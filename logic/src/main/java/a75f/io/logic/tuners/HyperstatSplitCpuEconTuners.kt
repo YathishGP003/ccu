@@ -303,7 +303,7 @@ class HyperstatSplitCpuEconTuners {
             // min = 0 , max = 360 , Default = 120 , inc = 1  unit = min
             val prePurgeRunTimeMarkers = arrayOf("prePurge", "cur", "runtime", "zone", "default", "cpu", "standalone", "oao")
             val prePurgeRunTimePoint = createTunerPoint(
-                "PrePurgeRunTime", prePurgeRunTimeMarkers, "0", "120", "1", "m", true
+                "PrePurgeRunTime", prePurgeRunTimeMarkers, "0", "360", "1", "m", true
             )
             listOfTunerPoints[prePurgeRunTimePoint] = HYPERSTAT_PREPURGE_RUNTIME_DEFAULT
 

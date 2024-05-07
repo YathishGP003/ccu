@@ -1236,6 +1236,18 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
         }
     }
 
+    private fun getCurrentCoolingStateActivated (): Double {
+        return if (stageActive("cooling and runtime and stage3")) {
+            hsSplitHaystackUtil.readPointValue("fan and cooling and stage3")
+        } else if (stageActive("cooling and runtime and stage2")) {
+            hsSplitHaystackUtil.readPointValue("fan and cooling and stage2")
+        } else if (stageActive("cooling and runtime and stage1")) {
+            hsSplitHaystackUtil.readPointValue("fan and cooling and stage1")
+        } else {
+            0.0
+        }
+    }
+
     private fun getCoolingActivatedAnalogVoltage(fanEnabledMapped: Boolean): Int {
         var voltage = getPercentageFromVoltageSelected(getCoolingStateActivated().roundToInt())
         // For title 24 compliance, check if fanEnabled is mapped, then set the fanloopForAnalog to the lowest cooling state activated
@@ -1255,6 +1267,17 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
             voltage = getPercentageFromVoltageSelected(getLowestHeatingStateActivated().roundToInt())
         }
         return voltage
+    }
+
+    /**
+     * Check if currently in any of the occupied mode
+     *
+     * @return true if in occupied,forced occupied etc, else false.
+     */
+    private fun checkIfInOccupiedMode(): Boolean {
+        return  occupancyStatus != Occupancy.UNOCCUPIED &&
+                occupancyStatus != Occupancy.DEMAND_RESPONSE_UNOCCUPIED &&
+                occupancyStatus != Occupancy.VACATION
     }
 
     private fun doAnalogStagedFanAction(
@@ -1301,12 +1324,18 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
                 else previousFanLoopValStaged = fanLoopForAnalog // else indicates we are not in protection mode, so store the fanLoopForAnalog value for protection mode
 
                 // Check Dead-band condition
-                if (fanLoopForAnalog == 0) { // When in dead-band, set the fan-loopForAnalog to the recirculate analog value
+                if (fanLoopForAnalog == 0 && fanProtectionCounter == 0 && checkIfInOccupiedMode()) { // When in dead-band, set the fan-loopForAnalog to the recirculate analog value
                     fanLoopForAnalog = getPercentageFromVoltageSelected(getAnalogRecirculateValueActivated().roundToInt())
-                    logMsg = "Dead-band"
+                    logMsg = "Deadband"
                 }
-                // The speed at which fan operates is determined by configuration parameter - "Analog-Out During Economizer"
-                if(economizingLoopOutput != 0) fanLoopForAnalog = getPercentageFromVoltageSelected(getAnalogEconomizerValueActivated().roundToInt())
+                // The speed at which fan operates during economization is determined by configuration parameter - "Analog-Out During Economizer"
+                // We also need to ensure that the currently no cooling stage is activated since we switch on Economization Value only when the
+                // cooling stage is not activated
+                val analogEconomizerValueActivated = getPercentageFromVoltageSelected(getAnalogEconomizerValueActivated().roundToInt())
+                if(economizingLoopOutput != 0 && getCurrentCoolingStateActivated() == 0.0 && fanProtectionCounter == 0) {
+                    logMsg = "Economization"
+                    fanLoopForAnalog = analogEconomizerValueActivated
+                }
                 if(epidemicState == EpidemicState.PREPURGE) {
                     if(prePurgeEnabled) {
                         fanLoopForAnalog = prePurgeOpeningValue.roundToInt()

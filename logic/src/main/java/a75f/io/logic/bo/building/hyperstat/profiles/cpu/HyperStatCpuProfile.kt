@@ -624,6 +624,17 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
         }
     }
 
+    /**
+     * Check if currently in any of the occupied mode
+     *
+     * @return true if in occupied,forced occupied etc, else false.
+     */
+    private fun checkIfInOccupiedMode(): Boolean {
+        return  occupancyStatus != Occupancy.UNOCCUPIED &&
+                occupancyStatus != Occupancy.DEMAND_RESPONSE_UNOCCUPIED &&
+                occupancyStatus != Occupancy.VACATION
+    }
+
      private fun doAnalogStagedFanAction(
         port: Port,
         fanLowPercent: Int,
@@ -637,6 +648,7 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
         fanProtectionCounter: Int
     ) {
         var fanLoopForAnalog = 0
+        var logMsg = "" // This will be overwritten based on priority
 
         if (fanMode != StandaloneFanStage.OFF) {
             if (fanMode == StandaloneFanStage.AUTO) {
@@ -648,21 +660,30 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
                 if (conditioningMode == StandaloneConditioningMode.AUTO) {
                     if (getOperatingMode() == 1.0) {
                         fanLoopForAnalog = getCoolingActivatedAnalogVoltage(fanEnabledMapped)
+                        logMsg = "Cooling"
                     } else if (getOperatingMode() == 2.0) {
                         fanLoopForAnalog = getHeatingActivatedAnalogVoltage(fanEnabledMapped)
+                        logMsg = "Heating"
                     }
                 } else if (conditioningMode == StandaloneConditioningMode.COOL_ONLY) {
                     fanLoopForAnalog = getCoolingActivatedAnalogVoltage(fanEnabledMapped)
+                    logMsg = "Cooling"
                 } else if (conditioningMode == StandaloneConditioningMode.HEAT_ONLY) {
                     fanLoopForAnalog = getHeatingActivatedAnalogVoltage(fanEnabledMapped)
+                    logMsg = "Heating"
                 }
-
                 // Check if we need fan protection
-                if(fanProtectionCounter > 0  && fanLoopForAnalog < previousFanLoopValStaged) fanLoopForAnalog = previousFanLoopValStaged
-                else previousFanLoopValStaged = fanLoopForAnalog // else indicates we are not in protection mode, so store the fanLoopForAnalog value for protection mdoe
-                // Check Dead-band condition
-                if (fanLoopForAnalog == 0 || getDoorWindowFanOperationStatus()) { // When in dead-band, set the fan-loopForAnalog to the recirculate analog value
+                if(fanProtectionCounter > 0  && fanLoopForAnalog < previousFanLoopValStaged) {
+                    fanLoopForAnalog = previousFanLoopValStaged
+                    logMsg = "Fan Protection"
+                } else {
+                    // else indicates we are not in protection mode, so store the fanLoopForAnalog value for protection mdoe
+                    previousFanLoopValStaged = fanLoopForAnalog
+                }
+                // When in dead-band, set the fan-loopForAnalog to the recirculate analog value. Also ensure fan protection is not ON
+                if ((fanLoopForAnalog == 0 || getDoorWindowFanOperationStatus()) && fanProtectionCounter == 0 && checkIfInOccupiedMode()) {
                     fanLoopForAnalog = getPercentageFromVoltageSelected(getAnalogRecirculateValueActivated().roundToInt())
+                    logMsg = "Deadband"
                 }
             } else {
                 when {
@@ -690,7 +711,7 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
             if (fanLoopForAnalog > 0) analogOutStages[AnalogOutput.FAN_SPEED.name] =
                 fanLoopForAnalog
             updateLogicalPointIdValue(logicalPointsList[port]!!, fanLoopForAnalog.toDouble())
-            Log.i(L.TAG_CCU_HSCPU, "$port = Staged Fan Speed  analogSignal  $fanLoopForAnalog")
+            Log.i(L.TAG_CCU_HSCPU, "$port = Staged Fan Speed($logMsg)  analogSignal  $fanLoopForAnalog")
         }
     }
 

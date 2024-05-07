@@ -388,7 +388,7 @@ public class Conditional
                     }
 
                     // check for last updated current temp value
-                    if (System.currentTimeMillis() - reading2.getDate().getTime() >= 65000){
+                    if (System.currentTimeMillis() - reading2.getDate().getTime() >= 185000){
                         reading1 = reading2 ;
                                                     sb.append("\nOlder his reading is more than 65 sec old, so setting readings to the same");
                     }

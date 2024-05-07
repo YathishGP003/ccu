@@ -30,16 +30,16 @@ class CommandSpinnerAdapter extends ArrayAdapter<Command> {
     @NonNull
     @Override
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-        return rowView(position, convertView, parent);
+        return rowView(position, convertView, parent, true);
     }
 
     @Override
     public View getDropDownView(int position, View convertView, ViewGroup parent) {
-
-        return rowView(position, convertView, parent);
+        parent.setPadding(0, 5, 0, 3);
+        return rowView(position, convertView, parent, false);
     }
 
-    private View rowView(int position, View convertView, ViewGroup parent) {
+    private View rowView(int position, View convertView, ViewGroup parent, Boolean isGetView) {
         Command rowItem = getItem(position);
 
         if (convertView == null) {
@@ -50,7 +50,9 @@ class CommandSpinnerAdapter extends ArrayAdapter<Command> {
 
         TextView txtTitle = (TextView) convertView.findViewById(R.id.spinnerTarget);
         txtTitle.setText(rowItem.getName());
-
+        if(isGetView) {
+            txtTitle.setPadding(0, 0, 4, 0);
+        }
         return convertView;
     }
 }

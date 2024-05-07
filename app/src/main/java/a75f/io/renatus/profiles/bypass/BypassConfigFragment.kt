@@ -165,7 +165,7 @@ class BypassConfigFragment : BaseDialogFragment() {
                             label = "Pressure Sensor",
                             list = viewModel.pressureSensorTypesList,
                             previewWidth = 165,
-                            expandedWidth = 165,
+                            expandedWidth = 190,
                             onSelected = { selectedIndex ->
                                 viewModel.viewState.pressureSensorType =
                                     selectedIndex.toDouble()
@@ -179,7 +179,7 @@ class BypassConfigFragment : BaseDialogFragment() {
                             label = "Damper Type",
                             list = viewModel.damperTypesList,
                             previewWidth = 165,
-                            expandedWidth = 160,
+                            expandedWidth = 175,
                             onSelected = { selectedIndex -> viewModel.viewState.damperType =
                                 selectedIndex.toDouble()
                             },
@@ -203,7 +203,7 @@ class BypassConfigFragment : BaseDialogFragment() {
                             label = "Damper Min",
                             list = viewModel.damperMinPosList,
                             previewWidth = 165,
-                            expandedWidth = 150,
+                            expandedWidth = 185,
                             onSelected = { selectedIndex ->
                                 viewModel.viewState.damperMinPosition =
                                     selectedIndex.toDouble()
@@ -217,7 +217,7 @@ class BypassConfigFragment : BaseDialogFragment() {
                             label = "Damper Max",
                             list = viewModel.damperMaxPosList,
                             previewWidth = 165,
-                            expandedWidth = 150,
+                            expandedWidth = 185,
                             onSelected = { selectedIndex -> viewModel.viewState.damperMaxPosition =
                                 selectedIndex.toDouble()
                             },
@@ -242,7 +242,7 @@ class BypassConfigFragment : BaseDialogFragment() {
                                 label = "Pressure Sensor",
                                 list = viewModel.pressureSensorMinValList,
                                 previewWidth = 165,
-                                expandedWidth = 150,
+                                expandedWidth = 185,
                                 onSelected = { selectedIndex ->
                                     viewModel.viewState.pressureSensorMinVal =
                                         selectedIndex.toDouble()
@@ -256,7 +256,7 @@ class BypassConfigFragment : BaseDialogFragment() {
                                 label = "Pressure Sensor",
                                 list = viewModel.pressureSensorMaxValList,
                                 previewWidth = 165,
-                                expandedWidth = 150,
+                                expandedWidth = 185,
                                 onSelected = { selectedIndex -> viewModel.viewState.pressureSensorMaxVal =
                                     selectedIndex.toDouble()
                                 },
@@ -280,7 +280,7 @@ class BypassConfigFragment : BaseDialogFragment() {
                                 label = "Sensor Min",
                                 list = viewModel.sensorMinVoltageList,
                                 previewWidth = 165,
-                                expandedWidth = 150,
+                                expandedWidth = 185,
                                 onSelected = { selectedIndex ->
                                     viewModel.viewState.sensorMinVoltage =
                                         selectedIndex.toDouble()
@@ -294,7 +294,7 @@ class BypassConfigFragment : BaseDialogFragment() {
                                 label = "Sensor Max",
                                 list = viewModel.sensorMaxVoltageList,
                                 previewWidth = 165,
-                                expandedWidth = 150,
+                                expandedWidth = 185,
                                 onSelected = { selectedIndex -> viewModel.viewState.sensorMaxVoltage =
                                     selectedIndex.toDouble()
                                 },
@@ -319,7 +319,7 @@ class BypassConfigFragment : BaseDialogFragment() {
                             label = "SAT Min",
                             list = viewModel.satMinThresholdList,
                             previewWidth = 165,
-                            expandedWidth = 150,
+                            expandedWidth = 185,
                             onSelected = { selectedIndex -> viewModel.viewState.satMinThreshold = viewModel.satMinThresholdList.get(selectedIndex).toDouble() },
                             defaultSelection = viewModel.satMinThresholdList.indexOf(("%.0f").format(viewModel.viewState.satMinThreshold)),
                             spacerLimit = 126,
@@ -330,7 +330,7 @@ class BypassConfigFragment : BaseDialogFragment() {
                             label = "SAT Max",
                             list = viewModel.satMaxThresholdList,
                             previewWidth = 165,
-                            expandedWidth = 150,
+                            expandedWidth = 185,
                             onSelected = { selectedIndex -> viewModel.viewState.satMaxThreshold = viewModel.satMaxThresholdList.get(selectedIndex).toDouble() },
                             defaultSelection = viewModel.satMaxThresholdList.indexOf(("%.0f").format(viewModel.viewState.satMaxThreshold)),
                             spacerLimit = 142,
@@ -352,7 +352,7 @@ class BypassConfigFragment : BaseDialogFragment() {
                             label = "Expected Pressure",
                             list = viewModel.expectedPressureErrorList,
                             previewWidth = 165,
-                            expandedWidth = 150,
+                            expandedWidth = 185,
                             onSelected = { selectedIndex -> viewModel.viewState.expectedPressureError = viewModel.expectedPressureErrorList.get(selectedIndex).toDouble() },
                             defaultSelection = viewModel.expectedPressureErrorList.indexOf(("%.1f").format(viewModel.viewState.expectedPressureError)),
                             spacerLimit = 11,
@@ -364,7 +364,7 @@ class BypassConfigFragment : BaseDialogFragment() {
                             label = "Pressure Setpoint",
                             list = viewModel.pressureSetpointsList,
                             previewWidth = 165,
-                            expandedWidth = 150,
+                            expandedWidth = 185,
                             onSelected = { selectedIndex -> viewModel.viewState.pressureSetpoint = viewModel.pressureSetpointsList.get(selectedIndex).toDouble() },
                             defaultSelection = viewModel.pressureSetpointsList.indexOf(("%.1f").format(viewModel.viewState.pressureSetpoint)),
                             spacerLimit = 42,
@@ -393,7 +393,7 @@ class BypassConfigFragment : BaseDialogFragment() {
                             label = "Pressure Sensor",
                             list = viewModel.pressureSensorTypesList,
                             previewWidth = 165,
-                            expandedWidth = 165,
+                            expandedWidth = 185,
                             onSelected = { selectedIndex ->
                                 viewModel.viewState.pressureSensorType =
                                     selectedIndex.toDouble()
@@ -407,7 +407,7 @@ class BypassConfigFragment : BaseDialogFragment() {
                             label = "Damper Type",
                             list = viewModel.damperTypesList,
                             previewWidth = 165,
-                            expandedWidth = 160,
+                            expandedWidth = 185,
                             onSelected = { selectedIndex ->
                                 viewModel.viewState.damperType =
                                     selectedIndex.toDouble()
@@ -441,7 +441,7 @@ class BypassConfigFragment : BaseDialogFragment() {
                             label = "Damper Min",
                             list = viewModel.damperMinPosList,
                             previewWidth = 165,
-                            expandedWidth = 150,
+                            expandedWidth = 185,
                             onSelected = { selectedIndex ->
                                 viewModel.viewState.damperMinPosition =
                                     selectedIndex.toDouble()
@@ -455,7 +455,7 @@ class BypassConfigFragment : BaseDialogFragment() {
                             label = "Damper Max",
                             list = viewModel.damperMaxPosList,
                             previewWidth = 165,
-                            expandedWidth = 150,
+                            expandedWidth = 185,
                             onSelected = { selectedIndex ->
                                 viewModel.viewState.damperMaxPosition =
                                     selectedIndex.toDouble()
@@ -487,7 +487,7 @@ class BypassConfigFragment : BaseDialogFragment() {
                                 label = "Pressure Sensor",
                                 list = viewModel.pressureSensorMinValList,
                                 previewWidth = 165,
-                                expandedWidth = 150,
+                                expandedWidth = 185,
                                 onSelected = { selectedIndex ->
                                     viewModel.viewState.pressureSensorMinVal =
                                         selectedIndex.toDouble()
@@ -501,7 +501,7 @@ class BypassConfigFragment : BaseDialogFragment() {
                                 label = "Pressure Sensor",
                                 list = viewModel.pressureSensorMaxValList,
                                 previewWidth = 165,
-                                expandedWidth = 150,
+                                expandedWidth = 185,
                                 onSelected = { selectedIndex ->
                                     viewModel.viewState.pressureSensorMaxVal =
                                         selectedIndex.toDouble()
@@ -532,7 +532,7 @@ class BypassConfigFragment : BaseDialogFragment() {
                                 label = "Sensor Min",
                                 list = viewModel.sensorMinVoltageList,
                                 previewWidth = 165,
-                                expandedWidth = 150,
+                                expandedWidth = 185,
                                 onSelected = { selectedIndex ->
                                     viewModel.viewState.sensorMinVoltage =
                                         selectedIndex.toDouble()
@@ -546,7 +546,7 @@ class BypassConfigFragment : BaseDialogFragment() {
                                 label = "Sensor Max",
                                 list = viewModel.sensorMaxVoltageList,
                                 previewWidth = 165,
-                                expandedWidth = 150,
+                                expandedWidth = 185,
                                 onSelected = { selectedIndex ->
                                     viewModel.viewState.sensorMaxVoltage =
                                         selectedIndex.toDouble()
@@ -578,7 +578,7 @@ class BypassConfigFragment : BaseDialogFragment() {
                             label = "SAT Min",
                             list = viewModel.satMinThresholdList,
                             previewWidth = 165,
-                            expandedWidth = 150,
+                            expandedWidth = 185,
                             onSelected = { selectedIndex ->
                                 viewModel.viewState.satMinThreshold =
                                     viewModel.satMinThresholdList.get(selectedIndex).toDouble()
@@ -596,7 +596,7 @@ class BypassConfigFragment : BaseDialogFragment() {
                             label = "SAT Max",
                             list = viewModel.satMaxThresholdList,
                             previewWidth = 165,
-                            expandedWidth = 150,
+                            expandedWidth = 185,
                             onSelected = { selectedIndex ->
                                 viewModel.viewState.satMaxThreshold =
                                     viewModel.satMaxThresholdList.get(selectedIndex).toDouble()
@@ -631,7 +631,7 @@ class BypassConfigFragment : BaseDialogFragment() {
                             label = "Expected Pressure",
                             list = viewModel.expectedPressureErrorList,
                             previewWidth = 165,
-                            expandedWidth = 150,
+                            expandedWidth = 185,
                             onSelected = { selectedIndex ->
                                 viewModel.viewState.expectedPressureError =
                                     viewModel.expectedPressureErrorList.get(selectedIndex)
@@ -651,7 +651,7 @@ class BypassConfigFragment : BaseDialogFragment() {
                             label = "Pressure Setpoint",
                             list = viewModel.pressureSetpointsList,
                             previewWidth = 165,
-                            expandedWidth = 150,
+                            expandedWidth = 185,
                             onSelected = { selectedIndex ->
                                 viewModel.viewState.pressureSetpoint =
                                     viewModel.pressureSetpointsList.get(selectedIndex).toDouble()

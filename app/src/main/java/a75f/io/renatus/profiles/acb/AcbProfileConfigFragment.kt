@@ -133,11 +133,11 @@ class AcbProfileConfigFragment : BaseDialogFragment() {
                         label = "Damper Type",
                         list = viewModel.damperTypesList,
                         previewWidth = 165,
-                        expandedWidth = 160,
+                        expandedWidth = 185,
                         onSelected = { selectedIndex -> viewModel.viewState.damperType = selectedIndex.toDouble() },
                         defaultSelection = viewModel.viewState.damperType.toInt(),
                         spacerLimit = 178,
-                        heightValue = 272
+                        heightValue = 320
                     )
                     Spacer(modifier=Modifier.width(87.dp))
                     Row (modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start) {
@@ -145,7 +145,7 @@ class AcbProfileConfigFragment : BaseDialogFragment() {
                             label = "Size",
                             list = viewModel.damperSizesList,
                             previewWidth = 60,
-                            expandedWidth = 120,
+                            expandedWidth = 90,
                             onSelected = { selectedIndex ->
                                 viewModel.viewState.damperSize = selectedIndex.toDouble()
                             },
@@ -160,7 +160,7 @@ class AcbProfileConfigFragment : BaseDialogFragment() {
                             label = "Shape",
                             list = viewModel.damperShapesList,
                             previewWidth = 135,
-                            expandedWidth = 136,
+                            expandedWidth = 155,
                             onSelected = { selectedIndex ->
                                 viewModel.viewState.damperShape = selectedIndex.toDouble()
                             },
@@ -181,7 +181,7 @@ class AcbProfileConfigFragment : BaseDialogFragment() {
                         label = "Valve Type",
                         list = viewModel.valveTypesList,
                         previewWidth = 160,
-                        expandedWidth = 160,
+                        expandedWidth = 180,
                         onSelected = {selectedIndex -> viewModel.viewState.valveType = selectedIndex.toDouble()},
                         defaultSelection = viewModel.viewState.valveType.toInt(),
                         spacerLimit = 209,
@@ -192,7 +192,7 @@ class AcbProfileConfigFragment : BaseDialogFragment() {
                         label = "Zone Priority",
                         list = viewModel.zonePrioritiesList,
                         previewWidth = 130,
-                        expandedWidth = 120,
+                        expandedWidth = 150,
                         onSelected = {selectedIndex -> viewModel.viewState.zonePriority = selectedIndex.toDouble() },
                         defaultSelection = viewModel.viewState.zonePriority.toInt(),
                         spacerLimit = 139,
@@ -226,7 +226,7 @@ class AcbProfileConfigFragment : BaseDialogFragment() {
                         label = "Thermistor-2",
                         list = viewModel.condensateSensorTypesList,
                         previewWidth = 160,
-                        expandedWidth = 277,
+                        expandedWidth = 310,
                         onSelected = {selectedIndex -> viewModel.viewState.condensateSensorType = selectedIndex > 0},
                         defaultSelection = if (viewModel.viewState.condensateSensorType) 1 else 0,
                         spacerLimit = 175,
@@ -299,7 +299,7 @@ class AcbProfileConfigFragment : BaseDialogFragment() {
                                 label = "K-Factor",
                                 list = viewModel.kFactorsList,
                                 previewWidth = 130,
-                                expandedWidth = 120,
+                                expandedWidth = 150,
                                 onSelected = { selectedIndex -> viewModel.viewState.kFactor = viewModel.kFactorsList.get(selectedIndex).toDouble() },
                                 defaultSelection = viewModel.kFactorsList.indexOf(("%.2f").format(viewModel.viewState.kFactor)),
                                 paddingLimit = 10,

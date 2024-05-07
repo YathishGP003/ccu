@@ -15,7 +15,10 @@ import androidx.compose.ui.text.font.FontWeight
 class ComposeUtil {
     companion object {
         val  primaryColor = getThemeColor()
+        val  secondaryColor = getSecondaryThemeColor()
         var greyColor = Color(android.graphics.Color.parseColor("#666666"))
+        val greyDropDownScrollBarColor = Color(android.graphics.Color.parseColor("#B6B6B6"))
+        val greyDropDownUnderlineColor = Color(android.graphics.Color.parseColor("#CCCCCC"))
         val myFontFamily = FontFamily(
             Font(R.font.lato_light, FontWeight.Light),
             Font(R.font.lato_regular, FontWeight.Normal),
@@ -32,6 +35,17 @@ class ComposeUtil {
             if (CCUUiUtil.isAiroverseThemeEnabled(Globals.getInstance().applicationContext))
                 primaryColor = Color(android.graphics.Color.parseColor("#6FC498"))
             return primaryColor
+        }
+
+        private fun getSecondaryThemeColor(): Color {
+            var secondaryColor = Color(android.graphics.Color.parseColor("#1AE5561A"))
+            if (CCUUiUtil.isDaikinEnvironment(Globals.getInstance().applicationContext))
+                secondaryColor = Color(android.graphics.Color.parseColor("#1A0097E0"))
+            if (CCUUiUtil.isCarrierThemeEnabled(Globals.getInstance().applicationContext))
+                secondaryColor = Color(android.graphics.Color.parseColor("#1A1891F6"))
+            if (CCUUiUtil.isAiroverseThemeEnabled(Globals.getInstance().applicationContext))
+                secondaryColor = Color(android.graphics.Color.parseColor("#1A6FC498"))
+            return secondaryColor
         }
 
         //Function to modify the list of strings as per UX which are to be displayed in the dropdown

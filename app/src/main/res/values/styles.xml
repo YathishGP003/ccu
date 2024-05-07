@@ -914,6 +914,7 @@
         <item name="android:foreground">@drawable/custom_spinner_down</item>
         <item name="android:spinnerMode">dropdown</item>
         <item name="android:layout_gravity">start|center_vertical</item>
+        <item name="fontFamily">@font/lato_regular</item>
     </style>
 
 <!--    <style name="CustomSpinnerDropdownStyle" parent="Widget.AppCompat.ListPopupWindow">-->

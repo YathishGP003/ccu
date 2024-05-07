@@ -100,7 +100,6 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
                                 commands = entry.getValue();
                             }
                             CommandSpinnerAdapter commandAdapter = new CommandSpinnerAdapter(context, R.layout.spinner_dropdown_item, commands);
-                            commandAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
                             CCUUiUtil.setSpinnerDropDownColor(viewHolder.spValue,context);
                             viewHolder.spValue.setAdapter(commandAdapter);
                             for (int i = 0; i < modbusParam.get(position).getCommands().size(); i++) {
@@ -117,7 +116,6 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
                             }
 
                             ArrayAdapter<Double> spinnerAdapter = getAdapterValue(doubleArrayList);
-                            spinnerAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
                             CCUUiUtil.setSpinnerDropDownColor(viewHolder.spValue,context);
                             viewHolder.spValue.setAdapter(spinnerAdapter);
                             viewHolder.spValue.setSelection(doubleArrayList.indexOf(readVal(p.getId())), false);
@@ -401,6 +399,6 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
     }
 
     private CustomSpinnerDropDownAdapter getAdapterValue(ArrayList values) {
-        return new CustomSpinnerDropDownAdapter(context, R.layout.spinner_dropdown_item, values);
+        return new CustomSpinnerDropDownAdapter(context, R.layout.spinner_item_orange, values);
     }
 }

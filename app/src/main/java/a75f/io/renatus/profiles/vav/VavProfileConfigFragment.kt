@@ -139,7 +139,7 @@ class VavProfileConfigFragment : BaseDialogFragment() {
                         label = "Damper Type",
                         list = viewModel.damperTypesList,
                         previewWidth = 165,
-                        expandedWidth = 160,
+                        expandedWidth = 185,
                         onSelected = { selectedIndex -> viewModel.viewState.damperType = selectedIndex.toDouble() },
                         defaultSelection = viewModel.viewState.damperType.toInt(),
                         spacerLimit = 178,
@@ -151,7 +151,7 @@ class VavProfileConfigFragment : BaseDialogFragment() {
                             label = "Size",
                             list = viewModel.damperSizesList,
                             previewWidth = 60,
-                            expandedWidth = 120,
+                            expandedWidth = 90,
                             onSelected = { selectedIndex ->
                                 viewModel.viewState.damperSize = selectedIndex.toDouble()
                             },
@@ -166,7 +166,7 @@ class VavProfileConfigFragment : BaseDialogFragment() {
                             label = "Shape",
                             list = viewModel.damperShapesList,
                             previewWidth = 135,
-                            expandedWidth = 136,
+                            expandedWidth = 155,
                             onSelected = { selectedIndex ->
                                 viewModel.viewState.damperShape = selectedIndex.toDouble()
                             },
@@ -187,7 +187,7 @@ class VavProfileConfigFragment : BaseDialogFragment() {
                         label = "Reheat Type",
                         list = viewModel.reheatTypesList,
                         previewWidth = 165,
-                        expandedWidth = 165,
+                        expandedWidth = 185,
                         onSelected = { selectedIndex -> viewModel.viewState.reheatType = selectedIndex.toDouble()},
                         defaultSelection = viewModel.viewState.reheatType.toInt(),
                         spacerLimit = 188,
@@ -198,7 +198,7 @@ class VavProfileConfigFragment : BaseDialogFragment() {
                         label = "Zone Priority",
                         list = viewModel.zonePrioritiesList,
                         previewWidth = 130,
-                        expandedWidth = 120,
+                        expandedWidth = 150,
                         onSelected = {selectedIndex -> viewModel.viewState.zonePriority = selectedIndex.toDouble() },
                         defaultSelection = viewModel.viewState.zonePriority.toInt(),
                         spacerLimit = 136,
@@ -364,7 +364,7 @@ class VavProfileConfigFragment : BaseDialogFragment() {
                                 label = "K-Factor",
                                 list = viewModel.kFactorsList,
                                 previewWidth = 130,
-                                expandedWidth = 120,
+                                expandedWidth = 150,
                                 onSelected = { selectedIndex -> viewModel.viewState.kFactor = viewModel.kFactorsList.get(selectedIndex).toDouble() },
                                 defaultSelection = viewModel.kFactorsList.indexOf(("%.2f").format(viewModel.viewState.kFactor)),
                                 paddingLimit = 10,

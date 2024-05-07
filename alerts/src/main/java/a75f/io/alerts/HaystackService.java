@@ -219,7 +219,7 @@ public class HaystackService {
     // if writable tag is there, return value of highest level
     // if writable tag is not there, check for his item and return latest value
     public Integer fetchValueById(String filter, Object contextHelper) {
-        int output = -1;
+        Integer output = null;
         try {
             output = (int)(CCUHsApi.getInstance().readHisValById(filter).doubleValue());
             CcuLog.d(TAG_CCU_ALERTS, "---fetchValueById###--id-"+filter+"<---->"+output);

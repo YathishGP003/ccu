@@ -124,8 +124,11 @@ public class ManualCalendarDialogFragment extends DialogFragment implements View
         
         mButtonSave.setOnClickListener(view1 ->
                                        {
-                                           processCalendar();
-                                           dismiss();
+                                           boolean dialogCloseflag = processCalendar();
+                                           if(dialogCloseflag)
+                                           {
+                                               dismiss();
+                                           }
                                        });
 
         mButtonCancel.setOnClickListener(view12 -> dismiss());

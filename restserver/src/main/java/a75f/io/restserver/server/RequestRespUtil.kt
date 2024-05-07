@@ -2,6 +2,7 @@ package a75f.io.restserver.server
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.device.bacnet.BacnetConfigConstants
+import a75f.io.logger.CcuLog
 import org.json.JSONException
 import org.json.JSONObject
 import org.projecthaystack.HDict
@@ -75,10 +76,11 @@ fun repackagePoints(tempGrid: HGrid, isVirtualZoneEnabled: Boolean, group: Strin
 
 
                 try {
-                    bacnetId = getBacNetId(bacnetId, group, extractedGroup, extractedEquipRef)
                     if (bacnetId != "0.0") {
-                        // todo : once bacapp is fixed this may be required
-                        //hDictBuilder.add("bacnetId", bacnetId.toLong())
+                        if (!isEquip) {
+                            val bacnetIdAfterModification = removeFirstFourChars(bacnetId)
+                            hDictBuilder.add("bacnetId", bacnetIdAfterModification.toLong())
+                        }
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -103,6 +105,13 @@ fun repackagePoints(tempGrid: HGrid, isVirtualZoneEnabled: Boolean, group: Strin
         mutableDictList.add(hDictBuilder.toDict())
     }
     return mutableDictList
+}
+
+fun removeFirstFourChars(input: String): String {
+    if(input.length < 4){
+        return input
+    }
+    return input.substring(4)
 }
 
 fun getBacNetId(

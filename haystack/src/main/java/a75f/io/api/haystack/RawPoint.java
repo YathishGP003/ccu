@@ -2,7 +2,6 @@ package a75f.io.api.haystack;
 
 import org.projecthaystack.HDateTime;
 import org.projecthaystack.HDict;
-import org.projecthaystack.HStr;
 import org.projecthaystack.HVal;
 
 import java.util.ArrayList;
@@ -48,6 +47,8 @@ public class RawPoint extends Entity
     private String shortDis;
     private String minVal;
     private String maxVal;
+
+    private String incrementVal;
     private String registerAddress;
     private String registerNumber;
     private String startBit;
@@ -66,6 +67,11 @@ public class RawPoint extends Entity
     }
     private boolean enabled;
     private String  id;
+
+    private String enums;
+
+    private String hisInterpolate;
+    private String sourcePoint;
 
     /**
      * Support for arbitrary KVP. This is only intended for new tags/profiles at this time.
@@ -153,6 +159,10 @@ public class RawPoint extends Entity
     public String getMaxVal() {
         return maxVal;
     }
+
+    public String getIncrementVal() {
+        return incrementVal;
+    }
     public String getRegisterAddress() {
         return registerAddress;
     }
@@ -191,6 +201,15 @@ public class RawPoint extends Entity
         return tags;
     }
 
+    public String getEnums()
+    {
+        return enums;
+    }
+
+    public String getHisInterpolate(){return hisInterpolate;}
+
+    public String getSourcePoint(){return sourcePoint;}
+
     public static class Builder{
         private String            displayName;
         private ArrayList<String> markers = new ArrayList<>();
@@ -211,6 +230,7 @@ public class RawPoint extends Entity
         private String shortDis;
         private String minVal;
         private String maxVal;
+        private String incrementVal;
         private String registerAddress;
         private String registerNumber;
         private String startBit;
@@ -218,6 +238,11 @@ public class RawPoint extends Entity
         private String registerType;
         private String parameterId;
         private String domainName;
+
+        private String enums;
+
+        private String hisInterpolate;
+        private String sourcePoint;
 
         private Map<String, HVal> tags = new HashMap<>();
         public Builder setEnabled(boolean enabled)
@@ -329,6 +354,11 @@ public class RawPoint extends Entity
             return this;
         }
 
+        public Builder setIncrementVal(String incrementVal) {
+            this.incrementVal = incrementVal;
+            return this;
+        }
+
         public Builder setRegisterAddress(String addr) {
             this.registerAddress = addr;
             return this;
@@ -369,6 +399,23 @@ public class RawPoint extends Entity
             return this;
         }
 
+        public Builder setEnums(String enums) {
+            this.enums = enums;
+            return this;
+        }
+
+        public Builder setHisInterpolate(String ipolate)
+        {
+            this.hisInterpolate = ipolate;
+            return this;
+        }
+
+        public Builder setSourcePoint(String sourcePoint)
+        {
+            this.sourcePoint = sourcePoint;
+            return this;
+        }
+
         public RawPoint build(){
             RawPoint p = new RawPoint();
             p.displayName = this.displayName;
@@ -392,6 +439,10 @@ public class RawPoint extends Entity
             p.shortDis = this.shortDis;
             p.minVal = this.minVal;
             p.maxVal = this.maxVal;
+            p.incrementVal = this.incrementVal;
+            p.enums= this.enums;
+            p.hisInterpolate = this.hisInterpolate;
+            p.sourcePoint = this.sourcePoint;
             p.registerAddress = this.registerAddress;
             p.registerNumber = this.registerNumber;
             p.startBit = this.startBit;
@@ -530,7 +581,24 @@ public class RawPoint extends Entity
                 else if (pair.getKey().equals("domainName"))
                 {
                     this.domainName = pair.getValue().toString();
-                } else {
+                }
+                else if (pair.getKey().equals("hisInterpolate"))
+                {
+                    this.hisInterpolate = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("incrementVal"))
+                {
+                    this.incrementVal = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("enum"))
+                {
+                    this.enums = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("sourcePoint"))
+                {
+                    this.sourcePoint = pair.getValue().toString();
+                }
+                else {
                     this.tags.put(pair.getKey().toString(), (HVal) pair.getValue());
                 }
 
@@ -620,6 +688,22 @@ public class RawPoint extends Entity
                 else if (pair.getKey().equals("minVal"))
                 {
                     this.minVal = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("incrementVal"))
+                {
+                    this.incrementVal = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("hisInterpolate"))
+                {
+                    this.hisInterpolate = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("enum"))
+                {
+                    this.enums = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("sourcePoint"))
+                {
+                    this.sourcePoint = pair.getValue().toString();
                 }
                 else if (pair.getKey().equals("registerAddress"))
                 {

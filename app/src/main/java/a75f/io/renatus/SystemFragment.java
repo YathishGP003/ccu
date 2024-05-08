@@ -7,7 +7,6 @@ import static a75f.io.domain.api.DomainName.dcvDamperCalculatedSetpoint;
 import static a75f.io.domain.api.DomainName.dcvDamperControlEnable;
 import static a75f.io.domain.api.DomainName.dualSetpointControlEnable;
 import static a75f.io.domain.api.DomainName.ductStaticPressureSetpoint;
-import static a75f.io.domain.api.DomainName.operatingMode;
 import static a75f.io.domain.api.DomainName.supplyAirflowTemperatureSetpoint;
 import static a75f.io.domain.api.DomainName.systemEnhancedVentilationEnable;
 import static a75f.io.domain.api.DomainName.systemPostPurgeEnable;
@@ -93,11 +92,13 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.oao.OAOEquip;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.system.DefaultSystem;
-import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.dab.DabExternalAhu;
 import a75f.io.logic.bo.building.system.vav.VavExternalAhu;
+import a75f.io.logic.bo.building.system.vav.VavFullyModulatingRtu;
 import a75f.io.logic.bo.building.system.vav.VavIERtu;
+import a75f.io.logic.bo.building.system.vav.VavStagedRtu;
+import a75f.io.logic.bo.building.system.vav.VavStagedRtuWithVfd;
 import a75f.io.logic.bo.util.DemandResponseMode;
 import a75f.io.logic.bo.util.TemperatureMode;
 import a75f.io.logic.cloudconnectivity.CloudConnectivityListener;
@@ -116,8 +117,8 @@ import a75f.io.renatus.util.RxjavaUtil;
 import a75f.io.renatus.util.SystemProfileUtil;
 import a75f.io.renatus.views.CustomCCUSwitch;
 import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
-import a75f.io.renatus.views.CustomCCUSwitch;
 import a75f.io.renatus.views.OaoArc;
+
 /**
  * Created by samjithsadasivan isOn 8/7/17.
  */
@@ -945,7 +946,10 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 
 	private boolean isExternalAhu(){
 		return (L.ccu().systemProfile instanceof DabExternalAhu
-				|| L.ccu().systemProfile instanceof VavExternalAhu);
+				|| L.ccu().systemProfile instanceof VavExternalAhu
+				|| L.ccu().systemProfile instanceof VavStagedRtu
+				|| L.ccu().systemProfile instanceof VavStagedRtuWithVfd
+				|| L.ccu().systemProfile instanceof VavFullyModulatingRtu);
 	}
 
 

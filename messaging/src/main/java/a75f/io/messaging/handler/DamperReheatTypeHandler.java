@@ -10,7 +10,6 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
-import a75f.io.domain.api.DomainName;
 import a75f.io.domain.logic.ProfileEquipBuilder;
 import a75f.io.domain.util.ModelLoader;
 import a75f.io.logger.CcuLog;
@@ -132,6 +131,7 @@ public class DamperReheatTypeHandler {
                         ModelLoader.INSTANCE.getModelForDomainName(equip.getDomainName()),
                         equip.getSiteRef(),
                         equip.getDisplayName(), true);
+
                 DesiredTempDisplayMode.setModeType(configPoint.getRoomRef(), hayStack);
             }
         }

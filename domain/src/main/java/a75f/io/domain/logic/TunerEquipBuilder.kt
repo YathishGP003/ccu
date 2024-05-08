@@ -4,7 +4,7 @@ import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.HayStackConstants
 import a75f.io.api.haystack.Site
 import a75f.io.api.haystack.sync.CcuRegistrationHandler
-import a75f.io.domain.BuildingEquip
+import a75f.io.domain.equips.BuildingEquip
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.EntityConfig
 import a75f.io.domain.config.EntityConfiguration

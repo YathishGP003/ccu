@@ -2,7 +2,6 @@ package a75f.io.renatus;
 
 import static a75f.io.renatus.FragmentDABConfiguration.CARRIER_PROD;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,7 +13,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
@@ -23,12 +21,13 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
-import a75f.io.logger.CcuLog;
-import a75f.io.logic.Globals;
 import a75f.io.logic.L;
+import a75f.io.renatus.profiles.system.VavModulatingRtuFragment;
+import a75f.io.renatus.profiles.system.VavStagedRtuFragment;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.renatus.externalahu.ExternalAhuFragment;
+import a75f.io.renatus.profiles.system.VavStagedVfdRtuFragment;
 import a75f.io.renatus.registration.FreshRegistration;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
@@ -92,7 +91,7 @@ public class SystemProfileFragment extends Fragment {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 if (!isFreshRegister&& adapterView.getChildAt(0)!= null) {
-                    ((TextView) adapterView.getChildAt(0)).setTextColor(CCUUiUtil.getPrimaryThemeColor(getContext()));
+                    ((TextView) adapterView.getChildAt(0)).setTextColor(getResources().getColor(R.color.black));
                     ((TextView) adapterView.getChildAt(0)).setTextSize(18);
                     spSystemProfile.getLayoutParams().width = 340;
                 }
@@ -114,7 +113,7 @@ public class SystemProfileFragment extends Fragment {
                     case 1:
                         if (canAddVAVProfile()) {
                             getActivity().getSupportFragmentManager().beginTransaction()
-                                    .replace(R.id.profileContainer, new VavStagedRtuProfile()).commit();
+                                    .replace(R.id.profileContainer, new VavStagedRtuFragment()).commit();
                             if (SystemConfigMenuFragment.SystemConfigMenuFragmentHandler != null) {
                                 SystemConfigMenuFragment.SystemConfigMenuFragmentHandler.sendEmptyMessage(1);
                             }
@@ -128,7 +127,7 @@ public class SystemProfileFragment extends Fragment {
                     case 2:
                         if (canAddVAVProfile()) {
                             getActivity().getSupportFragmentManager().beginTransaction()
-                                    .replace(R.id.profileContainer, new VavAnalogRtuProfile()).commit();
+                                    .replace(R.id.profileContainer, new VavModulatingRtuFragment()).commit();
                             if (SystemConfigMenuFragment.SystemConfigMenuFragmentHandler != null) {
                                 SystemConfigMenuFragment.SystemConfigMenuFragmentHandler.sendEmptyMessage(1);
                             }
@@ -141,7 +140,7 @@ public class SystemProfileFragment extends Fragment {
                     case 3:
                         if (canAddVAVProfile()) {
                             getActivity().getSupportFragmentManager().beginTransaction()
-                                    .replace(R.id.profileContainer, new VavStagedRtuWithVfdProfile()).commit();
+                                    .replace(R.id.profileContainer, new VavStagedVfdRtuFragment()).commit();
                             if (SystemConfigMenuFragment.SystemConfigMenuFragmentHandler != null) {
                                 SystemConfigMenuFragment.SystemConfigMenuFragmentHandler.sendEmptyMessage(1);
                             }

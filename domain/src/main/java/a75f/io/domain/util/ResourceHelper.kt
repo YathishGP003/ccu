@@ -100,6 +100,7 @@ object ResourceHelper {
         val model = JSONObject(modelData)
         val versionData = model.getJSONObject("version")
         CcuLog.printLongMessage("CCU_DM", "Model Version $versionData")
+        //CcuLog.printLongMessage("CCU_DM", "loadModel modelString $modelData")
         val modelDirectiveFactory = ModelDirectiveFactory(getObjectMapper())
         return modelDirectiveFactory.fromJson(modelData!!)
     }

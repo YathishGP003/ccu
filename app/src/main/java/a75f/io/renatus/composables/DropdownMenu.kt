@@ -2,11 +2,13 @@ package a75f.io.renatus.composables
 
 import a75f.io.renatus.R
 import a75f.io.renatus.compose.ComposeUtil
+import a75f.io.renatus.compose.ComposeUtil.Companion.greyDropDownColor
 import a75f.io.renatus.compose.ComposeUtil.Companion.greyDropDownScrollBarColor
 import a75f.io.renatus.compose.ComposeUtil.Companion.greyDropDownUnderlineColor
 import a75f.io.renatus.compose.ComposeUtil.Companion.primaryColor
 import a75f.io.renatus.compose.ComposeUtil.Companion.secondaryColor
 import a75f.io.renatus.compose.HeaderTextView
+import a75f.io.renatus.compose.LabelTextView
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -56,12 +58,18 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun DropDownWithLabel(
     label: String, list: List<String>, previewWidth: Int = 80, expandedWidth: Int = 100,
-    onSelected: (Int) -> Unit, defaultSelection: Int = 0,spacerLimit:Int=80,paddingLimit:Int=0,heightValue:Int= 435) {
+    onSelected: (Int) -> Unit, defaultSelection: Int = 0,spacerLimit:Int=80,paddingLimit:Int=0,heightValue:Int= 435
+    , isHeader : Boolean = true, isEnabled : Boolean = true) {
 
     var modifiedList = ComposeUtil.getModifiedList(list)
     Row {
         Box(modifier = Modifier.wrapContentWidth(), contentAlignment = Alignment.Center) {
-            HeaderTextView(text = label, padding = paddingLimit)
+            if (isHeader) {
+                HeaderTextView(text = label, padding = paddingLimit)
+            } else {
+                LabelTextView(text = label)
+            }
+
         }
 
         Spacer(modifier = Modifier.width(spacerLimit.dp))
@@ -80,7 +88,7 @@ fun DropDownWithLabel(
                     Text(
                         modifiedList[defaultSelection],
                         modifier = Modifier.width((previewWidth ).dp).height(35.dp)
-                            .clickable(onClick = { expanded = true }),
+                            .clickable(onClick = { if(isEnabled) expanded = true }, enabled = isEnabled),
                         fontSize = 22.sp,
                             maxLines = 1,
                           overflow = TextOverflow.Ellipsis
@@ -93,7 +101,8 @@ fun DropDownWithLabel(
                             .size(30.dp)
                             .padding(PaddingValues(top = 8.dp))
                             .clickable { expanded = true },
-                        colorFilter = ColorFilter.tint(primaryColor)
+                        colorFilter = ColorFilter.tint(if(isEnabled) primaryColor
+                        else greyDropDownColor)
                     )
                 }
                 Divider(color = greyDropDownUnderlineColor)

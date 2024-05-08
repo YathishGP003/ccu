@@ -302,20 +302,20 @@ class AcbProfileViewModel : ViewModel() {
         val device = hayStack.read("device and addr == \"" + config.nodeAddress + "\"")
 
         // Set
-        val relay1 = hayStack.read("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.relay1 + "\"");
-        var relay1Point = RawPoint.Builder().setHashMap(relay1)
+        val relay1 = hayStack.readHDict("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.relay1 + "\"");
+        var relay1Point = RawPoint.Builder().setHDict(relay1)
         hayStack.updatePoint(relay1Point.setType("Relay N/C").build(), relay1.get("id").toString())
 
-        var relay2 = hayStack.read("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.relay2 + "\"");
-        var relay2Point = RawPoint.Builder().setHashMap(relay2)
+        var relay2 = hayStack.readHDict("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.relay2 + "\"");
+        var relay2Point = RawPoint.Builder().setHDict(relay2)
         hayStack.updatePoint(relay2Point.setType("Relay N/C").build(), relay2.get("id").toString())
 
-        var analogOut1 = hayStack.read("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.analog1Out + "\"");
-        var analog1Point = RawPoint.Builder().setHashMap(analogOut1)
+        var analogOut1 = hayStack.readHDict("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.analog1Out + "\"");
+        var analog1Point = RawPoint.Builder().setHDict(analogOut1)
         hayStack.updatePoint(analog1Point.setType(getDamperTypeString(config)).build(), analogOut1.get("id").toString())
 
-        var analogOut2 = hayStack.read("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.analog2Out + "\"");
-        var analog2Point = RawPoint.Builder().setHashMap(analogOut2)
+        var analogOut2 = hayStack.readHDict("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.analog2Out + "\"");
+        var analog2Point = RawPoint.Builder().setHDict(analogOut2)
         hayStack.updatePoint(analog2Point.setType(getValveTypeString(config)).build(), analogOut2.get("id").toString())
 
     }

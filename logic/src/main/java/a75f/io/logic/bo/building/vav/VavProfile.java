@@ -9,6 +9,8 @@ import android.util.Log;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import org.projecthaystack.HDict;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -22,15 +24,12 @@ import a75.io.algos.tr.TrimResponseRequest;
 import a75.io.algos.vav.VavTRSystem;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
-import a75f.io.domain.VavAcbEquip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Occupied;
-import a75f.io.domain.VavEquip;
+import a75f.io.domain.VavAcbEquip;
 import a75f.io.domain.api.DomainName;
 import a75f.io.domain.config.ProfileConfiguration;
-import a75f.io.domain.logic.DeviceBuilder;
-import a75f.io.domain.logic.EntityMapper;
-import a75f.io.domain.logic.ProfileEquipBuilder;
+import a75f.io.domain.equips.VavEquip;
 import a75f.io.domain.util.ModelLoader;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
@@ -39,11 +38,11 @@ import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.ZonePriority;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
-import a75f.io.logic.bo.building.hvac.VavAcbUnit;
 import a75f.io.logic.bo.building.hvac.Damper;
 import a75f.io.logic.bo.building.hvac.ParallelFanVavUnit;
 import a75f.io.logic.bo.building.hvac.SeriesFanVavUnit;
 import a75f.io.logic.bo.building.hvac.Valve;
+import a75f.io.logic.bo.building.hvac.VavAcbUnit;
 import a75f.io.logic.bo.building.hvac.VavUnit;
 import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
@@ -51,11 +50,7 @@ import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.vav.VavSystemProfile;
 import a75f.io.logic.bo.building.truecfm.TrueCFMUtil;
 import a75f.io.logic.tuners.TunerConstants;
-import a75f.io.logic.tuners.TunerUtil;
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective;
-
-import org.projecthaystack.HDict;
-
 /**
  *
  * Created by samjithsadasivan on 5/31/18.
@@ -94,7 +89,7 @@ public abstract class VavProfile extends ZoneProfile {
     
     private SystemController.State cfmLoopState;
 
-    a75f.io.domain.VavEquip vavEquip;
+    a75f.io.domain.equips.VavEquip vavEquip;
 
     int    integralMaxTimeout = 30;
     int proportionalSpread = 20;
@@ -201,7 +196,6 @@ public abstract class VavProfile extends ZoneProfile {
                     +" co2Target "+co2Target
                     +" co2Threshold "+co2Threshold
                     +" vocTarget "+vocTarget
-                    +" vocThreshold "+vocThreshold
                     +" integralMaxTimeout "+integralMaxTimeout);
 
             initializeCfmController(equipId);

@@ -694,7 +694,13 @@ public class LSmartNode
                     }
 
                     Log.d(TAG_CCU_DEVICE, "Set "+logicalOpPoint.get("dis") +" "+ p.getPort() + " type " + p.getType() + " logicalVal: " + logicalVal + " mappedVal " + mappedVal);
-                    LSmartNode.getSmartNodePort(controls_t, p).set(mappedVal);
+
+                    Struct.Unsigned8 port = LSmartNode.getSmartNodePort(controls_t, p);
+                    if (port != null) {
+                        port.set(mappedVal);
+                    } else {
+                        CcuLog.d(L.TAG_CCU_DEVICE, "Unknown port info for "+p.getDisplayName());
+                    }
 
                 }  else {
                     //Disabled output port should reset its val
@@ -723,13 +729,7 @@ public class LSmartNode
     }
 
     public static boolean isAnalog(RawPoint point) {
-        String port = point.getPort();
-        if (port != null) {
-            return port.equals(ANALOG_OUT_ONE)
-                    || port.equals(ANALOG_OUT_TWO)
-                    || port.equals(ANALOG_IN_ONE)
-                    || port.equals(ANALOG_IN_TWO);
-        }
+
         String domainName = point.getDomainName();
         if (domainName != null) {
             return domainName.equals(DomainName.analog1Out)
@@ -738,18 +738,29 @@ public class LSmartNode
                     || domainName.equals(DomainName.analog2In);
         }
 
+        String port = point.getPort();
+        if (port != null) {
+            return port.equals(ANALOG_OUT_ONE)
+                    || port.equals(ANALOG_OUT_TWO)
+                    || port.equals(ANALOG_IN_ONE)
+                    || port.equals(ANALOG_IN_TWO);
+        }
+
         return false;
     }
 
     public static boolean isRelayTwo(RawPoint point) {
-        String port = point.getPort();
-        if (port != null) {
-            return port == RELAY_TWO;
-        }
+
         String domainName = point.getDomainName();
         if (domainName != null) {
             return domainName.equals(DomainName.relay2);
         }
+
+        String port = point.getPort();
+        if (port != null) {
+            return port == RELAY_TWO;
+        }
+
         return false;
     }
 
@@ -822,6 +833,21 @@ public class LSmartNode
     }
 
     public static Struct.Unsigned8 getSmartNodePort(SmartNodeControls_t controls, RawPoint p) {
+
+        String domainName = p.getDomainName();
+        if (domainName != null) {
+            switch (domainName) {
+                case DomainName.analog1Out:
+                    return controls.analogOut1;
+                case DomainName.analog2Out:
+                    return controls.analogOut2;
+                case DomainName.relay1:
+                    return controls.digitalOut1;
+                case DomainName.relay2:
+                    return controls.digitalOut2;
+            }
+        }
+        
         String port = p.getPort();
         if (port != null) {
             switch (port)
@@ -836,20 +862,6 @@ public class LSmartNode
                     return controls.digitalOut2;
                 default:
                     return null;
-            }
-        }
-
-        String domainName = p.getDomainName();
-        if (domainName != null) {
-            switch (domainName) {
-                case DomainName.analog1Out:
-                    return controls.analogOut1;
-                case DomainName.analog2Out:
-                    return controls.analogOut2;
-                case DomainName.relay1:
-                    return controls.digitalOut1;
-                case DomainName.relay2:
-                    return controls.digitalOut2;
             }
         }
 

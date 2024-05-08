@@ -1,5 +1,7 @@
 package a75f.io.logic.bo.building;
 
+import static a75f.io.logic.bo.building.ZoneState.COOLING;
+
 import java.util.HashMap;
 import java.util.Set;
 import java.util.UUID;
@@ -7,7 +9,6 @@ import java.util.UUID;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HisItem;
-import a75f.io.api.haystack.Tags;
 import a75f.io.domain.config.ProfileConfiguration;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
@@ -17,9 +18,6 @@ import a75f.io.logic.bo.building.schedules.EquipOccupancyHandler;
 import a75f.io.logic.bo.building.schedules.EquipScheduleHandler;
 import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.TunerUtil;
-
-import static a75f.io.logic.L.TAG_CCU_SCHEDULER;
-import static a75f.io.logic.bo.building.ZoneState.COOLING;
 
 public abstract class ZoneProfile
 {

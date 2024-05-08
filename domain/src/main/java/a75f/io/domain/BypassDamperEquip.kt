@@ -2,6 +2,7 @@ package a75f.io.domain
 
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.api.Point
+import a75f.io.domain.equips.DomainEquip
 
 class BypassDamperEquip (equipRef : String) : DomainEquip(equipRef){
 

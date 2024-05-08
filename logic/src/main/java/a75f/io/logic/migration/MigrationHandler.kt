@@ -2,29 +2,36 @@ package a75f.io.logic.migration
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Point
+import a75f.io.api.haystack.Site
 import a75f.io.api.haystack.Tags
 import a75f.io.api.haystack.sync.HttpUtil
-import a75f.io.domain.VavEquip
 import a75f.io.domain.api.Domain
 import a75f.io.domain.cutover.NodeDeviceCutOverMapping
+import a75f.io.domain.cutover.VavFullyModulatingRtuCutOverMapping
+import a75f.io.domain.cutover.VavStagedRtuCutOverMapping
+import a75f.io.domain.cutover.VavStagedVfdRtuCutOverMapping
 import a75f.io.domain.cutover.VavZoneProfileCutOverMapping
+import a75f.io.domain.equips.VavEquip
 import a75f.io.domain.logic.DeviceBuilder
+import a75f.io.domain.logic.DomainManager.addSystemDomainEquip
 import a75f.io.domain.logic.EntityMapper
 import a75f.io.domain.logic.ProfileEquipBuilder
 import a75f.io.domain.util.ModelLoader
 import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.logic.L
-import a75f.io.logic.bo.building.schedules.Occupancy
-import a75f.io.logic.bo.util.DemandResponseMode
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
+import a75f.io.logic.bo.building.schedules.Occupancy
+import a75f.io.logic.bo.building.system.vav.config.ModulatingRtuProfileConfig
+import a75f.io.logic.bo.building.system.vav.config.StagedRtuProfileConfig
+import a75f.io.logic.bo.building.system.vav.config.StagedVfdRtuProfileConfig
 import a75f.io.logic.bo.building.vav.VavProfileConfiguration
+import a75f.io.logic.bo.util.DemandResponseMode
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.logic.diag.DiagEquip
 import a75f.io.logic.diag.DiagEquip.createMigrationVersionPoint
 import a75f.io.logic.migration.scheduler.SchedulerRevampMigration
-import a75f.io.logic.tuners.TunerUtil
 import a75f.io.logic.util.PreferenceUtil
 import a75f.io.logic.util.createOfflineModePoint
 import android.content.pm.PackageInfo
@@ -38,8 +45,6 @@ import org.projecthaystack.HGridBuilder
 import org.projecthaystack.io.HZincReader
 import org.projecthaystack.io.HZincWriter
 import java.util.*
-import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
 
 
 class MigrationHandler (hsApi : CCUHsApi) : Migration {
@@ -60,13 +65,14 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
     }
 
     override fun doMigration() {
-        val ccuHsApi = CCUHsApi.getInstance()
-        doVavDomainModelMigration()
+        doVavTerminalDomainModelMigration()
+        doVavSystemDomainModelMigration()
         createMigrationVersionPoint(CCUHsApi.getInstance())
+        addSystemDomainEquip(CCUHsApi.getInstance())
+
+        val ccuHsApi = CCUHsApi.getInstance()
         if (ccuHsApi.readEntity(Tags.SITE).isNotEmpty()) {
             createOfflineModePoint()
-        }
-        if (ccuHsApi.readEntity(Tags.SITE).isNotEmpty()) {
             migrationForDRMode(ccuHsApi)
             migrateEquipStatusEnums(ccuHsApi)
             if(!PreferenceUtil.getSingleDualMigrationStatus()) {
@@ -93,6 +99,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             }
             schedulerRevamp.doMigration()
         }
+        hayStack.scheduleSync()
     }
 
     private fun migrationToHandleInfluenceOfUserIntentOnSentPoints(ccuHsApi: CCUHsApi) {
@@ -256,7 +263,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         return ""
     }
 
-    private fun doVavDomainModelMigration() {
+    private fun doVavTerminalDomainModelMigration() {
         val vavEquips = hayStack.readAllEntities("equip and zone and vav")
                                 .filter { it["domainName"] == null }
                                 .toList()
@@ -347,6 +354,121 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             24.0 -> 10.0
             else -> 0.0
         }
+    }
+
+    private fun doVavSystemDomainModelMigration() {
+        val vavEquips = hayStack.readAllEntities("equip and system and vav and not modbus")
+            .filter { it["domainName"] == null }
+            .toList()
+
+        val site = hayStack.site
+        if (vavEquips.isEmpty() || site == null) {
+            CcuLog.i(Domain.LOG_TAG, "VAV DM system equip migration not required : site $site")
+            return
+        }
+        val equipBuilder = ProfileEquipBuilder(hayStack)
+        val deviceModel = ModelLoader.getCMDeviceModel() as SeventyFiveFDeviceDirective
+        val deviceDis = hayStack.siteName +"-"+ deviceModel.name
+        vavEquips.forEach {
+            CcuLog.i(Domain.LOG_TAG, "Do DM system equip migration for $it")
+            when {
+                (it["profile"].toString() == "SYSTEM_VAV_STAGED_RTU" ||
+                    it["domainName"].toString() == "vavStagedRtu") -> {
+                    migrateVavStagedSystemProfile(it["id"].toString(), equipBuilder, site, deviceModel, deviceDis)
+                }
+                (it["profile"].toString() == "SYSTEM_VAV_STAGED_VFD_RTU" ||
+                        it["domainName"].toString() == "vavStagedRtuVfdFan") -> {
+                   migrateVavStagedVfdSystemProfile(it["id"].toString(), equipBuilder, site, deviceModel, deviceDis)
+                }
+                (it["profile"].toString() == "SYSTEM_VAV_ANALOG_RTU" ||
+                        it["domainName"].toString() == "vavFullyModulatingAhu") -> {
+                    migrateVavFullyModulatingSystemProfile(it["id"].toString(), equipBuilder, site, deviceModel, deviceDis)
+                }
+                else -> {}
+            }
+
+        }
+    }
+
+    private fun migrateVavStagedSystemProfile (equipId : String, equipBuilder: ProfileEquipBuilder, site: Site,
+                                               deviceModel : SeventyFiveFDeviceDirective, deviceDis : String) {
+
+        val model = ModelLoader.getVavStageRtuModelDef()
+        val equipDis = "${site.displayName}-${model.name}"
+        val profileConfig = StagedRtuProfileConfig(model as SeventyFiveFProfileDirective)
+        equipBuilder.doCutOverMigration(equipId, model,
+            equipDis, VavStagedRtuCutOverMapping.entries , profileConfig.getDefaultConfiguration())
+
+        val entityMapper = EntityMapper(model)
+        val deviceBuilder = DeviceBuilder(hayStack, entityMapper)
+
+        val cmDevice = hayStack.readEntity("cm and device")
+        if (cmDevice.isNotEmpty()) {
+            hayStack.deleteEntityTree(cmDevice["id"].toString())
+        }
+
+        CcuLog.i(Domain.LOG_TAG, " buildDeviceAndPoints")
+        deviceBuilder.buildDeviceAndPoints(
+            profileConfig.getActiveConfiguration(),
+            deviceModel,
+            equipId,
+            hayStack.site!!.id,
+            deviceDis
+        )
+    }
+
+    private fun migrateVavStagedVfdSystemProfile (equipId : String, equipBuilder: ProfileEquipBuilder, site: Site,
+                                               deviceModel : SeventyFiveFDeviceDirective, deviceDis : String) {
+
+        val model = ModelLoader.getVavStagedVfdRtuModelDef()
+        val equipDis = "${site.displayName}-${model.name}"
+        val profileConfig = StagedVfdRtuProfileConfig(model as SeventyFiveFProfileDirective)
+        equipBuilder.doCutOverMigration(equipId, model,
+            equipDis, VavStagedVfdRtuCutOverMapping.entries , profileConfig.getDefaultConfiguration())
+
+        val entityMapper = EntityMapper(model)
+        val deviceBuilder = DeviceBuilder(hayStack, entityMapper)
+
+        val cmDevice = hayStack.readEntity("cm and device")
+        if (cmDevice.isNotEmpty()) {
+            hayStack.deleteEntityTree(cmDevice["id"].toString())
+        }
+
+        CcuLog.i(Domain.LOG_TAG, " buildDeviceAndPoints")
+        deviceBuilder.buildDeviceAndPoints(
+            profileConfig.getActiveConfiguration(),
+            deviceModel,
+            equipId,
+            hayStack.site!!.id,
+            deviceDis
+        )
+    }
+
+    private fun migrateVavFullyModulatingSystemProfile (equipId : String, equipBuilder: ProfileEquipBuilder, site: Site,
+                                                  deviceModel : SeventyFiveFDeviceDirective, deviceDis : String) {
+        CcuLog.i(Domain.LOG_TAG, "VavFullyModulatingSystemProfile equipID: $equipId")
+        val model = ModelLoader.getVavModulatingRtuModelDef()
+        val equipDis = "${site.displayName}-${model.name}"
+        val profileConfig = ModulatingRtuProfileConfig(model as SeventyFiveFProfileDirective)
+        equipBuilder.doCutOverMigration(equipId, model,
+            equipDis, VavFullyModulatingRtuCutOverMapping.entries , profileConfig.getDefaultConfiguration())
+
+        val entityMapper = EntityMapper(model)
+        val deviceBuilder = DeviceBuilder(hayStack, entityMapper)
+
+        val cmDevice = hayStack.readEntity("cm and device")
+        if (cmDevice.isNotEmpty()) {
+            hayStack.deleteEntityTree(cmDevice["id"].toString())
+        }
+
+        CcuLog.i(Domain.LOG_TAG, " buildDeviceAndPoints")
+        deviceBuilder.buildDeviceAndPoints(
+            profileConfig.getActiveConfiguration(),
+            deviceModel,
+            equipId,
+            hayStack.site!!.id,
+            deviceDis
+        )
     }
 
     fun updateMigrationVersion(){

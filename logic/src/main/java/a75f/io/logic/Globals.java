@@ -2,7 +2,6 @@ package a75f.io.logic;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
-
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
 import org.projecthaystack.client.HClient;
@@ -241,6 +240,7 @@ public class Globals {
         CCUHsApi hsApi = new CCUHsApi(this.mApplicationContext, urls.getHaystackUrl(), urls.getCaretakerUrl(),urls.getGatewayUrl());
         CcuLog.i(L.TAG_CCU_INIT,"Initialize ModelCache");
         ModelCache.INSTANCE.init(hsApi, this.mApplicationContext);
+        CcuLog.i(L.TAG_CCU_INIT,"Initialized ModelCache");
     }
 
     public void startTimerTask(){
@@ -339,7 +339,7 @@ public class Globals {
                     if(!isSafeMode()) {
                         migrationHandler.doMigration();
                         MigrationUtil.doMigrationTasksIfRequired();
-                        performBuildingTunerUprades(site);
+                        //performBuildingTunerUprades(site);
                         migrateHeartbeatPointForEquips(site);
                         migrateHeartbeatDiagPointForEquips(site);
                         migrateHeartbeatwithNewtags(site);
@@ -444,47 +444,55 @@ public class Globals {
             //BuildingTuners.getInstance().addBuildingTunerEquip();
             Equip eq = new Equip.Builder().setHashMap(equip).build();
             CcuLog.d(L.TAG_CCU, "Load SystemEquip " + eq.getDisplayName() + " System profile " + eq.getProfile());
-            switch (ProfileType.valueOf(getDomainSafeProfile(eq.getProfile()))) {
-                case SYSTEM_VAV_ANALOG_RTU:
-                    L.ccu().systemProfile = new VavFullyModulatingRtu();
-                    break;
-                case SYSTEM_VAV_STAGED_RTU:
-                    L.ccu().systemProfile = new VavStagedRtu();
-                    break;
-                case SYSTEM_VAV_STAGED_VFD_RTU:
-                    L.ccu().systemProfile = new VavStagedRtuWithVfd();
-                    break;
-                case SYSTEM_VAV_HYBRID_RTU:
-                    L.ccu().systemProfile = new VavAdvancedHybridRtu();
-                    break;
-                case SYSTEM_VAV_IE_RTU:
-                    L.ccu().systemProfile = new VavIERtu();
-                    break;
-                case SYSTEM_VAV_BACNET_RTU:
-                    L.ccu().systemProfile = new VavBacnetRtu();
-                    break;
-                case SYSTEM_DAB_ANALOG_RTU:
-                    L.ccu().systemProfile = new DabFullyModulatingRtu();
-                    break;
-                case SYSTEM_DAB_STAGED_RTU:
-                    L.ccu().systemProfile = new DabStagedRtu();
-                    break;
-                case SYSTEM_DAB_STAGED_VFD_RTU:
-                    L.ccu().systemProfile = new DabStagedRtuWithVfd();
-                    break;
-                case SYSTEM_DAB_HYBRID_RTU:
-                    L.ccu().systemProfile = new DabAdvancedHybridRtu();
-                    break;
-                case dabExternalAHUController:
-                    L.ccu().systemProfile = new DabExternalAhu();
-                    break;
-                case vavExternalAHUController:
-                    L.ccu().systemProfile = new VavExternalAhu();
-                    break;
-                default:
-                    L.ccu().systemProfile = new DefaultSystem();
-                    isDefaultSystem = true;
-                    break;
+            if (eq.getProfile().equals("vavStagedRtu")) {
+                L.ccu().systemProfile = new VavStagedRtu();
+            } else if (eq.getProfile().equals("vavStagedRtuVfdFan")) {
+                L.ccu().systemProfile = new VavStagedRtuWithVfd();
+            }else if (eq.getProfile().equals("vavFullyModulatingAhu")) {
+                L.ccu().systemProfile = new VavFullyModulatingRtu();
+            }else {
+                switch (ProfileType.valueOf(getDomainSafeProfile(eq.getProfile()))) {
+                    case SYSTEM_VAV_ANALOG_RTU:
+                        L.ccu().systemProfile = new VavFullyModulatingRtu();
+                        break;
+                    case SYSTEM_VAV_STAGED_RTU:
+                        L.ccu().systemProfile = new VavStagedRtu();
+                        break;
+                    case SYSTEM_VAV_STAGED_VFD_RTU:
+                        L.ccu().systemProfile = new VavStagedRtuWithVfd();
+                        break;
+                    case SYSTEM_VAV_HYBRID_RTU:
+                        L.ccu().systemProfile = new VavAdvancedHybridRtu();
+                        break;
+                    case SYSTEM_VAV_IE_RTU:
+                        L.ccu().systemProfile = new VavIERtu();
+                        break;
+                    case SYSTEM_VAV_BACNET_RTU:
+                        L.ccu().systemProfile = new VavBacnetRtu();
+                        break;
+                    case SYSTEM_DAB_ANALOG_RTU:
+                        L.ccu().systemProfile = new DabFullyModulatingRtu();
+                        break;
+                    case SYSTEM_DAB_STAGED_RTU:
+                        L.ccu().systemProfile = new DabStagedRtu();
+                        break;
+                    case SYSTEM_DAB_STAGED_VFD_RTU:
+                        L.ccu().systemProfile = new DabStagedRtuWithVfd();
+                        break;
+                    case SYSTEM_DAB_HYBRID_RTU:
+                        L.ccu().systemProfile = new DabAdvancedHybridRtu();
+                        break;
+                    case dabExternalAHUController:
+                        L.ccu().systemProfile = new DabExternalAhu();
+                        break;
+                    case vavExternalAHUController:
+                        L.ccu().systemProfile = new VavExternalAhu();
+                        break;
+                    default:
+                        L.ccu().systemProfile = new DefaultSystem();
+                        isDefaultSystem = true;
+                        break;
+                }
             }
         } else {
             CcuLog.d(L.TAG_CCU, "System Equip does not exist.Create Default System Profile");
@@ -694,7 +702,7 @@ public class Globals {
     }
 
     public String getSmartNodeBand() {
-        HashMap<Object,Object> device = CCUHsApi.getInstance().readEntity("device and addr");
+        HashMap<Object,Object> device = CCUHsApi.getInstance().readEntity("device and node and addr");
         CcuLog.i(Domain.LOG_TAG, "Deviceband "+device);
         if (device != null && device.size() > 0 && device.get("modbus") == null && device.get("addr") != null) {
             String nodeAdd = device.get("addr").toString();

@@ -69,6 +69,9 @@ import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.dab.DabExternalAhu;
 import a75f.io.logic.bo.building.system.vav.VavExternalAhu;
+import a75f.io.logic.bo.building.system.vav.VavFullyModulatingRtu;
+import a75f.io.logic.bo.building.system.vav.VavStagedRtu;
+import a75f.io.logic.bo.building.system.vav.VavStagedRtuWithVfd;
 import a75f.io.logic.bo.util.DemandResponseMode;
 import a75f.io.logic.bo.util.DesiredTempDisplayMode;
 import a75f.io.logic.bo.util.TemperatureMode;
@@ -1232,7 +1235,10 @@ public class ScheduleManager {
 
     private static double getCoolingPreconditioningRate() {
         if (L.ccu().systemProfile instanceof DabExternalAhu
-                || L.ccu().systemProfile instanceof VavExternalAhu) {
+                || L.ccu().systemProfile instanceof VavExternalAhu
+                || L.ccu().systemProfile instanceof VavStagedRtu
+                || L.ccu().systemProfile instanceof VavStagedRtuWithVfd
+                || L.ccu().systemProfile instanceof VavFullyModulatingRtu) {
             return getPointByDomain(coolingPreconditioningRate);
         } else {
             return TunerUtil.readTunerValByQuery("cooling and precon and rate", L.ccu().systemProfile.getSystemEquipRef());
@@ -1240,7 +1246,10 @@ public class ScheduleManager {
     }
     private static double getHeatingPreconditioningRate() {
         if (L.ccu().systemProfile instanceof DabExternalAhu
-                || L.ccu().systemProfile instanceof VavExternalAhu) {
+                || L.ccu().systemProfile instanceof VavExternalAhu
+                || L.ccu().systemProfile instanceof VavStagedRtu
+                || L.ccu().systemProfile instanceof VavStagedRtuWithVfd
+                || L.ccu().systemProfile instanceof VavFullyModulatingRtu) {
             return getPointByDomain(heatingPreconditioningRate);
         } else {
             return TunerUtil.readTunerValByQuery("heating and precon and rate", L.ccu().systemProfile.getSystemEquipRef());

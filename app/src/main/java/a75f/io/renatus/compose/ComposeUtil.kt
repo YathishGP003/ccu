@@ -17,6 +17,7 @@ class ComposeUtil {
         val  primaryColor = getThemeColor()
         val  secondaryColor = getSecondaryThemeColor()
         var greyColor = Color(android.graphics.Color.parseColor("#666666"))
+        val greyDropDownColor = Color(android.graphics.Color.parseColor("#B6B6B6"))
         val greyDropDownScrollBarColor = Color(android.graphics.Color.parseColor("#B6B6B6"))
         val greyDropDownUnderlineColor = Color(android.graphics.Color.parseColor("#CCCCCC"))
         val myFontFamily = FontFamily(

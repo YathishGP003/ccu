@@ -3,7 +3,7 @@ package a75f.io.logic.tuners
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.HayStackConstants
 import a75f.io.api.haystack.Point
-import a75f.io.domain.BuildingEquip
+import a75f.io.domain.equips.BuildingEquip
 import a75f.io.domain.api.Domain
 import a75f.io.domain.logic.TunerEquipBuilder
 import a75f.io.domain.migration.DiffManger

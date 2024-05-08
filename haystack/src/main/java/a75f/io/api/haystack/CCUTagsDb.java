@@ -940,16 +940,18 @@ public class CCUTagsDb extends HServer {
                 .add("portEnabled",p.getEnabled() ? HBool.TRUE : HBool.FALSE)
                 .add("tz", p.getTz());
         if (p.getUnit() != null) b.add("unit", p.getUnit());
+        if (p.getEnums() != null) b.add("enum", p.getEnums());
         if (p.getShortDis() != null) b.add("shortDis",p.getShortDis());
         if (p.getMinVal() != null) b.add("minVal",Double.parseDouble(p.getMinVal()));
         if (p.getMaxVal() != null) b.add("maxVal",Double.parseDouble(p.getMaxVal()));
-        
+        if (p.getIncrementVal() != null) b.add("incrementVal",Double.parseDouble(p.getIncrementVal()));
         if (p.getRegisterAddress() != null) b.add("registerAddress", p.getRegisterAddress());
         if (p.getRegisterNumber() != null) b.add("registerNumber", p.getRegisterNumber());
         if (p.getStartBit() != null) b.add("startBit", p.getStartBit());
         if (p.getEndBit() != null) b.add("endBit", p.getEndBit());
         if (p.getRegisterType() != null) b.add("registerType", p.getRegisterType());
         if (p.getParameterId() != null) b.add("parameterId", p.getParameterId());
+        if (p.getHisInterpolate() != null) b.add("hisInterpolate",p.getHisInterpolate());
         if(p.getCcuRef() != null){
             b.add("ccuRef", p.getCcuRef());
         }
@@ -993,16 +995,18 @@ public class CCUTagsDb extends HServer {
                 .add("portEnabled",p.getEnabled() ? HBool.TRUE : HBool.FALSE)
                 .add("tz", p.getTz());
         if (p.getUnit() != null) b.add("unit", p.getUnit());
+        if (p.getEnums() != null) b.add("enum", p.getEnums());
         if (p.getShortDis() != null) b.add("shortDis",p.getShortDis());
         if (p.getMinVal() != null) b.add("minVal",Double.parseDouble(p.getMinVal()));
         if (p.getMaxVal() != null) b.add("maxVal",Double.parseDouble(p.getMaxVal()));
-    
+        if (p.getIncrementVal() != null) b.add("incrementVal",Double.parseDouble(p.getIncrementVal()));
         if (p.getRegisterAddress() != null) b.add("registerAddress", p.getRegisterAddress());
         if (p.getRegisterNumber() != null) b.add("registerNumber", p.getRegisterNumber());
         if (p.getStartBit() != null) b.add("startBit", p.getStartBit());
         if (p.getEndBit() != null) b.add("endBit", p.getEndBit());
         if (p.getRegisterType() != null) b.add("registerType", p.getRegisterType());
         if (p.getParameterId() != null) b.add("parameterId", p.getParameterId());
+        if (p.getHisInterpolate() != null) b.add("hisInterpolate",p.getHisInterpolate());
         if(p.getCcuRef() != null){
             b.add("ccuRef", p.getCcuRef());
         }
@@ -1807,7 +1811,6 @@ public class CCUTagsDb extends HServer {
     public void updateHisItemSynced(List<HisItem> hisItems) {
         hisItems.forEach(item -> item.syncStatus = true);
         hisBox.put(hisItems);
-        CcuLog.i("TEST_SAM", "updateHisItemSynced");
     }
 
     public void updateHisItems(List<HisItem> hisItems) {

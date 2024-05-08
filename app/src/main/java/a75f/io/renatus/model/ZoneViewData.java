@@ -5,10 +5,9 @@ import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HisItem;
-import a75f.io.domain.VavEquip;
 import a75f.io.domain.api.Domain;
-import a75f.io.domain.logic.DomainManager;
 import a75f.io.domain.api.DomainName;
+import a75f.io.domain.equips.VavEquip;
 import a75f.io.logic.bo.building.Thermistor;
 import a75f.io.logic.bo.building.sensors.NativeSensor;
 import a75f.io.logic.bo.building.sensors.Sensor;

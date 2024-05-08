@@ -1,21 +1,24 @@
 package a75f.io.logic.bo.building.vav;
 
+import static a75f.io.logic.bo.building.ZoneState.COOLING;
+import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
+import static a75f.io.logic.bo.building.ZoneState.HEATING;
+import static a75f.io.logic.bo.building.ZoneState.RFDEAD;
+import static a75f.io.logic.bo.building.ZoneState.TEMPDEAD;
+
 import android.util.Log;
 
-import java.util.Objects;
+import org.projecthaystack.UnknownRecException;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Occupied;
-import a75f.io.domain.VavEquip;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
-import a75f.io.logic.bo.building.BaseProfileConfiguration;
 import a75f.io.logic.bo.building.EpidemicState;
 import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
-import a75f.io.logic.bo.building.hvac.VavUnit;
 import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.system.SystemController;
@@ -23,14 +26,6 @@ import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.vav.VavSystemController;
 import a75f.io.logic.bo.building.truecfm.TrueCFMUtil;
 import a75f.io.logic.tuners.TunerUtil;
-
-import static a75f.io.logic.bo.building.ZoneState.COOLING;
-import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
-import static a75f.io.logic.bo.building.ZoneState.HEATING;
-import static a75f.io.logic.bo.building.ZoneState.RFDEAD;
-import static a75f.io.logic.bo.building.ZoneState.TEMPDEAD;
-
-import org.projecthaystack.UnknownRecException;
 
 /**
  * Created by samjithsadasivan on 8/23/18.
@@ -64,11 +59,6 @@ public class VavReheatProfile extends VavProfile
             mInterface.refreshView();
         }
         CcuLog.i(L.TAG_CCU_ZONE, "--->VavReheatProfile<--- "+nodeAddr);
-        /*if (vavDeviceMap.get(node) == null) {
-            addLogicalMap(node);
-            CcuLog.d(L.TAG_CCU_ZONE, " Logical Map added for node " + node);
-            continue;
-        }*/
         if (isRFDead()) {
             handleRFDead();
             return;

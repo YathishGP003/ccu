@@ -96,7 +96,7 @@ public abstract class SystemController
 
     public boolean isZoneDead(String equipRef) {
 
-        HashMap<Object, Object> point = CCUHsApi.getInstance().readEntity("point and (heartbeat or heartBeat) and equipRef == \""+equipRef+"\"");
+        /*HashMap<Object, Object> point = CCUHsApi.getInstance().readEntity("point and (heartbeat or heartBeat) and equipRef == \""+equipRef+"\"");
         if(!point.isEmpty()){
             HisItem hisItem = CCUHsApi.getInstance().curRead(point.get("id").toString());
             if (hisItem == null) {
@@ -107,7 +107,7 @@ public abstract class SystemController
                 CcuLog.e(L.TAG_CCU_SYSTEM, "Equip dead! "+equipRef+" , Heartbeat "+hisItem.getDate().toString());
                 return true;
             }
-        }
+        }*/
 
         double currentTemp = CCUHsApi.getInstance().readHisValByQuery("(current or space) and temp and sensor and equipRef == \"" + equipRef + "\"");
 

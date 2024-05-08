@@ -1,7 +1,6 @@
 package a75f.io.logic.bo.building.bypassdamper
 
 import a75f.io.domain.BypassDamperEquip
-import a75f.io.domain.VavEquip
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.config.AssociationConfig

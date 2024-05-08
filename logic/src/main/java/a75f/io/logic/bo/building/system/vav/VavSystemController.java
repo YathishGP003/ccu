@@ -272,8 +272,8 @@ public class VavSystemController extends SystemController
             CCUHsApi.getInstance().writeHisValByQuery("domainName == \""+averageHumidity+"\"", averageSystemHumidity);
             CCUHsApi.getInstance().writeHisValByQuery("domainName == \""+averageTemperature+"\"", averageSystemTemperature);
         } else {
-            systemProfile.setSystemPoint("average and humidity", averageSystemHumidity);
-            systemProfile.setSystemPoint("average and temp", averageSystemTemperature);
+            systemProfile.setSystemPoint("(average or avg) and humidity", averageSystemHumidity);
+            systemProfile.setSystemPoint("(average or avg) and temp", averageSystemTemperature);
         }
 
     }
@@ -409,9 +409,9 @@ public class VavSystemController extends SystemController
         }
         weightedAverageHeatingOnlyLoadMA = weightedAverageHeatingOnlyLoadMASum/weightedAverageHeatingOnlyLoadMAQueue.size();
         
-        systemProfile.setSystemPoint("moving and average and cooling and load",
+        systemProfile.setSystemPoint("moving and (average or avg) and cooling and load",
                                      CCUUtils.roundToTwoDecimal(weightedAverageCoolingOnlyLoadMA));
-        systemProfile.setSystemPoint("moving and average and heating and load",
+        systemProfile.setSystemPoint("moving and (average or avg) and heating and load",
                                      CCUUtils.roundToTwoDecimal(weightedAverageHeatingOnlyLoadMA));
 
 
@@ -692,7 +692,7 @@ public class VavSystemController extends SystemController
             double desiredTempCooling = ScheduleManager.getInstance().getSystemCoolingDesiredTemp();
             double desiredTempHeating = ScheduleManager.getInstance().getSystemHeatingDesiredTemp();
             HashMap<Object, Object> coolTempPoint = CCUHsApi.getInstance()
-                                                            .readEntity("point and system and cm and cooling and " +
+                                                            .readEntity("point and system and cooling and " +
                                                                         "desired and temp and equipRef == " + "\"" +
                                                                          L.ccu().systemProfile.getSystemEquipRef() + "\""
             );
@@ -700,7 +700,7 @@ public class VavSystemController extends SystemController
             CCUHsApi.getInstance().writeHisValById(coolTempPoint.get("id").toString(), desiredTempCooling);
             CCUHsApi.getInstance().writeDefaultValById(coolTempPoint.get("id").toString(), desiredTempCooling);
 
-            HashMap<Object, Object> heatTempPoint = CCUHsApi.getInstance().readEntity("point and system and cm and " +
+            HashMap<Object, Object> heatTempPoint = CCUHsApi.getInstance().readEntity("point and system and " +
                                                                            "heating and desired and temp and equipRef == \"" +
                                                                             L.ccu().systemProfile.getSystemEquipRef() + "\""
             );

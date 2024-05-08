@@ -10,6 +10,9 @@ import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Site;
 import a75f.io.api.haystack.Tags;
+import a75f.io.domain.api.Domain;
+import a75f.io.domain.api.DomainName;
+import a75f.io.domain.api.Point;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType;
@@ -43,10 +46,10 @@ public class ControlMote
     String tz;
     public ControlMote(String systemEquipRef) {
         
-        HashMap device = CCUHsApi.getInstance().read("device and cm");
+        ArrayList<HashMap<Object,Object>> devices = CCUHsApi.getInstance().readAllEntities("device and cm");
 
-        if ((device != null) && (device.size() > 0)) {
-            Device d = new Device.Builder().setHashMap(device).build();
+        if (devices.size() > 0) {
+            /*Device d = new Device.Builder().setHashMap(device).build();
             d.setEquipRef(systemEquipRef);
             CCUHsApi.getInstance().updateDevice(d,d.getId());
             createNewCMPointsForUpgrades();
@@ -58,7 +61,11 @@ public class ControlMote
                     site.getTz(),
                     CCUHsApi.getInstance()
             );
-            return;
+            return;*/
+            devices.forEach(device -> {
+                CcuLog.d(Domain.LOG_TAG," Delete CM device "+device);
+                CCUHsApi.getInstance().deleteEntityTree(device.get("id").toString());
+            });
         }
         site = new Site.Builder().setHashMap(CCUHsApi.getInstance().read(Tags.SITE)).build();
         siteRef = site.getId();
@@ -322,9 +329,37 @@ public class ControlMote
     {
         return CCUHsApi.getInstance().readHisValByQuery("point and his and system and state and "+relay);
     }
-    public static void setRelayState(String relay, double val)
-    {
+    public static void setRelayState(String relay, double val) {
         CCUHsApi.getInstance().writeHisValByQuery("point and his and system and state and "+relay, val);
+    }
+
+    public static double getRelayState(Point point) {
+        return CCUHsApi.getInstance().readHisValByQuery("point and his and system and state and "
+                +getRelayStringFromEnablePoint(point));
+    }
+    public static void setRelayState(Point point, double val) {
+        CCUHsApi.getInstance().writeHisValByQuery("point and his and system and state and "
+                +getRelayStringFromEnablePoint(point), val);
+    }
+
+    public static String getRelayStringFromEnablePoint(Point point) {
+        if (point.getDomainName().equals(DomainName.relay1OutputEnable)) {
+            return DomainName.relay1;
+        } else if (point.getDomainName().equals(DomainName.relay2OutputEnable)) {
+            return DomainName.relay2;
+        } if (point.getDomainName().equals(DomainName.relay3OutputEnable)) {
+            return DomainName.relay3;
+        } if (point.getDomainName().equals(DomainName.relay4OutputEnable)) {
+            return DomainName.relay4;
+        } if (point.getDomainName().equals(DomainName.relay5OutputEnable)) {
+            return DomainName.relay5;
+        } if (point.getDomainName().equals(DomainName.relay6OutputEnable)) {
+            return DomainName.relay6;
+        } if (point.getDomainName().equals(DomainName.relay7OutputEnable)) {
+            return DomainName.relay7;
+        }
+        CcuLog.e(L.TAG_CCU_DEVICE, "Invalid relay domain point "+point.getDomainName());
+        return "";
     }
     public void addSensor(Port p, String pointRef) {
         RawPoint sensor = new RawPoint.Builder()

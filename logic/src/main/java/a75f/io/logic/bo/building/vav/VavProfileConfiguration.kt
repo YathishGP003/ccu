@@ -2,7 +2,7 @@ package a75f.io.logic.bo.building.vav
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.HSUtil
-import a75f.io.domain.VavEquip
+import a75f.io.domain.equips.VavEquip
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.config.AssociationConfig

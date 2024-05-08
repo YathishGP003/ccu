@@ -9,6 +9,7 @@ import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -22,6 +23,8 @@ import a75f.io.api.haystack.Kind;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.domain.api.DomainName;
+import a75f.io.domain.api.PhysicalPoint;
+import a75f.io.domain.equips.DomainEquip;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.BacnetIdKt;
 import a75f.io.logic.BacnetUtilKt;
@@ -699,7 +702,7 @@ public abstract class SystemProfile
 
         CCUHsApi.getInstance().writeHisValByQuery("system and outside and temp and not lockout", externalTemp);
         CCUHsApi.getInstance().writeHisValByQuery("system and outside and humidity", externalHumidity);
-        
+
     }
     
     /**
@@ -928,5 +931,9 @@ public abstract class SystemProfile
     public void createDemandResponseConfigPoints(String equipDis, String siteRef, String equipRef, String tz, CCUHsApi hayStack) {
         DemandResponseMode demandResponseMode = new DemandResponseMode();
         demandResponseMode.createDemandResponseEnrollmentPoint(equipDis, siteRef, equipRef, tz, hayStack);
+    }
+
+    public Map<a75f.io.domain.api.Point, PhysicalPoint> getLogicalPhysicalMap() {
+        return new HashMap<a75f.io.domain.api.Point, PhysicalPoint>();
     }
 }

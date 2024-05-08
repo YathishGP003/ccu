@@ -1,5 +1,6 @@
-package a75f.io.domain
+package a75f.io.domain.equips
 
+import a75f.io.domain.BuildConfig
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.api.Point
 

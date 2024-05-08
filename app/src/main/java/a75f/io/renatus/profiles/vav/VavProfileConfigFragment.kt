@@ -9,6 +9,7 @@ import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.renatus.BASE.BaseDialogFragment
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.composables.DropDownWithLabel
+import a75f.io.renatus.composables.IndeterminateLoopProgress
 import a75f.io.renatus.composables.Picker
 import a75f.io.renatus.composables.rememberPickerState
 import a75f.io.renatus.compose.ComposeUtil.Companion.primaryColor
@@ -98,24 +99,11 @@ class VavProfileConfigFragment : BaseDialogFragment() {
         }
     }
 
-    @Composable
-    fun ShowProgressBar() {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            CircularProgressIndicator(color = primaryColor,)
-            Spacer(modifier = Modifier.height(10.dp))
-            Text(text = "Loading Profile Configuration")
-        }
-    }
-
     //@Preview
     @Composable
     fun RootView() {
         if (!viewModel.modelLoaded) {
-            ShowProgressBar()
+            IndeterminateLoopProgress(bottomText = "Loading Profile Configuration")
             CcuLog.i(Domain.LOG_TAG, "Show Progress")
             return
         }

@@ -2,6 +2,8 @@ package a75f.io.logic.bo.haystack.device;
 
 import android.util.Log;
 
+import org.projecthaystack.HDict;
+
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -441,14 +443,15 @@ public class SmartNode
     }
 
     public RawPoint getRawPoint(Port p) {
-        HashMap sensorPoint = CCUHsApi.getInstance().read("point and sensor and physical and deviceRef == \""+deviceRef+"\""
-                                                     +" and port == \""+p.toString()+"\"");
-        if (sensorPoint.size() > 0) {
-            return new RawPoint.Builder().setHashMap(sensorPoint).build();
+        HDict sensorPoint = CCUHsApi.getInstance().readHDict("point and domainName == \"" + getDomainNameFromPort(p) + "\" and deviceRef == \"" + deviceRef + "\"");
+
+        if (sensorPoint != null && sensorPoint.size() > 0) {
+            return new RawPoint.Builder().setHDict(sensorPoint).build();
         }
 
-        sensorPoint = CCUHsApi.getInstance().read("point and domainName == \"" + getDomainNameFromPort(p) + "\" and deviceRef == \"" + deviceRef + "\"");
-        return sensorPoint.size() > 0 ? new RawPoint.Builder().setHashMap(sensorPoint).build() : null;
+        sensorPoint = CCUHsApi.getInstance().readHDict("point and sensor and physical and deviceRef == \""+deviceRef+"\""
+                +" and port == \""+p+"\"");
+        return sensorPoint.size() > 0 ? new RawPoint.Builder().setHDict(sensorPoint).build() : null;
     }
 
     public void addPointsToDb() {

@@ -48,15 +48,17 @@ import a75f.io.device.serial.CcuToCmOverUsbCmRelayActivationMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSmartStatControlsMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSnControlsMessage_t;
 import a75f.io.device.serial.MessageType;
+import a75f.io.domain.api.Domain;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.Port;
+import a75f.io.logic.bo.building.system.vav.VavFullyModulatingRtu;
+import a75f.io.logic.bo.building.system.vav.VavStagedRtu;
+import a75f.io.logic.bo.building.system.vav.VavStagedRtuWithVfd;
 import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.diag.otastatus.OtaStatus;
-import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint;
 import a75f.io.logic.jobs.SystemScheduleUtil;
 import a75f.io.logic.tuners.BuildingTunerCache;
-import a75f.io.logic.tuners.TunerUtil;
 
 public class DeviceUtil {
     
@@ -228,19 +230,42 @@ public class DeviceUtil {
     public static CcuToCmOverUsbCmRelayActivationMessage_t getCMControlsMessage() {
         CcuToCmOverUsbCmRelayActivationMessage_t msg = new CcuToCmOverUsbCmRelayActivationMessage_t();
         msg.messageType.set(MessageType.CCU_RELAY_ACTIVATION);
-        msg.analog0.set((short) ControlMote.getAnalogOut("analog1"));
-        msg.analog1.set((short) ControlMote.getAnalogOut("analog2"));
-        msg.analog2.set((short) ControlMote.getAnalogOut("analog3"));
-        msg.analog3.set((short) ControlMote.getAnalogOut("analog4"));
-        int relayBitmap = 0;
-        for (int i = 1; i <= 7; i++)
-        {
-            if (ControlMote.getRelayState("relay" + i) > 0)
-            {
-                relayBitmap |= 1 << MeshUtil.getRelayMapping(i);
+
+        if (L.ccu().systemProfile instanceof VavStagedRtu
+                || L.ccu().systemProfile instanceof VavStagedRtuWithVfd
+                || L.ccu().systemProfile instanceof VavFullyModulatingRtu) {
+
+            msg.analog0.set((short) Domain.cmBoardDevice.getAnalog1Out().readHisVal());
+            msg.analog1.set((short) Domain.cmBoardDevice.getAnalog2Out().readHisVal());
+            msg.analog2.set((short) Domain.cmBoardDevice.getAnalog3Out().readHisVal());
+            msg.analog3.set((short) Domain.cmBoardDevice.getAnalog4Out().readHisVal());
+
+            int relayBitmap = 0;
+            for (int i = 1; i <= 7; i++) {
+                if (CCUHsApi.getInstance().readHisValByQuery("point and physical and deviceRef == \""
+                        + Domain.cmBoardDevice.getId() + "\" " +
+                        "and domainName == \"relay"+i+"\"") > 0) {
+                    relayBitmap |= 1 << MeshUtil.getRelayMapping(i);
+                }
             }
+            msg.relayBitmap.set((short) relayBitmap);
+
+        } else {
+            msg.analog0.set((short) ControlMote.getAnalogOut("analog1"));
+            msg.analog1.set((short) ControlMote.getAnalogOut("analog2"));
+            msg.analog2.set((short) ControlMote.getAnalogOut("analog3"));
+            msg.analog3.set((short) ControlMote.getAnalogOut("analog4"));
+            int relayBitmap = 0;
+            for (int i = 1; i <= 7; i++)
+            {
+                if (ControlMote.getRelayState("relay" + i) > 0)
+                {
+                    relayBitmap |= 1 << MeshUtil.getRelayMapping(i);
+                }
+            }
+            msg.relayBitmap.set((short) relayBitmap);
         }
-        msg.relayBitmap.set((short) relayBitmap);
+
         
         return msg;
     }

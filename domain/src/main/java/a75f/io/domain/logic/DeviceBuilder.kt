@@ -11,12 +11,16 @@ import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.cutover.BuildingEquipCutOverMapping
 import a75f.io.domain.cutover.devicePointWithDomainNameExists
 import a75f.io.domain.cutover.getDeviceDomainNameFromDis
+import a75f.io.domain.util.TagsUtil
 import a75f.io.logger.CcuLog
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDevicePointDef
+import io.seventyfivef.domainmodeler.common.point.Constraint
+import io.seventyfivef.domainmodeler.common.point.MultiStateConstraint
+import io.seventyfivef.domainmodeler.common.point.NumericConstraint
 import io.seventyfivef.ph.core.TagType
+import org.projecthaystack.HBool
 import org.projecthaystack.HStr
-import kotlin.math.log
 
 class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: EntityMapper) {
     fun buildDeviceAndPoints(configuration: ProfileConfiguration, modelDef: SeventyFiveFDeviceDirective, equipRef: String, siteRef : String, deviceDis: String) {
@@ -29,7 +33,7 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
     }
 
     fun updateDeviceAndPoints(configuration: ProfileConfiguration, modelDef: SeventyFiveFDeviceDirective, equipRef: String, siteRef : String, deviceDis: String) {
-
+        CcuLog.i(Domain.LOG_TAG, "updateDeviceAndPoints $configuration")
         val hayStackDevice = buildDevice(modelDef, configuration, equipRef, siteRef, deviceDis)
 
         val device = hayStack.readEntity(
@@ -87,10 +91,43 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
             .setUnit(modelDef.defaultUnit)
             .setSiteRef(device.siteRef)
 
-        modelDef.tags.filter { it.kind == TagType.MARKER }.forEach{ pointBuilder.addMarker(it.name)}
-        if (modelDef.tags.find { it.name == Tags.HIS } != null) {
-            pointBuilder.addTag(Tags.TZ, HStr.make(hayStack.site?.tz))
+        if (modelDef.valueConstraint?.constraintType == Constraint.ConstraintType.NUMERIC) {
+            val constraint = modelDef.valueConstraint as NumericConstraint
+            pointBuilder.setMaxVal(constraint.maxValue.toString())
+            pointBuilder.setMinVal(constraint.minValue.toString())
+
+            val incrementValTag = modelDef.presentationData?.entries?.find { it.key == "tagValueIncrement" }
+            incrementValTag?.let { pointBuilder.setIncrementVal(it.value.toString()) }
+        } else if (modelDef.valueConstraint?.constraintType == Constraint.ConstraintType.MULTI_STATE) {
+            val constraint = modelDef.valueConstraint as MultiStateConstraint
+            val enumString = constraint.allowedValues.joinToString { it.value }
+            pointBuilder.setEnums(enumString)
         }
+
+        if (modelDef is SeventyFiveFDevicePointDef) {
+            if (modelDef.hisInterpolate.name.isNotEmpty()) {
+                pointBuilder.setHisInterpolate(modelDef.hisInterpolate.name.lowercase())
+            }
+        }
+
+        modelDef.tags.filter { it.kind == TagType.MARKER }.forEach{ pointBuilder.addMarker(it.name)}
+
+        /*modelDef.tags.filter { it.kind == TagType.NUMBER }.forEach{ tag ->
+            TagsUtil.getTagDefHVal(tag)?.let { pointBuilder.addTag(tag.name, it) }
+        }
+
+        modelDef.tags.filter { it.kind == TagType.STR && it.name.lowercase() != "bacnetid" }.forEach{ tag ->
+            tag.defaultValue?.let {
+                pointBuilder.addTag(tag.name, HStr.make(tag.defaultValue.toString()))
+            }
+        }
+        modelDef.tags.filter { it.kind == TagType.BOOL && it.name != "portEnabled"}.forEach{ tag ->
+            tag.defaultValue?.let {
+                pointBuilder.addTag(tag.name, HBool.make(tag.defaultValue as Boolean))
+            }
+        }*/
+        pointBuilder.addTag(Tags.TZ, HStr.make(hayStack.site?.tz))
+        pointBuilder.addTag("sourcePoint", HStr.make(modelDef.id))
 
         val rawPoint = pointBuilder.build()
         updatePhysicalRef(configuration, rawPoint, entityMapper, device.equipRef, deviceDis)
@@ -105,6 +142,7 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
             val hayStackPointDict = hayStack.readHDict("domainName == \""+it.domainName+"\" and deviceRef == \""+device.id+"\"")
             val hayStackPoint = Point.Builder().setHDict(hayStackPointDict).build()
             if (!hayStackPoint.equals(newPoint)) {
+                CcuLog.i(Domain.LOG_TAG, "updateHaystackPoint ${it.domainName}")
                 hayStack.updatePoint(newPoint, hayStackPoint.id)
                 newPoint.id = hayStackPoint.id
                 DomainManager.addRawPoint(newPoint)

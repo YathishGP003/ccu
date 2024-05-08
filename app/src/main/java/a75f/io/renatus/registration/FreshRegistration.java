@@ -42,6 +42,7 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.system.vav.VavStagedRtuWithVfd;
 import a75f.io.logic.ccu.restore.RestoreCCU;
 import a75f.io.messaging.client.MessagingClient;
 import a75f.io.renatus.DABFullyAHUProfile;
@@ -58,7 +59,7 @@ import a75f.io.renatus.VavAnalogRtuProfile;
 import a75f.io.renatus.VavHybridRtuProfile;
 import a75f.io.renatus.VavIERtuProfile;
 import a75f.io.renatus.VavStagedRtuProfile;
-import a75f.io.renatus.VavStagedRtuWithVfdProfile;
+import a75f.io.renatus.profiles.system.VavStagedVfdRtuFragment;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.PreferenceConstants;
 import a75f.io.renatus.util.Prefs;
@@ -173,7 +174,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
                 if (currentFragment instanceof VavAnalogRtuProfile) {
                     selectItem(5);
                 }
-                if (currentFragment instanceof VavStagedRtuWithVfdProfile) {
+                if (currentFragment instanceof VavStagedVfdRtuFragment) {
                     selectItem(5);
                 }
                 if (currentFragment instanceof VavHybridRtuProfile) {
@@ -781,7 +782,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
         }
         if (position == 12) {
 
-            fragment = new VavStagedRtuWithVfdProfile();
+            fragment = new VavStagedVfdRtuFragment();
 
             Bundle data = new Bundle();
             data.putBoolean("REGISTRATION_WIZARD", true);

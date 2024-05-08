@@ -617,6 +617,14 @@ public class Point extends Entity
                 {
                     this.domainName = pair.getValue().toString();
                 }
+                else if (pair.getKey().equals("bacnetId"))
+                {
+                    this.bacnetId = (int) Double.parseDouble(pair.getValue().toString());
+                }
+                else if (pair.getKey().equals("bacnetType"))
+                {
+                    this.bacnetType = pair.getValue().toString();
+                }
                 else {
                     this.tags.put(pair.getKey().toString(), (HVal) pair.getValue());
                 }

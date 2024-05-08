@@ -101,19 +101,19 @@ fun HeaderLeftAlignedTextViewNew(text: String) {
 }
 
 @Composable
-fun LabelTextView(text: String,widthValue:Int =200) {
-    Text(
-        modifier = Modifier
-            .padding(PaddingValues(start = 20.dp))
-            .width(widthValue.dp),
-        style = TextStyle(
-            fontFamily = myFontFamily,
-            fontWeight = FontWeight.Normal,
-            fontSize = 20.sp,
-            color = Color.Black
-        ),
-        text = text
-    )
+fun LabelTextView(text: String,widthValue:Int =210) {
+        Text(
+            modifier = Modifier
+                .padding(PaddingValues(start = 20.dp))
+                .width(widthValue.dp),
+            style = TextStyle(
+                fontFamily = myFontFamily,
+                fontWeight = FontWeight.Normal,
+                fontSize = 20.sp,
+                color = Color.Black
+            ),
+            text = text
+        )
 }
 
 @Composable

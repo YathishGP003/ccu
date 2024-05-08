@@ -4,7 +4,7 @@ import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.RawPoint
 import a75f.io.device.mesh.LSerial
 import a75f.io.device.mesh.LSmartNode
-import a75f.io.domain.VavEquip
+import a75f.io.domain.equips.VavEquip
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.Domain.getListByDomainName
 import a75f.io.domain.api.DomainName
@@ -295,20 +295,20 @@ class VavProfileViewModel : ViewModel() {
 
         // Relay 1 enabled if Reheat Type is 1-Stage or 2-Stage (2-Stage is only an option for VAV No Fan)
         var relay1OpEnabled = reheatType == ReheatType.OneStage.ordinal || reheatType == ReheatType.TwoStage.ordinal
-        val relay1 = hayStack.read("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.relay1 + "\"")
-        var relay1Point = RawPoint.Builder().setHashMap(relay1).setType(if (relay1OpEnabled) "Relay N/C" else "Relay N/O").setEnabled(relay1OpEnabled)
+        val relay1 = hayStack.readHDict("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.relay1 + "\"")
+        var relay1Point = RawPoint.Builder().setHDict(relay1).setType(if (relay1OpEnabled) "Relay N/C" else "Relay N/O").setEnabled(relay1OpEnabled)
         if (reheatType == ReheatType.OneStage.ordinal || reheatType == ReheatType.TwoStage.ordinal) relay1Point.setPointRef(reheatCmdPoint.get("id").toString())
         hayStack.updatePoint(relay1Point.build(), relay1.get("id").toString())
 
         // Relay 2 is always enabled for VAV Series and Parallel Fan. For VAV No Fan, enabled only when Reheat Type is 2-Stage.
         var relay2OpEnabled = ((!config.profileType.equals(ProfileType.VAV_REHEAT.name)) || reheatType == ReheatType.TwoStage.ordinal)
-        var relay2 = hayStack.read("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.relay2 + "\"")
-        var relay2Point = RawPoint.Builder().setHashMap(relay2).setType(if (relay2OpEnabled) "Relay N/C" else "Relay N/O").setEnabled(relay2OpEnabled)
+        var relay2 = hayStack.readHDict("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.relay2 + "\"")
+        var relay2Point = RawPoint.Builder().setHDict(relay2).setType(if (relay2OpEnabled) "Relay N/C" else "Relay N/O").setEnabled(relay2OpEnabled)
         if (reheatType == ReheatType.TwoStage.ordinal) relay2Point.setPointRef(reheatCmdPoint.get("id").toString())
         hayStack.updatePoint(relay2Point.build(), relay2.get("id").toString())
 
-        var analogOut1 = hayStack.read("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.analog1Out + "\"")
-        var analog1Point = RawPoint.Builder().setHashMap(analogOut1)
+        var analogOut1 = hayStack.readHDict("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.analog1Out + "\"")
+        var analog1Point = RawPoint.Builder().setHDict(analogOut1)
         hayStack.updatePoint(analog1Point.setType(getDamperTypeString(config)).build(), analogOut1.get("id").toString())
 
         var analog2OpEnabled = reheatType == ReheatType.ZeroToTenV.ordinal ||
@@ -316,8 +316,8 @@ class VavProfileViewModel : ViewModel() {
                 reheatType == ReheatType.TenToZeroV.ordinal ||
                 reheatType == ReheatType.TenToTwov.ordinal ||
                 reheatType == ReheatType.Pulse.ordinal
-        var analogOut2 = hayStack.read("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.analog2Out + "\"");
-        var analog2Point = RawPoint.Builder().setHashMap(analogOut2)
+        var analogOut2 = hayStack.readHDict("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.analog2Out + "\"");
+        var analog2Point = RawPoint.Builder().setHDict(analogOut2)
         hayStack.updatePoint(analog2Point.setType(getReheatTypeString(config)).setEnabled(analog2OpEnabled).build(), analogOut2.get("id").toString())
 
     }

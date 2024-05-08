@@ -40,6 +40,7 @@ import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Zone;
 import a75f.io.device.mesh.ThermistorUtil;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.ZoneProfile;
@@ -246,7 +247,12 @@ public class TempOverrideFragment extends Fragment {
                 if (isExpandedTextBeginsWithAnalogType(t.get("dis").toString().toLowerCase()) && Objects.nonNull(t.get("dis").toString())) {
                     String NewexpandedListText = t.get("dis").toString();
                     if (t.containsKey("domainName") && Objects.nonNull(t.get("domainName").toString())) {
-                        if (t.get("domainName").toString().startsWith(("analog"))) {
+                        if (m.get("dis").toString().contains("cmBoardDevice")) {
+                            if (t.get("domainName").toString().contains("analog")
+                                    || t.get("domainName").toString().startsWith("relay")) {
+                                tunerList.add(siteName+"-CM-"+t.get("dis").toString());
+                            }
+                        } else if (t.get("domainName").toString().startsWith(("analog"))) {
                             tunerList.add(t.get("dis").toString());
                         } else if (t.get("domainName").toString().startsWith(("relay"))) {
                             tunerList.add(t.get("dis").toString());
@@ -366,25 +372,36 @@ public class TempOverrideFragment extends Fragment {
                     }
 
                     for(Object point : tunerList) {
-                        if (point.toString().contains("relay") || point.toString().contains("Relay 1") || point.toString().contains("Relay 2")){
+                        if (point.toString().contains("relay")
+                                || point.toString().contains("Relay")){
                             if (!newTunerList.contains(point)) {
 
                                 newTunerList.add(point);
                             }
                         }
                     }
-                    pointMap.put(t.get("dis").toString(), t.get("id").toString());
+                    if (m.get("dis").toString().contains("cmBoardDevice")) {
+                        pointMap.put(siteName+"-CM-"+t.get("dis").toString(), t.get("id").toString());
+                    } else {
+                        pointMap.put(t.get("dis").toString(), t.get("id").toString());
+                    }
+                    //pointMap.put(t.get("dis").toString(), t.get("id").toString());
                 }
             }
             if (newTunerList.isEmpty() == false) {
-                expandableListDetail.put(m.get("dis").toString(), newTunerList);
+                if (m.get("dis").toString().contains("cmBoardDevice")) {
+                    expandableListDetail.put("CM-device", newTunerList);
+                } else {
+                    expandableListDetail.put(m.get("dis").toString(), newTunerList);
+                }
+                //expandableListDetail.put(m.get("dis").toString(), newTunerList);
             }
             equipMap.put(m.get("dis").toString(), m.get("id").toString());
             //Log.e("InsideTempOverrideFrag", "equipMap- " + equipMap);
             expandableListTitle = new ArrayList<String>(expandableListDetail.keySet());
             ArrayList<ZoneSorter> zoneNodesList = new ArrayList<>();
             for (int i = 0; i < expandableListTitle.size(); i++) {
-                if (!expandableListTitle.get(i).equals("CM-device")) {
+                if (!expandableListTitle.get(i).equals("CM-device") && !expandableListTitle.get(i).contains("cmBoardDevice")) {
                     int nodeAddress = parseGroup(expandableListTitle.get(i));
                     ZoneProfile profile = L.getProfile(Short.parseShort(String.valueOf(nodeAddress)));
                     if (profile!=null) {
@@ -436,7 +453,8 @@ public class TempOverrideFragment extends Fragment {
     }
 
     public static boolean isExpandedTextBeginsWithAnalogType(String expandedListText) {
-        return (expandedListText.startsWith("analog1in") || expandedListText.startsWith("analog1out") || expandedListText.startsWith("analog2in") || expandedListText.startsWith("analog 2") || expandedListText.startsWith("analog 1")
+        return (expandedListText.startsWith("analog1in") || expandedListText.startsWith("analog1out") || expandedListText.startsWith("analog2in")
+                || expandedListText.startsWith("analog 4") ||expandedListText.startsWith("analog 3") || expandedListText.startsWith("analog 2") || expandedListText.startsWith("analog 1")
                 || expandedListText.startsWith("analog2out") || expandedListText.startsWith("analog3out") || expandedListText.startsWith("relay") || expandedListText.startsWith("th") ||
                 expandedListText.startsWith(siteName.toLowerCase()));
     }

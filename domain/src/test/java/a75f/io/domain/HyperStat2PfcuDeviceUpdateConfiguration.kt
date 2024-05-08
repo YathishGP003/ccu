@@ -2,6 +2,7 @@ package a75f.io.domain
 
 import a75f.io.domain.config.AssociationConfig
 import a75f.io.domain.config.EnableConfig
+import a75f.io.domain.config.ValueConfig
 
 class HyperStat2PfcuDeviceUpdateConfiguration(nodeAddress: Int,
                                                nodeType: String, priority: Int, roomRef : String, floorRef : String) :
@@ -18,5 +19,9 @@ class HyperStat2PfcuDeviceUpdateConfiguration(nodeAddress: Int,
         enabled.add(EnableConfig("relay1Enabled", true))
         enabled.add(EnableConfig("dcwbEnabled", true))
         return enabled
+    }
+
+    override fun getDependencies(): List<ValueConfig> {
+        TODO("Not yet implemented")
     }
 }

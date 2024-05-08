@@ -33,6 +33,9 @@ object ModelCache {
 
         modelContainer[MODEL_HELIO_NODE_DEVICE] = getModelById(MODEL_HELIO_NODE_DEVICE)
         CcuLog.i(Domain.LOG_TAG, "helioNodeDevice loaded")
+
+        modelContainer[MODEL_CM_DEVICE] = getModelById(MODEL_CM_DEVICE)
+        CcuLog.i(Domain.LOG_TAG, "cmBoardDevice loaded")
     }
     
     private fun loadVavZoneEquipModels() {
@@ -67,6 +70,12 @@ object ModelCache {
 
         //modelContainer[MODEL_EXTERNAL_AHU_VAV] = getModelById(MODEL_EXTERNAL_AHU_VAV)
         //CcuLog.i(Domain.LOG_TAG, "externalAhuVav model loaded")
+
+        modelContainer[MODEL_VAV_STAGED_RTU] = getModelById(MODEL_VAV_STAGED_RTU)
+        CcuLog.i(Domain.LOG_TAG, "VavStaged model loaded")
+
+        modelContainer[MODEL_VAV_STAGED_VFD_RTU] = getModelById(MODEL_VAV_STAGED_VFD_RTU)
+        CcuLog.i(Domain.LOG_TAG, "VavStagedVfd model loaded")
     }
 
     private fun loadBypassDamperModels() {

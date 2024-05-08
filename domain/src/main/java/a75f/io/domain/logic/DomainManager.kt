@@ -1,13 +1,18 @@
 package a75f.io.domain.logic
 
 import a75f.io.api.haystack.CCUHsApi
-import a75f.io.domain.BuildingEquip
-import a75f.io.domain.VavEquip
+import a75f.io.domain.equips.BuildingEquip
+import a75f.io.domain.equips.VavEquip
 import a75f.io.domain.api.Device
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.Equip
 import a75f.io.domain.api.Point
 import a75f.io.domain.api.Site
+import a75f.io.domain.devices.CmBoardDevice
+import a75f.io.domain.equips.DomainEquip
+import a75f.io.domain.equips.VavModulatingRtuSystemEquip
+import a75f.io.domain.equips.VavStagedSystemEquip
+import a75f.io.domain.equips.VavStagedVfdSystemEquip
 import a75f.io.logger.CcuLog
 import io.seventyfivef.ph.core.Tags
 
@@ -52,7 +57,8 @@ object DomainManager {
 
         }
         addDomainEquips(hayStack)
-
+        addSystemDomainEquip(hayStack)
+        addCmBoardDevice(hayStack)
     }
 
     private fun addDomainEquips(hayStack: CCUHsApi) {
@@ -65,6 +71,40 @@ object DomainManager {
             }
         Domain.equips.forEach {
             CcuLog.i(Domain.LOG_TAG, "Added equip to domain ${it.key}")
+        }
+    }
+
+    fun addSystemDomainEquip(hayStack: CCUHsApi) {
+        val systemEquip = hayStack.readEntity("system and equip and not modbus")
+        if (systemEquip.isNotEmpty() && systemEquip["domainName"] != null) {
+            Domain.systemEquip = when(systemEquip["domainName"].toString()) {
+                "vavStagedRtu" -> {
+                    CcuLog.i(Domain.LOG_TAG, "Add vavStagedRtu systemEquip to domain ")
+                    VavStagedSystemEquip(systemEquip["id"].toString())
+                }
+                "vavStagedRtuVfdFan" -> {
+                    CcuLog.i(Domain.LOG_TAG, "Add vavStagedRtuVfdFan systemEquip to domain ")
+                    VavStagedVfdSystemEquip(systemEquip["id"].toString())
+                }
+                "vavFullyModulatingAhu"->{
+                    CcuLog.i(Domain.LOG_TAG, "Add vavFullyModulatingAhu systemEquip to domain ")
+                    VavModulatingRtuSystemEquip(systemEquip["id"].toString())
+                }
+                else -> {
+                    CcuLog.e(Domain.LOG_TAG, "Unknown system equip ${systemEquip["domainName"]}")
+                    DomainEquip(systemEquip["id"].toString())
+                }
+            }
+        } else {
+            CcuLog.e(Domain.LOG_TAG, "No system equip found")
+        }
+    }
+
+    fun addCmBoardDevice(hayStack: CCUHsApi) {
+        val cmBoardDevice = hayStack.readEntity("device and cm")
+        if (cmBoardDevice.isNotEmpty()) {
+            CcuLog.e(Domain.LOG_TAG, "Added CM device to domain")
+            Domain.cmBoardDevice = CmBoardDevice(cmBoardDevice["id"].toString())
         }
     }
 

@@ -37,8 +37,9 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Zone;
 import a75f.io.device.mesh.ThermistorUtil;
-import a75f.io.domain.VavEquip;
+import a75f.io.domain.equips.VavEquip;
 import a75f.io.domain.api.Domain;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Thermistor;
@@ -569,55 +570,104 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                             spinner_override_value.setAdapter(targetValAdapter);
                             spinner_override_value.setSelection(0);
                             spinner_override_value.setSelection(0,false);
-                        } else if (NewexpandedListText.startsWith("CM-analog1Out")) {
-                            if (getConfigEnabled("analog1") > 0) {
-                                NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out1\n(Cooling)");
-                            } else
-                                NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out1\n(Not Enabled)");
+                        } else if (NewexpandedListText.startsWith("CM-analog1Out")
+                                || NewexpandedListText.contains("CM-Analog 1 Output")) {
+                            // post domain model migration support
+                            if(NewexpandedListText.contains("Output")) {
+                                if (isConfigEnabled("analog1OutputEnable") > 0)
+                                    NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out1\n(Cooling)");
+                                else
+                                    NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out1\n(Not Enabled)");
+                            }else {
+                                if (getConfigEnabled("analog1") > 0)
+                                    NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out1\n(Cooling)");
+                                else
+                                    NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out1\n(Not Enabled)");
+                            }
                             txt_calculated_output.setText("" + CCUUtils.roundToTwoDecimal(value) + " V");
                             spinner_override_value.setVisibility(View.VISIBLE);
                             spinner_override_value.setAdapter(targetValAdapter);
                             spinner_override_value.setSelection(0);
                             spinner_override_value.setSelection(0,false);
-                        }else if (NewexpandedListText.startsWith("CM-analog2Out")) {
-                            if (getConfigEnabled("analog2") > 0)
-                                NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out2\n(Fan Speed)");
-                            else
-                                NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out2\n(Not Enabled)");
+                        }else if (NewexpandedListText.startsWith("CM-analog2Out")
+                                || NewexpandedListText.contains("CM-Analog 2 Output")) {
+                            // post domain model migration support
+                            if(NewexpandedListText.contains("Output")) {
+                                if (isConfigEnabled("analog2OutputEnable") > 0)
+                                    NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out2\n(Fan Speed)");
+                                else
+                                    NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out2\n(Not Enabled)");
+                            }else{
+                                if (getConfigEnabled("analog2") > 0)
+                                    NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out2\n(Fan Speed)");
+                                else
+                                    NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out2\n(Not Enabled)");
+                            }
                             txt_calculated_output.setText("" + CCUUtils.roundToTwoDecimal(value) + " V");
                             spinner_override_value.setVisibility(View.VISIBLE);
                             spinner_override_value.setAdapter(targetValAdapter);
                             spinner_override_value.setSelection(0);
                             spinner_override_value.setSelection(0,false);
-                        } else if (NewexpandedListText.startsWith("CM-analog3Out")) {
-                            if (getConfigEnabled("analog3") > 0)
-                                NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out3\n(Heating)");
-                            else
-                                NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out3\n(Not Enabled)");
+                        } else if (NewexpandedListText.startsWith("CM-analog3Out")
+                                || NewexpandedListText.contains("CM-Analog 3 Output")) {
+                            if(NewexpandedListText.contains("Output")) {
+                                if (isConfigEnabled("analog3OutputEnable") > 0)
+                                    NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out3\n(Heating)");
+                                else
+                                    NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out3\n(Not Enabled)");
+                            }else {
+                                if (getConfigEnabled("analog3") > 0)
+                                    NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out3\n(Heating)");
+                                else
+                                    NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out3\n(Not Enabled)");
+                            }
                             txt_calculated_output.setText("" + CCUUtils.roundToTwoDecimal(value) + " V");
                             spinner_override_value.setVisibility(View.VISIBLE);
                             spinner_override_value.setAdapter(targetValAdapter);
                             spinner_override_value.setSelection(0);
                             spinner_override_value.setSelection(0,false);
-                        } else if (NewexpandedListText.startsWith("CM-analog4Out")) {
-                            if (getConfigEnabled("analog4") > 0)
-                                NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out4\n(Composite)");
-                            else
-                                NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out4\n(Not Enabled)");
+                        } else if (NewexpandedListText.startsWith("CM-analog4Out")
+                                || NewexpandedListText.contains("CM-Analog 4 Output")) {
+                            if(NewexpandedListText.contains("Output")) {
+                                if (isConfigEnabled("analog4OutputEnable") > 0)
+                                    NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out4\n(Composite)");
+                                else
+                                    NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out4\n(Not Enabled)");
+                            }else {
+                                if (getConfigEnabled("analog4") > 0)
+                                    NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out4\n(Composite)");
+                                else
+                                    NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out4\n(Not Enabled)");
+                            }
                             txt_calculated_output.setText("" + CCUUtils.roundToTwoDecimal(value) + " V");
                             spinner_override_value.setVisibility(View.VISIBLE);
                             spinner_override_value.setAdapter(targetValAdapter);
                             spinner_override_value.setSelection(0);
                             spinner_override_value.setSelection(0,false);
-                        } else if (NewexpandedListText.startsWith("relay")) {
+                        } else if (NewexpandedListText.startsWith("relay")
+                                || NewexpandedListText.contains("Relay")) {
                             String relayPos = (expandedListText.substring(siteName.length() + 6, siteName.length() + 7));
-                            if (getConfigEnabled("relay" + relayPos) > 0) {
-                                String relayMapped = getRelayMapping("relay" + relayPos, convertView);
-                                NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Relay " + relayPos + "\n(" + relayMapped + ")");
+                            // post domain model migration support
+                            if(expandedListText.contains("-CM-")) {
+                                relayPos = expandedListText.substring(expandedListText.length()-1);
+                                String domainName = "relay" + relayPos + "OutputEnable";
+                                if (isConfigEnabled(domainName) > 0) {
+                                    String relayMapped = getRelayMapping("relay" + relayPos, convertView, true);
+                                    NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Relay " + relayPos + "\n(" + relayMapped + ")");
+                                } else {
+                                    NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Relay " + relayPos + "\n(Not Enabled)");
+                                    Object valueToDelete = getChild(listPosition, expandedListPosition);
+                                    expandableListDetail.remove(valueToDelete);
+                                }
                             } else {
-                                NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Relay " + relayPos + "\n(Not Enabled)");
-                                Object valueToDelete = getChild(listPosition, expandedListPosition);
-                                expandableListDetail.remove(valueToDelete);
+                                if (getConfigEnabled("relay" + relayPos) > 0) {
+                                    String relayMapped = getRelayMapping("relay" + relayPos, convertView, false);
+                                    NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Relay " + relayPos + "\n(" + relayMapped + ")");
+                                } else {
+                                    NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Relay " + relayPos + "\n(Not Enabled)");
+                                    Object valueToDelete = getChild(listPosition, expandedListPosition);
+                                    expandableListDetail.remove(valueToDelete);
+                                }
                             }
                             txt_calculated_output.setText(Double.compare(getPointVal(idMap.get(expandedListText)), 1.0) == 0 ? "ON" : "OFF");
                             spinner_relay.setVisibility(View.VISIBLE);
@@ -793,12 +843,20 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                                     int spinnerPosition = targetValAdapter.getPosition(overridenData);
                                     spinner_override_value.setSelection(spinnerPosition);
                                 }
-                            } else if (NewexpandedListText.startsWith("CM-analog1Out")) {
+                            } else if (NewexpandedListText.startsWith("CM-analog1Out")
+                                    || NewexpandedListText.contains("CM-Analog 1 Output")) {
                                 String overridenData = TempOverRiddenValue.getInstance().getOverriddenValues().get(equipId+expandedListText.substring(6));
-                                if (getConfigEnabled("analog1") > 0) {
-                                    NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out1\n(Cooling)");
-                                } else
-                                    NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out1\n(Not Enabled)");
+                                if(NewexpandedListText.contains("Output")) {
+                                    if (isConfigEnabled("analog1OutputEnable") > 0)
+                                        NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out1\n(Cooling)");
+                                    else
+                                        NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out1\n(Not Enabled)");
+                                }else{
+                                    if (getConfigEnabled("analog1") > 0)
+                                        NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out1\n(Cooling)");
+                                    else
+                                        NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out1\n(Not Enabled)");
+                                }
                                 txt_calculated_output.setText("" + CCUUtils.roundToTwoDecimal(val) + " V");
                                 spinner_override_value.setVisibility(View.VISIBLE);
                                 targetValAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -807,12 +865,20 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                                     int spinnerPosition = targetValAdapter.getPosition(overridenData);
                                     spinner_override_value.setSelection(spinnerPosition);
                                 }
-                            }else if (NewexpandedListText.startsWith("CM-analog2Out")) {
+                            }else if (NewexpandedListText.startsWith("CM-analog2Out")
+                            || NewexpandedListText.contains("CM-Analog 2 Output")) {
                                 String overridenData = TempOverRiddenValue.getInstance().getOverriddenValues().get(equipId+expandedListText.substring(6));
-                                if (getConfigEnabled("analog2") > 0)
-                                    NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out2\n(Fan Speed)");
-                                else
-                                    NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out2\n(Not Enabled)");
+                                if(NewexpandedListText.contains("Output")) {
+                                    if (isConfigEnabled("analog2OutputEnable") > 0)
+                                        NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out2\n(Fan Speed)");
+                                    else
+                                        NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out2\n(Not Enabled)");
+                                }else {
+                                    if (getConfigEnabled("analog2") > 0)
+                                        NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out2\n(Fan Speed)");
+                                    else
+                                        NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out2\n(Not Enabled)");
+                                }
                                 txt_calculated_output.setText("" + CCUUtils.roundToTwoDecimal(val) + " V");
                                 spinner_override_value.setVisibility(View.VISIBLE);
                                 targetValAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -821,12 +887,20 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                                     int spinnerPosition = targetValAdapter.getPosition(overridenData);
                                     spinner_override_value.setSelection(spinnerPosition);
                                 }
-                            } else if (NewexpandedListText.startsWith("CM-analog3Out")) {
+                            } else if (NewexpandedListText.startsWith("CM-analog3Out")
+                            || NewexpandedListText.contains("CM-Analog 3 Output")) {
                                 String overridenData = TempOverRiddenValue.getInstance().getOverriddenValues().get(equipId+expandedListText.substring(6));
-                                if (getConfigEnabled("analog3") > 0)
-                                    NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out3\n(Heating)");
-                                else
-                                    NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out3\n(Not Enabled)");
+                                if(NewexpandedListText.contains("Output")) {
+                                    if (isConfigEnabled("analog3OutputEnable") > 0)
+                                        NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out3\n(Heating)");
+                                    else
+                                        NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out3\n(Not Enabled)");
+                                }else {
+                                    if (getConfigEnabled("analog3") > 0)
+                                        NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out3\n(Heating)");
+                                    else
+                                        NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out3\n(Not Enabled)");
+                                }
                                 txt_calculated_output.setText("" + CCUUtils.roundToTwoDecimal(val) + " V");
                                 spinner_override_value.setVisibility(View.VISIBLE);
                                 targetValAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -835,12 +909,20 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                                     int spinnerPosition = targetValAdapter.getPosition(overridenData);
                                     spinner_override_value.setSelection(spinnerPosition);
                                 }
-                            } else if (NewexpandedListText.startsWith("CM-analog4Out")) {
+                            } else if (NewexpandedListText.startsWith("CM-analog4Out")
+                            || NewexpandedListText.contains("CM-Analog 4 Output")) {
                                 String overridenData = TempOverRiddenValue.getInstance().getOverriddenValues().get(equipId+expandedListText.substring(6));
-                                if (getConfigEnabled("analog4") > 0)
-                                    NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out4\n(Composite)");
-                                else
-                                    NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out4\n(Not Enabled)");
+                                if(NewexpandedListText.contains("Output")) {
+                                    if (isConfigEnabled("analog4OutputEnable") > 0)
+                                        NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out4\n(Composite)");
+                                    else
+                                        NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out4\n(Not Enabled)");
+                                }else {
+                                    if (getConfigEnabled("analog4") > 0)
+                                        NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out4\n(Composite)");
+                                    else
+                                        NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Analog-out4\n(Not Enabled)");
+                                }
                                 txt_calculated_output.setText("" + CCUUtils.roundToTwoDecimal(val) + " V");
                                 spinner_override_value.setVisibility(View.VISIBLE);
                                 targetValAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -849,16 +931,31 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                                     int spinnerPosition = targetValAdapter.getPosition(overridenData);
                                     spinner_override_value.setSelection(spinnerPosition);
                                 }
-                            } else if (NewexpandedListText.startsWith("relay")) {
+                            } else if (NewexpandedListText.startsWith("relay")
+                            || NewexpandedListText.contains("Relay")) {
                                 String overridenData = TempOverRiddenValue.getInstance().getOverriddenValues().get(equipId+getThermistorIndex(expandedListText));
                                 String relayPos = (expandedListText.substring(siteName.length() + 6, siteName.length() + 7));
-                                if (getConfigEnabled("relay" + relayPos) > 0) {
-                                    String relayMapped = getRelayMapping("relay" + relayPos, convertView);
-                                    NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Relay " + relayPos + "\n(" + relayMapped + ")");
-                                } else {
-                                    NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Relay " + relayPos + "\n(Not Enabled)");
-                                    Object valueToDelete = getChild(listPosition, expandedListPosition);
-                                    expandableListDetail.remove(valueToDelete);
+                                // post domain model migration support
+                                if(expandedListText.contains("-CM-")) {
+                                    relayPos = expandedListText.substring(expandedListText.length() - 1);
+                                    String domainName = "relay" + relayPos + "OutputEnable";
+                                    if (isConfigEnabled(domainName) > 0) {
+                                        String relayMapped = getRelayMapping("relay" + relayPos, convertView, true);
+                                        NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Relay " + relayPos + "\n(" + relayMapped + ")");
+                                    } else {
+                                        NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Relay " + relayPos + "\n(Not Enabled)");
+                                        Object valueToDelete = getChild(listPosition, expandedListPosition);
+                                        expandableListDetail.remove(valueToDelete);
+                                    }
+                                }else{
+                                    if (getConfigEnabled("relay" + relayPos) > 0) {
+                                        String relayMapped = getRelayMapping("relay" + relayPos, convertView, false);
+                                        NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Relay " + relayPos + "\n(" + relayMapped + ")");
+                                    } else {
+                                        NewexpandedListText = NewexpandedListText.replace(NewexpandedListText, "Relay " + relayPos + "\n(Not Enabled)");
+                                        Object valueToDelete = getChild(listPosition, expandedListPosition);
+                                        expandableListDetail.remove(valueToDelete);
+                                    }
                                 }
                                 //txt_calculated_output.setText(Double.compare(getPointVal(idMap.get(value1)), 1.0) == 0 ? "ON" : "OFF");
                                 txt_calculated_output.setText(value1.equals("1.0") ? "ON" : "OFF");
@@ -1182,7 +1279,7 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
         return (short) 0;
     }
 
-    private String getRelayMapping(String relayname, View convertView){
+    private String getRelayMapping(String relayname, View convertView, boolean usingDomain){
         ProfileType profile =  L.ccu().systemProfile.getProfileType();
         List<String> hvac_stage_selector = Arrays.asList(convertView.getResources().getStringArray(R.array.hvac_stage_selector));
         VavStagedRtu vavStagedRtu = new VavStagedRtu();
@@ -1203,22 +1300,47 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
             case SYSTEM_DAB_HYBRID_RTU:
                 return hvac_stage_selector.get((int)dabStagedRtu.getConfigAssociation(relayname));
             case SYSTEM_VAV_STAGED_RTU:
-                return hvac_stage_selector.get((int)vavStagedRtu.getConfigAssociation(relayname));
+            case SYSTEM_VAV_STAGED_VFD_RTU:
+                if(usingDomain) {
+                    relayname = relayname + "OutputAssociation";
+                    return hvac_stage_selector.get((int) getConfigAssociationByDomain(relayname));
+                }else
+                    return hvac_stage_selector.get((int)vavStagedRtu.getConfigAssociation(relayname));
             case SYSTEM_VAV_ANALOG_RTU:
                 VavFullyModulatingRtu vavFullyModulatingRtu = new VavFullyModulatingRtu();
-                if (relayname.equals("relay7")) {
-                    if ((int) vavFullyModulatingRtu.getConfigVal("humidifier and type") == 0)
-                        return "Humidifier";
-                    else
-                        return "De-Humidifier";
-                }else
-                    return "Fan Enable";
-            case SYSTEM_VAV_STAGED_VFD_RTU:
-                return hvac_stage_selector.get((int)vavStagedRtu.getConfigAssociation(relayname));
+                if(usingDomain){
+                    if(relayname.equals("relay7")){
+                        if(isConfigEnabled("relay7OutputAssociation") == 0){
+                            return "Humidifier";
+                        } else {
+                            return "De-Humidifier";
+                        }
+                    }else{
+                        return "Fan Enable";
+                    }
+                }else {
+                    if (relayname.equals("relay7")) {
+                        if ((int) vavFullyModulatingRtu.getConfigVal("humidifier and type") == 0)
+                            return "Humidifier";
+                        else
+                            return "De-Humidifier";
+                    } else
+                        return "Fan Enable";
+                }
             case SYSTEM_VAV_HYBRID_RTU:
                 return hvac_stage_selector.get((int)vavStagedRtu.getConfigAssociation(relayname));
         }
         return "";
+    }
+
+    public double getConfigAssociationByDomain(String domainName) {
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        HashMap configPoint =  (HashMap) Domain.readPoint(domainName);
+        if (configPoint.isEmpty()) {
+            CcuLog.e(L.TAG_CCU_SYSTEM," !!!  System config point does not exist !!! - "+domainName);
+            return 0;
+        }
+        return hayStack.readPointPriorityVal(configPoint.get("id").toString());
     }
 
     private String getZoneMapping(String pointname, int listPosition, View convertView){
@@ -1822,6 +1944,17 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
             return hayStack.readPointPriorityVal(configPoint.get("id").toString());
         }
 
+    }
+
+    public double isConfigEnabled(String domainName) {
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        HashMap configPoint = (HashMap) Domain.readPoint(domainName);
+        if (configPoint.isEmpty()){
+            return 0.0;
+        }
+        else{
+            return hayStack.readPointPriorityVal(configPoint.get("id").toString());
+        }
     }
 
     @Override

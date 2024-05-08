@@ -110,7 +110,7 @@ class EntityMapper (private val modelDef: SeventyFiveFProfileDirective) {
 
         if (baseConfig != null && evaluateConfiguration(
                 pointConfiguration.comparisonType,
-                pointConfiguration.value as Int - 1, //TODO -index starts at 1 ?
+                pointConfiguration.value as Int, //TODO -index starts at 1 ?
                 baseConfig.enabled.toInt()
             )
         ) {

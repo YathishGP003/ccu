@@ -60,12 +60,10 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
         CcuLog.i(Domain.LOG_TAG, "updateEquipAndPoints $configuration isReconfiguration $isReconfiguration")
         val entityMapper = EntityMapper(modelDef as SeventyFiveFProfileDirective)
 
-        val equip = if (configuration.nodeAddress == 0) {
-            hayStack.readEntity(
-                "equip and system and not modbus")
-        } else {
-            hayStack.readEntity(
-                "equip and group == \"${configuration.nodeAddress}\"")
+        val equip = if(configuration.nodeAddress == 99){
+            hayStack.readEntity("equip and system and not modbus")
+        }else{
+            hayStack.readEntity("equip and group == \"${configuration.nodeAddress}\"")
         }
 
         val equipId =  equip["id"].toString()
@@ -137,7 +135,8 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
             CcuLog.i(Domain.LOG_TAG, "addPoint - ${point.domainName}")
             val modelPointDef = modelDef.points.find { it.domainName == point.domainName }
             modelPointDef?.run {
-                val hayStackPoint = buildPoint(PointBuilderConfig(modelPointDef, profileConfiguration, equipRef, siteRef, tz, equipDis))
+                createPoint(PointBuilderConfig(modelPointDef, profileConfiguration, equipRef, siteRef, tz, equipDis))
+                /*val hayStackPoint = buildPoint(PointBuilderConfig(modelPointDef, profileConfiguration, equipRef, siteRef, tz, equipDis))
                 val pointId = hayStack.addPoint(hayStackPoint)
                 hayStackPoint.id = pointId
                 if (profileConfiguration.getEnableConfigs().getConfig(point.domainName) != null) {
@@ -163,7 +162,7 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
                     // heartBeat is the one point where we don't want to initialize a hisVal to zero (since we want a gray dot on the zone screen, not green)
                     hayStack.writeHisValById(pointId, 0.0)
                 }
-                DomainManager.addPoint(hayStackPoint)
+                DomainManager.addPoint(hayStackPoint)*/
             }
         }
     }
@@ -233,7 +232,9 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
         entityConfiguration.tobeDeleted.forEach { point ->
             CcuLog.i(Domain.LOG_TAG, "deletePoint - ${point.domainName}")
             val existingPoint = hayStack.readEntity("domainName == \""+point.domainName+"\" and equipRef == \""+equipRef+"\"")
-            hayStack.deleteEntity(existingPoint["id"].toString())
+            if(existingPoint.isNotEmpty()){
+                hayStack.deleteEntity(existingPoint["id"].toString())
+            }
         }
     }
 
@@ -312,6 +313,7 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
 
     private fun updateEquip(equipRef: String, modelDef : SeventyFiveFProfileDirective, equipDis: String) {
         var equipDict = hayStack.readHDictById(equipRef)
+        CcuLog.i(Domain.LOG_TAG, " equipDict $equipDict")
         val equip = Equip.Builder().setHDict(equipDict).build()
         equip.domainName = modelDef.domainName
         equip.displayName = equipDis
@@ -320,6 +322,7 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
             "${modelDef.version?.major}" +
                     ".${modelDef.version?.minor}.${modelDef.version?.patch}"
         )
+        equip.group = "99"
         hayStack.updateEquip(equip, equip.id)
         CcuLog.i(Domain.LOG_TAG, " Updated Equip ${equip.group}-${equip.domainName}")
     }

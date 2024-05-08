@@ -1,5 +1,4 @@
 package a75f.io.domain.util
-
 import io.seventyfivef.domainmodeler.client.ModelDirective
 
 /**
@@ -55,11 +54,24 @@ object ModelLoader {
         return ModelCache.getModelById(MODEL_HELIO_NODE_DEVICE)
     }
 
+    fun getCMDeviceModel() : ModelDirective {
+        return ModelCache.getModelById(MODEL_CM_DEVICE)
+    }
+    fun getVavStageRtuModelDef() : ModelDirective {
+        return ModelCache.getModelById(MODEL_VAV_STAGED_RTU)
+    }
+
+    fun getVavStagedVfdRtuModelDef() : ModelDirective {
+        return ModelCache.getModelById(MODEL_VAV_STAGED_VFD_RTU)
+    }
     fun getDabExternalAhuModel() : ModelDirective {
         return ModelCache.getModelById(MODEL_EXTERNAL_AHU_DAB)
     }
     fun getVavExternalAhuModel() : ModelDirective {
         return ModelCache.getModelById(MODEL_EXTERNAL_AHU_VAV)
+    }
+    fun getVavModulatingRtuModelDef() : ModelDirective {
+        return ModelCache.getModelById(MODEL_VAV_MODULATING_AHU)
     }
     fun getModelForDomainName( domainName : String) : ModelDirective {
         return when(domainName) {

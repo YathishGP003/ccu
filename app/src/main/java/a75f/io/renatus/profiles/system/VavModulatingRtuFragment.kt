@@ -1,0 +1,243 @@
+package a75f.io.renatus.profiles.system
+
+import a75f.io.api.haystack.CCUHsApi
+import a75f.io.domain.api.Domain
+import a75f.io.logger.CcuLog
+import a75f.io.logic.Globals
+import a75f.io.renatus.R
+import a75f.io.renatus.composables.DropDownWithLabel
+import a75f.io.renatus.composables.IndeterminateLoopProgress
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+
+class VavModulatingRtuFragment : ModulatingRtuFragment() {
+
+    private val vavModulatingViewModel: VavModulatingRtuViewModel by viewModels()
+
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
+    ): View {
+        viewLifecycleOwner.lifecycleScope.launch {
+            withContext(Dispatchers.IO) {
+                vavModulatingViewModel.init(
+                    requireContext(),
+                    CCUHsApi.getInstance()
+                )
+            }
+        }
+        val rootView = ComposeView(requireContext())
+        rootView.apply {
+            setContent { RootView() }
+            return rootView
+        }
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        view.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
+            override fun onViewAttachedToWindow(v: View) {
+            }
+
+            override fun onViewDetachedFromWindow(v: View) {
+                if (Globals.getInstance().isTestMode()) {
+                    Globals.getInstance().setTestMode(false);
+                }
+            }
+        })
+    }
+    @Preview
+    @Composable
+    fun RootView() {
+        if (!vavModulatingViewModel.modelLoaded) {
+            IndeterminateLoopProgress(bottomText = "Loading VAV Fully Modulating AHU profile Configuration")
+            CcuLog.i(Domain.LOG_TAG, "Show Progress")
+            return
+        }
+        val viewState = vavModulatingViewModel.viewState
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(10.dp),
+        ) {
+            item {
+                Row(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(10.dp)
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.input_vavanalog),
+                        contentDescription = "Relays",
+                        modifier = Modifier
+                            .wrapContentSize()
+                            .padding(top = 42.dp)
+                    )
+
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(10.dp),
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(start = 25.dp, end = 20.dp),
+                            horizontalArrangement = Arrangement.SpaceEvenly
+                        ) {
+                            Text(text = "ENABLE", fontSize = 20.sp)
+                            Spacer(modifier = Modifier.width(242.dp))
+                            Text(text = "MAPPING", fontSize = 20.sp)
+                            Spacer(modifier = Modifier.width(200.dp))
+                            Text(text = "TEST SIGNAL", fontSize = 20.sp)
+                        }
+                        Spacer(modifier = Modifier.height(18.dp))
+                        AnalogOutAndRelayComposable(viewModel = vavModulatingViewModel)
+                    }
+                }
+            }
+
+            item {
+                Spacer(modifier = Modifier.height(20.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(end = 60.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    DropDownWithLabel(label = "Analog-Out1 at\n Min Cooling",
+                        list = (0..10).map { it.toString() }, isHeader = false,
+                        defaultSelection = viewState.analogOut1CoolingMin,
+                        onSelected = {
+                            viewState.analogOut1CoolingMin = it
+                            vavModulatingViewModel.saveConfiguration()
+                        },
+                        isEnabled = viewState.isAnalog1OutputEnabled,
+                        spacerLimit = 72)
+                    DropDownWithLabel(label = "Analog-Out1 at\n Max Cooling",
+                        list = (0..10).map { it.toString() }, isHeader = false,
+                        defaultSelection = viewState.analogOut1CoolingMax,
+                        onSelected = {
+                            viewState.analogOut1CoolingMax = it
+                            vavModulatingViewModel.saveConfiguration()
+                        },
+                        isEnabled = viewState.isAnalog1OutputEnabled,
+                        spacerLimit = 65)
+                }
+            }
+
+            item {
+                Spacer(modifier = Modifier.height(20.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(end = 60.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    DropDownWithLabel(label = "Analog-Out2 at\n Min Static",
+                        list = (0..10).map { it.toString() }, isHeader = false,
+                        defaultSelection = viewState.analogOut2StaticPressureMin,
+                        onSelected = {
+                            viewState.analogOut2StaticPressureMin = it
+                            vavModulatingViewModel.saveConfiguration()
+                        },
+                        isEnabled = viewState.isAnalog2OutputEnabled,
+                        spacerLimit = 72)
+                    DropDownWithLabel(label = "Analog-Out2 at\n Max Static",
+                        list = (0..10).map { it.toString() }, isHeader = false,
+                        defaultSelection = viewState.analogOut2StaticPressureMax,
+                        onSelected = {
+                            viewState.analogOut2StaticPressureMax = it
+                            vavModulatingViewModel.saveConfiguration()
+                        },
+                        isEnabled = viewState.isAnalog2OutputEnabled,
+                        spacerLimit = 65)
+                }
+            }
+
+            item {
+                Spacer(modifier = Modifier.height(20.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(end = 60.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    DropDownWithLabel(label = "Analog-Out3 at\n Min Heating",
+                        list = (0..10).map { it.toString() }, isHeader = false,
+                        defaultSelection = viewState.analogOut3HeatingMin,
+                        onSelected = {
+                            viewState.analogOut3HeatingMin = it
+                            vavModulatingViewModel.saveConfiguration()
+                        },
+                        isEnabled = viewState.isAnalog3OutputEnabled,
+                        spacerLimit = 72)
+                    DropDownWithLabel(label = "Analog-Out3 at\n Max Heating",
+                        list = (0..10).map { it.toString() }, isHeader = false,
+                        defaultSelection = viewState.analogOut3HeatingMax,
+                        onSelected = {
+                            viewState.analogOut3HeatingMax = it
+                            vavModulatingViewModel.saveConfiguration()
+                        },
+                        isEnabled = viewState.isAnalog3OutputEnabled,
+                        spacerLimit = 65)
+                }
+            }
+
+            item {
+                Spacer(modifier = Modifier.height(20.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(end = 60.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    DropDownWithLabel(label = "Analog-Out4 at\n Min Fresh Air",
+                        list = (0..10).map { it.toString() }, isHeader = false,
+                        defaultSelection = viewState.analogOut4FreshAirMin,
+                        onSelected = {
+                            viewState.analogOut4FreshAirMin = it
+                            vavModulatingViewModel.saveConfiguration()
+                        },
+                        isEnabled = viewState.isAnalog4OutputEnabled,
+                        spacerLimit = 72)
+                    DropDownWithLabel(label = "Analog-Out4 at\n Max Fresh Air",
+                        list = (0..10).map { it.toString() }, isHeader = false,
+                        defaultSelection = vavModulatingViewModel.viewState.analogOut4FreshAirMax,
+                        onSelected = {
+                            viewState.analogOut4FreshAirMax = it
+                            vavModulatingViewModel.saveConfiguration()
+                        },
+                        isEnabled = viewState.isAnalog4OutputEnabled,
+                        spacerLimit = 65)
+                }
+            }
+        }
+    }
+}

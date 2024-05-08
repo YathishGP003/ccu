@@ -29,6 +29,7 @@ import a75f.io.logic.bo.building.system.dab.DabExternalAhu;
 import a75f.io.logic.bo.building.system.dab.DabStagedRtu;
 import a75f.io.logic.bo.building.system.vav.VavAdvancedHybridRtu;
 import a75f.io.logic.bo.building.system.vav.VavExternalAhu;
+import a75f.io.logic.bo.building.system.vav.VavFullyModulatingRtu;
 import a75f.io.logic.bo.building.system.vav.VavStagedRtu;
 import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.tuners.TunerUtil;
@@ -181,9 +182,16 @@ public class OAOProfile
         }
         oaoEquip.setHisVal("mat and available", isMatThrottle() ? 1 : 0);
     }
-    private boolean isExternalAhu(){
+
+    /**
+     * Enabled for profiles with domain name on points
+     * @return
+     */
+    private boolean isDMMigrated(){
         return (L.ccu().systemProfile instanceof DabExternalAhu
-                || L.ccu().systemProfile instanceof VavExternalAhu);
+                || L.ccu().systemProfile instanceof VavExternalAhu
+                || L.ccu().systemProfile instanceof VavStagedRtu
+                || L.ccu().systemProfile instanceof VavFullyModulatingRtu);
     }
     public void doEpidemicControl(){
         epidemicState = EpidemicState.OFF;
@@ -193,7 +201,7 @@ public class OAOProfile
                 case UNOCCUPIED:
                     boolean isSmartPrePurge;
                     boolean isSmartPostPurge;
-                    if (isExternalAhu()) {
+                    if (isDMMigrated()) {
                         isSmartPrePurge = TunerUtil.readSystemUserIntentVal("domainName == \""+systemPrePurgeEnable+"\"") > 0;
                         isSmartPostPurge = TunerUtil.readSystemUserIntentVal("domainName == \""+systemPostPurgeEnable+"\"") > 0;
                     } else {
@@ -211,7 +219,7 @@ public class OAOProfile
                 case FORCEDOCCUPIED:
                 case OCCUPANCYSENSING:
                     boolean isEnhancedVentilation;
-                    if (isExternalAhu())
+                    if (isDMMigrated())
                         isEnhancedVentilation = TunerUtil.readSystemUserIntentVal("domainName == \""+systemEnhancedVentilationEnable+"\"") > 0;
                     else
                         isEnhancedVentilation = TunerUtil.readSystemUserIntentVal("enhanced and ventilation and enabled ") > 0;

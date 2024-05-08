@@ -3,13 +3,13 @@ package a75f.io.logic.bo.building.truecfm;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Occupied;
-import a75f.io.domain.VavEquip;
-import a75f.io.domain.api.Domain;
 import a75f.io.domain.api.DomainName;
+import a75f.io.domain.equips.VavEquip;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.DamperShape;
@@ -70,7 +70,7 @@ public class TrueCFMUtil {
                 return 4.0;
         }
     }
-    
+
     public static boolean isTrueCfmEnabled(CCUHsApi hayStack, String equipRef) {
         if (HSUtil.isDomainEquip(equipRef, hayStack)) {
             return hayStack.readDefaultVal("domainName == \"" + DomainName.enableCFMControl + "\" and equipRef == \"" + equipRef + "\"").intValue() > 0;

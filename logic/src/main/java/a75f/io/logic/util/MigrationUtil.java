@@ -17,6 +17,8 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.util.Log;
 
+import org.projecthaystack.HDateTime;
+import org.projecthaystack.HDict;
 import org.projecthaystack.HNum;
 
 import java.util.ArrayList;
@@ -899,12 +901,14 @@ public class MigrationUtil {
         ArrayList<HashMap<Object, Object>> reheatZoneToDATMinDifferentialPoint = ccuHsApi.readAllEntities("point and tuner and reheat and differential");
         String updatedMaxValue = "60";
         for (HashMap<Object, Object> relayDeactivationHysteresisDab : relayDeactivationPointAll) {
-            Point updatedPoint = new Point.Builder().setHashMap(relayDeactivationHysteresisDab).setMaxVal(updatedMaxValue).build();
+            HDict relayDeactivationHysteresisDabHDict = CCUHsApi.getInstance().readHDict("point and id == " + relayDeactivationHysteresisDab.get("id"));
+            Point updatedPoint = new Point.Builder().setHDict(relayDeactivationHysteresisDabHDict).setMaxVal(updatedMaxValue).build();
             CCUHsApi.getInstance().updatePoint(updatedPoint, updatedPoint.getId());
         }
 
         for (HashMap<Object, Object> reheatZoneToDATMinDifferential : reheatZoneToDATMinDifferentialPoint) {
-            Point updatedPoint = new Point.Builder().setHashMap(reheatZoneToDATMinDifferential).setMaxVal(updatedMaxValue).build();
+            HDict reheatZoneToDATMinDifferentialHDict = CCUHsApi.getInstance().readHDict("point and id == " + reheatZoneToDATMinDifferential.get("id"));
+            Point updatedPoint = new Point.Builder().setHDict(reheatZoneToDATMinDifferentialHDict).setMaxVal(updatedMaxValue).build();
             CCUHsApi.getInstance().updatePoint(updatedPoint, updatedPoint.getId());
         }
 
@@ -933,13 +937,16 @@ public class MigrationUtil {
     private static void pressureUnitMigration(CCUHsApi ccuHsApi) {
         ArrayList<HashMap<Object, Object>> equips = CCUHsApi.getInstance().readAllEntities("equip");
         equips.forEach(equipDetails -> {
-            Equip equip = new Equip.Builder().setHashMap(equipDetails).build();
-            ArrayList<HashMap<Object, Object>> pressurePoints = ccuHsApi.readAllEntities("point and (pressure or staticPressure) and equipRef == \"" + equip.getId() + "\"");
-            String updatedPressureUnit = "inH₂O";
-            for (HashMap<Object, Object> pressureMap : pressurePoints
-            ) {
-                Point updatedPoint = new Point.Builder().setHashMap(pressureMap).setUnit(updatedPressureUnit).build();
-                CCUHsApi.getInstance().updatePoint(updatedPoint, updatedPoint.getId());
+            HDict equipHDict = CCUHsApi.getInstance().readHDict("equip and id == " + equipDetails.get("id") );
+            if(equipHDict != null) {
+                Equip equip = new Equip.Builder().setHDict(equipHDict).build();
+                ArrayList<HashMap<Object, Object>> pressurePoints = ccuHsApi.readAllEntities("point and (pressure or staticPressure) and equipRef == \"" + equip.getId() + "\"");
+                String updatedPressureUnit = "inH₂O";
+                for (HashMap<Object, Object> pressureMap : pressurePoints) {
+                    HDict pressurePointDict = CCUHsApi.getInstance().readHDict("point and id == " + pressureMap.get("id"));
+                    Point updatedPoint = new Point.Builder().setHDict(pressurePointDict).setUnit(updatedPressureUnit).build();
+                    CCUHsApi.getInstance().updatePoint(updatedPoint, updatedPoint.getId());
+                }
             }
         });
     }
@@ -1589,22 +1596,25 @@ public class MigrationUtil {
     private static void migrateBPOSToOTN(CCUHsApi haystack){
         ArrayList <HashMap<Object, Object>> equipList = haystack.readAllEntities("bpos and equip");
         equipList.forEach(objectObjectHashMap -> {
-            objectObjectHashMap.put("profile", "OTN");
+            HDict bposEquip = haystack
+                    .readHDict("equip and bpos and id == " + objectObjectHashMap.get("id"));
             String displayName = objectObjectHashMap.get("dis").toString();
             displayName = displayName.replace("-BPOS-", "-OTN-");
-            objectObjectHashMap.put("dis", displayName);
             Equip updatedEquip =
-                    new Equip.Builder().setHashMap(objectObjectHashMap).removeMarker("bpos").addMarker(Tags.OTN).
+                    new Equip.Builder().setHDict(bposEquip)
+                            .setProfile("OTN")
+                            .setDisplayName(displayName)
+                            .removeMarker("bpos").addMarker(Tags.OTN).
                             build();
             CCUHsApi.getInstance().updateEquip(updatedEquip, updatedEquip.getId());
 
-            HashMap device = CCUHsApi.getInstance().readEntity("device and equipRef == \"" +
-                    updatedEquip.getId()+"\"");
+            HDict device = CCUHsApi.getInstance().readHDict("device and equipRef == \"" + updatedEquip.getId());
             displayName = device.get("dis").toString();
             displayName = displayName.replace("SN-", "OTN-");
-            device.put("dis", displayName);
             Device updatedDevice =
-                    new Device.Builder().setHashMap(device).removeMarker("smartnode").addMarker(Tags.OTN).build();
+                    new Device.Builder().setHDict(device)
+                            .setDisplayName(displayName)
+                            .removeMarker("smartnode").addMarker(Tags.OTN).build();
             CCUHsApi.getInstance().updateDevice(updatedDevice, updatedDevice.getId());
         });
 
@@ -1620,11 +1630,13 @@ public class MigrationUtil {
             }
             Point updatedPoint;
             if(pointHashMap.containsKey("bpos")) {
-                updatedPoint = new Point.Builder().setHashMap(pointHashMap).removeMarker("bpos").
+                HDict hDict = haystack.readHDict("point and bpos and id == " + pointHashMap.get("id"));
+                updatedPoint = new Point.Builder().setHDict(hDict).removeMarker("bpos").
                         addMarker(Tags.OTN).build();
             }
             else{
-                updatedPoint = new Point.Builder().setHashMap(pointHashMap).build();
+                HDict hDict = haystack.readHDict("point and id == " + pointHashMap.get("id"));
+                updatedPoint = new Point.Builder().setHDict(hDict).build();
             }
             CCUHsApi.getInstance().updatePoint(updatedPoint, updatedPoint.getId());
         });

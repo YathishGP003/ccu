@@ -1,3 +1,4 @@
+/*
 package a75f.io.renatus;
 
 import static a75f.io.logic.bo.util.DesiredTempDisplayMode.setSystemModeForDab;
@@ -54,9 +55,11 @@ import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+*/
 /**
  * Created by samjithsadasivan on 2/18/19.
- */
+ *//*
+
 
 public class VavStagedRtuWithVfdProfile extends Fragment implements AdapterView.OnItemSelectedListener, CompoundButton.OnCheckedChangeListener
 {
@@ -686,3 +689,4 @@ public class VavStagedRtuWithVfdProfile extends Fragment implements AdapterView.
         return new CustomSpinnerDropDownAdapter(requireContext(), R.layout.spinner_dropdown_item, values);
     }
 }
+*/

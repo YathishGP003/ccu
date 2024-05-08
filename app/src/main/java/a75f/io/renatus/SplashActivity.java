@@ -40,7 +40,7 @@ public class SplashActivity extends AppCompatActivity implements Globals.OnCcuIn
 
     public static final int CCU_PERMISSION_REQUEST_ID = 1;
 
-    public static final String TAG = SplashActivity.class.getSimpleName();
+    public static final String TAG = "CCU_INIT_SPLASH_UI";
     Prefs prefs;
     private Thread registrationThread;
     private ImageView splashLogo75f;
@@ -68,6 +68,7 @@ public class SplashActivity extends AppCompatActivity implements Globals.OnCcuIn
     private void launchUI() {
         HashMap<Object, Object> site = CCUHsApi.getInstance().read("site");
         if (PreferenceUtil.getUpdateCCUStatus() || PreferenceUtil.isCCUInstalling()) {
+            Log.i(TAG, "Resume Update CCU");
             resumeUpdateCCU();
         } else if (site.size() == 0 || RestoreCCU.isReplaceCCUUnderProcess()) {
             Log.i(TAG,"No Site Synced navigate to Register");
@@ -157,6 +158,12 @@ public class SplashActivity extends AppCompatActivity implements Globals.OnCcuIn
             i.putExtra("viewpager_position", 6);
             startActivity(i);
             finish();
+        } else {
+            Log.i(TAG,"Default launching state");
+            Intent i = new Intent(SplashActivity.this, RenatusLandingActivity.class);
+            i.putExtra("viewpager_position", 0);
+            startActivity(i);
+            finish();
         }
     }
 
@@ -182,7 +189,7 @@ public class SplashActivity extends AppCompatActivity implements Globals.OnCcuIn
 
         } else if (prefs.getString("INSTALL_TYPE").equals("ADDCCU")){
             Intent i = new Intent(SplashActivity.this, FreshRegistration.class);
-            i.putExtra("viewpager_position", 6);
+            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(i);
             finish();
         }

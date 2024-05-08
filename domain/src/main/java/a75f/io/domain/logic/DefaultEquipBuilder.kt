@@ -32,7 +32,6 @@ open class DefaultEquipBuilder : EquipBuilder {
             Equip.Builder().setDisplayName("$siteDisName-${equipConfig.modelDef.name}")
                 .setDomainName(equipConfig.modelDef.domainName)
                 .setFloorRef(equipConfig.profileConfiguration?.floorRef)
-                .setGroup(equipConfig.profileConfiguration?.nodeAddress.toString())
                 .setSiteRef(equipConfig.siteRef)
                 .setProfile(equipConfig.profileConfiguration?.profileType)
                 .setDomainName(equipConfig.modelDef.domainName)
@@ -42,9 +41,14 @@ open class DefaultEquipBuilder : EquipBuilder {
         if (equipConfig.profileConfiguration?.roomRef != null) {
             equipBuilder.setRoomRef(equipConfig.profileConfiguration.roomRef)
         }
-        equipConfig.modelDef.tags.filter { it.kind == TagType.MARKER }
-            .forEach { tag -> equipBuilder.addMarker(tag.name) }
-        equipConfig.modelDef.tags.filter { it.kind == TagType.STR }.forEach { tag ->
+        equipConfig.profileConfiguration?.nodeAddress?.let {
+            if (it > 0) {
+                equipBuilder.setGroup(equipConfig.profileConfiguration?.nodeAddress.toString())
+            }
+        }
+
+        equipConfig.modelDef.tags.filter { it.kind == TagType.MARKER }.forEach{ tag -> equipBuilder.addMarker(tag.name)}
+        equipConfig.modelDef.tags.filter { it.kind == TagType.STR }.forEach{ tag ->
             tag.defaultValue?.let {
                 //TODO- Temp Sam : This should be removed in future when profile models consistent with profile tag.
                 // We will stick with old profileType enum till then
@@ -83,7 +87,6 @@ open class DefaultEquipBuilder : EquipBuilder {
             .setFloorRef(pointConfig.configuration?.floorRef)
             .setKind(Kind.parsePointType(pointConfig.modelDef.kind.name))
             .setUnit(pointConfig.modelDef.defaultUnit)
-            .setGroup(pointConfig.configuration?.nodeAddress.toString())
             .setSiteRef(pointConfig.siteRef)
 
         if (pointConfig.modelDef is SeventyFiveFProfilePointDef) {
@@ -96,6 +99,11 @@ open class DefaultEquipBuilder : EquipBuilder {
 
         if (pointConfig.configuration?.roomRef != null) {
             pointBuilder.setRoomRef(pointConfig.configuration.roomRef)
+        }
+        pointConfig.configuration?.nodeAddress?.let {
+            if (it > 0) {
+                pointBuilder.setGroup(pointConfig.configuration?.nodeAddress.toString())
+            }
         }
 
         if (pointConfig.modelDef.valueConstraint.constraintType == Constraint.ConstraintType.NUMERIC) {

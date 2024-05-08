@@ -28,12 +28,18 @@ import android.content.Intent;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import a75.io.algos.vav.VavTRSystem;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
+import a75f.io.domain.api.Domain;
+import a75f.io.domain.equips.VavStagedSystemEquip;
+import a75f.io.domain.equips.VavStagedVfdSystemEquip;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.BacnetIdKt;
 import a75f.io.logic.BacnetUtilKt;
@@ -48,10 +54,8 @@ import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.system.SystemConstants;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
-import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.logic.tuners.VavTRTuners;
-import a75f.io.logic.util.SystemProfileUtil;
 
 /**
  * Created by samjithsadasivan on 8/14/18.
@@ -73,7 +77,7 @@ public class VavStagedRtu extends VavSystemProfile
     
     int[] stageStatus = new int[17];
     
-    
+    public VavStagedSystemEquip systemEquip;
     public void initTRSystem() {
         trSystem =  new VavTRSystem();
     }
@@ -119,46 +123,8 @@ public class VavStagedRtu extends VavSystemProfile
     
     @Override
     public void addSystemEquip() {
-        CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap equip = hayStack.read("equip and system and not modbus");
-        if (equip != null && equip.size() > 0) {
-            if (!equip.get("profile").equals(ProfileType.SYSTEM_VAV_STAGED_RTU.name())) {
-                hayStack.deleteEntityTree(equip.get("id").toString());
-                removeSystemEquipModbus();
-            } else {
-                initTRSystem();
-                addNewSystemUserIntentPoints(equip.get("id").toString());
-                addNewTunerPoints(equip.get("id").toString());
-                updateStagesSelected();
-                return;
-            }
-        }
-        CcuLog.d(L.TAG_CCU_SYSTEM,"System Equip does not exist. Create Now");
-        HashMap siteMap = hayStack.read(Tags.SITE);
-        String siteRef = (String) siteMap.get(Tags.ID);
-        String siteDis = (String) siteMap.get("dis");
-        Equip systemEquip= new Equip.Builder()
-                                   .setSiteRef(siteRef)
-                                   .setDisplayName(siteDis+"-SystemEquip")
-                                   .setProfile(ProfileType.SYSTEM_VAV_STAGED_RTU.name())
-                                   .addMarker("equip").addMarker("system").addMarker("vav")
-                                   .setTz(siteMap.get("tz").toString())
-                                   .build();
-        String equipRef = hayStack.addEquip(systemEquip);
-        addSystemLoopOpPoints(equipRef);
-        addUserIntentPoints(equipRef);
-        addCmdPoints(equipRef);
-        addConfigPoints(equipRef);
-        addTunerPoints(equipRef);
-        addVavSystemTuners(equipRef);
-        updateAhuRef(equipRef);
-        //sysEquip = new SystemEquip(equipRef);
-        new ControlMote(equipRef);
+        systemEquip = (VavStagedSystemEquip) Domain.systemEquip;
         initTRSystem();
-        L.saveCCUState();
-        CCUHsApi.getInstance().syncEntityTree();
-        
-        
     }
     
     @Override
@@ -184,10 +150,12 @@ public class VavStagedRtu extends VavSystemProfile
     }
     
     protected synchronized void updateSystemPoints() {
+
+        updateStagesSelected();
         updateOutsideWeatherParams();
         updateMechanicalConditioning(CCUHsApi.getInstance());
 
-        SystemMode systemMode = SystemMode.values()[(int)getUserIntentVal("conditioning and mode")];
+        SystemMode systemMode = SystemMode.values()[(int)systemEquip.getConditioningMode().readPriorityVal()];
         stageStatus = new int[17];
     
         if (currentConditioning == OFF) {
@@ -204,8 +172,8 @@ public class VavStagedRtu extends VavSystemProfile
             systemCoolingLoopOp = VavSystemController.getInstance().getCoolingSignal();
         } else if ((VavSystemController.getInstance().getSystemState() == COOLING)
                     && (systemMode == SystemMode.COOLONLY || systemMode == SystemMode.AUTO)) {
-            double satSpMax = VavTRTuners.getSatTRTunerVal("spmax");
-            double satSpMin = VavTRTuners.getSatTRTunerVal("spmin");
+            double satSpMax = systemEquip.getSatSPMax().readPriorityVal();
+            double satSpMin = systemEquip.getSatSPMin().readPriorityVal();
     
             CcuLog.d(L.TAG_CCU_SYSTEM,"satSpMax :"+satSpMax+" satSpMin: "+satSpMin+" SAT: "+getSystemSAT());
             systemCoolingLoopOp = (int) ((satSpMax - getSystemSAT())  * 100 / (satSpMax - satSpMin)) ;
@@ -229,16 +197,17 @@ public class VavStagedRtu extends VavSystemProfile
             systemHeatingLoopOp = getSystemLoopOutputValue(Tags.HEATING);
         }
 
-        double analogFanSpeedMultiplier = TunerUtil.readTunerValByQuery("analog and fan and speed and multiplier", getSystemEquipRef());
-        double epidemicMode = CCUHsApi.getInstance().readHisValByQuery("point and sp and system and epidemic and state and mode and equipRef ==\""+getSystemEquipRef()+"\"");
+        double analogFanSpeedMultiplier = systemEquip.getVavAnalogFanSpeedMultiplier().readPriorityVal();
+        double epidemicMode = systemEquip.getEpidemicModeSystemState().readHisVal();
         EpidemicState epidemicState = EpidemicState.values()[(int) epidemicMode];
     
         if (isSingleZoneTIMode(CCUHsApi.getInstance())) {
             systemFanLoopOp = getSingleZoneFanLoopOp(analogFanSpeedMultiplier);
         } else if((epidemicState == EpidemicState.PREPURGE || epidemicState == EpidemicState.POSTPURGE ) && (L.ccu().oaoProfile != null)) {
+            //TODO- Part OAO. Will be replaced with domanName later.
             double smartPurgeDabFanLoopOp = TunerUtil.readTunerValByQuery("system and purge and vav and fan and loop and output", L.ccu().oaoProfile.getEquipRef());
-            double spSpMax = VavTRTuners.getStaticPressureTRTunerVal("spmax");
-            double spSpMin = VavTRTuners.getStaticPressureTRTunerVal("spmin");
+            double spSpMax = systemEquip.getStaticPressureSPMax().readPriorityVal();
+            double spSpMin = systemEquip.getStaticPressureSPMin().readPriorityVal();
 
             CcuLog.d(L.TAG_CCU_SYSTEM,"spSpMax :"+spSpMax+" spSpMin: "+spSpMin+" SP: "+getStaticPressure()+","+smartPurgeDabFanLoopOp);
             double staticPressureLoopOutput = (int) ((getStaticPressure() - spSpMin) * 100 / (spSpMax -spSpMin)) ;
@@ -258,8 +227,8 @@ public class VavStagedRtu extends VavSystemProfile
 
         } else if (VavSystemController.getInstance().getSystemState() == COOLING
                                             && (systemMode == SystemMode.COOLONLY || systemMode == SystemMode.AUTO)) {
-            double spSpMax = VavTRTuners.getStaticPressureTRTunerVal("spmax");
-            double spSpMin = VavTRTuners.getStaticPressureTRTunerVal("spmin");
+            double spSpMax = systemEquip.getStaticPressureSPMax().readPriorityVal();
+            double spSpMin = systemEquip.getStaticPressureSPMin().readPriorityVal();
     
             CcuLog.d(L.TAG_CCU_SYSTEM,"spSpMax :"+spSpMax+" spSpMin: "+spSpMin+" SP: "+getStaticPressure());
             systemFanLoopOp = (int) ((getStaticPressure() - spSpMin) * 100 / (spSpMax -spSpMin)) ;
@@ -278,16 +247,14 @@ public class VavStagedRtu extends VavSystemProfile
 
         systemCo2LoopOp = VavSystemController.getInstance().getSystemState() == SystemController.State.OFF
                                   ? 0 : (SystemConstants.CO2_CONFIG_MAX - getSystemCO2()) * 100 / 200 ;
-        
-        setSystemLoopOp("cooling", systemCoolingLoopOp);
-        setSystemLoopOp("heating", systemHeatingLoopOp);
-        setSystemLoopOp("fan", systemFanLoopOp);
-        setSystemLoopOp("co2", systemCo2LoopOp);
+
+        systemEquip.getCoolingLoopOutput().writeHisVal(systemCoolingLoopOp);
+        systemEquip.getHeatingLoopOutput().writeHisVal(systemHeatingLoopOp);
+        systemEquip.getFanLoopOutput().writeHisVal(systemFanLoopOp);
+        systemEquip.getCo2LoopOutput().writeHisVal(systemCo2LoopOp);
     
         CcuLog.d(L.TAG_CCU_SYSTEM, "systemCoolingLoopOp "+systemCoolingLoopOp+
                                    " systemHeatingLoopOp "+ systemHeatingLoopOp+" " + "systemFanLoopOp "+systemFanLoopOp);
-        
-        updateStagesSelected();
     
         updateRelayStatus(epidemicState);
     
@@ -296,18 +263,18 @@ public class VavStagedRtu extends VavSystemProfile
                                    "changeOverStageDownTimerOverrideActive "+changeOverStageDownTimerOverrideActive);
     
         CcuLog.d(L.TAG_CCU_SYSTEM, "Relays Status: " + Arrays.toString(stageStatus));
-    
-        setSystemPoint("operating and mode", VavSystemController.getInstance().systemState.ordinal());
+
+        systemEquip.getOperatingMode().writeHisVal(VavSystemController.getInstance().systemState.ordinal());
         String systemStatus = getStatusMessage();
         String scheduleStatus =  ScheduleManager.getInstance().getSystemStatusString();
         CcuLog.d(L.TAG_CCU_SYSTEM, "StatusMessage: "+systemStatus);
         CcuLog.d(L.TAG_CCU_SYSTEM, "ScheduleStatus: " +scheduleStatus);
-        if (!CCUHsApi.getInstance().readDefaultStrVal("system and status and message").equals(systemStatus)) {
-            CCUHsApi.getInstance().writeDefaultVal("system and status and message", systemStatus);
+        if (!systemEquip.getEquipStatusMessage().readDefaultStrVal().equals(systemStatus)) {
+            systemEquip.getEquipStatusMessage().writeDefaultVal(systemStatus);
             Globals.getInstance().getApplicationContext().sendBroadcast(new Intent(ACTION_STATUS_CHANGE));
         }
-        if (!CCUHsApi.getInstance().readDefaultStrVal("system and scheduleStatus").equals(scheduleStatus)) {
-            CCUHsApi.getInstance().writeDefaultVal("system and scheduleStatus", scheduleStatus);
+        if (!systemEquip.getEquipScheduleStatus().readDefaultStrVal().equals(scheduleStatus)) {
+            systemEquip.getEquipScheduleStatus().writeDefaultVal(scheduleStatus);
         }
     
     }
@@ -321,8 +288,8 @@ public class VavStagedRtu extends VavSystemProfile
      */
     private void updateRelayStatus(EpidemicState epidemicState) {
         
-        double relayDeactHysteresis = TunerUtil.readTunerValByQuery("relay and deactivation and hysteresis", getSystemEquipRef());
-        SystemMode systemMode = SystemMode.values()[(int)getUserIntentVal("conditioning and mode")];
+        double relayDeactHysteresis = systemEquip.getVavRelayDeactivationHysteresis().readPriorityVal();
+        SystemMode systemMode = SystemMode.values()[(int)systemEquip.getConditioningMode().readPriorityVal()];
         
         int[] tempStatus = new int[17];
         
@@ -332,22 +299,22 @@ public class VavStagedRtu extends VavSystemProfile
         if (stageDownTimerCounter > 0) {
             stageDownTimerCounter--;
         }
-    
-        for (int relayCount = 1; relayCount <= 7; relayCount++) {
-            Stage stage = Stage.values()[(int) getConfigAssociation("relay" + relayCount)];
-            int stageStatus = (int)getNewRelayState(relayCount, epidemicState, relayDeactHysteresis,
-                                                    systemMode, stage);
+        getRelayAssiciationMap().forEach( (relay, association) -> {
+            Stage stage = Stage.values()[(int) association.readDefaultVal()];
+            int stageStatus = (int)getNewRelayState(relay, epidemicState, relayDeactHysteresis,
+                    systemMode, stage);
+            CcuLog.d(L.TAG_CCU_SYSTEM, "New relayState stage "+stage+" "+stageStatus+" "+relay.getDomainName());
             tempStatus[stage.ordinal()] = tempStatus[stage.ordinal()] | stageStatus;
-        }
-    
-    
+        });
+
         //Handle stage down transitions
         for (int stageIndex = HEATING_5.ordinal(); stageIndex >= COOLING_1.ordinal(); stageIndex-- ) {
             Stage stage = Stage.values()[stageIndex];
-            HashSet<Integer> relaySet = getRelayMappingForStage(stage);
-            CcuLog.d(L.TAG_CCU_SYSTEM, "Relays mapped to stage "+stage+" "+relaySet.toString());
-            for (Integer relay : relaySet) {
-                double curRelayState = ControlMote.getRelayState("relay" + relay);
+            Set<a75f.io.domain.api.Point> relaySet = getRelayMappingForStage(stage);
+            CcuLog.d(L.TAG_CCU_SYSTEM, "Relays mapped to stage "+stage+" "+Arrays.toString(relaySet.toArray()));
+            for (a75f.io.domain.api.Point relay : relaySet) {
+                //double curRelayState = ControlMote.getRelayState(relay);
+                double curRelayState = getLogicalPhysicalMap().get(relay).readHisVal();
                 stageStatus[stage.ordinal()] = (int) curRelayState;
                 if (stageUpTimerCounter == 0 && stageDownTimerCounter == 0) {
                     double relayState = tempStatus[stage.ordinal()];
@@ -373,10 +340,10 @@ public class VavStagedRtu extends VavSystemProfile
         //Handle stage up transitions
         for (int stageIndex = COOLING_1.ordinal(); stageIndex <= HEATING_5.ordinal(); stageIndex++ ) {
             Stage stage = Stage.values()[stageIndex];
-            HashSet<Integer> relaySet = getRelayMappingForStage(stage);
-            CcuLog.d(L.TAG_CCU_SYSTEM, "Relays mapped to stage "+stage+" "+relaySet.toString());
-            for (Integer relay : relaySet) {
-                double curRelayState = ControlMote.getRelayState("relay" + relay);
+            Set<a75f.io.domain.api.Point> relaySet = getRelayMappingForStage(stage);
+            CcuLog.d(L.TAG_CCU_SYSTEM, "Relays mapped to stage "+stage+" "+Arrays.toString(relaySet.toArray()));
+            for (a75f.io.domain.api.Point relay : relaySet) {
+                double curRelayState = getLogicalPhysicalMap().get(relay).readHisVal();
                 if (stageUpTimerCounter == 0 && stageDownTimerCounter == 0) {
                     double relayState = tempStatus[stage.ordinal()];
                     if (curRelayState == 0 && relayState > 0) {
@@ -413,56 +380,71 @@ public class VavStagedRtu extends VavSystemProfile
         
         updateRelays();
     }
-    
+
+    protected a75f.io.domain.api.Point getDomainPointForStage(Stage stage) {
+        switch (stage) {
+            case COOLING_1:
+                return systemEquip.getCoolingStage1();
+            case COOLING_2:
+                return systemEquip.getCoolingStage2();
+            case COOLING_3:
+                return systemEquip.getCoolingStage3();
+            case COOLING_4:
+                return systemEquip.getCoolingStage4();
+            case COOLING_5:
+                return systemEquip.getCoolingStage5();
+            case HEATING_1:
+                return systemEquip.getHeatingStage1();
+            case HEATING_2:
+                return systemEquip.getHeatingStage2();
+            case HEATING_3:
+                return systemEquip.getHeatingStage3();
+            case HEATING_4:
+                return systemEquip.getHeatingStage4();
+            case HEATING_5:
+                return systemEquip.getHeatingStage5();
+            case FAN_1:
+                return systemEquip.getFanStage1();
+            case FAN_2:
+                return systemEquip.getFanStage2();
+            case FAN_3:
+                return systemEquip.getFanStage3();
+            case FAN_4:
+                return systemEquip.getFanStage4();
+            case FAN_5:
+                return systemEquip.getFanStage5();
+            case HUMIDIFIER:
+                return systemEquip.getHumidifierEnable();
+            case DEHUMIDIFIER:
+                return systemEquip.getDehumidifierEnable();
+        }
+        return null;
+    }
     
     private void setStageStatus(Stage stage, double relayState) {
-        if (stage.getValue() <= COOLING_5.getValue()) {
-            double currState = getCmdSignal("cooling and stage" + (stage.ordinal() + 1));
-            if (currState != relayState) {
-                setCmdSignal("cooling and stage" + (stage.ordinal() + 1), relayState);
-            }
-        } else if (stage.getValue() >= HEATING_1.getValue() && stage.getValue() <= HEATING_5.getValue()) {
-            double currState = getCmdSignal("heating and stage" + (stage.ordinal() - COOLING_5.ordinal()));
-            if (currState != relayState) {
-                setCmdSignal("heating and stage" + (stage.ordinal() - COOLING_5.ordinal()), relayState);
-            }
-        } else if (stage.getValue() >= FAN_1.getValue() && stage.getValue() <= FAN_5.getValue()) {
-            double currState = getCmdSignal("fan and stage" + (stage.ordinal() - HEATING_5.ordinal()));
-            if (currState != relayState) {
-                setCmdSignal("fan and stage" + (stage.ordinal() - HEATING_5.ordinal()), relayState);
-            }
-        } else if (stage.getValue() == HUMIDIFIER.getValue()) {
-            double currState = getCmdSignal("humidifier");
-            if (currState != relayState) {
-                setCmdSignal("humidifier", relayState);
-            }
-        }  else if (stage.getValue() == DEHUMIDIFIER.getValue()) {
-            double currState = getCmdSignal("dehumidifier");
-            if (currState != relayState) {
-                setCmdSignal("dehumidifier", relayState);
-            }
-        }
+        getDomainPointForStage(stage).writeHisVal(relayState);
     }
     
-    private HashSet<Integer> getRelayMappingForStage(Stage stage) {
-        HashSet<Integer> relaySet= new HashSet<>();
-        for (int relayCount = 1; relayCount <= 7; relayCount++) {
-            if (getConfigEnabled("relay" + relayCount) > 0 &&
-                                stage.ordinal() == getConfigAssociation("relay" + relayCount)) {
-                relaySet.add(relayCount);
+    private Set<a75f.io.domain.api.Point> getRelayMappingForStage(Stage stage) {
+        Set<a75f.io.domain.api.Point> relaySet= new HashSet<>();
+
+        getRelayAssiciationMap().forEach( (relay, association) -> {
+            if (relay.readDefaultVal() > 0 && stage.ordinal() == association.readDefaultVal()) {
+                relaySet.add(relay);
             }
-        }
+        });
         return relaySet;
     }
+
     
-    public double getNewRelayState(int relayNum, EpidemicState epidemicState, double relayDeactHysteresis,
-                                                                                    SystemMode systemMode, Stage stage) {
+    public double getNewRelayState(a75f.io.domain.api.Point relayPoint, EpidemicState epidemicState, double relayDeactHysteresis,
+                                   SystemMode systemMode, Stage stage) {
     
         double relayState = 0;
-        double currState = 0;
+        double currState = getDomainPointForStage(stage).readHisVal();;
         double stageThreshold = 0;
         
-        if (getConfigEnabled("relay"+ relayNum) == 0) {
+        if (relayPoint.readDefaultVal() == 0) {
             relayState = 0;
         } else {
             switch (stage) {
@@ -474,7 +456,6 @@ public class VavStagedRtu extends VavSystemProfile
                     if (isCoolingLockoutActive()) {
                         relayState = 0;
                     } else {
-                        currState = getCmdSignal("cooling and stage" + (stage.ordinal() + 1));
                         if (L.ccu().oaoProfile != null && L.ccu().oaoProfile.isEconomizingAvailable()) {
                             stageThreshold = 100 * (stage.ordinal() + 1) / (coolingStages + 1);
                         } else {
@@ -496,7 +477,6 @@ public class VavStagedRtu extends VavSystemProfile
                     if (isHeatingLockoutActive()) {
                         relayState = 0;
                     } else {
-                        currState = getCmdSignal("heating and stage" + (stage.ordinal() - COOLING_5.ordinal()));
                         stageThreshold = 100 * (stage.ordinal() - HEATING_1.ordinal()) / heatingStages;
                         if (currState == 0) {
                             relayState = systemHeatingLoopOp > stageThreshold ? 1 : 0;
@@ -529,7 +509,6 @@ public class VavStagedRtu extends VavSystemProfile
                 case FAN_3:
                 case FAN_4:
                 case FAN_5:
-                    currState = getCmdSignal("fan and stage" + (stage.ordinal() - HEATING_5.ordinal()));
                     stageThreshold = 100 * (stage.ordinal() - FAN_2.ordinal()) / (fanStages - 1);
                     if (currState == 0) {
                         relayState = systemFanLoopOp >= stageThreshold ? 1: 0;
@@ -547,16 +526,11 @@ public class VavStagedRtu extends VavSystemProfile
                         relayState = 0;
                     } else {
                         double humidity = VavSystemController.getInstance().getAverageSystemHumidity();
-                        double targetMinHumidity = TunerUtil.readSystemUserIntentVal("target and min and inside and humidity");
-                        double targetMaxHumidity = TunerUtil.readSystemUserIntentVal("target and max and inside and humidity");
-                        double humidityHysteresis = TunerUtil.readTunerValByQuery("humidity and hysteresis", getSystemEquipRef());
-                        if(humidity == 0){
-                            relayState = 0;
-                            CcuLog.d(L.TAG_CCU_SYSTEM, "Humidity is 0");
-                            break;
-                        }
+                        double targetMinHumidity = systemEquip.getSystemtargetMinInsideHumidity().readPriorityVal();
+                        double targetMaxHumidity = systemEquip.getSystemtargetMaxInsideHumidity().readPriorityVal();
+                        double humidityHysteresis = systemEquip.getVavHumidityHysteresis().readPriorityVal();
                         if (stage == HUMIDIFIER) {
-                            currState = getCmdSignal("humidifier");
+                            currState = systemEquip.getHumidifierEnable().readHisVal();
                             //Humidification
                             if (humidity < targetMinHumidity) {
                                 relayState = 1;
@@ -566,7 +540,7 @@ public class VavStagedRtu extends VavSystemProfile
                                 relayState = currState;
                             }
                         } else {
-                            currState = getCmdSignal("dehumidifier");
+                            currState = systemEquip.getDehumidifierEnable().readHisVal();
                             //Dehumidification
                             if (humidity > targetMaxHumidity) {
                                 relayState = 1;
@@ -585,11 +559,11 @@ public class VavStagedRtu extends VavSystemProfile
     }
     
     private double getStageUpTimeMinutes() {
-        return TunerUtil.readTunerValByQuery("vav and stageUp and timer and counter", getSystemEquipRef());
+        return systemEquip.getVavStageUpTimerCounter().readPriorityVal();
     }
     
     private double getStageDownTimeMinutes() {
-        return TunerUtil.readTunerValByQuery("vav and stageDown and timer and counter", getSystemEquipRef());
+        return systemEquip.getVavStageDownTimerCounter().readPriorityVal();
     }
     
     @Override
@@ -624,40 +598,40 @@ public class VavStagedRtu extends VavSystemProfile
         if (systemCoolingLoopOp > 0 && L.ccu().oaoProfile != null && L.ccu().oaoProfile.isEconomizingAvailable()) {
             status.insert(0, "Free Cooling Used | ");
         }
-        if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_STAGED_VFD_RTU) {
-            if (getConfigEnabled("analog2") > 0) {
-                status.append(getCmdSignal("fan and modulating") > 0 ? " Analog Fan ON " : "");
-            }
+        if (L.ccu().systemProfile instanceof VavStagedRtuWithVfd) {
+            VavStagedVfdSystemEquip vfdSystemEquip = (VavStagedVfdSystemEquip) Domain.systemEquip;
+            status.append(vfdSystemEquip.getFanSignal().readHisVal() > 0 ? " Analog Fan ON " : "");
         }
-        return status.toString().equals("") ? "System OFF" + SystemProfileUtil.isDeHumidifierOn() + (SystemProfileUtil.isHumidifierOn()) : status.toString() + SystemProfileUtil.isDeHumidifierOn() + (SystemProfileUtil.isHumidifierOn());
+        String humidifierStatus = getRelayMappingForStage(HUMIDIFIER).isEmpty() ? "" :
+                                        systemEquip.getHumidifierEnable().readHisVal() > 0 ? " | Humidifier ON " : " | Humidifier OFF ";
+        String dehumidifierStatus = getRelayMappingForStage(DEHUMIDIFIER).isEmpty() ? "" :
+                                        systemEquip.getDehumidifierEnable().readHisVal() > 0 ? " | Dehumidifier ON " : " | Dehumidifier OFF ";
+
+        return status.toString().equals("") ? "System OFF" + humidifierStatus + dehumidifierStatus :
+                status + humidifierStatus + dehumidifierStatus;
     }
     
     public void updateStagesSelected() {
-       
+        systemEquip = (VavStagedSystemEquip) Domain.systemEquip;
         coolingStages = 0;
         heatingStages = 0;
         fanStages = 0;
-        
-        for (int i = 1; i < 8; i++)
-        {
-            if (getConfigEnabled("relay"+i) > 0)
-            {
-                int val = (int)getConfigAssociation("relay"+i);
-                if (val <= Stage.COOLING_5.ordinal() && val >= coolingStages)
-                {
+        getRelayAssiciationMap().forEach( (relay, association) -> {
+            CcuLog.i(L.TAG_CCU_SYSTEM, relay.getDomainName()+" enabled "+relay.readDefaultVal()+" association "+association.readDefaultVal());
+            if (relay.readDefaultVal() > 0) {
+                int val = (int)association.readDefaultVal();
+                if (val <= Stage.COOLING_5.ordinal() && val >= coolingStages) {
                     coolingStages = val + 1;
                     //CcuLog.d(L.TAG_CCU_SYSTEM," Cooling stage : "+coolingStages);
-                } else if (val >= Stage.HEATING_1.ordinal() && val <= HEATING_5.ordinal() && val >= heatingStages)
-                {
+                } else if (val >= Stage.HEATING_1.ordinal() && val <= HEATING_5.ordinal() && val >= heatingStages) {
                     heatingStages = val + 1;
                     //CcuLog.d(L.TAG_CCU_SYSTEM," Heating stage : "+heatingStages);
-                } else if (val >= Stage.FAN_1.ordinal() && val <= Stage.FAN_5.ordinal() && val >= fanStages)
-                {
+                } else if (val >= Stage.FAN_1.ordinal() && val <= Stage.FAN_5.ordinal() && val >= fanStages) {
                     fanStages = val + 1;
                     //CcuLog.d(L.TAG_CCU_SYSTEM," Fan stage : "+fanStages);
                 }
             }
-        }
+        });
         
         if ((heatingStages > 0)) {
             heatingStages -= Stage.HEATING_1.ordinal();
@@ -670,17 +644,13 @@ public class VavStagedRtu extends VavSystemProfile
     }
     
     public boolean isStageEnabled(Stage s) {
-        for (int i = 1; i < 8; i++)
-        {
-            if (getConfigEnabled("relay" + i) > 0)
-            {
-                int val = (int) getConfigAssociation("relay" + i);
-                if (val == s.ordinal())  {
-                    return true;
-                }
+        AtomicBoolean enabled = new AtomicBoolean(false);
+        getRelayAssiciationMap().forEach( (relay, association) -> {
+            if (relay.readDefaultVal() > 0 && s.ordinal() == association.readDefaultVal()) {
+                enabled.set(true);
             }
-        }
-        return false;
+        });
+        return enabled.get();
     }
     
     private boolean isStageMapped(Stage stage) {
@@ -691,150 +661,50 @@ public class VavStagedRtu extends VavSystemProfile
         }
         return false;
     }
-    
     public double getStageStatus(Stage stage) {
-        if (stage.getValue() <= COOLING_5.getValue()) {
-            return getCmdSignal("cooling and stage" + (stage.ordinal() + 1));
-        } else if (stage.getValue() >= HEATING_1.getValue() && stage.getValue() <= HEATING_5.getValue()) {
-            return getCmdSignal("heating and stage" + (stage.ordinal() - COOLING_5.ordinal()));
-        } else if (stage.getValue() >= FAN_1.getValue() && stage.getValue() <= FAN_5.getValue()) {
-            return getCmdSignal("fan and stage" + (stage.ordinal() - HEATING_5.ordinal()));
-        } else if (stage.getValue() == HUMIDIFIER.getValue()) {
-            return getCmdSignal("humidifier");
-        }  else if (stage.getValue() == DEHUMIDIFIER.getValue()) {
-            return getCmdSignal("dehumidifier");
-        }
-        return 0;
+        return getDomainPointForStage(stage).readHisVal();
     }
-    
     private void updateRelays() {
-        for (int relayCount = 1; relayCount <= 7; relayCount++) {
-            Double newState = 0.0;
-            if (getConfigEnabled("relay" + relayCount) > 0) {
-                Stage mappedStage = Stage.values()[(int) getConfigAssociation("relay" + relayCount)];
+        getRelayAssiciationMap().forEach( (relay, association) -> {
+            double newState = 0;
+            if (relay.readDefaultVal() > 0) {
+                Stage mappedStage = Stage.values()[(int) association.readDefaultVal()];
                 newState = getStageStatus(mappedStage);
+                //ControlMote.setRelayState(relay, newState);
+                getLogicalPhysicalMap().get(relay).writeHisVal(newState);
             }
-            Double curState = ControlMote.getRelayState("relay"+relayCount);
-            if (newState.intValue() != curState.intValue()) {
-                ControlMote.setRelayState("relay" + relayCount, newState);
-            }
+        });
+    }
+    protected Map<a75f.io.domain.api.Point, a75f.io.domain.api.Point> getRelayAssiciationMap() {
+        Map<a75f.io.domain.api.Point, a75f.io.domain.api.Point> associations = new HashMap<>();
+        if (systemEquip == null) {
+            return associations;
         }
+        associations.put(systemEquip.getRelay1OutputEnable(), systemEquip.getRelay1OutputAssociation());
+        associations.put(systemEquip.getRelay2OutputEnable(), systemEquip.getRelay2OutputAssociation());
+        associations.put(systemEquip.getRelay3OutputEnable(), systemEquip.getRelay3OutputAssociation());
+        associations.put(systemEquip.getRelay4OutputEnable(), systemEquip.getRelay4OutputAssociation());
+        associations.put(systemEquip.getRelay5OutputEnable(), systemEquip.getRelay5OutputAssociation());
+        associations.put(systemEquip.getRelay6OutputEnable(), systemEquip.getRelay6OutputAssociation());
+        associations.put(systemEquip.getRelay7OutputEnable(), systemEquip.getRelay7OutputAssociation());
+        return associations;
     }
-    
-    @Override
-    public synchronized void deleteSystemEquip() {
-        HashMap equip = CCUHsApi.getInstance().read("equip and system and not modbus");
-        if (equip.get("profile").equals(ProfileType.SYSTEM_VAV_STAGED_RTU.name())) {
-            CCUHsApi.getInstance().deleteEntityTree(equip.get("id").toString());
+
+    public Map<a75f.io.domain.api.Point, a75f.io.domain.api.PhysicalPoint> getLogicalPhysicalMap() {
+        Map<a75f.io.domain.api.Point, a75f.io.domain.api.PhysicalPoint> map = new HashMap<>();
+        if (systemEquip == null) {
+            return map;
         }
-        removeSystemEquipModbus();
+            map.put(systemEquip.getRelay1OutputEnable(), Domain.cmBoardDevice.getRelay1());
+            map.put(systemEquip.getRelay2OutputEnable(), Domain.cmBoardDevice.getRelay2());
+            map.put(systemEquip.getRelay3OutputEnable(), Domain.cmBoardDevice.getRelay3());
+            map.put(systemEquip.getRelay4OutputEnable(), Domain.cmBoardDevice.getRelay4());
+            map.put(systemEquip.getRelay5OutputEnable(), Domain.cmBoardDevice.getRelay5());
+            map.put(systemEquip.getRelay6OutputEnable(), Domain.cmBoardDevice.getRelay6());
+            map.put(systemEquip.getRelay7OutputEnable(), Domain.cmBoardDevice.getRelay7());
+        return map;
     }
-    
-    public void addCmdPoints(String equipref) {
-        HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
-        String equipDis = siteMap.get("dis").toString()+"-SystemEquip";
-        String siteRef = siteMap.get("id").toString();
-        String tz = siteMap.get("tz").toString();
-        addCmdPoint(COOLING_1.displayName,"cooling","stage1", equipDis, siteRef, equipref, tz,
-                BacnetIdKt.COOLINGSTAGE1ID, BacnetUtilKt.BINARY_VALUE);
-        addCmdPoint(COOLING_2.displayName,"cooling","stage2", equipDis, siteRef, equipref, tz,
-                BacnetIdKt.COOLINGSTAGE2ID, BacnetUtilKt.BINARY_VALUE);
-        addCmdPoint(FAN_1.displayName,"fan","stage1", equipDis, siteRef, equipref, tz,
-                BacnetIdKt.FANSTAGE1ID, BacnetUtilKt.BINARY_VALUE);
-        addCmdPoint(HEATING_1.displayName,"heating","stage1", equipDis, siteRef, equipref, tz,
-                BacnetIdKt.HEATINGSTAGE1ID, BacnetUtilKt.BINARY_VALUE);
-        addCmdPoint(HEATING_2.displayName,"heating","stage2", equipDis, siteRef, equipref, tz,
-                BacnetIdKt.HEATINGSTAGE2ID, BacnetUtilKt.BINARY_VALUE);
-        addCmdPoint(FAN_2.displayName,"fan","stage2", equipDis, siteRef, equipref, tz,
-                BacnetIdKt.FANSTAGE2ID, BacnetUtilKt.BINARY_VALUE);
-        addHumidityCmdPoint(HUMIDIFIER.displayName,"humidifier", equipDis, siteRef, equipref, tz);
-    }
-    
-    private void addCmdPoint(String name, String relayMap, String stage, String equipDis, String siteRef, String equipref, String tz,
-                             int bacnetId, String bacnetType){
-        //Name to be updated
-        Point relay1Op = new Point.Builder()
-                                 .setDisplayName(equipDis+"-"+name)
-                                 .setSiteRef(siteRef)
-                                 .setEquipRef(equipref).setHisInterpolate("cov")
-                                 .addMarker("system").addMarker("cmd").addMarker(relayMap).addMarker(stage).addMarker("his").addMarker("runtime")
-                                 .setTz(tz).setBacnetId(bacnetId).setBacnetType(bacnetType)
-                                 .build();
-        String cmdPointId = CCUHsApi.getInstance().addPoint(relay1Op);
-        CCUHsApi.getInstance().writeHisValById(cmdPointId,0.0);
-    }
-    private void addHumidityCmdPoint(String name, String relayMap, String equipDis, String siteRef, String equipref, String tz){
-        //Name to be updated
-        Point relay1Op = new Point.Builder()
-                .setDisplayName(equipDis+"-"+name)
-                .setSiteRef(siteRef)
-                .setEquipRef(equipref).setHisInterpolate("cov")
-                .addMarker("system").addMarker("cmd").addMarker(relayMap).addMarker("his").addMarker("runtime")
-                .setEnums("off,on")
-                .setTz(tz).setBacnetId(BacnetIdKt.HUMIDIFIERENABLEDID).setBacnetType(BacnetUtilKt.BINARY_VALUE)
-                .build();
-        String cmdPointId = CCUHsApi.getInstance().addPoint(relay1Op);
-        CCUHsApi.getInstance().writeHisValById(cmdPointId,0.0);
-    }
-    public double getCmdSignal(String cmd) {
-        try {
-            return CCUHsApi.getInstance().readHisValByQuery("point and system and cmd and his and " + cmd);
-        }catch (Exception e){
-            return 0;
-        }
-    }
-    public void setCmdSignal(String cmd, double val) {
-        CCUHsApi.getInstance().writeHisValByQuery("point and system and cmd and his and "+cmd, val);
-    }
-    
-    public void addConfigPoints(String equipref) {
-        HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
-        String equipDis = siteMap.get("dis").toString()+"-SystemEquip";
-        String siteRef = siteMap.get("id").toString();
-        String tz = siteMap.get("tz").toString();
-        addConfigPointEnabled("relay1", equipDis, siteRef, equipref, tz);
-        addConfigPointEnabled("relay2", equipDis, siteRef, equipref, tz);
-        addConfigPointEnabled("relay3", equipDis, siteRef, equipref, tz);
-        addConfigPointEnabled("relay4", equipDis, siteRef, equipref, tz);
-        addConfigPointEnabled("relay5", equipDis, siteRef, equipref, tz);
-        addConfigPointEnabled("relay6", equipDis, siteRef, equipref, tz);
-        addConfigPointEnabled("relay7", equipDis, siteRef, equipref, tz);
-        addConfigPointAssociation("relay1", equipDis, siteRef, equipref, tz, Stage.COOLING_1);
-        addConfigPointAssociation("relay2", equipDis, siteRef, equipref, tz, COOLING_2);
-        addConfigPointAssociation("relay3", equipDis, siteRef, equipref, tz, FAN_1);
-        addConfigPointAssociation("relay4", equipDis, siteRef, equipref, tz, HEATING_1);
-        addConfigPointAssociation("relay5", equipDis, siteRef, equipref, tz, HEATING_2);
-        addConfigPointAssociation("relay6", equipDis, siteRef, equipref, tz, FAN_2);
-        addConfigPointAssociation("relay7", equipDis, siteRef, equipref, tz, Stage.HUMIDIFIER);
-    
-    }
-    
-    private void addConfigPointEnabled(String relay, String equipDis, String siteRef, String equipref, String tz) {
-        Point relayEnabled = new Point.Builder()
-                                            .setDisplayName(equipDis+"-"+relay+"OutputEnabled")
-                                            .setSiteRef(siteRef)
-                                            .setEquipRef(equipref)
-                                            .addMarker("system").addMarker("config").addMarker(relay)
-                                            .addMarker("output").addMarker("enabled").addMarker("writable").addMarker("sp")
-                                            .setEnums("false,true").setTz(tz)
-                                            .build();
-        String relayEnabledId = CCUHsApi.getInstance().addPoint(relayEnabled);
-        CCUHsApi.getInstance().writeDefaultValById(relayEnabledId, 0.0 );
-    }
-    
-    private void addConfigPointAssociation(String relay, String equipDis, String siteRef, String equipref, String tz, Stage init) {
-        Point relayEnabled = new Point.Builder()
-                                     .setDisplayName(equipDis+"-"+relay+"OutputAssociation")
-                                     .setSiteRef(siteRef)
-                                     .setEquipRef(equipref)
-                                     .addMarker("system").addMarker("config").addMarker(relay)
-                                     .addMarker("output").addMarker("association").addMarker("writable").addMarker("sp")
-                                     .setTz(tz)
-                                     .build();
-        String relayEnabledId = CCUHsApi.getInstance().addPoint(relayEnabled);
-        CCUHsApi.getInstance().writeDefaultValById(relayEnabledId, (double)init.ordinal() );
-    }
-    
+
     public double getConfigEnabled(String config) {
         
         CCUHsApi hayStack = CCUHsApi.getInstance();
@@ -850,7 +720,7 @@ public class VavStagedRtu extends VavSystemProfile
         //sysEquip.setConfigEnabled(config, val);
         CCUHsApi ccuHsApi = CCUHsApi.getInstance();
         ccuHsApi.writeDefaultVal("point and system and config and output and enabled and "+config, val);
-        setSystemModeForVav(ccuHsApi);
+        setSystemModeForVav(ccuHsApi); //TODO
     }
     
     public double getConfigAssociation(String config) {
@@ -916,7 +786,7 @@ public class VavStagedRtu extends VavSystemProfile
                 case COOLING_3:
                 case COOLING_4:
                 case COOLING_5:
-                    if (!isStageMapped(curstage)) {
+                    if (!isStageEnabled(curstage)) {
                         curStageNum = curstage.ordinal() + 1;
                         cmd = CCUHsApi.getInstance().read("point and system and cmd and cooling and stage" + curStageNum);
                         oldPoint = new Point.Builder().setHashMap(cmd).build();
@@ -927,7 +797,7 @@ public class VavStagedRtu extends VavSystemProfile
                 case HEATING_3:
                 case HEATING_4:
                 case HEATING_5:
-                    if (!isStageMapped(curstage)) {
+                    if (!isStageEnabled(curstage)) {
                         curStageNum = curstage.ordinal() - COOLING_5.ordinal();
                         cmd = CCUHsApi.getInstance().read("point and system and cmd and heating and stage" + curStageNum);
                         oldPoint = new Point.Builder().setHashMap(cmd).build();
@@ -938,20 +808,20 @@ public class VavStagedRtu extends VavSystemProfile
                 case FAN_3:
                 case FAN_4:
                 case FAN_5:
-                    if (!isStageMapped(curstage)) {
+                    if (!isStageEnabled(curstage)) {
                         curStageNum = curstage.ordinal() - HEATING_5.ordinal();
                         cmd = CCUHsApi.getInstance().read("point and system and cmd and fan and stage" + curStageNum);
                         oldPoint = new Point.Builder().setHashMap(cmd).build();
                     }
                     break;
                 case HUMIDIFIER:
-                    if (!isStageMapped(curstage)) {
+                    if (!isStageEnabled(curstage)) {
                         cmd = CCUHsApi.getInstance().read("point and system and cmd and humidifier");
                         oldPoint = new Point.Builder().setHashMap(cmd).build();
                     }
                     break;
                 case DEHUMIDIFIER:
-                    if (!isStageMapped(curstage)) {
+                    if (!isStageEnabled(curstage)) {
                         cmd = CCUHsApi.getInstance().read("point and system and cmd and dehumidifier");
                         oldPoint = new Point.Builder().setHashMap(cmd).build();
                     }
@@ -1008,13 +878,120 @@ public class VavStagedRtu extends VavSystemProfile
             }
             CCUHsApi.getInstance().scheduleSync();
         }
-        setSystemModeForVav(CCUHsApi.getInstance());
+        setSystemModeForVav(CCUHsApi.getInstance()); //TODO -
     }
-    
+
+    @Override
+    public void deleteSystemEquip() {
+    }
+
+    public void addCmdPoints(String equipref) {
+        HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
+        String equipDis = siteMap.get("dis").toString()+"-SystemEquip";
+        String siteRef = siteMap.get("id").toString();
+        String tz = siteMap.get("tz").toString();
+        addCmdPoint(COOLING_1.displayName,"cooling","stage1", equipDis, siteRef, equipref, tz,
+                BacnetIdKt.COOLINGSTAGE1ID, BacnetUtilKt.BINARY_VALUE);
+        addCmdPoint(COOLING_2.displayName,"cooling","stage2", equipDis, siteRef, equipref, tz,
+                BacnetIdKt.COOLINGSTAGE2ID, BacnetUtilKt.BINARY_VALUE);
+        addCmdPoint(FAN_1.displayName,"fan","stage1", equipDis, siteRef, equipref, tz,
+                BacnetIdKt.FANSTAGE1ID, BacnetUtilKt.BINARY_VALUE);
+        addCmdPoint(HEATING_1.displayName,"heating","stage1", equipDis, siteRef, equipref, tz,
+                BacnetIdKt.HEATINGSTAGE1ID, BacnetUtilKt.BINARY_VALUE);
+        addCmdPoint(HEATING_2.displayName,"heating","stage2", equipDis, siteRef, equipref, tz,
+                BacnetIdKt.HEATINGSTAGE2ID, BacnetUtilKt.BINARY_VALUE);
+        addCmdPoint(FAN_2.displayName,"fan","stage2", equipDis, siteRef, equipref, tz,
+                BacnetIdKt.FANSTAGE2ID, BacnetUtilKt.BINARY_VALUE);
+        addHumidityCmdPoint(HUMIDIFIER.displayName,"humidifier", equipDis, siteRef, equipref, tz);
+    }
+
+    private void addCmdPoint(String name, String relayMap, String stage, String equipDis, String siteRef, String equipref, String tz,
+                             int bacnetId, String bacnetType){
+        //Name to be updated
+        Point relay1Op = new Point.Builder()
+                .setDisplayName(equipDis+"-"+name)
+                .setSiteRef(siteRef)
+                .setEquipRef(equipref).setHisInterpolate("cov")
+                .addMarker("system").addMarker("cmd").addMarker(relayMap).addMarker(stage).addMarker("his").addMarker("runtime")
+                .setTz(tz).setBacnetId(bacnetId).setBacnetType(bacnetType)
+                .build();
+        String cmdPointId = CCUHsApi.getInstance().addPoint(relay1Op);
+        CCUHsApi.getInstance().writeHisValById(cmdPointId,0.0);
+    }
+    private void addHumidityCmdPoint(String name, String relayMap, String equipDis, String siteRef, String equipref, String tz){
+        //Name to be updated
+        Point relay1Op = new Point.Builder()
+                .setDisplayName(equipDis+"-"+name)
+                .setSiteRef(siteRef)
+                .setEquipRef(equipref).setHisInterpolate("cov")
+                .addMarker("system").addMarker("cmd").addMarker(relayMap).addMarker("his").addMarker("runtime")
+                .setEnums("off,on")
+                .setTz(tz).setBacnetId(BacnetIdKt.HUMIDIFIERENABLEDID).setBacnetType(BacnetUtilKt.BINARY_VALUE)
+                .build();
+        String cmdPointId = CCUHsApi.getInstance().addPoint(relay1Op);
+        CCUHsApi.getInstance().writeHisValById(cmdPointId,0.0);
+    }
+    public double getCmdSignal(String cmd) {
+        try {
+            return CCUHsApi.getInstance().readHisValByQuery("point and system and cmd and his and " + cmd);
+        }catch (Exception e){
+            return 0;
+        }
+    }
+    public void setCmdSignal(String cmd, double val) {
+        CCUHsApi.getInstance().writeHisValByQuery("point and system and cmd and his and "+cmd, val);
+    }
+
+    public void addConfigPoints(String equipref) {
+        HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
+        String equipDis = siteMap.get("dis").toString()+"-SystemEquip";
+        String siteRef = siteMap.get("id").toString();
+        String tz = siteMap.get("tz").toString();
+        addConfigPointEnabled("relay1", equipDis, siteRef, equipref, tz);
+        addConfigPointEnabled("relay2", equipDis, siteRef, equipref, tz);
+        addConfigPointEnabled("relay3", equipDis, siteRef, equipref, tz);
+        addConfigPointEnabled("relay4", equipDis, siteRef, equipref, tz);
+        addConfigPointEnabled("relay5", equipDis, siteRef, equipref, tz);
+        addConfigPointEnabled("relay6", equipDis, siteRef, equipref, tz);
+        addConfigPointEnabled("relay7", equipDis, siteRef, equipref, tz);
+        addConfigPointAssociation("relay1", equipDis, siteRef, equipref, tz, Stage.COOLING_1);
+        addConfigPointAssociation("relay2", equipDis, siteRef, equipref, tz, COOLING_2);
+        addConfigPointAssociation("relay3", equipDis, siteRef, equipref, tz, FAN_1);
+        addConfigPointAssociation("relay4", equipDis, siteRef, equipref, tz, HEATING_1);
+        addConfigPointAssociation("relay5", equipDis, siteRef, equipref, tz, HEATING_2);
+        addConfigPointAssociation("relay6", equipDis, siteRef, equipref, tz, FAN_2);
+        addConfigPointAssociation("relay7", equipDis, siteRef, equipref, tz, Stage.HUMIDIFIER);
+
+    }
+
+    private void addConfigPointEnabled(String relay, String equipDis, String siteRef, String equipref, String tz) {
+        Point relayEnabled = new Point.Builder()
+                .setDisplayName(equipDis+"-"+relay+"OutputEnabled")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipref)
+                .addMarker("system").addMarker("config").addMarker(relay)
+                .addMarker("output").addMarker("enabled").addMarker("writable").addMarker("sp")
+                .setEnums("false,true").setTz(tz)
+                .build();
+        String relayEnabledId = CCUHsApi.getInstance().addPoint(relayEnabled);
+        CCUHsApi.getInstance().writeDefaultValById(relayEnabledId, 0.0 );
+    }
+
+    private void addConfigPointAssociation(String relay, String equipDis, String siteRef, String equipref, String tz, Stage init) {
+        Point relayEnabled = new Point.Builder()
+                .setDisplayName(equipDis+"-"+relay+"OutputAssociation")
+                .setSiteRef(siteRef)
+                .setEquipRef(equipref)
+                .addMarker("system").addMarker("config").addMarker(relay)
+                .addMarker("output").addMarker("association").addMarker("writable").addMarker("sp")
+                .setTz(tz)
+                .build();
+        String relayEnabledId = CCUHsApi.getInstance().addPoint(relayEnabled);
+        CCUHsApi.getInstance().writeDefaultValById(relayEnabledId, (double)init.ordinal() );
+    }
     public void addTunerPoints(String equipref) {
         VavTRTuners.addSatTRTunerPoints(equipref);
         VavTRTuners.addStaticPressureTRTunerPoints(equipref);
         VavTRTuners.addCO2TRTunerPoints(equipref);
     }
-    
 }

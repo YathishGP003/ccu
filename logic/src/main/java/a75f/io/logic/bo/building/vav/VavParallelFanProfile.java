@@ -1,18 +1,20 @@
 package a75f.io.logic.bo.building.vav;
 
-import java.util.Objects;
+import static a75f.io.logic.bo.building.ZoneState.COOLING;
+import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
+import static a75f.io.logic.bo.building.ZoneState.HEATING;
+import static a75f.io.logic.bo.building.ZoneState.RFDEAD;
+import static a75f.io.logic.bo.building.ZoneState.TEMPDEAD;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Occupied;
-import a75f.io.domain.VavEquip;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.EpidemicState;
 import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
-import a75f.io.logic.bo.building.hvac.ParallelFanVavUnit;
 import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.schedules.ScheduleUtil;
@@ -21,12 +23,6 @@ import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.vav.VavSystemController;
 import a75f.io.logic.bo.building.truecfm.TrueCFMUtil;
 import a75f.io.logic.tuners.TunerUtil;
-
-import static a75f.io.logic.bo.building.ZoneState.COOLING;
-import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
-import static a75f.io.logic.bo.building.ZoneState.HEATING;
-import static a75f.io.logic.bo.building.ZoneState.RFDEAD;
-import static a75f.io.logic.bo.building.ZoneState.TEMPDEAD;
 
 /**
  * Created by samjithsadasivan on 8/23/18.
@@ -61,6 +57,7 @@ public class VavParallelFanProfile extends VavProfile
         double roomTemp = getCurrentTemp();
 
         Equip equip = new Equip.Builder().setHashMap(CCUHsApi.getInstance().read("equip and group == \"" + nodeAddr + "\"")).build();
+
         if (isRFDead()) {
             handleRFDead();
             return;
@@ -282,7 +279,7 @@ public class VavParallelFanProfile extends VavProfile
             vavEquip.getNormalizedDamperCmd().writeHisVal(damperPos);
             vavEquip.getReheatCmd().writeHisVal(0);
             vavEquip.getEquipStatus().writeHisVal((double) TEMPDEAD.ordinal());
-            vavEquip.getEquipStatusMessage().writeDefaultVal("Zone Temp Dead : "+getFanStatusMessage());
+            vavEquip.getEquipStatusMessage().writeDefaultVal("Zone Temp Dead : "+getFanStatusMessage().replace(", ", ""));
             vavEquip.getParallelFanCmd().writeHisVal(0);
         }
     }

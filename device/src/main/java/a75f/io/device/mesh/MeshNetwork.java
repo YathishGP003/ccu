@@ -56,11 +56,11 @@ public class MeshNetwork extends DeviceNetwork
     public void sendMessage() {
         CcuLog.d(L.TAG_CCU_DEVICE, "MeshNetwork SendNodeMessage");
 
-        if (!LSerial.getInstance().isConnected()) {
+        /*if (!LSerial.getInstance().isConnected()) {
             CcuLog.d(L.TAG_CCU_DEVICE,"Device not connected !!");
             LSerial.getInstance().setResetSeedMessage(true);
             return;
-        }
+        }*/
 
         if(LSerial.getInstance().isNodesSeeding())
             return;
@@ -344,7 +344,7 @@ public class MeshNetwork extends DeviceNetwork
             IEDeviceHandler.getInstance().sendControl(systemProfile, CCUHsApi.getInstance());
         }
     
-        if (!LSerial.getInstance().isConnected()) {
+        if (/*!LSerial.getInstance().isConnected()*/ false) {
             CcuLog.d(L.TAG_CCU_DEVICE,"Device not connected !!");
             LSerial.getInstance().setResetSeedMessage(true);
             Pulse.setCMDeadTimerIncrement(false);

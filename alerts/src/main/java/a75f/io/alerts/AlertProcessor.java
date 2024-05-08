@@ -114,7 +114,7 @@ public class AlertProcessor
         // this change is there if next time alert is not there then it will be fixed,
         // suppose alerts A, B, C are there in db and now only A, C are triggered then B will be fixed
         AlertManager.getInstance().getActiveAlertsByCreator("blockly").forEach(alert -> {
-            String keyFromDb = alert.blockId+":@"+alert.equipId;
+            String keyFromDb = alert.blockId+":"+alert.equipId;
             if (!mapOfPastAlerts.containsKey(keyFromDb)) {
                 //AlertManager.getInstance().deleteAlert(alert);
                 AlertManager.getInstance().fixAlert(alert);

@@ -680,11 +680,7 @@ public abstract class SystemProfile
             Log.d(L.TAG_CCU_OAO, " Failed to read external Temp or Humidity ",e);
         }
         
-        //This can happen when weather service is down or CCU is not connected to network.
-        //Skip updating OAO weather point and update system outside temp with Local OAT value.
-        if (externalTemp == 0 && ccu().oaoProfile != null) {
-            externalTemp = ccu().oaoProfile.getOAOEquip().getHisVal("outside and air and temp");
-        } else if (ccu().oaoProfile != null) {
+        if (ccu().oaoProfile != null) {
             //Successfully read weather info. Update to OAO weather point
             ccu().oaoProfile.getOAOEquip().setHisVal("outsideWeather and air and temp", externalTemp);
             ccu().oaoProfile.getOAOEquip().setHisVal("outsideWeather and air and humidity", externalHumidity);

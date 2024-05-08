@@ -2576,8 +2576,6 @@ public class CCUHsApi
                 HRow r = hisGrid.row(hisGrid.numRows() - 1);
                 double humidityVal = Double.parseDouble(r.get("val").toString().replaceAll("[^\\d.]", ""));
                 return 100 * humidityVal;
-            } else {
-                return CCUHsApi.getInstance().readHisValByQuery("system and outside and humidity");
             }
         }
         return 0;

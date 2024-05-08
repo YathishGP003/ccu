@@ -184,6 +184,32 @@ object Domain {
         return valuesList
     }
 
+    fun getListByDomainNameWithCustomMaxVal(domainName: String, model: SeventyFiveFProfileDirective, maxVal: Double) : List<String> {
+        val valuesList : MutableList<String> = mutableListOf()
+        val point = model.points.find { it.domainName == domainName }
+
+        if (point?.valueConstraint is MultiStateConstraint) {
+
+            (point.valueConstraint as MultiStateConstraint).allowedValues.forEach{ state ->
+                valuesList.add(state.value)
+            }
+
+        } else if (point?.valueConstraint is NumericConstraint) {
+
+            val effectiveMaxVal = if (maxVal > 0.0) maxVal else (point.valueConstraint as NumericConstraint).maxValue
+            val minVal = (point.valueConstraint as NumericConstraint).minValue
+            val incVal = point.presentationData?.get("tagValueIncrement").toString().toDouble()
+
+            var it = minVal
+            while (it <= effectiveMaxVal && incVal > 0.0) {
+                valuesList.add(getStringFormat(it, incVal))
+                it += incVal
+            }
+
+        }
+        return valuesList
+    }
+
     private fun getStringFormat(itVal: Double, incVal: Double): String {
         var decimalPlaces = 0
         var i : Double = incVal

@@ -1,6 +1,7 @@
 package a75f.io.renatus.profiles.acb
 
 import a75f.io.api.haystack.CCUHsApi
+import a75f.io.api.haystack.Point
 import a75f.io.api.haystack.RawPoint
 import a75f.io.device.mesh.LSerial
 import a75f.io.device.mesh.LSmartNode
@@ -146,9 +147,19 @@ class AcbProfileViewModel : ViewModel() {
         kFactorsList = getListByDomainName(DomainName.kFactor, model)
 
         maxCFMCoolingList = getListByDomainName(DomainName.maxCFMCooling, model)
-        minCFMCoolingList = getListByDomainName(DomainName.minCFMCooling, model)
         maxCFMReheatingList = getListByDomainName(DomainName.maxCFMReheating, model)
-        minCFMReheatingList = getListByDomainName(DomainName.minCFMReheating, model)
+
+        if (!profileConfiguration.isDefault && profileConfiguration.enableCFMControl.enabled) {
+            val equip = hayStack.read("equip and group == \"" + profileConfiguration.nodeAddress + "\"")
+            val vavEquip = VavAcbEquip(equip.get("id").toString())
+
+            minCFMCoolingList = Domain.getListByDomainNameWithCustomMaxVal(DomainName.minCFMCooling, model, vavEquip.maxCFMCooling.readDefaultVal())
+            minCFMReheatingList = Domain.getListByDomainNameWithCustomMaxVal(DomainName.minCFMReheating, model, vavEquip.maxCFMReheating.readDefaultVal())
+        } else {
+            minCFMCoolingList = getListByDomainName(DomainName.minCFMCooling, model)
+            minCFMReheatingList = getListByDomainName(DomainName.minCFMReheating, model)
+        }
+
     }
 
     fun saveConfiguration() {
@@ -202,6 +213,7 @@ class AcbProfileViewModel : ViewModel() {
             setOutputTypes(profileConfiguration)
             if (L.ccu().bypassDamperProfile != null) overrideForBypassDamper(profileConfiguration)
             setScheduleType(profileConfiguration)
+            setMinCfmSetpointMaxVals(profileConfiguration)
             L.ccu().zoneProfiles.add(acbProfile)
 
         } else {
@@ -211,6 +223,7 @@ class AcbProfileViewModel : ViewModel() {
             acbProfile.init()
             setOutputTypes(profileConfiguration)
             updateCondensateSensor(profileConfiguration)
+            setMinCfmSetpointMaxVals(profileConfiguration)
             setScheduleType(profileConfiguration)
         }
 
@@ -376,6 +389,28 @@ class AcbProfileViewModel : ViewModel() {
 
         acbEquip.vavTemperatureProportionalRange.writeVal(14, hayStack.ccuUserName, 1.5, 0)
         acbEquip.vavTemperatureProportionalRange.writeHisVal(1.5)
+
+    }
+
+    // Previously, maxVal of (heating or cooling) Min CFM setpoint was set to the value of
+    // the corresponding Max CFM setpoint. To recreate this logic, we need to manually edit the maxVal
+    // tag on these points after they are created.
+    private fun setMinCfmSetpointMaxVals(config: AcbProfileConfiguration) {
+        val equip = hayStack.read("equip and group == \"" + config.nodeAddress + "\"")
+        val vavEquip = VavAcbEquip(equip.get("id").toString())
+
+        if (vavEquip.enableCFMControl.readDefaultVal() > 0.0) {
+            val maxCoolingCfm = vavEquip.maxCFMCooling.readDefaultVal()
+            val maxReheatingCfm = vavEquip.maxCFMReheating.readDefaultVal()
+
+            val minCoolingCfmMap = hayStack.readEntity("point and domainName == \"" + DomainName.minCFMCooling + "\"" + " and equipRef == \"" + vavEquip.equipRef + "\"")
+            val minCoolingCfmPoint = Point.Builder().setHashMap(minCoolingCfmMap).setMaxVal(maxCoolingCfm.toString()).build()
+            hayStack.updatePoint(minCoolingCfmPoint, minCoolingCfmMap.get("id").toString())
+
+            val minReheatingCfmMap = hayStack.readEntity("point and domainName == \"" + DomainName.minCFMReheating + "\"" + " and equipRef == \"" + vavEquip.equipRef + "\"")
+            val minReheatingCfmPoint = Point.Builder().setHashMap(minReheatingCfmMap).setMaxVal(maxReheatingCfm.toString()).build()
+            hayStack.updatePoint(minReheatingCfmPoint, minReheatingCfmMap.get("id").toString())
+        }
 
     }
 

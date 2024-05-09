@@ -107,6 +107,7 @@ public class HaystackService {
     public void pointWriteMany(String[] ids, int level, double value, boolean override, Object contextHelper) {
         CcuLog.d(TAG_CCU_ALERTS, "---pointWriteMany##--id-"+ids.length + "<--level-->"+level+"<--override-->"+override);
 
+        // TODO: 07-05-2024 - call below method once ameresh changes for batch write is ready
 //        for(int i=0;i<ids.length; i++){
 //            CCUHsApi.getInstance().pointWrite(HRef.copy(ids[i]), level, "Seq_Demo", HNum.make(value), HNum.make(0));
 //        }
@@ -218,14 +219,14 @@ public class HaystackService {
     // if writable tag is there, return value of highest level
     // if writable tag is not there, check for his item and return latest value
     public Integer fetchValueById(String filter, Object contextHelper) {
-        int output = -1;
+        Integer output = null;
         try {
             output = (int)(CCUHsApi.getInstance().readHisValById(filter).doubleValue());
             CcuLog.d(TAG_CCU_ALERTS, "---fetchValueById###--id-"+filter+"<---->"+output);
         }catch (Exception e){
             e.printStackTrace();
         }
-        return null;
+        return output;
     }
 
     // fetch values for given level for all point ids

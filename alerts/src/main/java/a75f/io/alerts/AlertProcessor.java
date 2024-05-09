@@ -114,7 +114,7 @@ public class AlertProcessor
         // this change is there if next time alert is not there then it will be fixed,
         // suppose alerts A, B, C are there in db and now only A, C are triggered then B will be fixed
         AlertManager.getInstance().getActiveAlertsByCreator("blockly").forEach(alert -> {
-            String keyFromDb = alert.blockId+":@"+alert.equipId;
+            String keyFromDb = alert.blockId+":"+alert.equipId;
             if (!mapOfPastAlerts.containsKey(keyFromDb)) {
                 //AlertManager.getInstance().deleteAlert(alert);
                 AlertManager.getInstance().fixAlert(alert);
@@ -141,7 +141,8 @@ public class AlertProcessor
                 CcuLog.d(TAG_CCU_ALERTS, "---triggerAlert-blockId5005@@-"+blockId + " notificationMsg: " + notificationMsg + " message: " + message + " entityId: " + entityId + "-current thread->"+Thread.currentThread().getName());
                 Alert alert = AlertBuilder.build(def, message, CCUHsApi.getInstance(),entityId,"");
                 alert.blockId = blockId;
-                mapOfPastAlerts.put(blockId+":"+entityId, alert);
+                String tempId = entityId.replaceFirst("@","");
+                mapOfPastAlerts.put(blockId+":"+tempId, alert);
                 return true;
             }
         }

@@ -1709,7 +1709,9 @@ public class CCUTagsDb extends HServer {
     public void updateHisItemCache(List<HisItem> syncedHisItems) {
         syncedHisItems.forEach( syncedHisItem -> {
             syncedHisItem.syncStatus = true;
-            HisItemCache.getInstance().add(syncedHisItem.rec, syncedHisItem);
+            if(syncedHisItem.date >= HisItemCache.getInstance().get(syncedHisItem.rec).date) {
+                HisItemCache.getInstance().add(syncedHisItem.rec, syncedHisItem);
+            }
         });
         CcuLog.i("CCU_HS_SYNC","All "+syncedHisItems.size());
         hisBox.put(syncedHisItems);

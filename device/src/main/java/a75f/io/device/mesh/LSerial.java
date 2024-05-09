@@ -528,6 +528,8 @@ public class LSerial
 
             HyperSplitMessageSender.sendSeedMessage(zone.getDisplayName(), Integer.parseInt(d.getAddr()),
                     d.getEquipRef(), false, TemperatureMode.values()[modeType]);
+            HyperSplitMessageSender.sendSettings4Message(Integer.parseInt(d.getAddr()),
+                    d.getEquipRef(), false);
 
             LSerial.getInstance().setNodeSeeding(false);
         }

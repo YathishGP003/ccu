@@ -13,9 +13,10 @@ enum HyperSplitRequestType_e {
   HYPERSPLIT_REQUEST_TYPE_HYPERSTAT_IDU_FIELD_SETTINGS = 4; // special request for Daikin-P1P2-variant field settings (Same as HYPERSTAT_REQUEST_TYPE_IDU_FIELD_SETTINGS)
   HYPERSPLIT_REQUEST_TYPE_HYPERSTAT_SETTINGS_2 = 5; // standard device settings 2 (Same as HYPERSTAT_REQUEST_TYPE_SETTINGS_2)
   HYPERSPLIT_REQUEST_TYPE_HYPERSTAT_SETTINGS_3 = 6; // standard device settings 3 (Same as HYPERSTAT_REQUEST_TYPE_SETTINGS_3)
-  HYPERSPLIT_REQUEST_TYPE_CONTROLS = 7;   // Hyperstat Split specific controls
-  HYPERSPLIT_REQUEST_TYPE_SETTINGS_2 = 8; // Hyperstat Split specific settings 2
-  HYPERSPLIT_REQUEST_TYPE_SETTINGS_3 = 9; // Hyperstat Split specific settings 3
+  HYPERSPLIT_REQUEST_TYPE_SETTINGS = 7;   // Hyperstat Split specific settings1
+  HYPERSPLIT_REQUEST_TYPE_CONTROLS = 8;   // Hyperstat Split specific controls
+  HYPERSPLIT_REQUEST_TYPE_SETTINGS_2 = 9; // Hyperstat Split specific settings 2
+  HYPERSPLIT_REQUEST_TYPE_SETTINGS_3 = 10; // Hyperstat Split specific settings 3
 }
 
 message HyperSplitRequestMessage_t {
@@ -43,13 +44,13 @@ enum HyperSplitProfiles_t {
 
 message HyperSplitTunersGeneric_t {
   uint32 unoccupiedSetback = 1; // Amount by which temperature is setback when no occupancy is detected 1/10 of a degree F (Currently not used)
-  uint32 heatingDeadbandMultiplier = 2; // To be removed
+  uint32 minFanRuntimePostconditioning = 2; // Time in minutes before switching the fan completely so that heat/cool is completely disappiated
   uint32 relayActivationHysteresis = 3; // Hysterisis value used for changing relay
   uint32 analogFanSpeedMultiplier = 4; // 1/10 of multiplier value for fan speed
   uint32 humidityHysteresis = 5; // Hysterisis value for setting humidifier and dehumidifier
   uint32 forcedOccupiedTime = 6; // Not used in standalone since schedules are not implemented yet
-  uint32 autoAwayTime = 7; // Time in minutes after which autoaway mode is activated 
-  uint32 autoAwayZoneSetbackTemp = 8; //  When no occupancy /keycard detected. 1/10 of deg F. 
+  uint32 autoAwayTime = 7; // Time in minutes after which autoaway mode is activated
+  uint32 autoAwayZoneSetbackTemp = 8; //  When no occupancy /keycard detected. 1/10 of deg F.
 }
 
 message HyperSplitTunersFcu_t {
@@ -90,6 +91,7 @@ message HyperSplitTunersEco_t {
   uint32 oaoDamperMatTarget = 12;
   uint32 oaoDamperMatMin = 13;
   uint32 outsideDamperMinOpen = 14;
+  uint32 aoutFanEconomizer = 15; // Voltage for aout so that max cool air to be allowed during economization
 }
 
 message HyperSplitSettingsMessage_t {
@@ -130,6 +132,7 @@ message HyperSplitConfigsCcu_t {
   uint32 heatingStage1FanAnalogVoltage  = 4; // 1/10 of the volts
   uint32 heatingStage2FanAnalogVoltage  = 5; // 1/10 of the volts
   uint32 heatingStage3FanAnalogVoltage  = 6; // 1/10 of the volts
+  uint32 analogoutAtRecFanAnalogVoltage = 7; // The voltage at which fan should be operated is determined based on configuration parameter called Analog2atRecirc.
 }
 
 message HyperSplitSettingsMessage3_t {
@@ -332,9 +335,9 @@ message HyperSplitSettingsMessage2_t {
   HyperSplitRelayConfig_t hyperSplitRelayConfig = 4;
   HyperSplitAnalogOutConfig_t hyperSplitAnalogOutConfig = 5;
   HyperSplitUniversalInConfig_t hyperSplitUniversalInConfig = 6;
-  uint32 zoneCO2DamperOpeningRate = 7; // Same as system/ 10 (%/100ppm) 
-  uint32 zoneCO2Threshold = 8; // Same as system/800 (ppm)  
-  uint32 zoneCO2Target = 9; // Same as system/1000 (ppm) 
+  uint32 zoneCO2DamperOpeningRate = 7; // Same as system/ 10 (%/100ppm)
+  uint32 zoneCO2Threshold = 8; // Same as system/800 (ppm)
+  uint32 zoneCO2Target = 9; // Same as system/1000 (ppm)
   uint32 proportionalConstant = 10; // default 50 - k constants for Proportional in 1/100
   uint32 integralConstant = 11; // default 50 - k constant for Integral in 1/100
   uint32 proportionalTemperatureRange = 12; // default 15 - temp range in 1/10 deg that the proportional control will apply
@@ -421,4 +424,12 @@ message HyperSplitDiagnosticsMessage_t {
   uint32 sensorBusBitfieldInternal = 2; // 20 bits of data where bits[4..0] = Sensor Address 0, bits[9..5] = Sensor Address 1, bits[14..10] = Sensor Address 2, bits[19..15] = Sensor Address 3
   // Each index within each address subfield corresponds to indexes defined in SensorBusConnectedTypes_t
   // For example 0b00100000110001100011, means Sensor Address 0, T & H connected, Sensor Address 1, T & H connected, Sensor Address 2, T & H connected, Sensor Address 3, P connected
+}
+
+message HyperSplitSettingsMessage4_t {
+  optional uint32 outsideDamperMinOpenDuringConditioning = 1;
+  optional uint32 outsideDamperMinOpenDuringRecirculation = 2;
+  optional uint32 outsideDamperMinOpenDuringFanLow = 3;
+  optional uint32 outsideDamperMinOpenDuringFanMedium = 4;
+  optional uint32 outsideDamperMinOpenDuringFanHigh = 5;
 }

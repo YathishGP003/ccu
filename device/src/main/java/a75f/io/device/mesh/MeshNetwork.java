@@ -233,6 +233,8 @@ public class MeshNetwork extends DeviceNetwork
                                     CcuLog.d(L.TAG_CCU_SERIAL,"=================NOW SENDING HyperSplit SEEDS ===================== "+d.getAddr());
                                     HyperSplitMessageSender.sendSeedMessage(zone.getDisplayName(), Integer.parseInt(d.getAddr()),
                                             d.getEquipRef(), false, hssTempMode);
+                                    HyperSplitMessageSender.sendSettings4Message(Integer.parseInt(d.getAddr()),
+                                            d.getEquipRef(), false);
                                 } else {
                                     CcuLog.d(L.TAG_CCU_SERIAL, "=================NOW SENDING HyperSplit Settings ===================== "+d.getAddr());
                                     HyperSplitMessageSender.sendSettingsMessage(zone, Integer.parseInt(d.getAddr()), d.getEquipRef());

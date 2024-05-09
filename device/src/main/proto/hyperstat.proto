@@ -23,6 +23,7 @@ enum HyperStatTemperatureMode_e {
   HYPERSTAT_TEMP_MODE_SINGLE = 0;
   HYPERSTAT_TEMP_MODE_DUAL_FIXED_DB = 1;
   HYPERSTAT_TEMP_MODE_DUAL_VARIABLE_DB = 2;
+  HYPERSTAT_TEMP_MODE_NUM_OF = 3;
 }
 
 enum HyperStatProfiles_t {
@@ -32,7 +33,8 @@ enum HyperStatProfiles_t {
   HYPERSTAT_PROFILE_2_PIPE_FANCOIL_UNIT = 3;
   HYPERSTAT_PROFILE_4_PIPE_FANCOIL_UNIT = 4;
   HYPERSTAT_PROFILE_VRV = 5;
-  HYPERSTAT_PROFILE_MONITORING = 6;
+  HYPERSTAT_PROFILE_SENSE = 6;
+  HYPERSTAT_PROFILE_NUM_OF = 7;
 }
 
 enum HyperstatAnalogInMapping_t {
@@ -41,6 +43,7 @@ enum HyperstatAnalogInMapping_t {
   HYPERSTAT_AIN_CURRENT_0_50 = 2;
   HYPERSTAT_AIN_KEYCARD = 3;
   HYPERSTAT_AIN_DOORWINDOW = 4;
+  HYPERSTAT_AIN_NUM_OF = 5;
 }
 
 message HyperstatRelay_t {
@@ -81,27 +84,25 @@ message HyperstatAnalogIn_t {
 }
 
 message HyperStatTunersGeneric_t {
-  uint32 unoccupiedSetback = 1;
-  uint32 heatingDeadbandMultiplier = 2; // To be removed
-  uint32 relayActivationHysteresis = 3;
-  uint32 analogFanSpeedMultiplier = 4;
-  uint32 humidityHysteresis = 5;
-  uint32 forcedOccupiedTime = 6;
-  uint32 autoAwayTime = 7;
-  uint32 autoAwayZoneSetbackTemp = 8;
-  uint32 maxSingleModeUserTemp = 9;
-  uint32 minSingleModeUserTemp = 10;
+  uint32 unoccupiedSetback = 1; // Amount by which temperature is setback when no occupancy is detected 1/10 of a degree F (Currently not used)
+  uint32 minFanRuntimePostconditioning = 2; // Time in minutes before switching the fan completely so that heat/cool is completely disappiated
+  uint32 relayActivationHysteresis = 3; // Hysterisis value used for changing relay
+  uint32 analogFanSpeedMultiplier = 4; // 1/10 of multiplier value for fan speed
+  uint32 humidityHysteresis = 5; // Hysterisis value for setting humidifier and dehumidifier
+  uint32 forcedOccupiedTime = 6; // Not used in standalone since schedules are not implemented yet
+  uint32 autoAwayTime = 7; // Time in minutes after which autoaway mode is activated
+  uint32 autoAwayZoneSetbackTemp = 8; //  When no occupancy /keycard detected. 1/10 of deg F.
 }
 
 message HyperStatTunersFcu_t {
-  uint32 auxHeating1Activate  = 1;
-  uint32 auxHeating2Activate  = 2;
-  uint32 twoPipeHeatingThreshold = 3;
-  uint32 twoPipeCoolingThreshold = 4;
-  uint32 waterValueSamplingOnTime = 5;
-  uint32 watreValueSamplingWaitTime = 6;
-  uint32 waterValueSamplingDuringNoOperationOnTime = 7;
-  uint32 waterValueSamplingDuringNoOperationOffTime = 8;
+  uint32 auxHeating1Activate  = 1; // 1/10 of the temperature value
+  uint32 auxHeating2Activate  = 2; // 1/10 of the temperature value
+  uint32 twoPipeHeatingThreshold = 3; //Typical values 70-130
+  uint32 twoPipeCoolingThreshold = 4; // Typical values 35-70
+  uint32 waterValueSamplingOnTime = 5; // Typical value 0-30
+  uint32 watreValueSamplingWaitTime = 6; // Typical value 5-300
+  uint32 waterValveSamplingDuringLoopDeadbandOnTime = 7; // Typical value 0-30
+  uint32 waterValveSamplingDuringLoopDeadbandWaitTime = 8; // Typical value 5-300
 }
 
 message HyperstatLinearFanSpeeds_t {
@@ -116,8 +117,9 @@ message HyperstatStagedFanSpeeds_t {
   uint32 stagedFanHighSpeedLevel  = 3; // in percentage
 }
 
+
 message HyperStatSettingsMessage_t {
-  string roomName = 1;// [(nanopb).max_size = 20];
+  string roomName = 1; // [(nanopb).max_size = 25];
   int32 maxHeatingUserTemp = 2; // Maximum temperature the user can set in degrees F (default 70)
   int32 minHeatingUserTemp = 3; // Minimum temperature the user can set in degrees F (default 67)
   int32 maxCoolingUserTemp = 4; // Maximum temperature the user can set in degrees F (default 77)
@@ -126,20 +128,25 @@ message HyperStatSettingsMessage_t {
   int32 heatingDeadBand = 7; // Amount above set temperature at which heating is activated. Unit is 1/10 of a degree F.
   int32 coolingDeadBand = 8; // Amount below set temperature at which cooling is activated. Unit is 1/10 of a degree F.
   HyperStatTemperatureMode_e temperatureMode = 9;
-  int32 co2AlertThreshold = 10;
-  int32 vocAlertThreshold = 11;
-  int32 pm25AlertThreshold = 12;
+  int32 co2AlertTarget = 10;
+  int32 vocAlertTarget = 11;
+  int32 pm25AlertTarget = 12;
   bool displayCO2 = 13;
   bool displayPM25 = 14;
   bool displayVOC = 15;
   bool displayHumidity = 16;
   bool showCentigrade = 17; // 0: show Fahrenheit, 1: show Celsius
-  bool enableExternal10kTemperatureSensor =18; // 1 if the external sensor is enabled
+  /* miscSettings
+       bit 0: enableExternal10kTemperatureSensor(1 if external sensor is enabled
+       bit 1: disableTouch(1 will disable touch)
+       bit 2: brightnessVariationEnable (1 will enable automatic brightness control) */
+  uint32 miscSettings1 =18;
   bool beaconingEnabled = 19; // 0 if beaconing disabled, 1 if beaconing enabled
   uint32 humidityMinSetpoint = 20; // Minimum humidity setpont 0-100% in which Hyperstat will set system to Humidify if humidity level is less than
   uint32 humidityMaxSetpoint = 21; // Maximum humidity setpont 0-100% in which Hyperstat will set system to Dehumidity/Dry if humidity level is greater than
-  HyperstatLinearFanSpeeds_t hyperstatLinearFanSpeeds_t = 23; // When linear fan is enabled these voltages provide user intent
-  HyperstatStagedFanSpeeds_t hyperstatStagedFanSpeeds = 24;
+  uint32 occupancySensorSensitivityLevel = 22; // Sensitivity level setting for the motion sensor 1-10, one being the most sensitive
+  HyperstatLinearFanSpeeds_t hyperstatLinearFanSpeeds = 23; // When linear fan is enabled these voltages provide user intent
+  HyperstatStagedFanSpeeds_t hyperstatStagedFanSpeeds = 24;   // When staged fan is enabled these voltages provide user intent
 }
 
 message HyperStatSettingsMessage2_t {
@@ -160,20 +167,21 @@ message HyperStatSettingsMessage2_t {
   uint32 integrationTime = 15; // default 30 - time in  minutes the integration takes to max out
 }
 
-message HyperStatConfigsCcu_t {
+message HyperStatConfigsCpu_t {
   uint32 coolingStage1FanAnalogVoltage  = 1; // 1/10 of the volts
   uint32 coolingStage2FanAnalogVoltage  = 2; // 1/10 of the volts
   uint32 coolingStage3FanAnalogVoltage  = 3; // 1/10 of the volts
   uint32 heatingStage1FanAnalogVoltage  = 4; // 1/10 of the volts
   uint32 heatingStage2FanAnalogVoltage  = 5; // 1/10 of the volts
   uint32 heatingStage3FanAnalogVoltage  = 6; // 1/10 of the volts
+  uint32 analogoutAtRecFanAnalogVoltage = 7; // The voltage at which fan should be operated is determined based on configuration parameter called Analog2atRecirc.
 }
 
 message HyperStatSettingsMessage3_t {
   HyperStatTunersGeneric_t genertiTuners = 1; // Generic tuner
   oneof profileSpecificTuners {
     HyperStatTunersFcu_t  fcuTuners = 2;
-    HyperStatConfigsCcu_t hyperStatConfigsCcu = 3; // When staged fan is enabled these voltages provide the fan speed control
+    HyperStatConfigsCpu_t hyperStatConfigsCpu = 3; // When staged fan is enabled in CPU profile these voltages provide the fan speed control
   }
 }
 
@@ -184,6 +192,7 @@ enum HyperStatFanSpeed_e {
   HYPERSTAT_FAN_SPEED_LOW = 2;
   HYPERSTAT_FAN_SPEED_MED = 3;
   HYPERSTAT_FAN_SPEED_HIGH = 4;
+  HYPERSTAT_FAN_SPEED_NUM_OF = 5;
 }
 
 enum HyperStatConditioningMode_e {
@@ -191,12 +200,14 @@ enum HyperStatConditioningMode_e {
   HYPERSTAT_CONDITIONING_MODE_AUTO = 1;
   HYPERSTAT_CONDITIONING_MODE_HEATING = 2;
   HYPERSTAT_CONDITIONING_MODE_COOLING = 3;
+  HYPERSTAT_CONDITIONING_MODE_NUM_OF = 4;
 }
 
 enum HyperStatOperatingMode_e {
   HYPERSTAT_OPERATING_MODE_OFF = 0;
   HYPERSTAT_OPERATING_MODE_HEATING = 1;
   HYPERSTAT_OPERATING_MODE_COOLING = 2;
+  HYPERSTAT_OPERATING_MODE_NUM_OF = 3;
 }
 
 message SystemTimePb_t {
@@ -246,7 +257,7 @@ message HyperStatRegularUpdateMessage_t {
   int32 externalAnalogVoltageInput2 = 8; // External voltage sense in millivolts
   int32 externalThermistorInput1 = 9; // External resistance sense in tens of ohms
   int32 externalThermistorInput2 = 10; // External resistance sense in tens of ohms
-  repeated SensorReadingPb_t sensorReadings = 11;// [(nanopb).max_count = 6]; // List of type-value sensor readings
+  repeated SensorReadingPb_t sensorReadings = 11; // [(nanopb).max_count = 6]; // List of type-value sensor readings
   bool occupantDetected = 12; // 0 is no, 1 is yes
 }
 
@@ -283,14 +294,14 @@ message HyperStatIduStatusMessage_t {
   int32 errorStatus = 14;
   int32 diagnosticStatus = 15;
   int32 iduTemperature = 16;
-  repeated int32 thData = 17;// [(nanopb).max_count = 6]; //Temp reading from 6 thermistors.
+  repeated int32 thData = 17; // [(nanopb).max_count = 6]; //Temp reading from 6 thermistors.
 }
 
 message HyperStatCcuDatabaseSeedMessage_t {
-  bytes encryptionKey = 1;// [(nanopb).max_size = 16, (nanopb).fixed_length = true]; // The encryption key to use for data sent over the mesh network to/from this device
-  bytes serializedSettingsData = 2;// [(nanopb).max_size = 109, (nanopb).fixed_length = false]; // fixed type HYPERSTAT_SETTINGS_MESSAGE
-  bytes serializedControlsData = 3;// [(nanopb).max_size = 109, (nanopb).fixed_length = false]; // fixed type HYPERSTAT_CONTROLS_MESSAGE
-  bytes serializedSettings2Data = 4;// [(nanopb).max_size = 109, (nanopb).fixed_length = false]; // fixed type HYPERSTAT_SETTINGS2_MESSAGE
+  bytes encryptionKey = 1; // [(nanopb).max_size = 16, (nanopb).fixed_length = true]; // The encryption key to use for data sent over the mesh network to/from this device
+  bytes serializedSettingsData = 2; // [(nanopb).max_size = 109, (nanopb).fixed_length = false]; // fixed type HYPERSTAT_SETTINGS_MESSAGE
+  bytes serializedControlsData = 3; // [(nanopb).max_size = 109, (nanopb).fixed_length = false]; // fixed type HYPERSTAT_CONTROLS_MESSAGE
+  bytes serializedSettings2Data = 4; // [(nanopb).max_size = 109, (nanopb).fixed_length = false]; // fixed type HYPERSTAT_SETTINGS2_MESSAGE
   bytes serializedSettings3Data = 5; // [(nanopb).max_size = 109, (nanopb).fixed_length = false]; // fixed type HYPERSTAT_SETTINGS3_MESSAGE
 }
 
@@ -300,11 +311,11 @@ message HyperStatCmToCcuSerializedMessage_t {
   int32 cmLqi = 2; // LQI of this received data packet @ CM
   int32 cmRssi = 3; // RSSI of this received data packet @ CM
   int32 protocolMessageType = 4; // ProtocolMessageType_t identifier for the serialized message
-  bytes serializedMessageData = 5;// [(nanopb).max_size = 109, (nanopb).fixed_length = false];
+  bytes serializedMessageData = 5; // [(nanopb).max_size = 109, (nanopb).fixed_length = false];
 }
 
 message HyperStatCcuToCmSerializedMessage_t {
   uint32 address = 1; // The (16-bit) mesh address of a device
   int32 protocolMessageType = 2; // ProtocolMessageType_t identifier for the serialized message
-  bytes serializedMessageData = 3;// [(nanopb).max_size = 109, (nanopb).fixed_length = false];
+  bytes serializedMessageData = 3; // [(nanopb).max_size = 109, (nanopb).fixed_length = false];
 }

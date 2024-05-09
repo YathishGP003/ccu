@@ -1,6 +1,7 @@
 package a75f.io.logic.migration
 
 import a75f.io.api.haystack.CCUHsApi
+import a75f.io.api.haystack.HayStackConstants
 import a75f.io.api.haystack.Point
 import a75f.io.api.haystack.Site
 import a75f.io.api.haystack.Tags
@@ -23,6 +24,7 @@ import a75f.io.logic.L
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.schedules.Occupancy
+import a75f.io.logic.bo.building.schedules.occupancy.DemandResponse
 import a75f.io.logic.bo.building.system.vav.config.ModulatingRtuProfileConfig
 import a75f.io.logic.bo.building.system.vav.config.StagedRtuProfileConfig
 import a75f.io.logic.bo.building.system.vav.config.StagedVfdRtuProfileConfig
@@ -41,7 +43,9 @@ import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import org.projecthaystack.HDict
 import org.projecthaystack.HDictBuilder
+import org.projecthaystack.HGrid
 import org.projecthaystack.HGridBuilder
+import org.projecthaystack.HRow
 import org.projecthaystack.io.HZincReader
 import org.projecthaystack.io.HZincWriter
 import java.util.*
@@ -85,6 +89,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         if (!isMigrationRequired()) {
             return
         }
+        clearLevel4ValuesOfDesiredTempIfDurationIs0(ccuHsApi)
         if (schedulerRevamp.isMigrationRequired()) {
             val ccuHsApi = CCUHsApi.getInstance()
             createMigrationVersionPoint(ccuHsApi)
@@ -100,6 +105,42 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             schedulerRevamp.doMigration()
         }
         hayStack.scheduleSync()
+    }
+
+    private fun clearLevel4ValuesOfDesiredTempIfDurationIs0(ccuHsApi: CCUHsApi) {
+        val listOfDesiredTempPoints: List<HashMap<Any, Any>> = ccuHsApi.readAllEntities("desired and temp and (heating or cooling)")
+        listOfDesiredTempPoints.forEach { desiredTempPoint ->
+            val desiredTempPointId : String = desiredTempPoint["id"].toString()
+            val priorityGrid : HGrid? = ccuHsApi.readPointArrRemote(desiredTempPointId)
+            priorityGrid?.let { grid ->
+                val iterator: MutableIterator<HRow?>? = grid.iterator() as MutableIterator<HRow?>?
+                while (iterator!=null && iterator.hasNext()) {
+                    val r: HRow? = iterator.next()
+                    if ((isLevelCleanable(r) && isLevelToBeCleared(r)) || isAutoAwayMappedToDemandResponseLevel(r, ccuHsApi)) {
+                        ccuHsApi.clearPointArrayLevel(desiredTempPointId, r!!.getInt("level"), false)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun isAutoAwayMappedToDemandResponseLevel(levelRow: HRow?, ccuHsApi: CCUHsApi): Boolean {
+        return levelRow!!.getInt("level") == HayStackConstants.DEMAND_RESPONSE_LEVEL &&
+                !DemandResponse.isDRModeActivated(ccuHsApi)
+    }
+
+    private fun isLevelToBeCleared(levelRow: HRow?): Boolean {
+        val oneDayInMs = 86400000L
+        val duration = levelRow?.getDouble("duration")
+        return duration != null && (duration <= 0.0 || duration - System.currentTimeMillis() > oneDayInMs)
+    }
+
+    private fun isLevelCleanable(levelRow: HRow?): Boolean {
+        return levelRow!!.getInt("level").let { level ->
+            level == HayStackConstants.AUTO_AWAY_LEVEL ||
+            level == HayStackConstants.FORCE_OVERRIDE_LEVEL ||
+            level == HayStackConstants.OCCUPANT_USER_WRITE_LEVEL ||
+            level == HayStackConstants.USER_APP_WRITE_LEVEL }
     }
 
     private fun migrationToHandleInfluenceOfUserIntentOnSentPoints(ccuHsApi: CCUHsApi) {

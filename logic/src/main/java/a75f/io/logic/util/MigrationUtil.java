@@ -1,7 +1,5 @@
 package a75f.io.logic.util;
 
-import static a75f.io.api.haystack.HayStackConstants.AUTO_AWAY_LEVEL;
-import static a75f.io.api.haystack.HayStackConstants.FORCE_OVERRIDE_LEVEL;
 import static a75f.io.api.haystack.Tags.OCCUPANCY_STATE;
 import static a75f.io.logic.L.TAG_CCU_MIGRATION_UTIL;
 import static a75f.io.logic.bo.building.dab.DabEquip.CARRIER_PROD;
@@ -189,8 +187,7 @@ public class MigrationUtil {
         boolean firmwareRemotePointMigrationState = initRemoteFirmwareVersionPointMigration();
         PreferenceUtil.updateMigrationStatus(FIRMWARE_VERSION_POINT_MIGRATION,
                 (firmwarePointMigrationState && firmwareRemotePointMigrationState));
-        clearLevel4ValuesOfDesiredTempIfDurationIs0(ccuHsApi);
-		 if(BuildConfig.BUILD_TYPE.equalsIgnoreCase(CARRIER_PROD) && (!PreferenceUtil.getCarrierDabToVvtMigration())){
+        if(BuildConfig.BUILD_TYPE.equalsIgnoreCase(CARRIER_PROD) && (!PreferenceUtil.getCarrierDabToVvtMigration())){
                 updateDisForPointsDabToVvt(CCUHsApi.getInstance());
                 PreferenceUtil.setCarrierDabToVvtMigrationDone();
         }
@@ -418,27 +415,6 @@ public class MigrationUtil {
                 ccuHsApi.updatePoint(equipStatusMessagePoint, equipStatusMessagePoint.getId());
             }
         }
-    }
-
-    private static void clearLevel4ValuesOfDesiredTempIfDurationIs0(CCUHsApi ccuHsApi) {
-        List<HashMap<Object, Object>> listOfDesiredTempPoints = ccuHsApi.readAllEntities("desired and temp and (heating or cooling)");
-        for (HashMap<Object, Object> desiredTempPoint : listOfDesiredTempPoints) {
-            String desiredTempPointId = desiredTempPoint.get("id").toString();
-            if (isLevelToBeCleared(ccuHsApi, desiredTempPointId, FORCE_OVERRIDE_LEVEL)) {
-                ccuHsApi.clearPointArrayLevel(desiredTempPointId, FORCE_OVERRIDE_LEVEL, false);
-            }
-            if (isLevelToBeCleared(ccuHsApi, desiredTempPointId, AUTO_AWAY_LEVEL)) {
-                ccuHsApi.clearPointArrayLevel(desiredTempPointId, AUTO_AWAY_LEVEL, false);
-            }
-        }
-    }
-
-    private static boolean isLevelToBeCleared(CCUHsApi ccuHsApi, String desiredTempPointId, int levelToBeCleared) {
-        int oneDayInMs = 86400000;
-        HashMap desiredTempPoint = ccuHsApi.readPoint(desiredTempPointId).get(levelToBeCleared - 1);
-        return desiredTempPoint.get("val") != null &&
-                (Objects.equals(desiredTempPoint.get("duration"), HNum.make(0, null)) ||
-                        Double.parseDouble(desiredTempPoint.get("duration").toString()) - System.currentTimeMillis() > oneDayInMs);
     }
 
     private static void writeValuesToLevel17ForMissingScheduleAblePoints(CCUHsApi ccuHsApi) {

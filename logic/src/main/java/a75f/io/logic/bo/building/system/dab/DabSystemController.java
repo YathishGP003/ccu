@@ -1091,7 +1091,12 @@ public class DabSystemController extends SystemController
             limitedSecondaryDamperPos = CCUUtils.roundToTwoDecimal(limitedSecondaryDamperPos);
             
             double minLimit, maxLimit;
-            if (systemState == COOLING) {
+            int systemConditioning = systemState.ordinal();
+            int satConditioning = CCUHsApi.getInstance().readHisValByQuery("system and sat and conditioning").intValue();
+            if (satConditioning > 0) {
+                systemConditioning = satConditioning;
+            }
+            if (systemConditioning == COOLING.ordinal()) {
                 minLimit = hayStack.readDefaultVal(
                     "point and min and damper and cooling and equipRef == \"" + equipRef + "\""
                 );

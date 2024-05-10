@@ -1,11 +1,7 @@
 package a75f.io.renatus.profiles.bypass
 
-import a75f.io.api.haystack.CCUHsApi
-import a75f.io.api.haystack.Device
-import a75f.io.api.haystack.Equip
-import a75f.io.api.haystack.HSUtil
-import a75f.io.api.haystack.RawPoint
-import a75f.io.api.haystack.sync.HttpUtil
+import a75f.io.api.haystack.*
+import a75f.io.api.haystack.sync.PointWriteCache
 import a75f.io.device.mesh.LSerial
 import a75f.io.device.mesh.LSmartNode
 import a75f.io.domain.api.Domain
@@ -47,14 +43,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.projecthaystack.HDateTime
-import org.projecthaystack.HDict
-import org.projecthaystack.HDictBuilder
-import org.projecthaystack.HGridBuilder
-import org.projecthaystack.HNum
-import org.projecthaystack.HRef
-import org.projecthaystack.HVal
-import org.projecthaystack.io.HZincWriter
+import org.projecthaystack.*
 import kotlin.properties.Delegates
 
 class BypassConfigViewModel : ViewModel() {
@@ -393,8 +382,7 @@ class BypassConfigViewModel : ViewModel() {
 
                 hayStack.getHSClient().pointWrite(HRef.copy(minCoolingDamperPosPointId), 7, hayStack.ccuUserName, null, HNum.make(1), HDateTime.make(System.currentTimeMillis()))
                 val b: HDictBuilder = HDictBuilder().add("id", HRef.copy(minCoolingDamperPosPointId)).add("level",7).add("who",CCUHsApi.getInstance().getCCUUserName()).add("duration", HNum.make(0, "ms")).add("val", null as? HVal).add("reason", "Bypass Damper Unpaired")
-                val dictArr: Array<HDict> = arrayOf(b.toDict())
-                HttpUtil.executePost(hayStack.pointWriteTarget(), HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)))
+                PointWriteCache.getInstance().writePoint(minCoolingDamperPosPointId, b.toDict())
                 hayStack.writeHisValById(minCoolingDamperPosPointId, HSUtil.getPriorityVal(minCoolingDamperPosPointId))
             }
 
@@ -404,8 +392,7 @@ class BypassConfigViewModel : ViewModel() {
 
                 hayStack.getHSClient().pointWrite(HRef.copy(minHeatingDamperPosPointId), 7, hayStack.ccuUserName, null, HNum.make(1), HDateTime.make(System.currentTimeMillis()))
                 val b: HDictBuilder = HDictBuilder().add("id", HRef.copy(minHeatingDamperPosPointId)).add("level",7).add("who",CCUHsApi.getInstance().getCCUUserName()).add("duration", HNum.make(0, "ms")).add("val", null as? HVal).add("reason", "Bypass Damper Unpaired")
-                val dictArr: Array<HDict> = arrayOf(b.toDict())
-                HttpUtil.executePost(hayStack.pointWriteTarget(), HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)))
+                PointWriteCache.getInstance().writePoint(minHeatingDamperPosPointId, b.toDict())
                 hayStack.writeHisValById(minHeatingDamperPosPointId, HSUtil.getPriorityVal(minHeatingDamperPosPointId))
             }
 

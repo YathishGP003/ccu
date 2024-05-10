@@ -66,6 +66,7 @@ import a75f.io.api.haystack.sync.EntityParser;
 import a75f.io.api.haystack.sync.EntitySyncResponse;
 import a75f.io.api.haystack.sync.HisSyncHandler;
 import a75f.io.api.haystack.sync.HttpUtil;
+import a75f.io.api.haystack.sync.PointWriteCache;
 import a75f.io.api.haystack.sync.SyncManager;
 import a75f.io.api.haystack.sync.SyncStatusService;
 import a75f.io.api.haystack.util.BackfillUtil;
@@ -994,9 +995,8 @@ public class CCUHsApi
                 b.add("reason", reason);
             }
 
-            HDict[] dictArr  = {b.toDict()};
-            CcuLog.d("CCU_HS", "PointWrite- "+id+" : "+val);
-            HttpUtil.executePostAsync(pointWriteTarget(), HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
+            PointWriteCache.Companion.getInstance().writePoint(uid, b.toDict());
+            CcuLog.d("CCU_HS", "PointWrite1- "+id+" : "+val);
         }
         return hGrid;
     }
@@ -1023,9 +1023,8 @@ public class CCUHsApi
                 b.add("reason", reason);
             }
 
-            HDict[] dictArr  = {b.toDict()};
             CcuLog.d("CCU_HS", "PointWrite- "+id+" : "+val);
-            HttpUtil.executePostAsync(pointWriteTarget(), HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
+            PointWriteCache.Companion.getInstance().writePoint(uid, b.toDict());
         }
         return hGrid;
     }
@@ -1040,8 +1039,7 @@ public class CCUHsApi
                     .add("who", CCUHsApi.getInstance().getCCUUserName())
                     .add("duration", HNum.make(0, "ms"))
                     .add("val", (HVal) null);
-            HDict[] dictArr = {b.toDict()};
-            HttpUtil.executePost(CCUHsApi.getInstance().pointWriteTarget(), HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
+            PointWriteCache.Companion.getInstance().writePoint(id, b.toDict());
         }
 
     }

@@ -338,7 +338,7 @@ public class AlertProcessor
                 .map(conditional -> conditional.grpOperation)
                 .distinct()
                 .collect(Collectors.toList());
-        if(!def.emitter.equalsIgnoreCase("ALERT_BUILDER_CCU")){
+        if(!def.emitter.equalsIgnoreCase("ALERT_BUILDER_CCU") && !def.emitter.equalsIgnoreCase("CCU")){
             return false;
         }
 

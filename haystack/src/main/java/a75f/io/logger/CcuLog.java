@@ -5,11 +5,7 @@ package a75f.io.logger;
  */
 
 import android.util.Log;
-
-import org.projecthaystack.UnknownRecException;
-
 import java.util.HashMap;
-
 import a75f.io.api.haystack.CCUHsApi;
 
 /**
@@ -212,15 +208,12 @@ public class CcuLog
 
 
 	private static int getLogLevel(){
-		double level = 4.0;
 		try {
-			HashMap<Object, Object>  entity = CCUHsApi.getInstance().readEntity("log and level and diag");
-			if(entity.isEmpty())
-				return (int) level;
-			return CCUHsApi.getInstance().readHisValById(entity.get("id").toString()).intValue();
+			int logLevel = CCUHsApi.getInstance().getCcuLogLevel();
+			return logLevel;
 		} catch (IllegalStateException e) {
 			Log.e("CcuLog", "hayStack is not initialized");
-			return (int) level;
+			return 0;
 		}
 	}
 }

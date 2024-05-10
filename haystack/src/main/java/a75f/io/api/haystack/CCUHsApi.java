@@ -118,6 +118,7 @@ public class CCUHsApi
 
     public Boolean isAuthorized = false;
 
+    private static int ccuLogLevel = -1;
     private List<OnCcuRegistrationCompletedListener> onCcuRegistrationCompletedListeners = new ArrayList<>();
     public static CCUHsApi getInstance() {
         if (instance == null) {
@@ -3530,5 +3531,24 @@ public class CCUHsApi
             return new Schedule.Builder().setHDict(scheduleHGrid).build();
         }
         return null;
+    }
+
+    public int getCcuLogLevel() {
+        try {
+            if(ccuLogLevel > 0){
+                return ccuLogLevel;
+            }
+            if(!isCCURegistered())
+                return 0;
+            HashMap<Object, Object>  entity = CCUHsApi.getInstance().readEntity("log and level and diag");
+            if(entity.isEmpty())
+                return 0;
+            ccuLogLevel =  CCUHsApi.getInstance().readHisValById(entity.get("id").toString()).intValue();
+            return ccuLogLevel;
+        } catch (IllegalStateException e) {
+            Log.e("CcuLog", "hayStack is not initialized");
+            return 0;
+        }
+
     }
 }

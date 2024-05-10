@@ -22,6 +22,7 @@ import java.util.Objects;
 import a75f.io.alerts.AlertManager;
 import a75f.io.alerts.AlertsDataStore;
 import a75f.io.api.haystack.Alert;
+import a75f.io.api.haystack.BuildConfig;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HisItemCache;
@@ -411,7 +412,16 @@ public class DiagEquip
 
         HashMap<Object,Object> logLevelPoint = CCUHsApi.getInstance().readEntity(Queries.LOG_LEVEL_QUERY);
         if(!logLevelPoint.isEmpty()) {
+            if( isDebuggable()) {
+                CCUHsApi.getInstance().writeHisValByQuery(Queries.LOG_LEVEL_QUERY,0.0);
+            }
+
             return;
+        }
+
+        double defaultLogLevel = 4.0;
+        if(isDebuggable()) {
+            defaultLogLevel = 0.0;
         }
 
         Equip diagEquip = new Equip.Builder().setHashMap(diagEquipMap).build();
@@ -428,8 +438,16 @@ public class DiagEquip
                 .setEnums("verbose,debug,info,warn,error")
                 .build();
         String logLevelId = hsApi.addPoint(logLevel);
-        hsApi.writeHisValById(logLevelId, 4.0);
+        hsApi.writeHisValById(logLevelId, defaultLogLevel);
 
 
     }
+
+    private static boolean isDebuggable() {
+        return BuildConfig.BUILD_TYPE.equals("qa") ||
+                BuildConfig.BUILD_TYPE.equalsIgnoreCase("dev") ||
+                BuildConfig.BUILD_TYPE.equalsIgnoreCase("staging") ||
+                BuildConfig.BUILD_TYPE.equalsIgnoreCase("dev_qa");
+    }
+
 }

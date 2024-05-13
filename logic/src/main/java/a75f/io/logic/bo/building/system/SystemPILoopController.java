@@ -131,11 +131,8 @@ public class SystemPILoopController {
     
     public double getLoopOutput(double sp, double cp) {
         updateControlVariable(sp, cp);
-        return Math.max(getControlVariable() * 100 / maxAllowedError, 0);
-    }
-    
-    public double getLoopOutput() {
-        return Math.max(getControlVariable() * 100 / maxAllowedError, 0);
+        double nonNegativeLoopOutput = Math.max(getControlVariable() * 100 / maxAllowedError, 0);
+        return Math.min(nonNegativeLoopOutput, 100);
     }
     
     public void dump() {

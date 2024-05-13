@@ -37,11 +37,11 @@ public class ControlLoop
     
     public double getLoopOutput(double sp, double cp) {
         piController.updateControlVariable(sp, cp);
-        return piController.getControlVariable() * 100 / proportionalSpread;
+        return Math.min(piController.getControlVariable() * 100 / proportionalSpread, 100);
     }
     
     public double getLoopOutput() {
-        return piController.getControlVariable() * 100 / proportionalSpread;
+        return Math.min(piController.getControlVariable() * 100 / proportionalSpread, 100);
     }
     
     public void setEnabled() {

@@ -59,7 +59,7 @@ class HyperStatSettingsUtil {
                 }
 
                 ProfileType.HYPERSTAT_MONITORING.name -> {
-                    settings2.profile = HyperStat.HyperStatProfiles_t.HYPERSTAT_PROFILE_MONITORING
+                    settings2.profile = HyperStat.HyperStatProfiles_t.HYPERSTAT_PROFILE_SENSE
                 }
                 ProfileType.HYPERSTAT_VRV.name -> {
                     settings2.profile = HyperStat.HyperStatProfiles_t.HYPERSTAT_PROFILE_VRV
@@ -81,7 +81,7 @@ class HyperStatSettingsUtil {
             when (equip.profile) {
                 ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT.name -> {
                     settings3.genertiTuners = getGenericTunerDetails(equipRef)
-                    settings3.hyperStatConfigsCcu = getStagedFanVoltageDetails(equipRef)
+                    settings3.hyperStatConfigsCpu = getStagedFanVoltageDetails(equipRef)
                 }
                 ProfileType.HYPERSTAT_HEAT_PUMP_UNIT.name -> {
                     settings3.genertiTuners = getGenericTunerDetails(equipRef)
@@ -328,6 +328,8 @@ class HyperStatSettingsUtil {
             val equip = CCUHsApi.getInstance().readHDictById(equipRef)
             genericTuners.unoccupiedSetback = (CCUHsApi.getInstance().readPointPriorityValByQuery
                 ("schedulable and zone and unoccupied and setback and roomRef == \"" + equip.get("roomRef").toString() + "\"")).toInt()
+            genericTuners.minFanRuntimePostconditioning =
+                    TunerUtil.readTunerValByQuery("min and fan and runtime and postconditioning", equipRef).toInt()
             genericTuners.relayActivationHysteresis =
                 TunerUtil.getHysteresisPoint("relay and activation", equipRef).toInt()
             genericTuners.analogFanSpeedMultiplier =
@@ -367,8 +369,8 @@ class HyperStatSettingsUtil {
             fcuTuners.auxHeating2Activate = TunerUtil.readTunerValByQuery("tuner and heating and aux and stage2 and equipRef == \"${equipRef}\"").toInt()
             fcuTuners.waterValueSamplingOnTime = TunerUtil.readTunerValByQuery("tuner and samplingrate and water and on and time and not loop and equipRef == \"${equipRef}\"").toInt()
             fcuTuners.watreValueSamplingWaitTime = TunerUtil.readTunerValByQuery("tuner and samplingrate and water and wait and time and not loop and equipRef == \"${equipRef}\"").toInt()
-            fcuTuners.waterValueSamplingDuringNoOperationOnTime = TunerUtil.readTunerValByQuery("tuner and samplingrate and loop and on and time and equipRef == \"${equipRef}\"").toInt()
-            fcuTuners.waterValueSamplingDuringNoOperationOffTime = TunerUtil.readTunerValByQuery("tuner and samplingrate and loop and wait and time and equipRef == \"${equipRef}\"").toInt()
+            fcuTuners.waterValveSamplingDuringLoopDeadbandOnTime = TunerUtil.readTunerValByQuery("tuner and samplingrate and loop and on and time and equipRef == \"${equipRef}\"").toInt()
+            fcuTuners.waterValveSamplingDuringLoopDeadbandWaitTime = TunerUtil.readTunerValByQuery("tuner and samplingrate and loop and wait and time and equipRef == \"${equipRef}\"").toInt()
             return fcuTuners.build()
         }
 
@@ -413,8 +415,8 @@ class HyperStatSettingsUtil {
          * @param equipRef
          * @return HyperstatStagedFanVoltages_t
          */
-        private fun getStagedFanVoltageDetails(equipRef: String): HyperStat.HyperStatConfigsCcu_t? {
-            val stagedFanVoltages = HyperStat.HyperStatConfigsCcu_t.newBuilder()
+        private fun getStagedFanVoltageDetails(equipRef: String): HyperStat.HyperStatConfigsCpu_t? {
+            val stagedFanVoltages = HyperStat.HyperStatConfigsCpu_t.newBuilder()
             val ccuHsApi = CCUHsApi.getInstance()
             val equipRefQuery = "equipRef == \"$equipRef\""
 
@@ -424,6 +426,7 @@ class HyperStatSettingsUtil {
             val heatingStage1Query = "heating and stage1 and fan and $equipRefQuery"
             val heatingStage2Query = "heating and stage2 and fan and $equipRefQuery"
             val heatingStage3Query = "heating and stage3 and fan and $equipRefQuery"
+            val aOutAtRecircQuery = "config and recirculate and $equipRefQuery"
 
             if (ccuHsApi.readEntity(coolingStage1Query).isNotEmpty()) {
                 stagedFanVoltages.coolingStage1FanAnalogVoltage = (ccuHsApi.readPointPriorityValByQuery(coolingStage1Query) * 10).toInt()
@@ -443,6 +446,10 @@ class HyperStatSettingsUtil {
             if (ccuHsApi.readEntity(heatingStage3Query).isNotEmpty()) {
                 stagedFanVoltages.heatingStage3FanAnalogVoltage = (ccuHsApi.readPointPriorityValByQuery(heatingStage3Query) * 10).toInt()
             }
+            if (ccuHsApi.readEntity(aOutAtRecircQuery).isNotEmpty()) {
+                stagedFanVoltages.analogoutAtRecFanAnalogVoltage = (ccuHsApi.readPointPriorityValByQuery(aOutAtRecircQuery) * 10).toInt()
+            }
+
             return stagedFanVoltages.build()
         }
 

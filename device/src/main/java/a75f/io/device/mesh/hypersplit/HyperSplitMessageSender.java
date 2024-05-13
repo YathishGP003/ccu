@@ -78,6 +78,21 @@ public class HyperSplitMessageSender {
         writeSettingMessage(settings, address, MessageType.HYPERSPLIT_SETTINGS_MESSAGE, true);
     }
 
+    /**
+     * Send setting4 message based on the node's state in database.
+     * Message can be called to check for a duplicate (normal case) or to send regardless (for seed message)
+     * @param address
+     * @param equipRef
+     */
+    public static void sendSettings4Message(int address, String equipRef, boolean checkDuplicate) {
+        HyperSplit.HyperSplitSettingsMessage4_t settings4 = HyperSplitMessageGenerator.getSetting4Message(address, equipRef);
+        if (DLog.isLoggingEnabled()) {
+            CcuLog.i(L.TAG_CCU_SERIAL, settings4.toString());
+        }
+
+        writeSetting4Message(settings4, address, MessageType.HYPERSPLIT_SETTINGS4_MESSAGE, checkDuplicate);
+    }
+
     public static void writeSettingMessage(HyperSplit.HyperSplitSettingsMessage_t message, int address,
                                            MessageType msgType, boolean checkDuplicate) {
 
@@ -178,15 +193,18 @@ public class HyperSplitMessageSender {
     public static void sendAdditionalSettingMessages(int address, String equipRef){
         HyperSplit.HyperSplitSettingsMessage2_t settingsMessage2 = HyperSplitMessageGenerator.getSetting2Message(address, equipRef);
         HyperSplit.HyperSplitSettingsMessage3_t settingsMessage3 = HyperSplitMessageGenerator.getSetting3Message(address, equipRef);
+        HyperSplit.HyperSplitSettingsMessage4_t settingsMessage4 = HyperSplitMessageGenerator.getSetting4Message(address, equipRef);
 
         if (DLog.isLoggingEnabled()) {
             CcuLog.d(L.TAG_CCU_DEVICE,"Debugger Enabled");
             CcuLog.i(L.TAG_CCU_SERIAL, settingsMessage2.toString());
             CcuLog.i(L.TAG_CCU_SERIAL, settingsMessage3.toString());
+            CcuLog.i(L.TAG_CCU_SERIAL, settingsMessage4.toString());
         }
 
         writeSetting2Message(settingsMessage2, address, MessageType.HYPERSPLIT_SETTINGS2_MESSAGE, true);
         writeSetting3Message(settingsMessage3, address, MessageType.HYPERSPLIT_SETTINGS3_MESSAGE, true);
+        writeSetting4Message(settingsMessage4, address, MessageType.HYPERSPLIT_SETTINGS4_MESSAGE, true);
     }
 
     public static void writeSetting2Message(HyperSplit.HyperSplitSettingsMessage2_t message, int address,
@@ -215,6 +233,23 @@ public class HyperSplitMessageSender {
             if (HyperSplitMessageCache.getInstance().checkAndInsert(address, HyperSplit.HyperSplitSettingsMessage3_t.class.getSimpleName(),
                     messageHash)) {
                 CcuLog.d(L.TAG_CCU_SERIAL, HyperSplit.HyperSplitSettingsMessage3_t.class.getSimpleName() +
+                        " was already sent, returning , type "+msgType);
+                return;
+            }
+        }
+
+        writeMessageBytesToUsb(address, msgType, message.toByteArray());
+    }
+
+    public static void writeSetting4Message(HyperSplit.HyperSplitSettingsMessage4_t message, int address,
+                                            MessageType msgType, boolean checkDuplicate) {
+
+        CcuLog.i(L.TAG_CCU_SERIAL, "Send Proto Buf Message " + msgType);
+        if (checkDuplicate) {
+            Integer messageHash = Arrays.hashCode(message.toByteArray());
+            if (HyperSplitMessageCache.getInstance().checkAndInsert(address, HyperSplit.HyperSplitSettingsMessage4_t.class.getSimpleName(),
+                    messageHash)) {
+                CcuLog.d(L.TAG_CCU_SERIAL, HyperSplit.HyperSplitSettingsMessage4_t.class.getSimpleName() +
                         " was already sent, returning , type "+msgType);
                 return;
             }

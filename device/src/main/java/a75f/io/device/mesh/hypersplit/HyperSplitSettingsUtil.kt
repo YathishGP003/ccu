@@ -4,6 +4,7 @@ import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Equip
 import a75f.io.api.haystack.HSUtil
 import a75f.io.device.HyperSplit
+import a75f.io.device.HyperSplit.HyperSplitSettingsMessage4_t
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.CpuEconAnalogOutAssociation
@@ -79,7 +80,8 @@ class HyperSplitSettingsUtil {
             ecoTunersBuilder.setExhaustFanHysteresis(getExhaustFanHysteresis(hsApi, equipRef))
             ecoTunersBuilder.setOaoDamperMatTarget(getOaoDamperMatTarget(hsApi, equipRef))
             ecoTunersBuilder.setOaoDamperMatMin(getOaoDamperMatMin(hsApi, equipRef))
-            ecoTunersBuilder.setOutsideDamperMinOpen(getOutsideDamperMinOpen(hsApi, equipRef))
+            ecoTunersBuilder.setOutsideDamperMinOpen(0)
+            ecoTunersBuilder.setAoutFanEconomizer(getAnalogOutFanDuringEconomizer(hsApi, equipRef))
             
             settings3.setEcoTuners(ecoTunersBuilder.build())
 
@@ -92,6 +94,26 @@ class HyperSplitSettingsUtil {
 
             return settings3.build()
         }
+
+        /**
+         * Function which constructs the setting4 message details
+         * @param equipRef
+         * @param nodeAddress
+         * return HyperStatSettingsMessage4_t
+         */
+        fun getSetting4Message(nodeAddress: Int, equipRef: String, hsApi: CCUHsApi): HyperSplitSettingsMessage4_t {
+            val settings4 = HyperSplitSettingsMessage4_t.newBuilder()
+
+            settings4.setOutsideDamperMinOpenDuringRecirculation(getOutsideDamperMinOpenDuringRecirculation(hsApi, equipRef))
+            settings4.setOutsideDamperMinOpenDuringConditioning(getOutsideDamperMinOpenDuringConditioning(hsApi, equipRef))
+            settings4.setOutsideDamperMinOpenDuringFanLow(getOutsideDamperMinOpenDuringFanLow(hsApi, equipRef))
+            settings4.setOutsideDamperMinOpenDuringFanMedium(getOutsideDamperMinOpenDuringFanMedium(hsApi, equipRef))
+            settings4.setOutsideDamperMinOpenDuringFanHigh(getOutsideDamperMinOpenDuringFanHigh(hsApi, equipRef))
+
+            return settings4.build()
+        }
+
+
 
         private fun getEconomizingToMainCoolingLoopMap(hsApi: CCUHsApi, equipRef: String): Int {
             
@@ -171,9 +193,37 @@ class HyperSplitSettingsUtil {
 
         }
 
-        private fun getOutsideDamperMinOpen(hsApi: CCUHsApi, equipRef: String): Int {
+        private fun getOutsideDamperMinOpenDuringConditioning(hsApi: CCUHsApi, equipRef: String): Int {
 
-            return readConfig(hsApi, equipRef, "outside and damper and min and open").toInt()
+            return readConfig(hsApi, equipRef, "outside and damper and min and open and conditioning").toInt()
+
+        }
+
+        private fun getAnalogOutFanDuringEconomizer(hsApi: CCUHsApi, equipRef: String): Int {
+            return 10 * readConfig(hsApi, equipRef, "economizer and sp and not tuner").toInt()
+        }
+
+        private fun getOutsideDamperMinOpenDuringRecirculation(hsApi: CCUHsApi, equipRef: String): Int {
+
+            return readConfig(hsApi, equipRef, "outside and damper and min and open and recirc").toInt()
+
+        }
+
+        private fun getOutsideDamperMinOpenDuringFanLow(hsApi: CCUHsApi, equipRef: String): Int {
+
+            return readConfig(hsApi, equipRef, "outside and damper and min and open and fan and low").toInt()
+
+        }
+
+        private fun getOutsideDamperMinOpenDuringFanMedium(hsApi: CCUHsApi, equipRef: String): Int {
+
+            return readConfig(hsApi, equipRef, "outside and damper and min and open and fan and medium").toInt()
+
+        }
+
+        private fun getOutsideDamperMinOpenDuringFanHigh(hsApi: CCUHsApi, equipRef: String): Int {
+
+            return readConfig(hsApi, equipRef, "outside and damper and min and open and fan and high").toInt()
 
         }
 
@@ -595,6 +645,8 @@ class HyperSplitSettingsUtil {
             val genericTuners = HyperSplit.HyperSplitTunersGeneric_t.newBuilder()
             genericTuners.unoccupiedSetback = (TunerUtil.readTunerValByQuery(
                 "unoccupied and setback", equipRef) * 10).toInt()
+            genericTuners.minFanRuntimePostconditioning = (
+                    TunerUtil.readTunerValByQuery("min and fan and runtime and postconditioning", equipRef)).toInt()
             genericTuners.relayActivationHysteresis =
                 TunerUtil.getHysteresisPoint("relay and activation", equipRef).toInt()
             genericTuners.analogFanSpeedMultiplier =
@@ -675,6 +727,7 @@ class HyperSplitSettingsUtil {
             val heatingStage1Query = "heating and stage1 and fan and $equipRefQuery"
             val heatingStage2Query = "heating and stage2 and fan and $equipRefQuery"
             val heatingStage3Query = "heating and stage3 and fan and $equipRefQuery"
+            val aOutAtRecircQuery = "config and recirculate and $equipRefQuery"
 
             if (ccuHsApi.readEntity(coolingStage1Query).isNotEmpty()) {
                 stagedFanVoltages.coolingStage1FanAnalogVoltage =
@@ -700,6 +753,10 @@ class HyperSplitSettingsUtil {
                 stagedFanVoltages.heatingStage3FanAnalogVoltage =
                     (10 * ccuHsApi.readPointPriorityValByQuery(heatingStage3Query)).toInt()
             }
+            if (ccuHsApi.readEntity(aOutAtRecircQuery).isNotEmpty()) {
+                stagedFanVoltages.analogoutAtRecFanAnalogVoltage = (ccuHsApi.readPointPriorityValByQuery(aOutAtRecircQuery) * 10).toInt()
+            }
+
             return stagedFanVoltages.build()
         }
 

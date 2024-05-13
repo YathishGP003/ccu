@@ -400,6 +400,9 @@ public class HyperSplitMessageGenerator {
     public static HyperSplit.HyperSplitSettingsMessage3_t getSetting3Message(int address, String equipRef){
         return HyperSplitSettingsUtil.Companion.getSetting3Message(address,equipRef,CCUHsApi.getInstance());
     }
+    public static HyperSplit.HyperSplitSettingsMessage4_t getSetting4Message(int address, String equipRef){
+        return HyperSplitSettingsUtil.Companion.getSetting4Message(address, equipRef, CCUHsApi.getInstance());
+    }
 
     public static HyperSplit.HyperSplitControlsMessage_t getHypersplitRebootControl(int address){
         HashMap<Object,Object> equip = CCUHsApi.getInstance().readEntity("equip and hyperstatsplit" +

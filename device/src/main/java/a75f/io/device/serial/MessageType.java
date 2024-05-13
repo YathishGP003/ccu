@@ -96,8 +96,8 @@ public enum MessageType
 	NONE1,
 	NONE2,
 	NONE3,
-	NONE4,
-	MODBUS_MESSAGE;
+	MODBUS_MESSAGE,
+	HYPERSPLIT_SETTINGS4_MESSAGE;
 
 	@Override
 	public String toString() {

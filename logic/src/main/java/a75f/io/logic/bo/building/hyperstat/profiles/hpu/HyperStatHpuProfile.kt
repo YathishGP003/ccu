@@ -328,8 +328,8 @@ class HyperStatHpuProfile : HyperStatPackageUnitProfile(){
                 }
             }
             (HyperStatAssociationUtil.isHpuRelayChangeOverCooling(relayState)) -> {
-                if(coolingLoopOutput != 0 && (basicSettings.conditioningMode == StandaloneConditioningMode.AUTO
-                    || basicSettings.conditioningMode == StandaloneConditioningMode.COOL_ONLY)) {
+                if(basicSettings.conditioningMode == StandaloneConditioningMode.AUTO
+                    || basicSettings.conditioningMode == StandaloneConditioningMode.COOL_ONLY) {
                     val status = if (coolingLoopOutput > 0) 1.0 else 0.0
                     updateLogicalPointIdValue(
                         logicalPointsList[port]!!,

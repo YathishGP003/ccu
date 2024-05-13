@@ -628,6 +628,9 @@ public abstract class VavProfile extends ZoneProfile {
             cfmLoopOp = cfmController.getLoopOutput(effectiveMinCfm, currentCfm);
             if (cfmLoopOp > damper.currentPosition) {
                 damper.currentPosition = (int)cfmLoopOp;
+                CcuLog.i(L.TAG_CCU_ZONE, "Using cfmLoopOp ("+cfmLoopOp+") as damper position.");
+            } else {
+                CcuLog.i(L.TAG_CCU_ZONE, "Ignoring cfmLoopOp, using existing damper command ("+damper.currentPosition+")");
             }
             vavEquip.getAirFlowSetpoint().writeHisVal(effectiveMinCfm);
         } else {

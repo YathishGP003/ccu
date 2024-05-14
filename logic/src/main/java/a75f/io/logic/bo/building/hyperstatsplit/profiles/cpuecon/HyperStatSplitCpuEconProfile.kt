@@ -1074,6 +1074,9 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
 
         if (fanEnabledMapped) setFanEnabledStatus(true) else setFanEnabledStatus(false)
 
+        setFanLowestFanLowStatus(false)
+        setFanLowestFanMediumStatus(false)
+        setFanLowestFanHighStatus(false)
         when(lowestStage) {
             CpuEconRelayAssociation.FAN_LOW_SPEED -> setFanLowestFanLowStatus(true)
             CpuEconRelayAssociation.FAN_MEDIUM_SPEED -> setFanLowestFanMediumStatus(true)
@@ -1248,22 +1251,22 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
         }
     }
 
-    private fun getCoolingActivatedAnalogVoltage(fanEnabledMapped: Boolean): Int {
+    private fun getCoolingActivatedAnalogVoltage(fanEnabledMapped: Boolean, fanLoopOutput: Int): Int {
         var voltage = getPercentageFromVoltageSelected(getCoolingStateActivated().roundToInt())
         // For title 24 compliance, check if fanEnabled is mapped, then set the fanloopForAnalog to the lowest cooling state activated
         // and check if staged fan is inactive(fanLoopForAnalog == 0)
-        if(fanEnabledMapped && voltage == 0) {
+        if(fanEnabledMapped && voltage == 0 && fanLoopOutput > 0) {
             voltage = getPercentageFromVoltageSelected(getLowestCoolingStateActivated().roundToInt())
         }
         return voltage
     }
 
 
-    private fun getHeatingActivatedAnalogVoltage(fanEnabledMapped: Boolean): Int {
+    private fun getHeatingActivatedAnalogVoltage(fanEnabledMapped: Boolean, fanLoopOutput: Int): Int {
         var voltage = getPercentageFromVoltageSelected(getHeatingStateActivated().roundToInt())
         // For title 24 compliance, check if fanEnabled is mapped, then set the fanloopForAnalog to the lowest heating state activated
         // and check if staged fan is inactive(fanLoopForAnalog == 0)
-        if (fanEnabledMapped && voltage == 0) {
+        if (fanEnabledMapped && voltage == 0 && fanLoopOutput > 0) {
             voltage = getPercentageFromVoltageSelected(getLowestHeatingStateActivated().roundToInt())
         }
         return voltage
@@ -1303,17 +1306,17 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
                 fanLoopForAnalog = fanLoopOutput
                 if (conditioningMode == StandaloneConditioningMode.AUTO) {
                     if (getOperatingMode() == 1.0) {
-                        fanLoopForAnalog = getCoolingActivatedAnalogVoltage(fanEnabledMapped)
+                        fanLoopForAnalog = getCoolingActivatedAnalogVoltage(fanEnabledMapped, fanLoopOutput)
                         logMsg = "Cooling"
                     } else if (getOperatingMode() == 2.0) {
-                        fanLoopForAnalog = getHeatingActivatedAnalogVoltage(fanEnabledMapped)
+                        fanLoopForAnalog = getHeatingActivatedAnalogVoltage(fanEnabledMapped, fanLoopOutput)
                         logMsg = "Heating"
                     }
                 } else if (conditioningMode == StandaloneConditioningMode.COOL_ONLY) {
-                    fanLoopForAnalog = getCoolingActivatedAnalogVoltage(fanEnabledMapped)
+                    fanLoopForAnalog = getCoolingActivatedAnalogVoltage(fanEnabledMapped, fanLoopOutput)
                     logMsg = "Cooling"
                 } else if (conditioningMode == StandaloneConditioningMode.HEAT_ONLY) {
-                    fanLoopForAnalog = getHeatingActivatedAnalogVoltage(fanEnabledMapped)
+                    fanLoopForAnalog = getHeatingActivatedAnalogVoltage(fanEnabledMapped, fanLoopOutput)
                     logMsg = "Heating"
                 }
                 // Check if we need fan protection
@@ -1324,7 +1327,7 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
                 else previousFanLoopValStaged = fanLoopForAnalog // else indicates we are not in protection mode, so store the fanLoopForAnalog value for protection mode
 
                 // Check Dead-band condition
-                if (fanLoopForAnalog == 0 && fanProtectionCounter == 0 && checkIfInOccupiedMode()) { // When in dead-band, set the fan-loopForAnalog to the recirculate analog value
+                if (fanLoopOutput == 0 && fanProtectionCounter == 0 && checkIfInOccupiedMode()) { // When in dead-band, set the fan-loopForAnalog to the recirculate analog value
                     fanLoopForAnalog = getPercentageFromVoltageSelected(getAnalogRecirculateValueActivated().roundToInt())
                     logMsg = "Deadband"
                 }

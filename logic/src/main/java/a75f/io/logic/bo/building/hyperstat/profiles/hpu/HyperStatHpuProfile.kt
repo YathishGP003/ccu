@@ -587,6 +587,9 @@ class HyperStatHpuProfile : HyperStatPackageUnitProfile(){
         val lowestStage = HyperStatAssociationUtil.getHpuLowestFanStage(config)
 
         // Check which fan speed is the lowest and set the status(Eg: If FAN_MEDIUM and FAN_HIGH are used, then FAN_MEDIUM is the lowest)
+        setFanLowestFanLowStatus(false)
+        setFanLowestFanMediumStatus(false)
+        setFanLowestFanHighStatus(false)
         when(lowestStage) {
             HpuRelayAssociation.FAN_LOW_SPEED -> setFanLowestFanLowStatus(true)
             HpuRelayAssociation.FAN_MEDIUM_SPEED -> setFanLowestFanMediumStatus(true)

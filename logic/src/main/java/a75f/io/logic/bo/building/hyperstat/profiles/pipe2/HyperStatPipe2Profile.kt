@@ -700,6 +700,9 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
             val lowestStage = HyperStatAssociationUtil.getPipe2LowestFanStage(configuration)
 
             // Check which fan speed is the lowest and set the status(Eg: If FAN_MEDIUM and FAN_HIGH are used, then FAN_MEDIUM is the lowest)
+            setFanLowestFanLowStatus(false)
+            setFanLowestFanMediumStatus(false)
+            setFanLowestFanHighStatus(false)
             when (lowestStage) {
                 Pipe2RelayAssociation.FAN_LOW_SPEED -> setFanLowestFanLowStatus(true)
                 Pipe2RelayAssociation.FAN_MEDIUM_SPEED -> setFanLowestFanMediumStatus(true)
@@ -731,6 +734,9 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
         val lowestStage = HyperStatAssociationUtil.getPipe2LowestFanStage(configuration)
 
         // Check which fan speed is the lowest and set the status(Eg: If FAN_MEDIUM and FAN_HIGH are used, then FAN_MEDIUM is the lowest)
+        setFanLowestFanLowStatus(false)
+        setFanLowestFanMediumStatus(false)
+        setFanLowestFanHighStatus(false)
         when(lowestStage) {
             Pipe2RelayAssociation.FAN_LOW_SPEED -> setFanLowestFanLowStatus(true)
             Pipe2RelayAssociation.FAN_MEDIUM_SPEED -> setFanLowestFanMediumStatus(true)

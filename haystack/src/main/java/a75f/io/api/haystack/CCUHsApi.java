@@ -1396,6 +1396,12 @@ public class CCUHsApi
         syncStatusService.addDeletedEntity(id, false);
         tagsDb.clearHistory(HRef.copy(id));
         HisItemCache.getInstance().delete(id);
+
+        if(isBacNetEnabled()) {
+            Intent intent = new Intent(INTENT_POINT_DELETED);
+            intent.putExtra("message", id);
+            context.sendBroadcast(intent);
+        }
     }
 
     public void deleteEntityLocally(String id) {

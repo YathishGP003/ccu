@@ -323,7 +323,8 @@ class HyperStatHpuProfile : HyperStatPackageUnitProfile(){
             }
             (HyperStatAssociationUtil.isHpuRelayAssociatedToFan(relayState)) -> {
                 // For title 24 compliance when doorwindow is open, run the lowest fan speed
-                if((fanLoopOutput != 0) || getDoorWindowFanOperationStatus()) {
+                if(((fanLoopOutput != 0) || getDoorWindowFanOperationStatus()) ||
+                        ((fanLoopOutput == 0 && getCurrentPortStatus(port) == 1.0))) {
                     runRelayForFanSpeed(relayState, port, config, tuner, relayStages, basicSettings)
                 }
             }

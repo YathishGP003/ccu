@@ -320,7 +320,7 @@ public class OAOProfile
         }
 
         Occupancy systemOccupancy = ScheduleManager.getInstance().getSystemOccupancy();
-        if (systemOccupancy.equals(Occupancy.OCCUPIED) || systemOccupancy.equals(Occupancy.FORCEDOCCUPIED)) {
+        if ((systemOccupancy.equals(Occupancy.OCCUPIED) || systemOccupancy.equals(Occupancy.FORCEDOCCUPIED)) && systemMode != SystemMode.OFF) {
             return Math.max(outsideDamperMinOpenFromFan, outsideDamperMinOpenFromConditioning);
         } else {
             return 0;

@@ -280,7 +280,7 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
         val zoneId = HSUtil.getZoneIdFromEquipId(equip?.id)
         val occ = ScheduleManager.getInstance().getOccupiedModeCache(zoneId)
         val isOccupied = if (occ == null) false else occ.isOccupied()
-        if (isOccupied) {
+        if (isOccupied && (hsSplitHaystackUtil.getCurrentConditioningMode().toInt() != StandaloneConditioningMode.OFF.ordinal)) {
             return Math.max(outsideDamperMinOpenFromConditioning.toInt(), outsideDamperMinOpenFromFanStage.toInt())
         } else {
             return 0

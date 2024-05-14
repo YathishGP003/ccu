@@ -258,13 +258,22 @@ public class CCUUtils
         try {
             Class<?> systemPropertiesClass = Class.forName("android.os.SystemProperties");
             Method method = systemPropertiesClass.getMethod("get", String.class);
-            return !method.invoke(null, "recommended_version_check").equals("false");
+            return !method.invoke(null, "recommended_version_check").toString().equalsIgnoreCase("false");
         } catch (Exception e) {
             e.printStackTrace();
             return true;
         }
     }
-
+    public static boolean isCCUOfflinePropertySet() {
+        try {
+            Class<?> systemPropertiesClass = Class.forName("android.os.SystemProperties");
+            Method method = systemPropertiesClass.getMethod("get", String.class);
+            return method.invoke(null, "ccu_offline_check").toString().equalsIgnoreCase("false");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return true;
+        }
+    }
     public static boolean isModbusHeartbeatRequired(HashMap<Object, Object> equip, CCUHsApi hayStack) {
         if(equip.containsKey("equipRef")) {
             HashMap<Object, Object> parentEquip = hayStack.readMapById(equip.get("equipRef").toString());

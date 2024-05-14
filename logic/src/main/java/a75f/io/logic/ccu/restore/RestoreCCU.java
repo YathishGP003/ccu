@@ -1,5 +1,6 @@
 package a75f.io.logic.ccu.restore;
 
+import static a75f.io.logic.bo.util.CCUUtils.isCCUOfflinePropertySet;
 import android.content.SharedPreferences;
 import android.util.Log;
 
@@ -60,6 +61,9 @@ public class RestoreCCU {
     }
 
     private boolean isCCUOnline(Date lastUpdatedDate){
+        if(isCCUOfflinePropertySet()){
+            return false;
+        }
         return new Date().getTime() - lastUpdatedDate.getTime() <= (15*60000);
     }
 

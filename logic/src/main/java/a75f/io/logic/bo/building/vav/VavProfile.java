@@ -625,9 +625,12 @@ public abstract class VavProfile extends ZoneProfile {
             When minimum CFM is being enforced (e.g. during Occupied), it will be written to the Haystack point. Otherwise, setpoint will be zero.
          */
         if (isMinCfmRequiredInDeadband) {
-            if (currentCfm < effectiveMinCfm) {
-                cfmLoopOp = cfmController.getLoopOutput(effectiveMinCfm, currentCfm);
+            cfmLoopOp = cfmController.getLoopOutput(effectiveMinCfm, currentCfm);
+            if (cfmLoopOp > damper.currentPosition) {
                 damper.currentPosition = (int)cfmLoopOp;
+                CcuLog.i(L.TAG_CCU_ZONE, "Using cfmLoopOp ("+cfmLoopOp+") as damper position.");
+            } else {
+                CcuLog.i(L.TAG_CCU_ZONE, "Ignoring cfmLoopOp, using existing damper command ("+damper.currentPosition+")");
             }
             vavEquip.getAirFlowSetpoint().writeHisVal(effectiveMinCfm);
         } else {

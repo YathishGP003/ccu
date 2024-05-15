@@ -311,7 +311,7 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
         CcuLog.i(Domain.LOG_TAG," Updated Equip point ${pointConfig.modelDef.domainName}")
     }
 
-    private fun updateEquip(equipRef: String, modelDef : SeventyFiveFProfileDirective, equipDis: String) {
+    private fun updateEquip(equipRef: String, modelDef : SeventyFiveFProfileDirective, equipDis: String, isSystem: Boolean) {
         var equipDict = hayStack.readHDictById(equipRef)
         CcuLog.i(Domain.LOG_TAG, " equipDict $equipDict")
         val equip = Equip.Builder().setHDict(equipDict).build()
@@ -322,12 +322,15 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
             "${modelDef.version?.major}" +
                     ".${modelDef.version?.minor}.${modelDef.version?.patch}"
         )
-        equip.group = "99"
+        if(isSystem) {
+            equip.group = "99"
+        }
         hayStack.updateEquip(equip, equip.id)
         CcuLog.i(Domain.LOG_TAG, " Updated Equip ${equip.group}-${equip.domainName}")
     }
     fun doCutOverMigration(equipRef: String, modelDef : SeventyFiveFProfileDirective, equipDis : String,
-                           mapping : Map<String, String>, profileConfiguration: ProfileConfiguration) {
+                           mapping : Map<String, String>, profileConfiguration: ProfileConfiguration,
+    isSystem: Boolean = false) {
         CcuLog.i(Domain.LOG_TAG, "doCutOverMigration for $equipDis")
         var equipPoints =
             hayStack.readAllEntities("point and equipRef == \"$equipRef\"")
@@ -384,7 +387,7 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
                     " Model: ${modelDef.points.size} Map: ${mapping.size} ")
         CcuLog.i(Domain.LOG_TAG, " Deleted $delete Updated $update added $add pass $pass")
 
-        updateEquip(equipRef, modelDef, equipDis)
+        updateEquip(equipRef, modelDef, equipDis, isSystem)
         CcuLog.i(Domain.LOG_TAG, " Cut-Over migration completed for Equip ${modelDef.domainName}")
     }
 

@@ -438,7 +438,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         val equipDis = "${site.displayName}-${model.name}"
         val profileConfig = StagedRtuProfileConfig(model as SeventyFiveFProfileDirective)
         equipBuilder.doCutOverMigration(equipId, model,
-            equipDis, VavStagedRtuCutOverMapping.entries , profileConfig.getDefaultConfiguration())
+            equipDis, VavStagedRtuCutOverMapping.entries , profileConfig.getDefaultConfiguration(), isSystem = true)
 
         val entityMapper = EntityMapper(model)
         val deviceBuilder = DeviceBuilder(hayStack, entityMapper)
@@ -465,7 +465,8 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         val equipDis = "${site.displayName}-${model.name}"
         val profileConfig = StagedVfdRtuProfileConfig(model as SeventyFiveFProfileDirective)
         equipBuilder.doCutOverMigration(equipId, model,
-            equipDis, VavStagedVfdRtuCutOverMapping.entries , profileConfig.getDefaultConfiguration())
+            equipDis, VavStagedVfdRtuCutOverMapping.entries , profileConfig.getDefaultConfiguration()
+            ,isSystem = true)
 
         val entityMapper = EntityMapper(model)
         val deviceBuilder = DeviceBuilder(hayStack, entityMapper)
@@ -492,7 +493,8 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         val equipDis = "${site.displayName}-${model.name}"
         val profileConfig = ModulatingRtuProfileConfig(model as SeventyFiveFProfileDirective)
         equipBuilder.doCutOverMigration(equipId, model,
-            equipDis, VavFullyModulatingRtuCutOverMapping.entries , profileConfig.getDefaultConfiguration())
+            equipDis, VavFullyModulatingRtuCutOverMapping.entries , profileConfig.getDefaultConfiguration()
+            ,isSystem = true)
 
         val entityMapper = EntityMapper(model)
         val deviceBuilder = DeviceBuilder(hayStack, entityMapper)

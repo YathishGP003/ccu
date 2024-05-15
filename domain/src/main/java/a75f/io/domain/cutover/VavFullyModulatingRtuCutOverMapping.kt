@@ -26,7 +26,7 @@ object VavFullyModulatingRtuCutOverMapping {
         "averageTemperature" to "averageTemperature",
         "ScheduleStatus" to "equipScheduleStatus",
         "heatingLoopOutput" to "heatingLoopOutput",
-        "cmCurrentTemp" to "currentTemp",
+        "cmCurrentTemp" to "cmCurrentTemp",
         "systemPostPurgeEnabled" to "systemPostPurgeEnable",
         "systemCI" to "systemCI",
 
@@ -72,8 +72,8 @@ object VavFullyModulatingRtuCutOverMapping {
         "relay6OutputAssociation" to "relay6OutputAssociation",
         "relay7OutputAssociation" to "relay7OutputAssociation",
 
-        "mechanicalHeatingAvailable" to "mechanicalHeatingAvailable",
-        "mechanicalCoolingAvailable" to "mechanicalCoolingAvailable",
+        "mechanicalHeatingAvailable" to "heatingAvailable",
+        "mechanicalCoolingAvailable" to "coolingAvailable",
         "demandResponseMode" to "demandResponseMode",
         "conditioningMode" to "conditioningMode",
 
@@ -83,7 +83,8 @@ object VavFullyModulatingRtuCutOverMapping {
 
         "targetMinInsideHumidty" to "systemtargetMinInsideHumidity",
         "outsideTempHeatingLockout" to "vavOutsideTempHeatingLockout",
-        "Humidifier" to "humidifier",
+        "Humidifier" to "humidifierEnable",
+        "DeHumidifier" to "dehumidifierEnable",
         "weightedAverageHeatingLoadMA" to "weightedAverageHeatingLoad",
 
 
@@ -98,7 +99,7 @@ object VavFullyModulatingRtuCutOverMapping {
         "analog3AtMaxHeating" to "analog3MaxHeating",
         "analog4AtMinCO2" to "analog4MinOutsideDamper",
         "analog4AtMaxCO2" to "analog4MaxOutsideDamper",
-        "humidifierType" to "relay7OutputEnable",
+        "humidifierType" to "relay7OutputAssociation",
 
 
         "satTRSp" to "satTRSp",

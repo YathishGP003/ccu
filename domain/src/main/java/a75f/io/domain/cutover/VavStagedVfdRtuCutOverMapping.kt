@@ -28,7 +28,7 @@ object VavStagedVfdRtuCutOverMapping {
         "averageTemperature" to "averageTemperature",
         "ScheduleStatus" to "equipScheduleStatus",
         "heatingLoopOutput" to "heatingLoopOutput",
-        "cmCurrentTemp" to "currentTemp",
+        "cmCurrentTemp" to "cmCurrentTemp",
         "cmHeatingDesiredTemp" to "cmHeatingDesiredTemp",
         "systemPostPurgeEnabled" to "systemPostPurgeEnable",
         "systemPostPurgeEnabled" to "systemPostPurgeEnable",
@@ -78,7 +78,8 @@ object VavStagedVfdRtuCutOverMapping {
 
         "targetMinInsideHumidty" to "systemtargetMinInsideHumidity",
         "outsideTempHeatingLockout" to "vavOutsideTempHeatingLockout",
-        "Humidifier" to "humidifier",
+        "Humidifier" to "humidifierEnable",
+        "DeHumidifier" to "dehumidifierEnable",
         "weightedAverageHeatingLoadMA" to "weightedAverageHeatingLoad",
 
 

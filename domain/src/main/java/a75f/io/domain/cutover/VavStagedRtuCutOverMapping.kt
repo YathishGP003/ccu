@@ -15,7 +15,7 @@ object VavStagedRtuCutOverMapping {
         "epidemicModeSystemState" to "epidemicModeSystemState",
 
         "systemEnhancedVentilationEnabled" to "systemEnhancedVentilationEnable",
-        "cmCoolingDesiredTemp" to "cmHeatingDesiredTemp",
+        "cmCoolingDesiredTemp" to "cmCoolingDesiredTemp",
         "StatusMessage" to "equipStatusMessage",
         "fanLoopOutput" to "fanLoopOutput",
         "averageHumidity" to "averageHumidity",
@@ -25,8 +25,8 @@ object VavStagedRtuCutOverMapping {
         "averageTemperature" to "averageTemperature",
         "ScheduleStatus" to "equipScheduleStatus",
         "heatingLoopOutput" to "heatingLoopOutput",
-        "cmCurrentTemp" to "currentTemp",
-        "cmHeatingDesiredTemp" to "desiredTempHeating",
+        "cmCurrentTemp" to "cmCurrentTemp",
+        "cmHeatingDesiredTemp" to "cmHeatingDesiredTemp",
         "systemPostPurgeEnabled" to "systemPostPurgeEnable",
         "systemPostPurgeEnabled" to "systemPostPurgeEnable",
         //"autoAwaySetback" to "autoAwaySetback",
@@ -75,7 +75,8 @@ object VavStagedRtuCutOverMapping {
 
         "targetMinInsideHumidty" to "systemtargetMinInsideHumidity",
         "outsideTempHeatingLockout" to "vavOutsideTempHeatingLockout",
-        "Humidifier" to "humidifier",
+        "Humidifier" to "humidifierEnable",
+        "DeHumidifier" to "dehumidifierEnable",
         "weightedAverageHeatingLoadMA" to "weightedAverageHeatingLoad",
 
 

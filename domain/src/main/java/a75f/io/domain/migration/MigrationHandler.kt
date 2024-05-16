@@ -20,6 +20,7 @@ import io.seventyfivef.domainmodeler.client.ModelDirective
 import io.seventyfivef.domainmodeler.client.ModelPointDef
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfilePointDef
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFTunerDirective
+import io.seventyfivef.domainmodeler.common.point.AssociationConfiguration
 import io.seventyfivef.domainmodeler.common.point.ComparisonType
 import io.seventyfivef.domainmodeler.common.point.DependentConfiguration
 import io.seventyfivef.domainmodeler.common.point.PointConfiguration
@@ -233,7 +234,7 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
                 PointConfiguration.ConfigType.DEPENDENT -> isDependentPointEnabled(pointDef, equipRef)
                 PointConfiguration.ConfigType.DYNAMIC_SENSOR -> false // never add DYNAMIC_SENSOR points; they are created from the device layer
                 PointConfiguration.ConfigType.ASSOCIATED -> isAssociatedPointEnabled(pointDef)
-                PointConfiguration.ConfigType.ASSOCIATION -> isAssociationPointEnabled(pointDef)
+                PointConfiguration.ConfigType.ASSOCIATION -> isAssociationPointEnabled(pointDef, equipRef)
             }
         }
 
@@ -259,13 +260,29 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
     }
 
     private fun isAssociatedPointEnabled(pointDef: SeventyFiveFProfilePointDef) : Boolean {
-        // Not used in Profiles yet. Default to adding the point in all cases.
-        return true
+        /*  ASSOCIATED points should not be added as part of a migration.
+            They are created only during configuration (when their domainName shows up in the enum of a created ASSOCIATION point).
+         */
+        return false
     }
 
-    private fun isAssociationPointEnabled(pointDef: SeventyFiveFProfilePointDef) : Boolean {
-        // Not used in Profiles yet. Default to adding the point in all cases.
-        return true
+    private fun isAssociationPointEnabled(pointDef: SeventyFiveFProfilePointDef, equipRef : String) : Boolean {
+        // Expectation is that new ASSOCIATION points would not be added to a model that's already in production
+        // But, if one appears, read the point it depends on from Haystack, then evaluate the config. Add only if it is enabled per the config.
+        val pointConfig = pointDef.configuration as AssociationConfiguration
+        val configValue = haystack.readPointPriorityValByQuery("point and domainName == \"" + pointConfig.domainName + "\" and equipRef == \"" + equipRef + "\"")
+
+        if (configValue != null) {
+            return when (pointConfig.comparisonType) {
+                ComparisonType.EQUALS -> (pointConfig.value as Int) == configValue.toInt()
+                ComparisonType.NOT_EQUALS -> (pointConfig.value as Int) != configValue.toInt()
+                ComparisonType.GREATER_THAN -> (pointConfig.value as Int) > configValue.toInt()
+                ComparisonType.LESS_THAN -> (pointConfig.value as Int) < configValue.toInt()
+                ComparisonType.GREATER_THAN_OR_EQUAL_TO -> (pointConfig.value as Int) >= configValue.toInt()
+                ComparisonType.LESS_THAN_OR_EQUAL_TO -> (pointConfig.value as Int) <= configValue.toInt()
+            }
+        }
+        return false
     }
 
 }

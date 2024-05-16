@@ -177,7 +177,7 @@ public class CCUHsApi
     }
 
     public boolean isBacNetEnabled() {
-        return defaultSharedPrefs.getBoolean("UseBACnet", false);
+        return defaultSharedPrefs.getBoolean("isBACnetinitialized", false);
     }
 
     // Check whether we've migrated kind: "string" to kind: "Str".  If not, run the migration.

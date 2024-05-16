@@ -4,9 +4,12 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
+import com.google.android.material.button.MaterialButton;
 
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import android.text.Editable;
 import android.text.Html;
@@ -31,10 +34,13 @@ import android.widget.Toast;
 
 import org.apache.commons.lang3.StringUtils;
 import org.projecthaystack.HDateTime;
+import org.projecthaystack.HDict;
 import org.projecthaystack.HDictBuilder;
+import org.projecthaystack.HGridBuilder;
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
 import org.projecthaystack.HVal;
+import org.projecthaystack.io.HZincWriter;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -49,12 +55,16 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
+import a75f.io.api.haystack.Point;
+import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
-import a75f.io.api.haystack.sync.PointWriteCache;
+import a75f.io.api.haystack.sync.HttpUtil;
 import a75f.io.domain.cutover.BuildingEquipCutOverMapping;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.tuners.BuildingTunerCache;
+import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.R;
@@ -62,8 +72,11 @@ import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.RxjavaUtil;
 import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
+import a75f.io.renatus.views.MasterControl.MasterControlView;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 
+import static a75f.io.logic.bo.util.UnitUtils.celsiusToFahrenheit;
+import static a75f.io.logic.bo.util.UnitUtils.celsiusToFahrenheitRelativeChange;
 import static a75f.io.logic.bo.util.UnitUtils.celsiusToFahrenheitTuner;
 import static a75f.io.logic.bo.util.UnitUtils.convertingDeadBandValueCtoF;
 import static a75f.io.logic.bo.util.UnitUtils.convertingDeadBandValueFtoC;
@@ -71,8 +84,11 @@ import static a75f.io.logic.bo.util.UnitUtils.convertingRelativeValueCtoF;
 import static a75f.io.logic.bo.util.UnitUtils.convertingRelativeValueFtoC;
 import static a75f.io.logic.bo.util.UnitUtils.doesPointNeedRelativeConversion;
 import static a75f.io.logic.bo.util.UnitUtils.doesPointNeedRelativeDeadBandConversion;
+import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
+import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusRelative;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusTuner;
 import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
+import static a75f.io.logic.bo.util.UnitUtils.roundToHalf;
 
 
 /**
@@ -701,8 +717,8 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                     .add("duration", HNum.make(0, "ms"))
                     .add("val", (HVal) null)
                     .add("reason", reason);
-
-            PointWriteCache.Companion.getInstance().writePoint(id, b.toDict());
+            HDict[] dictArr = {b.toDict()};
+            HttpUtil.executePost(CCUHsApi.getInstance().pointWriteTarget(), HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
             CCUHsApi.getInstance().writeHisValById(id, HSUtil.getPriorityVal(id));
         } else {
             CCUHsApi.getInstance().writeTunerPointForCcuUser(id, level, val, 0, reason);

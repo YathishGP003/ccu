@@ -2094,6 +2094,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         }
         if (((i + 1) % columnCount == 0) && (i != 0)) {
             try {
+                if (tablerowLayout[rowcount].getParent() != null) {
+                    ((ViewGroup) tablerowLayout[rowcount].getParent()).removeView(tablerowLayout[rowcount]);
+                }
                 tableLayout.addView(tablerowLayout[rowcount++]);
             } catch (Exception e) {
                 e.printStackTrace();

@@ -131,19 +131,13 @@ class HttpServer {
                     if (query != null) {
                         val isHeartBeatPoint = isHeartBeatPoint("heartbeat", query)
                         if (isHeartBeatPoint) {
-                            CcuLog.i(HTTP_SERVER, "this is hearbeat point")
                             val hisItem = getHisItemByIdAndRange(query, "current")
                             if (hisItem != null) {
-                                CcuLog.i(HTTP_SERVER, "his item is present")
                                 val lastModifiedTimeInMillis = hisItem.dateInMillis
                                 val currentTimeInMillis = System.currentTimeMillis()
                                 val diffTime =
                                     TimeUnit.MILLISECONDS.toMinutes(currentTimeInMillis - lastModifiedTimeInMillis)
-                                CcuLog.i(
-                                    HTTP_SERVER,
-                                    " currentTimeInMillis:==> $currentTimeInMillis <--lastmodified-->$lastModifiedTimeInMillis --diff-- $diffTime"
-                                )
-                                if (diffTime > 15) {
+                                if (diffTime > 15 || hisItem.`val`== null) {
                                     call.respond(
                                         HttpStatusCode.OK, BaseResponse(
                                             0
@@ -157,11 +151,9 @@ class HttpServer {
                                     )
                                 }
                             } else {
-                                CcuLog.i(HTTP_SERVER, "his item not present")
                                 call.respond(
                                     HttpStatusCode.OK, BaseResponse(
-                                        CCUHsApi.getInstance()
-                                            .readHisValById(query)
+                                        0
                                     )
                                 )
                             }
@@ -338,10 +330,17 @@ class HttpServer {
 
     private fun getHisItemByIdAndRange(pointId: String, range: String): HisItem? {
         var hisItem: HisItem? = null
-        val list = CCUHsApi.getInstance().hisRead(pointId, range)
-        if (list != null && list.size >= 1) {
-            hisItem = list[0]
+        try {
+            val list = CCUHsApi.getInstance().hisRead(pointId, range)
+            if (list != null && list.size >= 1) {
+                hisItem = list[0]
+                CcuLog.i(HTTP_SERVER, "his item present getHisItemByIdAndRange -> $hisItem")
+            }
         }
+        catch (e: Exception){
+            CcuLog.e(HTTP_SERVER, "Error in getHisItemByIdAndRange: $e")
+        }
+
         return hisItem
     }
 }

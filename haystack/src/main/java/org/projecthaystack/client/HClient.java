@@ -12,6 +12,7 @@ import android.util.Log;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import org.joda.time.DateTime;
 import org.projecthaystack.HDateTime;
 import org.projecthaystack.HDict;
 import org.projecthaystack.HDictBuilder;
@@ -48,9 +49,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import a75f.io.api.haystack.BuildConfig;
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.HisItem;
 import a75f.io.api.haystack.RetryCountCallback;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.exception.NullHGridException;
@@ -412,6 +415,20 @@ public class HClient extends HProj
 
   private void checkItemsWithInPointArray(ArrayList<HDict> pIds, String idStr, HRow r, HVal rowId) {
     Double currentHighPriorityVal = getValue(r.get(idStr).toString());
+    Boolean isHeartBeatPoint = isHeartBeatPoint("heartbeat", r.get(idStr).toString());
+    if(isHeartBeatPoint) {
+      ArrayList<HisItem> hisItem = CCUHsApi.getInstance().hisRead(r.get(idStr).toString(), "current");
+      if (hisItem != null && hisItem.size() > 0) {
+
+      long lastModifiedTimeInMillis = hisItem.get(0).getDateInMillis();
+      long currentTimeInMillis = System.currentTimeMillis();
+      long diffTime =
+              TimeUnit.MILLISECONDS.toMinutes(currentTimeInMillis - lastModifiedTimeInMillis);
+        if (diffTime > 15 || hisItem.get(0).getVal() == null) {
+          currentHighPriorityVal = 0.0;
+        }
+      }
+    }
     Double sharedHighPriorityVal = (Double) sharedPointArrays.get(r.get(idStr));
     Log.d("CCU_HS", "-currentHighPriorityVal-" + currentHighPriorityVal + "-sharedHighPriorityVal-" + sharedHighPriorityVal);
     if (Double.compare(currentHighPriorityVal, sharedHighPriorityVal) != 0) {
@@ -1060,6 +1077,12 @@ public class HClient extends HProj
 
   }
 
-
+  private boolean isHeartBeatPoint(String filterKey, String pointId) {
+    HashMap<Object, Object> pointMap = CCUHsApi.getInstance().readMapById(pointId);
+    if (pointMap != null && pointMap.get(filterKey) != null) {
+      return true;
+    }
+    return false;
+  }
 
 }

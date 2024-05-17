@@ -400,10 +400,15 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
 
             val matTemp  = hsSplitHaystackUtil.getMixedAirTemp()
 
+            handleSmartPrePurgeControl(equip)
             doEconomizing(equip)
             doDcv(equip, effectiveOutsideDamperMinOpen)
 
-            outsideAirLoopOutput = Math.max(economizingLoopOutput, dcvLoopOutput)
+            if (epidemicState == EpidemicState.PREPURGE) {
+                outsideAirLoopOutput = Math.max(economizingLoopOutput, outsideAirCalculatedMinDamper)
+            } else {
+                outsideAirLoopOutput = Math.max(economizingLoopOutput, dcvLoopOutput)
+            }
 
             Log.d(L.TAG_CCU_HSSPLIT_CPUECON,"outsideAirLoopOutput "+outsideAirLoopOutput+" oaoDamperMatTarget "+oaoDamperMatTarget+" oaoDamperMatMin "+oaoDamperMatMin
                     +" matTemp "+matTemp)
@@ -696,7 +701,7 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
             } else {
                 outsideAirCalculatedMinDamper = standaloneOutsideAirDamperMinOpen
             }
-        } else {
+        } else if (epidemicState != EpidemicState.PREPURGE) {
             outsideAirCalculatedMinDamper = 0
         }
 
@@ -1422,15 +1427,15 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
 
     /**
      * Handles the smart pre-purge control for the given HyperStatSplitCpuEconEquip.
-     * This function calculates the minimum damper open value based on pre-purge settings and occupancy status.
+     * If pre-purge is active, this method sets the value of outsideAirCalculatedMinDamper
      *
      * @param equip The HyperStatSplitCpuEconEquip for which smart pre-purge control is to be handled.
-     * @return The minimum damper open value if the conditions for smart pre-purge control are met, null otherwise.
+     *
      */
-    private fun handleSmartPrePurgeControl(equip: HyperStatSplitCpuEconEquip): Int? {
+    private fun handleSmartPrePurgeControl(equip: HyperStatSplitCpuEconEquip) {
         if(!prePurgeEnabled) {
             epidemicState = EpidemicState.OFF
-            return null
+            return
         }
         val prePurgeRunTime = TunerUtil.readTunerValByQuery(
             "prePurge and cur and runtime and zone and default and cpu and standalone and oao",
@@ -1448,13 +1453,11 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
             if (occuStatus != null) occuStatus.millisecondsUntilNextChange.toInt() / 60000 else -1
         if (minutesToOccupancy != -1 && prePurgeOccupiedTimeOffset >= minutesToOccupancy && minutesToOccupancy >= prePurgeOccupiedTimeOffset - prePurgeRunTime &&
             matTemp > oaoDamperMatMin) {
-            val outsideAirCalculatedMinDamper = hsSplitHaystackUtil.getDamperMinOpenConfigValue()
+            outsideAirCalculatedMinDamper = hsSplitHaystackUtil.getDamperMinOpenConfigValue().toInt()
             epidemicState = EpidemicState.PREPURGE
-            return outsideAirCalculatedMinDamper.toInt()
         } else {
             epidemicState = EpidemicState.OFF
         }
-        return null
     }
 
 
@@ -1465,16 +1468,8 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
         analogOutStages: HashMap<String, Int>,
         outsideAirFinalLoopOutput: Int
     ) {
-        var localFinalLoopOutput: Int = outsideAirFinalLoopOutput
-        // Pre purge control
-        if(occupancyStatus == Occupancy.UNOCCUPIED || occupancyStatus == Occupancy.VACATION) {
-            if(null != handleSmartPrePurgeControl(equip))
-                localFinalLoopOutput = handleSmartPrePurgeControl(equip)!!
-        }
-        // Safeties are handled in the algo, not here.
-        // If Condensate is tripped or conditioning mode is not appropriate, it will be reflected in the calculated outsideAirFinalLoopOutput.
-        updateLogicalPointIdValue(logicalPointsList[port]!!, localFinalLoopOutput.toDouble())
-        if (outsideAirFinalLoopOutput > 0) analogOutStages[AnalogOutput.OAO_DAMPER.name] = localFinalLoopOutput
+        updateLogicalPointIdValue(logicalPointsList[port]!!, outsideAirFinalLoopOutput.toDouble())
+        if (outsideAirFinalLoopOutput > 0) analogOutStages[AnalogOutput.OAO_DAMPER.name] = outsideAirFinalLoopOutput
     }
 
     private fun handleDeadZone(equip: HyperStatSplitCpuEconEquip) {

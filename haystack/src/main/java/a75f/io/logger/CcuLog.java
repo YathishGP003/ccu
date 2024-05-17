@@ -209,8 +209,7 @@ public class CcuLog
 
 	private static int getLogLevel(){
 		try {
-			int logLevel = CCUHsApi.getInstance().getCcuLogLevel();
-			return logLevel;
+			return CCUHsApi.getInstance().getCcuLogLevel();
 		} catch (IllegalStateException e) {
 			Log.e("CcuLog", "hayStack is not initialized");
 			return 0;

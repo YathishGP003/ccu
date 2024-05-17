@@ -411,14 +411,9 @@ public class DiagEquip
         }
 
         HashMap<Object,Object> logLevelPoint = CCUHsApi.getInstance().readEntity(Queries.LOG_LEVEL_QUERY);
-        if(!logLevelPoint.isEmpty()) {
-            if( isDebuggable()) {
-                CCUHsApi.getInstance().writeHisValByQuery(Queries.LOG_LEVEL_QUERY,0.0);
-            }
-
+        if (!logLevelPoint.isEmpty()) {
             return;
         }
-
         double defaultLogLevel = 4.0;
         if(isDebuggable()) {
             defaultLogLevel = 0.0;

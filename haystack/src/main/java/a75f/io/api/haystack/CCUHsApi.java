@@ -176,7 +176,7 @@ public class CCUHsApi
     }
 
     public boolean isBacNetEnabled() {
-        return defaultSharedPrefs.getBoolean("UseBACnet", false);
+        return defaultSharedPrefs.getBoolean("isBACnetinitialized", false);
     }
 
     // Check whether we've migrated kind: "string" to kind: "Str".  If not, run the migration.
@@ -1398,6 +1398,12 @@ public class CCUHsApi
         syncStatusService.addDeletedEntity(id, false);
         tagsDb.clearHistory(HRef.copy(id));
         HisItemCache.getInstance().delete(id);
+
+        if(isBacNetEnabled()) {
+            Intent intent = new Intent(INTENT_POINT_DELETED);
+            intent.putExtra("message", id);
+            context.sendBroadcast(intent);
+        }
     }
 
     public void deleteEntityLocally(String id) {

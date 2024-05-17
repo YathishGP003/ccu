@@ -1,5 +1,6 @@
 package a75f.io.renatus.profiles.system
 
+import a75f.io.domain.api.Domain
 import a75f.io.logic.bo.building.system.vav.config.StagedRtuProfileConfig
 import a75f.io.logic.bo.building.system.vav.config.StagedVfdRtuProfileConfig
 import a75f.io.logic.bo.building.vav.VavProfileConfiguration
@@ -27,7 +28,7 @@ class StagedRtuVfdViewState : StagedRtuViewState(){
     var analogOut2HeatStage5 by mutableStateOf (0)
     var analogOut2Default by mutableStateOf (0)
 
-    var analogOut2FanSpeedTestSignal by mutableStateOf (0.0)
+    var analogOut2FanSpeedTestSignal by mutableStateOf (Domain.cmBoardDevice.analog2Out.readHisVal())
 
 
     companion object {

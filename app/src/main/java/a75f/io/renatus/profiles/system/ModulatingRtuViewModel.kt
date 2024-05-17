@@ -138,6 +138,11 @@ open class ModulatingRtuViewModel : ViewModel() {
         TODO("Not yet implemented")
     }
 
+    fun getRelayState(relayName: String) : Boolean {
+        val physicalPoint = L.ccu().systemProfile.logicalPhysicalMap.values.find { it.domainName == relayName }
+        return physicalPoint?.readHisVal() == 1.0
+    }
+
     fun sendTestCommand(relayName: String, testCommand: Boolean) {
         Globals.getInstance().setTestMode(true)
         viewModelScope.launch {

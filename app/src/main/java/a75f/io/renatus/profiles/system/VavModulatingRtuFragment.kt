@@ -7,6 +7,7 @@ import a75f.io.logic.Globals
 import a75f.io.renatus.R
 import a75f.io.renatus.composables.DropDownWithLabel
 import a75f.io.renatus.composables.IndeterminateLoopProgress
+import a75f.io.renatus.compose.ComposeUtil
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -67,7 +68,7 @@ class VavModulatingRtuFragment : ModulatingRtuFragment() {
 
             override fun onViewDetachedFromWindow(v: View) {
                 if (Globals.getInstance().isTestMode()) {
-                    Globals.getInstance().setTestMode(false);
+                    Globals.getInstance().setTestMode(false)
                 }
             }
         })
@@ -76,7 +77,7 @@ class VavModulatingRtuFragment : ModulatingRtuFragment() {
     @Composable
     fun RootView() {
         if (!vavModulatingViewModel.modelLoaded) {
-            IndeterminateLoopProgress(bottomText = "Loading VAV Fully Modulating AHU profile Configuration")
+            IndeterminateLoopProgress(bottomText = "Loading System Profile")
             CcuLog.i(Domain.LOG_TAG, "Show Progress")
             return
         }
@@ -108,14 +109,14 @@ class VavModulatingRtuFragment : ModulatingRtuFragment() {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(start = 25.dp, end = 20.dp),
-                            horizontalArrangement = Arrangement.SpaceEvenly
+                                .padding(start = 5.dp),
+                            horizontalArrangement = Arrangement.Start
                         ) {
-                            Text(text = "ENABLE", fontSize = 20.sp)
-                            Spacer(modifier = Modifier.width(242.dp))
-                            Text(text = "MAPPING", fontSize = 20.sp)
-                            Spacer(modifier = Modifier.width(200.dp))
-                            Text(text = "TEST SIGNAL", fontSize = 20.sp)
+                            Text(text = "ENABLE", fontSize = 20.sp, color = ComposeUtil.greyColor)
+                            Spacer(modifier = Modifier.width(304.dp))
+                            Text(text = "MAPPING", fontSize = 20.sp, color = ComposeUtil.greyColor)
+                            Spacer(modifier = Modifier.width(189.dp))
+                            Text(text = "TEST SIGNAL", fontSize = 20.sp, color = ComposeUtil.greyColor)
                         }
                         Spacer(modifier = Modifier.height(18.dp))
                         AnalogOutAndRelayComposable(viewModel = vavModulatingViewModel)
@@ -128,10 +129,10 @@ class VavModulatingRtuFragment : ModulatingRtuFragment() {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(end = 60.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                        .padding(end = 40.dp),
+                    horizontalArrangement = Arrangement.Start
                 ) {
-                    DropDownWithLabel(label = "Analog-Out1 at\n Min Cooling",
+                    DropDownWithLabel(label = "Analog-Out1 at\nMin Cooling",
                         list = (0..10).map { it.toString() }, isHeader = false,
                         defaultSelection = viewState.analogOut1CoolingMin,
                         onSelected = {
@@ -139,8 +140,11 @@ class VavModulatingRtuFragment : ModulatingRtuFragment() {
                             vavModulatingViewModel.saveConfiguration()
                         },
                         isEnabled = viewState.isAnalog1OutputEnabled,
-                        spacerLimit = 72)
-                    DropDownWithLabel(label = "Analog-Out1 at\n Max Cooling",
+                        spacerLimit = 102,
+                        previewWidth = 100,
+                        expandedWidth = 120)
+                    Spacer(modifier = Modifier.width(130.dp))
+                    DropDownWithLabel(label = "Analog-Out1 at\nMax Cooling",
                         list = (0..10).map { it.toString() }, isHeader = false,
                         defaultSelection = viewState.analogOut1CoolingMax,
                         onSelected = {
@@ -148,7 +152,9 @@ class VavModulatingRtuFragment : ModulatingRtuFragment() {
                             vavModulatingViewModel.saveConfiguration()
                         },
                         isEnabled = viewState.isAnalog1OutputEnabled,
-                        spacerLimit = 65)
+                        spacerLimit = 147,
+                        previewWidth = 100,
+                        expandedWidth = 120)
                 }
             }
 
@@ -157,10 +163,10 @@ class VavModulatingRtuFragment : ModulatingRtuFragment() {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(end = 60.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                        .padding(end = 40.dp),
+                    horizontalArrangement = Arrangement.Start
                 ) {
-                    DropDownWithLabel(label = "Analog-Out2 at\n Min Static",
+                    DropDownWithLabel(label = "Analog-Out2 at\nMin Static",
                         list = (0..10).map { it.toString() }, isHeader = false,
                         defaultSelection = viewState.analogOut2StaticPressureMin,
                         onSelected = {
@@ -168,8 +174,11 @@ class VavModulatingRtuFragment : ModulatingRtuFragment() {
                             vavModulatingViewModel.saveConfiguration()
                         },
                         isEnabled = viewState.isAnalog2OutputEnabled,
-                        spacerLimit = 72)
-                    DropDownWithLabel(label = "Analog-Out2 at\n Max Static",
+                        spacerLimit = 102,
+                        previewWidth = 100,
+                        expandedWidth = 120)
+                    Spacer(modifier = Modifier.width(130.dp))
+                    DropDownWithLabel(label = "Analog-Out2 at\nMax Static",
                         list = (0..10).map { it.toString() }, isHeader = false,
                         defaultSelection = viewState.analogOut2StaticPressureMax,
                         onSelected = {
@@ -177,7 +186,9 @@ class VavModulatingRtuFragment : ModulatingRtuFragment() {
                             vavModulatingViewModel.saveConfiguration()
                         },
                         isEnabled = viewState.isAnalog2OutputEnabled,
-                        spacerLimit = 65)
+                        spacerLimit = 147,
+                        previewWidth = 100,
+                        expandedWidth = 120)
                 }
             }
 
@@ -186,10 +197,10 @@ class VavModulatingRtuFragment : ModulatingRtuFragment() {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(end = 60.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                        .padding(end = 40.dp),
+                    horizontalArrangement = Arrangement.Start
                 ) {
-                    DropDownWithLabel(label = "Analog-Out3 at\n Min Heating",
+                    DropDownWithLabel(label = "Analog-Out3 at\nMin Heating",
                         list = (0..10).map { it.toString() }, isHeader = false,
                         defaultSelection = viewState.analogOut3HeatingMin,
                         onSelected = {
@@ -197,8 +208,11 @@ class VavModulatingRtuFragment : ModulatingRtuFragment() {
                             vavModulatingViewModel.saveConfiguration()
                         },
                         isEnabled = viewState.isAnalog3OutputEnabled,
-                        spacerLimit = 72)
-                    DropDownWithLabel(label = "Analog-Out3 at\n Max Heating",
+                        spacerLimit = 102,
+                        previewWidth = 100,
+                        expandedWidth = 120)
+                    Spacer(modifier = Modifier.width(130.dp))
+                    DropDownWithLabel(label = "Analog-Out3 at\nMax Heating",
                         list = (0..10).map { it.toString() }, isHeader = false,
                         defaultSelection = viewState.analogOut3HeatingMax,
                         onSelected = {
@@ -206,7 +220,9 @@ class VavModulatingRtuFragment : ModulatingRtuFragment() {
                             vavModulatingViewModel.saveConfiguration()
                         },
                         isEnabled = viewState.isAnalog3OutputEnabled,
-                        spacerLimit = 65)
+                        spacerLimit = 147,
+                        previewWidth = 100,
+                        expandedWidth = 120)
                 }
             }
 
@@ -215,10 +231,10 @@ class VavModulatingRtuFragment : ModulatingRtuFragment() {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(end = 60.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                        .padding(end = 40.dp),
+                    horizontalArrangement = Arrangement.Start
                 ) {
-                    DropDownWithLabel(label = "Analog-Out4 at\n Min Fresh Air",
+                    DropDownWithLabel(label = "Analog-Out4 at\nMin Fresh Air",
                         list = (0..10).map { it.toString() }, isHeader = false,
                         defaultSelection = viewState.analogOut4FreshAirMin,
                         onSelected = {
@@ -226,8 +242,11 @@ class VavModulatingRtuFragment : ModulatingRtuFragment() {
                             vavModulatingViewModel.saveConfiguration()
                         },
                         isEnabled = viewState.isAnalog4OutputEnabled,
-                        spacerLimit = 72)
-                    DropDownWithLabel(label = "Analog-Out4 at\n Max Fresh Air",
+                        spacerLimit = 102,
+                        previewWidth = 100,
+                        expandedWidth = 120)
+                    Spacer(modifier = Modifier.width(130.dp))
+                    DropDownWithLabel(label = "Analog-Out4 at\nMax Fresh Air",
                         list = (0..10).map { it.toString() }, isHeader = false,
                         defaultSelection = vavModulatingViewModel.viewState.analogOut4FreshAirMax,
                         onSelected = {
@@ -235,7 +254,9 @@ class VavModulatingRtuFragment : ModulatingRtuFragment() {
                             vavModulatingViewModel.saveConfiguration()
                         },
                         isEnabled = viewState.isAnalog4OutputEnabled,
-                        spacerLimit = 65)
+                        spacerLimit = 147,
+                        previewWidth = 100,
+                        expandedWidth = 120)
                 }
             }
         }

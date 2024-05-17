@@ -144,6 +144,7 @@ open class StagedRtuProfileViewModel : ViewModel() {
     }
 
     fun sendAnalogTestSignal(value: Double) {
+        Globals.getInstance().setTestMode(true)
         Domain.cmBoardDevice.analog2Out.writeHisVal(10 * value)
         MeshUtil.sendStructToCM(DeviceUtil.getCMControlsMessage())
     }

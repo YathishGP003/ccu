@@ -219,6 +219,7 @@ public class RemoteCommandHandlerUtil {
         if(logLevelValue == -1)
             return;
         CCUHsApi.getInstance().writeHisValByQuery(Queries.LOG_LEVEL_QUERY,logLevelValue);
+        CCUHsApi.getInstance().setCcuLogLevel(logLevelValue);
     }
 
     private static void saveImportantDataBeforeSaveLogs() {

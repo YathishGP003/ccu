@@ -3541,6 +3541,9 @@ public class CCUHsApi
         return null;
     }
 
+    public void setCcuLogLevel(double ccuLogLevel) {
+        CCUHsApi.ccuLogLevel = (int) ccuLogLevel;
+    }
     public int getCcuLogLevel() {
         try {
             if(ccuLogLevel > 0){

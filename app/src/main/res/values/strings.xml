@@ -345,6 +345,22 @@
         <item>  @string/duct_pressure </item>
     </string-array>
 
+    <string-array name="hyperstat_cpu_thermistor_in_selector_th1">
+        <item>  Airflow Temperature </item>
+        <item>  Generic Fault (NC) </item>
+        <item>  Generic Fault (NO) </item>
+    </string-array>
+
+    <string-array name="hyperstat_cpu_thermistor_in_selector_th2">
+        <item>  Door/Window Sensor (TH2) </item>
+        <item>  Generic Fault (NC) </item>
+        <item>  Generic Fault (NO) </item>
+    </string-array>
+
+    <string-array name="hyperstat_pipe2_thermistor_in_selector_th2">
+        <item>  Supply Water Temperature </item>
+    </string-array>
+
     <string-array name="hyperstat_analog_in_selector_ai1">
         <item>  Current TX (0-10Amps) </item>
         <item>  Current TX (0-20Amps) </item>
@@ -659,6 +675,7 @@
     <string name="analog3">Analog-out3</string>
     <string name="door_window_sensor">Door/Window Sensor (Th2)</string>
     <string name="supply_water_sensor">Supply Water Sensor</string>
+    <string name="thermistor_1">Thermistor 1</string>
     <string name="thermistor_2">Thermistor 2</string>
     <string name="analogin_1">Analog-in1</string>
     <string name="analogin_2">Analog-in2</string>

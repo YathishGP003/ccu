@@ -88,15 +88,6 @@ class Pipe2ViewModel(application: Application) : HyperStatViewModel(application)
         return getApplication<Application>().resources.getStringArray(R.array.hyperstat_pipe2_analog_out_selector)
     }
 
-    override fun th2SwitchChanged(checked: Boolean) {
-    // For 2 pipe profile we should not allow user to operate the toggle
-    // viewState.onNext(currentState.copy(th2Enabled = checked ))
-    }
-
-    override fun getTh2SensorLabel(): String {
-        return getApplication<Application>().getString(R.string.supply_water_sensor)
-    }
-
     override fun isDamperSelected(association: Int): Boolean{
         return (association == Pipe2AnalogOutAssociation.DCV_DAMPER.ordinal)
     }

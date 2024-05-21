@@ -33,8 +33,8 @@ class CpuReconfiguration {
                 Port.ANALOG_OUT_THREE -> config.analogOut3State = config.analogOut3State.copy(enabled = status == 1.0)
                 Port.ANALOG_IN_ONE -> config.analogIn1State = config.analogIn1State.copy(enabled = status == 1.0)
                 Port.ANALOG_IN_TWO -> config.analogIn2State = config.analogIn2State.copy(enabled = status == 1.0)
-                Port.TH1_IN -> config.isEnableAirFlowTempSensor = status == 1.0
-                Port.TH2_IN -> config.isEnableDoorWindowSensor = status == 1.0
+                Port.TH1_IN -> config.thermistorIn1State = config.thermistorIn1State.copy(enabled = status == 1.0)
+                Port.TH2_IN -> config.thermistorIn2State = config.thermistorIn2State.copy(enabled = status == 1.0)
                 else -> {}
 
             }
@@ -64,8 +64,8 @@ class CpuReconfiguration {
                 temperatureOffset = original.temperatureOffset
                 isEnableAutoForceOccupied = original.isEnableAutoForceOccupied
                 isEnableAutoAway = original.isEnableAutoAway
-                isEnableAirFlowTempSensor = original.isEnableAirFlowTempSensor
-                isEnableDoorWindowSensor = original.isEnableDoorWindowSensor
+                thermistorIn1State = original.thermistorIn1State
+                thermistorIn2State = original.thermistorIn2State
                 relay1State = original.relay1State
                 relay2State = original.relay2State
                 relay3State = original.relay3State

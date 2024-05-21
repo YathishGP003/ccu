@@ -706,44 +706,65 @@ class HyperStatPointsUtil(
 
     // Function which creates Th1,Th2 config Points
     fun createIsThermistorEnabledConfigPoints(
-        thIn1: ConfigState, thIn2: ConfigState, is2PipeProfile: Boolean
+        thIn1: ConfigState, thIn2: ConfigState
     ): MutableList<Pair<Point, Any>> {
-        val thEnum = "false,true"
-        val configThPointsList: MutableList<Pair<Point, Any>> = LinkedList()
-        val th1PointMarkers = arrayOf(
-            "temp", "zone", "config", "enabled", "writable", "discharge",
-              "air","cmd"
-        )
-        val th1Point = createHaystackPointWithEnums(
-            "$equipDis-enableAirflowTempSensor",
-            th1PointMarkers,
-            thEnum,
+
+        val configThermistorInPointsList: MutableList<Pair<Point, Any>> = LinkedList()
+
+        val thermistorInEnum = "false,true"
+
+        val thermistorMarkers: MutableList<String> = LinkedList()
+        thermistorMarkers.addAll(
+            arrayOf("config", "writable", "zone", "input")
         )
 
-        if(is2PipeProfile){
-            val supplyWaterSensor = arrayOf(
-                "temp", "zone", "config", "enabled", "writable", "cmd","water","supply"
-            )
-            val th2Point = createHaystackPointWithEnums(
-                "$equipDis-enableSupplyWaterSensor",
-                supplyWaterSensor,
-                thEnum
-            )
-            configThPointsList.add(Pair(th2Point, if (thIn2.enabled) 1.0 else 0.0))
-        }else{
-            val doorWindowMarkers = arrayOf(
-                "temp", "zone", "config", "enabled", "writable", "window"
-            )
-            val th2Point = createHaystackPointWithEnums(
-                "$equipDis-enableDoorWindowSensor",
-                doorWindowMarkers,
-                thEnum
-            )
-            configThPointsList.add(Pair(th2Point, if (thIn2.enabled) 1.0 else 0.0))
-        }
+        thermistorMarkers.add("th1")
+        thermistorMarkers.add("enabled")
+        val thermistorIn1Point = createHaystackPointWithOnlyEnum(
+            "$equipDis-thIn1Enabled",
+            thermistorMarkers.stream().toArray { arrayOfNulls(it) },
+            thermistorInEnum
+        )
+        thermistorMarkers.add("association")
+        thermistorMarkers.remove("enabled")
+        val thermistorIn1AssociationPoint = createHaystackPointWithOnlyEnum(
+            "$equipDis-thIn1Association",
+            thermistorMarkers.stream().toArray { arrayOfNulls(it) },
+            thermistorInEnum
+        )
+        thermistorMarkers.remove("association")
+        thermistorMarkers.remove("th1")
 
-        configThPointsList.add(Pair(th1Point, if (thIn1.enabled) 1.0 else 0.0))
-        return configThPointsList
+
+        thermistorMarkers.add("th2")
+        thermistorMarkers.add("enabled")
+
+        val thermistorIn2Point = createHaystackPointWithOnlyEnum(
+            "$equipDis-thIn2Enabled",
+            thermistorMarkers.stream().toArray { arrayOfNulls(it) },
+            thermistorInEnum
+        )
+        thermistorMarkers.add("association")
+        thermistorMarkers.remove("enabled")
+
+        val thermistorIn2AssociationPoint = createHaystackPointWithOnlyEnum(
+            "$equipDis-thIn2Association",
+            thermistorMarkers.stream().toArray { arrayOfNulls(it) },
+            thermistorInEnum
+        )
+        thermistorMarkers.remove("association")
+        thermistorMarkers.remove("th2")
+
+        // Analog Enable/Disable Points
+        configThermistorInPointsList.add(Pair(thermistorIn1Point, if (thIn1.enabled) 1.0 else 0.0))
+        configThermistorInPointsList.add(Pair(thermistorIn2Point, if (thIn2.enabled) 1.0 else 0.0))
+
+        // Analog in Association points
+        configThermistorInPointsList.add( Pair(thermistorIn1AssociationPoint, thIn1.association))
+        configThermistorInPointsList.add( Pair(thermistorIn2AssociationPoint, thIn2.association))
+
+        return configThermistorInPointsList
+
     }
 
     // Function to create autoaway and auto force occupy point
@@ -1503,38 +1524,43 @@ class HyperStatPointsUtil(
         return configLogicalPointsList
     }
 
-
-    fun createAirflowTempSensor(): Point{
-       return LogicalPointsUtil.createPointForAirflowTempSensor(equipDis,siteRef,equipRef,roomRef,floorRef,tz, nodeAddress.toInt())
-    }
-
-    fun createPointForDoorWindowSensor(windowSensorType: LogicalPointsUtil.WindowSensorType): Point{
-       return LogicalPointsUtil.createPointForDoorWindowSensor(equipDis,siteRef,equipRef,roomRef,floorRef,tz,windowSensorType)
-    }
-
     fun createConfigThermistorInLogicalPoints(
-        isEnableAirFlowTempSensorEnabled: Boolean,
-        isTh2ConfigEnabled: Boolean,
-        isPipe2Config: Boolean
+        thIn1State: Th1InState,
+        thIn2State: Th2InState
     ): MutableList<Triple<Point, Any, Any>> {
 
         val configLogicalPointsList: MutableList<Triple<Point, Any, Any>> = LinkedList()
-        if (isEnableAirFlowTempSensorEnabled) {
-            val pointData: Point = LogicalPointsUtil.createPointForAirflowTempSensor(equipDis,siteRef,equipRef,roomRef,floorRef,tz, nodeAddress.toInt())
+
+        if (thIn1State.enabled) {
+            val pointData: Point = th1InConfiguration(th1InState = thIn1State)
             configLogicalPointsList.add(Triple(pointData, Port.TH1_IN, 0.0))
         }
-        if(isTh2ConfigEnabled) {
-            if(isPipe2Config){
-                val waterSupplySensor = LogicalPointsUtil.createPointForWaterSupplyTempSensor(equipDis,siteRef,equipRef,roomRef,floorRef,tz)
-                configLogicalPointsList.add(Triple(waterSupplySensor, Port.TH2_IN, 0.0))
-            }else{
-                val doorWindowSensorTh2Point = LogicalPointsUtil.createPointForDoorWindowSensor(equipDis,siteRef,equipRef,roomRef,floorRef,tz,LogicalPointsUtil.WindowSensorType.WINDOW_SENSOR)
-                configLogicalPointsList.add(Triple(doorWindowSensorTh2Point, Port.TH2_IN, 0.0))
-            }
+        if (thIn2State.enabled) {
+            val pointData: Point = th2InConfiguration(th2InState = thIn2State)
+            configLogicalPointsList.add(Triple(pointData, Port.TH2_IN, 0.0))
         }
+
         return configLogicalPointsList
     }
 
+    fun createConfigThermistorInLogicalPoints(
+        thIn1State: Pipe2Th1InState,
+        thIn2State: Pipe2Th2InState
+    ): MutableList<Triple<Point, Any, Any>> {
+
+        val configLogicalPointsList: MutableList<Triple<Point, Any, Any>> = LinkedList()
+
+        if (thIn1State.enabled) {
+            val pointData: Point = th1InConfiguration(th1InState = thIn1State)
+            configLogicalPointsList.add(Triple(pointData, Port.TH1_IN, 0.0))
+        }
+        if (thIn2State.enabled) {
+            val pointData: Point = th2InConfiguration(th2InState = thIn2State)
+            configLogicalPointsList.add(Triple(pointData, Port.TH2_IN, 0.0))
+        }
+
+        return configLogicalPointsList
+    }
 
     private fun getFanStageValueForCPU(relayState: RelayState): Int{
         return when(relayState.association){
@@ -1577,6 +1603,55 @@ class HyperStatPointsUtil(
             }
             else -> Point.Builder().build()
         }
+    }
+
+    fun th1InConfiguration(th1InState: Th1InState): Point {
+        return when {
+            (HyperStatAssociationUtil.isTh1InAssociatedToAirflowTemperature(th1InState)) -> {
+                LogicalPointsUtil.createPointForAirflowTempSensor(equipDis,siteRef,equipRef,roomRef,floorRef,tz, nodeAddress.toInt())
+            }
+            (HyperStatAssociationUtil.isTh1InAssociatedToGenericFaultNC(th1InState)) -> {
+                LogicalPointsUtil.createPointForGenericFaultNC(equipDis,siteRef,equipRef,roomRef,floorRef,tz, nodeAddress)
+            }
+            (HyperStatAssociationUtil.isTh1InAssociatedToGenericFaultNO(th1InState)) -> {
+                LogicalPointsUtil.createPointForGenericFaultNO(equipDis,siteRef,equipRef,roomRef,floorRef,tz, nodeAddress)
+            }
+            else -> Point.Builder().build()
+        }
+    }
+
+    fun th1InConfiguration(th1InState: Pipe2Th1InState): Point {
+        return when {
+            (HyperStatAssociationUtil.isTh1InAssociatedToAirflowTemperature(th1InState)) -> {
+                LogicalPointsUtil.createPointForAirflowTempSensor(equipDis,siteRef,equipRef,roomRef,floorRef,tz, nodeAddress.toInt())
+            }
+            (HyperStatAssociationUtil.isTh1InAssociatedToGenericFaultNC(th1InState)) -> {
+                LogicalPointsUtil.createPointForGenericFaultNC(equipDis,siteRef,equipRef,roomRef,floorRef,tz, nodeAddress)
+            }
+            (HyperStatAssociationUtil.isTh1InAssociatedToGenericFaultNO(th1InState)) -> {
+                LogicalPointsUtil.createPointForGenericFaultNO(equipDis,siteRef,equipRef,roomRef,floorRef,tz, nodeAddress)
+            }
+            else -> Point.Builder().build()
+        }
+    }
+
+    fun th2InConfiguration(th2InState: Th2InState): Point {
+        return when {
+            (HyperStatAssociationUtil.isTh2InAssociatedToDoorWindowSensor(th2InState)) -> {
+                LogicalPointsUtil.createPointForDoorWindowSensor(equipDis,siteRef,equipRef,roomRef,floorRef,tz,LogicalPointsUtil.WindowSensorType.WINDOW_SENSOR)
+            }
+            (HyperStatAssociationUtil.isTh2InAssociatedToGenericFaultNC(th2InState)) -> {
+                LogicalPointsUtil.createPointForGenericFaultNC(equipDis,siteRef,equipRef,roomRef,floorRef,tz, nodeAddress)
+            }
+            (HyperStatAssociationUtil.isTh2InAssociatedToGenericFaultNO(th2InState)) -> {
+                LogicalPointsUtil.createPointForGenericFaultNO(equipDis,siteRef,equipRef,roomRef,floorRef,tz, nodeAddress)
+            }
+            else -> Point.Builder().build()
+        }
+    }
+
+    fun th2InConfiguration(th2InState: Pipe2Th2InState): Point {
+        return LogicalPointsUtil.createPointForWaterSupplyTempSensor(equipDis,siteRef,equipRef,roomRef,floorRef,tz)
     }
 
 

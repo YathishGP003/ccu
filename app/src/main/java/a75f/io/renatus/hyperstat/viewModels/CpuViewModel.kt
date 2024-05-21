@@ -83,7 +83,6 @@ class CpuViewModel(application: Application) : HyperStatViewModel(application)  
 
     }
 
-
     override fun getRelayMapping(): Array<String> {
         return getApplication<Application>().resources.getStringArray(R.array.hyperstat_stage_selector)
 
@@ -93,24 +92,8 @@ class CpuViewModel(application: Application) : HyperStatViewModel(application)  
         return getApplication<Application>().resources.getStringArray(R.array.hyperstat_analog_out_selector)
     }
 
-    override fun th2SwitchChanged(checked: Boolean) {
-        doorWindowSensorSwitchChanged(checked)
-    }
-
-
-    private fun doorWindowSensorSwitchChanged(checked: Boolean) {
-        viewState.onNext(
-            currentState.copy(
-                th2Enabled = checked
-            )
-        )
-    }
     override fun isDamperSelected(association: Int): Boolean{
         return (association == CpuAnalogOutAssociation.DCV_DAMPER.ordinal)
-    }
-
-    override fun getTh2SensorLabel(): String {
-        return  getApplication<Application>().getString(R.string.door_window_sensor)
     }
 
     override fun isProfileConfigured() :Boolean {

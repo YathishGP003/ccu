@@ -113,6 +113,7 @@ public class PreferenceUtil {
 
     public static final String VAV_REHEAT_RELAY_ACTIVATION_HYSTERESIS_VALUE_MIGRATION = "vavReheatRelayActivationHysteresisValueMigration";
     public static final String HSS_OP_MODE_WRITABLE_MARKER_MIGRATION = "hssOpModeWritableMarkerMigration";
+    public static final String HS_TH_CONFIG_MIGRATION = "hsThConfigMigration";
 
     public static void setContext(Context c) {
         context= c;
@@ -913,6 +914,14 @@ public class PreferenceUtil {
 
     public static void setHssOpModeWritableMarkerMigration() {
         setBooleanPreference(HSS_OP_MODE_WRITABLE_MARKER_MIGRATION, true);
+    }
+
+    public static boolean getHyperStatThermistorConfigMigration() {
+        return getBooleanPreference(HS_TH_CONFIG_MIGRATION);
+    }
+
+    public static void setHyperStatThermistorConfigMigration() {
+        setBooleanPreference(HS_TH_CONFIG_MIGRATION, true);
     }
 
 }

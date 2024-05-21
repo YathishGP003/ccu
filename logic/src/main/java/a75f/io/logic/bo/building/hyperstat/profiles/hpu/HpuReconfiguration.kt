@@ -55,8 +55,10 @@ class HpuReconfiguration {
                     config.analogIn1State.copy(enabled = status == 1.0)
                 Port.ANALOG_IN_TWO -> config.analogIn2State =
                     config.analogIn2State.copy(enabled = status == 1.0)
-                Port.TH1_IN -> config.isEnableAirFlowTempSensor = status == 1.0
-                Port.TH2_IN -> config.isEnableDoorWindowSensor = status == 1.0
+                Port.TH1_IN -> config.thermistorIn1State =
+                    config.thermistorIn1State.copy(enabled = status == 1.0)
+                Port.TH2_IN -> config.thermistorIn2State =
+                    config.thermistorIn2State.copy(enabled = status == 1.0)
                 else -> {}
 
             }
@@ -103,8 +105,6 @@ class HpuReconfiguration {
                 temperatureOffset = original.temperatureOffset
                 isEnableAutoForceOccupied = original.isEnableAutoForceOccupied
                 isEnableAutoAway = original.isEnableAutoAway
-                isEnableAirFlowTempSensor = original.isEnableAirFlowTempSensor
-                isEnableDoorWindowSensor = original.isEnableDoorWindowSensor
                 relay1State = original.relay1State
                 relay2State = original.relay2State
                 relay3State = original.relay3State
@@ -116,6 +116,8 @@ class HpuReconfiguration {
                 analogOut3State = original.analogOut3State
                 analogIn1State = original.analogIn1State
                 analogIn2State = original.analogIn2State
+                thermistorIn1State = original.thermistorIn1State
+                thermistorIn2State = original.thermistorIn2State
                 zoneCO2DamperOpeningRate = original.zoneCO2DamperOpeningRate
                 zoneCO2Threshold = original.zoneCO2Threshold
                 zoneCO2Target = original.zoneCO2Target

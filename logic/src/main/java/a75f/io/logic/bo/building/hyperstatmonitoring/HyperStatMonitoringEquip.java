@@ -17,6 +17,7 @@ import a75f.io.logic.UtilKt;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.heartbeat.HeartBeat;
+import a75f.io.logic.bo.building.sensors.SensorType;
 import a75f.io.logic.bo.haystack.device.DeviceUtil;
 import a75f.io.logic.bo.haystack.device.HyperStatDevice;
 import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint;
@@ -322,14 +323,14 @@ public class HyperStatMonitoringEquip {
             String sensorId = createSensorPoint(floorRef, roomRef, "th1", config);
             device.th1In.setPointRef(sensorId);
             device.th1In.setEnabled(true);
-            device.th1In.setType(String.valueOf(config.th1Sensor));
+            device.th1In.setType(String.valueOf(getThermistorType(config, false)));
         }
 
         if (config.isTh2Enable) {
             String sensorId = createSensorPoint(floorRef, roomRef, "th2", config);
             device.th2In.setPointRef(sensorId);
             device.th2In.setEnabled(true);
-            device.th2In.setType(String.valueOf(config.th2Sensor));
+            device.th2In.setType(String.valueOf(getThermistorType(config, true)));
         }
         device.currentTemp.setPointRef(ctID);
         device.currentTemp.setEnabled(true);
@@ -341,6 +342,25 @@ public class HyperStatMonitoringEquip {
         device.rssi.setEnabled(true);
         device.addPointsToDb();
         mHayStack.syncEntityTree();
+    }
+
+    private int getThermistorType(HyperStatMonitoringConfiguration config, boolean isTh2) {
+        // This is a hard-coded mess. It will be cleaned up when HS Monitoring profile is migrated to use DM.
+        if (isTh2) {
+            if (config.th2Sensor == 2) {
+                return SensorType.GENERIC_NC.ordinal();
+            } else if (config.th2Sensor == 3) {
+                return SensorType.GENERIC_NO.ordinal();
+            }
+            return config.th2Sensor;
+        } else {
+            if (config.th1Sensor == 2) {
+                return SensorType.GENERIC_NC.ordinal();
+            } else if (config.th1Sensor == 3) {
+                return SensorType.GENERIC_NO.ordinal();
+            }
+            return config.th1Sensor;
+        }
     }
 
     public void update(ProfileType type, int node, HyperStatMonitoringConfiguration config, String floorRef, String roomRef) {

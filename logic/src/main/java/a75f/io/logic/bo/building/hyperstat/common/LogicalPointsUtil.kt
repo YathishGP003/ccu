@@ -11,8 +11,14 @@ import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.AnalogInAssociation
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.AnalogInState
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.HyperStatCpuConfiguration
+import a75f.io.logic.bo.building.hyperstat.profiles.cpu.Th1InAssociation
+import a75f.io.logic.bo.building.hyperstat.profiles.cpu.Th1InState
+import a75f.io.logic.bo.building.hyperstat.profiles.cpu.Th2InAssociation
+import a75f.io.logic.bo.building.hyperstat.profiles.cpu.Th2InState
 import a75f.io.logic.bo.building.hyperstat.profiles.hpu.HyperStatHpuConfiguration
 import a75f.io.logic.bo.building.hyperstat.profiles.pipe2.HyperStatPipe2Configuration
+import a75f.io.logic.bo.building.hyperstat.profiles.pipe2.Pipe2Th1InState
+import a75f.io.logic.bo.building.hyperstat.profiles.pipe2.Pipe2Th2InState
 import java.util.HashMap
 
 /**
@@ -883,6 +889,60 @@ class LogicalPointsUtil {
             return point.build()
         }
 
+        fun createPointForGenericFaultNC(
+            equipDis: String, siteRef: String, equipRef: String,
+            roomRef: String, floorRef: String, tz: String, nodeAddress: String
+        ): Point {
+
+            val existingPoint = readGenericFaultNC(equipRef)
+            if(existingPoint.isEmpty()) {
+
+                val markers = arrayOf(
+                    "cur", "his", "zone", "standalone", "cpu", "generic", "sensor", "alarm", "normallyClosed"
+                )
+
+                val point = Point.Builder()
+                    .setDisplayName("$equipDis-genericFaultNC")
+                    .setGroup(nodeAddress)
+                    .setSiteRef(siteRef).setEquipRef(equipRef)
+                    .setRoomRef(roomRef).setFloorRef(floorRef)
+                    .setTz(tz).setHisInterpolate("cov")
+                    .setEnums("normal,fault")
+                markers.forEach { point.addMarker(it) }
+                val builtPoint = point.build()
+                addBacnetTags(builtPoint, 91, BINARY_VALUE, nodeAddress.toInt())
+                addPointToHaystack(builtPoint)
+            }
+            return Point.Builder().setHashMap(readGenericFaultNC(equipRef)).build()
+        }
+
+        fun createPointForGenericFaultNO(
+            equipDis: String, siteRef: String, equipRef: String,
+            roomRef: String, floorRef: String, tz: String, nodeAddress: String
+        ): Point {
+
+            val existingPoint = readGenericFaultNO(equipRef)
+            if(existingPoint.isEmpty()) {
+
+                val markers = arrayOf(
+                    "cur", "his", "zone", "standalone", "cpu", "generic", "sensor", "alarm", "normallyOpen"
+                )
+
+                val point = Point.Builder()
+                    .setDisplayName("$equipDis-genericFaultNO")
+                    .setGroup(nodeAddress)
+                    .setSiteRef(siteRef).setEquipRef(equipRef)
+                    .setRoomRef(roomRef).setFloorRef(floorRef)
+                    .setTz(tz).setHisInterpolate("cov")
+                    .setEnums("normal,fault")
+                markers.forEach { point.addMarker(it) }
+                val builtPoint = point.build()
+                addBacnetTags(builtPoint, 91, BINARY_VALUE, nodeAddress.toInt())
+                addPointToHaystack(builtPoint)
+            }
+            return Point.Builder().setHashMap(readGenericFaultNO(equipRef)).build()
+        }
+
         fun createPointForKeyCardSensor(
             equipDis: String, siteRef: String, equipRef: String,
             roomRef: String, floorRef: String, tz: String,
@@ -979,6 +1039,18 @@ class LogicalPointsUtil {
             return CCUHsApi.getInstance().readEntity(
                 "logical and sensor and contact and door and $window and equipRef == \"$equipRef\"")
         }
+        fun readAirflowTemperatureSensor(equipRef: String): HashMap<Any, Any> {
+            return CCUHsApi.getInstance().readEntity(
+                "logical and sensor and temp and discharge and air and equipRef == \"$equipRef\"")
+        }
+        private fun readGenericFaultNC(equipRef: String): HashMap<Any, Any> {
+            return CCUHsApi.getInstance().readEntity(
+                "generic and sensor and alarm and normallyClosed and zone and equipRef == \"$equipRef\"")
+        }
+        private fun readGenericFaultNO(equipRef: String): HashMap<Any, Any> {
+            return CCUHsApi.getInstance().readEntity(
+                "generic and sensor and alarm and normallyOpen and zone and equipRef == \"$equipRef\"")
+        }
 
         private fun readKeycardSensor(equipRef: String, keycardType: KeyCardSensorType): HashMap<Any, Any> {
             var keycardMarker ="keycard"
@@ -997,6 +1069,7 @@ class LogicalPointsUtil {
             removeCpuRelayLogicalPoints(config, equipRef)
             removeCpuAnalogLogicalPoints(config, equipRef)
             removeAnalogInLogicalPoints(equipRef,config,ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT)
+            removeThermistorInLogicalPoints(equipRef,config)
         }
         private fun removeCpuRelayLogicalPoints(config: HyperStatCpuConfiguration, equipRef: String){
             if(!HyperStatAssociationUtil.isAnyRelayAssociatedToCoolingStage1(config))
@@ -1043,6 +1116,7 @@ class LogicalPointsUtil {
             removePipe2RelayLogicalPoints(config, equipRef)
             removePipe2AnalogLogicalPoints(config, equipRef)
             removeAnalogInLogicalPoints(equipRef,config,ProfileType.HYPERSTAT_TWO_PIPE_FCU)
+            removeThermistorInLogicalPoints(equipRef,config)
         }
         private fun removePipe2RelayLogicalPoints(config: HyperStatPipe2Configuration, equipRef: String){
             if(!HyperStatAssociationUtil.isAnyRelayAssociatedToAuxHeatingStage1(config))
@@ -1079,6 +1153,7 @@ class LogicalPointsUtil {
             removeHpuRelayLogicalPoints(config, equipRef)
             removeHpuAnalogLogicalPoints(config, equipRef)
             removeAnalogInLogicalPoints(equipRef,config,ProfileType.HYPERSTAT_HEAT_PUMP_UNIT)
+            removeThermistorInLogicalPoints(equipRef,config)
         }
         private fun removeHpuRelayLogicalPoints(config: HyperStatHpuConfiguration, equipRef: String){
             if(!HyperStatAssociationUtil.isAnyHpuRelayAssociatedToCompressorStage1(config))
@@ -1178,6 +1253,52 @@ class LogicalPointsUtil {
                 CCUHsApi.getInstance().deleteEntityTree(Point.Builder().setHashMap(point).build().id)
             }
         }
+
+        private fun removeThermistorInLogicalPoints(equipRef: String, config: HyperStatCpuConfiguration) {
+
+            var thIn1State = Th1InState(config.thermistorIn1State.enabled, config.thermistorIn1State.association)
+            var thIn2State = Th2InState(config.thermistorIn2State.enabled, config.thermistorIn2State.association)
+
+            if(!HyperStatAssociationUtil.isTh1AirflowSensorEnabled(thIn1State))
+                removePoint(readAirflowTemperatureSensor(equipRef))
+            if(!HyperStatAssociationUtil.isTh2DoorWindowSensorEnabled(thIn2State))
+                removePoint(readDoorWindowSensor(equipRef,WindowSensorType.WINDOW_SENSOR))
+            if(!HyperStatAssociationUtil.isAnyThermistorAssociatedToGenericFaultNC(thIn1State, thIn2State))
+                removePoint(readGenericFaultNC(equipRef))
+            if(!HyperStatAssociationUtil.isAnyThermistorAssociatedToGenericFaultNO(thIn1State, thIn2State))
+                removePoint(readGenericFaultNO(equipRef))
+
+        }
+
+        private fun removeThermistorInLogicalPoints(equipRef: String, config: HyperStatHpuConfiguration) {
+
+            var thIn1State = Th1InState(config.thermistorIn1State.enabled, config.thermistorIn1State.association)
+            var thIn2State = Th2InState(config.thermistorIn2State.enabled, config.thermistorIn2State.association)
+
+            if(!HyperStatAssociationUtil.isTh1AirflowSensorEnabled(thIn1State))
+                removePoint(readAirflowTemperatureSensor(equipRef))
+            if(!HyperStatAssociationUtil.isTh2DoorWindowSensorEnabled(thIn2State))
+                removePoint(readDoorWindowSensor(equipRef,WindowSensorType.WINDOW_SENSOR))
+            if(!HyperStatAssociationUtil.isAnyThermistorAssociatedToGenericFaultNC(thIn1State, thIn2State))
+                removePoint(readGenericFaultNC(equipRef))
+            if(!HyperStatAssociationUtil.isAnyThermistorAssociatedToGenericFaultNO(thIn1State, thIn2State))
+                removePoint(readGenericFaultNO(equipRef))
+
+        }
+
+        private fun removeThermistorInLogicalPoints(equipRef: String, config: HyperStatPipe2Configuration) {
+
+            var thIn1State = Pipe2Th1InState(config.thermistorIn1State.enabled, config.thermistorIn1State.association)
+
+            if(!HyperStatAssociationUtil.isTh1AirflowSensorEnabled(thIn1State))
+                removePoint(readAirflowTemperatureSensor(equipRef))
+            if(!HyperStatAssociationUtil.isTh1GenericFaultNCEnabled(thIn1State))
+                removePoint(readGenericFaultNC(equipRef))
+            if(!HyperStatAssociationUtil.isTh1GenericFaultNOEnabled(thIn1State))
+                removePoint(readGenericFaultNO(equipRef))
+
+        }
+
     }
 
 

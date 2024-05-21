@@ -226,15 +226,27 @@ abstract class HyperStatViewModel(application: Application) : AndroidViewModel(a
         )
     }
 
-    override fun airflowTempSensorSwitchChanged(checked: Boolean) {
+    override fun thermistorInSwitchChanged(index: Int, checked: Boolean) {
+        val thermistorIns = currentState.thermistorIns
+        val newThermistorIns = thermistorIns.updated(index, thermistorIns[index].copy(enabled = checked))
         viewState.onNext(
             currentState.copy(
-                airflowTempSensorEnabled = checked
+                thermistorIns = newThermistorIns
             )
         )
     }
 
-
+    override fun thermistorInMappingSelected(index: Int, position: Int) {
+        val thermistorIns = currentState.thermistorIns
+        val newThermistorIns = thermistorIns.updated(
+            index, thermistorIns[index].copy(association = position)
+        )
+        viewState.onNext(
+            currentState.copy(
+                thermistorIns = newThermistorIns
+            )
+        )
+    }
 
     override fun zoneCO2DamperOpeningRateSelect(position: Int) {
         viewState.onNext(
@@ -327,6 +339,10 @@ abstract class HyperStatViewModel(application: Application) : AndroidViewModel(a
     }
 
     override fun getRelayMappingAdapter(context: Context, values: Array<String>): ArrayAdapter<*> {
+        return CustomSpinnerDropDownAdapter(context , R.layout.spinner_dropdown_item, values.toMutableList())
+    }
+
+    override fun getTh2MappingAdapter(context: Context, values: Array<String>): ArrayAdapter<*> {
         return CustomSpinnerDropDownAdapter(context , R.layout.spinner_dropdown_item, values.toMutableList())
     }
 

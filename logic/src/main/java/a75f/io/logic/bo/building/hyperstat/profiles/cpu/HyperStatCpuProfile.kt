@@ -804,7 +804,7 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
         var analog2SensorEnabled = false
 
         // Thermistor 2 is always mapped to door window sensor
-        if (config.isEnableDoorWindowSensor) {
+        if (isDoorWindowSensorOnTh2(config)) {
             val sensorValue = equip.hsHaystackUtil.getSensorPointValue(
                 "door and window and logical and sensor"
             )
@@ -839,6 +839,10 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
             if (isDoorOpen) 1.0 else 0.0
         )
         return isDoorOpen
+    }
+
+    private fun isDoorWindowSensorOnTh2(config: HyperStatCpuConfiguration): Boolean {
+        return config.thermistorIn2State.enabled && config.thermistorIn2State.association.equals(Th2InAssociation.DOOR_WINDOW_SENSOR)
     }
 
     private fun resetLoopOutputValues() {

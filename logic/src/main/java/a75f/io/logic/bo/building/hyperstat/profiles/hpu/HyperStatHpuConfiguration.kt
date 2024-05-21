@@ -5,6 +5,10 @@ import a75f.io.logic.bo.building.Thermistor
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.AnalogInAssociation
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.AnalogInState
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.HyperStatCpuConfiguration
+import a75f.io.logic.bo.building.hyperstat.profiles.cpu.Th1InAssociation
+import a75f.io.logic.bo.building.hyperstat.profiles.cpu.Th1InState
+import a75f.io.logic.bo.building.hyperstat.profiles.cpu.Th2InAssociation
+import a75f.io.logic.bo.building.hyperstat.profiles.cpu.Th2InState
 
 /**
  * Created by Manjunath K on 28-12-2022.
@@ -27,8 +31,8 @@ class HyperStatHpuConfiguration: BaseProfileConfiguration() {
     var analogOut2State = HpuAnalogOutState(false, HpuAnalogOutAssociation.FAN_SPEED, 2.0, 10.0,70.0,80.0,100.0)
     var analogOut3State = HpuAnalogOutState(false, HpuAnalogOutAssociation.DCV_DAMPER, 2.0, 10.0,70.0,80.0,100.0)
 
-    var isEnableAirFlowTempSensor = false
-    var isEnableDoorWindowSensor = false
+    var thermistorIn1State = Th1InState(false, Th1InAssociation.AIRFLOW_TEMPERATURE)
+    var thermistorIn2State = Th2InState(false, Th2InAssociation.DOOR_WINDOW_SENSOR)
 
     var analogIn1State = AnalogInState(false, AnalogInAssociation.KEY_CARD_SENSOR)
     var analogIn2State = AnalogInState(false, AnalogInAssociation.DOOR_WINDOW_SENSOR)

@@ -91,6 +91,53 @@ class HyperStatAssociationUtil {
 
         }
 
+        // Function which returns the Relay Mapped state
+        fun getTh1InStage(state: Int): Th1InAssociation {
+            return when (state) {
+                // Order is important here
+                0 -> Th1InAssociation.AIRFLOW_TEMPERATURE
+                1 -> Th1InAssociation.GENERIC_FAULT_NC
+                2 -> Th1InAssociation.GENERIC_FAULT_NO
+
+                // assuming it never going to call
+                else -> Th1InAssociation.AIRFLOW_TEMPERATURE
+            }
+
+        }
+
+        // Function which returns the Relay Mapped state
+        fun getPipe2Th1InStage(state: Int): Pipe2Th1InAssociation {
+            return when (state) {
+                // Order is important here
+                0 -> Pipe2Th1InAssociation.AIRFLOW_TEMPERATURE
+                1 -> Pipe2Th1InAssociation.GENERIC_FAULT_NC
+                2 -> Pipe2Th1InAssociation.GENERIC_FAULT_NO
+
+                // assuming it never going to call
+                else -> Pipe2Th1InAssociation.AIRFLOW_TEMPERATURE
+            }
+
+        }
+
+        // Function which returns the Relay Mapped state
+        fun getTh2InStage(state: Int): Th2InAssociation {
+            return when (state) {
+                // Order is important here
+                0 -> Th2InAssociation.DOOR_WINDOW_SENSOR
+                1 -> Th2InAssociation.GENERIC_FAULT_NC
+                2 -> Th2InAssociation.GENERIC_FAULT_NO
+
+                // assuming it never going to call
+                else -> Th2InAssociation.DOOR_WINDOW_SENSOR
+            }
+
+        }
+
+        // Function which returns the Relay Mapped state
+        fun getPipe2Th2InStage(state: Int): Pipe2Th2InAssociation {
+            return Pipe2Th2InAssociation.SUPPLY_WATER_TEMPERATURE
+        }
+
         //Function which checks the Relay is Associated  to Fan Enabled
         fun isRelayAssociatedToFanEnabled(relayState: RelayState): Boolean {
             return (relayState.association == CpuRelayAssociation.FAN_ENABLED)
@@ -159,6 +206,42 @@ class HyperStatAssociationUtil {
         //Function which checks the Analog in is Associated  to CURRENT_TX_0_10
         fun isAnalogInAssociatedToKeyCardSensor(analogIn: AnalogInState): Boolean {
             return (analogIn.association == AnalogInAssociation.KEY_CARD_SENSOR)
+        }
+
+        fun isTh1InAssociatedToAirflowTemperature(th1In: Th1InState): Boolean {
+            return (th1In.association == Th1InAssociation.AIRFLOW_TEMPERATURE)
+        }
+
+        fun isTh1InAssociatedToGenericFaultNC(th1In: Th1InState): Boolean {
+            return (th1In.association == Th1InAssociation.GENERIC_FAULT_NC)
+        }
+
+        fun isTh1InAssociatedToGenericFaultNO(th1In: Th1InState): Boolean {
+            return (th1In.association == Th1InAssociation.GENERIC_FAULT_NO)
+        }
+
+        fun isTh1InAssociatedToAirflowTemperature(th1In: Pipe2Th1InState): Boolean {
+            return (th1In.association == Pipe2Th1InAssociation.AIRFLOW_TEMPERATURE)
+        }
+
+        fun isTh1InAssociatedToGenericFaultNC(th1In: Pipe2Th1InState): Boolean {
+            return (th1In.association == Pipe2Th1InAssociation.GENERIC_FAULT_NC)
+        }
+
+        fun isTh1InAssociatedToGenericFaultNO(th1In: Pipe2Th1InState): Boolean {
+            return (th1In.association == Pipe2Th1InAssociation.GENERIC_FAULT_NO)
+        }
+
+        fun isTh2InAssociatedToDoorWindowSensor(th2In: Th2InState): Boolean {
+            return (th2In.association == Th2InAssociation.DOOR_WINDOW_SENSOR)
+        }
+
+        fun isTh2InAssociatedToGenericFaultNC(th2In: Th2InState): Boolean {
+            return (th2In.association == Th2InAssociation.GENERIC_FAULT_NC)
+        }
+
+        fun isTh2InAssociatedToGenericFaultNO(th2In: Th2InState): Boolean {
+            return (th2In.association == Th2InAssociation.GENERIC_FAULT_NO)
         }
 
         fun isAnyRelayAssociatedToCoolingStage1(config: HyperStatCpuConfiguration): Boolean {
@@ -259,7 +342,29 @@ class HyperStatAssociationUtil {
             return isAnalogInMapped(analogIn1State,analogIn2State,AnalogInAssociation.CURRENT_TX_0_50)
         }
 
-
+        fun isTh1AirflowSensorEnabled(th1InState: Th1InState): Boolean {
+            return (th1InState.enabled && th1InState.association == Th1InAssociation.AIRFLOW_TEMPERATURE)
+        }
+        fun isTh2DoorWindowSensorEnabled(th2InState: Th2InState): Boolean {
+            return (th2InState.enabled && th2InState.association == Th2InAssociation.DOOR_WINDOW_SENSOR)
+        }
+        fun isTh1AirflowSensorEnabled(th1InState: Pipe2Th1InState): Boolean {
+            return (th1InState.enabled && th1InState.association == Pipe2Th1InAssociation.AIRFLOW_TEMPERATURE)
+        }
+        fun isTh1GenericFaultNCEnabled(th1InState: Pipe2Th1InState): Boolean {
+            return (th1InState.enabled && th1InState.association == Pipe2Th1InAssociation.GENERIC_FAULT_NC)
+        }
+        fun isTh1GenericFaultNOEnabled(th1InState: Pipe2Th1InState): Boolean {
+            return (th1InState.enabled && th1InState.association == Pipe2Th1InAssociation.GENERIC_FAULT_NO)
+        }
+        fun isAnyThermistorAssociatedToGenericFaultNC(th1InState: Th1InState, th2InState: Th2InState): Boolean {
+            return (th1InState.enabled && th1InState.association == Th1InAssociation.GENERIC_FAULT_NC) ||
+                    (th2InState.enabled && th2InState.association == Th2InAssociation.GENERIC_FAULT_NC)
+        }
+        fun isAnyThermistorAssociatedToGenericFaultNO(th1InState: Th1InState, th2InState: Th2InState): Boolean {
+            return (th1InState.enabled && th1InState.association == Th1InAssociation.GENERIC_FAULT_NO) ||
+                    (th2InState.enabled && th2InState.association == Th2InAssociation.GENERIC_FAULT_NO)
+        }
 
         // checks two Relay configurations and return based on the match
         fun isBothRelayHasSameConfigs(relayState1: RelayState, relayState2: RelayState): Boolean {
@@ -313,6 +418,40 @@ class HyperStatAssociationUtil {
             when {
                 (analogIn1.enabled != analogIn2.enabled) -> return false
                 (analogIn1.association != analogIn2.association) -> return false
+            }
+            return true
+        }
+
+        // checks two TH1 configurations and return based on the match
+        fun isBothTh1InHasSameConfigs(thIn1: Th1InState, thIn2: Th1InState): Boolean {
+            when {
+                (thIn1.enabled != thIn2.enabled) -> return false
+                (thIn1.association != thIn2.association) -> return false
+            }
+            return true
+        }
+        // checks two TH2 configurations and return based on the match
+        fun isBothTh2InHasSameConfigs(thIn1: Th2InState, thIn2: Th2InState): Boolean {
+            when {
+                (thIn1.enabled != thIn2.enabled) -> return false
+                (thIn1.association != thIn2.association) -> return false
+            }
+            return true
+        }
+
+        // checks two TH1 configurations and return based on the match
+        fun isBothTh1InHasSameConfigs(thIn1: Pipe2Th1InState, thIn2: Pipe2Th1InState): Boolean {
+            when {
+                (thIn1.enabled != thIn2.enabled) -> return false
+                (thIn1.association != thIn2.association) -> return false
+            }
+            return true
+        }
+        // checks two TH2 configurations and return based on the match
+        fun isBothTh2InHasSameConfigs(thIn1: Pipe2Th2InState, thIn2: Pipe2Th2InState): Boolean {
+            when {
+                (thIn1.enabled != thIn2.enabled) -> return false
+                (thIn1.association != thIn2.association) -> return false
             }
             return true
         }
@@ -867,6 +1006,36 @@ class HyperStatAssociationUtil {
                 AnalogInAssociation.CURRENT_TX_0_50 -> "10"
                 AnalogInAssociation.KEY_CARD_SENSOR -> SensorType.KEY_CARD_SENSOR.ordinal.toString()
                 AnalogInAssociation.DOOR_WINDOW_SENSOR -> SensorType.DOOR_WINDOW_SENSOR.ordinal.toString()
+            }
+        }
+
+        fun getSensorNameByType(sensorInputs: Th1InAssociation): String {
+            return when (sensorInputs) {
+                Th1InAssociation.AIRFLOW_TEMPERATURE -> "0"
+                Th1InAssociation.GENERIC_FAULT_NC -> SensorType.GENERIC_NC.ordinal.toString()
+                Th1InAssociation.GENERIC_FAULT_NO -> SensorType.GENERIC_NO.ordinal.toString()
+            }
+        }
+
+        fun getSensorNameByType(sensorInputs: Th2InAssociation): String {
+            return when (sensorInputs) {
+                Th2InAssociation.DOOR_WINDOW_SENSOR -> SensorType.DOOR_WINDOW_SENSOR.ordinal.toString()
+                Th2InAssociation.GENERIC_FAULT_NC -> SensorType.GENERIC_NC.ordinal.toString()
+                Th2InAssociation.GENERIC_FAULT_NO -> SensorType.GENERIC_NO.ordinal.toString()
+            }
+        }
+
+        fun getSensorNameByType(sensorInputs: Pipe2Th1InAssociation): String {
+            return when (sensorInputs) {
+                Pipe2Th1InAssociation.AIRFLOW_TEMPERATURE -> "0"
+                Pipe2Th1InAssociation.GENERIC_FAULT_NC -> SensorType.GENERIC_NC.ordinal.toString()
+                Pipe2Th1InAssociation.GENERIC_FAULT_NO -> SensorType.GENERIC_NO.ordinal.toString()
+            }
+        }
+
+        fun getSensorNameByType(sensorInputs: Pipe2Th2InAssociation): String {
+            return when (sensorInputs) {
+                Pipe2Th2InAssociation.SUPPLY_WATER_TEMPERATURE -> "0"
             }
         }
 

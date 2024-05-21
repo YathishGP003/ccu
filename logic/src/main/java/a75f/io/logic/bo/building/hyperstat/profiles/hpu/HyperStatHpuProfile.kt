@@ -16,6 +16,8 @@ import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
 import a75f.io.logic.bo.building.hyperstat.common.*
 import a75f.io.logic.bo.building.hyperstat.profiles.HyperStatPackageUnitProfile
+import a75f.io.logic.bo.building.hyperstat.profiles.cpu.HyperStatCpuConfiguration
+import a75f.io.logic.bo.building.hyperstat.profiles.cpu.Th2InAssociation
 import a75f.io.logic.bo.building.hyperstat.profiles.pipe2.Pipe2RelayAssociation
 import a75f.io.logic.bo.building.schedules.Occupancy
 import a75f.io.logic.jobs.HyperStatUserIntentHandler
@@ -745,7 +747,7 @@ class HyperStatHpuProfile : HyperStatPackageUnitProfile(){
         var analog2SensorEnabled = false
 
         // Thermistor 2 is always mapped to door window sensor
-        if (config.isEnableDoorWindowSensor) {
+        if (isDoorWindowSensorOnTh2(config)) {
             val sensorValue = equip.hsHaystackUtil.getSensorPointValue(
                 "door and window and logical and sensor"
             )
@@ -782,6 +784,11 @@ class HyperStatHpuProfile : HyperStatPackageUnitProfile(){
         )
 
         return isDoorOpen
+    }
+
+    private fun isDoorWindowSensorOnTh2(config: HyperStatHpuConfiguration): Boolean {
+        return config.thermistorIn2State.enabled && config.thermistorIn2State.association.equals(
+            Th2InAssociation.DOOR_WINDOW_SENSOR)
     }
 
     private fun runForKeyCardSensor(config: HyperStatHpuConfiguration, equip: HyperStatHpuEquip) {

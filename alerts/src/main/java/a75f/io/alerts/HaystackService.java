@@ -189,7 +189,7 @@ public class HaystackService {
 
     private List<HashMap> findByFilterCustom(String filter, Object contextHelper) {
         CcuLog.d(TAG_CCU_ALERTS, "---findByFilterCustom##--original filter-"+filter);
-        filter = filter.replaceAll("\\)", " ").replaceAll("\\(", " ");
+        filter = removeFirstAndLastParentheses(filter);
 
           // below code need to be fixed
         if(filter.contains("port")){
@@ -208,6 +208,14 @@ public class HaystackService {
         HGrid hGrid = CCUHsApi.getInstance().readGrid(filter);
         List<HashMap> list = CCUHsApi.getInstance().HGridToListPlainString(hGrid);
         return list;
+    }
+
+    public static String removeFirstAndLastParentheses(String input) {
+        if (input.startsWith("(") && input.endsWith(")")) {
+            return input.substring(1, input.length() - 1);
+        } else {
+            return input;
+        }
     }
 
     public void hisWrite(String id, Double val, Object contextHelper) {

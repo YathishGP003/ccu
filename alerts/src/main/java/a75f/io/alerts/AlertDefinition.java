@@ -246,6 +246,9 @@ public class AlertDefinition
         Object jsObject = org.mozilla.javascript.Context.javaToJS(HaystackService.getInstance(), scope);
         ScriptableObject.putProperty(scope, "haystack", jsObject);
 
+        Object persistBlockService = org.mozilla.javascript.Context.javaToJS(PersistBlockService.getInstance(def._id), scope);
+        ScriptableObject.putProperty(scope, "persistBlock", persistBlockService);
+
         Object alertJsUtilJsObject = org.mozilla.javascript.Context.javaToJS(alertJsUtil, scope);
         ScriptableObject.putProperty(scope, "alerts", alertJsUtilJsObject);
 

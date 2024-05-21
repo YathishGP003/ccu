@@ -43,6 +43,8 @@ public class AlertManager
 
     private final Context appContext;
 
+    private final HashMap<String, Object> persistentBlockMap= new HashMap<>();
+
     /**
      * Call this when apiBase changes.  Token should not be null, so please include current token.
      */
@@ -288,5 +290,17 @@ public class AlertManager
         for (Alert a: repo.getActiveCrashAlert()){
             fixAlert(a);
         }
+    }
+
+    public void initValue(String key, Object value) {
+        persistentBlockMap.computeIfAbsent(key, k -> value);
+    }
+
+    public void putValue(String key, Object value) {
+        persistentBlockMap.put(key, value);
+    }
+
+    public Object getValue(String key) {
+        return persistentBlockMap.get(key);
     }
 }

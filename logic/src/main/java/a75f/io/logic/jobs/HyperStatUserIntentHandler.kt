@@ -52,51 +52,56 @@ class HyperStatUserIntentHandler {
                 && portStages.containsKey(Stage.COOLING_2.displayName)
                 && portStages.containsKey(Stage.COOLING_3.displayName)
             ) {
-                status += "Cooling 1,2&3 ON "
+                status += "Cooling 1,2&3 ON"
             } else if (portStages.containsKey(Stage.COOLING_1.displayName)
                 && portStages.containsKey(Stage.COOLING_2.displayName)
             ) {
-                status += "Cooling 1&2 ON "
+                status += "Cooling 1&2 ON"
             } else if (portStages.containsKey(Stage.COOLING_1.displayName)
                 && portStages.containsKey(Stage.COOLING_3.displayName)
             ) {
-                status += "Cooling 1&3 ON "
+                status += "Cooling 1&3 ON"
             } else if (portStages.containsKey(Stage.COOLING_2.displayName)
                 && portStages.containsKey(Stage.COOLING_3.displayName)
             ) {
-                status += "Cooling 2&3 ON "
+                status += "Cooling 2&3 ON"
             } else if (portStages.containsKey(Stage.COOLING_1.displayName)) {
-                status += "Cooling 1 ON "
+                status += "Cooling 1 ON"
             } else if (portStages.containsKey(Stage.COOLING_2.displayName)) {
-                status += "Cooling 2 ON "
+                status += "Cooling 2 ON"
             } else if (portStages.containsKey(Stage.COOLING_3.displayName)) {
-                status += "Cooling 3 ON "
+                status += "Cooling 3 ON"
             }
             if (portStages.containsKey(Stage.HEATING_1.displayName)
                 && portStages.containsKey(Stage.HEATING_2.displayName)
                 && portStages.containsKey(Stage.HEATING_3.displayName)
             ) {
-                status += "Heating 1,2&3 ON "
+                status += "Heating 1,2&3 ON"
             } else if (portStages.containsKey(Stage.HEATING_1.displayName)
                 && portStages.containsKey(Stage.HEATING_2.displayName)
             ) {
-                status += "Heating 1&2 ON "
+                status += "Heating 1&2 ON"
             } else if (portStages.containsKey(Stage.HEATING_1.displayName)
                 && portStages.containsKey(Stage.HEATING_3.displayName)
             ) {
-                status += "Heating 1&3 ON "
+                status += "Heating 1&3 ON"
             } else if (portStages.containsKey(Stage.HEATING_2.displayName)
                 && portStages.containsKey(Stage.HEATING_3.displayName)
             ) {
-                status += "Heating 2&3 ON "
+                status += "Heating 2&3 ON"
             } else if (portStages.containsKey(Stage.HEATING_1.displayName)) {
-                status += "Heating 1 ON "
+                status += "Heating 1 ON"
             } else if (portStages.containsKey(Stage.HEATING_2.displayName)) {
-                status += "Heating 2 ON "
+                status += "Heating 2 ON"
             } else if (portStages.containsKey(Stage.HEATING_3.displayName)) {
-                status += "Heating 3 ON "
+                status += "Heating 3 ON"
             }
 
+            if ((portStages.containsKey(Pipe2RelayAssociation.AUX_HEATING_STAGE1.name)
+                            || portStages.containsKey(Pipe2RelayAssociation.AUX_HEATING_STAGE2.name))
+                    && status.isNotBlank()){
+                status +=", "
+            }
             if (portStages.containsKey(Pipe2RelayAssociation.AUX_HEATING_STAGE1.name)
                 && portStages.containsKey(Pipe2RelayAssociation.AUX_HEATING_STAGE2.name)
             ) {

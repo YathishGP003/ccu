@@ -1718,4 +1718,11 @@
     <string name="system_profile">System Profile</string>
     <string name="taost_for_fallback">The zone schedule of the zone is deleted and is therefore following default named schedule, which is not editable. Please restart the CCU app to reinstate the zone schedule</string>
 
+    <string-array name="log_level">
+        <item>verbose</item>
+        <item>debug</item>
+        <item>info</item>
+        <item>warn</item>
+        <item>error</item>
+    </string-array>
     </resources>

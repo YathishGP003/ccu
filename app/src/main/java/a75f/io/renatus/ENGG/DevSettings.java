@@ -44,6 +44,7 @@ import java.util.stream.IntStream;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HayStackConstants;
+import a75f.io.api.haystack.Queries;
 import a75f.io.api.haystack.Site;
 import a75f.io.device.mesh.LSerial;
 import a75f.io.logic.Globals;
@@ -142,6 +143,8 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
     public @BindView(R.id.saveRegisterRequestCount) Button btnregisterRequestCount;
 
     public @BindView(R.id.cacheSyncFrequency) Spinner cacheSyncFrequency;
+
+    public @BindView(R.id.loglevel) Spinner logLevelSpinner;
     SharedPreferences spDefaultPrefs = null;
 
     private final CompositeDisposable disposable = new CompositeDisposable();
@@ -470,6 +473,19 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
             CrashReporting.setAnrState(b? Feature.State.ENABLED : Feature.State.DISABLED);
             Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
                     .edit().putBoolean("anr_reporting_enabled", b).apply();
+        });
+
+        logLevelSpinner.setSelection(CCUHsApi.getInstance().getCcuLogLevel());
+        logLevelSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                CCUHsApi.getInstance().writeHisValByQuery(Queries.LOG_LEVEL_QUERY, (double) position);
+                CCUHsApi.getInstance().setCcuLogLevel(position);
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                // Handle case where no item is selected
+            }
         });
     }
 

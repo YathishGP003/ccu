@@ -414,6 +414,7 @@ public class HyperStatMonitoringEquip {
                 String id = createSensorPoint(floorRef, roomRef, "th1", config);
                 DeviceUtil.setPointEnabled(mNodeAddr, Port.TH1_IN.name(), true);
                 DeviceUtil.updatePhysicalPointRef(mNodeAddr, Port.TH1_IN.name(), id);
+                DeviceUtil.updatePhysicalPointType(mNodeAddr, Port.TH1_IN.name(), String.valueOf(getThermistorType(config, false)));
             }
         }
         else if (config.isTh1Enable && config.th1Sensor != currentConfig.th1Sensor){
@@ -427,6 +428,7 @@ public class HyperStatMonitoringEquip {
             String id = createSensorPoint(floorRef, roomRef, "th1", config);
             DeviceUtil.setPointEnabled(mNodeAddr, Port.TH1_IN.name(), true);
             DeviceUtil.updatePhysicalPointRef(mNodeAddr, Port.TH1_IN.name(), id);
+            DeviceUtil.updatePhysicalPointType(mNodeAddr, Port.TH1_IN.name(), String.valueOf(getThermistorType(config, false)));
         }
 
 
@@ -445,6 +447,7 @@ public class HyperStatMonitoringEquip {
                 String id = createSensorPoint(floorRef, roomRef, "th2", config);
                 DeviceUtil.setPointEnabled(mNodeAddr, Port.TH2_IN.name(), true);
                 DeviceUtil.updatePhysicalPointRef(mNodeAddr, Port.TH2_IN.name(), id);
+                DeviceUtil.updatePhysicalPointType(mNodeAddr, Port.TH2_IN.name(), String.valueOf(getThermistorType(config, true)));
             }
         }
         else if (config.isTh2Enable && config.th2Sensor != currentConfig.th2Sensor){
@@ -458,6 +461,7 @@ public class HyperStatMonitoringEquip {
             String id = createSensorPoint(floorRef, roomRef, "th2", config);
             DeviceUtil.setPointEnabled(mNodeAddr, Port.TH2_IN.name(), true);
             DeviceUtil.updatePhysicalPointRef(mNodeAddr, Port.TH2_IN.name(), id);
+            DeviceUtil.updatePhysicalPointType(mNodeAddr, Port.TH2_IN.name(), String.valueOf(getThermistorType(config, true)));
         }
 
 

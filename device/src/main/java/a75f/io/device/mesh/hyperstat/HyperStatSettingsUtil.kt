@@ -148,7 +148,7 @@ class HyperStatSettingsUtil {
          * @return Boolean
          */
         private fun getTh2DoorWindow(hsApi: CCUHsApi, equipRef: String): Boolean {
-            return (readConfig(hsApi, equipRef, "air and discharge and config and enabled") == 1.0)
+            return (readConfig(hsApi, equipRef, "window and sensing and config and enabled") == 1.0)
         }
 
         /**

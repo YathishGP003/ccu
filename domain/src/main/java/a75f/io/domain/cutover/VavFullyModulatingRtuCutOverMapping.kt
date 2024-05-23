@@ -109,7 +109,7 @@ object VavFullyModulatingRtuCutOverMapping {
         "satSPTrim" to "satSpTrim",
         "satTimeInterval" to "satTimeInterval",
         "satIgnoreRequest" to "satIgnoreRequest",
-        "satSPRes" to "satSpResMax",
+        "satSPRes" to "satSpRes",
         "satSPResMax" to "satSpResMax",
         "satTimeDelay" to "satTimeDelay",
 
@@ -184,7 +184,7 @@ object VavFullyModulatingRtuCutOverMapping {
         "fanSignal" to "fanSignal",
         "heatingSignal" to "heatingSignal",
         "coolingSignal" to "coolingSignal",
-        "co2Signal" to "outsideTemperature",
+        "co2Signal" to "outsideAirDamper",
         "occupancySignal" to "fanEnable"
     )
 }

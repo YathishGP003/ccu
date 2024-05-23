@@ -366,7 +366,14 @@ public class HyperStatMonitoringUtil {
     public static Bundle getThermistorBundle(int th) {
         Bundle bundle = new Bundle();
         Thermistor thermistor = Thermistor.getThermistorList().get(th);
-        String[] markers = new String[]{"temp"};
+        String[] markers;
+        if (th == 2) {
+            markers = new String[]{"generic", "normallyClosed"};
+        } else if (th == 3) {
+            markers = new String[]{"generic", "normallyOpen"};
+        } else {
+            markers = new String[]{"temp"};
+        }
 
         bundle.putString("shortDis", thermistor.sensorName);
         bundle.putString("shortDisTarget", "Target Temperature");

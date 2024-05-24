@@ -53,7 +53,7 @@ open class StagedRtuProfileConfig(val model : SeventyFiveFProfileDirective)
 
     open fun getActiveConfiguration() : StagedRtuProfileConfig {
 
-        val equip = Domain.hayStack.readEntity("system and equip and not modbus")
+        val equip = Domain.hayStack.readEntity("system and equip and not modbus and not connectModule")
         if (equip.isEmpty()) {
             return this
         }

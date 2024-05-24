@@ -713,6 +713,13 @@ public abstract class SystemProfile
                 ScheduleManager.getInstance().getSystemOccupancy() != Occupancy.NONE;
     }
 
+    public boolean isSystemOccupiedForDcv() {
+        return ScheduleManager.getInstance().getSystemOccupancy() == Occupancy.OCCUPIED ||
+                ScheduleManager.getInstance().getSystemOccupancy() == Occupancy.FORCEDOCCUPIED ||
+                ScheduleManager.getInstance().getSystemOccupancy() == Occupancy.AUTOFORCEOCCUPIED ||
+                ScheduleManager.getInstance().getSystemOccupancy() == Occupancy.DEMAND_RESPONSE_OCCUPIED;
+    }
+
     public void reset() {
     }
     
@@ -924,6 +931,22 @@ public abstract class SystemProfile
 
 
     }
+
+    public void deleteSystemConnectModule() {
+        // We don't know exactly when in the System equip deletion/creation cycle this will be invoked.
+        // So, it needs its own Haystack API instance to prevent crashes if "hayStack" is null
+        CCUHsApi hs = CCUHsApi.getInstance();
+        HashMap<Object, Object> connectSystemEquip = hs.readEntity("domainName == \"" + DomainName.vavAdvancedHybridAhuV2_connectModule + "\"");
+        if (connectSystemEquip != null && connectSystemEquip.size() > 0) {
+            hs.deleteEntityTree(connectSystemEquip.get("id").toString());
+        }
+
+        HashMap<Object, Object> connectDevice = hs.readEntity("domainName == \"" + DomainName.connectModuleDevice + "\"");
+        if (connectDevice != null && connectDevice.size() > 0) {
+            hs.deleteEntityTree(connectDevice.get("id").toString());
+        }
+    }
+
     public void createDemandResponseConfigPoints(String equipDis, String siteRef, String equipRef, String tz, CCUHsApi hayStack) {
         DemandResponseMode demandResponseMode = new DemandResponseMode();
         demandResponseMode.createDemandResponseEnrollmentPoint(equipDis, siteRef, equipRef, tz, hayStack);

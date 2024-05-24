@@ -3,30 +3,28 @@ package a75f.io.renatus.profiles.system
 import a75f.io.domain.api.Domain
 import a75f.io.logic.bo.building.system.vav.config.StagedRtuProfileConfig
 import a75f.io.logic.bo.building.system.vav.config.StagedVfdRtuProfileConfig
-import a75f.io.logic.bo.building.vav.VavProfileConfiguration
-import a75f.io.renatus.profiles.vav.VavConfigViewState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 
-class StagedRtuVfdViewState : StagedRtuViewState(){
+class StagedRtuVfdViewState : StagedRtuViewState() {
 
-    var analogOut2Enabled by mutableStateOf (false)
+    var analogOut2Enabled by mutableStateOf(false)
     //var analogOut2 by mutableStateOf (0)
 
-    var analogOut2Economizer by mutableStateOf (0)
-    var analogOut2Recirculate by mutableStateOf (0)
-    var analogOut2CoolStage1 by mutableStateOf (0)
-    var analogOut2CoolStage2 by mutableStateOf (0)
-    var analogOut2CoolStage3 by mutableStateOf (0)
-    var analogOut2CoolStage4 by mutableStateOf (0)
-    var analogOut2CoolStage5 by mutableStateOf (0)
-    var analogOut2HeatStage1 by mutableStateOf (0)
-    var analogOut2HeatStage2 by mutableStateOf (0)
-    var analogOut2HeatStage3 by mutableStateOf (0)
-    var analogOut2HeatStage4 by mutableStateOf (0)
-    var analogOut2HeatStage5 by mutableStateOf (0)
-    var analogOut2Default by mutableStateOf (0)
+    var analogOut2Economizer by mutableStateOf(0)
+    var analogOut2Recirculate by mutableStateOf(0)
+    var analogOut2CoolStage1 by mutableStateOf(0)
+    var analogOut2CoolStage2 by mutableStateOf(0)
+    var analogOut2CoolStage3 by mutableStateOf(0)
+    var analogOut2CoolStage4 by mutableStateOf(0)
+    var analogOut2CoolStage5 by mutableStateOf(0)
+    var analogOut2HeatStage1 by mutableStateOf(0)
+    var analogOut2HeatStage2 by mutableStateOf(0)
+    var analogOut2HeatStage3 by mutableStateOf(0)
+    var analogOut2HeatStage4 by mutableStateOf(0)
+    var analogOut2HeatStage5 by mutableStateOf(0)
+    var analogOut2Default by mutableStateOf(0)
 
     var analogOut2FanSpeedTestSignal by mutableStateOf (Domain.cmBoardDevice.analog2Out.readHisVal())
 
@@ -67,7 +65,7 @@ class StagedRtuVfdViewState : StagedRtuViewState(){
         }
     }
 
-    fun updateConfigFromViewState(config : StagedVfdRtuProfileConfig ) {
+    fun updateConfigFromViewState(config: StagedVfdRtuProfileConfig) {
         config.relay1Enabled.enabled = this.relay1Enabled
         config.relay2Enabled.enabled = this.relay2Enabled
         config.relay3Enabled.enabled = this.relay3Enabled

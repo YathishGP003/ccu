@@ -265,6 +265,9 @@ fun updateDefaultSetPoints(
 fun getTunerByDomainName(systemEquip: Equip, domainName: String): Double =
     TunerUtil.readTunerValByQuery("domainName == \"$domainName\"", systemEquip.id)
 
+fun getTunerByDomainName(equipRef: String, domainName: String): Double =
+        TunerUtil.readTunerValByQuery("domainName == \"$domainName\"", equipRef)
+
 fun isConfigEnabled(systemEquip: Equip, domainName: String): Boolean =
     Domain.getPointByDomain(systemEquip, domainName) == 1.0
 
@@ -677,8 +680,6 @@ fun setOccupancyMode(
     operatingStatus: BasicConfig,
     conditioningMode: SystemMode
 ) {
-
-
     var occupancyMode = if (operatingStatus.loopOutput > 0) 1.0
     else when (occupancy) {
         Occupancy.UNOCCUPIED, Occupancy.VACATION -> 0.0
@@ -942,6 +943,6 @@ private fun getChildEquipMap(equipRef: String): ArrayList<HashMap<Any, Any>> {
         .readAllEntities("equip and modbus and equipRef== \"$equipRef\"")
 }
 fun logIt(msg: String) {
-    Log.i(L.TAG_CCU_SYSTEM, msg)
+    CcuLog.i(L.TAG_CCU_SYSTEM, msg)
 }
 

@@ -173,7 +173,7 @@ open class DefaultEquipBuilder : EquipBuilder {
         pointBuilder.addTag("sourcePoint", HStr.make(pointConfig.modelDef.id))
 
         var enums = ""
-        if (pointConfig.modelDef.valueConstraint.constraintType.name.contentEquals("MULTI_STATE")) {
+        if (pointConfig.modelDef.valueConstraint.constraintType == Constraint.ConstraintType.MULTI_STATE) {
             (pointConfig.modelDef.valueConstraint as MultiStateConstraint).allowedValues.forEachIndexed { index, value ->
                 enums = if (enums.isNotEmpty()) {
                     "$enums${value.value}=$index,"

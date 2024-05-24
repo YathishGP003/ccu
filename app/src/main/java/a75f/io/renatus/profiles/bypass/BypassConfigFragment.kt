@@ -12,7 +12,7 @@ import a75f.io.renatus.SystemConfigFragment
 import a75f.io.renatus.composables.CancelDialog
 import a75f.io.renatus.composables.DropDownWithLabel
 import a75f.io.renatus.compose.ComposeUtil.Companion.primaryColor
-import a75f.io.renatus.compose.HeaderLeftAlignedTextViewNew
+import a75f.io.renatus.compose.BoldHeader
 import a75f.io.renatus.compose.HeaderTextView
 import a75f.io.renatus.compose.SaveTextViewNew
 import a75f.io.renatus.compose.TitleTextView
@@ -153,7 +153,7 @@ class BypassConfigFragment : BaseDialogFragment() {
                     }
                 } else {
                     Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterStart) {
-                        HeaderLeftAlignedTextViewNew("BYPASS DAMPER (" + viewModel.profileConfiguration.nodeAddress + ")")
+                        BoldHeader("BYPASS DAMPER (" + viewModel.profileConfiguration.nodeAddress + ")")
                     }
                 }
                 Spacer(modifier = Modifier.height(24.dp))

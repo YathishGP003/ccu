@@ -48,11 +48,12 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
     @Override
     public void addSystemEquip() {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap equip = hayStack.read("equip and system and not modbus");
+        HashMap equip = hayStack.read("equip and system and not modbus and not connectModule");
         if (equip != null && equip.size() > 0) {
             if (!equip.get("profile").equals(ProfileType.SYSTEM_VAV_HYBRID_RTU.name())) {
                 hayStack.deleteEntityTree(equip.get("id").toString());
                 removeSystemEquipModbus();
+                deleteSystemConnectModule();
             } else {
                 initTRSystem();
                 addNewSystemUserIntentPoints(equip.get("id").toString());

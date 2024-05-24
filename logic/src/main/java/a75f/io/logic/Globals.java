@@ -2,6 +2,7 @@ package a75f.io.logic;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
 import org.projecthaystack.client.HClient;
@@ -59,6 +60,7 @@ import a75f.io.logic.bo.building.system.dab.DabExternalAhu;
 import a75f.io.logic.bo.building.system.dab.DabFullyModulatingRtu;
 import a75f.io.logic.bo.building.system.dab.DabStagedRtu;
 import a75f.io.logic.bo.building.system.dab.DabStagedRtuWithVfd;
+import a75f.io.logic.bo.building.system.vav.VavAdvancedAhu;
 import a75f.io.logic.bo.building.system.vav.VavAdvancedHybridRtu;
 import a75f.io.logic.bo.building.system.vav.VavBacnetRtu;
 import a75f.io.logic.bo.building.system.vav.VavExternalAhu;
@@ -144,7 +146,8 @@ public class Globals {
     private SharedPreferences modelSharedPref = null;
 
 
-    private List<OnCcuInitCompletedListener> initCompletedListeners = new ArrayList<>();
+    private final List<OnCcuInitCompletedListener> initCompletedListeners = new ArrayList<>();
+
     private Globals() {
     }
 
@@ -174,39 +177,41 @@ public class Globals {
                 .getBoolean("biskit_mode", false);
     }
 
-    public boolean isTemporaryOverrideMode(){
+    public boolean isTemporaryOverrideMode() {
         return isTempOverride;
     }
 
-    public void setTemporaryOverrideMode(boolean isTemporaryOverrideMode){
+    public void setTemporaryOverrideMode(boolean isTemporaryOverrideMode) {
         isTempOverride = isTemporaryOverrideMode;
     }
 
-    public int gettempOverCount(){
+    public int gettempOverCount() {
         return tempOverCount;
     }
 
-    public void incrementTempOverCount(){
+    public void incrementTempOverCount() {
         tempOverCount++;
     }
 
-    public void resetTempOverCount(){
+    public void resetTempOverCount() {
         tempOverCount = 0;
     }
 
-    public boolean isTestMode()
-    {
+    public boolean isTestMode() {
         return Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
                 .getBoolean("test_mode", false);
     }
+
     public void setTestMode(boolean isTestMode) {
         Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
                 .edit().putBoolean("test_mode", isTestMode).apply();
     }
+
     public boolean isWeatherTest() {
         return Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
                 .getBoolean("weather_test", false);
     }
+
     public boolean isAckdMessagingEnabled() {
         return Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
                 .getBoolean("ackd_messaging_enabled", true);
@@ -226,8 +231,9 @@ public class Globals {
     }
 
     private RenatusServicesUrls renatusServicesUrls;
+
     public void initilize() {
-        CcuLog.i(L.TAG_CCU_INIT,"Globals Initialize");
+        CcuLog.i(L.TAG_CCU_INIT, "Globals Initialize");
         taskExecutor = Executors.newScheduledThreadPool(NUMBER_OF_CYCLICAL_TASKS_RENATUS_REQUIRES);
         //mHeartBeatJob = new HeartBeatJob();
         //5 seconds after application initializes start heart beat
@@ -235,15 +241,15 @@ public class Globals {
         RenatusServicesEnvironment servicesEnv = RenatusServicesEnvironment.createWithSharedPrefs(
                 PreferenceManager.getDefaultSharedPreferences(getApplicationContext()));
         RenatusServicesUrls urls = servicesEnv.getUrls();
-        CcuLog.i(L.TAG_CCU_INIT,"Initialize Haystack");
-		renatusServicesUrls = urls;
-        CCUHsApi hsApi = new CCUHsApi(this.mApplicationContext, urls.getHaystackUrl(), urls.getCaretakerUrl(),urls.getGatewayUrl());
-        CcuLog.i(L.TAG_CCU_INIT,"Initialize ModelCache");
+        CcuLog.i(L.TAG_CCU_INIT, "Initialize Haystack");
+        renatusServicesUrls = urls;
+        CCUHsApi hsApi = new CCUHsApi(this.mApplicationContext, urls.getHaystackUrl(), urls.getCaretakerUrl(), urls.getGatewayUrl());
+        CcuLog.i(L.TAG_CCU_INIT, "Initialize ModelCache");
         ModelCache.INSTANCE.init(hsApi, this.mApplicationContext);
-        CcuLog.i(L.TAG_CCU_INIT,"Initialized ModelCache");
+        CcuLog.i(L.TAG_CCU_INIT, "Initialized ModelCache");
     }
 
-    public void startTimerTask(){
+    public void startTimerTask() {
 
         new RestoreCCUHsApi();
         PreferenceUtil.setContext(this.mApplicationContext);
@@ -255,9 +261,9 @@ public class Globals {
         try {
             String addrBand = getSmartNodeBand();
             L.ccu().setSmartNodeAddressBand(addrBand == null ? 1000 : Short.parseShort(addrBand));
-        } catch ( NumberFormatException e) {
+        } catch (NumberFormatException e) {
             CcuLog.i(L.TAG_CCU_INIT, "Failerd to read device address band ", e);
-            L.ccu().setSmartNodeAddressBand((short)1000);
+            L.ccu().setSmartNodeAddressBand((short) 1000);
         }
         CCUHsApi.getInstance().trimObjectBoxHisStore();
         importTunersAndScheduleJobs();
@@ -270,31 +276,32 @@ public class Globals {
         MessageDbUtilKt.updateAllRemoteCommandsHandled(getApplicationContext(), RESTART_TABLET);
         CCUProxySettings.setUpProxySettingsIfExists();
     }
-    private void migrateHeartbeatPointForEquips(HashMap<Object, Object> site){
+
+    private void migrateHeartbeatPointForEquips(HashMap<Object, Object> site) {
         if (!site.isEmpty()) {
             HeartbeatMigration.initHeartbeatMigration();
         }
     }
 
-    private void migrateHeartbeatDiagPointForEquips(HashMap<Object, Object> site){
+    private void migrateHeartbeatDiagPointForEquips(HashMap<Object, Object> site) {
         if (!site.isEmpty()) {
             HeartbeatDiagMigration.initHeartbeatDiagMigration();
         }
     }
 
-    private void migrateHeartbeatwithNewtags(HashMap<Object, Object> site){
+    private void migrateHeartbeatwithNewtags(HashMap<Object, Object> site) {
         if (!site.isEmpty()) {
             HeartbeatTagMigration.initHeartbeatTagMigration();
         }
     }
 
-    private void migrateIduPoints(HashMap<Object, Object> site){
+    private void migrateIduPoints(HashMap<Object, Object> site) {
         if (!site.isEmpty()) {
             IduPointsMigration.init();
         }
     }
 
-    private void OAODamperOpenReasonMigration(HashMap<Object, Object> site){
+    private void OAODamperOpenReasonMigration(HashMap<Object, Object> site) {
         if (!site.isEmpty()) {
             OAODamperOpenReasonMigration.initOAOFreeCoolingReasonMigration();
         }
@@ -312,13 +319,13 @@ public class Globals {
                 CCUHsApi.getInstance().importBuildingTuners();
             }*/
 
-            if(!isHeatingLimitUpdated()){
+            if (!isHeatingLimitUpdated()) {
                 TunerUpgrades.updateHeatingMinMax(CCUHsApi.getInstance());
             }
         }
     }
 
-    private void migrateSNPoints(HashMap<Object, Object> site){
+    private void migrateSNPoints(HashMap<Object, Object> site) {
         if (!site.isEmpty()) {
             SmartNodeMigration.init();
         }
@@ -326,17 +333,15 @@ public class Globals {
 
     private void importTunersAndScheduleJobs() {
 
-        new Thread()
-        {
+        new Thread() {
             @Override
-            public void run()
-            {
+            public void run() {
                 MigrationHandler migrationHandler = new MigrationHandler(CCUHsApi.getInstance());
                 try {
-                    CcuLog.i(L.TAG_CCU_INIT,"Run Migrations");
+                    CcuLog.i(L.TAG_CCU_INIT, "Run Migrations");
                     ModelCache.INSTANCE.init(CCUHsApi.getInstance(), mApplicationContext);
                     HashMap<Object, Object> site = CCUHsApi.getInstance().readEntity("site");
-                    if(!isSafeMode()) {
+                    if (!isSafeMode()) {
                         migrationHandler.doMigration();
                         MigrationUtil.doMigrationTasksIfRequired();
                         //performBuildingTunerUprades(site);
@@ -352,36 +357,36 @@ public class Globals {
                         CCUHsApi.getInstance().importNamedSchedulebySite(new HClient(CCUHsApi.getInstance().getHSUrl(),
                                 HayStackConstants.USER, HayStackConstants.PASS), siteObject);
                     }
-                    CcuLog.i(L.TAG_CCU_INIT,"Schedule Jobs");
+                    CcuLog.i(L.TAG_CCU_INIT, "Schedule Jobs");
                     TunerUpgrades.migrateAutoAwaySetbackTuner(CCUHsApi.getInstance());
 
-                    CcuLog.i(L.TAG_CCU_INIT,"Init Watchdog");
+                    CcuLog.i(L.TAG_CCU_INIT, "Init Watchdog");
                     Watchdog.getInstance().addMonitor(mProcessJob);
                     Watchdog.getInstance().addMonitor(mScheduleProcessJob);
                     Watchdog.getInstance().start();
                     modelMigration(migrationHandler);
-                }  catch ( Exception e) {
+                } catch (Exception e) {
                     //Catch ignoring any exception here to avoid app from not loading in case of an init failure.
                     //Init would retried during next app restart.
-                    CcuLog.i(L.TAG_CCU_INIT,"Init failed");
+                    CcuLog.i(L.TAG_CCU_INIT, "Init failed");
                     e.printStackTrace();
                 } finally {
-                    CcuLog.i(L.TAG_CCU_INIT,"Init Completed");
+                    CcuLog.i(L.TAG_CCU_INIT, "Init Completed");
 
                     try {
                         loadEquipProfiles();
                     } catch (Exception e) {
-                        CcuLog.i(L.TAG_CCU_INIT,"Failed to load profiles", e);
+                        CcuLog.i(L.TAG_CCU_INIT, "Failed to load profiles", e);
                     }
                     isInitCompleted = true;
-                    DEFAULT_HEARTBEAT_INTERVAL =  Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
-                            .getInt("control_loop_frequency",60);
-                    initCompletedListeners.forEach( listener -> listener.onInitCompleted());
+                    DEFAULT_HEARTBEAT_INTERVAL = Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
+                            .getInt("control_loop_frequency", 60);
+                    initCompletedListeners.forEach(listener -> listener.onInitCompleted());
                     mProcessJob.scheduleJob("BuildingProcessJob", DEFAULT_HEARTBEAT_INTERVAL, TASK_SEPARATION, TASK_SEPARATION_TIMEUNIT);
-                    mScheduleProcessJob.scheduleJob("Schedule Process Job", DEFAULT_HEARTBEAT_INTERVAL, TASK_SEPARATION +15, TASK_SEPARATION_TIMEUNIT);
+                    mScheduleProcessJob.scheduleJob("Schedule Process Job", DEFAULT_HEARTBEAT_INTERVAL, TASK_SEPARATION + 15, TASK_SEPARATION_TIMEUNIT);
                     BearerTokenManager.getInstance().scheduleJob();
                     mAlertProcessJob = new AlertProcessJob(mApplicationContext);
-                    getScheduledThreadPool().scheduleAtFixedRate(mAlertProcessJob.getJobRunnable(), TASK_SEPARATION +30,DEFAULT_HEARTBEAT_INTERVAL, TASK_SEPARATION_TIMEUNIT);
+                    getScheduledThreadPool().scheduleAtFixedRate(mAlertProcessJob.getJobRunnable(), TASK_SEPARATION + 30, DEFAULT_HEARTBEAT_INTERVAL, TASK_SEPARATION_TIMEUNIT);
                 }
             }
         }.start();
@@ -391,9 +396,9 @@ public class Globals {
         }
     }
 
-    private void modelMigration(MigrationHandler migrationHandler){
+    private void modelMigration(MigrationHandler migrationHandler) {
         try {
-            String modelsPath = mApplicationContext.getFilesDir().getAbsolutePath()+"/models";
+            String modelsPath = mApplicationContext.getFilesDir().getAbsolutePath() + "/models";
             DiffManger diffManger = new DiffManger(getApplicationContext());
             if (migrationHandler.isMigrationRequired() && CCUHsApi.getInstance().isCCURegistered()) {
                 HashMap<Object, Object> site = CCUHsApi.getInstance().readEntity("site");
@@ -405,15 +410,15 @@ public class Globals {
                 migrationHandler.updateMigrationVersion();
                 copyModels();
             }
-        }  catch ( Exception e) {
+        } catch (Exception e) {
             //Catch ignoring any exception here to avoid app from not loading in case of an init failure.
-            CcuLog.i(L.TAG_CCU_INIT,"modelMigration is failed", e);
+            CcuLog.i(L.TAG_CCU_INIT, "modelMigration is failed", e);
             e.printStackTrace();
         }
     }
 
     public void copyModels() {
-        String modelsPath = mApplicationContext.getFilesDir().getAbsolutePath()+"/models";
+        String modelsPath = mApplicationContext.getFilesDir().getAbsolutePath() + "/models";
         FileSystemTools fileSystemTools = new FileSystemTools(getApplicationContext());
         fileSystemTools.createDirectory(modelsPath);
         fileSystemTools.copyModels(Globals.getInstance().getApplicationContext(),
@@ -433,12 +438,12 @@ public class Globals {
     }
 
     public void loadEquipProfiles() {
-        HashMap<Object,Object> site = CCUHsApi.getInstance().readEntity(Tags.SITE);
+        HashMap<Object, Object> site = CCUHsApi.getInstance().readEntity(Tags.SITE);
         if (site == null || site.size() == 0) {
             CcuLog.d(L.TAG_CCU, "Site does not exist. Profiles not loaded");
             return;
         }
-        HashMap<Object,Object> equip = CCUHsApi.getInstance().readEntity("equip and system and not modbus");
+        HashMap<Object, Object> equip = CCUHsApi.getInstance().readEntity("equip and system and not modbus and not connectModule");
         boolean isDefaultSystem = false;
         if (equip != null && equip.size() > 0) {
             //BuildingTuners.getInstance().addBuildingTunerEquip();
@@ -448,9 +453,12 @@ public class Globals {
                 L.ccu().systemProfile = new VavStagedRtu();
             } else if (eq.getProfile().equals("vavStagedRtuVfdFan")) {
                 L.ccu().systemProfile = new VavStagedRtuWithVfd();
-            }else if (eq.getProfile().equals("vavFullyModulatingAhu")) {
+            } else if (eq.getProfile().equals("vavAdvancedHybridAhuV2")) {
+                L.ccu().systemProfile = new VavAdvancedAhu();
+            } else if (eq.getProfile().equals("vavFullyModulatingAhu")) {
                 L.ccu().systemProfile = new VavFullyModulatingRtu();
-            }else {
+            } else {
+
                 switch (ProfileType.valueOf(getDomainSafeProfile(eq.getProfile()))) {
                     case SYSTEM_VAV_ANALOG_RTU:
                         L.ccu().systemProfile = new VavFullyModulatingRtu();
@@ -499,7 +507,7 @@ public class Globals {
             L.ccu().systemProfile = new DefaultSystem();
             isDefaultSystem = true;
         }
-        if(!isDefaultSystem)
+        if (!isDefaultSystem)
             L.ccu().systemProfile.addSystemEquip();
 
         for (Floor f : HSUtil.getFloors()) {
@@ -643,7 +651,7 @@ public class Globals {
 
         }
 
-        HashMap<Object,Object> oaoEquip = CCUHsApi.getInstance().readEntity("equip and oao");
+        HashMap<Object, Object> oaoEquip = CCUHsApi.getInstance().readEntity("equip and oao");
         if (oaoEquip != null && oaoEquip.size() > 0) {
             CcuLog.d(L.TAG_CCU, "Create Default OAO Profile");
             OAOProfile oao = new OAOProfile();
@@ -651,7 +659,7 @@ public class Globals {
             L.ccu().oaoProfile = oao;
         }
 
-        HashMap<Object,Object> bypassDamperEquip = CCUHsApi.getInstance().readEntity("equip and domainName == \"" + DomainName.smartnodeBypassDamper + "\"");
+        HashMap<Object, Object> bypassDamperEquip = CCUHsApi.getInstance().readEntity("equip and domainName == \"" + DomainName.smartnodeBypassDamper + "\"");
         if (bypassDamperEquip != null && bypassDamperEquip.size() > 0) {
             CcuLog.d(L.TAG_CCU, "Create Default Bypass Damper Profile");
             BypassDamperProfile bypassDamperProfile = new BypassDamperProfile(bypassDamperEquip.get("id").toString(), Short.parseShort(bypassDamperEquip.get("group").toString()));
@@ -661,10 +669,9 @@ public class Globals {
         /*
          * Get all the default BTU_Meter profile details
          */
-        ArrayList<HashMap<Object,Object>> equips = CCUHsApi.getInstance().readAllEntities("equip and btu");
+        ArrayList<HashMap<Object, Object>> equips = CCUHsApi.getInstance().readAllEntities("equip and btu");
 
-        for (HashMap<Object,Object> m : equips)
-        {
+        for (HashMap<Object, Object> m : equips) {
             ModbusProfile mbProfile = new ModbusProfile();
             short address = Short.parseShort(m.get("group").toString());
             mbProfile.addMbEquip(address, ProfileType.MODBUS_BTU);
@@ -674,13 +681,12 @@ public class Globals {
         /*
          * Get system level EMR profile details
          */
-        ArrayList<HashMap<Object,Object>> emEquips = CCUHsApi.getInstance().readAllEntities("equip and emr and modbus" +
+        ArrayList<HashMap<Object, Object>> emEquips = CCUHsApi.getInstance().readAllEntities("equip and emr and modbus" +
                 " and not zone");
 
-        for (HashMap<Object,Object> m : emEquips)
-        {
+        for (HashMap<Object, Object> m : emEquips) {
             ModbusProfile mbProfile = new ModbusProfile();
-            short address =Short.parseShort(m.get("group").toString());
+            short address = Short.parseShort(m.get("group").toString());
             mbProfile.addMbEquip(address, ProfileType.MODBUS_EMR);
             L.ccu().zoneProfiles.add(mbProfile);
         }
@@ -702,14 +708,14 @@ public class Globals {
     }
 
     public String getSmartNodeBand() {
-        HashMap<Object,Object> device = CCUHsApi.getInstance().readEntity("device and node and addr");
-        CcuLog.i(Domain.LOG_TAG, "Deviceband "+device);
+        HashMap<Object, Object> device = CCUHsApi.getInstance().readEntity("device and node and addr");
+        CcuLog.i(Domain.LOG_TAG, "Deviceband " + device);
         if (device != null && device.size() > 0 && device.get("modbus") == null && device.get("addr") != null) {
             String nodeAdd = device.get("addr").toString();
-            return nodeAdd.substring(0, nodeAdd.length()-2).concat("00");
+            return nodeAdd.substring(0, nodeAdd.length() - 2).concat("00");
         } else {
-            HashMap<Object,Object> band = CCUHsApi.getInstance().readEntity("point and snband");
-            CcuLog.i(Domain.LOG_TAG, "Deviceband "+device);
+            HashMap<Object, Object> band = CCUHsApi.getInstance().readEntity("point and snband");
+            CcuLog.i(Domain.LOG_TAG, "Deviceband " + device);
             if (band != null && band.size() > 0 && band.get("val") != null) {
                 return band.get("val").toString();
             }
@@ -742,20 +748,21 @@ public class Globals {
     }
 
     public void setRecoveryMode() {
-        recoveryMode = SystemProperties.getInt("renatus_recovery",0) > 0;
+        recoveryMode = SystemProperties.getInt("renatus_recovery", 0) > 0;
     }
 
     public boolean isRecoveryMode() {
         return recoveryMode;
-   }
+    }
 
-   public boolean isSafeMode(){
-       HashMap<Object,Object> safeModeObj = CCUHsApi.getInstance().readEntity("safe and mode");
-       if(!safeModeObj.isEmpty()){
-           return CCUHsApi.getInstance().readHisValById(safeModeObj.get("id").toString()) == 1;
-       }
-       return false;
-   }
+    public boolean isSafeMode() {
+        HashMap<Object, Object> safeModeObj = CCUHsApi.getInstance().readEntity("safe and mode");
+        if (!safeModeObj.isEmpty()) {
+            return CCUHsApi.getInstance().readHisValById(safeModeObj.get("id").toString()) == 1;
+        }
+        return false;
+    }
+
     public boolean getBuildingProcessStatus() {
         return mProcessJob.getStatus();
     }
@@ -763,18 +770,18 @@ public class Globals {
     /**
      * Below method ensures systemEquip Id is mapped to ahuRef
      */
-    private void updateCCUAhuRef(){
+    private void updateCCUAhuRef() {
         HashMap<Object, Object> ccuDevice = CCUHsApi.getInstance().readEntity("device and ccu");
         HashMap<Object, Object> systemProfile = CCUHsApi.getInstance().readEntity("system and profile and not modbus");
 
-        if(systemProfile.isEmpty() || ccuDevice.isEmpty()){
+        if (systemProfile.isEmpty() || ccuDevice.isEmpty()) {
             return;
         }
 
         String ahuRef = ccuDevice.get("ahuRef").toString();
         String systemProf = systemProfile.get("id").toString();
 
-        if(!(systemProf.equals(ahuRef))) {
+        if (!(systemProf.equals(ahuRef))) {
             CCUHsApi.getInstance().updateCCUahuRef(systemProf);
         }
     }
@@ -786,13 +793,14 @@ public class Globals {
             AutoCommissioningUtil.handleAutoCommissioningState(scheduledStopDatetimeInMillis);
         }
 
-        if(AutoCommissioningUtil.getAutoCommissionState() == AutoCommissioningState.ABORTED ||
-                AutoCommissioningUtil.getAutoCommissionState() == AutoCommissioningState.COMPLETED){
+        if (AutoCommissioningUtil.getAutoCommissionState() == AutoCommissioningState.ABORTED ||
+                AutoCommissioningUtil.getAutoCommissionState() == AutoCommissioningState.COMPLETED) {
             CCUHsApi.getInstance().pointWriteForCcuUser(HRef.copy(autoCommissioningPointId),
                     HayStackConstants.DEFAULT_POINT_LEVEL, HNum.make((double) AutoCommissioningState.NOT_STARTED.ordinal()), HNum.make(0));
             CCUHsApi.getInstance().writeHisValById(autoCommissioningPointId, (double) AutoCommissioningState.NOT_STARTED.ordinal());
         }
     }
+
     public interface OnCcuInitCompletedListener {
         void onInitCompleted();
     }
@@ -800,10 +808,11 @@ public class Globals {
     public void registerOnCcuInitCompletedListener(OnCcuInitCompletedListener listener) {
         initCompletedListeners.add(listener);
         if (isInitCompleted) {
-            CcuLog.i("UI_PROFILING","CCU Already initialized");
+            CcuLog.i("UI_PROFILING", "CCU Already initialized");
             listener.onInitCompleted();
         }
     }
+
     public void unRegisterOnCcuInitCompletedListener(OnCcuInitCompletedListener listener) {
         initCompletedListeners.remove(listener);
     }

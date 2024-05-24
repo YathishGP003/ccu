@@ -126,7 +126,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
 
     private fun isAutoAwayMappedToDemandResponseLevel(levelRow: HRow?, ccuHsApi: CCUHsApi): Boolean {
         return levelRow!!.getInt("level") == HayStackConstants.DEMAND_RESPONSE_LEVEL &&
-                !DemandResponse.isDRModeActivated(ccuHsApi)
+                ! DemandResponse.isDRModeActivated(ccuHsApi)
     }
 
     private fun isLevelToBeCleared(levelRow: HRow?): Boolean {
@@ -141,6 +141,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             level == HayStackConstants.FORCE_OVERRIDE_LEVEL ||
             level == HayStackConstants.OCCUPANT_USER_WRITE_LEVEL ||
             level == HayStackConstants.USER_APP_WRITE_LEVEL }
+        hayStack.scheduleSync()
     }
 
     private fun migrationToHandleInfluenceOfUserIntentOnSentPoints(ccuHsApi: CCUHsApi) {

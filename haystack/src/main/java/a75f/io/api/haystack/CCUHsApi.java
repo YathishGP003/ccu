@@ -1199,7 +1199,8 @@ public class CCUHsApi
         HashMap<Object, Object> point = readEntity(query);
         Object id = point.get("id");
         if (id == null || id == "") {
-            return null;
+            CcuLog.d("CCU_HS","readPointPriorityValByQuery point id is null : "+query);
+            return 0.0;
         }
 
         return readPointPriorityVal(id.toString());
@@ -3546,7 +3547,7 @@ public class CCUHsApi
     }
     public int getCcuLogLevel() {
         try {
-            if(ccuLogLevel > 0){
+            if(ccuLogLevel >= 0){
                 return ccuLogLevel;
             }
             if(!isCCURegistered())

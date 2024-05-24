@@ -16,7 +16,6 @@ open class StagedVfdRtuProfileConfig(modelDef : SeventyFiveFProfileDirective)
                         : StagedRtuProfileConfig(modelDef){
 
     lateinit var analogOut2Enabled : EnableConfig
-
     lateinit var analogOut2Economizer : ValueConfig
     lateinit var analogOut2Recirculate : ValueConfig
     lateinit var analogOut2CoolStage1 : ValueConfig
@@ -69,7 +68,7 @@ open class StagedVfdRtuProfileConfig(modelDef : SeventyFiveFProfileDirective)
 
     override fun getActiveConfiguration() : StagedVfdRtuProfileConfig {
 
-        val equip = Domain.hayStack.readEntity("system and equip and not modbus")
+        val equip = Domain.hayStack.readEntity("system and equip and not modbus and not connectModule")
         if (equip.isEmpty()) {
             return this
         }

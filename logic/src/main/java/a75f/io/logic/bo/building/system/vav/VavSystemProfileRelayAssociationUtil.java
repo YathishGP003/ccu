@@ -14,7 +14,7 @@ import a75f.io.logic.bo.util.TemperatureMode;
 
 public class VavSystemProfileRelayAssociationUtil {
     public static boolean getDesiredTempDisplayMode(TemperatureMode modeType){
-        HashMap<Object, Object> equips = CCUHsApi.getInstance().readEntity("equip and system and not modbus");
+        HashMap<Object, Object> equips = CCUHsApi.getInstance().readEntity("equip and system and not modbus and not connectModule");
         Equip equip = new Equip.Builder().setHashMap(equips).build();
         ProfileType profileType = ProfileType.getProfileTypeForName(equip.getProfile());
         //This will be needed for profiles not migrated to DM.

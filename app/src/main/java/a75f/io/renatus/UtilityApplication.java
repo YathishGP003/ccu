@@ -90,6 +90,7 @@ import a75f.io.renatus.schedules.FileBackupService;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.restserver.server.HttpServer;
 import a75f.io.usbserial.SerialEvent;
+import a75f.io.usbserial.UsbConnectService;
 import a75f.io.usbserial.UsbModbusService;
 import a75f.io.usbserial.UsbService;
 import a75f.io.usbserial.UsbServiceActions;
@@ -140,6 +141,10 @@ public abstract class UtilityApplication extends Application {
                     //NotificationHandler.setCMConnectionStatus(false);
                     Toast.makeText(context, "USB Modbus disconnected", Toast.LENGTH_SHORT).show();
                     break;
+                case UsbConnectService.ACTION_USB_CONNECT_DISCONNECTED: // USB DISCONNECTED
+                    //NotificationHandler.setCMConnectionStatus(false);
+                    Toast.makeText(context, "USB Connect disconnected", Toast.LENGTH_SHORT).show();
+                    break;
                 case UsbService.ACTION_USB_NOT_SUPPORTED: // USB NOT SUPPORTED
                     NotificationHandler.setCMConnectionStatus(false);
                     Toast.makeText(context, "USB device not supported", Toast.LENGTH_SHORT).show();
@@ -154,6 +159,8 @@ public abstract class UtilityApplication extends Application {
 
     private UsbService usbService;
     private UsbModbusService usbModbusService;
+
+    private UsbConnectService usbConnectService;
 
     private DeviceUpdateJob deviceUpdateJob;
     private static Prefs prefs;
@@ -203,7 +210,28 @@ public abstract class UtilityApplication extends Application {
         }
     };
 
+    private final ServiceConnection usbConnectConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName arg0, IBinder arg1) {
+            try {
+                Log.d(LOG_PREFIX, "utility Application -" + arg1.isBinderAlive() + "," + arg1.toString() + "," + arg0.getClassName() + "," + arg1.getInterfaceDescriptor());
+                if (arg1.isBinderAlive()) {
+                    usbConnectService = ((UsbConnectService.UsbBinder) arg1).getService();
+                    LSerial.getInstance().setUsbConnectService(usbConnectService);
 
+                    //TODO: research what cts and dsr changes are.  For now no handler will be used, because I'm uncertain if the information is relevant.
+                    usbConnectService.setHandler(null);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            usbService = null;
+        }
+    };
     @Override
     public void onCreate() {
         super.onCreate();
@@ -248,18 +276,14 @@ public abstract class UtilityApplication extends Application {
         isDataSyncRestartRequired();
         UpdateCCUFragment.abortCCUDownloadProcess();
 
-        // we now have haystack
         RaygunClient.setUser(userNameForCrashReportsFromHaystack());
 
         setUsbFilters();  // Start listening notifications from UsbService
         startService(new Intent(this, OTAUpdateHandlerService.class));  // Start OTA update event + timer handler service
         startService(UsbService.class, usbConnection, null); // Start UsbService(if it was not started before) and
-        // Bind it
-    
-        startUsbModbusService(UsbModbusService.class, usbModbusConnection, null); // Start UsbService(if it was not
-        // started before)
-        // and Bind it
 
+        startUsbModbusService(UsbModbusService.class, usbModbusConnection, null); // Start UsbService(if it was not
+        startConnectService(UsbConnectService.class, usbConnectConnection, null);
         wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         deviceUpdateJob = new DeviceUpdateJob();
         deviceUpdateJob.scheduleJob("DeviceUpdateJob",Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
@@ -429,6 +453,7 @@ public abstract class UtilityApplication extends Application {
         filter.addAction(UsbModbusService.ACTION_USB_MODBUS_DISCONNECTED);
         filter.addAction(UsbServiceActions.ACTION_USB_PRIV_APP_PERMISSION_DENIED);
         filter.addAction(UsbServiceActions.ACTION_USB_REQUIRES_TABLET_REBOOT);
+        filter.addAction(UsbConnectService.ACTION_USB_CONNECT_DISCONNECTED);
         registerReceiver(mUsbReceiver, filter);
     }
 
@@ -465,6 +490,21 @@ public abstract class UtilityApplication extends Application {
         bindService(bindingIntent, serviceConnection, Context.BIND_AUTO_CREATE);
     }
 
+    private void startConnectService(Class<?> service, ServiceConnection serviceConnection, Bundle extras) {
+        if (!UsbConnectService.SERVICE_CONNECTED) {
+            Intent startService = new Intent(this, service);
+            if (extras != null && !extras.isEmpty()) {
+                Set<String> keys = extras.keySet();
+                for (String key : keys) {
+                    String extra = extras.getString(key);
+                    startService.putExtra(key, extra);
+                }
+            }
+            this.startService(startService);
+        }
+        Intent bindingIntent = new Intent(this, service);
+        bindService(bindingIntent, serviceConnection, Context.BIND_AUTO_CREATE);
+    }
 
     @Override
     public void onTerminate() {

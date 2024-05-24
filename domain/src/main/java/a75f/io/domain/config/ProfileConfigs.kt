@@ -1,7 +1,5 @@
 package a75f.io.domain.config
 
-import a75f.io.domain.api.EntityConfig
-
 
 /**
  * A profile configuration binds a particular UI element or item to its domain Name.

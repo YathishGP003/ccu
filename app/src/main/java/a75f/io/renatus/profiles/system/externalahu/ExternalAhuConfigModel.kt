@@ -1,4 +1,4 @@
-package a75f.io.renatus.externalahu
+package a75f.io.renatus.profiles.system.externalahu
 
 import a75f.io.domain.api.DomainName.systemCO2DamperOpeningRate
 import a75f.io.domain.api.DomainName.systemCO2Target

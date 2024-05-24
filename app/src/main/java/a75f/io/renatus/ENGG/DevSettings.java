@@ -47,6 +47,7 @@ import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Queries;
 import a75f.io.api.haystack.Site;
 import a75f.io.device.mesh.LSerial;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.ZoneProfile;
@@ -62,6 +63,7 @@ import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.CCUUtils;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.util.RxjavaUtil;
+import a75f.io.usbserial.UsbSerialUtil;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
@@ -121,6 +123,8 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
     
     @BindView(R.id.imageCMSerial) ImageView cmSerial;
     @BindView(R.id.imageMBSerial) ImageView mbSerial;
+
+    @BindView(R.id.imageConnectSerial) ImageView connectSerial;
     @BindView(R.id.reconnectSerial) Button reconnectSerial;
     public  @BindView(R.id.daikin_theme_config) CheckBox daikinThemeConfig;
     public  @BindView(R.id.carrier_theme_config) CheckBox carrierThemeConfig;
@@ -145,6 +149,8 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
     public @BindView(R.id.cacheSyncFrequency) Spinner cacheSyncFrequency;
 
     public @BindView(R.id.loglevel) Spinner logLevelSpinner;
+
+    public @BindView(R.id.advancedAhuConnectPort) Spinner advancedAhuConnectPort;
     SharedPreferences spDefaultPrefs = null;
 
     private final CompositeDisposable disposable = new CompositeDisposable();
@@ -326,6 +332,9 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
                                                                       : android.R.drawable.checkbox_off_background);
         mbSerial.setImageResource(LSerial.getInstance().isModbusConnected() ? android.R.drawable.checkbox_on_background
                                       : android.R.drawable.checkbox_off_background);
+
+        connectSerial.setImageResource(LSerial.getInstance().isConnectModuleConnected() ? android.R.drawable.checkbox_on_background
+                : android.R.drawable.checkbox_off_background);
         reconnectSerial.setOnClickListener(new View.OnClickListener()
         {
             @Override
@@ -411,6 +420,13 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
         cacheSyncFrequency.setOnItemSelectedListener(this);
         cacheSyncFrequency.setSelection(oneToFifteenAdapter.getPosition(Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
                 .getInt("cacheSyncFrequency", 1)));
+
+
+        ArrayAdapter<String> portListAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, new String[]{"CCU_USB_PORT", "CM_COM_PORT2"});
+        oneToFifteenAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        advancedAhuConnectPort.setAdapter(portListAdapter);
+        advancedAhuConnectPort.setSelection(UsbSerialUtil.getPreferredConnectModuleSerialType(getContext()), false);
+        advancedAhuConnectPort.setOnItemSelectedListener(this);
 
 
         resetAppBtn.setOnClickListener((View.OnClickListener) view16 -> {
@@ -532,6 +548,23 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
                 break;
             case R.id.cacheSyncFrequency:
                 writePref("cacheSyncFrequency", Integer.parseInt(cacheSyncFrequency.getSelectedItem().toString()));
+                break;
+            case R.id.advancedAhuConnectPort:
+                PreferenceManager.getDefaultSharedPreferences(getActivity())
+                        .edit()
+                        .putInt("connect_serial_port", advancedAhuConnectPort.getSelectedItemPosition())
+                        .commit();
+                CcuLog.d("TEST_SAM","Selected port : " + advancedAhuConnectPort.getSelectedItemPosition());
+                AlertDialog dialog = new AlertDialog.Builder(getActivity())
+                        .setTitle("App restart confirmation")
+                        .setMessage("This change requires an app restart. Do you want to continue?")
+                        .setPositiveButton("Restart", (dialog1, which) -> {
+                            CCUUiUtil.triggerRestart(getContext());
+                        })
+                        .setNegativeButton("Cancel", (dialog1, which) -> {
+                        })
+                        .create();
+                dialog.show();
                 break;
         }
     }

@@ -560,10 +560,11 @@ public class UsbService extends Service
 	}
 	
 	private void configureSerialPort() {
+		CcuLog.i(TAG, "CM: configureSerialPort ");
 		serialPort = UsbSerialDevice.createUsbSerialDevice(device, connection);
 		if (serialPort != null) {
 			if (serialPort.open()) {
-				setDebug(false);
+				setDebug(true);
 				serialPortConnected = true;
 				UsbSerialWatchdog.getInstance().pet();
 				serialPort.setBaudRate(BAUD_RATE);
@@ -588,6 +589,7 @@ public class UsbService extends Service
 				Intent intent = new Intent(ACTION_USB_READY);
 				context.sendBroadcast(intent);
 			} else {
+				CcuLog.i(TAG, "CM: configureSerialPort Open Failed!");
 				// Serial port could not be opened, maybe an I/O error or if CDC driver was chosen, it does not really fit
 				// Send an Intent to Main Activity
 				Intent intent;
@@ -599,6 +601,7 @@ public class UsbService extends Service
 				context.sendBroadcast(intent);
 			}
 		} else {
+			CcuLog.i(TAG, "CM: configureSerialPort Failed");
 			// No driver for given device, even generic CDC driver could not be loaded
 			Intent intent = new Intent(ACTION_USB_NOT_SUPPORTED);
 			context.sendBroadcast(intent);

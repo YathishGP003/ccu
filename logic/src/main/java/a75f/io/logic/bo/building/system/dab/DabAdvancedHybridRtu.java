@@ -51,11 +51,12 @@ public class DabAdvancedHybridRtu extends DabStagedRtu
     @Override
     public void addSystemEquip() {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap equip = hayStack.read("equip and system and not modbus");
+        HashMap equip = hayStack.read("equip and system and not modbus and not connectModule");
         if (equip != null && equip.size() > 0) {
             if (!equip.get("profile").equals(ProfileType.SYSTEM_DAB_HYBRID_RTU.name())) {
                 hayStack.deleteEntityTree(equip.get("id").toString());
                 removeSystemEquipModbus();
+                deleteSystemConnectModule();
             } else {
                 addNewSystemUserIntentPoints(equip.get("id").toString());
                 addNewTunerPoints(equip.get("id").toString());

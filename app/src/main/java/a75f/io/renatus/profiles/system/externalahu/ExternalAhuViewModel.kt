@@ -1,4 +1,4 @@
-package a75f.io.renatus.externalahu
+package a75f.io.renatus.profiles.system.externalahu
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.modbus.EquipmentDevice

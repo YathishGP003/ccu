@@ -152,6 +152,10 @@ const val OK = "Ok"
 const val SEARCH_MODEL = "Search model"
 const val SEARCH_SLAVE_ID = "Search Slave Id"
 
+
+
+
+
 fun getSlaveIds(isParent: Boolean): List<String> {
     val slaveAddress: ArrayList<String> = ArrayList()
     if (!isParent) slaveAddress.add(SAME_AS_PARENT)

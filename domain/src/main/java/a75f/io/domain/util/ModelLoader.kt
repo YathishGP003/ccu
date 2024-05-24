@@ -1,4 +1,5 @@
 package a75f.io.domain.util
+
 import io.seventyfivef.domainmodeler.client.ModelDirective
 
 /**
@@ -57,6 +58,9 @@ object ModelLoader {
     fun getCMDeviceModel() : ModelDirective {
         return ModelCache.getModelById(MODEL_CM_DEVICE)
     }
+    fun getConnectModuleDeviceModel() : ModelDirective {
+        return ModelCache.getModelById(MODEL_CONNECT_DEVICE)
+    }
     fun getVavStageRtuModelDef() : ModelDirective {
         return ModelCache.getModelById(MODEL_VAV_STAGED_RTU)
     }
@@ -70,9 +74,17 @@ object ModelLoader {
     fun getVavExternalAhuModel() : ModelDirective {
         return ModelCache.getModelById(MODEL_EXTERNAL_AHU_VAV)
     }
+    fun getVavAdvancedAhuCmModelV2() : ModelDirective {
+        return ModelCache.getModelById(MODEL_VAV_ADVANCED_AHU_V2_CM)
+    }
+    fun getVavAdvancedAhuConnectModelV2() : ModelDirective {
+        return ModelCache.getModelById(MODEL_VAV_ADVANCED_AHU_V2_CONNECT)
+    }
+
     fun getVavModulatingRtuModelDef() : ModelDirective {
         return ModelCache.getModelById(MODEL_VAV_MODULATING_AHU)
     }
+
     fun getModelForDomainName( domainName : String) : ModelDirective {
         return when(domainName) {
             "smartnodeVAVReheatNoFan" -> getSmartNodeVavNoFanModelDef()
@@ -84,6 +96,8 @@ object ModelLoader {
             "helionodeVAVReheatSeriesFan" -> getHelioNodeVavSeriesModelDef()
             "helionodeVAVReheatParallelFan" -> getHelioNodeVavParallelFanModelDef()
             "helionodeActiveChilledBeam" -> getHelioNodeVavAcbModelDef()
+            "vavAdvancedHybridAhuV2" -> getVavAdvancedAhuCmModelV2()
+            "vavAdvancedHybridAhuV2_connectModule" -> getVavAdvancedAhuConnectModelV2()
             else -> throw IllegalStateException("Invalid Model Name")
         }
     }

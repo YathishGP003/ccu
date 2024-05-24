@@ -46,7 +46,8 @@ public class MeshUtil
     public static final int RELAY_BITMAP_POS_W1 = 4;
     public static final int RELAY_BITMAP_POS_W2 = 5;
     public static final int RELAY_BITMAP_POS_AUX = 6;
-    
+    public static final int RELAY_BITMAP_POS_AUX2 = 7;
+
     
     public static boolean sendHeartbeat(short temperatureOffset)
     {
@@ -151,6 +152,8 @@ public class MeshUtil
                 return RELAY_BITMAP_POS_G2;
             case 7:
                 return RELAY_BITMAP_POS_AUX;
+            case 8:
+                return RELAY_BITMAP_POS_AUX2; // CM2 has 8 Relay's
         }
         return relayPos;
     }

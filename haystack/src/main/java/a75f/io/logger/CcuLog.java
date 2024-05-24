@@ -5,7 +5,11 @@ package a75f.io.logger;
  */
 
 import android.util.Log;
+
+import org.projecthaystack.UnknownRecException;
+
 import java.util.HashMap;
+
 import a75f.io.api.haystack.CCUHsApi;
 
 /**
@@ -208,6 +212,7 @@ public class CcuLog
 
 
 	private static int getLogLevel(){
+		double level = 4.0;
 		try {
 			return CCUHsApi.getInstance().getCcuLogLevel();
 		} catch (IllegalStateException e) {

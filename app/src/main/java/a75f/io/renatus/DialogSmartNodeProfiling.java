@@ -437,23 +437,6 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
         );
     }
 
-    /*@OnClick(R.id.first_button)
-    void onFirstButtonClick()
-    {
-        removeDialogFragment(ID);
-    }*/
-    
-   /* @OnClick(R.id.second_button)
-    void onSecondButtonClick()
-    {
-        openBLEPairingInstructions();
-    }*/
-    
-    /*@OnClick(R.id.vavModuleTypeRB)
-    void onVavSelected() {
-        vavUnitSelector.setVisibility(View.VISIBLE);
-    }
-    */
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
     {
@@ -463,8 +446,6 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
         mRoomName = getArguments().getString(FragmentCommonBundleArgs.ARG_NAME);
         mFloorName = getArguments().getString(FragmentCommonBundleArgs.FLOOR_NAME);
         isPaired = getArguments().getBoolean(FragmentCommonBundleArgs.ALREADY_PAIRED);
-        //mZone = L.findZoneByName(mFloorName, mRoomName);
-        //mLightProfile = (LightProfile) mZone.findProfile(ProfileType.LIGHT);
         mProfileType = ProfileType.values()[getArguments().getInt(FragmentCommonBundleArgs.PROFILE_TYPE)];
 
         return view;
@@ -485,7 +466,14 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
         /*Code to disable VAV profiles if DAB is selected*/
         if(L.ccu().systemProfile.getProfileType() == ProfileType.DAB || L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_ANALOG_RTU
                 || L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_STAGED_RTU || L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_HYBRID_RTU
-                ||L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_STAGED_VFD_RTU ||L.ccu().systemProfile.getProfileType() == ProfileType.dabExternalAHUController){
+                ||L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_STAGED_VFD_RTU ||L.ccu().systemProfile.getProfileType() == ProfileType.dabExternalAHUController
+                ||L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_ADVANCED_AHU
+        ){
+
+            rlVAVNoFan.setEnabled(false);
+            rlVAVSeriesFan.setEnabled(false);
+            rlVAVParallelFan.setEnabled(false);
+            rlACB.setEnabled(false);
 
             disableMenuViews.addAll(Arrays.asList(
                     rlVAVNoFan, rlVAVSeriesFan, rlVAVParallelFan, rlACB
@@ -506,7 +494,13 @@ public class DialogSmartNodeProfiling extends BaseDialogFragment
                 || L.ccu().systemProfile.getProfileType() == ProfileType.VAV_PARALLEL_FAN ||L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_ANALOG_RTU
                 ||L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_STAGED_RTU || L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_HYBRID_RTU
                 ||L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_STAGED_VFD_RTU ||L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_IE_RTU
-                ||L.ccu().systemProfile.getProfileType() == ProfileType.vavExternalAHUController){
+                ||L.ccu().systemProfile.getProfileType() == ProfileType.vavExternalAHUController||L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_ADVANCED_AHU){
+            rlDabSingleDuct.setEnabled(false);
+            rlDabDualDuct.setEnabled(false);
+            textDabSingleDuct.setTextColor(getResources().getColor(R.color.selection_gray));
+            textDabDualDuct.setTextColor(getResources().getColor(R.color.selection_gray));
+            textDabSingleDuctDesc.setTextColor(getResources().getColor(R.color.selection_gray));
+            textDabDualDuctDesc.setTextColor(getResources().getColor(R.color.selection_gray));
 
             disableMenuViews.addAll(Arrays.asList(
                     rlDabSingleDuct, rlDabDualDuct

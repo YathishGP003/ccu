@@ -1,0 +1,256 @@
+syntax = "proto3";
+
+option java_package = "a75f.io.device";
+option java_outer_classname = "ControlMote";
+
+// version = 0.1
+enum CmRelayMappingStages_e {
+  RELAY_NOT_ENABLED = 0;
+  COOLING_STAGE_1 = 1;
+  COOLING_STAGE_2 = 2;
+  COOLING_STAGE_3 = 3;
+  COOLING_STAGE_4 = 4;
+  COOLING_STAGE_5 = 5;
+  HEATING_STAGE_1 = 6;
+  HEATING_STAGE_2 = 7;
+  HEATING_STAGE_3 = 8;
+  HEATING_STAGE_4 = 9;
+  HEATING_STAGE_5 = 10;
+  FAN_STAGE_1 = 11;
+  FAN_STAGE_2 = 12;
+  FAN_STAGE_3 = 13;
+  FAN_STAGE_4 = 14;
+  FAN_STAGE_5 = 15;
+  HUMIDIFIER = 16;
+  DEHUMIDIFIER = 17;
+  SAT_COOLING_STAGE_1 = 18;
+  SAT_COOLING_STAGE_2 = 19;
+  SAT_COOLING_STAGE_3 = 20;
+  SAT_COOLING_STAGE_4 = 21;
+  SAT_COOLING_STAGE_5 = 22;
+  SAT_HEATING_STAGE_1 = 23;
+  SAT_HEATING_STAGE_2 = 24;
+  SAT_HEATING_STAGE_3 = 25;
+  SAT_HEATING_STAGE_4 = 26;
+  SAT_HEATING_STAGE_5 = 27;
+  PRESSURE_FAN_STAGE_1 = 28;
+  PRESSURE_FAN_STAGE_2 = 29;
+  PRESSURE_FAN_STAGE_3 = 30;
+  PRESSURE_FAN_STAGE_4 = 31;
+  PRESSURE_FAN_STAGE_5 = 32;
+  OCCUPIED_ENABLE = 33;
+  FAN_ENABLE = 34;
+  FRESH_AIR_FAN_CMD = 35;
+}
+
+enum CmAnalogOutMappingStages_e {
+  AOUT_NOT_ENABLED = 0;
+  PRESSURE_FAN_CONTROL = 1;
+  SAT_COOLING_CONTROL = 2;
+  SAT_HEATING_CONTROL = 3;
+  LOAD_COOLING_CONTROL = 4;
+  LOAD_HEATING_CONTROL = 5;
+  LOAD_FAN_CONTROL = 6;
+  CO2_DAMPER_CONTROL = 7;
+  COMPOSITE_OUTPUT = 8;
+}
+
+enum CmAnalogInMappingStages_e {
+  AIN_NOT_ENABLED = 0;
+  AN_DUCT_STATIC_PRESSURE_WC01_1 = 12;
+  AN_DUCT_STATIC_PRESSURE_WC02_1 = 13;
+  AN_DUCT_STATIC_PRESSURE_WC10_1 = 14;
+  AN_DUCT_STATIC_PRESSURE_WC01_2 = 15;
+  AN_DUCT_STATIC_PRESSURE_WC02_2 = 16;
+  AN_DUCT_STATIC_PRESSURE_WC10_2 = 17;
+  AN_DUCT_STATIC_PRESSURE_WC01_3 = 18;
+  AN_DUCT_STATIC_PRESSURE_WC02_3 = 19;
+  AN_DUCT_STATIC_PRESSURE_WC10_3 = 20;
+}
+
+enum CmSensorBusMappings_e {
+  SENSOR_BUS_DISABLED = 0;
+  SENSOR_BUS_SAT1     = 1;
+  SENSOR_BUS_SAT2     = 2;
+  SENSOR_BUS_SAT3     = 3;
+  SENSOR_BUS_DSP1     = 4;
+  SENSOR_BUS_DSP2     = 5;
+  SENSOR_BUS_DSP3     = 6;
+  SENSOR_BUS_NUM_OF   = 7;
+}
+
+enum CmThermistorMappingStages_e {
+  TH_NOT_ENABLED = 0;
+  TH_SUPPLY_AIR_TEMP_1 = 9;
+  TH_SUPPLY_AIR_TEMP_2 = 10;
+  TH_SUPPLY_AIR_TEMP_3 = 11;
+}
+
+message CmAnalogOutConfig_t {
+  optional CmAnalogOutMappingStages_e analogOutMapping = 1; // Mapping to cooling stage, heating stage, etc. depending on connection to hyperstat relay
+  optional int32 analogOutMin = 2; // Voltage at which the cooler/damper/fan is at minimum position (1/10 V)
+  optional int32 analogOutMax = 3; // Voltage at which the cooler/damper/fan is at maximum position (1/10 V)
+}
+
+enum PiLoopInputDataOperation_e {
+  SUPPLY_AIR_TEMPERATURE_1_VAL   = 0;
+  SUPPLY_AIR_TEMPERATURE_2_VAL   = 1;
+  SUPPLY_AIR_TEMPERATURE_3_VAL   = 2;
+  AVERAGE_VAL = 3;
+  MINIMUM_VAL = 4;
+  MAXIMUM_VAL = 5;
+}
+
+enum PiLoopInputDataSources_e {
+  TH1_TEMP = 0; // Temperature is taken from Thermistor 1
+  TH2_TEMP = 1; // Temperature is taken from Thermistor 2
+  SENSOR_ADDR_0_TEMP = 2; // Temperature is taken from sensor bus address 1
+  SENSOR_ADDR_1_TEMP = 3;
+  SENSOR_ADDR_2_TEMP = 4;
+  SENSOR_ADDR_3_TEMP = 5;
+  AN1_PRESSURE = 6;
+  AN2_PRESSURE = 7;
+  SENSOR_ADDR_1_PRESSURE = 8;
+  AN1_CO2 = 9;
+  AN2_CO2 = 10;
+  SENSOR_ADDR_1_CO2 = 11;
+  SENSOR_ADDR_2_CO2 = 12;
+  SENSOR_ADDR_3_CO2 = 13;
+  SENSOR_ADDR_4_CO2 = 14;
+}
+
+message PiLoopInputDataType_t {
+  PiLoopInputDataOperation_e piLoopInputDataOperation = 1;
+  repeated PiLoopInputDataSources_e piLoopInputDataSources = 2;// [packed = true, (nanopb).max_count = 10, (nanopb).fixed_count = false];
+}
+
+message PiLoopConfiguration_t {
+  bool enable = 1;
+  PiLoopInputDataType_t piLoopInputDataType = 2;
+  int32 proportionalConstant= 3;
+  int32 integralConstant= 4;
+  int32 proportionalTemperatureRange= 5;
+  int32 integrationTime= 6;
+}
+
+message AnalogInSensorConfig_t {
+  optional bool IsAnaInUsedForSensor = 1;
+  optional uint32 minAnaInVoltforSensor = 2;
+  optional uint32 maxAnaInVoltforSensor = 3;
+  optional uint32 minEngValforSensor   = 4;
+  optional uint32 maxEngValforSensor   = 5;
+}
+
+enum SupplyAirTempOperation_e {
+  SUPPLY_AIR_TEMPERATURE_1_VALUE_OF   = 0;
+  SUPPLY_AIR_TEMPERATURE_2_VALUE_OF   = 1;
+  SUPPLY_AIR_TEMPERATURE_3_VALUE_OF   = 2;
+  AVERAGE_OF = 3;
+  MINIMUM_OF = 4;
+  MAXIMUM_OF = 5;
+}
+
+enum PressureSensorOperation_e {
+  PRESSURE_SENSOR_1_VALUE_OF = 0;
+  PRESSURE_SENSOR_2_VALUE_OF = 1;
+  PRESSURE_SENSOR_3_VALUE_OF = 2;
+  PRESSURE_SENSOR_AVERAGE_OF = 3;
+  PRESSURE_SENSOR_MINIMUM_OF = 4;
+  PRESSURE_SENSOR_MAXIMUM_OF = 5;
+}
+
+enum DamperCo2Control_e {
+  ZONE_CO2 = 0;
+  RETURN_AIR_CO2 = 1;
+  MIXED_AIR_CO2 = 2;
+}
+
+enum CMProfiles_e {
+  CM_PROFILE_NONE = 0;
+  CM_PROFILE_ADV_AHU = 1;
+}
+
+message CcuToCmSettingsMessage_t {
+  optional CMProfiles_e cmProfile = 1;  // Profile enabled on CM
+  optional int32 temperatureOffset = 2;
+  optional int32 relayActivationHysteresis = 3; // Hysteresis applied on relay toggle
+  optional int32 analogFanSpeedMultiplier = 4;  //  1/10 of multiplier value for fan speed
+
+
+  repeated CmRelayMappingStages_e relayMapping = 5; // [packed = true, (nanopb).max_count = 7, (nanopb).fixed_count = false]; // relay mappings
+
+  repeated CmAnalogOutConfig_t analogOutConfig = 6; // [(nanopb).max_count = 4, (nanopb).fixed_count = false];// Analog out config
+
+  repeated CmAnalogInMappingStages_e analogInMapping = 7; // [packed = true, (nanopb).max_count = 2, (nanopb).fixed_count = false];// Analog In mappings
+
+  repeated CmThermistorMappingStages_e thermistorMapping = 8; // [packed = true, (nanopb).max_count = 2, (nanopb).fixed_count = false];// Thermistor mappings
+
+  repeated PiLoopConfiguration_t piLoopConfiguration = 9; // [(nanopb).max_count = 4, (nanopb).fixed_count = false];// PI Loop Configurations
+
+  repeated AnalogInSensorConfig_t analogInSensorConfig = 10; // [(nanopb).max_count = 2, (nanopb).fixed_count = false];// Analog In mappings; // Parameters for conversion from Ana In voltage to sensor value
+
+  repeated CmSensorBusMappings_e sensorBusMapping = 11; // [packed = true, (nanopb).max_count = 4, (nanopb).fixed_count = false];// Sensor bus mappings;
+
+  optional SupplyAirTempOperation_e supplyAirTempSensorOp = 12;
+  optional PressureSensorOperation_e pressureSensorOp = 13;
+
+  optional int32 damperControlCO2Sensor= 14;
+  optional int32 co2Threshold= 15;
+  optional int32 co2Target= 16;
+  optional DamperCo2Control_e damperCo2Control = 17;
+}
+
+message PiLoopSetPoints_t {
+  optional int32 desiredSetPoint1 = 1 ; // cooling
+  optional int32 desiredSetPoint2 = 2 ; // heating
+}
+
+enum LEDs_e {
+  RED_LED = 0; // RED LED
+  GREEN_LED = 1; // GREEN_LED
+  BLUE_LED = 2; // BLUE_LED
+}
+
+enum SAToperatingMode_e {
+  SAT_OPERATING_MODE_OFF = 0;
+  SAT_OPERATING_MODE_COOLING = 1;
+  SAT_OPERATING_MODE_HEATING = 2;
+}
+
+message CcuToCmOverUsbCmControlMessage_t {
+  optional uint32 relayBitMap =  1; // Relay bitmap for the CM
+
+  repeated uint32 analogOut = 2 ;//[packed = true, (nanopb).max_count = 4, (nanopb).fixed_count = false]; // Four analog out values
+  repeated uint32 pwmLed = 3 ;//[packed = true, (nanopb).max_count = 3, (nanopb).fixed_count = false]; // pwm values for led colors red, green and blue
+  repeated int32 piloopSetPoint = 11 ;//[ (nanopb).max_count = 4, (nanopb).fixed_count = false]; // Four set points for four pi loops in the order SAT cooling, SAT heating, DSP pressure, zone co2.
+  optional SAToperatingMode_e SAToperatingMode = 12;
+  optional uint32 emergencyShutOff = 13;
+}
+
+message CM_SensorBusReadings_t {
+  optional int32 sensorAddress0Temperature = 1;
+  optional uint32 sensorAddress0Humidity = 2;
+  optional uint32 sensorAddress0Pressure = 3;
+  optional uint32 sensorAddress0Co2 = 4;
+  optional uint32 sensorAddress0Occupancy = 5;
+  optional int32 sensorAddress1Temperature = 6;
+  optional uint32 sensorAddress1Humidity = 7;
+  optional uint32 sensorAddress1Pressure = 8;
+  optional uint32 sensorAddress1Co2 = 9;
+  optional uint32 sensorAddress1Occupancy = 10;
+  optional int32 sensorAddress2Temperature = 11;
+  optional uint32 sensorAddress2Humidity = 12;
+  optional uint32 sensorAddress2Pressure = 13;
+  optional uint32 sensorAddress2Co2 = 14;
+  optional uint32 sensorAddress2Occupancy = 15;
+  optional int32 sensorAddress3Temperature = 16;
+  optional uint32 sensorAddress3Humidity = 17;
+  optional uint32 sensorAddress3Pressure = 18;
+  optional uint32 sensorAddress3Co2 = 19;
+  optional uint32 sensorAddress3Occupancy = 20;
+}
+message CmToCcuOverUsbCmSerialRegularUpdate_t {
+  optional CM_SensorBusReadings_t sensorBusReadings = 1;
+  optional uint32 relayBitMapStatus =  2; // Relay status bitmap
+  repeated uint32 analogOutStatus = 3;// [packed = true, (nanopb).max_count = 4, (nanopb).fixed_count = false]; // Four analog out values in 1/10 volts
+}

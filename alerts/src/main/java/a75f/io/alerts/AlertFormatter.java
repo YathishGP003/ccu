@@ -152,7 +152,7 @@ public class AlertFormatter
             case "site":
                 return hs.getSiteName();
             case "system":
-                HashMap<Object, Object> system = hs.readEntity("system and equip and not modbus");
+                HashMap<Object, Object> system = hs.readEntity("system and equip and not modbus and not connectModule");
                 return system.get("dis").toString();
             case "ccu":
                 HashMap<Object, Object> ccu = hs.readEntity("device and ccu");

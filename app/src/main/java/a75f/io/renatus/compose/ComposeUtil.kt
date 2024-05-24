@@ -38,17 +38,6 @@ class ComposeUtil {
             return primaryColor
         }
 
-        private fun getSecondaryThemeColor(): Color {
-            var secondaryColor = Color(android.graphics.Color.parseColor("#1AE5561A"))
-            if (CCUUiUtil.isDaikinEnvironment(Globals.getInstance().applicationContext))
-                secondaryColor = Color(android.graphics.Color.parseColor("#1A0097E0"))
-            if (CCUUiUtil.isCarrierThemeEnabled(Globals.getInstance().applicationContext))
-                secondaryColor = Color(android.graphics.Color.parseColor("#1A1891F6"))
-            if (CCUUiUtil.isAiroverseThemeEnabled(Globals.getInstance().applicationContext))
-                secondaryColor = Color(android.graphics.Color.parseColor("#1A6FC498"))
-            return secondaryColor
-        }
-
         //Function to modify the list of strings as per UX which are to be displayed in the dropdown
         //logic can be updated to accomodate formatting of new strings in future if needed  as per UX
         fun getModifiedList(list: List<String>): List<String> {
@@ -71,6 +60,17 @@ class ComposeUtil {
                 modifiedStrings.add(modifiedStringBuilder.toString())
             }
             return modifiedStrings
+        }
+
+        private fun getSecondaryThemeColor(): Color {
+            var secondaryColor = Color(android.graphics.Color.parseColor("#1AE5561A"))
+            if (CCUUiUtil.isDaikinEnvironment(Globals.getInstance().applicationContext))
+                secondaryColor = Color(android.graphics.Color.parseColor("#1A0097E0"))
+            if (CCUUiUtil.isCarrierThemeEnabled(Globals.getInstance().applicationContext))
+                secondaryColor = Color(android.graphics.Color.parseColor("#1A1891F6"))
+            if (CCUUiUtil.isAiroverseThemeEnabled(Globals.getInstance().applicationContext))
+                secondaryColor = Color(android.graphics.Color.parseColor("#1A6FC498"))
+            return secondaryColor
         }
 
 

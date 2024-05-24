@@ -1,5 +1,6 @@
 package a75f.io.device.mesh;
 
+import static a75f.io.device.cm.ControlMoteMessageGeneratorKt.getCMControlsMessage;
 import static a75f.io.device.mesh.DLog.tempLogdStructAsJson;
 import static a75f.io.device.mesh.MeshUtil.checkDuplicateStruct;
 import static a75f.io.device.mesh.MeshUtil.sendStruct;
@@ -19,9 +20,12 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Zone;
+import a75f.io.device.ControlMote;
 import a75f.io.device.DeviceNetwork;
 import a75f.io.device.HyperSplit;
 import a75f.io.device.HyperStat;
+import a75f.io.device.cm.ControlMoteMessageGeneratorKt;
+import a75f.io.device.cm.ControlMoteMessageSenderKt;
 import a75f.io.device.daikin.IEDeviceHandler;
 import a75f.io.device.mesh.hypersplit.HyperSplitMessageGenerator;
 import a75f.io.device.mesh.hypersplit.HyperSplitMessageSender;
@@ -37,11 +41,14 @@ import a75f.io.device.serial.CcuToCmOverUsbSnControlsMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSnSettings2Message_t;
 import a75f.io.device.serial.CcuToCmOverUsbSnSettingsMessage_t;
 import a75f.io.device.serial.MessageType;
+import a75f.io.domain.api.Domain;
+import a75f.io.domain.equips.VavAdvancedHybridSystemEquip;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.system.vav.VavAdvancedAhu;
 import a75f.io.logic.bo.building.system.vav.VavIERtu;
 import a75f.io.logic.bo.util.TemperatureMode;
 
@@ -354,14 +361,24 @@ public class MeshNetwork extends DeviceNetwork
         } else {
             AlertManager.getInstance().fixCMDead();
         }
-        
+
         if (ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_IE_RTU
                 && DLog.isLoggingEnabled()) {
             sendIETestMessage((VavIERtu) L.ccu().systemProfile);
             return;
         }
-    
-        MeshUtil.sendStructToCM(DeviceUtil.getCMControlsMessage());
+
+        if (ccu().systemProfile instanceof VavAdvancedAhu) {
+            ControlMote.CcuToCmOverUsbCmControlMessage_t cmControlMessage = ControlMoteMessageGeneratorKt
+                                    .getCMControlsMessage();
+            CcuLog.d(L.TAG_CCU_DEVICE, "CM Proto Control Message: " + cmControlMessage);
+            ControlMoteMessageSenderKt.sendControlMoteMessage(MessageType.CCU_TO_CM_OVER_USB_CM_SERIAL_CONTROLS, cmControlMessage.toByteArray());
+            ControlMote.CcuToCmSettingsMessage_t cmSettingsMessage = ControlMoteMessageGeneratorKt.getCMSettingsMessage();
+            CcuLog.d(L.TAG_CCU_DEVICE, "CM Proto Settings Message: " + cmSettingsMessage);
+            ControlMoteMessageSenderKt.sendControlMoteMessage(MessageType.CCU_TO_CM_OVER_USB_CM_SERIAL_SETTINGS, cmSettingsMessage.toByteArray());
+        } else {
+            MeshUtil.sendStructToCM(DeviceUtil.getCMControlsMessage());
+        }
         
     }
     

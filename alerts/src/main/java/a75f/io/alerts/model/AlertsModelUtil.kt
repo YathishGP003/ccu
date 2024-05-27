@@ -4,13 +4,13 @@ import a75f.io.alerts.AlertDefinition
 import a75f.io.api.haystack.Alert
 
 /**
- * Miscellaneious data classes, typealiases, extensions, and utility functions for Alerts Kt
+ * Miscellaneous data classes, type-aliases, extensions, and utility functions for Alerts Kt
  *
  * @author tcase@75f.io
  * Created on 4/15/21.
  */
 
-/** Map of alert def titles to alert defe */
+/** Map of alert def titles to alert def */
 typealias AlertDefsMap = MutableMap<String, AlertDefinition>
 
 /** Map of keys (title+equipId) to full AlertDef occurrence state (alert def, occurrence, progress) */
@@ -57,7 +57,7 @@ data class AlertsStateChange(
 )
 
 /** Calculates and returns the difference between current alerts state (this) and would-be alerts state
-   based on state of positive alert def occurrances  */
+   based on state of positive alert def occurrences  */
 operator fun List<Alert>.minus(alertDefsState: AlertDefsState): AlertsStateChange {
 
    val newAlerts = alertDefsState.getActiveAlerts()
@@ -104,9 +104,9 @@ operator fun AlertDefsState.plusAssign(occurrences: List<AlertDefOccurrence>) {
    fun handleNewAlertOccurrence(alertDefOccurrence: AlertDefOccurrence) {
       val offset = alertDefOccurrence.alertDef.offset?.toInt() ?: 0
       if (offset <= 1) {
-         updates.put(alertDefOccurrence.key, AlertDefOccurrenceState(alertDefOccurrence, AlertDefProgress.Raised()))
+         updates[alertDefOccurrence.key] = AlertDefOccurrenceState(alertDefOccurrence, AlertDefProgress.Raised())
       } else {
-         updates.put(alertDefOccurrence.key, AlertDefOccurrenceState(alertDefOccurrence, AlertDefProgress.Partial()))
+         updates[alertDefOccurrence.key] = AlertDefOccurrenceState(alertDefOccurrence, AlertDefProgress.Partial())
       }
    }
 
@@ -122,9 +122,9 @@ operator fun AlertDefsState.plusAssign(occurrences: List<AlertDefOccurrence>) {
                val offset = alertDefOccurrence.alertDef.offset.toInt()
                val count = progress.occurrenceCount + 1
                if (count >= offset) {
-                  updates.put(key, value.copy(progress = progress.toRaised()))
+                  updates[key] = value.copy(progress = progress.toRaised())
                } else {
-                  updates.put(key, value.copy(progress = progress.inc()))
+                  updates[key] = value.copy(progress = progress.inc())
                }
             }
             // it was fixed, but now it's occurring again
@@ -138,7 +138,7 @@ operator fun AlertDefsState.plusAssign(occurrences: List<AlertDefOccurrence>) {
             progress is AlertDefProgress.Partial -> deletions.add(key)
             progress.isFixed() -> deletions.add(key)
             // And "resolve" active alert.
-            progress.isActive() -> updates.put(key, value.copy(progress = progress.toFixed()))
+            progress.isActive() -> updates[key] = value.copy(progress = progress.toFixed())
          }
       }
    }

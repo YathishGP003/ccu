@@ -1,5 +1,7 @@
 package a75f.io.alerts;
 
+import static a75f.io.alerts.AlertProcessor.TAG_CCU_ALERTS;
+
 import android.content.SharedPreferences;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -18,8 +20,8 @@ import java.util.stream.Collectors;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HisItem;
 import a75f.io.logger.CcuLog;
-/**
- * Created by samjithsadasivan on 4/27/18.
+/*
+  Created by samjithsadasivan on 4/27/18.
  */
 
 /**
@@ -88,7 +90,7 @@ public class Conditional
     }
 
     // NOTE:  algorithm part of the code is formatted normally on the left.
-    // NOTE:  debugging code is indented far to the right and can be ingored when reading the algorithm.
+    // NOTE:  debugging code is indented far to the right and can be ignored when reading the algorithm.
     /**
      *  The mutedEquipIds are used by grpOperations other than 'equip' and 'delta'.
      *  grpOperations other than 'equip' and 'delta' will set the 'status' value INSIDE this method.
@@ -116,7 +118,7 @@ public class Conditional
                                     sb.append("  Ending evaluation.");
             return;
         }
-                                if (grpOperation != null && !grpOperation.equals(""))
+                                if (grpOperation != null && !grpOperation.isEmpty())
                                     sb.append("grpOperation: ").append(grpOperation).append("\n");
 
 
@@ -129,10 +131,10 @@ public class Conditional
                                 if (isNumeric(value)) sb.append("  (numeric)");
                                 sb.append("\nkey (LHS): ").append(key);
 
-        if (grpOperation == null || grpOperation.equals("")) {
-                                    sb.append("  -- find point from haystack for " + key);
+        if (grpOperation == null || grpOperation.isEmpty()) {
+                                    sb.append("  -- find point from haystack for ").append(key);
             HashMap point = CCUHsApi.getInstance().read(key);
-            if (point.size() == 0) {
+            if (point.isEmpty()) {
                                      error = "no point for " + key;
                                      sb.append("\nNo point for key. Ending evaluation.");
                 status = false;
@@ -153,11 +155,11 @@ public class Conditional
                                     sb.append("\nEvaluating for ").append(equips.size()).append(" equips");
             for (Map q : equips) {
                 String equipRef = q.get("id").toString();
-                                        sb.append("\nEquip: ").append(q.get("dis")).append(", " + equipRef.substring(0, 6));
+                                        sb.append("\nEquip: ").append(q.get("dis")).append(", ").append(equipRef.substring(0, 6));
                 HashMap point = CCUHsApi.getInstance().read(key+" and equipRef == \""+ equipRef +"\"");
-                if (point.size() == 0) {
+                if (point.isEmpty()) {
                                             error = "no point for " + key+" and equipRef == \"" + equipRef  +"\"";
-                                            sb.append("\n   no point for " + key+" and equipRef == \"" + equipRef +"\"");
+                                            sb.append("\n   no point for ").append(key).append(" and equipRef == \"").append(equipRef).append("\"");
                     continue;
                 }
                 String pointRef = point.get("id").toString();
@@ -197,14 +199,14 @@ public class Conditional
         } else if (grpOperation.contains("oao")){
             ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and oao");
                                         sb.append("\nEvaluating for ").append(equips.size()).append("OAO equips");
-            if (equips.size()!=0) {
+            if (!equips.isEmpty()) {
                 for (Map q : equips) {
                                                 sb.append("\nEquip: ").append(q.get("dis")).append("  -- expecting just one.");
 
                     HashMap point = CCUHsApi.getInstance().read(key+" and equipRef == \""+q.get("id")+"\"");
-                    if (point.size() == 0) {
+                    if (point.isEmpty()) {
                                                     error = "no point for " + key+" and equipRef == \""+q.get("id")+"\"";
-                                                    sb.append("no point for " + key+" and equipRef == \""+q.get("id")+"\"");
+                                                    sb.append("no point for ").append(key).append(" and equipRef == \"").append(q.get("id")).append("\"");
                         continue;
                     }
                                                 sb.append("\nFound point").append(point.get("id")).append(" -- reading his val");
@@ -264,7 +266,7 @@ public class Conditional
                                             sb.append(" ").append(pv.id.substring(0,6)).append(", with his val: ").append(pv.val);
             }
 
-            if (mutedEquipIds.size() > 0) {
+            if (!mutedEquipIds.isEmpty()) {
                                             sb.append("\n Excluded ")
                                                     .append(mutedEquipIds.size())
                                                     .append(" MUTED equip(s)")
@@ -360,11 +362,11 @@ public class Conditional
                                     sb.append("\nEvaluating for ").append(equips.size()).append(" equips for delta");
                 for (Map q : equips) {
                     String equipRef = q.get("id").toString();
-                                        sb.append("\nEquip: ").append(q.get("dis")).append(", " + equipRef.substring(0, 6));
+                                        sb.append("\nEquip: ").append(q.get("dis")).append(", ").append(equipRef.substring(0, 6));
                     HashMap point = CCUHsApi.getInstance().read(key+" and equipRef == \"" + equipRef + "\"");
-                    if (point.size() == 0) {
+                    if (point.isEmpty()) {
                                                     error = "no point for " + key+" and equipRef == \"" + equipRef + "\"";
-                                                    sb.append("\n   no point for " + key+" and equipRef == \"" + equipRef + "\"");
+                                                    sb.append("\n   no point for ").append(key).append(" and equipRef == \"").append(equipRef).append("\"");
                         continue;
                     }
                     String pointRef = point.get("id").toString();
@@ -376,7 +378,7 @@ public class Conditional
 
                     if (hisItems.size() < 2) {
                                                     error = " Not enough his vals to evaluate conditional ";
-                                                    sb.append("\n Not enough his vals " + hisItems.size() + " to evaluate conditional.  Return");
+                                                    sb.append("\n Not enough his vals ").append(hisItems.size()).append(" to evaluate conditional.  Return");
                         continue;
                     }
                     
@@ -390,12 +392,12 @@ public class Conditional
                     // check for last updated current temp value
                     if (System.currentTimeMillis() - reading2.getDate().getTime() >= 185000){
                         reading1 = reading2 ;
-                                                    sb.append("\nOlder his reading is more than 65 sec old, so setting readings to the same");
+                                                    sb.append("\nOlder his reading is more than 185 sec old, so setting readings to the same");
                     }
                     resVal = reading1.getVal() - reading2.getVal();
-                                               sb.append("\n   resVal (LHS): ").append(resVal).append("  -- difference between readinngs.");
+                                               sb.append("\n   resVal (LHS): ").append(resVal).append("  -- difference between readings.");
                     Expression expression = new Expression(resVal+ " "+condition+" " + val);
-                    CcuLog.d("CCU_ALERTS", " expression "+expression.toString());
+                    CcuLog.d(TAG_CCU_ALERTS, " expression "+ expression);
                                                 sb.append("\n").append(expression).append(": ");
 
                     boolean status = expression.eval().intValue() > 0;
@@ -404,7 +406,7 @@ public class Conditional
 
                     if (status) {
                                                     sb.append("TRUE");
-                        CcuLog.d("CCU_ALERTS", " Add to pointList");
+                        CcuLog.d(TAG_CCU_ALERTS, " Add to pointList");
                         pointList.add(pointRef);
                         equipList.add(equipRef);
                         pointValList.add(new PointVal(pointRef, Double.parseDouble(val)));
@@ -421,7 +423,7 @@ public class Conditional
             }
         }
         
-        CcuLog.d("CCU_ALERTS ", " Evaluated Conditional: "+toString()+" ,"+ (grpOperation != null ?(grpOperation.equals("equip") ? pointList.size() : status):"")+" resVal "+resVal);
+        CcuLog.d(TAG_CCU_ALERTS, " Evaluated Conditional: "+toString()+" ,"+ (grpOperation != null ?(grpOperation.equals("equip") ? pointList.size() : status):"")+" resVal "+resVal);
     }
 
     private String refToId(String ref) {
@@ -504,13 +506,13 @@ public class Conditional
                     .findFirst();
             // NOTE: For some reason the ::orElseThrow required the method signature to include "throws".
             //  Did not want the calling code to have to handle this exception.
-            //  Throwing the excpetion like this is apparently OK...
+            //  Throwing the exception like this is apparently OK...
             if (operator.isPresent()) {
                 return operator.get();
             } else {
                 String message = "operator = " + value + " does not exist. 'operator' is validated at alert def creation time." +
                         " Is there a bug in the Alerts Service? If no, is this an 'old' alert def? If so, cleanup the local/remote databases!!";
-                CcuLog.e("Invalid Operator", message);
+                CcuLog.e(TAG_CCU_ALERTS,"Invalid Operator\n" + message);
                 throw new IllegalArgumentException(message);
             }
 
@@ -560,11 +562,11 @@ public class Conditional
 
         public static GrpOperator fromValue(String value) {
             try {
-                return value.equals("") ? GrpOperator.NONE : GrpOperator.valueOf(value.toUpperCase());
+                return value.isEmpty() ? GrpOperator.NONE : GrpOperator.valueOf(value.toUpperCase());
             } catch (Exception ex) {
                 String message = "grpOperator = '" + value + "' does not exist. 'grpOperator' is validated at alert def creation time." +
                         " Is there a bug in the Alerts Service? If no, is this an 'old' alert def? If so, cleanup the local/remote databases!!";
-                CcuLog.e("Invalid GrpOperator", message);
+                CcuLog.e(TAG_CCU_ALERTS, "Invalid GrpOperator\n" + message);
                 throw ex;
             }
         }

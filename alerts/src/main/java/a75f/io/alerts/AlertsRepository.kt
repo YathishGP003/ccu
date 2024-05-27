@@ -1,6 +1,7 @@
 package a75f.io.alerts
 
 import a75f.io.alerts.AlertProcessor.TAG_CCU_ALERTS
+import a75f.io.alerts.AlertProcessor.TAG_CCU_DEV_DEBUG
 import a75f.io.alerts.cloud.AlertsService
 import a75f.io.alerts.model.AlertDefOccurrence
 import a75f.io.alerts.model.AlertDefProgress.Partial
@@ -17,7 +18,6 @@ import a75f.io.api.haystack.Alert_
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.util.hayStack
 import a75f.io.logger.CcuLog
-import android.util.Log
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.schedulers.Schedulers
@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit
 import kotlin.concurrent.thread
 
 /**
- * Gateway to Alerts and AlertDefinitions data, business logic processing, and backend alerservice.
+ * Gateway to Alerts and AlertDefinitions data, business logic processing, and backend alert service.
  *
  * @author tcase@75f.io
  * Created on 4/13/21.
@@ -63,12 +63,12 @@ class AlertsRepository(
 
    /////   Alert Definitions   /////
 
-   fun getAlertDefinitions(): List<AlertDefinition> = alertDefsMap.values.toList()
+   private fun getAlertDefinitions(): List<AlertDefinition> = alertDefsMap.values.toList()
 
    fun deleteAlertDefinition(id: String) {
       val title = alertDefsMap.findTitleById(id)
       if (title == null) {
-         CcuLog.w("CCU_ALERTS", "Could not find alert definition for id to delete: $id")
+         CcuLog.w(TAG_CCU_ALERTS, "Could not find alert definition for id to delete: $id")
          return
       }
       val alertDef = alertDefsMap.remove(title)
@@ -90,7 +90,7 @@ class AlertsRepository(
          .map { it.data }
          .subscribe(
             { alertDefs -> handleRetrievedDefsAlerts(alertDefs) },
-            { error -> CcuLog.e("CCU_ALERTS", "Unexpected error fetching or parsing site definitions.", error) }
+            { error -> CcuLog.e(TAG_CCU_ALERTS, "Unexpected error fetching or parsing site definitions.", error) }
          )
    }
 
@@ -131,8 +131,8 @@ class AlertsRepository(
     */
    fun getAllAlertsNotInternal(): List<Alert> = dataStore.getAllAlertsNotInternal()
 
-   fun addAlert(alert: Alert) {
-      CcuLog.d("CCU_ALERTS", "Add Alert!  $alert")
+   private fun addAlert(alert: Alert) {
+      CcuLog.d(TAG_CCU_ALERTS, "Add Alert!  $alert")
       dataStore.addAlertIfUnique(alert)
    }
 
@@ -152,17 +152,17 @@ class AlertsRepository(
    }
 
    fun deleteAlert(alert: Alert): Completable? {
-      CcuLog.d("CCU_ALERTS", "Delete alert! $alert")
+      CcuLog.d(TAG_CCU_ALERTS, "Delete alert! $alert")
 
       //_id is empty if the alert is not synced to backend.
       return if (alert._id == "") {
-         CcuLog.w("CCU_ALERTS", "empty global Id; just remove in alertBox")
+         CcuLog.w(TAG_CCU_ALERTS, "empty global Id; just remove in alertBox")
          removeAlert(alert)
          Completable.complete()
       } else {
          alertSyncHandler.delete(alert._id)
             .doOnComplete { removeAlert(alert) }
-            .doOnError { throwable: Throwable? -> CcuLog.w("CCU_ALERTS", "Delete alert failed " + alert._id, throwable) }
+            .doOnError { throwable: Throwable? -> CcuLog.e(TAG_CCU_ALERTS, "Delete alert failed " + alert._id, throwable) }
       }
    }
 
@@ -184,13 +184,13 @@ class AlertsRepository(
     *        -- that is enabled, and
     *        -- does NOT have a matching message.
     *
-    * I.e. This will only send one alert for any message, until restart.  (existing logic).  Used for interal alerts.
+    * I.e. This will only send one alert for any message, until restart.  (existing logic).  Used for internal alerts.
     */
    fun generateAlert(title: String, msg: String, equipRef: String) {
       val alertDef = alertDefsMap[title]
 
       if (alertDef == null) {
-         CcuLog.w("CCU_ALERTS", "In generateAlert(), no alert definition found for $title")
+         CcuLog.w(TAG_CCU_ALERTS, "In generateAlert(), no alert definition found for $title")
          return
       }
       val ccuId = haystack.ccuRef.toVal()
@@ -270,7 +270,7 @@ class AlertsRepository(
          .forEach { alert -> addAlert(alert)
       }
       alertsStateChange.newlyFixedAlerts.forEach { alert ->
-         Log.i("DEV_DEUG", "Hard Fix: $alert")
+         CcuLog.i(TAG_CCU_DEV_DEBUG, "Hard Fix: $alert")
               fixAlert(alert)
       }
       // check for alert time-out
@@ -298,12 +298,11 @@ class AlertsRepository(
    /////   private   /////
 
    private fun fixExpiredEventAlerts() {
-      Log.i("CCU_ALERTS", "fixExpiredEventAlerts: ")
       val alerts = dataStore.getActiveInternalEventAlerts()
-      Log.i("CCU_ALERTS", "fixExpiredEventAlerts: $alerts")
+      CcuLog.i(TAG_CCU_ALERTS, "fixExpiredEventAlerts: $alerts")
       for (a in alerts) {
          if (!a.isFixed && (System.currentTimeMillis() - a.startTime) >= 3600000) {
-            CcuLog.i("CCU_ALERTS", "Fixing expired event alert: $a")
+            CcuLog.i(TAG_CCU_ALERTS, "Fixing expired event alert: $a")
 
             fixAlert(a)
          }
@@ -344,16 +343,16 @@ class AlertsRepository(
          return
       }
 
-      //donot sync in offlineMode
+      //do not sync in offlineMode
       if (CCUHsApi.getInstance().readDefaultVal("offline and mode") > 0) {
          return
       }
 
       val unsyncedAlerts: List<Alert> = getUnsyncedAlerts()
-      CcuLog.d("CCU_ALERTS", "${unsyncedAlerts.size} alerts to sync")
+      CcuLog.d(TAG_CCU_ALERTS, "${unsyncedAlerts.size} alerts to sync")
 
       if (unsyncedAlerts.isNotEmpty()) {
-         if (CCUHsApi.getInstance().getAuthorised()) {
+         if (CCUHsApi.getInstance().authorised) {
             alertSyncHandler.sync(unsyncedAlerts, dataStore)
          }
       }
@@ -366,9 +365,9 @@ class AlertsRepository(
          _alertDefsMap.putAll(retrievedAlertDefs.associateBy { it.alert.mTitle })
 
          //log
-         CcuLog.d("CCU_ALERTS", "Fetched ${_alertDefsMap.size} Predefined alerts")
+         CcuLog.d(TAG_CCU_ALERTS, "Fetched ${_alertDefsMap.size} Predefined alerts")
          _alertDefsMap.values.forEach {
-            CcuLog.d("CCU_ALERTS", "Predefined alertDef Fetched: $it")
+            CcuLog.d(TAG_CCU_ALERTS, "Predefined alertDef Fetched: $it")
          }
 
          saveDefs()
@@ -396,7 +395,7 @@ class AlertsRepository(
             }
          }
       }
-      CcuLog.w("CCU_ALERTS", "removing alert definitions from map - $titles")
+      CcuLog.w(TAG_CCU_ALERTS, "removing alert definitions from map - $titles")
       for (alertTitle in titles) {
          val alertDef = alertDefsMap.remove(alertTitle)
          alertDef?.let {
@@ -423,7 +422,7 @@ class AlertsRepository(
       }
    }
 
-   fun alertBoxSizeAboveThreshold() : Boolean {
+   private fun alertBoxSizeAboveThreshold() : Boolean {
       val threshold = 5000
       return dataStore.getAllAlerts().size > threshold
    }

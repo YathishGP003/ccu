@@ -1,5 +1,7 @@
 package a75f.io.alerts;
 
+import static a75f.io.alerts.AlertProcessor.TAG_CCU_ALERTS;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,7 +33,7 @@ public class AlertSyncHandler
      * Creates or updates all listed alerts with service depending on if they already have a guid.
      * Pass in dataStore to update in parallel.
      * Returns same set, but with alerts' guids set and and sync status set to true.
-     *
+     * <p>
      * Note:  all the calls are made synchronously, on the same thread.
      * The oldest are occurring first.  This ensures, among other things, that fixed alerts are
      * getting synced on the backend before any newly raised alerts of the same type.
@@ -55,10 +57,10 @@ public class AlertSyncHandler
             AlertSyncDto dto = AlertSyncDto.fromAlert(a);
 
             // Alert not present on service if no guid.  If none, create.  Else, update
-            if (a.getGuid().equals(""))
+            if (a.getGuid().isEmpty())
             {
-                CcuLog.d("CCU_ALERTS", "Creating alert to alerts-service: " + a);
-                if (a.isFixed) CcuLog.d("CCU_ALERTS", "Creating *fixed* alert, i.e. alert without a remote id, to alerts-service: ");
+                CcuLog.d(TAG_CCU_ALERTS, "Creating alert to alerts-service: " + a);
+                if (a.isFixed) CcuLog.d(TAG_CCU_ALERTS, "Creating *fixed* alert, i.e. alert without a remote id, to alerts-service: ");
 
                 alertService.createAlert(siteId, dto)
                             .subscribe(
@@ -73,10 +75,10 @@ public class AlertSyncHandler
                                             handleCreateAlertErrorResponse(response, a, dataStore);
                                         }
                                     },
-                                    error -> CcuLog.w("CCU_ALERTS", "Unexpected error posting alert.", error)
+                                    error -> CcuLog.w(TAG_CCU_ALERTS, "Unexpected error posting alert.", error)
                             );
             } else {
-                CcuLog.d("CCU_ALERTS", "Updating alert on alerts-service: " + a);
+                CcuLog.d(TAG_CCU_ALERTS, "Updating alert on alerts-service: " + a);
 
                 alertService.updateAlert(siteId, a.getGuid(), dto)
                             .subscribe(
@@ -85,13 +87,13 @@ public class AlertSyncHandler
                                         syncedAlerts.add(a);
                                         dataStore.updateAlert(a);
                                     },
-                                    error -> CcuLog.w("CCU_ALERTS", "Unexpected error updating alert.", error)
+                                    error -> CcuLog.w(TAG_CCU_ALERTS, "Unexpected error updating alert.", error)
                             );
             }
         }
 
         if (alerts.size() != syncedAlerts.size()) {
-            CcuLog.w("CCU_ALERTS", "Attempted to sync " + alerts.size() + " alerts, but synced only "
+            CcuLog.w(TAG_CCU_ALERTS, "Attempted to sync " + alerts.size() + " alerts, but synced only "
                     + syncedAlerts.size());
         }
     }
@@ -101,7 +103,7 @@ public class AlertSyncHandler
      * alert Id and completes the rx call.
      */
     public Completable delete(String id) {
-        CcuLog.w("CCU_ALERTS", "called delete on service");
+        CcuLog.w(TAG_CCU_ALERTS, "called delete on service");
         return alertsService.deleteAlert(CCUHsApi.getInstance().getSiteIdRef().val, id)
                             // return normally if the alert to be deleted is missing on the server
                             .onErrorComplete(throwable -> throwable instanceof HttpException &&
@@ -115,12 +117,12 @@ public class AlertSyncHandler
             if (errorBody != null) {
                 handleDuplicateAlert(response.errorBody(), alert, dataStore);
             } else {
-                CcuLog.w("CCU_ALERTS", "409 response with null error body");
+                CcuLog.w(TAG_CCU_ALERTS, "409 response with null error body");
                 alert.setSyncStatus(true);
                 dataStore.updateAlert(alert);
             }
         } else {
-            CcuLog.w("CCU_ALERTS", "Unexpected error posting alert: " + response.toString());
+            CcuLog.w(TAG_CCU_ALERTS, "Unexpected error posting alert: " + response);
         }
     }
 
@@ -134,9 +136,9 @@ public class AlertSyncHandler
         }
 
         if (otherAlertIds == null || otherAlertIds.isEmpty()) {
-            CcuLog.e("CCU_ALERTS","Unable to parse AlertId(s) from the response body. Has the server's response format changed?" +
+            CcuLog.e(TAG_CCU_ALERTS,"Unable to parse AlertId(s) from the response body. Has the server's response format changed?" +
                     " Marking this new, duplicate alert as synced otherwise it will infinitely result in a 409." +
-                    " Response body = " + errorBody.toString() +
+                    " Response body = " + errorBody +
                     " | New alert that was never created in the remote = " + alert);
             alert.setSyncStatus(true);
             dataStore.updateAlert(alert);
@@ -151,19 +153,19 @@ public class AlertSyncHandler
                     //  There is no risk of the local alert changing any of the remote alert's "true alert content" (i.e. start time, end time, etc.) other than the isFixed flag, which is desired.
                     //  Long term, perhaps a message can be published by the Alerts Service and consumed by the CCU?
                     //  The CCU could then determine whether it created a local duplicate before sending the POST request and take the necessary actions.
-                    CcuLog.d("CCU_ALERTS",
+                    CcuLog.i(TAG_CCU_ALERTS,
                              "The remote alert does not exist locally. It must have been created by the Alert Service." +
                                      " Setting the local alert's guid equal to the remote alert's guid. The local alert has now assumed the identity of the remote alert.");
                     alert.setGuid(otherAlertId);
 
                     if (!alert.isFixed) {
-                        CcuLog.i("CCU_ALERTS",
+                        CcuLog.i(TAG_CCU_ALERTS,
                                  "The local alert has assumed the remote alert's identity. The local alert is unfixed and so is the remote alert." +
                                          " No need to sync the local with the remote. Setting the local alert's sync status to true." +
                                          " Remote alertId = " + otherAlertId);
                         alert.setSyncStatus(true);
                     } else {
-                        CcuLog.i("CCU_ALERTS",
+                        CcuLog.i(TAG_CCU_ALERTS,
                                  "The local alert has assumed the remote alert's identity. The local alert is fixed, but the remote alert is not." +
                                          " Need to sync the local with the remote. Setting the local alert's sync status to false." +
                                          " Remote alertId = " + otherAlertId);
@@ -184,7 +186,7 @@ public class AlertSyncHandler
                             // Did the Alerts Service mark it as fixed in its own processing logic?
                             // In any case, should this happen somehow someway, mark its local copy as unsynced so it can be re-synced as fixed in the remote.
                             // The new alert will then be able to be POSTed in the next loop.
-                            CcuLog.i("CCU_ALERTS",
+                            CcuLog.w(TAG_CCU_ALERTS,
                                      "The remote alert's local copy is FIXED and synced, but is UNFIXED in the remote. How could this be?" +
                                              " Setting the local copy's sync status to false so it will be synced in the next loop. The remote will then be marked as fixed." +
                                              " If this 409 occurs in the next loop, then there is a BUG somewhere!!!!" +
@@ -195,7 +197,7 @@ public class AlertSyncHandler
                                 // If this occurs, then there might be an issue with the data migration.
                                 // The NEWER, unsynced duplicate alters (fixed or unfixed) should have been deleted, but it is still here?
                                 // (I suppose the startTimes could have been changed, but there is no code path for that)
-                                CcuLog.i("CCU_ALERTS",
+                                CcuLog.w(TAG_CCU_ALERTS,
                                          "The remote alert IS NOT fixed, but its local copy IS fixed AND it is NEWER than the new alert. How could this be?" +
                                                  " There could be a bug in the duplicate-alert data migration logic, or requests are not synchronous and in ascending order by startTime!!!! " +
                                                  " Good news - this remote alert should be synced as fixed later in THIS loop (because it is newer, the request has not yet been sent)" +
@@ -208,7 +210,7 @@ public class AlertSyncHandler
                         // If the data migration was successful, then the new alert was created in error. An existing, UNFIXED alert apparently already existed!!!
                         // Or the data migration was unsuccessful....
                         // Deleting the new, duplicated alert.
-                        CcuLog.i("CCU_ALERTS",
+                        CcuLog.w(TAG_CCU_ALERTS,
                                  "The remote alert is NOT fixed. There is a BUG somewhere!!!" +
                                          "This alert should never have been created or it should have been cleaned up in the data migration. Deleting the new, duplicated alert." +
                                          "Remote alertId = " + otherAlertId + " | Alert = " + alert);

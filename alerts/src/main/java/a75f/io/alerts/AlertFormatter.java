@@ -1,6 +1,9 @@
 package a75f.io.alerts;
 
 
+import static a75f.io.alerts.AlertProcessor.TAG_CCU_ALERTS;
+import static a75f.io.alerts.AlertProcessor.TAG_CCU_ALERT_FORMATTER;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -16,7 +19,7 @@ import a75f.io.logger.CcuLog;
  *  generating the message.
  *  Expected format is
  *  #entity-(name/val)-conditional-number
- *
+ * <p>
  *  Example variable definitions
  *  #equipname1  => Use equip's name which satisfies the set conditionals here
  *  #pointval3  => Evaluate 3rd conditional use points value here.
@@ -67,7 +70,7 @@ public class AlertFormatter
         else {
             message = StringUtil.processMessageForNumberFormatting(message);
         }
-        CcuLog.d("CCU_ALERTS","  Alert Formatted Message "+message);
+        CcuLog.d(TAG_CCU_ALERTS,"  Alert Formatted Message "+message);
         return message;
     }
 
@@ -86,7 +89,7 @@ public class AlertFormatter
         else {
             message = StringUtil.processMessageForNumberFormatting(message);
         }
-        CcuLog.d("CCU_ALERTS","  Alert Formatted Message "+message);
+        CcuLog.d(TAG_CCU_ALERTS,"  Alert Formatted Message "+message);
         return message;
     }
 
@@ -158,7 +161,7 @@ public class AlertFormatter
                 HashMap<Object, Object> ccu = hs.readEntity("device and ccu");
                 return ccu.get("dis").toString();
             case "cond":
-                CcuLog.d("CCU_ALERTS"," Read cond val point "+point);
+                CcuLog.d(TAG_CCU_ALERTS," Read cond val point "+point);
                 //Cond vals can be of three forms
                 // 1. value fetched for a unique query or absolute value -> use c.val
                 // 2. point id for key - > run query to fetch cond val
@@ -211,7 +214,7 @@ public class AlertFormatter
                 int integer = Double.valueOf(value).intValue();
                 return Integer.valueOf(integer).toString();
             } catch (NumberFormatException ex) {
-                CcuLog.w("AlertFormatter", String.format("'%s' cannot not be coerced to an integer.", value));
+                CcuLog.w(TAG_CCU_ALERT_FORMATTER, String.format("'%s' cannot not be coerced to an integer.", value));
             }
         }
         return value;

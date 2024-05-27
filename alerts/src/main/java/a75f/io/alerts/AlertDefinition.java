@@ -1,9 +1,5 @@
 package a75f.io.alerts;
 
-/**
- * Created by samjithsadasivan on 4/23/18.
- */
-
 import static a75f.io.alerts.AlertProcessor.TAG_CCU_ALERTS;
 
 import android.content.Context;
@@ -17,14 +13,12 @@ import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import a75f.io.alerts.model.AlertScope;
 import a75f.io.alerts.model.AlertScopeEquip;
 import a75f.io.api.haystack.Alert;
-import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logger.CcuLog;
 /**
  * The format for alerts defined in json.
@@ -32,7 +26,7 @@ import a75f.io.logger.CcuLog;
 
 /**
  * A sample definition
- *
+ * <p>
     [
         {
             "conditionals":[
@@ -85,10 +79,9 @@ public class AlertDefinition
     
     }
 
-    /** evaluate this alert definition against current values
-     * @return a string describing the evaluation, for inspection */
+    /** evaluate this alert definition against current values  */
     public void evaluate(SharedPreferences sharedPrefs) {
-        CcuLog.d("CCU_ALERTS", "Evaluate " + this.toString());
+        CcuLog.d(TAG_CCU_ALERTS, "Evaluate " + this);
         List<String> mutedEquipIds = getMutedEquipIds();
         for (Conditional c : conditionals) {
             if (c.operator == null) {
@@ -97,7 +90,7 @@ public class AlertDefinition
                 try {
                     c.evaluate(sharedPrefs, mutedEquipIds);
                 } catch (RuntimeException error) {
-                    CcuLog.e("CCU_ALERTS", "Parsing error in alert def: " + this, error);
+                    CcuLog.e(TAG_CCU_ALERTS, "Parsing error in alert def: " + this, error);
                     c.status = false;
                     c.error = "Parse Exception - " + error.getClass().getSimpleName() + ", " + error.getLocalizedMessage();
                 }
@@ -107,33 +100,33 @@ public class AlertDefinition
 
     public boolean validate() {
         if (conditionals.size() % 2 == 0) {
-            logValidatation("Incorrect number of conditionals "+conditionals.size());
+            logValidation("Incorrect number of conditionals "+conditionals.size());
             return false;
         }
         
         for (int i = 0; i < conditionals.size() ; i+=2) {
             Conditional c = conditionals.get(i);
             if ( (c.isThisOperator() && c.operator != null) || (c.isThisCondition() && c.operator == null)) {
-                logValidatation("Operator not allowed "+c.toString());
+                logValidation("Operator not allowed "+ c);
                 return false;
             }
-            if (c.isThisCondition() && (c.grpOperation != null) && !c.grpOperation.equals("") && !c.grpOperation.equals("equip") && !c.grpOperation.equals("average")
+            if (c.isThisCondition() && (c.grpOperation != null) && !c.grpOperation.isEmpty() && !c.grpOperation.equals("equip") && !c.grpOperation.equals("average")
                         && !c.grpOperation.contains("top") && !c.grpOperation.contains("bottom")
                         && !c.grpOperation.contains("min") && !c.grpOperation.contains("max")) {
-                logValidatation("grpOperator not supported "+c.grpOperation);
+                logValidation("grpOperator not supported "+c.grpOperation);
                 return false;
             }
         }
         if (alert.mSeverity == null) {
-            logValidatation("missing severity level");
+            logValidation("missing severity level");
             return false;
         }
 
         return true;
     }
 
-    private void logValidatation(String msg) {
-        CcuLog.e("CCU_ALERTS","Invalid Alert Definition : "+msg);
+    private void logValidation(String msg) {
+        CcuLog.e(TAG_CCU_ALERTS,"Invalid Alert Definition : "+msg);
     }
 
     private boolean isInternalLogic() {
@@ -178,7 +171,7 @@ public class AlertDefinition
                 sb.append(": ");
                 if (c.operator != null) sb.append(c.operator);
                 else if (c.keyValueConditionAllEmpty()) sb.append("?? ");
-                else sb.append(c.toString());
+                else sb.append(c);
             }
             else if (c.keyValueConditionAllEmpty()) sb.append(": Empty");
             else {
@@ -194,9 +187,9 @@ public class AlertDefinition
     @Override
     public String toString() {
         StringBuilder b = new StringBuilder();
-        b.append("AlertDefinition, Title: "+alert.mTitle+" Message "+alert.mMessage);
+        b.append("AlertDefinition, Title: ").append(alert.mTitle).append(" Message ").append(alert.mMessage);
         for (Conditional c : conditionals) {
-            b.append("{"+c.toString()+"} ");
+            b.append("{").append(c.toString()).append("} ");
         }
         b.append(", AlertScope=").append(alertScope);
         return b.toString();
@@ -257,7 +250,7 @@ public class AlertDefinition
             rhino.evaluateString(scope, javascriptSnippet, "JavaScript", 1, null);
         } catch (RhinoException exception) {
             exception.printStackTrace();
-            CcuLog.i(TAG_CCU_ALERTS, exception.getMessage());
+            CcuLog.e(TAG_CCU_ALERTS, exception.getMessage());
         } finally {
             org.mozilla.javascript.Context.exit();
         }

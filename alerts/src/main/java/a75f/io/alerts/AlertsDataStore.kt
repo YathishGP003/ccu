@@ -1,5 +1,6 @@
 package a75f.io.alerts
 
+import a75f.io.alerts.AlertProcessor.TAG_CCU_ALERTS
 import a75f.io.api.haystack.Alert
 import a75f.io.api.haystack.Alert_
 import a75f.io.api.haystack.CCUHsApi
@@ -54,19 +55,19 @@ class AlertsDataStore @JvmOverloads constructor(
 
    fun getAlertDefinitions(): List<AlertDefinition> {
       val alertsDefString = alertsSharedPrefs.getString(PREFS_ALERTS_PREDEFINED, "")
-      CcuLog.d("CCU_ALERTS", "Parsing Alerts:  $alertsDefString, with $parser")
+      CcuLog.d(TAG_CCU_ALERTS, "Parsing Alerts:  $alertsDefString, with $parser")
 
       try {
          return if (StringUtils.isNotBlank(alertsDefString)) parser.parseAlertsString(alertsDefString) else ArrayList()
       } catch (ex: Exception) {
-         CcuLog.w("CCU_ALERTS", "Unable to parsing alerts:  $alertsDefString")
+         CcuLog.e(TAG_CCU_ALERTS, "Unable to parsing alerts:  $alertsDefString")
          return ArrayList()
       }
    }
 
    fun saveAlertDefinitions(alertDefs: ArrayList<AlertDefinition>) {
       val alerts = parser.alertDefsToString(alertDefs)
-      CcuLog.d("CCU_ALERTS", "Saving Alerts:  $alerts")
+      CcuLog.i(TAG_CCU_ALERTS, "Saving Alerts:  $alerts")
       alertsSharedPrefs.edit().putString(PREFS_ALERTS_PREDEFINED, alerts).apply()
    }
 

@@ -2,8 +2,6 @@ package a75f.io.alerts;
 
 import static a75f.io.alerts.AlertProcessor.TAG_CCU_ALERTS;
 
-import android.util.Log;
-
 import com.google.gson.Gson;
 
 import org.graalvm.polyglot.Value;

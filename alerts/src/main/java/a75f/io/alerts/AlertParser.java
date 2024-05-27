@@ -1,7 +1,6 @@
 package a75f.io.alerts;
 
-import android.content.Context;
-import android.util.Log;
+import static a75f.io.alerts.AlertProcessor.TAG_CCU_ALERTS;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
@@ -10,9 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.joda.JodaModule;
 import com.fasterxml.jackson.module.kotlin.KotlinModule;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -20,9 +17,9 @@ import a75f.io.logger.CcuLog;
 
 /**
  * Created by samjithsadasivan on 4/23/18.
- *
- * This class has just two remaining functions, both of which could coneivably go away --
- *
+ * <p>
+ * This class has just two remaining functions, both of which could conceivably go away --
+ * <p>
  * 1) gets the wifi alert def from assets folder.
  * 2) A place holder for jackson deserialization.  (I'll also add serialization since we now need it).
  */
@@ -65,7 +62,7 @@ public class AlertParser
             return objectMapper.writeValueAsString(alertDefsArray);
         }
         catch (IOException e) {
-            CcuLog.i("CCU_ALERTS", "Error serialzing alert defs.", e);
+            CcuLog.e(TAG_CCU_ALERTS, "Error serializing alert defs.", e);
 
             // We probably want the app to crash here.  Fail-fast.   (and fix)
             return null;

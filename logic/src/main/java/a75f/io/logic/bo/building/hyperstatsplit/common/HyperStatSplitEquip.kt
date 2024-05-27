@@ -3,6 +3,7 @@ package a75f.io.logic.bo.building.hyperstatsplit.common
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Point
 import a75f.io.api.haystack.Tags
+import a75f.io.logger.CcuLog
 import a75f.io.logic.bo.building.BaseProfileConfiguration
 import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.definitions.ProfileType
@@ -12,7 +13,6 @@ import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.UniversalInAsso
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.UniversalInState
 import a75f.io.logic.bo.haystack.device.DeviceUtil
 import a75f.io.logic.bo.haystack.device.HyperStatSplitDevice
-import android.util.Log
 
 /**
  * Created for HyperStat by Manjunath K on 11-07-2022.
@@ -93,7 +93,7 @@ open class HyperStatSplitEquip {
         tempPort: Port,
         humidityPort: Port,
     ) {
-        Log.d("CCU_DEVICE_TEST", " updateSensorBusDetails $sensorBusState $sensorBusTag $tempPort $humidityPort")
+        CcuLog.d("CCU_DEVICE_TEST", " updateSensorBusDetails $sensorBusState $sensorBusTag $tempPort $humidityPort")
         val sensorBusId = hsSplitHaystackUtil.readPointID("config and sensorBus and input and $sensorBusTag and enabled") as String
         val sensorBusAssociatedId = hsSplitHaystackUtil.readPointID("config and sensorBus and input and $sensorBusTag and association") as String
         hyperStatSplitPointsUtil.addDefaultValueForPoint(sensorBusId, if (sensorBusState.enabled) 1.0 else 0.0)
@@ -180,7 +180,7 @@ open class HyperStatSplitEquip {
 
             DeviceUtil.updatePhysicalPointType(nodeAddress, physicalPort.name, universalInState.association.ordinal.toDouble().toInt().toString())
 
-            val pointUnit = HyperStatSplitAssociationUtil.getPhysicalPointUnit(universalInState.association);
+            val pointUnit = HyperStatSplitAssociationUtil.getPhysicalPointUnit(universalInState.association)
             DeviceUtil.updatePhysicalPointUnit(nodeAddress, physicalPort.name, pointUnit)
 
             hyperStatSplitPointsUtil.addDefaultHisValueForPoint(pointId, 0.0)
@@ -585,9 +585,5 @@ open class HyperStatSplitEquip {
         val presentValue = CCUHsApi.getInstance().readDefaultValById(pointId)
         if(presentValue != newValue)
             hyperStatSplitPointsUtil.addDefaultValueForPoint(pointId,newValue)
-    }
-    fun putPointToMap(pointData: HashMap<Any, Any>, outputPointMap: HashMap<Int, String>, mapping: Int){
-        if (pointData.isNotEmpty() && pointData.containsKey(Tags.ID))
-            outputPointMap[mapping] = pointData[Tags.ID].toString()
     }
 }

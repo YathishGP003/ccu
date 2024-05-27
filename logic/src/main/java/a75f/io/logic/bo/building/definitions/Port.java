@@ -1,7 +1,5 @@
 package a75f.io.logic.bo.building.definitions;
 
-import a75f.io.domain.api.DomainName;
-
 /**
  * Created by Yinten isOn 8/17/2017.
  */

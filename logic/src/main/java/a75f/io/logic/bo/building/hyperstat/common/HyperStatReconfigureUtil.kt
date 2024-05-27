@@ -11,14 +11,32 @@ import a75f.io.api.haystack.Queries.Companion.ANALOG2_OUT
 import a75f.io.api.haystack.Queries.Companion.ANALOG3_OUT
 import a75f.io.api.haystack.Queries.Companion.IN
 import a75f.io.api.haystack.Queries.Companion.OUT
-import a75f.io.api.haystack.Tags.*
+import a75f.io.api.haystack.Tags.AIR
+import a75f.io.api.haystack.Tags.ANALOG1
+import a75f.io.api.haystack.Tags.ANALOG2
+import a75f.io.api.haystack.Tags.ANALOG3
+import a75f.io.api.haystack.Tags.CMD
+import a75f.io.api.haystack.Tags.CONFIG
+import a75f.io.api.haystack.Tags.CPU
+import a75f.io.api.haystack.Tags.DISCHARGE
+import a75f.io.api.haystack.Tags.HPU
+import a75f.io.api.haystack.Tags.PIPE2
+import a75f.io.api.haystack.Tags.RELAY1
+import a75f.io.api.haystack.Tags.RELAY2
+import a75f.io.api.haystack.Tags.RELAY3
+import a75f.io.api.haystack.Tags.RELAY4
+import a75f.io.api.haystack.Tags.RELAY5
+import a75f.io.api.haystack.Tags.RELAY6
+import a75f.io.api.haystack.Tags.TEMP
+import a75f.io.api.haystack.Tags.TH1
+import a75f.io.api.haystack.Tags.TH2
+import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.CpuReconfiguration
 import a75f.io.logic.bo.building.hyperstat.profiles.hpu.HpuReconfiguration
 import a75f.io.logic.bo.building.hyperstat.profiles.pipe2.Pipe2Reconfiguration
 import a75f.io.logic.bo.haystack.device.DeviceUtil
-import android.util.Log
 import com.google.gson.JsonObject
 
 /**
@@ -41,14 +59,13 @@ class HyperStatReconfigureUtil {
                 val updatedConfigValue = msgObject.get("val").asDouble
                 val configPointId = msgObject.get("id").asString
                 haystack.writeDefaultValById(configPointId, updatedConfigValue)
-                Log.i(L.TAG_CCU_HSCPU, "Reconfiguration Updated : $configPointId -> $updatedConfigValue")
+                CcuLog.i(L.TAG_CCU_HSCPU, "Reconfiguration Updated : $configPointId -> $updatedConfigValue")
 
             } else {
                 val equip = getEquip(configPoint.equipRef, haystack)
                 val updatedConfigValue = msgObject.get("val").asDouble
-                val configType = configType(configPoint.markers)
                 val portType = portType(configPoint.markers)
-                handleCreateReconfig(configPoint, updatedConfigValue, haystack, equip, configType!!, portType!!)
+                handleCreateReconfig(updatedConfigValue, equip, portType!!)
             }
 
         }
@@ -67,9 +84,9 @@ class HyperStatReconfigureUtil {
             val configType = configType(configPoint.markers)
             val portType = portType(configPoint.markers)
             if(configType != null && portType != null) {
-                updateAnalogActuatorType(configPoint, equip, haystack, portType!!, configType!!)
+                updateAnalogActuatorType(configPoint, equip, haystack, portType, configType)
             }
-            Log.i(L.TAG_CCU_HSCPU, "Reconfiguration change Updated : $configPointId -> $updatedConfigValue")
+            CcuLog.i(L.TAG_CCU_HSCPU, "Reconfiguration change Updated : $configPointId -> $updatedConfigValue")
             haystack.scheduleSync()
         }
 
@@ -78,8 +95,8 @@ class HyperStatReconfigureUtil {
             val whichConfig = configType(associationPoint.markers)
             val equip = getEquip(associationPoint.equipRef, haystack)
             val portType = portType(associationPoint.markers)
-            Log.i(L.TAG_CCU_HSCPU, "Reconfiguration for Association Points $whichConfig $portType")
-            handleAssociationConfig(whichConfig!!, portType!!, associationPoint, updatedConfigValue,equip)
+            CcuLog.i(L.TAG_CCU_HSCPU, "Reconfiguration for Association Points $whichConfig $portType")
+            handleAssociationConfig(portType!!, updatedConfigValue, equip)
         }
 
 
@@ -119,7 +136,7 @@ class HyperStatReconfigureUtil {
                     }
 
                     val pointType = "${minPointValue}-${maxPointValue}v"
-                    Log.i(L.TAG_CCU_HSCPU, "updateAnalogActuatorType: $pointType")
+                    CcuLog.i(L.TAG_CCU_HSCPU, "updateAnalogActuatorType: $pointType")
                     DeviceUtil.updatePhysicalPointType(equip.group.toInt(), portType.name, pointType)
                 }
             }
@@ -127,12 +144,9 @@ class HyperStatReconfigureUtil {
 
         // handle When we change the association
         private fun handleCreateReconfig(
-            point: Point,
-            updatedConfigValue: Double,
-            haystack: CCUHsApi,
-            equip: Equip,
-            configType: String,
-            portType: Port
+                updatedConfigValue: Double,
+                equip: Equip,
+                portType: Port
         ) {
             if (equip.markers.contains(CPU)) {
                 CpuReconfiguration.updateConfiguration(
@@ -153,11 +167,9 @@ class HyperStatReconfigureUtil {
         }
 
         private fun handleAssociationConfig(
-            configType: String,
-            portType: Port,
-            point: Point,
-            updatedConfigValue: Double,
-            equip: Equip,
+                portType: Port,
+                updatedConfigValue: Double,
+                equip: Equip,
         ) {
             if (equip.markers.contains(CPU)) {
                 CpuReconfiguration.configAssociationPoint(
@@ -193,49 +205,17 @@ class HyperStatReconfigureUtil {
         }
 
         // Function to Read point id
-        fun readPointID(markers: String, equipRef: String, profileName: String, haystack: CCUHsApi): String? {
+        fun readPointID(markers: String, equipRef: String, haystack: CCUHsApi): String? {
             val pointMap: HashMap<*, *> = haystack.read(
                 "point and $markers and equipRef == \"$equipRef\""
             )
             return pointMap["id"] as String?
         }
 
-        // Function to create Points
-        fun createPoint(pointData: Point, pointsUtil: HyperStatPointsUtil, defaultValue: Double): String {
-
-            val pointId = pointsUtil.addPointToHaystack(pointData)
-            Log.i(L.TAG_CCU_HSCPU,
-                   "Point name ${pointData.displayName} \n" +
-                        "Point name ${pointData.shortDis} \n" +
-                        " $pointId: ${pointData.markers} $defaultValue \n"
-            )
-            if (pointData.markers.contains("his")) {
-                pointsUtil.addDefaultHisValueForPoint(pointId, defaultValue)
-            }
-            if (pointData.markers.contains("writable")) {
-                pointsUtil.addDefaultValueForPoint(pointId, defaultValue)
-            }
-            Log.i("CCU_HSC", "Read ${CCUHsApi.getInstance().readDefaultValById(pointId)}")
-            return pointId
-        }
-
         // Util function to get Equip
         fun getEquip(equipRef: String, haystack: CCUHsApi): Equip {
             val equipMap: HashMap<*, *> = haystack.readMapById(equipRef)
             return Equip.Builder().setHashMap(equipMap).build()
-        }
-
-        // Function to Read Default value
-        fun readAssociationPointValue(
-            markers: String,
-            equipRef: String,
-            profileName: String,
-            haystack: CCUHsApi
-        ): Double {
-            return haystack.readDefaultVal(
-                "point and association and config and $markers and equipRef == " +
-                        "\"$equipRef\""
-            )
         }
 
         // Function to get Config type

@@ -34,7 +34,6 @@ import a75f.io.logic.tuners.HyperstatSplitCpuEconTuners
 import a75f.io.logic.tuners.OAOTuners
 import a75f.io.logic.util.RxTask
 import a75f.io.logic.util.TIMER_TO_BE_VALID
-import android.util.Log
 import java.util.Date
 
 /**
@@ -84,7 +83,7 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
     ) {
         val config = baseConfig as HyperStatSplitCpuEconConfiguration
 
-        Log.i(L.TAG_CCU_HSSPLIT_CPUECON, "New Profile  Initialising Points: ")
+        CcuLog.d(L.TAG_CCU_HSSPLIT_CPUECON, "New Profile  Initialising Points: ")
         nodeAddress = node.toInt()
         floorRef = floor
         roomRef = room
@@ -102,7 +101,7 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
             roomRef!!, floorRef!!,config.priority.toString(),nodeAddress.toString(),
             equipDis!!, ProfileType.HYPERSTATSPLIT_CPU
         )
-        Log.i(L.TAG_CCU_HSSPLIT_CPUECON, "New Profile  New Equip Created: $equipRef")
+        CcuLog.d(L.TAG_CCU_HSSPLIT_CPUECON, "New Profile  New Equip Created: $equipRef")
 
         // Init required reference
         init(HyperstatSplitProfileNames.HSSPLIT_CPUECON, equipRef!!,floorRef!!,roomRef!!,nodeAddress,equipDis!!)
@@ -111,27 +110,27 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
         createHyperStatSplitTunerPoints(
             equipRef!!, equipDis!!, roomRef!!, floorRef!!
         )
-        Log.i(L.TAG_CCU_HSSPLIT_CPUECON, "New Profile  Tuners Created")
+        CcuLog.d(L.TAG_CCU_HSSPLIT_CPUECON, "New Profile  Tuners Created")
         
         // Create config points
         createProfileConfigurationPoints(hyperStatSplitConfig = config)
 
-        Log.i(L.TAG_CCU_HSSPLIT_CPUECON, "New Profile Profile configuration points are created ")
+        CcuLog.d(L.TAG_CCU_HSSPLIT_CPUECON, "New Profile Profile configuration points are created ")
         // Create Logical Points
         createProfileLogicalPoints(hyperStatSplitConfig = config)
 
-        Log.i(L.TAG_CCU_HSSPLIT_CPUECON, "New Profile  logical points are created")
+        CcuLog.d(L.TAG_CCU_HSSPLIT_CPUECON, "New Profile  logical points are created")
 
         configHyperStatSplitDevice(config, profileEquip)
 
-        Log.i(L.TAG_CCU_HSSPLIT_CPUECON, "HSS device is created")
+        CcuLog.d(L.TAG_CCU_HSSPLIT_CPUECON, "HSS device is created")
 
         addOTAStatusPoint("${Tags.HS}-$nodeAddress", equipRef!!, basicInfo.siteRef, roomRef!!, floorRef!!, nodeAddress, basicInfo.timeZone, haystack)
 
         updateConditioningMode()
         // Syncing the Points
         haystack.syncEntityTree()
-        Log.i(L.TAG_CCU_HSSPLIT_CPUECON, "All done initializing points")
+        CcuLog.d(L.TAG_CCU_HSSPLIT_CPUECON, "All done initializing points")
         return
     }
 
@@ -142,10 +141,10 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
     fun initEquipReference(node: Short) {
         val equip = haystack.read("equip and $HYPERSTATSPLIT and group == \"$node\"")
         if (equip.isEmpty()) {
-            Log.i(L.TAG_CCU_HSSPLIT_CPUECON, " Unable to find the equip details for node $node ")
+            CcuLog.e(L.TAG_CCU_HSSPLIT_CPUECON, " Unable to find the equip details for node $node ")
             return
         } else {
-            Log.i(L.TAG_CCU_HSSPLIT_CPUECON, " Found equip for node $node ")
+            CcuLog.d(L.TAG_CCU_HSSPLIT_CPUECON, " Found equip for node $node ")
         }
         equipRef = equip["id"].toString()
         roomRef = equip["roomRef"].toString()
@@ -265,7 +264,7 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
      */
     private fun createProfileConfigurationPoints(hyperStatSplitConfig: HyperStatSplitCpuEconConfiguration) {
 
-        Log.d(L.TAG_CCU_HSSPLIT_CPUECON, hyperStatSplitConfig.toString())
+        CcuLog.i(L.TAG_CCU_HSSPLIT_CPUECON, hyperStatSplitConfig.toString())
 
         hyperStatSplitPointsUtil.addProfilePoints()
 
@@ -425,13 +424,13 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
         masterPoints.putAll(hyperStatSplitPointsUtil.addPointsToHaystack(listOfAllPoints = analogOutPointsList))
         masterPoints.putAll(hyperStatSplitPointsUtil.addPointsToHaystack(listOfAllPoints = universalInPointsList))
 
-        Log.i(L.TAG_CCU_HSSPLIT_CPUECON, "Done with Logical points creation")
+        CcuLog.d(L.TAG_CCU_HSSPLIT_CPUECON, "Done with Logical points creation")
 
     }
 
     // Function to update the existing profile
     override fun updateConfiguration(configuration: BaseProfileConfiguration) {
-        Log.i(L.TAG_CCU_HSSPLIT_CPUECON, "===========HyperStat Split Profile Update  ============")
+        CcuLog.d(L.TAG_CCU_HSSPLIT_CPUECON, "===========HyperStat Split Profile Update  ============")
 
         val updatedHyperStatSplitConfig =  configuration as HyperStatSplitCpuEconConfiguration
         val presetConfiguration = getConfiguration()
@@ -444,7 +443,7 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
 
         LogicalPointsUtil.cleanCpuEconLogicalPoints(updatedHyperStatSplitConfig,equipRef!!)
 
-        Log.i(L.TAG_CCU_HSSPLIT_CPUECON, "Profile update has been completed  ")
+        CcuLog.d(L.TAG_CCU_HSSPLIT_CPUECON, "Profile update has been completed  ")
         haystack.syncEntityTree()
 
     }
@@ -1204,16 +1203,16 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
         val addr3AssociatedTo = hsSplitHaystackUtil.readConfigAssociation("sensorBus and addr3 and input").toInt()
 
         config.address0State = SensorBusTempState(
-            addr0 == 1, HyperStatSplitAssociationUtil.getSensorBusTempStage(addr0AssociatedTo.toInt())
+            addr0 == 1, HyperStatSplitAssociationUtil.getSensorBusTempStage(addr0AssociatedTo)
         )
         config.address1State = SensorBusTempState(
-            addr1 == 1, HyperStatSplitAssociationUtil.getSensorBusTempStage(addr1AssociatedTo.toInt())
+            addr1 == 1, HyperStatSplitAssociationUtil.getSensorBusTempStage(addr1AssociatedTo)
         )
         config.address2State = SensorBusTempState(
-            addr2 == 1, HyperStatSplitAssociationUtil.getSensorBusTempStage(addr2AssociatedTo.toInt())
+            addr2 == 1, HyperStatSplitAssociationUtil.getSensorBusTempStage(addr2AssociatedTo)
         )
         config.address3State = SensorBusPressState(
-            addr3 == 1, HyperStatSplitAssociationUtil.getSensorBusPressStage(addr3AssociatedTo.toInt())
+            addr3 == 1, HyperStatSplitAssociationUtil.getSensorBusPressStage(addr3AssociatedTo)
         )
 
     }
@@ -1354,7 +1353,7 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
         newConfiguration: HyperStatSplitCpuEconConfiguration,
         existingConfiguration: HyperStatSplitCpuEconConfiguration
     ) {
-        Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "updateSensorBusConfig()")
+        CcuLog.d(L.TAG_CCU_HSSPLIT_CPUECON, "updateSensorBusConfig()")
         if (!HyperStatSplitAssociationUtil.isBothSensorBusAddressHasSameConfigs
                 (newConfiguration.address0State, existingConfiguration.address0State)
         ) {
@@ -1487,7 +1486,7 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
         val analogAtRecirculate = hsSplitHaystackUtil.readPointID("$analogOutTag and recirculate")
         val analogDuringEconomizer = hsSplitHaystackUtil.readPointID("$analogOutTag and economizer")
 
-        Log.i(L.TAG_CCU_HSSPLIT_CPUECON, "Reconfiguration changeIn $changeIn")
+        CcuLog.d(L.TAG_CCU_HSSPLIT_CPUECON, "Reconfiguration changeIn $changeIn")
 
         // Do the update when change is found in configuration
         if(changeIn != AnalogOutChanges.NOCHANGE
@@ -1532,7 +1531,7 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
         if (fanMediumPointId != null) hsSplitHaystackUtil.removePoint(fanMediumPointId)
         if (fanHighPointId != null) hsSplitHaystackUtil.removePoint(fanHighPointId)
 
-        Log.i(L.TAG_CCU_HSSPLIT_CPUECON, "Reconfiguration analogOutState.enabled ${analogOutState.enabled}")
+        CcuLog.d(L.TAG_CCU_HSSPLIT_CPUECON, "Reconfiguration analogOutState.enabled ${analogOutState.enabled}")
         DeviceUtil.setPointEnabled(nodeAddress, physicalPort.name, analogOutState.enabled)
 
         if (analogOutState.enabled) {
@@ -1658,7 +1657,7 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
      private fun updateFanMode(config: HyperStatSplitCpuEconConfiguration) {
         val fanLevel = getSelectedFanLevel(config)
         val curFanSpeed = hsSplitHaystackUtil.readPointValue("zone and sp and fan and operation and mode")
-         Log.i(L.TAG_CCU_HSSPLIT_CPUECON, "updateFanMode: fanLevel $fanLevel curFanSpeed $curFanSpeed")
+         CcuLog.d(L.TAG_CCU_HSSPLIT_CPUECON, "updateFanMode: fanLevel $fanLevel curFanSpeed $curFanSpeed")
          val fallbackFanSpeed: Double = if(fanLevel == 0) { 0.0 } else {
              if (fanLevel > 0 && curFanSpeed.toInt() != StandaloneFanStage.AUTO.ordinal) {
                  StandaloneFanStage.AUTO.ordinal.toDouble()
@@ -1667,7 +1666,7 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
              }
          }
          val fanModePointId = hsSplitHaystackUtil.readPointID("zone and sp and fan and operation and mode")
-         Log.i(L.TAG_CCU_HSSPLIT_CPUECON, "updateFanMode: fallbackFanSpeed $fallbackFanSpeed")
+         CcuLog.d(L.TAG_CCU_HSSPLIT_CPUECON, "updateFanMode: fallbackFanSpeed $fallbackFanSpeed")
          if(fanModePointId != null)
             hsSplitHaystackUtil.writeDefaultWithHisValue(fanModePointId, fallbackFanSpeed)
     }
@@ -1739,14 +1738,14 @@ class HyperStatSplitCpuEconEquip(val node: Short): HyperStatSplitEquip() {
         if (config.analogOut3State.enabled) logicalPoints[Port.ANALOG_OUT_THREE] = hyperStatSplitPointsUtil.getCpuEconAnalogOutLogicalPoint(config.analogOut3State.association).id
         if (config.analogOut4State.enabled) logicalPoints[Port.ANALOG_OUT_FOUR] = hyperStatSplitPointsUtil.getCpuEconAnalogOutLogicalPoint(config.analogOut4State.association).id
 
-        Log.i(L.TAG_CCU_HSSPLIT_CPUECON, "====== Logical Points list : ====")
-        logicalPoints.forEach { (key, id) -> Log.i(L.TAG_CCU_HSSPLIT_CPUECON, "key : $key  : $id") }
-        Log.i(L.TAG_CCU_HSSPLIT_CPUECON, "=================================")
+        CcuLog.d(L.TAG_CCU_HSSPLIT_CPUECON, "====== Logical Points list : ====")
+        logicalPoints.forEach { (key, id) -> CcuLog.d(L.TAG_CCU_HSSPLIT_CPUECON, "key : $key  : $id") }
+        CcuLog.d(L.TAG_CCU_HSSPLIT_CPUECON, "=================================")
         return logicalPoints
     }
 
     fun setHisVal(tags: String, writeVal: Double) {
-        haystack.writeHisValByQuery("point and " + tags + " and group == \"" + nodeAddress + "\"", writeVal)
+        haystack.writeHisValByQuery("point and $tags and group == \"$nodeAddress\"", writeVal)
 
     }
 

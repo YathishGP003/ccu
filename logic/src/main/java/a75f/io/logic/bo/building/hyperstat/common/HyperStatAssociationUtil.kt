@@ -1,12 +1,12 @@
 package a75f.io.logic.bo.building.hyperstat.common
 
+import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.*
 import a75f.io.logic.bo.building.hyperstat.profiles.hpu.*
 import a75f.io.logic.bo.building.hyperstat.profiles.pipe2.*
 import a75f.io.logic.bo.building.sensors.SensorType
-import android.util.Log
 
 /**
  * Created by Manjunath K on 30-07-2021.
@@ -795,7 +795,7 @@ class HyperStatAssociationUtil {
                     }
                 }
             } catch (e: ArrayIndexOutOfBoundsException) {
-                Log.i(L.TAG_CCU_HSCPU, "Error getSelectedFan function ${e.localizedMessage}")
+                CcuLog.e(L.TAG_CCU_HSCPU, "Error getSelectedFan function ${e.localizedMessage}",e)
             }
             return StandaloneFanStage.OFF
         }
@@ -849,7 +849,7 @@ class HyperStatAssociationUtil {
                     }
                 }
             } catch (e: ArrayIndexOutOfBoundsException) {
-                Log.i(L.TAG_CCU_HSCPU, "Error getSelectedFan function ${e.localizedMessage}")
+                CcuLog.e(L.TAG_CCU_HSCPU, "Error getSelectedFan function ${e.localizedMessage}",e)
             }
             return StandaloneFanStage.OFF.ordinal
         }

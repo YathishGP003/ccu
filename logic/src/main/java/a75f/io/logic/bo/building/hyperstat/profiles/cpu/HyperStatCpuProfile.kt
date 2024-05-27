@@ -2,6 +2,7 @@ package a75f.io.logic.bo.building.hyperstat.profiles.cpu
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Equip
+import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.BaseProfileConfiguration
@@ -12,13 +13,19 @@ import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.hvac.AnalogOutput
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
-import a75f.io.logic.bo.building.hyperstat.common.*
+import a75f.io.logic.bo.building.hyperstat.common.BasicSettings
+import a75f.io.logic.bo.building.hyperstat.common.FanModeCacheStorage
+import a75f.io.logic.bo.building.hyperstat.common.HSHaystackUtil
 import a75f.io.logic.bo.building.hyperstat.common.HSHaystackUtil.Companion.getActualFanMode
+import a75f.io.logic.bo.building.hyperstat.common.HyperStatAssociationUtil
+import a75f.io.logic.bo.building.hyperstat.common.HyperStatEquip
+import a75f.io.logic.bo.building.hyperstat.common.HyperStatProfileTuners
+import a75f.io.logic.bo.building.hyperstat.common.HyperstatLoopController
+import a75f.io.logic.bo.building.hyperstat.common.UserIntents
 import a75f.io.logic.bo.building.hyperstat.profiles.HyperStatPackageUnitProfile
 import a75f.io.logic.bo.building.schedules.Occupancy
 import a75f.io.logic.jobs.HyperStatUserIntentHandler
 import a75f.io.logic.tuners.TunerUtil
-import android.util.Log
 import com.fasterxml.jackson.annotation.JsonIgnore
 import kotlin.math.roundToInt
 
@@ -51,7 +58,7 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
 
     private val hyperstatCPUAlgorithm = HyperstatLoopController()
 
-    lateinit var curState: ZoneState
+    private lateinit var curState: ZoneState
 
     override fun getProfileType() = ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT
 
@@ -69,7 +76,7 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
 
     fun addEquip(node: Short): HyperStatEquip {
         val equip = HyperStatCpuEquip(node)
-        Log.i(L.TAG_CCU_HSSPLIT_CPUECON, "From addEquip(), calling initEquipReference()...")
+        CcuLog.d(L.TAG_CCU_HSSPLIT_CPUECON, "From addEquip(), calling initEquipReference()...")
         equip.initEquipReference(node)
         cpuDeviceMap[node] = equip
         return equip
@@ -79,7 +86,7 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
         val equip = addEquip(node)
         val configuration = equip.initializePoints(baseConfig as HyperStatCpuConfiguration, room, floor, node)
         hsHaystackUtil = equip.hsHaystackUtil
-        Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "configuration returned by addNewEquip for Cpu: " + configuration.toString())
+        CcuLog.d(L.TAG_CCU_HSSPLIT_CPUECON, "configuration returned by addNewEquip for Cpu: $configuration")
         return configuration
     }
 
@@ -628,7 +635,7 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
             if (fanLoopForAnalog > 0) analogOutStages[AnalogOutput.FAN_SPEED.name] =
                 fanLoopForAnalog
             updateLogicalPointIdValue(logicalPointsList[port]!!, fanLoopForAnalog.toDouble())
-            Log.i(L.TAG_CCU_HSCPU, "$port = Linear Fan Speed  analogSignal   $fanLoopForAnalog")
+            CcuLog.i(L.TAG_CCU_HSCPU, "$port = Linear Fan Speed  analogSignal   $fanLoopForAnalog")
         }
     }
 
@@ -719,7 +726,7 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
             if (fanLoopForAnalog > 0) analogOutStages[AnalogOutput.FAN_SPEED.name] =
                 fanLoopForAnalog
             updateLogicalPointIdValue(logicalPointsList[port]!!, fanLoopForAnalog.toDouble())
-            Log.i(L.TAG_CCU_HSCPU, "$port = Staged Fan Speed($logMsg)  analogSignal  $fanLoopForAnalog")
+            CcuLog.i(L.TAG_CCU_HSCPU, "$port = Staged Fan Speed($logMsg)  analogSignal  $fanLoopForAnalog")
         }
     }
 
@@ -777,13 +784,13 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
      * @return true if the door or window is open and the occupancy status is not UNOCCUPIED, otherwise false.
      */
     private fun checkFanOperationAllowedDoorWindow(equip: HyperStatCpuEquip): Boolean {
-        if(currentTemp < fetchUserIntents(equip).zoneCoolingTargetTemperature && currentTemp > fetchUserIntents(equip).zoneHeatingTargetTemperature) {
-            return doorWindowSensorOpenStatus &&
+        return if(currentTemp < fetchUserIntents(equip).zoneCoolingTargetTemperature && currentTemp > fetchUserIntents(equip).zoneHeatingTargetTemperature) {
+            doorWindowSensorOpenStatus &&
                     occupancyBeforeDoorWindow != Occupancy.UNOCCUPIED &&
                     occupancyBeforeDoorWindow != Occupancy.DEMAND_RESPONSE_UNOCCUPIED &&
                     occupancyBeforeDoorWindow != Occupancy.VACATION
         } else {
-            return doorWindowSensorOpenStatus
+            doorWindowSensorOpenStatus
         }
     }
 
@@ -936,7 +943,7 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
      * Function just to print logs
      */
     private fun logIt(msg: String){
-        Log.i(L.TAG_CCU_HSCPU,msg)
+        CcuLog.d(L.TAG_CCU_HSCPU,msg)
     }
 
     private fun getCoolingStateActivated (): Double {

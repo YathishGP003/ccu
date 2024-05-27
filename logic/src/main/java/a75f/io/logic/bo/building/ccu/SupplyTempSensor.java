@@ -7,12 +7,8 @@ public enum SupplyTempSensor {
 
     private final String name;
 
-    private SupplyTempSensor(String s) {
+    SupplyTempSensor(String s) {
         name = s;
-    }
-
-    public boolean equalsName(String otherName) {
-        return name.equals(otherName);
     }
 
     public String toString() {

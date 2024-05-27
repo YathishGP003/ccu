@@ -18,7 +18,6 @@ import a75f.io.logic.bo.haystack.device.HyperStatDevice
 import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint.Companion.addOTAStatusPoint
 import a75f.io.logic.tuners.HyperstatCpuTuners
 import a75f.io.logic.util.RxTask
-import android.util.Log
 
 /**
  * Models CPU Equipment in its interface, calls through to datastore (haystack)
@@ -63,7 +62,7 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
         node: Short
     ) {
         val config = baseConfig as HyperStatCpuConfiguration
-        Log.i(L.TAG_CCU_HSCPU, "New Profile  Initialising Points: ")
+        CcuLog.d(L.TAG_CCU_HSCPU, "New Profile  Initialising Points: ")
         nodeAddress = node.toInt()
         floorRef = floor
         roomRef = room
@@ -81,7 +80,7 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
             roomRef!!, floorRef!!,config.priority.toString(),nodeAddress.toString(),
             equipDis!!, ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT
         )
-        Log.i(L.TAG_CCU_HSCPU, "New Profile  New Equip Created: $equipRef")
+        CcuLog.d(L.TAG_CCU_HSCPU, "New Profile  New Equip Created: $equipRef")
 
         // Init required reference
         init(HyperstatProfileNames.HSCPU, equipRef!!,floorRef!!,roomRef!!,nodeAddress,equipDis!!)
@@ -90,16 +89,16 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
         createHyperStatTunerPoints(
             equipRef!!, equipDis!!, roomRef!!, floorRef!!
         )
-        Log.i(L.TAG_CCU_HSCPU, "New Profile  Tuners Created")
+        CcuLog.d(L.TAG_CCU_HSCPU, "New Profile  Tuners Created")
 
         // Create config points
         createProfileConfigurationPoints(hyperStatConfig = config)
 
-        Log.i(L.TAG_CCU_HSCPU, "New Profile Profile configuration points are created ")
+        CcuLog.d(L.TAG_CCU_HSCPU, "New Profile Profile configuration points are created ")
         // Create Logical Points
        createProfileLogicalPoints(hyperStatConfig = config)
 
-        Log.i(L.TAG_CCU_HSCPU, "New Profile  logical points are created")
+        CcuLog.d(L.TAG_CCU_HSCPU, "New Profile  logical points are created")
 
         configHyperStatDevice(config, profileEquip)
 
@@ -115,7 +114,7 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
     fun initEquipReference(node: Short) {
         val equip = haystack.read("equip and hyperstat and cpu and group == \"$node\"")
         if (equip.isEmpty()) {
-            Log.i(L.TAG_CCU_HSCPU, " Unable to find the equip details for node $node ")
+            CcuLog.e(L.TAG_CCU_HSCPU, " Unable to find the equip details for node $node ")
             return
         }
         equipRef = equip["id"].toString()
@@ -296,7 +295,7 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
             }
         }
         hyperStatPointsUtil.addPointsListToHaystackWithDefaultValue(listOfAllPoints = allConfigPoints)
-        Log.i(L.TAG_CCU_HSCPU, "adding : points default value ")
+        CcuLog.d(L.TAG_CCU_HSCPU, "adding : points default value ")
 
     }
 
@@ -308,7 +307,7 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
 
     //Function to create Logical Points
     private fun createProfileLogicalPoints(hyperStatConfig: HyperStatCpuConfiguration) {
-        Log.i(L.TAG_CCU_HSCPU, "createProfileLogicalPoints: ")
+        CcuLog.d(L.TAG_CCU_HSCPU, "createProfileLogicalPoints: ")
 
         val temperaturePointsList: MutableList<Triple<Point, Any, Any>> = hyperStatPointsUtil
             .temperatureScheduleLogicalPoints()
@@ -341,14 +340,14 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
         masterPoints.putAll(hyperStatPointsUtil.addPointsToHaystack(listOfAllPoints = analogInPointsList))
         masterPoints.putAll(hyperStatPointsUtil.addPointsToHaystack(listOfAllPoints = thermistorInPointsList))
 
-        Log.i(L.TAG_CCU_HSCPU, "Done with Logical points creation")
+        CcuLog.d(L.TAG_CCU_HSCPU, "Done with Logical points creation")
 
     }
 
 
     // Function to update the existing profile
     override fun updateConfiguration(configuration: BaseProfileConfiguration) {
-        Log.i(L.TAG_CCU_HSCPU, "===========HyperStat profile Update  ============")
+        CcuLog.d(L.TAG_CCU_HSCPU, "===========HyperStat profile Update  ============")
 
         val updatedHyperStatConfig =  configuration as HyperStatCpuConfiguration
         val presetConfiguration = getConfiguration()
@@ -361,7 +360,7 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
         updateAnalogInConfig(newConfiguration = updatedHyperStatConfig, existingConfiguration = presetConfiguration)
 
         LogicalPointsUtil.cleanCpuLogicalPoints(updatedHyperStatConfig,equipRef!!)
-        Log.i(L.TAG_CCU_HSCPU, "Profile update has been completed  ")
+        CcuLog.d(L.TAG_CCU_HSCPU, "Profile update has been completed  ")
         haystack.syncEntityTree()
 
     }
@@ -969,7 +968,7 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
         ) {
             updateAnalogInDetails(newConfiguration.analogIn2State, "analog2", Port.ANALOG_IN_TWO)
         }
-        Log.i(L.TAG_CCU_HSCPU, "updateAnalogInConfig: Done")
+        CcuLog.d(L.TAG_CCU_HSCPU, "updateAnalogInConfig: Done")
     }
 
 
@@ -1043,7 +1042,7 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
 
         val analogAtRecirculate = hsHaystackUtil.readPointID("$analogOutTag and recirculate")
 
-        Log.i(L.TAG_CCU_HSCPU, "Reconfiguration changeIn $changeIn")
+        CcuLog.d(L.TAG_CCU_HSCPU, "Reconfiguration changeIn $changeIn")
 
 
         // Do the update when change is found in configuration
@@ -1087,7 +1086,7 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
         if (fanMediumPointId != null) hsHaystackUtil.removePoint(fanMediumPointId)
         if (fanHighPointId != null) hsHaystackUtil.removePoint(fanHighPointId)
 
-        Log.i(L.TAG_CCU_HSCPU, "Reconfiguration analogOutState.enabled ${analogOutState.enabled}")
+        CcuLog.i(L.TAG_CCU_HSCPU, "Reconfiguration analogOutState.enabled ${analogOutState.enabled}")
         DeviceUtil.setPointEnabled(nodeAddress, physicalPort.name, analogOutState.enabled)
         if (analogOutState.enabled) {
 
@@ -1189,7 +1188,7 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
     }
 
      private fun updateConditioningMode() {
-         CcuLog.i(L.TAG_CCU_ZONE, "updateConditioningMode: ")
+         CcuLog.d(L.TAG_CCU_ZONE, "updateConditioningMode: ")
 
         val conditioningModeId = hsHaystackUtil.readPointID("zone and sp and conditioning and mode")
 
@@ -1200,7 +1199,7 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
 
         val curCondMode = haystack.readDefaultValById(conditioningModeId)
         var conditioningMode = curCondMode
-        Log.i(L.TAG_CCU_HSCPU, "updateConditioningMode: curCondMode $curCondMode")
+        CcuLog.i(L.TAG_CCU_HSCPU, "updateConditioningMode: curCondMode $curCondMode")
 
          when(HSHaystackUtil.getPossibleConditioningModeSettings(nodeAddress)){
              PossibleConditioningMode.BOTH -> {
@@ -1222,7 +1221,7 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
      private fun updateFanMode(config: HyperStatCpuConfiguration) {
         val fanLevel = getSelectedFanLevel(config)
         val curFanSpeed = hsHaystackUtil.readPointValue("zone and sp and fan and operation and mode")
-         Log.i(L.TAG_CCU_HSCPU, "updateFanMode: fanLevel $fanLevel curFanSpeed $curFanSpeed")
+         CcuLog.i(L.TAG_CCU_HSCPU, "updateFanMode: fanLevel $fanLevel curFanSpeed $curFanSpeed")
          val fallbackFanSpeed: Double = if(fanLevel == 0) { 0.0 } else {
              if (fanLevel > 0 && curFanSpeed.toInt() != StandaloneFanStage.AUTO.ordinal) {
                  StandaloneFanStage.AUTO.ordinal.toDouble()
@@ -1231,7 +1230,7 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
              }
          }
          val fanModePointId = hsHaystackUtil.readPointID("zone and sp and fan and operation and mode")
-         Log.i(L.TAG_CCU_HSCPU, "updateFanMode: fallbackFanSpeed $fallbackFanSpeed")
+         CcuLog.i(L.TAG_CCU_HSCPU, "updateFanMode: fallbackFanSpeed $fallbackFanSpeed")
          if(fanModePointId != null)
             hsHaystackUtil.writeDefaultWithHisValue(fanModePointId, fallbackFanSpeed)
     }
@@ -1258,9 +1257,9 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
         if (config.analogOut2State.enabled) logicalPoints[Port.ANALOG_OUT_TWO] = hyperStatPointsUtil.getCpuAnalogOutLogicalPoint(config.analogOut2State.association).id
         if (config.analogOut3State.enabled) logicalPoints[Port.ANALOG_OUT_THREE] = hyperStatPointsUtil.getCpuAnalogOutLogicalPoint(config.analogOut3State.association).id
 
-        Log.i(L.TAG_CCU_HSCPU, "====== Logical Points list : ====")
-        logicalPoints.forEach { (key, id) -> Log.i(L.TAG_CCU_HSCPU, "key : $key  : $id") }
-        Log.i(L.TAG_CCU_HSCPU, "=================================")
+        CcuLog.d(L.TAG_CCU_HSCPU, "====== Logical Points list : ====")
+        logicalPoints.forEach { (key, id) -> CcuLog.d(L.TAG_CCU_HSCPU, "key : $key  : $id") }
+        CcuLog.d(L.TAG_CCU_HSCPU, "=================================")
         return logicalPoints
     }
 }

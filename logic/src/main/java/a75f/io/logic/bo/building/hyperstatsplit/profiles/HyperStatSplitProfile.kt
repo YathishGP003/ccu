@@ -1,6 +1,7 @@
 package a75f.io.logic.bo.building.hyperstatsplit.profiles
 
 import a75f.io.api.haystack.CCUHsApi
+import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.BaseProfileConfiguration
 import a75f.io.logic.bo.building.ZoneProfile
@@ -19,7 +20,7 @@ import a75f.io.logic.bo.building.hyperstatsplit.common.HyperStatSplitEquip
 import a75f.io.logic.bo.building.hyperstatsplit.common.UserIntents
 import a75f.io.logic.bo.building.schedules.Occupancy
 import a75f.io.logic.jobs.HyperStatSplitUserIntentHandler
-import android.util.Log
+
 
 
 /**
@@ -491,7 +492,7 @@ abstract class HyperStatSplitProfile : ZoneProfile(), RelayActions, AnalogOutAct
     }
 
     private fun logIt(msg: String){
-        Log.i(L.TAG_CCU_HSSPLIT_CPUECON, msg)
+        CcuLog.d(L.TAG_CCU_HSSPLIT_CPUECON, msg)
     }
 
     // To run specific fan speed while running aux heating

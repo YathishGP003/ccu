@@ -1,6 +1,11 @@
 package a75f.io.logic.bo.building.ccu;
 
 
+import static a75f.io.logic.bo.building.ZoneState.COOLING;
+import static a75f.io.logic.bo.building.ZoneState.HEATING;
+import static a75f.io.logic.bo.building.ZoneState.RFDEAD;
+import static a75f.io.logic.bo.building.ZoneState.TEMPDEAD;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -15,13 +20,7 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.dab.DabSystemController;
 import a75f.io.logic.bo.building.system.vav.VavSystemController;
-import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.TunerUtil;
-
-import static a75f.io.logic.bo.building.ZoneState.COOLING;
-import static a75f.io.logic.bo.building.ZoneState.HEATING;
-import static a75f.io.logic.bo.building.ZoneState.RFDEAD;
-import static a75f.io.logic.bo.building.ZoneState.TEMPDEAD;
 
 //CCU As a Zone Profile
 public class CazProfile extends ZoneProfile {
@@ -115,9 +114,6 @@ public class CazProfile extends ZoneProfile {
             if (systemMode == SystemMode.HEATONLY && roomTemp > systemDefaultTemp) {
                 state = COOLING;
             }
-           /* if (state != DEADBAND) {
-                state = DEADBAND;
-            }*/
         }
         cazEquip.setStatus(state.ordinal(), (DabSystemController.getInstance().isEmergencyMode() || VavSystemController.getInstance().isEmergencyMode()) && (state == HEATING ? buildingLimitMinBreached()
                 : state == COOLING ? buildingLimitMaxBreached() : false));

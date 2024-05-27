@@ -1,6 +1,7 @@
 package a75f.io.logic.bo.building.hyperstat.common
 
 import a75f.io.api.haystack.*
+import a75f.io.logger.CcuLog
 import a75f.io.logic.*
 import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.definitions.ProfileType
@@ -12,7 +13,6 @@ import a75f.io.logic.bo.building.hyperstat.profiles.pipe2.*
 import a75f.io.logic.bo.building.hyperstat.profiles.util.*
 import a75f.io.logic.bo.building.schedules.Occupancy
 import a75f.io.logic.tuners.TunerConstants
-import android.util.Log
 import java.util.*
 
 /**
@@ -82,7 +82,7 @@ class HyperStatPointsUtil(
     }
 
     // Creating new Point
-    fun createHaystackPoint(
+    private fun createHaystackPoint(
         displayName: String, markers: Array<String>
     ): Point {
         // Point which has default details
@@ -265,9 +265,7 @@ class HyperStatPointsUtil(
             hayStackAPI.updatePoint(point, point.id)
             point.id
         }else {
-            val id: String = hayStackAPI.addPoint(point)
-            //Log.d("CCU_HS_SYNC", id + ", " + point.displayName.toString())
-            id
+            hayStackAPI.addPoint(point)
         }
     }
 
@@ -2598,7 +2596,7 @@ class HyperStatPointsUtil(
         for (pair in stagedFanConfigPointsList) {
             val point = pair.first
             val value = pair.second
-            Log.d("TAG",
+            CcuLog.i(L.TAG_CCU_HS,
                 "createStagedFanConfigPoint: config points created are $point and value $value and id is " + point.id
             )
         }

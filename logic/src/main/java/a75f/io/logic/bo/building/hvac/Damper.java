@@ -72,8 +72,8 @@ public class Damper implements Control
         public int getDefaultReverseBacklash() {
             return mReverseBacklash;
         }
-    };
-    static enum SHAPE { ROUND, SQUARE };
+    }
+    static enum SHAPE { ROUND, SQUARE }
     
     public static class Parameters {
         int    mDamperType       = -1;
@@ -98,7 +98,7 @@ public class Damper implements Control
             return mName;
         }
         
-    };
+    }
     
     public void applyOverride(int val) {
         overriddenVal = currentPosition;

@@ -1,12 +1,12 @@
 package a75f.io.logic.bo.building.hyperstat.profiles
 
+import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.hvac.AnalogOutput
 import a75f.io.logic.bo.building.hvac.Stage
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
-import android.util.Log
 
 /**
  * Created by Manjunath K on 22-07-2022.
@@ -96,14 +96,14 @@ abstract class HyperStatPackageUnitProfile: HyperStatProfile(){
     }
 
     override fun doFanMediumSpeed(
-        logicalPointId: String,
-        superLogicalPoint : String?,
-        fanMode: StandaloneFanStage,
-        fanLoopOutput: Int,
-        relayActivationHysteresis: Int,
-        divider: Int,
-        relayStages: HashMap<String, Int>,
-        doorWindowStatus: Boolean
+            logicalPointId: String,
+            superLogicalPoint : String?,
+            fanMode: StandaloneFanStage,
+            fanLoopOutput: Int,
+            relayActivationHysteresis: Int,
+            divider: Int,
+            relayStages: HashMap<String, Int>,
+            doorWindowOperate: Boolean
     ) {
 
         var relayState = -1.0
@@ -116,7 +116,7 @@ abstract class HyperStatPackageUnitProfile: HyperStatProfile(){
             // For Title 24 compliance, check if fanEnabled is mapped and fanMedium is the lowest
             // Or check if doorwindowStatus is true and lowest stage is fanMedium
             if ((fanEnabledStatus && (fanLoopOutput > 0) && lowestStageFanMedium) ||
-                (lowestStageFanMedium && doorWindowStatus)) {
+                (lowestStageFanMedium && doorWindowOperate)) {
                 relayState = 1.0
             }
 
@@ -131,7 +131,7 @@ abstract class HyperStatPackageUnitProfile: HyperStatProfile(){
         }
         if (relayState != -1.0) {
             updateLogicalPointIdValue(logicalPointId, relayState)
-            Log.i(L.TAG_CCU_HSPIPE2, "$logicalPointId = FanMediumSpeed:  $relayState")
+            CcuLog.i(L.TAG_CCU_HSPIPE2, "$logicalPointId = FanMediumSpeed:  $relayState")
         }
         if (getCurrentLogicalPointStatus(logicalPointId) == 1.0) {
             relayStages[Stage.FAN_2.displayName] = 1
@@ -168,7 +168,7 @@ abstract class HyperStatPackageUnitProfile: HyperStatProfile(){
         }
         if (relayState != -1.0) {
             updateLogicalPointIdValue(logicalPointId, relayState)
-            Log.i(L.TAG_CCU_HSPIPE2, "$logicalPointId = FanHighSpeed:  $relayState")
+            CcuLog.i(L.TAG_CCU_HSPIPE2, "$logicalPointId = FanHighSpeed:  $relayState")
         }
         if (getCurrentLogicalPointStatus(logicalPointId) == 1.0) {
             relayStages[Stage.FAN_3.displayName] = 1
@@ -232,7 +232,7 @@ abstract class HyperStatPackageUnitProfile: HyperStatProfile(){
             if (fanLoopForAnalog > 0) analogOutStages[AnalogOutput.FAN_SPEED.name] =
                 fanLoopForAnalog
             updateLogicalPointIdValue(logicalPointsList[port]!!, fanLoopForAnalog.toDouble())
-            Log.i(L.TAG_CCU_HSCPU, "$port = Linear Fan Speed  analogSignal   $fanLoopForAnalog")
+            CcuLog.i(L.TAG_CCU_HSCPU, "$port = Linear Fan Speed  analogSignal   $fanLoopForAnalog")
         }
     }
 

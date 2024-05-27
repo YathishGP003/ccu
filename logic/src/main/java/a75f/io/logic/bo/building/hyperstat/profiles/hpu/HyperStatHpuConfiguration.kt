@@ -1,7 +1,6 @@
 package a75f.io.logic.bo.building.hyperstat.profiles.hpu
 
 import a75f.io.logic.bo.building.BaseProfileConfiguration
-import a75f.io.logic.bo.building.Thermistor
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.AnalogInAssociation
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.AnalogInState
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.HyperStatCpuConfiguration

@@ -1,6 +1,7 @@
 package a75f.io.logic.bo.building.hyperstatsplit.common
 
 import a75f.io.api.haystack.*
+import a75f.io.logger.CcuLog
 import a75f.io.logic.ANALOG_VALUE
 import a75f.io.logic.BINARY_VALUE
 import a75f.io.logic.MULTI_STATE_VALUE
@@ -21,7 +22,6 @@ import a75f.io.logic.bo.building.hyperstatsplit.util.*
 import a75f.io.logic.bo.building.schedules.Occupancy
 import a75f.io.logic.getSchedule
 import a75f.io.logic.tuners.TunerConstants
-import android.util.Log
 import java.util.*
 
 /**
@@ -92,7 +92,7 @@ class HyperStatSplitPointsUtil(
     }
 
     // Creating new Point
-    fun createHaystackPoint(
+    private fun createHaystackPoint(
         displayName: String, markers: Array<String>
     ): Point {
         // Point which has default details
@@ -269,7 +269,6 @@ class HyperStatSplitPointsUtil(
             point.id
         }else {
             val id:String = hayStackAPI.addPoint(point)
-            //Log.d("CCU_HS_SYNC", id + ", " + point.displayName)
             id
         }
     }
@@ -292,10 +291,6 @@ class HyperStatSplitPointsUtil(
     fun addPointsListToHaystackWithDefaultValue(listOfAllPoints: Array<MutableList<Pair<Point, Any>>>) {
         listOfAllPoints.forEach { pointsList ->
             pointsList.forEach { actualPoint ->
-                // Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "adding point " + actualPoint.first.displayName)
-                // actualPoint.first will contains Point
-                // actualPoint.second will contains Default Value
-                // save the point and hold Id
 
                 val pointId = addPointToHaystack(actualPoint.first)
                 if(actualPoint.first.markers.contains(Tags.HIS)){
@@ -1543,7 +1538,7 @@ class HyperStatSplitPointsUtil(
             HyperStatSplitAssociationUtil.isRelayAssociatedToExhaustFanStage2(relayState = relayState) ->
                 LogicalPointsUtil.createPointForExhaustFanStage2(equipDis,siteRef,equipRef,roomRef,floorRef,tz)
             else -> {
-                Log.d("CCU_HS_SYNC", "Got to the default case for a relay point")
+                CcuLog.d("CCU_HS_SYNC", "Got to the default case for a relay point")
                 Point.Builder().build()
             }
         }
@@ -2241,7 +2236,7 @@ class HyperStatSplitPointsUtil(
             }
 
             else -> {
-                Log.d("CCU_HS_SYNC", "Got to the default case for a sensor bus point")
+                CcuLog.e("CCU_HS_SYNC", "Got to the default case for a sensor bus point")
                 Point.Builder().build()
             }
 
@@ -2269,7 +2264,7 @@ class HyperStatSplitPointsUtil(
             }
 
             else -> {
-                Log.d("CCU_HS_SYNC", "Got to the default case for a sensor bus point")
+                CcuLog.e("CCU_HS_SYNC", "Got to the default case for a sensor bus point")
                 Point.Builder().build()
             }
 
@@ -2288,7 +2283,7 @@ class HyperStatSplitPointsUtil(
             }
 
             else -> {
-                Log.d("CCU_HS_SYNC", "Got to the default case for a sensor bus pressure point")
+                CcuLog.e("CCU_HS_SYNC", "Got to the default case for a sensor bus pressure point")
                 Point.Builder().build()
             }
 
@@ -2658,7 +2653,7 @@ class HyperStatSplitPointsUtil(
     private fun getSensorBusPressureConfigEnum(profileType: ProfileType): String {
         when(profileType) {
             ProfileType.HYPERSTATSPLIT_CPU -> {
-                return "$PRESSURE"
+                return PRESSURE
             }
             else -> {}
         }
@@ -2697,13 +2692,13 @@ class HyperStatSplitPointsUtil(
     }
 
     fun createStagedFanConfigPoint(
-        HyperStatSplitConfig: HyperStatSplitCpuEconConfiguration,
+            hyperStatSplitConfig: HyperStatSplitCpuEconConfiguration,
     ): MutableList<Pair<Point, Any>> {
 
         val stagedFanConfigPointsList: MutableList<Pair<Point, Any>> = LinkedList()
 
-        if(HyperStatSplitConfig.analogOut1State.enabled &&
-            HyperStatSplitAssociationUtil.isAnalogOutAssociatedToStagedFanSpeed(HyperStatSplitConfig.analogOut1State)){
+        if(hyperStatSplitConfig.analogOut1State.enabled &&
+            HyperStatSplitAssociationUtil.isAnalogOutAssociatedToStagedFanSpeed(hyperStatSplitConfig.analogOut1State)){
             val analog1RecirculateConfigPointMarkers = arrayOf(
                 "recirculate", "writable", "config", "zone", "sp", "analog1"
             )
@@ -2713,7 +2708,7 @@ class HyperStatSplitPointsUtil(
                 null, "V"
             )
             stagedFanConfigPointsList.add(
-                Pair(analog1RecirculateConfigPoint, HyperStatSplitConfig.analogOut1State.voltageAtRecirculate)
+                Pair(analog1RecirculateConfigPoint, hyperStatSplitConfig.analogOut1State.voltageAtRecirculate)
             )
             val analog1DuringEconomizerConfigPointMarker = arrayOf(
                 "economizer", "writable", "config", "zone", "sp", "analog1"
@@ -2724,12 +2719,12 @@ class HyperStatSplitPointsUtil(
                 null, "V"
             )
             stagedFanConfigPointsList.add(
-                Pair(analog1DuringEconomizerConfigPoint, HyperStatSplitConfig.analogOut1State.voltageDuringEconomizer)
+                Pair(analog1DuringEconomizerConfigPoint, hyperStatSplitConfig.analogOut1State.voltageDuringEconomizer)
             )
         }
 
-        if(HyperStatSplitConfig.analogOut2State.enabled &&
-            HyperStatSplitAssociationUtil.isAnalogOutAssociatedToStagedFanSpeed(HyperStatSplitConfig.analogOut2State)){
+        if(hyperStatSplitConfig.analogOut2State.enabled &&
+            HyperStatSplitAssociationUtil.isAnalogOutAssociatedToStagedFanSpeed(hyperStatSplitConfig.analogOut2State)){
             val analog2RecirculateConfigPointMarkers = arrayOf(
                 "recirculate", "writable", "config", "zone", "sp", "analog2"
             )
@@ -2739,7 +2734,7 @@ class HyperStatSplitPointsUtil(
                 null, "V"
             )
             stagedFanConfigPointsList.add(
-                Pair(analog2RecirculateConfigPoint, HyperStatSplitConfig.analogOut2State.voltageAtRecirculate)
+                Pair(analog2RecirculateConfigPoint, hyperStatSplitConfig.analogOut2State.voltageAtRecirculate)
             )
             val analog2DuringEconomizerConfigPointMarkers = arrayOf(
                 "economizer", "writable", "config", "zone", "sp", "analog2"
@@ -2750,12 +2745,12 @@ class HyperStatSplitPointsUtil(
                 null, "V"
             )
             stagedFanConfigPointsList.add(
-                Pair(analog2DuringEconomizerConfigPoint, HyperStatSplitConfig.analogOut2State.voltageDuringEconomizer)
+                Pair(analog2DuringEconomizerConfigPoint, hyperStatSplitConfig.analogOut2State.voltageDuringEconomizer)
             )
         }
 
-        if(HyperStatSplitConfig.analogOut3State.enabled &&
-            HyperStatSplitAssociationUtil.isAnalogOutAssociatedToStagedFanSpeed(HyperStatSplitConfig.analogOut3State)){
+        if(hyperStatSplitConfig.analogOut3State.enabled &&
+            HyperStatSplitAssociationUtil.isAnalogOutAssociatedToStagedFanSpeed(hyperStatSplitConfig.analogOut3State)){
             val analog3RecirculateConfigPointMarkers = arrayOf(
                 "recirculate", "writable", "config", "zone", "sp", "analog3"
             )
@@ -2765,7 +2760,7 @@ class HyperStatSplitPointsUtil(
                 null, "V"
             )
             stagedFanConfigPointsList.add(
-                Pair(analog3RecirculateConfigPoint, HyperStatSplitConfig.analogOut3State.voltageAtRecirculate)
+                Pair(analog3RecirculateConfigPoint, hyperStatSplitConfig.analogOut3State.voltageAtRecirculate)
             )
             val analog3DuringEconomizerConfigPointMarkers = arrayOf(
                 "economizer", "writable", "config", "zone", "sp", "analog3"
@@ -2776,12 +2771,12 @@ class HyperStatSplitPointsUtil(
                 null, "V"
             )
             stagedFanConfigPointsList.add(
-                Pair(analog3DuringEconomizerConfigPoint, HyperStatSplitConfig.analogOut3State.voltageDuringEconomizer)
+                Pair(analog3DuringEconomizerConfigPoint, hyperStatSplitConfig.analogOut3State.voltageDuringEconomizer)
             )
         }
 
-        if(HyperStatSplitConfig.analogOut4State.enabled &&
-            HyperStatSplitAssociationUtil.isAnalogOutAssociatedToStagedFanSpeed(HyperStatSplitConfig.analogOut4State)){
+        if(hyperStatSplitConfig.analogOut4State.enabled &&
+            HyperStatSplitAssociationUtil.isAnalogOutAssociatedToStagedFanSpeed(hyperStatSplitConfig.analogOut4State)){
             val analog4RecirculateConfigPointMarkers = arrayOf(
                 "recirculate", "writable", "config", "zone", "sp", "analog4"
             )
@@ -2791,7 +2786,7 @@ class HyperStatSplitPointsUtil(
                 null, "V"
             )
             stagedFanConfigPointsList.add(
-                Pair(analog4RecirculateConfigPoint, HyperStatSplitConfig.analogOut4State.voltageAtRecirculate)
+                Pair(analog4RecirculateConfigPoint, hyperStatSplitConfig.analogOut4State.voltageAtRecirculate)
             )
             val analog4DuringEconomizerConfigPointMarkers = arrayOf(
                 "economizer", "writable", "config", "zone", "sp", "analog4"
@@ -2802,11 +2797,11 @@ class HyperStatSplitPointsUtil(
                 null, "V"
             )
             stagedFanConfigPointsList.add(
-                Pair(analog4DuringEconomizerConfigPoint, HyperStatSplitConfig.analogOut4State.voltageDuringEconomizer)
+                Pair(analog4DuringEconomizerConfigPoint, hyperStatSplitConfig.analogOut4State.voltageDuringEconomizer)
             )
         }
 
-        if (HyperStatSplitAssociationUtil.isStagedFanEnabled(HyperStatSplitConfig, CpuEconRelayAssociation.COOLING_STAGE_1)) {
+        if (HyperStatSplitAssociationUtil.isStagedFanEnabled(hyperStatSplitConfig, CpuEconRelayAssociation.COOLING_STAGE_1)) {
             val coolingStage1FanConfigPointMarkers = arrayOf(
                 "config", "writable", "zone", "fan", "cooling", "rate", "output", "sp", "stage1"
             )
@@ -2816,11 +2811,11 @@ class HyperStatSplitPointsUtil(
                 null, "V"
             )
             stagedFanConfigPointsList.add(
-                Pair(coolingStage1FanConfigPoint, HyperStatSplitConfig.coolingStage1FanState)
+                Pair(coolingStage1FanConfigPoint, hyperStatSplitConfig.coolingStage1FanState)
             )
         }
 
-        if (HyperStatSplitAssociationUtil.isStagedFanEnabled(HyperStatSplitConfig, CpuEconRelayAssociation.COOLING_STAGE_2)) {
+        if (HyperStatSplitAssociationUtil.isStagedFanEnabled(hyperStatSplitConfig, CpuEconRelayAssociation.COOLING_STAGE_2)) {
             val coolingStage2FanConfigPointMarkers = arrayOf(
                 "config", "writable", "zone", "fan", "cooling", "rate", "output", "sp", "stage2"
             )
@@ -2830,11 +2825,11 @@ class HyperStatSplitPointsUtil(
                 null, "V"
             )
             stagedFanConfigPointsList.add(
-                Pair(coolingStage2FanConfigPoint, HyperStatSplitConfig.coolingStage2FanState)
+                Pair(coolingStage2FanConfigPoint, hyperStatSplitConfig.coolingStage2FanState)
             )
         }
 
-        if (HyperStatSplitAssociationUtil.isStagedFanEnabled(HyperStatSplitConfig, CpuEconRelayAssociation.COOLING_STAGE_3)) {
+        if (HyperStatSplitAssociationUtil.isStagedFanEnabled(hyperStatSplitConfig, CpuEconRelayAssociation.COOLING_STAGE_3)) {
             val coolingStage3FanConfigPointMarkers = arrayOf(
                 "config", "writable", "zone", "fan", "cooling", "rate", "output", "sp", "stage3"
             )
@@ -2844,11 +2839,11 @@ class HyperStatSplitPointsUtil(
                 null, "V"
             )
             stagedFanConfigPointsList.add(
-                Pair(coolingStage3FanConfigPoint, HyperStatSplitConfig.coolingStage3FanState)
+                Pair(coolingStage3FanConfigPoint, hyperStatSplitConfig.coolingStage3FanState)
             )
         }
 
-        if (HyperStatSplitAssociationUtil.isStagedFanEnabled(HyperStatSplitConfig, CpuEconRelayAssociation.HEATING_STAGE_1)) {
+        if (HyperStatSplitAssociationUtil.isStagedFanEnabled(hyperStatSplitConfig, CpuEconRelayAssociation.HEATING_STAGE_1)) {
             val heatingStage1FanConfigPointMarkers = arrayOf(
                 "config", "writable", "zone", "fan", "heating", "rate", "output", "sp", "stage1"
             )
@@ -2858,11 +2853,11 @@ class HyperStatSplitPointsUtil(
                 null, "V"
             )
             stagedFanConfigPointsList.add(
-                Pair(heatingStage1FanConfigPoint, HyperStatSplitConfig.heatingStage1FanState)
+                Pair(heatingStage1FanConfigPoint, hyperStatSplitConfig.heatingStage1FanState)
             )
         }
 
-        if (HyperStatSplitAssociationUtil.isStagedFanEnabled(HyperStatSplitConfig, CpuEconRelayAssociation.HEATING_STAGE_2)) {
+        if (HyperStatSplitAssociationUtil.isStagedFanEnabled(hyperStatSplitConfig, CpuEconRelayAssociation.HEATING_STAGE_2)) {
             val heatingStage2FanConfigPointMarkers = arrayOf(
                 "config", "writable", "zone", "fan", "heating", "rate", "output", "sp", "stage2"
             )
@@ -2872,11 +2867,11 @@ class HyperStatSplitPointsUtil(
                 null, "V"
             )
             stagedFanConfigPointsList.add(
-                Pair(heatingStage2FanConfigPoint, HyperStatSplitConfig.heatingStage2FanState)
+                Pair(heatingStage2FanConfigPoint, hyperStatSplitConfig.heatingStage2FanState)
             )
         }
 
-        if (HyperStatSplitAssociationUtil.isStagedFanEnabled(HyperStatSplitConfig, CpuEconRelayAssociation.HEATING_STAGE_3)) {
+        if (HyperStatSplitAssociationUtil.isStagedFanEnabled(hyperStatSplitConfig, CpuEconRelayAssociation.HEATING_STAGE_3)) {
             val heatingStage3FanConfigPointMarkers = arrayOf(
                 "config", "writable", "zone", "fan", "heating", "rate", "output", "sp", "stage3"
             )
@@ -2886,14 +2881,14 @@ class HyperStatSplitPointsUtil(
                 null, "V"
             )
             stagedFanConfigPointsList.add(
-                Pair(heatingStage3FanConfigPoint, HyperStatSplitConfig.heatingStage3FanState)
+                Pair(heatingStage3FanConfigPoint, hyperStatSplitConfig.heatingStage3FanState)
             )
         }
 
         for (pair in stagedFanConfigPointsList) {
             val point = pair.first
             val value = pair.second
-            Log.d("TAG",
+            CcuLog.d("TAG",
                 "createStagedFanConfigPoint: config points created are $point and value $value and id is " + point.id
             )
         }

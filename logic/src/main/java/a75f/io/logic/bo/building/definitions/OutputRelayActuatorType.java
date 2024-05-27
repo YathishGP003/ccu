@@ -2,6 +2,8 @@ package a75f.io.logic.bo.building.definitions;
 
 import android.util.Log;
 
+import a75f.io.logger.CcuLog;
+
 /**
  * Created by Yinten isOn 8/15/2017.
  */
@@ -18,7 +20,7 @@ public enum OutputRelayActuatorType
 	public static OutputRelayActuatorType getEnum(String value) {
 		for(OutputRelayActuatorType v : values())
 			if(v.displayName.equalsIgnoreCase(value)) return v;
-		Log.d("CCU", "Actuator Not found: "+value);
+		CcuLog.d("CCU", "Actuator Not found: "+value);
 		throw new IllegalArgumentException();
 	}
 }

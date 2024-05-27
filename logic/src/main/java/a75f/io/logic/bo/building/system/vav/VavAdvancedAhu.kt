@@ -769,6 +769,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
     }
 
     private fun updatePointsDbVal(isConnectEquip : Boolean) {
+        CcuLog.d(L.TAG_CCU_SYSTEM, "updatePointsDbVal")
         val stageStatus = if (isConnectEquip) connectStageStatus else cmStageStatus
         stageStatus.forEachIndexed { index, status ->
             if (status.first < status.second) {
@@ -827,6 +828,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
     private fun isStageDownTimerActive() : Boolean = stageDownTimer > 0
 
     private fun updatePointVal(domainName: String, stageIndex : Int, pointVal : Int, isConnectEquip : Boolean) {
+        CcuLog.d(L.TAG_CCU_SYSTEM, "Update output $domainName $stageIndex $pointVal")
         if (isConnectEquip) {
             updateConnectPointVal(domainName, stageIndex, pointVal)
         } else {
@@ -844,7 +846,6 @@ open class VavAdvancedAhu : VavSystemProfile() {
     }
 
     private fun updateConnectPointVal(domainName: String, stageIndex : Int, pointVal : Int) {
-        CcuLog.d(L.TAG_CCU_SYSTEM, "updateConnectPointVal $domainName $stageIndex $pointVal")
         getDomainPointForName(domainName, systemEquip.connectEquip1).writeHisVal(pointVal.toDouble())
         getConnectRelayAssociationMap(systemEquip).forEach { (relay, association) ->
             if (association.readDefaultVal() == stageIndex.toDouble() && relay.readDefaultVal() > 0) {
@@ -886,6 +887,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
 
     private fun logOutputs() {
         try {
+            CcuLog.i(L.TAG_CCU_SYSTEM, "Test mode is active ${Globals.getInstance().isTestMode}")
             CcuLog.i(L.TAG_CCU_SYSTEM, "Operating mode ${VavSystemController.getInstance().systemState}")
             getCMRelayAssociationMap(systemEquip).entries.forEach { (relay, association) ->
                 val logical = relayAssociationToDomainName(association.readDefaultVal().toInt())

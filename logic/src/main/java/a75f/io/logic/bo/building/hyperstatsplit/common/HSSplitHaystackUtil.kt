@@ -2,6 +2,7 @@ package a75f.io.logic.bo.building.hyperstatsplit.common
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.HayStackConstants
+import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.hyperstatsplit.common.HyperStatSplitAssociationUtil.Companion.isAnyAnalogOutEnabledAssociatedToCooling
@@ -11,7 +12,6 @@ import a75f.io.logic.bo.building.hyperstatsplit.common.HyperStatSplitAssociation
 
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuEconEquip
 import a75f.io.logic.tuners.TunerUtil
-import android.util.Log
 import org.projecthaystack.HNum
 import org.projecthaystack.HRef
 
@@ -42,9 +42,9 @@ class HSSplitHaystackUtil(
                 }
 
             }catch (e: Exception){
-                Log.i(L.TAG_CCU_HSCPU, "Exception getPossibleConditioningModeSettings: ${e.message}")
+                CcuLog.e(L.TAG_CCU_HSCPU, "Exception getPossibleConditioningModeSettings: ${e.message}")
             }
-            Log.i(L.TAG_CCU_HSCPU, "getPossibleConditioningModeSettings: $status")
+            CcuLog.d(L.TAG_CCU_HSCPU, "getPossibleConditioningModeSettings: $status")
             return status
         }
 
@@ -90,7 +90,7 @@ class HSSplitHaystackUtil(
                 if (fanLevel == 15) return PossibleFanMode.MED_HIGH
                 if (fanLevel == 21) return PossibleFanMode.LOW_MED_HIGH
             }catch (e:Exception){
-                Log.i(L.TAG_CCU_HSSPLIT_CPUECON, "Exception getPossibleFanModeSettings: ${e.localizedMessage}")
+                CcuLog.e(L.TAG_CCU_HSSPLIT_CPUECON, "Exception getPossibleFanModeSettings: ${e.localizedMessage}")
             }
             return PossibleFanMode.OFF
         }
@@ -423,12 +423,6 @@ class HSSplitHaystackUtil(
 
     }
 
-    fun readCo2Value(): Double {
-        return haystack.readHisValByQuery(
-            "point and co2 and sensor and equipRef == \"$equipRef\""
-        )
-    }
-
     fun setHumidity(humidity: Double) {
         haystack.writeHisValByQuery(
             "point and air and humidity and sensor and equipRef == \"$equipRef\"", humidity
@@ -496,12 +490,6 @@ class HSSplitHaystackUtil(
             haystack.writeHisValueByIdWithoutCOV(detectionPointId, 1.0)
     }
 
-    fun getSensorPointValue(markers: String): Double {
-        return haystack.readHisValByQuery(
-            "point and $markers and his and equipRef == \"$equipRef\""
-        )
-    }
-
     fun updateConditioningLoopOutput(coolingLoop: Int, heatingLoop: Int, fanLoop: Int, isHpuProfile: Boolean, compressorLoop: Int) {
         haystack.writeHisValByQuery(
             "point and  his and cooling and loop and output and modulating " +
@@ -567,10 +555,7 @@ class HSSplitHaystackUtil(
     fun isPrePurgeEnabled(): Boolean{
         return (readPointValue("prePurge and enabled and cpu and standalone and userIntent").toInt() == 1)
     }
-    fun getCo2DamperOpeningConfigValue(): Double{
-        return haystack.readDefaultVal(
-            "point and co2 and opening and rate and equipRef == \"$equipRef\"")
-    }
+
     fun getCo2DamperThresholdConfigValue(): Double{
         return  haystack.readDefaultVal(
             "point and co2 and threshold and equipRef == \"$equipRef\""
@@ -591,11 +576,7 @@ class HSSplitHaystackUtil(
             "point and voc and target and equipRef == \"$equipRef\""
         )
     }
-    fun getPm2p5ThresholdConfigValue(): Double{
-        return haystack.readDefaultVal(
-            "point and pm2p5 and threshold and equipRef == \"$equipRef\""
-        )
-    }
+
     fun getPm2p5TargetConfigValue(): Double{
         return  haystack.readDefaultVal(
             "point and pm2p5 and target and equipRef == \"$equipRef\""

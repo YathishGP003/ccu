@@ -1,9 +1,5 @@
 package a75f.io.logic.bo.building.system.vav;
 
-/**
- * Created by samjithsadasivan on 8/14/18.
- */
-
 import android.content.Intent;
 
 import java.util.HashMap;
@@ -12,7 +8,6 @@ import java.util.Objects;
 import a75.io.algos.vav.VavTRSystem;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
-import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Kind;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
@@ -21,7 +16,6 @@ import a75f.io.logic.BacnetIdKt;
 import a75f.io.logic.BacnetUtilKt;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
-import a75f.io.logic.autocommission.AutoCommissioningState;
 import a75f.io.logic.autocommission.AutoCommissioningUtil;
 import a75f.io.logic.bo.building.EpidemicState;
 import a75f.io.logic.bo.building.definitions.Consts;
@@ -319,7 +313,7 @@ public class VavIERtu extends VavSystemProfile
             status.insert(0, "Free Cooling Used |");
         }
 
-        return status.toString().equals("")? "System OFF" : status.toString();
+        return status.toString().isEmpty() ? "System OFF" : status.toString();
     }
 
     private double getDuctStaticPressureTarget(){
@@ -328,7 +322,7 @@ public class VavIERtu extends VavSystemProfile
 
         CcuLog.d( L.TAG_CCU_SYSTEM,
                 "staticPressureMin: "+staticPressureMin+" staticPressureMax: "+staticPressureMax+" systemFanLoopOp: " +
-                +systemFanLoopOp);
+                systemFanLoopOp);
 
         double ductStaticPressure;
         if (staticPressureMax > staticPressureMin) {
@@ -345,7 +339,7 @@ public class VavIERtu extends VavSystemProfile
 
         CcuLog.d( L.TAG_CCU_SYSTEM,
                   "fanSpeedMin: "+fanSpeedMin+" fanSpeedMax: "+fanSpeedMax+" systemFanLoopOp: " +
-                  +systemFanLoopOp);
+                  systemFanLoopOp);
 
         double fanSpeed;
         if (fanSpeedMax > fanSpeedMin) {
@@ -358,7 +352,7 @@ public class VavIERtu extends VavSystemProfile
 
     private void addCmdPoints(String equipref) {
         HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
-        String equipDis = Objects.requireNonNull(siteMap.get("dis")).toString() + "-SystemEquip";
+        String equipDis = Objects.requireNonNull(siteMap.get("dis")) + "-SystemEquip";
         String siteRef = Objects.requireNonNull(siteMap.get("id")).toString();
         String tz = Objects.requireNonNull(siteMap.get("tz")).toString();
         Point DATClgSetpoint = new Point.Builder()

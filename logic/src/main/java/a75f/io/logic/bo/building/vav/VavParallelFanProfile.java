@@ -35,10 +35,6 @@ public class VavParallelFanProfile extends VavProfile
         super(equipRef, nodeAddress, ProfileType.VAV_PARALLEL_FAN);
     }
 
-    //TODO - Only for backward compatibility during development. Should be removed.
-    public VavParallelFanProfile() {
-        super(null, null, ProfileType.VAV_PARALLEL_FAN);
-    }
     @Override
     public ProfileType getProfileType()
     {
@@ -86,7 +82,7 @@ public class VavParallelFanProfile extends VavProfile
         }
 
         boolean occupied = ScheduleUtil.isZoneOccupied(CCUHsApi.getInstance(), equip.getRoomRef(), Occupancy.OCCUPIED);
-        updateIaqCompensatedMinDamperPos(occupied, (short)nodeAddr);
+        updateIaqCompensatedMinDamperPos(occupied);
         if (loopOp == 0) {
             damper.currentPosition = damper.iaqCompensatedMinPos;
         } else {
@@ -121,7 +117,7 @@ public class VavParallelFanProfile extends VavProfile
     
     private int getLoopOp(SystemController.State conditioning, double roomTemp, Equip equip) {
         int loopOp = 0;
-        SystemMode systemMode = SystemMode.values()[(int)(int) TunerUtil.readSystemUserIntentVal("conditioning and mode")];
+        SystemMode systemMode = SystemMode.values()[(int) TunerUtil.readSystemUserIntentVal("conditioning and mode")];
         if (roomTemp > setTempCooling && systemMode != SystemMode.OFF) {
             //Zone is in Cooling
             if (state != COOLING) {
@@ -222,14 +218,8 @@ public class VavParallelFanProfile extends VavProfile
         }
         CcuLog.d(L.TAG_CCU_ZONE,"updateReheatDuringSystemHeating valveStart "+valveStart);
     }
-    
-    private boolean getZoneOccupancy(String equipId) {
-        String zoneId = HSUtil.getZoneIdFromEquipId(equipId);
-        Occupied occ = ScheduleManager.getInstance().getOccupiedModeCache(zoneId);
-        return occ != null && occ.isOccupied();
-    }
-    
-    private void updateIaqCompensatedMinDamperPos(boolean occupied, short node) {
+
+    private void updateIaqCompensatedMinDamperPos(boolean occupied) {
         
         double co2 = vavEquip.getZoneCO2().readHisVal();
         double voc = vavEquip.getZoneVoc().readHisVal();

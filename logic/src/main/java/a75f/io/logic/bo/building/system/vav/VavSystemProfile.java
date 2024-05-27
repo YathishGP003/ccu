@@ -294,7 +294,7 @@ public abstract class VavSystemProfile extends SystemProfile
     public void setTrTargetVals()
     {
         if(trSystem == null) {
-            Log.d(L.TAG_CCU_SYSTEM, " TRSystem not initialized , Skip trSPUpdate");
+            CcuLog.d(L.TAG_CCU_SYSTEM, " TRSystem not initialized , Skip trSPUpdate");
             return;
         }
         CCUHsApi.getInstance().writeHisValByQuery("point and system and tr and target and his and sat", trSystem.satTRProcessor.getSetPoint());

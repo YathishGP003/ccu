@@ -22,7 +22,6 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.EpidemicState;
 import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
-import a75f.io.logic.bo.building.hvac.Damper;
 import a75f.io.logic.bo.building.hvac.Valve;
 import a75f.io.logic.bo.building.hvac.VavAcbUnit;
 import a75f.io.logic.bo.building.schedules.Occupancy;
@@ -46,10 +45,6 @@ public class VavAcbProfile extends VavProfile
 
     Valve chwValve;
 
-    //TODO - Only for backward compatibility during development. Should be removed.
-    public VavAcbProfile() {
-        super(null, null, ProfileType.VAV_ACB);
-    }
     @Override
     public ProfileType getProfileType()
     {
@@ -81,7 +76,7 @@ public class VavAcbProfile extends VavProfile
         initLoopVariables();
         double roomTemp = getCurrentTemp();
         boolean condensate = getCondensate();
-        CcuLog.e(L.TAG_CCU_ZONE, "Condensate detected? " + condensate);
+        CcuLog.d(L.TAG_CCU_ZONE, "Condensate detected? " + condensate);
 
         int loopOp = 0;
         //If supply air temperature from air handler is greater than room temperature, Cooling shall be
@@ -90,13 +85,13 @@ public class VavAcbProfile extends VavProfile
         SystemMode systemMode = SystemMode.values()[(int) TunerUtil.readSystemUserIntentVal("conditioning and mode")];
         Equip equip = new Equip.Builder()
                 .setHashMap(CCUHsApi.getInstance().readEntity("equip and group == \"" + nodeAddr + "\"")).build();
-        CcuLog.e(L.TAG_CCU_ZONE, "Run Zone algorithm for "+nodeAddr+" setTempCooling "+setTempCooling+
+        CcuLog.d(L.TAG_CCU_ZONE, "Run Zone algorithm for "+nodeAddr+" setTempCooling "+setTempCooling+
                 "setTempHeating "+setTempHeating+" systemMode "+systemMode+" roomTemp "+roomTemp);
 
-        CcuLog.i(L.TAG_CCU_ZONE, "PI Tuners: proportionalGain " + proportionalGain + ", integralGain " + integralGain +
+        CcuLog.d(L.TAG_CCU_ZONE, "PI Tuners: proportionalGain " + proportionalGain + ", integralGain " + integralGain +
                 ", proportionalSpread " + proportionalSpread + ", integralMaxTimeout " + integralMaxTimeout);
         if (vavEquip.getEnableCFMControl().readPriorityVal() > 0) {
-            CcuLog.i(L.TAG_CCU_ZONE, "CFM PI Tuners: cfmProportionalGain " + cfmController.getProportionalGain() + ", cfmIntegralGain " + cfmController.getIntegralGain() +
+            CcuLog.d(L.TAG_CCU_ZONE, "CFM PI Tuners: cfmProportionalGain " + cfmController.getProportionalGain() + ", cfmIntegralGain " + cfmController.getIntegralGain() +
                     ", cfmProportionalSpread " + cfmController.getProportionalSpread() + ", cfmIntegralMaxTimeout " + cfmController.getIntegralMaxTimeout());
         }
 
@@ -149,7 +144,7 @@ public class VavAcbProfile extends VavProfile
         ((VavAcbEquip)vavEquip).getChwValveCmd().writeHisVal(chwValve.currentPosition);
         ((VavAcbEquip)vavEquip).getChwShutOffValve().writeHisVal(getShutOffValveCmd());
 
-        logLoopParams(nodeAddr, roomTemp, loopOp);
+        logLoopParams(loopOp);
 
         updateTRResponse((short)nodeAddr);
 
@@ -173,7 +168,7 @@ public class VavAcbProfile extends VavProfile
         }
     }
 
-    private void logLoopParams(int node, double roomTemp, int loopOp) {
+    private void logLoopParams(int loopOp) {
 
         CcuLog.d(L.TAG_CCU_ZONE,"CoolingLoop Op: "+coolingLoop.getLoopOutput());
         coolingLoop.dump();
@@ -201,7 +196,7 @@ public class VavAcbProfile extends VavProfile
             vavEquip.getNormalizedDamperCmd().writeHisVal(damperPos);
             ((VavAcbEquip)vavEquip).getChwShutOffValve().writeHisVal(0.0);
             ((VavAcbEquip)vavEquip).getChwValveCmd().writeHisVal(0.0);
-            vavEquip.getEquipStatus().writeHisVal((double) TEMPDEAD.ordinal());
+            vavEquip.getEquipStatus().writeHisVal(TEMPDEAD.ordinal());
             vavEquip.getEquipStatusMessage().writeDefaultVal("Zone Temp Dead");}
     }
 

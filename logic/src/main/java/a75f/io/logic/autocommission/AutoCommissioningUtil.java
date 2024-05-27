@@ -76,7 +76,7 @@ public class AutoCommissioningUtil {
         }else {
             if (isAutoCommissioningStarted()) {
                 //This section deals with exceptional situations may be when the CCU is offline or not opened during the auto-commissioning process
-                CcuLog.d(AutoCommissioningUtil.class.toString(), "Setting auto-commissioning to COMPLETED state: " + new Date(System.currentTimeMillis()));
+                CcuLog.d(L.TAG_CCU_AUTO_COMMISSIONING, "Setting auto-commissioning to COMPLETED state: " + new Date(System.currentTimeMillis()));
                 String autoCommissioningPointId = CCUHsApi.getInstance().readId("point and diag and auto and commissioning");
                 instance.pointWriteForCcuUser(HRef.copy(autoCommissioningPointId),
                         HayStackConstants.DEFAULT_POINT_LEVEL, HNum.make((double) AutoCommissioningState.COMPLETED.ordinal()), HNum.make(0));

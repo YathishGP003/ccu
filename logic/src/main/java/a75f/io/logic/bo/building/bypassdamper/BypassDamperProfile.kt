@@ -8,7 +8,6 @@ import a75f.io.domain.BypassDamperEquip
 import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.util.ModelLoader
 import a75f.io.logger.CcuLog
-import a75f.io.logic.L
 import a75f.io.logic.bo.building.BaseProfileConfiguration
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.ZonePriority
@@ -19,7 +18,7 @@ import a75f.io.logic.tuners.TunerUtil
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 
 class BypassDamperProfile(equipRef: String, addr: Short): ZoneProfile() {
-
+    val TAG_CCU_BYPASS: String = "CCU_BYPASS"
     var bdEquip : BypassDamperEquip = BypassDamperEquip(equipRef)
     var nodeAddr : Short = addr
     //var equipRef : String? = null
@@ -32,7 +31,7 @@ class BypassDamperProfile(equipRef: String, addr: Short): ZoneProfile() {
     var integralMaxTimeout = 30
 
     init {
-        CcuLog.i("CCU_BYPASS", "Bypass Damper Profile Init")
+        CcuLog.i(TAG_CCU_BYPASS, "Bypass Damper Profile Init")
 
         if (bdEquip.proportionalKFactor.readPriorityVal() > 0.0) proportionalKFactor = bdEquip.proportionalKFactor.readPriorityVal()
         if (bdEquip.integralKFactor.readPriorityVal() > 0.0) integralKFactor = bdEquip.integralKFactor.readPriorityVal()
@@ -48,7 +47,7 @@ class BypassDamperProfile(equipRef: String, addr: Short): ZoneProfile() {
         bypassDamper.minPosition = bdEquip.damperMinPosition.readPriorityVal().toInt()
         bypassDamper.maxPosition = bdEquip.damperMaxPosition.readPriorityVal().toInt()
 
-        CcuLog.i("CCU_BYPASS", "Bypass Damper Profile Init Done")
+        CcuLog.i(TAG_CCU_BYPASS, "Bypass Damper Profile Init Done")
 
     }
 
@@ -64,16 +63,16 @@ class BypassDamperProfile(equipRef: String, addr: Short): ZoneProfile() {
 
     override fun updateZonePoints() {
         if (mInterface != null) mInterface.refreshView()
-        CcuLog.i("CCU_BYPASS", "--->Bypass Damper Profile<---"+nodeAddr)
+        CcuLog.i(TAG_CCU_BYPASS, "--->Bypass Damper Profile<---"+nodeAddr)
 
         initLoopVariables()
 
         var bypassLoopOp = 0.0
         if (isRFDead) {
-            CcuLog.d("CCU_BYPASS", "Bypass Damper: RF Signal is dead")
+            CcuLog.d(TAG_CCU_BYPASS, "Bypass Damper: RF Signal is dead")
             return
         }else if (isZoneDead) {
-            CcuLog.d("CCU_BYPASS", "Bypass Damper: Zone is dead")
+            CcuLog.d(TAG_CCU_BYPASS, "Bypass Damper: Zone is dead")
             return
         } else {
             val systemFanLoopOp = hayStack.readHisValByQuery("point and fan and system and loop and output and not tuner")
@@ -89,13 +88,13 @@ class BypassDamperProfile(equipRef: String, addr: Short): ZoneProfile() {
 
             } else {
                 if (bypassLoop.enabled) bypassLoop.setDisabled()
-                CcuLog.i("CCU_BYPASS", "systemFanLoop is zero, bypass damper set to minimum")
+                CcuLog.i(TAG_CCU_BYPASS, "systemFanLoop is zero, bypass damper set to minimum")
                 bypassLoop.reset()
             }
             bypassDamper.currentPosition = (bypassDamper.minPosition + (bypassLoopOp/100) * (bypassDamper.maxPosition - bypassDamper.minPosition)).toInt()
 
 
-            CcuLog.d("CCU_BYPASS", "Bypass Damper: systemFanLoopOp " + systemFanLoopOp + ", staticPressure " + staticPressureSensor + ", staticPressureSp: " + staticPressureSp + ", bypassLoopOp: " + bypassLoopOp + ", bypassDamperPos: " + bypassDamper.currentPosition)
+            CcuLog.d(TAG_CCU_BYPASS, "Bypass Damper: systemFanLoopOp " + systemFanLoopOp + ", staticPressure " + staticPressureSensor + ", staticPressureSp: " + staticPressureSp + ", bypassLoopOp: " + bypassLoopOp + ", bypassDamperPos: " + bypassDamper.currentPosition)
             bypassLoop.dumpWithTag("CCU_BYPASS")
         }
 
@@ -107,7 +106,7 @@ class BypassDamperProfile(equipRef: String, addr: Short): ZoneProfile() {
     override fun isZoneDead(): Boolean {
         val equip = equip
         if (equip == null) {
-            CcuLog.e("CCU_BYPASS", "Profile does not have linked equip , assume zone is dead")
+            CcuLog.e(TAG_CCU_BYPASS, "Profile does not have linked equip , assume zone is dead")
             return true
         }
         val point = CCUHsApi.getInstance()
@@ -116,7 +115,7 @@ class BypassDamperProfile(equipRef: String, addr: Short): ZoneProfile() {
             val hisItem = CCUHsApi.getInstance().curRead(point["id"].toString())
             if (hisItem == null) {
                 CcuLog.e(
-                    "CCU_BYPASS",
+                    TAG_CCU_BYPASS,
                     "Equip dead! , Heartbeat does not exist for " + equip.displayName
                 )
                 return true
@@ -127,14 +126,14 @@ class BypassDamperProfile(equipRef: String, addr: Short): ZoneProfile() {
             )
             if (zoneDeadTime == 0.0) {
                 CcuLog.e(
-                    "CCU_BYPASS",
+                    TAG_CCU_BYPASS,
                     "Invalid value for zoneDeadTime tuner, use default " + equip.displayName
                 )
                 zoneDeadTime = 15.0
             }
             if (System.currentTimeMillis() - hisItem.dateInMillis > zoneDeadTime * 60 * 1000) {
                 CcuLog.e(
-                    "CCU_BYPASS",
+                    TAG_CCU_BYPASS,
                     "Equip dead! , Heartbeat " + hisItem.date.toString() + " " + equip.displayName + " " + zoneDeadTime
                 )
                 return true

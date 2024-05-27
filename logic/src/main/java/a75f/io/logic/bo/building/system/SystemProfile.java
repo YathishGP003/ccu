@@ -204,7 +204,7 @@ public abstract class SystemProfile
             }else {
                 //TODO- This cant happen, we are passing an equip with invalid ahuRef/gatewayRef. There should be
                 // some sort of retry mechanism.
-                Log.e(L.TAG_CCU_SYSTEM, "Invalid profile, AhuRef is not updated for " + q.getDisplayName());
+                CcuLog.e(L.TAG_CCU_SYSTEM, "Invalid profile, AhuRef is not updated for " + q.getDisplayName());
             }
             CCUHsApi.getInstance().updateEquip(q, q.getId());
         });
@@ -677,7 +677,7 @@ public abstract class SystemProfile
                 externalHumidity = CCUHsApi.getInstance().getExternalHumidity();
             }
         } catch (Exception e) {
-            Log.d(L.TAG_CCU_OAO, " Failed to read external Temp or Humidity ",e);
+            CcuLog.d(L.TAG_CCU_OAO, " Failed to read external Temp or Humidity ",e);
         }
         
         if (ccu().oaoProfile != null) {
@@ -908,12 +908,12 @@ public abstract class SystemProfile
 
     public double getSystemLoopOutputValue(String state){
          double systemLoopOPValue = CCUHsApi.getInstance().readPointPriorityValByQuery(state+" and system and loop and output and point");
-         Log.i(L.TAG_CCU_AUTO_COMMISSIONING, "getSystemLoopOutputValue- "+state+": "+systemLoopOPValue);
+         CcuLog.i(L.TAG_CCU_AUTO_COMMISSIONING, "getSystemLoopOutputValue- "+state+": "+systemLoopOPValue);
          return systemLoopOPValue;
     }
 
     public void writeSystemLoopOutputValue(String state, double value){
-        Log.i(L.TAG_CCU_AUTO_COMMISSIONING, "writing "+state+" Loop Output value to HS (default level) "+value);
+        CcuLog.i(L.TAG_CCU_AUTO_COMMISSIONING, "writing "+state+" Loop Output value to HS (default level) "+value);
         CCUHsApi.getInstance().writeDefaultVal(state+" and system and loop and output and point",value);
     }
 

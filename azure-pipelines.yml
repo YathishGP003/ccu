@@ -7,7 +7,7 @@ trigger:
 - none
 
 schedules:
-  - cron: '30 18 * * *' # This cron expression represents 12:00 AM IST
+  - cron: '00 23 * * *' # This cron expression represents 12:00 AM IST
     displayName: CCU Scheduled Nightly Build
     branches:
       include:

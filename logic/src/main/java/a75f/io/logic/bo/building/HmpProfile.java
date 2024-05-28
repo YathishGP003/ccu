@@ -1,10 +1,10 @@
 package a75f.io.logic.bo.building;
 
-import android.util.Log;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import a75.io.algos.ValvePIController;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 
 /**
@@ -106,16 +106,7 @@ public class HmpProfile extends ZoneProfile
     public double getHwTemperature() {
         return hwTemperature;
     }
-    
-    /*@Override
-    public void mapRegularUpdate(CmToCcuOverUsbSnRegularUpdateMessage_t regularUpdateMessage)
-    {
-        //TODO - Setpoint
-        hwTemperature = (float) regularUpdateMessage.update.airflow1Temperature.get() / 10.0f;
-        //airflowTemperature = getThermisterValueToTemp(regularUpdateMessage.update.externalThermistorInput1.get() * 10);
-        Log.d("HMPProfile","mapRegularUpdate :airflowTemp = "+hwTemperature);
-    }*/
-    
+
     @JsonIgnore
     @Override
     public void updateZonePoints(){
@@ -139,7 +130,7 @@ public class HmpProfile extends ZoneProfile
     @JsonIgnore
     public double getUpdatedHmpValvePosition() {
         if (setTemperature == 0 || hwTemperature == 0) {
-            Log.d("HMP", "Skip PI update ; setTemperature ="+setTemperature+" , airflowTemperature ="+hwTemperature);
+            CcuLog.d("HMP", "Skip PI update ; setTemperature ="+setTemperature+" , airflowTemperature ="+hwTemperature);
             return 0.0;
         }
         return hmpValveController.getValveControlSignal(setTemperature, hwTemperature);
@@ -148,7 +139,7 @@ public class HmpProfile extends ZoneProfile
     @JsonIgnore
     public double getHmpValvePosition() {
         if (setTemperature == 0 || hwTemperature == 0) {
-            Log.d("HMP", "Skip PI update ; setTemperature ="+setTemperature+" , airflowTemperature ="+hwTemperature);
+            CcuLog.d("HMP", "Skip PI update ; setTemperature ="+setTemperature+" , airflowTemperature ="+hwTemperature);
             return 0.0;
         }
         return hmpValveController.getValveControlSignal();

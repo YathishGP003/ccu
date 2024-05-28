@@ -3,7 +3,7 @@ package a75.io.renatus.testharness;
 import android.content.Context;
 import android.content.Intent;
 import android.support.test.InstrumentationRegistry;
-import android.util.Log;
+import android.util.CcuLog;
 
 import junit.framework.Assert;
 
@@ -158,9 +158,9 @@ public class SimulationTest
             //ccuState = stateJson.getString("data");
             
             JSONObject dataJson = stateJson.getJSONObject("data");
-            Log.d("TestHarness"," dataJson "+dataJson);
+            CcuLog.d("TestHarness"," dataJson "+dataJson);
             siteId = dataJson.getString("siteId");
-            Log.d("TestHarness"," siteId "+siteId);
+            CcuLog.d("TestHarness"," siteId "+siteId);
             testTime = stateJson.optLong("time");
         
         }catch (JSONException e) {

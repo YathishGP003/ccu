@@ -22,7 +22,6 @@ import android.text.InputType;
 import android.text.SpannableString;
 import android.text.TextWatcher;
 import android.text.style.ForegroundColorSpan;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -248,19 +247,19 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
     @Override
     public void onUserInteraction() {
         super.onUserInteraction();
-        Log.i(TAG,"in user interaction");
+        CcuLog.i(TAG,"in user interaction");
         resetCountDownTimer();
     }
 
     private void resetCountDownTimer(){
-        Log.i(TAG,"resetCountDownTimer ");
+        CcuLog.i(TAG,"resetCountDownTimer ");
         stopCountdownTimer();
         startCountDownTimer(DISCONNECT_TIMEOUT);
     }
 
     @SuppressLint("LogNotTimber")
     private void startCountDownTimer(long interval) {
-        Log.i(TAG,"startCountDownTimer ");
+        CcuLog.i(TAG,"startCountDownTimer ");
         mStopTimeInFuture = System.currentTimeMillis() + SCREEN_SWITCH_TIMEOUT_MILLIS;
 
         if (countDownTimer != null)
@@ -272,7 +271,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
             }
             @Override
             public void onFinish() {
-                Log.i(TAG,"onFinish ");
+                CcuLog.i(TAG,"onFinish ");
                 launchZoneFragment();
                 stopCountdownTimer();
             }
@@ -281,7 +280,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
     }
 
     private void launchZoneFragment() {
-        Log.i(TAG,"launch ZoneFragment");
+        CcuLog.i(TAG,"launch ZoneFragment");
         Globals.getInstance().setTestMode(false);
         Globals.getInstance().setTemporaryOverrideMode(false);
         if( btnTabs.getSelectedTabPosition() != 0)
@@ -308,7 +307,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
 
     @SuppressLint("LogNotTimber")
     private  void stopCountdownTimer() {
-        Log.i(TAG,"stopCountdownTimer");
+        CcuLog.i(TAG,"stopCountdownTimer");
         if (countDownTimer != null) {
             countDownTimer.cancel();
             countDownTimer = null;

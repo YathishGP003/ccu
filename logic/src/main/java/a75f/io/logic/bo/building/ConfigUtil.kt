@@ -2,8 +2,8 @@ package a75f.io.logic.bo.building
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Point
+import a75f.io.logger.CcuLog
 import a75f.io.logic.bo.haystack.device.SmartNode
-import android.util.Log
 
 class ConfigUtil  {
     companion object {
@@ -11,7 +11,7 @@ class ConfigUtil  {
         fun addConfigPoints(profileName: String, siteRef: String, roomRef: String, floorRef: String,
                             equipRef: String, tz: String, nodeAddress: String, equipDis: String,tag : String,
                             autoawayVal: Double, autoForceVal : Double) {
-            Log.d(TAG, "AutoForceOcccupied and Autoaway add Points")
+            CcuLog.d(TAG, "AutoForceOcccupied and Autoaway add Points")
 
             val hs = CCUHsApi.getInstance()
             if(!isAutoForceOccupiedAlreadyExist(equipRef)) {
@@ -39,7 +39,7 @@ class ConfigUtil  {
                 hs.writeDefaultValById(autoforceoccupiedId, autoForceVal)
                 hs.writeHisValById(autoforceoccupiedId, autoForceVal)
             } else {
-                Log.d(TAG, "AutoForce Occcupied point is already exist")
+                CcuLog.d(TAG, "AutoForce Occcupied point is already exist")
             }
 
             if(!isAutoAwayAlreadyExist(equipRef)) {
@@ -66,7 +66,7 @@ class ConfigUtil  {
                 hs.writeDefaultValById(autoawayId, autoawayVal)
                 hs.writeHisValById(autoawayId, autoawayVal)
             }else{
-                Log.d(TAG, "Auto away point is already exist")
+                CcuLog.d(TAG, "Auto away point is already exist")
             }
 
         }
@@ -89,7 +89,7 @@ class ConfigUtil  {
                 val occupancyDetectionId = hs.addPoint(occupancyDetection)
                 hs.writeHisValById(occupancyDetectionId, 0.0)
             }else{
-                Log.d(TAG, "OccupancyDetection already exist")
+                CcuLog.d(TAG, "OccupancyDetection already exist")
             }
         }
 

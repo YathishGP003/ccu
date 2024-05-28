@@ -3,9 +3,10 @@ package a75f.io.logic;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Base64;
-import android.util.Log;
 
 import java.security.SecureRandom;
+
+import a75f.io.logger.CcuLog;
 
 /**
  * Created by ryanmattison isOn 7/24/17.
@@ -54,7 +55,7 @@ class EncryptionPrefs {
     public static void logEncryptionKey() {
         byte[] encryptionKey = getEncryptionKey();
         String encryptionKeyAsString = Base64.encodeToString(encryptionKey, Base64.DEFAULT);
-        Log.i(L.TAG_CCU, "Encryption Key As String: " + encryptionKeyAsString);
+        CcuLog.i(L.TAG_CCU, "Encryption Key As String: " + encryptionKeyAsString);
     }
 
     public static byte[] getBLELinkKey()

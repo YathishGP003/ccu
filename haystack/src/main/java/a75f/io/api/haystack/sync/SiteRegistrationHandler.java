@@ -1,7 +1,5 @@
 package a75f.io.api.haystack.sync;
 
-import android.util.Log;
-
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -40,7 +38,7 @@ public class SiteRegistrationHandler {
         if (siteCreationRequestJson != null) {
             String siteUrl = siteUpdate ? "sites/"+siteId : "sites";
             try {
-                Log.d(TAG, "Sending Site registration request: " + siteCreationRequestJson.toString());
+                CcuLog.d(TAG, "Sending Site registration request: " + siteCreationRequestJson.toString());
                 String response = HttpUtil.executeJson(
                     CCUHsApi.getInstance().getAuthenticationUrl() + siteUrl,
                     siteCreationRequestJson.toString(),

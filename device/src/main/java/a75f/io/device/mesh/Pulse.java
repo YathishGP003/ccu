@@ -4,15 +4,11 @@ import static a75f.io.alerts.AlertsConstantsKt.CM_DEAD;
 import static a75f.io.alerts.AlertsConstantsKt.DEVICE_DEAD;
 import static a75f.io.alerts.AlertsConstantsKt.DEVICE_LOW_SIGNAL;
 import static a75f.io.alerts.AlertsConstantsKt.DEVICE_REBOOT;
-import static a75f.io.device.mesh.DLog.LogdStructAsJson;
 import static a75f.io.device.mesh.DLog.tempLogdStructAsJson;
 import static a75f.io.device.mesh.MeshUtil.checkDuplicateStruct;
 import static a75f.io.device.mesh.MeshUtil.sendStructToNodes;
 import static a75f.io.device.serial.SmartStatFanSpeed_t.FAN_SPEED_HIGH;
 import static a75f.io.device.serial.SmartStatFanSpeed_t.FAN_SPEED_HIGH2;
-import static a75f.io.logic.bo.building.definitions.Port.*;
-
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -176,7 +172,7 @@ public class Pulse
 				isSse = logPointInfo.getMarkers().contains("sse");
 				double val = 0;
 				Port currentPort = getPhysicalPointPort(phyPoint);
-				Log.i(L.TAG_CCU_DEVICE, "regularSNUpdate: PORT "+currentPort);
+				CcuLog.i(L.TAG_CCU_DEVICE, "regularSNUpdate: PORT "+currentPort);
 				switch (currentPort){
 					case RSSI:
 						hayStack.writeHisValueByIdWithoutCOV(phyPoint.get("id").toString(), (double)rssi);
@@ -228,12 +224,12 @@ public class Pulse
 						break;
 					case ANALOG_IN_ONE:
 						val = smartNodeRegularUpdateMessage_t.update.externalAnalogVoltageInput1.get();
-						Log.i(L.TAG_CCU_DEVICE, "regularSNUpdate: "+val);
+						CcuLog.i(L.TAG_CCU_DEVICE, "regularSNUpdate: "+val);
 						boolean isPressureOnAI1 = hayStack.readDefaultVal("point and domainName == \"" + DomainName.pressureSensorType + "\" and equipRef == \"" + equip.getId() + "\"") > 0.0;
 						double oldDisAnalogVal = hayStack.readHisValById(logPoint.get("id").toString());
 						double curDisAnalogVal = (isBypassDamper && isPressureOnAI1) ? getPressureConversion(equip, val) : getAnalogConversion(phyPoint, logPoint, val);
 						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
-						Log.i(L.TAG_CCU_DEVICE, " Feedback regularSNUpdate: id "+logPoint.get("id").toString());
+						CcuLog.i(L.TAG_CCU_DEVICE, " Feedback regularSNUpdate: id "+logPoint.get("id").toString());
 						if (oldDisAnalogVal != curDisAnalogVal) {
 							hayStack.writeHisValueByIdWithoutCOV(logPoint.get("id").toString(), curDisAnalogVal);
 							if (currentTempInterface != null) {
@@ -467,13 +463,13 @@ public class Pulse
 	}
 	
 	public static Double getAnalogConversion(HashMap pp, HashMap lp, Double val) {
-		Log.i(L.TAG_CCU_DEVICE, "Feedback Node address "+ pp.get("group")+" Feedback  type"+pp.get("analogType"));
+		CcuLog.i(L.TAG_CCU_DEVICE, "Feedback Node address "+ pp.get("group")+" Feedback  type"+pp.get("analogType"));
 		double analogVal = val/1000;
-		Log.i(L.TAG_CCU_DEVICE, "Feedback Node address analogVal after devide "+analogVal);
+		CcuLog.i(L.TAG_CCU_DEVICE, "Feedback Node address analogVal after devide "+analogVal);
 		if(lp.containsKey("vav") || lp.containsKey("dab") || lp.containsKey("dualDuct") || lp.containsKey("bypassDamper")) {
 			double damperPercent= DeviceUtil.getPercentageFromVoltage(analogVal,
 					Objects.requireNonNull(pp.get("analogType")).toString());
-			Log.i(L.TAG_CCU_DEVICE, "Feedback Reversed damper percent  : "+damperPercent);
+			CcuLog.i(L.TAG_CCU_DEVICE, "Feedback Reversed damper percent  : "+damperPercent);
 			return damperPercent;
 		}
 		Sensor analogSensor;
@@ -487,7 +483,7 @@ public class Pulse
 			e.printStackTrace();
 			return analogVal;
 		}
-		Log.d(L.TAG_CCU_DEVICE,"Sensor input : type "+pp.get("analogType").toString()+" val "+analogVal);
+		CcuLog.d(L.TAG_CCU_DEVICE,"Sensor input : type "+pp.get("analogType").toString()+" val "+analogVal);
 		double analogConversion = analogSensor.minEngineeringValue +
 				(analogSensor.maxEngineeringValue- analogSensor.minEngineeringValue) * analogVal / (analogSensor.maxVoltage - analogSensor.minVoltage);
 		return CCUUtils.roundToTwoDecimal(analogConversion);
@@ -697,7 +693,7 @@ public class Pulse
 				
 				double val;
 				Port currentPort = getPhysicalPointPort(phyPoint);
-				Log.i(L.TAG_CCU_DEVICE, "regularCMUpdate: PORT "+currentPort);
+				CcuLog.i(L.TAG_CCU_DEVICE, "regularCMUpdate: PORT "+currentPort);
 				switch (currentPort) {
 					case RSSI:
 						hayStack.writeHisValueByIdWithoutCOV(phyPoint.get("id").toString(), 1.0);
@@ -806,14 +802,14 @@ public class Pulse
 			if (isTh1Enabled && !logicalCurTempPoint.isEmpty() && isTh1RoomTempInTI) {
 				hayStack.writeHisValById(logicalCurTempPoint, th1TempVal);
 				if (currentTempInterface != null) {
-					Log.i(L.TAG_CCU_DEVICE, "Current Temp Refresh th1:" + logicalCurTempPoint + " Node Address:" + deviceInfo.getAddr() + " currentTempVal:" + curTempVal);
+					CcuLog.i(L.TAG_CCU_DEVICE, "Current Temp Refresh th1:" + logicalCurTempPoint + " Node Address:" + deviceInfo.getAddr() + " currentTempVal:" + curTempVal);
 					currentTempInterface.updateTemperature(th1TempVal, Short.parseShort(deviceInfo.getAddr()));
 				}
 			}//Write Current temp point based on th2 enabled or not,
 			else if (isTh2Enabled && !logicalCurTempPoint.isEmpty() && isTh2RoomTempInTI) {
 				hayStack.writeHisValById(logicalCurTempPoint, th2TempVal);
 				if (currentTempInterface != null) {
-					Log.i(L.TAG_CCU_DEVICE, "Current Temp Refresh th2:" + logicalCurTempPoint + " Node Address:" + deviceInfo.getAddr() + " currentTempVal:" + curTempVal);
+					CcuLog.d(L.TAG_CCU_DEVICE, "Current Temp Refresh th2:" + logicalCurTempPoint + " Node Address:" + deviceInfo.getAddr() + " currentTempVal:" + curTempVal);
 					currentTempInterface.updateTemperature(th2TempVal, Short.parseShort(deviceInfo.getAddr()));
 				}
 			} else if (!logicalCurTempPoint.isEmpty()) {
@@ -821,7 +817,7 @@ public class Pulse
 				if(oldCurTemp != curTempVal) {
 					hayStack.writeHisValueByIdWithoutCOV(logicalCurTempPoint, curTempVal);
 					if (currentTempInterface != null) {
-						Log.i(L.TAG_CCU_DEVICE, "Current Temp Refresh Logical:" + logicalCurTempPoint + " Node Address:" + deviceInfo.getAddr() + " currentTempVal:" + curTempVal);
+						CcuLog.i(L.TAG_CCU_DEVICE, "Current Temp Refresh Logical:" + logicalCurTempPoint + " Node Address:" + deviceInfo.getAddr() + " currentTempVal:" + curTempVal);
 						currentTempInterface.updateTemperature(curTempVal, Short.parseShort(deviceInfo.getAddr()));
 					}
 				}
@@ -864,7 +860,7 @@ public class Pulse
 			for (HashMap phyPoint : phyPoints) {
 				double val;
 				Port currentPort = getPhysicalPointPort(phyPoint);
-				Log.i(L.TAG_CCU_DEVICE, "regularCMUpdate: PORT "+currentPort);
+				CcuLog.i(L.TAG_CCU_DEVICE, "regularCMUpdate: PORT "+currentPort);
 				switch (currentPort) {
 					case TH2_IN:
 						val = cmRegularUpdateMessage_t.thermistor2.get();
@@ -1106,7 +1102,7 @@ public class Pulse
 			if(isTh2Enabled && !logicalCurTempPoint.isEmpty() && !is2pfcu) {
 				hayStack.writeHisValById(logicalCurTempPoint, th2TempVal);
 				if ((currentTempInterface != null) && (oldCurTempVal != th2TempVal)) {
-					Log.i(L.TAG_CCU_DEVICE, "Current Temp Refresh Logical:" + logicalCurTempPoint + " Node Address:" + nodeAddr + " currentTempVal:" + curTempVal);
+					CcuLog.i(L.TAG_CCU_DEVICE, "Current Temp Refresh Logical:" + logicalCurTempPoint + " Node Address:" + nodeAddr + " currentTempVal:" + curTempVal);
 					currentTempInterface.updateTemperature(th2TempVal, nodeAddr);
 				}
 			}
@@ -1114,7 +1110,7 @@ public class Pulse
 				if(oldCurTempVal != curTempVal) {
 					hayStack.writeHisValueByIdWithoutCOV(logicalCurTempPoint, curTempVal);
 					if (currentTempInterface != null) {
-						Log.i(L.TAG_CCU_DEVICE, "Current Temp Refresh Logical:" + logicalCurTempPoint + " Node Address:" + nodeAddr + " currentTempVal:" + curTempVal);
+						CcuLog.i(L.TAG_CCU_DEVICE, "Current Temp Refresh Logical:" + logicalCurTempPoint + " Node Address:" + nodeAddr + " currentTempVal:" + curTempVal);
 						currentTempInterface.updateTemperature(curTempVal, nodeAddr);
 					}
 				}
@@ -1123,7 +1119,7 @@ public class Pulse
 	}
 
 	public static void rebootMessageFromCM(WrmOrCmRebootIndicationMessage_t wrmOrCMReootMsgs){
-		Log.d(L.TAG_CCU_DEVICE,"Reboot Messages from CM for = "+wrmOrCMReootMsgs.wrmAddress+","+wrmOrCMReootMsgs.rebootCause);
+		CcuLog.d(L.TAG_CCU_DEVICE,"Reboot Messages from CM for = "+wrmOrCMReootMsgs.wrmAddress+","+wrmOrCMReootMsgs.rebootCause);
 		short address = (short)wrmOrCMReootMsgs.wrmAddress.get();
 		if(address == 0x00 || (address == 0x01) || (address == L.ccu().getSmartNodeAddressBand()+99)){
 			LSerial.getInstance().setResetSeedMessage(true);
@@ -1166,7 +1162,7 @@ public class Pulse
 	}
 	public static void smartDevicesRebootMessage(SnRebootIndicationMessage_t snRebootIndicationMsgs){
 
-		Log.d(L.TAG_CCU_DEVICE,"smartDevicesRebootMessage = "+snRebootIndicationMsgs.smartNodeAddress+
+		CcuLog.d(L.TAG_CCU_DEVICE,"smartDevicesRebootMessage = "+snRebootIndicationMsgs.smartNodeAddress+
 				", "+snRebootIndicationMsgs.rebootCause+ "Node Status ");
 		short address = (short)snRebootIndicationMsgs.smartNodeAddress.get();
 			LSerial.getInstance().setResetSeedMessage(true);
@@ -1205,7 +1201,7 @@ public class Pulse
 				str += ", device type:" + snRebootIndicationMsgs.smartNodeDeviceType.get().name();
 				str += ", device:" + snRebootIndicationMsgs.smartNodeDeviceId;
 				str += ", serialnumber:" + snRebootIndicationMsgs.smartNodeSerialNumber;
-				Log.i(L.TAG_CCU_DEVICE, "Reboot Alert: "+str);
+				CcuLog.i(L.TAG_CCU_DEVICE, "Reboot Alert: "+str);
 				AlertGenerateHandler.handleMessage(DEVICE_REBOOT,"Device reboot info - "+str);
 			}catch (Exception e){
 				e.printStackTrace();
@@ -1535,7 +1531,7 @@ public class Pulse
 	{
 		HashMap point = CCUHsApi.getInstance().read("point and air and temp and desired and "+tag+" and sp and group == \""+node+"\"");
 		if (point == null || point.size() == 0) {
-			Log.d(L.TAG_CCU_DEVICE, " Desired Temp point does not exist for equip , sending 0");
+			CcuLog.d(L.TAG_CCU_DEVICE, " Desired Temp point does not exist for equip , sending 0");
 			return 0;
 		}
 		return CCUHsApi.getInstance().readPointPriorityVal(point.get("id").toString());

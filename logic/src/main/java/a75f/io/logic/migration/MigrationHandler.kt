@@ -38,7 +38,6 @@ import a75f.io.logic.util.PreferenceUtil
 import a75f.io.logic.util.createOfflineModePoint
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
-import android.util.Log
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import org.projecthaystack.HDict
@@ -282,7 +281,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                 CCUHsApi.getInstance().hsUrl +
                         "addEntity", HZincWriter.gridToString(zoneScheduleGridData)
             )
-            Log.i(L.TAG_CCU_SCHEDULER, "All zone schedules are synced to cloud$response")
+            CcuLog.i(L.TAG_CCU_SCHEDULER, "All zone schedules are synced to cloud$response")
         }
     }
 

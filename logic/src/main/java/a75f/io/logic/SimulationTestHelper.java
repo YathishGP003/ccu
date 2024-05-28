@@ -1,9 +1,10 @@
 package a75f.io.logic;
 
-import android.util.Log;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import a75f.io.logger.CcuLog;
 
 /**
  * Created by samjithsadasivan on 7/24/18.
@@ -21,7 +22,7 @@ public class SimulationTestHelper
     public static long getVavTestStartTime() {
         
         int testNo = SystemProperties.getInt("vav_test",0);
-        Log.d("VAV","Start VavTest :"+testNo);
+        CcuLog.d("VAV","Start VavTest :"+testNo);
         if (testNo == 0) {
             return 0;
         } else if (testNo == 100) {

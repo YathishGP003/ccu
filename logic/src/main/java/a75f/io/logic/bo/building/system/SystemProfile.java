@@ -5,7 +5,6 @@ import static a75f.io.logic.bo.building.BackfillUtilKt.addBackFillDurationPointI
 import static a75f.io.logic.util.OfflineModeUtilKt.createOfflineModePoint;
 
 import android.content.Context;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;

@@ -59,7 +59,6 @@ import a75f.io.logic.bo.haystack.device.ControlMote
 import a75f.io.logic.tuners.TunerUtil
 import a75f.io.logic.util.RxjavaUtil
 import android.content.Intent
-import android.util.Log
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import io.seventyfivef.ph.core.Tags
 import java.util.Objects

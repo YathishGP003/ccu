@@ -21,7 +21,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.util.Log;
 
 import com.felhr.usbserial.CDCSerialDevice;
 import com.felhr.usbserial.UsbSerialDevice;
@@ -112,7 +111,7 @@ public class UsbConnectService extends Service
 		public void onReceive(Context arg0, Intent arg1)
 		{
 			if (arg1.getAction().equals(ACTION_USB_PERMISSION)) {
-				Log.d(TAG,"OnReceive == "+arg1.getExtras().getBoolean(UsbManager.EXTRA_PERMISSION_GRANTED));
+				CcuLog.d(TAG,"OnReceive == "+arg1.getExtras().getBoolean(UsbManager.EXTRA_PERMISSION_GRANTED));
 				boolean granted = arg1.getExtras().getBoolean(UsbManager.EXTRA_PERMISSION_GRANTED);
 				if (granted) {
 					// User accepted our USB connection. Try to open the device as a serial port
@@ -123,14 +122,14 @@ public class UsbConnectService extends Service
 				} else {
 					// User not accepted our USB connection. Send an Intent to the Main Activity
 				
-					Log.d(TAG,"USB PERMISSION NOT GRANTED == "+arg1.getAction());
+					CcuLog.d(TAG,"USB PERMISSION NOT GRANTED == "+arg1.getAction());
 					Intent intent = new Intent(ACTION_USB_CONNECT_PERMISSION_NOT_GRANTED);
 					arg0.sendBroadcast(intent);
 				}
 			} else if (arg1.getAction().equals(ACTION_USB_ATTACHED)) {
 				UsbDevice attachedDevice = arg1.getParcelableExtra(UsbManager.EXTRA_DEVICE);
 				if (!serialPortConnected && UsbSerialUtil.isCMDevice(attachedDevice, context)) {
-					Log.d(TAG,"CM Serial device connected "+attachedDevice.toString());
+					CcuLog.d(TAG,"CM Serial device connected "+attachedDevice.toString());
 					scheduleUsbConnectedEvent(); // A USB device has been attached. Try to open it as a Serial port
 				}
 			} else if (arg1.getAction().equals(ACTION_USB_DETACHED)) {
@@ -139,7 +138,7 @@ public class UsbConnectService extends Service
 				ConnectSerialPort portSelection = ConnectSerialPort.values()[UsbSerialUtil.getPreferredConnectModuleSerialType(context)];
 				if ((portSelection == ConnectSerialPort.CCU_PORT && UsbSerialUtil.isConnectDevice(detachedDevice, context))
 					|| (portSelection == ConnectSerialPort.CM_VIRTUAL_PORT2 && UsbSerialUtil.isCMDevice(detachedDevice, context))) {
-					Log.d(TAG,"Connect Serial device disconnected "+detachedDevice.toString());
+					CcuLog.d(TAG,"Connect Serial device disconnected "+detachedDevice.toString());
 					usbPortScanTimer.cancel();
 					if (serialPortConnected) {
 						serialPort.close();
@@ -151,7 +150,7 @@ public class UsbConnectService extends Service
 					arg0.sendBroadcast(intent);
 				}
 			}
-			Log.d(TAG,"UsbService: OnReceive == "+arg1.getAction()+","+serialPortConnected);
+			CcuLog.d(TAG,"UsbService: OnReceive == "+arg1.getAction()+","+serialPortConnected);
 		}
 	};
 	
@@ -185,7 +184,7 @@ public class UsbConnectService extends Service
 						try {
 							nMsg = (data[0] & 0xff);
 						} catch (ArrayIndexOutOfBoundsException e) {
-							Log.d("SERIAL_DEBUG",
+							CcuLog.e("SERIAL_DEBUG",
 									"Bad message type received: " + String.valueOf(data[0] & 0xff) +
 											e.getMessage());
 							return;
@@ -233,7 +232,7 @@ public class UsbConnectService extends Service
 
 	private void messageToClients(byte[] data)
 	{
-		Log.d(TAG, "messageToClients: " + Arrays.toString(data));
+		CcuLog.d(TAG, "messageToClients: " + Arrays.toString(data));
 		SerialAction serialAction = SerialAction.MESSAGE_FROM_CM_CONNECT_PORT;
 		SerialEvent serialEvent = new SerialEvent(serialAction, data);
 		EventBus.getDefault().post(serialEvent);
@@ -257,7 +256,7 @@ public class UsbConnectService extends Service
 			findSerialPortDevice();
 		} catch (SecurityException e) {
 			//Android throws SecurityException if the application process is not granted android.permission.MANAGE_USB
-			Log.e(TAG, "USB Security Exception", e);
+			CcuLog.e(TAG, "USB Security Exception", e);
 			Intent intent = new Intent(UsbServiceActions.ACTION_USB_PRIV_APP_PERMISSION_DENIED);
 			UsbConnectService.this.getApplicationContext().sendBroadcast(intent);
 		}
@@ -306,19 +305,19 @@ public class UsbConnectService extends Service
 		// This snippet will try to open the first encountered usb device connected, excluding usb root hubs
 		HashMap<String, UsbDevice> usbDevices = usbManager.getDeviceList();
 		ConnectSerialPort portSelection = ConnectSerialPort.values()[UsbSerialUtil.getPreferredConnectModuleSerialType(context)];
-		Log.d(TAG,"findSerialPortDevice = "+usbDevices.size()+" portSelection `"+portSelection);
+		CcuLog.d(TAG,"findSerialPortDevice = "+usbDevices.size()+" portSelection `"+portSelection);
 		if (!usbDevices.isEmpty()) {
 			boolean keep = true;
 			for (Map.Entry<String, UsbDevice> entry : usbDevices.entrySet()) {
 				device = entry.getValue();
 				if (portSelection == ConnectSerialPort.CCU_PORT) {
-					Log.d(TAG,"isConnectDevice = "+device);
+					CcuLog.d(TAG,"isConnectDevice = "+device);
 					if (UsbSerialUtil.isConnectDevice(device, context)) {
 						boolean success = grantRootPermissionToUSBDevice(device);
 						connection = usbManager.openDevice(device);
 						handleUsbOpen(success);
 						keep = success;
-						Log.d(TAG, "Opened Serial CCU-USB device instance " + device.getVendorId() + " " + success);
+						CcuLog.d(TAG, "Opened Serial CCU-USB device instance " + device.getVendorId() + " " + success);
 					} else {
 						connection = null;
 						device = null;
@@ -329,7 +328,7 @@ public class UsbConnectService extends Service
 						connection = usbManager.openDevice(device);
 						handleUsbOpen(success);
 						keep = success;
-						Log.d(TAG, "Opened Serial CM device instance for connect" + device.getVendorId() + " " + success);
+						CcuLog.d(TAG, "Opened Serial CM device instance for connect" + device.getVendorId() + " " + success);
 					} else {
 						connection = null;
 						device = null;
@@ -364,7 +363,7 @@ public class UsbConnectService extends Service
 	{
 		IBinder b = ServiceManager.getService(Context.USB_SERVICE);
 		IUsbManager service = IUsbManager.Stub.asInterface(b);
-		Log.i(TAG, "Try connecting!");
+		CcuLog.i(TAG, "Try connecting!");
 		// There is a device connected to our Android device. Try to open it as a Serial Port.
 		try
 		{
@@ -424,9 +423,9 @@ public class UsbConnectService extends Service
 			while (true) {
 				try {
 					if (!serialPortConnected) {
-						Log.i(TAG, "Serial Port is not connected sleeping");
+						CcuLog.i(TAG, "Serial Port is not connected sleeping");
 						if (reconnectCounter++ >= 30) {
-							Log.i(TAG, "findSerialPortDevice");
+							CcuLog.i(TAG, "findSerialPortDevice");
 							findSerialPortDevice();
 							reconnectCounter = 0;
 						}
@@ -438,13 +437,13 @@ public class UsbConnectService extends Service
 					if (serialPort != null ) {
 						data = messageQueue.poll(1, TimeUnit.SECONDS);
 						if (data != null && data.length > 0) {
-							Log.i(TAG, "Write MB data : " + Arrays.toString(data) +" Hex : "+byteArrayToHex(data));
+							CcuLog.i(TAG, "Write MB data : " + Arrays.toString(data) +" Hex : "+byteArrayToHex(data));
 							serialPort.write(Arrays.copyOfRange(data, 0, data.length));
 							Thread.sleep(50);
 						}
 					}
 				} catch (Exception exception) {
-					Log.i(TAG, "Serial transaction failed: ", exception);
+					CcuLog.e(TAG, "Serial transaction failed: ", exception);
 					exception.printStackTrace();
 				}
 			}
@@ -464,7 +463,7 @@ public class UsbConnectService extends Service
 		else
 		{
 			messageQueue.clear();
-			Log.i(TAG, "Serial is disconnected, message discarded");
+			CcuLog.i(TAG, "Serial is disconnected, message discarded");
 		}
 	}
 

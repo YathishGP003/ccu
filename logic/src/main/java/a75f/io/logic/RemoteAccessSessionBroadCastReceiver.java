@@ -4,13 +4,13 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.Handler;
-import android.util.Log;
+
 
 import java.util.Timer;
 import java.util.TimerTask;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.autocommission.remoteSession.RemoteSessionStatus;
 
 public class RemoteAccessSessionBroadCastReceiver extends BroadcastReceiver {
@@ -47,7 +47,7 @@ public class RemoteAccessSessionBroadCastReceiver extends BroadcastReceiver {
     }
 
     private void updateRemoteSessionStatus(Context context, String remoteSessionStatus) {
-        Log.d(L.CCU_REMOTE_ACCESS, "remoteSessionStatus: "+remoteSessionStatus);
+        CcuLog.d(L.CCU_REMOTE_ACCESS, "remoteSessionStatus: "+remoteSessionStatus);
         switch (remoteSessionStatus) {
             case ACTION_REMOTE_APP_REGISTERED:
                 updateDiagPoint(context, RemoteSessionStatus.REGISTERED.ordinal());
@@ -78,7 +78,7 @@ public class RemoteAccessSessionBroadCastReceiver extends BroadcastReceiver {
     }
 
     public void updateDiagPoint(Context context,double val) {
-        Log.d(L.CCU_REMOTE_ACCESS, "updateRemoteSessionStatus: value "+val);
+        CcuLog.d(L.CCU_REMOTE_ACCESS, "updateRemoteSessionStatus: value "+val);
         SharedPreferences sharedPreferences = context.getSharedPreferences(
                 SHARED_PREFERENCE_NAME, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();

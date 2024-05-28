@@ -12,20 +12,15 @@ import android.net.wifi.WifiManager;
 import android.os.BatteryManager;
 import android.os.Environment;
 import android.os.StatFs;
-import android.preference.PreferenceManager;
-import android.util.Log;
 
 import java.io.File;
 import java.util.HashMap;
 import java.util.Objects;
 
 import a75f.io.alerts.AlertManager;
-import a75f.io.alerts.AlertsDataStore;
-import a75f.io.api.haystack.Alert;
 import a75f.io.api.haystack.BuildConfig;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
-import a75f.io.api.haystack.HisItemCache;
 import a75f.io.api.haystack.Kind;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Queries;
@@ -348,7 +343,7 @@ public class DiagEquip
             String version = pi.versionName.substring(pi.versionName.lastIndexOf('_')+1,pi.versionName.length() - 2);
             String prevVersion = CCUHsApi.getInstance().readDefaultStrVal("point and diag and app and version");
             String hisVersion = pi.versionName.substring(pi.versionName.lastIndexOf('_')+1);
-            Log.d("DiagEquip","version ="+version+","+pi.versionName+","+pi.versionName.substring(pi.versionName.lastIndexOf('_')+1)+",prevVer="+prevVersion+prevVersion.equals( hisVersion));
+            CcuLog.d("DiagEquip","version ="+version+","+pi.versionName+","+pi.versionName.substring(pi.versionName.lastIndexOf('_')+1)+",prevVer="+prevVersion+prevVersion.equals( hisVersion));
             if(!prevVersion.equals( hisVersion)) {
                 CCUHsApi.getInstance().writeDefaultVal("point and diag and app and version", hisVersion);
                 MessageDbUtilKt.updateAllRemoteCommandsHandled(Globals.getInstance().getApplicationContext(), CMD_UPDATE_CCU);
@@ -387,7 +382,7 @@ public class DiagEquip
         long blockSize = stat.getBlockSizeLong();
         long availableBlocks = stat.getAvailableBlocksLong();
         long freeInternalMemorySize = (((availableBlocks * blockSize)/1024)/1024);  // it returns size in MB
-        Log.d("DiagEquip","freeInternalStorage "+freeInternalMemorySize);
+        CcuLog.d("DiagEquip","freeInternalStorage "+freeInternalMemorySize);
         setDiagHisVal("internal and disk",freeInternalMemorySize);
     }
 

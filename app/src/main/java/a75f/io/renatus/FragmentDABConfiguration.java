@@ -9,7 +9,6 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -621,13 +620,13 @@ public class FragmentDABConfiguration extends BaseDialogFragment
                 try {
                     field.set(picker, getResources().getDrawable(R.drawable.divider_np));
                 } catch (IllegalArgumentException e) {
-                    Log.v("NP", "Illegal Argument Exception");
+                    CcuLog.e("NP", "Illegal Argument Exception");
                     e.printStackTrace();
                 } catch (Resources.NotFoundException e) {
-                    Log.v("NP", "Resources NotFound");
+                    CcuLog.e("NP", "Resources NotFound");
                     e.printStackTrace();
                 } catch (IllegalAccessException e) {
-                    Log.v("NP", "Illegal Access Exception");
+                    CcuLog.e("NP", "Illegal Access Exception");
                     e.printStackTrace();
                 }
                 break;

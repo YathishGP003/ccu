@@ -1,7 +1,5 @@
 package a75f.io.logic.bo.building.modbus;
 
-import android.util.Log;
-
 import org.projecthaystack.HNum;
 import org.projecthaystack.HStr;
 
@@ -23,6 +21,7 @@ import a75f.io.api.haystack.modbus.EquipmentDevice;
 import a75f.io.api.haystack.modbus.LogicalPointTags;
 import a75f.io.api.haystack.modbus.Parameter;
 import a75f.io.api.haystack.modbus.UserIntentPointTags;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.UtilKt;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.ScheduleType;
@@ -44,7 +43,7 @@ public class ModbusEquip {
         if (equipRef == null) {
             HashMap equip = hayStack.read("equip and modbus and group == \"" + slaveId + "\"");
             if (equip.isEmpty()) {
-                Log.e("Modbus","Init Failed : Equip does not exist "+slaveId);
+                CcuLog.e("Modbus","Init Failed : Equip does not exist "+slaveId);
                 return;
             }
             equipRef = equip.get("id").toString();
@@ -78,7 +77,7 @@ public class ModbusEquip {
         String equipDis = siteDis + "-"+modbusName+"-"+equipDisplayName+"-"+ equipmentInfo.getSlaveId();
         String gatewayRef = null;
         configuredParams = configParams;
-        Log.d("Modbus",modbusEquipType+"MbEquip create Entity = "+configuredParams.size());
+        CcuLog.d("Modbus",modbusEquipType+"MbEquip create Entity = "+configuredParams.size());
         HashMap systemEquip = hayStack.read("equip and system and not modbus");
         if (systemEquip != null && systemEquip.size() > 0) {
             gatewayRef = systemEquip.get("id").toString();
@@ -225,7 +224,7 @@ public class ModbusEquip {
                     logicalParamPoint.addMarker(marker.getTagName());
                     physicalParamPoint.addMarker(marker.getTagName());
                 }
-                Log.d("Modbus", modbusEquipType+"MBEquip logical and physical  markers="+marker.getTagName());
+                CcuLog.d("Modbus", modbusEquipType+"MBEquip logical and physical  markers="+marker.getTagName());
             }
             if(Objects.nonNull(configParam.getUserIntentPointTags())) {
                 for (UserIntentPointTags marker : configParam.getUserIntentPointTags()) {
@@ -264,7 +263,7 @@ public class ModbusEquip {
                         logicalParamPoint.addMarker(marker.getTagName());
                         physicalParamPoint.addMarker(marker.getTagName());
                     }
-                    Log.d("Modbus", modbusEquipType + "MBEquip UserIntent  markers=" + marker.getTagName());
+                    CcuLog.d("Modbus", modbusEquipType + "MBEquip UserIntent  markers=" + marker.getTagName());
                 }
             }
             StringBuffer enumVariables = new StringBuffer();
@@ -281,7 +280,7 @@ public class ModbusEquip {
                 }
                 if (Objects.nonNull(enumVariables)) {
                     logicalParamPoint.setEnums(enumVariables.toString());
-                    Log.d("Modbus", modbusEquipType+"MBEquip read params enums=" + enumVariables);
+                    CcuLog.d("Modbus", modbusEquipType+"MBEquip read params enums=" + enumVariables);
                 }
             }else if(Objects.nonNull( configParam.getCommands())){
 
@@ -297,7 +296,7 @@ public class ModbusEquip {
                 }
                 if (Objects.nonNull(enumVariables)) {
                     logicalParamPoint.setEnums(enumVariables.toString());
-                    Log.d("Modbus", modbusEquipType+"MBEquip write params enums=" + enumVariables);
+                    CcuLog.d("Modbus", modbusEquipType+"MBEquip write params enums=" + enumVariables);
                 }
             }
             Point logicalPoint = logicalParamPoint.build();

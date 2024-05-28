@@ -21,7 +21,6 @@ import static a75f.io.logic.bo.building.schedules.ScheduleUtil.ACTION_STATUS_CHA
 import static a75f.io.logic.bo.building.schedules.ScheduleUtil.isCurrentMinuteUnderSpecialSchedule;
 
 import android.content.Intent;
-import android.util.Log;
 
 import org.joda.time.DateTime;
 
@@ -197,7 +196,7 @@ public class ScheduleManager {
 
         Schedule activeSystemVacation = ScheduleUtil.getActiveVacation(activeVacationSchedules);
 
-        Log.d(TAG_CCU_SCHEDULER, " #### processSchedules activeSystemVacation ####" + activeSystemVacation);
+        CcuLog.d(TAG_CCU_SCHEDULER, " #### processSchedules activeSystemVacation ####" + activeSystemVacation);
 
         //Read all equips
         ArrayList<HashMap<Object, Object>> equips = CCUHsApi.getInstance()
@@ -205,7 +204,7 @@ public class ScheduleManager {
         for(HashMap hs : equips) {
             Equip equip = new Equip.Builder().setHashMap(hs).build();
             if(equip != null) {
-                Log.d(L.TAG_CCU_SCHEDULER, " processSchedules "+equip.getDisplayName());
+                CcuLog.d(L.TAG_CCU_SCHEDULER, " processSchedules "+equip.getDisplayName());
                 processScheduleForEquip(equip, activeSystemVacation);
             }
         }
@@ -274,7 +273,7 @@ public class ScheduleManager {
         } else if (activeSystemVacation == null ) {
             ArrayList<Schedule> activeZoneVacationSchedules = CCUHsApi.getInstance().getZoneSchedule(equip.getRoomRef(),true);
             Schedule activeZoneVacationSchedule = ScheduleUtil.getActiveVacation(activeZoneVacationSchedules);
-            Log.d(L.TAG_CCU_SCHEDULER, "Equip "+equip.getDisplayName()+" activeZoneVacationSchedules "+activeZoneVacationSchedules.size());
+            CcuLog.d(L.TAG_CCU_SCHEDULER, "Equip "+equip.getDisplayName()+" activeZoneVacationSchedules "+activeZoneVacationSchedules.size());
             updateOccupiedSchedule(equip, equipSchedule, activeZoneVacationSchedule);
         } else {
             updateOccupiedSchedule(equip, equipSchedule, activeSystemVacation);
@@ -286,7 +285,7 @@ public class ScheduleManager {
         if (equip == null) {
             return;
         }
-        Log.d(L.TAG_CCU_SCHEDULER, " Equip "+equip.getDisplayName());
+        CcuLog.d(L.TAG_CCU_SCHEDULER, " Equip "+equip.getDisplayName());
 
         ArrayList<Schedule> activeVacationSchedules = CCUHsApi.getInstance().getSystemSchedule(true);
         Schedule activeSystemVacation = ScheduleUtil.getActiveVacation(activeVacationSchedules);
@@ -815,7 +814,7 @@ public class ScheduleManager {
                     scheduleDataInterface.refreshScreenbySchedule(equip.getGroup(),equip.getId(),zoneId);
                 }
             } else {
-                Log.d(L.TAG_CCU_SCHEDULER, "ScheduleStatus not changed for  "+equip.getDisplayName());
+                CcuLog.d(L.TAG_CCU_SCHEDULER, "ScheduleStatus not changed for  "+equip.getDisplayName());
             }
         }
     }

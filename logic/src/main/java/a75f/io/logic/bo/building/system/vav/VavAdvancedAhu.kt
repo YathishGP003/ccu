@@ -772,9 +772,9 @@ open class VavAdvancedAhu : VavSystemProfile() {
         CcuLog.d(L.TAG_CCU_SYSTEM, "updatePointsDbVal")
         val stageStatus = if (isConnectEquip) connectStageStatus else cmStageStatus
         stageStatus.forEachIndexed { index, status ->
+            val domainName = relayAssociationToDomainName(index)
             if (status.first < status.second) {
                 //Stage is going up
-                val domainName = relayAssociationToDomainName(index)
                 CcuLog.d(L.TAG_CCU_SYSTEM, "Stage up detected for $domainName")
                 val associationType = relayAssociationDomainNameToType(domainName)
                 if (associationType.isConditioningStage() && isConditioningActive(associationType)) {
@@ -789,7 +789,6 @@ open class VavAdvancedAhu : VavSystemProfile() {
                 }
             } else if (status.first > status.second) {
                 //Stage is going down
-                val domainName = relayAssociationToDomainName(index)
                 CcuLog.d(L.TAG_CCU_SYSTEM, "Stage down detected for $domainName")
                 val associationType = relayAssociationDomainNameToType(domainName)
                 if (associationType.isConditioningStage() && isConditioningActive(associationType)) {
@@ -802,6 +801,8 @@ open class VavAdvancedAhu : VavSystemProfile() {
                 } else {
                     updatePointVal(domainName, index, status.second, isConnectEquip)
                 }
+            } else {
+                updatePointVal(domainName, index, status.second, isConnectEquip)
             }
         }
     }

@@ -1,7 +1,5 @@
 package a75f.io.logic.bo.building.otn;
 
-import android.util.Log;
-
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
 
@@ -17,6 +15,7 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.BacnetIdKt;
 import a75f.io.logic.BacnetUtilKt;
 import a75f.io.logic.UtilKt;
@@ -55,10 +54,10 @@ public class OTNEquip {
         HashMap equip = CCUHsApi.getInstance().read("equip  and group == \"" + mNodeAddr + "\"");
 
         if (equip.isEmpty()) {
-            Log.d(LOG_TAG, "Init Failed : Equip does not exist ");
+            CcuLog.d(LOG_TAG, "Init Failed : Equip does not exist ");
             return;
         }
-        Log.d(LOG_TAG, "Init equip : " + equip.get("id").toString());
+        CcuLog.d(LOG_TAG, "Init equip : " + equip.get("id").toString());
         mEquipRef = equip.get("id").toString();
     }
 
@@ -76,8 +75,6 @@ public class OTNEquip {
 
         Schedule roomSchedule = UtilKt.getSchedule(roomRef,floorRef);
 
-        /*Log.d(LOG_TAG, "config: " + config.gettempOffset() + " - " + config.getautoAway() + " - " +
-                "--" + config.getautoforceOccupied() + " - " + config.getzonePriority());*/
 
         Equip.Builder b = new Equip.Builder()
                 .setSiteRef(siteRef)
@@ -425,7 +422,7 @@ public class OTNEquip {
                 "auto and forced and occupied and equipRef == \"" + mEquipRef + "\"") > 0);
         otnConfig.setautoAway(CCUHsApi.getInstance().readDefaultVal("point and auto and " +
                 "away and enabled and equipRef == \"" + mEquipRef + "\"") > 0);
-        Log.d(LOG_TAG,
+        CcuLog.d(LOG_TAG,
                 "config: " + otnConfig.gettempOffset() + " - " + otnConfig.getautoAway() + " - " +
                         "--" + otnConfig.getautoforceOccupied() + " - " + otnConfig.getzonePriority());
         return otnConfig;

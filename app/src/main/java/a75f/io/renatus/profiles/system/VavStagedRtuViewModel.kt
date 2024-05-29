@@ -26,7 +26,7 @@ class VavStagedRtuViewModel : StagedRtuProfileViewModel() {
 
         CcuLog.i(Domain.LOG_TAG, "VavStagedRtuViewModel Init")
 
-        val systemEquip = hayStack.readEntity("system and equip and not modbus") //TODO - via domain
+        val systemEquip = hayStack.readEntity("system and equip and not modbus and not connectModule") //TODO - via domain
         CcuLog.i(Domain.LOG_TAG, "Current System Equip $systemEquip")
 
         if (systemEquip["profile"].toString() == "vavStagedRtu" ||

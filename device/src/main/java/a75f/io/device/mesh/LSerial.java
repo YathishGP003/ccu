@@ -1,7 +1,6 @@
 package a75f.io.device.mesh;
 
 import static a75f.io.device.mesh.DLog.LogdStructAsJson;
-import static a75f.io.device.mesh.DLog.tempLogdStructAsJson;
 import static a75f.io.device.mesh.MeshUtil.sendStructToCM;
 import static a75f.io.logic.L.ccu;
 
@@ -13,6 +12,7 @@ import org.javolution.io.Struct;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
@@ -20,6 +20,8 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Zone;
+import a75f.io.device.cm.ControlMoteMessageHandlerKt;
+import a75f.io.device.connect.ConnectModbusSerialComm;
 import a75f.io.device.mesh.hypersplit.HyperSplitMessageSender;
 import a75f.io.device.mesh.hypersplit.HyperSplitMsgReceiver;
 import a75f.io.device.mesh.hyperstat.HyperStatMessageSender;
@@ -44,6 +46,7 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.util.TemperatureMode;
 import a75f.io.usbserial.SerialAction;
 import a75f.io.usbserial.SerialEvent;
+import a75f.io.usbserial.UsbConnectService;
 import a75f.io.usbserial.UsbModbusService;
 import a75f.io.usbserial.UsbService;
 
@@ -56,6 +59,7 @@ public class LSerial
     private static LSerial    mLSerial;
     private        UsbService mUsbService;
     private UsbModbusService  mUsbModbusService;
+    private UsbConnectService mUsbConnectService;
     private static boolean mSendSeedMsgs;
     private static boolean isNodeSeeding;
 
@@ -181,6 +185,15 @@ public class LSerial
                 msg.setByteBuffer(ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN), 0);
                 DLog.LogdSerial("Event Type CM_TO_CCU_OTA_STATUS Status :" +msg.currentState+ " Data : "+msg.data);
 
+            } else if (messageType == MessageType.CM_TO_CCU_OVER_USB_CM_SERIAL_REGULAR_UPDATE) {
+                ControlMoteMessageHandlerKt.handleCMRegularUpdate(data);
+            } else if (messageType == MessageType.MODBUS_MESSAGE) {
+                try {
+                    byte[] modbusData = Arrays.copyOfRange(data, 1, data.length);
+                    ConnectModbusSerialComm.handleModbusResponse(modbusData);
+                } catch (Exception e) {
+                    CcuLog.e(L.TAG_CCU_DEVICE, "Error handling modbus message !!! ", e);
+                }
             }
 
             // Pass event to external handlers
@@ -193,6 +206,9 @@ public class LSerial
         }else if (event.getSerialAction() == SerialAction.MESSAGE_FROM_SERIAL_MODBUS) {
             byte[] data = event.getBytes();
             ModbusPulse.handleModbusPulseData(data, (event.getBytes()[0] & 0xff));
+        } else if (event.getSerialAction() == SerialAction.MESSAGE_FROM_CM_CONNECT_PORT) {
+            byte[] data = event.getBytes();
+            ConnectModbusSerialComm.handleModbusResponse(data);
         }
     }
 
@@ -249,6 +265,15 @@ public class LSerial
         return mUsbModbusService.isConnected();
     }
 
+    public boolean isConnectModuleConnected()
+    {
+        if (mUsbConnectService == null)
+        {
+            return false;
+        }
+        return mUsbConnectService.isConnected();
+    }
+
 
     /***
      * This is the setter method for the USB Service.
@@ -273,6 +298,11 @@ public class LSerial
         mUsbModbusService = modbusUSBService;
     }
 
+    public void setUsbConnectService(UsbConnectService usbService)
+    {
+        structs.clear();
+        mUsbConnectService = usbService;
+    }
 
 
 
@@ -414,6 +444,18 @@ public class LSerial
         }
         
         mUsbService.write(data);
+        return true;
+    }
+
+    public synchronized boolean sendSerialBytesToConnect(byte[] data)
+    {
+        if (mUsbConnectService == null) {
+            CcuLog.d(L.TAG_CCU_DEVICE, "sendSerialBytesToConnect Failed");
+            DLog.logUSBServiceNotInitialized();
+            return false;
+        }
+
+        mUsbConnectService.write(data);
         return true;
     }
 

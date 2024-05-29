@@ -1,9 +1,5 @@
 package a75f.io.alerts;
 
-import static a75f.io.alerts.AlertProcessor.TAG_CCU_ALERTS;
-
-import android.util.Log;
-
 public class AlertJsUtil {
 
     AlertDefinition def;

@@ -86,7 +86,7 @@ fun DropDownWithLabel(
             Column() {
                 Row {
                     Text(
-                        modifiedList[defaultSelection],
+                        modifiedList[selectedIndex],
                         modifier = Modifier.width((previewWidth ).dp).height(35.dp)
                             .clickable(onClick = { if(isEnabled) expanded = true }, enabled = isEnabled),
                         fontSize = 22.sp,
@@ -100,7 +100,7 @@ fun DropDownWithLabel(
                         modifier = Modifier
                             .size(30.dp)
                             .padding(PaddingValues(top = 8.dp))
-                            .clickable { expanded = true },
+                            .clickable(onClick = { if (isEnabled) expanded = true}),
                         colorFilter = ColorFilter.tint(if(isEnabled) primaryColor
                         else greyDropDownColor)
                     )

@@ -280,7 +280,7 @@ public class DabEquip
                                     .addMarker("zone").addMarker("dab")
                                     .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("current").addMarker("his").addMarker("cur").addMarker("logical")
                                     .setGroup(String.valueOf(nodeAddr))
-                                    .setUnit("\u00B0F")
+                                    .setUnit("°F")
                                     .setTz(tz)
                                     .build();
         BacnetUtilKt.addBacnetTags(currentTemp,BacnetIdKt.CURRENTTEMPID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
@@ -353,7 +353,7 @@ public class DabEquip
                                     .addMarker("zone").addMarker("air").addMarker("temp").addMarker("desired").addMarker("dab").addMarker("average")
                                     .addMarker("sp").addMarker("writable").addMarker("his").addMarker("userIntent")
                                     .setGroup(String.valueOf(nodeAddr))
-                                    .setUnit("\u00B0F")
+                                    .setUnit("°F")
                                     .setTz(tz)
                                     .build();
         BacnetUtilKt.addBacnetTags(desiredTemp,BacnetIdKt.DESIREDTEMPID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
@@ -369,7 +369,7 @@ public class DabEquip
                                            .addMarker("zone").addMarker("air").addMarker("temp").addMarker("desired").addMarker("dab").addMarker("cooling")
                                            .addMarker("sp").addMarker("writable").addMarker("his").addMarker("userIntent")
                                            .setGroup(String.valueOf(nodeAddr))
-                                           .setUnit("\u00B0F")
+                                           .setUnit("°F")
                                            .setTz(tz)
                                            .build();
         BacnetUtilKt.addBacnetTags(desiredTempCooling,BacnetIdKt.CMCOOLINGDESIREDTEMPID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
@@ -385,7 +385,7 @@ public class DabEquip
                                            .addMarker("zone").addMarker("air").addMarker("temp").addMarker("desired").addMarker("dab").addMarker("heating")
                                            .addMarker("sp").addMarker("writable").addMarker("his").addMarker("userIntent")
                                            .setGroup(String.valueOf(nodeAddr))
-                                           .setUnit("\u00B0F")
+                                           .setUnit("°F")
                                            .setTz(tz)
                                            .build();
         BacnetUtilKt.addBacnetTags(desiredTempHeating,BacnetIdKt.CMHEATINGDESIREDTEMPID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
@@ -404,7 +404,7 @@ public class DabEquip
                                     .build();
         String equipStatusId = CCUHsApi.getInstance().addPoint(equipStatus);
         hisItems.add(new HisItem(equipStatusId, new Date(System.currentTimeMillis()), 0.0));
-    
+
         Point equipStatusMessage = new Point.Builder()
                                            .setDisplayName(getDisName(siteDis, nodeAddr+"-equipStatusMessage"))
                                            .setEquipRef(equipRef)
@@ -454,7 +454,7 @@ public class DabEquip
                                     .addMarker("zone").addMarker("dab").setHisInterpolate("cov")
                                     .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("supply").addMarker("primary").addMarker("his").addMarker("logical")
                                     .setGroup(String.valueOf(nodeAddr))
-                                    .setUnit("\u00B0F")
+                                    .setUnit("°F")
                                     .setTz(tz)
                                     .build();
         BacnetUtilKt.addBacnetTags(supplyAirTemp1,BacnetIdKt.SUPPLYAIRTEMP1ID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
@@ -471,7 +471,7 @@ public class DabEquip
                                        .addMarker("zone").addMarker("dab").setHisInterpolate("cov")
                                        .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("supply").addMarker("secondary").addMarker("his").addMarker("logical")
                                        .setGroup(String.valueOf(nodeAddr))
-                                       .setUnit("\u00B0F")
+                                       .setUnit("°F")
                                        .setTz(tz)
                                        .build();
         BacnetUtilKt.addBacnetTags(supplyAirTemp2,BacnetIdKt.SUPPLYAIRTEMP2ID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
@@ -739,8 +739,8 @@ public class DabEquip
                                          .setTz(tz)
                                          .build();
         String enableCO2ControlId = CCUHsApi.getInstance().addPoint(enableCO2Control);
-        CCUHsApi.getInstance().writeDefaultValById(enableCO2ControlId, config.enableCO2Control == true ? 1.0 :0);
-        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(enableCO2ControlId, config.enableCO2Control == true ? 1.0 :0);
+        CCUHsApi.getInstance().writeDefaultValById(enableCO2ControlId, config.enableCO2Control ? 1.0 :0);
+        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(enableCO2ControlId, config.enableCO2Control ? 1.0 :0);
         
         Point enableIAQControl = new Point.Builder()
                                          .setDisplayName(equipDis+"-enableIAQControl")
@@ -783,7 +783,7 @@ public class DabEquip
                                           .addMarker("config").addMarker("dab").addMarker("writable").addMarker("zone")
                                           .addMarker("temperature").addMarker("offset").addMarker("sp")
                                           .setGroup(String.valueOf(nodeAddr))
-                                          .setUnit("\u00B0F")
+                                          .setUnit("°F")
                                           .setTz(tz)
                                           .build();
         BacnetUtilKt.addBacnetTags(temperatureOffset,BacnetIdKt.TEMPERATUREOFFSETID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);

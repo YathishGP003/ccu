@@ -401,7 +401,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
                 (systemEquip.getHumidifier().readHisVal() > 0 ? " | Humidifier ON " : " | Humidifier OFF ") :
                 (systemEquip.getDehumidifier().readHisVal() > 0 ? " | Dehumidifier ON " : " | Dehumidifier OFF ");
 
-        return status.toString().equals("") ? "System OFF" + sts :
+        return status.toString().isEmpty() ? "System OFF" + sts :
                 status + sts;
     }
 
@@ -418,10 +418,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
         }
         removeSystemEquipModbus();
     }
-    
-    private void addCmdPoints(String equipref) {
-    }
-    
+
     public double getCmdSignal(String cmd) {
         return CCUHsApi.getInstance().readHisValByQuery("point and system and cmd and "+cmd);
     }

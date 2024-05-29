@@ -1,15 +1,22 @@
 package a75f.io.domain.logic
 
+import a75f.io.api.haystack.Tags
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.EntityConfig
+import a75f.io.domain.config.AssociationConfig
+import a75f.io.domain.config.EnableConfig
 import a75f.io.domain.config.EntityConfiguration
 import a75f.io.domain.config.ProfileConfiguration
+import a75f.io.domain.config.ValueConfig
+import a75f.io.domain.config.getConfig
 import a75f.io.logger.CcuLog
+import android.util.Log
 import io.seventyfivef.domainmodeler.client.ModelPointDef
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfilePointDef
 import io.seventyfivef.domainmodeler.common.point.AssociationConfiguration
 import io.seventyfivef.domainmodeler.common.point.ComparisonType
+import io.seventyfivef.domainmodeler.common.point.Constraint
 import io.seventyfivef.domainmodeler.common.point.DependentConfiguration
 import io.seventyfivef.domainmodeler.common.point.DynamicSensorConfiguration
 import io.seventyfivef.domainmodeler.common.point.MultiStateConstraint
@@ -27,11 +34,27 @@ class EntityMapper (private val modelDef: SeventyFiveFProfileDirective) {
         val entityConfiguration = EntityConfiguration()
         entityConfiguration.tobeAdded.addAll(getBasePoints().map { EntityConfig(it.domainName)})
         CcuLog.i(Domain.LOG_TAG, "All base points "+entityConfiguration.tobeAdded.map { it.domainName }.joinToString { "," })
-        entityConfiguration.tobeAdded.addAll(getEnabledAssociations(configuration).map { EntityConfig(it)})
-        entityConfiguration.tobeAdded.addAll(getEnabledDependencies(configuration).map { EntityConfig(it)})
+
+        // There can be same associations for multiple points So checking the duplicates
+        getEnabledAssociations(configuration).forEach { newDomain ->
+            if (entityConfiguration.tobeAdded.find { it.domainName == newDomain } == null) {
+                entityConfiguration.tobeAdded.add(EntityConfig(newDomain))
+            }
+        }
+        getEnabledDependencies(configuration).forEach { newDomain ->
+            if (entityConfiguration.tobeAdded.find { it.domainName == newDomain } == null) {
+                entityConfiguration.tobeAdded.add(EntityConfig(newDomain))
+            }
+        }
+        getMultiDependentPoints(configuration, entityConfiguration.tobeAdded).forEach { newDomain ->
+            if (entityConfiguration.tobeAdded.find { it.domainName == newDomain } == null) {
+                entityConfiguration.tobeAdded.add(EntityConfig(newDomain))
+            }
+        }
         return entityConfiguration
     }
 
+    // Returns all the points that are base points in the model definition.
     fun getBasePoints() : List<SeventyFiveFProfilePointDef> {
         return modelDef.points.filter {
                 it.configuration.configType == PointConfiguration.ConfigType.BASE
@@ -63,13 +86,13 @@ class EntityMapper (private val modelDef: SeventyFiveFProfileDirective) {
     }
     private fun toPoint(pointDef : ModelPointDef) : Map <Any, Any> {
         val point = mutableMapOf<Any, Any>()
-        point["dis"] = pointDef.domainName
+        point[Tags.DIS] = pointDef.domainName
         //pointDef.rootTagNames.
 
         return point
     }
 
-    fun getPointByDomainName(name : String) : SeventyFiveFProfilePointDef? {
+    private fun getPointByDomainName(name : String) : SeventyFiveFProfilePointDef? {
         return modelDef.points.find { it.domainName == name }
     }
 
@@ -79,6 +102,12 @@ class EntityMapper (private val modelDef: SeventyFiveFProfileDirective) {
         }
     }
 
+    /**
+     * Returns a list of association and associated points list.
+     * Reads list of association points and get the config of the association point.
+     * create association point when config is enabled (example Relay1Association, Relay2Association)
+     * along with that associated point also will be added here (example CoolingStage1, CoolingStage2)
+     */
     fun getEnabledAssociations(profileConfiguration: ProfileConfiguration) : List<String> {
 
         val enabledAssociations = mutableListOf<String>()
@@ -91,7 +120,9 @@ class EntityMapper (private val modelDef: SeventyFiveFProfileDirective) {
             profileConfig?.let {
                 if (associationEnabled) {
                     val constraint = def.valueConstraint as MultiStateConstraint
+                    // Add Association point
                     enabledAssociations.add(def.domainName)
+                    // Add mapped associated point here
                     enabledAssociations.add(constraint.allowedValues[it.associationVal].value)
                 }
             }
@@ -119,6 +150,11 @@ class EntityMapper (private val modelDef: SeventyFiveFProfileDirective) {
         return false
     }
 
+    /**
+     * Returns a list of dependent points that are enabled based on the profile configuration.
+     * Reads list of dependent points and get the config of the dependent point.
+     * Finds the associated and its configuration
+     */
     fun getEnabledDependencies(profileConfiguration: ProfileConfiguration) : List<String> {
 
         val enabledDependencies = mutableListOf<String>()
@@ -141,9 +177,135 @@ class EntityMapper (private val modelDef: SeventyFiveFProfileDirective) {
             )) {
                 enabledDependencies.add(def.domainName)
             }
-
         }
         return enabledDependencies
+    }
+    private fun getMultiDependentPoints(configuration: ProfileConfiguration, pointsToAdd: MutableList<EntityConfig>): List<String> {
+        val dynamicConfigs = mutableListOf<String>()
+
+        getDependentPoints().forEach { def ->
+            val dynamicPoint = def.configuration as? DependentConfiguration ?: return@forEach
+            val dependentPoint = getPointByDomainName(dynamicPoint.domainName) ?: return@forEach
+
+            val configType = dependentPoint.configuration.configType
+            if (configType != PointConfiguration.ConfigType.ASSOCIATION &&
+                configType != PointConfiguration.ConfigType.DEPENDENT &&
+                configType != PointConfiguration.ConfigType.ASSOCIATED) {
+                return@forEach
+            }
+
+            if (configType == PointConfiguration.ConfigType.ASSOCIATION &&
+                !isAssociatedConfigEnabled(dependentPoint, configuration)) {
+                return@forEach
+            }
+
+            val associationConfig = configuration.getAssociationConfigs().getConfig(dynamicPoint.domainName)
+            val shouldAdd =
+                when (configType) {
+                    PointConfiguration.ConfigType.ASSOCIATION -> {
+                        associationConfig?.associationVal?.let {
+                            evaluateConfiguration(dynamicPoint.comparisonType, dynamicPoint.value as Int, it)
+                        } ?: false
+                    }
+                    PointConfiguration.ConfigType.DEPENDENT -> {
+                    // TODO Revisit if it has any use case and check it for base config type
+                        val valueConfig = configuration.getValueConfigs().getConfig(dynamicPoint.domainName)
+                        valueConfig?.currentVal?.let {
+                            evaluateConfiguration(dynamicPoint.comparisonType, dynamicPoint.value as Int, it.toInt())
+                        } ?: false
+                    }
+                    PointConfiguration.ConfigType.ASSOCIATED -> {
+                        val isDependencyExist = pointsToAdd.find { it.domainName == dynamicPoint.domainName }
+                        isDependencyExist != null
+                    }
+                    else -> true
+                }
+
+            if (shouldAdd) {
+                dynamicConfigs.add(def.domainName)
+                logIt("added ${def.domainName}  > depends on  ${dependentPoint.domainName} & its Config $configType")
+            }
+
+            getEnumPointIfExist(def, configuration)?.let { enumPoint ->
+                dynamicConfigs.add(enumPoint)
+                logIt("Added Dynamic enum point $enumPoint")
+            }
+        }
+        dynamicConfigs.addAll(getCustomPoints(configuration).map { it })
+        return dynamicConfigs
+    }
+
+    /**
+     * Function to add custom points to the entity configuration.
+     * This is in special case when point has dependency on multiple points then it will be added as
+     * base point. So framework can not create association for this point if it has multi association
+     * so it has to be added as custom point.
+     */
+    private fun getCustomPoints(configuration: ProfileConfiguration): List<String> {
+        val customPoints = mutableListOf<String>()
+        configuration.getCustomPoints().forEach { (pointDef, config) ->
+            if (pointDef.valueConstraint.constraintType == Constraint.ConstraintType.MULTI_STATE) {
+                when (config) {
+                    is ValueConfig -> {
+                        val constraint = pointDef.valueConstraint as MultiStateConstraint
+                        customPoints.add(constraint.allowedValues[config.currentVal.toInt()].value)
+                    }
+                    is EnableConfig -> {
+                        val constraint = pointDef.valueConstraint as MultiStateConstraint
+                        customPoints.add(constraint.allowedValues[config.enabled.toInt()].value)
+                    }
+                    is AssociationConfig -> {
+                        val constraint = pointDef.valueConstraint as MultiStateConstraint
+                        customPoints.add(constraint.allowedValues[config.associationVal].value)
+                    }
+                }
+            }
+        }
+        return customPoints
+    }
+
+
+    private fun getEnumPointIfExist(
+        pointDef: SeventyFiveFProfilePointDef,
+        configuration: ProfileConfiguration
+    ): String? {
+        if (pointDef.valueConstraint.constraintType == Constraint.ConstraintType.MULTI_STATE) {
+            val constraint = pointDef.valueConstraint as MultiStateConstraint
+            val value = configuration.getConfigByDomainName(pointDef.domainName)
+            logIt("${pointDef.domainName} : ${value?.javaClass?.simpleName}")
+
+            if (value != null) {
+                when (value) {
+                    is ValueConfig -> {
+                        return (constraint.allowedValues[value.currentVal.toInt()].value)
+                    }
+                    is EnableConfig -> {
+                        return (constraint.allowedValues[value.enabled.toInt()].value)
+                    }
+                    is AssociationConfig -> {
+                        return (constraint.allowedValues[value.associationVal].value)
+                    }
+                }
+            }
+        }
+       return null
+    }
+
+
+    /**
+     * Returns true if the associated config is enabled for dynamic points.
+     */
+    private fun isAssociatedConfigEnabled(point: SeventyFiveFProfilePointDef, config: ProfileConfiguration): Boolean {
+        val dependency = point.configuration as AssociationConfiguration
+        val configPoint = config.getEnableConfigs().find { it.domainName == dependency.domainName }
+        if (configPoint != null) {
+            return evaluateConfiguration(
+                dependency.comparisonType,
+                dependency.value as Int,
+                configPoint.enabled.toInt()
+            )
+        }
+        return false
     }
 
     /**
@@ -169,7 +331,7 @@ class EntityMapper (private val modelDef: SeventyFiveFProfileDirective) {
     }
 
     fun getPhysicalProfilePointRef(profileConfiguration: ProfileConfiguration, rawPointName : String) : String?{
-        val profilePointWithPhysicalMapping = modelDef.points.find {it.devicePointAssociation?.devicePointDomainName == rawPointName && PointIsPresentInConfig(it, profileConfiguration) }
+        val profilePointWithPhysicalMapping = modelDef.points.find {it.devicePointAssociation?.devicePointDomainName == rawPointName && pointIsPresentInConfig(it, profileConfiguration) }
             ?: return null
 
         val associationPoints = modelDef.points.filter {
@@ -179,7 +341,7 @@ class EntityMapper (private val modelDef: SeventyFiveFProfileDirective) {
         //Linked profile point is an association point. Attach the link if it is enabled.
         val associationPoint = associationPoints.find {
             val associationConfig = it.configuration as AssociationConfiguration
-            profilePointWithPhysicalMapping.domainName == associationConfig.domainName && PointIsPresentInConfig(it, profileConfiguration)
+            profilePointWithPhysicalMapping.domainName == associationConfig.domainName && pointIsPresentInConfig(it, profileConfiguration)
         }
 
         if (associationPoint != null) {
@@ -202,9 +364,9 @@ class EntityMapper (private val modelDef: SeventyFiveFProfileDirective) {
         return null
     }
 
-    private fun PointIsPresentInConfig(point: SeventyFiveFProfilePointDef, config: ProfileConfiguration): Boolean {
-        if (point.configuration.configType.equals(PointConfiguration.ConfigType.DEPENDENT)) {
-            if (getEnabledDependencies(config).find { it.equals(point.domainName)} == null) return false
+    private fun pointIsPresentInConfig(point: SeventyFiveFProfilePointDef, config: ProfileConfiguration): Boolean {
+        if (point.configuration.configType == PointConfiguration.ConfigType.DEPENDENT) {
+            if (getEnabledDependencies(config).find { it == point.domainName } == null) return false
         }
         return true
     }
@@ -220,5 +382,13 @@ class EntityMapper (private val modelDef: SeventyFiveFProfileDirective) {
         }
     }
 
+    // prints log message
+    fun logIt(msg: String, exception: Exception? = null) {
+        if (exception != null) {
+            CcuLog.e(Domain.LOG_TAG, msg, exception)
+        } else {
+            CcuLog.i(Domain.LOG_TAG, msg)
+        }
+    }
 
 }

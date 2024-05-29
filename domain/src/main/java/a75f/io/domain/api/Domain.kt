@@ -2,13 +2,14 @@ package a75f.io.domain.api
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.domain.devices.CmBoardDevice
+import a75f.io.domain.devices.ConnectDevice
 import a75f.io.domain.equips.BuildingEquip
 import a75f.io.domain.equips.DomainEquip
 import a75f.io.domain.logic.DomainManager
+import android.annotation.SuppressLint
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import io.seventyfivef.domainmodeler.common.point.MultiStateConstraint
 import io.seventyfivef.domainmodeler.common.point.NumericConstraint
-import android.annotation.SuppressLint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -27,6 +28,7 @@ object Domain {
     lateinit var systemEquip : DomainEquip
     var equips = mutableMapOf<String, DomainEquip>()
     lateinit var cmBoardDevice: CmBoardDevice
+    lateinit var connect1Device: ConnectDevice //This would be preset only when advanced ahu is configured
 
     /**
      * Retrieve the domain object of a point by it id and equipRef.

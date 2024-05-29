@@ -3,6 +3,7 @@ package a75f.io.logic.bo.building.hyperstat.profiles.hpu
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Equip
 import a75f.io.api.haystack.util.hayStack
+import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.BaseProfileConfiguration
@@ -14,7 +15,14 @@ import a75f.io.logic.bo.building.hvac.AnalogOutput
 import a75f.io.logic.bo.building.hvac.Stage
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
-import a75f.io.logic.bo.building.hyperstat.common.*
+import a75f.io.logic.bo.building.hyperstat.common.BasicSettings
+import a75f.io.logic.bo.building.hyperstat.common.FanModeCacheStorage
+import a75f.io.logic.bo.building.hyperstat.common.HSHaystackUtil
+import a75f.io.logic.bo.building.hyperstat.common.HyperStatAssociationUtil
+import a75f.io.logic.bo.building.hyperstat.common.HyperStatEquip
+import a75f.io.logic.bo.building.hyperstat.common.HyperStatProfileTuners
+import a75f.io.logic.bo.building.hyperstat.common.HyperstatLoopController
+import a75f.io.logic.bo.building.hyperstat.common.UserIntents
 import a75f.io.logic.bo.building.hyperstat.profiles.HyperStatPackageUnitProfile
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.HyperStatCpuConfiguration
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.Th2InAssociation
@@ -22,7 +30,6 @@ import a75f.io.logic.bo.building.hyperstat.profiles.pipe2.Pipe2RelayAssociation
 import a75f.io.logic.bo.building.schedules.Occupancy
 import a75f.io.logic.jobs.HyperStatUserIntentHandler
 import a75f.io.logic.tuners.TunerUtil
-import android.util.Log
 import com.fasterxml.jackson.annotation.JsonIgnore
 
 /**
@@ -40,7 +47,7 @@ class HyperStatHpuProfile : HyperStatPackageUnitProfile(){
     override lateinit var occupancyStatus: Occupancy
     private var occupancyBeforeDoorWindow = Occupancy.UNOCCUPIED
     private val hyperStatHpuAlgorithm = HyperstatLoopController()
-    lateinit var curState: ZoneState
+    private lateinit var curState: ZoneState
 
     private var analogOutputPoints: HashMap<Int, String> = HashMap()
     private var relayOutputPoints: HashMap<Int, String> = HashMap()
@@ -324,11 +331,7 @@ class HyperStatHpuProfile : HyperStatPackageUnitProfile(){
                 }
             }
             (HyperStatAssociationUtil.isHpuRelayAssociatedToFan(relayState)) -> {
-                // For title 24 compliance when doorwindow is open, run the lowest fan speed
-                if(((fanLoopOutput != 0) || getDoorWindowFanOperationStatus()) ||
-                        ((fanLoopOutput == 0 && getCurrentPortStatus(port) == 1.0))) {
-                    runRelayForFanSpeed(relayState, port, config, tuner, relayStages, basicSettings)
-                }
+                runRelayForFanSpeed(relayState, port, config, tuner, relayStages, basicSettings)
             }
             (HyperStatAssociationUtil.isHpuRelayChangeOverCooling(relayState)) -> {
                 if(basicSettings.conditioningMode == StandaloneConditioningMode.AUTO
@@ -719,13 +722,13 @@ class HyperStatHpuProfile : HyperStatPackageUnitProfile(){
      * @return true if the door or window is open and the occupancy status is not UNOCCUPIED, otherwise false.
      */
     private fun checkFanOperationAllowedDoorWindow(equip: HyperStatHpuEquip): Boolean {
-        if(currentTemp < fetchUserIntents(equip).zoneCoolingTargetTemperature && currentTemp > fetchUserIntents(equip).zoneHeatingTargetTemperature) {
-            return doorWindowSensorOpenStatus &&
+        return if(currentTemp < fetchUserIntents(equip).zoneCoolingTargetTemperature && currentTemp > fetchUserIntents(equip).zoneHeatingTargetTemperature) {
+            doorWindowSensorOpenStatus &&
                     occupancyBeforeDoorWindow != Occupancy.UNOCCUPIED &&
                     occupancyBeforeDoorWindow != Occupancy.DEMAND_RESPONSE_UNOCCUPIED &&
                     occupancyBeforeDoorWindow != Occupancy.VACATION
         } else {
-            return doorWindowSensorOpenStatus
+            doorWindowSensorOpenStatus
         }
     }
 
@@ -1008,6 +1011,6 @@ class HyperStatHpuProfile : HyperStatPackageUnitProfile(){
      * Function just to print logs
      */
     private fun logIt(msg: String){
-        Log.i(L.TAG_CCU_HSHPU,msg)
+        CcuLog.i(L.TAG_CCU_HSHPU,msg)
     }
 }

@@ -1,6 +1,7 @@
 package a75f.io.logic.bo.building.hyperstat.profiles
 
 import a75f.io.api.haystack.CCUHsApi
+import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.BaseProfileConfiguration
 import a75f.io.logic.bo.building.ZoneProfile
@@ -20,12 +21,10 @@ import a75f.io.logic.bo.building.hyperstat.common.UserIntents
 import a75f.io.logic.bo.building.hyperstat.profiles.pipe2.HyperStatPipe2Equip
 import a75f.io.logic.bo.building.schedules.Occupancy
 import a75f.io.logic.jobs.HyperStatUserIntentHandler
-import android.util.Log
 import org.projecthaystack.HDateTime
 import org.projecthaystack.HNum
 import org.projecthaystack.HRef
 import org.projecthaystack.HRow
-import org.projecthaystack.io.HZincWriter
 
 
 /**
@@ -547,7 +546,6 @@ abstract class HyperStatProfile : ZoneProfile(),RelayActions, AnalogOutActions, 
         var value: Double
         var duration: Double
         var lastModifiedDateTime: HDateTime?
-        logIt( "REMOTE ARRAY: ${HZincWriter.gridToString(pointGrid)}");
         val it = pointGrid.iterator()
         while (it.hasNext()) {
             val r = it.next() as HRow
@@ -643,7 +641,7 @@ abstract class HyperStatProfile : ZoneProfile(),RelayActions, AnalogOutActions, 
     }
 
     private fun logIt(msg: String){
-        Log.i(L.TAG_CCU_HSHST, msg)
+        CcuLog.i(L.TAG_CCU_HSHST, msg)
     }
 
     // To run specific fan speed while running aux heating

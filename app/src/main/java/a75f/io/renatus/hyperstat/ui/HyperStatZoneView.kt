@@ -7,6 +7,7 @@ package a75f.io.renatus.hyperstat.ui
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Equip
 import a75f.io.api.haystack.HSUtil
+import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.ZoneProfile
 import a75f.io.logic.bo.building.definitions.ProfileType
@@ -39,7 +40,6 @@ import a75f.io.renatus.util.RelayUtil
 import a75f.io.renatus.views.CustomSpinnerDropDownAdapter
 import android.app.Activity
 import android.content.Context
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.*
@@ -153,7 +153,7 @@ private fun setUpConditionFanConfig(
         conditioningModeSpinner.adapter = conModeAdapter
         conditioningModeSpinner.setSelection(conditionMode, false)
     } catch (e: Exception) {
-        Log.i(L.TAG_CCU_ZONE, "Exception : ${e.message}")
+        CcuLog.e(L.TAG_CCU_ZONE, "Exception : ${e.message}")
     }
     val fanSpinnerSelectionValues =
         RelayUtil.getFanOptionByLevel((cpuEquipPoints[HSZoneStatus.FAN_LEVEL.name] as Int?)!!)
@@ -166,7 +166,7 @@ private fun setUpConditionFanConfig(
         fanModeSpinner.adapter = fanModeAdapter
         fanModeSpinner.setSelection(fanMode, false)
     } catch (e: Exception) {
-        Log.i(
+        CcuLog.i(
             L.TAG_CCU_ZONE,
             "Exception while setting fan ode: " + e.message + " fan Mode " + fanMode
         )
@@ -341,16 +341,16 @@ fun getHyperStatCPUEquipPoints(equipDetails: Equip): HashMap<String, Any> {
         cpuPoints[HSZoneStatus.STATUS.name] = "OFF"
 
     val fanOpModePoint = hsHaystackUtil.readPointPriorityVal("zone and fan and mode and operation")
-    Log.i(L.TAG_CCU_HSCPU, "Saved fan mode $fanOpModePoint")
+    CcuLog.i(L.TAG_CCU_HSCPU, "Saved fan mode $fanOpModePoint")
     val fanPosition = getFanSelectionMode(equipDetails.group, fanOpModePoint.toInt())
-    Log.i(L.TAG_CCU_HSCPU, "converted fan mode $fanPosition")
+    CcuLog.i(L.TAG_CCU_HSCPU, "converted fan mode $fanPosition")
     cpuPoints[HSZoneStatus.FAN_MODE.name] = fanPosition
     val conditionModePoint = hsHaystackUtil.readPointPriorityVal(
         "zone and sp and conditioning and mode"
     )
-    Log.i(L.TAG_CCU_HSCPU, "Saved conditionModePoint mode $conditionModePoint")
+    CcuLog.i(L.TAG_CCU_HSCPU, "Saved conditionModePoint mode $conditionModePoint")
     val selectedConditioningMode = getSelectedConditioningMode(equipDetails.group, conditionModePoint.toInt())
-    Log.i(L.TAG_CCU_HSCPU, "converted conditionModePoint mode $selectedConditioningMode")
+    CcuLog.i(L.TAG_CCU_HSCPU, "converted conditionModePoint mode $selectedConditioningMode")
     cpuPoints[HSZoneStatus.CONDITIONING_MODE.name] = selectedConditioningMode
     val dischargePoint = hsHaystackUtil.readHisVal(
         "sensor and discharge and air and temp"
@@ -378,7 +378,7 @@ fun getHyperStatCPUEquipPoints(equipDetails: Equip): HashMap<String, Any> {
     }
     cpuPoints[HSZoneStatus.CONDITIONING_ENABLED.name] = status
     cpuPoints.forEach { (s: String, o: Any) ->
-        Log.i(L.TAG_CCU_HSCPU, "Config $s : $o")
+        CcuLog.i(L.TAG_CCU_HSCPU, "Config $s : $o")
     }
     return cpuPoints
 }
@@ -444,9 +444,9 @@ fun getHyperStatPipe2EquipPoints(equipDetails: Equip): HashMap<String, Any> {
     val conditionModePoint = hsHaystackUtil.readPointPriorityVal(
         "zone and sp and conditioning and mode"
     )
-    Log.i(L.TAG_CCU_HSCPU, "Saved conditionModePoint mode $conditionModePoint")
+    CcuLog.i(L.TAG_CCU_HSCPU, "Saved conditionModePoint mode $conditionModePoint")
     val selectedConditioningMode =  StandaloneConditioningMode.values()[conditionModePoint.toInt()].ordinal
-    Log.i(L.TAG_CCU_HSCPU, "converted conditionModePoint mode $selectedConditioningMode")
+    CcuLog.i(L.TAG_CCU_HSCPU, "converted conditionModePoint mode $selectedConditioningMode")
     pipe2Points[HSZoneStatus.CONDITIONING_MODE.name] = selectedConditioningMode
     val dischargePoint = hsHaystackUtil.readHisVal(
         "sensor and discharge and air and temp"
@@ -465,7 +465,7 @@ fun getHyperStatPipe2EquipPoints(equipDetails: Equip): HashMap<String, Any> {
 
     pipe2Points[HSZoneStatus.CONDITIONING_ENABLED.name] = "Both"
     pipe2Points.forEach { (s: String, o: Any) ->
-        Log.i(L.TAG_CCU_HSCPU, "Config $s : $o")
+        CcuLog.i(L.TAG_CCU_HSCPU, "Config $s : $o")
     }
     return pipe2Points
 }
@@ -531,9 +531,9 @@ fun getHyperStatHpuEquipPoints(equipDetails: Equip): HashMap<String, Any> {
     val conditionModePoint = hsHaystackUtil.readPointPriorityVal(
         "zone and sp and conditioning and mode"
     )
-    Log.i(L.TAG_CCU_HSCPU, "Saved conditionModePoint mode $conditionModePoint")
+    CcuLog.i(L.TAG_CCU_HSCPU, "Saved conditionModePoint mode $conditionModePoint")
     val selectedConditioningMode =  StandaloneConditioningMode.values()[conditionModePoint.toInt()].ordinal
-    Log.i(L.TAG_CCU_HSCPU, "converted conditionModePoint mode $selectedConditioningMode")
+    CcuLog.i(L.TAG_CCU_HSCPU, "converted conditionModePoint mode $selectedConditioningMode")
     hpuPoints[HSZoneStatus.CONDITIONING_MODE.name] = selectedConditioningMode
     val dischargePoint = hsHaystackUtil.readHisVal(
         "sensor and discharge and air and temp"
@@ -552,7 +552,7 @@ fun getHyperStatHpuEquipPoints(equipDetails: Equip): HashMap<String, Any> {
 
     hpuPoints[HSZoneStatus.CONDITIONING_ENABLED.name] = "Both"
     hpuPoints.forEach { (s: String, o: Any) ->
-        Log.i(L.TAG_CCU_HSCPU, "Config $s : $o")
+        CcuLog.i(L.TAG_CCU_HSCPU, "Config $s : $o")
     }
     return hpuPoints
 }

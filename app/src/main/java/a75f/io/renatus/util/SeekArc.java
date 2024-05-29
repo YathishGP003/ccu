@@ -26,7 +26,6 @@ import androidx.annotation.ColorInt;
 import androidx.core.content.res.ResourcesCompat;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
@@ -1347,7 +1346,7 @@ public class SeekArc extends View
             angle = angle - 360;
         }
 
-        Log.i("DEGREES", "touchDegrees: " + angle);
+        CcuLog.i("DEGREES", "touchDegrees: " + angle);
         return angle;
     }
 

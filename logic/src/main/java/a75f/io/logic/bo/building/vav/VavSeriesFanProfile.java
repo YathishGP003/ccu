@@ -36,11 +36,6 @@ public class VavSeriesFanProfile extends VavProfile
         super(equipRef, nodeAddress, ProfileType.VAV_SERIES_FAN);
     }
 
-    //TODO - Only for backward compatibility during development. Should be removed.
-    public VavSeriesFanProfile() {
-        super(null, null, ProfileType.VAV_SERIES_FAN);
-    }
-    private boolean fanReady = false;
     private boolean damperOverride = false;
     private int fanOnDelayCounter = 0;
     
@@ -230,13 +225,7 @@ public class VavSeriesFanProfile extends VavProfile
         }
         CcuLog.d(L.TAG_CCU_ZONE,"updateReheatDuringSystemHeating valveStart "+valveStart);
     }
-    
-    private boolean getZoneOccupancy(String equipId) {
-        String zoneId = HSUtil.getZoneIdFromEquipId(equipId);
-        Occupied occ = ScheduleManager.getInstance().getOccupiedModeCache(zoneId);
-        return occ != null && occ.isOccupied();
-    }
-    
+
     private void updateIaqCompensatedMinDamperPos(boolean occupied, short node) {
     
         double co2 = vavEquip.getZoneCO2().readHisVal();

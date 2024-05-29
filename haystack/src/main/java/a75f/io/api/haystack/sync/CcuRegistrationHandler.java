@@ -1,12 +1,5 @@
 package a75f.io.api.haystack.sync;
 
-import static android.widget.Toast.LENGTH_LONG;
-
-import android.os.Handler;
-import android.os.Looper;
-import android.preference.PreferenceManager;
-import android.util.Log;
-import android.widget.Toast;
 
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;

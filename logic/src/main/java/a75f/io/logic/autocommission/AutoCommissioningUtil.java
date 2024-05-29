@@ -41,7 +41,7 @@ public class AutoCommissioningUtil {
     public static void handleAutoCommissioningState(long scheduledStopDatetimeInMillis) {
 
         long stopDateTimeInMillis = scheduledStopDatetimeInMillis - System.currentTimeMillis();
-        Log.d(L.TAG_CCU_AUTO_COMMISSIONING,
+        CcuLog.d(L.TAG_CCU_AUTO_COMMISSIONING,
                 "current time in millis : " + new Date(System.currentTimeMillis()) + "" +
                         " stop times in millis : " + new Date(scheduledStopDatetimeInMillis) +
                         " auto-cx test duration in millis : " + stopDateTimeInMillis);
@@ -58,7 +58,7 @@ public class AutoCommissioningUtil {
                        new Handler(Looper.getMainLooper()).post(new Runnable() {
                            @Override
                            public void run() {
-                               Log.d(L.TAG_CCU_AUTO_COMMISSIONING, "Auto-commissioning timer completed");
+                               CcuLog.d(L.TAG_CCU_AUTO_COMMISSIONING, "Auto-commissioning timer completed");
                                Toast.makeText(Globals.getInstance().getApplicationContext(),
                                        "Auto-commissioning Test completed.",Toast.LENGTH_SHORT).show();
                            }
@@ -76,7 +76,7 @@ public class AutoCommissioningUtil {
         }else {
             if (isAutoCommissioningStarted()) {
                 //This section deals with exceptional situations may be when the CCU is offline or not opened during the auto-commissioning process
-                Log.d(AutoCommissioningUtil.class.toString(), "Setting auto-commissioning to COMPLETED state: " + new Date(System.currentTimeMillis()));
+                CcuLog.d(L.TAG_CCU_AUTO_COMMISSIONING, "Setting auto-commissioning to COMPLETED state: " + new Date(System.currentTimeMillis()));
                 String autoCommissioningPointId = CCUHsApi.getInstance().readId("point and diag and auto and commissioning");
                 instance.pointWriteForCcuUser(HRef.copy(autoCommissioningPointId),
                         HayStackConstants.DEFAULT_POINT_LEVEL, HNum.make((double) AutoCommissioningState.COMPLETED.ordinal()), HNum.make(0));

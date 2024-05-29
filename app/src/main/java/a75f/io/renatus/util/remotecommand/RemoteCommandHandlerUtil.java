@@ -24,7 +24,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.preference.PreferenceManager;
-import android.util.Log;
 
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
@@ -170,18 +169,18 @@ public class RemoteCommandHandlerUtil {
                         }
                         break;
                         default:
-                            Log.i("Remote Command","Command is not valid" + commands);
+                            CcuLog.i("Remote Command","Command is not valid" + commands);
                         break;
                 }
                 break;
             case DOWNLOAD_BAC_APP:
-                Log.i("Remote Command","DOWNLOAD_BAC_APP bac app version for download->" + id);
+                CcuLog.i("Remote Command","DOWNLOAD_BAC_APP bac app version for download->" + id);
                 bacAppApkName = id;
                 updateCCU(id, null, null);
                 setDownloadIdBacApp(downloadFile(DOWNLOAD_BASE_URL + bacAppApkName, bacAppApkName));
                 break;
             case DOWNLOAD_REMOTE_ACCESS_APP:
-                Log.i("Remote Command","remote access app version download->" + id);
+                CcuLog.i("Remote Command","remote access app version download->" + id);
                 remoteAccessAppName = id;
                 updateCCU(id, null, null);
                 setRemoteAccessAppDownloadId(downloadFile(DOWNLOAD_BASE_URL + remoteAccessAppName, remoteAccessAppName));
@@ -219,6 +218,7 @@ public class RemoteCommandHandlerUtil {
         if(logLevelValue == -1)
             return;
         CCUHsApi.getInstance().writeHisValByQuery(Queries.LOG_LEVEL_QUERY,logLevelValue);
+        CCUHsApi.getInstance().setCcuLogLevel(logLevelValue);
     }
 
     private static void saveImportantDataBeforeSaveLogs() {
@@ -270,7 +270,7 @@ public class RemoteCommandHandlerUtil {
     }
 
     private static synchronized long downloadFile(String url, String apkFile) {
-        Log.d(TAG_CCU_DOWNLOAD,"--DOWNLOAD_APP_URL--"+url);
+        CcuLog.d(TAG_CCU_DOWNLOAD,"--DOWNLOAD_APP_URL--"+url);
         DownloadManager manager =
                 (DownloadManager) RenatusApp.getAppContext().getSystemService(Context.DOWNLOAD_SERVICE);
         DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
@@ -290,11 +290,11 @@ public class RemoteCommandHandlerUtil {
     }
     private static void copyFile(String apkFile, String destination){
 
-        Log.d(TAG_CCU_DOWNLOAD, "----copyFile----"+apkFile+"<--destination-->"+destination);
+        CcuLog.d(TAG_CCU_DOWNLOAD, "----copyFile----"+apkFile+"<--destination-->"+destination);
         File file = new File(RenatusApp.getAppContext().getExternalFilesDir(null), apkFile);
         if (!file.exists())
         {
-            Log.d(TAG_CCU_DOWNLOAD, "----file not found to copy@!@----");
+            CcuLog.d(TAG_CCU_DOWNLOAD, "----file not found to copy@!@----");
             return;
         }
 
@@ -320,7 +320,7 @@ public class RemoteCommandHandlerUtil {
                 // Close the root shell
                 RootTools.closeAllShells();
 
-                Log.d(TAG_CCU_DOWNLOAD, "----root access  granted file is copied reboot after 5  seconds----");
+                CcuLog.d(TAG_CCU_DOWNLOAD, "----root access  granted file is copied reboot after 5  seconds----");
 
                 new Timer().schedule(new TimerTask() {
                     @Override
@@ -330,7 +330,7 @@ public class RemoteCommandHandlerUtil {
                 }, 5000);
 
             } else {
-                Log.d(TAG_CCU_DOWNLOAD, "----root access not granted----");
+                CcuLog.i(TAG_CCU_DOWNLOAD, "----root access not granted----");
             }
         } catch (IOException | TimeoutException | RootDeniedException ex) {
             ex.printStackTrace();
@@ -338,7 +338,7 @@ public class RemoteCommandHandlerUtil {
     }
 
     public static void updateCCU(String id, Fragment currentFragment, FragmentActivity activity) {
-        Log.d(TAG_CCU_DOWNLOAD, "got command to install update--" + DownloadManager.EXTRA_DOWNLOAD_ID + "," + id);
+        CcuLog.d(TAG_CCU_DOWNLOAD, "got command to install update--" + DownloadManager.EXTRA_DOWNLOAD_ID + "," + id);
         RenatusApp.getAppContext().registerReceiver(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {

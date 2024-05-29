@@ -2,12 +2,6 @@ package a75f.io.api.haystack.sync;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.constants.HttpConstants;
-import android.text.TextUtils;
-import android.util.Log;
-
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -116,7 +110,7 @@ public class HttpUtil {
 
                 final int chunkSize = 2048;
                 for (int i = 0; i < urlParameters.length(); i += chunkSize) {
-                    Log.d("CCU_HS", urlParameters.substring(i, Math.min(urlParameters.length(), i + chunkSize)));
+                    CcuLog.d("CCU_HS", urlParameters.substring(i, Math.min(urlParameters.length(), i + chunkSize)));
                 }
 
                 connection.setRequestProperty(HttpConstants.APP_NAME_HEADER_NAME, HttpConstants.APP_NAME_HEADER_VALUE);
@@ -208,7 +202,7 @@ public class HttpUtil {
 
                 final int chunkSize = 2048;
                 for (int i = 0; i < urlParameters.length(); i += chunkSize) {
-                    Log.d("CCU_HS", urlParameters.substring(i, Math.min(urlParameters.length(), i + chunkSize)));
+                    CcuLog.d("CCU_HS", urlParameters.substring(i, Math.min(urlParameters.length(), i + chunkSize)));
                 }
 
                 connection.setRequestProperty(HttpConstants.APP_NAME_HEADER_NAME, HttpConstants.APP_NAME_HEADER_VALUE);

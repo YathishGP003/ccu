@@ -5,7 +5,6 @@ import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.preference.PreferenceManager;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,6 +13,7 @@ import java.util.List;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Tags;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.bo.building.CCUApplication;
 import a75f.io.logic.bo.building.Zone;
 import a75f.io.logic.bo.building.ZoneProfile;
@@ -66,6 +66,7 @@ public class L
     public static final String CCU_REMOTE_ACCESS = "CCU_REMOTE_ACCESS";
     public static final String TAG_CCU_DR_MODE = "CCU_DR_MODE";
 
+    public static final String TAG_CCU_SERIAL_CONNECT = "CCU_SERIAL_CONNECT";
     public static Context app()
     {
         return Globals.getInstance().getApplicationContext();
@@ -200,7 +201,6 @@ public class L
                 throw new IllegalArgumentException();
             }
             float desiredTemp = CCUHsApi.getInstance().readDefaultValById(id).floatValue();
-            //Log.d("CCU", "DesiredTemp : "+desiredTemp);
             return desiredTemp;
         }
         return 0;
@@ -216,7 +216,7 @@ public class L
             {
                 throw new IllegalArgumentException();
             }
-            Log.d("CCU", "Set DesiredTemp : "+desiredTemp);
+            CcuLog.d("CCU", "Set DesiredTemp : "+desiredTemp);
             CCUHsApi.getInstance().writeDefaultValById(id, desiredTemp);
             CCUHsApi.getInstance().writeHisValById(id, desiredTemp);
         }
@@ -317,7 +317,7 @@ public class L
             }
 
         }
-        Log.d("CCU","Profile Not found for "+addr);
+        CcuLog.d("CCU","Profile Not found for "+addr);
         return null;
     }
 
@@ -340,7 +340,7 @@ public class L
     public static synchronized void pingCloudServer() {
         final ConnectivityManager connMgr = (ConnectivityManager) Globals.getInstance().getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
         final NetworkInfo netInfo = connMgr.getActiveNetworkInfo();
-        Log.d("CCU_CLOUDSTATUS", "Ping cloud server");
+        CcuLog.d("CCU_CLOUDSTATUS", "Ping cloud server");
         if (netInfo != null && netInfo.isConnected()) {
             //  Some sort of connection is open, check if server is reachable
             SharedPreferences spDefaultPrefs = PreferenceManager.getDefaultSharedPreferences(Globals.getInstance().getApplicationContext());

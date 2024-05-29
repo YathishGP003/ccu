@@ -87,20 +87,16 @@ object ResourceHelper {
     fun loadModel(fileName : String) : ModelDirective {
         CcuLog.i("CCU_DM", "loadModel $fileName")
         @Nullable val modelData: String? = loadString(fileName)
-        CcuLog.i("CCU_DM", "loadModel data $modelData")
         val modelDirectiveFactory = ModelDirectiveFactory(getObjectMapper())
         return modelDirectiveFactory.fromJson(modelData!!)
     }
     fun loadModel(fileName : String, context : Context) : ModelDirective {
         CcuLog.i("CCU_DM", "loadModel $fileName $context")
         val inputStream = context.assets.open(fileName)
-        CcuLog.i("CCU_DM", "loadModel stream $inputStream")
         @Nullable val modelData: String? = loadString(inputStream)
-        CcuLog.printLongMessage("CCU_DM", "loadModel modelString $modelData")
         val model = JSONObject(modelData)
         val versionData = model.getJSONObject("version")
-        CcuLog.printLongMessage("CCU_DM", "Model Version $versionData")
-        //CcuLog.printLongMessage("CCU_DM", "loadModel modelString $modelData")
+        CcuLog.i("CCU_DM", "Model Version $versionData")
         val modelDirectiveFactory = ModelDirectiveFactory(getObjectMapper())
         return modelDirectiveFactory.fromJson(modelData!!)
     }

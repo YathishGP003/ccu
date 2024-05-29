@@ -3,6 +3,7 @@ package a75f.io.domain.config
 import a75f.io.domain.api.Domain
 import a75f.io.logger.CcuLog
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
+import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfilePointDef
 import io.seventyfivef.domainmodeler.common.point.NumericConstraint
 
 /**
@@ -34,6 +35,18 @@ abstract class ProfileConfiguration (var nodeAddress : Int, var nodeType : Strin
         return emptyList()
     }
 
+    open fun getConfigByDomainName(domainName: String): Any? {
+        return ValueConfig(domainName, 0.0)
+    }
+
+    /**
+     * Override the function when you have custom points to be created
+     *
+     */
+    open fun getCustomPoints() : List<Pair <SeventyFiveFProfilePointDef, Any>> {
+        return emptyList()
+    }
+
     /**
      * Get a list of domainNames of all dependencies
      *
@@ -48,11 +61,11 @@ abstract class ProfileConfiguration (var nodeAddress : Int, var nodeType : Strin
         val config = ValueConfig(domainName, point?.defaultValue?.toString()?.toDouble() ?: 0.0)
         config.disName = point?.name ?:""
         if (point?.valueConstraint is NumericConstraint) {
-            config.minVal = (point?.valueConstraint as NumericConstraint).minValue
-            config.maxVal = (point?.valueConstraint as NumericConstraint).maxValue
+            config.minVal = (point.valueConstraint as NumericConstraint).minValue
+            config.maxVal = (point.valueConstraint as NumericConstraint).maxValue
         }
         point?.presentationData?.get("tagValueIncrement")?.let { config.incVal = it.toString().toDouble() }
-        CcuLog.i(Domain.LOG_TAG, "defaultValConfig $domainName ${config.currentVal} $point")
+        CcuLog.i(Domain.LOG_TAG, "defaultValConfig $domainName ${config.currentVal}")
         return config
     }
 

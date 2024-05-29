@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import android.preference.PreferenceManager;
-import android.util.Log;
 
 import java.util.Date;
 
@@ -16,8 +15,7 @@ public class PreferenceUtil {
     private static final String HYPERSTAT_AIR_TAG_MIGRATION = "hyperstatAirTagMigration";
     private static final String STANDALONE_HEATING_OFFSET = "standaloneHeatingOffset";
     private static final String STANDALONE_COOLING_AIRFLOW_TEMP_LOWER_OFFSET = "standaloneCoolingAirflowTempLowerOffset";
-    private static final String STANDALONE_AIRFLOW_SAMPLE_WAIT_TIME = "standaloneAirflowSampleWaitTime";
-    private static final String BACKFILL_DURATION_MIGRATION = "backFillDuration";
+    private static final String STANDALONE_AIRFLOW_SAMPLE_WAIT_TIME = "standaloneAirflowSampleWaitTime";;
     private static Context context;
     private static String PRESSURE_UNIT_MIGRATION = "pressureUnitMigration";
     private static final String SMART_NODE_MIGRATION ="smartNodeMigration";
@@ -115,6 +113,8 @@ public class PreferenceUtil {
     public static final String HSS_OP_MODE_WRITABLE_MARKER_MIGRATION = "hssOpModeWritableMarkerMigration";
     public static final String HS_TH_CONFIG_MIGRATION = "hsThConfigMigration";
 
+    public static final String LOCALLY_SYNC_SCHEDULE = "locallySyncedSchedules";
+
     public static void setContext(Context c) {
         context= c;
     }
@@ -181,7 +181,7 @@ public class PreferenceUtil {
 
     public static boolean isHeartbeatTagMigrationDone() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        Log.d("heartbeattag", "isHeartbeatTagMigrationDone return "+sharedPreferences.getBoolean("heartbeattagMigration",false));
+        CcuLog.d("heartbeattag", "isHeartbeatTagMigrationDone return "+sharedPreferences.getBoolean("heartbeattagMigration",false));
         return sharedPreferences.getBoolean("heartbeattagMigration",false);
     }
 
@@ -741,7 +741,7 @@ public class PreferenceUtil {
     }
 
     public static void setLastCCUUpdatedTime(long lastTimeToken) {
-        Log.i("CCU_READ_CHANGES", "setLastCCUUpdatedTime " + new Date(lastTimeToken));
+        CcuLog.i("CCU_READ_CHANGES", "setLastCCUUpdatedTime " + new Date(lastTimeToken));
         setLongPreference(LAST_TIME_TOKEN, lastTimeToken);
     }
 
@@ -914,6 +914,15 @@ public class PreferenceUtil {
 
     public static void setHssOpModeWritableMarkerMigration() {
         setBooleanPreference(HSS_OP_MODE_WRITABLE_MARKER_MIGRATION, true);
+    }
+
+
+    public static boolean areZonesLocallySynced() {
+        return getBooleanPreference(LOCALLY_SYNC_SCHEDULE);
+    }
+
+    public static void setZonesLocallySynced() {
+        setBooleanPreference(LOCALLY_SYNC_SCHEDULE, true);
     }
 
     public static boolean getHyperStatThermistorConfigMigration() {

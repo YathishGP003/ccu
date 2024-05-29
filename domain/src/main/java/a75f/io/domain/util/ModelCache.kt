@@ -68,14 +68,17 @@ object ModelCache {
         modelContainer[MODEL_EXTERNAL_AHU_DAB] = getModelById(MODEL_EXTERNAL_AHU_DAB)
         CcuLog.i(Domain.LOG_TAG, "externalAhuDab model loaded")
 
-        //modelContainer[MODEL_EXTERNAL_AHU_VAV] = getModelById(MODEL_EXTERNAL_AHU_VAV)
-        //CcuLog.i(Domain.LOG_TAG, "externalAhuVav model loaded")
+        modelContainer[MODEL_EXTERNAL_AHU_VAV] = getModelById(MODEL_EXTERNAL_AHU_VAV)
+        CcuLog.i(Domain.LOG_TAG, "externalAhuVav model loaded")
 
         modelContainer[MODEL_VAV_STAGED_RTU] = getModelById(MODEL_VAV_STAGED_RTU)
         CcuLog.i(Domain.LOG_TAG, "VavStaged model loaded")
 
         modelContainer[MODEL_VAV_STAGED_VFD_RTU] = getModelById(MODEL_VAV_STAGED_VFD_RTU)
         CcuLog.i(Domain.LOG_TAG, "VavStagedVfd model loaded")
+
+        modelContainer[MODEL_VAV_ADVANCED_AHU_V2_CM] = getModelById(MODEL_VAV_ADVANCED_AHU_V2_CM)
+        CcuLog.i(Domain.LOG_TAG, "MODEL_VAV_ADVANCED_AHU_V2 model loaded")
     }
 
     private fun loadBypassDamperModels() {
@@ -98,7 +101,7 @@ object ModelCache {
         } else {
             ResourceHelper.loadModel("$MODEL_ASSET_PREFIX$modelId.json")
         }
-        CcuLog.i(Domain.LOG_TAG, "Model Loaded from FS ${model.name}  ${model.version?.major}\" + \".${model.version?.minor}.${model.version?.patch}")
+        CcuLog.i(Domain.LOG_TAG, "Model Loaded from FS ${model.name}  ${model.version?.major}.${model.version?.minor}.${model.version?.patch}")
         modelContainer[modelId] = model
         return model
     }

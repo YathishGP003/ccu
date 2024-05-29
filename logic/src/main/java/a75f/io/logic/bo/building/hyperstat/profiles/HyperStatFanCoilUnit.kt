@@ -11,7 +11,6 @@ import a75f.io.logic.bo.building.hvac.StandaloneFanStage
  */
 
 abstract class HyperStatFanCoilUnit: HyperStatProfile(){
-    private var fanEnabledStatus = false
     /* Flags for checking if the current stage is lowest
     *  Eg: If FAN MEDIUM and FAN HIGH is used, then FAN MEDIUM is the lowest stage */
     private var lowestStageFanLow = false

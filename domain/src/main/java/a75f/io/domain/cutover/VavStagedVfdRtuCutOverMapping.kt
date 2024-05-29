@@ -94,7 +94,7 @@ object VavStagedVfdRtuCutOverMapping {
         "satSPTrim" to "satSpTrim",
         "satTimeInterval" to "satTimeInterval",
         "satIgnoreRequest" to "satIgnoreRequest",
-        "satSPRes" to "satSpResMax",
+        "satSPRes" to "satSpRes",
         "satSPResMax" to "satSpResMax",
         "satTimeDelay" to "satTimeDelay",
 

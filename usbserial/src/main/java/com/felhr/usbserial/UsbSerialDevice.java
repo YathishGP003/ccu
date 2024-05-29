@@ -388,7 +388,11 @@ public abstract class UsbSerialDevice implements UsbSerialInterface
 					resetTimer();
 					break;
 				case ADDR_BYTE_RCVD:
-					modbusState = ModbusState.FUNC_BYTE_RCVD;
+					if (inData == 0x10) {
+						modbusState = ModbusState.READ_ADDR1;
+					} else {
+						modbusState = ModbusState.FUNC_BYTE_RCVD;
+					}
 					inDataBuffer[nCurIndex++] = inData;
 					break;
 				case FUNC_BYTE_RCVD:
@@ -396,6 +400,25 @@ public abstract class UsbSerialDevice implements UsbSerialInterface
 					inDataBuffer[nCurIndex++] = inData;
 					nDataLength = inData & 0xff;
 					break;
+
+				//Specifically for writes (10) which sends response back in a different format from the reads.
+				case READ_ADDR1:
+					modbusState = ModbusState.READ_ADDR2;
+					inDataBuffer[nCurIndex++] = inData;
+					break;
+				case READ_ADDR2:
+					modbusState = ModbusState.LEN_BYTE1;
+					inDataBuffer[nCurIndex++] = inData;
+					break;
+				case LEN_BYTE1:
+					modbusState = ModbusState.LEN_BYTE2;
+					inDataBuffer[nCurIndex++] = inData;
+					break;
+				case LEN_BYTE2:
+					modbusState = ModbusState.DATA_BYTE_RCVD;
+					inDataBuffer[nCurIndex++] = inData;
+					break;
+
 				case LEN_BYTE_RCVD:
 				case DATA_BYTE_RCVD:
 					modbusState = ModbusState.DATA_BYTE_RCVD;
@@ -667,6 +690,7 @@ public abstract class UsbSerialDevice implements UsbSerialInterface
 	private enum ModbusState
 	{
 		PARSE_INIT, ADDR_BYTE_RCVD, FUNC_BYTE_RCVD, LEN_BYTE_RCVD,
+		READ_ADDR1, READ_ADDR2, LEN_BYTE1, LEN_BYTE2,
 		DATA_BYTE_RCVD, CRC_BYTE_RCVD, BAD_PACKET, DATA_AVAILABLE
 	}
 }

@@ -5,8 +5,6 @@ import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusRelative;
 import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
 
-import android.util.Log;
-
 import org.apache.commons.lang3.StringUtils;
 import org.projecthaystack.HDict;
 

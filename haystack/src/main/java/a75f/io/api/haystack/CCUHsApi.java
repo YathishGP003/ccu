@@ -13,7 +13,6 @@ import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.Looper;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.widget.Toast;
 
 import org.apache.commons.lang3.StringUtils;
@@ -146,10 +145,10 @@ public class CCUHsApi
 
     @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
     public void onDatabaseLoad(DatabaseEvent event) {
-        Log.i("CCU_DB", "Event Type:: " + event.getSerialAction().name());
+        CcuLog.i("CCU_DB", "Event Type:: " + event.getSerialAction().name());
         if (event.getSerialAction() == DatabaseAction.MESSAGE_DATABASE_LOADED_SUCCESS) {
             //postProcessingInit();
-            Log.i("CCU_DB", "post processing done- launch ui");
+            CcuLog.i("CCU_DB", "post processing done- launch ui");
             //setCcuDbReady(true);
             finishInitRemainingTasks();
 
@@ -176,7 +175,7 @@ public class CCUHsApi
     }
 
     public boolean isBacNetEnabled() {
-        return defaultSharedPrefs.getBoolean("UseBACnet", false);
+        return defaultSharedPrefs.getBoolean("isBACnetinitialized", false);
     }
 
     // Check whether we've migrated kind: "string" to kind: "Str".  If not, run the migration.
@@ -220,7 +219,7 @@ public class CCUHsApi
     }
 
     public String getHSUrl() {
-        Log.d("Haystack URL: ","url="+hayStackUrl);
+        CcuLog.d("Haystack URL: ","url="+hayStackUrl);
         return hayStackUrl;
     }
 
@@ -254,7 +253,7 @@ public class CCUHsApi
 
 
     public String getAuthenticationUrl() {
-        Log.d("Authentication URL: ","url="+careTakerUrl);
+        CcuLog.d("Authentication URL: ","url="+careTakerUrl);
         return careTakerUrl;
     }
     public void trimZoneSchedules(Schedule buildingSchedule) {
@@ -342,7 +341,7 @@ public class CCUHsApi
                     }
                 }
                 if (zoneSchedule.getRoomRef()!= null && intervalSpills.size() > 0) {
-                    Log.d("CCU_MESSAGING", "Trimmed Zone Schedule " + zoneSchedule.toString());
+                    CcuLog.d("CCU_MESSAGING", "Trimmed Zone Schedule " + zoneSchedule.toString());
                     CCUHsApi.getInstance().updateZoneSchedule(zoneSchedule, zoneSchedule.getRoomRef());
                 }
             }
@@ -350,7 +349,7 @@ public class CCUHsApi
     }
 
     public String getGatewayServiceUrl() {
-        Log.d("gatewayServiceUrl : ","url="+gatewayServiceUrl);
+        CcuLog.d("gatewayServiceUrl : ","url="+gatewayServiceUrl);
         return gatewayServiceUrl;
     }
 
@@ -375,7 +374,7 @@ public class CCUHsApi
         s.setLastModifiedDateTime(HDateTime.make(System.currentTimeMillis()));
         s.setLastModifiedBy(CCUHsApi.getInstance().getCCUUserName());
         String siteId = tagsDb.addSite(s);
-        Log.i("CCU_HS"," add Site "+siteId);
+        CcuLog.i("CCU_HS"," add Site "+siteId);
         syncStatusService.addUnSyncedEntity(StringUtils.prependIfMissing(siteId, "@"));
         return siteId;
     }
@@ -734,7 +733,7 @@ public class CCUHsApi
 
     public void updateZoneLocally(Zone z, String id)
     {
-        Log.i("ccu_read_changes","updateZoneLocally  "+z.getScheduleRef());
+        CcuLog.i("ccu_read_changes","updateZoneLocally  "+z.getScheduleRef());
         z.setCcuRef(getCcuId());
         tagsDb.updateZone(z, id);
     }
@@ -1199,7 +1198,8 @@ public class CCUHsApi
         HashMap<Object, Object> point = readEntity(query);
         Object id = point.get("id");
         if (id == null || id == "") {
-            return null;
+            CcuLog.d("CCU_HS","readPointPriorityValByQuery point id is null : "+query);
+            return 0.0;
         }
 
         return readPointPriorityVal(id.toString());
@@ -1398,6 +1398,12 @@ public class CCUHsApi
         syncStatusService.addDeletedEntity(id, false);
         tagsDb.clearHistory(HRef.copy(id));
         HisItemCache.getInstance().delete(id);
+
+        if(isBacNetEnabled()) {
+            Intent intent = new Intent(INTENT_POINT_DELETED);
+            intent.putExtra("message", id);
+            context.sendBroadcast(intent);
+        }
     }
 
     public void deleteEntityLocally(String id) {
@@ -1555,7 +1561,7 @@ public class CCUHsApi
     public void setSynced(String id)  {
 
         if (id == null || id.isEmpty()) {
-            Log.e("CCU_HS", "id null or empty in set synced");
+            CcuLog.e("CCU_HS", "id null or empty in set synced");
             return;
         }
         syncStatusService.setEntitySynced(id);
@@ -1641,7 +1647,7 @@ public class CCUHsApi
         EntityParser p = new EntityParser(remoteSite);
         Site s = p.getSite();
         addRemoteSite(s, siteId);
-        Log.d("CCU_HS_EXISTINGSITESYNC","Added Site "+s.getId());
+        CcuLog.d("CCU_HS_EXISTINGSITESYNC","Added Site "+s.getId());
 
         HClient hClient = new HClient(getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
 
@@ -1739,7 +1745,7 @@ public class CCUHsApi
                 buildingOccupancy.setSiteRef(siteId);
                 CCUHsApi.getInstance().addSchedule(guid, buildingOccupancy.getBuildingOccupancyHDict());
                 CCUHsApi.getInstance().setSynced(StringUtils.prependIfMissing(guid, "@"));
-                Log.d(TAG, "Import building Occupancy completed");
+                CcuLog.d(TAG, "Import building Occupancy completed");
             }
         } catch (UnknownRecException e) {
             e.printStackTrace();
@@ -1880,7 +1886,7 @@ public class CCUHsApi
                             if (defaultVal == 0) {
                                 HDict pid = new HDictBuilder().add("id", HRef.copy(p.getId())).toDict();
                                 hDicts.add(pid);
-                                Log.d(TAG, "No default value for point: " + pid.dis());
+                                CcuLog.d(TAG, "No default value for point: " + pid.dis());
                             }
                         }
                     }
@@ -1954,7 +1960,7 @@ public class CCUHsApi
                     if (defaultVal == 0) {
                         HDict pid = new HDictBuilder().add("id", HRef.copy(p.getId())).toDict();
                         scheduleDicts.add(pid);
-                        Log.d(TAG, "No default value for point: " + pid.dis());
+                        CcuLog.d(TAG, "No default value for point: " + pid.dis());
                     }
                 }
             }
@@ -2110,7 +2116,7 @@ public class CCUHsApi
 
     public void updateCCU(String ccuName, String installerEmail, String ahuRef, String managerEmail)
     {
-        Log.d("CCU_HS","updateCCUahuRef "+ahuRef);
+        CcuLog.d("CCU_HS","updateCCUahuRef "+ahuRef);
         HashMap ccu = read("device and ccu");
 
         if (ccu.size() == 0) {
@@ -2140,7 +2146,7 @@ public class CCUHsApi
 
     public void unRegisterCCU(String ccuName, String installerEmail, String ahuRef, String managerEmail)
     {
-        Log.d("CCU_HS","updateCCUahuRef "+ahuRef);
+        CcuLog.d("CCU_HS","updateCCUahuRef "+ahuRef);
         HashMap ccu = read("device and ccu");
 
         if (ccu.size() == 0) {
@@ -2209,7 +2215,7 @@ public class CCUHsApi
     }
     public void updateCCUahuRef(String ahuRef) {
 
-        Log.d("CCU_HS","updateCCUahuRef "+ahuRef);
+        CcuLog.d("CCU_HS","updateCCUahuRef "+ahuRef);
         HashMap ccu = read("device and ccu");
 
         if (ccu.size() == 0) {
@@ -2357,7 +2363,7 @@ public class CCUHsApi
         else
             filter = "schedule and zone and not named and not special and vacation and roomRef == "+zoneId;
 
-        Log.d("CCU_HS"," getZoneSchedule : "+filter);
+        CcuLog.d("CCU_HS"," getZoneSchedule : "+filter);
         if(filter != null) {
 
             HGrid scheduleHGrid = tagsDb.readAll(filter);
@@ -2394,7 +2400,7 @@ public class CCUHsApi
     {
         tagsDb.addHDict(localId, scheduleDict);
 
-        Log.i("CCH_HS", "updateScheduleDict: " + scheduleDict.toZinc());
+        CcuLog.i("CCH_HS", "updateScheduleDict: " + scheduleDict.toZinc());
         syncStatusService.addUnSyncedEntity(StringUtils.prependIfMissing(localId, "@"));
     }
 
@@ -2407,7 +2413,7 @@ public class CCUHsApi
         else
             tagsDb.addHDict(schedule.getId(), schedule.getScheduleHDict());
 
-        Log.i("CCH_HS", "updateSchedule: " + schedule.getScheduleHDict().toZinc());
+        CcuLog.i("CCH_HS", "updateSchedule: " + schedule.getScheduleHDict().toZinc());
         syncStatusService.addUpdatedEntity(StringUtils.prependIfMissing(schedule.getId(), "@"));
     }
 
@@ -2415,7 +2421,7 @@ public class CCUHsApi
     {
         tagsDb.addHDict(buildingOccupancy.getId(), buildingOccupancy.getBuildingOccupancyHDict());
 
-        Log.i("CCH_HS", "updateBuildingOccupancy: " + buildingOccupancy.getBuildingOccupancyHDict().toZinc());
+        CcuLog.i("CCH_HS", "updateBuildingOccupancy: " + buildingOccupancy.getBuildingOccupancyHDict().toZinc());
         syncStatusService.addUpdatedEntity(StringUtils.prependIfMissing(buildingOccupancy.getId(), "@"));
     }
 
@@ -2423,7 +2429,7 @@ public class CCUHsApi
     {
         schedule.setLastModifiedDateTime(HDateTime.make(System.currentTimeMillis()));
         tagsDb.addHDict(schedule.getId(), schedule.getZoneScheduleHDict(zoneId));
-        Log.i("CCU_HS", "updateZoneSchedule: " + schedule.getZoneScheduleHDict(zoneId).toZinc());
+        CcuLog.i("CCU_HS", "updateZoneSchedule: " + schedule.getZoneScheduleHDict(zoneId).toZinc());
         syncStatusService.addUpdatedEntity(StringUtils.prependIfMissing(schedule.getId(), "@"));
     }
 
@@ -2434,7 +2440,7 @@ public class CCUHsApi
 
     public void updateScheduleNoSync(Schedule schedule, String zoneId) {
         tagsDb.addHDict(schedule.getId(), (zoneId == null ? schedule.getScheduleHDict() : schedule.getZoneScheduleHDict(zoneId)));
-        Log.i("CCU_HS", "updateScheduleNoSync: "+schedule.getId()+" " + (zoneId == null ? schedule.getScheduleHDict().toZinc(): schedule.getZoneScheduleHDict(zoneId).toZinc()));
+        CcuLog.i("CCU_HS", "updateScheduleNoSync: "+schedule.getId()+" " + (zoneId == null ? schedule.getScheduleHDict().toZinc(): schedule.getZoneScheduleHDict(zoneId).toZinc()));
     }
 
     public void updateHDictNoSync(String entityId, HDict scheduleDict){
@@ -2453,7 +2459,7 @@ public class CCUHsApi
         try {
             hDict = tagsDb.readById(HRef.copy(scheduleRef));
         } catch (UnknownRecException e) {
-            Log.d("CCU_HS", " getScheduleById : Schedule not found !! - " +scheduleRef);
+            CcuLog.d("CCU_HS", " getScheduleById : Schedule not found !! - " +scheduleRef);
             importSchedule(scheduleRef);
         }
         return hDict == null ? null : new Schedule.Builder().setHDict(hDict).build() ;
@@ -2485,14 +2491,14 @@ public class CCUHsApi
                         HRow r = hisGrid.row(hisGrid.numRows() - 1);
                         HDateTime date = (HDateTime) r.get("ts");
                         double preconVal = Double.parseDouble(r.get("val").toString());
-                        Log.d("CCU_HS", "RemotePreconRate , " + date + " : " + preconVal);
+                        CcuLog.d("CCU_HS", "RemotePreconRate , " + date + " : " + preconVal);
                         return preconVal;
                     }
                 }
             }
         }catch (Exception e) {
             e.printStackTrace();
-            Log.d("CCU_HS","getPredictedPreconRate Failed : Fall back to default precon rate");
+            CcuLog.d("CCU_HS","getPredictedPreconRate Failed : Fall back to default precon rate");
         }
 
         return 0;
@@ -2523,7 +2529,7 @@ public class CCUHsApi
                             HDateTime date = (HDateTime) r.get("ts");
                             //Remove unicode chars and units. 48.32°F ->48.32
                             double tempVal = Double.parseDouble(r.get("val").toString().replaceAll("[^-?\\d.]", ""));
-                            Log.d("CCU_OAO",date+" External Temp: "+tempVal);
+                            CcuLog.d("CCU_OAO",date+" External Temp: "+tempVal);
                             return tempVal;
 
                         }
@@ -2563,7 +2569,7 @@ public class CCUHsApi
                             HRow r = hisGrid.row(hisGrid.numRows() - 1);
                             HDateTime date = (HDateTime) r.get("ts");
                             double humidityVal = Double.parseDouble(r.get("val").toString().replaceAll("[^\\d.]", ""));
-                            Log.d("CCU_OAO", date + " External Humidity: " + humidityVal);
+                            CcuLog.d("CCU_OAO", date + " External Humidity: " + humidityVal);
                             return 100 * humidityVal;
 
                         }
@@ -2625,7 +2631,7 @@ public class CCUHsApi
         editor.putBoolean("isCcuRegistered",true);
         editor.commit();
         setCcuReady();
-        Log.d("CCU_HS", "CCU Registered");
+        CcuLog.d("CCU_HS", "CCU Registered");
     }
 
     public void setCcuUnregistered() {
@@ -2634,7 +2640,7 @@ public class CCUHsApi
         editor.remove("isCcuRegistered");
         editor.commit();
         resetCcuReady();
-        Log.d("CCU_HS", "CCU Unregistered");
+        CcuLog.d("CCU_HS", "CCU Unregistered");
     }
 
     public boolean isNetworkConnected() {
@@ -2657,7 +2663,7 @@ public class CCUHsApi
         HashMap site = CCUHsApi.getInstance().read("site");
         CcuLog.i("CCURegInfo","registerCcu");
         if (siteSynced() && CCUHsApi.getInstance().isNetworkConnected()) {
-            Log.d("CCURegInfo","The CCU is not registered, but the site is created with ID " + getSiteIdRef().toString());
+            CcuLog.d("CCURegInfo","The CCU is not registered, but the site is created with ID " + getSiteIdRef().toString());
             HashMap<Object, Object> ccu = CCUHsApi.getInstance().readEntity("device and ccu");
 
             String ccuLuid = Objects.toString(ccu.get(CcuFieldConstants.ID),"");
@@ -2675,7 +2681,7 @@ public class CCUHsApi
                 JSONObject ccuRegistrationRequest = getCcuRegisterJson(ccuLuid, getSiteIdRef().toString(),
                         dis, ahuRef, gatewayRef, equipRef, facilityManagerEmail, installEmail, null);
                 if (ccuRegistrationRequest != null) {
-                    Log.d("CCURegInfo","Sending CCU registration request: " + ccuRegistrationRequest);
+                    CcuLog.d("CCURegInfo","Sending CCU registration request: " + ccuRegistrationRequest);
                     String ccuRegistrationResponse = HttpUtil.executeJson(
                             CCUHsApi.getInstance().getAuthenticationUrl()+"devices",
                             ccuRegistrationRequest.toString(),
@@ -2683,22 +2689,22 @@ public class CCUHsApi
                             true,
                             HttpConstants.HTTP_METHOD_POST
                     );
-                    Log.d("CCURegInfo","Registration response: " + ccuRegistrationResponse);
+                    CcuLog.d("CCURegInfo","Registration response: " + ccuRegistrationResponse);
 
                     if (ccuRegistrationResponse != null) {
                         completeRegistration(ccuRegistrationResponse, ccuLuid);
                     }
                 }
             } else {
-                Log.d("CCURegInfo","The CCU is synced, id: " + ccuLuid + " and the token is " + CCUHsApi.getInstance().getJwt());
+                CcuLog.d("CCURegInfo","The CCU is synced, id: " + ccuLuid + " and the token is " + CCUHsApi.getInstance().getJwt());
                 // TODO Matt Rudd - Need mechanism to handle the token being null here but the GUID existing; may happen in edge cases
                 CCUHsApi.getInstance().setCcuRegistered();
                 if (StringUtils.isBlank(CCUHsApi.getInstance().getJwt())) {
-                    Log.e("CCURegInfo", "There was a fatal error registering the CCU. The GUID is set, but the token is unavailable.");
+                    CcuLog.e("CCURegInfo", "There was a fatal error registering the CCU. The GUID is set, but the token is unavailable.");
                 }
             }
         } else {
-            Log.e("CCURegInfo","Registration cannot be completed now  - siteSynced : "+siteSynced());
+            CcuLog.e("CCURegInfo","Registration cannot be completed now  - siteSynced : "+siteSynced());
             new Handler(Looper.getMainLooper()).post(() -> {
                 Toast.makeText(context, "CCU cannot be completed at the moment. Please complete registration by clicking REGISTER button ", LENGTH_LONG).show();
                 importNamedSchedule(hsClient);
@@ -2759,14 +2765,14 @@ public class CCUHsApi
 
         } catch (JSONException jsonException) {
             ccuJsonRequest = null;
-            Log.e("CCURegInfo","Unable to construct a valid CCU registration request", jsonException);
+            CcuLog.e("CCURegInfo","Unable to construct a valid CCU registration request", jsonException);
         }
 
         return ccuJsonRequest;
     }
 
     public void completeRegistration(String ccuRegistrationResponse, String ccuId) {
-        Log.d("CCURegInfo", "completeRegistration");
+        CcuLog.d("CCURegInfo", "completeRegistration");
         try {
             JSONObject ccuRegistrationResponseJson = new JSONObject(ccuRegistrationResponse);
             String ccuGuid = ccuRegistrationResponseJson.getString("id");
@@ -2774,7 +2780,7 @@ public class CCUHsApi
             setSynced(ccuId);
             setJwt(token);
             setCcuRegistered();
-            Log.d("CCURegInfo","CCU was successfully registered with ID " + ccuGuid + "; token " + token);
+            CcuLog.d("CCURegInfo","CCU was successfully registered with ID " + ccuGuid + "; token " + token);
             defaultSharedPrefs.edit().putLong("ccuRegistrationTimeStamp", System.currentTimeMillis()).apply();
             new Handler(Looper.getMainLooper()).post(() -> {
                 Toast.makeText(context, "CCU Registered Successfully ", LENGTH_LONG).show();
@@ -2787,10 +2793,10 @@ public class CCUHsApi
     }
 
     public void publishRegistrationSuccessful() {
-        Log.d("CCURegInfo", "RegistrationCompletedListeners count "+onCcuRegistrationCompletedListeners.size());
+        CcuLog.d("CCURegInfo", "RegistrationCompletedListeners count "+onCcuRegistrationCompletedListeners.size());
         onCcuRegistrationCompletedListeners.forEach( listener -> {
             listener.onRegistrationCompleted(this);
-            Log.d("CCURegInfo", "RegistrationCompletedListener "+listener);
+            CcuLog.d("CCURegInfo", "RegistrationCompletedListener "+listener);
         } );
     }
 
@@ -3049,7 +3055,7 @@ public class CCUHsApi
         HDictBuilder b = new HDictBuilder()
                              .add("ccuId", HRef.copy(ccuId));
         HDict[] dictArr = {b.toDict()};
-        Log.d("CCU_HS", "removeCCU API call");
+        CcuLog.d("CCU_HS", "removeCCU API call");
         return HttpUtil.executePost(CCUHsApi.getInstance().getHSUrl() + "removeCCU/",
                                     HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
     }
@@ -3173,7 +3179,7 @@ public class CCUHsApi
 
     public void updateSchedulable(HGrid zoneScheduleGrid,boolean isZone) {
         if (zoneScheduleGrid != null) {
-            Log.d("CCU_SCHEDULABLE", "in updateSchedulabe = " + zoneScheduleGrid.numRows());
+            CcuLog.d("CCU_SCHEDULABLE", "in updateSchedulabe = " + zoneScheduleGrid.numRows());
 
             CCUHsApi ccuHsApi = CCUHsApi.getInstance();
             List<HashMap> pointMaps = ccuHsApi.HGridToList(zoneScheduleGrid);
@@ -3443,7 +3449,7 @@ public class CCUHsApi
         return readEntity("point and default and domainName == \""+domainName+"\"");
     }
     private HGrid invokeWithRetry(String op, HClient hClient, HGrid req){
-        RetryCountCallback retryCountCallback = retryCount -> Log.i("CCU_SCHEDULABLE", "retrying to get CCU list with the retry count " + retryCount);
+        RetryCountCallback retryCountCallback = retryCount -> CcuLog.i("CCU_SCHEDULABLE", "retrying to get CCU list with the retry count " + retryCount);
         HGrid responseHGrid;
         try{
             responseHGrid = hClient.invoke(op, req,retryCountCallback);
@@ -3535,9 +3541,12 @@ public class CCUHsApi
         return null;
     }
 
+    public void setCcuLogLevel(double ccuLogLevel) {
+        CCUHsApi.ccuLogLevel = (int) ccuLogLevel;
+    }
     public int getCcuLogLevel() {
         try {
-            if(ccuLogLevel > 0){
+            if(ccuLogLevel >= 0){
                 return ccuLogLevel;
             }
             if(!isCCURegistered())
@@ -3548,7 +3557,7 @@ public class CCUHsApi
             ccuLogLevel =  CCUHsApi.getInstance().readHisValById(entity.get("id").toString()).intValue();
             return ccuLogLevel;
         } catch (IllegalStateException e) {
-            Log.e("CcuLog", "hayStack is not initialized");
+            CcuLog.e("CcuLog", "hayStack is not initialized");
             return 0;
         }
 

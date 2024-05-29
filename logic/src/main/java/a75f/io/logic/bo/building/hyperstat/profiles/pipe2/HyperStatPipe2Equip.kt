@@ -3,6 +3,7 @@ package a75f.io.logic.bo.building.hyperstat.profiles.pipe2
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Point
 import a75f.io.api.haystack.Tags
+import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.BaseProfileConfiguration
 import a75f.io.logic.bo.building.definitions.Port
@@ -20,7 +21,6 @@ import a75f.io.logic.bo.haystack.device.HyperStatDevice
 import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint.Companion.addOTAStatusPoint
 import a75f.io.logic.tuners.HyperStat2PipeTuners
 import a75f.io.logic.util.RxTask
-import android.util.Log
 
 /**
  * Created by Manjunath K on 01-08-2022.
@@ -59,7 +59,7 @@ class HyperStatPipe2Equip(val node: Short): HyperStatEquip()  {
     fun initEquipReference(node: Short) {
         val equip = haystack.read("equip and hyperstat and pipe2 and fcu and group == \"$node\"")
         if (equip.isEmpty()) {
-            Log.i(L.TAG_CCU_HSPIPE2, " Unable to find the equip details for node $node ")
+            CcuLog.e(L.TAG_CCU_HSPIPE2, " Unable to find the equip details for node $node ")
             return
         }
         equipRef = equip["id"].toString()
@@ -82,7 +82,7 @@ class HyperStatPipe2Equip(val node: Short): HyperStatEquip()  {
     ) {
         val config = baseConfig as HyperStatPipe2Configuration
 
-        Log.i(L.TAG_CCU_HSPIPE2, "New Profile  Initialising Points: ")
+        CcuLog.d(L.TAG_CCU_HSPIPE2, "New Profile  Initialising Points: ")
         nodeAddress = node.toInt()
         floorRef = floor
         roomRef = room
@@ -100,7 +100,7 @@ class HyperStatPipe2Equip(val node: Short): HyperStatEquip()  {
             roomRef!!, floorRef!!,config.priority.toString(),nodeAddress.toString(),
             equipDis!!, ProfileType.HYPERSTAT_TWO_PIPE_FCU , arrayOf(Tags.FCU)
         )
-        Log.i(L.TAG_CCU_HSPIPE2, "New Profile  New Equip Created: $equipRef")
+        CcuLog.d(L.TAG_CCU_HSPIPE2, "New Profile  New Equip Created: $equipRef")
 
         // Init required reference
         init(HyperstatProfileNames.HSPIPE2, equipRef!!,floorRef!!,roomRef!!,nodeAddress,equipDis!!)
@@ -109,16 +109,16 @@ class HyperStatPipe2Equip(val node: Short): HyperStatEquip()  {
         createHyperstatTunerPoints(
             equipRef!!, equipDis!!, roomRef!!, floorRef!!
         )
-        Log.i(L.TAG_CCU_HSPIPE2, "New Profile  Tuners Created")
+        CcuLog.d(L.TAG_CCU_HSPIPE2, "New Profile  Tuners Created")
 
         // Create config points
         createProfileConfigurationPoints(hyperStatConfig = config)
 
-        Log.i(L.TAG_CCU_HSPIPE2, "New Profile Profile configuration points are created ")
+        CcuLog.d(L.TAG_CCU_HSPIPE2, "New Profile Profile configuration points are created ")
         // Create Logical Points
         createProfileLogicalPoints(hyperStatConfig = config)
 
-        Log.i(L.TAG_CCU_HSPIPE2, "New Profile  logical points are created")
+        CcuLog.d(L.TAG_CCU_HSPIPE2, "New Profile  logical points are created")
 
         configHyperStatDevice(config, profileEquip)
 
@@ -217,7 +217,7 @@ class HyperStatPipe2Equip(val node: Short): HyperStatEquip()  {
             analogInConfigPoints, thConfigPointsList, userIntentPointsList,
             co2ConfigPointsList, loopOutputPoints,vocPmPointsList, deviceDisplayConfigPoints
         )
-        Log.i(L.TAG_CCU_HSPIPE2, "adding : points default value ")
+        CcuLog.d(L.TAG_CCU_HSPIPE2, "adding : points default value ")
         hyperStatPointsUtil.addPointsListToHaystackWithDefaultValue(listOfAllPoints = allConfigPoints)
 
     }
@@ -226,7 +226,7 @@ class HyperStatPipe2Equip(val node: Short): HyperStatEquip()  {
     //Function to create Logical Points
     private fun createProfileLogicalPoints(hyperStatConfig: HyperStatPipe2Configuration) {
 
-        Log.i(L.TAG_CCU_HSPIPE2, "createProfileLogicalPoints: ")
+        CcuLog.d(L.TAG_CCU_HSPIPE2, "createProfileLogicalPoints: ")
 
         val temperaturePointsList: MutableList<Triple<Point, Any, Any>> = hyperStatPointsUtil
             .temperatureScheduleLogicalPoints()
@@ -261,7 +261,7 @@ class HyperStatPipe2Equip(val node: Short): HyperStatEquip()  {
         masterPoints.putAll(hyperStatPointsUtil.addPointsToHaystack(listOfAllPoints = analogInPointsList))
         masterPoints.putAll(hyperStatPointsUtil.addPointsToHaystack(listOfAllPoints = thermistorInPointsList))
 
-        Log.i(L.TAG_CCU_HSPIPE2, "Done with Logical points creation")
+        CcuLog.d(L.TAG_CCU_HSPIPE2, "Done with Logical points creation")
     }
 
 
@@ -590,7 +590,7 @@ class HyperStatPipe2Equip(val node: Short): HyperStatEquip()  {
     // Update configuration
     // Function to update the existing profile
     override fun updateConfiguration(configuration: BaseProfileConfiguration) {
-        Log.i(L.TAG_CCU_HSPIPE2, "===========Hyperstat profile Update  ============")
+        CcuLog.d(L.TAG_CCU_HSPIPE2, "===========Hyperstat profile Update  ============")
 
         val updatedHyperStatConfig =  configuration as HyperStatPipe2Configuration
         val presetConfiguration = getConfiguration()
@@ -607,7 +607,7 @@ class HyperStatPipe2Equip(val node: Short): HyperStatEquip()  {
         updateThermistorInConfig(newConfiguration = updatedHyperStatConfig, existingConfiguration = presetConfiguration)
 
         LogicalPointsUtil.cleanPipe2LogicalPoints(updatedHyperStatConfig,equipRef!!)
-        Log.i(L.TAG_CCU_HSPIPE2, "Profile update has been completed  ")
+        CcuLog.d(L.TAG_CCU_HSPIPE2, "Profile update has been completed  ")
         haystack.syncEntityTree()
 
     }
@@ -757,7 +757,7 @@ class HyperStatPipe2Equip(val node: Short): HyperStatEquip()  {
         val fanMediumPointId = hsHaystackUtil.readPointID("$analogOutTag and output and medium")
         val fanHighPointId = hsHaystackUtil.readPointID("$analogOutTag and output and high")
 
-        Log.i(L.TAG_CCU_HSPIPE2, "Reconfiguration changeIn $changeIn")
+        CcuLog.d(L.TAG_CCU_HSPIPE2, "Reconfiguration changeIn $changeIn")
 
 
         // Do the update when change is found in configuration
@@ -799,7 +799,7 @@ class HyperStatPipe2Equip(val node: Short): HyperStatEquip()  {
         if (fanMediumPointId != null) hsHaystackUtil.removePoint(fanMediumPointId)
         if (fanHighPointId != null) hsHaystackUtil.removePoint(fanHighPointId)
 
-        Log.i(L.TAG_CCU_HSPIPE2, "Reconfiguration analogOutState.enabled ${analogOutState.enabled}")
+        CcuLog.d(L.TAG_CCU_HSPIPE2, "Reconfiguration analogOutState.enabled ${analogOutState.enabled}")
         DeviceUtil.setPointEnabled(nodeAddress, physicalPort.name, analogOutState.enabled)
         if (analogOutState.enabled) {
 
@@ -855,10 +855,10 @@ class HyperStatPipe2Equip(val node: Short): HyperStatEquip()  {
         }
     }
 
-    fun updateFanMode(config: HyperStatPipe2Configuration) {
+    private fun updateFanMode(config: HyperStatPipe2Configuration) {
         val fanLevel = HyperStatAssociationUtil.getPipe2SelectedFanLevel(config)
         val curFanSpeed = hsHaystackUtil.readPointValue("zone and sp and fan and operation and mode")
-        Log.i(L.TAG_CCU_HSPIPE2, "updateFanMode: fanLevel $fanLevel curFanSpeed $curFanSpeed")
+        CcuLog.d(L.TAG_CCU_HSPIPE2, "updateFanMode: fanLevel $fanLevel curFanSpeed $curFanSpeed")
         val fallbackFanSpeed: Double = if(fanLevel == 0) { 0.0 } else {
             if (fanLevel > 0 && curFanSpeed.toInt() != StandaloneFanStage.AUTO.ordinal) {
                 StandaloneFanStage.AUTO.ordinal.toDouble()
@@ -866,7 +866,7 @@ class HyperStatPipe2Equip(val node: Short): HyperStatEquip()  {
                 curFanSpeed
             }
         }
-        Log.i(L.TAG_CCU_HSPIPE2, "updateFanMode: fallbackFanSpeed $fallbackFanSpeed")
+        CcuLog.d(L.TAG_CCU_HSPIPE2, "updateFanMode: fallbackFanSpeed $fallbackFanSpeed")
         hsHaystackUtil.writeDefaultVal("zone and sp and fan and operation and mode", fallbackFanSpeed)
         CCUHsApi.getInstance().writeHisValByQuery(
             "zone and sp and fan and operation and mode and equipRef == \"$equipRef\"",
@@ -920,7 +920,7 @@ class HyperStatPipe2Equip(val node: Short): HyperStatEquip()  {
         ) {
             updateAnalogInDetails(newConfiguration.analogIn2State, "analog2", Port.ANALOG_IN_TWO)
         }
-        Log.i(L.TAG_CCU_HSPIPE2, "updateAnalogInConfig: Done")
+        CcuLog.d(L.TAG_CCU_HSPIPE2, "updateAnalogInConfig: Done")
     }
 
     private fun updateThermistorInConfig(

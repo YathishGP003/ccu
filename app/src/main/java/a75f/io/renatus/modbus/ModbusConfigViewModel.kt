@@ -238,7 +238,7 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
 
     private fun isValidConfiguration(): Boolean {
 
-        if (equipModel.value.parameters.isEmpty()) {
+        if (modelName.value.contentEquals("Select Model")) {
             showToast(context.getString(R.string.no_device_paired), context)
             return false
         }

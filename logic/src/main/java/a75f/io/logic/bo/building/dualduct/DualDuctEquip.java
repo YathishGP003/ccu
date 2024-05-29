@@ -215,7 +215,7 @@ public class DualDuctEquip {
                                     .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("current")
                                     .addMarker("his").addMarker("cur").addMarker("logical")
                                     .setGroup(String.valueOf(nodeAddr))
-                                    .setUnit("\u00B0F")
+                                    .setUnit("°F")
                                     .setTz(tz)
                                     .build();
         BacnetUtilKt.addBacnetTags(currentTemp,BacnetIdKt.CURRENTTEMPID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
@@ -285,7 +285,7 @@ public class DualDuctEquip {
                                           .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("discharge")
                                           .addMarker("his").addMarker("logical")
                                           .setGroup(String.valueOf(nodeAddr))
-                                          .setUnit("\u00B0F")
+                                          .setUnit("°F")
                                           .setTz(tz)
                                           .build();
         BacnetUtilKt.addBacnetTags(dischargeAirTemp,BacnetIdKt.SUPPLYAIRTEMP1ID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
@@ -303,7 +303,7 @@ public class DualDuctEquip {
                                 .addMarker("zone").addMarker("air").addMarker("temp").addMarker("desired").addMarker("dualDuct").addMarker("average")
                                 .addMarker("sp").addMarker("writable").addMarker("his").addMarker("userIntent")
                                 .setGroup(String.valueOf(nodeAddr))
-                                .setUnit("\u00B0F")
+                                .setUnit("°F")
                                 .setTz(tz)
                                 .build();
         BacnetUtilKt.addBacnetTags(desiredTemp,BacnetIdKt.DESIREDTEMPID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
@@ -419,7 +419,7 @@ public class DualDuctEquip {
                                            .addMarker("zone").addMarker("air").addMarker("temp").addMarker("desired").addMarker("dualDuct").addMarker("cooling")
                                            .addMarker("sp").addMarker("writable").addMarker("his").addMarker("userIntent")
                                            .setGroup(String.valueOf(nodeAddr))
-                                           .setUnit("\u00B0F")
+                                           .setUnit("°F")
                                            .setTz(tz)
                                            .build();
         BacnetUtilKt.addBacnetTags(desiredTempCooling,BacnetIdKt.CMCOOLINGDESIREDTEMPID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
@@ -436,7 +436,7 @@ public class DualDuctEquip {
                                            .addMarker("zone").addMarker("air").addMarker("temp").addMarker("desired").addMarker("dualDuct").addMarker("heating")
                                            .addMarker("sp").addMarker("writable").addMarker("his").addMarker("userIntent")
                                            .setGroup(String.valueOf(nodeAddr))
-                                           .setUnit("\u00B0F")
+                                           .setUnit("°F")
                                            .setTz(tz)
                                            .build();
         BacnetUtilKt.addBacnetTags(desiredTempHeating,BacnetIdKt.CMHEATINGDESIREDTEMPID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
@@ -670,7 +670,7 @@ public class DualDuctEquip {
                                          .addMarker("config").addMarker("dualDuct").addMarker("writable").addMarker("zone")
                                          .addMarker("temperature").addMarker("offset").addMarker("sp").addMarker("his")
                                          .setGroup(String.valueOf(nodeAddr))
-                                         .setUnit("\u00B0F")
+                                         .setUnit("°F")
                                          .setTz(tz)
                                          .build();
         BacnetUtilKt.addBacnetTags(temperatureOffset,BacnetIdKt.TEMPERATUREOFFSETID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
@@ -1266,7 +1266,7 @@ public class DualDuctEquip {
                                            .addMarker("cooling").addMarker("supply")
                                            .addMarker("his").addMarker("logical")
                                            .setGroup(String.valueOf(nodeAddr))
-                                           .setUnit("\u00B0F")
+                                           .setUnit("°F")
                                            .setTz(tz)
                                            .build();
             BacnetUtilKt.addBacnetTags(coolingAirflowTemp,BacnetIdKt.SUPPLYAIRTEMP2ID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
@@ -1285,7 +1285,7 @@ public class DualDuctEquip {
                                            .addMarker("heating").addMarker("supply")
                                            .addMarker("his").addMarker("logical")
                                            .setGroup(String.valueOf(nodeAddr))
-                                           .setUnit("\u00B0F")
+                                           .setUnit("°F")
                                            .setTz(tz)
                                            .build();
             String heatingAirflowTempId = CCUHsApi.getInstance().addPoint(heatingAirflowTemp);
@@ -1370,7 +1370,7 @@ public class DualDuctEquip {
     
     public boolean needsRecreatingLogicalPoints(DualDuctProfileConfiguration curConfig,
                                               DualDuctProfileConfiguration newConfig) {
-    
+
         if (curConfig.getAnalogOut1Config() != newConfig.getAnalogOut1Config() ||
             curConfig.getAnalogOut2Config() != newConfig.getAnalogOut2Config() ||
             curConfig.getAnalog1OutAtMinDamperHeating() != newConfig.getAnalog1OutAtMinDamperHeating() ||

@@ -4,7 +4,6 @@ import static a75f.io.api.haystack.util.TimeUtil.getEndHour;
 import static a75f.io.api.haystack.util.TimeUtil.getEndMinute;
 import static a75f.io.api.haystack.util.TimeUtil.getEndSec;
 
-import android.util.Log;
 
 import org.joda.time.DateTime;
 import org.projecthaystack.HNum;
@@ -52,7 +51,7 @@ public class SystemScheduleUtil {
             
             if (!manual) {
                 HashMap overrideLevel = getAppOverride(point.getId());
-                Log.d(L.TAG_CCU_SCHEDULER, " OverrideLevel : "+overrideLevel);
+                CcuLog.d(L.TAG_CCU_SCHEDULER, " OverrideLevel : "+overrideLevel);
                 if (overrideLevel == null) {
                     return;
                 }
@@ -119,7 +118,7 @@ public class SystemScheduleUtil {
             } else
             {
                 HashMap overrideLevel = getAppOverride(point.getId());
-                Log.d(L.TAG_CCU_SCHEDULER, " Desired Temp OverrideLevel : " + overrideLevel);
+                CcuLog.d(L.TAG_CCU_SCHEDULER, " Desired Temp OverrideLevel : " + overrideLevel);
                 if (overrideLevel == null) {
                     return;
                 }
@@ -132,7 +131,7 @@ public class SystemScheduleUtil {
                     for (int l = 9; l <= values.size(); l++)
                     {
                         HashMap valMap = ((HashMap) values.get(l - 1));
-                        Log.d(L.TAG_CCU_SCHEDULER, " Desired Temp Override : " + valMap);
+                        CcuLog.d(L.TAG_CCU_SCHEDULER, " Desired Temp Override : " + valMap);
                         if (valMap.get("duration") != null && valMap.get("val") != null)
                         {
                             long d = (long) Double.parseDouble(valMap.get("duration").toString());
@@ -274,7 +273,7 @@ public class SystemScheduleUtil {
             for (int l = 9; l <= values.size(); l++)
             {
                 HashMap valMap = ((HashMap) values.get(l - 1));
-                Log.d(L.TAG_CCU_SCHEDULER, " Desired Temp Override : " + valMap);
+                CcuLog.d(L.TAG_CCU_SCHEDULER, " Desired Temp Override : " + valMap);
                 if (valMap.get("duration") != null && valMap.get("val") != null)
                 {
                     long d = (long) Double.parseDouble(valMap.get("duration").toString());
@@ -304,7 +303,7 @@ public class SystemScheduleUtil {
         {
             for (int l = 9; l <= values.size() ; l++ ) {
                 HashMap valMap = ((HashMap) values.get(l-1));
-                Log.d(L.TAG_CCU_SCHEDULER, "getAppOverride : "+valMap);
+                CcuLog.d(L.TAG_CCU_SCHEDULER, "getAppOverride : "+valMap);
                 if (valMap.get("duration") != null && valMap.get("val") != null ) {
                     long dur = (long) Double.parseDouble(valMap.get("duration").toString());
                     if (dur == 0) {
@@ -328,7 +327,7 @@ public class SystemScheduleUtil {
      */
     public static void setAppOverrideExpiry(Point point, long overrRideExpiryseconds) {
         HashMap overrideLevel = getAppOverride(point.getId());
-        Log.d(L.TAG_CCU_SCHEDULER, " setAppOverrideExpiry : overrideLevel " + overrideLevel);
+        CcuLog.d(L.TAG_CCU_SCHEDULER, " setAppOverrideExpiry : overrideLevel " + overrideLevel);
         if (overrideLevel == null) {
             return;
         }
@@ -339,7 +338,7 @@ public class SystemScheduleUtil {
             for (int l = 9; l <= values.size(); l++)
             {
                 HashMap valMap = ((HashMap) values.get(l - 1));
-                Log.d(L.TAG_CCU_SCHEDULER, "setAppOverrideExpiry : " + valMap);
+                CcuLog.i(L.TAG_CCU_SCHEDULER, "setAppOverrideExpiry : " + valMap);
                 if (valMap.get("duration") != null && valMap.get("val") != null)
                 {
                     long d = (long) Double.parseDouble(valMap.get("duration").toString());
@@ -372,7 +371,7 @@ public class SystemScheduleUtil {
      * @param p
      */
     public static void handleScheduleTypeUpdate(Point p){
-        CcuLog.d(L.TAG_CCU_SCHEDULER, " ScheduleType handleScheduleTypeUpdate "+p.getDisplayName());
+        CcuLog.i(L.TAG_CCU_SCHEDULER, " ScheduleType handleScheduleTypeUpdate "+p.getDisplayName());
     
         HSUtil.printPointArr(p, L.TAG_CCU_SCHEDULER);//TODO- Added 12/01: Remove once zone schedule issue is fixed.
         if (p.getRoomRef() == null || p.getRoomRef().contains("SYSTEM")) {

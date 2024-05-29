@@ -5,7 +5,6 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.SystemClock;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,7 +53,7 @@ public class BearerTokenManager{
         callAsync.enqueue(new Callback<BearerToken>() {
             @Override
             public void onResponse(Call<BearerToken> call, Response<BearerToken> response) {
-                Log.d(L.TAG_CCU_JOB, " BearerTokenManagerService : fetchToken response "+response);
+                CcuLog.d(L.TAG_CCU_JOB, " BearerTokenManagerService : fetchToken response "+response);
                 if (response != null && response.isSuccessful()) {
                     BearerToken token = response.body();
                     CcuLog.d(L.TAG_CCU_JOB, "BearerTokenManagerService: Set new token " + token.getAccessToken());

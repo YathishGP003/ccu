@@ -1,7 +1,5 @@
 package a75f.io.logic.bo.building.otn;
 
-import android.util.Log;
-
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
 
@@ -127,12 +125,6 @@ public class OTNProfile extends ZoneProfile {
         double systemDefaultTemp = 72.0;
 
 
-        /*Log.d(L.TAG_BPOS, "occupied = " + occupied
-                + "isAutoforceoccupiedenabled = " + isAutoforceoccupiedenabled
-                + "isAutoawayenabled = " + isAutoawayenabled
-                + "occupancyvalue = " + occupancyvalue
-                + "occDetPoint = " + occDetPoint);*/
-
         if (roomTemp > setTempCooling) {
             //Zone is in Cooling
             if (state != COOLING) {
@@ -225,7 +217,7 @@ public class OTNProfile extends ZoneProfile {
         Occupied occuStatus =
             ScheduleManager.getInstance().getOccupiedModeCache(HSUtil.getZoneIdFromEquipId(equipRef));
 
-        Log.d(L.TAG_OTN, "occupied = " + occuStatus
+        CcuLog.d(L.TAG_OTN, "occupied = " + occuStatus
                 + "occupancyModeval = " + occupancyModeval
                 + "occupancysensor = " + occupancysensor);
 
@@ -255,25 +247,25 @@ public class OTNProfile extends ZoneProfile {
                             (double) Occupancy.AUTOFORCEOCCUPIED.ordinal());
 
                     updateDesiredtemp(desiredAvgTemp,true);
-                    Log.i(L.TAG_OTN, "Falling in FORCE Occupy mode");
+                    CcuLog.i(L.TAG_OTN, "Falling in FORCE Occupy mode");
                 } else {
-                    Log.i(L.TAG_OTN, "We are already in force occupy");
+                    CcuLog.i(L.TAG_OTN, "We are already in force occupy");
                     // We are already in force occupy
                     // Just update with latest
                     updateDesiredtemp(desiredAvgTemp,false);
                 }
             } else {
-                Log.d(L.TAG_OTN, "Occupant not detected in unoccupied mode");
+                CcuLog.d(L.TAG_OTN, "Occupant not detected in unoccupied mode");
                 if (occupancyModeval == Occupancy.AUTOFORCEOCCUPIED.ordinal() && differenceInMinutes <= 0) {
                     resetForceOccupy();
                 }
             }
         } else {
             // Reset everything if there was force occupied condition
-            Log.d(L.TAG_OTN, "We are back to occupied");
-            Log.d(L.TAG_OTN, "occupancyModeval = "+occupancyModeval);
+            CcuLog.d(L.TAG_OTN, "We are back to occupied");
+            CcuLog.d(L.TAG_OTN, "occupancyModeval = "+occupancyModeval);
             if (occupancyModeval == Occupancy.AUTOFORCEOCCUPIED.ordinal()) {
-                Log.d(L.TAG_OTN, "Move to to occupied status");
+                CcuLog.d(L.TAG_OTN, "Move to to occupied status");
                 resetForceOccupy();
             }
         }
@@ -289,7 +281,7 @@ public class OTNProfile extends ZoneProfile {
     }
 
     private void resetForceOccupy() {
-        Log.d(L.TAG_OTN, "Resetting the resetForceOccupy: ");
+        CcuLog.d(L.TAG_OTN, "Resetting the resetForceOccupy: ");
         CCUHsApi.getInstance().writeHisValByQuery("point and  otn and occupancy  and his and " +
                 "mode and equipRef == \"" + mOTNEquip.mEquipRef + "\"", 0.0);
         CCUHsApi.getInstance().writeHisValByQuery("point and  otn and occupancy  and his and " +
@@ -306,7 +298,7 @@ public class OTNProfile extends ZoneProfile {
     }
 
     private void updateDesiredtemp(Double avgDesiredTemp,boolean isFirstTime) {
-        Log.d(L.TAG_OTN, "  updateDesiredtemp ++");
+        CcuLog.d(L.TAG_OTN, "  updateDesiredtemp ++");
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap<Object,Object> equipMap =
                 hayStack.readEntity("equip and group == \"" + mOTNEquip.mNodeAddr + "\"");
@@ -378,11 +370,11 @@ public class OTNProfile extends ZoneProfile {
                 "point and  otn and occupancy and detection and his and equipRef  == \"" + mOTNEquip.mEquipRef + "\"");
 
         if (occupied && occupancyModeval != Occupancy.AUTOFORCEOCCUPIED.ordinal()) {
-            Log.d(L.TAG_OTN,"  auto away handle");
+            CcuLog.d(L.TAG_OTN,"  auto away handle");
             //if the oocupantnotdetected for autoAwayTimer
             // then enter autoaway
             if (!occupancysensor) {
-                Log.d(L.TAG_OTN, "  auto away case -  occDetPoint <= 0");
+                CcuLog.d(L.TAG_OTN, "  auto away case -  occDetPoint <= 0");
                 //check if there was no detection from past autoawaytimer
                 HisItem hisItem =
                         CCUHsApi.getInstance().curRead(Objects.requireNonNull(ocupancyDetection.get("id")).toString());
@@ -393,7 +385,7 @@ public class OTNProfile extends ZoneProfile {
                         "and away and " +
                         "time ", mOTNEquip.mEquipRef);
 
-                Log.d(L.TAG_OTN, "  auto away case -  min = " + min + " autoawaytime ="
+                CcuLog.d(L.TAG_OTN, "  auto away case -  min = " + min + " autoawaytime ="
                         + autoawaytime + "lastupdatedtime" + lastupdatedtime);
 
                 if (min >= autoawaytime && occupancyModeval != (double) Occupancy.AUTOAWAY.ordinal()) {
@@ -421,7 +413,7 @@ public class OTNProfile extends ZoneProfile {
                 }
             }
         }else {
-            Log.d(L.TAG_OTN, "  auto away case -  reset to occupied");
+            CcuLog.d(L.TAG_OTN, "  auto away case -  reset to occupied");
             clearlevel3Override();
 
         }

@@ -1,5 +1,6 @@
 package a75f.io.renatus.profiles.system
 
+import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
 import a75f.io.renatus.composables.DropDownWithLabel
 import a75f.io.renatus.composables.SystemAnalogOutMappingView
@@ -8,6 +9,7 @@ import a75f.io.renatus.compose.ComposeUtil
 import a75f.io.renatus.compose.ToggleButtonStateful
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -50,12 +52,14 @@ open class ModulatingRtuFragment : Fragment() {
             },
             mappingText = "Cooling",
             analogOutValList = (0..100).map { it.toDouble().toString() },
-            analogOutVal = viewModel.viewState.analogOut1CoolingTestSignal.toInt(),
+            analogOutVal =(0..100).map{it}.indexOf(viewModel.viewState.analogOut1CoolingTestSignal.toInt()),
             onAnalogOutChanged = {
                 viewModel.viewState.analogOut1CoolingTestSignal = it.toDouble()
                 viewModel.sendAnalogRelayTestSignal(DomainName.analog1Out, it.toDouble());
             },
-            dropDownWidth = 80
+            dropDownWidthPreview = 100,
+            dropdownWidthExpanded = 120,
+            mappingTextSpacer = 193
         )
         Spacer(modifier = Modifier.height(14.dp))
 
@@ -68,12 +72,14 @@ open class ModulatingRtuFragment : Fragment() {
             },
             mappingText = "Fan Speed",
             analogOutValList = (0..100).map { it.toDouble().toString() },
-            analogOutVal = viewModel.viewState.analogOut2FanSpeedTestSignal.toInt(),
+            analogOutVal =(0..100).map{it}.indexOf(viewModel.viewState.analogOut2FanSpeedTestSignal.toInt()),
             onAnalogOutChanged = {
                 viewModel.viewState.analogOut2FanSpeedTestSignal = it.toDouble()
                 viewModel.sendAnalogRelayTestSignal(DomainName.analog2Out, it.toDouble());
             },
-            dropDownWidth = 80
+            dropDownWidthPreview = 100,
+            dropdownWidthExpanded = 120,
+            mappingTextSpacer = 163
         )
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -86,12 +92,14 @@ open class ModulatingRtuFragment : Fragment() {
             },
             mappingText = "Heating",
             analogOutValList = (0..100).map { it.toDouble().toString() },
-            analogOutVal =   viewModel.viewState.analogOut3HeatingTestSignal.toInt(),
+            analogOutVal = (0..100).map{it}.indexOf(viewModel.viewState.analogOut3HeatingTestSignal.toInt()),
             onAnalogOutChanged = {
                 viewModel.viewState.analogOut3HeatingTestSignal = it.toDouble()
                 viewModel.sendAnalogRelayTestSignal(DomainName.analog3Out, it.toDouble());
             },
-            dropDownWidth = 80
+            dropDownWidthPreview = 100,
+            dropdownWidthExpanded = 120,
+            mappingTextSpacer = 190
         )
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -104,17 +112,19 @@ open class ModulatingRtuFragment : Fragment() {
             },
             mappingText = "OutSide Air",
             analogOutValList = (0..100).map { it.toDouble().toString() },
-            analogOutVal = viewModel.viewState.analogOut4OutSideAirTestSignal.toInt(),
+            analogOutVal = (0..100).map{it}.indexOf(viewModel.viewState.analogOut4OutSideAirTestSignal.toInt()),
             onAnalogOutChanged = {
                 viewModel.viewState.analogOut4OutSideAirTestSignal = it.toDouble()
                 viewModel.sendAnalogRelayTestSignal(DomainName.analog4Out, it.toDouble());
             },
-            dropDownWidth = 80
+            dropDownWidthPreview = 100,
+            dropdownWidthExpanded = 120,
+            mappingTextSpacer = 153
         )
         Spacer(modifier = Modifier.height(14.dp))
 
         SystemAnalogOutMappingViewButtonComposable(
-            analogName = "Relay-3",
+            analogName = "Relay 3",
             analogOutState = viewModel.viewState.isRelay3OutputEnabled,
             onAnalogOutEnabled = {
                 viewModel.viewState.isRelay3OutputEnabled = it
@@ -122,14 +132,14 @@ open class ModulatingRtuFragment : Fragment() {
             },
             mappingText = "Fan Enable",
             paddingLimitEnd = 0,
-            buttonState = false,
+            buttonState = viewModel.getRelayState(DomainName.relay3),
             onTestActivated = {
                 viewModel.sendTestCommand(DomainName.relay3, it);
             }
         )
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(14.dp))
         SystemRelayMappingView(
-            relayText = "Relay-7",
+            relayText = "Relay 7",
             relayState = viewModel.viewState.isRelay7OutputEnabled,
             onRelayEnabled = {
                 viewModel.viewState.isRelay7OutputEnabled = it
@@ -141,7 +151,7 @@ open class ModulatingRtuFragment : Fragment() {
                 viewModel.viewState.relay7Association = it
                 viewModel.saveConfiguration()
             },
-            buttonState = false,
+            buttonState = viewModel.getRelayState(DomainName.relay7),
             onTestActivated = {
                 viewModel.sendTestCommand(DomainName.relay7, it);
             },
@@ -157,20 +167,23 @@ open class ModulatingRtuFragment : Fragment() {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 25.dp, end = 50.dp),
+                .padding(start = 25.dp, end = 0.dp),
             horizontalArrangement = Arrangement.Start
         ) {
             Row {
                 ToggleButtonStateful(defaultSelection = relayState, onEnabled = onRelayEnabled)
                 Spacer(modifier = Modifier.width(30.dp))
-                Text(text = relayText, fontSize = 20.sp)
+                Column {
+                    Spacer(modifier=Modifier.height(6.dp))
+                    Text(text = relayText, fontSize = 20.sp)
+                }
             }
             Spacer(modifier = Modifier.width(75.dp))
             DropDownWithLabel(
                 label = "",
                 list = mapping,
-                previewWidth = 190,
-                expandedWidth = 190,
+                previewWidth = 235,
+                expandedWidth = 253,
                 heightValue = 100,
                 onSelected = onMappingChanged,
                 defaultSelection = mappingSelection,
@@ -179,7 +192,7 @@ open class ModulatingRtuFragment : Fragment() {
 
             var buttonState by remember { mutableStateOf(buttonState) }
             var text by remember { mutableStateOf("OFF") }
-            Spacer(modifier =Modifier.width(160.dp))
+            Spacer(modifier =Modifier.width(102.dp))
             Button(
                 onClick = {
                     buttonState = !buttonState

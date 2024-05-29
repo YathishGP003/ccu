@@ -5,8 +5,6 @@ import static a75f.io.logic.bo.building.ZoneState.COOLING;
 import static a75f.io.logic.bo.building.ZoneState.HEATING;
 import static a75f.io.logic.bo.building.system.SystemController.State;
 
-import android.util.Log;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import org.projecthaystack.HDict;
@@ -315,7 +313,7 @@ public abstract class VavProfile extends ZoneProfile {
             VavTRSystem trSystem = (VavTRSystem) L.ccu().systemProfile.trSystem;
             trSystem.updateSATRequest(getSATRequest(node));
             trSystem.updateCO2Request(getCO2Requests(node));
-            Log.i(L.TAG_CCU_ZONE, "Damper Position before T&R: " + damper.currentPosition);
+            CcuLog.i(L.TAG_CCU_ZONE, "Damper Position before T&R: " + damper.currentPosition);
             trSystem.updateSpRequest(getSpRequests(node));
             trSystem.updateHwstRequest(getHwstRequests(node));
         }
@@ -323,7 +321,7 @@ public abstract class VavProfile extends ZoneProfile {
     
     @Override
     public void updateZonePoints() {
-        Log.d(TAG, " Invalid VAV Unit Type");
+        CcuLog.d(TAG, " Invalid VAV Unit Type");
     }
     
     protected void setDamperLimits(short node, Damper d) {
@@ -447,7 +445,7 @@ public abstract class VavProfile extends ZoneProfile {
     }
 
     public void handleSystemReset() {
-        Log.d("VAV","handleSystemReset");
+        CcuLog.d("VAV","handleSystemReset");
     }
 
     public double getDisplayCurrentTemp()
@@ -497,7 +495,7 @@ public abstract class VavProfile extends ZoneProfile {
     
     class SatResetListener implements TrimResetListener {
         public void handleSystemReset() {
-            Log.d("VAV","handleSATReset");
+            CcuLog.d("VAV","handleSATReset");
             satResetRequest.handleReset();
         }
     }
@@ -509,7 +507,7 @@ public abstract class VavProfile extends ZoneProfile {
     
     class CO2ResetListener implements TrimResetListener {
         public void handleSystemReset() {
-            Log.d("VAV","handleCO2Reset");
+            CcuLog.d("VAV","handleCO2Reset");
             co2ResetRequest.handleReset();
         }
     }
@@ -521,7 +519,7 @@ public abstract class VavProfile extends ZoneProfile {
     
     class SpResetListener implements TrimResetListener {
         public void handleSystemReset() {
-            Log.d("VAV","handleSPReset");
+            CcuLog.d("VAV","handleSPReset");
             spResetRequest.handleReset();
         }
     }
@@ -533,7 +531,7 @@ public abstract class VavProfile extends ZoneProfile {
     
     class HwstResetListener implements TrimResetListener {
         public void handleSystemReset() {
-            Log.d("VAV","handleHWSTReset");
+            CcuLog.d("VAV","handleHWSTReset");
             hwstResetRequest.handleReset();
         }
     }

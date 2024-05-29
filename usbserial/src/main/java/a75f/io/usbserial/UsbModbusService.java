@@ -18,7 +18,6 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.preference.PreferenceManager;
-import android.util.Log;
 
 import com.felhr.usbserial.UsbSerialDevice;
 import com.felhr.usbserial.UsbSerialInterface;
@@ -92,7 +91,7 @@ public class UsbModbusService extends Service {
         @Override
         public void onReceive(Context arg0, Intent arg1) {
             if (arg1.getAction().equals(ACTION_USB_PERMISSION)) {
-                Log.d(TAG, "OnReceive == " + arg1.getExtras().getBoolean(UsbManager.EXTRA_PERMISSION_GRANTED));
+                CcuLog.d(TAG, "OnReceive == " + arg1.getExtras().getBoolean(UsbManager.EXTRA_PERMISSION_GRANTED));
                 boolean granted = arg1.getExtras().getBoolean(UsbManager.EXTRA_PERMISSION_GRANTED);
                 if (granted) // User accepted our USB connection. Try to open the device as a serial port
                 {
@@ -102,14 +101,14 @@ public class UsbModbusService extends Service {
                     //new ConnectionThread().start();
                 } else // User not accepted our USB connection. Send an Intent to the Main Activity
                 {
-                    Log.d(TAG, "USB PERMISSION NOT GRANTED == " + arg1.getAction());
+                    CcuLog.d(TAG, "USB PERMISSION NOT GRANTED == " + arg1.getAction());
                     Intent intent = new Intent(ACTION_USB_PERMISSION_NOT_GRANTED);
                     arg0.sendBroadcast(intent);
                 }
             } else if (arg1.getAction().equals(ACTION_USB_ATTACHED)) {
                 UsbDevice attachedDevice = arg1.getParcelableExtra(UsbManager.EXTRA_DEVICE);
                 if (UsbSerialUtil.isModbusDevice(attachedDevice, context) && !serialPortConnected) {
-                    Log.d(TAG,"Modbus Serial device connected "+attachedDevice.toString());
+                    CcuLog.d(TAG,"Modbus Serial device connected "+attachedDevice.toString());
                      scheduleUsbConnectedEvent();
                 }
             } else if (arg1.getAction().equals(ACTION_USB_DETACHED)) {
@@ -117,7 +116,7 @@ public class UsbModbusService extends Service {
                 UsbDevice detachedDevice = arg1.getParcelableExtra(UsbManager.EXTRA_DEVICE);
                 if (UsbSerialUtil.isModbusDevice(detachedDevice, context)) {
                     usbPortScanTimer.cancel();
-                    Log.d(TAG,"Modbus Serial device disconnected "+detachedDevice.toString());
+                    CcuLog.d(TAG,"Modbus Serial device disconnected "+detachedDevice.toString());
                     if (serialPortConnected) {
                         serialPort.close();
                         serialPort = null;
@@ -127,7 +126,7 @@ public class UsbModbusService extends Service {
                     arg0.sendBroadcast(intent);
                 }
             }
-            Log.d(TAG,"UsbModbusService: OnReceive == "+arg1.getAction()+","+serialPortConnected);
+            CcuLog.d(TAG,"UsbModbusService: OnReceive == "+arg1.getAction()+","+serialPortConnected);
         }
     };
     
@@ -136,7 +135,7 @@ public class UsbModbusService extends Service {
         usbPortScanTimer = new Timer();
         usbPortScanTimer.schedule(new TimerTask() {
             @Override public void run() {
-                Log.d(TAG, "USB_CONNECTED Event received , Schedule port scan for Modbus device");
+                CcuLog.d(TAG, "USB_CONNECTED Event received , Schedule port scan for Modbus device");
                 findModbusSerialPortDevice();
             }
         }, 1000);
@@ -155,9 +154,9 @@ public class UsbModbusService extends Service {
                         int nMsg;
                         try {
                             nMsg = (data[0] & 0xff);
-                            Log.d(TAG, "onReceivedData: Slave: " + nMsg);
+                            CcuLog.d(TAG, "onReceivedData: Slave: " + nMsg);
                         } catch (ArrayIndexOutOfBoundsException e) {
-                            Log.d(TAG,
+                            CcuLog.d(TAG,
                                     "Modbus Bad message type received: " + String.valueOf(data[0] & 0xff) +
                                             e.getMessage());
                             return;
@@ -207,7 +206,7 @@ public class UsbModbusService extends Service {
         EventBus.getDefault().post(serialEvent);
         
         if (serialInputStream != null) {
-            Log.d(TAG, " Read data from MB : ");
+            CcuLog.d(TAG, " Read data from MB : ");
             serialInputStream.feedSerialData(data);
         }
     }
@@ -229,7 +228,7 @@ public class UsbModbusService extends Service {
             findModbusSerialPortDevice();
         } catch (SecurityException e) {
             //Android throws SecurityException if the application process is not granted android.permission.MANAGE_USB
-            Log.e(TAG, "USB Security Exception", e);
+            CcuLog.e(TAG, "USB Security Exception", e);
             Intent intent = new Intent(ACTION_USB_PERMISSION_NOT_GRANTED);
             UsbModbusService.this.getApplicationContext().sendBroadcast(intent);
         }
@@ -272,7 +271,7 @@ public class UsbModbusService extends Service {
     private void findModbusSerialPortDevice() {
 
         HashMap<String, UsbDevice> usbDevices = usbManager.getDeviceList();
-        Log.d(TAG, "findMBSerialPortDevice = " + usbDevices.size());
+        CcuLog.d(TAG, "findMBSerialPortDevice = " + usbDevices.size());
         if (!usbDevices.isEmpty()) {
             boolean keep = true;
             for (Map.Entry<String, UsbDevice> entry : usbDevices.entrySet()) {
@@ -288,15 +287,15 @@ public class UsbModbusService extends Service {
                             UsbModbusService.this.getApplicationContext().sendBroadcast(intent);
                             keep = true;
                         } else {
-                            Log.d(TAG, "Closing the connection "+connection);
+                            CcuLog.d(TAG, "Closing the connection "+connection);
                             connection.close();
                             Intent intent = new Intent(ACTION_USB_PERMISSION_NOT_GRANTED);
                             UsbModbusService.this.getApplicationContext().sendBroadcast(intent);
                             keep = false;
                         }
-                        Log.d(TAG, "Opened Serial MODBUS device "+device.toString());
+                        CcuLog.d(TAG, "Opened Serial MODBUS device "+device.toString());
                     } else {
-                        Log.d(TAG, "Failed to Open Serial MODBUS device "+device.toString());
+                        CcuLog.d(TAG, "Failed to Open Serial MODBUS device "+device.toString());
                     }
                 } else {
                     connection = null;
@@ -325,7 +324,7 @@ public class UsbModbusService extends Service {
     private void scanSerialPortSilentlyForMbDevice() {
     
         HashMap<String, UsbDevice> usbDevices = usbManager.getDeviceList();
-        Log.d(TAG, "scanSerialPortSilentlyForMbDevice=" + usbDevices.size());
+        CcuLog.d(TAG, "scanSerialPortSilentlyForMbDevice=" + usbDevices.size());
         if (!usbDevices.isEmpty()) {
             connection = null;
             device = null;
@@ -335,16 +334,16 @@ public class UsbModbusService extends Service {
                     boolean success = grantRootPermissionToUSBDevice(device);
                     if(connection != null)
                     {
-                        Log.d(TAG, "Closing the connection "+connection);
+                        CcuLog.d(TAG, "Closing the connection "+connection);
                         connection.close();
                     }
                     connection = usbManager.openDevice(device);
                     if (connection != null && success) {
                         ModbusRunnable modbusRunnable = new ModbusRunnable(device, connection);
                         new Thread(modbusRunnable).start();
-                        Log.d(TAG, "Opened Serial MODBUS device "+device.getDeviceName());
+                        CcuLog.d(TAG, "Opened Serial MODBUS device "+device.getDeviceName());
                     } else {
-                        Log.d(TAG, "Failed to Open Serial MODBUS device "+device.getDeviceName());
+                        CcuLog.d(TAG, "Failed to Open Serial MODBUS device "+device.getDeviceName());
                     }
                 }
                 sleep(1000);
@@ -355,7 +354,7 @@ public class UsbModbusService extends Service {
     private boolean grantRootPermissionToUSBDevice(UsbDevice device) {
         IBinder b = ServiceManager.getService(Context.USB_SERVICE);
         IUsbManager service = IUsbManager.Stub.asInterface(b);
-        Log.i("CCU_SERIAL", "Try connecting!");
+        CcuLog.i("CCU_SERIAL", "Try connecting!");
         // There is a device connected to our Android device. Try to open it as a Serial Port.
         try {
             service.grantDevicePermission(device, getApplicationInfo().uid);
@@ -400,10 +399,10 @@ public class UsbModbusService extends Service {
             while (true) {
                 try {
                     if (!serialPortConnected) {
-                        Log.i(TAG, "MB Serial Port is not connected sleeping");
+                        CcuLog.i(TAG, "MB Serial Port is not connected sleeping");
                         //When only modbus is disconnected
                         if (++reconnectCounter >= 60) {
-                            Log.i(TAG, "scanSerialPortSilentlyForMbDevice");
+                            CcuLog.i(TAG, "scanSerialPortSilentlyForMbDevice");
                             ArrayList<HashMap<Object, Object>> modbusEquips = CCUHsApi.getInstance()
                                                                                       .readAllEntities("equip and modbus");
                             if (modbusEquips.size() > 0) {
@@ -418,13 +417,13 @@ public class UsbModbusService extends Service {
                     if (serialPort != null ) {
                         data = modbusQueue.poll(1, TimeUnit.SECONDS);
                         if (data != null && data.length > 0) {
-                            Log.i(TAG, "Write MB data : " + Arrays.toString(data) +" Hex : "+byteArrayToHex(data));
+                            CcuLog.i(TAG, "Write MB data : " + Arrays.toString(data) +" Hex : "+byteArrayToHex(data));
                             serialPort.write(Arrays.copyOfRange(data, 0, data.length));
                             Thread.sleep(50);
                         }
                     }
                 } catch (Exception exception) {
-                    Log.i(TAG, "Modbus serial transaction failed ", exception);
+                    CcuLog.i(TAG, "Modbus serial transaction failed ", exception);
                     exception.printStackTrace();
                 }
             }
@@ -446,13 +445,7 @@ public class UsbModbusService extends Service {
      * This function will be called from MainActivity to write data through Serial Port
      */
     public void write(byte[] data) {
-        Log.i(TAG, " write TODO");
-        /*if (isConnected()) {
-            messageQueue.add(data);
-        } else {
-            messageQueue.clear();
-            Log.i(TAG, "Serial is disconnected, message discarded");
-        }*/
+        CcuLog.i(TAG, " write TODO");
     }
 
     /*
@@ -465,7 +458,7 @@ public class UsbModbusService extends Service {
 
         } else {
             modbusQueue.clear();
-            Log.i(TAG, "Serial is disconnected, modbus message discarded");
+            CcuLog.i(TAG, "Serial is disconnected, modbus message discarded");
         }
     }
 
@@ -514,11 +507,11 @@ public class UsbModbusService extends Service {
     
         private void configureMbSerialPort() {
             serialPort = UsbSerialDevice.createUsbSerialDevice(device, connection);
-            Log.d(TAG," ModbusRunnable : run serialPortMB "+serialPort+" connection: "+connection);
-            Log.d(TAG," ModbusRunnable : USB Params "+getModbusBaudrate()+" "+getModbusParity()+" "
+            CcuLog.d(TAG," ModbusRunnable : run serialPortMB "+serialPort+" connection: "+connection);
+            CcuLog.d(TAG," ModbusRunnable : USB Params "+getModbusBaudrate()+" "+getModbusParity()+" "
                       +getModbusDataBits()+" "+getModbusStopBits());
             if (serialPort != null) {
-                Log.d(TAG,"device name: "+device);
+                CcuLog.d(TAG,"device name: "+device);
                 if (serialPort.open()) {
                     serialPortConnected = true;
                     serialPort.setBaudRate(getModbusBaudrate());
@@ -547,9 +540,9 @@ public class UsbModbusService extends Service {
                     // Everything went as expected. Send an intent to MainActivity
                     Intent intent = new Intent(ACTION_USB_MODBUS_READY);
                     context.sendBroadcast(intent);
-                    Log.d(TAG,"device opened: - device: "+device);
+                    CcuLog.d(TAG,"device opened: - device: "+device);
                 } else {
-                    Log.d(TAG,"closing USB serial device "+device+"," +
+                    CcuLog.d(TAG,"closing USB serial device "+device+"," +
                             " because this device interface can not be claimed at this moment");
                     serialPort.close();
                     serialPort = null;

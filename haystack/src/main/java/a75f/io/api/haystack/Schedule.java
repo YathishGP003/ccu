@@ -4,9 +4,6 @@ import static a75f.io.api.haystack.util.TimeUtil.getEndHour;
 import static a75f.io.api.haystack.util.TimeUtil.getEndMinute;
 import static a75f.io.api.haystack.util.TimeUtil.getEndSec;
 
-import android.os.Build;
-import android.util.Log;
-
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
@@ -558,7 +555,7 @@ public class Schedule extends Entity
     private static Schedule mergeSpecialScheduleWithZoneSchedule(Set<Schedule.Days> combinedSpecialSchedules,
                                                                  Schedule zoneSchedule, boolean isZone){
         if(combinedSpecialSchedules.isEmpty()){
-            Log.i("CCU_SCHEDULER","schedule with out special schedule "+zoneSchedule);
+            CcuLog.i("CCU_SCHEDULER","schedule with out special schedule "+zoneSchedule);
             return zoneSchedule;
         }
         Set<Schedule.Days> zoneScheduleDays = new TreeSet<>(sortSchedules());
@@ -624,7 +621,7 @@ public class Schedule extends Entity
                 boolean hasOverlap = additions.overlaps(current);
                 if (hasOverlap)
                 {
-                    Log.d("CCU_UI"," hasOverlap "+" additions "+additions+" current "+current);
+                    CcuLog.d("CCU_UI"," hasOverlap "+" additions "+additions+" current "+current);
                     return true;
                 }
                 //If current day is monday , it could conflict with next week's multi-day sunday schedule.
@@ -662,7 +659,7 @@ public class Schedule extends Entity
             boolean hasOverlap = intervalOfAddition.overlaps(current);
             if (hasOverlap)
             {
-                Log.d("CCU_UI"," Current "+current+" new "+intervalOfAddition+" overlaps "+hasOverlap);
+                CcuLog.d("CCU_UI"," Current "+current+" new "+intervalOfAddition+" overlaps "+hasOverlap);
                 if (current.getStart().minuteOfDay().get() < current.getEnd().minuteOfDay().get())
                 {
                     overLaps.add(current.overlap(intervalOfAddition));
@@ -1077,7 +1074,7 @@ public class Schedule extends Entity
             }
         }
         for(Interval i : daysIntervals) {
-            Log.d("CCU_UI", "Scheduled interval for days"+i);
+            CcuLog.d("CCU_UI", "Scheduled interval for days"+i);
         }
         return daysIntervals;
     }
@@ -1330,7 +1327,7 @@ public class Schedule extends Entity
 
     public boolean isActiveVacation()
     {
-        Log.d("CCU_JOB","isActiveVacation  vacStart "+getStartDate().getMillis()+" vacEnd "+getEndDate().getMillis()+" Curr "+MockTime.getInstance().getMockTime());
+        CcuLog.d("CCU_JOB","isActiveVacation  vacStart "+getStartDate().getMillis()+" vacEnd "+getEndDate().getMillis()+" Curr "+MockTime.getInstance().getMockTime());
         Interval interval = new Interval(getStartDate(), getEndDate());
         return interval.contains(MockTime.getInstance().getMockTime());
     }
@@ -1366,7 +1363,7 @@ public class Schedule extends Entity
                     int endSchTime = (d.mEthh * 60) + d.mEtmm;
                     if (curTime > startSchTime && curTime < endSchTime) {
                         d.mCoolingVal = val;
-                        Log.d("CCU_JOB", " Set mCoolingVal : " + val + " day " + day);
+                        CcuLog.d("CCU_JOB", " Set mCoolingVal : " + val + " day " + day);
                         break;
                     }
                 }
@@ -1395,7 +1392,7 @@ public class Schedule extends Entity
                     int endSchTime = (d.mEthh * 60) + d.mEtmm;
                     if (curTime > startSchTime && curTime < endSchTime) {
                         d.mHeatingVal = val;
-                        Log.d("CCU_JOB", " Set mHeatingVal : " + val + " day " + day);
+                        CcuLog.d("CCU_JOB", " Set mHeatingVal : " + val + " day " + day);
                         break;
                     }
                 }

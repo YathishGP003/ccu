@@ -1,7 +1,8 @@
 package a75f.io.alerts;
 
+import static a75f.io.alerts.AlertProcessor.TAG_CCU_ALERTS;
+
 import android.content.Context;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,8 +18,8 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logger.CcuLog;
 import io.reactivex.rxjava3.core.Completable;
 
-/**
- * Created by samjithsadasivan on 4/24/18.
+/*
+  Created by samjithsadasivan on 4/24/18.
  */
 
 /**
@@ -42,6 +43,8 @@ public class AlertManager
     AlertsRepository repo;
 
     private final Context appContext;
+
+    private final HashMap<String, Object> persistentBlockMap= new HashMap<>();
 
     /**
      * Call this when apiBase changes.  Token should not be null, so please include current token.
@@ -90,7 +93,7 @@ public class AlertManager
 
     /**
      * Please only call this from places you know registration is complete.
-     *
+     * <p>
      * Otherwise there will be consequences.
      */
     public static AlertManager getInstance()
@@ -107,7 +110,7 @@ public class AlertManager
     }
 
     public void processAlerts() {
-        Log.i("CCU_ALERTS", "processAlerts: ");
+        CcuLog.d(TAG_CCU_ALERTS, "processAlerts: ");
         if (! repoCheck()) return;
         repo.processAlertDefs();
     }
@@ -190,12 +193,6 @@ public class AlertManager
         return repo.getCurrentOccurrences();
     }
 
-    public List<AlertDefinition> getAlertDefinitions() {
-        if (! repoCheck()) return Collections.emptyList();
-
-        return repo.getAlertDefinitions();
-    }
-    
     public void fixAlert(Alert a) {
         if (! repoCheck()) return;
         repo.fixAlert(a);
@@ -238,7 +235,7 @@ public class AlertManager
 
     private boolean repoCheck() {
         if (repo == null) {
-            CcuLog.d("CCU_ALERTS", "Repository null (no service) in AlertManager");
+            CcuLog.d(TAG_CCU_ALERTS, "Repository null (no service) in AlertManager");
             return false;
         }
         return true;
@@ -262,7 +259,7 @@ public class AlertManager
         }
     }
 
-    /**Fixing Safe mode explicity
+    /**Fixing Safe mode explicitly
      * as this value is set and restarted immediately
      */
     public void fixSafeMode(){
@@ -279,8 +276,8 @@ public class AlertManager
     }
 
 
-    /**Fixing CrashAlert explicity
-     * if there is a upcoming crashalert
+    /**Fixing CrashAlert explicitly
+     * if there is a upcoming crash_alert
      */
     public void fixPreviousCrashAlert(){
         if (! repoCheck()) return;
@@ -288,5 +285,17 @@ public class AlertManager
         for (Alert a: repo.getActiveCrashAlert()){
             fixAlert(a);
         }
+    }
+
+    public void initValue(String key, Object value) {
+        persistentBlockMap.computeIfAbsent(key, k -> value);
+    }
+
+    public void putValue(String key, Object value) {
+        persistentBlockMap.put(key, value);
+    }
+
+    public Object getValue(String key) {
+        return persistentBlockMap.get(key);
     }
 }

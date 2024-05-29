@@ -831,7 +831,7 @@ public class VavStagedRtu extends VavSystemProfile
             String timeZone = CCUHsApi.getInstance().getTimeZone();
     
             Equip systemEquip = new Equip.Builder()
-                                    .setHashMap(CCUHsApi.getInstance().read("system and equip and not modbus")).build();
+                                    .setHashMap(CCUHsApi.getInstance().read("system and equip and not modbus and not connectModule")).build();
     
             if (val <= Stage.COOLING_5.ordinal() && val >= COOLING_1.ordinal()) {
                 if (CCUHsApi.getInstance().read("point and system and cooling and cmd and stage"+newStageNum).isEmpty()) {

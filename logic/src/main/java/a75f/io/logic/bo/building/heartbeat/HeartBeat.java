@@ -5,7 +5,6 @@ import static a75f.io.logic.BacnetUtilKt.addBacnetTags;
 
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
-import a75f.io.api.haystack.Tags;
 import a75f.io.logic.BacnetIdKt;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;

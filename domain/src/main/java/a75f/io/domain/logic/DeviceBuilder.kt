@@ -21,6 +21,7 @@ import io.seventyfivef.domainmodeler.common.point.NumericConstraint
 import io.seventyfivef.ph.core.TagType
 import org.projecthaystack.HBool
 import org.projecthaystack.HStr
+import kotlin.math.log
 
 class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: EntityMapper) {
     fun buildDeviceAndPoints(configuration: ProfileConfiguration, modelDef: SeventyFiveFDeviceDirective, equipRef: String, siteRef : String, deviceDis: String) {
@@ -66,7 +67,7 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
             .setAddr(configuration.nodeAddress)
             .setSiteRef(siteRef)
 
-        modelDef.tags.forEach{ deviceBuilder.addMarker(it.name)}
+        modelDef.tags.filter { it.kind == TagType.MARKER && it.name.lowercase() != "addr"}.forEach{ deviceBuilder.addMarker(it.name)}
 
         deviceBuilder.addTag("sourceModel", HStr.make(modelDef.id))
         deviceBuilder.addTag(
@@ -110,7 +111,7 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
             }
         }
 
-        modelDef.tags.filter { it.kind == TagType.MARKER }.forEach{ pointBuilder.addMarker(it.name)}
+        modelDef.tags.filter { it.kind == TagType.MARKER && it.name.lowercase() != "addr"}.forEach{ pointBuilder.addMarker(it.name)}
 
         /*modelDef.tags.filter { it.kind == TagType.NUMBER }.forEach{ tag ->
             TagsUtil.getTagDefHVal(tag)?.let { pointBuilder.addTag(tag.name, it) }

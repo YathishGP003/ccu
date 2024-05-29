@@ -20,13 +20,13 @@ import androidx.core.content.ContextCompat;
 import android.text.TextPaint;
 import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
 import java.text.DecimalFormat;
 
 import a75f.io.api.haystack.Zone;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.definitions.RoomDataInterface;
@@ -726,7 +726,7 @@ public class SeekArc extends View implements RoomDataInterface
                 {
                     originalDesireTemp = angleProgress;
                 }
-                Log.d("VAV-TEMP", " Set desired "+originalDesireTemp+" desired "+getDesireTemp()+" angle "+angleProgress);
+                CcuLog.d("VAV-TEMP", " Set desired "+originalDesireTemp+" desired "+getDesireTemp()+" angle "+angleProgress);
                 String curTemp = "Desired";
                 mStatusTextPaint.getTextBounds(curTemp, 0, curTemp.length(), bounds);
                 canvas.drawText(curTemp,
@@ -764,7 +764,7 @@ public class SeekArc extends View implements RoomDataInterface
         }
         if (isTouched)
         {
-            Log.d("VAV-TEMP","isTouched");
+            CcuLog.d("VAV-TEMP","isTouched");
             if (getDesireTemp() >= getUserLimitStartPoint() &&
                 getDesireTemp() <= getUserLimitEndPoint())
             {
@@ -798,13 +798,13 @@ public class SeekArc extends View implements RoomDataInterface
         }
         if (isFirstRun)
         {
-            Log.i(TAG, "Is first run");
+            CcuLog.i(TAG, "Is first run");
             String firstTemp;
             if (!isSensorPaired)
             {
                 firstTemp = "Current";
                 mStatusTextPaint.getTextBounds(firstTemp, 0, firstTemp.length(), bounds);
-                Log.i(TAG, "Text Bounds: " + bounds.toString());
+                CcuLog.i(TAG, "Text Bounds: " + bounds.toString());
                 canvas.drawText(firstTemp,
                         cx - ((float) bounds.width() / 2),
                         cy + mStatusTextHeight - ((float) bounds.height() / 2), mStatusTextPaint);
@@ -916,7 +916,7 @@ public class SeekArc extends View implements RoomDataInterface
                         }
                     }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                     
-                    Log.d("CCU_TEMP", " mDesireTemp " + mDesireTemp);
+                    CcuLog.d("CCU_TEMP", " mDesireTemp " + mDesireTemp);
                 }
             }
             else
@@ -1542,7 +1542,6 @@ public class SeekArc extends View implements RoomDataInterface
 
     private void updateProgress(int progress, boolean fromUser)
     {
-        // Log.d(TAG,"Update Prigress----============>>> "+progress);
         if (progress == INVALID_PROGRESS_VALUE)
         {
             return;

@@ -40,7 +40,7 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
     private var fanLoopOutput = 0
     private var doorWindowSensorOpenStatus = false
     private var runFanLowDuringDoorWindow = false
-    lateinit var curState: ZoneState
+    private lateinit var curState: ZoneState
 
     private var analogOutputPoints: HashMap<Int, String> = HashMap()
     private var relayOutputPoints: HashMap<Int, String> = HashMap()
@@ -1343,13 +1343,13 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
      * @return true if the door or window is open and the occupancy status is not UNOCCUPIED, otherwise false.
      */
     private fun checkFanOperationAllowedDoorWindow(equip: HyperStatPipe2Equip): Boolean {
-        if(currentTemp < fetchUserIntents(equip).zoneCoolingTargetTemperature && currentTemp > fetchUserIntents(equip).zoneHeatingTargetTemperature) {
-            return doorWindowSensorOpenStatus &&
+        return if(currentTemp < fetchUserIntents(equip).zoneCoolingTargetTemperature && currentTemp > fetchUserIntents(equip).zoneHeatingTargetTemperature) {
+            doorWindowSensorOpenStatus &&
                     occupancyBeforeDoorWindow != Occupancy.UNOCCUPIED &&
                     occupancyBeforeDoorWindow != Occupancy.DEMAND_RESPONSE_UNOCCUPIED &&
                     occupancyBeforeDoorWindow != Occupancy.VACATION
         } else {
-            return doorWindowSensorOpenStatus
+            doorWindowSensorOpenStatus
         }
     }
 

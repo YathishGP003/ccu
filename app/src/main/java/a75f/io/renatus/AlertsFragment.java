@@ -1,24 +1,19 @@
 package a75f.io.renatus;
 
+import static a75f.io.alerts.AlertProcessor.TAG_CCU_ALERTS;
+import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusTwoDecimal;
+
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
-
-import a75f.io.api.haystack.CCUHsApi;
-import a75f.io.logger.CcuLog;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
-import org.apache.commons.lang3.StringUtils;
-import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
-import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusTwoDecimal;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 
 import java.text.DateFormat;
 import java.text.DecimalFormat;
@@ -26,22 +21,16 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Objects;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import a75f.io.alerts.AlertManager;
-import a75f.io.alerts.AlertSyncHandler;
 import a75f.io.api.haystack.Alert;
-import a75f.io.logic.bo.util.UnitUtils;
+import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.renatus.util.CCUUiUtil;
-import a75f.io.renatus.util.CCUUtils;
 import a75f.io.renatus.views.MasterControl.MasterControlView;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.disposables.Disposable;
-import io.reactivex.rxjava3.functions.Action;
-import io.reactivex.rxjava3.functions.Consumer;
 
 /**
  * Created by samjithsadasivan isOn 8/7/17.
@@ -68,8 +57,7 @@ public class AlertsFragment extends Fragment
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 	                         Bundle savedInstanceState)
 	{
-		View rootView = inflater.inflate(R.layout.alert_fragment, container, false);
-		return rootView;
+        return inflater.inflate(R.layout.alert_fragment, container, false);
 	}
 	
 	@Override
@@ -147,8 +135,8 @@ public class AlertsFragment extends Fragment
 						alertDeleteDisposable =
 							AlertManager.getInstance().deleteAlert(alert)
 									   .observeOn(AndroidSchedulers.mainThread())
-									   .subscribe( () -> CcuLog.i("CCU_ALERT", "delete success"),
-											throwable -> CcuLog.w("CCU_ALERT", "delete failure", throwable));
+									   .subscribe( () -> CcuLog.i(TAG_CCU_ALERTS, "delete success"),
+											throwable -> CcuLog.w(TAG_CCU_ALERTS, "delete failure", throwable));
 					   })
 					.setNegativeButton("Cancel", (dialog, id) -> {
 						//do things
@@ -164,7 +152,7 @@ public class AlertsFragment extends Fragment
 	String formatMessageToCelsius(String alertMessage) {
 
 		StringBuilder sb = new StringBuilder();
-		String[] strings = null;
+		String[] strings;
 		strings = alertMessage.split(" ");
 		try {
 			for (int i = 0; i < strings.length; i++) {
@@ -185,7 +173,7 @@ public class AlertsFragment extends Fragment
 			}
 		}catch (NumberFormatException e) {
 			e.printStackTrace();
-			CcuLog.e("CCU_ALERTS", "Failed to format units in alert message", e);
+			CcuLog.e(TAG_CCU_ALERTS, "Failed to format units in alert message", e);
 			return alertMessage;
 		}
 		return sb.toString();
@@ -211,7 +199,7 @@ public class AlertsFragment extends Fragment
 	@Override
 	public void onStop() {
 		if (alertDeleteDisposable != null) {
-			// Common rxjava pattern to not execute call response if fragment is dead or shuting down.
+			// Common rxjava pattern to not execute call response if fragment is dead or shutting down.
 			alertDeleteDisposable.dispose();
 		}
 		super.onStop();
@@ -231,7 +219,7 @@ public class AlertsFragment extends Fragment
 	public void setMenuVisibility(boolean menuVisible) {
 		super.setMenuVisibility(menuVisible);
 		if (menuVisible) {
-			CcuLog.d("CCU_ALERTS", "menuVisible is visible");
+			CcuLog.d(TAG_CCU_ALERTS, "menuVisible is visible");
 			setAlertList();
 		}
 	}

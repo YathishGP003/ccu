@@ -225,7 +225,7 @@ public class VavReheatProfile extends VavProfile
     }
     
     private void updateReheatDuringSystemCooling(int heatingLoopOp, double roomTemp, String vavEquipId) {
-        Log.i(TAG, "updateReheatDuringSystemCooling: ");
+        CcuLog.i(TAG, "updateReheatDuringSystemCooling: ");
         double maxDischargeTemp = TunerUtil.readTunerValByQuery("max and discharge and air and temp", vavEquipId);
         double heatingLoopOffset = TunerUtil.readTunerValByQuery("offset  and discharge and air and temp", vavEquipId);
         double dischargeTemp = vavEquip.getDischargeAirTemp().readHisVal();

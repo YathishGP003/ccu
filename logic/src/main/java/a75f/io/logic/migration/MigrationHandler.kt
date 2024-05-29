@@ -1,6 +1,7 @@
 package a75f.io.logic.migration
 
 import a75f.io.api.haystack.CCUHsApi
+import a75f.io.api.haystack.Equip
 import a75f.io.api.haystack.HayStackConstants
 import a75f.io.api.haystack.Point
 import a75f.io.api.haystack.Site
@@ -38,7 +39,6 @@ import a75f.io.logic.util.PreferenceUtil
 import a75f.io.logic.util.createOfflineModePoint
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
-import android.util.Log
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import org.projecthaystack.HDict
@@ -48,7 +48,6 @@ import org.projecthaystack.HGridBuilder
 import org.projecthaystack.HRow
 import org.projecthaystack.io.HZincReader
 import org.projecthaystack.io.HZincWriter
-import java.util.*
 
 
 class MigrationHandler (hsApi : CCUHsApi) : Migration {
@@ -74,13 +73,12 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         createMigrationVersionPoint(CCUHsApi.getInstance())
         addSystemDomainEquip(CCUHsApi.getInstance())
 
-        val ccuHsApi = CCUHsApi.getInstance()
-        if (ccuHsApi.readEntity(Tags.SITE).isNotEmpty()) {
+        if (hayStack.readEntity(Tags.SITE).isNotEmpty()) {
             createOfflineModePoint()
-            migrationForDRMode(ccuHsApi)
-            migrateEquipStatusEnums(ccuHsApi)
+            migrationForDRMode()
+            migrateEquipStatusEnums()
             if(!PreferenceUtil.getSingleDualMigrationStatus()) {
-                migrationToHandleInfluenceOfUserIntentOnSentPoints(ccuHsApi)
+                migrationToHandleInfluenceOfUserIntentOnSentPoints()
                 PreferenceUtil.setSingleDualMigrationStatus()
             }
 
@@ -89,16 +87,15 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         if (!isMigrationRequired()) {
             return
         }
-        clearLevel4ValuesOfDesiredTempIfDurationIs0(ccuHsApi)
+        updateAhuRefForTIEquip()
+        clearLevel4ValuesOfDesiredTempIfDurationIs0()
         if (schedulerRevamp.isMigrationRequired()) {
             val ccuHsApi = CCUHsApi.getInstance()
             createMigrationVersionPoint(ccuHsApi)
             val remoteScheduleAblePoint = ccuHsApi.fetchRemoteEntityByQuery("schedulable and" +
-                    " heating and limit and max and default")
-            if(remoteScheduleAblePoint == null)
-                return
+                    " heating and limit and max and default") ?: return
             val sGrid = HZincReader(remoteScheduleAblePoint).readGrid()
-            val it = sGrid.iterator();
+            val it = sGrid.iterator()
             if(!it.hasNext()) {
                 syncZoneSchedulesToCloud(ccuHsApi)
             }
@@ -107,26 +104,33 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         hayStack.scheduleSync()
     }
 
-    private fun clearLevel4ValuesOfDesiredTempIfDurationIs0(ccuHsApi: CCUHsApi) {
-        val listOfDesiredTempPoints: List<HashMap<Any, Any>> = ccuHsApi.readAllEntities("desired and temp and (heating or cooling)")
+    private fun updateAhuRefForTIEquip() {
+        val tiEquipMap = hayStack.readEntity("equip and ti")
+        val equip = Equip.Builder().setHashMap(tiEquipMap).build()
+        equip.ahuRef = hayStack.readId("equip and system and not modbus")
+        hayStack.updateEquip(equip, equip.id)
+    }
+
+    private fun clearLevel4ValuesOfDesiredTempIfDurationIs0() {
+        val listOfDesiredTempPoints: List<HashMap<Any, Any>> = hayStack.readAllEntities("desired and temp and (heating or cooling)")
         listOfDesiredTempPoints.forEach { desiredTempPoint ->
             val desiredTempPointId : String = desiredTempPoint["id"].toString()
-            val priorityGrid : HGrid? = ccuHsApi.readPointArrRemote(desiredTempPointId)
+            val priorityGrid : HGrid? = hayStack.readPointArrRemote(desiredTempPointId)
             priorityGrid?.let { grid ->
                 val iterator: MutableIterator<HRow?>? = grid.iterator() as MutableIterator<HRow?>?
                 while (iterator!=null && iterator.hasNext()) {
                     val r: HRow? = iterator.next()
-                    if ((isLevelCleanable(r) && isLevelToBeCleared(r)) || isAutoAwayMappedToDemandResponseLevel(r, ccuHsApi)) {
-                        ccuHsApi.clearPointArrayLevel(desiredTempPointId, r!!.getInt("level"), false)
+                    if ((isLevelCleanable(r) && isLevelToBeCleared(r)) || isAutoAwayMappedToDemandResponseLevel(r)) {
+                        hayStack.clearPointArrayLevel(desiredTempPointId, r!!.getInt("level"), false)
                     }
                 }
             }
         }
     }
 
-    private fun isAutoAwayMappedToDemandResponseLevel(levelRow: HRow?, ccuHsApi: CCUHsApi): Boolean {
+    private fun isAutoAwayMappedToDemandResponseLevel(levelRow: HRow?): Boolean {
         return levelRow!!.getInt("level") == HayStackConstants.DEMAND_RESPONSE_LEVEL &&
-                !DemandResponse.isDRModeActivated(ccuHsApi)
+                ! DemandResponse.isDRModeActivated(hayStack)
     }
 
     private fun isLevelToBeCleared(levelRow: HRow?): Boolean {
@@ -143,11 +147,11 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             level == HayStackConstants.USER_APP_WRITE_LEVEL }
     }
 
-    private fun migrationToHandleInfluenceOfUserIntentOnSentPoints(ccuHsApi: CCUHsApi) {
-        val standaloneEquips = ccuHsApi.readAllEntities("equip and (hyperstat or smartstat or hyperstatsplit)")
+    private fun migrationToHandleInfluenceOfUserIntentOnSentPoints() {
+        val standaloneEquips = hayStack.readAllEntities("equip and (hyperstat or smartstat or hyperstatsplit)")
         val roomRefs = getRoomRefsForAllStandaloneProfiles(standaloneEquips)
         roomRefs.forEach{roomRef ->
-            DesiredTempDisplayMode.setModeTypeOnUserIntentChange(roomRef, ccuHsApi)
+            DesiredTempDisplayMode.setModeTypeOnUserIntentChange(roomRef, hayStack)
         }
     }
 
@@ -155,14 +159,14 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             List<String> {
         val roomRefs: MutableList<String> = mutableListOf()
         standaloneEquips.forEach {standaloneEquip ->
-            roomRefs.add(standaloneEquip["roomRef"].toString());
+            roomRefs.add(standaloneEquip["roomRef"].toString())
         }
         return roomRefs.distinct()
     }
 
 
-    private fun migrateEquipStatusEnums(ccuHsApi: CCUHsApi) {
-        val equipStatusPointList = ccuHsApi.readAllEntities("status and not ota and not message" +
+    private fun migrateEquipStatusEnums() {
+        val equipStatusPointList = hayStack.readAllEntities("status and not ota and not message" +
                 " and zone and his and enum")
         equipStatusPointList.forEach{equipStatusMap ->
             val equipStatusPoint = Point.Builder().setHashMap(equipStatusMap).build()
@@ -173,30 +177,30 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         }
     }
 
-    private fun migrationForDRMode(ccuHsApi: CCUHsApi) {
+    private fun migrationForDRMode() {
         val demandResponse = DemandResponseMode()
-        val systemProfile = ccuHsApi.readEntity("equip and system and not modbus")
+        val systemProfile = hayStack.readEntity("equip and system and not modbus")
         val displayName = systemProfile[Tags.DIS].toString()
         val siteRef = systemProfile[Tags.SITEREF].toString()
         val id = systemProfile[Tags.ID].toString()
         val tz = systemProfile[Tags.TZ].toString()
-        val demandResponseMode = ccuHsApi.readEntity(
+        val demandResponseMode = hayStack.readEntity(
             "demand and" +
                     " response and not activation and not enable and system and not tuner"
         )
-        val demandResponseEnrollment = ccuHsApi.readEntity(
+        val demandResponseEnrollment = hayStack.readEntity(
             "demand and" +
                     " response and enable and system"
         )
         if (demandResponseMode.size > 0) {
-            ccuHsApi.deleteEntityItem(demandResponseMode["id"].toString())
+            hayStack.deleteEntityItem(demandResponseMode["id"].toString())
         }
         if (demandResponseEnrollment.isEmpty()) {
-            demandResponse.createDemandResponseEnrollmentPoint(displayName, siteRef, id, tz, ccuHsApi
+            demandResponse.createDemandResponseEnrollmentPoint(displayName, siteRef, id, tz, hayStack
             )
         }
-        migrateDemandResponseSetbackTunerForAllTempZones(ccuHsApi)
-        migrateDemandResponseForOccupancyEnum(ccuHsApi)
+        migrateDemandResponseSetbackTunerForAllTempZones(hayStack)
+        migrateDemandResponseForOccupancyEnum(hayStack)
     }
 
     private  fun migrateDemandResponseForOccupancyEnum(ccuHsApi: CCUHsApi) {
@@ -281,7 +285,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                 CCUHsApi.getInstance().hsUrl +
                         "addEntity", HZincWriter.gridToString(zoneScheduleGridData)
             )
-            Log.i(L.TAG_CCU_SCHEDULER, "All zone schedules are synced to cloud$response")
+            CcuLog.i(L.TAG_CCU_SCHEDULER, "All zone schedules are synced to cloud$response")
         }
     }
 
@@ -292,11 +296,10 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         val pi: PackageInfo
         try {
             pi = pm.getPackageInfo("a75f.io.renatus", 0)
-            val version = pi.versionName.substring(
-                pi.versionName.lastIndexOf('_') + 1,
-                pi.versionName.length
+            return pi.versionName.substring(
+                    pi.versionName.lastIndexOf('_') + 1,
+                    pi.versionName.length
             )
-            return version
         } catch (e: PackageManager.NameNotFoundException) {
             // TODO Auto-generated catch block
             e.printStackTrace()
@@ -372,7 +375,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             vavEquip.demandResponseSetback.writeVal(17, 2.0)
 
             deviceBuilder.doCutOverMigration(
-                device.get("id").toString(),
+                device["id"].toString(),
                 deviceModel,
                 deviceDis,
                 NodeDeviceCutOverMapping.entries,
@@ -526,7 +529,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                 CCUHsApi.getInstance().writeDefaultVal("point and diag and migration", currentAppVersion)
             }
         } catch (e: PackageManager.NameNotFoundException) {
-            e.printStackTrace();
+            e.printStackTrace()
         }
     }
 

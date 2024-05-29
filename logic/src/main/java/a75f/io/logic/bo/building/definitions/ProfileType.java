@@ -13,7 +13,8 @@ public enum ProfileType
     TEMP_MONITOR, TEMP_INFLUENCE,DUAL_DUCT,MODBUS_UPS30,MODBUS_UPS400,MODBUS_UPS80,MODBUS_VRF,MODBUS_PAC, MODBUS_WLD,MODBUS_RRS,MODBUS_EM,MODBUS_EMS,MODBUS_ATS,MODBUS_UPS150,MODBUS_BTU,MODBUS_EMR,MODBUS_EMR_ZONE,
     MODBUS_UPS40K,MODBUS_UPSL,MODBUS_UPSV,MODBUS_UPSVL,MODBUS_VAV_BACnet, HYPERSTAT_SENSE, MODBUS_DEFAULT, OTN,
     HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT,HYPERSTAT_HEAT_PUMP_UNIT, HYPERSTAT_TWO_PIPE_FCU, HYPERSTAT_FOUR_PIPE_FCU,
-    HYPERSTAT_VRV, HYPERSTAT_MONITORING, HYPERSTATSPLIT_CPU, VAV_ACB, dabExternalAHUController, vavExternalAHUController, BYPASS_DAMPER;
+    HYPERSTAT_VRV, HYPERSTAT_MONITORING, HYPERSTATSPLIT_CPU, VAV_ACB, dabExternalAHUController, vavExternalAHUController, BYPASS_DAMPER,
+    SYSTEM_VAV_ADVANCED_AHU, SYSTEM_DAB_ADVANCED_AHU;
 
 
     public static ProfileType getProfileTypeForName(String name){
@@ -22,6 +23,9 @@ public enum ProfileType
                 return SYSTEM_VAV_STAGED_RTU;
             case "vavStagedRtuVfdFan":
                 return SYSTEM_VAV_STAGED_VFD_RTU;
+            case "vavAdvancedHybridAhuV2":
+                return SYSTEM_VAV_ADVANCED_AHU;
+            case "vavAdvancedHybridAhuV2_connectModule":
             case "vavFullyModulatingAhu":
                 return SYSTEM_VAV_ANALOG_RTU;
         }

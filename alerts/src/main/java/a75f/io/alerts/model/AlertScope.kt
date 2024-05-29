@@ -1,6 +1,5 @@
 package a75f.io.alerts.model
 
-import a75f.io.logger.CcuLog
 import org.joda.time.DateTime
 
 /**

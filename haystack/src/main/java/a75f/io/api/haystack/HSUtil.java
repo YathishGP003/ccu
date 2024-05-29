@@ -2,8 +2,6 @@ package a75f.io.api.haystack;
 
 import static a75f.io.api.haystack.Tags.BACNET_ID;
 
-import android.util.Log;
-
 import com.google.gson.internal.LinkedTreeMap;
 
 import org.apache.commons.lang3.StringUtils;
@@ -229,7 +227,7 @@ public class HSUtil
                 HashMap valMap = ((HashMap) values.get(l - 1));
                 if (valMap.get("val") != null)
                 {
-                    Log.d("CCU_HS", " Override updated point " + id + " , level: " + l + " , val :" + Double.parseDouble(valMap.get("val").toString())
+                    CcuLog.d("CCU_HS", " Override updated point " + id + " , level: " + l + " , val :" + Double.parseDouble(valMap.get("val").toString())
                                     +" duration: "+Double.parseDouble(valMap.get("duration").toString()));
                 }
             }
@@ -245,7 +243,7 @@ public class HSUtil
                 HashMap valMap = ((HashMap) values.get(l - 1));
                 if (valMap.get("val") != null)
                 {
-                    Log.d(tag,
+                    CcuLog.d(tag,
                           "Updated point " + p.getDisplayName() + " , level: " + l + " , val :" + Double.parseDouble(valMap.get("val").toString())
                                                         +" duration: "+Double.parseDouble(valMap.get("duration").toString()));
                 }
@@ -712,7 +710,7 @@ public class HSUtil
             HashMap currentRoom = CCUHsApi.getInstance().readMapById(zoneID);
             if (currentRoom!= null && currentRoom.size()>0 && currentRoom.containsKey(BACNET_ID) && (Integer.parseInt(currentRoom.get(BACNET_ID).toString())) != 0) {
                 double bacnetID2 = Double.parseDouble(currentRoom.get(BACNET_ID).toString() + "");
-                Log.d(Tags.BACNET, "Already have bacnetID $bacnetID2");
+                CcuLog.d(Tags.BACNET, "Already have bacnetID $bacnetID2");
                 return (int) bacnetID2;
             }
             ArrayList<HashMap<Object, Object>> rooms = CCUHsApi.getInstance().readAllEntities("room");
@@ -721,7 +719,7 @@ public class HSUtil
             allEntities.addAll(rooms);
             allEntities.addAll(equips);
             if (allEntities.size() == 0) {
-                Log.d(Tags.BACNET, "rooms size : 0 ");
+                CcuLog.d(Tags.BACNET, "rooms size : 0 ");
                 return bacnetID;
             }
             while (isBacnetIDUsed) {
@@ -731,7 +729,7 @@ public class HSUtil
                             && Double.parseDouble(room.get(BACNET_ID).toString()) != 0
                             && Double.parseDouble(room.get(BACNET_ID).toString() + "") == bacnetID
                     ) {
-                        Log.d(Tags.BACNET, "In looping over - {bacnetID: ${room[BACNET_ID]} ,tempBacnetID: $bacnetID} - room object: $room");
+                        CcuLog.d(Tags.BACNET, "In looping over - {bacnetID: ${room[BACNET_ID]} ,tempBacnetID: $bacnetID} - room object: $room");
                         bacnetID += 1;
                         isBacnetIDUsed = true;
                         break;
@@ -740,7 +738,7 @@ public class HSUtil
                     }
                 }
             }
-            Log.d(Tags.BACNET, "Generated bacnetID: $bacnetID");
+            CcuLog.d(Tags.BACNET, "Generated bacnetID: $bacnetID");
         } catch (NumberFormatException e) {
             e.printStackTrace();
         }

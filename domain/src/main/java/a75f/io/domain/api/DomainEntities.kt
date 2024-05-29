@@ -1,6 +1,6 @@
 package a75f.io.domain.api
 
-import org.projecthaystack.UnknownRecException
+import java.util.Objects
 
 /**
  * An entity definition that binds its domainName to database UUID.
@@ -102,9 +102,17 @@ open class Point(domainName : String, val equipRef: String) : Entity(domainName)
         if (id.isEmpty() || id.equals("null")) {
             id = domainName.readPoint(equipRef)["id"].toString()
         }
-        if (id.isEmpty()) {
+        /*if (id.isEmpty()) {
             throw IllegalStateException("Invalid point domain name")
+        }*/
+    }
+    fun pointExists() : Boolean {
+        try {
+            requireId()
+        } catch (e: IllegalStateException) {
+            return false
         }
+        return id.isNotEmpty() && id != "null" && id != "@null"
     }
     fun readHisVal() : Double {
         requireId()
@@ -132,8 +140,8 @@ open class Point(domainName : String, val equipRef: String) : Entity(domainName)
         }
     }
     fun readDefaultVal() : Double {
-            requireId()
-            return Domain.hayStack.readDefaultValById(id)
+        requireId()
+        return Domain.hayStack.readDefaultValById(id)
     }
     fun readDefaultStrVal() : String {
         requireId()
@@ -149,6 +157,9 @@ open class Point(domainName : String, val equipRef: String) : Entity(domainName)
         Domain.hayStack.writePoint(id, level, who, writableVal, duration)
     }
 
+    override fun equals(other: Any?)
+            = (other is Point) && this.domainName == other.domainName
+    override fun hashCode() = Objects.hash(domainName)
 }
 
 open class PhysicalPoint(domainName : String, val deviceRef: String) : Entity (domainName) {
@@ -171,6 +182,9 @@ open class PhysicalPoint(domainName : String, val deviceRef: String) : Entity (d
         requireId()
         Domain.hayStack.writeHisValById(id, hisVal)
     }
+
+    override fun equals(other: Any?)
+            = (other is Point) && this.domainName == other.domainName
 }
 /*private fun  <T : Entity> getEntity(entityMap : HashMap<Any, Any>, clazz: KClass<T>) : Entity?{
     val domainName = entityMap["domainName"].toString()
@@ -194,3 +208,4 @@ fun String.readPoint(equipRef: String) : Map <Any, Any>{
 fun String.readPhysicalPoint(deviceRef: String) : Map <Any, Any>{
     return Domain.hayStack.readEntity("point and domainName == \"$this\" and deviceRef == \"$deviceRef\"")
 }
+

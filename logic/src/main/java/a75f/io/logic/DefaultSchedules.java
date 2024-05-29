@@ -1,6 +1,5 @@
 package a75f.io.logic;
 
-import android.util.Log;
 
 import org.joda.time.DateTime;
 import org.projecthaystack.HDate;
@@ -23,6 +22,7 @@ import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Queries;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.tuners.BuildingTunerCache;
 
 public class DefaultSchedules {
@@ -147,7 +147,7 @@ public class DefaultSchedules {
         } else {
             CCUHsApi.getInstance().updateSchedule(localId.toVal(), defaultSchedule.toDict());
         }
-        Log.d("CCU_HS","upsertVacation: "+defaultSchedule.toDict().toZinc());
+        CcuLog.d("CCU_HS","upsertVacation: "+defaultSchedule.toDict().toZinc());
     }
 
     private static HDict buildVacationHDictRange(DateTime startDate, DateTime endDate){
@@ -209,7 +209,7 @@ public class DefaultSchedules {
         } else {
             CCUHsApi.getInstance().updateSchedule(localId.toVal(), defaultSchedule.toDict());
         }
-        Log.d("CCU_HS","upsertZoneVacation: "+defaultSchedule.toDict().toZinc());
+        CcuLog.d("CCU_HS","upsertZoneVacation: "+defaultSchedule.toDict().toZinc());
     }
 
     public static void setDefaultCoolingHeatingTemp(){

@@ -5,7 +5,6 @@ import static a75f.io.logic.bo.building.BackfillUtilKt.addBackFillDurationPointI
 import static a75f.io.logic.util.OfflineModeUtilKt.createOfflineModePoint;
 
 import android.content.Context;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -204,7 +203,7 @@ public abstract class SystemProfile
             }else {
                 //TODO- This cant happen, we are passing an equip with invalid ahuRef/gatewayRef. There should be
                 // some sort of retry mechanism.
-                Log.e(L.TAG_CCU_SYSTEM, "Invalid profile, AhuRef is not updated for " + q.getDisplayName());
+                CcuLog.e(L.TAG_CCU_SYSTEM, "Invalid profile, AhuRef is not updated for " + q.getDisplayName());
             }
             CCUHsApi.getInstance().updateEquip(q, q.getId());
         });
@@ -677,7 +676,7 @@ public abstract class SystemProfile
                 externalHumidity = CCUHsApi.getInstance().getExternalHumidity();
             }
         } catch (Exception e) {
-            Log.d(L.TAG_CCU_OAO, " Failed to read external Temp or Humidity ",e);
+            CcuLog.d(L.TAG_CCU_OAO, " Failed to read external Temp or Humidity ",e);
         }
         
         if (ccu().oaoProfile != null) {
@@ -711,6 +710,13 @@ public abstract class SystemProfile
                 ScheduleManager.getInstance().getSystemOccupancy() != Occupancy.AUTOAWAY &&
                 ScheduleManager.getInstance().getSystemOccupancy() != Occupancy.DEMAND_RESPONSE_UNOCCUPIED &&
                 ScheduleManager.getInstance().getSystemOccupancy() != Occupancy.NONE;
+    }
+
+    public boolean isSystemOccupiedForDcv() {
+        return ScheduleManager.getInstance().getSystemOccupancy() == Occupancy.OCCUPIED ||
+                ScheduleManager.getInstance().getSystemOccupancy() == Occupancy.FORCEDOCCUPIED ||
+                ScheduleManager.getInstance().getSystemOccupancy() == Occupancy.AUTOFORCEOCCUPIED ||
+                ScheduleManager.getInstance().getSystemOccupancy() == Occupancy.DEMAND_RESPONSE_OCCUPIED;
     }
 
     public void reset() {
@@ -901,12 +907,12 @@ public abstract class SystemProfile
 
     public double getSystemLoopOutputValue(String state){
          double systemLoopOPValue = CCUHsApi.getInstance().readPointPriorityValByQuery(state+" and system and loop and output and point");
-         Log.i(L.TAG_CCU_AUTO_COMMISSIONING, "getSystemLoopOutputValue- "+state+": "+systemLoopOPValue);
+         CcuLog.i(L.TAG_CCU_AUTO_COMMISSIONING, "getSystemLoopOutputValue- "+state+": "+systemLoopOPValue);
          return systemLoopOPValue;
     }
 
     public void writeSystemLoopOutputValue(String state, double value){
-        Log.i(L.TAG_CCU_AUTO_COMMISSIONING, "writing "+state+" Loop Output value to HS (default level) "+value);
+        CcuLog.i(L.TAG_CCU_AUTO_COMMISSIONING, "writing "+state+" Loop Output value to HS (default level) "+value);
         CCUHsApi.getInstance().writeDefaultVal(state+" and system and loop and output and point",value);
     }
 
@@ -924,6 +930,22 @@ public abstract class SystemProfile
 
 
     }
+
+    public void deleteSystemConnectModule() {
+        // We don't know exactly when in the System equip deletion/creation cycle this will be invoked.
+        // So, it needs its own Haystack API instance to prevent crashes if "hayStack" is null
+        CCUHsApi hs = CCUHsApi.getInstance();
+        HashMap<Object, Object> connectSystemEquip = hs.readEntity("domainName == \"" + DomainName.vavAdvancedHybridAhuV2_connectModule + "\"");
+        if (connectSystemEquip != null && connectSystemEquip.size() > 0) {
+            hs.deleteEntityTree(connectSystemEquip.get("id").toString());
+        }
+
+        HashMap<Object, Object> connectDevice = hs.readEntity("domainName == \"" + DomainName.connectModuleDevice + "\"");
+        if (connectDevice != null && connectDevice.size() > 0) {
+            hs.deleteEntityTree(connectDevice.get("id").toString());
+        }
+    }
+
     public void createDemandResponseConfigPoints(String equipDis, String siteRef, String equipRef, String tz, CCUHsApi hayStack) {
         DemandResponseMode demandResponseMode = new DemandResponseMode();
         demandResponseMode.createDemandResponseEnrollmentPoint(equipDis, siteRef, equipRef, tz, hayStack);

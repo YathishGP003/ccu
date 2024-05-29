@@ -1,12 +1,20 @@
 package a75f.io.logic.bo.building.hyperstatsplit.common
 
+import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
-import a75f.io.logic.bo.building.hyperstat.profiles.cpu.CpuAnalogOutAssociation
-import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.*
-import a75f.io.logic.bo.building.sensors.SensorType
-import android.util.Log
+import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.AnalogOutState
+import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.CpuEconAnalogOutAssociation
+import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.CpuEconRelayAssociation
+import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.CpuEconSensorBusPressAssociation
+import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.CpuEconSensorBusTempAssociation
+import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuEconConfiguration
+import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.RelayState
+import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.SensorBusPressState
+import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.SensorBusTempState
+import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.UniversalInAssociation
+import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.UniversalInState
 
 /**
  * Created for HyperStat by Manjunath K on 30-07-2021.
@@ -477,22 +485,7 @@ class HyperStatSplitAssociationUtil {
         ): Boolean {
             return isUniversalInMapped(ui1,ui2,ui3,ui4,ui5,ui6,ui7,ui8,UniversalInAssociation.CONDENSATE_NO)
         }
-        fun isAnyUniversalInMappedToGenericVoltage(
-            ui1: UniversalInState, ui2: UniversalInState,
-            ui3: UniversalInState, ui4: UniversalInState,
-            ui5: UniversalInState, ui6: UniversalInState,
-            ui7: UniversalInState, ui8: UniversalInState,
-        ): Boolean {
-            return isUniversalInMapped(ui1,ui2,ui3,ui4,ui5,ui6,ui7,ui8,UniversalInAssociation.GENERIC_VOLTAGE)
-        }
-        fun isAnyUniversalInMappedToGenericResistance(
-            ui1: UniversalInState, ui2: UniversalInState,
-            ui3: UniversalInState, ui4: UniversalInState,
-            ui5: UniversalInState, ui6: UniversalInState,
-            ui7: UniversalInState, ui8: UniversalInState,
-        ): Boolean {
-            return isUniversalInMapped(ui1,ui2,ui3,ui4,ui5,ui6,ui7,ui8,UniversalInAssociation.GENERIC_RESISTANCE)
-        }
+
         fun isAnyUniversalInMappedToCT10(
             ui1: UniversalInState, ui2: UniversalInState,
             ui3: UniversalInState, ui4: UniversalInState,
@@ -1245,21 +1238,6 @@ class HyperStatSplitAssociationUtil {
             }
         }
 
-        // Function which checks that any of the Analog Out is mapped to OAO Damper
-        fun isAnyAnalogOutEnabledAssociatedToOaoDamper(configuration: HyperStatSplitCpuEconConfiguration): Boolean {
-            return when {
-                (configuration.analogOut1State.enabled &&
-                        isAnalogOutAssociatedToOaoDamper(configuration.analogOut1State)) -> true
-                (configuration.analogOut2State.enabled &&
-                        isAnalogOutAssociatedToOaoDamper(configuration.analogOut2State)) -> true
-                (configuration.analogOut3State.enabled &&
-                        isAnalogOutAssociatedToOaoDamper(configuration.analogOut3State)) -> true
-                (configuration.analogOut4State.enabled &&
-                        isAnalogOutAssociatedToOaoDamper(configuration.analogOut4State)) -> true
-                else -> false
-            }
-        }
-
 
         // function which checks the any of the relay is associated to any conditioning
         fun isRelayAssociatedToAnyOfConditioningModes(relayState: RelayState): Boolean{
@@ -1347,7 +1325,7 @@ class HyperStatSplitAssociationUtil {
          * @return the updated lowest value, considering the relay state.
          */
         private fun verifyFanStateLowValue(state: RelayState, lowestValue: Int): Int {
-            if (state.enabled && HyperStatSplitAssociationUtil.isRelayAssociatedToFan(state)
+            if (state.enabled && isRelayAssociatedToFan(state)
                 && state.association.ordinal < lowestValue
             )
                 return state.association.ordinal
@@ -1430,7 +1408,7 @@ class HyperStatSplitAssociationUtil {
                     }
                 }
             } catch (e: ArrayIndexOutOfBoundsException) {
-                Log.i(L.TAG_CCU_HSSPLIT_CPUECON, "Error getSelectedFan function ${e.localizedMessage}")
+                CcuLog.e(L.TAG_CCU_HSSPLIT_CPUECON, "Error getSelectedFan function ${e.localizedMessage}",e)
             }
             return StandaloneFanStage.OFF
         }
@@ -1484,7 +1462,7 @@ class HyperStatSplitAssociationUtil {
                     }
                 }
             } catch (e: ArrayIndexOutOfBoundsException) {
-                Log.i(L.TAG_CCU_HSSPLIT_CPUECON, "Error getSelectedFan function ${e.localizedMessage}")
+                CcuLog.e(L.TAG_CCU_HSSPLIT_CPUECON, "Error getSelectedFan function ${e.localizedMessage}",e)
             }
             return StandaloneFanStage.OFF.ordinal
         }
@@ -1516,83 +1494,44 @@ class HyperStatSplitAssociationUtil {
 
         }
 
-        // Updated Sensor Manager class accordingly. 0-2" duct pressure is already included in HyperStat Sense.
-        fun getSensorNameByType(sensorInputs: UniversalInAssociation): String {
-            /**
-             * These sensor names are constant do not change please refer Sensor Manager class for more info
-             * a75f.io.logic.bo.building.sensors.SensorManager.getExternalSensorListV2
-             */
-
-            return when (sensorInputs) {
-                // These positions are constant sensor position which are available in Sensor manager class
-                UniversalInAssociation.CURRENT_TX_0_10 -> "8"
-                UniversalInAssociation.CURRENT_TX_0_20 -> "9"
-                UniversalInAssociation.CURRENT_TX_0_50 -> "10"
-                UniversalInAssociation.CURRENT_TX_0_100 -> "12"
-                UniversalInAssociation.CURRENT_TX_0_150 -> "13"
-                UniversalInAssociation.DUCT_PRESSURE_0_1 -> "14"
-                UniversalInAssociation.DUCT_PRESSURE_0_2 -> "1"
-                UniversalInAssociation.GENERIC_VOLTAGE -> "0"
-                else -> "8"
-            }
-        }
-
-        private fun updateSelectedFanLevels(
-            association: Int, currentFoundDetails: Triple<Boolean, Boolean, Boolean>,
-            low: Int, medium: Int, high: Int
-        ): Triple<Boolean, Boolean, Boolean> {
-            var currentStatus = currentFoundDetails
-            if (!currentStatus.first) {
-                currentStatus = currentStatus.copy( first = association == low)
-            }
-            if (!currentStatus.second) {
-                currentStatus = currentStatus.copy( second = association == medium)
-            }
-            if (!currentStatus.third) {
-                currentStatus = currentStatus.copy( third = association == high)
-            }
-            return currentStatus
-        }
-
         fun getTempPort(state: SensorBusTempState): Port {
-            when (state.association) {
+            return when (state.association) {
                 CpuEconSensorBusTempAssociation.SUPPLY_AIR_TEMPERATURE_HUMIDITY -> {
-                    return Port.SENSOR_SAT
+                    Port.SENSOR_SAT
                 }
+
                 CpuEconSensorBusTempAssociation.OUTSIDE_AIR_TEMPERATURE_HUMIDITY -> {
-                    return Port.SENSOR_OAT
+                    Port.SENSOR_OAT
                 }
+
                 CpuEconSensorBusTempAssociation.MIXED_AIR_TEMPERATURE_HUMIDITY -> {
-                    return Port.SENSOR_MAT
+                    Port.SENSOR_MAT
                 }
-                // This case should never occur
-                else -> { return Port.SENSOR_SAT }
             }
         }
 
         fun getHumidityPort(state: SensorBusTempState): Port {
-            when (state.association) {
+            return when (state.association) {
                 CpuEconSensorBusTempAssociation.SUPPLY_AIR_TEMPERATURE_HUMIDITY -> {
-                    return Port.SENSOR_SAH
+                    Port.SENSOR_SAH
                 }
+
                 CpuEconSensorBusTempAssociation.OUTSIDE_AIR_TEMPERATURE_HUMIDITY -> {
-                    return Port.SENSOR_OAH
+                    Port.SENSOR_OAH
                 }
+
                 CpuEconSensorBusTempAssociation.MIXED_AIR_TEMPERATURE_HUMIDITY -> {
-                    return Port.SENSOR_MAH
+                    Port.SENSOR_MAH
                 }
-                // This case should never occur
-                else -> { return Port.SENSOR_SAH }
             }
         }
 
         fun getPressPort(state: SensorBusPressState): Port {
-            when (state.association) {
+            return when (state.association) {
                 CpuEconSensorBusPressAssociation.DUCT_PRESSURE -> {
-                    return Port.SENSOR_PRESSURE
+                    Port.SENSOR_PRESSURE
                 }
                 // This case should never occur
-                else -> { return Port.SENSOR_PRESSURE }
             }
 
         }

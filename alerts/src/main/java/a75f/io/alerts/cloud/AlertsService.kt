@@ -1,6 +1,9 @@
 package a75f.io.alerts.cloud
 
 import a75f.io.alerts.AlertDefinition
+import a75f.io.alerts.AlertProcessor.TAG_CCU_ALERTS
+import a75f.io.alerts.AlertProcessor.TAG_CCU_HTTP_REQUEST
+import a75f.io.alerts.AlertProcessor.TAG_CCU_HTTP_RESPONSE
 import a75f.io.api.haystack.Alert
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.constants.HttpConstants
@@ -8,7 +11,6 @@ import a75f.io.logger.CcuLog
 import com.google.gson.*
 import hu.akarnokd.rxjava3.retrofit.RxJava3CallAdapterFactory
 import io.reactivex.rxjava3.core.Completable
-import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
@@ -54,7 +56,7 @@ interface AlertsService {
 
    /**
     * Creates an alert for this site in the remote service.
-    * The service returns the same alert, with _id & timesteamp added.
+    * The service returns the same alert, with _id & timestamp added.
     *
     * We pass back a Response here so we can get access to the error message encoded into the
     * regular response body (as opposed to in the error response / exception)
@@ -68,7 +70,7 @@ interface AlertsService {
    /**
     * Updates an alert for this site in the remote service.
     * The alertId should be server id, i.e. _id returns with create Request.
-    * The service returns the same alert, with _id & timesteamp added.
+    * The service returns the same alert, with _id & timestamp added.
     */
    @PUT("/alerts/{siteId}/{alertId}")
    fun updateAlert(
@@ -145,7 +147,7 @@ class ServiceGenerator {
    }
 
    fun createService(baseUrl: String): AlertsService {
-      CcuLog.d("CCU_ALERTS", "AlertsService: createService $baseUrl")
+      CcuLog.d(TAG_CCU_ALERTS, "AlertsService: createService $baseUrl")
 
       return createRetrofit(baseUrl)
          .create(AlertsService::class.java)
@@ -156,7 +158,7 @@ class ServiceGenerator {
     *
     * Supply the baseUrl and encoding, and optionally the bearer token or Api-key.
     */
-   fun createRetrofit(baseUrl: String): Retrofit {
+   private fun createRetrofit(baseUrl: String): Retrofit {
       val okhttpLogging = HttpLoggingInterceptor().apply {
          level = HttpLoggingInterceptor.Level.BODY
       }
@@ -167,7 +169,7 @@ class ServiceGenerator {
             Interceptor { chain ->
                val bearerToken = CCUHsApi.getInstance().jwt
 
-               CcuLog.d("CCU_HTTP_REQUEST", "AlertsService: [${chain.request().method}] ${chain.request().url} - Token: $bearerToken")
+               CcuLog.d(TAG_CCU_HTTP_REQUEST, "AlertsService: [${chain.request().method}] ${chain.request().url} - Token: $bearerToken")
 
                val builder = chain.request().newBuilder()
                        .header(HttpConstants.APP_NAME_HEADER_NAME, HttpConstants.APP_NAME_HEADER_VALUE)
@@ -182,7 +184,7 @@ class ServiceGenerator {
                     val request = chain.request()
                     val response = chain.proceed(request)
 
-                    CcuLog.d("CCU_HTTP_RESPONSE", "AlertsService: ${response.code} - [${request.method}] ${request.url}")
+                    CcuLog.d(TAG_CCU_HTTP_RESPONSE, "AlertsService: ${response.code} - [${request.method}] ${request.url}")
                     response
                  }
          )
@@ -200,13 +202,6 @@ class ServiceGenerator {
          .build()
    }
 }
-
-data class HttpHeaders(
-   val contentType: String? = null,
-   val encoding: String? = null,
-   val token: String? = null,
-   val apiKey: String? = null
-)
 
 class DateTimeTypeConverter : JsonSerializer<DateTime>, JsonDeserializer<DateTime?> {
    override fun serialize(src: DateTime, srcType: Type?, context: JsonSerializationContext?): JsonElement {

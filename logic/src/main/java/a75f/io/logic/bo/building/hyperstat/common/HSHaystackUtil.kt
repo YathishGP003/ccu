@@ -2,6 +2,7 @@ package a75f.io.logic.bo.building.hyperstat.common
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.HayStackConstants
+import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.hyperstat.common.HyperStatAssociationUtil.Companion.isAnyAnalogOutEnabledAssociatedToCooling
@@ -12,7 +13,6 @@ import a75f.io.logic.bo.building.hyperstat.profiles.cpu.HyperStatCpuEquip
 import a75f.io.logic.bo.building.hyperstat.profiles.hpu.HyperStatHpuEquip
 import a75f.io.logic.bo.building.hyperstat.profiles.pipe2.HyperStatPipe2Equip
 import a75f.io.logic.tuners.TunerUtil
-import android.util.Log
 import org.projecthaystack.HNum
 import org.projecthaystack.HRef
 
@@ -42,9 +42,9 @@ class HSHaystackUtil(
                 }
 
             }catch (e: Exception){
-                Log.i(L.TAG_CCU_HSCPU, "Exception getPossibleConditioningModeSettings: ${e.message}")
+                CcuLog.e(L.TAG_CCU_HSCPU, "Exception getPossibleConditioningModeSettings: ${e.message}",e)
             }
-            Log.i(L.TAG_CCU_HSCPU, "getPossibleConditioningModeSettings: $status")
+            CcuLog.i(L.TAG_CCU_HSCPU, "getPossibleConditioningModeSettings: $status")
             return status
         }
 
@@ -90,7 +90,7 @@ class HSHaystackUtil(
                 if (fanLevel == 15) return PossibleFanMode.MED_HIGH
                 if (fanLevel == 21) return PossibleFanMode.LOW_MED_HIGH
             }catch (e:Exception){
-                Log.i(L.TAG_CCU_HSCPU, "Exception getPossibleFanModeSettings: ${e.localizedMessage}")
+                CcuLog.e(L.TAG_CCU_HSCPU, "Exception getPossibleFanModeSettings: ${e.localizedMessage}",e)
             }
             return PossibleFanMode.OFF
         }
@@ -157,7 +157,7 @@ class HSHaystackUtil(
                 if (fanLevel == 15) return PossibleFanMode.MED_HIGH
                 if (fanLevel == 21) return PossibleFanMode.LOW_MED_HIGH
             }catch (e:Exception){
-                Log.i(L.TAG_CCU_HSCPU, "Exception getPossibleFanModeSettings: ${e.localizedMessage}")
+                CcuLog.e(L.TAG_CCU_HSCPU, "Exception getPossibleFanModeSettings: ${e.localizedMessage}",e)
             }
             return PossibleFanMode.OFF
         }
@@ -173,7 +173,7 @@ class HSHaystackUtil(
                 if (fanLevel == 15) return PossibleFanMode.MED_HIGH
                 if (fanLevel == 21) return PossibleFanMode.LOW_MED_HIGH
             }catch (e:Exception){
-                Log.i(L.TAG_CCU_HSCPU, "Exception getPossibleFanModeSettings: ${e.localizedMessage}")
+                CcuLog.e(L.TAG_CCU_HSCPU, "Exception getPossibleFanModeSettings: ${e.localizedMessage}",e)
             }
             return PossibleFanMode.OFF
         }

@@ -3,6 +3,7 @@
 package a75f.io.messaging.handler
 
 import a75f.io.alerts.AlertManager
+import a75f.io.alerts.AlertProcessor.TAG_CCU_ALERTS
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.data.message.MESSAGE_ATTRIBUTE_ID
 import a75f.io.data.message.MESSAGE_ATTRIBUTE_IDS
@@ -94,7 +95,7 @@ class AlertMessageHandler(
                *  This is necessary to avoid having multiple definitions in the alert shared preference.*/
                alertManager.repo.removeAlertDefinition(alertManager.activeAlerts[index].alertDefId)
                alertManager.fixAlert(alertManager.activeAlerts[index]);
-               CcuLog.w("CCU_ALERTS", "fixing alert, alert definition ID - ${msgObject.get("id").asString}")
+               CcuLog.w(TAG_CCU_ALERTS, "fixing alert, alert definition ID - ${msgObject.get("id").asString}")
             }
          }
       }

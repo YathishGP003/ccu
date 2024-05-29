@@ -1,7 +1,7 @@
 package a75f.io.api.haystack.sync;
 
 import android.content.Context;
-import android.util.Log;
+
 
 import org.projecthaystack.HDict;
 import org.projecthaystack.HDictBuilder;

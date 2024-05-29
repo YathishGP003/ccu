@@ -5,8 +5,6 @@ import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
 import static a75f.io.logic.bo.building.ZoneState.HEATING;
 import static a75f.io.logic.bo.building.ZoneState.TEMPDEAD;
 
-import android.util.Log;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -18,24 +16,19 @@ import a75.io.algos.VOCLoop;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
-import a75f.io.api.haystack.Occupied;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
 import a75f.io.logic.bo.building.EpidemicState;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.ZoneProfile;
-import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Damper;
 import a75f.io.logic.bo.building.schedules.Occupancy;
-import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.schedules.ScheduleUtil;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.dab.DabSystemController;
-import a75f.io.logic.bo.util.CCUUtils;
-import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.TunerUtil;
 
 /**
@@ -53,10 +46,7 @@ public class DabProfile extends ZoneProfile
     double voc;
     
     Damper damper = new Damper();
-    
-    //State prior to changeover. User to identify the direction in which the PiLoop to be run while in deadband.
-    ZoneState prevState = DEADBAND;
-    
+
     private static final int LOOP_OP_MIDPOINT = 50;
     private ControlLoop heatingLoop;
     public void addDabEquip(short addr, DabProfileConfiguration config, String floorRef, String roomRef, NodeType nodeType) {
@@ -166,7 +156,7 @@ public class DabProfile extends ZoneProfile
 
         updateZoneState(roomTemp, setTempCooling, setTempHeating);
 
-        Log.d(L.TAG_CCU_ZONE, "DAB-"+dabEquip.nodeAddr+" : roomTemp " + roomTemp
+        CcuLog.d(L.TAG_CCU_ZONE, "DAB-"+dabEquip.nodeAddr+" : roomTemp " + roomTemp
                 + " setTempCooling:  " + setTempCooling+" setTempHeating: "+setTempHeating
                 + " satConditioning "+satConditioning);
         CcuLog.i(L.TAG_CCU_ZONE, "PI Tuners: proportionalGain " + dabEquip.damperController.getProportionalGain() + ", integralGain " + dabEquip.damperController.getIntegralGain() +

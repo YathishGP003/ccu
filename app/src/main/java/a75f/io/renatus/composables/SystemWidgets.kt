@@ -67,7 +67,9 @@ fun SystemRelayMappingView( relayText : String, relayState :Boolean = false, onR
                 true -> ComposeUtil.primaryColor
                 false -> ComposeUtil.greyColor
             }),
-            modifier = Modifier.width(72.dp).height(44.dp),
+            modifier = Modifier
+                .width(72.dp)
+                .height(44.dp),
             contentPadding = PaddingValues(0.dp),
         ) {
             Text(text = when(buttonState) {
@@ -86,25 +88,32 @@ fun SystemRelayMappingView( relayText : String, relayState :Boolean = false, onR
 
 @Composable
 fun SystemAnalogOutMappingView( analogName : String, analogOutState :Boolean = false, onAnalogOutEnabled: (Boolean) -> Unit,
-                                mappingText : String, analogOutValList : List<String>, analogOutVal : Int = 0 , dropDownWidth : Int = 160,
-                            onAnalogOutChanged : (Int) -> Unit) {
+                                mappingText : String, analogOutValList : List<String>, analogOutVal : Int = 0 , dropDownWidthPreview : Int = 160,dropdownWidthExpanded : Int = 160,
+                            onAnalogOutChanged : (Int) -> Unit,mappingTextSpacer : Int = 155) {
     Row (modifier = Modifier
         .fillMaxWidth()
-        .padding(start = 25.dp, end = 50.dp), horizontalArrangement = Arrangement.SpaceBetween){
+        .padding(start = 25.dp, end = 20.dp), horizontalArrangement = Arrangement.Start){
         Row {
             ToggleButtonStateful(defaultSelection = analogOutState, onEnabled = onAnalogOutEnabled )
             Spacer(modifier = Modifier.width(30.dp))
-            Text(text = analogName, fontSize = 20.sp)
+            Column {
+                Spacer(modifier = Modifier.height(6.dp))
+                Text(text = analogName, fontSize = 20.sp)
+            }
         }
-        Text(text = mappingText, fontSize = 20.sp, modifier = Modifier
-            .weight(1f)
-            .padding(start = 120.dp))
-        DropDownWithLabel(label = "", list = analogOutValList, previewWidth = dropDownWidth, expandedWidth = dropDownWidth,
+        Spacer(modifier=Modifier.width(41.dp))
+        Column {
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(text = mappingText, fontSize = 20.sp, modifier = Modifier
+                .padding(start = 55.dp))
+        }
+        Spacer(modifier = Modifier.width(mappingTextSpacer.dp))
+        DropDownWithLabel(label = "", list = analogOutValList, previewWidth = dropDownWidthPreview, expandedWidth = dropdownWidthExpanded,
             onSelected = onAnalogOutChanged, defaultSelection = analogOutVal)
     }
 }
 @Composable
-fun SystemAnalogOutMappingViewVavStagedVfdRtuFragment( analogName : String, analogOutState :Boolean = false, onAnalogOutEnabled: (Boolean) -> Unit,
+fun SystemAnalogOutMappingViewVavStagedVfdRtu( analogName : String, analogOutState :Boolean = false, onAnalogOutEnabled: (Boolean) -> Unit,
                                 mappingText : String, analogOutValList : List<String>, analogOutVal : Int = 0 ,
                                 onAnalogOutChanged : (Int) -> Unit) {
     Row(
@@ -130,11 +139,11 @@ fun SystemAnalogOutMappingViewVavStagedVfdRtuFragment( analogName : String, anal
                 DropDownWithLabel(
                     label = "",
                     list = analogOutValList,
-                    previewWidth = 80,
-                    expandedWidth = 80,
+                    previewWidth = 100,
+                    expandedWidth = 100,
                     onSelected = onAnalogOutChanged,
                     defaultSelection = analogOutVal,
-                    spacerLimit = 305
+                    spacerLimit = 282
                 )
             }
         }
@@ -155,20 +164,28 @@ fun SystemAnalogOutMappingViewButtonComposable(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 25.dp, end = 50.dp), horizontalArrangement = Arrangement.Start
+            .padding(start = 25.dp, end = 20.dp), horizontalArrangement = Arrangement.Start
     ) {
         Row(modifier = Modifier
             .padding(end = paddingLimitEnd.dp)) {
             ToggleButtonStateful(defaultSelection = analogOutState, onEnabled = onAnalogOutEnabled)
             Spacer(modifier = Modifier.width(30.dp))
-            Text(text = analogName, fontSize = 20.sp)
+            Column {
+                Spacer(modifier = Modifier.height(6.dp))
+                Text(text = analogName, fontSize = 20.sp)
+            }
         }
-        Spacer(modifier = Modifier.width(160.dp))
-        Text(text = mappingText, fontSize = 20.sp, modifier = Modifier
-            .padding(start = 21.dp))
+        Spacer(modifier = Modifier.width(135.dp))
+        Column {
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(
+                text = mappingText, fontSize = 20.sp, modifier = Modifier
+                    .padding(start = 21.dp)
+            )
+        }
         var buttonState by remember { mutableStateOf(buttonState) }
         var text by remember { mutableStateOf("OFF") }
-        Spacer(modifier = Modifier.width(229.dp))
+        Spacer(modifier = Modifier.width(241.dp))
         Button(onClick = {
             buttonState = !buttonState
             text = when(buttonState) {
@@ -189,7 +206,9 @@ fun SystemAnalogOutMappingViewButtonComposable(
                 true -> ComposeUtil.primaryColor
                 false -> ComposeUtil.greyColor
             }),
-            modifier = Modifier.width(80.dp).height(44.dp),
+            modifier = Modifier
+                .width(80.dp)
+                .height(44.dp),
             contentPadding = PaddingValues(0.dp),
         ) {
             Text(text = when(buttonState) {

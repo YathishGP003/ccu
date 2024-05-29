@@ -1,8 +1,8 @@
 package a75f.io.logic
 
 import a75f.io.api.haystack.Point
+import a75f.io.logger.CcuLog
 import a75f.io.logic.bo.building.hvac.Stage
-import android.util.Log
 
     const val ANALOG_VALUE = "AnalogValue"
     const val BINARY_VALUE = "BinaryValue"
@@ -26,7 +26,7 @@ import android.util.Log
         val bacnetId = "$nodeAdd$objectId"
         point.bacnetId = bacnetId.toInt()
         point.bacnetType = objectType
-        Log.d("CCU_BACNET", "Tag added to ${point.displayName}, bacnetId: $bacnetId and bacnetType: $objectType")
+        CcuLog.d("CCU_BACNET", "Tag added to ${point.displayName}, bacnetId: $bacnetId and bacnetType: $objectType")
     }
 
 fun getBacnetId(ordinal: Double): Int {

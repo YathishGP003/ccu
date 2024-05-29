@@ -1,7 +1,5 @@
 package a75f.io.logic.bo.building.dualduct;
 
-import a75f.io.api.haystack.Kind;
-
 public class DualDuctConstants {
     
     public static final int MIN_DAMPER_POS = 0;

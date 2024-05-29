@@ -32,7 +32,7 @@ data class AlertDefOccurrence(
    }
 }
 
-/** Current state (progress) in the system of one alert def occurrance */
+/** Current state (progress) in the system of one alert def occurrence */
 data class AlertDefOccurrenceState(
    val occurrence: AlertDefOccurrence,
    val progress: AlertDefProgress
@@ -40,7 +40,7 @@ data class AlertDefOccurrenceState(
 
 /**
  * Alert def occurrences must have a unique alert def title + equipId (possibly) null, to be separate
- * from an existing alert def occurence.
+ * from an existing alert def occurrence.
  */
 data class AlertsDefStateKey(
    val title: String,

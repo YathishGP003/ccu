@@ -140,8 +140,8 @@ public class DualDuctProfile extends ZoneProfile {
         updateDampers(coolingDamper, heatingDamper);
         
         updateZoneStatus();
-    
-        Log.d(L.TAG_CCU_ZONE, "DUALDUCT: roomTemp " + roomTemp + " setTempCooling:  " + setTempCooling+" " +
+
+        CcuLog.d(L.TAG_CCU_ZONE, "DUALDUCT: roomTemp " + roomTemp + " setTempCooling:  " + setTempCooling+" " +
                               "setTempHeating: "+setTempHeating+" ZoneState: "+state);
         CcuLog.i(L.TAG_CCU_ZONE, "Cooling PI Tuners: proportionalGain " + dualDuctEquip.coolingDamperController.getProportionalGain() + ", integralGain " + dualDuctEquip.coolingDamperController.getIntegralGain() +
                 ", proportionalSpread " + dualDuctEquip.coolingDamperController.getMaxAllowedError() + ", integralMaxTimeout " + dualDuctEquip.heatingDamperController.getIntegralMaxTimeout());

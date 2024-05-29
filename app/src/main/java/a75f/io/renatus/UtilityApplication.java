@@ -18,21 +18,14 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.DhcpInfo;
-import android.net.Network;
-import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
-import android.net.NetworkRequest;
 import android.net.wifi.WifiManager;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
+
 import android.os.IBinder;
-import android.text.format.Formatter;
-import android.util.Log;
+
 import android.widget.Toast;
 
-import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatDelegate;
 
 import com.instabug.library.Instabug;
@@ -41,12 +34,7 @@ import com.raygun.raygun4android.RaygunClient;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
-import org.threeten.bp.ZoneOffset;
 
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -55,7 +43,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -68,13 +55,10 @@ import a75f.io.api.haystack.util.DatabaseEvent;
 import a75f.io.device.DeviceUpdateJob;
 import a75f.io.device.EveryDaySchedulerService;
 import a75f.io.device.mesh.LSerial;
-import a75f.io.domain.service.DomainService;
-import a75f.io.domain.service.ResponseCallback;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.cloud.RenatusServicesEnvironment;
-import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.logic.watchdog.Watchdog;
 import a75f.io.messaging.MessageHandlerSubscriber;
 import a75f.io.messaging.handler.DataSyncHandler;
@@ -90,6 +74,7 @@ import a75f.io.renatus.schedules.FileBackupService;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.restserver.server.HttpServer;
 import a75f.io.usbserial.SerialEvent;
+import a75f.io.usbserial.UsbConnectService;
 import a75f.io.usbserial.UsbModbusService;
 import a75f.io.usbserial.UsbService;
 import a75f.io.usbserial.UsbServiceActions;
@@ -140,6 +125,10 @@ public abstract class UtilityApplication extends Application {
                     //NotificationHandler.setCMConnectionStatus(false);
                     Toast.makeText(context, "USB Modbus disconnected", Toast.LENGTH_SHORT).show();
                     break;
+                case UsbConnectService.ACTION_USB_CONNECT_DISCONNECTED: // USB DISCONNECTED
+                    //NotificationHandler.setCMConnectionStatus(false);
+                    Toast.makeText(context, "USB Connect disconnected", Toast.LENGTH_SHORT).show();
+                    break;
                 case UsbService.ACTION_USB_NOT_SUPPORTED: // USB NOT SUPPORTED
                     NotificationHandler.setCMConnectionStatus(false);
                     Toast.makeText(context, "USB device not supported", Toast.LENGTH_SHORT).show();
@@ -155,6 +144,8 @@ public abstract class UtilityApplication extends Application {
     private UsbService usbService;
     private UsbModbusService usbModbusService;
 
+    private UsbConnectService usbConnectService;
+
     private DeviceUpdateJob deviceUpdateJob;
     private static Prefs prefs;
     private static final String LOG_PREFIX = "CCU_UTILITYAPP";
@@ -162,7 +153,7 @@ public abstract class UtilityApplication extends Application {
         @Override
         public void onServiceConnected(ComponentName arg0, IBinder arg1) {
             try {
-                Log.d(LOG_PREFIX, "utility Application -" + arg1.isBinderAlive() + "," + arg1.toString() + "," + arg0.getClassName() + "," + arg1.getInterfaceDescriptor());
+                CcuLog.d(LOG_PREFIX, "utility Application -" + arg1.isBinderAlive() + "," + arg1.toString() + "," + arg0.getClassName() + "," + arg1.getInterfaceDescriptor());
                 if (arg1.isBinderAlive()) {
                     usbService = ((UsbService.UsbBinder) arg1).getService();
                     LSerial.getInstance().setUSBService(usbService);
@@ -185,7 +176,7 @@ public abstract class UtilityApplication extends Application {
         @Override
         public void onServiceConnected(ComponentName arg0, IBinder arg1) {
             try {
-                Log.d(LOG_PREFIX, "utility Application -" + arg1.isBinderAlive() + "," + arg1.toString() + "," + arg0.getClassName() + "," + arg1.getInterfaceDescriptor());
+                CcuLog.d(LOG_PREFIX, "utility Application -" + arg1.isBinderAlive() + "," + arg1.toString() + "," + arg0.getClassName() + "," + arg1.getInterfaceDescriptor());
                 if (arg1.isBinderAlive()) {
                     //Todo : modbus USB Serial to tested with real device
                     usbModbusService = ((UsbModbusService.UsbBinder) arg1).getService();
@@ -203,7 +194,28 @@ public abstract class UtilityApplication extends Application {
         }
     };
 
+    private final ServiceConnection usbConnectConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName arg0, IBinder arg1) {
+            try {
+                CcuLog.d(LOG_PREFIX, "utility Application -" + arg1.isBinderAlive() + "," + arg1.toString() + "," + arg0.getClassName() + "," + arg1.getInterfaceDescriptor());
+                if (arg1.isBinderAlive()) {
+                    usbConnectService = ((UsbConnectService.UsbBinder) arg1).getService();
+                    LSerial.getInstance().setUsbConnectService(usbConnectService);
 
+                    //TODO: research what cts and dsr changes are.  For now no handler will be used, because I'm uncertain if the information is relevant.
+                    usbConnectService.setHandler(null);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            usbService = null;
+        }
+    };
     @Override
     public void onCreate() {
         super.onCreate();
@@ -229,7 +241,7 @@ public abstract class UtilityApplication extends Application {
     }
 
     private void postProcessingInit(){
-        Log.i("CCU_DB", "postProcessingInit - start");
+        CcuLog.i("CCU_DB", "postProcessingInit - start");
 
         //Remove this Equip Manager once all modbus models are migrated from Domain modeler
         EquipsManager.getInstance(this).setApplicationContext(this);
@@ -248,18 +260,14 @@ public abstract class UtilityApplication extends Application {
         isDataSyncRestartRequired();
         UpdateCCUFragment.abortCCUDownloadProcess();
 
-        // we now have haystack
         RaygunClient.setUser(userNameForCrashReportsFromHaystack());
 
         setUsbFilters();  // Start listening notifications from UsbService
         startService(new Intent(this, OTAUpdateHandlerService.class));  // Start OTA update event + timer handler service
         startService(UsbService.class, usbConnection, null); // Start UsbService(if it was not started before) and
-        // Bind it
-    
-        startUsbModbusService(UsbModbusService.class, usbModbusConnection, null); // Start UsbService(if it was not
-        // started before)
-        // and Bind it
 
+        startUsbModbusService(UsbModbusService.class, usbModbusConnection, null); // Start UsbService(if it was not
+        startConnectService(UsbConnectService.class, usbConnectConnection, null);
         wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         deviceUpdateJob = new DeviceUpdateJob();
         deviceUpdateJob.scheduleJob("DeviceUpdateJob",Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
@@ -273,15 +281,15 @@ public abstract class UtilityApplication extends Application {
         OtaCache cache = new OtaCache();
         cache.restoreOtaRequests(context);
         CcuLog.i("UI_PROFILING", "UtilityApplication.onCreate Done");
-        Log.i("CCU_DB", "postProcessingInit - end");
+        CcuLog.i("CCU_DB", "postProcessingInit - end");
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
     public void onDatabaseLoad(DatabaseEvent event) {
-        Log.i("CCU_DB", "Event Type:@ " + event.getSerialAction().name());
+        CcuLog.i("CCU_DB", "Event Type:@ " + event.getSerialAction().name());
         if (event.getSerialAction() == DatabaseAction.MESSAGE_DATABASE_LOADED_SUCCESS_INIT_UI) {
             postProcessingInit();
-            Log.i("CCU_DB", "post processing done- launch ui now");
+            CcuLog.i("CCU_DB", "post processing done- launch ui now");
             setCcuDbReady(true);
         }
     }
@@ -429,6 +437,7 @@ public abstract class UtilityApplication extends Application {
         filter.addAction(UsbModbusService.ACTION_USB_MODBUS_DISCONNECTED);
         filter.addAction(UsbServiceActions.ACTION_USB_PRIV_APP_PERMISSION_DENIED);
         filter.addAction(UsbServiceActions.ACTION_USB_REQUIRES_TABLET_REBOOT);
+        filter.addAction(UsbConnectService.ACTION_USB_CONNECT_DISCONNECTED);
         registerReceiver(mUsbReceiver, filter);
     }
 
@@ -465,6 +474,21 @@ public abstract class UtilityApplication extends Application {
         bindService(bindingIntent, serviceConnection, Context.BIND_AUTO_CREATE);
     }
 
+    private void startConnectService(Class<?> service, ServiceConnection serviceConnection, Bundle extras) {
+        if (!UsbConnectService.SERVICE_CONNECTED) {
+            Intent startService = new Intent(this, service);
+            if (extras != null && !extras.isEmpty()) {
+                Set<String> keys = extras.keySet();
+                for (String key : keys) {
+                    String extra = extras.getString(key);
+                    startService.putExtra(key, extra);
+                }
+            }
+            this.startService(startService);
+        }
+        Intent bindingIntent = new Intent(this, service);
+        bindService(bindingIntent, serviceConnection, Context.BIND_AUTO_CREATE);
+    }
 
     @Override
     public void onTerminate() {

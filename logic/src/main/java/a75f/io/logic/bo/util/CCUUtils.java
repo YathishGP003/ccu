@@ -1,7 +1,6 @@
 package a75f.io.logic.bo.util;
 
 import android.content.Context;
-import android.util.Log;
 
 import org.joda.time.DateTime;
 import org.projecthaystack.HDict;
@@ -25,6 +24,7 @@ import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.SettingPoint;
 import a75f.io.api.haystack.Zone;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.BuildConfig;
 import a75f.io.logic.R;
 import a75f.io.logic.schedule.SpecialSchedule;
@@ -232,7 +232,7 @@ public class CCUUtils
             }
         }
         catch(ParseException exception){
-            Log.i("Adding CCURef tag", "Error while parsing special schedule");
+            CcuLog.e("Adding CCURef tag", "Error while parsing special schedule");
             exception.printStackTrace();
             PreferenceUtil.setCcuRefTagMigration(false);
         }

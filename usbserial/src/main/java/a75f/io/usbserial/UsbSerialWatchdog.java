@@ -2,10 +2,9 @@ package a75f.io.usbserial;
 
 import android.content.Context;
 import android.content.Intent;
-import android.preference.PreferenceManager;
-import android.util.Log;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.logger.CcuLog;
 
 /**
  * Reboots the tablet after 30 minutes if usb-serial connection is not active.
@@ -28,14 +27,14 @@ public class UsbSerialWatchdog {
     }
     
     public void pet() {
-        Log.i("CCU_USB", "USB watch dog pet.");
+        CcuLog.i("CCU_USB", "USB watch dog pet.");
         watchdogTimeoutCounter = 0;
     }
     
     public void bark(Context context, CCUHsApi hayStack) {
         int USB_TABLET_REBOOT_TIMEOUT_MINS = 30;
         if (++watchdogTimeoutCounter >= USB_TABLET_REBOOT_TIMEOUT_MINS) {
-            Log.i("CCU_USB", "USB watch dog triggering tablet reboot.");
+            CcuLog.i("CCU_USB", "USB watch dog triggering tablet reboot.");
             if (UsbSerialUtil.isSerialRetryRequired(hayStack, context)) {
                 watchdogTimeoutCounter = 0;
                 Intent intent = new Intent(UsbServiceActions.ACTION_USB_REQUIRES_TABLET_REBOOT);
@@ -44,7 +43,7 @@ public class UsbSerialWatchdog {
                 watchdogTimeoutCounter = 0;
             }
         } else {
-            Log.i("CCU_USB", "watchdogTimeoutCounter "+watchdogTimeoutCounter);
+            CcuLog.i("CCU_USB", "watchdogTimeoutCounter "+watchdogTimeoutCounter);
         }
     }
     

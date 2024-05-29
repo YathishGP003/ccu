@@ -4,11 +4,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.preference.PreferenceManager;
-import android.util.Log;
-
-import org.mozilla.javascript.RhinoException;
-import org.mozilla.javascript.Scriptable;
-import org.mozilla.javascript.ScriptableObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -24,12 +19,11 @@ import java.util.stream.Collectors;
 import a75f.io.alerts.model.AlertDefOccurrence;
 import a75f.io.api.haystack.Alert;
 import a75f.io.api.haystack.CCUHsApi;
-import a75f.io.api.haystack.HisItem;
 import a75f.io.logger.CcuLog;
 //import org.mozilla.javascript.Context;
 
-/**
- * Created by samjithsadasivan on 4/24/18.
+/*
+  Created by samjithsadasivan on 4/24/18.
  */
 
 /**
@@ -43,6 +37,14 @@ public class AlertProcessor
 
     public static final String TAG_CCU_ALERTS = "CCU_ALERTS";
 
+    public static final String TAG_CCU_ALERT_FORMATTER = "CCU_ALERT_FORMATTER";
+
+    public static final String TAG_CCU_DEV_DEBUG = "CCU_DEV_DEBUG";
+
+    public static final String TAG_CCU_HTTP_REQUEST = "CCU_HTTP_REQUEST";
+
+    public static final String TAG_CCU_HTTP_RESPONSE = "CCU_HTTP_RESPONSE";
+
     private final SharedPreferences defaultSharedPrefs;
 
     private Context mContext;
@@ -52,7 +54,7 @@ public class AlertProcessor
         this.defaultSharedPrefs = PreferenceManager.getDefaultSharedPreferences(c);
 
         // great candidate for DI when we have it:
-        CcuLog.d("CCU_ALERTS", "AlertProcessor Init");
+        CcuLog.d(TAG_CCU_ALERTS, "AlertProcessor Init");
 
         // The parser to
         parser = new AlertParser();
@@ -86,8 +88,8 @@ public class AlertProcessor
                 }
                 Conditional.GrpOperator alertDefType = Conditional.GrpOperator.fromValue(def.conditionals.get(0).grpOperation); // See the note in ::inspectAlertDef regarding unique grpOperations
                 if(def.alertBuilder != null){
-                    // new alert defination found use rhino processor to generate alert
-                    CcuLog.d(TAG_CCU_ALERTS, "new alert defination found evaluating alert-->"+def.alert.mTitle);
+                    // new alert definition found use rhino processor to generate alert
+                    CcuLog.d(TAG_CCU_ALERTS, "new alert definition found evaluating alert-->"+def.alert.mTitle);
                     //String jsForTesting = loadLocalJs(mContext, "test1.js");
                     //String jsForTesting = loadLocalJs(mContext, def.alertBuilder.getSnippet());
                     String jsForTesting = def.alertBuilder.getSnippet();
@@ -105,11 +107,11 @@ public class AlertProcessor
                     }
                 }
             }catch (Exception e) {
-                Log.e(TAG_CCU_ALERTS, "Error in evaluating alert defination-->" + def.alert.mTitle);
+                CcuLog.e(TAG_CCU_ALERTS, "Error in evaluating alert definition-->" + def.alert.mTitle);
                 e.printStackTrace();
             }
         }
-        CcuLog.d("CCU_ALERTS", "evaluateAlertDefinitions - end");
+        CcuLog.d(TAG_CCU_ALERTS, "evaluateAlertDefinitions - end");
 
         // this change is there if next time alert is not there then it will be fixed,
         // suppose alerts A, B, C are there in db and now only A, C are triggered then B will be fixed
@@ -188,7 +190,7 @@ public class AlertProcessor
                         conditional.value.equalsIgnoreCase("system and building and limit and max")) &&
                         (!def.alert.getmSeverity().toString().equalsIgnoreCase("SEVERE"))) {
                     isAlertMatches = true;
-                    CcuLog.d("CCU_ALERTS", ""+def.alert.getmTitle()+ " alert suppressed - conditional.value is -  "+conditional.value);
+                    CcuLog.d(TAG_CCU_ALERTS, def.alert.getmTitle()+ " alert suppressed - conditional.value is -  "+conditional.value);
                 }
             }
             return isAlertMatches;
@@ -203,14 +205,14 @@ public class AlertProcessor
 
     /**
      * NOTE: This assumes the alert def has already been evaluated (AlertDefinition::evaluate)
-     *
+     * <p>
      * Process the alert def at the alert def level.
      * Each conditional will evaluate to exactly one evaluation status.
      * This will generate only one alert def occurrence.
      */
     private AlertDefOccurrence process(AlertDefinition def) {
         boolean result = false;
-        for (int i = 0; i < def.conditionals.size(); i += 2) { // A multi-conditional alert def will have the conditions separated by a "comparision operator" condition. Skip these, hence, "i += 2"
+        for (int i = 0; i < def.conditionals.size(); i += 2) { // A multi-conditional alert def will have the conditions separated by a "comparison operator" condition. Skip these, hence, "i += 2"
             Conditional conditional = def.conditionals.get(i);
             if (i == 0) {
                 result = conditional.status;
@@ -229,11 +231,11 @@ public class AlertProcessor
     
     /**
      * NOTE: This assumes the alert def has already been evaluated (AlertDefinition::evaluate)
-     *
+     * <p>
      * Process an alert def at the equip level.
      * Each conditional can be evaluated against one or many equips.
      * This will generate an alert def occurrence for each equip.
-     *
+     * <p>
      * An alert def with an "equip" or "delta" grpOperation is evaluated in this manner.
      */
     private List<AlertDefOccurrence> processForEquips(AlertDefinition def) {
@@ -244,7 +246,7 @@ public class AlertProcessor
                 .distinct()
                 .collect(Collectors.toMap(Function.identity(), v -> false));
 
-        for (int i = 0; i < def.conditionals.size(); i += 2) { // A multi-conditional alert def will have the conditions separated by a "comparision" conditional. Skip these, hence, "i += 2"
+        for (int i = 0; i < def.conditionals.size(); i += 2) { // A multi-conditional alert def will have the conditions separated by a "comparison" conditional. Skip these, hence, "i += 2"
             Conditional conditional = def.conditionals.get(i);
 
             // For each equip, set (or recalculate) it's overall result
@@ -334,7 +336,7 @@ public class AlertProcessor
         String ccuId = CCUHsApi.getInstance().getCcuRef().toVal();
 
         List<String> uniqueGrpOperations = def.conditionals.stream()
-                .filter(conditional -> conditional.operator == null || conditional.operator.isEmpty()) // Skip the "comparision" conditionals
+                .filter(conditional -> conditional.operator == null || conditional.operator.isEmpty()) // Skip the "comparison" conditionals
                 .map(conditional -> conditional.grpOperation)
                 .distinct()
                 .collect(Collectors.toList());

@@ -9,7 +9,7 @@ import a75f.io.logic.bo.building.hyperstat.profiles.cpu.HyperStatCpuEquip.Compan
 class CpuReconfiguration {
 
     companion object {
-        fun configAssociationPoint(portType: Port, updatedConfigValue: Double, equipPoint: Equip, ) {
+        fun configAssociationPoint(portType: Port, updatedConfigValue: Double, equipPoint: Equip) {
             val equip =  getHyperStatEquipRef(equipPoint.group.toShort())
             val updatedConfiguration =  updateAssociation(equip.getConfiguration(),portType,updatedConfigValue.toInt()  )
             equip.updateConfiguration(updatedConfiguration)

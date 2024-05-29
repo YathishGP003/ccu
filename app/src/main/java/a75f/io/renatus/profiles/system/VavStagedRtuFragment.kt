@@ -79,7 +79,7 @@ class VavStagedRtuFragment : StagedRtuFragment() {
     @Composable
     fun RootView() {
         if (!viewModel.modelLoaded) {
-            IndeterminateLoopProgress(bottomText = "Loading Profile Configuration")
+            IndeterminateLoopProgress(bottomText = "Loading System Profile")
             CcuLog.i(Domain.LOG_TAG, "Show Progress")
             return
         }

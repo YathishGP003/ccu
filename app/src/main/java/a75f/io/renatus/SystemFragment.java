@@ -72,6 +72,7 @@ import org.joda.time.DateTime;
 import org.jsoup.helper.StringUtil;
 
 import java.lang.ref.WeakReference;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -93,7 +94,9 @@ import a75f.io.logic.bo.building.oao.OAOEquip;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.logic.bo.building.system.SystemMode;
+import a75f.io.logic.bo.building.system.UserIntentConfig;
 import a75f.io.logic.bo.building.system.dab.DabExternalAhu;
+import a75f.io.logic.bo.building.system.vav.VavAdvancedAhu;
 import a75f.io.logic.bo.building.system.vav.VavExternalAhu;
 import a75f.io.logic.bo.building.system.vav.VavFullyModulatingRtu;
 import a75f.io.logic.bo.building.system.vav.VavIERtu;
@@ -236,6 +239,10 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	LinearLayout dual_config;
 	LinearLayout singleSatConfig;
 	LinearLayout dualSatConfig;
+	LinearLayout dspConfig;
+	LinearLayout heatConfig;
+	LinearLayout coolConfig;
+
 	TextView satSetPoint;
 	TextView satCurrent;
 	TextView dualSatCurrent;
@@ -828,7 +835,10 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		dcv_config = view.findViewById(R.id.dcv_config);
 		singleSatConfig = view.findViewById(R.id.single_sat_config);
 		dualSatConfig = view.findViewById(R.id.dual_sat_config);
+		heatConfig = view.findViewById(R.id.heat_config);
+		coolConfig = view.findViewById(R.id.cool_config);
 		dual_config = view.findViewById(R.id.dual_config);
+		dspConfig = view.findViewById(R.id.dsp_config);
 		opMode = view.findViewById(R.id.sat_operatingmode);
 		coolingSp = view.findViewById(R.id.sat_coolingsp);
 		heatingSp = view.findViewById(R.id.sat_heatingsp);
@@ -912,7 +922,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		});
 		tbSmartPrePurge.setOnCheckedChangeListener((compoundButton, b) -> {
 			if (compoundButton.isPressed()) {
-				if (isExternalAhu()) {
+				if (isDMSupportProfile()) {
 					SystemProfileUtil.setUserIntentByDomain(systemPrePurgeEnable, b ? 1 : 0);
 				} else {
 					SystemProfileUtil.setUserIntentBackground("prePurge and enabled", b ? 1 : 0);
@@ -921,7 +931,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		});
 		tbSmartPostPurge.setOnCheckedChangeListener((compoundButton, b) -> {
 			if (compoundButton.isPressed()) {
-				if (isExternalAhu()) {
+				if (isDMSupportProfile()) {
 					SystemProfileUtil.setUserIntentByDomain(systemPostPurgeEnable, b ? 1 : 0);
 				} else {
 					SystemProfileUtil.setUserIntentBackground("postPurge and enabled", b ? 1 : 0);
@@ -931,7 +941,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		});
 		tbEnhancedVentilation.setOnCheckedChangeListener((compoundButton, b) -> {
 			if (compoundButton.isPressed()) {
-				if (isExternalAhu()) {
+				if (isDMSupportProfile()) {
 					SystemProfileUtil.setUserIntentByDomain(systemEnhancedVentilationEnable, b ? 1 : 0);
 				} else {
 					SystemProfileUtil.setUserIntentBackground("enhanced and ventilation and enabled", b ? 1 : 0);
@@ -944,10 +954,11 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		CcuLog.i("UI_PROFILING", "SystemFragment.onViewCreated Done");
 	}
 
-	private boolean isExternalAhu(){
+	private boolean isDMSupportProfile(){
 		return (L.ccu().systemProfile instanceof DabExternalAhu
 				|| L.ccu().systemProfile instanceof VavExternalAhu
 				|| L.ccu().systemProfile instanceof VavStagedRtu
+				|| L.ccu().systemProfile instanceof VavAdvancedAhu
 				|| L.ccu().systemProfile instanceof VavStagedRtuWithVfd
 				|| L.ccu().systemProfile instanceof VavFullyModulatingRtu);
 	}
@@ -979,7 +990,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		if (L.ccu().oaoProfile != null) {
 			oaoArc.setVisibility(View.VISIBLE);
 			purgeLayout.setVisibility(View.VISIBLE);
-			if (isExternalAhu()) {
+			if (isDMSupportProfile()) {
 				tbSmartPrePurge.setChecked(TunerUtil.readSystemUserIntentVal("domainName == \""+systemPrePurgeEnable+"\"") > 0);
 				tbSmartPostPurge.setChecked(TunerUtil.readSystemUserIntentVal("domainName == \""+systemPostPurgeEnable+"\"") > 0);
 				tbEnhancedVentilation.setChecked(TunerUtil.readSystemUserIntentVal("domainName == \""+systemEnhancedVentilationEnable+"\"") > 0);
@@ -1069,7 +1080,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 					}
 					tbCompHumidity.setChecked(TunerUtil.readSystemUserIntentVal("compensate and humidity") > 0);
 					tbDemandResponse.setChecked(TunerUtil.readSystemUserIntentVal("demand and response") > 0);
-					if (isExternalAhu()) {
+					if (isDMSupportProfile()) {
 						tbSmartPrePurge.setChecked(TunerUtil.readSystemUserIntentVal("domainName == \""+systemPrePurgeEnable+"\"") > 0);
 						tbSmartPostPurge.setChecked(TunerUtil.readSystemUserIntentVal("domainName == \""+systemPostPurgeEnable+"\"") > 0);
 						tbEnhancedVentilation.setChecked(TunerUtil.readSystemUserIntentVal("domainName == \""+systemEnhancedVentilationEnable+"\"") > 0);
@@ -1133,7 +1144,54 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 						getOperatingMode(ModelNames.VAV_EXTERNAL_AHU_CONTROLLER)
 				);
 			}
-		} else {
+		} else if (L.ccu().systemProfile instanceof VavAdvancedAhu) {
+			VavAdvancedAhu profile = (VavAdvancedAhu) L.ccu().systemProfile;
+			setPointConfig.setVisibility(View.VISIBLE);
+
+			String dspUnit = profile.getUnit(ductStaticPressureSetpoint);
+
+			UserIntentConfig userIntentConfig = profile.getUserIntentConfig();
+			if (userIntentConfig.isSatHeatingAvailable()) { // heating is available
+				String satUnit = profile.getUnit(airTempHeatingSp);
+				heatingSp.setText(" " + profile.systemEquip.getAirTempHeatingSp().readHisVal() +" "+ satUnit);
+				dualSatCurrent.setText(" " + profile.getSatControlPoint()+" "+ satUnit);
+			} else {
+				heatConfig.setVisibility(View.INVISIBLE);
+			}
+			if (userIntentConfig.isSatCoolingAvailable()) { // Cooling is available
+				String satUnit = profile.getUnit(airTempCoolingSp);
+				coolingSp.setText(" " + profile.systemEquip.getAirTempCoolingSp().readHisVal() +" "+ satUnit);
+				dualSatCurrent.setText(" " + profile.getSatControlPoint()+" "+ satUnit);
+			} else {
+				coolConfig.setVisibility(View.INVISIBLE);
+			}
+			if ((userIntentConfig.component1() || userIntentConfig.component2())) {
+				dualSatConfig.setVisibility(View.VISIBLE);
+				opMode.setText(" " + profile.getOperatingMode());
+			} else {
+				dualSatConfig.setVisibility(View.GONE);
+			}
+
+			if (userIntentConfig.isPressureControlAvailable()) { // Static Pressure control is available
+				DecimalFormat df = new DecimalFormat("0.00");
+				dspSetPoint.setText(" " + df.format( profile.systemEquip.getDuctStaticPressureSetpoint().readHisVal()) +" "+ dspUnit);
+				dspCurrent.setText(" " + df.format( profile.getStaticPressureControlPoint())+" "+ dspUnit);
+			} else {
+				dspSetPoint.setVisibility(View.GONE);
+				dspCurrent.setVisibility(View.GONE);
+				dspConfig.setVisibility(View.GONE);
+			}
+			dual_config.setVisibility((userIntentConfig.isSatHeatingAvailable() || userIntentConfig.isSatCoolingAvailable())? View.VISIBLE : View.GONE);
+			singleSatConfig.setVisibility(View.GONE);
+
+			if (userIntentConfig.isCo2DamperControlAvailable()) {
+				external_damper.setText(" " +profile.systemEquip.getCo2BasedDamperControl().readHisVal()+" %");
+				dcv_config.setVisibility(View.VISIBLE);
+			} else {
+				dcv_config.setVisibility(View.GONE);
+			}
+		}
+		else {
 			setPointConfig.setVisibility(View.GONE);
 		}
 	}

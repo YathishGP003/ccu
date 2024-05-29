@@ -39,12 +39,12 @@ private fun Conditional.evaluationText(): SpannableStringBuilder {
       // ccu internal
 
       if (!error.isNullOrBlank()) {
-         sb.append(error);
+         sb.append(error)
          sb.setSpan(ForegroundColorSpan(Color.RED), startIndex, sb.length, Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
          sb.setSpan(StyleSpan(Typeface.ITALIC), startIndex, sb.length, Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
       }
       else if (key.isNullOrBlank() || condition.isNullOrBlank() || value.isNullOrBlank()) {
-         sb.append("[ccu internal logic]");
+         sb.append("[ccu internal logic]")
          sb.setSpan(ForegroundColorSpan(Color.GRAY), startIndex, sb.length, Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
          sb.setSpan(StyleSpan(Typeface.ITALIC), startIndex, sb.length, Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
       } else {

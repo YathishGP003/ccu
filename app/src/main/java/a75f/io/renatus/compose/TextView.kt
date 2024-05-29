@@ -85,7 +85,7 @@ fun HeaderLeftAlignedTextView(text: String) {
 }
 
 @Composable
-fun HeaderLeftAlignedTextViewNew(text: String) {
+fun BoldHeader(text: String) {
     Text(
         modifier = Modifier
             .wrapContentSize(),
@@ -133,18 +133,33 @@ fun LabelTextViewForModbus(text: String) {
 }
 
 @Composable
-fun StyledTextView(text: String, fontSize : Int) {
+fun StyledTextView(text: String, fontSize : Int, textAlignment: TextAlign = TextAlign.Center) {
     Text(
         style = TextStyle(
             fontFamily = myFontFamily,
             fontWeight = FontWeight.Normal,
             fontSize = fontSize.sp,
             color = Color.Black,
-            textAlign = TextAlign.Center
+            textAlign = textAlignment
         ),
         text = text,
     )
 }
+
+@Composable
+fun BoldStyledTextView(text: String, fontSize : Int, textAlignment: TextAlign = TextAlign.Center) {
+    Text(
+        style = TextStyle(
+            fontFamily = myFontFamily,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = fontSize.sp,
+            color = Color.Black,
+            textAlign = textAlignment
+        ),
+        text = text,
+    )
+}
+
 
 @Composable
 fun VersionTextView(text: String) {
@@ -228,6 +243,20 @@ fun SaveTextViewNew(text: String,onClick: () -> Unit) {
         contentPadding = PaddingValues(0.dp)
     ) {
         Text(text = text, style =  TextStyle( fontFamily = myFontFamily,fontSize = 22.sp,  fontWeight = FontWeight.Normal))
+    }
+}
+
+@Composable
+fun SaveTextViewNewExtraBold(text: String,onClick: () -> Unit) {
+    Button(
+        onClick = {onClick()},
+        colors = ButtonDefaults.buttonColors(
+            contentColor = primaryColor,
+            containerColor = Color.White // text color
+        ),
+        contentPadding = PaddingValues(0.dp)
+    ) {
+        Text(text = text, style =  TextStyle( fontFamily = myFontFamily,fontSize = 22.sp,  fontWeight = FontWeight.ExtraBold))
     }
 }
 

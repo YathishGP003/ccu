@@ -65,7 +65,7 @@ public class CazEquip
 
         Schedule schedule = UtilKt.getSchedule(roomRef,floorRef);
 
-        HashMap systemEquip = CCUHsApi.getInstance().read("equip and system");
+        HashMap systemEquip = CCUHsApi.getInstance().read("equip and system and not modbus");
         if (systemEquip != null && systemEquip.size() > 0) {
             ahuRef = systemEquip.get("id").toString();
         }

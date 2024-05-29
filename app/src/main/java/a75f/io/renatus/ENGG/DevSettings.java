@@ -76,7 +76,7 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
     public static DevSettings newInstance(){
         return new DevSettings();
     }
-    private boolean frequencyUpdatedCheck = false;
+    private int previousControlLoopFrequency = 0;
                                     
     @BindView(R.id.biskitModBtn)
     ToggleButton biskitModeBtn;
@@ -192,6 +192,8 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
         ArrayAdapter<Integer> ControlLoopAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, controlLoopFrequency);
         ControlLoopAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         loopSpinner.setAdapter(ControlLoopAdapter);
+        previousControlLoopFrequency = Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
+                .getInt("control_loop_frequency", 60);
         loopSpinner.setSelection(ControlLoopAdapter.getPosition(Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
                 .getInt("control_loop_frequency", 60)));
         loopSpinner.setOnItemSelectedListener(this);
@@ -512,7 +514,8 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
         switch (arg0.getId())
         {
             case R.id.loopspinner:
-                if(frequencyUpdatedCheck) {
+                if(previousControlLoopFrequency != Integer.parseInt(loopSpinner.getSelectedItem().toString())) {
+                    previousControlLoopFrequency = Integer.parseInt(loopSpinner.getSelectedItem().toString());
                     AlertDialog dialog = new AlertDialog.Builder(getActivity())
                             .setTitle("App restart confirmation")
                             .setMessage("The updated control loop frequency will be applied after the next app restart. Do you want to continue?")
@@ -525,9 +528,6 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
                             })
                             .create();
                     dialog.show();
-                }
-                else {
-                    frequencyUpdatedCheck =true;
                 }
                 break;
             case R.id.outsideTemp:

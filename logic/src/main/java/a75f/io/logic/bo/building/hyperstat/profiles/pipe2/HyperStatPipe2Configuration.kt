@@ -27,8 +27,8 @@ class HyperStatPipe2Configuration: BaseProfileConfiguration() {
     var analogOut2State = Pipe2AnalogOutState(false, Pipe2AnalogOutAssociation.FAN_SPEED, 2.0, 10.0,70.0,80.0,100.0)
     var analogOut3State = Pipe2AnalogOutState(false, Pipe2AnalogOutAssociation.DCV_DAMPER, 2.0, 10.0,70.0,80.0,100.0)
 
-    var isEnableAirFlowTempSensor = false
-    var isSupplyWaterSensor = true
+    var thermistorIn1State = Pipe2Th1InState(false, Pipe2Th1InAssociation.AIRFLOW_TEMPERATURE)
+    var thermistorIn2State = Pipe2Th2InState(true, Pipe2Th2InAssociation.SUPPLY_WATER_TEMPERATURE)
 
     var analogIn1State = AnalogInState(false, AnalogInAssociation.KEY_CARD_SENSOR)
     var analogIn2State = AnalogInState(false, AnalogInAssociation.DOOR_WINDOW_SENSOR)
@@ -70,6 +70,16 @@ data class Pipe2AnalogOutState(
     val perAtFanHigh: Double,
 )
 
+data class Pipe2Th1InState(
+    val enabled: Boolean,
+    val association: Pipe2Th1InAssociation
+)
+
+data class Pipe2Th2InState(
+    val enabled: Boolean,
+    val association: Pipe2Th2InAssociation
+)
+
 // Order is important for this enum -- it matches the UI as set in xml & strings.xml and ordinal is saved in data storage.
 // Do not change order without a migration.
 enum class Pipe2RelayAssociation {
@@ -91,5 +101,18 @@ enum class Pipe2AnalogOutAssociation {
     FAN_SPEED,
     DCV_DAMPER
 }
+
+// Order is important -- see comment above.
+enum class Pipe2Th1InAssociation {
+    AIRFLOW_TEMPERATURE,
+    GENERIC_FAULT_NC,
+    GENERIC_FAULT_NO
+}
+
+// Order is important -- see comment above.
+enum class Pipe2Th2InAssociation {
+    SUPPLY_WATER_TEMPERATURE
+}
+
 
 

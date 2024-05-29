@@ -49,17 +49,6 @@ class HpuViewModel(application: Application) : HyperStatViewModel(application) {
         return getApplication<Application>().resources.getStringArray(R.array.hyperstat_hpu_analog_out_selector)
     }
 
-    override fun th2SwitchChanged(checked: Boolean) {
-        viewState.onNext(
-            currentState.copy(
-                th2Enabled = checked
-            )
-        )
-    }
-    override fun getTh2SensorLabel(): String {
-        return  getApplication<Application>().getString(R.string.door_window_sensor)
-    }
-
     override fun isDamperSelected(association: Int): Boolean {
         return true
     }

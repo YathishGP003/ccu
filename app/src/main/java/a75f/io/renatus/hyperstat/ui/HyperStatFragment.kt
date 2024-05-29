@@ -19,6 +19,7 @@ import a75f.io.renatus.hyperstat.AnalogInWidgets
 import a75f.io.renatus.hyperstat.AnalogOutWidgets
 import a75f.io.renatus.hyperstat.RelayWidgets
 import a75f.io.renatus.hyperstat.StagedFanWidgets
+import a75f.io.renatus.hyperstat.ThermistorInWidgets
 import a75f.io.renatus.hyperstat.viewModels.*
 import a75f.io.renatus.util.CCUUiUtil
 import a75f.io.renatus.util.ProgressDialogUtils
@@ -59,11 +60,12 @@ class HyperStatFragment : BaseDialogFragment() {
         get() = ProfileType.values()[requireArguments().getInt(FragmentCommonBundleArgs.PROFILE_TYPE)]
 
     private lateinit var profileName: TextView
-    lateinit var th2Label: TextView
 
     lateinit var tempOffsetSelector: NumberPicker
     lateinit var forceOccupiedSwitch: CustomCCUSwitch
     lateinit var autoAwaySwitch: CustomCCUSwitch
+
+    private lateinit var th2Spinner: Spinner
 
     // 6 rows, 1 for each relay
     private lateinit var relayUIs: List<RelayWidgets>
@@ -71,8 +73,8 @@ class HyperStatFragment : BaseDialogFragment() {
     // 3 rows, 1 for each analog out, plus damper voltage selectors
     private lateinit var analogOutUIs: List<AnalogOutWidgets>
 
-    lateinit var airflowSensorSwitch: CustomCCUSwitch
-    lateinit var th2Switch: CustomCCUSwitch
+    // 2 rows, 1 for each thermistor.
+    lateinit var thermistorInUIs: List<ThermistorInWidgets>
 
     // 2 rows, 1 for each analog in.
     lateinit var analogInUIs: List<AnalogInWidgets>
@@ -259,9 +261,6 @@ class HyperStatFragment : BaseDialogFragment() {
                 )
             )
 
-            airflowSensorSwitch = findViewById(R.id.airflowTempToggle)
-            th2Switch = findViewById(R.id.doorWindowEnableToggle)
-
             displayHumidity = findViewById(R.id.humidity)
             displayCo2 = findViewById(R.id.co2)
             displayVOC = findViewById(R.id.voc)
@@ -269,6 +268,11 @@ class HyperStatFragment : BaseDialogFragment() {
 
 
             configUIOnProfile(this)
+
+            thermistorInUIs = listOf(
+                ThermistorInWidgets(findViewById(R.id.toggle_thermistor_in1), findViewById(R.id.thermistor1_in_spinner)),
+                ThermistorInWidgets(findViewById(R.id.toggle_thermistor_in2), findViewById(R.id.thermistor2_in_spinner))
+            )
 
             analogInUIs = listOf(
                 AnalogInWidgets(findViewById(R.id.toggle_analog_in1), findViewById(R.id.analog1_in_spinner)),
@@ -427,9 +431,22 @@ class HyperStatFragment : BaseDialogFragment() {
             }
         }
 
+        val thermistorInAdapter  = ArrayList<ArrayAdapter<*>>()
+        thermistorInAdapter.add(getAdapterValue(resources.getStringArray(R.array.hyperstat_cpu_thermistor_in_selector_th1)))
+        if (viewModel is Pipe2ViewModel) {
+            thermistorInAdapter.add(getAdapterValue(resources.getStringArray(R.array.hyperstat_pipe2_thermistor_in_selector_th2)))
+        } else {
+            thermistorInAdapter.add(getAdapterValue(resources.getStringArray(R.array.hyperstat_cpu_thermistor_in_selector_th2)))
+        }
+
+        thermistorInUIs.forEachIndexed { index, thermistorInWidgets ->
+            thermistorInWidgets.selector.adapter = thermistorInAdapter[index]
+            CCUUiUtil.setSpinnerDropDownColor(thermistorInWidgets.selector, context)
+        }
+
         val analogInAdapter  = ArrayList<ArrayAdapter<*>>()
-            analogInAdapter.add(getAdapterValue(resources.getStringArray(R.array.hyperstat_analog_in_selector_ai1)))
-           analogInAdapter.add(getAdapterValue(resources.getStringArray(R.array.hyperstat_analog_in_selector_ai2)))
+        analogInAdapter.add(getAdapterValue(resources.getStringArray(R.array.hyperstat_analog_in_selector_ai1)))
+        analogInAdapter.add(getAdapterValue(resources.getStringArray(R.array.hyperstat_analog_in_selector_ai2)))
 
        analogInUIs.forEachIndexed { index, analogInWidgets ->
            analogInWidgets.selector.adapter = analogInAdapter[index]
@@ -527,14 +544,16 @@ class HyperStatFragment : BaseDialogFragment() {
             CCUUiUtil.setSpinnerDropDownColor(widgets.analogOutAtFanRecirculateSelector, context)
 
         }
-        airflowSensorSwitch.setOnCheckedChangeListener { _, isChecked ->
-            viewModel.airflowTempSensorSwitchChanged(isChecked)
-            pendingSwitchChange = true
+
+        thermistorInUIs.forEachIndexed { index, widgets ->
+            widgets.switch.setOnCheckedChangeListener { _, isChecked ->
+                viewModel.thermistorInSwitchChanged(index, isChecked)
+                pendingSwitchChange = true
+            }
+            widgets.selector.setOnItemSelected { position -> viewModel.thermistorInMappingSelected(index, position) }
+            CCUUiUtil.setSpinnerDropDownColor(widgets.selector,context)
         }
-        th2Switch.setOnCheckedChangeListener { _, isChecked ->
-            viewModel.th2SwitchChanged(isChecked)
-            pendingSwitchChange = true
-        }
+
         analogInUIs.forEachIndexed { index, widgets ->
             widgets.switch.setOnCheckedChangeListener { _, isChecked ->
                 viewModel.analogInSwitchChanged(index, isChecked)
@@ -861,13 +880,17 @@ class HyperStatFragment : BaseDialogFragment() {
         pendingRelayChange = false
     }
     private fun renderSwitch(viewState: ViewState) {
-        airflowSensorSwitch.isChecked = viewState.airflowTempSensorEnabled
-        if(viewModel is Pipe2ViewModel) {
-            th2Switch.isChecked = true
-            th2Switch.isEnabled = false
-        }else{
-            th2Switch.isChecked = viewState.th2Enabled
+
+        viewState.thermistorIns.forEachIndexed { index, thermistorInState ->
+            with(thermistorInUIs[index]) {
+                if (viewModel is Pipe2ViewModel && index == 1) switch.isEnabled = false
+                switch.isChecked = thermistorInState.enabled
+                selector.isEnabled = thermistorInState.enabled
+
+                selector.setSelection(thermistorInState.association)
+            }
         }
+
         viewState.analogIns.forEachIndexed { index, analogInState ->
             with(analogInUIs[index]) {
                 switch.isChecked = analogInState.enabled
@@ -1099,10 +1122,9 @@ class HyperStatFragment : BaseDialogFragment() {
     private fun configUIOnProfile(view: View){
 
         profileName = view.findViewById(R.id.profile_name)
-        th2Label = view.findViewById(R.id.th2Label)
 
         profileName.text = viewModel.getProfileName()
-        th2Label.text = viewModel.getTh2SensorLabel()
+
 
         val adapterRelayMapping = viewModel.getRelayMappingAdapter(requireContext(), viewModel.getRelayMapping())
         adapterAnalogOutMapping = context?.let { AnalogOutAdapter(it, R.layout.spinner_dropdown_item, viewModel.getAnalogOutMapping().toMutableList()) }

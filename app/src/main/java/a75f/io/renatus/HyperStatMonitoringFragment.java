@@ -273,7 +273,8 @@ public class HyperStatMonitoringFragment extends BaseDialogFragment {
         }
         ArrayList<String> thArr = new ArrayList<>();
         for (Thermistor m : Thermistor.getThermistorList()) {
-            thArr.add(m.sensorName + " " + m.engineeringUnit);
+            String unitStr = (m.engineeringUnit != null) ? (" " + m.engineeringUnit) : "";
+            thArr.add(m.sensorName + unitStr);
         }
 
         ArrayAdapter<String> analogAdapter = new CustomSpinnerDropDownAdapter<>(this.getContext(),R.layout.spinner_dropdown_item,analogArr);

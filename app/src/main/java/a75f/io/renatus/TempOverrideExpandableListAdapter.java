@@ -1779,13 +1779,13 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                     else return "Not Enabled";
                 }
                 else if (pointname.equals("Thermistor1")) {
-                    if (mHSCpuConfig.isEnableAirFlowTempSensor())
-                        return "Airflow Temperature Sensor ";
+                    if (mHSCpuConfig.getThermistorIn1State().getEnabled())
+                        return mHSCpuConfig.getThermistorIn1State().getAssociation().toString();
                     else return "Not Enabled";
                 }
                 else if (pointname.equals("Thermistor2")) {
-                    if (mHSCpuConfig.isEnableDoorWindowSensor())
-                        return "Door/Window Sensor 1";
+                    if (mHSCpuConfig.getThermistorIn2State().getEnabled())
+                        return mHSCpuConfig.getThermistorIn2State().getAssociation().toString();
                     else return "Not Enabled";
                 }
                 break;

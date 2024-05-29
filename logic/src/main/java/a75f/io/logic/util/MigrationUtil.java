@@ -170,6 +170,11 @@ public class MigrationUtil {
             PreferenceUtil.setHssOpModeWritableMarkerMigration();
         }
 
+        if (!PreferenceUtil.getHyperStatThermistorConfigMigration()) {
+            migrateHyperStatThermistorConfig(ccuHsApi);
+            PreferenceUtil.setHyperStatThermistorConfigMigration();
+        }
+
         migrateAirFlowTunerPoints(ccuHsApi);
         migrateZoneScheduleTypeIfMissed(ccuHsApi);
         if(SchedulableMigrationKt.validateMigration()) {
@@ -1726,6 +1731,120 @@ public class MigrationUtil {
                 }
             }
         });
+    }
+
+    private static void migrateHyperStatThermistorConfig(CCUHsApi hayStack) {
+        ArrayList<HashMap<Object, Object>> hsEquips = hayStack.readAllEntities("equip and hyperstat and not monitoring");
+        hsEquips.forEach(equip -> {
+            if (equip.containsKey("id") && equip.get("id") != null) {
+
+                // TH1 is the same for CPU, HPU, and 2-Pipe Profiles.
+                // TH2 is different for the 2-Pipe Profile.
+
+                HashMap<Object, Object> airflowEnabledPoint = hayStack.readEntity("config and air and discharge and temp and enabled and equipRef == \"" + equip.get("id") + "\"");
+
+                boolean isTh1Enabled = false;
+                if (airflowEnabledPoint.containsKey("id") && airflowEnabledPoint.get("id") != null) {
+                    isTh1Enabled = hayStack.readDefaultValById(airflowEnabledPoint.get("id").toString()) > 0.0;
+                    hayStack.deleteEntity(airflowEnabledPoint.get("id").toString());
+                }
+
+                Point th1EnabledPoint = new Point.Builder()
+                        .setDisplayName(equip.get("dis").toString() + "-thIn1Enabled")
+                        .setSiteRef(equip.get("siteRef").toString())
+                        .setEquipRef(equip.get("id").toString())
+                        .setRoomRef(equip.get("roomRef").toString())
+                        .setFloorRef(equip.get("floorRef").toString())
+                        .setTz(equip.get("tz").toString())
+                        .setGroup(equip.get("group").toString())
+                        .setEnums("false,true")
+                        .addMarker("config")
+                        .addMarker("writable")
+                        .addMarker("zone")
+                        .addMarker("input")
+                        .addMarker("th1")
+                        .addMarker("enabled").build();
+                String th1EnabledPointId = hayStack.addPoint(th1EnabledPoint);
+                hayStack.writeDefaultValById(th1EnabledPointId, isTh1Enabled ? 1.0 : 0.0);
+
+                Point th1AssociationPoint = new Point.Builder()
+                        .setDisplayName(equip.get("dis").toString() + "-thIn1Association")
+                        .setSiteRef(equip.get("siteRef").toString())
+                        .setEquipRef(equip.get("id").toString())
+                        .setRoomRef(equip.get("roomRef").toString())
+                        .setFloorRef(equip.get("floorRef").toString())
+                        .setTz(equip.get("tz").toString())
+                        .setGroup(equip.get("group").toString())
+                        .setEnums("airflowTemperatureSensor,genericFaultNC,genericFaultNO")
+                        .addMarker("config")
+                        .addMarker("writable")
+                        .addMarker("zone")
+                        .addMarker("input")
+                        .addMarker("th1")
+                        .addMarker("association").build();
+                String th1AssociationPointId = hayStack.addPoint(th1AssociationPoint);
+                hayStack.writeDefaultValById(th1AssociationPointId, 0.0);
+
+                boolean isTh2Enabled = false;
+                String th2AssociationEnum;
+                if (equip.containsKey("pipe2")) {
+                    isTh2Enabled = true;
+
+                    HashMap<Object, Object> swtEnabledPoint = hayStack.readEntity("config and supply and water and temp and enabled and equipRef == \"" + equip.get("id") + "\"");
+                    if (swtEnabledPoint.containsKey("id") && swtEnabledPoint.get("id") != null) {
+                        hayStack.deleteEntity(swtEnabledPoint.get("id").toString());
+                    }
+
+                    th2AssociationEnum = "supplyWaterTempSensor";
+                } else {
+                    HashMap<Object, Object> doorWindowEnabledPoint = hayStack.readEntity("config and window and temp and enabled and equipRef == \"" + equip.get("id") + "\"");
+                    if (doorWindowEnabledPoint.containsKey("id") && doorWindowEnabledPoint.get("id") != null) {
+                        isTh2Enabled = hayStack.readDefaultValById(doorWindowEnabledPoint.get("id").toString()) > 0.0;
+                        hayStack.deleteEntity(doorWindowEnabledPoint.get("id").toString());
+                    }
+
+                    th2AssociationEnum = "doorWindowTempSensor,genericFaultNC,genericFaultNO";
+                }
+
+                Point th2EnabledPoint = new Point.Builder()
+                        .setDisplayName(equip.get("dis").toString() + "-thIn2Enabled")
+                        .setSiteRef(equip.get("siteRef").toString())
+                        .setEquipRef(equip.get("id").toString())
+                        .setRoomRef(equip.get("roomRef").toString())
+                        .setFloorRef(equip.get("floorRef").toString())
+                        .setTz(equip.get("tz").toString())
+                        .setGroup(equip.get("group").toString())
+                        .setEnums("false,true")
+                        .addMarker("config")
+                        .addMarker("writable")
+                        .addMarker("zone")
+                        .addMarker("input")
+                        .addMarker("th2")
+                        .addMarker("enabled").build();
+                String th2EnabledPointId = hayStack.addPoint(th2EnabledPoint);
+                hayStack.writeDefaultValById(th2EnabledPointId, isTh2Enabled ? 1.0 : 0.0);
+
+                Point th2AssociationPoint = new Point.Builder()
+                        .setDisplayName(equip.get("dis").toString() + "-thIn2Association")
+                        .setSiteRef(equip.get("siteRef").toString())
+                        .setEquipRef(equip.get("id").toString())
+                        .setRoomRef(equip.get("roomRef").toString())
+                        .setFloorRef(equip.get("floorRef").toString())
+                        .setTz(equip.get("tz").toString())
+                        .setGroup(equip.get("group").toString())
+                        .setEnums(th2AssociationEnum)
+                        .addMarker("config")
+                        .addMarker("writable")
+                        .addMarker("zone")
+                        .addMarker("input")
+                        .addMarker("th2")
+                        .addMarker("association").build();
+                String th2AssociationPointId = hayStack.addPoint(th2AssociationPoint);
+                hayStack.writeDefaultValById(th2AssociationPointId, 0.0);
+
+            }
+        });
+
     }
 
     private static void analogOutConfigPointsMigration(Equip equip, CCUHsApi ccuHsApi) {

@@ -13,6 +13,9 @@ import a75f.io.logic.bo.building.hvac.StandaloneFanStage
 import a75f.io.logic.bo.building.hyperstat.common.*
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.AnalogInAssociation
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.AnalogInState
+import a75f.io.logic.bo.building.hyperstat.profiles.cpu.HyperStatCpuConfiguration
+import a75f.io.logic.bo.building.hyperstat.profiles.cpu.Th1InState
+import a75f.io.logic.bo.building.hyperstat.profiles.cpu.Th2InState
 import a75f.io.logic.bo.haystack.device.DeviceUtil
 import a75f.io.logic.bo.haystack.device.HyperStatDevice
 import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint.Companion.addOTAStatusPoint
@@ -182,9 +185,8 @@ class HyperStatHpuEquip(val node: Short): HyperStatEquip() {
 
         val thConfigPointsList: MutableList<Pair<Point, Any>> = hyperStatPointsUtil
             .createIsThermistorEnabledConfigPoints(
-                ConfigState(hyperStatConfig.isEnableAirFlowTempSensor, 0), //  aiflow sensor is constant
-                ConfigState(hyperStatConfig.isEnableDoorWindowSensor, 0),
-                false
+                ConfigState(hyperStatConfig.thermistorIn1State.enabled, hyperStatConfig.thermistorIn1State.association.ordinal), // aiflow sensor is constant
+                ConfigState(hyperStatConfig.thermistorIn2State.enabled, hyperStatConfig.thermistorIn2State.association.ordinal) // this is cpu config not 2 pipe configuration
             )
 
         // For user intent Point CCU level default values need to be added
@@ -237,9 +239,7 @@ class HyperStatHpuEquip(val node: Short): HyperStatEquip() {
             )
         val thermistorInPointsList: MutableList<Triple<Point, Any, Any>> =
             hyperStatPointsUtil.createConfigThermistorInLogicalPoints(
-                hyperStatConfig.isEnableAirFlowTempSensor,
-                hyperStatConfig.isEnableDoorWindowSensor,
-                false
+                hyperStatConfig.thermistorIn1State, hyperStatConfig.thermistorIn2State
             )
         // Device Class will create all the sensor points dynamically based on the input message
         // which is received by the Hyper state device
@@ -295,8 +295,8 @@ class HyperStatHpuEquip(val node: Short): HyperStatEquip() {
         // do not change it
         // Added new sensor type as supply water temp at 19 position
         profileEquip.setupDeviceThermistors(
-            config.isEnableAirFlowTempSensor, "3",
-            config.isEnableDoorWindowSensor,HyperStatAssociationUtil.getSensorNameByType(AnalogInAssociation.DOOR_WINDOW_SENSOR),
+            config.thermistorIn1State.enabled,HyperStatAssociationUtil.getSensorNameByType(config.thermistorIn1State.association),
+            config.thermistorIn2State.enabled,HyperStatAssociationUtil.getSensorNameByType(config.thermistorIn2State.association),
             masterPoints, hyperStatDevice
         )
 
@@ -320,12 +320,11 @@ class HyperStatHpuEquip(val node: Short): HyperStatEquip() {
         getRelayConfigurations(config)
         getAnalogOutConfigurations(config)
         getAnalogInConfigurations(config)
+        getThermistorInConfigurations(config)
 
         config.temperatureOffset = hsHaystackUtil.getTempOffValue()
         config.isEnableAutoForceOccupied = hsHaystackUtil.isAutoForceOccupyEnabled()
         config.isEnableAutoAway =  hsHaystackUtil.isAutoAwayEnabled()
-        config.isEnableAirFlowTempSensor = hsHaystackUtil.isAirFlowSensorTh1Enabled()
-        config.isEnableDoorWindowSensor = hsHaystackUtil.isDoorWindowSensorTh2Enabled()
         config.zoneCO2DamperOpeningRate = hsHaystackUtil.getCo2DamperOpeningConfigValue()
         config.zoneCO2Threshold = hsHaystackUtil.getCo2DamperThresholdConfigValue()
         config.zoneCO2Target = hsHaystackUtil.getCo2TargetConfigValue()
@@ -522,11 +521,10 @@ class HyperStatHpuEquip(val node: Short): HyperStatEquip() {
         val presetConfiguration = getConfiguration()
 
         updateGeneralConfiguration(newConfiguration = updatedHyperStatConfig, existingConfiguration = presetConfiguration)
-        updateAirFlowTempSensorConfiguration(presetConfiguration.isEnableAirFlowTempSensor,updatedHyperStatConfig.isEnableAirFlowTempSensor)
-        updateDoorWindowSensorTh2Configuration(presetConfiguration.isEnableDoorWindowSensor,updatedHyperStatConfig.isEnableDoorWindowSensor)
         updateRelaysConfig(newConfiguration = updatedHyperStatConfig, existingConfiguration = presetConfiguration)
         updateAnalogOutConfig(newConfiguration = updatedHyperStatConfig, existingConfiguration = presetConfiguration)
         updateAnalogInConfig(newConfiguration = updatedHyperStatConfig, existingConfiguration = presetConfiguration)
+        updateThermistorInConfig(newConfiguration = updatedHyperStatConfig, existingConfiguration = presetConfiguration)
 
         LogicalPointsUtil.cleanHpuLogicalPoints(updatedHyperStatConfig,equipRef!!)
         CcuLog.d(L.TAG_CCU_HSHPU, "Profile update has been completed  ")
@@ -569,6 +567,21 @@ class HyperStatHpuEquip(val node: Short): HyperStatEquip() {
             existingConfiguration.displayVOC,newConfiguration.displayVOC,
             existingConfiguration.displayPp2p5,newConfiguration.displayPp2p5,
             existingConfiguration.displayCo2,newConfiguration.displayCo2
+        )
+    }
+
+    private fun getThermistorInConfigurations(config: HyperStatHpuConfiguration) {
+        val th1 = hsHaystackUtil.readConfigStatus("th1 and input").toInt()
+        val th2 = hsHaystackUtil.readConfigStatus("th2 and input").toInt()
+
+        val th1AssociatedTo = hsHaystackUtil.readConfigAssociation("th1 and input")
+        val th2AssociatedTo = hsHaystackUtil.readConfigAssociation("th2 and input")
+
+        config.thermistorIn1State = Th1InState(
+            th1 == 1, HyperStatAssociationUtil.getTh1InStage(th1AssociatedTo.toInt())
+        )
+        config.thermistorIn2State = Th2InState(
+            th2 == 1, HyperStatAssociationUtil.getTh2InStage(th2AssociatedTo.toInt())
         )
     }
 
@@ -826,6 +839,23 @@ class HyperStatHpuEquip(val node: Short): HyperStatEquip() {
             updateAnalogInDetails(newConfiguration.analogIn2State, "analog2", Port.ANALOG_IN_TWO)
         }
         CcuLog.d(L.TAG_CCU_HSHPU, "updateAnalogInConfig: Done")
+    }
+
+    private fun updateThermistorInConfig(
+        newConfiguration: HyperStatHpuConfiguration,
+        existingConfiguration: HyperStatHpuConfiguration
+    ) {
+        if (!HyperStatAssociationUtil.isBothTh1InHasSameConfigs
+                (newConfiguration.thermistorIn1State, existingConfiguration.thermistorIn1State)
+        ) {
+            updateTh1InDetails(newConfiguration.thermistorIn1State)
+        }
+        if (!HyperStatAssociationUtil.isBothTh2InHasSameConfigs
+                (newConfiguration.thermistorIn2State, existingConfiguration.thermistorIn2State)
+        ) {
+            updateTh2InDetails(newConfiguration.thermistorIn2State)
+        }
+        Log.i(L.TAG_CCU_HSCPU, "updateThermistorInConfig: Done")
     }
 
     private fun updateFanMode(config: HyperStatHpuConfiguration) {

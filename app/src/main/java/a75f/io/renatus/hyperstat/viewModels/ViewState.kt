@@ -20,8 +20,7 @@ import a75f.io.renatus.R
     val autoAwayEnabled: Boolean,
     val relays: List<ConfigState>,
     val analogOutUis: List<AnalogConfigState>,
-    val airflowTempSensorEnabled: Boolean,
-    val th2Enabled: Boolean,
+    val thermistorIns: List<ConfigState>,
     val analogIns: List<ConfigState>,
     var zoneCO2DamperOpeningRatePos: Int,
     var zoneCO2ThresholdPos: Int,
@@ -108,8 +107,10 @@ import a75f.io.renatus.R
                 ),
 
                 ),
-            airflowTempSensorEnabled = config.isEnableAirFlowTempSensor,
-            th2Enabled = config.isEnableDoorWindowSensor,
+            thermistorIns = listOf(
+                ConfigState(config.thermistorIn1State.enabled,config.thermistorIn1State.association.ordinal),
+                ConfigState(config.thermistorIn2State.enabled,config.thermistorIn2State.association.ordinal),
+            ),
             analogIns = listOf(
                 ConfigState(config.analogIn1State.enabled,config.analogIn1State.association.ordinal),
                 ConfigState(config.analogIn2State.enabled,config.analogIn2State.association.ordinal),
@@ -178,8 +179,10 @@ import a75f.io.renatus.R
                 ),
 
                 ),
-            airflowTempSensorEnabled = config.isEnableAirFlowTempSensor,
-            th2Enabled = config.isSupplyWaterSensor,
+            thermistorIns = listOf(
+                ConfigState(config.thermistorIn1State.enabled,config.thermistorIn1State.association.ordinal),
+                ConfigState(config.thermistorIn2State.enabled,config.thermistorIn2State.association.ordinal),
+            ),
             analogIns = listOf(
                 ConfigState(config.analogIn1State.enabled,config.analogIn1State.association.ordinal),
                 ConfigState(config.analogIn2State.enabled,config.analogIn2State.association.ordinal),
@@ -244,8 +247,10 @@ import a75f.io.renatus.R
                     0.0 // Unused
                 ),
                 ),
-            airflowTempSensorEnabled = config.isEnableAirFlowTempSensor,
-            th2Enabled = config.isEnableDoorWindowSensor,
+            thermistorIns = listOf(
+                ConfigState(config.thermistorIn1State.enabled,config.thermistorIn1State.association.ordinal),
+                ConfigState(config.thermistorIn2State.enabled,config.thermistorIn2State.association.ordinal),
+            ),
             analogIns = listOf(
                 ConfigState(config.analogIn1State.enabled,config.analogIn1State.association.ordinal),
                 ConfigState(config.analogIn2State.enabled,config.analogIn2State.association.ordinal),
@@ -282,8 +287,10 @@ import a75f.io.renatus.R
             temperatureOffset = tempOffsetSpinnerValues()[(tempOffsetPosition)]!!.toDouble()
             isEnableAutoForceOccupied = forceOccupiedEnabled
             isEnableAutoAway = autoAwayEnabled
-            isEnableAirFlowTempSensor = airflowTempSensorEnabled
-            isEnableDoorWindowSensor = th2Enabled
+
+            thermistorIn1State = Th1InState(thermistorIns[0].enabled,Th1InAssociation.values()[thermistorIns[0].association])
+            thermistorIn2State = Th2InState(thermistorIns[1].enabled,Th2InAssociation.values()[thermistorIns[1].association])
+
             relay1State = RelayState(relays[0].enabled,CpuRelayAssociation.values()[relays[0].association])
             relay2State = RelayState(relays[1].enabled,CpuRelayAssociation.values()[relays[1].association])
             relay3State = RelayState(relays[2].enabled,CpuRelayAssociation.values()[relays[2].association])
@@ -343,8 +350,10 @@ import a75f.io.renatus.R
             temperatureOffset = tempOffsetSpinnerValues()[(tempOffsetPosition)]!!.toDouble()
             isEnableAutoForceOccupied = forceOccupiedEnabled
             isEnableAutoAway = autoAwayEnabled
-            isEnableAirFlowTempSensor = airflowTempSensorEnabled
-            isSupplyWaterSensor = th2Enabled
+
+            thermistorIn1State = Pipe2Th1InState(thermistorIns[0].enabled,Pipe2Th1InAssociation.values()[thermistorIns[0].association])
+            thermistorIn2State = Pipe2Th2InState(thermistorIns[1].enabled,Pipe2Th2InAssociation.values()[thermistorIns[1].association])
+
             relay1State = Pipe2RelayState(relays[0].enabled,Pipe2RelayAssociation.values()[relays[0].association])
             relay2State = Pipe2RelayState(relays[1].enabled,Pipe2RelayAssociation.values()[relays[1].association])
             relay3State = Pipe2RelayState(relays[2].enabled,Pipe2RelayAssociation.values()[relays[2].association])
@@ -394,8 +403,10 @@ import a75f.io.renatus.R
             temperatureOffset = tempOffsetSpinnerValues()[(tempOffsetPosition)]!!.toDouble()
             isEnableAutoForceOccupied = forceOccupiedEnabled
             isEnableAutoAway = autoAwayEnabled
-            isEnableAirFlowTempSensor = airflowTempSensorEnabled
-            isEnableDoorWindowSensor = th2Enabled
+
+            thermistorIn1State = Th1InState(thermistorIns[0].enabled,Th1InAssociation.values()[thermistorIns[0].association])
+            thermistorIn2State = Th2InState(thermistorIns[1].enabled,Th2InAssociation.values()[thermistorIns[1].association])
+
             relay1State = HpuRelayState(relays[0].enabled,HpuRelayAssociation.values()[relays[0].association])
             relay2State = HpuRelayState(relays[1].enabled,HpuRelayAssociation.values()[relays[1].association])
             relay3State = HpuRelayState(relays[2].enabled,HpuRelayAssociation.values()[relays[2].association])
@@ -484,6 +495,25 @@ val AnalogInAssociation.displayName: Int
             AnalogInAssociation.DOOR_WINDOW_SENSOR -> R.string.door_window_sensor_ai
         }
     }
+
+val Th1InAssociation.displayName: Int
+    get() {
+        return when (this) {
+            Th1InAssociation.AIRFLOW_TEMPERATURE -> R.string.label_airflowtemp
+            Th1InAssociation.GENERIC_FAULT_NC -> R.string.generic_fault_nc
+            Th1InAssociation.GENERIC_FAULT_NO -> R.string.generic_fault_no
+        }
+    }
+
+val Th2InAssociation.displayName: Int
+    get() {
+        return when (this) {
+            Th2InAssociation.DOOR_WINDOW_SENSOR -> R.string.door_window_sensor
+            Th2InAssociation.GENERIC_FAULT_NC -> R.string.generic_fault_nc
+            Th2InAssociation.GENERIC_FAULT_NO -> R.string.generic_fault_no
+        }
+    }
+
 
 // an extension function for the list update functionality.
 fun <E> Iterable<E>.updated(index: Int, elem: E) = mapIndexed { i, existing -> if (i == index) elem else existing }

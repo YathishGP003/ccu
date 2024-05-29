@@ -4322,7 +4322,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
     public void loadGrid(AlertDialog dialog, Timer timer) {
         if(getActivity() != null) {
             getActivity().runOnUiThread(() -> {
-                MigrationUtil.createZoneSchedulesIfMissing(CCUHsApi.getInstance());
                 loadGrid(parentRootView);
                 dialog.dismiss();
                 timer.cancel();

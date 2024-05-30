@@ -106,9 +106,11 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
 
     private fun updateAhuRefForTIEquip() {
         val tiEquipMap = hayStack.readEntity("equip and ti")
-        val equip = Equip.Builder().setHashMap(tiEquipMap).build()
-        equip.ahuRef = hayStack.readId("equip and system and not modbus")
-        hayStack.updateEquip(equip, equip.id)
+        if(tiEquipMap.isNotEmpty()) {
+            val equip = Equip.Builder().setHashMap(tiEquipMap).build()
+            equip.ahuRef = hayStack.readId("equip and system and not modbus")
+            hayStack.updateEquip(equip, equip.id)
+        }
     }
 
     private fun clearLevel4ValuesOfDesiredTempIfDurationIs0() {

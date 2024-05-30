@@ -3,8 +3,9 @@ package a75f.io.logic.tuners
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.HayStackConstants
 import a75f.io.api.haystack.Point
-import a75f.io.domain.equips.BuildingEquip
 import a75f.io.domain.api.Domain
+import a75f.io.domain.api.DomainName
+import a75f.io.domain.equips.BuildingEquip
 import a75f.io.domain.logic.TunerEquipBuilder
 import a75f.io.domain.migration.DiffManger
 import a75f.io.logger.CcuLog
@@ -69,7 +70,7 @@ object TunerEquip : CCUHsApi.OnCcuRegistrationCompletedListener, DiffManger.OnMi
             val tunerPointsDict = HDictBuilder().add(
                 "filter",
                 "point and (tuner or schedulable) and default and siteRef == $siteId"
-            ).toDict();
+            ).toDict()
             val tunerPointsGrid = hClient.call ("read", HGridBuilder.dictToGrid(tunerPointsDict))
             tunerPointsGrid?.dump()
 
@@ -77,7 +78,7 @@ object TunerEquip : CCUHsApi.OnCcuRegistrationCompletedListener, DiffManger.OnMi
             pointMaps.forEach {remotePoints.add(Point.Builder().setHashMap(it).build())}
 
         } catch (e: UnknownRecException) {
-            e.printStackTrace();
+            e.printStackTrace()
         }
 
         remotePoints.forEach {
@@ -112,6 +113,9 @@ object TunerEquip : CCUHsApi.OnCcuRegistrationCompletedListener, DiffManger.OnMi
                     }
                 } catch ( e : Exception) {
                     CcuLog.e(L.TAG_CCU_TUNER, "Point not found in local DB for domainName ${it.domainName}", e)
+                    if(isSyncRequired(it.domainName)) {
+                        syncEquipPointsWithDomainNameFromCloud(haystack, it, tunerEquip)
+                    }
                 }
 
 
@@ -125,6 +129,21 @@ object TunerEquip : CCUHsApi.OnCcuRegistrationCompletedListener, DiffManger.OnMi
         //Re-initialize cached Ids in building equip singleton.
         Domain.buildingEquip = BuildingEquip(tunerEquip[Tags.ID].toString())
         CcuLog.i(L.TAG_CCU_TUNER, "syncBuildingTuners Completed")
+    }
+
+    private fun syncEquipPointsWithDomainNameFromCloud(haystack: CCUHsApi, remotePoint: Point, tunerEquip: HashMap<Any, Any>) {
+        CcuLog.w(L.TAG_CCU_TUNER,"Local point not valid. Syncing point with domain name from cloud ${remotePoint.domainName}")
+        haystack.readId("id==" + remotePoint.id).takeIf { it!=null && it.isNotEmpty() }?.let { haystack.removeEntity(remotePoint.id) }
+        remotePoint.equipRef = tunerEquip[Tags.ID].toString()
+        val defaultVal = haystack.readPointArrRemote(remotePoint.id)?.let { grid ->
+            grid.row(grid.numRows()-1).get("val").toString().toDouble() } ?: 0.0
+        haystack.addRemotePoint(remotePoint, remotePoint.id)
+        haystack.writeDefaultTunerValById(remotePoint.id, defaultVal)
+        haystack.writeHisValById(remotePoint.id, defaultVal)
+    }
+
+    private fun isSyncRequired(domainName: String): Boolean {
+        return domainName in setOf(DomainName.buildingLimitMin, DomainName.buildingLimitMax, DomainName.buildingToZoneDifferential)
     }
 
 
@@ -167,12 +186,6 @@ object TunerEquip : CCUHsApi.OnCcuRegistrationCompletedListener, DiffManger.OnMi
                             CcuLog.i(L.TAG_CCU_TUNER, "Sync Level 16 to CCU")
                             val who = dataElement.getStr("who")
                             val value = dataElement["val"]
-                            /*val lastModifiedTimeTag: Any? = dataElement["lastModifiedDateTime", false]
-                    val lastModifiedDateTime = if (lastModifiedTimeTag != null) {
-                        lastModifiedTimeTag as HDateTime?
-                    } else {
-                        HDateTime.make(System.currentTimeMillis())
-                    }*/
                             haystack.pointWrite(
                                 HRef.copy(id),
                                 level.toInt(),
@@ -199,7 +212,7 @@ object TunerEquip : CCUHsApi.OnCcuRegistrationCompletedListener, DiffManger.OnMi
         syncBuildingTuners(haystack)
     }
     fun syncBuildingTuners(haystack: CCUHsApi) {
-        CcuLog.i(L.TAG_CCU_TUNER, "Sync building Tuners");
+        CcuLog.i(L.TAG_CCU_TUNER, "Sync building Tuners")
         val hClient = HClient(haystack.hsUrl, HayStackConstants.USER, HayStackConstants.PASS)
         val siteId = haystack.siteIdRef.toString()
         Domain.domainScope.launch {

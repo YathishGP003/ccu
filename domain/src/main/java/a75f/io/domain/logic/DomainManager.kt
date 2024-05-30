@@ -10,6 +10,7 @@ import a75f.io.domain.api.Point
 import a75f.io.domain.api.Site
 import a75f.io.domain.devices.CmBoardDevice
 import a75f.io.domain.devices.ConnectDevice
+import a75f.io.domain.equips.DefaultSystemEquip
 import a75f.io.domain.equips.DomainEquip
 import a75f.io.domain.equips.VavAdvancedHybridSystemEquip
 import a75f.io.domain.equips.VavModulatingRtuSystemEquip
@@ -78,30 +79,38 @@ object DomainManager {
 
     fun addSystemDomainEquip(hayStack: CCUHsApi) {
         val systemEquip = hayStack.readEntity("system and equip and not modbus and not connectModule")
-        if (systemEquip.isNotEmpty() && systemEquip["domainName"] != null) {
-            Domain.systemEquip = when(systemEquip["domainName"].toString()) {
-                "vavStagedRtu" -> {
-                    CcuLog.i(Domain.LOG_TAG, "Add vavStagedRtu systemEquip to domain ")
-                    VavStagedSystemEquip(systemEquip["id"].toString())
-                }
-                "vavStagedRtuVfdFan" -> {
-                    CcuLog.i(Domain.LOG_TAG, "Add vavStagedRtuVfdFan systemEquip to domain ")
-                    VavStagedVfdSystemEquip(systemEquip["id"].toString())
-                }
+        if (systemEquip.isNotEmpty()) {
+            if (systemEquip["domainName"] != null) {
+                    Domain.systemEquip = when(systemEquip["domainName"].toString()) {
+                    "vavStagedRtu" -> {
+                        CcuLog.i(Domain.LOG_TAG, "Add vavStagedRtu systemEquip to domain ")
+                        VavStagedSystemEquip(systemEquip["id"].toString())
+                    }
 
-                "vavAdvancedHybridAhuV2" -> {
-                    val connectEquip = hayStack.readEntity("system and equip and connectModule")
-                    CcuLog.i(Domain.LOG_TAG, "Add vavAdvancedHybridAhuV2 systemEquip to domain  : ConnectEquip ${connectEquip["id"]}")
-                    VavAdvancedHybridSystemEquip(systemEquip["id"].toString(), connectEquip["id"].toString())
+                    "vavStagedRtuVfdFan" -> {
+                        CcuLog.i(Domain.LOG_TAG, "Add vavStagedRtuVfdFan systemEquip to domain ")
+                        VavStagedVfdSystemEquip(systemEquip["id"].toString())
+                    }
+
+                    "vavAdvancedHybridAhuV2" -> {
+                        val connectEquip = hayStack.readEntity("system and equip and connectModule")
+                        CcuLog.i(Domain.LOG_TAG, "Add vavAdvancedHybridAhuV2 systemEquip to domain  : ConnectEquip ${connectEquip["id"]}")
+                        VavAdvancedHybridSystemEquip(systemEquip["id"].toString(), connectEquip["id"].toString())
+                    }
+
+                    "vavFullyModulatingAhu" -> {
+                        CcuLog.i(Domain.LOG_TAG, "Add vavFullyModulatingAhu systemEquip to domain ")
+                        VavModulatingRtuSystemEquip(systemEquip["id"].toString())
+                    }
+
+                    else -> {
+                        CcuLog.e(Domain.LOG_TAG, "Unknown system equip ${systemEquip["domainName"]}")
+                        DomainEquip(systemEquip["id"].toString())
+                    }
                 }
-                "vavFullyModulatingAhu" -> {
-                    CcuLog.i(Domain.LOG_TAG, "Add vavFullyModulatingAhu systemEquip to domain ")
-                    VavModulatingRtuSystemEquip(systemEquip["id"].toString())
-                }
-                else -> {
-                    CcuLog.e(Domain.LOG_TAG, "Unknown system equip ${systemEquip["domainName"]}")
-                    DomainEquip(systemEquip["id"].toString())
-                }
+            } else  {
+                CcuLog.e(Domain.LOG_TAG, "Unknown system (${systemEquip["profile"]}) equip does not contains domainName ")
+                Domain.systemEquip = DefaultSystemEquip(systemEquip["id"].toString())
             }
         } else {
             CcuLog.e(Domain.LOG_TAG, "No system equip found")
@@ -113,17 +122,18 @@ object DomainManager {
         if (cmBoardDevice.isNotEmpty()) {
             CcuLog.e(Domain.LOG_TAG, "Added CM device to domain")
             Domain.cmBoardDevice = CmBoardDevice(cmBoardDevice["id"].toString())
-        }
-
-        if (Domain.systemEquip is VavAdvancedHybridSystemEquip) {
-            val connect1Device = hayStack.readEntity("device and connectModule")
-            if (connect1Device.isNotEmpty()) {
-                CcuLog.d(Domain.LOG_TAG, "Added Connect1 device to domain")
-                Domain.connect1Device = ConnectDevice(connect1Device["id"].toString())
-            } else {
-                CcuLog.e(Domain.LOG_TAG, "-------- Connect1 device not added to to domain -")
+            if (Domain.systemEquip is VavAdvancedHybridSystemEquip) {
+                val connect1Device = hayStack.readEntity("device and connectModule")
+                if (connect1Device.isNotEmpty()) {
+                    CcuLog.d(Domain.LOG_TAG, "Added Connect1 device to domain")
+                    Domain.connect1Device = ConnectDevice(connect1Device["id"].toString())
+                } else {
+                    CcuLog.e(Domain.LOG_TAG, "-------- Connect1 device not added to to domain -")
+                }
             }
         }
+
+
     }
 
     fun addDomainEquip(equip: a75f.io.api.haystack.Equip) {

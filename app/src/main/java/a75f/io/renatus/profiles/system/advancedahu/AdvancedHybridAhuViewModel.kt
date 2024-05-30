@@ -206,7 +206,7 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 Globals.getInstance().isTestMode = true
-                val physicalPoint = getPhysicalPointForRelayIndex(relayIndex)
+                val physicalPoint = getPhysicalPointForRelayIndex(relayIndex, false)
                 physicalPoint?.let {
                     it.writeHisVal(testCommand.toDouble())
                     val cmControlMessage = getCMControlsMessage()
@@ -282,7 +282,7 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
         }
     }
 
-    fun getPhysicalPointForRelayIndex(relayIndex : Int) : PhysicalPoint? {
+    fun getPhysicalPointForRelayIndex(relayIndex : Int, isConnect: Boolean) : PhysicalPoint? {
         if (isEquipPaired) {
             val systemEquip = if (Domain.systemEquip is VavAdvancedHybridSystemEquip) {
                 Domain.systemEquip as VavAdvancedHybridSystemEquip
@@ -290,7 +290,11 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
                 Domain.systemEquip as DabAdvancedHybridSystemEquip
             }
             val relayName = getRelayNameForIndex(relayIndex)
-            return getCMRelayLogicalPhysicalMap(systemEquip).values.find { it.domainName == relayName }
+            if (isConnect) {
+                getConnectRelayLogicalPhysicalMap(systemEquip.connectEquip1, Domain.connect1Device).values.find { it.domainName == relayName }
+            } else {
+                return getCMRelayLogicalPhysicalMap(systemEquip).values.find { it.domainName == relayName }
+            }
         }
         return null
     }

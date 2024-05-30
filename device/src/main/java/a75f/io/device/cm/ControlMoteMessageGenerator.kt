@@ -73,7 +73,7 @@ fun getCMSettingsMessage() : ControlMote.CcuToCmSettingsMessage_t {
         //setTemperatureOffset(systemEquip.temperatureOffset.readHisVal().toInt())
         cmProfile = ControlMote.CMProfiles_e.CM_PROFILE_ADV_AHU
         relayActivationHysteresis = systemEquip.vavRelayDeactivationHysteresis.readHisVal().toInt()
-        analogFanSpeedMultiplier = systemEquip.vavAnalogFanSpeedMultiplier.readHisVal().toInt()
+        analogFanSpeedMultiplier = systemEquip.vavAnalogFanSpeedMultiplier.readHisVal().toInt() * 10
         addRelayConfigsToSettingsMessage(this)
         addAnalogOutConfigsToSettingsMessage(this)
         addAnalogInConfigsToSettingsMessage(this)
@@ -89,7 +89,11 @@ fun getCMSettingsMessage() : ControlMote.CcuToCmSettingsMessage_t {
 }
 
 fun addRelayConfigsToSettingsMessage(builder: Builder) {
-
+    /*
+        [ Y1 Y2 G1 G2 W1 W2 AUX (mappings)]
+        CCU needs to send in this format - [ R1 R2 R3 R6 R4 R5 R7 R8 (mappings)]
+        Because in hardware it is mapper in this way. please do not change the position
+    */
     val systemEquip = if (Domain.systemEquip is VavAdvancedHybridSystemEquip) {
         Domain.systemEquip as VavAdvancedHybridSystemEquip
     } else {
@@ -119,6 +123,14 @@ fun addRelayConfigsToSettingsMessage(builder: Builder) {
         } else {
             addRelayMapping(ControlMote.CmRelayMappingStages_e.RELAY_NOT_ENABLED)
         }
+        if (systemEquip.relay6OutputEnable.readDefaultVal() > 0) {
+            val relay6OutputAssociation = systemEquip.relay6OutputAssociation.readDefaultVal().toInt()
+            val mappingStage = ControlMote.CmRelayMappingStages_e.forNumber(relay6OutputAssociation + 1) ?: ControlMote.CmRelayMappingStages_e.RELAY_NOT_ENABLED
+            addRelayMapping(mappingStage)
+        } else {
+            addRelayMapping(ControlMote.CmRelayMappingStages_e.RELAY_NOT_ENABLED)
+        }
+
         if (systemEquip.relay4OutputEnable.readDefaultVal() > 0) {
             val relay4OutputAssociation = systemEquip.relay4OutputAssociation.readDefaultVal().toInt()
             val mappingStage = ControlMote.CmRelayMappingStages_e.forNumber(relay4OutputAssociation + 1) ?: ControlMote.CmRelayMappingStages_e.RELAY_NOT_ENABLED
@@ -133,13 +145,7 @@ fun addRelayConfigsToSettingsMessage(builder: Builder) {
         } else {
             addRelayMapping(ControlMote.CmRelayMappingStages_e.RELAY_NOT_ENABLED)
         }
-        if (systemEquip.relay6OutputEnable.readDefaultVal() > 0) {
-            val relay6OutputAssociation = systemEquip.relay6OutputAssociation.readDefaultVal().toInt()
-            val mappingStage = ControlMote.CmRelayMappingStages_e.forNumber(relay6OutputAssociation + 1) ?: ControlMote.CmRelayMappingStages_e.RELAY_NOT_ENABLED
-            addRelayMapping(mappingStage)
-        } else {
-            addRelayMapping(ControlMote.CmRelayMappingStages_e.RELAY_NOT_ENABLED)
-        }
+
         if (systemEquip.relay7OutputEnable.readDefaultVal() > 0) {
             val relay7OutputAssociation = systemEquip.relay7OutputAssociation.readDefaultVal().toInt()
             val mappingStage = ControlMote.CmRelayMappingStages_e.forNumber(relay7OutputAssociation + 1) ?: ControlMote.CmRelayMappingStages_e.RELAY_NOT_ENABLED

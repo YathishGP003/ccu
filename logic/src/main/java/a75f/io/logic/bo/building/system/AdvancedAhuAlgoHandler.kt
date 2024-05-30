@@ -194,17 +194,24 @@ class AdvancedAhuAlgoHandler (val equip: SystemEquip) {
         return Pair(associatedPoint, pointVal)
     }
 
-    fun getAnalogLogicalPhysicalValue(enable: Point, association: Point, systemEquip: DomainEquip) : Pair<Double,Double> {
+    fun getAnalogLogicalPhysicalValue(enable: Point, association: Point, systemEquip: DomainEquip, mode: SystemMode) : Pair<Double,Double> {
         return when (systemEquip) {
             is VavAdvancedHybridSystemEquip -> {
                 val analogOutAssociationType = AdvancedAhuAnalogOutAssociationType.values()[association.readDefaultVal().toInt()]
                     CcuLog.i(L.TAG_CCU_SYSTEM, "getAnalogOutValue- association: ${association.domainName}, analogOutAssociationType: $analogOutAssociationType")
-                Pair(getAnalogOutValueForLoopType(enable, systemEquip, analogOutAssociationType), getCmLoopOutput(systemEquip, analogOutAssociationType,enable))
+                Pair (
+                        getAnalogOutValueForLoopType(enable, systemEquip, analogOutAssociationType),
+                        getLogicalOutput(systemEquip, analogOutAssociationType,enable, mode)
+                )
+
             }
             is ConnectModuleEquip -> {
                 val analogOutAssociationType = AdvancedAhuAnalogOutAssociationTypeConnect.values()[association.readDefaultVal().toInt()]
                 CcuLog.i(L.TAG_CCU_SYSTEM, "getAnalogOutValue- association: ${association.domainName}, analogOutAssociationType: $analogOutAssociationType")
-                Pair(getConnectAnalogOutValueForLoopType(enable, systemEquip, equip, analogOutAssociationType), getConnectLoopOutput(systemEquip, analogOutAssociationType, enable))
+                Pair (
+                        getConnectAnalogOutValueForLoopType(enable, systemEquip, equip, analogOutAssociationType),
+                        getConnectLogicalOutput(systemEquip, analogOutAssociationType, enable, mode)
+                )
             }
             else -> {
                 throw IllegalArgumentException("Invalid system equip type")

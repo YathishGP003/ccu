@@ -284,7 +284,7 @@ public abstract class UtilityApplication extends Application {
         CcuLog.i("CCU_DB", "postProcessingInit - end");
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
+    @Subscribe(threadMode = ThreadMode.ASYNC, sticky = true)
     public void onDatabaseLoad(DatabaseEvent event) {
         CcuLog.i("CCU_DB", "Event Type:@ " + event.getSerialAction().name());
         if (event.getSerialAction() == DatabaseAction.MESSAGE_DATABASE_LOADED_SUCCESS_INIT_UI) {

@@ -855,7 +855,7 @@ class HyperStatHpuEquip(val node: Short): HyperStatEquip() {
         ) {
             updateTh2InDetails(newConfiguration.thermistorIn2State)
         }
-        Log.i(L.TAG_CCU_HSCPU, "updateThermistorInConfig: Done")
+        CcuLog.i(L.TAG_CCU_HSCPU, "updateThermistorInConfig: Done")
     }
 
     private fun updateFanMode(config: HyperStatHpuConfiguration) {

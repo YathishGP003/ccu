@@ -6,6 +6,9 @@ import a75f.io.logger.CcuLog
 import android.annotation.SuppressLint
 import android.content.Context
 import io.seventyfivef.domainmodeler.client.ModelDirective
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 @SuppressLint("StaticFieldLeak")
 object ModelCache {
@@ -17,14 +20,34 @@ object ModelCache {
     var context : Context? = null
     fun init(hayStack : CCUHsApi, context: Context) {
         this.context = context
+        loadSystemModelsAsync()
+        loadTerminalModelsAsync()
         CcuLog.i(Domain.LOG_TAG, "Load BuildingEquipModel")
         val buildingEquipModel = ResourceHelper.loadModel(BUILDING_EQUIP_MODEL, context)
         modelContainer[MODEL_BUILDING_EQUIP] = buildingEquipModel
-        CcuLog.i(Domain.LOG_TAG, "BuildingEquipModel loaded ${buildingEquipModel.name}")
+        CcuLog.i(Domain.LOG_TAG, "BuildingEquipModel loaded Version: ${buildingEquipModel.version.toString()}")
         loadDeviceModels()
-        loadVavZoneEquipModels()
-        loadSystemProfileModels()
-        loadBypassDamperModels()
+    }
+
+    private fun loadSystemModelsAsync() {
+        CcuLog.i(Domain.LOG_TAG, "Load loadSystemModelsAsync")
+        CoroutineScope(Dispatchers.IO).launch {
+            loadSystemProfileModels()
+            loadBypassDamperModels()
+        }
+    }
+
+    private fun loadTerminalModelsAsync() {
+        CcuLog.i(Domain.LOG_TAG, "Load loadTerminalModelsAsync")
+        CoroutineScope(Dispatchers.IO).launch {
+            loadVavZoneEquipModels()
+        }
+    }
+    private fun loadDeviceModelsAsync() {
+        CcuLog.i(Domain.LOG_TAG, "Load loadDeviceModelsAsync")
+        CoroutineScope(Dispatchers.IO).launch {
+
+        }
     }
 
     private fun loadDeviceModels() {

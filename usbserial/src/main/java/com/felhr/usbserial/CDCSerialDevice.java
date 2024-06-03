@@ -6,7 +6,8 @@ import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbEndpoint;
 import android.hardware.usb.UsbInterface;
 import android.hardware.usb.UsbRequest;
-import android.util.Log;
+
+import a75f.io.logger.CcuLog;
 
 public class CDCSerialDevice extends UsbSerialDevice
 {
@@ -267,10 +268,10 @@ public class CDCSerialDevice extends UsbSerialDevice
     {
         if(connection.claimInterface(mInterface, true))
         {
-            Log.i(CLASS_ID, "Interface succesfully claimed");
+            CcuLog.d(CLASS_ID, "Interface successfully claimed");
         }else
         {
-            Log.i(CLASS_ID, "Interface could not be claimed");
+            CcuLog.d(CLASS_ID, "Interface could not be claimed");
             return false;
         }
 
@@ -292,7 +293,7 @@ public class CDCSerialDevice extends UsbSerialDevice
 
         if(outEndpoint == null || inEndpoint == null)
         {
-            Log.i(CLASS_ID, "Interface does not have an IN or OUT interface");
+            CcuLog.i(CLASS_ID, "Interface does not have an IN or OUT interface");
             return false;
         }
 
@@ -311,7 +312,7 @@ public class CDCSerialDevice extends UsbSerialDevice
             dataLength = data.length;
         }
         int response = connection.controlTransfer(CDC_REQTYPE_HOST2DEVICE, request, value, 0, data, dataLength, USB_TIMEOUT);
-        Log.i(CLASS_ID,"Control Transfer Response: " + String.valueOf(response));
+        CcuLog.d(CLASS_ID,"Control Transfer Response: " + response);
         return response;
     }
 
@@ -319,7 +320,7 @@ public class CDCSerialDevice extends UsbSerialDevice
     {
         byte[] data = new byte[7];
         int response = connection.controlTransfer(CDC_REQTYPE_DEVICE2HOST, CDC_GET_LINE_CODING, 0, 0, data, data.length, USB_TIMEOUT);
-        Log.i(CLASS_ID,"Control Transfer Response: " + String.valueOf(response));
+        CcuLog.d(CLASS_ID,"Control Transfer Response: " + response);
         return data;
     }
 
@@ -335,7 +336,7 @@ public class CDCSerialDevice extends UsbSerialDevice
             }
         }
 
-        Log.i(CLASS_ID, "There is no CDC class interface");
+        CcuLog.d(CLASS_ID, "There is no CDC class interface");
         return -1;
     }
 

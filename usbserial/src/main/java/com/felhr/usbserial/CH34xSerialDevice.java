@@ -1,7 +1,7 @@
 /*
  * Based in the CH340x driver made by Andreas Butti (https://github.com/mik3y/usb-serial-for-android/blob/master/usbSerialForAndroid/src/main/java/com/hoho/android/usbserial/driver/Ch34xSerialDriver.java)
  * Thanks to Paul Alcock for provide me with one of those Arduino nano clones!!!
- * Also thanks to Lex Wernars for send me a CH340 that didnt work with the former version of this code!!
+ * Also thanks to Lex Wernars for send me a CH340 that didn't work with the former version of this code!!
  * */
 
 package com.felhr.usbserial;
@@ -12,9 +12,10 @@ import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbEndpoint;
 import android.hardware.usb.UsbInterface;
 import android.hardware.usb.UsbRequest;
-import android.util.Log;
 
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import a75f.io.logger.CcuLog;
 
 public class CH34xSerialDevice extends UsbSerialDevice
 {
@@ -77,7 +78,7 @@ public class CH34xSerialDevice extends UsbSerialDevice
     private static final int CH34X_FLOW_CONTROL_NONE = 0x0000;
     private static final int CH34X_FLOW_CONTROL_RTS_CTS = 0x0101;
     private static final int CH34X_FLOW_CONTROL_DSR_DTR = 0x0202;
-    // XON/XOFF doesnt appear to be supported directly from hardware
+    // XON/XOFF doesn't appear to be supported directly from hardware
 
 
     private UsbInterface mInterface;
@@ -178,68 +179,68 @@ public class CH34xSerialDevice extends UsbSerialDevice
         {
             int ret = setBaudRate(CH34X_300_1312, CH34X_300_0f2c); //300
             if(ret == -1)
-                Log.i(CLASS_ID, "SetBaudRate failed!");
+                CcuLog.w(CLASS_ID, "SetBaudRate failed!");
         }else if(baudRate > 300  && baudRate <= 600)
         {
             int ret = setBaudRate(CH34X_600_1312, CH34X_600_0f2c); //600
             if(ret == -1)
-                Log.i(CLASS_ID, "SetBaudRate failed!");
+                CcuLog.w(CLASS_ID, "SetBaudRate failed!");
 
         }else if(baudRate > 600 && baudRate <= 1200)
         {
             int ret = setBaudRate(CH34X_1200_1312, CH34X_1200_0f2c); //1200
             if(ret == -1)
-                Log.i(CLASS_ID, "SetBaudRate failed!");
+                CcuLog.w(CLASS_ID, "SetBaudRate failed!");
         }else if(baudRate > 1200 && baudRate <=2400)
         {
             int ret = setBaudRate(CH34X_2400_1312, CH34X_2400_0f2c); //2400
             if(ret == -1)
-                Log.i(CLASS_ID, "SetBaudRate failed!");
+                CcuLog.w(CLASS_ID, "SetBaudRate failed!");
         }else if(baudRate > 2400 && baudRate <= 4800)
         {
             int ret = setBaudRate(CH34X_4800_1312, CH34X_4800_0f2c); //4800
             if(ret == -1)
-                Log.i(CLASS_ID, "SetBaudRate failed!");
+                CcuLog.w(CLASS_ID, "SetBaudRate failed!");
         }else if(baudRate > 4800 && baudRate <= 9600)
         {
             int ret = setBaudRate(CH34X_9600_1312, CH34X_9600_0f2c); //9600
             if(ret == -1)
-                Log.i(CLASS_ID, "SetBaudRate failed!");
+                CcuLog.w(CLASS_ID, "SetBaudRate failed!");
         }else if(baudRate > 9600 && baudRate <= 19200)
         {
             int ret = setBaudRate(CH34X_19200_1312, CH34X_19200_0f2c_rest); //19200
             if(ret == -1)
-                Log.i(CLASS_ID, "SetBaudRate failed!");
+                CcuLog.w(CLASS_ID, "SetBaudRate failed!");
         }else if(baudRate > 19200 && baudRate <= 38400)
         {
             int ret = setBaudRate(CH34X_38400_1312, CH34X_19200_0f2c_rest); //38400
             if(ret == -1)
-                Log.i(CLASS_ID, "SetBaudRate failed!");
+                CcuLog.w(CLASS_ID, "SetBaudRate failed!");
         }else if(baudRate > 38400 && baudRate <= 57600)
         {
             int ret = setBaudRate(CH34X_57600_1312, CH34X_19200_0f2c_rest); //57600
             if(ret == -1)
-                Log.i(CLASS_ID, "SetBaudRate failed!");
+                CcuLog.w(CLASS_ID, "SetBaudRate failed!");
         }else if(baudRate > 57600 && baudRate <= 115200) //115200
         {
             int ret = setBaudRate(CH34X_115200_1312, CH34X_19200_0f2c_rest);
             if(ret == -1)
-                Log.i(CLASS_ID, "SetBaudRate failed!");
+                CcuLog.w(CLASS_ID, "SetBaudRate failed!");
         }else if(baudRate > 115200 && baudRate <= 230400) //230400
         {
             int ret = setBaudRate(CH34X_230400_1312, CH34X_19200_0f2c_rest);
             if(ret == -1)
-                Log.i(CLASS_ID, "SetBaudRate failed!");
+                CcuLog.w(CLASS_ID, "SetBaudRate failed!");
         }else if(baudRate > 230400 && baudRate <= 460800) //460800
         {
             int ret = setBaudRate(CH34X_460800_1312, CH34X_19200_0f2c_rest);
             if(ret == -1)
-                Log.i(CLASS_ID, "SetBaudRate failed!");
+                CcuLog.w(CLASS_ID, "SetBaudRate failed!");
         }else if(baudRate > 460800 && baudRate <= 921600)
         {
             int ret = setBaudRate(CH34X_921600_1312, CH34X_19200_0f2c_rest);
             if(ret == -1)
-                Log.i(CLASS_ID, "SetBaudRate failed!");
+                CcuLog.w(CLASS_ID, "SetBaudRate failed!");
         }
     }
 
@@ -365,10 +366,10 @@ public class CH34xSerialDevice extends UsbSerialDevice
     {
         if(connection.claimInterface(mInterface, true))
         {
-            Log.i(CLASS_ID, "Interface succesfully claimed");
+            CcuLog.d(CLASS_ID, "Interface successfully claimed");
         }else
         {
-            Log.i(CLASS_ID, "Interface could not be claimed");
+            CcuLog.d(CLASS_ID, "Interface could not be claimed");
             return false;
         }
 
@@ -399,19 +400,19 @@ public class CH34xSerialDevice extends UsbSerialDevice
 
         if(setControlCommandOut(0xa1, 0xc29c, 0xb2b9, null) < 0)
         {
-            Log.i(CLASS_ID, "init failed! #1");
+            CcuLog.w(CLASS_ID, "init failed! #1");
             return -1;
         }
 
         if(setControlCommandOut(0xa4, 0xdf, 0, null) < 0)
         {
-            Log.i(CLASS_ID, "init failed! #2");
+            CcuLog.w(CLASS_ID, "init failed! #2");
             return -1;
         }
 
         if(setControlCommandOut(0xa4, 0x9f, 0, null) < 0)
         {
-            Log.i(CLASS_ID, "init failed! #3");
+            CcuLog.w(CLASS_ID, "init failed! #3");
             return -1;
         }
 
@@ -420,25 +421,25 @@ public class CH34xSerialDevice extends UsbSerialDevice
 
         if(setControlCommandOut(0x9a, 0x2727, 0x0000, null) < 0)
         {
-            Log.i(CLASS_ID, "init failed! #5");
+            CcuLog.w(CLASS_ID, "init failed! #5");
             return -1;
         }
 
         if(setControlCommandOut(0x9a, 0x1312, 0xb282, null) < 0)
         {
-            Log.i(CLASS_ID, "init failed! #6");
+            CcuLog.w(CLASS_ID, "init failed! #6");
             return -1;
         }
 
         if(setControlCommandOut(0x9a, 0x0f2c, 0x0008, null) < 0)
         {
-            Log.i(CLASS_ID, "init failed! #7");
+            CcuLog.w(CLASS_ID, "init failed! #7");
             return -1;
         }
 
         if(setControlCommandOut(0x9a, 0x2518, 0x00c3, null) < 0)
         {
-            Log.i(CLASS_ID, "init failed! #8");
+            CcuLog.w(CLASS_ID, "init failed! #8");
             return -1;
         }
 
@@ -447,7 +448,7 @@ public class CH34xSerialDevice extends UsbSerialDevice
 
         if(setControlCommandOut(0x9a, 0x2727, 0x0000, null) < 0)
         {
-            Log.i(CLASS_ID, "init failed! #10");
+            CcuLog.w(CLASS_ID, "init failed! #10");
             return -1;
         }
 
@@ -494,7 +495,7 @@ public class CH34xSerialDevice extends UsbSerialDevice
 
         if (ret != expected.length)
         {
-            Log.i(CLASS_ID, ("Expected " + expected.length + " bytes, but get " + ret + " [" + msg + "]"));
+            CcuLog.d(CLASS_ID, ("Expected " + expected.length + " bytes, but get " + ret + " [" + msg + "]"));
             return -1;
         }else
         {
@@ -509,7 +510,7 @@ public class CH34xSerialDevice extends UsbSerialDevice
 
         if(ret != 2)
         {
-            Log.i(CLASS_ID, ("Expected " + "2" + " bytes, but get " + ret));
+            CcuLog.d(CLASS_ID, ("Expected " + "2" + " bytes, but get " + ret));
             return false;
         }
 
@@ -529,7 +530,7 @@ public class CH34xSerialDevice extends UsbSerialDevice
 
         if(ret != 2)
         {
-            Log.i(CLASS_ID, ("Expected " + "2" + " bytes, but get " + ret));
+            CcuLog.d(CLASS_ID, ("Expected " + "2" + " bytes, but get " + ret));
             return false;
         }
 
@@ -546,7 +547,7 @@ public class CH34xSerialDevice extends UsbSerialDevice
     {
         if(setControlCommandOut(0xa4, ~((dtr ? 1 << 5 : 0) | (rts ? 1 << 6 : 0)), 0, null) < 0)
         {
-            Log.i(CLASS_ID, "Failed to set handshake byte");
+            CcuLog.w(CLASS_ID, "Failed to set handshake byte");
             return -1;
         }
         return 0;
@@ -560,7 +561,7 @@ public class CH34xSerialDevice extends UsbSerialDevice
             dataLength = data.length;
         }
         int response = connection.controlTransfer(REQTYPE_HOST_TO_DEVICE, request, value, index, data, dataLength, USB_TIMEOUT);
-        Log.i(CLASS_ID,"Control Transfer Response: " + String.valueOf(response));
+        CcuLog.d(CLASS_ID,"Control Transfer Response: " + response);
         return response;
     }
 
@@ -572,7 +573,7 @@ public class CH34xSerialDevice extends UsbSerialDevice
             dataLength = data.length;
         }
         int response = connection.controlTransfer(REQTYPE_HOST_FROM_DEVICE, request, value, index, data, dataLength, USB_TIMEOUT);
-        Log.i(CLASS_ID,"Control Transfer Response: " + String.valueOf(response));
+        CcuLog.d(CLASS_ID,"Control Transfer Response: " + response);
         return response;
     }
 

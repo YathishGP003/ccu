@@ -1,5 +1,6 @@
 package a75f.io.usbserial;
 
+import static com.felhr.usbserial.UsbSerialDevice.TAG_SERIAL_DEBUG;
 import static a75f.io.usbserial.UsbModbusService.byteArrayToHex;
 import static a75f.io.usbserial.UsbService.ACTION_USB_PERMISSION_GRANTED;
 import static a75f.io.usbserial.UsbService.ACTION_USB_PERMISSION_NOT_GRANTED;
@@ -184,7 +185,7 @@ public class UsbConnectService extends Service
 						try {
 							nMsg = (data[0] & 0xff);
 						} catch (ArrayIndexOutOfBoundsException e) {
-							CcuLog.e("SERIAL_DEBUG",
+							CcuLog.e(TAG_SERIAL_DEBUG,
 									"Bad message type received: " + String.valueOf(data[0] & 0xff) +
 											e.getMessage());
 							return;

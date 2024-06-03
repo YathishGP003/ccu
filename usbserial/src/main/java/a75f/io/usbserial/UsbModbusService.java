@@ -82,6 +82,8 @@ public class UsbModbusService extends Service {
     private int reconnectCounter = 0;
     
     private Timer usbPortScanTimer = new Timer();
+
+    public static String TAG_CCU_SERIAL = "CCU_SERIAL";
     ;
     /*
      * Different notifications from OS will be received here (USB attached, detached, permission responses...)
@@ -354,7 +356,7 @@ public class UsbModbusService extends Service {
     private boolean grantRootPermissionToUSBDevice(UsbDevice device) {
         IBinder b = ServiceManager.getService(Context.USB_SERVICE);
         IUsbManager service = IUsbManager.Stub.asInterface(b);
-        CcuLog.i("CCU_SERIAL", "Try connecting!");
+        CcuLog.i(TAG_CCU_SERIAL, "Try connecting!");
         // There is a device connected to our Android device. Try to open it as a Serial Port.
         try {
             service.grantDevicePermission(device, getApplicationInfo().uid);

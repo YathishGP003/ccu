@@ -10,10 +10,14 @@ import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.heartbeat.HeartBeat
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
-import a75f.io.logic.bo.building.hyperstat.common.*
-import a75f.io.logic.bo.building.hyperstat.profiles.cpu.AnalogInAssociation
+import a75f.io.logic.bo.building.hyperstat.common.AnalogOutChanges
+import a75f.io.logic.bo.building.hyperstat.common.ConfigState
+import a75f.io.logic.bo.building.hyperstat.common.HyperStatAssociationUtil
+import a75f.io.logic.bo.building.hyperstat.common.HyperStatEquip
+import a75f.io.logic.bo.building.hyperstat.common.HyperstatProfileNames
+import a75f.io.logic.bo.building.hyperstat.common.LogicalKeyID
+import a75f.io.logic.bo.building.hyperstat.common.LogicalPointsUtil
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.AnalogInState
-import a75f.io.logic.bo.building.hyperstat.profiles.cpu.HyperStatCpuConfiguration
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.Th1InState
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.Th2InState
 import a75f.io.logic.bo.haystack.device.DeviceUtil
@@ -38,7 +42,7 @@ class HyperStatHpuEquip(val node: Short): HyperStatEquip() {
     var equipRef: String? = null
     private var roomRef: String? = null
     private var floorRef: String? = null
-    private var systemEquip = haystack.readEntity("equip and system and not modbus") as HashMap<Any, Any>
+    private var systemEquip = haystack.readEntity("equip and system and not modbus and not connectModule") as HashMap<Any, Any>
 
     companion object {
         fun getHyperStatEquipRef(nodeAddress: Short): HyperStatHpuEquip {

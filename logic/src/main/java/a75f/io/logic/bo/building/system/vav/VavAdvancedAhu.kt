@@ -852,7 +852,6 @@ open class VavAdvancedAhu : VavSystemProfile() {
     private fun isStageDownTimerActive() : Boolean = stageDownTimer > 0
 
     private fun updatePointVal(domainName: String, stageIndex : Int, pointVal : Int, isConnectEquip : Boolean) {
-        CcuLog.d(L.TAG_CCU_SYSTEM, "Update output $domainName $stageIndex $pointVal")
         if (isConnectEquip) {
             updateConnectPointVal(domainName, stageIndex, pointVal)
         } else {
@@ -860,7 +859,6 @@ open class VavAdvancedAhu : VavSystemProfile() {
         }
     }
     private fun updateCMPointVal(domainName: String, stageIndex : Int, pointVal : Int) {
-        CcuLog.d(L.TAG_CCU_SYSTEM, "updateCMPointVal $domainName $stageIndex $pointVal")
         getDomainPointForName(domainName, systemEquip).writeHisVal(pointVal.toDouble())
         getCMRelayAssociationMap(systemEquip).forEach { (relay, association) ->
             if (association.readDefaultVal() == stageIndex.toDouble() && relay.readDefaultVal() > 0) {

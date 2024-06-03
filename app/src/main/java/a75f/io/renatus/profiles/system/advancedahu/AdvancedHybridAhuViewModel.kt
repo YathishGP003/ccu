@@ -290,7 +290,7 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
                 Domain.systemEquip as DabAdvancedHybridSystemEquip
             }
             val relayName = getRelayNameForIndex(relayIndex)
-            if (isConnect) {
+            if (isConnect && isConnectModulePaired) {
                 getConnectRelayLogicalPhysicalMap(systemEquip.connectEquip1, Domain.connect1Device).values.find { it.domainName == relayName }
             } else {
                 return getCMRelayLogicalPhysicalMap(systemEquip).values.find { it.domainName == relayName }

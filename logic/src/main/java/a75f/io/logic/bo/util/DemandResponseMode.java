@@ -19,7 +19,7 @@ public class DemandResponseMode {
     static String demandResponseActivationQuery = "demand and response and activation";
     private static void createDemandResponseActivationPoint(CCUHsApi ccuHsApi) {
         CcuLog.i(L.TAG_CCU_DR_MODE, "createDemandResponseActivationPoint:  ");
-        HashMap<Object, Object> equip = ccuHsApi.readEntity("equip and system and not modbus");
+        HashMap<Object, Object> equip = ccuHsApi.readEntity("equip and system and not modbus and not connectModule");
         Point demandResponseActivation = new Point.Builder().setDisplayName(equip.get("dis").toString()
                         + "-" + "demandResponseActivation").setSiteRef(ccuHsApi.getSiteIdRef().toString())
                 .setEquipRef(equip.get("id").toString()).setHisInterpolate("cov").addMarker("system")

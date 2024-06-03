@@ -41,7 +41,7 @@ class HyperStatPipe2Equip(val node: Short): HyperStatEquip()  {
     var equipRef: String? = null
     private var roomRef: String? = null
     private var floorRef: String? = null
-    private var systemEquip = haystack.readEntity("equip and system and not modbus") as HashMap<Any, Any>
+    private var systemEquip = haystack.readEntity("equip and system and not modbus and not connectModule") as HashMap<Any, Any>
 
 
     var lastWaterValveTurnedOnTime: Long = System.currentTimeMillis()

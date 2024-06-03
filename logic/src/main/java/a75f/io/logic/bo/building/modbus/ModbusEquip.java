@@ -78,7 +78,7 @@ public class ModbusEquip {
         String gatewayRef = null;
         configuredParams = configParams;
         CcuLog.d("Modbus",modbusEquipType+"MbEquip create Entity = "+configuredParams.size());
-        HashMap systemEquip = hayStack.read("equip and system and not modbus");
+        HashMap systemEquip = hayStack.read("equip and system and not modbus and not connectModule");
         if (systemEquip != null && systemEquip.size() > 0) {
             gatewayRef = systemEquip.get("id").toString();
         }

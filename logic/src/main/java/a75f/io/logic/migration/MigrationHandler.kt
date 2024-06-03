@@ -15,6 +15,7 @@ import a75f.io.domain.cutover.VavStagedVfdRtuCutOverMapping
 import a75f.io.domain.cutover.VavZoneProfileCutOverMapping
 import a75f.io.domain.equips.VavEquip
 import a75f.io.domain.logic.DeviceBuilder
+import a75f.io.domain.logic.DomainManager.addCmBoardDevice
 import a75f.io.domain.logic.DomainManager.addSystemDomainEquip
 import a75f.io.domain.logic.EntityMapper
 import a75f.io.domain.logic.ProfileEquipBuilder
@@ -72,6 +73,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         doVavSystemDomainModelMigration()
         createMigrationVersionPoint(CCUHsApi.getInstance())
         addSystemDomainEquip(CCUHsApi.getInstance())
+        addCmBoardDevice(hayStack)
 
         if (hayStack.readEntity(Tags.SITE).isNotEmpty()) {
             createOfflineModePoint()

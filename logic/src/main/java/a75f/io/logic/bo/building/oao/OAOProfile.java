@@ -4,10 +4,8 @@ import static a75f.io.domain.api.DomainName.systemEnhancedVentilationEnable;
 import static a75f.io.domain.api.DomainName.systemPostPurgeEnable;
 import static a75f.io.domain.api.DomainName.systemPrePurgeEnable;
 
-
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Occupied;
-import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
@@ -28,7 +26,6 @@ import a75f.io.logic.bo.building.system.vav.VavFullyModulatingRtu;
 import a75f.io.logic.bo.building.system.vav.VavStagedRtu;
 import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.tuners.TunerUtil;
-import a75f.io.logic.util.OfflineModeUtilKt;
 
 /*
 *  OAO Combines both System profile and Zone Profile behaviours.
@@ -57,7 +54,7 @@ public class OAOProfile
     }
     public void setEconomizingAvailable(boolean economizingAvailable)
     {
-        this.economizingAvailable = economizingAvailable;
+        OAOProfile.economizingAvailable = economizingAvailable;
     }
 
     public boolean isDcvAvailable() {
@@ -291,7 +288,7 @@ public class OAOProfile
 
         }
 
-        double outsideDamperMinOpenFromConditioning = 0.0;
+        double outsideDamperMinOpenFromConditioning;
         if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_HYBRID_RTU) {
             DabAdvancedHybridRtu dabHybridRtu = (DabAdvancedHybridRtu) L.ccu().systemProfile;
             if (dabHybridRtu.isCoolingActive() || dabHybridRtu.isHeatingActive() || dabHybridRtu.isModulatingCoolingActive() || dabHybridRtu.isModulatingHeatingActive() || oaoEquip.getHisVal("economizing and loop and output") > 0.0) {

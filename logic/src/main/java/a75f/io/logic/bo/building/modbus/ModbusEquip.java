@@ -79,7 +79,7 @@ public class ModbusEquip {
         configuredParams = configParams;
         CcuLog.d("Modbus",modbusEquipType+"MbEquip create Entity = "+configuredParams.size());
         HashMap systemEquip = hayStack.read("equip and system and not modbus and not connectModule");
-        if (systemEquip != null && systemEquip.size() > 0) {
+        if (systemEquip != null && !systemEquip.isEmpty()) {
             gatewayRef = systemEquip.get("id").toString();
         }
 
@@ -106,10 +106,10 @@ public class ModbusEquip {
         }
         mbEquip.addMarker(modbusLevel.toLowerCase().trim());
 
-        if (equipmentInfo.getVendor()!= null && !equipmentInfo.getVendor().equals("")) {
+        if (equipmentInfo.getVendor()!= null && !equipmentInfo.getVendor().isEmpty()) {
             mbEquip.setVendor(equipmentInfo.getVendor());
         }
-        if (equipmentInfo.getModelNumbers() != null && equipmentInfo.getModelNumbers().size() >0) {
+        if (equipmentInfo.getModelNumbers() != null && !equipmentInfo.getModelNumbers().isEmpty()) {
 
             mbEquip.setModel(equipmentInfo.getModelNumbers().get(0));
         }
@@ -271,10 +271,10 @@ public class ModbusEquip {
                 for(Condition readCondition :configParam.getConditions()) {
                     if(Objects.nonNull(readCondition.getBitValues())) {
                         if(enumVariables.length() == 0)
-                            enumVariables.append(readCondition.getName()+"="+readCondition.getBitValues());
+                            enumVariables.append(readCondition.getName()).append("=").append(readCondition.getBitValues());
                         else {
                             enumVariables.append(",");
-                            enumVariables.append(readCondition.getName()+"="+readCondition.getBitValues());
+                            enumVariables.append(readCondition.getName()).append("=").append(readCondition.getBitValues());
                         }
                     }
                 }
@@ -287,10 +287,10 @@ public class ModbusEquip {
                 for(Command writeCommand :configParam.getCommands()) {
                     if(Objects.nonNull(writeCommand.getBitValues())) {
                         if(enumVariables.length() == 0)
-                            enumVariables.append(writeCommand.getName()+"="+writeCommand.getBitValues());
+                            enumVariables.append(writeCommand.getName()).append("=").append(writeCommand.getBitValues());
                         else {
                             enumVariables.append(",");
-                            enumVariables.append(writeCommand.getName()+"="+writeCommand.getBitValues());
+                            enumVariables.append(writeCommand.getName()).append("=").append(writeCommand.getBitValues());
                         }
                     }
                 }
@@ -304,7 +304,7 @@ public class ModbusEquip {
             RawPoint physicalPoint = physicalParamPoint.setPointRef(logicalParamId).build();
             String physicalParamId = CCUHsApi.getInstance().addPoint(physicalPoint);
             if (configParam.getUserIntentPointTags() != null) {
-                if (configParam.getCommands() != null && configParam.getCommands().size() > 0) {
+                if (configParam.getCommands() != null && !configParam.getCommands().isEmpty()) {
                     CCUHsApi.getInstance().writeHisValById(logicalParamId, Double.parseDouble(configParam.getCommands().get(0).getBitValues()));
                     CCUHsApi.getInstance().writeDefaultValById(logicalParamId, Double.parseDouble(configParam.getCommands().get(0).getBitValues()));
                 } else {
@@ -318,7 +318,7 @@ public class ModbusEquip {
                 }
 
             } else {
-                if (configParam.getConditions() != null && configParam.getConditions().size() > 0) {
+                if (configParam.getConditions() != null && !configParam.getConditions().isEmpty()) {
                     CCUHsApi.getInstance().writeHisValById(logicalParamId, Double.parseDouble(configParam.getConditions().get(0).getBitValues()));
                     if (logicalPoint.getMarkers().contains("writable")) {
                         CCUHsApi.getInstance().writeDefaultValById(logicalParamId, Double.parseDouble(configParam.getConditions().get(0).getBitValues()));

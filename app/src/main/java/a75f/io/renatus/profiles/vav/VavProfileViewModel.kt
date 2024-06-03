@@ -1,8 +1,10 @@
 package a75f.io.renatus.profiles.vav
 
 import a75f.io.api.haystack.CCUHsApi
+import a75f.io.api.haystack.HSUtil
 import a75f.io.api.haystack.Point
 import a75f.io.api.haystack.RawPoint
+import a75f.io.api.haystack.Tags
 import a75f.io.device.mesh.LSerial
 import a75f.io.device.mesh.LSmartNode
 import a75f.io.domain.equips.VavEquip
@@ -19,7 +21,7 @@ import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
-import a75f.io.logic.bo.building.definitions.ReheatType
+import a75f.io.logic.bo.building.definitions.ReheatType.*
 import a75f.io.logic.bo.building.vav.VavParallelFanProfile
 import a75f.io.logic.bo.building.vav.VavProfile
 import a75f.io.logic.bo.building.vav.VavProfileConfiguration
@@ -30,8 +32,9 @@ import a75f.io.logic.getSchedule
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.FloorPlanFragment
 import a75f.io.renatus.modbus.util.showToast
+import a75f.io.renatus.profiles.profileUtils.UnusedPortsModel
+import a75f.io.renatus.profiles.profileUtils.UnusedPortsModel.Companion.saveUnUsedPortStatus
 import a75f.io.renatus.util.ProgressDialogUtils
-import a75f.io.renatus.util.RxjavaUtil
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -88,6 +91,8 @@ class VavProfileViewModel : ViewModel() {
     lateinit var minCFMCoolingList: List<String>
     lateinit var maxCFMReheatingList: List<String>
     lateinit var minCFMReheatingList: List<String>
+    private lateinit var unusedPorts: HashMap<String, Boolean>
+
 
     private val _isDialogOpen = MutableLiveData<Boolean>()
     private var saveJob : Job? = null
@@ -133,6 +138,7 @@ class VavProfileViewModel : ViewModel() {
         this.hayStack = hayStack
 
         initializeLists()
+        unusedPorts = UnusedPortsModel.initializeUnUsedPorts(deviceAddress, hayStack)
         CcuLog.i(Domain.LOG_TAG, "VavProfileViewModel Loaded")
         modelLoaded = true
     }
@@ -217,7 +223,7 @@ class VavProfileViewModel : ViewModel() {
 
         if (profileConfiguration.isDefault) {
 
-            addEquipAndPoints(deviceAddress, profileConfiguration, floorRef, zoneRef, nodeType, hayStack, model, deviceModel)
+            addEquipAndPoints(deviceAddress, profileConfiguration, nodeType, hayStack, model, deviceModel)
             setOutputTypes(profileConfiguration)
             if (L.ccu().bypassDamperProfile != null) overrideForBypassDamper(profileConfiguration)
             setScheduleType(profileConfiguration)
@@ -231,15 +237,15 @@ class VavProfileViewModel : ViewModel() {
             setOutputTypes(profileConfiguration)
             setMinCfmSetpointMaxVals(profileConfiguration)
             setScheduleType(profileConfiguration)
+            saveUnUsedPortStatus(profileConfiguration, deviceAddress, hayStack)
         }
 
     }
 
+
     private fun addEquipAndPoints(
-        addr: Short,
+        deviceAddress: Short,
         config: ProfileConfiguration,
-        floorRef: String?,
-        roomRef: String?,
         nodeType: NodeType?,
         hayStack: CCUHsApi,
         equipModel: SeventyFiveFProfileDirective?,
@@ -268,9 +274,9 @@ class VavProfileViewModel : ViewModel() {
         )
         CcuLog.i(Domain.LOG_TAG, " add Profile")
         vavProfile = when(profileType) {
-            ProfileType.VAV_SERIES_FAN -> VavSeriesFanProfile(equipId, addr)
-            ProfileType.VAV_PARALLEL_FAN -> VavParallelFanProfile(equipId, addr)
-            else -> VavReheatProfile(equipId, addr)
+            ProfileType.VAV_SERIES_FAN -> VavSeriesFanProfile(equipId, deviceAddress)
+            ProfileType.VAV_PARALLEL_FAN -> VavParallelFanProfile(equipId, deviceAddress)
+            else -> VavReheatProfile(equipId, deviceAddress)
         }
 
     }
@@ -302,45 +308,56 @@ class VavProfileViewModel : ViewModel() {
     // "analogType" tag is used by control message code and cannot easily be replaced with a domain name query.
     // We are setting this value upon equip creation/reconfiguration for now.
     private fun setOutputTypes(config: VavProfileConfiguration) {
-        val device = hayStack.read("device and addr == \"" + config.nodeAddress + "\"")
+        val device = hayStack.readEntity("device and addr == \"" + config.nodeAddress + "\"")
 
         val reheatType = config.reheatType.currentVal.toInt() - 1
-        val reheatCmdPoint = hayStack.read("point and group == \"" + config.nodeAddress + "\" and domainName == \"" + DomainName.reheatCmd + "\"")
+        val reheatCmdPoint = hayStack.readEntity("point and group == \"" + config.nodeAddress + "\" and domainName == \"" + DomainName.reheatCmd + "\"")
 
         // Relay 1 enabled if Reheat Type is 1-Stage or 2-Stage (2-Stage is only an option for VAV No Fan)
-        var relay1OpEnabled = reheatType == ReheatType.OneStage.ordinal || reheatType == ReheatType.TwoStage.ordinal
-        val relay1 = hayStack.readHDict("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.relay1 + "\"")
-        var relay1Point = RawPoint.Builder().setHDict(relay1).setType(if (relay1OpEnabled) "Relay N/C" else "Relay N/O").setEnabled(relay1OpEnabled)
-        if (reheatType == ReheatType.OneStage.ordinal || reheatType == ReheatType.TwoStage.ordinal) relay1Point.setPointRef(reheatCmdPoint.get("id").toString())
-        hayStack.updatePoint(relay1Point.build(), relay1.get("id").toString())
+        val relay1OpEnabled = reheatType == OneStage.ordinal || reheatType == TwoStage.ordinal
+        val relay1 = hayStack.readHDict("point and deviceRef == \""+ device["id"] +"\" and domainName == \"" + DomainName.relay1 + "\"")
+        val relay1Point = RawPoint.Builder().setHDict(relay1).setType(if (relay1OpEnabled) "Relay N/C" else "Relay N/O").setEnabled(relay1OpEnabled).build()
+        if (reheatType == OneStage.ordinal || reheatType == TwoStage.ordinal) {
+            relay1Point.pointRef = reheatCmdPoint["id"].toString()
+        } else {
+            relay1Point.pointRef = null
+        }
+        hayStack.updatePoint(relay1Point, relay1["id"].toString())
 
         // Relay 2 is always enabled for VAV Series and Parallel Fan. For VAV No Fan, enabled only when Reheat Type is 2-Stage.
-        var relay2OpEnabled = ((!config.profileType.equals(ProfileType.VAV_REHEAT.name)) || reheatType == ReheatType.TwoStage.ordinal)
-        var relay2 = hayStack.readHDict("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.relay2 + "\"")
-        var relay2Point = RawPoint.Builder().setHDict(relay2).setType(if (relay2OpEnabled) "Relay N/C" else "Relay N/O").setEnabled(relay2OpEnabled)
-        if (reheatType == ReheatType.TwoStage.ordinal) relay2Point.setPointRef(reheatCmdPoint.get("id").toString())
-        hayStack.updatePoint(relay2Point.build(), relay2.get("id").toString())
 
-        var analogOut1 = hayStack.readHDict("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.analog1Out + "\"")
-        var analog1Point = RawPoint.Builder().setHDict(analogOut1)
-        hayStack.updatePoint(analog1Point.setType(getDamperTypeString(config)).build(), analogOut1.get("id").toString())
+        val relay2OpEnabled = ((config.profileType != ProfileType.VAV_REHEAT.name) || reheatType == TwoStage.ordinal)
+        val relay2 = hayStack.readHDict("point and deviceRef == \""+ device["id"] +"\" and domainName == \"" + DomainName.relay2 + "\"")
+        val relay2Point = RawPoint.Builder().setHDict(relay2).setType(if (relay2OpEnabled) "Relay N/C" else "Relay N/O").setEnabled(relay2OpEnabled)
+        if (relay2OpEnabled){
+            relay2Point.setPointRef(reheatCmdPoint["id"].toString())
+        } else {
+            relay2Point.setPointRef(null)
+        }
+        hayStack.updatePoint(relay2Point.build(), relay2["id"].toString())
 
-        var analog2OpEnabled = reheatType == ReheatType.ZeroToTenV.ordinal ||
-                reheatType == ReheatType.TwoToTenV.ordinal ||
-                reheatType == ReheatType.TenToZeroV.ordinal ||
-                reheatType == ReheatType.TenToTwov.ordinal ||
-                reheatType == ReheatType.Pulse.ordinal
-        var analogOut2 = hayStack.readHDict("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.analog2Out + "\"");
-        var analog2Point = RawPoint.Builder().setHDict(analogOut2)
-        hayStack.updatePoint(analog2Point.setType(getReheatTypeString(config)).setEnabled(analog2OpEnabled).build(), analogOut2.get("id").toString())
+        val analogOut1 = hayStack.readHDict("point and deviceRef == \""+ device["id"] +"\" and domainName == \"" + DomainName.analog1Out + "\"")
+        val analog1Point = RawPoint.Builder().setHDict(analogOut1)
+        hayStack.updatePoint(analog1Point.setType(getDamperTypeString(config)).build(), analogOut1["id"].toString())
+
+        val analog2OpEnabled = reheatType == ZeroToTenV.ordinal ||
+                reheatType == TwoToTenV.ordinal ||
+                reheatType == TenToZeroV.ordinal ||
+                reheatType == TenToTwov.ordinal ||
+                reheatType == Pulse.ordinal
+        val analogOut2 = hayStack.readHDict("point and deviceRef == \""+ device["id"]
+                +"\" and domainName == \"" + DomainName.analog2Out + "\"")
+        val analog2Point = RawPoint.Builder().setHDict(analogOut2)
+            .setType(getReheatTypeString(config)).setEnabled(analog2OpEnabled).build()
+        hayStack.updatePoint(analog2Point, analogOut2["id"].toString())
 
     }
 
     private fun overrideForBypassDamper(config: VavProfileConfiguration) {
-        val equip = hayStack.read("equip and group == \"" + config.nodeAddress + "\"")
-        val vavEquip = VavEquip(equip.get("id").toString())
+        val equip = hayStack.readEntity("equip and group == \"" + config.nodeAddress + "\"")
+        val vavEquip = VavEquip(equip["id"].toString())
 
-        if (!(vavEquip.enableCFMControl.readDefaultVal() > 0.0)) {
+        if (vavEquip.enableCFMControl.readDefaultVal() <= 0.0) {
             vavEquip.minCoolingDamperPos.writeVal(7, hayStack.ccuUserName, vavEquip.minCoolingDamperPos.readDefaultVal(), 0)
             vavEquip.minCoolingDamperPos.writeDefaultVal(20.0)
             vavEquip.minCoolingDamperPos.writeHisVal(10.0)
@@ -363,7 +380,7 @@ class VavProfileViewModel : ViewModel() {
 
     private fun setScheduleType(config: VavProfileConfiguration) {
         val scheduleTypePoint = hayStack.readEntity("point and domainName == \"" + DomainName.scheduleType + "\" and group == \"" + config.nodeAddress + "\"")
-        val scheduleTypeId = scheduleTypePoint.get("id").toString()
+        val scheduleTypeId = scheduleTypePoint["id"].toString()
 
         val roomSchedule = getSchedule(zoneRef, floorRef)
         if(roomSchedule.isZoneSchedule) {

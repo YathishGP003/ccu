@@ -10,6 +10,7 @@ import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.system.SystemMode
 import a75f.io.logic.bo.building.system.vav.VavStagedRtu
 import a75f.io.logic.bo.building.system.vav.config.StagedRtuProfileConfig
+import a75f.io.logic.bo.haystack.device.ControlMote
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.renatus.util.ProgressDialogUtils
 import a75f.io.renatus.util.SystemProfileUtil
@@ -47,6 +48,7 @@ class VavStagedRtuViewModel : StagedRtuProfileViewModel() {
         CcuLog.i(Domain.LOG_TAG, profileConfiguration.toString())
         viewState = StagedRtuViewState.fromProfileConfig(profileConfiguration)
         CcuLog.i(Domain.LOG_TAG, "VavStagedRtuViewModel Loaded")
+        viewState.unusedPortState = ControlMote.getCMUnusedPorts(Domain.hayStack)
         modelLoaded = true
     }
 

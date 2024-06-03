@@ -1,5 +1,6 @@
 package a75f.io.domain.api
 
+import a75f.io.api.haystack.RawPoint
 import java.util.Objects
 
 /**
@@ -181,6 +182,11 @@ open class PhysicalPoint(domainName : String, val deviceRef: String) : Entity (d
     fun writeHisVal(hisVal : Double) {
         requireId()
         Domain.hayStack.writeHisValById(id, hisVal)
+    }
+
+    fun readPoint() : RawPoint {
+        requireId()
+        return RawPoint.Builder().setHDict(Domain.hayStack.readHDictById(id)).build()
     }
 
     override fun equals(other: Any?)

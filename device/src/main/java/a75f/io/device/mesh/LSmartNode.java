@@ -19,6 +19,7 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.RawPoint;
+import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.device.serial.AddressedStruct;
 import a75f.io.device.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
@@ -46,7 +47,6 @@ import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.definitions.DamperType;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.ReheatType;
-import a75f.io.logic.bo.building.hvac.Damper;
 import a75f.io.logic.bo.util.SystemTemperatureUtil;
 import a75f.io.logic.tuners.TunerUtil;
 
@@ -694,15 +694,24 @@ public class LSmartNode
                     }
 
                     Log.d(TAG_CCU_DEVICE, "Set "+logicalOpPoint.get("dis") +" "+ p.getPort() + " type " + p.getType() + " logicalVal: " + logicalVal + " mappedVal " + mappedVal);
-
-                    Struct.Unsigned8 port = LSmartNode.getSmartNodePort(controls_t, p);
+                    Struct.Unsigned8 port = getDevicePort(device, controls_t, p);
                     if (port != null) {
                         port.set(mappedVal);
                     } else {
                         CcuLog.d(L.TAG_CCU_DEVICE, "Unknown port info for "+p.getDisplayName());
                     }
 
-                }  else {
+                } else if (opPoint.containsKey(Tags.WRITABLE)) {
+                    RawPoint p = new RawPoint.Builder().setHashMap(opPoint).build();
+                    double rawPointValue = hayStack.readPointPriorityVal(opPoint.get("id").toString());
+                    Log.d(TAG_CCU_DEVICE, " Raw Point: " + p.getDisplayName() +
+                                    " is unused port and has value: " +rawPointValue);
+                    Struct.Unsigned8 port = getDevicePort(device, controls_t, p);
+                    if (port != null) {
+                        port.set((short) rawPointValue);
+                    }
+                }
+                    else {
                     //Disabled output port should reset its val
                     hayStack.writeHisValById(opPoint.get("id").toString(), 0.0);
                 }
@@ -710,6 +719,14 @@ public class LSmartNode
             controls_t.setTemperature.set((short)(getSetTemp(equipRef) > 0 ? (getSetTemp(equipRef) * 2) : 144));
             controls_t.conditioningMode.set((short) (L.ccu().systemProfile.getSystemController().getSystemState() == HEATING ? 1 : 0));
             controls_t.targetValue.set(getTargetValue(equipRef));
+        }
+    }
+
+    private static Struct.Unsigned8 getDevicePort(HashMap device, SmartNodeControls_t controls_t, RawPoint physicalPoint) {
+        if(device.containsKey(Tags.HELIO_NODE)){
+            return LHelioNode.Companion.getHelioNodePort(controls_t, physicalPoint);
+        } else {
+            return LSmartNode.getSmartNodePort(controls_t, physicalPoint);
         }
     }
 

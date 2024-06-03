@@ -10,6 +10,8 @@ import a75f.io.renatus.composables.DropDownWithLabel
 import a75f.io.renatus.composables.IndeterminateLoopProgress
 import a75f.io.renatus.composables.SystemAnalogOutMappingViewVavStagedVfdRtu
 import a75f.io.renatus.compose.ComposeUtil
+import a75f.io.renatus.profiles.profileUtils.UnusedPortsFragment
+import a75f.io.renatus.profiles.profileUtils.UnusedPortsFragment.Companion.LabelUnusedPorts
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -400,6 +402,18 @@ class VavStagedVfdRtuFragment : StagedRtuFragment() {
                         expandedWidth = 100, spacerLimit = 90)
                 }
 
+            }
+
+            if(viewModel.viewState.unusedPortState.isNotEmpty()) {
+                item {
+                    UnusedPortsFragment.DividerRow()
+                }
+                item {
+                    LabelUnusedPorts()
+                }
+                item {
+                    UnusedPortsFragment.UnUsedPortsListView(viewModel)
+                }
             }
         }
 

@@ -42,6 +42,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Point;
+import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.constants.DeviceFieldConstants;
 import a75f.io.device.serial.CcuToCmOverUsbCmRelayActivationMessage_t;
@@ -49,6 +50,7 @@ import a75f.io.device.serial.CcuToCmOverUsbSmartStatControlsMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSnControlsMessage_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.domain.api.Domain;
+import a75f.io.domain.api.PhysicalPoint;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.Port;
@@ -229,6 +231,7 @@ public class DeviceUtil {
     }
     
     public static CcuToCmOverUsbCmRelayActivationMessage_t getCMControlsMessage() {
+        CCUHsApi ccuHsApi = CCUHsApi.getInstance();
         CcuToCmOverUsbCmRelayActivationMessage_t msg = new CcuToCmOverUsbCmRelayActivationMessage_t();
         msg.messageType.set(MessageType.CCU_RELAY_ACTIVATION);
 
@@ -237,16 +240,14 @@ public class DeviceUtil {
                 L.ccu().systemProfile instanceof VavAdvancedAhu ||
                 L.ccu().systemProfile instanceof VavFullyModulatingRtu) {
 
-            msg.analog0.set((short) Domain.cmBoardDevice.getAnalog1Out().readHisVal());
-            msg.analog1.set((short) Domain.cmBoardDevice.getAnalog2Out().readHisVal());
-            msg.analog2.set((short) Domain.cmBoardDevice.getAnalog3Out().readHisVal());
-            msg.analog3.set((short) Domain.cmBoardDevice.getAnalog4Out().readHisVal());
+            msg.analog0.set(getPortValue(Domain.cmBoardDevice.getAnalog1Out(), ccuHsApi));
+            msg.analog1.set(getPortValue(Domain.cmBoardDevice.getAnalog2Out(), ccuHsApi));
+            msg.analog2.set(getPortValue(Domain.cmBoardDevice.getAnalog3Out(), ccuHsApi));
+            msg.analog3.set(getPortValue(Domain.cmBoardDevice.getAnalog4Out(), ccuHsApi));
 
             int relayBitmap = 0;
             for (int i = 1; i <= 7; i++) {
-                if (CCUHsApi.getInstance().readHisValByQuery("point and physical and deviceRef == \""
-                        + Domain.cmBoardDevice.getId() + "\" " +
-                        "and domainName == \"relay"+i+"\"") > 0) {
+                if (isRelayActivated(ccuHsApi, "relay"+i)) {
                     relayBitmap |= 1 << MeshUtil.getRelayMapping(i);
                 }
             }
@@ -270,6 +271,24 @@ public class DeviceUtil {
 
         
         return msg;
+    }
+
+    private static boolean isRelayActivated(CCUHsApi ccuHsApi, String relay) {
+        String relayQuery = ("point and physical and deviceRef == \""
+                + Domain.cmBoardDevice.getId() + "\" " +
+                "and domainName == \""+relay+"\"");
+        if(ccuHsApi.readEntity(relayQuery).containsKey(Tags.WRITABLE)){
+            return ccuHsApi.readPointPriorityValByQuery(relayQuery) > 0;
+        } else {
+            return CCUHsApi.getInstance().readHisValByQuery(relayQuery) > 0;
+        }
+    }
+
+    private static short getPortValue(PhysicalPoint physicalPoint, CCUHsApi ccuHsApi) {
+        if(physicalPoint.readPoint().getMarkers().contains(Tags.WRITABLE)){
+            return (short) ccuHsApi.readPointPriorityVal(physicalPoint.readPoint().getId());
+        }
+        return (short) physicalPoint.readHisVal();
     }
 
 

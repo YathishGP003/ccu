@@ -13,6 +13,7 @@ import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.Looper;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.widget.Toast;
 
 import org.apache.commons.lang3.StringUtils;
@@ -3561,5 +3562,27 @@ public class CCUHsApi
             return 0;
         }
 
+    }
+    public void clearAllAvailableLevelsInPoint(String id) {
+        if (HSUtil.readPointPriorityValWithNull(id) != null) {
+            List<HDict> hDictArrayList = new ArrayList<>();
+            for (int i = 1; i <= 16; i++) {
+                HDictBuilder hDictBuilder = new HDictBuilder()
+                        .add("id", HRef.copy(id))
+                        .add("level", i)
+                        .add("who", CCUHsApi.getInstance().getCCUUserName())
+                        .add("duration", HNum.make(0, "ms"))
+                        .add("val", (HVal) null);
+                hDictArrayList.add(hDictBuilder.toDict());
+                deletePointArrayLevel(id, i);
+            }
+            HGrid hGrid = HGridBuilder.dictsToGrid(hDictArrayList.toArray(new HDict[hDictArrayList.size()]));
+            EntitySyncResponse e = HttpUtil.executeEntitySync(
+                    CCUHsApi.getInstance().pointWriteManyTarget(),
+                    HZincWriter.gridToString(hGrid), CCUHsApi.getInstance().getJwt());
+            CcuLog.d(TAG, "clear All Available Levels In Point : " + "Response " + e.getRespString() + " Error" + e.getErrRespString());
+        } else {
+            CcuLog.d(TAG, "Available levels are  cleared for point " + id);
+        }
     }
 }

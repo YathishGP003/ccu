@@ -37,7 +37,9 @@ import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-
+import a75f.io.renatus.compose.LabelTextView
+import a75f.io.renatus.profiles.profileUtils.UnusedPortsFragment
+import a75f.io.renatus.profiles.profileUtils.UnusedPortsFragment.Companion.DividerRow
 class VavModulatingRtuFragment : ModulatingRtuFragment() {
 
     private val vavModulatingViewModel: VavModulatingRtuViewModel by viewModels()
@@ -257,6 +259,17 @@ class VavModulatingRtuFragment : ModulatingRtuFragment() {
                         spacerLimit = 147,
                         previewWidth = 100,
                         expandedWidth = 120)
+                }
+            }
+            if(vavModulatingViewModel.viewState.unusedPortState.isNotEmpty()) {
+                item {
+                    DividerRow()
+                }
+                item {
+                    LabelTextView(text = "Unused ports for External mapping", widthValue = 400)
+                }
+                item {
+                    UnusedPortsFragment.UnUsedPortsListView(vavModulatingViewModel)
                 }
             }
         }

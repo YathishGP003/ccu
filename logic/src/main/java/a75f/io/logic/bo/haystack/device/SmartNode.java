@@ -15,6 +15,8 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.domain.api.DomainName;
 import a75f.io.domain.config.ProfileConfiguration;
 import a75f.io.domain.util.PointsUtil;
+import a75f.io.logger.CcuLog;
+import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.bypassdamper.BypassDamperProfileConfiguration;
 import a75f.io.logic.bo.building.definitions.Consts;
@@ -26,7 +28,6 @@ import a75f.io.logic.bo.building.firmware.FirmwareVersion;
 import a75f.io.logic.bo.building.heartbeat.HeartBeat;
 import a75f.io.logic.bo.building.vav.AcbProfileConfiguration;
 import a75f.io.logic.bo.building.vav.VavProfileConfiguration;
-import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective;
 
 /**
  * Created by samjithsadasivan on 9/5/18.
@@ -561,22 +562,26 @@ public class SmartNode
         }
     }
 
-    public static void setDomainPointEnabled(int addr, String domainName, boolean enabled) {
-        Log.d("CCU"," Enabled Physical point "+domainName+" "+enabled);
+    public static void setDomainPointEnabled(int addr, String domainName, boolean enabled, CCUHsApi hayStack) {
+        CcuLog.d(L.TAG_CCU_PUBNUB," Enabled Physical point "+domainName+" "+enabled);
 
-        HashMap device = CCUHsApi.getInstance().read("device and addr == \""+addr+"\"");
-        if (device.isEmpty())
-        {
+        HashMap<Object, Object> device = hayStack.readEntity("device and addr == \""+addr+"\"");
+        if (device.isEmpty()) {
             return ;
         }
 
-        HashMap point = CCUHsApi.getInstance().read("point and physical and deviceRef == \"" + device.get("id").toString() + "\""+" and domainName == \""+domainName+"\"");
-        if (point != null && point.size() > 0)
-        {
+        HashMap<Object, Object> point = hayStack.readEntity("point and physical and" +
+                " deviceRef == \"" + device.get("id").toString() + "\""+" and domainName == \""+domainName+"\"");
+        if (point != null && point.size() > 0) {
             RawPoint p = new RawPoint.Builder().setHashMap(point).build();
             p.setEnabled(enabled);
-            CCUHsApi.getInstance().updatePoint(p,p.getId());
-            CCUHsApi.getInstance().writeHisValById(p.getId(), 0.0);
+            if(enabled && p.getMarkers().contains(Tags.WRITABLE)) {
+                p.getMarkers().remove(Tags.WRITABLE);
+                hayStack.clearAllAvailableLevelsInPoint(p.getId());
+                hayStack.writeHisValById(p.getId(), 0.0);
+            }
+            hayStack.updatePoint(p,p.getId());
+            hayStack.writeHisValById(p.getId(), 0.0);
         }
     }
     

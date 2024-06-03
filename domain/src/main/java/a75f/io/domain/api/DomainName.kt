@@ -923,5 +923,16 @@ object DomainName {
     const val humidifier = "humidifier"
     const val dehumidifier = "dehumidifier"
     const val voltageInput = "voltageInput"
+
+    const val universal1In = "universal1In"
+    const val universal2In = "universal2In"
+    const val universal3In = "universal3In"
+    const val universal4In = "universal4In"
+    const val universal5In = "universal5In"
+    const val universal6In = "universal6In"
+    const val universal7In = "universal7In"
+    const val universal8In = "universal8In"
+
+
 }
 

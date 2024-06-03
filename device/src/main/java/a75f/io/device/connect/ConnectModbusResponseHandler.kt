@@ -7,6 +7,7 @@ import a75f.io.device.cm.PressureSensorBusMapping
 import a75f.io.device.cm.TemperatureSensorBusMapping
 import a75f.io.device.cm.getAdvancedAhuSensorInputMappings
 import a75f.io.domain.api.Domain
+import a75f.io.domain.api.PhysicalPoint
 import a75f.io.domain.equips.ConnectModuleEquip
 import a75f.io.domain.equips.VavAdvancedHybridSystemEquip
 import a75f.io.logger.CcuLog
@@ -72,20 +73,26 @@ fun updateUniversalInputMappedValues(slaveId : Int, response : RtuMessageRespons
     }
     val systemEquip = Domain.systemEquip as VavAdvancedHybridSystemEquip
     val connectEquip = systemEquip.connectEquip1
-    writeUniversalInputMappedVal(connectEquip.universalIn1Association.readDefaultVal().toInt(), universalInput1Val, connectEquip)
-    writeUniversalInputMappedVal(connectEquip.universalIn2Association.readDefaultVal().toInt(), universalInput2Val, connectEquip)
-    writeUniversalInputMappedVal(connectEquip.universalIn3Association.readDefaultVal().toInt(), universalInput3Val, connectEquip)
-    writeUniversalInputMappedVal(connectEquip.universalIn4Association.readDefaultVal().toInt(), universalInput4Val, connectEquip)
-    writeUniversalInputMappedVal(connectEquip.universalIn5Association.readDefaultVal().toInt(), universalInput5Val, connectEquip)
-    writeUniversalInputMappedVal(connectEquip.universalIn6Association.readDefaultVal().toInt(), universalInput6Val, connectEquip)
-    writeUniversalInputMappedVal(connectEquip.universalIn7Association.readDefaultVal().toInt(), universalInput7Val, connectEquip)
-    writeUniversalInputMappedVal(connectEquip.universalIn8Association.readDefaultVal().toInt(), universalInput8Val, connectEquip)
+    writeUniversalInputMappedVal(connectEquip.universalIn1Association.readDefaultVal().toInt(), universalInput1Val, connectEquip, Domain.connect1Device.universal1In)
+    writeUniversalInputMappedVal(connectEquip.universalIn2Association.readDefaultVal().toInt(), universalInput2Val, connectEquip, Domain.connect1Device.universal2In)
+    writeUniversalInputMappedVal(connectEquip.universalIn3Association.readDefaultVal().toInt(), universalInput3Val, connectEquip, Domain.connect1Device.universal3In)
+    writeUniversalInputMappedVal(connectEquip.universalIn4Association.readDefaultVal().toInt(), universalInput4Val, connectEquip, Domain.connect1Device.universal4In)
+    writeUniversalInputMappedVal(connectEquip.universalIn5Association.readDefaultVal().toInt(), universalInput5Val, connectEquip, Domain.connect1Device.universal5In)
+    writeUniversalInputMappedVal(connectEquip.universalIn6Association.readDefaultVal().toInt(), universalInput6Val, connectEquip, Domain.connect1Device.universal6In)
+    writeUniversalInputMappedVal(connectEquip.universalIn7Association.readDefaultVal().toInt(), universalInput7Val, connectEquip, Domain.connect1Device.universal7In)
+    writeUniversalInputMappedVal(connectEquip.universalIn8Association.readDefaultVal().toInt(), universalInput8Val, connectEquip, Domain.connect1Device.universal8In)
 }
 
-private fun writeUniversalInputMappedVal(associationVal: Int, sensorVal: Float, connectEquip: ConnectModuleEquip) {
+private fun writeUniversalInputMappedVal(
+        associationVal: Int,
+        sensorVal: Float,
+        connectEquip: ConnectModuleEquip,
+        physicalPoint: PhysicalPoint
+) {
     val universalInputMapping = getAdvancedAhuSensorInputMappings()[associationVal]
     CcuLog.i(L.TAG_CCU_SERIAL_CONNECT, "universalInputVal $sensorVal associationVal $associationVal")
     if (universalInputMapping != null) {
+        physicalPoint.writeHisVal(sensorVal.toDouble())
         Domain.writeHisValByDomain(universalInputMapping.domainName, sensorVal.toDouble(), connectEquip.equipRef)
     } else {
         CcuLog.e(L.TAG_CCU_SERIAL_CONNECT, "universalInputMapping not found for associationVal $associationVal")

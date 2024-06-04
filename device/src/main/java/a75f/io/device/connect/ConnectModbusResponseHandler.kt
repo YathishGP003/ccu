@@ -278,7 +278,7 @@ fun updateConnectHumiditySensor(slaveId: Int, responseArray : ByteArray, sensorM
 
 fun updateConnectPressureSensor(slaveId: Int, responseArray : ByteArray, sensorMapping : Int, sensorBusAddr : Int ,connectEquip : ConnectModuleEquip) {
     val offset = (sensorBusAddr - SENSOR_BUS_START_ADDR) * 2
-    val sensorVal = parse12BitPressureValue(responseArray.copyOfRange(offset, offset + 2)) /10
+    val sensorVal = parse12BitPressureValue(responseArray.copyOfRange(offset, offset + 2))
     val scaledSensorVal = sensorVal * 0.0040146 //Convert from Pa to inch of wc
     when(sensorMapping) {
         PressureSensorBusMapping.notConnected.ordinal -> {CcuLog.e(L.TAG_CCU_SERIAL_CONNECT, "Pressure sensor not connected")}

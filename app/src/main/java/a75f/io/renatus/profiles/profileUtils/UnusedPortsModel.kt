@@ -17,7 +17,6 @@ import a75f.io.renatus.profiles.acb.AcbProfileViewModel
 import a75f.io.renatus.profiles.system.StagedRtuProfileViewModel
 import a75f.io.renatus.profiles.system.VavModulatingRtuViewModel
 import a75f.io.renatus.profiles.vav.VavProfileViewModel
-import android.util.Log
 import java.util.*
 
 open class UnusedPortsModel {
@@ -42,7 +41,6 @@ open class UnusedPortsModel {
         }
 
         fun saveUnUsedPortStatusOfSystemProfile(profileConfiguration: Any, hayStack: CCUHsApi) {
-            val timeStart = System.currentTimeMillis()
             val unusedPorts = when (profileConfiguration) {
                 is ModulatingRtuProfileConfig -> profileConfiguration.unusedPorts
                 is StagedVfdRtuProfileConfig -> profileConfiguration.unusedPorts
@@ -71,7 +69,6 @@ open class UnusedPortsModel {
                     }
                 }
             }
-            CcuLog.i("UnusedPortsModel", "Time taken to save unused port status: ${System.currentTimeMillis() - timeStart} ms")
         }
 
         private fun isPortUsedInAlgo(hayStack: CCUHsApi, unusedPort: String): Boolean {

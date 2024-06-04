@@ -99,14 +99,18 @@ public class DamperReheatTypeHandler {
             if (typeVal <= 0) {
                 SmartNode.setDomainPointEnabled(address, "analog2Out", false, hayStack);
                 SmartNode.setDomainPointEnabled(address, "relay1", false, hayStack);
-                 isVavNoFan(hayStack, configPoint);
+                 if(isVavNoFan(hayStack, configPoint)){
+                    SmartNode.setDomainPointEnabled(address, "relay2", false, hayStack);
+                 }
             } else if (typeVal-1 <= ReheatType.Pulse.ordinal()) {
                 //Modulating Reheat -> Enable AnalogOut2 and disable relays
                 SmartNode.updateDomainPhysicalPointType(address, "analog2Out", ReheatType.values()[typeVal].displayName);
                 SmartNode.setDomainPointEnabled(address, "analog2Out", true, hayStack);
 
                 SmartNode.setDomainPointEnabled(address, "relay1", false, hayStack);
-
+                if(isVavNoFan(hayStack, configPoint)){
+                    SmartNode.setDomainPointEnabled(address, "relay2", false, hayStack);
+                }
             } else {
                 SmartNode.setDomainPointEnabled(address, "analog2Out", false, hayStack);
                 SmartNode.updateDomainPhysicalPointType(address, "relay1",
@@ -115,6 +119,10 @@ public class DamperReheatTypeHandler {
                 if (typeVal -1 == ReheatType.TwoStage.ordinal()) {
                     SmartNode.updateDomainPhysicalPointType(address, "relay2", OutputRelayActuatorType.NormallyClose.displayName);
                     SmartNode.setDomainPointEnabled(address, "relay2", true, hayStack);
+                }else {
+                    if (isVavNoFan(hayStack, configPoint)) {
+                        SmartNode.setDomainPointEnabled(address, "relay2", false, hayStack);
+                    }
                 }
             }
         }

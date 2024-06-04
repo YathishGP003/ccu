@@ -17,6 +17,7 @@ import a75f.io.renatus.profiles.acb.AcbProfileViewModel
 import a75f.io.renatus.profiles.system.StagedRtuProfileViewModel
 import a75f.io.renatus.profiles.system.VavModulatingRtuViewModel
 import a75f.io.renatus.profiles.vav.VavProfileViewModel
+import android.util.Log
 import java.util.*
 
 open class UnusedPortsModel {
@@ -41,6 +42,7 @@ open class UnusedPortsModel {
         }
 
         fun saveUnUsedPortStatusOfSystemProfile(profileConfiguration: Any, hayStack: CCUHsApi) {
+            val timeStart = System.currentTimeMillis()
             val unusedPorts = when (profileConfiguration) {
                 is ModulatingRtuProfileConfig -> profileConfiguration.unusedPorts
                 is StagedVfdRtuProfileConfig -> profileConfiguration.unusedPorts
@@ -50,23 +52,26 @@ open class UnusedPortsModel {
             val currentPortStatus: HashMap<String, Boolean> = unusedPorts!!
             val cmDevicePortsList = Domain.cmBoardDevice.getPortsDomainNameWithPhysicalPoint()
 
+            val cmPortsDisplayNameWithDomainName = ControlMote.getCmPortsDisplayNameWithDomainName()
             for ((unusedPort, unusedPortState) in currentPortStatus) {
-                ControlMote.getCmPortsDisplayNameWithDomainName()[unusedPort]?.let { unusedPortDomainName ->
-                    cmDevicePortsList[unusedPortDomainName]?.let { rawPoint ->
-                        val isPortUsedInAlgo = isPortUsedInAlgo(hayStack, unusedPort)
-                        if (((unusedPortState && !isPortUsedInAlgo) && !rawPoint.markers.contains(
-                                Tags.WRITABLE))) {
-                            rawPoint.markers.add(Tags.WRITABLE)
-                            hayStack.updatePoint(rawPoint, rawPoint.id)
-                        } else if ((!unusedPortState && rawPoint.markers.contains(Tags.WRITABLE)) || isPortUsedInAlgo) {
-                            hayStack.clearAllAvailableLevelsInPoint(rawPoint.id)
-                            rawPoint.markers.remove(Tags.WRITABLE)
-                            hayStack.updatePoint(rawPoint, rawPoint.id)
-                            hayStack.writeHisValById(rawPoint.id, 0.0)
-                        }
+                val unusedPortDomainName = cmPortsDisplayNameWithDomainName[unusedPort] ?: continue
+                val rawPoint = cmDevicePortsList[unusedPortDomainName] ?: continue
+                val isPortUsedInAlgo = isPortUsedInAlgo(hayStack, unusedPort)
+
+                when {
+                    unusedPortState && !isPortUsedInAlgo && !rawPoint.markers.contains(Tags.WRITABLE) -> {
+                        rawPoint.markers.add(Tags.WRITABLE)
+                        hayStack.updatePoint(rawPoint, rawPoint.id)
+                    }
+                    (!unusedPortState && rawPoint.markers.contains(Tags.WRITABLE)) || isPortUsedInAlgo -> {
+                        hayStack.clearAllAvailableLevelsInPoint(rawPoint.id)
+                        rawPoint.markers.remove(Tags.WRITABLE)
+                        hayStack.updatePoint(rawPoint, rawPoint.id)
+                        hayStack.writeHisValById(rawPoint.id, 0.0)
                     }
                 }
             }
+            CcuLog.i("UnusedPortsModel", "Time taken to save unused port status: ${System.currentTimeMillis() - timeStart} ms")
         }
 
         private fun isPortUsedInAlgo(hayStack: CCUHsApi, unusedPort: String): Boolean {

@@ -54,13 +54,7 @@ open class ModulatingRtuProfileConfig(val model: SeventyFiveFProfileDirective) :
         analogOut3HeatingMax = getDefaultValConfig(DomainName.analog3MaxHeating, model)
         analogOut4FreshAirMin = getDefaultValConfig(DomainName.analog4MinOutsideDamper, model)
         analogOut4FreshAirMax = getDefaultValConfig(DomainName.analog4MaxOutsideDamper, model)
-        try {
-            unusedPorts = ControlMote.getCMUnusedPorts(Domain.hayStack)
-        } catch (e : Exception) {
-            unusedPorts = hashMapOf()
-            CcuLog.e(Domain.LOG_TAG,"Failed to fetch CM Unused ports")
-            e.printStackTrace()
-        }
+        unusedPorts = ControlMote.getCMUnusedPorts(Domain.hayStack)
 
         isDefault = true
         return this
@@ -125,12 +119,7 @@ open class ModulatingRtuProfileConfig(val model: SeventyFiveFProfileDirective) :
             analogOut4FreshAirMin = getDefaultValConfig(DomainName.analog4MinOutsideDamper, model)
             analogOut4FreshAirMax = getDefaultValConfig(DomainName.analog4MaxOutsideDamper, model)
         }
-        try {
-            unusedPorts = ControlMote.getCMUnusedPorts(Domain.hayStack)
-        } catch (e : Exception) {
-            CcuLog.e(Domain.LOG_TAG,"Failed to fetch CM Unused ports")
-            e.printStackTrace()
-        }
+        unusedPorts = ControlMote.getCMUnusedPorts(Domain.hayStack)
         isDefault = false
         return this
     }

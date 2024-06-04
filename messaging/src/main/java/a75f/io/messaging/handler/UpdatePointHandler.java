@@ -83,6 +83,7 @@ public class UpdatePointHandler implements MessageHandler
         Point localPoint = new Point.Builder().setHashMap(CCUHsApi.getInstance().readMapById(pointUid)).build();
         CcuLog.d(L.TAG_CCU_PUBNUB, " handleMessage for" + Arrays.toString(localPoint.getMarkers().toArray()));
 
+        //move this class to a separate file
         if(HSUtil.isPhysicalPointUpdate(localPoint)){
             String value = msgObject.get(WRITABLE_ARRAY_VAL).getAsString();
             CcuLog.i(L.TAG_CCU_PUBNUB, "update physical point : "+localPoint.getDisplayName() +
@@ -99,6 +100,7 @@ public class UpdatePointHandler implements MessageHandler
                                 msgObject.get(WRITABLE_ARRAY_DURATION).getAsInt() : 0);
                 hayStack.writeHisValById(localPoint.getId(),Double.parseDouble( value));
                 // Read priority array list to get duration of levels.
+                // read all points once
                 fetchRemotePoint(pointUid, isDataSync, msgObject);
             }
             return;

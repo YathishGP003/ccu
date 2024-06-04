@@ -335,7 +335,7 @@ class BypassConfigViewModel : ViewModel() {
         updateSystemTunerVal("vav and pspread and not airflow and not air", 1.5, "Bypass Damper Added", hayStack)
 
 
-        val sysEquipId = CCUHsApi.getInstance().readEntity("equip and system and not modbus").get("id").toString()
+        val sysEquipId = CCUHsApi.getInstance().readEntity("equip and system and not modbus and not connectModule").get("id").toString()
         val childEquips = HSUtil.getEquipsWithAhuRefOnThisCcu(sysEquipId)
         val childEquipsIterator = childEquips.iterator()
         while(childEquipsIterator.hasNext()) {
@@ -381,7 +381,7 @@ class BypassConfigViewModel : ViewModel() {
         updateSystemTunerVal("vav and igain and not airflow and not air", null, "Bypass Damper Unpaired", hayStack)
         updateSystemTunerVal("vav and pspread and not airflow and not air", null, "Bypass Damper Unpaired", hayStack)
 
-        val sysEquipId = CCUHsApi.getInstance().readEntity("equip and system and not modbus").get("id").toString()
+        val sysEquipId = CCUHsApi.getInstance().readEntity("equip and system and not modbus and not connectModule").get("id").toString()
         val childEquips = HSUtil.getEquipsWithAhuRefOnThisCcu(sysEquipId)
         val childEquipsIterator = childEquips.iterator()
         while(childEquipsIterator.hasNext()) {

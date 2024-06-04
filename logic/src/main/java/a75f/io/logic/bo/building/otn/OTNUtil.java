@@ -26,7 +26,7 @@ public class OTNUtil {
         Log.d(LOG_TAG, "equipStatusPoint =" + equipStatusPoint +
                 "humidity =" + humidity + "forceoccupied" + forceoccupied);
 
-        if (equipStatusPoint.length() > 0) {
+        if (!equipStatusPoint.isEmpty()) {
             points.put("Status", equipStatusPoint);
         } else {
             points.put("Status", "OFF");

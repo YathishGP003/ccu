@@ -6,7 +6,8 @@ import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbEndpoint;
 import android.hardware.usb.UsbInterface;
 import android.hardware.usb.UsbRequest;
-import android.util.Log;
+
+import a75f.io.logger.CcuLog;
 
 public class PL2303SerialDevice extends UsbSerialDevice
 {
@@ -163,7 +164,6 @@ public class PL2303SerialDevice extends UsbSerialDevice
                 }
                 break;
             default:
-                return;
         }
 
     }
@@ -195,7 +195,6 @@ public class PL2303SerialDevice extends UsbSerialDevice
                 }
                 break;
             default:
-                return;
         }
     }
 
@@ -240,7 +239,6 @@ public class PL2303SerialDevice extends UsbSerialDevice
                 }
                 break;
             default:
-                return;
         }
 
     }
@@ -304,10 +302,10 @@ public class PL2303SerialDevice extends UsbSerialDevice
     {
         if(connection.claimInterface(mInterface, true))
         {
-            Log.i(CLASS_ID, "Interface succesfully claimed");
+            CcuLog.d(CLASS_ID, "Interface successfully claimed");
         }else
         {
-            Log.i(CLASS_ID, "Interface could not be claimed");
+            CcuLog.d(CLASS_ID, "Interface could not be claimed");
             return false;
         }
 
@@ -366,7 +364,7 @@ public class PL2303SerialDevice extends UsbSerialDevice
         if(data != null)
             dataLength = data.length;
         int response = connection.controlTransfer(reqType, request, value, index, data, dataLength, USB_TIMEOUT);
-        Log.i(CLASS_ID,"Control Transfer Response: " + String.valueOf(response));
+        CcuLog.d(CLASS_ID,"Control Transfer Response: " + response);
         return response;
     }
 }

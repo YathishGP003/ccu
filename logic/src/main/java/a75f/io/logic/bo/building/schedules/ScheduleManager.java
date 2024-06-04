@@ -42,7 +42,6 @@ import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Occupied;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
-import a75f.io.api.haystack.util.SchedulableMigrationKt;
 import a75f.io.api.haystack.util.TimeUtil;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
@@ -201,11 +200,16 @@ public class ScheduleManager {
         //Read all equips
         ArrayList<HashMap<Object, Object>> equips = CCUHsApi.getInstance()
                 .readAllEntities("equip and zone and not pid and not modbus and not emr and not monitoring");
-        for(HashMap hs : equips) {
-            Equip equip = new Equip.Builder().setHashMap(hs).build();
-            if(equip != null) {
-                CcuLog.d(L.TAG_CCU_SCHEDULER, " processSchedules "+equip.getDisplayName());
-                processScheduleForEquip(equip, activeSystemVacation);
+        for(HashMap<Object,Object> hs : equips) {
+            try {
+                Equip equip = new Equip.Builder().setHashMap(hs).build();
+                if (equip != null) {
+                    CcuLog.d(L.TAG_CCU_SCHEDULER, " processSchedules " + equip.getDisplayName());
+                    processScheduleForEquip(equip, activeSystemVacation);
+                }
+            } catch (NullPointerException | IllegalStateException e) {
+                CcuLog.e(TAG_CCU_SCHEDULER, "Error in processSchedules for equip " + e);
+                e.printStackTrace();
             }
         }
 
@@ -293,7 +297,6 @@ public class ScheduleManager {
         processScheduleForEquip(equip, activeSystemVacation);
 
         updateEquipScheduleStatus(equip);
-        //systemVacation = activeSystemVacation != null || isAllZonesInVacation();
         updateSystemOccupancy(CCUHsApi.getInstance());
     }
 
@@ -303,13 +306,19 @@ public class ScheduleManager {
             if (profile instanceof ModbusProfile) {
                 continue;
             }
-            profile.updateOccupancy(hayStack);
-            EquipOccupancyHandler occupancyHandler = profile.getEquipOccupancyHandler();
-            OccupancyData occupancyData = getOccupancyData(occupancyHandler, CCUHsApi.getInstance());
-            CcuLog.i(TAG_CCU_SCHEDULER,
-                     "Updated equipOccupancy "+profile.getEquip().getDisplayName()+" : "+occupancyData.occupancy);
+            try {
+                profile.updateOccupancy(hayStack);
+                EquipOccupancyHandler occupancyHandler = profile.getEquipOccupancyHandler();
+                OccupancyData occupancyData = getOccupancyData(occupancyHandler, CCUHsApi.getInstance());
+                CcuLog.i(TAG_CCU_SCHEDULER,
+                        "Updated equipOccupancy "+profile.getEquip().getDisplayName()+" : "+occupancyData.occupancy);
 
-            equipOccupancy.put(occupancyHandler.getEquipRef(), occupancyData);
+                equipOccupancy.put(occupancyHandler.getEquipRef(), occupancyData);
+            }catch (NullPointerException | IllegalStateException e){
+                CcuLog.e(TAG_CCU_SCHEDULER, "Error in updateOccupancy for profile "+e);
+                e.printStackTrace();
+            }
+
         }
 
         updateZoneOccupancy(hayStack);
@@ -379,29 +388,34 @@ public class ScheduleManager {
     public void updateDesiredTemp(Set<ZoneProfile> zoneProfiles) {
 
         for (ZoneProfile profile : zoneProfiles) {
-            if (profile instanceof ModbusProfile || profile instanceof HyperStatMonitoringProfile) {
-                continue;
-            }
-            EquipOccupancyHandler occupancyHandler = profile.getEquipOccupancyHandler();
-            Occupancy currentOccupiedMode = occupancyHandler.getCurrentOccupiedMode();
-            OccupancyData updatedOccupancy = equipOccupancy.get(occupancyHandler.getEquipRef());
+            try {
+                if (profile instanceof ModbusProfile || profile instanceof HyperStatMonitoringProfile) {
+                    continue;
+                }
+                EquipOccupancyHandler occupancyHandler = profile.getEquipOccupancyHandler();
+                Occupancy currentOccupiedMode = occupancyHandler.getCurrentOccupiedMode();
+                OccupancyData updatedOccupancy = equipOccupancy.get(occupancyHandler.getEquipRef());
 
-            if (updatedOccupancy == null) {
-                CcuLog.i(TAG_CCU_SCHEDULER, "Invalid updatedOccupancy for " + occupancyHandler.getEquipRef());
-                continue;
-            }
+                if (updatedOccupancy == null) {
+                    CcuLog.i(TAG_CCU_SCHEDULER, "Invalid updatedOccupancy for " + occupancyHandler.getEquipRef());
+                    continue;
+                }
 
                 Equip equip = profile.getEquip();
                 Schedule equipSchedule = Schedule.getScheduleForZoneScheduleProcessing(equip.getRoomRef()
                         .replace("@", ""));
 
-            CcuLog.i(TAG_CCU_SCHEDULER,
-                    " updateDesiredTemp " + equip.getDisplayName() + " : occupancy " + currentOccupiedMode
-                            + " -> " + updatedOccupancy.occupancy);
-            profile.getEquipScheduleHandler().updateDesiredTemp(currentOccupiedMode, updatedOccupancy.occupancy, equipSchedule,updatedOccupancy);
-            if ((zoneDataInterface != null) /*&& (cachedOccupied != null)*/) {
-                zoneDataInterface.refreshDesiredTemp(equip.getGroup(), "",
-                        "", equip.getRoomRef());
+                CcuLog.i(TAG_CCU_SCHEDULER,
+                        " updateDesiredTemp " + equip.getDisplayName() + " : occupancy " + currentOccupiedMode
+                                + " -> " + updatedOccupancy.occupancy);
+                profile.getEquipScheduleHandler().updateDesiredTemp(currentOccupiedMode, updatedOccupancy.occupancy, equipSchedule, updatedOccupancy);
+                if ((zoneDataInterface != null) /*&& (cachedOccupied != null)*/) {
+                    zoneDataInterface.refreshDesiredTemp(equip.getGroup(), "",
+                            "", equip.getRoomRef());
+                }
+            }catch (NullPointerException | IllegalStateException e) {
+                CcuLog.e(TAG_CCU_SCHEDULER, "Error in updateDesiredTemp for profile " + e);
+                e.printStackTrace();
             }
         }
     }
@@ -517,52 +531,58 @@ public class ScheduleManager {
     public void updateZoneOccupancy(CCUHsApi hayStack) {
         List<HashMap<Object, Object>> rooms = hayStack.readAllEntities("room");
 
-        rooms.forEach( room -> {
-            List<HashMap<Object, Object>> equips =
-                hayStack.readAllEntities("equip and roomRef == \"" + Objects.requireNonNull(room.get("id")) + "\"");
-            Occupancy occupancy;
-            if (equips.isEmpty()) {
-                occupancy = UNOCCUPIED;
-            } else {
-                Occupied scheduleOccupancy = getOccupiedModeCache(room.get("id").toString());
-                boolean zoneOccupied = scheduleOccupancy != null ? scheduleOccupancy.isOccupied() : false;
-                OccupiedTrigger occupiedTrigger = OccupiedTrigger.Occupied;
-                UnoccupiedTrigger unoccupiedTrigger = UnoccupiedTrigger.Unoccupied;
-                for (HashMap<Object, Object> equip : equips) {
-                    String equipId = Objects.requireNonNull(equip.get("id")).toString();
-                    OccupancyData equipOccData = equipOccupancy.get(equipId);
-                    //Modbus equips do not have occupancy.
-                    if (equipOccData == null) {
-                        continue;
+        rooms.forEach(room -> {
+            try {
+                List<HashMap<Object, Object>> equips =
+                        hayStack.readAllEntities("equip and roomRef == \"" + Objects.requireNonNull(room.get("id")) + "\"");
+                Occupancy occupancy;
+                if (equips.isEmpty()) {
+                    occupancy = UNOCCUPIED;
+                } else {
+                    Occupied scheduleOccupancy = getOccupiedModeCache(room.get("id").toString());
+                    boolean zoneOccupied = scheduleOccupancy != null ? scheduleOccupancy.isOccupied() : false;
+                    OccupiedTrigger occupiedTrigger = OccupiedTrigger.Occupied;
+                    UnoccupiedTrigger unoccupiedTrigger = UnoccupiedTrigger.Unoccupied;
+                    for (HashMap<Object, Object> equip : equips) {
+                        String equipId = Objects.requireNonNull(equip.get("id")).toString();
+                        OccupancyData equipOccData = equipOccupancy.get(equipId);
+                        //Modbus equips do not have occupancy.
+                        if (equipOccData == null) {
+                            continue;
+                        }
+                        if (zoneOccupied) {
+                            if (equipOccData.occupiedTrigger.ordinal() < occupiedTrigger.ordinal()) {
+                                occupiedTrigger = equipOccData.occupiedTrigger;
+                            }
+                        } else {
+                            if (equipOccData.unoccupiedTrigger.ordinal() < unoccupiedTrigger.ordinal()) {
+                                unoccupiedTrigger = equipOccData.unoccupiedTrigger;
+                            }
+                        }
                     }
                     if (zoneOccupied) {
-                        if (equipOccData.occupiedTrigger.ordinal() < occupiedTrigger.ordinal()) {
-                            occupiedTrigger = equipOccData.occupiedTrigger;
-                        }
+                        CcuLog.i(TAG_CCU_SCHEDULER,
+                                "updateZoneOccupancy " + room.get("dis") + " : " + occupiedTrigger.toOccupancy());
+                        occupancy = occupiedTrigger.toOccupancy();
                     } else {
-                        if (equipOccData.unoccupiedTrigger.ordinal() < unoccupiedTrigger.ordinal()) {
-                            unoccupiedTrigger = equipOccData.unoccupiedTrigger;
-                        }
+                        CcuLog.i(TAG_CCU_SCHEDULER, "updateZoneOccupancy " + room.get("dis") + " : "
+                                + unoccupiedTrigger.toOccupancy());
+                        occupancy = unoccupiedTrigger.toOccupancy();
                     }
                 }
-                if (zoneOccupied) {
-                    CcuLog.i(TAG_CCU_SCHEDULER,
-                             "updateZoneOccupancy "+room.get("dis")+" : "+occupiedTrigger.toOccupancy());
-                    occupancy = occupiedTrigger.toOccupancy();
-                } else {
-                    CcuLog.i(TAG_CCU_SCHEDULER, "updateZoneOccupancy "+room.get("dis")+" : "
-                                                                    +unoccupiedTrigger.toOccupancy());
-                    occupancy = unoccupiedTrigger.toOccupancy();
+                if (zoneOccupancy.get(room.get("id").toString()) != occupancy) {
+                    if (occupancy == UNOCCUPIED)
+                        clearLevel10(room.get("id").toString());
                 }
+                zoneOccupancy.put(room.get("id").toString(), occupancy);
+                hayStack.writeHisValByQuery("occupancy and state and roomRef == \"" + room.get("id") + "\"",
+                        (double) occupancy.ordinal());
+            } catch (NullPointerException | IllegalStateException e) {
+                CcuLog.e(TAG_CCU_SCHEDULER, "Error in updateZoneOccupancy for room " + e);
+                e.printStackTrace();
             }
-            if(zoneOccupancy.get(room.get("id").toString()) != occupancy){
-                if(occupancy == UNOCCUPIED)
-                    clearLevel10(room.get("id").toString());
-            }
-            zoneOccupancy.put(room.get("id").toString(), occupancy);
-            hayStack.writeHisValByQuery("occupancy and state and roomRef == \""+room.get("id")+"\"",
-                                        (double)occupancy.ordinal());
         });
+
     }
 
 

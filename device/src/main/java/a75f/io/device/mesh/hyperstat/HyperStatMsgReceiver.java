@@ -272,6 +272,14 @@ public class HyperStatMsgReceiver {
             hayStack.writeHisValById(point.getId(),((val*10) >= 10000)? 1.0 : 0.0);
             Log.d(L.TAG_CCU_DEVICE, "DOOR_WINDOW_SENSOR Thermistor input : "+(((val*10) >= 10000)? 1.0 : 0.0));
             return;
+        } else if (index == SensorType.GENERIC_NC.ordinal()) { // Generic Fault NC
+            hayStack.writeHisValById(point.getId(), ((val * 10) >= 10000) ? 1.0 : 0.0);
+            Log.d(L.TAG_CCU_DEVICE, "GENERIC_NC Thermistor input : " + (((val * 10) < 10000) ? 1.0 : 0.0));
+            return;
+        }  else if (index == SensorType.GENERIC_NO.ordinal()) { // Generic Fault NO
+            hayStack.writeHisValById(point.getId(), ((val * 10) < 10000) ? 1.0 : 0.0);
+            Log.d(L.TAG_CCU_DEVICE, "GENERIC_NO Thermistor input : " + (((val * 10) >= 10000) ? 1.0 : 0.0));
+            return;
         }
 
         double thInputVal = ThermistorUtil.getThermistorValueToTemp(val * 10);

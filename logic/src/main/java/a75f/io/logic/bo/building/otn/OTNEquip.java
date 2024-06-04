@@ -8,13 +8,11 @@ import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
-import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Kind;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
-import a75f.io.api.haystack.Zone;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.BacnetIdKt;
 import a75f.io.logic.BacnetUtilKt;
@@ -27,7 +25,6 @@ import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.schedules.ScheduleUtil;
 import a75f.io.logic.bo.haystack.device.OTN;
-import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.tuners.OTNTuners;
 
 /*
@@ -68,8 +65,8 @@ public class OTNEquip {
         String tz = siteMap.get("tz").toString();
         String equipDis = siteDis + "-OTN-" + mNodeAddr;
         String ahuRef = null;
-        HashMap systemEquip = CCUHsApi.getInstance().read("equip and system and not modbus");
-        if (systemEquip != null && systemEquip.size() > 0) {
+        HashMap systemEquip = CCUHsApi.getInstance().read("equip and system and not modbus and not connectModule");
+        if (systemEquip != null && !systemEquip.isEmpty()) {
             ahuRef = systemEquip.get("id").toString();
         }
 
@@ -104,7 +101,7 @@ public class OTNEquip {
                 .addMarker("air").addMarker("temp").addMarker("sensor").addMarker("current")
                 .addMarker("his").addMarker("cur").addMarker("logical").addMarker("otn")
                 .setGroup(String.valueOf(mNodeAddr))
-                .setUnit("\u00B0F")
+                .setUnit("°F")
                 .setTz(tz)
                 .build();
         BacnetUtilKt.addBacnetTags(currentTemp, BacnetIdKt.CURRENTTEMPID,BacnetUtilKt.ANALOG_VALUE,mNodeAddr);
@@ -207,15 +204,14 @@ public class OTNEquip {
                 .addMarker("config").addMarker("otn").addMarker("writable").addMarker("zone")
                 .addMarker("temperature").addMarker("offset").addMarker("sp")
                 .setGroup(String.valueOf(mNodeAddr))
-                .setUnit("\u00B0F")
+                .setUnit("°F")
                 .setTz(tz)
                 .build();
         BacnetUtilKt.addBacnetTags(temperatureOffset, BacnetIdKt.TEMPERATUREOFFSETID,BacnetUtilKt.ANALOG_VALUE,mNodeAddr);
         String temperatureOffsetId = CCUHsApi.getInstance().addPoint(temperatureOffset);
         CCUHsApi.getInstance().writeDefaultValById(temperatureOffsetId,
-                (double) config.gettempOffset());
-       // CCUHsApi.getInstance().writeHisValById(temperatureOffsetId,
-            //    (double) config.gettempOffset());
+                config.gettempOffset());
+
 
         Point autoforceoccupied = new Point.Builder()
                 .setDisplayName(equipDis + "-autoForceOccupiedEnabled")
@@ -283,11 +279,11 @@ public class OTNEquip {
                 .addMarker("zone").addMarker("air").addMarker("temp").addMarker("desired").addMarker("otn")
                 .addMarker("average").addMarker("sp").addMarker("writable").addMarker("his").addMarker("userIntent")
                 .setGroup(String.valueOf(mNodeAddr))
-                .setUnit("\u00B0F")
+                .setUnit("°F")
                 .setTz(tz)
                 .build();
         BacnetUtilKt.addBacnetTags(desiredTemp, BacnetIdKt.DESIREDTEMPID,BacnetUtilKt.ANALOG_VALUE,mNodeAddr);
-        String dtId = CCUHsApi.getInstance().addPoint(desiredTemp);
+        CCUHsApi.getInstance().addPoint(desiredTemp);
 
         Point desiredTempCooling = new Point.Builder()
                 .setDisplayName(equipDis + "-desiredTempCooling")
@@ -298,7 +294,7 @@ public class OTNEquip {
                 .addMarker("zone").addMarker("air").addMarker("temp").addMarker("desired").addMarker("otn")
                 .addMarker("cooling").addMarker("sp").addMarker("writable").addMarker("his").addMarker("userIntent")
                 .setGroup(String.valueOf(mNodeAddr))
-                .setUnit("\u00B0F")
+                .setUnit("°F")
                 .setTz(tz)
                 .build();
         BacnetUtilKt.addBacnetTags(desiredTempCooling, BacnetIdKt.CMCOOLINGDESIREDTEMPID,BacnetUtilKt.ANALOG_VALUE,mNodeAddr);
@@ -313,7 +309,7 @@ public class OTNEquip {
                 .addMarker("zone").addMarker("air").addMarker("temp").addMarker("desired").addMarker("otn")
                 .addMarker("heating").addMarker("sp").addMarker("writable").addMarker("his").addMarker("userIntent")
                 .setGroup(String.valueOf(mNodeAddr))
-                .setUnit("\u00B0F")
+                .setUnit("°F")
                 .setTz(tz)
                 .build();
         BacnetUtilKt.addBacnetTags(desiredTempHeating, BacnetIdKt.CMHEATINGDESIREDTEMPID,BacnetUtilKt.ANALOG_VALUE,mNodeAddr);
@@ -582,7 +578,7 @@ public class OTNEquip {
         ArrayList points = CCUHsApi.getInstance().readAll("point and scheduleStatus and group " +
                 "== \"" + mNodeAddr + "\"");
         String id = ((HashMap) points.get(0)).get("id").toString();
-        if (id == null || id == "") {
+        if (id == null || id.isEmpty()) {
             throw new IllegalArgumentException();
         }
         CCUHsApi.getInstance().writeDefaultValById(id, status);

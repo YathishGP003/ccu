@@ -12,4 +12,4 @@ fun getModulatedOutput(loopOutput: Double, min : Double, max : Double)  = (((max
 /**
  * This function is get the mid point of min max
  */
-fun composeMappedLoop(minMax: Pair<Double,Double>) = (10 * ((minMax.first + minMax.second) / 2).coerceIn(0.0,10.0))
+fun getComposeMidPoint(minMax: Pair<Double,Double>) = (((minMax.first + minMax.second) / 2).coerceIn(0.0,10.0))

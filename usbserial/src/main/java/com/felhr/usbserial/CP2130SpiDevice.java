@@ -6,7 +6,8 @@ import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbEndpoint;
 import android.hardware.usb.UsbInterface;
 import android.hardware.usb.UsbRequest;
-import android.util.Log;
+
+import a75f.io.logger.CcuLog;
 
 
 public class CP2130SpiDevice extends UsbSpiDevice
@@ -162,7 +163,7 @@ public class CP2130SpiDevice extends UsbSpiDevice
     {
         if(nSlave > 10 || nSlave < 0)
         {
-            Log.i(CLASS_ID, "selected slave must be in 0-10 range");
+            CcuLog.i(CLASS_ID, "selected slave must be in 0-10 range");
             return;
         }
 
@@ -188,10 +189,10 @@ public class CP2130SpiDevice extends UsbSpiDevice
     {
         if(connection.claimInterface(mInterface, true))
         {
-            Log.i(CLASS_ID, "Interface succesfully claimed");
+            CcuLog.d(CLASS_ID, "Interface successfully claimed");
         }else
         {
-            Log.i(CLASS_ID, "Interface could not be claimed");
+            CcuLog.d(CLASS_ID, "Interface could not be claimed");
             return false;
         }
 
@@ -222,7 +223,7 @@ public class CP2130SpiDevice extends UsbSpiDevice
             payload[0] = (byte) channel;
         }else
         {
-            Log.i(CLASS_ID, "Channel not valid");
+            CcuLog.w(CLASS_ID, "Channel not valid");
             return;
         }
         payload[1] = (byte) (freq);
@@ -241,7 +242,7 @@ public class CP2130SpiDevice extends UsbSpiDevice
             payload[0] = (byte) channel;
         }else
         {
-            Log.i(CLASS_ID, "Channel not valid");
+            CcuLog.w(CLASS_ID, "Channel not valid");
             return;
         }
 
@@ -273,7 +274,7 @@ public class CP2130SpiDevice extends UsbSpiDevice
             dataLength = data.length;
         }
         int response = connection.controlTransfer(BM_REQ_HOST_2_DEVICE, request, value, mInterface.getId(), data, dataLength, USB_TIMEOUT);
-        Log.i(CLASS_ID,"Control Transfer Response: " + String.valueOf(response));
+        CcuLog.d(CLASS_ID,"Control Transfer Response: " + response);
         return response;
     }
 
@@ -281,7 +282,7 @@ public class CP2130SpiDevice extends UsbSpiDevice
     {
         byte[] data = new byte[length];
         int response = connection.controlTransfer(BM_REQ_DEVICE_2_HOST, request, value, mInterface.getId(), data, length, USB_TIMEOUT);
-        Log.i(CLASS_ID,"Control Transfer Response: " + String.valueOf(response));
+        CcuLog.d(CLASS_ID,"Control Transfer Response: " + response);
         return data;
     }
 }

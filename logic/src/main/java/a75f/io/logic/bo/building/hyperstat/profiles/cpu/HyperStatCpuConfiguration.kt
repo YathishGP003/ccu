@@ -26,8 +26,8 @@ class HyperStatCpuConfiguration : BaseProfileConfiguration() {
    var analogOut2State = AnalogOutState(false, CpuAnalogOutAssociation.MODULATING_FAN_SPEED, 2.0, 10.0,70.0,80.0,100.0, 4.0)
    var analogOut3State = AnalogOutState(false, CpuAnalogOutAssociation.HEATING, 2.0, 10.0,70.0,80.0,100.0, 4.0)
 
-   var isEnableAirFlowTempSensor = false
-   var isEnableDoorWindowSensor = false
+   var thermistorIn1State = Th1InState(false, Th1InAssociation.AIRFLOW_TEMPERATURE)
+   var thermistorIn2State = Th2InState(false, Th2InAssociation.DOOR_WINDOW_SENSOR)
 
    var analogIn1State = AnalogInState(false, AnalogInAssociation.KEY_CARD_SENSOR)
    var analogIn2State = AnalogInState(false, AnalogInAssociation.CURRENT_TX_0_20)
@@ -108,6 +108,16 @@ data class AnalogOutState(
    val voltageAtRecirculate: Double,
 )
 
+data class Th1InState(
+   val enabled: Boolean,
+   val association: Th1InAssociation
+)
+
+data class Th2InState(
+   val enabled: Boolean,
+   val association: Th2InAssociation
+)
+
 data class AnalogInState(
    val enabled: Boolean,
    val association: AnalogInAssociation
@@ -138,6 +148,20 @@ enum class CpuAnalogOutAssociation {
    HEATING,
    DCV_DAMPER,
    PREDEFINED_FAN_SPEED,
+}
+
+// Order is important -- see comment above.
+enum class Th1InAssociation {
+   AIRFLOW_TEMPERATURE,
+   GENERIC_FAULT_NC,
+   GENERIC_FAULT_NO
+}
+
+// Order is important -- see comment above.
+enum class Th2InAssociation {
+   DOOR_WINDOW_SENSOR,
+   GENERIC_FAULT_NC,
+   GENERIC_FAULT_NO
 }
 
 // Order is important -- see comment above.

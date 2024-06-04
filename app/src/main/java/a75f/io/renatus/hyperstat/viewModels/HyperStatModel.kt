@@ -29,11 +29,10 @@ interface HyperStatModel {
     fun voltageAtDamperSelected(isMinPosition: Boolean, index: Int, position: Int)
     fun voltageDuringCirculation(index: Int, position: Int)
     fun updateFanConfigSelected(type: Int, index: Int, position: Int)
+    fun thermistorInSwitchChanged(index: Int, checked: Boolean)
+    fun thermistorInMappingSelected(index: Int, position: Int)
     fun analogInSwitchChanged(index: Int, checked: Boolean)
     fun analogInMappingSelected(index: Int, position: Int)
-    fun airflowTempSensorSwitchChanged(checked: Boolean)
-    fun th2SwitchChanged(checked: Boolean)
-    fun getTh2SensorLabel(): String
     fun isDamperSelected(association: Int): Boolean
     fun zoneCO2DamperOpeningRateSelect(position: Int)
     fun zoneCO2ThresholdSelect(position: Int)
@@ -48,6 +47,7 @@ interface HyperStatModel {
     fun onDisplayP2pmSelected(checked: Boolean)
     fun setConfigSelected()
     fun getRelayMappingAdapter(context : Context, values: Array<String>): ArrayAdapter<*>
+    fun getTh2MappingAdapter(context : Context, values: Array<String>): ArrayAdapter<*>
     fun validateProfileConfig() : Boolean
     fun getValidationMessage() : String
     fun voltageAtStagedFanSelected(index: Int, position: Int)

@@ -14,7 +14,7 @@ val TIMER_TO_BE_VALID = 900000
 fun createOfflineModePoint(){
 
     val siteMap = hayStack.readEntity(Tags.SITE)
-    val equipMap = hayStack.readEntity("equip and system and not modbus")
+    val equipMap = hayStack.readEntity("equip and system and not modbus and not connectModule")
     val equip = Equip.Builder().setHashMap(equipMap).build()
     val equipRef = equip.id
     val siteRef = Objects.requireNonNull(siteMap[Tags.ID]).toString()

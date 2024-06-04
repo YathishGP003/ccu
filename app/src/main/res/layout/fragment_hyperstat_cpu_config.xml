@@ -414,42 +414,80 @@
                         </LinearLayout>
                     </TableRow>
 
-                    <!--  Airflow Toggle   -->
-                    <TableRow
-                        style="@style/TableRow_HyperStat"
-                        android:layout_marginTop="27dp">
-
-                        <LinearLayout style="@style/TableToggleButtonWrapper">
-
-                            <include
-                                android:id="@+id/airflowTempToggle"
-                                style="@style/ToggleButton_HyperStat"
-                                layout="@layout/custom_ccu_switch" />
-
-                            <TextView
-                                style="@style/ToggleLabel"
-                                android:text="@string/label_airflowtemp" />
-                        </LinearLayout>
-                    </TableRow>
-
-                    <!--  Door/Window Toggle   -->
+                    <!--  Thermistor-in1 -->
                     <TableRow
                         style="@style/TableRow_HyperStat"
                         android:layout_marginTop="20dp">
 
-                        <LinearLayout style="@style/TableToggleButtonWrapper">
+                        <LinearLayout
+                            style="@style/TableToggleButtonWrapper"
+                            android:layout_weight="1.0">
 
                             <include
-                                android:id="@+id/doorWindowEnableToggle"
+                                android:id="@+id/toggle_thermistor_in1"
                                 style="@style/ToggleButton_HyperStat"
                                 layout="@layout/custom_ccu_switch"/>
 
                             <TextView
-                                android:id="@+id/th2Label"
                                 style="@style/ToggleLabel"
-                                android:text="@string/door_window_sensor" />
-
+                                android:singleLine="true"
+                                android:text="@string/thermistor_1" />
                         </LinearLayout>
+
+                        <LinearLayout
+                            style="@style/TableBasicItemWrapper"
+                            android:layout_width="wrap_content"
+                            android:layout_gravity="start|center_vertical"
+                            android:layout_weight="0.7"
+                            android:gravity="start">
+
+                            <Spinner
+                                android:id="@+id/thermistor1_in_spinner"
+                                style="@style/TableSpinner"
+                                android:layout_width="wrap_content"
+                                android:entries="@array/hyperstat_cpu_thermistor_in_selector_th1"
+                                tools:listitem="@layout/spinner_dropdown_item" />
+                        </LinearLayout>
+
+
+                    </TableRow>
+
+                    <!--  Thermistor-in2 -->
+                    <TableRow
+                        style="@style/TableRow_HyperStat"
+                        android:layout_marginTop="18dp">
+
+                        <LinearLayout
+                            style="@style/TableToggleButtonWrapper"
+                            android:layout_weight="1.0">
+
+                            <include
+                                android:id="@+id/toggle_thermistor_in2"
+                                style="@style/ToggleButton_HyperStat"
+                                layout="@layout/custom_ccu_switch"/>
+
+                            <!--todo: this text is a smidge too long and wraps -->
+                            <TextView
+                                style="@style/ToggleLabel"
+                                android:text="@string/thermistor_2" />
+                        </LinearLayout>
+
+                        <!-- The layout weight of 0.9 is to provide the layout above enough space for "Thermistor-in 2" without wrapping -->
+                        <LinearLayout
+                            style="@style/TableBasicItemWrapper"
+                            android:layout_width="wrap_content"
+                            android:layout_gravity="start|center_vertical"
+                            android:layout_weight="0.7"
+                            android:gravity="start">
+
+                            <Spinner
+                                android:id="@+id/thermistor2_in_spinner"
+                                style="@style/TableSpinner"
+                                android:layout_width="wrap_content"
+                                android:entries="@array/hyperstat_cpu_thermistor_in_selector_th2"
+                                tools:listitem="@layout/spinner_dropdown_item" />
+                        </LinearLayout>
+
                     </TableRow>
 
                     <!--  Analog-in1 -->

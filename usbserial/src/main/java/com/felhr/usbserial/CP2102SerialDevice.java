@@ -6,9 +6,10 @@ import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbEndpoint;
 import android.hardware.usb.UsbInterface;
 import android.hardware.usb.UsbRequest;
-import android.util.Log;
 
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import a75f.io.logger.CcuLog;
 
 public class CP2102SerialDevice extends UsbSerialDevice
 {
@@ -517,10 +518,10 @@ public class CP2102SerialDevice extends UsbSerialDevice
     {
         if(connection.claimInterface(mInterface, true))
         {
-            Log.i(CLASS_ID, "Interface succesfully claimed");
+            CcuLog.d(CLASS_ID, "Interface successfully claimed");
         }else
         {
-            Log.i(CLASS_ID, "Interface could not be claimed");
+            CcuLog.d(CLASS_ID, "Interface could not be claimed");
             return false;
         }
 
@@ -581,7 +582,7 @@ public class CP2102SerialDevice extends UsbSerialDevice
             dataLength = data.length;
         }
         int response = connection.controlTransfer(CP210x_REQTYPE_HOST2DEVICE, request, value, mInterface.getId(), data, dataLength, USB_TIMEOUT);
-        Log.i(CLASS_ID,"Control Transfer Response: " + String.valueOf(response));
+        CcuLog.d(CLASS_ID,"Control Transfer Response: " + response);
         return response;
     }
 
@@ -596,7 +597,7 @@ public class CP2102SerialDevice extends UsbSerialDevice
     {
         byte[] data = new byte[19];
         int response = connection.controlTransfer(CP210x_REQTYPE_DEVICE2HOST, CP210x_GET_COMM_STATUS, 0, mInterface.getId(), data, 19, USB_TIMEOUT);
-        Log.i(CLASS_ID, "Control Transfer Response (Comm status): " + String.valueOf(response));
+        CcuLog.d(CLASS_ID, "Control Transfer Response (Comm status): " + response);
         return data;
     }
 
@@ -604,7 +605,7 @@ public class CP2102SerialDevice extends UsbSerialDevice
     {
         byte[] data = new byte[2];
         int response = connection.controlTransfer(CP210x_REQTYPE_DEVICE2HOST, CP210x_GET_LINE_CTL, 0, mInterface.getId(), data, data.length, USB_TIMEOUT);
-        Log.i(CLASS_ID,"Control Transfer Response: " + String.valueOf(response));
+        CcuLog.d(CLASS_ID,"Control Transfer Response: " + response);
         return data;
     }
 }

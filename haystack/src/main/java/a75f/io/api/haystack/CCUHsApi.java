@@ -2090,7 +2090,7 @@ public class CCUHsApi
 
     public String createCCU(String ccuName, String installerEmail, String equipRef, String managerEmail)
     {
-        HashMap equip = CCUHsApi.getInstance().read("equip and system and not modbus");
+        HashMap equip = CCUHsApi.getInstance().read("equip and system and not modbus and not connectModule");
         String ahuRef = equip.size() > 0 ? equip.get("id").toString() : "";
 
         HDictBuilder hDictBuilder = new HDictBuilder();

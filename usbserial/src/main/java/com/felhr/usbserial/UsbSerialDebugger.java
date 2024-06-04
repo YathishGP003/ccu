@@ -1,8 +1,8 @@
 package com.felhr.usbserial;
 
-import android.util.Log;
-
 import com.felhr.utils.HexData;
+
+import a75f.io.logger.CcuLog;
 
 public class UsbSerialDebugger
 {
@@ -18,12 +18,12 @@ public class UsbSerialDebugger
     {
         if(!verbose)
         {
-            Log.i(CLASS_ID, "Data obtained from write buffer: " + new String(src));
+            CcuLog.i(CLASS_ID, "Data obtained from write buffer: " + new String(src));
         }else
         {
-            Log.i(CLASS_ID, "Data obtained from write buffer: " + new String(src));
-            Log.i(CLASS_ID, "Raw data from write buffer: " + HexData.hexToString(src));
-            Log.i(CLASS_ID, "Number of bytes obtained from write buffer: " + src.length);
+            CcuLog.i(CLASS_ID, "Data obtained from write buffer: " + new String(src));
+            CcuLog.i(CLASS_ID, "Raw data from write buffer: " + HexData.hexToString(src));
+            CcuLog.i(CLASS_ID, "Number of bytes obtained from write buffer: " + src.length);
         }
     }
 
@@ -31,45 +31,14 @@ public class UsbSerialDebugger
     {
         if(!verbose)
         {
-            Log.i(CLASS_ID, "Data obtained pushed to write buffer: " + new String(src));
+            CcuLog.i(CLASS_ID, "Data obtained pushed to write buffer: " + new String(src));
         }else
         {
-            Log.i(CLASS_ID, "Data obtained pushed to write buffer: " + new String(src));
-            Log.i(CLASS_ID, "Raw data pushed to write buffer: " + HexData.hexToString(src));
-            Log.i(CLASS_ID, "Number of bytes pushed from write buffer: " + src.length);
+            CcuLog.i(CLASS_ID, "Data obtained pushed to write buffer: " + new String(src));
+            CcuLog.i(CLASS_ID, "Raw data pushed to write buffer: " + HexData.hexToString(src));
+            CcuLog.i(CLASS_ID, "Number of bytes pushed from write buffer: " + src.length);
         }
     }
-
-    public static void printReadLogGet(byte[] src, boolean verbose)
-    {
-        if (src.length > 0)
-        {
-            if (!verbose)
-            {
-                Log.i(CLASS_ID, "Data obtained from Read buffer: " + new String(src));
-            }
-            else
-            {
-                Log.i(CLASS_ID, "Data obtained from Read buffer: " + new String(src));
-                Log.i(CLASS_ID, "Raw data from Read buffer: " + HexData.hexToString(src));
-                Log.i(CLASS_ID, "Number of bytes obtained from Read buffer: " + src.length);
-            }
-        }
-    }
-
-    public static void printReadLogPut(byte[] src, boolean verbose)
-    {
-        if(!verbose)
-        {
-            Log.i(CLASS_ID, "Data obtained pushed to read buffer: " + new String(src));
-        }else
-        {
-            Log.i(CLASS_ID, "Data obtained pushed to read buffer: " + new String(src));
-            Log.i(CLASS_ID, "Raw data pushed to read buffer: " + HexData.hexToString(src));
-            Log.i(CLASS_ID, "Number of bytes pushed from read buffer: " + src.length);
-        }
-    }
-
 
 
 }

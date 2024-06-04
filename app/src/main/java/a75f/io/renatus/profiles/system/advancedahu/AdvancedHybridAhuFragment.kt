@@ -461,7 +461,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                             relayConfig.association = associationIndex.index
                         },
                         isEnabled = relayConfig.enabled,
-                        testState = viewModel.getPhysicalPointForRelayIndex(index)?.let { it.readHisVal() > 0 } ?: false,
+                        testState = viewModel.getPhysicalPointForRelayIndex(index, false)?.let { it.readHisVal() > 0 } ?: false,
                         onTestActivated = {viewModel.sendCMRelayTestCommand(index, it)})
                 }
             }
@@ -1872,7 +1872,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                         onAssociationChanged = { associationIndex ->
                             relayConfig.association = associationIndex.index
                         },
-                        testState = viewModel.getPhysicalPointForRelayIndex(index)?.let { it.readHisVal() > 0 } ?: false,
+                        testState = viewModel.getPhysicalPointForRelayIndex(index, true)?.let { it.readHisVal() > 0 } ?: false,
                         onTestActivated = {viewModel.sendConnectRelayTestCommand(index, it)})
                 }
             }

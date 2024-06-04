@@ -6,7 +6,8 @@ import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbEndpoint;
 import android.hardware.usb.UsbInterface;
 import android.hardware.usb.UsbRequest;
-import android.util.Log;
+
+import a75f.io.logger.CcuLog;
 
 /*
  * Werner Wolfrum (w.wolfrum@wolfrum-elektronik.de)
@@ -76,10 +77,10 @@ public class XdcVcpSerialDevice extends UsbSerialDevice
 
         if(connection.claimInterface(mInterface, true))
         {
-            Log.i(CLASS_ID, "Interface succesfully claimed");
+            CcuLog.d(CLASS_ID, "Interface successfully claimed");
         }else
         {
-            Log.i(CLASS_ID, "Interface could not be claimed");
+            CcuLog.d(CLASS_ID, "Interface could not be claimed");
             return false;
         }
 
@@ -354,7 +355,7 @@ public class XdcVcpSerialDevice extends UsbSerialDevice
             dataLength = data.length;
         }
         int response = connection.controlTransfer(XDCVCP_REQTYPE_HOST2DEVICE, request, value, mInterface.getId(), data, dataLength, USB_TIMEOUT);
-        Log.i(CLASS_ID,"Control Transfer Response: " + String.valueOf(response));
+        CcuLog.d(CLASS_ID,"Control Transfer Response: " + response);
         return response;
     }
 
@@ -362,7 +363,7 @@ public class XdcVcpSerialDevice extends UsbSerialDevice
     {
         byte[] data = new byte[2];
         int response = connection.controlTransfer(XDCVCP_REQTYPE_DEVICE2HOST, XDCVCP_GET_LINE_CTL, 0, mInterface.getId(), data, data.length,  USB_TIMEOUT );
-        Log.i(CLASS_ID,"Control Transfer Response: " + String.valueOf(response));
+        CcuLog.d(CLASS_ID,"Control Transfer Response: " + response);
         return data;
     }
 

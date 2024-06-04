@@ -3923,17 +3923,24 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             TextView val = viewPointRow1.findViewById(R.id.text_point1value);
 
 
-            if( isCelsiusTunerAvailableStatus()) {
+            if( isCelsiusTunerAvailableStatus() && !monitoringPoints.get("Thermistor1").toString().equals("Generic Fault (NC)") && !monitoringPoints.get("Thermistor1").toString().equals("Generic Fault (NO)")) {
                 String label_string = monitoringPoints.get("Thermistor1").toString() +
                         " (" + getString(R.string.thermistor1_label) + ") " + " : ";
                 String val_string = (String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(monitoringPoints.get("Th1Val").toString())))) + " " +  (" \u00B0C");
                 label.setText(label_string);
                 val.setText(val_string);
+            } else if (monitoringPoints.get("Thermistor1").toString().equals("Generic Fault (NC)") || monitoringPoints.get("Thermistor1").toString().equals("Generic Fault (NO)")) {
+                String label_string = monitoringPoints.get("Thermistor1").toString() +
+                        " (" + getString(R.string.thermistor1_label)+") " + " : ";
+                String val_string = ((double)monitoringPoints.get("Th1Val") > 0 ? "Fault" : "Normal");
+
+                label.setText(label_string);
+                val.setText(val_string);
             } else {
                 String label_string = monitoringPoints.get("Thermistor1").toString() +
                         " (" + getString(R.string.thermistor1_label) + ") " + " : ";
-                String val_string = (monitoringPoints.get("Th1Val").toString()) + " " + (monitoringPoints.get(
-                        "Unit3").toString());
+                String unit3 = monitoringPoints.get("Unit3") != null ? monitoringPoints.get("Unit3").toString() : "";
+                String val_string = (monitoringPoints.get("Th1Val").toString()) + " " + unit3;
 
                 label.setText(label_string);
                 val.setText(val_string);
@@ -3951,10 +3958,17 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             TextView label = viewPointRow1.findViewById(R.id.text_point1label);
             TextView val = viewPointRow1.findViewById(R.id.text_point1value);
 
-            if( isCelsiusTunerAvailableStatus()) {
+            if(isCelsiusTunerAvailableStatus() && !monitoringPoints.get("Thermistor2").toString().equals("Generic Fault (NC)") && !monitoringPoints.get("Thermistor2").toString().equals("Generic Fault (NO)")) {
                 String label_string = monitoringPoints.get("Thermistor2").toString() +
                         " (" + getString(R.string.thermistor2_label) + ") " + " : ";
                 String val_string = (String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(monitoringPoints.get("Th2Val").toString())))) + " " +  (" \u00B0C");
+                label.setText(label_string);
+                val.setText(val_string);
+            } else if (monitoringPoints.get("Thermistor2").toString().equals("Generic Fault (NC)") || monitoringPoints.get("Thermistor2").toString().equals("Generic Fault (NO)")) {
+                String label_string = monitoringPoints.get("Thermistor2").toString() +
+                        " (" + getString(R.string.thermistor2_label)+") " + " : ";
+                String val_string = ((double)monitoringPoints.get("Th2Val") > 0 ? "Fault" : "Normal");
+
                 label.setText(label_string);
                 val.setText(val_string);
             } else {
@@ -4322,7 +4336,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
     public void loadGrid(AlertDialog dialog, Timer timer) {
         if(getActivity() != null) {
             getActivity().runOnUiThread(() -> {
-                MigrationUtil.createZoneSchedulesIfMissing(CCUHsApi.getInstance());
                 loadGrid(parentRootView);
                 dialog.dismiss();
                 timer.cancel();

@@ -8,6 +8,10 @@ import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.AnalogInAssociation
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.AnalogInState
+import a75f.io.logic.bo.building.hyperstat.profiles.cpu.Th1InState
+import a75f.io.logic.bo.building.hyperstat.profiles.cpu.Th2InState
+import a75f.io.logic.bo.building.hyperstat.profiles.pipe2.Pipe2Th1InState
+import a75f.io.logic.bo.building.hyperstat.profiles.pipe2.Pipe2Th2InState
 import a75f.io.logic.bo.haystack.device.DeviceUtil
 import a75f.io.logic.bo.haystack.device.HyperStatDevice
 
@@ -82,70 +86,6 @@ open class HyperStatEquip {
         // update at profile specific
     }
 
-    // Function to update AirFlowTempSensor configuration
-    fun updateAirFlowTempSensorConfiguration(
-        isOldEnableAirFlowTempSensor: Boolean,
-        isNewEnableAirFlowTempSensor: Boolean
-    ) {
-
-        if (isOldEnableAirFlowTempSensor != isNewEnableAirFlowTempSensor) {
-            val enabledId = hsHaystackUtil
-                .readPointID("config and air and discharge and temp") as String
-            hyperStatPointsUtil.addDefaultValueForPoint(
-                enabledId, if (isNewEnableAirFlowTempSensor) 1.0 else 0.0
-            )
-            val logicalPointId: String? = hsHaystackUtil.readPointID(
-                "air and cur and discharge and logical"
-            )
-            if (logicalPointId != null) {
-                hsHaystackUtil.removePoint(logicalPointId)
-            }
-            if (isNewEnableAirFlowTempSensor) {
-                val pointData: Point =  hyperStatPointsUtil.createAirflowTempSensor()
-                val pointId = hyperStatPointsUtil.addPointToHaystack(pointData)
-                if (pointData.markers.contains("his")) {
-                    hyperStatPointsUtil.addDefaultHisValueForPoint(pointId, 0.0)
-                }
-                hyperStatPointsUtil.addDefaultValueForPoint(pointId, 0.0)
-                DeviceUtil.setPointEnabled(nodeAddress, Port.TH1_IN.name, true)
-                DeviceUtil.updatePhysicalPointRef(nodeAddress, Port.TH1_IN.name, pointId)
-            }
-        }
-    }
-
-
-    // Function to update DoorWindowSensor configuration
-     fun updateDoorWindowSensorTh2Configuration(
-        isOldEnableDoorWindowSensor: Boolean,
-        isNewEnableDoorWindowSensor: Boolean
-    ){
-        if (isOldEnableDoorWindowSensor != isNewEnableDoorWindowSensor) {
-            val enabledId = hsHaystackUtil.readPointID(
-                "config and window and enabled and not sensing"
-            ) as String
-            hyperStatPointsUtil.addDefaultValueForPoint(
-                enabledId, if (isNewEnableDoorWindowSensor) 1.0 else 0.0
-            )
-            val logicalPointId = LogicalPointsUtil.readDoorWindowSensor(hsHaystackUtil.equipRef,LogicalPointsUtil.WindowSensorType.WINDOW_SENSOR)
-            if (logicalPointId.isNotEmpty()) {
-                hsHaystackUtil.removePoint(logicalPointId[Tags.ID].toString())
-            }
-            if (isNewEnableDoorWindowSensor) {
-                val pointData: Point = hyperStatPointsUtil.createPointForDoorWindowSensor(LogicalPointsUtil.WindowSensorType.WINDOW_SENSOR)
-                val pointId = hyperStatPointsUtil.addPointToHaystack(pointData)
-                if (pointData.markers.contains("his")) {
-                    hyperStatPointsUtil.addDefaultHisValueForPoint(pointId, 0.0)
-                }
-                hyperStatPointsUtil.addDefaultValueForPoint(pointId, 0.0)
-                DeviceUtil.setPointEnabled(nodeAddress, Port.TH2_IN.name, true)
-                DeviceUtil.updatePhysicalPointRef(nodeAddress, Port.TH2_IN.name, pointId)
-                DeviceUtil.updatePhysicalPointType(
-                    nodeAddress, Port.TH2_IN.name,
-                    HyperStatAssociationUtil.getSensorNameByType(AnalogInAssociation.DOOR_WINDOW_SENSOR)
-                )
-            }
-        }
-    }
     // Function which updates the Analog In new configurations
     fun updateAnalogInDetails(
         analogInState: AnalogInState,
@@ -173,6 +113,107 @@ open class HyperStatEquip {
         }
 
     }
+
+    // Function which updates the TH1 In new configurations
+    fun updateTh1InDetails(
+        th1InState: Th1InState
+    ) {
+        val th1InId = hsHaystackUtil.readPointID("config and th1 and input and enabled") as String
+        val th1InAssociatedId = hsHaystackUtil.readPointID("config and th1 and input and association") as String
+        hyperStatPointsUtil.addDefaultValueForPoint(th1InId, if (th1InState.enabled) 1.0 else 0.0)
+        hyperStatPointsUtil.addDefaultValueForPoint(th1InAssociatedId, th1InState.association.ordinal.toDouble())
+
+        DeviceUtil.setPointEnabled(nodeAddress, Port.TH1_IN.name, th1InState.enabled)
+        if (th1InState.enabled) {
+            val pointData: Point = hyperStatPointsUtil.th1InConfiguration(
+                th1InState = th1InState
+            )
+            val pointId = hyperStatPointsUtil.addPointToHaystack(pointData)
+            hyperStatPointsUtil.addDefaultValueForPoint(pointId, 0.0)
+            hyperStatPointsUtil.addDefaultHisValueForPoint(pointId, 0.0)
+
+            DeviceUtil.updatePhysicalPointRef(nodeAddress, Port.TH1_IN.name, pointId)
+            val pointType = HyperStatAssociationUtil.getSensorNameByType(th1InState.association)
+            DeviceUtil.updatePhysicalPointType(nodeAddress, Port.TH1_IN.name, pointType)
+        }
+
+    }
+
+    // Function which updates the TH2 In new configurations
+    fun updateTh2InDetails(
+        th2InState: Th2InState
+    ) {
+        val th2InId = hsHaystackUtil.readPointID("config and th2 and input and enabled") as String
+        val th2InAssociatedId = hsHaystackUtil.readPointID("config and th2 and input and association") as String
+        hyperStatPointsUtil.addDefaultValueForPoint(th2InId, if (th2InState.enabled) 1.0 else 0.0)
+        hyperStatPointsUtil.addDefaultValueForPoint(th2InAssociatedId, th2InState.association.ordinal.toDouble())
+
+        DeviceUtil.setPointEnabled(nodeAddress, Port.TH2_IN.name, th2InState.enabled)
+        if (th2InState.enabled) {
+            val pointData: Point = hyperStatPointsUtil.th2InConfiguration(
+                th2InState = th2InState
+            )
+            val pointId = hyperStatPointsUtil.addPointToHaystack(pointData)
+            hyperStatPointsUtil.addDefaultValueForPoint(pointId, 0.0)
+            hyperStatPointsUtil.addDefaultHisValueForPoint(pointId, 0.0)
+
+            DeviceUtil.updatePhysicalPointRef(nodeAddress, Port.TH2_IN.name, pointId)
+            val pointType = HyperStatAssociationUtil.getSensorNameByType(th2InState.association)
+            DeviceUtil.updatePhysicalPointType(nodeAddress, Port.TH2_IN.name, pointType)
+        }
+
+    }
+
+    // Function which updates the TH1 In new configurations
+    fun updateTh1InDetails(
+        th1InState: Pipe2Th1InState
+    ) {
+        val th1InId = hsHaystackUtil.readPointID("config and th1 and input and enabled") as String
+        val th1InAssociatedId = hsHaystackUtil.readPointID("config and th1 and input and association") as String
+        hyperStatPointsUtil.addDefaultValueForPoint(th1InId, if (th1InState.enabled) 1.0 else 0.0)
+        hyperStatPointsUtil.addDefaultValueForPoint(th1InAssociatedId, th1InState.association.ordinal.toDouble())
+
+        DeviceUtil.setPointEnabled(nodeAddress, Port.TH1_IN.name, th1InState.enabled)
+        if (th1InState.enabled) {
+            val pointData: Point = hyperStatPointsUtil.th1InConfiguration(
+                th1InState = th1InState
+            )
+            val pointId = hyperStatPointsUtil.addPointToHaystack(pointData)
+            hyperStatPointsUtil.addDefaultValueForPoint(pointId, 0.0)
+            hyperStatPointsUtil.addDefaultHisValueForPoint(pointId, 0.0)
+
+            DeviceUtil.updatePhysicalPointRef(nodeAddress, Port.TH1_IN.name, pointId)
+            val pointType = HyperStatAssociationUtil.getSensorNameByType(th1InState.association)
+            DeviceUtil.updatePhysicalPointType(nodeAddress, Port.TH1_IN.name, pointType)
+        }
+
+    }
+
+    // Function which updates the TH2 In new configurations
+    fun updateTh2InDetails(
+        th2InState: Pipe2Th2InState
+    ) {
+        val th2InId = hsHaystackUtil.readPointID("config and th2 and input and enabled") as String
+        val th2InAssociatedId = hsHaystackUtil.readPointID("config and th2 and input and association") as String
+        hyperStatPointsUtil.addDefaultValueForPoint(th2InId, if (th2InState.enabled) 1.0 else 0.0)
+        hyperStatPointsUtil.addDefaultValueForPoint(th2InAssociatedId, th2InState.association.ordinal.toDouble())
+
+        DeviceUtil.setPointEnabled(nodeAddress, Port.TH2_IN.name, th2InState.enabled)
+        if (th2InState.enabled) {
+            val pointData: Point = hyperStatPointsUtil.th2InConfiguration(
+                th2InState = th2InState
+            )
+            val pointId = hyperStatPointsUtil.addPointToHaystack(pointData)
+            hyperStatPointsUtil.addDefaultValueForPoint(pointId, 0.0)
+            hyperStatPointsUtil.addDefaultHisValueForPoint(pointId, 0.0)
+
+            DeviceUtil.updatePhysicalPointRef(nodeAddress, Port.TH2_IN.name, pointId)
+            val pointType = HyperStatAssociationUtil.getSensorNameByType(th2InState.association)
+            DeviceUtil.updatePhysicalPointType(nodeAddress, Port.TH2_IN.name, pointType)
+        }
+
+    }
+
 
 
     fun updatePm25Values(
@@ -394,7 +435,7 @@ open class HyperStatEquip {
 
     private fun getPointBasicInfo(): PointBasicInfo {
         val siteMap = CCUHsApi.getInstance().readEntity(Tags.SITE) as HashMap<Any, Any>
-        val systemEquip = CCUHsApi.getInstance().readEntity("equip and system and not modbus") as HashMap<Any, Any>
+        val systemEquip = CCUHsApi.getInstance().readEntity("equip and system and not modbus and not connectModule") as HashMap<Any, Any>
 
         return PointBasicInfo(
             siteMap[Tags.ID].toString(),

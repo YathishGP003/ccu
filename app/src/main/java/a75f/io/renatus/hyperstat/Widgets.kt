@@ -30,6 +30,11 @@ class AnalogOutWidgets(
     val analogOutAtFanRecirculateSelector: Spinner
 )
 
+class ThermistorInWidgets(
+    val switch: CustomCCUSwitch,
+    val selector: Spinner
+)
+
 class AnalogInWidgets(
     val switch: CustomCCUSwitch,
     val selector: Spinner

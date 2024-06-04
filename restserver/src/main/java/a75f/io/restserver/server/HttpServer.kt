@@ -74,14 +74,14 @@ class HttpServer {
             server.start(wait = true)
         }
         sharedPreferences!!.edit().putBoolean(HTTP_SERVER_STATUS, true).apply()
-        Log.d(L.TAG_CCU_BACNET, "server started.")
+        CcuLog.d(L.TAG_CCU_BACNET, "server started.")
     }
 
     fun stopServer() {
         server.stop(1_000, 2_000)
         instance = null
         sharedPreferences!!.edit().putBoolean(HTTP_SERVER_STATUS, false).apply()
-        Log.d(L.TAG_CCU_BACNET, "server stopped.")
+        CcuLog.d(L.TAG_CCU_BACNET, "server stopped.")
     }
 
     val server by lazy {
@@ -245,6 +245,7 @@ class HttpServer {
                 }
 
                 post("/watchPoll") {
+                    CcuLog.d(HTTP_SERVER," watchPoll: ")
                     val body = call.receive<String>()
                     if (body != null) {
                         val hGrid = retrieveGridFromRequest(body)

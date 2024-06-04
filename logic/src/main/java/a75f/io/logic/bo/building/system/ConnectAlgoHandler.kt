@@ -6,7 +6,7 @@ import a75f.io.domain.equips.ConnectModuleEquip
 import a75f.io.domain.equips.SystemEquip
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
-import a75f.io.logic.bo.building.system.util.composeMappedLoop
+import a75f.io.logic.bo.building.system.util.getComposeMidPoint
 import a75f.io.logic.bo.building.system.util.getModulatedOutput
 
 
@@ -53,6 +53,24 @@ fun getAnalogAssociation(enabledControls: MutableSet<AdvancedAhuAnalogOutAssocia
     }
 }
 
+
+fun getConnectLogicalOutput(systemEquip: ConnectModuleEquip, controlType: AdvancedAhuAnalogOutAssociationTypeConnect, source: Point, mode: SystemMode) : Double {
+    val loopOutput = getConnectLoopOutput(systemEquip, controlType, source)
+    val minMax = getMinMax(source, controlType, systemEquip)
+    return when (controlType) {
+        AdvancedAhuAnalogOutAssociationTypeConnect.COMPOSITE_SIGNAL -> {
+            when (mode) {
+                SystemMode.COOLONLY, SystemMode.HEATONLY -> { minMax.first * 10 }
+                SystemMode.AUTO -> { getModulatedOutput(loopOutput, minMax.first, minMax.second) * 10 }
+                else -> { loopOutput }
+            }
+        } else -> {
+            loopOutput
+        }
+    }
+}
+
+
 fun getConnectLoopOutput(systemEquip: ConnectModuleEquip, controlType: AdvancedAhuAnalogOutAssociationTypeConnect, source: Point) : Double {
     return when (controlType) {
         AdvancedAhuAnalogOutAssociationTypeConnect.LOAD_COOLING -> systemEquip.coolingLoopOutput.readHisVal()
@@ -65,15 +83,19 @@ fun getConnectLoopOutput(systemEquip: ConnectModuleEquip, controlType: AdvancedA
             } else if (systemEquip.heatingLoopOutput.readHisVal() > 0) {
                 systemEquip.heatingLoopOutput.readHisVal()
             } else {
-                return when(source.domainName) {
-                    DomainName.analog1OutputEnable -> composeMappedLoop(getConnectAnalogOut1MinMax(controlType, systemEquip))
-                    DomainName.analog2OutputEnable -> composeMappedLoop(getConnectAnalogOut2MinMax(controlType, systemEquip))
-                    DomainName.analog3OutputEnable -> composeMappedLoop(getConnectAnalogOut3MinMax(controlType, systemEquip))
-                    DomainName.analog4OutputEnable -> composeMappedLoop(getConnectAnalogOut4MinMax(controlType, systemEquip))
-                    else -> {0.0}
-                }
+                return getComposeMidPoint(getMinMax(source, controlType, systemEquip)) * 10
             }
         }
+    }
+}
+
+fun getMinMax(source: Point, controlType: AdvancedAhuAnalogOutAssociationTypeConnect, systemEquip: ConnectModuleEquip): Pair<Double, Double>{
+    return when(source.domainName) {
+        DomainName.analog1OutputEnable -> getConnectAnalogOut1MinMax(controlType, systemEquip)
+        DomainName.analog2OutputEnable -> getConnectAnalogOut2MinMax(controlType, systemEquip)
+        DomainName.analog3OutputEnable -> getConnectAnalogOut3MinMax(controlType, systemEquip)
+        DomainName.analog4OutputEnable -> getConnectAnalogOut4MinMax(controlType, systemEquip)
+        else -> { Pair(0.0, 0.0)}
     }
 }
 
@@ -263,7 +285,6 @@ fun getConnectAnalogModulation(
         systemEquip: SystemEquip,
         minMax: Pair<Double, Double>
 ) : Double {
-
     val finalLoop = when (controlType) {
         AdvancedAhuAnalogOutAssociationTypeConnect.COMPOSITE_SIGNAL -> {
             val presentMode = SystemController.State.values()[systemEquip.operatingMode.readHisVal().toInt()]
@@ -275,7 +296,8 @@ fun getConnectAnalogModulation(
                     systemEquip.heatingLoopOutput.readHisVal()
                 }
                 else -> {
-                    (10 * (minMax.first + minMax.second) / 2).coerceIn(0.0,10.0)
+                    CcuLog.i(L.TAG_CCU_SYSTEM, " compositeSignal ${getComposeMidPoint(minMax)} analogMinVoltage: ${minMax.first}, analogMaxVoltage: ${minMax.second}")
+                    return getComposeMidPoint(minMax)
                 }
             }
         }
@@ -283,12 +305,6 @@ fun getConnectAnalogModulation(
             loopOutput
         }
     }
-
-    if (controlType == AdvancedAhuAnalogOutAssociationTypeConnect.COMPOSITE_SIGNAL) {
-        CcuLog.i(L.TAG_CCU_SYSTEM, "modulateAnalogOut4: compositeSignal ${((minMax.first + minMax.second) / 2).coerceIn(0.0,10.0)} analogMinVoltage: ${minMax.first}, analogMaxVoltage: ${minMax.second}")
-        return ((minMax.first + minMax.second) / 2).coerceIn(0.0,10.0)
-    } else {
-        CcuLog.i(L.TAG_CCU_SYSTEM, "modulateAnalogOut4: loopOutput $finalLoop analogMinVoltage: ${minMax.first}, analogMaxVoltage: ${minMax.second}")
-        return getModulatedOutput(finalLoop, minMax.first, minMax.second).coerceIn(0.0,10.0)
-    }
+    CcuLog.i(L.TAG_CCU_SYSTEM, "modulateAnalogOut: loopOutput $finalLoop analogMinVoltage: ${minMax.first}, analogMaxVoltage: ${minMax.second}")
+    return getModulatedOutput(finalLoop, minMax.first, minMax.second).coerceIn(0.0,10.0)
 }

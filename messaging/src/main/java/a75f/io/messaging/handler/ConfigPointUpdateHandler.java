@@ -173,8 +173,12 @@ class ConfigPointUpdateHandler {
             DomainManager.INSTANCE.addSystemDomainEquip(hayStack);
         } else if (systemProfile instanceof VavStagedRtu) {
 
-            SeventyFiveFProfileDirective model = (SeventyFiveFProfileDirective) ModelLoader.INSTANCE.getVavStageRtuModelDef();
-            StagedRtuProfileConfig config = new StagedRtuProfileConfig(model).getActiveConfiguration();
+            boolean isVfd = systemProfile instanceof VavStagedRtuWithVfd;
+            SeventyFiveFProfileDirective model = (SeventyFiveFProfileDirective) (isVfd ? ModelLoader.INSTANCE.getVavStagedVfdRtuModelDef()
+                    :ModelLoader.INSTANCE.getVavStageRtuModelDef());
+            StagedRtuProfileConfig config = isVfd ? new StagedVfdRtuProfileConfig(model).getActiveConfiguration()
+                    :new StagedRtuProfileConfig(model).getActiveConfiguration();
+
             if (configPoint.getDomainName().contains(DomainName.relay1OutputAssociation)) {
                 config.relay1Association.setAssociationVal((int) val);
             } else if (configPoint.getDomainName().contains(DomainName.relay2OutputAssociation)) {

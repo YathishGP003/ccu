@@ -162,6 +162,7 @@ object VavStagedRtuCutOverMapping {
         "temperatureIntegralTime" to "vavTemperatureIntegralTime",
         "integralKFactor" to "vavIntegralKFactor",
         "temperatureProportionalRange" to "vavTemperatureProportionalRange",
+        "modeChangeoverHysteresis" to "vavModeChangeOverHysteresis",
 
     )
 }

@@ -69,7 +69,7 @@ public class SystemTuners {
                                .setTz(hayStack.getTimeZone()).setUnit(Units.FAHRENHEIT)
                                .build();
         String pSpreadId = hayStack.addPoint(propSpread);
-        BuildingTunerUtil.copyFromBuildingTuner(pSpreadId, TunerUtil.getQueryString(propSpread), hayStack);
+        BuildingTunerUtil.copyFromBuildingTuner(pSpreadId, "vav and pspread and not airflow and not air", hayStack);
         hayStack.writeHisValById(pSpreadId, HSUtil.getPriorityVal(pSpreadId));
 
         Point integralTimeout = new Point.Builder()

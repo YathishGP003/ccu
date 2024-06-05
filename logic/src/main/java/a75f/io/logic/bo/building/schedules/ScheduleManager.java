@@ -66,6 +66,7 @@ import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.dab.DabExternalAhu;
+import a75f.io.logic.bo.building.system.vav.VavAdvancedHybridRtu;
 import a75f.io.logic.bo.building.system.vav.VavExternalAhu;
 import a75f.io.logic.bo.building.system.vav.VavFullyModulatingRtu;
 import a75f.io.logic.bo.building.system.vav.VavStagedRtu;
@@ -1253,22 +1254,14 @@ public class ScheduleManager {
 
 
     private static double getCoolingPreconditioningRate() {
-        if (L.ccu().systemProfile instanceof DabExternalAhu
-                || L.ccu().systemProfile instanceof VavExternalAhu
-                || L.ccu().systemProfile instanceof VavStagedRtu
-                || L.ccu().systemProfile instanceof VavStagedRtuWithVfd
-                || L.ccu().systemProfile instanceof VavFullyModulatingRtu) {
+        if (isDMSupportProfile()) {
             return getPointByDomain(coolingPreconditioningRate);
         } else {
             return TunerUtil.readTunerValByQuery("cooling and precon and rate", L.ccu().systemProfile.getSystemEquipRef());
         }
     }
     private static double getHeatingPreconditioningRate() {
-        if (L.ccu().systemProfile instanceof DabExternalAhu
-                || L.ccu().systemProfile instanceof VavExternalAhu
-                || L.ccu().systemProfile instanceof VavStagedRtu
-                || L.ccu().systemProfile instanceof VavStagedRtuWithVfd
-                || L.ccu().systemProfile instanceof VavFullyModulatingRtu) {
+        if (isDMSupportProfile()) {
             return getPointByDomain(heatingPreconditioningRate);
         } else {
             return TunerUtil.readTunerValByQuery("heating and precon and rate", L.ccu().systemProfile.getSystemEquipRef());
@@ -1276,5 +1269,13 @@ public class ScheduleManager {
     }
     private static double getPointByDomain(String domainName) {
         return  TunerUtil.readTunerValByQuery("domainName == \""+domainName+"\"", L.ccu().systemProfile.getSystemEquipRef());
+    }
+
+    private static boolean isDMSupportProfile() {
+        return L.ccu().systemProfile instanceof DabExternalAhu
+                || L.ccu().systemProfile instanceof VavExternalAhu
+                || (L.ccu().systemProfile instanceof VavStagedRtu && !(L.ccu().systemProfile instanceof VavAdvancedHybridRtu))
+                || L.ccu().systemProfile instanceof VavStagedRtuWithVfd
+                || L.ccu().systemProfile instanceof VavFullyModulatingRtu;
     }
 }

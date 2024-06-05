@@ -70,9 +70,9 @@ public class VavStagedRtu extends VavSystemProfile
     public int coolingStages = 0;
     public int fanStages = 0;
     
-    private int stageUpTimerCounter = 0;
-    private int stageDownTimerCounter = 0;
-    private boolean changeOverStageDownTimerOverrideActive = false;
+    public int stageUpTimerCounter = 0;
+    public int stageDownTimerCounter = 0;
+    public boolean changeOverStageDownTimerOverrideActive = false;
     SystemController.State currentConditioning = OFF;
     
     int[] stageStatus = new int[17];

@@ -165,6 +165,7 @@ object VavStagedVfdRtuCutOverMapping {
         "temperatureIntegralTime" to "vavTemperatureIntegralTime",
         "integralKFactor" to "vavIntegralKFactor",
         "temperatureProportionalRange" to "vavTemperatureProportionalRange",
+        "modeChangeoverHysteresis" to "vavModeChangeOverHysteresis",
 
         "analog2OutputEnabled" to "analog2OutputEnable",
         "analog2AtCoolStage1" to "analog2CoolStage1",

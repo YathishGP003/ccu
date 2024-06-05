@@ -175,6 +175,11 @@ public class MigrationUtil {
             PreferenceUtil.setHyperStatThermistorConfigMigration();
         }
 
+        if (!PreferenceUtil.getHSMonitoringGenericFaultEnumMigration()) {
+            migrateHyperStatMonitoringGenericFaultEnum(ccuHsApi);
+            PreferenceUtil.setHSMonitoringGenericFaultEnumMigration();
+        }
+
         migrateAirFlowTunerPoints(ccuHsApi);
         migrateZoneScheduleTypeIfMissed(ccuHsApi);
         if(SchedulableMigrationKt.validateMigration()) {
@@ -1845,6 +1850,17 @@ public class MigrationUtil {
             }
         });
 
+    }
+
+    private static void migrateHyperStatMonitoringGenericFaultEnum(CCUHsApi hayStack) {
+        ArrayList<HashMap<Object, Object>> hsEquips = hayStack.readAllEntities("equip and hyperstat and monitoring");
+        hsEquips.forEach(equip -> {
+            ArrayList<HashMap<Object, Object>> faultPointsMap = hayStack.readAllEntities("point and generic and (normallyOpen or normallyClosed) and equipRef == \"" + equip.get("id") + "\"");
+            faultPointsMap.forEach(faultPointMap -> {
+                Point faultPoint = new Point.Builder().setHashMap(faultPointMap).setEnums("Normal,Fault").build();
+                hayStack.updatePoint(faultPoint, faultPointMap.get("id").toString());
+            });
+        });
     }
 
     private static void analogOutConfigPointsMigration(Equip equip, CCUHsApi ccuHsApi) {

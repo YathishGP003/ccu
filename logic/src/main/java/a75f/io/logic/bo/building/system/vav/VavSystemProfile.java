@@ -17,6 +17,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
+import a75f.io.domain.api.Domain;
 import a75f.io.domain.api.DomainName;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.BacnetIdKt;
@@ -297,9 +298,16 @@ public abstract class VavSystemProfile extends SystemProfile
             CcuLog.d(L.TAG_CCU_SYSTEM, " TRSystem not initialized , Skip trSPUpdate");
             return;
         }
-        CCUHsApi.getInstance().writeHisValByQuery("point and system and tr and target and his and sat", trSystem.satTRProcessor.getSetPoint());
-        CCUHsApi.getInstance().writeHisValByQuery("point and system and tr and target and his and co2", trSystem.co2TRProcessor.getSetPoint());
-        CCUHsApi.getInstance().writeHisValByQuery("point and system and tr and target and his and staticPressure", trSystem.spTRProcessor.getSetPoint());
+
+        if(CCUHsApi.getInstance().readEntity("system and equip and not modbus").containsKey("domainName")){
+            Domain.writeHisValByDomain(DomainName.satTRSp, trSystem.satTRProcessor.getSetPoint());
+            Domain.writeHisValByDomain(DomainName.co2TRSp, trSystem.co2TRProcessor.getSetPoint());
+            Domain.writeHisValByDomain(DomainName.staticPressureTRSp, trSystem.spTRProcessor.getSetPoint());
+        }else{
+            CCUHsApi.getInstance().writeHisValByQuery("point and system and tr and target and his and sat", trSystem.satTRProcessor.getSetPoint());
+            CCUHsApi.getInstance().writeHisValByQuery("point and system and tr and target and his and co2", trSystem.co2TRProcessor.getSetPoint());
+            CCUHsApi.getInstance().writeHisValByQuery("point and system and tr and target and his and staticPressure", trSystem.spTRProcessor.getSetPoint());
+        }
     }
     
     @Override
@@ -379,34 +387,34 @@ public abstract class VavSystemProfile extends SystemProfile
         - previous values of R from zones would be lost
         - the T&R algo would run once with R=0 before the zone requests are consumed again next minute
          */
-        trSystem.satTRResponse.setSP0(((VavTRSystem)trSystem).getSatTRTunerVal("spinit"));
-        trSystem.satTRResponse.setSPmin(((VavTRSystem)trSystem).getSatTRTunerVal("spmin"));
-        trSystem.satTRResponse.setSPmax(((VavTRSystem)trSystem).getSatTRTunerVal("spmax"));
-        trSystem.satTRResponse.setSPtrim(((VavTRSystem)trSystem).getSatTRTunerVal("sptrim"));
-        trSystem.satTRResponse.setSPres(((VavTRSystem)trSystem).getSatTRTunerVal("spres"));
-        trSystem.satTRResponse.setSPresmax(((VavTRSystem)trSystem).getSatTRTunerVal("spresmax"));
-        trSystem.satTRResponse.setI((int)((VavTRSystem)trSystem).getSatTRTunerVal("ignoreRequest"));
-        trSystem.satTRResponse.setT((int)((VavTRSystem)trSystem).getSatTRTunerVal("timeInterval"));
-        trSystem.satTRResponse.setTd((int)((VavTRSystem)trSystem).getSatTRTunerVal("timeDelay"));
+        trSystem.satTRResponse.setSP0(((VavTRSystem)trSystem).getSatTRTunerVal("spinit", "sat"));
+        trSystem.satTRResponse.setSPmin(((VavTRSystem)trSystem).getSatTRTunerVal("spmin", "sat"));
+        trSystem.satTRResponse.setSPmax(((VavTRSystem)trSystem).getSatTRTunerVal("spmax", "sat"));
+        trSystem.satTRResponse.setSPtrim(((VavTRSystem)trSystem).getSatTRTunerVal("sptrim", "sat"));
+        trSystem.satTRResponse.setSPres(((VavTRSystem)trSystem).getSatTRTunerVal("spres", "sat"));
+        trSystem.satTRResponse.setSPresmax(((VavTRSystem)trSystem).getSatTRTunerVal("spresmax", "sat"));
+        trSystem.satTRResponse.setI((int)((VavTRSystem)trSystem).getSatTRTunerVal("ignoreRequest", "sat"));
+        trSystem.satTRResponse.setT((int)((VavTRSystem)trSystem).getSatTRTunerVal("timeInterval", "sat"));
+        trSystem.satTRResponse.setTd((int)((VavTRSystem)trSystem).getSatTRTunerVal("timeDelay", "sat"));
 
-        trSystem.co2TRResponse.setSP0(((VavTRSystem)trSystem).getCO2TRTunerVal("spinit"));
-        trSystem.co2TRResponse.setSPmin(((VavTRSystem)trSystem).getCO2TRTunerVal("spmin"));
-        trSystem.co2TRResponse.setSPmax(((VavTRSystem)trSystem).getCO2TRTunerVal("spmax"));
-        trSystem.co2TRResponse.setSPtrim(((VavTRSystem)trSystem).getCO2TRTunerVal("sptrim"));
-        trSystem.co2TRResponse.setSPres(((VavTRSystem)trSystem).getCO2TRTunerVal("spres"));
-        trSystem.co2TRResponse.setSPresmax(((VavTRSystem)trSystem).getCO2TRTunerVal("spresmax"));
-        trSystem.co2TRResponse.setI((int)((VavTRSystem)trSystem).getCO2TRTunerVal("ignoreRequest"));
-        trSystem.co2TRResponse.setT((int)((VavTRSystem)trSystem).getCO2TRTunerVal("timeInterval"));
-        trSystem.co2TRResponse.setTd((int)((VavTRSystem)trSystem).getCO2TRTunerVal("timeDelay"));
+        trSystem.co2TRResponse.setSP0(((VavTRSystem)trSystem).getCO2TRTunerVal("spinit", "co2"));
+        trSystem.co2TRResponse.setSPmin(((VavTRSystem)trSystem).getCO2TRTunerVal("spmin", "co2"));
+        trSystem.co2TRResponse.setSPmax(((VavTRSystem)trSystem).getCO2TRTunerVal("spmax", "co2"));
+        trSystem.co2TRResponse.setSPtrim(((VavTRSystem)trSystem).getCO2TRTunerVal("sptrim", "co2"));
+        trSystem.co2TRResponse.setSPres(((VavTRSystem)trSystem).getCO2TRTunerVal("spres", "co2"));
+        trSystem.co2TRResponse.setSPresmax(((VavTRSystem)trSystem).getCO2TRTunerVal("spresmax", "co2"));
+        trSystem.co2TRResponse.setI((int)((VavTRSystem)trSystem).getCO2TRTunerVal("ignoreRequest", "co2"));
+        trSystem.co2TRResponse.setT((int)((VavTRSystem)trSystem).getCO2TRTunerVal("timeInterval", "co2"));
+        trSystem.co2TRResponse.setTd((int)((VavTRSystem)trSystem).getCO2TRTunerVal("timeDelay", "co2"));
 
-        trSystem.spTRResponse.setSP0(((VavTRSystem)trSystem).getSpTRTunerVal("spinit"));
-        trSystem.spTRResponse.setSPmin(((VavTRSystem)trSystem).getSpTRTunerVal("spmin"));
-        trSystem.spTRResponse.setSPmax(((VavTRSystem)trSystem).getSpTRTunerVal("spmax"));
-        trSystem.spTRResponse.setSPtrim(((VavTRSystem)trSystem).getSpTRTunerVal("sptrim"));
-        trSystem.spTRResponse.setSPres(((VavTRSystem)trSystem).getSpTRTunerVal("spres"));
-        trSystem.spTRResponse.setSPresmax(((VavTRSystem)trSystem).getSpTRTunerVal("spresmax"));
-        trSystem.spTRResponse.setI((int)((VavTRSystem)trSystem).getSpTRTunerVal("ignoreRequest"));
-        trSystem.spTRResponse.setT((int)((VavTRSystem)trSystem).getSpTRTunerVal("timeInterval"));
-        trSystem.spTRResponse.setTd((int)((VavTRSystem)trSystem).getSpTRTunerVal("timeDelay"));
+        trSystem.spTRResponse.setSP0(((VavTRSystem)trSystem).getSpTRTunerVal("spinit", "staticPressure"));
+        trSystem.spTRResponse.setSPmin(((VavTRSystem)trSystem).getSpTRTunerVal("spmin", "staticPressure"));
+        trSystem.spTRResponse.setSPmax(((VavTRSystem)trSystem).getSpTRTunerVal("spmax", "staticPressure"));
+        trSystem.spTRResponse.setSPtrim(((VavTRSystem)trSystem).getSpTRTunerVal("sptrim", "staticPressure"));
+        trSystem.spTRResponse.setSPres(((VavTRSystem)trSystem).getSpTRTunerVal("spres", "staticPressure"));
+        trSystem.spTRResponse.setSPresmax(((VavTRSystem)trSystem).getSpTRTunerVal("spresmax", "staticPressure"));
+        trSystem.spTRResponse.setI((int)((VavTRSystem)trSystem).getSpTRTunerVal("ignoreRequest", "staticPressure"));
+        trSystem.spTRResponse.setT((int)((VavTRSystem)trSystem).getSpTRTunerVal("timeInterval", "staticPressure"));
+        trSystem.spTRResponse.setTd((int)((VavTRSystem)trSystem).getSpTRTunerVal("timeDelay", "staticPressure"));
     }
 }

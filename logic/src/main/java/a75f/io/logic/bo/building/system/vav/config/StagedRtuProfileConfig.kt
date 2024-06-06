@@ -49,8 +49,13 @@ open class StagedRtuProfileConfig(val model : SeventyFiveFProfileDirective)
         relay5Association = getDefaultAssociationConfig(DomainName.relay5OutputAssociation, model)
         relay6Association = getDefaultAssociationConfig(DomainName.relay6OutputAssociation, model)
         relay7Association = getDefaultAssociationConfig(DomainName.relay7OutputAssociation, model)
-        unusedPorts = ControlMote.getCMUnusedPorts(Domain.hayStack)
-
+        try {
+            unusedPorts = ControlMote.getCMUnusedPorts(Domain.hayStack)
+        } catch (e : NullPointerException) {
+            unusedPorts = hashMapOf()
+            CcuLog.e(Domain.LOG_TAG,"Failed to fetch CM Unused ports")
+            e.printStackTrace()
+        }
 
 
         isDefault = true

@@ -261,6 +261,10 @@ public class AppInstaller
         timer.scheduleAtFixedRate(task, 0, 1000);
     }
 
+
+    public void downloadHomeInstall(String sFileName){
+        setHomeAppDownloadId(downloadFile(DOWNLOAD_BASE_URL+sFileName,HOME_APK_FILE_NAME, null, null));
+    }
     public void downloadCCUInstall(String sFileName, Fragment currentFragment, FragmentActivity activity) {
         setCCUAppDownloadId(downloadFile(DOWNLOAD_BASE_URL+sFileName, CCU_APK_FILE_NAME, currentFragment, activity));
     }

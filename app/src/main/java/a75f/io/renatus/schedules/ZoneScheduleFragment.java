@@ -323,6 +323,10 @@ public class ZoneScheduleFragment extends DialogFragment implements ZoneSchedule
             schedule = CCUHsApi.getInstance().getScheduleById(mScheduleId);
             if(schedule == null){
                 schedule = CCUHsApi.getInstance().getDefaultNamedSchedule();
+                if(schedule == null){
+                    Toast.makeText(getContext(), "Error loading schedule", Toast.LENGTH_SHORT).show();
+                    return;
+                }
             }
             updateUI();
         } else {

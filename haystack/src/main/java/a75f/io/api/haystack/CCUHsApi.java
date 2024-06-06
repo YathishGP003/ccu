@@ -3536,10 +3536,16 @@ public class CCUHsApi
     }
 
     public Schedule getDefaultNamedSchedule() {
-        HDict scheduleHGrid = tagsDb.read("default and named and schedule");
-        if(scheduleHGrid != null) {
-            return new Schedule.Builder().setHDict(scheduleHGrid).build();
+        try {
+            HDict scheduleHGrid = tagsDb.read("default and named and schedule");
+            if(scheduleHGrid != null) {
+                return new Schedule.Builder().setHDict(scheduleHGrid).build();
+            }
+        }catch (UnknownRecException e){
+            CcuLog.e(TAG,"Default Named Schedule is empty");
+            e.printStackTrace();
         }
+
         return null;
     }
 

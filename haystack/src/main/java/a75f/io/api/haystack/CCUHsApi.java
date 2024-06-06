@@ -2187,7 +2187,9 @@ public class CCUHsApi
     private void updateCcuRefForDiagPointWhileMigration(Equip equip) {
         ArrayList<HashMap<Object, Object>> equipPoints = readAllEntities("point and equipRef == \"" + equip.getId()+"\"");
         for(HashMap<Object, Object> equipPoint : equipPoints){
-            Point point = new Point.Builder().setHashMap(equipPoint).build();
+            if(equipPoint.get("id") == null) continue;
+            HDict pointDict = CCUHsApi.getInstance().readHDictById(equipPoint.get("id").toString());
+            Point point = new Point.Builder().setHDict(pointDict).build();
             if( point.getCcuRef() == null || point.getCcuRef().isEmpty()) {
                 updatePoint(point, point.getId());
             }

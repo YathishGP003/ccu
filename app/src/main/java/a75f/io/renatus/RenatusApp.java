@@ -8,31 +8,19 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
-
-import a75f.io.alerts.AlertManager;
-import a75f.io.alerts.AlertsDataStore;
-import a75f.io.api.haystack.CCUHsApi;
-import a75f.io.logger.CcuLog;
-import a75f.io.logic.Globals;
-import a75f.io.renatus.util.Prefs;
-import dagger.hilt.android.HiltAndroidApp;
-
-import androidx.multidex.MultiDex;
-import androidx.appcompat.app.AppCompatDelegate;
 import android.util.Log;
 
+import androidx.appcompat.app.AppCompatDelegate;
+import androidx.multidex.MultiDex;
 
-import com.instabug.crash.CrashReporting;
-import com.instabug.library.Feature;
-import com.instabug.library.Instabug;
-import com.instabug.library.invocation.InstabugInvocationEvent;
-
-import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
+
+import a75f.io.alerts.AlertManager;
+import a75f.io.api.haystack.CCUHsApi;
+import dagger.hilt.android.HiltAndroidApp;
 /**
  * Created by ryanmattison isOn 7/24/17.
  */
@@ -51,13 +39,13 @@ public class RenatusApp extends UtilityApplication
 		mContext = getApplicationContext();
 		AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
 
-		initInstabug();
+		//initInstabug();
 	}
 
 	private void initInstabug() {
-		new Instabug.Builder(this, "a92457eeb44e965eabf019b4373e8216")
+		/*new Instabug.Builder(this, "a92457eeb44e965eabf019b4373e8216")
 				.setInvocationEvents(InstabugInvocationEvent.NONE)
-				.build();
+				.build(Feature.State.DISABLED);
 
 		boolean anrReporting = Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting"
 				, Context.MODE_PRIVATE).getBoolean("anr_reporting_enabled", false);
@@ -67,7 +55,7 @@ public class RenatusApp extends UtilityApplication
 		} else {
 			CrashReporting.setAnrState(Feature.State.DISABLED);
 			CrashReporting.setState(Feature.State.DISABLED);
-		}
+		}*/
 	}
 	public static Context getAppContext() {
 		return mContext;

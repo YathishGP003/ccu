@@ -564,7 +564,7 @@ public class NamedSchedule extends DialogFragment {
             schedule = CCUHsApi.getInstance().getScheduleById(mScheduleId);
         } else {
             schedule = CCUHsApi.getInstance().getSystemSchedule(false).get(0);
-            CcuLog.d("CCU_UI", " Loaded System Schedule " + schedule.toString());
+            CcuLog.d("CCU_UI", " Loaded System Schedule - NamedSchedule " + schedule.toString());
         }
         CcuLog.d(TAG, "PARAM_SCHEDULE_ID " + mScheduleId);
         String namedScheduleDis = getArguments().getString(PARAM_SCHED_NAME);

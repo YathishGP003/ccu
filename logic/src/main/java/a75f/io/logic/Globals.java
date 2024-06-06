@@ -244,9 +244,9 @@ public class Globals {
         CcuLog.i(L.TAG_CCU_INIT, "Initialize Haystack");
         renatusServicesUrls = urls;
         CCUHsApi hsApi = new CCUHsApi(this.mApplicationContext, urls.getHaystackUrl(), urls.getCaretakerUrl(), urls.getGatewayUrl());
-        CcuLog.i(L.TAG_CCU_INIT, "Initialize ModelCache");
-        ModelCache.INSTANCE.init(hsApi, this.mApplicationContext);
-        CcuLog.i(L.TAG_CCU_INIT, "Initialized ModelCache");
+        //CcuLog.i(L.TAG_CCU_INIT, "Initialize ModelCache");
+        //ModelCache.INSTANCE.init(hsApi, this.mApplicationContext);
+        //CcuLog.i(L.TAG_CCU_INIT, "Initialized ModelCache");
     }
 
     public void startTimerTask() {

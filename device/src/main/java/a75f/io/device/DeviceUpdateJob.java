@@ -63,7 +63,7 @@ public class DeviceUpdateJob extends BaseJob implements WatchdogMonitor
                         .getInt("control_loop_frequency",60), 45, TimeUnit.SECONDS);
 
         //TODO - TEMP code for performance testing. Remove this code after testing
-        //injectTestInputMessage();
+        injectTestInputMessage();
     }
     
     public void doJob()

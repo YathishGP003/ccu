@@ -1,11 +1,10 @@
 package a75f.io.renatus;
 
+import static a75f.io.device.bacnet.BacnetConfigConstants.IS_BACNET_INITIALIZED;
 import static a75f.io.logic.util.PreferenceUtil.getDataSyncProcessing;
 import static a75f.io.logic.util.PreferenceUtil.getSyncStartTime;
-import static a75f.io.device.bacnet.BacnetConfigConstants.IS_BACNET_INITIALIZED;
 import static a75f.io.usbserial.UsbServiceActions.ACTION_USB_PRIV_APP_PERMISSION_DENIED;
 
-import android.annotation.SuppressLint;
 import android.app.Application;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -21,14 +20,11 @@ import android.net.DhcpInfo;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
-
 import android.os.IBinder;
-
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatDelegate;
 
-import com.instabug.library.Instabug;
 import com.raygun.raygun4android.RaygunClient;
 
 import org.greenrobot.eventbus.EventBus;
@@ -49,7 +45,6 @@ import javax.inject.Inject;
 
 import a75f.io.alerts.AlertManager;
 import a75f.io.api.haystack.CCUHsApi;
-import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.util.DatabaseAction;
 import a75f.io.api.haystack.util.DatabaseEvent;
 import a75f.io.device.DeviceUpdateJob;
@@ -61,8 +56,8 @@ import a75f.io.logic.L;
 import a75f.io.logic.cloud.RenatusServicesEnvironment;
 import a75f.io.logic.watchdog.Watchdog;
 import a75f.io.messaging.MessageHandlerSubscriber;
-import a75f.io.messaging.handler.DataSyncHandler;
 import a75f.io.messaging.client.MessagingClient;
+import a75f.io.messaging.handler.DataSyncHandler;
 import a75f.io.messaging.service.MessageCleanUpWork;
 import a75f.io.messaging.service.MessageRetryHandlerWork;
 import a75f.io.messaging.service.MessagingAckJob;
@@ -246,7 +241,7 @@ public abstract class UtilityApplication extends Application {
         //Remove this Equip Manager once all modbus models are migrated from Domain modeler
         EquipsManager.getInstance(this).setApplicationContext(this);
 
-        CCUHsApi hayStack = CCUHsApi.getInstance();
+        /*CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap<Object, Object> site = hayStack.readEntity("site");
         if (!site.isEmpty()) {
             Instabug.setUserAttribute("Site",site.get(Tags.DIS).toString());
@@ -254,7 +249,7 @@ public abstract class UtilityApplication extends Application {
         HashMap<Object, Object> ccu = hayStack.readEntity("device and ccu");
         if (!ccu.isEmpty()) {
             Instabug.setUserAttribute("CCU",ccu.get(Tags.ID).toString()+":"+ccu.get(Tags.DIS));
-        }
+        }*/
 
         Globals.getInstance().startTimerTask();
         isDataSyncRestartRequired();

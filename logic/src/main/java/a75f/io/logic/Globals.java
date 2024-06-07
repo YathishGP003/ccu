@@ -444,6 +444,9 @@ public class Globals {
             return;
         }
         HashMap<Object, Object> equip = CCUHsApi.getInstance().readEntity("equip and system and not modbus and not connectModule");
+        if (equip.containsKey("domainName")) {
+            updatingDomainEquip(CCUHsApi.getInstance());
+        }
         boolean isDefaultSystem = false;
         if (equip != null && equip.size() > 0) {
             //BuildingTuners.getInstance().addBuildingTunerEquip();
@@ -689,6 +692,15 @@ public class Globals {
             short address = Short.parseShort(m.get("group").toString());
             mbProfile.addMbEquip(address, ProfileType.MODBUS_EMR);
             L.ccu().zoneProfiles.add(mbProfile);
+        }
+    }
+
+    private void updatingDomainEquip(CCUHsApi ccuHsApi) {
+        if (Domain.systemEquip == null) {
+            DomainManager.INSTANCE.addSystemDomainEquip(ccuHsApi);
+        }
+        if (Domain.cmBoardDevice == null) {
+            DomainManager.INSTANCE.addCmBoardDevice(ccuHsApi);
         }
     }
 

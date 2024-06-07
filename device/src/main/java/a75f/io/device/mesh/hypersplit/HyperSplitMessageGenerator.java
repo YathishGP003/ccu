@@ -17,6 +17,8 @@ import a75f.io.device.HyperSplit;
 import a75f.io.device.mesh.DeviceHSUtil;
 import a75f.io.device.mesh.DeviceUtil;
 import a75f.io.device.util.DeviceConfigurationUtil;
+import a75f.io.domain.api.Domain;
+import a75f.io.domain.api.DomainName;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
@@ -70,10 +72,7 @@ public class HyperSplitMessageGenerator {
      */
     public static HyperSplit.HyperSplitSettingsMessage_t getSettingsMessage(String zone, int address,
                                                                           String equipRef, TemperatureMode mode) {
-        boolean singleMode = false;
-        if(mode == TemperatureMode.HEATING || mode == TemperatureMode.COOLING){
-            singleMode = true;
-        }
+        int temperatureMode = (int) Domain.readDefaultValByDomain(DomainName.temperatureMode);
 
         int minCoolingUserTemp = CCUHsApi.getInstance().readPointPriorityValByQuery(HyperSplitSettingsUtil.Companion.getCoolingUserLimitByQuery(mode, "min", equipRef)).intValue();
         int maxCoolingUserTemp = CCUHsApi.getInstance().readPointPriorityValByQuery(HyperSplitSettingsUtil.Companion.getCoolingUserLimitByQuery(mode, "max", equipRef)).intValue();
@@ -117,7 +116,7 @@ public class HyperSplitMessageGenerator {
                 .setCo2AlertTarget((int)readCo2ThresholdValue(equipRef))
                 .setPm25AlertTarget((int)readPm2p5TargetValue(equipRef))
                 .setVocAlertTarget((int)readVocThresholdValue(equipRef))
-                .setTemperatureMode(singleMode ? HyperSplit.HyperSplitTemperatureMode_e.HYPERSPLIT_TEMP_MODE_SINGLE
+                .setTemperatureMode(temperatureMode == 0 ? HyperSplit.HyperSplitTemperatureMode_e.HYPERSPLIT_TEMP_MODE_DUAL_FIXED_DB
                         : HyperSplit.HyperSplitTemperatureMode_e.HYPERSPLIT_TEMP_MODE_DUAL_VARIABLE_DB)
                 .setHyperstatLinearFanSpeeds(HyperSplitSettingsUtil.Companion.getLinearFanSpeedDetails(equipRef))
                 .setHyperstatStagedFanSpeeds(HyperSplitSettingsUtil.Companion.getStagedFanSpeedDetails(equipRef));

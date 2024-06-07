@@ -1018,6 +1018,7 @@ public class CreateNewSite extends Fragment {
 
     private void goTonext() {
         prefs.setBoolean("CCU_SETUP", false);
+        PreferenceUtil.setTempModeMigrationNotRequired();
         L.saveCCUState();
         ((FreshRegistration) getActivity()).selectItem(21);
     }

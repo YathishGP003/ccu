@@ -114,6 +114,7 @@ public class PreferenceUtil {
     public static final String HS_TH_CONFIG_MIGRATION = "hsThConfigMigration";
 
     public static final String LOCALLY_SYNC_SCHEDULE = "locallySyncedSchedules";
+    public static final String TEMP_MODE_MIGRATION = "tempModeMigration";
 
     public static void setContext(Context c) {
         context= c;
@@ -933,4 +934,10 @@ public class PreferenceUtil {
         setBooleanPreference(HS_TH_CONFIG_MIGRATION, true);
     }
 
+    public static void setTempModeMigrationNotRequired() {
+        setBooleanPreference(TEMP_MODE_MIGRATION, true);
+    }
+    public static boolean isTempModeMigrationRequired() {
+        return getBooleanPreference(TEMP_MODE_MIGRATION);
+    }
 }

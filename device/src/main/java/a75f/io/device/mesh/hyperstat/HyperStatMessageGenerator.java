@@ -15,6 +15,8 @@ import a75f.io.device.HyperStat;
 import a75f.io.device.mesh.DeviceHSUtil;
 import a75f.io.device.mesh.DeviceUtil;
 import a75f.io.device.util.DeviceConfigurationUtil;
+import a75f.io.domain.api.Domain;
+import a75f.io.domain.api.DomainName;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
@@ -83,10 +85,7 @@ public class HyperStatMessageGenerator {
      */
     public static HyperStatSettingsMessage_t getSettingsMessage(String zone, int address,
                                                                 String equipRef, TemperatureMode mode) {
-        boolean singleMode = false;
-        if(mode == TemperatureMode.HEATING || mode == TemperatureMode.COOLING){
-            singleMode = true;
-        }
+        int temperatureMode = (int) Domain.readDefaultValByDomain(DomainName.temperatureMode);
 
         int minCoolingUserTemp = CCUHsApi.getInstance().readPointPriorityValByQuery(HyperStatSettingsUtil.Companion.getCoolingUserLimitByQuery(mode, "min", equipRef)).intValue();
         int maxCoolingUserTemp = CCUHsApi.getInstance().readPointPriorityValByQuery(HyperStatSettingsUtil.Companion.getCoolingUserLimitByQuery(mode, "max", equipRef)).intValue();
@@ -131,8 +130,8 @@ public class HyperStatMessageGenerator {
             .setVocAlertTarget((int)readVocThresholdValue(equipRef))
             .setHyperstatLinearFanSpeeds(HyperStatSettingsUtil.Companion.getLinearFanSpeedDetails(equipRef))
             .setHyperstatStagedFanSpeeds(HyperStatSettingsUtil.Companion.getStagedFanSpeedDetails(equipRef))
-            .setTemperatureMode(singleMode ? HyperStat.HyperStatTemperatureMode_e.HYPERSTAT_TEMP_MODE_SINGLE
-                    : HyperStat.HyperStatTemperatureMode_e.HYPERSTAT_TEMP_MODE_DUAL_VARIABLE_DB)
+                .setTemperatureMode(temperatureMode == 0 ? HyperStat.HyperStatTemperatureMode_e.HYPERSTAT_TEMP_MODE_DUAL_FIXED_DB
+                        : HyperStat.HyperStatTemperatureMode_e.HYPERSTAT_TEMP_MODE_DUAL_VARIABLE_DB)
             .build();
 
 

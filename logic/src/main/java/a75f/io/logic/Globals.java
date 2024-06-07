@@ -365,6 +365,8 @@ public class Globals {
                     Watchdog.getInstance().addMonitor(mScheduleProcessJob);
                     Watchdog.getInstance().start();
                     modelMigration(migrationHandler);
+                    /*temperatureMode migration should be handled after model migration*/
+                    migrationHandler.temperatureModeMigration();
                 } catch (Exception e) {
                     //Catch ignoring any exception here to avoid app from not loading in case of an init failure.
                     //Init would retried during next app restart.

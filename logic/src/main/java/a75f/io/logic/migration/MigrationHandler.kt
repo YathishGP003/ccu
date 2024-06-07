@@ -8,6 +8,8 @@ import a75f.io.api.haystack.Site
 import a75f.io.api.haystack.Tags
 import a75f.io.api.haystack.sync.HttpUtil
 import a75f.io.domain.api.Domain
+import a75f.io.domain.api.Domain.writeDefaultValByDomain
+import a75f.io.domain.api.DomainName
 import a75f.io.domain.cutover.NodeDeviceCutOverMapping
 import a75f.io.domain.cutover.VavFullyModulatingRtuCutOverMapping
 import a75f.io.domain.cutover.VavStagedRtuCutOverMapping
@@ -534,6 +536,14 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             }
         } catch (e: PackageManager.NameNotFoundException) {
             e.printStackTrace()
+        }
+    }
+
+     fun temperatureModeMigration() {
+        if (!PreferenceUtil.isTempModeMigrationRequired()) {
+            CcuLog.i(L.TAG_CCU_MIGRATION_UTIL,"Temperature mode migration Initiated")
+            writeDefaultValByDomain(DomainName.temperatureMode, 1.0)
+            PreferenceUtil.setTempModeMigrationNotRequired()
         }
     }
 

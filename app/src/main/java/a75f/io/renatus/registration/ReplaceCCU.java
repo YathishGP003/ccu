@@ -596,6 +596,7 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
         prefs.setBoolean("CCU_SETUP", true);
         prefs.setBoolean("PROFILE_SETUP", true);
         prefs.setBoolean("isCcuRegistered", true);
+        PreferenceUtil.setTempModeMigrationNotRequired();
         prefs.setString(BacnetConfigConstants.BACNET_CONFIGURATION, bacnet_pref.getString(BacnetConfigConstants.BACNET_CONFIGURATION,null));
         prefs.setBoolean(BacnetConfigConstants.IS_BACNET_INITIALIZED, bacnet_pref.getBoolean(BacnetConfigConstants.IS_BACNET_INITIALIZED,false));
         prefs.setBoolean(BacnetConfigConstants.IS_BACNET_CONFIG_FILE_CREATED, bacnet_pref.getBoolean(BacnetConfigConstants.IS_BACNET_CONFIG_FILE_CREATED,false));

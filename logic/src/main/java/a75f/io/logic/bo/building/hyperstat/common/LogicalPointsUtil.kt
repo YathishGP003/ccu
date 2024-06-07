@@ -1045,11 +1045,11 @@ class LogicalPointsUtil {
         }
         private fun readGenericFaultNC(equipRef: String): HashMap<Any, Any> {
             return CCUHsApi.getInstance().readEntity(
-                "generic and sensor and alarm and normallyClosed and zone and equipRef == \"$equipRef\"")
+                "generic and sensor and normallyClosed and zone and equipRef == \"$equipRef\"")
         }
         private fun readGenericFaultNO(equipRef: String): HashMap<Any, Any> {
             return CCUHsApi.getInstance().readEntity(
-                "generic and sensor and alarm and normallyOpen and zone and equipRef == \"$equipRef\"")
+                "generic and sensor and normallyOpen and zone and equipRef == \"$equipRef\"")
         }
 
         private fun readKeycardSensor(equipRef: String, keycardType: KeyCardSensorType): HashMap<Any, Any> {

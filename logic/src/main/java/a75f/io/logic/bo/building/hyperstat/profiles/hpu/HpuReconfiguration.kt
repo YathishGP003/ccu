@@ -3,6 +3,8 @@ package a75f.io.logic.bo.building.hyperstat.profiles.hpu
 import a75f.io.api.haystack.Equip
 import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.AnalogInAssociation
+import a75f.io.logic.bo.building.hyperstat.profiles.cpu.Th1InAssociation
+import a75f.io.logic.bo.building.hyperstat.profiles.cpu.Th2InAssociation
 
 /**
  * Created by Manjunath K on 26-09-2022.
@@ -94,6 +96,11 @@ class HpuReconfiguration {
                     config.analogIn1State.copy(association = AnalogInAssociation.values()[association])
                 Port.ANALOG_IN_TWO -> config.analogIn2State =
                     config.analogIn2State.copy(association = AnalogInAssociation.values()[association])
+                Port.TH1_IN -> config.thermistorIn1State =
+                    config.thermistorIn1State.copy(association = Th1InAssociation.values()[association])
+                Port.TH2_IN -> config.thermistorIn2State =
+                    config.thermistorIn2State.copy(association = Th2InAssociation.values()[association])
+
                 else -> {}
 
             }

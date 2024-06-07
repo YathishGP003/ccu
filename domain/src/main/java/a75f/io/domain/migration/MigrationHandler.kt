@@ -1,23 +1,32 @@
 package a75f.io.domain.migration
 
 import a75f.io.api.haystack.CCUHsApi
+import a75f.io.api.haystack.Point
+import a75f.io.api.haystack.RawPoint
 import a75f.io.domain.api.*
+import a75f.io.domain.api.Domain.getDeviceEntityByDomain
 import a75f.io.domain.api.Domain.getEquipDetailsByDomain
 import a75f.io.domain.api.Domain.getSystemEquipByDomainName
 import a75f.io.domain.config.DefaultProfileConfiguration
 import a75f.io.domain.config.EntityConfiguration
 import a75f.io.domain.config.ExternalAhuConfiguration
 import a75f.io.domain.config.ProfileConfiguration
+import a75f.io.domain.logic.DeviceBuilder
 import a75f.io.domain.logic.DomainManager
+import a75f.io.domain.logic.EntityMapper
 import a75f.io.domain.logic.EquipBuilderConfig
 import a75f.io.domain.logic.PointBuilderConfig
 
 import a75f.io.domain.logic.ProfileEquipBuilder
 import a75f.io.domain.logic.TunerEquipBuilder
+import a75f.io.domain.util.ModelCache
 import a75f.io.logger.CcuLog
 import android.util.Log
 import io.seventyfivef.domainmodeler.client.ModelDirective
 import io.seventyfivef.domainmodeler.client.ModelPointDef
+import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
+import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDevicePointDef
+import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfilePointDef
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFTunerDirective
 import io.seventyfivef.domainmodeler.common.point.AssociationConfiguration
@@ -39,6 +48,12 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
             tunerEquipBuilder.updateEquipAndPoints(newModel,entityData, siteRef)
             tunerEquipBuilder.updateBackendBuildingTuner(siteRef, haystack)
             listener.onMigrationCompletedCompleted(haystack)
+        }else if (newModel is SeventyFiveFDeviceDirective) {
+            CcuLog.printLongMessage(Domain.LOG_TAG,
+                "Device equip model upgrade detected : Run migration to $newModel. modelId: ${newModel.id} "
+            )
+            migrateDeviceModel(entityData, oldModel, newModel, siteRef)
+
         } else {
             val equips: List<Equip> = if (Domain.readEquip(newModel.id)["roomRef"].toString() == "SYSTEM") {
                 val equip = getSystemEquipByDomainName(newModel.domainName)
@@ -49,17 +64,17 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
             CcuLog.printLongMessage(Domain.LOG_TAG,
                 "Equip model upgrade detected : Run migration to $newModel; equip size ${equips.size}"
             )
-            Log.d("CCU_MODEL", "tobeAdded: size:${entityData.tobeAdded.size}")
+            CcuLog.d(Domain.LOG_TAG, "tobeAdded: size:${entityData.tobeAdded.size}")
             entityData.tobeAdded.forEach { item ->
-                Log.d("CCU_DOMAIN", "tobeAdded: item:${item.domainName}")
+                CcuLog.d(Domain.LOG_TAG, "tobeAdded: item:${item.domainName}")
             }
             Log.d("CCU_DOMAIN", "tobeDeleted: size:${entityData.tobeDeleted.size}")
             entityData.tobeDeleted.forEach { item ->
-                Log.d("CCU_MODEL", "tobeDeleted: item:${item.domainName}")
+                CcuLog.d(Domain.LOG_TAG, "tobeDeleted: item:${item.domainName}")
             }
-            Log.d("CCU_DOMAIN", "tobeUpdated: size:${entityData.tobeUpdated.size}")
+            CcuLog.d(Domain.LOG_TAG, "tobeUpdated: size:${entityData.tobeUpdated.size}")
             entityData.tobeUpdated.forEach { item ->
-                Log.d("CCU_MODEL", "tobeUpdated: item:${item.domainName}")
+                CcuLog.d(Domain.LOG_TAG, "tobeUpdated: item:${item.domainName}")
             }
             if(equips.isNotEmpty()) {
                 addEntityData(entityData.tobeAdded, newModel, equips, siteRef)
@@ -67,6 +82,108 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
                 updateEntityData(entityData.tobeUpdated, newModel, equips, siteRef)
                 updateEquipVersion(newModel, equips, siteRef)
             }
+        }
+    }
+
+    fun migrateDeviceModel(
+        entityData: EntityConfiguration,
+        oldModel: ModelDirective,
+        newModel: ModelDirective,
+        siteRef: String
+    ) {
+        val devices: List<Device> =
+            if (Domain.readEquip(newModel.id)["roomRef"].toString() == "SYSTEM") {
+                /*val equip = getSystemEquipByDomainName(newModel.domainName)
+                if (equip != null) listOf(equip) else*/ emptyList()
+            } else {
+                getDeviceEntityByDomain(newModel.domainName)
+            }
+        CcuLog.d(Domain.LOG_TAG, "Device points to be Added: size:${entityData.tobeAdded.size}")
+        entityData.tobeAdded.forEach { item ->
+            CcuLog.d(Domain.LOG_TAG,"tobeAdded: item:${item.domainName}")
+        }
+        CcuLog.d(Domain.LOG_TAG, "Device points to be Deleted: size:${entityData.tobeDeleted.size}")
+        entityData.tobeDeleted.forEach { item ->
+            CcuLog.d(Domain.LOG_TAG, "tobeDeleted: item:${item.domainName}")
+        }
+        CcuLog.d(Domain.LOG_TAG,"Device points to be Updated: size:${entityData.tobeUpdated.size}")
+        entityData.tobeUpdated.forEach { item ->
+            CcuLog.d(Domain.LOG_TAG,"tobeUpdated: item:${item.domainName}")
+        }
+        if (devices.isNotEmpty()) {
+            addDeviceEntityData(entityData.tobeAdded, newModel, devices)
+            removeDeviceEntityData(entityData.tobeDeleted, oldModel, devices, siteRef)
+            updateDeviceEntityData(entityData.tobeUpdated, newModel, devices, siteRef)
+        }
+
+    }
+
+    private fun addDeviceEntityData(
+        tobeAdded: MutableList<EntityConfig>,
+        newModel: ModelDirective,
+        devices: List<Device>
+    ) {
+        if(tobeAdded.isEmpty()) return
+        devices.forEach { device ->
+            CcuLog.d(Domain.LOG_TAG, "device Id: ${device.id}, domainName: ${device.domainName}")
+            val deviceHdict = haystack.readHDict("device and id == "+device.id)
+            val haystackDevice = a75f.io.api.haystack.Device.Builder().setHDict(deviceHdict).build()
+            val equip = haystack.readEntity("equip and id == "+haystackDevice.equipRef.toString())
+            val sourceModel = equip["sourceModel"].toString()
+            val modelDirective = ModelCache.getModelById(sourceModel)
+            val profileConfiguration = getProfileConfig(equip["profile"].toString())
+            updateRef(equip, profileConfiguration)
+            val entityMapper = EntityMapper(modelDirective as SeventyFiveFProfileDirective)
+            val deviceBuilder = DeviceBuilder(haystack, entityMapper)
+            tobeAdded.forEach { diffDomain ->
+                CcuLog.d(Domain.LOG_TAG, "tobe added ${diffDomain.domainName}  to the device $device" )
+               val modelPointDef =
+                    newModel.points.find { it.domainName == diffDomain.domainName }
+                try {
+                    deviceBuilder.createPoint(
+                        modelPointDef as SeventyFiveFDevicePointDef,
+                        profileConfiguration,
+                        haystackDevice,
+                        haystackDevice.displayName
+                    )
+                } catch (e: Exception) {
+                    CcuLog.d(Domain.LOG_TAG,"Exception: $e")
+                    e.printStackTrace()
+                }
+            }
+
+            CcuLog.d(Domain.LOG_TAG,"Update device id ${haystackDevice.id} and device name : ${haystackDevice.displayName}")
+            deviceBuilder.updateDevice(
+                haystackDevice.id.toString(),
+                newModel as SeventyFiveFDeviceDirective,
+                haystackDevice.displayName
+            )
+        }
+    }
+
+
+    private fun updateDeviceEntityData(
+        tobeUpdated: MutableList<EntityConfig>,
+        newModel: ModelDirective,
+        devices: List<Device>,
+        siteRef: String
+    ) {
+        if(tobeUpdated.isEmpty()) return
+        tobeUpdated.forEach { diffDomain ->
+            //yet to implement
+        }
+    }
+
+
+    private fun removeDeviceEntityData(
+        tobeDeleted: MutableList<EntityConfig>,
+        oldModel: ModelDirective,
+        devices: List<Device>,
+        siteRef: String
+    ) {
+        if(tobeDeleted.isEmpty()) return
+        tobeDeleted.forEach { diffDomain ->
+            //yet to implement
         }
     }
 
@@ -195,10 +312,43 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
                         haystack.updatePoint(hayStackPoint, point["id"].toString())
                         DomainManager.addPoint(hayStackPoint)
                     }
+                    try {
+                        updatePointAssociation(modelPointDef, hayStackPoint, point["id"].toString())
+                    } catch (e: Exception) {
+                        /*
+                       * Since we are unsure about the specific exception to catch here, we use the generic Exception class instead.
+                       * we need to revisit this and add a proper exception handling
+                        */
+                        CcuLog.d(Domain.LOG_TAG, "Update point Association is failed : "+point["id"].toString())
+                        e.printStackTrace()
+                    }
                 }
             }
         }
     }
+
+    private fun updatePointAssociation(modelPointDef: ModelPointDef, logicalPoint: Point, logicalPointId: String) {
+        CcuLog.d(Domain.LOG_TAG, "point association update: ${modelPointDef.domainName}")
+        if (modelPointDef is SeventyFiveFProfilePointDef) {
+            if (modelPointDef.devicePointAssociation != null) {
+                val device =  haystack.readEntity("device and equipRef == \"${logicalPoint.equipRef}\"")
+                val physicalPointDict = haystack.readHDict("point and" +
+                        " domainName == \"${modelPointDef.devicePointAssociation?.devicePointDomainName.toString()}\" and deviceRef == \"${device["id"]}\"")
+                val physicalPoint = RawPoint.Builder().setHDict(physicalPointDict).build()
+                physicalPoint.pointRef = logicalPointId
+                DomainManager.addRawPoint(physicalPoint)
+                haystack.updatePoint(physicalPoint, physicalPoint.id)
+                CcuLog.d(
+                    Domain.LOG_TAG,
+                    "point association updated: ${modelPointDef.domainName} " +
+                            "logicalPoint.id: $logicalPointId\" " +
+                            "physicalPoint: ${physicalPoint.id} " +
+                            "device: ${device}"
+                )
+            }
+        }
+    }
+
 
     private fun getProfileConfig(profileType: String) : ProfileConfiguration {
         return when(profileType) {

@@ -1452,7 +1452,7 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
         val occuStatus = ScheduleManager.getInstance().getOccupiedModeCache(zoneId)
         val minutesToOccupancy =
             if (occuStatus != null) occuStatus.millisecondsUntilNextChange.toInt() / 60000 else -1
-        if (minutesToOccupancy != -1 && prePurgeOccupiedTimeOffset >= minutesToOccupancy && minutesToOccupancy >= prePurgeOccupiedTimeOffset - prePurgeRunTime &&
+        if (minutesToOccupancy > 0 && prePurgeOccupiedTimeOffset >= minutesToOccupancy && minutesToOccupancy >= prePurgeOccupiedTimeOffset - prePurgeRunTime &&
             matTemp > oaoDamperMatMin && basicSettings.conditioningMode != StandaloneConditioningMode.OFF && basicSettings.fanMode != StandaloneFanStage.OFF) {
             outsideAirCalculatedMinDamper = hsSplitHaystackUtil.getDamperMinOpenConfigValue().toInt()
             epidemicState = EpidemicState.PREPURGE

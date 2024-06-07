@@ -602,7 +602,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
             (analogControlsEnabled.contains(AdvancedAhuAnalogOutAssociationType.SAT_COOLING) && systemSatCoolingLoopOp > 0))) {
             analogStatus.append("| Cooling ON ")
         }
-        if ((systemEquip.mechanicalCoolingAvailable.readHisVal() > 0) &&
+        if ((systemEquip.mechanicalHeatingAvailable.readHisVal() > 0) &&
             ((analogControlsEnabled.contains(AdvancedAhuAnalogOutAssociationType.LOAD_HEATING) && systemHeatingLoopOp > 0) ||
             ( analogControlsEnabled.contains(AdvancedAhuAnalogOutAssociationType.SAT_HEATING) && systemSatHeatingLoopOp > 0))) {
             analogStatus.append("| Heating ON ")

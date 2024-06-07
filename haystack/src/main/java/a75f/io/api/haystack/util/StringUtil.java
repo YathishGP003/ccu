@@ -1,5 +1,7 @@
 package a75f.io.api.haystack.util;
 
+import java.text.DecimalFormat;
+
 public class StringUtil {
 
     private StringUtil(){
@@ -28,13 +30,14 @@ public class StringUtil {
 
     public static String processMessageForNumberFormattingOnlyOtaUpdate(String message){
         String space = " ";
+        DecimalFormat decimalFormat = new DecimalFormat("#,##0.###");
         String[] messageWords = message.split(space);
         StringBuilder modifiedMessage = new StringBuilder();
         for (String messageWord : messageWords){
             modifiedMessage.append(space);
             if(messageWord.matches("-?\\d+(\\.\\d+)?")){
                 if(messageWord.contains(".")) {
-                    modifiedMessage.append(String.format("%,.3f", Double.parseDouble(messageWord)));
+                    modifiedMessage.append(decimalFormat.format(messageWord));
                 }
                 else {
                     modifiedMessage.append(String.format("%,d", Long.parseLong(messageWord)));

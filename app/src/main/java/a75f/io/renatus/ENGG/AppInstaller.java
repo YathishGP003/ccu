@@ -9,23 +9,16 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.content.res.AssetManager;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Environment;
 import android.preference.PreferenceManager;
 
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
-import androidx.annotation.WorkerThread;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -68,77 +61,6 @@ public class AppInstaller
     }
 
 
-    @WorkerThread
-    /***
-     *  silentInstallMoverApp()
-     *
-     *  If the mover application package doesn't exist install it.
-     *
-     *
-     */
-    public static void silentInstallMoverApp() {
-        final PackageManager packageManager = RenatusApp.getAppContext().getPackageManager();
-        ApplicationInfo applicationInfo = null;
-        try {
-            applicationInfo = packageManager.getApplicationInfo(COM_X75_APPMOVER_PACKAGE_NAME, 0);
-        }
-        catch (NameNotFoundException e) {
-            e.printStackTrace();
-        }
-        if (applicationInfo == null) {
-            CcuLog.e("upgrade", "The app wasn't installed, installing now");
-            final String libs = "";
-            try {
-                String sFilePath = moveAssetToExternalStorage("mover.apk");
-                if (!sFilePath.isEmpty())
-                {
-                    final String[] commands = {libs+"pm install -r -d "+sFilePath};
-                    RenatusApp.executeAsRoot(commands);
-                }
-                try
-                {
-                    final String[] commands = {libs+"rm "+sFilePath};
-                    RenatusApp.executeAsRoot(commands);
-                }
-                catch (Exception e)
-                {
-                    e.printStackTrace();
-                }
-
-            }
-            catch (IOException e)
-            {
-                e.printStackTrace();
-            }
-        }
-    }
-
-
-    private static String moveAssetToExternalStorage(String name) throws IOException {
-        AssetManager assetManager = RenatusApp.getAppContext().getAssets();
-        InputStream in;
-        OutputStream out;
-        String path = Environment.getExternalStorageDirectory().getPath()+"/"+name;
-        File fileToMove = new File(path);
-        if (!fileToMove.exists()) {
-            in = assetManager.open(name);
-            out = new FileOutputStream(fileToMove);
-            byte[] buffer = new byte[1024];
-            int read;
-            while ((read = in.read(buffer)) != -1)
-            {
-                out.write(buffer, 0, read);
-            }
-            in.close();
-            out.flush();
-            out.close();
-            return path;
-        }
-        else {
-            return path;
-        }
-    }
-
 
     public long getCCUAppDownloadId()
     {
@@ -173,7 +95,6 @@ public class AppInstaller
         mCCUAppDownloadId = -1;
         mHomeAppDownloadId = -1;
     }
-
 
     private synchronized long downloadFile(String url, String apkFile, Fragment currentFragment, FragmentActivity activity) {
         DownloadManager manager =
@@ -294,7 +215,7 @@ public class AppInstaller
                     final String[] commands = {"pm install -r -d -g "+file.getAbsolutePath()};
 
                     CcuLog.d(L.TAG_CCU_DOWNLOAD, "Install AppInstall silent invokeInstallerIntent===>>>"+sFilePath+","+file.getAbsolutePath());
-                    RenatusApp.executeAsRoot(commands);
+                    RenatusApp.executeAsRoot(commands, true);
                     OtaStatusDiagPoint.Companion.updateCCUOtaStatus(OtaStatus.OTA_SUCCEEDED);
                     Globals.getInstance().setCcuUpdateTriggerTimeToken(0);
                 }

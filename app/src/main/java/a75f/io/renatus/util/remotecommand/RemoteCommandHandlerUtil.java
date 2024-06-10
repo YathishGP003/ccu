@@ -30,6 +30,8 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import a75f.io.alerts.AlertManager;
 import a75f.io.alerts.AlertsConstantsKt;
@@ -65,6 +67,7 @@ import a75f.io.renatus.UtilityApplication;
 import a75f.io.renatus.util.CCUUtils;
 
 public class RemoteCommandHandlerUtil {
+    private static final String APPOPS_SET_ALLOW = "appops set %s %s allow";
     private static final String BAC_APP_PACKAGE_NAME = "com.example.ccu_bacapp";
     private static final String REMOTE_ACCESS_PACKAGE_NAME = "io.seventyfivef.remoteaccess";
     private static final String HOME_APP_PACKAGE_NAME = "com.xrenatus.home";
@@ -316,11 +319,12 @@ public class RemoteCommandHandlerUtil {
                             AppInstaller.getHandle().install(null, true, false, true);
                         }
                     } else if(downloadId == bacAppDownloadId){
-                        new Thread(() -> installApp(bacAppApkName)).start();
+                        new Thread(() -> installApp(bacAppApkName, null)).start();
                     } else if(downloadId == remoteAccessAppDownloadId){
-                        new Thread(() -> installApp(remoteAccessApkName)).start();
+                        String allowMediaProjectCommand = String.format(APPOPS_SET_ALLOW, REMOTE_ACCESS_PACKAGE_NAME, "PROJECT_MEDIA");
+                        new Thread(() -> installApp(remoteAccessApkName, new String[] {allowMediaProjectCommand})).start();
                     } else if(downloadId == homeAppDownloadId){
-                        new Thread(() -> installApp(homeAppApkName)).start();
+                        new Thread(() -> installApp(homeAppApkName, null)).start();
                     }
                 }
             }
@@ -338,12 +342,16 @@ public class RemoteCommandHandlerUtil {
         }
     }
 
-    private static void installApp(String apkName) {
+    private static void installApp(String apkName, String [] postInstallCommands) {
         File file = new File(RenatusApp.getAppContext().getExternalFilesDir(null), apkName);
-        // TODO: test MEDIA PROJECTION permission here
-        final String[] commands = {"pm install -r -d -g " + file.getAbsolutePath()};
+        final ArrayList<String> commands = new ArrayList<>();
+        commands.add("pm install -r -d -g " + file.getAbsolutePath());
+        if (postInstallCommands != null) {
+            commands.addAll(Arrays.asList(postInstallCommands));
+        }
         CcuLog.d(TAG_CCU_DOWNLOAD, "Install AppInstall silent invokeInstallerIntent===>>>"  + "," + file.getAbsolutePath());
-        RenatusApp.executeAsRoot(commands);
+
+        RenatusApp.executeAsRoot(commands.toArray(new String[commands.size()]), false);
     }
 
     private static void sendSmartStatResetMsg(String address){

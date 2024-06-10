@@ -27,12 +27,10 @@ import com.instabug.library.Feature;
 import com.instabug.library.Instabug;
 import com.instabug.library.invocation.InstabugInvocationEvent;
 
-import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 /**
  * Created by ryanmattison isOn 7/24/17.
  */
@@ -96,14 +94,12 @@ public class RenatusApp extends UtilityApplication
 		}
 		return found;
 	}
-	public static void executeAsRoot(String[] commands) {
+	public static void executeAsRoot(String[] commands, Boolean restartCCUAppAfterInstall) {
 		Thread thread = new Thread(new Runnable() {
 			@Override
 			public void run() {
 				try {
 					// Do the magic
-
-
 					ApplicationInfo appInfo = RenatusApp.getAppContext().getApplicationInfo();
 					Log.d(TAG_CCU_DOWNLOAD, "RenatusAPP ExecuteAsRoot===>"+isRooted()+","+(appInfo.flags & ApplicationInfo.FLAG_SYSTEM));
 					if(isRooted()) {
@@ -129,7 +125,9 @@ public class RenatusApp extends UtilityApplication
 						Log.d(TAG_CCU_DOWNLOAD, output.trim() + " (" + p.exitValue() + ")");
 						ApplicationInfo appInfo2 = RenatusApp.getAppContext().getApplicationInfo();
 						Log.d(TAG_CCU_DOWNLOAD, "RenatusAPP ExecuteAsRoot END===>"+(appInfo2.flags & ApplicationInfo.FLAG_SYSTEM));
-						restartApp();
+						if (restartCCUAppAfterInstall) {
+							restartApp();
+						}
 					}
 				} catch (IOException e) {
 					Log.e(TAG_CCU_DOWNLOAD, e.getMessage());

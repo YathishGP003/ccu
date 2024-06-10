@@ -208,7 +208,7 @@ public class ScheduleManager {
                     CcuLog.d(L.TAG_CCU_SCHEDULER, " processSchedules " + equip.getDisplayName());
                     processScheduleForEquip(equip, activeSystemVacation);
                 }
-            } catch (NullPointerException | IllegalStateException e) {
+            } catch (Exception e) {
                 CcuLog.e(TAG_CCU_SCHEDULER, "Error in processSchedules for equip " + e);
                 e.printStackTrace();
             }
@@ -315,7 +315,7 @@ public class ScheduleManager {
                         "Updated equipOccupancy "+profile.getEquip().getDisplayName()+" : "+occupancyData.occupancy);
 
                 equipOccupancy.put(occupancyHandler.getEquipRef(), occupancyData);
-            }catch (NullPointerException | IllegalStateException e){
+            }catch (Exception e){
                 CcuLog.e(TAG_CCU_SCHEDULER, "Error in updateOccupancy for profile "+e);
                 e.printStackTrace();
             }
@@ -414,7 +414,7 @@ public class ScheduleManager {
                     zoneDataInterface.refreshDesiredTemp(equip.getGroup(), "",
                             "", equip.getRoomRef());
                 }
-            }catch (NullPointerException | IllegalStateException e) {
+            }catch (Exception e) {
                 CcuLog.e(TAG_CCU_SCHEDULER, "Error in updateDesiredTemp for profile " + e);
                 e.printStackTrace();
             }
@@ -578,7 +578,7 @@ public class ScheduleManager {
                 zoneOccupancy.put(room.get("id").toString(), occupancy);
                 hayStack.writeHisValByQuery("occupancy and state and roomRef == \"" + room.get("id") + "\"",
                         (double) occupancy.ordinal());
-            } catch (NullPointerException | IllegalStateException e) {
+            } catch (Exception e) {
                 CcuLog.e(TAG_CCU_SCHEDULER, "Error in updateZoneOccupancy for room " + e);
                 e.printStackTrace();
             }

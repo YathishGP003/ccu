@@ -59,6 +59,7 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.api.haystack.sync.HttpUtil;
+import a75f.io.api.haystack.sync.PointWriteCache;
 import a75f.io.domain.cutover.BuildingEquipCutOverMapping;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
@@ -717,8 +718,8 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                     .add("duration", HNum.make(0, "ms"))
                     .add("val", (HVal) null)
                     .add("reason", reason);
-            HDict[] dictArr = {b.toDict()};
-            HttpUtil.executePost(CCUHsApi.getInstance().pointWriteTarget(), HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
+            PointWriteCache.Companion.getInstance().writePoint(id, b.toDict());
+
             CCUHsApi.getInstance().writeHisValById(id, HSUtil.getPriorityVal(id));
         } else {
             CCUHsApi.getInstance().writeTunerPointForCcuUser(id, level, val, 0, reason);

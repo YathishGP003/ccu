@@ -299,6 +299,10 @@ dependencies {
     implementation 'com.squareup.okhttp3:logging-interceptor:4.7.2'
     implementation(group: 'io.seventyfivef', name: 'haystack-java-lib', version: '1.1.13')
 
+    implementation "androidx.compose.runtime:runtime-livedata:1.0.0"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-compose:1.0.0"
+
+
 }
 
 

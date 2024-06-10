@@ -39,6 +39,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -102,7 +104,8 @@ class VavProfileConfigFragment : BaseDialogFragment() {
     //@Preview
     @Composable
     fun RootView() {
-        if (!viewModel.modelLoaded) {
+        val modelLoaded by viewModel.modelLoaded.observeAsState(initial = false)
+        if (!modelLoaded) {
             IndeterminateLoopProgress(bottomText = "Loading Profile Configuration")
             CcuLog.i(Domain.LOG_TAG, "Show Progress")
             return
@@ -369,7 +372,9 @@ class VavProfileConfigFragment : BaseDialogFragment() {
                 val values = remember { (0..100).map { it.toString() } }
                 val valuesPickerState = rememberPickerState()
 
-                Row(modifier = Modifier.wrapContentWidth().padding(PaddingValues(start = 135.dp, end = 135.dp))) {
+                Row(modifier = Modifier
+                    .wrapContentWidth()
+                    .padding(PaddingValues(start = 135.dp, end = 135.dp))) {
                     Picker(
                         header = "Temperature\n    Offset",
                         state = valuesPickerState,

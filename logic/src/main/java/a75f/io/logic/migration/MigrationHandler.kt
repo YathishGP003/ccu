@@ -37,6 +37,7 @@ import a75f.io.logic.bo.util.DemandResponseMode
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.logic.diag.DiagEquip
 import a75f.io.logic.diag.DiagEquip.createMigrationVersionPoint
+import a75f.io.logic.migration.modbus.correctEnumsForCorruptModbusPoints
 import a75f.io.logic.migration.scheduler.SchedulerRevampMigration
 import a75f.io.logic.util.PreferenceUtil
 import a75f.io.logic.util.createOfflineModePoint
@@ -77,6 +78,9 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         addSystemDomainEquip(CCUHsApi.getInstance())
         addCmBoardDevice(hayStack)
 
+        if (!isMigrationRequired()) {
+            return
+        }
         if (hayStack.readEntity(Tags.SITE).isNotEmpty()) {
             createOfflineModePoint()
             migrationForDRMode()
@@ -87,9 +91,6 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             }
 
             DiagEquip.addLogLevelPoint(CCUHsApi.getInstance())
-        }
-        if (!isMigrationRequired()) {
-            return
         }
         updateAhuRefForTIEquip()
         clearLevel4ValuesOfDesiredTempIfDurationIs0()
@@ -104,6 +105,10 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                 syncZoneSchedulesToCloud(ccuHsApi)
             }
             schedulerRevamp.doMigration()
+        }
+        if(!PreferenceUtil.isModbusEnumCorrectionRequired()) {
+            correctEnumsForCorruptModbusPoints(hayStack)
+            PreferenceUtil.setModbusEnumCorrectionDone()
         }
         hayStack.scheduleSync()
     }
@@ -173,7 +178,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
 
     private fun migrateEquipStatusEnums() {
         val equipStatusPointList = hayStack.readAllEntities("status and not ota and not message" +
-                " and zone and his and enum")
+                " and zone and his and enum and not modbus")
         equipStatusPointList.forEach{equipStatusMap ->
             val equipStatusPoint = Point.Builder().setHashMap(equipStatusMap).build()
             if (!equipStatusPoint.enums.toString().contains("rfdead")) {
@@ -210,7 +215,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
     }
 
     private  fun migrateDemandResponseForOccupancyEnum(ccuHsApi: CCUHsApi) {
-        val occModePoints = ccuHsApi.readAllEntities("occupancy and mode")
+        val occModePoints = ccuHsApi.readAllEntities("occupancy and mode and enum and not modbus")
         occModePoints.forEach { occMode ->
             val occModePoint = Point.Builder().setHashMap(occMode).build()
             if (!occModePoint.enums.toString().contains("demandresponseoccupied")) {
@@ -219,7 +224,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             }
         }
 
-        val occStatePoints = ccuHsApi.readAllEntities("occupancy and state")
+        val occStatePoints = ccuHsApi.readAllEntities("occupancy and state and enum and not modbus")
         occStatePoints.forEach { occState ->
             val occStatePoint = Point.Builder().setHashMap(occState).build()
             if (!occStatePoint.enums.toString().contains("demandresponseoccupied")) {

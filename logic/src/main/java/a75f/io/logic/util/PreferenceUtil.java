@@ -116,6 +116,8 @@ public class PreferenceUtil {
     public static final String LOCALLY_SYNC_SCHEDULE = "locallySyncedSchedules";
     public static final String TEMP_MODE_MIGRATION = "tempModeMigration";
 
+    public static final String MODBUS_ENUM_CORRECTION = "modbusEnumCorrection";
+
     public static void setContext(Context c) {
         context= c;
     }
@@ -940,4 +942,12 @@ public class PreferenceUtil {
     public static boolean isTempModeMigrationRequired() {
         return getBooleanPreference(TEMP_MODE_MIGRATION);
     }
+    public static boolean isModbusEnumCorrectionRequired() {
+        return getBooleanPreference(MODBUS_ENUM_CORRECTION);
+    }
+
+    public static void setModbusEnumCorrectionDone() {
+        setBooleanPreference(MODBUS_ENUM_CORRECTION, true);
+    }
+
 }

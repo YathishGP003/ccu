@@ -1,5 +1,9 @@
 package a75f.io.logic.bo.building.system.util
 
+import a75f.io.domain.equips.AdvancedHybridSystemEquip
+import a75f.io.domain.equips.ConnectModuleEquip
+import a75f.io.logic.bo.building.system.SystemMode
+
 /**
  * Created by Manjunath K on 23-05-2024.
  */
@@ -13,3 +17,11 @@ fun getModulatedOutput(loopOutput: Double, min : Double, max : Double)  = (((max
  * This function is get the mid point of min max
  */
 fun getComposeMidPoint(minMax: Pair<Double,Double>) = (((minMax.first + minMax.second) / 2).coerceIn(0.0,10.0))
+
+data class AhuSettings(
+        var systemEquip: AdvancedHybridSystemEquip,
+        var conditioningMode: SystemMode,
+        var isMechanicalCoolingAvailable: Boolean,
+        var isMechanicalHeatingAvailable: Boolean,
+        var isEmergencyShutoffActive: Boolean
+)

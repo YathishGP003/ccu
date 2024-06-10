@@ -107,31 +107,20 @@ class DiffManger(var context: Context?) {
                     // Retrieve the current equip map by using modelID
                     val currentEquipMap = Domain.readEquip(assetsModelMeta.modelId)
 
+                    // Retrieve the current device map by using modelID
+                    val currentDeviceMap = Domain.readDevice(assetsModelMeta.modelId)
+
                     Log.d(Domain.LOG_TAG, "OLD Model Data ${oldModel!!.name} ${oldModel.version}")
                     Log.d(Domain.LOG_TAG, "Current Model Data $currentEquipMap")
 
                     // Ensure that the current model JSON and new model JSON are not null
-                    if (currentEquipMap["modelVersion"] != null || currentEquipMap["sourceModelVersion"] != null
+                    if ((currentEquipMap["modelVersion"] != null || currentEquipMap["sourceModelVersion"] != null) ||
+                        (currentDeviceMap["modelVersion"] != null || currentDeviceMap["sourceModelVersion"] != null)
                     ) {
-                        // if block should be removed once modelVersion key migrated completely to sourceModelVersion
-                        if (currentEquipMap.containsKey("modelVersion") &&
-                            (assetsModelMeta.version.toString() != (currentEquipMap["modelVersion"]).toString())
-                        ) {
-                            CcuLog.i(
-                                Domain.LOG_TAG,
-                                "Comparing new model version: ${assetsModelMeta.version}," +
-                                        " current equipment version: ${currentEquipMap["modelVersion"]}"
-                            )
-                            val entityConfiguration =
-                                getDiffEntityConfiguration(oldModel, newModel)
-                            handler.migrateModel(
-                                entityConfiguration,
-                                oldModel,
-                                newModel,
-                                siteRef
-                            )
-                        } else if (currentEquipMap.containsKey("sourceModelVersion") &&
-                            (assetsModelMeta.version.toString() != (currentEquipMap["sourceModelVersion"]).toString())
+                        if ((currentEquipMap.containsKey("sourceModelVersion") &&
+                                    (assetsModelMeta.version.toString() != (currentEquipMap["sourceModelVersion"]).toString())) ||
+                            (currentDeviceMap.containsKey("sourceModelVersion") &&
+                                    (assetsModelMeta.version.toString() != (currentDeviceMap["sourceModelVersion"]).toString()))
                         ) {
                             CcuLog.i(
                                 Domain.LOG_TAG,

@@ -65,6 +65,7 @@ import a75f.io.api.haystack.sync.EntityParser;
 import a75f.io.api.haystack.sync.EntitySyncResponse;
 import a75f.io.api.haystack.sync.HisSyncHandler;
 import a75f.io.api.haystack.sync.HttpUtil;
+import a75f.io.api.haystack.sync.PointWriteCache;
 import a75f.io.api.haystack.sync.SyncManager;
 import a75f.io.api.haystack.sync.SyncStatusService;
 import a75f.io.api.haystack.util.BackfillUtil;
@@ -994,9 +995,9 @@ public class CCUHsApi
                 b.add("reason", reason);
             }
 
-            HDict[] dictArr  = {b.toDict()};
+
+            PointWriteCache.Companion.getInstance().writePoint(uid, b.toDict());
             CcuLog.d("CCU_HS", "PointWrite- "+id+" : "+val);
-            HttpUtil.executePostAsync(pointWriteTarget(), HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
         }
         return hGrid;
     }
@@ -1022,10 +1023,8 @@ public class CCUHsApi
             if (StringUtils.isNotEmpty(reason)) {
                 b.add("reason", reason);
             }
-
-            HDict[] dictArr  = {b.toDict()};
             CcuLog.d("CCU_HS", "PointWrite- "+id+" : "+val);
-            HttpUtil.executePostAsync(pointWriteTarget(), HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
+            PointWriteCache.Companion.getInstance().writePoint(uid, b.toDict());
         }
         return hGrid;
     }
@@ -1040,9 +1039,7 @@ public class CCUHsApi
                     .add("who", CCUHsApi.getInstance().getCCUUserName())
                     .add("duration", HNum.make(0, "ms"))
                     .add("val", (HVal) null);
-            HDict[] dictArr = {b.toDict()};
-            HttpUtil.executePost(CCUHsApi.getInstance().pointWriteTarget(), HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)));
-        }
+            PointWriteCache.Companion.getInstance().writePoint(id, b.toDict());        }
 
     }
 
@@ -2187,7 +2184,9 @@ public class CCUHsApi
     private void updateCcuRefForDiagPointWhileMigration(Equip equip) {
         ArrayList<HashMap<Object, Object>> equipPoints = readAllEntities("point and equipRef == \"" + equip.getId()+"\"");
         for(HashMap<Object, Object> equipPoint : equipPoints){
-            Point point = new Point.Builder().setHashMap(equipPoint).build();
+            if(equipPoint.get("id") == null) continue;
+            HDict pointDict = CCUHsApi.getInstance().readHDictById(equipPoint.get("id").toString());
+            Point point = new Point.Builder().setHDict(pointDict).build();
             if( point.getCcuRef() == null || point.getCcuRef().isEmpty()) {
                 updatePoint(point, point.getId());
             }
@@ -3534,10 +3533,16 @@ public class CCUHsApi
     }
 
     public Schedule getDefaultNamedSchedule() {
-        HDict scheduleHGrid = tagsDb.read("default and named and schedule");
-        if(scheduleHGrid != null) {
-            return new Schedule.Builder().setHDict(scheduleHGrid).build();
+        try {
+            HDict scheduleHGrid = tagsDb.read("default and named and schedule");
+            if(scheduleHGrid != null) {
+                return new Schedule.Builder().setHDict(scheduleHGrid).build();
+            }
+        }catch (UnknownRecException e){
+            CcuLog.e(TAG,"Default Named Schedule is empty");
+            e.printStackTrace();
         }
+
         return null;
     }
 

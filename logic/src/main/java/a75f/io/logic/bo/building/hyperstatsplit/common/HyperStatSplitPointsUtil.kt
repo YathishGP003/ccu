@@ -1212,7 +1212,17 @@ class HyperStatSplitPointsUtil(
                 "%"
             )
 
+            val prePurgeStatusMarkers = arrayOf(
+                "cur", "his", "zone", "prePurge", "run", "sensor", "sp", "userIntent", "standalone", "cpu"
+            )
+            val prePurgeStatusPoint = createHaystackPointWithEnums(
+                "$equipDis-prePurgeStatus",
+                prePurgeStatusMarkers,
+                "off,on"
+            )
+
             prePurgeConfigPointsList.add(Pair(prePurgeOutsideDamperMinPosPoint, prePurgeMinPosition))
+            prePurgeConfigPointsList.add(Pair(prePurgeStatusPoint, 0.0))
         }
 
         return prePurgeConfigPointsList
@@ -2981,6 +2991,25 @@ class HyperStatSplitPointsUtil(
         )
         prePurgeMinPointList.add(prePurgeMinConfigPoint)
         return prePurgeMinPointList
+    }
+
+    /**
+     * Creates a list of pre-purge status points with initial values.
+     *
+     * This function generates a `MutableList` containing pairs of `Point` objects and their corresponding initial values.
+     * Each point represents the status of a pre-purge operation with specific attributes and markers.
+     *
+     * @return A `MutableList` of pairs where each pair consists of a `Point` object representing a pre-purge status and an initial value (0.0).
+     */
+    fun createPrePurgeStatusPoint(): MutableList<Pair<Point, Any>> {
+        val prePurgeStatusPointList: MutableList<Pair<Point, Any>> = LinkedList()
+        val prePurgeStatusPoint = createHaystackPointWithEnums(
+            "$equipDis-prePurgeStatus",
+            arrayOf("cur", "his", "zone", "prePurge", "run", "sensor", "sp", "userIntent", "standalone", "cpu"),
+            "$OFF,$ON"
+        )
+        prePurgeStatusPointList.add(Pair(prePurgeStatusPoint, 0.0))
+        return prePurgeStatusPointList
     }
 
     /**

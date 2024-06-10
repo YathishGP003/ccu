@@ -680,12 +680,6 @@ public class CCUTagsDb extends HServer {
             equip.add("capacity", q.getCapacity());
         }
 
-        for (String m : q.getMarkers()) {
-            equip.add(m);
-        }
-
-        q.getTags().entrySet().forEach( entry -> equip.add(entry.getKey(), entry.getValue()));
-
         if (q.getBacnetType() != null) {
             if(q.getMarkers() != null && q.getMarkers().contains(SYSTEM)){
                 equip.add(Tags.BACNET_ID, 0);
@@ -695,6 +689,12 @@ public class CCUTagsDb extends HServer {
                 equip.add(Tags.BACNET_TYPE, DEVICE);
             }
         }
+
+        for (String m : q.getMarkers()) {
+            equip.add(m);
+        }
+
+        q.getTags().entrySet().forEach( entry -> equip.add(entry.getKey(), entry.getValue()));
 
        /* Log.i("CDT_LMDT_LMB"," id>>> "+equip.get("id") + " dis>>> "+equip.get("dis") + " createdDateTime>>> "+
                 equip.get("createdDateTime") +" lastModifiedDateTime>>> "+equip.get("lastModifiedDateTime") +
@@ -765,11 +765,6 @@ public class CCUTagsDb extends HServer {
             equip.add("capacity", q.getCapacity());
         }
 
-        for (String m : q.getMarkers()) {
-            equip.add(m);
-        }
-        q.getTags().entrySet().forEach( entry -> equip.add(entry.getKey(), entry.getValue()));
-
         if (q.getBacnetType() != null) {
             if(q.getMarkers() != null && q.getMarkers().contains(SYSTEM)){
                 equip.add(Tags.BACNET_ID, 0);
@@ -780,6 +775,12 @@ public class CCUTagsDb extends HServer {
             }
         }
 
+
+
+        for (String m : q.getMarkers()) {
+            equip.add(m);
+        }
+        q.getTags().entrySet().forEach( entry -> equip.add(entry.getKey(), entry.getValue()));
        /* Log.i("CDT_LMDT_LMB"," id>>> "+equip.get("id") + " dis>>> "+equip.get("dis") + " createdDateTime>>> "+
                 equip.get("createdDateTime") +" lastModifiedDateTime>>> "+equip.get("lastModifiedDateTime") +
                 " lastModifiedBy>>> " + equip.get("lastModifiedBy"));*/

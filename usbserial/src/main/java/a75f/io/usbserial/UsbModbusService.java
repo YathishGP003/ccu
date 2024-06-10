@@ -84,6 +84,7 @@ public class UsbModbusService extends Service {
     private Timer usbPortScanTimer = new Timer();
 
     public static String TAG_CCU_SERIAL = "CCU_SERIAL";
+    ;
     /*
      * Different notifications from OS will be received here (USB attached, detached, permission responses...)
      * About BroadcastReceiver: http://developer.android.com/reference/android/content/BroadcastReceiver.html
@@ -277,7 +278,6 @@ public class UsbModbusService extends Service {
             boolean keep = true;
             for (Map.Entry<String, UsbDevice> entry : usbDevices.entrySet()) {
                 device = entry.getValue();
-                CcuLog.e(TAG, "UsbModbusService.findModbusSerialPortDevice: assigned value to device from deviceList= " + device);
                 if (UsbSerialUtil.isModbusDevice(device, getApplicationContext())) {
                     boolean success = grantRootPermissionToUSBDevice(device);
                     connection = usbManager.openDevice(device);
@@ -302,7 +302,6 @@ public class UsbModbusService extends Service {
                 } else {
                     connection = null;
                     device = null;
-                    CcuLog.e(TAG, "UsbModbusService.findModbusSerialPortDevice: assigned value to device if it is not modbus= null");
                 }
                 if (!keep) {
                     break;
@@ -331,10 +330,8 @@ public class UsbModbusService extends Service {
         if (!usbDevices.isEmpty()) {
             connection = null;
             device = null;
-            CcuLog.e(TAG, "UsbModbusService.scanSerialPortSilentlyForMbDevice: assigned value to device before iterating usb devices= null");
             for (Map.Entry<String, UsbDevice> entry : usbDevices.entrySet()) {
                 device = entry.getValue();
-                CcuLog.e(TAG, "UsbModbusService.scanSerialPortSilentlyForMbDevice(): assigned value to device while iterating usb devices= " + device);
                 if (UsbSerialUtil.isModbusDevice(device, context)) {
                     boolean success = grantRootPermissionToUSBDevice(device);
                     if(connection != null)
@@ -497,7 +494,6 @@ public class UsbModbusService extends Service {
         public ModbusRunnable(UsbDevice usbDevice, UsbDeviceConnection usbDeviceConnection) {
             device = usbDevice;
             connection = usbDeviceConnection;
-            CcuLog.e(TAG, "UsbModbusService.ModbusRunnable: assigned value to device = " + device);
         }
 
         public void run() {

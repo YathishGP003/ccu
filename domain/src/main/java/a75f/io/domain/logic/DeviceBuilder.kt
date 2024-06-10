@@ -11,6 +11,7 @@ import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.cutover.BuildingEquipCutOverMapping
 import a75f.io.domain.cutover.devicePointWithDomainNameExists
 import a75f.io.domain.cutover.getDeviceDomainNameFromDis
+import a75f.io.domain.util.TagsUtil
 import a75f.io.logger.CcuLog
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDevicePointDef
@@ -18,7 +19,9 @@ import io.seventyfivef.domainmodeler.common.point.Constraint
 import io.seventyfivef.domainmodeler.common.point.MultiStateConstraint
 import io.seventyfivef.domainmodeler.common.point.NumericConstraint
 import io.seventyfivef.ph.core.TagType
+import org.projecthaystack.HBool
 import org.projecthaystack.HStr
+import kotlin.math.log
 
 class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: EntityMapper) {
     fun buildDeviceAndPoints(configuration: ProfileConfiguration, modelDef: SeventyFiveFDeviceDirective, equipRef: String, siteRef : String, deviceDis: String) {
@@ -201,7 +204,7 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
         DomainManager.addRawPoint(hayStackPoint)
         CcuLog.i(Domain.LOG_TAG," Updated Equip point ${def.domainName}")
     }
-    fun updateDevice(deviceRef: String, modelDef : SeventyFiveFDeviceDirective, deviceDis: String) {
+    private fun updateDevice(deviceRef: String, modelDef : SeventyFiveFDeviceDirective, deviceDis: String) {
         var deviceDict = hayStack.readHDictById(deviceRef)
         val device = Device.Builder().setHDict(deviceDict).build()
         device.domainName = modelDef.domainName
@@ -282,14 +285,6 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
         updateDevice(deviceRef, modelDef, deviceDis)
         CcuLog.e(Domain.LOG_TAG, " Cut-Over migration completed for Device ${modelDef.domainName}")
 
-    }
-
-    fun createPoint(modelDef: SeventyFiveFDevicePointDef, profileConfiguration: ProfileConfiguration, device: Device, deviceDis: String) {
-            val hayStackPoint = buildRawPoint(modelDef, profileConfiguration, device, deviceDis)
-            val pointId = hayStack.addPoint(hayStackPoint)
-            hayStackPoint.id = pointId
-            DomainManager.addRawPoint(hayStackPoint)
-            CcuLog.d(Domain.LOG_TAG,"point created ${hayStackPoint.domainName} id = ${hayStackPoint.id} for the device: $deviceDis " )
     }
 
 }

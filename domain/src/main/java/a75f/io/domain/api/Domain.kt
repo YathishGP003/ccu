@@ -90,18 +90,6 @@ object Domain {
         return equips
     }
 
-    fun getDeviceEntityByDomain(domainName: String) : List<Device> {
-        val deviceEntities = hayStack.readAllEntities("device and domainName == \"$domainName\"")
-        val deviceEntityList = mutableListOf<Device>()
-        deviceEntities.forEach { device ->
-            domainName.let {
-                val deviceEntity = Device(domainName, device["id"].toString())
-                deviceEntityList.add(deviceEntity)
-            }
-        }
-        return deviceEntityList
-    }
-
     fun getSystemEquipByDomainName(domainName: String): Equip? {
         DomainManager.buildDomain(CCUHsApi.getInstance())
         site?.ccus?.entries?.forEach {
@@ -267,9 +255,5 @@ object Domain {
 
     fun readEquip(modelId: String) : Map<Any,Any> {
         return hayStack.readEntity("equip and sourceModel==\"$modelId\" or modelId == \"$modelId\"")
-    }
-
-    fun readDevice(modelId: String) : Map<Any,Any> {
-        return hayStack.readEntity("device and sourceModel==\"$modelId\" or modelId == \"$modelId\"")
     }
 }

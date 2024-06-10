@@ -296,10 +296,6 @@ open class HyperStatSplitEquip {
         if (prePurgeMinPointId != null)
             updatePointValueChangeRequired(prePurgeMinPointId, minVal)
     }
-
-    private fun getPrePurgeStatusPointID() =
-        hsSplitHaystackUtil.readPointID("zone and prePurge and run and sensor and sp and userIntent and standalone and cpu") as String
-
     fun updatePrePurgePoints(
         oldPrePurgeMinVal: Double, newPrePurgeMinVal: Double,
         oldPrePurgeEnabled: Boolean, newPrePurgeEnabled: Boolean
@@ -318,19 +314,10 @@ open class HyperStatSplitEquip {
                     prePurgeMinPoint
                 ))
                 updatePrePurgeMinPoint(newPrePurgeMinVal)
-                val prePurgeStatusPoint : MutableList<Pair<Point, Any>> = hyperStatSplitPointsUtil.createPrePurgeStatusPoint()
-                hyperStatSplitPointsUtil.addPointsListToHaystackWithDefaultValue(listOfAllPoints = arrayOf(
-                    prePurgeStatusPoint
-                ))
-
             } else {
                 val prePurgeDamperId = getPrePurgeMinIdPointID()
                 if(prePurgeDamperId.isNotEmpty()) {
                     hsSplitHaystackUtil.removePoint(prePurgeDamperId)
-                }
-                val prePurgeStatusId =getPrePurgeStatusPointID()
-                if(prePurgeStatusId.isNotEmpty()) {
-                    hsSplitHaystackUtil.removePoint(prePurgeStatusId)
                 }
             }
         }

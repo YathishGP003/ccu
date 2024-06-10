@@ -9,7 +9,6 @@ import a75f.io.domain.equips.VavAdvancedHybridSystemEquip
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.oao.OAOProfile
-import a75f.io.logic.bo.building.system.util.AhuSettings
 
 /**
  * Common implementation of utility methods for VAV and DAB advanced AHUs
@@ -195,19 +194,14 @@ class AdvancedAhuAlgoHandler (val equip: SystemEquip) {
         return Pair(associatedPoint, pointVal)
     }
 
-    fun getAnalogLogicalPhysicalValue(
-            enable: Point,
-            association: Point,
-            ahuSettings: AhuSettings,
-            systemEquip: DomainEquip
-    ) : Pair<Double,Double> {
+    fun getAnalogLogicalPhysicalValue(enable: Point, association: Point, systemEquip: DomainEquip, mode: SystemMode) : Pair<Double,Double> {
         return when (systemEquip) {
             is VavAdvancedHybridSystemEquip -> {
                 val analogOutAssociationType = AdvancedAhuAnalogOutAssociationType.values()[association.readDefaultVal().toInt()]
                     CcuLog.i(L.TAG_CCU_SYSTEM, "getAnalogOutValue- association: ${association.domainName}, analogOutAssociationType: $analogOutAssociationType")
                 Pair (
-                        getAnalogOutValueForLoopType(enable, analogOutAssociationType, ahuSettings),
-                        getLogicalOutput(analogOutAssociationType, enable, ahuSettings)
+                        getAnalogOutValueForLoopType(enable, systemEquip, analogOutAssociationType),
+                        getLogicalOutput(systemEquip, analogOutAssociationType,enable, mode)
                 )
 
             }
@@ -215,8 +209,8 @@ class AdvancedAhuAlgoHandler (val equip: SystemEquip) {
                 val analogOutAssociationType = AdvancedAhuAnalogOutAssociationTypeConnect.values()[association.readDefaultVal().toInt()]
                 CcuLog.i(L.TAG_CCU_SYSTEM, "getAnalogOutValue- association: ${association.domainName}, analogOutAssociationType: $analogOutAssociationType")
                 Pair (
-                        getConnectAnalogOutValueForLoopType(enable, analogOutAssociationType, ahuSettings),
-                        getConnectLogicalOutput(analogOutAssociationType, enable, ahuSettings)
+                        getConnectAnalogOutValueForLoopType(enable, systemEquip, equip, analogOutAssociationType),
+                        getConnectLogicalOutput(systemEquip, analogOutAssociationType, enable, mode)
                 )
             }
             else -> {

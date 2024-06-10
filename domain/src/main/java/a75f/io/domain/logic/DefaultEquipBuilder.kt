@@ -2,7 +2,6 @@ package a75f.io.domain.logic
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Equip
-import a75f.io.api.haystack.HSUtil
 import a75f.io.api.haystack.Kind
 import a75f.io.api.haystack.Point
 import a75f.io.api.haystack.Tags
@@ -64,19 +63,6 @@ open class DefaultEquipBuilder : EquipBuilder {
         equipConfig.modelDef.tags.filter { it.kind == TagType.BOOL }.forEach { tag ->
             tag.defaultValue?.let {
                 equipBuilder.addTag(tag.name, HBool.make(tag.defaultValue as Boolean))
-            }
-        }
-
-        equipConfig.modelDef.tags.filter { it.kind == TagType.NUMBER && it.name.lowercase() == "bacnetid" }.forEach{ tag ->
-            tag.defaultValue?.let {
-                equipBuilder.setBacnetId(HSUtil.generateBacnetId(equipConfig.profileConfiguration?.nodeAddress.toString()))
-            }
-        }
-
-        equipConfig.modelDef.tags.filter { it.kind == TagType.STR && it.name.lowercase() == "bacnettype" }.forEach{ tag ->
-            tag.defaultValue?.let {
-                val bacnetType = tag.defaultValue.toString()
-                equipBuilder.setBacnetType(bacnetType)
             }
         }
 

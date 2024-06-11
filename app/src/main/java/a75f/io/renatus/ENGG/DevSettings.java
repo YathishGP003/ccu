@@ -77,6 +77,8 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
         return new DevSettings();
     }
     private int previousControlLoopFrequency = 0;
+
+    private int prevoiusAhuConnectPort = 0;
                                     
     @BindView(R.id.biskitModBtn)
     ToggleButton biskitModeBtn;
@@ -194,8 +196,7 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
         loopSpinner.setAdapter(ControlLoopAdapter);
         previousControlLoopFrequency = Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
                 .getInt("control_loop_frequency", 60);
-        loopSpinner.setSelection(ControlLoopAdapter.getPosition(Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
-                .getInt("control_loop_frequency", 60)));
+        loopSpinner.setSelection(ControlLoopAdapter.getPosition(previousControlLoopFrequency));
         loopSpinner.setOnItemSelectedListener(this);
         logCaptureBtn.setOnClickListener(view13 -> {
             AlertDialog.Builder alert = new AlertDialog.Builder(getActivity());
@@ -263,7 +264,7 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
         });
         
         deleteHis.setOnClickListener(view15 -> {
-            Log.d("CCU"," deleteHis data ");
+            CcuLog.d("CCU"," deleteHis data ");
             disposable.add(RxjavaUtil.executeBackgroundTaskWithDisposable(
                     () -> ProgressDialogUtils.showProgressDialog(getActivity(),"Deleting history data"),
                     () -> {
@@ -276,7 +277,7 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
         });
 
         clearHisData.setOnClickListener(view15 -> {
-            Log.d("CCU"," Clear History data(Respecting Backfill time) ");
+            CcuLog.d("CCU"," Clear History data(Respecting Backfill time) ");
             RxTask.executeAsync(() -> CCUHsApi.getInstance().trimObjectBoxHisStore());
         });
 
@@ -285,7 +286,7 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
             @Override
             public void onClick(View view)
             {
-                Log.d("CCU"," forceSync site data ");
+                CcuLog.d("CCU"," forceSync site data ");
                 
                 CCUHsApi.getInstance().resyncSiteTree();
             }
@@ -427,12 +428,13 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
         ArrayAdapter<String> portListAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, new String[]{"CCU_USB_PORT", "CM_COM_PORT2"});
         oneToFifteenAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         advancedAhuConnectPort.setAdapter(portListAdapter);
-        advancedAhuConnectPort.setSelection(UsbSerialUtil.getPreferredConnectModuleSerialType(getContext()), false);
+        prevoiusAhuConnectPort= UsbSerialUtil.getPreferredConnectModuleSerialType(getContext());
+        advancedAhuConnectPort.setSelection(prevoiusAhuConnectPort);
         advancedAhuConnectPort.setOnItemSelectedListener(this);
 
 
         resetAppBtn.setOnClickListener((View.OnClickListener) view16 -> {
-            Log.d("CCU"," ResetAppState ");
+            CcuLog.d("CCU"," ResetAppState ");
             L.ccu().systemProfile.reset();
             for (ZoneProfile p : L.ccu().zoneProfiles) {
                 p.reset();
@@ -516,15 +518,14 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
             case R.id.loopspinner:
                 if(previousControlLoopFrequency != Integer.parseInt(loopSpinner.getSelectedItem().toString())) {
                     previousControlLoopFrequency = Integer.parseInt(loopSpinner.getSelectedItem().toString());
+                    writePref("control_loop_frequency", Integer.parseInt(loopSpinner.getSelectedItem().toString()));
                     AlertDialog dialog = new AlertDialog.Builder(getActivity())
                             .setTitle("App restart confirmation")
                             .setMessage("The updated control loop frequency will be applied after the next app restart. Do you want to continue?")
                             .setPositiveButton("Restart", (dialog1, which) -> {
-                                writePref("control_loop_frequency", Integer.parseInt(loopSpinner.getSelectedItem().toString()));
                                 CCUUiUtil.triggerRestart(getContext());
                             })
                             .setNegativeButton("Cancel", (dialog1, which) -> {
-                                writePref("control_loop_frequency", Integer.parseInt(loopSpinner.getSelectedItem().toString()));
                             })
                             .create();
                     dialog.show();
@@ -550,21 +551,23 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
                 writePref("cacheSyncFrequency", Integer.parseInt(cacheSyncFrequency.getSelectedItem().toString()));
                 break;
             case R.id.advancedAhuConnectPort:
-                PreferenceManager.getDefaultSharedPreferences(getActivity())
-                        .edit()
-                        .putInt("connect_serial_port", advancedAhuConnectPort.getSelectedItemPosition())
-                        .commit();
-                CcuLog.d("TEST_SAM","Selected port : " + advancedAhuConnectPort.getSelectedItemPosition());
-                AlertDialog dialog = new AlertDialog.Builder(getActivity())
-                        .setTitle("App restart confirmation")
-                        .setMessage("This change requires an app restart. Do you want to continue?")
-                        .setPositiveButton("Restart", (dialog1, which) -> {
-                            CCUUiUtil.triggerRestart(getContext());
-                        })
-                        .setNegativeButton("Cancel", (dialog1, which) -> {
-                        })
-                        .create();
-                dialog.show();
+                if(prevoiusAhuConnectPort != advancedAhuConnectPort.getSelectedItemPosition()) {
+                    prevoiusAhuConnectPort = advancedAhuConnectPort.getSelectedItemPosition();
+                    PreferenceManager.getDefaultSharedPreferences(getActivity())
+                            .edit()
+                            .putInt("connect_serial_port", advancedAhuConnectPort.getSelectedItemPosition())
+                            .commit();
+                    AlertDialog dialog = new AlertDialog.Builder(getActivity())
+                            .setTitle("App restart confirmation")
+                            .setMessage("This change requires an app restart. Do you want to continue?")
+                            .setPositiveButton("Restart", (dialog1, which) -> {
+                                CCUUiUtil.triggerRestart(getContext());
+                            })
+                            .setNegativeButton("Cancel", (dialog1, which) -> {
+                            })
+                            .create();
+                    dialog.show();
+                }
                 break;
         }
     }

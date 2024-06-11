@@ -300,17 +300,28 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
                 val profileConfiguration = getProfileConfig(equipMap["profile"].toString())
                 updateRef(equipMap, profileConfiguration)
                 modelPointDef?.run {
-                    val hayStackPoint = equipBuilder.buildPoint(PointBuilderConfig( modelPointDef,
-                        profileConfiguration, equip.id, siteRef, haystack.timeZone, equipMap["dis"].toString()))
-                    val point = CCUHsApi.getInstance().readEntity("point and domainName == \"${diffDomain.domainName}\" and equipRef == \"${equip.id}\"")
-                   Log.d("CCU_DOMAIN", "updated haystack point: $hayStackPoint")
-                    if (Domain.readEquip(newModel.id)["roomRef"].toString() == "SYSTEM") {
-                        hayStackPoint.roomRef = "SYSTEM"
-                        hayStackPoint.floorRef = "SYSTEM"
-                        haystack.updatePoint(hayStackPoint, point["id"].toString())
-                    }else {
-                        haystack.updatePoint(hayStackPoint, point["id"].toString())
-                        DomainManager.addPoint(hayStackPoint)
+                    if (toBeAddedForEquip(modelPointDef, equip.id)) {
+                        val hayStackPoint = equipBuilder.buildPoint(
+                            PointBuilderConfig(
+                                modelPointDef,
+                                profileConfiguration,
+                                equip.id,
+                                siteRef,
+                                haystack.timeZone,
+                                equipMap["dis"].toString()
+                            )
+                        )
+                        val point = CCUHsApi.getInstance()
+                            .readEntity("point and domainName == \"${diffDomain.domainName}\" and equipRef == \"${equip.id}\"")
+                        Log.d("CCU_DOMAIN", "updated haystack point: $hayStackPoint")
+                        if (Domain.readEquip(newModel.id)["roomRef"].toString() == "SYSTEM") {
+                            hayStackPoint.roomRef = "SYSTEM"
+                            hayStackPoint.floorRef = "SYSTEM"
+                            haystack.updatePoint(hayStackPoint, point["id"].toString())
+                        } else {
+                            haystack.updatePoint(hayStackPoint, point["id"].toString())
+                            DomainManager.addPoint(hayStackPoint)
+                        }
                     }
                     try {
                         updatePointAssociation(modelPointDef, hayStackPoint, point["id"].toString())

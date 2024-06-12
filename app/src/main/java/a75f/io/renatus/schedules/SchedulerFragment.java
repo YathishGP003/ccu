@@ -153,8 +153,6 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
             scheduleScrollView.post(() -> scheduleScrollView.smoothScrollTo(0,0));
         }
         if (isVisibleToUser) {
-            //Log.d("CCU_UI"," Load System Schedule setUserVisibleHint");
-            //new Handler().post(() -> loadSchedule());
             UpdateScheduleHandler.setBuildingScheduleListener(this);
             ScheduleManager.getInstance().setBuildingScheduleListener(this);
         } else {
@@ -1653,9 +1651,6 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
     @Override
     public void onResume() {
         super.onResume();
-        //Runnable runnable = () -> loadSchedule();
-        //Log.d("CCU_UI"," Load System Schedule - onResume");
-        //scheduleFragmentHandler.postDelayed(runnable, 1500);
         UpdateScheduleHandler.setBuildingScheduleListener(this);
         ScheduleManager.getInstance().setBuildingScheduleListener(this);
     }

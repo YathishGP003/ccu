@@ -54,7 +54,7 @@ public class HyperStatMonitoringEquip {
         String siteDis = (String) siteMap.get("dis");
         String tz = siteMap.get("tz").toString();
         String equipDis = siteDis + "-MONITORING-" + mNodeAddr;
-        HashMap systemEquip = mHayStack.read("equip and system and not modbus");
+        HashMap systemEquip = mHayStack.read("equip and system and not modbus and not connectModule");
         String ahuRef = null;
         if (systemEquip != null && !systemEquip.isEmpty()) {
             ahuRef = systemEquip.get("id").toString();

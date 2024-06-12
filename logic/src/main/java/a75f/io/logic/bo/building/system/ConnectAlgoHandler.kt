@@ -6,7 +6,8 @@ import a75f.io.domain.equips.ConnectModuleEquip
 import a75f.io.domain.equips.SystemEquip
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
-import a75f.io.logic.bo.building.system.util.composeMappedLoop
+import a75f.io.logic.bo.building.system.util.AhuSettings
+import a75f.io.logic.bo.building.system.util.getComposeMidPoint
 import a75f.io.logic.bo.building.system.util.getModulatedOutput
 
 
@@ -31,49 +32,107 @@ fun getAnalogAssociation(enabledControls: MutableSet<AdvancedAhuAnalogOutAssocia
 
  fun getConnectAnalogOutValueForLoopType(
          enable: Point,
-         connectEquip: ConnectModuleEquip,
-         systemEquip: SystemEquip,
-         controlType: AdvancedAhuAnalogOutAssociationTypeConnect
+         controlType: AdvancedAhuAnalogOutAssociationTypeConnect,
+         ahuSettings: AhuSettings
  ) : Double {
-    val loopOutput = getConnectLoopOutput (connectEquip, controlType, enable)
+    val loopOutput = getConnectLoopOutput (ahuSettings.systemEquip.connectEquip1, controlType, enable, ahuSettings)
     return when (enable.domainName) {
         DomainName.analog1OutputEnable -> {
-            getConnectAnalogModulation(loopOutput, controlType, systemEquip, getConnectAnalogOut1MinMax(controlType, connectEquip))
+            getConnectAnalogModulation(loopOutput, controlType, getConnectAnalogOut1MinMax(controlType, ahuSettings.systemEquip.connectEquip1,ahuSettings), ahuSettings)
         }
         DomainName.analog2OutputEnable -> {
-            getConnectAnalogModulation(loopOutput, controlType, systemEquip, getConnectAnalogOut2MinMax(controlType, connectEquip))
+            getConnectAnalogModulation(loopOutput, controlType, getConnectAnalogOut2MinMax(controlType, ahuSettings.systemEquip.connectEquip1,ahuSettings), ahuSettings)
         }
         DomainName.analog3OutputEnable -> {
-            getConnectAnalogModulation(loopOutput, controlType, systemEquip, getConnectAnalogOut3MinMax(controlType, connectEquip))
+            getConnectAnalogModulation(loopOutput, controlType, getConnectAnalogOut3MinMax(controlType, ahuSettings.systemEquip.connectEquip1,ahuSettings), ahuSettings)
         }
         DomainName.analog4OutputEnable -> {
-            getConnectAnalogModulation(loopOutput, controlType, systemEquip, getConnectAnalogOut4MinMax(controlType, connectEquip))
+            getConnectAnalogModulation(loopOutput, controlType, getConnectAnalogOut4MinMax(controlType, ahuSettings.systemEquip.connectEquip1,ahuSettings), ahuSettings)
         }
         else -> 0.0
     }
 }
 
-fun getConnectLoopOutput(systemEquip: ConnectModuleEquip, controlType: AdvancedAhuAnalogOutAssociationTypeConnect, source: Point) : Double {
+
+fun getConnectLogicalOutput(
+        controlType: AdvancedAhuAnalogOutAssociationTypeConnect,
+        source: Point,
+        ahuSettings: AhuSettings
+) : Double {
+    val loopOutput = getConnectLoopOutput(ahuSettings.systemEquip.connectEquip1, controlType, source, ahuSettings)
+    val minMax = getMinMax(source, controlType, ahuSettings.systemEquip.connectEquip1, ahuSettings)
     return when (controlType) {
-        AdvancedAhuAnalogOutAssociationTypeConnect.LOAD_COOLING -> systemEquip.coolingLoopOutput.readHisVal()
-        AdvancedAhuAnalogOutAssociationTypeConnect.LOAD_HEATING -> systemEquip.heatingLoopOutput.readHisVal()
-        AdvancedAhuAnalogOutAssociationTypeConnect.LOAD_FAN -> systemEquip.fanLoopOutput.readHisVal()
-        AdvancedAhuAnalogOutAssociationTypeConnect.CO2_DAMPER -> systemEquip.co2LoopOutput.readHisVal()
         AdvancedAhuAnalogOutAssociationTypeConnect.COMPOSITE_SIGNAL -> {
-            if (systemEquip.coolingLoopOutput.readHisVal() > 0) {
-                systemEquip.coolingLoopOutput.readHisVal()
-            } else if (systemEquip.heatingLoopOutput.readHisVal() > 0) {
-                systemEquip.heatingLoopOutput.readHisVal()
+            if (ahuSettings.isMechanicalCoolingAvailable || ahuSettings.isMechanicalHeatingAvailable
+                    || ahuSettings.isEmergencyShutoffActive) {
+                return getComposeMidPoint(minMax) * 10
+            }
+            when (ahuSettings.conditioningMode) {
+                SystemMode.COOLONLY, SystemMode.HEATONLY -> { minMax.first * 10 }
+                SystemMode.AUTO -> { getModulatedOutput(loopOutput, minMax.first, minMax.second) * 10 }
+                else -> { loopOutput }
+            }
+        }
+        AdvancedAhuAnalogOutAssociationTypeConnect.LOAD_COOLING -> {
+            if (ahuSettings.isMechanicalCoolingAvailable) {
+                0.0
             } else {
-                return when(source.domainName) {
-                    DomainName.analog1OutputEnable -> composeMappedLoop(getConnectAnalogOut1MinMax(controlType, systemEquip))
-                    DomainName.analog2OutputEnable -> composeMappedLoop(getConnectAnalogOut2MinMax(controlType, systemEquip))
-                    DomainName.analog3OutputEnable -> composeMappedLoop(getConnectAnalogOut3MinMax(controlType, systemEquip))
-                    DomainName.analog4OutputEnable -> composeMappedLoop(getConnectAnalogOut4MinMax(controlType, systemEquip))
-                    else -> {0.0}
+                loopOutput
+            }
+        }
+        AdvancedAhuAnalogOutAssociationTypeConnect.LOAD_HEATING -> {
+            if (ahuSettings.isMechanicalHeatingAvailable) {
+                0.0
+            } else {
+                loopOutput
+            }
+        } else -> {
+            loopOutput
+        }
+    }
+}
+
+
+fun getConnectLoopOutput(
+        connectEquip: ConnectModuleEquip,
+        controlType: AdvancedAhuAnalogOutAssociationTypeConnect,
+        source: Point,
+        ahuSettings: AhuSettings
+) : Double {
+    return when (controlType) {
+        AdvancedAhuAnalogOutAssociationTypeConnect.LOAD_COOLING -> connectEquip.coolingLoopOutput.readHisVal()
+        AdvancedAhuAnalogOutAssociationTypeConnect.LOAD_HEATING -> connectEquip.heatingLoopOutput.readHisVal()
+        AdvancedAhuAnalogOutAssociationTypeConnect.LOAD_FAN -> connectEquip.fanLoopOutput.readHisVal()
+        AdvancedAhuAnalogOutAssociationTypeConnect.CO2_DAMPER -> connectEquip.co2LoopOutput.readHisVal()
+        AdvancedAhuAnalogOutAssociationTypeConnect.COMPOSITE_SIGNAL -> {
+            val presentMode = SystemController.State.values()[ahuSettings.systemEquip.operatingMode.readHisVal().toInt()]
+            when (presentMode) {
+                SystemController.State.COOLING -> {
+                    connectEquip.coolingLoopOutput.readHisVal()
+                }
+                SystemController.State.HEATING -> {
+                    connectEquip.heatingLoopOutput.readHisVal()
+                }
+                else -> {
+                    return getComposeMidPoint(getMinMax(source, controlType, connectEquip, ahuSettings)) * 10
                 }
             }
         }
+    }
+}
+
+fun getMinMax(
+        source: Point,
+        controlType: AdvancedAhuAnalogOutAssociationTypeConnect,
+        connectEquip: ConnectModuleEquip,
+        ahuSettings: AhuSettings
+): Pair<Double, Double>{
+    return when(source.domainName) {
+        DomainName.analog1OutputEnable -> getConnectAnalogOut1MinMax(controlType, connectEquip, ahuSettings)
+        DomainName.analog2OutputEnable -> getConnectAnalogOut2MinMax(controlType, connectEquip, ahuSettings)
+        DomainName.analog3OutputEnable -> getConnectAnalogOut3MinMax(controlType, connectEquip, ahuSettings)
+        DomainName.analog4OutputEnable -> getConnectAnalogOut4MinMax(controlType, connectEquip, ahuSettings)
+        else -> { Pair(0.0, 0.0)}
     }
 }
 
@@ -101,7 +160,7 @@ fun getConnectLoopOutput(systemEquip: ConnectModuleEquip, controlType: AdvancedA
 }
 
 fun getConnectAnalogOut1MinMax(
-        controlType : AdvancedAhuAnalogOutAssociationTypeConnect, connectEquip: ConnectModuleEquip
+        controlType : AdvancedAhuAnalogOutAssociationTypeConnect, connectEquip: ConnectModuleEquip, ahuSettings: AhuSettings
 ) : Pair<Double, Double> {
     var analogMinVoltage = 0.0
     var analogMaxVoltage = 0.0
@@ -124,15 +183,20 @@ fun getConnectAnalogOut1MinMax(
             analogMaxVoltage = connectEquip.analog1MaxDamperPos.readDefaultVal()
         }
         AdvancedAhuAnalogOutAssociationTypeConnect.COMPOSITE_SIGNAL -> {
-            if (connectEquip.coolingLoopOutput.readHisVal() > 0) {
-                analogMinVoltage = connectEquip.analog1MinCoolingComposite.readDefaultVal()
-                analogMaxVoltage = connectEquip.analog1MaxCoolingComposite.readDefaultVal()
-            } else if (connectEquip.heatingLoopOutput.readHisVal() > 0) {
-                analogMinVoltage = connectEquip.analog1MinHeatingComposite.readDefaultVal()
-                analogMaxVoltage = connectEquip.analog1MaxHeatingComposite.readDefaultVal()
-            } else {
-                analogMinVoltage = connectEquip.analog1MinCoolingComposite.readDefaultVal()
-                analogMaxVoltage = connectEquip.analog1MinHeatingComposite.readDefaultVal()
+            val presentMode = SystemController.State.values()[ahuSettings.systemEquip.operatingMode.readHisVal().toInt()]
+            when (presentMode) {
+                SystemController.State.COOLING -> {
+                    analogMinVoltage = connectEquip.analog1MinCoolingComposite.readDefaultVal()
+                    analogMaxVoltage = connectEquip.analog1MaxCoolingComposite.readDefaultVal()
+                }
+                SystemController.State.HEATING -> {
+                    analogMinVoltage = connectEquip.analog1MinHeatingComposite.readDefaultVal()
+                    analogMaxVoltage = connectEquip.analog1MaxHeatingComposite.readDefaultVal()
+                }
+                else -> {
+                    analogMinVoltage = connectEquip.analog1MinCoolingComposite.readDefaultVal()
+                    analogMaxVoltage = connectEquip.analog1MinHeatingComposite.readDefaultVal()
+                }
             }
         }
     }
@@ -140,7 +204,7 @@ fun getConnectAnalogOut1MinMax(
 }
 
 fun getConnectAnalogOut2MinMax(
-    controlType: AdvancedAhuAnalogOutAssociationTypeConnect, connectEquip: ConnectModuleEquip
+    controlType: AdvancedAhuAnalogOutAssociationTypeConnect, connectEquip: ConnectModuleEquip, ahuSettings: AhuSettings
 ): Pair<Double,Double> {
     var analogMinVoltage = 0.0
     var analogMaxVoltage = 0.0
@@ -163,15 +227,20 @@ fun getConnectAnalogOut2MinMax(
             analogMaxVoltage = connectEquip.analog2MaxDamperPos.readDefaultVal()
         }
         AdvancedAhuAnalogOutAssociationTypeConnect.COMPOSITE_SIGNAL -> {
-            if (connectEquip.coolingLoopOutput.readHisVal() > 0) {
-                analogMinVoltage = connectEquip.analog2MinCoolingComposite.readDefaultVal()
-                analogMaxVoltage = connectEquip.analog2MaxCoolingComposite.readDefaultVal()
-            } else if (connectEquip.heatingLoopOutput.readHisVal() > 0) {
-                analogMinVoltage = connectEquip.analog2MinHeatingComposite.readDefaultVal()
-                analogMaxVoltage = connectEquip.analog2MaxHeatingComposite.readDefaultVal()
-            } else {
-                analogMinVoltage = connectEquip.analog2MinCoolingComposite.readDefaultVal()
-                analogMaxVoltage = connectEquip.analog2MinHeatingComposite.readDefaultVal()
+            val presentMode = SystemController.State.values()[ahuSettings.systemEquip.operatingMode.readHisVal().toInt()]
+            when (presentMode) {
+                SystemController.State.COOLING -> {
+                    analogMinVoltage = connectEquip.analog2MinCoolingComposite.readDefaultVal()
+                    analogMaxVoltage = connectEquip.analog2MaxCoolingComposite.readDefaultVal()
+                }
+                SystemController.State.HEATING -> {
+                    analogMinVoltage = connectEquip.analog2MinHeatingComposite.readDefaultVal()
+                    analogMaxVoltage = connectEquip.analog2MaxHeatingComposite.readDefaultVal()
+                }
+                else -> {
+                    analogMinVoltage = connectEquip.analog2MinCoolingComposite.readDefaultVal()
+                    analogMaxVoltage = connectEquip.analog2MinHeatingComposite.readDefaultVal()
+                }
             }
         }
     }
@@ -179,7 +248,7 @@ fun getConnectAnalogOut2MinMax(
 }
 
 fun getConnectAnalogOut3MinMax(
-    controlType: AdvancedAhuAnalogOutAssociationTypeConnect, connectEquip: ConnectModuleEquip
+    controlType: AdvancedAhuAnalogOutAssociationTypeConnect, connectEquip: ConnectModuleEquip, ahuSettings: AhuSettings
 ): Pair<Double,Double> {
     var analogMinVoltage = 0.0
     var analogMaxVoltage = 0.0
@@ -202,15 +271,20 @@ fun getConnectAnalogOut3MinMax(
             analogMaxVoltage = connectEquip.analog3MaxDamperPos.readDefaultVal()
         }
         AdvancedAhuAnalogOutAssociationTypeConnect.COMPOSITE_SIGNAL -> {
-            if (connectEquip.coolingLoopOutput.readHisVal() > 0) {
-                analogMinVoltage = connectEquip.analog3MinCoolingComposite.readDefaultVal()
-                analogMaxVoltage = connectEquip.analog3MaxCoolingComposite.readDefaultVal()
-            } else if (connectEquip.heatingLoopOutput.readHisVal() > 0) {
-                analogMinVoltage = connectEquip.analog3MinHeatingComposite.readDefaultVal()
-                analogMaxVoltage = connectEquip.analog3MaxHeatingComposite.readDefaultVal()
-            } else {
-                analogMinVoltage = connectEquip.analog3MinCoolingComposite.readDefaultVal()
-                analogMaxVoltage = connectEquip.analog3MinHeatingComposite.readDefaultVal()
+            val presentMode = SystemController.State.values()[ahuSettings.systemEquip.operatingMode.readHisVal().toInt()]
+            when (presentMode) {
+                SystemController.State.COOLING -> {
+                    analogMinVoltage = connectEquip.analog3MinCoolingComposite.readDefaultVal()
+                    analogMaxVoltage = connectEquip.analog3MaxCoolingComposite.readDefaultVal()
+                }
+                SystemController.State.HEATING -> {
+                    analogMinVoltage = connectEquip.analog3MinHeatingComposite.readDefaultVal()
+                    analogMaxVoltage = connectEquip.analog3MaxHeatingComposite.readDefaultVal()
+                }
+                else -> {
+                    analogMinVoltage = connectEquip.analog3MinCoolingComposite.readDefaultVal()
+                    analogMaxVoltage = connectEquip.analog3MinHeatingComposite.readDefaultVal()
+                }
             }
         }
     }
@@ -218,7 +292,7 @@ fun getConnectAnalogOut3MinMax(
 }
 
 fun getConnectAnalogOut4MinMax(
-    controlType: AdvancedAhuAnalogOutAssociationTypeConnect, connectEquip: ConnectModuleEquip
+    controlType: AdvancedAhuAnalogOutAssociationTypeConnect, connectEquip: ConnectModuleEquip, ahuSettings: AhuSettings
 ): Pair<Double,Double> {
     var analogMinVoltage = 0.0
     var analogMaxVoltage = 0.0
@@ -241,15 +315,20 @@ fun getConnectAnalogOut4MinMax(
             analogMaxVoltage = connectEquip.analog4MaxDamperPos.readDefaultVal()
         }
         AdvancedAhuAnalogOutAssociationTypeConnect.COMPOSITE_SIGNAL -> {
-            if (connectEquip.coolingLoopOutput.readHisVal() > 0) {
-                analogMinVoltage = connectEquip.analog4MinCoolingComposite.readDefaultVal()
-                analogMaxVoltage = connectEquip.analog4MaxCoolingComposite.readDefaultVal()
-            } else if (connectEquip.heatingLoopOutput.readHisVal() > 0) {
-                analogMinVoltage = connectEquip.analog4MinHeatingComposite.readDefaultVal()
-                analogMaxVoltage = connectEquip.analog4MaxHeatingComposite.readDefaultVal()
-            } else {
-                analogMinVoltage = connectEquip.analog4MinCoolingComposite.readDefaultVal()
-                analogMaxVoltage = connectEquip.analog4MinHeatingComposite.readDefaultVal()
+            val presentMode = SystemController.State.values()[ahuSettings.systemEquip.operatingMode.readHisVal().toInt()]
+            when (presentMode) {
+                SystemController.State.COOLING -> {
+                    analogMinVoltage = connectEquip.analog4MinCoolingComposite.readDefaultVal()
+                    analogMaxVoltage = connectEquip.analog4MaxCoolingComposite.readDefaultVal()
+                }
+                SystemController.State.HEATING -> {
+                    analogMinVoltage = connectEquip.analog4MinHeatingComposite.readDefaultVal()
+                    analogMaxVoltage = connectEquip.analog4MaxHeatingComposite.readDefaultVal()
+                }
+                else -> {
+                    analogMinVoltage = connectEquip.analog4MinCoolingComposite.readDefaultVal()
+                    analogMaxVoltage = connectEquip.analog4MinHeatingComposite.readDefaultVal()
+                }
             }
         }
     }
@@ -260,35 +339,48 @@ fun getConnectAnalogOut4MinMax(
 fun getConnectAnalogModulation(
         loopOutput: Double,
         controlType: AdvancedAhuAnalogOutAssociationTypeConnect,
-        systemEquip: SystemEquip,
-        minMax: Pair<Double, Double>
+        minMax: Pair<Double, Double>,
+        ahuSettings: AhuSettings
 ) : Double {
-
     val finalLoop = when (controlType) {
         AdvancedAhuAnalogOutAssociationTypeConnect.COMPOSITE_SIGNAL -> {
-            val presentMode = SystemController.State.values()[systemEquip.operatingMode.readHisVal().toInt()]
+            if (ahuSettings.isMechanicalCoolingAvailable || ahuSettings.isMechanicalHeatingAvailable
+                    || ahuSettings.isEmergencyShutoffActive){
+                CcuLog.i(L.TAG_CCU_SYSTEM, " compositeSignal ${getComposeMidPoint(minMax)} analogMinVoltage: ${minMax.first}, analogMaxVoltage: ${minMax.second}")
+                return getComposeMidPoint(minMax)
+            }
+            val presentMode = SystemController.State.values()[ahuSettings.systemEquip.operatingMode.readHisVal().toInt()]
             when (presentMode) {
                 SystemController.State.COOLING -> {
-                    systemEquip.coolingLoopOutput.readHisVal()
+                    ahuSettings.systemEquip.coolingLoopOutput.readHisVal()
                 }
                 SystemController.State.HEATING -> {
-                    systemEquip.heatingLoopOutput.readHisVal()
+                    ahuSettings.systemEquip.heatingLoopOutput.readHisVal()
                 }
                 else -> {
-                    (10 * (minMax.first + minMax.second) / 2).coerceIn(0.0,10.0)
+                    CcuLog.i(L.TAG_CCU_SYSTEM, " compositeSignal ${getComposeMidPoint(minMax)} analogMinVoltage: ${minMax.first}, analogMaxVoltage: ${minMax.second}")
+                    return getComposeMidPoint(minMax)
                 }
+            }
+        }
+        AdvancedAhuAnalogOutAssociationTypeConnect.LOAD_COOLING -> {
+            if (ahuSettings.isMechanicalCoolingAvailable) {
+                0.0
+            } else {
+                ahuSettings.systemEquip.coolingLoopOutput.readHisVal()
+            }
+        }
+        AdvancedAhuAnalogOutAssociationTypeConnect.LOAD_HEATING -> {
+            if (ahuSettings.isMechanicalHeatingAvailable) {
+                0.0
+            } else {
+                ahuSettings.systemEquip.heatingLoopOutput.readHisVal()
             }
         }
         else -> {
             loopOutput
         }
     }
-
-    if (controlType == AdvancedAhuAnalogOutAssociationTypeConnect.COMPOSITE_SIGNAL) {
-        CcuLog.i(L.TAG_CCU_SYSTEM, "modulateAnalogOut4: compositeSignal ${((minMax.first + minMax.second) / 2).coerceIn(0.0,10.0)} analogMinVoltage: ${minMax.first}, analogMaxVoltage: ${minMax.second}")
-        return ((minMax.first + minMax.second) / 2).coerceIn(0.0,10.0)
-    } else {
-        CcuLog.i(L.TAG_CCU_SYSTEM, "modulateAnalogOut4: loopOutput $finalLoop analogMinVoltage: ${minMax.first}, analogMaxVoltage: ${minMax.second}")
-        return getModulatedOutput(finalLoop, minMax.first, minMax.second).coerceIn(0.0,10.0)
-    }
+    CcuLog.i(L.TAG_CCU_SYSTEM, "modulateAnalogOut: loopOutput $finalLoop analogMinVoltage: ${minMax.first}, analogMaxVoltage: ${minMax.second}")
+    return getModulatedOutput(finalLoop, minMax.first, minMax.second).coerceIn(0.0,10.0)
 }

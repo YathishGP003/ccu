@@ -85,11 +85,11 @@ object VavFullyModulatingRtuCutOverMapping {
         "outsideTempHeatingLockout" to "vavOutsideTempHeatingLockout",
         "Humidifier" to "humidifierEnable",
         "DeHumidifier" to "dehumidifierEnable",
-        "weightedAverageHeatingLoadMA" to "weightedAverageHeatingLoad",
+        "weightedAverageHeatingLoadMA" to "weightedAverageHeatingLoadMA",
 
 
         "targetMaxInsideHumidty" to "systemtargetMaxInsideHumidity",
-        "weightedAverageCoolingLoadMA" to "weightedAverageCoolingLoad",
+        "weightedAverageCoolingLoadMA" to "weightedAverageCoolingLoadMA",
 
         "analog1AtMinCoolingSat" to "analog1MinCooling",
         "analog1AtMaxCoolingSat" to "analog1MaxCooling",

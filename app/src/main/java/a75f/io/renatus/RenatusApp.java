@@ -38,24 +38,6 @@ public class RenatusApp extends UtilityApplication
 		super.onCreate();
 		mContext = getApplicationContext();
 		AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
-
-		//initInstabug();
-	}
-
-	private void initInstabug() {
-		/*new Instabug.Builder(this, "a92457eeb44e965eabf019b4373e8216")
-				.setInvocationEvents(InstabugInvocationEvent.NONE)
-				.build(Feature.State.DISABLED);
-
-		boolean anrReporting = Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting"
-				, Context.MODE_PRIVATE).getBoolean("anr_reporting_enabled", false);
-		if (anrReporting) {
-			CrashReporting.setAnrState(Feature.State.ENABLED);
-			CrashReporting.setState(Feature.State.ENABLED);
-		} else {
-			CrashReporting.setAnrState(Feature.State.DISABLED);
-			CrashReporting.setState(Feature.State.DISABLED);
-		}*/
 	}
 	public static Context getAppContext() {
 		return mContext;

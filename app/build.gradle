@@ -293,11 +293,14 @@ dependencies {
     implementation project(path: ':domain')
     implementation "androidx.compose.foundation:foundation:1.4.3"
     implementation(group: 'io.seventyfivef', name: 'domain-modeler-api', version: '0.1.16-SNAPSHOT')
-    //implementation 'com.instabug.library:instabug:12.1.0'
     implementation(group: 'io.seventyfivef', name: 'domain-modeler-api', version: '0.1.10-SNAPSHOT')
 
     implementation 'com.squareup.okhttp3:logging-interceptor:4.7.2'
     implementation(group: 'io.seventyfivef', name: 'haystack-java-lib', version: '1.1.13')
+
+    implementation "androidx.compose.runtime:runtime-livedata:1.0.0"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-compose:1.0.0"
+
 
 }
 

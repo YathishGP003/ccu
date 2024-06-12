@@ -6,9 +6,10 @@ import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbEndpoint;
 import android.hardware.usb.UsbInterface;
 import android.hardware.usb.UsbRequest;
-import android.util.Log;
 
 import java.util.Arrays;
+
+import a75f.io.logger.CcuLog;
 
 public class FTDISerialDevice extends UsbSerialDevice
 {
@@ -24,7 +25,7 @@ public class FTDISerialDevice extends UsbSerialDevice
 
     /**
      *  RTS and DTR values obtained from FreeBSD FTDI driver
-     *  https://github.com/freebsd/freebsd/blob/70b396ca9c54a94c3fad73c3ceb0a76dffbde635/sys/dev/usb/serial/uftdi_reg.h
+     *  <a href="https://github.com/freebsd/freebsd/blob/70b396ca9c54a94c3fad73c3ceb0a76dffbde635/sys/dev/usb/serial/uftdi_reg.h">...</a>
      */
     private static final int FTDI_SIO_SET_DTR_MASK = 0x1;
     private static final int FTDI_SIO_SET_DTR_HIGH = (1 | (FTDI_SIO_SET_DTR_MASK << 8));
@@ -178,7 +179,7 @@ public class FTDISerialDevice extends UsbSerialDevice
     @Override
     public void setBaudRate(int baudRate)
     {
-        int value = 0;
+        int value;
         if(baudRate >= 0 && baudRate <= 300 )
             value = FTDI_BAUDRATE_300;
         else if(baudRate > 300 && baudRate <= 600)
@@ -430,10 +431,10 @@ public class FTDISerialDevice extends UsbSerialDevice
     {
         if(connection.claimInterface(mInterface, true))
         {
-            Log.i(CLASS_ID, "Interface succesfully claimed");
+            CcuLog.d(CLASS_ID, "Interface successfully claimed");
         }else
         {
-            Log.i(CLASS_ID, "Interface could not be claimed");
+            CcuLog.d(CLASS_ID, "Interface could not be claimed");
             return false;
         }
 
@@ -483,7 +484,7 @@ public class FTDISerialDevice extends UsbSerialDevice
             dataLength = data.length;
         }
         int response = connection.controlTransfer(FTDI_REQTYPE_HOST2DEVICE, request, value, mInterface.getId() + 1 + index, data, dataLength, USB_TIMEOUT);
-        Log.i(CLASS_ID,"Control Transfer Response: " + String.valueOf(response));
+        CcuLog.d(CLASS_ID,"Control Transfer Response: " + response);
         return response;
     }
 

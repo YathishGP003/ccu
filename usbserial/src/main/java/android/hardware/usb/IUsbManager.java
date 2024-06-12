@@ -7,7 +7,7 @@ package android.hardware.usb;
 public interface IUsbManager extends android.os.IInterface
 {
 	/** Local-side IPC implementation stub class. */
-	public static abstract class Stub extends android.os.Binder implements IUsbManager
+	abstract class Stub extends android.os.Binder implements IUsbManager
 	{
 		private static final String DESCRIPTOR = "android.hardware.usb.IUsbManager";
 		/** Construct the stub at attach it to the interface. */
@@ -794,59 +794,59 @@ public interface IUsbManager extends android.os.IInterface
 		static final int TRANSACTION_clearUsbDebuggingKeys = (android.os.IBinder.FIRST_CALL_TRANSACTION + 18);
 	}
 	/* Returns a list of all currently attached USB devices */
-	public void getDeviceList(android.os.Bundle devices) throws android.os.RemoteException;
+    void getDeviceList(android.os.Bundle devices) throws android.os.RemoteException;
 	/* Returns a file descriptor for communicating with the USB device.
 		 * The native fd can be passed to usb_device_new() in libusbhost.
 		 */
-	public android.os.ParcelFileDescriptor openDevice(String deviceName) throws android.os.RemoteException;
+    android.os.ParcelFileDescriptor openDevice(String deviceName) throws android.os.RemoteException;
 	/* Returns the currently attached USB accessory */
-	public UsbAccessory getCurrentAccessory() throws android.os.RemoteException;
+    UsbAccessory getCurrentAccessory() throws android.os.RemoteException;
 	/* Returns a file descriptor for communicating with the USB accessory.
 		 * This file descriptor can be used with standard Java file operations.
 		 */
-	public android.os.ParcelFileDescriptor openAccessory(UsbAccessory accessory) throws android.os.RemoteException;
+    android.os.ParcelFileDescriptor openAccessory(UsbAccessory accessory) throws android.os.RemoteException;
 	/* Sets the default package for a USB device
 		 * (or clears it if the package name is null)
 		 */
-	public void setDevicePackage(UsbDevice device, String packageName, int userId) throws android.os.RemoteException;
+    void setDevicePackage(UsbDevice device, String packageName, int userId) throws android.os.RemoteException;
 	/* Sets the default package for a USB accessory
 		 * (or clears it if the package name is null)
 		 */
-	public void setAccessoryPackage(UsbAccessory accessory, String packageName, int userId) throws android.os.RemoteException;
+    void setAccessoryPackage(UsbAccessory accessory, String packageName, int userId) throws android.os.RemoteException;
 	/* Returns true if the caller has permission to access the device. */
-	public boolean hasDevicePermission(UsbDevice device) throws android.os.RemoteException;
+    boolean hasDevicePermission(UsbDevice device) throws android.os.RemoteException;
 	/* Returns true if the caller has permission to access the accessory. */
-	public boolean hasAccessoryPermission(UsbAccessory accessory) throws android.os.RemoteException;
+    boolean hasAccessoryPermission(UsbAccessory accessory) throws android.os.RemoteException;
 	/* Requests permission for the given package to access the device.
 		 * Will display a system dialog to query the user if permission
 		 * had not already been given.
 		 */
-	public void requestDevicePermission(UsbDevice device, String packageName,
-	                                    android.app.PendingIntent pi) throws android.os.RemoteException;
+    void requestDevicePermission(UsbDevice device, String packageName,
+                                 android.app.PendingIntent pi) throws android.os.RemoteException;
 	/* Requests permission for the given package to access the accessory.
 		 * Will display a system dialog to query the user if permission
 		 * had not already been given. Result is returned via pi.
 		 */
-	public void requestAccessoryPermission(UsbAccessory accessory, String packageName,
-	                                       android.app.PendingIntent pi) throws android.os.RemoteException;
+    void requestAccessoryPermission(UsbAccessory accessory, String packageName,
+                                    android.app.PendingIntent pi) throws android.os.RemoteException;
 	/* Grants permission for the given UID to access the device */
-	public void grantDevicePermission(UsbDevice device, int uid) throws android.os.RemoteException;
+    void grantDevicePermission(UsbDevice device, int uid) throws android.os.RemoteException;
 	/* Grants permission for the given UID to access the accessory */
-	public void grantAccessoryPermission(UsbAccessory accessory, int uid) throws android.os.RemoteException;
+    void grantAccessoryPermission(UsbAccessory accessory, int uid) throws android.os.RemoteException;
 	/* Returns true if the USB manager has default preferences or permissions for the package */
-	public boolean hasDefaults(String packageName, int userId) throws android.os.RemoteException;
+    boolean hasDefaults(String packageName, int userId) throws android.os.RemoteException;
 	/* Clears default preferences and permissions for the package */
-	public void clearDefaults(String packageName, int userId) throws android.os.RemoteException;
+    void clearDefaults(String packageName, int userId) throws android.os.RemoteException;
 	/* Sets the current USB function. */
-	public void setCurrentFunction(String function, boolean makeDefault) throws android.os.RemoteException;
+    void setCurrentFunction(String function, boolean makeDefault) throws android.os.RemoteException;
 	/* Sets the file path for USB mass storage backing file. */
-	public void setMassStorageBackingFile(String path) throws android.os.RemoteException;
+    void setMassStorageBackingFile(String path) throws android.os.RemoteException;
 	/* Allow USB debugging from the attached host. If alwaysAllow is true, add the
 		 * the public key to list of host keys that the user has approved.
 		 */
-	public void allowUsbDebugging(boolean alwaysAllow, String publicKey) throws android.os.RemoteException;
+    void allowUsbDebugging(boolean alwaysAllow, String publicKey) throws android.os.RemoteException;
 	/* Deny USB debugging from the attached host */
-	public void denyUsbDebugging() throws android.os.RemoteException;
+    void denyUsbDebugging() throws android.os.RemoteException;
 	/* Clear public keys installed for secure USB debugging */
-	public void clearUsbDebuggingKeys() throws android.os.RemoteException;
+    void clearUsbDebuggingKeys() throws android.os.RemoteException;
 }

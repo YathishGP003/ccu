@@ -33,6 +33,9 @@ public class CustomSpinnerAdapter extends ArrayAdapter<String> {
 
     @Override
     public boolean isEnabled(int position) {
+        if(position == 2 && values.get(position).contains("No Named Schedule available"))
+            return false;
+
         return position !=1 ;// As this option is a title for NamedSchedule
     }
 
@@ -88,9 +91,7 @@ public class CustomSpinnerAdapter extends ArrayAdapter<String> {
             View row = inflater.inflate(R.layout.custom_dropdown_item_text_only, parent, false);
             TextView textView = row.findViewById(R.id.textView);
             textView.setText(values.get(position));
-            if(position == 2 && values.get(position).contains("No Named Schedule available")){
-                textView.setEnabled(false);
-            }
+
             if(position == 1) {
                 textView.setTextColor(Color.BLACK);
                 textView.setEnabled(false);
@@ -101,6 +102,10 @@ public class CustomSpinnerAdapter extends ArrayAdapter<String> {
             if(isGetView) {
                 textView.setPadding(0, 0, 4, 0);
                 textView.setGravity(View.TEXT_ALIGNMENT_CENTER);
+            }
+
+            if(position == 2 && values.get(position).contains("No Named Schedule available")){
+                textView.setEnabled(false);
             }
             return row;
         }

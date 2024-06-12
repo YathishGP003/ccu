@@ -92,7 +92,8 @@ class VavProfileViewModel : ViewModel() {
     private val _isDialogOpen = MutableLiveData<Boolean>()
     private var saveJob : Job? = null
 
-    var modelLoaded by  mutableStateOf(false)
+    var _modelLoaded =  MutableLiveData(false)
+    val modelLoaded: LiveData<Boolean> get() = _modelLoaded
     val isDialogOpen: LiveData<Boolean>
         get() = _isDialogOpen
 
@@ -134,7 +135,8 @@ class VavProfileViewModel : ViewModel() {
 
         initializeLists()
         CcuLog.i(Domain.LOG_TAG, "VavProfileViewModel Loaded")
-        modelLoaded = true
+        _modelLoaded.postValue(true)
+        CcuLog.i(Domain.LOG_TAG, "model calue set to true")
     }
 
     private fun initializeLists() {

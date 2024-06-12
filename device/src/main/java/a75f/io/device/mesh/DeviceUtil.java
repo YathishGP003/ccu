@@ -53,6 +53,7 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.system.vav.VavAdvancedAhu;
+import a75f.io.logic.bo.building.system.vav.VavAdvancedHybridRtu;
 import a75f.io.logic.bo.building.system.vav.VavFullyModulatingRtu;
 import a75f.io.logic.bo.building.system.vav.VavStagedRtu;
 import a75f.io.logic.bo.building.system.vav.VavStagedRtuWithVfd;
@@ -232,7 +233,7 @@ public class DeviceUtil {
         CcuToCmOverUsbCmRelayActivationMessage_t msg = new CcuToCmOverUsbCmRelayActivationMessage_t();
         msg.messageType.set(MessageType.CCU_RELAY_ACTIVATION);
 
-        if (L.ccu().systemProfile instanceof VavStagedRtu ||
+        if ((L.ccu().systemProfile instanceof VavStagedRtu && !(L.ccu().systemProfile instanceof VavAdvancedHybridRtu)) ||
                 L.ccu().systemProfile instanceof VavStagedRtuWithVfd ||
                 L.ccu().systemProfile instanceof VavAdvancedAhu ||
                 L.ccu().systemProfile instanceof VavFullyModulatingRtu) {

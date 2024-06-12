@@ -79,7 +79,7 @@ class HyperStatSplitCpuEconConfiguration : BaseProfileConfiguration() {
 
    // zonePm2p5Threshold has been removed
    var zonePm2p5Target = 25.0
-   var prePurgeMinOpen = 50.0
+   var prePurgeMinOpen = 100.0
 
    var displayHumidity = true
    var displayVOC = false

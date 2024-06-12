@@ -41,7 +41,7 @@ public class OAOEquip
     
     public void init() {
         HashMap equipMap = CCUHsApi.getInstance().read("equip and group == \"" + nodeAddr + "\"");
-        if (equipMap != null && equipMap.size() > 0)
+        if (equipMap != null && !equipMap.isEmpty())
         {
             equipRef = equipMap.get("id").toString();
             OAOTuners.updateOaoSystemTuners(hayStack, equipMap.get("siteRef").toString(), equipRef,
@@ -62,8 +62,8 @@ public class OAOEquip
         String tz = siteMap.get("tz").toString();
         String equipDis = siteDis + "-OAO-" + nodeAddr;
         String ahuRef = null;
-        HashMap systemEquip = hayStack.read("equip and system and not modbus");
-        if (systemEquip != null && systemEquip.size() > 0)
+        HashMap systemEquip = hayStack.read("equip and system and not modbus and not connectModule");
+        if (systemEquip != null && !systemEquip.isEmpty())
         {
             ahuRef = systemEquip.get("id").toString();
         }
@@ -198,7 +198,7 @@ public class OAOEquip
                                      .setFloorRef(floorRef).setHisInterpolate("cov")
                                      .addMarker("oao").addMarker("outside").addMarker("air").addMarker("temp").addMarker("sensor").addMarker("his")
                                      .setGroup(String.valueOf(nodeAddr))
-                                     .setUnit("\u00B0F")
+                                     .setUnit("°F")
                                      .setTz(tz)
                                      .build();
         addBacnetTags(outsideAirTemperature, 43, ANALOG_VALUE, nodeAddr);
@@ -212,7 +212,7 @@ public class OAOEquip
                                          .setFloorRef(floorRef).setHisInterpolate("cov")
                                          .addMarker("oao").addMarker("outsideWeather").addMarker("air").addMarker("temp").addMarker("sensor").addMarker("his")
                                          .setGroup(String.valueOf(nodeAddr))
-                                         .setUnit("\u00B0F")
+                                         .setUnit("°F")
                                          .setTz(tz)
                                          .build();
         String weatherOutsideTempId = hayStack.addPoint(weatherOutsideTemp);
@@ -238,7 +238,7 @@ public class OAOEquip
                                               .setFloorRef(floorRef).setHisInterpolate("cov")
                                               .addMarker("oao").addMarker("supply").addMarker("air").addMarker("temp").addMarker("sensor").addMarker("his")
                                               .setGroup(String.valueOf(nodeAddr))
-                                              .setUnit("\u00B0F")
+                                              .setUnit("°F")
                                               .setTz(tz)
                                               .build();
         addBacnetTags(supplyAirTemperature, 1, ANALOG_VALUE, nodeAddr);
@@ -252,7 +252,7 @@ public class OAOEquip
                                              .setFloorRef(floorRef).setHisInterpolate("cov")
                                              .addMarker("oao").addMarker("mixed").addMarker("air").addMarker("temp").addMarker("sensor").addMarker("his")
                                              .setGroup(String.valueOf(nodeAddr))
-                                             .setUnit("\u00B0F")
+                                             .setUnit("°F")
                                              .setTz(tz)
                                              .build();
         addBacnetTags(mixedAirTemperature, 84, ANALOG_VALUE, nodeAddr);
@@ -587,7 +587,7 @@ public class OAOEquip
     }
     public void updateNewConfigParams(String siteRef,String equipRef, String equipDis, String tz){
         ArrayList<HashMap> purgePoints = CCUHsApi.getInstance().readAll("point and userIntent and oao and purge and outside and damper and pos and min and open and equipRef == \"" + equipRef + "\"");
-        if (purgePoints == null || purgePoints.size() == 0) {
+        if (purgePoints == null || purgePoints.isEmpty()) {
             Point smartPurgeMinDamperOpen = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis + "-systemPurgeOutsideDamperMinPos"))
                     .setEquipRef(equipRef)
                     .setSiteRef(siteRef).setHisInterpolate("cov")
@@ -601,7 +601,7 @@ public class OAOEquip
             hayStack.writeHisValueByIdWithoutCOV(smartPurgeMinDamperOpenId, 100.0);
         }
         ArrayList<HashMap> points = CCUHsApi.getInstance().readAll("point and userIntent and oao and enhanced and ventilation and outside and damper and pos and min and open and equipRef == \"" + equipRef + "\"");
-        if (points == null || points.size() == 0) {
+        if (points == null || points.isEmpty()) {
             Point enhancedVentilationMinDamperOpen = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis + "-systemEnhancedVentilationOutsideDamperMinPos"))
                     .setEquipRef(equipRef)
                     .setSiteRef(siteRef).setHisInterpolate("cov")
@@ -647,7 +647,7 @@ public class OAOEquip
         config.currentTranformerType = getConfigNumVal("current and transformer and type") ;
         config.co2Threshold = getConfigNumVal("co2 and threshold");
         config.exhaustFanHysteresis = getConfigNumVal("exhaust and fan and hysteresis");
-        config.usePerRoomCO2Sensing = getConfigNumVal("config and oao and co2 and sensing") > 0? true : false;
+        config.usePerRoomCO2Sensing = getConfigNumVal("config and oao and co2 and sensing") > 0;
         config.smartPurgeMinDamperOpen = getConfigNumVal("userIntent and purge and outside and damper and pos and min and open");
         config.enhancedVentilationMinDamperOpen = getConfigNumVal("userIntent and enhanced and ventilation and outside and damper and pos and min and open");
         

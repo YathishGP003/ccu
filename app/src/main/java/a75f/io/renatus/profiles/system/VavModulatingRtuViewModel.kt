@@ -26,7 +26,7 @@ open class VavModulatingRtuViewModel : ModulatingRtuViewModel() {
     fun init(context: Context, hayStack: CCUHsApi) {
         super.init(context, ModelLoader.getVavModulatingRtuModelDef(), hayStack)
 
-        var systemEquip = hayStack.readEntity("system and equip and not modbus")
+        var systemEquip = hayStack.readEntity("system and equip and not modbus and not connectModule")
         CcuLog.i(Domain.LOG_TAG, "Current System Equip $systemEquip")
 
         if (systemEquip["profile"].toString() == "vavFullyModulatingAhu"

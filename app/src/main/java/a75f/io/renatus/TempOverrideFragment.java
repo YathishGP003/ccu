@@ -391,7 +391,11 @@ public class TempOverrideFragment extends Fragment {
             if (newTunerList.isEmpty() == false) {
                 if (m.get("dis").toString().contains("cmBoardDevice")) {
                     expandableListDetail.put("CM-device", newTunerList);
-                } else {
+                }
+                else if (m.get("dis").toString().contains("connectModuleDevice")) {
+                    expandableListDetail.put("Connect-Module", newTunerList);
+                }
+                else {
                     expandableListDetail.put(m.get("dis").toString(), newTunerList);
                 }
                 //expandableListDetail.put(m.get("dis").toString(), newTunerList);
@@ -401,7 +405,9 @@ public class TempOverrideFragment extends Fragment {
             expandableListTitle = new ArrayList<String>(expandableListDetail.keySet());
             ArrayList<ZoneSorter> zoneNodesList = new ArrayList<>();
             for (int i = 0; i < expandableListTitle.size(); i++) {
-                if (!expandableListTitle.get(i).equals("CM-device") && !expandableListTitle.get(i).contains("cmBoardDevice")) {
+                if (!expandableListTitle.get(i).equals("CM-device") && !expandableListTitle.get(i).contains("cmBoardDevice")
+                    && !expandableListTitle.get(i).equals("connectModuleDevice") && !expandableListTitle.get(i).contains("Module")
+                ) {
                     int nodeAddress = parseGroup(expandableListTitle.get(i));
                     ZoneProfile profile = L.getProfile(Short.parseShort(String.valueOf(nodeAddress)));
                     if (profile!=null) {

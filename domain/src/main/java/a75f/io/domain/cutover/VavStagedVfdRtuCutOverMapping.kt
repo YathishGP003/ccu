@@ -80,11 +80,11 @@ object VavStagedVfdRtuCutOverMapping {
         "outsideTempHeatingLockout" to "vavOutsideTempHeatingLockout",
         "Humidifier" to "humidifierEnable",
         "DeHumidifier" to "dehumidifierEnable",
-        "weightedAverageHeatingLoadMA" to "weightedAverageHeatingLoad",
+        "weightedAverageHeatingLoadMA" to "weightedAverageHeatingLoadMA",
 
 
         "targetMaxInsideHumidty" to "systemtargetMaxInsideHumidity",
-        "weightedAverageCoolingLoadMA" to "weightedAverageCoolingLoad",
+        "weightedAverageCoolingLoadMA" to "weightedAverageCoolingLoadMA",
 
 
         "satTRSp" to "satTRSp",
@@ -165,6 +165,7 @@ object VavStagedVfdRtuCutOverMapping {
         "temperatureIntegralTime" to "vavTemperatureIntegralTime",
         "integralKFactor" to "vavIntegralKFactor",
         "temperatureProportionalRange" to "vavTemperatureProportionalRange",
+        "modeChangeoverHysteresis" to "vavModeChangeOverHysteresis",
 
         "analog2OutputEnabled" to "analog2OutputEnable",
         "analog2AtCoolStage1" to "analog2CoolStage1",

@@ -9,6 +9,7 @@ import a75f.io.device.ControlMote.SAToperatingMode_e
 import a75f.io.device.mesh.MeshUtil
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.toInt
+import a75f.io.domain.equips.AdvancedHybridSystemEquip
 import a75f.io.domain.equips.DabAdvancedHybridSystemEquip
 import a75f.io.domain.equips.VavAdvancedHybridSystemEquip
 import a75f.io.logic.L
@@ -73,7 +74,7 @@ fun getCMSettingsMessage() : ControlMote.CcuToCmSettingsMessage_t {
         //setTemperatureOffset(systemEquip.temperatureOffset.readHisVal().toInt())
         cmProfile = ControlMote.CMProfiles_e.CM_PROFILE_ADV_AHU
         relayActivationHysteresis = systemEquip.vavRelayDeactivationHysteresis.readHisVal().toInt()
-        analogFanSpeedMultiplier = systemEquip.vavAnalogFanSpeedMultiplier.readHisVal().toInt()
+        analogFanSpeedMultiplier = systemEquip.vavAnalogFanSpeedMultiplier.readHisVal().toInt() * 10
         addRelayConfigsToSettingsMessage(this)
         addAnalogOutConfigsToSettingsMessage(this)
         addAnalogInConfigsToSettingsMessage(this)
@@ -89,7 +90,11 @@ fun getCMSettingsMessage() : ControlMote.CcuToCmSettingsMessage_t {
 }
 
 fun addRelayConfigsToSettingsMessage(builder: Builder) {
-
+    /*
+        [ Y1 Y2 G1 G2 W1 W2 AUX (mappings)]
+        CCU needs to send in this format - [ R1 R2 R3 R6 R4 R5 R7 R8 (mappings)]
+        Because in hardware it is mapper in this way. please do not change the position
+    */
     val systemEquip = if (Domain.systemEquip is VavAdvancedHybridSystemEquip) {
         Domain.systemEquip as VavAdvancedHybridSystemEquip
     } else {
@@ -119,6 +124,14 @@ fun addRelayConfigsToSettingsMessage(builder: Builder) {
         } else {
             addRelayMapping(ControlMote.CmRelayMappingStages_e.RELAY_NOT_ENABLED)
         }
+        if (systemEquip.relay6OutputEnable.readDefaultVal() > 0) {
+            val relay6OutputAssociation = systemEquip.relay6OutputAssociation.readDefaultVal().toInt()
+            val mappingStage = ControlMote.CmRelayMappingStages_e.forNumber(relay6OutputAssociation + 1) ?: ControlMote.CmRelayMappingStages_e.RELAY_NOT_ENABLED
+            addRelayMapping(mappingStage)
+        } else {
+            addRelayMapping(ControlMote.CmRelayMappingStages_e.RELAY_NOT_ENABLED)
+        }
+
         if (systemEquip.relay4OutputEnable.readDefaultVal() > 0) {
             val relay4OutputAssociation = systemEquip.relay4OutputAssociation.readDefaultVal().toInt()
             val mappingStage = ControlMote.CmRelayMappingStages_e.forNumber(relay4OutputAssociation + 1) ?: ControlMote.CmRelayMappingStages_e.RELAY_NOT_ENABLED
@@ -133,13 +146,7 @@ fun addRelayConfigsToSettingsMessage(builder: Builder) {
         } else {
             addRelayMapping(ControlMote.CmRelayMappingStages_e.RELAY_NOT_ENABLED)
         }
-        if (systemEquip.relay6OutputEnable.readDefaultVal() > 0) {
-            val relay6OutputAssociation = systemEquip.relay6OutputAssociation.readDefaultVal().toInt()
-            val mappingStage = ControlMote.CmRelayMappingStages_e.forNumber(relay6OutputAssociation + 1) ?: ControlMote.CmRelayMappingStages_e.RELAY_NOT_ENABLED
-            addRelayMapping(mappingStage)
-        } else {
-            addRelayMapping(ControlMote.CmRelayMappingStages_e.RELAY_NOT_ENABLED)
-        }
+
         if (systemEquip.relay7OutputEnable.readDefaultVal() > 0) {
             val relay7OutputAssociation = systemEquip.relay7OutputAssociation.readDefaultVal().toInt()
             val mappingStage = ControlMote.CmRelayMappingStages_e.forNumber(relay7OutputAssociation + 1) ?: ControlMote.CmRelayMappingStages_e.RELAY_NOT_ENABLED
@@ -339,30 +346,101 @@ fun addSensorConfigs(builder: Builder) {
 
 fun addSensorBusMappings(builder: Builder) {
 
-    val systemEquip = if (Domain.systemEquip is VavAdvancedHybridSystemEquip) {
-        Domain.systemEquip as VavAdvancedHybridSystemEquip
-    } else {
-        Domain.systemEquip as DabAdvancedHybridSystemEquip
-    }
+    val systemEquip = Domain.systemEquip as AdvancedHybridSystemEquip
 
     builder.apply {
-        if (systemEquip.temperatureSensorBusAdd0.pointExists()) {
-            addSensorBusMapping(ControlMote.CmSensorBusMappings_e.SENSOR_BUS_SAT1)
-        }
-        if (systemEquip.temperatureSensorBusAdd1.pointExists()) {
-            addSensorBusMapping(ControlMote.CmSensorBusMappings_e.SENSOR_BUS_SAT2)
-        }
-        if (systemEquip.temperatureSensorBusAdd2.pointExists()) {
-            addSensorBusMapping(ControlMote.CmSensorBusMappings_e.SENSOR_BUS_SAT3)
-        }
-        if (systemEquip.pressureSensorBusAdd0.pointExists()) {
-            addSensorBusMapping(ControlMote.CmSensorBusMappings_e.SENSOR_BUS_DSP1)
-        }
-        if (systemEquip.pressureSensorBusAdd1.pointExists()) {
-            addSensorBusMapping(ControlMote.CmSensorBusMappings_e.SENSOR_BUS_DSP2)
-        }
-        if (systemEquip.pressureSensorBusAdd2.pointExists()) {
-            addSensorBusMapping(ControlMote.CmSensorBusMappings_e.SENSOR_BUS_DSP3)
-        }
+        this.addSensorBusMapping(addAddressSensorMapping(
+                systemEquip.temperatureSensorBusAdd0.readDefaultVal().toInt(),
+                systemEquip.humiditySensorBusAdd0.readDefaultVal().toInt(),
+                systemEquip.occupancySensorBusAdd0.readDefaultVal().toInt(),
+                systemEquip.co2SensorBusAdd0.readDefaultVal().toInt(),
+                systemEquip.pressureSensorBusAdd0.readDefaultVal().toInt()
+        ))
+
+        this.addSensorBusMapping(addAddressSensorMapping(
+                systemEquip.temperatureSensorBusAdd1.readDefaultVal().toInt(),
+                systemEquip.humiditySensorBusAdd1.readDefaultVal().toInt(),
+                systemEquip.occupancySensorBusAdd1.readDefaultVal().toInt(),
+                systemEquip.co2SensorBusAdd1.readDefaultVal().toInt(),
+                -1 // not exist
+        ))
+
+        this.addSensorBusMapping(addAddressSensorMapping(
+                systemEquip.temperatureSensorBusAdd2.readDefaultVal().toInt(),
+                systemEquip.humiditySensorBusAdd2.readDefaultVal().toInt(),
+                systemEquip.occupancySensorBusAdd2.readDefaultVal().toInt(),
+                systemEquip.co2SensorBusAdd2.readDefaultVal().toInt(),
+                -1 // not exist
+        ))
+
+        this.addSensorBusMapping(addAddressSensorMapping(
+                systemEquip.temperatureSensorBusAdd3.readDefaultVal().toInt(),
+                systemEquip.humiditySensorBusAdd3.readDefaultVal().toInt(),
+                systemEquip.occupancySensorBusAdd3.readDefaultVal().toInt(),
+                systemEquip.co2SensorBusAdd3.readDefaultVal().toInt(),
+                -1 // not exist
+        ))
     }
 }
+
+
+fun addAddressSensorMapping(
+        tempMapping: Int, humidityMapping: Int, occupancyMapping: Int, co2Mapping: Int, pressureMapping: Int
+): ControlMote.CmSensorBusMappings_t {
+    return ControlMote.CmSensorBusMappings_t.newBuilder().apply {
+        setSensorBusMappingTemp(getTemperatureMapping(tempMapping))
+        setSensorBusMappingHumi(getHumidityMapping(humidityMapping))
+        setSensorBusMappingOccupancy(getOccupancyMapping(occupancyMapping))
+        setSensorBusMappingCo2(getCo2Mapping(co2Mapping))
+        if (pressureMapping != -1) { setSensorBusMappingPressure(getPressureMapping(pressureMapping)) }
+    }.build()
+}
+
+private fun getTemperatureMapping(mapping: Int): ControlMote.CmSensorBusMappingsTemp_e {
+    return when(mapping) {
+        1 -> ControlMote.CmSensorBusMappingsTemp_e.SENSOR_BUS_RETURN_AIR_TEMP
+        2 -> ControlMote.CmSensorBusMappingsTemp_e.SENSOR_BUS_MIXED_AIR_TEMP
+        3 -> ControlMote.CmSensorBusMappingsTemp_e.SENSOR_BUS_SUPPLY_AIR_TEMP_1
+        4 -> ControlMote.CmSensorBusMappingsTemp_e.SENSOR_BUS_SUPPLY_AIR_TEMP_2
+        5 -> ControlMote.CmSensorBusMappingsTemp_e.SENSOR_BUS_SUPPLY_AIR_TEMP_3
+        else -> ControlMote.CmSensorBusMappingsTemp_e.SENSOR_BUS_TEMP_DISABLED
+    }
+}
+
+private fun getHumidityMapping(mapping: Int): ControlMote.CmSensorBusMappingsHumi_e {
+    return when(mapping) {
+        1 -> ControlMote.CmSensorBusMappingsHumi_e.SENSOR_BUS_RETURN_AIR_HUMI
+        2 -> ControlMote.CmSensorBusMappingsHumi_e.SENSOR_BUS_MIXED_AIR_HUMI
+        3 -> ControlMote.CmSensorBusMappingsHumi_e.SENSOR_BUS_SUPPLY_AIR_HUMI_1
+        4 -> ControlMote.CmSensorBusMappingsHumi_e.SENSOR_BUS_SUPPLY_AIR_HUMI_2
+        5 -> ControlMote.CmSensorBusMappingsHumi_e.SENSOR_BUS_SUPPLY_AIR_HUMI_3
+        else -> ControlMote.CmSensorBusMappingsHumi_e.SENSOR_BUS_HUMI_DISABLED
+    }
+}
+
+private fun getOccupancyMapping(mapping: Int): ControlMote.CmSensorBusMappingsOccupancy_e {
+    return when(mapping) {
+        1 -> ControlMote.CmSensorBusMappingsOccupancy_e.SENSOR_BUS_OCCUPANCY_1
+        2 -> ControlMote.CmSensorBusMappingsOccupancy_e.SENSOR_BUS_OCCUPANCY_2
+        3 -> ControlMote.CmSensorBusMappingsOccupancy_e.SENSOR_BUS_OCCUPANCY_3
+        else -> ControlMote.CmSensorBusMappingsOccupancy_e.SENSOR_BUS_OCCUPANCY_DISABLED
+    }
+}
+
+private fun getCo2Mapping(mapping: Int): ControlMote.CmSensorBusMappingsCO2_e {
+    return when(mapping) {
+        1 -> ControlMote.CmSensorBusMappingsCO2_e.SENSOR_BUS_RETURN_AIR_CO2
+        2 -> ControlMote.CmSensorBusMappingsCO2_e.SENSOR_BUS_MIXED_AIR_CO2
+        else -> ControlMote.CmSensorBusMappingsCO2_e.SENSOR_BUS_CO2_DISABLED
+    }
+}
+
+private fun getPressureMapping(mapping: Int): ControlMote.CmSensorBusMappingsPressure_e {
+    return when(mapping) {
+        1 -> ControlMote.CmSensorBusMappingsPressure_e.SENSOR_BUS_DUCT_STATIC_PRESSURE_1
+        2 -> ControlMote.CmSensorBusMappingsPressure_e.SENSOR_BUS_DUCT_STATIC_PRESSURE_2
+        3 -> ControlMote.CmSensorBusMappingsPressure_e.SENSOR_BUS_DUCT_STATIC_PRESSURE_3
+        else -> ControlMote.CmSensorBusMappingsPressure_e.SENSOR_BUS_PRESSURE_DISABLED
+    }
+}
+

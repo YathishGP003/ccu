@@ -45,11 +45,11 @@ public class VavTRSystem extends TRSystem
     
     private void buildSATTRSystem()
     {
-        satTRResponse = new SystemTrimResponseBuilder().setSP0(getSatTRTunerVal("spinit")).setSPmin(getSatTRTunerVal("spmin"))
-                                                       .setSPmax(getSatTRTunerVal("spmax")).setTd((int)getSatTRTunerVal("timeDelay"))//TODO- TEST
-                                                       .setT((int)getSatTRTunerVal("timeInterval")).setI((int)getSatTRTunerVal("ignoreRequest"))
-                                                       .setSPtrim(getSatTRTunerVal("sptrim")).setSPres(getSatTRTunerVal("spres"))
-                                                       .setSPresmax(getSatTRTunerVal("spresmax")).buildTRSystem();
+        satTRResponse = new SystemTrimResponseBuilder().setSP0(getSatTRTunerVal("spinit", "sat")).setSPmin(getSatTRTunerVal("spmin", "sat"))
+                                                       .setSPmax(getSatTRTunerVal("spmax", "sat")).setTd((int)getSatTRTunerVal("timeDelay", "sat"))//TODO- TEST
+                                                       .setT((int)getSatTRTunerVal("timeInterval", "sat")).setI((int)getSatTRTunerVal("ignoreRequest", "sat"))
+                                                       .setSPtrim(getSatTRTunerVal("sptrim", "sat")).setSPres(getSatTRTunerVal("spres", "sat"))
+                                                       .setSPresmax(getSatTRTunerVal("spresmax", "sat")).buildTRSystem();
         satTRProcessor = new TrimResponseProcessor(satTRResponse);
     }
     
@@ -68,11 +68,11 @@ public class VavTRSystem extends TRSystem
      *
      * */
     private void buildCO2TRSystem() {
-        co2TRResponse = new SystemTrimResponseBuilder().setSP0(getCO2TRTunerVal("spinit")).setSPmin(getCO2TRTunerVal("spmin"))
-                                                       .setSPmax(getCO2TRTunerVal("spmax")).setTd((int)getCO2TRTunerVal("timeDelay"))//TODO-TEST
-                                                       .setT((int)getCO2TRTunerVal("timeInterval")).setI((int)getCO2TRTunerVal("ignoreRequest"))
-                                                       .setSPtrim(getCO2TRTunerVal("sptrim")).setSPres(getCO2TRTunerVal("spres"))
-                                                       .setSPresmax(getCO2TRTunerVal("spresmax")).buildTRSystem();
+        co2TRResponse = new SystemTrimResponseBuilder().setSP0(getCO2TRTunerVal("spinit", "co2")).setSPmin(getCO2TRTunerVal("spmin", "co2"))
+                                                       .setSPmax(getCO2TRTunerVal("spmax", "co2")).setTd((int)getCO2TRTunerVal("timeDelay", "co2"))//TODO-TEST
+                                                       .setT((int)getCO2TRTunerVal("timeInterval", "co2")).setI((int)getCO2TRTunerVal("ignoreRequest", "co2"))
+                                                       .setSPtrim(getCO2TRTunerVal("sptrim", "co2")).setSPres(getCO2TRTunerVal("spres", "co2"))
+                                                       .setSPresmax(getCO2TRTunerVal("spresmax", "co2")).buildTRSystem();
         co2TRProcessor = new TrimResponseProcessor(co2TRResponse);
     }
     
@@ -90,11 +90,11 @@ public class VavTRSystem extends TRSystem
      * SPres-max    +0.10 inches
      * */
     private void buildSpTRSystem() {
-        spTRResponse = new SystemTrimResponseBuilder().setSP0(getSpTRTunerVal("spinit")).setSPmin(getSpTRTunerVal("spmin"))
-                                                      .setSPmax(getSpTRTunerVal("spmax")).setTd((int)getSpTRTunerVal("timeDelay"))//TODO-TEST
-                                                      .setT((int)getSpTRTunerVal("timeInterval")).setI((int)getSpTRTunerVal("ignoreRequest"))
-                                                      .setSPtrim(getSpTRTunerVal("sptrim")).setSPres(getSpTRTunerVal("spres"))
-                                                      .setSPresmax(getSpTRTunerVal("spresmax")).buildTRSystem();
+        spTRResponse = new SystemTrimResponseBuilder().setSP0(getSpTRTunerVal("spinit", "staticPressure")).setSPmin(getSpTRTunerVal("spmin", "staticPressure"))
+                                                      .setSPmax(getSpTRTunerVal("spmax", "staticPressure")).setTd((int)getSpTRTunerVal("timeDelay", "staticPressure"))//TODO-TEST
+                                                      .setT((int)getSpTRTunerVal("timeInterval", "staticPressure")).setI((int)getSpTRTunerVal("ignoreRequest", "staticPressure"))
+                                                      .setSPtrim(getSpTRTunerVal("sptrim", "staticPressure")).setSPres(getSpTRTunerVal("spres", "staticPressure"))
+                                                      .setSPresmax(getSpTRTunerVal("spresmax", "staticPressure")).buildTRSystem();
         spTRProcessor = new TrimResponseProcessor(spTRResponse);
     }
     
@@ -173,9 +173,14 @@ public class VavTRSystem extends TRSystem
     {
         return (double) hwstTRProcessor.getSetPoint();
     }
-    
-    public double getSatTRTunerVal(String trParam) {
+
+    public double getSatTRTunerVal(String trParam, String tunerType) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
+        if(hayStack.readEntity("system and equip and not modbus").containsKey("domainName")){
+            double tunerValue = getSystemTunerVal(trParam, hayStack, tunerType);
+            if(tunerValue != -1) return tunerValue;
+        }
+
         HashMap cdb = hayStack.read("point and system and tuner and tr and sat and " + trParam);
         if((cdb == null) || (cdb.size() == 0)) {
             cdb = hayStack.read("point and tuner and default and tr and sat and " + trParam);
@@ -214,11 +219,14 @@ public class VavTRSystem extends TRSystem
         return 0;
         //throw new IllegalStateException("Tuner not initialized");
     }
-    
-    public double getSpTRTunerVal(String trParam) {
+    public double getSpTRTunerVal(String trParam, String tunerType) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap cdb = hayStack.read("point and system and tuner and tr and staticPressure and "+trParam);
+        if(hayStack.readEntity("system and equip and not modbus").containsKey("domainName")){
+            double tunerValue = getSystemTunerVal(trParam, hayStack, tunerType);
+            if(tunerValue != -1) return tunerValue;
+        }
 
+        HashMap cdb = hayStack.read("point and system and tuner and tr and staticPressure and "+trParam);
         if(cdb == null)
             cdb = hayStack.read("point and default and tuner and tr and staticPressure and "+trParam);
         if(cdb != null && cdb.size() > 0) {
@@ -253,8 +261,12 @@ public class VavTRSystem extends TRSystem
         //throw new IllegalStateException("Tuner not initialized");
     }
     
-    public double getCO2TRTunerVal(String trParam) {
+    public double getCO2TRTunerVal(String trParam, String tunerType) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
+        if(hayStack.readEntity("system and equip and not modbus").containsKey("domainName")){
+            double tunerValue = getSystemTunerVal(trParam, hayStack, tunerType);
+            if(tunerValue != -1) return tunerValue;
+        }
         HashMap cdb = hayStack.read("point and system and tuner and tr and co2 and "+trParam);
         if(cdb == null)
             cdb = hayStack.read("point and default and tuner and tr and co2 and "+trParam);
@@ -289,5 +301,98 @@ public class VavTRSystem extends TRSystem
         }
         return 0;
         //throw new IllegalStateException("Tuner not initialized");
+    }
+
+    private double getSystemTunerVal(String trParam, CCUHsApi hayStack, String tunerType){
+        String domainName = getDomainName(trParam, tunerType);
+        HashMap cdb =  hayStack.readEntity("system and point and domainName == \"" + domainName + "\"");
+        if(cdb == null)
+            cdb = hayStack.read("point and default and tuner and tr and co2 and "+trParam);
+        if(cdb != null && cdb.size() > 0) {
+            ArrayList values = hayStack.readPoint(cdb.get("id").toString());
+            if (values != null && values.size() > 0) {
+                for (int l = 1; l <= values.size(); l++) {
+                    HashMap valMap = ((HashMap) values.get(l - 1));
+                    if (valMap.get("val") != null) {
+                        return Double.parseDouble(valMap.get("val").toString());
+                    }
+                }
+            }
+        }
+
+        return -1;
+    }
+
+    private String getDomainName(String trParam, String tunerType){ {
+            switch (tunerType) {
+                case "sat":
+                    switch (trParam) {
+                        case "spinit":
+                            return "satSpInit";
+                        case "spmin":
+                            return "satSpMin";
+                        case "spmax":
+                            return "satSpMax";
+                        case "spres":
+                            return "satSpRes";
+                        case "sptrim":
+                            return "satSpTrim";
+                        case "ignoreRequest":
+                            return "satIgnoreRequest";
+                        case "timeInterval":
+                            return "satTimeInterval";
+                        case "timeDelay":
+                            return "satTimeDelay";
+                        case "spresmax":
+                            return "satSpResMax";
+                    }
+                    break;
+                case "co2":
+                    switch (trParam) {
+                        case "spinit":
+                            return "co2SpInit";
+                        case "spmin":
+                            return "co2SpMin";
+                        case "spmax":
+                            return "co2SpMax";
+                        case "spres":
+                            return "co2SpRes";
+                        case "sptrim":
+                            return "co2SpTrim";
+                        case "ignoreRequest":
+                            return "co2IgnoreRequest";
+                        case "timeInterval":
+                            return "co2TimeInterval";
+                        case "timeDelay":
+                            return "co2TimeDelay";
+                        case "spresmax":
+                            return "co2SpResMax";
+                    }
+                    break;
+                case "staticPressure":
+                    switch (trParam) {
+                        case "spinit":
+                            return "staticPressureSpInit";
+                        case "spmin":
+                            return "staticPressureSpMin";
+                        case "spmax":
+                            return "staticPressureSpMax";
+                        case "spres":
+                            return "staticPressureSpRes";
+                        case "sptrim":
+                            return "staticPressureSpTrim";
+                        case "ignoreRequest":
+                            return "staticPressureIgnoreRequest";
+                        case "timeInterval":
+                            return "staticPressureTimeInterval";
+                        case "timeDelay":
+                            return "staticPressureTimeDelay";
+                        case "spresmax":
+                            return "staticPressureSpResMax";
+                    }
+                    break;
+            }
+            return trParam;
+        }
     }
 }

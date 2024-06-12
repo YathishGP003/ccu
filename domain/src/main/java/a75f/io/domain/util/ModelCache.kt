@@ -43,12 +43,6 @@ object ModelCache {
             loadVavZoneEquipModels()
         }
     }
-    private fun loadDeviceModelsAsync() {
-        CcuLog.i(Domain.LOG_TAG, "Load loadDeviceModelsAsync")
-        CoroutineScope(Dispatchers.IO).launch {
-
-        }
-    }
 
     private fun loadDeviceModels() {
         modelContainer[MODEL_SMART_NODE_DEVICE] = getModelById(MODEL_SMART_NODE_DEVICE)

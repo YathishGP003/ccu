@@ -1,7 +1,6 @@
 package com.felhr.usbserial;
 
 import java.io.OutputStream;
-import java.util.Arrays;
 
 public class SerialOutputStream extends OutputStream
 {

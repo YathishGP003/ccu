@@ -17,4 +17,14 @@ class ConnectDevice (deviceRef : String) : DomainDevice (deviceRef) {
     val analog2Out = PhysicalPoint(DomainName.analog2Out ,deviceRef)
     val analog3Out = PhysicalPoint(DomainName.analog3Out ,deviceRef)
     val analog4Out = PhysicalPoint(DomainName.analog4Out ,deviceRef)
+
+    val universal1In = PhysicalPoint(DomainName.universal1In ,deviceRef)
+    val universal2In = PhysicalPoint(DomainName.universal2In ,deviceRef)
+    val universal3In = PhysicalPoint(DomainName.universal3In ,deviceRef)
+    val universal4In = PhysicalPoint(DomainName.universal4In ,deviceRef)
+    val universal5In = PhysicalPoint(DomainName.universal5In ,deviceRef)
+    val universal6In = PhysicalPoint(DomainName.universal6In ,deviceRef)
+    val universal7In = PhysicalPoint(DomainName.universal7In ,deviceRef)
+    val universal8In = PhysicalPoint(DomainName.universal8In ,deviceRef)
+
 }

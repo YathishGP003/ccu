@@ -13,7 +13,7 @@ private val backfillPref = BackfillPref()
 fun addBackFillDurationPointIfNotExists(ccuHsApi: CCUHsApi) {
 
     val siteMap = ccuHsApi.readEntity(Tags.SITE)
-    val equipMap = ccuHsApi.readEntity("equip and system and not modbus")
+    val equipMap = ccuHsApi.readEntity("equip and system and not modbus and not connectModule")
     val equip = Equip.Builder().setHashMap(equipMap).build()
     val equipRef = equip.id
     val siteRef = Objects.requireNonNull(siteMap[Tags.ID]).toString()

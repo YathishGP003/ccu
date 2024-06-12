@@ -62,8 +62,8 @@ public class DeviceUpdateJob extends BaseJob implements WatchdogMonitor
         deviceStatusUpdateJob.scheduleJob("deviceStatusUpdateJob", Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
                         .getInt("control_loop_frequency",60), 45, TimeUnit.SECONDS);
 
-        //TODO - TEMP code for performance testing. Remove this code after testing
-        injectTestInputMessage();
+        //TODO - TEMP code for performance testing to simulate device load. Remove this code after performance issue resolved
+        //injectTestInputMessage();
     }
     
     public void doJob()

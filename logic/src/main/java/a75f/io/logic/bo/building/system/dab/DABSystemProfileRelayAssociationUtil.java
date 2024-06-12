@@ -14,7 +14,7 @@ import a75f.io.logic.bo.util.TemperatureMode;
 
 public class DABSystemProfileRelayAssociationUtil {
     public static boolean getDesiredTempDisplayMode(TemperatureMode modeType){
-        HashMap<Object, Object> equip = CCUHsApi.getInstance().readEntity("equip and system and not modbus");
+        HashMap<Object, Object> equip = CCUHsApi.getInstance().readEntity("equip and system and not modbus and not connectModule");
         Equip eq = new Equip.Builder().setHashMap(equip).build();
         switch (ProfileType.valueOf(eq.getProfile())) {
             case SYSTEM_DAB_STAGED_RTU:

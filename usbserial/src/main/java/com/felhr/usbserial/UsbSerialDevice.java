@@ -6,19 +6,17 @@ import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbEndpoint;
 import android.hardware.usb.UsbInterface;
 import android.hardware.usb.UsbRequest;
-import android.util.Log;
 
 import com.felhr.deviceids.CH34xIds;
 import com.felhr.deviceids.CP210xIds;
 import com.felhr.deviceids.FTDISioIds;
 import com.felhr.deviceids.PL2303Ids;
 
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import a75f.io.logger.CcuLog;
 
 public abstract class UsbSerialDevice implements UsbSerialInterface
 {
@@ -52,6 +50,11 @@ public abstract class UsbSerialDevice implements UsbSerialInterface
 	protected boolean asyncMode;
 	
 	public boolean isModbusDevice = false;
+
+	public static final String TAG_USB_SERIAL = "USB_SERIAL";
+	public static final String TAG_SERIAL_RAW = "SERIAL_RAW";
+	public static final String TAG_CCU_MODBUS = "CCU_MODBUS";
+	public static final String TAG_SERIAL_DEBUG = "SERIAL_DEBUG";
 	
 	// Get Android version if version < 4.3 It is not going to be asynchronous read operations
 	static
@@ -287,8 +290,6 @@ public abstract class UsbSerialDevice implements UsbSerialInterface
 							for (; nCount < nRet; nCount++) {
 								byte inData = inReg[nCount];
 								if (isModbusDevice) {
-									//byte[] data = {inData};
-									//onReceivedData(data, 1);
 									handleIncomigModbusData(inData);
 								} else {
 									handleIncomingSerialByte(inData);
@@ -299,7 +300,7 @@ public abstract class UsbSerialDevice implements UsbSerialInterface
 						requestIN.queue(serialBuffer.getReadBuffer(), SerialBuffer.DEFAULT_READ_BUFFER_SIZE);
 					}
 				}catch (NullPointerException e){
-					Log.e("USB_SERIAL","Exception on while invoking the requestWait() method.");
+					CcuLog.e(TAG_USB_SERIAL,"Exception on while invoking the requestWait() method.");
 					e.printStackTrace();
 				}
 			}
@@ -330,7 +331,7 @@ public abstract class UsbSerialDevice implements UsbSerialInterface
 						if (nIncomingCRC == nCRC)
 							curState = SerialState.CRC_RCVD;
 						else {
-							Log.d("SERIAL_RAW", "CRC Mismatch: Incoming: " + nIncomingCRC + "Calculated: " + nCRC);
+							CcuLog.w(TAG_SERIAL_RAW, "CRC Mismatch: Incoming: " + nIncomingCRC + "Calculated: " + nCRC);
 							curState = SerialState.BAD_PACKET;
 						}
 					} else if (nCurIndex < nDataLength) {
@@ -370,7 +371,7 @@ public abstract class UsbSerialDevice implements UsbSerialInterface
 			}
 			
 			if (curState == SerialState.BAD_PACKET) {
-				Log.d("SERIAL_RAW", "*******BAD PACKET RECEIVED*****");
+				CcuLog.w(TAG_SERIAL_RAW, "*******BAD PACKET RECEIVED*****");
 				nCurIndex = 0;
 				nCRC = 0;
 				curState = SerialState.PARSE_INIT;
@@ -422,7 +423,6 @@ public abstract class UsbSerialDevice implements UsbSerialInterface
 				case LEN_BYTE_RCVD:
 				case DATA_BYTE_RCVD:
 					modbusState = ModbusState.DATA_BYTE_RCVD;
-					//Log.d("CCU_MODBUS", "nCurIndex "+nCurIndex+" nDataLength "+nDataLength);
 					if (nDataLength == 0 ) {
 						modbusState = ModbusState.CRC_BYTE_RCVD;
 						inDataBuffer[nCurIndex++] = inData;
@@ -437,17 +437,16 @@ public abstract class UsbSerialDevice implements UsbSerialInterface
 					cancelTimer();
 					break;
 			}
-			//Log.d("CCU_MODBUS", " handleIncomigModbusData "+inData+" modbusState "+modbusState);
 			if (modbusState == ModbusState.DATA_AVAILABLE) {
-				Log.d("CCU_MODBUS", "USB SERIAL: Data Length "+(nCurIndex+1));
-				Log.d("CCU_MODBUS"," Packet Xfer Time "+(System.currentTimeMillis() - startTimeLog)+"ms");
+				CcuLog.d(TAG_CCU_MODBUS, "USB SERIAL: Data Length "+(nCurIndex+1));
+				CcuLog.d(TAG_CCU_MODBUS," Packet Xfer Time "+(System.currentTimeMillis() - startTimeLog)+"ms");
 				onReceivedData(inDataBuffer, nCurIndex+1);
 				nCurIndex = 0;
 				modbusState = ModbusState.PARSE_INIT;
 			}
 			
 			if (modbusState == ModbusState.BAD_PACKET) {
-				Log.d("SERIAL_RAW", "*******BAD PACKET RECEIVED*****");
+				CcuLog.w(TAG_SERIAL_RAW, "*******BAD PACKET RECEIVED*****");
 				nCurIndex = 0;
 				modbusState = ModbusState.PARSE_INIT;
 			}
@@ -569,7 +568,7 @@ public abstract class UsbSerialDevice implements UsbSerialInterface
 				
 				if(numberBytes > 0)
 				{
-					Log.d("CCU_MODBUS", " USB DATA READ "+numberBytes);
+					CcuLog.d(TAG_CCU_MODBUS, " USB DATA READ "+numberBytes);
 					dataReceived = serialBuffer.getDataReceivedCompatible(numberBytes);
 					
 					// FTDI devices reserve two first bytes of an IN endpoint with info about

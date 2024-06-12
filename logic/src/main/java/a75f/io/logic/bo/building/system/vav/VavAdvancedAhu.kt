@@ -44,6 +44,7 @@ import a75f.io.logic.bo.building.system.relayAssociationToDomainName
 import a75f.io.logic.bo.building.system.satControlIndexToDomainPoint
 import a75f.io.logic.bo.building.system.updatePressureSensorDerivedPoints
 import a75f.io.logic.bo.building.system.updateTemperatureSensorDerivedPoints
+import a75f.io.logic.bo.building.system.util.AhuSettings
 import a75f.io.logic.bo.building.system.util.getModulatedOutput
 import a75f.io.logic.tuners.TunerUtil
 import android.annotation.SuppressLint
@@ -60,6 +61,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
     private lateinit var cmStageStatus : Array<Pair<Int, Int>>
     private lateinit var connectStageStatus : Array<Pair<Int, Int>>
     private lateinit var conditioningMode : SystemMode
+    private lateinit var ahuSettings: AhuSettings
 
     private var systemSatCoolingLoopOp = 0.0
     private var systemSatHeatingLoopOp = 0.0
@@ -259,16 +261,26 @@ open class VavAdvancedAhu : VavSystemProfile() {
         systemSatHeatingLoopOp = getSystemSatHeatingLoop().coerceIn(0.0, 100.0)
         staticPressureFanLoopOp = getSystemStaticPressureFanLoop().coerceIn(0.0, 100.0)
         systemCo2LoopOp = if (isSystemOccupiedForDcv) getCo2Loop() else 0.0
-
+        ahuSettings = getAhuSettings()
 
         if (advancedAhuImpl.isEmergencyShutOffEnabledAndActive() || conditioningMode == SystemMode.OFF) {
             resetSystem()
         } else {
+            updateLoopOpPoints()
             updateOutputPorts()
         }
-        updateLoopOpPoints()
         dumpLoops()
         updateSystemStatus()
+    }
+
+    private fun getAhuSettings(): AhuSettings {
+        return AhuSettings(
+            systemEquip = systemEquip,
+            conditioningMode = conditioningMode,
+            isMechanicalCoolingAvailable = !(systemEquip.mechanicalCoolingAvailable.readHisVal() > 0),
+            isMechanicalHeatingAvailable = !(systemEquip.mechanicalHeatingAvailable.readHisVal() > 0),
+            isEmergencyShutoffActive = isEmergencyShutoffActive()
+        )
     }
 
     private fun updateLoopOpPoints() {
@@ -303,6 +315,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
             systemFanLoopOp = 0.0
             systemCo2LoopOp = 0.0
         }
+        updateLoopOpPoints()
     }
 
     private fun dumpLoops() {
@@ -401,17 +414,17 @@ open class VavAdvancedAhu : VavSystemProfile() {
 
     private fun getSystemSatCoolingLoop() : Double {
         if (!analogControlsEnabled.contains(AdvancedAhuAnalogOutAssociationType.SAT_COOLING)) {
-            CcuLog.d(L.TAG_CCU_SYSTEM, "SAT_COOLING")
+            CcuLog.d(L.TAG_CCU_SYSTEM, "Sat cooling control not enabled")
             return 0.0
         }
         val satControlPoint = getSatControlPoint()
         return if (VavSystemController.getInstance().getSystemState() == SystemController.State.COOLING
-                && (conditioningMode == SystemMode.COOLONLY || conditioningMode == SystemMode.AUTO)) {
+                && (conditioningMode == SystemMode.COOLONLY || conditioningMode == SystemMode.AUTO)
+                && (systemEquip.mechanicalCoolingAvailable.readHisVal() > 0)) {
             val satSpMax = systemEquip.systemCoolingSatMax.readDefaultVal()
             val satSpMin = systemEquip.systemCoolingSatMin.readDefaultVal()
             val coolingSatSp = roundOff(satSpMax - systemCoolingLoopOp * (satSpMax - satSpMin) / 100)
             systemEquip.airTempCoolingSp.writeHisVal(coolingSatSp)
-
             systemEquip.airTempHeatingSp.writeHisVal(systemEquip.systemHeatingSatMin.readDefaultVal())
             CcuLog.d(L.TAG_CCU_SYSTEM, "coolingSatSpMax :$satSpMax coolingSatSpMin: " +
                     "$satSpMin satSensorVal $satControlPoint coolingSatSp: $coolingSatSp")
@@ -421,6 +434,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
                 0.0
             }
         } else {
+            CcuLog.d(L.TAG_CCU_SYSTEM, "airTempCoolingSp : ${systemEquip.systemCoolingSatMax.readDefaultVal()}")
             systemEquip.airTempCoolingSp.writeHisVal(systemEquip.systemCoolingSatMax.readDefaultVal())
             0.0
         }
@@ -428,12 +442,13 @@ open class VavAdvancedAhu : VavSystemProfile() {
 
     private fun getSystemSatHeatingLoop() : Double {
         if (!analogControlsEnabled.contains(AdvancedAhuAnalogOutAssociationType.SAT_HEATING)) {
-            CcuLog.d(L.TAG_CCU_SYSTEM, "SAT_HEATING control not enabled")
+            CcuLog.d(L.TAG_CCU_SYSTEM, "Sat heating control not enabled")
             return 0.0
         }
         val satControlPoint = getSatControlPoint()
         return if (VavSystemController.getInstance().getSystemState() == SystemController.State.HEATING
-                && (conditioningMode == SystemMode.HEATONLY || conditioningMode == SystemMode.AUTO)) {
+                && (conditioningMode == SystemMode.HEATONLY || conditioningMode == SystemMode.AUTO)
+                && (systemEquip.mechanicalHeatingAvailable.readHisVal() > 0)) {
             val satSpMax = systemEquip.systemHeatingSatMax.readDefaultVal()
             val satSpMin = systemEquip.systemHeatingSatMin.readDefaultVal()
             val heatingSatSp = roundOff(getModulatedOutput(systemHeatingLoopOp, satSpMin, satSpMax))
@@ -446,8 +461,8 @@ open class VavAdvancedAhu : VavSystemProfile() {
             } else {
                 0.0
             }
-
         } else {
+            CcuLog.d(L.TAG_CCU_SYSTEM, "airTempHeatingSp : ${systemEquip.systemHeatingSatMin.readDefaultVal()}")
             systemEquip.airTempHeatingSp.writeHisVal(systemEquip.systemHeatingSatMin.readDefaultVal())
             0.0
         }
@@ -582,12 +597,14 @@ open class VavAdvancedAhu : VavSystemProfile() {
             (analogControlsEnabled.contains(AdvancedAhuAnalogOutAssociationType.PRESSURE_FAN) && staticPressureFanLoopOp > 0)) {
             analogStatus.append("| Fan ON ")
         }
-        if ((analogControlsEnabled.contains(AdvancedAhuAnalogOutAssociationType.LOAD_COOLING) && systemCoolingLoopOp > 0) ||
-            (analogControlsEnabled.contains(AdvancedAhuAnalogOutAssociationType.SAT_COOLING) && systemSatCoolingLoopOp > 0)) {
+        if ((systemEquip.mechanicalCoolingAvailable.readHisVal() > 0) &&
+            ((analogControlsEnabled.contains(AdvancedAhuAnalogOutAssociationType.LOAD_COOLING) && systemCoolingLoopOp > 0 ) ||
+            (analogControlsEnabled.contains(AdvancedAhuAnalogOutAssociationType.SAT_COOLING) && systemSatCoolingLoopOp > 0))) {
             analogStatus.append("| Cooling ON ")
         }
-        if ((analogControlsEnabled.contains(AdvancedAhuAnalogOutAssociationType.LOAD_HEATING) && systemHeatingLoopOp > 0) ||
-            ( analogControlsEnabled.contains(AdvancedAhuAnalogOutAssociationType.SAT_HEATING) && systemSatHeatingLoopOp > 0)) {
+        if ((systemEquip.mechanicalHeatingAvailable.readHisVal() > 0) &&
+            ((analogControlsEnabled.contains(AdvancedAhuAnalogOutAssociationType.LOAD_HEATING) && systemHeatingLoopOp > 0) ||
+            ( analogControlsEnabled.contains(AdvancedAhuAnalogOutAssociationType.SAT_HEATING) && systemSatHeatingLoopOp > 0))) {
             analogStatus.append("| Heating ON ")
         }
         if (analogStatus.isNotEmpty()) {
@@ -738,7 +755,10 @@ open class VavAdvancedAhu : VavSystemProfile() {
         associationMap.forEach { (analogOut: Point, association: Point) ->
             if (analogOut.readDefaultVal() > 0) {
                 val domainEquip = if (isConnectEquip) systemEquip.connectEquip1 else systemEquip
-                val (physicalValue,logicalValue) = advancedAhuImpl.getAnalogLogicalPhysicalValue(analogOut, association, domainEquip)
+                val (physicalValue,logicalValue) = advancedAhuImpl.getAnalogLogicalPhysicalValue(
+                        analogOut, association, ahuSettings, domainEquip
+                )
+
                 CcuLog.d(L.TAG_CCU_SYSTEM, "New analogOutValue ${analogOut.domainName} physicalValue: $physicalValue logicalValue: $logicalValue")
                 physicalMap?.get(analogOut)?.writeHisVal(physicalValue * 10)
 
@@ -772,9 +792,9 @@ open class VavAdvancedAhu : VavSystemProfile() {
         CcuLog.d(L.TAG_CCU_SYSTEM, "updatePointsDbVal")
         val stageStatus = if (isConnectEquip) connectStageStatus else cmStageStatus
         stageStatus.forEachIndexed { index, status ->
+            val domainName = relayAssociationToDomainName(index)
             if (status.first < status.second) {
                 //Stage is going up
-                val domainName = relayAssociationToDomainName(index)
                 CcuLog.d(L.TAG_CCU_SYSTEM, "Stage up detected for $domainName")
                 val associationType = relayAssociationDomainNameToType(domainName)
                 if (associationType.isConditioningStage() && isConditioningActive(associationType)) {
@@ -789,7 +809,6 @@ open class VavAdvancedAhu : VavSystemProfile() {
                 }
             } else if (status.first > status.second) {
                 //Stage is going down
-                val domainName = relayAssociationToDomainName(index)
                 CcuLog.d(L.TAG_CCU_SYSTEM, "Stage down detected for $domainName")
                 val associationType = relayAssociationDomainNameToType(domainName)
                 if (associationType.isConditioningStage() && isConditioningActive(associationType)) {
@@ -802,9 +821,33 @@ open class VavAdvancedAhu : VavSystemProfile() {
                 } else {
                     updatePointVal(domainName, index, status.second, isConnectEquip)
                 }
+            } else {
+                updatePointVal(domainName, index, status.second, isConnectEquip)
+            }
+        }
+        updateLogicalToPhysical(isConnectEquip)
+    }
+
+    private fun updateLogicalToPhysical(isConnectEquip : Boolean) {
+        if (isConnectEquip) {
+            getConnectRelayAssociationMap(systemEquip).forEach { (relay, association) ->
+                if (relay.readDefaultVal() > 0) {
+                    val domainName = relayAssociationToDomainName(association.readDefaultVal().toInt())
+                    val physicalPoint = getConnectRelayLogicalPhysicalMap(systemEquip.connectEquip1, Domain.connect1Device)[relay]
+                    physicalPoint?.writeHisVal(getDomainPointForName(domainName, systemEquip.connectEquip1).readHisVal())
+                }
+            }
+        } else {
+            // sync logical to physical
+            getCMRelayAssociationMap(systemEquip).forEach { (relay, association) ->
+                if (relay.readDefaultVal() > 0) {
+                    val domainName = relayAssociationToDomainName(association.readDefaultVal().toInt())
+                    getCMRelayLogicalPhysicalMap(systemEquip)[relay]?.writeHisVal(getDomainPointForName(domainName, systemEquip).readHisVal())
+                }
             }
         }
     }
+
 
     private fun isConditioningActive(type : AdvancedAhuRelayAssociationType) : Boolean {
         return when(type) {
@@ -828,7 +871,6 @@ open class VavAdvancedAhu : VavSystemProfile() {
     private fun isStageDownTimerActive() : Boolean = stageDownTimer > 0
 
     private fun updatePointVal(domainName: String, stageIndex : Int, pointVal : Int, isConnectEquip : Boolean) {
-        CcuLog.d(L.TAG_CCU_SYSTEM, "Update output $domainName $stageIndex $pointVal")
         if (isConnectEquip) {
             updateConnectPointVal(domainName, stageIndex, pointVal)
         } else {
@@ -836,7 +878,6 @@ open class VavAdvancedAhu : VavSystemProfile() {
         }
     }
     private fun updateCMPointVal(domainName: String, stageIndex : Int, pointVal : Int) {
-        CcuLog.d(L.TAG_CCU_SYSTEM, "updateCMPointVal $domainName $stageIndex $pointVal")
         getDomainPointForName(domainName, systemEquip).writeHisVal(pointVal.toDouble())
         getCMRelayAssociationMap(systemEquip).forEach { (relay, association) ->
             if (association.readDefaultVal() == stageIndex.toDouble() && relay.readDefaultVal() > 0) {
@@ -855,17 +896,15 @@ open class VavAdvancedAhu : VavSystemProfile() {
     }
 
     @SuppressLint("SuspiciousIndentation")
-    fun getUnit(domainName: String) : String? {
-        domainName.readPoint(systemEquip.equipRef)?.let {
+    fun getUnit(domainName: String) : String {
+        domainName.readPoint(systemEquip.equipRef).let {
             return it["unit"].toString()
         }
-        return ""
     }
 
     private fun resetSystem() {
         reset() // Resetting PI the loop variables
         resetLoops()
-        updateOutputPorts()
         resetOutput()
     }
 
@@ -876,12 +915,24 @@ open class VavAdvancedAhu : VavSystemProfile() {
             getDomainPointForName(domainName, systemEquip).writeHisVal(0.0)
             getCMRelayLogicalPhysicalMap(systemEquip)[relay]?.writeHisVal(0.0)
         }
+
+        updateAnalogOutputPorts(getCMAnalogAssociationMap(systemEquip), getAnalogOutLogicalPhysicalMap(), false)
+
         if (!systemEquip.connectEquip1.equipRef.contentEquals("null")) {
             getConnectRelayAssociationMap(systemEquip).entries.forEach {(relay, association) ->
                 val domainName = relayAssociationToDomainName(association.readDefaultVal().toInt())
-                getDomainPointForName(domainName, systemEquip).writeHisVal(0.0)
+                getDomainPointForName(domainName, systemEquip.connectEquip1).writeHisVal(0.0)
                 getConnectRelayLogicalPhysicalMap(systemEquip.connectEquip1, Domain.connect1Device)[relay]?.writeHisVal(0.0)
             }
+
+            updateAnalogOutputPorts(
+                    getConnectAnalogAssociationMap(systemEquip),
+                    getConnectAnalogOutLogicalPhysicalMap(
+                            systemEquip.connectEquip1,
+                            Domain.connect1Device,
+                    ),
+                    true
+            )
         }
     }
 
@@ -889,6 +940,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
         try {
             CcuLog.i(L.TAG_CCU_SYSTEM, "Test mode is active ${Globals.getInstance().isTestMode}")
             CcuLog.i(L.TAG_CCU_SYSTEM, "Operating mode ${VavSystemController.getInstance().systemState}")
+            CcuLog.i(L.TAG_CCU_SYSTEM, "Conditioning  mode $conditioningMode")
             getCMRelayAssociationMap(systemEquip).entries.forEach { (relay, association) ->
                 val logical = relayAssociationToDomainName(association.readDefaultVal().toInt())
                 CcuLog.i(L.TAG_CCU_SYSTEM,

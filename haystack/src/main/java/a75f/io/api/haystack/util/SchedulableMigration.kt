@@ -22,9 +22,9 @@ fun setDiagMigrationVal() {
     if(validateMigration()){
         hayStack.writeDefaultVal("point and diag and migration", version)
         val pointmig = hayStack.readEntity("point and diag and migration")
-        Log.d("CCU_SCHEDULABLE", "Diag Point Id is =  "+pointmig.get("id")+  " Value is set to " + version)
+       CcuLog.i("CCU_SCHEDULABLE", "Diag Point Id is =  "+pointmig.get("id")+  " Value is set to " + version)
     }else{
-        Log.d("CCU_SCHEDULABLE", "Diag Point is not Set")
+       CcuLog.i("CCU_SCHEDULABLE", "Diag Point is not Set")
     }
 }
 
@@ -46,7 +46,7 @@ fun deleteDuplication(
                         //delete the duplicate userlimit
                         //copy the limit value.
                         //if dulpicate zone Schedule- clear.
-                        Log.d("CCU_SCHEDULABLE", "Delete Schedule"+ zoneSchedule["id"].toString() )
+                       CcuLog.i("CCU_SCHEDULABLE", "Delete Schedule"+ zoneSchedule["id"].toString() )
                         hayStack.deleteEntity(zoneSchedule["id"].toString())
                     }
                 }
@@ -58,7 +58,7 @@ fun deleteDuplication(
         }
     }
 
-    Log.d("SCHEDULE_MIGRATION", "Complete")
+   CcuLog.i("SCHEDULE_MIGRATION", "Complete")
 
 }
 fun deleteDuplicateLimits(roomRef: String) {
@@ -84,7 +84,7 @@ fun retainAndRemove(entitiesToRemoveDuplication: ArrayList<HashMap<Any, Any>>) {
         val limitToKeep = entitiesToRemoveDuplication.get(0)
         for (limit in entitiesToRemoveDuplication){
             if(!(limit["id"].toString().equals((limitToKeep.get("id").toString())))){
-                Log.d("CCU_SCHEDULABLE", "Delete limit"+ limit["id"].toString())
+               CcuLog.i("CCU_SCHEDULABLE", "Delete limit"+ limit["id"].toString())
                 hayStack.deleteEntity(limit["id"].toString())
             }
         }
@@ -94,7 +94,7 @@ fun retainAndRemove(entitiesToRemoveDuplication: ArrayList<HashMap<Any, Any>>) {
 }
 fun importSchedules() {
     GlobalScope.launch(Dispatchers.IO + coroutineExceptionHandler) {
-        Log.d("CCU_SCHEDULABLE", "Update schedule object start")
+       CcuLog.i("CCU_SCHEDULABLE", "Update schedule object start")
         val siteUID = hayStack.siteIdRef.toString()
         val hClient =
             HClient(hayStack.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS)
@@ -107,11 +107,11 @@ fun importSchedules() {
             zoneRefSet.add(zone.get("id").toString())
         }
 
-        Log.d("CCU_SCHEDULABLE", "zoneRefSet = " + zoneRefSet)
+       CcuLog.i("CCU_SCHEDULABLE", "zoneRefSet = " + zoneRefSet)
 
         val retryCountCallback =
             RetryCountCallback { retryCount: Int ->
-                Log.i(
+               CcuLog.i(
                     "CCU_SCHEDULABLE",
                     "retrying to get CCU list with the retry count $retryCount"
                 )
@@ -126,7 +126,7 @@ fun importSchedules() {
        // clearScheduleType(zoneRefSet)
 
 
-        Log.d("CCU_SCHEDULABLE", "Update schedule object completed")
+       CcuLog.i("CCU_SCHEDULABLE", "Update schedule object completed")
         setZoneEnabled()
         updateZoneScheduleWithinBuildingSchedule(CCUHsApi.getInstance())
     }
@@ -141,20 +141,20 @@ fun setZoneEnabled() {
     val zoneSchedules = hayStack.readAllEntities("zone and schedule and not special and not vacation")
 
     for(zoneSchedule in zoneSchedules){
-        Log.d("CCU_SCHEDULABLE", "Enabling =" + zoneSchedule.get("id").toString())
+       CcuLog.i("CCU_SCHEDULABLE", "Enabling =" + zoneSchedule.get("id").toString())
         val s = hayStack.getScheduleById(zoneSchedule.get("id").toString())
         if(CCUHsApi.getInstance().isEntityExisting(s.getRoomRef()) && zoneSchedule["unoccupiedZoneSetback"] != null) {
             s.setDisabled(false)
             CCUHsApi.getInstance().updateZoneSchedule(s, zoneSchedule.get("roomRef").toString())
-            Log.d("CCU_SCHEDULABLE", "Enabled =" + s.toString())
+           CcuLog.i("CCU_SCHEDULABLE", "Enabled =" + s.toString())
         }
 
     }
-    Log.d("CCU_SCHEDULABLE", "Enable Zone Schedule completed")
+   CcuLog.i("CCU_SCHEDULABLE", "Enable Zone Schedule completed")
 }
 
 fun doPointWriteForSchedulable(){
-    Log.d("CCU_SCHEDULABLE", "PointWrite Schedulable")
+   CcuLog.i("CCU_SCHEDULABLE", "PointWrite Schedulable")
     val schedulabaledata: ArrayList<HashMap<Any, Any>> = hayStack.readAllSchedulable()
     val hDicts = java.util.ArrayList<HDict>()
     for (m in schedulabaledata) {

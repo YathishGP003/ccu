@@ -99,7 +99,7 @@ public class PlcEquip {
         String tz = siteMap.get("tz").toString();
         String equipDis = siteDis + "-PID-" + nodeAddr;
         String ahuRef = null;
-        HashMap systemEquip = hayStack.read("equip and system and not modbus");
+        HashMap systemEquip = hayStack.read("equip and system and not modbus and not connectModule");
         if (systemEquip != null && systemEquip.size() > 0) {
             ahuRef = systemEquip.get("id").toString();
         }

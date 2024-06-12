@@ -105,9 +105,11 @@ class ConnectModuleEquip (equipRef : String) : DomainEquip(equipRef) {
     val supplyAirTemperature1 = Point(DomainName.supplyAirTemperature1, equipRef)
     val supplyAirTemperature2 = Point(DomainName.supplyAirTemperature2, equipRef)
     val supplyAirTemperature3 = Point(DomainName.supplyAirTemperature3, equipRef)
-    val ductStaticPressure1 = Point(DomainName.ductStaticPressure1, equipRef)
+
+   /*  val ductStaticPressure1 = Point(DomainName.ductStaticPressure1, equipRef)
     val ductStaticPressure2 = Point(DomainName.ductStaticPressure2, equipRef)
     val ductStaticPressure3 = Point(DomainName.ductStaticPressure3, equipRef)
+    */
 
     val returnAirHumidity = Point(DomainName.returnAirHumidity, equipRef)
     val mixedAirHumidity = Point(DomainName.mixedAirHumidity, equipRef)

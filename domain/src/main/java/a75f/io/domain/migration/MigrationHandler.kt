@@ -322,16 +322,16 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
                             haystack.updatePoint(hayStackPoint, point["id"].toString())
                             DomainManager.addPoint(hayStackPoint)
                         }
-                    }
-                    try {
-                        updatePointAssociation(modelPointDef, hayStackPoint, point["id"].toString())
-                    } catch (e: Exception) {
-                        /*
+                        try {
+                            updatePointAssociation(modelPointDef, hayStackPoint, point["id"].toString())
+                        } catch (e: Exception) {
+                            /*
                        * Since we are unsure about the specific exception to catch here, we use the generic Exception class instead.
                        * we need to revisit this and add a proper exception handling
                         */
-                        CcuLog.d(Domain.LOG_TAG, "Update point Association is failed : "+point["id"].toString())
-                        e.printStackTrace()
+                            CcuLog.d(Domain.LOG_TAG, "Update point Association is failed : " + point["id"].toString())
+                            e.printStackTrace()
+                        }
                     }
                 }
             }

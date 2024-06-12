@@ -125,15 +125,18 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         listOfDesiredTempPoints.forEach { desiredTempPoint ->
             val desiredTempPointId : String = desiredTempPoint["id"].toString()
             val priorityGrid : HGrid? = hayStack.readPointArrRemote(desiredTempPointId)
+            var isCleared = false
             priorityGrid?.let { grid ->
                 val iterator: MutableIterator<HRow?>? = grid.iterator() as MutableIterator<HRow?>?
                 while (iterator!=null && iterator.hasNext()) {
                     val r: HRow? = iterator.next()
                     if ((isLevelCleanable(r) && isLevelToBeCleared(r)) || isAutoAwayMappedToDemandResponseLevel(r)) {
                         hayStack.clearPointArrayLevel(desiredTempPointId, r!!.getInt("level"), false)
+                        isCleared = true
                     }
                 }
             }
+            if(isCleared) { hayStack.writeHisValById(desiredTempPointId, hayStack.readPointPriorityVal(desiredTempPointId)) }
         }
     }
 

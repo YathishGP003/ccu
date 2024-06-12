@@ -4,7 +4,6 @@ import a75f.io.domain.api.Domain
 import a75f.io.domain.util.*
 import a75f.io.domain.util.ResourceHelper
 import a75f.io.logger.CcuLog
-import android.util.Log
 import io.seventyfivef.domainmodeler.client.ModelDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFEquipDirective
@@ -30,7 +29,7 @@ class ModelValidator {
                 val isValidDefinition = isValidaModel(it, path)
                 if (!isValidDefinition) {
                     inValidModels.add(it)
-                    Log.i(Domain.LOG_TAG, "Invalid Model $it")
+                    CcuLog.i(Domain.LOG_TAG, "Invalid Model $it")
                 }
             }
             return inValidModels
@@ -82,7 +81,10 @@ class ModelValidator {
                 MODEL_SMART_NODE_DEVICE,
                 MODEL_HELIO_NODE_DEVICE,
                 MODEL_EXTERNAL_AHU_DAB,
-                MODEL_EXTERNAL_AHU_VAV
+                MODEL_EXTERNAL_AHU_VAV,
+                MODEL_VAV_STAGED_RTU,
+                MODEL_VAV_STAGED_VFD_RTU,
+                MODEL_VAV_MODULATING_AHU
             )
         }
     }

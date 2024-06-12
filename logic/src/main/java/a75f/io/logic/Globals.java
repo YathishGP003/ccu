@@ -103,6 +103,7 @@ public class Globals {
     private static final String RESTART_CCU = "restart_ccu";
     private static final String RESTART_TABLET = "restart_tablet";
     private static final String DOMAIN_MODEL_SF = "domain_model_sf";
+    public int selectedTab;
 
     public static final class IntentActions {
         public static final String LSERIAL_MESSAGE = "a75f.io.intent.action.LSERIAL_MESSAGE";
@@ -827,5 +828,9 @@ public class Globals {
 
     public void unRegisterOnCcuInitCompletedListener(OnCcuInitCompletedListener listener) {
         initCompletedListeners.remove(listener);
+    }
+
+    public int getSelectedTab(){
+        return selectedTab;
     }
 }

@@ -343,15 +343,11 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                     menuToggle.setVisibility(View.VISIBLE);
                     floorMenu.setVisibility(View.GONE);
                     startCountDownTimer(INTERVAL);
-                }
-
-                else if(i==2 && mViewPager.getAdapter().instantiateItem(mViewPager,i) instanceof SettingsFragment){
+                } else if(i==2 && mViewPager.getAdapter().instantiateItem(mViewPager,i) instanceof SettingsFragment){
                     menuToggle.setVisibility(View.VISIBLE);
                     floorMenu.setVisibility(View.GONE);
                     startCountDownTimer(INTERVAL);
-                }
-
-                else if (i == 0 && mViewPager.getAdapter().instantiateItem(mViewPager, i) instanceof ZoneFragmentNew){
+                } else if (i == 0 && mViewPager.getAdapter().instantiateItem(mViewPager, i) instanceof ZoneFragmentNew){
                     if (isZonePassWordRequired()) {
                         showRequestPasswordAlert("Zone Settings Authentication", getString(R.string.ZONE_SETTINGS_PASSWORD_KEY), i);
                     }
@@ -377,6 +373,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                     menuToggle.setVisibility(View.GONE);
                     startCountDownTimer(INTERVAL);
                 }
+                Globals.getInstance().selectedTab = i;
             }
 
             @Override

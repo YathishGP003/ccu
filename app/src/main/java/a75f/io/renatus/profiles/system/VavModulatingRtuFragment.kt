@@ -6,8 +6,8 @@ import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.renatus.R
 import a75f.io.renatus.composables.DropDownWithLabel
-import a75f.io.renatus.composables.IndeterminateLoopProgress
 import a75f.io.renatus.compose.ComposeUtil
+import a75f.io.renatus.util.ProgressDialogUtils
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -41,7 +41,7 @@ import kotlinx.coroutines.withContext
 class VavModulatingRtuFragment : ModulatingRtuFragment() {
 
     private val vavModulatingViewModel: VavModulatingRtuViewModel by viewModels()
-
+    private val SYSTEM_CONFIG_TAB: Int = 1
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
@@ -77,10 +77,13 @@ class VavModulatingRtuFragment : ModulatingRtuFragment() {
     @Composable
     fun RootView() {
         if (!vavModulatingViewModel.modelLoaded) {
-            IndeterminateLoopProgress(bottomText = "Loading System Profile")
+            if(Globals.getInstance().getSelectedTab() == SYSTEM_CONFIG_TAB) {
+                ProgressDialogUtils.showProgressDialog(context, "Loading System Profile")
+            }
             CcuLog.i(Domain.LOG_TAG, "Show Progress")
             return
         }
+        ProgressDialogUtils.hideProgressDialog()
         val viewState = vavModulatingViewModel.viewState
         LazyColumn(
             modifier = Modifier

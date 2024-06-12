@@ -10,11 +10,8 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 
 import a75f.io.alerts.AlertManager;
-import a75f.io.alerts.AlertsDataStore;
 import a75f.io.api.haystack.CCUHsApi;
-import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
-import a75f.io.renatus.util.Prefs;
 import dagger.hilt.android.HiltAndroidApp;
 
 import androidx.multidex.MultiDex;
@@ -31,6 +28,7 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+
 /**
  * Created by ryanmattison isOn 7/24/17.
  */
@@ -104,11 +102,12 @@ public class RenatusApp extends UtilityApplication
 					Log.d(TAG_CCU_DOWNLOAD, "RenatusAPP ExecuteAsRoot===>"+isRooted()+","+(appInfo.flags & ApplicationInfo.FLAG_SYSTEM));
 					if(isRooted()) {
 						Process p = Runtime.getRuntime().exec("su");
+						InputStream stdout = p.getInputStream();
 						InputStream es = p.getErrorStream();
 						DataOutputStream os = new DataOutputStream(p.getOutputStream());
 
 						for (String command : commands) {
-							//Log.i(TAG,command);
+							Log.d(TAG_CCU_DOWNLOAD, "ExecuteAsRoot: Preparing command: " + command);
 							os.writeBytes(command + "\n");
 						}
 						os.writeBytes("exit\n");
@@ -117,17 +116,32 @@ public class RenatusApp extends UtilityApplication
 
 						int read;
 						byte[] buffer = new byte[4096];
-						String output = new String();
+						String errorOutput = new String();
+
+						// Read stderr
 						while ((read = es.read(buffer)) > 0) {
-							output += new String(buffer, 0, read);
+							errorOutput += new String(buffer, 0, read);
 						}
+
+						// Read stdout
+						String stdOutput = new String();
+						while ((read = stdout.read(buffer)) > 0) {
+							stdOutput += new String(buffer, 0, read);
+						}
+
 						p.waitFor();
-						Log.d(TAG_CCU_DOWNLOAD, output.trim() + " (" + p.exitValue() + ")");
+
+						Log.d(TAG_CCU_DOWNLOAD, "ExecuteAsRoot stdout: " + stdOutput.trim());
+						Log.d(TAG_CCU_DOWNLOAD, "ExecuteAsRoot stderr: " + errorOutput.trim() + " (exit status: " + p.exitValue() + ")");
+
 						ApplicationInfo appInfo2 = RenatusApp.getAppContext().getApplicationInfo();
 						Log.d(TAG_CCU_DOWNLOAD, "RenatusAPP ExecuteAsRoot END===>"+(appInfo2.flags & ApplicationInfo.FLAG_SYSTEM));
 						if (restartCCUAppAfterInstall) {
 							restartApp();
 						}
+					} else {
+						// Two semicolons in case one of the commands is actually multiple commands separated by a semicolon
+						Log.e(TAG_CCU_DOWNLOAD, "Tablet is NOT rooted, unable to execute remote commands:" + String.join(";; ", commands));
 					}
 				} catch (IOException e) {
 					Log.e(TAG_CCU_DOWNLOAD, e.getMessage());

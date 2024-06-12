@@ -3,7 +3,7 @@ syntax = "proto3";
 option java_package = "a75f.io.device";
 option java_outer_classname = "ControlMote";
 
-// version = 0.1
+// version = 0.5
 enum CmRelayMappingStages_e {
   RELAY_NOT_ENABLED = 0;
   COOLING_STAGE_1 = 1;
@@ -68,16 +68,55 @@ enum CmAnalogInMappingStages_e {
   AN_DUCT_STATIC_PRESSURE_WC10_3 = 20;
 }
 
-enum CmSensorBusMappings_e {
-  SENSOR_BUS_DISABLED = 0;
-  SENSOR_BUS_SAT1     = 1;
-  SENSOR_BUS_SAT2     = 2;
-  SENSOR_BUS_SAT3     = 3;
-  SENSOR_BUS_DSP1     = 4;
-  SENSOR_BUS_DSP2     = 5;
-  SENSOR_BUS_DSP3     = 6;
-  SENSOR_BUS_NUM_OF   = 7;
+
+// Sensor bus mapping options for temperature
+enum CmSensorBusMappingsTemp_e {
+  SENSOR_BUS_TEMP_DISABLED   = 0;
+  SENSOR_BUS_RETURN_AIR_TEMP = 1;
+  SENSOR_BUS_MIXED_AIR_TEMP  = 2;
+  SENSOR_BUS_SUPPLY_AIR_TEMP_1 = 3;
+  SENSOR_BUS_SUPPLY_AIR_TEMP_2 = 4;
+  SENSOR_BUS_SUPPLY_AIR_TEMP_3 = 5;
+  SENSOR_BUS_TEMP_NUM_OF   = 6;
 }
+
+// Sensor bus mapping options for Humidity
+enum CmSensorBusMappingsHumi_e {
+  SENSOR_BUS_HUMI_DISABLED   = 0;
+  SENSOR_BUS_RETURN_AIR_HUMI = 1;
+  SENSOR_BUS_MIXED_AIR_HUMI  = 2;
+  SENSOR_BUS_SUPPLY_AIR_HUMI_1 = 3;
+  SENSOR_BUS_SUPPLY_AIR_HUMI_2 = 4;
+  SENSOR_BUS_SUPPLY_AIR_HUMI_3 = 5;
+  SENSOR_BUS_HUMI_NUM_OF   = 6;
+}
+
+// Sensor bus mapping options for Occupancy
+enum CmSensorBusMappingsOccupancy_e {
+  SENSOR_BUS_OCCUPANCY_DISABLED   = 0;
+  SENSOR_BUS_OCCUPANCY_1 = 1;
+  SENSOR_BUS_OCCUPANCY_2 = 2;
+  SENSOR_BUS_OCCUPANCY_3 = 3;
+  SENSOR_BUS_OCCUPANCY_NUM_OF = 4;
+}
+
+// Sensor bus mapping options for CO2
+enum CmSensorBusMappingsCO2_e {
+  SENSOR_BUS_CO2_DISABLED   = 0;
+  SENSOR_BUS_RETURN_AIR_CO2 = 1;
+  SENSOR_BUS_MIXED_AIR_CO2  = 2;
+  SENSOR_BUS_CO2_NUM_OF = 4;
+}
+
+// Sensor bus mapping options for Pressure
+enum CmSensorBusMappingsPressure_e {
+  SENSOR_BUS_PRESSURE_DISABLED = 0;
+  SENSOR_BUS_DUCT_STATIC_PRESSURE_1 = 1;
+  SENSOR_BUS_DUCT_STATIC_PRESSURE_2 = 2;
+  SENSOR_BUS_DUCT_STATIC_PRESSURE_3 = 3;
+  SENSOR_BUS_PRESSURE_NUM_OF = 4;
+}
+
 
 enum CmThermistorMappingStages_e {
   TH_NOT_ENABLED = 0;
@@ -102,21 +141,28 @@ enum PiLoopInputDataOperation_e {
 }
 
 enum PiLoopInputDataSources_e {
-  TH1_TEMP = 0; // Temperature is taken from Thermistor 1
-  TH2_TEMP = 1; // Temperature is taken from Thermistor 2
-  SENSOR_ADDR_0_TEMP = 2; // Temperature is taken from sensor bus address 1
+  TH1_TEMP = 0; /* Temperature is taken from Thermistor 1 */;
+  TH2_TEMP = 1; /* Temperature is taken from Thermistor 2 */;
+  SENSOR_ADDR_0_TEMP = 2; /* Temperature is taken from sensor bus address 1 */;
   SENSOR_ADDR_1_TEMP = 3;
   SENSOR_ADDR_2_TEMP = 4;
   SENSOR_ADDR_3_TEMP = 5;
-  AN1_PRESSURE = 6;
-  AN2_PRESSURE = 7;
-  SENSOR_ADDR_1_PRESSURE = 8;
-  AN1_CO2 = 9;
-  AN2_CO2 = 10;
-  SENSOR_ADDR_1_CO2 = 11;
-  SENSOR_ADDR_2_CO2 = 12;
-  SENSOR_ADDR_3_CO2 = 13;
-  SENSOR_ADDR_4_CO2 = 14;
+  AN1_PRESSURE_WC_01 = 6;
+  AN1_PRESSURE_WC_02 = 7;
+  AN1_PRESSURE_WC_10 = 8;
+  AN2_PRESSURE_WC_01 = 9;
+  AN2_PRESSURE_WC_02 = 10;
+  AN2_PRESSURE_WC_10 = 11;
+  SENSOR_ADDR_0_PRESSURE = 12;
+  SENSOR_ADDR_1_PRESSURE = 13;
+  SENSOR_ADDR_2_PRESSURE = 14;
+  SENSOR_ADDR_3_PRESSURE = 15;
+  AN1_CO2 = 16;
+  AN2_CO2 = 17;
+  SENSOR_ADDR_1_CO2 = 18;
+  SENSOR_ADDR_2_CO2 = 19;
+  SENSOR_ADDR_3_CO2 = 20;
+  SENSOR_ADDR_4_CO2 = 21;
 }
 
 message PiLoopInputDataType_t {
@@ -145,9 +191,9 @@ enum SupplyAirTempOperation_e {
   SUPPLY_AIR_TEMPERATURE_1_VALUE_OF   = 0;
   SUPPLY_AIR_TEMPERATURE_2_VALUE_OF   = 1;
   SUPPLY_AIR_TEMPERATURE_3_VALUE_OF   = 2;
-  AVERAGE_OF = 3;
-  MINIMUM_OF = 4;
-  MAXIMUM_OF = 5;
+  SUPPLY_AIR_TEMPERATURE_AVERAGE_OF   = 3;
+  SUPPLY_AIR_TEMPERATURE_MINIMUM_OF   = 4;
+  SUPPLY_AIR_TEMPERATURE_MAXIMUM_OF   = 5;
 }
 
 enum PressureSensorOperation_e {
@@ -170,6 +216,14 @@ enum CMProfiles_e {
   CM_PROFILE_ADV_AHU = 1;
 }
 
+message CmSensorBusMappings_t {
+  optional CmSensorBusMappingsTemp_e sensorBusMappingTemp = 1;
+  optional CmSensorBusMappingsHumi_e sensorBusMappingHumi = 2;
+  optional CmSensorBusMappingsOccupancy_e sensorBusMappingOccupancy = 3;
+  optional CmSensorBusMappingsCO2_e sensorBusMappingCo2 = 4;
+  optional CmSensorBusMappingsPressure_e sensorBusMappingPressure = 5;
+}
+
 message CcuToCmSettingsMessage_t {
   optional CMProfiles_e cmProfile = 1;  // Profile enabled on CM
   optional int32 temperatureOffset = 2;
@@ -189,7 +243,7 @@ message CcuToCmSettingsMessage_t {
 
   repeated AnalogInSensorConfig_t analogInSensorConfig = 10; // [(nanopb).max_count = 2, (nanopb).fixed_count = false];// Analog In mappings; // Parameters for conversion from Ana In voltage to sensor value
 
-  repeated CmSensorBusMappings_e sensorBusMapping = 11; // [packed = true, (nanopb).max_count = 4, (nanopb).fixed_count = false];// Sensor bus mappings;
+  repeated CmSensorBusMappings_t sensorBusMapping = 11; // [packed = true, (nanopb).max_count = 4, (nanopb).fixed_count = false];// Sensor bus mappings;
 
   optional SupplyAirTempOperation_e supplyAirTempSensorOp = 12;
   optional PressureSensorOperation_e pressureSensorOp = 13;

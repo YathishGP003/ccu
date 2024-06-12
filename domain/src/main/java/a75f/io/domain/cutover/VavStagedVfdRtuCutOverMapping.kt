@@ -80,11 +80,11 @@ object VavStagedVfdRtuCutOverMapping {
         "outsideTempHeatingLockout" to "vavOutsideTempHeatingLockout",
         "Humidifier" to "humidifierEnable",
         "DeHumidifier" to "dehumidifierEnable",
-        "weightedAverageHeatingLoadMA" to "weightedAverageHeatingLoad",
+        "weightedAverageHeatingLoadMA" to "weightedAverageHeatingLoadMA",
 
 
         "targetMaxInsideHumidty" to "systemtargetMaxInsideHumidity",
-        "weightedAverageCoolingLoadMA" to "weightedAverageCoolingLoad",
+        "weightedAverageCoolingLoadMA" to "weightedAverageCoolingLoadMA",
 
 
         "satTRSp" to "satTRSp",

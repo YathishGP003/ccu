@@ -2,12 +2,11 @@ package a75f.io.renatus.profiles.system
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.domain.api.Domain
-import a75f.io.domain.api.DomainName
 import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.renatus.R
-import a75f.io.renatus.composables.IndeterminateLoopProgress
 import a75f.io.renatus.compose.ComposeUtil
+import a75f.io.renatus.util.ProgressDialogUtils
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -38,7 +37,7 @@ import kotlinx.coroutines.withContext
 class VavStagedRtuFragment : StagedRtuFragment() {
 
     private val viewModel: VavStagedRtuViewModel by viewModels()
-
+    private val SYSTEM_CONFIG_TAB: Int = 1
     companion object {
         val ID: String = VavStagedRtuFragment::class.java.simpleName
         fun newInstance(): VavStagedRtuFragment {
@@ -79,10 +78,13 @@ class VavStagedRtuFragment : StagedRtuFragment() {
     @Composable
     fun RootView() {
         if (!viewModel.modelLoaded) {
-            IndeterminateLoopProgress(bottomText = "Loading System Profile")
+            if(Globals.getInstance().getSelectedTab() == SYSTEM_CONFIG_TAB) {
+                ProgressDialogUtils.showProgressDialog(context, "Loading System Profile")
+            }
             CcuLog.i(Domain.LOG_TAG, "Show Progress")
             return
         }
+        ProgressDialogUtils.hideProgressDialog()
         Row(
             modifier = Modifier
                 .fillMaxSize()

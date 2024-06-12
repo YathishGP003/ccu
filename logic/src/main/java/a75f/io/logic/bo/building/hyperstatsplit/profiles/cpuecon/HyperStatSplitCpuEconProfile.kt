@@ -179,6 +179,12 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
         hyperstatSplitCPUEconAlgorithm.dumpLogs()
         handleChangeOfDirection(userIntents)
 
+        prePurgeEnabled = hsSplitHaystackUtil.isPrePurgeEnabled()
+        prePurgeOpeningValue = TunerUtil.readTunerValByQuery(
+            "prePurge and oao and fan and cur and speed and cpu and standalone and zone",
+            equip.equipRef
+        )
+
         coolingLoopOutput = 0
         heatingLoopOutput = 0
         fanLoopOutput = 0
@@ -196,11 +202,6 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
         val currentOperatingMode = equip.hsSplitHaystackUtil.getOccupancyModePointValue().toInt()
 
         updateTitle24LoopCounter(hyperStatSplitTuners, basicSettings)
-        prePurgeEnabled = hsSplitHaystackUtil.isPrePurgeEnabled()
-        prePurgeOpeningValue = TunerUtil.readTunerValByQuery(
-            "prePurge and oao and fan and cur and speed and cpu and standalone and zone",
-            equip.equipRef
-        )
 
         logIt(
             "Analog Fan speed multiplier  ${hyperStatSplitTuners.analogFanSpeedMultiplier} \n"+
@@ -397,7 +398,7 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
 
             val matTemp  = hsSplitHaystackUtil.getMixedAirTemp()
 
-            handleSmartPrePurgeControl(equip)
+            handleSmartPrePurgeControl(equip, basicSettings)
             doEconomizing(equip)
             doDcv(equip, effectiveOutsideDamperMinOpen)
 
@@ -1417,15 +1418,22 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
         return hsSplitHaystackUtil.readHisVal("point and operating and mode")
 
     }
+    private fun updatePrePurgeStatusPoint(equip: HyperStatSplitCpuEconEquip, prePurgeStatus: Double) {
+        equip.haystack.writeHisValByQuery(
+            "zone and prePurge and run and sensor and sp and userIntent and standalone and cpu and group == \"${equip.node}\"",
+            prePurgeStatus
+        )
+    }
 
     /**
      * Handles the smart pre-purge control for the given HyperStatSplitCpuEconEquip.
      * If pre-purge is active, this method sets the value of outsideAirCalculatedMinDamper
      *
      * @param equip The HyperStatSplitCpuEconEquip for which smart pre-purge control is to be handled.
+     * @param basicSettings The conditioning and fan settings for the given HyperStatSplitCpuEconEquip.
      *
      */
-    private fun handleSmartPrePurgeControl(equip: HyperStatSplitCpuEconEquip) {
+    private fun handleSmartPrePurgeControl(equip: HyperStatSplitCpuEconEquip, basicSettings: BasicSettings) {
         if(!prePurgeEnabled) {
             epidemicState = EpidemicState.OFF
             return
@@ -1444,12 +1452,14 @@ class HyperStatSplitCpuEconProfile : HyperStatSplitPackageUnitProfile() {
         val occuStatus = ScheduleManager.getInstance().getOccupiedModeCache(zoneId)
         val minutesToOccupancy =
             if (occuStatus != null) occuStatus.millisecondsUntilNextChange.toInt() / 60000 else -1
-        if (minutesToOccupancy != -1 && prePurgeOccupiedTimeOffset >= minutesToOccupancy && minutesToOccupancy >= prePurgeOccupiedTimeOffset - prePurgeRunTime &&
-            matTemp > oaoDamperMatMin) {
+        if (minutesToOccupancy > 0 && prePurgeOccupiedTimeOffset >= minutesToOccupancy && minutesToOccupancy >= prePurgeOccupiedTimeOffset - prePurgeRunTime &&
+            matTemp > oaoDamperMatMin && basicSettings.conditioningMode != StandaloneConditioningMode.OFF && basicSettings.fanMode != StandaloneFanStage.OFF) {
             outsideAirCalculatedMinDamper = hsSplitHaystackUtil.getDamperMinOpenConfigValue().toInt()
             epidemicState = EpidemicState.PREPURGE
+            updatePrePurgeStatusPoint(equip, 1.0)
         } else {
             epidemicState = EpidemicState.OFF
+            updatePrePurgeStatusPoint(equip, 0.0)
         }
     }
 

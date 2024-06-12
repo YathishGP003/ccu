@@ -138,7 +138,7 @@ class HyperStatSettingsUtil {
          * @return Boolean
          */
         private fun getTh1Enabled(hsApi: CCUHsApi, equipRef: String): Boolean {
-            return (readConfig(hsApi, equipRef, "air and temp and config and enabled") == 1.0)
+            return (readConfig(hsApi, equipRef, "th1 and config and enabled") == 1.0)
         }
 
         /**
@@ -148,7 +148,7 @@ class HyperStatSettingsUtil {
          * @return Boolean
          */
         private fun getTh2DoorWindow(hsApi: CCUHsApi, equipRef: String): Boolean {
-            return (readConfig(hsApi, equipRef, "window and sensing and config and enabled") == 1.0)
+            return (readConfig(hsApi, equipRef, "th2 and config and enabled") == 1.0)
         }
 
         /**

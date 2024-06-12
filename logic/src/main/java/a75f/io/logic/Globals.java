@@ -103,6 +103,7 @@ public class Globals {
     private static final String RESTART_CCU = "restart_ccu";
     private static final String RESTART_TABLET = "restart_tablet";
     private static final String DOMAIN_MODEL_SF = "domain_model_sf";
+    public int selectedTab;
 
     public static final class IntentActions {
         public static final String LSERIAL_MESSAGE = "a75f.io.intent.action.LSERIAL_MESSAGE";
@@ -444,6 +445,9 @@ public class Globals {
             return;
         }
         HashMap<Object, Object> equip = CCUHsApi.getInstance().readEntity("equip and system and not modbus and not connectModule");
+        if (equip.containsKey("domainName")) {
+            updatingDomainEquip(CCUHsApi.getInstance());
+        }
         boolean isDefaultSystem = false;
         if (equip != null && equip.size() > 0) {
             //BuildingTuners.getInstance().addBuildingTunerEquip();
@@ -692,6 +696,15 @@ public class Globals {
         }
     }
 
+    private void updatingDomainEquip(CCUHsApi ccuHsApi) {
+        if (Domain.systemEquip == null) {
+            DomainManager.INSTANCE.addSystemDomainEquip(ccuHsApi);
+        }
+        if (Domain.cmBoardDevice == null) {
+            DomainManager.INSTANCE.addCmBoardDevice(ccuHsApi);
+        }
+    }
+
     private String getDomainSafeProfile(String profile) {
         switch (profile) {
             case DomainName.vavReheatNoFan:
@@ -815,5 +828,9 @@ public class Globals {
 
     public void unRegisterOnCcuInitCompletedListener(OnCcuInitCompletedListener listener) {
         initCompletedListeners.remove(listener);
+    }
+
+    public int getSelectedTab(){
+        return selectedTab;
     }
 }

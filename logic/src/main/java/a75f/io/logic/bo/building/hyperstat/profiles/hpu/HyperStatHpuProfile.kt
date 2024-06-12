@@ -137,7 +137,9 @@ class HyperStatHpuProfile : HyperStatPackageUnitProfile(){
                 relayStages
             )
             runAnalogOutOperations(equip, config, basicSettings, analogOutStages)
-            runFanOperationBasedOnAuxStages(relayStages,analogOutStages,config)
+            if(basicSettings.fanMode==StandaloneFanStage.AUTO) {
+                runFanOperationBasedOnAuxStages(relayStages,analogOutStages,config)
+            }
         }else{
             resetAllLogicalPointValues()
         }
@@ -467,7 +469,8 @@ class HyperStatHpuProfile : HyperStatPackageUnitProfile(){
                     relayStages[Stage.FAN_2.displayName] = 1
                 }
                 if(relayOutputPoints.containsKey(HpuRelayAssociation.FAN_HIGH_SPEED.ordinal)
-                    && (getCurrentLogicalPointStatus(relayOutputPoints[HpuRelayAssociation.AUX_HEATING_STAGE2.ordinal]!!) == 0.0)
+                    && (!relayOutputPoints.containsKey(HpuRelayAssociation.AUX_HEATING_STAGE2.ordinal)
+                            || getCurrentLogicalPointStatus(relayOutputPoints[HpuRelayAssociation.AUX_HEATING_STAGE2.ordinal]!!) == 0.0)
                 ) {
                     updateLogicalPointIdValue(relayOutputPoints[HpuRelayAssociation.FAN_HIGH_SPEED.ordinal]!!, 0.0)
                     relayStages.remove(Stage.FAN_3.displayName)
@@ -613,7 +616,8 @@ class HyperStatHpuProfile : HyperStatPackageUnitProfile(){
             }
             HpuRelayAssociation.FAN_MEDIUM_SPEED -> {
                 if(relayOutputPoints.containsKey(HpuRelayAssociation.AUX_HEATING_STAGE1.ordinal) &&
-                    getCurrentLogicalPointStatus(relayOutputPoints[HpuRelayAssociation.AUX_HEATING_STAGE1.ordinal]!!) == 1.0){
+                    getCurrentLogicalPointStatus(relayOutputPoints[HpuRelayAssociation.AUX_HEATING_STAGE1.ordinal]!!) == 1.0 &&
+                    basicSettings.fanMode == StandaloneFanStage.AUTO){
                     return
                 }
                 doFanMediumSpeed(
@@ -622,11 +626,13 @@ class HyperStatHpuProfile : HyperStatPackageUnitProfile(){
             }
             HpuRelayAssociation.FAN_HIGH_SPEED -> {
                 if(relayOutputPoints.containsKey(HpuRelayAssociation.AUX_HEATING_STAGE2.ordinal) &&
-                    getCurrentLogicalPointStatus(relayOutputPoints[HpuRelayAssociation.AUX_HEATING_STAGE2.ordinal]!!) == 1.0){
+                    getCurrentLogicalPointStatus(relayOutputPoints[HpuRelayAssociation.AUX_HEATING_STAGE2.ordinal]!!) == 1.0 &&
+                    basicSettings.fanMode == StandaloneFanStage.AUTO){
                     return
                 }
                 if(relayOutputPoints.containsKey(HpuRelayAssociation.AUX_HEATING_STAGE1.ordinal) &&
-                    getCurrentLogicalPointStatus(relayOutputPoints[HpuRelayAssociation.AUX_HEATING_STAGE1.ordinal]!!) == 1.0){
+                    getCurrentLogicalPointStatus(relayOutputPoints[HpuRelayAssociation.AUX_HEATING_STAGE1.ordinal]!!) == 1.0 &&
+                    basicSettings.fanMode == StandaloneFanStage.AUTO){
                     return
                 }
                 doFanHighSpeed(

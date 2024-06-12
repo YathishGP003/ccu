@@ -60,13 +60,12 @@ import a75f.io.api.haystack.Site;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.device.bacnet.BacnetUtilKt;
-import a75f.io.domain.util.ModelLoader;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
+import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.ZoneProfile;
-import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.cloud.CloudConnectionManager;
 import a75f.io.logic.cloud.CloudConnectionResponseCallback;
 import a75f.io.logic.limits.SchedulabeLimits;
@@ -267,6 +266,7 @@ public class FloorPlanFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         enableFloorButton();
         disableRoomModule();
+        Globals.getInstance().selectedTab = 0;
     }
 
 

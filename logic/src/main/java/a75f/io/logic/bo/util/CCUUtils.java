@@ -155,7 +155,9 @@ public class CCUUtils
             ccuHsApi.updateEquip(equip, equip.getId());
             ArrayList<HashMap<Object, Object>> equipPoints = ccuHsApi.readAllEntities("point and equipRef == \"" + equip.getId()+"\"");
             for(HashMap<Object, Object> equipPoint : equipPoints){
-                Point point = new Point.Builder().setHashMap(equipPoint).build();
+                if(equipPoint.get("id") == null) continue;
+                HDict pointDict = CCUHsApi.getInstance().readHDictById(equipPoint.get("id").toString());
+                Point point = new Point.Builder().setHDict(pointDict).build();
                 if(point != null && (isCcuReregistration || point.getCcuRef() == null)) {
                     ccuHsApi.updatePoint(point, point.getId());
                 }

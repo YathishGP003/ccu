@@ -67,10 +67,14 @@ import a75f.io.renatus.UtilityApplication;
 import a75f.io.renatus.util.CCUUtils;
 
 public class RemoteCommandHandlerUtil {
-    private static final String APPOPS_SET_ALLOW = "appops set %s %s allow";
+    private static final String APPOPS_SET_ALLOW_CMD = "appops set %s %s allow";
+    private static final String INSTALL_CMD = "pm install -r -d -g %s";
+    private static final String UNINSTALL_CMD = "pm uninstall --user 0 %s";
+    private static final String SET_HOME_APP_CMD = "cmd package set-home-activity --user 0 \"%s/.MainActivity\"";
     private static final String BAC_APP_PACKAGE_NAME = "com.example.ccu_bacapp";
     private static final String REMOTE_ACCESS_PACKAGE_NAME = "io.seventyfivef.remoteaccess";
-    private static final String HOME_APP_PACKAGE_NAME = "com.x75frenatus.home";
+    private static final String HOME_APP_PACKAGE_NAME = "io.seventyfivef.home";
+    private static final String LEGACY_HOME_APP_PACKAGE_NAME = "com.x75frenatus.home";
 
     private static long bacAppDownloadId = -1;
     private static String bacAppApkName = "";
@@ -294,6 +298,16 @@ public class RemoteCommandHandlerUtil {
         return downloadId;
     }
 
+    public static String resolveApkFilename(String apkName) {
+        File file = new File(RenatusApp.getAppContext().getExternalFilesDir(null), apkName);
+        final String filePath = file.getAbsolutePath();
+        if (!file.exists()) {
+            CcuLog.e(TAG_CCU_DOWNLOAD, String.format("Unable to find APK for %s, file %s does not exist", apkName, filePath));
+            return null;
+        }
+        return filePath;
+    }
+
     public static void updateCCU(String id, Fragment currentFragment, FragmentActivity activity) {
         CcuLog.i(TAG_CCU_DOWNLOAD, "got command to install update--" + DownloadManager.EXTRA_DOWNLOAD_ID + "," + id);
         RenatusApp.getAppContext().registerReceiver(new BroadcastReceiver() {
@@ -312,19 +326,39 @@ public class RemoteCommandHandlerUtil {
                             CcuLog.d(TAG_CCU_DOWNLOAD, "Update command ignored, Invalid version downloaded");
                             Globals.getInstance().setCcuUpdateTriggerTimeToken(0);
                         }
-                    } else if (downloadId == AppInstaller.getHandle().getHomeAppDownloadId()) {
-                        int homeAppVersion = AppInstaller.getHandle().getDownloadedFileVersion(downloadId);
-                        if (homeAppVersion >= 1) {
-                            PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit().putInt("home_app_version", homeAppVersion).commit();
-                            AppInstaller.getHandle().install(null, true, false, true);
-                        }
                     } else if(downloadId == bacAppDownloadId){
-                        new Thread(() -> installApp(bacAppApkName, null, null)).start();
+                        String fileName = resolveApkFilename(bacAppApkName);
+                        if (fileName != null) {
+                            String[] commands = new String[]{
+                                    String.format(INSTALL_CMD, fileName)
+                            };
+                            RenatusApp.executeAsRoot(commands, false);
+                        }
                     } else if(downloadId == remoteAccessAppDownloadId){
-                        String allowMediaProjectCommand = String.format(APPOPS_SET_ALLOW, REMOTE_ACCESS_PACKAGE_NAME, "PROJECT_MEDIA");
-                        new Thread(() -> installApp(remoteAccessApkName, REMOTE_ACCESS_PACKAGE_NAME, new String[] {allowMediaProjectCommand})).start();
+                        String fileName = resolveApkFilename(remoteAccessApkName);
+                        if (fileName != null) {
+                            String[] commands = new String[]{
+                                    String.format(INSTALL_CMD, fileName),
+                                    String.format(APPOPS_SET_ALLOW_CMD, REMOTE_ACCESS_PACKAGE_NAME, "PROJECT_MEDIA")
+                            };
+                            RenatusApp.executeAsRoot(commands, false);
+                        }
                     } else if(downloadId == homeAppDownloadId){
-                        new Thread(() -> installApp(homeAppApkName, HOME_APP_PACKAGE_NAME, null)).start();
+                        String fileName = resolveApkFilename(homeAppApkName);
+                        int homeAppVersion = AppInstaller.getHandle().getDownloadedFileVersion(homeAppDownloadId);
+                        if (homeAppVersion >= 1) {
+                            CcuLog.i(TAG_CCU_DOWNLOAD, String.format("Updating home app to version %d", homeAppVersion));
+                            PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit().putInt("home_app_version", homeAppVersion).commit();
+                        }
+
+                        if (fileName != null) {
+                            String[] commands = new String[]{
+                                    String.format(UNINSTALL_CMD, LEGACY_HOME_APP_PACKAGE_NAME),
+                                    String.format(INSTALL_CMD, fileName),
+                                    String.format(SET_HOME_APP_CMD, HOME_APP_PACKAGE_NAME)
+                            };
+                            RenatusApp.executeAsRoot(commands, false);
+                        }
                     }
                 }
             }
@@ -340,31 +374,6 @@ public class RemoteCommandHandlerUtil {
                         + Globals.getInstance().getCcuUpdateTriggerTimeToken());
             }
         }
-    }
-
-    private static void installApp(String apkName, String packageToUninstall, String [] postInstallCommands) {
-        File file = new File(RenatusApp.getAppContext().getExternalFilesDir(null), apkName);
-        final String filePath = file.getAbsolutePath();
-        if (!file.exists()) {
-            CcuLog.e(TAG_CCU_DOWNLOAD, String.format("Unable to install %s, file %s does not exist", apkName, filePath));
-            return;
-        }
-
-        final ArrayList<String> commands = new ArrayList<>();
-        if (packageToUninstall != null) {
-            commands.add("pm uninstall --user 0 " + packageToUninstall);
-        }
-
-        commands.add("pm install -r -d -g " + filePath);
-
-        if (postInstallCommands != null) {
-            for (String postCmd: postInstallCommands) {
-                commands.add(postCmd);
-            }
-        }
-        CcuLog.d(TAG_CCU_DOWNLOAD, "Install AppInstall silent invokeInstallerIntent===>>>"  + "," + filePath);
-
-        RenatusApp.executeAsRoot(commands.toArray(new String[commands.size()]), false);
     }
 
     private static void sendSmartStatResetMsg(String address){

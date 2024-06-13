@@ -99,7 +99,7 @@ public class RenatusApp extends UtilityApplication
 				try {
 					// Do the magic
 					ApplicationInfo appInfo = RenatusApp.getAppContext().getApplicationInfo();
-					Log.d(TAG_CCU_DOWNLOAD, "RenatusAPP ExecuteAsRoot===>"+isRooted()+","+(appInfo.flags & ApplicationInfo.FLAG_SYSTEM));
+					Log.d(TAG_CCU_DOWNLOAD, "RenatusAPP ExecuteAsRoot===>rooted="+isRooted()+", system flag="+(appInfo.flags & ApplicationInfo.FLAG_SYSTEM));
 					if(isRooted()) {
 						Process p = Runtime.getRuntime().exec("su");
 						InputStream stdout = p.getInputStream();

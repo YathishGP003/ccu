@@ -105,10 +105,10 @@ public class RenatusApp extends UtilityApplication
 						InputStream stdout = p.getInputStream();
 						InputStream es = p.getErrorStream();
 						DataOutputStream os = new DataOutputStream(p.getOutputStream());
-
 						for (String command : commands) {
 							Log.d(TAG_CCU_DOWNLOAD, "ExecuteAsRoot: Preparing command: " + command);
 							os.writeBytes(command + "\n");
+							os.writeBytes( "echo Status $? for command: " + command + "\n");
 						}
 						os.writeBytes("exit\n");
 						os.flush();
@@ -132,7 +132,7 @@ public class RenatusApp extends UtilityApplication
 						p.waitFor();
 
 						Log.d(TAG_CCU_DOWNLOAD, "ExecuteAsRoot stdout: " + stdOutput.trim());
-						Log.d(TAG_CCU_DOWNLOAD, "ExecuteAsRoot stderr: " + errorOutput.trim() + " (exit status: " + p.exitValue() + ")");
+						Log.d(TAG_CCU_DOWNLOAD, "ExecuteAsRoot stderr: " + errorOutput.trim());
 
 						ApplicationInfo appInfo2 = RenatusApp.getAppContext().getApplicationInfo();
 						Log.d(TAG_CCU_DOWNLOAD, "RenatusAPP ExecuteAsRoot END===>"+(appInfo2.flags & ApplicationInfo.FLAG_SYSTEM));

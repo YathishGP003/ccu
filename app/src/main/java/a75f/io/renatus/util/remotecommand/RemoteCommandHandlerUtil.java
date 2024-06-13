@@ -344,25 +344,22 @@ public class RemoteCommandHandlerUtil {
 
     private static void installApp(String apkName, String packageToUninstall, String [] postInstallCommands) {
         File file = new File(RenatusApp.getAppContext().getExternalFilesDir(null), apkName);
-        final ArrayList<String> commands = new ArrayList<>();
         final String filePath = file.getAbsolutePath();
-        String cmd;
-        if (packageToUninstall != null) {
-            cmd = "pm uninstall --user 0 " + packageToUninstall;
-            commands.add(cmd);
-            // Updated sequence of commands to include output of execution status
-            commands.add(String.format("echo Status $? for command: %s", cmd));
+        if (!file.exists()) {
+            CcuLog.e(TAG_CCU_DOWNLOAD, String.format("Unable to install %s, file %s does not exist", apkName, filePath));
+            return;
         }
-        cmd = "pm install -r -d -g " + filePath;
-        commands.add(cmd);
-        // Updated sequence of commands to include output of execution status
-        commands.add(String.format("echo Status $? for command: %s", cmd));
+
+        final ArrayList<String> commands = new ArrayList<>();
+        if (packageToUninstall != null) {
+            commands.add("pm uninstall --user 0 " + packageToUninstall);
+        }
+
+        commands.add("pm install -r -d -g " + filePath);
 
         if (postInstallCommands != null) {
             for (String postCmd: postInstallCommands) {
                 commands.add(postCmd);
-                // Updated sequence of commands to include output of execution status
-                commands.add(String.format("echo Status $? for command: %s", postCmd));
             }
         }
         CcuLog.d(TAG_CCU_DOWNLOAD, "Install AppInstall silent invokeInstallerIntent===>>>"  + "," + filePath);

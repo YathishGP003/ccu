@@ -245,9 +245,9 @@ public class Globals {
         CcuLog.i(L.TAG_CCU_INIT, "Initialize Haystack");
         renatusServicesUrls = urls;
         CCUHsApi hsApi = new CCUHsApi(this.mApplicationContext, urls.getHaystackUrl(), urls.getCaretakerUrl(), urls.getGatewayUrl());
-        CcuLog.i(L.TAG_CCU_INIT, "Initialize ModelCache");
-        ModelCache.INSTANCE.init(hsApi, this.mApplicationContext);
-        CcuLog.i(L.TAG_CCU_INIT, "Initialized ModelCache");
+        //CcuLog.i(L.TAG_CCU_INIT, "Initialize ModelCache");
+        //ModelCache.INSTANCE.init(hsApi, this.mApplicationContext);
+        //CcuLog.i(L.TAG_CCU_INIT, "Initialized ModelCache");
     }
 
     public void startTimerTask() {
@@ -290,48 +290,6 @@ public class Globals {
         }
     }
 
-    private void migrateHeartbeatwithNewtags(HashMap<Object, Object> site) {
-        if (!site.isEmpty()) {
-            HeartbeatTagMigration.initHeartbeatTagMigration();
-        }
-    }
-
-    private void migrateIduPoints(HashMap<Object, Object> site) {
-        if (!site.isEmpty()) {
-            IduPointsMigration.init();
-        }
-    }
-
-    private void OAODamperOpenReasonMigration(HashMap<Object, Object> site) {
-        if (!site.isEmpty()) {
-            OAODamperOpenReasonMigration.initOAOFreeCoolingReasonMigration();
-        }
-    }
-
-    private void performBuildingTunerUprades(HashMap<Object, Object> site) {
-        //If site already exists , import building tuners from backend before initializing building tuner equip.
-        if (!site.isEmpty()) {
-
-            ////TODO- Common data feature
-            /*if (CCUHsApi.getInstance().isPrimaryCcu()) {
-                BuildingTuners.getInstance().updateBuildingTuners();
-                CCUHsApi.getInstance().importBuildingTuners();
-            } else {
-                CCUHsApi.getInstance().importBuildingTuners();
-            }*/
-
-            if (!isHeatingLimitUpdated()) {
-                TunerUpgrades.updateHeatingMinMax(CCUHsApi.getInstance());
-            }
-        }
-    }
-
-    private void migrateSNPoints(HashMap<Object, Object> site) {
-        if (!site.isEmpty()) {
-            SmartNodeMigration.init();
-        }
-    }
-
     private void importTunersAndScheduleJobs() {
 
         new Thread() {
@@ -340,18 +298,11 @@ public class Globals {
                 MigrationHandler migrationHandler = new MigrationHandler(CCUHsApi.getInstance());
                 try {
                     CcuLog.i(L.TAG_CCU_INIT, "Run Migrations");
-                    ModelCache.INSTANCE.init(CCUHsApi.getInstance(), mApplicationContext);
+                    //ModelCache.INSTANCE.init(CCUHsApi.getInstance(), mApplicationContext);
                     HashMap<Object, Object> site = CCUHsApi.getInstance().readEntity("site");
                     if (!isSafeMode()) {
                         migrationHandler.doMigration();
                         MigrationUtil.doMigrationTasksIfRequired();
-                        //performBuildingTunerUprades(site);
-                        migrateHeartbeatPointForEquips(site);
-                        migrateHeartbeatDiagPointForEquips(site);
-                        migrateHeartbeatwithNewtags(site);
-                        OAODamperOpenReasonMigration(site);
-                        migrateIduPoints(site);
-                        migrateSNPoints(site);
                         CcuLog.i(L.TAG_CCU_INIT, "Load Profiles");
                         isInitCompleted = true;
                         Site siteObject = new Site.Builder().setHashMap(site).build();
@@ -359,7 +310,7 @@ public class Globals {
                                 HayStackConstants.USER, HayStackConstants.PASS), siteObject);
                     }
                     CcuLog.i(L.TAG_CCU_INIT, "Schedule Jobs");
-                    TunerUpgrades.migrateAutoAwaySetbackTuner(CCUHsApi.getInstance());
+                    //TunerUpgrades.migrateAutoAwaySetbackTuner(CCUHsApi.getInstance());
 
                     CcuLog.i(L.TAG_CCU_INIT, "Init Watchdog");
                     Watchdog.getInstance().addMonitor(mProcessJob);

@@ -31,9 +31,6 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
-import com.instabug.crash.CrashReporting;
-import com.instabug.library.Feature;
-
 import org.projecthaystack.client.HClient;
 
 import java.io.IOException;
@@ -489,11 +486,13 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
                 , Context.MODE_PRIVATE).getBoolean("anr_reporting_enabled", false));
         anrReporting.setOnCheckedChangeListener((compoundButton, b) -> {
 
-            CrashReporting.setState(b? Feature.State.ENABLED : Feature.State.DISABLED);
-            CrashReporting.setAnrState(b? Feature.State.ENABLED : Feature.State.DISABLED);
+            /*CrashReporting.setState(b? Feature.State.ENABLED : Feature.State.DISABLED);
+            CrashReporting.setAnrState(b? Feature.State.ENABLED : Feature.State.DISABLED);*/
             Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
                     .edit().putBoolean("anr_reporting_enabled", b).apply();
         });
+        // Disable ANR reporting UI till we figure out an alternative for instabug.
+        anrReporting.setVisibility(View.GONE);
 
         logLevelSpinner.setSelection(CCUHsApi.getInstance().getCcuLogLevel());
         logLevelSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {

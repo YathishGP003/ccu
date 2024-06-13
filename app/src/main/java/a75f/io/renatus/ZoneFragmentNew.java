@@ -3757,6 +3757,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
     @Override
     public void onPause() {
         super.onPause();
+        CcuLog.i("UI_PROFILING","ZoneFragmentNew.onPause");
         ScheduleManager.getInstance().setZoneDataInterface(null);
         Pulse.setCurrentTempInterface(null);
         ScheduleManager.getInstance().setScheduleDataInterface(null);

@@ -337,7 +337,7 @@ public class ZoneScheduleFragment extends DialogFragment implements ZoneSchedule
                 schedule = CCUHsApi.getInstance().getBuildingOccupancySchedule().get(0);
             }
 
-            CcuLog.d(L.TAG_CCU_UI," Loaded System Schedule " + schedule.toString());
+            CcuLog.d(L.TAG_CCU_UI," Loaded System Schedule - ZoneScheduleFragment" + schedule.toString());
         }
 
     }

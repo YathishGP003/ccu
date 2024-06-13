@@ -39,6 +39,7 @@ open class VavModulatingRtuViewModel : ModulatingRtuViewModel() {
             profileConfiguration = ModulatingRtuProfileConfig(model).getDefaultConfiguration()
             val newEquipId = createNewEquip(systemEquip["id"].toString())
             L.ccu().systemProfile = VavFullyModulatingRtu()
+            L.ccu().systemProfile.removeSystemEquipModbus()
             L.ccu().systemProfile.addSystemEquip()
             L.ccu().systemProfile.updateAhuRef(newEquipId)
         }

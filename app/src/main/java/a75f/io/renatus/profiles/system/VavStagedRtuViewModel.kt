@@ -38,6 +38,7 @@ class VavStagedRtuViewModel : StagedRtuProfileViewModel() {
             profileConfiguration = StagedRtuProfileConfig(model).getDefaultConfiguration()
             val newEquipId = createNewEquip(systemEquip["id"].toString())
             L.ccu().systemProfile = VavStagedRtu()
+            L.ccu().systemProfile.removeSystemEquipModbus()
             L.ccu().systemProfile.addSystemEquip()
             L.ccu().systemProfile.updateAhuRef(newEquipId)
         }

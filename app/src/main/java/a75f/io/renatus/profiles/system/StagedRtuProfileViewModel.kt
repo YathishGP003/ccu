@@ -31,6 +31,8 @@ import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import a75f.io.logic.bo.haystack.device.ControlMote
+import a75f.io.renatus.profiles.profileUtils.UnusedPortsModel.Companion.saveUnUsedPortStatusOfSystemProfile
 
 open class StagedRtuProfileViewModel : ViewModel() {
 
@@ -49,7 +51,7 @@ open class StagedRtuProfileViewModel : ViewModel() {
     lateinit var relay5AssociationList : List<String>
     lateinit var relay6AssociationList : List<String>
     lateinit var relay7AssociationList : List<String>
-
+    private lateinit var unusedPorts: HashMap<String, Boolean>
     var modelLoaded by  mutableStateOf(false)
     lateinit var equipBuilder : ProfileEquipBuilder
     lateinit var deviceBuilder: DeviceBuilder
@@ -139,6 +141,8 @@ open class StagedRtuProfileViewModel : ViewModel() {
             hayStack.siteName +"-"+ deviceModel.name
         )
         DomainManager.addSystemDomainEquip(hayStack)
+        saveUnUsedPortStatusOfSystemProfile(profileConfiguration, hayStack)
+        viewState.unusedPortState = ControlMote.getCMUnusedPorts(Domain.hayStack)
     }
 
     fun getRelayState(relayName: String) : Boolean {

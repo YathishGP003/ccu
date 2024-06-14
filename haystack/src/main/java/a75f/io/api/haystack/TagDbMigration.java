@@ -80,7 +80,7 @@ public class TagDbMigration {
             Type waType = new TypeToken<ConcurrentHashMap<String, CCUTagsDb.WriteArray>>() {
             }.getType();
             ConcurrentHashMap<String, CCUTagsDb.WriteArray> writeArrays = gson.fromJson(waPreference, waType);
-            Log.d(TAG, "Migrate all writable");
+           CcuLog.i(TAG, "Migrate all writable");
 
             writeArrays.entrySet().forEach(entry -> {
                 String id = entry.getKey();

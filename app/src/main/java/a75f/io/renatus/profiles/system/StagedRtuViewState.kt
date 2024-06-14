@@ -33,7 +33,7 @@ open class StagedRtuViewState {
     var relay5Test by mutableStateOf (false)
     var relay6Test by mutableStateOf (false)
     var relay7Test by mutableStateOf (false)
-
+    var unusedPortState by mutableStateOf(hashMapOf<String, Boolean>())
     companion object {
         fun fromProfileConfig(config: StagedRtuProfileConfig): StagedRtuViewState {
             return StagedRtuViewState().apply {
@@ -52,6 +52,7 @@ open class StagedRtuViewState {
                 this.relay5Association = config.relay5Association.associationVal
                 this.relay6Association = config.relay6Association.associationVal
                 this.relay7Association = config.relay7Association.associationVal
+                this.unusedPortState = config.unusedPorts
             }
         }
     }
@@ -72,5 +73,6 @@ open class StagedRtuViewState {
         config.relay5Association.associationVal = this.relay5Association
         config.relay6Association.associationVal = this.relay6Association
         config.relay7Association.associationVal = this.relay7Association
+        config.unusedPorts = this.unusedPortState
     }
 }

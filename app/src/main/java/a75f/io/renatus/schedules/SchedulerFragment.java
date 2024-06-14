@@ -153,7 +153,6 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
             scheduleScrollView.post(() -> scheduleScrollView.smoothScrollTo(0,0));
         }
         if (isVisibleToUser) {
-            new Handler().post(() -> loadSchedule());
             UpdateScheduleHandler.setBuildingScheduleListener(this);
             ScheduleManager.getInstance().setBuildingScheduleListener(this);
         } else {
@@ -393,6 +392,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
                 }
                 //Leave 20% for padding.
                 mPixelsBetweenADay = mPixelsBetweenADay - (mPixelsBetweenADay * .2f);
+                Log.d("CCU_UI"," Load System Schedule onPreDraw ");
                 loadSchedule();
                 drawCurrentTime();
                 return true;
@@ -402,6 +402,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
 
     private void loadSchedule()
     {
+        Log.d("CCU_UI"," Load System Schedule ");
 
         if (getArguments() != null && getArguments().containsKey(PARAM_SCHEDULE_ID)) {
             mScheduleId = getArguments().getString(PARAM_SCHEDULE_ID);
@@ -413,7 +414,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
             if(buildingScheduleList.size() > 0) {
                 schedule = buildingScheduleList.get(0);
             }
-            Log.d("CCU_UI"," Loaded System Schedule "+schedule.toString());
+            Log.d("CCU_UI"," Loaded System Schedule - ScheduleFragment "+schedule.toString());
         }
 
         if((getArguments() != null && getArguments().containsKey(PARAM_ROOM_REF))
@@ -1650,8 +1651,6 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
     @Override
     public void onResume() {
         super.onResume();
-        Runnable runnable = () -> loadSchedule();
-        scheduleFragmentHandler.postDelayed(runnable, 1500);
         UpdateScheduleHandler.setBuildingScheduleListener(this);
         ScheduleManager.getInstance().setBuildingScheduleListener(this);
     }
@@ -1664,6 +1663,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
     }
     public void refreshScreen() {
         if(getActivity() != null) {
+            Log.d("CCU_UI"," Load System Schedule - refresh screen");
             getActivity().runOnUiThread(() -> loadSchedule());
         }
     }

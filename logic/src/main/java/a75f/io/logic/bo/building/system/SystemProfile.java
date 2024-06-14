@@ -918,12 +918,22 @@ public abstract class SystemProfile
 
     public void removeSystemEquipModbus() {
         // TODO if it has modbus Equip Revisit when we add Bacnet support
-        HashMap modbusEquip = CCUHsApi.getInstance().readEntity("system and equip and modbus and not emr and not btu");
+        HashMap modbusEquip = CCUHsApi.getInstance().readEntity("system and equip and modbus and not emr and not btu and not equipRef");
         if (modbusEquip != null && !modbusEquip.isEmpty()) {
+            // Taking sub equip points before deleting the modbus equip
+            ArrayList<HashMap<Object, Object>> modbusSubEquips = CCUHsApi.getInstance().readAllEntities("system and equip and modbus and not emr and not btu and equipRef == \"" + Objects.requireNonNull(modbusEquip.get("id")) + "\"");
+
             CCUHsApi.getInstance().deleteEntityTree(Objects.requireNonNull(modbusEquip.get("id")).toString());
             HashMap modbusDevice = CCUHsApi.getInstance().readEntity("modbus and device and equipRef == \"" + Objects.requireNonNull(modbusEquip.get("id")) + "\"");
             if (modbusDevice != null && !modbusEquip.isEmpty()) {
                 CCUHsApi.getInstance().deleteEntityTree(Objects.requireNonNull(modbusDevice.get("id")).toString());
+            }
+            //Deleting sub equip device points
+            for (HashMap modbusSubEquip : modbusSubEquips) {
+                HashMap modbusSubEquipDevice = CCUHsApi.getInstance().readEntity("modbus and device and equipRef == \"" + Objects.requireNonNull(modbusSubEquip.get("id")) + "\"");
+                if (modbusSubEquipDevice != null && !modbusSubEquipDevice.isEmpty()) {
+                    CCUHsApi.getInstance().deleteEntityTree(Objects.requireNonNull(modbusSubEquipDevice.get("id")).toString());
+                }
             }
 
         }

@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.RawPoint;
+import a75f.io.domain.api.DomainName;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.Port;
@@ -112,5 +113,33 @@ public class DeviceUtil {
                 .collect(Collectors.toList());
 
     }
+    /*Not version tag is used to ignore firmware version point in the collection*/
+    public static List<RawPoint> getPortsForDevice(Short deviceAddress, CCUHsApi hayStack) {
+        HashMap<Object, Object> device = hayStack.readEntity("device and addr == \""+deviceAddress+"\"");
+        if(device.size() > 0) {
+            ArrayList<HashMap<Object, Object>> rawPoints = hayStack.readAllEntities("point and physical" +
+                    " and not version and deviceRef == \"" + device.get("id").toString() + "\"");
 
+            return rawPoints.stream()
+                    .map(p -> new RawPoint.Builder().setHashMap(p).build())
+                    .collect(Collectors.toList());
+        } else {
+            return null;
+        }
+
+    }
+    public static List<RawPoint> getUnusedPortsForDevice(Short deviceAddress, CCUHsApi hayStack) {
+        List<RawPoint> rawPoints = getPortsForDevice(deviceAddress, hayStack);
+        if (rawPoints != null && rawPoints.size() > 0) {
+            return rawPoints.stream()
+                    .filter(rawPoint -> rawPoint.getDomainName() != null
+                            && !(rawPoint.getDomainName().equals(DomainName.analog1In)
+                            || rawPoint.getDomainName().equals(DomainName.analog2In)
+                            || rawPoint.getDomainName().equals(DomainName.th1In)
+                            || rawPoint.getDomainName().equals(DomainName.th2In)) && !rawPoint.getEnabled())
+                    .collect(Collectors.toList());
+        } else {
+            return null;
+        }
+    }
 }

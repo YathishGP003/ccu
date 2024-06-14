@@ -413,7 +413,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
     @Override
     public synchronized void deleteSystemEquip() {
         HashMap equip = CCUHsApi.getInstance().read("equip and system and not modbus");
-        if (equip.get("profile").equals(ProfileType.SYSTEM_VAV_ANALOG_RTU.name())) {
+        if ((ProfileType.getProfileTypeForName(equip.get("profile").toString()).name()).equals(ProfileType.SYSTEM_VAV_ANALOG_RTU.name())) {
             CCUHsApi.getInstance().deleteEntityTree(equip.get("id").toString());
         }
         removeSystemEquipModbus();

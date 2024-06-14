@@ -347,6 +347,9 @@ public class DiagEquip
             if(!prevVersion.equals( hisVersion)) {
                 CCUHsApi.getInstance().writeDefaultVal("point and diag and app and version", hisVersion);
                 MessageDbUtilKt.updateAllRemoteCommandsHandled(Globals.getInstance().getApplicationContext(), CMD_UPDATE_CCU);
+                //There has been an upgrade. Reset the BISKIT test mode.
+                Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
+                        .edit().putBoolean("biskit_mode", false).apply();
             }
             if(!PreferenceUtil.isSRMigrationPointUpdated() && SchedulableMigrationKt.validateMigration()) {
                 MigrationUtil.createZoneSchedulesIfMissing(CCUHsApi.getInstance());

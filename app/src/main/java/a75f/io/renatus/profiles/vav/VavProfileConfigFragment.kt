@@ -12,13 +12,10 @@ import a75f.io.renatus.composables.DropDownWithLabel
 import a75f.io.renatus.composables.IndeterminateLoopProgress
 import a75f.io.renatus.composables.Picker
 import a75f.io.renatus.composables.rememberPickerState
+import a75f.io.renatus.compose.*
 import a75f.io.renatus.compose.ComposeUtil.Companion.primaryColor
-import a75f.io.renatus.compose.HeaderTextView
-import a75f.io.renatus.compose.LabelTextView
-import a75f.io.renatus.compose.SaveTextView
-import a75f.io.renatus.compose.TitleTextView
-import a75f.io.renatus.compose.ToggleButtonStateful
 import a75f.io.renatus.modbus.util.SET
+import a75f.io.renatus.profiles.profileUtils.UnusedPortsFragment
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -38,6 +35,7 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
+import androidx.compose.runtime.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -493,6 +491,13 @@ class VavProfileConfigFragment : BaseDialogFragment() {
                     }
 
                 }
+                val mapOfUnUsedPorts = viewModel.viewState.unusedPortState
+                if(mapOfUnUsedPorts.isNotEmpty()) {
+                    UnusedPortsFragment.DividerRow()
+                    UnusedPortsFragment.LabelUnusedPorts()
+                    UnusedPortsFragment.UnUsedPortsListView(viewModel)
+                }
+
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()

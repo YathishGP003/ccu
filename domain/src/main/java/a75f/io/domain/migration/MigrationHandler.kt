@@ -300,27 +300,38 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
                 val profileConfiguration = getProfileConfig(equipMap["profile"].toString())
                 updateRef(equipMap, profileConfiguration)
                 modelPointDef?.run {
-                    val hayStackPoint = equipBuilder.buildPoint(PointBuilderConfig( modelPointDef,
-                        profileConfiguration, equip.id, siteRef, haystack.timeZone, equipMap["dis"].toString()))
-                    val point = CCUHsApi.getInstance().readEntity("point and domainName == \"${diffDomain.domainName}\" and equipRef == \"${equip.id}\"")
-                   Log.d("CCU_DOMAIN", "updated haystack point: $hayStackPoint")
-                    if (Domain.readEquip(newModel.id)["roomRef"].toString() == "SYSTEM") {
-                        hayStackPoint.roomRef = "SYSTEM"
-                        hayStackPoint.floorRef = "SYSTEM"
-                        haystack.updatePoint(hayStackPoint, point["id"].toString())
-                    }else {
-                        haystack.updatePoint(hayStackPoint, point["id"].toString())
-                        DomainManager.addPoint(hayStackPoint)
-                    }
-                    try {
-                        updatePointAssociation(modelPointDef, hayStackPoint, point["id"].toString())
-                    } catch (e: Exception) {
-                        /*
+                    if (toBeAddedForEquip(modelPointDef, equip.id)) {
+                        val hayStackPoint = equipBuilder.buildPoint(
+                            PointBuilderConfig(
+                                modelPointDef,
+                                profileConfiguration,
+                                equip.id,
+                                siteRef,
+                                haystack.timeZone,
+                                equipMap["dis"].toString()
+                            )
+                        )
+                        val point = CCUHsApi.getInstance()
+                            .readEntity("point and domainName == \"${diffDomain.domainName}\" and equipRef == \"${equip.id}\"")
+                        Log.d("CCU_DOMAIN", "updated haystack point: $hayStackPoint")
+                        if (Domain.readEquip(newModel.id)["roomRef"].toString() == "SYSTEM") {
+                            hayStackPoint.roomRef = "SYSTEM"
+                            hayStackPoint.floorRef = "SYSTEM"
+                            haystack.updatePoint(hayStackPoint, point["id"].toString())
+                        } else {
+                            haystack.updatePoint(hayStackPoint, point["id"].toString())
+                            DomainManager.addPoint(hayStackPoint)
+                        }
+                        try {
+                            updatePointAssociation(modelPointDef, hayStackPoint, point["id"].toString())
+                        } catch (e: Exception) {
+                            /*
                        * Since we are unsure about the specific exception to catch here, we use the generic Exception class instead.
                        * we need to revisit this and add a proper exception handling
                         */
-                        CcuLog.d(Domain.LOG_TAG, "Update point Association is failed : "+point["id"].toString())
-                        e.printStackTrace()
+                            CcuLog.d(Domain.LOG_TAG, "Update point Association is failed : " + point["id"].toString())
+                            e.printStackTrace()
+                        }
                     }
                 }
             }

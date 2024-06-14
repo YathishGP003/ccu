@@ -2,14 +2,15 @@ package a75f.io.renatus.profiles.system
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.domain.api.Domain
-import a75f.io.domain.api.DomainName
 import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.renatus.R
 import a75f.io.renatus.composables.DropDownWithLabel
-import a75f.io.renatus.composables.IndeterminateLoopProgress
 import a75f.io.renatus.composables.SystemAnalogOutMappingViewVavStagedVfdRtu
 import a75f.io.renatus.compose.ComposeUtil
+import a75f.io.renatus.util.ProgressDialogUtils
+import a75f.io.renatus.profiles.profileUtils.UnusedPortsFragment
+import a75f.io.renatus.profiles.profileUtils.UnusedPortsFragment.Companion.LabelUnusedPorts
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -44,6 +45,7 @@ class VavStagedVfdRtuFragment : StagedRtuFragment() {
 
     private val viewModel : VavStagedVfdRtuViewModel by viewModels()
     lateinit var viewState: StagedRtuVfdViewState
+    private val SYSTEM_CONFIG_TAB: Int = 1
     companion object {
         val ID: String = VavStagedVfdRtuFragment::class.java.simpleName
         fun newInstance() : VavStagedVfdRtuFragment {
@@ -150,10 +152,13 @@ class VavStagedVfdRtuFragment : StagedRtuFragment() {
     @Composable
     fun RootView() {
         if (!viewModel.modelLoaded) {
-            IndeterminateLoopProgress(bottomText = "Loading System Profile")
+            if(Globals.getInstance().getSelectedTab() == SYSTEM_CONFIG_TAB) {
+                ProgressDialogUtils.showProgressDialog(context, "Loading System Profile");
+            }
             CcuLog.i(Domain.LOG_TAG, "Show Progress")
             return
         }
+        ProgressDialogUtils.hideProgressDialog()
         val viewState = viewModel.viewState as StagedRtuVfdViewState
         LazyColumn(modifier = Modifier
             .fillMaxSize()
@@ -400,6 +405,18 @@ class VavStagedVfdRtuFragment : StagedRtuFragment() {
                         expandedWidth = 100, spacerLimit = 90)
                 }
 
+            }
+
+            if(viewModel.viewState.unusedPortState.isNotEmpty()) {
+                item {
+                    UnusedPortsFragment.DividerRow()
+                }
+                item {
+                    LabelUnusedPorts()
+                }
+                item {
+                    UnusedPortsFragment.UnUsedPortsListView(viewModel)
+                }
             }
         }
 

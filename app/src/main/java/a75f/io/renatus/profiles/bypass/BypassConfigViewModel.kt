@@ -6,6 +6,7 @@ import a75f.io.api.haystack.Equip
 import a75f.io.api.haystack.HSUtil
 import a75f.io.api.haystack.RawPoint
 import a75f.io.api.haystack.sync.HttpUtil
+import a75f.io.api.haystack.sync.PointWriteCache
 import a75f.io.device.mesh.LSerial
 import a75f.io.device.mesh.LSmartNode
 import a75f.io.domain.api.Domain
@@ -393,8 +394,7 @@ class BypassConfigViewModel : ViewModel() {
 
                 hayStack.getHSClient().pointWrite(HRef.copy(minCoolingDamperPosPointId), 7, hayStack.ccuUserName, null, HNum.make(1), HDateTime.make(System.currentTimeMillis()))
                 val b: HDictBuilder = HDictBuilder().add("id", HRef.copy(minCoolingDamperPosPointId)).add("level",7).add("who",CCUHsApi.getInstance().getCCUUserName()).add("duration", HNum.make(0, "ms")).add("val", null as? HVal).add("reason", "Bypass Damper Unpaired")
-                val dictArr: Array<HDict> = arrayOf(b.toDict())
-                HttpUtil.executePost(hayStack.pointWriteTarget(), HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)))
+                PointWriteCache.getInstance().writePoint(minCoolingDamperPosPointId, b.toDict())
                 hayStack.writeHisValById(minCoolingDamperPosPointId, HSUtil.getPriorityVal(minCoolingDamperPosPointId))
             }
 
@@ -404,8 +404,7 @@ class BypassConfigViewModel : ViewModel() {
 
                 hayStack.getHSClient().pointWrite(HRef.copy(minHeatingDamperPosPointId), 7, hayStack.ccuUserName, null, HNum.make(1), HDateTime.make(System.currentTimeMillis()))
                 val b: HDictBuilder = HDictBuilder().add("id", HRef.copy(minHeatingDamperPosPointId)).add("level",7).add("who",CCUHsApi.getInstance().getCCUUserName()).add("duration", HNum.make(0, "ms")).add("val", null as? HVal).add("reason", "Bypass Damper Unpaired")
-                val dictArr: Array<HDict> = arrayOf(b.toDict())
-                HttpUtil.executePost(hayStack.pointWriteTarget(), HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)))
+                PointWriteCache.getInstance().writePoint(minHeatingDamperPosPointId, b.toDict())
                 hayStack.writeHisValById(minHeatingDamperPosPointId, HSUtil.getPriorityVal(minHeatingDamperPosPointId))
             }
 

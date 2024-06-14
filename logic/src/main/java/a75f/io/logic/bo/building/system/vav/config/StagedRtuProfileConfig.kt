@@ -7,6 +7,8 @@ import a75f.io.domain.config.AssociationConfig
 import a75f.io.domain.config.EnableConfig
 import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.config.ValueConfig
+import a75f.io.logger.CcuLog
+import a75f.io.logic.bo.haystack.device.ControlMote
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import io.seventyfivef.ph.core.Tags
 
@@ -28,6 +30,7 @@ open class StagedRtuProfileConfig(val model : SeventyFiveFProfileDirective)
     lateinit var relay5Association: AssociationConfig
     lateinit var relay6Association: AssociationConfig
     lateinit var relay7Association: AssociationConfig
+    lateinit var unusedPorts: HashMap<String, Boolean>
 
 
     open fun getDefaultConfiguration() : StagedRtuProfileConfig {
@@ -46,6 +49,14 @@ open class StagedRtuProfileConfig(val model : SeventyFiveFProfileDirective)
         relay5Association = getDefaultAssociationConfig(DomainName.relay5OutputAssociation, model)
         relay6Association = getDefaultAssociationConfig(DomainName.relay6OutputAssociation, model)
         relay7Association = getDefaultAssociationConfig(DomainName.relay7OutputAssociation, model)
+        try {
+            unusedPorts = ControlMote.getCMUnusedPorts(Domain.hayStack)
+        } catch (e : NullPointerException) {
+            unusedPorts = hashMapOf()
+            CcuLog.e(Domain.LOG_TAG,"Failed to fetch CM Unused ports")
+            e.printStackTrace()
+        }
+
 
         isDefault = true
         return this
@@ -103,6 +114,7 @@ open class StagedRtuProfileConfig(val model : SeventyFiveFProfileDirective)
         } else {
             getDefaultAssociationConfig(DomainName.relay7OutputAssociation, model).associationVal
         }
+        unusedPorts = ControlMote.getCMUnusedPorts(Domain.hayStack)
 
         isDefault = false
         return this

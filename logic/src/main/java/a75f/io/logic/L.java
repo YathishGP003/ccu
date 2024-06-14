@@ -67,6 +67,8 @@ public class L
     public static final String TAG_CCU_DR_MODE = "CCU_DR_MODE";
 
     public static final String TAG_CCU_SERIAL_CONNECT = "CCU_SERIAL_CONNECT";
+    public static final String TAG_CCU_ERROR = "CCU_ERROR";
+
     public static Context app()
     {
         return Globals.getInstance().getApplicationContext();

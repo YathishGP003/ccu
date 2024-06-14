@@ -61,6 +61,7 @@ class StagedRtuVfdViewState : StagedRtuViewState() {
                 this.analogOut2HeatStage4 = config.analogOut2HeatStage4.currentVal.toInt()
                 this.analogOut2HeatStage5 = config.analogOut2HeatStage5.currentVal.toInt()
                 this.analogOut2Default = config.analogOut2Default.currentVal.toInt()
+                this.unusedPortState = config.unusedPorts
             }
         }
     }
@@ -95,6 +96,7 @@ class StagedRtuVfdViewState : StagedRtuViewState() {
         config.analogOut2HeatStage4.currentVal = this.analogOut2HeatStage4.toDouble()
         config.analogOut2HeatStage5.currentVal = this.analogOut2HeatStage5.toDouble()
         config.analogOut2Default.currentVal = this.analogOut2Default.toDouble()
+        config.unusedPorts = this.unusedPortState
 
     }
 }

@@ -1,8 +1,7 @@
 package a75f.io.domain.devices
 
-import a75f.io.domain.api.DomainName
-import a75f.io.domain.api.PhysicalPoint
-import a75f.io.domain.api.Point
+import a75f.io.api.haystack.RawPoint
+import a75f.io.domain.api.*
 
 class CmBoardDevice (deviceRef : String) : DomainDevice (deviceRef) {
     val relay1 = PhysicalPoint(DomainName.relay1 ,deviceRef)
@@ -23,4 +22,28 @@ class CmBoardDevice (deviceRef : String) : DomainDevice (deviceRef) {
     val th2In = PhysicalPoint(DomainName.th2In ,deviceRef)
     val analog1In = PhysicalPoint(DomainName.analog1In ,deviceRef)
     val analog2In = PhysicalPoint(DomainName.analog2In ,deviceRef)
+
+    fun getPortsDomainNameWithPhysicalPoint() : HashMap<String, RawPoint> {
+        val portsList = HashMap<String, RawPoint>()
+        portsList[DomainName.relay1] = relay1.readPoint()
+        portsList[DomainName.relay2] = relay2.readPoint()
+        portsList[DomainName.relay3] = relay3.readPoint()
+        portsList[DomainName.relay4] = relay4.readPoint()
+        portsList[DomainName.relay5] = relay5.readPoint()
+        portsList[DomainName.relay6] = relay6.readPoint()
+        portsList[DomainName.relay7] = relay7.readPoint()
+        portsList[DomainName.relay8] = relay8.readPoint()
+
+        portsList[DomainName.analog1Out] = analog1Out.readPoint()
+        portsList[DomainName.analog2Out] = analog2Out.readPoint()
+        portsList[DomainName.analog3Out] = analog3Out.readPoint()
+        portsList[DomainName.analog4Out] = analog4Out.readPoint()
+
+        portsList[DomainName.analog1In] = analog1In.readPoint()
+        portsList[DomainName.analog2In] = analog2In.readPoint()
+
+        portsList[DomainName.th1In] = th1In.readPoint()
+        portsList[DomainName.th2In] = th2In.readPoint()
+        return portsList
+    }
 }

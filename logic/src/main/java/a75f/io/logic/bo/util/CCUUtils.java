@@ -276,6 +276,17 @@ public class CCUUtils
             return true;
         }
     }
+    public static void setCCUReadyProperty(String propertyStatus) {
+        try {
+            Class<?> systemPropertiesClass = Class.forName("android.os.SystemProperties");
+            Method setMethod = systemPropertiesClass.getMethod("set", String.class, String.class);
+            setMethod.invoke(null, "ccu_ready_property", propertyStatus);
+            CcuLog.i("CCU_PROPERTY","setCCUReadyProperty"+propertyStatus);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
     public static boolean isModbusHeartbeatRequired(HashMap<Object, Object> equip, CCUHsApi hayStack) {
         if(equip.containsKey("equipRef")) {
             HashMap<Object, Object> parentEquip = hayStack.readMapById(equip.get("equipRef").toString());

@@ -64,10 +64,7 @@ public class EquipScheduleHandler implements Schedulable {
                 updatedOccupancy == Occupancy.VACATION ||
                 updatedOccupancy == Occupancy.DEMAND_RESPONSE_OCCUPIED ||
                 updatedOccupancy == Occupancy.DEMAND_RESPONSE_UNOCCUPIED ||
-                updatedOccupancy == Occupancy.KEYCARD_AUTOAWAY ||
-                updatedOccupancy == Occupancy.WINDOW_OPEN ||
-                updatedOccupancy == Occupancy.NO_CONDITIONING ||
-                updatedOccupancy == Occupancy.EMERGENCY_CONDITIONING) {
+                updatedOccupancy == Occupancy.KEYCARD_AUTOAWAY) {
             updateScheduleDesiredTemp(schedule, updatedOccupancy);
         }
 

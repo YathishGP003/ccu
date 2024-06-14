@@ -430,12 +430,12 @@ public class HClient extends HProj
       }
     }
     Double sharedHighPriorityVal = (Double) sharedPointArrays.get(r.get(idStr));
-    Log.d("CCU_HS", "-currentHighPriorityVal-" + currentHighPriorityVal + "-sharedHighPriorityVal-" + sharedHighPriorityVal);
+   CcuLog.d("CCU_HS", "-currentHighPriorityVal-" + currentHighPriorityVal + "-sharedHighPriorityVal-" + sharedHighPriorityVal);
     if (Double.compare(currentHighPriorityVal, sharedHighPriorityVal) != 0) {
       pIds.add(getDictFromHRow(r));
       sharedPointArrays.put(rowId, currentHighPriorityVal);
     } else {
-      Log.d("CCU_HS", "no change in data");
+     CcuLog.d("CCU_HS", "no change in data");
     }
   }
 
@@ -478,7 +478,7 @@ public class HClient extends HProj
           return false;
         }
       }
-      Log.d("CCU_HS", "lastModifiedDateTimeForVal->" + lastModifiedDateTimeForVal + "<----val---->" + val);
+     CcuLog.d("CCU_HS", "lastModifiedDateTimeForVal->" + lastModifiedDateTimeForVal + "<----val---->" + val);
     }
     // shared value is removed
     return false;
@@ -755,7 +755,7 @@ public class HClient extends HProj
     String apiKey = BuildConfig.HAYSTACK_API_KEY;
     if (StringUtils.isNotBlank(bearerToken) || StringUtils.isNotBlank(apiKey)) {
       try {
-        Log.d("CCU_HTTP_HCLIENT", "Request body: " + req);
+       CcuLog.d("CCU_HTTP_HCLIENT", "Request body: " + req);
 
         URL url = new URL(uriStr);
         HttpURLConnection c = openHttpConnection(url, "POST");
@@ -948,9 +948,9 @@ public class HClient extends HProj
       if(uriStr.endsWith("hisRead")){
         uriStr = uriStr.replace("v1", "v2");
       }
-      Log.d("CCU_HCLIENT", "Request to " + uriStr);
-      Log.d("CCU_HCLIENT", "Request body: " + req);
-      Log.i("CCU_HCLIENT","Client Token: " + bearerToken);
+     CcuLog.d("CCU_HCLIENT", "Request to " + uriStr);
+     CcuLog.d("CCU_HCLIENT", "Request body: " + req);
+     CcuLog.i("CCU_HCLIENT","Client Token: " + bearerToken);
       int retry = 0;
       int maxRetryCount = 15;
       long delay = 1000 * 30;
@@ -959,10 +959,10 @@ public class HClient extends HProj
       do{
         try{
         if(!isOKResponse){
-          Log.i("CCU_REPLACE", "Delay in the thread!");
+         CcuLog.i("CCU_REPLACE", "Delay in the thread!");
           Thread.sleep(delay);
         }
-          Log.i("CCU_REPLACE", "retry count : " +retry);
+         CcuLog.i("CCU_REPLACE", "retry count : " +retry);
           URL url = new URL(uriStr);
         httpConnection = openHttpConnection(url, "POST");
         httpConnection.setDoOutput(true);
@@ -976,15 +976,15 @@ public class HClient extends HProj
           httpConnection.setRequestProperty("api-key", apiKey);
         }
         httpConnection.connect();
-        Log.d("CCU_HTTP_REQUEST", "HClient: [POST] " + uriStr + " - Token: " + bearerToken);
+       CcuLog.d("CCU_HTTP_REQUEST", "HClient: [POST] " + uriStr + " - Token: " + bearerToken);
 
         // post expression
         Writer cout = new OutputStreamWriter(httpConnection.getOutputStream(), StandardCharsets.UTF_8);
         cout.write(req);
         cout.close();
 
-        Log.i("CCU_HCLIENT", "Request response code: " + httpConnection.getResponseCode());
-        Log.i("CCU_HCLIENT", "HClient:postString: " + httpConnection.getResponseCode() + " - [POST] "+ uriStr);
+       CcuLog.i("CCU_HCLIENT", "Request response code: " + httpConnection.getResponseCode());
+       CcuLog.i("CCU_HCLIENT", "HClient:postString: " + httpConnection.getResponseCode() + " - [POST] "+ uriStr);
 
 
         StringBuffer s = new StringBuffer(1024);
@@ -996,7 +996,7 @@ public class HClient extends HProj
         if(httpConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
           retry = 0;
           retryCountCallback.onRetry(0);
-          Log.i("CCU_HCLIENT","Response " + s.toString());
+         CcuLog.i("CCU_HCLIENT","Response " + s.toString());
           return s.toString();
         }
         }catch (Exception e){
@@ -1006,8 +1006,8 @@ public class HClient extends HProj
           else if(e instanceof InterruptedIOException){
             throw new NullHGridException(e.getMessage());
           }
-          Log.i("CCU_REPLACE","Exception occurred while hitting "+uriStr);
-          Log.i("CCU_REPLACE", "Retry "+Log.getStackTraceString(e));
+         CcuLog.e("CCU_REPLACE","Exception occurred while hitting "+uriStr);
+         CcuLog.e("CCU_REPLACE", "Retry "+Log.getStackTraceString(e));
         }
         finally {
         }

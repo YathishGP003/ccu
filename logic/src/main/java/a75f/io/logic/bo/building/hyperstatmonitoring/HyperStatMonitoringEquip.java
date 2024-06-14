@@ -585,9 +585,14 @@ public class HyperStatMonitoringEquip {
                 .setMaxVal(maxVal)
                 .setUnit(unit)
                 .setTz(tz);
+
         if (markers != null) {
             for (String marker : markers) {
                 sensorTag.addMarker(marker);
+            }
+
+            if (Arrays.stream(markers).anyMatch("generic"::equals)) {
+                sensorTag.setEnums("Normal,Fault");
             }
         }
 

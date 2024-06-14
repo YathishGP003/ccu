@@ -1,7 +1,5 @@
 package a75f.io.api.haystack;
 
-import android.util.Log;
-
 import org.projecthaystack.HGrid;
 import org.projecthaystack.HGridBuilder;
 import org.projecthaystack.HNum;
@@ -13,6 +11,8 @@ import org.projecthaystack.UnknownWatchException;
 import org.projecthaystack.client.HClient;
 import org.projecthaystack.server.HOp;
 import org.projecthaystack.server.HServer;
+
+import a75f.io.logger.CcuLog;
 
 /**
  * Created by samjithsadasivan on 8/31/18.
@@ -116,7 +116,7 @@ public class AndroidHSClient extends HClient
                 try {
                     watch.unsub(gridToIds(req));
                 }catch (IllegalArgumentException illegalArgumentException){
-                    Log.d("CCU_HS", illegalArgumentException.getMessage());
+                   CcuLog.e("CCU_HS", illegalArgumentException.getMessage());
                 }
             }
         }
@@ -134,9 +134,9 @@ public class AndroidHSClient extends HClient
             else
                 return watch.pollChanges();
         } catch (UnknownWatchException | UnknownRecException unknownWatchException) {
-            Log.d("CCU_HS", unknownWatchException.getMessage());
+           CcuLog.e("CCU_HS", unknownWatchException.getMessage());
         }catch (Exception exception){
-            Log.d("CCU_HS", exception.getMessage());
+           CcuLog.e("CCU_HS", exception.getMessage());
         }
         return createEmptyGrid("err", "wrong watch id");
     }

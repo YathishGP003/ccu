@@ -30,6 +30,7 @@ import a75f.io.api.haystack.Constants;
 import a75f.io.api.haystack.DAYS;
 import a75f.io.api.haystack.MockTime;
 import a75f.io.api.haystack.Tags;
+import a75f.io.logger.CcuLog;
 
 public class BuildingOccupancy {
     private String id;
@@ -375,7 +376,7 @@ public class BuildingOccupancy {
             for (Interval current : intervalsOfCurrent) {
                 boolean hasOverlap = additions.overlaps(current);
                 if (hasOverlap) {
-                    Log.d("CCU_UI"," hasOverlap "+" additions "+additions+" current "+current);
+                   CcuLog.i("CCU_UI"," hasOverlap "+" additions "+additions+" current "+current);
                     return true;
                 }
                 //If current day is monday , it could conflict with next week's multi-day sunday schedule.
@@ -438,7 +439,7 @@ public class BuildingOccupancy {
         for (Interval current : intervalsOfCurrent) {
             boolean hasOverlap = intervalOfAddition.overlaps(current);
             if (hasOverlap) {
-                Log.d("CCU_UI"," Current "+current+" new "+intervalOfAddition+" overlaps "+hasOverlap);
+               CcuLog.i("CCU_UI"," Current "+current+" new "+intervalOfAddition+" overlaps "+hasOverlap);
                 if (current.getStart().minuteOfDay().get() < current.getEnd().minuteOfDay().get()) {
                     overLaps.add(current.overlap(intervalOfAddition));
                 } else {

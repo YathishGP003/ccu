@@ -114,6 +114,7 @@ object DomainManager {
             }
         } else {
             CcuLog.e(Domain.LOG_TAG, "No system equip found")
+            Domain.systemEquip = DomainEquip(systemEquip["id"].toString())
         }
     }
 

@@ -27,7 +27,7 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
         val deviceId = hayStack.addDevice(hayStackDevice)
         hayStackDevice.id = deviceId
         DomainManager.addDevice(hayStackDevice)
-        createPoints(modelDef, configuration, hayStackDevice, deviceDis)
+        createPoints(modelDef, configuration, hayStackDevice)
     }
 
     fun updateDeviceAndPoints(configuration: ProfileConfiguration, modelDef: SeventyFiveFDeviceDirective, equipRef: String, siteRef : String, deviceDis: String) {
@@ -42,13 +42,13 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
 
         hayStackDevice.id = deviceId
         DomainManager.addDevice(hayStackDevice)
-        updatePoints(modelDef, configuration, hayStackDevice, deviceDis)
+        updatePoints(modelDef, configuration, hayStackDevice)
     }
 
-    private fun createPoints(modelDef: SeventyFiveFDeviceDirective, profileConfiguration: ProfileConfiguration, device: Device, deviceDis: String) {
+    private fun createPoints(modelDef: SeventyFiveFDeviceDirective, profileConfiguration: ProfileConfiguration, device: Device) {
 
         modelDef.points.forEach {
-            val hayStackPoint = buildRawPoint(it, profileConfiguration, device, deviceDis)
+            val hayStackPoint = buildRawPoint(it, profileConfiguration, device)
             val pointId = hayStack.addPoint(hayStackPoint)
             hayStackPoint.id = pointId
             DomainManager.addRawPoint(hayStackPoint)
@@ -77,7 +77,7 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
         return deviceBuilder.build()
     }
 
-    private fun buildRawPoint(modelDef: SeventyFiveFDevicePointDef, configuration: ProfileConfiguration, device: Device, deviceDis: String) : RawPoint{
+    private fun buildRawPoint(modelDef: SeventyFiveFDevicePointDef, configuration: ProfileConfiguration, device: Device) : RawPoint{
         CcuLog.i(Domain.LOG_TAG, "buildRawPoint ${modelDef.domainName}")
         val pointBuilder = RawPoint.Builder().setDisplayName(modelDef.name)
             .setDomainName(modelDef.domainName)
@@ -85,7 +85,7 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
             .setRoomRef(configuration.roomRef)
             .setFloorRef(configuration.floorRef)
             .setKind(Kind.parsePointType(modelDef.kind.name))
-            .setEnabled(true)
+            .setEnabled(false)
             .setUnit(modelDef.defaultUnit)
             .setSiteRef(device.siteRef)
 
@@ -128,17 +128,24 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
         pointBuilder.addTag("sourcePoint", HStr.make(modelDef.id))
 
         val rawPoint = pointBuilder.build()
-        updatePhysicalRef(configuration, rawPoint, entityMapper, device.equipRef, deviceDis)
+        /*If there is logical point associated with Physical point Then only enable port */
+        if (updatePhysicalRef(configuration, rawPoint, entityMapper, device.equipRef)) {
+            CcuLog.i(Domain.LOG_TAG, "Raw point is enabled for  ${modelDef.domainName}")
+            rawPoint.enabled = true
+        }
 
         return rawPoint
 
     }
 
-    private fun updatePoints(modelDef: SeventyFiveFDeviceDirective, profileConfiguration: ProfileConfiguration, device: Device, deviceDis: String) {
+    private fun updatePoints(modelDef: SeventyFiveFDeviceDirective, profileConfiguration: ProfileConfiguration, device: Device) {
         modelDef.points.forEach {
-            val newPoint = buildRawPoint(it, profileConfiguration, device, deviceDis)
+            val newPoint = buildRawPoint(it, profileConfiguration, device)
             val hayStackPointDict = hayStack.readHDict("domainName == \""+it.domainName+"\" and deviceRef == \""+device.id+"\"")
             val hayStackPoint = Point.Builder().setHDict(hayStackPointDict).build()
+            if(hayStackPoint.markers.contains(Tags.WRITABLE)){
+                newPoint.markers.add(Tags.WRITABLE)
+            }
             if (!hayStackPoint.equals(newPoint)) {
                 CcuLog.i(Domain.LOG_TAG, "updateHaystackPoint ${it.domainName}")
                 hayStack.updatePoint(newPoint, hayStackPoint.id)
@@ -147,7 +154,7 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
             }
         }
     }
-    private fun updatePhysicalRef(configuration: ProfileConfiguration, rawPoint : RawPoint, entityMapper: EntityMapper , equipRef : String, deviceDis: String) {
+    private fun updatePhysicalRef(configuration: ProfileConfiguration, rawPoint : RawPoint, entityMapper: EntityMapper , equipRef : String): Boolean {
         val logicalPointRefName = entityMapper.getPhysicalProfilePointRef(configuration, rawPoint.domainName)
         CcuLog.i(Domain.LOG_TAG, "updatePhysicalRef $logicalPointRefName")
         /*val logicalPointId = Domain.site?.floors?.get(rawPoint.floorRef)?.
@@ -158,8 +165,9 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
                                             "and equipRef == \"$equipRef\"")
             rawPoint.pointRef = logicalPoint["id"]?.toString()
             rawPoint.type= getType(logicalPointRefName, equipRef)
-
+            return true
         }
+        return false
     }
 
     private fun getType(domainName : String, equipRef: String) : String{
@@ -189,11 +197,17 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
         }
     }
 
-    private fun updatePoint(def : SeventyFiveFDevicePointDef, equipConfiguration : ProfileConfiguration, device: Device, deviceDis: String, existingPoint : HashMap<Any, Any>) {
-        val hayStackPoint = buildRawPoint(def, equipConfiguration, device, deviceDis)
+    private fun updatePoint(
+        def: SeventyFiveFDevicePointDef,
+        equipConfiguration: ProfileConfiguration,
+        device: Device,
+        existingPoint: HashMap<Any, Any>
+    ) {
+        val hayStackPoint = buildRawPoint(def, equipConfiguration, device)
         hayStackPoint.id = existingPoint["id"].toString()
         if (existingPoint.containsKey("pointRef")) hayStackPoint.pointRef = existingPoint["pointRef"].toString()
-        if (existingPoint.containsKey("portEnabled")) hayStackPoint.enabled = existingPoint["portEnabled"].toString().equals("true")
+        if (existingPoint.containsKey("portEnabled")) hayStackPoint.enabled =
+            existingPoint["portEnabled"].toString() == "true"
         if (existingPoint.containsKey("analogType")) hayStackPoint.type = existingPoint["analogType"].toString()
 
         hayStack.updatePoint(hayStackPoint, existingPoint["id"].toString())
@@ -214,8 +228,12 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
         hayStack.updateDevice(device, device.id)
         CcuLog.i(Domain.LOG_TAG, " Updated Device ${device.addr}-${device.domainName}")
     }
-    private fun createCutoverMigrationPoint(def : SeventyFiveFDevicePointDef, equipConfiguration : ProfileConfiguration, device: Device, deviceDis: String) {
-        val hayStackPoint = buildRawPoint(def, equipConfiguration, device, deviceDis)
+    private fun createCut0verMigrationPoint(
+        def: SeventyFiveFDevicePointDef,
+        equipConfiguration: ProfileConfiguration,
+        device: Device
+    ) {
+        val hayStackPoint = buildRawPoint(def, equipConfiguration, device)
         val pointId = hayStack.addPoint(hayStackPoint)
         hayStackPoint.id = pointId
         DomainManager.addRawPoint(hayStackPoint)
@@ -223,9 +241,8 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
     }
     fun doCutOverMigration(deviceRef: String, modelDef: SeventyFiveFDeviceDirective, deviceDis: String,
                            mapping : Map<String, String>, equipConfiguration: ProfileConfiguration) {
-        var devicePoints = hayStack.readAllEntities("point and deviceRef == \"$deviceRef\"")
-        val site = hayStack.site
-        var deviceDict = hayStack.readHDictById(deviceRef)
+        val devicePoints = hayStack.readAllEntities("point and deviceRef == \"$deviceRef\"")
+        val deviceDict = hayStack.readHDictById(deviceRef)
         val device = Device.Builder().setHDict(deviceDict).build()
         //TODO-To be removed after testing is complete
         var update = 0
@@ -247,7 +264,7 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
                     //println("Cut-Over migration Update $dbPoint")
                     val modelPoint = modelDef.points.find { it.domainName.equals(modelPointName, true)}
                     if (modelPoint != null) {
-                        updatePoint(modelPoint, equipConfiguration, device, deviceDis, dbPoint)
+                        updatePoint(modelPoint, equipConfiguration, device, dbPoint)
                     } else {
                         CcuLog.e(Domain.LOG_TAG, " Model point does not exist for domain name $modelPointName")
                     }
@@ -264,12 +281,11 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
                 //println(" Cut-Over migration Add ${modelPointDef.domainName}- $modelPointDef")
                 if (!devicePointWithDomainNameExists(devicePoints, modelPointDef.domainName, mapping)) {
                     CcuLog.e(Domain.LOG_TAG, " Cut-Over migration createPoint ${modelPointDef.domainName}")
-                    createCutoverMigrationPoint(modelPointDef, equipConfiguration, device, deviceDis)
+                    createCut0verMigrationPoint(modelPointDef, equipConfiguration, device)
                 }
             } else {
                 //TODO- Need to consider the case when point exists in map but not in DB.
                 CcuLog.e(Domain.LOG_TAG, " Cut-Over migration PASS $modelPointDef")
-                //println(" Cut-Over migration PASS $modelPointDef")
                 pass++
             }
         }
@@ -285,7 +301,7 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
     }
 
     fun createPoint(modelDef: SeventyFiveFDevicePointDef, profileConfiguration: ProfileConfiguration, device: Device, deviceDis: String) {
-            val hayStackPoint = buildRawPoint(modelDef, profileConfiguration, device, deviceDis)
+            val hayStackPoint = buildRawPoint(modelDef, profileConfiguration, device)
             val pointId = hayStack.addPoint(hayStackPoint)
             hayStackPoint.id = pointId
             DomainManager.addRawPoint(hayStackPoint)

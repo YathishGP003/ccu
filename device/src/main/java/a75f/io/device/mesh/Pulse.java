@@ -922,7 +922,7 @@ public class Pulse
 			hayStack.writeHisValById(cmCurrentTemp.get("id").toString(), curTempVal);
 			CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : CM currentTemp " + curTempVal+","+val);
 		}
-		HashMap cmHumidity = hayStack.read("point and system and cm and humidity");
+		HashMap cmHumidity = hayStack.read("domainName == \""+DomainName.outsideHumidity+"\" and equipRef == \""+Domain.systemEquip.getEquipRef()+"\"" );
 		if (cmHumidity != null && cmHumidity.size() > 0) {
 			double val = CCUUtils.roundToOneDecimal(cmRegularUpdateMessage_t.humidity.get());
 			hayStack.writeHisValById(cmHumidity.get("id").toString(), val);

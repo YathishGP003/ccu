@@ -77,7 +77,7 @@ public class RestoreCCUHsApi {
 
     public void importZoneSpecialSchedule(Set<String> zoneRefSet, RetryCountCallback retryCountCallback){
         if (zoneRefSet.isEmpty()) {
-            Log.i(TAG, "Importing Zone special schedule aborted : zoneRefSet is empty");
+           CcuLog.i(TAG, "Importing Zone special schedule aborted : zoneRefSet is empty");
             return;
         }
         StringBuilder zoneRefString = new StringBuilder("(");
@@ -113,9 +113,9 @@ public class RestoreCCUHsApi {
     }
 
     public void importZoneSchedule(Set<String> zoneRefSet, RetryCountCallback retryCountCallback){
-        Log.i(TAG, "Importing Zone schedule started");
+       CcuLog.i(TAG, "Importing Zone schedule started");
         if (zoneRefSet.isEmpty()) {
-            Log.i(TAG, "Importing Zone schedule aborted : zoneRefSet is empty");
+           CcuLog.i(TAG, "Importing Zone schedule aborted : zoneRefSet is empty");
             return;
         }
         StringBuffer zoneRefString = new StringBuffer("(");
@@ -147,12 +147,12 @@ public class RestoreCCUHsApi {
             ccuHsApi.addSchedule(guid, zoneSchedule.getZoneScheduleHDict(zoneSchedule.getRoomRef()));
             ccuHsApi.setSynced(StringUtils.prependIfMissing(guid, "@"));
         }
-        Log.i(TAG, " Importing Zone  schedule completed");
+       CcuLog.i(TAG, " Importing Zone  schedule completed");
     }
 
     public HGrid getAllCCUs(String siteId, RetryCountCallback retryCountCallback){
         HClient hClient = new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
-        Log.i("CCU_REPLACE","query "+"ccu and equipRef and siteRef == " + StringUtils.prependIfMissing(siteId, "@"));
+       CcuLog.i("CCU_REPLACE","query "+"ccu and equipRef and siteRef == " + StringUtils.prependIfMissing(siteId, "@"));
         HDict ccuDict = new HDictBuilder().add("filter",
                 "ccu and equipRef and siteRef == " + StringUtils.prependIfMissing(siteId, "@")).toDict();
         return invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(ccuDict), retryCountCallback);
@@ -174,9 +174,9 @@ public class RestoreCCUHsApi {
     }
 
     public void importFloors(Set<String> floorRefSet, RetryCountCallback retryCountCallback) {
-        Log.i(TAG, " Importing floor started");
+       CcuLog.i(TAG, " Importing floor started");
         if (floorRefSet.isEmpty()) {
-            Log.i(TAG, " Importing floor aborted : floorRefSet is empty");
+           CcuLog.i(TAG, " Importing floor aborted : floorRefSet is empty");
             return;
         }
         HClient hClient = new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
@@ -195,13 +195,13 @@ public class RestoreCCUHsApi {
             String floorLuid = ccuHsApi.addRemoteFloor(floor, floor.getId().replace("@", ""));
             CCUHsApi.getInstance().setSynced(StringUtils.prependIfMissing(floorLuid, "@"));
         }
-        Log.i(TAG, " Importing floor completed");
+       CcuLog.i(TAG, " Importing floor completed");
     }
 
     public void importZones(Set<String> zoneRefSet, RetryCountCallback retryCountCallback){
-        Log.i(TAG, " Importing Zone started");
+       CcuLog.i(TAG, " Importing Zone started");
         if (zoneRefSet.isEmpty()) {
-            Log.i(TAG, " Importing zone aborted : zoneRefSet is empty");
+           CcuLog.i(TAG, " Importing zone aborted : zoneRefSet is empty");
             return;
         }
         HClient hClient = new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
@@ -221,11 +221,11 @@ public class RestoreCCUHsApi {
             CCUHsApi.getInstance().setSynced(StringUtils.prependIfMissing(floorLuid, "@"));
         }
         importZonePoints(zoneRefSet, retryCountCallback);
-        Log.i(TAG, " Importing Zone completed");
+       CcuLog.i(TAG, " Importing Zone completed");
     }
 
     public void importZonePoints(Set<String> zoneRefSet, RetryCountCallback retryCountCallback){
-        Log.i(TAG, " Importing Zone points started");
+       CcuLog.i(TAG, " Importing Zone points started");
         StringBuffer zonePointsQuery = constructQueryStringToRetrieveZonePoints(zoneRefSet);
 
         HClient hClient = new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
@@ -267,7 +267,7 @@ public class RestoreCCUHsApi {
                         "[^-?\\d.]", "")));
             }
         }
-        Log.i(TAG, " Importing Zone points completed");
+       CcuLog.i(TAG, " Importing Zone points completed");
     }
 
     @NonNull
@@ -294,7 +294,7 @@ public class RestoreCCUHsApi {
 
     public Map<String, String> getCCUVersion(List<String> equipRefs){
         HClient hClient = new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
-        RetryCountCallback retryCountCallback = retryCount -> Log.i(TAG, "Retry count to get CCU version "+ retryCount);
+        RetryCountCallback retryCountCallback = retryCount ->CcuLog.i(TAG, "Retry count to get CCU version "+ retryCount);
         List<String> diagEquipPointList = getDiagEquipPointId(equipRefs, hClient, retryCountCallback);
         HDict[] dictArr = new HDict[diagEquipPointList.size()];
         for(int index = 0; index < dictArr.length; index++){
@@ -394,7 +394,7 @@ public class RestoreCCUHsApi {
     }
 
     public void importEquip(HRow equipRow, RetryCountCallback retryCountCallback){
-        Log.i(TAG, "Import Equip started for "+equipRow.get("dis").toString());
+       CcuLog.i(TAG, "Import Equip started for "+equipRow.get("dis").toString());
         List<Equip> equips = new ArrayList<>();
         String siteManager = "SITE_MANAGER";
         List<HashMap> equipMaps = ccuHsApi.HGridToList(equipRow.grid());
@@ -415,11 +415,11 @@ public class RestoreCCUHsApi {
 
         addEquipAndPoints(equips, points);
         writeValueToEquipPoints(equips, hClient, retryCountCallback);
-        Log.i(TAG, "Import Equip completed for "+equipRow.get("dis").toString());
+       CcuLog.i(TAG, "Import Equip completed for "+equipRow.get("dis").toString());
     }
 
     public void importDevice(HRow deviceRow, RetryCountCallback retryCountCallback){
-        Log.i(TAG, "Import device started for "+deviceRow.get("dis").toString());
+       CcuLog.i(TAG, "Import device started for "+deviceRow.get("dis").toString());
         List<Device> devices = new ArrayList<>();
         List<HashMap> deviceMap = ccuHsApi.HGridToList(deviceRow.grid());
         deviceMap.forEach(equip -> devices.add(new Device.Builder().setHashMap(equip).build()));
@@ -438,13 +438,13 @@ public class RestoreCCUHsApi {
 
         addDeviceAndPoints(devices, points);
         writeValueToDevicePoints(devices, hClient, retryCountCallback);
-        Log.i(TAG, "Import device completed for "+deviceRow.get("dis").toString());
+       CcuLog.i(TAG, "Import device completed for "+deviceRow.get("dis").toString());
     }
 
     private void addDeviceAndPoints(List<Device> devices, List<RawPoint> points) {
         CCUHsApi hsApi = CCUHsApi.getInstance();
         for (Device device : devices) {
-            Log.i(TAG, "Adding points to the device "+ device.getDisplayName() +" started");
+           CcuLog.i(TAG, "Adding points to the device "+ device.getDisplayName() +" started");
             String equipLuid = hsApi.addRemoteDevice(device, device.getId().replace("@", ""));
             hsApi.setSynced(StringUtils.prependIfMissing(equipLuid, "@"));
             //Points
@@ -460,14 +460,14 @@ public class RestoreCCUHsApi {
                     }
                 }
             }
-            Log.i(TAG, "Adding points to the device "+ device.getDisplayName() +" completed");
+           CcuLog.i(TAG, "Adding points to the device "+ device.getDisplayName() +" completed");
         }
     }
 
     private void addEquipAndPoints(List<Equip> equips, List<Point> points) {
         CCUHsApi hsApi = CCUHsApi.getInstance();
         for (Equip equip : equips) {
-            Log.i(TAG, "Adding points to the equip "+ equip.getDisplayName() +" started");
+           CcuLog.i(TAG, "Adding points to the equip "+ equip.getDisplayName() +" started");
             String equipLuid = hsApi.addRemoteEquip(equip, equip.getId().replace("@", ""));
             hsApi.setSynced(equipLuid);
             //Points
@@ -483,16 +483,16 @@ public class RestoreCCUHsApi {
                     }
                 }
             }
-            Log.i(TAG, "Adding points to the equip "+ equip.getDisplayName() +" completed");
+           CcuLog.i(TAG, "Adding points to the equip "+ equip.getDisplayName() +" completed");
         }
     }
 
     private void writeValueToDevicePoints(List<Device> devices, HClient hClient, RetryCountCallback retryCountCallback) {
         for(Device device : devices){
-            Log.i(TAG, "Writing value to points of the device "+ device.getDisplayName() +" started");
+           CcuLog.i(TAG, "Writing value to points of the device "+ device.getDisplayName() +" started");
             List<HDict> devicePoints = getDevicePoints(device);
             writeValueToPoints(devicePoints, hClient, retryCountCallback);
-            Log.i(TAG, "Writing value to points of the device "+ device.getDisplayName() +" completed");
+           CcuLog.i(TAG, "Writing value to points of the device "+ device.getDisplayName() +" completed");
         }
     }
     private HGrid invokeWithRetry(String op, HClient hClient, HGrid req, RetryCountCallback retryCountCallback){
@@ -562,10 +562,10 @@ public class RestoreCCUHsApi {
 
     private void writeValueToEquipPoints(List<Equip> equips, HClient hClient, RetryCountCallback retryCountCallback) {
         for(Equip equip : equips){
-            Log.i(TAG, "Writing value to points of the equip "+ equip.getDisplayName() +" started");
+           CcuLog.i(TAG, "Writing value to points of the equip "+ equip.getDisplayName() +" started");
             List<HDict> equipPoints = getEquipPoints(equip);
             writeValueToPoints(equipPoints, hClient, retryCountCallback);
-            Log.i(TAG, "Writing value to points of the equip "+ equip.getDisplayName() +" completed");
+           CcuLog.i(TAG, "Writing value to points of the equip "+ equip.getDisplayName() +" completed");
         }
     }
 
@@ -598,7 +598,7 @@ public class RestoreCCUHsApi {
      * @param hClient
      */
     private void importBuildingSchedule(String siteId, HClient hClient, RetryCountCallback retryCountCallback){
-        Log.i(TAG, "Import building schedule started");
+       CcuLog.i(TAG, "Import building schedule started");
         HashMap<Object, Object> currentBuildingSchedule = ccuHsApi.readEntity("schedule and building and not special");
         if (!currentBuildingSchedule.isEmpty()) {
             //CCU already has a building schedule.
@@ -629,14 +629,14 @@ public class RestoreCCUHsApi {
                 CCUHsApi.getInstance().setSynced(StringUtils.prependIfMissing(guid, "@"));
             }
         } catch (UnknownRecException e) {
-            Log.i(TAG, "Exception occurred while Importing building schedule "+e.getMessage());
+           CcuLog.i(TAG, "Exception occurred while Importing building schedule "+e.getMessage());
             e.printStackTrace();
         }
-        Log.i(TAG, "Import building schedule completed");
+       CcuLog.i(TAG, "Import building schedule completed");
     }
 
     public void importBuildingOccupancy(String siteId, HClient hClient, RetryCountCallback retryCountCallback){
-        Log.i(TAG, "Import building Occupancy started");
+       CcuLog.i(TAG, "Import building Occupancy started");
         HashMap<Object, Object> buildingOccupancyMap =
                 CCUHsApi.getInstance().readEntity(Queries.BUILDING_OCCUPANCY);
         if (!buildingOccupancyMap.isEmpty()) {
@@ -666,10 +666,10 @@ public class RestoreCCUHsApi {
                 CCUHsApi.getInstance().setSynced(StringUtils.prependIfMissing(guid, "@"));
             }
         } catch (UnknownRecException e) {
-            Log.i(TAG, "Exception occurred while Importing Building Occupancy "+e.getMessage());
+           CcuLog.i(TAG, "Exception occurred while Importing Building Occupancy "+e.getMessage());
             e.printStackTrace();
         }
-        Log.i(TAG, "Import building Occupancy completed");
+       CcuLog.i(TAG, "Import building Occupancy completed");
 
     }
 
@@ -743,7 +743,7 @@ public class RestoreCCUHsApi {
         EntityParser p = new EntityParser(remoteSite);
         Site s = p.getSite();
         tagsDb.idMap.put("@"+tagsDb.addSiteWithId(s, siteId), s.getId());
-        Log.d("CCU_HS_EXISTINGSITESYNC","Added Site "+s.getId());
+       CcuLog.i("CCU_HS_EXISTINGSITESYNC","Added Site "+s.getId());
 
         HClient hClient = new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
 
@@ -831,7 +831,7 @@ public class RestoreCCUHsApi {
     }
 
     public void importNamedSchedule(RetryCountCallback retryCountCallback) {
-        Log.i(TAG, " Import Named schedule started");
+       CcuLog.i(TAG, " Import Named schedule started");
         Site site = CCUHsApi.getInstance().getSite();
         HClient hClient =new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
         if (site != null && site.getOrganization() != null) {
@@ -885,9 +885,9 @@ public class RestoreCCUHsApi {
     }
 
     public void importSchedulablePoints(Set<String> zoneRefSet ,RetryCountCallback retryCountCallback) {
-        Log.i(TAG, " Importing Zone schedulable started");
+       CcuLog.i(TAG, " Importing Zone schedulable started");
         if (zoneRefSet.isEmpty()) {
-            Log.i(TAG, " Importing Zone schedulable aborted : zoneRefSet is empty");
+           CcuLog.i(TAG, " Importing Zone schedulable aborted : zoneRefSet is empty");
             return;
         }
         ArrayList<Point> points = new ArrayList<>();
@@ -925,7 +925,7 @@ public class RestoreCCUHsApi {
             }
         }
         doPointWriteForSchedulable();
-        Log.i(TAG, " Importing schedulable zone points completed");
+       CcuLog.i(TAG, " Importing schedulable zone points completed");
     }
 
 }

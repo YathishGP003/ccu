@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
@@ -97,6 +96,8 @@ public class CCUTagsDb extends HServer {
     private static final String PREFS_REMOVE_ID_MAP = "removeIdMap";
     private static final String PREFS_UPDATE_ID_MAP = "updateIdMap";
     public static final String TAG_CCU_HS = "CCU_HS";
+    public static final String TAG_CCU_OAO = "CCU_OAO";
+
     private static final String PREFS_HAS_MIGRATED_GUID = "hasMigratedGuid";
     private static final String BROADCAST_BACNET_ZONE_ADDED = "a75f.io.renatus.BACNET_ZONE_ADDED";
     private static final String BROADCAST_BACNET_POINT_ADDED = "a75f.io.renatus.BACNET_POINT_ADDED";
@@ -108,7 +109,7 @@ public class CCUTagsDb extends HServer {
     private static final long MAX_DB_SIZE_IN_KB = 5 * 1024 * 1024;
     private static final long MAX_DB_SIZE_IN_KB_RECOVERY = 6 * 1024 * 1024;
 
-    private static final String TAG_CCU_ROOM_DB = "CCU_DB";
+    public static final String TAG_CCU_ROOM_DB = "CCU_DB";
 
     public ConcurrentHashMap<String, HDict> tagsMap;
     public ConcurrentHashMap<String, WriteArray>      writeArrays;
@@ -287,11 +288,11 @@ public class CCUTagsDb extends HServer {
                     DatabaseHelper databaseHelper = new EntityDatabaseHelper(RenatusDatabaseBuilder
                             .getInstance(appContext));
                     allEntities = databaseHelper.getAllEntities();
-                    Log.d(TAG_CCU_ROOM_DB, "Entities read from DB = " + databaseHelper.getAllEntities().size());
+                    CcuLog.d(TAG_CCU_ROOM_DB, "Entities read from DB = " + databaseHelper.getAllEntities().size());
 
                     a75f.io.data.writablearray.DatabaseHelper dbHelper = new WritableArrayDatabaseHelper((RenatusDatabaseBuilder.getInstance(appContext)));
                     allWritable = dbHelper.getAllwritableArrays();
-                    Log.d(TAG_CCU_ROOM_DB, "Writable points read from DB = " + allWritable.size());
+                    CcuLog.d(TAG_CCU_ROOM_DB, "Writable points read from DB = " + allWritable.size());
 
                     loadTagsMap();
                     loadWritableArray();
@@ -344,7 +345,7 @@ public class CCUTagsDb extends HServer {
 
             return result;
         } else {
-            CcuLog.i("CCU_HS", "Already migrated Guids");
+            CcuLog.i(TAG_CCU_HS, "Already migrated Guids");
             return null;
         }
     }
@@ -388,7 +389,7 @@ public class CCUTagsDb extends HServer {
         if(allWritable != null) {
             if(writeArrays == null)
                 writeArrays = new ConcurrentHashMap();
-            Log.d(TAG_CCU_ROOM_DB, "writable table size = " + allWritable.size());
+            CcuLog.d(TAG_CCU_ROOM_DB, "writable table size = " + allWritable.size());
             for (WritableArray eachItem : allWritable) {
                 if (eachItem.component2() != null) {
                     a75f.io.data.WriteArray component2 = new Gson().fromJson(eachItem.component2(), a75f.io.data.WriteArray.class);//make it readable
@@ -413,7 +414,7 @@ public class CCUTagsDb extends HServer {
                 }
             }
         }else{
-            Log.d(TAG_CCU_ROOM_DB, "No writable points to store to in-memory" );
+            CcuLog.d(TAG_CCU_ROOM_DB, "No writable points to store to in-memory" );
         }
     }
 
@@ -422,7 +423,7 @@ public class CCUTagsDb extends HServer {
      */
     public void loadTagsMap() {
         if(allEntities != null) {
-            Log.d(TAG_CCU_ROOM_DB, "size  of the Entities table= " + allEntities.size());
+            CcuLog.d(TAG_CCU_ROOM_DB, "size  of the Entities table= " + allEntities.size());
             for (HayStackEntity entity : allEntities) {
                 entity.component2().entrySet().forEach( item ->  {
 
@@ -437,7 +438,7 @@ public class CCUTagsDb extends HServer {
                 });
             }
         }else{
-            Log.d(TAG_CCU_ROOM_DB, "No entity to add to in-memory" );
+            CcuLog.d(TAG_CCU_ROOM_DB, "No entity to add to in-memory" );
         }
     }
 
@@ -1938,7 +1939,7 @@ public class CCUTagsDb extends HServer {
         // check if point has bacnet id
         boolean isBacnetPoint = CCUHsApi.getInstance().readMapById(id.replace("@","")).containsKey("bacnetId");
         if(isBacnetPoint){
-            Log.d(TAG_CCU_BACNET, "there is a change in bacnet point, share this with bac app id is ->"+id+"<--level-->"+level+"<--val-->"+val);
+            CcuLog.d(TAG_CCU_BACNET, "there is a change in bacnet point, share this with bac app id is ->"+id+"<--level-->"+level+"<--val-->"+val);
             Intent intent = new Intent(BROADCAST_BACNET_POINT_UPDATED);
             intent.putExtra("pointId", id);
             intent.putExtra("level", level);

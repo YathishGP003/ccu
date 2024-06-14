@@ -44,7 +44,10 @@ import a75f.io.logic.jobs.SystemScheduleUtil;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.messaging.MessageHandler;
 import a75f.io.messaging.exceptions.MessageHandlingFailed;
-
+import static a75f.io.api.haystack.HayStackConstants.WRITABLE_ARRAY_DURATION;
+import static a75f.io.api.haystack.HayStackConstants.WRITABLE_ARRAY_LEVEL;
+import static a75f.io.api.haystack.HayStackConstants.WRITABLE_ARRAY_VAL;
+import static a75f.io.api.haystack.HayStackConstants.WRITABLE_ARRAY_WHO;
 public class UpdatePointHandler implements MessageHandler
 {
     public static final String CMD = "updatePoint";
@@ -83,7 +86,28 @@ public class UpdatePointHandler implements MessageHandler
         Point localPoint = new Point.Builder().setHashMap(CCUHsApi.getInstance().readMapById(pointUid)).build();
         CcuLog.d(L.TAG_CCU_PUBNUB, " handleMessage for" + Arrays.toString(localPoint.getMarkers().toArray()));
 
-
+        //move this class to a separate file
+        if(HSUtil.isPhysicalPointUpdate(localPoint)){
+            String value = msgObject.get(WRITABLE_ARRAY_VAL).getAsString();
+            CcuLog.i(L.TAG_CCU_PUBNUB, "update physical point : "+localPoint.getDisplayName() +
+                    " Value: "+value);
+            if(value.isEmpty()){
+                //When a level is deleted, it currently generates a message with empty value.
+                //Handle it here.
+                int level = msgObject.get(HayStackConstants.WRITABLE_ARRAY_LEVEL).getAsInt();
+                hayStack.clearPointArrayLevel(localPoint.getId(), level, true);
+                hayStack.writeHisValById(localPoint.getId(), HSUtil.getPriorityVal(localPoint.getId()));
+            } else {
+                hayStack.writePointLocal(localPoint.getId(), msgObject.get(WRITABLE_ARRAY_LEVEL).getAsInt(),
+                        msgObject.get(WRITABLE_ARRAY_WHO).getAsString(), Double.parseDouble(value), msgObject.has(WRITABLE_ARRAY_DURATION) ?
+                                msgObject.get(WRITABLE_ARRAY_DURATION).getAsInt() : 0);
+                hayStack.writeHisValById(localPoint.getId(),Double.parseDouble( value));
+                // Read priority array list to get duration of levels.
+                // read all points once
+                fetchRemotePoint(pointUid, isDataSync, msgObject);
+            }
+            return;
+        }
         /*
         Reconfiguration handled for PI profile
          */

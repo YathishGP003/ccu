@@ -111,6 +111,7 @@ import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.sscpu.ConventionalPackageUnitUtil;
 import a75f.io.logic.bo.building.truecfm.TrueCFMUtil;
+import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.bo.util.TemperatureMode;
 import a75f.io.logic.interfaces.ZoneDataInterface;
 import a75f.io.logic.jobs.HyperStatSplitUserIntentHandler;
@@ -732,6 +733,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         zoneLoadTextView.setVisibility(View.GONE);
         if(PreferenceUtil.getIsCcuLaunched()) {
             Toast.makeText(getContext(), "CCU Ready", Toast.LENGTH_SHORT).show();
+            CCUUtils.setCCUReadyProperty("true");
             PreferenceUtil.setIsCcuLaunched(false);
         }
     }

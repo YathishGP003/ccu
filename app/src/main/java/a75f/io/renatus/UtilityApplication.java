@@ -53,6 +53,7 @@ import a75f.io.device.mesh.LSerial;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.cloud.RenatusServicesEnvironment;
 import a75f.io.logic.watchdog.Watchdog;
 import a75f.io.messaging.MessageHandlerSubscriber;
@@ -275,6 +276,7 @@ public abstract class UtilityApplication extends Application {
         initMessaging();
         OtaCache cache = new OtaCache();
         cache.restoreOtaRequests(context);
+        CCUUtils.setCCUReadyProperty("false");
         CcuLog.i("UI_PROFILING", "UtilityApplication.onCreate Done");
         CcuLog.i("CCU_DB", "postProcessingInit - end");
     }

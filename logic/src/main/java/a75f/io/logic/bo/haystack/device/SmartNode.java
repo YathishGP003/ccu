@@ -452,7 +452,7 @@ public class SmartNode
 
         sensorPoint = CCUHsApi.getInstance().readHDict("point and sensor and physical and deviceRef == \""+deviceRef+"\""
                 +" and port == \""+p+"\"");
-        return sensorPoint.size() > 0 ? new RawPoint.Builder().setHDict(sensorPoint).build() : null;
+        return ((sensorPoint != null) && sensorPoint.size() > 0) ? new RawPoint.Builder().setHDict(sensorPoint).build() : null;
     }
 
     public void addPointsToDb() {

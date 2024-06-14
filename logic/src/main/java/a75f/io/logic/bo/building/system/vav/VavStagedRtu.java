@@ -70,9 +70,9 @@ public class VavStagedRtu extends VavSystemProfile
     public int coolingStages = 0;
     public int fanStages = 0;
     
-    private int stageUpTimerCounter = 0;
-    private int stageDownTimerCounter = 0;
-    private boolean changeOverStageDownTimerOverrideActive = false;
+    public int stageUpTimerCounter = 0;
+    public int stageDownTimerCounter = 0;
+    public boolean changeOverStageDownTimerOverrideActive = false;
     SystemController.State currentConditioning = OFF;
     
     int[] stageStatus = new int[17];
@@ -883,6 +883,11 @@ public class VavStagedRtu extends VavSystemProfile
 
     @Override
     public void deleteSystemEquip() {
+        HashMap equip = CCUHsApi.getInstance().read("equip and system and not modbus");
+        if (ProfileType.getProfileTypeForName(equip.get("profile").toString()).name().equals(ProfileType.SYSTEM_VAV_STAGED_RTU.name())) {
+            CCUHsApi.getInstance().deleteEntityTree(equip.get("id").toString());
+        }
+        removeSystemEquipModbus();
     }
 
     public void addCmdPoints(String equipref) {

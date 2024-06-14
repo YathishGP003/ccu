@@ -182,7 +182,7 @@ public class OAOProfile
     private boolean isDMMigrated(){
         return (L.ccu().systemProfile instanceof DabExternalAhu
                 || L.ccu().systemProfile instanceof VavExternalAhu
-                || L.ccu().systemProfile instanceof VavStagedRtu
+                || (L.ccu().systemProfile instanceof VavStagedRtu && !(L.ccu().systemProfile instanceof VavAdvancedHybridRtu))
                 || L.ccu().systemProfile instanceof VavFullyModulatingRtu);
     }
     public void doEpidemicControl(){

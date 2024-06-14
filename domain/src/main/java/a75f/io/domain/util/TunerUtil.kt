@@ -6,6 +6,7 @@ import a75f.io.api.haystack.HSUtil.isEquipHasEquipsWithAhuRefOnThisCcu
 import a75f.io.api.haystack.sync.HttpUtil
 import a75f.io.domain.api.Domain
 import a75f.io.api.haystack.Tags
+import a75f.io.api.haystack.sync.PointWriteCache
 import a75f.io.domain.util.Constants.TAG_DM_CCU
 import a75f.io.logger.CcuLog
 import org.projecthaystack.HDateTime
@@ -26,8 +27,7 @@ object TunerUtil {
         if (tunerVal == null) {
             hayStack.getHSClient().pointWrite(HRef.copy(tunerId), 14, hayStack.ccuUserName, HNum.make(getTuner(tunerId)), HNum.make(1), HDateTime.make(System.currentTimeMillis()))
             val b: HDictBuilder = HDictBuilder().add("id", HRef.copy(tunerId)).add("level",14).add("who",CCUHsApi.getInstance().getCCUUserName()).add("duration", HNum.make(0, "ms")).add("val", null as? HVal).add("reason", reason)
-            val dictArr: Array<HDict> = arrayOf(b.toDict())
-            HttpUtil.executePost(hayStack.pointWriteTarget(), HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)))
+            PointWriteCache.getInstance().writePoint(tunerId, b.toDict())
             hayStack.writeHisValById(tunerId, HSUtil.getPriorityVal(tunerId))
         } else {
             hayStack.writePointForCcuUser(tunerId, 14, tunerVal, 0, reason)
@@ -46,8 +46,7 @@ object TunerUtil {
                 if (tunerVal == null) {
                     hayStack.getHSClient().pointWrite(HRef.copy(childTunerId), 14, hayStack.ccuUserName, HNum.make(getTuner(childTunerId)), HNum.make(1), HDateTime.make(System.currentTimeMillis()))
                     val b: HDictBuilder = HDictBuilder().add("id", HRef.copy(childTunerId)).add("level",14).add("who",CCUHsApi.getInstance().getCCUUserName()).add("duration", HNum.make(0, "ms")).add("val", null as? HVal).add("reason", reason)
-                    val dictArr: Array<HDict> = arrayOf(b.toDict())
-                    HttpUtil.executePost(hayStack.pointWriteTarget(), HZincWriter.gridToString(HGridBuilder.dictsToGrid(dictArr)))
+                    PointWriteCache.getInstance().writePoint(childTunerId, b.toDict())
                     hayStack.writeHisValById(childTunerId, HSUtil.getPriorityVal(childTunerId))
                 } else {
                     hayStack.writePointForCcuUser(childTunerId, 14, tunerVal, 0, reason)

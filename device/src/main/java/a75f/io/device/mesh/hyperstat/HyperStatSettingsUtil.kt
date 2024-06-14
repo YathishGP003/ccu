@@ -138,7 +138,7 @@ class HyperStatSettingsUtil {
          * @return Boolean
          */
         private fun getTh1Enabled(hsApi: CCUHsApi, equipRef: String): Boolean {
-            return (readConfig(hsApi, equipRef, "air and temp and config and enabled") == 1.0)
+            return (readConfig(hsApi, equipRef, "th1 and config and enabled") == 1.0)
         }
 
         /**
@@ -148,7 +148,7 @@ class HyperStatSettingsUtil {
          * @return Boolean
          */
         private fun getTh2DoorWindow(hsApi: CCUHsApi, equipRef: String): Boolean {
-            return (readConfig(hsApi, equipRef, "window and sensing and config and enabled") == 1.0)
+            return (readConfig(hsApi, equipRef, "th2 and config and enabled") == 1.0)
         }
 
         /**
@@ -327,7 +327,7 @@ class HyperStatSettingsUtil {
             val genericTuners = HyperStat.HyperStatTunersGeneric_t.newBuilder()
             val equip = CCUHsApi.getInstance().readHDictById(equipRef)
             genericTuners.unoccupiedSetback = (CCUHsApi.getInstance().readPointPriorityValByQuery
-                ("schedulable and zone and unoccupied and setback and roomRef == \"" + equip.get("roomRef").toString() + "\"")).toInt()
+                ("schedulable and zone and unoccupied and setback and roomRef == \"" + equip.get("roomRef").toString() + "\"") * 10).toInt()
             genericTuners.minFanRuntimePostconditioning =
                     TunerUtil.readTunerValByQuery("min and fan and runtime and postconditioning", equipRef).toInt()
             genericTuners.relayActivationHysteresis =
@@ -458,7 +458,7 @@ class HyperStatSettingsUtil {
          * @param equipRef
          * @return HyperstatLinearFanSpeeds_t
          */
-        public fun getLinearFanSpeedDetails(equipRef: String): HyperStat.HyperstatLinearFanSpeeds_t? {
+        fun getLinearFanSpeedDetails(equipRef: String): HyperStat.HyperstatLinearFanSpeeds_t? {
             val linearFanSpeedBuilder = HyperStat.HyperstatLinearFanSpeeds_t.newBuilder()
             val ccuHsApi = CCUHsApi.getInstance()
             val equipRefQuery = "equipRef == \"$equipRef\""
@@ -488,7 +488,7 @@ class HyperStatSettingsUtil {
          * @param equipRef
          * @return HyperstatStagedFanSpeeds_t
          */
-        public fun getStagedFanSpeedDetails(equipRef: String): HyperStat.HyperstatStagedFanSpeeds_t? {
+        fun getStagedFanSpeedDetails(equipRef: String): HyperStat.HyperstatStagedFanSpeeds_t? {
             val stagedFanSpeedBuilder = HyperStat.HyperstatStagedFanSpeeds_t.newBuilder()
             val ccuHsApi = CCUHsApi.getInstance()
             val equipRefQuery = "equipRef == \"$equipRef\""

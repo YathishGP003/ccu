@@ -94,6 +94,7 @@ class Pipe2Reconfiguration {
                     config.analogIn1State.copy(association = AnalogInAssociation.values()[association])
                 Port.ANALOG_IN_TWO -> config.analogIn2State =
                     config.analogIn2State.copy(association = AnalogInAssociation.values()[association])
+                Port.TH1_IN -> config.thermistorIn1State = config.thermistorIn1State.copy(association = Pipe2Th1InAssociation.values()[association])
                 else -> {}
 
             }

@@ -70,11 +70,4 @@ object ReconfigHandler {
         } != null
     }
 
-
-    fun getPointConfig(
-        modelDef: SeventyFiveFProfileDirective,
-        domainName: String): PointConfiguration.ConfigType? {
-        return modelDef.points.find { it.domainName == domainName }?.configuration?.configType
-    }
-
 }

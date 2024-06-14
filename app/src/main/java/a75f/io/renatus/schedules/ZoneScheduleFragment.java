@@ -323,6 +323,10 @@ public class ZoneScheduleFragment extends DialogFragment implements ZoneSchedule
             schedule = CCUHsApi.getInstance().getScheduleById(mScheduleId);
             if(schedule == null){
                 schedule = CCUHsApi.getInstance().getDefaultNamedSchedule();
+                if(schedule == null){
+                    Toast.makeText(getContext(), "Error loading schedule", Toast.LENGTH_SHORT).show();
+                    return;
+                }
             }
             updateUI();
         } else {
@@ -333,7 +337,7 @@ public class ZoneScheduleFragment extends DialogFragment implements ZoneSchedule
                 schedule = CCUHsApi.getInstance().getBuildingOccupancySchedule().get(0);
             }
 
-            CcuLog.d(L.TAG_CCU_UI," Loaded System Schedule " + schedule.toString());
+            CcuLog.d(L.TAG_CCU_UI," Loaded System Schedule - ZoneScheduleFragment" + schedule.toString());
         }
 
     }

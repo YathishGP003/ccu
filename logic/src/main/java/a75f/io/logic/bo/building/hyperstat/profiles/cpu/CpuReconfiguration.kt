@@ -54,6 +54,8 @@ class CpuReconfiguration {
                 Port.ANALOG_OUT_THREE -> config.analogOut3State = config.analogOut3State.copy(association = CpuAnalogOutAssociation.values()[association])
                 Port.ANALOG_IN_ONE -> config.analogIn1State = config.analogIn1State.copy(association = AnalogInAssociation.values()[association])
                 Port.ANALOG_IN_TWO -> config.analogIn2State = config.analogIn2State.copy(association = AnalogInAssociation.values()[association])
+                Port.TH1_IN -> config.thermistorIn1State = config.thermistorIn1State.copy(association = Th1InAssociation.values()[association])
+                Port.TH2_IN -> config.thermistorIn2State = config.thermistorIn2State.copy(association = Th2InAssociation.values()[association])
                 else -> {}
 
             }

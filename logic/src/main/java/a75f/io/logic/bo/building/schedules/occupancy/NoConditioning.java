@@ -38,7 +38,7 @@ public class NoConditioning implements OccupancyTrigger{
             String conditioningMode = hayStack.
                     readDefaultStrVal("status and zone and message and equipRef == \"" + equipRef + "\"");
             isZoneAndSystemOnDifferentDirection(conditioningMode);
-            double currentTemp = hayStack.readHisValByQuery("current and temp and sensor and equipRef == \"" + equipRef + "\"");
+            double currentTemp = hayStack.readHisValByQuery("(current or space) and temp and sensor and equipRef == \"" + equipRef + "\"");
             double buildingLimitMin = BuildingTunerCache.getInstance().getBuildingLimitMin();
             double buildingLimitMax = BuildingTunerCache.getInstance().getBuildingLimitMax();
             double tempDeadLeeway = BuildingTunerCache.getInstance().getTempDeadLeeway();

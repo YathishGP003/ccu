@@ -112,8 +112,11 @@ public class PreferenceUtil {
     public static final String VAV_REHEAT_RELAY_ACTIVATION_HYSTERESIS_VALUE_MIGRATION = "vavReheatRelayActivationHysteresisValueMigration";
     public static final String HSS_OP_MODE_WRITABLE_MARKER_MIGRATION = "hssOpModeWritableMarkerMigration";
     public static final String HS_TH_CONFIG_MIGRATION = "hsThConfigMigration";
+    public static final String HS_MONITORING_GENERIC_FAULT_ENUM_MIGRATION = "hsMonitoringGenericFaultEnumMigration";
 
     public static final String LOCALLY_SYNC_SCHEDULE = "locallySyncedSchedules";
+
+    public static final String MODBUS_ENUM_CORRECTION = "modbusEnumCorrection";
 
     public static void setContext(Context c) {
         context= c;
@@ -931,6 +934,22 @@ public class PreferenceUtil {
 
     public static void setHyperStatThermistorConfigMigration() {
         setBooleanPreference(HS_TH_CONFIG_MIGRATION, true);
+    }
+
+    public static boolean getHSMonitoringGenericFaultEnumMigration() {
+        return getBooleanPreference(HS_MONITORING_GENERIC_FAULT_ENUM_MIGRATION);
+    }
+
+    public static void setHSMonitoringGenericFaultEnumMigration() {
+        setBooleanPreference(HS_MONITORING_GENERIC_FAULT_ENUM_MIGRATION, true);
+    }
+
+    public static boolean isModbusEnumCorrectionRequired() {
+        return getBooleanPreference(MODBUS_ENUM_CORRECTION);
+    }
+
+    public static void setModbusEnumCorrectionDone() {
+        setBooleanPreference(MODBUS_ENUM_CORRECTION, true);
     }
 
 }

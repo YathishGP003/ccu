@@ -30,6 +30,7 @@ import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
+import a75f.io.api.haystack.sync.PointWriteCache;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.vrv.VrvControlMessageCache;
@@ -58,6 +59,7 @@ public class UpdatePointHandler implements MessageHandler
     public static void handlePointUpdateMessage(final JsonObject msgObject, Long timeToken, Boolean isDataSync) throws MessageHandlingFailed {
         String src = msgObject.get("who").getAsString();
         String pointUid = "@" + msgObject.get("id").getAsString();
+        String pointLevel = msgObject.get("level").getAsString();
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap<Object, Object> pointEntity = hayStack.readMapById(pointUid);
 
@@ -68,6 +70,7 @@ public class UpdatePointHandler implements MessageHandler
             Log.i("ccu_read_changes","CCU HAS LATEST VALUE ");
             return;
         }
+        PointWriteCache.Companion.getInstance().clearPointWriteInCache(pointUid, pointLevel);
 
         if (HSUtil.isBuildingTuner(pointUid, hayStack)  ||  (HSUtil.isSchedulable(pointUid, hayStack))) {
             HashMap<Object, Object> buildingTunerPoint = hayStack.readMapById(pointUid);

@@ -283,13 +283,13 @@ fun updateConnectPressureSensor(slaveId: Int, responseArray : ByteArray, sensorM
     when(sensorMapping) {
         PressureSensorBusMapping.notConnected.ordinal -> {CcuLog.e(L.TAG_CCU_SERIAL_CONNECT, "Pressure sensor not connected")}
         PressureSensorBusMapping.ductStaticPressure12.ordinal -> {
-            connectEquip.ductStaticPressure1.writeHisVal(scaledSensorVal)
+            connectEquip.ductStaticPressureSensor12.writeHisVal(scaledSensorVal)
         }
         PressureSensorBusMapping.ductStaticPressure22.ordinal -> {
-            connectEquip.ductStaticPressure2.writeHisVal(scaledSensorVal)
+            connectEquip.ductStaticPressureSensor22.writeHisVal(scaledSensorVal)
         }
         PressureSensorBusMapping.ductStaticPressure32.ordinal -> {
-            connectEquip.ductStaticPressure3.writeHisVal(scaledSensorVal)
+            connectEquip.ductStaticPressureSensor32.writeHisVal(scaledSensorVal)
         }
     }
     CcuLog.i(L.TAG_CCU_SERIAL_CONNECT, "Connect pressureVal $sensorVal sensorMapping $sensorMapping sensorBusAddr $sensorBusAddr")

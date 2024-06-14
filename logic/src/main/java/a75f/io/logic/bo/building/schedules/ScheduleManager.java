@@ -66,6 +66,7 @@ import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.dab.DabExternalAhu;
+import a75f.io.logic.bo.building.system.vav.VavAdvancedHybridRtu;
 import a75f.io.logic.bo.building.system.vav.VavExternalAhu;
 import a75f.io.logic.bo.building.system.vav.VavFullyModulatingRtu;
 import a75f.io.logic.bo.building.system.vav.VavStagedRtu;
@@ -207,7 +208,7 @@ public class ScheduleManager {
                     CcuLog.d(L.TAG_CCU_SCHEDULER, " processSchedules " + equip.getDisplayName());
                     processScheduleForEquip(equip, activeSystemVacation);
                 }
-            } catch (NullPointerException | IllegalStateException e) {
+            } catch (Exception e) {
                 CcuLog.e(TAG_CCU_SCHEDULER, "Error in processSchedules for equip " + e);
                 e.printStackTrace();
             }
@@ -314,7 +315,7 @@ public class ScheduleManager {
                         "Updated equipOccupancy "+profile.getEquip().getDisplayName()+" : "+occupancyData.occupancy);
 
                 equipOccupancy.put(occupancyHandler.getEquipRef(), occupancyData);
-            }catch (NullPointerException | IllegalStateException e){
+            }catch (Exception e){
                 CcuLog.e(TAG_CCU_SCHEDULER, "Error in updateOccupancy for profile "+e);
                 e.printStackTrace();
             }
@@ -413,7 +414,7 @@ public class ScheduleManager {
                     zoneDataInterface.refreshDesiredTemp(equip.getGroup(), "",
                             "", equip.getRoomRef());
                 }
-            }catch (NullPointerException | IllegalStateException e) {
+            }catch (Exception e) {
                 CcuLog.e(TAG_CCU_SCHEDULER, "Error in updateDesiredTemp for profile " + e);
                 e.printStackTrace();
             }
@@ -577,7 +578,7 @@ public class ScheduleManager {
                 zoneOccupancy.put(room.get("id").toString(), occupancy);
                 hayStack.writeHisValByQuery("occupancy and state and roomRef == \"" + room.get("id") + "\"",
                         (double) occupancy.ordinal());
-            } catch (NullPointerException | IllegalStateException e) {
+            } catch (Exception e) {
                 CcuLog.e(TAG_CCU_SCHEDULER, "Error in updateZoneOccupancy for room " + e);
                 e.printStackTrace();
             }
@@ -1253,22 +1254,14 @@ public class ScheduleManager {
 
 
     private static double getCoolingPreconditioningRate() {
-        if (L.ccu().systemProfile instanceof DabExternalAhu
-                || L.ccu().systemProfile instanceof VavExternalAhu
-                || L.ccu().systemProfile instanceof VavStagedRtu
-                || L.ccu().systemProfile instanceof VavStagedRtuWithVfd
-                || L.ccu().systemProfile instanceof VavFullyModulatingRtu) {
+        if (isDMSupportProfile()) {
             return getPointByDomain(coolingPreconditioningRate);
         } else {
             return TunerUtil.readTunerValByQuery("cooling and precon and rate", L.ccu().systemProfile.getSystemEquipRef());
         }
     }
     private static double getHeatingPreconditioningRate() {
-        if (L.ccu().systemProfile instanceof DabExternalAhu
-                || L.ccu().systemProfile instanceof VavExternalAhu
-                || L.ccu().systemProfile instanceof VavStagedRtu
-                || L.ccu().systemProfile instanceof VavStagedRtuWithVfd
-                || L.ccu().systemProfile instanceof VavFullyModulatingRtu) {
+        if (isDMSupportProfile()) {
             return getPointByDomain(heatingPreconditioningRate);
         } else {
             return TunerUtil.readTunerValByQuery("heating and precon and rate", L.ccu().systemProfile.getSystemEquipRef());
@@ -1276,5 +1269,13 @@ public class ScheduleManager {
     }
     private static double getPointByDomain(String domainName) {
         return  TunerUtil.readTunerValByQuery("domainName == \""+domainName+"\"", L.ccu().systemProfile.getSystemEquipRef());
+    }
+
+    private static boolean isDMSupportProfile() {
+        return L.ccu().systemProfile instanceof DabExternalAhu
+                || L.ccu().systemProfile instanceof VavExternalAhu
+                || (L.ccu().systemProfile instanceof VavStagedRtu && !(L.ccu().systemProfile instanceof VavAdvancedHybridRtu))
+                || L.ccu().systemProfile instanceof VavStagedRtuWithVfd
+                || L.ccu().systemProfile instanceof VavFullyModulatingRtu;
     }
 }

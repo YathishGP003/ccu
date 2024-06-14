@@ -1,5 +1,6 @@
 package a75f.io.api.haystack.util;
 
+
 public class StringUtil {
 
     private StringUtil(){

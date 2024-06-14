@@ -6,6 +6,8 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.sync.PointWriteCache;
+import a75f.io.api.haystack.sync.PointWriteHandler;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.BaseJob;
 import a75f.io.logic.Globals;
@@ -79,6 +81,7 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
 
                 runSystemControlAlgorithm();
 
+                syncCachedPointWrites();
                 status = true;
                 CcuLog.d(L.TAG_CCU_JOB,"<- BuildingProcessJob");
 
@@ -181,7 +184,10 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
             }
         }.start();
     }
-
+    private void syncCachedPointWrites() {
+        PointWriteHandler.Companion.getInstance().processPointWrites(
+                PointWriteCache.Companion.getInstance().getPointWriteList());
+    }
     public boolean getStatus() {
         return status;
     }

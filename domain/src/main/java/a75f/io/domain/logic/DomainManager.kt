@@ -1,6 +1,7 @@
 package a75f.io.domain.logic
 
 import a75f.io.api.haystack.CCUHsApi
+import a75f.io.domain.BypassDamperEquip
 import a75f.io.domain.equips.BuildingEquip
 import a75f.io.domain.equips.VavEquip
 import a75f.io.domain.api.Device
@@ -38,6 +39,7 @@ object DomainManager {
             Domain.site?.addCcu(it)
             addSystemEquip(hayStack, it["id"].toString())
             addSystemDevice(hayStack, it["id"].toString())
+            addBypassEquip(hayStack, it["id"].toString())
         }
 
         val floors = hayStack.readAllEntities("floor")
@@ -72,6 +74,14 @@ object DomainManager {
                     it.contains("vav") -> Domain.equips[it["id"].toString()] = VavEquip(it["id"].toString())
                 }
             }
+
+        hayStack.readAllEntities("bypassDamper and equip")
+            .forEach {
+                CcuLog.i(Domain.LOG_TAG, "Build domain $it")
+                Domain.equips[it["id"].toString()] = BypassDamperEquip(it["id"].toString())
+            }
+
+
         Domain.equips.forEach {
             CcuLog.i(Domain.LOG_TAG, "Added equip to domain ${it.key}")
         }
@@ -163,7 +173,7 @@ object DomainManager {
     }
 
     fun addSystemDevice(hayStack: CCUHsApi,ccuId: String) {
-        val devices = hayStack.readAllEntities("device and roomRef == \"SYSTEM\"")
+        val devices = hayStack.readAllEntities("device and roomRef == \"SYSTEM\" and not smartnode") // this query should not pick up OAO or Bypass Smart Nodes
         devices.forEach { device ->
             val deviceId = device["id"]
             deviceId?.let {
@@ -174,6 +184,24 @@ object DomainManager {
                     val domainName = point["domainName"]
                     domainName?.let {
                         Domain.site?.ccus?.get(ccuId)?.devices?.get(deviceId)?.addPoint(point)
+                    }
+                }
+            }
+        }
+    }
+
+    fun addBypassEquip(hayStack: CCUHsApi, ccuId: String) {
+        val bypassEquip = hayStack.readAllEntities("bypassDamper and equip")
+        bypassEquip.forEach { equip->
+            val equipId = equip["id"]
+            equipId?.let {
+                Domain.site?.ccus?.get(ccuId)?.addBypassEquip(equip)
+                val points =
+                    hayStack.readAllEntities("point and equipRef == \"$equipId\"")
+                points.forEach { point ->
+                    val domainName = point["domainName"]
+                    domainName?.let {
+                        Domain.site?.ccus?.get(ccuId)?.bypassEquips?.get(equipId.toString())?.addPoint(point)
                     }
                 }
             }

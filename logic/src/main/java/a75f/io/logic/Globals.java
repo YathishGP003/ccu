@@ -246,7 +246,7 @@ public class Globals {
         renatusServicesUrls = urls;
         CCUHsApi hsApi = new CCUHsApi(this.mApplicationContext, urls.getHaystackUrl(), urls.getCaretakerUrl(), urls.getGatewayUrl());
         //CcuLog.i(L.TAG_CCU_INIT, "Initialize ModelCache");
-        //ModelCache.INSTANCE.init(hsApi, this.mApplicationContext);
+        ModelCache.INSTANCE.init(hsApi, this.mApplicationContext);
         //CcuLog.i(L.TAG_CCU_INIT, "Initialized ModelCache");
     }
 

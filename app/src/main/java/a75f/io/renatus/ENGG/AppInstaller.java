@@ -215,7 +215,7 @@ public class AppInstaller
                     final String[] commands = {"pm install -r -d -g "+file.getAbsolutePath()};
 
                     CcuLog.d(L.TAG_CCU_DOWNLOAD, "Install AppInstall silent invokeInstallerIntent===>>>"+sFilePath+","+file.getAbsolutePath());
-                    RenatusApp.executeAsRoot(commands, true);
+                    RenatusApp.executeAsRoot(commands, null, true);
                     OtaStatusDiagPoint.Companion.updateCCUOtaStatus(OtaStatus.OTA_SUCCEEDED);
                     Globals.getInstance().setCcuUpdateTriggerTimeToken(0);
                 }

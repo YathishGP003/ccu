@@ -16,6 +16,8 @@ import dagger.hilt.android.HiltAndroidApp;
 
 import androidx.multidex.MultiDex;
 import androidx.appcompat.app.AppCompatDelegate;
+
+import android.content.pm.PackageManager;
 import android.util.Log;
 
 
@@ -92,7 +94,7 @@ public class RenatusApp extends UtilityApplication
 		}
 		return found;
 	}
-	public static void executeAsRoot(String[] commands, Boolean restartCCUAppAfterInstall) {
+	public static void executeAsRoot(String[] commands, String packageToLaunch, boolean restartCCUAppAfterInstall) {
 		Thread thread = new Thread(new Runnable() {
 			@Override
 			public void run() {
@@ -134,9 +136,23 @@ public class RenatusApp extends UtilityApplication
 						Log.d(TAG_CCU_DOWNLOAD, "ExecuteAsRoot stdout: " + stdOutput.trim());
 						Log.d(TAG_CCU_DOWNLOAD, "ExecuteAsRoot stderr: " + errorOutput.trim());
 
+						if (packageToLaunch != null) {
+							try {
+								Log.i(TAG_CCU_DOWNLOAD, String.format("Launching package %s", packageToLaunch));
+								Context context = RenatusApp.getAppContext();
+								PackageManager pm = context.getPackageManager();
+								Intent launchIntent = pm.getLaunchIntentForPackage(packageToLaunch);
+								context.startActivity(launchIntent);
+							} catch(Exception e) {
+								Log.e(TAG_CCU_DOWNLOAD, String.format("Unable to launch package %s: %s", packageToLaunch, e.getMessage()));
+							}
+						}
+
 						ApplicationInfo appInfo2 = RenatusApp.getAppContext().getApplicationInfo();
 						Log.d(TAG_CCU_DOWNLOAD, "RenatusAPP ExecuteAsRoot END===>"+(appInfo2.flags & ApplicationInfo.FLAG_SYSTEM));
+
 						if (restartCCUAppAfterInstall) {
+							Log.i(TAG_CCU_DOWNLOAD, "CCU app restart requested");
 							restartApp();
 						}
 					} else {

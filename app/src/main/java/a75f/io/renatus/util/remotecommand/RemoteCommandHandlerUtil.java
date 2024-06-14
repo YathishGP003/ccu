@@ -31,7 +31,6 @@ import androidx.fragment.app.FragmentActivity;
 
 
 import java.io.File;
-import java.util.ArrayList;
 
 import a75f.io.alerts.AlertManager;
 import a75f.io.alerts.AlertsConstantsKt;
@@ -332,7 +331,7 @@ public class RemoteCommandHandlerUtil {
                             String[] commands = new String[]{
                                     String.format(INSTALL_CMD, fileName)
                             };
-                            RenatusApp.executeAsRoot(commands, false);
+                            RenatusApp.executeAsRoot(commands, BAC_APP_PACKAGE_NAME, false);
                         }
                     } else if(downloadId == remoteAccessAppDownloadId){
                         String fileName = resolveApkFilename(remoteAccessApkName);
@@ -341,7 +340,7 @@ public class RemoteCommandHandlerUtil {
                                     String.format(INSTALL_CMD, fileName),
                                     String.format(APPOPS_SET_ALLOW_CMD, REMOTE_ACCESS_PACKAGE_NAME, "PROJECT_MEDIA")
                             };
-                            RenatusApp.executeAsRoot(commands, false);
+                            RenatusApp.executeAsRoot(commands, REMOTE_ACCESS_PACKAGE_NAME, false);
                         }
                     } else if(downloadId == homeAppDownloadId){
                         String fileName = resolveApkFilename(homeAppApkName);
@@ -357,7 +356,7 @@ public class RemoteCommandHandlerUtil {
                                     String.format(INSTALL_CMD, fileName),
                                     String.format(SET_HOME_APP_CMD, HOME_APP_PACKAGE_NAME)
                             };
-                            RenatusApp.executeAsRoot(commands, false);
+                            RenatusApp.executeAsRoot(commands, HOME_APP_PACKAGE_NAME, false);
                         }
                     }
                 }

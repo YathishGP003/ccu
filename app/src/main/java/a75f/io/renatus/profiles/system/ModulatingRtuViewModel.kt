@@ -14,6 +14,8 @@ import a75f.io.domain.util.ModelLoader
 import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.logic.L
+import a75f.io.logic.bo.haystack.device.ControlMote
+import a75f.io.renatus.profiles.profileUtils.UnusedPortsModel.Companion.saveUnUsedPortStatusOfSystemProfile
 import a75f.io.logic.bo.building.system.SystemMode
 import a75f.io.logic.bo.building.system.vav.VavFullyModulatingRtu
 import a75f.io.logic.bo.building.system.vav.config.ModulatingRtuProfileConfig
@@ -46,7 +48,7 @@ open class ModulatingRtuViewModel : ViewModel() {
     var modelLoaded by mutableStateOf(false)
     lateinit var equipBuilder: ProfileEquipBuilder
     lateinit var deviceBuilder: DeviceBuilder
-
+    private lateinit var unusedPorts: HashMap<String, Boolean>
     fun init(context: Context, profileModel: ModelDirective, hayStack: CCUHsApi) {
         this.hayStack = hayStack
         equipBuilder = ProfileEquipBuilder(hayStack)
@@ -117,6 +119,8 @@ open class ModulatingRtuViewModel : ViewModel() {
             hayStack.siteName + "-" + deviceModel.name
         )
         DomainManager.addSystemDomainEquip(hayStack)
+        saveUnUsedPortStatusOfSystemProfile(profileConfiguration, hayStack)
+        viewState.unusedPortState = ControlMote.getCMUnusedPorts(Domain.hayStack)
     }
 
     fun updateSystemMode() {

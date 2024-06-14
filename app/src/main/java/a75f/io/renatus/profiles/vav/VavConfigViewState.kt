@@ -33,6 +33,7 @@ class VavConfigViewState {
     var maxCFMReheating by mutableStateOf(0.0)
     var minCFMReheating by mutableStateOf(0.0)
 
+    var unusedPortState by mutableStateOf(hashMapOf<String, Boolean>())
     companion object {
         fun fromVavProfileConfig(config : VavProfileConfiguration) : VavConfigViewState {
             return VavConfigViewState().apply {
@@ -61,11 +62,12 @@ class VavConfigViewState {
                 this.minCFMCooling = config.minCFMCooling.currentVal
                 this.maxCFMReheating = config.maxCFMReheating.currentVal
                 this.minCFMReheating = config.minCFMReheating.currentVal
+                this.unusedPortState = config.unusedPorts
             }
         }
     }
 
-    fun updateConfigFromViewState(config : VavProfileConfiguration, ) {
+    fun updateConfigFromViewState(config : VavProfileConfiguration) {
         config.damperType.currentVal = this.damperType
         config.damperSize.currentVal = this.damperSize
         config.damperShape.currentVal = this.damperShape
@@ -91,5 +93,6 @@ class VavConfigViewState {
         config.minCFMCooling.currentVal = this.minCFMCooling
         config.maxCFMReheating.currentVal = this.maxCFMReheating
         config.minCFMReheating.currentVal = this.minCFMReheating
+        config.unusedPorts = this.unusedPortState
     }
 }

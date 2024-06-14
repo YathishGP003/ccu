@@ -25,7 +25,7 @@ open class ModulatingRtuViewState {
     var analogOut4FreshAirMin by mutableStateOf(2)
     var analogOut4FreshAirMax by mutableStateOf(10)
 
-
+    var unusedPortState by mutableStateOf(hashMapOf<String, Boolean>())
     var analogOut1CoolingTestSignal by  mutableStateOf (Domain.cmBoardDevice.analog1Out.readHisVal())
     var analogOut2FanSpeedTestSignal by mutableStateOf (Domain.cmBoardDevice.analog2Out.readHisVal())
     var analogOut3HeatingTestSignal by mutableStateOf (Domain.cmBoardDevice.analog3Out.readHisVal())
@@ -55,6 +55,7 @@ open class ModulatingRtuViewState {
                 this.analogOut3HeatingMax = config.analogOut3HeatingMax.currentVal.toInt()
                 this.analogOut4FreshAirMin = config.analogOut4FreshAirMin.currentVal.toInt()
                 this.analogOut4FreshAirMax = config.analogOut4FreshAirMax.currentVal.toInt()
+                this.unusedPortState = config.unusedPorts
             }
         }
     }
@@ -78,5 +79,6 @@ open class ModulatingRtuViewState {
         config.analogOut3HeatingMax.currentVal = this.analogOut3HeatingMax.toDouble()
         config.analogOut4FreshAirMin.currentVal = this.analogOut4FreshAirMin.toDouble()
         config.analogOut4FreshAirMax.currentVal = this.analogOut4FreshAirMax.toDouble()
+        config.unusedPorts = this.unusedPortState
     }
 }

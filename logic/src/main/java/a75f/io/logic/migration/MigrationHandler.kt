@@ -1,25 +1,21 @@
 package a75f.io.logic.migration
 
+import a75f.io.api.haystack.*
 import a75f.io.api.haystack.CCUHsApi
-import a75f.io.api.haystack.Equip
 import a75f.io.api.haystack.HayStackConstants
 import a75f.io.api.haystack.Point
 import a75f.io.api.haystack.Site
 import a75f.io.api.haystack.Tags
 import a75f.io.api.haystack.sync.HttpUtil
 import a75f.io.domain.api.Domain
-import a75f.io.domain.cutover.NodeDeviceCutOverMapping
-import a75f.io.domain.cutover.VavFullyModulatingRtuCutOverMapping
-import a75f.io.domain.cutover.VavStagedRtuCutOverMapping
-import a75f.io.domain.cutover.VavStagedVfdRtuCutOverMapping
-import a75f.io.domain.cutover.VavZoneProfileCutOverMapping
+import a75f.io.domain.cutover.*
 import a75f.io.domain.equips.VavEquip
 import a75f.io.domain.logic.DeviceBuilder
 import a75f.io.domain.logic.DomainManager.addCmBoardDevice
 import a75f.io.domain.logic.DomainManager.addSystemDomainEquip
 import a75f.io.domain.logic.EntityMapper
 import a75f.io.domain.logic.ProfileEquipBuilder
-import a75f.io.domain.util.ModelLoader
+import a75f.io.domain.util.*
 import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.logic.L
@@ -31,6 +27,7 @@ import a75f.io.logic.bo.building.system.vav.config.ModulatingRtuProfileConfig
 import a75f.io.logic.bo.building.system.vav.config.StagedRtuProfileConfig
 import a75f.io.logic.bo.building.system.vav.config.StagedVfdRtuProfileConfig
 import a75f.io.logic.bo.building.vav.VavProfileConfiguration
+import a75f.io.logic.bo.haystack.device.DeviceUtil
 import a75f.io.logic.bo.util.DemandResponseMode
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.logic.diag.DiagEquip
@@ -41,6 +38,7 @@ import a75f.io.logic.util.PreferenceUtil
 import a75f.io.logic.util.createOfflineModePoint
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
+import android.util.Log
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import org.projecthaystack.HDict
@@ -50,6 +48,7 @@ import org.projecthaystack.HGridBuilder
 import org.projecthaystack.HRow
 import org.projecthaystack.io.HZincReader
 import org.projecthaystack.io.HZincWriter
+import java.util.*
 
 
 class MigrationHandler (hsApi : CCUHsApi) : Migration {
@@ -75,8 +74,8 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         createMigrationVersionPoint(CCUHsApi.getInstance())
         addSystemDomainEquip(CCUHsApi.getInstance())
         addCmBoardDevice(hayStack)
-
         if (!isMigrationRequired()) {
+            CcuLog.i(L.TAG_CCU_MIGRATION_UTIL, "---- Migration Not Required ----")
             return
         }
         if (hayStack.readEntity(Tags.SITE).isNotEmpty()) {
@@ -90,6 +89,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
 
             DiagEquip.addLogLevelPoint(CCUHsApi.getInstance())
         }
+        VavAndAcbProfileMigration.migrateVavAndAcbProfilesToCorrectPortEnabledStatus(hayStack)
         updateAhuRefForTIEquip()
         clearLevel4ValuesOfDesiredTempIfDurationIs0()
         if (schedulerRevamp.isMigrationRequired()) {

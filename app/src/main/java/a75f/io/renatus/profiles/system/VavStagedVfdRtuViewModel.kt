@@ -8,11 +8,11 @@ import a75f.io.domain.util.ModelLoader
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.ProfileType
-import a75f.io.logic.bo.building.system.vav.VavStagedRtu
 import a75f.io.logic.bo.building.system.vav.VavStagedRtuWithVfd
-import a75f.io.logic.bo.building.system.vav.config.StagedRtuProfileConfig
 import a75f.io.logic.bo.building.system.vav.config.StagedVfdRtuProfileConfig
+import a75f.io.logic.bo.haystack.device.ControlMote
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
+import a75f.io.renatus.profiles.profileUtils.UnusedPortsModel
 import a75f.io.renatus.util.ProgressDialogUtils
 import android.content.Context
 import androidx.lifecycle.viewModelScope
@@ -48,6 +48,7 @@ class VavStagedVfdRtuViewModel : StagedRtuProfileViewModel() {
         CcuLog.i(Domain.LOG_TAG, vfdProfileConfig.toString())
         viewState = StagedRtuVfdViewState.fromProfileConfig(vfdProfileConfig)
         CcuLog.i(Domain.LOG_TAG, "VavStagedRtuViewModel Loaded")
+        viewState.unusedPortState = ControlMote.getCMUnusedPorts(Domain.hayStack)
         modelLoaded = true
     }
     override fun saveConfiguration() {
@@ -72,6 +73,8 @@ class VavStagedVfdRtuViewModel : StagedRtuProfileViewModel() {
                 val stagedRtu = L.ccu().systemProfile as VavStagedRtuWithVfd
                 stagedRtu.updateStagesSelected()
                 DesiredTempDisplayMode.setSystemModeForVav(hayStack)
+                UnusedPortsModel.saveUnUsedPortStatusOfSystemProfile(profileConfiguration, hayStack)
+                viewState.unusedPortState = ControlMote.getCMUnusedPorts(Domain.hayStack)
                 hayStack.syncEntityTree()
                 withContext(Dispatchers.Main) {
                     ProgressDialogUtils.hideProgressDialog()

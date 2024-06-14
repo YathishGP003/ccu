@@ -301,7 +301,7 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
     }
 
     fun createPoint(modelDef: SeventyFiveFDevicePointDef, profileConfiguration: ProfileConfiguration, device: Device, deviceDis: String) {
-            val hayStackPoint = buildRawPoint(modelDef, profileConfiguration, device, deviceDis)
+            val hayStackPoint = buildRawPoint(modelDef, profileConfiguration, device)
             val pointId = hayStack.addPoint(hayStackPoint)
             hayStackPoint.id = pointId
             DomainManager.addRawPoint(hayStackPoint)

@@ -40,6 +40,7 @@ class VavStagedRtuFragment : StagedRtuFragment() {
 
     private val viewModel: VavStagedRtuViewModel by viewModels()
     private val SYSTEM_CONFIG_TAB: Int = 1
+
     companion object {
         val ID: String = VavStagedRtuFragment::class.java.simpleName
         fun newInstance(): VavStagedRtuFragment {
@@ -62,8 +63,9 @@ class VavStagedRtuFragment : StagedRtuFragment() {
         }
 
     }
-   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-       super.onViewCreated(view, savedInstanceState)
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         view.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
             override fun onViewAttachedToWindow(v: View) {
             }
@@ -80,32 +82,19 @@ class VavStagedRtuFragment : StagedRtuFragment() {
     @Composable
     fun RootView() {
         if (!viewModel.modelLoaded) {
-            if(Globals.getInstance().getSelectedTab() == SYSTEM_CONFIG_TAB) {
+            if (Globals.getInstance().getSelectedTab() == SYSTEM_CONFIG_TAB) {
                 ProgressDialogUtils.showProgressDialog(context, "Loading System Profile")
             }
             CcuLog.i(Domain.LOG_TAG, "Show Progress")
             return
         }
         ProgressDialogUtils.hideProgressDialog()
-        Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(10.dp)
-        )
-        {
-            Image(
-                painter = painterResource(id = R.drawable.input_vav_rtu_2),
-                contentDescription = "Relays",
-                modifier = Modifier
-                    .padding(top = 75.dp, bottom = 5.dp, start = 20.dp)
-                    .height(475.dp)
-            )
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(10.dp),
         ) {
-            item {
+            item{
                 Row(
                     modifier = Modifier
                         .fillMaxSize()
@@ -119,7 +108,6 @@ class VavStagedRtuFragment : StagedRtuFragment() {
                             .padding(top = 75.dp, bottom = 5.dp, start = 20.dp)
                             .height(475.dp)
                     )
-
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
@@ -127,14 +115,27 @@ class VavStagedRtuFragment : StagedRtuFragment() {
                     ) {
                         Row(
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(start = 10.dp, end = 20.dp),
-                        ) {
-                            Text(text = "ENABLE", fontSize = 20.sp, color = ComposeUtil.greyColor)
+                                .fillMaxSize()
+                                .padding(10.dp)
+                        )
+                        {
+                            Text(
+                                text = "ENABLE",
+                                fontSize = 20.sp,
+                                color = ComposeUtil.greyColor
+                            )
                             Spacer(modifier = Modifier.width(270.dp))
-                            Text(text = "MAPPING", fontSize = 20.sp, color = ComposeUtil.greyColor)
+                            Text(
+                                text = "MAPPING",
+                                fontSize = 20.sp,
+                                color = ComposeUtil.greyColor
+                            )
                             Spacer(modifier = Modifier.width(190.dp))
-                            Text(text = "TEST SIGNAL", fontSize = 20.sp, color = ComposeUtil.greyColor)
+                            Text(
+                                text = "TEST SIGNAL",
+                                fontSize = 20.sp,
+                                color = ComposeUtil.greyColor
+                            )
                         }
 
                         Spacer(modifier = Modifier.height(10.dp))
@@ -142,7 +143,7 @@ class VavStagedRtuFragment : StagedRtuFragment() {
                     }
                 }
             }
-            if(viewModel.viewState.unusedPortState.isNotEmpty()) {
+            if (viewModel.viewState.unusedPortState.isNotEmpty()) {
                 item {
                     UnusedPortsFragment.DividerRow()
                 }
@@ -155,5 +156,4 @@ class VavStagedRtuFragment : StagedRtuFragment() {
             }
         }
     }
-
 }

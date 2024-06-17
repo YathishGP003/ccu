@@ -106,7 +106,7 @@ class ConfigPointUpdateHandler {
             } else if (configPoint.getDomainName().contains(DomainName.relay7OutputEnable)) {
                 config.relay7OutputEnable.setEnabled(val > 0);
             }
-            CcuLog.i(L.TAG_CCU_PUBNUB, "updateConfigPoint for VavFullyModulatingAhu" + config.toString());
+            CcuLog.i(L.TAG_CCU_PUBNUB, "updateConfigPoint for VavFullyModulatingAhu" + config);
             ProfileEquipBuilder equipBuilder = new ProfileEquipBuilder(hayStack);
             HashMap<Object, Object> systemEquip = hayStack.readMapById(Domain.systemEquip.getEquipRef());
             equipBuilder.updateEquipAndPoints(config, model, hayStack.getSite().getId(), systemEquip.get("dis").toString(), true);
@@ -139,7 +139,7 @@ class ConfigPointUpdateHandler {
                 StagedVfdRtuProfileConfig vfdRtuProfileConfig = (StagedVfdRtuProfileConfig) config;
                 vfdRtuProfileConfig.analogOut2Enabled.setEnabled(val > 0);
             }
-            CcuLog.i(L.TAG_CCU_PUBNUB, "updateConfigAssociation vavStagedRtu"+config.toString());
+            CcuLog.i(L.TAG_CCU_PUBNUB, "updateConfigAssociation vavStagedRtu"+ config);
             ProfileEquipBuilder equipBuilder = new ProfileEquipBuilder(hayStack);
             HashMap<Object, Object> systemEquip = hayStack.readMapById(Domain.systemEquip.getEquipRef());
             equipBuilder.updateEquipAndPoints(config, model, hayStack.getSite().getId(),systemEquip.get("dis").toString() , true);

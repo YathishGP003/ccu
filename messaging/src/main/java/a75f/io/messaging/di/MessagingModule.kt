@@ -1,9 +1,6 @@
 package a75f.io.messaging.di
 
-import a75f.io.data.RenatusDatabaseBuilder
-import a75f.io.data.message.DatabaseHelper
 import a75f.io.data.message.MessageDatabaseHelper
-import a75f.io.logic.Globals
 import a75f.io.messaging.service.MessageHandlerService
 import android.content.Context
 import dagger.Module

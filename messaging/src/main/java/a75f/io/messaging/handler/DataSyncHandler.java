@@ -5,10 +5,7 @@ import static a75f.io.messaging.handler.UpdateScheduleHandler.refreshIntrinsicSc
 import static a75f.io.messaging.handler.UpdateScheduleHandler.refreshSchedulesScreen;
 import static a75f.io.messaging.handler.UpdateScheduleHandler.trimZoneSchedules;
 
-import android.util.Log;
-
 import com.google.gson.JsonObject;
-
 import org.projecthaystack.HDateTime;
 import org.projecthaystack.HDict;
 import org.projecthaystack.HDictBuilder;
@@ -141,20 +138,20 @@ public class DataSyncHandler {
                 floorEntities.add(entityToSync);
             }
         });
-        if (roomEntities.size() > 0){
+        if (!roomEntities.isEmpty()){
             syncRoom(roomEntities, ccuHsApi);
         }
-        if (pointsToSync.size() > 0) {
+        if (!pointsToSync.isEmpty()) {
             syncPoint(pointsToSync, ccuHsApi);
         }
 
-        if (floorEntities.size() > 0){
+        if (!floorEntities.isEmpty()){
             syncFloor(floorEntities, ccuHsApi);
         }
-        if (schedulesToSync.size() > 0) {
+        if (!schedulesToSync.isEmpty()) {
             syncSchedule(schedulesToSync, ccuHsApi);
         }
-        if (deletedEntities.size() > 0) {
+        if (!deletedEntities.isEmpty()) {
             removeEntities(deletedEntities, ccuHsApi);
         }
     }
@@ -257,7 +254,7 @@ public class DataSyncHandler {
             CcuLog.i(L.TAG_CCU_READ_CHANGES,"lastModifiedTimeInCCU: "+lastModifiedTimeInCCU+
                     " ||lastModifiedDateTimeInMessage "+lastModifiedDateTimeInMessage);
             HDateTime lastModifiedDateTimeInCCU = HDateTime.make(lastModifiedTimeInCCU);
-            CcuLog.i(L.TAG_CCU_READ_CHANGES,"Is cloud has latest value ? " + (lastModifiedDateTimeInCCU.millis() < lastModifiedDateTimeInMessage.millis()));;
+            CcuLog.i(L.TAG_CCU_READ_CHANGES,"Is cloud has latest value ? " + (lastModifiedDateTimeInCCU.millis() < lastModifiedDateTimeInMessage.millis()));
             return lastModifiedDateTimeInCCU.millis() < lastModifiedDateTimeInMessage.millis();
         }
         return true;
@@ -271,7 +268,7 @@ public class DataSyncHandler {
                     "||  lastModifiedDateTimeInMessage: "+lastModifiedDateTimeInMessage);
             HDateTime lastModifiedDateTimeInCCU = HDateTime.make(lastModifiedTimeInCCU);
             CcuLog.i(L.TAG_CCU_READ_CHANGES,"Is cloud has latest value ? " +
-                    (lastModifiedDateTimeInCCU.millis() < lastModifiedDateTimeInMessage.millis()));;
+                    (lastModifiedDateTimeInCCU.millis() < lastModifiedDateTimeInMessage.millis()));
             return lastModifiedDateTimeInCCU.millis() < lastModifiedDateTimeInMessage.millis();
         }
         return true;
@@ -494,16 +491,15 @@ public class DataSyncHandler {
             }else {
                 ccuHsApi.writePointLocal(pointRef, level,
                         who, doubleValue, 0);
-                Log.i("CCU_READ_CHANGES", " Synced Point val Non writable" + doubleValue);
+                CcuLog.i("CCU_READ_CHANGES", " Synced Point val Non writable" + doubleValue);
             }
-            Log.i("CCU_READ_CHANGES", " Synced Point val " + doubleValue);
+            CcuLog.i("CCU_READ_CHANGES", " Synced Point val " + doubleValue);
         } catch (NumberFormatException e) {
             logIt(" NumberFormatException " + e);
             ccuHsApi.writePointStrValLocal(pointRef, level, who, value, 0);
-            Log.i("CCU_READ_CHANGES", " Synced Point val with exception " + value);
+            CcuLog.i("CCU_READ_CHANGES", " Synced Point val with exception " + value);
         } catch (MessageHandlingFailed e) {
-            Log.i("CCU_READ_CHANGES", "Message not handled:" + e.getMessage() +", value: "+value);
-            e.printStackTrace();
+            CcuLog.e("CCU_READ_CHANGES", "Message not handled:" + e.getMessage() +", value: "+value, e);
         }
     }
 
@@ -548,20 +544,19 @@ public class DataSyncHandler {
                 try {
                     if (syncData(lastCCUUpdateTime, CCUHsApi.getInstance(),
                             getMessageExpiryTime()) == SyncStatus.COMPLETED) {
-                        Log.i(L.TAG_CCU_READ_CHANGES, " All Entities are Synced from cloud and starting to sync local data");
+                        CcuLog.i(L.TAG_CCU_READ_CHANGES, " All Entities are Synced from cloud and starting to sync local data");
                         CCUHsApi.getInstance().syncEntityWithPointWrite();
                         setDataSyncStopped();
                     }
                 } catch (Exception e){
-                    e.printStackTrace();
-                    Log.e(L.TAG_CCU_READ_CHANGES, " Data sync failed ");
+                    CcuLog.e(L.TAG_CCU_READ_CHANGES, " Data sync failed ",e);
                     // If Data sync failed retry when App is restarted
                 }
             }
         }, DELAY_FOR_DATA_SYNC);
     }
     private void setDataSyncRunning(long lastCCUUpdateTime) {
-        Log.i("CCU_READ_CHANGES","setDataSyncRunning  "+new Date(lastCCUUpdateTime));
+        CcuLog.i("CCU_READ_CHANGES","setDataSyncRunning  "+new Date(lastCCUUpdateTime));
         a75f.io.logic.util.PreferenceUtil.setDataSyncRunning();
         a75f.io.logic.util.PreferenceUtil.setSyncStartTime(lastCCUUpdateTime);
     }

@@ -1,7 +1,5 @@
 package a75f.io.messaging.client;
 
-import android.util.Log;
-
 import com.google.gson.JsonObject;
 import com.here.oksse.OkSse;
 import com.here.oksse.ServerSentEvent;
@@ -105,7 +103,6 @@ public class MessagingClient implements BearerTokenManager.OnBearerTokenRefreshL
     /**
      * Resets Messaging connection without restarting the MessagingAck thread.
      * Could be called when Messaging client runs into error.
-     *
      * Connection will not be opened before complete registration, or if
      * the CCU loses authentication (i.e. expired bearer token)
      */
@@ -175,10 +172,6 @@ public class MessagingClient implements BearerTokenManager.OnBearerTokenRefreshL
             sse.close();
             sse = null;
         }
-    }
-
-    public OkSse getOkSse() {
-        return okSse;
     }
 
     @Override

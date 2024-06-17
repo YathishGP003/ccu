@@ -66,7 +66,6 @@ import a75f.io.renatus.UtilityApplication;
 import a75f.io.renatus.util.CCUUtils;
 
 public class RemoteCommandHandlerUtil {
-    private static final String APPOPS_SET_ALLOW_CMD = "appops set %s %s allow";
     private static final String INSTALL_CMD = "pm install -r -d -g %s";
     private static final String UNINSTALL_CMD = "pm uninstall --user 0 %s";
     private static final String SET_HOME_APP_CMD = "cmd package set-home-activity --user 0 \"%s/.MainActivity\"";
@@ -337,8 +336,7 @@ public class RemoteCommandHandlerUtil {
                         String fileName = resolveApkFilename(remoteAccessApkName);
                         if (fileName != null) {
                             String[] commands = new String[]{
-                                    String.format(INSTALL_CMD, fileName),
-                                    String.format(APPOPS_SET_ALLOW_CMD, REMOTE_ACCESS_PACKAGE_NAME, "PROJECT_MEDIA")
+                                    String.format(INSTALL_CMD, fileName)
                             };
                             RenatusApp.executeAsRoot(commands, REMOTE_ACCESS_PACKAGE_NAME, false);
                         }

@@ -532,6 +532,10 @@ public class ControlMote
             CCUHsApi.getInstance().writeHisValById(p.getId(), 0.0);
         }
     }
+    /*
+    * getCMUnusedPorts function should be surrounded with Null pointer exception
+    * Because at the time of cut-over migration CCU loads system configuration
+    * If crash occurs at that instance then CM will not be loaded in Domain*/
     public static HashMap<String, Boolean> getCMUnusedPorts(CCUHsApi ccuHsApi){
         HashMap<Object, Object> systemEquip = ccuHsApi.readEntity("system and equip and not modbus and not connectModule");
         HashMap<String, String> cmPortsWithSystemEquipDomainName = getSystemEquipPointsDomainNameWithCmPortsDisName();

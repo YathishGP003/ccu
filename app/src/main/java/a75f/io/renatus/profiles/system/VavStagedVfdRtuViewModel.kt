@@ -48,7 +48,13 @@ class VavStagedVfdRtuViewModel : StagedRtuProfileViewModel() {
         CcuLog.i(Domain.LOG_TAG, vfdProfileConfig.toString())
         viewState = StagedRtuVfdViewState.fromProfileConfig(vfdProfileConfig)
         CcuLog.i(Domain.LOG_TAG, "VavStagedRtuViewModel Loaded")
-        viewState.unusedPortState = ControlMote.getCMUnusedPorts(Domain.hayStack)
+        try {
+            viewState.unusedPortState = ControlMote.getCMUnusedPorts(Domain.hayStack)
+        } catch (e : NullPointerException) {
+            viewState.unusedPortState = hashMapOf()
+            CcuLog.e(Domain.LOG_TAG,"Failed to fetch CM Unused ports")
+            e.printStackTrace()
+        }
         modelLoaded = true
     }
     override fun saveConfiguration() {
@@ -74,7 +80,13 @@ class VavStagedVfdRtuViewModel : StagedRtuProfileViewModel() {
                 stagedRtu.updateStagesSelected()
                 DesiredTempDisplayMode.setSystemModeForVav(hayStack)
                 UnusedPortsModel.saveUnUsedPortStatusOfSystemProfile(profileConfiguration, hayStack)
-                viewState.unusedPortState = ControlMote.getCMUnusedPorts(Domain.hayStack)
+                try {
+                    viewState.unusedPortState = ControlMote.getCMUnusedPorts(Domain.hayStack)
+                } catch (e : NullPointerException) {
+                    viewState.unusedPortState = hashMapOf()
+                    CcuLog.e(Domain.LOG_TAG,"Failed to fetch CM Unused ports")
+                    e.printStackTrace()
+                }
                 hayStack.syncEntityTree()
                 withContext(Dispatchers.Main) {
                     ProgressDialogUtils.hideProgressDialog()

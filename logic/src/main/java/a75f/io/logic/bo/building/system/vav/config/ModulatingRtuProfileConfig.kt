@@ -125,8 +125,13 @@ open class ModulatingRtuProfileConfig(val model: SeventyFiveFProfileDirective) :
             analogOut4FreshAirMax = getDefaultValConfig(DomainName.analog4MaxOutsideDamper, model)
         }
 
-        unusedPorts = ControlMote.getCMUnusedPorts(Domain.hayStack)
-
+        try {
+            unusedPorts = ControlMote.getCMUnusedPorts(Domain.hayStack)
+        } catch (e : NullPointerException) {
+            unusedPorts = hashMapOf()
+            CcuLog.e(Domain.LOG_TAG,"Failed to fetch CM Unused ports")
+            e.printStackTrace()
+        }
         isDefault = false
         return this
     }

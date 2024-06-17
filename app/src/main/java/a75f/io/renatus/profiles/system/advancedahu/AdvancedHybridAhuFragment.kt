@@ -1,7 +1,6 @@
 package a75f.io.renatus.profiles.system.advancedahu
 
 import a75f.io.domain.api.DomainName
-import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.renatus.R
 import a75f.io.renatus.composables.AOTHConfig
@@ -1872,7 +1871,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                         onAssociationChanged = { associationIndex ->
                             relayConfig.association = associationIndex.index
                         },
-                        testState = viewModel.getPhysicalPointForRelayIndex(index, true)?.let { it.readHisVal() > 0 } ?: false,
+                        testState = if(viewModel.isConnectModulePaired) viewModel.getConnectPhysicalPointForRelayIndex(index)?.let { it.readHisVal() > 0 } ?: false else false,
                         onTestActivated = {viewModel.sendConnectRelayTestCommand(index, it)})
                 }
             }
@@ -1952,7 +1951,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                                     association.index
                             }
                         },
-                        testVal = viewModel.getPhysicalPointForAnalogIndex(index)?.readHisVal()?.toInt() ?: 0,
+                        testVal = if(viewModel.isConnectModulePaired) viewModel.getConnectPhysicalPointForAnalogIndex(index)?.readHisVal()?.toInt() ?: 0 else 0,
                         onTestSignalSelected = {viewModel.sendConnectAnalogTestCommand(index, it)})
                 }
             }

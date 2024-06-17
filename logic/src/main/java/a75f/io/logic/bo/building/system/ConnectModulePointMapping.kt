@@ -1,5 +1,6 @@
 package a75f.io.logic.bo.building.system
 
+import a75f.io.domain.api.DomainName
 import a75f.io.domain.api.PhysicalPoint
 import a75f.io.domain.api.Point
 import a75f.io.domain.devices.ConnectDevice
@@ -82,4 +83,31 @@ fun getConnectAnalogOutLogicalPhysicalMap(connectEquip : ConnectModuleEquip, dev
     return map
 }
 
+
+
+fun connectRelayAssociationToDomainName(associationIndex : Int) : String {
+    return when(associationIndex) {
+        0 -> DomainName.loadCoolingStage1
+        1 -> DomainName.loadCoolingStage2
+        2 -> DomainName.loadCoolingStage3
+        3 -> DomainName.loadCoolingStage4
+        4 -> DomainName.loadCoolingStage5
+        5 -> DomainName.loadHeatingStage1
+        6 -> DomainName.loadHeatingStage2
+        7 -> DomainName.loadHeatingStage3
+        8 -> DomainName.loadHeatingStage4
+        9 -> DomainName.loadHeatingStage5
+        10 -> DomainName.loadFanStage1
+        11 -> DomainName.loadFanStage2
+        12 -> DomainName.loadFanStage3
+        13 -> DomainName.loadFanStage4
+        14 -> DomainName.loadFanStage5
+        15 -> DomainName.humidifierEnable
+        16 -> DomainName.dehumidifierEnable
+        17 -> DomainName.occupiedEnable
+        18 -> DomainName.fanEnable
+        19 -> DomainName.ahuFreshAirFanRunCommand
+        else -> throw IllegalArgumentException("Invalid association index $associationIndex")
+    }
+}
 

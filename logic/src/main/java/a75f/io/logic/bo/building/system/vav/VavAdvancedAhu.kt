@@ -30,6 +30,7 @@ import a75f.io.logic.bo.building.system.UserIntentConfig
 import a75f.io.logic.bo.building.system.analogOutAssociationToDomainName
 import a75f.io.logic.bo.building.system.co2DamperControlTypeToDomainPoint
 import a75f.io.logic.bo.building.system.connectAnalogOutAssociationToDomainName
+import a75f.io.logic.bo.building.system.connectRelayAssociationToDomainName
 import a75f.io.logic.bo.building.system.getCMAnalogAssociationMap
 import a75f.io.logic.bo.building.system.getCMRelayAssociationMap
 import a75f.io.logic.bo.building.system.getCMRelayLogicalPhysicalMap
@@ -228,7 +229,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
         updateDerivedSensorPoints()
         conditioningMode = SystemMode.values()[systemEquip.conditioningMode.readPriorityVal().toInt()]
         cmStageStatus = Array(34) { Pair(0, 0) }
-        connectStageStatus = Array(17) { Pair(0, 0) }
+        connectStageStatus = Array(19) { Pair(0, 0) }
 
         if (stageUpTimer > 0) {
             stageUpTimer--
@@ -760,7 +761,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
                 )
 
                 CcuLog.d(L.TAG_CCU_SYSTEM, "New analogOutValue ${analogOut.domainName} physicalValue: $physicalValue logicalValue: $logicalValue")
-                physicalMap?.get(analogOut)?.writeHisVal(physicalValue * 10)
+                physicalMap?.get(analogOut)?.writeHisVal(physicalValue )
 
                 if (isConnectEquip) {
                     val domainName = connectAnalogOutAssociationToDomainName(association.readDefaultVal().toInt())
@@ -789,13 +790,11 @@ open class VavAdvancedAhu : VavSystemProfile() {
     }
 
     private fun updatePointsDbVal(isConnectEquip : Boolean) {
-        CcuLog.d(L.TAG_CCU_SYSTEM, "updatePointsDbVal")
         val stageStatus = if (isConnectEquip) connectStageStatus else cmStageStatus
         stageStatus.forEachIndexed { index, status ->
-            val domainName = relayAssociationToDomainName(index)
+            val domainName = if (isConnectEquip) connectRelayAssociationToDomainName(index) else relayAssociationToDomainName(index)
             if (status.first < status.second) {
                 //Stage is going up
-                CcuLog.d(L.TAG_CCU_SYSTEM, "Stage up detected for $domainName")
                 val associationType = relayAssociationDomainNameToType(domainName)
                 if (associationType.isConditioningStage() && isConditioningActive(associationType)) {
                     if (!isStageUpTimerActive()) {
@@ -832,7 +831,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
         if (isConnectEquip) {
             getConnectRelayAssociationMap(systemEquip).forEach { (relay, association) ->
                 if (relay.readDefaultVal() > 0) {
-                    val domainName = relayAssociationToDomainName(association.readDefaultVal().toInt())
+                    val domainName = connectRelayAssociationToDomainName(association.readDefaultVal().toInt())
                     val physicalPoint = getConnectRelayLogicalPhysicalMap(systemEquip.connectEquip1, Domain.connect1Device)[relay]
                     physicalPoint?.writeHisVal(getDomainPointForName(domainName, systemEquip.connectEquip1).readHisVal())
                 }
@@ -920,7 +919,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
 
         if (!systemEquip.connectEquip1.equipRef.contentEquals("null")) {
             getConnectRelayAssociationMap(systemEquip).entries.forEach {(relay, association) ->
-                val domainName = relayAssociationToDomainName(association.readDefaultVal().toInt())
+                val domainName = connectRelayAssociationToDomainName(association.readDefaultVal().toInt())
                 getDomainPointForName(domainName, systemEquip.connectEquip1).writeHisVal(0.0)
                 getConnectRelayLogicalPhysicalMap(systemEquip.connectEquip1, Domain.connect1Device)[relay]?.writeHisVal(0.0)
             }

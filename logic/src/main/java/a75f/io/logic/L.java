@@ -68,6 +68,12 @@ public class L
 
     public static final String TAG_CCU_SERIAL_CONNECT = "CCU_SERIAL_CONNECT";
     public static final String TAG_CCU_ERROR = "CCU_ERROR";
+    public static final String TAG_CCU_SCHEDULE = "CCU_SCHEDULE";
+    public static final String TAG_CCU_MASTER_CONTROL = "CCU_MASTER_CONTROL";
+    public static final String TAG_CCU_TUNERS_UI = "CCU_TUNERS_UI";
+    public static final String TAG_CCU_RANGE_CONTROL = "CCU_RANGE_CONTROL";
+    public static final String TAG_CCU_MOVEMENT = "CCU_MOVEMENT";
+    public static final String TAG_CCU_VAV_TEMP = "CCU_VAV_TEMP";
 
     public static Context app()
     {

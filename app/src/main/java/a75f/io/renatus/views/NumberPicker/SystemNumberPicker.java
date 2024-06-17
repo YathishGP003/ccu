@@ -22,7 +22,6 @@ import android.text.TextUtils;
 import android.text.method.NumberKeyListener;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.util.SparseArray;
 import android.util.TypedValue;
 import android.view.KeyEvent;
@@ -45,6 +44,8 @@ import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.Locale;
 
+import a75f.io.logger.CcuLog;
+import a75f.io.logic.L;
 import a75f.io.renatus.R;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
@@ -649,22 +650,22 @@ public class SystemNumberPicker extends LinearLayout {
 
         @IntDef({SCROLL_STATE_IDLE, SCROLL_STATE_TOUCH_SCROLL, SCROLL_STATE_FLING})
         @Retention(RetentionPolicy.SOURCE)
-        public @interface ScrollState{}
+        @interface ScrollState{}
 
         /**
          * The view is not scrolling.
          */
-        public static int SCROLL_STATE_IDLE = 0;
+        int SCROLL_STATE_IDLE = 0;
 
         /**
          * The user is scrolling using touch, and his finger is still on the screen.
          */
-        public static int SCROLL_STATE_TOUCH_SCROLL = 1;
+        int SCROLL_STATE_TOUCH_SCROLL = 1;
 
         /**
          * The user had previously been scrolling using touch and performed a fling.
          */
-        public static int SCROLL_STATE_FLING = 2;
+        int SCROLL_STATE_FLING = 2;
 
         /**
          * Callback invoked while the number picker scroll state has changed.
@@ -675,7 +676,7 @@ public class SystemNumberPicker extends LinearLayout {
          *                    {@link #SCROLL_STATE_TOUCH_SCROLL} or
          *                    {@link #SCROLL_STATE_IDLE}.
          */
-        public void onScrollStateChange(SystemNumberPicker view, @ScrollState int scrollState);
+        void onScrollStateChange(SystemNumberPicker view, @ScrollState int scrollState);
     }
 
     /**
@@ -689,7 +690,7 @@ public class SystemNumberPicker extends LinearLayout {
          * @param value The currently selected value.
          * @return A formatted string representation.
          */
-        public String format(int value);
+        String format(int value);
     }
 
     /**
@@ -1513,9 +1514,8 @@ public class SystemNumberPicker extends LinearLayout {
             }
             maxTextWidth = (int) (numberOfDigits * maxDigitWidth);
         } else {
-            final int valueCount = mDisplayedValues.length;
-            for (int i = 0; i < valueCount; i++) {
-                final float textWidth = mSelectorWheelPaint.measureText(mDisplayedValues[i]);
+            for (String mDisplayedValue : mDisplayedValues) {
+                final float textWidth = mSelectorWheelPaint.measureText(mDisplayedValue);
                 if (textWidth > maxTextWidth) {
                     maxTextWidth = (int) textWidth;
                 }
@@ -1523,11 +1523,7 @@ public class SystemNumberPicker extends LinearLayout {
         }
         maxTextWidth += mSelectedText.getPaddingLeft() + mSelectedText.getPaddingRight();
         if (mMaxWidth != maxTextWidth) {
-            if (maxTextWidth > mMinWidth) {
-                mMaxWidth = maxTextWidth;
-            } else {
-                mMaxWidth = mMinWidth;
-            }
+            mMaxWidth = Math.max(maxTextWidth, mMinWidth);
             invalidate();
         }
     }
@@ -1617,7 +1613,6 @@ public class SystemNumberPicker extends LinearLayout {
      * Sets the min value of the picker.
      *
      * @param minValue The min value inclusive.
-     *
      * <strong>Note:</strong> The length of the displayed values array
      * set via {@link #setDisplayedValues(String[])} must be equal to the
      * range of selectable numbers which is equal to
@@ -1651,7 +1646,6 @@ public class SystemNumberPicker extends LinearLayout {
      * Sets the max value of the picker.
      *
      * @param maxValue The max value inclusive.
-     *
      * <strong>Note:</strong> The length of the displayed values array
      * set via {@link #setDisplayedValues(String[])} must be equal to the
      * range of selectable numbers which is equal to
@@ -1686,7 +1680,6 @@ public class SystemNumberPicker extends LinearLayout {
      * Sets the values to be displayed.
      *
      * @param displayedValues The displayed values.
-     *
      * <strong>Note:</strong> The length of the displayed values array
      * must be equal to the range of selectable numbers which is equal to
      * {@link #getMaxValue()} - {@link #getMinValue()} + 1.
@@ -1763,7 +1756,7 @@ public class SystemNumberPicker extends LinearLayout {
         // save canvas
         canvas.save();
 
-        final boolean showSelectorWheel = mHideWheelUntilFocused ? hasFocus() : true;
+        final boolean showSelectorWheel = !mHideWheelUntilFocused || hasFocus();
         float x, y;
         if (isHorizontalMode()) {
             x = mCurrentScrollOffset;
@@ -2255,8 +2248,8 @@ public class SystemNumberPicker extends LinearLayout {
          * find the correct value in the displayed values for the current
          * number.
          */
-        Log.i("TunersUI","mDisplayedValues:"+ Arrays.toString(mDisplayedValues));
-        Log.i("TunersUI","mValue:"+mValue+" mMinValue:"+mMinValue+" maxValue:"+mMaxValue);
+        CcuLog.i(L.TAG_CCU_TUNERS_UI,"mDisplayedValues:"+ Arrays.toString(mDisplayedValues));
+        CcuLog.i(L.TAG_CCU_TUNERS_UI,"mValue:"+mValue+" mMinValue:"+mMinValue+" maxValue:"+mMaxValue);
         String text = (mDisplayedValues == null) ? formatNumber(mValue)
                 : mDisplayedValues[mValue - mMinValue];
         if (!TextUtils.isEmpty(text)) {

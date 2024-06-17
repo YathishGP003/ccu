@@ -15,7 +15,6 @@ import android.graphics.Typeface;
 import android.os.Build;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Toast;
@@ -23,6 +22,8 @@ import android.widget.Toast;
 import androidx.annotation.RequiresApi;
 import androidx.core.content.res.ResourcesCompat;
 
+import a75f.io.logger.CcuLog;
+import a75f.io.logic.L;
 import a75f.io.renatus.R;
 
 
@@ -71,14 +72,11 @@ public class RangeBar extends View {
     int unOccupiedSetBack = 0;
 
     private static final int PADDING_LEFT_RIGHT_PX = 40; //dp
-    boolean isZoneSchedule;
 
     public RangeBar(Context context) {
         super(context);
         init();
     }
-
-    private static final boolean DEBUG = true;
 
     public void setUnOccupiedSetBack(int setBack) {
         unOccupiedSetBack = setBack;
@@ -126,8 +124,8 @@ public class RangeBar extends View {
             mTempIconPaint.setColor(getResources().getColor(R.color.min_temp));
         }
         //force push the text if overlap
-        int dbWidth = 0;
-        Log.d("TAG", "drawSliderIcon: coolband " + cdb);
+        int dbWidth;
+        CcuLog.d(L.TAG_CCU_RANGE_CONTROL, "drawSliderIcon: coolband " + cdb);
             dbWidth = (int)(temps[RangeBarState.LOWER_COOLING_LIMIT.ordinal()] - temps[RangeBarState.LOWER_HEATING_LIMIT.ordinal()]) + 30;
         if (stateReflected == RangeBarState.LOWER_HEATING_LIMIT){
             xPos = (int)( xPos + bitmaps[stateReflected.ordinal()].getWidth() / 2f) - dbWidth;
@@ -159,7 +157,7 @@ public class RangeBar extends View {
         for (int i = 0; i < hitBoxes.length; i++) {
             if (hitBoxes[i].contains(x, y)) {
                 RangeBarState retVal = RangeBarState.values()[i];
-                Log.d("RangeControl", "HitBox was selected: " + retVal.name());
+                CcuLog.d(L.TAG_CCU_RANGE_CONTROL, "HitBox was selected: " + retVal.name());
 
                 return retVal;
             }
@@ -173,7 +171,7 @@ public class RangeBar extends View {
     @Override
     public boolean onTouchEvent(MotionEvent event) {
 
-        Log.i("RangeControl", "X: " + event.getX() + " Y: " + event.getY());
+        CcuLog.i(L.TAG_CCU_RANGE_CONTROL, "X: " + event.getX() + " Y: " + event.getY());
         if(isUnoccupiedSetBackFragment){
             return false;
         }
@@ -185,13 +183,13 @@ public class RangeBar extends View {
                 break;
             case MotionEvent.ACTION_MOVE:
                 
-                Log.i("Movement", "mSelected - " + mSelected.name()
+                CcuLog.i(L.TAG_CCU_MOVEMENT, "mSelected - " + mSelected.name()
                                   + " Temps: " + getTempForPX(event.getX()));
                 float tempSelected = getTempForPX(event.getX());
                 float deadbandSum = (float) (cdb + hdb);
                 if (tempSelected > mLowerBound && tempSelected < mUpperBound) {
         
-                    Log.i("Movement", "Temps: " + tempSelected);
+                    CcuLog.i(L.TAG_CCU_MOVEMENT, "Temps: " + tempSelected);
                     if (mSelected == RangeBarState.LOWER_COOLING_LIMIT) {
                         if (tempSelected >= lowerCoolingTemp && tempSelected <= upperCoolingTemp
                                                     && (tempSelected - deadbandSum) >= upperHeatingTemp) {
@@ -222,14 +220,12 @@ public class RangeBar extends View {
                 break;
         }
 
-        Log.d("RangeControl", "Touched: " + isHitBoxTouched(event.getX(), event.getY()).name());
+        CcuLog.d(L.TAG_CCU_RANGE_CONTROL, "Touched: " + isHitBoxTouched(event.getX(), event.getY()).name());
         return true;
     }
 
     Paint mDebugBoxesPaint;
 
-
-    private boolean mDataSet = false;
 
     // init temps
     public void setData(float lowerHeatingTemp, float upperHeatingTemp, float lowerCoolingTemp,
@@ -245,7 +241,6 @@ public class RangeBar extends View {
         this.upperCoolingTemp = upperCoolingTemp;
         this.cdb = cdb;
         this.hdb = hdb;
-        mDataSet = true;
         invalidate();
     }
 

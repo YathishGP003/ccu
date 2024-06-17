@@ -7,10 +7,10 @@ package a75f.io.renatus.hyperstatsplit.ui
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Equip
 import a75f.io.api.haystack.HSUtil
+import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
-import a75f.io.logic.bo.building.hyperstat.common.HSZoneStatus
 import a75f.io.logic.bo.building.hyperstatsplit.common.*
 import a75f.io.logic.bo.building.hyperstatsplit.common.HSSplitHaystackUtil.Companion.getActualConditioningMode
 import a75f.io.logic.bo.building.hyperstatsplit.common.HSSplitHaystackUtil.Companion.getActualFanMode
@@ -22,25 +22,21 @@ import a75f.io.logic.bo.building.hyperstatsplit.common.HyperStatSplitAssociation
 import a75f.io.logic.bo.building.hyperstatsplit.common.HyperStatSplitAssociationUtil.Companion.isAnyRelayAssociatedToHumidifier
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuEconConfiguration
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuEconEquip.Companion.getHyperStatSplitEquipRef
+import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.logic.bo.util.UnitUtils
 import a75f.io.logic.jobs.HyperStatSplitUserIntentHandler.Companion.updateHyperStatSplitUIPoints
 import a75f.io.renatus.R
 import a75f.io.renatus.util.CCUUiUtil
 import a75f.io.renatus.util.HeartBeatUtil
 import a75f.io.renatus.util.RelayUtil
+import a75f.io.renatus.views.CustomSpinnerDropDownAdapter
 import android.app.Activity
-import android.util.Log
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.*
 import android.widget.AdapterView.OnItemSelectedListener
 import java.util.*
-import a75f.io.device.HyperSplit
-import a75f.io.device.mesh.hypersplit.HyperSplitMessageGenerator
-import a75f.io.logic.bo.util.DesiredTempDisplayMode
-import a75f.io.logic.bo.util.TemperatureMode
-import a75f.io.renatus.views.CustomSpinnerDropDownAdapter
-import android.content.Context
 
 fun loadHyperStatSplitCpuEconProfile(
     cpuEconEquipPoints: HashMap<*, *>, inflater: LayoutInflater,
@@ -170,7 +166,7 @@ private fun setUpConditionFanConfig(
         conditioningModeSpinner.adapter = conModeAdapter
         conditioningModeSpinner.setSelection(conditionMode, false)
     } catch (e: Exception) {
-        Log.i(L.TAG_CCU_ZONE, "Exception : ${e.message}")
+        CcuLog.e(L.TAG_CCU_ZONE, "Exception : ${e.message}")
     }
     val fanSpinnerSelectionValues =
         RelayUtil.getFanOptionByLevel((cpuEconEquipPoints[HSSplitZoneStatus.FAN_LEVEL.name] as Int?)!!)
@@ -180,7 +176,7 @@ private fun setUpConditionFanConfig(
         fanModeSpinner.adapter = fanModeAdapter
         fanModeSpinner.setSelection(fanMode, false)
     } catch (e: Exception) {
-        Log.i(
+        CcuLog.e(
             L.TAG_CCU_ZONE,
             "Exception while setting fan mode: " + e.message + " fan Mode " + fanMode
         )
@@ -192,13 +188,6 @@ private fun setUpConditionFanConfig(
     setSpinnerListenerForHyperstatSplit(
         fanModeSpinner, HSSplitZoneStatus.FAN_MODE, equipId, nodeAddress,profileType
     )
-}
-
-
-fun createAdapter(context: Activity , itemArray: Int):ArrayAdapter<CharSequence>{
-    val adapter = ArrayAdapter.createFromResource(context, itemArray, R.layout.spinner_zone_item)
-    adapter.setDropDownViewResource(R.layout.spinner_dropdown_item)
-    return adapter
 }
 
 
@@ -345,16 +334,16 @@ fun getHyperStatSplitCPUEconEquipPoints(equipDetails: Equip): HashMap<String, An
         cpuEconPoints[HSSplitZoneStatus.STATUS.name] = "OFF"
 
     val fanOpModePoint = hsSplitHaystackUtil.readPointPriorityVal("zone and fan and mode and operation")
-    Log.i(L.TAG_CCU_HSSPLIT_CPUECON, "Saved fan mode $fanOpModePoint")
+    CcuLog.i(L.TAG_CCU_HSSPLIT_CPUECON, "Saved fan mode $fanOpModePoint")
     val fanPosition = getFanSelectionMode(equipDetails.group, fanOpModePoint.toInt())
-    Log.i(L.TAG_CCU_HSSPLIT_CPUECON, "converted fan mode $fanPosition")
+    CcuLog.i(L.TAG_CCU_HSSPLIT_CPUECON, "converted fan mode $fanPosition")
     cpuEconPoints[HSSplitZoneStatus.FAN_MODE.name] = fanPosition
     val conditionModePoint = hsSplitHaystackUtil.readPointPriorityVal(
         "zone and sp and conditioning and mode"
     )
-    Log.i(L.TAG_CCU_HSSPLIT_CPUECON, "Saved conditionModePoint mode $conditionModePoint")
+    CcuLog.i(L.TAG_CCU_HSSPLIT_CPUECON, "Saved conditionModePoint mode $conditionModePoint")
     val selectedConditioningMode = getSelectedConditioningMode(equipDetails.group, conditionModePoint.toInt())
-    Log.i(L.TAG_CCU_HSSPLIT_CPUECON, "converted conditionModePoint mode $selectedConditioningMode")
+    CcuLog.i(L.TAG_CCU_HSSPLIT_CPUECON, "converted conditionModePoint mode $selectedConditioningMode")
     cpuEconPoints[HSSplitZoneStatus.CONDITIONING_MODE.name] = selectedConditioningMode
 
     if (isAnyInputMappedToSupplyAirTemperature(config)) {
@@ -380,7 +369,7 @@ fun getHyperStatSplitCPUEconEquipPoints(equipDetails: Equip): HashMap<String, An
     cpuEconPoints[HSSplitZoneStatus.FAN_LEVEL.name] = fanLevel
 
     // Add conditioning status
-    var status: String
+    val status: String
     val possibleConditioningMode = getPossibleConditioningModeSettings(equipDetails.group.toInt())
     status = when (possibleConditioningMode) {
         PossibleConditioningMode.OFF -> "Off"
@@ -390,7 +379,7 @@ fun getHyperStatSplitCPUEconEquipPoints(equipDetails: Equip): HashMap<String, An
     }
     cpuEconPoints[HSSplitZoneStatus.CONDITIONING_ENABLED.name] = status
     cpuEconPoints.forEach { (s: String, o: Any) ->
-        Log.i(L.TAG_CCU_HSSPLIT_CPUECON, "Config $s : $o")
+        CcuLog.i(L.TAG_CCU_HSSPLIT_CPUECON, "Config $s : $o")
     }
     return cpuEconPoints
 }

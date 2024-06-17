@@ -2,12 +2,12 @@ package a75f.io.renatus.views.wizard;
 
 import android.os.Bundle;
 import android.os.Parcelable;
-import android.util.Log;
-
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.Date;
+
+import a75f.io.logger.CcuLog;
 
 /**
  * The engine of the Wizard. This class is in charge of
@@ -29,7 +29,7 @@ class Wizard {
 	 * @param wizardFlow WizardFlow instance. See WizardFlow.Builder for more information on creating WizardFlow objects.
 	 */
 	Wizard(WizardFlow wizardFlow) {
-		Log.d(TAG, "Wizard constructor");
+		CcuLog.d(TAG, "Wizard constructor");
 		this.flow = wizardFlow;
 		this.fragmentContainerId = wizardFlow.getFragmentContainerId();
 		this.context = new Bundle();
@@ -37,7 +37,7 @@ class Wizard {
 		String currentStepTag = WizardFlow.getTagForWizardStep(currentStep, getCurrentStep().getClass());
 		WizardStep step = (WizardStep) flow.getFragmentManager().findFragmentByTag(currentStepTag);
 		if (step == null) {
-			Log.d(TAG, "Wizard step was null. Creating transaction");
+			CcuLog.d(TAG, "Wizard step was null. Creating transaction");
 			flow.getFragmentManager().beginTransaction().add(fragmentContainerId, getCurrentStep(), currentStepTag).commit();
 			getCurrentStep().setState(WizardStep.STATE_RUNNING);
 		}
@@ -48,7 +48,7 @@ class Wizard {
 	 * Advance the wizard to the next step
 	 */
 	void next() {
-		Log.d(TAG, "Wizard next called");
+		CcuLog.d(TAG, "Wizard next called");
 		persistStepContext();
 		currentStep++;
 		passStepContext();
@@ -92,17 +92,7 @@ class Wizard {
 		return flow.getSteps().get(currentStep);
 	}
 
-	/**
-	 * Gets the step at specific position
-	 * @param position the position of the step within the WizardFlow
-	 * @return WizardStep the instance of WizardStep in the required position
-	 * @throws ArrayIndexOutOfBoundsException
-	 */
-	WizardStep getStepAtPosition(int position) throws ArrayIndexOutOfBoundsException {
-		return flow.getSteps().get(position);
-	}
-
-	/**
+    /**
 	 * Checks if the current step is the last step in the Wizard
 	 * @return boolean representing the result of the check
 	 */
@@ -133,7 +123,7 @@ class Wizard {
         if (args == null) {
             args = new Bundle();
         }
-        //Scan the step for fields annotaed with @ContextVariable and check if there is a value stored in the Wizard Context for the field name
+        //Scan the step for fields annotated with @ContextVariable and check if there is a value stored in the Wizard Context for the field name
         for (Field field : fields) {
             if (field.getAnnotation(ContextVariable.class) != null && context.containsKey(field.getName())) {
                 field.setAccessible(true);

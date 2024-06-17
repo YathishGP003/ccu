@@ -145,13 +145,6 @@ public class Scroller  {
     }
 
     /**
-     * Create a Scroller with the default duration and interpolator.
-     */
-    public Scroller(Context context) {
-        this(context, null);
-    }
-
-    /**
      * Create a Scroller with the specified interpolator. If the interpolator is
      * null, the default (viscous) interpolator will be used. "Flywheel" behavior will
      * be in effect for apps targeting Honeycomb or newer.
@@ -178,18 +171,6 @@ public class Scroller  {
         mFlywheel = flywheel;
 
         mPhysicalCoeff = computeDeceleration(0.84f); // look and feel tuning
-    }
-
-    /**
-     * The amount of friction applied to flings. The default value
-     * is {@link ViewConfiguration#getScrollFriction}.
-     *
-     * @param friction A scalar dimension-less value representing the coefficient of
-     *         friction.
-     */
-    public final void setFriction(float friction) {
-        mDeceleration = computeDeceleration(friction);
-        mFlingFriction = friction;
     }
 
     private float computeDeceleration(float friction) {
@@ -352,24 +333,6 @@ public class Scroller  {
     }
 
     /**
-     * Start scrolling by providing a starting point and the distance to travel.
-     * The scroll will use the default value of 250 milliseconds for the
-     * duration.
-     *
-     * @param startX Starting horizontal scroll offset in pixels. Positive
-     *        numbers will scroll the content to the left.
-     * @param startY Starting vertical scroll offset in pixels. Positive numbers
-     *        will scroll the content up.
-     * @param dx Horizontal distance to travel. Positive numbers will scroll the
-     *        content to the left.
-     * @param dy Vertical distance to travel. Positive numbers will scroll the
-     *        content up.
-     */
-    public void startScroll(int startX, int startY, int dx, int dy) {
-        startScroll(startX, startY, dx, dy, DEFAULT_DURATION);
-    }
-
-    /**
      * Start scrolling by providing a starting point, the distance to travel,
      * and the duration of the scroll.
      *
@@ -488,19 +451,6 @@ public class Scroller  {
     }
 
     /**
-     * Stops the animation. Contrary to {@link #forceFinished(boolean)},
-     * aborting the animating cause the scroller to move to the final x and y
-     * position
-     *
-     * @see #forceFinished(boolean)
-     */
-    public void abortAnimation() {
-        mCurrX = mFinalX;
-        mCurrY = mFinalY;
-        mFinished = true;
-    }
-
-    /**
      * Extend the scroll animation. This allows a running animation to scroll
      * further and longer, when used with {@link #setFinalX(int)} or {@link #setFinalY(int)}.
      *
@@ -548,14 +498,6 @@ public class Scroller  {
         mFinalY = newY;
         mDeltaY = (float) mFinalY - mStartY;
         mFinished = false;
-    }
-
-    /**
-     * @hide
-     */
-    public boolean isScrollingInDirection(float xvel, float yvel) {
-        return !mFinished && Math.signum(xvel) == Math.signum((float) mFinalX - mStartX) &&
-                Math.signum(yvel) == Math.signum((float) mFinalY - mStartY);
     }
 
     static class ViscousFluidInterpolator implements Interpolator {

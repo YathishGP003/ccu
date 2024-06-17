@@ -7,22 +7,18 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.os.Build;
-import androidx.annotation.RequiresApi;
-import androidx.core.content.res.ResourcesCompat;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.view.MotionEvent;
 import android.view.View;
 
-import java.util.HashMap;
-import a75f.io.api.haystack.CCUHsApi;
-import a75f.io.logic.tuners.TunerConstants;
+import androidx.annotation.RequiresApi;
+import androidx.core.content.res.ResourcesCompat;
+
 import a75f.io.renatus.R;
 import a75f.io.renatus.registration.InstallerOptions;
-import a75f.io.renatus.views.MasterControl.MasterControlView;
 
 /**
  * Created by mahesh on 27-08-2019.
@@ -71,8 +67,6 @@ public class TempLimit extends View {
         super(context);
         init();
     }
-
-    private static final boolean DEBUG = true;
 
     enum TempLimitState {
         NONE,
@@ -125,16 +119,12 @@ public class TempLimit extends View {
         }
     }
 
-    private TempLimitState mSelected = TempLimitState.NONE;
-
     @Override
     public boolean onTouchEvent(MotionEvent event) {
 
         return false;
     }
 
-
-    private boolean mDataSet = false;
 
     // init temps
     public void setData(float lowerHeatingTemp, float upperHeatingTemp, float lowerCoolingTemp,
@@ -153,7 +143,6 @@ public class TempLimit extends View {
         this.lowerBuildingTemp = lowerBuildingTemp;
         this.upperBuildingTemp = upperBuildingTemp;
 
-        mDataSet = true;
         invalidate();
     }
 
@@ -276,7 +265,7 @@ public class TempLimit extends View {
         int yLoc = getTempLineYLocation();
 
         if(isCelsiusTunerAvailableStatus()) {
-            canvas.drawText(String.valueOf(" " + fahrenheitToCelsius(buildingTemp) + " "),
+            canvas.drawText(" " + fahrenheitToCelsius(buildingTemp) + " ",
                     xLoc - (float) 8, yLoc - (float) 15, mTempPaint);
         } else {
             canvas.drawText(String.valueOf((int) temps[controlState.ordinal()]),
@@ -291,11 +280,6 @@ public class TempLimit extends View {
         return Math.round(mPaddingPX + mDegreeIncremntPX * (temp - mLowerBound));
     }
 
-    private float getTempForPX(float px) {
-        return ((px - mPaddingPX) / mDegreeIncremntPX) + mLowerBound;
-    }
-
-
     private void drawTempLine(Canvas canvas) {
         //why 10
         canvas.drawLine(mPaddingPX, getTempLineYLocation(), mViewWidth - mPaddingPX, getTempLineYLocation(), mLinePaint);
@@ -303,10 +287,6 @@ public class TempLimit extends View {
 
     private int getTempLineYLocation() {
         return mViewHeight / 2;
-    }
-
-    private static float roundToHalf(float d) {
-        return Math.round(d * 2) / 2.0f;
     }
 
     public TempLimit(Context context, AttributeSet attrs) {

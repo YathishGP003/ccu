@@ -6,13 +6,12 @@ package a75f.io.renatus.hyperstat.ui
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Equip
-import a75f.io.api.haystack.HSUtil
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
-import a75f.io.logic.bo.building.ZoneProfile
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
-import a75f.io.logic.bo.building.hyperstat.common.*
+import a75f.io.logic.bo.building.hyperstat.common.FanModeCacheStorage
+import a75f.io.logic.bo.building.hyperstat.common.HSHaystackUtil
 import a75f.io.logic.bo.building.hyperstat.common.HSHaystackUtil.Companion.getActualConditioningMode
 import a75f.io.logic.bo.building.hyperstat.common.HSHaystackUtil.Companion.getActualFanMode
 import a75f.io.logic.bo.building.hyperstat.common.HSHaystackUtil.Companion.getFanSelectionMode
@@ -22,15 +21,18 @@ import a75f.io.logic.bo.building.hyperstat.common.HSHaystackUtil.Companion.getPi
 import a75f.io.logic.bo.building.hyperstat.common.HSHaystackUtil.Companion.getPipe2FanSelectionMode
 import a75f.io.logic.bo.building.hyperstat.common.HSHaystackUtil.Companion.getPossibleConditioningModeSettings
 import a75f.io.logic.bo.building.hyperstat.common.HSHaystackUtil.Companion.getSelectedConditioningMode
+import a75f.io.logic.bo.building.hyperstat.common.HSZoneStatus
+import a75f.io.logic.bo.building.hyperstat.common.HyperStatAssociationUtil
 import a75f.io.logic.bo.building.hyperstat.common.HyperStatAssociationUtil.Companion.getHpuSelectedFanLevel
 import a75f.io.logic.bo.building.hyperstat.common.HyperStatAssociationUtil.Companion.getPipe2SelectedFanLevel
 import a75f.io.logic.bo.building.hyperstat.common.HyperStatAssociationUtil.Companion.getSelectedFanLevel
 import a75f.io.logic.bo.building.hyperstat.common.HyperStatAssociationUtil.Companion.isAnyRelayAssociatedToDeHumidifier
 import a75f.io.logic.bo.building.hyperstat.common.HyperStatAssociationUtil.Companion.isAnyRelayAssociatedToHumidifier
+import a75f.io.logic.bo.building.hyperstat.common.HyperstatProfileNames
+import a75f.io.logic.bo.building.hyperstat.common.PossibleConditioningMode
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.HyperStatCpuEquip.Companion.getHyperStatEquipRef
 import a75f.io.logic.bo.building.hyperstat.profiles.hpu.HyperStatHpuEquip
 import a75f.io.logic.bo.building.hyperstat.profiles.pipe2.HyperStatPipe2Equip
-import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.logic.bo.util.UnitUtils
 import a75f.io.logic.jobs.HyperStatUserIntentHandler.Companion.updateHyperStatUIPoints
 import a75f.io.renatus.R
@@ -42,10 +44,13 @@ import android.app.Activity
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
-import android.widget.*
+import android.widget.AdapterView
 import android.widget.AdapterView.OnItemSelectedListener
-import androidx.core.view.size
-import java.util.*
+import android.widget.ArrayAdapter
+import android.widget.LinearLayout
+import android.widget.Spinner
+import android.widget.TextView
+import java.util.Locale
 
 
 fun loadHyperStatCpuProfile(
@@ -166,7 +171,7 @@ private fun setUpConditionFanConfig(
         fanModeSpinner.adapter = fanModeAdapter
         fanModeSpinner.setSelection(fanMode, false)
     } catch (e: Exception) {
-        CcuLog.i(
+        CcuLog.e(
             L.TAG_CCU_ZONE,
             "Exception while setting fan ode: " + e.message + " fan Mode " + fanMode
         )
@@ -179,14 +184,6 @@ private fun setUpConditionFanConfig(
         fanModeSpinner, HSZoneStatus.FAN_MODE, equipId, nodeAddress,profileType
     )
 }
-
-
-fun createAdapter(context: Activity , itemArray: Int):ArrayAdapter<CharSequence>{
-    val adapter = ArrayAdapter.createFromResource(context, itemArray, R.layout.spinner_zone_item)
-    adapter.setDropDownViewResource(R.layout.spinner_dropdown_item)
-    return adapter
-}
-
 
 private fun setUpHumidifierDeHumidifier(
     viewPointRow2: View,

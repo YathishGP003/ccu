@@ -1,20 +1,15 @@
 package a75f.io.renatus.views.TempLimit;
 
+import static a75f.io.renatus.tuners.ExpandableTunerListAdapter.getTuner;
+
 import android.content.Context;
 import android.util.AttributeSet;
-import android.view.ViewTreeObserver;
 import android.widget.LinearLayout;
 
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
-import a75f.io.api.haystack.Equip;
-import a75f.io.api.haystack.HSUtil;
-import a75f.io.logic.tuners.BuildingTunerCache;
-import a75f.io.renatus.registration.InstallerOptions;
 import a75f.io.renatus.views.MasterControl.MasterControlUtil;
-
-import static a75f.io.renatus.tuners.ExpandableTunerListAdapter.getTuner;
 
 /**
  * Created by mahesh on 27-08-2019.
@@ -41,15 +36,12 @@ public class TempLimitView extends LinearLayout {
 
     private void init(AttributeSet attrs) {
 
-        this.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            @Override
-            public void onGlobalLayout() {
-                if (!mAdded) {
-                    add();
-                    mAdded = true;
-                }
-
+        this.getViewTreeObserver().addOnGlobalLayoutListener(() -> {
+            if (!mAdded) {
+                add();
+                mAdded = true;
             }
+
         });
     }
 
@@ -87,7 +79,7 @@ public class TempLimitView extends LinearLayout {
                                float upperCoolingTemp, float lowerBuildingTemp, float upperBuildingTemp){
 
         if (tempControl!=null)
-        tempControl.setData(lowerHeatingTemp, upperHeatingTemp,
+            tempControl.setData(lowerHeatingTemp, upperHeatingTemp,
                 lowerCoolingTemp, upperCoolingTemp,
                 lowerBuildingTemp, upperBuildingTemp);
     }

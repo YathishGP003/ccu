@@ -49,13 +49,8 @@ class VavStagedRtuViewModel : StagedRtuProfileViewModel() {
         CcuLog.i(Domain.LOG_TAG, profileConfiguration.toString())
         viewState = StagedRtuViewState.fromProfileConfig(profileConfiguration)
         CcuLog.i(Domain.LOG_TAG, "VavStagedRtuViewModel Loaded")
-        try {
-            viewState.unusedPortState = ControlMote.getCMUnusedPorts(Domain.hayStack)
-        } catch (e : NullPointerException) {
-            viewState.unusedPortState = hashMapOf()
-            CcuLog.e(Domain.LOG_TAG,"Failed to fetch CM Unused ports")
-            e.printStackTrace()
-        }
+        viewState.unusedPortState = ControlMote.getCMUnusedPorts(Domain.hayStack)
+
         modelLoaded = true
     }
 

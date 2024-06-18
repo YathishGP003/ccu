@@ -1,63 +1,35 @@
 package a75f.io.renatus.views.MasterControl;
 
+import static a75f.io.renatus.util.BitmapUtil.getBitmapFromVectorDrawable;
+
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.AsyncTask;
-import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 import android.widget.Toast;
-import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
 
 import org.projecthaystack.HDict;
-import org.projecthaystack.HDictBuilder;
 import org.projecthaystack.HGrid;
-import org.projecthaystack.HGridBuilder;
-import org.projecthaystack.HList;
-import org.projecthaystack.HNum;
-import org.projecthaystack.HRef;
 import org.projecthaystack.HRow;
 import org.projecthaystack.UnknownRecException;
-import org.projecthaystack.client.HClient;
-import org.projecthaystack.io.HZincWriter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
-import a75f.io.api.haystack.HayStackConstants;
-import a75f.io.api.haystack.Schedule;
-import a75f.io.api.haystack.sync.HttpUtil;
 import a75f.io.domain.api.Domain;
-import a75f.io.logger.CcuLog;
-import a75f.io.logic.bo.util.UnitUtils;
-import a75f.io.logic.tuners.BuildingTunerCache;
-import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.renatus.R;
-import a75f.io.renatus.registration.InstallerOptions;
-import a75f.io.renatus.schedules.ScheduleUtil;
-import a75f.io.renatus.util.ProgressDialogUtils;
-
-import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
-import static a75f.io.renatus.util.BitmapUtil.getBitmapFromVectorDrawable;
 
 
 public class MasterControlView extends LinearLayout {
@@ -231,7 +203,7 @@ public class MasterControlView extends LinearLayout {
     public static double getTuner(String id) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
         ArrayList values = hayStack.readPoint(id);
-        if (values != null && values.size() > 0) {
+        if (values != null && !values.isEmpty()) {
             for (int l = 1; l <= values.size(); l++) {
                 HashMap valMap = ((HashMap) values.get(l - 1));
                 if (valMap.get("val") != null) {

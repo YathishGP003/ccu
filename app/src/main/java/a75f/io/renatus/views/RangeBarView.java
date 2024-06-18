@@ -1,9 +1,10 @@
 package a75f.io.renatus.views;
 
+import static a75f.io.renatus.tuners.ExpandableTunerListAdapter.getTuner;
+
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.widget.LinearLayout;
 
 import java.util.HashMap;
@@ -14,8 +15,6 @@ import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.renatus.views.MasterControl.MasterControlUtil;
-
-import static a75f.io.renatus.tuners.ExpandableTunerListAdapter.getTuner;
 
 /**
  * Created by mahesh on 15-08-2019.
@@ -54,15 +53,12 @@ public class RangeBarView extends LinearLayout {
 
     private void init(AttributeSet attrs) {
 
-        this.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            @Override
-            public void onGlobalLayout() {
-                if (!mAdded) {
-                    add();
-                    mAdded = true;
-                }
-
+        this.getViewTreeObserver().addOnGlobalLayoutListener(() -> {
+            if (!mAdded) {
+                add();
+                mAdded = true;
             }
+
         });
     }
 

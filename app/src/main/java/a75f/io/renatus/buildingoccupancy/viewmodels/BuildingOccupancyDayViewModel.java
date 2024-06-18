@@ -15,7 +15,6 @@ public class BuildingOccupancyDayViewModel {
     private static final String ZERO = "0";
 
     public String constructBuildingOccupancyTitle(BuildingOccupancy.Days mDay) {
-        String title = ADD_BUILDING_OCCUPANCY_TITLE;
         if (mDay != null) {
             StringBuffer stringBuffer = new StringBuffer(EDIT);
             stringBuffer.append(SPACE);
@@ -26,7 +25,7 @@ public class BuildingOccupancyDayViewModel {
             stringBuffer.append(CB);
             return stringBuffer.toString();
         }
-        return title;
+        return ADD_BUILDING_OCCUPANCY_TITLE;
     }
 
     private String constructTime(BuildingOccupancy.Days mDay) {

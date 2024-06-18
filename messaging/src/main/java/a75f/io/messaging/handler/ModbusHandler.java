@@ -6,7 +6,6 @@ import com.google.gson.JsonObject;
 import org.projecthaystack.HDateTime;
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
-import org.projecthaystack.HVal;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HSUtil;
@@ -22,7 +21,7 @@ public class ModbusHandler {
             CCUHsApi.getInstance().writeHisValById(configPoint.getId(), HSUtil.getPriorityVal(configPoint.getId()));
             return;
         }
-        double duration = 0;
+        double duration;
         HDateTime lastModifiedDateTime;
 
         JsonElement durHVal = msgObject.get("duration");

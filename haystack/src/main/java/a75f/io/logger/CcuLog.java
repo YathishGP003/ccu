@@ -1,14 +1,6 @@
 package a75f.io.logger;
 
-/**
- * Created by samjithsadasivan isOn 8/17/17.
- */
-
 import android.util.Log;
-
-import org.projecthaystack.UnknownRecException;
-
-import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 
@@ -56,7 +48,6 @@ public class CcuLog
 			mLogNode.println(priority, tag, msg, tr);
 		}
 		Log.i(tag, msg);
-		//System.out.println(msg);
 		if (tr != null) {
 			tr.printStackTrace();
 		}
@@ -212,8 +203,7 @@ public class CcuLog
 
 
 	private static int getLogLevel(){
-		double level = 4.0;
-		try {
+        try {
 			return CCUHsApi.getInstance().getCcuLogLevel();
 		} catch (IllegalStateException e) {
 			Log.e("CcuLog", "hayStack is not initialized");

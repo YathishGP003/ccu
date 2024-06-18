@@ -64,7 +64,7 @@ class TIConfigHandler {
                 }
                 updateSensorPoints(supplyTempSensorConfig, roomTempSensorConfig, currentTempPoint, nodeAddress, configPoint.equipRef)
             }
-            CCUHsApi.getInstance().scheduleSync();
+            CCUHsApi.getInstance().scheduleSync()
         }
 
         private fun updateSensorPoints(

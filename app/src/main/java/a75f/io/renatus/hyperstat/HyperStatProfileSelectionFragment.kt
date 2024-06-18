@@ -80,7 +80,7 @@ class HyperStatProfileSelectionFragment : BaseDialogFragment() {
       val vrvCell = view.findViewById<View>(R.id.vrvCell)
       val monitoringCell = view.findViewById<View>(R.id.hypersenseCell)
 
-      vrvCell.isVisible = BuildConfig.BUILD_TYPE == "daikin_prod" || CCUUiUtil.isDaikinThemeEnabled(context)
+      vrvCell.isVisible = BuildConfig.BUILD_TYPE.equals("daikin_prod") || CCUUiUtil.isDaikinThemeEnabled(context)
 
       goBack.setOnClickListener { removeDialogFragment(HYPERSTAT_PROFILE_SELECTION_ID) }
       cpuCell.setOnClickListener { showCPUConfigFragment() }
@@ -125,7 +125,7 @@ class HyperStatProfileSelectionFragment : BaseDialogFragment() {
    }
 
    private fun showMonitoringConfigFragment(){
-      val zoneEquips   = HSUtil.getEquips(mRoomName).size;
+      val zoneEquips   = HSUtil.getEquips(mRoomName).size
       if (zoneEquips == 0) {
          showDialogFragment(
                  HyperStatMonitoringPairScreen.newInstance(mNodeAddress,
@@ -135,12 +135,12 @@ class HyperStatProfileSelectionFragment : BaseDialogFragment() {
                  HyperStatMonitoringPairScreen.ID
          )
       }else{
-         Toast.makeText(context,"Please delete other profiles",Toast.LENGTH_LONG).show();
+         Toast.makeText(context,"Please delete other profiles",Toast.LENGTH_LONG).show()
       }
    }
 
    private fun showVrvConfigFragment() {
-      val zoneEquips   = HSUtil.getEquips(mRoomName).size;
+      val zoneEquips   = HSUtil.getEquips(mRoomName).size
       if (zoneEquips == 0) {
          showDialogFragment(
             FragmentBLEInstructionScreen.getInstance(
@@ -152,7 +152,7 @@ class HyperStatProfileSelectionFragment : BaseDialogFragment() {
             ), FragmentBLEInstructionScreen.ID
          )
       }else{
-         Toast.makeText(context,"Please delete other profiles",Toast.LENGTH_LONG).show();
+         Toast.makeText(context,"Please delete other profiles",Toast.LENGTH_LONG).show()
       }
    }
 

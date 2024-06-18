@@ -1,6 +1,5 @@
 package a75f.io.domain.util
 
-import a75f.io.api.haystack.CCUHsApi
 import a75f.io.domain.api.Domain
 import a75f.io.logger.CcuLog
 import android.annotation.SuppressLint
@@ -18,7 +17,7 @@ object ModelCache {
     private const val BUILDING_EQUIP_MODEL = "assets/75f/models/657739fbd1743f797c4c2ca4.json"
 
     var context : Context? = null
-    fun init(hayStack : CCUHsApi, context: Context) {
+    fun init(context: Context) {
         this.context = context
         loadSystemModelsAsync()
         loadTerminalModelsAsync()

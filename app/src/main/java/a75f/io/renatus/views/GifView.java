@@ -33,6 +33,7 @@ public class GifView extends View {
         requestLayout();
     }
 
+
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         if (mMovie != null) {

@@ -1,6 +1,5 @@
 package a75f.io.renatus.hyperstatsplit
 
-import a75f.io.api.haystack.HSUtil
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.renatus.BASE.BaseDialogFragment
@@ -12,8 +11,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
-import android.widget.Toast
-import androidx.core.view.isVisible
 
 
 const val HYPERSTATSPLIT_PROFILE_SELECTION_ID = "HyperStatSplitProfileSelection"

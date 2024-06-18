@@ -9,7 +9,6 @@ import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.hyperstat.profiles.HyperStatProfile
 import a75f.io.renatus.R
-import a75f.io.renatus.hyperstat.ui.AnalogOutAdapter
 import a75f.io.renatus.views.CustomSpinnerDropDownAdapter
 import android.app.Application
 import android.content.Context
@@ -443,9 +442,6 @@ fun analogVoltageAtSpinnerValues(): Array<String?> =
 
 fun analogFanSpeedIndexFromValue(percent: Double) =
     offsetIndexFromValue(ANALOG_FAN_MIN_SPEED, ANALOG_FAN_SPEED_INC, percent)
-
-fun analogFanSpeedFromIndex(index: Int) =
-    offsetFromIndex(ANALOG_FAN_MIN_SPEED, ANALOG_FAN_SPEED_INC, index)
 
 fun analogFanLevelSpeedValue(): Array<String?> {
     return offsetSpinnerValues(

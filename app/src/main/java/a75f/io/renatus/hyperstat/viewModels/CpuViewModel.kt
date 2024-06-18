@@ -9,12 +9,9 @@ import a75f.io.logic.bo.building.hyperstat.profiles.HyperStatProfile
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.CpuAnalogOutAssociation
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.HyperStatCpuConfiguration
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.HyperStatCpuProfile
-import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuEconConfiguration
-import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuEconProfile
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.renatus.R
 import android.app.Application
-import android.util.Log
 
 /**
  * Created by Manjunath K on 15-07-2022.

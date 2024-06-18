@@ -16,9 +16,9 @@ import androidx.recyclerview.widget.RecyclerView
 class ZoneTempAdapter(allZones: ArrayList<HashMap<Any, Any>>, tag: String) : RecyclerView.Adapter<ZoneTempAdapter.ViewHolder>() {
 
     var zones:  ArrayList<HashMap<Any, Any>>
-    var tempTag : String
+    private var tempTag : String
     private val FOLLOW_BUILDING = "followBuilding"
-    val SAME_AS_BUILDING = "Same as Building"
+    private val SAME_AS_BUILDING = "Same as Building"
 
     init {
         zones = allZones
@@ -41,17 +41,17 @@ class ZoneTempAdapter(allZones: ArrayList<HashMap<Any, Any>>, tag: String) : Rec
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val zone: HashMap<Any, Any> = zones.get(position)
+        val zone: HashMap<Any, Any> = zones[position]
 
-        if(!(position % 2 == 0)){
+        if(position % 2 != 0){
             holder.lLayout.setBackgroundColor(Color.parseColor("#F8F8F8"))
         }
 
-        holder.zoneName.setText(zone["dis"].toString())
-        val roomRef = zone.get("id").toString()
-        if(CCUHsApi.getInstance().getScheduleById(zone.get("scheduleRef").toString()).markers.contains(FOLLOW_BUILDING)){
-            holder.zoneMaxTemp.setText(SAME_AS_BUILDING)
-            holder.zoneMinTemp.setText(SAME_AS_BUILDING)
+        holder.zoneName.text = zone["dis"].toString()
+        val roomRef = zone["id"].toString()
+        if(CCUHsApi.getInstance().getScheduleById(zone["scheduleRef"].toString()).markers.contains(FOLLOW_BUILDING)){
+            holder.zoneMaxTemp.text = SAME_AS_BUILDING
+            holder.zoneMinTemp.text = SAME_AS_BUILDING
         }else{
             var zoneMaxTempVal = CCUHsApi.getInstance().readPointPriorityValByQuery("point and "+tempTag+
                     " and max and schedulable and limit and user and roomRef == \""+roomRef+"\"")
@@ -62,8 +62,8 @@ class ZoneTempAdapter(allZones: ArrayList<HashMap<Any, Any>>, tag: String) : Rec
                 zoneMaxTempVal = roundToHalf(fahrenheitToCelsius(zoneMaxTempVal))
                 zoneMinTempVal = roundToHalf(fahrenheitToCelsius(zoneMinTempVal))
             }
-            holder.zoneMaxTemp.setText(zoneMaxTempVal.toString())
-            holder.zoneMinTemp.setText(zoneMinTempVal.toString())
+            holder.zoneMaxTemp.text = zoneMaxTempVal.toString()
+            holder.zoneMinTemp.text = zoneMinTempVal.toString()
 
         }
 

@@ -100,7 +100,6 @@ class MessageHandlerService @Inject constructor(private val appContext: Context,
             //handler to avoid app crashing due to an invalid message.
             } catch (e : Exception) {
                 CcuLog.e(L.TAG_CCU_MESSAGING, "Failed to handle this message $message, and the reason is  ${e.message}")
-                e.printStackTrace();
                 updateMessageFailed(message, e)
             }
         } else {
@@ -156,7 +155,7 @@ class MessageHandlerService @Inject constructor(private val appContext: Context,
             if(jsonobjectOfMessage.has("ccuRef")) {
                 if (!((JSONObject(message).getString("ccuRef")).equals(
                         CCUHsApi.getInstance().ccuId.replace("@", "")))) {
-                    return true;
+                    return true
                 }
             }
         }

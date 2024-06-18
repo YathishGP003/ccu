@@ -375,7 +375,7 @@ fun getAnalogModulation(
             if (ahuSettings.isMechanicalCoolingAvailable || ahuSettings.isMechanicalHeatingAvailable
                     || ahuSettings.isEmergencyShutoffActive) {
                 CcuLog.i(L.TAG_CCU_SYSTEM, " compositeSignal ${getComposeMidPoint(minMax)} analogMinVoltage: ${minMax.first}, analogMaxVoltage: ${minMax.second}")
-                return getComposeMidPoint(minMax)
+                return getComposeMidPoint(minMax) * 10
             }
             val presentMode = SystemController.State.values()[ahuSettings.systemEquip.operatingMode.readHisVal().toInt()]
             when (presentMode) {
@@ -387,7 +387,7 @@ fun getAnalogModulation(
                 }
                 else -> {
                     CcuLog.i(L.TAG_CCU_SYSTEM, " compositeSignal ${getComposeMidPoint(minMax)} analogMinVoltage: ${minMax.first}, analogMaxVoltage: ${minMax.second}")
-                    return getComposeMidPoint(minMax)
+                    return getComposeMidPoint(minMax) * 10
                 }
             }
         }
@@ -395,14 +395,14 @@ fun getAnalogModulation(
             if (ahuSettings.isMechanicalCoolingAvailable) {
                 0.0
             } else {
-                ahuSettings.systemEquip.coolingLoopOutput.readHisVal()
+                loopOutput
             }
         }
         AdvancedAhuAnalogOutAssociationType.LOAD_HEATING ,AdvancedAhuAnalogOutAssociationType.SAT_HEATING -> {
             if (ahuSettings.isMechanicalHeatingAvailable) {
                 0.0
             } else {
-                ahuSettings.systemEquip.heatingLoopOutput.readHisVal()
+                loopOutput
             }
         }
         else -> {
@@ -410,7 +410,7 @@ fun getAnalogModulation(
         }
     }
     CcuLog.i(L.TAG_CCU_SYSTEM, "modulateAnalogOut: loopOutput $finalLoop analogMinVoltage: ${minMax.first}, analogMaxVoltage: ${minMax.second}")
-    return getModulatedOutput(finalLoop, minMax.first, minMax.second).coerceIn(0.0,10.0)
+    return getModulatedOutput(finalLoop, minMax.first, minMax.second).coerceIn(0.0,10.0) * 10
 }
 
 

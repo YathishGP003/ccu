@@ -10,7 +10,6 @@ import a75f.io.logic.bo.building.vrv.VrvProfileConfiguration
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import io.reactivex.rxjava3.subjects.BehaviorSubject
-import io.reactivex.rxjava3.subjects.PublishSubject
 import kotlin.math.round
 
 class HyperStatVrvViewModel(application: Application) : AndroidViewModel(application) {
@@ -24,9 +23,8 @@ class HyperStatVrvViewModel(application: Application) : AndroidViewModel(applica
     private val HUMIDITY_INC = 1.0F
 
     val viewState: BehaviorSubject<VrvViewState> = BehaviorSubject.create()
-    val oneTimeActions: PublishSubject<OneTimeUiActions> = PublishSubject.create()
 
-    var vrvProfile : VrvProfile? = null
+    private var vrvProfile : VrvProfile? = null
     private var nodeAddr : Short = 0
     lateinit var roomRef : String
     lateinit var floorRef : String
@@ -40,7 +38,7 @@ class HyperStatVrvViewModel(application: Application) : AndroidViewModel(applica
         floorRef = floor
         vrvProfile = L.getProfile(addr)?.let {
             it as VrvProfile
-        }?:null
+        }
         viewState.onNext(getInitialViewState())
     }
 
@@ -74,15 +72,13 @@ class HyperStatVrvViewModel(application: Application) : AndroidViewModel(applica
     }
 
     fun saveProfile() {
-        vrvProfile?.let {
-            it.updateEquip(VrvProfileConfiguration(
-                            currentState.tempOffsetPosition.toDouble() - 100,
-                            currentState.humidityMinPosition.toDouble(),
-                            currentState.humidityMaxPosition.toDouble(),
-                            currentState.masterControllerMode.toDouble(),
-                            currentState.isAutoAwayEnabled,
-                            currentState.isAutoForcedOccupiedEnabled))
-        }?: run {
+        vrvProfile?.updateEquip(VrvProfileConfiguration(
+                currentState.tempOffsetPosition.toDouble() - 100,
+                currentState.humidityMinPosition.toDouble(),
+                currentState.humidityMaxPosition.toDouble(),
+                currentState.masterControllerMode.toDouble(),
+                currentState.isAutoAwayEnabled,
+                currentState.isAutoForcedOccupiedEnabled)) ?: run {
             vrvProfile = VrvProfile()
             vrvProfile!!.createVrvEquip(
                 CCUHsApi.getInstance(), nodeAddr,
@@ -206,10 +202,6 @@ data class VrvViewState(
     val iduConnectionStatus :Int,
     val isAutoAwayEnabled : Boolean,
     val isAutoForcedOccupiedEnabled: Boolean
-)
-
-data class OneTimeUiActions(
-    val errorMessage: String? = null
 )
 
 enum class IduConnectionStatus{

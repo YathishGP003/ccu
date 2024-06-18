@@ -58,8 +58,8 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
     lateinit var connectEquipBuilder: ProfileEquipBuilder
     lateinit var cmDeviceBuilder: DeviceBuilder
     lateinit var connectDeviceBuilder: DeviceBuilder
-    private var isEquipPaired = false
-    private var isConnectModulePaired = false
+    var isEquipPaired = false
+    var isConnectModulePaired = false
     /**
      * This voltage values never going to be changed so hardcoded here
      */
@@ -298,7 +298,7 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
         }
         return null
     }
-    private fun getConnectPhysicalPointForRelayIndex(relayIndex : Int) : PhysicalPoint? {
+    fun getConnectPhysicalPointForRelayIndex(relayIndex : Int) : PhysicalPoint? {
         if (isEquipPaired) {
             val systemEquip = if (Domain.systemEquip is VavAdvancedHybridSystemEquip) {
                 Domain.systemEquip as VavAdvancedHybridSystemEquip
@@ -335,8 +335,8 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
         return null
     }
 
-    private fun getConnectPhysicalPointForAnalogIndex(analogIndex : Int) : PhysicalPoint? {
-        if (isEquipPaired) {
+    fun getConnectPhysicalPointForAnalogIndex(analogIndex : Int) : PhysicalPoint? {
+        if (isConnectModulePaired) {
             val systemEquip = Domain.systemEquip as VavAdvancedHybridSystemEquip
             val analogName = getAnalogNameForIndex(analogIndex)
             return getConnectAnalogOutLogicalPhysicalMap(systemEquip.connectEquip1,Domain.connect1Device).values.find { it.domainName == analogName }

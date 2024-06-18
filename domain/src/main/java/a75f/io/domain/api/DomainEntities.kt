@@ -76,6 +76,7 @@ class Device(domainName : String, val id : String) : Entity(domainName) {
 }
 class Ccu(domainName : String, id : String) : Entity(domainName) {
     val equips = mutableMapOf<String, Equip>()
+    val bypassEquips = mutableMapOf<String, Equip>()
     val devices = mutableMapOf<String, Device>()
 
     fun addEquip(entityMap : HashMap<Any, Any>) {
@@ -89,6 +90,13 @@ class Ccu(domainName : String, id : String) : Entity(domainName) {
         val id = entityMap["id"].toString()
         devices[id] = Device(domainName, id)
     }
+
+    fun addBypassEquip(entityMap : HashMap<Any, Any>) {
+        val domainName = entityMap["domainName"].toString()
+        val id = entityMap["id"].toString()
+        bypassEquips[id] = Equip(domainName, id)
+    }
+
 }
 open class Point(domainName : String, val equipRef: String) : Entity(domainName) {
 

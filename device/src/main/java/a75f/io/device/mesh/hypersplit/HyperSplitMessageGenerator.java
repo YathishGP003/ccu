@@ -28,6 +28,7 @@ import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode;
 import a75f.io.logic.bo.building.hyperstatsplit.common.BasicSettings;
 import a75f.io.logic.bo.util.TemperatureMode;
+import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
 
 public class HyperSplitMessageGenerator {
@@ -72,7 +73,8 @@ public class HyperSplitMessageGenerator {
      */
     public static HyperSplit.HyperSplitSettingsMessage_t getSettingsMessage(String zone, int address,
                                                                           String equipRef, TemperatureMode mode) {
-        int temperatureMode = (int) Domain.readDefaultValByDomain(DomainName.temperatureMode);
+        int temperatureMode = (int) Domain.readValAtLevelByDomain(DomainName.temperatureMode,
+                TunerConstants.SYSTEM_BUILDING_VAL_LEVEL);
 
         int minCoolingUserTemp = CCUHsApi.getInstance().readPointPriorityValByQuery(HyperSplitSettingsUtil.Companion.getCoolingUserLimitByQuery(mode, "min", equipRef)).intValue();
         int maxCoolingUserTemp = CCUHsApi.getInstance().readPointPriorityValByQuery(HyperSplitSettingsUtil.Companion.getCoolingUserLimitByQuery(mode, "max", equipRef)).intValue();

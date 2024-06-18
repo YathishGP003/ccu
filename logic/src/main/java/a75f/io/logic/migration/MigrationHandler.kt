@@ -8,8 +8,7 @@ import a75f.io.api.haystack.Site
 import a75f.io.api.haystack.Tags
 import a75f.io.api.haystack.sync.HttpUtil
 import a75f.io.domain.api.Domain
-import a75f.io.domain.cutover.*
-import a75f.io.domain.api.Domain.writeDefaultValByDomain
+import a75f.io.domain.api.Domain.writeValAtLevelByDomain
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.cutover.NodeDeviceCutOverMapping
 import a75f.io.domain.cutover.VavFullyModulatingRtuCutOverMapping
@@ -34,18 +33,17 @@ import a75f.io.logic.bo.building.system.vav.config.ModulatingRtuProfileConfig
 import a75f.io.logic.bo.building.system.vav.config.StagedRtuProfileConfig
 import a75f.io.logic.bo.building.system.vav.config.StagedVfdRtuProfileConfig
 import a75f.io.logic.bo.building.vav.VavProfileConfiguration
-import a75f.io.logic.bo.haystack.device.DeviceUtil
 import a75f.io.logic.bo.util.DemandResponseMode
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.logic.diag.DiagEquip
 import a75f.io.logic.diag.DiagEquip.createMigrationVersionPoint
 import a75f.io.logic.migration.modbus.correctEnumsForCorruptModbusPoints
 import a75f.io.logic.migration.scheduler.SchedulerRevampMigration
+import a75f.io.logic.tuners.TunerConstants
 import a75f.io.logic.util.PreferenceUtil
 import a75f.io.logic.util.createOfflineModePoint
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
-import android.util.Log
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import org.projecthaystack.HDict
@@ -555,7 +553,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
      fun temperatureModeMigration() {
         if (!PreferenceUtil.isTempModeMigrationRequired()) {
             CcuLog.i(L.TAG_CCU_MIGRATION_UTIL,"Temperature mode migration Initiated")
-            writeDefaultValByDomain(DomainName.temperatureMode, 1.0)
+            writeValAtLevelByDomain(DomainName.temperatureMode, TunerConstants.SYSTEM_BUILDING_VAL_LEVEL,1.0)
             PreferenceUtil.setTempModeMigrationNotRequired()
         }
     }

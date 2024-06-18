@@ -27,6 +27,7 @@ import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode;
 import a75f.io.logic.bo.building.hyperstat.common.BasicSettings;
 import a75f.io.logic.bo.building.hyperstat.common.HSHaystackUtil;
 import a75f.io.logic.bo.util.TemperatureMode;
+import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
 
 import static a75f.io.logic.bo.building.schedules.Occupancy.AUTOAWAY;
@@ -85,7 +86,8 @@ public class HyperStatMessageGenerator {
      */
     public static HyperStatSettingsMessage_t getSettingsMessage(String zone, int address,
                                                                 String equipRef, TemperatureMode mode) {
-        int temperatureMode = (int) Domain.readDefaultValByDomain(DomainName.temperatureMode);
+        int temperatureMode = (int) Domain.readValAtLevelByDomain(DomainName.temperatureMode,
+                TunerConstants.SYSTEM_BUILDING_VAL_LEVEL);
 
         int minCoolingUserTemp = CCUHsApi.getInstance().readPointPriorityValByQuery(HyperStatSettingsUtil.Companion.getCoolingUserLimitByQuery(mode, "min", equipRef)).intValue();
         int maxCoolingUserTemp = CCUHsApi.getInstance().readPointPriorityValByQuery(HyperStatSettingsUtil.Companion.getCoolingUserLimitByQuery(mode, "max", equipRef)).intValue();

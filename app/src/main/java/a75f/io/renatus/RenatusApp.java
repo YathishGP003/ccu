@@ -81,9 +81,9 @@ public class RenatusApp extends UtilityApplication
 						InputStream es = p.getErrorStream();
 						DataOutputStream os = new DataOutputStream(p.getOutputStream());
 						for (String command : commands) {
-							Log.d(TAG_CCU_DOWNLOAD, "ExecuteAsRoot: Preparing command: " + command);
+							Log.d(TAG_CCU_DOWNLOAD, "ExecuteAsRoot: Preparing command: '" + command +"'");
 							os.writeBytes(command + "\n");
-							os.writeBytes( "echo Status $? for command: " + command + "\n");
+							os.writeBytes( "echo Status $? for command: '" + command + "'\n");
 						}
 						os.writeBytes("exit\n");
 						os.flush();
@@ -111,11 +111,18 @@ public class RenatusApp extends UtilityApplication
 
 						if (packageToLaunch != null) {
 							try {
-								Log.i(TAG_CCU_DOWNLOAD, String.format("Launching package %s", packageToLaunch));
 								Context context = RenatusApp.getAppContext();
 								PackageManager pm = context.getPackageManager();
+
+								// Look for a normal launch intent
 								Intent launchIntent = pm.getLaunchIntentForPackage(packageToLaunch);
-								context.startActivity(launchIntent);
+
+								if (launchIntent != null) {
+									Log.i(TAG_CCU_DOWNLOAD, String.format("Launching package %s", packageToLaunch));
+									context.startActivity(launchIntent);
+								} else {
+									Log.w(TAG_CCU_DOWNLOAD, "Unable to get launch intent for package " + packageToLaunch);
+								}
 							} catch(Exception e) {
 								Log.e(TAG_CCU_DOWNLOAD, String.format("Unable to launch package %s: %s", packageToLaunch, e.getMessage()));
 							}

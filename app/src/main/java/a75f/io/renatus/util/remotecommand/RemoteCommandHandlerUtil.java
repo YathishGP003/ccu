@@ -69,6 +69,8 @@ public class RemoteCommandHandlerUtil {
     private static final String INSTALL_CMD = "pm install -r -d -g %s";
     private static final String UNINSTALL_CMD = "pm uninstall --user 0 %s";
     private static final String SET_HOME_APP_CMD = "cmd package set-home-activity --user 0 \"%s/.MainActivity\"";
+    private static final String APPOPS_SET_ALLOW_CMD = "appops set %s %s allow";
+    private static final String PM_GRANT_CMD = "pm grant %s %s";
     private static final String BAC_APP_PACKAGE_NAME = "com.example.ccu_bacapp";
     private static final String REMOTE_ACCESS_PACKAGE_NAME = "io.seventyfivef.remoteaccess";
     private static final String HOME_APP_PACKAGE_NAME = "io.seventyfivef.home";
@@ -336,7 +338,10 @@ public class RemoteCommandHandlerUtil {
                         String fileName = resolveApkFilename(remoteAccessApkName);
                         if (fileName != null) {
                             String[] commands = new String[]{
-                                    String.format(INSTALL_CMD, fileName)
+                                    String.format(INSTALL_CMD, fileName),
+                                    String.format(APPOPS_SET_ALLOW_CMD, REMOTE_ACCESS_PACKAGE_NAME, "PROJECT_MEDIA"),                     // Screen Capture access
+                                    String.format(APPOPS_SET_ALLOW_CMD, REMOTE_ACCESS_PACKAGE_NAME, "SYSTEM_ALERT_WINDOW"),               // Overlay access
+                                    String.format(PM_GRANT_CMD, REMOTE_ACCESS_PACKAGE_NAME, "android.permission.WRITE_SECURE_SETTINGS")   // Accessibility access
                             };
                             RenatusApp.executeAsRoot(commands, REMOTE_ACCESS_PACKAGE_NAME, false);
                         }

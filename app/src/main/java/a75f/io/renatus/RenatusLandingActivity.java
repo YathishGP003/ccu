@@ -145,11 +145,14 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                 @Override
                 public void onTabSelected(TabLayout.Tab tab) {
                     btnTabs.setEnabled(false);
+                    mViewPager.removeAllViews();
+                    mViewPager.setAdapter(null);
                     if (tab.getPosition() == 0){
                         if (isSetupPassWordRequired()) {
                             showRequestPasswordAlert("Setup Access Authentication",getString(R.string.USE_SETUP_PASSWORD_KEY), tab.getPosition());
                         }
                         tab.setIcon(R.drawable.ic_settings_orange);
+                        mSettingPagerAdapter = new SettingsPagerAdapter(getSupportFragmentManager());
                         mViewPager.setAdapter(mSettingPagerAdapter);
                         mTabLayout.post(() -> mTabLayout.setupWithViewPager(mViewPager, true));
                         startCountDownTimer(INTERVAL);
@@ -158,6 +161,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
 
                     } else if (tab.getPosition() == 1){
                         tab.setIcon(R.drawable.ic_dashboard_orange);
+                        mStatusPagerAdapter = new StatusPagerAdapter(getSupportFragmentManager());
                         mViewPager.setAdapter(mStatusPagerAdapter);
                         mTabLayout.post(() -> mTabLayout.setupWithViewPager(mViewPager, true));
                         if (isZonePassWordRequired()) {
@@ -284,11 +288,12 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
         CcuLog.i(TAG,"launch ZoneFragment");
         Globals.getInstance().setTestMode(false);
         Globals.getInstance().setTemporaryOverrideMode(false);
-        if( btnTabs.getSelectedTabPosition() != 0)
-            mViewPager.setAdapter(mStatusPagerAdapter);
+        if( btnTabs.getSelectedTabPosition() != 0) {
+            updateStatusViewPagerAdapter();
+        }
         btnTabs.getTabAt(1).select();
         mTabLayout.post(() -> mTabLayout.setupWithViewPager(mViewPager, true));
-        FragmentManager fm = getSupportFragmentManager();
+        /*FragmentManager fm = getSupportFragmentManager();
         try {
             if (!isFinishing() && !fm.isDestroyed()) {
                 for (int i = 0; i < fm.getBackStackEntryCount(); ++i) {
@@ -302,7 +307,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
             }
         } catch (IllegalStateException e){
             e.printStackTrace();
-        }
+        }*/
     }
 
 
@@ -561,7 +566,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                 if (position == 0 && key.equals(getString(R.string.USE_SETUP_PASSWORD_KEY))) {
                     btnTabs.getTabAt(1).setIcon(R.drawable.ic_dashboard_orange);
                     btnTabs.getTabAt(1).select();
-                    mViewPager.setAdapter(mStatusPagerAdapter);
+                    updateStatusViewPagerAdapter();
                     mTabLayout.post(() -> mTabLayout.setupWithViewPager(mViewPager, true));
 
                     menuToggle.setVisibility(View.GONE);
@@ -681,6 +686,12 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
             return;
         }
         UtilityApplication.startRestServer();
+    }
+    private void updateStatusViewPagerAdapter() {
+        mViewPager.removeAllViews();
+        mViewPager.setAdapter(null);
+        mStatusPagerAdapter = new StatusPagerAdapter(getSupportFragmentManager());
+        mViewPager.setAdapter(mStatusPagerAdapter);
     }
 
 }

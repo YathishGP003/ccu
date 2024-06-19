@@ -55,7 +55,6 @@ open class ModulatingRtuProfileConfig(val model: SeventyFiveFProfileDirective) :
         analogOut4FreshAirMin = getDefaultValConfig(DomainName.analog4MinOutsideDamper, model)
         analogOut4FreshAirMax = getDefaultValConfig(DomainName.analog4MaxOutsideDamper, model)
         unusedPorts = ControlMote.getCMUnusedPorts(Domain.hayStack)
-
         isDefault = true
         return this
     }
@@ -120,7 +119,6 @@ open class ModulatingRtuProfileConfig(val model: SeventyFiveFProfileDirective) :
             analogOut4FreshAirMax = getDefaultValConfig(DomainName.analog4MaxOutsideDamper, model)
         }
         unusedPorts = ControlMote.getCMUnusedPorts(Domain.hayStack)
-
         isDefault = false
         return this
     }

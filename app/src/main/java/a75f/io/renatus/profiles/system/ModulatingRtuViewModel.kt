@@ -121,7 +121,6 @@ open class ModulatingRtuViewModel : ViewModel() {
         DomainManager.addSystemDomainEquip(hayStack)
         saveUnUsedPortStatusOfSystemProfile(profileConfiguration, hayStack)
         viewState.unusedPortState = ControlMote.getCMUnusedPorts(Domain.hayStack)
-
     }
 
     fun updateSystemMode() {

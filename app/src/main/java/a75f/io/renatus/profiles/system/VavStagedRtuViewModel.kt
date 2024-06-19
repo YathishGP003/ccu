@@ -50,7 +50,6 @@ class VavStagedRtuViewModel : StagedRtuProfileViewModel() {
         viewState = StagedRtuViewState.fromProfileConfig(profileConfiguration)
         CcuLog.i(Domain.LOG_TAG, "VavStagedRtuViewModel Loaded")
         viewState.unusedPortState = ControlMote.getCMUnusedPorts(Domain.hayStack)
-
         modelLoaded = true
     }
 

@@ -135,7 +135,6 @@ open class StagedVfdRtuProfileConfig(modelDef : SeventyFiveFProfileDirective)
         analogOut2HeatStage5.currentVal = stagedRtuEquip.analog2HeatStage5.readDefaultVal()
         analogOut2Default.currentVal = stagedRtuEquip.analog2Default.readDefaultVal()
         unusedPorts = ControlMote.getCMUnusedPorts(Domain.hayStack)
-
         isDefault = false
         return this
     }

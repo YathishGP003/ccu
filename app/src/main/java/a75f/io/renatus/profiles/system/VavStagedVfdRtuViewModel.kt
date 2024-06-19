@@ -75,7 +75,6 @@ class VavStagedVfdRtuViewModel : StagedRtuProfileViewModel() {
                 DesiredTempDisplayMode.setSystemModeForVav(hayStack)
                 UnusedPortsModel.saveUnUsedPortStatusOfSystemProfile(profileConfiguration, hayStack)
                 viewState.unusedPortState = ControlMote.getCMUnusedPorts(Domain.hayStack)
-
                 hayStack.syncEntityTree()
                 withContext(Dispatchers.Main) {
                     ProgressDialogUtils.hideProgressDialog()

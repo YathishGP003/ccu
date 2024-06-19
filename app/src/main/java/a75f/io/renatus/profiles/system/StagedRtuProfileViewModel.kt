@@ -142,7 +142,6 @@ open class StagedRtuProfileViewModel : ViewModel() {
         DomainManager.addSystemDomainEquip(hayStack)
         saveUnUsedPortStatusOfSystemProfile(profileConfiguration, hayStack)
         viewState.unusedPortState = ControlMote.getCMUnusedPorts(Domain.hayStack)
-
     }
 
     fun getRelayState(relayName: String) : Boolean {

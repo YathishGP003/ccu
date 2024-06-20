@@ -94,7 +94,7 @@ class UserLimitScaleFragment : DialogFragment() {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 val updateZonesList:ArrayList<HashMap<Any, Any>> = ArrayList()
                 for( zone in allTempZones){
-                    if((zone.get("dis").toString()).contains(s.toString())){
+                    if((zone["dis"].toString()).contains(s.toString())){
                         updateZonesList.add(zone)
                     }
                 }

@@ -13,6 +13,7 @@ import java.util.List;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
+import a75f.io.logic.L;
 import a75f.io.logic.interfaces.RemoteCommandHandleInterface;
 import a75f.io.logic.interfaces.SafeModeInterface;
 import a75f.io.messaging.MessageHandler;
@@ -46,7 +47,7 @@ public class RemoteCommandUpdateHandler implements MessageHandler
      */
 
     @Override
-    public void handleMessage(JsonObject msgObject, Context context) {
+    public void handleMessage(@NonNull JsonObject msgObject, @NonNull Context context) {
         try {
             String cmdType = msgObject.get(CMD_TYPE).getAsString();
             String cmdLevel = msgObject.get("remoteCmdLevel").getAsString();
@@ -158,8 +159,7 @@ public class RemoteCommandUpdateHandler implements MessageHandler
             }
 
         } catch(NullPointerException e) {
-            // Command parsing failed
-            e.printStackTrace();
+            CcuLog.e(L.TAG_CCU_MESSAGING, "Parsing error" , e);
         }
     }
 

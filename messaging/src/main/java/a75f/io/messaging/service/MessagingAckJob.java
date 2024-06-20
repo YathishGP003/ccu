@@ -18,7 +18,7 @@ public class MessagingAckJob {
     }
 
     public Runnable getJobRunnable() {
-        return () -> doJob();
+        return this::doJob;
     }
 
     /**
@@ -59,8 +59,7 @@ public class MessagingAckJob {
                                     error -> CcuLog.e(L.TAG_CCU_MESSAGING, "ACK Job FAILED for Messages: " + messageIds, error)
                             );
                 }catch (SocketTimeoutException | RuntimeException e) {
-                    CcuLog.d(L.TAG_CCU_MESSAGING, "Ack request Failed: " + e.getMessage());
-                    e.printStackTrace();
+                    CcuLog.e(L.TAG_CCU_MESSAGING, "Ack request Failed: " , e);
                 }
             });
         }

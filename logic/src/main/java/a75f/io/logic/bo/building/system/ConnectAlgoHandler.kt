@@ -347,7 +347,7 @@ fun getConnectAnalogModulation(
             if (ahuSettings.isMechanicalCoolingAvailable || ahuSettings.isMechanicalHeatingAvailable
                     || ahuSettings.isEmergencyShutoffActive){
                 CcuLog.i(L.TAG_CCU_SYSTEM, " compositeSignal ${getComposeMidPoint(minMax)} analogMinVoltage: ${minMax.first}, analogMaxVoltage: ${minMax.second}")
-                return getComposeMidPoint(minMax)
+                return getComposeMidPoint(minMax) * 10
             }
             val presentMode = SystemController.State.values()[ahuSettings.systemEquip.operatingMode.readHisVal().toInt()]
             when (presentMode) {
@@ -359,7 +359,7 @@ fun getConnectAnalogModulation(
                 }
                 else -> {
                     CcuLog.i(L.TAG_CCU_SYSTEM, " compositeSignal ${getComposeMidPoint(minMax)} analogMinVoltage: ${minMax.first}, analogMaxVoltage: ${minMax.second}")
-                    return getComposeMidPoint(minMax)
+                    return getComposeMidPoint(minMax) * 10
                 }
             }
         }
@@ -382,5 +382,5 @@ fun getConnectAnalogModulation(
         }
     }
     CcuLog.i(L.TAG_CCU_SYSTEM, "modulateAnalogOut: loopOutput $finalLoop analogMinVoltage: ${minMax.first}, analogMaxVoltage: ${minMax.second}")
-    return getModulatedOutput(finalLoop, minMax.first, minMax.second).coerceIn(0.0,10.0)
+    return getModulatedOutput(finalLoop, minMax.first, minMax.second).coerceIn(0.0,10.0) * 10
 }

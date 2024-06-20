@@ -3,7 +3,6 @@ package a75f.io.messaging.handler;
 import static a75f.io.messaging.handler.DataSyncHandler.isCloudScheduleHasLatestValue;
 
 import android.content.Context;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -32,7 +31,6 @@ import a75f.io.api.haystack.MockTime;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.sync.HttpUtil;
-import a75f.io.data.message.MessageDbUtilKt;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
@@ -48,7 +46,7 @@ public class UpdateScheduleHandler implements MessageHandler
     private static BuildingScheduleListener scheduleListener;
     private static IntrinsicScheduleListener intrinsicScheduleListener;
 
-    public static void handleMessage(JsonObject msgObject, Long timeToken) {
+    public static void handleMessage(JsonObject msgObject) {
         String uid = msgObject.get("id").getAsString();
         HashMap<Object,Object> scheduleEntity = CCUHsApi.getInstance().read("id == " + HRef.make(uid));
         HDictBuilder b = new HDictBuilder().add("id", HRef.copy(uid));
@@ -77,7 +75,7 @@ public class UpdateScheduleHandler implements MessageHandler
                 lastModifiedDateTime = null;
             }
             if(!isCloudScheduleHasLatestValue(scheduleEntity, lastModifiedDateTime)){
-                Log.i(L.TAG_CCU_READ_CHANGES,"CCU HAS LATEST VALUE ");
+                CcuLog.i(L.TAG_CCU_READ_CHANGES,"CCU HAS LATEST VALUE ");
                 return;
             }
             if (CCUHsApi.getInstance().isEntityExisting("@" + uid))
@@ -258,8 +256,8 @@ public class UpdateScheduleHandler implements MessageHandler
                         }
                     }
                 }
-                if (zoneSchedule.getRoomRef()!= null && intervalSpills.size() > 0) {
-                    Log.d(L.TAG_CCU_PUBNUB, "Trimmed Zone Schedule " + zoneSchedule.toString());
+                if (zoneSchedule.getRoomRef()!= null && !intervalSpills.isEmpty()) {
+                    CcuLog.d(L.TAG_CCU_PUBNUB, "Trimmed Zone Schedule " + zoneSchedule);
                     CCUHsApi.getInstance().updateZoneSchedule(zoneSchedule, zoneSchedule.getRoomRef());
                 }
             }
@@ -298,8 +296,7 @@ public class UpdateScheduleHandler implements MessageHandler
             CCUHsApi.getInstance().removeEntity(jsonObject.get("id").getAsString());
             return;
         }
-        long timeToken = jsonObject.get("timeToken").getAsLong();
-        handleMessage(jsonObject, timeToken);
+        handleMessage(jsonObject);
     }
 
     @Override

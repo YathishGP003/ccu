@@ -4,6 +4,7 @@ import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Point
 import a75f.io.api.haystack.RawPoint
 import a75f.io.domain.api.*
+import a75f.io.domain.api.Domain.getBypassEquipByDomainName
 import a75f.io.domain.api.Domain.getDeviceEntityByDomain
 import a75f.io.domain.api.Domain.getEquipDetailsByDomain
 import a75f.io.domain.api.Domain.getSystemEquipByDomainName
@@ -55,11 +56,15 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
             migrateDeviceModel(entityData, oldModel, newModel, siteRef)
 
         } else {
-            val equips: List<Equip> = if (Domain.readEquip(newModel.id)["roomRef"].toString() == "SYSTEM") {
+            val equips: List<Equip>
+            if (Domain.readEquip(newModel.id)["domainName"].toString() == DomainName.smartnodeBypassDamper) {
+                val equip = getBypassEquipByDomainName(newModel.domainName)
+                equips = if (equip != null) listOf(equip) else emptyList()
+            } else if (Domain.readEquip(newModel.id)["roomRef"].toString() == "SYSTEM") {
                 val equip = getSystemEquipByDomainName(newModel.domainName)
-                if (equip != null) listOf(equip) else emptyList()
+                equips = if (equip != null) listOf(equip) else emptyList()
             } else {
-                getEquipDetailsByDomain(newModel.domainName)
+                equips = getEquipDetailsByDomain(newModel.domainName)
             }
             CcuLog.printLongMessage(Domain.LOG_TAG,
                 "Equip model upgrade detected : Run migration to $newModel; equip size ${equips.size}"
@@ -195,7 +200,14 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
             updateRef(equipMap, profileConfiguration)
             val hayStackEquip = equipBuilder.buildEquip(EquipBuilderConfig(newModel, profileConfiguration, siteRef,
                 haystack.timeZone, equipMap["dis"].toString()))
-            if (Domain.readEquip(newModel.id)["roomRef"].toString() == "SYSTEM") {
+            // TODO: once OAO is DM-migrated, a similar conditional should be created for it
+            if (Domain.readEquip(newModel.id)["profile"].toString() == DomainName.smartnodeBypassDamper) {
+                hayStackEquip.roomRef = "SYSTEM"
+                hayStackEquip.floorRef = "SYSTEM"
+                haystack.updateEquip(hayStackEquip, it.id)
+                hayStackEquip.id = it.id
+                DomainManager.addBypassEquip(Domain.hayStack, Domain.hayStack.ccuId)
+            } else if (Domain.readEquip(newModel.id)["roomRef"].toString() == "SYSTEM") {
                 hayStackEquip.roomRef = "SYSTEM"
                 hayStackEquip.floorRef = "SYSTEM"
                 haystack.updateEquip(hayStackEquip, it.id)

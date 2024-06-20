@@ -3,7 +3,6 @@ package a75f.io.renatus.buildingoccupancy;
 import android.app.Dialog;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
@@ -24,6 +23,8 @@ import java.util.ArrayList;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.DAYS;
 import a75f.io.api.haystack.schedule.BuildingOccupancy;
+import a75f.io.logger.CcuLog;
+import a75f.io.logic.L;
 import a75f.io.logic.util.OfflineModeUtilKt;
 import a75f.io.renatus.BuildConfig;
 import a75f.io.renatus.R;
@@ -87,7 +88,7 @@ public class BuildingOccupancyDialogFragment extends DialogFragment {
         buildingOccupancyDayViewModel = new BuildingOccupancyDayViewModel();
         LayoutInflater inflater = LayoutInflater.from(getActivity());
         View view = inflater.inflate(R.layout.dialog_building_occupancy, null);
-        int dayselectionBackground = CCUUiUtil.getDayselectionBackgroud(getContext());
+        int daySelectionBackground = CCUUiUtil.getDayselectionBackgroud(getContext());
         buildingOccupancyTitle = view.findViewById(R.id.buildingOccupancyTitle);
         npStartTime = view.findViewById(R.id.np1);
         npEndTime = view.findViewById(R.id.np2);
@@ -131,7 +132,7 @@ public class BuildingOccupancyDialogFragment extends DialogFragment {
             method.setAccessible(true);
             method.invoke(npStartTime, true);
         } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
-            Log.e(TAG, "Reflection error for start time");
+            CcuLog.e(TAG, "Reflection error for start time");
         }
 
         npEndTime.setMinValue(nMinVal);
@@ -149,7 +150,7 @@ public class BuildingOccupancyDialogFragment extends DialogFragment {
             method.setAccessible(true);
             method.invoke(npEndTime, true);
         }  catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
-            Log.e(TAG, "Reflection error for end time");
+            CcuLog.e(TAG, "Reflection error for end time");
         }
 
         checkBoxMonday.setOnCheckedChangeListener((buttonView, isChecked) ->
@@ -157,7 +158,7 @@ public class BuildingOccupancyDialogFragment extends DialogFragment {
             // update your model (or other business logic) based on isChecked
             if (isChecked) {
                 checkBoxMonday.setTextColor(Color.parseColor("#ffffff"));
-                checkBoxMonday.setBackgroundResource(dayselectionBackground);
+                checkBoxMonday.setBackgroundResource(daySelectionBackground);
             } else {
                 checkBoxMonday.setTextColor(Color.parseColor("#000000"));
                 checkBoxMonday.setBackground(null);
@@ -168,7 +169,7 @@ public class BuildingOccupancyDialogFragment extends DialogFragment {
             // update your model (or other business logic) based on isChecked
             if (isChecked) {
                 checkBoxTuesday.setTextColor(Color.parseColor("#ffffff"));
-                checkBoxTuesday.setBackgroundResource(dayselectionBackground);
+                checkBoxTuesday.setBackgroundResource(daySelectionBackground);
             } else {
                 checkBoxTuesday.setTextColor(Color.parseColor("#000000"));
                 checkBoxTuesday.setBackground(null);
@@ -179,7 +180,7 @@ public class BuildingOccupancyDialogFragment extends DialogFragment {
             // update your model (or other business logic) based on isChecked
             if (isChecked) {
                 checkBoxWednesday.setTextColor(Color.parseColor("#ffffff"));
-                checkBoxWednesday.setBackgroundResource(dayselectionBackground);
+                checkBoxWednesday.setBackgroundResource(daySelectionBackground);
             } else {
                 checkBoxWednesday.setTextColor(Color.parseColor("#000000"));
                 checkBoxWednesday.setBackground(null);
@@ -190,7 +191,7 @@ public class BuildingOccupancyDialogFragment extends DialogFragment {
             // update your model (or other business logic) based on isChecked
             if (isChecked) {
                 checkBoxThursday.setTextColor(Color.parseColor("#ffffff"));
-                checkBoxThursday.setBackgroundResource(dayselectionBackground);
+                checkBoxThursday.setBackgroundResource(daySelectionBackground);
             } else {
                 checkBoxThursday.setTextColor(Color.parseColor("#000000"));
                 checkBoxThursday.setBackground(null);
@@ -201,7 +202,7 @@ public class BuildingOccupancyDialogFragment extends DialogFragment {
             // update your model (or other business logic) based on isChecked
             if (isChecked) {
                 checkBoxFriday.setTextColor(Color.parseColor("#ffffff"));
-                checkBoxFriday.setBackgroundResource(dayselectionBackground);
+                checkBoxFriday.setBackgroundResource(daySelectionBackground);
             } else {
                 checkBoxFriday.setTextColor(Color.parseColor("#000000"));
                 checkBoxFriday.setBackground(null);
@@ -212,7 +213,7 @@ public class BuildingOccupancyDialogFragment extends DialogFragment {
             // update your model (or other business logic) based on isChecked
             if (isChecked) {
                 checkBoxSaturday.setTextColor(Color.parseColor("#ffffff"));
-                checkBoxSaturday.setBackgroundResource(dayselectionBackground);
+                checkBoxSaturday.setBackgroundResource(daySelectionBackground);
             } else {
                 checkBoxSaturday.setTextColor(Color.parseColor("#000000"));
                 checkBoxSaturday.setBackground(null);
@@ -223,7 +224,7 @@ public class BuildingOccupancyDialogFragment extends DialogFragment {
             // update your model (or other business logic) based on isChecked
             if (isChecked) {
                 checkBoxSunday.setTextColor(Color.parseColor("#ffffff"));
-                checkBoxSunday.setBackgroundResource(dayselectionBackground);
+                checkBoxSunday.setBackgroundResource(daySelectionBackground);
             } else {
                 checkBoxSunday.setTextColor(Color.parseColor("#000000"));
                 checkBoxSunday.setBackground(null);
@@ -254,7 +255,7 @@ public class BuildingOccupancyDialogFragment extends DialogFragment {
                 return;
             }
 
-            if (days.size() == 0) {
+            if (days.isEmpty()) {
                 Toast.makeText(BuildingOccupancyDialogFragment.this.getContext(), "Select one or more days to add " +
                         "Building Occupancy", Toast.LENGTH_SHORT).show();
                 return;
@@ -291,8 +292,9 @@ public class BuildingOccupancyDialogFragment extends DialogFragment {
     private void showDeleteAlert() {
 
         boolean isCloudConnected = CCUHsApi.getInstance().readHisValByQuery("cloud and connected and diag and point") > 0;
-        if(BuildConfig.BUILD_TYPE == "qa")
-            Log.d(TAG,"isCloudConnected" + isCloudConnected);
+        if(BuildConfig.BUILD_TYPE.equals("qa")) {
+            CcuLog.d(TAG,"isCloudConnected" + isCloudConnected);
+        }
 
         if ((!NetworkUtil.isNetworkConnected(getActivity()) || !isCloudConnected ) && !OfflineModeUtilKt.isOfflineMode()){
             Toast.makeText(getActivity(), "Building Occupancy cannot be deleted when CCU is offline. Please " +
@@ -319,7 +321,7 @@ public class BuildingOccupancyDialogFragment extends DialogFragment {
         int startTimePosition = mDay.getSthh() * 4 + mDay.getStmm() / 15;
 
         int endTimePosition = mDay.getEthh() * 4 + mDay.getEtmm() / 15;
-        Log.i("Schedule", "StartTime Position: " + startTimePosition +"EndTime Position: " + endTimePosition);
+        CcuLog.i(L.TAG_CCU_SCHEDULE, "StartTime Position: " + startTimePosition +"EndTime Position: " + endTimePosition);
 
         npStartTime.setValue(startTimePosition);
         npEndTime.setValue(endTimePosition);

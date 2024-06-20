@@ -57,15 +57,10 @@ public class UpdatePointHandler implements MessageHandler
     private static ModbusWritableDataInterface modbusWritableDataInterface = null;
 
     public static void handlePointUpdateMessage(final JsonObject msgObject, Long timeToken, Boolean isDataSync) throws MessageHandlingFailed {
-        String src = msgObject.get("who").getAsString();
         String pointUid = "@" + msgObject.get("id").getAsString();
         String pointLevel = msgObject.get("level").getAsString();
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap<Object, Object> pointEntity = hayStack.readMapById(pointUid);
-
-        /*if (canIgnorePointUpdate(src, pointUid, hayStack)) {
-            return;
-        }*/
         if(!isCloudEntityHasLatestValue(pointEntity, timeToken)){
             Log.i("ccu_read_changes","CCU HAS LATEST VALUE ");
             return;
@@ -195,7 +190,7 @@ public class UpdatePointHandler implements MessageHandler
         }
 
         if (HSUtil.isVAVZonePriorityConfig(pointUid, CCUHsApi.getInstance())) {
-            VAVZonePriorityHandler.updateVAVZonePriority(msgObject, localPoint, hayStack);
+            VAVZonePriorityHandler.updateVAVZonePriority(msgObject, localPoint);
         }
 
         if(HSUtil.isDABTrueCFMConfig(pointUid, CCUHsApi.getInstance())){
@@ -247,7 +242,7 @@ public class UpdatePointHandler implements MessageHandler
                 Thread.sleep(10);
                 updatePoints(localPoint);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                CcuLog.e(L.TAG_CCU_MESSAGING, "Error in thread sleep", e);
             }
         
         } else {
@@ -267,9 +262,9 @@ public class UpdatePointHandler implements MessageHandler
      * Replace local point array with point array values from server
      */
     private static void fetchRemotePoint(String pointUid, Boolean isDataSync, JsonObject msgObject) throws MessageHandlingFailed {
-        double level = 0;
-        double val = 0;
-        double duration = 0;
+        double level;
+        double val;
+        double duration;
         HDateTime lastModifiedDateTime;
         CCUHsApi.getInstance().deletePointArray(pointUid);
         if (isDataSync) {
@@ -312,7 +307,7 @@ public class UpdatePointHandler implements MessageHandler
                             CCUHsApi.getInstance().getCCUUserName(), HNum.make(val), HNum.make(duration), lastModifiedDateTime);
 
                 } catch (NumberFormatException e) {
-                    e.printStackTrace();
+                    CcuLog.e(L.TAG_CCU_MESSAGING, "Error in parsing remote point array", e);
                 }
 
             }
@@ -323,11 +318,11 @@ public class UpdatePointHandler implements MessageHandler
 
     private static void logPointArray(Point localPoint) {
         ArrayList values = CCUHsApi.getInstance().readPoint(localPoint.getId());
-        if (values != null && values.size() > 0) {
+        if (values != null && !values.isEmpty()) {
             for (int l = 1; l <= values.size(); l++) {
                 HashMap valMap = ((HashMap) values.get(l - 1));
                 if (valMap.get("val") != null) {
-                    Double duration = Double.parseDouble(valMap.get("duration").toString());
+                    double duration = Double.parseDouble(valMap.get("duration").toString());
                     CcuLog.d(L.TAG_CCU_PUBNUB, "Updated point " + localPoint.getDisplayName() + " , level: " + l + " , val :" + Double.parseDouble(valMap.get("val").toString())
                                                + " duration " + (duration > 0 ? duration - System.currentTimeMillis() : duration));
                 }

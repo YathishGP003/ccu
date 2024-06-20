@@ -591,9 +591,6 @@ fun analogVoltageAtSpinnerValues(): Array<String?> =
 fun analogFanSpeedIndexFromValue(percent: Double) =
     offsetIndexFromValue(ANALOG_FAN_MIN_SPEED, ANALOG_FAN_SPEED_INC, percent)
 
-fun analogFanSpeedFromIndex(index: Int) =
-    offsetFromIndex(ANALOG_FAN_MIN_SPEED, ANALOG_FAN_SPEED_INC, index)
-
 fun analogFanLevelSpeedValue(): Array<String?> {
     return offsetSpinnerValues(
         ANALOG_FAN_MAX_SPEED, ANALOG_FAN_MIN_SPEED,

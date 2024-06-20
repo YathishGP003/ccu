@@ -84,7 +84,7 @@ public class MessagingListener implements ServerSentEvent.Listener {
 
         if(CCUHsApi.getInstance().isCCURegistered() && isOldMessage(payload)){
             acknowledge(payload);
-            CcuLog.printLongMessage(L.TAG_CCU_MESSAGING, "the message is acknowledged and ignored [messageId: "+payload.get("messageId").getAsString()+"" +
+            CcuLog.printLongMessage(L.TAG_CCU_MESSAGING, "the message is acknowledged and ignored [messageId: "+payload.get("messageId").getAsString()+
                     ", timetoken: "+payload.get("timetoken").getAsString()+"]");
             return;
         }

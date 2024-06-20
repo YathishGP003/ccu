@@ -19,7 +19,7 @@ import android.app.Application
 
 class Pipe2ViewModel(application: Application) : HyperStatViewModel(application) {
     override fun getProfileName(): String {
-        return  return getApplication<Application>().getString(R.string.two_pipe_fcu)
+        return getApplication<Application>().getString(R.string.two_pipe_fcu)
     }
 
     override fun initData(address: Short, roomName: String, floorName: String, nodeType: NodeType, profileType: ProfileType) {

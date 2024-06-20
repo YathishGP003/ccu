@@ -121,7 +121,7 @@ class HpuViewModel(application: Application) : HyperStatViewModel(application) {
                     parent
                 ) as TextView
                 if (parent.tag != null) {
-                    if (shouldDisableRelayChangeOver(context, position, parent.tag.toString().toInt(), values)) {
+                    if (shouldDisableRelayChangeOver(position, parent.tag.toString().toInt())) {
                         view.setTextColor(Color.LTGRAY)
                         when (position) {
                             TYPE_O_INDEX -> typeOEnabled = false
@@ -156,7 +156,7 @@ class HpuViewModel(application: Application) : HyperStatViewModel(application) {
         return adapter
     }
 
-    private fun shouldDisableRelayChangeOver(context: Context, selectedPos : Int, relayPos : Int, values : Array<String>) : Boolean {
+    private fun shouldDisableRelayChangeOver(selectedPos : Int, relayPos : Int) : Boolean {
         if (selectedPos != TYPE_O_INDEX && selectedPos != TYPE_B_INDEX) {
             return false
         }

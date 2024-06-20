@@ -11,7 +11,6 @@ import org.projecthaystack.HDict;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -23,12 +22,9 @@ import a75f.io.api.haystack.util.SchedulableMigrationKt;
 import a75f.io.domain.api.Domain;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.util.CCUUtils;
-import a75f.io.logic.migration.MigrationHandler;
-import a75f.io.logic.migration.scheduler.SchedulerRevampMigration;
+import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.util.OfflineModeUtilKt;
 import a75f.io.renatus.schedules.ScheduleUtil;
-
-import a75f.io.logic.tuners.BuildingTunerCache;
 
 public class MasterControlUtil {
 
@@ -225,10 +221,8 @@ public class MasterControlUtil {
 
 
             if (!getSpecialSchedule(null).isEmpty() || isZoneSpecialExist())  {
-                String buildingSpecial = validateSpecialSchedule(null, buildingLimMinVal, buildingLimMaxVal, unoccupiedZoneSetBackval, buildingZoneDifferentialVal,
-                        heatingMinVal,heatingMaxVal,coolingMinVal,coolingMaxVal);
-                String val = validateZoneSpecialSchedule(null, buildingLimMinVal, buildingLimMaxVal, unoccupiedZoneSetBackval, buildingZoneDifferentialVal,
-                        heatingMinVal,heatingMaxVal,coolingMinVal,coolingMaxVal);
+                String buildingSpecial = validateSpecialSchedule(null, buildingLimMinVal, buildingLimMaxVal, unoccupiedZoneSetBackval, buildingZoneDifferentialVal);
+                String val = validateZoneSpecialSchedule(null, buildingLimMinVal, buildingLimMaxVal, buildingZoneDifferentialVal);
 
                 if (val != null || buildingSpecial != null) {
                     WarningMessage = WarningMessage + "\n \n For the Below Special schedules, please go back and edit the Heating/Cooling limit min/max temperature/desiredTemp to be within the temperature limits of the building"
@@ -250,28 +244,20 @@ public class MasterControlUtil {
         return CCUHsApi.getInstance().getSpecialSchedules(zoneId);
     }
 
-    private static String validateZoneSpecialSchedule(String zoneId, double buildingLimMin, double buildingLimMax,
-                                                      double unoccupiedSetback, double buildingZoneDifferentialVal,double heatingMin,
-                                                      double heatingMax, double coolingMin, double coolingMax) {
+    private static String validateZoneSpecialSchedule(String zoneId, double buildingLimMin, double buildingLimMax, double buildingZoneDifferentialVal) {
         String WarningMessage = null;
         ArrayList<HashMap<Object, Object>> zones = CCUHsApi.getInstance().readAllEntities("room");
         for (HashMap<Object, Object> zone : zones) {
             List<Schedule.Days> combinedSpecialSchedules = Schedule.getSpecialScheduleDaysForZone(zone.get("id").toString().startsWith("@")? zoneId : "@"+zoneId);
             if(!combinedSpecialSchedules.isEmpty())
                 WarningMessage = validateSpecialSchedule(zone.get("id").toString(),
-                                buildingLimMin, buildingLimMax, 0, buildingZoneDifferentialVal, heatingMin,
-                                heatingMax, coolingMin, coolingMax);
-
-
-
-
+                                buildingLimMin, buildingLimMax, 0, buildingZoneDifferentialVal);
         }
         return WarningMessage;
     }
 
     private static String validateSpecialSchedule(String zoneId, double buildingLimMin, double buildingLimMax,
-                                                  double unoccupiedSetback, double buildingZoneDifferentialVal,double heatingMin,
-                                                  double heatingMax, double coolingMin, double coolingMax) {
+                                                  double unoccupiedSetback, double buildingZoneDifferentialVal) {
         List<HashMap<Object, Object>> specialSchedules = getSpecialSchedule(zoneId);
         StringBuilder warningMessage = new StringBuilder();
         double unoccupiedSetbackVal = unoccupiedSetback;
@@ -366,18 +352,17 @@ public class MasterControlUtil {
                         String unOccupiedId = CCUHsApi.getInstance().readId("schedulable and zone and unocc and setback and roomRef == \"" + zone.get("id").toString() + "\"");
                         unoccupiedZoneSetBackval = CCUHsApi.getInstance().readPointPriorityVal(unOccupiedId);
                     }
+                    StringBuilder val;
                     if (schedule.getMarkers().contains("followBuilding")) {
-                        StringBuilder val = validation(schedule, buildingLimMinVal, buildingZoneDifferential, buildingLimMaxVal, unoccupiedZoneSetback,
+                        val = validation(schedule, buildingLimMinVal, buildingZoneDifferential, buildingLimMaxVal, unoccupiedZoneSetback,
                                 heatingMinVal, heatingMaxVal, coolingMinVal, coolingMaxVal, zone.get("dis").toString(), false);
-                        if (val != null)
-                            WarningMessage = WarningMessage.append(val);
 
                     } else {
-                        StringBuilder val = validation(schedule, buildingLimMinVal, buildingZoneDifferential, buildingLimMaxVal, unoccupiedZoneSetBackval,
+                        val = validation(schedule, buildingLimMinVal, buildingZoneDifferential, buildingLimMaxVal, unoccupiedZoneSetBackval,
                                 heatingMinVal, heatingMaxVal, coolingMinVal, coolingMaxVal, zone.get("dis").toString(), true);
-                        if (val != null)
-                            WarningMessage = WarningMessage.append(val);
                     }
+                    if (val != null)
+                        WarningMessage = WarningMessage.append(val);
                 } else if (scheduleType == 2) {
                     Schedule schedule = CCUHsApi.getInstance().getScheduleById(zone.get("scheduleRef").toString());
                     double unoccupiedZoneSetBackval = schedule.getUnoccupiedZoneSetback();

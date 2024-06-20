@@ -13,7 +13,7 @@ import javax.inject.Inject
 
 const val MESSAGE_RETRY_CLEANUP_MINUTES : Long = 60
 const val MESSAGE_CLEANUP_INITIAL_DELAY_SECONDS : Long = 30
-const val MESSAGE_EXPIRY_DURATION_MILLIS : Long = 24 * 60 * 60 * 1000;
+const val MESSAGE_EXPIRY_DURATION_MILLIS : Long = 24 * 60 * 60 * 1000
 class MessageCleanUpWork(context: Context, params: WorkerParameters) :
     CoroutineWorker(context, params) {
     private val appContext = context
@@ -31,13 +31,6 @@ class MessageCleanUpWork(context: Context, params: WorkerParameters) :
             msgDbHelper = messagingDIEntryPoint.dbHelper
         }
         CcuLog.i(L.TAG_CCU_MESSAGING,"MessageCleanUpWork ")
-
-        /*msgDbHelper.getAllMessagesList().forEach {
-            CcuLog.i(L.TAG_CCU_MESSAGING,"MessageCleanUpWork $it")
-            if (it.timeToken < System.currentTimeMillis() - MESSAGE_EXPIRY_DURATION_MILLIS) {
-                deleteMessage(it, appContext)
-            }
-        }*/
 
         msgDbHelper.getAllExpiredMessages(System.currentTimeMillis() - MESSAGE_EXPIRY_DURATION_MILLIS).forEach {
             CcuLog.i(L.TAG_CCU_MESSAGING,"MessageCleanUpWork - expired Message : $it")

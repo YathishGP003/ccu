@@ -2,8 +2,9 @@ package a75f.io.renatus.views.wizard;
 
 import android.os.Bundle;
 import androidx.fragment.app.FragmentActivity;
-import android.util.Log;
 import android.view.KeyEvent;
+
+import a75f.io.logger.CcuLog;
 
 /**
  * Base class for activities that want to implement step-by-step wizard functionality.
@@ -20,7 +21,7 @@ public abstract class WizardActivity extends FragmentActivity implements WizardS
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		Log.i(TAG, "Loading wizard data");
+		CcuLog.i(TAG, "Loading wizard data");
         onSetup(flow);
 		if (flow == null) {
 			throw new IllegalArgumentException("Error setting up the Wizard's flow. You must override WizardActivity#onSetup " +
@@ -36,7 +37,7 @@ public abstract class WizardActivity extends FragmentActivity implements WizardS
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
-		Log.v(TAG, "Persisting current wizard step ID");
+		CcuLog.v(TAG, "Persisting current wizard step ID");
         outState.putInt(STATE_WIZARD_LAST_STEP, wizard.getCurrentStepPosition());
         outState.putBundle(STATE_WIZARD_CONTEXT, wizard.getContext());
 	}
@@ -45,7 +46,7 @@ public abstract class WizardActivity extends FragmentActivity implements WizardS
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (keyCode == KeyEvent.KEYCODE_BACK) {
-            Log.v(TAG, "Going back one step");
+            CcuLog.v(TAG, "Going back one step");
 			wizard.getCurrentStep().abort();
 			return true;
 		}
@@ -57,7 +58,7 @@ public abstract class WizardActivity extends FragmentActivity implements WizardS
 	 */
 	@Override
 	public final void onStepStateChanged(WizardStep step) {
-        Log.v(TAG, "Step state changed");
+        CcuLog.v(TAG, "Step state changed");
 		switch (step.getState()) {
 		case WizardStep.STATE_ABORTED:
 			stepAborted();
@@ -87,7 +88,7 @@ public abstract class WizardActivity extends FragmentActivity implements WizardS
 	}
 
  	private void stepAborted() {
-        Log.v(TAG, "Step was aborted, going back one step");
+        CcuLog.v(TAG, "Step was aborted, going back one step");
 		if (wizard.isFirstStep()) {
 			finish();
 		}
@@ -97,7 +98,7 @@ public abstract class WizardActivity extends FragmentActivity implements WizardS
 	}
 
 	private void stepCompleted() {
-        Log.v(TAG, "Step completed, proceeding to the next step");
+        CcuLog.v(TAG, "Step completed, proceeding to the next step");
 		if (!wizard.isLastStep()) {
 			wizard.next();
 		}

@@ -73,10 +73,10 @@ class HyperstatReconfigurationHandler {
                 }
                 if((configPoint.markers.contains("analog1") || configPoint.markers.contains("analog2")
                             || configPoint.markers.contains("analog3")) && configPoint.markers.contains("output")) {
-                    DesiredTempDisplayMode.setModeType(configPoint.roomRef, CCUHsApi.getInstance());
+                    DesiredTempDisplayMode.setModeType(configPoint.roomRef, CCUHsApi.getInstance())
                 }
             } catch (e: NullPointerException){
-            e.printStackTrace()
+                e.printStackTrace()
                 Log.i(L.TAG_CCU_HSCPU, "updateConfigPoint: ${e.localizedMessage}")
             }
             pointUpdateOwner(configPoint, msgObject, hayStack)

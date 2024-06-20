@@ -10,7 +10,8 @@ enum class AdvancedAhuRelayAssociationType {
     LOAD_COOLING, LOAD_HEATING, LOAD_FAN, HUMIDIFIER, DEHUMIDIFIER, SAT_COOLING, SAT_HEATING, FAN_PRESSURE, OCCUPIED_ENABLE, FAN_ENABLE, AHU_FRESH_AIR_FAN_COMMAND;
 
     fun isConditioningStage() = this == LOAD_COOLING || this == SAT_COOLING || this == LOAD_HEATING || this == SAT_HEATING
-    fun isFanStage() = this == LOAD_FAN || this == FAN_PRESSURE
+    fun isSatStage() = this == SAT_COOLING || this == SAT_HEATING
+    fun isLoadStage() = this == LOAD_COOLING || this == LOAD_HEATING
 }
 
 enum class AdvancedAhuAnalogOutAssociationType {

@@ -22,16 +22,15 @@ import android.text.StaticLayout;
 import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.HorizontalScrollView;
 
 import androidx.annotation.RequiresApi;
 import androidx.core.content.res.ResourcesCompat;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 
+import a75f.io.logger.CcuLog;
+import a75f.io.logic.L;
 import a75f.io.renatus.R;
 
 
@@ -129,18 +128,14 @@ public class MasterControl extends View {
     Matrix matrix = new Matrix();
 
 
-    enum Direction {
-        UP, DOWN
-    }
-
-    private void drawSliderIcon(Canvas canvas, Direction direction, int yDisplacemnet, MasterControlState stateReflected, float buildTemp) {
+    private void drawSliderIcon(Canvas canvas, int yDisplacement, MasterControlState stateReflected) {
 
         matrix.reset();
 
         hitBoxes[stateReflected.ordinal()].set(0, 0, bitmaps[stateReflected.ordinal()].getWidth(), bitmaps[stateReflected.ordinal()].getHeight());
 
         int xPos = getPXForTemp(temps[stateReflected.ordinal()]) - bitmaps[stateReflected.ordinal()].getWidth() / 2;
-        int yPos = getTempLineYLocation() + yDisplacemnet - bitmaps[stateReflected.ordinal()].getHeight();
+        int yPos = getTempLineYLocation() + yDisplacement - bitmaps[stateReflected.ordinal()].getHeight();
 
         matrix.postTranslate(xPos, yPos);
         canvas.drawBitmap(bitmaps[stateReflected.ordinal()], matrix, mTempPaint);
@@ -157,7 +152,7 @@ public class MasterControl extends View {
         //The 2 and 1.5 are used to slide the number on the bitmap image.
         //Text centered left to right and 1/3 the way down the icon.
         if(isCelsiusTunerAvailableStatus()) {
-            canvas.drawText(String.valueOf(Math.round(temps[stateReflected.ordinal()]) + "\u00B0F  (" + fahrenheitToCelsius(Math.round(temps[stateReflected.ordinal()])) + "\u00B0C)"),
+            canvas.drawText(Math.round(temps[stateReflected.ordinal()]) + "\u00B0F  (" + fahrenheitToCelsius(Math.round(temps[stateReflected.ordinal()])) + "\u00B0C)",
                     xPos +  bitmaps[stateReflected.ordinal()].getWidth() / 2,
                     (yPos +  bitmaps[stateReflected.ordinal()].getHeight() / 2), mTempIconPaint);
         } else {
@@ -169,10 +164,10 @@ public class MasterControl extends View {
 
     private MasterControlState isHitBoxTouched(float x, float y) {
         for (int i = 0; i < hitBoxes.length; i++) {
-            Log.d("MasterControl", "HitBox was selected: " + hitBoxes[i]);
+            CcuLog.d(L.TAG_CCU_MASTER_CONTROL, "HitBox was selected: " + hitBoxes[i]);
             if (hitBoxes[i].contains(x,y)) {
                 MasterControlState retVal = MasterControlState.values()[i];
-                Log.d("MasterControl", "HitBox was selected: " + retVal.name());
+                CcuLog.d(L.TAG_CCU_MASTER_CONTROL, "HitBox was selected: " + retVal.name());
 
                 return retVal;
             }
@@ -184,7 +179,7 @@ public class MasterControl extends View {
     /*
     parameters - x and y value of the touch.
     returns - if its heating or cooling line
-    here we return Upper limit as we donot have a separate state for
+    here we return Upper limit as we do not have a separate state for
     whole line.
      */
     private MasterControlState isHitLineTouched(float x, float y) {
@@ -209,7 +204,7 @@ public class MasterControl extends View {
     @SuppressLint("ClickableViewAccessibility")
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        Log.i("MasterControl", "X: " + event.getX() + " Y: " + event.getY()+"Action is"+event.getAction());
+        CcuLog.i(L.TAG_CCU_MASTER_CONTROL, "X: " + event.getX() + " Y: " + event.getY()+"Action is"+event.getAction());
 
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
@@ -232,14 +227,12 @@ public class MasterControl extends View {
                 break;
         }
 
-        Log.d("MasterControl", "Touched: " + isHitBoxTouched(event.getX(), event.getY()).name());
+        CcuLog.d(L.TAG_CCU_MASTER_CONTROL, "Touched: " + isHitBoxTouched(event.getX(), event.getY()).name());
         return true;
     }
 
     Paint mDebugBoxesPaint;
 
-
-    private boolean mDataSet = false;
 
     // init temps
     public void setData(float lowerHeatingTemp, float upperHeatingTemp, float lowerCoolingTemp,
@@ -263,7 +256,6 @@ public class MasterControl extends View {
         this.hdb = hdb;
         this.cdb = cdb;
 
-        mDataSet = true;
         invalidate();
     }
 
@@ -535,32 +527,32 @@ public class MasterControl extends View {
 
                 if (mSelected == MasterControlState.LOWER_COOLING_LIMIT) {
                     drawSliderIcon(canvas,
-                            Direction.UP, mCoolingBarDisplacement - mPaddingBetweenCoolingBarAndSliderIcon, MasterControlState.LOWER_COOLING_LIMIT,lowerCoolingTemp);
+                            mCoolingBarDisplacement - mPaddingBetweenCoolingBarAndSliderIcon, MasterControlState.LOWER_COOLING_LIMIT);
                 }
 
                 if (mSelected == MasterControlState.LOWER_HEATING_LIMIT) {
                     drawSliderIcon(canvas,
-                            Direction.DOWN, mHeatingBarDisplacement - mPaddingBetweenCoolingBarAndSliderIcon, MasterControlState.LOWER_HEATING_LIMIT, lowerHeatingTemp);
+                            mHeatingBarDisplacement - mPaddingBetweenCoolingBarAndSliderIcon, MasterControlState.LOWER_HEATING_LIMIT);
                 }
 
                 if (mSelected == MasterControlState.UPPER_COOLING_LIMIT) {
                     drawSliderIcon(canvas,
-                            Direction.UP, mCoolingBarDisplacement - mPaddingBetweenCoolingBarAndSliderIcon, MasterControlState.UPPER_COOLING_LIMIT, upperCoolingTemp);
+                            mCoolingBarDisplacement - mPaddingBetweenCoolingBarAndSliderIcon, MasterControlState.UPPER_COOLING_LIMIT);
                 }
 
                 if (mSelected == MasterControlState.UPPER_HEATING_LIMIT) {
                     drawSliderIcon(canvas,
-                            Direction.DOWN, mHeatingBarDisplacement - mPaddingBetweenCoolingBarAndSliderIcon, MasterControlState.UPPER_HEATING_LIMIT, upperHeatingTemp);
+                            mHeatingBarDisplacement - mPaddingBetweenCoolingBarAndSliderIcon, MasterControlState.UPPER_HEATING_LIMIT);
                 }
 
             }
             drawBuildingLimitCircles(canvas);
             if (mSelected == MasterControlState.UPPER_BUILDING_LIMIT) {
-                drawSliderIcon(canvas, Direction.UP, -mPaddingBetweenCoolingBarAndSliderIcon, MasterControlState.UPPER_BUILDING_LIMIT, upperBuildingTemp);
+                drawSliderIcon(canvas, -mPaddingBetweenCoolingBarAndSliderIcon, MasterControlState.UPPER_BUILDING_LIMIT);
             }
 
             if (mSelected == MasterControlState.LOWER_BUILDING_LIMIT) {
-                drawSliderIcon(canvas, Direction.UP, -mPaddingBetweenCoolingBarAndSliderIcon, MasterControlState.LOWER_BUILDING_LIMIT, lowerBuildingTemp);
+                drawSliderIcon(canvas, -mPaddingBetweenCoolingBarAndSliderIcon, MasterControlState.LOWER_BUILDING_LIMIT);
             }
         }
 
@@ -722,11 +714,6 @@ public class MasterControl extends View {
         return Math.round(mPaddingPX + mDegreeIncremntPX * (temp - mLowerBound));
     }
 
-    private float getTempForPX(int px) {
-        return ((px - mPaddingPX) / mDegreeIncremntPX) + mLowerBound;
-    }
-
-
     private void drawTempLine(Canvas canvas) {
         mLinePaint.setStrokeWidth(mTempLineHeight);
 
@@ -749,16 +736,12 @@ public class MasterControl extends View {
             mDebugTextPaint.setTextSize(mArrowTextSize);
             mDebugTextPaint.getTextBounds(temp, 0, temp.length(), bounds);
             if(isCelsiusTunerAvailableStatus()) {
-                canvas.drawText(temp + "\u00B0F ("+fahrenheitToCelsius((Double.valueOf(temp)))+"\u00B0C )", getPXForTemp(i) - mSetBack, getTempLineYLocation() + (float) mEnergySavingsSpacing, mDebugTextPaint);
+                canvas.drawText(temp + "\u00B0F ("+fahrenheitToCelsius((Double.parseDouble(temp)))+"\u00B0C )", getPXForTemp(i) - mSetBack, getTempLineYLocation() + (float) mEnergySavingsSpacing, mDebugTextPaint);
             } else {
                 canvas.drawText(temp+ " \u00B0F" , getPXForTemp(i) - mSetBack, getTempLineYLocation() + (float) mEnergySavingsSpacing, mDebugTextPaint);
 
             }
         }
-    }
-
-    private static float roundToHalf(float d) {
-        return Math.round(d * 2) / 2.0f;
     }
 
     public MasterControl(Context context, AttributeSet attrs) {

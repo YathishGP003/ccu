@@ -147,7 +147,7 @@ class AdvancedAhuAlgoHandler (val equip: SystemEquip) {
             AdvancedAhuRelayAssociationType.HUMIDIFIER -> {
                 if (systemOccupied && systemEquip.conditioningMode.readPriorityVal() > 0) {
                     getHumidifierRelayState(associatedPoint, systemEquip.averageHumidity.readHisVal(),
-                        systemEquip.systemtargetMinInsideHumidity.readHisVal(), systemEquip.vavHumidityHysteresis.readHisVal())
+                        systemEquip.systemtargetMinInsideHumidity.readPriorityVal(), systemEquip.vavHumidityHysteresis.readHisVal())
                 } else {
                     false
                 }
@@ -156,7 +156,7 @@ class AdvancedAhuAlgoHandler (val equip: SystemEquip) {
             AdvancedAhuRelayAssociationType.DEHUMIDIFIER ->
                 if (systemOccupied && systemEquip.conditioningMode.readPriorityVal() > 0) {
                     getDehumidifierRelayState(associatedPoint, systemEquip.averageHumidity.readHisVal(),
-                        systemEquip.systemtargetMaxInsideHumidity.readHisVal(), systemEquip.vavHumidityHysteresis.readHisVal())
+                        systemEquip.systemtargetMaxInsideHumidity.readPriorityVal(), systemEquip.vavHumidityHysteresis.readHisVal())
                 } else {
                     false
                 }

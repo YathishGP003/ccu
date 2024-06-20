@@ -1,14 +1,35 @@
 package a75f.io.messaging
 
-import a75f.io.data.message.*
-import a75f.io.logic.bo.building.dab.createReheatMinDamper
+import a75f.io.data.message.MESSAGE_ATTRIBUTE_AUTO_CX_STATE
+import a75f.io.data.message.MESSAGE_ATTRIBUTE_AUTO_CX_STOP_TIME
+import a75f.io.data.message.MESSAGE_ATTRIBUTE_COMMAND
+import a75f.io.data.message.MESSAGE_ATTRIBUTE_ID
+import a75f.io.data.message.MESSAGE_ATTRIBUTE_IDS
+import a75f.io.data.message.MESSAGE_ATTRIBUTE_LEVEL
+import a75f.io.data.message.MESSAGE_ATTRIBUTE_LOG_LEVEL
+import a75f.io.data.message.MESSAGE_ATTRIBUTE_MESSAGE_ID
+import a75f.io.data.message.MESSAGE_ATTRIBUTE_REMOTE_CMD_TYPE
+import a75f.io.data.message.MESSAGE_ATTRIBUTE_SITE_ID
+import a75f.io.data.message.MESSAGE_ATTRIBUTE_VERSION
+import a75f.io.data.message.MESSAGE_ATTRIBUTE_WHO
+import a75f.io.data.message.Message
 import a75f.io.messaging.exceptions.InvalidMessageFormatException
-import a75f.io.messaging.handler.*
+import a75f.io.messaging.handler.AutoCommissioningStateHandler
+import a75f.io.messaging.handler.CREATE_CUSTOM_ALERT_DEF_CMD
+import a75f.io.messaging.handler.DELETE_CUSTOM_ALERT_DEF_CMD
+import a75f.io.messaging.handler.DELETE_SITE_DEFS_CMD
+import a75f.io.messaging.handler.KEY_ALERT_DEF_IDS
+import a75f.io.messaging.handler.KEY_ALERT_IDS
+import a75f.io.messaging.handler.REMOVE_ALERT_CMD
+import a75f.io.messaging.handler.RemoteCommandUpdateHandler
+import a75f.io.messaging.handler.RemoveEntityHandler
+import a75f.io.messaging.handler.SchedulerRevampMigrationHandler
+import a75f.io.messaging.handler.SiteSyncHandler
+import a75f.io.messaging.handler.UPDATE_CUSTOM_ALERT_DEF_CMD
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonObject
 import com.google.gson.reflect.TypeToken
-import kotlinx.coroutines.flow.SharingCommand
 
 fun messageToJson(message : Message) : JsonObject {
     val gson: Gson = GsonBuilder().create()
@@ -26,7 +47,7 @@ fun jsonToMessage(msgJson : JsonObject) : Message {
         throw InvalidMessageFormatException("Invalid message")
     }
 
-    var messagePojo = Message(messageId)
+    val messagePojo = Message(messageId)
     messagePojo.command = messageContent.asJsonObject.get(MESSAGE_ATTRIBUTE_COMMAND)?.asString
 
 

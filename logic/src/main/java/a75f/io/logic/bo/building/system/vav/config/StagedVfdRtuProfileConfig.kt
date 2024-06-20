@@ -63,14 +63,7 @@ open class StagedVfdRtuProfileConfig(modelDef : SeventyFiveFProfileDirective)
         analogOut2HeatStage4 = getDefaultValConfig(DomainName.analog2HeatStage4, model)
         analogOut2HeatStage5 = getDefaultValConfig(DomainName.analog2HeatStage5, model)
         analogOut2Default = getDefaultValConfig(DomainName.analog2Default, model)
-        try {
-            unusedPorts = ControlMote.getCMUnusedPorts(Domain.hayStack)
-        } catch (e : NullPointerException) {
-            unusedPorts = hashMapOf()
-            CcuLog.e(Domain.LOG_TAG,"Failed to fetch CM Unused ports")
-            e.printStackTrace()
-        }
-
+        unusedPorts = ControlMote.getCMUnusedPorts(Domain.hayStack)
         isDefault = true
         return this
     }

@@ -274,7 +274,7 @@ public class DesiredTempDisplayMode {
                 fourPipeFanCoilUnitConfiguration.getWaterValueConfigurations())) {
             heating = true;
         }
-        return getTemperatureMode(heating, cooling);
+        return getTemperatureForStandaloneBasedOnConditioningMode(getTemperatureMode(heating, cooling), mEquip);
     }
 
     private static TemperatureMode getTemperatureModeForSSCPU(Equip mEquip) {
@@ -291,7 +291,7 @@ public class DesiredTempDisplayMode {
                 conventionalUnitConfiguration.getRelayConfiguration())) {
             heating = true;
         }
-        return getTemperatureMode(heating, cooling);
+        return getTemperatureForStandaloneBasedOnConditioningMode(getTemperatureMode(heating, cooling), mEquip);
     }
 
     private static TemperatureMode getTemperatureModeForHSCPU(Equip mEquip) {
@@ -310,7 +310,23 @@ public class DesiredTempDisplayMode {
                 HyperStatAssociationUtil.Companion.isAnyAnalogOutEnabledAssociatedToHeating(analogConfigurations)) {
             heating = true;
         }
-       return getTemperatureMode(heating, cooling);
+       return getTemperatureForStandaloneBasedOnConditioningMode(getTemperatureMode(heating, cooling), mEquip);
+    }
+
+    private static TemperatureMode getTemperatureForStandaloneBasedOnConditioningMode(TemperatureMode temperatureMode,Equip equip) {
+
+        HashMap<Object, Object> conditioningModeEntity = CCUHsApi.getInstance().readEntity(
+                "conditioning and mode and equipRef == \""+equip.getId() +"\"");
+        StandaloneConditioningMode conditioningMode = StandaloneConditioningMode.values()[(int)
+                (CCUHsApi.getInstance().readPointPriorityVal(conditioningModeEntity.get("id").toString()))];
+        if ((conditioningMode == AUTO || conditioningMode == OFF) ){
+            return DUAL;
+        } else if (conditioningMode == HEAT_ONLY || temperatureMode == HEATING) {
+            return HEATING;
+        } else if (conditioningMode == COOL_ONLY || temperatureMode == COOLING) {
+            return COOLING;
+        }
+        return DUAL;
     }
 
     private static TemperatureMode getTemperatureModeForHSSplitCPUEcon(Equip mEquip) {
@@ -329,7 +345,7 @@ public class DesiredTempDisplayMode {
                 HyperStatSplitAssociationUtil.Companion.isAnyAnalogOutEnabledAssociatedToHeating(analogConfigurations)) {
             heating = true;
         }
-        return getTemperatureMode(heating, cooling);
+        return getTemperatureForStandaloneBasedOnConditioningMode(getTemperatureMode(heating, cooling), mEquip);
     }
 
     public static void setSystemModeForVav(CCUHsApi ccuHsApi) {

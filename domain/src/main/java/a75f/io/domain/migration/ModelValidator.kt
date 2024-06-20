@@ -78,6 +78,7 @@ class ModelValidator {
                 MODEL_HN_VAV_PARALLEL_FAN,
                 MODEL_SN_VAV_ACB,
                 MODEL_HN_VAV_ACB,
+                MODEL_SN_BYPASS_DAMPER,
                 MODEL_SMART_NODE_DEVICE,
                 MODEL_HELIO_NODE_DEVICE,
                 MODEL_EXTERNAL_AHU_DAB,

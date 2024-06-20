@@ -3,13 +3,11 @@ package a75f.io.logic.bo.building.system.vav;
 import java.util.HashMap;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
-import a75f.io.domain.api.Domain;
-import a75f.io.domain.equips.VavModulatingRtuSystemEquip;
-import a75f.io.domain.equips.VavStagedVfdSystemEquip;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Stage;
+import a75f.io.logic.bo.building.system.SystemProfile;
 import a75f.io.logic.bo.util.TemperatureMode;
 
 public class VavSystemProfileRelayAssociationUtil {
@@ -22,27 +20,36 @@ public class VavSystemProfileRelayAssociationUtil {
             profileType = ProfileType.valueOf(equip.getProfile());
         }
 
+        SystemProfile profileInstance = L.ccu().systemProfile;
+        if (profileInstance == null) {
+            return false;
+        }
+        VavSystemProfile systemProfile = getSystemProfileInstance(profileInstance);
+
         switch (profileType) {
             case SYSTEM_VAV_STAGED_RTU:
-                VavStagedRtu vavStagedRtu = new VavStagedRtu();
-                vavStagedRtu.addSystemEquip();
-                return modeType == TemperatureMode.COOLING ?
-                        vavStagedRtu.isCoolingAvailable() : vavStagedRtu.isHeatingAvailable();
             case SYSTEM_VAV_STAGED_VFD_RTU:
-                VavStagedRtuWithVfd vavStagedRtuWithVfd = new VavStagedRtuWithVfd();
-                vavStagedRtuWithVfd.systemEquip = (VavStagedVfdSystemEquip) Domain.systemEquip;
-                return modeType == TemperatureMode.COOLING ?
-                        vavStagedRtuWithVfd.isCoolingAvailable() : vavStagedRtuWithVfd.isHeatingAvailable();
             case SYSTEM_VAV_ANALOG_RTU:
-                VavFullyModulatingRtu vavFullyModulatingRtu = new VavFullyModulatingRtu();
-                vavFullyModulatingRtu.systemEquip = (VavModulatingRtuSystemEquip) Domain.systemEquip;
                 return modeType == TemperatureMode.COOLING ?
-                        vavFullyModulatingRtu.isCoolingAvailable() : vavFullyModulatingRtu.isHeatingAvailable();
+                        systemProfile.isCoolingAvailable() : systemProfile.isHeatingAvailable();
             case SYSTEM_VAV_HYBRID_RTU:
-                VavAdvancedHybridRtu vavAdvancedHybridRtu = new VavAdvancedHybridRtu();
-                return getAnyVavStagedRtuRelayAssociation(vavAdvancedHybridRtu, true, modeType);
+                return getAnyVavStagedRtuRelayAssociation((VavStagedRtu) systemProfile, true, modeType);
         }
         return false;
+    }
+
+    private static VavSystemProfile getSystemProfileInstance(SystemProfile systemProfile) {
+
+        if (systemProfile instanceof  VavStagedRtu) {
+            return (VavStagedRtu)systemProfile;
+        } else if (systemProfile instanceof VavStagedRtuWithVfd) {
+            return (VavStagedRtuWithVfd)systemProfile;
+        } else if (systemProfile instanceof VavFullyModulatingRtu) {
+            return  (VavFullyModulatingRtu)systemProfile;
+        } else if (systemProfile instanceof VavAdvancedHybridRtu) {
+            return  (VavAdvancedHybridRtu)systemProfile;
+        }
+        return (VavSystemProfile) systemProfile;
     }
 
     private static boolean getAnyVavStagedRtuRelayAssociation(VavStagedRtu vavStagedRtu, Boolean isVavHybridRtu, TemperatureMode modeType){

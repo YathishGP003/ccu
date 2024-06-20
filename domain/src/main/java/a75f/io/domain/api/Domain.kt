@@ -116,6 +116,19 @@ object Domain {
         return null
     }
 
+    fun getBypassEquipByDomainName(domainName: String): Equip? {
+        DomainManager.buildDomain(CCUHsApi.getInstance())
+        site?.ccus?.entries?.forEach {
+            it.value.bypassEquips.forEach { (_,equip)->
+                if (equip.domainName == domainName){
+                    return equip
+                }
+            }
+        }
+        return null
+    }
+
+
 
     fun getPointByDomain(equip: Equip, domainName: String): Double {
         val point = equip.points.entries.find { it.key.contentEquals(domainName) }?.value

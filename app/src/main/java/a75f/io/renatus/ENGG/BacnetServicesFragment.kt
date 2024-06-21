@@ -56,7 +56,7 @@ class BacnetServicesFragment : Fragment() {
 
         }
         val aa: ArrayAdapter<*> = ArrayAdapter<Any?>(
-            requireContext(), R.layout.spinner_item_type_1, propertyArray
+            requireContext(), R.layout.spinner_item_type_2, propertyArray
         )
         aa.setDropDownViewResource(R.layout.spinner_item_type_2)
         spin.adapter = aa

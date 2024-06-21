@@ -18,22 +18,23 @@
 
             <RelativeLayout
                 android:id="@+id/layoutHeader"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="32dp">
+                android:layout_marginLeft="8dp"
+                android:layout_marginTop="20dp">
 
 
                 <TextView
                     android:id="@+id/textTitleFragment"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_centerHorizontal="true"
+                    android:gravity="center_vertical|left"
                     android:layout_centerVertical="true"
                     android:fontFamily="@font/lato_bold"
                     android:text="@string/title_oao"
                     android:textAllCaps="true"
-                    android:textColor="?orange_75f"
-                    android:textSize="33.5dp"
+                    android:textColor="@color/black"
+                    android:textSize="24sp"
                     android:textStyle="bold" />
 
             </RelativeLayout>
@@ -41,25 +42,26 @@
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="72dp"
-                android:layout_marginRight="72dp"
-                android:orientation="horizontal"
-                android:layout_marginTop="20dp"
                 android:layout_gravity="center_horizontal"
-                android:paddingTop="20dp" >
+                android:layout_marginTop="20dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="15dp"
+                android:orientation="horizontal"
+                android:paddingTop="20dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:weightSum="2"
-                    android:orientation="horizontal">
+                    android:orientation="horizontal"
+                    android:weightSum="2">
 
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_marginRight="35dp"
                         android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:layout_marginRight="42dp">
+                        android:paddingLeft="3dp"
+                        android:orientation="vertical">
 
                         <RelativeLayout
                             android:layout_width="match_parent"
@@ -71,22 +73,23 @@
                                 android:id="@+id/textOADamperAtMin"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_centerInParent="true"
-                                android:text="@string/label_oadamper_at_min"
                                 android:layout_alignParentStart="true"
-                                android:layout_toStartOf="@+id/oaDamperAtMin"
+                                android:layout_centerInParent="true"
                                 android:layout_marginEnd="5dp"
+                                android:layout_toStartOf="@+id/oaDamperAtMin"
+                                android:textSize="22sp"
+                                android:text="@string/label_oadamper_at_min"
                                 android:textAppearance="@style/title_normal" />
 
                             <Spinner
                                 android:id="@+id/oaDamperAtMin"
-                                android:layout_width="wrap_content"
+                                style="@style/customSpinnerForNumber"
+                                android:layout_width="110dp"
                                 android:layout_alignParentRight="true"
                                 android:layout_centerHorizontal="true"
                                 android:layout_gravity="center"
                                 android:gravity="center"
-                                style="@style/customSpinnerForNumber"
-                                tools:listitem="@layout/spinner_dropdown_item"/>
+                                tools:listitem="@layout/spinner_dropdown_item" />
 
 
                         </RelativeLayout>
@@ -94,29 +97,30 @@
                         <RelativeLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="30dp"
                             android:layout_gravity="center"
+                            android:layout_marginTop="30dp"
                             android:gravity="center">
 
                             <TextView
                                 android:id="@+id/textRetDamperMin"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_centerInParent="true"
                                 android:layout_alignParentStart="true"
-                                android:layout_toStartOf="@+id/returnDamperAtMin"
+                                android:layout_centerInParent="true"
                                 android:layout_marginEnd="5dp"
+                                android:textSize="22sp"
+                                android:layout_toStartOf="@+id/returnDamperAtMin"
                                 android:text="@string/label_return_damper_at_min"
                                 android:textAppearance="@style/title_normal" />
 
                             <Spinner
                                 android:id="@+id/returnDamperAtMin"
-                                android:layout_width="wrap_content"
+                                style="@style/customSpinnerForNumber"
+                                android:layout_width="110dp"
                                 android:layout_alignParentRight="true"
                                 android:layout_gravity="center"
                                 android:gravity="center"
-                                style="@style/customSpinnerForNumber"
-                                tools:listitem="@layout/spinner_dropdown_item"/>
+                                tools:listitem="@layout/spinner_dropdown_item" />
 
 
                         </RelativeLayout>
@@ -130,21 +134,21 @@
                                 android:id="@+id/textOAMinOpenDuringRecirc"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_centerInParent="true"
                                 android:layout_alignParentStart="true"
-                                android:text="@string/label_oadamper_min_open_during_recirc"
-                                android:layout_toStartOf="@+id/oaDamperMinOpenDuringRecirc"
+                                android:layout_centerInParent="true"
                                 android:layout_marginEnd="5dp"
+                                android:textSize="22sp"
+                                android:layout_toStartOf="@+id/oaDamperMinOpenDuringRecirc"
+                                android:text="@string/label_oadamper_min_open_during_recirc"
                                 android:textAppearance="@style/title_normal" />
 
                             <Spinner
                                 android:id="@+id/oaDamperMinOpenDuringRecirc"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
+                                style="@style/customSpinnerForNumber"
+                                android:layout_width="110dp"
                                 android:layout_alignParentRight="true"
                                 android:layout_gravity="center_vertical"
-                                style="@style/Widget.AppCompat.Spinner.Underlined"
-                                tools:listitem="@layout/spinner_dropdown_item"/>
+                                tools:listitem="@layout/spinner_dropdown_item" />
 
 
                         </RelativeLayout>
@@ -158,21 +162,21 @@
                                 android:id="@+id/textOAMinOpenDuringFanLow"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_centerInParent="true"
                                 android:layout_alignParentStart="true"
-                                android:text="@string/label_oadamper_min_open_during_fan_low"
-                                android:layout_toStartOf="@+id/oaDamperMinOpenDuringFanLow"
+                                android:layout_centerInParent="true"
                                 android:layout_marginEnd="5dp"
+                                android:textSize="22sp"
+                                android:layout_toStartOf="@+id/oaDamperMinOpenDuringFanLow"
+                                android:text="@string/label_oadamper_min_open_during_fan_low"
                                 android:textAppearance="@style/title_normal" />
 
                             <Spinner
                                 android:id="@+id/oaDamperMinOpenDuringFanLow"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
+                                style="@style/customSpinnerForNumber"
+                                android:layout_width="110dp"
                                 android:layout_alignParentRight="true"
                                 android:layout_gravity="center_vertical"
-                                style="@style/Widget.AppCompat.Spinner.Underlined"
-                                tools:listitem="@layout/spinner_dropdown_item"/>
+                                tools:listitem="@layout/spinner_dropdown_item" />
 
 
                         </RelativeLayout>
@@ -186,20 +190,21 @@
                                 android:id="@+id/textOAMinOpenDuringFanHigh"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_centerInParent="true"
                                 android:layout_alignParentStart="true"
-                                android:text="@string/label_oadamper_min_open_during_fan_high"
-                                android:layout_toStartOf="@+id/oaDamperMinOpenDuringFanHigh"
+                                android:layout_centerInParent="true"
                                 android:layout_marginEnd="5dp"
+                                android:textSize="22sp"
+                                android:layout_toStartOf="@+id/oaDamperMinOpenDuringFanHigh"
+                                android:text="@string/label_oadamper_min_open_during_fan_high"
                                 android:textAppearance="@style/title_normal" />
 
                             <Spinner
                                 android:id="@+id/oaDamperMinOpenDuringFanHigh"
-                                android:layout_width="wrap_content"
+                                style="@style/customSpinnerForNumber"
+                                android:layout_width="110dp"
                                 android:layout_alignParentRight="true"
                                 android:layout_gravity="center_vertical"
-                                style="@style/customSpinnerForNumber"
-                                tools:listitem="@layout/spinner_dropdown_item"/>
+                                tools:listitem="@layout/spinner_dropdown_item" />
 
 
                         </RelativeLayout>
@@ -213,19 +218,21 @@
                                 android:id="@+id/textExFanStage1"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_centerInParent="true"
                                 android:layout_alignParentStart="true"
+                                android:layout_centerInParent="true"
+                                android:layout_marginEnd="5dp"
+                                android:textSize="22sp"
+                                android:layout_toStartOf="@+id/exFanStage1Threshold"
                                 android:text="@string/label_exfan_stage1_threshold"
-                                android:layout_alignParentLeft="true"
                                 android:textAppearance="@style/title_normal" />
 
                             <Spinner
                                 android:id="@+id/exFanStage1Threshold"
-                                android:layout_width="wrap_content"
+                                style="@style/customSpinnerForNumber"
+                                android:layout_width="110dp"
                                 android:layout_alignParentRight="true"
                                 android:layout_gravity="center_vertical"
-                                style="@style/customSpinnerForNumber"
-                                tools:listitem="@layout/spinner_dropdown_item"/>
+                                tools:listitem="@layout/spinner_dropdown_item" />
 
 
                         </RelativeLayout>
@@ -241,18 +248,19 @@
                                 android:layout_height="wrap_content"
                                 android:layout_alignParentStart="true"
                                 android:layout_centerInParent="true"
-                                android:text="@string/label_current_transformer_type"
-                                android:layout_toStartOf="@+id/currentTransformerType"
                                 android:layout_marginEnd="5dp"
+                                android:textSize="22sp"
+                                android:layout_toStartOf="@+id/currentTransformerType"
+                                android:text="@string/label_current_transformer_type"
                                 android:textAppearance="@style/title_normal" />
 
                             <Spinner
                                 android:id="@+id/currentTransformerType"
-                                android:layout_width="wrap_content"
+                                style="@style/customSpinnerForNumber"
+                                android:layout_width="110dp"
                                 android:layout_alignParentRight="true"
                                 android:layout_gravity="center_vertical"
-                                style="@style/customSpinnerForNumber"
-                                tools:listitem="@layout/spinner_dropdown_item"/>
+                                tools:listitem="@layout/spinner_dropdown_item" />
 
 
                         </RelativeLayout>
@@ -266,23 +274,25 @@
                                 android:id="@+id/textExFanHyst"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_centerInParent="true"
                                 android:layout_alignParentStart="true"
-                                android:text="@string/label_exfan_hysteresis"
-                                android:layout_toStartOf="@+id/exFanHysteresis"
+                                android:layout_centerInParent="true"
                                 android:layout_marginEnd="5dp"
+                                android:textSize="22sp"
+                                android:layout_toStartOf="@+id/exFanHysteresis"
+                                android:text="@string/label_exfan_hysteresis"
                                 android:textAppearance="@style/title_normal" />
 
                             <Spinner
                                 android:id="@+id/exFanHysteresis"
-                                android:layout_width="wrap_content"
+                                style="@style/customSpinnerForNumber"
+                                android:layout_width="110dp"
                                 android:layout_alignParentEnd="true"
                                 android:layout_gravity="center_vertical"
-                                style="@style/customSpinnerForNumber"
-                                tools:listitem="@layout/spinner_dropdown_item"/>
+                                tools:listitem="@layout/spinner_dropdown_item" />
 
 
                         </RelativeLayout>
+
                         <RelativeLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -292,20 +302,21 @@
                                 android:id="@+id/textSmartPurgeOutsideDamperMinOpen"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_centerInParent="true"
                                 android:layout_alignParentStart="true"
-                                android:text="@string/label_smartpurge_outside_damper_min"
-                                android:layout_toStartOf="@+id/smartPurgeOutsideDamperMinOpen"
+                                android:layout_centerInParent="true"
                                 android:layout_marginEnd="5dp"
+                                android:textSize="22sp"
+                                android:layout_toStartOf="@+id/smartPurgeOutsideDamperMinOpen"
+                                android:text="@string/label_smartpurge_outside_damper_min"
                                 android:textAppearance="@style/title_normal" />
 
                             <Spinner
                                 android:id="@+id/smartPurgeOutsideDamperMinOpen"
-                                android:layout_width="wrap_content"
+                                style="@style/customSpinnerForNumber"
+                                android:layout_width="110dp"
                                 android:layout_alignParentEnd="true"
                                 android:layout_gravity="center_vertical"
-                                style="@style/customSpinnerForNumber"
-                                tools:listitem="@layout/spinner_dropdown_item"/>
+                                tools:listitem="@layout/spinner_dropdown_item" />
 
 
                         </RelativeLayout>
@@ -315,9 +326,9 @@
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_marginLeft="35dp"
                         android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:layout_marginLeft="42dp">
+                        android:orientation="vertical">
 
                         <RelativeLayout
                             android:layout_width="match_parent"
@@ -327,20 +338,21 @@
                                 android:id="@+id/textOADamperAtMax"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_centerInParent="true"
                                 android:layout_alignParentStart="true"
-                                android:text="@string/label_oadamper_at_max"
-                                android:layout_toStartOf="@+id/oaDamperAtMax"
+                                android:layout_centerInParent="true"
                                 android:layout_marginEnd="5dp"
+                                android:textSize="22sp"
+                                android:layout_toStartOf="@+id/oaDamperAtMax"
+                                android:text="@string/label_oadamper_at_max"
                                 android:textAppearance="@style/title_normal" />
 
                             <Spinner
                                 android:id="@+id/oaDamperAtMax"
-                                android:layout_width="wrap_content"
+                                style="@style/customSpinnerForNumber"
+                                android:layout_width="110dp"
                                 android:layout_alignParentRight="true"
                                 android:layout_gravity="center_vertical"
-                                style="@style/customSpinnerForNumber"
-                                tools:listitem="@layout/spinner_dropdown_item"/>
+                                tools:listitem="@layout/spinner_dropdown_item" />
 
 
                         </RelativeLayout>
@@ -354,20 +366,21 @@
                                 android:id="@+id/textRetDamperMax"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_centerInParent="true"
                                 android:layout_alignParentStart="true"
-                                android:text="@string/label_return_damper_at_max"
-                                android:layout_toStartOf="@+id/returnDamperAtMax"
+                                android:layout_centerInParent="true"
                                 android:layout_marginEnd="5dp"
+                                android:textSize="22sp"
+                                android:layout_toStartOf="@+id/returnDamperAtMax"
+                                android:text="@string/label_return_damper_at_max"
                                 android:textAppearance="@style/title_normal" />
 
                             <Spinner
                                 android:id="@+id/returnDamperAtMax"
-                                android:layout_width="wrap_content"
+                                style="@style/customSpinnerForNumber"
+                                android:layout_width="110dp"
                                 android:layout_alignParentRight="true"
                                 android:layout_gravity="center_vertical"
-                                style="@style/customSpinnerForNumber"
-                                tools:listitem="@layout/spinner_dropdown_item"/>
+                                tools:listitem="@layout/spinner_dropdown_item" />
 
 
                         </RelativeLayout>
@@ -381,21 +394,21 @@
                                 android:id="@+id/textOAMinOpenDuringConditioning"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_centerInParent="true"
                                 android:layout_alignParentStart="true"
-                                android:text="@string/label_oadamper_min_open_during_conditioning"
-                                android:layout_toStartOf="@+id/oaDamperMinOpenDuringConditioning"
+                                android:layout_centerInParent="true"
                                 android:layout_marginEnd="5dp"
+                                android:textSize="22sp"
+                                android:layout_toStartOf="@+id/oaDamperMinOpenDuringConditioning"
+                                android:text="@string/label_oadamper_min_open_during_conditioning"
                                 android:textAppearance="@style/title_normal" />
 
                             <Spinner
                                 android:id="@+id/oaDamperMinOpenDuringConditioning"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
+                                style="@style/customSpinnerForNumber"
+                                android:layout_width="110dp"
                                 android:layout_alignParentRight="true"
                                 android:layout_gravity="center_vertical"
-                                style="@style/Widget.AppCompat.Spinner.Underlined"
-                                tools:listitem="@layout/spinner_dropdown_item"/>
+                                tools:listitem="@layout/spinner_dropdown_item" />
 
 
                         </RelativeLayout>
@@ -409,21 +422,21 @@
                                 android:id="@+id/textOAMinOpenDuringFanMedium"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_centerInParent="true"
                                 android:layout_alignParentStart="true"
-                                android:text="@string/label_oadamper_min_open_during_fan_medium"
-                                android:layout_toStartOf="@+id/oaDamperMinOpenDuringFanMedium"
+                                android:layout_centerInParent="true"
                                 android:layout_marginEnd="5dp"
+                                android:textSize="22sp"
+                                android:layout_toStartOf="@+id/oaDamperMinOpenDuringFanMedium"
+                                android:text="@string/label_oadamper_min_open_during_fan_medium"
                                 android:textAppearance="@style/title_normal" />
 
                             <Spinner
                                 android:id="@+id/oaDamperMinOpenDuringFanMedium"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
+                                style="@style/customSpinnerForNumber"
+                                android:layout_width="110dp"
                                 android:layout_alignParentRight="true"
                                 android:layout_gravity="center_vertical"
-                                style="@style/Widget.AppCompat.Spinner.Underlined"
-                                tools:listitem="@layout/spinner_dropdown_item"/>
+                                tools:listitem="@layout/spinner_dropdown_item" />
 
 
                         </RelativeLayout>
@@ -437,20 +450,21 @@
                                 android:id="@+id/textReturnMinOpen"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_centerInParent="true"
                                 android:layout_alignParentStart="true"
-                                android:text="@string/label_return_damper_min_open"
-                                android:layout_toStartOf="@+id/returnDamperMinOpen"
+                                android:layout_centerInParent="true"
                                 android:layout_marginEnd="5dp"
+                                android:textSize="22sp"
+                                android:layout_toStartOf="@+id/returnDamperMinOpen"
+                                android:text="@string/label_return_damper_min_open"
                                 android:textAppearance="@style/title_normal" />
 
                             <Spinner
                                 android:id="@+id/returnDamperMinOpen"
-                                android:layout_width="wrap_content"
+                                style="@style/customSpinnerForNumber"
+                                android:layout_width="110dp"
                                 android:layout_alignParentRight="true"
                                 android:layout_gravity="center_vertical"
-                                style="@style/customSpinnerForNumber"
-                                tools:listitem="@layout/spinner_dropdown_item"/>
+                                tools:listitem="@layout/spinner_dropdown_item" />
 
 
                         </RelativeLayout>
@@ -458,7 +472,7 @@
                         <RelativeLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="30dp">
+                            android:layout_marginTop="45dp">
 
                             <TextView
                                 android:id="@+id/textExFanStage2"
@@ -466,13 +480,16 @@
                                 android:layout_height="wrap_content"
                                 android:layout_alignParentStart="true"
                                 android:layout_centerInParent="true"
+                                android:layout_marginEnd="5dp"
+                                android:textSize="22sp"
+                                android:layout_toStartOf="@+id/exFanStage2Threshold"
                                 android:text="@string/label_exfan_stage2_threshold"
                                 android:textAppearance="@style/title_normal" />
 
                             <Spinner
                                 android:id="@+id/exFanStage2Threshold"
                                 style="@style/customSpinnerForNumber"
-                                android:layout_width="wrap_content"
+                                android:layout_width="110dp"
                                 android:layout_alignParentRight="true"
                                 android:layout_gravity="center_vertical"
                                 tools:listitem="@layout/spinner_dropdown_item" />
@@ -492,6 +509,7 @@
                                 android:layout_alignParentStart="true"
                                 android:layout_centerInParent="true"
                                 android:layout_marginEnd="5dp"
+                                android:textSize="22sp"
                                 android:layout_toStartOf="@+id/co2Threshold"
                                 android:text="@string/label_co2threshold"
                                 android:textAppearance="@style/title_normal" />
@@ -499,28 +517,30 @@
 
                             <Spinner
                                 android:id="@+id/co2Threshold"
-                                android:layout_width="wrap_content"
+                                style="@style/customSpinnerForNumber"
+                                android:layout_width="110dp"
                                 android:layout_alignParentRight="true"
                                 android:layout_gravity="center_vertical"
-                                style="@style/customSpinnerForNumber"
-                                tools:listitem="@layout/spinner_dropdown_item"/>
+                                tools:listitem="@layout/spinner_dropdown_item" />
 
                         </RelativeLayout>
 
                         <RelativeLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="30dp">
+                            android:layout_marginTop="30dp"
+                            android:paddingTop="5dp">
 
                             <TextView
                                 android:id="@+id/textRoomCo2Sensing"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_centerInParent="true"
                                 android:layout_alignParentStart="true"
-                                android:text="@string/label_use_room_co2_sensing"
-                                android:layout_toStartOf="@+id/roomCO2Sensing"
+                                android:layout_centerInParent="true"
                                 android:layout_marginEnd="5dp"
+                                android:textSize="22sp"
+                                android:layout_toStartOf="@+id/roomCO2Sensing"
+                                android:text="@string/label_use_room_co2_sensing"
                                 android:textAppearance="@style/title_normal" />
 
 
@@ -528,15 +548,17 @@
                                 android:id="@+id/roomCO2Sensing"
                                 android:layout_width="46.12dp"
                                 android:layout_height="27.42dp"
+                                android:layout_marginTop="6dp"
+                                android:layout_marginBottom="5dp"
                                 android:layout_alignParentRight="true"
                                 android:layout_centerVertical="true"
-                                android:layout_marginTop="35dp"
                                 android:background="@drawable/toggle_selector"
                                 android:checked="false"
                                 android:textOff=""
                                 android:textOn="" />
 
                         </RelativeLayout>
+
                         <RelativeLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -546,20 +568,21 @@
                                 android:id="@+id/textEnhancedVentiDamperMinOpen"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_centerInParent="true"
                                 android:layout_alignParentStart="true"
-                                android:text="@string/label_enhanced_ventilation_outside_damper_min"
-                                android:layout_toStartOf="@+id/enhancedVentiOutsideDamperMinOpen"
+                                android:layout_centerInParent="true"
                                 android:layout_marginEnd="5dp"
+                                android:textSize="22sp"
+                                android:layout_toStartOf="@+id/enhancedVentiOutsideDamperMinOpen"
+                                android:text="@string/label_enhanced_ventilation_outside_damper_min"
                                 android:textAppearance="@style/title_normal" />
 
                             <Spinner
                                 android:id="@+id/enhancedVentiOutsideDamperMinOpen"
-                                android:layout_width="wrap_content"
+                                style="@style/customSpinnerForNumber"
+                                android:layout_width="110dp"
                                 android:layout_alignParentRight="true"
                                 android:layout_gravity="center_vertical"
-                                style="@style/customSpinnerForNumber"
-                                tools:listitem="@layout/spinner_dropdown_item"/>
+                                tools:listitem="@layout/spinner_dropdown_item" />
 
                         </RelativeLayout>
 
@@ -573,6 +596,7 @@
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
                 android:layout_marginTop="30dp">
 
                 <Button
@@ -586,7 +610,7 @@
                     android:text="@string/button_unpair"
                     android:textAllCaps="true"
                     android:textColor="?orange_75f"
-                    android:textSize="19.5dp" />
+                    android:textSize="22sp" />
 
                 <Button
                     android:id="@+id/setBtn"
@@ -599,7 +623,7 @@
                     android:text="@string/button_set"
                     android:textAllCaps="true"
                     android:textColor="?orange_75f"
-                    android:textSize="19.5dp" />
+                    android:textSize="22sp" />
             </RelativeLayout>
 
         </LinearLayout>

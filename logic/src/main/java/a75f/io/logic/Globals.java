@@ -648,10 +648,10 @@ public class Globals {
     }
 
     private void updatingDomainEquip(CCUHsApi ccuHsApi) {
-        if (Domain.systemEquip == null) {
+        if (Domain.systemEquip == null || Domain.systemEquip.getEquipRef().equals("null")) {
             DomainManager.INSTANCE.addSystemDomainEquip(ccuHsApi);
         }
-        if (Domain.cmBoardDevice == null) {
+        if (Domain.cmBoardDevice == null || Domain.systemEquip.getEquipRef().equals("null")) {
             DomainManager.INSTANCE.addCmBoardDevice(ccuHsApi);
         }
     }

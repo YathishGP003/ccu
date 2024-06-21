@@ -147,12 +147,22 @@ public class EquipScheduleHandler implements Schedulable {
                 "Cooling desired temp: "+coolingDT + "Heating desired temp: "+heatingDT + "updated occupancy: "+updatedOccupancy
                 +"Setback: "+setback);
         if(updatedOccupancy == Occupancy.DEMAND_RESPONSE_UNOCCUPIED &&
-                AutoForcedOccupied.isZoneInAutoForcedOccupied(occupancyUtil) ||
-                ForcedOccupied.isZoneForcedOccupied(equipRef)){
+                AutoForcedOccupied.isZoneInAutoForcedOccupied(occupancyUtil)){
             double coolingSetBack = DemandResponseMode.getCoolingSetBack(coolingDT - setback +
                      demandResponseSetback, buildingLimitMax);
             double heatingSetBack = DemandResponseMode.getHeatingSetBack(heatingDT + setback -
                      demandResponseSetback, buildingLimitMin);
+            ScheduleUtil.setDesiredTempAtLevel(hayStack, coolingDtId,
+                    HayStackConstants.DEMAND_RESPONSE_LEVEL, coolingSetBack, 0, WhoFiledConstants.SCHEDULER_WHO);
+            ScheduleUtil.setDesiredTempAtLevel(hayStack, heatingDtId, HayStackConstants.DEMAND_RESPONSE_LEVEL,
+                    heatingSetBack, 0, WhoFiledConstants.SCHEDULER_WHO);
+        } else if ((updatedOccupancy == Occupancy.DEMAND_RESPONSE_UNOCCUPIED &&
+                ForcedOccupied.isZoneForcedOccupied(equipRef))) {
+            /*For forced occupied we do not clear Forced occupied levels so add DR setback on top of it*/
+            double coolingSetBack = DemandResponseMode.getCoolingSetBack(coolingDT +
+                    demandResponseSetback, buildingLimitMax);
+            double heatingSetBack = DemandResponseMode.getHeatingSetBack(heatingDT -
+                    demandResponseSetback, buildingLimitMin);
             ScheduleUtil.setDesiredTempAtLevel(hayStack, coolingDtId,
                     HayStackConstants.DEMAND_RESPONSE_LEVEL, coolingSetBack, 0, WhoFiledConstants.SCHEDULER_WHO);
             ScheduleUtil.setDesiredTempAtLevel(hayStack, heatingDtId, HayStackConstants.DEMAND_RESPONSE_LEVEL,

@@ -532,9 +532,19 @@ public class ControlMote
             CCUHsApi.getInstance().writeHisValById(p.getId(), 0.0);
         }
     }
+
+    /*Null pointer exception occurs at the time of cut-over migration, because In Domain CM Device
+     * is not yet loaded*/
     public static HashMap<String, Boolean> getCMUnusedPorts(CCUHsApi ccuHsApi){
         HashMap<Object, Object> systemEquip = ccuHsApi.readEntity("system and equip and not modbus and not connectModule");
-        HashMap<String, String> cmPortsWithSystemEquipDomainName = getSystemEquipPointsDomainNameWithCmPortsDisName();
+        HashMap<String, String> cmPortsWithSystemEquipDomainName;
+        try {
+             cmPortsWithSystemEquipDomainName = getSystemEquipPointsDomainNameWithCmPortsDisName();
+        } catch (NullPointerException e){
+            CcuLog.e(Domain.LOG_TAG,"Failed to fetch CM Unused ports");
+            e.printStackTrace();
+            return new HashMap<>();
+        }
         ArrayList<HashMap<Object, Object>> systemEquipEnablePoints = ccuHsApi.readAllEntities("enable and equipRef == \"" + systemEquip.get("id").toString() + "\"");
         for (HashMap<Object, Object> systemEquipEnablePoint : systemEquipEnablePoints) {
             Object domainName = systemEquipEnablePoint.get(Tags.DOMAIN_NAME);

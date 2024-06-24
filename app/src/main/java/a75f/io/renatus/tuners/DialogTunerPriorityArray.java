@@ -1,15 +1,20 @@
 package a75f.io.renatus.tuners;
 
+import static a75f.io.logic.bo.util.UnitUtils.convertingDeadBandValueFtoC;
+import static a75f.io.logic.bo.util.UnitUtils.convertingRelativeValueFtoC;
+import static a75f.io.logic.bo.util.UnitUtils.doesPointNeedRelativeConversion;
+import static a75f.io.logic.bo.util.UnitUtils.doesPointNeedRelativeDeadBandConversion;
+import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusTuner;
+import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
+import static a75f.io.logic.bo.util.UnitUtils.roundToHalf;
+import static a75f.io.renatus.FragmentDABConfiguration.CARRIER_PROD;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
-import androidx.annotation.Nullable;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import android.text.Html;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,10 +25,12 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.NumberPicker;
-import android.widget.TableRow;
 import android.widget.TextView;
 
-import java.io.Serializable;
+import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -34,7 +41,9 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Zone;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.BuildConfig;
+import a75f.io.logic.L;
 import a75f.io.logic.tuners.SystemTuners;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.R;
@@ -43,20 +52,8 @@ import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.TunerNumberPicker;
 import butterknife.ButterKnife;
 
-import static a75f.io.logic.bo.util.UnitUtils.convertingDeadBandValueFtoC;
-import static a75f.io.logic.bo.util.UnitUtils.convertingRelativeValueFtoC;
-import static a75f.io.logic.bo.util.UnitUtils.doesPointNeedRelativeConversion;
-import static a75f.io.logic.bo.util.UnitUtils.doesPointNeedRelativeDeadBandConversion;
-import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusTuner;
-import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
-import static a75f.io.logic.bo.util.UnitUtils.roundToHalf;
-import static a75f.io.renatus.FragmentDABConfiguration.CARRIER_PROD;
-
 public class DialogTunerPriorityArray extends BaseDialogFragment implements PriorityItemClickListener, TunerUndoClickListener {
     public static final String ID = DialogTunerPriorityArray.class.getSimpleName();
-    public static final String TUNER_ITEM = "tunerItem";
-    public static final String TUNER_GROUP_ITEM = "TunerGroupItem";
-    public static final String TUNER_GROUP_TYPE = "TunerGroupType";
     private static final String EMPTY_STRING = "";
     HashMap tunerItemSelected = null;
     TunerGroupItem tunerGroupSelected = null;
@@ -75,7 +72,6 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
     LinearLayout layoutTitle;
     Prefs prefs;
     double defaultVal;
-    HashMap<Object, Object> useCelsius = CCUHsApi.getInstance().readEntity("displayUnit");
 
 
     private void configureArguments(HashMap tunerItem, String tunerGroupType, TunerGroupItem tunerGroupItem) {
@@ -175,7 +171,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                 }
             }
             Collections.reverse(equips);
-            if (equips.size() > 0) {
+            if (!equips.isEmpty()) {
                 for (HashMap equip : equips) {
                     View columnView = inflater.inflate(R.layout.tuner_priority_column, viewStub, false);
                     ((TextView) columnView.findViewById(R.id.textLabelBuilding)).setText(ccu.get("dis").toString());
@@ -193,7 +189,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                 View columnView = inflater.inflate(R.layout.tuner_priority_column, viewStub, false);
                 ((TextView) columnView.findViewById(R.id.textLabelBuilding)).setText(site.get("dis").toString());
                 ((TextView) columnView.findViewById(R.id.textLabelZone)).setText(ccu.get("dis").toString());
-                ((TextView) columnView.findViewById(R.id.textLabelModule)).setVisibility(View.GONE);
+                columnView.findViewById(R.id.textLabelModule).setVisibility(View.GONE);
                 ((TextView) columnView.findViewById(R.id.textRow8)).setText(getTunerValue(tunerItemSelected.get("id").toString(), "8"));
                 ((TextView) columnView.findViewById(R.id.textRow10)).setText(getTunerValue(tunerItemSelected.get("id").toString(), "10"));
                 ((TextView) columnView.findViewById(R.id.textRow14)).setText(getTunerValue(tunerItemSelected.get("id").toString(), "14"));
@@ -211,7 +207,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                     View columnView = inflater.inflate(R.layout.tuner_priority_column, viewStub, false);
                     ((TextView) columnView.findViewById(R.id.textLabelBuilding)).setText(site.get("dis").toString());
                     ((TextView) columnView.findViewById(R.id.textLabelZone)).setText(ccu.get("dis").toString());
-                    ((TextView) columnView.findViewById(R.id.textLabelModule)).setVisibility(View.GONE);
+                    columnView.findViewById(R.id.textLabelModule).setVisibility(View.GONE);
                     ((TextView) columnView.findViewById(R.id.textRow8)).setText(getTunerValue(tunerItemSelected.get("id").toString(), "8"));
                     ((TextView) columnView.findViewById(R.id.textRow10)).setText(getTunerValue(tunerItemSelected.get("id").toString(), "10"));
                     ((TextView) columnView.findViewById(R.id.textRow14)).setText(getTunerValue(tunerItemSelected.get("id").toString(), "14"));
@@ -222,8 +218,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                 }
                 case "Zone":
 
-                    ArrayList<Equip> equipsList = new ArrayList<>();
-                    equipsList.addAll(HSUtil.getEquips(tunerItemSelected.get("roomRef").toString()));
+                    ArrayList<Equip> equipsList = new ArrayList<>(HSUtil.getEquips(tunerItemSelected.get("roomRef").toString()));
                     ArrayList<HashMap> equipsFinal = new ArrayList<>();
                     for (Equip equip : equipsList) {
                         ArrayList<HashMap> moduleTuners = CCUHsApi.getInstance().readAll("tuner and equipRef == \"" + equip.getId() + "\"");
@@ -267,18 +262,18 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
             }
         }
 
-        ((TableRow) viewStub.findViewById(R.id.header)).getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+        viewStub.findViewById(R.id.header).getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
-                layoutTitle.setMinimumHeight(((TableRow) viewStub.findViewById(R.id.header)).getHeight());
-                ((TableRow) viewStub.findViewById(R.id.header)).getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                layoutTitle.setMinimumHeight(viewStub.findViewById(R.id.header).getHeight());
+                viewStub.findViewById(R.id.header).getViewTreeObserver().removeOnGlobalLayoutListener(this);
             }
         });
     }
 
     public double getClosestNumberOfTarget(ArrayList<String> dataArray, double target) {
 
-        if (dataArray.size() == 0)
+        if (dataArray.isEmpty())
             System.exit(1);
         if (Double.parseDouble(dataArray.get(0)) > Double.parseDouble(dataArray.get(dataArray.size()-1))) {
             if (target >= Double.parseDouble(dataArray.get(0)))
@@ -294,7 +289,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
 
         int start = 0;
         int end = dataArray.size()-1;
-        int mid = 0;
+        int mid;
 
         if (Double.parseDouble(dataArray.get(0)) > Double.parseDouble(dataArray.get(dataArray.size()-1))) {
             while (end - start != 1) {
@@ -352,7 +347,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
 
         priorityList = new ArrayList<>();
         priorityList = CCUHsApi.getInstance().readPoint(tunerItemSelected.get("id").toString());
-        Log.i("TunersUI", "priorityList:" + priorityList);
+        CcuLog.i(L.TAG_CCU_TUNERS_UI, "priorityList:" + priorityList);
 
         priorityArrayAdapter = new PriorityArrayAdapter(getActivity(), tunerGroupType, priorityList, this, this, tunerItemSelected);
         recyclerViewPriority.setAdapter(priorityArrayAdapter);
@@ -363,8 +358,8 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                 selectedTunerLevel = revertMap.get("newLevel").toString();
             }
             Intent tunerValue = new Intent()
-                    .putExtra("Tuner_HashMap_Selected", (Serializable) tunerItemSelected)
-                    .putExtra("Tuner_Group_Selected", (Serializable) tunerGroupSelected)
+                    .putExtra("Tuner_HashMap_Selected", tunerItemSelected)
+                    .putExtra("Tuner_Group_Selected", tunerGroupSelected)
                     .putExtra("Tuner_Value_Selected", selectedTunerValue)
                     .putExtra("Tuner_Level_Selected", selectedTunerLevel);
             getTargetFragment().onActivityResult(getTargetRequestCode(), Activity.RESULT_OK, tunerValue);
@@ -377,7 +372,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
     public double getTunerValue(String id) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
         ArrayList values = hayStack.readPoint(id);
-        if (values != null && values.size() > 0) {
+        if (values != null && !values.isEmpty()) {
             for (int l = 1; l <= values.size(); l++) {
                 HashMap valMap = ((HashMap) values.get(l - 1));
                 if (valMap.get("val") != null) {
@@ -402,7 +397,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
 
         CCUHsApi hayStack = CCUHsApi.getInstance();
         ArrayList values = hayStack.readPoint(id);
-        if (values != null && values.size() > 0) {
+        if (values != null && !values.isEmpty()) {
             for (int l = 1; l <= values.size(); l++) {
                 HashMap valMap = ((HashMap) values.get(l - 1));
                 if (valMap.get("val") != null && valMap.get("level").toString().equals(String.valueOf(level))) {
@@ -416,7 +411,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
     public double getTunerDefaultValue(String id) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
         ArrayList values = hayStack.readPoint(id);
-        if (values != null && values.size() > 0) {
+        if (values != null && !values.isEmpty()) {
             for (int l = 1; l <= values.size(); l++) {
                 HashMap valMap = ((HashMap) values.get(l - 1));
                 if (valMap.get("level").toString().equals("17") && valMap.get("val") != null) {
@@ -432,7 +427,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
         ArrayList values = hayStack.readPoint(id);
         ArrayList<String> valueList = new ArrayList<>();
         loadValueList(valueList);
-        if (values != null && values.size() > 0) {
+        if (values != null && !values.isEmpty()) {
             for (int l = 1; l <= values.size(); l++) {
                 HashMap valMap = ((HashMap) values.get(l - 1));
                 if (valMap.get("level").toString().equals(level) && valMap.get("val") != null) {
@@ -482,12 +477,8 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                 levelName = "Module";
                 currentTunerValue = getTunerValue(tunerItemSelected.get("id").toString(), "8");
             }
-            if (tunerItemSelected.containsKey("hideRefresh")) {
-                tunerItemSelected.remove("hideRefresh");
-            }
-            if (tunerItemSelected.containsKey("reset")) {
-                tunerItemSelected.remove("reset");
-            }
+            tunerItemSelected.remove("hideRefresh");
+            tunerItemSelected.remove("reset");
             String colorHex = CCUUiUtil.getColorCode(getContext());
 
             String text = "Level " + (position + 1) + " " + levelName;
@@ -525,12 +516,11 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                     currentValueDb = convertToCelsius(currentValueDb);
                 }
 
-                Log.i("TunersUI", "currentValue:" + currentValue + " minValue:" + minValue + " maxValue:" + maxValue + " incVal:" + incrementVal);
+                CcuLog.i(L.TAG_CCU_TUNERS_UI, "currentValue:" + currentValue + " minValue:" + minValue + " maxValue:" + maxValue + " incVal:" + incrementVal);
 
                 ArrayList<String> valueList = new ArrayList<>();
                 if (incrementValDb == 0) {
                     incrementValDb = 1.0;
-                    incrementVal = 1;
                 }
                 int currentValPos = 0;
                 if (minValueDb > maxValueDb) {
@@ -566,7 +556,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                 }
                 npTunerRange.setValue(index);
 
-                Log.i("TunersUI", "valueList :" + Arrays.toString(npTunerRange.getDisplayedValues()));
+                CcuLog.i(L.TAG_CCU_TUNERS_UI, "valueList :" + Arrays.toString(npTunerRange.getDisplayedValues()));
 
                 npTunerRange.setWrapSelectorWheel(false);
                 npTunerRange.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
@@ -592,7 +582,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                                 selectedTunerValue = valueList.get(npTunerRange.getValue());
                             }
                             //tunerItemSelected.put("newValue", selectedTunerValue);
-                            HashMap newValue = (HashMap) priorityList.get(position);
+                            HashMap newValue = priorityList.get(position);
                             newValue.put("newValue", selectedTunerValue);
                             selectedTunerLevel = String.valueOf(position + 1);
                             priorityList.set(position, newValue);
@@ -602,10 +592,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                             buttonSaveTuner.setTextColor(CCUUiUtil.getPrimaryThemeColor(getContext()));
                         }
                 );
-            } else {
-
             }
-            //dialog.show();
         }
     }
     public void loadValueList(ArrayList<String> valueList) {
@@ -636,12 +623,11 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
             currentValueDb = convertToCelsius(currentValueDb);
         }
 
-        Log.i("TunersUI", "currentValue:" + currentValue + " minValue:" + minValue + " maxValue:" + maxValue + " incVal:" + incrementVal);
+        CcuLog.i(L.TAG_CCU_TUNERS_UI, "currentValue:" + currentValue + " minValue:" + minValue + " maxValue:" + maxValue + " incVal:" + incrementVal);
 
 
         if (incrementValDb == 0) {
             incrementValDb = 1.0;
-            incrementVal = 1;
         }
         int currentValPos = 0;
         if (minValueDb > maxValueDb) {

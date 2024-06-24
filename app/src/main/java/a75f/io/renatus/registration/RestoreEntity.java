@@ -9,6 +9,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import a75f.io.api.haystack.RetryCountCallback;
 import a75f.io.api.haystack.Tags;
+import a75f.io.logger.CcuLog;
+import a75f.io.logic.L;
 import a75f.io.logic.ccu.restore.CCU;
 import a75f.io.logic.ccu.restore.EquipResponseCallback;
 import a75f.io.logic.ccu.restore.ReplaceCCUTracker;
@@ -78,7 +80,7 @@ public class RestoreEntity implements Runnable{
                     break;
             }
         } catch(Exception ex){
-            Log.i("CCU_REPLACE", "Thread interrupted "+Log.getStackTraceString(ex));
+            CcuLog.e(L.TAG_CCU_REPLACE, "Thread interrupted "+ Log.getStackTraceString(ex));
         }
     }
 }

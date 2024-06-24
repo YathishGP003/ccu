@@ -2,7 +2,6 @@ package a75f.io.renatus.registration;
 
 import android.content.Context;
 import android.graphics.PorterDuff;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,6 +9,8 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 
+import a75f.io.logger.CcuLog;
+import a75f.io.logic.L;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.CCUUiUtil;
 
@@ -19,7 +20,7 @@ public class VerticalTabAdapter extends BaseAdapter{
     private final ListView listView;
     private OnItemClickListener listener;
     private Context mContext;
-    private int currentSelected = 0;
+    private int currentSelected;
     View menuLine;
 
 
@@ -54,8 +55,8 @@ public class VerticalTabAdapter extends BaseAdapter{
             view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.layout_verticaltabs, viewGroup, false);
         }
 
-        ImageView menuImage = (ImageView)view.findViewById(R.id.Tab1);
-        menuLine = (View)view.findViewById(R.id.viewLine);
+        ImageView menuImage = view.findViewById(R.id.Tab1);
+        menuLine = view.findViewById(R.id.viewLine);
         menuImage.setImageResource((int)getItem(i));
 
         if(i == currentSelected){
@@ -71,12 +72,12 @@ public class VerticalTabAdapter extends BaseAdapter{
     }
 
     private void setImageviewSelected(ImageView tabIcon, int position) {
-        Log.i("Tab","Position:"+position);
+        CcuLog.i(L.TAG_CCU_UI,"Tab Position:"+position);
         if(position > 0) {
             for (int i = 0; i < data.length; i++) {
-                View otherview = null;
+                View otherview;
                 otherview = getViewByPosition(i);
-                Log.i("Tab","View Position:"+i+" View:"+otherview);
+                CcuLog.i(L.TAG_CCU_UI,"Tab View Position:"+i+" View:"+otherview);
                 if(otherview != null) {
                     if (i < position) {
                         ((ImageView) otherview.findViewById(R.id.Tab1)).setColorFilter(mContext.getResources().getColor(android.R.color.black), PorterDuff.Mode.SRC_IN);
@@ -85,11 +86,6 @@ public class VerticalTabAdapter extends BaseAdapter{
                         ((ImageView) otherview.findViewById(R.id.Tab1)).setColorFilter(mContext.getResources().getColor(android.R.color.darker_gray), PorterDuff.Mode.SRC_IN);
                     }
                 }
-                /*
-                if(i == position) {
-                    ((ImageView)otherview.findViewById(R.id.Tab1)).setColorFilter(mContext.getResources().getColor(R.color.orange_75f), PorterDuff.Mode.SRC_IN);
-                }
-                */
             }
         }
         tabIcon.setColorFilter(CCUUiUtil.getPrimaryThemeColor(mContext), PorterDuff.Mode.SRC_IN);
@@ -123,15 +119,8 @@ public class VerticalTabAdapter extends BaseAdapter{
 
         View targetView = getViewByPosition(position);
         if(targetView != null) {
-            setImageviewSelected((ImageView)targetView.findViewById(R.id.Tab1),position);
+            setImageviewSelected(targetView.findViewById(R.id.Tab1),position);
         }
-
-/*
-
-        if(listener != null){
-            listener.selectItem(position);
-        }
-*/
 
         currentSelected = position;
 
@@ -142,28 +131,11 @@ public class VerticalTabAdapter extends BaseAdapter{
             View targetView = getViewByPosition(position);
             if(targetView != null) {
                 //setTextViewToUnSelected((TextView)(targetView.findViewById(R.id.txt_tab_title)));
-                setImageviewUnSelected((ImageView)targetView.findViewById(R.id.Tab1));
+                setImageviewUnSelected(targetView.findViewById(R.id.Tab1));
             }
         }
         currentSelected = -1;
     }
-
-
-    // OnClick Events
-/*
-
-    @Override
-    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-        select(i);
-    }
-*/
-/*
-
-
-    public void OnItemClickListener(VerticalTabAdapter.OnItemClickListener listener){
-        this.listener = listener;
-    }
-*/
 
     public void setCurrentSelected(int i) {
         select(i);

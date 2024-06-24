@@ -48,7 +48,7 @@ class CommandSpinnerAdapter extends ArrayAdapter<Command> {
         convertView.setPadding(20, 0, 20, 0);
         convertView.setBackgroundResource(R.drawable.custmspinner);
 
-        TextView txtTitle = (TextView) convertView.findViewById(R.id.spinnerTarget);
+        TextView txtTitle = convertView.findViewById(R.id.spinnerTarget);
         txtTitle.setText(rowItem.getName());
         if(isGetView) {
             txtTitle.setPadding(0, 0, 4, 0);

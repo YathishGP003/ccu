@@ -11,7 +11,6 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,6 +32,7 @@ import a75f.io.device.ble.GattAttributes;
 import a75f.io.device.ble.GattPin;
 import a75f.io.device.ble.StructShort;
 import a75f.io.device.serial.SerialConsts;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.definitions.ProfileType;
@@ -232,7 +232,7 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
         if (!mPinEntered)
         {
             if (bleDialogEnterPinEdittext.getText() == null ||
-                bleDialogEnterPinEdittext.getText().toString().trim().equals(""))
+                    bleDialogEnterPinEdittext.getText().toString().trim().isEmpty())
             {
                 bleDialogEnterPinEdittext
                         .setError("Pin required.  Please enter pin displayed isOn the 75F device you'd like to pair.");
@@ -240,11 +240,10 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
             else
             {
                 String pinFeildText = bleDialogEnterPinEdittext.getText() != null &&
-                                      !bleDialogEnterPinEdittext.getText().toString().trim()
-                                                                .equals("")
+                        !bleDialogEnterPinEdittext.getText().toString().trim().isEmpty()
                                               ? bleDialogEnterPinEdittext.getText().toString()
                                               : "0";
-                int pinNumericValue = Integer.valueOf(pinFeildText);
+                int pinNumericValue = Integer.parseInt(pinFeildText);
                 if (pinNumericValue == mGattPin.getPin())
                 {
                     mPinEntered = true;
@@ -270,7 +269,7 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onBLEEvent(BLEProvisionService.BLEEvent event)
     {
-        Log.i(TAG, "Event Type: " + event.getAction().name());
+        CcuLog.i(TAG, "Event Type: " + event.getAction().name());
         if (event.getAction() == BLEAction.ACTION_GATT_SERVICES_DISCOVERED)
         {
             if (!mBLEProvisionService.isCharacteristicReady(GattAttributes.BLE_PIN))
@@ -354,7 +353,7 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
             else if (event.getBluetoothGattCharacteristic().getUuid().toString()
                           .equalsIgnoreCase(GattAttributes.FIRMWARE_SIGNATURE_KEY))
             {
-                byte[] crc = null;
+                byte[] crc;
                 if (needsLinkKey() || needsLinkKeyHN())
                 {
                     crc = ByteArrayUtils

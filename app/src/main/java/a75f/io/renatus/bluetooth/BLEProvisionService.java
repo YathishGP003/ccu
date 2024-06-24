@@ -13,11 +13,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
-import android.util.Log;
 
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.List;
+
+import a75f.io.logger.CcuLog;
 
 /**
  * Created by ryanmattison on 7/25/17.
@@ -30,7 +31,6 @@ public class BLEProvisionService extends Service
     
     private BluetoothManager mBluetoothManager;
     private BluetoothAdapter mBluetoothAdapter;
-    private String           mBluetoothDeviceAddress;
     private BluetoothGatt    mBluetoothGatt;
     private String nodeAddress;
     private int GATT_STATUS_133 = 133;
@@ -45,12 +45,11 @@ public class BLEProvisionService extends Service
             BLEAction intentAction;
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 intentAction = BLEAction.ACTION_GATT_CONNECTED;
-                //      tSleep();
                 broadcastUpdate(intentAction, null);
-                Log.i(TAG, "Connected to GATT server.");
+                CcuLog.i(TAG, "Connected to GATT server.");
                 // Attempts to discover services after successful connection.
                 
-                Log.i(TAG, "Attempting to start service discovery:" +
+                CcuLog.i(TAG, "Attempting to start service discovery:" +
                            mBluetoothGatt.discoverServices());
                 retryCount = 1;
                 
@@ -60,11 +59,11 @@ public class BLEProvisionService extends Service
                 mBluetoothGatt.close();
                 
                 mBluetoothGatt = null;
-                Log.i(TAG, "Disconnected from GATT server. status code: "+status);
+                CcuLog.i(TAG, "Disconnected from GATT server. status code: "+status);
                 broadcastUpdate(intentAction, null);
 
                 if(status == GATT_STATUS_133 && retryCount <= 3){
-                    Log.i(TAG, "re-trying with node: "+nodeAddress+" retryCount: "+retryCount);
+                    CcuLog.i(TAG, "re-trying with node: "+nodeAddress+" retryCount: "+retryCount);
                     retryCount = retryCount + 1;
                     connect(nodeAddress);
                 }
@@ -75,12 +74,11 @@ public class BLEProvisionService extends Service
         @Override
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                //   tSleep();
                 broadcastUpdate(BLEAction.ACTION_GATT_SERVICES_DISCOVERED, null);
             }
             else
             {
-                Log.i(TAG, "onServicesDiscovered: Services failed to be discovered");
+                CcuLog.i(TAG, "onServicesDiscovered: Services failed to be discovered");
             }
         }
         
@@ -91,7 +89,7 @@ public class BLEProvisionService extends Service
             if (status == BluetoothGatt.GATT_SUCCESS)
                 broadcastUpdate(BLEAction.ACTION_DATA_AVAILABLE, characteristic);
             else
-                Log.w(TAG, "onCharacteristicRead received: " + status);
+                CcuLog.w(TAG, "onCharacteristicRead received: " + status);
             
         }
         
@@ -108,25 +106,13 @@ public class BLEProvisionService extends Service
             if (status == BluetoothGatt.GATT_SUCCESS)
                 broadcastUpdate(BLEAction.ACTION_DATA_WROTE, characteristic);
             else
-                Log.w(TAG, "onCharacteristicWrite received: " + status);
+                CcuLog.w(TAG, "onCharacteristicWrite received: " + status);
             
             
         }
     };
-    
-    
-    /*
-	Sleep hack when connection has happened and it is still reading the gatt services, but it notifies early that it is finished with this process.
-	Wait a very long time, because the amount of services and chars the server has and the distance between this device & peripheral can impact the read time.
-	 */
-    private void tSleep() {
-        try {
-            Thread.sleep(500);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
-    
+
+
     private void broadcastUpdate(final BLEAction action,
                                  final BluetoothGattCharacteristic characteristic) {
         BLEEvent event = new BLEEvent(action, characteristic);
@@ -136,9 +122,9 @@ public class BLEProvisionService extends Service
     public BluetoothGattCharacteristic getSupportedGattAttribute(String characteristic) {
         List<BluetoothGattService> supportedGattServices = getSupportedGattServices();
         for (BluetoothGattService blueToothGattService : supportedGattServices) {
-            Log.i(TAG, "BluetoothGatt Service: " + blueToothGattService.getUuid().toString());
+            CcuLog.i(TAG, "BluetoothGatt Service: " + blueToothGattService.getUuid().toString());
             for (BluetoothGattCharacteristic blueToothGattCharacteristic : blueToothGattService.getCharacteristics()) {
-                Log.i(TAG, "BluetoothGatt Chara: " + blueToothGattCharacteristic.getUuid().toString());
+                CcuLog.i(TAG, "BluetoothGatt Chara: " + blueToothGattCharacteristic.getUuid().toString());
                 if (blueToothGattCharacteristic.getUuid().toString().equalsIgnoreCase(characteristic)) {
                     return blueToothGattCharacteristic;
                 }
@@ -186,14 +172,14 @@ public class BLEProvisionService extends Service
         if (mBluetoothManager == null) {
             mBluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
             if (mBluetoothManager == null) {
-                Log.e(TAG, "Unable to initialize BluetoothManager.");
+                CcuLog.e(TAG, "Unable to initialize BluetoothManager.");
                 return false;
             }
         }
         
         mBluetoothAdapter = mBluetoothManager.getAdapter();
         if (mBluetoothAdapter == null) {
-            Log.e(TAG, "Unable to obtain a BluetoothAdapter.");
+            CcuLog.e(TAG, "Unable to obtain a BluetoothAdapter.");
             return false;
         }
         
@@ -211,33 +197,19 @@ public class BLEProvisionService extends Service
      */
     public boolean connect(final String address) {
         if (mBluetoothAdapter == null || address == null) {
-            Log.w(TAG, "BluetoothAdapter not initialized or unspecified address.");
+            CcuLog.w(TAG, "BluetoothAdapter not initialized or unspecified address.");
             return false;
         }
         
-        //		// Previously connected device.  Try to reconnect.
-        //		if (mBluetoothDeviceAddress != null && address.equals(mBluetoothDeviceAddress)
-        //		    && mBluetoothGatt != null) {
-        //			Log.d(TAG, "Trying to use an existing mBluetoothGatt for connection.");
-        //			if (mBluetoothGatt.connect()) {
-        //				//mConnectionState = STATE_CONNECTING;
-        //				return true;
-        //			} else {
-        //				return false;
-        //			}
-        //		}
-        
         final BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
         if (device == null) {
-            Log.w(TAG, "Device not found.  Unable to connect.");
+            CcuLog.w(TAG, "Device not found.  Unable to connect.");
             return false;
         }
         // We want to directly connect to the device, so we are setting the autoConnect
         // parameter to false.
         mBluetoothGatt = device.connectGatt(this, false, mGattCallback, BluetoothDevice.TRANSPORT_LE);
-        Log.d(TAG, "Trying to create a new connection.");
-        //mBluetoothDeviceAddress = address;
-        //mConnectionState = STATE_CONNECTING;
+        CcuLog.d(TAG, "Trying to create a new connection.");
         nodeAddress = address;
         return true;
     }
@@ -272,7 +244,7 @@ public class BLEProvisionService extends Service
      */
     private void readCharacteristic(BluetoothGattCharacteristic characteristic) {
         if (mBluetoothAdapter == null || mBluetoothGatt == null) {
-            Log.w(TAG, "BluetoothAdapter not initialized");
+            CcuLog.w(TAG, "BluetoothAdapter not initialized");
             return;
         }
         mBluetoothGatt.readCharacteristic(characteristic);
@@ -299,13 +271,12 @@ public class BLEProvisionService extends Service
      */
     public boolean writeCharacteristic(BluetoothGattCharacteristic characteristic, byte[] dataToWrite) {
         if (mBluetoothAdapter == null || mBluetoothGatt == null) {
-            Log.w(TAG, "BluetoothAdapter not initialized");
+            CcuLog.w(TAG, "BluetoothAdapter not initialized");
             return false;
         }
         characteristic.setValue(dataToWrite);
         boolean initiatedSuccessfully = mBluetoothGatt.writeCharacteristic(characteristic);
-        Log.i(TAG, "Write to: " + characteristic.getUuid().toString() + " - initially successful? " + initiatedSuccessfully);
-        //tSleep();
+        CcuLog.i(TAG, "Write to: " + characteristic.getUuid().toString() + " - initially successful? " + initiatedSuccessfully);
         return initiatedSuccessfully;
     }
     
@@ -324,7 +295,7 @@ public class BLEProvisionService extends Service
     public void setCharacteristicNotification(BluetoothGattCharacteristic characteristic,
                                               boolean enabled) {
         if (mBluetoothAdapter == null || mBluetoothGatt == null) {
-            Log.w(TAG, "BluetoothAdapter not initialized");
+            CcuLog.w(TAG, "BluetoothAdapter not initialized");
             return;
         }
         mBluetoothGatt.setCharacteristicNotification(characteristic, enabled);
@@ -369,10 +340,7 @@ public class BLEProvisionService extends Service
         public BluetoothGattCharacteristic getBluetoothGattCharacteristic() {
             return mBluetoothGattCharacteristic;
         }
-        
-        public void setBluetoothGattCharacteristic(BluetoothGattCharacteristic bluetoothGattCharacteristic) {
-            this.mBluetoothGattCharacteristic = bluetoothGattCharacteristic;
-        }
+
     }
     
 }

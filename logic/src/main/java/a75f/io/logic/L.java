@@ -74,7 +74,12 @@ public class L
     public static final String TAG_CCU_RANGE_CONTROL = "CCU_RANGE_CONTROL";
     public static final String TAG_CCU_MOVEMENT = "CCU_MOVEMENT";
     public static final String TAG_CCU_VAV_TEMP = "CCU_VAV_TEMP";
-
+    public static final String TAG_CCU_ADD_EXISTING = "CCU_ADD_EXISTING";
+    public static final String TAG_CCU_WIFI = "CCU_WIFI";
+    public static final String TAG_CCU_REGISTER_GATHER_DETAILS = "CCU_REGISTER_GATHER_DETAILS";
+    public static final String TAG_CCU_CRASH = "CCU_CRASH";
+    public static final String TAG_CCU_SAFE_MODE = "CCU_SAFE_MODE";
+    public static final String TAG_CCU_DM_MODBUS = "CCU_DM_MODBUS";
     public static Context app()
     {
         return Globals.getInstance().getApplicationContext();

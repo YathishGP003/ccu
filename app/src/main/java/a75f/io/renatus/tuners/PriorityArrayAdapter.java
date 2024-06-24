@@ -3,15 +3,13 @@ package a75f.io.renatus.tuners;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Color;
-
-import androidx.core.content.ContextCompat;
-import androidx.recyclerview.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
+
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -53,9 +51,9 @@ public class PriorityArrayAdapter extends RecyclerView.Adapter<PriorityArrayAdap
         holder.textViewPriority.setText(String.valueOf((int)level));
         setBlackTextColor(holder.textViewName);
         holder.imgBtnTunerUndo.setVisibility(View.GONE);
-        if (priorityMap != null && priorityMap.size() > 0) {
+        if (priorityMap != null && !priorityMap.isEmpty()) {
             if (priorityMap.get("level") != null) {
-                if (priorityItem.get("newValue") != null && !priorityItem.get("newValue").toString().equals("")) {
+                if (priorityItem.get("newValue") != null && !priorityItem.get("newValue").toString().isEmpty()) {
                     holder.textViewCurrentValue.setText(priorityItem.get("newValue").toString());
                     setOrangeTextColor(holder.textViewCurrentValue);
                     setOrangeTextColor(holder.textViewName);
@@ -185,7 +183,7 @@ public class PriorityArrayAdapter extends RecyclerView.Adapter<PriorityArrayAdap
 
     private HashMap getPriorityLevelMap(ArrayList<HashMap> values) {
 
-        if (values != null && values.size() > 0) {
+        if (values != null && !values.isEmpty()) {
             for (int l = 1; l <= values.size(); l++) {
                 HashMap valMap = values.get(l - 1);
                 if (valMap.get("level") != null && valMap.get("val") != null) {
@@ -210,7 +208,7 @@ public class PriorityArrayAdapter extends RecyclerView.Adapter<PriorityArrayAdap
 
         CCUHsApi hayStack = CCUHsApi.getInstance();
         ArrayList values = hayStack.readPoint(id);
-        if (values != null && values.size() > 0) {
+        if (values != null && !values.isEmpty()) {
             for (int l = 1; l <= values.size(); l++) {
                 HashMap valMap = ((HashMap) values.get(l - 1));
                 if (valMap.get("val") != null && valMap.get("level").toString().equals(String.valueOf(level))) {

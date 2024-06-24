@@ -3,7 +3,6 @@ package a75f.io.renatus.tuners;
 import android.content.Context;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,15 +10,18 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import a75f.io.logger.CcuLog;
+import a75f.io.logic.L;
+
 public class TunerExpandableLayoutHelper implements TunerGroupChangeListener {
 
     //data list
-    private LinkedHashMap<TunerGroupItem, List<HashMap>> mSectionDataMap = new LinkedHashMap<TunerGroupItem, List<HashMap>>();
-    private ArrayList<Object> mDataArrayList = new ArrayList<Object>();
+    private LinkedHashMap<TunerGroupItem, List<HashMap>> mSectionDataMap = new LinkedHashMap<>();
+    private ArrayList<Object> mDataArrayList = new ArrayList<>();
 
     //section map
     //TODO : look for a way to avoid this
-    private HashMap<String, TunerGroupItem> mSectionMap = new HashMap<String, TunerGroupItem>();
+    private HashMap<String, TunerGroupItem> mSectionMap = new HashMap<>();
 
     //adapter
     private TunerExpandableGridAdapter mSectionedExpandableGridAdapter;
@@ -65,12 +67,8 @@ public class TunerExpandableLayoutHelper implements TunerGroupChangeListener {
         mSectionDataMap.put(newSection, sectionList);
     }
 
-    public void addItem(String section, HashMap item) {
-        mSectionDataMap.get(mSectionMap.get(section)).add(item);
-    }
-
     public void updateTuner(TunerGroupItem section, HashMap item, HashMap oldItem) {
-        Log.i("TunersUI", "section:" + section + " hashmap:" + item);
+        CcuLog.i(L.TAG_CCU_TUNERS_UI, "section:" + section + " hashmap:" + item);
         for(HashMap m: mSectionDataMap.get(section)){
             if (m.get("id").toString().equals(oldItem.get("id").toString())){
                 mSectionDataMap.get(section).set(mSectionDataMap.get(section).indexOf(m), item);
@@ -78,15 +76,6 @@ public class TunerExpandableLayoutHelper implements TunerGroupChangeListener {
             }
         }
         notifyDataSetChanged();
-    }
-
-    public void removeItem(String section, HashMap item) {
-        mSectionDataMap.get(mSectionMap.get(section)).remove(item);
-    }
-
-    public void removeSection(String section) {
-        mSectionDataMap.remove(mSectionMap.get(section));
-        mSectionMap.remove(section);
     }
 
     private void generateDataList() {

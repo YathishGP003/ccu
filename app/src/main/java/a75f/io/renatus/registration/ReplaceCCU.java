@@ -12,7 +12,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -55,6 +54,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.device.bacnet.BacnetConfigConstants;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.ccu.restore.CCU;
 import a75f.io.logic.ccu.restore.EquipResponseCallback;
@@ -185,15 +185,15 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
                 pauseAlert.setVisibility(View.INVISIBLE);
                 pauseStatus.setText("");
                 pauseSync.setText(" PAUSE SYNCING");
-                new Thread(() -> resumeRestoreCCUProcess()).start();
+                new Thread(this::resumeRestoreCCUProcess).start();
 
             }
         });
 
         toastFail = getLayoutInflater().inflate(R.layout.custom_toast_layout_failed,
-                (ViewGroup) rootView.findViewById(R.id.custom_toast_layout_fail));
+                rootView.findViewById(R.id.custom_toast_layout_fail));
         toastCcuRestoreSuccess = getLayoutInflater().inflate(R.layout.custom_toast_replace_ccu_success_layout,
-                (ViewGroup) rootView.findViewById(R.id.custom_toast_layout));
+                rootView.findViewById(R.id.custom_toast_layout));
 
         next.setOnClickListener(v -> {
             enteredPassCode = passCode_1.getText().toString() + passCode_2.getText().toString() +
@@ -248,7 +248,7 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
             @Override
             public void onSuccessResponse(JSONObject response) throws JSONException {
                 ProgressDialogUtils.hideProgressDialog();
-                if (response.getString("valid") == "true") {
+                if (response.getString("valid").equals("true")) {
                     getAllCCUs(response.getJSONObject("siteCode").getString("siteId"), response.getJSONArray("devices"));
                 } else {
                     Toast toast = new Toast(Globals.getInstance().getApplicationContext());
@@ -397,7 +397,7 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
                 toast.setDuration(Toast.LENGTH_LONG);
                 toast.show();
                 deleteRenatusData();
-                Log.i(TAG_CCU_REPLACE, "Replace CCU abrupted");
+                CcuLog.e(TAG_CCU_REPLACE, "Replace CCU abrupted");
             }
         };
         ProgressDialogUtils.showProgressDialog(getActivity(), "Validating token...");
@@ -411,7 +411,7 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
             runtime.exec("pm clear "+packageName);
         }
         catch (IOException exception){
-            Log.i(TAG_CCU_REPLACE, exception.getMessage());
+            CcuLog.e(TAG_CCU_REPLACE, exception.getMessage());
             exception.printStackTrace();
         }
     }
@@ -434,7 +434,7 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
     }
 
     private void resumeRestoreCCUProcess(){
-        Log.i(TAG_CCU_REPLACE, "Resuming Replace CCU process");
+        CcuLog.i(TAG_CCU_REPLACE, "Resuming Replace CCU process");
         ReplaceCCUTracker replaceCCUTracker = new ReplaceCCUTracker();
         ConcurrentHashMap<String, ?> currentReplacementProgress =
                 new ConcurrentHashMap<> (replaceCCUTracker.getReplaceCCUStatus());
@@ -455,7 +455,7 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
 
     private void initRestoreCCUProcess(CCU ccu) {
         this.ccu = ccu;
-        Log.i(TAG_CCU_REPLACE, "Replace CCU Started");
+        CcuLog.i(TAG_CCU_REPLACE, "Replace CCU Started");
         ReplaceCCUTracker replaceCCUTracker = new ReplaceCCUTracker();
         floorAndZoneIds = restoreCCU.getEquipDetailsOfCCU(ccu.getCcuId(), ccu.getSiteCode(),
                 replaceCCUTracker.getEditor(), isReplaceClosed);
@@ -490,13 +490,13 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
         EquipResponseCallback equipResponseCallback = remainingCount -> handler.post(() -> {
             progressBar.setProgress((total - remainingCount));
             int percentCompleted = 100 - (int) ((remainingCount * 1.0 / total) * 100);
-            Log.i(TAG_CCU_REPLACE, "Syncing.. " + (total - remainingCount) + "/" + total + " (" + percentCompleted +
+            CcuLog.i(TAG_CCU_REPLACE, "Syncing.. " + (total - remainingCount) + "/" + total + " (" + percentCompleted +
                     "%)");
             replaceStatus.setText("Syncing.. " + (total - remainingCount) + "/" + total + " (" + percentCompleted +
                     "%)");
             if (RestoreCCU.isReplaceCCUCompleted()) {
                 Globals.getInstance().copyModels();
-                Log.i(TAG_CCU_REPLACE, "Replace CCU successfully completed");
+                CcuLog.i(TAG_CCU_REPLACE, "Replace CCU successfully completed");
                 progressAlertDialog.dismiss();
                 ReplaceCCU.this.displayToastMessageOnRestoreSuccess(ccu);
                 ReplaceCCU.this.loadRenatusLandingIntent();
@@ -528,7 +528,6 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
             }
             if(isProcessPaused.get()){
                 pauseReplaceProcess();
-                return;
             }
         });
         return retryCountCallback;
@@ -557,14 +556,14 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
                     future.get();
                 }
             } catch (CancellationException | InterruptedException | ExecutionException e ) {
-                Log.i(TAG_CCU_REPLACE,"Pausing replace process "+ e);
+                CcuLog.e(TAG_CCU_REPLACE,"Pausing replace process "+ e);
                 e.printStackTrace();
             }
         }
     }
 
     private void pauseReplaceProcess(){
-        Log.i(TAG_CCU_REPLACE, "Pausing Replace CCU process");
+        CcuLog.i(TAG_CCU_REPLACE, "Pausing Replace CCU process");
         for (Future<?> future : futures) {
             future.cancel(true);
         }

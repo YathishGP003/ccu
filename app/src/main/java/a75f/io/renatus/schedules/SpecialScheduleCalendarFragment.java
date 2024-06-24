@@ -53,20 +53,20 @@ public class SpecialScheduleCalendarFragment extends DialogFragment{
         Button buttonCancel = view.findViewById(R.id.buttonCancel);
 
         calendarView.state().edit().setMinimumDate(CalendarDay.today()).commit();
-        calendarView.state().edit().setMaximumDate(LocalDate.now().plusDays(DAYS_IN_YEAR-1l)).commit();
+        calendarView.state().edit().setMaximumDate(LocalDate.now().plusDays(DAYS_IN_YEAR- 1L)).commit();
         calendarView.setOnDateChangedListener((widget, date, selected) -> {
             if(selected) {
                 LocalDate localDate = LocalDate.of(date.getYear(), date.getMonth(), date.getDay());
                 calendarView.state().edit().setMinimumDate(localDate).commit();
-                if(localDate.plusDays(SPECIAL_SCHEDULE_DAYS_LIMIT - 1l).isAfter(LocalDate.now().plusDays(DAYS_IN_YEAR-1l))){
-                    calendarView.state().edit().setMaximumDate(LocalDate.now().plusDays(DAYS_IN_YEAR-1l)).commit();
+                if(localDate.plusDays(SPECIAL_SCHEDULE_DAYS_LIMIT - 1L).isAfter(LocalDate.now().plusDays(DAYS_IN_YEAR- 1L))){
+                    calendarView.state().edit().setMaximumDate(LocalDate.now().plusDays(DAYS_IN_YEAR- 1L)).commit();
                 }
                 else {
-                    calendarView.state().edit().setMaximumDate(localDate.plusDays(SPECIAL_SCHEDULE_DAYS_LIMIT - 1l)).commit();
+                    calendarView.state().edit().setMaximumDate(localDate.plusDays(SPECIAL_SCHEDULE_DAYS_LIMIT - 1L)).commit();
                 }
             }else {
                 calendarView.state().edit().setMinimumDate(CalendarDay.today()).commit();
-                calendarView.state().edit().setMaximumDate(LocalDate.now().plusDays(DAYS_IN_YEAR-1l)).commit();
+                calendarView.state().edit().setMaximumDate(LocalDate.now().plusDays(DAYS_IN_YEAR- 1L)).commit();
                 calendarView.setCurrentDate(date, true);
             }
         });
@@ -110,11 +110,11 @@ public class SpecialScheduleCalendarFragment extends DialogFragment{
         calendarView.selectRange(startDay, endDay);
         LocalDate localDate = LocalDate.of(startDate.getYear(), startDate.getMonthOfYear(),
                 startDate.getDayOfMonth());
-        if(localDate.plusDays(SPECIAL_SCHEDULE_DAYS_LIMIT - 1l).isAfter(LocalDate.now().plusDays(DAYS_IN_YEAR-1l))){
-            calendarView.state().edit().setMaximumDate(LocalDate.now().plusDays(DAYS_IN_YEAR-1l)).commit();
+        if(localDate.plusDays(SPECIAL_SCHEDULE_DAYS_LIMIT - 1L).isAfter(LocalDate.now().plusDays(DAYS_IN_YEAR- 1L))){
+            calendarView.state().edit().setMaximumDate(LocalDate.now().plusDays(DAYS_IN_YEAR- 1L)).commit();
         }
         else {
-            calendarView.state().edit().setMaximumDate(localDate.plusDays(SPECIAL_SCHEDULE_DAYS_LIMIT - 1l)).commit();
+            calendarView.state().edit().setMaximumDate(localDate.plusDays(SPECIAL_SCHEDULE_DAYS_LIMIT - 1L)).commit();
         }
         calendarView.setCurrentDate(startDay, true);
     }

@@ -23,7 +23,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -41,6 +40,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import a75f.io.device.serial.SerialConsts;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.definitions.ProfileType;
@@ -58,7 +58,6 @@ public class FragmentDeviceScan extends BaseDialogFragment
 
     public static final  String ID                = "scan_dialog";
     static final         int    REQUEST_ENABLE_BT = 1;
-    private static final long SCAN_PERIOD = 180000;
     private static final String PROFILE_TYPE      = "profile_type";
     @BindView(R.id.ble_device_list_list_view)
     ListView mBLEDeviceListListView;
@@ -93,7 +92,7 @@ public class FragmentDeviceScan extends BaseDialogFragment
             if(getActivity() != null) {
                 getActivity().runOnUiThread(() -> {
                     BluetoothDevice device = result.getDevice();
-                    Log.d(L.TAG_CCU_BLE,"onScanResult called "+device.getName()+" address "+device.getAddress());
+                    CcuLog.d(L.TAG_CCU_BLE,"onScanResult called "+device.getName()+" address "+device.getAddress());
                     if(device != null && device.getName() != null && !(isDeviceMatching(device.getName()))){
                         setListViewEmptyView();
                         return;
@@ -214,7 +213,7 @@ public class FragmentDeviceScan extends BaseDialogFragment
     }
 
     private void searchDevices() {
-        Log.d(L.TAG_CCU_BLE, "ble searching...");
+        CcuLog.d(L.TAG_CCU_BLE, "ble searching...");
         bluetoothStateReceiver = new BluetoothStateReceiver();
         new Thread(() -> {
             if (mBluetoothAdapter != null) {
@@ -222,21 +221,18 @@ public class FragmentDeviceScan extends BaseDialogFragment
                     // Ensures Bluetooth is enabled isOn the device.  If Bluetooth is not currently enabled,
                     // fire an intent to display a dialog asking the user to grant permission to enable it.
                     //Skip BLE because we can't emulate it.
-                    Log.d(L.TAG_CCU_BLE, "enabling bluetooth...");
+                    CcuLog.d(L.TAG_CCU_BLE, "enabling bluetooth...");
                     mBluetoothAdapter.enable();
                     requireContext().registerReceiver(bluetoothStateReceiver, new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED));
 
                 } else {
 
-                    new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
+                    new Handler(Looper.getMainLooper()).postDelayed(() -> {
 
-                            if (mBLEDeviceListListView.getCount() == 0 && getActivity() != null) {
-                                Log.d(L.TAG_CCU_BLE, "disabling bluetooth...");
-                                mBluetoothAdapter.disable();
-                                requireContext().registerReceiver(bluetoothStateReceiver, new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED));
-                            }
+                        if (mBLEDeviceListListView.getCount() == 0 && getActivity() != null) {
+                            CcuLog.d(L.TAG_CCU_BLE, "disabling bluetooth...");
+                            mBluetoothAdapter.disable();
+                            requireContext().registerReceiver(bluetoothStateReceiver, new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED));
                         }
                     }, 10000);
 
@@ -248,7 +244,7 @@ public class FragmentDeviceScan extends BaseDialogFragment
                         mBLEDeviceListListView.setAdapter(mLeDeviceListAdapter);
                         mBLEDeviceListListView.setOnItemClickListener((adapterView, view, position, id) -> {
                             final BluetoothDevice device = mLeDeviceListAdapter.getDevice(position);
-                            Log.d(L.TAG_CCU_BLE,"Clicked on the device "+device);
+                            CcuLog.d(L.TAG_CCU_BLE,"Clicked on the device "+device);
                             finish(device);
                             scanLeDevice(false);
                         });
@@ -345,14 +341,14 @@ public class FragmentDeviceScan extends BaseDialogFragment
                     .build();
 
             mBluetoothLeScanner.startScan(filters, scanSettings, mScanCallback);
-            Log.d(L.TAG_CCU_BLE,"Scan Started");
+            CcuLog.d(L.TAG_CCU_BLE,"Scan Started");
         }
         else
         {
             mScanning = false;
             mBluetoothLeScanner.flushPendingScanResults(mScanCallback);
             mBluetoothLeScanner.stopScan(mScanCallback);
-            Log.d(L.TAG_CCU_BLE,"Scan Stopped");
+            CcuLog.d(L.TAG_CCU_BLE,"Scan Stopped");
         }
     }
     
@@ -396,7 +392,6 @@ public class FragmentDeviceScan extends BaseDialogFragment
         if (mBluetoothAdapter == null)
         {
             Toast.makeText(this.getActivity(), "BLE not supported", Toast.LENGTH_SHORT).show();
-            return;
         }
     }
     
@@ -426,7 +421,7 @@ public class FragmentDeviceScan extends BaseDialogFragment
         {
             if (!mLeDevices.contains(device))
             {
-                Log.d(L.TAG_CCU_BLE,"New Device added to the list "+device);
+                CcuLog.d(L.TAG_CCU_BLE,"New Device added to the list "+device);
                 mLeDevices.add(device);
                 mLeDeviceListAdapter.notifyDataSetChanged();
             }
@@ -437,14 +432,8 @@ public class FragmentDeviceScan extends BaseDialogFragment
         {
             return mLeDevices.get(position);
         }
-        
-        
-        public void clear()
-        {
-            mLeDevices.clear();
-        }
-        
-        
+
+
         @Override
         public int getCount()
         {
@@ -475,8 +464,8 @@ public class FragmentDeviceScan extends BaseDialogFragment
             {
                 view = mInflator.inflate(R.layout.listitem_device_scan, null);
                 viewHolder = new ViewHolder();
-                viewHolder.deviceAddress = (TextView) view.findViewById(R.id.device_address);
-                viewHolder.deviceName = (TextView) view.findViewById(R.id.device_name);
+                viewHolder.deviceAddress = view.findViewById(R.id.device_address);
+                viewHolder.deviceName = view.findViewById(R.id.device_name);
                 view.setTag(viewHolder);
             }
             else
@@ -485,7 +474,7 @@ public class FragmentDeviceScan extends BaseDialogFragment
             }
             BluetoothDevice device = mLeDevices.get(i);
             final String deviceName = device.getName();
-            if (deviceName != null && deviceName.length() > 0)
+            if (deviceName != null && !deviceName.isEmpty())
             {
                 viewHolder.deviceName.setText(deviceName);
             }
@@ -512,17 +501,17 @@ public class FragmentDeviceScan extends BaseDialogFragment
                     mBluetoothLeScanner = mBluetoothAdapter.getBluetoothLeScanner();
 
                     if (state == BluetoothAdapter.STATE_ON) {
-                        Log.d(L.TAG_CCU_BLE, "bluetooth is enabled");
+                        CcuLog.d(L.TAG_CCU_BLE, "bluetooth is enabled");
                         requireContext().unregisterReceiver(bluetoothStateReceiver);
                         searchDevices();
                     }
                     if (state == BluetoothAdapter.STATE_OFF) {
-                        Log.d(L.TAG_CCU_BLE, "bluetooth is disabled");
+                        CcuLog.d(L.TAG_CCU_BLE, "bluetooth is disabled");
                         requireContext().unregisterReceiver(bluetoothStateReceiver);
                         searchDevices();
                     }
                 } else {
-                    Log.d(L.TAG_CCU_BLE, "Fragment is not yet added");
+                    CcuLog.d(L.TAG_CCU_BLE, "Fragment is not yet added");
                 }
             }
         }

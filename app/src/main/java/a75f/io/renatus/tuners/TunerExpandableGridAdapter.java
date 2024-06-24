@@ -1,25 +1,6 @@
 package a75f.io.renatus.tuners;
 
 
-import android.annotation.SuppressLint;
-import android.app.Activity;
-import android.content.Context;
-import android.content.Intent;
-import android.graphics.Color;
-import android.content.SharedPreferences;
-import androidx.cardview.widget.CardView;
-import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ImageButton;
-import android.widget.TextView;
-import android.widget.ToggleButton;
-
-import static a75f.io.logic.bo.util.UnitUtils.celsiusToFahrenheit;
-import static a75f.io.logic.bo.util.UnitUtils.celsiusToFahrenheitRelativeChange;
 import static a75f.io.logic.bo.util.UnitUtils.celsiusToFahrenheitTuner;
 import static a75f.io.logic.bo.util.UnitUtils.convertingDeadBandValueCtoF;
 import static a75f.io.logic.bo.util.UnitUtils.convertingDeadBandValueFtoC;
@@ -31,18 +12,30 @@ import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusTuner;
 import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
 import static a75f.io.renatus.FragmentDABConfiguration.CARRIER_PROD;
 
+import android.annotation.SuppressLint;
+import android.content.Context;
+import android.graphics.Color;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageButton;
+import android.widget.TextView;
+import android.widget.ToggleButton;
+
+import androidx.cardview.widget.CardView;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
-import a75f.io.api.haystack.Tags;
+import a75f.io.logger.CcuLog;
+import a75f.io.logic.L;
 import a75f.io.logic.tuners.SystemTuners;
-import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.renatus.BuildConfig;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.Prefs;
-import a75f.io.renatus.views.MasterControl.MasterControlView;
 
 public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpandableGridAdapter.ViewHolder> {
 
@@ -64,8 +57,7 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
     int lastExpandedPosition;
     int childIndexPosition = 0;
     TunerGroupItem previousOpenGroup = null;
-    String tunerGroupType = "Building";
-    HashMap<Object, Object> useCelsius = CCUHsApi.getInstance().readEntity("displayUnit");
+    String tunerGroupType;
 
     public TunerExpandableGridAdapter(Context context, ArrayList<Object> dataArrayList,
                                       final GridLayoutManager gridLayoutManager, TunerItemClickListener itemClickListener,
@@ -105,7 +97,7 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
             case VIEW_TYPE_ITEM:
                 childIndexPosition++;
                 final HashMap tunerItem = (HashMap) mDataArrayList.get(position);
-                Log.i("TunersUI", "tunerItem:" + tunerItem);
+                CcuLog.i(L.TAG_CCU_TUNERS_UI, "tunerItem:" + tunerItem);
                 String tunerName = SystemTuners.getDisplayNameFromVariation(tunerItem.get("dis").toString());
                 Prefs prefs = new Prefs(getmContext().getApplicationContext());
                 ArrayList<String> valueList = new ArrayList<>();
@@ -333,7 +325,7 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
 
         CCUHsApi hayStack = CCUHsApi.getInstance();
         ArrayList values = hayStack.readPoint(id);
-        if (values != null && values.size() > 0) {
+        if (values != null && !values.isEmpty()) {
             for (int l = 1; l <= values.size(); l++) {
                 HashMap valMap = ((HashMap) values.get(l - 1));
                 if (valMap.get("val") != null && valMap.get("level").toString().equals(String.valueOf(level))) {
@@ -351,9 +343,7 @@ public class TunerExpandableGridAdapter extends RecyclerView.Adapter<TunerExpand
                 if (tunerItem.get("reset") == null && tunerItem.containsKey("newValue")){
                     tunerItem.put("hideRefresh",true);
                 }
-                if (tunerItem.containsKey("reset")){
-                    tunerItem.remove("reset");
-                }
+                tunerItem.remove("reset");
             }
         }
         notifyDataSetChanged();

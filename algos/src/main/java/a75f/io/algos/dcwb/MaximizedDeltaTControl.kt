@@ -1,7 +1,7 @@
 package a75f.io.algos.dcwb
 
 import a75.io.algos.ControlLoop
-import android.util.Log
+import a75f.io.logger.CcuLog
 
 
 data class MaximizedDeltaTInput( val outletWaterTemperature : Double,
@@ -22,7 +22,7 @@ class MaximizedDeltaTControl {
     companion object {
         @JvmStatic
         fun getChilledWaterMaximizedDeltaTValveLoop(data: MaximizedDeltaTInput): Double {
-            Log.i("CCU_SYSTEM", " getChilledWaterAdaptiveDeltaTValveLoop $data")
+            CcuLog.i("CCU_SYSTEM", " getChilledWaterAdaptiveDeltaTValveLoop $data")
             val chilledWaterTargetExitTemperature = data.averageDesiredCoolingTemp - data.chilledWaterExitTemperatureMargin
             val loopOp = data.piLoop.getLoopOutput(data.outletWaterTemperature, chilledWaterTargetExitTemperature)
             data.piLoop.dump()

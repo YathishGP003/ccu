@@ -25,15 +25,7 @@ public class TrimResponseRequest
     public TrimResponseRequest() {
     
     }
-    
-    public TrimResponseRequest(int im) {
-        importanceMultiplier = im;
-    }
-    
-    public double getImportanceMultiplier()
-    {
-        return importanceMultiplier;
-    }
+
     public void setImportanceMultiplier(double importanceMultiplier)
     {
         this.importanceMultiplier = importanceMultiplier;

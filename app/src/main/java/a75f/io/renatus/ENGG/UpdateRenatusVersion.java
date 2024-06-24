@@ -60,21 +60,13 @@ public class UpdateRenatusVersion extends Fragment {
                     if (downloadId == AppInstaller.getHandle().getCCUAppDownloadId()) {
                         if (AppInstaller.getHandle().getDownloadedFileVersion(downloadId) > 0)
                             AppInstaller.getHandle().install(null, false, true, true);
-                    }/*else if(downloadId == AppInstaller.getHandle().getHomeAppDownloadId()){
-                        int homeAppVersion = AppInstaller.getHandle().getDownloadedFileVersion(downloadId);
-                        if(homeAppVersion >= 17) {
-                            PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit().putInt("home_app_version", homeAppVersion).commit();
-                            AppInstaller.getHandle().install(null, true, false, true);
-                        }
-                    }*/
+                    }
                 }
             }
 
         }, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
-        if(apkName.startsWith("75f") || apkName.startsWith("75F"))
-            AppInstaller.getHandle().downloadHomeInstall(apkName);
-        else
-            AppInstaller.getHandle().downloadCCUInstall(apkName, null, null);
+
+        AppInstaller.getHandle().downloadCCUInstall(apkName, null, null);
     }
 
 

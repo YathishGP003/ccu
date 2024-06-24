@@ -1038,6 +1038,17 @@ class HyperStatSplitFragment : BaseDialogFragment() {
         }
         var isDampSelected = false
         var isStagedFanEnabled = false
+        var isOaoDamperSelected = false
+
+        // Getting the index of the OAO damper and Fan staged ,if it is enabled and selected in the analog out
+        val oaoStagedIndex = viewState.analogOutUis.indexOfFirst {
+            it.enabled && it.association == CpuEconAnalogOutAssociation.OAO_DAMPER.ordinal
+        }
+
+        val fanStagedIndex = viewState.analogOutUis.indexOfFirst {
+            it.enabled && it.association == CpuEconAnalogOutAssociation.PREDEFINED_FAN_SPEED.ordinal
+        }
+
 
         viewState.analogOutUis.forEachIndexed { index, analogOutState ->
             with(analogOutUIs[index]) {
@@ -1087,22 +1098,47 @@ class HyperStatSplitFragment : BaseDialogFragment() {
                     vAtMaxDamperSelector.setSelection(analogVoltageIndexFromValue(analogOutState.voltageAtMax))
 
                 }
+                if(analogOutState.association == CpuEconAnalogOutAssociation.OAO_DAMPER.ordinal  && analogOutState.enabled) {
+                    isOaoDamperSelected= true
+                }
+
+                // when fan staged and OAO damper is enabled at a same time,then only During economizer is visible
+                // if no element is mapped to fan staged and oao damper then we will get -1 as a index for both
+                // During economizer, should mapped to fan staged index for that I am checking only Fan stage in the condition
+                if( fanStagedIndex != -1 && oaoStagedIndex != -1 && analogOutState.enabled && (analogOutState.association == CpuEconAnalogOutAssociation.PREDEFINED_FAN_SPEED.ordinal)) {
+                    // if fan staged index is less than OAO damper index then show the analog out during economizer, is map to fan staged index
+                    if (fanStagedIndex < oaoStagedIndex) {
+                        analogOutDuringEconomizerSelector.visibility = View.VISIBLE
+                        analogOutDuringEconomizerLabel.visibility = View.VISIBLE
+                    }
+                    // if fan stage index is coming next of OAO damper index ,we are verifying the damper is selected and staged fan is selected
+                    // then showing the analog out during economizer,is  map to fan staged index
+                    else if ((fanStagedIndex > oaoStagedIndex) && isOaoDamperSelected && isStagedFanEnabled){
+                        analogOutDuringEconomizerSelector.visibility = View.VISIBLE
+                        analogOutDuringEconomizerLabel.visibility = View.VISIBLE
+                    }
+                    else{
+                        analogOutDuringEconomizerSelector.visibility = View.GONE
+                        analogOutDuringEconomizerLabel.visibility = View.GONE
+                    }
+                }
+                else{
+                    analogOutDuringEconomizerSelector.visibility = View.GONE
+                    analogOutDuringEconomizerLabel.visibility = View.GONE
+                }
 
                 analogOutFanConfig.visibility =
                     if (analogOutState.enabled && (analogOutState.association == CpuEconAnalogOutAssociation.MODULATING_FAN_SPEED.ordinal ||
                                 analogOutState.association == CpuEconAnalogOutAssociation.PREDEFINED_FAN_SPEED.ordinal)) View.VISIBLE else View.GONE
 
                 // In case of modulating fan speed, show/hide the recirculate fan speed
-                if(analogOutState.association == CpuEconAnalogOutAssociation.PREDEFINED_FAN_SPEED.ordinal) {
+                if(analogOutState.association == CpuEconAnalogOutAssociation.PREDEFINED_FAN_SPEED.ordinal && analogOutState.enabled) {
                     analogOutAtFanRecirculateLabel.visibility = View.VISIBLE
                     analogOutAtFanRecirculateSelector.visibility = View.VISIBLE
-                    analogOutDuringEconomizerLabel.visibility = View.VISIBLE
-                    analogOutDuringEconomizerSelector.visibility = View.VISIBLE
+
                 } else {
                     analogOutAtFanRecirculateLabel.visibility = View.GONE
                     analogOutAtFanRecirculateSelector.visibility = View.GONE
-                    analogOutDuringEconomizerLabel.visibility = View.GONE
-                    analogOutDuringEconomizerSelector.visibility = View.GONE
                 }
 
                 analogOutAtFanLow.setSelection(analogFanSpeedIndexFromValue(analogOutState.perAtFanLow))

@@ -3,10 +3,8 @@ package a75f.io.renatus;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.graphics.Typeface;
 import android.os.AsyncTask;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -49,15 +47,15 @@ import static a75f.io.renatus.ENGG.HaystackExplorer.getPointVal;
  */
 public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
 {
-    private Fragment                      mFragment;
-    private List<String>                  expandableListTitle;
-    private HashMap<String, List<String>> expandableListDetail;
-    private HashMap<String, String>       idMap;
+    private final Fragment                      mFragment;
+    private final List<String>                  expandableListTitle;
+    private final HashMap<String, List<String>> expandableListDetail;
+    private final HashMap<String, String>       idMap;
     
     Schedule mSchedule = null;
     int mScheduleType = -1;
     
-    Activity mActivity = null;
+    Activity mActivity;
 
     public EquipTempExpandableListAdapter(Fragment fragment, List<String> expandableListTitle,
                                           HashMap<String, List<String>> expandableListDetail, HashMap idmap, Activity activity)
@@ -81,12 +79,11 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
                              boolean isLastChild, View convertView, ViewGroup parent)
     {
         final String expandedListText = (String) getChild(listPosition, expandedListPosition);
-        //Log.i("Scheduler", "IDE Too Slow: " + expandedListText);
 
+        LayoutInflater layoutInflater = (LayoutInflater) this.mFragment.getContext()
+                                                                       .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         if (!expandedListText.startsWith("schedule") && (!expandedListText.startsWith("smartstat")))
         {
-            LayoutInflater layoutInflater = (LayoutInflater) this.mFragment.getContext()
-                                                                           .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = layoutInflater.inflate(R.layout.exp_list_item, parent, false);
 
 
@@ -97,11 +94,9 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
 
 
             expandedListTextView.setText(expandedListText);
-            expandedListTextVal.setText("" + getPointVal(idMap.get(expandedListText)));
+            expandedListTextVal.setText(getPointVal(idMap.get(expandedListText)));
         } else
         {
-            LayoutInflater layoutInflater = (LayoutInflater) this.mFragment.getContext()
-                                                                           .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             String equipId = idMap.get(expandedListText);
             convertView = layoutInflater.inflate(R.layout.temp_schedule, parent, false);
             TextView    scheduleStatus      = convertView.findViewById(R.id.schedule_status_tv);
@@ -109,7 +104,6 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
             ImageButton scheduleImageButton = convertView.findViewById(R.id.schedule_edit_button);
             TextView vacationStatusTV = convertView.findViewById(R.id.vacation_status);
             TextView specialScheduleStatusText = convertView.findViewById(R.id.special_status_status);
-            ImageButton vacationEditButton = convertView.findViewById(R.id.vacation_edit_button);
             LinearLayout smartStatLayout = convertView.findViewById(R.id.ss_layout);
             TextView ssStatus = convertView.findViewById(R.id.ss_conditioning_status_tv);
             Spinner ssCondModeSpinner = convertView.findViewById(R.id.ss_conditioning_spinner);
@@ -135,7 +129,6 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
     
             mSchedule = Schedule.getScheduleByEquipId(equipId);
 
-            Schedule vacationSchedule = Schedule.getVacationByEquipId(equipId);
             scheduleImageButton.setTag(mSchedule.getId());
             scheduleImageButton.setOnClickListener(v ->
                                                    {
@@ -205,7 +198,7 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
                                 HashMap<Object, Object> schedule = CCUHsApi.getInstance().readEntity("schedule and " +
                                         "not vacation and roomRef == " +zone.getId());
                                 scheduleById = CCUHsApi.getInstance().getScheduleById(schedule.get("id").toString());
-                                Log.d(L.TAG_CCU_UI," scheduleType changed to ZoneSchedule : "+scheduleTypeId);
+                                CcuLog.d(L.TAG_CCU_UI," scheduleType changed to ZoneSchedule : "+scheduleTypeId);
                                 scheduleById.setDisabled(false);
                                 if (checkContainment(scheduleById))
                                 {
@@ -213,7 +206,7 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
                                 }
                             } else if (!zone.hasSchedule())
                             {
-                                Log.d(L.TAG_CCU_UI," Zone does not have Schedule : Shouldn't happen");
+                                CcuLog.d(L.TAG_CCU_UI," Zone does not have Schedule : Shouldn't happen");
                                 DefaultSchedules.setDefaultCoolingHeatingTemp();
                                 zone.setScheduleRef(DefaultSchedules.generateDefaultSchedule(true, zone.getId()));
                                 CCUHsApi.getInstance().updateZone(zone, zone.getId());
@@ -231,10 +224,9 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
                             setScheduleType(scheduleTypeId, ScheduleType.ZONE);
                             mScheduleType = ScheduleType.ZONE.ordinal();
                         }
-                    } else
-                    {
-                        //list named schedules
                     }
+                    //list named schedules
+
                     mSchedule = Schedule.getScheduleByEquipId(equipId);
                 }
 
@@ -251,8 +243,8 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
                 double ssOperatingMode = CCUHsApi.getInstance().readPointPriorityValByQuery("point and standalone and temp and operation and mode and his and equipRef == \"" + equipId + "\"");
                 double ssFanOpMode = CCUHsApi.getInstance().readPointPriorityValByQuery("point and standalone and fan and operation and mode and his and equipRef == \"" + equipId + "\"");
                 double ssFanHighHumdOption = 1.0;
-                double ssTargetHumidity = 25.0;
-                double ssTargetDehumidity = 45.0;
+                double ssTargetHumidity;
+                double ssTargetDehumidity;
                 if(profileType.equals("smartstat_hpu"))
                     ssFanHighHumdOption = CCUHsApi.getInstance().readDefaultVal("point and zone and config and relay5 and type and equipRef == \"" + equipId + "\"");
                 else if(profileType.equals("smartstat_cpu"))
@@ -260,10 +252,10 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
 
                 if(ssFanHighHumdOption > 1.0) {
                     ssHumiDifier.setVisibility(View.VISIBLE);
-                    ArrayList<Integer> arrayHumdityTargetList = new ArrayList<Integer>();
+                    ArrayList<Integer> arrayHumdityTargetList = new ArrayList<>();
                     for (int pos = 1; pos <= 100; pos++)
                         arrayHumdityTargetList.add(pos);
-                    ArrayAdapter<Integer> humidityTargetAdapter = new ArrayAdapter<Integer>(mFragment.getContext(),android.R.layout.simple_spinner_dropdown_item,arrayHumdityTargetList);
+                    ArrayAdapter<Integer> humidityTargetAdapter = new ArrayAdapter<>(mFragment.getContext(), android.R.layout.simple_spinner_dropdown_item, arrayHumdityTargetList);
                     ssHumiDifierSpinner.setAdapter(humidityTargetAdapter);
                     if(ssFanHighHumdOption == 2.0) {
                         ssTargetHumidity = CCUHsApi.getInstance().readDefaultVal("point and standalone and target and humidity and his and equipRef == \"" + equipId + "\"");
@@ -291,7 +283,7 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
                     });
                 }
                 if(profileType.equals("smartstat_pfc") ) {
-                    ArrayAdapter<String> fanMode2PfcuAdapter = new ArrayAdapter<String>(mFragment.getContext(), android.R.layout.simple_spinner_dropdown_item, mFragment.getResources().getStringArray(R.array.smartstat_2pfcu_fanmode));
+                    ArrayAdapter<String> fanMode2PfcuAdapter = new ArrayAdapter<>(mFragment.getContext(), android.R.layout.simple_spinner_dropdown_item, mFragment.getResources().getStringArray(R.array.smartstat_2pfcu_fanmode));
                     ssFanModeSpinner.setAdapter(fanMode2PfcuAdapter);
                 }
                 ssCondModeSpinner.setSelection((int)ssOperatingMode);
@@ -302,7 +294,7 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
                     ssCondModeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                         @Override
                         public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                            Log.d("EquipTempListAdap","condition mode change ="+position+","+ssOperatingMode);
+                            CcuLog.d("EquipTempListAdap","condition mode change ="+position+","+ssOperatingMode);
                             if(position != (int)ssOperatingMode)
                                 StandaloneScheduler.updateOperationalPoints(equipId,"temp and conditioning and mode",position);
                         }
@@ -315,7 +307,7 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
                     ssFanModeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                         @Override
                         public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                            Log.d("EquipTempListAdap","fan mode change ="+position+","+ssOperatingMode);
+                            CcuLog.d("EquipTempListAdap","fan mode change ="+position+","+ssOperatingMode);
                             if(position != ssFanOpMode)
                                 StandaloneScheduler.updateOperationalPoints(equipId, "fan and operation and mode", position);
                         }
@@ -332,16 +324,7 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
 
         return convertView;
     }
-    
-    
-    private void alignZoneSchedule(Schedule zoneSchedule) {
-        Schedule systemSchedule = CCUHsApi.getInstance().getSystemSchedule(false).get(0);
-        zoneSchedule.getDays().clear();
-        for (Schedule.Days d : systemSchedule.getDays()) {
-            zoneSchedule.getDays().add(d);
-        }
-    }
-    
+
     private boolean checkContainment(Schedule zoneSchedule) {
         Schedule systemSchedule = CCUHsApi.getInstance().getSystemSchedule(false).get(0);
         ArrayList<Interval> intervalSpills = new ArrayList<>();
@@ -378,7 +361,7 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
         }
         
         
-        if (intervalSpills.size() > 0) {
+        if (!intervalSpills.isEmpty()) {
             StringBuilder spillZones = new StringBuilder();
             for (Interval i : intervalSpills)
             {
@@ -391,29 +374,25 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
                    .setCancelable(false)
                    .setTitle("Schedule Errors")
                    .setIcon(R.drawable.ic_dialog_alert)
-                   .setNegativeButton("Edit", new DialogInterface.OnClickListener() {
-                       public void onClick(DialogInterface dialog, int id) {
-                           SchedulerFragment schedulerFragment    = SchedulerFragment.newInstance(zoneSchedule.getId());
-                           FragmentManager   childFragmentManager = mFragment.getFragmentManager();
-                           childFragmentManager.beginTransaction()
-                                               .add(R.id.zone_fragment_temp, schedulerFragment)
-                                               .addToBackStack("schedule").commit();
-    
-                           schedulerFragment.setOnExitListener(() -> {
-                               mSchedule = CCUHsApi.getInstance().getScheduleById(zoneSchedule.getId());
-                               if (checkContainment(mSchedule))
-                               {
-                                   ScheduleManager.getInstance().updateSchedules();
-                               }
-                           });
-                       }
+                   .setNegativeButton("Edit", (dialog, id) -> {
+                       SchedulerFragment schedulerFragment    = SchedulerFragment.newInstance(zoneSchedule.getId());
+                       FragmentManager   childFragmentManager = mFragment.getFragmentManager();
+                       childFragmentManager.beginTransaction()
+                                           .add(R.id.zone_fragment_temp, schedulerFragment)
+                                           .addToBackStack("schedule").commit();
+
+                       schedulerFragment.setOnExitListener(() -> {
+                           mSchedule = CCUHsApi.getInstance().getScheduleById(zoneSchedule.getId());
+                           if (checkContainment(mSchedule))
+                           {
+                               ScheduleManager.getInstance().updateSchedules();
+                           }
+                       });
                    })
-                   .setPositiveButton("Force-Trim", new DialogInterface.OnClickListener() {
-                       public void onClick(DialogInterface dialog, int id) {
-                           HashMap<String, ArrayList<Interval>> spillsMap = new HashMap<>();
-                           spillsMap.put(zoneSchedule.getRoomRef(), intervalSpills);
-                           ScheduleUtil.trimZoneSchedules(spillsMap);
-                       }
+                   .setPositiveButton("Force-Trim", (dialog, id) -> {
+                       HashMap<String, ArrayList<Interval>> spillsMap = new HashMap<>();
+                       spillsMap.put(zoneSchedule.getRoomRef(), intervalSpills);
+                       ScheduleUtil.trimZoneSchedules(spillsMap);
                    });
     
             AlertDialog alert = builder.create();
@@ -485,24 +464,7 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
         return true;
     }
 
-    public static double getTuner(String id)
-    {
-        CCUHsApi  hayStack = CCUHsApi.getInstance();
-        ArrayList values   = hayStack.readPoint(id);
-        if (values != null && values.size() > 0)
-        {
-            for (int l = 1; l <= values.size(); l++)
-            {
-                HashMap valMap = ((HashMap) values.get(l - 1));
-                if (valMap.get("val") != null)
-                {
-                    return Double.parseDouble(valMap.get("val").toString());
-                }
-            }
-        }
-        return 0;
-    }
-    
+
     private void setScheduleType(String id, ScheduleType schedule) {
         new AsyncTask<String, Void, Void>() {
             @Override

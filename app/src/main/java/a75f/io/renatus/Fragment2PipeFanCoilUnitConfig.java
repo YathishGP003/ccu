@@ -4,13 +4,10 @@ import static a75f.io.device.bacnet.BacnetUtilKt.addBacnetTags;
 
 import android.app.Dialog;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.os.Bundle;
-import android.os.Handler;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,7 +19,6 @@ import android.widget.NumberPicker;
 import android.widget.RelativeLayout;
 import android.widget.ToggleButton;
 
-import java.lang.reflect.Field;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -32,6 +28,7 @@ import a75f.io.device.serial.CcuToCmOverUsbSmartStatControlsMessage_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.device.serial.SmartStatConditioningMode_t;
 import a75f.io.device.serial.SmartStatFanSpeed_t;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
@@ -42,7 +39,6 @@ import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.ss2pfcu.TwoPipeFanCoilUnitConfiguration;
 import a75f.io.logic.bo.building.ss2pfcu.TwoPipeFanCoilUnitProfile;
-import a75f.io.logic.bo.building.sshpu.HeatPumpUnitProfile;
 import a75f.io.logic.bo.util.DesiredTempDisplayMode;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
@@ -53,7 +49,6 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnCheckedChanged;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
-import io.reactivex.rxjava3.disposables.Disposable;
 
 public class Fragment2PipeFanCoilUnitConfig extends BaseDialogFragment implements CompoundButton.OnCheckedChangeListener {
     public static final String ID = Fragment2PipeFanCoilUnitConfig.class.getSimpleName();
@@ -66,7 +61,7 @@ public class Fragment2PipeFanCoilUnitConfig extends BaseDialogFragment implement
     private TwoPipeFanCoilUnitProfile twoPfcuProfile;
     private TwoPipeFanCoilUnitConfiguration mProfileConfig;
 
-    private CompositeDisposable compositeDisposable = new CompositeDisposable();
+    private final CompositeDisposable compositeDisposable = new CompositeDisposable();
 
     CustomCCUSwitch switchThermistor1;
     CustomCCUSwitch switchFanMediumY1;
@@ -173,10 +168,10 @@ public class Fragment2PipeFanCoilUnitConfig extends BaseDialogFragment implement
         }
 
         if (twoPfcuProfile != null) {
-            Log.d("CPUConfig", "Get Config: "+twoPfcuProfile.getProfileType()+","+twoPfcuProfile.getProfileConfiguration(mSmartNodeAddress)+","+mSmartNodeAddress);
+            CcuLog.d("CPUConfig", "Get Config: "+twoPfcuProfile.getProfileType()+","+twoPfcuProfile.getProfileConfiguration(mSmartNodeAddress)+","+mSmartNodeAddress);
             mProfileConfig = (TwoPipeFanCoilUnitConfiguration) twoPfcuProfile.getProfileConfiguration(mSmartNodeAddress);
         } else {
-            Log.d("CPUConfig", "Create Profile: ");
+            CcuLog.d("CPUConfig", "Create Profile: ");
             twoPfcuProfile = new TwoPipeFanCoilUnitProfile();
 
         }
@@ -224,7 +219,6 @@ public class Fragment2PipeFanCoilUnitConfig extends BaseDialogFragment implement
             toggleAutoForceOccupied.setChecked(mProfileConfig.enableAutoForceOccupied);
             toggleAutoaway.setChecked(mProfileConfig.enableAutoAway);
 
-            //switchExtTempSensor.setChecked(mProfileConfig.enableThermistor2);
             switchThermistor1.setChecked(mProfileConfig.enableThermistor1);
 
                 switchFanMediumY1.setChecked(mProfileConfig.isOpConfigured(Port.RELAY_ONE));
@@ -245,8 +239,7 @@ public class Fragment2PipeFanCoilUnitConfig extends BaseDialogFragment implement
 
             compositeDisposable.add(RxjavaUtil.executeBackgroundTaskWithDisposable(
                     ()->{
-                        ProgressDialogUtils.showProgressDialog(getActivity(),"Saving 2PFCU Configuration");
-                    },
+                        ProgressDialogUtils.showProgressDialog(getActivity(),"Saving 2PFCU Configuration");},
                     ()->{
                         CCUHsApi.getInstance().resetCcuReady();
                         setup2PFCUZoneProfile();
@@ -344,29 +337,7 @@ public class Fragment2PipeFanCoilUnitConfig extends BaseDialogFragment implement
             twoPfcuProfile.updateLogicalMapAndPoints(mSmartNodeAddress, twoPfcuConfig, roomRef);
         }
         L.ccu().zoneProfiles.add(twoPfcuProfile);
-        Log.d("CPUConfig", "Set Config: Profiles - " + L.ccu().zoneProfiles.size());
-    }
-
-    private void setDividerColor(NumberPicker picker) {
-        Field[] numberPickerFields = NumberPicker.class.getDeclaredFields();
-        for (Field field : numberPickerFields) {
-            if (field.getName().equals("mSelectionDivider")) {
-                field.setAccessible(true);
-                try {
-                    field.set(picker, getResources().getDrawable(R.drawable.divider_np));
-                } catch (IllegalArgumentException e) {
-                    Log.v("NP", "Illegal Argument Exception");
-                    e.printStackTrace();
-                } catch (Resources.NotFoundException e) {
-                    Log.v("NP", "Resources NotFound");
-                    e.printStackTrace();
-                } catch (IllegalAccessException e) {
-                    Log.v("NP", "Illegal Access Exception");
-                    e.printStackTrace();
-                }
-                break;
-            }
-        }
+        CcuLog.d("CPUConfig", "Set Config: Profiles - " + L.ccu().zoneProfiles.size());
     }
 
     @Override
@@ -438,8 +409,8 @@ public class Fragment2PipeFanCoilUnitConfig extends BaseDialogFragment implement
     public static double getDesiredTemp(short node)
     {
         HashMap point = CCUHsApi.getInstance().read("point and air and temp and desired and average and sp and group == \""+node+"\"");
-        if (point == null || point.size() == 0) {
-            Log.d("2PFCU", " Desired Temp point does not exist for equip , sending 0");
+        if (point == null || point.isEmpty()) {
+            CcuLog.d("2PFCU", " Desired Temp point does not exist for equip , sending 0");
             return 72;
         }
         return CCUHsApi.getInstance().readPointPriorityVal(point.get("id").toString());

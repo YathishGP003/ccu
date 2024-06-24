@@ -22,7 +22,6 @@ import android.os.Looper;
 import android.text.Editable;
 import android.text.Html;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -58,7 +57,6 @@ import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -178,7 +176,7 @@ public class AboutFragment extends Fragment {
             String action = intent.getAction();
             if (DownloadManager.ACTION_DOWNLOAD_COMPLETE.equals(action)) {
                 long downloadId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, 0);
-                Log.d("CCU_DOWNLOAD", String.format("Received download complete for %d from %d and %d", downloadId, AppInstaller.getHandle().getCCUAppDownloadId(), AppInstaller.getHandle().getHomeAppDownloadId()));
+                CcuLog.d("CCU_DOWNLOAD", String.format("Received download complete for %d from %d and %d", downloadId, AppInstaller.getHandle().getCCUAppDownloadId(), AppInstaller.getHandle().getHomeAppDownloadId()));
                 if (downloadId == AppInstaller.getHandle().getCCUAppDownloadId())
                     mCCUAppDownloaded = true;
 
@@ -561,7 +559,7 @@ public class AboutFragment extends Fragment {
                     });
                 }
             } catch (Exception e) {
-                Log.i("Version management","Version management Exception ");
+                CcuLog.i("Version management","Version management Exception ");
                 e.printStackTrace();
             }
         } else {
@@ -857,12 +855,7 @@ public class AboutFragment extends Fragment {
         loading = (ProgressBar) layout.findViewById(R.id.loading);
         tvmessage.setText("Checking for updates. Please wait...");
         Button close = (Button) layout.findViewById(R.id.close_button);
-        close.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                alertDialog.dismiss();
-            }
-        });
+        close.setOnClickListener(v -> alertDialog.dismiss());
         builder.setView(layout);
         builder.setCancelable(false);
         alertDialog = builder.create();
@@ -882,7 +875,7 @@ public class AboutFragment extends Fragment {
     }
 
     private String otpWithDoubleSpaceBetween(String otp){
-        StringBuffer otpwithSpace = new StringBuffer();
+        StringBuilder otpwithSpace = new StringBuilder();
         String doubleSpace = "  ";
         for(Character ch : otp.toCharArray()){
             otpwithSpace.append(ch);
@@ -1103,7 +1096,7 @@ public class AboutFragment extends Fragment {
                 stringList.add(entry.getKey());
             }
         }
-        Collections.sort(stringList, new VersionComparator());
+        stringList.sort(new VersionComparator());
         List<String> tempHash = new ArrayList<>();
         for (String version : stringList) {
             for (Map.Entry<String, String> entry : hashmaps.entrySet()) {

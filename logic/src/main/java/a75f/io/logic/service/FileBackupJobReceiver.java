@@ -3,7 +3,6 @@ import static a75f.io.logic.L.TAG_CCU_BACKUP;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
 import com.google.common.base.Strings;
 
 import org.projecthaystack.HRef;
@@ -11,7 +10,7 @@ import org.projecthaystack.HRef;
 import java.io.File;
 import java.io.IOException;
 import a75f.io.api.haystack.CCUHsApi;
-import a75f.io.logic.bo.util.CCUUtils;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.cloud.FileBackupManager;
 import a75f.io.logic.util.ConnectionUtil;
 import a75f.io.logic.util.RxTask;
@@ -35,7 +34,7 @@ public class FileBackupJobReceiver extends BroadcastReceiver {
             if (Strings.isNullOrEmpty(siteId)) {
                 return;
             }
-            Log.i(TAG_CCU_BACKUP," File backup service invoked  for Config files "+ccuId);
+            CcuLog.i(TAG_CCU_BACKUP," File backup service invoked  for Config files "+ccuId);
             FileOperationsUtil.zipSingleFile(FileConstants.CCU_CONFIG_FILE_PATH, FileConstants.CCU_CONFIG_FILE_NAME,
                     ccuId);
             File file = new File(FileConstants.CCU_CONFIG_FILE_PATH + ccuId  + ".zip");

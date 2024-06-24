@@ -5,15 +5,10 @@ import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
 import static a75f.io.logic.bo.building.ZoneState.HEATING;
 import static a75f.io.logic.bo.building.ZoneState.RFDEAD;
 import static a75f.io.logic.bo.building.ZoneState.TEMPDEAD;
-
-import android.util.Log;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
-
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
@@ -28,7 +23,6 @@ import a75f.io.logic.bo.building.hvac.SSEStage;
 import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.schedules.ScheduleUtil;
-import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.StandaloneTunerUtil;
 
 /**
@@ -48,7 +42,7 @@ public class SingleStageProfile extends ZoneProfile
         sseEquip = new SingleStageEquip(getProfileType(), addr);
     }
 
-    public void updateSSEEquip(Short nodeaddr, SingleStageConfig config, String roomRef) {
+    public void updateSSEEquip(SingleStageConfig config) {
         sseEquip.updateHaystackPoints(config);
     }
 
@@ -116,7 +110,7 @@ public class SingleStageProfile extends ZoneProfile
             boolean autoForceOccupied = ScheduleUtil.isZoneOccupied(CCUHsApi.getInstance(), zoneId, Occupancy.AUTOFORCEOCCUPIED);
             boolean forceOccupied = ScheduleUtil.isZoneOccupied(CCUHsApi.getInstance(), zoneId, Occupancy.FORCEDOCCUPIED);
             String stageStatus = "";
-            Log.d("SSE", "sse profile11 =" + roomTemp + "," + sseStage.name()+","+avgSetTemp);
+            CcuLog.d("SSE", "sse profile11 =" + roomTemp + "," + sseStage.name()+","+avgSetTemp);
             if ((roomTemp > 0) && (sseStage == SSEStage.COOLING)) {
                 //Zone is in Cooling
                 state = COOLING;
@@ -247,10 +241,10 @@ public class SingleStageProfile extends ZoneProfile
         String zoneId = HSUtil.getZoneIdFromEquipId(equip.getId());
         double relay2config = getConfigEnabled("enable and relay2",(short)sseEquip.nodeAddr);
         boolean occupied = ScheduleUtil.isZoneOccupied(CCUHsApi.getInstance(), zoneId, Occupancy.OCCUPIED);
-        String stageStatus = "";
+        String stageStatus;
 
         if ((relay2config > 0) && occupied) {
-            stageStatus = stageStatus.isEmpty() ? "Fan ON" : stageStatus + ", Fan ON";
+            stageStatus = "Fan ON";
             setCmdSignal("fan and stage1", 1.0, (short) sseEquip.nodeAddr);
         } else {
             setCmdSignal("fan and stage1", 0, (short) sseEquip.nodeAddr);

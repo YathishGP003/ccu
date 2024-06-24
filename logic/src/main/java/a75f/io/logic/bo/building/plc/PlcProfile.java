@@ -81,7 +81,7 @@ public class PlcProfile extends ZoneProfile
         if (plcEquip.hasPendingTunerChange()) plcEquip.refreshPITuners();
 
         if (plcEquip.isEnabledAnalog2InForSp()) {
-            Log.d(L.TAG_CCU_ZONE,"Use analog 2 offset "+plcEquip.getSpVariable());
+            CcuLog.d(L.TAG_CCU_ZONE,"Use analog 2 offset "+plcEquip.getSpVariable());
             targetValue = plcEquip.getSpVariable();
         }
         
@@ -115,7 +115,7 @@ public class PlcProfile extends ZoneProfile
         plcEquip.getPIController().dump();
         CcuLog.i(L.TAG_CCU_ZONE, "PI Tuners: proportionalGain " + plcEquip.plc.getProportionalGain() + ", integralGain " + plcEquip.plc.getIntegralGain() +
                 ", proportionalSpread " + plcEquip.plc.getMaxAllowedError() + ", integralMaxTimeout " + plcEquip.plc.getIntegralMaxTimeout());
-        Log.d(L.TAG_CCU_ZONE, "PlcProfile, processVariable: "+processVariable+", targetValue: "+targetValue+", controlVariable: "+controlVariable);
+        CcuLog.d(L.TAG_CCU_ZONE, "PlcProfile, processVariable: "+processVariable+", targetValue: "+targetValue+", controlVariable: "+controlVariable);
     }
     
     /**

@@ -13,8 +13,6 @@ import static a75f.io.logic.bo.building.system.SystemMode.AUTO;
 import static a75f.io.logic.bo.building.system.SystemMode.COOLONLY;
 import static a75f.io.logic.bo.building.system.SystemMode.HEATONLY;
 
-import android.util.Log;
-
 import com.google.common.collect.EvictingQueue;
 
 import org.projecthaystack.UnknownRecException;
@@ -62,7 +60,7 @@ public class DabSystemController extends SystemController
     double proportionalGain = 0.5;
     double integralGain = 0.5;
     
-    private static DabSystemController instance = new DabSystemController();
+    private static final DabSystemController instance = new DabSystemController();
     
     SystemPILoopController piController;
     
@@ -333,9 +331,8 @@ public class DabSystemController extends SystemController
         double cmTempInfForPercentileZonesDead = TunerUtil.readTunerValByQuery("dead and percent and influence",
                                                                                L.ccu().systemProfile.getSystemEquipRef());
         if(zoneDeadCount > 0)
-            CcuLog.d(L.TAG_CCU_SYSTEM, "DabSysController = "+hasTi+","+zoneDeadCount+"," +
-                                       ""+zoneCount+","+cmTempInfForPercentileZonesDead
-            );
+            CcuLog.d(L.TAG_CCU_SYSTEM, "DabSysController = "+hasTi+","+zoneDeadCount+"," +zoneCount+","
+                    +cmTempInfForPercentileZonesDead);
 
         if( (zoneCount == 0) || (!hasTi && ((zoneDeadCount > 0)
                    && (((double)(zoneDeadCount*100)/(zoneDeadCount + zoneCount)) >= cmTempInfForPercentileZonesDead)))){
@@ -606,8 +603,7 @@ public class DabSystemController extends SystemController
     }
     
     public double getEquipCurrentTemp(String equipRef) {
-        return CCUHsApi.getInstance().readHisValByQuery("point and air and temp and sensor and current and equipRef == \"" +
-                                                        ""+equipRef+"\""
+        return CCUHsApi.getInstance().readHisValByQuery("point and air and temp and sensor and current and equipRef == \"" +equipRef+"\""
         );
     }
     public double getCMCurrentTemp(String equipRef) {
@@ -690,8 +686,7 @@ public class DabSystemController extends SystemController
     }
     
     private double getEquipCo2(String equipRef) {
-        return CCUHsApi.getInstance().readHisValByQuery("point and air and co2 and sensor and current and equipRef == \"" +
-                                                        ""+equipRef+"\""
+        return CCUHsApi.getInstance().readHisValByQuery("point and air and co2 and sensor and current and equipRef == \"" +equipRef+"\""
         );
     }
     
@@ -888,7 +883,7 @@ public class DabSystemController extends SystemController
             primaryDamperPos = damperPosMap.get(normalizedPrimaryDamper.get("id").toString());
             secondaryDamperPos = damperPosMap.get(normalizedSecondaryamper.get("id").toString());
             if (deadZones.contains(dabEquip.get("id").toString())) {
-                Log.d("CCU_SYSTEM", "Skip Normalize, Equip Dead " + dabEquip.toString());
+                CcuLog.d(L.TAG_CCU_SYSTEM, "Skip Normalize, Equip Dead " + dabEquip);
                 normalizedPrimaryDamperPos = primaryDamperPos;
                 normalizedSecondaryDamperPos = secondaryDamperPos;
             } else {
@@ -1043,7 +1038,7 @@ public class DabSystemController extends SystemController
             adjustedDamperPos = Math.min(adjustedDamperPos, SystemConstants.DAMPER_POSITION_MAX);
             
             if (deadZones.contains(dabEquip.get("id").toString())) {
-                Log.d("CCU_SYSTEM", "Skip Cumulative damper adjustment, Equip Dead " + dabEquip.toString());
+                CcuLog.d(L.TAG_CCU_SYSTEM, "Skip Cumulative damper adjustment, Equip Dead " + dabEquip);
                 adjustedDamperOpeningMap.put(damperPosPrimary.get("id").toString(), primaryDamperVal);
             } else {
                 adjustedDamperOpeningMap.put(damperPosPrimary.get("id").toString(), adjustedDamperPos);
@@ -1059,7 +1054,7 @@ public class DabSystemController extends SystemController
             adjustedDamperPos = Math.min(adjustedDamperPos, SystemConstants.DAMPER_POSITION_MAX);
             
             if (deadZones.contains(dabEquip.get("id").toString())) {
-                Log.d("CCU_SYSTEM", "Skip Cumulative damper adjustment, Equip Dead " + dabEquip.toString());
+                CcuLog.d("CCU_SYSTEM", "Skip Cumulative damper adjustment, Equip Dead " + dabEquip);
                 adjustedDamperOpeningMap.put(damperPosSecondary.get("id").toString(), secondaryDamperVal);
             } else {
                 adjustedDamperOpeningMap.put(damperPosSecondary.get("id").toString(), adjustedDamperPos);

@@ -1,7 +1,4 @@
 package a75f.io.logic.tuners;
-
-import android.util.Log;
-
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -22,7 +19,7 @@ public class VrvTuners {
                                            String tz){
         
         HashMap tuner = CCUHsApi.getInstance().read("point and tuner and default and vrv");
-        if (tuner != null && tuner.size() > 0) {
+        if (tuner != null && !tuner.isEmpty()) {
             CcuLog.d(L.TAG_CCU_SYSTEM, "Default VRV Tuner points already exist");
             return;
         }
@@ -56,8 +53,8 @@ public class VrvTuners {
     
     public static void addEquipVrvTuners(CCUHsApi hayStack, String siteRef, String equipdis, String equipref,
                                          String roomRef, String floorRef, String tz) {
-        
-        Log.d("CCU", "addEquipVrvTuners for " + equipdis);
+
+        CcuLog.d(L.TAG_CCU, "addEquipVrvTuners for " + equipdis);
         //ZoneTuners.addZoneTunersForEquip(hayStack, siteRef, equipdis, equipref, roomRef, floorRef, tz);
         
         Point coolingDbMultiplier = new Point.Builder()
@@ -154,7 +151,7 @@ public class VrvTuners {
                 .addMarker("occupancy").addMarker("detection").addMarker("sp").addMarker("vrv")
                 .addMarker("his").addMarker("zone")
                 .setEnums("false,true")
-                .setGroup(nodeAddress.toString())
+                .setGroup(nodeAddress)
                 .setTz(tz)
                 .build();
         String occupancyDetectionPointID = hayStack.addPoint(occupancyDetectionPoint);
@@ -169,7 +166,7 @@ public class VrvTuners {
                 .addMarker("vrv").addMarker("occupancy").addMarker("logical").addMarker("zone")
                 .addMarker("his").addMarker("cur").addMarker("sensor").addMarker("standalone")
                 .setEnums("false,true")
-                .setGroup(nodeAddress.toString())
+                .setGroup(nodeAddress)
                 .setTz(tz)
                 .build();
         BacnetUtilKt.addBacnetTags(occupancySensor, BacnetIdKt.OCCUPANCYID,BacnetUtilKt.BINARY_VALUE,Integer.parseInt(nodeAddress));
@@ -215,7 +212,7 @@ public class VrvTuners {
                 .addMarker("control").addMarker("his").addMarker("cmd")
                 .setHisInterpolate("cov").setEnums("off,on").addMarker(Tags.STANDALONE)
                 .addMarker("vrv")
-                .setGroup(nodeAddr.toString())
+                .setGroup(nodeAddr)
                 .setTz(tz)
                 .build();
         String autoAwayPointId = hayStack.addPoint(autoAwayPoint);

@@ -1,12 +1,12 @@
 package a75f.io.logic.migration.heartbeat;
 
-import android.util.Log;
 import java.util.HashMap;
 import java.util.List;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Tags;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.bo.building.dab.DabEquip;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.heartbeat.HeartBeat;
@@ -22,10 +22,10 @@ public class HeartbeatDiagMigration {
 
     private void checkForHeartbeatDiagMigration(){
         if (!PreferenceUtil.isHeartbeatMigrationAsDiagDone()) {
-            Log.i(CCU_HEART_BEAT_DIAG_MIGRATION,"heartbeat diag migration started ");
+            CcuLog.i(CCU_HEART_BEAT_DIAG_MIGRATION,"heartbeat diag migration started ");
             upgradeEquipsWithHeartbeatPoints(CCUHsApi.getInstance());
             PreferenceUtil.setHeartbeatMigrationAsDiagStatus(true);
-            Log.i(CCU_HEART_BEAT_DIAG_MIGRATION,"heartbeat diag migration completed ");
+            CcuLog.i(CCU_HEART_BEAT_DIAG_MIGRATION,"heartbeat diag migration completed ");
         }
     }
 
@@ -66,7 +66,7 @@ public class HeartbeatDiagMigration {
                         modbusEquip.getSiteRef(), modbusEquip.getRoomRef(), modbusEquip.getFloorRef(),
                         Integer.parseInt(slaveId), "modbus", ProfileType.valueOf(modbusEquip.getProfile()),
                         modbusEquip.getTz()));
-                Log.i(CCU_HEART_BEAT_DIAG_MIGRATION,"heartbeat diag point added for modbus with the address "+slaveId);
+                CcuLog.d(CCU_HEART_BEAT_DIAG_MIGRATION,"heartbeat diag point added for modbus with the address "+slaveId);
             }
             else if(isHeartbeatDiagCreated(hayStack, slaveId) && isRssiPointMoreThanOne(hayStack, slaveId)){
                 deleteDanglingRssiPoint(hayStack, slaveId);
@@ -88,7 +88,7 @@ public class HeartbeatDiagMigration {
             if(!isHeartbeatDiagCreated(hayStack, nodeAddress)){
                 deleteNonDiagHeartbeatPoint(hayStack, nodeAddress);
                 deleteRssiPointReferringNonDiagHeartbeatPoint(hayStack, nodeAddress);
-                String heartBeatId = "";
+                String heartBeatId;
                 if(isStandAlone){
                     heartBeatId = hayStack.addPoint(HeartBeat.getHeartBeatPoint(equipDisplay, equip.getId(), equip.getSiteRef(),
                             equip.getRoomRef(), equip.getFloorRef(), Integer.parseInt(nodeAddress),
@@ -99,7 +99,7 @@ public class HeartbeatDiagMigration {
                             equip.getSiteRef(), equip.getRoomRef(), equip.getFloorRef(), Integer.parseInt(nodeAddress),
                             profile, equip.getTz(), false));
                 }
-                Log.i(CCU_HEART_BEAT_DIAG_MIGRATION,
+                CcuLog.d(CCU_HEART_BEAT_DIAG_MIGRATION,
                         "heartbeat diag point added for "+ profile +" with the address  "+nodeAddress);
                 addRssiPointToDevice(hayStack, profile, nodeAddress, equip.getTz(), heartBeatId);
             }
@@ -119,7 +119,7 @@ public class HeartbeatDiagMigration {
             if(!heartbeatId.equals(rssiPoint.get("pointRef").toString())){
                 String rssiId = rssiPoint.get("id").toString();
                 hayStack.deleteEntityTree(rssiId);
-                Log.i(CCU_HEART_BEAT_DIAG_MIGRATION,
+                CcuLog.d(CCU_HEART_BEAT_DIAG_MIGRATION,
                         "Dangling rssi point with id  "+ rssiId +" for the address "+nodeAddress +" is deleted");
             }
         }
@@ -131,7 +131,7 @@ public class HeartbeatDiagMigration {
 
     private void deleteNonDiagHeartbeatPoint(CCUHsApi hayStack, String nodeAddress){
         HashMap heartbeatPoint = hayStack.read("point and heartbeat and group == \""+nodeAddress+"\"");
-        if(heartbeatPoint.size() > 0){
+        if(!heartbeatPoint.isEmpty()){
             hayStack.deleteEntityTree(heartbeatPoint.get("id").toString());
         }
     }
@@ -144,7 +144,7 @@ public class HeartbeatDiagMigration {
     private void deleteRssiPointReferringNonDiagHeartbeatPoint(CCUHsApi hayStack, String nodeAddress){
         String rssiDis = "rssi-"+nodeAddress;
         HashMap rssiHeartbeatPoint = hayStack.read("point and rssi and dis == \""+rssiDis+"\"");
-        if(rssiHeartbeatPoint.size() > 0){
+        if(!rssiHeartbeatPoint.isEmpty()){
             hayStack.deleteEntityTree(rssiHeartbeatPoint.get("id").toString());
         }
     }
@@ -157,7 +157,7 @@ public class HeartbeatDiagMigration {
                 timeZone);
         rawPoint.setPointRef(heartBeatId);
         hayStack.addPoint(rawPoint);
-        Log.i(CCU_HEART_BEAT_DIAG_MIGRATION,"rssi point added for "+ profile +" with the address "+nodeAddress);
+        CcuLog.d(CCU_HEART_BEAT_DIAG_MIGRATION,"rssi point added for "+ profile +" with the address "+nodeAddress);
     }
 
 }

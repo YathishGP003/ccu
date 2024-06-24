@@ -1,25 +1,20 @@
 package a75f.io.logic.tuners;
 
-import android.util.Log;
-
-import org.projecthaystack.HNum;
-import org.projecthaystack.HRef;
-
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.HisItem;
 import a75f.io.api.haystack.Point;
-import a75f.io.logic.util.RxTask;
+import a75f.io.logger.CcuLog;
+import a75f.io.logic.L;
 
 public class ZoneTuners {
     
     public static void addZoneTunersForEquip(CCUHsApi hayStack, String siteRef, String equipdis, String equipref,
                                              String roomRef, String floorRef, String tz ) {
-        Log.d("CCU", "addZoneTunersForEquip for " + equipdis);
+        CcuLog.d(L.TAG_CCU, "addZoneTunersForEquip for " + equipdis);
         List<HisItem> hisItems = new ArrayList<>();
 
         Point zoneDeadTime = new Point.Builder()

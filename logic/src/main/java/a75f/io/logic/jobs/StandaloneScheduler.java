@@ -1,8 +1,6 @@
 package a75f.io.logic.jobs;
 
 import android.os.AsyncTask;
-import android.util.Log;
-
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
 
@@ -23,24 +21,20 @@ import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.ZoneTempState;
 import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
-import a75f.io.logic.tuners.StandaloneTunerUtil;
 import a75f.io.logic.tuners.TunerConstants;
-import a75f.io.logic.tuners.TunerUtil;
 
 public class StandaloneScheduler {
 
-    private static final int SCHEDULER_PRIORITY = 12;
-
     private static ZoneDataInterface zoneDataInterface = null;
 
-    static HashMap<String, String> standaloneStatus = new HashMap<String, String>();
+    static HashMap<String, String> standaloneStatus = new HashMap<>();
 
     private static final String TAG = "SAScheduler";
     public static Occupied processEquip( Equip equip, Schedule equipSchedule, Schedule vacation) {
 
 
-        Log.i(TAG, "Equip: " + equip);
-        Log.i(TAG, "Equip Schedule: " + equipSchedule);
+        CcuLog.d(TAG, "Equip: " + equip);
+        CcuLog.d(TAG, "Equip Schedule: " + equipSchedule);
         Occupied occ = equipSchedule.getCurrentValues();
         //When schedule is deleted
         if (occ == null) {
@@ -84,7 +78,7 @@ public class StandaloneScheduler {
     public static void setDesiredTemp(Equip equip, Double desiredTemp, String flag, boolean isForcedOccupied) {
         //CcuLog.d(L.TAG_CCU_SCHEDULER, "Equip: " + equip.getId() + " Temp: " + desiredTemp + " Flag: " + flag);
         ArrayList points = CCUHsApi.getInstance().readAll("point and air and temp and " + flag + " and desired and sp and equipRef == \"" + equip.getId() + "\"");
-        if (points == null || points.size() == 0) {
+        if (points == null || points.isEmpty()) {
             return; //Equip might have been deleted.
         }
         final String id = ((HashMap) points.get(0)).get("id").toString();
@@ -154,13 +148,7 @@ public class StandaloneScheduler {
         }
 
         if((temperatureState != ZoneTempState.FAN_OP_MODE_OFF) && (temperatureState != ZoneTempState.TEMP_DEAD)) {
-            if (status.equals("OFF ") && relayStages.size() > 0) status = "";
-            /*if(relayStages.containsKey("FanStage3") && relayStages.containsKey("FanStage2") && relayStages.containsKey("FanStage1"))
-                status = status + " Fan 1,2&3 ON";
-            else if (relayStages.containsKey("FanStage3") && relayStages.containsKey("FanStage2"))
-                status = status + " Fan 2&3 ON";
-            else if (relayStages.containsKey("FanStage3") && relayStages.containsKey("FanStage1"))
-                status = status + " Fan 1&3 ON";*/
+            if (status.equals("OFF ") && !relayStages.isEmpty()) status = "";
            else if (relayStages.containsKey("FanStage2") && relayStages.containsKey("FanStage1"))
                 status = status + " Fan 1&2 ON";
             else if (relayStages.containsKey("Humidifier") && relayStages.containsKey("FanStage1"))
@@ -184,16 +172,16 @@ public class StandaloneScheduler {
             double curState = CCUHsApi.getInstance().readHisValByQuery("point and temp and operating and mode and his and equipRef == \""+equipId+"\"");
             if(curState != state.ordinal())
                 CCUHsApi.getInstance().writeHisValByQuery("point and temp and operating and mode and his and equipRef == \""+equipId+"\"" , (double)state.ordinal());
-            if(getSmartStatStatusString(equipId).equals(status) == false) {
+            if(!getSmartStatStatusString(equipId).equals(status)) {
                 if(standaloneStatus.containsKey(equipId))standaloneStatus.remove(equipId);
                 standaloneStatus.put(equipId, status);
-                updateStandaloneEquipStatus(equipId,status,state);
+                updateStandaloneEquipStatus(equipId,status);
             }
         }
 
     }
     public static String getSmartStatStatusString(String equipRef) {
-        if(standaloneStatus.size() > 0 && standaloneStatus.containsKey(equipRef))
+        if(!standaloneStatus.isEmpty() && standaloneStatus.containsKey(equipRef))
             return standaloneStatus.get(equipRef);
         else
             return "OFF";
@@ -237,17 +225,17 @@ public class StandaloneScheduler {
             protected void onPostExecute( final Void result ) {
                 // continue what you are doing...
                 if (zoneDataInterface != null) {
-                    Log.i("PubNub","Zone Data updateOperationalPoints Refresh");
+                    CcuLog.i("PubNub","Zone Data updateOperationalPoints Refresh");
                     zoneDataInterface.refreshScreen("", false);
                 }
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
     }
 
-	public static void updateStandaloneEquipStatus(String equipId,String status, ZoneState state) {
+	public static void updateStandaloneEquipStatus(String equipId,String status) {
         CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and equipRef == \""+equipId+"\"", status);
         if (zoneDataInterface != null) {
-            Log.i("PubNub","updateStandaloneEquipStatus Refresh");
+            CcuLog.i("PubNub","updateStandaloneEquipStatus Refresh");
             zoneDataInterface.refreshScreen("", false);
         }
 

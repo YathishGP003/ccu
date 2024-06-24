@@ -11,7 +11,6 @@ import a75f.io.domain.migration.DiffManger
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.TunerSyncFailed
-import android.util.Log
 import io.seventyfivef.ph.core.Tags
 import kotlinx.coroutines.launch
 import org.projecthaystack.HDict
@@ -170,12 +169,10 @@ object TunerEquip : CCUHsApi.OnCcuRegistrationCompletedListener, DiffManger.OnMi
                 )
                 throw TunerSyncFailed("Failed to fetch tuners")
             }
-            val hDictList = ArrayList<HDict>()
             val rowIterator = writableArrayPoints.iterator()
             while (rowIterator.hasNext()) {
                 val row = rowIterator.next() as HRow
                 val id = row["id"].toString()
-                val kind = row["kind"].toString()
                 val data = row["data"]
                 CcuLog.i(L.TAG_CCU_TUNER, "Imported point array $data")
                 if (data is HList && data.size() > 0) {
@@ -237,7 +234,7 @@ object TunerEquip : CCUHsApi.OnCcuRegistrationCompletedListener, DiffManger.OnMi
     }
 
     override fun onMigrationCompletedCompleted(hsApi: CCUHsApi) {
-        Log.d(Domain.LOG_TAG, "invoking onMigrationCompletedCompleted")
+        CcuLog.i(Domain.LOG_TAG, "invoking onMigrationCompletedCompleted")
         syncBuildingTuners(hsApi)
     }
 }

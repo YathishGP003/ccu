@@ -408,7 +408,7 @@ public class FragmentCPUConfiguration extends BaseDialogFragment implements Comp
         if (mProfileConfig == null) {
             mCPUProfile.addLogicalMapAndPoints(mSmartNodeAddress, cpuConfig, floorRef, roomRef);
         } else {
-            mCPUProfile.updateLogicalMapAndPoints(mSmartNodeAddress, cpuConfig, roomRef);
+            mCPUProfile.updateLogicalMapAndPoints(mSmartNodeAddress, cpuConfig);
         }
         L.ccu().zoneProfiles.add(mCPUProfile);
         CcuLog.d("CPUConfig", "Set Config: Profiles - " + L.ccu().zoneProfiles.size());

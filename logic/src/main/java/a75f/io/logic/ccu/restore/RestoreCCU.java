@@ -2,8 +2,6 @@ package a75f.io.logic.ccu.restore;
 
 import static a75f.io.logic.bo.util.CCUUtils.isCCUOfflinePropertySet;
 import android.content.SharedPreferences;
-import android.util.Log;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -30,6 +28,7 @@ import a75f.io.api.haystack.RestoreCCUHsApi;
 import a75f.io.api.haystack.RetryCountCallback;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.exception.NullHGridException;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.tuners.TunerEquip;
 
@@ -68,8 +67,8 @@ public class RestoreCCU {
     }
 
     public List<CCU> getCCUList(String siteCode, JSONArray ccuArray) {
-      Log.i(TAG, "Fetching all the CCU details");
-      RetryCountCallback retryCountCallback = retryCount -> Log.i(TAG, "retrying to get CCU list with the retry count "+retryCount);
+        CcuLog.i(TAG, "Fetching all the CCU details");
+      RetryCountCallback retryCountCallback = retryCount -> CcuLog.d(TAG, "retrying to get CCU list with the retry count "+retryCount);
         HGrid ccuGrid = getCcuHGrid(siteCode, retryCountCallback);
         Iterator ccuGridIterator = ccuGrid.iterator();
         List<String> equipRefs = new LinkedList<>();
@@ -117,8 +116,8 @@ public class RestoreCCU {
         return ccuList;
     }
 
-    public void restoreCCUDevice(CCU ccu, ReplaceCCUTracker replaceCCUTracker){
-        RetryCountCallback retryCountCallback = retryCount -> Log.i(TAG, "Retry count while restoring CCU device "+ retryCount);
+    public void restoreCCUDevice(CCU ccu){
+        RetryCountCallback retryCountCallback = retryCount -> CcuLog.d(TAG, "Retry count while restoring CCU device "+ retryCount);
         restoreCCUHsApi.readCCUDevice(ccu.getCcuId(), retryCountCallback);
         getSettingPointsOfCCUDevice(ccu.getCcuId(), retryCountCallback);
         getDiagEquipOfCCU(ccu.getCcuId(), ccu.getSiteCode(), retryCountCallback);
@@ -136,13 +135,13 @@ public class RestoreCCU {
     }
 
     private HGrid getAllEquips(String ccuId, String siteCode){
-        RetryCountCallback retryCountCallback = retryCount -> Log.i(TAG, "Retry count while restoring all the equips "+ retryCount);
+        RetryCountCallback retryCountCallback = retryCount -> CcuLog.d(TAG, "Retry count while restoring all the equips "+ retryCount);
         String gatewayRef = getGatewayRefFromCCU(ccuId, siteCode, retryCountCallback);
         String ahuRef = getAhuRefFromCCU(ccuId, siteCode, retryCountCallback);
-        Log.i("CCU_DEBUG", "getAllEquips: gatewayRef : "+gatewayRef);
-        Log.i("CCU_DEBUG", "getAllEquips: ahuRef : "+ahuRef);
-        Log.i("CCU_DEBUG", "getAllEquips: ccuId : "+ccuId);
-        Log.i("CCU_DEBUG", "getAllEquips: siteCode : "+siteCode);
+        CcuLog.i("CCU_DEBUG", "getAllEquips: gatewayRef : "+gatewayRef);
+        CcuLog.i("CCU_DEBUG", "getAllEquips: ahuRef : "+ahuRef);
+        CcuLog.i("CCU_DEBUG", "getAllEquips: ccuId : "+ccuId);
+        CcuLog.i("CCU_DEBUG", "getAllEquips: siteCode : "+siteCode);
         return restoreCCUHsApi.getAllEquips(ahuRef, gatewayRef, retryCountCallback);
     }
 
@@ -225,7 +224,7 @@ public class RestoreCCU {
     }
 
     public void getSystemProfileOfCCU(String ccuId, String siteCode, RetryCountCallback retryCountCallback){
-        Log.i(TAG, "Restoring system profile of CCU started");
+        CcuLog.i(TAG, "Restoring system profile of CCU started");
         String ahuRef = getAhuRefFromCCU(ccuId, siteCode, retryCountCallback);
         HGrid systemGrid = restoreCCUHsApi.getCCUSystemEquip(ahuRef, retryCountCallback);
         if (systemGrid == null){
@@ -236,11 +235,11 @@ public class RestoreCCU {
             HRow systemEquipRow = (HRow) systemGridIterator.next();
             getEquipAndPoints(systemEquipRow, retryCountCallback);
         }
-        Log.i(TAG, "Restoring system profile of CCU completed");
+        CcuLog.i(TAG, "Restoring system profile of CCU completed");
     }
 
     public void getCMDeviceOfCCU(String ccuId, String siteCode, RetryCountCallback retryCountCallback){
-        Log.i(TAG, "Restoring CM device is started");
+        CcuLog.i(TAG, "Restoring CM device is started");
         String ahuRef = getAhuRefFromCCU(ccuId, siteCode, retryCountCallback);
         HGrid cmDeviceGrid = restoreCCUHsApi.getDevice(ahuRef, retryCountCallback);
         if(cmDeviceGrid == null){
@@ -251,7 +250,7 @@ public class RestoreCCU {
             HRow cmDeviceRow = (HRow) cmDeviceGridIterator.next();
             getDeviceAndPoints(cmDeviceRow, retryCountCallback);
         }
-        Log.i(TAG, "Restoring CM device is completed");
+        CcuLog.i(TAG, "Restoring CM device is completed");
     }
 
     public void getDiagEquipOfCCU(String ccuId, String siteCode, RetryCountCallback retryCountCallback){
@@ -259,7 +258,7 @@ public class RestoreCCU {
     }
 
     public void getDiagEquipOfCCU(String equipRef, RetryCountCallback retryCountCallback){
-        Log.i(TAG, "Restoring Diag equip is started");
+        CcuLog.i(TAG, "Restoring Diag equip is started");
         HGrid diagEquipGrid = restoreCCUHsApi.getDiagEquipByEquipId(equipRef, retryCountCallback);
         if(diagEquipGrid == null){
             throw new NullHGridException("Null occurred while fetching diag equip.");
@@ -269,7 +268,7 @@ public class RestoreCCU {
             HRow diagEquipRow = (HRow) diagEquipGridIterator.next();
             getEquipAndPoints(diagEquipRow, retryCountCallback);
         }
-        Log.i(TAG, "Restoring Diag equip is completed");
+        CcuLog.i(TAG, "Restoring Diag equip is completed");
 
     }
 
@@ -407,7 +406,7 @@ public class RestoreCCU {
 
     public void syncExistingSite(String siteCode, AtomicInteger deviceCount, EquipResponseCallback equipResponseCallback,
                                  ReplaceCCUTracker replaceCCUTracker, RetryCountCallback retryCountCallback){
-        Log.i(TAG, "Saving site details started");
+        CcuLog.i(TAG, "Saving site details started");
         replaceCCUTracker.updateReplaceStatus(RestoreCCU.SYNC_SITE, ReplaceStatus.RUNNING.toString());
         restoreCCUHsApi.syncExistingSite(siteCode, retryCountCallback);
         TunerEquip.INSTANCE.initialize(CCUHsApi.getInstance());
@@ -415,13 +414,13 @@ public class RestoreCCU {
         L.saveCCUState();
         replaceCCUTracker.updateReplaceStatus(RestoreCCU.SYNC_SITE, ReplaceStatus.COMPLETED.toString());
         equipResponseCallback.onEquipRestoreComplete(deviceCount.decrementAndGet());
-        Log.i(TAG, "Saving site details completed");
+        CcuLog.i(TAG, "Saving site details completed");
     }
 
     public void getSettingPointsOfCCUDevice(String ccuDeviceID, RetryCountCallback retryCountCallback){
-        Log.i(TAG, "Saving Setting points started");
+        CcuLog.i(TAG, "Saving Setting points started");
         restoreCCUHsApi.restoreSettingPointsOfCCUDevice(ccuDeviceID, retryCountCallback);
-        Log.i(TAG, "Saving Setting points completed");
+        CcuLog.i(TAG, "Saving Setting points completed");
     }
 
     public static boolean isReplaceCCUUnderProcess(){

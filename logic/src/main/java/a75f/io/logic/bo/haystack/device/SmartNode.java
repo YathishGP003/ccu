@@ -1,11 +1,7 @@
 package a75f.io.logic.bo.haystack.device;
 
-import android.util.Log;
-
 import org.projecthaystack.HDict;
-
 import java.util.HashMap;
-
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.Equip;
@@ -420,39 +416,40 @@ public class SmartNode
     }
 
     private ProfileConfiguration getConfigurationFromEquip(Equip equip, PointsUtil pointsUtil) {
-        if (equip.getDomainName().equals(DomainName.smartnodeVAVReheatNoFan)) {
-            return new VavProfileConfiguration(Integer.parseInt(equip.getGroup()), NodeType.SMART_NODE.name(), 0, equip.getRoomRef(), equip.getFloorRef(), ProfileType.VAV_REHEAT, pointsUtil.getModelFromEquip(equip)).getActiveConfiguration();
-        } else if (equip.getDomainName().equals(DomainName.smartnodeVAVReheatParallelFan)) {
-            return new VavProfileConfiguration(Integer.parseInt(equip.getGroup()), NodeType.SMART_NODE.name(), 0, equip.getRoomRef(), equip.getFloorRef(), ProfileType.VAV_PARALLEL_FAN, pointsUtil.getModelFromEquip(equip)).getActiveConfiguration();
-        } else if (equip.getDomainName().equals(DomainName.smartnodeVAVReheatSeriesFan)) {
-            return new VavProfileConfiguration(Integer.parseInt(equip.getGroup()), NodeType.SMART_NODE.name(), 0, equip.getRoomRef(), equip.getFloorRef(), ProfileType.VAV_SERIES_FAN, pointsUtil.getModelFromEquip(equip)).getActiveConfiguration();
-        } else if (equip.getDomainName().equals(DomainName.smartnodeActiveChilledBeam)) {
-            return new AcbProfileConfiguration(Integer.parseInt(equip.getGroup()), NodeType.SMART_NODE.name(), 0, equip.getRoomRef(), equip.getFloorRef(), ProfileType.VAV_ACB, pointsUtil.getModelFromEquip(equip)).getActiveConfiguration();
-        } else if (equip.getDomainName().equals(DomainName.helionodeVAVReheatNoFan)) {
-            return new VavProfileConfiguration(Integer.parseInt(equip.getGroup()), NodeType.HELIO_NODE.name(), 0, equip.getRoomRef(), equip.getFloorRef(), ProfileType.VAV_REHEAT, pointsUtil.getModelFromEquip(equip)).getActiveConfiguration();
-        } else if (equip.getDomainName().equals(DomainName.helionodeVAVReheatParallelFan)) {
-            return new VavProfileConfiguration(Integer.parseInt(equip.getGroup()), NodeType.HELIO_NODE.name(), 0, equip.getRoomRef(), equip.getFloorRef(), ProfileType.VAV_PARALLEL_FAN, pointsUtil.getModelFromEquip(equip)).getActiveConfiguration();
-        } else if (equip.getDomainName().equals(DomainName.helionodeVAVReheatSeriesFan)) {
-            return new VavProfileConfiguration(Integer.parseInt(equip.getGroup()), NodeType.HELIO_NODE.name(), 0, equip.getRoomRef(), equip.getFloorRef(), ProfileType.VAV_SERIES_FAN, pointsUtil.getModelFromEquip(equip)).getActiveConfiguration();
-        }  else if (equip.getDomainName().equals(DomainName.helionodeActiveChilledBeam)) {
-            return new AcbProfileConfiguration(Integer.parseInt(equip.getGroup()), NodeType.HELIO_NODE.name(), 0, equip.getRoomRef(), equip.getFloorRef(), ProfileType.VAV_ACB, pointsUtil.getModelFromEquip(equip)).getActiveConfiguration();
-        } else if (equip.getDomainName().equals(DomainName.smartnodeBypassDamper)) {
-            return new BypassDamperProfileConfiguration(Integer.parseInt(equip.getGroup()), NodeType.SMART_NODE.name(), 0, equip.getRoomRef(), equip.getFloorRef(), ProfileType.BYPASS_DAMPER, pointsUtil.getModelFromEquip(equip)).getActiveConfiguration();
-        } else {
-            return null;
+        switch (equip.getDomainName()) {
+            case DomainName.smartnodeVAVReheatNoFan:
+                return new VavProfileConfiguration(Integer.parseInt(equip.getGroup()), NodeType.SMART_NODE.name(), 0, equip.getRoomRef(), equip.getFloorRef(), ProfileType.VAV_REHEAT, pointsUtil.getModelFromEquip(equip)).getActiveConfiguration();
+            case DomainName.smartnodeVAVReheatParallelFan:
+                return new VavProfileConfiguration(Integer.parseInt(equip.getGroup()), NodeType.SMART_NODE.name(), 0, equip.getRoomRef(), equip.getFloorRef(), ProfileType.VAV_PARALLEL_FAN, pointsUtil.getModelFromEquip(equip)).getActiveConfiguration();
+            case DomainName.smartnodeVAVReheatSeriesFan:
+                return new VavProfileConfiguration(Integer.parseInt(equip.getGroup()), NodeType.SMART_NODE.name(), 0, equip.getRoomRef(), equip.getFloorRef(), ProfileType.VAV_SERIES_FAN, pointsUtil.getModelFromEquip(equip)).getActiveConfiguration();
+            case DomainName.smartnodeActiveChilledBeam:
+                return new AcbProfileConfiguration(Integer.parseInt(equip.getGroup()), NodeType.SMART_NODE.name(), 0, equip.getRoomRef(), equip.getFloorRef(), ProfileType.VAV_ACB, pointsUtil.getModelFromEquip(equip)).getActiveConfiguration();
+            case DomainName.helionodeVAVReheatNoFan:
+                return new VavProfileConfiguration(Integer.parseInt(equip.getGroup()), NodeType.HELIO_NODE.name(), 0, equip.getRoomRef(), equip.getFloorRef(), ProfileType.VAV_REHEAT, pointsUtil.getModelFromEquip(equip)).getActiveConfiguration();
+            case DomainName.helionodeVAVReheatParallelFan:
+                return new VavProfileConfiguration(Integer.parseInt(equip.getGroup()), NodeType.HELIO_NODE.name(), 0, equip.getRoomRef(), equip.getFloorRef(), ProfileType.VAV_PARALLEL_FAN, pointsUtil.getModelFromEquip(equip)).getActiveConfiguration();
+            case DomainName.helionodeVAVReheatSeriesFan:
+                return new VavProfileConfiguration(Integer.parseInt(equip.getGroup()), NodeType.HELIO_NODE.name(), 0, equip.getRoomRef(), equip.getFloorRef(), ProfileType.VAV_SERIES_FAN, pointsUtil.getModelFromEquip(equip)).getActiveConfiguration();
+            case DomainName.helionodeActiveChilledBeam:
+                return new AcbProfileConfiguration(Integer.parseInt(equip.getGroup()), NodeType.HELIO_NODE.name(), 0, equip.getRoomRef(), equip.getFloorRef(), ProfileType.VAV_ACB, pointsUtil.getModelFromEquip(equip)).getActiveConfiguration();
+            case DomainName.smartnodeBypassDamper:
+                return new BypassDamperProfileConfiguration(Integer.parseInt(equip.getGroup()), NodeType.SMART_NODE.name(), 0, equip.getRoomRef(), equip.getFloorRef(), ProfileType.BYPASS_DAMPER, pointsUtil.getModelFromEquip(equip)).getActiveConfiguration();
+            default:
+                return null;
         }
     }
 
     public RawPoint getRawPoint(Port p) {
         HDict sensorPoint = CCUHsApi.getInstance().readHDict("point and domainName == \"" + getDomainNameFromPort(p) + "\" and deviceRef == \"" + deviceRef + "\"");
 
-        if (sensorPoint != null && sensorPoint.size() > 0) {
+        if (sensorPoint != null && !sensorPoint.isEmpty()) {
             return new RawPoint.Builder().setHDict(sensorPoint).build();
         }
 
         sensorPoint = CCUHsApi.getInstance().readHDict("point and sensor and physical and deviceRef == \""+deviceRef+"\""
                 +" and port == \""+p+"\"");
-        return ((sensorPoint != null) && sensorPoint.size() > 0) ? new RawPoint.Builder().setHDict(sensorPoint).build() : null;
+        return ((sensorPoint != null) && !sensorPoint.isEmpty()) ? new RawPoint.Builder().setHDict(sensorPoint).build() : null;
     }
 
     public void addPointsToDb() {
@@ -471,7 +468,7 @@ public class SmartNode
     }
     
     public static void updatePhysicalPointType(int addr, String port, String type) {
-        Log.d("CCU"," Update Physical point "+port+" "+type);
+        CcuLog.d("CCU"," Update Physical point "+port+" "+type);
     
         HashMap device = CCUHsApi.getInstance().read("device and addr == \""+addr+"\"");
         if (device.isEmpty())
@@ -489,7 +486,7 @@ public class SmartNode
     }
 
     public static void updateDomainPhysicalPointType(int addr, String domainName, String type) {
-        Log.d("CCU"," Update Physical point "+domainName+" "+type);
+        CcuLog.d("CCU"," Update Physical point "+domainName+" "+type);
 
         HashMap device = CCUHsApi.getInstance().read("device and addr == \""+addr+"\"");
         if (device.isEmpty())
@@ -507,7 +504,7 @@ public class SmartNode
     }
     
     public static void updatePhysicalPointRef(int addr, String port, String pointRef) {
-        Log.d("CCU"," Update Physical point "+port);
+        CcuLog.d("CCU"," Update Physical point "+port);
         
         HashMap device = CCUHsApi.getInstance().read("device and addr == \""+addr+"\"");
         if (device.isEmpty())
@@ -523,7 +520,7 @@ public class SmartNode
     }
 
     public static void updatePhysicalPointRef(int addr, Port port, String pointRef) {
-        Log.d("CCU"," Update Physical point "+port);
+        CcuLog.d("CCU"," Update Physical point "+port);
 
         HashMap device = CCUHsApi.getInstance().read("device and addr == \""+addr+"\"");
         if (device.isEmpty())
@@ -544,7 +541,7 @@ public class SmartNode
     }
     
     public static void setPointEnabled(int addr, String port, boolean enabled) {
-        Log.d("CCU"," Enabled Physical point "+port+" "+enabled);
+        CcuLog.d("CCU"," Enabled Physical point "+port+" "+enabled);
         
         HashMap device = CCUHsApi.getInstance().read("device and addr == \""+addr+"\"");
         if (device.isEmpty())
@@ -553,7 +550,7 @@ public class SmartNode
         }
         
         HashMap point = CCUHsApi.getInstance().read("point and physical and deviceRef == \"" + device.get("id").toString() + "\""+" and port == \""+port+"\"");
-        if (point != null && point.size() > 0)
+        if (point != null && !point.isEmpty())
         {
             RawPoint p = new RawPoint.Builder().setHashMap(point).build();
             p.setEnabled(enabled);
@@ -572,7 +569,7 @@ public class SmartNode
 
         HashMap<Object, Object> point = hayStack.readEntity("point and physical and" +
                 " deviceRef == \"" + device.get("id").toString() + "\""+" and domainName == \""+domainName+"\"");
-        if (point != null && point.size() > 0) {
+        if (point != null && !point.isEmpty()) {
             RawPoint p = new RawPoint.Builder().setHashMap(point).build();
             p.setEnabled(enabled);
             if(enabled && p.getMarkers().contains(Tags.WRITABLE)) {
@@ -594,7 +591,7 @@ public class SmartNode
         }
         
         HashMap point = CCUHsApi.getInstance().read("point and physical and deviceRef == \"" + device.get("id").toString() + "\""+" and port == \""+port+"\"");
-        if (point != null && point.size() > 0)
+        if (point != null && !point.isEmpty())
         {
             return new RawPoint.Builder().setHashMap(point).build();
         }

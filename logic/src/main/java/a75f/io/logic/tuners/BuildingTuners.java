@@ -2,9 +2,7 @@ package a75f.io.logic.tuners;
 
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.util.Log;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -43,7 +41,7 @@ public class BuildingTuners
     public void addBuildingTunerEquip() {
         hayStack = CCUHsApi.getInstance();
         HashMap tuner = CCUHsApi.getInstance().read("equip and tuner");
-        if (tuner != null && tuner.size() > 0) {
+        if (tuner != null && !tuner.isEmpty()) {
             equipRef = tuner.get("id").toString();
             equipDis = tuner.get("dis").toString();
             HashMap siteMap = hayStack.read(Tags.SITE);
@@ -83,31 +81,21 @@ public class BuildingTuners
     }
 
     private void checkForTunerMigration() {
-        Log.i(L.TAG_CCU_TUNER, "checkForTunerMigration: ");
+        CcuLog.i(L.TAG_CCU_TUNER, "checkForTunerMigration: ");
         PackageManager manager = Globals.getInstance().getApplicationContext().getPackageManager();
         try {
             PackageInfo info = manager.getPackageInfo(Globals.getInstance().getApplicationContext().getPackageName(), 0);
             String tunerVersion = info.versionName + "." + info.versionCode;
 
-            Log.i(L.TAG_CCU_TUNER, " PreferenceUtil.getTunerVersion(): "+ PreferenceUtil.getTunerVersion()+"" +
+            CcuLog.i(L.TAG_CCU_TUNER, " PreferenceUtil.getTunerVersion(): "+ PreferenceUtil.getTunerVersion()+
                     " Version "+tunerVersion);
             if (!PreferenceUtil.getTunerVersion().equals(tunerVersion)) {
                 TunerUpgrades.handleTunerUpgrades(CCUHsApi.getInstance());
                 PreferenceUtil.setTunerVersion(tunerVersion);
             }
         } catch (PackageManager.NameNotFoundException e) {
-            Log.i(L.TAG_CCU_TUNER, "checkForTunerMigration: "+e.getLocalizedMessage());
+            CcuLog.e(L.TAG_CCU_TUNER, "checkForTunerMigration: "+e.getLocalizedMessage());
             e.printStackTrace();
-        }
-    }
-
-    private void doTunerMigrationJob() {
-        ArrayList<HashMap> tunersList = CCUHsApi.getInstance().readAll("tuner and tunerGroup");
-
-        for (HashMap tunerMap : tunersList) {
-            String tunerMapDis = tunerMap.get("dis").toString();
-            String tunerMapShortDis = tunerMapDis.substring(tunerMapDis.lastIndexOf("-") + 1).trim();
-            TunerMigration.migrateTunerIfRequired(tunerMap.get("id").toString(), tunerMapShortDis);
         }
     }
 

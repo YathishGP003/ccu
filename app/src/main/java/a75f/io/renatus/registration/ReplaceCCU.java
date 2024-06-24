@@ -461,7 +461,7 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
                 replaceCCUTracker.getEditor(), isReplaceClosed);
         ConcurrentHashMap<String, ?> currentReplacementProgress =
                 new ConcurrentHashMap<> (replaceCCUTracker.getReplaceCCUStatus());
-        restoreCCU.restoreCCUDevice(ccu, replaceCCUTracker);
+        restoreCCU.restoreCCUDevice(ccu);
 
         deviceCount = new AtomicInteger();
         deviceCount.set(currentReplacementProgress.size());

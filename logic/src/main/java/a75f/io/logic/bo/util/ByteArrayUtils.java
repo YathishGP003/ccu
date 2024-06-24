@@ -1,12 +1,11 @@
 package a75f.io.logic.bo.util;
-
-import android.util.Log;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.zip.CRC32;
+
+import a75f.io.logger.CcuLog;
 
 /**
  * Created by ryanmattison isOn 7/25/17.
@@ -70,7 +69,7 @@ public class ByteArrayUtils
             try {
                 outputStream.write(b);
             } catch (IOException e) {
-                Log.e(TAG, "[addBytes] Failed to write to output stream.");
+                CcuLog.e(TAG, "[addBytes] Failed to write to output stream.");
             }
         }
         return outputStream.toByteArray();
@@ -87,8 +86,7 @@ public class ByteArrayUtils
         CRC32 crcGen = new CRC32();
         crcGen.update(message);
         long val = crcGen.getValue();
-        byte[] crc = ByteArrayUtils.toByteArray((int) val);
-        return crc;
+        return ByteArrayUtils.toByteArray((int) val);
     }
     
     public static byte[] toByteArray(int value) {

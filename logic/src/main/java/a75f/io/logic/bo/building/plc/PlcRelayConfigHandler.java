@@ -1,7 +1,6 @@
 package a75f.io.logic.bo.building.plc;
 
 import android.os.Bundle;
-import android.util.Log;
 
 import com.google.gson.JsonObject;
 
@@ -12,6 +11,7 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Tags;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.bo.building.definitions.Consts;
 import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
@@ -170,7 +170,7 @@ public class PlcRelayConfigHandler {
 
     public static void updateInputSensor(JsonObject msgObject, Point configPoint) {
         //logical point tags- process variable
-        Log.d("updateInputSensor", "updateInputSensor ++");
+        CcuLog.i("updateInputSensor", "updateInputSensor ++");
         HashMap<Object, Object> equipMap =
                 CCUHsApi.getInstance().readMapById(configPoint.getEquipRef());
         Equip equip = new Equip.Builder().setHashMap(equipMap).build();
@@ -186,15 +186,10 @@ public class PlcRelayConfigHandler {
         if (configPoint.getMarkers().contains(Tags.ANALOG1)) {
             CCUHsApi.getInstance().writeDefaultVal("point and config and analog1 and" +
                     " input and sensor and equipRef == \"" + equipRef + "\"", (double) configVal);
-            /*CCUHsApi.getInstance().writeDefaultVal("point and config and th1 and input and " +
-                    "sensor and equipRef == \"" + equipRef + "\"", 0.0);
-            CCUHsApi.getInstance().writeDefaultVal("point and config and native and input" +
-                    " and sensor and equipRef == \"" + equipRef + "\"", 0.0);*/
             HashMap processVariable = CCUHsApi.getInstance().read("point and process and " +
                     "variable and equipRef == \"" + equipRef + "\"");
 
             //delete prev targetpoint and create new.
-
             if(configVal > 0){
                 if (targetValuePoint != null && targetValuePoint.get("id") != null) {
                     CCUHsApi.getInstance().deleteEntityTree(targetValuePoint.get("id").toString());

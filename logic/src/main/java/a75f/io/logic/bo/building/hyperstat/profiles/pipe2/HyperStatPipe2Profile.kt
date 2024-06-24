@@ -2,6 +2,7 @@ package a75f.io.logic.bo.building.hyperstat.profiles.pipe2
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Equip
+import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.BaseProfileConfiguration
@@ -18,7 +19,6 @@ import a75f.io.logic.bo.building.hyperstat.profiles.HyperStatFanCoilUnit
 import a75f.io.logic.bo.building.schedules.Occupancy
 import a75f.io.logic.jobs.HyperStatUserIntentHandler
 import a75f.io.logic.tuners.TunerUtil
-import android.util.Log
 import com.fasterxml.jackson.annotation.JsonIgnore
 
 
@@ -1420,6 +1420,6 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
      * Function just to print logs
      */
     private fun logIt(msg: String){
-        Log.i(L.TAG_CCU_HSPIPE2, msg)
+        CcuLog.d(L.TAG_CCU_HSPIPE2, msg)
     }
 }

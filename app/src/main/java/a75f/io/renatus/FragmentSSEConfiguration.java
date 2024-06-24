@@ -1,7 +1,6 @@
 package a75f.io.renatus;
 
 import static a75f.io.device.bacnet.BacnetUtilKt.addBacnetTags;
-import static a75f.io.logic.bo.building.ss2pfcu.TwoPipeFanCoilUnitProfile.TAG;
 
 import android.app.Dialog;
 import android.content.Intent;
@@ -42,7 +41,6 @@ import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.sse.InputActuatorType;
 import a75f.io.logic.bo.building.sse.SingleStageConfig;
-import a75f.io.logic.bo.building.sse.SingleStageEquip;
 import a75f.io.logic.bo.building.sse.SingleStageProfile;
 import a75f.io.logic.bo.util.DesiredTempDisplayMode;
 import a75f.io.renatus.BASE.BaseDialogFragment;
@@ -345,7 +343,7 @@ public class FragmentSSEConfiguration  extends BaseDialogFragment implements Com
             mSSEProfile.addSSEEquip(mSmartNodeAddress, sseConfig, floorRef, roomRef, mNodeType);
         } else
         {
-            mSSEProfile.updateSSEEquip(mSmartNodeAddress, sseConfig,roomRef);
+            mSSEProfile.updateSSEEquip(sseConfig);
         }
         L.ccu().zoneProfiles.add(mSSEProfile);
         Log.d("SSEConfig", "Set Config: Profiles - "+L.ccu().zoneProfiles.size());

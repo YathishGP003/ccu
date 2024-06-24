@@ -1,7 +1,4 @@
 package a75f.io.logic.bo.building.sshpu;
-
-import android.util.Log;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.ArrayList;
@@ -12,6 +9,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Occupied;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
 import a75f.io.logic.bo.building.ZoneProfile;
@@ -66,10 +64,10 @@ public class HeatPumpUnitProfile extends ZoneProfile {
         for (short node : hpuDeviceMap.keySet()) {
             if (hpuDeviceMap.get(node) == null) {
                 addLogicalMap(node);
-                Log.d(TAG, " Logical Map added for smartstat " + node);
+                CcuLog.d(TAG, " Logical Map added for smartstat " + node);
                 continue;
             }
-            Log.d(TAG, "SmartStat HPU profile");
+            CcuLog.i(TAG, "SmartStat HPU profile");
             HeatPumpUnitEquip hpuDevice = hpuDeviceMap.get(node);
             if (hpuDevice.profileType != ProfileType.SMARTSTAT_HEAT_PUMP_UNIT)
                 continue;
@@ -77,7 +75,7 @@ public class HeatPumpUnitProfile extends ZoneProfile {
             double curHumidity = hpuDevice.getHumidity();
             Equip hpuEquip = new Equip.Builder().setHashMap(CCUHsApi.getInstance().read("equip and group == \"" + node + "\"")).build();
 
-            Log.i("CPUC_Config", "updateZonePoints: "+isZoneDead());
+            CcuLog.d("CPUC_Config", "updateZonePoints: "+isZoneDead());
             if (isRFDead()) {
                 handleRFDead(hpuDevice, node);
                 continue;
@@ -99,7 +97,7 @@ public class HeatPumpUnitProfile extends ZoneProfile {
                 hpuDevice.setDesiredTemp(averageDesiredTemp);
             }
 
-            Log.d(TAG, " smartstat hpu, updates 111=" + hpuEquip.getRoomRef() + "," + setTempHeating + "," + setTempCooling+","+roomTemp);
+            CcuLog.d(TAG, " smartstat hpu, updates 111=" + hpuEquip.getRoomRef() + "," + setTempHeating + "," + setTempCooling+","+roomTemp);
 
             String zoneId = HSUtil.getZoneIdFromEquipId(hpuEquip.getId());
             Occupied occuStatus = ScheduleManager.getInstance().getOccupiedModeCache(zoneId);
@@ -126,7 +124,7 @@ public class HeatPumpUnitProfile extends ZoneProfile {
                     fanSpeed = StandaloneLogicalFanSpeeds.values()[ fanModeSaved];
                 }
             }
-            Log.d(TAG, " smartstat hpu, updates =" + node+","+roomTemp+","+occupied+","+","+state);
+            CcuLog.d(TAG, " smartstat hpu, updates =" + node+","+roomTemp+","+occupied+","+","+state);
 
             if((fanSpeed != StandaloneLogicalFanSpeeds.OFF) && (roomTemp > 0)){
                 switch (opMode){
@@ -181,11 +179,6 @@ public class HeatPumpUnitProfile extends ZoneProfile {
                 //state = DEADBAND;
                 resetRelays(hpuEquip.getId(),node,curHumidity,ZoneTempState.FAN_OP_MODE_OFF);
             }
-
-
-            //hpuDevice.setProfilePoint("temp and operating and mode",state.ordinal());
-            /*if(hpuDevice.getStatus() != state.ordinal())
-                hpuDevice.setStatus(state.ordinal());*/
         }
     }
 
@@ -215,7 +208,7 @@ public class HeatPumpUnitProfile extends ZoneProfile {
     /**
      * Only creates a run time instance of logical map for initialize.
      *
-     * @param addr
+     * @param addr address
      */
     public void addLogicalMap(short addr) {
         HeatPumpUnitEquip deviceMap = new HeatPumpUnitEquip(getProfileType(), addr);
@@ -225,7 +218,7 @@ public class HeatPumpUnitProfile extends ZoneProfile {
     /**
      * Only creates a run time instance of logical map for initialize.
      *
-     * @param addr
+     * @param addr address
      */
     public void addLogicalMap(short addr, String roomRef) {
         HeatPumpUnitEquip deviceMap = new HeatPumpUnitEquip(getProfileType(), addr);
@@ -237,10 +230,10 @@ public class HeatPumpUnitProfile extends ZoneProfile {
      * When the profile is created first time , either via UI or from existing tagsMap
      * this method has to be called on the profile instance.
      *
-     * @param addr
-     * @param config
-     * @param floorRef
-     * @param zoneRef
+     * @param addr  address
+     * @param config configuration
+     * @param floorRef  floorRef
+     * @param zoneRef   zoneRef
      */
     public void addLogicalMapAndPoints(short addr, HeatPumpUnitConfiguration config, String floorRef, String zoneRef) {
         HeatPumpUnitEquip deviceMap = new HeatPumpUnitEquip(getProfileType(), addr);
@@ -249,7 +242,7 @@ public class HeatPumpUnitProfile extends ZoneProfile {
         hpuDeviceMap.put(addr, deviceMap);
     }
 
-    public void updateLogicalMapAndPoints(short addr, HeatPumpUnitConfiguration config, String roomRef) {
+    public void updateLogicalMapAndPoints(short addr, HeatPumpUnitConfiguration config) {
         HeatPumpUnitEquip deviceMap = hpuDeviceMap.get(addr);
         deviceMap.updateHaystackPoints(config);
     }
@@ -293,8 +286,8 @@ public class HeatPumpUnitProfile extends ZoneProfile {
             if (hpuDeviceMap.get(nodeAddress) == null) {
                 continue;
             }
-            if (hpuDeviceMap.get(Short.valueOf(nodeAddress)).getCurrentTemp() > 0) {
-                tempTotal += hpuDeviceMap.get(Short.valueOf(nodeAddress)).getCurrentTemp();
+            if (hpuDeviceMap.get(nodeAddress).getCurrentTemp() > 0) {
+                tempTotal += hpuDeviceMap.get(nodeAddress).getCurrentTemp();
                 nodeCount++;
             }
         }
@@ -330,7 +323,7 @@ public class HeatPumpUnitProfile extends ZoneProfile {
         setCmdSignal("compressor and stage2", 0, node);
         if(getConfigEnabled("relay4", node) > 0 && (getCmdSignal("aux and heating ",node) > 0))
             setCmdSignal("aux and heating ",0,node);
-        HashMap<String, Integer> relayStages = new HashMap<String, Integer>();
+        HashMap<String, Integer> relayStages = new HashMap<>();
         switch (fanSpeed) {
             case AUTO:
                 resetRelays(equipId, node,curHumidity,ZoneTempState.NONE);
@@ -410,7 +403,7 @@ public class HeatPumpUnitProfile extends ZoneProfile {
                 setCmdSignal("changeover and heating and stage1", 0, node);
             }
         }
-         HashMap<String,Integer> relayStages = new HashMap<String, Integer>();
+         HashMap<String,Integer> relayStages = new HashMap<>();
          if(temperatureState != ZoneTempState.FAN_OP_MODE_OFF)
              updateHumidityStatus(fanStage2Type,node,equipId,humidity,relayStages);
         StandaloneScheduler.updateSmartStatStatus(equipId, DEADBAND,relayStages ,temperatureState);
@@ -420,11 +413,11 @@ public class HeatPumpUnitProfile extends ZoneProfile {
 
 
         double hysteresis = StandaloneTunerUtil.getStandaloneStage1Hysteresis(equip.getId());
-        boolean isCompressorStage1Enabled = getConfigEnabled("relay1",addr) > 0 ? true : false;
-        boolean isCompressorStage2Enabled = getConfigEnabled("relay2",addr) > 0 ? true : false;
-        boolean isFanStage1Enabled = getConfigEnabled("relay3", addr) > 0 ? true : false; //relay3 for fan low
-        boolean isFanRelay5Enabled = getConfigEnabled("relay5", addr) > 0 ? true : false; //relay5 for fan high
-        boolean isAuxHeatingEnabled = getConfigEnabled("relay4",addr)> 0 ? true : false;//Aux
+        boolean isCompressorStage1Enabled = getConfigEnabled("relay1", addr) > 0;
+        boolean isCompressorStage2Enabled = getConfigEnabled("relay2", addr) > 0;
+        boolean isFanStage1Enabled = getConfigEnabled("relay3", addr) > 0; //relay3 for fan low
+        boolean isFanRelay5Enabled = getConfigEnabled("relay5", addr) > 0; //relay5 for fan high
+        boolean isAuxHeatingEnabled = getConfigEnabled("relay4", addr) > 0;//Aux
         double curHumidity = hpuEquip.getHumidity();
         double humidifierTargetThreshold = 25.0;
         int fanStage2Type = (int)getConfigType("relay5",addr);
@@ -451,8 +444,8 @@ public class HeatPumpUnitProfile extends ZoneProfile {
         }
         int heatPumpChangeoverType = (int)getConfigType("relay6",addr);
         SmartStatHeatPumpChangeOverType hpChangeOverType = SmartStatHeatPumpChangeOverType.values()[heatPumpChangeoverType];
-        HashMap<String, Integer> relayStages = new HashMap<String, Integer>();
-        Log.d(TAG,"hpuCoolOnlyMode ="+occupied+","+addr+","+isAuxHeatingEnabled+","+isCompressorStage1Enabled+","+isCompressorStage2Enabled+","+isFanStage1Enabled);
+        HashMap<String, Integer> relayStages = new HashMap<>();
+        CcuLog.d(TAG,"hpuCoolOnlyMode ="+occupied+","+addr+","+isAuxHeatingEnabled+","+isCompressorStage1Enabled+","+isCompressorStage2Enabled+","+isFanStage1Enabled);
         if(isAuxHeatingEnabled && (getCmdSignal("aux and heating ",addr) > 0))setCmdSignal("aux and heating ",0,addr);
         if(curTemp >= setTempCooling){
             //Turn on relay1
@@ -652,11 +645,11 @@ public class HeatPumpUnitProfile extends ZoneProfile {
     }
     private void hpuHeatOnlyMode(HeatPumpUnitEquip hpuEquip, Equip equip, double curTemp, Occupied occuStatus, Short addr, StandaloneLogicalFanSpeeds fanSpeed){
         double hysteresis = StandaloneTunerUtil.getStandaloneStage1Hysteresis(equip.getId());
-        boolean isCompressorStage1Enabled = getConfigEnabled("relay1",addr) > 0 ? true : false;
-        boolean isCompressorStage2Enabled = getConfigEnabled("relay2",addr) > 0 ? true : false;
-        boolean isFanStage1Enabled = getConfigEnabled("relay3", addr) > 0 ? true : false; //relay3 for fan low
-        boolean isFanRelay5Enabled = getConfigEnabled("relay5", addr) > 0 ? true : false; //relay5 for fan high
-        boolean isAuxHeatingEnabled = getConfigEnabled("relay4",addr)> 0 ? true : false;//Aux Heating
+        boolean isCompressorStage1Enabled = getConfigEnabled("relay1", addr) > 0;
+        boolean isCompressorStage2Enabled = getConfigEnabled("relay2", addr) > 0;
+        boolean isFanStage1Enabled = getConfigEnabled("relay3", addr) > 0; //relay3 for fan low
+        boolean isFanRelay5Enabled = getConfigEnabled("relay5", addr) > 0; //relay5 for fan high
+        boolean isAuxHeatingEnabled = getConfigEnabled("relay4", addr) > 0;//Aux Heating
         int fanStage2Type = (int)getConfigType("relay5",addr);
         double curHumidity = hpuEquip.getHumidity();
         SmartStatFanRelayType fanRelayType = SmartStatFanRelayType.values()[fanStage2Type];
@@ -683,7 +676,7 @@ public class HeatPumpUnitProfile extends ZoneProfile {
                 break;
         }
         SmartStatHeatPumpChangeOverType hpChangeOverType = SmartStatHeatPumpChangeOverType.values()[heatPumpChangeoverType];
-        HashMap<String, Integer> relayStages = new HashMap<String, Integer>();
+        HashMap<String, Integer> relayStages = new HashMap<>();
         if(curTemp <= setTempHeating){
             if(isAuxHeatingEnabled){
                 if(isCompressorStage1Enabled && isCompressorStage2Enabled && (curTemp <= (setTempHeating - (2 * heatingDeadband))) ) { //tunrs on 61 and below

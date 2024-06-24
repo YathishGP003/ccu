@@ -1,10 +1,5 @@
 package a75f.io.logic.tuners;
 
-import android.util.Log;
-
-import org.projecthaystack.HNum;
-import org.projecthaystack.HRef;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -17,14 +12,13 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.Units;
 import a75f.io.logic.bo.util.DemandResponseMode;
-import a75f.io.logic.bo.building.schedules.occupancy.DemandResponse;
 
 public class TITuners {
     
     public static void addDefaultTiTuners(CCUHsApi hayStack, String siteRef, String equipRef, String equipDis,
                                           String tz) {
         HashMap tuner = CCUHsApi.getInstance().read("point and tuner and default and ti");
-        if (tuner != null && tuner.size() > 0) {
+        if (tuner != null && !tuner.isEmpty()) {
             CcuLog.d(L.TAG_CCU_SYSTEM, "Default TI Tuner points already exist");
             return;
         }
@@ -142,7 +136,7 @@ public class TITuners {
     
     public static void addEquipTiTuners(CCUHsApi hayStack, String siteRef, String equipdis, String equipref,
                                         String roomRef, String floorRef, String tz) {
-        Log.d("CCU", "addEquipTiTuners for " + equipdis);
+        CcuLog.d("CCU", "addEquipTiTuners for " + equipdis);
         //addEquipZoneTuners(equipdis, equipref, roomRef, floorRef);
         ZoneTuners.addZoneTunersForEquip(hayStack, siteRef, equipdis, equipref, roomRef, floorRef, tz);
     

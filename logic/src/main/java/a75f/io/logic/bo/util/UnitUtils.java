@@ -2,8 +2,6 @@ package a75f.io.logic.bo.util;
 
 import static a75f.io.logic.tuners.TunerUtil.getTuner;
 
-import android.util.Log;
-
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -21,8 +19,8 @@ public class UnitUtils {
     /**
      * Convert celsius to Fahrenheit
      *
-     * @param temperature
-     * @return
+     * @param temperature temperature
+     * @return temperature in Fahrenheit
      */
     public static double celsiusToFahrenheit(double temperature) {
         return CCUUtils.roundToTwoDecimal((temperature * 9 / 5) + 32);
@@ -80,7 +78,7 @@ public class UnitUtils {
 
     public static boolean isCelsiusTunerAvailableStatus() {
         HashMap<Object, Object> useCelsius = CCUHsApi.getInstance().readEntity("displayUnit");
-        if((!useCelsius.isEmpty()) && (double) getTuner(useCelsius.get("id").toString())== TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
+        if((!useCelsius.isEmpty()) && getTuner(useCelsius.get("id").toString()) == TunerConstants.USE_CELSIUS_FLAG_ENABLED) {
            return true;
         } else {
             return false;
@@ -108,7 +106,7 @@ public class UnitUtils {
     }
 
     public static String StatusCelsiusVal(String temp, int modeType) {
-        boolean tempContainsF = false;
+        boolean tempContainsF;
         CcuLog.i(L.TAG_DESIRED_TEMP_MODE,"temp "+temp+ "modeType > "+modeType);
 
         // Below method checks whether String "temp" cpntains "F" or not because based
@@ -120,7 +118,7 @@ public class UnitUtils {
         }
 
         String s = "";
-        ArrayList<Double> myDoubles = new ArrayList<Double>();
+        ArrayList<Double> myDoubles = new ArrayList<>();
         Matcher matcher = Pattern.compile("[-+]?\\d*\\.?\\d+([eE][-+]?\\d+)?").matcher(temp);
 
         Pattern p = Pattern.compile("[a-zA-Z]+");
@@ -136,7 +134,7 @@ public class UnitUtils {
         final String f = s.substring(0, s.lastIndexOf("F")) + " ";
         DecimalFormat timeFormatter = new DecimalFormat("00");
         if(modeType == TemperatureMode.DUAL.ordinal()){
-            if (myDoubles.size() > 0) {
+            if (!myDoubles.isEmpty()) {
                 if(myDoubles.size() > 3) {
                     return (f + (CCUUtils.roundToOneDecimal(fahrenheitToCelsius(myDoubles.get(0))))
                             + "-" + (CCUUtils.roundToOneDecimal(fahrenheitToCelsius(myDoubles.get(1))))
@@ -153,7 +151,7 @@ public class UnitUtils {
             }
         }
         if (modeType == TemperatureMode.HEATING.ordinal()) {
-            if (myDoubles.size() > 0) {
+            if (!myDoubles.isEmpty()) {
                 if(myDoubles.size() > 3) {
                     return (f + (CCUUtils.roundToOneDecimal(fahrenheitToCelsius(myDoubles.get(0))))
                             + " \u00B0C" + " at " + (myDoubles.get(2).intValue()) + ":" +
@@ -168,10 +166,10 @@ public class UnitUtils {
                 return temp;
             }
         }else if (modeType == TemperatureMode.COOLING.ordinal()) {
-            Log.i("fatal","mydoubles "+f+",,,  "+myDoubles);
-            if (myDoubles.size() > 0) {
+           CcuLog.d("fatal", "mydoubles "+f+",,,  "+myDoubles);
+            if (!myDoubles.isEmpty()) {
                 if (myDoubles.size() > 3) {
-                    Log.i("fatal", "return  " + (f + (CCUUtils.roundToOneDecimal(
+                    CcuLog.d("fatal", "return  " + (f + (CCUUtils.roundToOneDecimal(
                             fahrenheitToCelsius(myDoubles.get(1)))) + " \u00B0C" + " at " +
                             (myDoubles.get(2).intValue()) + ":" + timeFormatter.format(myDoubles.get(3).intValue())));
                     return (f + (CCUUtils.roundToOneDecimal(fahrenheitToCelsius(myDoubles.get(1))))

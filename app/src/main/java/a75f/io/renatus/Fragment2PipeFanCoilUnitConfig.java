@@ -334,7 +334,7 @@ public class Fragment2PipeFanCoilUnitConfig extends BaseDialogFragment implement
         if (mProfileConfig == null) {
             twoPfcuProfile.addLogicalMapAndPoints(mSmartNodeAddress, twoPfcuConfig, floorRef, roomRef);
         } else {
-            twoPfcuProfile.updateLogicalMapAndPoints(mSmartNodeAddress, twoPfcuConfig, roomRef);
+            twoPfcuProfile.updateLogicalMapAndPoints(mSmartNodeAddress, twoPfcuConfig);
         }
         L.ccu().zoneProfiles.add(twoPfcuProfile);
         CcuLog.d("CPUConfig", "Set Config: Profiles - " + L.ccu().zoneProfiles.size());

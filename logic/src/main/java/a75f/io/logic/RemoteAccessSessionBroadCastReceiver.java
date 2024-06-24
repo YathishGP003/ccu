@@ -6,9 +6,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 
 
-import java.util.Timer;
-import java.util.TimerTask;
-
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.autocommission.remoteSession.RemoteSessionStatus;

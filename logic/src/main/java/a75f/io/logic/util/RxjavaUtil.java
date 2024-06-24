@@ -13,7 +13,6 @@ public class RxjavaUtil {
     /**
      * Simple background execution using rxjava threadpool.
      *
-     * @param function
      */
     public static void executeBackground(Runnable function) {
         Observable.fromCallable(() -> {

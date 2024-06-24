@@ -82,14 +82,7 @@ import a75f.io.logic.jobs.BuildingProcessJob;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.jobs.bearertoken.BearerTokenManager;
 import a75f.io.logic.migration.MigrationHandler;
-import a75f.io.logic.migration.heartbeat.HeartbeatDiagMigration;
-import a75f.io.logic.migration.heartbeat.HeartbeatMigration;
-import a75f.io.logic.migration.heartbeat.HeartbeatTagMigration;
-import a75f.io.logic.migration.idupoints.IduPointsMigration;
-import a75f.io.logic.migration.oao.OAODamperOpenReasonMigration;
-import a75f.io.logic.migration.smartnode.SmartNodeMigration;
 import a75f.io.logic.tuners.TunerEquip;
-import a75f.io.logic.tuners.TunerUpgrades;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.logic.util.CCUProxySettings;
 import a75f.io.logic.util.MigrationUtil;
@@ -236,7 +229,6 @@ public class Globals {
     public void initilize() {
         CcuLog.i(L.TAG_CCU_INIT, "Globals Initialize");
         taskExecutor = Executors.newScheduledThreadPool(NUMBER_OF_CYCLICAL_TASKS_RENATUS_REQUIRES);
-        //mHeartBeatJob = new HeartBeatJob();
         //5 seconds after application initializes start heart beat
         testHarness = getApplicationContext().getResources().getBoolean(R.bool.test_harness);
         RenatusServicesEnvironment servicesEnv = RenatusServicesEnvironment.createWithSharedPrefs(
@@ -245,9 +237,7 @@ public class Globals {
         CcuLog.i(L.TAG_CCU_INIT, "Initialize Haystack");
         renatusServicesUrls = urls;
         CCUHsApi hsApi = new CCUHsApi(this.mApplicationContext, urls.getHaystackUrl(), urls.getCaretakerUrl(), urls.getGatewayUrl());
-        //CcuLog.i(L.TAG_CCU_INIT, "Initialize ModelCache");
         ModelCache.INSTANCE.init(this.mApplicationContext);
-        //CcuLog.i(L.TAG_CCU_INIT, "Initialized ModelCache");
     }
 
     public void startTimerTask() {
@@ -278,17 +268,6 @@ public class Globals {
         CCUProxySettings.setUpProxySettingsIfExists();
     }
 
-    private void migrateHeartbeatPointForEquips(HashMap<Object, Object> site) {
-        if (!site.isEmpty()) {
-            HeartbeatMigration.initHeartbeatMigration();
-        }
-    }
-
-    private void migrateHeartbeatDiagPointForEquips(HashMap<Object, Object> site) {
-        if (!site.isEmpty()) {
-            HeartbeatDiagMigration.initHeartbeatDiagMigration();
-        }
-    }
 
     private void importTunersAndScheduleJobs() {
 
@@ -298,7 +277,7 @@ public class Globals {
                 MigrationHandler migrationHandler = new MigrationHandler(CCUHsApi.getInstance());
                 try {
                     CcuLog.i(L.TAG_CCU_INIT, "Run Migrations");
-                    //ModelCache.INSTANCE.init(CCUHsApi.getInstance(), mApplicationContext);
+                    ModelCache.INSTANCE.init(mApplicationContext);
                     HashMap<Object, Object> site = CCUHsApi.getInstance().readEntity("site");
                     if (!isSafeMode()) {
                         migrationHandler.doMigration();
@@ -333,7 +312,7 @@ public class Globals {
                     isInitCompleted = true;
                     DEFAULT_HEARTBEAT_INTERVAL = Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
                             .getInt("control_loop_frequency", 60);
-                    initCompletedListeners.forEach(listener -> listener.onInitCompleted());
+                    initCompletedListeners.forEach(OnCcuInitCompletedListener::onInitCompleted);
                     mProcessJob.scheduleJob("BuildingProcessJob", DEFAULT_HEARTBEAT_INTERVAL, TASK_SEPARATION, TASK_SEPARATION_TIMEUNIT);
                     mScheduleProcessJob.scheduleJob("Schedule Process Job", DEFAULT_HEARTBEAT_INTERVAL, TASK_SEPARATION + 15, TASK_SEPARATION_TIMEUNIT);
                     BearerTokenManager.getInstance().scheduleJob();
@@ -377,9 +356,6 @@ public class Globals {
                 "assets/75f", modelsPath);
     }
 
-    public boolean testHarness() {
-        return testHarness;
-    }
 
     public void setCCU(CCUApplication CCU) {
         this.mCCUApplication = CCU;
@@ -617,8 +593,7 @@ public class Globals {
         HashMap<Object, Object> bypassDamperEquip = CCUHsApi.getInstance().readEntity("equip and domainName == \"" + DomainName.smartnodeBypassDamper + "\"");
         if (bypassDamperEquip != null && bypassDamperEquip.size() > 0) {
             CcuLog.d(L.TAG_CCU, "Create Default Bypass Damper Profile");
-            BypassDamperProfile bypassDamperProfile = new BypassDamperProfile(bypassDamperEquip.get("id").toString(), Short.parseShort(bypassDamperEquip.get("group").toString()));
-            L.ccu().bypassDamperProfile = bypassDamperProfile;
+            L.ccu().bypassDamperProfile = new BypassDamperProfile(bypassDamperEquip.get("id").toString(), Short.parseShort(bypassDamperEquip.get("group").toString()));
         }
 
         /*
@@ -701,14 +676,6 @@ public class Globals {
 
     public long getCcuUpdateTriggerTimeToken() {
         return ccuUpdateTriggerTimeToken;
-    }
-
-    private boolean isHeatingLimitUpdated() {
-        double heatDTMin = CCUHsApi.getInstance().readHisValByQuery("point and limit and min and heating and user");
-        double heatDTMax = CCUHsApi.getInstance().readHisValByQuery("point and limit and max and heating and user");
-        double heatDTMindf = TunerUtil.readTunerValByQuery("point and limit and min and heating and user");
-        double heatDTMaxdf = TunerUtil.readTunerValByQuery("point and limit and max and heating and user");
-        return !(heatDTMin >= heatDTMax) && !(heatDTMindf >= heatDTMaxdf);
     }
 
     public void setRecoveryMode() {

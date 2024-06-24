@@ -6,10 +6,9 @@ import a75f.io.logic.L
 import a75f.io.logic.jobs.bearertoken.BearerTokenManager
 import a75f.io.logic.tuners.SystemTuners
 import a75f.io.logic.tuners.TunerConstants
-import org.projecthaystack.HDateTime
 import java.util.*
 
-val TIMER_TO_BE_VALID = 900000
+const val TIMER_TO_BE_VALID = 900000
 
 fun createOfflineModePoint(){
 
@@ -23,7 +22,7 @@ fun createOfflineModePoint(){
     if(isPointNotAvailable(equipRef)) {
         val offlineMode: Point =
             Point.Builder()
-                .setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis + "-" + "offlineMode"))
+                .setDisplayName(SystemTuners.getDisplayNameFromVariation("$equipDis-offlineMode"))
                 .setSiteRef(siteRef).setEquipRef(equipRef)
                 .addMarker("sp").addMarker("system").setHisInterpolate("cov")
                 .addMarker("writable").addMarker("his")
@@ -59,7 +58,7 @@ fun fetchToken(){
 
 fun updateMechanicalLockout() {
     val outsideTemp = hayStack.readEntity("point and outside and air and temp and sensor and oao")
-    if(!outsideTemp.isEmpty())
+    if(outsideTemp.isNotEmpty())
         if(!isOATValid() && !isWeatherAPIValid()) {
             L.ccu().systemProfile.setOutsideTempCoolingLockoutEnabled(hayStack, false)
         }

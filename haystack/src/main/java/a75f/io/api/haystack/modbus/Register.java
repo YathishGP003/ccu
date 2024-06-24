@@ -1,6 +1,8 @@
 package a75f.io.api.haystack.modbus;
 
 
+import androidx.annotation.NonNull;
+
 import com.google.gson.Gson;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
@@ -120,10 +122,11 @@ public class Register {
         }
     }
     
+    @NonNull
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append(registerNumber+":"+registerAddress+":"+registerType+":"+parameterDefinitionType+":"+wordOrder+":"+multiplier+" ");
+        sb.append(registerNumber).append(":").append(registerAddress).append(":").append(registerType).append(":").append(parameterDefinitionType).append(":").append(wordOrder).append(":").append(multiplier).append(" ");
         
         for(Parameter p : parameters) {
             sb.append(p.toString());

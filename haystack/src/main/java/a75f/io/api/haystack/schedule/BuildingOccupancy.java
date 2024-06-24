@@ -4,18 +4,17 @@ import static a75f.io.api.haystack.util.TimeUtil.getEndHour;
 import static a75f.io.api.haystack.util.TimeUtil.getEndMinute;
 import static a75f.io.api.haystack.util.TimeUtil.getEndSec;
 
-import android.util.Log;
+import androidx.annotation.NonNull;
 
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
+import org.joda.time.base.BaseInterval;
 import org.projecthaystack.HDict;
 import org.projecthaystack.HDictBuilder;
 import org.projecthaystack.HList;
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
-
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -81,7 +80,7 @@ public class BuildingOccupancy {
     }
 
     public List<Days> getDays() {
-        Collections.sort(days, Comparator.comparingInt(d -> d.day));
+        days.sort(Comparator.comparingInt(d -> d.day));
         return days;
     }
 
@@ -89,7 +88,7 @@ public class BuildingOccupancy {
         this.days = days;
     }
 
-    public static String buildDefaultBuildingOccupancy(){
+    public static void buildDefaultBuildingOccupancy(){
         HDict[] days = new HDict[7];
         days[0] = getDefaultForDay(DAYS.MONDAY.ordinal());
         days[1] = getDefaultForDay(DAYS.TUESDAY.ordinal());
@@ -111,18 +110,17 @@ public class BuildingOccupancy {
                 .add(Tags.SITEREF, CCUHsApi.getInstance().getSiteIdRef());
 
         CCUHsApi.getInstance().addSchedule(localId.toVal(), defaultSchedule.toDict());
-        return localId.toCode();
+        localId.toCode();
     }
 
     private static HDict getDefaultForDay(int day) {
-        HDict hDictDay = new HDictBuilder()
+        return new HDictBuilder()
                 .add(Tags.DAY, HNum.make(day))
                 .add(Tags.STHH, HNum.make(0))
                 .add(Tags.STMM, HNum.make(0))
                 .add(Tags.ETHH, HNum.make(24))
                 .add(Tags.ETMM, HNum.make(0))
                 .toDict();
-        return hDictDay;
     }
 
     public static class Days {
@@ -226,6 +224,7 @@ public class BuildingOccupancy {
             return Objects.hash(getDay(), getSthh(), getStmm(), getEthh(), getEtmm(), isIntersection());
         }
 
+        @NonNull
         @Override
         public String toString() {
             return "Days{" +
@@ -240,7 +239,7 @@ public class BuildingOccupancy {
     }
     public static class Builder {
         private String id;
-        private Set<String> markers = new HashSet<>();
+        private final Set<String> markers = new HashSet<>();
         private String dis;
         private String kind;
         private String siteRef;
@@ -359,11 +358,11 @@ public class BuildingOccupancy {
     }
     public List<Days> getDaysSorted() {
 
-        Collections.sort(days, Comparator.comparing(o -> Integer.valueOf(o.getStmm())));
+        days.sort(Comparator.comparing(Days::getStmm));
 
-        Collections.sort(days, Comparator.comparing(o -> Integer.valueOf(o.getSthh())));
+        days.sort(Comparator.comparing(Days::getSthh));
 
-        Collections.sort(days, Comparator.comparing(o -> Integer.valueOf(o.day)));
+        days.sort(Comparator.comparing(o -> o.day));
 
         return days;
     }
@@ -439,7 +438,7 @@ public class BuildingOccupancy {
         for (Interval current : intervalsOfCurrent) {
             boolean hasOverlap = intervalOfAddition.overlaps(current);
             if (hasOverlap) {
-               CcuLog.i("CCU_UI"," Current "+current+" new "+intervalOfAddition+" overlaps "+hasOverlap);
+               CcuLog.i("CCU_UI", " Current "+current+" new "+intervalOfAddition+" overlaps "+ true);
                 if (current.getStart().minuteOfDay().get() < current.getEnd().minuteOfDay().get()) {
                     overLaps.add(current.overlap(intervalOfAddition));
                 } else {
@@ -492,15 +491,10 @@ public class BuildingOccupancy {
     public List<Interval> getMergedIntervals(List<BuildingOccupancy.Days> daysSorted) {
 
         List<Interval> intervals   = getScheduledIntervals(daysSorted);
-        Collections.sort(intervals, new Comparator<Interval>() {
-                    public int compare(Interval p1, Interval p2) {
-                        return Long.compare(p1.getStartMillis(), p2.getStartMillis());
-                    }
-                }
-        );
+        intervals.sort(Comparator.comparingLong(BaseInterval::getStartMillis));
 
         Stack<Interval> stack=new Stack<>();
-        if (intervals.size() > 0)
+        if (!intervals.isEmpty())
         {
             stack.push(intervals.get(0));
             for (int i = 1; i < intervals.size(); i++)

@@ -29,7 +29,6 @@ import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode;
 import a75f.io.logic.bo.building.hyperstatsplit.common.BasicSettings;
 import a75f.io.logic.bo.util.TemperatureMode;
 import a75f.io.logic.tuners.TunerConstants;
-import a75f.io.logic.tuners.TunerUtil;
 
 public class HyperSplitMessageGenerator {
 
@@ -76,10 +75,10 @@ public class HyperSplitMessageGenerator {
         int temperatureMode = (int) Domain.readValAtLevelByDomain(DomainName.temperatureMode,
                 TunerConstants.SYSTEM_BUILDING_VAL_LEVEL);
 
-        int minCoolingUserTemp = CCUHsApi.getInstance().readPointPriorityValByQuery(HyperSplitSettingsUtil.Companion.getCoolingUserLimitByQuery(mode, "min", equipRef)).intValue();
-        int maxCoolingUserTemp = CCUHsApi.getInstance().readPointPriorityValByQuery(HyperSplitSettingsUtil.Companion.getCoolingUserLimitByQuery(mode, "max", equipRef)).intValue();
-        int minHeatingUserTemp = CCUHsApi.getInstance().readPointPriorityValByQuery(HyperSplitSettingsUtil.Companion.getHeatingUserLimitByQuery(mode, "min", equipRef)).intValue();
-        int maxHeatingUserTemp = CCUHsApi.getInstance().readPointPriorityValByQuery(HyperSplitSettingsUtil.Companion.getHeatingUserLimitByQuery(mode, "max", equipRef)).intValue();
+        int minCoolingUserTemp = CCUHsApi.getInstance().readPointPriorityValByQuery(HyperSplitSettingsUtil.Companion.getCoolingUserLimitByQuery("min", equipRef)).intValue();
+        int maxCoolingUserTemp = CCUHsApi.getInstance().readPointPriorityValByQuery(HyperSplitSettingsUtil.Companion.getCoolingUserLimitByQuery("max", equipRef)).intValue();
+        int minHeatingUserTemp = CCUHsApi.getInstance().readPointPriorityValByQuery(HyperSplitSettingsUtil.Companion.getHeatingUserLimitByQuery("min", equipRef)).intValue();
+        int maxHeatingUserTemp = CCUHsApi.getInstance().readPointPriorityValByQuery(HyperSplitSettingsUtil.Companion.getHeatingUserLimitByQuery("max", equipRef)).intValue();
 
         if (minCoolingUserTemp == 0) {
             minCoolingUserTemp = CCUHsApi.getInstance().readPointPriorityValByQuery("point and schedulable and default and cooling and user and limit and min").intValue();
@@ -101,8 +100,8 @@ public class HyperSplitMessageGenerator {
 
         HyperSplit.HyperSplitSettingsMessage_t.Builder msg = HyperSplit.HyperSplitSettingsMessage_t.newBuilder()
                 .setRoomName(zone)
-                .setHeatingDeadBand((int) (getStandaloneHeatingDeadband(equipRef, mode) * 10))
-                .setCoolingDeadBand((int) (getStandaloneCoolingDeadband(equipRef, mode) * 10))
+                .setHeatingDeadBand((int) (getStandaloneHeatingDeadband(equipRef) * 10))
+                .setCoolingDeadBand((int) (getStandaloneCoolingDeadband(equipRef) * 10))
                 .setMinCoolingUserTemp(minCoolingUserTemp)
                 .setMaxCoolingUserTemp(maxCoolingUserTemp)
                 .setMinHeatingUserTemp(minHeatingUserTemp)
@@ -334,7 +333,7 @@ public class HyperSplitMessageGenerator {
         return hayStack.readDefaultVal("dehumidifier and control and group == \"" + address + "\"").intValue();
     }
 
-    private static double getStandaloneCoolingDeadband(String equipRef, TemperatureMode mode) {
+    private static double getStandaloneCoolingDeadband(String equipRef) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap collingDeadband = hayStack.read("point and deadband and cooling and zone and not multiplier and roomRef == \""+HSUtil.getZoneIdFromEquipId(equipRef)+"\"");
         try {
@@ -346,7 +345,7 @@ public class HyperSplitMessageGenerator {
 
     }
 
-    public static double getStandaloneHeatingDeadband(String equipRef, TemperatureMode mode) {
+    public static double getStandaloneHeatingDeadband(String equipRef) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap deadbandPoint =
                 hayStack.read("point and deadband and heating and zone and not multiplier and roomRef == \""+HSUtil.getZoneIdFromEquipId(equipRef)+

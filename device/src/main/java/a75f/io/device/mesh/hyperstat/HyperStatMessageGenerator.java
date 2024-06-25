@@ -25,10 +25,8 @@ import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode;
 import a75f.io.logic.bo.building.hyperstat.common.BasicSettings;
-import a75f.io.logic.bo.building.hyperstat.common.HSHaystackUtil;
 import a75f.io.logic.bo.util.TemperatureMode;
 import a75f.io.logic.tuners.TunerConstants;
-import a75f.io.logic.tuners.TunerUtil;
 
 import static a75f.io.logic.bo.building.schedules.Occupancy.AUTOAWAY;
 import static a75f.io.logic.bo.building.schedules.Occupancy.UNOCCUPIED;
@@ -89,10 +87,10 @@ public class HyperStatMessageGenerator {
         int temperatureMode = (int) Domain.readValAtLevelByDomain(DomainName.temperatureMode,
                 TunerConstants.SYSTEM_BUILDING_VAL_LEVEL);
 
-        int minCoolingUserTemp = CCUHsApi.getInstance().readPointPriorityValByQuery(HyperStatSettingsUtil.Companion.getCoolingUserLimitByQuery(mode, "min", equipRef)).intValue();
-        int maxCoolingUserTemp = CCUHsApi.getInstance().readPointPriorityValByQuery(HyperStatSettingsUtil.Companion.getCoolingUserLimitByQuery(mode, "max", equipRef)).intValue();
-        int minHeatingUserTemp = CCUHsApi.getInstance().readPointPriorityValByQuery(HyperStatSettingsUtil.Companion.getHeatingUserLimitByQuery(mode, "min", equipRef)).intValue();
-        int maxHeatingUserTemp = CCUHsApi.getInstance().readPointPriorityValByQuery(HyperStatSettingsUtil.Companion.getHeatingUserLimitByQuery(mode, "max", equipRef)).intValue();
+        int minCoolingUserTemp = CCUHsApi.getInstance().readPointPriorityValByQuery(HyperStatSettingsUtil.Companion.getCoolingUserLimitByQuery("min", equipRef)).intValue();
+        int maxCoolingUserTemp = CCUHsApi.getInstance().readPointPriorityValByQuery(HyperStatSettingsUtil.Companion.getCoolingUserLimitByQuery("max", equipRef)).intValue();
+        int minHeatingUserTemp = CCUHsApi.getInstance().readPointPriorityValByQuery(HyperStatSettingsUtil.Companion.getHeatingUserLimitByQuery("min", equipRef)).intValue();
+        int maxHeatingUserTemp = CCUHsApi.getInstance().readPointPriorityValByQuery(HyperStatSettingsUtil.Companion.getHeatingUserLimitByQuery("max", equipRef)).intValue();
 
         if (minCoolingUserTemp == 0) {
             minCoolingUserTemp = CCUHsApi.getInstance().readPointPriorityValByQuery("point and schedulable and default and cooling and user and limit and min").intValue();
@@ -113,7 +111,7 @@ public class HyperStatMessageGenerator {
 
         return HyperStatSettingsMessage_t.newBuilder()
             .setRoomName(zone)
-                .setHeatingDeadBand((int) (getStandaloneHeatingDeadband(equipRef, mode) * 10))
+                .setHeatingDeadBand((int) (getStandaloneHeatingDeadband(equipRef) * 10))
                 .setCoolingDeadBand((int) (getStandaloneCoolingDeadband(equipRef, mode) * 10))
                 .setMinCoolingUserTemp(minCoolingUserTemp)
                 .setMaxCoolingUserTemp(maxCoolingUserTemp)
@@ -352,7 +350,7 @@ public class HyperStatMessageGenerator {
 
     }
 
-    public static double getStandaloneHeatingDeadband(String equipRef, TemperatureMode mode) {
+    public static double getStandaloneHeatingDeadband(String equipRef) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap deadbandPoint =
                 hayStack.read("point and deadband and heating and not multiplier and roomRef == \""+HSUtil.getZoneIdFromEquipId(equipRef)+

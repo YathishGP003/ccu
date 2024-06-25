@@ -1,8 +1,8 @@
 package a75f.io.logic.bo.building.otn;
 
-import android.util.Log;
 import java.util.HashMap;
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.logger.CcuLog;
 
 /*
  * created by spoorthidev on 3-August-2021
@@ -23,7 +23,7 @@ public class OTNUtil {
         double forceoccupied = CCUHsApi.getInstance().readHisValByQuery("point and occupancy and" +
                 " mode and equipRef == \"" + equipID + "\"");
 
-        Log.d(LOG_TAG, "equipStatusPoint =" + equipStatusPoint +
+        CcuLog.d(LOG_TAG, "equipStatusPoint =" + equipStatusPoint +
                 "humidity =" + humidity + "forceoccupied" + forceoccupied);
 
         if (!equipStatusPoint.isEmpty()) {

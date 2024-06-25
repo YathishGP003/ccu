@@ -1,25 +1,38 @@
 package a75f.io.renatus.registration;
 
-import android.animation.ObjectAnimator;
-import android.animation.ValueAnimator;
-import static com.raygun.raygun4android.RaygunClient.getApplicationContext;
+import static a75f.io.api.haystack.util.SchedulableMigrationKt.validateMigration;
+import static a75f.io.device.bacnet.BacnetConfigConstants.BACNET_CONFIGURATION;
+import static a75f.io.device.bacnet.BacnetConfigConstants.IP_DEVICE_INSTANCE_NUMBER;
+import static a75f.io.device.bacnet.BacnetUtilKt.sendBroadCast;
+import static a75f.io.logic.L.ccu;
+import static a75f.io.logic.bo.util.UnitUtils.celsiusToFahrenheit;
+import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
+import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusRelative;
+import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
+import static a75f.io.logic.service.FileBackupJobReceiver.performConfigFileBackup;
+import static a75f.io.renatus.SettingsFragment.ACTION_SETTING_SCREEN;
+import static a75f.io.renatus.util.BackFillViewModel.BackFillDuration;
+import static a75f.io.renatus.util.BackFillViewModel.backfieldTimeSelectedValue;
+import static a75f.io.renatus.util.BackFillViewModel.generateToastMessage;
+import static a75f.io.renatus.util.BackFillViewModel.getBackFillDuration;
+import static a75f.io.renatus.util.BackFillViewModel.getBackFillTimeArrayAdapter;
+import static a75f.io.renatus.util.extension.FragmentContextKt.showMigrationErrorDialog;
+import static a75f.io.renatus.views.MasterControl.MasterControlUtil.getAdapterVal;
+import static a75f.io.renatus.views.MasterControl.MasterControlUtil.getAdapterValDeadBand;
+import static a75f.io.renatus.views.MasterControl.MasterControlUtil.getAdapterValDiff;
 
-import android.app.AlertDialog;
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.net.ConnectivityManager;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
-import android.util.Patterns;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,14 +42,17 @@ import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.CompoundButton;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -70,11 +86,11 @@ import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BackfillUtilKt;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.bo.util.DemandResponseMode;
 import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint;
-import a75f.io.logic.tuners.TunerEquip;
-import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.tuners.TunerConstants;
+import a75f.io.logic.tuners.TunerEquip;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.logic.util.OfflineModeUtilKt;
 import a75f.io.messaging.exceptions.ScheduleMigrationNotComplete;
@@ -94,30 +110,6 @@ import a75f.io.renatus.views.MasterControl.MasterControlUtil;
 import a75f.io.renatus.views.MasterControl.MasterControlView;
 import a75f.io.renatus.views.TempLimit.TempLimitView;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.widget.SwitchCompat;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
-
-import static a75f.io.api.haystack.util.SchedulableMigrationKt.validateMigration;
-import static a75f.io.device.bacnet.BacnetConfigConstants.BACNET_CONFIGURATION;
-import static a75f.io.device.bacnet.BacnetConfigConstants.IP_DEVICE_INSTANCE_NUMBER;
-import static a75f.io.device.bacnet.BacnetUtilKt.sendBroadCast;
-import static a75f.io.logic.L.ccu;
-
-import static a75f.io.logic.bo.util.UnitUtils.celsiusToFahrenheit;
-import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
-import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusRelative;
-import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
-import static a75f.io.logic.service.FileBackupJobReceiver.performConfigFileBackup;
-import static a75f.io.renatus.SettingsFragment.ACTION_SETTING_SCREEN;
-import static a75f.io.renatus.util.BackFillViewModel.*;
-import static a75f.io.renatus.util.extension.FragmentContextKt.showMigrationErrorDialog;
-import static a75f.io.renatus.views.MasterControl.MasterControlUtil.getAdapterVal;
-import static a75f.io.renatus.views.MasterControl.MasterControlUtil.getAdapterValDeadBand;
-import static a75f.io.renatus.views.MasterControl.MasterControlUtil.getAdapterValDiff;
-
 public class InstallerOptions extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -134,12 +126,8 @@ public class InstallerOptions extends Fragment {
     Context mContext;
     Spinner mAddressBandSpinner;
     ToggleButton mToggleTempAll;
-    HGrid mCCUS;
-    HGrid mSite;
-    String mSiteId;
     String addressBandSelected = "1000";
     Prefs prefs;
-    String localSiteID;
     String CCU_ID = "";
     private boolean isFreshRegister;
     private static InstallerOptions instance;
@@ -162,10 +150,6 @@ public class InstallerOptions extends Fragment {
     TextView textOfflineMode;
     TextView descOfflineMode;
 
-    EditText editIPAddr,editSubnet,editGateway;
-    Button buttonInitialise;
-    String networkConfig = "";
-    boolean isEthernet = false;
     UtilityApplication utilityApplication;
     LinearLayout linearLayout;
     View toastLayout;
@@ -290,7 +274,7 @@ public class InstallerOptions extends Fragment {
         Button buttonCancel = rootView.findViewById(R.id.buttonCancel);
         linearLayout = rootView.findViewById(R.id.layoutFooterButtons);
         LayoutInflater li = getLayoutInflater();
-        toastLayout = li.inflate(R.layout.custom_toast_layout_backfill, (ViewGroup) rootView.findViewById(R.id.custom_toast_layout_backfill));
+        toastLayout = li.inflate(R.layout.custom_toast_layout_backfill, rootView.findViewById(R.id.custom_toast_layout_backfill));
 
         toggleCoolingLockout = rootView.findViewById(R.id.toggleCoolingLockout);
         toggleHeatingLockout = rootView.findViewById(R.id.toggleHeatingLockout);
@@ -303,8 +287,9 @@ public class InstallerOptions extends Fragment {
         textHeatingLockout = rootView.findViewById(R.id.textHeatingLockout);
         textHeatingLockoutDesc = rootView.findViewById(R.id.textHeatingLockoutDesc);
         switchDREnrollment = rootView.findViewById(R.id.switchDRMode);
-        initializeTempLockoutUI(CCUHsApi.getInstance());
-		HRef ccuId = CCUHsApi.getInstance().getCcuRef();
+
+        initializeTempLockoutUI(ccuHsApi);
+		HRef ccuId = ccuHsApi.getCcuRef();
         String ccuUid = null;
 
         textCelsiusEnable.setVisibility(View.VISIBLE);
@@ -318,26 +303,23 @@ public class InstallerOptions extends Fragment {
 
         setToggleCheck();
 
-        toggleOfflineMode.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                double offlineValue = isChecked ? 1.0 : 0.0;
-                CCUHsApi.getInstance().writeDefaultVal("offline and mode ",offlineValue);
-                CCUHsApi.getInstance().writeHisValByQuery("offline and mode ",offlineValue);
-                TunerUtil.updateDefault(offlineValue);
-            }
+        toggleOfflineMode.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            double offlineValue = isChecked ? 1.0 : 0.0;
+            ccuHsApi.writeDefaultVal("offline and mode ",offlineValue);
+            ccuHsApi.writeHisValByQuery("offline and mode ",offlineValue);
+            TunerUtil.updateDefault(offlineValue);
         });
 
         if (ccuId != null) {
-            ccuUid = CCUHsApi.getInstance().getCcuRef().toString();
+            ccuUid = ccuHsApi.getCcuRef().toString();
         }
 
         for (int addr = 1000; addr <= 10900; addr += 100) {
             addressBand.add(String.valueOf(addr));
         }
 
-        ArrayList<HashMap> equipments = CCUHsApi.getInstance().readAll("equip and zone or equip and oao or equip and connectModule");
-        if (equipments.size() == 0)
+        ArrayList<HashMap> equipments = ccuHsApi.readAll("equip and zone or equip and oao or equip and connectModule");
+        if (equipments.isEmpty())
             getRegisteredAddressBand(); // doing this when no equips available
         else
             setNodeAddress();
@@ -345,12 +327,12 @@ public class InstallerOptions extends Fragment {
         mAddressBandSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                Log.d("CCU", "AddressBandSelected : " + mAddressBandSpinner.getSelectedItem());
+                CcuLog.d(L.TAG_CCU, "AddressBandSelected : " + mAddressBandSpinner.getSelectedItem());
                 if (i >= 0) {
                     addressBandSelected = mAddressBandSpinner.getSelectedItem().toString();
                     L.ccu().setSmartNodeAddressBand(Short.parseShort(addressBandSelected));
                     if (!isFreshRegister){
-                        HashMap band = CCUHsApi.getInstance().read("point and snband");
+                        HashMap band = ccuHsApi.read("point and snband");
                         if(!addressBandSelected.equals(band.get("val").toString()) && regAddressBands.contains(addressBandSelected)) {
                             Toast toast = new Toast(Globals.getInstance().getApplicationContext());
                             toast.setGravity(Gravity.BOTTOM, 50, 50);
@@ -362,7 +344,7 @@ public class InstallerOptions extends Fragment {
                         sp.setVal(addressBandSelected);
                         SettingPoint snBand = sp.build();
 
-                        CCUHsApi.getInstance().updateSettingPoint(snBand, snBand.getId());
+                        ccuHsApi.updateSettingPoint(snBand, snBand.getId());
                         regAddressBands.remove(band.get("val"));
                         regAddressBands.add(addressBandSelected);
                         try {
@@ -391,28 +373,22 @@ public class InstallerOptions extends Fragment {
 
         if (isFreshRegister) mNext.setVisibility(View.VISIBLE);
         else mNext.setVisibility(View.GONE);
-        HashMap ccu = CCUHsApi.getInstance().read("ccu");
-        mNext.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                if (ccu.size() == 0) {
-                    Toast.makeText(getContext(), "CCU device does not exist. Please clear app data and retry " +
-                                                 "registration", Toast.LENGTH_LONG).show();
-                    return;
-                }
-                mNext.setEnabled(false);
-                createInstallerPoints(ccu, prefs);
-                // TODO Auto-generated method stub
-                goTonext();
+        HashMap ccu = ccuHsApi.read("ccu");
+        mNext.setOnClickListener(v -> {
+            if (ccu.isEmpty()) {
+                Toast.makeText(getContext(), "CCU device does not exist. Please clear app data and retry " +
+                                             "registration", Toast.LENGTH_LONG).show();
+                return;
             }
+            mNext.setEnabled(false);
+            createInstallerPoints(ccu, prefs);
+            // TODO Auto-generated method stub
+            goToNext();
         });
 
         if (!isFreshRegister) {
-            ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and zone");
-            if (equips != null && equips.size() > 0) {
-                mAddressBandSpinner.setEnabled(false);
-            } else {
-                mAddressBandSpinner.setEnabled(true);
-            }
+            ArrayList<HashMap> equips = ccuHsApi.readAll("equip and zone");
+            mAddressBandSpinner.setEnabled(equips == null || equips.isEmpty());
         }
 
         imageTemp.setOnClickListener(view -> {
@@ -428,30 +404,27 @@ public class InstallerOptions extends Fragment {
 
         getTempValues();
 
-        toggleCelsius.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                HashMap<Object, Object> useCelsius = CCUHsApi.getInstance().readEntity("displayUnit");
+        toggleCelsius.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            HashMap<Object, Object> useCelsius = ccuHsApi.readEntity("displayUnit");
 
-                if (!useCelsius.isEmpty()) {
-                    if (isChecked) {
-                        CCUHsApi.getInstance().writePoint(useCelsius.get("id").toString(), TunerConstants.TUNER_BUILDING_VAL_LEVEL,
-                                CCUHsApi.getInstance().getCCUUserName(), 1.0, 0);
-                    } else {
-                        CCUHsApi.getInstance().writePoint(useCelsius.get("id").toString(), TunerConstants.TUNER_BUILDING_VAL_LEVEL,
-                                CCUHsApi.getInstance().getCCUUserName(), 0.0, 0);
-                    }
+            if (!useCelsius.isEmpty()) {
+                if (isChecked) {
+                    ccuHsApi.writePoint(useCelsius.get("id").toString(), TunerConstants.TUNER_BUILDING_VAL_LEVEL,
+                            ccuHsApi.getCCUUserName(), 1.0, 0);
                 } else {
-                    Toast.makeText(getContext(), "To enable \"Use Celsius\" feature on this device upgrade Primary CCU.\nRestart app on this device after Primary CCU is Upgraded.", Toast.LENGTH_LONG).show();
+                    ccuHsApi.writePoint(useCelsius.get("id").toString(), TunerConstants.TUNER_BUILDING_VAL_LEVEL,
+                            ccuHsApi.getCCUUserName(), 0.0, 0);
                 }
-                getTempValues();
-                initializeTempLockoutUI(CCUHsApi.getInstance());
-                if (TunerFragment.newInstance().tunerExpandableLayoutHelper != null) {
-                    TunerFragment.newInstance().tunerExpandableLayoutHelper.notifyDataSetChanged();
-                }
-                toggleCelsius.setEnabled(false);
-                new Handler().postDelayed(() -> toggleCelsius.setEnabled(true),2000);
+            } else {
+                Toast.makeText(getContext(), "To enable \"Use Celsius\" feature on this device upgrade Primary CCU.\nRestart app on this device after Primary CCU is Upgraded.", Toast.LENGTH_LONG).show();
             }
+            getTempValues();
+            initializeTempLockoutUI(ccuHsApi);
+            if (TunerFragment.newInstance().tunerExpandableLayoutHelper != null) {
+                TunerFragment.newInstance().tunerExpandableLayoutHelper.notifyDataSetChanged();
+            }
+            toggleCelsius.setEnabled(false);
+            new Handler().postDelayed(() -> toggleCelsius.setEnabled(true),2000);
         });
 
 
@@ -460,7 +433,7 @@ public class InstallerOptions extends Fragment {
         getActivity().registerReceiver(mPairingReceiver, new IntentFilter(ACTION_SETTING_SCREEN));
 
         setBackFillTimeSpinner(rootView);
-        setUpDREnrollmentMode(CCUHsApi.getInstance());
+        setUpDREnrollmentMode(ccuHsApi);
         setUpTemperatureModeSpinner(rootView, ccuHsApi);
 
         buttonApply.setOnClickListener(view -> {
@@ -573,18 +546,6 @@ public class InstallerOptions extends Fragment {
         CCUHsApi.getInstance().addPoint(bacnetIp);
 
         BackfillUtilKt.addBackFillDurationPointIfNotExists(CCUHsApi.getInstance());
-    }
-
-    private String getEditGateWay(EditText editGateway) {
-        return editGateway.getText() != null ? editGateway.getText().toString() : "";
-    }
-
-    private String getEditSubnet(EditText editSubnet) {
-        return editSubnet.getText() != null ? editSubnet.getText().toString() : "";
-    }
-
-    private String getToggleForBacnet(ToggleButton toggleBACnet) {
-        return toggleBACnet.isChecked() ? "true":"false";
     }
 
     public void setToggleCheck() {
@@ -700,7 +661,7 @@ public class InstallerOptions extends Fragment {
     private void getTempValues() {
 
         hdb = (float) Domain.buildingEquip.getHeatingDeadband().readPriorityVal();
-        cdb = (float) Domain.buildingEquip.getCoolingDeadband().readPriorityVal();;
+        cdb = (float) Domain.buildingEquip.getCoolingDeadband().readPriorityVal();
         upperCoolingTemp = (float) Domain.buildingEquip.getCoolingUserLimitMax().readPriorityVal();
         lowerCoolingTemp = (float) Domain.buildingEquip.getCoolingUserLimitMin().readPriorityVal();
         upperHeatingTemp = (float) Domain.buildingEquip.getHeatingUserLimitMax().readPriorityVal();
@@ -741,7 +702,7 @@ public class InstallerOptions extends Fragment {
 
             try {
                 heatDBVal = (float) Domain.buildingEquip.getHeatingDeadband().readPriorityVal();
-                coolDBVal = (float) Domain.buildingEquip.getCoolingDeadband().readPriorityVal();;
+                coolDBVal = (float) Domain.buildingEquip.getCoolingDeadband().readPriorityVal();
                 coolMaxVal = (float) Domain.buildingEquip.getCoolingUserLimitMax().readPriorityVal();
                 coolMinVal = (float) Domain.buildingEquip.getCoolingUserLimitMin().readPriorityVal();
                 heatMinVal = (float) Domain.buildingEquip.getHeatingUserLimitMin().readPriorityVal();
@@ -1003,9 +964,7 @@ public class InstallerOptions extends Fragment {
                                 builder.setCancelable(false);
                                 builder.setTitle(R.string.schedule_error);
                                 builder.setIcon(R.drawable.ic_alert);
-                                builder.setNegativeButton("OKAY", (dialog1, id) -> {
-                                    dialog1.dismiss();
-                                });
+                                builder.setNegativeButton("OKAY", (dialog1, id) -> dialog1.dismiss());
 
                                 AlertDialog alert = builder.create();
                                 alert.show();
@@ -1051,7 +1010,7 @@ public class InstallerOptions extends Fragment {
         super.onDetach();
     }
 
-    private void goTonext() {
+    private void goToNext() {
         new AsyncTask<Void, Void, Void>() {
             @Override
             protected void onPreExecute() {
@@ -1109,36 +1068,11 @@ public class InstallerOptions extends Fragment {
             if (intent.getAction().equals(ACTION_SETTING_SCREEN)) {
                 if (mAddressBandSpinner != null) {
                     ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and zone");
-                    if (equips != null && equips.size() > 0) {
-                        mAddressBandSpinner.setEnabled(false);
-                    } else {
-                        mAddressBandSpinner.setEnabled(true);
-                    }
+                    mAddressBandSpinner.setEnabled(equips == null || equips.isEmpty());
                 }
             }
         }
     };
-
-    public void setDefaultNetwork(){
-        final ConnectivityManager connMgr = (ConnectivityManager) Globals.getInstance().getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            ConnectivityManager.setProcessDefaultNetwork(null);
-        } else {
-            connMgr.bindProcessToNetwork(null);
-        }
-    }
-
-    public boolean validateIPAddress(String manualIPAddress) {
-        if(!Patterns.IP_ADDRESS.matcher(manualIPAddress).matches()){
-            return false;
-        }else{
-            String[] manualIp = (manualIPAddress).split("\\.");
-            return  Integer.parseInt(manualIp[0]) < 255 & Integer.parseInt(manualIp[0]) > 0 &
-                    Integer.parseInt(manualIp[1]) < 255 & Integer.parseInt(manualIp[1]) > 0 &
-                    Integer.parseInt(manualIp[2]) < 255 & Integer.parseInt(manualIp[2]) >= 0 &
-                    Integer.parseInt(manualIp[3]) < 255 & Integer.parseInt(manualIp[3]) > 0;
-        }
-    }
 
     private void setBackFillTimeSpinner(View rootView) {
 
@@ -1166,16 +1100,14 @@ public class InstallerOptions extends Fragment {
 
     private void getRegisteredAddressBand() {
         RxjavaUtil.executeBackgroundTask(
-                ()->{
-                    regAddressBands.clear();
-                },
+                ()-> regAddressBands.clear(),
                 ()->{
                     HClient hClient = new HClient(CCUHsApi.getInstance().getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
                     String siteUID = CCUHsApi.getInstance().getSiteIdRef().toString();
                     HDict tDict = new HDictBuilder().add("filter", "snband and siteRef == " + siteUID).toDict();
                     HGrid addressPoint = hClient.call("read", HGridBuilder.dictToGrid(tDict));
                     if(addressPoint == null) {
-                        Log.w("RegisterGatherCCUDetails","HGrid(schedulePoint) is null.");
+                        CcuLog.w(L.TAG_CCU_REGISTER_GATHER_DETAILS,"HGrid(schedulePoint) is null.");
                         new Handler(Looper.getMainLooper()).post(() -> {
                             Toast.makeText(getActivity(),"Couldn't find the remote node addresses, Please choose the node address which is not used already.", Toast.LENGTH_LONG).show();
                             setNodeAddress();
@@ -1190,9 +1122,7 @@ public class InstallerOptions extends Fragment {
                         }
                     }
                 },
-                ()->{
-                    setNodeAddress();
-                }
+                this::setNodeAddress
         );
     }
 
@@ -1203,7 +1133,7 @@ public class InstallerOptions extends Fragment {
 
         HashMap ccu = CCUHsApi.getInstance().read("ccu");
         //if ccu exists
-        if (ccu.size() > 0) {
+        if (!ccu.isEmpty()) {
             for (String addBand : addressBand) {
                 String addB = String.valueOf(L.ccu().getSmartNodeAddressBand());
                 if (addBand.equals(addB)) {

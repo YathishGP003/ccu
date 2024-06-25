@@ -1,7 +1,7 @@
 package a75f.io.logger;
 
-/**
- * Created by samjithsadasivan isOn 8/17/17.
+/*
+  Created by samjithsadasivan isOn 8/17/17.
  */
 
 /**

@@ -1,9 +1,10 @@
 package a75.io.algos;
 
-import android.util.Log;
-/**
- * Created by samjithsadasivan on 5/1/18.
+/*
+  Created by samjithsadasivan on 5/1/18.
  */
+
+import a75f.io.logger.CcuLog;
 
 /**
  * ValvePIController modulates the loop output (valvePosition) from minPosition to maxPosition.
@@ -21,7 +22,7 @@ public class ValvePIController extends GenericPIController
     }
     
     public double getValveControlSignal(double setTemp, double roomTemp) {
-        Log.d("ValvePIController", "setTemp " + setTemp + " roomTemp " + roomTemp);
+        CcuLog.d("ValvePIController", "setTemp " + setTemp + " roomTemp " + roomTemp);
         updateControlVariable(setTemp, roomTemp);
         return minPosition + ((double) maxPosition - minPosition)/2 * (1+ getControlVariable()/getMaxAllowedError());
     }

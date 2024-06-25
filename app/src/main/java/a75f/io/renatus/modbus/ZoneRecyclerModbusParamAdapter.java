@@ -6,7 +6,6 @@ import android.content.Context;
 import android.graphics.Color;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -35,6 +34,7 @@ import a75f.io.api.haystack.modbus.Parameter;
 import a75f.io.api.haystack.modbus.Register;
 import a75f.io.api.haystack.modbus.UserIntentPointTags;
 import a75f.io.device.modbus.LModbus;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.interfaces.ModbusDataInterface;
 import a75f.io.messaging.handler.UpdatePointHandler;
@@ -319,7 +319,7 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
                                          " and deviceRef == \"" + deviceRef + "\"");
     
         if (phyPoint.get("pointRef") == null || phyPoint.get("pointRef") == "") {
-            Log.d(L.TAG_CCU_MODBUS, "Physical point does not exist for register "
+            CcuLog.d(L.TAG_CCU_MODBUS, "Physical point does not exist for register "
                                     + configParams.getRegisterAddress() + " and device " + deviceRef);
             return null;
         }

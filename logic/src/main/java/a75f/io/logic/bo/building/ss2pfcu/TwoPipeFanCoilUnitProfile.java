@@ -6,8 +6,6 @@ import static a75f.io.logic.bo.building.ZoneState.HEATING;
 import static a75f.io.logic.bo.building.ZoneState.RFDEAD;
 import static a75f.io.logic.bo.building.ZoneState.TEMPDEAD;
 
-import android.util.Log;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.ArrayList;
@@ -20,6 +18,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Occupied;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
 import a75f.io.logic.bo.building.ZoneProfile;
@@ -68,10 +67,10 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
         for (short node : twoPfcuDeviceMap.keySet()) {
             if (twoPfcuDeviceMap.get(node) == null) {
                 addLogicalMap(node);
-                Log.d(TAG, " Logical Map added for smartstat " + node);
+                CcuLog.d(TAG, " Logical Map added for smartstat " + node);
                 continue;
             }
-            Log.d(TAG, "SmartStat 2PFCU profile");
+            CcuLog.i(TAG, "SmartStat 2PFCU profile");
             TwoPipeFanCoilUnitEquip twoPfcuDevice = twoPfcuDeviceMap.get(node);
             if (twoPfcuDevice.profileType != ProfileType.SMARTSTAT_TWO_PIPE_FCU)
                 continue;
@@ -111,7 +110,7 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
             Occupied occuStatus = ScheduleManager.getInstance().getOccupiedModeCache(zoneId);
             SmartStatFanModeCache fanCacheStorage = new SmartStatFanModeCache();
             int fanModeSaved = fanCacheStorage.getFanModeFromCache(twoPfcuEquip.getId());
-            Log.d(TAG, " smartstat 2pfcu, updates 111=" + heatingThreshold+","+coolingThreshold + "," + setTempHeating + "," + setTempCooling + "," + roomTemp+","+supplyWaterTempTh2);
+            CcuLog.d(TAG, " smartstat 2pfcu, updates 111=" + heatingThreshold+","+coolingThreshold + "," + setTempHeating + "," + setTempCooling + "," + roomTemp+","+supplyWaterTempTh2);
 
             boolean occupied = (occuStatus != null && occuStatus.isOccupied());
             //For dual temp but for single mode we use tuners
@@ -189,7 +188,7 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
     /**
      * Only creates a run time instance of logical map for initialize.
      *
-     * @param addr
+     * @param addr address
      */
     public void addLogicalMap(short addr) {
         TwoPipeFanCoilUnitEquip deviceMap = new TwoPipeFanCoilUnitEquip(getProfileType(), addr);
@@ -199,7 +198,7 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
     /**
      * Only creates a run time instance of logical map for initialize.
      *
-     * @param addr
+     * @param addr address
      */
     public void addLogicalMap(short addr, String roomRef) {
         TwoPipeFanCoilUnitEquip deviceMap = new TwoPipeFanCoilUnitEquip(getProfileType(), addr);
@@ -211,10 +210,10 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
      * When the profile is created first time , either via UI or from existing tagsMap
      * this method has to be called on the profile instance.
      *
-     * @param addr
-     * @param config
-     * @param floorRef
-     * @param zoneRef
+     * @param addr address
+     * @param config configuration
+     * @param floorRef floor reference
+     * @param zoneRef zone reference
      */
     public void addLogicalMapAndPoints(short addr, TwoPipeFanCoilUnitConfiguration config, String floorRef, String zoneRef) {
         TwoPipeFanCoilUnitEquip deviceMap = new TwoPipeFanCoilUnitEquip(getProfileType(), addr);
@@ -223,7 +222,7 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
         twoPfcuDeviceMap.put(addr, deviceMap);
     }
 
-    public void updateLogicalMapAndPoints(short addr, TwoPipeFanCoilUnitConfiguration config, String roomRef) {
+    public void updateLogicalMapAndPoints(short addr, TwoPipeFanCoilUnitConfiguration config) {
         TwoPipeFanCoilUnitEquip deviceMap = twoPfcuDeviceMap.get(addr);
         deviceMap.updateHaystackPoints(config);
     }
@@ -265,8 +264,8 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
             if (twoPfcuDeviceMap.get(nodeAddress) == null) {
                 continue;
             }
-            if (twoPfcuDeviceMap.get(Short.valueOf(nodeAddress)).getCurrentTemp() > 0) {
-                tempTotal += twoPfcuDeviceMap.get(Short.valueOf(nodeAddress)).getCurrentTemp();
+            if (twoPfcuDeviceMap.get(nodeAddress).getCurrentTemp() > 0) {
+                tempTotal += twoPfcuDeviceMap.get(nodeAddress).getCurrentTemp();
                 nodeCount++;
             }
         }
@@ -278,17 +277,13 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
         return CCUHsApi.getInstance().readDefaultVal("point and zone and config and enable and " + config + " and group == \"" + node + "\"");
 
     }
-    public double getConfigType(String config, short node) {
-        return CCUHsApi.getInstance().readDefaultVal("point and zone and config and type and " + config + " and group == \"" + node + "\"");
-
-    }
 
     public double getCmdSignal(String cmd, short node) {
         return CCUHsApi.getInstance().readHisValByQuery("point and standalone and pipe2 and fcu and cmd and his and " + cmd + " and group == \"" + node + "\"");
     }
 
     public void setCmdSignal(String cmd, double val, short node) {
-        Log.i("SSPIPE2", cmd + " : "+val);
+        CcuLog.d(TAG, cmd + " : "+val);
         CCUHsApi.getInstance().writeHisValByQuery("point and standalone and pipe2 and fcu and cmd and his and " + cmd + " and group == \"" + node + "\"", val);
     }
 
@@ -298,12 +293,12 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
     private void fanOperationalModes(String equipId, StandaloneLogicalFanSpeeds fanSpeed, short addr, boolean occupied, StandaloneOperationalMode opMode, double roomTemp){
 
         double hysteresis = StandaloneTunerUtil.getStandaloneStage1Hysteresis(equipId);
-        HashMap<String,Integer> relayStates = new HashMap<String, Integer>();
-        boolean isFanMediumEnabled = getConfigEnabled("relay1",addr) > 0 ? true : false;
-        boolean isFanHighEnabled = getConfigEnabled("relay2",addr) > 0 ? true : false;
-        boolean isFanLowEnabled = getConfigEnabled("relay3", addr) > 0 ? true : false; //relay3 for fan low
-        boolean isAuxHeatingEnabled = getConfigEnabled("relay4",addr)> 0 ? true : false;//Aux Heating
-        boolean isWaterValveEnabled = getConfigEnabled("relay6",addr) > 0 ? true : false;
+        HashMap<String,Integer> relayStates = new HashMap<>();
+        boolean isFanMediumEnabled = getConfigEnabled("relay1", addr) > 0;
+        boolean isFanHighEnabled = getConfigEnabled("relay2", addr) > 0;
+        boolean isFanLowEnabled = getConfigEnabled("relay3", addr) > 0; //relay3 for fan low
+        boolean isAuxHeatingEnabled = getConfigEnabled("relay4", addr) > 0;//Aux Heating
+        boolean isWaterValveEnabled = getConfigEnabled("relay6", addr) > 0;
         switch (fanSpeed) {
             case AUTO:
                 resetRelays(equipId,addr,ZoneTempState.NONE);
@@ -376,7 +371,7 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
                         // run periodic water valve check 2 mins on and 5 mins OFF
                         fcuPeriodicWaterValveCheck(addr, false);
                     }else if((twoPfcuDeviceMap.get(addr).getWaterValvePeriodicTimer() != 0) && (waterVal > 0)&& (((System.currentTimeMillis() - twoPfcuDeviceMap.get(addr).getWaterValvePeriodicTimer())/60000) > 3) ) {
-                        Log.d("FCU","fcuPeriodicWaterCheck AUTO fanmode="+addr+","+twoPfcuDeviceMap.get(addr).getWaterValvePeriodicTimer()+","+((System.currentTimeMillis() - twoPfcuDeviceMap.get(addr).getWaterValvePeriodicTimer())/60000)+","+((System.currentTimeMillis() - twoPfcuDeviceMap.get(addr).getWaterValveLastOnTime())/60000));
+                        CcuLog.d("FCU","fcuPeriodicWaterCheck AUTO fanmode="+addr+","+twoPfcuDeviceMap.get(addr).getWaterValvePeriodicTimer()+","+((System.currentTimeMillis() - twoPfcuDeviceMap.get(addr).getWaterValvePeriodicTimer())/60000)+","+((System.currentTimeMillis() - twoPfcuDeviceMap.get(addr).getWaterValveLastOnTime())/60000));
                         //setCmdSignal("pipe2 and fcu and water and valve", 0, addr);
                         turnOffWaterValve(addr);
                         twoPfcuDeviceMap.get(addr).setWaterValvePeriodicTimer(0);
@@ -461,18 +456,18 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
         setCmdSignal("aux and heating",0,node);
         if(temperatureState == ZoneTempState.FAN_OP_MODE_OFF)
             turnOffWaterValve(node);
-        StandaloneScheduler.updateSmartStatStatus(equipId, DEADBAND,new HashMap<String, Integer>() ,temperatureState);
+        StandaloneScheduler.updateSmartStatStatus(equipId, DEADBAND, new HashMap<>() ,temperatureState);
         twoPfcuDeviceMap.get(node).setStatus(DEADBAND.ordinal());
     }
 
     private void twoPipeFCUCoolOnlyMode(Equip equip, short addr, double roomTemp, Occupied occuStatus, StandaloneLogicalFanSpeeds fanSpeed, StandaloneOperationalMode opMode){
 
         double hysteresis = StandaloneTunerUtil.getStandaloneStage1Hysteresis(equip.getId());
-        boolean isFanMediumEnabled = getConfigEnabled("relay1",addr) > 0 ? true : false;
-        boolean isFanHighEnabled = getConfigEnabled("relay2",addr) > 0 ? true : false;
-        boolean isFanLowEnabled = getConfigEnabled("relay3", addr) > 0 ? true : false; //relay3 for fan low
-        boolean isAuxHeatingEnabled = getConfigEnabled("relay4",addr)> 0 ? true : false;//Aux Heating
-        boolean isWaterValve = getConfigEnabled("relay6",addr) > 0 ? true : false;
+        boolean isFanMediumEnabled = getConfigEnabled("relay1", addr) > 0;
+        boolean isFanHighEnabled = getConfigEnabled("relay2", addr) > 0;
+        boolean isFanLowEnabled = getConfigEnabled("relay3", addr) > 0; //relay3 for fan low
+        boolean isAuxHeatingEnabled = getConfigEnabled("relay4", addr) > 0;//Aux Heating
+        boolean isWaterValve = getConfigEnabled("relay6", addr) > 0;
         double coolingDeadband = 2.0;
         double heatingDeadband = 2.0;
         boolean occupied = false;
@@ -488,7 +483,7 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
             }
             occupied = occuStatus.isOccupied();
         }
-        HashMap<String,Integer> relayStates = new HashMap<String, Integer>();
+        HashMap<String,Integer> relayStates = new HashMap<>();
 
         String fanstages = "";
         switch (fanSpeed){
@@ -639,7 +634,7 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
                 }
             }
         }
-        Log.d("FANMODE", Arrays.toString(twoPfcuDeviceMap.keySet().toArray())+"SmartStat - 111 2PFCcool only :"+fanSpeed.name()+","+Arrays.toString(relayStates.entrySet().toArray())+","+heatingDeadband+","+roomTemp+","
+        CcuLog.d(TAG, Arrays.toString(twoPfcuDeviceMap.keySet().toArray())+"SmartStat - 111 2PFCcool only :"+fanSpeed.name()+","+Arrays.toString(relayStates.entrySet().toArray())+","+heatingDeadband+","+roomTemp+","
                 +setTempCooling+" "+isFanLowEnabled+" "+isFanMediumEnabled+" "+isFanHighEnabled+" "+isAuxHeatingEnabled+" "+isWaterValve);
 
         //ZoneState curstate = relayStates.size() > 0 ?  (relayStates.containsKey("CoolingStage1") ? COOLING : DEADBAND ) : DEADBAND;
@@ -650,18 +645,18 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
 
     private void twoPipeFCUHeatOnlyMode(Equip equip, short addr, double roomTemp, Occupied occuStatus, StandaloneLogicalFanSpeeds fanSpeed){
         double hysteresis = StandaloneTunerUtil.getStandaloneStage1Hysteresis(equip.getId());
-        boolean isFanMediumEnabled = getConfigEnabled("relay1",addr) > 0 ? true : false;
-        boolean isFanHighEnabled = getConfigEnabled("relay2",addr) > 0 ? true : false;
-        boolean isFanLowEnabled = getConfigEnabled("relay3", addr) > 0 ? true : false; //relay3 for fan low
-        boolean isAuxHeatingEnabled = getConfigEnabled("relay4",addr)> 0 ? true : false;//Aux Heating
-        boolean isWaterValve = getConfigEnabled("relay6",addr) > 0 ? true : false;
+        boolean isFanMediumEnabled = getConfigEnabled("relay1", addr) > 0;
+        boolean isFanHighEnabled = getConfigEnabled("relay2", addr) > 0;
+        boolean isFanLowEnabled = getConfigEnabled("relay3", addr) > 0; //relay3 for fan low
+        boolean isAuxHeatingEnabled = getConfigEnabled("relay4", addr) > 0;//Aux Heating
+        boolean isWaterValve = getConfigEnabled("relay6", addr) > 0;
         double heatingDeadband = 2.0;
         boolean occupied = false;
         if(occuStatus != null){
             heatingDeadband = occuStatus.getHeatingDeadBand();
             occupied = occuStatus.isOccupied();
         }
-        HashMap<String,Integer> relayStates = new HashMap<String, Integer>();
+        HashMap<String,Integer> relayStates = new HashMap<>();
 
         String fanstages = "";
 
@@ -826,7 +821,7 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
             }
         }
 
-        Log.d("FANMODE", Arrays.toString(twoPfcuDeviceMap.keySet().toArray())+"SmartStat - 111 2PFHeat only :"+fanSpeed.name()+","+Arrays.toString(relayStates.entrySet().toArray())+","+heatingDeadband+","+roomTemp+","
+        CcuLog.d(TAG, Arrays.toString(twoPfcuDeviceMap.keySet().toArray())+"SmartStat - 111 2PFHeat only :"+fanSpeed.name()+","+Arrays.toString(relayStates.entrySet().toArray())+","+heatingDeadband+","+roomTemp+","
                 +setTempCooling+" "+isFanLowEnabled+" "+isFanMediumEnabled+" "+isFanHighEnabled+" "+isAuxHeatingEnabled+" "+isWaterValve);
 
         //ZoneState curstate = relayStates.size() > 0 ?  (relayStates.containsKey("CoolingStage1") ? COOLING : DEADBAND ) : DEADBAND;
@@ -846,7 +841,7 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
     }
 
     private boolean fcuPeriodicWaterValveCheck(short addr, boolean isHourlyCheck){
-        Log.d("FCU","fcuPeriodicWaterCheck="+addr+","+isHourlyCheck+","+twoPfcuDeviceMap.get(addr).getWaterValvePeriodicTimer()+","+((System.currentTimeMillis() - twoPfcuDeviceMap.get(addr).getWaterValvePeriodicTimer())/60000)+","+((System.currentTimeMillis() - twoPfcuDeviceMap.get(addr).getWaterValveLastOnTime())/60000));
+        CcuLog.d(TAG,"fcuPeriodicWaterCheck="+addr+","+isHourlyCheck+","+twoPfcuDeviceMap.get(addr).getWaterValvePeriodicTimer()+","+((System.currentTimeMillis() - twoPfcuDeviceMap.get(addr).getWaterValvePeriodicTimer())/60000)+","+((System.currentTimeMillis() - twoPfcuDeviceMap.get(addr).getWaterValveLastOnTime())/60000));
         if((twoPfcuDeviceMap.get(addr).getWaterValvePeriodicTimer() == 0) ||(((System.currentTimeMillis() - twoPfcuDeviceMap.get(addr).getWaterValvePeriodicTimer())/60000) < 2)){ //ON for two mins
             if((getCmdSignal("pipe2 and fcu and water and valve",addr) == 0) || ( twoPfcuDeviceMap.get(addr).getWaterValvePeriodicTimer() == 0)) {
 
@@ -854,7 +849,7 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
                     turnOnWaterValve(addr);
                     //setCmdSignal("pipe2 and fcu and water and valve", 1.0, addr);
                     twoPfcuDeviceMap.get(addr).setWaterValvePeriodicTimer(System.currentTimeMillis());
-                    Log.i("SSPIPE2", "fcuPeriodicWaterValveCheck: turning on water valve");
+                    CcuLog.i("SSPIPE2", "fcuPeriodicWaterValveCheck: turning on water valve");
                 } else {
                     if(!isSupplyWithInThreshold()) {
                         turnOnWaterValve(addr);
@@ -876,36 +871,9 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
 
     }
 
-    /*private boolean fcuWaterSamplingEveryHour(short addr){
-        Log.i("SSPIPE2","Called for water sampling "+twoPfcuDeviceMap.get(addr).getWaterValveLastOnTime());
-        Log.i("SSPIPE2","Called for water getWaterValveLastOnTime "+new Date(twoPfcuDeviceMap.get(addr).getWaterValveLastOnTime()));
-        Log.i("SSPIPE2","Called for water getWaterValvePeriodicTimer "+twoPfcuDeviceMap.get(addr).getWaterValvePeriodicTimer());
-        Log.i("SSPIPE2","Called for water sampling wait time"+(((System.currentTimeMillis() - twoPfcuDeviceMap.get(addr).getWaterValveLastOnTime())/(60000))));
-
-        if(twoPfcuDeviceMap.get(addr).getWaterValveLastOnTime() != 0){
-            if((((System.currentTimeMillis() - twoPfcuDeviceMap.get(addr).getWaterValveLastOnTime())/(60000)) > 58)){//Starts with 0 and at 60th minute we turn on
-                if((twoPfcuDeviceMap.get(addr).getWaterValvePeriodicTimer() == 0 ) || ((((System.currentTimeMillis() - twoPfcuDeviceMap.get(addr).getWaterValvePeriodicTimer())/60000) < 2))){
-                    return fcuPeriodicWaterValveCheck(addr,true);
-                }else {
-                    twoPfcuDeviceMap.get(addr).setWaterValveLastOnTime(System.currentTimeMillis());
-                    twoPfcuDeviceMap.get(addr).setWaterValvePeriodicTimer(0);
-                    if(getCmdSignal("pipe2 and fcu and water and valve",addr) > 0)
-                        setCmdSignal("pipe2 and fcu and water and valve",0,addr);
-                }
-            }
-        }else {
-            twoPfcuDeviceMap.get(addr).setWaterValveLastOnTime(System.currentTimeMillis());
-        }
-        return false;
-    }
-
-
-
-*/
-
     private void checkWaterSampling (short address) {
         boolean isWaterValveEnabled = getConfigEnabled("relay6", address) > 0;
-        Log.i("SSPIPE2", "isWaterValveEnabled is enabled "+isWaterValveEnabled);
+        CcuLog.d(TAG, "isWaterValveEnabled is enabled "+isWaterValveEnabled);
 
         int waitingDuration = 58;
 
@@ -917,12 +885,12 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
             double currentValveStatus = getCmdSignal("pipe2 and fcu and water and valve", address);
             long runningValveTime = Objects.requireNonNull(twoPfcuDeviceMap.get(address)).getWaterValvePeriodicTimer();
             long lastWaterValveOnTime = Objects.requireNonNull(twoPfcuDeviceMap.get(address)).getWaterValveLastOnTime();
-            Log.i("SSPIPE2", "runningValveTime : "+runningValveTime );
+            CcuLog.d(TAG, "runningValveTime : "+runningValveTime );
 
             if (lastWaterValveOnTime != 0) {
                 if (runningValveTime == 0) {
                     long waitingTimeMin = milliToMin (System.currentTimeMillis() - lastWaterValveOnTime);
-                    Log.i("SSPIPE2", "Waiting to turn on : "+waitingTimeMin);
+                    CcuLog.d(TAG, "Waiting to turn on : "+waitingTimeMin);
                     if (waitingTimeMin > waitingDuration) {
                         if (currentValveStatus != 1.0) {
                             Objects.requireNonNull(twoPfcuDeviceMap.get(address)).setWaterValvePeriodicTimer(System.currentTimeMillis());
@@ -931,12 +899,12 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
                     }
                 } else {
                     long samplingSinceFrom = milliToMin (System.currentTimeMillis() - lastWaterValveOnTime);
-                    Log.i("SSPIPE2", "checkWaterSampling is running from min "+samplingSinceFrom);
+                    CcuLog.d(TAG, "checkWaterSampling is running from min "+samplingSinceFrom);
                     if (samplingSinceFrom >= 2) {
                         Objects.requireNonNull(twoPfcuDeviceMap.get(address)).setWaterValvePeriodicTimer(0);
                         Objects.requireNonNull(twoPfcuDeviceMap.get(address)).setWaterValveLastOnTime(System.currentTimeMillis());
                         turnOffWaterValve( address);
-                        Log.i("SSPIPE2", "Resetting WATER_VALVE to OFF");
+                        CcuLog.i(TAG, "Resetting WATER_VALVE to OFF");
                     }
                 }
             } else {
@@ -980,13 +948,13 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
     }
 
     void dumpOutput(short node, StandaloneLogicalFanSpeeds fanSpeed, StandaloneOperationalMode opMode){
-        Log.i("SSPIPE2",
+        CcuLog.d(TAG,
                 " \nSWT :  "+supplyWaterTempTh2+"\nCT : "+getCurrentTemp() +"\ndesired : "+setTempHeating +" "+setTempCooling+
                         " \nFan mode : "+fanSpeed+" Conditioning Mode : "+opMode+
                         " \nWater valve     "+getCmdSignal("pipe2 and fcu and water and valve",node) +
                         " \nAux Heat        "+getCmdSignal("aux and heating",node)+
                         " \nLOW             "+getCmdSignal("fan and low",node)+
                         " \nMEDIUM          "+getCmdSignal("fan and medium",node)+
-                        " \nHIGH            "+getCmdSignal("fan and high",node)+ "");
+                        " \nHIGH            "+getCmdSignal("fan and high",node));
     }
 }

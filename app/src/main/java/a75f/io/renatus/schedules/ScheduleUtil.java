@@ -1,12 +1,9 @@
 package a75f.io.renatus.schedules;
 
-import android.util.Log;
-
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -17,6 +14,8 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Zone;
 import a75f.io.api.haystack.schedule.BuildingOccupancy;
+import a75f.io.logger.CcuLog;
+import a75f.io.logic.L;
 import a75f.io.renatus.util.Marker;
 
 public class ScheduleUtil {
@@ -57,7 +56,7 @@ public class ScheduleUtil {
                 }
             }
 
-            Log.d("CCU_UI ", " Trimmed Zone Schedule" + zoneSchedule.toString());
+            CcuLog.d(L.TAG_CCU_UI, " Trimmed Zone Schedule" + zoneSchedule);
             CCUHsApi.getInstance().updateZoneSchedule(zoneSchedule, zoneSchedule.getRoomRef());
         }
     }
@@ -66,10 +65,10 @@ public class ScheduleUtil {
 
         ArrayList<Interval> spills = spillsMap.get(s.getRoomRef());
         if (spills == null) {
-            Log.d("CCU_UI ","Schedule spills invalid for "+s.toString()+" in "+spillsMap.toString());
+            CcuLog.d(L.TAG_CCU_UI,"Schedule spills invalid for "+ s +" in "+ spillsMap);
             return;
         }
-        Log.d("CCU_UI ","Trim spills for "+s.toString()+" in "+spillsMap.toString());
+        CcuLog.d(L.TAG_CCU_UI,"Trim spills for "+ s +" in "+ spillsMap);
         HashMap<Schedule.Days, ArrayList<Interval>> validSpills = new HashMap<>();
         CopyOnWriteArrayList<Schedule.Days> days = new CopyOnWriteArrayList<>(s.getDays());
         CopyOnWriteArrayList<Schedule.Days> conflictDays = new CopyOnWriteArrayList<>();
@@ -127,14 +126,12 @@ public class ScheduleUtil {
     public static Interval OverNightEnding(Interval Ending)
     {
         DateTime initialEnding = Ending.getStart().withTime(23, 59, 59, 0);
-        Interval iEnding = new Interval(Ending.getStart(), initialEnding);
-        return iEnding;
+        return new Interval(Ending.getStart(), initialEnding);
     }
     public static Interval OverNightStarting(Interval Start)
     {
         DateTime subsequentStart = Start.getEnd().withTime(0, 0, 0, 0);
-        Interval iStart = new Interval(subsequentStart, Start.getEnd());
-        return iStart;
+        return new Interval(subsequentStart, Start.getEnd());
     }
 
     public static Interval AddingNextWeekDayForOverNight(Schedule interval)
@@ -168,8 +165,7 @@ public class ScheduleUtil {
             }
             DateTime startNext = new DateTime(yearNext, monthNext, dayNext, startHr, startMin);
             DateTime endNext = new DateTime(yearNext, monthNext, dayNext, endHr, endMin);
-            Interval nextDayInterval = new Interval(startNext, endNext);
-            AddingNewData = nextDayInterval;
+            AddingNewData = new Interval(startNext, endNext);
         }
         return AddingNewData;
     }
@@ -184,7 +180,7 @@ public class ScheduleUtil {
             markers.add(new Marker(i.getEndMillis(), false));
         }
 
-        Collections.sort(markers, (a, b) -> Long.compare(a.val, b.val));
+        markers.sort((a, b) -> Long.compare(a.val, b.val));
 
 
         int overlap = 0;
@@ -201,7 +197,7 @@ public class ScheduleUtil {
             Marker next = markers.get(i + 1);
 
             if (m.val != next.val && overlap == 0 && next.val > r.getStartMillis()) {
-                long start = m.val > r.getStartMillis() ? m.val : r.getStartMillis();
+                long start = Math.max(m.val, r.getStartMillis());
                 long end = next.val;
                 if (next.val > r.getEndMillis()) {
                     end = r.getEndMillis();

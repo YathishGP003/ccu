@@ -1,10 +1,10 @@
 package a75.io.algos.tr;
 
-/**
- * Created by samjithsadasivan on 5/31/18.
+/*
+  Created by samjithsadasivan on 5/31/18.
  */
 
-import android.util.Log;
+import a75f.io.logger.CcuLog;
 
 /**
  * SP0 - Initial setpoint
@@ -110,11 +110,7 @@ public class SystemTrimResponse
     {
         this.SPresmax = SPresmax;
     }
-    
-    public SystemTrimResponse() {
-    
-    }
-    
+
     public SystemTrimResponse(double SP0, double SPmin, double SPmax, int Td, int T, int I, double SPtrim, double SPres, double SPresmax) {
         this.SP0 = SP0;
         this.SPmin = SPmin;
@@ -128,18 +124,14 @@ public class SystemTrimResponse
     }
     
     public void dump() {
-        Log.d("CCU_SYSTEM"," SP0: "+SP0+" SPmin: "+SPmin+" SPmax: "+SPmax+" Td: "+Td+" T: "+T+" I: "+I+" R: "+R+" SPtrim: "+SPtrim
+        CcuLog.d("CCU_SYSTEM"," SP0: "+SP0+" SPmin: "+SPmin+" SPmax: "+SPmax+" Td: "+Td+" T: "+T+" I: "+I+" R: "+R+" SPtrim: "+SPtrim
                             +" SPres: "+SPres+" SPresmax: "+SPresmax);
     }
     
     public void resetRequest() {
         R = 0;
     }
-    
-    public void resetSystem() {
-    
-    }
-    
+
     public void updateRequest(TrimResponseRequest r) {
         R += (r.currentRequests * r.importanceMultiplier);
     }

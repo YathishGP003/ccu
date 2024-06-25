@@ -8,7 +8,6 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import androidx.recyclerview.widget.RecyclerView;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,21 +16,17 @@ import android.widget.TextView;
 
 import java.util.List;
 
+import a75f.io.logger.CcuLog;
+import a75f.io.logic.L;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.CCUUiUtil;
 
 
 public class WifiListAdapter extends RecyclerView.Adapter<WifiListAdapter.WifiViewHolder> {
 
-    //private List<ScanResult> wifiList;
-    //HashMap<String,ScanResult> wifiList;
-    //private ArrayList<HashMap<String, ScanResult>> wifiList;
-    //private HashMap<String, ScanResult> wifiList;
     private List<String> wifiList;
     private Context mContext;
     private View.OnClickListener mOnClickListener;
-    public String networkSSID;
-    public String networkPass;
     private ItemClickListener onItemClickListener;
 
     public class WifiViewHolder extends RecyclerView.ViewHolder {
@@ -42,52 +37,11 @@ public class WifiListAdapter extends RecyclerView.Adapter<WifiListAdapter.WifiVi
 
         public WifiViewHolder(View itemView) {
             super(itemView);
-            textWifiNw = (TextView) itemView.findViewById(R.id.textWifiNw);
-            textisConnected = (TextView) itemView.findViewById(R.id.textisConnected);
-            imageWifi = (ImageView) itemView.findViewById(R.id.imageWifi);
-            imageSecurity = (ImageView) itemView.findViewById(R.id.imageSecurity);
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    onItemClickListener.onItemClicked(itemView, getAdapterPosition());
-                }
-            });
-           /* itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-                    View alertview = LayoutInflater.from(mContext).inflate(R.layout.alert_wifipassword, null);
-                    builder.setView(alertview);
-
-                    EditText editText_Password = alertview.findViewById(R.id.editPassword);
-                    builder.setPositiveButton("Connect", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-
-                            networkSSID = wifiList.get(getAdapterPosition());
-                            networkPass = editText_Password.getText().toString().trim();
-                            connectWifi(networkSSID, networkPass);
-
-                            dialog.dismiss();
-                        }
-                    });
-
-
-                    builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                        }
-                    });
-
-
-                    AlertDialog alertDialog = builder.create();
-                    TextView tvisConnected = v.findViewById(R.id.textisConnected);
-                    if (!tvisConnected.getText().toString().equals("CONNECTED")) {
-                        alertDialog.show();
-                    }
-                }
-            });*/
+            textWifiNw = itemView.findViewById(R.id.textWifiNw);
+            textisConnected = itemView.findViewById(R.id.textisConnected);
+            imageWifi = itemView.findViewById(R.id.imageWifi);
+            imageSecurity = itemView.findViewById(R.id.imageSecurity);
+            itemView.setOnClickListener(view -> onItemClickListener.onItemClicked(itemView, getAdapterPosition()));
         }
 
     }
@@ -118,8 +72,6 @@ public class WifiListAdapter extends RecyclerView.Adapter<WifiListAdapter.WifiVi
     @Override
     public void onBindViewHolder(WifiViewHolder holder, int position) {
         String ssid_connected;
-        //String ssid_scanned = wifiItem.get(WifiFragment.ITEM_KEY);
-        //ScanResult scanResult = wifiList;
         String ssid_scanned = wifiList.get(position);
 
         holder.textWifiNw.setText(ssid_scanned);
@@ -130,7 +82,7 @@ public class WifiListAdapter extends RecyclerView.Adapter<WifiListAdapter.WifiVi
         if (networkInfo.isConnected()) {
             final WifiManager wifiManager = (WifiManager) mContext.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
             final WifiInfo connectionInfo = wifiManager.getConnectionInfo();
-            Log.i("Wifi", "Current SSID:" + connectionInfo.getSSID() + " Wifi Available:" + ssid_scanned);
+            CcuLog.i(L.TAG_CCU_WIFI, "Current SSID:" + connectionInfo.getSSID() + " Wifi Available:" + ssid_scanned);
             ssid_scanned = String.format("\"%s\"", ssid_scanned);
             if (!TextUtils.isEmpty(connectionInfo.getSSID())) {
                 ssid_connected = connectionInfo.getSSID();

@@ -213,7 +213,6 @@ public class DefaultSchedules {
     }
 
     public static void setDefaultCoolingHeatingTemp(){
-        HashMap tuner = CCUHsApi.getInstance().read("equip and tuner");
         BuildingTunerCache buildingTunerCache = BuildingTunerCache.getInstance();
 
         HashMap<Object,Object> coolDB = CCUHsApi.getInstance().readEntity("point and cooling and deadband and schedulable and default");
@@ -221,11 +220,6 @@ public class DefaultSchedules {
 
         double hdb = HSUtil.getLevelValueFrom16(heatDB.get("id").toString());
         double cdb = HSUtil.getLevelValueFrom16(coolDB.get("id").toString());
-        /*HashMap<Object,Object> coolULMap =  CCUHsApi.getInstance().readEntity("schedulable and point and limit and max and cooling and user and default");
-        HashMap<Object,Object> heatULMap =  CCUHsApi.getInstance().readEntity("schedulable and point and limit and min and heating and user and default");
-        HashMap<Object,Object> coolLLMap =  CCUHsApi.getInstance().readEntity("schedulable and point and limit and min and cooling and user and default");
-        HashMap<Object,Object> heatLLMap =  CCUHsApi.getInstance().readEntity("schedulable and point and limit and max and heating and user and default");
-       */
         double heatLL = buildingTunerCache.getMaxHeatingUserLimit();
         double coolLL = buildingTunerCache.getMinCoolingUserLimit();
 

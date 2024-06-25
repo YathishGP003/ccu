@@ -1,10 +1,10 @@
 package a75f.io.renatus.ota
 
+import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException
 import com.google.gson.internal.LinkedTreeMap
@@ -150,7 +150,7 @@ class OtaCache {
     }
 
     private fun logIt(msg: String) {
-        Log.i(OTA_CACHE, msg)
+        CcuLog.i(OTA_CACHE, msg)
     }
 
     companion object {

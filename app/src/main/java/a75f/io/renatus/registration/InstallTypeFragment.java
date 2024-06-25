@@ -2,16 +2,14 @@ package a75f.io.renatus.registration;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
-
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.viewpager.widget.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 
-import java.util.ArrayList;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -24,7 +22,6 @@ import a75f.io.renatus.util.Prefs;
 
 public class InstallTypeFragment extends Fragment {
 
-    ViewPager pager;
     RelativeLayout layoutCreateNew;
     RelativeLayout layoutAddCCU;
     RelativeLayout layoutPreconfigCCU;
@@ -54,11 +51,11 @@ public class InstallTypeFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         View root_view = getView();
-        layoutCreateNew = (RelativeLayout)root_view.findViewById(R.id.layoutCreateNew);
-        layoutAddCCU = (RelativeLayout)root_view.findViewById(R.id.layoutAddCCU);
-        layoutPreconfigCCU = (RelativeLayout)root_view.findViewById(R.id.layoutPreconfigCCU);
-        layoutReplaceCCU = (RelativeLayout)root_view.findViewById(R.id.layoutReplaceCCU);
-        layoutWithoutCloud = (RelativeLayout)root_view.findViewById(R.id.layoutWithoutCloud);
+        layoutCreateNew = root_view.findViewById(R.id.layoutCreateNew);
+        layoutAddCCU = root_view.findViewById(R.id.layoutAddCCU);
+        layoutPreconfigCCU = root_view.findViewById(R.id.layoutPreconfigCCU);
+        layoutReplaceCCU = root_view.findViewById(R.id.layoutReplaceCCU);
+        layoutWithoutCloud = root_view.findViewById(R.id.layoutWithoutCloud);
 
         prefs = new Prefs(getActivity());
 
@@ -67,53 +64,38 @@ public class InstallTypeFragment extends Fragment {
         layoutReplaceCCU.setEnabled(true);
         layoutWithoutCloud.setEnabled(false);
 
-        layoutCreateNew.setOnClickListener(new View.OnClickListener() {
+        layoutCreateNew.setOnClickListener(v -> {
+            // TODO Auto-generated method stub
+            prefs.setString("INSTALL_TYPE","CREATENEW");
+            //mCallback.GoTo(2,3);
+            ((FreshRegistration)getActivity()).selectItem(2);
 
-            public void onClick(View v) {
-                // TODO Auto-generated method stub
-                prefs.setString("INSTALL_TYPE","CREATENEW");
-                //mCallback.GoTo(2,3);
-                ((FreshRegistration)getActivity()).selectItem(2);
-
-            }
         });
 
-        layoutAddCCU.setOnClickListener(new View.OnClickListener() {
-
-            public void onClick(View v) {
-                // TODO Auto-generated method
-                prefs.setString("INSTALL_TYPE","ADDCCU");
-                //mCallback.GoTo(2,6);
-                ((FreshRegistration)getActivity()).selectItem(2);
-            }
+        layoutAddCCU.setOnClickListener(v -> {
+            // TODO Auto-generated method
+            prefs.setString("INSTALL_TYPE","ADDCCU");
+            //mCallback.GoTo(2,6);
+            ((FreshRegistration)getActivity()).selectItem(2);
         });
 
-        layoutPreconfigCCU.setOnClickListener(new View.OnClickListener() {
-
-            public void onClick(View v) {
-                // TODO Auto-generated method stub
-                prefs.setString("INSTALL_TYPE","PRECONFIGCCU");
-                //mCallback.GoTo(2,7);
-                ((FreshRegistration)getActivity()).selectItem(2);
-            }
+        layoutPreconfigCCU.setOnClickListener(v -> {
+            // TODO Auto-generated method stub
+            prefs.setString("INSTALL_TYPE","PRECONFIGCCU");
+            //mCallback.GoTo(2,7);
+            ((FreshRegistration)getActivity()).selectItem(2);
         });
 
-        layoutReplaceCCU.setOnClickListener(new View.OnClickListener() {
-
-            public void onClick(View v) {
-                // TODO Auto-generated method stub
-                prefs.setString("INSTALL_TYPE","REPLACECCU");
-                //mCallback.GoTo(2,8);
-                ((FreshRegistration)getActivity()).selectItem(2);
-            }
+        layoutReplaceCCU.setOnClickListener(v -> {
+            // TODO Auto-generated method stub
+            prefs.setString("INSTALL_TYPE","REPLACECCU");
+            //mCallback.GoTo(2,8);
+            ((FreshRegistration)getActivity()).selectItem(2);
         });
 
-        layoutWithoutCloud.setOnClickListener(new View.OnClickListener() {
-
-            public void onClick(View v) {
-                prefs.setString("INSTALL_TYPE","OFFLINE");
-                ((FreshRegistration)getActivity()).selectItem(21);
-            }
+        layoutWithoutCloud.setOnClickListener(v -> {
+            prefs.setString("INSTALL_TYPE","OFFLINE");
+            ((FreshRegistration)getActivity()).selectItem(21);
         });
 
 
@@ -124,7 +106,7 @@ public class InstallTypeFragment extends Fragment {
                 String ccuId = ccu.get("id").toString();
                 CCUHsApi.getInstance().deleteEntityTree(ccuId);
             }*/
-        if(site.size() > 0)
+        if(!site.isEmpty())
         {
             String siteId = site.get("id").toString();
             CCUHsApi.getInstance().deleteEntityTree(siteId);

@@ -1,7 +1,5 @@
 package a75f.io.logic.bo.building.schedules;
 
-import android.util.Log;
-
 import org.projecthaystack.HDict;
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
@@ -54,7 +52,7 @@ public class EquipScheduleHandler implements Schedulable {
             initOccupancyDetection(false);
         }
 
-        Log.i("CCU_SCHEDULER", "updateDesiredTemp: "+updatedOccupancy);
+        CcuLog.d(L.TAG_CCU_SCHEDULER, "updateDesiredTemp: "+updatedOccupancy);
         //Write to Level 8 all the time.
         if (updatedOccupancy == Occupancy.OCCUPIED ||
                 updatedOccupancy == Occupancy.PRECONDITIONING ||
@@ -147,12 +145,22 @@ public class EquipScheduleHandler implements Schedulable {
                 "Cooling desired temp: "+coolingDT + "Heating desired temp: "+heatingDT + "updated occupancy: "+updatedOccupancy
                 +"Setback: "+setback);
         if(updatedOccupancy == Occupancy.DEMAND_RESPONSE_UNOCCUPIED &&
-                AutoForcedOccupied.isZoneInAutoForcedOccupied(occupancyUtil) ||
-                ForcedOccupied.isZoneForcedOccupied(equipRef)){
+                AutoForcedOccupied.isZoneInAutoForcedOccupied(occupancyUtil)){
             double coolingSetBack = DemandResponseMode.getCoolingSetBack(coolingDT - setback +
                      demandResponseSetback, buildingLimitMax);
             double heatingSetBack = DemandResponseMode.getHeatingSetBack(heatingDT + setback -
                      demandResponseSetback, buildingLimitMin);
+            ScheduleUtil.setDesiredTempAtLevel(hayStack, coolingDtId,
+                    HayStackConstants.DEMAND_RESPONSE_LEVEL, coolingSetBack, 0, WhoFiledConstants.SCHEDULER_WHO);
+            ScheduleUtil.setDesiredTempAtLevel(hayStack, heatingDtId, HayStackConstants.DEMAND_RESPONSE_LEVEL,
+                    heatingSetBack, 0, WhoFiledConstants.SCHEDULER_WHO);
+        } else if ((updatedOccupancy == Occupancy.DEMAND_RESPONSE_UNOCCUPIED &&
+                ForcedOccupied.isZoneForcedOccupied(equipRef))) {
+            /*For forced occupied we do not clear Forced occupied levels so add DR setback on top of it*/
+            double coolingSetBack = DemandResponseMode.getCoolingSetBack(coolingDT +
+                    demandResponseSetback, buildingLimitMax);
+            double heatingSetBack = DemandResponseMode.getHeatingSetBack(heatingDT -
+                    demandResponseSetback, buildingLimitMin);
             ScheduleUtil.setDesiredTempAtLevel(hayStack, coolingDtId,
                     HayStackConstants.DEMAND_RESPONSE_LEVEL, coolingSetBack, 0, WhoFiledConstants.SCHEDULER_WHO);
             ScheduleUtil.setDesiredTempAtLevel(hayStack, heatingDtId, HayStackConstants.DEMAND_RESPONSE_LEVEL,
@@ -332,22 +340,6 @@ public class EquipScheduleHandler implements Schedulable {
                                 HayStackConstants.FORCE_OVERRIDE_LEVEL));
         CcuLog.i(L.TAG_CCU_SCHEDULER, "AutoForceOccupied updated heating dt "+HSUtil.getPriorityLevel(heatingPointId,
                                                                                           HayStackConstants.FORCE_OVERRIDE_LEVEL));
-    }
-
-    private void checkAndUpdateDesiredTempForcedOccupied(double forceOccupiedMins) {
-        HashMap<Object, Object> coolingDtPoint = hayStack.readEntity("temp and desired and " +
-                                                                     "cooling and sp and equipRef == \""+equipRef+"\"");
-
-        if (!coolingDtPoint.isEmpty()) {
-            HashMap<Object, Object> overrideLevel = HSUtil.getPriorityLevel(coolingDtPoint.get("id").toString(),
-                                                                            HayStackConstants.FORCE_OVERRIDE_LEVEL,
-                                                                            hayStack);
-            if (!overrideLevel.isEmpty()) {
-                CcuLog.d(L.TAG_CCU_SCHEDULER, "updateDesiredTempForcedOccupied not required coolingDt: " + overrideLevel);
-                return;
-            }
-            updateDesiredTempAutoForceOccupied(forceOccupiedMins);
-        }
     }
 
     private String getCoolingDesiredTempId() {

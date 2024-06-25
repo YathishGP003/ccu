@@ -630,7 +630,7 @@ public class ScheduleManager {
 
         if (ScheduleUtil.isAnyZoneOccupiedOrAutoAway(ahuServedEquipsOccupancy)) {
             systemOccupancy = OCCUPIED;
-            currentOccupiedInfo = ScheduleUtil.getCurrentOccupied(occupiedHashMap, equipOccupancy);
+            currentOccupiedInfo = ScheduleUtil.getCurrentOccupied(occupiedHashMap);
             CcuLog.i(TAG_CCU_SCHEDULER, "updateSystemOccupancy occupied , currentOccupied "+currentOccupiedInfo);
         }
 
@@ -643,7 +643,7 @@ public class ScheduleManager {
             }
         }
         if (ScheduleUtil.isAnyZoneInDemandResponse(ahuServedEquipsOccupancy)) {
-            currentOccupiedInfo = ScheduleUtil.getCurrentOccupied(occupiedHashMap, equipOccupancy);
+            currentOccupiedInfo = ScheduleUtil.getCurrentOccupied(occupiedHashMap);
             nextOccupiedInfo = ScheduleUtil.getNextOccupied(occupiedHashMap);
             systemOccupancy = ScheduleUtil.getDemandResponseMode(ahuServedEquipsOccupancy);
             postSystemOccupancy(CCUHsApi.getInstance());

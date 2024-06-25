@@ -1,12 +1,10 @@
 package a75f.io.logic.migration.idupoints;
-
-import android.util.Log;
-
 import java.util.HashMap;
 import java.util.List;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.bo.building.vrv.VrvPoints;
 import a75f.io.logic.util.PreferenceUtil;
 
@@ -20,7 +18,7 @@ public class IduPointsMigration {
 
     private void checkForMigration(){
         if (!PreferenceUtil.isIduPointsMigrationDone()) {
-            Log.i(CCU_IDU_MIGRATION,"idu migration started ");
+            CcuLog.i(CCU_IDU_MIGRATION,"idu migration started ");
             updateIduPoints(CCUHsApi.getInstance());
             PreferenceUtil.setIduMigrationStatus(true);
         }

@@ -1,11 +1,6 @@
 package a75f.io.logic.bo.haystack.device;
-
-import android.util.Log;
-
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
-
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.RawPoint;
@@ -49,20 +44,7 @@ public class ControlMote
         
         ArrayList<HashMap<Object,Object>> devices = CCUHsApi.getInstance().readAllEntities("device and cm");
 
-        if (devices.size() > 0) {
-            /*Device d = new Device.Builder().setHashMap(device).build();
-            d.setEquipRef(systemEquipRef);
-            CCUHsApi.getInstance().updateDevice(d,d.getId());
-            createNewCMPointsForUpgrades();
-            CcuLog.d(L.TAG_CCU_DEVICE," CM device exists - update equipRef ="+systemEquipRef);
-            site = new Site.Builder().setHashMap(CCUHsApi.getInstance().read(Tags.SITE)).build();
-            OtaStatusDiagPoint.Companion.addOTAStatusPoint(
-                    site.getDisplayName()+"-"+Tags.CM,
-                    systemEquipRef, site.getId(),
-                    site.getTz(),
-                    CCUHsApi.getInstance()
-            );
-            return;*/
+        if (!devices.isEmpty()) {
             devices.forEach(device -> {
                 CcuLog.d(Domain.LOG_TAG," Delete CM device "+device);
                 CCUHsApi.getInstance().deleteEntityTree(device.get("id").toString());
@@ -93,7 +75,7 @@ public class ControlMote
     public ControlMote(int address, String site, String floor, String room, String equipRef) {
 
         HashMap device = CCUHsApi.getInstance().read("device and addr == \""+address+"\"");
-        if (device != null && device.size() > 0) {
+        if (device != null && !device.isEmpty()) {
             CcuLog.d(L.TAG_CCU_DEVICE," CM device exists");
             return;
         }
@@ -458,7 +440,7 @@ public class ControlMote
 
 
     public static void updatePhysicalPointRef(int addr, String port, String pointRef) {
-        Log.d("CCU"," Update Physical point "+port);
+        CcuLog.d("CCU"," Update Physical point "+port);
 
         HashMap<Object,Object> device = CCUHsApi.getInstance().readEntity("device and addr == \""+addr+"\"");
         if (device == null)
@@ -473,7 +455,7 @@ public class ControlMote
     }
 
     public static void setPointEnabled(int addr, String port, boolean enabled) {
-        Log.d("CCU"," Enabled Physical point for CM "+port+" "+enabled);
+        CcuLog.d("CCU"," Enabled Physical point for CM "+port+" "+enabled);
 
         HashMap<Object,Object> device = CCUHsApi.getInstance().readEntity("device and addr == \""+addr+"\"");
         if (device == null)
@@ -484,7 +466,7 @@ public class ControlMote
         HashMap<Object,Object> point = CCUHsApi.getInstance().readEntity(
                 "point and physical and deviceRef == \"" + device.get("id").toString() +
                         "\""+" and port == \""+port+"\"");
-        if (point != null && point.size() > 0)
+        if (point != null && !point.isEmpty())
         {
             RawPoint p = new RawPoint.Builder().setHashMap(point).build();
             p.setEnabled(enabled);
@@ -505,7 +487,7 @@ public class ControlMote
         for (HashMap rawPoint : points) {
             RawPoint.Builder point = new RawPoint.Builder().setHashMap(rawPoint);
             String dis = rawPoint.get("dis").toString();
-            String tokens[] = dis.split("-");
+            String[] tokens = dis.split("-");
             if(tokens.length == 2)  point.setDisplayName(siteName+"-"+tokens[1]);
             if(tokens.length == 3)  point.setDisplayName(siteName+"-"+tokens[1]+"-"+tokens[2]);
             hsApi.updatePoint(point.build(),point.build().getId());
@@ -514,7 +496,7 @@ public class ControlMote
     }
 
     public static void setCMPointEnabled(String port, boolean enabled) {
-        Log.d("CCU"," Enabled Physical point "+port+" "+enabled);
+        CcuLog.d("CCU"," Enabled Physical point "+port+" "+enabled);
 
         HashMap<Object,Object> device = CCUHsApi.getInstance().readEntity("device and cm");
         if (device == null)
@@ -524,7 +506,7 @@ public class ControlMote
 
         HashMap<Object,Object> point = CCUHsApi.getInstance().readEntity(
                 "point and th1 and physical and deviceRef == \"" + device.get("id").toString() + "\"");
-        if (point != null && point.size() > 0)
+        if (point != null && !point.isEmpty())
         {
             RawPoint p = new RawPoint.Builder().setHashMap(point).build();
             p.setEnabled(enabled);

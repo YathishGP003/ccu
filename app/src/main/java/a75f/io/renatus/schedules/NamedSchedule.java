@@ -16,7 +16,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.Html;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -564,7 +563,7 @@ public class NamedSchedule extends DialogFragment {
             schedule = CCUHsApi.getInstance().getScheduleById(mScheduleId);
         } else {
             schedule = CCUHsApi.getInstance().getSystemSchedule(false).get(0);
-            CcuLog.d("CCU_UI", " Loaded System Schedule - NamedSchedule " + schedule.toString());
+            CcuLog.d(L.TAG_CCU_UI, " Loaded System Schedule - NamedSchedule " + schedule.toString());
         }
         CcuLog.d(TAG, "PARAM_SCHEDULE_ID " + mScheduleId);
         String namedScheduleDis = getArguments().getString(PARAM_SCHED_NAME);
@@ -622,7 +621,7 @@ public class NamedSchedule extends DialogFragment {
     private void drawCurrentTime() {
         DateTime now = new DateTime(MockTime.getInstance().getMockTime());
         DAYS day = DAYS.values()[now.getDayOfWeek() - 1];
-        Log.i("Scheduler", "DAY: " + day.toString());
+        CcuLog.i(L.TAG_CCU_SCHEDULER, "DAY: " + day.toString());
         int hh = now.getHourOfDay();
         int mm = now.getMinuteOfHour();
         AppCompatImageView imageView = new AppCompatImageView(requireActivity());

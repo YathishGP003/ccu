@@ -334,7 +334,7 @@ public class UpdateCCUFragment extends DialogFragment {
 
     public void setProgress(int value, long downloadId, int columnIndex){
         this.downloadTd = downloadId;
-        CcuLog.i("CCU_DOWNLOAD", "progress " + value);
+        CcuLog.i(L.TAG_CCU_DOWNLOAD, "progress " + value);
         DecimalFormat df = new DecimalFormat("#.##");
         double downloadSize = Double.parseDouble(df.format(value * .01 * Double.parseDouble(
                 (fileSize.getText().toString().split(" MB")[0]))));
@@ -450,9 +450,7 @@ public class UpdateCCUFragment extends DialogFragment {
     }
     public void checkIsCCUHasRecommendedVersion(FragmentActivity activity, FragmentManager parentFragmentManager,
                                                        View toastLayout, Context context, FragmentActivity fragmentActivity) {
-        RxjavaUtil.executeBackgroundTaskWithDisposable(()->{
-                    ProgressDialogUtils.showProgressDialog(activity,"Checking for recommended version");
-                },
+        RxjavaUtil.executeBackgroundTaskWithDisposable(()-> ProgressDialogUtils.showProgressDialog(activity,"Checking for recommended version"),
                 ()->{String response = getRecommendedCCUVersion();
                     boolean isCCCUHasRecommendedVersion = isCCUHasRecommendedVersion(parentFragmentManager, response);
                     if(isCCCUHasRecommendedVersion){
@@ -484,7 +482,7 @@ public class UpdateCCUFragment extends DialogFragment {
         DownloadManager downloadManager = (DownloadManager) Globals.getInstance().getApplicationContext()
                 .getSystemService(DOWNLOAD_SERVICE);
         AppInstaller appInstaller = new AppInstaller();
-        if(downloadIds.size() > 0) {
+        if(!downloadIds.isEmpty()) {
             appInstaller.checkDownload(downloadIds.get(0), downloadManager, UpdateCCUFragment.this, null);
         }
     }

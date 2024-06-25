@@ -3,7 +3,6 @@ package a75f.io.api.haystack.sync;
 import android.content.Context;
 
 import org.projecthaystack.HDict;
-import org.projecthaystack.HDictBuilder;
 import org.projecthaystack.HGrid;
 
 import java.util.Iterator;
@@ -37,7 +36,6 @@ public class MigrationWorker extends Worker {
         processDeletedItems();
         syncStatusService.saveSyncStatus();
         CCUHsApi.getInstance().saveTagsData();
-        PreferenceUtil.setUuidMigrationCompleted(true, appContext);
         CcuLog.i(TAG, " doWork Migration Success");
         return Result.success();
     }
@@ -53,11 +51,8 @@ public class MigrationWorker extends Worker {
         while (gridIterator.hasNext()) {
             HDict entity = gridIterator.next();
             String entityId = entity.get(Tags.ID).toString();
-            
-            if (idMap.containsKey(entityId)) {
-                //Commenting this temporarily. Removing idmap will make it impossible to downgrade to a lower version.
-                //CCUHsApi.getInstance().getIdMap().remove(entityId);
-            } else {
+
+            if (!idMap.containsKey(entityId)) {
                 CcuLog.i(TAG, "Migration Unsynced data "+entity.get("dis"));
                 syncStatusService.addUnSyncedEntity(entityId);
             }
@@ -67,16 +62,16 @@ public class MigrationWorker extends Worker {
     
     private void processUpdatedItems() {
         ConcurrentHashMap<String, String> updateIdMap = CCUHsApi.getInstance().getUpdateIdMap();
-        for (Map.Entry updateEntry : updateIdMap.entrySet()) {
-            syncStatusService.addUpdatedEntity(updateEntry.getKey().toString());
+        for (Map.Entry<String, String> updateEntry : updateIdMap.entrySet()) {
+            syncStatusService.addUpdatedEntity(updateEntry.getKey());
             updateIdMap.remove(updateEntry.getKey());
         }
     }
     
     private void processDeletedItems() {
         ConcurrentHashMap<String, String> removeIdMap = CCUHsApi.getInstance().getRemoveIdMap();
-        for (Map.Entry removeEntry : removeIdMap.entrySet()) {
-            syncStatusService.addDeletedEntity(removeEntry.getKey().toString(), true);
+        for (Map.Entry<String, String> removeEntry : removeIdMap.entrySet()) {
+            syncStatusService.addDeletedEntity(removeEntry.getKey(), true);
             removeIdMap.remove(removeEntry.getKey());
         }
         syncStatusService.saveSyncStatus();

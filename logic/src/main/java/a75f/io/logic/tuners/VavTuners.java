@@ -1,7 +1,5 @@
 package a75f.io.logic.tuners;
 
-import android.util.Log;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -31,7 +29,7 @@ public class VavTuners {
         HashMap tuner = CCUHsApi.getInstance().read("point and tuner and default and vav");
         HashMap<Object, Object> equipMap = hayStack.readMapById(equipRef);
         Equip equip = new Equip.Builder().setHashMap(equipMap).build();
-        if (tuner != null && tuner.size() > 0) {
+        if (tuner != null && !tuner.isEmpty()) {
             CcuLog.d(L.TAG_CCU_SYSTEM,"Default VAV Tuner points already exist");
             return;
         }
@@ -760,8 +758,8 @@ public class VavTuners {
     
     public static void addVavEquipTuners(CCUHsApi hayStack, String siteRef, String equipdis, String equipref,
                                          String roomRef, String floorRef, String tz) {
-        
-        Log.d("CCU", "addVavEquipTuners for " + equipdis);
+
+        CcuLog.d(L.TAG_CCU, "addVavEquipTuners for " + equipdis);
     
         ZoneTuners.addZoneTunersForEquip(hayStack, siteRef, equipdis, equipref, roomRef, floorRef, tz);
         List<HisItem> hisItems = new ArrayList<>();

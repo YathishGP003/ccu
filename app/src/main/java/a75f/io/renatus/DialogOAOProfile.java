@@ -415,7 +415,7 @@ public class DialogOAOProfile extends BaseDialogFragment
     }
 
     private CustomSpinnerDropDownAdapter getAdapterValue(ArrayList values) {
-        return new CustomSpinnerDropDownAdapter(requireContext(), R.layout.spinner_dropdown_item, values);
+        return new CustomSpinnerDropDownAdapter(requireContext(), R.layout.spinner_item_type_1, values);
     }
 
 }

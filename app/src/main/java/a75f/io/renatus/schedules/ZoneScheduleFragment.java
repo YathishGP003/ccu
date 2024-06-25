@@ -18,7 +18,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.Html;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -115,7 +114,7 @@ public class ZoneScheduleFragment extends DialogFragment implements ZoneSchedule
             scheduleScrollView.post(() -> scheduleScrollView.smoothScrollTo(0,0));
         }
         if (isVisibleToUser) {
-            new Handler().post(() -> loadSchedule());
+            new Handler().post(this::loadSchedule);
             UpdateScheduleHandler.setBuildingScheduleListener(this);
         } else {
             UpdateScheduleHandler.setBuildingScheduleListener(null);
@@ -159,11 +158,7 @@ public class ZoneScheduleFragment extends DialogFragment implements ZoneSchedule
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Bundle args = getArguments();
-        if (args != null) {
-            setShowsDialog(true);
-        } else {
-            setShowsDialog(false);
-        }
+        setShowsDialog(args != null);
     }
 
     @Override
@@ -302,7 +297,7 @@ public class ZoneScheduleFragment extends DialogFragment implements ZoneSchedule
                 View viewHourTwo = viewTimeLines.get(2);
 
                 mPixelsBetweenAnHour = viewHourTwo.getX() - viewHourOne.getX();
-                mPixelsBetweenADay = constraintScheduler.getHeight() / 7;
+                mPixelsBetweenADay = (float) constraintScheduler.getHeight() / 7;
 
                 //Leave 20% for padding.
                 mPixelsBetweenADay = mPixelsBetweenADay - (mPixelsBetweenADay * .2f);
@@ -331,7 +326,7 @@ public class ZoneScheduleFragment extends DialogFragment implements ZoneSchedule
             updateUI();
         } else {
             ArrayList<Schedule> buildingOccupancy = CCUHsApi.getInstance().getBuildingOccupancySchedule();
-            if(buildingOccupancy.size() == 0){
+            if(buildingOccupancy.isEmpty()){
                 schedule = CCUHsApi.getInstance().getSystemSchedule(false).get(0);
             }else{
                 schedule = CCUHsApi.getInstance().getBuildingOccupancySchedule().get(0);
@@ -532,7 +527,7 @@ public class ZoneScheduleFragment extends DialogFragment implements ZoneSchedule
                 Collections.sort(schedule.getDays(), (lhs, rhs) -> lhs.getDay() - (rhs.getDay()));
                 removeEntry = schedule.getDays().remove(position);
             } catch (ArrayIndexOutOfBoundsException e) {
-                Log.d(TAG, "onClickSave: " + e.getMessage());
+                CcuLog.e(TAG, "onClickSave: " + e.getMessage());
             }
         } else {
             removeEntry = null;
@@ -597,7 +592,7 @@ public class ZoneScheduleFragment extends DialogFragment implements ZoneSchedule
             for (Schedule.Days day : daysArrayList) {
                 ArrayList<Interval> overlaps = schedule.getOverLapInterval(day);
                 for (Interval overlap : overlaps) {
-                    Log.d("CCU_UI", " overLap " + overlap);
+                    CcuLog.d(L.TAG_CCU_UI, " overLap " + overlap);
                     overlapDays.append(getDayString(overlap.getStart()) + "(" + overlap.getStart().hourOfDay().get() + ":" + (overlap.getStart().minuteOfHour().get() == 0 ? "00" : overlap.getStart().minuteOfHour().get())
                             + " - " + (getEndTimeHr(overlap.getEnd().hourOfDay().get(), overlap.getEnd().minuteOfHour().get())) + ":" + (getEndTimeMin(overlap.getEnd().hourOfDay().get(), overlap.getEnd().minuteOfHour().get()) == 0 ? "00" : overlap.getEnd().minuteOfHour().get()) + ") ");
                 }
@@ -777,7 +772,7 @@ public class ZoneScheduleFragment extends DialogFragment implements ZoneSchedule
 
         DateTime now = new DateTime(MockTime.getInstance().getMockTime());
         DAYS day = DAYS.values()[now.getDayOfWeek() - 1];
-        CcuLog.d("Scheduler", "DAY: " + day.toString());
+        CcuLog.d(L.TAG_CCU_SCHEDULER, "DAY: " + day.toString());
         int hh = now.getHourOfDay();
         int mm = now.getMinuteOfHour();
         AppCompatImageView imageView = new AppCompatImageView(getActivity());
@@ -895,7 +890,7 @@ public class ZoneScheduleFragment extends DialogFragment implements ZoneSchedule
                         showDialog(ID_DIALOG_UN_OCCUPIED_SCHEDULE, clickedPosition, schedule);
                     }
                 } catch (ArrayIndexOutOfBoundsException e) {
-                    CcuLog.d(TAG, "onClick: " + e.getMessage());
+                    CcuLog.e(TAG, "onClick: " + e.getMessage());
                 }
             }
         });

@@ -8,8 +8,6 @@ import android.preference.PreferenceManager;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Tags;
@@ -38,14 +36,11 @@ public class L
     public static final String TAG_CCU_SERIAL = "CCU_SERIAL";
     public static final String TAG_CCU_SCHEDULER = "CCU_SCHEDULER";
     public static final String TAG_CCU_PUBNUB = "CCU_MESSAGING";
-    public static final String TAG_CCU_WARN = "CCU_WARN";
     public static final String TAG_CCU_MODBUS = "CCU_MODBUS";
     public static final String TAG_CCU_TUNER = "CCU_TUNER";
-    public static final String TAG_CCU_PROFILING = "CCU_PROFILING";
     public static final String TAG_CCU_BACKUP = "CCU_BACKUP";
     public static final String TAG_CCU_REPLACE = "CCU_REPLACE";
     public static final String TAG_CCU_HSHST = "CCU_HST";
-    public static final String TAG_CCU_HSSPLIT_HST = "CCU_HST";
     public static final String TAG_CCU_HSCPU = "CCU_HSCPU";
     public static final String TAG_CCU_HSPIPE2 = "CCU_HSPIPE2";
     public static final String TAG_CCU_HSHPU = "CCU_HSHPU";
@@ -74,37 +69,32 @@ public class L
     public static final String TAG_CCU_RANGE_CONTROL = "CCU_RANGE_CONTROL";
     public static final String TAG_CCU_MOVEMENT = "CCU_MOVEMENT";
     public static final String TAG_CCU_VAV_TEMP = "CCU_VAV_TEMP";
-
+    public static final String TAG_CCU_ADD_EXISTING = "CCU_ADD_EXISTING";
+    public static final String TAG_CCU_WIFI = "CCU_WIFI";
+    public static final String TAG_CCU_REGISTER_GATHER_DETAILS = "CCU_REGISTER_GATHER_DETAILS";
+    public static final String TAG_CCU_CRASH = "CCU_CRASH";
+    public static final String TAG_CCU_SAFE_MODE = "CCU_SAFE_MODE";
+    public static final String TAG_CCU_DM_MODBUS = "CCU_DM_MODBUS";
     public static Context app()
     {
         return Globals.getInstance().getApplicationContext();
     }
 
 
-    /****
-     *
-     * @return
-     */
     public static byte[] getEncryptionKey()
     {
         return EncryptionPrefs.getEncryptionKey();
     }
 
 
-    /****
-     *
-     * @return
-     */
+
     public static byte[] getFirmwareSignatureKey()
     {
         return EncryptionPrefs.getFirmwareSignatureKey();
     }
 
 
-    /****
-     *
-     * @return
-     */
+
     public static byte[] getBLELinkKey()
     {
         return EncryptionPrefs.getBLELinkKey();
@@ -112,11 +102,11 @@ public class L
 
 
     public static boolean isModbusSlaveIdExists(Short slaveId) {
-        ArrayList<HashMap> nodes = CCUHsApi.getInstance().readAll("device and modbus");
+        ArrayList<HashMap<Object, Object>> nodes = CCUHsApi.getInstance().readAllEntities("device and modbus");
         if(nodes.size() == 0)
             return false;
 
-        for (HashMap node : nodes)
+        for (HashMap<Object,Object> node : nodes)
         {
             if (node.get("addr").toString().equals(String.valueOf(slaveId))) {
                 return true;
@@ -124,23 +114,11 @@ public class L
         }
         return false;
     }
-    public static List<String> getExistingModbusSlaveIds() {
-        List<String> existingSlaveIds = new ArrayList<String>();
-        ArrayList<HashMap> nodes = CCUHsApi.getInstance().readAll("device and modbus");
-        if(nodes.size() == 0)
-            return existingSlaveIds;
-
-        for (HashMap node : nodes)
-        {
-            existingSlaveIds.add(node.get("addr").toString());
-        }
-        return existingSlaveIds;
-    }
     
     public static short generateSmartNodeAddress()
     {
         short currentBand = L.ccu().getSmartNodeAddressBand();
-        ArrayList<HashMap> nodes = CCUHsApi.getInstance().readAll("device and node");
+        ArrayList<HashMap<Object,Object>> nodes = CCUHsApi.getInstance().readAllEntities("device and node");
         if (nodes.size() == 0) {
             return currentBand;
         }
@@ -149,33 +127,9 @@ public class L
         short nextAddr = currentBand;
         while (addrUsed)
         {
-            for (HashMap node : nodes)
+            for (HashMap<Object,Object> node : nodes)
             {
                 if (node.get("addr").toString().equals(String.valueOf(nextAddr))) {
-                    nextAddr++;
-                    addrUsed = true;
-                    break;
-                } else {
-                    addrUsed = false;
-                }
-            }
-        }
-        return nextAddr;
-    }
-
-    public static short generateModbusAddress()
-    {
-        short currentAddr = 1;
-        ArrayList<HashMap> modbusDevices = CCUHsApi.getInstance().readAll("device and modbus");
-
-        boolean addrUsed = true;
-        short nextAddr = currentAddr;
-
-        while (addrUsed)
-        {
-            for (HashMap d : modbusDevices)
-            {
-                if (d.get("addr").toString().equals(String.valueOf(nextAddr))) {
                     nextAddr++;
                     addrUsed = true;
                     break;
@@ -203,13 +157,12 @@ public class L
     {
         for (short node : profile.getNodeAddresses())
         {
-            ArrayList points = CCUHsApi.getInstance().readAll("point and air and temp and desired and sp and group == \"" + node + "\"");
-            String id = ((HashMap)points.get(0)).get("id").toString();
-            if (id == null || id == "") {
+            ArrayList<HashMap<Object, Object>> points = CCUHsApi.getInstance().readAllEntities("point and air and temp and desired and sp and group == \"" + node + "\"");
+            String id = ((HashMap<?, ?>)points.get(0)).get("id").toString();
+            if (id == null || id.equals("")) {
                 throw new IllegalArgumentException();
             }
-            float desiredTemp = CCUHsApi.getInstance().readDefaultValById(id).floatValue();
-            return desiredTemp;
+            return CCUHsApi.getInstance().readDefaultValById(id).floatValue();
         }
         return 0;
     }
@@ -218,9 +171,9 @@ public class L
     {
         for (short node : profile.getNodeAddresses())
         {
-            ArrayList points = CCUHsApi.getInstance().readAll("point and air and temp and desired and sp and group == \"" + node + "\"");
-            String id = ((HashMap) points.get(0)).get("id").toString();
-            if (id == null || id == "")
+            ArrayList<HashMap<Object,Object>> points = CCUHsApi.getInstance().readAllEntities("point and air and temp and desired and sp and group == \"" + node + "\"");
+            String id = ( points.get(0)).get("id").toString();
+            if (id == null || id.equals(""))
             {
                 throw new IllegalArgumentException();
             }
@@ -229,20 +182,10 @@ public class L
             CCUHsApi.getInstance().writeHisValById(id, desiredTemp);
         }
     }
-    
-    /****
-     *
-     * @return
-     */
+
     public static CCUApplication ccu()
     {
         return Globals.getInstance().ccu();
-    }
-
-
-    public static boolean isTestHarness()
-    {
-        return Globals.getInstance().testHarness();
     }
 
 
@@ -251,52 +194,24 @@ public class L
         return Globals.getInstance().isSimulation();
     }
 
-    public static boolean isOccupied(Zone zone, ZoneProfile zoneProfile)
+    public static boolean isOccupied()
     {
         return false;
     }
 
-
-    //TODO: implement clear caches.
-    public static void clearCaches()
-    {
-    }
-
-
-    /*
-    User can exist and not be registered, user can exist and already be registered, just need
-    login, or user can just be logged in.
-     */
-    public static boolean isUserRegistered()
-    {
-        return LocalStorage.getIsUserRegistered();
-    }
-
-
-    public static void setUserRegistered(boolean userRegistered)
-    {
-        LocalStorage.setIsUserRegistered(userRegistered);
-    }
     public static void saveCCUState(CCUApplication state)
     {
         Globals.getInstance().setCCU(state);
         saveCCUState();
     }
 
-    /*
-    This should set a preference to what environment
-    the user would like to use with Kinvey for testing and development purposes.
-     */
-    public static void setServerEnvironment(String serverEnvironment) {
-        //L.serverEnvironment = serverEnvironment;
-    }
 
     public static void removeHSDeviceEntities(Short node) {
         CCUHsApi hsApi = CCUHsApi.getInstance();
         if (L.ccu().oaoProfile != null && L.ccu().oaoProfile.getNodeAddress() == node) {
             L.ccu().oaoProfile = null;
         }
-        HashMap equip = hsApi.read("equip and group == \""+node+"\"");
+        HashMap<Object, Object> equip = hsApi.readEntity("equip and group == \""+node+"\"");
         if (equip.get("id") != null)
         {
             hsApi.deleteEntityTree(equip.get("id").toString());
@@ -306,7 +221,7 @@ public class L
                 ccu().systemProfile.setOutsideTempCoolingLockoutEnabled(hsApi, false);
             }
         }
-        HashMap device = hsApi.read("device and addr == \""+node+"\"");
+        HashMap<Object, Object> device = hsApi.readEntity("device and addr == \""+node+"\"");
         if (device.get("id") != null)
         {
             hsApi.deleteEntityTree(device.get("id").toString());
@@ -315,9 +230,7 @@ public class L
     }
 
     public static ZoneProfile getProfile(short addr) {
-        for (Iterator<ZoneProfile> it = L.ccu().zoneProfiles.iterator(); it.hasNext();)
-        {
-            ZoneProfile p = it.next();
+        for (ZoneProfile p : L.ccu().zoneProfiles) {
             for (Short node : p.getNodeAddresses()) {
                 if (node == addr) {
                     return p;

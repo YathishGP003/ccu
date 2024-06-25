@@ -6,34 +6,21 @@ import a75f.io.constants.HttpConstants;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.HttpCookie;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
-
-import javax.net.ssl.HttpsURLConnection;
-
 import a75f.io.logger.CcuLog;
-import info.guardianproject.netcipher.NetCipher;
-import okhttp3.Call;
-import okhttp3.Callback;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
-import okhttp3.Request;
 import okhttp3.RequestBody;
-import okhttp3.Response;
 import okhttp3.ResponseBody;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
-
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
-import android.content.Context;
-
 
 public class HttpUtil {
 
@@ -47,50 +34,6 @@ public class HttpUtil {
 
     public static String executePost(String targetURL, String urlParameters) {
         return executePost(targetURL, urlParameters, CCUHsApi.getInstance().getJwt()); // TODO Matt Rudd - I hate this hack, but the executePost needs a complete rewrite
-    }
-
-
-    public static final MediaType ZINC = MediaType.get("text/zinc; charset=utf-8");
-    private static OkHttpClient client = new OkHttpClient();
-
-    private static Call post(String url, String params, String token, Callback callback) {
-        RequestBody body = RequestBody.create(params, ZINC);
-        Request request = new Request.Builder()
-                .url(url)
-                .addHeader(HttpConstants.APP_NAME_HEADER_NAME, HttpConstants.APP_NAME_HEADER_VALUE)
-                .addHeader("Content-Length", "" + params.getBytes(StandardCharsets.UTF_8).length)
-                .addHeader("Content-Language", "en-US")
-                .addHeader("Authorization", " Bearer " + token)
-                .post(body)
-                .build();
-        Call call = getSharedOkHttpClient().newCall(request);
-        call.enqueue(callback);
-
-        CcuLog.d("CCU_HTTP_REQUEST", "HttpUtil:post: [POST] " + url + " - Token: " + token);
-
-        return call;
-    }
-
-    public static void executePostAsync(String targetURL, String urlParameters) {
-
-        post(targetURL, urlParameters, CCUHsApi.getInstance().getJwt(), new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                CcuLog.i("CCU_HS", "executePostAsync Failed : " + e.getMessage());
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                CcuLog.d("CCU_HTTP_RESPONSE", "HttpUtil:executePostAsync: " + response.code() + " - [" + response.request().method() + "] " + response.request().url());
-
-                if (response.isSuccessful()) {
-                    String responseStr = response.body().string();
-                    CcuLog.i("CCU_HS", "executePostAsync Succeeded : " + responseStr);
-                } else {
-                    CcuLog.i("CCU_HS", "executePostAsync Failed : " + response.message());
-                }
-            }
-        });
     }
 
 
@@ -133,24 +76,24 @@ public class HttpUtil {
 
                 int responseCode = connection.getResponseCode();
 
-                CcuLog.d("CCU_HTTP_RESPONSE", "HttpUtil:executePost: " + responseCode + " - [POST] " + url.toString());
+                CcuLog.d("CCU_HTTP_RESPONSE", "HttpUtil:executePost: " + responseCode + " - [POST] " + url);
 
                 if (responseCode >= 400) {
 
                     BufferedReader rde = new BufferedReader(new InputStreamReader(connection.getErrorStream()));
                     String linee;
-                    StringBuffer responsee = new StringBuffer();
+                    StringBuilder responsee = new StringBuilder();
                     while ((linee = rde.readLine()) != null) {
                         responsee.append(linee);
                         responsee.append('\n');
                     }
-                    CcuLog.e("CCU_HTTP_RESPONSE", "Response error stream: " + responsee.toString());
+                    CcuLog.e("CCU_HTTP_RESPONSE", "Response error stream: " + responsee);
                 }
 
                 //Get Response
                 BufferedReader rd = new BufferedReader(new InputStreamReader(connection.getInputStream()));
                 String line;
-                StringBuffer response = new StringBuffer();
+                StringBuilder response = new StringBuilder();
                 while ((line = rd.readLine()) != null) {
                     response.append(line);
                     response.append('\n');
@@ -180,10 +123,6 @@ public class HttpUtil {
     /**
      * Returns EntitySyncResponse object instead of response string.
      *
-     * @param targetURL
-     * @param urlParameters
-     * @param bearerToken
-     * @return
      */
     public static EntitySyncResponse executeEntitySync(String targetURL, String urlParameters, String bearerToken) {
         targetURL = StringUtils.appendIfMissing(targetURL, "/");
@@ -224,26 +163,26 @@ public class HttpUtil {
 
                 int responseCode = connection.getResponseCode();
 
-                CcuLog.d("CCU_HTTP_RESPONSE", "HttpUtil:executeEntitySync: " + responseCode + " - [POST] " + url.toString());
+                CcuLog.d("CCU_HTTP_RESPONSE", "HttpUtil:executeEntitySync: " + responseCode + " - [POST] " + url);
 
                 syncResponse.setRespCode(responseCode);
                 if (responseCode >= HTTP_RESPONSE_ERR_REQUEST) {
 
                     BufferedReader rde = new BufferedReader(new InputStreamReader(connection.getErrorStream()));
                     String linee;
-                    StringBuffer responsee = new StringBuffer();
+                    StringBuilder response = new StringBuilder();
                     while ((linee = rde.readLine()) != null) {
-                        responsee.append(linee);
-                        responsee.append('\n');
+                        response.append(linee);
+                        response.append('\n');
                     }
-                    syncResponse.setErrRespString(responsee.toString());
-                    CcuLog.e("CCU_HS", "Response error stream: " + responsee.toString());
+                    syncResponse.setErrRespString(response.toString());
+                    CcuLog.e("CCU_HS", "Response error stream: " + response);
                 }
 
                 //Get Response
                 BufferedReader rd = new BufferedReader(new InputStreamReader(connection.getInputStream()));
                 String line;
-                StringBuffer response = new StringBuffer();
+                StringBuilder response = new StringBuilder();
                 while ((line = rd.readLine()) != null) {
                     response.append(line);
                     response.append('\n');
@@ -321,24 +260,24 @@ public class HttpUtil {
                 int responseCode = connection.getResponseCode();
                 CcuLog.i("CCU_HS", "HttpResponse: responseCode " + responseCode);
 
-                CcuLog.d("CCU_HTTP_RESPONSE", "HttpUtil:executeJson: " + responseCode + " - [POST] " + url.toString());
+                CcuLog.d("CCU_HTTP_RESPONSE", "HttpUtil:executeJson: " + responseCode + " - [POST] " + url);
 
                 if (responseCode >= 400) {
 
                     BufferedReader rde = new BufferedReader(new InputStreamReader(connection.getErrorStream()));
                     String linee;
-                    StringBuffer responsee = new StringBuffer();
+                    StringBuilder response = new StringBuilder();
                     while ((linee = rde.readLine()) != null) {
-                        responsee.append(linee);
-                        responsee.append('\n');
+                        response.append(linee);
+                        response.append('\n');
                     }
-                    CcuLog.i("CCU_HS", "Response error stream: " + responsee.toString());
+                    CcuLog.i("CCU_HS", "Response error stream: " + response);
                 }
 
                 //Get Response
                 BufferedReader rd = new BufferedReader(new InputStreamReader(connection.getInputStream()));
                 String line;
-                StringBuffer response = new StringBuffer();
+                StringBuilder response = new StringBuilder();
                 while ((line = rd.readLine()) != null) {
                     response.append(line);
                     response.append('\n');

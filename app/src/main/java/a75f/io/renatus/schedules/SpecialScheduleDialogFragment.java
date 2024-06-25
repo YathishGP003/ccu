@@ -1,6 +1,5 @@
 package a75f.io.renatus.schedules;
 
-import static a75f.io.logic.bo.util.UnitUtils.celsiusToFahrenheitRelativeChange;
 import static a75f.io.logic.bo.util.UnitUtils.celsiusToFahrenheitTuner;
 import static a75f.io.logic.bo.util.UnitUtils.convertingDeadBandValueCtoF;
 import static a75f.io.logic.bo.util.UnitUtils.convertingRelativeValueFtoC;
@@ -12,7 +11,6 @@ import static a75f.io.logic.schedule.SpecialSchedule.getInt;
 import android.app.Dialog;
 import android.os.Bundle;
 import android.os.CountDownTimer;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
@@ -22,6 +20,11 @@ import android.widget.EditText;
 import android.widget.NumberPicker;
 import android.widget.Spinner;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AlertDialog;
+import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.prolificinteractive.materialcalendarview.CalendarDay;
 
@@ -47,6 +50,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.schedule.SpecialSchedule;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.CCUUiUtil;
@@ -54,10 +58,6 @@ import a75f.io.renatus.util.TimeUtils;
 import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
 import a75f.io.renatus.views.MasterControl.MasterControlUtil;
 import a75f.io.renatus.views.RangeBarView;
-import androidx.appcompat.app.AlertDialog;
-import androidx.fragment.app.DialogFragment;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
 
 public class SpecialScheduleDialogFragment extends DialogFragment {
     private NumberPicker npStartTime;
@@ -259,7 +259,7 @@ public class SpecialScheduleDialogFragment extends DialogFragment {
             method.setAccessible(true);
             method.invoke(npStartTime, true);
         } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
-            Log.e(TAG, "Reflection error for start time");
+            CcuLog.e(TAG, "Reflection error for start time");
         }
 
         npEndTime.setMinValue(nMinVal);
@@ -374,7 +374,7 @@ public class SpecialScheduleDialogFragment extends DialogFragment {
             method.setAccessible(true);
             method.invoke(npEndTime, true);
         }  catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
-            Log.e(TAG, "Reflection error for end time");
+            CcuLog.e(TAG, "Reflection error for end time");
         }
 
         displaySelectedSpecialSchedule();
@@ -549,13 +549,13 @@ public class SpecialScheduleDialogFragment extends DialogFragment {
         if(!overlapSchedules.isEmpty()){
             StringBuilder overlapMessage = new StringBuilder();
             for (Map.Entry<String, String> overlapEntry: overlapSchedules.entries()) {
-                overlapMessage.append(overlapEntry.getKey()+" : "+overlapEntry.getValue());
+                overlapMessage.append(overlapEntry.getKey()).append(" : ").append(overlapEntry.getValue());
                 overlapMessage.append("\n");
             }
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
             builder.setMessage("The special schedule "+scheduleName+" cannot be applied as it is overlapping with " +
-                    "the below special schedules." +"\n\n"+overlapMessage.toString())
+                    "the below special schedules." +"\n\n"+ overlapMessage)
                     .setCancelable(false)
                     .setTitle("Special Schedule Overlaps")
                     .setIcon(R.drawable.ic_dialog_alert)

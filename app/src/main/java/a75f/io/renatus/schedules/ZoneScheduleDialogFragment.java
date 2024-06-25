@@ -21,7 +21,6 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.DialogFragment;
 import androidx.appcompat.app.AlertDialog;
 import android.os.Handler;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
@@ -314,15 +313,13 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
                             dayIndexArr.add(tempDay.getDay());
                         }
                     }
-                    if(dayIndexArr.size() > 0) {
+                    if(!dayIndexArr.isEmpty()) {
                         new AlertDialog.Builder(getContext())
                                 .setCancelable(false)
                                 .setTitle("Follow Building\n")
                                 .setIcon(R.drawable.ic_dialog_alert)
                                 .setMessage("The desired temperature range for the following day(s) is not within the range of the building.\n\n " +displayDayName(dayIndexArr)+"\n\n"+"Building Heating limits -("+heatingLimitMin+" - "+heatingLimitMax+")"+"\n" +"Building Cooling limits-("+coolingLimitMin+" - "+coolingLimitMax+")" +"\n" + "\n"+"Please edit the Desired Temperatures for Heating and Cooling for the day(s) mentioned above.")
-                                .setNegativeButton(getString(R.string.cancel), (dialog, which) -> {
-                                    followBuilding.setChecked(false);
-                                })
+                                .setNegativeButton(getString(R.string.cancel), (dialog, which) -> followBuilding.setChecked(false))
                                 .show();
                         dayIndexArr.clear();
                         return;
@@ -379,7 +376,7 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
             method.setAccessible(true);
             method.invoke(npEndTime, true);
         } catch (Exception e) {
-            Log.e("Crash", "Reflection Crash?");
+            CcuLog.e(L.TAG_CCU_CRASH, "Reflection Crash?");
         }
         checkBoxMonday.setOnCheckedChangeListener((buttonView, isChecked) ->
         {
@@ -518,7 +515,7 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
                 return;
             }
 
-            if (days.size() == 0) {
+            if (days.isEmpty()) {
                 Toast.makeText(ZoneScheduleDialogFragment.this.getContext(), "Select one or more days to apply the schedule", Toast.LENGTH_SHORT).show();
                 return;
             }
@@ -546,13 +543,13 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
                 return;
             }
 
-            Double buildingLimitMax = Domain.buildingEquip.getBuildingLimitMax().readPriorityVal();
-            Double buildingLimitMin =  Domain.buildingEquip.getBuildingLimitMin().readPriorityVal();
-            Double unoccupiedZoneSetback = Domain.buildingEquip.getUnoccupiedZoneSetback().readPriorityVal();
-            Double buildingToZoneDiff = Domain.buildingEquip.getBuildingToZoneDifferential().readPriorityVal();
+            double buildingLimitMax = Domain.buildingEquip.getBuildingLimitMax().readPriorityVal();
+            double buildingLimitMin =  Domain.buildingEquip.getBuildingLimitMin().readPriorityVal();
+            double unoccupiedZoneSetback = Domain.buildingEquip.getUnoccupiedZoneSetback().readPriorityVal();
+            double buildingToZoneDiff = Domain.buildingEquip.getBuildingToZoneDifferential().readPriorityVal();
             double coolingTemp = rangeSeekBarView.getCoolValue();
             double heatingTemp = rangeSeekBarView.getHeatValue();
-            String warning = null;
+            String warning;
 
             CcuLog.i(L.TAG_CCU, "buildingLimitMin "+buildingLimitMin);
             CcuLog.i(L.TAG_CCU, "heatingUserLimitMinVal "+heatingUserLimitMinVal);
@@ -588,9 +585,7 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
                 builder.setCancelable(false);
                 builder.setTitle(R.string.warning_ns);
                 builder.setIcon(R.drawable.ic_alert);
-                builder.setNegativeButton("OKAY", (dialog1, id) -> {
-                    dialog1.dismiss();
-                });
+                builder.setNegativeButton("OKAY", (dialog1, id) -> dialog1.dismiss());
 
                 android.app.AlertDialog alert = builder.create();
                 alert.show();
@@ -690,7 +685,7 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
         });
 
 
-        if (mDays != null && (mDays.size() > 0)) {
+        if (mDays != null && (!mDays.isEmpty())) {
 
             for(Schedule.Days d : mDays) {
                 checkDays(d);
@@ -744,7 +739,7 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
         StringBuilder daysName = new StringBuilder();
 
         for(int i=0; i<dayIndexArr.size(); i++){
-            daysName.append(getDayName(dayIndexArr.get(i))+"\n");
+            daysName.append(getDayName(dayIndexArr.get(i))).append("\n");
         }
         return daysName.toString();
     }
@@ -811,33 +806,33 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
     }
 
     private void resetRangeBarLimits() {
-        String heatingUserlimitMinItem =  (heatingUserLimitMin.getSelectedItem() == null) ?
+        String heatingUserLimitMinItem =  (heatingUserLimitMin.getSelectedItem() == null) ?
                 heatingUserLimitMin.getItemAtPosition(heatingUserLimitMin.getCount() -1).toString() :
                 heatingUserLimitMin.getSelectedItem().toString();
-        String heatingUserlimitMaxItem = (heatingUserLimitMax.getSelectedItem() == null) ?
+        String heatingUserLimitMaxItem = (heatingUserLimitMax.getSelectedItem() == null) ?
                 heatingUserLimitMax.getItemAtPosition(heatingUserLimitMax.getCount() -1).toString() :
                 heatingUserLimitMax.getSelectedItem().toString();
-        String coolingUserlimitMinItem = (coolingUserLimitMin.getSelectedItem() == null) ?
+        String coolingUserLimitMinItem = (coolingUserLimitMin.getSelectedItem() == null) ?
                 coolingUserLimitMin.getItemAtPosition(coolingUserLimitMin.getCount() -1).toString() :
                 coolingUserLimitMin.getSelectedItem().toString();
-        String coolingUserlimitMaxItem = (coolingUserLimitMax.getSelectedItem() == null) ?
+        String coolingUserLimitMaxItem = (coolingUserLimitMax.getSelectedItem() == null) ?
                 coolingUserLimitMax.getItemAtPosition(coolingUserLimitMax.getCount() -1).toString() :
                 coolingUserLimitMax.getSelectedItem().toString();
 
         if (isCelsiusTunerAvailableStatus()) {
             rangeSeekBarView.setHeatingLimitMinForced(celsiusToFahrenheitTuner(Double.parseDouble(
-                    StringUtils.substringBefore(heatingUserlimitMinItem, "\u00B0C"))));
+                    StringUtils.substringBefore(heatingUserLimitMinItem, "\u00B0C"))));
             rangeSeekBarView.setHeatingLimitMaxForced(celsiusToFahrenheitTuner(Double.parseDouble(
-                    StringUtils.substringBefore(heatingUserlimitMaxItem, "\u00B0C"))));
+                    StringUtils.substringBefore(heatingUserLimitMaxItem, "\u00B0C"))));
             rangeSeekBarView.setCoolingLimitMaxForced(celsiusToFahrenheitTuner(Double.parseDouble(
-                    StringUtils.substringBefore(coolingUserlimitMaxItem, "\u00B0C"))));
+                    StringUtils.substringBefore(coolingUserLimitMaxItem, "\u00B0C"))));
             rangeSeekBarView.setCoolingLimitMinForced(celsiusToFahrenheitTuner(Double.parseDouble(
-                    StringUtils.substringBefore(coolingUserlimitMinItem, "\u00B0C"))));
+                    StringUtils.substringBefore(coolingUserLimitMinItem, "\u00B0C"))));
         } else {
-            rangeSeekBarView.setHeatingLimitMinForced(MasterControlUtil.getAdapterFarhenheitVal(heatingUserlimitMinItem));
-            rangeSeekBarView.setHeatingLimitMaxForced(MasterControlUtil.getAdapterFarhenheitVal(heatingUserlimitMaxItem));
-            rangeSeekBarView.setCoolingLimitMaxForced(MasterControlUtil.getAdapterFarhenheitVal(coolingUserlimitMaxItem));
-            rangeSeekBarView.setCoolingLimitMinForced(MasterControlUtil.getAdapterFarhenheitVal(coolingUserlimitMinItem));
+            rangeSeekBarView.setHeatingLimitMinForced(MasterControlUtil.getAdapterFarhenheitVal(heatingUserLimitMinItem));
+            rangeSeekBarView.setHeatingLimitMaxForced(MasterControlUtil.getAdapterFarhenheitVal(heatingUserLimitMaxItem));
+            rangeSeekBarView.setCoolingLimitMaxForced(MasterControlUtil.getAdapterFarhenheitVal(coolingUserLimitMaxItem));
+            rangeSeekBarView.setCoolingLimitMinForced(MasterControlUtil.getAdapterFarhenheitVal(coolingUserLimitMinItem));
         }
     }
 
@@ -874,9 +869,9 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
 
     private void checkTime(Schedule.Days mDay) {
         int startTimePosition = mDay.getSthh() * 4 + mDay.getStmm() / 15;
-        CcuLog.d("Schedule", "StartTime Position: " + startTimePosition);
+        CcuLog.d(L.TAG_CCU_SCHEDULE, "StartTime Position: " + startTimePosition);
         int endTimePosition = mDay.getEthh() * 4 + mDay.getEtmm() / 15;
-        CcuLog.d("Schedule", "EndTime Position: " + endTimePosition);
+        CcuLog.d(L.TAG_CCU_SCHEDULE, "EndTime Position: " + endTimePosition);
 
         npStartTime.setValue(startTimePosition);
         npEndTime.setValue(endTimePosition);

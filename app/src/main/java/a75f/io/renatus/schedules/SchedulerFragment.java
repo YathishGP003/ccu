@@ -8,7 +8,6 @@ import static a75f.io.usbserial.UsbModbusService.TAG;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.DialogInterface;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -16,7 +15,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.text.Html;
 import android.text.TextUtils;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -56,7 +54,6 @@ import org.projecthaystack.HDict;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -80,7 +77,6 @@ import a75f.io.logic.util.OfflineModeUtilKt;
 import a75f.io.messaging.handler.UpdateScheduleHandler;
 import a75f.io.renatus.R;
 import a75f.io.renatus.schedules.ManualSchedulerDialogFragment.ManualScheduleDialogListener;
-import a75f.io.renatus.tuners.TunerFragment;
 import a75f.io.renatus.util.FontManager;
 import a75f.io.renatus.util.Marker;
 import a75f.io.renatus.util.ProgressDialogUtils;
@@ -294,7 +290,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         view23 = rootView.findViewById(R.id.view23);
 
         //collecting each timeline to arraylist
-        viewTimeLines = new ArrayList<View>();
+        viewTimeLines = new ArrayList<>();
         viewTimeLines.add(view00);
         viewTimeLines.add(view01);
         viewTimeLines.add(view02);
@@ -326,16 +322,13 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         colorMaxTemp = getResources().getString(0 + R.color.max_temp);
         colorMaxTemp = "#" + colorMaxTemp.substring(3);
 
-        textViewaddEntry.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                FragmentTransaction fragmentTransaction = getChildFragmentManager().beginTransaction();
-                Fragment buildingOccupancyFragment = getChildFragmentManager().findFragmentByTag("popup");
-                if(buildingOccupancyFragment != null){
-                    fragmentTransaction.remove(buildingOccupancyFragment);
-                }
-                showDialogNamed();
+        textViewaddEntry.setOnClickListener(view -> {
+            FragmentTransaction fragmentTransaction = getChildFragmentManager().beginTransaction();
+            Fragment buildingOccupancyFragment = getChildFragmentManager().findFragmentByTag("popup");
+            if(buildingOccupancyFragment != null){
+                fragmentTransaction.remove(buildingOccupancyFragment);
             }
+            showDialogNamed();
         });
         textViewScheduletitle.setFocusable(true);
 
@@ -392,7 +385,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
                 }
                 //Leave 20% for padding.
                 mPixelsBetweenADay = mPixelsBetweenADay - (mPixelsBetweenADay * .2f);
-                Log.d("CCU_UI"," Load System Schedule onPreDraw ");
+                CcuLog.d(L.TAG_CCU_UI," Load System Schedule onPreDraw ");
                 loadSchedule();
                 drawCurrentTime();
                 return true;
@@ -402,7 +395,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
 
     private void loadSchedule()
     {
-        Log.d("CCU_UI"," Load System Schedule ");
+        CcuLog.d(L.TAG_CCU_UI," Load System Schedule ");
 
         if (getArguments() != null && getArguments().containsKey(PARAM_SCHEDULE_ID)) {
             mScheduleId = getArguments().getString(PARAM_SCHEDULE_ID);
@@ -411,10 +404,10 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
                     CCUHsApi.getInstance().getScheduleById(mScheduleId);
         } else {
             ArrayList<Schedule> buildingScheduleList = CCUHsApi.getInstance().getSystemSchedule(false);
-            if(buildingScheduleList.size() > 0) {
+            if(!buildingScheduleList.isEmpty()) {
                 schedule = buildingScheduleList.get(0);
             }
-            Log.d("CCU_UI"," Loaded System Schedule - ScheduleFragment "+schedule.toString());
+            CcuLog.d(L.TAG_CCU_UI," Loaded System Schedule - ScheduleFragment "+schedule.toString());
         }
 
         if((getArguments() != null && getArguments().containsKey(PARAM_ROOM_REF))
@@ -559,9 +552,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
                         builder.setCancelable(false);
                         builder.setTitle(R.string.warning_ns);
                         builder.setIcon(R.drawable.ic_alert);
-                        builder.setNegativeButton("OKAY", (dialog1, id) -> {
-                            dialog1.dismiss();
-                        });
+                        builder.setNegativeButton("OKAY", (dialog1, id) -> dialog1.dismiss());
 
                         AlertDialog alert = builder.create();
                         alert.show();
@@ -717,15 +708,15 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
             specialScheduleList = CCUHsApi.getInstance().getSpecialSchedules(null);
         }
         if(specialScheduleList != null){
-            Collections.sort(specialScheduleList, (lhss, rhss) -> {
+            specialScheduleList.sort((lhss, rhss) -> {
                 HDict lhrange = (HDict) lhss.get(Tags.RANGE);
                 HDict rhrange = (HDict) rhss.get(Tags.RANGE);
                 String lhStartDate = lhrange.get(Tags.STDT).toString();
                 String rhStartDate = rhrange.get(Tags.STDT).toString();
-                if(lhStartDate.equals(rhStartDate)){
+                if (lhStartDate.equals(rhStartDate)) {
                     int lhStartHour = SpecialSchedule.getInt(lhrange.get(Tags.STHH).toString());
                     int rhStartHour = SpecialSchedule.getInt(rhrange.get(Tags.STHH).toString());
-                    if(lhStartHour == rhStartHour){
+                    if (lhStartHour == rhStartHour) {
                         return SpecialSchedule.getInt(lhrange.get(Tags.STMM).toString()) -
                                 SpecialSchedule.getInt((rhrange.get(Tags.STMM).toString()));
                     }
@@ -777,8 +768,8 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         }
         
         if(vacations != null) {
-            Collections.sort(vacations, (lhs, rhs) -> lhs.getStartDate().compareTo(rhs.getStartDate()));
-            Collections.sort(vacations, (lhs, rhs) -> lhs.getEndDate().compareTo(rhs.getEndDate()));
+            vacations.sort((lhs, rhs) -> lhs.getStartDate().compareTo(rhs.getStartDate()));
+            vacations.sort((lhs, rhs) -> lhs.getEndDate().compareTo(rhs.getEndDate()));
             mVacationAdapter = new VacationAdapter(vacations, mEditOnClickListener, mDeleteOnClickListener);
             mVacationRecycler.setAdapter(mVacationAdapter);
             mVacationRecycler.setLayoutManager(new LinearLayoutManager(this.getContext()));
@@ -823,19 +814,19 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         if (position != ManualSchedulerDialogFragment.NO_REPLACE) {
             //sort schedule days according to the start hour of the day
             try {
-                Collections.sort(schedule.getDays(), (lhs, rhs) -> lhs.getSthh() - (rhs.getSthh()));
-                Collections.sort(schedule.getDays(), (lhs, rhs) -> lhs.getDay() - (rhs.getDay()));
+                schedule.getDays().sort((lhs, rhs) -> lhs.getSthh() - (rhs.getSthh()));
+                schedule.getDays().sort((lhs, rhs) -> lhs.getDay() - (rhs.getDay()));
                 removeEntry = schedule.getDays().remove(position);
             }catch (ArrayIndexOutOfBoundsException e) {
-                Log.d(TAG, "onClickSave: " + e.getMessage());
+                CcuLog.e(TAG, "onClickSave: " + e.getMessage());
             }
         } else {
             removeEntry = null;
         }
 
-        Log.d("CCU_UI"," onClickSave "+"startTime "+startTimeHour+":"+startTimeMinute+" endTime "+endTimeHour+":"+endTimeMinute+" removeEntry "+removeEntry);
+        CcuLog.d(L.TAG_CCU_UI," onClickSave "+"startTime "+startTimeHour+":"+startTimeMinute+" endTime "+endTimeHour+":"+endTimeMinute+" removeEntry "+removeEntry);
 
-        ArrayList<Schedule.Days> daysArrayList = new ArrayList<Schedule.Days>();
+        ArrayList<Schedule.Days> daysArrayList = new ArrayList<>();
 
         if (days != null) {
             for (DAYS day : days) {
@@ -854,7 +845,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         }
     
         for (Schedule.Days d : daysArrayList) {
-            Log.d("CCU_UI", " daysArrayList  "+d);
+            CcuLog.d(L.TAG_CCU_UI, " daysArrayList  "+d);
         }
 
         boolean intersection = schedule.checkIntersection(daysArrayList);
@@ -864,21 +855,18 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
             for (Schedule.Days day : daysArrayList) {
                 ArrayList<Interval> overlaps = schedule.getOverLapInterval(day);
                 for (Interval overlap : overlaps) {
-                    Log.d("CCU_UI"," overLap "+overlap);
-                    overlapDays.append(getDayString(overlap.getStart())+"("+overlap.getStart().hourOfDay().get()+":"+(overlap.getStart().minuteOfHour().get() == 0 ? "00" : overlap.getStart().minuteOfHour().get())
-                                       +" - " +(getEndTimeHr(overlap.getEnd().hourOfDay().get(), overlap.getEnd().minuteOfHour().get()))+":"+(getEndTimeMin(overlap.getEnd().hourOfDay().get(), overlap.getEnd().minuteOfHour().get())  == 0 ? "00": overlap.getEnd().minuteOfHour().get())+ ") ");
+                    CcuLog.d(L.TAG_CCU_UI," overLap "+overlap);
+                    overlapDays.append(getDayString(overlap.getStart())).append("(").append(overlap.getStart().hourOfDay().get()).append(":").append(overlap.getStart().minuteOfHour().get() == 0 ? "00" : overlap.getStart().minuteOfHour().get()).append(" - ").append(getEndTimeHr(overlap.getEnd().hourOfDay().get(), overlap.getEnd().minuteOfHour().get())).append(":").append(getEndTimeMin(overlap.getEnd().hourOfDay().get(), overlap.getEnd().minuteOfHour().get()) == 0 ? "00" : overlap.getEnd().minuteOfHour().get()).append(") ");
                 }
             }
         
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-            builder.setMessage("The current settings cannot be overridden because the following duration of the schedules are overlapping \n"+overlapDays.toString())
+            builder.setMessage("The current settings cannot be overridden because the following duration of the schedules are overlapping \n"+ overlapDays)
                    .setCancelable(false)
                    .setIcon(R.drawable.ic_dialog_alert)
-                   .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                       public void onClick(DialogInterface dialog, int id) {
-                           if (removeEntry != null)
-                               schedule.getDays().add(position, removeEntry);
-                       }
+                   .setPositiveButton("OK", (dialog, id) -> {
+                       if (removeEntry != null)
+                           schedule.getDays().add(position, removeEntry);
                    });
         
             AlertDialog alert = builder.create();
@@ -887,16 +875,16 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         
         }
         
-        HashMap<String, ArrayList<Interval>> spillsMap = days == null ? getRemoveScheduleSpills(removeEntry):
+        HashMap<String, ArrayList<Interval>> spillsMap = days == null ? getRemoveScheduleSpills():
                                                                               getScheduleSpills(daysArrayList);
-        if (spillsMap != null && spillsMap.size() > 0) {
+        if (spillsMap != null && !spillsMap.isEmpty()) {
             if (schedule.isZoneSchedule()) {
                 StringBuilder spillZones = new StringBuilder();
                 for (String zone : spillsMap.keySet())
                 {
                     for (Interval i : spillsMap.get(zone))
                     {
-                        spillZones.append(ScheduleUtil.getDayString(i.getStart().getDayOfWeek())+" (" + i.getStart().hourOfDay().get() + ":" + (i.getStart().minuteOfHour().get() == 0 ? "00" : i.getStart().minuteOfHour().get()) + " - " + getEndTimeHr(i.getEnd().hourOfDay().get(), i.getEnd().minuteOfHour().get()) + ":" + (getEndTimeMin(i.getEnd().hourOfDay().get(), i.getEnd().minuteOfHour().get()) == 0 ? "00" : i.getEnd().minuteOfHour().get()) + ") \n");
+                        spillZones.append(ScheduleUtil.getDayString(i.getStart().getDayOfWeek())).append(" (").append(i.getStart().hourOfDay().get()).append(":").append(i.getStart().minuteOfHour().get() == 0 ? "00" : i.getStart().minuteOfHour().get()).append(" - ").append(getEndTimeHr(i.getEnd().hourOfDay().get(), i.getEnd().minuteOfHour().get())).append(":").append(getEndTimeMin(i.getEnd().hourOfDay().get(), i.getEnd().minuteOfHour().get()) == 0 ? "00" : i.getEnd().minuteOfHour().get()).append(") \n");
                     }
                 }
                 
@@ -906,26 +894,22 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
                        .setCancelable(false)
                        .setTitle("Schedule Errors")
                        .setIcon(R.drawable.ic_dialog_alert)
-                       .setNegativeButton("Re-Edit", new DialogInterface.OnClickListener() {
-                           public void onClick(DialogInterface dialog, int id) {
-                               if (removeEntry != null) {
-                                   showDialog(ID_DIALOG_SCHEDULE, position, removeEntry);
-                               } else {
-                                   showDialog(ID_DIALOG_SCHEDULE, position, daysArrayList);
-                               }
+                       .setNegativeButton("Re-Edit", (dialog, id) -> {
+                           if (removeEntry != null) {
+                               showDialog(ID_DIALOG_SCHEDULE, position, removeEntry);
+                           } else {
+                               showDialog(ID_DIALOG_SCHEDULE, position, daysArrayList);
                            }
                        })
-                       .setPositiveButton("Force-Trim", new DialogInterface.OnClickListener() {
-                           public void onClick(DialogInterface dialog, int id) {
-                               schedule.getDays().addAll(daysArrayList);
-                               if (schedule.isZoneSchedule()) {
-                                   ScheduleUtil.trimZoneSchedule(schedule, spillsMap);
-                               } else{
-                                   ScheduleUtil.trimZoneSchedules(spillsMap);
-                               }
-                               schedule = CCUHsApi.getInstance().getScheduleById(schedule.getId());
-                               doScheduleUpdate();
+                       .setPositiveButton("Force-Trim", (dialog, id) -> {
+                           schedule.getDays().addAll(daysArrayList);
+                           if (schedule.isZoneSchedule()) {
+                               ScheduleUtil.trimZoneSchedule(schedule, spillsMap);
+                           } else{
+                               ScheduleUtil.trimZoneSchedules(spillsMap);
                            }
+                           schedule = CCUHsApi.getInstance().getScheduleById(schedule.getId());
+                           doScheduleUpdate();
                        });
     
                 AlertDialog alert = builder.create();
@@ -960,17 +944,17 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
                     }
                 }
 
-                String namedSchedulesWarning = "" ;
+                String namedSchedulesWarning;
                 String zoneSchedulesWarning = "" ;
                 if (schedules.contains("named")) {
                     namedSchedulesWarning = "Named Schedule for below zone(s) is outside updated " +
                             "building occupancy.\n"
-                            + ((spillNamedZones.toString()).equals("") ? "" : "\tThe Schedule is " +
-                            "outside by \n\t" + spillNamedZones.toString()+"\n");
+                            + ((spillNamedZones.toString()).isEmpty() ? "" : "\tThe Schedule is " +
+                            "outside by \n\t" + spillNamedZones +"\n");
                     if(schedules.contains("zone")){
                         zoneSchedulesWarning = "Zone Schedule for below zone(s) is outside updated " +
-                                "building occupancy.\n" + (spillZones.toString().equals("") ? "" : "\tThe Schedule " +
-                                "is outside by \n\t" + spillZones.toString());
+                                "building occupancy.\n" + (spillZones.toString().isEmpty() ? "" : "\tThe Schedule " +
+                                "is outside by \n\t" + spillZones);
                     }
                     AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                     builder.setMessage(namedSchedulesWarning + zoneSchedulesWarning)
@@ -990,8 +974,8 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
                 }
                 else if(schedules.contains("zone")){
                     zoneSchedulesWarning = "Zone Schedule for below zone(s) is outside updated " +
-                            "building occupancy.\n" + (spillZones.toString().equals("") ? "" : "\tThe Schedule " +
-                            "is outside by \n\t" + spillZones.toString());
+                            "building occupancy.\n" + (spillZones.toString().isEmpty() ? "" : "\tThe Schedule " +
+                            "is outside by \n\t" + spillZones);
                     AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                     builder.setMessage(zoneSchedulesWarning)
                             .setCancelable(false)
@@ -1041,7 +1025,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         ScheduleManager.getInstance().updateSchedules();
     }
     
-    private HashMap<String,ArrayList<Interval>> getRemoveScheduleSpills(Schedule.Days d) {
+    private HashMap<String,ArrayList<Interval>> getRemoveScheduleSpills() {
         if (!schedule.isBuildingSchedule()) {
             return null;
         }
@@ -1076,14 +1060,6 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
                         add = false;
                         break;
                     } else if (s.overlaps(z)) {
-                        /*if(z.getStartMillis() < s.getStartMillis() && z.getEndMillis() > s.getEndMillis()){
-                            intervalSpills.add(new Interval(z.getStartMillis(), s.getStartMillis()));
-                            intervalSpills.add(new Interval(s.getEndMillis(), z.getEndMillis()));
-                        } else if (z.getStartMillis() < s.getStartMillis()) {
-                            intervalSpills.add(new Interval(z.getStartMillis(), s.getStartMillis()));
-                        } else if (z.getEndMillis() > s.getEndMillis()) {
-                            intervalSpills.add(new Interval(s.getEndMillis(), z.getEndMillis()));
-                        }*/
                         add = false;
                         for (Interval i: disconnectedIntervals(systemIntervals,z)){
                             if (!intervalSpills.contains(i)){
@@ -1099,14 +1075,14 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
                     CcuLog.d(L.TAG_CCU_UI, " Zone Interval not contained "+z);
                 }
             }
-            if (intervalSpills.size() > 0)
+            if (!intervalSpills.isEmpty())
             {
                 spillsMap.put(schedule.getRoomRef(), intervalSpills);
             }
 
         } else if (schedule.isBuildingSchedule()) {
             ArrayList<HashMap> zones = CCUHsApi.getInstance().readAll("room");
-            Collections.sort(zones, (lhs, rhs) -> lhs.get("floorRef").toString().compareTo(rhs.get("floorRef").toString()));
+            zones.sort((lhs, rhs) -> lhs.get("floorRef").toString().compareTo(rhs.get("floorRef").toString()));
             for (HashMap m : zones) {
                 ArrayList<Interval> intervalSpills = new ArrayList<>();
                 if(m.containsKey("scheduleRef")) {
@@ -1159,14 +1135,6 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
                         if (!contains) {
                             for (Interval s : systemIntervals) {
                                 if (s.overlaps(z)) {
-                                    /*if(z.getStartMillis() < s.getStartMillis() && z.getEndMillis() > s.getEndMillis()){
-                                        intervalSpills.add(new Interval(z.getStartMillis(), s.getStartMillis()));
-                                        intervalSpills.add(new Interval(s.getEndMillis(), z.getEndMillis()));
-                                    } else if (z.getStartMillis() < s.getStartMillis()) {
-                                        intervalSpills.add(new Interval(z.getStartMillis(), s.getStartMillis()));
-                                    } else if (z.getEndMillis() > s.getEndMillis()) {
-                                        intervalSpills.add(new Interval(s.getEndMillis(), z.getEndMillis()));
-                                    }*/
                                     for (Interval i: disconnectedIntervals(systemIntervals,z)){
                                         if (!intervalSpills.contains(i)){
                                             intervalSpills.add(i);
@@ -1185,7 +1153,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
 
                     }
 
-                    if (intervalSpills.size() > 0) {
+                    if (!intervalSpills.isEmpty()) {
                         spillsMap.put(m.get("id").toString(), intervalSpills);
                     }
                 }
@@ -1203,12 +1171,12 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
             markers.add(new Marker(i.getEndMillis(), false));
         }
 
-        Collections.sort(markers, (a, b) -> Long.compare(a.val, b.val));
+        markers.sort((a, b) -> Long.compare(a.val, b.val));
 
         int overlap = 0;
         boolean endReached = false;
 
-        if (markers.size() > 0 && markers.get(0).val > r.getStartMillis()) {
+        if (!markers.isEmpty() && markers.get(0).val > r.getStartMillis()) {
             result.add(new Interval(r.getStartMillis(), markers.get(0).val));
         }
 
@@ -1219,7 +1187,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
             Marker next = markers.get(i + 1);
 
             if (m.val != next.val && overlap == 0 && next.val > r.getStartMillis()) {
-                long start = m.val > r.getStartMillis() ? m.val : r.getStartMillis();
+                long start = Math.max(m.val, r.getStartMillis());
                 long end = next.val;
                 if (next.val > r.getEndMillis()) {
                     end = r.getEndMillis();
@@ -1325,7 +1293,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
 
 
             DAYS day = DAYS.values()[now.getDayOfWeek() - 1];
-            Log.i("Scheduler", "DAY: " + day.toString());
+            CcuLog.i(L.TAG_CCU_SCHEDULER, "DAY: " + day.toString());
             int hh = now.getHourOfDay();
             int mm = now.getMinuteOfHour();
 
@@ -1335,11 +1303,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
             imageView.setImageResource(R.drawable.ic_time_marker_svg);
             imageView.setId(View.generateViewId());
             imageView.setScaleType(ImageView.ScaleType.FIT_XY);
-            //imageView.setPadding(0, 50,0, 0);
-            //imageView.setForegroundGravity(Gravity.CENTER);
             ConstraintLayout.LayoutParams lp = new ConstraintLayout.LayoutParams(0, (int) mPixelsBetweenADay);
-            //lp.topMargin = (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 6, getResources().getDisplayMetrics());
-            //lp.bottomMargin = (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 6, getResources().getDisplayMetrics());
             lp.bottomToBottom = getTextViewFromDay(day).getId();
             lp.topToTop = getTextViewFromDay(day).getId();
             lp.startToStart = viewTimeLines.get(hh).getId();
@@ -1349,7 +1313,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
             constraintScheduler.addView(imageView, lp);
         }catch(IllegalStateException exception){
             // if context is null we will get this exception, some rare scenario we get this.
-            Log.e(L.TAG_CCU_UI,exception.getMessage());
+            CcuLog.e(L.TAG_CCU_UI,exception.getMessage());
         }
 
     }
@@ -1463,30 +1427,27 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
 
         textViewTemp.setBackground(drawableCompat);
         constraintScheduler.addView(textViewTemp, lp);
-        textViewTemp.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(schedule.isNamedSchedule() && !OfflineModeUtilKt.isOfflineMode()){
-                    Toast.makeText(getContext(), R.string.taost_for_fallback, Toast.LENGTH_SHORT).show();
-                    return;
-                }
+        textViewTemp.setOnClickListener(v -> {
+            if(schedule.isNamedSchedule() && !OfflineModeUtilKt.isOfflineMode()){
+                Toast.makeText(getContext(), R.string.taost_for_fallback, Toast.LENGTH_SHORT).show();
+                return;
+            }
 
-                int clickedPosition = (int)v.getTag();
-                HashMap<Object,Object> scheduleObject = CCUHsApi.getInstance().readEntity("named and default and schedule and organization");
-                mScheduleId = scheduleObject.get("id").toString();
-                schedule = CCUHsApi.getInstance().getScheduleById(mScheduleId);
-                ArrayList<Schedule.Days> days = schedule.getDays();
-                try {
-                    Collections.sort(days, (lhs, rhs) -> lhs.getSthh() - (rhs.getSthh()));
-                    Collections.sort(days, (lhs, rhs) -> lhs.getDay() - (rhs.getDay()));
-                    if(isOccupied) {
-                        showDialogNamed(0, clickedPosition, schedule);
-                    }else {
-                        showDialogNamed(1, clickedPosition, schedule);
-                    }
-                } catch (ArrayIndexOutOfBoundsException e) {
-                    CcuLog.d(TAG, "onClick: " + e.getMessage());
+            int clickedPosition = (int)v.getTag();
+            HashMap<Object,Object> scheduleObject = CCUHsApi.getInstance().readEntity("named and default and schedule and organization");
+            mScheduleId = scheduleObject.get("id").toString();
+            schedule = CCUHsApi.getInstance().getScheduleById(mScheduleId);
+            ArrayList<Schedule.Days> days = schedule.getDays();
+            try {
+                days.sort((lhs, rhs) -> lhs.getSthh() - (rhs.getSthh()));
+                days.sort((lhs, rhs) -> lhs.getDay() - (rhs.getDay()));
+                if(isOccupied) {
+                    showDialogNamed(0, clickedPosition, schedule);
+                }else {
+                    showDialogNamed(1, clickedPosition, schedule);
                 }
+            } catch (ArrayIndexOutOfBoundsException e) {
+                CcuLog.e(TAG, "onClick: " + e.getMessage());
             }
         });
 
@@ -1500,11 +1461,11 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         if (position != NamedScheduleOccupiedDialogFragment.NO_REPLACE) {
             //sort schedule days according to the start hour of the day
             try {
-                Collections.sort(schedule.getDays(), (lhs, rhs) -> lhs.getSthh() - (rhs.getSthh()));
-                Collections.sort(schedule.getDays(), (lhs, rhs) -> lhs.getDay() - (rhs.getDay()));
+                schedule.getDays().sort((lhs, rhs) -> lhs.getSthh() - (rhs.getSthh()));
+                schedule.getDays().sort((lhs, rhs) -> lhs.getDay() - (rhs.getDay()));
                 removeEntry = schedule.getDays().remove(position);
             } catch (ArrayIndexOutOfBoundsException e) {
-                Log.d(TAG, "onClickSave: " + e.getMessage());
+                CcuLog.e(TAG, "onClickSave: " + e.getMessage());
             }
         } else {
             removeEntry = null;
@@ -1546,21 +1507,18 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
             for (Schedule.Days day : daysArrayList) {
                 ArrayList<Interval> overlaps = schedule.getOverLapInterval(day);
                 for (Interval overlap : overlaps) {
-                    Log.d("CCU_UI", " overLap " + overlap);
-                    overlapDays.append(getDayString(overlap.getStart()) + "(" + overlap.getStart().hourOfDay().get() + ":" + (overlap.getStart().minuteOfHour().get() == 0 ? "00" : overlap.getStart().minuteOfHour().get())
-                            + " - " + (getEndTimeHr(overlap.getEnd().hourOfDay().get(), overlap.getEnd().minuteOfHour().get())) + ":" + (getEndTimeMin(overlap.getEnd().hourOfDay().get(), overlap.getEnd().minuteOfHour().get()) == 0 ? "00" : overlap.getEnd().minuteOfHour().get()) + ") ");
+                    CcuLog.d(L.TAG_CCU_UI, " overLap " + overlap);
+                    overlapDays.append(getDayString(overlap.getStart())).append("(").append(overlap.getStart().hourOfDay().get()).append(":").append(overlap.getStart().minuteOfHour().get() == 0 ? "00" : overlap.getStart().minuteOfHour().get()).append(" - ").append(getEndTimeHr(overlap.getEnd().hourOfDay().get(), overlap.getEnd().minuteOfHour().get())).append(":").append(getEndTimeMin(overlap.getEnd().hourOfDay().get(), overlap.getEnd().minuteOfHour().get()) == 0 ? "00" : overlap.getEnd().minuteOfHour().get()).append(") ");
                 }
             }
 
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-            builder.setMessage("The current settings cannot be overridden because the following duration of the schedules are overlapping \n" + overlapDays.toString())
+            builder.setMessage("The current settings cannot be overridden because the following duration of the schedules are overlapping \n" + overlapDays)
                     .setCancelable(false)
                     .setIcon(R.drawable.ic_dialog_alert)
-                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            if (removeEntry != null)
-                                schedule.getDays().add(position, removeEntry);
-                        }
+                    .setPositiveButton("OK", (dialog, id) -> {
+                        if (removeEntry != null)
+                            schedule.getDays().add(position, removeEntry);
                     });
 
             AlertDialog alert = builder.create();
@@ -1573,7 +1531,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
         HashMap<String, ArrayList<Interval>> spillsMap =
                 zoneScheduleViewModel.getScheduleSpills(daysArrayList, schedule);
 
-        if (spillsMap != null && spillsMap.size() > 0) {
+        if (spillsMap != null && !spillsMap.isEmpty()) {
             if (schedule.isNamedSchedule()) {
                 StringBuilder spillZones = new StringBuilder();
                 for (String zone : spillsMap.keySet()) {
@@ -1588,18 +1546,12 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
                         .setCancelable(false)
                         .setTitle("Schedule Errors")
                         .setIcon(R.drawable.ic_dialog_alert)
-                        .setNegativeButton("Re-Edit", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                showDialogNamed(position, daysArrayList);
-                            }
-                        })
-                        .setPositiveButton("Force-Trim", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                schedule.getDays().addAll(daysArrayList);
-                                ScheduleUtil.trimZoneSchedule(schedule, spillsMap);
-                                zoneScheduleViewModel.doScheduleUpdate(schedule);
-                                updateUINamed();
-                            }
+                        .setNegativeButton("Re-Edit", (dialog, id) -> showDialogNamed(position, daysArrayList))
+                        .setPositiveButton("Force-Trim", (dialog, id) -> {
+                            schedule.getDays().addAll(daysArrayList);
+                            ScheduleUtil.trimZoneSchedule(schedule, spillsMap);
+                            zoneScheduleViewModel.doScheduleUpdate(schedule);
+                            updateUINamed();
                         });
 
                 AlertDialog alert = builder.create();
@@ -1663,8 +1615,8 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
     }
     public void refreshScreen() {
         if(getActivity() != null) {
-            Log.d("CCU_UI"," Load System Schedule - refresh screen");
-            getActivity().runOnUiThread(() -> loadSchedule());
+            CcuLog.d(L.TAG_CCU_UI," Load System Schedule - refresh screen");
+            getActivity().runOnUiThread(this::loadSchedule);
         }
     }
 
@@ -1719,7 +1671,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
                 List<UnOccupiedDays> unoccupiedDays = zoneScheduleViewModel.getUnoccupiedDays(days);
                 unOccupiedDays = unoccupiedDays.get(position);
                 int occupiedSlotsSize = schedule.getDays().size();
-                if(schedule.getDays().size() == 0)
+                if(schedule.getDays().isEmpty())
                     break;
                 Schedule.Days nextDay = getNextOccupiedSlot(position, unOccupiedDays, occupiedSlotsSize);
                 UnOccupiedZoneSetBackDialogFragment unOccupiedZoneSetBackDialogFragment = new UnOccupiedZoneSetBackDialogFragment(this, nextDay, schedule);

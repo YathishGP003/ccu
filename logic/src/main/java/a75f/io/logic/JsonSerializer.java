@@ -41,10 +41,6 @@ public class JsonSerializer
     public static <T> T fromJson(FileReader fr, Class<T> pojoClass) throws JsonParseException,
             IOException
     {
-
-
-        //m.enable(DeserializationFeature.UNWRAP_SINGLE_VALUE_ARRAYS);
-        //m.enable(DeserializationFeature.UNWRAP_ROOT_VALUE);
         m.enable(SerializationFeature.WRITE_ENUMS_USING_TO_STRING);
         m.enable(DeserializationFeature.READ_ENUMS_USING_TO_STRING);
         return m.readValue(fr, pojoClass);

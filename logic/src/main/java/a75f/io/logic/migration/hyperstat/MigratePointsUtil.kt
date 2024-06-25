@@ -2,7 +2,7 @@ package a75f.io.logic.migration.hyperstat
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Point
-import android.util.Log
+import a75f.io.logger.CcuLog
 
 /**
  * Created by Manjunath K on 13-10-2022.
@@ -26,11 +26,11 @@ class MigratePointsUtil {
             displayName: String?
         ) {
             if (pointMap.isEmpty()) {
-                Log.e(TAG, "updateMarkers: point does not exist $displayName")
+                CcuLog.d(TAG, "updateMarkers: point does not exist $displayName")
                 return
             }
             var point = Point.Builder().setHashMap(pointMap)
-            Log.i(TAG, "updateMarkers: $pointMap")
+            CcuLog.d(TAG, "updateMarkers: $pointMap")
             if(displayName != null)
                 point.setDisplayName(displayName)
             point = addMarker(point, markersToAdd)
@@ -66,7 +66,7 @@ class MigratePointsUtil {
          * @return Point.Builder
          */
         fun updatePoint(updatedPoint: Point) {
-            Log.i(TAG, "updatedPoint: ${updatedPoint.displayName} Markers: ${updatedPoint.markers}")
+            CcuLog.d(TAG, "updatedPoint: ${updatedPoint.displayName} Markers: ${updatedPoint.markers}")
             CCUHsApi.getInstance().updatePoint(updatedPoint, updatedPoint.id)
         }
 

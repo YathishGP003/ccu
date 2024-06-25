@@ -1,6 +1,5 @@
 package a75.io.algos.vav;
 
-import android.util.Log;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -12,6 +11,7 @@ import a75.io.algos.tr.TRSystem;
 import a75.io.algos.tr.TrimResponseProcessor;
 import a75.io.algos.tr.TrimResponseRequest;
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.logger.CcuLog;
 
 /**
  * Created by samjithsadasivan on 8/13/18.
@@ -65,7 +65,6 @@ public class VavTRSystem extends TRSystem
      * SPtrim 	+20 ppm
      * SPres 	 -10 ppm
      * SPres-max -30 ppm
-     *
      * */
     private void buildCO2TRSystem() {
         co2TRResponse = new SystemTrimResponseBuilder().setSP0(getCO2TRTunerVal("spinit", "co2")).setSPmin(getCO2TRTunerVal("spmin", "co2"))
@@ -125,7 +124,7 @@ public class VavTRSystem extends TRSystem
         co2TRProcessor.processResetResponse();
         spTRProcessor.processResetResponse();
         hwstTRProcessor.processResetResponse();
-        Log.d("CCU_SYSTEM", "processResetResponse SAT : " + satTRProcessor.getSetPoint() + ", CO2 : " +
+        CcuLog.d("CCU_SYSTEM", "processResetResponse SAT : " + satTRProcessor.getSetPoint() + ", CO2 : " +
                       co2TRProcessor.getSetPoint()+", SP : "+spTRProcessor.getSetPoint()+" HWST : "+spTRProcessor.getSetPoint());
     }
     
@@ -165,13 +164,7 @@ public class VavTRSystem extends TRSystem
     @JsonIgnore
     public double getCurrentSp()
     {
-        return (double) spTRProcessor.getSetPoint();
-    }
-    
-    @JsonIgnore
-    public double getCurrentHwst()
-    {
-        return (double) hwstTRProcessor.getSetPoint();
+        return spTRProcessor.getSetPoint();
     }
 
     public double getSatTRTunerVal(String trParam, String tunerType) {
@@ -182,13 +175,13 @@ public class VavTRSystem extends TRSystem
         }
 
         HashMap cdb = hayStack.read("point and system and tuner and tr and sat and " + trParam);
-        if((cdb == null) || (cdb.size() == 0)) {
+        if((cdb == null) || (cdb.isEmpty())) {
             cdb = hayStack.read("point and tuner and default and tr and sat and " + trParam);
         }
-        if(cdb != null && cdb.size() > 0) {
+        if(cdb != null && !cdb.isEmpty()) {
 
             ArrayList values = hayStack.readPoint(cdb.get("id").toString());
-            if (values != null && values.size() > 0) {
+            if (values != null && !values.isEmpty()) {
                 for (int l = 1; l <= values.size(); l++) {
                     HashMap valMap = ((HashMap) values.get(l - 1));
                     if (valMap.get("val") != null) {
@@ -229,9 +222,9 @@ public class VavTRSystem extends TRSystem
         HashMap cdb = hayStack.read("point and system and tuner and tr and staticPressure and "+trParam);
         if(cdb == null)
             cdb = hayStack.read("point and default and tuner and tr and staticPressure and "+trParam);
-        if(cdb != null && cdb.size() > 0) {
+        if(cdb != null && !cdb.isEmpty()) {
             ArrayList values = hayStack.readPoint(cdb.get("id").toString());
-            if (values != null && values.size() > 0) {
+            if (values != null && !values.isEmpty()) {
                 for (int l = 1; l <= values.size(); l++) {
                     HashMap valMap = ((HashMap) values.get(l - 1));
                     if (valMap.get("val") != null) {
@@ -270,10 +263,10 @@ public class VavTRSystem extends TRSystem
         HashMap cdb = hayStack.read("point and system and tuner and tr and co2 and "+trParam);
         if(cdb == null)
             cdb = hayStack.read("point and default and tuner and tr and co2 and "+trParam);
-        if(cdb != null && cdb.size() > 0) {
+        if(cdb != null && !cdb.isEmpty()) {
 
             ArrayList values = hayStack.readPoint(cdb.get("id").toString());
-            if (values != null && values.size() > 0) {
+            if (values != null && !values.isEmpty()) {
                 for (int l = 1; l <= values.size(); l++) {
                     HashMap valMap = ((HashMap) values.get(l - 1));
                     if (valMap.get("val") != null) {
@@ -308,9 +301,9 @@ public class VavTRSystem extends TRSystem
         HashMap cdb =  hayStack.readEntity("system and point and domainName == \"" + domainName + "\"");
         if(cdb == null)
             cdb = hayStack.read("point and default and tuner and tr and co2 and "+trParam);
-        if(cdb != null && cdb.size() > 0) {
+        if(cdb != null && !cdb.isEmpty()) {
             ArrayList values = hayStack.readPoint(cdb.get("id").toString());
-            if (values != null && values.size() > 0) {
+            if (values != null && !values.isEmpty()) {
                 for (int l = 1; l <= values.size(); l++) {
                     HashMap valMap = ((HashMap) values.get(l - 1));
                     if (valMap.get("val") != null) {

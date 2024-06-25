@@ -452,7 +452,7 @@ public class FragmentHeatPumpConfiguration extends BaseDialogFragment implements
         if (mProfileConfig == null) {
             mHPUProfile.addLogicalMapAndPoints(mSmartNodeAddress, hpuConfig, floorRef, roomRef);
         } else {
-            mHPUProfile.updateLogicalMapAndPoints(mSmartNodeAddress, hpuConfig, roomRef);
+            mHPUProfile.updateLogicalMapAndPoints(mSmartNodeAddress, hpuConfig);
         }
         L.ccu().zoneProfiles.add(mHPUProfile);
     }

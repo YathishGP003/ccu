@@ -1266,27 +1266,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                             imageButtonClickListener(splScheduleImageView, zoneId, equipId, ZoneFragmentNew.this.getChildFragmentManager(),true));
 
 
-                    if(mScheduleType >= 2){
-                        if(!isSelectedScheduleAvailable) {
-                            scheduleSpinner.setSelection(1);
-                        }else {
-                            int spinnerposition = 2;
-                            for (HashMap<Object, Object> a : namedScheds) {
-                                if ((Objects.requireNonNull(Objects.requireNonNull(a.get("id"))).toString().substring(1)).equals
-                                        (Schedule.getScheduleByEquipId(equipId[0]).getId())) {
-                                    spinnerposition = namedScheds.indexOf(a) + 2;
-                                }
-                            }
-                            isItemSelectedEvent = true;
-                            scheduleSpinner.setSelection(spinnerposition, false);
-                            adapter.setSelectedPosition(spinnerposition);
-                            isItemSelectedEvent = false;
-                        }
-                    }else{
-                        isItemSelectedEvent = true;
-                        scheduleSpinner.setSelection(mScheduleType -1, false);
-                        isItemSelectedEvent = false;
-                    }
 
                     scheduleSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                         @Override
@@ -1296,8 +1275,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                             adapter.setSelectedPosition(position);
 
                             CcuLog.i("UI_PROFILING","ZoneFragmentNew.scheduleSpinner");
-                            if(isItemSelectedEvent)
+                            if(isItemSelectedEvent) {
+                                isItemSelectedEvent = false;
                                 return;
+                            }
 
                             if (position == 0 && (mScheduleType != -1)/*&& (mScheduleType != position)*/) {
                                 namedScheduleView.setVisibility(View.GONE);
@@ -1384,6 +1365,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                         });
 
                                         namedSchedule.setOnCancelButtonClickListener(() -> {
+                                            if(prevPosition == 0)
+                                                isItemSelectedEvent = true;
                                             scheduleSpinner.setSelection(prevPosition);
                                         });
                                     }
@@ -1401,6 +1384,27 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
                         }
                     });
+
+                    if(mScheduleType >= 2){
+                        if(!isSelectedScheduleAvailable) {
+                            scheduleSpinner.setSelection(1);
+                        }else {
+                            int spinnerposition = 2;
+                            for (HashMap<Object, Object> a : namedScheds) {
+                                if ((Objects.requireNonNull(Objects.requireNonNull(a.get("id"))).toString().substring(1)).equals
+                                        (Schedule.getScheduleByEquipId(equipId[0]).getId())) {
+                                    spinnerposition = namedScheds.indexOf(a) + 2;
+                                }
+                            }
+                            isItemSelectedEvent = true;
+                            scheduleSpinner.setSelection(spinnerposition, false);
+                            adapter.setSelectedPosition(spinnerposition);
+                        }
+                    }else{
+                        isItemSelectedEvent = true;
+                        scheduleSpinner.setSelection(mScheduleType -1, false);
+                    }
+
                     v.setContentDescription(zoneTitle);
                     linearLayoutZonePoints.removeAllViews();
                     if (scheduleSpinner.getSelectedItemPosition() == 0) {
@@ -1718,14 +1722,12 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 isItemSelectedEvent = true;
                 scheduleSpinner.setSelection(spinnerposition, false);
                 adapter.setSelectedPosition(spinnerposition);
-                isItemSelectedEvent = false;
             }
 
 
         }else{
             isItemSelectedEvent = true;
             scheduleSpinner.setSelection(mScheduleType -1, false);
-            isItemSelectedEvent = false;
         }
         if (mSchedule.isZoneSchedule()
                 || (mSchedule.isNamedSchedule() && mSchedule.getDis().contains("Default") && !mSchedule.getDis().contains("Temporary")  && !namedScheds.isEmpty()
@@ -1742,8 +1744,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                     currentPosition = position;
                     adapter.setSelectedPosition(position);
 
-                if(isItemSelectedEvent)
+                if(isItemSelectedEvent) {
+                    isItemSelectedEvent = false;
                     return;
+                }
 
                if (position == 0 && (mScheduleType != -1)/*&& (mScheduleType != position)*/) {
                   //  clearTempOverride(equipId);
@@ -1837,6 +1841,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                            });
 
                            namedSchedule.setOnCancelButtonClickListener(() -> {
+                               if(prevPosition == 0)
+                                   isItemSelectedEvent = true;
                                scheduleSpinner.setSelection(prevPosition);
                            });
                        }

@@ -1,7 +1,7 @@
 package a75f.io.algos.dcwb
 
 import a75.io.algos.ControlLoop
-import android.util.Log
+import a75f.io.logger.CcuLog
 
 data class AdaptiveDeltaTInput (val inletWaterTemperature : Double,
                           val outletWaterTemperature : Double,
@@ -25,19 +25,13 @@ class AdaptiveDeltaTControlAlgo {
 
         @JvmStatic
         fun getChilledWaterAdaptiveDeltaTValveLoop(data: AdaptiveDeltaTInput): Double {
-            Log.i("CCU_SYSTEM", " getChilledWaterAdaptiveDeltaTValveLoop $data")
+            CcuLog.i("CCU_SYSTEM", " getChilledWaterAdaptiveDeltaTValveLoop $data")
             data.piLoop.dump()
             val adaptiveComfortThreshold = data.averageDesiredCoolingTemp - data.adaptiveComfortThresholdMargin
 
             val chilledWaterTargetTemp = data.inletWaterTemperature + data.chilledWaterTargetDeltaT
-            val actualDeltaT = data.outletWaterTemperature - data.inletWaterTemperature;
+            val actualDeltaT = data.outletWaterTemperature - data.inletWaterTemperature
             return if (chilledWaterTargetTemp < adaptiveComfortThreshold) {
-                /*if (linearModeLoop) {
-                    linearModeLoop = false
-                    data.piLoop.loopOutput
-                } else {
-                    data.piLoop.getLoopOutput(data.chilledWaterTargetDeltaT, actualDeltaT)
-                }*/
                 linearModeLoop = false
                 data.piLoop.getLoopOutput(data.chilledWaterTargetDeltaT, actualDeltaT)
             } else {

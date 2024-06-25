@@ -6,19 +6,18 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.StrictMode;
-import androidx.fragment.app.Fragment;
-import androidx.appcompat.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.ToggleButton;
+
+import androidx.appcompat.app.AlertDialog;
+import androidx.fragment.app.Fragment;
 
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.Prefs;
@@ -122,7 +121,7 @@ public class Security extends Fragment {
 
 
         zonePassword = prefs.getString(getString(R.string.ZONE_SETTINGS_PASSWORD_KEY));
-        if(zonePassword.length()>0) {
+        if(!zonePassword.isEmpty()) {
             mZoneTap.setText(getString(R.string.taptochange));
         }else
         {
@@ -130,7 +129,7 @@ public class Security extends Fragment {
         }
 
         systemPassword = prefs.getString(getString(R.string.SYSTEM_SETTINGS_PASSWORD_KEY));
-        if(systemPassword.length()>0) {
+        if(!systemPassword.isEmpty()) {
             mSystemtap.setText(getString(R.string.taptochange));
         }else
         {
@@ -138,7 +137,7 @@ public class Security extends Fragment {
         }
 
         buildingPassword = prefs.getString(getString(R.string.BUILDING_SETTINGS_PASSWORD_KEY));
-        if(buildingPassword.length()>0) {
+        if(!buildingPassword.isEmpty()) {
             mBuildingTap.setText(getString(R.string.taptochange));
         }else
         {
@@ -146,7 +145,7 @@ public class Security extends Fragment {
         }
 
         setupPassword = prefs.getString(getString(R.string.USE_SETUP_PASSWORD_KEY));
-        if(setupPassword.length()>0) {
+        if(!setupPassword.isEmpty()) {
             mSetupTap.setText(getString(R.string.taptochange));
         }else
         {
@@ -158,160 +157,138 @@ public class Security extends Fragment {
         mBuildingPassTb.setChecked(prefs.getBoolean(getString(R.string.SET_BUILDING_PASSWORD)));
         mSetupPassTb.setChecked(prefs.getBoolean(getString(R.string.SET_SETUP_PASSWORD)));
 
-        mZonePass.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                // TODO Auto-generated method stub
-                mTitle = getString(R.string.zonesettings);
-                mKey = getString(R.string.ZONE_SETTINGS_PASSWORD_KEY);
-                mSetKey = getString(R.string.SET_ZONE_PASSWORD);
-                showCustomDialog(mTitle,mKey,mSetKey,mZonePassTb,mZoneTap);
-            }
+        mZonePass.setOnClickListener(v -> {
+            // TODO Auto-generated method stub
+            mTitle = getString(R.string.zonesettings);
+            mKey = getString(R.string.ZONE_SETTINGS_PASSWORD_KEY);
+            mSetKey = getString(R.string.SET_ZONE_PASSWORD);
+            showCustomDialog(mTitle,mKey,mSetKey,mZonePassTb,mZoneTap);
         });
 
-        mSystemPass.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                // TODO Auto-generated method stub
-                mTitle = getString(R.string.systemsettings);
-                mKey = getString(R.string.SYSTEM_SETTINGS_PASSWORD_KEY);
-                mSetKey = getString(R.string.SET_SYSTEM_PASSWORD);
-                showCustomDialog(mTitle,mKey,mSetKey,mSystemPassTb,mSystemtap);
-            }
+        mSystemPass.setOnClickListener(v -> {
+            // TODO Auto-generated method stub
+            mTitle = getString(R.string.systemsettings);
+            mKey = getString(R.string.SYSTEM_SETTINGS_PASSWORD_KEY);
+            mSetKey = getString(R.string.SET_SYSTEM_PASSWORD);
+            showCustomDialog(mTitle,mKey,mSetKey,mSystemPassTb,mSystemtap);
         });
 
 
-        mBuildingPass.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                // TODO Auto-generated method stub
-                mTitle = getString(R.string.buildingchange);
-                mKey = getString(R.string.BUILDING_SETTINGS_PASSWORD_KEY);
-                mSetKey = getString(R.string.SET_BUILDING_PASSWORD);
-                showCustomDialog(mTitle,mKey,mSetKey,mBuildingPassTb,mBuildingTap);
-            }
+        mBuildingPass.setOnClickListener(v -> {
+            // TODO Auto-generated method stub
+            mTitle = getString(R.string.buildingchange);
+            mKey = getString(R.string.BUILDING_SETTINGS_PASSWORD_KEY);
+            mSetKey = getString(R.string.SET_BUILDING_PASSWORD);
+            showCustomDialog(mTitle,mKey,mSetKey,mBuildingPassTb,mBuildingTap);
         });
 
 
-        mSetupPass.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                // TODO Auto-generated method stub
-                mTitle = getString(R.string.setupchange);
-                mKey = getString(R.string.USE_SETUP_PASSWORD_KEY);
-                mSetKey = getString(R.string.SET_SETUP_PASSWORD);
-                showCustomDialog(mTitle,mKey,mSetKey,mSetupPassTb,mSetupTap);
-            }
+        mSetupPass.setOnClickListener(v -> {
+            // TODO Auto-generated method stub
+            mTitle = getString(R.string.setupchange);
+            mKey = getString(R.string.USE_SETUP_PASSWORD_KEY);
+            mSetKey = getString(R.string.SET_SETUP_PASSWORD);
+            showCustomDialog(mTitle,mKey,mSetKey,mSetupPassTb,mSetupTap);
         });
 
 
-        mZonePassTb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener(){
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                mTitle = getString(R.string.zonesettings);
-                mKey = getString(R.string.ZONE_SETTINGS_PASSWORD_KEY);
-                mSetKey = getString(R.string.SET_ZONE_PASSWORD);
-                zonePassword = prefs.getString(mKey);
-                if(isChecked){
-                    if(zonePassword.length()>0)
-                    {
-                        prefs.setBoolean(mSetKey, true);
-                        mZoneTap.setText(getString(R.string.taptochange));
-                    }
-                    else {
-                        mTitle = getString(R.string.zonesettings);
-                        mKey = getString(R.string.ZONE_SETTINGS_PASSWORD_KEY);
-                        showCustomDialog(mTitle,mKey,mSetKey,mZonePassTb,mZoneTap);
-                    }
+        mZonePassTb.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            mTitle = getString(R.string.zonesettings);
+            mKey = getString(R.string.ZONE_SETTINGS_PASSWORD_KEY);
+            mSetKey = getString(R.string.SET_ZONE_PASSWORD);
+            zonePassword = prefs.getString(mKey);
+            if(isChecked){
+                if(!zonePassword.isEmpty())
+                {
+                    prefs.setBoolean(mSetKey, true);
+                    mZoneTap.setText(getString(R.string.taptochange));
                 }
-                else{
-                    prefs.setBoolean(mSetKey, false);
+                else {
+                    mTitle = getString(R.string.zonesettings);
+                    mKey = getString(R.string.ZONE_SETTINGS_PASSWORD_KEY);
+                    showCustomDialog(mTitle,mKey,mSetKey,mZonePassTb,mZoneTap);
                 }
+            }
+            else{
+                prefs.setBoolean(mSetKey, false);
             }
         });
 
 
-        mSystemPassTb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener(){
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                mTitle = getString(R.string.systemsettings);
-                mKey = getString(R.string.SYSTEM_SETTINGS_PASSWORD_KEY);
-                mSetKey = getString(R.string.SET_SYSTEM_PASSWORD);
-                systemPassword = prefs.getString(mKey);
-                if(isChecked){
-                    if(systemPassword.length()>0)
-                    {
-                        prefs.setBoolean(mSetKey, true);
-                        mSystemtap.setText(getString(R.string.taptochange));
-                    }
-                    else {
-                        mTitle = getString(R.string.systemsettings);
-                        mKey = getString(R.string.SYSTEM_SETTINGS_PASSWORD_KEY);
-                        showCustomDialog(mTitle,mKey,mSetKey,mSystemPassTb,mSystemtap);
-                    }
+        mSystemPassTb.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            mTitle = getString(R.string.systemsettings);
+            mKey = getString(R.string.SYSTEM_SETTINGS_PASSWORD_KEY);
+            mSetKey = getString(R.string.SET_SYSTEM_PASSWORD);
+            systemPassword = prefs.getString(mKey);
+            if(isChecked){
+                if(!systemPassword.isEmpty())
+                {
+                    prefs.setBoolean(mSetKey, true);
+                    mSystemtap.setText(getString(R.string.taptochange));
                 }
-                else{
-                    prefs.setBoolean(mSetKey, false);
+                else {
+                    mTitle = getString(R.string.systemsettings);
+                    mKey = getString(R.string.SYSTEM_SETTINGS_PASSWORD_KEY);
+                    showCustomDialog(mTitle,mKey,mSetKey,mSystemPassTb,mSystemtap);
                 }
+            }
+            else{
+                prefs.setBoolean(mSetKey, false);
             }
         });
 
 
-        mBuildingPassTb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener(){
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                mTitle = getString(R.string.buildingchange);
-                mKey = getString(R.string.BUILDING_SETTINGS_PASSWORD_KEY);
-                mSetKey = getString(R.string.SET_BUILDING_PASSWORD);
-                buildingPassword = prefs.getString(mKey);
-                if(isChecked){
-                    if(buildingPassword.length()>0)
-                    {
-                        prefs.setBoolean(mSetKey, true);
-                        mBuildingTap.setText(getString(R.string.taptochange));
-                    }
-                    else {
-                        mTitle = getString(R.string.buildingchange);
-                        mKey = getString(R.string.BUILDING_SETTINGS_PASSWORD_KEY);
-                        showCustomDialog(mTitle,mKey,mSetKey,mBuildingPassTb,mBuildingTap);
-                    }
+        mBuildingPassTb.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            mTitle = getString(R.string.buildingchange);
+            mKey = getString(R.string.BUILDING_SETTINGS_PASSWORD_KEY);
+            mSetKey = getString(R.string.SET_BUILDING_PASSWORD);
+            buildingPassword = prefs.getString(mKey);
+            if(isChecked){
+                if(!buildingPassword.isEmpty())
+                {
+                    prefs.setBoolean(mSetKey, true);
+                    mBuildingTap.setText(getString(R.string.taptochange));
                 }
-                else{
-                    prefs.setBoolean(mSetKey, false);
+                else {
+                    mTitle = getString(R.string.buildingchange);
+                    mKey = getString(R.string.BUILDING_SETTINGS_PASSWORD_KEY);
+                    showCustomDialog(mTitle,mKey,mSetKey,mBuildingPassTb,mBuildingTap);
                 }
+            }
+            else{
+                prefs.setBoolean(mSetKey, false);
             }
         });
 
 
-        mSetupPassTb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener(){
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                mTitle = getString(R.string.setupchange);
-                mKey = getString(R.string.USE_SETUP_PASSWORD_KEY);
-                mSetKey = getString(R.string.SET_SETUP_PASSWORD);
-                setupPassword = prefs.getString(mKey);
-                if(isChecked){
-                    if(setupPassword.length()>0)
-                    {
-                        prefs.setBoolean(mSetKey, true);
-                        mSetupTap.setText(getString(R.string.taptochange));
-                    }
-                    else {
-                        mTitle = getString(R.string.setupchange);
-                        mKey = getString(R.string.USE_SETUP_PASSWORD_KEY);
-                        showCustomDialog(mTitle,mKey,mSetKey,mSetupPassTb,mSetupTap);
-                    }
+        mSetupPassTb.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            mTitle = getString(R.string.setupchange);
+            mKey = getString(R.string.USE_SETUP_PASSWORD_KEY);
+            mSetKey = getString(R.string.SET_SETUP_PASSWORD);
+            setupPassword = prefs.getString(mKey);
+            if(isChecked){
+                if(!setupPassword.isEmpty())
+                {
+                    prefs.setBoolean(mSetKey, true);
+                    mSetupTap.setText(getString(R.string.taptochange));
                 }
-                else{
-                    prefs.setBoolean(mSetKey, false);
+                else {
+                    mTitle = getString(R.string.setupchange);
+                    mKey = getString(R.string.USE_SETUP_PASSWORD_KEY);
+                    showCustomDialog(mTitle,mKey,mSetKey,mSetupPassTb,mSetupTap);
                 }
+            }
+            else{
+                prefs.setBoolean(mSetKey, false);
             }
         });
 
 
 
-        mNext.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                // TODO Auto-generated method stub
-                mNext.setEnabled(false);
-                goTonext();
-            }
+        mNext.setOnClickListener(v -> {
+            // TODO Auto-generated method stub
+            mNext.setEnabled(false);
+            goTonext();
         });
 
         if (isFreshRegister)  mNext.setVisibility(View.VISIBLE); else mNext.setVisibility(View.GONE);
@@ -337,7 +314,7 @@ public class Security extends Fragment {
         ImageView mClose = layoutView.findViewById(R.id.imageViewCancel);
 
         String oldPass = prefs.getString(mKey);
-        if(oldPass.length()>0)
+        if(!oldPass.isEmpty())
         {
             mCurrentPass.setVisibility(View.VISIBLE);
             buttonClear.setVisibility(View.VISIBLE);
@@ -347,42 +324,21 @@ public class Security extends Fragment {
             buttonClear.setVisibility(View.GONE);
         }
 
-        buttonSetNew.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                // TODO Auto-generated method stub
-                String password = mNewPass.getText().toString().trim();
-                String confirmpassword = mConfirmPass.getText().toString().trim();
-                if(oldPass.length()>0)
-                {
-                    if (oldPass.equals(mCurrentPass.getText().toString())) {
-                        if (password.length() > 0 && confirmpassword.length() > 0) {
-                            if (password.equals(confirmpassword)) {
-                                prefs.setBoolean(setKey, true);
-                                prefs.setString(key, password);
-                                togglePassword.setChecked(true);
-                                alertDialog.dismiss();
-                                textViewTap.setText(getString(R.string.taptochange));
-                                Toast.makeText(mContext, "Password is set for " + title, Toast.LENGTH_SHORT).show();
-                            } else {
-                                Toast.makeText(mContext, "Password is not same!", Toast.LENGTH_SHORT).show();
-                            }
-                        } else {
-                            Toast.makeText(mContext, "Password fields cannot be empty!", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                    else{
-                        Toast.makeText(mContext, "Current Password is Invalid!", Toast.LENGTH_SHORT).show();
-                    }
-                }
-                else{
-                    if (password.length() > 0 && confirmpassword.length() > 0) {
+        buttonSetNew.setOnClickListener(v -> {
+            // TODO Auto-generated method stub
+            String password = mNewPass.getText().toString().trim();
+            String confirmpassword = mConfirmPass.getText().toString().trim();
+            if(!oldPass.isEmpty())
+            {
+                if (oldPass.equals(mCurrentPass.getText().toString())) {
+                    if (!password.isEmpty() && !confirmpassword.isEmpty()) {
                         if (password.equals(confirmpassword)) {
                             prefs.setBoolean(setKey, true);
                             prefs.setString(key, password);
                             togglePassword.setChecked(true);
                             alertDialog.dismiss();
-                            Toast.makeText(mContext, "Password is set for " + title, Toast.LENGTH_SHORT).show();
                             textViewTap.setText(getString(R.string.taptochange));
+                            Toast.makeText(mContext, "Password is set for " + title, Toast.LENGTH_SHORT).show();
                         } else {
                             Toast.makeText(mContext, "Password is not same!", Toast.LENGTH_SHORT).show();
                         }
@@ -390,43 +346,58 @@ public class Security extends Fragment {
                         Toast.makeText(mContext, "Password fields cannot be empty!", Toast.LENGTH_SHORT).show();
                     }
                 }
+                else{
+                    Toast.makeText(mContext, "Current Password is Invalid!", Toast.LENGTH_SHORT).show();
+                }
             }
-        });
-
-        buttonClear.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                // TODO Auto-generated method stub
-                if(oldPass.length()>0) {
-                    if (oldPass.equals(mCurrentPass.getText().toString()))
-                    {
-                        prefs.setBoolean(setKey, false);
-                        prefs.setString(key, "");
-                        togglePassword.setChecked(false);
+            else{
+                if (!password.isEmpty() && !confirmpassword.isEmpty()) {
+                    if (password.equals(confirmpassword)) {
+                        prefs.setBoolean(setKey, true);
+                        prefs.setString(key, password);
+                        togglePassword.setChecked(true);
                         alertDialog.dismiss();
-                        textViewTap.setText(getString(R.string.taptoset));
-                        Toast.makeText(mContext, title+" Password is cleared", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(mContext, "Password is set for " + title, Toast.LENGTH_SHORT).show();
+                        textViewTap.setText(getString(R.string.taptochange));
                     } else {
-                        Toast.makeText(mContext, "Invalid Password!", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(mContext, "Password is not same!", Toast.LENGTH_SHORT).show();
                     }
-                }else {
-                    Toast.makeText(mContext, "Current Password Cannot be empty!", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(mContext, "Password fields cannot be empty!", Toast.LENGTH_SHORT).show();
                 }
             }
         });
 
-        mClose.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                // TODO Auto-generated method stub
-                if(oldPass.length()>0)
+        buttonClear.setOnClickListener(v -> {
+            // TODO Auto-generated method stub
+            if(!oldPass.isEmpty()) {
+                if (oldPass.equals(mCurrentPass.getText().toString()))
                 {
-                    textViewTap.setText(getString(R.string.taptochange));
-                }else {
+                    prefs.setBoolean(setKey, false);
+                    prefs.setString(key, "");
+                    togglePassword.setChecked(false);
+                    alertDialog.dismiss();
                     textViewTap.setText(getString(R.string.taptoset));
+                    Toast.makeText(mContext, title+" Password is cleared", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(mContext, "Invalid Password!", Toast.LENGTH_SHORT).show();
                 }
-                togglePassword.setChecked(false);
-                prefs.setBoolean(setKey, false);
-                alertDialog.dismiss();
+            }else {
+                Toast.makeText(mContext, "Current Password Cannot be empty!", Toast.LENGTH_SHORT).show();
             }
+        });
+
+        mClose.setOnClickListener(v -> {
+            // TODO Auto-generated method stub
+            if(!oldPass.isEmpty())
+            {
+                textViewTap.setText(getString(R.string.taptochange));
+            }else {
+                textViewTap.setText(getString(R.string.taptoset));
+            }
+            togglePassword.setChecked(false);
+            prefs.setBoolean(setKey, false);
+            alertDialog.dismiss();
         });
 
         mTitlePass.setText(title);
@@ -451,8 +422,6 @@ public class Security extends Fragment {
 
 
     private void goTonext() {
-        //Intent i = new Intent(mContext, RegisterGatherCCUDetails.class);
-        //startActivity(i);
         ((FreshRegistration)getActivity()).selectItem(9);
     }
 }

@@ -11,7 +11,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.WindowManager;
@@ -19,7 +18,6 @@ import android.view.animation.Animation;
 import android.view.animation.RotateAnimation;
 import android.widget.AdapterView;
 import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -37,12 +35,12 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import java.util.HashMap;
+
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
-import a75f.io.logic.bo.building.system.vav.VavStagedRtuWithVfd;
 import a75f.io.logic.ccu.restore.RestoreCCU;
 import a75f.io.messaging.client.MessagingClient;
 import a75f.io.renatus.DABFullyAHUProfile;
@@ -108,7 +106,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
         imageView_Goback = findViewById(R.id.imageGoback);
         spinnerSystemProile = findViewById(R.id.spinnerSystemProfile);
 
-        imageRefresh = (ImageView) findViewById(R.id.imageRefresh);
+        imageRefresh = findViewById(R.id.imageRefresh);
         toggleWifi = findViewById(R.id.toggleWifi);
 
         showIcons(false);
@@ -126,192 +124,182 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
         Animation animation = new RotateAnimation(0.0f, 360.0f, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
         animation.setDuration(1200);
 
-        imageView_Goback.setOnClickListener(new View.OnClickListener() {
+        imageView_Goback.setOnClickListener(v -> {
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            Fragment currentFragment = fragmentManager.findFragmentById(R.id.container);
+            // TODO Auto-generated method stub
+            if (currentFragment instanceof WifiFragment) {
+                selectItem(1);
+            }
+            if (currentFragment instanceof CreateNewSite) {
+                selectItem(2);
+            }
 
-            public void onClick(View v) {
-                FragmentManager fragmentManager = getSupportFragmentManager();
-                Fragment currentFragment = fragmentManager.findFragmentById(R.id.container);
-                // TODO Auto-generated method stub
-                if (currentFragment instanceof WifiFragment) {
+            if (currentFragment instanceof InstallTypeFragment) {
+                selectItem(0);
+            }
+            if (currentFragment instanceof InstallerOptions) {
+               String installType = prefs.getString("INSTALL_TYPE");
+                if (installType.equals("OFFLINE")) {
                     selectItem(1);
+                } else {
+                    selectItem(3);
                 }
-                if (currentFragment instanceof CreateNewSite) {
-                    selectItem(2);
-                }
+            }
+            if (currentFragment instanceof Security) {
+                selectItem(4);
+            }
+            if (currentFragment instanceof AddtoExisting) {
+                selectItem(1);
+            }
+            if (currentFragment instanceof PreConfigCCU) {
+                selectItem(1);
+            }
+            if (currentFragment instanceof ReplaceCCU) {
+                selectItem(1);
+            }
+            if (currentFragment instanceof RegisterCCUToExistingSite) {
+                selectItem(6);
+            }
+            if (currentFragment instanceof DefaultSystemProfile) {
+                selectItem(5);
+            }
+            if (currentFragment instanceof VavStagedRtuProfile) {
+                selectItem(5);
+            }
+            if (currentFragment instanceof VavAnalogRtuProfile) {
+                selectItem(5);
+            }
+            if (currentFragment instanceof VavStagedVfdRtuFragment) {
+                selectItem(5);
+            }
+            if (currentFragment instanceof VavHybridRtuProfile) {
+                selectItem(5);
+            }
+            if (currentFragment instanceof DABStagedProfile) {
+                selectItem(5);
+            }
+            if (currentFragment instanceof DABFullyAHUProfile) {
+                selectItem(5);
+            }
+            if (currentFragment instanceof DABStagedRtuWithVfdProfile) {
+                selectItem(5);
+            }
+            if (currentFragment instanceof DABHybridAhuProfile) {
+                selectItem(5);
+            }
+            if (currentFragment instanceof VavIERtuProfile) {
+                selectItem(5);
+            }
+            if (currentFragment instanceof FloorPlanFragment) {
+                String profileType = prefs.getString("PROFILE");
 
-                if (currentFragment instanceof InstallTypeFragment) {
-                    selectItem(0);
+                if (profileType.equals("DEFAULT")) {
+                    spinnerSystemProile.setSelection(0);
+                    selectItem(9);
                 }
-                if (currentFragment instanceof InstallerOptions) {
-                   String installType = prefs.getString("INSTALL_TYPE");
-                    if (installType.equals("OFFLINE")) {
-                        selectItem(1);
-                    } else {
-                        selectItem(3);
-                    }
+                if (profileType.equals("VAV_STAGED_RTU")) {
+                    spinnerSystemProile.setSelection(1);
+                    selectItem(10);
                 }
-                if (currentFragment instanceof Security) {
-                    selectItem(4);
+                if (profileType.equals("VAV_FULLY_MODULATING")) {
+                    spinnerSystemProile.setSelection(2);
+                    selectItem(11);
                 }
-                if (currentFragment instanceof AddtoExisting) {
-                    selectItem(1);
+                if (profileType.equals("VAV_STAGED_RTU_VFD")) {
+                    spinnerSystemProile.setSelection(3);
+                    selectItem(12);
                 }
-                if (currentFragment instanceof PreConfigCCU) {
-                    selectItem(1);
+                if (profileType.equals("VAV_HYBRID_RTU")) {
+                    spinnerSystemProile.setSelection(4);
+                    selectItem(13);
                 }
-                if (currentFragment instanceof ReplaceCCU) {
-                    selectItem(1);
+                if (profileType.equals("DAB_STAGED_RTU")) {
+                    spinnerSystemProile.setSelection(5);
+                    selectItem(14);
                 }
-                if (currentFragment instanceof RegisterCCUToExistingSite) {
-                    selectItem(6);
+                if (profileType.equals("DAB_FULLY_MODULATING")) {
+                    spinnerSystemProile.setSelection(6);
+                    selectItem(15);
                 }
-                if (currentFragment instanceof DefaultSystemProfile) {
-                    selectItem(5);
+                if (profileType.equals("DAB_STAGED_RTU_VFD")) {
+                    spinnerSystemProile.setSelection(7);
+                    selectItem(16);
                 }
-                if (currentFragment instanceof VavStagedRtuProfile) {
-                    selectItem(5);
+                if (profileType.equals("DAB_HYBRID_RTU")) {
+                    spinnerSystemProile.setSelection(8);
+                    selectItem(17);
                 }
-                if (currentFragment instanceof VavAnalogRtuProfile) {
-                    selectItem(5);
+                if (profileType.equals("VAV_IE_RTU")) {
+                    spinnerSystemProile.setSelection(8);
+                    selectItem(18);
                 }
-                if (currentFragment instanceof VavStagedVfdRtuFragment) {
-                    selectItem(5);
-                }
-                if (currentFragment instanceof VavHybridRtuProfile) {
-                    selectItem(5);
-                }
-                if (currentFragment instanceof DABStagedProfile) {
-                    selectItem(5);
-                }
-                if (currentFragment instanceof DABFullyAHUProfile) {
-                    selectItem(5);
-                }
-                if (currentFragment instanceof DABStagedRtuWithVfdProfile) {
-                    selectItem(5);
-                }
-                if (currentFragment instanceof DABHybridAhuProfile) {
-                    selectItem(5);
-                }
-                if (currentFragment instanceof VavIERtuProfile) {
-                    selectItem(5);
-                }
-                if (currentFragment instanceof FloorPlanFragment) {
-                    String profileType = prefs.getString("PROFILE");
+            }
 
-                    if (profileType.equals("DEFAULT")) {
-                        spinnerSystemProile.setSelection(0);
-                        selectItem(9);
-                    }
-                    if (profileType.equals("VAV_STAGED_RTU")) {
-                        spinnerSystemProile.setSelection(1);
-                        selectItem(10);
-                    }
-                    if (profileType.equals("VAV_FULLY_MODULATING")) {
-                        spinnerSystemProile.setSelection(2);
-                        selectItem(11);
-                    }
-                    if (profileType.equals("VAV_STAGED_RTU_VFD")) {
-                        spinnerSystemProile.setSelection(3);
-                        selectItem(12);
-                    }
-                    if (profileType.equals("VAV_HYBRID_RTU")) {
-                        spinnerSystemProile.setSelection(4);
-                        selectItem(13);
-                    }
-                    if (profileType.equals("DAB_STAGED_RTU")) {
-                        spinnerSystemProile.setSelection(5);
-                        selectItem(14);
-                    }
-                    if (profileType.equals("DAB_FULLY_MODULATING")) {
-                        spinnerSystemProile.setSelection(6);
-                        selectItem(15);
-                    }
-                    if (profileType.equals("DAB_STAGED_RTU_VFD")) {
-                        spinnerSystemProile.setSelection(7);
-                        selectItem(16);
-                    }
-                    if (profileType.equals("DAB_HYBRID_RTU")) {
-                        spinnerSystemProile.setSelection(8);
-                        selectItem(17);
-                    }
-                    if (profileType.equals("VAV_IE_RTU")) {
-                        spinnerSystemProile.setSelection(8);
-                        selectItem(18);
-                    }
-                }
-
-                if (currentFragment instanceof SystemFragment) {
-                    selectItem(19);
-                }
+            if (currentFragment instanceof SystemFragment) {
+                selectItem(19);
             }
         });
 
-        imageRefresh.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                // TODO Auto-generated method stub
-                if (mainWifiObj.isWifiEnabled()) {
-                    animation.setRepeatCount(0);
-                    animation.setDuration(1200);
-                    imageRefresh.startAnimation(animation);
-                    mainWifiObj.startScan();
-                }
+        imageRefresh.setOnClickListener(v -> {
+            // TODO Auto-generated method stub
+            if (mainWifiObj.isWifiEnabled()) {
+                animation.setRepeatCount(0);
+                animation.setDuration(1200);
+                imageRefresh.startAnimation(animation);
+                mainWifiObj.startScan();
             }
         });
 
-        imageRefresh.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                Toast.makeText(v.getContext(), "Skip Wifi", Toast.LENGTH_LONG).show();
-                Log.e("WIFI", "Skip Wifi");
-                selectItem(3);
-                return false;
-            }
+        imageRefresh.setOnLongClickListener(v -> {
+            Toast.makeText(v.getContext(), "Skip Wifi", Toast.LENGTH_LONG).show();
+            CcuLog.e(L.TAG_CCU_WIFI, "Skip Wifi");
+            selectItem(3);
+            return false;
         });
 
-        buttonNext.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                // TODO Auto-generated method stub
-                buttonNext.setEnabled(false);
-                FragmentManager fragmentManager = getSupportFragmentManager();
-                Fragment currentFragment = fragmentManager.findFragmentById(R.id.container);
-                if (currentFragment instanceof FloorPlanFragment) {
-                    selectItem(20);
-                    buttonNext.setEnabled(true);
-                }
-                if (currentFragment instanceof SystemFragment) {
-                    selectItem(21);
-                    buttonNext.setEnabled(true);
-                }
-                if (currentFragment instanceof WifiFragment) {
-                    buttonNext.setEnabled(true);
-                    String INSTALL_TYPE = prefs.getString("INSTALL_TYPE");
-                    ConnectivityManager connManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-                    NetworkInfo networkInfo = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-                    if (networkInfo.isConnected()) {
-                        switch (INSTALL_TYPE) {
-                            case "CREATENEW":
-                                selectItem(3);
-                                break;
-                            case "ADDCCU":
-                                selectItem(6);
-                                break;
-                            case "PRECONFIGCCU":
-                                selectItem(7);
-                                break;
-                            case "REPLACECCU":
-                                selectItem(8);
-                                break;
-                            default:
-                                Toast.makeText(FreshRegistration.this, "Please connect to internet to continue!", Toast.LENGTH_LONG).show();
-                                break;
-                        }
+        buttonNext.setOnClickListener(v -> {
+            // TODO Auto-generated method stub
+            buttonNext.setEnabled(false);
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            Fragment currentFragment = fragmentManager.findFragmentById(R.id.container);
+            if (currentFragment instanceof FloorPlanFragment) {
+                selectItem(20);
+                buttonNext.setEnabled(true);
+            }
+            if (currentFragment instanceof SystemFragment) {
+                selectItem(21);
+                buttonNext.setEnabled(true);
+            }
+            if (currentFragment instanceof WifiFragment) {
+                buttonNext.setEnabled(true);
+                String INSTALL_TYPE = prefs.getString("INSTALL_TYPE");
+                ConnectivityManager connManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+                NetworkInfo networkInfo = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+                if (networkInfo.isConnected()) {
+                    switch (INSTALL_TYPE) {
+                        case "CREATENEW":
+                            selectItem(3);
+                            break;
+                        case "ADDCCU":
+                            selectItem(6);
+                            break;
+                        case "PRECONFIGCCU":
+                            selectItem(7);
+                            break;
+                        case "REPLACECCU":
+                            selectItem(8);
+                            break;
+                        default:
+                            Toast.makeText(FreshRegistration.this, "Please connect to internet to continue!", Toast.LENGTH_LONG).show();
+                            break;
                     }
                 }
-                if (currentFragment instanceof CongratsFragment) {
-                    prefs.setBoolean("REGISTRATION", true);
-                    updateCCURegistrationInfo();
-                    buttonNext.setEnabled(true);
-                }
+            }
+            if (currentFragment instanceof CongratsFragment) {
+                prefs.setBoolean("REGISTRATION", true);
+                updateCCURegistrationInfo();
+                buttonNext.setEnabled(true);
             }
         });
 
@@ -321,27 +309,23 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
 
                         getSystemService(Context.WIFI_SERVICE);
 
-        toggleWifi.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                mainWifiObj = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-                if (isChecked) {
-                    if (!mainWifiObj.isWifiEnabled()) {
-                        animation.setDuration(2000);
-                        imageRefresh.startAnimation(animation);
-                        mainWifiObj = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-                        mainWifiObj.setWifiEnabled(true);
-                        imageRefresh.setEnabled(true);
-                        imageRefresh.setImageResource(R.drawable.ic_refresh);
-                    }
-                } else {
-                    if (mainWifiObj.isWifiEnabled()) {
-                        mainWifiObj = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-                        mainWifiObj.setWifiEnabled(false);
-                        imageRefresh.setEnabled(false);
-                        imageRefresh.setImageResource(R.drawable.ic_refresh_disable);
-                    }
+        toggleWifi.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            mainWifiObj = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+            if (isChecked) {
+                if (!mainWifiObj.isWifiEnabled()) {
+                    animation.setDuration(2000);
+                    imageRefresh.startAnimation(animation);
+                    mainWifiObj = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+                    mainWifiObj.setWifiEnabled(true);
+                    imageRefresh.setEnabled(true);
+                    imageRefresh.setImageResource(R.drawable.ic_refresh);
+                }
+            } else {
+                if (mainWifiObj.isWifiEnabled()) {
+                    mainWifiObj = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+                    mainWifiObj.setWifiEnabled(false);
+                    imageRefresh.setEnabled(false);
+                    imageRefresh.setImageResource(R.drawable.ic_refresh_disable);
                 }
             }
         });
@@ -428,16 +412,12 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
 
     @Override
     public void selectItem(int position) {
-        Fragment fragment = null;
+        Fragment fragment;
         FragmentManager fragmentManager = getSupportFragmentManager();
 
-        if (position == 0) {
-            showIcons(false);
-        } else {
-            showIcons(true);
-        }
+        showIcons(position != 0);
 
-        Log.i("Tab", "Position:" + position);
+        CcuLog.i(L.TAG_CCU_UI, "Tab Position:" + position);
 
         if (position == 0) {
             fragment = new StartCCUFragment();

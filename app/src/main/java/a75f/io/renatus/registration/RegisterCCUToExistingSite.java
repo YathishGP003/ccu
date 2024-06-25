@@ -1,19 +1,15 @@
 package a75f.io.renatus.registration;
-import static com.raygun.raygun4android.RaygunClient.getApplicationContext;
 
+import static com.raygun.raygun4android.RaygunClient.getApplicationContext;
 import static a75f.io.logic.L.ccu;
 
 import android.os.Bundle;
-
-import androidx.fragment.app.DialogFragment;
-
 import android.os.Handler;
 import android.os.Looper;
 import android.text.Editable;
 import android.text.Html;
 import android.text.Spanned;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,6 +20,8 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.fragment.app.DialogFragment;
 
 import com.google.android.material.textfield.TextInputLayout;
 
@@ -36,8 +34,6 @@ import org.projecthaystack.HRow;
 import org.projecthaystack.client.HClient;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -45,6 +41,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.SettingPoint;
 import a75f.io.api.haystack.Tags;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
@@ -103,12 +100,12 @@ public class RegisterCCUToExistingSite extends DialogFragment {
         mManagerEmailET.setEnabled(ccuFmEmail.isEmpty());
         mInstallerEmailET.setEnabled(ccuInstallerEmail.isEmpty());
 
-        toastWarning = getLayoutInflater().inflate(R.layout.custom_toast_layout_warning, (ViewGroup) rootView.findViewById(R.id.custom_toast_layout_warning));
+        toastWarning = getLayoutInflater().inflate(R.layout.custom_toast_layout_warning, rootView.findViewById(R.id.custom_toast_layout_warning));
 
         for (int addr = 1000; addr <= 10900; addr+=100) {
             addressBand.add(String.valueOf(addr));
         }
-        ArrayAdapter<String> analogAdapter = new ArrayAdapter<String>(getApplicationContext(), R.layout.spinner_dropdown_item, addressBand);
+        ArrayAdapter<String> analogAdapter = new ArrayAdapter<>(getApplicationContext(), R.layout.spinner_dropdown_item, addressBand);
         analogAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
 
         addressBandSpinner.setAdapter(analogAdapter);
@@ -117,7 +114,7 @@ public class RegisterCCUToExistingSite extends DialogFragment {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l)
             {
-                Log.d("CCU","AddressBandSelected : "+addressBandSpinner.getSelectedItem());
+                CcuLog.d(L.TAG_CCU,"AddressBandSelected : "+addressBandSpinner.getSelectedItem());
                 if (i >= 0)
                 {
                     addressBandSelected = addressBandSpinner.getSelectedItem().toString();
@@ -141,13 +138,13 @@ public class RegisterCCUToExistingSite extends DialogFragment {
             String ccuName = mCCUNameET.getText().toString();
             String installerEmail = mInstallerEmailET.getText().toString();
             String managerEmail = mManagerEmailET.getText().toString();
-            if (ccuName.trim().length() == 0) {
+            if (ccuName.trim().isEmpty()) {
                 Toast.makeText(getApplicationContext(), "Enter CCU name", Toast.LENGTH_SHORT).show();
                 return;
-            } else if (installerEmail.trim().length() == 0) {
+            } else if (installerEmail.trim().isEmpty()) {
                 Toast.makeText(getApplicationContext(), "Enter Installer email", Toast.LENGTH_SHORT).show();
                 return;
-            } else if (managerEmail.trim().length() == 0) {
+            } else if (managerEmail.trim().isEmpty()) {
                 Toast.makeText(getApplicationContext(), "Enter Manager email", Toast.LENGTH_SHORT).show();
                 return;
             }
@@ -180,7 +177,7 @@ public class RegisterCCUToExistingSite extends DialogFragment {
 
             @Override
             public void afterTextChanged(Editable s) {
-                if (mCCUName.getText().toString().trim().length() > 0) {
+                if (!mCCUName.getText().toString().trim().isEmpty()) {
                     if(CCUUiUtil.isInvalidName(mCCUName.getText().toString())){
                         mCCUName.setError(getString(R.string.error_invalid_ccu_name));
                     }
@@ -192,9 +189,7 @@ public class RegisterCCUToExistingSite extends DialogFragment {
 
     private void next(String ccuName, String installerEmail, String managerEmail) {
         RxjavaUtil.executeBackgroundTask(
-                ()->{
-                    ProgressDialogUtils.showProgressDialog(getActivity(),"Adding CCU");
-                },
+                ()-> ProgressDialogUtils.showProgressDialog(getActivity(),"Adding CCU"),
                 ()->{
                     mAddCCU.setClickable(false);
                     ArrayList<HashMap<Object, Object> >ccus = CCUHsApi.getInstance().readAllEntities("device and ccu");
@@ -237,19 +232,15 @@ public class RegisterCCUToExistingSite extends DialogFragment {
 
     private void getRegisteredAddressBand() {
         RxjavaUtil.executeBackgroundTask(
-                ()->{
-                    regAddressBands.clear();
-                },
+                ()-> regAddressBands.clear(),
                 ()->{
                     HClient hClient = new HClient(CCUHsApi.getInstance().getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
                     String siteUID = CCUHsApi.getInstance().getSiteIdRef().toString();
                     HDict tDict = new HDictBuilder().add("filter", "snband and  siteRef == " + siteUID).toDict();
                     HGrid addressPoint = hClient.call("read", HGridBuilder.dictToGrid(tDict));
                     if(addressPoint == null) {
-                        Log.w("RegisterGatherCCUDetails","HGrid(schedulePoint) is null.");
-                        new Handler(Looper.getMainLooper()).post(() -> {
-                            Toast.makeText(getActivity(),"Couldn't find the node address, Please choose the node address which is not used already.", Toast.LENGTH_LONG).show();
-                        });
+                        CcuLog.w(L.TAG_CCU_REGISTER_GATHER_DETAILS,"HGrid(schedulePoint) is null.");
+                        new Handler(Looper.getMainLooper()).post(() -> Toast.makeText(getActivity(),"Couldn't find the node address, Please choose the node address which is not used already.", Toast.LENGTH_LONG).show());
                     }
                     Iterator it = addressPoint.iterator();
                     while (it.hasNext())
@@ -261,12 +252,7 @@ public class RegisterCCUToExistingSite extends DialogFragment {
                     }
                 },
                 ()->{
-                    Collections.sort(regAddressBands, new Comparator<String>() {
-                        @Override
-                        public int compare(String s, String t1) {
-                            return Integer.compare(Integer.parseInt(s), Integer.parseInt(t1));
-                        }
-                    });
+                    regAddressBands.sort((s, t1) -> Integer.compare(Integer.parseInt(s), Integer.parseInt(t1)));
                     int selectedIndex = 0;
                     for(int i = 0; i < regAddressBands.size(); i++)
                     {

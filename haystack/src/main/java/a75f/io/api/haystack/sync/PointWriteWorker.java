@@ -1,22 +1,13 @@
 package a75f.io.api.haystack.sync;
 
 import android.content.Context;
-
-
 import org.projecthaystack.HDict;
-import org.projecthaystack.HDictBuilder;
 import org.projecthaystack.HGrid;
 import org.projecthaystack.HGridBuilder;
-import org.projecthaystack.HNum;
-import org.projecthaystack.HRef;
-import org.projecthaystack.HStr;
 import org.projecthaystack.io.HZincWriter;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Objects;
-
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
@@ -85,11 +76,11 @@ public class PointWriteWorker extends Worker {
                     continue;
                 }
                 ArrayList<HDict> valDictList = PointWriteUtil.getWriteArrDict(pointDict.get(Tags.ID).toString());
-                if (valDictList.size() > 0) {
+                if (!valDictList.isEmpty()) {
                     pointValList.addAll(valDictList);
                 }
             }
-            if (pointValList.size() > 0) {
+            if (!pointValList.isEmpty()) {
                 HGrid gridData = HGridBuilder.dictsToGrid(pointValList.toArray(new HDict[0]));
                 EntitySyncResponse response = HttpUtil.executeEntitySync(CCUHsApi.getInstance().getHSUrl() + ENDPOINT_POINT_WRITE_MANY,
                         HZincWriter.gridToString(gridData), CCUHsApi.getInstance().getJwt());
@@ -98,7 +89,7 @@ public class PointWriteWorker extends Worker {
                 } else if (response.getRespCode() >= HttpUtil.HTTP_RESPONSE_ERR_REQUEST) {
                     EntitySyncErrorHandler.handle400HttpError(CCUHsApi.getInstance(), response.getErrRespString());
                 }
-                return response != null;
+                return false;
             }
             return true;
         }

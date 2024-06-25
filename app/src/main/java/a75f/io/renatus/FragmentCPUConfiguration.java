@@ -4,12 +4,10 @@ import static a75f.io.device.bacnet.BacnetUtilKt.addBacnetTags;
 
 import android.app.Dialog;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,7 +22,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
-import java.lang.reflect.Field;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -34,6 +31,7 @@ import a75f.io.device.serial.CcuToCmOverUsbSmartStatControlsMessage_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.device.serial.SmartStatConditioningMode_t;
 import a75f.io.device.serial.SmartStatFanSpeed_t;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
@@ -94,7 +92,6 @@ public class FragmentCPUConfiguration extends BaseDialogFragment implements Comp
     CustomCCUSwitch toggleAutoForceOccupied;
 
     Button setButton;
-    Button cancelButton;
     NumberPicker temperatureOffset;
     Spinner fanHumiDSpinner;
 
@@ -173,10 +170,10 @@ public class FragmentCPUConfiguration extends BaseDialogFragment implements Comp
         mCPUProfile = (ConventionalUnitProfile) L.getProfile(mSmartNodeAddress);
 
         if (mCPUProfile != null) {
-            Log.d("CPUConfig", "Get Config: ");
+            CcuLog.d("CPUConfig", "Get Config: ");
             mProfileConfig = (ConventionalUnitConfiguration) mCPUProfile.getProfileConfiguration(mSmartNodeAddress);
         } else {
-            Log.d("CPUConfig", "Create Profile: ");
+            CcuLog.d("CPUConfig", "Create Profile: ");
             mCPUProfile = new ConventionalUnitProfile();
 
         }
@@ -227,7 +224,7 @@ public class FragmentCPUConfiguration extends BaseDialogFragment implements Comp
             toggleAutoaway.setChecked(mProfileConfig.enableAutoAway);
 
             fanHumiDSpinner.setSelection(mProfileConfig.relay6Type - 1);
-            if (mProfileConfig.getOutputs().size() > 0) {
+            if (!mProfileConfig.getOutputs().isEmpty()) {
                 for (Output output : mProfileConfig.getOutputs()) {
                     switch (output.getPort()) {
                         case RELAY_ONE:
@@ -302,7 +299,6 @@ public class FragmentCPUConfiguration extends BaseDialogFragment implements Comp
                         ProgressDialogUtils.showProgressDialog(getActivity(),"Saving CPU Configuration");
                         super.onPreExecute();
                     }
-
                     @Override
                     protected Void doInBackground(final String... params) {
                         CCUHsApi.getInstance().resetCcuReady();
@@ -412,57 +408,11 @@ public class FragmentCPUConfiguration extends BaseDialogFragment implements Comp
         if (mProfileConfig == null) {
             mCPUProfile.addLogicalMapAndPoints(mSmartNodeAddress, cpuConfig, floorRef, roomRef);
         } else {
-            mCPUProfile.updateLogicalMapAndPoints(mSmartNodeAddress, cpuConfig, roomRef);
+            mCPUProfile.updateLogicalMapAndPoints(mSmartNodeAddress, cpuConfig);
         }
         L.ccu().zoneProfiles.add(mCPUProfile);
-        Log.d("CPUConfig", "Set Config: Profiles - " + L.ccu().zoneProfiles.size());
+        CcuLog.d("CPUConfig", "Set Config: Profiles - " + L.ccu().zoneProfiles.size());
     }
-
-    private void setDividerColor(NumberPicker picker) {
-        Field[] numberPickerFields = NumberPicker.class.getDeclaredFields();
-        for (Field field : numberPickerFields) {
-            if (field.getName().equals("mSelectionDivider")) {
-                field.setAccessible(true);
-                try {
-                    field.set(picker, getResources().getDrawable(R.drawable.divider_np));
-                } catch (IllegalArgumentException e) {
-                    Log.v("NP", "Illegal Argument Exception");
-                    e.printStackTrace();
-                } catch (Resources.NotFoundException e) {
-                    Log.v("NP", "Resources NotFound");
-                    e.printStackTrace();
-                } catch (IllegalAccessException e) {
-                    Log.v("NP", "Illegal Access Exception");
-                    e.printStackTrace();
-                }
-                break;
-            }
-        }
-    }
-
-    private void setNumberPickerDividerColor(NumberPicker pk) {
-        Class<?> numberPickerClass = null;
-        try {
-            numberPickerClass = Class.forName("android.widget.NumberPicker");
-            Field selectionDivider = numberPickerClass.getDeclaredField("mSelectionDivider");
-            selectionDivider.setAccessible(true);
-            //if(!CCUUtils.isxlargedevice(getActivity())) {
-            selectionDivider.set(pk, getResources().getDrawable(R.drawable.line_959595));
-            //}else{
-            //   selectionDivider.set(pk, getResources().getDrawable(R.drawable.connect_192x48_orange));
-            //}
-
-        } catch (ClassNotFoundException e) {
-            Log.e("class not found", e.toString());
-        } catch (NoSuchFieldException e) {
-            Log.e("NoSuchFieldException", e.toString());
-        } catch (IllegalAccessException e) {
-            Log.e("IllegalAccessException", e.toString());
-        } catch (Exception e) {
-            Log.e("dividerexception", e.getMessage().toString());
-        }
-    }
-
     @Override
     @OnCheckedChanged({R.id.testCpuRelay1, R.id.testCpuRelay2, R.id.testCpuRelay3, R.id.testCpuRelay4, R.id.testCpuRelay5, R.id.testCpuRelay6,R.id.toggleCpuFanLow,R.id.toggleCpuFanHigh})
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -542,8 +492,8 @@ public class FragmentCPUConfiguration extends BaseDialogFragment implements Comp
 
     public static double getDesiredTemp(short node) {
         HashMap point = CCUHsApi.getInstance().read("point and air and temp and desired and average and sp and group == \"" + node + "\"");
-        if (point == null || point.size() == 0) {
-            Log.d("HPU", " Desired Temp point does not exist for equip , sending 0");
+        if (point == null || point.isEmpty()) {
+            CcuLog.d("HPU", " Desired Temp point does not exist for equip , sending 0");
             return 72;
         }
         return CCUHsApi.getInstance().readPointPriorityVal(point.get("id").toString());

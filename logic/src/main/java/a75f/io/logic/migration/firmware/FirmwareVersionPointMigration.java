@@ -1,7 +1,4 @@
 package a75f.io.logic.migration.firmware;
-
-import android.util.Log;
-
 import org.apache.commons.lang3.StringUtils;
 import org.projecthaystack.io.HZincReader;
 
@@ -36,7 +33,7 @@ public class FirmwareVersionPointMigration {
 
     private boolean checkForFirmwarePointMigration(){
         if (!PreferenceUtil.isFirmwareVersionPointMigrationDone()) {
-            Log.i(CCU_FIRMWARE_VERSION_MIGRATION,"Firmware version point migration started ");
+            CcuLog.i(CCU_FIRMWARE_VERSION_MIGRATION,"Firmware version point migration started ");
             upgradeEquipsWithFirmwareVersionPoints(CCUHsApi.getInstance());
         }
         return true;
@@ -129,7 +126,7 @@ public class FirmwareVersionPointMigration {
                                         firmwareVersionRemotePointId+ " for the device : "+ deviceInfo.getDisplayName());
                     }
                 }
-                if(duplicateFirmwareVersionRemotePointIds.size() > 0){
+                if(!duplicateFirmwareVersionRemotePointIds.isEmpty()){
                     if(!deleteRemoteFirmwareVersionPoints(duplicateFirmwareVersionRemotePointIds, ccuHsApi)){
                         failedCount.add(false);
                     }
@@ -141,10 +138,10 @@ public class FirmwareVersionPointMigration {
                 }
             }
         }
-        if(failedCount.size() == 0){
-            Log.i(CCU_FIRMWARE_VERSION_MIGRATION,"Firmware version point migration completed ");
+        if(failedCount.isEmpty()){
+            CcuLog.i(CCU_FIRMWARE_VERSION_MIGRATION,"Firmware version point migration completed ");
         }
-        return failedCount.size() == 0;
+        return failedCount.isEmpty();
     }
     private boolean deleteRemoteFirmwareVersionPoints(List<String> duplicateFirmwareVersionRemotePointIds,
                                                       CCUHsApi ccuHsApi){

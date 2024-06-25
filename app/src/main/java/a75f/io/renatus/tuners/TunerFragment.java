@@ -1,20 +1,23 @@
 package a75f.io.renatus.tuners;
 
+import static a75f.io.logic.bo.util.UnitUtils.celsiusToFahrenheitTuner;
+import static a75f.io.logic.bo.util.UnitUtils.convertingDeadBandValueCtoF;
+import static a75f.io.logic.bo.util.UnitUtils.convertingDeadBandValueFtoC;
+import static a75f.io.logic.bo.util.UnitUtils.convertingRelativeValueCtoF;
+import static a75f.io.logic.bo.util.UnitUtils.convertingRelativeValueFtoC;
+import static a75f.io.logic.bo.util.UnitUtils.doesPointNeedRelativeConversion;
+import static a75f.io.logic.bo.util.UnitUtils.doesPointNeedRelativeDeadBandConversion;
+import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusTuner;
+import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import androidx.annotation.Nullable;
-import com.google.android.material.button.MaterialButton;
-
-import androidx.core.content.ContextCompat;
-import androidx.recyclerview.widget.RecyclerView;
 import android.text.Editable;
 import android.text.Html;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,15 +35,15 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.RecyclerView;
+
 import org.apache.commons.lang3.StringUtils;
 import org.projecthaystack.HDateTime;
-import org.projecthaystack.HDict;
 import org.projecthaystack.HDictBuilder;
-import org.projecthaystack.HGridBuilder;
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
 import org.projecthaystack.HVal;
-import org.projecthaystack.io.HZincWriter;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -55,17 +58,12 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
-import a75f.io.api.haystack.Point;
-import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
-import a75f.io.api.haystack.sync.HttpUtil;
 import a75f.io.api.haystack.sync.PointWriteCache;
 import a75f.io.domain.cutover.BuildingEquipCutOverMapping;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
-import a75f.io.logic.tuners.BuildingTunerCache;
-import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.R;
@@ -73,23 +71,7 @@ import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.RxjavaUtil;
 import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
-import a75f.io.renatus.views.MasterControl.MasterControlView;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
-
-import static a75f.io.logic.bo.util.UnitUtils.celsiusToFahrenheit;
-import static a75f.io.logic.bo.util.UnitUtils.celsiusToFahrenheitRelativeChange;
-import static a75f.io.logic.bo.util.UnitUtils.celsiusToFahrenheitTuner;
-import static a75f.io.logic.bo.util.UnitUtils.convertingDeadBandValueCtoF;
-import static a75f.io.logic.bo.util.UnitUtils.convertingDeadBandValueFtoC;
-import static a75f.io.logic.bo.util.UnitUtils.convertingRelativeValueCtoF;
-import static a75f.io.logic.bo.util.UnitUtils.convertingRelativeValueFtoC;
-import static a75f.io.logic.bo.util.UnitUtils.doesPointNeedRelativeConversion;
-import static a75f.io.logic.bo.util.UnitUtils.doesPointNeedRelativeDeadBandConversion;
-import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
-import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusRelative;
-import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusTuner;
-import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
-import static a75f.io.logic.bo.util.UnitUtils.roundToHalf;
 
 
 /**
@@ -191,7 +173,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                 for (Floor f : HSUtil.getFloors()) {
                     zones.addAll(HSUtil.getZones(f.getId()));
                 }
-                if (zones.size() > 0){
+                if (!zones.isEmpty()){
                     spinnerSelection.setVisibility(View.VISIBLE);
                 } else {
                     spinnerSelection.setVisibility(View.GONE);
@@ -221,7 +203,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                     eb.setHashMap(map);
                     UpdatedEquips.add(eb.build());
                 }
-                if (equips.size()>0){
+                if (!equips.isEmpty()){
                     spinnerSelection.setVisibility(View.VISIBLE);
                 } else {
                     spinnerSelection.setVisibility(View.GONE);
@@ -265,12 +247,12 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
 
         updatedTunerValues = new ArrayList<>();
         saveTunerValues.setOnClickListener(v -> {
-            if (editChangeReason.getText().toString().length() == 0) {
+            if (editChangeReason.getText().toString().isEmpty()) {
                 Toast.makeText(getActivity(), "Please enter reason to save!", Toast.LENGTH_SHORT).show();
                 return;
             }
             String changeReason = editChangeReason.getText().toString();
-            if (updatedTunerValues.size() <= 0){
+            if (updatedTunerValues.isEmpty()){
                 return;
             }
 
@@ -681,7 +663,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
     public static double getTuner(String id) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
         ArrayList values = hayStack.readPoint(id);
-        if (values != null && values.size() > 0) {
+        if (values != null && !values.isEmpty()) {
             for (int l = 1; l <= values.size(); l++) {
                 HashMap valMap = ((HashMap) values.get(l - 1));
                 if (valMap.get("val") != null) {
@@ -698,10 +680,8 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
 
         if (tunerFragment != null && tunerFragment.isAdded()) {
             disposable.add(RxjavaUtil.executeBackgroundTaskWithDisposable(()->{},
-                    () -> {
-                        processData(id, level, val, reason);
-                    },
-                    ()->{ TunerUtil.refreshEquipTuners(); } // after update is processed, notify any affected equips to refresh cached tuners next time their algo runs
+                    () -> processData(id, level, val, reason),
+                    TunerUtil::refreshEquipTuners // after update is processed, notify any affected equips to refresh cached tuners next time their algo runs
             ));
         }
     }
@@ -799,7 +779,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
 
         if(childSelected == -1) {
             childSelected = position;
-            Log.i("TunersUI", "childSelected:" + childSelected + " hashmap:" + item);
+            CcuLog.i(L.TAG_CCU_TUNERS_UI, "childSelected:" + childSelected + " hashmap:" + item);
             if (radioBtnBuilding.isChecked()) {
                 tunerGroupType = "Building";
             } else if (radioButtonSystem.isChecked()) {
@@ -837,15 +817,13 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
                     TunerGroupItem tunerGroupSelected = (TunerGroupItem) bundle.getSerializable("Tuner_Group_Selected");
                     String tunerValue = bundle.getString("Tuner_Value_Selected");
                     String tunerLevel = bundle.getString("Tuner_Level_Selected");
-                   /* Toast.makeText(getActivity(), "TunerUI-HashMap: " + tunerItemSelected.get("dis") + " clicked\n" +
-                            " tunerGroupSelected:" + tunerGroupSelected.getName() + " tunerValue:" + tunerValue, Toast.LENGTH_SHORT).show();*/
                     tunerItemSelected.put("newValue", tunerValue);
                     tunerItemSelected.put("newLevel", tunerLevel);
                     tunerExpandableLayoutHelper.updateTuner(tunerGroupSelected, tunerItemSelected, oldTunerItemSelected);
                     if (!updatedTunerValues.contains(tunerItemSelected)) {
                         updatedTunerValues.add(tunerItemSelected);
                     }
-                    if (updatedTunerValues.size() > 0) {
+                    if (!updatedTunerValues.isEmpty()) {
                         saveTunerValues.setEnabled(true);
                         saveTunerValues.setTextColor(CCUUiUtil.getPrimaryThemeColor(getContext()));
                     }
@@ -859,7 +837,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
     public String getTunerValue(String id, String level) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
         ArrayList values = hayStack.readPoint(id);
-        if (values != null && values.size() > 0) {
+        if (values != null && !values.isEmpty()) {
             for (int l = 1; l <= values.size(); l++) {
                 HashMap valMap = ((HashMap) values.get(l - 1));
                 if (valMap.get("level") != null && level.equals(valMap.get("level").toString()) && valMap.get("val") != null) {
@@ -868,20 +846,6 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
             }
         }
         return "-";
-    }
-
-    public String getTunerLevelValue(String id) {
-        CCUHsApi hayStack = CCUHsApi.getInstance();
-        ArrayList values = hayStack.readPoint(id);
-        if (values != null && values.size() > 0) {
-            for (int l = 1; l <= values.size(); l++) {
-                HashMap valMap = ((HashMap) values.get(l - 1));
-                if (valMap.get("val") != null && valMap.get("level") != null) {
-                    return valMap.get("level").toString();
-                }
-            }
-        }
-        return "14";
     }
 
     private String getSystemProfileType(){
@@ -904,7 +868,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
 
     @Override
     public void onUndoClick(HashMap item) {
-        if (updatedTunerValues != null && updatedTunerValues.size() > 0){
+        if (updatedTunerValues != null && !updatedTunerValues.isEmpty()){
             updatedTunerValues.remove(item);
         }
     }

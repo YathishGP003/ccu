@@ -2,8 +2,6 @@ package a75f.io.logic.bo.building.sse;
 
 import static a75f.io.logic.bo.building.ss2pfcu.TwoPipeFanCoilUnitProfile.TAG;
 
-import android.util.Log;
-
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
 
@@ -18,6 +16,7 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.BacnetIdKt;
 import a75f.io.logic.BacnetUtilKt;
 import a75f.io.logic.UtilKt;
@@ -46,7 +45,6 @@ public class SingleStageEquip {
     double      currentTemp;
     double      humidity;
     double desiredTemp;
-    double supplyAirTemp;
     double dischargeTemp;
 
     String equipRef = null;
@@ -68,10 +66,10 @@ public class SingleStageEquip {
         String ahuRef = null;
         Schedule roomSchedule = UtilKt.getSchedule(roomRef,floorRef);
 
-        Log.d(TAG, "setupSSEZoneProfile: association cvalue " + config.analogInAssociation);
+        CcuLog.d(TAG, "setupSSEZoneProfile: association cvalue " + config.analogInAssociation);
 
         HashMap systemEquip = CCUHsApi.getInstance().read("equip and system and not modbus");
-        if (systemEquip != null && systemEquip.size() > 0) {
+        if (systemEquip != null && !systemEquip.isEmpty()) {
             ahuRef = systemEquip.get("id").toString();
         }
         Equip.Builder b = new Equip.Builder()
@@ -364,8 +362,8 @@ public class SingleStageEquip {
         device.th1In.setEnabled(config.enableThermistor1);
         device.th2In.setPointRef(eatID);
         device.th2In.setEnabled(config.enableThermistor2);
-        device.relay1.setEnabled(config.enableRelay1 > 0 ? true : false);
-        device.relay2.setEnabled(config.enableRelay1 > 0 ? true : false);
+        device.relay1.setEnabled(config.enableRelay1 > 0);
+        device.relay2.setEnabled(config.enableRelay1 > 0);
         device.rssi.setPointRef(heartBeatId);
         device.rssi.setEnabled(true);
         device.analog1In.setEnabled(config.analogIn1);
@@ -444,7 +442,7 @@ public class SingleStageEquip {
                 .build();
         BacnetUtilKt.addBacnetTags(temperatureOffset, BacnetIdKt.TEMPERATUREOFFSETID,BacnetUtilKt.ANALOG_VALUE,nodeAddr);
         String temperatureOffsetId = CCUHsApi.getInstance().addPoint(temperatureOffset);
-        CCUHsApi.getInstance().writeDefaultValById(temperatureOffsetId, (double)config.temperaturOffset);
+        CCUHsApi.getInstance().writeDefaultValById(temperatureOffsetId, config.temperaturOffset);
 
         Point external10KProbeTh2 = new Point.Builder()
                 .setDisplayName(equipDis+"-enableExternal10kTempSensorTh2")
@@ -458,7 +456,7 @@ public class SingleStageEquip {
                 .setTz(tz)
                 .build();
         String enableexternal10KProbeTh2Id = CCUHsApi.getInstance().addPoint(external10KProbeTh2);
-        CCUHsApi.getInstance().writeDefaultValById(enableexternal10KProbeTh2Id, (double)(config.enableThermistor2 == true? 1.0 : 0));
+        CCUHsApi.getInstance().writeDefaultValById(enableexternal10KProbeTh2Id, config.enableThermistor2 ? 1.0 : 0);
 
         Point enableRelay1 = new Point.Builder()
                 .setDisplayName(equipDis+"-enableRelay1")
@@ -508,8 +506,8 @@ public class SingleStageEquip {
 
         setConfigNumVal("enable and relay1",config.isOpConfigured(Port.RELAY_ONE) ? (double)config.enableRelay1 : 0);
         setConfigNumVal("enable and relay2",config.isOpConfigured(Port.RELAY_TWO) ? (double)config.enableRelay2 : 0);
-        setConfigNumVal("enable and th2",config.enableThermistor2 == true ? 1.0 : 0);
-        setConfigNumVal("enable and th1",config.enableThermistor1 == true ? 1.0 : 0);
+        setConfigNumVal("enable and th2", config.enableThermistor2 ? 1.0 : 0);
+        setConfigNumVal("enable and th1", config.enableThermistor1 ? 1.0 : 0);
         setConfigNumVal("temperature and offset",config.temperaturOffset);
         setConfigNumVal("analog1 and input and enabled",config.analogIn1 ? 1.0 : 0);
         setConfigNumVal("input and association", config.analogInAssociation.ordinal());
@@ -597,8 +595,8 @@ public class SingleStageEquip {
         setConfigNumVal("enable and relay1",config.isOpConfigured(Port.RELAY_ONE) ? (double)config.enableRelay1 : 0);
         setConfigNumVal("enable and relay2",config.isOpConfigured(Port.RELAY_TWO) ? (double)config.enableRelay2 : 0);
         setConfigNumVal("temperature and offset",config.temperaturOffset);
-        setConfigNumVal("enable and th2",config.enableThermistor2 == true ? 1.0 : 0);
-        setConfigNumVal("enable and th1",config.enableThermistor1 == true ? 1.0 : 0);
+        setConfigNumVal("enable and th2", config.enableThermistor2 ? 1.0 : 0);
+        setConfigNumVal("enable and th1", config.enableThermistor1 ? 1.0 : 0);
         setConfigNumVal("auto and away",config.enableAutoAway ? 1.0 : 0 );
         setConfigNumVal("auto and occupied and forced",config.enableAutoForceOccupied ? 1.0 : 0 );
         setHisVal("auto and away",config.enableAutoAway ? 1.0 : 0 );
@@ -614,13 +612,13 @@ public class SingleStageEquip {
     public SingleStageConfig getProfileConfiguration() {
         SingleStageConfig config = new SingleStageConfig();
         config.temperaturOffset = getConfigNumVal("temperature and offset");
-        config.enableThermistor1 = getConfigNumVal("enable and th1") > 0 ? true : false;
-        config.enableThermistor2 = getConfigNumVal("enable and th2") > 0 ? true : false;
+        config.enableThermistor1 = getConfigNumVal("enable and th1") > 0;
+        config.enableThermistor2 = getConfigNumVal("enable and th2") > 0;
         config.enableRelay1 = (int)getConfigNumVal("enable and relay1");
         config.enableRelay2 = (int)getConfigNumVal("enable and relay2");
         config.enableAutoAway = getConfigNumVal("auto and away") > 0;
         config.enableAutoForceOccupied = getConfigNumVal("auto and occupied and forced") > 0;
-        config.analogIn1 = getConfigNumVal("analog1 and input and enabled") > 0 ? true : false;
+        config.analogIn1 = getConfigNumVal("analog1 and input and enabled") > 0;
         config.setAnalogInAssociation(InputActuatorType.values()[(int) getConfigNumVal("input and association")]);
 
         config.setNodeType(NodeType.SMART_NODE);
@@ -708,7 +706,7 @@ public class SingleStageEquip {
     {
         ArrayList points = CCUHsApi.getInstance().readAll("point and air and temp and desired and average and sp and group == \""+nodeAddr+"\"");
         String id = ((HashMap)points.get(0)).get("id").toString();
-        if (id == null || id == "") {
+        if (id == null || id.isEmpty()) {
             throw new IllegalArgumentException();
         }
         desiredTemp = CCUHsApi.getInstance().readDefaultValById(id);
@@ -718,7 +716,7 @@ public class SingleStageEquip {
     {
         ArrayList points = CCUHsApi.getInstance().readAll("point and air and temp and desired and average and sp and group == \""+nodeAddr+"\"");
         String id = ((HashMap)points.get(0)).get("id").toString();
-        if (id == null || id == "") {
+        if (id == null || id.isEmpty()) {
             throw new IllegalArgumentException();
         }
         CCUHsApi.getInstance().writeDefaultValById(id, desiredTemp);
@@ -730,11 +728,11 @@ public class SingleStageEquip {
     {
         ArrayList points = CCUHsApi.getInstance().readAll("point and air and temp and desired and cooling and sp and group == \""+nodeAddr+"\"");
         String id = ((HashMap)points.get(0)).get("id").toString();
-        if (id == null || id == "") {
+        if (id == null || id.isEmpty()) {
             throw new IllegalArgumentException();
         }
         ArrayList values = CCUHsApi.getInstance().readPoint(id);
-        if (values != null && values.size() > 0)
+        if (values != null && !values.isEmpty())
         {
             for (int l = 1; l <= values.size() ; l++ ) {
                 HashMap valMap = ((HashMap) values.get(l-1));
@@ -749,7 +747,7 @@ public class SingleStageEquip {
     {
         ArrayList points = CCUHsApi.getInstance().readAll("point and air and temp and desired and cooling and sp and group == \""+nodeAddr+"\"");
         String id = ((HashMap)points.get(0)).get("id").toString();
-        if (id == null || id == "") {
+        if (id == null || id.isEmpty()) {
             throw new IllegalArgumentException();
         }
         CCUHsApi.getInstance().pointWriteForCcuUser(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, HNum.make(desiredTemp), HNum.make(0));
@@ -760,11 +758,11 @@ public class SingleStageEquip {
     {
         ArrayList points = CCUHsApi.getInstance().readAll("point and air and temp and desired and heating and sp and group == \""+nodeAddr+"\"");
         String id = ((HashMap)points.get(0)).get("id").toString();
-        if (id == null || id == "") {
+        if (id == null || id.isEmpty()) {
             throw new IllegalArgumentException();
         }
         ArrayList values = CCUHsApi.getInstance().readPoint(id);
-        if (values != null && values.size() > 0)
+        if (values != null && !values.isEmpty())
         {
             for (int l = 1; l <= values.size() ; l++ ) {
                 HashMap valMap = ((HashMap) values.get(l-1));
@@ -779,17 +777,13 @@ public class SingleStageEquip {
     {
         ArrayList points = CCUHsApi.getInstance().readAll("point and air and temp and desired and heating and sp and group == \""+nodeAddr+"\"");
         String id = ((HashMap)points.get(0)).get("id").toString();
-        if (id == null || id == "") {
+        if (id == null || id.isEmpty()) {
             throw new IllegalArgumentException();
         }
         CCUHsApi.getInstance().pointWriteForCcuUser(HRef.copy(id), HayStackConstants.DEFAULT_POINT_LEVEL, HNum.make(desiredTemp), HNum.make(0));
         CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(id, desiredTemp);
     }
-    public double getDischargeTemp()
-    {
-        dischargeTemp = CCUHsApi.getInstance().readHisValByQuery("point and air and temp and sensor and th1 and standalone and group == \""+nodeAddr+"\"");
-        return dischargeTemp;
-    }
+
     public void setDischargeTemp(double dischargeTemp)
     {
         CCUHsApi.getInstance().writeHisValByQuery("point and air and temp and sensor and th1 and standalone and group == \""+nodeAddr+"\"", dischargeTemp);
@@ -836,14 +830,10 @@ public class SingleStageEquip {
     {
         ArrayList points = CCUHsApi.getInstance().readAll("point and scheduleStatus and group == \""+nodeAddr+"\"");
         String id = ((HashMap)points.get(0)).get("id").toString();
-        if (id == null || id == "") {
+        if (id == null || id.isEmpty()) {
             throw new IllegalArgumentException();
         }
         CCUHsApi.getInstance().writeDefaultValById(id, status);
-    }
-    public double getZonePriorityValue(){
-        HashMap equip = CCUHsApi.getInstance().read("equip and group == \""+nodeAddr+"\"");
-        return CCUHsApi.getInstance().readPointPriorityValByQuery("zone and priority and config and equipRef == \""+equip.get("id")+"\"");
     }
 
     public void setHisVal(String tags,double val) {

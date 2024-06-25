@@ -7,18 +7,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.IBinder;
-import android.util.Log;
 
 import java.util.Timer;
 import java.util.TimerTask;
 
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.usbserial.UsbService;
 
 public class OTAUpdateHandlerService extends Service {
-
-    private static String TAG = "OTAUpdateHandlerService";
 
 
     private static final int THREE_MINUTE = 60000 * 3;
@@ -99,7 +97,7 @@ public class OTAUpdateHandlerService extends Service {
              TimerTask otaTimeOutTask = new TimerTask() {
                 @Override
                 public void run() {
-                    Log.i(L.TAG_CCU_OTA_PROCESS, "OTA timeout check is running lastOTAUpdateTime :"+lastOTAUpdateTime);
+                   CcuLog.i(L.TAG_CCU_OTA_PROCESS, "OTA timeout check is running lastOTAUpdateTime :"+lastOTAUpdateTime);
                     if (lastOTAUpdateTime != 0 && ( System.currentTimeMillis()-lastOTAUpdateTime ) > TWELVE_HR_IN_MS) {
                         stopOtaUpdateTimeoutTimer();
                         sendBroadcast(new Intent(Globals.IntentActions.OTA_UPDATE_TIMED_OUT));
@@ -111,7 +109,7 @@ public class OTAUpdateHandlerService extends Service {
     }
 
      void stopOtaUpdateTimeoutTimer() {
-        Log.i(L.TAG_CCU_OTA_PROCESS, "OTA timeout stopOtaUpdateTimeoutTimer");
+        CcuLog.i(L.TAG_CCU_OTA_PROCESS, "OTA timeout stopOtaUpdateTimeoutTimer");
         lastOTAUpdateTime = 0;
         if(mTimeoutTimer != null ) {
             mTimeoutTimer.cancel();

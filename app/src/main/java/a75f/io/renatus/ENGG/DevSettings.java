@@ -76,6 +76,9 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
     private int previousControlLoopFrequency = 0;
 
     private int prevoiusAhuConnectPort = 0;
+
+    @BindView(R.id.EnableANRLayout)
+    LinearLayout EnableANRLayout;
                                     
     @BindView(R.id.biskitModBtn)
     ToggleButton biskitModeBtn;
@@ -482,6 +485,9 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
             }
         });
 
+        //Disable ANR reporting UI till we figure out an alternative for instabug.
+        EnableANRLayout.setVisibility(View.GONE);
+
         anrReporting.setChecked(Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting"
                 , Context.MODE_PRIVATE).getBoolean("anr_reporting_enabled", false));
         anrReporting.setOnCheckedChangeListener((compoundButton, b) -> {
@@ -491,8 +497,6 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
             Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
                     .edit().putBoolean("anr_reporting_enabled", b).apply();
         });
-        // Disable ANR reporting UI till we figure out an alternative for instabug.
-        anrReporting.setVisibility(View.GONE);
 
         logLevelSpinner.setSelection(CCUHsApi.getInstance().getCcuLogLevel());
         logLevelSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {

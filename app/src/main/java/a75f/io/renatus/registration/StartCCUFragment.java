@@ -58,14 +58,11 @@ public class StartCCUFragment extends Fragment {
         //((FreshRegistration)getActivity()).showIcons(false);
         View view = inflater.inflate(R.layout.fragment_startccu, container, false);
         RelativeLayout view_ccunext = view.findViewById(R.id.startCCU);
-        view_ccunext.setOnClickListener(new View.OnClickListener() {
+        view_ccunext.setOnClickListener(v -> {
+            // TODO Auto-generated method stub
+            ((FreshRegistration)getActivity()).selectItem(1);
+            //showCustomDialog();
 
-            public void onClick(View v) {
-                // TODO Auto-generated method stub
-                ((FreshRegistration)getActivity()).selectItem(1);
-                //showCustomDialog();
-
-            }
         });
         return view;
     }

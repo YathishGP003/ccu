@@ -4,11 +4,9 @@ import static a75f.io.device.bacnet.BacnetUtilKt.addBacnetTags;
 
 import android.app.Dialog;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,7 +19,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
-import java.lang.reflect.Field;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -31,6 +28,7 @@ import a75f.io.device.serial.CcuToCmOverUsbSmartStatControlsMessage_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.device.serial.SmartStatConditioningMode_t;
 import a75f.io.device.serial.SmartStatFanSpeed_t;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
@@ -63,7 +61,7 @@ public class Fragment4PipeFanCoilUnitConfig extends BaseDialogFragment implement
     private FourPipeFanCoilUnitProfile fourPfcuProfile;
     private FourPipeFanCoilUnitConfiguration mProfileConfig;
 
-    private CompositeDisposable compositeDisposable = new CompositeDisposable();
+    private final CompositeDisposable compositeDisposable = new CompositeDisposable();
 
     CustomCCUSwitch switchThermistor1;
     CustomCCUSwitch switchFanMediumY1;
@@ -179,11 +177,11 @@ public class Fragment4PipeFanCoilUnitConfig extends BaseDialogFragment implement
         fourPfcuProfile = (FourPipeFanCoilUnitProfile) L.getProfile(mSmartNodeAddress);
 
         if (fourPfcuProfile != null) {
-            Log.d("CPUConfig", "Get Config: "+fourPfcuProfile.getProfileType()+","+fourPfcuProfile.getProfileConfiguration(mSmartNodeAddress)+","+mSmartNodeAddress);
+            CcuLog.d("CPUConfig", "Get Config: "+fourPfcuProfile.getProfileType()+","+fourPfcuProfile.getProfileConfiguration(mSmartNodeAddress)+","+mSmartNodeAddress);
             mProfileConfig = (FourPipeFanCoilUnitConfiguration) fourPfcuProfile
                     .getProfileConfiguration(mSmartNodeAddress);
         } else {
-            Log.d("CPUConfig", "Create Profile: ");
+            CcuLog.d("CPUConfig", "Create Profile: ");
             fourPfcuProfile = new FourPipeFanCoilUnitProfile();
 
         }
@@ -227,7 +225,7 @@ public class Fragment4PipeFanCoilUnitConfig extends BaseDialogFragment implement
             toggleAutoForceOccupied.setChecked(mProfileConfig.enableAutoForceOccupied);
             toggleAutoaway.setChecked(mProfileConfig.enableAutoAway);
 
-            if (mProfileConfig.getOutputs().size() > 0) {
+            if (!mProfileConfig.getOutputs().isEmpty()) {
                 for (Output output : mProfileConfig.getOutputs()) {
                     switch (output.getPort()) {
                         case RELAY_ONE:
@@ -358,29 +356,7 @@ public class Fragment4PipeFanCoilUnitConfig extends BaseDialogFragment implement
             fourPfcuProfile.updateLogicalMapAndPoints(mSmartNodeAddress, fourPfcuConfig, roomRef);
         }
         L.ccu().zoneProfiles.add(fourPfcuProfile);
-        Log.d("CPUConfig", "Set Config: Profiles - " + L.ccu().zoneProfiles.size());
-    }
-
-    private void setDividerColor(NumberPicker picker) {
-        Field[] numberPickerFields = NumberPicker.class.getDeclaredFields();
-        for (Field field : numberPickerFields) {
-            if (field.getName().equals("mSelectionDivider")) {
-                field.setAccessible(true);
-                try {
-                    field.set(picker, getResources().getDrawable(R.drawable.divider_np));
-                } catch (IllegalArgumentException e) {
-                    Log.v("NP", "Illegal Argument Exception");
-                    e.printStackTrace();
-                } catch (Resources.NotFoundException e) {
-                    Log.v("NP", "Resources NotFound");
-                    e.printStackTrace();
-                } catch (IllegalAccessException e) {
-                    Log.v("NP", "Illegal Access Exception");
-                    e.printStackTrace();
-                }
-                break;
-            }
-        }
+        CcuLog.d("CPUConfig", "Set Config: Profiles - " + L.ccu().zoneProfiles.size());
     }
 
     @Override
@@ -452,8 +428,8 @@ public class Fragment4PipeFanCoilUnitConfig extends BaseDialogFragment implement
     public static double getDesiredTemp(short node)
     {
         HashMap point = CCUHsApi.getInstance().read("point and air and temp and desired and average and sp and group == \""+node+"\"");
-        if (point == null || point.size() == 0) {
-            Log.d("HPU", " Desired Temp point does not exist for equip , sending 0");
+        if (point == null || point.isEmpty()) {
+            CcuLog.d("HPU", " Desired Temp point does not exist for equip , sending 0");
             return 72;
         }
         return CCUHsApi.getInstance().readPointPriorityVal(point.get("id").toString());

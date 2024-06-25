@@ -1,7 +1,4 @@
 package a75f.io.logic.tuners;
-
-import android.util.Log;
-
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -16,7 +13,7 @@ public class DcwbTuners {
     public static void addDefaultDcwbTuners(CCUHsApi hayStack, String siteRef, String equipRef, String equipDis,
                                             String tz) {
         HashMap tuner = CCUHsApi.getInstance().read("point and tuner and default and dcwb");
-        if (tuner != null && tuner.size() > 0) {
+        if (tuner != null && !tuner.isEmpty()) {
             CcuLog.d(L.TAG_CCU_SYSTEM, "Default DCWB Tuner points already exist");
             return;
         }
@@ -95,7 +92,7 @@ public class DcwbTuners {
 
     public static void addEquipDcwbTuners(CCUHsApi hayStack, String siteRef, String equipDis, String equipRef,
                                           String tz) {
-        Log.d("CCU", "addEquipDcwbTuners for " + equipDis);
+        CcuLog.d(L.TAG_CCU, "addEquipDcwbTuners for " + equipDis);
 
         Point chilledWaterProportionalKFactor  = new Point.Builder()
                 .setDisplayName(equipDis+"-DCWB-"+"chilledWaterProportionalKFactor")

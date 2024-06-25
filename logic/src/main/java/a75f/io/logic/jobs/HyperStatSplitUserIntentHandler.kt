@@ -2,6 +2,7 @@ package a75f.io.logic.jobs
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Point
+import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.EpidemicState
 import a75f.io.logic.interfaces.ZoneDataInterface
@@ -14,7 +15,6 @@ import a75f.io.logic.bo.building.hyperstat.profiles.pipe2.Pipe2RelayAssociation
 import a75f.io.logic.bo.building.hyperstatsplit.common.BasicSettings
 import a75f.io.logic.tuners.TunerConstants
 import a75f.io.logic.util.RxjavaUtil
-import android.util.Log
 import org.projecthaystack.HNum
 import org.projecthaystack.HRef
 import kotlin.collections.set
@@ -29,7 +29,7 @@ class HyperStatSplitUserIntentHandler {
     companion object {
 
         var zoneDataInterface: ZoneDataInterface? = null
-        var hyperStatSplitStatus: HashMap<String, String> = HashMap()
+        private var hyperStatSplitStatus: HashMap<String, String> = HashMap()
 
         private fun getHyperStatSplitStatusString(equipRef: String?): String? {
             return if (hyperStatSplitStatus.size > 0 && hyperStatSplitStatus.containsKey(equipRef))
@@ -292,7 +292,7 @@ class HyperStatSplitUserIntentHandler {
                         val pointDetails = Point.Builder().setHashMap(haystack.readMapById(id)).build()
 
                         if(pointDetails.markers.contains("writable")){
-                            Log.i(L.TAG_CCU_HSSPLIT_CPUECON, " updated point write $id")
+                            CcuLog.d(L.TAG_CCU_HSSPLIT_CPUECON, " updated point write $id")
                             haystack.pointWrite(
                                 HRef.copy(id),
                                 TunerConstants.UI_DEFAULT_VAL_LEVEL,
@@ -302,11 +302,11 @@ class HyperStatSplitUserIntentHandler {
                             )
                         }
                         if(pointDetails.markers.contains("his")){
-                            Log.i(L.TAG_CCU_HSSPLIT_CPUECON, " updated his write $id")
+                            CcuLog.d(L.TAG_CCU_HSSPLIT_CPUECON, " updated his write $id")
                             haystack.writeHisValById(id, value)
                         }
                     }
-                    Log.i(L.TAG_CCU_HSSPLIT_CPUECON, " update HyperStat Split UI Points work done")
+                    CcuLog.i(L.TAG_CCU_HSSPLIT_CPUECON, " update HyperStat Split UI Points work done")
 
                 },
                 {

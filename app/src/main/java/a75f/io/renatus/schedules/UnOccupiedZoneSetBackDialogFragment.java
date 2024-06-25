@@ -102,12 +102,12 @@ public class UnOccupiedZoneSetBackDialogFragment extends DialogFragment {
                         new android.app.AlertDialog.Builder(getActivity());
 
                 if(heatingLimitWarning.length() > 0) {
-                    builder.setMessage("Building Limit Min violated:" + "\n\n" + heatingLimitWarning.toString() +
+                    builder.setMessage("Building Limit Min violated:" + "\n\n" + heatingLimitWarning +
                             "\n" + "please go back and edit the Heating Limit Min temperature / Unoccupied Zone Setback" +
                             " to be within the temperature limits of the building or adjust the temperature limits of the building to accommodate" +
                             " the required Heating Limit Min temperature / Unoccupied Zone Setback.");
                 }else {
-                    builder.setMessage("Building Limit Max violated:" + "\n\n" + coolingLimitWarning.toString() +
+                    builder.setMessage("Building Limit Max violated:" + "\n\n" + coolingLimitWarning +
                             "\n" + "please go back and edit the Cooling Limit Max temperature / Unoccupied Zone Setback" +
                             " to be within the temperature limits of the building or adjust the temperature limits of the building to accommodate" +
                             " the required Cooling Limit Max temperature / Unoccupied Zone Setback.");
@@ -115,9 +115,7 @@ public class UnOccupiedZoneSetBackDialogFragment extends DialogFragment {
                 builder.setCancelable(false);
                 builder.setTitle(R.string.warning_ns);
                 builder.setIcon(R.drawable.ic_alert);
-                builder.setNegativeButton("OKAY", (dialog1, id) -> {
-                    dialog1.dismiss();
-                });
+                builder.setNegativeButton("OKAY", (dialog1, id) -> dialog1.dismiss());
                 android.app.AlertDialog alert = builder.create();
                 alert.show();
             }

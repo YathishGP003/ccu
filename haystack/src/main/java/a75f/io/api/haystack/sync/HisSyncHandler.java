@@ -2,7 +2,6 @@ package a75f.io.api.haystack.sync;
 
 
 import org.apache.commons.lang3.StringUtils;
-import org.joda.time.DateTime;
 import org.projecthaystack.HBool;
 import org.projecthaystack.HDateTime;
 import org.projecthaystack.HDict;
@@ -64,8 +63,8 @@ public class HisSyncHandler
     private void sync() {
         CcuLog.d(TAG, "doHisSync ->");
 
-        HashMap site = CCUHsApi.getInstance().read("site");
-        if (site.size() > 0) {
+        HashMap<Object, Object> site = CCUHsApi.getInstance().readEntity("site");
+        if (!site.isEmpty()) {
             String siteUID = CCUHsApi.getInstance().getSiteIdRef().toString();
 
             CcuLog.d(TAG,"Site is found during sync.");
@@ -94,7 +93,7 @@ public class HisSyncHandler
         }
 
         int cacheSyncFrequency = Math.max(ccuHsApi.getCacheSyncFrequency(), 1);
-        int numberOfHisEntryPerPoint = getNumberOfHisEntriesPerPoint(ccuHsApi);
+        int numberOfHisEntryPerPoint = getNumberOfHisEntriesPerPoint();
         CcuLog.d(TAG,"Processing sync for equips and devices: syncAllData "+syncAllData+" cacheSyncFrequency "+cacheSyncFrequency);
         if (syncAllData) {
             nonCovSyncPending = false;
@@ -177,7 +176,7 @@ public class HisSyncHandler
                 hDictList.clear();
             }
         }
-        if (hDictList.size() > 0) {
+        if (!hDictList.isEmpty()) {
             writeCachedHisData(hDictList, hisItemList);
         }
 
@@ -207,18 +206,18 @@ public class HisSyncHandler
     }
 
     private void syncHistorizedEquipPoints(boolean timeForQuarterHourSync, int numberOfHisEntryPerPoint) {
-        List<HashMap> allEquips = ccuHsApi.readAll("equip");
-        List<HashMap> equipsToSync = getEntitiesWithGuidForSyncing(allEquips);
+        List<HashMap<Object, Object>> allEquips = ccuHsApi.readAllEntities("equip");
+        List<HashMap<Object, Object>> equipsToSync = getEntitiesWithGuidForSyncing(allEquips);
         int totalNumberOfEquipPoints = 0;
 
-        for (HashMap equipToSync : equipsToSync) {
+        for (HashMap<Object, Object> equipToSync : equipsToSync) {
             String equipId = equipToSync.get("id").toString();
             if (!CCUHsApi.getInstance().hasEntitySynced(equipId)) {
                continue;
             }
-            List<HashMap> allPointsForEquip = ccuHsApi.readAll("point and his and equipRef == \""+ equipId +"\"");
+            List<HashMap<Object, Object>> allPointsForEquip = ccuHsApi.readAllEntities("point and his and equipRef == \""+ equipId +"\"");
             CcuLog.d(TAG,"Found " + allPointsForEquip.size() + " equip points");
-            List<HashMap> pointsToSyncForEquip = getEntitiesWithGuidForSyncing(allPointsForEquip);
+            List<HashMap<Object, Object>> pointsToSyncForEquip = getEntitiesWithGuidForSyncing(allPointsForEquip);
             totalNumberOfEquipPoints = totalNumberOfEquipPoints + pointsToSyncForEquip.size();
             CcuLog.d(TAG,"Found " + pointsToSyncForEquip.size() + " equip points that have a GUID for syncing");
             if (!pointsToSyncForEquip.isEmpty()) {
@@ -231,26 +230,25 @@ public class HisSyncHandler
     /**
      * This is a short cut to get all the occupancy points on rooms to get synced.
      * This must be revisited.
-     * @param timeForQuarterHourSync
      */
     private void syncHistorizedZonePoints(boolean timeForQuarterHourSync, int numberOfHisEntryPerPoint) {
-        List<HashMap> allZones = ccuHsApi.readAll("room");
-        List<HashMap> zonesToSync = getEntitiesWithGuidForSyncing(allZones);
+        List<HashMap<Object, Object>> allZones = ccuHsApi.readAllEntities("room");
+        List<HashMap<Object, Object>> zonesToSync = getEntitiesWithGuidForSyncing(allZones);
         int totalNumberOfZonePoints = 0;
 
-        for (HashMap zone : zonesToSync) {
+        for (HashMap<Object, Object> zone : zonesToSync) {
             String roomId = zone.get("id").toString();
 
-            ArrayList<HashMap> allPointsForZone =
-                ccuHsApi.readAll("point and his and occupancy and state and roomRef == \""+ roomId +"\"");
-            ArrayList<HashMap> schedulablePoints = ccuHsApi.readAll("point and his and schedulable and roomRef == \"" + roomId + "\"");
+            ArrayList<HashMap<Object, Object>> allPointsForZone =
+                ccuHsApi.readAllEntities("point and his and occupancy and state and roomRef == \""+ roomId +"\"");
+            ArrayList<HashMap<Object, Object>> schedulablePoints = ccuHsApi.readAllEntities("point and his and schedulable and roomRef == \"" + roomId + "\"");
             allPointsForZone.addAll(schedulablePoints);
             CcuLog.d(TAG,"Found " + allPointsForZone.size() + " zone points");
-            List<HashMap> hvacModePoint =
-                    ccuHsApi.readAll("hvacMode and his and zone and roomRef == \""+ roomId +"\"");
+            List<HashMap<Object, Object>> hvacModePoint =
+                    ccuHsApi.readAllEntities("hvacMode and his and zone and roomRef == \""+ roomId +"\"");
             CcuLog.d(TAG,"Found " + allPointsForZone.size() + " zone points"+hvacModePoint);
-            List<HashMap> pointsToSyncForEquip = getEntitiesWithGuidForSyncing(allPointsForZone);
-            List<HashMap> hvacModePointForEquip = getEntitiesWithGuidForSyncing(hvacModePoint);
+            List<HashMap<Object, Object>> pointsToSyncForEquip = getEntitiesWithGuidForSyncing(allPointsForZone);
+            List<HashMap<Object, Object>> hvacModePointForEquip = getEntitiesWithGuidForSyncing(hvacModePoint);
             totalNumberOfZonePoints = totalNumberOfZonePoints + pointsToSyncForEquip.size() + hvacModePointForEquip.size();
             CcuLog.d(TAG,"Found " + pointsToSyncForEquip.size() + " zone points that have a GUID for syncing");
             if (!pointsToSyncForEquip.isEmpty()) {
@@ -260,24 +258,23 @@ public class HisSyncHandler
                 syncPoints(roomId, hvacModePointForEquip, timeForQuarterHourSync, SYNC_TYPE_EQUIP, numberOfHisEntryPerPoint);
             }
         }
-        numberOfPoints = numberOfPoints + totalNumberOfZonePoints;
         //For testing purpose, will be removed before merging
         numberOfPoints = 0;
         totalHisItemCount = 0;
     }
 
     private void syncHistorizedDevicePoints(boolean timeForQuarterHourSync, int numberOfHisEntryPerPoint) {
-    List<HashMap> allEquips = ccuHsApi.readAll("device");
-    List<HashMap> devicesToSync = getEntitiesWithGuidForSyncing(allEquips);
+    List<HashMap<Object, Object>> allEquips = ccuHsApi.readAllEntities("device");
+    List<HashMap<Object, Object>> devicesToSync = getEntitiesWithGuidForSyncing(allEquips);
         int totalNumberOfDevicePoints = 0;
-        for (HashMap deviceToSync : devicesToSync) {
+        for (HashMap<Object, Object> deviceToSync : devicesToSync) {
             String deviceId = deviceToSync.get("id").toString();
             if (!CCUHsApi.getInstance().hasEntitySynced(deviceId)) {
                 continue;
             }
-            List<HashMap> allPointsForDevice = ccuHsApi.readAll("point and his and deviceRef == \""+ deviceId +"\"");
+            List<HashMap<Object, Object>> allPointsForDevice = ccuHsApi.readAllEntities("point and his and deviceRef == \""+ deviceId +"\"");
             CcuLog.d(TAG,"Found " + allPointsForDevice.size() + " device points");
-            List<HashMap> pointsToSyncForDevice = getEntitiesWithGuidForSyncing(allPointsForDevice);
+            List<HashMap<Object, Object>> pointsToSyncForDevice = getEntitiesWithGuidForSyncing(allPointsForDevice);
             totalNumberOfDevicePoints = totalNumberOfDevicePoints + pointsToSyncForDevice.size();
             CcuLog.d(TAG,"Found " + pointsToSyncForDevice.size() + " device points that have a GUID for syncing");
             if (!pointsToSyncForDevice.isEmpty()) {
@@ -288,13 +285,13 @@ public class HisSyncHandler
     }
 
 
-    private void syncPoints(String deviceOrEquipGuid, List<HashMap> pointList, boolean timeForQuarterHourSync, String syncType, int numberOfHisEntryPerPoint) {
+    private void syncPoints(String deviceOrEquipGuid, List<HashMap<Object, Object>> pointList, boolean timeForQuarterHourSync, String syncType, int numberOfHisEntryPerPoint) {
 
         List<HisItem> hisItemsToSyncForDeviceOrEquip = new ArrayList<>();
         List<HDict> hDictList = new ArrayList<>();
         Date quarterHourSyncDateTimeForDeviceOrEquip = new Date(System.currentTimeMillis());
 
-        for (HashMap pointToSync : pointList) {
+        for (HashMap<Object, Object> pointToSync : pointList) {
             if (pointToSync.get("tz") == null) {
                 CcuLog.e(TAG," His point without TZ cannot be synced "+pointToSync);
                 continue;
@@ -337,7 +334,7 @@ public class HisSyncHandler
                                       + pointDescription + " is null. Skipping.");
                     }
                 }
-            } else if (unsyncedHisItems.isEmpty() && timeForQuarterHourSync && !skipForcedHisWrites(pointToSync)) {
+            } else if (timeForQuarterHourSync && !skipForcedHisWrites(pointToSync)) {
 
                 HisItem latestHisItemToReSync = ccuHsApi.tagsDb.getLastHisItem(HRef.copy(pointID));
                 if (latestHisItemToReSync != null) {
@@ -419,7 +416,7 @@ public class HisSyncHandler
     }
     
     //These points need not be synced unless there is a 'history' entry
-    private boolean skipForcedHisWrites(HashMap pointToSync) {
+    private boolean skipForcedHisWrites(HashMap<Object, Object> pointToSync) {
         return pointToSync.containsKey("heartbeat")
                 || pointToSync.containsKey("rssi")
                 || (pointToSync.containsKey("system") && pointToSync.containsKey("clock"))
@@ -432,7 +429,7 @@ public class HisSyncHandler
     private HDict[] hDictListToArray(List<HDict> hDictList) {
         HDict[] hDicts = null;
 
-        if (hDictList != null && hDictList.size() > 0) {
+        if (hDictList != null && !hDictList.isEmpty()) {
             hDicts = new HDict[hDictList.size()];
             int hDictIterator = 0;
             for (HDict hDict : hDictList) {
@@ -449,19 +446,17 @@ public class HisSyncHandler
         HTimeZone hTimeZone = HTimeZone.make(pointTimezone);
         HDateTime hDateTime = HDateTime.make(pointTimestamp, hTimeZone);
 
-        HDict hDict = new HDictBuilder()
+        return new HDictBuilder()
                 .add("id", HRef.make(StringUtils.stripStart(pointGuid,"@")))
                 .add("val", pointValue)
                 .add("ts", hDateTime)
                 .toDict();
-
-        return hDict;
     }
 
-    private List<HashMap> getEntitiesWithGuidForSyncing(List<HashMap> entityList) {
-        List<HashMap> entitiesWithGuid = new ArrayList<>();
+    private List<HashMap<Object, Object>> getEntitiesWithGuidForSyncing(List<HashMap<Object, Object>> entityList) {
+        List<HashMap<Object, Object>> entitiesWithGuid = new ArrayList<>();
 
-        for (HashMap entity : entityList) {
+        for (HashMap<Object, Object> entity : entityList) {
             if (CCUHsApi.getInstance().hasEntitySynced(entity.get("id").toString())) {
                 entitiesWithGuid.add(entity);
             } else if (!entitySyncRequired) {
@@ -505,7 +500,7 @@ public class HisSyncHandler
         purgeThread.start();
     }
 
-    private int getNumberOfHisEntriesPerPoint(CCUHsApi ccuHsApi) {
+    private int getNumberOfHisEntriesPerPoint() {
         return 50;
     }
 

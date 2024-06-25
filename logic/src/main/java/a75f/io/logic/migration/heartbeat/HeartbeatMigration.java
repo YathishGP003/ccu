@@ -1,12 +1,11 @@
 package a75f.io.logic.migration.heartbeat;
-
-import android.util.Log;
 import java.util.HashMap;
 import java.util.List;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Tags;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.bo.building.dab.DabEquip;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.heartbeat.HeartBeat;
@@ -23,7 +22,7 @@ public class HeartbeatMigration {
 
     private void checkForHeartbeatMigration(){
         if (!PreferenceUtil.isHeartbeatMigrationDone()) {
-            Log.i(CCU_HEART_BEAT_MIGRATION,"heartbeat migration started ");
+            CcuLog.i(CCU_HEART_BEAT_MIGRATION,"heartbeat migration started ");
             upgradeEquipsWithHeartbeatPoints(CCUHsApi.getInstance());
             PreferenceUtil.setHeartbeatMigrationStatus(true);
         }
@@ -64,7 +63,7 @@ public class HeartbeatMigration {
                         modbusEquip.getSiteRef(), modbusEquip.getRoomRef(), modbusEquip.getFloorRef(),
                         Integer.parseInt(slaveId), "modbus", ProfileType.valueOf(modbusEquip.getProfile()),
                         modbusEquip.getTz()));
-                Log.i(CCU_HEART_BEAT_MIGRATION,"heartbeat point added for modbus with the address "+slaveId);
+                CcuLog.d(CCU_HEART_BEAT_MIGRATION,"heartbeat point added for modbus with the address "+slaveId);
           }
         });
     }
@@ -80,7 +79,7 @@ public class HeartbeatMigration {
             String nodeAddress = equip.getGroup();
             String equipDisplay = equipDis+nodeAddress;
             if(!isHeartbeatCreated(hayStack, nodeAddress)){
-                String heartBeatId = "";
+                String heartBeatId;
                 if(isStandAlone){
                     heartBeatId = hayStack.addPoint(HeartBeat.getHeartBeatPoint(equipDisplay, equip.getId(),
                             equip.getSiteRef(), equip.getRoomRef(), equip.getFloorRef(), Integer.parseInt(nodeAddress),
@@ -91,7 +90,7 @@ public class HeartbeatMigration {
                             equip.getSiteRef(), equip.getRoomRef(), equip.getFloorRef(), Integer.parseInt(nodeAddress),
                             profile, equip.getTz(), false));
                 }
-                Log.i(CCU_HEART_BEAT_MIGRATION,"heartbeat point added for "+ profile +" with the address  "+nodeAddress);
+                CcuLog.d(CCU_HEART_BEAT_MIGRATION,"heartbeat point added for "+ profile +" with the address  "+nodeAddress);
                 addRssiPointToDevice(hayStack, profile, nodeAddress, equip.getTz(), heartBeatId);
             }
         });
@@ -109,6 +108,6 @@ public class HeartbeatMigration {
                     timeZone);
             rawPoint.setPointRef(heartBeatId);
             hayStack.addPoint(rawPoint);
-            Log.i(CCU_HEART_BEAT_MIGRATION,"rssi point added for "+ profile +" with the address "+nodeAddress);
+            CcuLog.d(CCU_HEART_BEAT_MIGRATION,"rssi point added for "+ profile +" with the address "+nodeAddress);
     }
 }

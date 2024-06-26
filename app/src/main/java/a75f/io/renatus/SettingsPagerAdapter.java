@@ -1,10 +1,16 @@
 package a75f.io.renatus;
 
+import android.view.ViewGroup;
+
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.fragment.app.FragmentStatePagerAdapter;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import a75f.io.logger.CcuLog;
 import a75f.io.renatus.tuners.TunerFragment;
 
 /**
@@ -12,34 +18,19 @@ import a75f.io.renatus.tuners.TunerFragment;
  */
 
 public class SettingsPagerAdapter extends FragmentStatePagerAdapter {
+
+    private List<Fragment> fragments;
     public SettingsPagerAdapter(FragmentManager fm) {
         super(fm);
+        fragments = new ArrayList<>();
+        fragments.add(FloorPlanFragment.newInstance());
+        fragments.add(SystemConfigFragment.newInstance());
+        fragments.add(SettingsFragment.newInstance());
+        fragments.add(TunerFragment.newInstance());
     }
 
-
-    @Override
     public Fragment getItem(int position) {
-        // getItem is called to instantiate the fragment for the given page.
-        // Return a PlaceholderFragment (defined as a static inner class below).
-        Fragment fragment = null;
-        switch (position) {
-            case 0:
-                fragment = FloorPlanFragment.newInstance();
-                break;
-            case 1:
-                fragment = SystemConfigFragment.newInstance();
-                //fragment = SystemProfileFragment.newInstance();
-                break;
-            case 2:
-                //fragment = USBHomeFragment.getInstance();
-                fragment = SettingsFragment.newInstance();
-                break;
-            case 3:
-                //fragment = USBHomeFragment.getInstance();
-                fragment = TunerFragment.newInstance();
-                break;
-        }
-        return fragment;
+        return fragments.get(position);
     }
 
 
@@ -69,5 +60,15 @@ public class SettingsPagerAdapter extends FragmentStatePagerAdapter {
                 return "Tuners";
         }
         return null;
+    }
+
+    /**
+     * Intercepting the destroyItem method to avoid view deletion and creation during tab switch.
+     * Messing with android FW : but it seems like a decent quick fix that works till we upgrade to new ViewPager.
+     */
+    @Override
+    public void destroyItem(ViewGroup container, int position, Object object) {
+        CcuLog.i("UI_PROFILING", "destroyItem: " + position + " " + object.toString());
+        //super.destroyItem(container, position, object);
     }
 }

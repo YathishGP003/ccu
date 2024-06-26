@@ -20,7 +20,6 @@ import a75f.io.device.mesh.LSerial;
 import a75f.io.device.serial.MessageType;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
-import a75f.io.logic.bo.util.TemperatureMode;
 
 public class HyperSplitMessageSender {
 
@@ -34,9 +33,9 @@ public class HyperSplitMessageSender {
      * @param equipRef
      */
     public static void sendSeedMessage(String zone, int address, String equipRef,
-                                       boolean checkDuplicate, TemperatureMode mode) {
+                                       boolean checkDuplicate) {
         HyperSplit.HyperSplitCcuDatabaseSeedMessage_t seedMessage = HyperSplitMessageGenerator.getSeedMessage(zone, address,
-                equipRef, mode);
+                equipRef);
         if (DLog.isLoggingEnabled()) {
             CcuLog.i(L.TAG_CCU_SERIAL, "Send Proto Buf Message " + HYPERSPLIT_CCU_DATABASE_SEED_MESSAGE);
             CcuLog.i(L.TAG_CCU_SERIAL, seedMessage.getSerializedSettingsData().toString());
@@ -68,9 +67,8 @@ public class HyperSplitMessageSender {
      * @param equipRef
      */
     public static void sendSettingsMessage(Zone zone, int address, String equipRef) {
-        int modeType = CCUHsApi.getInstance().readHisValByQuery("zone and hvacMode and roomRef == \"" + zone.getId() + "\"").intValue();
         HyperSplit.HyperSplitSettingsMessage_t settings = HyperSplitMessageGenerator.getSettingsMessage(
-                zone.getDisplayName(), address, equipRef, TemperatureMode.values()[modeType]);
+                zone.getDisplayName(), address, equipRef);
         if (DLog.isLoggingEnabled()) {
             CcuLog.i(L.TAG_CCU_SERIAL, settings.toString());
         }
@@ -118,11 +116,8 @@ public class HyperSplitMessageSender {
      */
     public static void sendControlMessage(int address, String equipRef) {
         Log.d(L.TAG_CCU_SERIAL, "sendControlMessage("+address+","+equipRef+")");
-        Equip equip = HSUtil.getEquipInfo(equipRef);
-        int modeType = CCUHsApi.getInstance().readHisValByQuery("zone and hvacMode and roomRef" +
-                " == \"" + equip.getRoomRef() + "\"").intValue();
         HyperSplit.HyperSplitControlsMessage_t controls = HyperSplitMessageGenerator.getControlMessage(address,
-                equipRef, TemperatureMode.values()[modeType]).build();
+                equipRef).build();
 
         if (DLog.isLoggingEnabled()) {
             CcuLog.i(L.TAG_CCU_SERIAL, controls.toString());

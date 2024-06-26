@@ -25,7 +25,6 @@ import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode;
 import a75f.io.logic.bo.building.hyperstat.common.BasicSettings;
-import a75f.io.logic.bo.util.TemperatureMode;
 import a75f.io.logic.tuners.TunerConstants;
 
 import static a75f.io.logic.bo.building.schedules.Occupancy.AUTOAWAY;
@@ -47,17 +46,18 @@ public class HyperStatMessageGenerator {
     
     /**
      * Generates seed message for a node from haystack data.
+     *
      * @param zone
      * @param address
      * @param equipRef
      * @return
      */
     public static HyperStatCcuDatabaseSeedMessage_t getSeedMessage(String zone, int address,
-                                                                   String equipRef, TemperatureMode temperatureMode) {
+                                                                   String equipRef) {
         HyperStatSettingsMessage_t hyperStatSettingsMessage_t = getSettingsMessage(zone, address,
-                equipRef, temperatureMode);
+                equipRef);
         HyperStatControlsMessage_t hyperStatControlsMessage_t = getControlMessage(address,
-                equipRef, temperatureMode).build();
+                equipRef).build();
         HyperStat.HyperStatSettingsMessage2_t hyperStatSettingsMessage2_t = getSetting2Message(address, equipRef);
         HyperStat.HyperStatSettingsMessage3_t hyperStatSettingsMessage3_t = getSetting3Message(address, equipRef);
         CcuLog.i(L.TAG_CCU_SERIAL, "Seed Message t"+hyperStatSettingsMessage_t.toByteString().toString());
@@ -83,7 +83,7 @@ public class HyperStatMessageGenerator {
      * @return
      */
     public static HyperStatSettingsMessage_t getSettingsMessage(String zone, int address,
-                                                                String equipRef, TemperatureMode mode) {
+                                                                String equipRef) {
         int temperatureMode = (int) Domain.readValAtLevelByDomain(DomainName.temperatureMode,
                 TunerConstants.SYSTEM_BUILDING_VAL_LEVEL);
 
@@ -112,7 +112,7 @@ public class HyperStatMessageGenerator {
         return HyperStatSettingsMessage_t.newBuilder()
             .setRoomName(zone)
                 .setHeatingDeadBand((int) (getStandaloneHeatingDeadband(equipRef) * 10))
-                .setCoolingDeadBand((int) (getStandaloneCoolingDeadband(equipRef, mode) * 10))
+                .setCoolingDeadBand((int) (getStandaloneCoolingDeadband(equipRef) * 10))
                 .setMinCoolingUserTemp(minCoolingUserTemp)
                 .setMaxCoolingUserTemp(maxCoolingUserTemp)
                 .setMinHeatingUserTemp(minHeatingUserTemp)
@@ -139,22 +139,24 @@ public class HyperStatMessageGenerator {
     
     /**
      * Generate control message for a node from haystack data.
+     *
      * @param address
      * @param equipRef
      * @return
      */
-    public static HyperStatControlsMessage_t.Builder getControlMessage(int address, String equipRef,
-                                                                       TemperatureMode mode) {
+    public static HyperStatControlsMessage_t.Builder getControlMessage(int address, String equipRef) {
 
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap device = hayStack.read("device and addr == \"" + address + "\"");
-
+        String temperatureMode = (int) Domain.readValAtLevelByDomain(DomainName.temperatureMode,
+                TunerConstants.SYSTEM_BUILDING_VAL_LEVEL) == 0 ? HyperStat.HyperStatTemperatureMode_e.HYPERSTAT_TEMP_MODE_DUAL_FIXED_DB.name()
+                : HyperStat.HyperStatTemperatureMode_e.HYPERSTAT_TEMP_MODE_DUAL_VARIABLE_DB.name();
         // Sense profile does not have control messages
         if(device.containsKey("monitoring")) return HyperStat.HyperStatControlsMessage_t.newBuilder();
 
         HyperStatControlsMessage_t.Builder controls = HyperStat.HyperStatControlsMessage_t.newBuilder();
-        controls.setSetTempCooling((int)(getDesiredTempCooling(equipRef, mode) * 2));
-        controls.setSetTempHeating((int)(getDesiredTempHeating(equipRef, mode) * 2));
+        controls.setSetTempCooling((int)(getDesiredTempCooling(equipRef) * 2));
+        controls.setSetTempHeating((int)(getDesiredTempHeating(equipRef) * 2));
         BasicSettings settings = new BasicSettings(
                 StandaloneConditioningMode.values()[(int)getFanMode(equipRef)],
                 StandaloneFanStage.values()[(int)getConditioningMode(equipRef)]
@@ -165,14 +167,14 @@ public class HyperStatMessageGenerator {
         controls.setOperatingMode(getOperatingMode(equipRef));
 
         Log.i(L.TAG_CCU_DEVICE,
-                "Desired Heat temp "+((int)getDesiredTempHeating(equipRef, mode) * 2)+
-                 "\n Desired Cool temp "+((int)getDesiredTempCooling(equipRef, mode) * 2)+
+                "Desired Heat temp "+((int)getDesiredTempHeating(equipRef) * 2)+
+                 "\n Desired Cool temp "+((int)getDesiredTempCooling(equipRef) * 2)+
                  "\n DeviceFanMode "+getDeviceFanMode(settings).name()+
                  "\n ConditioningMode"+getConditioningMode(settings,address).name()+
                  "\n occupancyMode :"+isInUnOccupiedMode(equipRef)+
                 "\n operatingMode :"+controls.getOperatingMode()+
                  "\n occupancyMode :"+isInUnOccupiedMode(equipRef)+
-                "\n TemperatureMode :"+mode);
+                "\n TemperatureMode :"+temperatureMode);
         controls.setFanSpeed(getDeviceFanMode(settings));
         controls.setConditioningMode(getConditioningMode(settings,address));
         controls.setUnoccupiedMode(isInUnOccupiedMode(equipRef));
@@ -209,17 +211,11 @@ public class HyperStatMessageGenerator {
         return controls;
     }
     
-    public static double getDesiredTempCooling(String equipRef, TemperatureMode mode) {
+    public static double getDesiredTempCooling(String equipRef) {
         HashMap<Object, Object> desiredTempCooling;
-        if(mode == TemperatureMode.HEATING){
-            desiredTempCooling = CCUHsApi.getInstance().readEntity("desired and temp and " +
-                    "heating and equipRef == \"" + equipRef +
-                    "\"");
-        }else {
-            desiredTempCooling = CCUHsApi.getInstance().readEntity("desired and temp and " +
-                    "cooling and equipRef == \"" + equipRef +
-                    "\"");
-        }
+        desiredTempCooling = CCUHsApi.getInstance().readEntity("desired and temp and " +
+                "cooling and equipRef == \"" + equipRef +
+                "\"");
         try {
             return CCUHsApi.getInstance().readPointPriorityVal(desiredTempCooling.get("id").toString());
         } catch (NullPointerException e) {
@@ -228,17 +224,11 @@ public class HyperStatMessageGenerator {
         return 0;
     }
 
-    public static double getDesiredTempHeating(String equipRef, TemperatureMode mode) {
+    public static double getDesiredTempHeating(String equipRef) {
         HashMap<Object, Object> desiredTempHeating;
-        if(mode == TemperatureMode.COOLING){
-            desiredTempHeating = CCUHsApi.getInstance().readEntity("desired and temp and " +
-                    "cooling and equipRef == \"" + equipRef +
-                    "\"");
-        }else {
-            desiredTempHeating = CCUHsApi.getInstance().readEntity("desired and temp and " +
-                    "heating and equipRef == \"" + equipRef +
-                    "\"");
-        }
+        desiredTempHeating = CCUHsApi.getInstance().readEntity("desired and temp and " +
+                "heating and equipRef == \"" + equipRef +
+                "\"");
         try {
             return CCUHsApi.getInstance().readPointPriorityVal(desiredTempHeating.get("id").toString());
         } catch (NullPointerException e) {
@@ -338,7 +328,7 @@ public class HyperStatMessageGenerator {
             return hayStack.readDefaultVal("dehumidifier and control and group == \"" + address + "\"").intValue();
         }
 
-    private static double getStandaloneCoolingDeadband(String equipRef, TemperatureMode mode) {
+    private static double getStandaloneCoolingDeadband(String equipRef) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap collingDeadband = hayStack.read("point and deadband and cooling and not multiplier and roomRef == \""+HSUtil.getZoneIdFromEquipId(equipRef)+"\"");
         try {
@@ -416,7 +406,7 @@ public class HyperStatMessageGenerator {
         Log.d(L.TAG_CCU_SERIAL,"Reset set to true");
         int modeType = CCUHsApi.getInstance().readHisValByQuery("zone and hvacMode and roomRef" +
                 " == \"" + equip.get("roomRef").toString() + "\"").intValue();
-        return getControlMessage(address ,equipRef, TemperatureMode.values()[modeType]).setReset(true).build();
+        return getControlMessage(address ,equipRef).setReset(true).build();
     }
 
     public static double getFanMode(String equipRef){

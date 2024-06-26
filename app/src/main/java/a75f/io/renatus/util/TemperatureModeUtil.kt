@@ -4,7 +4,7 @@ import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
 import a75f.io.logic.tuners.TunerConstants
 
-class TemperatureModeModel {
+class TemperatureModeUtil {
     fun getTemperatureMode(): Double {
         return Domain.readValAtLevelByDomain(DomainName.temperatureMode,
             TunerConstants.SYSTEM_BUILDING_VAL_LEVEL)

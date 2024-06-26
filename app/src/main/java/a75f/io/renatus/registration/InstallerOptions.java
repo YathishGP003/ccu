@@ -103,7 +103,7 @@ import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.util.RxjavaUtil;
-import a75f.io.renatus.util.TemperatureModeModel;
+import a75f.io.renatus.util.TemperatureModeUtil;
 import a75f.io.renatus.views.CustomCCUSwitch;
 import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
 import a75f.io.renatus.views.MasterControl.MasterControlUtil;
@@ -458,13 +458,13 @@ public class InstallerOptions extends Fragment {
     private void setUpTemperatureModeSpinner(View rootView, CCUHsApi ccuHsApi) {
         this.temperatureModeSpinner = rootView.findViewById(R.id.spinnerTemperatureMode);
         CCUUiUtil.setSpinnerDropDownColor(temperatureModeSpinner,this.getContext());
-        ArrayAdapter<String> temperatureModeAdapter = getAdapterValue(new TemperatureModeModel().getTemperatureModeArray());
+        ArrayAdapter<String> temperatureModeAdapter = getAdapterValue(new TemperatureModeUtil().getTemperatureModeArray());
         this.temperatureModeSpinner.setAdapter(temperatureModeAdapter);
-        this.temperatureModeSpinner.setSelection((int) new TemperatureModeModel().getTemperatureMode());
+        this.temperatureModeSpinner.setSelection((int) new TemperatureModeUtil().getTemperatureMode());
         this.temperatureModeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
-                new TemperatureModeModel().setTemperatureMode(position);
+                new TemperatureModeUtil().setTemperatureMode(position);
             }
             @Override
             public void onNothingSelected(AdapterView<?> adapterView) {

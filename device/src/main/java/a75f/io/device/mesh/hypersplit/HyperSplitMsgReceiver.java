@@ -729,8 +729,8 @@ public class HyperSplitMsgReceiver {
                 TemperatureMode.values()[modeType]);
         double coolingDesiredTemp = (double) message.getSetTempCooling() / 2;
         double heatingDesiredTemp = (double) message.getSetTempHeating() / 2;
-        double currentCoolingDesiredTemp = HyperSplitMessageGenerator.getDesiredTempCooling(hsEquip.getId(), temperatureMode);
-        double currentHeatingDesiredTemp = HyperSplitMessageGenerator.getDesiredTempHeating(hsEquip.getId(), temperatureMode);
+        double currentCoolingDesiredTemp = HyperSplitMessageGenerator.getDesiredTempCooling(hsEquip.getId());
+        double currentHeatingDesiredTemp = HyperSplitMessageGenerator.getDesiredTempHeating(hsEquip.getId());
 
         if(currentHeatingDesiredTemp != heatingDesiredTemp || currentCoolingDesiredTemp != coolingDesiredTemp) {
             double averageDesiredTemp = (coolingDesiredTemp + heatingDesiredTemp)/2;

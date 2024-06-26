@@ -122,6 +122,9 @@ public class CCUHsApi
     public Boolean isAuthorized = false;
 
     private static int ccuLogLevel = -1;
+
+    private static double mCurrentTemperature =-1;
+    private static double mCurrentHumidity =-1;
     private List<OnCcuRegistrationCompletedListener> onCcuRegistrationCompletedListeners = new ArrayList<>();
     public static CCUHsApi getInstance() {
         if (instance == null) {
@@ -2533,6 +2536,8 @@ public class CCUHsApi
                             //Remove unicode chars and units. 48.32°F ->48.32
                             double tempVal = Double.parseDouble(r.get("val").toString().replaceAll("[^-?\\d.]", ""));
                             CcuLog.d(TAG_CCU_OAO,date+" External Temp: "+tempVal);
+                            CcuLog.d("CCU_OAO",date+" External Temp: "+tempVal);
+                            mCurrentTemperature = tempVal;
                             return tempVal;
 
                         }
@@ -2540,11 +2545,16 @@ public class CCUHsApi
                 }
             }
         } else {
-            HGrid hisGrid = hClient.hisRead(tempWeatherRef, "current");
-            if (hisGrid != null && hisGrid.numRows() > 0) {
-                hisGrid.dump();
-                HRow r = hisGrid.row(hisGrid.numRows() - 1);
-                return Double.parseDouble(r.get("val").toString().replaceAll("[^-?\\d.]", ""));
+            if(((appAliveMinutes % 15) == 0) || (appAliveMinutes == 1)){
+                HGrid hisGrid = hClient.hisRead(tempWeatherRef, "current");
+                if (hisGrid != null && hisGrid.numRows() > 0) {
+                    hisGrid.dump();
+                    HRow r = hisGrid.row(hisGrid.numRows() - 1);
+                    mCurrentTemperature = Double.parseDouble(r.get("val").toString().replaceAll("[^-?\\d.]", ""));
+                    return mCurrentTemperature;
+                }
+            }else{
+                return mCurrentTemperature;
             }
         }
         return 0;
@@ -2573,19 +2583,25 @@ public class CCUHsApi
                             HDateTime date = (HDateTime) r.get("ts");
                             double humidityVal = Double.parseDouble(r.get("val").toString().replaceAll("[^\\d.]", ""));
                             CcuLog.d(TAG_CCU_OAO, date + " External Humidity: " + humidityVal);
-                            return 100 * humidityVal;
+                            mCurrentHumidity = 100 * humidityVal;
+                            return mCurrentHumidity;
 
                         }
                     }
                 }
             }
         } else {
-            HGrid hisGrid = hClient.hisRead(humidityWeatherRef, "current");
-            if (hisGrid != null && hisGrid.numRows() > 0) {
-                hisGrid.dump();
-                HRow r = hisGrid.row(hisGrid.numRows() - 1);
-                double humidityVal = Double.parseDouble(r.get("val").toString().replaceAll("[^\\d.]", ""));
-                return 100 * humidityVal;
+            if(((appAliveMinutes % 15) == 0) || (appAliveMinutes == 1)) {
+                HGrid hisGrid = hClient.hisRead(humidityWeatherRef, "current");
+                if (hisGrid != null && hisGrid.numRows() > 0) {
+                    hisGrid.dump();
+                    HRow r = hisGrid.row(hisGrid.numRows() - 1);
+                    double humidityVal = Double.parseDouble(r.get("val").toString().replaceAll("[^\\d.]", ""));
+                    mCurrentHumidity = 100 * humidityVal;
+                    return mCurrentHumidity;
+                }
+            } else{
+                return mCurrentHumidity;
             }
         }
         return 0;

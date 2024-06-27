@@ -259,7 +259,6 @@ public class Globals {
         CCUHsApi.getInstance().trimObjectBoxHisStore();
         importTunersAndScheduleJobs();
         handleAutoCommissioning();
-        DomainManager.INSTANCE.buildDomain(CCUHsApi.getInstance());
         updateCCUAhuRef();
         setRecoveryMode();
 
@@ -372,9 +371,8 @@ public class Globals {
             return;
         }
         HashMap<Object, Object> equip = CCUHsApi.getInstance().readEntity("equip and system and not modbus and not connectModule");
-        if (equip.containsKey("domainName")) {
-            updatingDomainEquip(CCUHsApi.getInstance());
-        }
+        DomainManager.INSTANCE.buildDomain(CCUHsApi.getInstance());
+
         boolean isDefaultSystem = false;
         if (equip != null && equip.size() > 0) {
             //BuildingTuners.getInstance().addBuildingTunerEquip();
@@ -622,14 +620,6 @@ public class Globals {
         }
     }
 
-    private void updatingDomainEquip(CCUHsApi ccuHsApi) {
-        if (Domain.systemEquip == null || Domain.systemEquip.getEquipRef().equals("null")) {
-            DomainManager.INSTANCE.addSystemDomainEquip(ccuHsApi);
-        }
-        if (Domain.cmBoardDevice == null || Domain.systemEquip.getEquipRef().equals("null")) {
-            DomainManager.INSTANCE.addCmBoardDevice(ccuHsApi);
-        }
-    }
 
     private String getDomainSafeProfile(String profile) {
         switch (profile) {

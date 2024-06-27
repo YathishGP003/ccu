@@ -1,4 +1,5 @@
 package a75f.io.logic;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
@@ -6,6 +7,7 @@ import android.preference.PreferenceManager;
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
 import org.projecthaystack.client.HClient;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -68,8 +70,6 @@ import a75f.io.logic.bo.building.system.vav.VavFullyModulatingRtu;
 import a75f.io.logic.bo.building.system.vav.VavIERtu;
 import a75f.io.logic.bo.building.system.vav.VavStagedRtu;
 import a75f.io.logic.bo.building.system.vav.VavStagedRtuWithVfd;
-
-
 import a75f.io.logic.bo.building.vav.VavAcbProfile;
 import a75f.io.logic.bo.building.vav.VavParallelFanProfile;
 import a75f.io.logic.bo.building.vav.VavReheatProfile;
@@ -84,12 +84,7 @@ import a75f.io.logic.jobs.bearertoken.BearerTokenManager;
 import a75f.io.logic.migration.MigrationHandler;
 import a75f.io.logic.migration.heartbeat.HeartbeatDiagMigration;
 import a75f.io.logic.migration.heartbeat.HeartbeatMigration;
-import a75f.io.logic.migration.heartbeat.HeartbeatTagMigration;
-import a75f.io.logic.migration.idupoints.IduPointsMigration;
-import a75f.io.logic.migration.oao.OAODamperOpenReasonMigration;
-import a75f.io.logic.migration.smartnode.SmartNodeMigration;
 import a75f.io.logic.tuners.TunerEquip;
-import a75f.io.logic.tuners.TunerUpgrades;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.logic.util.CCUProxySettings;
 import a75f.io.logic.util.MigrationUtil;
@@ -269,7 +264,6 @@ public class Globals {
         CCUHsApi.getInstance().trimObjectBoxHisStore();
         importTunersAndScheduleJobs();
         handleAutoCommissioning();
-        DomainManager.INSTANCE.buildDomain(CCUHsApi.getInstance());
         updateCCUAhuRef();
         setRecoveryMode();
 
@@ -396,9 +390,8 @@ public class Globals {
             return;
         }
         HashMap<Object, Object> equip = CCUHsApi.getInstance().readEntity("equip and system and not modbus and not connectModule");
-        if (equip.containsKey("domainName")) {
-            updatingDomainEquip(CCUHsApi.getInstance());
-        }
+        DomainManager.INSTANCE.buildDomain(CCUHsApi.getInstance());
+
         boolean isDefaultSystem = false;
         if (equip != null && equip.size() > 0) {
             //BuildingTuners.getInstance().addBuildingTunerEquip();
@@ -647,14 +640,6 @@ public class Globals {
         }
     }
 
-    private void updatingDomainEquip(CCUHsApi ccuHsApi) {
-        if (Domain.systemEquip == null || Domain.systemEquip.getEquipRef().equals("null")) {
-            DomainManager.INSTANCE.addSystemDomainEquip(ccuHsApi);
-        }
-        if (Domain.cmBoardDevice == null || Domain.systemEquip.getEquipRef().equals("null")) {
-            DomainManager.INSTANCE.addCmBoardDevice(ccuHsApi);
-        }
-    }
 
     private String getDomainSafeProfile(String profile) {
         switch (profile) {

@@ -5,7 +5,6 @@ import android.app.AlarmManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -14,11 +13,11 @@ import android.widget.Spinner;
 
 import androidx.annotation.Nullable;
 
-import java.util.HashMap;
 import java.util.TimeZone;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Site;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.logic.tuners.TunerEquip;
@@ -71,13 +70,7 @@ public class RegisterGatherSiteDetails extends Activity {
 
                         saveSite(siteName, siteCity, siteZip);
 
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-
-                                next();
-                            }
-                        });
+                        runOnUiThread(RegisterGatherSiteDetails.this::next);
                     }
                 }.start();
 
@@ -87,12 +80,12 @@ public class RegisterGatherSiteDetails extends Activity {
     
     private void populateAndUpdateTimeZone()
     {
-        timeZoneAdapter= new ArrayAdapter <String> (this, android.R.layout.simple_spinner_item );
+        timeZoneAdapter= new ArrayAdapter<>(this, android.R.layout.simple_spinner_item);
         timeZoneAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         String[] tzIds = TimeZone.getAvailableIDs();
-        
-        for(int i = 0; i < tzIds.length; i++) {
-            timeZoneAdapter.add(tzIds[i]);
+
+        for (String tzId : tzIds) {
+            timeZoneAdapter.add(tzId);
         }
         
         mTimeZoneSelector = findViewById(R.id.timeZoneSelector);
@@ -108,9 +101,8 @@ public class RegisterGatherSiteDetails extends Activity {
         finish();
     }
 
-    public String saveSite(String siteName, String siteCity, String siteZip) {
-        HashMap site = CCUHsApi.getInstance().read("site");
-    
+    public void saveSite(String siteName, String siteCity, String siteZip) {
+
         String tzID = mTimeZoneSelector.getSelectedItem().toString();
         AlarmManager am = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
         am.setTimeZone(tzID);
@@ -125,17 +117,12 @@ public class RegisterGatherSiteDetails extends Activity {
                 .setGeoZip(siteZip)
                 .setArea(10000).build();
         String localSiteId = CCUHsApi.getInstance().addSite(s75f);
-        Log.i(TAG, "LocalSiteID: " + localSiteId + " tz " + s75f.getTz());
+        CcuLog.i(TAG, "LocalSiteID: " + localSiteId + " tz " + s75f.getTz());
         TunerEquip.INSTANCE.initialize(CCUHsApi.getInstance());
-        //BuildingTuners.getInstance();
-        //SchedulabeLimits.Companion.addSchedulableLimits(true,null,null);
-
-        //SystemEquip.getInstance();
-        Log.i(TAG, "LocalSiteID: " + localSiteId);
+        CcuLog.i(TAG, "LocalSiteID: " + localSiteId);
         CCUHsApi.getInstance().log();
         L.ccu().systemProfile = new DefaultSystem();
         CCUHsApi.getInstance().saveTagsData();
-        return localSiteId;
     }
 
 

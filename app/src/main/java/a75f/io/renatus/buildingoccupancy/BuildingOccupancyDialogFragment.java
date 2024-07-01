@@ -88,7 +88,7 @@ public class BuildingOccupancyDialogFragment extends DialogFragment {
         buildingOccupancyDayViewModel = new BuildingOccupancyDayViewModel();
         LayoutInflater inflater = LayoutInflater.from(getActivity());
         View view = inflater.inflate(R.layout.dialog_building_occupancy, null);
-        int daySelectionBackground = CCUUiUtil.getDayselectionBackgroud(getContext());
+        int daySelectionBackground = CCUUiUtil.getDaySelectionBackground(getContext());
         buildingOccupancyTitle = view.findViewById(R.id.buildingOccupancyTitle);
         npStartTime = view.findViewById(R.id.np1);
         npEndTime = view.findViewById(R.id.np2);

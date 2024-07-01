@@ -1,7 +1,5 @@
 package a75f.io.renatus.ENGG.messages
 
-import a75f.io.logger.CcuLog
-import a75f.io.logic.L
 import a75f.io.data.message.Message
 import a75f.io.renatus.R
 import android.annotation.SuppressLint
@@ -12,7 +10,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
 
 class MessageListAdapter(messages : List<Message>) : RecyclerView.Adapter<MessageViewHolder>() {
     private var messageList = messages

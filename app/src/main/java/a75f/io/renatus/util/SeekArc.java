@@ -1346,7 +1346,7 @@ public class SeekArc extends View
             angle = angle - 360;
         }
 
-        CcuLog.i("DEGREES", "touchDegrees: " + angle);
+        CcuLog.i(L.TAG_CCU_UI, "touchDegrees: " + angle);
         return angle;
     }
 

@@ -1,6 +1,7 @@
 package a75f.io.renatus.ENGG.bacnet.services
 
 import a75f.io.device.bacnet.BacnetConfigConstants
+import a75f.io.logger.CcuLog
 import a75f.io.renatus.ENGG.bacnet.services.client.BaseResponse
 import a75f.io.renatus.ENGG.bacnet.services.client.CcuService
 import a75f.io.renatus.ENGG.bacnet.services.client.ServiceManager
@@ -9,9 +10,6 @@ import a75f.io.renatus.UtilityApplication
 import a75f.io.renatus.util.CCUUiUtil
 import android.os.Bundle
 import android.preference.PreferenceManager
-import android.text.Editable
-import android.text.TextWatcher
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -25,14 +23,11 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.android.synthetic.main.fragment_modbusconfig.etIP
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.json.JSONException
 import org.json.JSONObject
-import java.lang.Exception
-import java.lang.NumberFormatException
 import java.net.ConnectException
 import java.net.SocketTimeoutException
 
@@ -75,7 +70,7 @@ class FragmentWhoIs : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        Log.d(TAG, "--onViewCreated--")
+        CcuLog.d(TAG, "--onViewCreated--")
 
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
         val confString: String? = sharedPreferences.getString(BacnetConfigConstants.BACNET_CONFIGURATION, null)
@@ -201,10 +196,10 @@ class FragmentWhoIs : Fragment() {
                 val request = Gson().toJson(
                     bacnetWhoIsRequest
                 )
-                Log.d(TAG, "this is the unicast request-->$request")
+                CcuLog.d(TAG, "this is the unicast request-->$request")
                 sendRequest(bacnetWhoIsRequest)
             }catch (e : NumberFormatException){
-                Log.d(TAG, "please provide valid input - ${e.message}")
+                CcuLog.d(TAG, "please provide valid input - ${e.message}")
             }
         } else {
             try {
@@ -225,10 +220,10 @@ class FragmentWhoIs : Fragment() {
                 val request = Gson().toJson(
                     bacnetWhoIsRequest
                 )
-                Log.d(TAG, "this is the broadcast request-->$request")
+                CcuLog.d(TAG, "this is the broadcast request-->$request")
                 sendRequest(bacnetWhoIsRequest)
             }catch (e : NumberFormatException){
-                Log.d(TAG, "please provide valid input - ${e.message}")
+                CcuLog.e(TAG, "please provide valid input - ${e.message}")
             }
         }
 
@@ -291,12 +286,12 @@ class FragmentWhoIs : Fragment() {
         val spin = view.findViewById(R.id.sp_object_types) as Spinner
         spin.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, position: Int, p3: Long) {
-                Log.d(TAG, "selected item is ${objectTypeArray[position]}")
+                CcuLog.d(TAG, "selected item is ${objectTypeArray[position]}")
                 selectedObjectType = objectTypeArray[position]
             }
 
             override fun onNothingSelected(p0: AdapterView<*>?) {
-                Log.d(TAG, "onNothingSelected")
+                CcuLog.d(TAG, "onNothingSelected")
             }
 
         }
@@ -309,7 +304,7 @@ class FragmentWhoIs : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        Log.d(TAG, "--onDestroyView--")
+        CcuLog.d(TAG, "--onDestroyView--")
     }
 
     private fun sendRequest(bacnetWhoIsRequest: BacnetWhoIsRequest) {
@@ -321,26 +316,26 @@ class FragmentWhoIs : Fragment() {
                     val result = resp.data
                     if (result != null) {
                         val readResponse = result.body()
-                        Log.d(TAG, "received response->${readResponse}")
+                        CcuLog.d(TAG, "received response->${readResponse}")
                         CoroutineScope(Dispatchers.Main).launch {
                             //updateUi(readResponse)
                             val responseText = Gson().toJson(readResponse)
                             showToastMessage("success-->$responseText")
                         }
                     } else {
-                        Log.d(TAG, "--null response--")
+                        CcuLog.d(TAG, "--null response--")
                     }
                 } else {
-                    Log.d(TAG, "--error--${resp.error}")
+                    CcuLog.d(TAG, "--error--${resp.error}")
                 }
             } catch (e: SocketTimeoutException) {
-                Log.d(TAG, "--SocketTimeoutException--${e.message}")
+                CcuLog.e(TAG, "--SocketTimeoutException--${e.message}")
                 showToastMessage("SocketTimeoutException")
             } catch (e: ConnectException) {
-                Log.d(TAG, "--ConnectException--${e.message}")
+                CcuLog.e(TAG, "--ConnectException--${e.message}")
                 showToastMessage("ConnectException")
             } catch (e: Exception) {
-                Log.d(TAG, "--connection time out--${e.message}")
+                CcuLog.e(TAG, "--connection time out--${e.message}")
             }
         }
     }

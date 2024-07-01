@@ -1,5 +1,10 @@
 package a75f.io.device.mesh;
 
+import static a75f.io.device.mesh.MeshUtil.getSetTemp;
+import static a75f.io.device.serial.DamperActuator_t.DAMPER_ACTUATOR_NOT_PRESENT;
+import static a75f.io.logic.L.TAG_CCU_DEVICE;
+import static a75f.io.logic.bo.building.system.SystemController.State.HEATING;
+
 import android.util.Log;
 
 import org.javolution.io.Struct;
@@ -49,11 +54,6 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.ReheatType;
 import a75f.io.logic.bo.util.SystemTemperatureUtil;
 import a75f.io.logic.tuners.TunerUtil;
-
-import static a75f.io.device.mesh.MeshUtil.getSetTemp;
-import static a75f.io.device.serial.DamperActuator_t.DAMPER_ACTUATOR_NOT_PRESENT;
-import static a75f.io.logic.L.TAG_CCU_DEVICE;
-import static a75f.io.logic.bo.building.system.SystemController.State.HEATING;
 
 /**
  * Created by Yinten isOn 8/17/2017.

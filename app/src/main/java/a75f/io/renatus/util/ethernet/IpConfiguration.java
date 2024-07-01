@@ -93,16 +93,16 @@ public class IpConfiguration implements Parcelable {
     @Override
     public String toString() {
         StringBuilder sbuf = new StringBuilder();
-        sbuf.append("IP assignment: " + ipAssignment.toString());
+        sbuf.append("IP assignment: ").append(ipAssignment.toString());
         sbuf.append("\n");
         if (staticIpConfiguration != null) {
-            sbuf.append("Static configuration: " + staticIpConfiguration.toString());
+            sbuf.append("Static configuration: ").append(staticIpConfiguration);
             sbuf.append("\n");
         }
-        sbuf.append("Proxy settings: " + proxySettings.toString());
+        sbuf.append("Proxy settings: ").append(proxySettings.toString());
         sbuf.append("\n");
         if (httpProxy != null) {
-            sbuf.append("HTTP proxy: " + httpProxy.toString());
+            sbuf.append("HTTP proxy: ").append(httpProxy.toString());
             sbuf.append("\n");
         }
         return sbuf.toString();

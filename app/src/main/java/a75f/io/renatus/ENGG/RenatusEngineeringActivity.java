@@ -1,19 +1,17 @@
 package a75f.io.renatus.ENGG;
 
-import com.google.android.material.tabs.TabLayout;
-
-import androidx.core.content.res.ResourcesCompat;
-import androidx.viewpager.widget.ViewPager;
-import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.ImageView;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.res.ResourcesCompat;
+import androidx.viewpager.widget.ViewPager;
+
+import com.google.android.material.tabs.TabLayout;
+
 import a75f.io.logger.CcuLog;
-import a75f.io.renatus.BuildConfig;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.CCUUiUtil;
-import a75f.io.renatus.util.CCUUtils;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint

@@ -1,5 +1,9 @@
 package a75f.io.renatus.ENGG;
 
+import static android.app.DownloadManager.STATUS_RUNNING;
+import static android.app.DownloadManager.STATUS_SUCCESSFUL;
+
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.DownloadManager;
 import android.content.ActivityNotFoundException;
@@ -178,11 +182,16 @@ public class AppInstaller
     private synchronized long downloadFile(String url, String apkFile, Fragment currentFragment, FragmentActivity activity) {
         DownloadManager manager =
                 (DownloadManager) RenatusApp.getAppContext().getSystemService(Context.DOWNLOAD_SERVICE);
+        removeAllQueuedDownloads(manager);
         DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
         request.setDescription("Downloading software update");
         request.setTitle("Downloading Update");
         request.allowScanningByMediaScanner();
         request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE);
+        request.setAllowedOverRoaming(true)
+                .setAllowedOverMetered(true)
+                .setRequiresCharging(false)
+                .setRequiresDeviceIdle(false);
         File file = new File(RenatusApp.getAppContext().getExternalFilesDir(null), apkFile);
         if (file.exists())
         {
@@ -195,6 +204,48 @@ public class AppInstaller
             checkDownload(dowloadId, manager, currentFragment, activity);
         }
         return dowloadId;
+    }
+
+    private void removeAllQueuedDownloads(DownloadManager manager) {
+        DownloadManager.Query query = new DownloadManager.Query();
+        Cursor cursor = manager.query(query);
+
+        if (cursor != null) {
+            try {
+                int idColumnIndex = cursor.getColumnIndex(DownloadManager.COLUMN_ID);
+                int statusColumnIndex = cursor.getColumnIndex(DownloadManager.COLUMN_STATUS);
+                while (cursor.moveToNext()) {
+                    int status = cursor.getInt(statusColumnIndex);
+                    if (status != STATUS_SUCCESSFUL && status != STATUS_RUNNING) {
+                        long downloadId = cursor.getLong(idColumnIndex);
+                        manager.remove(downloadId);
+                        CcuLog.d(L.TAG_CCU_DOWNLOAD, "Removed download: " + downloadId);
+                    }
+                }
+            } finally {
+                cursor.close();
+            }
+        }
+    }
+
+    private boolean isFIleDownloaded(long downloadId) {
+        if(downloadId!=-1) {
+            DownloadManager dm = (DownloadManager) RenatusApp.getAppContext().getSystemService(Context.DOWNLOAD_SERVICE);
+            DownloadManager.Query query = new DownloadManager.Query();
+            query.setFilterById(getCCUAppDownloadId());
+            Cursor cursor = dm.query(query);
+            if (cursor.moveToFirst()) {
+                @SuppressLint("Range") int columnStatusIndex = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS));
+                if (columnStatusIndex == STATUS_RUNNING) {
+                    CcuLog.d(L.TAG_CCU_DOWNLOAD, "File is still downloading, downloadID: "+downloadId);
+                    return false;
+                } else {
+                    CcuLog.d(L.TAG_CCU_DOWNLOAD, "File download status : "+columnStatusIndex+", downloadID: "+downloadId);
+                    dm.remove(downloadId);
+                }
+            }
+        }
+        return true;
     }
 
     public void checkDownload(long downloadId, DownloadManager downloadManager, Fragment currentFragment, FragmentActivity activity) {
@@ -266,7 +317,11 @@ public class AppInstaller
         setHomeAppDownloadId(downloadFile(DOWNLOAD_BASE_URL+sFileName,HOME_APK_FILE_NAME, null, null));
     }
     public void downloadCCUInstall(String sFileName, Fragment currentFragment, FragmentActivity activity) {
-        setCCUAppDownloadId(downloadFile(DOWNLOAD_BASE_URL+sFileName, CCU_APK_FILE_NAME, currentFragment, activity));
+        if(isFIleDownloaded(getCCUAppDownloadId())) {
+            long downloadId = downloadFile(DOWNLOAD_BASE_URL+sFileName, CCU_APK_FILE_NAME, currentFragment, activity);
+            CcuLog.d(L.TAG_CCU_DOWNLOAD, "Generated downloadId: "+downloadId);
+            setCCUAppDownloadId(downloadId);
+        }
     }
     
     

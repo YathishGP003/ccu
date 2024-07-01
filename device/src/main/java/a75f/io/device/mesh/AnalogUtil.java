@@ -1,8 +1,8 @@
 package a75f.io.device.mesh;
 
-import android.util.Log;
 
 import a75f.io.api.haystack.RawPoint;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.sensors.Sensor;
 import a75f.io.logic.bo.building.sensors.SensorManager;
@@ -20,12 +20,12 @@ public class AnalogUtil {
             int index = (int)Double.parseDouble(rawPoint.getType());
             analogSensor = SensorManager.getInstance().getAdditionalWithExternalSensorList().get(index);
         }catch (NumberFormatException e) {
-            e.printStackTrace();
+            CcuLog.e(L.TAG_CCU_DEVICE," Error getAnalogConversion ", e);
             return analogVal;
         }
         double analogConversion = analogSensor.minEngineeringValue +
                                   (analogSensor.maxEngineeringValue- analogSensor.minEngineeringValue) * analogVal / (analogSensor.maxVoltage - analogSensor.minVoltage);
-        Log.d(L.TAG_CCU_DEVICE, "Sensor input : analogConversion " + rawPoint.getType() + " val " + analogConversion);
+        CcuLog.d(L.TAG_CCU_DEVICE, "Sensor input : analogConversion " + rawPoint.getType() + " val " + analogConversion);
         return CCUUtils.roundToTwoDecimal(analogConversion);
 
         

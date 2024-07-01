@@ -2,15 +2,15 @@ package a75f.io.device.bacnet
 
 
 object  BacnetConfigConstants {
-    const val BROADCAST_BACNET_APP_CONFIGURATION_TYPE = "a75f.io.renatus.BACNET_APP_CONFIGURATION";
-    const val BROADCAST_BACNET_APP_START = "a75f.io.renatus.BACNET_APP_START";
-    const val BROADCAST_BACNET_APP_STOP = "a75f.io.renatus.BACNET_APP_STOP";
+    const val BROADCAST_BACNET_APP_CONFIGURATION_TYPE = "a75f.io.renatus.BACNET_APP_CONFIGURATION"
+    const val BROADCAST_BACNET_APP_START = "a75f.io.renatus.BACNET_APP_START"
+    const val BROADCAST_BACNET_APP_STOP = "a75f.io.renatus.BACNET_APP_STOP"
     const val BROADCAST_BACNET_ZONE_ADDED = "a75f.io.renatus.BACNET_ZONE_ADDED"
 
     const val BACNET_CONFIGURATION = "BACnet_Config"
-    const val IS_BACNET_CONFIG_FILE_CREATED = "isBACnetConfigFileCreated";
-    const val IS_BACNET_INITIALIZED = "isBACnetinitialized";
-    const val HTTP_SERVER_STATUS = "httpServerStatus";
+    const val IS_BACNET_CONFIG_FILE_CREATED = "isBACnetConfigFileCreated"
+    const val IS_BACNET_INITIALIZED = "isBACnetinitialized"
+    const val HTTP_SERVER_STATUS = "httpServerStatus"
     const val BACNET_HEART_BEAT = "BACnet_HeartBeat"
     const val BACNET_ID = "bacnetId"
     const val BACNET_TYPE = "bacnetType"

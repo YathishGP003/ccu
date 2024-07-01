@@ -2,8 +2,6 @@ package a75f.io.device.mesh.hyperstat;
 
 import static a75f.io.device.mesh.hyperstat.HyperStatMessageGenerator.getSettingsMessage;
 
-import android.util.Log;
-
 import com.google.protobuf.ByteString;
 
 import java.util.HashMap;
@@ -45,8 +43,7 @@ class HyperStatIduMessageHandler {
         
         //Temporary solution till response is implemented
         if (msgCache.isControlsPendingResponse(nodeAddress)) {
-            CcuLog.d(L.TAG_CCU_SERIAL, "Ignore IDU Status , Controls pending for " +
-                                       ""+nodeAddress+" timer "+msgCache.getControlsPendingTimer(nodeAddress));
+            CcuLog.d(L.TAG_CCU_SERIAL, "Ignore IDU Status , Controls pending for " +nodeAddress+" timer "+msgCache.getControlsPendingTimer(nodeAddress));
             return;
         }
         
@@ -70,7 +67,7 @@ class HyperStatIduMessageHandler {
         for (IduThermister iduth :IduThermister.values()) {
             hayStack.writeHisValByQuery("idu and vrv and "+iduth+" and group == \""+address+"\"",
                     (double) (thDataList.get(iduth.ordinal()))/10);
-            Log.d( L.TAG_CCU_SERIAL,iduth +" value = "+
+            CcuLog.d( L.TAG_CCU_SERIAL,iduth +" value = "+
                     hayStack.readHisValByQuery("idu and vrv and "+iduth+" and group == \""+address+"\"").toString());
         }
     }
@@ -236,12 +233,11 @@ class HyperStatIduMessageHandler {
         CcuLog.i(L.TAG_CCU_SERIAL, "Seed Message t"+hyperStatSettingsMessage_t.toByteString().toString());
         CcuLog.i(L.TAG_CCU_SERIAL, "Seed Message t"+hyperStatControlsMessage_t.toString());
 
-        HyperStat.HyperStatCcuDatabaseSeedMessage_t seedMessage = HyperStat.HyperStatCcuDatabaseSeedMessage_t.newBuilder()
+        return HyperStat.HyperStatCcuDatabaseSeedMessage_t.newBuilder()
                 .setEncryptionKey(ByteString.copyFrom(L.getEncryptionKey()))
                 .setSerializedSettingsData(hyperStatSettingsMessage_t.toByteString())
                 .setSerializedControlsData(hyperStatControlsMessage_t.toByteString())
                 .build();
-        return seedMessage;
     }
     
     private static int getOperationMode(int address, CCUHsApi hayStack) {

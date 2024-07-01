@@ -38,6 +38,7 @@ import a75f.io.device.bacnet.BacnetConfigConstants.VENDOR_NAME
 import a75f.io.device.bacnet.BacnetConfigConstants.VENDOR_NAME_VALUE
 import a75f.io.device.bacnet.BacnetConfigConstants.VIRTUAL_NETWORK_NUMBER
 import a75f.io.device.bacnet.BacnetConfigConstants.ZONE_TO_VIRTUAL_DEVICE_MAPPING
+import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.logic.L
 import android.content.Context
@@ -49,22 +50,22 @@ import android.net.wifi.WifiManager
 import android.os.Build
 import android.preference.PreferenceManager
 import android.text.format.Formatter
-import android.util.Log
 import org.json.JSONObject
 import java.net.InetAddress
 import java.net.NetworkInterface
 import java.util.*
+import kotlin.math.abs
 
 
 fun sendBroadCast(context: Context, intentAction: String, message: String) {
-        Log.i("sendBroadCast", ""+intentAction)
+        CcuLog.i("sendBroadCast", ""+intentAction)
         val intent = Intent(intentAction)
         intent.putExtra("message", message)
         context.sendBroadcast(intent)
     }
 
     fun sendBroadCast(context: Context, intentAction: String, message: String, deviceId: String) {
-        Log.i("sendBroadCast", ""+intentAction)
+        CcuLog.i("sendBroadCast", ""+intentAction)
         val intent = Intent(intentAction)
         intent.putExtra("message", message)
         intent.putExtra("deviceId", deviceId)
@@ -73,7 +74,7 @@ fun sendBroadCast(context: Context, intentAction: String, message: String) {
 
     fun populateBacnetConfigurationObject() : JSONObject {
 
-        val configObject = JSONObject();
+        val configObject = JSONObject()
 
         // "config" property
         configObject.put(ZONE_TO_VIRTUAL_DEVICE_MAPPING, false)
@@ -117,7 +118,7 @@ fun sendBroadCast(context: Context, intentAction: String, message: String) {
         configObject.put("network", networkObject)
         configObject.put("objectConf", objectConf)
 
-        return configObject;
+        return configObject
     }
 
     fun getAddressBand(): Int {
@@ -128,15 +129,10 @@ fun sendBroadCast(context: Context, intentAction: String, message: String) {
         val calendar = Calendar.getInstance(TimeZone.getTimeZone("GMT"), Locale.getDefault())
         val timeZone = TimeZone.getDefault()
         val offsetInMillis = timeZone.getOffset(calendar.timeInMillis)
-        var offset = String.format(
-            "%02d:%02d", Math.abs(offsetInMillis / 3600000), Math.abs(
-                offsetInMillis / 60000 % 60
-            )
-        )
-        val inHrs = Math.abs(offsetInMillis / 3600000)
-        val totalMins = inHrs * 60 + Math.abs(offsetInMillis / 60000 % 60)
+        val offset: String
+        val inHrs = abs(offsetInMillis / 3600000)
+        val totalMins = inHrs * 60 + abs(offsetInMillis / 60000 % 60)
         offset = (if (offsetInMillis >= 0) "+" else "-") + totalMins
-        //Log.i("Bacnet", " offset:$offset inHrs:$inHrs total Offset Mins:$totalMins")
         return offset.toInt()
     }
 
@@ -147,23 +143,23 @@ fun sendBroadCast(context: Context, intentAction: String, message: String) {
     fun getCcuVersion(): Any {
         val pm: PackageManager = Globals.getInstance().applicationContext.packageManager
         val pi: PackageInfo
-        try {
+        return try {
             pi = pm.getPackageInfo("a75f.io.renatus", 0)
-            return pi.versionName + "." + pi.versionCode.toString()
+            pi.versionName + "." + pi.versionCode.toString()
         } catch (e: PackageManager.NameNotFoundException) {
             e.printStackTrace()
-            return JSONObject.NULL
+            JSONObject.NULL
         }
     }
 
-    fun getDeviceObjectName() = CCUHsApi.getInstance().getSiteName() +"_"+ CCUHsApi.getInstance().getCcuName();
+    fun getDeviceObjectName() = CCUHsApi.getInstance().getSiteName() +"_"+ CCUHsApi.getInstance().getCcuName()
     fun getDayLightSavingStatus() = if(TimeZone.getTimeZone(TimeZone.getDefault().id).inDaylightTime(Date())) 1 else 0
     fun getSerialNumber() = CCUHsApi.getInstance().getCcuRef().toString()
 
 
     fun getIpAddress(): String {
 
-        val ethernetIP = getEthernetIPAddress();
+        val ethernetIP = getEthernetIPAddress()
         if(ethernetIP != null)
             return ethernetIP
 
@@ -205,14 +201,14 @@ fun sendBroadCast(context: Context, intentAction: String, message: String) {
 
     fun updateBacnetHeartBeat() {
         val sharedPreferences: SharedPreferences =  PreferenceManager.getDefaultSharedPreferences(Globals.getInstance().applicationContext)
-        sharedPreferences.edit().putLong(BACNET_HEART_BEAT, System.currentTimeMillis()).apply();
+        sharedPreferences.edit().putLong(BACNET_HEART_BEAT, System.currentTimeMillis()).apply()
     }
 
     fun checkBacnetHealth() {
         val preferences =
             PreferenceManager.getDefaultSharedPreferences(Globals.getInstance().applicationContext)
         val bacnetLastHeartBeatTime = preferences.getLong(BACNET_HEART_BEAT, 0)
-        Log.d(L.TAG_CCU_BACNET, "Last Bacnet HeartBeat Time: $bacnetLastHeartBeatTime,  time: "+(System.currentTimeMillis() - bacnetLastHeartBeatTime))
+        CcuLog.d(L.TAG_CCU_BACNET, "Last Bacnet HeartBeat Time: $bacnetLastHeartBeatTime,  time: "+(System.currentTimeMillis() - bacnetLastHeartBeatTime))
         val isBACnetIntialized = preferences.getBoolean(IS_BACNET_INITIALIZED, false)
         if((isBACnetIntialized && (System.currentTimeMillis() - bacnetLastHeartBeatTime) > 300000)) {
             preferences.edit().putLong(BACNET_HEART_BEAT, System.currentTimeMillis()).apply()  // resetting the timer again
@@ -227,12 +223,12 @@ fun sendBroadCast(context: Context, intentAction: String, message: String) {
             val currentRoom = CCUHsApi.getInstance().readMapById(zoneID)
             if (currentRoom.containsKey(BACNET_ID) && currentRoom[BACNET_ID] != 0) {
                 val bacnetID2 = (currentRoom[BACNET_ID].toString() + "").toDouble()
-                Log.d(L.TAG_CCU_BACNET, "Already have bacnetID $bacnetID2")
+                CcuLog.d(L.TAG_CCU_BACNET, "Already have bacnetID $bacnetID2")
                 return bacnetID2.toInt()
             }
             val rooms = CCUHsApi.getInstance().readAllEntities("room")
             if (rooms.size == 0) {
-                Log.d(L.TAG_CCU_BACNET, "rooms size : 0 ")
+                CcuLog.d(L.TAG_CCU_BACNET, "rooms size : 0 ")
                 return bacnetID
             }
             while (isBacnetIDUsed) {
@@ -241,7 +237,7 @@ fun sendBroadCast(context: Context, intentAction: String, message: String) {
                         && room[BACNET_ID] != 0
                         && (room[Tags.BACNET_ID].toString() + "").toDouble() == bacnetID.toDouble()
                     ) {
-                        Log.d(L.TAG_CCU_BACNET,"In looping over - {bacnetID: ${room[BACNET_ID]} ,tempBacnetID: $bacnetID} - room object: $room")
+                        CcuLog.d(L.TAG_CCU_BACNET,"In looping over - {bacnetID: ${room[BACNET_ID]} ,tempBacnetID: $bacnetID} - room object: $room")
                         bacnetID += 1
                         isBacnetIDUsed = true
                         break
@@ -250,7 +246,7 @@ fun sendBroadCast(context: Context, intentAction: String, message: String) {
                     }
                 }
             }
-            Log.d(L.TAG_CCU_BACNET, "Generated bacnetID: $bacnetID")
+            CcuLog.d(L.TAG_CCU_BACNET, "Generated bacnetID: $bacnetID")
         } catch (e: NumberFormatException) {
             e.printStackTrace()
         }
@@ -277,11 +273,11 @@ fun sendBroadCast(context: Context, intentAction: String, message: String) {
                     zone.id
                 )
             }
-            zone.bacnetId = bacnetId;
-            zone.bacnetType = Tags.DEVICE;
-            CCUHsApi.getInstance().updateZone(zone, zone.id);
+            zone.bacnetId = bacnetId
+            zone.bacnetType = Tags.DEVICE
+            CCUHsApi.getInstance().updateZone(zone, zone.id)
         } catch (e: NullPointerException) {
-            Log.d(L.TAG_CCU_BACNET, "Unable to update zone:  " + e.message)
+            CcuLog.d(L.TAG_CCU_BACNET, "Unable to update zone:  " + e.message)
             e.printStackTrace()
         }
     }

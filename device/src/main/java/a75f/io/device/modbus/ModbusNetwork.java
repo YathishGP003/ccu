@@ -18,8 +18,6 @@ import a75f.io.api.haystack.modbus.EquipmentDevice;
 import a75f.io.api.haystack.modbus.Register;
 import a75f.io.device.DeviceNetwork;
 import a75f.io.device.mesh.LSerial;
-import a75f.io.device.serial.MessageType;
-import a75f.io.device.serial.ModbusMessage_t;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
@@ -69,14 +67,13 @@ public class ModbusNetwork extends DeviceNetwork implements ModbusWritableDataIn
                         LModbus.readRegister((short)modbusDevice.getSlaveId(), register, getRegisterCount(register));
 
                         CcuLog.d(L.TAG_CCU_MODBUS,
-                                "modbus_data_received: "+LModbus.IS_MODBUS_DATA_RECEIVED+"" +
+                                "modbus_data_received: "+LModbus.IS_MODBUS_DATA_RECEIVED+
                                         ", count: "+count+
                                         ", registerRequestCount: "+registerRequestCount);
                     }
                 }
             } catch (Exception e) {
-                e.printStackTrace();
-                CcuLog.d(L.TAG_CCU_MODBUS,"Modbus read failed : ");
+                CcuLog.e(L.TAG_CCU_MODBUS,"Modbus read failed : ",e);
             }
         });
     }

@@ -15,15 +15,15 @@ import a75f.io.logic.diag.otastatus.OtaStatus;
 public class DeviceUtilTest extends TestCase {
 
     public void testParseNodeStatusMessage() {
-        assertEquals(DeviceUtil.parseNodeStatusMessage(1, 1000), DeviceFieldConstants.CAUSE0);
-        assertEquals(DeviceUtil.parseNodeStatusMessage(9, 1000), DeviceFieldConstants.CAUSE1);
-        assertEquals(DeviceUtil.parseNodeStatusMessage(17, 1000), DeviceFieldConstants.CAUSE2);
-        assertEquals(DeviceUtil.parseNodeStatusMessage(25, 1000), DeviceFieldConstants.CAUSE3);
-        assertEquals(DeviceUtil.parseNodeStatusMessage(33, 1000), DeviceFieldConstants.CAUSE4);
-        assertEquals(DeviceUtil.parseNodeStatusMessage(41, 1000), DeviceFieldConstants.CAUSE5);
-        assertEquals(DeviceUtil.parseNodeStatusMessage(49, 1000), DeviceFieldConstants.CAUSE6);
-        assertEquals(DeviceUtil.parseNodeStatusMessage(57, 1000), DeviceFieldConstants.CAUSE7);
-        assertEquals(DeviceUtil.parseNodeStatusMessage(255, 1000), DeviceFieldConstants.NO_INFO);
+        assertEquals(DeviceUtil.parseNodeStatusMessage(1), DeviceFieldConstants.CAUSE0);
+        assertEquals(DeviceUtil.parseNodeStatusMessage(9), DeviceFieldConstants.CAUSE1);
+        assertEquals(DeviceUtil.parseNodeStatusMessage(17), DeviceFieldConstants.CAUSE2);
+        assertEquals(DeviceUtil.parseNodeStatusMessage(25), DeviceFieldConstants.CAUSE3);
+        assertEquals(DeviceUtil.parseNodeStatusMessage(33), DeviceFieldConstants.CAUSE4);
+        assertEquals(DeviceUtil.parseNodeStatusMessage(41), DeviceFieldConstants.CAUSE5);
+        assertEquals(DeviceUtil.parseNodeStatusMessage(49), DeviceFieldConstants.CAUSE6);
+        assertEquals(DeviceUtil.parseNodeStatusMessage(57), DeviceFieldConstants.CAUSE7);
+        assertEquals(DeviceUtil.parseNodeStatusMessage(255), DeviceFieldConstants.NO_INFO);
 
     }
 

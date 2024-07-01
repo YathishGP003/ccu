@@ -3,8 +3,6 @@ package a75f.io.device.mesh.hypersplit;
 import static a75f.io.api.haystack.Tags.HYPERSTATSPLIT;
 import static a75f.io.device.mesh.Pulse.getHumidityConversion;
 
-import android.util.Log;
-
 import com.google.protobuf.InvalidProtocolBufferException;
 
 import java.nio.ByteBuffer;
@@ -87,10 +85,7 @@ public class HyperSplitMsgReceiver {
 
                 So, skip evaluation here if the message contents are actually a HyperStat message.
             */
-            if (messageType == MessageType.HYPERSTAT_REGULAR_UPDATE_MESSAGE
-                    || messageType == MessageType.HYPERSTAT_IDU_STATUS_MESSAGE) {
-                return;
-            } else if (messageType == MessageType.HYPERSPLIT_REGULAR_UPDATE_MESSAGE) {
+           if (messageType == MessageType.HYPERSPLIT_REGULAR_UPDATE_MESSAGE) {
                 HyperSplit.HyperSplitRegularUpdateMessage_t regularUpdate =
                         HyperSplit.HyperSplitRegularUpdateMessage_t.parseFrom(messageArray);
 
@@ -290,7 +285,7 @@ public class HyperSplitMsgReceiver {
             writePressureSensorVal(rawPoint, point, regularUpdateMessage, hayStack, equipRef);
         }
         else if (Port.valueOf(rawPoint.getPort()) == Port.SENSOR_UVI) {
-            writeUviSensorVal(rawPoint, point, regularUpdateMessage, hayStack, equipRef);
+            writeUviSensorVal(rawPoint, point, regularUpdateMessage, hayStack);
         }
     }
 
@@ -428,7 +423,7 @@ public class HyperSplitMsgReceiver {
     }
 
     private static void writeUviSensorVal(RawPoint rawPoint, Point point, HyperSplit.HyperSplitRegularUpdateMessage_t
-            regularUpdateMessage, CCUHsApi hayStack, String equipRef) {
+            regularUpdateMessage, CCUHsApi hayStack) {
 
         hayStack.writeHisValById(rawPoint.getId(), (double)regularUpdateMessage.getRegularUpdateCommon().getUltravioletIndex());
         hayStack.writeHisValById(point.getId(), (double) regularUpdateMessage.getRegularUpdateCommon().getUltravioletIndex());
@@ -437,10 +432,8 @@ public class HyperSplitMsgReceiver {
 
     private static boolean isSensorBusAddressMapped(CCUHsApi hsApi, String addr, int association, String equipRef) {
 
-        if (hsApi.readDefaultVal("point and " + addr + " and config and sensorBus and enabled and equipRef == \"" + equipRef + "\"") == 1.0 &&
-            hsApi.readDefaultVal("point and " + addr + " and config and sensorBus and association and equipRef == \"" + equipRef + "\"").intValue() == association) return true;
-
-        return false;
+        return hsApi.readDefaultVal("point and " + addr + " and config and sensorBus and enabled and equipRef == \"" + equipRef + "\"") == 1.0 &&
+                hsApi.readDefaultVal("point and " + addr + " and config and sensorBus and association and equipRef == \"" + equipRef + "\"").intValue() == association;
 
     }
 
@@ -466,7 +459,7 @@ public class HyperSplitMsgReceiver {
     }
 
     private static void writeUniversalInVal(RawPoint rawPoint, Point point, CCUHsApi hayStack, int val) {
-        Log.i(L.TAG_CCU_DEVICE, "writeUniversalInVal: "+rawPoint.getPort()+" " +rawPoint.getType());
+        CcuLog.i(L.TAG_CCU_DEVICE, "writeUniversalInVal: "+rawPoint.getPort()+" " +rawPoint.getType());
 
         if (isUniversalInMappedToThermistor(rawPoint)) writeThermistorInVal(rawPoint, point, hayStack, val);
         else if (isUniversalInMappedToVoltage(rawPoint)) writeVoltageInVal(rawPoint, point, hayStack, val);
@@ -532,7 +525,7 @@ public class HyperSplitMsgReceiver {
     private static void writeThermistorInVal(RawPoint rawPoint, Point point, CCUHsApi hayStack, int val) {
         // If 15th bit is "0", then HyperSplit says input is type "voltage" and not type "thermistor". That's a problem.
         if (getBit(val, 15) == 0) {
-            Log.w(L.TAG_CCU_DEVICE, "Universal input " + rawPoint + " is mapped as thermistor in CCU, but stored as type Voltage in HyperStat.");
+            CcuLog.w(L.TAG_CCU_DEVICE, "Universal input " + rawPoint + " is mapped as thermistor in CCU, but stored as type Voltage in HyperStat.");
             return;
         } else {
             double ohmsReading = 10.0 * getBits(val, 0, 14);
@@ -551,7 +544,7 @@ public class HyperSplitMsgReceiver {
 
         // If 15th bit is "1", then HyperSplit says input is type "thermistor" and not type "voltage". That's a problem.
         if (getBit(val, 15) == 1) {
-            Log.w(L.TAG_CCU_DEVICE, "Universal input " + rawPoint + " is mapped as voltage in CCU, but stored as type Thermistor in HyperStat.");
+            CcuLog.w(L.TAG_CCU_DEVICE, "Universal input " + rawPoint + " is mapped as voltage in CCU, but stored as type Thermistor in HyperStat.");
             return;
         } else {
             double mvReading = getBits(val, 0, 14);
@@ -610,7 +603,7 @@ public class HyperSplitMsgReceiver {
 
         // If 15th bit is "0", then HyperSplit says input is type "voltage" and not type "thermistor". That's a problem.
         if (getBit(val, 15) == 0) {
-            Log.w(L.TAG_CCU_DEVICE, "Universal input " + rawPoint + " is mapped as digital input in CCU, but stored as type Voltage in HyperStat.");
+            CcuLog.w(L.TAG_CCU_DEVICE, "Universal input " + rawPoint + " is mapped as digital input in CCU, but stored as type Voltage in HyperStat.");
             return;
         } else {
             double ohmsReading = 10.0 * getBits(val, 0, 14);
@@ -631,7 +624,7 @@ public class HyperSplitMsgReceiver {
 
         // If 15th bit is "0", then HyperSplit says input is type "voltage" and not type "thermistor". That's a problem.
         if (getBit(val, 15) == 0) {
-            Log.w(L.TAG_CCU_DEVICE, "Universal input " + rawPoint + " is mapped as digital input in CCU, but stored as type Voltage in HyperStat.");
+            CcuLog.w(L.TAG_CCU_DEVICE, "Universal input " + rawPoint + " is mapped as digital input in CCU, but stored as type Voltage in HyperStat.");
             return;
         } else {
             double ohmsReading = 10.0 * getBits(val, 0, 14);
@@ -652,7 +645,7 @@ public class HyperSplitMsgReceiver {
 
         // If 15th bit is "0", then HyperSplit says input is type "voltage" and not type "thermistor". That's a problem.
         if (getBit(val, 15) == 0) {
-            Log.w(L.TAG_CCU_DEVICE, "Universal input " + rawPoint + " is mapped as digital input in CCU, but stored as type Voltage in HyperStat.");
+            CcuLog.w(L.TAG_CCU_DEVICE, "Universal input " + rawPoint + " is mapped as digital input in CCU, but stored as type Voltage in HyperStat.");
             return;
         } else {
             double ohmsReading = 10.0 * getBits(val, 0, 14);
@@ -679,7 +672,7 @@ public class HyperSplitMsgReceiver {
 
     private static void writeOccupancyVal(RawPoint rawPoint, Point point, HyperSplit.HyperSplitRegularUpdateMessage_t
             regularUpdateMessage, CCUHsApi hayStack) {
-        Log.i(L.TAG_CCU_DEVICE, "OccupantDetected : "+regularUpdateMessage.getRegularUpdateCommon().getOccupantDetected());
+        CcuLog.i(L.TAG_CCU_DEVICE, "OccupantDetected : "+regularUpdateMessage.getRegularUpdateCommon().getOccupantDetected());
         hayStack.writeHisValById(rawPoint.getId(), regularUpdateMessage.getRegularUpdateCommon().getOccupantDetected()?1.0:0);
         hayStack.writeHisValById(point.getId(), regularUpdateMessage.getRegularUpdateCommon().getOccupantDetected()?1.0:0);
     }
@@ -788,26 +781,26 @@ public class HyperSplitMsgReceiver {
     }
 
     public static void updateConditioningMode(String equipId, int mode, PossibleConditioningMode possibleMode){
-        Log.d("CCU_MODETEST", "updateConditioningMode: mode " + mode + ", possibleMode " + possibleMode);
+        CcuLog.d("CCU_MODETEST", "updateConditioningMode: mode " + mode + ", possibleMode " + possibleMode);
         int conditioningMode;
         if (mode == HyperSplit.HyperSplitConditioningMode_e.HYPERSPLIT_CONDITIONING_MODE_AUTO.ordinal()){
             if (possibleMode != PossibleConditioningMode.BOTH) {
-                Log.i(L.TAG_CCU_DEVICE, mode+" Invalid conditioning mode "); return;
+                CcuLog.i(L.TAG_CCU_DEVICE, mode+" Invalid conditioning mode "); return;
             }
             conditioningMode = StandaloneConditioningMode.AUTO.ordinal();
         } else if (mode == HyperSplit.HyperSplitConditioningMode_e.HYPERSPLIT_CONDITIONING_MODE_HEATING.ordinal()){
             if (possibleMode == PossibleConditioningMode.COOLONLY) {
-                Log.i(L.TAG_CCU_DEVICE, mode+"Invalid conditioning mode"); return;
+                CcuLog.i(L.TAG_CCU_DEVICE, mode+"Invalid conditioning mode"); return;
             }
             conditioningMode = StandaloneConditioningMode.HEAT_ONLY.ordinal();
         } else if (mode == HyperSplit.HyperSplitConditioningMode_e.HYPERSPLIT_CONDITIONING_MODE_COOLING.ordinal()){
             if (possibleMode == PossibleConditioningMode.HEATONLY) {
-                Log.i(L.TAG_CCU_DEVICE, mode+"Invalid conditioning mode"); return;
+                CcuLog.i(L.TAG_CCU_DEVICE, mode+"Invalid conditioning mode"); return;
             }
             conditioningMode = StandaloneConditioningMode.COOL_ONLY.ordinal();
         } else {
             if (mode != PossibleConditioningMode.OFF.ordinal()) {
-                Log.i(L.TAG_CCU_DEVICE, mode+" Invalid conditioning mode "); return;
+                CcuLog.i(L.TAG_CCU_DEVICE, mode+" Invalid conditioning mode "); return;
             }
             conditioningMode = StandaloneConditioningMode.OFF.ordinal();
         }
@@ -817,7 +810,7 @@ public class HyperSplitMsgReceiver {
     }
 
     private static void sendAcknowledge(int address){
-        Log.i(L.TAG_CCU_DEVICE, "Sending Acknowledgement");
+        CcuLog.i(L.TAG_CCU_DEVICE, "Sending Acknowledgement");
         if (!LSerial.getInstance().isConnected()) {
             CcuLog.d(L.TAG_CCU_DEVICE,"Device not connected !!");
             return;
@@ -851,14 +844,14 @@ public class HyperSplitMsgReceiver {
     }
 
     private static int getLogicalFanMode(PossibleFanMode mode,int selectedMode){
-        Log.i(L.TAG_CCU_DEVICE, "PossibleFanMode: "+mode + " selectedMode  "+selectedMode);
+        CcuLog.i(L.TAG_CCU_DEVICE, "PossibleFanMode: "+mode + " selectedMode  "+selectedMode);
         if(selectedMode == 0 ) return StandaloneFanStage.OFF.ordinal();
         switch (mode){
             case OFF:
                 if(HyperSplit.HyperSplitFanSpeed_e.HYPERSPLIT_FAN_SPEED_OFF.ordinal() == selectedMode ) {
                     return StandaloneFanStage.OFF.ordinal();
                 } else {
-                    Log.i(L.TAG_CCU_DEVICE, "Invalid Fan mode"); return -1;
+                    CcuLog.i(L.TAG_CCU_DEVICE, "Invalid Fan mode"); return -1;
                 }
             case LOW:
                 if(selectedMode == HyperSplit.HyperSplitFanSpeed_e.HYPERSPLIT_FAN_SPEED_AUTO.ordinal()) {
@@ -866,7 +859,7 @@ public class HyperSplitMsgReceiver {
                 }else if(HyperSplit.HyperSplitFanSpeed_e.HYPERSPLIT_FAN_SPEED_LOW.ordinal() == selectedMode ) {
                     return StandaloneFanStage.LOW_CUR_OCC.ordinal();
                 } else {
-                    Log.i(L.TAG_CCU_DEVICE, "Invalid Fan mode"); return -1;
+                    CcuLog.i(L.TAG_CCU_DEVICE, "Invalid Fan mode"); return -1;
                 }
             case MED:
                 if(selectedMode == HyperSplit.HyperSplitFanSpeed_e.HYPERSPLIT_FAN_SPEED_AUTO.ordinal()) {
@@ -874,7 +867,7 @@ public class HyperSplitMsgReceiver {
                 }else if(HyperSplit.HyperSplitFanSpeed_e.HYPERSPLIT_FAN_SPEED_MED.ordinal() == selectedMode ) {
                     return StandaloneFanStage.MEDIUM_CUR_OCC.ordinal();
                 } else {
-                    Log.i(L.TAG_CCU_DEVICE, "Invalid Fan mode"); return -1;
+                    CcuLog.i(L.TAG_CCU_DEVICE, "Invalid Fan mode"); return -1;
                 }
             case HIGH:
                 if(selectedMode == HyperSplit.HyperSplitFanSpeed_e.HYPERSPLIT_FAN_SPEED_AUTO.ordinal()) {
@@ -882,7 +875,7 @@ public class HyperSplitMsgReceiver {
                 } else if(HyperSplit.HyperSplitFanSpeed_e.HYPERSPLIT_FAN_SPEED_HIGH.ordinal() == selectedMode ) {
                     return StandaloneFanStage.HIGH_CUR_OCC.ordinal();
                 } else {
-                    Log.i(L.TAG_CCU_DEVICE, "Invalid Fan mode"); return -1;
+                    CcuLog.i(L.TAG_CCU_DEVICE, "Invalid Fan mode"); return -1;
                 }
 
             case LOW_MED:
@@ -893,7 +886,7 @@ public class HyperSplitMsgReceiver {
                 } else if(HyperSplit.HyperSplitFanSpeed_e.HYPERSPLIT_FAN_SPEED_MED.ordinal() == selectedMode ) {
                     return StandaloneFanStage.MEDIUM_CUR_OCC.ordinal();
                 } else {
-                    Log.i(L.TAG_CCU_DEVICE, "Invalid Fan mode"); return -1;
+                    CcuLog.i(L.TAG_CCU_DEVICE, "Invalid Fan mode"); return -1;
                 }
 
             case LOW_HIGH:
@@ -904,7 +897,7 @@ public class HyperSplitMsgReceiver {
                 } else if(HyperSplit.HyperSplitFanSpeed_e.HYPERSPLIT_FAN_SPEED_HIGH.ordinal() == selectedMode ) {
                     return StandaloneFanStage.HIGH_CUR_OCC.ordinal();
                 } else {
-                    Log.i(L.TAG_CCU_DEVICE, "Invalid Fan mode"); return -1;
+                    CcuLog.i(L.TAG_CCU_DEVICE, "Invalid Fan mode"); return -1;
                 }
 
             case MED_HIGH:
@@ -915,7 +908,7 @@ public class HyperSplitMsgReceiver {
                 } else if(HyperSplit.HyperSplitFanSpeed_e.HYPERSPLIT_FAN_SPEED_HIGH.ordinal() == selectedMode ) {
                     return StandaloneFanStage.HIGH_CUR_OCC.ordinal();
                 } else {
-                    Log.i(L.TAG_CCU_DEVICE, "Invalid Fan mode"); return -1;
+                    CcuLog.i(L.TAG_CCU_DEVICE, "Invalid Fan mode"); return -1;
                 }
             case LOW_MED_HIGH:
                 if(selectedMode == HyperSplit.HyperSplitFanSpeed_e.HYPERSPLIT_FAN_SPEED_AUTO.ordinal()) {
@@ -927,7 +920,7 @@ public class HyperSplitMsgReceiver {
                 } else if(HyperSplit.HyperSplitFanSpeed_e.HYPERSPLIT_FAN_SPEED_HIGH.ordinal() == selectedMode ) {
                     return StandaloneFanStage.HIGH_CUR_OCC.ordinal();
                 } else {
-                    Log.i(L.TAG_CCU_DEVICE, "Invalid Fan mode"); return -1;
+                    CcuLog.i(L.TAG_CCU_DEVICE, "Invalid Fan mode"); return -1;
                 }
         }
         return -1;

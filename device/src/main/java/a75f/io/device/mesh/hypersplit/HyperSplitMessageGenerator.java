@@ -1,10 +1,20 @@
 package a75f.io.device.mesh.hypersplit;
 
-import static a75f.io.logic.bo.building.definitions.Port.*;
+import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_FOUR;
+import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_ONE;
+import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_THREE;
+import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_TWO;
+import static a75f.io.logic.bo.building.definitions.Port.RELAY_EIGHT;
+import static a75f.io.logic.bo.building.definitions.Port.RELAY_FIVE;
+import static a75f.io.logic.bo.building.definitions.Port.RELAY_FOUR;
+import static a75f.io.logic.bo.building.definitions.Port.RELAY_ONE;
+import static a75f.io.logic.bo.building.definitions.Port.RELAY_SEVEN;
+import static a75f.io.logic.bo.building.definitions.Port.RELAY_SIX;
+import static a75f.io.logic.bo.building.definitions.Port.RELAY_THREE;
+import static a75f.io.logic.bo.building.definitions.Port.RELAY_TWO;
 import static a75f.io.logic.bo.building.schedules.Occupancy.AUTOAWAY;
 import static a75f.io.logic.bo.building.schedules.Occupancy.UNOCCUPIED;
 
-import android.util.Log;
 
 import com.google.protobuf.ByteString;
 
@@ -20,13 +30,12 @@ import a75f.io.device.util.DeviceConfigurationUtil;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
-import a75f.io.logic.bo.building.hvac.StandaloneFanStage;
-import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode;
+import a75f.io.logic.bo.building.hvac.StandaloneFanStage;
 import a75f.io.logic.bo.building.hyperstatsplit.common.BasicSettings;
+import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.util.TemperatureMode;
-import a75f.io.logic.tuners.TunerUtil;
 
 public class HyperSplitMessageGenerator {
 
@@ -47,17 +56,16 @@ public class HyperSplitMessageGenerator {
         HyperSplit.HyperSplitSettingsMessage3_t hyperSplitSettingsMessage3_t = getSetting3Message(address, equipRef);
         CcuLog.i(L.TAG_CCU_SERIAL, "Seed Message t" + hyperSplitSettingsMessage_t.toByteString().toString());
         CcuLog.i(L.TAG_CCU_SERIAL, "Seed Message t" + hyperSplitControlsMessage_t.toString());
-        CcuLog.i(L.TAG_CCU_SERIAL, "Seed Message t" + hyperSplitSettingsMessage2_t.toString());
-        CcuLog.i(L.TAG_CCU_SERIAL, "Seed Message t" + hyperSplitSettingsMessage3_t.toString());
+        CcuLog.i(L.TAG_CCU_SERIAL, "Seed Message t" + hyperSplitSettingsMessage2_t);
+        CcuLog.i(L.TAG_CCU_SERIAL, "Seed Message t" + hyperSplitSettingsMessage3_t);
 
-        HyperSplit.HyperSplitCcuDatabaseSeedMessage_t seed = HyperSplit.HyperSplitCcuDatabaseSeedMessage_t.newBuilder()
+        return HyperSplit.HyperSplitCcuDatabaseSeedMessage_t.newBuilder()
                 .setEncryptionKey(ByteString.copyFrom(L.getEncryptionKey()))
                 .setSerializedSettingsData(hyperSplitSettingsMessage_t.toByteString())
                 .setSerializedHyperSplitControlsData(hyperSplitControlsMessage_t.toByteString())
                 .setSerializedHyperSplitSettings2Data(hyperSplitSettingsMessage2_t.toByteString())
                 .setSerializedHyperSplitSettings3Data(hyperSplitSettingsMessage3_t.toByteString())
                 .build();
-        return seed;
 
     }
 
@@ -70,10 +78,7 @@ public class HyperSplitMessageGenerator {
      */
     public static HyperSplit.HyperSplitSettingsMessage_t getSettingsMessage(String zone, int address,
                                                                           String equipRef, TemperatureMode mode) {
-        boolean singleMode = false;
-        if(mode == TemperatureMode.HEATING || mode == TemperatureMode.COOLING){
-            singleMode = true;
-        }
+        boolean singleMode = mode == TemperatureMode.HEATING || mode == TemperatureMode.COOLING;
 
         int minCoolingUserTemp = CCUHsApi.getInstance().readPointPriorityValByQuery(HyperSplitSettingsUtil.Companion.getCoolingUserLimitByQuery(mode, "min", equipRef)).intValue();
         int maxCoolingUserTemp = CCUHsApi.getInstance().readPointPriorityValByQuery(HyperSplitSettingsUtil.Companion.getCoolingUserLimitByQuery(mode, "max", equipRef)).intValue();
@@ -101,7 +106,7 @@ public class HyperSplitMessageGenerator {
         HyperSplit.HyperSplitSettingsMessage_t.Builder msg = HyperSplit.HyperSplitSettingsMessage_t.newBuilder()
                 .setRoomName(zone)
                 .setHeatingDeadBand((int) (getStandaloneHeatingDeadband(equipRef, mode) * 10))
-                .setCoolingDeadBand((int) (getStandaloneCoolingDeadband(equipRef, mode) * 10))
+                .setCoolingDeadBand((int) (getStandaloneCoolingDeadband(equipRef) * 10))
                 .setMinCoolingUserTemp(minCoolingUserTemp)
                 .setMaxCoolingUserTemp(maxCoolingUserTemp)
                 .setMinHeatingUserTemp(minHeatingUserTemp)
@@ -124,15 +129,6 @@ public class HyperSplitMessageGenerator {
 
         return msg.build();
 
-    }
-
-    private static double getUserLimit(String query, int address) {
-        HashMap<Object,Object> equip = CCUHsApi.getInstance().readEntity("equip and hyperstatsplit" +
-                " and group == \"" + address + "\"");
-
-        return CCUHsApi.getInstance().readPointPriorityValByQuery(
-                "point and schedulable and " + query +
-                        " and roomRef== \"" + equip.get("roomRef").toString() + "\"");
     }
 
     /**
@@ -178,19 +174,19 @@ public class HyperSplitMessageGenerator {
                 hayStack.writeHisValById(rawPoint.getId(), (double) mappedVal);
                 setHyperSplitPort(controls, Port.valueOf(rawPoint.getPort()), mappedVal);
             });
-            Log.i(L.TAG_CCU_DEVICE, "===================Device Layer==================================");
+            CcuLog.i(L.TAG_CCU_DEVICE, "===================Device Layer==================================");
             DeviceHSUtil.getEnabledCmdPointsWithRefForDevice(device, hayStack)
                     .forEach( rawPoint -> {
                         double logicalVal = hayStack.readHisValById(rawPoint.getPointRef());
                         int mappedVal = (DeviceUtil.isAnalog(rawPoint.getPort())
                                 ? DeviceUtil.mapAnalogOut(rawPoint.getType(), (short) logicalVal)
                                 : DeviceUtil.mapDigitalOut(rawPoint.getType(), logicalVal > 0));
-                        hayStack.writeHisValById(rawPoint.getId(), Double.valueOf(mappedVal));
-                        Log.i(L.TAG_CCU_DEVICE,
+                        hayStack.writeHisValById(rawPoint.getId(), (double) mappedVal);
+                        CcuLog.i(L.TAG_CCU_DEVICE,
                                 rawPoint.getType()+" "+logicalVal+" Port "+rawPoint.getPort() +" =  "+mappedVal);
                         setHyperSplitPort(controls, Port.valueOf(rawPoint.getPort()), mappedVal);
                     });
-            Log.i(L.TAG_CCU_DEVICE, "=====================================================");
+            CcuLog.i(L.TAG_CCU_DEVICE, "=====================================================");
         }
 
         return controls;
@@ -210,7 +206,7 @@ public class HyperSplitMessageGenerator {
         try {
             return CCUHsApi.getInstance().readPointPriorityVal(desiredTempCooling.get("id").toString());
         } catch (NullPointerException e) {
-            e.printStackTrace();
+            CcuLog.e(L.TAG_CCU_DEVICE,"Error getDesiredTempCooling", e);
         }
         return 0;
     }
@@ -229,7 +225,7 @@ public class HyperSplitMessageGenerator {
         try {
             return CCUHsApi.getInstance().readPointPriorityVal(desiredTempHeating.get("id").toString());
         } catch (NullPointerException e) {
-            e.printStackTrace();
+            CcuLog.e(L.TAG_CCU_DEVICE,"Error getDesiredTempHeating", e);
         }
         return 0;
     }
@@ -296,7 +292,7 @@ public class HyperSplitMessageGenerator {
             }
         }catch (Exception e){
             e.printStackTrace();
-            Log.i(L.TAG_CCU_DEVICE, "Exception getDeviceFanMode: ");
+            CcuLog.i(L.TAG_CCU_DEVICE, "Exception getDeviceFanMode: ");
         }
 
         return HyperSplit.HyperSplitFanSpeed_e.HYPERSPLIT_FAN_SPEED_OFF;
@@ -313,7 +309,7 @@ public class HyperSplitMessageGenerator {
             else
                 return HyperSplit.HyperSplitConditioningMode_e.HYPERSPLIT_CONDITIONING_MODE_OFF;
         }catch (Exception e){
-            Log.i(L.TAG_CCU_DEVICE, "Exception getConditioningMode: ");
+            CcuLog.i(L.TAG_CCU_DEVICE, "Exception getConditioningMode: ");
             e.printStackTrace();
         }
         return HyperSplit.HyperSplitConditioningMode_e.HYPERSPLIT_CONDITIONING_MODE_OFF;
@@ -333,13 +329,13 @@ public class HyperSplitMessageGenerator {
         return hayStack.readDefaultVal("dehumidifier and control and group == \"" + address + "\"").intValue();
     }
 
-    private static double getStandaloneCoolingDeadband(String equipRef, TemperatureMode mode) {
+    private static double getStandaloneCoolingDeadband(String equipRef) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap collingDeadband = hayStack.read("point and deadband and cooling and zone and not multiplier and roomRef == \""+HSUtil.getZoneIdFromEquipId(equipRef)+"\"");
         try {
             return HSUtil.getPriorityVal(Objects.requireNonNull(collingDeadband.get("id")).toString());
         } catch (NullPointerException e) {
-            e.printStackTrace();
+            CcuLog.e(L.TAG_CCU_DEVICE,"Error getStandaloneCoolingDeadband",e);
             return 0;
         }
 
@@ -353,7 +349,7 @@ public class HyperSplitMessageGenerator {
         try {
             return HSUtil.getPriorityVal(Objects.requireNonNull(deadbandPoint.get("id")).toString());
         } catch (NullPointerException e) {
-            e.printStackTrace();
+            CcuLog.e(L.TAG_CCU_DEVICE,"Error getStandaloneHeatingDeadband", e);
             return 0;
         }
 
@@ -408,7 +404,7 @@ public class HyperSplitMessageGenerator {
         HashMap<Object,Object> equip = CCUHsApi.getInstance().readEntity("equip and hyperstatsplit" +
                 " and group == \"" + address + "\"");
         String equipRef =equip.get("id").toString();
-        Log.d(L.TAG_CCU_SERIAL,"Reset set to true");
+        CcuLog.d(L.TAG_CCU_SERIAL,"Reset set to true");
         int modeType = CCUHsApi.getInstance().readHisValByQuery("zone and hvacMode and roomRef" +
                 " == \"" + equip.get("roomRef").toString() + "\"").intValue();
         return getControlMessage(address ,equipRef, TemperatureMode.values()[modeType]).setReset(true).build();

@@ -6,7 +6,6 @@ import org.javolution.io.Struct;
 
 import java.io.IOException;
 
-import a75f.io.alerts.BuildConfig;
 import a75f.io.device.json.serializers.JsonSerializer;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
@@ -21,12 +20,9 @@ public class DLog
 {
 	
 	private static final String TAG             = DLog.class.getSimpleName();
-	private static final String SERIAL_TAG      = "Serial";
-    public static final String UPDATED_ZONE_TAG = "UPDATE_ZONE";
-    public static final String UPDATED_STRUCT     = "UPDATED_STRUCT";
-    
-    
-    public static <T extends Struct>  void
+
+
+	public static <T extends Struct>  void
     
     
     
@@ -34,8 +30,7 @@ public class DLog
     LogdStructAsJson(T struct)
 	{
 		CcuLog.d(L.TAG_CCU_SERIAL, "MSG: "+struct.toString());
-		//if (BuildConfig.DEBUG)
-		//{
+
 			String structString = null;
 		
 			//We can bury this exception because when we log a struct to json, it is purely for loggin purposes
@@ -52,7 +47,7 @@ public class DLog
 			{
 				e.printStackTrace();
 			}
-		//}
+
 	}
 
 	public static <T extends Struct>  void
@@ -62,12 +57,10 @@ public class DLog
 
 	tempLogdStructAsJson(T struct)
 	{
-		//CcuLog.d("CCU_SN_MESSAGES", "MSG: "+struct.toString());
-		//if (BuildConfig.DEBUG)
-		//{
+
 		String structString = null;
 
-		//We can bury this exception because when we log a struct to json, it is purely for loggin purposes
+
 		try
 		{
 			structString = JsonSerializer.toJson(struct, true);
@@ -82,7 +75,7 @@ public class DLog
 		{
 			e.printStackTrace();
 		}
-		//}
+
 	}
 	
 	public static void logUSBServiceNotInitialized()
@@ -93,42 +86,16 @@ public class DLog
 	
 	public  static void Logd(String message)
 	{
-	//	if (BuildConfig.DEBUG)
-		//{
-			//Log.d(TAG, message);
 		CcuLog.d(L.TAG_CCU_SERIAL, message);
-		
-		//}
 	}
 	
 	public static void LogdSerial(String message)
 	{
-		
-	//	if (BuildConfig.DEBUG)
-	//	{
-			//Log.d(SERIAL_TAG, message);
-		CcuLog.d(L.TAG_CCU_SERIAL, message);
-		//}
-	}
-	
-	public static String objectNullString(Object object)
-	{
-		return object == null ? " is null. " : " is not null. ";
-	}
-	
-	
-	public static void Logw(String message)
-	{
-		//Log.w(TAG, message);
 		CcuLog.d(L.TAG_CCU_SERIAL, message);
 	}
-	
+
+
 	public static boolean isLoggingEnabled() {
     	return true;
-        //Lets keep logging until things are stabilized
-		/*return BuildConfig.BUILD_TYPE.equals("staging") ||
-				BuildConfig.BUILD_TYPE.equals("qa") ||
-		       BuildConfig.BUILD_TYPE.equals("dev") ||
-		       BuildConfig.BUILD_TYPE.equals("local");*/
 	}
 }

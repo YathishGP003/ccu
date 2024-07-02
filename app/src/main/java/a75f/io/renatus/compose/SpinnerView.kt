@@ -228,7 +228,7 @@ fun SpinnerElementOption(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchSpinnerElement(
-    default: String,
+    default: Option,
     allItems: List<Option>,
     unit: String,
     onSelect: (Option) -> Unit,
@@ -239,7 +239,8 @@ fun SearchSpinnerElement(
     val expanded = remember { mutableStateOf(false) }
     var searchedOption by rememberSaveable { mutableStateOf("") }
     val lazyListState = rememberLazyListState()
-    var selectedIndex by remember { mutableStateOf(getDefaultSelectionIndex(allItems,default)) }
+  //  var selectedIndex by remember { mutableStateOf(getDefaultSelectionIndex(allItems,default)) }
+    var selectedIndex by remember { mutableStateOf(default.index) }
     Box(
         modifier = Modifier
             .wrapContentSize()
@@ -258,7 +259,7 @@ fun SearchSpinnerElement(
                     fontFamily = ComposeUtil.myFontFamily,
                     modifier = Modifier.width((width-50).dp),
                     fontWeight = FontWeight.Normal,
-                    text = "${formatText(selectedItem.value)} $unit",
+                    text = "${ selectedItem.value.dis?: selectedItem.value.dis } $unit",
                     maxLines = 1
                 )
 
@@ -323,7 +324,7 @@ fun SearchSpinnerElement(
                     ) {
                         items(filteredItems) {
                             DropdownMenuItem(
-                                modifier = Modifier.background(if (it.value == selectedItem.value) secondaryColor else Color.White),
+                                modifier = Modifier.background(if (it.value == selectedItem.value.value) secondaryColor else Color.White),
                                 contentPadding = PaddingValues(10.dp),
                                 text = {
                                     Row {
@@ -332,7 +333,7 @@ fun SearchSpinnerElement(
                                             fontFamily = ComposeUtil.myFontFamily,
                                             modifier = Modifier.padding(end = 10.dp),
                                             fontWeight = FontWeight.Normal,
-                                            text = formatText(it.value)
+                                            text = it.dis ?: it.value // formatText(it.value)
                                         )
                                         Text(
                                             fontSize = 20.sp,
@@ -342,7 +343,7 @@ fun SearchSpinnerElement(
                                         )
                                     }
                                 }, onClick = {
-                                    selectedItem.value = it.value
+                                    selectedItem.value = it
                                     expanded.value = false
                                     selectedIndex = allItems.indexOf(it)
                                     searchedOption = ""

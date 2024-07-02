@@ -5,6 +5,7 @@ import a75f.io.domain.api.Point
 import a75f.io.domain.equips.ConnectModuleEquip
 import a75f.io.domain.equips.DomainEquip
 import a75f.io.domain.equips.VavAdvancedHybridSystemEquip
+import a75f.io.logic.bo.building.system.util.DuctPressureSensorSource
 
 enum class AdvancedAhuRelayAssociationType {
     LOAD_COOLING, LOAD_HEATING, LOAD_FAN, HUMIDIFIER, DEHUMIDIFIER, SAT_COOLING, SAT_HEATING, FAN_PRESSURE, OCCUPIED_ENABLE, FAN_ENABLE, AHU_FRESH_AIR_FAN_COMMAND;
@@ -401,7 +402,24 @@ fun pressureFanControlIndexToDomainPoint(index: Int, equip: DomainEquip) : Point
         is VavAdvancedHybridSystemEquip -> equip
         else -> throw IllegalArgumentException("Invalid system equip type")
     }
-    return when(index) {
+    val source = DuctPressureSensorSource.values()[index]
+    when(source) {
+        DuctPressureSensorSource.DUCT_STATIC_PRESSURE_SENSOR_1 -> {
+
+        }
+        DuctPressureSensorSource.DUCT_STATIC_PRESSURE_SENSOR_2 -> {
+
+        }
+        DuctPressureSensorSource.DUCT_STATIC_PRESSURE_SENSOR_3 -> {
+
+        }
+        DuctPressureSensorSource.AVERAGE_PRESSURE -> return systemEquip.averagePressure
+        DuctPressureSensorSource.MIN_PRESSURE -> return systemEquip.minPressure
+        DuctPressureSensorSource.MAX_PRESSURE -> return systemEquip.maxPressure
+        else -> throw IllegalArgumentException("Invalid index $index")
+    }
+
+    /* return when(index) {
         0 -> systemEquip.ductStaticPressureSensor12
         1 -> systemEquip.ductStaticPressureSensor22
         2 -> systemEquip.ductStaticPressureSensor32
@@ -409,7 +427,15 @@ fun pressureFanControlIndexToDomainPoint(index: Int, equip: DomainEquip) : Point
         4 -> systemEquip.minPressure
         5 -> systemEquip.maxPressure
         else -> throw IllegalArgumentException("Invalid index $index")
+    }*/
+}
+
+fun getPressureSource(enabled: Point, association: Point, systemEquip: VavAdvancedHybridSystemEquip) {
+    if (enabled.readDefaultVal() > 0) {
+        val association = association.readDefaultVal()
+
     }
+
 }
 
 fun co2DamperControlTypeToDomainPoint(index: Int, equip: DomainEquip) : Point {

@@ -402,9 +402,13 @@ fun pressureFanControlIndexToDomainPoint(index: Int, equip: DomainEquip) : Point
         is VavAdvancedHybridSystemEquip -> equip
         else -> throw IllegalArgumentException("Invalid system equip type")
     }
-    val source = DuctPressureSensorSource.values()[index]
-    when(source) {
+    val sourceOption = DuctPressureSensorSource.values()[index]
+    val sourceDomain: Point
+    when(sourceOption) {
         DuctPressureSensorSource.DUCT_STATIC_PRESSURE_SENSOR_1 -> {
+            if (systemEquip.sensorBus0PressureEnable.readDefaultVal() > 0) {
+                sourceDomain =
+            }
 
         }
         DuctPressureSensorSource.DUCT_STATIC_PRESSURE_SENSOR_2 -> {
@@ -433,11 +437,29 @@ fun pressureFanControlIndexToDomainPoint(index: Int, equip: DomainEquip) : Point
 fun getPressureSource(enabled: Point, association: Point, systemEquip: VavAdvancedHybridSystemEquip) {
     if (enabled.readDefaultVal() > 0) {
         val association = association.readDefaultVal()
-
+        ductStaticPressureSensor1_2
+        ductStaticPressureSensor2_2
+        ductStaticPressureSensor3_2
     }
-
 }
 
+fun getPressureDomain(enabled: Point, association: Point, systemEquip: VavAdvancedHybridSystemEquip): Point? {
+    if (enabled.readDefaultVal() > 0) {
+        return when (association.readDefaultVal().toInt()) {
+            12 -> systemEquip.ductStaticPressureSensor11
+            13 -> systemEquip.ductStaticPressureSensor12
+            14 -> systemEquip.ductStaticPressureSensor110
+            15 -> systemEquip.ductStaticPressureSensor21
+            16 -> systemEquip.ductStaticPressureSensor22
+            17 -> systemEquip.ductStaticPressureSensor210
+            18 -> systemEquip.ductStaticPressureSensor31
+            19 -> systemEquip.ductStaticPressureSensor32
+            20 -> systemEquip.ductStaticPressureSensor310
+            else -> null
+        }
+    }
+    return null
+}
 fun co2DamperControlTypeToDomainPoint(index: Int, equip: DomainEquip) : Point {
     val systemEquip = when (equip) {
         is VavAdvancedHybridSystemEquip -> equip

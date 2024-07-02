@@ -396,56 +396,15 @@ fun satControlIndexToDomainPoint(index: Int, equip: DomainEquip) : Point {
         else -> throw IllegalArgumentException("Invalid index $index")
     }
 }
+fun pressureFanControlIndexToDomainPoint(index: Int, equip: DomainEquip): Point? {
+    val systemEquip = equip as? VavAdvancedHybridSystemEquip
+            ?: throw IllegalArgumentException("Invalid system equip type")
 
-fun pressureFanControlIndexToDomainPoint(index: Int, equip: DomainEquip) : Point {
-    val systemEquip = when (equip) {
-        is VavAdvancedHybridSystemEquip -> equip
-        else -> throw IllegalArgumentException("Invalid system equip type")
-    }
-    val sourceOption = DuctPressureSensorSource.values()[index]
-    val sourceDomain: Point
-    when(sourceOption) {
-        DuctPressureSensorSource.DUCT_STATIC_PRESSURE_SENSOR_1 -> {
-            if (systemEquip.sensorBus0PressureEnable.readDefaultVal() > 0) {
-                sourceDomain =
-            }
+    val sourceOption = DuctPressureSensorSource.values().getOrNull(index)
+            ?: return null
 
-        }
-        DuctPressureSensorSource.DUCT_STATIC_PRESSURE_SENSOR_2 -> {
-
-        }
-        DuctPressureSensorSource.DUCT_STATIC_PRESSURE_SENSOR_3 -> {
-
-        }
-        DuctPressureSensorSource.AVERAGE_PRESSURE -> return systemEquip.averagePressure
-        DuctPressureSensorSource.MIN_PRESSURE -> return systemEquip.minPressure
-        DuctPressureSensorSource.MAX_PRESSURE -> return systemEquip.maxPressure
-        else -> throw IllegalArgumentException("Invalid index $index")
-    }
-
-    /* return when(index) {
-        0 -> systemEquip.ductStaticPressureSensor12
-        1 -> systemEquip.ductStaticPressureSensor22
-        2 -> systemEquip.ductStaticPressureSensor32
-        3 -> systemEquip.averagePressure
-        4 -> systemEquip.minPressure
-        5 -> systemEquip.maxPressure
-        else -> throw IllegalArgumentException("Invalid index $index")
-    }*/
-}
-
-fun getPressureSource(enabled: Point, association: Point, systemEquip: VavAdvancedHybridSystemEquip) {
-    if (enabled.readDefaultVal() > 0) {
-        val association = association.readDefaultVal()
-        ductStaticPressureSensor1_2
-        ductStaticPressureSensor2_2
-        ductStaticPressureSensor3_2
-    }
-}
-
-fun getPressureDomain(enabled: Point, association: Point, systemEquip: VavAdvancedHybridSystemEquip): Point? {
-    if (enabled.readDefaultVal() > 0) {
-        return when (association.readDefaultVal().toInt()) {
+    fun getAnalogSensorPoint(association: Int): Point? {
+        return when (association) {
             12 -> systemEquip.ductStaticPressureSensor11
             13 -> systemEquip.ductStaticPressureSensor12
             14 -> systemEquip.ductStaticPressureSensor110
@@ -458,8 +417,34 @@ fun getPressureDomain(enabled: Point, association: Point, systemEquip: VavAdvanc
             else -> null
         }
     }
-    return null
+
+    fun getSensorFromBus(sensorIndex: Int): Point? {
+        if (systemEquip.sensorBus0PressureEnable.readDefaultVal() > 0) {
+            return when (sensorIndex) {
+                1 -> if (systemEquip.sensorBus0PressureAssociation.readDefaultVal().toInt() == 1) systemEquip.ductStaticPressureSensor12 else null
+                2 -> if (systemEquip.sensorBus0PressureAssociation.readDefaultVal().toInt() == 2) systemEquip.ductStaticPressureSensor22 else null
+                3 -> if (systemEquip.sensorBus0PressureAssociation.readDefaultVal().toInt() == 3) systemEquip.ductStaticPressureSensor32 else null
+                else -> null
+            }
+        }
+        return null
+    }
+
+    fun getAnalogSensor(): Point? {
+        return getAnalogSensorPoint(systemEquip.analog1InputAssociation.readDefaultVal().toInt())
+                ?: getAnalogSensorPoint(systemEquip.analog2InputAssociation.readDefaultVal().toInt())
+    }
+
+    return when (sourceOption) {
+        DuctPressureSensorSource.DUCT_STATIC_PRESSURE_SENSOR_1 -> getSensorFromBus(1) ?: getAnalogSensor()
+        DuctPressureSensorSource.DUCT_STATIC_PRESSURE_SENSOR_2 -> getSensorFromBus(2) ?: getAnalogSensor()
+        DuctPressureSensorSource.DUCT_STATIC_PRESSURE_SENSOR_3 -> getSensorFromBus(3) ?: getAnalogSensor()
+        DuctPressureSensorSource.AVERAGE_PRESSURE -> systemEquip.averagePressure
+        DuctPressureSensorSource.MIN_PRESSURE -> systemEquip.minPressure
+        DuctPressureSensorSource.MAX_PRESSURE -> systemEquip.maxPressure
+    }
 }
+
 fun co2DamperControlTypeToDomainPoint(index: Int, equip: DomainEquip) : Point {
     val systemEquip = when (equip) {
         is VavAdvancedHybridSystemEquip -> equip

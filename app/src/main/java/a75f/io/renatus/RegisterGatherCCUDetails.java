@@ -10,7 +10,6 @@ import androidx.appcompat.app.AlertDialog;
 
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -38,6 +37,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.SettingPoint;
 import a75f.io.api.haystack.Tags;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
@@ -63,7 +63,6 @@ public class RegisterGatherCCUDetails extends Activity {
     Button      mCreateNewCCU;
     HGrid       mCCUS;
     Prefs prefs;
-    String      mSiteId;
     String addressBandSelected = "1000";
     ArrayList<String> regAddressBands = new ArrayList<>();
     ArrayList<String> addressBand = new ArrayList<>();
@@ -98,7 +97,7 @@ public class RegisterGatherCCUDetails extends Activity {
         {
             addressBand.add(String.valueOf(addr));
         }
-        ArrayAdapter<String> analogAdapter = new ArrayAdapter<String>(this, R.layout.spinner_dropdown_item, addressBand);
+        ArrayAdapter<String> analogAdapter = new ArrayAdapter<>(this, R.layout.spinner_dropdown_item, addressBand);
         analogAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         
         mAddressBandSpinner.setAdapter(analogAdapter);
@@ -108,7 +107,7 @@ public class RegisterGatherCCUDetails extends Activity {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l)
             {
-                Log.d("CCU","AddressBandSelected : "+mAddressBandSpinner.getSelectedItem());
+                CcuLog.d("CCU","AddressBandSelected : "+mAddressBandSpinner.getSelectedItem());
                 if (i > 0)
                 {
                     addressBandSelected = mAddressBandSpinner.getSelectedItem().toString();
@@ -135,7 +134,7 @@ public class RegisterGatherCCUDetails extends Activity {
 
             @Override
             public void afterTextChanged(Editable s) {
-                if(mCCUNameET.getText().toString().trim().length() == 0){
+                if(mCCUNameET.getText().toString().trim().isEmpty()){
                     mCCUNameET.setError("Enter CCU name");
                 }
                 if(CCUUiUtil.isInvalidName(mCCUNameET.getText().toString())) {
@@ -148,13 +147,13 @@ public class RegisterGatherCCUDetails extends Activity {
             String ccuName = mCCUNameET.getText().toString();
             String installerEmail = mInstallerEmailET.getText().toString();
             String managerEmail = mManagerEmailET.getText().toString();
-            if (ccuName.trim().length() == 0) {
+            if (ccuName.trim().isEmpty()) {
                 Toast.makeText(RegisterGatherCCUDetails.this, "Enter CCU name", Toast.LENGTH_SHORT).show();
                 return;
-            } else if (installerEmail.trim().length() == 0) {
+            } else if (installerEmail.trim().isEmpty()) {
                 Toast.makeText(RegisterGatherCCUDetails.this, "Enter Installer email", Toast.LENGTH_SHORT).show();
                 return;
-            } else if (managerEmail.trim().length() == 0) {
+            } else if (managerEmail.trim().isEmpty()) {
                 Toast.makeText(RegisterGatherCCUDetails.this, "Enter Manager email", Toast.LENGTH_SHORT).show();
                 return;
             }
@@ -212,14 +211,11 @@ public class RegisterGatherCCUDetails extends Activity {
                 HDict tDict = new HDictBuilder().add("filter", "equip and group and siteRef == " + siteUID).toDict();
                 HGrid schedulePoint = hClient.call("read", HGridBuilder.dictToGrid(tDict));
                 if(schedulePoint == null) {
-                    Log.w("RegisterGatherCCUDetails","HGrid(schedulePoint) is null.");
-                    RegisterGatherCCUDetails.this.runOnUiThread( (new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            // Display the text we just generated within the LogView.
-                            Toast.makeText(RegisterGatherCCUDetails.this,"Couldn't find the node address, Please choose the node address which is not used already.", Toast.LENGTH_LONG).show();
+                    CcuLog.w("RegisterGatherCCUDetails","HGrid(schedulePoint) is null.");
+                    RegisterGatherCCUDetails.this.runOnUiThread( (new Thread(() -> {
+                        // Display the text we just generated within the LogView.
+                        Toast.makeText(RegisterGatherCCUDetails.this,"Couldn't find the node address, Please choose the node address which is not used already.", Toast.LENGTH_LONG).show();
 
-                        }
                     })));
                     return null;
                 }
@@ -250,7 +246,7 @@ public class RegisterGatherCCUDetails extends Activity {
                         }
                     }
                 }
-                ArrayAdapter<String> analogAdapter = new ArrayAdapter<String>(RegisterGatherCCUDetails.this, R.layout.spinner_dropdown_item, addressBand);
+                ArrayAdapter<String> analogAdapter = new ArrayAdapter<>(RegisterGatherCCUDetails.this, R.layout.spinner_dropdown_item, addressBand);
                 analogAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
 
                 mAddressBandSpinner.setAdapter(analogAdapter);
@@ -328,10 +324,7 @@ public class RegisterGatherCCUDetails extends Activity {
 
                 if(!Globals.getInstance().siteAlreadyCreated()) {
                     TunerEquip.INSTANCE.initialize(CCUHsApi.getInstance());
-                    //BuildingTuners.getInstance();
-                    //SchedulabeLimits.Companion.addSchedulableLimits(true,null,null);
                     DefaultSchedules.setDefaultCoolingHeatingTemp();
-//                    DefaultSchedules.generateDefaultSchedule(false, null);
                 }
                 return null;
             }

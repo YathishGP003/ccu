@@ -30,7 +30,6 @@ import a75f.io.api.haystack.Zone;
 import a75f.io.constants.WhoFiledConstants;
 import a75f.io.device.alerts.AlertGenerateHandler;
 import a75f.io.device.cm.ControlMoteMessageHandlerKt;
-import a75f.io.device.serial.CcuToCmOverUsbCmResetMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbDatabaseSeedSmartStatMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbDatabaseSeedSnMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbDeviceTempAckMessage_t;
@@ -52,8 +51,6 @@ import a75f.io.domain.api.DomainName;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
-import a75f.io.logic.bo.building.system.vav.VavAdvancedAhu;
-import a75f.io.logic.interfaces.ZoneDataInterface;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.ccu.CazEquipUtil;
 import a75f.io.logic.bo.building.definitions.DamperType;
@@ -63,10 +60,12 @@ import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.sensors.Sensor;
 import a75f.io.logic.bo.building.sensors.SensorManager;
 import a75f.io.logic.bo.building.sensors.SensorType;
+import a75f.io.logic.bo.building.system.vav.VavAdvancedAhu;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.bo.haystack.device.SmartStat;
 import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.bo.util.TemperatureMode;
+import a75f.io.logic.interfaces.ZoneDataInterface;
 import a75f.io.logic.jobs.SystemScheduleUtil;
 import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.TunerConstants;
@@ -110,7 +109,7 @@ public class Pulse
 		CCUHsApi hayStack = CCUHsApi.getInstance();
 		HashMap device = hayStack.read("device and addr == \""+nodeAddr+"\"");
 		CcuLog.d(L.TAG_CCU_DEVICE, "Found device "+device);
-		if (device != null && device.size() > 0)
+		if (device != null && !device.isEmpty())
 		{
 			Device deviceInfo = new Device.Builder().setHashMap(device).build();
 			//update last updated time
@@ -170,7 +169,7 @@ public class Pulse
 				}
 				Point logPointInfo = new Point.Builder().setHashMap(logPoint).build();
 				isSse = logPointInfo.getMarkers().contains("sse");
-				double val = 0;
+				double val;
 				Port currentPort = getPhysicalPointPort(phyPoint);
 				CcuLog.i(L.TAG_CCU_DEVICE, "regularSNUpdate: PORT "+currentPort);
 				switch (currentPort){
@@ -319,8 +318,7 @@ public class Pulse
 		if (i < 0) i = 0;
 		if (i > 1) i = 1;
 
-		double pressure = i * (maxPressure - minPressure) + minPressure;
-		return pressure;
+        return i * (maxPressure - minPressure) + minPressure;
 	}
 
 	private static boolean isMATDamperConfigured(HashMap logicalPoint, Short nodeAddr, String primary,
@@ -338,7 +336,7 @@ public class Pulse
 			SensorType t = SensorType.values()[r.sensorType.get()];
 			Port p = t.getSensorPort();
 			if (p == null) {
-				CcuLog.d(L.TAG_CCU_DEVICE, " Unknown sensor type : "+t.toString());
+				CcuLog.d(L.TAG_CCU_DEVICE, " Unknown sensor type : "+ t);
 				continue;
 			}
 			double val = r.sensorData.get();
@@ -366,7 +364,7 @@ public class Pulse
 					double curHumidityVal = getHumidityConversion(val);
 					CCUHsApi.getInstance().writeHisValById(sp.getId(), val );
 					if(oldHumidityVal != curHumidityVal && sp.getPointRef() != null)
-					CCUHsApi.getInstance().writeHisValById(sp.getPointRef(), curHumidityVal);
+						CCUHsApi.getInstance().writeHisValById(sp.getPointRef(), curHumidityVal);
 					break;
 				case PRESSURE:
 					CCUHsApi.getInstance().writeHisValById(sp.getId(), val );
@@ -480,7 +478,7 @@ public class Pulse
 			int index = (int)Double.parseDouble(pp.get("analogType").toString());
 			analogSensor = SensorManager.getInstance().getExternalSensorList().get(index);
 		}catch (NumberFormatException e) {
-			e.printStackTrace();
+			CcuLog.e(L.TAG_CCU_DEVICE, "error ", e);
 			return analogVal;
 		}
 		CcuLog.d(L.TAG_CCU_DEVICE,"Sensor input : type "+pp.get("analogType").toString()+" val "+analogVal);
@@ -494,7 +492,7 @@ public class Pulse
 		HashMap equipMap = CCUHsApi.getInstance().read("equip and group == \""+node+"\"");
 		Equip equip = new Equip.Builder().setHashMap(equipMap).build();
 		if( equip == null ) return;
-		double coolingDesiredTemp = 0;
+		double coolingDesiredTemp;
 		double heatingDesiredTemp = 0;
 		double averageTemp;
 		double cdb = CCUHsApi.getInstance().readPointPriorityValByQuery("zone and cooling and deadband and not multiplier and roomRef == \""+equip.getRoomRef()+"\"");
@@ -515,10 +513,6 @@ public class Pulse
 				dt,coolingDeadband,buildingTuner.getMaxCoolingUserLimit(),
 				buildingTuner.getMinCoolingUserLimit()
 		);
-		/*double coolingDeadband = TunerUtil.readBuildingTunerValByQuery("cooling and deadband and base and equipRef == \""
-				+ equip.getId()+"\"");
-		double heatingDeadband = TunerUtil.readBuildingTunerValByQuery("heating and deadband and base and equipRef == \""
-				+equip.getId()+"\"");*/
 		HashMap<Object, Object> coolingDtPoint = CCUHsApi.getInstance().readEntity("point and air and temp and desired and cooling and sp and equipRef == \""+equip.getId()+"\"");
 		HashMap<Object, Object> heatingDtPoint = CCUHsApi.getInstance().readEntity("point and air and temp and desired and heating and sp and equipRef == \""+equip.getId()+"\"");
 		int modeType = CCUHsApi.getInstance().readHisValByQuery("zone and hvacMode and roomRef" +
@@ -546,19 +540,19 @@ public class Pulse
 
 
 		CcuLog.d(L.TAG_CCU_DEVICE,"updateDesiredTemp : dt "+dt+" cdb : "+cdb+" hdb: "+hdb+" coolingDesiredTemp: "+coolingDesiredTemp+" heatingDesiredTemp: "+heatingDesiredTemp+" desiredTemp: "+averageTemp);
-		if (coolingDtPoint == null || coolingDtPoint.size() == 0) {
+		if (coolingDtPoint == null || coolingDtPoint.isEmpty()) {
 			throw new IllegalArgumentException();
 		}
 		CCUHsApi.getInstance().writeHisValById(coolingDtPoint.get("id").toString(), coolingDesiredTemp);
 
-		if (heatingDtPoint == null || heatingDtPoint.size() == 0) {
+		if (heatingDtPoint == null || heatingDtPoint.isEmpty()) {
 			throw new IllegalArgumentException();
 		}
 		CCUHsApi.getInstance().writeHisValById(heatingDtPoint.get("id").toString(), heatingDesiredTemp);
 
 
 		HashMap singleDtPoint = CCUHsApi.getInstance().read("point and air and temp and desired and (avg or average) and sp and equipRef == \""+equip.getId()+"\"");
-		if (singleDtPoint == null || singleDtPoint.size() == 0) {
+		if (singleDtPoint == null || singleDtPoint.isEmpty()) {
 			throw new IllegalArgumentException();
 		}
 		CCUHsApi.getInstance().writeHisValById(singleDtPoint.get("id").toString(), dt);
@@ -582,7 +576,6 @@ public class Pulse
 		if( equip == null ) return;
 		double coolingDesiredTemp = 0;
 		double heatingDesiredTemp= 0;
-		double averageTemp = 0;
 		int modeType = CCUHsApi.getInstance().readHisValByQuery("zone and hvacMode and roomRef" +
 				" == \"" + equip.getRoomRef() + "\"").intValue();
 		TemperatureMode temperatureMode = TemperatureMode.values()[modeType];
@@ -594,10 +587,8 @@ public class Pulse
 		HashMap<Object, Object> heatinDtPoint = CCUHsApi.getInstance().readEntity("point and air and temp and desired and heating and sp and equipRef == \""+equip.getId()+"\"");
 		if(temperatureMode == TemperatureMode.COOLING){
 			coolingDesiredTemp = dt;
-			averageTemp = (dt + CCUHsApi.getInstance().readPointPriorityVal(heatinDtPoint.get("id").toString())) / 2;
 		}else if(temperatureMode == TemperatureMode.HEATING){
 			heatingDesiredTemp = dt;
-			averageTemp = (dt + CCUHsApi.getInstance().readPointPriorityVal(coolingDtPoint.get("id").toString())) / 2;
 		}else {
 			coolingDesiredTemp = DeviceUtil.getValidDesiredCoolingTemp(
 					dt, coolingDeadband, buildingTuner.getMaxCoolingUserLimit(),
@@ -610,7 +601,7 @@ public class Pulse
 			);
 		}
 
-        if (coolingDtPoint == null || coolingDtPoint.size() == 0) {
+        if (coolingDtPoint == null || coolingDtPoint.isEmpty()) {
             throw new IllegalArgumentException();
         }
         try{
@@ -618,10 +609,10 @@ public class Pulse
 				CCUHsApi.getInstance().writeHisValById(coolingDtPoint.get("id").toString(), coolingDesiredTemp);
 			}
         }catch (Exception e){
-            e.printStackTrace();
+			CcuLog.e(L.TAG_CCU_DEVICE, "error", e);
         }
 
-        if (heatinDtPoint == null || heatinDtPoint.size() == 0) {
+        if (heatinDtPoint == null || heatinDtPoint.isEmpty()) {
             throw new IllegalArgumentException();
         }
         try{
@@ -629,17 +620,17 @@ public class Pulse
 				CCUHsApi.getInstance().writeHisValById(heatinDtPoint.get("id").toString(), heatingDesiredTemp);
 			}
         }catch (Exception e){
-            e.printStackTrace();
+			CcuLog.e(L.TAG_CCU_DEVICE, "error", e);
         }
 
 		HashMap singleDtPoint = CCUHsApi.getInstance().read("point and air and temp and desired and average and sp and equipRef == \""+equip.getId()+"\"");
-		if (singleDtPoint == null || singleDtPoint.size() == 0) {
+		if (singleDtPoint == null || singleDtPoint.isEmpty()) {
 			throw new IllegalArgumentException();
 		}
 			try {
 		    CCUHsApi.getInstance().writeHisValById(singleDtPoint.get("id").toString(), dt);
         }catch (Exception e){
-		    e.printStackTrace();
+				CcuLog.e(L.TAG_CCU_DEVICE, "error", e);
         }
 	    DeviceUtil.updateDesiredTempFromDevice(new Point.Builder().setHashMap(coolingDtPoint).build(),
 				new Point.Builder().setHashMap(heatinDtPoint).build(),
@@ -666,7 +657,7 @@ public class Pulse
 		double curTempVal = 0.0;
 		CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate "+device );
 
-		if (device != null && device.size() > 0) {
+		if (device != null && !device.isEmpty()) {
 			Device deviceInfo = new Device.Builder().setHashMap(device).build();
 			ArrayList<HashMap> phyPoints = hayStack.readAll("point and physical and sensor and deviceRef == \"" + deviceInfo.getId() + "\"");
 			CcuLog.d(L.TAG_CCU_DEVICE, "deviceRef "+ deviceInfo.getId() +" points "+phyPoints.size());
@@ -732,7 +723,7 @@ public class Pulse
 							double curTh2TempVal =
 									getCMRoomTempConversion(ThermistorUtil.getThermistorValueToTemp(val * 10) * 10, offSet);
 							curTh2TempVal = CCUUtils.roundToOneDecimal(curTh2TempVal);
-							if (logPoint.keySet().contains(Tags.TI) && !isPortMappedToSAT) {
+							if (logPoint.containsKey(Tags.TI) && !isPortMappedToSAT) {
 								curTempVal = curTh2TempVal;
 								isTh2RoomTempInTI = true;
 							}
@@ -747,14 +738,13 @@ public class Pulse
 						break;
 					case ANALOG_IN_ONE:
 						val = cmRegularUpdateMessage_t.analogSense1.get();
-						//hayStack.writeHisValById(phyPoint.get("id").toString(), val);
+
 						hayStack.writeHisValById(logPoint.get("id").toString(), getAnalogConversion(phyPoint, logPoint, val));
 						hayStack.writeHisValById(phyPoint.get("id").toString(), val / 100);
 						CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : analog1In " + getAnalogConversion(phyPoint, logPoint, val));
 						break;
 					case ANALOG_IN_TWO:
 						val = cmRegularUpdateMessage_t.analogSense2.get();
-						//hayStack.writeHisValById(phyPoint.get("id").toString(), val);
 						hayStack.writeHisValById(logPoint.get("id").toString(), getAnalogConversion(phyPoint, logPoint, val));
 						hayStack.writeHisValById(phyPoint.get("id").toString(), val / 100);
 						CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : analog2In " + getAnalogConversion(phyPoint, logPoint, val));
@@ -775,7 +765,7 @@ public class Pulse
 									getCMRoomTempConversion(ThermistorUtil.getThermistorValueToTemp(val * 10) * 10, offSet);
 							th1TempVal = curTh1TempVal;
 							hayStack.writeHisValById(phyPoint.get("id").toString(), val / 100);
-							if (logPoint.keySet().contains(Tags.TI) && !isPortMappedToSAT) {
+							if (logPoint.containsKey(Tags.TI) && !isPortMappedToSAT) {
 								curTempVal = curTh1TempVal;
 								isTh1RoomTempInTI = true;
 							}
@@ -824,7 +814,7 @@ public class Pulse
 			}
 		}
 		HashMap cmCurrentTemp = hayStack.read("point and system and temp and (current or space)");
-		if (cmCurrentTemp != null && cmCurrentTemp.size() > 0) {
+		if (cmCurrentTemp != null && !cmCurrentTemp.isEmpty()) {
 
 			double val = cmRegularUpdateMessage_t.roomTemperature.get();
 			if(curTempVal == 0.0) curTempVal = getCMRoomTempConversion(val,0);
@@ -832,7 +822,7 @@ public class Pulse
 			CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : CM currentTemp " + curTempVal+","+val);
 		}
 		HashMap cmHumidity = hayStack.read("point and system and cm and humidity");
-		if (cmHumidity != null && cmHumidity.size() > 0) {
+		if (cmHumidity != null && !cmHumidity.isEmpty()) {
 			double val = CCUUtils.roundToOneDecimal(cmRegularUpdateMessage_t.humidity.get());
 			if (val > 0) {
 				hayStack.writeHisValById(cmHumidity.get("id").toString(), val);
@@ -852,7 +842,7 @@ public class Pulse
 	private static void handleAdvancedAhuCmUpdate(CCUHsApi hayStack, CmToCcuOverUsbCmRegularUpdateMessage_t cmRegularUpdateMessage_t) {
 		HashMap<Object, Object> device = hayStack.readEntity("device and cm");
 		CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate handleAdvancedAhuCmUpdate "+device );
-		if (device != null && device.size() > 0) {
+		if (device != null && !device.isEmpty()) {
 			Device deviceInfo = new Device.Builder().setHashMap(device).build();
 			ArrayList<HashMap<Object, Object>> phyPoints = hayStack.readAllEntities("point and physical and sensor and deviceRef == \"" + deviceInfo.getId() + "\"");
 			CcuLog.d(L.TAG_CCU_DEVICE, "deviceRef "+ deviceInfo.getId() +" points "+phyPoints.size());
@@ -889,8 +879,6 @@ public class Pulse
 						break;
 					case ANALOG_IN_TWO:
 						val = cmRegularUpdateMessage_t.analogSense2.get();
-						//hayStack.writeHisValById(phyPoint.get("id").toString(), val);
-						//val = 8000;
 						physicalPointName = phyPoint.get("domainName");
 						if (physicalPointName != null) {
 							ControlMoteMessageHandlerKt.updateAnalogInput(physicalPointName.toString(), val/1000, Domain.systemEquip);
@@ -915,7 +903,7 @@ public class Pulse
 			}
 		}
 		HashMap cmCurrentTemp = hayStack.read("point and system and cm and temp and (current or space)");
-		if (cmCurrentTemp != null && cmCurrentTemp.size() > 0) {
+		if (cmCurrentTemp != null && !cmCurrentTemp.isEmpty()) {
 
 			double val = cmRegularUpdateMessage_t.roomTemperature.get();
 			double curTempVal = getCMRoomTempConversion(val,0);
@@ -985,7 +973,7 @@ public class Pulse
 		}
 		CCUHsApi hayStack = CCUHsApi.getInstance();
 		HashMap device = hayStack.read("device and addr == \""+nodeAddr+"\"");
-		if (device != null && device.size() > 0)
+		if (device != null && !device.isEmpty())
 		{
 			Device deviceInfo = new Device.Builder().setHashMap(device).build();
 			mDeviceUpdate.put(nodeAddr,Calendar.getInstance().getTimeInMillis());
@@ -1204,7 +1192,7 @@ public class Pulse
 				CcuLog.i(L.TAG_CCU_DEVICE, "Reboot Alert: "+str);
 				AlertGenerateHandler.handleMessage(DEVICE_REBOOT,"Device reboot info - "+str);
 			}catch (Exception e){
-				e.printStackTrace();
+				CcuLog.e(L.TAG_CCU_DEVICE, "error", e);
 			}
 	}
 	public static void updateSetTempFromSmartNode(CmToCcuOverUsbSnLocalControlsOverrideMessage_t setTempUpdate){
@@ -1258,14 +1246,14 @@ public class Pulse
 		double updatedHeatingDt = 0;
 		double updatedCoolingDt = 0;
 		HashMap coolingDtPoint = CCUHsApi.getInstance().read("point and air and temp and desired and cooling and sp and equipRef == \"" + equip.getId() + "\"");
-		if (coolingDtPoint == null || coolingDtPoint.size() == 0) {
+		if (coolingDtPoint == null || coolingDtPoint.isEmpty()) {
 			throw new IllegalArgumentException();
 		}
 		double coolingDesiredTemp = CCUHsApi.getInstance().readPointPriorityVal(coolingDtPoint.get("id").toString());
 		Point coolingPt = new Point.Builder().setHashMap(coolingDtPoint).build();
 
 		HashMap heatinDtPoint = CCUHsApi.getInstance().read("point and air and temp and desired and heating and sp and equipRef == \""+equip.getId()+"\"");
-		if (heatinDtPoint == null || heatinDtPoint.size() == 0) {
+		if (heatinDtPoint == null || heatinDtPoint.isEmpty()) {
 			throw new IllegalArgumentException();
 		}
 		double heatingDesiredTemp = CCUHsApi.getInstance().readPointPriorityVal(heatinDtPoint.get("id").toString());
@@ -1300,7 +1288,7 @@ public class Pulse
 		SmartStatFanSpeed_t fanSpeed = setTempUpdate.fanSpeed.get();
 		CCUHsApi hayStack = CCUHsApi.getInstance();
 		HashMap device = hayStack.read("device and addr == \""+nodeAddr+"\"");
-		if (device != null && device.size() > 0)
+		if (device != null && !device.isEmpty())
 		{
 
 			ArrayList<HashMap> phyPoints = hayStack.readAll("point and physical and sensor and deviceRef == \"" + device.get("id") + "\"");
@@ -1314,7 +1302,7 @@ public class Pulse
 				HashMap logPoint = hayStack.read("point and id=="+phyPoint.get("pointRef"));
 				switch (Port.valueOf(phyPoint.get("port").toString())) {
 					case DESIRED_TEMP:
-						double curValue = LSmartStat.getDesiredTemp(nodeAddr);//hayStack.readHisValById(phyPoint.get("id").toString());
+						double curValue = LSmartStat.getDesiredTemp(nodeAddr);
 						double desiredTemp = getDesredTempConversion(temp);
 						
 						boolean validDesiredTemp = DeviceUtil.validateDesiredTempUserLimits(nodeAddr, desiredTemp);
@@ -1527,23 +1515,7 @@ public class Pulse
 		}
 	}
 
-	public static double getDesiredTemp(short node, String tag)
-	{
-		HashMap point = CCUHsApi.getInstance().read("point and air and temp and desired and "+tag+" and sp and group == \""+node+"\"");
-		if (point == null || point.size() == 0) {
-			CcuLog.d(L.TAG_CCU_DEVICE, " Desired Temp point does not exist for equip , sending 0");
-			return 0;
-		}
-		return CCUHsApi.getInstance().readPointPriorityVal(point.get("id").toString());
-	}
 	public static void setCurrentTempInterface(ZoneDataInterface in) { currentTempInterface = in; }
-
-	public static void sendCMResetMessage(){
-		CcuToCmOverUsbCmResetMessage_t msg = new CcuToCmOverUsbCmResetMessage_t();
-		msg.messageType.set(MessageType.CCU_TO_CM_OVER_USB_CM_RESET);
-		msg.reset.set((short)1);
-		MeshUtil.sendStructToCM(msg);
-	}
 
 	public static void checkForDeviceDead(){
 

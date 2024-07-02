@@ -138,7 +138,7 @@ public class NamedScheduleOccupiedDialogFragment  extends  DialogFragment{
         prefs = new Prefs(getActivity());
         LayoutInflater inflater = LayoutInflater.from(getActivity());
         View view = inflater.inflate(R.layout.named_edit, null);
-        int daySelectionBackGround = CCUUiUtil.getDayselectionBackgroud(getContext());
+        int daySelectionBackGround = CCUUiUtil.getDaySelectionBackground(getContext());
         ImageButton deleteButton = view.findViewById(R.id.buttonDelete);
         rangeSeekBarView = view.findViewById(R.id.rangeSeekBar);
         Schedule schedule = CCUHsApi.getInstance().getScheduleById(mSchedule.getId());

@@ -56,6 +56,7 @@ import a75f.io.device.serial.CcuToCmOverUsbSnControlsMessage_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
+import a75f.io.logic.L;
 import a75f.io.logic.diag.otastatus.OtaStatus;
 import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint;
 import a75f.io.logic.logtasks.UploadLogs;
@@ -86,7 +87,7 @@ public class RemoteCommandHandlerUtil {
     private static String homeAppApkName = "";
 
     public static void handleRemoteCommand(String commands, String cmdLevel, String id) {
-        CcuLog.i("RemoteCommand", "RemoteCommandHandlerUtil=" + commands + "," + cmdLevel);
+        CcuLog.i(L.TAG_CCU_REMOTE_COMMAND, "RemoteCommandHandlerUtil=" + commands + "," + cmdLevel);
         switch (commands) {
             case RESTART_CCU:
                 AlertManager.getInstance().generateAlert(AlertsConstantsKt.CCU_RESTART, "CCU Restart request sent for  - " + CCUHsApi.getInstance().getCcuName());
@@ -170,24 +171,24 @@ public class RemoteCommandHandlerUtil {
                         }
                         break;
                         default:
-                            CcuLog.i("Remote Command","Command is not valid" + commands);
+                            CcuLog.i(L.TAG_CCU_REMOTE_COMMAND,"Command is not valid" + commands);
                         break;
                 }
                 break;
             case OTA_UPDATE_BAC_APP:
-                CcuLog.i("Remote Command","Downloading BAC App for OTA Update; ApkName=" + id);
+                CcuLog.i(L.TAG_CCU_REMOTE_COMMAND,"Downloading BAC App for OTA Update; ApkName=" + id);
                 bacAppApkName = id;
                 updateCCU(id, null, null);
                 setDownloadIdBacApp(downloadFile(DOWNLOAD_BASE_URL + bacAppApkName, bacAppApkName));
                 break;
             case OTA_UPDATE_REMOTE_ACCESS_APP:
-                CcuLog.i("Remote Command","Downloading Remote Access Agent for OTA Update; ApkName=" + id);
+                CcuLog.i(L.TAG_CCU_REMOTE_COMMAND,"Downloading Remote Access Agent for OTA Update; ApkName=" + id);
                 remoteAccessApkName = id;
                 updateCCU(id, null, null);
                 setRemoteAccessAppDownloadId(downloadFile(DOWNLOAD_BASE_URL + remoteAccessApkName, remoteAccessApkName));
                 break;
             case OTA_UPDATE_HOME_APP:
-                CcuLog.i("Remote Command","Downloading Home App for OTA Update; ApkName=" + id);
+                CcuLog.i(L.TAG_CCU_REMOTE_COMMAND,"Downloading Home App for OTA Update; ApkName=" + id);
                 homeAppApkName = id;
                 updateCCU(id, null, null);
                 setHomeAppDownloadId(downloadFile(DOWNLOAD_BASE_URL + homeAppApkName, homeAppApkName));
@@ -323,7 +324,7 @@ public class RemoteCommandHandlerUtil {
                         if (AppInstaller.getHandle().getDownloadedFileVersion(downloadId) > 1) {
                             AppInstaller.getHandle().install(null, false, true, true);
                         } else {
-                            CcuLog.d(TAG_CCU_DOWNLOAD, "Update command ignored, Invalid version downloaded");
+                            CcuLog.w(TAG_CCU_DOWNLOAD, "Update command ignored, Invalid version downloaded");
                             Globals.getInstance().setCcuUpdateTriggerTimeToken(0);
                         }
                     } else if(downloadId == bacAppDownloadId){
@@ -372,7 +373,7 @@ public class RemoteCommandHandlerUtil {
                 Globals.getInstance().setCcuUpdateTriggerTimeToken(System.currentTimeMillis());
                 AppInstaller.getHandle().downloadCCUInstall(id, currentFragment, activity);
             } else {
-                CcuLog.d(TAG_CCU_DOWNLOAD, "Update command ignored , previous update in progress "
+                CcuLog.w(TAG_CCU_DOWNLOAD, "Update command ignored , previous update in progress "
                         + Globals.getInstance().getCcuUpdateTriggerTimeToken());
             }
         }

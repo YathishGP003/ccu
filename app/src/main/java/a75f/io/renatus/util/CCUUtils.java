@@ -3,21 +3,14 @@ package a75f.io.renatus.util;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.res.Configuration;
 import android.location.Address;
-import android.util.Log;
 
 import com.google.common.base.Strings;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+
 import java.text.DecimalFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -25,6 +18,7 @@ import java.util.TimeZone;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
+import a75f.io.logic.L;
 import a75f.io.renatus.R;
 
 
@@ -121,280 +115,10 @@ public class CCUUtils {
 	}
 
 	//Standalone conditioning and operational modes
-	public enum SMARTSTAT_OP_FANSPEED{FANSPEED_OFF,FANSPEED_AUTO,FANSPEED_LOW, FANSPEED_HIGH, FANSPEED_HIGH2};
-	public enum STANDALONE_CONDITION_FANSPEED{FANSPEED_LOW, FANSPEED_HIGH}; //For Fan Auto modes
+	public enum SMARTSTAT_OP_FANSPEED{FANSPEED_OFF,FANSPEED_AUTO,FANSPEED_LOW, FANSPEED_HIGH, FANSPEED_HIGH2}
+	public enum STANDALONE_CONDITION_FANSPEED{FANSPEED_LOW, FANSPEED_HIGH} //For Fan Auto modes
 	public enum SMARTSTAT_OP_CONDITIONING_MODE{STANDALONE_OFF, STANDALONE_AUTO, STANDALONE_HEATING,STANDALONE_COOLING}
-	public enum STANDALONE_CONDITIONING_MODE{COOLING, HEATING}; //For operational Auto modes
-    public static String valToTime(int value) {
-    	StringBuilder mBuilder = new StringBuilder();
-        java.util.Formatter mFmt = new java.util.Formatter(mBuilder, java.util.Locale.US);
-        Object[] mArgs = new Object[2];
-        mArgs[0] = value/4;
-        mArgs[1] = (value%4)*(15);
-        mBuilder.delete(0, mBuilder.length());
-        mFmt.format("%02d:%02d", mArgs);
-        return mFmt.toString();
-    }
-
-    public static String valToTime12Hr(int value) {
-    	StringBuilder mBuilder = new StringBuilder();
-        java.util.Formatter mFmt = new java.util.Formatter(mBuilder, java.util.Locale.US);
-        Object[] mArgs = new Object[2];
-        if (value/4 > 12)
-        	mArgs[0] = value/4 - 12;
-        else
-        	mArgs[0] = value/4;
-        mArgs[1] = (value%4)*(15);
-        mBuilder.delete(0, mBuilder.length());
-        if (value/4 > 11)
-        	mFmt.format("%02d:%02d PM", mArgs);
-        else {
-			if(value < 4)
-				mFmt.format("12:%02d AM",mArgs[1]);
-			else
-				mFmt.format("%02d:%02d AM", mArgs);
-		}
-        return mFmt.toString();
-    }
-
-	public static boolean isxlargedevice(Context c){
-		if ((c.getResources().getConfiguration().screenLayout &
-				Configuration.SCREENLAYOUT_SIZE_MASK) ==
-				Configuration.SCREENLAYOUT_SIZE_XLARGE) {
-			// on a large screen device ...
-			return true;
-
-		}else{
-			return false;
-		}
-	}
-
-    public static Calendar valToTimeCal(int value) {
-		int hour = value/4;
-		int min = (value%4)*(15);
-		Calendar now = Calendar.getInstance();
-		now.set(Calendar.HOUR_OF_DAY, hour);
-		now.set(Calendar.MINUTE, min);
-		return now;
-    }
-
-	public static String strToDateMMMDD(Date val){
-		SimpleDateFormat sdf = new SimpleDateFormat("MMM dd", Locale.US);
-		return sdf.format(val);
-	}
-
-	public static String forcedModeCal(){
-		SimpleDateFormat sdf = new SimpleDateFormat("hh:mm aaa");
-		Date a=new Date();
-		//a.setTime(System.currentTimeMillis()+(AlgoTuningParameters.getHandle().getForcedOccupiedTimePeriod()*60 * 1000));
-		return sdf.format(a);
-	}
-	public static boolean isForcedTimeEnd(String forceTime){
-		try {
-			SimpleDateFormat sdf = new SimpleDateFormat("hh:mm aaa");
-			Date parse = sdf.parse(forceTime);
-			Calendar fot = sdf.getCalendar();
-			fot.setTime(parse);
-			Calendar c = Calendar.getInstance();
-			fot.set(Calendar.DATE,c.get(Calendar.DATE));
-			fot.set(Calendar.MONTH,c.get(Calendar.MONTH));
-			fot.set(Calendar.YEAR, c.get(Calendar.YEAR));
-			Date ft = new Date(fot.getTimeInMillis());
-			Date et = new Date();
-			et.setTime(System.currentTimeMillis());
-			return et.after(ft);
-		}catch (ParseException pe){
-
-		}
-		return false;
-	}
-    public static Date strToDateMMDDYYYY(String val) throws ParseException {
-    	String myFormat = "MM-dd-yyyy"; //In which you need put here
-		SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.US);
-		return sdf.parse(val);
-    }
-
-    public static String valToTime1x60(int value) {
-    	StringBuilder mBuilder = new StringBuilder();
-        java.util.Formatter mFmt = new java.util.Formatter(mBuilder, java.util.Locale.US);
-        Object[] mArgs = new Object[2];
-        mArgs[0] = value/60;
-        mArgs[1] = (value%60)*(60/60);
-        mBuilder.delete(0, mBuilder.length());
-        mFmt.format("%02d:%02d", mArgs);
-        return mFmt.toString();
-    }
-
-    public static int timeToVal(String str) {
-    	int hr = Integer.parseInt(str.substring(0, 2));
-    	int min = Integer.parseInt(str.substring(3,5));
-    	if (str.contains("PM") && hr < 12)
-    		return (48+(hr*4))+(min/15);
-		else if(str.contains("AM") && hr == 12){
-			return 0+(min / 15);
-		} else {
-			return (hr * 4) + (min / 15);
-		}
-    }
-
-    public static int dp2px(Context context, int dp) {
-    	final float scale = context.getResources().getDisplayMetrics().density;
-        return (int) (dp * scale + 0.5f);
-    }
-
-    public static int getCurrentTimeSlot() {
-    	Calendar calendar = GregorianCalendar.getInstance();
-    	return (calendar.get(Calendar.HOUR_OF_DAY)*4) + (calendar.get(Calendar.MINUTE)/15);
-    }
-
-	public static int getCurrentDayOfWeekWithMondayAsStart() {
-		Calendar calendar = GregorianCalendar.getInstance();
-		switch (calendar.get(Calendar.DAY_OF_WEEK))
-		{
-			case Calendar.MONDAY: return 0;
-			case Calendar.TUESDAY: return 1;
-			case Calendar.WEDNESDAY: return 2;
-			case Calendar.THURSDAY: return 3;
-			case Calendar.FRIDAY: return 4;
-			case Calendar.SATURDAY: return 5;
-			case Calendar.SUNDAY: return 6;
-		}
-		return 0;
-	}
-
-	public static String getNameOfDayWithMondayAsStart(int nDay) {
-		switch (nDay) {
-		case 0: return "monday";
-		case 1: return "tuesday";
-		case 2: return "wednesday";
-		case 3: return "thursday";
-		case 4: return "friday";
-		case 5: return "saturday";
-		case 6: return "sunday";
-		}
-		return "";
-	}
-
-	public static String getNameOfDayWithMondayAsStartShortForm(int nDay) {
-		switch (nDay) {
-		case 0: return "mon";
-		case 1: return "tue";
-		case 2: return "wed";
-		case 3: return "thu";
-		case 4: return "fri";
-		case 5: return "sat";
-		case 6: return "sun";
-		}
-		return "";
-	}
-
-	public static ArrayList<String> getCountriesList() {
-        Locale[] locales = Locale.getAvailableLocales();
-        ArrayList<String> countries = new ArrayList<String>();
-        for (Locale locale : locales) {
-            String country = locale.getDisplayCountry();
-            if (country.trim().length()>0 && !countries.contains(country)) {
-                countries.add(country);
-            }
-        }
-        Collections.sort(countries);
-        countries.add(0,"");
-        countries.add(1, Locale.US.getDisplayCountry());
-        return countries;
-    }
-
-	public static String getMD5(String str) {
-		try {
-			MessageDigest digest;
-			digest = MessageDigest.getInstance("MD5");
-			digest.reset();
-			digest.update(str.getBytes());
-			byte[] hashCode = digest.digest();
-			StringBuffer MD5Hash = new StringBuffer();
-            for (int i = 0; i < hashCode.length; i++)
-            {
-                String h = Integer.toHexString(0xFF & hashCode[i]);
-                while (h.length() < 2)
-                    h = "0" + h;
-                MD5Hash.append(h);
-            }
-            return MD5Hash.toString();
-		} catch (NoSuchAlgorithmException e1) {
-			e1.printStackTrace();
-			return str;
-		}
-	}
-
-	public static synchronized String dateTimeYYYYMMDD(Date dateTime) {
-		SimpleDateFormat formatYYYYMMDD = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
-		return formatYYYYMMDD.format(dateTime);
-	}
-
-	public static synchronized String dateTimeYYYYMMDDHHMMSS(Date dateTime) {
-		SimpleDateFormat formatYYYYMMDDHHMMSS = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US);
-		return formatYYYYMMDDHHMMSS.format(dateTime);
-	}
-
-	public static synchronized String dateTimeYYYYMMDDHHMM(Date dateTime) {
-		SimpleDateFormat formatYYYYMMDDHHMM = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.US);
-		return formatYYYYMMDDHHMM.format(dateTime);
-	}
-
-	public static synchronized String dateTimeYYYYMMDDHHMM_WITH_T(Date dateTime) {
-		SimpleDateFormat formatYYYYMMDDHHMM_WITH_T = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm", Locale.US);
-		return formatYYYYMMDDHHMM_WITH_T.format(dateTime);
-	}
-
-	public static synchronized String dateTimeYYYYMMDDHHMMSS_GMT(Date dateTime) {
-		SimpleDateFormat formatYYYYMMDDHHMMSS_GMT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US);
-		formatYYYYMMDDHHMMSS_GMT.setTimeZone(TimeZone.getTimeZone("GMT"));
-		return formatYYYYMMDDHHMMSS_GMT.format(dateTime);
-	}
-
-	public static synchronized String dateTimeMMDDHHMMSS(Date dateTime) {
-		SimpleDateFormat formatMMDDHHMMSS = new SimpleDateFormat("MM-dd HH:mm:ss", Locale.US);
-		return formatMMDDHHMMSS.format(dateTime);
-	}
-
-	public static synchronized String dateTimeMMMDDHHMM(Date dateTime) {
-		SimpleDateFormat formatMMMDDHHMM = new SimpleDateFormat("MMM-dd HH:mm", Locale.US);
-		return formatMMMDDHHMM.format(dateTime);
-	}
-
-	public static synchronized String dateTimeMMDDYYYY(Date dateTime) {
-		SimpleDateFormat formatMMDDYYYY = new SimpleDateFormat("MM-dd-yyyy", Locale.US);
-		return formatMMDDYYYY.format(dateTime);
-	}
-	public static synchronized String dateTimeHHMM(Date dateTime) {
-		SimpleDateFormat formatMMDDYYYY = new SimpleDateFormat("hh:mm a", Locale.US);
-		return formatMMDDYYYY.format(dateTime);
-	}
-
-	/*public static String getCurrentVersion() {
-    	PackageManager pm = CCUApp.getAppContext().getPackageManager();
-		PackageInfo pi;
-		try {
-			pi = pm.getPackageInfo("com.x75fahrenheit.ccu", 0);
-			return pi.versionName + "."+ String.valueOf(pi.versionCode);
-		} catch (NameNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return "";
-		}
-	}*/
-
-	/*public static int getCurrentVersionNumber() {
-    	PackageManager pm = CCUApp.getAppContext().getPackageManager();
-		PackageInfo pi;
-		try {
-			pi = pm.getPackageInfo("com.x75fahrenheit.ccu", 0);
-			return pi.versionCode;
-		} catch (NameNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return -1;
-		}
-	}*/
+	public enum STANDALONE_CONDITIONING_MODE{COOLING, HEATING} //For operational Auto modes
 
 	public static double roundTo2Decimal(double number) {
 		DecimalFormat df = new DecimalFormat("#.#");
@@ -411,9 +135,9 @@ public class CCUUtils {
 		40 REM Relative humidity in percentage (RH)
 		50 REM Enthalpy in BTU/LB OF DRY AIR (H)
 		60 T = TEMP + 459.67
-		70 N = LN( T ) : REM Natural Logrithm
+		70 N = LN( T ) : REM Natural Logarithm
 		80 L = -10440.4 / T - 11.29465 - 0.02702235 * T + 1.289036E-005 * T ^ 2 - 2.478068E-009 * T ^ 3 + 6.545967 * N
-		90 S = LN-1( L ) : REM Inverse Natural Logrithm
+		90 S = LN-1( L ) : REM Inverse Natural Logarithm
 		100 P = RH / 100 * S
 		110 W = 0.62198 * P / ( 14.7 - P )
 		120 H = 0.24 * TEMP + W * ( 1061 + 0.444 * TEMP )
@@ -436,30 +160,10 @@ public class CCUUtils {
 		double A = 0.007468* Math.pow(mCurrentTemp,2) - 0.4344*mCurrentTemp + 11.1769;
 		double B = 0.2372*mCurrentTemp + 0.1230;
 		double H = A*mCurrentHumidity+B;
-		Log.d("CCU_WEATHER", String.format("Enthalpy %f %f %f", mCurrentTemp, mCurrentHumidity, H));
+		CcuLog.d(L.TAG_CCU_WEATHER, String.format("Enthalpy %f %f %f", mCurrentTemp, mCurrentHumidity, H));
 		return H;
 	}
 
-	public static double calculateRHForTemperatureChange(double rh, double oldTemp, double newTemp) {
-		double kOldTemp = convertFToKTemp(oldTemp);
-		double kNewTemp = convertFToKTemp(newTemp);
-		double pH2OOldTemp = getPH2O(kOldTemp);
-		double pH2ONewTemp = getPH2O(kNewTemp);
-		double newRH = (pH2OOldTemp/pH2ONewTemp*kOldTemp/kNewTemp*rh);
-		Log.d("CCU_DCV", String.format("Old RH %f, Old Temp %f(%f), New Temp %f(%f), Old PH2O %f, New PH2O %f, New RH %f", rh, kOldTemp, oldTemp, kNewTemp, newTemp, pH2OOldTemp, pH2ONewTemp, newRH));
-		return newRH;
-	}
-
-	private static double convertFToKTemp(double inTemp) {
-		return (inTemp+459.67)*5.0/9.0;
-	}
-
-	private static double getPH2O(double inTemp) {
-		return Math.exp(20.386-5132/inTemp);
-	}
-
-
-	static boolean isRunning = false;
 
 	public static String getTimeFromTimeStamp(long timeStamp, String timezone) {
 		String ret= null;
@@ -475,51 +179,7 @@ public class CCUUtils {
 		return ret;
 	}
 
-	public static Calendar getTimeFromHourString(String val, int offset){
-		int hr = Integer.parseInt(val.substring(0,2));
-		int min = Integer.parseInt(val.substring(3,5));
-		if(offset != 0){
-			min = min+offset;
-			if(min > 60){
-				hr = hr + (min  / 60);
-				min = min %60;
-			}
-		}
-		Calendar cal = Calendar.getInstance();
-
-		if(hr == 24){
-			cal.set(Calendar.HOUR_OF_DAY, 23);
-			cal.set(Calendar.MINUTE, 59);
-			cal.set(Calendar.SECOND, 59);
-			cal.set(Calendar.MILLISECOND, 999);
-		}else {
-			cal.set(Calendar.HOUR_OF_DAY, hr);
-			cal.set(Calendar.MINUTE, min);
-			cal.set(Calendar.SECOND, 30);
-		}
-
-		return cal;
-
-	}
-	public static Date getEndOfDay() {
-		Calendar calendar = Calendar.getInstance();
-		calendar.set(Calendar.HOUR_OF_DAY, 23);
-		calendar.set(Calendar.MINUTE, 59);
-		calendar.set(Calendar.SECOND, 59);
-		calendar.set(Calendar.MILLISECOND, 999);
-		return calendar.getTime();
-	}
-
-    public static Date getStartOfDay() {
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.HOUR_OF_DAY, 0);
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
-        calendar.set(Calendar.MILLISECOND, 0);
-        return calendar.getTime();
-    }
-
-    public static String getValue(String item) {
+	public static String getValue(String item) {
 
         String value = "NA";
         if (!Strings.isNullOrEmpty(item)) {
@@ -556,7 +216,7 @@ public class CCUUtils {
 			String appVersion = info.versionName;
 			String migrationVersion=appVersion.substring(appVersion.lastIndexOf('_') + 1);
 			CCUHsApi.getInstance().writeDefaultVal("point and diag and migration", migrationVersion);
-			CcuLog.d("CCU_MIGRATION", "Update Migration Diag Point "+migrationVersion);
+			CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "Update Migration Diag Point "+migrationVersion);
 		} catch (PackageManager.NameNotFoundException e) {
 			e.printStackTrace();
 		}

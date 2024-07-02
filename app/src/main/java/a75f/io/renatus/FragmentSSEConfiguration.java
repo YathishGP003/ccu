@@ -6,7 +6,6 @@ import android.app.Dialog;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,6 +29,7 @@ import a75f.io.device.mesh.LSerial;
 import a75f.io.device.mesh.MeshUtil;
 import a75f.io.device.serial.CcuToCmOverUsbSnControlsMessage_t;
 import a75f.io.device.serial.MessageType;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Input;
@@ -159,10 +159,10 @@ public class FragmentSSEConfiguration  extends BaseDialogFragment implements Com
         mSSEProfile = (SingleStageProfile) L.getProfile(mSmartNodeAddress);
 
         if (mSSEProfile != null) {
-            Log.d("SSEConfig", "Get Config: ");
+            CcuLog.d("SSEConfig", "Get Config: ");
             mProfileConfig = (SingleStageConfig) mSSEProfile.getProfileConfiguration(mSmartNodeAddress);
         } else {
-            Log.d("SSEConfig", "Create Profile: ");
+            CcuLog.d("SSEConfig", "Create Profile: ");
             mSSEProfile = new SingleStageProfile();
 
         }
@@ -193,7 +193,7 @@ public class FragmentSSEConfiguration  extends BaseDialogFragment implements Com
         temperatureOffset.setValue(TEMP_OFFSET_LIMIT);
         temperatureOffset.setWrapSelectorWheel(false);
 
-        ArrayList<Integer> temp = new ArrayList<Integer>();
+        ArrayList<Integer> temp = new ArrayList<>();
         for (int pos = 0; pos <= 150; pos++)
             temp.add(pos);
         ArrayAdapter<Integer> tempRange = getAdapterValue(temp);
@@ -219,7 +219,7 @@ public class FragmentSSEConfiguration  extends BaseDialogFragment implements Com
             {
                 //When Fan status is disabled or  "Not Used" (index - 0), relay2 should be disabled.
                 //And when Fan status is Enabled ( index -1 ) - relay2 should be enabled.
-                switchFanR2.setChecked(position > 0 ? true : false);
+                switchFanR2.setChecked(position > 0);
             }
             @Override
             public void onNothingSelected(AdapterView<?> adapterView)
@@ -346,7 +346,7 @@ public class FragmentSSEConfiguration  extends BaseDialogFragment implements Com
             mSSEProfile.updateSSEEquip(sseConfig);
         }
         L.ccu().zoneProfiles.add(mSSEProfile);
-        Log.d("SSEConfig", "Set Config: Profiles - "+L.ccu().zoneProfiles.size());
+        CcuLog.d("SSEConfig", "Set Config: Profiles - "+L.ccu().zoneProfiles.size());
     }
 
 
@@ -388,8 +388,8 @@ public class FragmentSSEConfiguration  extends BaseDialogFragment implements Com
     public static double getDesiredTemp(short node)
     {
         HashMap point = CCUHsApi.getInstance().read("point and air and temp and desired and average and sp and group == \""+node+"\"");
-        if (point == null || point.size() == 0) {
-            Log.d("HPU", " Desired Temp point does not exist for equip , sending 0");
+        if (point == null || point.isEmpty()) {
+            CcuLog.d("HPU", " Desired Temp point does not exist for equip , sending 0");
             return 72;
         }
         return CCUHsApi.getInstance().readPointPriorityVal(point.get("id").toString());

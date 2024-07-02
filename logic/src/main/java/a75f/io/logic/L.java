@@ -75,6 +75,10 @@ public class L
     public static final String TAG_CCU_CRASH = "CCU_CRASH";
     public static final String TAG_CCU_SAFE_MODE = "CCU_SAFE_MODE";
     public static final String TAG_CCU_DM_MODBUS = "CCU_DM_MODBUS";
+    public static final String TAG_CCU_CONNECTION_INFO = "CCU_CONNECTION_INFO";
+    public static final String TAG_CCU_REMOTE_COMMAND = "CCU_REMOTE_COMMAND";
+    public static final String TAG_CCU_CLOUD_STATUS = "CCU_CLOUD_STATUS";
+    public static final String TAG_CCU_UI_PROFILING = "CCU_UI_PROFILING";
     public static Context app()
     {
         return Globals.getInstance().getApplicationContext();

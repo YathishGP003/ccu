@@ -2,7 +2,6 @@ package a75f.io.renatus.ENGG;
 
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -10,7 +9,6 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.text.method.DigitsKeyListener;
 import android.text.method.KeyListener;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,7 +17,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -172,19 +169,14 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
          super.onViewCreated(view, savedInstanceState);
 
-        biskitModeBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
-         {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean b)
-                 {
-                     Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
-                                             .edit().putBoolean("biskit_mode", b).apply();
+        biskitModeBtn.setOnCheckedChangeListener((compoundButton, b) -> {
+            Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
+                                    .edit().putBoolean("biskit_mode", b).apply();
 
-                     if(BuildConfig.BUILD_TYPE.equals("qa") || BuildConfig.BUILD_TYPE.equals("dev_qa")) {
-                         biskitModLayout.setVisibility(b?View.VISIBLE :View.INVISIBLE);
-                     }
-                 }
-         });
+            if(BuildConfig.BUILD_TYPE.equals("qa") || BuildConfig.BUILD_TYPE.equals("dev_qa")) {
+                biskitModLayout.setVisibility(b?View.VISIBLE :View.INVISIBLE);
+            }
+        });
         biskitModeBtn.setChecked(Globals.getInstance().isSimulation());
         if(BuildConfig.BUILD_TYPE.equals("qa") || BuildConfig.BUILD_TYPE.equals("dev_qa")) {
             biskitModLayout.setVisibility(Globals.getInstance().isSimulation() ? View.VISIBLE : View.INVISIBLE);
@@ -212,108 +204,77 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
             input.setTextSize(20);
             alert.setView(input);
 
-            alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int whichButton) {
-                    new Thread() {
-                        @Override
-                        public void run() {
-                            try {
-                                fileSystemTools.writeLogCat(input.getText().toString() + ".txt");
-                            }
-                            catch (IOException | SecurityException ex) {
-                                ex.printStackTrace();
-                                getActivity().runOnUiThread(() -> showErrorDialog(
-                                        "Unable to save log file: " + ex.getMessage()));
-                            }
-                        }
-                    }.start();
+            alert.setPositiveButton("Ok", (dialog, whichButton) -> new Thread() {
+                @Override
+                public void run() {
+                    try {
+                        fileSystemTools.writeLogCat(input.getText().toString() + ".txt");
+                    }
+                    catch (IOException | SecurityException ex) {
+                        ex.printStackTrace();
+                        getActivity().runOnUiThread(() -> showErrorDialog(
+                                "Unable to save log file: " + ex.getMessage()));
+                    }
                 }
-            });
+            }.start());
 
-            alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int whichButton) {
-                    // Canceled.
-                }
+            alert.setNegativeButton("Cancel", (dialog, whichButton) -> {
+                // Canceled.
             });
 
             alert.show();
         });
 
-        logUploadBtn.setOnClickListener( v -> {
-            new Thread() {
-                @Override
-                public void run() {
-                    UploadLogs.instanceOf().saveCcuLogs();
-                }
-            }.start();
-        });
+        logUploadBtn.setOnClickListener( v -> new Thread() {
+            @Override
+            public void run() {
+                UploadLogs.instanceOf().saveCcuLogs();
+            }
+        }.start());
 
-        pullDataBtn.setOnClickListener(view14 -> {
-            disposable.add(RxjavaUtil.executeBackgroundTaskWithDisposable(
-                    () -> ProgressDialogUtils.showProgressDialog(getActivity(),"Pulling building tuners to CCU"),
-                    () -> {
-                        Site site = CCUHsApi.getInstance().getSite();
-                        HClient hClient = new HClient(CCUHsApi.getInstance().getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
-                        CCUHsApi.getInstance().importBuildingSchedule(site.getId(), hClient);
-                        TunerEquip.INSTANCE.syncBuildingTuners(CCUHsApi.getInstance());
-                    },
-                    () -> {
-                        ProgressDialogUtils.hideProgressDialog();
-                    }
-            ));
-        });
+        pullDataBtn.setOnClickListener(view14 -> disposable.add(RxjavaUtil.executeBackgroundTaskWithDisposable(
+                () -> ProgressDialogUtils.showProgressDialog(getActivity(),"Pulling building tuners to CCU"),
+                () -> {
+                    Site site = CCUHsApi.getInstance().getSite();
+                    HClient hClient = new HClient(CCUHsApi.getInstance().getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
+                    CCUHsApi.getInstance().importBuildingSchedule(site.getId(), hClient);
+                    TunerEquip.INSTANCE.syncBuildingTuners(CCUHsApi.getInstance());
+                },
+                ProgressDialogUtils::hideProgressDialog
+        )));
         
         deleteHis.setOnClickListener(view15 -> {
-            CcuLog.d("CCU"," deleteHis data ");
+            CcuLog.d(L.TAG_CCU," deleteHis data ");
             disposable.add(RxjavaUtil.executeBackgroundTaskWithDisposable(
                     () -> ProgressDialogUtils.showProgressDialog(getActivity(),"Deleting history data"),
-                    () -> {
-                        CCUHsApi.getInstance().deleteHistory();
-                    },
-                    () -> {
-                        ProgressDialogUtils.hideProgressDialog();
-                    }
+                    () -> CCUHsApi.getInstance().deleteHistory(),
+                    ProgressDialogUtils::hideProgressDialog
             ));
         });
 
         clearHisData.setOnClickListener(view15 -> {
-            CcuLog.d("CCU"," Clear History data(Respecting Backfill time) ");
+            CcuLog.d(L.TAG_CCU," Clear History data(Respecting Backfill time) ");
             RxTask.executeAsync(() -> CCUHsApi.getInstance().trimObjectBoxHisStore());
         });
 
-        forceSyncBtn.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View view)
-            {
-                CcuLog.d("CCU"," forceSync site data ");
-                
-                CCUHsApi.getInstance().resyncSiteTree();
-            }
+        forceSyncBtn.setOnClickListener(view112 -> {
+            CcuLog.d(L.TAG_CCU," forceSync site data ");
+
+            CCUHsApi.getInstance().resyncSiteTree();
         });
 
-        ackdMessagingBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
-        {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean b)
-            {
-                Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
-                        .edit().putBoolean("ackd_messaging_enabled", b).apply();
+        ackdMessagingBtn.setOnCheckedChangeListener((compoundButton, b) -> {
+            Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
+                    .edit().putBoolean("ackd_messaging_enabled", b).apply();
 
-                MessagingClient.getInstance().init();
-            }
+            MessagingClient.getInstance().init();
         });
         ackdMessagingBtn.setChecked(Globals.getInstance().isAckdMessagingEnabled());
 
-        testModBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
-        {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean b)
-            {
-                Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
-                       .edit().putBoolean("weather_test", b).apply();
-                testModLayout.setVisibility(b?View.VISIBLE :View.INVISIBLE);
-            }
+        testModBtn.setOnCheckedChangeListener((compoundButton, b) -> {
+            Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
+                   .edit().putBoolean("weather_test", b).apply();
+            testModLayout.setVisibility(b?View.VISIBLE :View.INVISIBLE);
         });
         testModBtn.setChecked(Globals.getInstance().isWeatherTest());
         testModLayout.setVisibility(Globals.getInstance().isWeatherTest()?View.VISIBLE :View.INVISIBLE);
@@ -338,14 +299,7 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
 
         connectSerial.setImageResource(LSerial.getInstance().isConnectModuleConnected() ? android.R.drawable.checkbox_on_background
                 : android.R.drawable.checkbox_off_background);
-        reconnectSerial.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View view)
-            {
-                triggerRebirth(getActivity());
-            }
-        });
+        reconnectSerial.setOnClickListener(view111 -> triggerRebirth(getActivity()));
 
         if (BuildConfig.BUILD_TYPE.equals("local")
             || BuildConfig.BUILD_TYPE.equals("dev")
@@ -434,7 +388,7 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
 
 
         resetAppBtn.setOnClickListener((View.OnClickListener) view16 -> {
-            CcuLog.d("CCU"," ResetAppState ");
+            CcuLog.d(L.TAG_CCU," ResetAppState ");
             L.ccu().systemProfile.reset();
             for (ZoneProfile p : L.ccu().zoneProfiles) {
                 p.reset();
@@ -447,42 +401,30 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
         etRegisterRequestCount.setText(String.valueOf(spDefaultPrefs.getInt("registerRequestCount", 3)));
         etSerialCommTimeOut.setText(String.valueOf(spDefaultPrefs.getInt("serialCommTimeOut", 300)));
 
-        etRegisterRequestCount.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                etRegisterRequestCount.setCursorVisible(true);
-                etRegisterRequestCount.requestFocus();
-            }
+        etRegisterRequestCount.setOnClickListener(view110 -> {
+            etRegisterRequestCount.setCursorVisible(true);
+            etRegisterRequestCount.requestFocus();
         });
 
-        etSerialCommTimeOut.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                etSerialCommTimeOut.setCursorVisible(true);
-                etSerialCommTimeOut.requestFocus();
-            }
+        etSerialCommTimeOut.setOnClickListener(view19 -> {
+            etSerialCommTimeOut.setCursorVisible(true);
+            etSerialCommTimeOut.requestFocus();
         });
 
-        btnregisterRequestCount.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                spDefaultPrefs.edit().putInt("registerRequestCount",
-                        Integer.parseInt(etRegisterRequestCount.getText().toString())).apply();
-                etRegisterRequestCount.setCursorVisible(false);
-                hideKeyboard(view);
-                Toast.makeText(getActivity(), "Saved.", Toast.LENGTH_SHORT).show();
-            }
+        btnregisterRequestCount.setOnClickListener(view18 -> {
+            spDefaultPrefs.edit().putInt("registerRequestCount",
+                    Integer.parseInt(etRegisterRequestCount.getText().toString())).apply();
+            etRegisterRequestCount.setCursorVisible(false);
+            hideKeyboard(view18);
+            Toast.makeText(getActivity(), "Saved.", Toast.LENGTH_SHORT).show();
         });
 
-        btnSerialCommTimeOut.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                spDefaultPrefs.edit().putInt("serialCommTimeOut",
-                        Integer.parseInt(etSerialCommTimeOut.getText().toString())).apply();
-                etSerialCommTimeOut.setCursorVisible(false);
-                hideKeyboard(view);
-                Toast.makeText(getActivity(), "Saved.", Toast.LENGTH_SHORT).show();
-            }
+        btnSerialCommTimeOut.setOnClickListener(view17 -> {
+            spDefaultPrefs.edit().putInt("serialCommTimeOut",
+                    Integer.parseInt(etSerialCommTimeOut.getText().toString())).apply();
+            etSerialCommTimeOut.setCursorVisible(false);
+            hideKeyboard(view17);
+            Toast.makeText(getActivity(), "Saved.", Toast.LENGTH_SHORT).show();
         });
 
         //Disable ANR reporting UI till we figure out an alternative for instabug.
@@ -525,9 +467,7 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
                     AlertDialog dialog = new AlertDialog.Builder(getActivity())
                             .setTitle("App restart confirmation")
                             .setMessage("The updated control loop frequency will be applied after the next app restart. Do you want to continue?")
-                            .setPositiveButton("Restart", (dialog1, which) -> {
-                                CCUUiUtil.triggerRestart(getContext());
-                            })
+                            .setPositiveButton("Restart", (dialog1, which) -> CCUUiUtil.triggerRestart(getContext()))
                             .setNegativeButton("Cancel", (dialog1, which) -> {
                             })
                             .create();
@@ -563,9 +503,7 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
                     AlertDialog dialog = new AlertDialog.Builder(getActivity())
                             .setTitle("App restart confirmation")
                             .setMessage("This change requires an app restart. Do you want to continue?")
-                            .setPositiveButton("Restart", (dialog1, which) -> {
-                                CCUUiUtil.triggerRestart(getContext());
-                            })
+                            .setPositiveButton("Restart", (dialog1, which) -> CCUUiUtil.triggerRestart(getContext()))
                             .setNegativeButton("Cancel", (dialog1, which) -> {
                             })
                             .create();

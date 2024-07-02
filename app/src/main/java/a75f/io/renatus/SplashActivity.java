@@ -1,20 +1,18 @@
 package a75f.io.renatus;
 
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
+
 import org.json.JSONException;
 
 import java.util.HashMap;
@@ -34,7 +32,6 @@ import a75f.io.renatus.safemode.SafeModeActivity;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.PreferenceConstants;
 import a75f.io.renatus.util.Prefs;
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 
 public class SplashActivity extends AppCompatActivity implements Globals.OnCcuInitCompletedListener{
 
@@ -60,37 +57,37 @@ public class SplashActivity extends AppCompatActivity implements Globals.OnCcuIn
         prefs = new Prefs(this);
         /*PreferenceManager.getDefaultSharedPreferences(this).edit().
                 putBoolean(getString(R.string.prefs_theme_key),true).commit();*/
-        Log.i(TAG, "Splash activity");
+        CcuLog.i(TAG, "Splash activity");
         configSplashLogo();
-        CcuLog.i("UI_PROFILING", "SplashActivity.onCreate Done");
+        CcuLog.i(L.TAG_CCU_UI_PROFILING, "SplashActivity.onCreate Done");
     }
 
     private void launchUI() {
         HashMap<Object, Object> site = CCUHsApi.getInstance().read("site");
         if (PreferenceUtil.getUpdateCCUStatus() || PreferenceUtil.isCCUInstalling()) {
-            Log.i(TAG, "Resume Update CCU");
+            CcuLog.i(TAG, "Resume Update CCU");
             resumeUpdateCCU();
-        } else if (site.size() == 0 || RestoreCCU.isReplaceCCUUnderProcess()) {
-            Log.i(TAG,"No Site Synced navigate to Register");
+        } else if (site.isEmpty() || RestoreCCU.isReplaceCCUUnderProcess()) {
+            CcuLog.i(TAG,"No Site Synced navigate to Register");
             Intent i = new Intent(SplashActivity.this, FreshRegistration.class);
             startActivity(i);
             finish();
-        }  else if(site.size() > 0 && !prefs.getBoolean(PreferenceConstants.CCU_SETUP) &&
+        }  else if(!site.isEmpty() && !prefs.getBoolean(PreferenceConstants.CCU_SETUP) &&
             prefs.getString("INSTALL_TYPE").equals("CREATENEW")) {
-            Log.i(TAG,"CCU Setup is not completed");
+            CcuLog.i(TAG,"CCU Setup is not completed");
             Intent i = new Intent(SplashActivity.this, FreshRegistration.class);
             i.putExtra("viewpager_position", 21);
             startActivity(i);
             finish();
         } else if(prefs.getBoolean(PreferenceConstants.CCU_SETUP) && !prefs.getBoolean(PreferenceConstants.PROFILE_SETUP)
                 && !prefs.getBoolean("ADD_CCU")) {
-            Log.i(TAG,"No profile synced navigate to create profile");
+            CcuLog.i(TAG,"No profile synced navigate to create profile");
             Intent i = new Intent(SplashActivity.this, FreshRegistration.class);
             i.putExtra("viewpager_position", getViewPagerPosition());
             startActivity(i);
             finish();
         } else if(prefs.getBoolean(PreferenceConstants.PROFILE_SETUP) && !prefs.getBoolean(PreferenceConstants.REGISTRATION)) {
-            Log.i(TAG,"No floor is Created");
+            CcuLog.i(TAG,"No floor is Created");
             System.out.println("No Floor is Created");
             Intent i = new Intent(SplashActivity.this, FreshRegistration.class);
             i.putExtra("viewpager_position", getViewPagerPosition());
@@ -108,7 +105,7 @@ public class SplashActivity extends AppCompatActivity implements Globals.OnCcuIn
                         try {
                             UploadLogs.instanceOf().saveCcuLogs();
                         } catch (Exception e) {
-                            Log.e(TAG,"Failed to save logs while in safe mode");
+                            CcuLog.e(TAG,"Failed to save logs while in safe mode");
                         }
                     }
                 }.start();
@@ -125,9 +122,9 @@ public class SplashActivity extends AppCompatActivity implements Globals.OnCcuIn
             i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(i);
             finish();
-        }else if(site.size() > 0 && prefs.getBoolean(PreferenceConstants.CCU_SETUP)
+        }else if(!site.isEmpty() && prefs.getBoolean(PreferenceConstants.CCU_SETUP)
                 && prefs.getBoolean(PreferenceConstants.ADD_CCU)) {
-            Log.i(TAG,"ADD CCU is not completed");
+            CcuLog.i(TAG,"ADD CCU is not completed");
             Intent i = new Intent(SplashActivity.this,
                     FreshRegistration.class);
             i.putExtra("viewpager_position", 21);
@@ -144,14 +141,14 @@ public class SplashActivity extends AppCompatActivity implements Globals.OnCcuIn
             i.putExtra("viewpager_position", 21);
             startActivity(i);
             finish();
-        } else if(site.size() > 0 && prefs.getString("INSTALL_TYPE").equals("ADDCCU")
+        } else if(!site.isEmpty() && prefs.getString("INSTALL_TYPE").equals("ADDCCU")
                 && !prefs.getBoolean(PreferenceConstants.ADD_CCU)) {
             Intent i = new Intent(SplashActivity.this,
                     FreshRegistration.class);
             i.putExtra("viewpager_position", 6);
             startActivity(i);
             finish();
-        } else if(site.size() > 0 && prefs.getString("INSTALL_TYPE").equals("ADDCCU")
+        } else if(!site.isEmpty() && prefs.getString("INSTALL_TYPE").equals("ADDCCU")
                 && !prefs.getBoolean(PreferenceConstants.ADD_CCU)) {
             Intent i = new Intent(SplashActivity.this,
                     FreshRegistration.class);
@@ -159,7 +156,7 @@ public class SplashActivity extends AppCompatActivity implements Globals.OnCcuIn
             startActivity(i);
             finish();
         } else {
-            Log.i(TAG,"Default launching state");
+            CcuLog.i(TAG,"Default launching state");
             Intent i = new Intent(SplashActivity.this, RenatusLandingActivity.class);
             i.putExtra("viewpager_position", 0);
             startActivity(i);

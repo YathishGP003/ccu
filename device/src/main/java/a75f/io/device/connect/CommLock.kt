@@ -1,10 +1,7 @@
 package a75f.io.device.connect
 
-import a75f.io.api.haystack.modbus.Register
-import a75f.io.device.modbus.SerialCommLock
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
-import android.util.Log
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.locks.Lock

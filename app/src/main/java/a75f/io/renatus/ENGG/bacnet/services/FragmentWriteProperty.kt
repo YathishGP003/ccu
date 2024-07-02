@@ -1,6 +1,7 @@
 package a75f.io.renatus.ENGG.bacnet.services
 
 import a75f.io.device.bacnet.BacnetConfigConstants
+import a75f.io.logger.CcuLog
 import a75f.io.renatus.ENGG.bacnet.services.client.BaseResponse
 import a75f.io.renatus.ENGG.bacnet.services.client.CcuService
 import a75f.io.renatus.ENGG.bacnet.services.client.ServiceManager
@@ -9,9 +10,6 @@ import a75f.io.renatus.UtilityApplication
 import a75f.io.renatus.util.CCUUiUtil
 import android.os.Bundle
 import android.preference.PreferenceManager
-import android.text.Editable
-import android.text.TextWatcher
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -24,13 +22,11 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.google.gson.Gson
-import kotlinx.android.synthetic.main.damper_details.damperSizeTv2
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.json.JSONException
 import org.json.JSONObject
-import java.lang.Exception
 import java.net.ConnectException
 import java.net.SocketTimeoutException
 
@@ -76,7 +72,7 @@ class FragmentWriteProperty : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        Log.d(TAG, "--onViewCreated--")
+        CcuLog.d(TAG, "--onViewCreated--")
 
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
         val confString: String? = sharedPreferences.getString(BacnetConfigConstants.BACNET_CONFIGURATION, null)
@@ -354,7 +350,7 @@ class FragmentWriteProperty : Fragment() {
             bacnetWriteRequest
         )
         sendRequest(bacnetWriteRequest)
-        Log.d(TAG, "this is the request-->$request")
+        CcuLog.d(TAG, "this is the request-->$request")
     }
 
     private fun disableReadButton() {
@@ -403,12 +399,12 @@ class FragmentWriteProperty : Fragment() {
         val spin = view.findViewById(R.id.sp_object_types) as Spinner
         spin.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, position: Int, p3: Long) {
-                Log.d(TAG, "selected item is ${objectTypeArray[position]}")
+                CcuLog.d(TAG, "selected item is ${objectTypeArray[position]}")
                 selectedObjectType = objectTypeArray[position].value
             }
 
             override fun onNothingSelected(p0: AdapterView<*>?) {
-                Log.d(TAG, "onNothingSelected")
+                CcuLog.d(TAG, "onNothingSelected")
             }
 
         }
@@ -424,12 +420,12 @@ class FragmentWriteProperty : Fragment() {
         val spin = view.findViewById(R.id.sp_data_types) as Spinner
         spin.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, position: Int, p3: Long) {
-                Log.d(TAG, "selected item is ${dataTypeArray[position]}")
+                CcuLog.d(TAG, "selected item is ${dataTypeArray[position]}")
                 selectedDataType = BacNetConstants.DataTypes.valueOf(dataTypeArray[position].name).ordinal
             }
 
             override fun onNothingSelected(p0: AdapterView<*>?) {
-                Log.d(TAG, "onNothingSelected")
+                CcuLog.d(TAG, "onNothingSelected")
             }
 
         }
@@ -445,12 +441,12 @@ class FragmentWriteProperty : Fragment() {
         val spin = view.findViewById(R.id.sp_property_types) as Spinner
         spin.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, position: Int, p3: Long) {
-                Log.d(TAG, "selected item is ${propertyTypeArray[position]}")
+                CcuLog.d(TAG, "selected item is ${propertyTypeArray[position]}")
                 selectedPropertyType = propertyTypeArray[position].value
             }
 
             override fun onNothingSelected(p0: AdapterView<*>?) {
-                Log.d(TAG, "onNothingSelected")
+                CcuLog.d(TAG, "onNothingSelected")
             }
 
         }
@@ -463,7 +459,7 @@ class FragmentWriteProperty : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        Log.d(TAG, "--onDestroyView--")
+        CcuLog.d(TAG, "--onDestroyView--")
     }
 
     private fun sendRequest(bacnetWriteRequest: BacnetWriteRequest) {
@@ -475,7 +471,7 @@ class FragmentWriteProperty : Fragment() {
                     val result = resp.data
                     if (result != null) {
                         val readResponse = result.body()
-                        Log.d(TAG, "received response->${readResponse}")
+                        CcuLog.d(TAG, "received response->${readResponse}")
                         CoroutineScope(Dispatchers.Main).launch {
                             if (readResponse != null) {
 
@@ -505,19 +501,19 @@ class FragmentWriteProperty : Fragment() {
                             }
                         }
                     } else {
-                        Log.d(TAG, "--null response--")
+                        CcuLog.d(TAG, "--null response--")
                     }
                 } else {
-                    Log.d(TAG, "--error--${resp.error}")
+                    CcuLog.d(TAG, "--error--${resp.error}")
                 }
             } catch (e: SocketTimeoutException) {
-                Log.d(TAG, "--SocketTimeoutException--${e.message}")
+                CcuLog.e(TAG, "--SocketTimeoutException--${e.message}")
                 showToastMessage("SocketTimeoutException")
             } catch (e: ConnectException) {
-                Log.d(TAG, "--ConnectException--${e.message}")
+                CcuLog.e(TAG, "--ConnectException--${e.message}")
                 showToastMessage("ConnectException")
             } catch (e: Exception) {
-                Log.d(TAG, "--connection time out--${e.message}")
+                CcuLog.e(TAG, "--connection time out--${e.message}")
             }
         }
     }

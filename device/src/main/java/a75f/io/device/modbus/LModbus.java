@@ -61,7 +61,7 @@ public class LModbus {
                         return rtuMessageRequest.getMessageData();
                 }
             }catch (Exception e){
-                e.printStackTrace();
+                CcuLog.e(L.TAG_CCU_DEVICE, "error ", e);
             }
         return null;
     }
@@ -184,7 +184,7 @@ public class LModbus {
             }
             LModbus.getModbusCommLock().lock(register, SERIAL_COMM_TIMEOUT_MS);
         } catch (Exception e) {
-            e.printStackTrace();
+            CcuLog.e(L.TAG_CCU_DEVICE, "error ", e);
             Log.d(L.TAG_CCU_MODBUS, "Modbus write failed. "+register.getRegisterAddress()+" : "+writeValue+" "+e.getMessage());
         }
     }

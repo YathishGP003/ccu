@@ -23,13 +23,9 @@ abstract class BaseJob
         CcuLog.d(L.TAG_CCU_JOB, "Device Scheduling: " + name + " interval: " + interval + " task Seperation:  " +
                     taskSeperation + " unit: " + unit.name());
         // This task runs every minute.
-        scheduledFuture = Globals.getInstance().getScheduledThreadPool().scheduleAtFixedRate(new Runnable()
-        {
-            public void run()
-            {
-                DLog.Logd("Job: " + mName + " executing");
-                doJob();
-            }
+        scheduledFuture = Globals.getInstance().getScheduledThreadPool().scheduleAtFixedRate(() -> {
+            DLog.Logd("Job: " + mName + " executing");
+            doJob();
         }, taskSeperation, interval, unit);
     }
     

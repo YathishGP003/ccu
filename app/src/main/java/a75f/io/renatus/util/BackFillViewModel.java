@@ -1,7 +1,5 @@
 package a75f.io.renatus.util;
 
-import static a75f.io.logic.bo.building.BackfillUtilKt.updateBackfillDuration;
-
 import android.content.Context;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -10,15 +8,12 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
-
 import androidx.annotation.NonNull;
 
 import org.javolution.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logic.Globals;

@@ -47,15 +47,15 @@ class LocalConnectionView @JvmOverloads constructor(
    // Obtain view model.  The usual pattern is to get Viewmodels in Activities or Fragments,
    // but I'd rather not refactor DevSettings at this time, so I'll use this workaround of getting the
    // Viewmodel from this View.
-   private val activity: androidx.fragment.app.FragmentActivity by lazy {
-      if (isInEditMode) androidx.fragment.app.FragmentActivity()   // this is here so Layout Preview does not crash
+   private val activity: FragmentActivity by lazy {
+      if (isInEditMode) FragmentActivity()   // this is here so Layout Preview does not crash
       else try {
-         context as androidx.fragment.app.FragmentActivity
+         context as FragmentActivity
       } catch (exception: ClassCastException) {
          throw ClassCastException("Please ensure that the provided Context is a valid FragmentActivity")
       }
    }
-   private var viewModel = ViewModelProviders.of(activity).get(LocalConnectionViewModel::class.java)
+   private var viewModel = ViewModelProviders.of(activity)[LocalConnectionViewModel::class.java]
 
    init {
       val inflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
@@ -139,7 +139,7 @@ fun ipEntryPopup(context: Context,
    val editText = AutoCompleteTextView(context).apply {
       setRawInputType(TYPE_CLASS_NUMBER.or(TYPE_NUMBER_FLAG_DECIMAL))
       autoCompleteValues?.let {
-         setAdapter(ArrayAdapter<String>(context, android.R.layout.simple_list_item_1, it))
+         setAdapter(ArrayAdapter(context, android.R.layout.simple_list_item_1, it))
       }
    }
 

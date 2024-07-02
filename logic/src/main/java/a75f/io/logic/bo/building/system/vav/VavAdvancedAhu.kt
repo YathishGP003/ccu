@@ -371,7 +371,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
             getSingleZoneFanLoopOp(analogFanSpeedMultiplier)
         } else if ((epidemicState == EpidemicState.PREPURGE || epidemicState == EpidemicState.POSTPURGE) && L.ccu().oaoProfile != null) {
             //TODO- Part OAO. Will be replaced with domanName later.
-            val smartPurgeDabFanLoopOp = TunerUtil.readTunerValByQuery(
+            val smartPurgeFanLoopOp = TunerUtil.readTunerValByQuery(
                 "system and purge and vav and fan and loop and output",
                 L.ccu().oaoProfile.equipRef
             )
@@ -379,21 +379,21 @@ open class VavAdvancedAhu : VavSystemProfile() {
             val spSpMin = systemEquip.staticPressureSPMin.readPriorityVal()
             CcuLog.d(
                 L.TAG_CCU_SYSTEM,
-                "spSpMax :$spSpMax spSpMin: $spSpMin SP: $staticPressure,$smartPurgeDabFanLoopOp"
+                "spSpMax :$spSpMax spSpMin: $spSpMin SP: $staticPressure,$smartPurgeFanLoopOp"
             )
             val staticPressureLoopOutput = ((staticPressure - spSpMin) * 100 / (spSpMax - spSpMin)).toInt().toDouble()
             if (VavSystemController.getInstance().getSystemState() == SystemController.State.COOLING
                 && (conditioningMode == SystemMode.COOLONLY || conditioningMode == SystemMode.AUTO)) {
-                if (staticPressureLoopOutput < (spSpMax - spSpMin) * smartPurgeDabFanLoopOp) {
-                    (spSpMax - spSpMin) * smartPurgeDabFanLoopOp
+                if (staticPressureLoopOutput < (spSpMax - spSpMin) * smartPurgeFanLoopOp) {
+                    (spSpMax - spSpMin) * smartPurgeFanLoopOp
                 } else {
                     ((staticPressure - spSpMin) * 100 / (spSpMax - spSpMin)).toInt().toDouble()
                 }
             } else if (VavSystemController.getInstance().getSystemState() == SystemController.State.HEATING) {
                 (VavSystemController.getInstance().getHeatingSignal() * analogFanSpeedMultiplier).toInt()
-                    .toDouble().coerceAtLeast(smartPurgeDabFanLoopOp)
+                    .toDouble().coerceAtLeast(smartPurgeFanLoopOp)
             } else {
-                smartPurgeDabFanLoopOp
+                smartPurgeFanLoopOp
             }
         } else if (VavSystemController.getInstance().getSystemState() == SystemController.State.COOLING
             && (conditioningMode == SystemMode.COOLONLY || conditioningMode == SystemMode.AUTO)) {

@@ -2,6 +2,7 @@ package a75f.io.renatus.registration;
 import static com.raygun.raygun4android.RaygunClient.getApplicationContext;
 
 import static a75f.io.logic.L.ccu;
+import static a75f.io.renatus.util.CCUUtils.updateMigrationDiagWithAppVersion;
 
 import android.os.Bundle;
 
@@ -216,6 +217,7 @@ public class RegisterCCUToExistingSite extends DialogFragment {
                             .setDisplayName(ccuName + "-smartNodeBand")
                             .addMarker("snband").addMarker("sp").setVal(addressBandSelected).build();
                     CCUHsApi.getInstance().addPoint(snBand);
+                    updateMigrationDiagWithAppVersion();
                     if(!Globals.getInstance().siteAlreadyCreated()) {
                         DefaultSchedules.setDefaultCoolingHeatingTemp();
                     }

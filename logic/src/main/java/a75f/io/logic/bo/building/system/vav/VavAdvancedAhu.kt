@@ -232,8 +232,8 @@ open class VavAdvancedAhu : VavSystemProfile() {
         updateMechanicalConditioning(CCUHsApi.getInstance())
         updateDerivedSensorPoints()
         conditioningMode = SystemMode.values()[systemEquip.conditioningMode.readPriorityVal().toInt()]
-        cmStageStatus = Array(34) { Pair(0, 0) }
-        connectStageStatus = Array(19) { Pair(0, 0) }
+        cmStageStatus = Array(35) { Pair(0, 0) }
+        connectStageStatus = Array(20) { Pair(0, 0) }
         updateStageTimers()
         systemCoolingLoopOp = getSystemCoolingLoop()
 
@@ -750,7 +750,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
                         cmStageStatus[stageIndex] = Pair(logicalPoint.readHisVal().toInt(), if (relayOutput) 1 else 0)
                     }
                 } catch (e: Exception) {
-                    CcuLog.e(L.TAG_CCU_SYSTEM, "Error in updateOutputPorts ${relay.domainName}", e)
+                    CcuLog.e(L.TAG_CCU_SYSTEM, "as ${relay.domainName}", e)
                 }
             }
         }
@@ -1007,7 +1007,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
             if (!systemEquip.connectEquip1.equipRef.contentEquals("null")) {
                 getConnectRelayAssociationMap(systemEquip).entries.forEach { (relay, association) ->
                     if (relay.readDefaultVal() > 0) {
-                        val logical = relayAssociationToDomainName(association.readDefaultVal().toInt())
+                        val logical = connectRelayAssociationToDomainName(association.readDefaultVal().toInt())
                         CcuLog.i(L.TAG_CCU_SYSTEM,
                                 "Connect ${relay.domainName}:${relay.readDefaultVal()} => : " +
                                         "Physical Value: ${getConnectRelayLogicalPhysicalMap(systemEquip.connectEquip1, Domain.connect1Device)[relay]!!.readHisVal()}  " +

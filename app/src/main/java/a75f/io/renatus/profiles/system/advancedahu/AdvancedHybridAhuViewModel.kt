@@ -23,7 +23,11 @@ import a75f.io.logic.bo.building.system.getCMRelayLogicalPhysicalMap
 import a75f.io.logic.bo.building.system.getConnectAnalogOutLogicalPhysicalMap
 import a75f.io.logic.bo.building.system.getConnectRelayLogicalPhysicalMap
 import a75f.io.logic.bo.building.system.vav.config.AdvancedHybridAhuConfig
+import a75f.io.renatus.R
+import a75f.io.renatus.modbus.util.OK
+import a75f.io.renatus.modbus.util.WARNING
 import android.content.Context
+import androidx.appcompat.app.AlertDialog
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -361,6 +365,19 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
         isConnectModulePaired =  CCUHsApi.getInstance().readEntity(
                 "domainName == \"" + DomainName.vavAdvancedHybridAhuV2_connectModule + "\"").isNotEmpty()
     }
+
+    fun showErrorDialog(context: Context, message: String) {
+        val builder = AlertDialog.Builder(context)
+        builder.setTitle(WARNING)
+        builder.setIcon(R.drawable.ic_warning)
+        builder.setMessage(message)
+        builder.setCancelable(false)
+        builder.setPositiveButton(OK) { dialog, _ ->
+            dialog.dismiss()
+        }
+        builder.create().show()
+    }
+
 }
 
 /**

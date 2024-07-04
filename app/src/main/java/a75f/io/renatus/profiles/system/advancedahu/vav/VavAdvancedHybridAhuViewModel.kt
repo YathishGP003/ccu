@@ -8,10 +8,15 @@ import a75f.io.domain.logic.DomainManager
 import a75f.io.domain.util.ModelLoader
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
+import a75f.io.logic.bo.building.system.AdvancedAhuAnalogOutAssociationType
+import a75f.io.logic.bo.building.system.AdvancedAhuRelayAssociationType
 import a75f.io.logic.bo.building.system.vav.VavAdvancedAhu
 import a75f.io.logic.bo.building.system.vav.config.VavAdvancedHybridAhuConfig
 import a75f.io.renatus.modbus.util.showToast
 import a75f.io.renatus.profiles.system.advancedahu.AdvancedHybridAhuViewModel
+import a75f.io.renatus.profiles.system.advancedahu.isAnyAOMapped
+import a75f.io.renatus.profiles.system.advancedahu.isAnyRelayMapped
+import a75f.io.renatus.profiles.system.advancedahu.isValidateConfiguration
 import a75f.io.renatus.util.ProgressDialogUtils
 import android.content.Context
 import androidx.compose.runtime.mutableStateOf
@@ -95,6 +100,11 @@ class VavAdvancedHybridAhuViewModel : AdvancedHybridAhuViewModel() {
     }
 
     override fun saveConfiguration() {
+        val validConfig = isValidateConfiguration(profileConfiguration as VavAdvancedHybridAhuConfig)
+        if (!validConfig.first) {
+            showErrorDialog(context,validConfig.second)
+            return
+        }
         ((viewState.value) as VavAdvancedAhuState).fromStateToProfileConfig(profileConfiguration as VavAdvancedHybridAhuConfig)
         CcuLog.i(L.TAG_CCU_SYSTEM, profileConfiguration.toString())
         isEquipAvailable()

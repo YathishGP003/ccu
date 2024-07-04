@@ -309,6 +309,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
                 }
                 if (currentFragment instanceof CongratsFragment) {
                     prefs.setBoolean("REGISTRATION", true);
+                    Globals.getInstance().copyModels();
                     updateCCURegistrationInfo();
                     buttonNext.setEnabled(true);
                 }

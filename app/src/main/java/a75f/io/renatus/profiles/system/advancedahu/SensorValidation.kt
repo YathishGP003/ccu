@@ -1,11 +1,8 @@
 package a75f.io.renatus.profiles.system.advancedahu
 
-import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.config.AssociationConfig
 import a75f.io.domain.config.EnableConfig
-import a75f.io.domain.config.ProfileConfiguration
-import a75f.io.domain.equips.VavAdvancedHybridSystemEquip
 import a75f.io.logic.bo.building.system.AdvancedAhuAnalogOutAssociationType
 import a75f.io.logic.bo.building.system.AdvancedAhuRelayAssociationType
 import a75f.io.logic.bo.building.system.vav.config.CmConfiguration
@@ -85,31 +82,13 @@ fun isValidateConfiguration(config: VavAdvancedHybridAhuConfig): Pair<Boolean, S
         }
     }
 
+    val pressureStatus = findPressureDuplicate(config.cmConfiguration)
+    if (!pressureStatus.first) {
+        return pressureStatus
+    }
 
     return Pair(true, "Success")
 }
-
-/*
-12=	ductStaticPressureSensor1_1
-Duct Static Pressure Sensor 1 (0-1in.WC)
-13=	ductStaticPressureSensor1_2
-Duct Static Pressure Sensor 1 (0-2in.WC)
-14=	ductStaticPressureSensor1_10
-Duct Static Pressure Sensor 1 (0-10in.WC)
-15=	ductStaticPressureSensor2_1
-Duct Static Pressure Sensor 2 (0-1in.WC)
-16=	ductStaticPressureSensor2_2
-Duct Static Pressure Sensor 2 (0-2in.WC)
-17=	ductStaticPressureSensor2_10
-Duct Static Pressure Sensor 2 (0-10in.WC)
-18=	ductStaticPressureSensor3_1
-Duct Static Pressure Sensor 3 (0-1in.WC)
-19=	ductStaticPressureSensor3_2
-Duct Static Pressure Sensor 3 (0-2in.WC)
-20=	ductStaticPressureSensor3_10
-Duct Static Pressure Sensor 3 (0-10in.WC)
-
- */
 
 fun getDomainPressure(config: CmConfiguration): String? {
     if (config.sensorBus0PressureEnabled.enabled) {
@@ -130,7 +109,7 @@ fun getAnalog2Domain(config: CmConfiguration): String? {
     return getDomainForAnalogOut(config.analog2InEnabled, config.analog2InAssociation)
 }
 
-fun getDomainForAnalogOut(enabled: EnableConfig, association: AssociationConfig,): String? {
+fun getDomainForAnalogOut(enabled: EnableConfig, association: AssociationConfig): String? {
     if (enabled.enabled) {
         return when (association.associationVal) {
             12 -> DomainName.ductStaticPressureSensor1_1
@@ -148,18 +127,42 @@ fun getDomainForAnalogOut(enabled: EnableConfig, association: AssociationConfig,
     return null
 }
 
-fun isValidMappingSequence(config: CmConfiguration): Pair<Boolean,String> {
+fun findPressureDuplicate(config: CmConfiguration): Pair<Boolean,String> {
     val pressureDomainName = getDomainPressure(config)
     val analogIn1DomainName = getAnalog1Domain(config)
     val analogIn2DomainName = getAnalog2Domain(config)
 
-    val pressureMapping = Triple(pressureDomainName, analogIn1DomainName, analogIn2DomainName)
-
-
+    if (pressureDomainName != null) {
+        val status = validatePressure(pressureDomainName, analogIn1DomainName, analogIn2DomainName)
+        if (!status.first) {
+            return status
+        }
+    }
+    if (analogIn1DomainName != null) {
+        val status = validatePressure(analogIn1DomainName, pressureDomainName , analogIn2DomainName)
+        if (!status.first) {
+            return status
+        }
+    }
+    if (analogIn2DomainName != null) {
+        val status = validatePressure(analogIn2DomainName, pressureDomainName, analogIn1DomainName)
+        if (!status.first) {
+            return status
+        }
+    }
+    return Pair(true, "success")
 }
 
-fun validatePressure(pressureMapping: Triple<String,String,String>):Pair<Boolean,String> {
-    if (pressurea)
+fun validatePressure(primary: String?, mapping1: String?, mapping2: String?):Pair<Boolean,String> {
+    if (primary != null) {
+        if (mapping1 != null && mapping1.contentEquals(primary)) {
+            return Pair(false, "Duplicate selection for $primary")
+        }
+        if (mapping2 != null && mapping2.contentEquals(primary)) {
+            return Pair(false, "Duplicate selection for $primary")
+        }
+    }
+    return Pair(true, "success")
 }
 
 

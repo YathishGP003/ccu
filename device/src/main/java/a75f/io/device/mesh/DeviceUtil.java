@@ -296,7 +296,7 @@ public class DeviceUtil {
 
         String binaryValue = String.format("%08d",(Integer.parseInt(Integer.toBinaryString(data))));
         int message = Integer.parseInt(binaryValue.substring(0,5),2);
-        int msgType = Integer.parseInt(binaryValue.substring(5),2);
+        int msgType = Integer.parseInt(binaryValue.substring(7),2);
         if(msgType == 1) return getCause(message);
         return DeviceFieldConstants.NO_INFO;
     }
@@ -305,7 +305,7 @@ public class DeviceUtil {
 
         String binaryValue = String.format("%08d",(Integer.parseInt(Integer.toBinaryString(data))));
         int message = Integer.parseInt(binaryValue.substring(0,5),2);
-        int msgType = Integer.parseInt(binaryValue.substring(5),2);
+        int msgType = Integer.parseInt(binaryValue.substring(7),2);
         Log.i(L.TAG_CCU_OTA_PROCESS, "getNodeStatus: message : "+message + " msgType : "+msgType);
         if(msgType == 1)
             return getStatus(message);

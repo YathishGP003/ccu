@@ -1246,7 +1246,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
 
         //This is a hack to give bit more time to complete Site-registration before we start
         //CCU registration
-        long delay = CCUHsApi.getInstance().siteSynced() ? 1000 : 15000;
+        long delay = CCUHsApi.getInstance().siteSynced() ? 1000 : 30000;
         CcuLog.i(L.TAG_CCU_UI, "updateCCURegistrationInfo with delay "+delay);
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
             CcuLog.i(L.TAG_CCU_UI, "updateCCURegistrationInfo");

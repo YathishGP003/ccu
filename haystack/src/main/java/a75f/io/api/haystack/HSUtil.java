@@ -419,7 +419,22 @@ public class HSUtil {
         return ((pointEntity.containsKey(Tags.MAX)) && (pointEntity.containsKey(Tags.CFM) || pointEntity.containsKey("trueCFM")) && (pointEntity.containsKey(Tags.HEATING)));
     }
 
-    public static double getSystemUserIntentVal(String tags) {
+    public static boolean isACBRelay1TypeConfig(String id, CCUHsApi hayStack) {
+        HashMap<Object, Object> pointEntity = hayStack.readMapById(id);
+        if (pointEntity.containsKey(Tags.DOMAIN_NAME) && pointEntity.containsKey(Tags.EQUIPREF)) {
+            HashMap<Object, Object> equipEntity = hayStack.readMapById(pointEntity.get("equipRef").toString());
+            if (equipEntity.containsKey(Tags.DOMAIN_NAME)) {
+                return pointEntity.get(Tags.DOMAIN_NAME).toString().equals("relay1OutputAssociation") &&
+                        (equipEntity.get(Tags.DOMAIN_NAME).toString().equals("smartnodeActiveChilledBeam") || equipEntity.get(Tags.DOMAIN_NAME).toString().equals("helionodeActiveChilledBeam")
+                        );
+            }
+        }
+
+        return false;
+    }
+
+    public static double getSystemUserIntentVal(String tags)
+    {
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap<Object, Object> cdb = hayStack.readEntity("point and system and userIntent and " + tags);
         ArrayList values = hayStack.readPoint(cdb.get("id").toString());

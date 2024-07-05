@@ -47,6 +47,7 @@ import a75f.io.logic.bo.building.hyperstat.common.HyperStatPointsUtil;
 import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.bo.util.CCUUtils;
+import a75f.io.logic.migration.VavAndAcbProfileMigration;
 import a75f.io.logic.migration.hyperstat.CpuPointsMigration;
 import a75f.io.logic.migration.hyperstat.MigratePointsUtil;
 import a75f.io.logic.migration.title24.Title24Migration;
@@ -151,6 +152,11 @@ public class MigrationUtil {
         if (!PreferenceUtil.getHSMonitoringGenericFaultEnumMigration()) {
             migrateHyperStatMonitoringGenericFaultEnum(ccuHsApi);
             PreferenceUtil.setHSMonitoringGenericFaultEnumMigration();
+        }
+
+        if (!PreferenceUtil.getACBCondensateSensorMigration()) {
+            VavAndAcbProfileMigration.Companion.condensateSensorCleanupMigration(ccuHsApi);
+            PreferenceUtil.setACBCondensateSensorMigration();
         }
 
         migrateAirFlowTunerPoints(ccuHsApi);

@@ -192,11 +192,11 @@ class AcbProfileConfigFragment : BaseDialogFragment() {
                     DropDownWithLabel(
                         label = "Zone Priority",
                         list = viewModel.zonePrioritiesList,
-                        previewWidth = 130,
-                        expandedWidth = 150,
+                        previewWidth = 220,
+                        expandedWidth = 240,
                         onSelected = {selectedIndex -> viewModel.viewState.zonePriority = selectedIndex.toDouble() },
                         defaultSelection = viewModel.viewState.zonePriority.toInt(),
-                        spacerLimit = 139,
+                        spacerLimit = 49,
                         heightValue = 211
                     )
                 }
@@ -210,11 +210,18 @@ class AcbProfileConfigFragment : BaseDialogFragment() {
                         Spacer(modifier = Modifier.width(160.dp))
                         LabelTextView(text = "Discharge Airflow")
                     }
-                    Spacer(modifier=Modifier.width(67.dp))
+                    Spacer(modifier=Modifier.width(56.dp))
                     Row{
-                        HeaderTextView(text = "Relay 1",padding=0)
-                        Spacer(modifier = Modifier.width(180.dp))
-                        LabelTextView(text = "Shut-Off Valve")
+                        DropDownWithLabel(
+                            label = "Relay 1",
+                            list = viewModel.relay1AssociationList,
+                            previewWidth = 220,
+                            expandedWidth = 240,
+                            onSelected = {selectedIndex -> viewModel.viewState.relay1Config.association = selectedIndex },
+                            defaultSelection = viewModel.viewState.relay1Config.association,
+                            spacerLimit = 115,
+                            heightValue = 211
+                        )
                     }
 
                 }

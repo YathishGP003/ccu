@@ -25,6 +25,11 @@ class AcbProfileConfiguration (nodeAddress: Int, nodeType: String, priority: Int
     lateinit var valveType: ValueConfig
     lateinit var zonePriority: ValueConfig
 
+    lateinit var relay1Enable: EnableConfig
+    lateinit var relay1Association: AssociationConfig
+    lateinit var relay2Enable: EnableConfig
+    lateinit var relay2Association: AssociationConfig
+
     lateinit var condensateSensorType: EnableConfig
 
     lateinit var autoForceOccupied: EnableConfig
@@ -52,6 +57,11 @@ class AcbProfileConfiguration (nodeAddress: Int, nodeType: String, priority: Int
         damperShape = getDefaultValConfig(DomainName.damperShape, model)
         valveType = getDefaultValConfig(DomainName.valveType, model)
         zonePriority = getDefaultValConfig(DomainName.zonePriority, model)
+
+        relay1Enable = getDefaultEnableConfig(DomainName.relay1OutputEnable, model)
+        relay1Association = getDefaultAssociationConfig(DomainName.relay1OutputAssociation, model)
+        relay2Enable = getDefaultEnableConfig(DomainName.relay2OutputEnable, model)
+        relay2Association = getDefaultAssociationConfig(DomainName.relay2OutputAssociation, model)
 
         condensateSensorType = getDefaultEnableConfig(DomainName.thermistor2Type, model)
 
@@ -107,6 +117,11 @@ class AcbProfileConfiguration (nodeAddress: Int, nodeType: String, priority: Int
         zonePriority.currentVal = vavEquip.zonePriority.readPriorityVal()
         condensateSensorType.enabled = vavEquip.thermistor2Type.readDefaultVal() > 0
 
+        relay1Enable.enabled = vavEquip.relay1OutputEnable.readDefaultVal() > 0
+        relay1Association.associationVal = vavEquip.relay1OutputAssociation.readDefaultVal().toInt()
+        relay2Enable.enabled = vavEquip.relay2OutputEnable.readDefaultVal() > 0
+        relay2Association.associationVal = vavEquip.relay2OutputAssociation.readDefaultVal().toInt()
+
         autoAway.enabled = vavEquip.autoAway.readDefaultVal() > 0
         autoForceOccupied.enabled = vavEquip.autoForceOccupied.readDefaultVal() > 0
         enableCo2Control.enabled = vavEquip.enableCo2Control.readDefaultVal() > 0
@@ -150,30 +165,6 @@ class AcbProfileConfiguration (nodeAddress: Int, nodeType: String, priority: Int
             if (maxCFMReheating.currentVal <= 0.0) maxCFMReheating.currentVal = 250.0
             if (minCFMReheating.currentVal <= 0.0) minCFMReheating.currentVal = 50.0
         }
-
-
-        /*damperType = ValueConfig(DomainName.damperType, vavEquip.damperType.readDefaultVal())
-        damperSize = ValueConfig(DomainName.damperSize, vavEquip.damperSize.readDefaultVal())
-        damperShape = ValueConfig(DomainName.damperShape, vavEquip.damperShape.readDefaultVal())
-        reheatType = AssociationConfig(DomainName.reheatType, vavEquip.reheatType.readDefaultVal().toInt())
-        zonePriority = ValueConfig(DomainName.zonePriority, vavEquip.zonePriority.readDefaultVal())
-
-        autoAway = EnableConfig(DomainName.autoAway, vavEquip.autoAway.readDefaultVal() > 0)
-        autoForceOccupied = EnableConfig(DomainName.autoForceOccupied, vavEquip.autoForceOccupied.readDefaultVal() > 0)
-        enableCo2Control = EnableConfig(DomainName.enableCo2Control, vavEquip.enableCo2Control.readDefaultVal() > 0)
-        enableIAQControl = EnableConfig(DomainName.enableIAQControl, vavEquip.enableIAQControl.readDefaultVal() > 0)
-        enableCFMControl = EnableConfig(DomainName.enableCFMControl, vavEquip.enableCFMControl.readDefaultVal() > 0)
-
-        temperatureOffset = ValueConfig(DomainName.temperatureOffset, vavEquip.enableCFMControl.readDefaultVal())
-        maxCoolingDamperPos = ValueConfig(DomainName.maxCoolingDamperPos, vavEquip.maxCoolingDamperPos.readDefaultVal())
-        minCoolingDamperPos = ValueConfig(DomainName.minCoolingDamperPos, vavEquip.minCoolingDamperPos.readDefaultVal())
-        maxHeatingDamperPos = ValueConfig(DomainName.maxHeatingDamperPos, vavEquip.maxHeatingDamperPos.readDefaultVal())
-        minHeatingDamperPos = ValueConfig(DomainName.minHeatingDamperPos, vavEquip.minHeatingDamperPos.readDefaultVal())
-        kFactor = ValueConfig(DomainName.kFactor, vavEquip.kFactor.readDefaultVal())
-        maxCFMCooling = ValueConfig(DomainName.maxCFMCooling, vavEquip.maxCFMCooling.readDefaultVal())
-        minCFMCooling = ValueConfig(DomainName.minCFMCooling, vavEquip.minCFMCooling.readDefaultVal())
-        maxCFMReheating = ValueConfig(DomainName.maxCFMReheating, vavEquip.maxCFMReheating.readDefaultVal())
-        minCFMReheating = ValueConfig(DomainName.minCFMReheating, vavEquip.minCFMReheating.readDefaultVal())*/
         val devicePorts = DeviceUtil.getUnusedPortsForDevice(nodeAddress.toShort(), Domain.hayStack)
         devicePorts?.forEach { disabledPort ->
             unusedPorts[disabledPort.displayName] = disabledPort.markers.contains(Tags.WRITABLE)
@@ -184,6 +175,8 @@ class AcbProfileConfiguration (nodeAddress: Int, nodeType: String, priority: Int
 
     override fun getAssociationConfigs() : List<AssociationConfig> {
         return mutableListOf<AssociationConfig>().apply {
+            add(relay1Association)
+            add(relay2Association)
         }
     }
 

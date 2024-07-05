@@ -52,6 +52,10 @@ public class PreferenceUtil {
 
     public static final String MODBUS_ENUM_CORRECTION = "modbusEnumCorrection";
 
+    public static final String ACB_RELAY_LOGICAL_POINTS_MIGRATION = "acbRelayLogicalPointsMigration";
+    public static final String RECOVER_HELIO_NODE_ACB_TUNERS_MIGRATION = "recoverHelioNodeACBTunersMigration";
+    public static final String ACB_COND_SENSOR_MIGRATION = "acbCondensateSensorMigration";
+
     public static void setContext(Context c) {
         context= c;
     }
@@ -447,6 +451,29 @@ public class PreferenceUtil {
         setBooleanPreference(HS_TH_CONFIG_MIGRATION, true);
     }
 
+    public static boolean getACBRelayLogicalPointsMigration() {
+        return getBooleanPreference(ACB_RELAY_LOGICAL_POINTS_MIGRATION);
+    }
+
+    public static void setACBRelayLogicalPointsMigration() {
+        setBooleanPreference(ACB_RELAY_LOGICAL_POINTS_MIGRATION, true);
+    }
+
+    public static boolean getRecoverHelioNodeACBTunersMigration() {
+        return getBooleanPreference(RECOVER_HELIO_NODE_ACB_TUNERS_MIGRATION);
+    }
+
+    public static void setRecoverHelioNodeACBTunersMigration() {
+        setBooleanPreference(RECOVER_HELIO_NODE_ACB_TUNERS_MIGRATION, true);
+    }
+
+    public static boolean getACBCondensateSensorMigration() {
+        return getBooleanPreference(ACB_COND_SENSOR_MIGRATION);
+    }
+
+    public static void setACBCondensateSensorMigration() {
+        setBooleanPreference(ACB_COND_SENSOR_MIGRATION, true);
+    }
     public static boolean getHSMonitoringGenericFaultEnumMigration() {
         return getBooleanPreference(HS_MONITORING_GENERIC_FAULT_ENUM_MIGRATION);
     }

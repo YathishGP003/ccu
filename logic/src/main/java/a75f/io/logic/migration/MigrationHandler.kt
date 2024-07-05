@@ -53,6 +53,14 @@ import org.projecthaystack.io.HZincWriter
 
 
 class MigrationHandler (hsApi : CCUHsApi) : Migration {
+
+    companion object {
+        fun doPostModelMigrationTasks() {
+            if (!PreferenceUtil.getRecoverHelioNodeACBTunersMigration()) VavAndAcbProfileMigration.recoverHelioNodeACBTuners(CCUHsApi.getInstance())
+            if (!PreferenceUtil.getACBRelayLogicalPointsMigration()) VavAndAcbProfileMigration.verifyACBIsoValveLogicalPoints(CCUHsApi.getInstance())
+        }
+    }
+
     override val hayStack = hsApi
 
     private val schedulerRevamp = SchedulerRevampMigration(hayStack)

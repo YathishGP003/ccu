@@ -229,7 +229,7 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
     private fun initializeDefaultVal(point : Point, defaultVal : Number) {
         CcuLog.i(Domain.LOG_TAG,"InitializeDefaultVal ${point.domainName} - val $defaultVal")
         if (point.markers.contains("tuner")) {
-            TunerUtil.updateTunerLevels(point.id, point.roomRef,  point.domainName, hayStack)
+            TunerUtil.updateTunerLevels(point.id, point.roomRef,  point.domainName, hayStack, defaultVal.toDouble())
         } else {
             hayStack.writeDefaultValById(point.id, defaultVal.toDouble())
         }

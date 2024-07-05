@@ -13,6 +13,9 @@ class AcbConfigViewState {
     var valveType by mutableStateOf (0.0)
     var zonePriority by mutableStateOf (0.0)
 
+    var relay1Config by mutableStateOf(ConfigState(false, 0))
+    var relay2Config by mutableStateOf(ConfigState(false, 0))
+
     var condensateSensorType by mutableStateOf(false)
 
     var autoAway by mutableStateOf (false)
@@ -43,6 +46,9 @@ class AcbConfigViewState {
                 this.damperShape = config.damperShape.currentVal
                 this.valveType = config.valveType.currentVal
                 this.zonePriority = config.zonePriority.currentVal
+
+                this.relay1Config = ConfigState(config.relay1Enable.enabled, config.relay1Association.associationVal)
+                this.relay2Config = ConfigState(config.relay2Enable.enabled, config.relay2Association.associationVal)
 
                 this.condensateSensorType = config.condensateSensorType.enabled
 
@@ -76,6 +82,11 @@ class AcbConfigViewState {
         config.valveType.currentVal = this.valveType
         config.zonePriority.currentVal = this.zonePriority
 
+        config.relay1Enable.enabled = this.relay1Config.enabled
+        config.relay1Association.associationVal = this.relay1Config.association
+        config.relay2Enable.enabled = this.relay2Config.enabled
+        config.relay2Association.associationVal = this.relay2Config.association
+
         config.condensateSensorType.enabled = this.condensateSensorType
 
         config.autoAway.enabled = this.autoAway
@@ -98,4 +109,9 @@ class AcbConfigViewState {
         config.maxCFMReheating.currentVal = this.maxCFMReheating
         config.minCFMReheating.currentVal = this.minCFMReheating
     }
+}
+
+class ConfigState(enabled: Boolean,association: Int) {
+    var enabled by mutableStateOf(enabled)
+    var association by mutableStateOf(association)
 }

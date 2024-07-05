@@ -318,6 +318,10 @@ public class LSmartNode
             airflowCFMIntegralTime = (int)(acbEquip.getVavAirflowCFMIntegralTime().readPriorityVal()); // fallback
             airflowCFMIntegralKFactor = (int)(100 * acbEquip.getVavAirflowCFMIntegralKFactor().readPriorityVal()); // fallback
             enableCFM = (int)(acbEquip.getEnableCFMControl().readPriorityVal());
+
+            settings2.relayBitmap.relay1.set((int)acbEquip.getRelay1OutputAssociation().readDefaultVal());
+            // Relay 2 will always be zero, because relay 2 is not used in ACB and no relay 2 association point will exist
+
         } else if (equip.getProfile().equals("PLC")) {
             CCUHsApi hsApi = CCUHsApi.getInstance();
             settings2.inputSensor1.set(getInputSensor1(hsApi, address));

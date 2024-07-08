@@ -239,7 +239,6 @@ fun SearchSpinnerElement(
     val expanded = remember { mutableStateOf(false) }
     var searchedOption by rememberSaveable { mutableStateOf("") }
     val lazyListState = rememberLazyListState()
-  //  var selectedIndex by remember { mutableStateOf(getDefaultSelectionIndex(allItems,default)) }
     var selectedIndex by remember { mutableStateOf(default.index) }
     Box(
         modifier = Modifier
@@ -333,7 +332,7 @@ fun SearchSpinnerElement(
                                             fontFamily = ComposeUtil.myFontFamily,
                                             modifier = Modifier.padding(end = 10.dp),
                                             fontWeight = FontWeight.Normal,
-                                            text = it.dis ?: it.value // formatText(it.value)
+                                            text = it.dis ?: it.value
                                         )
                                         Text(
                                             fontSize = 20.sp,

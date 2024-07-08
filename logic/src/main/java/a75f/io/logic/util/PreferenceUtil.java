@@ -55,6 +55,7 @@ public class PreferenceUtil {
     public static final String ACB_RELAY_LOGICAL_POINTS_MIGRATION = "acbRelayLogicalPointsMigration";
     public static final String RECOVER_HELIO_NODE_ACB_TUNERS_MIGRATION = "recoverHelioNodeACBTunersMigration";
     public static final String ACB_COND_SENSOR_MIGRATION = "acbCondensateSensorMigration";
+    public static final String HSS_GATEWAY_REF_MIGRATION = "hssGatewayRefMigration";
 
     public static void setContext(Context c) {
         context= c;
@@ -489,5 +490,12 @@ public class PreferenceUtil {
     public static void setModbusEnumCorrectionDone() {
         setBooleanPreference(MODBUS_ENUM_CORRECTION, true);
     }
+    public static boolean isHyperStatSplitGatewayRefMigrationDone() {
+        return getBooleanPreference(HSS_GATEWAY_REF_MIGRATION);
+    }
+    public static void setHyperStatSplitGatewayRefMigrationDone() {
+        setBooleanPreference(HSS_GATEWAY_REF_MIGRATION, true);
+    }
+    
 
 }

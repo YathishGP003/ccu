@@ -56,11 +56,13 @@ fun updateSensorBusData(readings: CM_SensorBusReadings_t) {
         return
     }
     val systemEquip = Domain.systemEquip as VavAdvancedHybridSystemEquip
+
+    if (systemEquip.sensorBus0PressureEnable.readDefaultVal() > 0) {
+        CcuLog.i(L.TAG_CCU_SERIAL, "CM updateSensorBusData : readings.sensorAddress0Pressure "+readings.sensorAddress0Pressure)
+        updatePressureSensorPoint(systemEquip.sensorBus0PressureAssociation.readDefaultVal().toInt(), readings.sensorAddress0Pressure.toDouble(), systemEquip)
+    }
+
     if (systemEquip.sensorBusAddress0Enable.readDefaultVal() > 0) {
-        if (systemEquip.pressureSensorBusAdd0.pointExists()) {
-            CcuLog.i(L.TAG_CCU_SERIAL, "CM updateSensorBusData : readings.sensorAddress0Pressure "+readings.sensorAddress0Pressure)
-            updatePressureSensorPoint(systemEquip.pressureSensorBusAdd0.readDefaultVal().toInt(), readings.sensorAddress0Pressure.toDouble(), systemEquip)
-        }
         if (systemEquip.temperatureSensorBusAdd0.pointExists()) {
             CcuLog.i(L.TAG_CCU_SERIAL, "CM updateSensorBusData : readings.sensorAddress0Temperature "+readings.sensorAddress0Temperature)
             updateTemperatureSensorPoint(systemEquip.temperatureSensorBusAdd0.readDefaultVal().toInt(), readings.sensorAddress0Temperature.toDouble(), systemEquip)
@@ -80,10 +82,7 @@ fun updateSensorBusData(readings: CM_SensorBusReadings_t) {
     }
     CcuLog.i(L.TAG_CCU_SERIAL, "CM updateSensorBusData : sensorBusAddress1Enable "+systemEquip.sensorBusAddress1Enable.readDefaultVal())
     if (systemEquip.sensorBusAddress1Enable.readDefaultVal() > 0) {
-        if (systemEquip.pressureSensorBusAdd1.pointExists()) {
-            CcuLog.i(L.TAG_CCU_SERIAL, "CM updateSensorBusData : readings.sensorAddress1Pressure "+readings.sensorAddress1Pressure)
-            updatePressureSensorPoint(systemEquip.pressureSensorBusAdd1.readDefaultVal().toInt(), readings.sensorAddress1Pressure.toDouble(), systemEquip)
-        }
+
         if (systemEquip.temperatureSensorBusAdd1.pointExists()) {
             CcuLog.i(L.TAG_CCU_SERIAL, "CM updateSensorBusData : readings.sensorAddress1Temperature "+readings.sensorAddress1Temperature)
             updateTemperatureSensorPoint(systemEquip.temperatureSensorBusAdd1.readDefaultVal().toInt(), readings.sensorAddress1Temperature.toDouble(), systemEquip)
@@ -102,10 +101,7 @@ fun updateSensorBusData(readings: CM_SensorBusReadings_t) {
         }
     }
     if (systemEquip.sensorBusAddress2Enable.readDefaultVal() > 0) {
-        if (systemEquip.pressureSensorBusAdd2.pointExists()) {
-            CcuLog.i(L.TAG_CCU_SERIAL, "CM updateSensorBusData : readings.sensorAddress2Pressure "+readings.sensorAddress2Pressure)
-           updatePressureSensorPoint(systemEquip.pressureSensorBusAdd2.readDefaultVal().toInt(), readings.sensorAddress2Pressure.toDouble(), systemEquip)
-        }
+
         if (systemEquip.temperatureSensorBusAdd2.pointExists()) {
             CcuLog.i(L.TAG_CCU_SERIAL, "CM updateSensorBusData : readings.sensorAddress2Temperature "+readings.sensorAddress2Temperature)
             updateTemperatureSensorPoint(systemEquip.temperatureSensorBusAdd2.readDefaultVal().toInt(), readings.sensorAddress2Temperature.toDouble(), systemEquip)
@@ -125,10 +121,6 @@ fun updateSensorBusData(readings: CM_SensorBusReadings_t) {
     }
 
     if (systemEquip.sensorBusAddress3Enable.readDefaultVal() > 0) {
-        if (systemEquip.pressureSensorBusAdd3.pointExists()) {
-            CcuLog.i(L.TAG_CCU_SERIAL, "CM updateSensorBusData : readings.sensorAddress3Pressure "+readings.sensorAddress3Pressure)
-            updatePressureSensorPoint(systemEquip.pressureSensorBusAdd3.readDefaultVal().toInt(), readings.sensorAddress3Pressure.toDouble(), systemEquip)
-        }
         if (systemEquip.temperatureSensorBusAdd3.pointExists()) {
             CcuLog.i(L.TAG_CCU_SERIAL, "CM updateSensorBusData : readings.sensorAddress3Temperature "+readings.sensorAddress3Temperature)
             updateTemperatureSensorPoint(systemEquip.temperatureSensorBusAdd3.readDefaultVal().toInt(), readings.sensorAddress3Temperature.toDouble(), systemEquip)

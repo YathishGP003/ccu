@@ -513,9 +513,14 @@ public class UsbConnectService extends Service
 	private void configureSerialPort() {
 		CcuLog.i(TAG, "Connect: configureSerialPort ");
 		ConnectSerialPort portSelection = ConnectSerialPort.values()[UsbSerialUtil.getPreferredConnectModuleSerialType(context)];
+
+		/*
+		No need to open for modbus in connect module service
 		if (portSelection == ConnectSerialPort.CCU_PORT) {
 			serialPort = UsbSerialDevice.createUsbSerialDevice(device, connection);
-		} else if (portSelection == ConnectSerialPort.CM_VIRTUAL_PORT2) {
+		} else
+		*/
+		if (portSelection == ConnectSerialPort.CM_VIRTUAL_PORT2) {
 			serialPort = UsbSerialDevice.createUsbSerialDevice(device, connection, 3);
 		}
 		if (serialPort != null) {

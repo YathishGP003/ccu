@@ -6,12 +6,13 @@ import a75f.io.api.haystack.CCUTagsDb
 import a75f.io.api.haystack.HisItem
 import a75f.io.logger.CcuLog
 import com.google.gson.Gson
-import io.objectbox.Box
-import org.projecthaystack.*
-import java.lang.IndexOutOfBoundsException
-import java.util.*
+import org.projecthaystack.HBool
+import org.projecthaystack.HDict
+import org.projecthaystack.HDictBuilder
+import org.projecthaystack.HMarker
+import org.projecthaystack.HRef
+import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
-import kotlin.collections.HashMap
 
 /**
  * This function modifies the contents of the CCUTabsDb object in place, replacing all
@@ -56,13 +57,6 @@ fun migrateGuidsToLuids(dbStrings: DbStrings, gson: Gson): DbStrings {
    return result
 }
 
-fun ConcurrentHashMap<String, String>.replaceKeyIfPresent(oldKey: String, newKey: String) {
-   get(oldKey)?.let {
-      put(newKey, it)
-      remove(oldKey)
-   }
-}
-
 
 /**
  * Function.  (Can be called statically in Java with `MigrateToStr.migrateTagsDb(..)`)
@@ -88,7 +82,7 @@ fun migrateTagsDb(tagsDb: CCUTagsDb) {
    tagsMap.entries
 
       // for all entries, take only those with kind: string (ingore case)
-      .filter { it.value.get("kind", false)?.toString()?.toLowerCase(Locale.US).equals("string", true) }
+      .filter { it.value.get("kind", false)?.toString()?.lowercase(Locale.US).equals("string", true) }
 
       // update the HDict for that key in place, with new kind value
       .forEach {
@@ -153,7 +147,7 @@ fun migrateTagsDb(tagsDb: CCUTagsDb) {
 private fun printTagsMap(tagsMap: ConcurrentHashMap<String, HDict>) {
    tagsMap.toMap()
       .forEach { entry ->
-         CcuLog.i("CCU_HS", "${entry.key}: ${entry.value.toString()}") }
+         CcuLog.i("CCU_HS", "${entry.key}: ${entry.value}") }
 }
 
 private fun addIdToUpdateMap(
@@ -207,7 +201,7 @@ fun StringBuilder.replaceAll(oldStr: String, newStr: String): StringBuilder {
          } catch (ex: IndexOutOfBoundsException) {
             println("IndexOutOfBoundsException: ${ex.localizedMessage}")
             println("occurrenceIndex = $occurrenceIndex, oldStrLength = $oldStrLength, newStr = $newStr")
-            println("this string: ${this.toString()}")
+            println("this string: $this")
             throw ex
          }
       }
@@ -234,14 +228,14 @@ data class DbStrings (
 
 fun migrateHisData(ccuTagsDb: CCUTagsDb, idMap: Map<String, String>?) {
 
-   CcuLog.d("CCU", "migrate his data");
+   CcuLog.d("CCU", "migrate his data")
 
    idMap?.forEach { (luid, guid) ->
       val href = HRef.make(luid.dropAtSign())
 
       // Get all the items for update.  (Ideally, sync & prune will have occurred to keep this DB from being in a large state.)
       val hisItems: List<HisItem> = ccuTagsDb.getHisItemsForMigration(href, 0, 99)
-      CcuLog.d("CCU", "got ${hisItems.size} hisItems for $href" + (if (hisItems.size > 0) "including ${hisItems[0]}" else ""))
+      CcuLog.d("CCU", "got ${hisItems.size} hisItems for $href" + (if (hisItems.isNotEmpty()) "including ${hisItems[0]}" else ""))
 
       // for all items, switch the rec field from old (luid to new (guild)
       hisItems.forEach { it.rec = guid }

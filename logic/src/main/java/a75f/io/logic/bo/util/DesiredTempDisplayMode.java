@@ -39,12 +39,15 @@ public class DesiredTempDisplayMode {
     public static void setModeType(String roomRef, CCUHsApi ccuHsApi) {
         ArrayList<Equip> zoneEquips = HSUtil.getEquips(roomRef);
         TemperatureMode modeType = getDesiredTempDisplayMode(zoneEquips, ccuHsApi);
-        if(modeType.equals(DUAL) && !getConditioningModeForZone(roomRef, ccuHsApi).equals(DUAL)) {
-            return;
-        }
-        int currentModeType = ccuHsApi.readHisValByQuery("hvacMode and roomRef == \""
-                + roomRef + "\"").intValue();
-        if (currentModeType != modeType.ordinal()) {
+        if (modeType.equals(DUAL)) {
+            TemperatureMode modeToset = modeType;
+            //Check if any systemProfile is present in the zone
+            if(!hasSystemEquip(zoneEquips, ccuHsApi)){
+                modeToset = getConditioningModeForZone(roomRef, ccuHsApi);
+            }
+            ccuHsApi.writeHisValByQuery("hvacMode and roomRef == \""
+                    + roomRef + "\"", (double) modeToset.ordinal());
+        } else {
             ccuHsApi.writeHisValByQuery("hvacMode and roomRef == \""
                     + roomRef + "\"", (double) modeType.ordinal());
         }

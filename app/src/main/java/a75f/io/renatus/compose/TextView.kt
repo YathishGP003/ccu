@@ -211,17 +211,17 @@ fun TitleTextView(text: String) {
 }
 
 @Composable
-fun SubTitle(text: String) {
+fun SubTitle(text: String, fontSizeCustom : Double = 19.5, topPaddingValue: Int = 10, startPaddingValue : Int = 5) {
 
     Text(
         modifier = Modifier
             .height(50.dp)
-            .padding(start = 5.dp, top = 10.dp),
+            .padding(start = startPaddingValue.dp, top = topPaddingValue.dp),
         style = TextStyle(
             textAlign = TextAlign.Center,
             fontWeight = FontWeight.Normal,
             fontFamily = myFontFamily,
-            fontSize =  19.5.sp,
+            fontSize =  fontSizeCustom.sp,
             color = greyColor
         ),
         text = text
@@ -261,16 +261,21 @@ fun SaveTextViewNew(text: String,onClick: () -> Unit) {
 }
 
 @Composable
-fun SaveTextViewNewExtraBold(text: String,onClick: () -> Unit) {
+fun SaveTextViewNewExtraBold(onClick: () -> Unit) {
     Button(
         onClick = {onClick()},
         colors = ButtonDefaults.buttonColors(
             contentColor = primaryColor,
             containerColor = Color.White // text color
         ),
-        contentPadding = PaddingValues(0.dp)
+        contentPadding = PaddingValues(top = 0.dp)
     ) {
-        Text(text = text, style =  TextStyle( fontFamily = myFontFamily,fontSize = 22.sp,  fontWeight = FontWeight.ExtraBold))
+        Image( painter = painterResource(id = R.drawable.font_awesome_close),
+                contentDescription = "Custom Icon",
+                modifier = Modifier
+                        .size(24.dp)
+                        .padding(top = 0.dp),
+                colorFilter = ColorFilter.tint(primaryColor))
     }
 }
 

@@ -354,7 +354,7 @@ fun addSensorBusMappings(builder: Builder) {
                 systemEquip.humiditySensorBusAdd0.readDefaultVal().toInt(),
                 systemEquip.occupancySensorBusAdd0.readDefaultVal().toInt(),
                 systemEquip.co2SensorBusAdd0.readDefaultVal().toInt(),
-                systemEquip.pressureSensorBusAdd0.readDefaultVal().toInt()
+                systemEquip.sensorBus0PressureAssociation.readDefaultVal().toInt()
         ))
 
         this.addSensorBusMapping(addAddressSensorMapping(

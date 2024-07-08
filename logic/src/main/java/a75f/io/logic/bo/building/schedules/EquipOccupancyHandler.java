@@ -10,6 +10,8 @@ import a75f.io.api.haystack.Occupied;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.schedules.occupancy.AutoForcedOccupied;
+import a75f.io.logic.bo.building.schedules.occupancy.ForcedOccupied;
 import a75f.io.logic.bo.building.schedules.occupancy.OccupancyUtil;
 
 import static a75f.io.logic.L.TAG_CCU_SCHEDULER;
@@ -38,7 +40,10 @@ public class EquipOccupancyHandler {
         occupancyUtil = new OccupancyUtil(hayStack, equipRef);
         occupancyHandler = new OccupancyHandler(hayStack, equipRef, occupancyUtil);
     }
-    
+
+    public EquipOccupancyHandler() {
+    }
+
     public String getEquipRef() {
         return equipRef;
     }
@@ -58,6 +63,11 @@ public class EquipOccupancyHandler {
             occupancyHandler.prepareUnoccupied();
         }
 
+        if(isUnoccupiedToOccupiedTransitionRequired(currentOccupancy, scheduleOccupied,
+                        ForcedOccupied.isZoneForcedOccupied(equipRef),
+                        AutoForcedOccupied.isZoneInAutoForcedOccupied(occupancyUtil))) {
+            occupancyHandler.prepareOccupied();
+        }
         if (scheduleOccupied) {
             occupiedTrigger = occupancyHandler.getOccupiedTrigger();
             updatedOccupancy = occupiedTrigger.toOccupancy();
@@ -142,6 +152,15 @@ public class EquipOccupancyHandler {
                 //resetForceOccupied();
             }
         }
+    }
+    public boolean isUnoccupiedToOccupiedTransitionRequired(Occupancy currentOccupancy,
+                                                            boolean scheduleOccupied,
+                                                            boolean zoneForcedOccupied,
+                                                            boolean zoneInAutoForcedOccupied) {
+        return (scheduleOccupied) && (currentOccupancy == Occupancy.AUTOFORCEOCCUPIED ||
+                currentOccupancy == Occupancy.FORCEDOCCUPIED ||
+                currentOccupancy == Occupancy.DEMAND_RESPONSE_UNOCCUPIED &&
+                        (zoneForcedOccupied || zoneInAutoForcedOccupied));
     }
 
 }

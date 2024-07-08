@@ -144,7 +144,7 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
         return if (point.defaultUnit != null) point.defaultUnit!! else ""
     }
 
-    private fun getPointByDomainName(
+    fun getPointByDomainName(
         modelDefinition: SeventyFiveFProfileDirective, domainName: String
     ): SeventyFiveFProfilePointDef? {
         return modelDefinition.points.find { (it.domainName.contentEquals(domainName)) }

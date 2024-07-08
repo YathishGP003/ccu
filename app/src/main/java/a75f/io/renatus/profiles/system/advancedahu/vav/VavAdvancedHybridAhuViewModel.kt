@@ -11,6 +11,7 @@ import a75f.io.logic.L
 import a75f.io.logic.bo.building.system.AdvancedAhuAnalogOutAssociationType
 import a75f.io.logic.bo.building.system.AdvancedAhuRelayAssociationType
 import a75f.io.logic.bo.building.system.vav.VavAdvancedAhu
+import a75f.io.logic.bo.building.system.vav.config.AdvancedHybridAhuConfig
 import a75f.io.logic.bo.building.system.vav.config.VavAdvancedHybridAhuConfig
 import a75f.io.renatus.modbus.util.showToast
 import a75f.io.renatus.profiles.system.advancedahu.AdvancedHybridAhuViewModel
@@ -100,12 +101,12 @@ class VavAdvancedHybridAhuViewModel : AdvancedHybridAhuViewModel() {
     }
 
     override fun saveConfiguration() {
-        val validConfig = isValidateConfiguration(profileConfiguration as VavAdvancedHybridAhuConfig)
+        ((viewState.value) as VavAdvancedAhuState).fromStateToProfileConfig(profileConfiguration as VavAdvancedHybridAhuConfig)
+        val validConfig = isValidateConfiguration(this@VavAdvancedHybridAhuViewModel)
         if (!validConfig.first) {
             showErrorDialog(context,validConfig.second)
             return
         }
-        ((viewState.value) as VavAdvancedAhuState).fromStateToProfileConfig(profileConfiguration as VavAdvancedHybridAhuConfig)
         CcuLog.i(L.TAG_CCU_SYSTEM, profileConfiguration.toString())
         isEquipAvailable()
         viewModelScope.launch {

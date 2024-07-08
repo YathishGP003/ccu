@@ -5,8 +5,9 @@ import a75f.io.domain.config.AssociationConfig
 import a75f.io.domain.config.EnableConfig
 import a75f.io.logic.bo.building.system.AdvancedAhuAnalogOutAssociationType
 import a75f.io.logic.bo.building.system.AdvancedAhuRelayAssociationType
+import a75f.io.logic.bo.building.system.relayAssociationDomainNameToType
+import a75f.io.logic.bo.building.system.relayAssociationToDomainName
 import a75f.io.logic.bo.building.system.vav.config.CmConfiguration
-import a75f.io.logic.bo.building.system.vav.config.VavAdvancedHybridAhuConfig
 
 /**
  * Created by Manjunath K on 04-07-2024.
@@ -14,7 +15,9 @@ import a75f.io.logic.bo.building.system.vav.config.VavAdvancedHybridAhuConfig
 
 
 fun isAnalogOutMapped(enabled: EnableConfig, association: AssociationConfig, mappedTo: AdvancedAhuAnalogOutAssociationType) = (enabled.enabled && association.associationVal == mappedTo.ordinal)
-fun isRelayMapped(enabled: EnableConfig, association: AssociationConfig, mappedTo: AdvancedAhuRelayAssociationType) = (enabled.enabled && association.associationVal == mappedTo.ordinal)
+
+fun isRelayMapped(enabled: EnableConfig, association: AssociationConfig, mappedTo: AdvancedAhuRelayAssociationType) = (enabled.enabled && (relayAssociationDomainNameToType(relayAssociationToDomainName(association.associationVal))).ordinal == mappedTo.ordinal)
+
 
 fun isAnyAOMapped(config: CmConfiguration, mappedTo: AdvancedAhuAnalogOutAssociationType): Boolean {
     if (isAnalogOutMapped(config.analogOut1Enabled, config.analogOut1Association, mappedTo)) return true
@@ -58,35 +61,34 @@ fun isRelaySatCoolingAvailable(config: CmConfiguration) = isAnyRelayMapped(confi
 fun isRelaySatHeatingAvailable(config: CmConfiguration) = isAnyRelayMapped(config, AdvancedAhuRelayAssociationType.SAT_HEATING)
 
 
-fun isValidateConfiguration(config: VavAdvancedHybridAhuConfig): Pair<Boolean, String> {
+fun isValidateConfiguration(viewModel: AdvancedHybridAhuViewModel): Pair<Boolean, String> {
 
-    if (isRelayPressureFanAvailable(config.cmConfiguration)) {
-        if (!isAOPressureAvailable(config.cmConfiguration)) {
+    if (isRelayPressureFanAvailable(viewModel.profileConfiguration.cmConfiguration)) {
+        if (!isAOPressureAvailable(viewModel.profileConfiguration.cmConfiguration)) {
             return Pair(false, "Relay Pressure Fan is mapped but Analog Out Pressure Fan is not mapped")
         }
-        if (!isPressureSensorAvailable(config.cmConfiguration)) {
+        if (!isPressureSensorAvailable(viewModel.profileConfiguration.cmConfiguration)) {
             return Pair(false, "Pressure configuration mapped but Pressure Sensor is not available")
         }
     }
 
     // TODO it all validations for all the configurations
-    if (isRelaySatCoolingAvailable(config.cmConfiguration)) {
-        if (!isAOCoolingSatAvailable(config.cmConfiguration)) {
+    if (isRelaySatCoolingAvailable(viewModel.profileConfiguration.cmConfiguration)) {
+        if (!isAOCoolingSatAvailable(viewModel.profileConfiguration.cmConfiguration)) {
             return Pair(false, "Relay Sat Cooling is mapped but Analog Out Sat Cooling is not mapped")
         }
     }
 
-    if (isRelaySatHeatingAvailable(config.cmConfiguration)) {
-        if (!isAOHeatingSatAvailable(config.cmConfiguration)) {
+    if (isRelaySatHeatingAvailable(viewModel.profileConfiguration.cmConfiguration)) {
+        if (!isAOHeatingSatAvailable(viewModel.profileConfiguration.cmConfiguration)) {
             return Pair(false, "Relay Sat Heating is mapped but Analog Out Sat Heating is not mapped")
         }
     }
 
-    val pressureStatus = findPressureDuplicate(config.cmConfiguration)
+    val pressureStatus = findPressureDuplicate(viewModel.profileConfiguration.cmConfiguration)
     if (!pressureStatus.first) {
         return pressureStatus
     }
-
     return Pair(true, "Success")
 }
 
@@ -133,36 +135,70 @@ fun findPressureDuplicate(config: CmConfiguration): Pair<Boolean,String> {
     val analogIn2DomainName = getAnalog2Domain(config)
 
     if (pressureDomainName != null) {
-        val status = validatePressure(pressureDomainName, analogIn1DomainName, analogIn2DomainName)
+        val status = validateDuplicatePressure(pressureDomainName, analogIn1DomainName, analogIn2DomainName)
         if (!status.first) {
             return status
+        }
+        val sequenceStatus = validatePressureSequence(pressureDomainName, analogIn1DomainName, analogIn2DomainName)
+        if (!sequenceStatus.first) {
+            return sequenceStatus
         }
     }
     if (analogIn1DomainName != null) {
-        val status = validatePressure(analogIn1DomainName, pressureDomainName , analogIn2DomainName)
+        val status = validateDuplicatePressure(analogIn1DomainName, pressureDomainName, analogIn2DomainName)
         if (!status.first) {
             return status
         }
+        val sequenceStatus = validatePressureSequence(analogIn1DomainName, pressureDomainName, analogIn2DomainName)
+        if (!sequenceStatus.first) {
+            return sequenceStatus
+        }
     }
     if (analogIn2DomainName != null) {
-        val status = validatePressure(analogIn2DomainName, pressureDomainName, analogIn1DomainName)
+        val status = validateDuplicatePressure(analogIn2DomainName, pressureDomainName, analogIn1DomainName)
         if (!status.first) {
             return status
+        }
+        val sequenceStatus = validatePressureSequence(analogIn2DomainName, pressureDomainName, analogIn1DomainName)
+        if (!sequenceStatus.first) {
+            return sequenceStatus
         }
     }
     return Pair(true, "success")
 }
 
-fun validatePressure(primary: String?, mapping1: String?, mapping2: String?):Pair<Boolean,String> {
-    if (primary != null) {
-        if (mapping1 != null && mapping1.contentEquals(primary)) {
-            return Pair(false, "Duplicate selection for $primary")
+fun validatePressureSequence(primary: String, mapping1: String?, mapping2: String?) :Pair<Boolean,String> {
+    if(primary.contains("_3")) {
+        if (mapping1 != null && (!mapping1.contains("_2")) && mapping2 != null && (!mapping2.contains("_2"))) {
+            return Pair(false, "In order to select Pressure Sensor 3, You should select sensor 2 !")
         }
-        if (mapping2 != null && mapping2.contentEquals(primary)) {
-            return Pair(false, "Duplicate selection for $primary")
+    }
+    if(primary.contains("_2")) {
+        if (mapping1 != null && (!mapping1.contains("_1")) && mapping2 != null && (!mapping2.contains("_1"))) {
+            return Pair(false, "In order to select Pressure Sensor 2, You should select Pressure Sensor 1 !")
         }
     }
     return Pair(true, "success")
+}
+fun validateDuplicatePressure(primary: String?, mapping1: String?, mapping2: String?):Pair<Boolean,String> {
+    if (primary != null) {
+        if (mapping1 != null && mapping1.contentEquals(primary)) {
+            return Pair(false, "Duplicate selection for ${getDisForDomain(primary)} sensor")
+        }
+        if (mapping2 != null && mapping2.contentEquals(primary)) {
+            return Pair(false, "Duplicate selection for ${getDisForDomain(primary)} sensor")
+        }
+    }
+    return Pair(true, "success")
+}
+
+fun getDisForDomain(domainName: String): String {
+    return when(domainName) {
+        DomainName.ductStaticPressureSensor1_1, DomainName.ductStaticPressureSensor2_1, DomainName.ductStaticPressureSensor3_1 -> "Duct Static Pressure Sensor (0-1in.WC)"
+        DomainName.ductStaticPressureSensor1_2, DomainName.ductStaticPressureSensor2_2, DomainName.ductStaticPressureSensor3_2 -> "Duct Static Pressure Sensor (0-2in.WC)"
+        DomainName.ductStaticPressureSensor1_10, DomainName.ductStaticPressureSensor2_10, DomainName.ductStaticPressureSensor3_10 -> "Duct Static Pressure Sensor (0-10in.WC)"
+        else -> "Unknown"
+    }
 }
 
 

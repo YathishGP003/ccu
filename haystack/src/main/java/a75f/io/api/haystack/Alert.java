@@ -1,5 +1,7 @@
 package a75f.io.api.haystack;
 
+import androidx.annotation.NonNull;
+
 import javax.annotation.Nullable;
 
 import io.objectbox.annotation.Convert;
@@ -58,10 +60,6 @@ public class Alert
 
     public String blockId;
 
-    public String getBlockId() {
-        return blockId;
-    }
-
     public void setBlockId(String blockId) {
         this.blockId = blockId;
     }
@@ -74,10 +72,6 @@ public class Alert
         this.creator = creator;
     }
 
-    public String getmAlertType()
-    {
-        return mAlertType;
-    }
     public void setmAlertType(String mAlertType)
     {
         this.mAlertType = mAlertType;
@@ -91,11 +85,12 @@ public class Alert
         this.syncStatus = syncStatus;
     }
 
+    @androidx.annotation.Nullable
     public String getRef()
     {
         return ref;
     }
-    public void setRef(String ref)
+    public void setRef(@androidx.annotation.Nullable String ref)
     {
         this.ref = ref;
     }
@@ -132,10 +127,7 @@ public class Alert
     {
         this.mMessage = mMessage;
     }
-    public String getmNotificationMsg()
-    {
-        return mNotificationMsg;
-    }
+
     public void setmNotificationMsg(String mNotificationMsg) { this.mNotificationMsg = mNotificationMsg; }
     public AlertSeverity getmSeverity()
     {
@@ -222,6 +214,7 @@ public class Alert
         }
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "Alert{" +

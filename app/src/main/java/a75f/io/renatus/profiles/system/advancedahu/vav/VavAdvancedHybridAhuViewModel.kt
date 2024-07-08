@@ -47,6 +47,7 @@ class VavAdvancedHybridAhuViewModel : AdvancedHybridAhuViewModel() {
         CcuLog.i(Domain.LOG_TAG, profileConfiguration.connectConfiguration.toString())
         viewState = mutableStateOf(VavAdvancedAhuState.fromProfileConfigToState(profileConfiguration as VavAdvancedHybridAhuConfig))
         CcuLog.i(Domain.LOG_TAG, "VavAdvancedAhuViewModel Loaded")
+        viewState.value.isSaveRequired = !systemEquip["profile"].toString().contentEquals("vavAdvancedHybridAhuV2")
     }
 
     private fun createNewEquip(id: String): String {
@@ -188,6 +189,17 @@ class VavAdvancedHybridAhuViewModel : AdvancedHybridAhuViewModel() {
                 hayStack.deleteEntityTree(connectDevice[Tags.ID].toString())
             }
         }
+    }
+
+     fun reset() {
+        val systemEquip = hayStack.readEntity("system and equip and not modbus and not connectModule")
+        profileConfiguration = if (systemEquip["profile"].toString().contentEquals("vavAdvancedHybridAhuV2")) {
+            VavAdvancedHybridAhuConfig(cmModel, connectModel).getActiveConfiguration() as VavAdvancedHybridAhuConfig
+        } else {
+            VavAdvancedHybridAhuConfig(cmModel, connectModel)
+        }
+        viewState.value = VavAdvancedAhuState.fromProfileConfigToState(profileConfiguration as VavAdvancedHybridAhuConfig)
+         viewState.value.isSaveRequired = !systemEquip["profile"].toString().contentEquals("vavAdvancedHybridAhuV2")
     }
 }
 

@@ -828,7 +828,7 @@ public abstract class VavProfile extends ZoneProfile {
                     message += ", CHW Valve OFF";
                 }
             } else {
-                if (acbEquip.getChwShutOffValve().readHisVal() > 0.0) {
+                if (acbEquip.getChilledWaterValveIsolationCmdPointNC().readHisVal() > 0.0 || acbEquip.getChilledWaterValveIsolationCmdPointNO().readHisVal() > 0.0) {
                     message += ", CHW Valve ON";
                 } else {
                     message += ", CHW Valve OFF";

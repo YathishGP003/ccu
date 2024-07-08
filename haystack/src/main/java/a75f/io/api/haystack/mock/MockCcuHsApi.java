@@ -69,8 +69,8 @@ public class MockCcuHsApi extends CCUHsApi {
     }
     
     @Override
-    public String updateSettingPoint(SettingPoint p, String id) {
-        return tagsDb.updateSettingPoint(p,id);
+    public void updateSettingPoint(SettingPoint p, String id) {
+        tagsDb.updateSettingPoint(p, id);
     }
     
     @Override

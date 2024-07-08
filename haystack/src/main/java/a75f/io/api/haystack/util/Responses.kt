@@ -4,8 +4,6 @@ import a75f.io.api.haystack.CCUHsApi
 
 data class ReadAllResponse(val points : String?, val levelData: MutableList<LevelData>)
 
-data class BaseResponse<T>(val data: T? = null, val error: String? = null)
-
 data class LevelData(val pointId: String, val levelArray: ArrayList<String?>?)
 
 fun retrieveLevelValues(id: String): ArrayList<String?> {

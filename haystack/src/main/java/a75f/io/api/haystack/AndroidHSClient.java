@@ -6,16 +6,14 @@ import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
 import org.projecthaystack.HVal;
 import org.projecthaystack.HWatch;
-import org.projecthaystack.UnknownRecException;
-import org.projecthaystack.UnknownWatchException;
 import org.projecthaystack.client.HClient;
 import org.projecthaystack.server.HOp;
 import org.projecthaystack.server.HServer;
 
 import a75f.io.logger.CcuLog;
 
-/**
- * Created by samjithsadasivan on 8/31/18.
+/*
+  Created by samjithsadasivan on 8/31/18.
  */
 
 /**
@@ -30,12 +28,7 @@ public class AndroidHSClient extends HClient
         super();
         uri = null;
     }
-    
-    @Override
-    public HClient open() {
-        return this;
-    }
-    
+
     @Override
     public HGrid call(String opName, HGrid req)
     {
@@ -133,18 +126,16 @@ public class AndroidHSClient extends HClient
                 return watch.pollRefresh();
             else
                 return watch.pollChanges();
-        } catch (UnknownWatchException | UnknownRecException unknownWatchException) {
-           CcuLog.e("CCU_HS", unknownWatchException.getMessage());
-        }catch (Exception exception){
+        } catch (Exception exception){
            CcuLog.e("CCU_HS", exception.getMessage());
         }
-        return createEmptyGrid("err", "wrong watch id");
+        return createEmptyGrid();
     }
 
-    private HGrid createEmptyGrid(String metaInput, String message) {
+    private HGrid createEmptyGrid() {
         HGridBuilder b = new HGridBuilder();
-        b.meta().add(metaInput)
-                .add("errTrace", message);
+        b.meta().add("err")
+                .add("errTrace", "wrong watch id");
         //b.addCol(message);
         return b.toGrid();
     }

@@ -125,7 +125,11 @@ public class OccupancyHandler implements Occupiable {
      * Do clean up while transitioning from Unoccupied -> occupied
      */
     public void prepareOccupied() {
-
+        Map<Object, Object> forcedOccupiedLevel = ScheduleUtil.getForcedOccupiedLevel(equipRef);
+        if (forcedOccupiedLevel != null) {
+            CcuLog.i(L.TAG_CCU_SCHEDULER, "Clear forced occupied "+forcedOccupiedLevel);
+            ScheduleUtil.clearTempOverrideAtLevel(equipRef, HayStackConstants.FORCE_OVERRIDE_LEVEL);
+        }
     }
 
     /**

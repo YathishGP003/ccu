@@ -37,4 +37,14 @@ public class SmartNodeSettings2_t extends Struct {
     public final Unsigned8 maxVolt = new Unsigned8();
     public final Signed16 minEngVal = new Signed16();
     public final Signed16 maxEngVal = new Signed16();
+    public final RelayBitmap_t relayBitmap = inner(new RelayBitmap_t()); // This is used to set the type of relay used ex : NO or NC.
+
+    public class RelayBitmap_t extends Struct
+    {
+        public final Unsigned16 relay1 = new Unsigned16(1); // This bit is based on relay type( NO: 1 or NC: 0)
+        public final Unsigned16 relay2 = new Unsigned16(1); //This bit is based on relay type( NO: 1 or NC: 0)
+        public final Unsigned16 relay3 = new Unsigned16(1); //This bit is based on relay type( NO: 1 or NC: 0)
+        public final Unsigned16 relay4 = new Unsigned16(1); //This bit is based on relay type( NO: 1 or NC: 0)
+    }
+
 }

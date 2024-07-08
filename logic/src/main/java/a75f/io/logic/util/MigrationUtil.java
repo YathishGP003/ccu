@@ -71,6 +71,7 @@ import a75f.io.logic.bo.util.DesiredTempDisplayMode;
 import a75f.io.logic.ccu.restore.RestoreCCU;
 import a75f.io.logic.diag.DiagEquip;
 import a75f.io.logic.limits.SchedulabeLimits;
+import a75f.io.logic.migration.VavAndAcbProfileMigration;
 import a75f.io.logic.migration.hyperstat.CpuPointsMigration;
 import a75f.io.logic.migration.hyperstat.MigratePointsUtil;
 import a75f.io.logic.migration.point.PointMigrationHandler;
@@ -174,7 +175,10 @@ public class MigrationUtil {
             migrateHyperStatThermistorConfig(ccuHsApi);
             PreferenceUtil.setHyperStatThermistorConfigMigration();
         }
-
+        if (!PreferenceUtil.getACBCondensateSensorMigration()) {
+            VavAndAcbProfileMigration.Companion.condensateSensorCleanupMigration(ccuHsApi);
+            PreferenceUtil.setACBCondensateSensorMigration();
+        }
         migrateAirFlowTunerPoints(ccuHsApi);
         migrateZoneScheduleTypeIfMissed(ccuHsApi);
         if(SchedulableMigrationKt.validateMigration()) {

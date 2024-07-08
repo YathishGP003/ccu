@@ -188,6 +188,11 @@ public class UpdatePointHandler implements MessageHandler
             TrueCFMVAVConfigHandler.updateMinReheatingConfigPoint(msgObject, localPoint, hayStack);
         }
 
+        if (HSUtil.isACBRelay1TypeConfig(pointUid, CCUHsApi.getInstance())) {
+            ACBRelayConfigHandler.Companion.updateACBRelay1Type(msgObject, localPoint, hayStack);
+            hayStack.scheduleSync();
+        }
+
         if(HSUtil.isTIProfile(pointUid, CCUHsApi.getInstance())){
             TIConfigHandler.Companion.updateTIConfig(msgObject,localPoint,hayStack);
         }

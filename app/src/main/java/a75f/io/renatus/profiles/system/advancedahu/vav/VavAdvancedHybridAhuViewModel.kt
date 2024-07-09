@@ -8,15 +8,10 @@ import a75f.io.domain.logic.DomainManager
 import a75f.io.domain.util.ModelLoader
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
-import a75f.io.logic.bo.building.system.AdvancedAhuAnalogOutAssociationType
-import a75f.io.logic.bo.building.system.AdvancedAhuRelayAssociationType
 import a75f.io.logic.bo.building.system.vav.VavAdvancedAhu
-import a75f.io.logic.bo.building.system.vav.config.AdvancedHybridAhuConfig
 import a75f.io.logic.bo.building.system.vav.config.VavAdvancedHybridAhuConfig
 import a75f.io.renatus.modbus.util.showToast
 import a75f.io.renatus.profiles.system.advancedahu.AdvancedHybridAhuViewModel
-import a75f.io.renatus.profiles.system.advancedahu.isAnyAOMapped
-import a75f.io.renatus.profiles.system.advancedahu.isAnyRelayMapped
 import a75f.io.renatus.profiles.system.advancedahu.isValidateConfiguration
 import a75f.io.renatus.util.ProgressDialogUtils
 import android.content.Context
@@ -108,6 +103,8 @@ class VavAdvancedHybridAhuViewModel : AdvancedHybridAhuViewModel() {
             showErrorDialog(context,validConfig.second)
             return
         }
+        viewState.value.isSaveRequired = false
+        viewState.value.isStateChanged = false
         CcuLog.i(L.TAG_CCU_SYSTEM, profileConfiguration.toString())
         isEquipAvailable()
         viewModelScope.launch {

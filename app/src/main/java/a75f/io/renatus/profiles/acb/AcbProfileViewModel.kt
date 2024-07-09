@@ -328,7 +328,7 @@ class AcbProfileViewModel : ViewModel() {
 
         // Set
         val relay1 = hayStack.readHDict("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.relay1 + "\"");
-        var relay1Point = RawPoint.Builder().setHDict(relay1)
+        var relay1Point = RawPoint.Builder().setHDict(relay1).setEnabled(true)
         hayStack.updatePoint(relay1Point.setType("Relay N/C").build(), relay1.get("id").toString())
 
         var relay2 = hayStack.readHDict("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.relay2 + "\"");

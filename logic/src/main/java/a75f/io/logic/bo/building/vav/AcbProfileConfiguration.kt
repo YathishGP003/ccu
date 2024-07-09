@@ -186,6 +186,8 @@ class AcbProfileConfiguration (nodeAddress: Int, nodeType: String, priority: Int
 
     override fun getEnableConfigs() : List<EnableConfig> {
         return mutableListOf<EnableConfig>().apply {
+            add(relay1Enable)
+            add(relay2Enable)
             add(condensateSensorType)
             add(autoAway)
             add(autoForceOccupied)

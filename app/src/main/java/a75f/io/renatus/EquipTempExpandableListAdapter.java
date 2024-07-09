@@ -113,7 +113,7 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
             Spinner ssHumiDifierSpinner = convertView.findViewById(R.id.ss_humidity_spinner);
             
             String zoneId = Schedule.getZoneIdByEquipId(equipId);
-            String status = ScheduleManager.getInstance().getZoneStatusMessage(zoneId, equipId);
+            String status = ScheduleManager.getInstance().getMultiModuleZoneStatusMessage(zoneId);
             String vacationStatus = ScheduleManager.getInstance().getVacationStateString(zoneId);
             vacationStatusTV.setText(vacationStatus);
             String specialScheduleStatus = getScheduleStateString(zoneId);

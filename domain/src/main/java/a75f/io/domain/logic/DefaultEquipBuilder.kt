@@ -17,6 +17,7 @@ import io.seventyfivef.domainmodeler.client.type.SeventyFiveFTunerPointDef
 import io.seventyfivef.domainmodeler.common.point.Constraint
 import io.seventyfivef.domainmodeler.common.point.MultiStateConstraint
 import io.seventyfivef.domainmodeler.common.point.NumericConstraint
+import io.seventyfivef.domainmodeler.common.point.PointState
 import io.seventyfivef.ph.core.TagType
 import org.projecthaystack.HBool
 import org.projecthaystack.HStr
@@ -190,9 +191,9 @@ open class DefaultEquipBuilder : EquipBuilder {
         if (pointConfig.modelDef.valueConstraint.constraintType == Constraint.ConstraintType.MULTI_STATE) {
             (pointConfig.modelDef.valueConstraint as MultiStateConstraint).allowedValues.forEachIndexed { index, value ->
                 enums = if (enums.isNotEmpty()) {
-                    "$enums${value.value}=$index,"
+                    "$enums${getEnum(value)}=$index,"
                 } else {
-                    "${value.value}=$index,"
+                    "${getEnum(value)}=$index,"
                 }
             }
         }
@@ -202,6 +203,15 @@ open class DefaultEquipBuilder : EquipBuilder {
             pointBuilder.setEnums(enums)
         }
         return pointBuilder.build()
+    }
+
+    private fun getEnum(pointState: PointState): String {
+        pointState.dis?.let {
+            if (pointState.dis!!.isNotEmpty()) {
+                return pointState.dis.toString()
+            }
+        }
+        return pointState.value
     }
 
     private fun getDisplayNameFromVariation(dis: String): String? {

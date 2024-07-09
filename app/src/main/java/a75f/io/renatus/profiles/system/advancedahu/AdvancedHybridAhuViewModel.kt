@@ -108,7 +108,7 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
             val constraint = pointDef.valueConstraint as MultiStateConstraint
             val enums = mutableListOf<Option>()
             constraint.allowedValues.forEach {
-                enums.add(Option(it.index, it.value))
+                enums.add(Option(it.index, it.value, it.dis))
             }
             enums
         } else {
@@ -379,4 +379,4 @@ enum class ConnectControlType {
     LOAD_BASED_COOLING_CONTROL, LOAD_BASED_HEATING_CONTROL, LOAD_BASED_FAN_CONTROL, COMPOSITE, CO2_BASED_DAMPER_CONTROL
 }
 
-data class Option(val index: Int, val value: String)
+data class Option(val index: Int, val value: String, val dis: String? = null)

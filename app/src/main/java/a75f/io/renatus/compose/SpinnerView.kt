@@ -3,6 +3,7 @@ package a75f.io.renatus.compose
 import a75f.io.renatus.R
 import a75f.io.renatus.compose.ComposeUtil.Companion.greyDropDownColor
 import a75f.io.renatus.compose.ComposeUtil.Companion.greyDropDownUnderlineColor
+import a75f.io.renatus.compose.ComposeUtil.Companion.greySearchIcon
 import a75f.io.renatus.compose.ComposeUtil.Companion.primaryColor
 import a75f.io.renatus.compose.ComposeUtil.Companion.secondaryColor
 import a75f.io.renatus.profiles.system.advancedahu.Option
@@ -49,7 +50,9 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -173,6 +176,7 @@ fun SpinnerElementOption(
                     modifier = Modifier.width(previewWidth.dp),
                     fontWeight = FontWeight.Normal,
                     text = "${selectedItem.value} $unit",
+                    overflow = TextOverflow.Ellipsis,
                     maxLines = 1
                 )
 
@@ -180,8 +184,8 @@ fun SpinnerElementOption(
                     painter = painterResource(id = R.drawable.angle_down_solid),
                     contentDescription = "Custom Icon",
                     modifier = Modifier
-                        .size(28.dp)
-                        .padding(PaddingValues(top = 8.dp)),
+                            .size(30.dp)
+                            .padding(PaddingValues(top = 8.dp)),
                     colorFilter = ColorFilter.tint(primaryColor),
                     alignment = Alignment.CenterEnd
                 )
@@ -197,7 +201,7 @@ fun SpinnerElementOption(
                 modifier = Modifier.height((customHeight).dp).width((previewWidth + 30).dp)) {
                 itemsIndexed(items) { index, item ->
                     DropdownMenuItem(
-                        modifier = Modifier.background(if (item.value == selectedItem.value) secondaryColor else Color.White),
+                        modifier = Modifier.background(if (index == selectedIndex) secondaryColor else Color.White),
                         contentPadding = PaddingValues(10.dp),
                         text = {
                             Row {
@@ -259,6 +263,7 @@ fun SearchSpinnerElement(
                     modifier = Modifier.width((width-50).dp),
                     fontWeight = FontWeight.Normal,
                     text = "${ selectedItem.value.dis?: selectedItem.value.dis } $unit",
+                    overflow = TextOverflow.Ellipsis,
                     maxLines = 1
                 )
 
@@ -266,12 +271,12 @@ fun SearchSpinnerElement(
                     painter = painterResource(id = R.drawable.angle_down_solid),
                     contentDescription = "Custom Icon",
                     modifier = Modifier
-                        .size(28.dp)
-                        .padding(PaddingValues(top = 8.dp)),
+                            .size(30.dp)
+                            .padding(PaddingValues(top = 8.dp)),
                     colorFilter = ColorFilter.tint(if(isEnabled) primaryColor else greyDropDownColor)
                 )
             }
-            Divider(modifier = Modifier.width((width-20).dp),color = if(expanded.value) primaryColor else greyDropDownUnderlineColor)
+            Divider(modifier = Modifier.width((width-20).dp),color = if(expanded.value) Color.Black else greyDropDownUnderlineColor)
         }
 
         DropdownMenu(
@@ -286,7 +291,7 @@ fun SearchSpinnerElement(
                 val filteredItems = if (searchText.isEmpty()) {
                     allItems
                 } else {
-                    allItems.filter { it.value.contains(searchText, ignoreCase = true) }
+                    allItems.filter { it.value.contains(searchText.replace(" ",""), ignoreCase = true) }
                 }
                 if (allItems.size > 16) {
                     Row {
@@ -303,15 +308,29 @@ fun SearchSpinnerElement(
                                 containerColor = Color.White
                             ),
                             modifier = Modifier
-                                .padding(10.dp)
-                                .width((width - 50).dp),
+                                    .padding(10.dp)
+                                    .width((width - 30).dp),
+                            textStyle = TextStyle(fontSize = 20.sp, fontFamily = ComposeUtil.myFontFamily),
                             leadingIcon = {
                                 Image(
                                     painter = painterResource(id = R.drawable.ic_search),
                                     contentDescription = "Custom Icon",
-                                    modifier = Modifier.size(24.dp)
+                                    modifier = Modifier.size(24.dp),
+                                    colorFilter = ColorFilter.tint(greySearchIcon)
                                 )
                             },
+                                trailingIcon = {
+                                    if (searchText.isNotEmpty()) {
+                                        Image(
+                                                painter = painterResource(id = R.drawable.font_awesome_close),
+                                                contentDescription = "Clear Icon",
+                                                modifier = Modifier
+                                                        .size(24.dp)
+                                                        .clickable { searchText = "" },
+                                                colorFilter = ColorFilter.tint(primaryColor)
+                                        )
+                                    }
+                                },
                         )
                     }
                 }
@@ -330,7 +349,7 @@ fun SearchSpinnerElement(
                                         Text(
                                             fontSize = 20.sp,
                                             fontFamily = ComposeUtil.myFontFamily,
-                                            modifier = Modifier.padding(end = 10.dp),
+                                            modifier = Modifier.padding(end = 10.dp, start = 10.dp),
                                             fontWeight = FontWeight.Normal,
                                             text = it.dis ?: it.value
                                         )
@@ -403,8 +422,8 @@ fun Modifier.simpleVerticalScrollbar(
 private fun getDropdownCustomHeight(list: List<Any>, noOfItemsDisplayInDropDown: Int, heightValue: Int): Int {
     var customHeight = heightValue
     if(list.isNotEmpty()) {
-        if(list.size < noOfItemsDisplayInDropDown) {
-            customHeight = (list.size * 54) // 54 is the height and padding for each dropdown item and 5 is the padding
+        if(list.size <= noOfItemsDisplayInDropDown) {
+            customHeight = (list.size * 48) // 48 is the height and padding for each dropdown item and 5 is the padding
         }
         return customHeight
     }
@@ -416,8 +435,14 @@ fun getDefaultSelectionIndex(items: List<Option>, defaultSelection: String):Int 
         return -1
     }
 
+    val isDefaultSelectionIsNumber = defaultSelection.toDoubleOrNull() != null
+    var selectedItem = defaultSelection
+    if (isDefaultSelectionIsNumber && items[0].value.contains('.')) {
+        selectedItem = String.format("%.2f", defaultSelection.toDouble())
+    }
+
     for (i in items.indices) {
-        if (items[i].value == defaultSelection) {
+        if (items[i].value == selectedItem) {
             selectedIndex = i
             break
         }

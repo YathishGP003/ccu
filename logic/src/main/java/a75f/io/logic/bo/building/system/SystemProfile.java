@@ -197,7 +197,7 @@ public abstract class SystemProfile
                 || q.getMarkers().contains("vrv") || q.getMarkers().contains("otn")) {
                 q.setAhuRef(systemEquipId);
             } else if (q.getMarkers().contains("smartstat") || q.getMarkers().contains("emr") || q.getMarkers().contains("pid") ||
-                       q.getMarkers().contains("modbus") || q.getMarkers().contains("monitoring") || q.getMarkers().contains("hyperstat")) {
+                       q.getMarkers().contains("modbus") || q.getMarkers().contains("monitoring") || q.getMarkers().contains("hyperstat") ||q.getMarkers().contains("hyperstatsplit")) {
                 //All the standalone zone equips will have a gatewayRef
                 q.setGatewayRef(systemEquipId);
             }else {

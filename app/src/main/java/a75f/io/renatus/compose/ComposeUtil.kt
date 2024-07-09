@@ -4,11 +4,18 @@ import a75f.io.logic.Globals
 import a75f.io.renatus.R
 import a75f.io.renatus.util.CCUUiUtil
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.drawscope.Stroke
 /**
  * Created by Manjunath K on 16-08-2023.
  */
@@ -20,6 +27,7 @@ class ComposeUtil {
         val greyDropDownColor = Color(android.graphics.Color.parseColor("#B6B6B6"))
         val greyDropDownScrollBarColor = Color(android.graphics.Color.parseColor("#B6B6B6"))
         val greyDropDownUnderlineColor = Color(android.graphics.Color.parseColor("#CCCCCC"))
+        val greySearchIcon = Color(android.graphics.Color.parseColor("#999999"))
         val myFontFamily = FontFamily(
             Font(R.font.lato_light, FontWeight.Light),
             Font(R.font.lato_regular, FontWeight.Normal),
@@ -74,6 +82,46 @@ class ComposeUtil {
         }
 
 
+        @Composable
+        fun DashDivider() {
+            LazyColumn(modifier = Modifier.width(1200.dp).height(50.dp)) {
+                items(1) {
+                    Column(
+                        modifier = Modifier.width(1200.dp).height(50.dp)
+                    ) {
+                        DashDivider(
+                            color = greyDropDownUnderlineColor,
+                            thickness = 2.dp,
+                            modifier = Modifier
+                                .padding(16.dp)
+                                .fillMaxWidth()
+                        )
+                    }
+                }
+            }
+        }
+        @Composable
+        fun DashDivider(
+            thickness: Dp,
+            color: Color,
+            phase: Float = 10f,
+            intervals: FloatArray = floatArrayOf(10f, 10f),
+            modifier: Modifier
+        ) {
+            Canvas(modifier = modifier.fillMaxWidth()) {
+                val dividerHeight = thickness.toPx()
+                drawRoundRect(
+                    color = color,
+                    style = Stroke(
+                        width = dividerHeight,
+                        pathEffect = PathEffect.dashPathEffect(
+                            intervals,
+                            phase
+                        )
+                    )
+                )
+            }
+        }
 
     }
 }

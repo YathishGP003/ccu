@@ -11,7 +11,8 @@ import a75f.io.renatus.composables.HumidityCompose
 import a75f.io.renatus.composables.MinMaxConfiguration
 import a75f.io.renatus.composables.RelayConfiguration
 import a75f.io.renatus.compose.BoldStyledTextView
-import a75f.io.renatus.compose.HeaderTextView
+import a75f.io.renatus.compose.ComposeUtil
+import a75f.io.renatus.compose.LabelTextView
 import a75f.io.renatus.compose.SaveTextViewNew
 import a75f.io.renatus.compose.SaveTextViewNewExtraBold
 import a75f.io.renatus.compose.SearchSpinnerElement
@@ -107,18 +108,18 @@ open class AdvancedHybridAhuFragment : Fragment() {
     fun TitleLabel() {
         Row(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 10.dp)
+                    .fillMaxWidth()
+                    .padding(top = 5.dp, bottom = 10.dp)
         ) {
             Box(
                 modifier = Modifier.weight(0.5f), contentAlignment = Alignment.Center
             ) { SubTitle(CM) }
-            Box(modifier = Modifier.weight(3f), contentAlignment = Alignment.Center) {
+            Box(modifier = Modifier.weight(3.5f), contentAlignment = Alignment.Center) {
                 SubTitle(
                     ENABLE
                 )
             }
-            Box(modifier = Modifier.weight(1.5f), contentAlignment = Alignment.Center) {
+            Box(modifier = Modifier.weight(2f), contentAlignment = Alignment.Center) {
                 SubTitle(
                     MAPPING
                 )
@@ -136,15 +137,18 @@ open class AdvancedHybridAhuFragment : Fragment() {
         if (viewModel.viewState.value.isConnectEnabled) {
             Row(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 10.dp)
+                        .fillMaxWidth()
+                        .padding(top = 10.dp, bottom = 10.dp)
             ) {
-                Box(modifier = Modifier.padding(top = 7.dp)) {
-                    HeaderTextView(text = CONNECT_MODULE)
+                Box(modifier = Modifier.padding(top = 10.dp)) {
+                    LabelTextView(text = CONNECT_MODULE, widthValue = 250)
                 }
-                SaveTextViewNewExtraBold(text = "x") { viewModel.viewState.value.pendingDeleteConnect = true }
+                SaveTextViewNewExtraBold {
+                    viewModel.viewState.value.pendingDeleteConnect = true
+                    setStateChanged(viewModel)
+                }
                 Spacer(Modifier.weight(1f))
-                Box(modifier = Modifier.padding(top = 12.dp, end = 30.dp)) {
+                Box(modifier = Modifier.padding(end = 30.dp)) {
                     StyledTextView("Address: " + viewModel.viewState.value.connectAddress.toString(), fontSize = 20)
                 }
             }
@@ -162,7 +166,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
         val co2Enum = viewModel.getAllowedValues(DomainName.co2SensorBusAdd0, viewModel.cmModel)
         val pressureEnum = viewModel.getAllowedValues(DomainName.pressureSensorBusAdd0, viewModel.cmModel)
 
-        SubTitle(SENSOR_BUS)
+        SubTitle(SENSOR_BUS, fontSizeCustom = 16.0, topPaddingValue = 3, startPaddingValue = 15)
         Row {
             EnableCompose(ADDRESS_0, viewModel.viewState.value.sensorAddress0.enabled) {
                 viewModel.viewState.value.sensorAddress0.enabled = it
@@ -177,6 +181,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                 ) {
                     viewModel.viewState.value.sensorAddress0.temperatureAssociation = it.index
                     viewModel.viewState.value.sensorAddress0.humidityAssociation = it.index
+                    setStateChanged(viewModel)
                 }
                 HumidityCompose(
                     HUMIDITY,
@@ -190,6 +195,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     isEnabled = viewModel.viewState.value.sensorAddress0.enabled
                 ) {
                     viewModel.viewState.value.sensorAddress0.occupancyAssociation = it.index
+                    setStateChanged(viewModel)
                 }
                 ConfigCompose(
                     CO2,
@@ -199,6 +205,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     isEnabled = viewModel.viewState.value.sensorAddress0.enabled
                 ) {
                     viewModel.viewState.value.sensorAddress0.co2Association = it.index
+                    setStateChanged(viewModel)
                 }
             }
         }
@@ -207,6 +214,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                 "", viewModel.viewState.value.sensorBusPressureEnable, hide = true
             ) {
                 viewModel.viewState.value.sensorBusPressureEnable = it
+                setStateChanged(viewModel)
             }
             Column {
                 ConfigCompose(
@@ -217,6 +225,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     isEnabled = viewModel.viewState.value.sensorBusPressureEnable
                 ) {
                     viewModel.viewState.value.sensorAddress0.pressureAssociation = it.index
+                    setStateChanged(viewModel)
                 }
             }
         }
@@ -235,6 +244,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                 ) {
                     viewModel.viewState.value.sensorAddress1.temperatureAssociation = it.index
                     viewModel.viewState.value.sensorAddress1.humidityAssociation = it.index
+                    setStateChanged(viewModel)
                 }
                 HumidityCompose(
                     HUMIDITY,
@@ -248,6 +258,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     isEnabled = viewModel.viewState.value.sensorAddress1.enabled
                 ) {
                     viewModel.viewState.value.sensorAddress1.occupancyAssociation = it.index
+                    setStateChanged(viewModel)
                 }
                 ConfigCompose(
                     CO2,
@@ -257,6 +268,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     isEnabled = viewModel.viewState.value.sensorAddress1.enabled
                 ) {
                     viewModel.viewState.value.sensorAddress1.co2Association = it.index
+                    setStateChanged(viewModel)
                 }
             }
         }
@@ -274,6 +286,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                 ) {
                     viewModel.viewState.value.sensorAddress2.temperatureAssociation = it.index
                     viewModel.viewState.value.sensorAddress2.humidityAssociation = it.index
+                    setStateChanged(viewModel)
                 }
                 HumidityCompose(
                     HUMIDITY,
@@ -287,6 +300,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     isEnabled = viewModel.viewState.value.sensorAddress2.enabled
                 ) {
                     viewModel.viewState.value.sensorAddress2.occupancyAssociation = it.index
+                    setStateChanged(viewModel)
                 }
                 ConfigCompose(
                     CO2,
@@ -296,6 +310,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     isEnabled = viewModel.viewState.value.sensorAddress2.enabled
                 ) {
                     viewModel.viewState.value.sensorAddress2.co2Association = it.index
+                    setStateChanged(viewModel)
                 }
             }
         }
@@ -313,6 +328,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                 ) {
                     viewModel.viewState.value.sensorAddress3.temperatureAssociation = it.index
                     viewModel.viewState.value.sensorAddress3.humidityAssociation = it.index
+                    setStateChanged(viewModel)
                 }
                 HumidityCompose(
                     HUMIDITY,
@@ -327,6 +343,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     isEnabled = viewModel.viewState.value.sensorAddress3.enabled
                 ) {
                     viewModel.viewState.value.sensorAddress3.occupancyAssociation = it.index
+                    setStateChanged(viewModel)
                 }
                 ConfigCompose(
                     CO2,
@@ -336,6 +353,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     isEnabled = viewModel.viewState.value.sensorAddress3.enabled
                 ) {
                     viewModel.viewState.value.sensorAddress3.co2Association = it.index
+                    setStateChanged(viewModel)
                 }
             }
         }
@@ -370,37 +388,45 @@ open class AdvancedHybridAhuFragment : Fragment() {
             ) {
                 AOTHConfig(ANALOG_IN1,
                     viewModel.viewState.value.analogIn1Config.enabled,
-                    { viewModel.viewState.value.analogIn1Config.enabled = it },
+                    { viewModel.viewState.value.analogIn1Config.enabled = it
+                        setStateChanged(viewModel)},
                     analogEnum[viewModel.viewState.value.analogIn1Config.association],
                     analogEnum,
                     "",
                     viewModel.viewState.value.analogIn1Config.enabled,
-                    { viewModel.viewState.value.analogIn1Config.association = it.index })
+                    { viewModel.viewState.value.analogIn1Config.association = it.index
+                        setStateChanged(viewModel)})
                 AOTHConfig(ANALOG_IN2,
                     viewModel.viewState.value.analogIn2Config.enabled,
-                    { viewModel.viewState.value.analogIn2Config.enabled = it },
+                    { viewModel.viewState.value.analogIn2Config.enabled = it
+                        setStateChanged(viewModel)},
                     analogEnum[viewModel.viewState.value.analogIn2Config.association],
                     analogEnum,
                     "",
                     viewModel.viewState.value.analogIn2Config.enabled,
-                    { viewModel.viewState.value.analogIn2Config.association = it.index })
+                    { viewModel.viewState.value.analogIn2Config.association = it.index
+                        setStateChanged(viewModel)})
 
                 AOTHConfig(THERMISTOR_1,
                     viewModel.viewState.value.thermistor1Config.enabled,
-                    { viewModel.viewState.value.thermistor1Config.enabled = it },
+                    { viewModel.viewState.value.thermistor1Config.enabled = it
+                        setStateChanged(viewModel)},
                     thEnum[viewModel.viewState.value.thermistor1Config.association],
                     thEnum,
                     "",
                     viewModel.viewState.value.thermistor1Config.enabled,
-                    { viewModel.viewState.value.thermistor1Config.association = it.index })
+                    { viewModel.viewState.value.thermistor1Config.association = it.index
+                        setStateChanged(viewModel)})
                 AOTHConfig(THERMISTOR_2,
                     viewModel.viewState.value.thermistor2Config.enabled,
-                    { viewModel.viewState.value.thermistor2Config.enabled = it },
+                    { viewModel.viewState.value.thermistor2Config.enabled = it
+                        setStateChanged(viewModel)},
                     thEnum[viewModel.viewState.value.thermistor2Config.association],
                     thEnum,
                     "",
                     viewModel.viewState.value.thermistor2Config.enabled,
-                    { viewModel.viewState.value.thermistor2Config.association = it.index })
+                    { viewModel.viewState.value.thermistor2Config.association = it.index
+                        setStateChanged(viewModel)})
 
             }
         }
@@ -452,12 +478,14 @@ open class AdvancedHybridAhuFragment : Fragment() {
                                 relayConfig.association = viewModel.getModelDefaultValue(relayConfig)
                             }
                             relayConfig.enabled = it
+                            setStateChanged(viewModel)
                         },
                         association = relayEnums[relayConfig.association],
                         unit = "",
                         relayEnums = relayEnums,
                         onAssociationChanged = { associationIndex ->
                             relayConfig.association = associationIndex.index
+                            setStateChanged(viewModel)
                         },
                         isEnabled = relayConfig.enabled,
                         testState = viewModel.getPhysicalPointForRelayIndex(index, false)?.let { it.readHisVal() > 0 } ?: false,
@@ -498,7 +526,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     .padding(top = 10.dp)
             ) {
                 repeat(4) { index ->
-                    val analogOut = "Analog-out${index + 1}"
+                    val analogOut = "Analog-Out${index + 1}"
                     val enabled = when (index) {
                         0 -> viewModel.viewState.value.analogOut1Enabled
                         1 -> viewModel.viewState.value.analogOut2Enabled
@@ -523,6 +551,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                                 2 -> viewModel.viewState.value.analogOut3Enabled = enabledAction
                                 3 -> viewModel.viewState.value.analogOut4Enabled = enabledAction
                             }
+                            setStateChanged(viewModel)
                         },
                         association = analogOutEnums[associationIndex],
                         analogOutEnums = analogOutEnums,
@@ -542,6 +571,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                                 3 -> viewModel.viewState.value.analogOut4Association =
                                     association.index
                             }
+                            setStateChanged(viewModel)
                         },
                         testVal = viewModel.getPhysicalPointForAnalogIndex(index)?.readHisVal()?.toInt() ?: 0,
                         onTestSignalSelected = {viewModel.sendCMAnalogTestCommand(index, it)})
@@ -556,6 +586,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
      */
     @Composable
     fun CMAnalogOutDynamicConfig(viewModel: AdvancedHybridAhuViewModel) {
+        viewModel.viewState.value.noOfAnalogOutDynamic = 0
         PressureBasedFanControl(viewModel)
         SATBasedControl(viewModel)
         CO2BasedDamperControl(viewModel)
@@ -573,15 +604,24 @@ open class AdvancedHybridAhuFragment : Fragment() {
             val pressureMinMaxList = viewModel.getListByDomainName(DomainName.staticPressureMin, viewModel.cmModel)
             val unit = viewModel.getUnit(DomainName.staticPressureMin, viewModel.cmModel)
 
-            Column(modifier = Modifier.padding(top = 10.dp, bottom = 10.dp)) {
+            if (viewModel.viewState.value.noOfAnalogOutDynamic > 0) {
+                ComposeUtil.DashDivider()
+            }
+            viewModel.viewState.value.noOfAnalogOutDynamic++
+
+            Column(modifier = Modifier.padding(top = 15.dp, bottom = 10.dp, start = 17.dp)) {
                 BoldStyledTextView(PRESSURE_BASED_FC, fontSize = 20)
                 Row(modifier = Modifier.padding(top = 10.dp, bottom = 15.dp)) {
-                    Box(modifier = Modifier.weight(1f).padding(top = 10.dp)) {
+                    Box(modifier = Modifier
+                            .weight(1f)
+                            .padding(top = 10.dp)) {
                         StyledTextView(
                             PRESSURE_BASED_FC_ON, fontSize = 20, textAlignment = TextAlign.Left
                         )
                     }
-                    Box(modifier = Modifier.weight(1f)) {
+                    Box(modifier = Modifier
+                            .weight(1f)
+                            .padding(top = 5.dp)) {
                         SearchSpinnerElement(
                             default = pressureEnum[viewModel.viewState.value.pressureConfig.pressureControlAssociation],
                             allItems = pressureEnum,
@@ -589,6 +629,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                             onSelect = {
                                 viewModel.viewState.value.pressureConfig.pressureControlAssociation =
                                     it.index
+                                setStateChanged(viewModel)
                             },
                             width = 350
                         )
@@ -604,10 +645,12 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     onMinSelected = {
                         viewModel.viewState.value.pressureConfig.staticMinPressure =
                             it.value.toDouble()
+                        setStateChanged(viewModel)
                     },
                     onMaxSelected = {
                         viewModel.viewState.value.pressureConfig.staticMaxPressure =
                             it.value.toDouble()
+                        setStateChanged(viewModel)
                     })
             }
             PressureBaseMinMaxConfig(viewModel)
@@ -616,7 +659,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
 
     @Composable
     fun PressureBaseMinMaxConfig(viewModel: AdvancedHybridAhuViewModel) {
-        Column(modifier = Modifier.padding(top = 10.dp, bottom = 10.dp)) {
+        Column(modifier = Modifier.padding(top = 10.dp, bottom = 10.dp, start = 15.dp)) {
             if (viewModel.isAnalogEnabledAndMapped(
                     ControlType.PRESSURE_BASED_FAN_CONTROL,
                     viewModel.viewState.value.analogOut1Enabled,
@@ -632,10 +675,12 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     onMinSelected = {
                         viewModel.viewState.value.analogOut1MinMax.staticPressureMinVoltage =
                             it.value.toInt()
+                        setStateChanged(viewModel)
                     },
                     onMaxSelected = {
                         viewModel.viewState.value.analogOut1MinMax.staticPressureMaxVoltage =
                             it.value.toInt()
+                        setStateChanged(viewModel)
                     })
             }
             if (viewModel.isAnalogEnabledAndMapped(
@@ -653,10 +698,12 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     onMinSelected = {
                         viewModel.viewState.value.analogOut2MinMax.staticPressureMinVoltage =
                             it.value.toInt()
+                        setStateChanged(viewModel)
                     },
                     onMaxSelected = {
                         viewModel.viewState.value.analogOut2MinMax.staticPressureMaxVoltage =
                             it.value.toInt()
+                        setStateChanged(viewModel)
                     })
             }
             if (viewModel.isAnalogEnabledAndMapped(
@@ -674,10 +721,12 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     onMinSelected = {
                         viewModel.viewState.value.analogOut3MinMax.staticPressureMinVoltage =
                             it.value.toInt()
+                        setStateChanged(viewModel)
                     },
                     onMaxSelected = {
                         viewModel.viewState.value.analogOut3MinMax.staticPressureMaxVoltage =
                             it.value.toInt()
+                        setStateChanged(viewModel)
                     })
             }
             if (viewModel.isAnalogEnabledAndMapped(
@@ -695,10 +744,12 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     onMinSelected = {
                         viewModel.viewState.value.analogOut4MinMax.staticPressureMinVoltage =
                             it.value.toInt()
+                        setStateChanged(viewModel)
                     },
                     onMaxSelected = {
                         viewModel.viewState.value.analogOut4MinMax.staticPressureMaxVoltage =
                             it.value.toInt()
+                        setStateChanged(viewModel)
                     })
             }
         }
@@ -711,10 +762,17 @@ open class AdvancedHybridAhuFragment : Fragment() {
             val minMax = viewModel.getListByDomainName(DomainName.systemCoolingSatMin, viewModel.cmModel)
             val unit = viewModel.getUnit(DomainName.systemCoolingSatMin, viewModel.cmModel)
 
-            Column(modifier = Modifier.padding(top = 10.dp, bottom = 10.dp)) {
+            if (viewModel.viewState.value.noOfAnalogOutDynamic > 0) {
+                ComposeUtil.DashDivider()
+            }
+            viewModel.viewState.value.noOfAnalogOutDynamic++
+
+            Column(modifier = Modifier.padding(top = 10.dp, bottom = 10.dp, start = 17.dp)) {
                 BoldStyledTextView(SAT_CONTROL, fontSize = 20)
                 Row(modifier = Modifier.padding(top = 10.dp, bottom = 15.dp)) {
-                    Box(modifier = Modifier.weight(1f).padding(top = 10.dp)) {
+                    Box(modifier = Modifier
+                            .weight(1f)
+                            .padding(top = 10.dp)) {
                         StyledTextView(
                             SAT_CONTROL_ON, fontSize = 20, textAlignment = TextAlign.Left
                         )
@@ -724,6 +782,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                             default = satEnum[viewModel.viewState.value.satConfig.satControlAssociation],
                             allItems = satEnum, unit = "", onSelect = {
                                 viewModel.viewState.value.satConfig.satControlAssociation = it.index
+                            setStateChanged(viewModel)
                             }, width = 350
                         )
                     }
@@ -739,13 +798,16 @@ open class AdvancedHybridAhuFragment : Fragment() {
                         onMinSelected = {
                             viewModel.viewState.value.satConfig.systemSatCoolingMin =
                                 it.value.toDouble()
+                            setStateChanged(viewModel)
                         },
                         onMaxSelected = {
                             viewModel.viewState.value.satConfig.systemSatCoolingMax =
                                 it.value.toDouble()
+                            setStateChanged(viewModel)
                         })
                 }
                 if (viewModel.isSATHeatingEnabled()) {
+                    Spacer(modifier = Modifier.padding(top = 5.dp))
                     MinMaxConfiguration(SYSTEM_HEATING_SAT_MIN,
                         SYSTEM_HEATING_SAT_MAX,
                         minMax,
@@ -755,10 +817,12 @@ open class AdvancedHybridAhuFragment : Fragment() {
                         onMinSelected = {
                             viewModel.viewState.value.satConfig.systemSatHeatingMin =
                                 it.value.toDouble()
+                            setStateChanged(viewModel)
                         },
                         onMaxSelected = {
                             viewModel.viewState.value.satConfig.systemSatHeatingMax =
                                 it.value.toDouble()
+                            setStateChanged(viewModel)
                         })
                 }
             }
@@ -769,7 +833,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
 
     @Composable
     fun SATCoolingMinMaxConfig(viewModel: AdvancedHybridAhuViewModel) {
-        Column(modifier = Modifier.padding(top = 10.dp, bottom = 10.dp)) {
+        Column(modifier = Modifier.padding(top = 10.dp, bottom = 10.dp, start = 15.dp)) {
             if (viewModel.isAnalogEnabledAndMapped(
                     ControlType.SAT_BASED_COOLING_CONTROL,
                     viewModel.viewState.value.analogOut1Enabled,
@@ -785,10 +849,12 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     onMinSelected = {
                         viewModel.viewState.value.analogOut1MinMax.satCoolingMinVoltage =
                             it.value.toInt()
+                        setStateChanged(viewModel)
                     },
                     onMaxSelected = {
                         viewModel.viewState.value.analogOut1MinMax.satCoolingMaxVoltage =
                             it.value.toInt()
+                        setStateChanged(viewModel)
                     })
             }
             if (viewModel.isAnalogEnabledAndMapped(
@@ -806,10 +872,12 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     onMinSelected = {
                         viewModel.viewState.value.analogOut2MinMax.satCoolingMinVoltage =
                             it.value.toInt()
+                        setStateChanged(viewModel)
                     },
                     onMaxSelected = {
                         viewModel.viewState.value.analogOut2MinMax.satCoolingMaxVoltage =
                             it.value.toInt()
+                        setStateChanged(viewModel)
                     })
             }
             if (viewModel.isAnalogEnabledAndMapped(
@@ -827,10 +895,12 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     onMinSelected = {
                         viewModel.viewState.value.analogOut3MinMax.satCoolingMinVoltage =
                             it.value.toInt()
+                        setStateChanged(viewModel)
                     },
                     onMaxSelected = {
                         viewModel.viewState.value.analogOut3MinMax.satCoolingMaxVoltage =
                             it.value.toInt()
+                        setStateChanged(viewModel)
                     })
             }
             if (viewModel.isAnalogEnabledAndMapped(
@@ -848,10 +918,12 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     onMinSelected = {
                         viewModel.viewState.value.analogOut4MinMax.satCoolingMinVoltage =
                             it.value.toInt()
+                        setStateChanged(viewModel)
                     },
                     onMaxSelected = {
                         viewModel.viewState.value.analogOut4MinMax.satCoolingMaxVoltage =
                             it.value.toInt()
+                        setStateChanged(viewModel)
                     })
             }
         }
@@ -859,7 +931,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
 
     @Composable
     fun SATHeatingMinMaxConfig(viewModel: AdvancedHybridAhuViewModel) {
-        Column(modifier = Modifier.padding(top = 10.dp, bottom = 10.dp)) {
+        Column(modifier = Modifier.padding(top = 10.dp, bottom = 10.dp, start = 15.dp)) {
             if (viewModel.isAnalogEnabledAndMapped(
                     ControlType.SAT_BASED_HEATING_CONTROL,
                     viewModel.viewState.value.analogOut1Enabled,
@@ -875,10 +947,12 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     onMinSelected = {
                         viewModel.viewState.value.analogOut1MinMax.satHeatingMinVoltage =
                             it.value.toInt()
+                        setStateChanged(viewModel)
                     },
                     onMaxSelected = {
                         viewModel.viewState.value.analogOut1MinMax.satHeatingMaxVoltage =
                             it.value.toInt()
+                        setStateChanged(viewModel)
                     })
             }
             if (viewModel.isAnalogEnabledAndMapped(
@@ -896,10 +970,12 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     onMinSelected = {
                         viewModel.viewState.value.analogOut2MinMax.satHeatingMinVoltage =
                             it.value.toInt()
+                        setStateChanged(viewModel)
                     },
                     onMaxSelected = {
                         viewModel.viewState.value.analogOut2MinMax.satHeatingMaxVoltage =
                             it.value.toInt()
+                        setStateChanged(viewModel)
                     })
             }
             if (viewModel.isAnalogEnabledAndMapped(
@@ -917,10 +993,12 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     onMinSelected = {
                         viewModel.viewState.value.analogOut3MinMax.satHeatingMinVoltage =
                             it.value.toInt()
+                        setStateChanged(viewModel)
                     },
                     onMaxSelected = {
                         viewModel.viewState.value.analogOut3MinMax.satHeatingMaxVoltage =
                             it.value.toInt()
+                        setStateChanged(viewModel)
                     })
             }
             if (viewModel.isAnalogEnabledAndMapped(
@@ -938,10 +1016,12 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     onMinSelected = {
                         viewModel.viewState.value.analogOut4MinMax.satHeatingMinVoltage =
                             it.value.toInt()
+                        setStateChanged(viewModel)
                     },
                     onMaxSelected = {
                         viewModel.viewState.value.analogOut4MinMax.satHeatingMaxVoltage =
                             it.value.toInt()
+                        setStateChanged(viewModel)
                     })
             }
         }
@@ -956,10 +1036,17 @@ open class AdvancedHybridAhuFragment : Fragment() {
             val damperOperate = viewModel.getListByDomainName(DomainName.co2DamperOpeningRate, viewModel.cmModel)
             val percentUnit = viewModel.getUnit(DomainName.co2DamperOpeningRate, viewModel.cmModel)
 
-            Column(modifier = Modifier.padding(top = 10.dp, bottom = 10.dp)) {
+            if (viewModel.viewState.value.noOfAnalogOutDynamic > 0) {
+                ComposeUtil.DashDivider()
+            }
+            viewModel.viewState.value.noOfAnalogOutDynamic++
+
+            Column(modifier = Modifier.padding(top = 10.dp, bottom = 10.dp, start = 17.dp)) {
                 BoldStyledTextView(CO2_DAMPER_CONTROL, fontSize = 20)
                 Row(modifier = Modifier.padding(top = 10.dp, bottom = 15.dp)) {
-                    Box(modifier = Modifier.weight(1f).padding(top = 10.dp)) {
+                    Box(modifier = Modifier
+                            .weight(1f)
+                            .padding(top = 10.dp)) {
                         StyledTextView(
                             CO2_DAMPER_CONTROL_ON, fontSize = 20, textAlignment = TextAlign.Left
                         )
@@ -972,6 +1059,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                             onSelect = {
                                 viewModel.viewState.value.damperConfig.damperControlAssociation =
                                     it.index
+                                setStateChanged(viewModel)
                             },
                             350
                         )
@@ -986,9 +1074,11 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     maxDefault = viewModel.viewState.value.damperConfig.co2Target.toString(),
                     onMinSelected = {
                         viewModel.viewState.value.damperConfig.co2Threshold = it.value.toDouble()
+                        setStateChanged(viewModel)
                     },
                     onMaxSelected = {
                         viewModel.viewState.value.damperConfig.co2Target = it.value.toDouble()
+                        setStateChanged(viewModel)
                     })
 
                 Row(
@@ -1008,6 +1098,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                             itemSelected = {
                                 viewModel.viewState.value.damperConfig.openingRate =
                                     it.value.toDouble()
+                                setStateChanged(viewModel)
                             })
                     }
                     Box(modifier = Modifier.weight(2f))
@@ -1019,7 +1110,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
 
     @Composable
     fun Co2MinMaxConfig(viewModel: AdvancedHybridAhuViewModel) {
-        Column(modifier = Modifier.padding(top = 10.dp, bottom = 10.dp)) {
+        Column(modifier = Modifier.padding(top = 10.dp, bottom = 10.dp, start = 15.dp)) {
             if (viewModel.isAnalogEnabledAndMapped(
                     ControlType.CO2_BASED_DAMPER_CONTROL,
                     viewModel.viewState.value.analogOut1Enabled,
@@ -1035,10 +1126,12 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     onMinSelected = {
                         viewModel.viewState.value.analogOut1MinMax.damperPosMinVoltage =
                             it.value.toInt()
+                        setStateChanged(viewModel)
                     },
                     onMaxSelected = {
                         viewModel.viewState.value.analogOut1MinMax.damperPosMaxVoltage =
                             it.value.toInt()
+                        setStateChanged(viewModel)
                     })
             }
             if (viewModel.isAnalogEnabledAndMapped(
@@ -1056,10 +1149,12 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     onMinSelected = {
                         viewModel.viewState.value.analogOut2MinMax.damperPosMinVoltage =
                             it.value.toInt()
+                        setStateChanged(viewModel)
                     },
                     onMaxSelected = {
                         viewModel.viewState.value.analogOut2MinMax.damperPosMaxVoltage =
                             it.value.toInt()
+                        setStateChanged(viewModel)
                     })
             }
             if (viewModel.isAnalogEnabledAndMapped(
@@ -1077,10 +1172,12 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     onMinSelected = {
                         viewModel.viewState.value.analogOut3MinMax.damperPosMinVoltage =
                             it.value.toInt()
+                        setStateChanged(viewModel)
                     },
                     onMaxSelected = {
                         viewModel.viewState.value.analogOut3MinMax.damperPosMaxVoltage =
                             it.value.toInt()
+                        setStateChanged(viewModel)
                     })
             }
             if (viewModel.isAnalogEnabledAndMapped(
@@ -1098,10 +1195,12 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     onMinSelected = {
                         viewModel.viewState.value.analogOut4MinMax.damperPosMinVoltage =
                             it.value.toInt()
+                        setStateChanged(viewModel)
                     },
                     onMaxSelected = {
                         viewModel.viewState.value.analogOut4MinMax.damperPosMaxVoltage =
                             it.value.toInt()
+                        setStateChanged(viewModel)
                     })
             }
         }
@@ -1109,8 +1208,15 @@ open class AdvancedHybridAhuFragment : Fragment() {
 
     @Composable
     fun LoadBasedCoolingControl(viewModel: AdvancedHybridAhuViewModel) {
-        Column(modifier = Modifier.padding(top = 10.dp, bottom = 10.dp)) {
-            if (viewModel.isCoolingLoadEnabled()) {
+        if (viewModel.isCoolingLoadEnabled()) {
+
+            if (viewModel.viewState.value.noOfAnalogOutDynamic > 0) {
+                ComposeUtil.DashDivider()
+            }
+            viewModel.viewState.value.noOfAnalogOutDynamic++
+
+        Column(modifier = Modifier.padding(top = 10.dp, bottom = 10.dp, start = 17.dp)) {
+
                 BoldStyledTextView(COOLING_CONTROL, fontSize = 20)
                 if (viewModel.isAnalogEnabledAndMapped(
                         ControlType.LOAD_BASED_COOLING_CONTROL,
@@ -1126,9 +1232,11 @@ open class AdvancedHybridAhuFragment : Fragment() {
                         maxDefault = viewModel.viewState.value.analogOut1MinMax.coolingMaxVoltage.toString(),
                         onMinSelected = {
                             viewModel.viewState.value.analogOut1MinMax.coolingMinVoltage = it.value.toInt()
+                            setStateChanged(viewModel)
                         },
                         onMaxSelected = {
                             viewModel.viewState.value.analogOut1MinMax.coolingMaxVoltage = it.value.toInt()
+                            setStateChanged(viewModel)
                         })
                 }
                 if (viewModel.isAnalogEnabledAndMapped(
@@ -1145,9 +1253,11 @@ open class AdvancedHybridAhuFragment : Fragment() {
                         maxDefault = viewModel.viewState.value.analogOut2MinMax.coolingMaxVoltage.toString(),
                         onMinSelected = {
                             viewModel.viewState.value.analogOut2MinMax.coolingMinVoltage = it.value.toInt()
+                            setStateChanged(viewModel)
                         },
                         onMaxSelected = {
                             viewModel.viewState.value.analogOut2MinMax.coolingMaxVoltage = it.value.toInt()
+                            setStateChanged(viewModel)
                         })
                 }
                 if (viewModel.isAnalogEnabledAndMapped(
@@ -1164,9 +1274,11 @@ open class AdvancedHybridAhuFragment : Fragment() {
                         maxDefault = viewModel.viewState.value.analogOut3MinMax.coolingMaxVoltage.toString(),
                         onMinSelected = {
                             viewModel.viewState.value.analogOut3MinMax.coolingMinVoltage = it.value.toInt()
+                            setStateChanged(viewModel)
                         },
                         onMaxSelected = {
                             viewModel.viewState.value.analogOut3MinMax.coolingMaxVoltage = it.value.toInt()
+                            setStateChanged(viewModel)
                         })
                 }
                 if (viewModel.isAnalogEnabledAndMapped(
@@ -1183,9 +1295,11 @@ open class AdvancedHybridAhuFragment : Fragment() {
                         maxDefault = viewModel.viewState.value.analogOut4MinMax.coolingMaxVoltage.toString(),
                         onMinSelected = {
                             viewModel.viewState.value.analogOut4MinMax.coolingMinVoltage = it.value.toInt()
+                            setStateChanged(viewModel)
                         },
                         onMaxSelected = {
                             viewModel.viewState.value.analogOut4MinMax.coolingMaxVoltage = it.value.toInt()
+                            setStateChanged(viewModel)
                         })
                 }
             }
@@ -1194,8 +1308,15 @@ open class AdvancedHybridAhuFragment : Fragment() {
 
     @Composable
     fun LoadBasedFanControl(viewModel: AdvancedHybridAhuViewModel) {
-        Column(modifier = Modifier.padding(top = 10.dp, bottom = 10.dp)) {
-            if (viewModel.isFanLoadEnabled()) {
+        if (viewModel.isFanLoadEnabled()) {
+
+            if (viewModel.viewState.value.noOfAnalogOutDynamic > 0) {
+                ComposeUtil.DashDivider()
+            }
+            viewModel.viewState.value.noOfAnalogOutDynamic++
+
+        Column(modifier = Modifier.padding(top = 10.dp, bottom = 10.dp, start = 17.dp)) {
+
                 BoldStyledTextView(FAN_CONTROL, fontSize = 20)
                 if (viewModel.isAnalogEnabledAndMapped(
                         ControlType.LOAD_BASED_FAN_CONTROL,
@@ -1212,10 +1333,12 @@ open class AdvancedHybridAhuFragment : Fragment() {
                         onMinSelected = {
                             viewModel.viewState.value.analogOut1MinMax.fanMinVoltage =
                                 it.value.toInt()
+                            setStateChanged(viewModel)
                         },
                         onMaxSelected = {
                             viewModel.viewState.value.analogOut1MinMax.fanMaxVoltage =
                                 it.value.toInt()
+                            setStateChanged(viewModel)
                         })
                 }
                 if (viewModel.isAnalogEnabledAndMapped(
@@ -1233,10 +1356,12 @@ open class AdvancedHybridAhuFragment : Fragment() {
                         onMinSelected = {
                             viewModel.viewState.value.analogOut2MinMax.fanMinVoltage =
                                 it.value.toInt()
+                            setStateChanged(viewModel)
                         },
                         onMaxSelected = {
                             viewModel.viewState.value.analogOut2MinMax.fanMaxVoltage =
                                 it.value.toInt()
+                            setStateChanged(viewModel)
                         })
                 }
                 if (viewModel.isAnalogEnabledAndMapped(
@@ -1254,10 +1379,12 @@ open class AdvancedHybridAhuFragment : Fragment() {
                         onMinSelected = {
                             viewModel.viewState.value.analogOut3MinMax.fanMinVoltage =
                                 it.value.toInt()
+                            setStateChanged(viewModel)
                         },
                         onMaxSelected = {
                             viewModel.viewState.value.analogOut3MinMax.fanMaxVoltage =
                                 it.value.toInt()
+                            setStateChanged(viewModel)
                         })
                 }
                 if (viewModel.isAnalogEnabledAndMapped(
@@ -1275,10 +1402,12 @@ open class AdvancedHybridAhuFragment : Fragment() {
                         onMinSelected = {
                             viewModel.viewState.value.analogOut4MinMax.fanMinVoltage =
                                 it.value.toInt()
+                            setStateChanged(viewModel)
                         },
                         onMaxSelected = {
                             viewModel.viewState.value.analogOut4MinMax.fanMaxVoltage =
                                 it.value.toInt()
+                            setStateChanged(viewModel)
                         })
                 }
             }
@@ -1288,8 +1417,15 @@ open class AdvancedHybridAhuFragment : Fragment() {
 
     @Composable
     fun HeatLoadBasedControl(viewModel: AdvancedHybridAhuViewModel) {
-        Column(modifier = Modifier.padding(top = 10.dp, bottom = 10.dp)) {
-            if (viewModel.isHeatLoadEnabled()) {
+        if (viewModel.isHeatLoadEnabled()) {
+
+            if (viewModel.viewState.value.noOfAnalogOutDynamic > 0) {
+                ComposeUtil.DashDivider()
+            }
+            viewModel.viewState.value.noOfAnalogOutDynamic++
+
+        Column(modifier = Modifier.padding(top = 10.dp, bottom = 10.dp, start = 17.dp)) {
+
                 BoldStyledTextView(HEATING_CONTROL, fontSize = 20)
                 if (viewModel.isAnalogEnabledAndMapped(
                         ControlType.LOAD_BASED_HEATING_CONTROL,
@@ -1305,9 +1441,11 @@ open class AdvancedHybridAhuFragment : Fragment() {
                         maxDefault = viewModel.viewState.value.analogOut1MinMax.heatingMaxVoltage.toString(),
                         onMinSelected = {
                             viewModel.viewState.value.analogOut1MinMax.heatingMinVoltage = it.value.toInt()
+                            setStateChanged(viewModel)
                         },
                         onMaxSelected = {
                             viewModel.viewState.value.analogOut1MinMax.heatingMaxVoltage = it.value.toInt()
+                            setStateChanged(viewModel)
                         })
                 }
                 if (viewModel.isAnalogEnabledAndMapped(
@@ -1324,9 +1462,11 @@ open class AdvancedHybridAhuFragment : Fragment() {
                         maxDefault = viewModel.viewState.value.analogOut2MinMax.heatingMaxVoltage.toString(),
                         onMinSelected = {
                             viewModel.viewState.value.analogOut2MinMax.heatingMinVoltage = it.value.toInt()
+                            setStateChanged(viewModel)
                         },
                         onMaxSelected = {
                             viewModel.viewState.value.analogOut2MinMax.heatingMaxVoltage = it.value.toInt()
+                            setStateChanged(viewModel)
                         })
                 }
                 if (viewModel.isAnalogEnabledAndMapped(
@@ -1343,9 +1483,11 @@ open class AdvancedHybridAhuFragment : Fragment() {
                         maxDefault = viewModel.viewState.value.analogOut3MinMax.heatingMaxVoltage.toString(),
                         onMinSelected = {
                             viewModel.viewState.value.analogOut3MinMax.heatingMinVoltage = it.value.toInt()
+                            setStateChanged(viewModel)
                         },
                         onMaxSelected = {
                             viewModel.viewState.value.analogOut3MinMax.heatingMaxVoltage = it.value.toInt()
+                            setStateChanged(viewModel)
                         })
                 }
                 if (viewModel.isAnalogEnabledAndMapped(
@@ -1362,9 +1504,11 @@ open class AdvancedHybridAhuFragment : Fragment() {
                         maxDefault = viewModel.viewState.value.analogOut4MinMax.heatingMaxVoltage.toString(),
                         onMinSelected = {
                             viewModel.viewState.value.analogOut4MinMax.heatingMinVoltage = it.value.toInt()
+                            setStateChanged(viewModel)
                         },
                         onMaxSelected = {
                             viewModel.viewState.value.analogOut4MinMax.heatingMaxVoltage = it.value.toInt()
+                            setStateChanged(viewModel)
                         })
                 }
             }
@@ -1373,8 +1517,15 @@ open class AdvancedHybridAhuFragment : Fragment() {
 
     @Composable
     fun CompositeBasedControl(viewModel: AdvancedHybridAhuViewModel) {
-        Column(modifier = Modifier.padding(top = 10.dp, bottom = 10.dp)) {
-            if (viewModel.isCompositeEnabled()) {
+        if (viewModel.isCompositeEnabled()) {
+
+            if (viewModel.viewState.value.noOfAnalogOutDynamic > 0) {
+                ComposeUtil.DashDivider()
+            }
+            viewModel.viewState.value.noOfAnalogOutDynamic++
+
+            Column(modifier = Modifier.padding(bottom = 10.dp, start = 17.dp)) {
+
                 BoldStyledTextView(COMPOSITE_CONTROL, fontSize = 20)
                 EnableCompositeCoolingMinMax(viewModel)
                 EnableCompositeHeatingMinMax(viewModel)
@@ -1398,9 +1549,11 @@ open class AdvancedHybridAhuFragment : Fragment() {
                 maxDefault = viewModel.viewState.value.analogOut1MinMax.compositeCoolingMaxVoltage.toString(),
                 onMinSelected = {
                     viewModel.viewState.value.analogOut1MinMax.compositeCoolingMinVoltage = it.value.toInt()
+                    setStateChanged(viewModel)
                 },
                 onMaxSelected = {
                     viewModel.viewState.value.analogOut1MinMax.compositeCoolingMaxVoltage = it.value.toInt()
+                    setStateChanged(viewModel)
                 })
         }
         if (viewModel.isAnalogEnabledAndMapped(
@@ -1417,9 +1570,11 @@ open class AdvancedHybridAhuFragment : Fragment() {
                 maxDefault = viewModel.viewState.value.analogOut2MinMax.compositeCoolingMaxVoltage.toString(),
                 onMinSelected = {
                     viewModel.viewState.value.analogOut2MinMax.compositeCoolingMinVoltage = it.value.toInt()
+                    setStateChanged(viewModel)
                 },
                 onMaxSelected = {
                     viewModel.viewState.value.analogOut2MinMax.compositeCoolingMaxVoltage = it.value.toInt()
+                    setStateChanged(viewModel)
                 })
         }
         if (viewModel.isAnalogEnabledAndMapped(
@@ -1436,9 +1591,11 @@ open class AdvancedHybridAhuFragment : Fragment() {
                 maxDefault = viewModel.viewState.value.analogOut3MinMax.compositeCoolingMaxVoltage.toString(),
                 onMinSelected = {
                     viewModel.viewState.value.analogOut3MinMax.compositeCoolingMinVoltage = it.value.toInt()
+                    setStateChanged(viewModel)
                 },
                 onMaxSelected = {
                     viewModel.viewState.value.analogOut3MinMax.compositeCoolingMaxVoltage = it.value.toInt()
+                    setStateChanged(viewModel)
                 })
         }
         if (viewModel.isAnalogEnabledAndMapped(
@@ -1455,9 +1612,11 @@ open class AdvancedHybridAhuFragment : Fragment() {
                 maxDefault = viewModel.viewState.value.analogOut4MinMax.compositeCoolingMaxVoltage.toString(),
                 onMinSelected = {
                     viewModel.viewState.value.analogOut4MinMax.compositeCoolingMinVoltage = it.value.toInt()
+                    setStateChanged(viewModel)
                 },
                 onMaxSelected = {
                     viewModel.viewState.value.analogOut4MinMax.compositeCoolingMaxVoltage = it.value.toInt()
+                    setStateChanged(viewModel)
                 })
         }
     }
@@ -1478,9 +1637,11 @@ open class AdvancedHybridAhuFragment : Fragment() {
                 maxDefault = viewModel.viewState.value.analogOut1MinMax.compositeHeatingMaxVoltage.toString(),
                 onMinSelected = {
                     viewModel.viewState.value.analogOut1MinMax.compositeHeatingMinVoltage = it.value.toInt()
+                    setStateChanged(viewModel)
                 },
                 onMaxSelected = {
                     viewModel.viewState.value.analogOut1MinMax.compositeHeatingMaxVoltage = it.value.toInt()
+                    setStateChanged(viewModel)
                 })
         }
         if (viewModel.isAnalogEnabledAndMapped(
@@ -1497,9 +1658,11 @@ open class AdvancedHybridAhuFragment : Fragment() {
                 maxDefault = viewModel.viewState.value.analogOut2MinMax.compositeHeatingMaxVoltage.toString(),
                 onMinSelected = {
                     viewModel.viewState.value.analogOut2MinMax.compositeHeatingMinVoltage = it.value.toInt()
+                    setStateChanged(viewModel)
                 },
                 onMaxSelected = {
                     viewModel.viewState.value.analogOut2MinMax.compositeHeatingMaxVoltage = it.value.toInt()
+                    setStateChanged(viewModel)
                 })
         }
         if (viewModel.isAnalogEnabledAndMapped(
@@ -1516,9 +1679,11 @@ open class AdvancedHybridAhuFragment : Fragment() {
                 maxDefault = viewModel.viewState.value.analogOut3MinMax.compositeHeatingMaxVoltage.toString(),
                 onMinSelected = {
                     viewModel.viewState.value.analogOut3MinMax.compositeHeatingMinVoltage = it.value.toInt()
+                    setStateChanged(viewModel)
                 },
                 onMaxSelected = {
                     viewModel.viewState.value.analogOut3MinMax.compositeHeatingMaxVoltage = it.value.toInt()
+                    setStateChanged(viewModel)
                 })
         }
         if (viewModel.isAnalogEnabledAndMapped(
@@ -1535,17 +1700,22 @@ open class AdvancedHybridAhuFragment : Fragment() {
                 maxDefault = viewModel.viewState.value.analogOut4MinMax.compositeHeatingMaxVoltage.toString(),
                 onMinSelected = {
                     viewModel.viewState.value.analogOut4MinMax.compositeHeatingMinVoltage = it.value.toInt()
+                    setStateChanged(viewModel)
                 },
                 onMaxSelected = {
                     viewModel.viewState.value.analogOut4MinMax.compositeHeatingMaxVoltage = it.value.toInt()
+                    setStateChanged(viewModel)
                 })
         }
     }
 
     @Composable
     fun AddConnectModule(viewModel: AdvancedHybridAhuViewModel) {
-        SaveTextViewNew(text = "ADD CONNECT MODULE") {
-            viewModel.viewState.value.isConnectEnabled = true
+        Box(modifier = Modifier.padding(top = 10.dp)) {
+            SaveTextViewNew(text = "ADD CONNECT MODULE") {
+                viewModel.viewState.value.isConnectEnabled = true
+                setStateChanged(viewModel)
+            }
         }
     }
 
@@ -1557,10 +1727,11 @@ open class AdvancedHybridAhuFragment : Fragment() {
         val co2Enum = viewModel.getAllowedValues(DomainName.co2SensorBusAdd0, viewModel.connectModel)
         val pressureEnum = viewModel.getAllowedValues(DomainName.pressureSensorBusAdd0, viewModel.connectModel)
 
-        SubTitle(SENSOR_BUS)
+        SubTitle(SENSOR_BUS, fontSizeCustom = 16.0, startPaddingValue = 18, topPaddingValue = 0)
         Row {
             EnableCompose(ADDRESS_0, viewModel.viewState.value.connectSensorAddress0.enabled) {
                 viewModel.viewState.value.connectSensorAddress0.enabled = it
+                setStateChanged(viewModel)
             }
             Column {
                 ConfigCompose(
@@ -1572,6 +1743,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                 ) {
                     viewModel.viewState.value.connectSensorAddress0.temperatureAssociation = it.index
                     viewModel.viewState.value.connectSensorAddress0.humidityAssociation = it.index
+                    setStateChanged(viewModel)
                 }
                 HumidityCompose(
                     HUMIDITY,
@@ -1585,6 +1757,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     viewModel.viewState.value.connectSensorAddress0.enabled
                 ) {
                     viewModel.viewState.value.connectSensorAddress0.occupancyAssociation = it.index
+                    setStateChanged(viewModel)
                 }
                 ConfigCompose(
                     CO2,
@@ -1594,6 +1767,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     viewModel.viewState.value.connectSensorAddress0.enabled
                 ) {
                     viewModel.viewState.value.connectSensorAddress0.co2Association = it.index
+                    setStateChanged(viewModel)
                 }
             }
         }
@@ -1602,6 +1776,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                 "", viewModel.viewState.value.connectSensorBusPressureEnable, hide = true
             ) {
                 viewModel.viewState.value.connectSensorBusPressureEnable = it
+                setStateChanged(viewModel)
             }
             Column {
                 ConfigCompose(
@@ -1612,6 +1787,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     viewModel.viewState.value.connectSensorBusPressureEnable
                 ) {
                     viewModel.viewState.value.connectSensorAddress0.pressureAssociation = it.index
+                    setStateChanged(viewModel)
                 }
             }
         }
@@ -1630,6 +1806,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                 ) {
                     viewModel.viewState.value.connectSensorAddress1.temperatureAssociation = it.index
                     viewModel.viewState.value.connectSensorAddress1.humidityAssociation = it.index
+                    setStateChanged(viewModel)
                 }
                 HumidityCompose(
                     HUMIDITY,
@@ -1643,6 +1820,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     viewModel.viewState.value.connectSensorAddress1.enabled
                 ) {
                     viewModel.viewState.value.connectSensorAddress1.occupancyAssociation = it.index
+                    setStateChanged(viewModel)
                 }
                 ConfigCompose(
                     CO2,
@@ -1652,6 +1830,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     viewModel.viewState.value.connectSensorAddress1.enabled
                 ) {
                     viewModel.viewState.value.connectSensorAddress1.co2Association = it.index
+                    setStateChanged(viewModel)
                 }
             }
         }
@@ -1669,6 +1848,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                 ) {
                     viewModel.viewState.value.connectSensorAddress2.temperatureAssociation = it.index
                     viewModel.viewState.value.connectSensorAddress2.humidityAssociation = it.index
+                    setStateChanged(viewModel)
                 }
                 HumidityCompose(
                     HUMIDITY,
@@ -1682,6 +1862,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     viewModel.viewState.value.connectSensorAddress2.enabled
                 ) {
                     viewModel.viewState.value.connectSensorAddress2.occupancyAssociation = it.index
+                    setStateChanged(viewModel)
                 }
                 ConfigCompose(
                     CO2,
@@ -1691,6 +1872,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     viewModel.viewState.value.connectSensorAddress2.enabled
                 ) {
                     viewModel.viewState.value.connectSensorAddress2.co2Association = it.index
+                    setStateChanged(viewModel)
                 }
             }
         }
@@ -1708,6 +1890,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                 ) {
                     viewModel.viewState.value.connectSensorAddress3.temperatureAssociation = it.index
                     viewModel.viewState.value.connectSensorAddress3.humidityAssociation = it.index
+                    setStateChanged(viewModel)
                 }
                 HumidityCompose(
                     HUMIDITY,
@@ -1721,6 +1904,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     viewModel.viewState.value.connectSensorAddress3.enabled
                 ) {
                     viewModel.viewState.value.connectSensorAddress3.occupancyAssociation = it.index
+                    setStateChanged(viewModel)
                 }
                 ConfigCompose(
                     CO2,
@@ -1730,6 +1914,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     viewModel.viewState.value.connectSensorAddress3.enabled
                 ) {
                     viewModel.viewState.value.connectSensorAddress3.co2Association = it.index
+                    setStateChanged(viewModel)
                 }
             }
         }
@@ -1743,7 +1928,9 @@ open class AdvancedHybridAhuFragment : Fragment() {
          */
         val universalEnum = viewModel.getAllowedValues(DomainName.universalIn1Association, viewModel.connectModel)
 
-        Row(modifier = Modifier.fillMaxWidth()) {
+        Row(modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 20.dp)) {
             Image(
                 painter = painterResource(id = R.drawable.connect_ui),
                 contentDescription = "Universal Inputs",
@@ -1759,68 +1946,84 @@ open class AdvancedHybridAhuFragment : Fragment() {
             ) {
                 AOTHConfig(UNIVERSAL_IN1,
                     viewModel.viewState.value.connectUniversalIn1Config.enabled,
-                    { viewModel.viewState.value.connectUniversalIn1Config.enabled = it },
+                    { viewModel.viewState.value.connectUniversalIn1Config.enabled = it
+                        setStateChanged(viewModel)},
                     universalEnum[viewModel.viewState.value.connectUniversalIn1Config.association],
                     universalEnum,
                     "",
                     viewModel.viewState.value.connectUniversalIn1Config.enabled,
-                    { viewModel.viewState.value.connectUniversalIn1Config.association = it.index })
+                    { viewModel.viewState.value.connectUniversalIn1Config.association = it.index
+                        setStateChanged(viewModel)})
                 AOTHConfig(UNIVERSAL_IN2,
                     viewModel.viewState.value.connectUniversalIn2Config.enabled,
-                    { viewModel.viewState.value.connectUniversalIn2Config.enabled = it },
+                    { viewModel.viewState.value.connectUniversalIn2Config.enabled = it
+                        setStateChanged(viewModel)},
                     universalEnum[viewModel.viewState.value.connectUniversalIn2Config.association],
                     universalEnum,
                     "",
                     viewModel.viewState.value.connectUniversalIn2Config.enabled,
-                    { viewModel.viewState.value.connectUniversalIn2Config.association = it.index })
+                    { viewModel.viewState.value.connectUniversalIn2Config.association = it.index
+                        setStateChanged(viewModel)})
                 AOTHConfig(UNIVERSAL_IN3,
                     viewModel.viewState.value.connectUniversalIn3Config.enabled,
-                    { viewModel.viewState.value.connectUniversalIn3Config.enabled = it },
+                    { viewModel.viewState.value.connectUniversalIn3Config.enabled = it
+                        setStateChanged(viewModel)},
                     universalEnum[viewModel.viewState.value.connectUniversalIn3Config.association],
                     universalEnum,
                     "",
                     viewModel.viewState.value.connectUniversalIn3Config.enabled,
-                    { viewModel.viewState.value.connectUniversalIn3Config.association = it.index })
+                    { viewModel.viewState.value.connectUniversalIn3Config.association = it.index
+                        setStateChanged(viewModel)})
                 AOTHConfig(UNIVERSAL_IN4,
                     viewModel.viewState.value.connectUniversalIn4Config.enabled,
-                    { viewModel.viewState.value.connectUniversalIn4Config.enabled = it },
+                    { viewModel.viewState.value.connectUniversalIn4Config.enabled = it
+                        setStateChanged(viewModel)},
                     universalEnum[viewModel.viewState.value.connectUniversalIn4Config.association],
                     universalEnum,
                     "",
                     viewModel.viewState.value.connectUniversalIn4Config.enabled,
-                    { viewModel.viewState.value.connectUniversalIn4Config.association = it.index })
+                    { viewModel.viewState.value.connectUniversalIn4Config.association = it.index
+                        setStateChanged(viewModel)})
                 AOTHConfig(UNIVERSAL_IN5,
                     viewModel.viewState.value.connectUniversalIn5Config.enabled,
-                    { viewModel.viewState.value.connectUniversalIn5Config.enabled = it },
+                    { viewModel.viewState.value.connectUniversalIn5Config.enabled = it
+                        setStateChanged(viewModel)},
                     universalEnum[viewModel.viewState.value.connectUniversalIn5Config.association],
                     universalEnum,
                     "",
                     viewModel.viewState.value.connectUniversalIn5Config.enabled,
-                    { viewModel.viewState.value.connectUniversalIn5Config.association = it.index })
+                    { viewModel.viewState.value.connectUniversalIn5Config.association = it.index
+                        setStateChanged(viewModel)})
                 AOTHConfig(UNIVERSAL_IN6,
                     viewModel.viewState.value.connectUniversalIn6Config.enabled,
-                    { viewModel.viewState.value.connectUniversalIn6Config.enabled = it },
+                    { viewModel.viewState.value.connectUniversalIn6Config.enabled = it
+                        setStateChanged(viewModel)},
                     universalEnum[viewModel.viewState.value.connectUniversalIn6Config.association],
                     universalEnum,
                     "",
                     viewModel.viewState.value.connectUniversalIn6Config.enabled,
-                    { viewModel.viewState.value.connectUniversalIn6Config.association = it.index })
+                    { viewModel.viewState.value.connectUniversalIn6Config.association = it.index
+                        setStateChanged(viewModel)})
                 AOTHConfig(UNIVERSAL_IN7,
                     viewModel.viewState.value.connectUniversalIn7Config.enabled,
-                    { viewModel.viewState.value.connectUniversalIn7Config.enabled = it },
+                    { viewModel.viewState.value.connectUniversalIn7Config.enabled = it
+                        setStateChanged(viewModel)},
                     universalEnum[viewModel.viewState.value.connectUniversalIn7Config.association],
                     universalEnum,
                     "",
                     viewModel.viewState.value.connectUniversalIn7Config.enabled,
-                    { viewModel.viewState.value.connectUniversalIn7Config.association = it.index })
+                    { viewModel.viewState.value.connectUniversalIn7Config.association = it.index
+                        setStateChanged(viewModel)})
                 AOTHConfig(UNIVERSAL_IN8,
                     viewModel.viewState.value.connectUniversalIn8Config.enabled,
-                    { viewModel.viewState.value.connectUniversalIn8Config.enabled = it },
+                    { viewModel.viewState.value.connectUniversalIn8Config.enabled = it
+                        setStateChanged(viewModel)},
                     universalEnum[viewModel.viewState.value.connectUniversalIn8Config.association],
                     universalEnum,
                     "",
                     viewModel.viewState.value.connectUniversalIn8Config.enabled,
-                    { viewModel.viewState.value.connectUniversalIn8Config.association = it.index })
+                    { viewModel.viewState.value.connectUniversalIn8Config.association = it.index
+                        setStateChanged(viewModel)})
             }
         }
     }
@@ -1863,13 +2066,15 @@ open class AdvancedHybridAhuFragment : Fragment() {
 
                     RelayConfiguration(relayName = "Relay ${index + 1}",
                         enabled = relayConfig.enabled,
-                        onEnabledChanged = { enabled -> relayConfig.enabled = enabled },
+                        onEnabledChanged = { enabled -> relayConfig.enabled = enabled
+                            setStateChanged(viewModel)},
                         association = relayEnums[relayConfig.association],
                         unit = "",
                         relayEnums = relayEnums,
                         isEnabled = relayConfig.enabled,
                         onAssociationChanged = { associationIndex ->
                             relayConfig.association = associationIndex.index
+                            setStateChanged(viewModel)
                         },
                         testState = if(viewModel.isConnectModulePaired) viewModel.getConnectPhysicalPointForRelayIndex(index)?.let { it.readHisVal() > 0 } ?: false else false,
                         onTestActivated = {viewModel.sendConnectRelayTestCommand(index, it)})
@@ -1906,7 +2111,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     .padding(top = 10.dp)
             ) {
                 repeat(4) { index ->
-                    val analogOut = "Analog-out${index + 1}"
+                    val analogOut = "Analog-Out${index + 1}"
                     val enabled = when (index) {
                         0 -> viewModel.viewState.value.connectAnalogOut1Enabled
                         1 -> viewModel.viewState.value.connectAnalogOut2Enabled
@@ -1931,6 +2136,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                                 2 -> viewModel.viewState.value.connectAnalogOut3Enabled = enabledAction
                                 3 -> viewModel.viewState.value.connectAnalogOut4Enabled = enabledAction
                             }
+                            setStateChanged(viewModel)
                         },
                         association = analogOutEnums[associationIndex],
                         analogOutEnums = analogOutEnums,
@@ -1950,6 +2156,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                                 3 -> viewModel.viewState.value.connectAnalogOut4Association =
                                     association.index
                             }
+                            setStateChanged(viewModel)
                         },
                         testVal = if(viewModel.isConnectModulePaired) viewModel.getConnectPhysicalPointForAnalogIndex(index)?.readHisVal()?.toInt() ?: 0 else 0,
                         onTestSignalSelected = {viewModel.sendConnectAnalogTestCommand(index, it)})
@@ -1960,6 +2167,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
 
     @Composable
     fun ConnectAnalogOutDynamicConfig(viewModel: AdvancedHybridAhuViewModel) {
+        viewModel.viewState.value.noOfAnalogOutDynamic = 0
         ConnectCO2BasedDamperControl(viewModel)
         ConnectLoadBasedCoolingControl(viewModel)
         ConnectLoadBasedFanControl(viewModel)
@@ -1969,8 +2177,14 @@ open class AdvancedHybridAhuFragment : Fragment() {
 
     @Composable
     fun ConnectLoadBasedCoolingControl(viewModel: AdvancedHybridAhuViewModel) {
-        Column(modifier = Modifier.padding(top = 10.dp, bottom = 10.dp)) {
-            if (viewModel.isConnectCoolingLoadEnabled()) {
+        if (viewModel.isConnectCoolingLoadEnabled()) {
+            if (viewModel.viewState.value.noOfAnalogOutDynamic > 0) {
+                ComposeUtil.DashDivider()
+            }
+            viewModel.viewState.value.noOfAnalogOutDynamic++
+
+         Column(modifier = Modifier.padding(top = 10.dp, bottom = 10.dp, start = 10.dp)) {
+
                 BoldStyledTextView(COOLING_CONTROL, fontSize = 20)
                 if (viewModel.isAnalogEnabledAndMapped(
                         ConnectControlType.LOAD_BASED_COOLING_CONTROL,
@@ -1986,9 +2200,11 @@ open class AdvancedHybridAhuFragment : Fragment() {
                         maxDefault = viewModel.viewState.value.connectAnalogOut1MinMax.coolingMaxVoltage.toString(),
                         onMinSelected = {
                             viewModel.viewState.value.connectAnalogOut1MinMax.coolingMinVoltage = it.value.toInt()
+                            setStateChanged(viewModel)
                         },
                         onMaxSelected = {
                             viewModel.viewState.value.connectAnalogOut1MinMax.coolingMaxVoltage = it.value.toInt()
+                            setStateChanged(viewModel)
                         })
                 }
                 if (viewModel.isAnalogEnabledAndMapped(
@@ -2005,9 +2221,11 @@ open class AdvancedHybridAhuFragment : Fragment() {
                         maxDefault = viewModel.viewState.value.connectAnalogOut2MinMax.coolingMaxVoltage.toString(),
                         onMinSelected = {
                             viewModel.viewState.value.connectAnalogOut2MinMax.coolingMinVoltage = it.value.toInt()
+                            setStateChanged(viewModel)
                         },
                         onMaxSelected = {
                             viewModel.viewState.value.connectAnalogOut2MinMax.coolingMaxVoltage = it.value.toInt()
+                            setStateChanged(viewModel)
                         })
                 }
                 if (viewModel.isAnalogEnabledAndMapped(
@@ -2024,9 +2242,11 @@ open class AdvancedHybridAhuFragment : Fragment() {
                         maxDefault = viewModel.viewState.value.connectAnalogOut3MinMax.coolingMaxVoltage.toString(),
                         onMinSelected = {
                             viewModel.viewState.value.connectAnalogOut3MinMax.coolingMinVoltage = it.value.toInt()
+                            setStateChanged(viewModel)
                         },
                         onMaxSelected = {
                             viewModel.viewState.value.connectAnalogOut3MinMax.coolingMaxVoltage = it.value.toInt()
+                            setStateChanged(viewModel)
                         })
                 }
                 if (viewModel.isAnalogEnabledAndMapped(
@@ -2043,9 +2263,11 @@ open class AdvancedHybridAhuFragment : Fragment() {
                         maxDefault = viewModel.viewState.value.connectAnalogOut4MinMax.coolingMaxVoltage.toString(),
                         onMinSelected = {
                             viewModel.viewState.value.connectAnalogOut4MinMax.coolingMinVoltage = it.value.toInt()
+                            setStateChanged(viewModel)
                         },
                         onMaxSelected = {
                             viewModel.viewState.value.connectAnalogOut4MinMax.coolingMaxVoltage = it.value.toInt()
+                            setStateChanged(viewModel)
                         })
                 }
             }
@@ -2054,8 +2276,13 @@ open class AdvancedHybridAhuFragment : Fragment() {
 
     @Composable
     fun ConnectLoadBasedFanControl(viewModel: AdvancedHybridAhuViewModel) {
-        Column(modifier = Modifier.padding(top = 10.dp, bottom = 10.dp)) {
-            if (viewModel.isConnectFanLoadEnabled()) {
+        if (viewModel.isConnectFanLoadEnabled()) {
+            if (viewModel.viewState.value.noOfAnalogOutDynamic > 0) {
+                ComposeUtil.DashDivider()
+            }
+            viewModel.viewState.value.noOfAnalogOutDynamic++
+        Column(modifier = Modifier.padding(top = 10.dp, bottom = 10.dp, start = 17.dp)) {
+
                 BoldStyledTextView(FAN_CONTROL, fontSize = 20)
                 if (viewModel.isAnalogEnabledAndMapped(
                         ConnectControlType.LOAD_BASED_FAN_CONTROL,
@@ -2072,10 +2299,12 @@ open class AdvancedHybridAhuFragment : Fragment() {
                         onMinSelected = {
                             viewModel.viewState.value.connectAnalogOut1MinMax.fanMinVoltage =
                                 it.value.toInt()
+                            setStateChanged(viewModel)
                         },
                         onMaxSelected = {
                             viewModel.viewState.value.connectAnalogOut1MinMax.fanMaxVoltage =
                                 it.value.toInt()
+                            setStateChanged(viewModel)
                         })
                 }
                 if (viewModel.isAnalogEnabledAndMapped(
@@ -2093,10 +2322,12 @@ open class AdvancedHybridAhuFragment : Fragment() {
                         onMinSelected = {
                             viewModel.viewState.value.connectAnalogOut2MinMax.fanMinVoltage =
                                 it.value.toInt()
+                            setStateChanged(viewModel)
                         },
                         onMaxSelected = {
                             viewModel.viewState.value.connectAnalogOut2MinMax.fanMaxVoltage =
                                 it.value.toInt()
+                            setStateChanged(viewModel)
                         })
                 }
                 if (viewModel.isAnalogEnabledAndMapped(
@@ -2114,10 +2345,12 @@ open class AdvancedHybridAhuFragment : Fragment() {
                         onMinSelected = {
                             viewModel.viewState.value.connectAnalogOut3MinMax.fanMinVoltage =
                                 it.value.toInt()
+                            setStateChanged(viewModel)
                         },
                         onMaxSelected = {
                             viewModel.viewState.value.connectAnalogOut3MinMax.fanMaxVoltage =
                                 it.value.toInt()
+                            setStateChanged(viewModel)
                         })
                 }
                 if (viewModel.isAnalogEnabledAndMapped(
@@ -2135,10 +2368,12 @@ open class AdvancedHybridAhuFragment : Fragment() {
                         onMinSelected = {
                             viewModel.viewState.value.connectAnalogOut4MinMax.fanMinVoltage =
                                 it.value.toInt()
+                            setStateChanged(viewModel)
                         },
                         onMaxSelected = {
                             viewModel.viewState.value.connectAnalogOut4MinMax.fanMaxVoltage =
                                 it.value.toInt()
+                            setStateChanged(viewModel)
                         })
                 }
             }
@@ -2148,8 +2383,14 @@ open class AdvancedHybridAhuFragment : Fragment() {
 
     @Composable
     fun ConnectHeatLoadBasedControl(viewModel: AdvancedHybridAhuViewModel) {
-        Column(modifier = Modifier.padding(top = 10.dp, bottom = 10.dp)) {
-            if (viewModel.isConnectHeatLoadEnabled()) {
+        if (viewModel.isConnectHeatLoadEnabled()) {
+
+            if (viewModel.viewState.value.noOfAnalogOutDynamic > 0) {
+                ComposeUtil.DashDivider()
+            }
+            viewModel.viewState.value.noOfAnalogOutDynamic++
+        Column(modifier = Modifier.padding(top = 10.dp, bottom = 10.dp, start = 17.dp)) {
+
                 BoldStyledTextView(HEATING_CONTROL, fontSize = 20)
                 if (viewModel.isAnalogEnabledAndMapped(
                         ConnectControlType.LOAD_BASED_HEATING_CONTROL,
@@ -2165,9 +2406,11 @@ open class AdvancedHybridAhuFragment : Fragment() {
                         maxDefault = viewModel.viewState.value.connectAnalogOut1MinMax.heatingMaxVoltage.toString(),
                         onMinSelected = {
                             viewModel.viewState.value.connectAnalogOut1MinMax.heatingMinVoltage = it.value.toInt()
+                            setStateChanged(viewModel)
                         },
                         onMaxSelected = {
                             viewModel.viewState.value.connectAnalogOut1MinMax.heatingMaxVoltage = it.value.toInt()
+                            setStateChanged(viewModel)
                         })
                 }
                 if (viewModel.isAnalogEnabledAndMapped(
@@ -2184,9 +2427,11 @@ open class AdvancedHybridAhuFragment : Fragment() {
                         maxDefault = viewModel.viewState.value.connectAnalogOut2MinMax.heatingMaxVoltage.toString(),
                         onMinSelected = {
                             viewModel.viewState.value.connectAnalogOut2MinMax.heatingMinVoltage = it.value.toInt()
+                            setStateChanged(viewModel)
                         },
                         onMaxSelected = {
                             viewModel.viewState.value.connectAnalogOut2MinMax.heatingMaxVoltage = it.value.toInt()
+                            setStateChanged(viewModel)
                         })
                 }
                 if (viewModel.isAnalogEnabledAndMapped(
@@ -2203,9 +2448,11 @@ open class AdvancedHybridAhuFragment : Fragment() {
                         maxDefault = viewModel.viewState.value.connectAnalogOut3MinMax.heatingMaxVoltage.toString(),
                         onMinSelected = {
                             viewModel.viewState.value.connectAnalogOut3MinMax.heatingMinVoltage = it.value.toInt()
+                            setStateChanged(viewModel)
                         },
                         onMaxSelected = {
                             viewModel.viewState.value.connectAnalogOut3MinMax.heatingMaxVoltage = it.value.toInt()
+                            setStateChanged(viewModel)
                         })
                 }
                 if (viewModel.isAnalogEnabledAndMapped(
@@ -2222,9 +2469,11 @@ open class AdvancedHybridAhuFragment : Fragment() {
                         maxDefault = viewModel.viewState.value.connectAnalogOut4MinMax.heatingMaxVoltage.toString(),
                         onMinSelected = {
                             viewModel.viewState.value.connectAnalogOut4MinMax.heatingMinVoltage = it.value.toInt()
+                            setStateChanged(viewModel)
                         },
                         onMaxSelected = {
                             viewModel.viewState.value.connectAnalogOut4MinMax.heatingMaxVoltage = it.value.toInt()
+                            setStateChanged(viewModel)
                         })
                 }
             }
@@ -2233,8 +2482,14 @@ open class AdvancedHybridAhuFragment : Fragment() {
 
     @Composable
     fun ConnectCompositeBasedControl(viewModel: AdvancedHybridAhuViewModel) {
-        Column(modifier = Modifier.padding(top = 10.dp, bottom = 10.dp)) {
-            if (viewModel.isConnectCompositeEnabled()) {
+        if (viewModel.isConnectCompositeEnabled()) {
+
+            if (viewModel.viewState.value.noOfAnalogOutDynamic > 0) {
+                ComposeUtil.DashDivider()
+            }
+            viewModel.viewState.value.noOfAnalogOutDynamic++
+        Column(modifier = Modifier.padding(top = 10.dp, bottom = 10.dp, start = 17.dp)) {
+
                 BoldStyledTextView(COMPOSITE_CONTROL, fontSize = 20)
                 EnableConnectCompositeCoolingMinMax(viewModel)
                 EnableConnectCompositeHeatingMinMax(viewModel)
@@ -2244,16 +2499,24 @@ open class AdvancedHybridAhuFragment : Fragment() {
     @Composable
     fun ConnectCO2BasedDamperControl(viewModel: AdvancedHybridAhuViewModel) {
         if (viewModel.isConnectDampersEnabled()) {
+
+            if (viewModel.viewState.value.noOfAnalogOutDynamic > 0) {
+                ComposeUtil.DashDivider()
+            }
+            viewModel.viewState.value.noOfAnalogOutDynamic++
+
             val damperEnum = viewModel.getAllowedValues(DomainName.co2BasedDamperControlOn, viewModel.connectModel)
             val minMaxCo2List = viewModel.getListByDomainName(DomainName.co2Target, viewModel.connectModel)
             val co2Unit = viewModel.getUnit(DomainName.co2Target, viewModel.connectModel)
             val damperOperate = viewModel.getListByDomainName(DomainName.co2DamperOpeningRate, viewModel.connectModel)
             val percentUnit = viewModel.getUnit(DomainName.co2DamperOpeningRate, viewModel.connectModel)
 
-            Column(modifier = Modifier.padding(top = 10.dp, bottom = 10.dp)) {
+            Column(modifier = Modifier.padding(top = 10.dp, bottom = 10.dp, start = 17.dp)) {
                 BoldStyledTextView(CO2_DAMPER_CONTROL, fontSize = 20)
                 Row(modifier = Modifier.padding(top = 10.dp, bottom = 15.dp)) {
-                    Box(modifier = Modifier.weight(1f).padding(top = 10.dp)) {
+                    Box(modifier = Modifier
+                            .weight(1f)
+                            .padding(top = 10.dp)) {
                         StyledTextView(
                             CO2_DAMPER_CONTROL_ON, fontSize = 20, textAlignment = TextAlign.Left
                         )
@@ -2266,6 +2529,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                             onSelect = {
                                 viewModel.viewState.value.connectDamperConfig.damperControlAssociation =
                                     it.index
+                                setStateChanged(viewModel)
                             },
                             350
                         )
@@ -2280,9 +2544,11 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     maxDefault = viewModel.viewState.value.connectDamperConfig.co2Target.toString(),
                     onMinSelected = {
                         viewModel.viewState.value.connectDamperConfig.co2Threshold = it.value.toDouble()
+                        setStateChanged(viewModel)
                     },
                     onMaxSelected = {
                         viewModel.viewState.value.connectDamperConfig.co2Target = it.value.toDouble()
+                        setStateChanged(viewModel)
                     })
 
                 Row(
@@ -2302,6 +2568,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                             itemSelected = {
                                 viewModel.viewState.value.connectDamperConfig.openingRate =
                                     it.value.toDouble()
+                                setStateChanged(viewModel)
                             })
                     }
                     Box(modifier = Modifier.weight(2f))
@@ -2313,7 +2580,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
 
     @Composable
     fun ConnectCo2MinMaxConfig(viewModel: AdvancedHybridAhuViewModel) {
-        Column(modifier = Modifier.padding(top = 10.dp, bottom = 10.dp)) {
+        Column(modifier = Modifier.padding(top = 10.dp, bottom = 10.dp, start = 15.dp)) {
             if (viewModel.isAnalogEnabledAndMapped(
                     ConnectControlType.CO2_BASED_DAMPER_CONTROL,
                     viewModel.viewState.value.connectAnalogOut1Enabled,
@@ -2329,10 +2596,12 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     onMinSelected = {
                         viewModel.viewState.value.connectAnalogOut1MinMax.damperPosMinVoltage =
                             it.value.toInt()
+                        setStateChanged(viewModel)
                     },
                     onMaxSelected = {
                         viewModel.viewState.value.connectAnalogOut1MinMax.damperPosMaxVoltage =
                             it.value.toInt()
+                        setStateChanged(viewModel)
                     })
             }
             if (viewModel.isAnalogEnabledAndMapped(
@@ -2350,10 +2619,12 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     onMinSelected = {
                         viewModel.viewState.value.connectAnalogOut2MinMax.damperPosMinVoltage =
                             it.value.toInt()
+                        setStateChanged(viewModel)
                     },
                     onMaxSelected = {
                         viewModel.viewState.value.connectAnalogOut2MinMax.damperPosMaxVoltage =
                             it.value.toInt()
+                        setStateChanged(viewModel)
                     })
             }
             if (viewModel.isAnalogEnabledAndMapped(
@@ -2371,10 +2642,12 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     onMinSelected = {
                         viewModel.viewState.value.connectAnalogOut3MinMax.damperPosMinVoltage =
                             it.value.toInt()
+                        setStateChanged(viewModel)
                     },
                     onMaxSelected = {
                         viewModel.viewState.value.connectAnalogOut3MinMax.damperPosMaxVoltage =
                             it.value.toInt()
+                        setStateChanged(viewModel)
                     })
             }
             if (viewModel.isAnalogEnabledAndMapped(
@@ -2392,10 +2665,12 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     onMinSelected = {
                         viewModel.viewState.value.connectAnalogOut4MinMax.damperPosMinVoltage =
                             it.value.toInt()
+                        setStateChanged(viewModel)
                     },
                     onMaxSelected = {
                         viewModel.viewState.value.connectAnalogOut4MinMax.damperPosMaxVoltage =
                             it.value.toInt()
+                        setStateChanged(viewModel)
                     })
             }
         }
@@ -2417,9 +2692,11 @@ open class AdvancedHybridAhuFragment : Fragment() {
                 maxDefault = viewModel.viewState.value.connectAnalogOut1MinMax.compositeCoolingMaxVoltage.toString(),
                 onMinSelected = {
                     viewModel.viewState.value.connectAnalogOut1MinMax.compositeCoolingMinVoltage = it.value.toInt()
+                    setStateChanged(viewModel)
                 },
                 onMaxSelected = {
                     viewModel.viewState.value.connectAnalogOut1MinMax.compositeCoolingMaxVoltage = it.value.toInt()
+                    setStateChanged(viewModel)
                 })
         }
         if (viewModel.isAnalogEnabledAndMapped(
@@ -2436,9 +2713,11 @@ open class AdvancedHybridAhuFragment : Fragment() {
                 maxDefault = viewModel.viewState.value.connectAnalogOut2MinMax.compositeCoolingMaxVoltage.toString(),
                 onMinSelected = {
                     viewModel.viewState.value.connectAnalogOut2MinMax.compositeCoolingMinVoltage = it.value.toInt()
+                    setStateChanged(viewModel)
                 },
                 onMaxSelected = {
                     viewModel.viewState.value.connectAnalogOut2MinMax.compositeCoolingMaxVoltage = it.value.toInt()
+                    setStateChanged(viewModel)
                 })
         }
         if (viewModel.isAnalogEnabledAndMapped(
@@ -2455,9 +2734,11 @@ open class AdvancedHybridAhuFragment : Fragment() {
                 maxDefault = viewModel.viewState.value.connectAnalogOut3MinMax.compositeCoolingMaxVoltage.toString(),
                 onMinSelected = {
                     viewModel.viewState.value.connectAnalogOut3MinMax.compositeCoolingMinVoltage = it.value.toInt()
+                    setStateChanged(viewModel)
                 },
                 onMaxSelected = {
                     viewModel.viewState.value.connectAnalogOut3MinMax.compositeCoolingMaxVoltage = it.value.toInt()
+                    setStateChanged(viewModel)
                 })
         }
         if (viewModel.isAnalogEnabledAndMapped(
@@ -2474,9 +2755,11 @@ open class AdvancedHybridAhuFragment : Fragment() {
                 maxDefault = viewModel.viewState.value.connectAnalogOut4MinMax.compositeCoolingMaxVoltage.toString(),
                 onMinSelected = {
                     viewModel.viewState.value.connectAnalogOut4MinMax.compositeCoolingMinVoltage = it.value.toInt()
+                    setStateChanged(viewModel)
                 },
                 onMaxSelected = {
                     viewModel.viewState.value.connectAnalogOut4MinMax.compositeCoolingMaxVoltage = it.value.toInt()
+                    setStateChanged(viewModel)
                 })
         }
     }
@@ -2497,9 +2780,11 @@ open class AdvancedHybridAhuFragment : Fragment() {
                 maxDefault = viewModel.viewState.value.connectAnalogOut1MinMax.compositeHeatingMaxVoltage.toString(),
                 onMinSelected = {
                     viewModel.viewState.value.connectAnalogOut1MinMax.compositeHeatingMinVoltage = it.value.toInt()
+                    setStateChanged(viewModel)
                 },
                 onMaxSelected = {
                     viewModel.viewState.value.connectAnalogOut1MinMax.compositeHeatingMaxVoltage = it.value.toInt()
+                    setStateChanged(viewModel)
                 })
         }
         if (viewModel.isAnalogEnabledAndMapped(
@@ -2516,9 +2801,11 @@ open class AdvancedHybridAhuFragment : Fragment() {
                 maxDefault = viewModel.viewState.value.connectAnalogOut2MinMax.compositeHeatingMaxVoltage.toString(),
                 onMinSelected = {
                     viewModel.viewState.value.connectAnalogOut2MinMax.compositeHeatingMinVoltage = it.value.toInt()
+                    setStateChanged(viewModel)
                 },
                 onMaxSelected = {
                     viewModel.viewState.value.connectAnalogOut2MinMax.compositeHeatingMaxVoltage = it.value.toInt()
+                    setStateChanged(viewModel)
                 })
         }
         if (viewModel.isAnalogEnabledAndMapped(
@@ -2535,9 +2822,11 @@ open class AdvancedHybridAhuFragment : Fragment() {
                 maxDefault = viewModel.viewState.value.connectAnalogOut3MinMax.compositeHeatingMaxVoltage.toString(),
                 onMinSelected = {
                     viewModel.viewState.value.connectAnalogOut3MinMax.compositeHeatingMinVoltage = it.value.toInt()
+                    setStateChanged(viewModel)
                 },
                 onMaxSelected = {
                     viewModel.viewState.value.connectAnalogOut3MinMax.compositeHeatingMaxVoltage = it.value.toInt()
+                    setStateChanged(viewModel)
                 })
         }
         if (viewModel.isAnalogEnabledAndMapped(
@@ -2554,10 +2843,16 @@ open class AdvancedHybridAhuFragment : Fragment() {
                 maxDefault = viewModel.viewState.value.connectAnalogOut4MinMax.compositeHeatingMaxVoltage.toString(),
                 onMinSelected = {
                     viewModel.viewState.value.connectAnalogOut4MinMax.compositeHeatingMinVoltage = it.value.toInt()
+                    setStateChanged(viewModel)
                 },
                 onMaxSelected = {
                     viewModel.viewState.value.connectAnalogOut4MinMax.compositeHeatingMaxVoltage = it.value.toInt()
+                    setStateChanged(viewModel)
                 })
         }
+    }
+    private fun setStateChanged(viewModel: AdvancedHybridAhuViewModel) {
+        viewModel.viewState.value.isStateChanged = true
+        viewModel.viewState.value.isSaveRequired = true
     }
 }

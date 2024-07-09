@@ -179,6 +179,10 @@ public class MigrationUtil {
             VavAndAcbProfileMigration.Companion.condensateSensorCleanupMigration(ccuHsApi);
             PreferenceUtil.setACBCondensateSensorMigration();
         }
+        if (!PreferenceUtil.isHyperStatSplitGatewayRefMigrationDone()) {
+            migrateHyperStatSplitGatewayRef(ccuHsApi);
+            PreferenceUtil.setHyperStatSplitGatewayRefMigrationDone();
+        }
         migrateAirFlowTunerPoints(ccuHsApi);
         migrateZoneScheduleTypeIfMissed(ccuHsApi);
         if(SchedulableMigrationKt.validateMigration()) {
@@ -202,6 +206,22 @@ public class MigrationUtil {
         syncZoneSchedulesFromLocal(ccuHsApi);
         ccuHsApi.scheduleSync();
     }
+
+    private static void migrateHyperStatSplitGatewayRef(CCUHsApi hayStack) {
+        ArrayList<HashMap<Object, Object>> hsEquips = hayStack.readAllEntities("equip and hyperstatsplit");
+        HashMap<Object, Object> sysEquipMap = hayStack.readEntity("system and equip and not modbus and not connectModule");
+
+        if (sysEquipMap.containsKey("id") && sysEquipMap.get("id") != null) {
+            hsEquips.forEach(equipMap -> {
+                Equip hsEquip = new Equip.Builder().setHashMap(equipMap).build();
+                if (hsEquip.getGatewayRef() != sysEquipMap.get("id").toString()) {
+                    Equip updatedEquip = new Equip.Builder().setHashMap(equipMap).setGatewayRef(sysEquipMap.get("id").toString()).build();
+                    hayStack.updateEquip(updatedEquip, updatedEquip.getId());
+                }
+            });
+        }
+    }
+
 
     private static void deleteDuplicateLimitsifAny(CCUHsApi ccuHsApi) {
         List<HashMap<Object, Object>> rooms = ccuHsApi.readAllEntities("room");

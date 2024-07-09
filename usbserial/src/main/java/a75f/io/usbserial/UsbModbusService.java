@@ -148,26 +148,23 @@ public class UsbModbusService extends Service {
      */
 
     private UsbSerialInterface.UsbReadCallback modbusCallback =
-            new UsbSerialInterface.UsbReadCallback() {
-                @Override
-                public void onReceivedData(byte[] data, int mLength) {
-                    if (data.length > 0) {
-                        int nMsg;
-                        try {
-                            nMsg = (data[0] & 0xff);
-                            CcuLog.d(TAG, "onReceivedData: Slave: " + nMsg);
-                        } catch (ArrayIndexOutOfBoundsException e) {
-                            CcuLog.d(TAG,
-                                    "Modbus Bad message type received: " + String.valueOf(data[0] & 0xff) +
-                                            e.getMessage());
-                            return;
-                        }
-                        /*if (data.length < 3) {
-                            return; //We need minimum bytes atleast 3 with msg and fsv address causing crash for WRM Pairing
-                        }*/
-                        
-                        messageToClients(Arrays.copyOfRange(data, 0, mLength), true);
+            (data, mLength) -> {
+                if (data.length > 0) {
+                    int nMsg;
+                    try {
+                        nMsg = (data[0] & 0xff);
+                        CcuLog.d(TAG, "onReceivedData: Slave: " + nMsg);
+                    } catch (ArrayIndexOutOfBoundsException e) {
+                        CcuLog.d(TAG,
+                                "Modbus Bad message type received: " + String.valueOf(data[0] & 0xff) +
+                                        e.getMessage());
+                        return;
                     }
+                    /*if (data.length < 3) {
+                        return; //We need minimum bytes atleast 3 with msg and fsv address causing crash for WRM Pairing
+                    }*/
+
+                    messageToClients(Arrays.copyOfRange(data, 0, mLength), true);
                 }
             };
     /*
@@ -195,10 +192,6 @@ public class UsbModbusService extends Service {
                 }
             };
 
-    public void setSerialInputStream(SerialInputStream is) {
-        serialInputStream = is;
-    }
-    
     private void messageToClients(byte[] data, boolean isModbusData) {
         SerialAction serialAction = SerialAction.MESSAGE_FROM_SERIAL_PORT;
         if (isModbusData)
@@ -224,7 +217,6 @@ public class UsbModbusService extends Service {
         UsbModbusService.SERVICE_CONNECTED = true;
         setFilter();
         usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
-    
         try {
             findModbusSerialPortDevice();
         } catch (SecurityException e) {

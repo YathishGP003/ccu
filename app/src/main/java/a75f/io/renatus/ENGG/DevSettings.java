@@ -379,7 +379,7 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
                 .getInt("cacheSyncFrequency", 1)));
 
 
-        ArrayAdapter<String> portListAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, new String[]{"CCU_USB_PORT", "CM_COM_PORT2"});
+        ArrayAdapter<String> portListAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, new String[]{"No Connect Module","CCU_USB_PORT", "CM_COM_PORT2"});
         oneToFifteenAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         advancedAhuConnectPort.setAdapter(portListAdapter);
         prevoiusAhuConnectPort= UsbSerialUtil.getPreferredConnectModuleSerialType(getContext());

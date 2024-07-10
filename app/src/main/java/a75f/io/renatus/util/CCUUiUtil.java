@@ -29,6 +29,8 @@ import java.util.regex.Pattern;
 
 import a75f.io.alerts.AlertManager;
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.logger.CcuLog;
+import a75f.io.logic.L;
 import a75f.io.renatus.BuildConfig;
 import a75f.io.renatus.R;
 import a75f.io.renatus.RenatusApp;
@@ -185,6 +187,11 @@ public class CCUUiUtil {
     }
 
     public static boolean isCCUNeedsToBeUpdated(String currentAppVersionWithPatch, String recommendedVersionOfCCUWithPatch) {
+        if (recommendedVersionOfCCUWithPatch == null) {
+            CcuLog.w(L.TAG_CCU, "Recommended version is null, returning false (no update)");
+            return false;
+        }
+
         String[] currentVersionComponents = currentAppVersionWithPatch.split("\\.");
         String[] recommendedVersionComponents = recommendedVersionOfCCUWithPatch.split("\\.");
         int minLength = Math.min(currentVersionComponents.length, recommendedVersionComponents.length);

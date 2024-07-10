@@ -50,6 +50,7 @@ import a75f.io.logic.bo.building.system.util.getModulatedOutput
 import a75f.io.logic.tuners.TunerUtil
 import android.annotation.SuppressLint
 import android.content.Intent
+import java.util.BitSet
 
 open class VavAdvancedAhu : VavSystemProfile() {
 
@@ -86,6 +87,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
 
     private var satStageUpTimer = 0.0
     private var satStageDownTimer = 0.0
+    val testConfigs = BitSet()
 
     private fun initTRSystem() {
         trSystem = VavTRSystem()
@@ -1082,4 +1084,14 @@ open class VavAdvancedAhu : VavSystemProfile() {
         return CCUHsApi.getInstance().readEntity(
                 "domainName == \"" + DomainName.connectModuleDevice + "\"").isNotEmpty()
     }
+
+    fun getOccupancy(): Int {
+        return if(isSystemOccupied) 1 else 0
+    }
+
+    fun setTestConfigs(port: Int) {
+        testConfigs.set(port,true) // 0 - 7 Relays and 8 - 11 Analog
+        CcuLog.d(L.TAG_CCU_SYSTEM, "Test Configs set for port $port cache $testConfigs")
+    }
+
 }

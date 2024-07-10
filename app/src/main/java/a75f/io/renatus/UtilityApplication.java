@@ -470,19 +470,24 @@ public abstract class UtilityApplication extends Application {
     }
 
     private void startConnectService(Class<?> service, ServiceConnection serviceConnection, Bundle extras) {
-        if (!UsbConnectService.SERVICE_CONNECTED) {
-            Intent startService = new Intent(this, service);
-            if (extras != null && !extras.isEmpty()) {
-                Set<String> keys = extras.keySet();
-                for (String key : keys) {
-                    String extra = extras.getString(key);
-                    startService.putExtra(key, extra);
+        if (isAdvancedAhuProfile()) {
+            CcuLog.i(L.TAG_CCU, "Connect module service is started");
+            if (!UsbConnectService.SERVICE_CONNECTED) {
+                Intent startService = new Intent(this, service);
+                if (extras != null && !extras.isEmpty()) {
+                    Set<String> keys = extras.keySet();
+                    for (String key : keys) {
+                        String extra = extras.getString(key);
+                        startService.putExtra(key, extra);
+                    }
                 }
+                this.startService(startService);
             }
-            this.startService(startService);
+            Intent bindingIntent = new Intent(this, service);
+            bindService(bindingIntent, serviceConnection, Context.BIND_AUTO_CREATE);
+        } else {
+            CcuLog.i(L.TAG_CCU, "Connect module service is not required");
         }
-        Intent bindingIntent = new Intent(this, service);
-        bindService(bindingIntent, serviceConnection, Context.BIND_AUTO_CREATE);
     }
 
     @Override
@@ -550,4 +555,17 @@ public abstract class UtilityApplication extends Application {
         HttpServer.Companion.getInstance(context).startServer();
     }
 
+
+    public static boolean isAdvancedAhuProfile() {
+        try {
+            HashMap<Object, Object> equip = CCUHsApi.getInstance().readEntity("equip and system and not modbus and not connectModule");
+            if (!equip.isEmpty() && equip.get("profile").toString().equals("vavAdvancedHybridAhuV2")) {
+                return true;
+            }
+        } catch (Exception e){
+            // Just not to block anything
+            e.printStackTrace();
+        }
+        return false;
+    }
 }

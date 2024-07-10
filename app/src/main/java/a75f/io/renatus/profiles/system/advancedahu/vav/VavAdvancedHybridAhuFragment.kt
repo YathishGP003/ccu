@@ -23,7 +23,7 @@ import androidx.fragment.app.viewModels
 
 class VavAdvancedHybridAhuFragment : AdvancedHybridAhuFragment() {
 
-    private val viewModel: VavAdvancedHybridAhuViewModel by viewModels()
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?

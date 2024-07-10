@@ -65,6 +65,7 @@ import a75f.io.renatus.profiles.system.UNIVERSAL_IN5
 import a75f.io.renatus.profiles.system.UNIVERSAL_IN6
 import a75f.io.renatus.profiles.system.UNIVERSAL_IN7
 import a75f.io.renatus.profiles.system.UNIVERSAL_IN8
+import a75f.io.renatus.profiles.system.advancedahu.vav.VavAdvancedHybridAhuViewModel
 import android.os.Bundle
 import android.view.View
 import android.view.View.OnAttachStateChangeListener
@@ -84,13 +85,14 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 
 /**
  * Created by Manjunath K on 14-03-2024.
  */
 
 open class AdvancedHybridAhuFragment : Fragment() {
-
+    val viewModel: VavAdvancedHybridAhuViewModel by viewModels()
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         view.addOnAttachStateChangeListener(object : OnAttachStateChangeListener {
@@ -99,6 +101,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
             override fun onViewDetachedFromWindow(view: View) {
                 if (Globals.getInstance().isTestMode) {
                     Globals.getInstance().isTestMode = false
+                    viewModel.updateTestCacheConfig(0, true)
                 }
             }
         })
@@ -573,8 +576,8 @@ open class AdvancedHybridAhuFragment : Fragment() {
                             }
                             setStateChanged(viewModel)
                         },
-                        testVal = viewModel.getPhysicalPointForAnalogIndex(index)?.readHisVal()?.toInt() ?: 0,
-                        onTestSignalSelected = {viewModel.sendCMAnalogTestCommand(index, it)})
+                        testVal = ((viewModel.getPhysicalPointForAnalogIndex(index)?.readHisVal())?.div(10))?: 0.0,
+                        onTestSignalSelected = {viewModel.sendCMAnalogTestCommand(index, (it * 10))})
                 }
             }
         }
@@ -2158,8 +2161,8 @@ open class AdvancedHybridAhuFragment : Fragment() {
                             }
                             setStateChanged(viewModel)
                         },
-                        testVal = if(viewModel.isConnectModulePaired) viewModel.getConnectPhysicalPointForAnalogIndex(index)?.readHisVal()?.toInt() ?: 0 else 0,
-                        onTestSignalSelected = {viewModel.sendConnectAnalogTestCommand(index, it)})
+                        testVal = viewModel.getPhysicalPointForAnalogIndex(index)?.readHisVal()?.div(10) ?: 0.0,
+                        onTestSignalSelected = {viewModel.sendConnectAnalogTestCommand(index, it * 10)})
                 }
             }
         }

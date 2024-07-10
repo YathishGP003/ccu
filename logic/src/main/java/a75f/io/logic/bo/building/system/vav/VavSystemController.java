@@ -58,7 +58,6 @@ public class VavSystemController extends SystemController
     EvictingQueue<Double> weightedAverageCoolingOnlyLoadMAQueue = EvictingQueue.create(15);
     EvictingQueue<Double> weightedAverageHeatingOnlyLoadMAQueue = EvictingQueue.create(15);;
     
-    int ciDesired;
     int comfortIndex = 0;
     
     
@@ -205,11 +204,8 @@ public class VavSystemController extends SystemController
     private void initializeAlgoLoopVariables() {
 
         systemProfile = (VavSystemProfile) L.ccu().systemProfile;
-        ciDesired = (int)systemProfile.getUserIntentVal("desired and ci");
         conditioningMode = SystemMode.values()[(int)systemProfile.getUserIntentVal("conditioning and mode")];
-        CcuLog.d(L.TAG_CCU_SYSTEM, "runVavSystemControlAlgo -> ciDesired: " + ciDesired
-                                        + " conditioningMode: " + conditioningMode
-        );
+        CcuLog.d(L.TAG_CCU_SYSTEM, "runVavSystemControlAlgo -> conditioningMode: " + conditioningMode);
 
         weightedAverageCoolingOnlyLoadSum = 0;
         weightedAverageHeatingOnlyLoadSum = 0;

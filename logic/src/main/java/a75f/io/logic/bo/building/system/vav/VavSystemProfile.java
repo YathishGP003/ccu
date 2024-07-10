@@ -11,6 +11,7 @@ import org.projecthaystack.HRef;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 import a75.io.algos.vav.VavTRSystem;
 import a75f.io.api.haystack.CCUHsApi;
@@ -266,8 +267,12 @@ public abstract class VavSystemProfile extends SystemProfile
     public double getUserIntentVal(String tags)
     {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap cdb = hayStack.read("point and system and userIntent and " + tags);
-        return HSUtil.getPriorityVal(cdb.get("id").toString());
+        Map userIntent = hayStack.readEntity("point and system and userIntent and " + tags);
+        if (userIntent.isEmpty()) {
+            CcuLog.e(L.TAG_CCU_SYSTEM, "UserIntent point not found for tags: " + tags);
+            return 0;
+        }
+        return HSUtil.getPriorityVal(userIntent.get("id").toString());
     }
     
     public void setUserIntentVal(String tags, double val)

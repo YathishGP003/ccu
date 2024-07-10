@@ -65,6 +65,7 @@ import a75f.io.renatus.profiles.system.UNIVERSAL_IN5
 import a75f.io.renatus.profiles.system.UNIVERSAL_IN6
 import a75f.io.renatus.profiles.system.UNIVERSAL_IN7
 import a75f.io.renatus.profiles.system.UNIVERSAL_IN8
+import a75f.io.renatus.profiles.system.advancedahu.vav.VavAdvancedHybridAhuViewModel
 import android.os.Bundle
 import android.view.View
 import android.view.View.OnAttachStateChangeListener
@@ -84,13 +85,14 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 
 /**
  * Created by Manjunath K on 14-03-2024.
  */
 
 open class AdvancedHybridAhuFragment : Fragment() {
-
+    val viewModel: VavAdvancedHybridAhuViewModel by viewModels()
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         view.addOnAttachStateChangeListener(object : OnAttachStateChangeListener {
@@ -99,6 +101,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
             override fun onViewDetachedFromWindow(view: View) {
                 if (Globals.getInstance().isTestMode) {
                     Globals.getInstance().isTestMode = false
+                    viewModel.updateTestCacheConfig(0, true)
                 }
             }
         })
@@ -174,7 +177,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
             Column {
                 ConfigCompose(
                     TEMPERATURE,
-                    temperatureEnums[viewModel.viewState.value.sensorAddress0.temperatureAssociation].value,
+                    temperatureEnums[viewModel.viewState.value.sensorAddress0.temperatureAssociation],
                     temperatureEnums,
                     "",
                     isEnabled = viewModel.viewState.value.sensorAddress0.enabled
@@ -189,7 +192,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                 )
                 ConfigCompose(
                     OCCUPANCY,
-                    occupancyEnum[viewModel.viewState.value.sensorAddress0.occupancyAssociation].value,
+                    occupancyEnum[viewModel.viewState.value.sensorAddress0.occupancyAssociation],
                     occupancyEnum,
                     "",
                     isEnabled = viewModel.viewState.value.sensorAddress0.enabled
@@ -199,7 +202,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                 }
                 ConfigCompose(
                     CO2,
-                    co2Enum[viewModel.viewState.value.sensorAddress0.co2Association].value,
+                    co2Enum[viewModel.viewState.value.sensorAddress0.co2Association],
                     co2Enum,
                     "",
                     isEnabled = viewModel.viewState.value.sensorAddress0.enabled
@@ -219,7 +222,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
             Column {
                 ConfigCompose(
                     PRESSURE,
-                    pressureEnum[viewModel.viewState.value.sensorAddress0.pressureAssociation].value,
+                    pressureEnum[viewModel.viewState.value.sensorAddress0.pressureAssociation],
                     pressureEnum,
                     "",
                     isEnabled = viewModel.viewState.value.sensorBusPressureEnable
@@ -237,7 +240,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
             Column {
                 ConfigCompose(
                     TEMPERATURE,
-                    temperatureEnums[viewModel.viewState.value.sensorAddress1.temperatureAssociation].value,
+                    temperatureEnums[viewModel.viewState.value.sensorAddress1.temperatureAssociation],
                     temperatureEnums,
                     "",
                     isEnabled = viewModel.viewState.value.sensorAddress1.enabled
@@ -252,7 +255,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                 )
                 ConfigCompose(
                     OCCUPANCY,
-                    occupancyEnum[viewModel.viewState.value.sensorAddress1.occupancyAssociation].value,
+                    occupancyEnum[viewModel.viewState.value.sensorAddress1.occupancyAssociation],
                     occupancyEnum,
                     "",
                     isEnabled = viewModel.viewState.value.sensorAddress1.enabled
@@ -262,7 +265,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                 }
                 ConfigCompose(
                     CO2,
-                    co2Enum[viewModel.viewState.value.sensorAddress1.co2Association].value,
+                    co2Enum[viewModel.viewState.value.sensorAddress1.co2Association],
                     co2Enum,
                     "",
                     isEnabled = viewModel.viewState.value.sensorAddress1.enabled
@@ -279,7 +282,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
             Column {
                 ConfigCompose(
                     TEMPERATURE,
-                    temperatureEnums[viewModel.viewState.value.sensorAddress2.temperatureAssociation].value,
+                    temperatureEnums[viewModel.viewState.value.sensorAddress2.temperatureAssociation],
                     temperatureEnums,
                     "",
                     isEnabled = viewModel.viewState.value.sensorAddress2.enabled
@@ -294,7 +297,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                 )
                 ConfigCompose(
                     OCCUPANCY,
-                    occupancyEnum[viewModel.viewState.value.sensorAddress2.occupancyAssociation].value,
+                    occupancyEnum[viewModel.viewState.value.sensorAddress2.occupancyAssociation],
                     occupancyEnum,
                     "",
                     isEnabled = viewModel.viewState.value.sensorAddress2.enabled
@@ -304,7 +307,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                 }
                 ConfigCompose(
                     CO2,
-                    co2Enum[viewModel.viewState.value.sensorAddress2.co2Association].value,
+                    co2Enum[viewModel.viewState.value.sensorAddress2.co2Association],
                     co2Enum,
                     "",
                     isEnabled = viewModel.viewState.value.sensorAddress2.enabled
@@ -321,7 +324,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
             Column {
                 ConfigCompose(
                     TEMPERATURE,
-                    temperatureEnums[viewModel.viewState.value.sensorAddress3.temperatureAssociation].value,
+                    temperatureEnums[viewModel.viewState.value.sensorAddress3.temperatureAssociation],
                     temperatureEnums,
                     "",
                     isEnabled = viewModel.viewState.value.sensorAddress3.enabled
@@ -337,7 +340,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                 )
                 ConfigCompose(
                     OCCUPANCY,
-                    occupancyEnum[viewModel.viewState.value.sensorAddress3.occupancyAssociation].value,
+                    occupancyEnum[viewModel.viewState.value.sensorAddress3.occupancyAssociation],
                     occupancyEnum,
                     "",
                     isEnabled = viewModel.viewState.value.sensorAddress3.enabled
@@ -347,7 +350,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                 }
                 ConfigCompose(
                     CO2,
-                    co2Enum[viewModel.viewState.value.sensorAddress3.co2Association].value,
+                    co2Enum[viewModel.viewState.value.sensorAddress3.co2Association],
                     co2Enum,
                     "",
                     isEnabled = viewModel.viewState.value.sensorAddress3.enabled
@@ -390,7 +393,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     viewModel.viewState.value.analogIn1Config.enabled,
                     { viewModel.viewState.value.analogIn1Config.enabled = it
                         setStateChanged(viewModel)},
-                    analogEnum[viewModel.viewState.value.analogIn1Config.association].value,
+                    analogEnum[viewModel.viewState.value.analogIn1Config.association],
                     analogEnum,
                     "",
                     viewModel.viewState.value.analogIn1Config.enabled,
@@ -400,7 +403,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     viewModel.viewState.value.analogIn2Config.enabled,
                     { viewModel.viewState.value.analogIn2Config.enabled = it
                         setStateChanged(viewModel)},
-                    analogEnum[viewModel.viewState.value.analogIn2Config.association].value,
+                    analogEnum[viewModel.viewState.value.analogIn2Config.association],
                     analogEnum,
                     "",
                     viewModel.viewState.value.analogIn2Config.enabled,
@@ -411,7 +414,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     viewModel.viewState.value.thermistor1Config.enabled,
                     { viewModel.viewState.value.thermistor1Config.enabled = it
                         setStateChanged(viewModel)},
-                    thEnum[viewModel.viewState.value.thermistor1Config.association].value,
+                    thEnum[viewModel.viewState.value.thermistor1Config.association],
                     thEnum,
                     "",
                     viewModel.viewState.value.thermistor1Config.enabled,
@@ -421,7 +424,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     viewModel.viewState.value.thermistor2Config.enabled,
                     { viewModel.viewState.value.thermistor2Config.enabled = it
                         setStateChanged(viewModel)},
-                    thEnum[viewModel.viewState.value.thermistor2Config.association].value,
+                    thEnum[viewModel.viewState.value.thermistor2Config.association],
                     thEnum,
                     "",
                     viewModel.viewState.value.thermistor2Config.enabled,
@@ -480,7 +483,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                             relayConfig.enabled = it
                             setStateChanged(viewModel)
                         },
-                        association = relayEnums[relayConfig.association].value,
+                        association = relayEnums[relayConfig.association],
                         unit = "",
                         relayEnums = relayEnums,
                         onAssociationChanged = { associationIndex ->
@@ -553,7 +556,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                             }
                             setStateChanged(viewModel)
                         },
-                        association = analogOutEnums[associationIndex].value,
+                        association = analogOutEnums[associationIndex],
                         analogOutEnums = analogOutEnums,
                         testSingles = viewModel.testVoltage,
                         isEnabled = enabled,
@@ -573,8 +576,8 @@ open class AdvancedHybridAhuFragment : Fragment() {
                             }
                             setStateChanged(viewModel)
                         },
-                        testVal = viewModel.getPhysicalPointForAnalogIndex(index)?.readHisVal()?.toInt() ?: 0,
-                        onTestSignalSelected = {viewModel.sendCMAnalogTestCommand(index, it)})
+                        testVal = ((viewModel.getPhysicalPointForAnalogIndex(index)?.readHisVal())?.div(10))?: 0.0,
+                        onTestSignalSelected = {viewModel.sendCMAnalogTestCommand(index, (it * 10))})
                 }
             }
         }
@@ -623,7 +626,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                             .weight(1f)
                             .padding(top = 5.dp)) {
                         SearchSpinnerElement(
-                            default = pressureEnum[viewModel.viewState.value.pressureConfig.pressureControlAssociation].value,
+                            default = pressureEnum[viewModel.viewState.value.pressureConfig.pressureControlAssociation],
                             allItems = pressureEnum,
                             unit = "",
                             onSelect = {
@@ -779,7 +782,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     }
                     Box(modifier = Modifier.weight(1f)) {
                         SearchSpinnerElement(
-                            default = satEnum[viewModel.viewState.value.satConfig.satControlAssociation].value,
+                            default = satEnum[viewModel.viewState.value.satConfig.satControlAssociation],
                             allItems = satEnum, unit = "", onSelect = {
                                 viewModel.viewState.value.satConfig.satControlAssociation = it.index
                             setStateChanged(viewModel)
@@ -1053,7 +1056,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     }
                     Box(modifier = Modifier.weight(1f)) {
                         SearchSpinnerElement(
-                            default = damperEnum[viewModel.viewState.value.damperConfig.damperControlAssociation].value,
+                            default = damperEnum[viewModel.viewState.value.damperConfig.damperControlAssociation],
                             allItems = damperEnum,
                             unit = "",
                             onSelect = {
@@ -1736,7 +1739,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
             Column {
                 ConfigCompose(
                     TEMPERATURE,
-                    temperatureEnums[viewModel.viewState.value.connectSensorAddress0.temperatureAssociation].value,
+                    temperatureEnums[viewModel.viewState.value.connectSensorAddress0.temperatureAssociation],
                     temperatureEnums,
                     "",
                     viewModel.viewState.value.connectSensorAddress0.enabled
@@ -1751,7 +1754,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                 )
                 ConfigCompose(
                     OCCUPANCY,
-                    occupancyEnum[viewModel.viewState.value.connectSensorAddress0.occupancyAssociation].value,
+                    occupancyEnum[viewModel.viewState.value.connectSensorAddress0.occupancyAssociation],
                     occupancyEnum,
                     "",
                     viewModel.viewState.value.connectSensorAddress0.enabled
@@ -1761,7 +1764,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                 }
                 ConfigCompose(
                     CO2,
-                    co2Enum[viewModel.viewState.value.connectSensorAddress0.co2Association].value,
+                    co2Enum[viewModel.viewState.value.connectSensorAddress0.co2Association],
                     co2Enum,
                     "",
                     viewModel.viewState.value.connectSensorAddress0.enabled
@@ -1781,7 +1784,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
             Column {
                 ConfigCompose(
                     PRESSURE,
-                    pressureEnum[viewModel.viewState.value.connectSensorAddress0.pressureAssociation].value,
+                    pressureEnum[viewModel.viewState.value.connectSensorAddress0.pressureAssociation],
                     pressureEnum,
                     "",
                     viewModel.viewState.value.connectSensorBusPressureEnable
@@ -1799,7 +1802,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
             Column {
                 ConfigCompose(
                     TEMPERATURE,
-                    temperatureEnums[viewModel.viewState.value.connectSensorAddress1.temperatureAssociation].value,
+                    temperatureEnums[viewModel.viewState.value.connectSensorAddress1.temperatureAssociation],
                     temperatureEnums,
                     "",
                     viewModel.viewState.value.connectSensorAddress1.enabled
@@ -1814,7 +1817,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                 )
                 ConfigCompose(
                     OCCUPANCY,
-                    occupancyEnum[viewModel.viewState.value.connectSensorAddress1.occupancyAssociation].value,
+                    occupancyEnum[viewModel.viewState.value.connectSensorAddress1.occupancyAssociation],
                     occupancyEnum,
                     "",
                     viewModel.viewState.value.connectSensorAddress1.enabled
@@ -1824,7 +1827,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                 }
                 ConfigCompose(
                     CO2,
-                    co2Enum[viewModel.viewState.value.connectSensorAddress1.co2Association].value,
+                    co2Enum[viewModel.viewState.value.connectSensorAddress1.co2Association],
                     co2Enum,
                     "",
                     viewModel.viewState.value.connectSensorAddress1.enabled
@@ -1841,7 +1844,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
             Column {
                 ConfigCompose(
                     TEMPERATURE,
-                    temperatureEnums[viewModel.viewState.value.connectSensorAddress2.temperatureAssociation].value,
+                    temperatureEnums[viewModel.viewState.value.connectSensorAddress2.temperatureAssociation],
                     temperatureEnums,
                     "",
                     viewModel.viewState.value.connectSensorAddress2.enabled
@@ -1856,7 +1859,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                 )
                 ConfigCompose(
                     OCCUPANCY,
-                    occupancyEnum[viewModel.viewState.value.connectSensorAddress2.occupancyAssociation].value,
+                    occupancyEnum[viewModel.viewState.value.connectSensorAddress2.occupancyAssociation],
                     occupancyEnum,
                     "",
                     viewModel.viewState.value.connectSensorAddress2.enabled
@@ -1866,7 +1869,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                 }
                 ConfigCompose(
                     CO2,
-                    co2Enum[viewModel.viewState.value.connectSensorAddress2.co2Association].value,
+                    co2Enum[viewModel.viewState.value.connectSensorAddress2.co2Association],
                     co2Enum,
                     "",
                     viewModel.viewState.value.connectSensorAddress2.enabled
@@ -1883,7 +1886,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
             Column {
                 ConfigCompose(
                     TEMPERATURE,
-                    temperatureEnums[viewModel.viewState.value.connectSensorAddress3.temperatureAssociation].value,
+                    temperatureEnums[viewModel.viewState.value.connectSensorAddress3.temperatureAssociation],
                     temperatureEnums,
                     "",
                     viewModel.viewState.value.connectSensorAddress3.enabled
@@ -1898,7 +1901,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                 )
                 ConfigCompose(
                     OCCUPANCY,
-                    occupancyEnum[viewModel.viewState.value.connectSensorAddress3.occupancyAssociation].value,
+                    occupancyEnum[viewModel.viewState.value.connectSensorAddress3.occupancyAssociation],
                     occupancyEnum,
                     "",
                     viewModel.viewState.value.connectSensorAddress3.enabled
@@ -1908,7 +1911,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                 }
                 ConfigCompose(
                     CO2,
-                    co2Enum[viewModel.viewState.value.connectSensorAddress3.co2Association].value,
+                    co2Enum[viewModel.viewState.value.connectSensorAddress3.co2Association],
                     co2Enum,
                     "",
                     viewModel.viewState.value.connectSensorAddress3.enabled
@@ -1948,7 +1951,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     viewModel.viewState.value.connectUniversalIn1Config.enabled,
                     { viewModel.viewState.value.connectUniversalIn1Config.enabled = it
                         setStateChanged(viewModel)},
-                    universalEnum[viewModel.viewState.value.connectUniversalIn1Config.association].value,
+                    universalEnum[viewModel.viewState.value.connectUniversalIn1Config.association],
                     universalEnum,
                     "",
                     viewModel.viewState.value.connectUniversalIn1Config.enabled,
@@ -1958,7 +1961,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     viewModel.viewState.value.connectUniversalIn2Config.enabled,
                     { viewModel.viewState.value.connectUniversalIn2Config.enabled = it
                         setStateChanged(viewModel)},
-                    universalEnum[viewModel.viewState.value.connectUniversalIn2Config.association].value,
+                    universalEnum[viewModel.viewState.value.connectUniversalIn2Config.association],
                     universalEnum,
                     "",
                     viewModel.viewState.value.connectUniversalIn2Config.enabled,
@@ -1968,7 +1971,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     viewModel.viewState.value.connectUniversalIn3Config.enabled,
                     { viewModel.viewState.value.connectUniversalIn3Config.enabled = it
                         setStateChanged(viewModel)},
-                    universalEnum[viewModel.viewState.value.connectUniversalIn3Config.association].value,
+                    universalEnum[viewModel.viewState.value.connectUniversalIn3Config.association],
                     universalEnum,
                     "",
                     viewModel.viewState.value.connectUniversalIn3Config.enabled,
@@ -1978,7 +1981,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     viewModel.viewState.value.connectUniversalIn4Config.enabled,
                     { viewModel.viewState.value.connectUniversalIn4Config.enabled = it
                         setStateChanged(viewModel)},
-                    universalEnum[viewModel.viewState.value.connectUniversalIn4Config.association].value,
+                    universalEnum[viewModel.viewState.value.connectUniversalIn4Config.association],
                     universalEnum,
                     "",
                     viewModel.viewState.value.connectUniversalIn4Config.enabled,
@@ -1988,7 +1991,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     viewModel.viewState.value.connectUniversalIn5Config.enabled,
                     { viewModel.viewState.value.connectUniversalIn5Config.enabled = it
                         setStateChanged(viewModel)},
-                    universalEnum[viewModel.viewState.value.connectUniversalIn5Config.association].value,
+                    universalEnum[viewModel.viewState.value.connectUniversalIn5Config.association],
                     universalEnum,
                     "",
                     viewModel.viewState.value.connectUniversalIn5Config.enabled,
@@ -1998,7 +2001,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     viewModel.viewState.value.connectUniversalIn6Config.enabled,
                     { viewModel.viewState.value.connectUniversalIn6Config.enabled = it
                         setStateChanged(viewModel)},
-                    universalEnum[viewModel.viewState.value.connectUniversalIn6Config.association].value,
+                    universalEnum[viewModel.viewState.value.connectUniversalIn6Config.association],
                     universalEnum,
                     "",
                     viewModel.viewState.value.connectUniversalIn6Config.enabled,
@@ -2008,7 +2011,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     viewModel.viewState.value.connectUniversalIn7Config.enabled,
                     { viewModel.viewState.value.connectUniversalIn7Config.enabled = it
                         setStateChanged(viewModel)},
-                    universalEnum[viewModel.viewState.value.connectUniversalIn7Config.association].value,
+                    universalEnum[viewModel.viewState.value.connectUniversalIn7Config.association],
                     universalEnum,
                     "",
                     viewModel.viewState.value.connectUniversalIn7Config.enabled,
@@ -2018,7 +2021,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     viewModel.viewState.value.connectUniversalIn8Config.enabled,
                     { viewModel.viewState.value.connectUniversalIn8Config.enabled = it
                         setStateChanged(viewModel)},
-                    universalEnum[viewModel.viewState.value.connectUniversalIn8Config.association].value,
+                    universalEnum[viewModel.viewState.value.connectUniversalIn8Config.association],
                     universalEnum,
                     "",
                     viewModel.viewState.value.connectUniversalIn8Config.enabled,
@@ -2068,7 +2071,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                         enabled = relayConfig.enabled,
                         onEnabledChanged = { enabled -> relayConfig.enabled = enabled
                             setStateChanged(viewModel)},
-                        association = relayEnums[relayConfig.association].value,
+                        association = relayEnums[relayConfig.association],
                         unit = "",
                         relayEnums = relayEnums,
                         isEnabled = relayConfig.enabled,
@@ -2138,7 +2141,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                             }
                             setStateChanged(viewModel)
                         },
-                        association = analogOutEnums[associationIndex].value,
+                        association = analogOutEnums[associationIndex],
                         analogOutEnums = analogOutEnums,
                         testSingles = viewModel.testVoltage,
                         isEnabled = enabled,
@@ -2158,8 +2161,8 @@ open class AdvancedHybridAhuFragment : Fragment() {
                             }
                             setStateChanged(viewModel)
                         },
-                        testVal = if(viewModel.isConnectModulePaired) viewModel.getConnectPhysicalPointForAnalogIndex(index)?.readHisVal()?.toInt() ?: 0 else 0,
-                        onTestSignalSelected = {viewModel.sendConnectAnalogTestCommand(index, it)})
+                        testVal = viewModel.getPhysicalPointForAnalogIndex(index)?.readHisVal()?.div(10) ?: 0.0,
+                        onTestSignalSelected = {viewModel.sendConnectAnalogTestCommand(index, it * 10)})
                 }
             }
         }
@@ -2523,7 +2526,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                     }
                     Box(modifier = Modifier.weight(1f)) {
                         SearchSpinnerElement(
-                            default = damperEnum[viewModel.viewState.value.connectDamperConfig.damperControlAssociation].value,
+                            default = damperEnum[viewModel.viewState.value.connectDamperConfig.damperControlAssociation],
                             allItems = damperEnum,
                             unit = "",
                             onSelect = {

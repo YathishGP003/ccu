@@ -193,11 +193,8 @@ public class DabSystemController extends SystemController
     private void initializeAlgoLoopVariables() {
 
         systemProfile = (DabSystemProfile) L.ccu().systemProfile;
-        ciDesired = (int)systemProfile.getUserIntentVal("desired and ci");
         conditioningMode = SystemMode.values()[(int)systemProfile.getUserIntentVal("conditioning and mode")];
-        CcuLog.d(L.TAG_CCU_SYSTEM, "runDabSystemControlAlgo -> ciDesired: " + ciDesired + " conditioningMode: "
-                                   + conditioningMode
-        );
+        CcuLog.d(L.TAG_CCU_SYSTEM, "runDabSystemControlAlgo ->  conditioningMode: " + conditioningMode);
     
         weightedAverageCoolingLoadSum = 0;
         weightedAverageHeatingLoadSum = 0;

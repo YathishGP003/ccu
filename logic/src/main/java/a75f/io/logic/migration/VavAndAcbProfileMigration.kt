@@ -58,15 +58,27 @@ class VavAndAcbProfileMigration {
 
                 devicePorts?.forEach { port ->
                     val entityMapper = EntityMapper(deviceModel as SeventyFiveFProfileDirective)
-                    val profileConfiguration = VavProfileConfiguration(
-                        Integer.parseInt(equip.group),
-                        nodeType.name,
-                        domainEquip.zonePriority.readPriorityVal().toInt(),
-                        equip.roomRef,
-                        equip.floorRef,
-                        ProfileType.valueOf(equip.profile),
-                        deviceModel
-                    ).getActiveConfiguration()
+                    val profileConfiguration = if (ProfileType.valueOf(equip.profile) == ProfileType.VAV_ACB) {
+                        AcbProfileConfiguration(
+                            Integer.parseInt(equip.group),
+                            nodeType.name,
+                            domainEquip.zonePriority.readPriorityVal().toInt(),
+                            equip.roomRef,
+                            equip.floorRef,
+                            ProfileType.valueOf(equip.profile),
+                            deviceModel
+                        ).getActiveConfiguration()
+                    } else {
+                        VavProfileConfiguration(
+                            Integer.parseInt(equip.group),
+                            nodeType.name,
+                            domainEquip.zonePriority.readPriorityVal().toInt(),
+                            equip.roomRef,
+                            equip.floorRef,
+                            ProfileType.valueOf(equip.profile),
+                            deviceModel
+                        ).getActiveConfiguration()
+                    }
 
                     val logicalPointRefName = entityMapper.getPhysicalProfilePointRef(
                         profileConfiguration,
@@ -85,6 +97,10 @@ class VavAndAcbProfileMigration {
                         port.enabled = true
                         ccuHsApi.updatePoint(port, port.id)
                         CcuLog.i(L.TAG_CCU_MIGRATION_UTIL, "Port enabled: ${port.displayName}")
+                    } else if (port.enabled && isAcbValveNotInstalled(port, ccuHsApi, equip)) {
+                        port.enabled = false
+                        ccuHsApi.updatePoint(port, port.id)
+                        CcuLog.i(L.TAG_CCU_MIGRATION_UTIL, "Port enabled: ${port.displayName}")
                     }
                 }
             }
@@ -93,6 +109,21 @@ class VavAndAcbProfileMigration {
         /*For Vav-Parallel profile relay1 is enabled but pointRef is null*/
         private fun isRelay1PortIsNotEnabled(port: RawPoint): Boolean {
             return port.domainName == DomainName.relay1 && port.enabled
+        }
+
+        private fun isAcbValveNotInstalled(
+            port: RawPoint,
+            hayStack: CCUHsApi,
+            equip: Equip
+        ): Boolean {
+            if (ProfileType.valueOf(equip.profile) == ProfileType.VAV_ACB && port.domainName.equals(DomainName.analog2Out)) {
+                val valveTypePoint =
+                    hayStack.readEntity("point and group == \"" + equip.group + "\" and domainName == \"" + DomainName.valveType + "\"")
+                val valveType =
+                    hayStack.readDefaultValById(valveTypePoint["id"].toString()).toInt()
+                return valveType == 0
+            }
+            return false
         }
 
         /*Analog-out2 is mapped to reheatType all the time, even if reheatType is mapped to relay1*/

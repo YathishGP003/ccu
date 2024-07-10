@@ -6,6 +6,7 @@ import static a75f.io.api.haystack.util.TimeUtil.getEndTimeMin;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
+import org.joda.time.LocalTime;
 import org.projecthaystack.HDict;
 import org.projecthaystack.HDictBuilder;
 import org.projecthaystack.HGrid;
@@ -241,6 +242,7 @@ public class BuildingOccupancyViewModel {
                for (Schedule schedule : activeScheduleList.values()) {
                     ArrayList<Interval> intervalSpills = new ArrayList<>();
                     ArrayList<Interval> zoneIntervals = schedule.getScheduledIntervals();
+                   separateOvernightSchedules(zoneIntervals);
 
                     for (Interval v : zoneIntervals) {
                         CcuLog.d(L.TAG_CCU_UI, "Zone interval " + v);
@@ -331,6 +333,22 @@ public class BuildingOccupancyViewModel {
 
 
         return spillsMap;
+    }
+
+    private void separateOvernightSchedules(ArrayList<Interval> zoneIntervals) {
+        int size = zoneIntervals.size();
+        for (int i = 0; i < size; i++) {
+            Interval it = zoneIntervals.get(i);
+
+            LocalTime startTimeOfDay = it.getStart().toLocalTime();
+            LocalTime endTimeOfDay = it.getEnd().toLocalTime();
+
+            // Check if the start time is after the end time and separating the overnight schedule
+            if (startTimeOfDay.isAfter(endTimeOfDay)) {
+                zoneIntervals.set(i, ScheduleUtil.OverNightEnding(it));
+                zoneIntervals.add(ScheduleUtil.OverNightStarting(it));
+            }
+        }
     }
 
     public String getWarningMessage(HashMap<String, ArrayList<Interval>> spillsMap){

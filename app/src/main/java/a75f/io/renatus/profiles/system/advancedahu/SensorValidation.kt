@@ -6,6 +6,8 @@ import a75f.io.domain.config.AssociationConfig
 import a75f.io.domain.config.EnableConfig
 import a75f.io.logic.bo.building.system.AdvancedAhuAnalogOutAssociationType
 import a75f.io.logic.bo.building.system.AdvancedAhuRelayAssociationType
+import a75f.io.logic.bo.building.system.getDomainForAnalogOut
+import a75f.io.logic.bo.building.system.getDomainPressure
 import a75f.io.logic.bo.building.system.relayAssociationDomainNameToType
 import a75f.io.logic.bo.building.system.relayAssociationToDomainName
 import a75f.io.logic.bo.building.system.vav.config.CmConfiguration
@@ -68,42 +70,8 @@ private fun getDisForDomain(domainName: String): String {
     }
 }
 
-fun getDomainPressure(config: CmConfiguration): String? {
-    if (config.sensorBus0PressureEnabled.enabled) {
-        return when(config.address0SensorAssociation.pressureAssociation?.associationVal!!.toInt()) {
-            1 -> DomainName.ductStaticPressureSensor1_2
-            2 -> DomainName.ductStaticPressureSensor2_2
-            3 -> DomainName.ductStaticPressureSensor3_2
-            else -> null
-        }
-    }
-    return null
-}
-fun getAnalog1Domain(config: CmConfiguration): String? {
-    return getDomainForAnalogOut(config.analog1InEnabled, config.analog1InAssociation)
-}
 
-fun getAnalog2Domain(config: CmConfiguration): String? {
-    return getDomainForAnalogOut(config.analog2InEnabled, config.analog2InAssociation)
-}
 
-fun getDomainForAnalogOut(enabled: EnableConfig, association: AssociationConfig): String? {
-    if (enabled.enabled) {
-        return when (association.associationVal) {
-            12 -> DomainName.ductStaticPressureSensor1_1
-            13 -> DomainName.ductStaticPressureSensor1_2
-            14 -> DomainName.ductStaticPressureSensor1_10
-            15 -> DomainName.ductStaticPressureSensor2_1
-            16 -> DomainName.ductStaticPressureSensor2_2
-            17 -> DomainName.ductStaticPressureSensor2_10
-            18 -> DomainName.ductStaticPressureSensor3_1
-            19 -> DomainName.ductStaticPressureSensor3_2
-            20 -> DomainName.ductStaticPressureSensor3_10
-            else -> null
-        }
-    }
-    return null
-}
 
 fun findPressureDuplicate(pressureData: Triple<String?, String?, String?>): Pair<Boolean,String> {
     val pressureDomainName = pressureData.first
@@ -211,9 +179,18 @@ fun isValidateConfiguration(viewModel: AdvancedHybridAhuViewModel): Pair<Boolean
         isPressureAvailable = true
     }
 
-    val pressureDomainName = getDomainPressure(viewModel.profileConfiguration.cmConfiguration)
-    val analogIn1DomainName = getAnalog1Domain(viewModel.profileConfiguration.cmConfiguration)
-    val analogIn2DomainName = getAnalog2Domain(viewModel.profileConfiguration.cmConfiguration)
+    val pressureDomainName = getDomainPressure(
+            viewModel.profileConfiguration.cmConfiguration.sensorBus0PressureEnabled.enabled,
+            viewModel.profileConfiguration.cmConfiguration.address0SensorAssociation.pressureAssociation!!.associationVal
+    )
+    val analogIn1DomainName = getDomainForAnalogOut(
+            viewModel.profileConfiguration.cmConfiguration.analog1InEnabled.enabled,
+            viewModel.profileConfiguration.cmConfiguration.analog1InAssociation.associationVal
+    )
+    val analogIn2DomainName = getDomainForAnalogOut(
+            viewModel.profileConfiguration.cmConfiguration.analog2InEnabled.enabled,
+            viewModel.profileConfiguration.cmConfiguration.analog2InAssociation.associationVal
+    )
 
     if (isPressureAvailable && pressureDomainName == null && analogIn1DomainName == null && analogIn2DomainName == null) {
         return Pair(false, "Pressure configuration mapped but Pressure Sensor is not available")

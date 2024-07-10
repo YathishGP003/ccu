@@ -396,6 +396,40 @@ fun satControlIndexToDomainPoint(index: Int, equip: DomainEquip) : Point {
         else -> throw IllegalArgumentException("Invalid index $index")
     }
 }
+
+fun getPressureInputSensor(sensorType: DuctPressureSensorSource, systemEquip: VavAdvancedHybridSystemEquip): Point? {
+    val (pressure, analogIn1, analogIn2) = getPressureMappings(systemEquip) // Reads if enabled only else it will be null
+
+    fun getSensor(type: String): Point? {
+        if (pressure != null && pressure.domainName.contains(type))
+            return pressure
+        if (analogIn1 != null && analogIn1.domainName.contains(type))
+            return analogIn1
+        if (analogIn2 != null && analogIn2.domainName.contains(type))
+            return analogIn2
+        return null
+    }
+
+    return when (sensorType) {
+        DuctPressureSensorSource.DUCT_STATIC_PRESSURE_SENSOR_1 -> getSensor("1_")
+        DuctPressureSensorSource.DUCT_STATIC_PRESSURE_SENSOR_2 -> getSensor("2_")
+        DuctPressureSensorSource.DUCT_STATIC_PRESSURE_SENSOR_3 -> getSensor("3_")
+        else -> null
+    }
+}
+
+fun getPressureMappings(systemEquip: VavAdvancedHybridSystemEquip): Triple<Point?, Point?, Point?> {
+    return Triple(
+            getPointForPressureFromDomain(
+                    getDomainPressure(systemEquip.sensorBus0PressureEnable.readDefaultVal() > 1, systemEquip.sensorBus0PressureAssociation.readDefaultVal().toInt()), systemEquip),
+            getPointForPressureFromDomain(
+                    getDomainForAnalogOut(systemEquip.analog1InputEnable.readDefaultVal() > 1, systemEquip.analog1InputAssociation.readDefaultVal().toInt()), systemEquip),
+            getPointForPressureFromDomain(
+                    getDomainForAnalogOut(systemEquip.analog2InputEnable.readDefaultVal() > 1, systemEquip.analog2InputAssociation.readDefaultVal().toInt()), systemEquip
+            )
+    )
+}
+
 fun pressureFanControlIndexToDomainPoint(index: Int, equip: DomainEquip): Point? {
     val systemEquip = equip as? VavAdvancedHybridSystemEquip
             ?: throw IllegalArgumentException("Invalid system equip type")
@@ -403,42 +437,10 @@ fun pressureFanControlIndexToDomainPoint(index: Int, equip: DomainEquip): Point?
     val sourceOption = DuctPressureSensorSource.values().getOrNull(index)
             ?: return null
 
-    fun getAnalogSensorPoint(association: Int): Point? {
-        return when (association) {
-            12 -> systemEquip.ductStaticPressureSensor11
-            13 -> systemEquip.ductStaticPressureSensor12
-            14 -> systemEquip.ductStaticPressureSensor110
-            15 -> systemEquip.ductStaticPressureSensor21
-            16 -> systemEquip.ductStaticPressureSensor22
-            17 -> systemEquip.ductStaticPressureSensor210
-            18 -> systemEquip.ductStaticPressureSensor31
-            19 -> systemEquip.ductStaticPressureSensor32
-            20 -> systemEquip.ductStaticPressureSensor310
-            else -> null
-        }
-    }
-
-    fun getSensorFromBus(sensorIndex: Int): Point? {
-        if (systemEquip.sensorBus0PressureEnable.readDefaultVal() > 0) {
-            return when (sensorIndex) {
-                1 -> if (systemEquip.sensorBus0PressureAssociation.readDefaultVal().toInt() == 1) systemEquip.ductStaticPressureSensor12 else null
-                2 -> if (systemEquip.sensorBus0PressureAssociation.readDefaultVal().toInt() == 2) systemEquip.ductStaticPressureSensor22 else null
-                3 -> if (systemEquip.sensorBus0PressureAssociation.readDefaultVal().toInt() == 3) systemEquip.ductStaticPressureSensor32 else null
-                else -> null
-            }
-        }
-        return null
-    }
-
-    fun getAnalogSensor(): Point? {
-        return getAnalogSensorPoint(systemEquip.analog1InputAssociation.readDefaultVal().toInt())
-                ?: getAnalogSensorPoint(systemEquip.analog2InputAssociation.readDefaultVal().toInt())
-    }
-
     return when (sourceOption) {
-        DuctPressureSensorSource.DUCT_STATIC_PRESSURE_SENSOR_1 -> getSensorFromBus(1) ?: getAnalogSensor()
-        DuctPressureSensorSource.DUCT_STATIC_PRESSURE_SENSOR_2 -> getSensorFromBus(2) ?: getAnalogSensor()
-        DuctPressureSensorSource.DUCT_STATIC_PRESSURE_SENSOR_3 -> getSensorFromBus(3) ?: getAnalogSensor()
+        DuctPressureSensorSource.DUCT_STATIC_PRESSURE_SENSOR_1,
+        DuctPressureSensorSource.DUCT_STATIC_PRESSURE_SENSOR_2,
+        DuctPressureSensorSource.DUCT_STATIC_PRESSURE_SENSOR_3 -> getPressureInputSensor(sourceOption, systemEquip)
         DuctPressureSensorSource.AVERAGE_PRESSURE -> systemEquip.averagePressure
         DuctPressureSensorSource.MIN_PRESSURE -> systemEquip.minPressure
         DuctPressureSensorSource.MAX_PRESSURE -> systemEquip.maxPressure
@@ -557,3 +559,56 @@ fun getStageIndex(point: Point) : Int {
         else -> {0}
     }
 }
+
+fun getDomainForAnalogOut(enabled: Boolean, association: Int): String? {
+    if (enabled) {
+        return when (association) {
+            12 -> DomainName.ductStaticPressureSensor1_1
+            13 -> DomainName.ductStaticPressureSensor1_2
+            14 -> DomainName.ductStaticPressureSensor1_10
+            15 -> DomainName.ductStaticPressureSensor2_1
+            16 -> DomainName.ductStaticPressureSensor2_2
+            17 -> DomainName.ductStaticPressureSensor2_10
+            18 -> DomainName.ductStaticPressureSensor3_1
+            19 -> DomainName.ductStaticPressureSensor3_2
+            20 -> DomainName.ductStaticPressureSensor3_10
+            else -> null
+        }
+    }
+    return null
+}
+
+
+fun getDomainPressure(
+        enabled: Boolean,
+        association: Int
+): String? {
+    if (enabled) {
+        return when(association) {
+            1 -> DomainName.ductStaticPressureSensor1_2
+            2 -> DomainName.ductStaticPressureSensor2_2
+            3 -> DomainName.ductStaticPressureSensor3_2
+            else -> null
+        }
+    }
+    return null
+}
+fun getPointForPressureFromDomain(domainName: String?, systemEquip: VavAdvancedHybridSystemEquip): Point? {
+    if (domainName != null) {
+        return when (domainName) {
+            DomainName.ductStaticPressureSensor1_1 -> systemEquip.ductStaticPressureSensor11
+            DomainName.ductStaticPressureSensor1_2 -> systemEquip.ductStaticPressureSensor12
+            DomainName.ductStaticPressureSensor1_10 -> systemEquip.ductStaticPressureSensor110
+            DomainName.ductStaticPressureSensor2_1 -> systemEquip.ductStaticPressureSensor21
+            DomainName.ductStaticPressureSensor2_2 -> systemEquip.ductStaticPressureSensor22
+            DomainName.ductStaticPressureSensor2_10 -> systemEquip.ductStaticPressureSensor210
+            DomainName.ductStaticPressureSensor3_1 -> systemEquip.ductStaticPressureSensor31
+            DomainName.ductStaticPressureSensor3_2 -> systemEquip.ductStaticPressureSensor32
+            DomainName.ductStaticPressureSensor3_10 -> systemEquip.ductStaticPressureSensor310
+            else -> null
+        }
+    }
+    return null
+}
+
+

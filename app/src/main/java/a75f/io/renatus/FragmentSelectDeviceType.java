@@ -158,6 +158,11 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
             return;
         }
 
+        if (misPaired) {
+            Toast.makeText(getContext(),"HyperStat Split cannot be paired if another module is already paired in the zone.",Toast.LENGTH_LONG).show();
+            return;
+        }
+
         HyperStatSplitProfileSelectionFragment hyperStatSplitProfiling = HyperStatSplitProfileSelectionFragment.newInstance(mNodeAddress, mRoomName, mFloorName);
         showDialogFragment(hyperStatSplitProfiling, hyperStatSplitProfiling.getIdString());
     }

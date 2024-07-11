@@ -358,13 +358,14 @@ public class MeshNetwork extends DeviceNetwork
         }
 
         if (ccu().systemProfile instanceof VavAdvancedAhu) {
+            ControlMote.CcuToCmSettingsMessage_t cmSettingsMessage = ControlMoteMessageGeneratorKt.getCMSettingsMessage();
+            CcuLog.d(L.TAG_CCU_DEVICE, "CM Proto Settings Message: " + cmSettingsMessage);
+            ControlMoteMessageSenderKt.sendControlMoteMessage(MessageType.CCU_TO_CM_OVER_USB_CM_SERIAL_SETTINGS, cmSettingsMessage.toByteArray());
+
             ControlMote.CcuToCmOverUsbCmControlMessage_t cmControlMessage = ControlMoteMessageGeneratorKt
                                     .getCMControlsMessage();
             CcuLog.d(L.TAG_CCU_DEVICE, "CM Proto Control Message: " + cmControlMessage);
             ControlMoteMessageSenderKt.sendControlMoteMessage(MessageType.CCU_TO_CM_OVER_USB_CM_SERIAL_CONTROLS, cmControlMessage.toByteArray());
-            ControlMote.CcuToCmSettingsMessage_t cmSettingsMessage = ControlMoteMessageGeneratorKt.getCMSettingsMessage();
-            CcuLog.d(L.TAG_CCU_DEVICE, "CM Proto Settings Message: " + cmSettingsMessage);
-            ControlMoteMessageSenderKt.sendControlMoteMessage(MessageType.CCU_TO_CM_OVER_USB_CM_SERIAL_SETTINGS, cmSettingsMessage.toByteArray());
         } else {
             MeshUtil.sendStructToCM(DeviceUtil.getCMControlsMessage());
         }

@@ -894,6 +894,7 @@ public class FloorPlanFragment extends Fragment {
         boolean isPaired = false;
         boolean isMonitoringPaired = false;
         boolean isOTNPaired = false;
+        boolean isHSSplitPaired = false;
 
         if (!zoneEquips.isEmpty()) {
             isPaired = true;
@@ -913,6 +914,9 @@ public class FloorPlanFragment extends Fragment {
                 if (zoneEquips.get(i).getProfile().contains("OTN")) {
                     isOTNPaired = true;
                 }
+                if (zoneEquips.get(i).getProfile().contains("HYPERSTATSPLIT_CPU")) {
+                    isHSSplitPaired = true;
+                }
             }
             if(HSUtil.isZoneHasSubEquips(selectedZone.getId())){
                 Toast.makeText(getActivity(), "No module can be paired as modbus with sub equips is paired",
@@ -921,7 +925,7 @@ public class FloorPlanFragment extends Fragment {
             }
         }
 
-        if (!isPLCPaired && !isEMRPaired && !isCCUPaired && !isMonitoringPaired && !isOTNPaired) {
+        if (!isPLCPaired && !isEMRPaired && !isCCUPaired && !isMonitoringPaired && !isOTNPaired && !isHSSplitPaired) {
             short meshAddress = L.generateSmartNodeAddress();
             if (mFloorListAdapter.getSelectedPostion() == -1) {
             } else {
@@ -948,8 +952,14 @@ public class FloorPlanFragment extends Fragment {
             if (isMonitoringPaired) {
                 Toast.makeText(getActivity(), "HyperStat Monitoring is already paired in this zone", Toast.LENGTH_LONG).show();
             }
+            if (isHSSplitPaired) {
+                Toast.makeText(getActivity(), "HyperStat Split is already paired in this zone", Toast.LENGTH_LONG).show();
+            }
             if (isOTNPaired) {
                 Toast.makeText(getActivity(), "OTN is already paired in this zone", Toast.LENGTH_LONG).show();
+            }
+            if (isHSSplitPaired) {
+                Toast.makeText(getActivity(), "HyperStat Split is already paired in this zone; cannot pair additional modules.", Toast.LENGTH_LONG).show();
             }
         }
     }

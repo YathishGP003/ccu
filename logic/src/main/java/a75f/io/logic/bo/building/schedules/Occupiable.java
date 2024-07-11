@@ -9,10 +9,10 @@ import a75f.io.api.haystack.Schedule;
 public interface Occupiable {
     
     //Trigger than can influence the occupied mode.
-    OccupiedTrigger getOccupiedTrigger(boolean skipDemandResponse);
+    OccupiedTrigger getOccupiedTrigger();
     
     //Trigger that can influence the unoccupied mode.
-    UnoccupiedTrigger getUnoccupiedTrigger(boolean skipDemandResponse);
+    UnoccupiedTrigger getUnoccupiedTrigger();
 
     void prepareOccupied();
 

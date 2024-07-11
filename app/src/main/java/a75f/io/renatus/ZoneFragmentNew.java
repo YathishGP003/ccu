@@ -464,7 +464,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
     public void refreshScreenbySchedule(String nodeAddress, String equipId, String zoneId) {
         if (getActivity() != null) {
             int i;
-            String status = ScheduleManager.getInstance().getMultiModuleZoneStatusMessage(zoneId);
+            String status = ScheduleManager.getInstance().getZoneStatusMessage(zoneId, equipId);
             String vacationStatus = ScheduleManager.getInstance().getVacationStateString(zoneId);
             String specialScheduleStatus = getScheduleStateString(zoneId);
             for (i = 0; i < zoneStatusArrayList.size(); i++) {
@@ -1185,12 +1185,12 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                     try {
                         if( isCelsiusTunerAvailableStatus()) {
 
-                            Observable.fromCallable(() -> ScheduleManager.getInstance().getMultiModuleZoneStatusMessage(zoneId))
+                            Observable.fromCallable(() -> ScheduleManager.getInstance().getZoneStatusMessage(zoneId, equipId[0]))
                                     .subscribeOn(Schedulers.io())
                                     .observeOn(AndroidSchedulers.mainThread())
                                     .subscribe(status -> scheduleStatus.setText(StatusCelsiusVal(status, temperatureMode)));
                         } else {
-                            Observable.fromCallable(() -> ScheduleManager.getInstance().getMultiModuleZoneStatusMessage(zoneId))
+                            Observable.fromCallable(() -> ScheduleManager.getInstance().getZoneStatusMessage(zoneId, equipId[0]))
                                     .subscribeOn(Schedulers.io())
                                     .observeOn(AndroidSchedulers.mainThread())
                                     .subscribe(status -> scheduleStatus.setText(setPointStatusMessage(status, TemperatureMode.values()[temperatureMode])));
@@ -1612,12 +1612,12 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
         try {
         if( isCelsiusTunerAvailableStatus()) {
-            Observable.fromCallable(() -> ScheduleManager.getInstance().getMultiModuleZoneStatusMessage(zoneId))
+            Observable.fromCallable(() -> ScheduleManager.getInstance().getZoneStatusMessage(zoneId, p.getId()))
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(status -> scheduleStatus.setText(StatusCelsiusVal(status, temperatureMode)));
         } else {
-            Observable.fromCallable(() -> ScheduleManager.getInstance().getMultiModuleZoneStatusMessage(zoneId))
+            Observable.fromCallable(() -> ScheduleManager.getInstance().getZoneStatusMessage(zoneId, p.getId()))
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(status -> scheduleStatus.setText(setPointStatusMessage(status, TemperatureMode.values()[temperatureMode])));
@@ -1871,7 +1871,12 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         float heatingDeadBand ;
         float coolingDeadBand ;
         double currentTemp = 0;
-        float avgTemp = 0;
+
+        int statusVal = CCUHsApi.getInstance().readHisValByQuery("point and not ota and status and his and not writable and equipRef ==\""+p.getId()+"\"").intValue();
+        if (statusVal != ZoneState.TEMPDEAD.ordinal()) {
+            currentTemp = CCUHsApi.getInstance().readHisValByQuery("temp and sensor and (current or space) and equipRef == \"" + p.getId() + "\"");
+        }
+
 
             String roomRefZone = StringUtils.prependIfMissing(p.getRoomRef(), "@");
             buildingLimitMin = BuildingTunerCache.getInstance().getBuildingLimitMin().floatValue();
@@ -1888,14 +1893,14 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
         int modeType = CCUHsApi.getInstance().readHisValByQuery("zone and hvacMode and roomRef == \"" + zoneId + "\"").intValue();
 
+        if(heatingDesired != 0 && coolingDesired !=0)
+            seekArc.setData(seekArc.isDetailedView(), buildingLimitMin, buildingLimitMax, heatLowerLimitVal, heatUpperLimitVal,
+                    coolingLowerLimitVal, coolingUpperLimitVal, heatingDesired, coolingDesired, (float)currentTemp,
+                    heatingDeadBand, coolingDeadBand,modeType);
+
         linearLayoutZonePoints.removeAllViews();
         for (int k = 0; k < openZoneMap.size(); k++) {
             Equip updatedEquip = new Equip.Builder().setHashMap(openZoneMap.get(k)).build();
-            int statusVal = CCUHsApi.getInstance().readHisValByQuery("point and not ota and status and his and not writable and equipRef ==\""+updatedEquip.getId()+"\"").intValue();
-            if (statusVal != ZoneState.TEMPDEAD.ordinal()) {
-                currentTemp += CCUHsApi.getInstance().readHisValByQuery("temp and sensor and (current or space) and equipRef == \"" + updatedEquip.getId() + "\"");
-            }
-
             if (updatedEquip.getProfile().startsWith("DAB")) {
                 HashMap dabPoints = ZoneViewData.getDABEquipPoints(updatedEquip.getId());
                 loadDABPointsUI(dabPoints, inflater, linearLayoutZonePoints, updatedEquip.getGroup());
@@ -1969,13 +1974,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             scheduleImageButton.setVisibility(View.GONE);
             namedScheduleView.setVisibility(View.GONE);
         }
-        if(openZoneMap.size() > 0) {
-            avgTemp = (float)currentTemp / openZoneMap.size();
-        }
-        if(heatingDesired != 0 && coolingDesired !=0)
-            seekArc.setData(seekArc.isDetailedView(), buildingLimitMin, buildingLimitMax, heatLowerLimitVal, heatUpperLimitVal,
-                    coolingLowerLimitVal, coolingUpperLimitVal, heatingDesired, coolingDesired, (float) (Math.round(avgTemp * 10.0) / 10.0),
-                    heatingDeadBand, coolingDeadBand,modeType);
         CcuLog.i("UI_PROFILING","ZoneFragmentNew.updateTemperatureBasedZones Done");
 
     }

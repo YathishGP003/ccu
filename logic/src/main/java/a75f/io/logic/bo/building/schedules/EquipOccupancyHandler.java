@@ -13,7 +13,6 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.schedules.occupancy.AutoForcedOccupied;
 import a75f.io.logic.bo.building.schedules.occupancy.ForcedOccupied;
 import a75f.io.logic.bo.building.schedules.occupancy.OccupancyUtil;
-import a75f.io.logic.bo.util.DemandResponseMode;
 
 import static a75f.io.logic.L.TAG_CCU_SCHEDULER;
 
@@ -30,14 +29,11 @@ public class EquipOccupancyHandler {
     private OccupancyUtil    occupancyUtil;
     
     private OccupiedTrigger occupiedTrigger;
-    private OccupiedTrigger occupiedTriggerDR = OccupiedTrigger.Occupied;
     private UnoccupiedTrigger unoccupiedTrigger;
-    private UnoccupiedTrigger unoccupiedTriggerDR = UnoccupiedTrigger.Unoccupied;
     private boolean scheduleOccupied = false;
     
     private Occupancy updatedOccupancy;
-    private Occupancy updatedOccupancyDR = Occupancy.NONE;
-
+    
     public EquipOccupancyHandler(CCUHsApi hayStack, String equipRef) {
         this.hayStack = hayStack;
         this.equipRef = equipRef;
@@ -59,7 +55,7 @@ public class EquipOccupancyHandler {
     /**
      * Handles occupancy transitions and updates desired temps.
      */
-    public void updateOccupancy(boolean drActivated) {
+    public void updateOccupancy() {
         Occupied scheduleOccupancy = ScheduleUtil.getOccupied(equipRef);
         scheduleOccupied = scheduleOccupancy != null ? scheduleOccupancy.isOccupied() : false;
         Occupancy currentOccupancy = occupancyUtil.getCurrentOccupiedMode();
@@ -73,43 +69,16 @@ public class EquipOccupancyHandler {
             occupancyHandler.prepareOccupied();
         }
         if (scheduleOccupied) {
-            occupiedTrigger = occupancyHandler.getOccupiedTrigger(false);
+            occupiedTrigger = occupancyHandler.getOccupiedTrigger();
             updatedOccupancy = occupiedTrigger.toOccupancy();
-            if(drActivated) {
-                occupiedTriggerDR = occupancyHandler.getOccupiedTrigger(true);
-                if (occupiedTriggerDR != null) {
-                    updatedOccupancyDR = occupiedTriggerDR.toOccupancy();
-                }
-            }
             CcuLog.i(TAG_CCU_SCHEDULER, "updateOccupancy : occupiedTrigger "+occupiedTrigger);
         } else {
-            unoccupiedTrigger = occupancyHandler.getUnoccupiedTrigger(false);
+            unoccupiedTrigger = occupancyHandler.getUnoccupiedTrigger();
             updatedOccupancy = unoccupiedTrigger.toOccupancy();
             CcuLog.i(TAG_CCU_SCHEDULER, "updateOccupancy : unoccupiedTrigger "+unoccupiedTrigger);
-            if(drActivated) {
-                unoccupiedTriggerDR = occupancyHandler.getUnoccupiedTrigger(true);
-                if (unoccupiedTriggerDR != null) {
-                    updatedOccupancyDR = unoccupiedTriggerDR.toOccupancy();
-                }
-            }
         }
     }
-
-    /**
-     * Retrieves the occupancy mode during Demand Response.
-     *
-     * This method obtains the occupancy mode based on the demand response status
-     * by invoking the occupancy handler.
-     *
-     * @return The OccupiedTrigger instance representing the current Demand Response occupancy mode.
-     */
-    public OccupiedTrigger getDRModeOccupiedTrigger() {
-        return occupiedTriggerDR;
-    }
-    public UnoccupiedTrigger getDRModeUnoccupiedTrigger() {
-        return unoccupiedTriggerDR;
-    }
-
+    
     public Occupancy getUpdatedOccupancy() {
         return updatedOccupancy;
     }

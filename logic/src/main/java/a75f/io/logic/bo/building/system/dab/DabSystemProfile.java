@@ -4,6 +4,7 @@ import static a75f.io.logic.tuners.TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HSUtil;
@@ -246,20 +247,12 @@ public abstract class DabSystemProfile extends SystemProfile
     public double getUserIntentVal(String tags)
     {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap cdb = hayStack.read("point and system and userIntent and " + tags);
-        ArrayList values = hayStack.readPoint(cdb.get("id").toString());
-        if (values != null && values.size() > 0)
-        {
-            for (int l = 1; l <= values.size(); l++)
-            {
-                HashMap valMap = ((HashMap) values.get(l - 1));
-                if (valMap.get("val") != null)
-                {
-                    return Double.parseDouble(valMap.get("val").toString());
-                }
-            }
+        Map userIntent = hayStack.readEntity("point and system and userIntent and " + tags);
+        if (userIntent.isEmpty()) {
+            CcuLog.e(L.TAG_CCU_SYSTEM, "UserIntent point not found for tags: " + tags);
+            return 0;
         }
-        return 0;
+        return HSUtil.getPriorityVal(userIntent.get("id").toString());
     }
     
     public void setUserIntentVal(String tags, double val)

@@ -264,7 +264,7 @@ fun AnalogOutConfig(
     unit: String = "",
     isEnabled: Boolean,
     onAssociationChanged: (Option) -> Unit = {},
-    testVal: Int,
+    testVal: Double,
     onTestSignalSelected: (Double) -> Unit = {}
 ) {
     Row(

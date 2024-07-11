@@ -252,6 +252,9 @@ message CcuToCmSettingsMessage_t {
   optional int32 co2Threshold= 15;
   optional int32 co2Target= 16;
   optional DamperCo2Control_e damperCo2Control = 17;
+  optional CmTestSignals_t cmTestSignals = 18; // Indicates which relays and Aouts are under test
+  optional int32 cmStageUpTimer = 19; // In minutes
+  optional int32 cmStageDownTimer = 20; // In minutes
 }
 
 message PiLoopSetPoints_t {
@@ -271,6 +274,15 @@ enum SAToperatingMode_e {
   SAT_OPERATING_MODE_HEATING = 2;
 }
 
+enum UnoccupiedMode_e {
+  OCCUPIED_MODE = 0;
+  UNOCCUPIED_MODE = 1;
+}
+message CmTestSignals_t {
+  optional int32 relayTestSignalsBitmap         = 1; // Indicates which relays are under test
+  optional int32 analogOutputsTestSignalsBitmap = 2; // Indicates which anaOuts are under test
+}
+
 message CcuToCmOverUsbCmControlMessage_t {
   optional uint32 relayBitMap =  1; // Relay bitmap for the CM
 
@@ -279,6 +291,7 @@ message CcuToCmOverUsbCmControlMessage_t {
   repeated int32 piloopSetPoint = 11 ;//[ (nanopb).max_count = 4, (nanopb).fixed_count = false]; // Four set points for four pi loops in the order SAT cooling, SAT heating, DSP pressure, zone co2.
   optional SAToperatingMode_e SAToperatingMode = 12;
   optional uint32 emergencyShutOff = 13;
+  optional UnoccupiedMode_e unoccupiedMode = 14; // 1 = Unoccupied, 0 = Occupied
 }
 
 message CM_SensorBusReadings_t {

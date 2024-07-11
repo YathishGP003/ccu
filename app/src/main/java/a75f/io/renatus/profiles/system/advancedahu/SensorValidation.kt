@@ -65,9 +65,9 @@ fun isRelaySatHeatingAvailable(config: CmConfiguration) = isAnyRelayMapped(confi
 
 private fun getDisForDomain(domainName: String): String {
     return when (domainName) {
-        DomainName.ductStaticPressureSensor1_1, DomainName.ductStaticPressureSensor2_1, DomainName.ductStaticPressureSensor3_1 -> "Duct Static Pressure Sensor (0-1in.WC)"
-        DomainName.ductStaticPressureSensor1_2, DomainName.ductStaticPressureSensor2_2, DomainName.ductStaticPressureSensor3_2 -> "Duct Static Pressure Sensor (0-2in.WC)"
-        DomainName.ductStaticPressureSensor1_10, DomainName.ductStaticPressureSensor2_10, DomainName.ductStaticPressureSensor3_10 -> "Duct Static Pressure Sensor (0-10in.WC)"
+        DomainName.ductStaticPressureSensor1_1, DomainName.ductStaticPressureSensor1_2, DomainName.ductStaticPressureSensor1_10 -> "Duct Static Pressure Sensor 1"
+        DomainName.ductStaticPressureSensor2_1, DomainName.ductStaticPressureSensor2_2, DomainName.ductStaticPressureSensor2_10 -> "Duct Static Pressure Sensor "
+        DomainName.ductStaticPressureSensor3_1, DomainName.ductStaticPressureSensor3_2, DomainName.ductStaticPressureSensor3_10 -> "Duct Static Pressure Sensor 3"
         else -> "Unknown"
     }
 }

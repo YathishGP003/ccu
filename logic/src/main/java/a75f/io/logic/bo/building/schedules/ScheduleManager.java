@@ -55,7 +55,13 @@ import a75f.io.logic.bo.building.erm.EmrProfile;
 import a75f.io.logic.bo.building.hyperstatmonitoring.HyperStatMonitoringProfile;
 import a75f.io.logic.bo.building.modbus.ModbusProfile;
 import a75f.io.logic.bo.building.plc.PlcProfile;
+import a75f.io.logic.bo.building.schedules.occupancy.AutoAway;
+import a75f.io.logic.bo.building.schedules.occupancy.AutoForcedOccupied;
 import a75f.io.logic.bo.building.schedules.occupancy.DemandResponse;
+import a75f.io.logic.bo.building.schedules.occupancy.EmergencyConditioning;
+import a75f.io.logic.bo.building.schedules.occupancy.ForcedOccupied;
+import a75f.io.logic.bo.building.schedules.occupancy.OccupancyUtil;
+import a75f.io.logic.bo.building.schedules.occupancy.Preconditioning;
 import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
@@ -76,12 +82,11 @@ import a75f.io.logic.util.RxjavaUtil;
 public class ScheduleManager {
 
 
-
     private static ScheduleManager instance = null;
 
 
     private final HashMap<String, Occupied> occupiedHashMap = new HashMap<>();
-    private final Map<String, ZoneOccupancyData> zoneOccupancy = new HashMap<>();
+    private final Map<String, Occupancy> zoneOccupancy = new HashMap<>();
     private final Map<String, OccupancyData> equipOccupancy = new ConcurrentHashMap<>();
 
     private Occupied currentOccupiedInfo = null;
@@ -185,6 +190,7 @@ public class ScheduleManager {
         if (!CCUHsApi.getInstance().isCCURegistered()){
             return;
         }
+        zoneOccupancy.clear();
         equipOccupancy.clear();
         ArrayList<Schedule> activeVacationSchedules = CCUHsApi.getInstance().getSystemSchedule(true);
 
@@ -296,14 +302,13 @@ public class ScheduleManager {
     }
 
     public void updateOccupancy(CCUHsApi hayStack, Set<ZoneProfile> zoneProfiles) {
-        boolean drActivated = DemandResponseMode.isDRModeActivated(hayStack);
         CcuLog.i(TAG_CCU_SCHEDULER, "updateOccupancy : ScheduleManager");
         for (ZoneProfile profile : zoneProfiles) {
             if (profile instanceof ModbusProfile) {
                 continue;
             }
             try {
-                profile.updateOccupancy(hayStack, drActivated);
+                profile.updateOccupancy(hayStack);
                 EquipOccupancyHandler occupancyHandler = profile.getEquipOccupancyHandler();
                 OccupancyData occupancyData = getOccupancyData(occupancyHandler, CCUHsApi.getInstance());
                 CcuLog.i(TAG_CCU_SCHEDULER,
@@ -317,9 +322,10 @@ public class ScheduleManager {
 
         }
 
-        updateZoneOccupancy(hayStack, drActivated);
+        updateZoneOccupancy(hayStack);
         updateSystemOccupancy(hayStack);
     }
+
 
     //Update Schedules instantly
     public void updateSchedules() {
@@ -523,48 +529,21 @@ public class ScheduleManager {
                 days.getCoolingUserLimitMax() == null || days.getCoolingUserLimitMin() == null;
     }
 
-    /**
-     * @brief Updates the occupancy status of each zone based on the equipment occupancy within that zone.
-     *
-     * | Module 1                    | Module 2                    | Module 3                    | Zone Level Status Messages    |
-     * |-----------------------------|-----------------------------|-----------------------------|-------------------------------|
-     * | Occupied                    | Occupied                    | Occupied                    | In Occupied                   |
-     * | Preconditioning             | Preconditioning             | Preconditioning             | In Preconditioning            |
-     * | Emergency Conditioning      | Occupied                    | Occupied                    | Emergency Conditioning        |
-     * | KeyCard Autoaway            | Occupied                    | Occupied                    | KeyCard Autoaway              |
-     * | Door/Window Open            | Occupied                    | Occupied                    | Door/Window Open              |
-     * | Autoaway                    | Occupied                    | Occupied                    | In Autoaway                   |
-     * | Autoaway                    | Autoaway                    | Autoaway                    | In Autoaway                   |
-     * | Auto forced occupied        | Unoccupied                  | Unoccupied                  | Temporary Hold Auto           |
-     * | Emergency Conditioning      | Unoccupied                  | Unoccupied                  | Emergency Conditioning        |
-     * | Emergency Conditioning      | Unoccupied                  | Unoccupied                  | Emergency Conditioning        |
-     * | Auto forced occupied        | Auto forced occupied        | Auto forced occupied        | Temporary Hold,               |
-     * | Forced Occupied             | Unoccupied                  | Unoccupied                  | In Temporary Hold Manual      |
-     *
-     * This method reads all rooms from the CCUHsApi and determines the occupancy status for each zone based on
-     * the occupancy status of the equipment within each room. If all equipment in a room are unoccupied, the room
-     * is marked as unoccupied. If any equipment in a room is occupied, the room is marked as occupied based on
-     * the most significant occupancy trigger. The occupancy status is then logged and written back to the CCUHsApi.
-     *
-     * @param hayStack An instance of CCUHsApi used to interact with the occupancy data.
-     */
-    public void updateZoneOccupancy(CCUHsApi hayStack, boolean drModeActive) {
+    public void updateZoneOccupancy(CCUHsApi hayStack) {
         List<HashMap<Object, Object>> rooms = hayStack.readAllEntities("room");
 
-        rooms.forEach( room -> {
+        rooms.forEach(room -> {
             try {
-                ZoneOccupancyData zoneOccupancyData = new ZoneOccupancyData();
                 List<HashMap<Object, Object>> equips =
                         hayStack.readAllEntities("equip and roomRef == \"" + Objects.requireNonNull(room.get("id")) + "\"");
+                Occupancy occupancy;
                 if (equips.isEmpty()) {
-                    zoneOccupancyData.occupancy = UNOCCUPIED;
+                    occupancy = UNOCCUPIED;
                 } else {
                     Occupied scheduleOccupancy = getOccupiedModeCache(room.get("id").toString());
                     boolean zoneOccupied = scheduleOccupancy != null ? scheduleOccupancy.isOccupied() : false;
                     OccupiedTrigger occupiedTrigger = OccupiedTrigger.Occupied;
-                    OccupiedTrigger occupiedTriggerDR = OccupiedTrigger.Occupied;
                     UnoccupiedTrigger unoccupiedTrigger = UnoccupiedTrigger.Unoccupied;
-                    UnoccupiedTrigger unoccupiedTriggerDR = UnoccupiedTrigger.Unoccupied;
                     for (HashMap<Object, Object> equip : equips) {
                         String equipId = Objects.requireNonNull(equip.get("id")).toString();
                         OccupancyData equipOccData = equipOccupancy.get(equipId);
@@ -573,118 +552,38 @@ public class ScheduleManager {
                             continue;
                         }
                         if (zoneOccupied) {
-                            if (equipOccData.occupiedTrigger.ordinal() <= occupiedTrigger.ordinal()) {
+                            if (equipOccData.occupiedTrigger.ordinal() < occupiedTrigger.ordinal()) {
                                 occupiedTrigger = equipOccData.occupiedTrigger;
-                                zoneOccupancyData.message = equipOccData.message;
-                                zoneOccupancyData.occupiedTrigger = equipOccData.occupiedTrigger;
                             }
                         } else {
-                            if (equipOccData.unoccupiedTrigger.ordinal() <= unoccupiedTrigger.ordinal()) {
+                            if (equipOccData.unoccupiedTrigger.ordinal() < unoccupiedTrigger.ordinal()) {
                                 unoccupiedTrigger = equipOccData.unoccupiedTrigger;
-                                zoneOccupancyData.message = equipOccData.message;
-                                zoneOccupancyData.unoccupiedTrigger = equipOccData.unoccupiedTrigger;
-                            }
-                        }
-
-                        // During DR mode, we need to update the TriggerDR field in zoneOccupancyData
-                        if (drModeActive) {
-                            if(zoneOccupied) {
-                                if (equipOccData.occupiedTriggerDR.ordinal() <= occupiedTriggerDR.ordinal()) {
-                                    occupiedTriggerDR = equipOccData.occupiedTriggerDR;
-                                    zoneOccupancyData.occupiedTriggerDR = equipOccData.occupiedTriggerDR;
-                                    equipOccData.occupancyDR = zoneOccupancyData.occupiedTriggerDR.toOccupancy();
-                                }
-                            } else {
-                                if(equipOccData.unoccupiedTriggerDR.ordinal() <= unoccupiedTriggerDR.ordinal()) {
-                                    unoccupiedTriggerDR = equipOccData.unoccupiedTriggerDR;
-                                    zoneOccupancyData.unoccupiedTriggerDR = equipOccData.unoccupiedTriggerDR;
-                                    equipOccData.occupancyDR = zoneOccupancyData.unoccupiedTriggerDR.toOccupancy();
-                                }
                             }
                         }
                     }
                     if (zoneOccupied) {
                         CcuLog.i(TAG_CCU_SCHEDULER,
                                 "updateZoneOccupancy " + room.get("dis") + " : " + occupiedTrigger.toOccupancy());
-                        zoneOccupancyData.occupancy = occupiedTrigger.toOccupancy();
-                        zoneOccupancyData.occupancyDR = occupiedTriggerDR.toOccupancy();
+                        occupancy = occupiedTrigger.toOccupancy();
                     } else {
                         CcuLog.i(TAG_CCU_SCHEDULER, "updateZoneOccupancy " + room.get("dis") + " : "
                                 + unoccupiedTrigger.toOccupancy());
-                        zoneOccupancyData.occupancy = unoccupiedTrigger.toOccupancy();
-                        zoneOccupancyData.occupancyDR = unoccupiedTriggerDR.toOccupancy();
-                    }
-                    // Check if we need to update occupancy of other modules in case of multi-modules in 1 zone
-                    if(equips.size() > 1) {
-                        for (HashMap<Object, Object> equip : equips) {
-                            String equipId = Objects.requireNonNull(equip.get("id")).toString();
-                            OccupancyData equipOccData = equipOccupancy.get(equipId);
-                            if(zoneOccupied) {
-                                if(zoneOccupancyData.occupiedTrigger.ordinal() <= equipOccData.occupiedTrigger.ordinal()) {
-                                    equipOccData.occupancy = zoneOccupancyData.occupancy;
-                                    // Skip updating message for now if dr since it will be updated later below
-                                    if(!drModeActive) equipOccData.message = zoneOccupancyData.message;
-                                    equipOccData.occupiedTrigger = zoneOccupancyData.occupiedTrigger;
-                                }
-                                // Check if the zone is in demand response mode. Update the zone message accordingly
-                                if(drModeActive) {
-                                    // Copy the message from the equipment with the highest priority
-                                    if(zoneOccupancyData.occupiedTriggerDR.ordinal() == equipOccData.occupiedTriggerDR.ordinal()) {
-                                        zoneOccupancyData.message = equipOccData.message;
-                                    }
-                                    if(zoneOccupancyData.occupiedTriggerDR.ordinal() <= equipOccData.occupiedTriggerDR.ordinal()) {
-                                        equipOccData.occupancyDR = zoneOccupancyData.occupancyDR;
-                                        // For portals, all the modules should have same message in case of multimodule
-                                        equipOccData.message = zoneOccupancyData.message;
-                                        equipOccData.occupiedTriggerDR = zoneOccupancyData.occupiedTriggerDR;
-                                    }
-                                }
-                            } else {
-                                if(zoneOccupancyData.unoccupiedTrigger.ordinal() <= equipOccData.unoccupiedTrigger.ordinal()) {
-                                    equipOccData.occupancy = zoneOccupancyData.occupancy;
-                                    // Skip updating message for now if dr since it will be updated later below
-                                    if(!drModeActive) equipOccData.message = zoneOccupancyData.message;
-                                    equipOccData.unoccupiedTrigger = zoneOccupancyData.unoccupiedTrigger;
-                                }
-                                // Check if the zone is in demand response mode. Update the zone message accordingly
-                                if(drModeActive) {
-                                    // Copy the message from the equipment with the highest priority
-                                    if(zoneOccupancyData.unoccupiedTriggerDR.ordinal() == equipOccData.unoccupiedTriggerDR.ordinal()) {
-                                        zoneOccupancyData.message = equipOccData.message;
-                                    }
-                                    if (zoneOccupancyData.unoccupiedTriggerDR.ordinal() <= equipOccData.unoccupiedTriggerDR.ordinal()) {
-                                        equipOccData.occupancyDR = zoneOccupancyData.occupancyDR;
-                                        // For portals, all the modules should have same message in case of multimodule
-                                        equipOccData.message = zoneOccupancyData.message;
-                                        equipOccData.unoccupiedTriggerDR = zoneOccupancyData.unoccupiedTriggerDR;
-                                    }
-                                }
-                            }
-                            // Update the occupancy status of the equipment
-                            equipOccupancy.put(equipId, equipOccData);
-                        }
+                        occupancy = unoccupiedTrigger.toOccupancy();
                     }
                 }
-
-                // Ensure room.get("id") is not null and perform operations safely
-                String roomId = room.get("id") != null ? Objects.requireNonNull(room.get("id")).toString() : null;
-                if (roomId != null) {
-                    ZoneOccupancyData currentOccupancyData = zoneOccupancy.get(roomId);
-                    if (currentOccupancyData != null && currentOccupancyData.occupancy != zoneOccupancyData.occupancy) {
-                        if (zoneOccupancyData.occupancy == Occupancy.UNOCCUPIED) {
-                            clearLevel10(roomId);
-                        }
-                    }
-                    zoneOccupancy.put(roomId, zoneOccupancyData);
+                if (zoneOccupancy.get(room.get("id").toString()) != occupancy) {
+                    if (occupancy == UNOCCUPIED)
+                        clearLevel10(room.get("id").toString());
                 }
-
+                zoneOccupancy.put(room.get("id").toString(), occupancy);
                 hayStack.writeHisValByQuery("occupancy and state and roomRef == \"" + room.get("id") + "\"",
-                        (double) zoneOccupancyData.occupancy.ordinal());
+                        (double) occupancy.ordinal());
             } catch (Exception e) {
                 CcuLog.e(TAG_CCU_SCHEDULER, "Error in updateZoneOccupancy for room " + e);
                 e.printStackTrace();
             }
         });
+
     }
 
 
@@ -835,7 +734,7 @@ public class ScheduleManager {
         return equipOccupancy.get(equipRef).occupancy;
     }
 
-    public ZoneOccupancyData getZoneOccupancyData(String zoneRef) {
+    public Occupancy getZoneOccupancy(String zoneRef) {
         return zoneOccupancy.get(zoneRef);
     }
 
@@ -861,32 +760,6 @@ public class ScheduleManager {
             }
             return prevOccupied;
         }
-    }
-
-    /**
-     * @brief Retrieves the status message for a multi-module zone.
-     *
-     * This method checks if the system is currently in auto-commissioning mode. If so,
-     * it returns a message indicating that the zone is in diagnostic mode. Otherwise,
-     * it fetches the occupancy data for the specified zone and retrieves the associated
-     * status message. If no specific message is found, it defaults to "Loading Schedules".
-     *
-     * @param zoneId The identifier for the zone whose status message is to be retrieved.
-     * @return A string representing the status message of the specified zone.
-     */
-    public String getMultiModuleZoneStatusMessage(String zoneId) {
-        if(AutoCommissioningUtil.isAutoCommissioningStarted()) {
-            CcuLog.i(TAG_CCU_SCHEDULER, "Zone page status - AutoCommissioning is Started ");
-            return "In Diagnostic Mode";
-        }
-        ZoneOccupancyData zoneOccupancyData = getZoneOccupancyData(zoneId);
-        String status;
-        if(zoneOccupancyData != null && zoneOccupancyData.message != null) {
-            status = zoneOccupancyData.message.toString();
-        } else {
-            status = "Loading Schedules";
-        }
-        return status;
     }
 
     /**
@@ -918,35 +791,31 @@ public class ScheduleManager {
         return status;
     }
 
-    private OccupancyData getOccupiedData(OccupiedTrigger occupiedTrigger, OccupiedTrigger drModeOccupiedTrigger, String equipRef, CCUHsApi hayStack) {
+    private OccupancyData getOccupiedData(OccupiedTrigger occupiedTrigger, String equipRef, CCUHsApi hayStack) {
         OccupancyData occupancyData = new OccupancyData();
         occupancyData.isOccupied = true;
         occupancyData.occupiedTrigger = occupiedTrigger;
-        occupancyData.occupiedTriggerDR = drModeOccupiedTrigger;
         occupancyData.occupancy = occupiedTrigger.toOccupancy();
-        occupancyData.occupancyDR = drModeOccupiedTrigger.toOccupancy();
-        occupancyData.message = getZoneStatusString(equipRef, occupancyData, hayStack);
+        occupancyData.message = getZoneStatusString(equipRef, occupancyData.occupancy, hayStack);
         return occupancyData;
     }
 
-    private OccupancyData getUnoccupiedData(UnoccupiedTrigger unoccupiedTrigger, UnoccupiedTrigger drModeOccupiedTrigger, String equipRef, CCUHsApi hayStack) {
+    private OccupancyData getUnoccupiedData(UnoccupiedTrigger unoccupiedTrigger, String equipRef, CCUHsApi hayStack) {
         OccupancyData occupancyData = new OccupancyData();
         occupancyData.isOccupied = false;
         occupancyData.unoccupiedTrigger = unoccupiedTrigger;
-        occupancyData.unoccupiedTriggerDR = drModeOccupiedTrigger;
         occupancyData.occupancy = unoccupiedTrigger.toOccupancy();
-        occupancyData.occupancyDR = drModeOccupiedTrigger.toOccupancy();
-        occupancyData.message = getZoneStatusString(equipRef, occupancyData, hayStack);
+        occupancyData.message = getZoneStatusString(equipRef, occupancyData.occupancy, hayStack);
         return occupancyData;
     }
 
     private OccupancyData getOccupancyData(EquipOccupancyHandler occupancyHandler, CCUHsApi hayStack) {
         if (occupancyHandler.isScheduleOccupied()) {
-            return getOccupiedData(occupancyHandler.getCurrentOccupiedTrigger(), occupancyHandler.getDRModeOccupiedTrigger(),
-                    occupancyHandler.getEquipRef(), hayStack);
+            return getOccupiedData(occupancyHandler.getCurrentOccupiedTrigger(), occupancyHandler.getEquipRef(),
+                                   hayStack);
         } else {
-            return getUnoccupiedData(occupancyHandler.getCurrentUnoccupiedTrigger(), occupancyHandler.getDRModeUnoccupiedTrigger(),
-                    occupancyHandler.getEquipRef(), hayStack);
+            return getUnoccupiedData(occupancyHandler.getCurrentUnoccupiedTrigger(), occupancyHandler.getEquipRef(),
+                                     hayStack);
         }
     }
 
@@ -971,8 +840,7 @@ public class ScheduleManager {
         }
     }
 
-    private String getZoneStatusString(String equipId, OccupancyData occupancyData, CCUHsApi hayStack){
-        Occupancy curOccupancyMode = occupancyData.occupancy;
+    private String getZoneStatusString(String equipId, Occupancy curOccupancyMode, CCUHsApi hayStack){
         Equip equip = HSUtil.getEquip(hayStack, equipId);
         Occupied cachedOccupied = getOccupiedModeCache(equip.getRoomRef());
         CcuLog.i(TAG_CCU_SCHEDULER,
@@ -1019,19 +887,31 @@ public class ScheduleManager {
                 CcuLog.i(TAG_CCU_SCHEDULER, " getZoneStatusString , occupied but current schedule null");
                 return "No schedule configured";
             }
-            return getOccupiedStatusMessage(cachedOccupied, "Occupied mode");
+            return String.format("In %s, changes to Energy saving range of %.1f-%.1f\u00B0F at %02d:%02d", "Occupied mode",
+                    cachedOccupied.getHeatingVal() - cachedOccupied.getUnoccupiedZoneSetback(),
+                    cachedOccupied.getCoolingVal() + cachedOccupied.getUnoccupiedZoneSetback(),
+                    TimeUtil.getEndTimeHr(cachedOccupied.getCurrentlyOccupiedSchedule().getEthh(),cachedOccupied.getCurrentlyOccupiedSchedule().getEtmm()),
+                    TimeUtil.getEndTimeMin(cachedOccupied.getCurrentlyOccupiedSchedule().getEthh(),cachedOccupied.getCurrentlyOccupiedSchedule().getEtmm()));
         }
         if(curOccupancyMode == DEMAND_RESPONSE_OCCUPIED) {
-            if(occupancyData.occupancyDR == WINDOW_OPEN){
-                return getOccupiedStatusMessage(cachedOccupied, "Demand Response | Door/Window Open");
-            } else if(occupancyData.occupancyDR == KEYCARD_AUTOAWAY){
-                return getOccupiedStatusMessage(cachedOccupied, "Demand Response | Keycard Autoaway");
-            } else if(occupancyData.occupancyDR == AUTOAWAY){
-                 return getOccupiedStatusMessage(cachedOccupied, "Demand Response | Auto Away");
-            } else if (occupancyData.occupancyDR == EMERGENCY_CONDITIONING) {
-                return getOccupiedStatusMessage(cachedOccupied, "Demand Response Occupied | Emergency Conditioning");
+            if(AutoAway.isZoneInAutoAwayMode(new OccupancyUtil(hayStack, equipId))){
+                 return String.format("In %s, changes to Energy saving range of %.1f-%.1f\u00B0F at %02d:%02d", "Demand Response | Auto Away",
+                         cachedOccupied.getHeatingVal() - cachedOccupied.getUnoccupiedZoneSetback(),
+                         cachedOccupied.getCoolingVal() + cachedOccupied.getUnoccupiedZoneSetback(),
+                         TimeUtil.getEndTimeHr(cachedOccupied.getCurrentlyOccupiedSchedule().getEthh(),cachedOccupied.getCurrentlyOccupiedSchedule().getEtmm()),
+                        TimeUtil.getEndTimeMin(cachedOccupied.getCurrentlyOccupiedSchedule().getEthh(),cachedOccupied.getCurrentlyOccupiedSchedule().getEtmm()));
+            } else if (EmergencyConditioning.isZoneInEmergencyConditioning(hayStack, equipId)) {
+                return String.format("In %s, changes to Energy saving range of %.1f-%.1f\u00B0F at %02d:%02d", "Demand Response Occupied | Emergency Conditioning",
+                        cachedOccupied.getHeatingVal() - cachedOccupied.getUnoccupiedZoneSetback(),
+                        cachedOccupied.getCoolingVal() + cachedOccupied.getUnoccupiedZoneSetback(),
+                        TimeUtil.getEndTimeHr(cachedOccupied.getCurrentlyOccupiedSchedule().getEthh(),cachedOccupied.getCurrentlyOccupiedSchedule().getEtmm()),
+                        TimeUtil.getEndTimeMin(cachedOccupied.getCurrentlyOccupiedSchedule().getEthh(),cachedOccupied.getCurrentlyOccupiedSchedule().getEtmm()));
             }
-            return getOccupiedStatusMessage(cachedOccupied, "Demand Response Occupied mode");
+            return String.format("In %s, changes to Energy saving range of %.1f-%.1f\u00B0F at %02d:%02d", "Demand Response Occupied mode",
+                    cachedOccupied.getHeatingVal() - cachedOccupied.getUnoccupiedZoneSetback(),
+                    cachedOccupied.getCoolingVal() + cachedOccupied.getUnoccupiedZoneSetback(),
+                    TimeUtil.getEndTimeHr(cachedOccupied.getCurrentlyOccupiedSchedule().getEthh(),cachedOccupied.getCurrentlyOccupiedSchedule().getEtmm()),
+                    TimeUtil.getEndTimeMin(cachedOccupied.getCurrentlyOccupiedSchedule().getEthh(),cachedOccupied.getCurrentlyOccupiedSchedule().getEtmm()));
         }
         long th = ScheduleUtil.getTemporaryHoldExpiry(equip);
         CcuLog.i(TAG_CCU_SCHEDULER, " th "+th);
@@ -1062,7 +942,11 @@ public class ScheduleManager {
             statusString = String.format(Locale.US, "In Energy saving %s till %s", "Vacation",
                     cachedOccupied.getVacation().getEndDateString());
             if(curOccupancyMode == DEMAND_RESPONSE_UNOCCUPIED) {
-                statusString = getUnOccupiedStatusMessage(cachedOccupied, "Demand Response Unoccupied mode");
+                statusString = String.format("In Energy saving %s, changes to %.1f-%.1f\u00B0F at %02d:%02d", "Demand Response Unoccupied mode",
+                        cachedOccupied.getHeatingVal(),
+                        cachedOccupied.getCoolingVal(),
+                        cachedOccupied.getNextOccupiedSchedule().getSthh(),
+                        cachedOccupied.getNextOccupiedSchedule().getStmm());
             }
         } else {
             boolean isZoneTempDead = hayStack.readHisValByQuery("point and status and not ota and " +
@@ -1074,7 +958,11 @@ public class ScheduleManager {
                             "Preconditioning nextOccupied schedule not found "+equip.getDisplayName());
                     return "No schedule configured";
                 }
-                statusString = getUnOccupiedStatusMessage(cachedOccupied, "Preconditioning");
+                statusString = String.format("In %s, changes to Energy saving range of %.1f-%.1f\u00B0F at %02d:%02d", "Preconditioning",
+                        cachedOccupied.getHeatingVal() - cachedOccupied.getUnoccupiedZoneSetback(),
+                        cachedOccupied.getCoolingVal() + cachedOccupied.getUnoccupiedZoneSetback(),
+                        cachedOccupied.getNextOccupiedSchedule().getEthh(),
+                        cachedOccupied.getNextOccupiedSchedule().getEtmm());
 
             } else {
                 if (cachedOccupied.getNextOccupiedSchedule() == null) {
@@ -1082,28 +970,44 @@ public class ScheduleManager {
                     return "No schedule configured";
                 }
                 if(curOccupancyMode == DEMAND_RESPONSE_UNOCCUPIED){
-                    if(occupancyData.occupancyDR == WINDOW_OPEN) {
-                        statusString = getUnOccupiedStatusMessage(cachedOccupied, "Demand Response | Door/Window Open");
-                    } else if(occupancyData.occupancyDR == KEYCARD_AUTOAWAY) {
-                        statusString = getUnOccupiedStatusMessage(cachedOccupied, "Demand Response | Keycard Autoaway");
-                    } else if(occupancyData.occupancyDR == AUTOFORCEOCCUPIED){
-                        statusString = getUnOccupiedStatusMessage(cachedOccupied, "Demand Response | Auto Forced Occupied");
-                    } else if (occupancyData.occupancyDR == FORCEDOCCUPIED){
-                        statusString = getUnOccupiedStatusMessage(cachedOccupied, "Demand Response | Forced Occupied");
+                    if(AutoForcedOccupied.isZoneInAutoForcedOccupied(new OccupancyUtil(hayStack, equipId))){
+                        statusString = String.format("In Energy saving %s, changes to %.1f-%.1f\u00B0F at %02d:%02d", "Demand Response | Auto Forced Occupied",
+                                cachedOccupied.getHeatingVal(),
+                                cachedOccupied.getCoolingVal(),
+                                cachedOccupied.getNextOccupiedSchedule().getSthh(),
+                                cachedOccupied.getNextOccupiedSchedule().getStmm());
+                    } else if (ForcedOccupied.isZoneForcedOccupied(equipId)){
+                        statusString = String.format("In Energy saving %s, changes to %.1f-%.1f\u00B0F at %02d:%02d", "Demand Response | Forced Occupied",
+                                cachedOccupied.getHeatingVal(),
+                                cachedOccupied.getCoolingVal(),
+                                cachedOccupied.getNextOccupiedSchedule().getSthh(),
+                                cachedOccupied.getNextOccupiedSchedule().getStmm());
                     }
-                    else if (occupancyData.occupancyDR == EMERGENCY_CONDITIONING){
-                        statusString = getUnOccupiedStatusMessage(cachedOccupied, "Demand Response Unoccupied | Emergency Conditioning");
-                    } else if (occupancyData.occupancyDR == PRECONDITIONING){
+                    else if (EmergencyConditioning.isZoneInEmergencyConditioning(hayStack, equipId)){
+                        statusString = String.format("In Energy saving %s, changes to %.1f-%.1f\u00B0F at %02d:%02d", "Demand Response Unoccupied | Emergency Conditioning",
+                                cachedOccupied.getHeatingVal(),
+                                cachedOccupied.getCoolingVal(),
+                                cachedOccupied.getNextOccupiedSchedule().getSthh(),
+                                cachedOccupied.getNextOccupiedSchedule().getStmm());
+                    } else if (Preconditioning.isZoneInPreconditioning(hayStack, equipId)){
                         return "In Demand Response | Preconditioning";
                     } else if ((equip.getMarkers().contains("vav") || equip.getMarkers().contains("dab")) &&
                             nextOccupiedInfo != null && getSystemPreconditioningStatus(nextOccupiedInfo,
                             hayStack) == PRECONDITIONING) {
                         return "In Demand Response | Preconditioning";
-                    } else {
-                        statusString = getUnOccupiedStatusMessage(cachedOccupied, "Demand Response Unoccupied mode");
+                    }else {
+                        statusString = String.format("In Energy saving %s, changes to %.1f-%.1f\u00B0F at %02d:%02d", "Demand Response Unoccupied mode",
+                                cachedOccupied.getHeatingVal(),
+                                cachedOccupied.getCoolingVal(),
+                                cachedOccupied.getNextOccupiedSchedule().getSthh(),
+                                cachedOccupied.getNextOccupiedSchedule().getStmm());
                     }
                 }else {
-                    statusString = getUnOccupiedStatusMessage(cachedOccupied, "Unoccupied mode");
+                    statusString = String.format("In Energy saving %s, changes to %.1f-%.1f\u00B0F at %02d:%02d", "Unoccupied mode",
+                            cachedOccupied.getHeatingVal(),
+                            cachedOccupied.getCoolingVal(),
+                            cachedOccupied.getNextOccupiedSchedule().getSthh(),
+                            cachedOccupied.getNextOccupiedSchedule().getStmm());
                 }
             }
         }
@@ -1112,42 +1016,6 @@ public class ScheduleManager {
         }
         CcuLog.i(TAG_CCU_SCHEDULER, "Invalid zone occupancy status  ");
         return statusString;
-    }
-
-    /**
-     * Generates a status message for unoccupied mode.
-     *
-     * This method constructs a formatted string indicating the current energy saving mode status,
-     * the heating and cooling values, and the start time of the next occupied schedule.
-     *
-     * @param cachedOccupied The cached Occupied instance containing the current schedule and temperature settings.
-     * @param modeStatus The string representing the current mode status.
-     * @return A formatted status message string.
-     */
-    private static String getUnOccupiedStatusMessage(Occupied cachedOccupied, String modeStatus) {
-        return String.format("In Energy saving %s, changes to %.1f-%.1f\u00B0F at %02d:%02d", modeStatus,
-                cachedOccupied.getHeatingVal(),
-                cachedOccupied.getCoolingVal(),
-                cachedOccupied.getNextOccupiedSchedule().getSthh(),
-                cachedOccupied.getNextOccupiedSchedule().getStmm());
-    }
-
-    /**
-     * Constructs a status message for the Demand Response mode.
-     *
-     * This method formats a string message indicating the current mode status,
-     * energy-saving temperature range, and the end time of the current schedule.
-     *
-     * @param cachedOccupied An instance of the Occupied class representing the current occupancy state.
-     * @param modeStatus A string representing the current mode status (e.g., "Demand Response | Door/Window Open").
-     * @return A formatted string message with the mode status and energy-saving details.
-     */
-    private static String getOccupiedStatusMessage(Occupied cachedOccupied, String modeStatus) {
-        return String.format("In %s, changes to Energy saving range of %.1f-%.1f\u00B0F at %02d:%02d", modeStatus,
-                cachedOccupied.getHeatingVal() - cachedOccupied.getUnoccupiedZoneSetback(),
-                cachedOccupied.getCoolingVal() + cachedOccupied.getUnoccupiedZoneSetback(),
-                TimeUtil.getEndTimeHr(cachedOccupied.getCurrentlyOccupiedSchedule().getEthh(), cachedOccupied.getCurrentlyOccupiedSchedule().getEtmm()),
-                TimeUtil.getEndTimeMin(cachedOccupied.getCurrentlyOccupiedSchedule().getEthh(), cachedOccupied.getCurrentlyOccupiedSchedule().getEtmm()));
     }
 
     /**

@@ -19,10 +19,8 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.schedules.occupancy.AutoAway;
 import a75f.io.logic.bo.building.schedules.occupancy.AutoForcedOccupied;
 import a75f.io.logic.bo.building.schedules.occupancy.ForcedOccupied;
-import a75f.io.logic.bo.building.schedules.occupancy.KeyCard;
 import a75f.io.logic.bo.building.schedules.occupancy.OccupancyUtil;
 import a75f.io.logic.bo.building.schedules.occupancy.Preconditioning;
-import a75f.io.logic.bo.building.schedules.occupancy.WindowSensor;
 import a75f.io.logic.bo.util.DemandResponseMode;
 import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.TunerUtil;
@@ -69,7 +67,7 @@ public class EquipScheduleHandler implements Schedulable {
         }
 
         //Write to Level 4 when AutoAway
-        if (updatedOccupancy == Occupancy.AUTOAWAY || updatedOccupancy == Occupancy.KEYCARD_AUTOAWAY) {
+        if (updatedOccupancy == Occupancy.AUTOAWAY ||updatedOccupancy == Occupancy.KEYCARD_AUTOAWAY) {
             updateDesiredTempForAutoAway();
         }
         if ((currentOccupancy == Occupancy.DEMAND_RESPONSE_OCCUPIED||currentOccupancy ==
@@ -121,11 +119,11 @@ public class EquipScheduleHandler implements Schedulable {
 
         if (updatedOccupancy == Occupancy.DEMAND_RESPONSE_OCCUPIED ||
                 updatedOccupancy == Occupancy.DEMAND_RESPONSE_UNOCCUPIED) {
-            updateDesiredTempForDemandResponse(updatedOccupancy, new OccupancyUtil(hayStack, equipRef), occupancyData);
+            updateDesiredTempForDemandResponse(updatedOccupancy, new OccupancyUtil(hayStack, equipRef));
         }
     }
 
-    private void updateDesiredTempForDemandResponse(Occupancy updatedOccupancy, OccupancyUtil occupancyUtil, OccupancyData occupancyData) {
+    private void updateDesiredTempForDemandResponse(Occupancy updatedOccupancy, OccupancyUtil occupancyUtil) {
         Double setback = null;
         Schedule schedule = Schedule.getScheduleByEquipId(equipRef);
         if(!schedule.getMarkers().contains(Tags.FOLLOW_BUILDING))
@@ -146,15 +144,8 @@ public class EquipScheduleHandler implements Schedulable {
         CcuLog.i(L.TAG_CCU_SCHEDULER, "Demand response setback value: " + demandResponseSetback +
                 "Cooling desired temp: "+coolingDT + "Heating desired temp: "+heatingDT + "updated occupancy: "+updatedOccupancy
                 +"Setback: "+setback);
-        if(updatedOccupancy == Occupancy.DEMAND_RESPONSE_OCCUPIED && occupancyData.occupancyDR == Occupancy.WINDOW_OPEN){
-            double coolingSetBack = DemandResponseMode.getCoolingSetBack(coolingDT + demandResponseSetback, buildingLimitMax);
-            double heatingSetBack = DemandResponseMode.getHeatingSetBack(heatingDT - demandResponseSetback, buildingLimitMin);
-            ScheduleUtil.setDesiredTempAtLevel(hayStack, coolingDtId, HayStackConstants.DEMAND_RESPONSE_LEVEL,
-                    coolingSetBack, 0, WhoFiledConstants.SCHEDULER_WHO);
-            ScheduleUtil.setDesiredTempAtLevel(hayStack, heatingDtId, HayStackConstants.DEMAND_RESPONSE_LEVEL,
-                    heatingSetBack, 0, WhoFiledConstants.SCHEDULER_WHO);
-        } else if(updatedOccupancy == Occupancy.DEMAND_RESPONSE_UNOCCUPIED &&
-                occupancyData.occupancyDR == Occupancy.AUTOFORCEOCCUPIED){
+        if(updatedOccupancy == Occupancy.DEMAND_RESPONSE_UNOCCUPIED &&
+                AutoForcedOccupied.isZoneInAutoForcedOccupied(occupancyUtil)){
             double coolingSetBack = DemandResponseMode.getCoolingSetBack(coolingDT - setback +
                      demandResponseSetback, buildingLimitMax);
             double heatingSetBack = DemandResponseMode.getHeatingSetBack(heatingDT + setback -
@@ -163,9 +154,8 @@ public class EquipScheduleHandler implements Schedulable {
                     HayStackConstants.DEMAND_RESPONSE_LEVEL, coolingSetBack, 0, WhoFiledConstants.SCHEDULER_WHO);
             ScheduleUtil.setDesiredTempAtLevel(hayStack, heatingDtId, HayStackConstants.DEMAND_RESPONSE_LEVEL,
                     heatingSetBack, 0, WhoFiledConstants.SCHEDULER_WHO);
-
-        } else if(updatedOccupancy == Occupancy.DEMAND_RESPONSE_OCCUPIED &&
-                occupancyData.occupancyDR == Occupancy.FORCEDOCCUPIED) {
+        } else if ((updatedOccupancy == Occupancy.DEMAND_RESPONSE_UNOCCUPIED &&
+                ForcedOccupied.isZoneForcedOccupied(equipRef))) {
             /*For forced occupied we do not clear Forced occupied levels so add DR setback on top of it*/
             double coolingSetBack = DemandResponseMode.getCoolingSetBack(coolingDT +
                     demandResponseSetback, buildingLimitMax);
@@ -175,8 +165,9 @@ public class EquipScheduleHandler implements Schedulable {
                     HayStackConstants.DEMAND_RESPONSE_LEVEL, coolingSetBack, 0, WhoFiledConstants.SCHEDULER_WHO);
             ScheduleUtil.setDesiredTempAtLevel(hayStack, heatingDtId, HayStackConstants.DEMAND_RESPONSE_LEVEL,
                     heatingSetBack, 0, WhoFiledConstants.SCHEDULER_WHO);
-        } else if (updatedOccupancy == Occupancy.DEMAND_RESPONSE_OCCUPIED && (occupancyData.occupancyDR == Occupancy.AUTOAWAY
-                || occupancyData.occupancyDR == Occupancy.KEYCARD_AUTOAWAY)) {
+
+        } else if (updatedOccupancy == Occupancy.DEMAND_RESPONSE_OCCUPIED &&
+                AutoAway.isZoneInAutoAwayMode(occupancyUtil)){
             double autoAwaySetback = TunerUtil.readTunerValByQuery("auto and away and setback", equipRef);
             double coolingSetBack = DemandResponseMode.getCoolingSetBack(coolingDT +
                     demandResponseSetback + autoAwaySetback, buildingLimitMax);
@@ -187,7 +178,7 @@ public class EquipScheduleHandler implements Schedulable {
             ScheduleUtil.setDesiredTempAtLevel(hayStack, heatingDtId, HayStackConstants.DEMAND_RESPONSE_LEVEL,
                     heatingSetBack, 0, WhoFiledConstants.SCHEDULER_WHO);
         } else if (updatedOccupancy == Occupancy.DEMAND_RESPONSE_UNOCCUPIED &&
-                occupancyData.occupancyDR == Occupancy.PRECONDITIONING) {
+                Preconditioning.isZoneInPreconditioning(hayStack, equipRef)) {
 
             double coolingSetBack = DemandResponseMode.getCoolingSetBack(coolingDT +
                     demandResponseSetback - setback, buildingLimitMax);

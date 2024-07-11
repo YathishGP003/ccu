@@ -11,6 +11,8 @@ import a75f.io.logic.bo.building.system.getDomainPressure
 import a75f.io.logic.bo.building.system.relayAssociationDomainNameToType
 import a75f.io.logic.bo.building.system.relayAssociationToDomainName
 import a75f.io.logic.bo.building.system.vav.config.CmConfiguration
+import android.text.Html
+import android.text.Spanned
 
 
 /**
@@ -73,7 +75,7 @@ private fun getDisForDomain(domainName: String): String {
 
 
 
-fun findPressureDuplicate(pressureData: Triple<String?, String?, String?>): Pair<Boolean,String> {
+fun findPressureDuplicate(pressureData: Triple<String?, String?, String?>): Pair<Boolean,Spanned> {
     val pressureDomainName = pressureData.first
     val analogIn1DomainName = pressureData.second
     val analogIn2DomainName = pressureData.third
@@ -108,73 +110,73 @@ fun findPressureDuplicate(pressureData: Triple<String?, String?, String?>): Pair
             return sequenceStatus
         }
     }
-    return Pair(true, "success")
+    return Pair(true, Html.fromHtml("success", Html.FROM_HTML_MODE_LEGACY))
 }
 
-fun validatePressureSequence(primary: String, mapping1: String?, mapping2: String?) :Pair<Boolean,String> {
+fun validatePressureSequence(primary: String, mapping1: String?, mapping2: String?) :Pair<Boolean,Spanned> {
     if (primary.contains("3_")) {
         if ((mapping1 != null && (!mapping1.contains("2_")) && mapping2 != null && (!mapping2.contains("2_"))) || (mapping1 == null && mapping2 == null)) {
-            return Pair(false, "In order to select Pressure Sensor 3, You should select Pressure sensor 2")
+            return Pair(false, Html.fromHtml("Pressure sensor should be <b>selected in sequential order</b>. Please select Pressure Sensor 2 before selecting Pressure Sensor 3 in Sensor Bus and Analog Inputs.", Html.FROM_HTML_MODE_LEGACY))
         }
         if (mapping2 == null && mapping1 != null && (!mapping1.contains("2_"))) {
-            return Pair(false, "In order to select Pressure Sensor 3, You should select Pressure sensor 2")
+            return Pair(false, Html.fromHtml("Pressure sensor should be <b>selected in sequential order</b>. Please select Pressure Sensor 2 before selecting Pressure Sensor 3 in Sensor Bus and Analog Inputs.", Html.FROM_HTML_MODE_LEGACY))
         }
         if (mapping1 == null && mapping2 != null && (!mapping2.contains("2_"))) {
-            return Pair(false, "In order to select Pressure Sensor 3, You should select Pressure sensor 2")
+            return Pair(false, Html.fromHtml("Pressure sensor should be <b>selected in sequential order</b>. Please select Pressure Sensor 2 before selecting Pressure Sensor 3 in Sensor Bus and Analog Inputs.", Html.FROM_HTML_MODE_LEGACY))
         }
     }
     if (primary.contains("2_")) {
         if ((mapping1 != null && (!mapping1.contains("1_")) && mapping2 != null && (!mapping2.contains("1_"))) || (mapping1 == null && mapping2 == null)) {
-            return Pair(false, "In order to select Pressure Sensor 2, You should select Pressure Sensor 1")
+            return Pair(false, Html.fromHtml("Pressure sensor should be <b>selected in sequential order</b>. Please select Pressure Sensor 1 before selecting Pressure Sensor 2 in Sensor Bus and Analog Inputs.", Html.FROM_HTML_MODE_LEGACY))
         }
         if (mapping2 == null && mapping1 != null && (!mapping1.contains("1_"))) {
-            return Pair(false, "In order to select Pressure Sensor 2, You should select Pressure sensor 1")
+            return Pair(false, Html.fromHtml("Pressure sensor should be <b>selected in sequential order</b>. Please select Pressure Sensor 1 before selecting Pressure Sensor 2 in Sensor Bus and Analog Inputs.", Html.FROM_HTML_MODE_LEGACY))
         }
         if (mapping1 == null && mapping2 != null && (!mapping2.contains("1_"))) {
-            return Pair(false, "In order to select Pressure Sensor 2, You should select Pressure sensor 1")
+            return Pair(false, Html.fromHtml("Pressure sensor should be <b>selected in sequential order</b>. Please select Pressure Sensor 1 before selecting Pressure Sensor 2 in Sensor Bus and Analog Inputs.", Html.FROM_HTML_MODE_LEGACY))
         }
     }
-    return Pair(true, "success")
+    return Pair(true, Html.fromHtml("success", Html.FROM_HTML_MODE_LEGACY))
 }
-fun validateDuplicatePressure(primary: String?, mapping1: String?, mapping2: String?):Pair<Boolean,String> {
+fun validateDuplicatePressure(primary: String?, mapping1: String?, mapping2: String?):Pair<Boolean,Spanned> {
     if (primary != null) {
         if (mapping1 != null && mapping1.contentEquals(primary)) {
-            return Pair(false, "Duplicate selection for ${getDisForDomain(primary)} sensor")
+            return Pair(false, Html.fromHtml("Duplicate selection for <b>${getDisForDomain(primary)} Sensor</b> is not allowed.", Html.FROM_HTML_MODE_LEGACY))
         }
         if (mapping2 != null && mapping2.contentEquals(primary)) {
-            return Pair(false, "Duplicate selection for ${getDisForDomain(primary)} sensor")
+            return Pair(false, Html.fromHtml("Duplicate selection for <b>${getDisForDomain(primary)} Sensor</b> is not allowed.", Html.FROM_HTML_MODE_LEGACY))
         }
         if (primary.contains("1_") && ((mapping1 != null && mapping1.contains("1_"))
                         || (mapping2 != null && mapping2.contains("1_")))) {
-            return Pair(false, "Duplicate selection for ${getDisForDomain(primary)} sensor, ")
+            return Pair(false, Html.fromHtml("Duplicate selection for <b>${getDisForDomain(primary)} sensor</b> is not allowed.", Html.FROM_HTML_MODE_LEGACY))
         }
         if (primary.contains("2_") && ((mapping1 != null && mapping1.contains("2_"))
                         || (mapping2 != null && mapping2.contains("2_")))) {
-            return Pair(false, "Duplicate selection for ${getDisForDomain(primary)} sensor, ")
+            return Pair(false, Html.fromHtml("Duplicate selection for <b>${getDisForDomain(primary)} sensor</b> is not allowed.", Html.FROM_HTML_MODE_LEGACY))
         }
         if (primary.contains("3_") && ((mapping1 != null && mapping1.contains("3_"))
                         || (mapping2 != null && mapping2.contains("3_")))) {
-            return Pair(false, "Duplicate selection for ${getDisForDomain(primary)} sensor, ")
+            return Pair(false,  Html.fromHtml("Duplicate selection for ${getDisForDomain(primary)} sensor</b> is not allowed.", Html.FROM_HTML_MODE_LEGACY))
         }
     }
-    return Pair(true, "success")
+    return Pair(true, Html.fromHtml("success", Html.FROM_HTML_MODE_LEGACY))
 }
 
-fun isValidateConfiguration(viewModel: AdvancedHybridAhuViewModel): Pair<Boolean, String> {
+fun isValidateConfiguration(viewModel: AdvancedHybridAhuViewModel): Pair<Boolean, Spanned> {
 
     var isPressureAvailable = false
     if (isRelayPressureFanAvailable(viewModel.profileConfiguration.cmConfiguration)) {
         if (!isAOPressureAvailable(viewModel.profileConfiguration.cmConfiguration)) {
-            return Pair(false, "Relay Pressure Fan is mapped but Analog Output Pressure Fan is not mapped")
+            return Pair(false, Html.fromHtml("Relay based Pressure Fan is mapped but <b>Pressure Fan configuration is not mapped</b>", Html.FROM_HTML_MODE_LEGACY))
         }
         if (!isPressureSensorAvailable(viewModel.profileConfiguration.cmConfiguration)) {
-            return Pair(false, "Pressure configuration mapped but Pressure Sensor is not available")
+            return Pair(false, Html.fromHtml("Pressure configuration mapped but <b>Pressure Sensor is not available</b>", Html.FROM_HTML_MODE_LEGACY))
         }
         isPressureAvailable = true
     }
     if (isAOPressureAvailable(viewModel.profileConfiguration.cmConfiguration)) {
         if (!isPressureSensorAvailable(viewModel.profileConfiguration.cmConfiguration)) {
-            return Pair(false, "Pressure configuration mapped but Pressure Sensor is not available")
+            return Pair(false, Html.fromHtml("Pressure configuration mapped but <b>Pressure Sensor is not available</b>", Html.FROM_HTML_MODE_LEGACY))
         }
         isPressureAvailable = true
     }
@@ -193,7 +195,7 @@ fun isValidateConfiguration(viewModel: AdvancedHybridAhuViewModel): Pair<Boolean
     )
 
     if (isPressureAvailable && pressureDomainName == null && analogIn1DomainName == null && analogIn2DomainName == null) {
-        return Pair(false, "Pressure configuration mapped but Pressure Sensor is not available")
+        return Pair(false, Html.fromHtml("Pressure configuration mapped but <b>Pressure Sensor</b> is not available", Html.FROM_HTML_MODE_LEGACY))
     }
 
     val pressureStatus = findPressureDuplicate(Triple(pressureDomainName, analogIn1DomainName, analogIn2DomainName))
@@ -203,14 +205,14 @@ fun isValidateConfiguration(viewModel: AdvancedHybridAhuViewModel): Pair<Boolean
 
     if (isRelaySatCoolingAvailable(viewModel.profileConfiguration.cmConfiguration)) {
         if (!isAOCoolingSatAvailable(viewModel.profileConfiguration.cmConfiguration)) {
-            return Pair(false, "Relay Sat Cooling is mapped but Analog Out Sat Cooling is not mapped")
+            return Pair(false, Html.fromHtml("Relay based SAT Cooling is mapped but <b>SAT Cooling configuration</b> is not mapped", Html.FROM_HTML_MODE_LEGACY))
         }
     }
 
     if (isRelaySatHeatingAvailable(viewModel.profileConfiguration.cmConfiguration)) {
         if (!isAOHeatingSatAvailable(viewModel.profileConfiguration.cmConfiguration)) {
-            return Pair(false, "Relay Sat Heating is mapped but Analog Out Sat Heating is not mapped")
+            return Pair(false, Html.fromHtml("Relay based SAT Heating is mapped but <b>SAT Heating configuration</b> is not mapped", Html.FROM_HTML_MODE_LEGACY))
         }
     }
-    return Pair(true, "Success")
+    return Pair(true, Html.fromHtml("Success", Html.FROM_HTML_MODE_LEGACY))
 }

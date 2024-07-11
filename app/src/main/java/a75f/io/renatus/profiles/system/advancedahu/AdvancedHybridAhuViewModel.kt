@@ -1,11 +1,8 @@
 package a75f.io.renatus.profiles.system.advancedahu
 
 import a75f.io.api.haystack.CCUHsApi
-import a75f.io.device.cm.getCMControlsMessage
-import a75f.io.device.cm.sendControlMoteMessage
 import a75f.io.device.cm.sendTestModeMessage
 import a75f.io.device.connect.ConnectModbusSerialComm
-import a75f.io.device.serial.MessageType
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.api.PhysicalPoint
@@ -26,10 +23,11 @@ import a75f.io.logic.bo.building.system.getConnectRelayLogicalPhysicalMap
 import a75f.io.logic.bo.building.system.vav.VavAdvancedAhu
 import a75f.io.logic.bo.building.system.vav.config.AdvancedHybridAhuConfig
 import a75f.io.renatus.R
+import a75f.io.renatus.modbus.util.ALERT
 import a75f.io.renatus.modbus.util.OK
-import a75f.io.renatus.modbus.util.WARNING
 import android.annotation.SuppressLint
 import android.content.Context
+import android.text.Spanned
 import androidx.appcompat.app.AlertDialog
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -65,7 +63,7 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
     lateinit var connectEquipBuilder: ProfileEquipBuilder
     lateinit var cmDeviceBuilder: DeviceBuilder
     lateinit var connectDeviceBuilder: DeviceBuilder
-    var isEquipPaired = false
+    private var isEquipPaired = false
     var isConnectModulePaired = false
     /**
      * This voltage values never going to be changed so hardcoded here
@@ -148,7 +146,7 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
         return if (point.defaultUnit != null) point.defaultUnit!! else ""
     }
 
-    fun getPointByDomainName(
+    private fun getPointByDomainName(
         modelDefinition: SeventyFiveFProfileDirective, domainName: String
     ): SeventyFiveFProfilePointDef? {
         return modelDefinition.points.find { (it.domainName.contentEquals(domainName)) }
@@ -357,7 +355,7 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
         return null
     }
 
-    fun getConnectPhysicalPointForAnalogIndex(analogIndex : Int) : PhysicalPoint? {
+    private fun getConnectPhysicalPointForAnalogIndex(analogIndex : Int) : PhysicalPoint? {
         if (isConnectModulePaired) {
             val systemEquip = Domain.systemEquip as VavAdvancedHybridSystemEquip
             val analogName = getAnalogNameForIndex(analogIndex)
@@ -384,9 +382,9 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
                 "domainName == \"" + DomainName.vavAdvancedHybridAhuV2_connectModule + "\"").isNotEmpty()
     }
 
-    fun showErrorDialog(context: Context, message: String) {
+    fun showErrorDialog(context: Context, message: Spanned) {
         val builder = AlertDialog.Builder(context)
-        builder.setTitle(WARNING)
+        builder.setTitle(ALERT)
         builder.setIcon(R.drawable.ic_warning)
         builder.setMessage(message)
         builder.setCancelable(false)
@@ -395,6 +393,9 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
         }
         builder.create().show()
     }
+
+
+
 
 }
 

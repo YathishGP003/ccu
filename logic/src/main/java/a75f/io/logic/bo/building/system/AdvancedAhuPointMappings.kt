@@ -421,11 +421,11 @@ fun getPressureInputSensor(sensorType: DuctPressureSensorSource, systemEquip: Va
 fun getPressureMappings(systemEquip: VavAdvancedHybridSystemEquip): Triple<Point?, Point?, Point?> {
     return Triple(
             getPointForPressureFromDomain(
-                    getDomainPressure(systemEquip.sensorBus0PressureEnable.readDefaultVal() > 1, systemEquip.sensorBus0PressureAssociation.readDefaultVal().toInt()), systemEquip),
+                    getDomainPressure(systemEquip.sensorBus0PressureEnable.readDefaultVal() > 0, systemEquip.sensorBus0PressureAssociation.readDefaultVal().toInt()), systemEquip),
             getPointForPressureFromDomain(
-                    getDomainForAnalogOut(systemEquip.analog1InputEnable.readDefaultVal() > 1, systemEquip.analog1InputAssociation.readDefaultVal().toInt()), systemEquip),
+                    getDomainForAnalogOut(systemEquip.analog1InputEnable.readDefaultVal() > 0, systemEquip.analog1InputAssociation.readDefaultVal().toInt()), systemEquip),
             getPointForPressureFromDomain(
-                    getDomainForAnalogOut(systemEquip.analog2InputEnable.readDefaultVal() > 1, systemEquip.analog2InputAssociation.readDefaultVal().toInt()), systemEquip
+                    getDomainForAnalogOut(systemEquip.analog2InputEnable.readDefaultVal() > 0, systemEquip.analog2InputAssociation.readDefaultVal().toInt()), systemEquip
             )
     )
 }

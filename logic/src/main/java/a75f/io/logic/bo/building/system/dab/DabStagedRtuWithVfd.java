@@ -174,6 +174,7 @@ public class DabStagedRtuWithVfd extends DabStagedRtu
             CCUHsApi.getInstance().deleteEntityTree(equip.get("id").toString());
         }
         removeSystemEquipModbus();
+        deleteSystemConnectModule();
     }
     
     private void addAnalogConfigPoints(String equipref)

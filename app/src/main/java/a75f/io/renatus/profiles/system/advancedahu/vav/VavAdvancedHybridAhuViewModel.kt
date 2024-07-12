@@ -131,6 +131,7 @@ class VavAdvancedHybridAhuViewModel : AdvancedHybridAhuViewModel() {
         val systemEquip = hayStack.readEntity("system and equip and not modbus and not connectModule")
         val newEquipId = createNewEquip(systemEquip[Tags.ID].toString())
         L.ccu().systemProfile = VavAdvancedAhu()
+        L.ccu().systemProfile.removeSystemEquipModbus()
         L.ccu().systemProfile.addSystemEquip()
         L.ccu().systemProfile.updateAhuRef(newEquipId)
         val vavAdvancedAhuProfile = L.ccu().systemProfile as VavAdvancedAhu

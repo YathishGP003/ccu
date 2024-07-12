@@ -101,7 +101,7 @@ open class StagedRtuProfileViewModel : ViewModel() {
             hayStack.deleteEntityTree(cmDevice["id"].toString())
         }
 
-        deleteSystemConnectModule()
+        L.ccu().systemProfile.deleteSystemConnectModule()
 
         val deviceDis = hayStack.siteName +"-"+ deviceModel.name
         CcuLog.i(Domain.LOG_TAG, " buildDeviceAndPoints")
@@ -117,18 +117,6 @@ open class StagedRtuProfileViewModel : ViewModel() {
         DomainManager.addSystemDomainEquip(hayStack)
         DomainManager.addCmBoardDevice(hayStack)
         return equipId
-    }
-
-    private fun deleteSystemConnectModule() {
-        val connectSystemEquip = hayStack.readEntity("domainName == \"" + DomainName.vavAdvancedHybridAhuV2_connectModule + "\"")
-        if (connectSystemEquip.isNotEmpty()) {
-            hayStack.deleteEntityTree(connectSystemEquip["id"].toString())
-        }
-
-        val connectDevice = hayStack.readEntity("domainName == \"" + DomainName.connectModuleDevice + "\"")
-        if (connectDevice.isNotEmpty()) {
-            hayStack.deleteEntityTree(connectDevice["id"].toString())
-        }
     }
 
     open fun saveConfiguration() {

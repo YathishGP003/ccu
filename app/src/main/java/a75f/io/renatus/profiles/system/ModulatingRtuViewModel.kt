@@ -84,6 +84,9 @@ open class ModulatingRtuViewModel : ViewModel() {
         if (cmDevice.isNotEmpty()) {
             hayStack.deleteEntityTree(cmDevice["id"].toString())
         }
+
+        L.ccu().systemProfile.deleteSystemConnectModule()
+
         val deviceDis = hayStack.siteName + "-" + deviceModel.name
         CcuLog.i(Domain.LOG_TAG, " buildDeviceAndPoints")
         deviceBuilder.buildDeviceAndPoints(

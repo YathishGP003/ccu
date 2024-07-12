@@ -163,12 +163,16 @@ public class ModbusNetwork extends DeviceNetwork implements ModbusWritableDataIn
                 for (Register register : modbusDevice.getRegisters()) {
                     if (Integer.parseInt(physicalPoint.get("registerAddress").toString())
                             == register.getRegisterAddress()) {
-                        int priorityVal = (int) HSUtil.getPriorityVal(id);
-                        CcuLog.i(L.TAG_CCU_MODBUS, "Write mb register "
-                                + register.getRegisterAddress() + " val " + priorityVal);
-
-                        LModbus.writeRegister(groupId, register, priorityVal);
-
+                        float priorityVal = (float) HSUtil.getPriorityVal(id);
+                        if(register.parameterDefinitionType!=null && register.parameterDefinitionType.equals("float")) {
+                            CcuLog.i(L.TAG_CCU_MODBUS, "Write mb register "
+                                    + register.getRegisterAddress() + " val " + priorityVal);
+                            LModbus.writeRegister(groupId, register, priorityVal);
+                        } else {
+                            CcuLog.i(L.TAG_CCU_MODBUS, "Write mb register "
+                                    + register.getRegisterAddress() + " val " + (int) priorityVal);
+                            LModbus.writeRegister(groupId, register, (int) priorityVal);
+                        }
                     }
                 }
             }

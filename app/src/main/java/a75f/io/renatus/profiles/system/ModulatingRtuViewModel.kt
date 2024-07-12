@@ -22,9 +22,8 @@ import a75f.io.logic.bo.building.system.vav.config.ModulatingRtuProfileConfig
 import a75f.io.renatus.util.SystemProfileUtil
 import android.app.Activity
 import android.content.Context
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.seventyfivef.domainmodeler.client.ModelDirective
@@ -37,7 +36,7 @@ import kotlinx.coroutines.withContext
 open class ModulatingRtuViewModel : ViewModel() {
 
     lateinit var model: SeventyFiveFProfileDirective
-    lateinit var deviceModel: SeventyFiveFDeviceDirective
+    private lateinit var deviceModel: SeventyFiveFDeviceDirective
     lateinit var viewState: ModulatingRtuViewState
     lateinit var profileConfiguration: ModulatingRtuProfileConfig
 
@@ -45,10 +44,11 @@ open class ModulatingRtuViewModel : ViewModel() {
     lateinit var hayStack: CCUHsApi
     lateinit var relay7AssociationList: List<String>
 
-    var modelLoaded by mutableStateOf(false)
+    var _modelLoaded =  MutableLiveData(false)
+    val modelLoaded: LiveData<Boolean> get() = _modelLoaded
     lateinit var equipBuilder: ProfileEquipBuilder
     lateinit var deviceBuilder: DeviceBuilder
-    private lateinit var unusedPorts: HashMap<String, Boolean>
+   
     fun init(context: Context, profileModel: ModelDirective, hayStack: CCUHsApi) {
         this.hayStack = hayStack
         equipBuilder = ProfileEquipBuilder(hayStack)

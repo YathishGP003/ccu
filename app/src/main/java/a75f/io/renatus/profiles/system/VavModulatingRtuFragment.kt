@@ -7,7 +7,7 @@ import a75f.io.logic.Globals
 import a75f.io.renatus.R
 import a75f.io.renatus.composables.DropDownWithLabel
 import a75f.io.renatus.compose.ComposeUtil
-import a75f.io.renatus.util.ProgressDialogUtils
+
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -33,27 +33,34 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import a75f.io.renatus.compose.LabelTextView
 import a75f.io.renatus.profiles.profileUtils.UnusedPortsFragment
 import a75f.io.renatus.profiles.profileUtils.UnusedPortsFragment.Companion.DividerRow
+import a75f.io.renatus.util.AddProgressGif
+import a75f.io.renatus.util.highPriorityDispatcher
+import android.widget.ImageView
+
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.lifecycleScope
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions
+
 class VavModulatingRtuFragment : ModulatingRtuFragment() {
 
     private val vavModulatingViewModel: VavModulatingRtuViewModel by viewModels()
-    private val SYSTEM_CONFIG_TAB: Int = 1
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
-        viewLifecycleOwner.lifecycleScope.launch {
-            withContext(Dispatchers.IO) {
-                vavModulatingViewModel.init(
+        viewLifecycleOwner.lifecycleScope.launch (highPriorityDispatcher) {
+            vavModulatingViewModel.init(
                     requireContext(),
                     CCUHsApi.getInstance()
                 )
-            }
+
         }
         val rootView = ComposeView(requireContext())
         rootView.apply {
@@ -78,14 +85,16 @@ class VavModulatingRtuFragment : ModulatingRtuFragment() {
     @Preview
     @Composable
     fun RootView() {
-        if (!vavModulatingViewModel.modelLoaded) {
-            if(Globals.getInstance().getSelectedTab() == SYSTEM_CONFIG_TAB) {
-                ProgressDialogUtils.showProgressDialog(context, "Loading System Profile")
-            }
+        val modelLoaded by vavModulatingViewModel.modelLoaded.observeAsState(initial = false)
+        if (!modelLoaded) {
+            AddProgressGif()
             CcuLog.i(Domain.LOG_TAG, "Show Progress")
             return
+
         }
-        ProgressDialogUtils.hideProgressDialog()
+
+
+        CcuLog.i(Domain.LOG_TAG, "Hide Progress")
         val viewState = vavModulatingViewModel.viewState
         LazyColumn(
             modifier = Modifier
@@ -105,7 +114,6 @@ class VavModulatingRtuFragment : ModulatingRtuFragment() {
                             .wrapContentSize()
                             .padding(top = 42.dp)
                     )
-
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
@@ -239,6 +247,7 @@ class VavModulatingRtuFragment : ModulatingRtuFragment() {
                         .padding(end = 40.dp),
                     horizontalArrangement = Arrangement.Start
                 ) {
+
                     DropDownWithLabel(label = "Analog-Out4 at\nMin Fresh Air",
                         list = (0..10).map { it.toString() }, isHeader = false,
                         defaultSelection = viewState.analogOut4FreshAirMin,
@@ -277,4 +286,5 @@ class VavModulatingRtuFragment : ModulatingRtuFragment() {
             }
         }
     }
+
 }

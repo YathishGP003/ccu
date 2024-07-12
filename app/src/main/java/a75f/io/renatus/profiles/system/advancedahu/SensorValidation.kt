@@ -1,13 +1,19 @@
 
 package a75f.io.renatus.profiles.system.advancedahu
 
+import a75f.io.device.cm.getAdvancedAhuAnalogInputMappings
+import a75f.io.device.cm.getAdvancedAhuThermistorMappings
+import a75f.io.device.cm.getCo2DomainName
+import a75f.io.device.cm.getHumidityDomainName
+import a75f.io.device.cm.getOccupancyDomainName
+import a75f.io.device.cm.getTemperatureDomainName
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.config.AssociationConfig
 import a75f.io.domain.config.EnableConfig
 import a75f.io.logic.bo.building.system.AdvancedAhuAnalogOutAssociationType
 import a75f.io.logic.bo.building.system.AdvancedAhuRelayAssociationType
-import a75f.io.logic.bo.building.system.getDomainForAnalogOut
 import a75f.io.logic.bo.building.system.getDomainPressure
+import a75f.io.logic.bo.building.system.getPressureDomainForAnalogOut
 import a75f.io.logic.bo.building.system.relayAssociationDomainNameToType
 import a75f.io.logic.bo.building.system.relayAssociationToDomainName
 import a75f.io.logic.bo.building.system.vav.config.CmConfiguration
@@ -19,6 +25,14 @@ import android.text.Spanned
  * Created by Manjunath K on 04-07-2024.
  */
 
+
+data class Sensors(
+        var temp: List<String?>,
+        var occupancy: List<String?>,
+        var co2: List<String?>,
+        var humidity: List<String?>,
+        var analogIn1: String?, var analogIn2: String?, var th1: String?, var th2: String?
+)
 
 private fun isAnalogOutMapped(enabled: EnableConfig, association: AssociationConfig, mappedTo: AdvancedAhuAnalogOutAssociationType) =
         enabled.enabled && association.associationVal == mappedTo.ordinal
@@ -71,9 +85,6 @@ private fun getDisForDomain(domainName: String): String {
         else -> "Unknown"
     }
 }
-
-
-
 
 fun findPressureDuplicate(pressureData: Triple<String?, String?, String?>): Pair<Boolean,Spanned> {
     val pressureDomainName = pressureData.first
@@ -159,7 +170,142 @@ fun validateDuplicatePressure(primary: String?, mapping1: String?, mapping2: Str
             return Pair(false,  Html.fromHtml("Duplicate selection for ${getDisForDomain(primary)} sensor</b> is not allowed.", Html.FROM_HTML_MODE_LEGACY))
         }
     }
+
     return Pair(true, Html.fromHtml("success", Html.FROM_HTML_MODE_LEGACY))
+}
+
+fun isValidSatSensorSelection(config: CmConfiguration): Pair<Boolean,Spanned>{
+    val sensorsMapping = getSensorMapping(config)
+    val list = mutableListOf<String?>()
+    list.addAll(sensorsMapping.temp)
+    list.addAll(sensorsMapping.occupancy)
+    list.addAll(sensorsMapping.co2)
+    list.addAll(sensorsMapping.humidity)
+    if (sensorsMapping.analogIn1 != null){
+        list.add(sensorsMapping.analogIn1!!)
+    }
+    if (sensorsMapping.analogIn2 != null){
+        list.add(sensorsMapping.analogIn2!!)
+    }
+    if (sensorsMapping.th1 != null){
+        list.add(sensorsMapping.th1!!)
+    }
+    if (sensorsMapping.th2 != null){
+        list.add(sensorsMapping.th2!!)
+    }
+    val duplicateSensor = findAndGetDuplicate(list)
+    if (duplicateSensor != null) {
+        val errorMessage = "Duplicate selection for <b>$duplicateSensor</b> sensor is not allowed."
+        return Pair(false, Html.fromHtml(errorMessage, Html.FROM_HTML_MODE_LEGACY))
+    }
+
+    val satSequence = validateSatSequence(sensorsMapping)
+    if (!satSequence.first) {
+        return satSequence
+    }
+
+
+    return Pair(true, Html.fromHtml("success", Html.FROM_HTML_MODE_LEGACY))
+}
+
+fun findAndGetDuplicate(list: MutableList<String?>): String? {
+    val seen = mutableSetOf<String?>()
+    for (item in list) {
+        if (item == null) continue
+        if (!seen.add(item)) {
+            return item
+        }
+    }
+    return null
+}
+
+fun getSensorMapping(config: CmConfiguration): Sensors {
+    val sensors = Sensors(emptyList(), emptyList(), emptyList(), emptyList(), null, null, null, null)
+    val temp = mutableListOf<String?>()
+    val occupancy = mutableListOf<String?>()
+    val co2 = mutableListOf<String?>()
+    val humidity = mutableListOf<String?>()
+    if (config.address0Enabled.enabled){
+        temp.add(getTemperatureDomainName(config.address0SensorAssociation.temperatureAssociation.associationVal))
+        occupancy.add(getOccupancyDomainName(config.address0SensorAssociation.occupancyAssociation.associationVal))
+        co2.add(getCo2DomainName(config.address0SensorAssociation.co2Association.associationVal))
+        humidity.add(getHumidityDomainName(config.address0SensorAssociation.humidityAssociation.associationVal))
+    }
+    if (config.address1Enabled.enabled){
+        temp.add(getTemperatureDomainName(config.address1SensorAssociation.temperatureAssociation.associationVal))
+        occupancy.add(getOccupancyDomainName(config.address1SensorAssociation.occupancyAssociation.associationVal))
+        co2.add(getCo2DomainName(config.address1SensorAssociation.co2Association.associationVal))
+        humidity.add(getHumidityDomainName(config.address1SensorAssociation.humidityAssociation.associationVal))
+    }
+    if (config.address2Enabled.enabled){
+        temp.add(getTemperatureDomainName(config.address2SensorAssociation.temperatureAssociation.associationVal))
+        occupancy.add(getOccupancyDomainName(config.address2SensorAssociation.occupancyAssociation.associationVal))
+        co2.add(getCo2DomainName(config.address2SensorAssociation.co2Association.associationVal))
+        humidity.add(getHumidityDomainName(config.address2SensorAssociation.humidityAssociation.associationVal))
+    }
+    if (config.address3Enabled.enabled){
+        temp.add(getTemperatureDomainName(config.address3SensorAssociation.temperatureAssociation.associationVal))
+        occupancy.add(getOccupancyDomainName(config.address3SensorAssociation.occupancyAssociation.associationVal))
+        co2.add(getCo2DomainName(config.address3SensorAssociation.co2Association.associationVal))
+        humidity.add(getHumidityDomainName(config.address3SensorAssociation.humidityAssociation.associationVal))
+    }
+
+    sensors.apply {
+        this.temp = temp
+        this.occupancy = occupancy
+        this.co2 = co2
+        this.humidity = humidity
+    }
+
+    val analogSensorList = getAdvancedAhuAnalogInputMappings()
+    val thermistorList = getAdvancedAhuThermistorMappings()
+    if (config.analog1InEnabled.enabled) {
+        val index = config.analog1InAssociation.associationVal
+        sensors.analogIn1 = if (index in 0 until analogSensorList.size) analogSensorList[index]!!.domainName else null
+    }
+    if (config.analog2InEnabled.enabled) {
+        val index = config.analog2InAssociation.associationVal
+        sensors.analogIn2 = if (index in 0 until analogSensorList.size) analogSensorList[index]!!.domainName else null
+    }
+    if (config.thermistor1Enabled.enabled) {
+        val index = config.thermistor1Association.associationVal
+        sensors.th1 = if (index in 0 until thermistorList.size) thermistorList[index]!!.domainName else null
+    }
+    if (config.thermistor2Enabled.enabled) {
+        val index = config.thermistor2Association.associationVal
+        sensors.th2 = if (index in 0 until thermistorList.size) thermistorList[index]!!.domainName else null
+    }
+    return sensors
+}
+fun validateTemperatureSequence(list: List<String>): Pair<Boolean,Spanned> {
+
+}
+
+
+fun validateSatSequence(sensors: Sensors): Pair<Boolean,Spanned> {
+    val satSensors = mutableListOf<String?>()
+    satSensors.addAll(sensors.temp)
+    satSensors.add(sensors.analogIn1)
+    satSensors.add(sensors.analogIn2)
+    satSensors.add(sensors.th1)
+    satSensors.add(sensors.th2)
+    var hasTemp1 = false
+    var hasTemp2 = false
+    var hasTemp3 = false
+
+    for (item in satSensors) {
+        when (item) {
+            DomainName.supplyAirTemperature1 -> hasTemp1 = true
+            DomainName.supplyAirTemperature2 -> hasTemp2 = true
+            DomainName.supplyAirTemperature3 -> hasTemp3 = true
+        }
+    }
+    if (hasTemp3 && !hasTemp2) {
+        return Pair(false, Html.fromHtml("Supply Air Temperature 3 should be <b>selected after Supply Air Temperature 2</b> in Sensor Bus and Analog Inputs.", Html.FROM_HTML_MODE_LEGACY))
+    }
+    if (hasTemp2 && !hasTemp1) {
+        return Pair(false, Html.fromHtml("Supply Air Temperature 2 should be <b>selected after Supply Air Temperature 1</b> in Sensor Bus and Analog Inputs.", Html.FROM_HTML_MODE_LEGACY))
+    }
 }
 
 fun isValidateConfiguration(viewModel: AdvancedHybridAhuViewModel): Pair<Boolean, Spanned> {
@@ -185,11 +331,11 @@ fun isValidateConfiguration(viewModel: AdvancedHybridAhuViewModel): Pair<Boolean
             viewModel.profileConfiguration.cmConfiguration.sensorBus0PressureEnabled.enabled,
             viewModel.profileConfiguration.cmConfiguration.address0SensorAssociation.pressureAssociation!!.associationVal
     )
-    val analogIn1DomainName = getDomainForAnalogOut(
+    val analogIn1DomainName = getPressureDomainForAnalogOut(
             viewModel.profileConfiguration.cmConfiguration.analog1InEnabled.enabled,
             viewModel.profileConfiguration.cmConfiguration.analog1InAssociation.associationVal
     )
-    val analogIn2DomainName = getDomainForAnalogOut(
+    val analogIn2DomainName = getPressureDomainForAnalogOut(
             viewModel.profileConfiguration.cmConfiguration.analog2InEnabled.enabled,
             viewModel.profileConfiguration.cmConfiguration.analog2InAssociation.associationVal
     )
@@ -213,6 +359,11 @@ fun isValidateConfiguration(viewModel: AdvancedHybridAhuViewModel): Pair<Boolean
         if (!isAOHeatingSatAvailable(viewModel.profileConfiguration.cmConfiguration)) {
             return Pair(false, Html.fromHtml("Relay based SAT Heating is mapped but <b>SAT Heating configuration</b> is not mapped", Html.FROM_HTML_MODE_LEGACY))
         }
+    }
+
+    val otherSensorStatus = isValidSatSensorSelection(viewModel.profileConfiguration.cmConfiguration)
+    if (!otherSensorStatus.first) {
+        return otherSensorStatus
     }
     return Pair(true, Html.fromHtml("Success", Html.FROM_HTML_MODE_LEGACY))
 }

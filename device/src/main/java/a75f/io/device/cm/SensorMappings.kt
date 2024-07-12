@@ -58,6 +58,7 @@ data class AnalogInput(override val domainName : String,
 
 /**
  * This is mapping of "index" to the sensor input.
+ * Universal input
  */
 
 fun getAdvancedAhuSensorInputMappings() : Map<Int, SensorInput> {

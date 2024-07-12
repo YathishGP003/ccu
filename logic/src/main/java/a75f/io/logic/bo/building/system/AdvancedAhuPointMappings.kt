@@ -423,9 +423,9 @@ fun getPressureMappings(systemEquip: VavAdvancedHybridSystemEquip): Triple<Point
             getPointForPressureFromDomain(
                     getDomainPressure(systemEquip.sensorBus0PressureEnable.readDefaultVal() > 0, systemEquip.sensorBus0PressureAssociation.readDefaultVal().toInt()), systemEquip),
             getPointForPressureFromDomain(
-                    getDomainForAnalogOut(systemEquip.analog1InputEnable.readDefaultVal() > 0, systemEquip.analog1InputAssociation.readDefaultVal().toInt()), systemEquip),
+                    getPressureDomainForAnalogOut(systemEquip.analog1InputEnable.readDefaultVal() > 0, systemEquip.analog1InputAssociation.readDefaultVal().toInt()), systemEquip),
             getPointForPressureFromDomain(
-                    getDomainForAnalogOut(systemEquip.analog2InputEnable.readDefaultVal() > 0, systemEquip.analog2InputAssociation.readDefaultVal().toInt()), systemEquip
+                    getPressureDomainForAnalogOut(systemEquip.analog2InputEnable.readDefaultVal() > 0, systemEquip.analog2InputAssociation.readDefaultVal().toInt()), systemEquip
             )
     )
 }
@@ -560,7 +560,7 @@ fun getStageIndex(point: Point) : Int {
     }
 }
 
-fun getDomainForAnalogOut(enabled: Boolean, association: Int): String? {
+fun getPressureDomainForAnalogOut(enabled: Boolean, association: Int): String? {
     if (enabled) {
         return when (association) {
             12 -> DomainName.ductStaticPressureSensor1_1

@@ -241,7 +241,21 @@ public class SystemProfileFragment extends Fragment {
                                     systemProfileSelectorAdapter.getPosition(L.ccu().systemProfile.getProfileName()) : 0);
                         }
                         break;
+
                     case 11:
+                        if (canAddDABProfile()) {
+                            getActivity().getSupportFragmentManager().beginTransaction()
+                                    .replace(R.id.profileContainer, new DABHybridAhuProfile()).commit();
+                            if (SystemConfigMenuFragment.SystemConfigMenuFragmentHandler != null) {
+                                SystemConfigMenuFragment.SystemConfigMenuFragmentHandler.sendEmptyMessage(1);
+                            }
+                        }else {
+                            Toast.makeText(getActivity(),"Unpair all VAV Zones and try",Toast.LENGTH_LONG).show();
+                            spSystemProfile.setSelection(L.ccu().systemProfile != null ?
+                                    systemProfileSelectorAdapter.getPosition(L.ccu().systemProfile.getProfileName()) : 0);
+                        }
+                        break;
+                    case 12:
                         if (canAddDABProfile()) {
                             getActivity().getSupportFragmentManager().beginTransaction()
                                     .replace(R.id.profileContainer, new ExternalAhuFragment(ProfileType.dabExternalAHUController),"dabExternalAHUController").commit();
@@ -256,7 +270,7 @@ public class SystemProfileFragment extends Fragment {
                         }
                         break;
 
-                    case 12:
+                    case 13:
                         if (canAddVAVProfile()) {
                             getActivity().getSupportFragmentManager().beginTransaction()
                                     .replace(R.id.profileContainer, new VavIERtuProfile()).commit();

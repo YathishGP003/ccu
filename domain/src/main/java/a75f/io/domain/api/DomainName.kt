@@ -409,6 +409,8 @@ object DomainName {
     const val vavAdvancedHybridAhuV2_connectModule = "vavAdvancedHybridAhuV2_connectModule"
     const val connectModuleDevice = "connectModuleDevice"
 
+    const val dabAdvancedHybridAhuV2_connectModule = "dabAdvancedHybridAhuV2_connectModule"
+
     const val smartnodeVAVReheatNoFan = "smartnodeVAVReheatNoFan"
     const val smartnodeVAVReheatParallelFan = "smartnodeVAVReheatParallelFan"
     const val smartnodeVAVReheatSeriesFan = "smartnodeVAVReheatSeriesFan"

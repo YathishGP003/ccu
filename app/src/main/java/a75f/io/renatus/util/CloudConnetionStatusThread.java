@@ -108,15 +108,7 @@ public class CloudConnetionStatusThread extends Thread {
                 if (mCloudAlive % WIFI_TOGGLE_SKIP_COUNT == 0) {
                     WifiManager wifi = (WifiManager) Globals.getInstance().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
                     wifi.setWifiEnabled(false);
-                    new Handler().postDelayed(() -> {
-                        try {
-                            wifi.setWifiEnabled(true);
-                        } catch (NullPointerException e) {
-                            CcuLog.e(TAG_CLOUD_CONNECTION_STATUS, "NullPointerException while enabling Wi-Fi", e);
-                        } catch (Exception e) {
-                            CcuLog.e(TAG_CLOUD_CONNECTION_STATUS, "Exception while enabling Wi-Fi", e);
-                        }
-                    }, 1000);
+                    wifi.setWifiEnabled(true);
                 }
                 if(mCloudAlive > (WIFI_TOGGLE_SKIP_COUNT * 20))
                     RenatusApp.rebootTablet();

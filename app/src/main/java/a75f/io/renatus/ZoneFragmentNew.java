@@ -300,7 +300,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         if (floorList != null && floorList.size() > 0) {
             lvFloorList.setContentDescription(floorList.get(0).getDisplayName());
         }
-        floorMenu = view.findViewById(R.id.floorMenu);
+        floorMenu = (ImageView) view.findViewById(R.id.floorMenu);
         floorMenu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

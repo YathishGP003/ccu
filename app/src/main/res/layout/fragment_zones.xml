@@ -26,16 +26,16 @@
         </ScrollView>
 
         <ImageView
-            android:id="@+id/floorMenu"
-            android:layout_width="42dp"
-            android:layout_height="42dp"
-            android:padding="6dp"
+            android:id="@+id/openDrawerBtn"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_alignParentTop="true"
+            android:layout_marginTop="15dp"
+            android:focusable="false"
+            android:focusableInTouchMode="false"
             android:clickable="true"
-            android:layout_marginLeft="10dp"
-            android:layout_gravity="center_vertical"
-            app:srcCompat="@drawable/ic_floormenu"
-            android:visibility="gone"
-            android:adjustViewBounds="true"
+            android:padding="10dp"
+            android:src="@drawable/buttonlist"
             app:tint="?orange_75f" />
 
         <RelativeLayout

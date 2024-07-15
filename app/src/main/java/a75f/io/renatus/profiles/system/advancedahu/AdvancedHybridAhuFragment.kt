@@ -65,7 +65,6 @@ import a75f.io.renatus.profiles.system.UNIVERSAL_IN5
 import a75f.io.renatus.profiles.system.UNIVERSAL_IN6
 import a75f.io.renatus.profiles.system.UNIVERSAL_IN7
 import a75f.io.renatus.profiles.system.UNIVERSAL_IN8
-import a75f.io.renatus.profiles.system.advancedahu.vav.VavAdvancedHybridAhuViewModel
 import android.os.Bundle
 import android.view.View
 import android.view.View.OnAttachStateChangeListener
@@ -92,7 +91,7 @@ import androidx.fragment.app.viewModels
  */
 
 open class AdvancedHybridAhuFragment : Fragment() {
-    val viewModel: VavAdvancedHybridAhuViewModel by viewModels()
+    open val viewModel: AdvancedHybridAhuViewModel by viewModels()
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         view.addOnAttachStateChangeListener(object : OnAttachStateChangeListener {

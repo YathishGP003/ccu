@@ -9,7 +9,6 @@ import a75f.io.device.ControlMote.SAToperatingMode_e
 import a75f.io.device.mesh.MeshUtil
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.toInt
-import a75f.io.domain.equips.AdvancedHybridSystemEquip
 import a75f.io.domain.equips.DabAdvancedHybridSystemEquip
 import a75f.io.domain.equips.VavAdvancedHybridSystemEquip
 import a75f.io.logic.L
@@ -18,22 +17,18 @@ import a75f.io.logic.bo.building.system.getAnalogOut1MinMax
 import a75f.io.logic.bo.building.system.getAnalogOut2MinMax
 import a75f.io.logic.bo.building.system.getAnalogOut3MinMax
 import a75f.io.logic.bo.building.system.getAnalogOut4MinMax
+import a75f.io.logic.bo.building.system.util.getAdvancedAhuSystemEquip
 import a75f.io.logic.bo.building.system.vav.VavAdvancedAhu
 
 //Decimal values are multiplied by 10 to keep precision since all the values are send as integers.z
 const val SERIAL_COMM_SCALE = 10
 fun getCMControlsMessage(): ControlMote.CcuToCmOverUsbCmControlMessage_t {
 
-    val systemEquip = if (Domain.systemEquip is VavAdvancedHybridSystemEquip) {
-        Domain.systemEquip as VavAdvancedHybridSystemEquip
-    } else {
-        Domain.systemEquip as DabAdvancedHybridSystemEquip
-    }
-
+    val systemEquip = getAdvancedAhuSystemEquip()
     val cmDevice = Domain.cmBoardDevice
     val msgBuilder = ControlMote.CcuToCmOverUsbCmControlMessage_t.newBuilder()
-
     var relayBitmap = 0
+
     for (relayPos in 1..8) {
         if (CCUHsApi.getInstance().readHisValByQuery(
                 "point and physical and deviceRef == \""
@@ -44,6 +39,7 @@ fun getCMControlsMessage(): ControlMote.CcuToCmOverUsbCmControlMessage_t {
             relayBitmap = relayBitmap or (1 shl MeshUtil.getRelayMapping(relayPos))
         }
     }
+
     msgBuilder.apply {
         addAnalogOut(cmDevice.analog1Out.readHisVal() .toInt())
         addAnalogOut(cmDevice.analog2Out.readHisVal().toInt())
@@ -56,14 +52,14 @@ fun getCMControlsMessage(): ControlMote.CcuToCmOverUsbCmControlMessage_t {
         addPiloopSetPoint(systemEquip.zoneAvgCo2.readHisVal().toInt() * 10)
         saToperatingMode = SAToperatingMode_e.forNumber(systemEquip.operatingMode.readHisVal().toInt())
                     ?: SAToperatingMode_e.SAT_OPERATING_MODE_OFF
-        emergencyShutOff = (L.ccu().systemProfile as VavAdvancedAhu)?.isEmergencyShutoffActive()?.toInt() ?: 0
+        emergencyShutOff = (L.ccu().systemProfile as VavAdvancedAhu)?.isEmergencyShutoffActive()?.toInt() ?: 0 // TODO
         unoccupiedMode = getOccupancy()
     }
     return msgBuilder.build()
 }
 
 private fun getOccupancy(): ControlMote.UnoccupiedMode_e {
-    val occupancy = (L.ccu().systemProfile as VavAdvancedAhu)?.getOccupancy()
+    val occupancy = (L.ccu().systemProfile as VavAdvancedAhu)?.getOccupancy()  // TODO
     return if (occupancy == 0) {
         ControlMote.UnoccupiedMode_e.UNOCCUPIED_MODE
     } else {
@@ -72,21 +68,10 @@ private fun getOccupancy(): ControlMote.UnoccupiedMode_e {
 }
 
 fun getCMSettingsMessage() : ControlMote.CcuToCmSettingsMessage_t {
-
-    val systemEquip = if (Domain.systemEquip is VavAdvancedHybridSystemEquip) {
-        Domain.systemEquip as VavAdvancedHybridSystemEquip
-    } else {
-        Domain.systemEquip as DabAdvancedHybridSystemEquip
-    }
-
     val msgBuilder = ControlMote.CcuToCmSettingsMessage_t.newBuilder()
     msgBuilder.apply {
-        //setTemperatureOffset(systemEquip.temperatureOffset.readHisVal().toInt())
         cmProfile = ControlMote.CMProfiles_e.CM_PROFILE_ADV_AHU
-        relayActivationHysteresis = systemEquip.vavRelayDeactivationHysteresis.readHisVal().toInt()
-        analogFanSpeedMultiplier = systemEquip.vavAnalogFanSpeedMultiplier.readHisVal().toInt() * 10
-        cmStageUpTimer = systemEquip.vavStageUpTimerCounter.readHisVal().toInt()
-        cmStageDownTimer = systemEquip.vavStageDownTimerCounter.readHisVal().toInt()
+        addTuners(this)
         addRelayConfigsToSettingsMessage(this)
         addAnalogOutConfigsToSettingsMessage(this)
         addAnalogInConfigsToSettingsMessage(this)
@@ -98,9 +83,30 @@ fun getCMSettingsMessage() : ControlMote.CcuToCmSettingsMessage_t {
         addSensorConfigs(this)
         addSensorBusMappings(this)
         addTestSignals(this)
-
     }
     return msgBuilder.build()
+}
+
+
+
+fun addTuners(builder: Builder) {
+    if (Domain.systemEquip is VavAdvancedHybridSystemEquip) {
+        val systemEquip = Domain.systemEquip as VavAdvancedHybridSystemEquip
+        builder.apply {
+            relayActivationHysteresis = systemEquip.vavRelayDeactivationHysteresis.readHisVal().toInt()
+            analogFanSpeedMultiplier = systemEquip.vavAnalogFanSpeedMultiplier.readHisVal().toInt() * 10
+            cmStageUpTimer = systemEquip.vavStageUpTimerCounter.readHisVal().toInt()
+            cmStageDownTimer = systemEquip.vavStageDownTimerCounter.readHisVal().toInt()
+        }
+    } else {
+        val systemEquip = Domain.systemEquip as DabAdvancedHybridSystemEquip
+        builder.apply {
+            relayActivationHysteresis = systemEquip.dabRelayDeactivationHysteresis.readHisVal().toInt()
+            analogFanSpeedMultiplier = systemEquip.dabAnalogFanSpeedMultiplier.readHisVal().toInt() * 10
+            cmStageUpTimer = systemEquip.dabStageUpTimerCounter.readHisVal().toInt()
+            cmStageDownTimer = systemEquip.dabStageDownTimerCounter.readHisVal().toInt()
+        }
+    }
 }
 
 fun addRelayConfigsToSettingsMessage(builder: Builder) {
@@ -109,12 +115,7 @@ fun addRelayConfigsToSettingsMessage(builder: Builder) {
         CCU needs to send in this format - [ R1 R2 R3 R6 R4 R5 R7 R8 (mappings)]
         Because in hardware it is mapper in this way. please do not change the position
     */
-    val systemEquip = if (Domain.systemEquip is VavAdvancedHybridSystemEquip) {
-        Domain.systemEquip as VavAdvancedHybridSystemEquip
-    } else {
-        Domain.systemEquip as DabAdvancedHybridSystemEquip
-    }
-
+    val systemEquip = getAdvancedAhuSystemEquip()
     builder.apply {
         if (systemEquip.relay1OutputEnable.readDefaultVal() > 0) {
             val relay1OutputAssociation = systemEquip.relay1OutputAssociation.readDefaultVal().toInt()
@@ -123,7 +124,6 @@ fun addRelayConfigsToSettingsMessage(builder: Builder) {
         } else {
             addRelayMapping(ControlMote.CmRelayMappingStages_e.RELAY_NOT_ENABLED)
         }
-
         if (systemEquip.relay2OutputEnable.readDefaultVal() > 0) {
             val relay2OutputAssociation = systemEquip.relay2OutputAssociation.readDefaultVal().toInt()
             val mappingStage = ControlMote.CmRelayMappingStages_e.forNumber(relay2OutputAssociation + 1) ?: ControlMote.CmRelayMappingStages_e.RELAY_NOT_ENABLED
@@ -180,12 +180,7 @@ fun addRelayConfigsToSettingsMessage(builder: Builder) {
 
 fun addAnalogOutConfigsToSettingsMessage(builder: Builder) {
 
-    val systemEquip = if (Domain.systemEquip is VavAdvancedHybridSystemEquip) {
-        Domain.systemEquip as VavAdvancedHybridSystemEquip
-    } else {
-        Domain.systemEquip as DabAdvancedHybridSystemEquip
-    }
-
+    val systemEquip = getAdvancedAhuSystemEquip()
     builder.apply {
         val analog1OutBuilder = CmAnalogOutConfig_t.newBuilder()
         if (systemEquip.analog1OutputEnable.readDefaultVal() > 0) {
@@ -259,13 +254,7 @@ fun addAnalogOutConfigsToSettingsMessage(builder: Builder) {
 }
 
 fun addAnalogInConfigsToSettingsMessage(builder: Builder) {
-
-    val systemEquip = if (Domain.systemEquip is VavAdvancedHybridSystemEquip) {
-        Domain.systemEquip as VavAdvancedHybridSystemEquip
-    } else {
-        Domain.systemEquip as DabAdvancedHybridSystemEquip
-    }
-
+    val systemEquip = getAdvancedAhuSystemEquip()
     builder.apply {
         if (systemEquip.analog1InputEnable.readDefaultVal() > 0) {
             val analog1InputAssociation = systemEquip.analog1InputAssociation.readDefaultVal().toInt()
@@ -285,13 +274,7 @@ fun addAnalogInConfigsToSettingsMessage(builder: Builder) {
 }
 
 fun addThermistorConfigsToSettingsMessage(builder: Builder) {
-
-    val systemEquip = if (Domain.systemEquip is VavAdvancedHybridSystemEquip) {
-        Domain.systemEquip as VavAdvancedHybridSystemEquip
-    } else {
-        Domain.systemEquip as DabAdvancedHybridSystemEquip
-    }
-
+    val systemEquip = getAdvancedAhuSystemEquip()
     builder.apply {
         if (systemEquip.thermistor1InputEnable.readDefaultVal() > 0) {
             val thermistor1InputAssociation = systemEquip.thermistor1InputAssociation.readDefaultVal().toInt()
@@ -332,12 +315,7 @@ fun addPILoopConfiguration(builder: Builder) {
 }
 
 fun addSensorConfigs(builder: Builder) {
-    val systemEquip = if (Domain.systemEquip is VavAdvancedHybridSystemEquip) {
-        Domain.systemEquip as VavAdvancedHybridSystemEquip
-    } else {
-        Domain.systemEquip as DabAdvancedHybridSystemEquip
-    }
-
+    val systemEquip = getAdvancedAhuSystemEquip()
     builder.apply {
         if (systemEquip.supplyAirTempControlOn.pointExists()) {
             supplyAirTempSensorOp = ControlMote.SupplyAirTempOperation_e.
@@ -359,9 +337,7 @@ fun addSensorConfigs(builder: Builder) {
 }
 
 fun addSensorBusMappings(builder: Builder) {
-
-    val systemEquip = Domain.systemEquip as AdvancedHybridSystemEquip
-
+    val systemEquip = getAdvancedAhuSystemEquip()
     builder.apply {
         this.addSensorBusMapping(addAddressSensorMapping(
                 systemEquip.temperatureSensorBusAdd0.readDefaultVal().toInt(),
@@ -421,7 +397,7 @@ fun addTestSignals(builder: Builder) {
 
     var relayBitmap = 0
     var analogBitmap = 0
-    val config = (L.ccu().systemProfile as VavAdvancedAhu)?.testConfigs
+    val config = (L.ccu().systemProfile as VavAdvancedAhu)?.testConfigs // TODO
     for (relayPos in 0..7) {
         if (config != null) {
             if (config.get(relayPos)) {

@@ -6,8 +6,11 @@ import a75f.io.domain.api.DomainName
 import a75f.io.domain.equips.VavAdvancedHybridSystemEquip
 import a75f.io.domain.logic.DomainManager
 import a75f.io.domain.util.ModelLoader
+import a75f.io.domain.util.ModelNames
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
+import a75f.io.logic.bo.building.definitions.ProfileType
+import a75f.io.logic.bo.building.system.util.deleteSystemConnectModule
 import a75f.io.logic.bo.building.system.vav.VavAdvancedAhu
 import a75f.io.logic.bo.building.system.vav.config.VavAdvancedHybridAhuConfig
 import a75f.io.renatus.modbus.util.showToast
@@ -32,7 +35,7 @@ class VavAdvancedHybridAhuViewModel : AdvancedHybridAhuViewModel() {
     }
 
     fun init(context: Context, hayStack: CCUHsApi) {
-        super.init(context, ModelLoader.getVavAdvancedAhuCmModelV2(), ModelLoader.getVavAdvancedAhuConnectModelV2(), hayStack)
+        super.init(context, ModelLoader.getVavAdvancedAhuCmModelV2(), ModelLoader.getVavAdvancedAhuConnectModelV2(), hayStack, ProfileType.SYSTEM_VAV_ADVANCED_AHU)
         CcuLog.i(Domain.LOG_TAG, "VavAdvancedAhuViewModel Init")
         val systemEquip = hayStack.readEntity("system and equip and not modbus and not connectModule") //TODO - via domain
         CcuLog.i(Domain.LOG_TAG, "Current System Equip $systemEquip")
@@ -68,10 +71,7 @@ class VavAdvancedHybridAhuViewModel : AdvancedHybridAhuViewModel() {
             profileConfiguration.cmConfiguration, cmDeviceModel, cmEquipId, hayStack.site!!.id, cmDeviceDis
         )
 
-        val existingConnectEquip = hayStack.readEntity("domainName == \"" + DomainName.vavAdvancedHybridAhuV2_connectModule + "\"")
-        if (existingConnectEquip.isNotEmpty()) {
-            hayStack.deleteEntityTree(existingConnectEquip["id"].toString())
-        }
+        deleteSystemConnectModule()
 
         if (profileConfiguration.connectConfiguration.connectEnabled) {
             val connectEquipDis = "${hayStack.siteName}-${connectModel.name}"
@@ -106,7 +106,7 @@ class VavAdvancedHybridAhuViewModel : AdvancedHybridAhuViewModel() {
         viewState.value.isSaveRequired = false
         viewState.value.isStateChanged = false
         CcuLog.i(L.TAG_CCU_SYSTEM, profileConfiguration.toString())
-        isEquipAvailable()
+        isEquipAvailable(ProfileType.SYSTEM_VAV_ADVANCED_AHU)
         viewModelScope.launch {
             ProgressDialogUtils.showProgressDialog(context, "Saving profile configuration")
             withContext(Dispatchers.IO) {
@@ -187,19 +187,11 @@ class VavAdvancedHybridAhuViewModel : AdvancedHybridAhuViewModel() {
                 profileConfiguration.connectConfiguration, connectDeviceModel, connectEquipId, hayStack.site!!.id, connectDeviceDis
             )
         } else {
-            val connectEquip = hayStack.readEntity("domainName == \"" + DomainName.vavAdvancedHybridAhuV2_connectModule + "\"")
-            if (connectEquip.isNotEmpty()) {
-                hayStack.deleteEntityTree(connectEquip[Tags.ID].toString())
-            }
-
-            val connectDevice = hayStack.readEntity("domainName == \"" + DomainName.connectModuleDevice + "\"")
-            if (connectDevice.isNotEmpty()) {
-                hayStack.deleteEntityTree(connectDevice[Tags.ID].toString())
-            }
+            deleteSystemConnectModule(ModelNames.vavAdvancedHybridAhuV2_connectModule)
         }
     }
 
-     fun reset() {
+     override fun reset() {
         val systemEquip = hayStack.readEntity("system and equip and not modbus and not connectModule")
         profileConfiguration = if (systemEquip["profile"].toString().contentEquals("vavAdvancedHybridAhuV2")) {
             VavAdvancedHybridAhuConfig(cmModel, connectModel).getActiveConfiguration() as VavAdvancedHybridAhuConfig

@@ -6,8 +6,6 @@ import a75f.io.device.connect.ConnectModbusSerialComm
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.api.PhysicalPoint
-import a75f.io.domain.equips.DabAdvancedHybridSystemEquip
-import a75f.io.domain.equips.VavAdvancedHybridSystemEquip
 import a75f.io.domain.logic.DeviceBuilder
 import a75f.io.domain.logic.EntityMapper
 import a75f.io.domain.logic.ProfileEquipBuilder
@@ -16,10 +14,17 @@ import a75f.io.domain.util.ModelLoader
 import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.logic.L
+import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.system.getAnalogOutLogicalPhysicalMap
 import a75f.io.logic.bo.building.system.getCMRelayLogicalPhysicalMap
 import a75f.io.logic.bo.building.system.getConnectAnalogOutLogicalPhysicalMap
 import a75f.io.logic.bo.building.system.getConnectRelayLogicalPhysicalMap
+import a75f.io.logic.bo.building.system.util.getAdvancedAhuSystemEquip
+import a75f.io.logic.bo.building.system.util.getConnectEquip
+import a75f.io.logic.bo.building.system.util.getDabCmEquip
+import a75f.io.logic.bo.building.system.util.getDabConnectEquip
+import a75f.io.logic.bo.building.system.util.getVavCmEquip
+import a75f.io.logic.bo.building.system.util.getVavConnectEquip
 import a75f.io.logic.bo.building.system.vav.VavAdvancedAhu
 import a75f.io.logic.bo.building.system.vav.config.AdvancedHybridAhuConfig
 import a75f.io.renatus.R
@@ -77,14 +82,15 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
     /**
      * Initialize the ViewModel
      */
-    fun init(context: Context, cmProfileModel: ModelDirective, connectProfileModel : ModelDirective, hayStack: CCUHsApi) {
+    fun init(context: Context, cmProfileModel: ModelDirective,
+             connectProfileModel : ModelDirective, hayStack: CCUHsApi, profile: ProfileType) {
 
         CcuLog.i(Domain.LOG_TAG, "Advanced AHU Init")
 
         this.hayStack = hayStack
         cmEquipBuilder = ProfileEquipBuilder(hayStack)
         connectEquipBuilder = ProfileEquipBuilder(hayStack)
-        isEquipAvailable()
+        isEquipAvailable(profile)
         cmModel = cmProfileModel as SeventyFiveFProfileDirective
         CcuLog.i(Domain.LOG_TAG, "Advanced AHU CM EquipModel Loaded")
         cmDeviceModel = ModelLoader.getCMDeviceModel() as SeventyFiveFDeviceDirective
@@ -241,13 +247,6 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
                 physicalPoint?.let {
                     it.writeHisVal(testVal)
                     sendTestModeMessage()
-                    /*val cmControlMessage = getCMControlsMessage()
-                    CcuLog.d(L.TAG_CCU_DEVICE, "CM Proto Control Message: $cmControlMessage")
-                    CcuLog.i(Domain.LOG_TAG, "Send Test Command analogIndex $analogIndex $testVal ${physicalPoint.readHisVal()}")
-                    sendControlMoteMessage(
-                        MessageType.CCU_TO_CM_OVER_USB_CM_SERIAL_CONTROLS,
-                        cmControlMessage.toByteArray()
-                    )*/
                 }
             }
         }
@@ -304,29 +303,19 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
 
     fun getPhysicalPointForRelayIndex(relayIndex : Int, isConnect: Boolean) : PhysicalPoint? {
         if (isEquipPaired) {
-            val systemEquip = if (Domain.systemEquip is VavAdvancedHybridSystemEquip) {
-                Domain.systemEquip as VavAdvancedHybridSystemEquip
-            } else {
-                Domain.systemEquip as DabAdvancedHybridSystemEquip
-            }
             val relayName = getRelayNameForIndex(relayIndex)
             if (isConnect && isConnectModulePaired) {
-                getConnectRelayLogicalPhysicalMap(systemEquip.connectEquip1, Domain.connect1Device).values.find { it.domainName == relayName }
+                getConnectRelayLogicalPhysicalMap(getConnectEquip(), Domain.connect1Device).values.find { it.domainName == relayName }
             } else {
-                return getCMRelayLogicalPhysicalMap(systemEquip).values.find { it.domainName == relayName }
+                return getCMRelayLogicalPhysicalMap(getAdvancedAhuSystemEquip()).values.find { it.domainName == relayName }
             }
         }
         return null
     }
     fun getConnectPhysicalPointForRelayIndex(relayIndex : Int) : PhysicalPoint? {
         if (isEquipPaired) {
-            val systemEquip = if (Domain.systemEquip is VavAdvancedHybridSystemEquip) {
-                Domain.systemEquip as VavAdvancedHybridSystemEquip
-            } else {
-                Domain.systemEquip as DabAdvancedHybridSystemEquip
-            }
             val relayName = getRelayNameForIndex(relayIndex)
-            return getConnectRelayLogicalPhysicalMap(systemEquip.connectEquip1, Domain.connect1Device).values.find { it.domainName == relayName }
+            return getConnectRelayLogicalPhysicalMap(getConnectEquip(), Domain.connect1Device).values.find { it.domainName == relayName }
         }
         return null
     }
@@ -348,7 +337,7 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
 
     fun getPhysicalPointForAnalogIndex(analogIndex : Int) : PhysicalPoint? {
         if (isEquipPaired) {
-            val systemEquip = Domain.systemEquip as VavAdvancedHybridSystemEquip
+            val systemEquip = getAdvancedAhuSystemEquip()
             val analogName = getAnalogNameForIndex(analogIndex)
             return getAnalogOutLogicalPhysicalMap(systemEquip).values.find { it.domainName == analogName }
         }
@@ -357,9 +346,9 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
 
     private fun getConnectPhysicalPointForAnalogIndex(analogIndex : Int) : PhysicalPoint? {
         if (isConnectModulePaired) {
-            val systemEquip = Domain.systemEquip as VavAdvancedHybridSystemEquip
+            val connectEquip1 = getConnectEquip()
             val analogName = getAnalogNameForIndex(analogIndex)
-            return getConnectAnalogOutLogicalPhysicalMap(systemEquip.connectEquip1,Domain.connect1Device).values.find { it.domainName == analogName }
+            return getConnectAnalogOutLogicalPhysicalMap(connectEquip1,Domain.connect1Device).values.find { it.domainName == analogName }
         }
         return null
     }
@@ -375,11 +364,14 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
         }
     }
 
-    fun isEquipAvailable() {
-        isEquipPaired =  CCUHsApi.getInstance().readEntity(
-                "domainName == \"" + DomainName.vavAdvancedHybridAhuV2 + "\"").isNotEmpty()
-        isConnectModulePaired =  CCUHsApi.getInstance().readEntity(
-                "domainName == \"" + DomainName.vavAdvancedHybridAhuV2_connectModule + "\"").isNotEmpty()
+    fun isEquipAvailable(profile: ProfileType) {
+        if (profile == ProfileType.SYSTEM_VAV_ADVANCED_AHU) {
+            isEquipPaired = getVavCmEquip().isNotEmpty()
+            isConnectModulePaired = getVavConnectEquip().isNotEmpty()
+        } else {
+            isEquipPaired = getDabCmEquip().isNotEmpty()
+            isConnectModulePaired = getDabConnectEquip().isNotEmpty()
+        }
     }
 
     fun showErrorDialog(context: Context, message: Spanned) {
@@ -394,7 +386,7 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
         builder.create().show()
     }
 
-
+    open fun reset() {}
 
 
 }

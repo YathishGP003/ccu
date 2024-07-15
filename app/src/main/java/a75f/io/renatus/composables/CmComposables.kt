@@ -12,8 +12,8 @@ import a75f.io.renatus.compose.ToggleButtonStateful
 import a75f.io.renatus.compose.formatText
 import a75f.io.renatus.modbus.util.CANCEL
 import a75f.io.renatus.modbus.util.SAVE
+import a75f.io.renatus.profiles.system.advancedahu.AdvancedHybridAhuViewModel
 import a75f.io.renatus.profiles.system.advancedahu.Option
-import a75f.io.renatus.profiles.system.advancedahu.vav.VavAdvancedHybridAhuViewModel
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -309,7 +309,7 @@ fun AnalogOutConfig(
 }
 
 @Composable
-fun SaveConfig(viewModel: VavAdvancedHybridAhuViewModel) {
+fun SaveConfig(viewModel: AdvancedHybridAhuViewModel) {
     Row(
         modifier = Modifier
             .fillMaxWidth()

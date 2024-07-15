@@ -15,6 +15,7 @@ import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.system.SystemMode
+import a75f.io.logic.bo.building.system.util.deleteSystemConnectModule
 import a75f.io.logic.bo.building.system.vav.VavStagedRtu
 import a75f.io.logic.bo.building.system.vav.config.StagedRtuProfileConfig
 import a75f.io.renatus.util.SystemProfileUtil
@@ -112,18 +113,6 @@ open class StagedRtuProfileViewModel : ViewModel() {
         DomainManager.addSystemDomainEquip(hayStack)
         DomainManager.addCmBoardDevice(hayStack)
         return equipId
-    }
-
-    private fun deleteSystemConnectModule() {
-        val connectSystemEquip = hayStack.readEntity("domainName == \"" + DomainName.vavAdvancedHybridAhuV2_connectModule + "\"")
-        if (connectSystemEquip.isNotEmpty()) {
-            hayStack.deleteEntityTree(connectSystemEquip["id"].toString())
-        }
-
-        val connectDevice = hayStack.readEntity("domainName == \"" + DomainName.connectModuleDevice + "\"")
-        if (connectDevice.isNotEmpty()) {
-            hayStack.deleteEntityTree(connectDevice["id"].toString())
-        }
     }
 
     open fun saveConfiguration() {

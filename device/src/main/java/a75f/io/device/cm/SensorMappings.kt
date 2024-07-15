@@ -2,8 +2,7 @@ package a75f.io.device.cm
 
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.api.Point
-import a75f.io.domain.equips.DomainEquip
-import a75f.io.domain.equips.VavAdvancedHybridSystemEquip
+import a75f.io.domain.equips.AdvancedHybridSystemEquip
 
 /**
  * These are specific to Advanced AHU configuration and sensors that could be connected to thermistor/analog
@@ -658,6 +657,7 @@ fun getUniversalInputSensorMapping() : Map<Int, SensorInput> {
 
     )
 }
+
 fun getAdvancedAhuThermistorMappings() : Map<Int, ThermistorInput> {
     return mapOf(
         0 to ThermistorInput(
@@ -881,6 +881,7 @@ fun getAdvancedAhuThermistorMappings() : Map<Int, ThermistorInput> {
         )
     )
 }
+
 fun getAdvancedAhuThermistorDomainNameMappings() : Map<String, ThermistorInput> {
     return mapOf(
         "thermistorInput" to ThermistorInput(
@@ -1478,6 +1479,7 @@ fun getAdvancedAhuAnalogInputMappings() : Map<Int, AnalogInput> {
             maxVoltage = 10.0
         ))
 }
+
 fun getAdvancedAhuAnalogInputDomainNameMappings() : Map<String, AnalogInput> {
     return mapOf(
         "voltageInput" to AnalogInput(
@@ -1853,12 +1855,8 @@ fun getAdvancedAhuAnalogInputDomainNameMappings() : Map<String, AnalogInput> {
             maxVoltage = 10.0
         ))
 }
-fun getSensorDomainPointFromName(name : String, equip : DomainEquip) : Point? {
-    val systemEquip = when (equip) {
-        is VavAdvancedHybridSystemEquip -> equip
-        //is ConnectModuleEquip -> equip
-        else -> throw IllegalArgumentException("Invalid system equip type")
-        }
+
+fun getSensorDomainPointFromName(name : String, systemEquip : AdvancedHybridSystemEquip) : Point? {
     return when(name) {
         DomainName.voltageInput -> systemEquip.voltageInput
         DomainName.buildingStaticPressureSensor_1 -> systemEquip.buildingStaticPressureSensor1
@@ -1955,6 +1953,4 @@ fun getSensorDomainPointFromName(name : String, equip : DomainEquip) : Point? {
 
     }
 }
-
-// write function for universal input mapping of connect module to return map of sensor
 

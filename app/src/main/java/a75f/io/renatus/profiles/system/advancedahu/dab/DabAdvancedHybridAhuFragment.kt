@@ -19,11 +19,9 @@ import androidx.fragment.app.viewModels
  */
 
 class DabAdvancedHybridAhuFragment : AdvancedHybridAhuFragment() {
-    private val viewModel: DabAdvancedHybridAhuViewModel by viewModels()
+    override val viewModel: DabAdvancedHybridAhuViewModel by viewModels()
 
-    override fun onCreateView(
-            inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
-    ): View {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
 
         val rootView = ComposeView(requireContext())
         rootView.apply {
@@ -32,20 +30,15 @@ class DabAdvancedHybridAhuFragment : AdvancedHybridAhuFragment() {
         }
     }
 
-
     @Composable
     fun RootView() {
         Column {
             if (viewModel.viewState.value.pendingDeleteConnect) {
-                DeleteDialog(
-                        onDismissRequest = { viewModel.viewState.value.pendingDeleteConnect = false },
-                        onConfirmation = {
-                            viewModel.viewState.value.isConnectEnabled = false
-                            viewModel.viewState.value.pendingDeleteConnect = false
-                            DabAdvancedAhuState.connectConfigToState(viewModel.profileConfiguration as DabAdvancedHybridAhuConfig, viewModel.viewState.value)
-                        },
-                        toDelete = "Connect Module 1"
-                )
+                DeleteDialog(onDismissRequest = { viewModel.viewState.value.pendingDeleteConnect = false }, onConfirmation = {
+                    viewModel.viewState.value.isConnectEnabled = false
+                    viewModel.viewState.value.pendingDeleteConnect = false
+                    DabAdvancedAhuState.connectConfigToState(viewModel.profileConfiguration as DabAdvancedHybridAhuConfig, viewModel.viewState.value)
+                }, toDelete = "Connect Module 1")
             }
 
 

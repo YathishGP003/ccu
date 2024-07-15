@@ -94,8 +94,9 @@ import a75f.io.logic.bo.building.oao.OAOEquip;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.logic.bo.building.system.SystemMode;
-import a75f.io.logic.bo.building.system.UserIntentConfig;
+import a75f.io.logic.bo.building.system.dab.DabAdvancedAhu;
 import a75f.io.logic.bo.building.system.dab.DabExternalAhu;
+import a75f.io.logic.bo.building.system.util.UserIntentConfig;
 import a75f.io.logic.bo.building.system.vav.VavAdvancedAhu;
 import a75f.io.logic.bo.building.system.vav.VavAdvancedHybridRtu;
 import a75f.io.logic.bo.building.system.vav.VavExternalAhu;
@@ -960,6 +961,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 				|| L.ccu().systemProfile instanceof VavExternalAhu
 				|| (L.ccu().systemProfile instanceof VavStagedRtu && !(L.ccu().systemProfile instanceof VavAdvancedHybridRtu))
 				|| L.ccu().systemProfile instanceof VavAdvancedAhu
+				|| L.ccu().systemProfile instanceof DabAdvancedAhu
 				|| L.ccu().systemProfile instanceof VavStagedRtuWithVfd
 				|| L.ccu().systemProfile instanceof VavFullyModulatingRtu);
 	}
@@ -1145,58 +1147,86 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 						getOperatingMode(ModelNames.VAV_EXTERNAL_AHU_CONTROLLER)
 				);
 			}
+		} else if (L.ccu().systemProfile instanceof DabAdvancedAhu) {
+			DabAdvancedAhu profile = (DabAdvancedAhu) L.ccu().systemProfile;
+			setAdvancedAhuConfiguration(
+					profile.getUserIntentConfig(),
+					profile.getUnit(ductStaticPressureSetpoint),
+					profile.getUnit(airTempCoolingSp),
+					profile.systemEquip.getCmEquip().getAirTempHeatingSp().readHisVal() + " " + profile.getUnit(airTempHeatingSp),
+					profile.systemEquip.getCmEquip().getAirTempCoolingSp().readHisVal() + " " + profile.getUnit(airTempCoolingSp),
+					profile.getSatControlPoint() + " " + profile.getUnit(airTempCoolingSp),
+					profile.getOperatingMode(),
+					profile.systemEquip.getCmEquip().getDuctStaticPressureSetpoint().readHisVal(),
+					profile.getStaticPressureControlPoint(),
+					profile.systemEquip.getCmEquip().getCo2BasedDamperControl().readHisVal()
+			);
 		} else if (L.ccu().systemProfile instanceof VavAdvancedAhu) {
 			VavAdvancedAhu profile = (VavAdvancedAhu) L.ccu().systemProfile;
-			setPointConfig.setVisibility(View.VISIBLE);
-
-			String dspUnit = profile.getUnit(ductStaticPressureSetpoint);
-
-			UserIntentConfig userIntentConfig = profile.getUserIntentConfig();
-			if (userIntentConfig.isSatHeatingAvailable()) { // heating is available
-				String satUnit = profile.getUnit(airTempHeatingSp);
-				heatingSp.setText(" " + profile.systemEquip.getAirTempHeatingSp().readHisVal() +" "+ satUnit);
-				dualSatCurrent.setText(" " + profile.getSatControlPoint()+" "+ satUnit);
-			} else {
-				heatConfig.setVisibility(View.INVISIBLE);
-			}
-			if (userIntentConfig.isSatCoolingAvailable()) { // Cooling is available
-				String satUnit = profile.getUnit(airTempCoolingSp);
-				coolingSp.setText(" " + profile.systemEquip.getAirTempCoolingSp().readHisVal() +" "+ satUnit);
-				dualSatCurrent.setText(" " + profile.getSatControlPoint()+" "+ satUnit);
-			} else {
-				coolConfig.setVisibility(View.INVISIBLE);
-			}
-			if ((userIntentConfig.component1() || userIntentConfig.component2())) {
-				dualSatConfig.setVisibility(View.VISIBLE);
-				opMode.setText(" " + profile.getOperatingMode());
-			} else {
-				dualSatConfig.setVisibility(View.GONE);
-			}
-
-			if (userIntentConfig.isPressureControlAvailable()) { // Static Pressure control is available
-				DecimalFormat df = new DecimalFormat("0.00");
-				dspSetPoint.setText(" " + df.format( profile.systemEquip.getDuctStaticPressureSetpoint().readHisVal()) +" "+ dspUnit);
-				dspCurrent.setText(" " + df.format( profile.getStaticPressureControlPoint())+" "+ dspUnit);
-			} else {
-				dspSetPoint.setVisibility(View.GONE);
-				dspCurrent.setVisibility(View.GONE);
-				dspConfig.setVisibility(View.GONE);
-			}
-			dual_config.setVisibility((userIntentConfig.isSatHeatingAvailable() || userIntentConfig.isSatCoolingAvailable())? View.VISIBLE : View.GONE);
-			singleSatConfig.setVisibility(View.GONE);
-
-			if (userIntentConfig.isCo2DamperControlAvailable()) {
-				external_damper.setText(" " +profile.systemEquip.getCo2BasedDamperControl().readHisVal()+" %");
-				dcv_config.setVisibility(View.VISIBLE);
-			} else {
-				dcv_config.setVisibility(View.GONE);
-			}
+			setAdvancedAhuConfiguration(
+					profile.getUserIntentConfig(),
+					profile.getUnit(ductStaticPressureSetpoint),
+					profile.getUnit(airTempCoolingSp),
+					profile.systemEquip.getCmEquip().getAirTempHeatingSp().readHisVal() + " " + profile.getUnit(airTempHeatingSp),
+					profile.systemEquip.getCmEquip().getAirTempCoolingSp().readHisVal() + " " + profile.getUnit(airTempCoolingSp),
+					profile.getSatControlPoint() + " " + profile.getUnit(airTempCoolingSp),
+					profile.getOperatingMode(),
+					profile.systemEquip.getCmEquip().getDuctStaticPressureSetpoint().readHisVal(),
+					profile.getStaticPressureControlPoint(),
+					profile.systemEquip.getCmEquip().getCo2BasedDamperControl().readHisVal()
+			);
 		}
 		else {
 			setPointConfig.setVisibility(View.GONE);
 		}
 	}
 
+	@SuppressLint("SetTextI18n")
+	private void setAdvancedAhuConfiguration(
+			UserIntentConfig userIntentConfig,
+			String dspUnit, String satUnit, String heatingSpVal,
+			String CoolingSpVal, String dualSatCurrentVal, String opModeVal,
+			double dspSetPointVal, double dspCurrentVal, double damperVal
+	) {
+		setPointConfig.setVisibility(View.VISIBLE);
+		if (userIntentConfig.isSatHeatingAvailable()) { // heating is available
+			heatingSp.setText(" " + heatingSpVal +" "+ satUnit);
+			dualSatCurrent.setText(" " + dualSatCurrentVal+" "+ satUnit);
+		} else {
+			heatConfig.setVisibility(View.INVISIBLE);
+		}
+		if (userIntentConfig.isSatCoolingAvailable()) { // Cooling is available
+			coolingSp.setText(" " + CoolingSpVal +" "+ satUnit);
+			dualSatCurrent.setText(" " + dualSatCurrentVal+" "+ satUnit);
+		} else {
+			coolConfig.setVisibility(View.INVISIBLE);
+		}
+		if ((userIntentConfig.component1() || userIntentConfig.component2())) {
+			dualSatConfig.setVisibility(View.VISIBLE);
+			opMode.setText(" " + opModeVal);
+		} else {
+			dualSatConfig.setVisibility(View.GONE);
+		}
+
+		if (userIntentConfig.isPressureControlAvailable()) { // Static Pressure control is available
+			DecimalFormat df = new DecimalFormat("0.00");
+			dspSetPoint.setText(" " + df.format(dspSetPointVal) +" "+ dspUnit);
+			dspCurrent.setText(" " + df.format(dspCurrentVal)+" "+ dspUnit);
+		} else {
+			dspSetPoint.setVisibility(View.GONE);
+			dspCurrent.setVisibility(View.GONE);
+			dspConfig.setVisibility(View.GONE);
+		}
+		dual_config.setVisibility((userIntentConfig.isSatHeatingAvailable() || userIntentConfig.isSatCoolingAvailable())? View.VISIBLE : View.GONE);
+		singleSatConfig.setVisibility(View.GONE);
+
+		if (userIntentConfig.isCo2DamperControlAvailable()) {
+			external_damper.setText(" " +damperVal+" %");
+			dcv_config.setVisibility(View.VISIBLE);
+		} else {
+			dcv_config.setVisibility(View.GONE);
+		}
+	}
 	private void setCurrentAndSetPoints(
 			String satSp, String dspSp,String satCur, String dspCur, boolean dcvEnabled,
 			String dcvSp, boolean dualEnabled, String coolingSpVal, String heatingSpVal,

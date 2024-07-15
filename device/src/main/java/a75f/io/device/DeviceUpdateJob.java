@@ -2,6 +2,7 @@ package a75f.io.device;
 
 import static java.lang.Thread.sleep;
 import static a75f.io.device.serial.MessageType.HYPERSTAT_CM_TO_CCU_SERIALIZED_MESSAGE;
+import static a75f.io.logic.bo.building.system.util.AdvancedAhuUtilKt.isConnectModuleAvailable;
 
 import android.content.Context;
 
@@ -84,7 +85,7 @@ public class DeviceUpdateJob extends BaseJob implements WatchdogMonitor
         if (jobLock.tryLock()) {
             try {
                 if (Globals.getInstance().getBuildingProcessStatus()) {
-                    if (L.ccu().systemProfile instanceof VavAdvancedAhu) {
+                    if (isConnectModuleAvailable()) {
                         VavAdvancedAhu profile = (VavAdvancedAhu) L.ccu().systemProfile;
                         if (profile.isConnectModuleAvailable()) {
                             ConnectModbusSerialComm.sendSettingConfig();
@@ -102,8 +103,6 @@ public class DeviceUpdateJob extends BaseJob implements WatchdogMonitor
                     }
                     BacnetUtilKt.checkBacnetHealth();
                     modbusNetwork.sendMessage();
-
-
                     CcuLog.d(L.TAG_CCU_JOB, "<-DeviceUpdateJob ");
             }
             catch (Exception e) {

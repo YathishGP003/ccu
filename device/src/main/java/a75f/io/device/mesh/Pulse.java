@@ -868,7 +868,7 @@ public class Pulse
 						CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : pointID - th2 " + phyPoint.get("id").toString() );
 						Object physicalPointName = phyPoint.get("domainName");
 						if (physicalPointName != null) {
-							ControlMoteMessageHandlerKt.updateThermistorInput(physicalPointName.toString(), val, Domain.systemEquip);
+							ControlMoteMessageHandlerKt.updateThermistorInput(physicalPointName.toString(), val);
 						} else {
 							CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : Advanced AHU invalid thermistor mapping");
 						}
@@ -881,7 +881,7 @@ public class Pulse
 						//val = 9000;
 						physicalPointName = phyPoint.get("domainName");
 						if (physicalPointName != null) {
-							ControlMoteMessageHandlerKt.updateAnalogInput(physicalPointName.toString(), val/1000, Domain.systemEquip);
+							ControlMoteMessageHandlerKt.updateAnalogInput(physicalPointName.toString(), val/1000);
 						} else {
 							CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : Advanced AHU invalid thermistor mapping");
 						}
@@ -893,7 +893,7 @@ public class Pulse
 						//val = 8000;
 						physicalPointName = phyPoint.get("domainName");
 						if (physicalPointName != null) {
-							ControlMoteMessageHandlerKt.updateAnalogInput(physicalPointName.toString(), val/1000, Domain.systemEquip);
+							ControlMoteMessageHandlerKt.updateAnalogInput(physicalPointName.toString(), val/1000);
 						} else {
 							CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : Advanced AHU invalid thermistor mapping for "+phyPoint);
 						}
@@ -905,7 +905,7 @@ public class Pulse
 						///val = 16359;//TODO-TEST
 						physicalPointName = phyPoint.get("domainName");
 						if (physicalPointName != null) {
-							ControlMoteMessageHandlerKt.updateThermistorInput(physicalPointName.toString(), val, Domain.systemEquip);
+							ControlMoteMessageHandlerKt.updateThermistorInput(physicalPointName.toString(), val);
 						} else {
 							CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : Advanced AHU invalid thermistor mapping "+phyPoint);
 						}

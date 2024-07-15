@@ -1,8 +1,6 @@
 package a75f.io.renatus.profiles.system.advancedahu.vav
 
 import a75f.io.api.haystack.CCUHsApi
-import a75f.io.logger.CcuLog
-import a75f.io.logic.Globals
 import a75f.io.logic.bo.building.system.vav.config.VavAdvancedHybridAhuConfig
 import a75f.io.renatus.composables.DeleteDialog
 import a75f.io.renatus.composables.SaveConfig
@@ -23,19 +21,11 @@ import androidx.fragment.app.viewModels
 
 class VavAdvancedHybridAhuFragment : AdvancedHybridAhuFragment() {
 
-
+    override val viewModel: VavAdvancedHybridAhuViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
-        /*viewLifecycleOwner.lifecycleScope.launch {
-            withContext(Dispatchers.IO) {
-                viewModel.init(requireContext(), CCUHsApi.getInstance())
-                withContext(Dispatchers.Main) {
-                    viewModel.modelLoaded = true
-                }
-            }
-        }*/
         viewModel.init(requireContext(), CCUHsApi.getInstance())
         val rootView = ComposeView(requireContext())
         rootView.apply {
@@ -46,11 +36,6 @@ class VavAdvancedHybridAhuFragment : AdvancedHybridAhuFragment() {
 
     @Composable
     fun RootView() {
-        /*if (!viewModel.modelLoaded) {
-            IndeterminateLoopProgress(bottomText = "Loading Profile Configuration")
-            CcuLog.i(Domain.LOG_TAG, "Show Progress")
-            return
-        }*/
         Column {
             if (viewModel.viewState.value.pendingDeleteConnect) {
                 DeleteDialog(

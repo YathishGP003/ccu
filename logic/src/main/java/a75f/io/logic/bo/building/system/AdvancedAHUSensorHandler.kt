@@ -1,14 +1,11 @@
 package a75f.io.logic.bo.building.system
 
 import a75f.io.domain.equips.DomainEquip
-import a75f.io.domain.equips.VavAdvancedHybridSystemEquip
+import a75f.io.logic.bo.building.system.util.getAdvancedAhuSystemEquip
 
 
-fun updatePressureSensorDerivedPoints(equip: DomainEquip) {
-    val systemEquip = when (equip) {
-        is VavAdvancedHybridSystemEquip -> equip
-        else -> throw IllegalArgumentException("Invalid system equip type")
-    }
+fun updatePressureSensorDerivedPoints() {
+    val systemEquip = getAdvancedAhuSystemEquip()
     val (pressure, analogIn1, analogIn2) = getPressureMappings(systemEquip)
     val availableSensors = listOfNotNull(pressure?.readHisVal(), analogIn1?.readHisVal(), analogIn2?.readHisVal())
     if (availableSensors.isNotEmpty()) {
@@ -25,10 +22,7 @@ fun updatePressureSensorDerivedPoints(equip: DomainEquip) {
 }
 
 fun updateTemperatureSensorDerivedPoints(equip: DomainEquip) {
-    val systemEquip = when (equip) {
-        is VavAdvancedHybridSystemEquip -> equip
-        else -> throw IllegalArgumentException("Invalid system equip type")
-    }
+    val systemEquip = getAdvancedAhuSystemEquip()
     if (systemEquip.averageSat.pointExists()) {
         val avgSat = (systemEquip.supplyAirTemperature1.readHisVal() +
                 systemEquip.supplyAirTemperature2.readHisVal() +

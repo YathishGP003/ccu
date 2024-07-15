@@ -259,5 +259,4 @@ public class CCUUiUtil {
     public static int getGreyColor() {
         return ContextCompat.getColor(context, R.color.tuner_group);
     }
-
 }

@@ -30,8 +30,6 @@ import android.content.Context
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.seventyfivef.domainmodeler.client.ModelDirective
@@ -72,8 +70,7 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
     @SuppressLint("DefaultLocale")
     var testVoltage = List(101) { Option(it,String.format("%.1f", it * 0.1)) }
 
-    var _modelLoaded =  MutableLiveData(false)
-    val modelLoaded: LiveData<Boolean> get() = _modelLoaded
+    var modelLoaded by mutableStateOf(false)
 
     /**
      * Initialize the ViewModel

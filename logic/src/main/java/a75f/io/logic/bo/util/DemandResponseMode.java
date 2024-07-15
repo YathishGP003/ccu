@@ -106,6 +106,10 @@ public class DemandResponseMode {
     }
 
     public static boolean isDREnrollmentPoint(HashMap<Object, Object> demandResponseEnrollment) {
+        if (demandResponseEnrollment.containsKey("domainName")
+                && demandResponseEnrollment.get("domainName").toString().equals("demandResponseEnrollment")) {
+            return true;
+        }
         return demandResponseEnrollment.containsKey("demand") && demandResponseEnrollment.
                 containsKey("response") && demandResponseEnrollment.containsKey("enable")
                 && demandResponseEnrollment.containsKey("system");

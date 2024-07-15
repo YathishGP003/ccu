@@ -61,7 +61,7 @@ data class AnalogInput(override val domainName : String,
  * Universal input
  */
 
-fun getAdvancedAhuSensorInputMappings() : Map<Int, SensorInput> {
+fun getUniversalInputSensorMapping() : Map<Int, SensorInput> {
     return mapOf(
         0 to AnalogInput(
             domainName = "None",
@@ -1853,7 +1853,6 @@ fun getAdvancedAhuAnalogInputDomainNameMappings() : Map<String, AnalogInput> {
             maxVoltage = 10.0
         ))
 }
-
 fun getSensorDomainPointFromName(name : String, equip : DomainEquip) : Point? {
     val systemEquip = when (equip) {
         is VavAdvancedHybridSystemEquip -> equip
@@ -1956,3 +1955,6 @@ fun getSensorDomainPointFromName(name : String, equip : DomainEquip) : Point? {
 
     }
 }
+
+// write function for universal input mapping of connect module to return map of sensor
+

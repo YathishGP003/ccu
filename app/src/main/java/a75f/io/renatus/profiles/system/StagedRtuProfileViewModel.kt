@@ -33,8 +33,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import a75f.io.logic.bo.haystack.device.ControlMote
 import a75f.io.renatus.profiles.profileUtils.UnusedPortsModel.Companion.saveUnUsedPortStatusOfSystemProfile
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 
 open class StagedRtuProfileViewModel : ViewModel() {
 
@@ -53,9 +51,7 @@ open class StagedRtuProfileViewModel : ViewModel() {
     lateinit var relay5AssociationList : List<String>
     lateinit var relay6AssociationList : List<String>
     lateinit var relay7AssociationList : List<String>
-    private lateinit var unusedPorts: HashMap<String, Boolean>
-    var _modelLoaded =  MutableLiveData(false)
-    val modelLoaded: LiveData<Boolean> get() = _modelLoaded
+    var modelLoaded by  mutableStateOf(false)
     lateinit var equipBuilder : ProfileEquipBuilder
     lateinit var deviceBuilder: DeviceBuilder
     fun init(context: Context, profileModel : ModelDirective, hayStack : CCUHsApi) {

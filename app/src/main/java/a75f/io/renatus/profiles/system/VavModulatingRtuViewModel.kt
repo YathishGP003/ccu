@@ -51,7 +51,7 @@ open class VavModulatingRtuViewModel : ModulatingRtuViewModel() {
         viewState = ModulatingRtuViewState.fromProfileConfig(profileConfiguration)
         CcuLog.i(Domain.LOG_TAG, "VavModulatingRtuViewModel Loaded")
         viewState.unusedPortState = ControlMote.getCMUnusedPorts(Domain.hayStack)
-        _modelLoaded.postValue(true)
+        modelLoaded = true
     }
 
     override fun saveConfiguration() {

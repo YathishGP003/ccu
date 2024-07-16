@@ -31,6 +31,9 @@ import kotlinx.coroutines.withContext
 
 class DabAdvancedHybridAhuViewModel : AdvancedHybridAhuViewModel() {
 
+    init {
+        viewState = mutableStateOf(DabAdvancedAhuState())
+    }
     fun init(context: Context, hayStack: CCUHsApi) {
         super.init(context, ModelLoader.getDabAdvancedAhuCmModelV2(), ModelLoader.getDabAdvancedAhuConnectModelV2(), hayStack, ProfileType.SYSTEM_DAB_ADVANCED_AHU)
         CcuLog.i(Domain.LOG_TAG, "DabAdvancedAhuViewModel Init")
@@ -121,7 +124,7 @@ class DabAdvancedHybridAhuViewModel : AdvancedHybridAhuViewModel() {
         L.ccu().systemProfile.addSystemEquip()
         L.ccu().systemProfile.updateAhuRef(newEquipId)
         val dabAdvancedAhuProfile = L.ccu().systemProfile as DabAdvancedAhu
-        // dabAdvancedAhuProfile.updateStagesSelected() // todo
+         dabAdvancedAhuProfile.updateStagesSelected()
     }
 
     private fun updateConfiguration() {

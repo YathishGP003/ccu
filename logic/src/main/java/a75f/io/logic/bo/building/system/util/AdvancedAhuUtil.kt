@@ -21,18 +21,14 @@ import io.seventyfivef.ph.core.Tags
 /**
  * This function is used to get the modulated output based on the loop output
  */
-fun getModulatedOutput(loopOutput: Double, min : Double, max : Double)  = (((max - min) * (loopOutput / 100.0)) + min)
+fun getModulatedOutput(loopOutput: Double, min: Double, max: Double) = (((max - min) * (loopOutput / 100.0)) + min)
 
 /**
  * This function is get the mid point of min max
  */
-fun getComposeMidPoint(minMax: Pair<Double,Double>) = (((minMax.first + minMax.second) / 2).coerceIn(0.0,10.0))
+fun getComposeMidPoint(minMax: Pair<Double, Double>) = (((minMax.first + minMax.second) / 2).coerceIn(0.0, 10.0))
 
-data class AhuTuners(
-        var relayAActivationHysteresis: Double,
-        var relayDeactivationHysteresis: Double,
-        var humidityHysteresis: Double
-)
+data class AhuTuners(var relayAActivationHysteresis: Double, var relayDeactivationHysteresis: Double, var humidityHysteresis: Double)
 
 data class AhuSettings(
         var systemEquip: AdvancedHybridSystemEquip,
@@ -44,12 +40,7 @@ data class AhuSettings(
 )
 
 enum class DuctPressureSensorSource {
-    DUCT_STATIC_PRESSURE_SENSOR_1,
-    DUCT_STATIC_PRESSURE_SENSOR_2,
-    DUCT_STATIC_PRESSURE_SENSOR_3,
-    AVERAGE_PRESSURE,
-    MIN_PRESSURE,
-    MAX_PRESSURE
+    DUCT_STATIC_PRESSURE_SENSOR_1, DUCT_STATIC_PRESSURE_SENSOR_2, DUCT_STATIC_PRESSURE_SENSOR_3, AVERAGE_PRESSURE, MIN_PRESSURE, MAX_PRESSURE
 }
 
 data class UserIntentConfig(
@@ -64,38 +55,19 @@ fun roundOff(value: Double): Double {
     return String.format("%.2f", value).toDouble()
 }
 
-
-fun isConnectModuleAvailable(): Boolean {
-    return CCUHsApi.getInstance().readEntity(
-            "domainName == \"" + DomainName.connectModuleDevice + "\"").isNotEmpty()
+fun getConnectDevice(): HashMap<Any, Any> {
+    return CCUHsApi.getInstance().readEntity("domainName == \"" + DomainName.connectModuleDevice + "\"")
 }
 
-fun needToUpdateConditioningMode(
-        systemMode: SystemMode,
-        isCoolingAvailable: Boolean,
-        isHeatingAvailable: Boolean
-): Boolean {
-    when(systemMode) {
-        SystemMode.AUTO -> {
-            if (isCoolingAvailable && isHeatingAvailable) {
-                return false
-            }
-        }
-        SystemMode.COOLONLY -> {
-            if (isCoolingAvailable) {
-                return false
-            }
-        }
-        SystemMode.HEATONLY -> {
-            if (isHeatingAvailable) {
-                return false
-            }
-        }
-        else -> {
-            return true
-        }
+fun isConnectModuleAvailable(): Boolean = getConnectDevice().isNotEmpty()
+
+fun needToUpdateConditioningMode(systemMode: SystemMode, isCoolingAvailable: Boolean, isHeatingAvailable: Boolean): Boolean {
+    return when (systemMode) {
+        SystemMode.AUTO -> !(isCoolingAvailable && isHeatingAvailable)
+        SystemMode.COOLONLY -> !isCoolingAvailable
+        SystemMode.HEATONLY -> !isHeatingAvailable
+        else -> true
     }
-    return true
 }
 
 fun getAdvancedAhuSystemEquip(): AdvancedHybridSystemEquip {
@@ -114,7 +86,7 @@ fun getConnectEquip(): ConnectModuleEquip {
     }
 }
 
-fun getConnectModuleDomain():String {
+fun getConnectModuleDomain(): String {
     return if (L.ccu().systemProfile is DabAdvancedAhu) {
         ModelNames.dabAdvancedHybridAhuV2_connectModule
     } else {
@@ -143,7 +115,7 @@ fun deleteSystemConnectModule(modelName: String) {
         hayStack.deleteEntityTree(connectEquip[Tags.ID].toString())
     }
 
-    val connectDevice = hayStack.readEntity("domainName == \"" + DomainName.connectModuleDevice + "\"")
+    val connectDevice = getConnectDevice()
     if (connectDevice.isNotEmpty()) {
         hayStack.deleteEntityTree(connectDevice[Tags.ID].toString())
     }
@@ -152,6 +124,7 @@ fun deleteSystemConnectModule(modelName: String) {
 fun getVavCmEquip(): HashMap<Any, Any> {
     return CCUHsApi.getInstance().readEntity("domainName == \"" + ModelNames.vavAdvancedHybridAhuV2 + "\"")
 }
+
 fun getDabCmEquip(): HashMap<Any, Any> {
     return CCUHsApi.getInstance().readEntity("domainName == \"" + ModelNames.dabAdvancedHybridAhuV2 + "\"")
 }
@@ -159,6 +132,7 @@ fun getDabCmEquip(): HashMap<Any, Any> {
 fun getVavConnectEquip(): HashMap<Any, Any> {
     return CCUHsApi.getInstance().readEntity("domainName == \"" + ModelNames.vavAdvancedHybridAhuV2_connectModule + "\"")
 }
+
 fun getDabConnectEquip(): HashMap<Any, Any> {
     return CCUHsApi.getInstance().readEntity("domainName == \"" + ModelNames.dabAdvancedHybridAhuV2_connectModule + "\"")
 }

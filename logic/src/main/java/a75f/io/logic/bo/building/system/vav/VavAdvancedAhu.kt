@@ -47,6 +47,7 @@ import a75f.io.logic.bo.building.system.updateTemperatureSensorDerivedPoints
 import a75f.io.logic.bo.building.system.util.AhuSettings
 import a75f.io.logic.bo.building.system.util.AhuTuners
 import a75f.io.logic.bo.building.system.util.UserIntentConfig
+import a75f.io.logic.bo.building.system.util.getConnectDevice
 import a75f.io.logic.bo.building.system.util.getModulatedOutput
 import a75f.io.logic.bo.building.system.util.needToUpdateConditioningMode
 import a75f.io.logic.bo.building.system.util.roundOff
@@ -144,7 +145,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
             hayStack.deleteEntityTree(connectSystemEquip["id"].toString())
         }
 
-        val connectDevice = hayStack.readEntity("domainName == \"" + DomainName.connectModuleDevice + "\"")
+        val connectDevice = getConnectDevice()
         if (connectDevice.isNotEmpty()) {
             hayStack.deleteEntityTree(connectDevice["id"].toString())
         }
@@ -1071,10 +1072,8 @@ open class VavAdvancedAhu : VavSystemProfile() {
     fun isEmergencyShutoffActive() : Boolean {
         return advancedAhuImpl.isEmergencyShutOffEnabledAndActive(ahuSettings.systemEquip, ahuSettings.connectEquip1)
     }
-    fun isConnectModuleAvailable(): Boolean {
-        return CCUHsApi.getInstance().readEntity(
-                "domainName == \"" + DomainName.connectModuleDevice + "\"").isNotEmpty()
-    }
+
+    fun isConnectModuleAvailable(): Boolean = isConnectModuleAvailable()
 
     fun getOccupancy(): Int {
         return if(isSystemOccupied) 1 else 0

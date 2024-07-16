@@ -4,7 +4,6 @@ import a75f.io.api.haystack.*
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.hyperstat.common.FanModeCacheStorage
-import a75f.io.logic.bo.building.hyperstat.common.HyperStatReconfigureUtil
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import android.util.Log
 import com.google.gson.JsonObject

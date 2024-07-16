@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Timer;
@@ -34,7 +33,7 @@ public class SyncStatusService {
     private static final String PREFS_ID_LIST_DELETED  = "deletedIdList";
     
     Context applicationContext;
-    private SharedPreferences preferences;
+    private final SharedPreferences preferences;
     
     private List<String> unsyncedIdList;
     private List<String> updatedIdList;
@@ -87,16 +86,9 @@ public class SyncStatusService {
         putListString(PREFS_ID_LIST_UPDATED, updatedIdList);
         putListString(PREFS_ID_LIST_DELETED, deletedIdList);
     }
-    
-    public void clearSyncStatus() {
-        unsyncedIdList.clear();
-        updatedIdList.clear();
-        deletedIdList.clear();
-        saveSyncStatus();
-    }
-    
+
     public boolean isSyncNotRequired() {
-        return unsyncedIdList.size() == 0 && updatedIdList.size() == 0 && deletedIdList.size() == 0;
+        return unsyncedIdList.isEmpty() && updatedIdList.isEmpty() && deletedIdList.isEmpty();
     }
     
     public void addUnSyncedEntity(String id) {
@@ -157,15 +149,7 @@ public class SyncStatusService {
             }
         }, 15000);
     }
-    
-    public void setUnSyncedEntitySynced(String id) {
-        unsyncedIdList.remove(id);
-    }
-    
-    public void setUpdatedEntitySynced(String id) {
-        updatedIdList.remove(id);
-    }
-    
+
     public void setDeletedEntitySynced(String id) {
         CcuLog.i(HayStackConstants.LOG_TAG,"setDeletedEntitySynced "+id);
         deletedIdList.remove(id);
@@ -212,23 +196,19 @@ public class SyncStatusService {
     }
     
     public boolean hasUnSyncedData() {
-        return unsyncedIdList.size() > 0;
+        return !unsyncedIdList.isEmpty();
     }
     
     public boolean hasUpdatedData() {
-        return updatedIdList.size() > 0;
+        return !updatedIdList.isEmpty();
     }
     
     public boolean hasDeletedData() {
-        return deletedIdList.size() > 0;
+        return !deletedIdList.isEmpty();
     }
     
     public HGridIterator getUnSyncedData() {
-    
-        /*HGrid unsyncedGridData = CCUHsApi.getInstance()
-                                            .hsClient
-                                            .readByIds(getHRefArrayFromStringList(unsyncedIdList));*/
-    
+
         //TODO- Entities currently have refs stored as strings which the backend does not allow.
         //Changing refs across app has a larger scope. So as part of ID Migration , just changing the HStr refs to
         //HRef before sending them. This is should bs removed to use above code once it is done.
@@ -256,11 +236,7 @@ public class SyncStatusService {
     }
     
     public HGridIterator getUpdatedData() {
-        
-        /*HGrid updatedGridData = CCUHsApi.getInstance()
-                                        .hsClient
-                                        .readByIds(getHRefArrayFromStringList(updatedIdList));*/
-    
+
         ArrayList<HDict> updatedDictList = new ArrayList<>();
         CcuLog.d("CCU_HS_Sync", " Updated Data : " + updatedIdList.size());
         ListIterator<String> updatedItr = new ArrayList<>(updatedIdList).listIterator();
@@ -289,12 +265,6 @@ public class SyncStatusService {
         return new HGridIterator(updatedGridData);
     }
     
-    private HRef[] getHRefArrayFromStringList(List<String> strList) {
-        return strList.stream()
-                      .map(HRef::copy)
-                      .toArray(HRef[]::new);
-    }
-    
     public List<String> getDeletedData() {
         CcuLog.d("CCU_HS_Sync", " Deleted Data : " + Arrays.toString(deletedIdList.toArray()));
         return deletedIdList;
@@ -308,19 +278,16 @@ public class SyncStatusService {
     private void putListString(String key, List<String> stringList) {
         long time = System.currentTimeMillis();
         String[] stringArr = stringList.toArray(new String[0]);
-        preferences.edit().putString(key, TextUtils.join("‚‗‚", stringArr)).commit();
+        preferences.edit().putString(key, TextUtils.join("‚‗‚", stringArr)).apply();
         CcuLog.i("CCU_PROFILING", "Time to save "+key+" "+(System.currentTimeMillis() - time));
     }
     
-    public boolean updateRefs(HDict entity, HDictBuilder builder) {
-        Iterator<String> iterator = refTypes.iterator();
-        while(iterator.hasNext()) {
-            String hRef = iterator.next();
+    public void updateRefs(HDict entity, HDictBuilder builder) {
+        for (String hRef : refTypes) {
             if (entity.has(hRef) && !entity.get(hRef).toString().equals("SYSTEM")) {
                 builder.add(hRef, HRef.copy(entity.get(hRef).toString()));
             }
         }
-        return true;
     }
 
     public void updateLastModifiedDateTime(HDict entity, HDictBuilder builder) {

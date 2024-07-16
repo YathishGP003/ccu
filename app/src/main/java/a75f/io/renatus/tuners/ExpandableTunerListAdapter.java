@@ -1,9 +1,7 @@
 package a75f.io.renatus.tuners;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.graphics.Typeface;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +16,8 @@ import java.util.HashMap;
 import java.util.List;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.logger.CcuLog;
+import a75f.io.logic.L;
 import a75f.io.renatus.R;
 
 /**
@@ -32,14 +32,14 @@ public class ExpandableTunerListAdapter extends BaseExpandableListAdapter {
     private HashMap<String, String> idMap;
 
     public ExpandableTunerListAdapter(Context context, List<String> expandableListTitle,
-                                      HashMap<String, List<HashMap>> expandableListDetail, HashMap idmap) {
+                                      HashMap<String, List<HashMap>> expandableListDetail, HashMap idMap) {
         this.context = context;
         this.expandableListTitle = expandableListTitle;
         this.expandableListDetail = expandableListDetail;
-        this.idMap = idmap;
-        Log.i("TunersUI", "expandableListTitle:" + expandableListTitle);
-        Log.i("TunersUI", "expandableListDetail:" + expandableListDetail);
-        Log.i("TunersUI", "idMap:" + idmap);
+        this.idMap = idMap;
+        CcuLog.i(L.TAG_CCU_TUNERS_UI, "expandableListTitle:" + expandableListTitle);
+        CcuLog.i(L.TAG_CCU_TUNERS_UI, "expandableListDetail:" + expandableListDetail);
+        CcuLog.i(L.TAG_CCU_TUNERS_UI, "idMap:" + idMap);
     }
 
     @Override
@@ -48,7 +48,7 @@ public class ExpandableTunerListAdapter extends BaseExpandableListAdapter {
     }
 
     public List<HashMap> getChildList(String tunerGroupTitle) {
-        Log.i("TunersUI","getChildList:"+this.expandableListDetail.get(tunerGroupTitle));
+        CcuLog.i(L.TAG_CCU_TUNERS_UI,"getChildList:"+this.expandableListDetail.get(tunerGroupTitle));
         return this.expandableListDetail.get(tunerGroupTitle);
     }
 
@@ -68,30 +68,16 @@ public class ExpandableTunerListAdapter extends BaseExpandableListAdapter {
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = layoutInflater.inflate(R.layout.tuner_list_item, null);
             GridView tunerGrid = convertView.findViewById(R.id.tunerGrid);
-            Log.i("TunersUI","tunerGroupTitle:"+this.expandableListTitle.get(listPosition));
-            Log.i("TunersUI","tunerGridAdapter:");
+            CcuLog.i(L.TAG_CCU_TUNERS_UI,"tunerGroupTitle:"+this.expandableListTitle.get(listPosition));
+            CcuLog.i(L.TAG_CCU_TUNERS_UI,"tunerGridAdapter:");
             tunerGrid.setAdapter(new TunerGridViewAdapter(this.context, getChildList(this.expandableListTitle.get(expandedListPosition))));
         }
         return convertView;
-        /*final HashMap expandedListText = (HashMap) getChild(listPosition, expandedListPosition);
-        if (convertView == null) {
-            LayoutInflater layoutInflater = (LayoutInflater) this.context
-                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            convertView = layoutInflater.inflate(R.layout.tuner_list_item, null);
-        }
-        TextView expandedListTextView = convertView.findViewById(R.id.expandedListItemName);
-        TextView expandedListTextVal =  convertView.findViewById(R.id.expandedListItemVal);
-        expandedListTextView.setText(expandedListText.get("dis").toString());
-        //expandedListTextVal.setText(""+getTuner(idMap.get(expandedListText)));
-        return convertView;*/
     }
 
     @Override
     public int getChildrenCount(int listPosition) {
-        //Log.i("TunersUI", "listPosition:" + listPosition);
-        Log.i("TunersUI", "expandableListTitle:" + expandableListTitle.get(listPosition));
-        //Log.i("TunersUI", "expandableListDetail:" + expandableListDetail.get(expandableListTitle.get(listPosition)));
-        //Log.i("TunersUI", "expandableListDetailSize:" + expandableListDetail.get(expandableListTitle.get(listPosition)).size());
+        CcuLog.i(L.TAG_CCU_TUNERS_UI, "expandableListTitle:" + expandableListTitle.get(listPosition));
         if (expandableListDetail.get(expandableListTitle.get(listPosition)) != null) {
             return (expandableListDetail.get(expandableListTitle.get(listPosition))).size();
         } else {
@@ -143,7 +129,7 @@ public class ExpandableTunerListAdapter extends BaseExpandableListAdapter {
     public static double getTuner(String id) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
         ArrayList values = hayStack.readPoint(id);
-        if (values != null && values.size() > 0) {
+        if (values != null && !values.isEmpty()) {
             for (int l = 1; l <= values.size(); l++) {
                 HashMap valMap = ((HashMap) values.get(l - 1));
                 if (valMap.get("val") != null) {
@@ -181,8 +167,8 @@ public class ExpandableTunerListAdapter extends BaseExpandableListAdapter {
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             final HashMap expandedListText = tunerValueList.get(position);
-            Log.i("TunersUI", "tunerValueLabel:" + expandedListText.get("dis").toString());
-            Log.i("TunersUI", "expandedListText:" + expandedListText.size());
+            CcuLog.i(L.TAG_CCU_TUNERS_UI, "tunerValueLabel:" + expandedListText.get("dis").toString());
+            CcuLog.i(L.TAG_CCU_TUNERS_UI, "expandedListText:" + expandedListText.size());
             if (convertView == null) {
                 LayoutInflater layoutInflater = (LayoutInflater) this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                 convertView = layoutInflater.inflate(R.layout.item_tunergrid, null);
@@ -191,10 +177,6 @@ public class ExpandableTunerListAdapter extends BaseExpandableListAdapter {
             TextView expandedListTextVal = convertView.findViewById(R.id.expandedListItemVal);
             expandedListTextView.setText(expandedListText.get("dis").toString());
             LinearLayout tunerGridBg = convertView.findViewById(R.id.tunerGridBg);
-           /* if (position % 4 == 0)
-                tunerGridBg.setBackgroundColor(Color.parseColor("#FFFFFF"));
-            else
-                tunerGridBg.setBackgroundColor(Color.parseColor("#F9F9F9"));*/
             return convertView;
         }
     }

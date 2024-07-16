@@ -15,8 +15,6 @@ import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.SettingPoint;
 import a75f.io.api.haystack.Site;
 import a75f.io.api.haystack.Zone;
-import a75f.io.data.entities.EntityDBUtilKt;
-import a75f.io.logger.CcuLog;
 
 /**
  * Mock API class bypasses sync and local data persisting.
@@ -71,8 +69,8 @@ public class MockCcuHsApi extends CCUHsApi {
     }
     
     @Override
-    public String updateSettingPoint(SettingPoint p, String id) {
-        return tagsDb.updateSettingPoint(p,id);
+    public void updateSettingPoint(SettingPoint p, String id) {
+        tagsDb.updateSettingPoint(p, id);
     }
     
     @Override

@@ -1,34 +1,34 @@
 package a75f.io.renatus.ENGG;
 
-import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.method.DigitsKeyListener;
 import android.text.method.KeyListener;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ExpandableListView;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.fragment.app.Fragment;
+
+import org.projecthaystack.HGrid;
+import org.projecthaystack.HRow;
+
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
-import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Schedule;
@@ -42,16 +42,6 @@ import a75f.io.renatus.EquipTempExpandableListAdapter;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.util.RxjavaUtil;
-import kotlin.coroutines.CoroutineContext;
-import kotlinx.coroutines.GlobalScope;
-
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
-import androidx.fragment.app.Fragment;
-
-import org.projecthaystack.HDict;
-import org.projecthaystack.HGrid;
-import org.projecthaystack.HRow;
 
 public class HaystackExplorer extends Fragment
 {
@@ -84,8 +74,7 @@ public class HaystackExplorer extends Fragment
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState)
     {
-        View rootView = inflater.inflate(R.layout.fragment_tuner_explore, container, false);
-        return rootView;
+        return inflater.inflate(R.layout.fragment_tuner_explore, container, false);
     }
 
     @Override
@@ -97,72 +86,53 @@ public class HaystackExplorer extends Fragment
         updateAllData();
         expandableListAdapter = new EquipTempExpandableListAdapter(HaystackExplorer.this, expandableListTitle, expandableListDetail, tunerMap, getActivity());
         expandableListView.setAdapter(expandableListAdapter);
-        expandableListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
-            @Override
-            public boolean onChildClick(ExpandableListView parent, View v,
-                                        int groupPosition, int childPosition, long id) {
-    
-                if (passCodeValidationRequired) {
-                    showPassCodeScren();
-                    return true;
-                }
-                Log.d("CCU_HE", "onChildClick "+groupPosition+" "+childPosition);
-                String tunerName = expandableListDetail.get(expandableListTitle.get(groupPosition)).get(
-                        childPosition);
-                
-                /*if (tunerName.contains("currentTemp") || tunerName.contains("Variable")) {
-                    return true ;
-                }*/
-                //Toast.makeText(getActivity(), expandableListTitle.get(groupPosition) + " -> " + tunerName, Toast.LENGTH_SHORT).show();
-                
-                final EditText taskEditText = new EditText(getActivity());
-                String tunerVal = getPointVal(tunerMap.get(tunerName));
-                KeyListener keyListener = DigitsKeyListener.getInstance("0123456789.");
-                taskEditText.setKeyListener(keyListener);
+        expandableListView.setOnChildClickListener((parent, v, groupPosition, childPosition, id) -> {
 
-                HashMap<Object, Object> pointTags = CCUHsApi.getInstance().readMapById(tunerMap.get(tunerName));
-                AlertDialog dialog = new AlertDialog.Builder(getActivity())
-                                             .setTitle(tunerName)
-                                             .setMessage(pointTags.toString()+"\n\ncurrentVal - "+tunerVal)
-                                             .setView(taskEditText)
-                                             .setPositiveButton("Save", new DialogInterface.OnClickListener() {
-                                                 @Override
-                                                 public void onClick(DialogInterface dialog, int which) {
-                                                     if (taskEditText.getText().toString().trim().length() > 0) {
-                                                         setPointVal(tunerMap.get(tunerName), Double.parseDouble(taskEditText.getText().toString()) );
-                                                         tunerMap.put(tunerMap.get(tunerName), taskEditText.getText().toString());
-                                                         expandableListView.invalidateViews();
-                                                     }
-                                                 }
-                                             })
-                                             .setNegativeButton("Cancel", null)
-                                             .create();
-                dialog.show();
-                return false;
+            if (passCodeValidationRequired) {
+                showPassCodeScren();
+                return true;
             }
+            CcuLog.d(L.TAG_CCU_UI, "onChildClick "+groupPosition+" "+childPosition);
+            String tunerName = expandableListDetail.get(expandableListTitle.get(groupPosition)).get(
+                    childPosition);
+
+            final EditText taskEditText = new EditText(getActivity());
+            String tunerVal = getPointVal(tunerMap.get(tunerName));
+            KeyListener keyListener = DigitsKeyListener.getInstance("0123456789.");
+            taskEditText.setKeyListener(keyListener);
+
+            HashMap<Object, Object> pointTags = CCUHsApi.getInstance().readMapById(tunerMap.get(tunerName));
+            AlertDialog dialog = new AlertDialog.Builder(getActivity())
+                                         .setTitle(tunerName)
+                                         .setMessage(pointTags.toString()+"\n\ncurrentVal - "+tunerVal)
+                                         .setView(taskEditText)
+                                         .setPositiveButton("Save", (dialog1, which) -> {
+                                             if (!taskEditText.getText().toString().trim().isEmpty()) {
+                                                 setPointVal(tunerMap.get(tunerName), Double.parseDouble(taskEditText.getText().toString()) );
+                                                 tunerMap.put(tunerMap.get(tunerName), taskEditText.getText().toString());
+                                                 expandableListView.invalidateViews();
+                                             }
+                                         })
+                                         .setNegativeButton("Cancel", null)
+                                         .create();
+            dialog.show();
+            return false;
         });
         
-        expandableListView.setOnGroupExpandListener(new ExpandableListView.OnGroupExpandListener() {
-            @Override
-            public void onGroupExpand(int groupPosition) {
-                // This is breaking HaystackExplorer for me since the second time we grab data here, the order
-                // of the groups changes in the backing data, but not in the UI.  I'm unable to programmatically force the UI to update.
-                // Recommend not updating data after UI drawn, unless we can get the expandable list to redraw.
-                // updateAllData();
-                for (int g = 0; g < expandableListAdapter.getGroupCount(); g++) {
-                    if (g != groupPosition) {
-                        expandableListView.collapseGroup(g);
-                    }
+        expandableListView.setOnGroupExpandListener(groupPosition -> {
+            // This is breaking HaystackExplorer for me since the second time we grab data here, the order
+            // of the groups changes in the backing data, but not in the UI.  I'm unable to programmatically force the UI to update.
+            // Recommend not updating data after UI drawn, unless we can get the expandable list to redraw.
+            // updateAllData();
+            for (int g = 0; g < expandableListAdapter.getGroupCount(); g++) {
+                if (g != groupPosition) {
+                    expandableListView.collapseGroup(g);
                 }
-                expandableListView.invalidateViews();
-                /*if (lastExpandedPosition != -1
-                    && groupPosition != lastExpandedPosition) {
-                    expandableListView.collapseGroup(lastExpandedPosition);
-                }*/
-                lastExpandedPosition = groupPosition;
-
-
             }
+            expandableListView.invalidateViews();
+            lastExpandedPosition = groupPosition;
+
+
         });
     
         setupLongClick();
@@ -178,16 +148,13 @@ public class HaystackExplorer extends Fragment
                                  .setMessage("Changing haystack data may corrupt the device.\n" +
                                              "We are making sure you know what you are doing.")
                                  .setView(taskEditText)
-                                 .setPositiveButton("Done", new DialogInterface.OnClickListener() {
-                                     @Override
-                                     public void onClick(DialogInterface dialog, int which) {
-                                         if (taskEditText.getText().toString().trim().equals("7575")) {
-                                            dialog.dismiss();
-                                            passCodeValidationRequired = false;
-                                         } else {
-                                             taskEditText.getText().clear();
-                                             Toast.makeText(getActivity(), "Incorrect passcode", Toast.LENGTH_SHORT).show();
-                                         }
+                                 .setPositiveButton("Done", (dialog1, which) -> {
+                                     if (taskEditText.getText().toString().trim().equals("7575")) {
+                                        dialog1.dismiss();
+                                        passCodeValidationRequired = false;
+                                     } else {
+                                         taskEditText.getText().clear();
+                                         Toast.makeText(getActivity(), "Incorrect passcode", Toast.LENGTH_SHORT).show();
                                      }
                                  })
                                  .setCancelable(false)
@@ -195,73 +162,63 @@ public class HaystackExplorer extends Fragment
         dialog.show();
     }
     private void setupLongClick() {
-        expandableListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-        
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-    
-                if (passCodeValidationRequired) {
-                    showPassCodeScren();
-                    return true;
-                }
-                long packedPosition = expandableListView.getExpandableListPosition(position);
-                if (ExpandableListView.getPackedPositionType(packedPosition) ==
-                    ExpandableListView.PACKED_POSITION_TYPE_GROUP) {
-                    int groupPosition = ExpandableListView.getPackedPositionGroup(packedPosition);
-                    
-                    String equip = expandableListTitle.get(groupPosition);
-                    new AlertDialog.Builder(getContext())
-                        .setTitle("Delete ?")
-                        .setMessage("Do you want to delete "+equip+" and all its points?")
-                           .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                               public void onClick(DialogInterface dialog, int which) {
-                                   deleteEntity(equipMap.get(equip), false);
-                               }
-                           })
-                       .setNegativeButton(android.R.string.no, null)
-                       .setIcon(R.drawable.ic_dialog_alert)
-                       .show();
-                    return true;
-                } else if (ExpandableListView.getPackedPositionType(packedPosition) ==
-                           ExpandableListView.PACKED_POSITION_TYPE_CHILD) {
-                    int groupPosition = ExpandableListView.getPackedPositionGroup(packedPosition);
-                    int childPosition = ExpandableListView.getPackedPositionChild(packedPosition);
-                
-                    String point = expandableListDetail.get(expandableListTitle.get(groupPosition)).get(
-                        childPosition);
-                
-                    new AlertDialog.Builder(getContext())
-                        .setTitle("Delete ?")
-                        .setMessage("Points should be deleted only when there are duplicates, otherwise this may " +
-                                    "result in app crashes.\n\n" +
-                                    "Do you want to delete the point "+point+"?")
-                        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
+        expandableListView.setOnItemLongClickListener((parent, view, position, id) -> {
 
-                                if (point.contains("Building Schedule")) {
-                                    CcuLog.i("CCU_UI", " scheduleMap.size  "+scheduleMap.size());
-                                    if (scheduleMap.size() == 1) {
-                                        Toast.makeText(parent.getContext(),
-                                                "Delete Failed ! Cant delete the only building schedule",
-                                                Toast.LENGTH_LONG).show();
-                                        return;
-                                    }
-                                    //Its a hack based on the current point length
-                                    int startIndex = point.indexOf("-");
-                                    String id = point.substring(startIndex+1, startIndex+37);
-                                    CcuLog.i("CCU_UI", " Delete Schedule : id "+id);
-                                    deleteEntity(id , true);
-                                } else {
-                                    deleteEntity(tunerMap.get(point), false);
-                                }
-                            }
-                        })
-                        .setNegativeButton(android.R.string.no, null)
-                        .setIcon(R.drawable.ic_dialog_alert)
-                        .show();
-                }
+            if (passCodeValidationRequired) {
+                showPassCodeScren();
                 return true;
             }
+            long packedPosition = expandableListView.getExpandableListPosition(position);
+            if (ExpandableListView.getPackedPositionType(packedPosition) ==
+                ExpandableListView.PACKED_POSITION_TYPE_GROUP) {
+                int groupPosition = ExpandableListView.getPackedPositionGroup(packedPosition);
+
+                String equip = expandableListTitle.get(groupPosition);
+                new AlertDialog.Builder(getContext())
+                    .setTitle("Delete ?")
+                    .setMessage("Do you want to delete "+equip+" and all its points?")
+                       .setPositiveButton(android.R.string.yes, (dialog, which) -> deleteEntity(equipMap.get(equip), false))
+                   .setNegativeButton(android.R.string.no, null)
+                   .setIcon(R.drawable.ic_dialog_alert)
+                   .show();
+                return true;
+            } else if (ExpandableListView.getPackedPositionType(packedPosition) ==
+                       ExpandableListView.PACKED_POSITION_TYPE_CHILD) {
+                int groupPosition = ExpandableListView.getPackedPositionGroup(packedPosition);
+                int childPosition = ExpandableListView.getPackedPositionChild(packedPosition);
+
+                String point = expandableListDetail.get(expandableListTitle.get(groupPosition)).get(
+                    childPosition);
+
+                new AlertDialog.Builder(getContext())
+                    .setTitle("Delete ?")
+                    .setMessage("Points should be deleted only when there are duplicates, otherwise this may " +
+                                "result in app crashes.\n\n" +
+                                "Do you want to delete the point "+point+"?")
+                    .setPositiveButton(android.R.string.yes, (dialog, which) -> {
+
+                        if (point.contains("Building Schedule")) {
+                            CcuLog.i(L.TAG_CCU_UI, " scheduleMap.size  "+scheduleMap.size());
+                            if (scheduleMap.size() == 1) {
+                                Toast.makeText(parent.getContext(),
+                                        "Delete Failed ! Cant delete the only building schedule",
+                                        Toast.LENGTH_LONG).show();
+                                return;
+                            }
+                            //Its a hack based on the current point length
+                            int startIndex = point.indexOf("-");
+                            String id1 = point.substring(startIndex+1, startIndex+37);
+                            CcuLog.i(L.TAG_CCU_UI, " Delete Schedule : id "+ id1);
+                            deleteEntity(id1, true);
+                        } else {
+                            deleteEntity(tunerMap.get(point), false);
+                        }
+                    })
+                    .setNegativeButton(android.R.string.no, null)
+                    .setIcon(R.drawable.ic_dialog_alert)
+                    .show();
+            }
+            return true;
         });
     }
     
@@ -350,7 +307,7 @@ public class HaystackExplorer extends Fragment
                 equipMap.put(m.get("dis").toString(), m.get("id").toString());
             }
         }
-        expandableListTitle = new ArrayList<String>(expandableListDetail.keySet());
+        expandableListTitle = new ArrayList<>(expandableListDetail.keySet());
     }
     
     public static String getPointVal(String id) {
@@ -361,12 +318,12 @@ public class HaystackExplorer extends Fragment
             for (String marker : p.getMarkers()) {
                 if (marker.equals("writable")) {
                     ArrayList values = hayStack.readPoint(id);
-                    if (values != null && values.size() > 0) {
+                    if (values != null && !values.isEmpty()) {
                         for (int l = 1; l <= values.size(); l++) {
                             HashMap valMap = ((HashMap) values.get(l - 1));
                             System.out.println(valMap);
                             if (valMap.get("val") != null) {
-                                val.append("level : "+l+" val : "+valMap.get("val")+"\n");
+                                val.append("level : ").append(l).append(" val : ").append(valMap.get("val")).append("\n");
                             }
                         }
                     }
@@ -376,7 +333,7 @@ public class HaystackExplorer extends Fragment
             {
                 if (marker.equals("his"))
                 {
-                    val.append("hisVal : "+hayStack.readHisValById(p.getId()));
+                    val.append("hisVal : ").append(hayStack.readHisValById(p.getId()));
                 }
             }
 

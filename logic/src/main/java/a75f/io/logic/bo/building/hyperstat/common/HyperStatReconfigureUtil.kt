@@ -235,7 +235,7 @@ class HyperStatReconfigureUtil {
             if (markers.contains(ANALOG1) && markers.contains(IN)) return ANALOG1_IN
             if (markers.contains(ANALOG2) && markers.contains(IN)) return ANALOG2_IN
 
-            if (isAirflowConfig(markers)) return TH1
+            if (markers.contains(TH1)) return TH1
             if (markers.contains(TH2)) return TH2
             return null
         }
@@ -256,15 +256,10 @@ class HyperStatReconfigureUtil {
             if (markers.contains(ANALOG2) && markers.contains(IN)) return Port.ANALOG_IN_TWO
 
 
-            if (isAirflowConfig(markers)) return Port.TH1_IN
+            if (markers.contains(TH1)) return Port.TH1_IN
             if (markers.contains(TH2)) return Port.TH2_IN
 
             return null
-        }
-
-        private fun isAirflowConfig(markers: ArrayList<String>): Boolean{
-            return (markers.contains(TEMP) && markers.contains(CMD) && markers.contains(CONFIG)
-                    && markers.contains(AIR) && markers.contains(DISCHARGE))
         }
 
     }

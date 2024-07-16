@@ -1,8 +1,6 @@
 package a75f.io.api.haystack.sync;
 
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -130,19 +128,6 @@ public class SyncManager {
                    .build();
     }
 
-    private OneTimeWorkRequest getMigrationWorkRequest() {
-
-        return new OneTimeWorkRequest.Builder(MigrationWorker.class)
-                   .setConstraints(getSyncConstraints())
-                   .setBackoffCriteria(
-                       BackoffPolicy.LINEAR,
-                       OneTimeWorkRequest.MIN_BACKOFF_MILLIS,
-                       TimeUnit.MILLISECONDS)
-                   .addTag(SYNC_WORK_TAG)
-                   .build();
-
-    }
-
     private OneTimeWorkRequest getSyncWorkRequest() {
         return getSyncWorkRequestBuilder().build();
     }
@@ -191,21 +176,7 @@ public class SyncManager {
         };
         mSyncTimer.schedule(mSyncTimerTask, SYNC_SCHEDULE_INTERVAL_MILLIS);
     }
-    
-    /*@Subscribe(threadMode = ThreadMode.ASYNC)
-    public void onSyncEvent(SyncEvent event) {
-        CcuLog.i(TAG, "onSyncEvent : "+event.getSyncStatus());
-        if (event.getSyncStatus() == SyncEvent.SyncStatus.FAILED ||
-                                event.getSyncStatus() == SyncEvent.SyncStatus.COMPLETED) {
-            EventBus.getDefault().unregister(this);
-        }
-        
-        if (event.getSyncStatus() == SyncEvent.SyncStatus.FAILED) {
-            scheduleSync();
-        }
-        
-    }*/
-    
+
     public boolean isEntitySyncProgress() {
         return SyncWorker.isSyncWorkInProgress();
     }

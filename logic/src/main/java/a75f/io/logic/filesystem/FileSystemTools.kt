@@ -9,7 +9,6 @@ import a75f.io.logic.Globals
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Environment
-import android.util.Log
 import java.io.*
 import java.text.SimpleDateFormat
 import java.util.*
@@ -148,7 +147,7 @@ class FileSystemTools(private val appContext: Context) {
          File(logsDir + File.separator + logFileName)
 
       if (!logFile.exists()) {
-         Log.d(TAG_BAC_APP_LOGS, "----bac app log file not present");
+          CcuLog.i(TAG_BAC_APP_LOGS, "----bac app log file not present")
          return null
       }
       return logFile
@@ -158,7 +157,7 @@ class FileSystemTools(private val appContext: Context) {
       val folder = File(folderPath)
 
       if (!folder.exists() || !folder.isDirectory) {
-         Log.d(TAG_BAC_APP_LOGS, "The specified path is not a valid directory.")
+          CcuLog.i(TAG_BAC_APP_LOGS, "The specified path is not a valid directory.")
          return
       }
 
@@ -166,12 +165,12 @@ class FileSystemTools(private val appContext: Context) {
       zipFiles?.forEach { file ->
          try {
             if (file.delete()) {
-               Log.d(TAG_BAC_APP_LOGS, "Deleted file: ${file.name}")
+                CcuLog.d(TAG_BAC_APP_LOGS, "Deleted file: ${file.name}")
             } else {
-               Log.d(TAG_BAC_APP_LOGS, "Failed to delete file: ${file.name}")
+                CcuLog.d(TAG_BAC_APP_LOGS, "Failed to delete file: ${file.name}")
             }
          } catch (e: Exception) {
-            Log.d(TAG_BAC_APP_LOGS, "Failed to delete file: ${file.name}, Error: ${e.message}")
+             CcuLog.d(TAG_BAC_APP_LOGS, "Failed to delete file: ${file.name}, Error: ${e.message}")
          }
       }
    }

@@ -3,7 +3,6 @@ package a75f.io.messaging.handler;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -45,7 +44,7 @@ public class AutoCommissioningStateHandler  implements MessageHandler {
       public void startAutoCX(long scheduleStopTime) {
         long scheduledStopDatetimeInMillis = scheduleStopTime - System.currentTimeMillis();
         CcuLog.d(L.TAG_CCU_AUTO_COMMISSIONING,
-                "current time in millis : " + new Date(System.currentTimeMillis()) + "" +
+                "current time in millis : " + new Date(System.currentTimeMillis()) +
                         " stop times in millis : " + new Date(scheduleStopTime) +
                         " auto-cx test duration in millis : " + scheduledStopDatetimeInMillis);
 
@@ -54,13 +53,10 @@ public class AutoCommissioningStateHandler  implements MessageHandler {
                 @Override
                 public void run() {
 
-                    new Handler(Looper.getMainLooper()).post(new Runnable() {
-                        @Override
-                        public void run() {
-                            CcuLog.d(L.TAG_CCU_AUTO_COMMISSIONING, "Auto-commissioning test completed "+new Date(System.currentTimeMillis()));
-                            Toast.makeText(Globals.getInstance().getApplicationContext(),
-                                    "Auto-commissioning test completed.",Toast.LENGTH_SHORT).show();
-                        }
+                    new Handler(Looper.getMainLooper()).post(() -> {
+                        CcuLog.d(L.TAG_CCU_AUTO_COMMISSIONING, "Auto-commissioning test completed "+new Date(System.currentTimeMillis()));
+                        Toast.makeText(Globals.getInstance().getApplicationContext(),
+                                "Auto-commissioning test completed.",Toast.LENGTH_SHORT).show();
                     });
                     CCUHsApi instance  = CCUHsApi.getInstance();
                     instance.pointWriteForCcuUser(HRef.copy(autoCommissioningPointId),

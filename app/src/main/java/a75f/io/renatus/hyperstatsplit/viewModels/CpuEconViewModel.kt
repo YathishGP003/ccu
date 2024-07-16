@@ -1,6 +1,7 @@
 package a75f.io.renatus.hyperstatsplit.viewModels
 
 import a75f.io.api.haystack.CCUHsApi
+import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.ZonePriority
@@ -8,13 +9,11 @@ import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.hyperstatsplit.common.HyperStatSplitAssociationUtil
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.HyperStatSplitProfile
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.CpuEconAnalogOutAssociation
-import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.CpuEconSensorBusTempAssociation
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuEconConfiguration
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuEconProfile
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.renatus.R
 import android.app.Application
-import android.util.Log
 
 /**
  * Created for HyperStat by Manjunath K on 15-07-2022.
@@ -44,7 +43,7 @@ class CpuEconViewModel(application: Application) : HyperStatSplitViewModel(appli
             hyperStatSplitConfiguration = hyperStatSplitProfile!!.getProfileConfiguration(address)
             ViewState.fromConfigTo(( if (hyperStatSplitProfile !=null ) hyperStatSplitConfiguration!! else HyperStatSplitCpuEconConfiguration()), profileType)
         } else {
-            Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "HSS Profile is null")
+            CcuLog.d(L.TAG_CCU_HSSPLIT_CPUECON, "HSS Profile is null")
             hyperStatSplitProfile = HyperStatSplitCpuEconProfile()
             ViewState.fromConfigTo(HyperStatSplitCpuEconConfiguration(),profileType)
         }
@@ -73,8 +72,8 @@ class CpuEconViewModel(application: Application) : HyperStatSplitViewModel(appli
 
         hyperStatSplitProfile?.profileConfiguration?.put(address, cpuConfig)
 
-        val intConfig: HyperStatSplitCpuEconConfiguration? = (hyperStatSplitProfile as HyperStatSplitCpuEconProfile)?.getProfileConfiguration(address)
-        Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "intConfig: " + intConfig.toString())
+        val intConfig: HyperStatSplitCpuEconConfiguration? = (hyperStatSplitProfile as HyperStatSplitCpuEconProfile).getProfileConfiguration(address)
+        CcuLog.d(L.TAG_CCU_HSSPLIT_CPUECON, "intConfig: " + intConfig.toString())
 
         if (hyperStatSplitConfiguration == null) {
             // creating all the Equip and point details for new profile

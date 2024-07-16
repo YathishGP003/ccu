@@ -1,7 +1,6 @@
 package a75f.io.api.haystack;
 
 import static android.widget.Toast.LENGTH_LONG;
-
 import static a75f.io.api.haystack.CCUTagsDb.TAG_CCU_HS;
 import static a75f.io.api.haystack.CCUTagsDb.TAG_CCU_OAO;
 import static a75f.io.api.haystack.CCUTagsDb.TAG_CCU_ROOM_DB;
@@ -121,7 +120,10 @@ public class CCUHsApi
     public Boolean isAuthorized = false;
 
     private static int ccuLogLevel = -1;
-    private List<OnCcuRegistrationCompletedListener> onCcuRegistrationCompletedListeners = new ArrayList<>();
+
+    private static double mCurrentTemperature =-1;
+    private static double mCurrentHumidity =-1;
+    private final List<OnCcuRegistrationCompletedListener> onCcuRegistrationCompletedListeners = new ArrayList<>();
     public static CCUHsApi getInstance() {
         if (instance == null) {
             throw new IllegalStateException("Hay stack api is not initialized");
@@ -261,8 +263,8 @@ public class CCUHsApi
         return careTakerUrl;
     }
     public void trimZoneSchedules(Schedule buildingSchedule) {
-        ArrayList<HashMap> zones = CCUHsApi.getInstance().readAll("room");
-        for (HashMap m : zones) {
+        ArrayList<HashMap<Object, Object>> zones = CCUHsApi.getInstance().readAllEntities("room");
+        for (HashMap<Object, Object> m : zones) {
             if(m.containsKey("scheduleRef")) {
                 ArrayList<Interval> intervalSpills = new ArrayList<>();
                 Schedule zoneSchedule = CCUHsApi.getInstance().getScheduleById(m.get("scheduleRef").toString());
@@ -344,8 +346,8 @@ public class CCUHsApi
                         }
                     }
                 }
-                if (zoneSchedule.getRoomRef()!= null && intervalSpills.size() > 0) {
-                    CcuLog.d("CCU_MESSAGING", "Trimmed Zone Schedule " + zoneSchedule.toString());
+                if (zoneSchedule.getRoomRef()!= null && !intervalSpills.isEmpty()) {
+                    CcuLog.d("CCU_MESSAGING", "Trimmed Zone Schedule " + zoneSchedule);
                     CCUHsApi.getInstance().updateZoneSchedule(zoneSchedule, zoneSchedule.getRoomRef());
                 }
             }
@@ -509,20 +511,19 @@ public class CCUHsApi
         return pointId;
     }
 
-    public String updateSettingPoint(SettingPoint p, String id) {
+    public void updateSettingPoint(SettingPoint p, String id) {
         p.setCcuRef(getCcuId());
         p.setLastModifiedDateTime(HDateTime.make(System.currentTimeMillis()));
         String pointId = tagsDb.updateSettingPoint(p,id);
         syncStatusService.addUnSyncedEntity(pointId);
-        return pointId;
     }
 
-    private boolean isDeviceCCU(Device device){
-        return device.getMarkers().contains("ccu");
+    private boolean isDeviceNotCCU(Device device){
+        return !device.getMarkers().contains("ccu");
     }
 
     public String addDevice(Device d) {
-        if(!isDeviceCCU(d)){
+        if(isDeviceNotCCU(d)){
             d.setCcuRef(getCcuId());
         }
         d.setCreatedDateTime(HDateTime.make(System.currentTimeMillis()));
@@ -535,14 +536,14 @@ public class CCUHsApi
 
     // From EntityPullHandler
     public String addRemoteDevice(Device d, String id) {
-        if(!isDeviceCCU(d)){
+        if(isDeviceNotCCU(d)){
             d.setCcuRef(getCcuId());
         }
         return tagsDb.addDeviceWithId(d, id);
     }
 
     public void updateDevice(Device d, String id) {
-        if(!isDeviceCCU(d)){
+        if(isDeviceNotCCU(d)){
             d.setCcuRef(getCcuId());
         }
         d.setLastModifiedDateTime(HDateTime.make(System.currentTimeMillis()));
@@ -641,7 +642,7 @@ public class CCUHsApi
         spPrefsEditor.putString("country", updatedSite.getGeoCountry());
         spPrefsEditor.putString("state", updatedSite.getGeoState());
 
-        spPrefsEditor.commit();
+        spPrefsEditor.apply();
     }
 
     public void updateEquip(Equip q, String id)
@@ -808,7 +809,6 @@ public class CCUHsApi
      * Normally, we use Hashmap from our query but this was needed for proper serialization by
      * EquipSyncAdapter#syncSystemEquip.
      *
-     * @param query
      * @return an HDict from a query, or null if the result is empty
      */
     public @Nullable HDict readAsHdict(String query) {
@@ -862,8 +862,7 @@ public class CCUHsApi
     {
         try
         {
-            HDict dict = hsClient.read(query);
-            return dict;
+            return hsClient.read(query);
         }
         catch (UnknownRecException e)
         {
@@ -911,11 +910,6 @@ public class CCUHsApi
 
     /**
      * Write local point array without remote sync.
-     * @param id
-     * @param level
-     * @param who
-     * @param val
-     * @param duration
      */
     public void writePointLocal(String id, int level, String who, Double val, int duration) {
         hsClient.pointWrite(HRef.copy(id), level, who, HNum.make(val), HNum.make(duration), HDateTime.make(System.currentTimeMillis()));
@@ -1005,15 +999,15 @@ public class CCUHsApi
         return hGrid;
     }
 
-    public HGrid tunerPointWrite(HRef id, int level, String who, HVal val, HNum dur, String reason) {
-        HGrid hGrid = hsClient.pointWrite(id, level, who, val, dur, HDateTime.make(System.currentTimeMillis()));
+    public void tunerPointWrite(HRef id, int level, String who, HVal val, HNum dur, String reason) {
+        hsClient.pointWrite(id, level, who, val, dur, HDateTime.make(System.currentTimeMillis()));
 
         HashMap<Object, Object> pointMap = readMapById(id.toString());
 
         if((readDefaultVal("offline and mode and point") > 0)
                 && ((!pointMap.containsKey("offline") && !pointMap.containsKey("watchdog")))){
             CcuLog.d(TAG_CCU_HS," Skip write");
-            return hGrid;
+            return;
         }
 
         if (CCUHsApi.getInstance().isCCURegistered()) {
@@ -1029,7 +1023,6 @@ public class CCUHsApi
             CcuLog.d(TAG_CCU_HS, "PointWrite- "+id+" : "+val);
             PointWriteCache.Companion.getInstance().writePoint(uid, b.toDict());
         }
-        return hGrid;
     }
 
     public void clearPointArrayLevel(String id, int level, boolean local) {
@@ -1068,12 +1061,12 @@ public class CCUHsApi
         HashMap<Object, Object> point = readEntity(query);
         if(!point.isEmpty()) {
             String id = point.get("id").toString();
-            if (id == null || id == "") {
+            if (id.isEmpty()) {
                 return 0.0;
             }
-            ArrayList values = CCUHsApi.getInstance().readPoint(id);
+            ArrayList<HashMap> values = CCUHsApi.getInstance().readPoint(id);
             if (values != null && values.size() > 0) {
-                HashMap valMap = ((HashMap) values.get(HayStackConstants.DEFAULT_POINT_LEVEL - 1));
+                HashMap valMap = values.get(HayStackConstants.DEFAULT_POINT_LEVEL - 1);
                 return valMap.get("val") == null ? 0 : Double.parseDouble(valMap.get("val").toString());
             } else {
                 return 0.0;
@@ -2532,6 +2525,8 @@ public class CCUHsApi
                             //Remove unicode chars and units. 48.32°F ->48.32
                             double tempVal = Double.parseDouble(r.get("val").toString().replaceAll("[^-?\\d.]", ""));
                             CcuLog.d(TAG_CCU_OAO,date+" External Temp: "+tempVal);
+                            CcuLog.d("CCU_OAO",date+" External Temp: "+tempVal);
+                            mCurrentTemperature = tempVal;
                             return tempVal;
 
                         }
@@ -2539,11 +2534,16 @@ public class CCUHsApi
                 }
             }
         } else {
-            HGrid hisGrid = hClient.hisRead(tempWeatherRef, "current");
-            if (hisGrid != null && hisGrid.numRows() > 0) {
-                hisGrid.dump();
-                HRow r = hisGrid.row(hisGrid.numRows() - 1);
-                return Double.parseDouble(r.get("val").toString().replaceAll("[^-?\\d.]", ""));
+            if(((appAliveMinutes % 15) == 0) || (appAliveMinutes == 1)){
+                HGrid hisGrid = hClient.hisRead(tempWeatherRef, "current");
+                if (hisGrid != null && hisGrid.numRows() > 0) {
+                    hisGrid.dump();
+                    HRow r = hisGrid.row(hisGrid.numRows() - 1);
+                    mCurrentTemperature = Double.parseDouble(r.get("val").toString().replaceAll("[^-?\\d.]", ""));
+                    return mCurrentTemperature;
+                }
+            }else{
+                return mCurrentTemperature;
             }
         }
         return 0;
@@ -2572,19 +2572,25 @@ public class CCUHsApi
                             HDateTime date = (HDateTime) r.get("ts");
                             double humidityVal = Double.parseDouble(r.get("val").toString().replaceAll("[^\\d.]", ""));
                             CcuLog.d(TAG_CCU_OAO, date + " External Humidity: " + humidityVal);
-                            return 100 * humidityVal;
+                            mCurrentHumidity = 100 * humidityVal;
+                            return mCurrentHumidity;
 
                         }
                     }
                 }
             }
         } else {
-            HGrid hisGrid = hClient.hisRead(humidityWeatherRef, "current");
-            if (hisGrid != null && hisGrid.numRows() > 0) {
-                hisGrid.dump();
-                HRow r = hisGrid.row(hisGrid.numRows() - 1);
-                double humidityVal = Double.parseDouble(r.get("val").toString().replaceAll("[^\\d.]", ""));
-                return 100 * humidityVal;
+            if(((appAliveMinutes % 15) == 0) || (appAliveMinutes == 1)) {
+                HGrid hisGrid = hClient.hisRead(humidityWeatherRef, "current");
+                if (hisGrid != null && hisGrid.numRows() > 0) {
+                    hisGrid.dump();
+                    HRow r = hisGrid.row(hisGrid.numRows() - 1);
+                    double humidityVal = Double.parseDouble(r.get("val").toString().replaceAll("[^\\d.]", ""));
+                    mCurrentHumidity = 100 * humidityVal;
+                    return mCurrentHumidity;
+                }
+            } else{
+                return mCurrentHumidity;
             }
         }
         return 0;
@@ -3570,5 +3576,27 @@ public class CCUHsApi
             return 0;
         }
 
+    }
+    public void clearAllAvailableLevelsInPoint(String id) {
+        if (HSUtil.readPointPriorityValWithNull(id) != null) {
+            List<HDict> hDictArrayList = new ArrayList<>();
+            for (int i = 1; i <= 16; i++) {
+                HDictBuilder hDictBuilder = new HDictBuilder()
+                        .add("id", HRef.copy(id))
+                        .add("level", i)
+                        .add("who", CCUHsApi.getInstance().getCCUUserName())
+                        .add("duration", HNum.make(0, "ms"))
+                        .add("val", (HVal) null);
+                hDictArrayList.add(hDictBuilder.toDict());
+                deletePointArrayLevel(id, i);
+            }
+            HGrid hGrid = HGridBuilder.dictsToGrid(hDictArrayList.toArray(new HDict[hDictArrayList.size()]));
+            EntitySyncResponse e = HttpUtil.executeEntitySync(
+                    CCUHsApi.getInstance().pointWriteManyTarget(),
+                    HZincWriter.gridToString(hGrid), CCUHsApi.getInstance().getJwt());
+            CcuLog.d(TAG, "clear All Available Levels In Point : " + "Response " + e.getRespString() + " Error" + e.getErrRespString());
+        } else {
+            CcuLog.d(TAG, "Available levels are  cleared for point " + id);
+        }
     }
 }

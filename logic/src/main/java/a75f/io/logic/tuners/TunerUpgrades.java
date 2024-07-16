@@ -1,9 +1,5 @@
 package a75f.io.logic.tuners;
 
-import android.content.Context;
-import android.preference.PreferenceManager;
-import android.util.Log;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -22,9 +18,6 @@ import a75f.io.logic.util.PreferenceUtil;
 
 import static a75f.io.logic.tuners.TunerConstants.GENERIC_TUNER_GROUP;
 import static a75f.io.logic.tuners.TunerConstants.TUNER_BUILDING_VAL_LEVEL;
-import static a75f.io.logic.tuners.TunerConstants.TUNER_EQUIP_VAL_LEVEL;
-
-import org.projecthaystack.HDict;
 
 /**
  * Tuners are normally created when an equip is created.
@@ -32,9 +25,7 @@ import org.projecthaystack.HDict;
  *
  */
 public class TunerUpgrades {
-    
-    private static final String PREF_TUNER_EQUIP_LEVEL_RESET = "buildingTunerEquipLevelReset";
-    
+
     /**
      * Takes care creating new tuners on existing equips during an upgrade.
      */
@@ -62,7 +53,7 @@ public class TunerUpgrades {
         //Make sure the tuner does not exist before creating it. A duplicate tuner if ever created can be hard to
         //track and fix.
         ArrayList<HashMap<Object, Object>> reheatTuners = hayStack.readAllEntities("point and tuner and reheat and dat and min and differential");
-        if (reheatTuners.size() > 0) {
+        if (!reheatTuners.isEmpty()) {
             CcuLog.e(L.TAG_CCU_TUNER, "reheatZoneToDATMinDifferential exists");
             return;
         }
@@ -99,7 +90,7 @@ public class TunerUpgrades {
      */
     private static void upgradeDcwbBuildingTuners(CCUHsApi hayStack) {
         ArrayList<HashMap<Object, Object>> rdcwbTuners = hayStack.readAllEntities("point and tuner and dcwb and default");
-        if (rdcwbTuners.size() > 0) {
+        if (!rdcwbTuners.isEmpty()) {
             CcuLog.e(L.TAG_CCU_TUNER, "dcwbTuners exist");
             return;
         }
@@ -129,7 +120,7 @@ public class TunerUpgrades {
      */
     public static void updateHeatingMinMax(CCUHsApi hayStack) {
 
-        Log.d("TunerUpdate", "updateHeatingMinMax ++");
+        CcuLog.i("TunerUpdate", "updateHeatingMinMax ++");
         HashMap<Object, Object> heatDTMin = hayStack.readEntity("point and limit and min and heating " +
                 "and user");
         HashMap<Object, Object> heatDTMax = hayStack.readEntity("point and limit and max and heating " +
@@ -229,8 +220,6 @@ public class TunerUpgrades {
                             hayStack.getTimeZone());
 
                     String equipTunerPointId = hayStack.addPoint(equipTunerPoint);
-                   //  BuildingTunerUtil.updateTunerLevels(equipTunerPointId, vavEquip.getRoomRef(), hayStack);
-                  //  hayStack.writeHisValById(equipTunerPointId, HSUtil.getPriorityVal(equipTunerPointId));
 
                     hayStack.writePointForCcuUser(equipTunerPointId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.DEFAULT_REHEAT_ZONE_MAX_DISCHAGE_TEMP, 0);
                     hayStack.writeHisValById(equipTunerPointId, TunerConstants.DEFAULT_REHEAT_ZONE_MAX_DISCHAGE_TEMP);
@@ -259,8 +248,6 @@ public class TunerUpgrades {
 
                     String equipTunerPointId = hayStack.addPoint(equipTunerPoint);
 
-                   //  BuildingTunerUtil.updateTunerLevels(equipTunerPointId, vavEquip.getRoomRef(), hayStack);
-                  //  hayStack.writeHisValById(equipTunerPointId, HSUtil.getPriorityVal(equipTunerPointId));
                     hayStack.writePointForCcuUser(equipTunerPointId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.DEFAULT_REHEAT_ZONE_MAX_DISCHAGE_TEMP_OFFSET, 0);
                     hayStack.writeHisValById(equipTunerPointId, TunerConstants.DEFAULT_REHEAT_ZONE_MAX_DISCHAGE_TEMP_OFFSET);
                   });
@@ -322,9 +309,9 @@ public class TunerUpgrades {
                 String useCelsiusId = hayStack.addPoint(useCelsius);
                 hayStack.writePointForCcuUser(useCelsiusId, TunerConstants.TUNER_BUILDING_VAL_LEVEL, TunerConstants.USE_CELSIUS_FLAG_DISABLED, 0);
                 hayStack.writeHisValById(useCelsiusId, TunerConstants.USE_CELSIUS_FLAG_DISABLED);
-                Log.i(L.TAG_CCU_TUNER, "migrateCelsiusSupportConfiguration: useCelsiusPoint Point created ");
+                CcuLog.i(L.TAG_CCU_TUNER, "migrateCelsiusSupportConfiguration: useCelsiusPoint Point created ");
             }else{
-                Log.i(L.TAG_CCU_TUNER, "migrateCelsiusSupportConfiguration: useCelsiusPoint already present");
+                CcuLog.i(L.TAG_CCU_TUNER, "migrateCelsiusSupportConfiguration: useCelsiusPoint already present");
             }
        }
 

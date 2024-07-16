@@ -64,8 +64,8 @@ public class LightingTestFragment extends DialogFragment implements AdapterView.
     private ArrayAdapter<CharSequence> analog2OutAdapter;
     private ArrayAdapter<CharSequence> analog1InAdapter;
     private ArrayAdapter<CharSequence> analog2InAdapter;
-    ArrayList<EditText>     circuitsList   = new ArrayList<EditText>();
-    ArrayList<Switch> circuitEnabled = new ArrayList<Switch>();
+    ArrayList<EditText>     circuitsList   = new ArrayList<>();
+    ArrayList<Switch> circuitEnabled = new ArrayList<>();
     ArrayList<String> zoneCircuitNames;
     public LightingTestFragment(){
     }
@@ -144,20 +144,10 @@ public class LightingTestFragment extends DialogFragment implements AdapterView.
         
         
         Button setBtn = (Button) view.findViewById(R.id.lcmSetCommand);
-        setBtn.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View v){
-                saveLightData();
-            }
-        });
+        setBtn.setOnClickListener(v -> saveLightData());
         
         Button cancelBtn = (Button) view.findViewById(R.id.lcmCancelCommand);
-        cancelBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dismiss();
-            }
-        });
+        cancelBtn.setOnClickListener(v -> dismiss());
         
         return new AlertDialog.Builder(getActivity(), R.style.NewDialogStyle)
                        .setTitle("Lighting Test").setView(view)
@@ -169,7 +159,7 @@ public class LightingTestFragment extends DialogFragment implements AdapterView.
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
         switch (parent.getId()){
-          
+
         }
     }
 

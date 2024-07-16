@@ -553,7 +553,12 @@ class HSSplitHaystackUtil(
         return (readConfigStatus("auto and away").toInt() == 1)
     }
     fun isPrePurgeEnabled(): Boolean{
-        return (readPointValue("prePurge and enabled and cpu and standalone and userIntent").toInt() == 1)
+        val prePurgeStatusId = readPointID("zone and prePurge and run and sensor and sp and userIntent and standalone and cpu")
+        if(prePurgeStatusId != null){
+            return (readPointValue("prePurge and enabled and cpu and standalone and userIntent").toInt() == 1)
+        } else {
+            return false
+        }
     }
 
     fun getCo2DamperThresholdConfigValue(): Double{

@@ -37,7 +37,7 @@ class AcbConfigViewState {
     var minCFMCooling by mutableStateOf(0.0)
     var maxCFMReheating by mutableStateOf(0.0)
     var minCFMReheating by mutableStateOf(0.0)
-
+    var unusedPortState by mutableStateOf(hashMapOf<String, Boolean>())
     companion object {
         fun fromAcbProfileConfig(config : AcbProfileConfiguration) : AcbConfigViewState {
             return AcbConfigViewState().apply {
@@ -71,6 +71,7 @@ class AcbConfigViewState {
                 this.minCFMCooling = config.minCFMCooling.currentVal
                 this.maxCFMReheating = config.maxCFMReheating.currentVal
                 this.minCFMReheating = config.minCFMReheating.currentVal
+                this.unusedPortState = config.unusedPorts
             }
         }
     }
@@ -108,6 +109,7 @@ class AcbConfigViewState {
         config.minCFMCooling.currentVal = this.minCFMCooling
         config.maxCFMReheating.currentVal = this.maxCFMReheating
         config.minCFMReheating.currentVal = this.minCFMReheating
+        config.unusedPorts = this.unusedPortState
     }
 }
 

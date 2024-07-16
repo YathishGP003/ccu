@@ -1,7 +1,5 @@
 package a75f.io.logic.tuners;
 
-import  android.util.Log;
-
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -17,7 +15,7 @@ public class OTNTuners {
     public static void addDefaultOTNTuners(CCUHsApi hayStack, String siteRef, String equipRef, String equipDis,
                                            String tz) {
         HashMap tuner = CCUHsApi.getInstance().read("point and tuner and default and otn");
-        if (tuner != null && tuner.size() > 0) {
+        if (tuner != null && !tuner.isEmpty()) {
             CcuLog.d(L.TAG_CCU_SYSTEM, "Default OTN Tuner points already exist");
             return;
         }
@@ -114,7 +112,7 @@ public class OTNTuners {
 
     public static void addEquipTuners(CCUHsApi hayStack, String siteRef, String equipdis, String equipref,
                                         String roomRef, String floorRef, String tz) {
-        Log.d("CCU", "addEquipTuners for " + equipdis);
+        CcuLog.d("CCU", "addEquipTuners for " + equipdis);
 
         ZoneTuners.addZoneTunersForEquip(hayStack, siteRef, equipdis, equipref, roomRef, floorRef, tz);
 

@@ -1,16 +1,14 @@
 package a75f.io.renatus.ENGG.bacnet.services
 
 import a75f.io.device.bacnet.BacnetConfigConstants
-import a75f.io.logic.reportNull
+import a75f.io.logger.CcuLog
 import a75f.io.renatus.ENGG.bacnet.services.client.BaseResponse
 import a75f.io.renatus.ENGG.bacnet.services.client.CcuService
 import a75f.io.renatus.ENGG.bacnet.services.client.ServiceManager
 import a75f.io.renatus.R
-import a75f.io.renatus.UtilityApplication
 import a75f.io.renatus.util.CCUUiUtil
 import android.os.Bundle
 import android.preference.PreferenceManager
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -22,7 +20,6 @@ import android.widget.LinearLayout
 import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -32,7 +29,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.json.JSONException
 import org.json.JSONObject
-import java.lang.Exception
 import java.net.ConnectException
 import java.net.SocketTimeoutException
 
@@ -92,7 +88,7 @@ class FragmentReadPropertyMultiple : Fragment() {
         etMacAddress = view.findViewById(R.id.et_destination_mac)
         etDnet = view.findViewById(R.id.etDnet)
 
-        containerObject = view.findViewById(R.id.container_property);
+        containerObject = view.findViewById(R.id.container_property)
 
         btnAddObject = view.findViewById(R.id.btnAddObject)
         btnAddObject.setOnClickListener {
@@ -106,7 +102,7 @@ class FragmentReadPropertyMultiple : Fragment() {
 
         btnReadProperty = view.findViewById(R.id.btnReadProperty)
         btnReadProperty.setOnClickListener {
-            Log.d(TAG, "total objects -> ${containerObject.childCount}")
+            CcuLog.d(TAG, "total objects -> ${containerObject.childCount}")
            /* if(!validateData()){
                 return@setOnClickListener
             }
@@ -139,7 +135,7 @@ class FragmentReadPropertyMultiple : Fragment() {
 
             sendRequest(BacnetReadRequestMultiple(destination, rpmRequest))
 
-            Log.d(TAG, "readRequestMultiple-->$readRequestMultiple")
+            CcuLog.d(TAG, "readRequestMultiple-->$readRequestMultiple")
         }
 
         rvResponseMultiRead = view.findViewById(R.id.bac_resp_rv)
@@ -198,10 +194,10 @@ class FragmentReadPropertyMultiple : Fragment() {
     }
 
     private fun getDetailsFromObjectLayout(childView: View, i: Int): ObjectIdentifierBacNet {
-        Log.d(TAG, "--------------------checking object-->$i<------------------------------- ->")
+        CcuLog.d(TAG, "--------------------checking object-->$i<------------------------------- ->")
         val spin = childView.findViewById(R.id.sp_object_types) as Spinner
         val objectId = childView.findViewById<EditText>(R.id.etObjectId)
-        Log.d(
+        CcuLog.d(
             TAG,
             "selected object type->${spin.selectedItem} <----object id>--->${objectId.text.toString()}"
         )
@@ -213,16 +209,16 @@ class FragmentReadPropertyMultiple : Fragment() {
 
     private fun getDetailsOfProperties(chileView: View, i: Int): MutableList<PropertyReference> {
         val list = mutableListOf<PropertyReference>()
-        Log.d(TAG, "----checking properties-->$i<------- ->")
+        CcuLog.d(TAG, "----checking properties-->$i<------- ->")
         val containerHoldingProperties =
             chileView.findViewById<LinearLayout>(R.id.containerToAddProperties)
         val totalObjectCount = containerHoldingProperties.childCount - 1
-        Log.d(TAG, "----no of properties-->$totalObjectCount<------- ->")
+        CcuLog.d(TAG, "----no of properties-->$totalObjectCount<------- ->")
         for (i in 0..totalObjectCount) {
             val childView = containerHoldingProperties.getChildAt(i)
             val propertySpinner = childView.findViewById<Spinner>(R.id.sp_property_types)
             val etArrayIndex = childView.findViewById<EditText>(R.id.etArrayIndex)
-            Log.d(TAG, "selected property is->${(propertySpinner).selectedItem}")
+            CcuLog.d(TAG, "selected property is->${(propertySpinner).selectedItem}")
 
             var arrayIndex: Int? = if (etArrayIndex.text.toString().isNotEmpty()) {
                 etArrayIndex.text.toString().toInt()
@@ -278,11 +274,11 @@ class FragmentReadPropertyMultiple : Fragment() {
         val spin = view.findViewById(R.id.sp_object_types) as Spinner
         spin.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, position: Int, p3: Long) {
-                Log.d(TAG, "selected item is ${objectTypeArray[position]}")
+                CcuLog.d(TAG, "selected item is ${objectTypeArray[position]}")
             }
 
             override fun onNothingSelected(p0: AdapterView<*>?) {
-                Log.d(TAG, "onNothingSelected")
+                CcuLog.d(TAG, "onNothingSelected")
             }
 
         }
@@ -298,11 +294,11 @@ class FragmentReadPropertyMultiple : Fragment() {
         val spin = view.findViewById(R.id.sp_property_types) as Spinner
         spin.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, position: Int, p3: Long) {
-                Log.d(TAG, "selected item is ${propertyTypeArray[position]}")
+                CcuLog.d(TAG, "selected item is ${propertyTypeArray[position]}")
             }
 
             override fun onNothingSelected(p0: AdapterView<*>?) {
-                Log.d(TAG, "onNothingSelected")
+                CcuLog.d(TAG, "onNothingSelected")
             }
 
         }
@@ -317,33 +313,33 @@ class FragmentReadPropertyMultiple : Fragment() {
     private fun sendRequest(rpmRequest: BacnetReadRequestMultiple) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                Log.d(TAG, "--------------service.multiread--------------------")
+                CcuLog.d(TAG, "--------------service.multiread--------------------")
                 val response = service.multiread(rpmRequest)
-                Log.d(TAG, "--------------service.multiread response--------------------")
+                CcuLog.d(TAG, "--------------service.multiread response--------------------")
                 val resp = BaseResponse(response)
                 if (response.isSuccessful) {
                     val result = resp.data
                     if (result != null) {
                         val readResponse = result.body()
-                        Log.d(TAG, "received response->${readResponse}")
+                        CcuLog.d(TAG, "received response->${readResponse}")
                         CoroutineScope(Dispatchers.Main).launch {
                             //Log.d(TAG, "--null response--${readResponse!!.rpResponse.listOfItems.size}")
                             updateUi(readResponse)
                         }
                     } else {
-                        Log.d(TAG, "--null response--")
+                        CcuLog.d(TAG, "--null response--")
                     }
                 } else {
-                    Log.d(TAG, "--error--${resp.error}")
+                    CcuLog.d(TAG, "--error--${resp.error}")
                 }
             } catch (e: SocketTimeoutException) {
-                Log.d(TAG, "--SocketTimeoutException--${e.message}")
+                CcuLog.e(TAG, "--SocketTimeoutException--${e.message}")
                 showToastMessage("SocketTimeoutException")
             } catch (e: ConnectException) {
-                Log.d(TAG, "--ConnectException--${e.message}")
+                CcuLog.e(TAG, "--ConnectException--${e.message}")
                 showToastMessage("ConnectException")
             } catch (e: Exception) {
-                Log.d(TAG, "--connection time out--${e.message}")
+                CcuLog.e(TAG, "--connection time out--${e.message}")
             }
         }
     }

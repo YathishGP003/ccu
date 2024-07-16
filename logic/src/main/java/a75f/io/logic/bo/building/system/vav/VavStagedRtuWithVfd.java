@@ -134,5 +134,6 @@ public class VavStagedRtuWithVfd extends VavStagedRtu
             CCUHsApi.getInstance().deleteEntityTree(equip.get("id").toString());
         }
         removeSystemEquipModbus();
+        deleteSystemConnectModule();
     }
 }

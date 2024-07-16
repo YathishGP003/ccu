@@ -238,14 +238,14 @@ public class ManualCalendarDialogFragment extends DialogFragment implements View
 
     private boolean validate()
     {
-        if (mVacationNameEditText.getText() == null || mVacationNameEditText.getText().toString().length() == 0)
+        if (mVacationNameEditText.getText() == null || mVacationNameEditText.getText().toString().isEmpty())
         {
             Toast.makeText(this.getContext(), "Please enter a vacation name", Toast.LENGTH_SHORT).show();
             return false;
         }
 
 
-        if (mCalendarView.getSelectedDates() == null || mCalendarView.getSelectedDates().size() == 0)
+        if (mCalendarView.getSelectedDates() == null || mCalendarView.getSelectedDates().isEmpty())
         {
             Toast.makeText(this.getContext(), "Please select a calendar item", Toast.LENGTH_SHORT).show();
             return false;

@@ -1,7 +1,5 @@
 package a75f.io.api.haystack.sync;
 
-import static a75f.io.api.haystack.sync.HttpUtil.HTTP_RESPONSE_UNAUTHORIZED;
-
 import android.content.Context;
 
 import androidx.annotation.NonNull;
@@ -22,7 +20,6 @@ import org.projecthaystack.io.HZincWriter;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logger.CcuLog;
@@ -162,7 +159,7 @@ public class SyncWorker extends Worker {
                     b.add("id", HRef.make(deletedId.replace("@", "")));
                     entities.add(b.toDict());
                 }
-                HGrid gridData = HGridBuilder.dictsToGrid(entities.toArray(new HDict[entities.size()]));
+                HGrid gridData = HGridBuilder.dictsToGrid(entities.toArray(new HDict[0]));
 
                 EntitySyncResponse response = HttpUtil.executeEntitySync(CCUHsApi.getInstance().getHSUrl() + ENDPOINT_REMOVE_ENTITY,
                         HZincWriter.gridToString(gridData), CCUHsApi.getInstance().getJwt());
@@ -180,8 +177,6 @@ public class SyncWorker extends Worker {
     
     /**
      * First time syncing entities require point arrays to be written to backend.
-     * @param response
-     * @param pointWriteRequired
      */
     private void updateSyncStatus(String response, boolean pointWriteRequired) {
         ArrayList<String> syncedIds = retrieveIdsFromResponse(response);
@@ -200,9 +195,8 @@ public class SyncWorker extends Worker {
     }
     
     private void updateDeleteStatus(List<String> entityList) {
-        ListIterator<String> deletedIr = entityList.listIterator();
-        while(deletedIr.hasNext()) {
-            syncStatusService.setDeletedEntitySynced(deletedIr.next());
+        for (String s : entityList) {
+            syncStatusService.setDeletedEntitySynced(s);
         }
         syncStatusService.saveSyncStatus();
     }

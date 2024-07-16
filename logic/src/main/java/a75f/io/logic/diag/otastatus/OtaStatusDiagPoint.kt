@@ -4,8 +4,8 @@ import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Kind
 import a75f.io.api.haystack.Point
 import a75f.io.api.haystack.Tags
+import a75f.io.logger.CcuLog
 import a75f.io.logic.L
-import android.util.Log
 
 /**
  * Created by Manjunath K on 28-02-2023.
@@ -81,7 +81,7 @@ class OtaStatusDiagPoint {
                 equipRef, siteRef, room, floor, nodeAddr, tz
             )
             val statusPointId = ccuHsApi.addPoint(otaStatusPoint)
-            Log.i(L.TAG_CCU_OTA_PROCESS, "addOTAStatusPoint: $statusPointId")
+            CcuLog.d(L.TAG_CCU_OTA_PROCESS, "addOTAStatusPoint: $statusPointId")
         }
 
         /**
@@ -90,7 +90,7 @@ class OtaStatusDiagPoint {
         fun addOTAStatusPoint(equipDis: String,equipRef : String, siteRef: String, tz: String, ccuHsApi: CCUHsApi) {
             val otaStatusPoint = createOtaStatusDiagPoint(equipDis,equipRef,siteRef,tz)
             val statusPointId = ccuHsApi.addPoint(otaStatusPoint)
-            Log.i(L.TAG_CCU_OTA_PROCESS, "addOTAStatusPoint CCU: $statusPointId")
+            CcuLog.d(L.TAG_CCU_OTA_PROCESS, "addOTAStatusPoint CCU: $statusPointId")
         }
 
         /**
@@ -133,7 +133,7 @@ class OtaStatusDiagPoint {
 
         fun updateOtaStatusPoint(ccuHsApi: CCUHsApi, equipRef: String, status: OtaStatus) {
             ccuHsApi.writeHisValByQuery("ota and status and equipRef == \"$equipRef\"",status.ordinal.toDouble())
-            Log.i(L.TAG_CCU_OTA_PROCESS, "apk update updated $equipRef : $status ${status.ordinal.toDouble()}")
+            CcuLog.d(L.TAG_CCU_OTA_PROCESS, "apk update updated $equipRef : $status ${status.ordinal.toDouble()}")
         }
         fun updateOtaStatusPoint(status: OtaStatus,nodes: ArrayList<Int>) {
             val hsApi = CCUHsApi.getInstance()
@@ -144,7 +144,7 @@ class OtaStatusDiagPoint {
                 } else {
                     hsApi.writeHisValByQuery("ota and status and group ==\"$i\"",status.ordinal.toDouble())
                 }
-                Log.i(L.TAG_CCU_OTA_PROCESS, "multiple updates updated $i : $status ${status.ordinal.toDouble()}")
+                CcuLog.d(L.TAG_CCU_OTA_PROCESS, "multiple updates updated $i : $status ${status.ordinal.toDouble()}")
             }
         }
 
@@ -156,14 +156,14 @@ class OtaStatusDiagPoint {
             } else {
                 hsApi.writeHisValByQuery("ota and status and group ==\"$node\"",status.ordinal.toDouble())
             }
-            Log.i(L.TAG_CCU_OTA_PROCESS, "updateOtaStatusPoint updated $node : $status ${status.ordinal.toDouble()}")
+            CcuLog.d(L.TAG_CCU_OTA_PROCESS, "updateOtaStatusPoint updated $node : $status ${status.ordinal.toDouble()}")
         }
 
         /**
          * Function to get the current ota status
          */
         fun getCurrentOtaStatus(node: Int): Double {
-            Log.i(L.TAG_CCU_OTA_PROCESS, "Reading OTA status $node" );
+            CcuLog.d(L.TAG_CCU_OTA_PROCESS, "Reading OTA status $node" )
             return if (isCMDevice(node)) {
                 val systemEquip: HashMap<*, *> = CCUHsApi.getInstance().readEntity("system and equip and not modbus and not connectModule")
                 CCUHsApi.getInstance().readHisValByQuery("ota and status and equipRef ==\"${systemEquip[Tags.ID].toString()}\"")
@@ -176,7 +176,7 @@ class OtaStatusDiagPoint {
         fun updateCcuToCmOtaProgress(totalPackets: Double, currentRunningPacket: Int, nodeAddress: Int) {
             val otaProgress = ((currentRunningPacket.toDouble() / totalPackets) * 100).toInt()
             val currentOtaStatus = getCurrentOtaStatus(nodeAddress).toInt()
-            Log.i(L.TAG_CCU_OTA_PROCESS, "" +
+            CcuLog.d(L.TAG_CCU_OTA_PROCESS, "" +
                     "\n totalPackets : $totalPackets"+ "  currentRunningPacket : $currentRunningPacket"+
                     "\n otaProgress : $otaProgress"+ "  currentOtaStatus : ${OtaStatus.values()[currentOtaStatus]}"
             )
@@ -206,7 +206,7 @@ class OtaStatusDiagPoint {
             val otaProgress = ((currentRunningPacket.toDouble() / totalPackets) * 100).toInt()
             val currentOtaStatus = getCurrentOtaStatus(nodeAddress).toInt()
 
-            Log.i(L.TAG_CCU_OTA_PROCESS, "" +
+            CcuLog.d(L.TAG_CCU_OTA_PROCESS, "" +
                     "\n totalPackets : $totalPackets"+ " currentRunningPacket : $currentRunningPacket"+
                     "\n otaProgress : $otaProgress"+ " currentOtaStatus : ${OtaStatus.values()[getCurrentOtaStatus(nodeAddress).toInt()]}")
             when {

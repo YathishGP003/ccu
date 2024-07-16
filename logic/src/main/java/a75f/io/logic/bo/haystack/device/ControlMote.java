@@ -1,10 +1,6 @@
 package a75f.io.logic.bo.haystack.device;
-
-import android.util.Log;
-
 import java.util.ArrayList;
 import java.util.HashMap;
-
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.RawPoint;
@@ -48,20 +44,7 @@ public class ControlMote
         
         ArrayList<HashMap<Object,Object>> devices = CCUHsApi.getInstance().readAllEntities("device and cm");
 
-        if (devices.size() > 0) {
-            /*Device d = new Device.Builder().setHashMap(device).build();
-            d.setEquipRef(systemEquipRef);
-            CCUHsApi.getInstance().updateDevice(d,d.getId());
-            createNewCMPointsForUpgrades();
-            CcuLog.d(L.TAG_CCU_DEVICE," CM device exists - update equipRef ="+systemEquipRef);
-            site = new Site.Builder().setHashMap(CCUHsApi.getInstance().read(Tags.SITE)).build();
-            OtaStatusDiagPoint.Companion.addOTAStatusPoint(
-                    site.getDisplayName()+"-"+Tags.CM,
-                    systemEquipRef, site.getId(),
-                    site.getTz(),
-                    CCUHsApi.getInstance()
-            );
-            return;*/
+        if (!devices.isEmpty()) {
             devices.forEach(device -> {
                 CcuLog.d(Domain.LOG_TAG," Delete CM device "+device);
                 CCUHsApi.getInstance().deleteEntityTree(device.get("id").toString());
@@ -92,7 +75,7 @@ public class ControlMote
     public ControlMote(int address, String site, String floor, String room, String equipRef) {
 
         HashMap device = CCUHsApi.getInstance().read("device and addr == \""+address+"\"");
-        if (device != null && device.size() > 0) {
+        if (device != null && !device.isEmpty()) {
             CcuLog.d(L.TAG_CCU_DEVICE," CM device exists");
             return;
         }
@@ -457,7 +440,7 @@ public class ControlMote
 
 
     public static void updatePhysicalPointRef(int addr, String port, String pointRef) {
-        Log.d("CCU"," Update Physical point "+port);
+        CcuLog.d("CCU"," Update Physical point "+port);
 
         HashMap<Object,Object> device = CCUHsApi.getInstance().readEntity("device and addr == \""+addr+"\"");
         if (device == null)
@@ -472,7 +455,7 @@ public class ControlMote
     }
 
     public static void setPointEnabled(int addr, String port, boolean enabled) {
-        Log.d("CCU"," Enabled Physical point for CM "+port+" "+enabled);
+        CcuLog.d("CCU"," Enabled Physical point for CM "+port+" "+enabled);
 
         HashMap<Object,Object> device = CCUHsApi.getInstance().readEntity("device and addr == \""+addr+"\"");
         if (device == null)
@@ -483,7 +466,7 @@ public class ControlMote
         HashMap<Object,Object> point = CCUHsApi.getInstance().readEntity(
                 "point and physical and deviceRef == \"" + device.get("id").toString() +
                         "\""+" and port == \""+port+"\"");
-        if (point != null && point.size() > 0)
+        if (point != null && !point.isEmpty())
         {
             RawPoint p = new RawPoint.Builder().setHashMap(point).build();
             p.setEnabled(enabled);
@@ -504,7 +487,7 @@ public class ControlMote
         for (HashMap rawPoint : points) {
             RawPoint.Builder point = new RawPoint.Builder().setHashMap(rawPoint);
             String dis = rawPoint.get("dis").toString();
-            String tokens[] = dis.split("-");
+            String[] tokens = dis.split("-");
             if(tokens.length == 2)  point.setDisplayName(siteName+"-"+tokens[1]);
             if(tokens.length == 3)  point.setDisplayName(siteName+"-"+tokens[1]+"-"+tokens[2]);
             hsApi.updatePoint(point.build(),point.build().getId());
@@ -513,7 +496,7 @@ public class ControlMote
     }
 
     public static void setCMPointEnabled(String port, boolean enabled) {
-        Log.d("CCU"," Enabled Physical point "+port+" "+enabled);
+        CcuLog.d("CCU"," Enabled Physical point "+port+" "+enabled);
 
         HashMap<Object,Object> device = CCUHsApi.getInstance().readEntity("device and cm");
         if (device == null)
@@ -523,12 +506,126 @@ public class ControlMote
 
         HashMap<Object,Object> point = CCUHsApi.getInstance().readEntity(
                 "point and th1 and physical and deviceRef == \"" + device.get("id").toString() + "\"");
-        if (point != null && point.size() > 0)
+        if (point != null && !point.isEmpty())
         {
             RawPoint p = new RawPoint.Builder().setHashMap(point).build();
             p.setEnabled(enabled);
             CCUHsApi.getInstance().updatePoint(p,p.getId());
             CCUHsApi.getInstance().writeHisValById(p.getId(), 0.0);
         }
+    }
+
+    /*Null pointer exception occurs at the time of cut-over migration, because In Domain CM Device
+     * is not yet loaded*/
+    public static HashMap<String, Boolean> getCMUnusedPorts(CCUHsApi ccuHsApi){
+        HashMap<Object, Object> systemEquip = ccuHsApi.readEntity("system and equip and not modbus and not connectModule");
+        HashMap<String, String> cmPortsWithSystemEquipDomainName;
+        try {
+             cmPortsWithSystemEquipDomainName = getSystemEquipPointsDomainNameWithCmPortsDisName();
+        } catch (NullPointerException e){
+            CcuLog.e(Domain.LOG_TAG,"Failed to fetch CM Unused ports");
+            e.printStackTrace();
+            return new HashMap<>();
+        }
+        ArrayList<HashMap<Object, Object>> systemEquipEnablePoints = ccuHsApi.readAllEntities("enable and equipRef == \"" + systemEquip.get("id").toString() + "\"");
+        for (HashMap<Object, Object> systemEquipEnablePoint : systemEquipEnablePoints) {
+            Object domainName = systemEquipEnablePoint.get(Tags.DOMAIN_NAME);
+            if (domainName != null) {
+                Object cmPort = cmPortsWithSystemEquipDomainName.get(domainName.toString());
+                if (cmPort != null && ccuHsApi.readDefaultValById(systemEquipEnablePoint.get("id").toString()) == 1) {
+                    cmPortsWithSystemEquipDomainName.remove(domainName.toString());
+                }
+            }
+        }
+
+        HashMap<String, Boolean> cmUnusedPorts = new HashMap<>();
+        for (String value : cmPortsWithSystemEquipDomainName.values()) {
+            RawPoint cmPortPoint = Domain.cmBoardDevice
+                    .getPortsDomainNameWithPhysicalPoint()
+                    .get(getCmPortsDisplayNameWithDomainName().get(value));
+            cmUnusedPorts.put(value, cmPortPoint.getMarkers().contains(Tags.WRITABLE));
+        }
+        return cmUnusedPorts;
+    }
+
+    public static HashMap<String, String> getSystemEquipPointsDomainNameWithCmPortsDisName(){
+        HashMap<String, String> systemEquipPointsDomainNameWithCmPortsDisName = new HashMap<>();
+        systemEquipPointsDomainNameWithCmPortsDisName.put(DomainName.relay1OutputEnable, getCmPortsDisplayNameByDomainName().get(DomainName.relay1));
+        systemEquipPointsDomainNameWithCmPortsDisName.put(DomainName.relay2OutputEnable, getCmPortsDisplayNameByDomainName().get(DomainName.relay2));
+        systemEquipPointsDomainNameWithCmPortsDisName.put(DomainName.relay3OutputEnable, getCmPortsDisplayNameByDomainName().get(DomainName.relay3));
+        systemEquipPointsDomainNameWithCmPortsDisName.put(DomainName.relay4OutputEnable, getCmPortsDisplayNameByDomainName().get(DomainName.relay4));
+        systemEquipPointsDomainNameWithCmPortsDisName.put(DomainName.relay5OutputEnable, getCmPortsDisplayNameByDomainName().get(DomainName.relay5));
+        systemEquipPointsDomainNameWithCmPortsDisName.put(DomainName.relay6OutputEnable, getCmPortsDisplayNameByDomainName().get(DomainName.relay6));
+        systemEquipPointsDomainNameWithCmPortsDisName.put(DomainName.relay7OutputEnable, getCmPortsDisplayNameByDomainName().get(DomainName.relay7));
+        systemEquipPointsDomainNameWithCmPortsDisName.put(DomainName.relay8OutputEnable, getCmPortsDisplayNameByDomainName().get(DomainName.relay8));
+
+        systemEquipPointsDomainNameWithCmPortsDisName.put(DomainName.analog1OutputEnable, getCmPortsDisplayNameByDomainName().get(DomainName.analog1Out));
+        systemEquipPointsDomainNameWithCmPortsDisName.put(DomainName.analog2OutputEnable, getCmPortsDisplayNameByDomainName().get(DomainName.analog2Out));
+        systemEquipPointsDomainNameWithCmPortsDisName.put(DomainName.analog3OutputEnable, getCmPortsDisplayNameByDomainName().get(DomainName.analog3Out));
+        systemEquipPointsDomainNameWithCmPortsDisName.put(DomainName.analog4OutputEnable, getCmPortsDisplayNameByDomainName().get(DomainName.analog4Out));
+        return systemEquipPointsDomainNameWithCmPortsDisName;
+    }
+    public static HashMap<String, String> getSystemEquipPointsDomainNameWithCmPortsDomainName(){
+        HashMap<String, String> systemEquipPointsDomainNameWithCmPortsDisName = new HashMap<>();
+        systemEquipPointsDomainNameWithCmPortsDisName.put(DomainName.relay1OutputEnable, DomainName.relay1);
+        systemEquipPointsDomainNameWithCmPortsDisName.put(DomainName.relay2OutputEnable, DomainName.relay2);
+        systemEquipPointsDomainNameWithCmPortsDisName.put(DomainName.relay3OutputEnable, DomainName.relay3);
+        systemEquipPointsDomainNameWithCmPortsDisName.put(DomainName.relay4OutputEnable, DomainName.relay4);
+        systemEquipPointsDomainNameWithCmPortsDisName.put(DomainName.relay5OutputEnable, DomainName.relay5);
+        systemEquipPointsDomainNameWithCmPortsDisName.put(DomainName.relay6OutputEnable, DomainName.relay6);
+        systemEquipPointsDomainNameWithCmPortsDisName.put(DomainName.relay7OutputEnable, DomainName.relay7);
+        systemEquipPointsDomainNameWithCmPortsDisName.put(DomainName.relay8OutputEnable, DomainName.relay8);
+
+        systemEquipPointsDomainNameWithCmPortsDisName.put(DomainName.analog1OutputEnable, DomainName.analog1Out);
+        systemEquipPointsDomainNameWithCmPortsDisName.put(DomainName.analog2OutputEnable, DomainName.analog2Out);
+        systemEquipPointsDomainNameWithCmPortsDisName.put(DomainName.analog3OutputEnable, DomainName.analog3Out);
+        systemEquipPointsDomainNameWithCmPortsDisName.put(DomainName.analog4OutputEnable, DomainName.analog4Out);
+        return systemEquipPointsDomainNameWithCmPortsDisName;
+    }
+    public static HashMap<String, String> getCmPortsDisplayNameWithDomainName(){
+        HashMap<String, String> cmPortsDisNameWithDomainName = new HashMap<>();
+        cmPortsDisNameWithDomainName.put(getCmPortsDisplayNameByDomainName().get(DomainName.relay1), DomainName.relay1);
+        cmPortsDisNameWithDomainName.put(getCmPortsDisplayNameByDomainName().get(DomainName.relay2), DomainName.relay2);
+        cmPortsDisNameWithDomainName.put(getCmPortsDisplayNameByDomainName().get(DomainName.relay3), DomainName.relay3);
+        cmPortsDisNameWithDomainName.put(getCmPortsDisplayNameByDomainName().get(DomainName.relay4), DomainName.relay4);
+        cmPortsDisNameWithDomainName.put(getCmPortsDisplayNameByDomainName().get(DomainName.relay5), DomainName.relay5);
+        cmPortsDisNameWithDomainName.put(getCmPortsDisplayNameByDomainName().get(DomainName.relay6), DomainName.relay6);
+        cmPortsDisNameWithDomainName.put(getCmPortsDisplayNameByDomainName().get(DomainName.relay7), DomainName.relay7);
+        cmPortsDisNameWithDomainName.put(getCmPortsDisplayNameByDomainName().get(DomainName.relay8), DomainName.relay8);
+
+        cmPortsDisNameWithDomainName.put(getCmPortsDisplayNameByDomainName().get(DomainName.analog1Out), DomainName.analog1Out);
+        cmPortsDisNameWithDomainName.put(getCmPortsDisplayNameByDomainName().get(DomainName.analog2Out), DomainName.analog2Out);
+        cmPortsDisNameWithDomainName.put(getCmPortsDisplayNameByDomainName().get(DomainName.analog3Out), DomainName.analog3Out);
+        cmPortsDisNameWithDomainName.put(getCmPortsDisplayNameByDomainName().get(DomainName.analog4Out), DomainName.analog4Out);
+
+        cmPortsDisNameWithDomainName.put(getCmPortsDisplayNameByDomainName().get(DomainName.analog1In), DomainName.analog1In);
+        cmPortsDisNameWithDomainName.put(getCmPortsDisplayNameByDomainName().get(DomainName.analog2In),DomainName.analog2In);
+
+        cmPortsDisNameWithDomainName.put(getCmPortsDisplayNameByDomainName().get(DomainName.th1In), DomainName.th1In);
+        cmPortsDisNameWithDomainName.put(getCmPortsDisplayNameByDomainName().get(DomainName.th2In), DomainName.th2In);
+        return cmPortsDisNameWithDomainName;
+    }
+    public static HashMap<String, String> getCmPortsDisplayNameByDomainName(){
+        HashMap<String, String> cmPortsDisNameWithDomainName = new HashMap<>();
+        cmPortsDisNameWithDomainName.put(DomainName.relay1, Domain.cmBoardDevice.getRelay1().readPoint().getDisplayName());
+        cmPortsDisNameWithDomainName.put(DomainName.relay2, Domain.cmBoardDevice.getRelay2().readPoint().getDisplayName());
+        cmPortsDisNameWithDomainName.put(DomainName.relay3, Domain.cmBoardDevice.getRelay3().readPoint().getDisplayName());
+        cmPortsDisNameWithDomainName.put(DomainName.relay4, Domain.cmBoardDevice.getRelay4().readPoint().getDisplayName());
+        cmPortsDisNameWithDomainName.put(DomainName.relay5, Domain.cmBoardDevice.getRelay5().readPoint().getDisplayName());
+        cmPortsDisNameWithDomainName.put(DomainName.relay6, Domain.cmBoardDevice.getRelay6().readPoint().getDisplayName());
+        cmPortsDisNameWithDomainName.put(DomainName.relay7, Domain.cmBoardDevice.getRelay7().readPoint().getDisplayName());
+        cmPortsDisNameWithDomainName.put(DomainName.relay8, Domain.cmBoardDevice.getRelay8().readPoint().getDisplayName());
+
+        cmPortsDisNameWithDomainName.put(DomainName.analog1Out, Domain.cmBoardDevice.getAnalog1Out().readPoint().getDisplayName());
+        cmPortsDisNameWithDomainName.put(DomainName.analog2Out, Domain.cmBoardDevice.getAnalog2Out().readPoint().getDisplayName());
+        cmPortsDisNameWithDomainName.put(DomainName.analog3Out, Domain.cmBoardDevice.getAnalog3Out().readPoint().getDisplayName());
+        cmPortsDisNameWithDomainName.put(DomainName.analog4Out, Domain.cmBoardDevice.getAnalog4Out().readPoint().getDisplayName());
+
+        cmPortsDisNameWithDomainName.put(DomainName.analog1In, Domain.cmBoardDevice.getAnalog1In().readPoint().getDisplayName());
+        cmPortsDisNameWithDomainName.put(DomainName.analog2In, Domain.cmBoardDevice.getAnalog2In().readPoint().getDisplayName());
+
+        cmPortsDisNameWithDomainName.put(DomainName.th1In, Domain.cmBoardDevice.getTh1In().readPoint().getDisplayName());
+        cmPortsDisNameWithDomainName.put(DomainName.th2In, Domain.cmBoardDevice.getTh2In().readPoint().getDisplayName());
+        return cmPortsDisNameWithDomainName;
     }
 }

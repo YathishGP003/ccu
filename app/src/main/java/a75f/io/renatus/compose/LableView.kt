@@ -2,7 +2,6 @@ package a75f.io.renatus.compose
 
 import a75f.io.renatus.modbus.util.DISPLAY_UI
 import a75f.io.renatus.modbus.util.PARAMETER
-import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer

@@ -3,25 +3,19 @@ package a75f.io.renatus.buildingoccupancy.viewmodels;
 import static a75f.io.api.haystack.util.TimeUtil.getEndTimeHr;
 import static a75f.io.api.haystack.util.TimeUtil.getEndTimeMin;
 
-import android.app.AlertDialog;
-import android.os.Handler;
-import android.os.Looper;
-import android.util.Log;
-
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
+import org.joda.time.LocalTime;
 import org.projecthaystack.HDict;
 import org.projecthaystack.HDictBuilder;
 import org.projecthaystack.HGrid;
 import org.projecthaystack.HGridBuilder;
-import org.projecthaystack.HRef;
 import org.projecthaystack.HRow;
 import org.projecthaystack.client.HClient;
 import org.projecthaystack.io.HZincReader;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -34,7 +28,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.stream.Collectors;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.DAYS;
@@ -46,35 +39,17 @@ import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.api.haystack.schedule.BuildingOccupancy;
-import a75f.io.domain.api.Room;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.util.OfflineModeUtilKt;
-import a75f.io.renatus.buildingoccupancy.BuildingOccupancyDialogFragment;
 import a75f.io.renatus.schedules.ScheduleUtil;
 import a75f.io.renatus.schedules.SchedulerFragment;
-import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.views.MasterControl.MasterControlUtil;
 
 public class BuildingOccupancyViewModel {
 
     private String getDayString(DateTime d) {
         return ScheduleUtil.getDayString(d.getDayOfWeek());
-    }
-
-    public BuildingOccupancy.Days removeDaysEntry(int position, BuildingOccupancy buildingOccupancy){
-        BuildingOccupancy.Days removeEntry = null;
-        if (position != BuildingOccupancyDialogFragment.NO_REPLACE) {
-            //sort schedule days according to the start hour of the day
-            try {
-                Collections.sort(buildingOccupancy.getDays(), Comparator.comparingInt(BuildingOccupancy.Days::getSthh));
-                Collections.sort(buildingOccupancy.getDays(), Comparator.comparingInt(BuildingOccupancy.Days::getDay));
-                removeEntry = buildingOccupancy.getDays().remove(position);
-            }catch (ArrayIndexOutOfBoundsException e) {
-                Log.d("CCU_UI", "onClickSave: " + e.getMessage());
-            }
-        }
-        return removeEntry;
     }
 
     public List<BuildingOccupancy.Days> constructBuildingOccupancyDays(int startTimeHour, int endTimeHour,
@@ -101,20 +76,16 @@ public class BuildingOccupancyViewModel {
         for (BuildingOccupancy.Days day : daysList) {
             List<Interval> overlaps = buildingOccupancy.getOverLapInterval(day);
             for (Interval overlap : overlaps) {
-                Log.d("CCU_UI"," overLap "+overlap);
-                overlapDays.append(getDayString(overlap.getStart())+"("+overlap.getStart().hourOfDay().get()+":"+
-                        (overlap.getStart().minuteOfHour().get() == 0 ? "00" : overlap.getStart().minuteOfHour().get())
-                        +" - " +(getEndTimeHr(overlap.getEnd().hourOfDay().get(), overlap.getEnd().minuteOfHour().get()))
-                        +":"+(getEndTimeMin(overlap.getEnd().hourOfDay().get(),
-                        overlap.getEnd().minuteOfHour().get())  == 0 ? "00": overlap.getEnd().minuteOfHour().get())+
-                        ") ");
+                CcuLog.d(L.TAG_CCU_UI," overLap "+overlap);
+                overlapDays.append(getDayString(overlap.getStart())).append("(").append(overlap.getStart().hourOfDay().get()).append(":").append(overlap.getStart().minuteOfHour().get() == 0 ? "00" : overlap.getStart().minuteOfHour().get()).append(" - ").append(getEndTimeHr(overlap.getEnd().hourOfDay().get(), overlap.getEnd().minuteOfHour().get())).append(":").append(getEndTimeMin(overlap.getEnd().hourOfDay().get(),
+                        overlap.getEnd().minuteOfHour().get()) == 0 ? "00" : overlap.getEnd().minuteOfHour().get()).append(") ");
             }
         }
         return overlapDays.toString();
     }
     public List<BuildingOccupancy.Days> getUnoccupiedDays(List<BuildingOccupancy.Days> days){
-        Collections.sort(days, Comparator.comparingInt(BuildingOccupancy.Days::getSthh));
-        Collections.sort(days, Comparator.comparingInt(BuildingOccupancy.Days::getDay));
+        days.sort(Comparator.comparingInt(BuildingOccupancy.Days::getSthh));
+        days.sort(Comparator.comparingInt(BuildingOccupancy.Days::getDay));
         Map<Integer, List<BuildingOccupancy.Days>> occupiedDaysMap= new LinkedHashMap<>();
         for(int i = 0; i < days.size(); i++){
             if(occupiedDaysMap.containsKey((days.get(i).getDay()))){
@@ -123,7 +94,7 @@ public class BuildingOccupancyViewModel {
                 occupiedDaysMap.put(days.get(i).getDay(), availableDays);
             }
             else{
-                occupiedDaysMap.put(days.get(i).getDay(), new ArrayList<>(Arrays.asList(days.get(i))));
+                occupiedDaysMap.put(days.get(i).getDay(), new ArrayList<>(Collections.singletonList(days.get(i))));
             }
         }
         List<BuildingOccupancy.Days> unoccupiedDays = new ArrayList<>();
@@ -203,7 +174,7 @@ public class BuildingOccupancyViewModel {
                 HDict queryDictionary = new HDictBuilder().add("filter",
                         "named and schedule and organization == \"" +
                                 Objects.requireNonNull(CCUHsApi.getInstance().getSite()).getOrganization() + "\"").toDict();
-                HGrid namedschedules = hClient.call("read", HGridBuilder.dictToGrid(queryDictionary));
+                HGrid namedSchedules = hClient.call("read", HGridBuilder.dictToGrid(queryDictionary));
 
 
                 HDict roomDict = new HDictBuilder().add("filter", "room and siteRef == " + siteRef).toDict();
@@ -239,8 +210,8 @@ public class BuildingOccupancyViewModel {
                         scheduleList.add(new Schedule.Builder().setHDict(new HDictBuilder().add(r).toDict()).build());
                     }
                 }
-                if (namedschedules != null) {
-                    Iterator it = namedschedules.iterator();
+                if (namedSchedules != null) {
+                    Iterator it = namedSchedules.iterator();
                     while (it.hasNext()) {
                         HRow r = (HRow) it.next();
                         Schedule schedule = new Schedule.Builder().setHDict(new HDictBuilder().add(r).toDict()).build();
@@ -271,6 +242,7 @@ public class BuildingOccupancyViewModel {
                for (Schedule schedule : activeScheduleList.values()) {
                     ArrayList<Interval> intervalSpills = new ArrayList<>();
                     ArrayList<Interval> zoneIntervals = schedule.getScheduledIntervals();
+                   separateOvernightSchedules(zoneIntervals);
 
                     for (Interval v : zoneIntervals) {
                         CcuLog.d(L.TAG_CCU_UI, "Zone interval " + v);
@@ -332,7 +304,7 @@ public class BuildingOccupancyViewModel {
 
                     }
 
-                    if (intervalSpills.size() > 0) {
+                    if (!intervalSpills.isEmpty()) {
                         if(schedule.isNamedSchedule()){
                             for (Zone zone:zoneList) {
                                 if(schedule.getId().replace("@","").equals(zone.getScheduleRef().replace("@",""))){
@@ -363,12 +335,28 @@ public class BuildingOccupancyViewModel {
         return spillsMap;
     }
 
+    private void separateOvernightSchedules(ArrayList<Interval> zoneIntervals) {
+        int size = zoneIntervals.size();
+        for (int i = 0; i < size; i++) {
+            Interval it = zoneIntervals.get(i);
+
+            LocalTime startTimeOfDay = it.getStart().toLocalTime();
+            LocalTime endTimeOfDay = it.getEnd().toLocalTime();
+
+            // Check if the start time is after the end time and separating the overnight schedule
+            if (startTimeOfDay.isAfter(endTimeOfDay)) {
+                zoneIntervals.set(i, ScheduleUtil.OverNightEnding(it));
+                zoneIntervals.add(ScheduleUtil.OverNightStarting(it));
+            }
+        }
+    }
+
     public String getWarningMessage(HashMap<String, ArrayList<Interval>> spillsMap){
         StringBuilder spillZones = new StringBuilder();
         StringBuilder spillNamedZones = new StringBuilder();
-        ArrayList<String> namedheaders = new ArrayList<>();
-        ArrayList<String> zoneheaders = new ArrayList<>();
-        String Warning = "";
+        ArrayList<String> namedHeaders = new ArrayList<>();
+        ArrayList<String> zoneHeaders = new ArrayList<>();
+        String Warning;
 
         ExecutorService executor = Executors.newSingleThreadExecutor();
         Future<String> result = executor.submit(() -> {
@@ -387,10 +375,10 @@ public class BuildingOccupancyViewModel {
                                 equipList.add(new Equip.Builder().setHashMap(equip).build());
                             }
                         }
-                        HashMap<Object, Object> zonemap = CCUHsApi.getInstance().readMapById(zone);
-                        z = new Zone.Builder().setHashMap(zonemap).build();
-                        HashMap<Object, Object> floormap = CCUHsApi.getInstance().readMapById(z.getFloorRef());
-                        f = new Floor.Builder().setHashMap(floormap).build();
+                        HashMap<Object, Object> zoneMap = CCUHsApi.getInstance().readMapById(zone);
+                        z = new Zone.Builder().setHashMap(zoneMap).build();
+                        HashMap<Object, Object> floorMap = CCUHsApi.getInstance().readMapById(z.getFloorRef());
+                        f = new Floor.Builder().setHashMap(floorMap).build();
                     }else {
 
                         HClient hClient = new HClient(CCUHsApi.getInstance().getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
@@ -438,16 +426,16 @@ public class BuildingOccupancyViewModel {
                         }
                     }
 
-                    if(equipList.size() > 0 && !MasterControlUtil.isNonTempModule(equipList.get(0).getProfile())) {
+                    if(!equipList.isEmpty() && !MasterControlUtil.isNonTempModule(equipList.get(0).getProfile())) {
                         Schedule schedule = CCUHsApi.getInstance().getScheduleById(z.getScheduleRef());
                         if(schedule == null){
                              schedule = CCUHsApi.getInstance().getRemoteSchedule(z.getScheduleRef());
                         }
                         if (schedule.isNamedSchedule()) {
                             schedules = schedules.concat("named");
-                            if (!namedheaders.contains(f.getDisplayName())) {
+                            if (!namedHeaders.contains(f.getDisplayName())) {
                                 spillNamedZones.append("\t").append(f.getDisplayName()).append("->\n");
-                                namedheaders.add(f.getDisplayName());
+                                namedHeaders.add(f.getDisplayName());
                             }
                             spillNamedZones.append("\t\t\tZone ").append(z.getDisplayName()).append(" ")
                                     .append(ScheduleUtil.getDayString(i.getStart().getDayOfWeek()))
@@ -457,9 +445,9 @@ public class BuildingOccupancyViewModel {
                                     .append(":").append(getEndTimeMin(i.getEnd().hourOfDay().get(), i.getEnd().minuteOfHour().get()) == 0 ? "00" : i.getEnd().minuteOfHour().get()).append(") \n");
                         } else {
                             schedules = schedules.concat(Tags.ZONE);
-                            if (!zoneheaders.contains(f.getDisplayName())) {
+                            if (!zoneHeaders.contains(f.getDisplayName())) {
                                 spillZones.append("\t").append(f.getDisplayName()).append("->\n");
-                                zoneheaders.add(f.getDisplayName());
+                                zoneHeaders.add(f.getDisplayName());
                             }
                             spillZones.append("\t\t\tZone ").append(z.getDisplayName()).append(" ").append(ScheduleUtil.getDayString(i.getStart().getDayOfWeek())).append(" (").append(i.getStart().hourOfDay().get()).append(":").append(i.getStart().minuteOfHour().get() == 0 ? "00" : i.getStart().minuteOfHour().get()).append(" - ").append(getEndTimeHr(i.getEnd().hourOfDay().get(), i.getEnd().minuteOfHour().get())).append(":").append(getEndTimeMin(i.getEnd().hourOfDay().get(), i.getEnd().minuteOfHour().get()) == 0 ? "00" : i.getEnd().minuteOfHour().get()).append(") \n");
                         }
@@ -468,24 +456,24 @@ public class BuildingOccupancyViewModel {
             }
 
             String returnVal = "";
-            String namedSchedulesWarning = "";
+            String namedSchedulesWarning;
             String zoneSchedulesWarning = "";
             if (schedules.contains("named")) {
                 namedSchedulesWarning = "Named Schedule for below zone(s) is outside updated " +
                         "building occupancy.\n"
-                        + ((spillNamedZones.toString()).equals("") ? "" : "\tThe Schedule is " +
-                        "outside by \n\t" + spillNamedZones.toString() + "\n");
+                        + ((spillNamedZones.toString()).isEmpty() ? "" : "\tThe Schedule is " +
+                        "outside by \n\t" + spillNamedZones + "\n");
                 if (schedules.contains("zone")) {
                     zoneSchedulesWarning = "Zone Schedule for below zone(s) is outside updated " +
-                            "building occupancy.\n" + (spillZones.toString().equals("") ? "" : "\tThe Schedule " +
-                            "is outside by \n\t" + spillZones.toString());
+                            "building occupancy.\n" + (spillZones.toString().isEmpty() ? "" : "\tThe Schedule " +
+                            "is outside by \n\t" + spillZones);
                 }
                 returnVal = namedSchedulesWarning + zoneSchedulesWarning;
 
             } else if (schedules.contains("zone")) {
                 zoneSchedulesWarning = "Zone Schedule for below zone(s) is outside updated " +
-                        "building occupancy.\n" + (spillZones.toString().equals("") ? "" : "\tThe Schedule " +
-                        "is outside by \n\t" + spillZones.toString());
+                        "building occupancy.\n" + (spillZones.toString().isEmpty() ? "" : "\tThe Schedule " +
+                        "is outside by \n\t" + spillZones);
                 returnVal = zoneSchedulesWarning;
 
             }
@@ -512,9 +500,4 @@ public class BuildingOccupancyViewModel {
         return getScheduleSpills(null,buildingOccupancy);
     }
 
-    public boolean checkIfNonTempEquipInZone(HashMap<Object,Object> zone){
-        ArrayList<HashMap<Object, Object>> equips = CCUHsApi.getInstance().readAllEntities("equip and roomRef ==\""
-                + zone.get("id").toString() + "\"");
-        return equips.stream().anyMatch(equip -> MasterControlUtil.isNonTempModule(equip.get("profile").toString()));
-    }
 }

@@ -1,5 +1,6 @@
 package a75f.io.logic.bo.building.vav
 
+import a75f.io.api.haystack.HSUtil
 import a75f.io.domain.VavAcbEquip
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
@@ -9,6 +10,7 @@ import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.config.ValueConfig
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.ProfileType
+import a75f.io.logic.bo.haystack.device.DeviceUtil
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import io.seventyfivef.ph.core.Tags
 
@@ -47,6 +49,7 @@ class AcbProfileConfiguration (nodeAddress: Int, nodeType: String, priority: Int
     lateinit var minCFMCooling: ValueConfig
     lateinit var maxCFMReheating: ValueConfig
     lateinit var minCFMReheating: ValueConfig
+    lateinit var unusedPorts: HashMap<String, Boolean>
 
     fun getDefaultConfiguration() : AcbProfileConfiguration {
         damperType = getDefaultValConfig(DomainName.damperType, model)
@@ -81,16 +84,16 @@ class AcbProfileConfiguration (nodeAddress: Int, nodeType: String, priority: Int
         maxCFMReheating = getDefaultValConfig(DomainName.maxCFMReheating, model)
         minCFMReheating = getDefaultValConfig(DomainName.minCFMReheating, model)
 
-        if (!(maxCFMCooling.currentVal > 0.0)) maxCFMCooling.currentVal = 250.0
-        if (!(minCFMCooling.currentVal > 0.0)) minCFMCooling.currentVal = 50.0
-        if (!(maxCFMReheating.currentVal > 0.0)) maxCFMReheating.currentVal = 250.0
-        if (!(minCFMReheating.currentVal > 0.0)) minCFMReheating.currentVal = 50.0
+        if (maxCFMCooling.currentVal <= 0.0) maxCFMCooling.currentVal = 250.0
+        if (minCFMCooling.currentVal <= 0.0) minCFMCooling.currentVal = 50.0
+        if (maxCFMReheating.currentVal <= 0.0) maxCFMReheating.currentVal = 250.0
+        if (minCFMReheating.currentVal <= 0.0) minCFMReheating.currentVal = 50.0
 
         if (L.ccu().bypassDamperProfile != null) {
             minCoolingDamperPos.currentVal = 10.0
             minHeatingDamperPos.currentVal = 10.0
         }
-
+        unusedPorts = hashMapOf()
         isDefault = true
 
         return this
@@ -157,10 +160,14 @@ class AcbProfileConfiguration (nodeAddress: Int, nodeType: String, priority: Int
             maxCFMReheating = getDefaultValConfig(DomainName.maxCFMReheating, model)
             minCFMReheating = getDefaultValConfig(DomainName.minCFMReheating, model)
 
-            if (!(maxCFMCooling.currentVal > 0.0)) maxCFMCooling.currentVal = 250.0
-            if (!(minCFMCooling.currentVal > 0.0)) minCFMCooling.currentVal = 50.0
-            if (!(maxCFMReheating.currentVal > 0.0)) maxCFMReheating.currentVal = 250.0
-            if (!(minCFMReheating.currentVal > 0.0)) minCFMReheating.currentVal = 50.0
+            if (maxCFMCooling.currentVal <= 0.0) maxCFMCooling.currentVal = 250.0
+            if (minCFMCooling.currentVal <= 0.0) minCFMCooling.currentVal = 50.0
+            if (maxCFMReheating.currentVal <= 0.0) maxCFMReheating.currentVal = 250.0
+            if (minCFMReheating.currentVal <= 0.0) minCFMReheating.currentVal = 50.0
+        }
+        val devicePorts = DeviceUtil.getUnusedPortsForDevice(nodeAddress.toShort(), Domain.hayStack)
+        devicePorts?.forEach { disabledPort ->
+            unusedPorts[disabledPort.displayName] = disabledPort.markers.contains(Tags.WRITABLE)
         }
         isDefault = false
         return this

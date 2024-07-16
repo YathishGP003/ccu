@@ -9,7 +9,6 @@ import a75f.io.data.message.MESSAGE_ATTRIBUTE_ID
 import a75f.io.data.message.MESSAGE_ATTRIBUTE_IDS
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
-import a75f.io.logic.cloud.RenatusServicesEnvironment
 import a75f.io.messaging.MessageHandler
 import android.content.Context
 import com.google.gson.JsonObject
@@ -68,7 +67,6 @@ class AlertMessageHandler(
     */
    fun handleCustomAlertDefMessage(msgObject: JsonObject) {
 
-      val env = RenatusServicesEnvironment.instance
       val alertGUID = msgObject[MESSAGE_ATTRIBUTE_ID]?.asString
          ?: return CcuLog.e(L.TAG_CCU_PUBNUB, "No $KEY_ALERT_DEF_ID in $CREATE_CUSTOM_ALERT_DEF_CMD message")
 
@@ -94,7 +92,7 @@ class AlertMessageHandler(
                * The 'removeAlertDefinition' function removes the older definition and occurrences from the map.
                *  This is necessary to avoid having multiple definitions in the alert shared preference.*/
                alertManager.repo.removeAlertDefinition(alertManager.activeAlerts[index].alertDefId)
-               alertManager.fixAlert(alertManager.activeAlerts[index]);
+               alertManager.fixAlert(alertManager.activeAlerts[index])
                CcuLog.w(TAG_CCU_ALERTS, "fixing alert, alert definition ID - ${msgObject.get("id").asString}")
             }
          }
@@ -123,7 +121,7 @@ class AlertMessageHandler(
     *
     * Delegates to AlertManager, which simply refreshes all predefined alerts.
     */
-   fun handlePredefinedAlertDefMessage(msgObject: JsonObject) {
+   fun handlePredefinedAlertDefMessage() {
       alertManager.fetchPredefinedAlerts()
       CcuLog.d(L.TAG_CCU_PUBNUB, "Predefined alert definitions fetched.")
    }
@@ -168,7 +166,7 @@ class AlertMessageHandler(
                                     DELETE_PREDEFINED_ALERT_DEF_CMD)
 
       override fun handleMessage(jsonObject: JsonObject, context : Context) {
-         instanceOf().handlePredefinedAlertDefMessage(jsonObject)
+         instanceOf().handlePredefinedAlertDefMessage()
       }
    }
    class CustomAlertDefHandler : MessageHandler {

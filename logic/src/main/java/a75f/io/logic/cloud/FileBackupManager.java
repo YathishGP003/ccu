@@ -1,7 +1,6 @@
 package a75f.io.logic.cloud;
 import java.io.File;
 import java.io.IOException;
-import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 import java.util.HashMap;
 import java.util.Map;
@@ -13,7 +12,6 @@ import static a75f.io.logic.L.TAG_CCU_BACKUP;
 import static a75f.io.logic.L.TAG_CCU_REPLACE;
 
 import android.content.SharedPreferences;
-import android.util.Log;
 import com.google.gson.Gson;
 
 import org.w3c.dom.Document;
@@ -25,10 +23,8 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.logic.util.backupfiles.FileConstants;
 import a75f.io.logic.util.backupfiles.FileOperationsUtil;
-import a75f.io.modbusbox.EquipsManager;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
@@ -78,7 +74,7 @@ public class FileBackupManager {
 
     private void deleteZipFileFromCCU(File file){
         if(file.delete()){
-            Log.i(TAG_CCU_BACKUP, file.getAbsolutePath() + " deleted from CCU after backing up.");
+            CcuLog.d(TAG_CCU_BACKUP, file.getAbsolutePath() + " deleted from CCU after backing up.");
         }
     }
 

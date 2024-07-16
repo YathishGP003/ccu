@@ -136,7 +136,7 @@ class AlertMessageHandlerTest {
 
       // When..
       val message = Gson().fromJson(getPredefinedAlertDefJson, JsonObject::class.java)
-      alertMessageHandler.handlePredefinedAlertDefMessage(message)
+      alertMessageHandler.handlePredefinedAlertDefMessage()
 
       // Then..
        verify {

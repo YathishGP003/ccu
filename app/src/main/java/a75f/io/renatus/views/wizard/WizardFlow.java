@@ -138,7 +138,7 @@ public class WizardFlow {
 					throw new RuntimeException(String.format("Failed to add step: %s to the WizardFlow while attempting to instantiate the step", stepClass.getName()));
 				}
 			}
-            step.setOnStepChangedListener(activity);
+			step.setOnStepChangedListener(activity);
 			wizardSteps.add(step);
 			valid = true;
 			return this;

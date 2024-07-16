@@ -13,7 +13,9 @@ import a75f.io.renatus.compose.formatText
 import a75f.io.renatus.modbus.util.CANCEL
 import a75f.io.renatus.modbus.util.SAVE
 import a75f.io.renatus.profiles.system.advancedahu.AdvancedHybridAhuViewModel
+import a75f.io.renatus.modbus.util.SAVE
 import a75f.io.renatus.profiles.system.advancedahu.Option
+import a75f.io.renatus.profiles.system.advancedahu.vav.VavAdvancedHybridAhuViewModel
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -344,6 +346,8 @@ fun SaveConfig(viewModel: AdvancedHybridAhuViewModel) {
                     L.TAG_CCU_SYSTEM, viewModel.viewState.toString()
                 )
                 viewModel.saveConfiguration()
+                viewModel.viewState.value.isSaveRequired = false
+                viewModel.viewState.value.isStateChanged = false
             }
         }
     }

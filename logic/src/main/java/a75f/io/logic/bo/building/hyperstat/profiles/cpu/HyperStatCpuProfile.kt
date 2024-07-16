@@ -69,7 +69,7 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
 
     override fun updateZonePoints() {
         cpuDeviceMap.forEach { (_, equip) ->
-            logIt("Process Equip: equipRef =  ${equip.equipRef}")
+            CcuLog.d(L.TAG_CCU_HSCPU,"Process Equip: equipRef =  ${equip.equipRef}")
             processHyperStatCPUProfile(equip)
         }
     }
@@ -98,7 +98,7 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
     fun processHyperStatCPUProfile(equip: HyperStatCpuEquip) {
 
         if (Globals.getInstance().isTestMode) {
-            logIt("Test mode is on: ${equip.nodeAddress}")
+            CcuLog.i(L.TAG_CCU_HSCPU,"Test mode is on: ${equip.nodeAddress}")
             return
         }
 
@@ -127,10 +127,10 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
         val fanModeSaved = FanModeCacheStorage().getFanModeFromCache(equip.equipRef!!)
         val actualFanMode = getActualFanMode(equip.node.toString(), fanModeSaved)
         val basicSettings = fetchBasicSettings(equip)
-        logIt("Before fall back ${basicSettings.fanMode} ${basicSettings.conditioningMode}")
+        CcuLog.d(L.TAG_CCU_HSCPU,"Before fall back ${basicSettings.fanMode} ${basicSettings.conditioningMode}")
         val updatedFanMode = fallBackFanMode(equip, equip.equipRef!!, fanModeSaved, actualFanMode, basicSettings)
         basicSettings.fanMode = updatedFanMode
-        logIt("After fall back ${basicSettings.fanMode} ${basicSettings.conditioningMode}")
+        CcuLog.d(L.TAG_CCU_HSCPU,"After fall back ${basicSettings.fanMode} ${basicSettings.conditioningMode}")
         hyperstatCPUAlgorithm.initialise(tuners = hyperStatTuners)
         hyperstatCPUAlgorithm.dumpLogs()
         handleChangeOfDirection(userIntents)
@@ -152,7 +152,7 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
 
         updateTitle24LoopCounter(hyperStatTuners, basicSettings)
 
-        logIt(
+        CcuLog.i(L.TAG_CCU_HSCPU,
             "Analog Fan speed multiplier  ${hyperStatTuners.analogFanSpeedMultiplier} \n"+
                  "Current Working mode : ${Occupancy.values()[currentOperatingMode]} \n"+
                  "Current Temp : $currentTemp \n"+
@@ -177,7 +177,7 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
         var temperatureState = ZoneTempState.NONE
         if (buildingLimitMinBreached() || buildingLimitMaxBreached()) temperatureState = ZoneTempState.EMERGENCY
 
-        logIt("Equip Running : $curState")
+        CcuLog.i(L.TAG_CCU_HSCPU,"Equip Running : $curState")
         HyperStatUserIntentHandler.updateHyperStatStatus(
             equip.equipRef!!, relayStages, analogOutStages, temperatureState
         )
@@ -227,11 +227,11 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
         if (currentTemp > userIntents.zoneCoolingTargetTemperature && state != ZoneState.COOLING) {
             hyperstatCPUAlgorithm.resetCoolingControl()
             state = ZoneState.COOLING
-            logIt("Resetting cooling")
+            CcuLog.d(L.TAG_CCU_HSCPU,"Resetting cooling")
         } else if (currentTemp < userIntents.zoneHeatingTargetTemperature && state != ZoneState.HEATING) {
             hyperstatCPUAlgorithm.resetHeatingControl()
             state = ZoneState.HEATING
-            logIt("Resetting heating")
+            CcuLog.d(L.TAG_CCU_HSCPU,"Resetting heating")
         }
     }
 
@@ -247,7 +247,7 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
                 userIntents.zoneHeatingTargetTemperature, currentTemp
             ).toInt().coerceAtLeast(0)
 
-            else -> logIt(" Zone is in deadband")
+            else -> CcuLog.d(L.TAG_CCU_HSCPU," Zone is in deadband")
         }
 
         if (coolingLoopOutput > 0 && (basicSettings.conditioningMode == StandaloneConditioningMode.COOL_ONLY
@@ -418,7 +418,7 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
         tuner: HyperStatProfileTuners,
         relayStages: HashMap<String, Int>
     ) {
-        logIt(" $whichPort: ${relayAssociation.association}")
+        CcuLog.i(L.TAG_CCU_HSCPU," $whichPort: ${relayAssociation.association}")
         when (relayAssociation.association) {
             CpuRelayAssociation.COOLING_STAGE_1 -> {
                 doCoolingStage1(
@@ -448,7 +448,7 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
         relayAssociation: RelayState, whichPort: Port, config: HyperStatCpuConfiguration,
         tuner: HyperStatProfileTuners, relayStages: HashMap<String, Int>
     ) {
-        logIt(" $whichPort: ${relayAssociation.association}")
+        CcuLog.i(L.TAG_CCU_HSCPU," $whichPort: ${relayAssociation.association}")
         when (relayAssociation.association) {
             CpuRelayAssociation.HEATING_STAGE_1 -> {
                 doHeatingStage1(
@@ -481,10 +481,10 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
         previousFanLoopVal: Int, fanProtectionCounter: Int
     ) {
         var localFanLoopOutput = fanLoopOutput
-        logIt(" $whichPort: ${relayAssociation.association} runRelayForFanSpeed: ${basicSettings.fanMode}")
+        CcuLog.i(L.TAG_CCU_HSCPU," $whichPort: ${relayAssociation.association} runRelayForFanSpeed: ${basicSettings.fanMode}")
         if (basicSettings.fanMode == StandaloneFanStage.AUTO
             && basicSettings.conditioningMode == StandaloneConditioningMode.OFF ) {
-            logIt("Cond is Off , Fan is Auto  : ")
+            CcuLog.d(L.TAG_CCU_HSCPU,"Cond is Off , Fan is Auto  : ")
             resetPort(whichPort)
             return
         }
@@ -738,7 +738,7 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
 
     private fun handleDeadZone(equip: HyperStatCpuEquip) {
 
-       logIt("Zone is Dead ${equip.node}")
+       CcuLog.d(L.TAG_CCU_HSCPU,"Zone is Dead ${equip.node}")
         state = ZoneState.TEMPDEAD
         resetAllLogicalPointValues(equip)
         equip.hsHaystackUtil.setProfilePoint("operating and mode", state.ordinal.toDouble())
@@ -754,7 +754,7 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
         )
     }
     private fun handleRFDead(equip: HyperStatCpuEquip) {
-        logIt("RF Signal is Dead ${equip.node}")
+        CcuLog.d(L.TAG_CCU_HSCPU,"RF Signal is Dead ${equip.node}")
         state = ZoneState.RFDEAD
         equip.hsHaystackUtil.setProfilePoint("operating and mode", state.ordinal.toDouble())
         if (equip.hsHaystackUtil.getEquipStatus() != state.ordinal.toDouble()) {
@@ -796,7 +796,7 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
 
     private fun runForDoorWindowSensor(config: HyperStatCpuConfiguration, equip: HyperStatCpuEquip): Boolean {
         val isDoorOpen = isDoorOpenState(config,equip)
-       logIt(" is Door Open ? $isDoorOpen")
+       CcuLog.i(L.TAG_CCU_HSCPU," is Door Open ? $isDoorOpen")
         return isDoorOpen
     }
     
@@ -815,7 +815,7 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
             val sensorValue = equip.hsHaystackUtil.getSensorPointValue(
                 "door and window and logical and sensor"
             )
-           logIt("TH2 Door Window sensor value : Door is $sensorValue")
+           CcuLog.d(L.TAG_CCU_HSCPU,"TH2 Door Window sensor value : Door is $sensorValue")
             if (sensorValue.toInt() == 1) isDoorOpen = true
             th2SensorEnabled = true
         }
@@ -826,7 +826,7 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
             val sensorValue = equip.hsHaystackUtil.getSensorPointValue(
                 "door and window2 and logical and sensor"
             )
-           logIt("Analog In 1 Door Window sensor value : Door is $sensorValue")
+           CcuLog.d(L.TAG_CCU_HSCPU,"Analog In 1 Door Window sensor value : Door is $sensorValue")
             if (sensorValue.toInt() == 1) isDoorOpen = true
             analog1SensorEnabled = true
         }
@@ -837,7 +837,7 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
             val sensorValue = equip.hsHaystackUtil.getSensorPointValue(
                 "door and window3 and logical and sensor"
             )
-           logIt("Analog In 2 Door Window sensor value : Door is $sensorValue")
+           CcuLog.d(L.TAG_CCU_HSCPU,"Analog In 2 Door Window sensor value : Door is $sensorValue")
             if (sensorValue.toInt() == 1) isDoorOpen = true
             analog2SensorEnabled = true
         }
@@ -853,7 +853,7 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
     }
 
     private fun resetLoopOutputValues() {
-       logIt("Resetting all the loop output values: ")
+       CcuLog.d(L.TAG_CCU_HSCPU,"Resetting all the loop output values: ")
         coolingLoopOutput = 0
         heatingLoopOutput = 0
         fanLoopOutput = 0
@@ -881,8 +881,8 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
             analog2Sensor = equip.hsHaystackUtil.getSensorPointValue("keycard2 and sensor and logical")
         }
 
-        logIt("Keycard Enable Value "+  if (analog1KeycardEnabled || analog2KeycardEnabled) 1.0 else 0.0)
-        logIt("Keycard sensor Value "+ if (analog1Sensor > 0 || analog2Sensor > 0) 1.0 else 0.0)
+        CcuLog.d(L.TAG_CCU_HSCPU,"Keycard Enable Value "+  if (analog1KeycardEnabled || analog2KeycardEnabled) 1.0 else 0.0)
+        CcuLog.d(L.TAG_CCU_HSCPU,"Keycard sensor Value "+ if (analog1Sensor > 0 || analog2Sensor > 0) 1.0 else 0.0)
 
         keyCardIsInSlot(
             if (analog1KeycardEnabled || analog2KeycardEnabled) 1.0 else 0.0,
@@ -941,13 +941,6 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
             }
         }
         return if (nodeCount == 0) 0.0 else tempTotal / nodeCount
-    }
-
-    /**
-     * Function just to print logs
-     */
-    private fun logIt(msg: String){
-        CcuLog.d(L.TAG_CCU_HSCPU,msg)
     }
 
     private fun getCoolingStateActivated (): Double {

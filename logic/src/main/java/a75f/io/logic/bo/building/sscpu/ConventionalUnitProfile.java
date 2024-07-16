@@ -13,6 +13,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Occupied;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
 import a75f.io.logic.bo.building.ZoneProfile;
@@ -61,107 +62,104 @@ public class ConventionalUnitProfile extends ZoneProfile {
 
     @Override
     public void updateZonePoints() {
-        if (Globals.getInstance().isTestMode()){
+        if (Globals.getInstance().isTestMode()) {
             return;
         }
-        if(mInterface != null)
-        {
+        if (mInterface != null) {
             mInterface.refreshView();
         }
 
-        for (short node : cpuDeviceMap.keySet())
-        {
+        for (short node : cpuDeviceMap.keySet()) {
             if (cpuDeviceMap.get(node) == null) {
                 addLogicalMap(node);
-                Log.d(TAG, " Logical Map added for smartstat " + node);
+                CcuLog.d(TAG, " Logical Map added for smartstat " + node);
                 continue;
             }
-            Log.d(TAG,"SmartStat CPU profile");
+            CcuLog.i(TAG, "SmartStat CPU profile");
 
-            HashMap<String,Integer> relayStages = new HashMap<String,Integer>();
+            HashMap<String, Integer> relayStages = new HashMap<>();
             ZoneState curState = DEADBAND;
             ConventionalUnitLogicalMap cpuDevice = cpuDeviceMap.get(node);
-            if(cpuDevice.profileType != ProfileType.SMARTSTAT_CONVENTIONAL_PACK_UNIT)
+            if (cpuDevice.profileType != ProfileType.SMARTSTAT_CONVENTIONAL_PACK_UNIT)
                 continue;
             double roomTemp = cpuDevice.getCurrentTemp();
             Equip cpuEquip = new Equip.Builder().setHashMap(CCUHsApi.getInstance().read("equip and group == \"" + node + "\"")).build();
             if (isRFDead()) {
                 handleRFDead(cpuDevice, node, cpuEquip);
                 continue;
-            } else if (isZoneDead()){
-                resetRelays(cpuEquip.getId(),node);
-                StandaloneScheduler.updateSmartStatStatus(cpuEquip.getId(),DEADBAND, new HashMap<String, Integer>(),ZoneTempState.TEMP_DEAD);
-                if(cpuDevice.getStatus() != state.ordinal())
+            } else if (isZoneDead()) {
+                resetRelays(node);
+                StandaloneScheduler.updateSmartStatStatus(cpuEquip.getId(), DEADBAND, new HashMap<>(), ZoneTempState.TEMP_DEAD);
+                if (cpuDevice.getStatus() != state.ordinal())
                     cpuDevice.setStatus(state.ordinal());
                 String curStatus = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and writable and group == \"" + node + "\"");
                 if (!curStatus.equals("Zone Temp Dead")) {
                     CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \"" + node + "\"", "Zone Temp Dead");
                 }
-				Log.d(TAG,"Invalid Temp , skip controls update for "+node+" roomTemp : "+cpuDeviceMap.get(node).getCurrentTemp());
+                Log.d(TAG, "Invalid Temp , skip controls update for " + node + " roomTemp : " + cpuDeviceMap.get(node).getCurrentTemp());
                 CCUHsApi.getInstance().writeHisValByQuery("point and not ota and status and his and group == \"" + node + "\"", (double) TEMPDEAD.ordinal());
                 continue;
             }
-			setTempCooling = cpuDevice.getDesiredTempCooling();
+            setTempCooling = cpuDevice.getDesiredTempCooling();
             setTempHeating = cpuDevice.getDesiredTempHeating();
-            double averageDesiredTemp = (setTempCooling+setTempHeating)/2.0;
-            if (averageDesiredTemp != cpuDevice.getDesiredTemp())
-            {
+            double averageDesiredTemp = (setTempCooling + setTempHeating) / 2.0;
+            if (averageDesiredTemp != cpuDevice.getDesiredTemp()) {
                 cpuDevice.setDesiredTemp(averageDesiredTemp);
             }
 
-            Log.d(TAG, " smartstat cpu, updates 111="+cpuEquip.getRoomRef()+","+setTempHeating+","+setTempCooling);
+            CcuLog.d(TAG, " smartstat cpu, updates 111=" + cpuEquip.getRoomRef() + "," + setTempHeating + "," + setTempCooling);
 
             String zoneId = HSUtil.getZoneIdFromEquipId(cpuEquip.getId());
             Occupied occuStatus = ScheduleManager.getInstance().getOccupiedModeCache(zoneId);
             double coolingDeadband = 2.0;
             double heatingDeadband = 2.0;
-            if(occuStatus != null){
-                ArrayList<HashMap<Object , Object>> isSchedulableAvailable = CCUHsApi.getInstance().readAllSchedulable();
-                HashMap<Object,Object> hDBMap = CCUHsApi.getInstance().readEntity("zone and heating and deadband and roomRef == \"" + cpuEquip.getRoomRef() + "\"");
+            if (occuStatus != null) {
+                ArrayList<HashMap<Object, Object>> isSchedulableAvailable = CCUHsApi.getInstance().readAllSchedulable();
+                HashMap<Object, Object> hDBMap = CCUHsApi.getInstance().readEntity("zone and heating and deadband and roomRef == \"" + cpuEquip.getRoomRef() + "\"");
                 if (!isSchedulableAvailable.isEmpty() && !hDBMap.isEmpty()) {
                     heatingDeadband = CCUHsApi.getInstance().readPointPriorityValByQuery("zone and heating and deadband and roomRef == \"" + cpuEquip.getRoomRef() + "\"");
                     coolingDeadband = CCUHsApi.getInstance().readPointPriorityValByQuery("zone and cooling and deadband and roomRef == \"" + cpuEquip.getRoomRef() + "\"");
-                }else{
+                } else {
                     heatingDeadband = TunerUtil.readTunerValByQuery("heating and deadband and base", cpuEquip.getId());
                     coolingDeadband = TunerUtil.readTunerValByQuery("cooling and deadband and base", cpuEquip.getId());
                 }
                 occupied = occuStatus.isOccupied();
-            }else
+            } else
                 occupied = false;
             //For dual temp but for single mode we use tuners
             double hysteresis = StandaloneTunerUtil.getStandaloneStage1Hysteresis(cpuEquip.getId());
 
-            double ssOperatingMode = getOperationalModes("temp and conditioning",cpuEquip.getId());
-            double ssFanOpMode = getOperationalModes("fan and operation",cpuEquip.getId());
-            int fanStage2Type = (int)getConfigType("relay6",node);
-            boolean enableFanStage1DuringOccupied = getConfigEnabled("fan and stage1",node) > 0 ? true : false;
-            StandaloneOperationalMode opMode = StandaloneOperationalMode.values()[(int)ssOperatingMode];
-            StandaloneLogicalFanSpeeds fanSpeed = StandaloneLogicalFanSpeeds.values()[(int)ssFanOpMode];
-            SmartStatFanRelayType fanHighType = SmartStatFanRelayType.values()[(int)fanStage2Type];
+            double ssOperatingMode = getOperationalModes("temp and conditioning", cpuEquip.getId());
+            double ssFanOpMode = getOperationalModes("fan and operation", cpuEquip.getId());
+            int fanStage2Type = (int) getConfigType("relay6", node);
+            boolean enableFanStage1DuringOccupied = getConfigEnabled("fan and stage1", node) > 0;
+            StandaloneOperationalMode opMode = StandaloneOperationalMode.values()[(int) ssOperatingMode];
+            StandaloneLogicalFanSpeeds fanSpeed = StandaloneLogicalFanSpeeds.values()[(int) ssFanOpMode];
+            SmartStatFanRelayType fanHighType = SmartStatFanRelayType.values()[fanStage2Type];
             SmartStatFanModeCache fanCacheStorage = new SmartStatFanModeCache();
             int fanModeSaved = fanCacheStorage.getFanModeFromCache(cpuEquip.getId());
             boolean isFanSpeedHigh = ((fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_ALL_TIMES) ||
-                                 (fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_CURRENT_OCCUPIED) ||
-                                 (fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_OCCUPIED));
+                    (fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_CURRENT_OCCUPIED) ||
+                    (fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_OCCUPIED));
 
-            Log.d("FANMODE","CPU profile - fanmodesaved="+fanModeSaved+","+fanSpeed.name()+","+occupied);
-            if(!occupied &&(fanSpeed != OFF ) && (fanSpeed != StandaloneLogicalFanSpeeds.FAN_LOW_ALL_TIMES) && (fanSpeed != StandaloneLogicalFanSpeeds.FAN_HIGH_ALL_TIMES)&& (fanSpeed != StandaloneLogicalFanSpeeds.FAN_HIGH2_ALL_TIMES)){
+            CcuLog.d("FANMODE", "CPU profile - fanmodesaved=" + fanModeSaved + "," + fanSpeed.name() + "," + occupied);
+            if (!occupied && (fanSpeed != OFF) && (fanSpeed != StandaloneLogicalFanSpeeds.FAN_LOW_ALL_TIMES) && (fanSpeed != StandaloneLogicalFanSpeeds.FAN_HIGH_ALL_TIMES) && (fanSpeed != StandaloneLogicalFanSpeeds.FAN_HIGH2_ALL_TIMES)) {
                 //Reset to auto during unoccupied hours, if it is not all times set
-                if((fanSpeed != StandaloneLogicalFanSpeeds.AUTO) && (fanSpeed != StandaloneLogicalFanSpeeds.FAN_LOW_ALL_TIMES) && (fanSpeed != StandaloneLogicalFanSpeeds.FAN_HIGH_ALL_TIMES)) {
+                if ((fanSpeed != StandaloneLogicalFanSpeeds.AUTO) && (fanSpeed != StandaloneLogicalFanSpeeds.FAN_LOW_ALL_TIMES) && (fanSpeed != StandaloneLogicalFanSpeeds.FAN_HIGH_ALL_TIMES)) {
                     StandaloneScheduler.updateOperationalPoints(cpuEquip.getId(), "fan and operation and mode", StandaloneLogicalFanSpeeds.AUTO.ordinal());
                     fanSpeed = StandaloneLogicalFanSpeeds.AUTO;
                 }
             }
-            if(occupied && (fanSpeed == AUTO) && (fanModeSaved != 0)){
+            if (occupied && (fanSpeed == AUTO) && (fanModeSaved != 0)) {
                 //KUMAR need to reset back for FAN_LOW_OCCIPIED or FAN_MEDIUM_OCCUPIED or FAN_HIGH_OCCUPIED_PERIOD means next day schedule periods
-                if(fanSpeed == StandaloneLogicalFanSpeeds.AUTO) {
+                if (fanSpeed == StandaloneLogicalFanSpeeds.AUTO) {
                     StandaloneScheduler.updateOperationalPoints(cpuEquip.getId(), "fan and operation and mode", fanModeSaved);
-                    fanSpeed = StandaloneLogicalFanSpeeds.values()[ fanModeSaved];
+                    fanSpeed = StandaloneLogicalFanSpeeds.values()[fanModeSaved];
                 }
             }
             double targetThreshold = 25.0;
 
-            switch (fanHighType){
+            switch (fanHighType) {
                 case HUMIDIFIER:
                     targetThreshold = CCUHsApi.getInstance().readPointPriorityValByQuery("point and standalone and target and humidity and equipRef == \"" + cpuEquip.getId() + "\"");
                     break;
@@ -169,305 +167,314 @@ public class ConventionalUnitProfile extends ZoneProfile {
                     targetThreshold = CCUHsApi.getInstance().readPointPriorityValByQuery("point and standalone and target and dehumidifier and equipRef == \"" + cpuEquip.getId() + "\"");
                     break;
             }
-            boolean isFanStage1Enabled = getConfigEnabled("relay3", node) > 0 ? true : false;
-            boolean isFanStage2Enabled = getConfigEnabled("relay6", node) > 0 ? true : false;
-            Log.d(TAG, " smartstat cpu, updates =" + node+","+roomTemp+","+occupied+","+coolingDeadband+","+state+","+isFanStage1Enabled+","+isFanStage2Enabled);
+            boolean isFanStage1Enabled = getConfigEnabled("relay3", node) > 0;
+            boolean isFanStage2Enabled = getConfigEnabled("relay6", node) > 0;
+            CcuLog.d(TAG, " smartstat cpu, updates =" + node + "," + roomTemp + "," + occupied + "," + coolingDeadband + "," + state + "," + isFanStage1Enabled + "," + isFanStage2Enabled);
 
             if (fanSpeed == OFF) {
-                resetRelays(cpuEquip.getId(),node);
-                StandaloneScheduler.updateSmartStatStatus(cpuEquip.getId(),DEADBAND, new HashMap<String, Integer>(),ZoneTempState.FAN_OP_MODE_OFF);
-            }
-            else if ((fanSpeed != OFF) && (((opMode == StandaloneOperationalMode.AUTO) && (roomTemp >=  averageDesiredTemp)) || (opMode == StandaloneOperationalMode.COOL_ONLY)) )
-            {
+                resetRelays(node);
+                StandaloneScheduler.updateSmartStatStatus(cpuEquip.getId(), DEADBAND, new HashMap<>(), ZoneTempState.FAN_OP_MODE_OFF);
+            } else if ((fanSpeed != OFF) && (((opMode == StandaloneOperationalMode.AUTO) && (roomTemp >= averageDesiredTemp)) || (opMode == StandaloneOperationalMode.COOL_ONLY))) {
 
                 //Zone is in Cooling
                 curState = COOLING;
-                double cs1 = getConfigEnabled("relay1",node);
-                boolean isCoolingStage1Enabled = cs1 > 0 ? true : false;
-                boolean isCoolingStage2Enabled = getConfigEnabled("relay2", node) > 0 ? true : false;
-                if(getCmdSignal("heating and stage1", node) > 0)
-                    setCmdSignal("heating and stage1",0,node);
-                if(getCmdSignal("heating and stage2", node) > 0)
-                    setCmdSignal("heating and stage2",0,node);
+                double cs1 = getConfigEnabled("relay1", node);
+                boolean isCoolingStage1Enabled = cs1 > 0;
+                boolean isCoolingStage2Enabled = getConfigEnabled("relay2", node) > 0;
+                if (getCmdSignal("heating and stage1", node) > 0)
+                    setCmdSignal("heating and stage1", 0, node);
+                if (getCmdSignal("heating and stage2", node) > 0)
+                    setCmdSignal("heating and stage2", 0, node);
                 if (isCoolingStage1Enabled) {
-                    if(roomTemp >= setTempCooling) {
-                        relayStages.put("CoolingStage1",1);
-                        relayStages.put("FanStage1",1);
-                        if(getCmdSignal("cooling and stage1",node) == 0)
+                    if (roomTemp >= setTempCooling) {
+                        relayStages.put("CoolingStage1", 1);
+                        relayStages.put("FanStage1", 1);
+                        if (getCmdSignal("cooling and stage1", node) == 0)
                             setCmdSignal("cooling and stage1", 1.0, node);
-                        if(isFanStage1Enabled || (occupied && enableFanStage1DuringOccupied))
-                            if(getCmdSignal("fan and stage1",node) == 0) {
+                        if (isFanStage1Enabled || (occupied && enableFanStage1DuringOccupied))
+                            if (getCmdSignal("fan and stage1", node) == 0) {
                                 setCmdSignal("fan and stage1", 1.0, node);
                             }
-                    }else{
-                        if (roomTemp <= (setTempCooling-hysteresis)){//Turn off stage1
-                            if(getCmdSignal("cooling and stage1", node) > 0)
-                                setCmdSignal("cooling and stage1",0,node);
+                    } else {
+                        if (roomTemp <= (setTempCooling - hysteresis)) {//Turn off stage1
+                            if (getCmdSignal("cooling and stage1", node) > 0)
+                                setCmdSignal("cooling and stage1", 0, node);
 
-                            if(( occupied && isFanStage1Enabled && (fanSpeed != StandaloneLogicalFanSpeeds.AUTO)) || (occupied && enableFanStage1DuringOccupied) || (isFanStage1Enabled && ((fanSpeed == FAN_LOW_ALL_TIMES) || (fanSpeed == FAN_HIGH_ALL_TIMES)))){
-                                relayStages.put("FanStage1",1);
-                                if(getCmdSignal("fan and stage1",node) == 0) setCmdSignal("fan and stage1",1.0,node);
-                            }else if(isFanStage1Enabled)
-                                setCmdSignal("fan and stage1",0,node);
-                        }else if((occupied && enableFanStage1DuringOccupied) || (occupied && isFanStage1Enabled && (fanSpeed != StandaloneLogicalFanSpeeds.AUTO))|| (isFanStage1Enabled && ((fanSpeed == FAN_LOW_ALL_TIMES) || (fanSpeed == FAN_HIGH_ALL_TIMES)))){
-                            relayStages.put("FanStage1",1);
-                            if(getCmdSignal("fan and stage1",node) == 0)
-                                setCmdSignal("fan and stage1",1.0,node);
-                        }else {
-                            if(getCmdSignal("cooling and stage1", node) > 0)relayStages.put("CoolingStage1",1);
-                            if(getCmdSignal("fan and stage1", node) > 0)relayStages.put("FanStage1",1);
+                            if ((occupied && isFanStage1Enabled && (fanSpeed != StandaloneLogicalFanSpeeds.AUTO)) || (occupied && enableFanStage1DuringOccupied) || (isFanStage1Enabled && ((fanSpeed == FAN_LOW_ALL_TIMES) || (fanSpeed == FAN_HIGH_ALL_TIMES)))) {
+                                relayStages.put("FanStage1", 1);
+                                if (getCmdSignal("fan and stage1", node) == 0)
+                                    setCmdSignal("fan and stage1", 1.0, node);
+                            } else if (isFanStage1Enabled)
+                                setCmdSignal("fan and stage1", 0, node);
+                        } else if ((occupied && enableFanStage1DuringOccupied) || (occupied && isFanStage1Enabled && (fanSpeed != StandaloneLogicalFanSpeeds.AUTO)) || (isFanStage1Enabled && ((fanSpeed == FAN_LOW_ALL_TIMES) || (fanSpeed == FAN_HIGH_ALL_TIMES)))) {
+                            relayStages.put("FanStage1", 1);
+                            if (getCmdSignal("fan and stage1", node) == 0)
+                                setCmdSignal("fan and stage1", 1.0, node);
+                        } else {
+                            if (getCmdSignal("cooling and stage1", node) > 0)
+                                relayStages.put("CoolingStage1", 1);
+                            if (getCmdSignal("fan and stage1", node) > 0)
+                                relayStages.put("FanStage1", 1);
                         }
                     }
-                }else{
+                } else {
 
-                    if((occupied && isFanStage1Enabled && (fanSpeed != StandaloneLogicalFanSpeeds.AUTO)) ||  (occupied && enableFanStage1DuringOccupied) || (isFanStage1Enabled && ((fanSpeed == FAN_LOW_ALL_TIMES) || (fanSpeed == FAN_HIGH_ALL_TIMES)))){
-                        relayStages.put("FanStage1",1);
-                        if(getCmdSignal("fan and stage1",node) == 0)
-                            setCmdSignal("fan and stage1",1.0,node);
-                    }else if(isFanStage1Enabled) {
-                        if(getCmdSignal("fan and stage1",node) >  0)
+                    if ((occupied && isFanStage1Enabled && (fanSpeed != StandaloneLogicalFanSpeeds.AUTO)) || (occupied && enableFanStage1DuringOccupied) || (isFanStage1Enabled && ((fanSpeed == FAN_LOW_ALL_TIMES) || (fanSpeed == FAN_HIGH_ALL_TIMES)))) {
+                        relayStages.put("FanStage1", 1);
+                        if (getCmdSignal("fan and stage1", node) == 0)
+                            setCmdSignal("fan and stage1", 1.0, node);
+                    } else if (isFanStage1Enabled) {
+                        if (getCmdSignal("fan and stage1", node) > 0)
                             setCmdSignal("fan and stage1", 0, node);
                     }
-                    if(getCmdSignal("cooling and stage1",node) > 0)
+                    if (getCmdSignal("cooling and stage1", node) > 0)
                         setCmdSignal("cooling and stage1", 0, node);
                 }
-                if(isCoolingStage2Enabled){
+                if (isCoolingStage2Enabled) {
                     if (roomTemp > (setTempCooling + coolingDeadband)) {
-                        if(getCmdSignal("cooling and stage2",node) == 0)
+                        if (getCmdSignal("cooling and stage2", node) == 0)
                             setCmdSignal("cooling and stage2", 1.0, node);
-                        relayStages.put("CoolingStage2",1);
-                        if(isFanStage1Enabled && getCmdSignal("fan and stage1", node) == 0) {
-                                setCmdSignal("fan and stage1", 1, node);
-                                relayStages.put("FanStage1",1);
+                        relayStages.put("CoolingStage2", 1);
+                        if (isFanStage1Enabled && getCmdSignal("fan and stage1", node) == 0) {
+                            setCmdSignal("fan and stage1", 1, node);
+                            relayStages.put("FanStage1", 1);
                         }
-                        if(((isFanStage2Enabled  && ((fanSpeed == AUTO) || isFanSpeedHigh) ) ||  (occupied && enableFanStage1DuringOccupied && isFanSpeedHigh))&& (fanHighType == SmartStatFanRelayType.FAN_STAGE2)){
-                            relayStages.put("FanStage2",1);
-                            if(getCmdSignal("fan and stage2",node) == 0)
-                                setCmdSignal("fan and stage2",1.0,node);
-                        }else{
-                            if(getCmdSignal("fan and stage2",node) != 0)
-                                setCmdSignal("fan and stage2",0,node);
+                        if (((isFanStage2Enabled && ((fanSpeed == AUTO) || isFanSpeedHigh)) || (occupied && enableFanStage1DuringOccupied && isFanSpeedHigh)) && (fanHighType == SmartStatFanRelayType.FAN_STAGE2)) {
+                            relayStages.put("FanStage2", 1);
+                            if (getCmdSignal("fan and stage2", node) == 0)
+                                setCmdSignal("fan and stage2", 1.0, node);
+                        } else {
+                            if (getCmdSignal("fan and stage2", node) != 0)
+                                setCmdSignal("fan and stage2", 0, node);
                         }
-                    } else{
+                    } else {
                         if (roomTemp <= setTempCooling) {//Turn off stage 2
-                            if(getCmdSignal("cooling and stage2", node) > 0)
+                            if (getCmdSignal("cooling and stage2", node) > 0)
                                 setCmdSignal("cooling and stage2", 0, node);
-                            if (occupied && isFanStage2Enabled && (fanHighType == SmartStatFanRelayType.FAN_STAGE2) && ((fanSpeed == FAN_HIGH_ALL_TIMES) || (fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_CURRENT_OCCUPIED) || (fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_OCCUPIED)   ) /*(fanSpeed == StandaloneFanSpeed.FAN_HIGH)*/) {
+                            if (occupied && isFanStage2Enabled && (fanHighType == SmartStatFanRelayType.FAN_STAGE2) && ((fanSpeed == FAN_HIGH_ALL_TIMES) || (fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_CURRENT_OCCUPIED) || (fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_OCCUPIED)) /*(fanSpeed == StandaloneFanSpeed.FAN_HIGH)*/) {
                                 relayStages.put("FanStage2", 1);
-                                if(getCmdSignal("fan and stage2", node) == 0) setCmdSignal("fan and stage2", 1.0, node);
+                                if (getCmdSignal("fan and stage2", node) == 0)
+                                    setCmdSignal("fan and stage2", 1.0, node);
                             } else if (isFanStage2Enabled && (fanHighType == SmartStatFanRelayType.FAN_STAGE2) && (fanSpeed == FAN_HIGH_ALL_TIMES)) {
                                 relayStages.put("FanStage2", 1);
-                                if(getCmdSignal("fan and stage2", node) == 0) setCmdSignal("fan and stage2", 1.0, node);
-                            }else if ((isFanStage2Enabled || enableFanStage1DuringOccupied)&& (fanHighType == SmartStatFanRelayType.FAN_STAGE2))
-                                if(getCmdSignal("fan and stage2", node) > 0)setCmdSignal("fan and stage2", 0, node);
-                        }else {
-                            if(getCmdSignal("cooling and stage2", node) > 0)relayStages.put("CoolingStage2",1);
-                            if(getCmdSignal("fan and stage2", node) > 0)relayStages.put("FanStage2",1);
+                                if (getCmdSignal("fan and stage2", node) == 0)
+                                    setCmdSignal("fan and stage2", 1.0, node);
+                            } else if ((isFanStage2Enabled || enableFanStage1DuringOccupied) && (fanHighType == SmartStatFanRelayType.FAN_STAGE2))
+                                if (getCmdSignal("fan and stage2", node) > 0)
+                                    setCmdSignal("fan and stage2", 0, node);
+                        } else {
+                            if (getCmdSignal("cooling and stage2", node) > 0)
+                                relayStages.put("CoolingStage2", 1);
+                            if (getCmdSignal("fan and stage2", node) > 0)
+                                relayStages.put("FanStage2", 1);
                         }
                     }
-                }else{
-                    if(occupied && isFanStage2Enabled && (fanHighType == SmartStatFanRelayType.FAN_STAGE2)&& ((fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_ALL_TIMES) || (fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_CURRENT_OCCUPIED) || (fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_OCCUPIED)   ) /*(fanSpeed == StandaloneFanSpeed.FAN_HIGH)*/){
-                        relayStages.put("FanStage2",1);
-                        if(getCmdSignal("fan and stage2", node) == 0)setCmdSignal("fan and stage2",1.0,node);
-                    }else if(isFanStage2Enabled && (fanHighType == SmartStatFanRelayType.FAN_STAGE2)&& (fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_ALL_TIMES)){
-                        relayStages.put("FanStage2",1);
-                        if(getCmdSignal("fan and stage2", node) == 0)setCmdSignal("fan and stage2",1.0,node);
-                    }
-                    else if(isFanStage2Enabled && (fanHighType == SmartStatFanRelayType.FAN_STAGE2))
-                        if(getCmdSignal("fan and stage2", node) > 0)
-                            setCmdSignal("fan and stage2",0,node);
-                    if(getCmdSignal("cooling and stage2", node) > 0)
+                } else {
+                    if (occupied && isFanStage2Enabled && (fanHighType == SmartStatFanRelayType.FAN_STAGE2) && ((fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_ALL_TIMES) || (fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_CURRENT_OCCUPIED) || (fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_OCCUPIED)) /*(fanSpeed == StandaloneFanSpeed.FAN_HIGH)*/) {
+                        relayStages.put("FanStage2", 1);
+                        if (getCmdSignal("fan and stage2", node) == 0)
+                            setCmdSignal("fan and stage2", 1.0, node);
+                    } else if (isFanStage2Enabled && (fanHighType == SmartStatFanRelayType.FAN_STAGE2) && (fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_ALL_TIMES)) {
+                        relayStages.put("FanStage2", 1);
+                        if (getCmdSignal("fan and stage2", node) == 0)
+                            setCmdSignal("fan and stage2", 1.0, node);
+                    } else if (isFanStage2Enabled && (fanHighType == SmartStatFanRelayType.FAN_STAGE2))
+                        if (getCmdSignal("fan and stage2", node) > 0)
+                            setCmdSignal("fan and stage2", 0, node);
+                    if (getCmdSignal("cooling and stage2", node) > 0)
                         setCmdSignal("cooling and stage2", 0, node);
                 }
-                if(isFanStage2Enabled && ((fanHighType == SmartStatFanRelayType.HUMIDIFIER) || (fanHighType == SmartStatFanRelayType.DE_HUMIDIFIER)))
-                    updateHumidityStatus(fanHighType,node,cpuDevice.getHumidity(),targetThreshold,relayStages);
-                Log.d(TAG, " smartstat cpu,cooling updates =" + node+","+roomTemp+","+occupied+","+isCoolingStage1Enabled+","+opMode.name()+","+fanSpeed.name()+","+cs1);
-            }
-            else if ((roomTemp > 0) && (fanSpeed != OFF) &&(((opMode == StandaloneOperationalMode.AUTO) &&(roomTemp < averageDesiredTemp))|| (opMode == StandaloneOperationalMode.HEAT_ONLY)))
-            {
+                if (isFanStage2Enabled && ((fanHighType == SmartStatFanRelayType.HUMIDIFIER) || (fanHighType == SmartStatFanRelayType.DE_HUMIDIFIER)))
+                    updateHumidityStatus(fanHighType, node, cpuDevice.getHumidity(), targetThreshold, relayStages);
+                CcuLog.d(TAG, " smartstat cpu,cooling updates =" + node + "," + roomTemp + "," + occupied + "," + isCoolingStage1Enabled + "," + opMode.name() + "," + fanSpeed.name() + "," + cs1);
+            } else if ((roomTemp > 0) && (fanSpeed != OFF) && (((opMode == StandaloneOperationalMode.AUTO) && (roomTemp < averageDesiredTemp)) || (opMode == StandaloneOperationalMode.HEAT_ONLY))) {
                 //Zone is in heating
 
                 curState = HEATING;
-                if(getCmdSignal("cooling and stage1", node) > 0)
-                    setCmdSignal("cooling and stage1",0,node);
-                if(getCmdSignal("cooling and stage2", node) > 0)
-                    setCmdSignal("cooling and stage2",0,node);
+                if (getCmdSignal("cooling and stage1", node) > 0)
+                    setCmdSignal("cooling and stage1", 0, node);
+                if (getCmdSignal("cooling and stage2", node) > 0)
+                    setCmdSignal("cooling and stage2", 0, node);
                 boolean isHeatingStage1Enabled = getConfigEnabled("relay4", node) > 0;
                 boolean isHeatingStage2Enabled = getConfigEnabled("relay5", node) > 0;
-                if (isHeatingStage1Enabled)
-                {
-                    if(roomTemp <= setTempHeating ) {
-                        if(getCmdSignal("heating and stage1", node) == 0)
+                if (isHeatingStage1Enabled) {
+                    if (roomTemp <= setTempHeating) {
+                        if (getCmdSignal("heating and stage1", node) == 0)
                             setCmdSignal("heating and stage1", 1.0, node);
-                        if(isFanStage1Enabled || (occupied && enableFanStage1DuringOccupied)){
-                            if(getCmdSignal("fan and stage1", node) == 0)
-                                setCmdSignal("fan and stage1",1.0,node);
+                        if (isFanStage1Enabled || (occupied && enableFanStage1DuringOccupied)) {
+                            if (getCmdSignal("fan and stage1", node) == 0)
+                                setCmdSignal("fan and stage1", 1.0, node);
                         }
-                        relayStages.put("HeatingStage1",1);
-                        relayStages.put("FanStage1",1);
-                    }else {
-                        if( roomTemp >= (setTempHeating + hysteresis)){
-                            if(getCmdSignal("heating and stage1", node) > 0)
-                                setCmdSignal("heating and stage1",0,node);
+                        relayStages.put("HeatingStage1", 1);
+                        relayStages.put("FanStage1", 1);
+                    } else {
+                        if (roomTemp >= (setTempHeating + hysteresis)) {
+                            if (getCmdSignal("heating and stage1", node) > 0)
+                                setCmdSignal("heating and stage1", 0, node);
 
-                            if((occupied && isFanStage1Enabled &&  (fanSpeed != AUTO)) || (occupied && enableFanStage1DuringOccupied) || (isFanStage1Enabled && ((fanSpeed == FAN_LOW_ALL_TIMES) || (fanSpeed == FAN_HIGH_ALL_TIMES)))){
-                                relayStages.put("FanStage1",1);
-                                if(getCmdSignal("fan and stage1", node) == 0)
-                                    setCmdSignal("fan and stage1",1.0,node);
-                            }else if(isFanStage1Enabled){
-                                if(getCmdSignal("fan and stage1", node) > 0)
-                                    setCmdSignal("fan and stage1",0,node);
+                            if ((occupied && isFanStage1Enabled && (fanSpeed != AUTO)) || (occupied && enableFanStage1DuringOccupied) || (isFanStage1Enabled && ((fanSpeed == FAN_LOW_ALL_TIMES) || (fanSpeed == FAN_HIGH_ALL_TIMES)))) {
+                                relayStages.put("FanStage1", 1);
+                                if (getCmdSignal("fan and stage1", node) == 0)
+                                    setCmdSignal("fan and stage1", 1.0, node);
+                            } else if (isFanStage1Enabled) {
+                                if (getCmdSignal("fan and stage1", node) > 0)
+                                    setCmdSignal("fan and stage1", 0, node);
                             }
-                        }else if((occupied && enableFanStage1DuringOccupied) || (occupied && isFanStage1Enabled && (fanSpeed != StandaloneLogicalFanSpeeds.AUTO)) || (isFanStage1Enabled && ((fanSpeed == FAN_LOW_ALL_TIMES) || (fanSpeed == FAN_HIGH_ALL_TIMES)))){
-                            relayStages.put("FanStage1",1);
-                            if(getCmdSignal("fan and stage1",node) == 0)
-                                setCmdSignal("fan and stage1",1.0,node);
-                        }else {
-                            if(getCmdSignal("heating and stage1", node) > 0)relayStages.put("HeatingStage1",1);
-                            if(getCmdSignal("fan and stage1", node) > 0)relayStages.put("FanStage1",1);
+                        } else if ((occupied && enableFanStage1DuringOccupied) || (occupied && isFanStage1Enabled && (fanSpeed != StandaloneLogicalFanSpeeds.AUTO)) || (isFanStage1Enabled && ((fanSpeed == FAN_LOW_ALL_TIMES) || (fanSpeed == FAN_HIGH_ALL_TIMES)))) {
+                            relayStages.put("FanStage1", 1);
+                            if (getCmdSignal("fan and stage1", node) == 0)
+                                setCmdSignal("fan and stage1", 1.0, node);
+                        } else {
+                            if (getCmdSignal("heating and stage1", node) > 0)
+                                relayStages.put("HeatingStage1", 1);
+                            if (getCmdSignal("fan and stage1", node) > 0)
+                                relayStages.put("FanStage1", 1);
                         }
                     }
-                }else{
+                } else {
 
-                    if((occupied && isFanStage1Enabled && (fanSpeed != StandaloneLogicalFanSpeeds.AUTO)) || (occupied && enableFanStage1DuringOccupied) || (isFanStage1Enabled && ((fanSpeed == FAN_LOW_ALL_TIMES) || (fanSpeed == FAN_HIGH_ALL_TIMES)))){
-                        relayStages.put("FanStage1",1);
-                        if(getCmdSignal("fan and stage1", node) == 0)
-                            setCmdSignal("fan and stage1",1.0,node);
-                    }else if(isFanStage1Enabled){
-                        if(getCmdSignal("fan and stage1", node) > 0)
-                            setCmdSignal("fan and stage1",0,node);
+                    if ((occupied && isFanStage1Enabled && (fanSpeed != StandaloneLogicalFanSpeeds.AUTO)) || (occupied && enableFanStage1DuringOccupied) || (isFanStage1Enabled && ((fanSpeed == FAN_LOW_ALL_TIMES) || (fanSpeed == FAN_HIGH_ALL_TIMES)))) {
+                        relayStages.put("FanStage1", 1);
+                        if (getCmdSignal("fan and stage1", node) == 0)
+                            setCmdSignal("fan and stage1", 1.0, node);
+                    } else if (isFanStage1Enabled) {
+                        if (getCmdSignal("fan and stage1", node) > 0)
+                            setCmdSignal("fan and stage1", 0, node);
                     }
-                    if(getCmdSignal("heating and stage1", node) > 0)
+                    if (getCmdSignal("heating and stage1", node) > 0)
                         setCmdSignal("heating and stage1", 0, node);
                 }
-                if(isHeatingStage2Enabled){
+                if (isHeatingStage2Enabled) {
 
                     if (roomTemp <= (setTempHeating - heatingDeadband)) {
-                        if(getCmdSignal("heating and stage2", node) == 0)
+                        if (getCmdSignal("heating and stage2", node) == 0)
                             setCmdSignal("heating and stage2", 1.0, node);
-                        if(((isFanStage2Enabled  && ((fanSpeed == AUTO) || (fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_ALL_TIMES) || (fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_CURRENT_OCCUPIED) || (fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_OCCUPIED)  )) || (occupied && enableFanStage1DuringOccupied)) && (fanHighType == SmartStatFanRelayType.FAN_STAGE2)){
-                            relayStages.put("FanStage2",1);
-                            if(getCmdSignal("fan and stage2", node) == 0)
-                                setCmdSignal("fan and stage2",1.0,node);
-                        }else{
-                            if(getCmdSignal("fan and stage2",node) != 0)
-                                setCmdSignal("fan and stage2",0,node);
+                        if (((isFanStage2Enabled && ((fanSpeed == AUTO) || (fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_ALL_TIMES) || (fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_CURRENT_OCCUPIED) || (fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_OCCUPIED))) || (occupied && enableFanStage1DuringOccupied)) && (fanHighType == SmartStatFanRelayType.FAN_STAGE2)) {
+                            relayStages.put("FanStage2", 1);
+                            if (getCmdSignal("fan and stage2", node) == 0)
+                                setCmdSignal("fan and stage2", 1.0, node);
+                        } else {
+                            if (getCmdSignal("fan and stage2", node) != 0)
+                                setCmdSignal("fan and stage2", 0, node);
                         }
-                        relayStages.put("HeatingStage2",1);
+                        relayStages.put("HeatingStage2", 1);
                     } else {
                         if (roomTemp >= setTempHeating) {//Turn off stage 2
-                            if(getCmdSignal("heating and stage2", node) > 0)
+                            if (getCmdSignal("heating and stage2", node) > 0)
                                 setCmdSignal("heating and stage2", 0, node);
-                            if (occupied && (isFanStage2Enabled || enableFanStage1DuringOccupied)&& (fanHighType == SmartStatFanRelayType.FAN_STAGE2) && ((fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_ALL_TIMES) || (fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_CURRENT_OCCUPIED) || (fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_OCCUPIED)   )/*(fanSpeed == StandaloneFanSpeed.FAN_HIGH)*/) {
+                            if (occupied && (isFanStage2Enabled || enableFanStage1DuringOccupied) && (fanHighType == SmartStatFanRelayType.FAN_STAGE2) && ((fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_ALL_TIMES) || (fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_CURRENT_OCCUPIED) || (fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_OCCUPIED))/*(fanSpeed == StandaloneFanSpeed.FAN_HIGH)*/) {
                                 relayStages.put("FanStage2", 1);
-                                if(getCmdSignal("fan and stage2", node) == 0)setCmdSignal("fan and stage2", 1.0, node);
-                            }else if ((isFanStage2Enabled || enableFanStage1DuringOccupied)&& (fanHighType == SmartStatFanRelayType.FAN_STAGE2) && (fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_ALL_TIMES)) {
+                                if (getCmdSignal("fan and stage2", node) == 0)
+                                    setCmdSignal("fan and stage2", 1.0, node);
+                            } else if ((isFanStage2Enabled || enableFanStage1DuringOccupied) && (fanHighType == SmartStatFanRelayType.FAN_STAGE2) && (fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_ALL_TIMES)) {
                                 relayStages.put("FanStage2", 1);
-                                if(getCmdSignal("fan and stage2", node) == 0)setCmdSignal("fan and stage2", 1.0, node);
-                            } else if ((isFanStage2Enabled || enableFanStage1DuringOccupied) && (fanHighType == SmartStatFanRelayType.FAN_STAGE2)){
-                                if(getCmdSignal("fan and stage2", node) > 0)
+                                if (getCmdSignal("fan and stage2", node) == 0)
+                                    setCmdSignal("fan and stage2", 1.0, node);
+                            } else if ((isFanStage2Enabled || enableFanStage1DuringOccupied) && (fanHighType == SmartStatFanRelayType.FAN_STAGE2)) {
+                                if (getCmdSignal("fan and stage2", node) > 0)
                                     setCmdSignal("fan and stage2", 0, node);
                             }
-                        }else {
-                            if(getCmdSignal("heating and stage2", node) > 0)relayStages.put("HeatingStage2",1);
-                            if(getCmdSignal("fan and stage2", node) > 0)relayStages.put("FanStage2",1);
+                        } else {
+                            if (getCmdSignal("heating and stage2", node) > 0)
+                                relayStages.put("HeatingStage2", 1);
+                            if (getCmdSignal("fan and stage2", node) > 0)
+                                relayStages.put("FanStage2", 1);
                         }
                     }
-                }else{
-                    if(occupied && (isFanStage2Enabled || enableFanStage1DuringOccupied) && (fanHighType == SmartStatFanRelayType.FAN_STAGE2) && ((fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_ALL_TIMES) || (fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_CURRENT_OCCUPIED) || (fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_OCCUPIED)   )/*(fanSpeed == StandaloneFanSpeed.FAN_HIGH)*/){
-                        relayStages.put("FanStage2",1);
-                        if(getCmdSignal("fan and stage2", node) == 0)setCmdSignal("fan and stage2",1.0,node);
-                    }else if( isFanStage2Enabled && (fanHighType == SmartStatFanRelayType.FAN_STAGE2) && (fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_ALL_TIMES)){
-                        relayStages.put("FanStage2",1);
-                        if(getCmdSignal("fan and stage2", node) == 0)setCmdSignal("fan and stage2",1.0,node);
+                } else {
+                    if (occupied && (isFanStage2Enabled || enableFanStage1DuringOccupied) && (fanHighType == SmartStatFanRelayType.FAN_STAGE2) && ((fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_ALL_TIMES) || (fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_CURRENT_OCCUPIED) || (fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_OCCUPIED))/*(fanSpeed == StandaloneFanSpeed.FAN_HIGH)*/) {
+                        relayStages.put("FanStage2", 1);
+                        if (getCmdSignal("fan and stage2", node) == 0)
+                            setCmdSignal("fan and stage2", 1.0, node);
+                    } else if (isFanStage2Enabled && (fanHighType == SmartStatFanRelayType.FAN_STAGE2) && (fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_ALL_TIMES)) {
+                        relayStages.put("FanStage2", 1);
+                        if (getCmdSignal("fan and stage2", node) == 0)
+                            setCmdSignal("fan and stage2", 1.0, node);
+                    } else if (isFanStage2Enabled) {
+                        if (getCmdSignal("fan and stage2", node) > 0)
+                            setCmdSignal("fan and stage2", 0, node);
                     }
-                    else if(isFanStage2Enabled){
-                        if(getCmdSignal("fan and stage2", node) > 0)
-                            setCmdSignal("fan and stage2",0,node);
-                    }
-                    if(getCmdSignal("heating and stage2", node) > 0)
+                    if (getCmdSignal("heating and stage2", node) > 0)
                         setCmdSignal("heating and stage2", 0, node);
                 }
 
-                if(isFanStage2Enabled && ((fanHighType == SmartStatFanRelayType.HUMIDIFIER) || (fanHighType == SmartStatFanRelayType.DE_HUMIDIFIER)))
-                    updateHumidityStatus(fanHighType,node,cpuDevice.getHumidity(),targetThreshold,relayStages);
-                Log.d(TAG, " smartstat cpu,heating updates =" + node+","+roomTemp+","+occupied+","+setTempHeating+","+heatingDeadband+","+opMode.name()+","+fanSpeed.name());
-            }
-            else
-            {
-                if(occupied && (fanSpeed != OFF)) {
+                if (isFanStage2Enabled && ((fanHighType == SmartStatFanRelayType.HUMIDIFIER) || (fanHighType == SmartStatFanRelayType.DE_HUMIDIFIER)))
+                    updateHumidityStatus(fanHighType, node, cpuDevice.getHumidity(), targetThreshold, relayStages);
+                CcuLog.d(TAG, " smartstat cpu,heating updates =" + node + "," + roomTemp + "," + occupied + "," + setTempHeating + "," + heatingDeadband + "," + opMode.name() + "," + fanSpeed.name());
+            } else {
+                if (occupied && (fanSpeed != OFF)) {
                     curState = DEADBAND;
-                    if(enableFanStage1DuringOccupied || (isFanStage1Enabled &&  (fanSpeed != AUTO)) /*((fanSpeed == StandaloneFanSpeed.FAN_LOW) || (fanSpeed == StandaloneFanSpeed.FAN_HIGH))*/) {
+                    if (enableFanStage1DuringOccupied || (isFanStage1Enabled && (fanSpeed != AUTO)) /*((fanSpeed == StandaloneFanSpeed.FAN_LOW) || (fanSpeed == StandaloneFanSpeed.FAN_HIGH))*/) {
                         relayStages.put("FanStage1", 1);
-                        if(getCmdSignal("fan and stage1", node) == 0)
-                            setCmdSignal("fan and stage1",1.0,node);
-                    }else{
-                        if(getCmdSignal("fan and stage1", node) > 0)
-                            setCmdSignal("fan and stage1",0,node);
+                        if (getCmdSignal("fan and stage1", node) == 0)
+                            setCmdSignal("fan and stage1", 1.0, node);
+                    } else {
+                        if (getCmdSignal("fan and stage1", node) > 0)
+                            setCmdSignal("fan and stage1", 0, node);
                     }
-                    if(isFanStage2Enabled  && (fanHighType == SmartStatFanRelayType.FAN_STAGE2) && ((fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_ALL_TIMES) || (fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_CURRENT_OCCUPIED) || (fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_OCCUPIED)   ) /*(fanSpeed == StandaloneFanSpeed.FAN_HIGH)*/) {
+                    if (isFanStage2Enabled && (fanHighType == SmartStatFanRelayType.FAN_STAGE2) && ((fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_ALL_TIMES) || (fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_CURRENT_OCCUPIED) || (fanSpeed == StandaloneLogicalFanSpeeds.FAN_HIGH_OCCUPIED)) /*(fanSpeed == StandaloneFanSpeed.FAN_HIGH)*/) {
                         relayStages.put("FanStage2", 1);
-                        if(getCmdSignal("fan and stage2", node) == 0)
-                            setCmdSignal("fan and stage2",1.0,node);
-                    }else if(fanHighType == SmartStatFanRelayType.FAN_STAGE2){
-                        if(getCmdSignal("fan and stage2", node) > 0)
-                            setCmdSignal("fan and stage2",0,node);
-                    }else if(isFanStage2Enabled && ((fanHighType == SmartStatFanRelayType.HUMIDIFIER) || (fanHighType == SmartStatFanRelayType.DE_HUMIDIFIER)))
-                        updateHumidityStatus(fanHighType,node,cpuDevice.getHumidity(),targetThreshold,relayStages);
-                }else if((fanSpeed == FAN_HIGH_ALL_TIMES) || (fanSpeed == FAN_LOW_ALL_TIMES)){
+                        if (getCmdSignal("fan and stage2", node) == 0)
+                            setCmdSignal("fan and stage2", 1.0, node);
+                    } else if (fanHighType == SmartStatFanRelayType.FAN_STAGE2) {
+                        if (getCmdSignal("fan and stage2", node) > 0)
+                            setCmdSignal("fan and stage2", 0, node);
+                    } else if (isFanStage2Enabled && ((fanHighType == SmartStatFanRelayType.HUMIDIFIER) || (fanHighType == SmartStatFanRelayType.DE_HUMIDIFIER)))
+                        updateHumidityStatus(fanHighType, node, cpuDevice.getHumidity(), targetThreshold, relayStages);
+                } else if ((fanSpeed == FAN_HIGH_ALL_TIMES) || (fanSpeed == FAN_LOW_ALL_TIMES)) {
                     curState = DEADBAND;
-                    if(isFanStage1Enabled ) {
+                    if (isFanStage1Enabled) {
                         relayStages.put("FanStage1", 1);
-                        if(getCmdSignal("fan and stage1", node) == 0)
-                            setCmdSignal("fan and stage1",1.0,node);
-                    }else{
-                        if(getCmdSignal("fan and stage1", node) > 0)
-                            setCmdSignal("fan and stage1",0,node);
+                        if (getCmdSignal("fan and stage1", node) == 0)
+                            setCmdSignal("fan and stage1", 1.0, node);
+                    } else {
+                        if (getCmdSignal("fan and stage1", node) > 0)
+                            setCmdSignal("fan and stage1", 0, node);
                     }
-                    if(isFanStage2Enabled  && (fanHighType == SmartStatFanRelayType.FAN_STAGE2) && (fanSpeed == FAN_HIGH_ALL_TIMES)) {
+                    if (isFanStage2Enabled && (fanHighType == SmartStatFanRelayType.FAN_STAGE2) && (fanSpeed == FAN_HIGH_ALL_TIMES)) {
                         relayStages.put("FanStage2", 1);
-                        if(getCmdSignal("fan and stage2", node) == 0)
-                            setCmdSignal("fan and stage2",1.0,node);
-                    }else if(fanHighType == SmartStatFanRelayType.FAN_STAGE2){
-                        if(getCmdSignal("fan and stage2", node) > 0)
-                            setCmdSignal("fan and stage2",0,node);
-                    }else if(isFanStage2Enabled && ((fanHighType == SmartStatFanRelayType.HUMIDIFIER) || (fanHighType == SmartStatFanRelayType.DE_HUMIDIFIER)))
-                        updateHumidityStatus(fanHighType,node,cpuDevice.getHumidity(),targetThreshold,relayStages);
-                } else{
+                        if (getCmdSignal("fan and stage2", node) == 0)
+                            setCmdSignal("fan and stage2", 1.0, node);
+                    } else if (fanHighType == SmartStatFanRelayType.FAN_STAGE2) {
+                        if (getCmdSignal("fan and stage2", node) > 0)
+                            setCmdSignal("fan and stage2", 0, node);
+                    } else if (isFanStage2Enabled && ((fanHighType == SmartStatFanRelayType.HUMIDIFIER) || (fanHighType == SmartStatFanRelayType.DE_HUMIDIFIER)))
+                        updateHumidityStatus(fanHighType, node, cpuDevice.getHumidity(), targetThreshold, relayStages);
+                } else {
                     curState = DEADBAND;
-                    if(getCmdSignal("fan and stage1",node) > 0)
-                        setCmdSignal("fan and stage1",0,node);
+                    if (getCmdSignal("fan and stage1", node) > 0)
+                        setCmdSignal("fan and stage1", 0, node);
                     if (fanHighType == SmartStatFanRelayType.FAN_STAGE2) {
                         if (getCmdSignal("fan and stage2", node) > 0)
                             setCmdSignal("fan and stage2", 0, node);
-                    }else if( (fanSpeed != OFF ) && isFanStage2Enabled && ((fanHighType == SmartStatFanRelayType.HUMIDIFIER) || (fanHighType == SmartStatFanRelayType.DE_HUMIDIFIER)))
-                        updateHumidityStatus(fanHighType,node,cpuDevice.getHumidity(),targetThreshold,relayStages);
+                    } else if ((fanSpeed != OFF) && isFanStage2Enabled && ((fanHighType == SmartStatFanRelayType.HUMIDIFIER) || (fanHighType == SmartStatFanRelayType.DE_HUMIDIFIER)))
+                        updateHumidityStatus(fanHighType, node, cpuDevice.getHumidity(), targetThreshold, relayStages);
                 }
                 //Turn off all cooling and heating stages
-                if(getCmdSignal("cooling and stage1",node) > 0)
-                    setCmdSignal("cooling and stage1",0,node);
-                if(getCmdSignal("cooling and stage2",node) > 0)
-                    setCmdSignal("cooling and stage2",0,node);
-                if(getCmdSignal("heating and stage1",node) > 0)
-                    setCmdSignal("heating and stage1",0,node);
-                if(getCmdSignal("heating and stage2",node) > 0)
-                    setCmdSignal("heating and stage2",0,node);
+                if (getCmdSignal("cooling and stage1", node) > 0)
+                    setCmdSignal("cooling and stage1", 0, node);
+                if (getCmdSignal("cooling and stage2", node) > 0)
+                    setCmdSignal("cooling and stage2", 0, node);
+                if (getCmdSignal("heating and stage1", node) > 0)
+                    setCmdSignal("heating and stage1", 0, node);
+                if (getCmdSignal("heating and stage2", node) > 0)
+                    setCmdSignal("heating and stage2", 0, node);
             }
 
 
-            cpuDevice.setProfilePoint("temp and operating and mode",curState.ordinal());
-            if(cpuDevice.getStatus() != curState.ordinal())
+            cpuDevice.setProfilePoint("temp and operating and mode", curState.ordinal());
+            if (cpuDevice.getStatus() != curState.ordinal())
                 cpuDevice.setStatus(curState.ordinal());
-           ZoneTempState temperatureState = ZoneTempState.NONE;
-            if(buildingLimitMinBreached() ||  buildingLimitMaxBreached() )
+            ZoneTempState temperatureState = ZoneTempState.NONE;
+            if (buildingLimitMinBreached() || buildingLimitMaxBreached())
                 temperatureState = ZoneTempState.EMERGENCY;
 
-            StandaloneScheduler.updateSmartStatStatus(cpuEquip.getId(),curState, relayStages, temperatureState);
+            StandaloneScheduler.updateSmartStatStatus(cpuEquip.getId(), curState, relayStages, temperatureState);
         }
     }
 
     private void handleRFDead(ConventionalUnitLogicalMap cpuDevice, short node, Equip cpuEquip) {
-        StandaloneScheduler.updateSmartStatStatus(cpuEquip.getId(),DEADBAND, new HashMap<String, Integer>(),ZoneTempState.RF_DEAD);
+        StandaloneScheduler.updateSmartStatStatus(cpuEquip.getId(),DEADBAND, new HashMap<>(),ZoneTempState.RF_DEAD);
         if(cpuDevice.getStatus() != RFDEAD.ordinal()) {
             cpuDevice.setStatus(RFDEAD.ordinal());
         }
@@ -490,7 +497,7 @@ public class ConventionalUnitProfile extends ZoneProfile {
     }
     /**
      * Only creates a run time instance of logical map for initialize.
-     * @param addr
+     * @param addr address of the node
      */
     public void addLogicalMap(short addr) {
         ConventionalUnitLogicalMap deviceMap = new ConventionalUnitLogicalMap(getProfileType(), addr);
@@ -498,7 +505,7 @@ public class ConventionalUnitProfile extends ZoneProfile {
     }
     /**
      * Only creates a run time instance of logical map for initialize.
-     * @param addr
+     * @param addr address of the node
      */
     public void addLogicalMap(short addr,String roomRef) {
         ConventionalUnitLogicalMap deviceMap = new ConventionalUnitLogicalMap(getProfileType(), addr);
@@ -509,10 +516,10 @@ public class ConventionalUnitProfile extends ZoneProfile {
     /**
      * When the profile is created first time , either via UI or from existing tagsMap
      * this method has to be called on the profile instance.
-     * @param addr
-     * @param config
-     * @param floorRef
-     * @param zoneRef
+     * @param addr address of the node
+     * @param config configuration of the node
+     * @param floorRef floor reference
+     * @param zoneRef zone reference
      */
     public void addLogicalMapAndPoints(short addr, ConventionalUnitConfiguration config, String floorRef, String zoneRef) {
         ConventionalUnitLogicalMap deviceMap = new ConventionalUnitLogicalMap(getProfileType(), addr);
@@ -521,7 +528,7 @@ public class ConventionalUnitProfile extends ZoneProfile {
         cpuDeviceMap.put(addr, deviceMap);
     }
 
-    public void updateLogicalMapAndPoints(short addr, ConventionalUnitConfiguration config, String roomRef) {
+    public void updateLogicalMapAndPoints(short addr, ConventionalUnitConfiguration config) {
         ConventionalUnitLogicalMap deviceMap = cpuDeviceMap.get(addr);
         deviceMap.updateHaystackPoints(config);
     }
@@ -570,9 +577,9 @@ public class ConventionalUnitProfile extends ZoneProfile {
             if (cpuDeviceMap.get(nodeAddress) ==  null) {
                 continue;
             }
-            if (cpuDeviceMap.get(Short.valueOf(nodeAddress)).getCurrentTemp() > 0)
+            if (cpuDeviceMap.get(nodeAddress).getCurrentTemp() > 0)
             {
-                tempTotal += cpuDeviceMap.get(Short.valueOf(nodeAddress)).getCurrentTemp();
+                tempTotal += cpuDeviceMap.get(nodeAddress).getCurrentTemp();
                 nodeCount++;
             }
         }
@@ -601,7 +608,7 @@ public class ConventionalUnitProfile extends ZoneProfile {
         return CCUHsApi.getInstance().readHisValByQuery("point and standalone and mode and his and "+cmd+" and equipRef == \"" + equipRef + "\"");
     }
 
-    private void resetRelays(String equipRef, short node){
+    private void resetRelays(short node){
 
         if(getCmdSignal("cooling and stage1", node) > 0)
             setCmdSignal("cooling and stage1",0,node);

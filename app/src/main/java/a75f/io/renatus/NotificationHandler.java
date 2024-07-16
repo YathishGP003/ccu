@@ -1,19 +1,15 @@
 package a75f.io.renatus;
 import static a75f.io.logic.util.PreferenceUtil.getDataSyncProcessing;
-import static a75f.io.messaging.handler.DataSyncHandler.getMessageExpiryTime;
 import static a75f.io.messaging.handler.DataSyncHandler.isMessageTimeExpired;
 
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.graphics.Color;
-import android.util.Log;
 
 import org.joda.time.DateTime;
 
 import java.util.Date;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logger.CcuLog;
@@ -22,15 +18,12 @@ import a75f.io.logic.L;
 import a75f.io.logic.cloudconnectivity.CloudConnectivityListener;
 
 import a75f.io.logic.tuners.TunerUtil;
-import a75f.io.logic.util.OfflineModeUtilKt;
 import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.messaging.handler.DataSyncHandler;
 import a75f.io.renatus.util.Prefs;
 
 public class NotificationHandler {
-    private static final long DELAY_FOR_DATA_SYNC = 480000;
-    private static final long DELAY_FOR_POINT_WRITE = 120000;
-    private NotificationManager mNM = null;
+    private final NotificationManager mNM;
     private static final Prefs prefs = new Prefs(Globals.getInstance().getApplicationContext());
     static private final NotificationHandler mHandler = new NotificationHandler();
     private static CloudConnectivityListener cloudConnectivityListener;

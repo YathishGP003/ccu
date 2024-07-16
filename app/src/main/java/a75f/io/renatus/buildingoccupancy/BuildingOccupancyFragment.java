@@ -11,7 +11,6 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -37,24 +36,22 @@ import org.joda.time.DateTime;
 import org.joda.time.Interval;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.DAYS;
-
 import a75f.io.api.haystack.MockTime;
 import a75f.io.api.haystack.schedule.BuildingOccupancy;
-
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.interfaces.BuildingOccupancyListener;
 import a75f.io.logic.util.OfflineModeUtilKt;
 import a75f.io.messaging.handler.UpdateEntityHandler;
 import a75f.io.renatus.R;
-import a75f.io.renatus.buildingoccupancy.viewmodels.BuildingOccupancyViewModel;
 import a75f.io.renatus.buildingoccupancy.BuildingOccupancyDialogFragment.BuildingOccupancyDialogListener;
+import a75f.io.renatus.buildingoccupancy.viewmodels.BuildingOccupancyViewModel;
 import a75f.io.renatus.schedules.ManualSchedulerDialogFragment;
 import a75f.io.renatus.schedules.ScheduleUtil;
 import a75f.io.renatus.util.NetworkUtil;
@@ -123,7 +120,7 @@ public class BuildingOccupancyFragment extends DialogFragment implements Buildin
         view22 = rootView.findViewById(R.id.view22);
         view24 = rootView.findViewById(R.id.view24);
 
-        //Time lines with 1hr Inerval 00:00 to 24:00
+        //Time lines with 1hr Interval 00:00 to 24:00
         view01 = rootView.findViewById(R.id.view01);
         view03 = rootView.findViewById(R.id.view03);
         view05 = rootView.findViewById(R.id.view05);
@@ -138,7 +135,7 @@ public class BuildingOccupancyFragment extends DialogFragment implements Buildin
         view23 = rootView.findViewById(R.id.view23);
 
         //collecting each timeline to arraylist
-        viewTimeLines = new ArrayList<View>();
+        viewTimeLines = new ArrayList<>();
         viewTimeLines.add(view00);
         viewTimeLines.add(view01);
         viewTimeLines.add(view02);
@@ -232,22 +229,22 @@ public class BuildingOccupancyFragment extends DialogFragment implements Buildin
         if (position != ManualSchedulerDialogFragment.NO_REPLACE) {
             //sort schedule days according to the start hour of the day
             try {
-                Collections.sort(buildingOccupancy.getDays(), (lhs, rhs) -> lhs.getSthh() - (rhs.getSthh()));
-                Collections.sort(buildingOccupancy.getDays(), (lhs, rhs) -> lhs.getDay() - (rhs.getDay()));
+                buildingOccupancy.getDays().sort((lhs, rhs) -> lhs.getSthh() - (rhs.getSthh()));
+                buildingOccupancy.getDays().sort((lhs, rhs) -> lhs.getDay() - (rhs.getDay()));
                 removeEntry = buildingOccupancy.getDays().remove(position);
             }catch (ArrayIndexOutOfBoundsException e) {
-                Log.d(TAG, "onClickSave: " + e.getMessage());
+                CcuLog.d(TAG, "onClickSave: " + e.getMessage());
             }
         } else {
             removeEntry = null;
         }
 
-        Log.d("CCU_UI"," onClickSave "+"startTime "+startTimeHour+":"+startTimeMinute+" endTime "+endTimeHour+":"+endTimeMinute+" removeEntry "+removeEntry);
+        CcuLog.d(L.TAG_CCU_UI," onClickSave "+"startTime "+startTimeHour+":"+startTimeMinute+" endTime "+endTimeHour+":"+endTimeMinute+" removeEntry "+removeEntry);
 
         List<BuildingOccupancy.Days> daysList = buildingOccupancyViewModel.constructBuildingOccupancyDays(startTimeHour,
                 endTimeHour,  startTimeMinute, endTimeMinute, days);
         for (BuildingOccupancy.Days d : daysList) {
-            Log.d("CCU_UI", " daysArrayList  "+d);
+            CcuLog.d(L.TAG_CCU_UI, " daysArrayList  "+d);
         }
 
         boolean intersection = buildingOccupancy.checkIntersection(daysList);
@@ -272,24 +269,21 @@ public class BuildingOccupancyFragment extends DialogFragment implements Buildin
         HashMap<String, ArrayList<Interval>> spillsMap =days == null ? buildingOccupancyViewModel.getRemoveScheduleSpills(buildingOccupancy):
                 buildingOccupancyViewModel.getScheduleSpills(daysList,buildingOccupancy);
 
-        if (spillsMap != null && spillsMap.size() > 0 && position != ManualSchedulerDialogFragment.NO_REPLACE) {
+        if (spillsMap != null && !spillsMap.isEmpty() && position != ManualSchedulerDialogFragment.NO_REPLACE) {
             ProgressDialogUtils.showProgressDialog(getActivity(),
                     "Fetching Zone Schedules...");
             RxjavaUtil.executeBackgroundTask(
-                    () -> {
-                        errorMessage = buildingOccupancyViewModel.getWarningMessage(spillsMap);},
+                    () -> errorMessage = buildingOccupancyViewModel.getWarningMessage(spillsMap),
                     ()-> {
                         ProgressDialogUtils.hideProgressDialog();
-                        if (errorMessage != null && !errorMessage.equals("")) {
+                        if (errorMessage != null && !errorMessage.isEmpty()) {
                             if (errorMessage.contains("Named Schedule")) {
                                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                                 builder.setMessage(errorMessage)
                                         .setCancelable(false)
                                         .setTitle("Schedule Errors")
                                         .setIcon(R.drawable.ic_dialog_alert)
-                                        .setNegativeButton("Re-Edit", (dialog, id) -> {
-                                            showdialog(position);
-                                        });
+                                        .setNegativeButton("Re-Edit", (dialog, id) -> showDialog(position));
                                 alert = builder.create();
                                 alert.show();
                             } else if (errorMessage.contains("zone")) {
@@ -298,15 +292,11 @@ public class BuildingOccupancyFragment extends DialogFragment implements Buildin
                                         .setCancelable(false)
                                         .setTitle("Schedule Errors")
                                         .setIcon(R.drawable.ic_dialog_alert)
-                                        .setNegativeButton("Re-Edit", (dialog, id) -> {
-                                            showdialog(position);
-                                        })
+                                        .setNegativeButton("Re-Edit", (dialog, id) -> showDialog(position))
                                         .setPositiveButton("Force-Trim", (dialog, id) -> {
                                             buildingOccupancy.getDays().addAll(daysList);
                                             ScheduleUtil.trimZoneSchedules(spillsMap);
-                                            if (buildingOccupancy.getDays().contains(removeEntry)) {
-                                                buildingOccupancy.getDays().remove(removeEntry);
-                                            }
+                                            buildingOccupancy.getDays().remove(removeEntry);
                                             doScheduleUpdate(false);
                                         });
                                 alert = builder.create();
@@ -318,9 +308,7 @@ public class BuildingOccupancyFragment extends DialogFragment implements Buildin
                             builder.setMessage(warningMessageNull)
                                     .setCancelable(false)
                                     .setIcon(R.drawable.ic_dialog_alert)
-                                    .setPositiveButton("OK", (dialog, id) -> {
-                                        buildingOccupancy = CCUHsApi.getInstance().getBuildingOccupancy();
-                                    });
+                                    .setPositiveButton("OK", (dialog, id) -> buildingOccupancy = CCUHsApi.getInstance().getBuildingOccupancy());
                             alert = builder.create();
                             alert.show();
                         }
@@ -364,25 +352,25 @@ public class BuildingOccupancyFragment extends DialogFragment implements Buildin
 
             hasTextViewChildren();
             List<BuildingOccupancy.Days> days = buildingOccupancy.getDays();
-            Collections.sort(days, Comparator.comparingInt(BuildingOccupancy.Days::getSthh));
-            Collections.sort(days, Comparator.comparingInt(BuildingOccupancy.Days::getDay));
+            days.sort(Comparator.comparingInt(BuildingOccupancy.Days::getSthh));
+            days.sort(Comparator.comparingInt(BuildingOccupancy.Days::getDay));
 
 
             List<BuildingOccupancy.Days> unoccupiedDays = buildingOccupancyViewModel.getUnoccupiedDays(days);
             for (int i = 0; i < days.size(); i++) {
                 BuildingOccupancy.Days occupiedDaysElement = days.get(i);
                 if (occupiedDaysElement.getSthh() > occupiedDaysElement.getEthh()) {
-                    for (int j = 0; j < unoccupiedDays.size(); j++) {
-                        BuildingOccupancy.Days daysElement1 = unoccupiedDays.get(j);
-                        if (occupiedDaysElement.getDay() == daysElement1.getDay() && occupiedDaysElement.getEthh() == daysElement1.getSthh() ){
-                            if(unoccupiedDays.get(j).getDay() == 6){
-                                unoccupiedDays.remove(j);
+                    for (int unOccupiedDayIteration = 0; unOccupiedDayIteration < unoccupiedDays.size(); unOccupiedDayIteration++) {
+                        BuildingOccupancy.Days daysElement1 = unoccupiedDays.get(unOccupiedDayIteration);
+                        if (occupiedDaysElement.getDay() == daysElement1.getDay() && (occupiedDaysElement.getEthh() == daysElement1.getSthh() && occupiedDaysElement.getEtmm() == daysElement1.getStmm())){
+                            if(unoccupiedDays.get(unOccupiedDayIteration).getDay() == 6 && (unOccupiedDayIteration+1) == unoccupiedDays.size()){
+                                unoccupiedDays.remove(unOccupiedDayIteration);
                                 unoccupiedDays.get(0).setSthh(daysElement1.getSthh());
                                 unoccupiedDays.get(0).setStmm(daysElement1.getStmm());
-                            }else {
-                                unoccupiedDays.remove(j);
-                                unoccupiedDays.get(j).setSthh(daysElement1.getSthh());
-                                unoccupiedDays.get(j).setStmm(daysElement1.getStmm());
+                            }else if ((unOccupiedDayIteration+1 < unoccupiedDays.size() && unoccupiedDays.get(unOccupiedDayIteration+1).getDay() != daysElement1.getDay())) {
+                                unoccupiedDays.remove(unOccupiedDayIteration);
+                                unoccupiedDays.get(unOccupiedDayIteration).setSthh(daysElement1.getSthh());
+                                unoccupiedDays.get(unOccupiedDayIteration).setStmm(daysElement1.getStmm());
                             }
                         }
                     }
@@ -435,7 +423,7 @@ public class BuildingOccupancyFragment extends DialogFragment implements Buildin
                                    int startTimeMM, int endTimeMM, TextView textView,
                                    boolean leftBreak, boolean rightBreak, boolean intersection, boolean isOccupied) {
 
-        Log.i(L.TAG_CCU_UI, "position: "+position+" tempStartTime: " + tempStartTime + " tempEndTime: " + tempEndTime + " startTimeMM: " + startTimeMM + " endTimeMM " + endTimeMM);
+        CcuLog.i(L.TAG_CCU_UI, "position: "+position+" tempStartTime: " + tempStartTime + " tempEndTime: " + tempEndTime + " startTimeMM: " + startTimeMM + " endTimeMM " + endTimeMM);
 
         if(getContext()==null) return;
         AppCompatTextView textViewTemp = new AppCompatTextView(getContext());
@@ -531,8 +519,8 @@ public class BuildingOccupancyFragment extends DialogFragment implements Buildin
             int clickedPosition = (int)view.getTag();
             buildingOccupancy = CCUHsApi.getInstance().getBuildingOccupancy();
             List<BuildingOccupancy.Days> days = buildingOccupancy.getDays();
-            Collections.sort(days, Comparator.comparingInt(BuildingOccupancy.Days::getSthh));
-            Collections.sort(days, Comparator.comparingInt(BuildingOccupancy.Days::getDay));
+            days.sort(Comparator.comparingInt(BuildingOccupancy.Days::getSthh));
+            days.sort(Comparator.comparingInt(BuildingOccupancy.Days::getDay));
             FragmentTransaction fragmentTransaction = getChildFragmentManager().beginTransaction();
             Fragment buildingOccupancyFragment = getChildFragmentManager().findFragmentByTag("popup");
             if(buildingOccupancyFragment != null){
@@ -551,7 +539,7 @@ public class BuildingOccupancyFragment extends DialogFragment implements Buildin
 
 
         DAYS day = DAYS.values()[now.getDayOfWeek() - 1];
-        Log.i("Scheduler", "DAY: " + day.toString());
+        CcuLog.i(L.TAG_CCU_SCHEDULER, "DAY: " + day.toString());
         int hh = now.getHourOfDay();
         int mm = now.getMinuteOfHour();
 
@@ -604,11 +592,11 @@ public class BuildingOccupancyFragment extends DialogFragment implements Buildin
         drawBuildingOccupancy();
     }
 
-    private void showdialog(int position){
+    private void showDialog(int position){
         buildingOccupancy = CCUHsApi.getInstance().getBuildingOccupancy();
-        List<BuildingOccupancy.Days> alldays = buildingOccupancy.getDays();
-        Collections.sort(alldays, Comparator.comparingInt(BuildingOccupancy.Days::getSthh));
-        Collections.sort(alldays, Comparator.comparingInt(BuildingOccupancy.Days::getDay));
+        List<BuildingOccupancy.Days> allDays = buildingOccupancy.getDays();
+        allDays.sort(Comparator.comparingInt(BuildingOccupancy.Days::getSthh));
+        allDays.sort(Comparator.comparingInt(BuildingOccupancy.Days::getDay));
         FragmentTransaction fragmentTransaction = getChildFragmentManager().beginTransaction();
         Fragment buildingOccupancyFragment = getChildFragmentManager().findFragmentByTag("popup");
         if(buildingOccupancyFragment != null){
@@ -616,7 +604,7 @@ public class BuildingOccupancyFragment extends DialogFragment implements Buildin
         }
         BuildingOccupancyDialogFragment buildingOccupancyDialogFragment =
                 new BuildingOccupancyDialogFragment(BuildingOccupancyFragment.this,
-                        position, alldays.get(position));
+                        position, allDays.get(position));
         buildingOccupancyDialogFragment.show(fragmentTransaction, "popup");
     }
 

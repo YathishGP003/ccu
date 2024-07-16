@@ -23,7 +23,6 @@ import android.text.Html;
 import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -146,7 +145,7 @@ public class CreateNewSite extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_createnewsite, container, false);
         LayoutInflater li = getLayoutInflater();
-        toastLayout = li.inflate(R.layout.custom_layout_ccu_successful_update, (ViewGroup) rootView.findViewById(R.id.custom_toast_layout_update_ccu));
+        toastLayout = li.inflate(R.layout.custom_layout_ccu_successful_update, rootView.findViewById(R.id.custom_toast_layout_update_ccu));
 
         if(!CCUHsApi.getInstance().isCCURegistered() && !BuildConfig.BUILD_TYPE.equals("dev_qa")
                 && isRecommendedVersionCheckIsNotFalse()) {
@@ -296,7 +295,7 @@ public class CreateNewSite extends Fragment {
 
         mNext.setOnClickListener(v -> {
             mNext.setEnabled(false);
-            int[] mandotaryIds = new int[]
+            int[] mandatoryIds = new int[]
                     {
                             R.id.editSitename,
                             R.id.editStreetAdd,
@@ -310,7 +309,7 @@ public class CreateNewSite extends Fragment {
                             R.id.editInstallerEmail,
                     };
 
-            if (!validateEditText(mandotaryIds) && Patterns.EMAIL_ADDRESS.matcher(mSiteEmailId.getText().toString()).matches()
+            if (!validateEditText(mandatoryIds) && Patterns.EMAIL_ADDRESS.matcher(mSiteEmailId.getText().toString()).matches()
                 && Patterns.EMAIL_ADDRESS.matcher(mSiteInstallerEmailId.getText().toString()).matches()
                 && !CCUUiUtil.isInvalidName(mSiteName.getText().toString()) && !CCUUiUtil.isInvalidName(mSiteCCU.getText().toString())
             && CCUUiUtil.isValidOrgName(mSiteOrg.getText().toString())
@@ -333,7 +332,7 @@ public class CreateNewSite extends Fragment {
                         () -> {},
                         () -> {
                             CcuLog.i("UI_PROFILING","Add Save Site to DB ");
-                            if (site.size() > 0) {
+                            if (!site.isEmpty()) {
                                 String siteId = site.get("id").toString();
                                 updateSite(siteName, siteCity, siteZip, siteAddress, siteState, siteCountry, siteId,installerOrg, installerEmail, managerEmail);
                             } else {
@@ -343,7 +342,7 @@ public class CreateNewSite extends Fragment {
                             CcuLog.i("UI_PROFILING","Create CCU & Diag Equip ");
                             HashMap<Object,Object> diagEquipMap = CCUHsApi.getInstance().readEntity("equip and diag");
                             Equip  diagEquip = new Equip.Builder().setHashMap(diagEquipMap).build();
-                            if (ccu.size() > 0) {
+                            if (!ccu.isEmpty()) {
                                 String ahuRef = ccu.get("ahuRef").toString();
                                 CCUHsApi.getInstance().updateCCU(ccuName, installerEmail, ahuRef, managerEmail);
                                 L.ccu().setCCUName(ccuName);
@@ -357,7 +356,7 @@ public class CreateNewSite extends Fragment {
                         () -> {
                             mNext.setEnabled(true);
                             ProgressDialogUtils.hideProgressDialog();
-                            goTonext();
+                            goToNext();
                             CcuLog.i("UI_PROFILING","Add CCU Complete ");
                         }
 
@@ -372,7 +371,7 @@ public class CreateNewSite extends Fragment {
                 enableViews(true);
                 btnEditSite.setText(getResources().getString(R.string.title_save));
             } else {
-                int[] mandotaryIds = new int[]
+                int[] mandatoryIds = new int[]
                         {
                                 R.id.editSitename,
                                 R.id.editStreetAdd,
@@ -385,7 +384,7 @@ public class CreateNewSite extends Fragment {
                                 R.id.editFacilityOrganization,
                                 R.id.editInstallerEmail,
                         };
-                if (!validateEditText(mandotaryIds) && Patterns.EMAIL_ADDRESS.matcher(mSiteEmailId.getText().toString()).matches()
+                if (!validateEditText(mandatoryIds) && Patterns.EMAIL_ADDRESS.matcher(mSiteEmailId.getText().toString()).matches()
                         && Patterns.EMAIL_ADDRESS.matcher(mSiteInstallerEmailId.getText().toString()).matches()
                         && !CCUUiUtil.isInvalidName(mSiteName.getText().toString()) && !CCUUiUtil.isInvalidName(mSiteCCU.getText().toString())
                 ) {
@@ -402,7 +401,7 @@ public class CreateNewSite extends Fragment {
                     String installerOrg = mSiteOrg.getText().toString();
                     String ccuName = mSiteCCU.getText().toString();
 
-                    if (site.size() > 0) {
+                    if (!site.isEmpty()) {
                         String siteId = site.get("id").toString();
                         updateSite(siteName, siteCity, siteZip, siteAddress, siteState, siteCountry, siteId, installerOrg, installerEmail, facilityManagerEmail);
                     } else {
@@ -412,7 +411,7 @@ public class CreateNewSite extends Fragment {
                     Intent locationUpdateIntent = new Intent(RenatusLogicIntentActions.ACTION_SITE_LOCATION_UPDATED);
                     getContext().sendBroadcast(locationUpdateIntent);
 
-                    if (ccu.size() > 0) {
+                    if (!ccu.isEmpty()) {
                         if (!ccu.get("dis").toString().equals(ccuName) ||
                                 !ccu.get("installerEmail").toString().equals(installerEmail) ||
                                 !ccu.get("fmEmail").toString().equals(facilityManagerEmail)) {
@@ -443,7 +442,7 @@ public class CreateNewSite extends Fragment {
 
         btnEditSite.setOnClickListener(editSiteOnClickListener);
         imgEditSite.setOnClickListener(editSiteOnClickListener);
-        if (site.size() > 0) {
+        if (!site.isEmpty()) {
             //if Site Exists
             String siteName = site.get("dis").toString();
             String siteAdd = site.get("geoAddr").toString();
@@ -473,7 +472,7 @@ public class CreateNewSite extends Fragment {
                     break;
                 }
             }
-            if (ccu.size() > 0) {
+            if (!ccu.isEmpty()) {
                 //if CCU Exists
                 String ccuName = ccu.get("dis").toString();
                 mSiteCCU.setText(ccuName);
@@ -556,7 +555,7 @@ public class CreateNewSite extends Fragment {
     }
 
     private void handleRegistrationAsync(String installerEmail) {
-        Log.d(TAG, "Register Button Clicked");
+        CcuLog.d(TAG, "Register Button Clicked");
         RxjavaUtil.executeBackgroundTask(
             () -> ProgressDialogUtils.showProgressDialog(getActivity(), "Registering CCU..."),
             () -> {
@@ -612,13 +611,13 @@ public class CreateNewSite extends Fragment {
 
     private void showUnregisterAlertDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        Log.d(TAG, "Unregister Button Clicked");
+        CcuLog.d(TAG, "Unregister Button Clicked");
         builder.setIcon(R.drawable.ic_warning);
         builder.setTitle("Unregister CCU");
         builder.setMessage("\n"+"Are you sure you want to unregister ccu?");
         builder.setCancelable(false);
         builder.setPositiveButton("YES", (dialog, which) -> {
-            Log.d(TAG, "Unregister Button Clicked and Confirmed");
+            CcuLog.d(TAG, "Unregister Button Clicked and Confirmed");
             HashMap ccu = CCUHsApi.getInstance().read("device and ccu");
             String ahuRef = ccu.get("ahuRef").toString();
             String managerEmail = mSiteEmailId.getText().toString();
@@ -661,14 +660,14 @@ public class CreateNewSite extends Fragment {
             protected void onPostExecute(String response) {
                 super.onPostExecute(response);
                 ProgressDialogUtils.hideProgressDialog();
-                if( (response != null) && (!response.equals(""))){
+                if( (response != null) && (!response.isEmpty())){
                         HZincReader zReader = new HZincReader(response);
                         Iterator it = zReader.readGrid().iterator();
                         while (it.hasNext())
                         {
                             HRow row = (HRow) it.next();
                             String ccuId = row.get("removeCCUId").toString();
-                            if (ccuId != null && ccuId != "")
+                            if (ccuId != null && !ccuId.isEmpty())
                             {
                                 btnUnregisterSite.setText("Register");
                                 btnUnregisterSite.setTextColor(CCUUiUtil.getPrimaryThemeColor(getContext()));
@@ -752,8 +751,8 @@ public class CreateNewSite extends Fragment {
         public void afterTextChanged(Editable editable) {
             switch (view.getId()) {
                 case R.id.editSitename:
-                    if (mSiteName.getText().toString().trim().length() > 0) {
-                        Log.i(TAG, "afterTextChanged: "+CCUUiUtil.isInvalidName(mSiteName.getText().toString()));
+                    if (!mSiteName.getText().toString().trim().isEmpty()) {
+                        CcuLog.i(TAG, "afterTextChanged: "+CCUUiUtil.isInvalidName(mSiteName.getText().toString()));
                         if(CCUUiUtil.isInvalidName(mSiteName.getText().toString())){
                             mSiteName.setError(getString(R.string.error_invalid_site_name));
                         }else {
@@ -766,7 +765,7 @@ public class CreateNewSite extends Fragment {
                     }
 
                 case R.id.editStreetAdd:
-                    if (mStreetAdd.getText().toString().trim().length() > 0) {
+                    if (!mStreetAdd.getText().toString().trim().isEmpty()) {
                         mTextInputStreetAdd.setErrorEnabled(true);
                         mTextInputStreetAdd.setError(" " + getString(R.string.input_streetadd));
                         mStreetAdd.setError(null);
@@ -775,7 +774,7 @@ public class CreateNewSite extends Fragment {
                     }
 
                 case R.id.editCity:
-                    if (mSiteCity.getText().toString().trim().length() > 0) {
+                    if (!mSiteCity.getText().toString().trim().isEmpty()) {
                         mTextInputCity.setErrorEnabled(true);
                         mTextInputCity.setError(getString(R.string.input_city));
                         mSiteCity.setError(null);
@@ -784,7 +783,7 @@ public class CreateNewSite extends Fragment {
                     }
 
                 case R.id.editState:
-                    if (mSiteState.getText().toString().trim().length() > 0) {
+                    if (!mSiteState.getText().toString().trim().isEmpty()) {
                         mTextInputState.setErrorEnabled(true);
                         mTextInputState.setError(getString(R.string.input_state));
                         mSiteState.setError(null);
@@ -793,7 +792,7 @@ public class CreateNewSite extends Fragment {
                     }
                     break;
                 case R.id.editCountry:
-                    if (mSiteCountry.getText().toString().trim().length() > 0) {
+                    if (!mSiteCountry.getText().toString().trim().isEmpty()) {
                         mTextInputCountry.setErrorEnabled(true);
                         mTextInputCountry.setError(getString(R.string.input_country));
                         mSiteCountry.setError(null);
@@ -802,7 +801,7 @@ public class CreateNewSite extends Fragment {
                     }
 
                 case R.id.editZip:
-                    if (mSiteZip.getText().toString().trim().length() > 0) {
+                    if (!mSiteZip.getText().toString().trim().isEmpty()) {
                         mTextInputZip.setErrorEnabled(true);
                         mTextInputZip.setError(getString(R.string.input_zip));
                         mSiteZip.setError(null);
@@ -811,7 +810,7 @@ public class CreateNewSite extends Fragment {
                     }
 
                 case R.id.editCCU:
-                    if (mSiteCCU.getText().toString().trim().length() > 0) {
+                    if (!mSiteCCU.getText().toString().trim().isEmpty()) {
                         if(CCUUiUtil.isInvalidName(mSiteCCU.getText().toString())){
                             mSiteCCU.setError(getString(R.string.error_invalid_ccu_name));
                         }else {
@@ -824,7 +823,7 @@ public class CreateNewSite extends Fragment {
                     }
 
                 case R.id.editFacilityOrganization:
-                    if (mSiteOrg.getText().toString().trim().length() > 0) {
+                    if (!mSiteOrg.getText().toString().trim().isEmpty()) {
                         mTextInputOrg.setErrorEnabled(true);
                         mTextInputOrg.setError(getString(R.string.input_facilityorg));
                         mSiteOrg.setError(null);
@@ -841,14 +840,12 @@ public class CreateNewSite extends Fragment {
                     }
 
                 case R.id.editFacilityEmail:
-                    if (mSiteEmailId.getText().toString().trim().length() > 0) {
+                    if (!mSiteEmailId.getText().toString().trim().isEmpty()) {
                         mTextInputEmail.setErrorEnabled(true);
                         mTextInputEmail.setError(getString(R.string.input_facilityemail));
                         mSiteEmailId.setError(null);
                         String emailID = mSiteEmailId.getText().toString();
-                        if (Patterns.EMAIL_ADDRESS.matcher(emailID).matches()) {
-
-                        } else {
+                        if (!Patterns.EMAIL_ADDRESS.matcher(emailID).matches()) {
                             mSiteEmailId.setError("Invalid Email Address");
                         }
                     } else {
@@ -857,14 +854,12 @@ public class CreateNewSite extends Fragment {
                     }
 
                 case R.id.editInstallerEmail:
-                    if (mSiteInstallerEmailId.getText().toString().trim().length() > 0) {
+                    if (!mSiteInstallerEmailId.getText().toString().trim().isEmpty()) {
                         mTextInputInstallerEmail.setErrorEnabled(true);
                         mTextInputInstallerEmail.setError(getString(R.string.input_installer_email));
                         mSiteInstallerEmailId.setError(null);
                         String emailID = mSiteInstallerEmailId.getText().toString();
-                        if (Patterns.EMAIL_ADDRESS.matcher(emailID).matches()) {
-
-                        } else {
+                        if (!Patterns.EMAIL_ADDRESS.matcher(emailID).matches()) {
                             mSiteInstallerEmailId.setError("Invalid Email Address");
                         }
                     } else {
@@ -881,7 +876,7 @@ public class CreateNewSite extends Fragment {
         boolean isEmpty = false;
 
         for (int id : ids) {
-            EditText et = (EditText) getView().findViewById(id);
+            EditText et = getView().findViewById(id);
 
             if (TextUtils.isEmpty(et.getText().toString().trim())) {
                 et.setError("Must enter Value");
@@ -932,7 +927,7 @@ public class CreateNewSite extends Fragment {
         CCUHsApi.getInstance().syncEntityTree();
         DiagEquip.getInstance().create();
         updateMigrationDiagWithAppVersion();
-        Log.i(TAG, "LocalSiteID: " + localSiteId);
+        CcuLog.i(TAG, "LocalSiteID: " + localSiteId);
         ccuHsApi.log();
         prefs.setString("SITE_ID", localSiteId);
         HashMap<Object, Object> buildingOccupancy =
@@ -991,11 +986,7 @@ public class CreateNewSite extends Fragment {
 
         TunerEquip.INSTANCE.initialize(CCUHsApi.getInstance());
 
-        //BuildingTuners.getInstance();
-        //SchedulabeLimits.Companion.addSchedulableLimits(true,null,null);
-
         ccuHsApi.log();
-      //  L.ccu().systemProfile = new DefaultSystem();
         updateTimeZoneInVacations();
         ccuHsApi.saveTagsData();
         CCUHsApi.tempWeatherRef = null;
@@ -1017,7 +1008,7 @@ public class CreateNewSite extends Fragment {
         }
     }
 
-    private void goTonext() {
+    private void goToNext() {
         prefs.setBoolean("CCU_SETUP", false);
         L.saveCCUState();
         ((FreshRegistration) getActivity()).selectItem(21);
@@ -1038,7 +1029,7 @@ public class CreateNewSite extends Fragment {
             JSONObject deviceObject = config.getJSONObject("device");
             if(!deviceObject.get(IP_DEVICE_OBJECT_NAME).toString().equals(siteName+"_"+ccuName))
             {
-                Log.d(L.TAG_CCU_BACNET, "siteName or ccuName changed "+siteName+"_"+ccuName);
+                CcuLog.d(L.TAG_CCU_BACNET, "siteName or ccuName changed "+siteName+"_"+ccuName);
                 deviceObject.put(IP_DEVICE_OBJECT_NAME,siteName+"_"+ccuName);
                 prefs.setString(BACNET_CONFIGURATION, config.toString());
                 sendBroadCast(mContext, "a75f.io.renatus.BACNET_CONFIG_CHANGE", "BACnet configurations are changed");

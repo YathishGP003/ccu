@@ -8,7 +8,6 @@ import android.view.View;
 import android.view.Window;
 import android.widget.TextView;
 
-import a75f.io.renatus.BuildConfig;
 import a75f.io.renatus.R;
 import a75f.io.renatus.views.GifView;
 
@@ -17,7 +16,6 @@ import a75f.io.renatus.views.GifView;
  */
 public class ProgressDialogUtils {
 
-    //
     private static Dialog progressDialog;
 
     public static void showProgressDialog(Context context, String message) {

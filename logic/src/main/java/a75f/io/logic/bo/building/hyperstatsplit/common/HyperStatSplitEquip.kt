@@ -322,6 +322,12 @@ open class HyperStatSplitEquip {
                 hyperStatSplitPointsUtil.addPointsListToHaystackWithDefaultValue(listOfAllPoints = arrayOf(
                     prePurgeStatusPoint
                 ))
+                // Initialize the prePurgeStatus to 0. It will be later taken care when prePurge operation is running in profile
+                val prePurgeStatusId = getPrePurgeStatusPointID()
+                if(prePurgeStatusId.isNotEmpty()) {
+                    hyperStatSplitPointsUtil.addDefaultValueForPoint(prePurgeStatusId, 0.0)
+                    hyperStatSplitPointsUtil.addDefaultHisValueForPoint(prePurgeStatusId, 0.0)
+                }
 
             } else {
                 val prePurgeDamperId = getPrePurgeMinIdPointID()

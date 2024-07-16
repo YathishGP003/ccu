@@ -5,7 +5,6 @@ import static a75f.io.device.bacnet.BacnetUtilKt.addBacnetTags;
 import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,7 +12,6 @@ import android.view.Window;
 import android.widget.Button;
 import android.widget.NumberPicker;
 import android.widget.Spinner;
-import android.widget.ToggleButton;
 
 import androidx.annotation.Nullable;
 
@@ -46,9 +44,9 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable;
  * created by spoorthidev on 21-July-2021
  */
 public class FragmentOTNTempInfConfiguration extends BaseDialogFragment {
-    private CompositeDisposable compositeDisposable = new CompositeDisposable();
+    private final CompositeDisposable compositeDisposable = new CompositeDisposable();
     public static String ID = FragmentOTNTempInfConfiguration.class.getSimpleName();
-    private static String LOG_TAG = "FragmentOTNTempInfConfiguration";
+    private static final String LOG_TAG = "FragmentOTNTempInfConfiguration";
     static final int TEMP_OFFSET_LIMIT = 100;
     private short    mNodeAddress;
     String floorRef;
@@ -152,9 +150,7 @@ public class FragmentOTNTempInfConfiguration extends BaseDialogFragment {
     void setOnClick(View v) {
         mSetbtn.setEnabled(false);
         compositeDisposable.add(RxjavaUtil.executeBackgroundTaskWithDisposable(
-                ()->{
-                    ProgressDialogUtils.showProgressDialog(getActivity(), "Saving OTN Configuration");
-                },
+                ()-> ProgressDialogUtils.showProgressDialog(getActivity(), "Saving OTN Configuration"),
                 ()->{
                     setupOTNProfile();
                     L.saveCCUState();
@@ -182,10 +178,10 @@ public class FragmentOTNTempInfConfiguration extends BaseDialogFragment {
         mOTNProfile.getProfileConfiguration().put(mNodeAddress,otn);
 
         if(mOTNConfig == null ){
-            Log.d(LOG_TAG, "Creating new config");
+            CcuLog.d(LOG_TAG, "Creating new config");
             mOTNProfile.addOTNEquip(ProfileType.OTN,mNodeAddress,otn,floorRef,zoneRef);
         }else{
-            Log.d(LOG_TAG, "Updating config");
+            CcuLog.d(LOG_TAG, "Updating config");
             mOTNProfile.updateOTN(ProfileType.OTN,mNodeAddress,otn,floorRef,zoneRef);
         }
         L.ccu().zoneProfiles.add(mOTNProfile);

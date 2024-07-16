@@ -3,8 +3,6 @@ package a75f.io.renatus.schedules;
 import static a75f.io.renatus.UtilityApplication.context;
 
 import android.content.Context;
-import android.graphics.Color;
-import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,7 +11,6 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.joda.time.DateTime;
@@ -23,10 +20,10 @@ import org.projecthaystack.HDict;
 
 import java.util.HashMap;
 import java.util.List;
+
 import a75f.io.api.haystack.Tags;
 import a75f.io.logic.schedule.SpecialSchedule;
 import a75f.io.renatus.R;
-import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.FontManager;
 
 public class SpecialScheduleAdapter extends RecyclerView.Adapter<SpecialScheduleAdapter.ViewHolder>{

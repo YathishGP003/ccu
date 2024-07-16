@@ -12,13 +12,10 @@ import a75f.io.renatus.composables.DropDownWithLabel
 import a75f.io.renatus.composables.IndeterminateLoopProgress
 import a75f.io.renatus.composables.Picker
 import a75f.io.renatus.composables.rememberPickerState
+import a75f.io.renatus.compose.*
 import a75f.io.renatus.compose.ComposeUtil.Companion.primaryColor
-import a75f.io.renatus.compose.HeaderTextView
-import a75f.io.renatus.compose.LabelTextView
-import a75f.io.renatus.compose.SaveTextView
-import a75f.io.renatus.compose.TitleTextView
-import a75f.io.renatus.compose.ToggleButtonStateful
 import a75f.io.renatus.modbus.util.SET
+import a75f.io.renatus.profiles.profileUtils.UnusedPortsFragment
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -38,6 +35,7 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
+import androidx.compose.runtime.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -221,9 +219,7 @@ class VavProfileConfigFragment : BaseDialogFragment() {
                     Row{
                         when(viewModel.viewState.reheatType){
                             0.0->{
-                                HeaderTextView(text = "Relay 1",padding=0)
-                                Spacer(modifier=Modifier.width(186.dp))
-                                LabelTextView(text = "Staged Electric Heater", widthValue = 250)
+                              // While reheat type is not install it should not show the Relay or Analog out ports in UI
                             }
                             1.0->{
                                 HeaderTextView(text = "Analog Out 2",padding=0)
@@ -246,9 +242,9 @@ class VavProfileConfigFragment : BaseDialogFragment() {
                                 LabelTextView(text = "Modulating Reheat", widthValue = 216)
                             }
                             5.0->{
-                                HeaderTextView(text = "Relay 1",padding=0)
-                                Spacer(modifier=Modifier.width(186.dp))
-                                LabelTextView(text = "Staged Electric Heater", widthValue = 250)
+                                HeaderTextView(text = "Analog Out 2",padding=0)
+                                Spacer(modifier=Modifier.width(147.dp))
+                                LabelTextView(text = "Modulating Reheat", widthValue = 216)
                             }
                             6.0->{
                                 HeaderTextView(text = "Relay 1",padding=0)
@@ -264,14 +260,14 @@ class VavProfileConfigFragment : BaseDialogFragment() {
                     }
                     when(viewModel.viewState.reheatType)
                     {
-                        0.0->Spacer(modifier=Modifier.width(55.dp))
-                        1.0->Spacer(modifier=Modifier.width(60.dp))
-                        2.0->Spacer(modifier=Modifier.width(60.dp))
-                        3.0->Spacer(modifier=Modifier.width(60.dp))
-                        4.0->Spacer(modifier=Modifier.width(60.dp))
-                        5.0->Spacer(modifier=Modifier.width(55.dp))
-                        6.0->Spacer(modifier=Modifier.width(55.dp))
-                        7.0->Spacer(modifier=Modifier.width(55.dp))
+                        0.0->Spacer(modifier=Modifier.width(0.dp))
+                        1.0->Spacer(modifier=Modifier.width(65.dp))
+                        2.0->Spacer(modifier=Modifier.width(65.dp))
+                        3.0->Spacer(modifier=Modifier.width(65.dp))
+                        4.0->Spacer(modifier=Modifier.width(65.dp))
+                        5.0->Spacer(modifier=Modifier.width(65.dp))
+                        6.0->Spacer(modifier=Modifier.width(60.dp))
+                        7.0->Spacer(modifier=Modifier.width(60.dp))
                     }
                     Row{
                         when (viewModel.profileType){
@@ -493,6 +489,13 @@ class VavProfileConfigFragment : BaseDialogFragment() {
                     }
 
                 }
+                val mapOfUnUsedPorts = viewModel.viewState.unusedPortState
+                if(mapOfUnUsedPorts.isNotEmpty()) {
+                    UnusedPortsFragment.DividerRow()
+                    UnusedPortsFragment.LabelUnusedPorts()
+                    UnusedPortsFragment.UnUsedPortsListView(viewModel)
+                }
+
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()

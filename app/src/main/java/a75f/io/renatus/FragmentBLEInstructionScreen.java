@@ -8,7 +8,6 @@ import static a75f.io.renatus.BASE.FragmentCommonBundleArgs.PROFILE_TYPE;
 
 import android.app.Dialog;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,6 +22,7 @@ import java.util.ArrayList;
 
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.Zone;
@@ -57,9 +57,6 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
     
     String mRoomName;
     String mFloorName;
-
-    @BindView(R.id.imageGoback)
-    ImageView imageGoback;
 
     @BindView(R.id.pairinginstruct_daikin)
     ImageView pairinginstructDaikin;
@@ -294,7 +291,7 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
             }
             else
             {
-                Log.d("FragBleInstrScrn","CPU profile. device scan");
+                CcuLog.d("FragBleInstrScrn","CPU profile. device scan");
                 FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan.getInstance(mNodeAddress, mRoomName, mFloorName, mNodeType, ProfileType.SMARTSTAT_CONVENTIONAL_PACK_UNIT);
                 showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
             }
@@ -307,7 +304,7 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
             }
             else
             {
-                Log.d("FragBleInstrScrn","CPU profile. device scan");
+                CcuLog.d("FragBleInstrScrn","CPU profile. device scan");
                 FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan.getInstance(mNodeAddress, mRoomName, mFloorName, mNodeType, ProfileType.SMARTSTAT_HEAT_PUMP_UNIT);
                 showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
             }
@@ -320,7 +317,7 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
             }
             else
             {
-                Log.d("FragBleInstrScrn","TEmp Monitor profile. device scan");
+                CcuLog.d("FragBleInstrScrn","TEmp Monitor profile. device scan");
                 FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan.getInstance(mNodeAddress, mRoomName, mFloorName, mNodeType, ProfileType.TEMP_MONITOR);
                 showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
             }
@@ -346,7 +343,7 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
             }
             else
             {
-                Log.d("FragBleInstrScrn","CPU profile. device scan");
+                CcuLog.d("FragBleInstrScrn","CPU profile. device scan");
                 FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan.getInstance(mNodeAddress, mRoomName, mFloorName, mNodeType, ProfileType.SMARTSTAT_TWO_PIPE_FCU);
                 showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
             }
@@ -359,7 +356,7 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
             }
             else
             {
-                Log.d("FragBleInstrScrn","CPU profile. device scan");
+                CcuLog.d("FragBleInstrScrn","CPU profile. device scan");
                 FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan.getInstance(mNodeAddress, mRoomName, mFloorName, mNodeType, ProfileType.SMARTSTAT_FOUR_PIPE_FCU);
                 showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
             }
@@ -371,7 +368,7 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
                     HyperStatVrvFragment.ID);
             }
             else {
-                Log.d("FragBleInstrScrn","Hyperstat VRV profile. device scan");
+                CcuLog.d("FragBleInstrScrn","Hyperstat VRV profile. device scan");
                 FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan.getInstance(mNodeAddress, mRoomName, mFloorName, mNodeType, ProfileType.HYPERSTAT_VRV);
                 showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
             }

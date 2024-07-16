@@ -18,9 +18,6 @@ import static a75f.io.logic.BacnetUtilKt.OCCUPANCY;
 import static a75f.io.logic.BacnetUtilKt.SOUND;
 import static a75f.io.logic.BacnetUtilKt.VOC;
 import static a75f.io.logic.BacnetUtilKt.addBacnetTags;
-
-import android.util.Log;
-
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -29,6 +26,7 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Tags;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.Consts;
 import a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType;
@@ -36,10 +34,7 @@ import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.firmware.FirmwareVersion;
 import a75f.io.logic.bo.building.heartbeat.HeartBeat;
-import a75f.io.logic.bo.building.hyperstat.common.HyperstatProfileNames;
-import a75f.io.logic.bo.building.hyperstatsplit.common.HyperStatSplitAssociationUtil;
 import a75f.io.logic.bo.building.hyperstatsplit.common.HyperstatSplitProfileNames;
-import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuEconConfiguration;
 
 /**
  * Models a HyperStat Split device Haystack entity.
@@ -92,15 +87,14 @@ public class HyperStatSplitDevice {
     /**
      * Constructs a new HaystackDevice instance , and adds the device and all its associated entities to the
      * Haystack device.
-     *
      * !This should be called only once for a specific address.!
      *
-     * @param address
-     * @param site
-     * @param floor
-     * @param room
-     * @param equipRef
-     * @param profile
+     * @param address The address of the HyperStatSplit device.
+     * @param site The site reference.
+     * @param floor The floor reference.
+     * @param room The room reference.
+     * @param equipRef The equip reference.
+     * @param profile   The profile type of the device.
      */
     public HyperStatSplitDevice(int address, String site, String floor, String room, String equipRef, String profile) {
         Device d = new Device.Builder()
@@ -128,7 +122,7 @@ public class HyperStatSplitDevice {
 
     /**
      * Reconstruct a HyperStatSplitDevice from haystack database using the address.
-     * @param address
+     * @param address The address of the HyperStatSplit device.
      */
     public HyperStatSplitDevice(int address) {
         HashMap device = CCUHsApi.getInstance().read("device and addr == \""+address+"\"");
@@ -398,7 +392,7 @@ public class HyperStatSplitDevice {
         firmWareVersion = FirmwareVersion.getFirmwareVersion(hyperStatNodeAddress, deviceRef, siteRef, floorRef, roomRef,
                 tz);
 
-        Log.d(L.TAG_CCU_HSSPLIT_CPUECON, "Finished adding device points");
+        CcuLog.d(L.TAG_CCU_HSSPLIT_CPUECON, "Finished adding device points");
 
     }
 
@@ -431,22 +425,6 @@ public class HyperStatSplitDevice {
                 .setUnit("dV")
                 .setTz(tz)
                 .build();
-    }
-
-    public void createPhysicalSensorPoint(Port p, String pointRef) {
-        RawPoint sensor = new RawPoint.Builder()
-                .setDisplayName(p.toString()+"-"+hyperStatNodeAddress)
-                .setDeviceRef(deviceRef)
-                .setSiteRef(siteRef)
-                .setRoomRef(roomRef)
-                .setFloorRef(floorRef)
-                .setPointRef(pointRef)
-                .setEnabled(true)
-                .addMarker("sensor").addMarker("his")
-                .setPort(p.toString())
-                .setTz(tz)
-                .build();
-        CCUHsApi.getInstance().addPoint(sensor);
     }
 
     public RawPoint createSensorPoints(Port p) {
@@ -486,7 +464,7 @@ public class HyperStatSplitDevice {
             default:
                 break;
         }
-        Point.Builder equipSensor = null;
+        Point.Builder equipSensor;
 
         if(isOccupancySensor){
             equipSensor = new Point.Builder()
@@ -572,7 +550,7 @@ public class HyperStatSplitDevice {
     public RawPoint getRawPoint(Port p) {
         HashMap sensorPoint = CCUHsApi.getInstance().read("point and sensor and physical and deviceRef == \""+deviceRef+"\""
                 +" and port == \""+p.toString()+"\"");
-        return sensorPoint.size() > 0 ? new RawPoint.Builder().setHashMap(sensorPoint).build() : null;
+        return !sensorPoint.isEmpty() ? new RawPoint.Builder().setHashMap(sensorPoint).build() : null;
     }
 
     public void addPointsToDb() {

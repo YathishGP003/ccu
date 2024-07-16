@@ -1,7 +1,6 @@
 package a75f.io.api.haystack.modbus;
 
-
-import android.util.Log;
+import androidx.annotation.NonNull;
 
 import com.google.gson.Gson;
 import com.google.gson.annotations.Expose;
@@ -163,6 +162,7 @@ public class EquipmentDevice {
 
     public void setCapacity(String capacity) { this.capacity = capacity; }
 
+    @NonNull
     @Override
     public String toString() {
         return this.name;
@@ -283,7 +283,6 @@ public class EquipmentDevice {
     }
 
     public boolean isEmpty(List<EquipmentDevice> e){
-       if( e!=null && e.size()>0) return false;
-       return true;
+        return e == null || e.isEmpty();
     }
 }

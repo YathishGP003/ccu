@@ -13,12 +13,12 @@ import android.graphics.Typeface;
 import androidx.core.content.res.ResourcesCompat;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
 import java.lang.reflect.InvocationTargetException;
 
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.BitmapUtil;
@@ -33,7 +33,6 @@ public class OaoArc extends View {
     private static final String TAG = SeekArc.class.getSimpleName();
     private static int INVALID_PROGRESS_VALUE = -1;
     // The initial rotational offset -90 means we start at 12 o'clock
-    private final int mAngleOffset = -90;
 
     /**
      * The Maximum value that this SeekArc can be set to
@@ -49,11 +48,6 @@ public class OaoArc extends View {
      * The width of the progress line for this SeekArc
      */
     private int mProgressWidth = 4;
-
-    /**
-     * The Width of the background arc for the SeekArc
-     */
-    private int mArcWidth = 4;
 
     /**
      * The Angle to start drawing this Arc from
@@ -119,16 +113,16 @@ public class OaoArc extends View {
         // Convert progress width to pixels for current density
         mProgressWidth = (int) (mProgressWidth * density);
 
-        mProgress = (mProgress > mMax) ? mMax : mProgress;
-        mProgress = (mProgress < 0) ? 0 : mProgress;
+        mProgress = Math.min(mProgress, mMax);
+        mProgress = Math.max(mProgress, 0);
 
-        mSweepAngle = (mSweepAngle > 360) ? 360 : mSweepAngle;
-        mSweepAngle = (mSweepAngle < 0) ? 0 : mSweepAngle;
+        mSweepAngle = Math.min(mSweepAngle, 360);
+        mSweepAngle = Math.max(mSweepAngle, 0);
 
         mProgressSweep = (float) mProgress / mMax * mSweepAngle;
 
         mStartAngle = (mStartAngle > 360) ? 0 : mStartAngle;
-        mStartAngle = (mStartAngle < 0) ? 0 : mStartAngle;
+        mStartAngle = Math.max(mStartAngle, 0);
 
         mArcPaint = new Paint();
         mArcPaint.setColor(arcColor);
@@ -201,7 +195,7 @@ public class OaoArc extends View {
 
         drawInitText(canvas);
 
-        drawIconByAngle(canvas, mThumb, angle, mArcRadius, mThumbPaint);
+        drawIconByAngle(canvas, mThumb, angle, mThumbPaint);
     }
 
     public void setData(int angle, int airCO2) {
@@ -253,9 +247,9 @@ public class OaoArc extends View {
         final int width = getDefaultSize(getSuggestedMinimumWidth(),
                 widthMeasureSpec);
         final int min = Math.min(width, height);
-        float top = 0;
-        float left = 0;
-        int arcDiameter = 0;
+        float top;
+        float left;
+        int arcDiameter;
 
         mTranslateX = (width * 0.5f);
         mTranslateY = (height * 0.5f);
@@ -290,13 +284,13 @@ public class OaoArc extends View {
         invalidate();
     }
 
-    private void updateProgress(int progress, boolean fromUser) {
+    private void updateProgress(int progress) {
         if (progress == INVALID_PROGRESS_VALUE) {
             return;
         }
 
-        progress = (progress > mMax) ? mMax : progress;
-        progress = (progress < 0) ? 0 : progress;
+        progress = Math.min(progress, mMax);
+        progress = Math.max(progress, 0);
         mProgress = progress;
 
         mProgressSweep = (float) progress / mMax * mSweepAngle;
@@ -305,7 +299,7 @@ public class OaoArc extends View {
     }
 
     public void setProgress(int progress) {
-        updateProgress(progress, false);
+        updateProgress(progress);
     }
 
     public int getProgress() {
@@ -314,7 +308,7 @@ public class OaoArc extends View {
 
     Matrix matrix = new Matrix();
 
-    private void drawIconByAngle(Canvas canvas, Bitmap bitmap, int angle, float radius, Paint paint) {
+    private void drawIconByAngle(Canvas canvas, Bitmap bitmap, int angle, Paint paint) {
         matrix.reset();
 
         int arcStart = (int) getAngle(angle);
@@ -329,30 +323,6 @@ public class OaoArc extends View {
 
 
         canvas.drawBitmap(bitmap, matrix, paint);
-    }
-
-    public int getArcRotation() {
-        return mRotation;
-    }
-
-    public void setArcRotation(int mRotation) {
-        this.mRotation = mRotation;
-    }
-
-    public int getStartAngle() {
-        return mStartAngle;
-    }
-
-    public void setStartAngle(int mStartAngle) {
-        this.mStartAngle = mStartAngle;
-    }
-
-    public int getSweepAngle() {
-        return mSweepAngle;
-    }
-
-    public void setSweepAngle(int mSweepAngle) {
-        this.mSweepAngle = mSweepAngle;
     }
 
     public int getMax() {
@@ -382,7 +352,7 @@ public class OaoArc extends View {
         }catch (InvocationTargetException e){
             // It will throw the exception when invoke the method that wraps around with InvocationTargetException
             // Here we are using e.getCause - which returns the cause of this exception.
-            Log.d(L.TAG_CCU_UI,"Problem in init method: "+e.getCause());
+            CcuLog.d(L.TAG_CCU_UI,"Problem in init method: "+e.getCause());
             e.printStackTrace();
         }
     }

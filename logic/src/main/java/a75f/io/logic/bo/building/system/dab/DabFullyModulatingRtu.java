@@ -209,6 +209,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
             CCUHsApi.getInstance().deleteEntityTree(equip.get("id").toString());
         }
         removeSystemEquipModbus();
+        deleteSystemConnectModule();
     }
     
     private void addCmdPoints(String equipref) {

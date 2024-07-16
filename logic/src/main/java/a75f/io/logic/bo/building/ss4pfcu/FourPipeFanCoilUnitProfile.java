@@ -1,7 +1,5 @@
 package a75f.io.logic.bo.building.ss4pfcu;
 
-import android.util.Log;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -11,6 +9,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Occupied;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
 import a75f.io.logic.bo.building.ZoneProfile;
@@ -40,7 +39,6 @@ public class FourPipeFanCoilUnitProfile extends ZoneProfile {
     public HashMap<Short, FourPipeFanCoilUnitEquip> fourPfcuDeviceMap;
     double setTempCooling = 74.0;
     double setTempHeating = 70.0;
-    double airflowTempTh1 = 0.0;
 
     public FourPipeFanCoilUnitProfile(){
         fourPfcuDeviceMap = new HashMap<>();
@@ -66,10 +64,10 @@ public class FourPipeFanCoilUnitProfile extends ZoneProfile {
         for (short node : fourPfcuDeviceMap.keySet()) {
             if (fourPfcuDeviceMap.get(node) == null) {
                 addLogicalMap(node);
-                Log.d(TAG, " Logical Map added for smartstat " + node);
+                CcuLog.d(TAG, " Logical Map added for smartstat " + node);
                 continue;
             }
-            Log.d(TAG, "SmartStat 4PFCU profile");
+            CcuLog.i(TAG, "SmartStat 4PFCU profile");
             FourPipeFanCoilUnitEquip fourPfcuDevice = fourPfcuDeviceMap.get(node);
             if (fourPfcuDevice.profileType != ProfileType.SMARTSTAT_FOUR_PIPE_FCU)
                 continue;
@@ -93,7 +91,7 @@ public class FourPipeFanCoilUnitProfile extends ZoneProfile {
             if (averageDesiredTemp != fourPfcuDevice.getDesiredTemp()) {
                 fourPfcuDevice.setDesiredTemp(averageDesiredTemp);
             }
-            Log.d(TAG, " smartstat 4pfcu, updates 111=" + fourPfcuEquip.getRoomRef() + "," + setTempHeating + "," + setTempCooling + "," + roomTemp );
+            CcuLog.d(TAG, " smartstat 4pfcu, updates 111=" + fourPfcuEquip.getRoomRef() + "," + setTempHeating + "," + setTempCooling + "," + roomTemp );
 
 
             double ssOperatingMode = getOperationalModes("temp and conditioning", fourPfcuEquip.getId());
@@ -165,7 +163,7 @@ public class FourPipeFanCoilUnitProfile extends ZoneProfile {
         setCmdSignal("fan and low",0,node);
         setCmdSignal("water and valve and heating",0,node);
             setCmdSignal("water and valve and cooling",0,node);
-        StandaloneScheduler.updateSmartStatStatus(equipId, DEADBAND,new HashMap<String, Integer>() ,temperatureState);
+        StandaloneScheduler.updateSmartStatStatus(equipId, DEADBAND,new HashMap<>() ,temperatureState);
         fourPfcuDeviceMap.get(node).setStatus(DEADBAND.ordinal());
     }
     @Override
@@ -181,7 +179,7 @@ public class FourPipeFanCoilUnitProfile extends ZoneProfile {
     /**
      * Only creates a run time instance of logical map for initialize.
      *
-     * @param addr
+     * @param addr address of the node
      */
     public void addLogicalMap(short addr) {
         FourPipeFanCoilUnitEquip deviceMap = new FourPipeFanCoilUnitEquip(getProfileType(), addr);
@@ -191,7 +189,7 @@ public class FourPipeFanCoilUnitProfile extends ZoneProfile {
     /**
      * Only creates a run time instance of logical map for initialize.
      *
-     * @param addr
+     * @param addr address of the node
      */
     public void addLogicalMap(short addr, String roomRef) {
         FourPipeFanCoilUnitEquip deviceMap = new FourPipeFanCoilUnitEquip(getProfileType(), addr);
@@ -203,10 +201,10 @@ public class FourPipeFanCoilUnitProfile extends ZoneProfile {
      * When the profile is created first time , either via UI or from existing tagsMap
      * this method has to be called on the profile instance.
      *
-     * @param addr
-     * @param config
-     * @param floorRef
-     * @param zoneRef
+     * @param addr address of the node
+     * @param config configuration of the profile
+     * @param floorRef floor reference
+     * @param zoneRef zone reference
      */
     public void addLogicalMapAndPoints(short addr, FourPipeFanCoilUnitConfiguration config, String floorRef, String zoneRef) {
         FourPipeFanCoilUnitEquip deviceMap = new FourPipeFanCoilUnitEquip(getProfileType(), addr);
@@ -254,8 +252,8 @@ public class FourPipeFanCoilUnitProfile extends ZoneProfile {
             if (fourPfcuDeviceMap.get(nodeAddress) == null) {
                 continue;
             }
-            if (fourPfcuDeviceMap.get(Short.valueOf(nodeAddress)).getCurrentTemp() > 0) {
-                tempTotal += fourPfcuDeviceMap.get(Short.valueOf(nodeAddress)).getCurrentTemp();
+            if (fourPfcuDeviceMap.get(nodeAddress).getCurrentTemp() > 0) {
+                tempTotal += fourPfcuDeviceMap.get(nodeAddress).getCurrentTemp();
                 nodeCount++;
             }
         }
@@ -265,10 +263,6 @@ public class FourPipeFanCoilUnitProfile extends ZoneProfile {
 
     public double getConfigEnabled(String config, short node) {
         return CCUHsApi.getInstance().readDefaultVal("point and zone and config and enable and " + config + " and group == \"" + node + "\"");
-
-    }
-    public double getConfigType(String config, short node) {
-        return CCUHsApi.getInstance().readDefaultVal("point and zone and config and type and " + config + " and group == \"" + node + "\"");
 
     }
 
@@ -286,13 +280,13 @@ public class FourPipeFanCoilUnitProfile extends ZoneProfile {
 
     private void fanOperationalModes(String equipId, short addr, Occupied occuStatus, StandaloneLogicalFanSpeeds fanSpeed){
 
-        boolean isFanMediumEnabled = getConfigEnabled("relay1",addr) > 0 ? true : false;
-        boolean isFanHighEnabled = getConfigEnabled("relay2",addr) > 0 ? true : false;
-        boolean isFanLowEnabled = getConfigEnabled("relay3", addr) > 0 ? true : false; //relay3 for fan low
+        boolean isFanMediumEnabled = getConfigEnabled("relay1", addr) > 0;
+        boolean isFanHighEnabled = getConfigEnabled("relay2", addr) > 0;
+        boolean isFanLowEnabled = getConfigEnabled("relay3", addr) > 0; //relay3 for fan low
         boolean occupied = false;
         if(occuStatus != null)
             occupied = occuStatus.isOccupied();
-        HashMap<String,Integer> relayStates = new HashMap<String, Integer>();
+        HashMap<String,Integer> relayStates = new HashMap<>();
         //Deactivate all relays if fan speed is auto. Else R1,R2,R3 depends on user selection
         switch (fanSpeed){
             case AUTO:
@@ -356,11 +350,11 @@ public class FourPipeFanCoilUnitProfile extends ZoneProfile {
 
     private void fcu4CoolOnlyMode(Equip equip, short addr, double roomTemp, Occupied occuStatus, StandaloneLogicalFanSpeeds fanSpeed){
         double hysteresis = StandaloneTunerUtil.getStandaloneStage1Hysteresis(equip.getId());
-        boolean isFanMediumEnabled = getConfigEnabled("relay1",addr) > 0 ? true : false;
-        boolean isFanHighEnabled = getConfigEnabled("relay2",addr) > 0 ? true : false;
-        boolean isFanLowEnabled = getConfigEnabled("relay3", addr) > 0 ? true : false; //relay3 for fan low
-        boolean isHeatingWaterValve = getConfigEnabled("relay4",addr)> 0 ? true : false;// Heating water valve
-        boolean isCoolingWaterValve = getConfigEnabled("relay6",addr) > 0 ? true : false;//Cooling water valve
+        boolean isFanMediumEnabled = getConfigEnabled("relay1", addr) > 0;
+        boolean isFanHighEnabled = getConfigEnabled("relay2", addr) > 0;
+        boolean isFanLowEnabled = getConfigEnabled("relay3", addr) > 0; //relay3 for fan low
+        boolean isHeatingWaterValve = getConfigEnabled("relay4", addr) > 0;// Heating water valve
+        boolean isCoolingWaterValve = getConfigEnabled("relay6", addr) > 0;//Cooling water valve
         double coolingDeadband = 2.0;
         boolean occupied = false;
         if(occuStatus != null){
@@ -373,7 +367,7 @@ public class FourPipeFanCoilUnitProfile extends ZoneProfile {
             }
             occupied = occuStatus.isOccupied();
         }
-        HashMap<String,Integer> relayStates = new HashMap<String, Integer>();
+        HashMap<String,Integer> relayStates = new HashMap<>();
         if(isHeatingWaterValve){
 
             if(getCmdSignal("water and valve and heating",addr) > 0)
@@ -496,7 +490,7 @@ public class FourPipeFanCoilUnitProfile extends ZoneProfile {
                 }
                 break;
         }
-        Log.d("FANMODE",Arrays.toString(fourPfcuDeviceMap.keySet().toArray())+"SmartStat - 111 4PFCcool only :"+fanSpeed.name()+","+Arrays.toString(relayStates.entrySet().toArray())+","+coolingDeadband+","+roomTemp+","
+        CcuLog.d(TAG, Arrays.toString(fourPfcuDeviceMap.keySet().toArray())+"SmartStat - 111 4PFCcool only :"+fanSpeed.name()+","+Arrays.toString(relayStates.entrySet().toArray())+","+coolingDeadband+","+roomTemp+","
                 +setTempCooling+" "+isFanLowEnabled+" "+isFanMediumEnabled+" "+isFanHighEnabled+" "+isHeatingWaterValve+" "+isCoolingWaterValve);
         //ZoneState state = relayStates.size() > 0 ? (relayStates.containsKey("CoolingStage") ? COOLING : DEADBAND) : DEADBAND;
         StandaloneScheduler.updateSmartStatStatus(equip.getId(), COOLING,relayStates,ZoneTempState.NONE);
@@ -505,11 +499,11 @@ public class FourPipeFanCoilUnitProfile extends ZoneProfile {
     }
     private void fcu4HeatOnlyMode(Equip equip, short addr, double roomTemp, Occupied occuStatus, StandaloneLogicalFanSpeeds fanSpeed){
         double hysteresis = StandaloneTunerUtil.getStandaloneStage1Hysteresis(equip.getId());
-        boolean isFanMediumEnabled = getConfigEnabled("relay1",addr) > 0 ? true : false;
-        boolean isFanHighEnabled = getConfigEnabled("relay2",addr) > 0 ? true : false;
-        boolean isFanLowEnabled = getConfigEnabled("relay3", addr) > 0 ? true : false; //relay3 for fan low
-        boolean isHeatingWaterValve = getConfigEnabled("relay4",addr)> 0 ? true : false;// Heating water valve
-        boolean isCoolingWaterValve = getConfigEnabled("relay6",addr) > 0 ? true : false;//Cooling water valve
+        boolean isFanMediumEnabled = getConfigEnabled("relay1", addr) > 0;
+        boolean isFanHighEnabled = getConfigEnabled("relay2", addr) > 0;
+        boolean isFanLowEnabled = getConfigEnabled("relay3", addr) > 0; //relay3 for fan low
+        boolean isHeatingWaterValve = getConfigEnabled("relay4", addr) > 0;// Heating water valve
+        boolean isCoolingWaterValve = getConfigEnabled("relay6", addr) > 0;//Cooling water valve
         double heatingDeadband = 2.0;
         boolean occupied = false;
         if(occuStatus != null){
@@ -522,7 +516,7 @@ public class FourPipeFanCoilUnitProfile extends ZoneProfile {
             }
             occupied = occuStatus.isOccupied();
         }
-        HashMap<String,Integer> relayStates = new HashMap<String, Integer>();
+        HashMap<String,Integer> relayStates = new HashMap<>();
         if(isCoolingWaterValve){
             if(getCmdSignal("water and valve and cooling",addr) > 0)
                 setCmdSignal("water and valve and cooling",0,addr);
@@ -643,7 +637,7 @@ public class FourPipeFanCoilUnitProfile extends ZoneProfile {
                 }
                 break;
         }
-        Log.d("FANMODE",Arrays.toString(fourPfcuDeviceMap.keySet().toArray())+"SmartStat - 111 4PFHeat only :"+fanSpeed.name()+","+Arrays.toString(relayStates.entrySet().toArray())+","+heatingDeadband+","+roomTemp+","
+        CcuLog.d(TAG, Arrays.toString(fourPfcuDeviceMap.keySet().toArray())+"SmartStat - 111 4PFHeat only :"+fanSpeed.name()+","+Arrays.toString(relayStates.entrySet().toArray())+","+heatingDeadband+","+roomTemp+","
                 +setTempCooling+" "+isFanLowEnabled+" "+isFanMediumEnabled+" "+isFanHighEnabled+" "+isHeatingWaterValve+" "+isCoolingWaterValve);
 
         //ZoneState state = relayStates.size() > 0 ? (relayStates.containsKey("HeatingStage") ? HEATING : DEADBAND) : DEADBAND;

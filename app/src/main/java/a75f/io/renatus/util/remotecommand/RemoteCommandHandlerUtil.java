@@ -1,8 +1,9 @@
 package a75f.io.renatus.util.remotecommand;
 
 import static a75f.io.logic.L.TAG_CCU_DOWNLOAD;
-import static a75f.io.messaging.handler.RemoteCommandUpdateHandler.DOWNLOAD_BAC_APP;
-import static a75f.io.messaging.handler.RemoteCommandUpdateHandler.DOWNLOAD_REMOTE_ACCESS_APP;
+import static a75f.io.messaging.handler.RemoteCommandUpdateHandler.OTA_UPDATE_HOME_APP;
+import static a75f.io.messaging.handler.RemoteCommandUpdateHandler.OTA_UPDATE_BAC_APP;
+import static a75f.io.messaging.handler.RemoteCommandUpdateHandler.OTA_UPDATE_REMOTE_ACCESS_APP;
 import static a75f.io.messaging.handler.RemoteCommandUpdateHandler.RESET_CM;
 import static a75f.io.messaging.handler.RemoteCommandUpdateHandler.RESET_PASSWORD;
 import static a75f.io.messaging.handler.RemoteCommandUpdateHandler.RESTART_CCU;
@@ -28,16 +29,8 @@ import android.preference.PreferenceManager;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 
-import com.stericson.RootShell.exceptions.RootDeniedException;
-import com.stericson.RootShell.execution.Command;
-import com.stericson.RootTools.RootTools;
 
 import java.io.File;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.TimeoutException;
 
 import a75f.io.alerts.AlertManager;
 import a75f.io.alerts.AlertsConstantsKt;
@@ -74,18 +67,27 @@ import a75f.io.renatus.UtilityApplication;
 import a75f.io.renatus.util.CCUUtils;
 
 public class RemoteCommandHandlerUtil {
-    private static final String TAG_DOWNLOAD_BAC_APP = "DOWNLOAD_BAC_APP";
-    private static String bacAppApkName = "BACapp_qa_0.2.1.apk";
-    private static String bacAppPackageName = "com.example.ccu_bacapp";
+    private static final String INSTALL_CMD = "pm install -r -d -g %s";
+    private static final String UNINSTALL_CMD = "pm uninstall --user 0 %s";
+    private static final String SET_HOME_APP_CMD = "cmd package set-home-activity --user 0 \"%s/.MainActivity\"";
+    private static final String APPOPS_SET_ALLOW_CMD = "appops set %s %s allow";
+    private static final String PM_GRANT_CMD = "pm grant %s %s";
+    private static final String BAC_APP_PACKAGE_NAME = "com.example.ccu_bacapp";
+    private static final String REMOTE_ACCESS_PACKAGE_NAME = "io.seventyfivef.remoteaccess";
+    private static final String HOME_APP_PACKAGE_NAME = "io.seventyfivef.home";
+    private static final String LEGACY_HOME_APP_PACKAGE_NAME = "com.x75frenatus.home";
 
-    private static String privAppPath = "/system/priv-app/";
     private static long bacAppDownloadId = -1;
+    private static String bacAppApkName = "";
+
     private static long remoteAccessAppDownloadId = -1;
-    private static String remoteAccessAppName;
-    private static final String remoteAccessAppPackageName = "io.seventyfivef.remoteaccess";
+    private static String remoteAccessApkName = "";
+
+    private static long homeAppDownloadId = -1;
+    private static String homeAppApkName = "";
 
     public static void handleRemoteCommand(String commands, String cmdLevel, String id) {
-        CcuLog.d("RemoteCommand", "RemoteCommandHandlerUtil=" + commands + "," + cmdLevel);
+        CcuLog.i(L.TAG_CCU_REMOTE_COMMAND, "RemoteCommandHandlerUtil=" + commands + "," + cmdLevel);
         switch (commands) {
             case RESTART_CCU:
                 AlertManager.getInstance().generateAlert(AlertsConstantsKt.CCU_RESTART, "CCU Restart request sent for  - " + CCUHsApi.getInstance().getCcuName());
@@ -169,27 +171,31 @@ public class RemoteCommandHandlerUtil {
                         }
                         break;
                         default:
-                            CcuLog.i("Remote Command","Command is not valid" + commands);
+                            CcuLog.i(L.TAG_CCU_REMOTE_COMMAND,"Command is not valid" + commands);
                         break;
                 }
                 break;
-            case DOWNLOAD_BAC_APP:
-                CcuLog.i("Remote Command","DOWNLOAD_BAC_APP bac app version for download->" + id);
+            case OTA_UPDATE_BAC_APP:
+                CcuLog.i(L.TAG_CCU_REMOTE_COMMAND,"Downloading BAC App for OTA Update; ApkName=" + id);
                 bacAppApkName = id;
                 updateCCU(id, null, null);
                 setDownloadIdBacApp(downloadFile(DOWNLOAD_BASE_URL + bacAppApkName, bacAppApkName));
                 break;
-            case DOWNLOAD_REMOTE_ACCESS_APP:
-                CcuLog.i("Remote Command","remote access app version download->" + id);
-                remoteAccessAppName = id;
+            case OTA_UPDATE_REMOTE_ACCESS_APP:
+                CcuLog.i(L.TAG_CCU_REMOTE_COMMAND,"Downloading Remote Access Agent for OTA Update; ApkName=" + id);
+                remoteAccessApkName = id;
                 updateCCU(id, null, null);
-                setRemoteAccessAppDownloadId(downloadFile(DOWNLOAD_BASE_URL + remoteAccessAppName, remoteAccessAppName));
+                setRemoteAccessAppDownloadId(downloadFile(DOWNLOAD_BASE_URL + remoteAccessApkName, remoteAccessApkName));
+                break;
+            case OTA_UPDATE_HOME_APP:
+                CcuLog.i(L.TAG_CCU_REMOTE_COMMAND,"Downloading Home App for OTA Update; ApkName=" + id);
+                homeAppApkName = id;
+                updateCCU(id, null, null);
+                setHomeAppDownloadId(downloadFile(DOWNLOAD_BASE_URL + homeAppApkName, homeAppApkName));
                 break;
             case UPDATE_CCU_LOG_LEVEL:
                 handleCCULogLevelChange(id);
                 break;
-
-
         }
     }
 
@@ -261,12 +267,16 @@ public class RemoteCommandHandlerUtil {
         return size;
     }
 
-    private static void setDownloadIdBacApp(long downLoadId){
-        bacAppDownloadId = downLoadId;
+    private static void setDownloadIdBacApp(long downloadId){
+        bacAppDownloadId = downloadId;
     }
 
-    private static void setRemoteAccessAppDownloadId(long downLoadId){
-        remoteAccessAppDownloadId = downLoadId;
+    private static void setRemoteAccessAppDownloadId(long downloadId){
+        remoteAccessAppDownloadId = downloadId;
+    }
+
+    private static void setHomeAppDownloadId(long downloadId){
+        homeAppDownloadId = downloadId;
     }
 
     private static synchronized long downloadFile(String url, String apkFile) {
@@ -288,57 +298,19 @@ public class RemoteCommandHandlerUtil {
         CcuLog.d(TAG_CCU_DOWNLOAD, "downloading file: "+downloadId+","+url);
         return downloadId;
     }
-    private static void copyFile(String apkFile, String destination){
 
-        CcuLog.d(TAG_CCU_DOWNLOAD, "----copyFile----"+apkFile+"<--destination-->"+destination);
-        File file = new File(RenatusApp.getAppContext().getExternalFilesDir(null), apkFile);
-        if (!file.exists())
-        {
-            CcuLog.d(TAG_CCU_DOWNLOAD, "----file not found to copy@!@----");
-            return;
+    public static String resolveApkFilename(String apkName) {
+        File file = new File(RenatusApp.getAppContext().getExternalFilesDir(null), apkName);
+        final String filePath = file.getAbsolutePath();
+        if (!file.exists()) {
+            CcuLog.e(TAG_CCU_DOWNLOAD, String.format("Unable to find APK for %s, file %s does not exist", apkName, filePath));
+            return null;
         }
-
-        String apkFilePath = file.getAbsolutePath();
-
-        try {
-            // Request root access
-            if (RootTools.isRootAvailable() && RootTools.isAccessGiven()) {
-                // Remount the system partition as read-write
-                String remountCommand = "mount -o rw,remount /system";
-                Command remountCmd = new Command(0, remountCommand);
-                RootTools.getShell(true).add(remountCmd);
-
-                // Copy the APK file from data folder to system/priv-app
-                String copyCommand = "cp " + apkFilePath + " " + destination + apkFile;
-                Command copyCmd = new Command(0, copyCommand);
-                RootTools.getShell(true).add(copyCmd);
-
-                String changePermissionCommand = "chmod 644 "+ "/system/priv-app/"+apkFile;
-                Command changePermissionCmd = new Command(0, changePermissionCommand);
-                RootTools.getShell(true).add(changePermissionCmd);
-
-                // Close the root shell
-                RootTools.closeAllShells();
-
-                CcuLog.d(TAG_CCU_DOWNLOAD, "----root access  granted file is copied reboot after 5  seconds----");
-
-                new Timer().schedule(new TimerTask() {
-                    @Override
-                    public void run() {
-                        RenatusApp.rebootTablet();
-                    }
-                }, 5000);
-
-            } else {
-                CcuLog.i(TAG_CCU_DOWNLOAD, "----root access not granted----");
-            }
-        } catch (IOException | TimeoutException | RootDeniedException ex) {
-            ex.printStackTrace();
-        }
+        return filePath;
     }
 
     public static void updateCCU(String id, Fragment currentFragment, FragmentActivity activity) {
-        CcuLog.d(TAG_CCU_DOWNLOAD, "got command to install update--" + DownloadManager.EXTRA_DOWNLOAD_ID + "," + id);
+        CcuLog.i(TAG_CCU_DOWNLOAD, "got command to install update--" + DownloadManager.EXTRA_DOWNLOAD_ID + "," + id);
         RenatusApp.getAppContext().registerReceiver(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -352,68 +324,58 @@ public class RemoteCommandHandlerUtil {
                         if (AppInstaller.getHandle().getDownloadedFileVersion(downloadId) > 1) {
                             AppInstaller.getHandle().install(null, false, true, true);
                         } else {
-                            CcuLog.d(TAG_CCU_DOWNLOAD, "Update command ignored, Invalid version downloaded");
+                            CcuLog.w(TAG_CCU_DOWNLOAD, "Update command ignored, Invalid version downloaded");
                             Globals.getInstance().setCcuUpdateTriggerTimeToken(0);
                         }
-                    } else if (downloadId == AppInstaller.getHandle().getHomeAppDownloadId()) {
-                        int homeAppVersion = AppInstaller.getHandle().getDownloadedFileVersion(downloadId);
-                        if (homeAppVersion >= 1) {
-                            PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit().putInt("home_app_version", homeAppVersion).commit();
-                            AppInstaller.getHandle().install(null, true, false, true);
-                        }
                     } else if(downloadId == bacAppDownloadId){
-                        new Thread(() -> {
-                            boolean isBacAppInstalled = isPackageInstalled(bacAppPackageName, RenatusApp.context.getPackageManager());
-                            CcuLog.d(TAG_CCU_DOWNLOAD, "isBacAppInstalled -->"+isBacAppInstalled);
-                            if(isBacAppInstalled){
-                                updateApp(bacAppApkName);
-                            }else{
-                                copyFile(bacAppApkName, privAppPath);
-                            }
-                        }).start();
-
+                        String fileName = resolveApkFilename(bacAppApkName);
+                        if (fileName != null) {
+                            String[] commands = new String[]{
+                                    String.format(INSTALL_CMD, fileName)
+                            };
+                            RenatusApp.executeAsRoot(commands, BAC_APP_PACKAGE_NAME, false);
+                        }
                     } else if(downloadId == remoteAccessAppDownloadId){
-                        new Thread(() -> {
-                            boolean isAppInstalled = isPackageInstalled(remoteAccessAppPackageName, RenatusApp.context.getPackageManager());
-                            CcuLog.d(TAG_CCU_DOWNLOAD, "isAppInstalled -->"+isAppInstalled+" "+remoteAccessAppPackageName);
-                            if(isAppInstalled){
-                                updateApp(remoteAccessAppName);
-                            }else{
-                                copyFile(remoteAccessAppName, privAppPath);
-                            }
-                        }).start();
+                        String fileName = resolveApkFilename(remoteAccessApkName);
+                        if (fileName != null) {
+                            String[] commands = new String[]{
+                                    String.format(INSTALL_CMD, fileName),
+                                    String.format(APPOPS_SET_ALLOW_CMD, REMOTE_ACCESS_PACKAGE_NAME, "PROJECT_MEDIA"),                     // Screen Capture access
+                                    String.format(APPOPS_SET_ALLOW_CMD, REMOTE_ACCESS_PACKAGE_NAME, "SYSTEM_ALERT_WINDOW"),               // Overlay access
+                                    String.format(PM_GRANT_CMD, REMOTE_ACCESS_PACKAGE_NAME, "android.permission.WRITE_SECURE_SETTINGS")   // Accessibility access
+                            };
+                            RenatusApp.executeAsRoot(commands, REMOTE_ACCESS_PACKAGE_NAME, false);
+                        }
+                    } else if(downloadId == homeAppDownloadId){
+                        String fileName = resolveApkFilename(homeAppApkName);
+                        int homeAppVersion = AppInstaller.getHandle().getDownloadedFileVersion(homeAppDownloadId);
+                        if (homeAppVersion >= 1) {
+                            CcuLog.i(TAG_CCU_DOWNLOAD, String.format("Updating home app to version %d", homeAppVersion));
+                            PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit().putInt("home_app_version", homeAppVersion).commit();
+                        }
+
+                        if (fileName != null) {
+                            String[] commands = new String[]{
+                                    String.format(UNINSTALL_CMD, LEGACY_HOME_APP_PACKAGE_NAME),
+                                    String.format(INSTALL_CMD, fileName),
+                                    String.format(SET_HOME_APP_CMD, HOME_APP_PACKAGE_NAME)
+                            };
+                            RenatusApp.executeAsRoot(commands, HOME_APP_PACKAGE_NAME, false);
+                        }
                     }
                 }
             }
 
         }, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
-        if (id.startsWith("75f") || id.startsWith("75F"))
-            AppInstaller.getHandle().downloadHomeInstall(id);
-        else if (id.startsWith("RENATUS_CCU") || id.startsWith("CCU") || id.startsWith("DAIKIN_CCU")) {
+
+        if (id.startsWith("RENATUS_CCU") || id.startsWith("CCU") || id.startsWith("DAIKIN_CCU")) {
             if (System.currentTimeMillis() > Globals.getInstance().getCcuUpdateTriggerTimeToken() + 5 * 60 * 1000) {
                 Globals.getInstance().setCcuUpdateTriggerTimeToken(System.currentTimeMillis());
                 AppInstaller.getHandle().downloadCCUInstall(id, currentFragment, activity);
             } else {
-                CcuLog.d(TAG_CCU_DOWNLOAD, "Update command ignored , previous update in progress "
+                CcuLog.w(TAG_CCU_DOWNLOAD, "Update command ignored , previous update in progress "
                         + Globals.getInstance().getCcuUpdateTriggerTimeToken());
             }
-
-        }
-    }
-
-    private static void updateApp(String apkName) {
-        File file = new File(RenatusApp.getAppContext().getExternalFilesDir(null), apkName);
-        final String[] commands = {"pm install -r -d -g " + file.getAbsolutePath()};
-        CcuLog.d(TAG_CCU_DOWNLOAD, "Install AppInstall silent invokeInstallerIntent===>>>"  + "," + file.getAbsolutePath());
-        RenatusApp.executeAsRoot(commands);
-    }
-
-    private static boolean isPackageInstalled(String packageName, PackageManager packageManager) {
-        try {
-            packageManager.getPackageInfo(packageName, 0);
-            return true;
-        } catch (PackageManager.NameNotFoundException e) {
-            return false;
         }
     }
 

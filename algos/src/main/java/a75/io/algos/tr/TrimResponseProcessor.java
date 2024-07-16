@@ -1,8 +1,9 @@
 package a75.io.algos.tr;
 
-import android.util.Log;
 
 import java.util.ArrayList;
+
+import a75f.io.logger.CcuLog;
 
 /**
  * Created by samjithsadasivan on 6/4/18.
@@ -17,11 +18,7 @@ public class TrimResponseProcessor
     public ArrayList<TrimResetListener> trListeners;
     
     public int minuteCounter;//assuming TR processed every minute
-    
-    public TrimResponseProcessor() {
-    
-    }
-    
+
     public TrimResponseProcessor(SystemTrimResponse tr) {
         trSetting = tr;
         setPoint = tr.getSP0();
@@ -40,11 +37,7 @@ public class TrimResponseProcessor
     public void addTRListener(TrimResetListener l) {
         trListeners.add(l);
     }
-    
-    public void removeTRListener(TrimResetListener l) {
-        trListeners.remove(l);
-    }
-    
+
     public void processResetResponse() {
         if (++minuteCounter < trSetting.getTd()) {
             trSetting.resetRequest();
@@ -78,6 +71,6 @@ public class TrimResponseProcessor
         }
         
         setPoint = sp;
-        Log.d("CCU_SYSTEM", "setpoint "+setPoint);
+        CcuLog.d("CCU_SYSTEM", "setpoint "+setPoint);
     }
 }

@@ -8,6 +8,7 @@ import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.domain.logic.ProfileEquipBuilder;
@@ -96,22 +97,32 @@ public class DamperReheatTypeHandler {
         } else if (configPoint.getMarkers().contains(Tags.REHEAT) && configPoint.getMarkers().contains(Tags.VAV)) {
 
             if (typeVal <= 0) {
-                SmartNode.setDomainPointEnabled(address, "analog2Out", false);
-            } else if (typeVal <= ReheatType.Pulse.ordinal()) {
+                SmartNode.setDomainPointEnabled(address, "analog2Out", false, hayStack);
+                SmartNode.setDomainPointEnabled(address, "relay1", false, hayStack);
+                 if(isVavNoFan(hayStack, configPoint)){
+                    SmartNode.setDomainPointEnabled(address, "relay2", false, hayStack);
+                 }
+            } else if (typeVal-1 <= ReheatType.Pulse.ordinal()) {
                 //Modulating Reheat -> Enable AnalogOut2 and disable relays
                 SmartNode.updateDomainPhysicalPointType(address, "analog2Out", ReheatType.values()[typeVal].displayName);
-                SmartNode.setDomainPointEnabled(address, "analog2Out", true);
+                SmartNode.setDomainPointEnabled(address, "analog2Out", true, hayStack);
 
-                SmartNode.setDomainPointEnabled(address, "relay1", false);
-
+                SmartNode.setDomainPointEnabled(address, "relay1", false, hayStack);
+                if(isVavNoFan(hayStack, configPoint)){
+                    SmartNode.setDomainPointEnabled(address, "relay2", false, hayStack);
+                }
             } else {
-                SmartNode.setDomainPointEnabled(address, "analog2Out", false);
+                SmartNode.setDomainPointEnabled(address, "analog2Out", false, hayStack);
                 SmartNode.updateDomainPhysicalPointType(address, "relay1",
                         OutputRelayActuatorType.NormallyClose.displayName);
-                SmartNode.setPointEnabled(address, "relay1", true);
-                if (typeVal == ReheatType.TwoStage.ordinal()) {
+                SmartNode.setDomainPointEnabled(address, "relay1", true, hayStack);
+                if (typeVal -1 == ReheatType.TwoStage.ordinal()) {
                     SmartNode.updateDomainPhysicalPointType(address, "relay2", OutputRelayActuatorType.NormallyClose.displayName);
-                    SmartNode.setDomainPointEnabled(address, "relay2", true);
+                    SmartNode.setDomainPointEnabled(address, "relay2", true, hayStack);
+                }else {
+                    if (isVavNoFan(hayStack, configPoint)) {
+                        SmartNode.setDomainPointEnabled(address, "relay2", false, hayStack);
+                    }
                 }
             }
         }
@@ -135,5 +146,10 @@ public class DamperReheatTypeHandler {
                 DesiredTempDisplayMode.setModeType(configPoint.getRoomRef(), hayStack);
             }
         }
+    }
+
+    private static boolean isVavNoFan(CCUHsApi hayStack, Point configPoint) {
+        Equip vavEquip = HSUtil.getEquip(hayStack, configPoint.getEquipRef());
+        return !vavEquip.getMarkers().contains(Tags.SERIES) && !vavEquip.getMarkers().contains(Tags.PARALLEL);
     }
 }

@@ -17,6 +17,7 @@ import a75f.io.logger.CcuLog
 import io.seventyfivef.domainmodeler.client.ModelDirective
 import io.seventyfivef.domainmodeler.client.ModelPointDef
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
+import io.seventyfivef.domainmodeler.common.point.MultiStateConstraint
 import io.seventyfivef.domainmodeler.common.point.PointConfiguration
 import org.projecthaystack.HStr
 
@@ -260,7 +261,20 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
                 initializeDefaultVal(hayStackPoint, valueConfig.currentVal )
             }
         } else if (pointConfig.modelDef.tagNames.contains("writable") && pointConfig.modelDef.defaultValue is Number) {
-            initializeDefaultVal(hayStackPoint, pointConfig.modelDef.defaultValue as Number)
+            if (pointConfig.modelDef.valueConstraint is MultiStateConstraint) {
+                var enumValue: Int
+                (pointConfig.modelDef.valueConstraint as MultiStateConstraint).allowedValues.get(pointConfig.modelDef.defaultValue as Int)
+                    .let { enumIndex->
+                        if (enumIndex.value.filter { it.isDigit() }.isNotEmpty()) {
+                            enumValue = enumIndex.value.filter { it.isDigit() }.toInt()
+                            initializeDefaultVal(hayStackPoint, enumValue.toDouble())
+                        } else {
+                            initializeDefaultVal(hayStackPoint, pointConfig.modelDef.defaultValue as Number)
+                        }
+                    }
+            } else {
+                initializeDefaultVal(hayStackPoint, pointConfig.modelDef.defaultValue as Number)
+            }
         } else if (pointConfig.modelDef.tagNames.contains("his") && !(pointConfig.modelDef.domainName.equals(
                 DomainName.heartBeat))) {
             // heartBeat is the one point where we don't want to initialize a hisVal to zero (since we want a gray dot on the zone screen, not green)

@@ -106,26 +106,22 @@ public class PreConfigCCU extends Fragment {
 
 
 
-        imageGoback.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                // TODO Auto-generated method stub
-                ((FreshRegistration)getActivity()).selectItem(1);
-            }
+        imageGoback.setOnClickListener(v -> {
+            // TODO Auto-generated method stub
+            ((FreshRegistration)getActivity()).selectItem(1);
         });
 
 
-        mNext.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                // TODO Auto-generated method stub
-                int[] mandotaryIds = new int []
-                        {
-                                R.id.editConfigCode,
-                                R.id.editConfirmCode
-                        };
-                if(!validateEditText(mandotaryIds))
-                {
-                    goTonext();
-                }
+        mNext.setOnClickListener(v -> {
+            // TODO Auto-generated method stub
+            int[] mandotaryIds = new int []
+                    {
+                            R.id.editConfigCode,
+                            R.id.editConfirmCode
+                    };
+            if(!validateEditText(mandotaryIds))
+            {
+                goTonext();
             }
         });
 
@@ -178,7 +174,7 @@ public class PreConfigCCU extends Fragment {
 
         for(int id: ids)
         {
-            EditText et = (EditText)getView().findViewById(id);
+            EditText et = getView().findViewById(id);
 
             if(TextUtils.isEmpty(et.getText().toString()))
             {

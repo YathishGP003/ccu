@@ -3,9 +3,9 @@ package a75f.io.logic.migration.schedulerevamp
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.HayStackConstants
 import a75f.io.api.haystack.util.*
+import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.util.RxjavaUtil
-import android.util.Log
 import org.apache.commons.lang3.StringUtils
 import org.projecthaystack.HDictBuilder
 import org.projecthaystack.HGridBuilder
@@ -15,7 +15,7 @@ const val CMD = "SCHEDULE_MIGRATED"
 
 fun handleMessage(){
     val ccuHsApi = CCUHsApi.getInstance()
-    Log.d(L.TAG_SCHEDULABLE,"handle SCHEDULE_MIGRATED")
+    CcuLog.d(L.TAG_SCHEDULABLE,"handle SCHEDULE_MIGRATED")
     RxjavaUtil.executeBackground {
         val siteRef = CCUHsApi.getInstance().siteIdRef.toString()
         val hClient =
@@ -26,11 +26,11 @@ fun handleMessage(){
 
         val buildingSchedulable = HDictBuilder().add(
             "filter", "schedulable and default and equipRef == "
-                    + StringUtils.prependIfMissing(buildingEquipRef.get("id").toString(), "@")
+                    + StringUtils.prependIfMissing(buildingEquipRef["id"].toString(), "@")
         ).toDict()
         val buildingSchedulableGrid =
             hClient.call("read", HGridBuilder.dictToGrid(buildingSchedulable))
-        Log.d(L.TAG_SCHEDULABLE,"buildingSchedulableGrid = "+buildingSchedulableGrid.numRows())
+        CcuLog.d(L.TAG_SCHEDULABLE,"buildingSchedulableGrid = "+buildingSchedulableGrid.numRows())
         CCUHsApi.getInstance().updateSchedulable(buildingSchedulableGrid,false)
 
 
@@ -39,11 +39,11 @@ fun handleMessage(){
         for(zone in zones){
             val schedulableDict = HDictBuilder().add(
                 "filter", "schedulable and zone and roomRef == "
-                        + StringUtils.prependIfMissing(zone.get("id").toString(), "@")
+                        + StringUtils.prependIfMissing(zone["id"].toString(), "@")
             ).toDict()
             val schedulableGrid =
                 hClient.call("read", HGridBuilder.dictToGrid(schedulableDict))
-            Log.d(L.TAG_SCHEDULABLE,"schedulableGrid = "+zone.get("dis").toString()+"==  "+schedulableGrid.numRows())
+            CcuLog.d(L.TAG_SCHEDULABLE,"schedulableGrid = "+ zone["dis"].toString()+"==  "+schedulableGrid.numRows())
             CCUHsApi.getInstance().updateSchedulable(schedulableGrid, true)
         }
 

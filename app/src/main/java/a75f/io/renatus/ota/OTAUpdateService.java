@@ -15,7 +15,6 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Environment;
-import android.util.Log;
 
 import androidx.annotation.Nullable;
 
@@ -37,7 +36,6 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
@@ -60,6 +58,7 @@ import a75f.io.device.serial.FirmwareDeviceType_t;
 import a75f.io.device.serial.MessageConstants;
 import a75f.io.device.serial.MessageType;
 import a75f.io.device.serial.SnRebootIndicationMessage_t;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.BuildConfig;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
@@ -80,9 +79,9 @@ public class OTAUpdateService extends IntentService {
     private static final String DOWNLOAD_BASE_URL = "http://updates.75fahrenheit.com/";
     private static final File DOWNLOAD_DIR = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
 
-    private static long RETRY_TIME = 5 * 60000;
-    private static long DELAY = 2 * 60000;
-    private static int NO_OF_RETRY = 5;
+    private static final long RETRY_TIME = 5 * 60000;
+    private static final  long DELAY = 2 * 60000;
+    private static final int NO_OF_RETRY = 5;
     //Update variables
     private static ArrayList<Integer> mLwMeshAddresses;
     private static int mCurrentLwMeshAddress;
@@ -195,7 +194,7 @@ public class OTAUpdateService extends IntentService {
                 int reason = c.getInt(c.getColumnIndex(DownloadManager.COLUMN_REASON));
                 c.close();
 
-            Log.d(TAG, "[DOWNLOAD] Download failed, reason: " + reason);
+            CcuLog.d(TAG, "[DOWNLOAD] Download failed, reason: " + reason);
             if (currentOtaRequest != null) {
                 OtaCache cache = new OtaCache();
                 cache.updateRetryCount(currentOtaRequest);
@@ -209,11 +208,11 @@ public class OTAUpdateService extends IntentService {
             c.close();
 
             if (id == mMetadataDownloadId) {
-                Log.d(TAG, "[DOWNLOAD] Metadata downloaded");
+                CcuLog.d(TAG, "[DOWNLOAD] Metadata downloaded");
 
                 runMetadataCheck(mVersionMajor, mVersionMinor, mFirmwareDeviceType);
             } else if (id == mBinaryDownloadId) {
-                Log.d(TAG, "[DOWNLOAD] Binary downloaded");
+                CcuLog.d(TAG, "[DOWNLOAD] Binary downloaded");
 
                 runBinaryCheck(mVersionMajor, mVersionMinor, mFirmwareDeviceType);
             }
@@ -223,9 +222,9 @@ public class OTAUpdateService extends IntentService {
         CmToCcuOverUsbFirmwareUpdateAckMessage_t msg = new CmToCcuOverUsbFirmwareUpdateAckMessage_t();
         msg.setByteBuffer(ByteBuffer.wrap(eventBytes).order(ByteOrder.LITTLE_ENDIAN), 0);
 
-        Log.i(TAG,"msg.lwMeshAddress.get()  "+msg.lwMeshAddress.get()+"   "+mCurrentLwMeshAddress);
+        CcuLog.i(TAG,"msg.lwMeshAddress.get()  "+msg.lwMeshAddress.get()+"   "+mCurrentLwMeshAddress);
         if(msg.lwMeshAddress.get() == mCurrentLwMeshAddress) {
-            Log.d(TAG, "[UPDATE] CM has acknowledged update");
+            CcuLog.d(TAG, "[UPDATE] CM has acknowledged update");
             sendBroadcast(new Intent(Globals.IntentActions.OTA_UPDATE_CM_ACK));
             // We will receive multiple packets ack so always update the value need to check how to do this
         }
@@ -245,7 +244,7 @@ public class OTAUpdateService extends IntentService {
             CmToCcuOverUsbFirmwarePacketRequest_t msg = new CmToCcuOverUsbFirmwarePacketRequest_t();
             msg.setByteBuffer(ByteBuffer.wrap(eventBytes).order(ByteOrder.LITTLE_ENDIAN), 0);
 
-            Log.d(TAG, "[UPDATE] CM asks for packet " + msg.sequenceNumber.get() + " of "
+            CcuLog.d(TAG, "[UPDATE] CM asks for packet " + msg.sequenceNumber.get() + " of "
                     + (mUpdateLength / MessageConstants.FIRMWARE_UPDATE_PACKET_SIZE));
 
             sendPacket(msg.lwMeshAddress.get(), msg.sequenceNumber.get());
@@ -275,7 +274,7 @@ public class OTAUpdateService extends IntentService {
             } else {
                 boolean isExtracted = extractFirmwareMetadata(metadata);
                 if (!isExtracted || !versionMatches((short) versionMajor, (short) versionMinor)) {
-                    Log.d(TAG, "[METADATA] Incorrect firmware metadata, downloading correct metadata");
+                    CcuLog.d(TAG, "[METADATA] Incorrect firmware metadata, downloading correct metadata");
                     mMetadataDownloadId = startFileDownload(filename, deviceType, METADATA_FILE_FORMAT);
                     return;
                 }
@@ -287,7 +286,7 @@ public class OTAUpdateService extends IntentService {
                 packets = importFile(binary, MessageConstants.FIRMWARE_UPDATE_PACKET_SIZE);
             }
         } else {
-            Log.i(L.TAG_CCU_OTA_PROCESS, " OTA request device is not found..!");
+            CcuLog.i(L.TAG_CCU_OTA_PROCESS, " OTA request device is not found..!");
         }
     }
 
@@ -297,7 +296,7 @@ public class OTAUpdateService extends IntentService {
         CmToCcuOtaStatus_t msg = new CmToCcuOtaStatus_t();
         msg.setByteBuffer(ByteBuffer.wrap(eventBytes).order(ByteOrder.LITTLE_ENDIAN), 0);
 
-        Log.i(L.TAG_CCU_OTA_PROCESS, " CM to Device process : State : "+msg.currentState.get() + " Data : "+msg.data.get());
+        CcuLog.i(L.TAG_CCU_OTA_PROCESS, " CM to Device process : State : "+msg.currentState.get() + " Data : "+msg.data.get());
         if ( msg.currentState.get() == OtaState.FIRMWARE_RECEIVED.ordinal()
                 || msg.currentState.get() == OtaState.FIRMWARE_COPY_AVAILABLE.ordinal()) {
             OtaStatusDiagPoint.Companion.updateOtaStatusPoint(OtaStatus.OTA_CCU_TO_CM_FIRMWARE_RECEIVED, mCurrentLwMeshAddress);
@@ -322,16 +321,16 @@ public class OTAUpdateService extends IntentService {
         msg.setByteBuffer(ByteBuffer.wrap(eventBytes).order(ByteOrder.LITTLE_ENDIAN), 0);
 
         if(msg.smartNodeDeviceType == null){
-            Log.d(TAG, " SmartNode device type is null" );
+            CcuLog.d(TAG, " SmartNode device type is null" );
             return;
         }
-        Log.d(TAG, "Node: "+msg.smartNodeAddress.get() + " Device :"+msg.smartNodeDeviceType.get() + " Device Rebooted");
+        CcuLog.d(TAG, "Node: "+msg.smartNodeAddress.get() + " Device :"+msg.smartNodeDeviceType.get() + " Device Rebooted");
         if (msg.smartNodeDeviceType.get() != FirmwareDeviceType_t.FIRMWARE_DEVICE_CONTROL_MOTE
                 && mCurrentLwMeshAddress != msg.smartNodeAddress.get()) {
-            Log.d(TAG, mCurrentLwMeshAddress+ " != "+msg.smartNodeAddress.get());
+            CcuLog.d(TAG, mCurrentLwMeshAddress+ " != "+msg.smartNodeAddress.get());
             return;
         }
-        Log.d(TAG, "mUpdateInProgress : "+mUpdateInProgress);
+        CcuLog.d(TAG, "mUpdateInProgress : "+mUpdateInProgress);
        if (( msg.smartNodeDeviceType.get() == FirmwareDeviceType_t.FIRMWARE_DEVICE_CONTROL_MOTE ||
                 (msg.smartNodeAddress.get() == mCurrentLwMeshAddress)) && mUpdateInProgress) {
             sendBroadcast(new Intent(Globals.IntentActions.OTA_UPDATE_NODE_REBOOT));
@@ -344,16 +343,16 @@ public class OTAUpdateService extends IntentService {
                     "ended for "+mFirmwareDeviceType.getUpdateFileName()+" "+ mCurrentLwMeshAddress+" "+"with version"+" "+versionMajor +
                     // changed Smart node to Smart Device as it is indicating the general name (US:9387)
                     "." + versionMinor);
-            Log.d(TAG, mUpdateWaitingToComplete + " - "+versionMajor+" - "+versionMinor);
+           CcuLog.d(TAG, mUpdateWaitingToComplete + " - "+versionMajor+" - "+versionMinor);
             if (mUpdateWaitingToComplete && versionMatches(versionMajor, versionMinor)) {
-                Log.d(TAG, "[UPDATE] [SUCCESSFUL]"
+                CcuLog.d(TAG, "[UPDATE] [SUCCESSFUL]"
                         + " [Node Address:" + mCurrentLwMeshAddress + "]"   // updated to Node address from SN as
                         // Node address is more generic and mCurrentLwMeshAddress contains generic node address (US:9387)
                         + " [PACKETS:" + mLastSentPacket
                         + "] Updated to target: " + versionMajor + "." + versionMinor);
                 OtaStatusDiagPoint.Companion.updateOtaStatusPoint(OtaStatus.OTA_SUCCEEDED, mCurrentLwMeshAddress);
             } else {
-                Log.d(TAG, "[UPDATE] [FAILED]"
+                CcuLog.d(TAG, "[UPDATE] [FAILED]"
                         + " [Node Address:" + mCurrentLwMeshAddress + "]"
                         + " [PACKETS:" + mLastSentPacket + "]"
                         + " [TARGET: " + mVersionMajor
@@ -377,7 +376,7 @@ public class OTAUpdateService extends IntentService {
      */
     private void handleOtaUpdateStartRequest(Intent intent) {
         otaRequestProcessInProgress = true;
-        Log.i(TAG, "handleOtaUpdateStartRequest: called started a request");
+        CcuLog.i(TAG, "handleOtaUpdateStartRequest: called started a request");
         deleteFilesByDeviceType(DOWNLOAD_DIR);
         String id = intent.getStringExtra(ID);
         String firmwareVersion = intent.getStringExtra(FIRMWARE_VERSION);
@@ -442,19 +441,19 @@ public class OTAUpdateService extends IntentService {
                                FirmwareComponentType_t deviceType, String requestType, String currentRequest) {
 
         String filename = makeFileName(versionMajor, versionMinor, deviceType);
-        Log.d(TAG, "[VALIDATION] Validating update instructions: " + filename);
+        CcuLog.d(TAG, "[VALIDATION] Validating update instructions: " + filename);
         if (mUpdateInProgress) {
-            Log.d(TAG, "[VALIDATION] Update already in progress");
+            CcuLog.d(TAG, "[VALIDATION] Update already in progress");
             return;
         }
 
         if (!validVersion((short) versionMajor, (short) versionMinor)) {
-            Log.d(TAG, "[VALIDATION] Invalid version: " + versionMajor + "." + versionMinor);
+            CcuLog.d(TAG, "[VALIDATION] Invalid version: " + versionMajor + "." + versionMinor);
             resetUpdateVariables();
             return;
         }
 
-        Log.d(TAG, "[VALIDATION] Valid version");
+        CcuLog.d(TAG, "[VALIDATION] Valid version");
 
         if(mLwMeshAddresses == null) {
             mLwMeshAddresses = new ArrayList<>();
@@ -471,7 +470,7 @@ public class OTAUpdateService extends IntentService {
                 if(!equipment.isEmpty()){
                     Device OAOdevice = HSUtil.getDevice(Short.parseShort(equipment.get(Tags.GROUP).toString()));
                     if(OAOdevice.getMarkers().contains( deviceType.getHsMarkerName() )) {
-                        Log.d(TAG, "[VALIDATION] Adding OAO device " + OAOdevice.getAddr() + " to update");
+                        CcuLog.d(TAG, "[VALIDATION] Adding OAO device " + OAOdevice.getAddr() + " to update");
                         mLwMeshAddresses.add(Integer.parseInt(OAOdevice.getAddr()));
                     }
                 }
@@ -486,7 +485,7 @@ public class OTAUpdateService extends IntentService {
                         for(Device device : HSUtil.getDevices(zone.getId())) {
 
                             if(shouldBeCheckedForUpdate(device, deviceType)) {
-                                Log.d(TAG, "[VALIDATION] Adding device " + device.getAddr() + " to update");
+                                CcuLog.d(TAG, "[VALIDATION] Adding device " + device.getAddr() + " to update");
                                 mLwMeshAddresses.add(Integer.parseInt(device.getAddr()));
                             }
 
@@ -499,7 +498,7 @@ public class OTAUpdateService extends IntentService {
                 //update all nodes in the same zone as the specified node
                 for(Device device : HSUtil.getDevices("@"+id)) {
                     if(shouldBeCheckedForUpdate(device, deviceType)) {
-                        Log.d(TAG, "[VALIDATION] Adding device " + device.getAddr() + " to update");
+                        CcuLog.d(TAG, "[VALIDATION] Adding device " + device.getAddr() + " to update");
                         mLwMeshAddresses.add(Integer.parseInt(device.getAddr()));
                     }
                 }
@@ -511,17 +510,17 @@ public class OTAUpdateService extends IntentService {
                 Equip equip = HSUtil.getEquipInfo("@"+id);
                 Device device = HSUtil.getDevice(Short.parseShort(equip.getGroup()));
                     if(shouldBeCheckedForUpdate(device, deviceType)) {
-                        Log.d(TAG, "[VALIDATION] Adding device " + equip.getGroup() + " to update");
+                        CcuLog.d(TAG, "[VALIDATION] Adding device " + equip.getGroup() + " to update");
                         mLwMeshAddresses.add(Integer.parseInt(equip.getGroup()));
                     }
                 break;
         }
         if(mLwMeshAddresses.isEmpty()) {
-            Log.d(TAG, "[VALIDATION] Could not find device " + id + " at level " + updateLevel);
+            CcuLog.d(TAG, "[VALIDATION] Could not find device " + id + " at level " + updateLevel);
 
             resetUpdateVariables();
             otaRequestProcessInProgress = false;
-            Log.d(TAG, "[RESET] OTA Resetting the Update Variables & moving for next request");
+            CcuLog.d(TAG, "[RESET] OTA Resetting the Update Variables & moving for next request");
             processOtaRequest();
             return;
         }
@@ -563,19 +562,19 @@ public class OTAUpdateService extends IntentService {
 
         String filename = makeFileName(versionMajor, versionMinor, deviceType);
 
-        Log.d(TAG, "[METADATA] Running metadata check on file: " + filename);
+        CcuLog.d(TAG, "[METADATA] Running metadata check on file: " + filename);
         File metadata = findFile(OTAUpdateService.DOWNLOAD_DIR, filename, METADATA_FILE_FORMAT);
 
         if (metadata == null) {
-            Log.d(TAG, "[METADATA] File not found, downloading metadata");
+            CcuLog.d(TAG, "[METADATA] File not found, downloading metadata");
             mMetadataDownloadId = startFileDownload(filename, deviceType, METADATA_FILE_FORMAT);
             return;
 
         } else {
-            Log.d(TAG, "[METADATA] Extracting firmware metadata");
+            CcuLog.d(TAG, "[METADATA] Extracting firmware metadata");
             boolean isExtracted = extractFirmwareMetadata(metadata);
             if (!isExtracted || !versionMatches( (short) versionMajor, (short) versionMinor) ) {
-                Log.d(TAG, "[METADATA] Incorrect firmware metadata, downloading correct metadata");
+                CcuLog.d(TAG, "[METADATA] Incorrect firmware metadata, downloading correct metadata");
                 mMetadataDownloadId = startFileDownload(filename, deviceType, METADATA_FILE_FORMAT);
                 return;
             }
@@ -585,11 +584,11 @@ public class OTAUpdateService extends IntentService {
         }
 
         if (skipCurrentDeviceBasedOnMetadata()) {
-            Log.d(TAG, "[METADATA] Metadata contents do not match device type, moving to next node");
+            CcuLog.d(TAG, "[METADATA] Metadata contents do not match device type, moving to next node");
             OtaStatusDiagPoint.Companion.updateOtaStatusPoint(OtaStatus.NODE_STATUS_VALUE_FW_OTA_FAIL_NOT_FOR_ME_DEV_TYPE, mCurrentLwMeshAddress);
             moveUpdateToNextNode();
         } else {
-            Log.d(TAG, "[METADATA] Metadata passed check, starting binary check");
+            CcuLog.d(TAG, "[METADATA] Metadata passed check, starting binary check");
             runBinaryCheck(versionMajor, versionMinor, deviceType);
         }
 
@@ -620,25 +619,25 @@ public class OTAUpdateService extends IntentService {
     private void runBinaryCheck(int versionMajor, int versionMinor, FirmwareComponentType_t deviceType) {
         String filename = makeFileName(versionMajor, versionMinor, deviceType);
 
-        Log.d(TAG, "[BINARY] Running binary check on file: " + filename);
+        CcuLog.d(TAG, "[BINARY] Running binary check on file: " + filename);
         File binary = findFile(OTAUpdateService.DOWNLOAD_DIR, filename, BINARY_FILE_FORMAT);
 
         if (binary == null) {
-            Log.d(TAG, "[BINARY] File not found, downloading binary");
+            CcuLog.d(TAG, "[BINARY] File not found, downloading binary");
             mBinaryDownloadId = startFileDownload(filename, deviceType, BINARY_FILE_FORMAT);
             return;
 
         } else {
-            Log.d(TAG, "[BINARY] Checking binary length match: " + binary.length() + ", " + mUpdateLength);
+            CcuLog.d(TAG, "[BINARY] Checking binary length match: " + binary.length() + ", " + mUpdateLength);
             if (binary.length() != mUpdateLength) {
-                Log.d(TAG, "[BINARY] Incorrect firmware binary, downloading correct binary");
+                CcuLog.d(TAG, "[BINARY] Incorrect firmware binary, downloading correct binary");
                 mMetadataDownloadId = startFileDownload(filename, deviceType, BINARY_FILE_FORMAT);
                 return;
             }
         }
 
-        Log.d(TAG, "[BINARY] Binary passed check");
-        Log.d(TAG, "[STARTUP] Starting to update device with address " + mCurrentLwMeshAddress);
+        CcuLog.d(TAG, "[BINARY] Binary passed check");
+        CcuLog.d(TAG, "[STARTUP] Starting to update device with address " + mCurrentLwMeshAddress);
 
         //TODO notify something (PubNub?) that an update has started
         HashMap ccu = CCUHsApi.getInstance().read("ccu");
@@ -663,7 +662,7 @@ public class OTAUpdateService extends IntentService {
     private long startFileDownload(String filename, FirmwareComponentType_t deviceType, String fileFormat) {
         String filePathSystem = DOWNLOAD_DIR.toString() + "/" + filename + fileFormat;
         String filePathUrl = DOWNLOAD_BASE_URL + deviceType.getUpdateUrlDirectory() + filename + fileFormat;
-        Log.d(TAG, "[DOWNLOAD] Starting download of file " + filePathUrl);
+        CcuLog.d(TAG, "[DOWNLOAD] Starting download of file " + filePathUrl);
 
         DownloadManager.Request downloadRequest = new DownloadManager.Request(Uri.parse(filePathUrl))
                 .setTitle(filename + fileFormat)
@@ -683,14 +682,14 @@ public class OTAUpdateService extends IntentService {
     private File findFile(File dir, final String fileName, String fileFormat) {
         try {
             for(File file : dir.listFiles()) {
-                Log.d(TAG,"Compare files: " + file.getName() + ", " + fileName);
+                CcuLog.d(TAG,"Compare files: " + file.getName() + ", " + fileName);
                 if(file.getName().startsWith(fileName) && file.getName().endsWith(fileFormat))
                     return file;
             }
             return null;
 
         } catch (ArrayIndexOutOfBoundsException e) {
-            Log.e(TAG, "[STARTUP] File not found in " + dir);
+            CcuLog.e(TAG, "[STARTUP] File not found in " + dir);
             return null;
         }
     }
@@ -729,10 +728,10 @@ public class OTAUpdateService extends IntentService {
         try {
             fileByteArray = Files.toByteArray(file);
         } catch (IOException e) {
-            Log.e(TAG, "[STARTUP] I/O exception while importing update file: " + e.getMessage());
+            CcuLog.e(TAG, "[STARTUP] I/O exception while importing update file: " + e.getMessage());
             e.printStackTrace();
         } catch (IllegalArgumentException e) {
-            Log.e(TAG, "[STARTUP] File is too large: " + e.getMessage());
+            CcuLog.e(TAG, "[STARTUP] File is too large: " + e.getMessage());
             e.printStackTrace();
         }
 
@@ -741,11 +740,11 @@ public class OTAUpdateService extends IntentService {
         int packetNum = len / packetLength;
 
         if ((packetNum * packetLength) < len) {
-            Log.d(TAG, "[STARTUP] Added packet: " + packetNum + ", to " + (packetNum + 1) + "]");
+            CcuLog.d(TAG, "[STARTUP] Added packet: " + packetNum + ", to " + (packetNum + 1) + "]");
             packetNum++;
         }
 
-        Log.d(TAG, "[STARTUP] File imported, number of packets: " + packetNum);
+        CcuLog.d(TAG, "[STARTUP] File imported, number of packets: " + packetNum);
 
         for (int i = 0; i < packetNum; i++) {
             byte[] packet = new byte[packetLength];
@@ -758,7 +757,7 @@ public class OTAUpdateService extends IntentService {
             rPackets.add(packet);
         }
 
-        Log.d(TAG, "[STARTUP] Packets generated: " + rPackets.size());
+        CcuLog.d(TAG, "[STARTUP] Packets generated: " + rPackets.size());
 
         return rPackets;
     }
@@ -770,17 +769,17 @@ public class OTAUpdateService extends IntentService {
      * @param deviceType The type of device being updated
      */
     private void setUpdateFile(File file, FirmwareComponentType_t deviceType) {
-        Log.d(TAG, "[STARTUP] Moving binary file to RAM");
+        CcuLog.d(TAG, "[STARTUP] Moving binary file to RAM");
         packets = importFile(file, MessageConstants.FIRMWARE_UPDATE_PACKET_SIZE);
 
         if (packets == null) {
-            Log.d(TAG, "[STARTUP] Failed to move binary file to RAM");
+            CcuLog.d(TAG, "[STARTUP] Failed to move binary file to RAM");
             OtaStatusDiagPoint.Companion.updateOtaStatusPoint(OtaStatus.OTA_CCU_TO_CM_FAILED, mCurrentLwMeshAddress);
             resetUpdateVariables();
             return;
         }
 
-        Log.d(TAG, "[STARTUP] Successfully moved binary file to RAM, sending metadata");
+        CcuLog.d(TAG, "[STARTUP] Successfully moved binary file to RAM, sending metadata");
 
         OtaStatusDiagPoint.Companion.updateOtaStatusPoint(OtaStatus.OTA_REQUEST_IN_PROGRESS, mCurrentLwMeshAddress);
         sendFirmwareMetadata(deviceType);
@@ -827,17 +826,17 @@ public class OTAUpdateService extends IntentService {
             reader.close();
 
         } catch (FileNotFoundException e) {
-            Log.e(TAG, "[METADATA] Unable to parse file: File Not Found");
+            CcuLog.e(TAG, "[METADATA] Unable to parse file: File Not Found");
             json.delete();
             return false;
         } catch (IOException e) {
             json.delete();
-            Log.e(TAG, "[METADATA] Unable to parse file: IO Error");
+            CcuLog.e(TAG, "[METADATA] Unable to parse file: IO Error");
             return false;
         }
 
         if (BuildConfig.DEBUG) {
-            Log.d(TAG, "[METADATA] [Node address:" + mCurrentLwMeshAddress
+            CcuLog.d(TAG, "[METADATA] [Node address:" + mCurrentLwMeshAddress
                     + "] [VER:" + mVersionMajor + "." + mVersionMinor
                     + "] [LEN:" + mUpdateLength
                     + "] [SIG:" + ByteArrayUtils.byteArrayToHexString(mFirmwareSignature, true) + "]");
@@ -866,14 +865,14 @@ public class OTAUpdateService extends IntentService {
 
         message.metadata.setSignature(mFirmwareSignature);
         if (BuildConfig.DEBUG) {
-            Log.d(TAG,
+            CcuLog.d(TAG,
                     "[METADATA] [Node Address:" + mCurrentLwMeshAddress + "] [DATA: " + ByteArrayUtils.byteArrayToHexString(message.getByteBuffer().array(), true) + "]");
         }
 
         try {
             MeshUtil.sendStructToCM(message);
         } catch (Exception e) {
-            Log.e(TAG, "[METADATA] FAILED TO SEND");
+            CcuLog.e(TAG, "[METADATA] FAILED TO SEND");
         }
     }
 
@@ -886,19 +885,19 @@ public class OTAUpdateService extends IntentService {
     private void sendPacket(int lwMeshAddress, int packetNumber) {
 
         if (lwMeshAddress != mCurrentLwMeshAddress) {
-            Log.d(TAG, "[UPDATE] Received packet request from address " + lwMeshAddress + ", instead of " + mCurrentLwMeshAddress);
+            CcuLog.d(TAG, "[UPDATE] Received packet request from address " + lwMeshAddress + ", instead of " + mCurrentLwMeshAddress);
             return;
         }
         if (mUpdateWaitingToComplete && packetNumber == packets.size() /*- 2*/) {
-            Log.d(TAG, "[UPDATE] Received packet request while waiting for the update to complete");
+            CcuLog.d(TAG, "[UPDATE] Received packet request while waiting for the update to complete");
             return;
         }
         if (packetNumber < 0 || packetNumber > packets.size()) {
-            Log.d(TAG, "[UPDATE] Received request for invalid packet: " + packetNumber);
+            CcuLog.d(TAG, "[UPDATE] Received request for invalid packet: " + packetNumber);
             return;
         }
         if (!mUpdateWaitingToComplete && (packetNumber == (packets.size() - 1))) {
-            Log.d(TAG, "[UPDATE] Received request for final packet");
+            CcuLog.d(TAG, "[UPDATE] Received request for final packet");
             mUpdateWaitingToComplete = true;
         }
 
@@ -914,7 +913,7 @@ public class OTAUpdateService extends IntentService {
             mLastSentPacket = packetNumber;
             if (BuildConfig.DEBUG) {
                 if (packetNumber % 100 == 0) {
-                    Log.d(TAG,
+                    CcuLog.d(TAG,
                             "[UPDATE] [Node Address:" + lwMeshAddress + "]" + "PS:"+packets.size()+","+message.packet.length+","+message.sequenceNumber.get()+" [PN:" + mLastSentPacket
                             + "] [DATA: " + ByteArrayUtils.byteArrayToHexString(packets.get(packetNumber), true) +  "]");
                 }
@@ -924,7 +923,7 @@ public class OTAUpdateService extends IntentService {
         try {
             MeshUtil.sendStructToCM(message);
         } catch (Exception e) {
-            Log.e(TAG, "[UPDATE] [Node Address:" + lwMeshAddress + "] [PN:" + packetNumber + "] [FAILED]");
+            CcuLog.e(TAG, "[UPDATE] [Node Address:" + lwMeshAddress + "] [PN:" + packetNumber + "] [FAILED]");
         }
     }
 
@@ -989,7 +988,7 @@ public class OTAUpdateService extends IntentService {
         mBinaryDownloadId = -1;
 
         mUpdateWaitingToComplete = false;
-        Log.d(TAG, "[RESET] Reset OTA update status");
+        CcuLog.d(TAG, "[RESET] Reset OTA update status");
 
     }
 
@@ -1011,7 +1010,7 @@ public class OTAUpdateService extends IntentService {
         Intent completeIntent = new Intent(Globals.IntentActions.OTA_UPDATE_COMPLETE);
         sendBroadcast(completeIntent);
         otaRequestProcessInProgress = false;
-        Log.d(TAG, "[RESET] OTA Request process completed moving for next request");
+        CcuLog.d(TAG, "[RESET] OTA Request process completed moving for next request");
         processOtaRequest();
 
     }
@@ -1023,27 +1022,27 @@ public class OTAUpdateService extends IntentService {
      */
     void addRequest(Intent otaRequest){
 
-        Log.i(TAG, "addRequest: "+ otaRequestsQueue);
+        CcuLog.i(TAG, "addRequest: "+ otaRequestsQueue);
         if (otaRequest != null) {
             otaRequestsQueue.add(otaRequest);
             OtaCache cache = new OtaCache();
             cache.saveRequest(otaRequest);
              startRetryHandler();
-            Log.i(TAG, "Current Requests size : "+otaRequestsQueue.size());
+            CcuLog.i(TAG, "Current Requests size : "+otaRequestsQueue.size());
             processOtaRequest();
 
         }
     }
 
     void processOtaRequest(){
-        Log.i(TAG,"processOtaRequest Called " + otaRequestsQueue.size() + " otaRequestProcessInProgress"+otaRequestProcessInProgress );
+        CcuLog.i(TAG,"processOtaRequest Called " + otaRequestsQueue.size() + " otaRequestProcessInProgress"+otaRequestProcessInProgress );
         try {
             if (!otaRequestsQueue.isEmpty() && !otaRequestProcessInProgress){
                 handleOtaUpdateStartRequest(Objects.requireNonNull(otaRequestsQueue.poll()));
             }
         } catch (Exception e){
             e.printStackTrace();
-            Log.i(TAG,"Failed to take request from queue "+ e.getMessage());
+            CcuLog.i(TAG,"Failed to take request from queue "+ e.getMessage());
         }
     }
 
@@ -1096,7 +1095,7 @@ public class OTAUpdateService extends IntentService {
         }
     }
     void stopRetryHandler() {
-        Log.i(TAG, "Retry handler stopped");
+        CcuLog.i(TAG, "Retry handler stopped");
         if(retryHandler != null ) {
             retryHandler.cancel();
         }

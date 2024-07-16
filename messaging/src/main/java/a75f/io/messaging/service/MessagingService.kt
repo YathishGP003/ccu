@@ -45,7 +45,7 @@ class ServiceGenerator {
         return createRetrofit(baseUrl).create(MessagingService::class.java)
     }
 
-    fun createRetrofit(baseUrl: String): Retrofit {
+    private fun createRetrofit(baseUrl: String): Retrofit {
         val okhttpLogging = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
         }

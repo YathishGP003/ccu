@@ -15,7 +15,6 @@ import static a75f.io.logic.bo.building.schedules.Occupancy.OCCUPIED;
 import static a75f.io.logic.bo.building.schedules.Occupancy.VACATION;
 
 import android.os.StrictMode;
-import android.util.Log;
 
 import org.joda.time.DateTime;
 import org.projecthaystack.HDict;
@@ -203,8 +202,7 @@ public class ScheduleUtil {
         return false;
     }
     
-    public static Occupied getCurrentOccupied(HashMap<String, Occupied> occupiedHashMap,
-                                                        Map<String, OccupancyData> equipOccupancy) {
+    public static Occupied getCurrentOccupied(HashMap<String, Occupied> occupiedHashMap) {
         Occupied currOccupied = null;
         for (Map.Entry occEntry : occupiedHashMap.entrySet()) {
             String roomRef = occEntry.getKey().toString();
@@ -234,7 +232,7 @@ public class ScheduleUtil {
             if (!isAHUServedZone(roomRef, CCUHsApi.getInstance())) {
                 continue;
             }
-            Occupied occ = (Occupied) occEntry.getValue();
+            Occupied occ = occEntry.getValue();
             if (millisToOccupancy == 0) {
                 millisToOccupancy = occ.getMillisecondsUntilNextChange();
                 next = occ;
@@ -388,7 +386,7 @@ public class ScheduleUtil {
         //Logging temporary hold expiry for debugging.
         if (thExpiry > 0)
         {
-            Log.d(TAG_CCU_SCHEDULER, "thExpiry: " + thExpiry);
+            CcuLog.d(TAG_CCU_SCHEDULER, "thExpiry: " + thExpiry);
         }
         return thExpiry;
     }
@@ -492,9 +490,7 @@ public class ScheduleUtil {
 
     public static boolean isSystemProfile(CCUHsApi hayStack,String equipId){
         HashMap<Object, Object> equip = hayStack.readMapById(equipId);
-        if(equip.containsKey("vav") || equip.containsKey("dab"))
-            return true;
-        return false;
+        return equip.containsKey("vav") || equip.containsKey("dab");
     }
 
     public static boolean areAllZonesBuildingLimitsBreached(Map<String, OccupancyData> equipOccupancy ){

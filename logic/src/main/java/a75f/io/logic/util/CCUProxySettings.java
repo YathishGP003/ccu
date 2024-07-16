@@ -69,6 +69,7 @@ public class CCUProxySettings {
         }
         return output.toString();
     }
+
     public static boolean CheckEthernet() {
         CcuLog.i("CCU_PROXY","CheckEthernet : ");
         boolean isEthernetConnected = false;
@@ -80,4 +81,5 @@ public class CCUProxySettings {
         }
         return isEthernetConnected;
     }
+
 }

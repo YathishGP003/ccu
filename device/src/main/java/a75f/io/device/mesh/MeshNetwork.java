@@ -119,25 +119,19 @@ public class MeshNetwork extends DeviceNetwork
                                     CcuLog.d("CCU_SN_MESSAGES", "=================NOW SENDING SN SEEDS=====================" + zone.getId());
                                     CcuToCmOverUsbDatabaseSeedSnMessage_t seedMessage = LSmartNode.getSeedMessage(zone, Short.parseShort(d.getAddr()), d.getEquipRef(), snprofile);
                                     tempLogdStructAsJson(seedMessage);
-                                    if (sendStructToCM(/*(short) seedMessage.smartNodeAddress.get(),*/ seedMessage)) {
-                                        //Log.w(DLog.UPDATED_ZONE_TAG, JsonSerializer.toJson(zone, true));
-                                    }
+                                    sendStructToCM(seedMessage);
+
                                     CcuLog.d("CCU_SN_MESSAGES", "=================NOW SENDING SN Settings2=====================");
                                     CcuToCmOverUsbSnSettings2Message_t settings2Message = LSmartNode.getSettings2Message(zone, Short.parseShort(d.getAddr()), d.getEquipRef(), snprofile);
                                     tempLogdStructAsJson(settings2Message);
-                                    if (sendStructToCM(settings2Message)) {
-                                        //Log.w(DLog.UPDATED_ZONE_TAG, JsonSerializer.toJson(zone, true));
-                                    }
+                                    sendStructToCM(settings2Message);
                                 } else {
                                     CcuLog.d("CCU_SN_MESSAGES", "=================NOW SENDING SN Settings=====================");
                                     CcuToCmOverUsbSnSettingsMessage_t settingsMessage = LSmartNode.getSettingsMessage(zone, Short.parseShort(d.getAddr()), d.getEquipRef(), snprofile);
                                     tempLogdStructAsJson(settingsMessage);
-                                    if (sendStruct((short) settingsMessage.smartNodeAddress.get(), settingsMessage)) {
-                                        //Log.w(DLog.UPDATED_ZONE_TAG, JsonSerializer.toJson(zone, true));
-                                    }
+                                    sendStruct((short) settingsMessage.smartNodeAddress.get(), settingsMessage);
                                     CcuLog.d("CCU_SN_MESSAGES", "=================NOW SENDING SN CONTROLS=====================");
                                     CcuToCmOverUsbSnControlsMessage_t controlsMessage = LSmartNode.getControlMessage(zone, Short.parseShort(d.getAddr()), d.getEquipRef());
-                                    //Check duplicated without current time and then append time to control package.
                                     tempLogdStructAsJson(controlsMessage);
                                     if (!checkDuplicateStruct((short) controlsMessage.smartNodeAddress.get(), controlsMessage)) {
                                         controlsMessage = LSmartNode.getCurrentTimeForControlMessage(controlsMessage);
@@ -146,9 +140,7 @@ public class MeshNetwork extends DeviceNetwork
                                     CcuLog.d("CCU_SN_MESSAGES", "=================NOW SENDING SN Settings2=====================");
                                     CcuToCmOverUsbSnSettings2Message_t settings2Message = LSmartNode.getSettings2Message(zone, Short.parseShort(d.getAddr()), d.getEquipRef(), snprofile);
                                     tempLogdStructAsJson(settings2Message);
-                                    if (sendStruct((short) settings2Message.smartNodeAddress.get(), settings2Message)) {
-                                        //Log.w(DLog.UPDATED_ZONE_TAG, JsonSerializer.toJson(zone, true));
-                                    }
+                                    sendStruct((short) settings2Message.smartNodeAddress.get(), settings2Message);
                                 }
                                 break;
                             case SMART_STAT:
@@ -162,15 +154,13 @@ public class MeshNetwork extends DeviceNetwork
                                 if (bSeedMessage) {
                                     CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING SS SEEDS=====================" + zone.getId());
                                     CcuToCmOverUsbDatabaseSeedSmartStatMessage_t seedSSMessage = LSmartStat.getSeedMessage(zone, Short.parseShort(d.getAddr()), d.getEquipRef(), profile);
-                                    if (sendStructToCM(seedSSMessage)) {
-                                        //Log.w(DLog.UPDATED_ZONE_TAG, JsonSerializer.toJson(zone, true));
-                                    }
+                                    sendStructToCM(seedSSMessage);
                                 } else {
                                     CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING SMART_STAT Settings=====================");
                                     CcuToCmOverUsbSmartStatSettingsMessage_t settingsMessage = LSmartStat.getSettingsMessage(zone, Short.parseShort(d.getAddr()), d.getEquipRef(), profile);
-                                    if (sendStruct((short) settingsMessage.address.get(), settingsMessage)) {
-                                        //Log.w(DLog.UPDATED_ZONE_TAG, JsonSerializer.toJson(zone, true));
-                                    }
+                                    sendStruct((short) settingsMessage.address.get(), settingsMessage);
+
+
                                     CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING SMART_STAT CONTROLS=====================");
                                     CcuToCmOverUsbSmartStatControlsMessage_t controlsSSMessage = LSmartStat.getControlMessage(zone, Short.parseShort(d.getAddr()), d.getEquipRef());
                                     if (!checkDuplicateStruct((short) controlsSSMessage.address.get(), controlsSSMessage)) {
@@ -182,7 +172,6 @@ public class MeshNetwork extends DeviceNetwork
 
 
                             case HYPER_STAT:
-                                String hyperStatProfile = "monitoring"; //TODO
                                 Equip equip = new Equip.Builder()
                                         .setHashMap(CCUHsApi.getInstance()
                                                 .read("equip and group ==\"" + d.getAddr() + "\"")).build();

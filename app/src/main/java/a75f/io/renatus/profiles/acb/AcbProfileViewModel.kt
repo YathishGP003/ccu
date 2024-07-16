@@ -44,7 +44,11 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.properties.Delegates
-
+import a75f.io.logic.bo.building.definitions.ReheatType.*
+import a75f.io.renatus.profiles.profileUtils.UnusedPortsModel
+import a75f.io.renatus.profiles.profileUtils.UnusedPortsModel.Companion.saveUnUsedPortStatus
+import a75f.io.api.haystack.HSUtil
+import a75f.io.api.haystack.Tags
 class AcbProfileViewModel : ViewModel() {
 
     lateinit var zoneRef: String
@@ -85,6 +89,7 @@ class AcbProfileViewModel : ViewModel() {
     lateinit var minCFMCoolingList: List<String>
     lateinit var maxCFMReheatingList: List<String>
     lateinit var minCFMReheatingList: List<String>
+    private lateinit var unusedPorts: HashMap<String, Boolean>
 
     private val _isDialogOpen = MutableLiveData<Boolean>()
     private var saveJob : Job? = null
@@ -125,6 +130,7 @@ class AcbProfileViewModel : ViewModel() {
         this.hayStack = hayStack
 
         initializeLists()
+        unusedPorts = UnusedPortsModel.initializeUnUsedPorts(deviceAddress, hayStack)
         CcuLog.i(Domain.LOG_TAG, "VavProfileViewModel Loaded")
         modelLoaded = true
     }
@@ -226,6 +232,7 @@ class AcbProfileViewModel : ViewModel() {
 
             acbProfile.init()
             setOutputTypes(profileConfiguration)
+            saveUnUsedPortStatus(profileConfiguration, deviceAddress, hayStack)
             updateCondensateSensor(profileConfiguration)
             updateRelayAssociation(profileConfiguration)
             setMinCfmSetpointMaxVals(profileConfiguration)
@@ -317,11 +324,11 @@ class AcbProfileViewModel : ViewModel() {
     // "analogType" tag is used by control message code and cannot easily be replaced with a domain name query.
     // We are setting this value upon equip creation/reconfiguration for now.
     private fun setOutputTypes(config: AcbProfileConfiguration) {
-        val device = hayStack.read("device and addr == \"" + config.nodeAddress + "\"")
+        val device = hayStack.readEntity("device and addr == \"" + config.nodeAddress + "\"")
 
         // Set
         val relay1 = hayStack.readHDict("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.relay1 + "\"");
-        var relay1Point = RawPoint.Builder().setHDict(relay1)
+        var relay1Point = RawPoint.Builder().setHDict(relay1).setEnabled(true)
         hayStack.updatePoint(relay1Point.setType("Relay N/C").build(), relay1.get("id").toString())
 
         var relay2 = hayStack.readHDict("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.relay2 + "\"");
@@ -332,9 +339,19 @@ class AcbProfileViewModel : ViewModel() {
         var analog1Point = RawPoint.Builder().setHDict(analogOut1)
         hayStack.updatePoint(analog1Point.setType(getDamperTypeString(config)).build(), analogOut1.get("id").toString())
 
-        var analogOut2 = hayStack.readHDict("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.analog2Out + "\"");
-        var analog2Point = RawPoint.Builder().setHDict(analogOut2)
-        hayStack.updatePoint(analog2Point.setType(getValveTypeString(config)).build(), analogOut2.get("id").toString())
+        val analogOut2 = hayStack.readHDict("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.analog2Out + "\"");
+
+        val valueType = config.valveType.currentVal.toInt() - 1
+        val analog2OpEnabled = valueType == ZeroToTenV.ordinal ||
+                valueType == TwoToTenV.ordinal ||
+                valueType == TenToZeroV.ordinal ||
+                valueType == TenToTwov.ordinal  ||
+                valueType == Pulse.ordinal
+
+        val analog2Point = RawPoint.Builder().setHDict(analogOut2)
+            .setType(getValveTypeString(config)).setEnabled(analog2OpEnabled).build()
+
+        hayStack.updatePoint(analog2Point, analogOut2.get("id").toString())
 
     }
 

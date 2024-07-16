@@ -145,7 +145,21 @@ fun StyledTextView(text: String, fontSize : Int, textAlignment: TextAlign = Text
         text = text,
     )
 }
-
+@Composable
+fun GrayLabelTextColor(text: String,widthValue:Int =200) {
+    Text(
+        modifier = Modifier
+            .padding(PaddingValues(start = 16.dp))
+            .width(widthValue.dp),
+        style = TextStyle(
+            fontFamily = myFontFamily,
+            fontWeight = FontWeight.Normal,
+            fontSize = 20.sp,
+            color = Color.Gray
+        ),
+        text = text
+    )
+}
 @Composable
 fun BoldStyledTextView(text: String, fontSize : Int, textAlignment: TextAlign = TextAlign.Center) {
     Text(

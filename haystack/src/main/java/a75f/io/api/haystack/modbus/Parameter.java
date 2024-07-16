@@ -1,6 +1,8 @@
 package a75f.io.api.haystack.modbus;
 
 
+import androidx.annotation.NonNull;
+
 import com.google.gson.Gson;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
@@ -61,16 +63,10 @@ public class Parameter {
     public List<Condition> conditions;
 
     public boolean isDisplayInUiDefault() {
-        return displayInUiDefault;
+        return false;
     }
 
-    public void setDisplayInUiDefault(boolean displayInUiDefault) {
-        this.displayInUiDefault = displayInUiDefault;
-    }
 
-    @SerializedName("displayInUiDefault")
-    @Expose
-    private boolean displayInUiDefault = false;
     private boolean displayInUI = false;
     private int registerAddress;
     private String registerNumber;
@@ -97,49 +93,34 @@ public class Parameter {
         return startBit;
     }
 
-    public void setStartBit(Integer startBit) {
-        this.startBit = startBit;
-    }
+
 
     public Integer getEndBit() {
         return endBit;
     }
 
-    public void setEndBit(Integer endBit) {
-        this.endBit = endBit;
-    }
 
     public String getBitParamRange() {
         return bitParamRange;
     }
 
-    public void setBitParamRange(String bitParamRange) {
-        this.bitParamRange = bitParamRange;
-    }
 
     public Integer getBitParam() {
         return bitParam;
     }
 
-    public void setBitParam(Integer bitParam) {
-        this.bitParam = bitParam;
-    }
 
     public List<LogicalPointTags> getLogicalPointTags() {
         return logicalPointTags;
     }
 
-    public void setLogicalPointTags(List<LogicalPointTags> logicalPointTags) {
-        this.logicalPointTags = logicalPointTags;
-    }
+
 
     public List<UserIntentPointTags> getUserIntentPointTags() {
         return userIntentPointTags;
     }
 
-    public void setUserIntentPointTags(List<UserIntentPointTags> userintentPointTags) {
-        this.userIntentPointTags = userintentPointTags;
-    }
+
 
     public List<Command> getCommands() {
         return commands;
@@ -155,9 +136,6 @@ public class Parameter {
 
     public void setConditions(List<Condition> conditions) {
         this.conditions = conditions;
-    }
-    public boolean getDisplayInUiDefault() {
-        return displayInUiDefault;
     }
     public boolean isDisplayInUI() {
         return displayInUI;
@@ -302,6 +280,7 @@ public class Parameter {
         }
     }
     
+    @NonNull
     @Override
     public String toString() {
         return " Param : name "+name+",startBit "+startBit+", endBit "+endBit+", bitParam "+bitParam+", " +

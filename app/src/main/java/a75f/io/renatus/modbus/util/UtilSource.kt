@@ -3,6 +3,7 @@ package a75f.io.renatus.modbus.util
 import a75f.io.api.haystack.modbus.EquipmentDevice
 import a75f.io.api.haystack.modbus.Parameter
 import a75f.io.logger.CcuLog
+import a75f.io.logic.L
 import a75f.io.renatus.R
 import a75f.io.renatus.modbus.models.EquipModel
 import a75f.io.renatus.modbus.models.RegisterItem
@@ -116,7 +117,7 @@ fun isAllRightParamsSelected(equipDevice: EquipmentDevice) : Boolean {
 
 }
 fun log(msg: String) {
-    CcuLog.i("DMModbus",msg)
+    CcuLog.i(L.TAG_CCU_DM_MODBUS,msg)
 }
 
 fun parseModbusDataFromString(json: String?): EquipmentDevice? {

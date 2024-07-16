@@ -2,12 +2,9 @@ package a75f.io.api.haystack.sync;
 
 
 import org.apache.commons.lang3.StringUtils;
-import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.util.HashMap;
 import java.util.Objects;
-
 import a75f.io.api.haystack.BuildConfig;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.constants.CcuFieldConstants;
@@ -18,7 +15,7 @@ public class CcuRegistrationHandler {
     public static final String TAG = "CCU_HS_CcuSyncHandler";
 
     public boolean doSync() {
-        HashMap ccu = CCUHsApi.getInstance().read("device and ccu");
+        HashMap<Object, Object> ccu = CCUHsApi.getInstance().readEntity("device and ccu");
 
         String id = Objects.toString(ccu.get(CcuFieldConstants.ID), "");
 
@@ -35,7 +32,7 @@ public class CcuRegistrationHandler {
 
     public boolean updateCcuDeviceId(HashMap<Object, Object> ccu, String id, String buildTunerId) {
         CcuLog.d(TAG, "updateCcuDeviceId "+id+" buildTunerId "+buildTunerId);
-        HashMap site = CCUHsApi.getInstance().read("site");
+        HashMap<Object, Object> site = CCUHsApi.getInstance().readEntity("site");
 
         String siteRef = site.get("id").toString();
 

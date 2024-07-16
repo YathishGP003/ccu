@@ -44,7 +44,10 @@ import a75f.io.logic.jobs.SystemScheduleUtil;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.messaging.MessageHandler;
 import a75f.io.messaging.exceptions.MessageHandlingFailed;
-
+import static a75f.io.api.haystack.HayStackConstants.WRITABLE_ARRAY_DURATION;
+import static a75f.io.api.haystack.HayStackConstants.WRITABLE_ARRAY_LEVEL;
+import static a75f.io.api.haystack.HayStackConstants.WRITABLE_ARRAY_VAL;
+import static a75f.io.api.haystack.HayStackConstants.WRITABLE_ARRAY_WHO;
 public class UpdatePointHandler implements MessageHandler
 {
     public static final String CMD = "updatePoint";
@@ -54,15 +57,10 @@ public class UpdatePointHandler implements MessageHandler
     private static ModbusWritableDataInterface modbusWritableDataInterface = null;
 
     public static void handlePointUpdateMessage(final JsonObject msgObject, Long timeToken, Boolean isDataSync) throws MessageHandlingFailed {
-        String src = msgObject.get("who").getAsString();
         String pointUid = "@" + msgObject.get("id").getAsString();
         String pointLevel = msgObject.get("level").getAsString();
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap<Object, Object> pointEntity = hayStack.readMapById(pointUid);
-
-        /*if (canIgnorePointUpdate(src, pointUid, hayStack)) {
-            return;
-        }*/
         if(!isCloudEntityHasLatestValue(pointEntity, timeToken)){
             Log.i("ccu_read_changes","CCU HAS LATEST VALUE ");
             return;
@@ -83,7 +81,28 @@ public class UpdatePointHandler implements MessageHandler
         Point localPoint = new Point.Builder().setHashMap(CCUHsApi.getInstance().readMapById(pointUid)).build();
         CcuLog.d(L.TAG_CCU_PUBNUB, " handleMessage for" + Arrays.toString(localPoint.getMarkers().toArray()));
 
-
+        //move this class to a separate file
+        if(HSUtil.isPhysicalPointUpdate(localPoint)){
+            String value = msgObject.get(WRITABLE_ARRAY_VAL).getAsString();
+            CcuLog.i(L.TAG_CCU_PUBNUB, "update physical point : "+localPoint.getDisplayName() +
+                    " Value: "+value);
+            if(value.isEmpty()){
+                //When a level is deleted, it currently generates a message with empty value.
+                //Handle it here.
+                int level = msgObject.get(HayStackConstants.WRITABLE_ARRAY_LEVEL).getAsInt();
+                hayStack.clearPointArrayLevel(localPoint.getId(), level, true);
+                hayStack.writeHisValById(localPoint.getId(), HSUtil.getPriorityVal(localPoint.getId()));
+            } else {
+                hayStack.writePointLocal(localPoint.getId(), msgObject.get(WRITABLE_ARRAY_LEVEL).getAsInt(),
+                        msgObject.get(WRITABLE_ARRAY_WHO).getAsString(), Double.parseDouble(value), msgObject.has(WRITABLE_ARRAY_DURATION) ?
+                                msgObject.get(WRITABLE_ARRAY_DURATION).getAsInt() : 0);
+                hayStack.writeHisValById(localPoint.getId(),Double.parseDouble( value));
+                // Read priority array list to get duration of levels.
+                // read all points once
+                fetchRemotePoint(pointUid, isDataSync, msgObject);
+            }
+            return;
+        }
         /*
         Reconfiguration handled for PI profile
          */
@@ -171,7 +190,7 @@ public class UpdatePointHandler implements MessageHandler
         }
 
         if (HSUtil.isVAVZonePriorityConfig(pointUid, CCUHsApi.getInstance())) {
-            VAVZonePriorityHandler.updateVAVZonePriority(msgObject, localPoint, hayStack);
+            VAVZonePriorityHandler.updateVAVZonePriority(msgObject, localPoint);
         }
 
         if(HSUtil.isDABTrueCFMConfig(pointUid, CCUHsApi.getInstance())){
@@ -228,7 +247,7 @@ public class UpdatePointHandler implements MessageHandler
                 Thread.sleep(10);
                 updatePoints(localPoint);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                CcuLog.e(L.TAG_CCU_MESSAGING, "Error in thread sleep", e);
             }
         
         } else {
@@ -248,9 +267,9 @@ public class UpdatePointHandler implements MessageHandler
      * Replace local point array with point array values from server
      */
     private static void fetchRemotePoint(String pointUid, Boolean isDataSync, JsonObject msgObject) throws MessageHandlingFailed {
-        double level = 0;
-        double val = 0;
-        double duration = 0;
+        double level;
+        double val;
+        double duration;
         HDateTime lastModifiedDateTime;
         CCUHsApi.getInstance().deletePointArray(pointUid);
         if (isDataSync) {
@@ -293,7 +312,7 @@ public class UpdatePointHandler implements MessageHandler
                             CCUHsApi.getInstance().getCCUUserName(), HNum.make(val), HNum.make(duration), lastModifiedDateTime);
 
                 } catch (NumberFormatException e) {
-                    e.printStackTrace();
+                    CcuLog.e(L.TAG_CCU_MESSAGING, "Error in parsing remote point array", e);
                 }
 
             }
@@ -304,11 +323,11 @@ public class UpdatePointHandler implements MessageHandler
 
     private static void logPointArray(Point localPoint) {
         ArrayList values = CCUHsApi.getInstance().readPoint(localPoint.getId());
-        if (values != null && values.size() > 0) {
+        if (values != null && !values.isEmpty()) {
             for (int l = 1; l <= values.size(); l++) {
                 HashMap valMap = ((HashMap) values.get(l - 1));
                 if (valMap.get("val") != null) {
-                    Double duration = Double.parseDouble(valMap.get("duration").toString());
+                    double duration = Double.parseDouble(valMap.get("duration").toString());
                     CcuLog.d(L.TAG_CCU_PUBNUB, "Updated point " + localPoint.getDisplayName() + " , level: " + l + " , val :" + Double.parseDouble(valMap.get("val").toString())
                                                + " duration " + (duration > 0 ? duration - System.currentTimeMillis() : duration));
                 }

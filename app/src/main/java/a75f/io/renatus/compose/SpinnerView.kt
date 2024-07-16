@@ -109,11 +109,17 @@ fun SpinnerElement(
         }
         val customHeight = getDropdownCustomHeight(items, noOfItemsDisplayInDropDown, dropDownHeight)
         DropdownMenu(
-            modifier = Modifier.background(Color.White).height(customHeight.dp).width(200.dp).simpleVerticalScrollbar(lazyListState),
+            modifier = Modifier
+                    .background(Color.White)
+                    .height(customHeight.dp)
+                    .width(200.dp)
+                    .simpleVerticalScrollbar(lazyListState),
             expanded = expanded.value,
             onDismissRequest = { expanded.value = false }) {
             LazyColumn(state = lazyListState,
-                modifier = Modifier.height((customHeight).dp).width(200.dp)) {
+                modifier = Modifier
+                        .height((customHeight).dp)
+                        .width(200.dp)) {
                 itemsIndexed(items) { index, item ->
                     DropdownMenuItem(
                         modifier = Modifier.background(if (item == selectedItem.value) secondaryColor else Color.White),
@@ -159,16 +165,16 @@ fun SpinnerElementOption(
     var selectedIndex by remember { mutableStateOf(getDefaultSelectionIndex(items, defaultSelection))}
     Box(
         modifier = Modifier
-            .wrapContentSize()
-            .padding(
-                PaddingValues(
-                    top = 5.dp
+                .wrapContentSize()
+                .padding(
+                        PaddingValues(
+                                top = 5.dp
+                        )
                 )
-            )
     ) {
         Column(modifier = Modifier
-            .wrapContentWidth()
-            .clickable(onClick = { expanded.value = true })) {
+                .wrapContentWidth()
+                .clickable(onClick = { expanded.value = true })) {
             Row {
                 Text(
                     fontSize = 20.sp,
@@ -194,11 +200,17 @@ fun SpinnerElementOption(
         }
         val customHeight = getDropdownCustomHeight(items, noOfItemsDisplayInDropDown, dropDownHeight)
         DropdownMenu(
-            modifier = Modifier.background(Color.White).width((previewWidth + 30).dp).height(customHeight.dp).simpleVerticalScrollbar(lazyListState),
+            modifier = Modifier
+                    .background(Color.White)
+                    .width((previewWidth + 30).dp)
+                    .height(customHeight.dp)
+                    .simpleVerticalScrollbar(lazyListState),
             expanded = expanded.value,
             onDismissRequest = { expanded.value = false }) {
             LazyColumn(state = lazyListState,
-                modifier = Modifier.height((customHeight).dp).width((previewWidth + 30).dp)) {
+                modifier = Modifier
+                        .height((customHeight).dp)
+                        .width((previewWidth + 30).dp)) {
                 itemsIndexed(items) { index, item ->
                     DropdownMenuItem(
                         modifier = Modifier.background(if (index == selectedIndex) secondaryColor else Color.White),
@@ -246,16 +258,16 @@ fun SearchSpinnerElement(
     var selectedIndex by remember { mutableStateOf(default.index) }
     Box(
         modifier = Modifier
-            .wrapContentSize()
-            .padding(
-                PaddingValues(
-                    top = 5.dp
+                .wrapContentSize()
+                .padding(
+                        PaddingValues(
+                                top = 5.dp
+                        )
                 )
-            )
     ) {
         Column(modifier = Modifier
-            .width(width.dp)
-            .clickable(onClick = { expanded.value = true }, enabled = isEnabled)) {
+                .width(width.dp)
+                .clickable(onClick = { expanded.value = true }, enabled = isEnabled)) {
             Row {
                 Text(
                     fontSize = 20.sp,
@@ -280,7 +292,9 @@ fun SearchSpinnerElement(
         }
 
         DropdownMenu(
-            modifier = Modifier.background(Color.White).width(width.dp),
+            modifier = Modifier
+                    .background(Color.White)
+                    .width(width.dp),
             expanded = expanded.value,
             onDismissRequest = { expanded.value = false }) {
             Column(
@@ -337,8 +351,10 @@ fun SearchSpinnerElement(
                     val customHeight = getDropdownCustomHeight(filteredItems, noOfItemsDisplayInDropDown, dropDownHeight)
                     LazyColumn(
                         state = lazyListState,
-                        modifier = Modifier.height((customHeight).dp).width(width.dp)
-                            .simpleVerticalScrollbar(lazyListState)
+                        modifier = Modifier
+                                .height((customHeight).dp)
+                                .width(width.dp)
+                                .simpleVerticalScrollbar(lazyListState)
                     ) {
                         items(filteredItems) {
                             DropdownMenuItem(

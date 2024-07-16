@@ -2,7 +2,6 @@ package a75f.io.logic.watchdog;
 
 import java.io.DataOutputStream;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import a75f.io.logger.CcuLog;

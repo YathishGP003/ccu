@@ -6,11 +6,11 @@ import com.google.gson.JsonObject;
 import org.projecthaystack.HDateTime;
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
-import org.projecthaystack.HVal;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Point;
+import a75f.io.logger.CcuLog;
 
 public class ModbusHandler {
 
@@ -22,7 +22,7 @@ public class ModbusHandler {
             CCUHsApi.getInstance().writeHisValById(configPoint.getId(), HSUtil.getPriorityVal(configPoint.getId()));
             return;
         }
-        double duration = 0;
+        double duration;
         HDateTime lastModifiedDateTime;
 
         JsonElement durHVal = msgObject.get("duration");
@@ -36,9 +36,14 @@ public class ModbusHandler {
         //If duration shows it has already expired, then just write 1ms to force-expire it locally.
         duration = (durationRemote == 0 ? 0 : (durationRemote - System.currentTimeMillis()) > 0 ? (durationRemote - System.currentTimeMillis()) : 1);
 
-
-        CCUHsApi.getInstance().getHSClient().pointWrite(HRef.copy(configPoint.getId()), msgObject.get("level").getAsInt(),
-                CCUHsApi.getInstance().getCCUUserName(), HNum.make(msgObject.get("val").getAsInt()),
-                HNum.make(duration), lastModifiedDateTime );
+        if(msgObject.get("val").getAsDouble()!=msgObject.get("val").getAsInt()) {
+            CCUHsApi.getInstance().getHSClient().pointWrite(HRef.copy(configPoint.getId()), msgObject.get("level").getAsInt(),
+                    CCUHsApi.getInstance().getCCUUserName(), HNum.make(msgObject.get("val").getAsDouble()),
+                    HNum.make(duration), lastModifiedDateTime );
+        } else {
+            CCUHsApi.getInstance().getHSClient().pointWrite(HRef.copy(configPoint.getId()), msgObject.get("level").getAsInt(),
+                    CCUHsApi.getInstance().getCCUUserName(), HNum.make(msgObject.get("val").getAsInt()),
+                    HNum.make(duration), lastModifiedDateTime );
+        }
     }
 }

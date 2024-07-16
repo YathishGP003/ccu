@@ -1,7 +1,5 @@
 package a75f.io.api.haystack.util;
 
-import android.util.Log;
-
 import org.projecthaystack.HDateTime;
 import org.projecthaystack.ParseException;
 
@@ -16,7 +14,6 @@ public class TimeUtil {
      *  Below method takes end hour as input
      *  If input is 24hr then it returns 23
      * @param endTimeHour: last hour of schedule
-     * @return
      */
     public static int getEndHour(int endTimeHour){
         if(endTimeHour == END_HOUR){
@@ -30,7 +27,6 @@ public class TimeUtil {
      *  Below method takes end hour as input
      *  If input is 24hr then it returns 59
      * @param endTimeHour: last hour of schedule
-     * @return
      */
     public static int getEndMinute(int endTimeHour, int endTimeMinute){
         if(endTimeHour == END_HOUR){
@@ -44,7 +40,6 @@ public class TimeUtil {
      *  Below method takes end hour as input
      *  If input is 24hr then it returns 59
      * @param endTimeHour: last hour of schedule
-     * @return
      */
     public static int getEndSec(int endTimeHour){
         if(endTimeHour == END_HOUR){
@@ -62,7 +57,7 @@ public class TimeUtil {
 
     public static int getEndTimeMin(int hour, int minute){
         if(hour == 23 && minute == 59){
-            return 00;
+            return 0;
         }
         return minute;
     }
@@ -95,7 +90,7 @@ public class TimeUtil {
             dateTimeInMillis = HDateTime.make(dateTime).millis();
            CcuLog.d("CCU_AUTO_COMMISSIONING","converted in millis "+dateTimeInMillis);
         }catch (ParseException pe){
-           CcuLog.d("CCU_AUTO_COMMISSIONING",""+pe.getMessage()+" Exception caught while parsing received date "+dateTime);
+           CcuLog.d("CCU_AUTO_COMMISSIONING", pe.getMessage()+" Exception caught while parsing received date "+dateTime);
             pe.printStackTrace();
         }
         return dateTimeInMillis;

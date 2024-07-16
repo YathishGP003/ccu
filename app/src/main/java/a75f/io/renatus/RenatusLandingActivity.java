@@ -56,6 +56,7 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
+import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.interfaces.RemoteCommandHandleInterface;
 import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.messaging.handler.RemoteCommandUpdateHandler;
@@ -477,6 +478,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
 
     private void ccuLaunched(){
         PreferenceUtil.setIsCcuLaunched(true);
+        CCUUtils.setCCUReadyProperty("false");
     }
 
     @Override

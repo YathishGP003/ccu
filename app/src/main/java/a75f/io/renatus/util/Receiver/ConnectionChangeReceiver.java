@@ -7,13 +7,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.util.Log;
 
 import java.util.Timer;
 import java.util.TimerTask;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.L;
 import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.messaging.handler.DataSyncHandler;
 
@@ -25,16 +25,16 @@ public class ConnectionChangeReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.d("Connection_Info", "Result Action: " + intent.getAction());
+        CcuLog.d(L.TAG_CCU_CONNECTION_INFO, "Result Action: " + intent.getAction());
         //here, check that the network connection is available. If yes, restart point write.
         ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo info = cm.getActiveNetworkInfo();
         if (info != null) {
             if (info.isConnected()) {
-                CcuLog.i("CCU_READ_CHANGES", " CONNECTION CHANGE RECEIVER");
+                CcuLog.i(L.TAG_CCU_READ_CHANGES, " CONNECTION CHANGE RECEIVER");
                 if (!DataSyncHandler.isMessageTimeExpired(PreferenceUtil.getLastCCUUpdatedTime()) &&
                         !getDataSyncProcessing()) {
-                    CcuLog.i("CCU_READ_CHANGES", " DATA SYNC NOT IN PROGRESS");
+                    CcuLog.i(L.TAG_CCU_READ_CHANGES, " DATA SYNC NOT IN PROGRESS");
                     new Timer().schedule(new TimerTask() {
                         @Override
                         public void run() {

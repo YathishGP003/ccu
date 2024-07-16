@@ -1,16 +1,11 @@
 package a75f.io.renatus;
 
-import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Resources;
-import android.graphics.PorterDuff;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
 import androidx.annotation.Nullable;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,10 +14,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.NumberPicker;
 import android.widget.Spinner;
-import android.widget.ToggleButton;
 
-import java.lang.reflect.Array;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -35,7 +27,6 @@ import a75f.io.logic.bo.building.ccu.CazProfile;
 import a75f.io.logic.bo.building.ccu.CazProfileConfig;
 import a75f.io.logic.bo.building.ccu.RoomTempSensor;
 import a75f.io.logic.bo.building.ccu.SupplyTempSensor;
-import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.util.DesiredTempDisplayMode;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
@@ -71,8 +62,6 @@ public class FragmentTempInfConfiguration extends BaseDialogFragment
     @BindView(R.id.supplyAirTempSpinner)
     Spinner supplyAirTempSpinner;
 
-
-    private ProfileType             mProfileType;
     private CazProfile              mCcuAsZoneProfile;
     private CazProfileConfig mProfileConfig;
 
@@ -139,11 +128,11 @@ public class FragmentTempInfConfiguration extends BaseDialogFragment
         mCcuAsZoneProfile = (CazProfile) L.getProfile(mSmartNodeAddress);
 
         if (mCcuAsZoneProfile != null) {
-            Log.d("CPUConfig", "Get Config: "+mCcuAsZoneProfile.getProfileType()+","+mCcuAsZoneProfile.getProfileConfiguration(mSmartNodeAddress)+","+mSmartNodeAddress);
+            CcuLog.d("CPUConfig", "Get Config: "+mCcuAsZoneProfile.getProfileType()+","+mCcuAsZoneProfile.getProfileConfiguration(mSmartNodeAddress)+","+mSmartNodeAddress);
             mProfileConfig = (CazProfileConfig) mCcuAsZoneProfile
                     .getProfileConfiguration(mSmartNodeAddress);
         } else {
-            Log.d("CPUConfig", "Create Profile: ");
+            CcuLog.d("CPUConfig", "Create Profile: ");
             mCcuAsZoneProfile = new CazProfile();
 
         }
@@ -315,27 +304,6 @@ public class FragmentTempInfConfiguration extends BaseDialogFragment
         }
         L.ccu().zoneProfiles.add(mCcuAsZoneProfile);
         CcuLog.d(L.TAG_CCU_UI, "Set CCU As Zone Config: Profiles - "+L.ccu().zoneProfiles.size());
-    }
-    private void setDividerColor(NumberPicker picker) {
-        Field[] numberPickerFields = NumberPicker.class.getDeclaredFields();
-        for (Field field : numberPickerFields) {
-            if (field.getName().equals("mSelectionDivider")) {
-                field.setAccessible(true);
-                try {
-                    field.set(picker, getResources().getDrawable(R.drawable.divider_np));
-                } catch (IllegalArgumentException e) {
-                    Log.v("NP", "Illegal Argument Exception");
-                    e.printStackTrace();
-                } catch (Resources.NotFoundException e) {
-                    Log.v("NP", "Resources NotFound");
-                    e.printStackTrace();
-                } catch (IllegalAccessException e) {
-                    Log.v("NP", "Illegal Access Exception");
-                    e.printStackTrace();
-                }
-                break;
-            }
-        }
     }
 
     private CustomSpinnerDropDownAdapter getAdapterValue(ArrayList values) {

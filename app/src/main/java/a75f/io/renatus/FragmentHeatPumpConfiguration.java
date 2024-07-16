@@ -4,13 +4,11 @@ import static a75f.io.device.bacnet.BacnetUtilKt.addBacnetTags;
 
 import android.app.Dialog;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,7 +23,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
-import java.lang.reflect.Field;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -35,6 +32,7 @@ import a75f.io.device.serial.CcuToCmOverUsbSmartStatControlsMessage_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.device.serial.SmartStatConditioningMode_t;
 import a75f.io.device.serial.SmartStatFanSpeed_t;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
@@ -68,7 +66,6 @@ public class FragmentHeatPumpConfiguration extends BaseDialogFragment implements
     private HeatPumpUnitProfile mHPUProfile;
     private HeatPumpUnitConfiguration mProfileConfig;
 
-    //static boolean isRelay5Enables;
 
 
     CustomCCUSwitch switchThermistor1;
@@ -90,7 +87,6 @@ public class FragmentHeatPumpConfiguration extends BaseDialogFragment implements
     CustomCCUSwitch switchOccSensor;
     CustomCCUSwitch switchExtTempSensor;
     Button setButton;
-    Button cancelButton;
     Spinner hpChangeOverTypeSpinner;
     Spinner fanHumiDSpinner;
     NumberPicker temperatureOffset;
@@ -137,11 +133,6 @@ public class FragmentHeatPumpConfiguration extends BaseDialogFragment implements
         if (dialog == null) {
             return;
         }
-        /*TextView titleView = this.getDialog().findViewById(android.R.id.title);
-        if (titleView != null) {
-            titleView.setGravity(Gravity.CENTER);
-            titleView.setTextColor(getResources().getColor(R.color.accent75F));
-        }*/
         int titleDividerId = getContext().getResources()
                 .getIdentifier("titleDivider", "id", "android");
 
@@ -185,10 +176,10 @@ public class FragmentHeatPumpConfiguration extends BaseDialogFragment implements
         }
 
         if (mHPUProfile != null) {
-            Log.d("CPUConfig", "Get Config: "+mHPUProfile.getProfileType()+","+mHPUProfile.getProfileConfiguration(mSmartNodeAddress)+","+mSmartNodeAddress);
+            CcuLog.d("CPUConfig", "Get Config: "+mHPUProfile.getProfileType()+","+mHPUProfile.getProfileConfiguration(mSmartNodeAddress)+","+mSmartNodeAddress);
             mProfileConfig = (HeatPumpUnitConfiguration) mHPUProfile.getProfileConfiguration(mSmartNodeAddress);
         } else {
-            Log.d("CPUConfig", "Create Profile: ");
+            CcuLog.d("CPUConfig", "Create Profile: ");
             mHPUProfile = new HeatPumpUnitProfile();
 
         }
@@ -245,7 +236,7 @@ public class FragmentHeatPumpConfiguration extends BaseDialogFragment implements
             hpChangeOverTypeSpinner.setSelection(mProfileConfig.changeOverRelay6Type - 1);
             toggleAutoForceOccupied.setChecked(mProfileConfig.enableAutoForceOccupied);
             toggleAutoaway.setChecked(mProfileConfig.enableAutoAway);
-            if (mProfileConfig.getOutputs().size() > 0) {
+            if (!mProfileConfig.getOutputs().isEmpty()) {
                 for (Output output : mProfileConfig.getOutputs()) {
                     switch (output.getPort()) {
                         case RELAY_ONE:
@@ -276,36 +267,29 @@ public class FragmentHeatPumpConfiguration extends BaseDialogFragment implements
         fanHumiDSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
-                Log.d("FragHPU","HPU OnItemSelected ="+position);
+                CcuLog.d("FragHPU","HPU OnItemSelected ="+position);
                 if(mProfileConfig != null){
-                    Log.d("FragHPU","HPU OnItemSelected ="+position+","+mProfileConfig.fanRelay5Type);
+                    CcuLog.d("FragHPU","HPU OnItemSelected ="+position+","+mProfileConfig.fanRelay5Type);
                     if(mProfileConfig.fanRelay5Type > 0) {
                         switchFanHigh.setEnabled(true);
-                        //HeatPumpUnitConfiguration.enableRelay5 = true;
                         if(position == 0 && !switchFanLowG.isChecked())switchFanHigh.setChecked(false);
                     }else{
                         if(switchFanLowG.isChecked()){
                             switchFanHigh.setEnabled(true);
-                            //HeatPumpUnitConfiguration.enableRelay5 = true;
                         }else{
                             switchFanHigh.setEnabled(false);
                             switchFanHigh.setChecked(false);
-                            //HeatPumpUnitConfiguration.enableRelay5 = false;
                         }
                     }
                 }else{
                     if(position > 0){
                         switchFanHigh.setEnabled(true);
-                        //HeatPumpUnitConfiguration.enableRelay5 = true;
-                        //switchFanHigh.setChecked(true);
                     }else{
                         if(switchFanLowG.isChecked()){
                             switchFanHigh.setEnabled(true);
-                            //HeatPumpUnitConfiguration.enableRelay5 = true;
                         }else{
                             switchFanHigh.setEnabled(false);
                             switchFanHigh.setChecked(false);
-                            //HeatPumpUnitConfiguration.enableRelay5 = true;
                         }
                     }
                 }
@@ -316,18 +300,6 @@ public class FragmentHeatPumpConfiguration extends BaseDialogFragment implements
 
             }
         });
-        /*hpChangeOverTypeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                hpChangeOverTypeSpinner.setSelection(position);
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });*/
-        
         view.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
 
             @Override
@@ -436,9 +408,7 @@ public class FragmentHeatPumpConfiguration extends BaseDialogFragment implements
             hpuConfig.getOutputs().add(relay5Op);
         }
         HeatPumpUnitConfiguration.enableRelay5 = switchFanHigh.isChecked();
-        /*isRelay5Enables = switchFanHigh.isChecked();
-        hpuConfig.enableRelay5 = isRelay5Enables;*/
-        Log.e("isRelay5Enabled","insideFragmentHeatPumpConfig "+switchFanHigh.isChecked());
+        CcuLog.i("isRelay5Enabled","insideFragmentHeatPumpConfig "+switchFanHigh.isChecked());
         if (switchHpChangeOver.isChecked()) {
             Output relay6Op = new Output();
             relay6Op.setAddress(mSmartNodeAddress);
@@ -452,53 +422,9 @@ public class FragmentHeatPumpConfiguration extends BaseDialogFragment implements
         if (mProfileConfig == null) {
             mHPUProfile.addLogicalMapAndPoints(mSmartNodeAddress, hpuConfig, floorRef, roomRef);
         } else {
-            mHPUProfile.updateLogicalMapAndPoints(mSmartNodeAddress, hpuConfig, roomRef);
+            mHPUProfile.updateLogicalMapAndPoints(mSmartNodeAddress, hpuConfig);
         }
         L.ccu().zoneProfiles.add(mHPUProfile);
-    }
-
-    private void setDividerColor(NumberPicker picker) {
-        Field[] numberPickerFields = NumberPicker.class.getDeclaredFields();
-        for (Field field : numberPickerFields) {
-            if (field.getName().equals("mSelectionDivider")) {
-                field.setAccessible(true);
-                try {
-                    field.set(picker, getResources().getDrawable(R.drawable.divider_np));
-                } catch (IllegalArgumentException e) {
-                    Log.v("NP", "Illegal Argument Exception");
-                    e.printStackTrace();
-                } catch (Resources.NotFoundException e) {
-                    Log.v("NP", "Resources NotFound");
-                    e.printStackTrace();
-                } catch (IllegalAccessException e) {
-                    Log.v("NP", "Illegal Access Exception");
-                    e.printStackTrace();
-                }
-                break;
-            }
-        }
-    }
-    private void setNumberPickerDividerColor(NumberPicker pk) {
-        Class<?> numberPickerClass = null;
-        try {
-            numberPickerClass = Class.forName("android.widget.NumberPicker");
-            Field selectionDivider = numberPickerClass.getDeclaredField("mSelectionDivider");
-            selectionDivider.setAccessible(true);
-            //if(!CCUUtils.isxlargedevice(getActivity())) {
-            selectionDivider.set(pk, getResources().getDrawable(R.drawable.line_959595));
-            //}else{
-            //   selectionDivider.set(pk, getResources().getDrawable(R.drawable.connect_192x48_orange));
-            //}
-
-        } catch (ClassNotFoundException e) {
-            Log.e("class not found", e.toString());
-        } catch (NoSuchFieldException e) {
-            Log.e("NoSuchFieldException", e.toString());
-        } catch (IllegalAccessException e) {
-            Log.e("IllegalAccessException", e.toString());
-        } catch (Exception e) {
-            Log.e("dividerexception", e.getMessage().toString());
-        }
     }
 
     @Override
@@ -590,8 +516,8 @@ public class FragmentHeatPumpConfiguration extends BaseDialogFragment implements
     public static double getDesiredTemp(short node)
     {
         HashMap point = CCUHsApi.getInstance().read("point and air and temp and desired and average and sp and group == \""+node+"\"");
-        if (point == null || point.size() == 0) {
-            Log.d("HPU", " Desired Temp point does not exist for equip , sending 0");
+        if (point == null || point.isEmpty()) {
+            CcuLog.d("HPU", " Desired Temp point does not exist for equip , sending 0");
             return 72;
         }
         return CCUHsApi.getInstance().readPointPriorityVal(point.get("id").toString());

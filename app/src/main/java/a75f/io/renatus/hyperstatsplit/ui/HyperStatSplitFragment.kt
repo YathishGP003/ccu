@@ -4,6 +4,7 @@ import a75f.io.device.HyperSplit
 import a75f.io.device.mesh.LSerial
 import a75f.io.device.mesh.hypersplit.HyperSplitMessageSender
 import a75f.io.device.serial.MessageType
+import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.NodeType
@@ -29,7 +30,6 @@ import a75f.io.renatus.views.CustomSpinnerDropDownAdapter
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -63,10 +63,10 @@ class HyperStatSplitFragment : BaseDialogFragment() {
 
     private lateinit var profileName: TextView
 
-    lateinit var tempOffsetSelector: NumberPicker
-    lateinit var forceOccupiedSwitch: CustomCCUSwitch
-    lateinit var autoAwaySwitch: CustomCCUSwitch
-    lateinit var prePurgeSwitch: CustomCCUSwitch
+    private lateinit var tempOffsetSelector: NumberPicker
+    private lateinit var forceOccupiedSwitch: CustomCCUSwitch
+    private lateinit var autoAwaySwitch: CustomCCUSwitch
+    private lateinit var prePurgeSwitch: CustomCCUSwitch
 
     // 8 rows, 1 for each relay
     private lateinit var relayUIs: List<RelayWidgets>
@@ -75,74 +75,74 @@ class HyperStatSplitFragment : BaseDialogFragment() {
     private lateinit var analogOutUIs: List<AnalogOutWidgets>
 
     // 8 rows, 1 for each universal in.
-    lateinit var universalInUIs: List<UniversalInWidgets>
+    private lateinit var universalInUIs: List<UniversalInWidgets>
 
     private lateinit var stagedFanUIs: List<StagedFanWidgets>
 
     // 4 rows, 1 for each sensor bus address
     // Addresses 0-2 are for Temp/Humidity Sensors, Address 3 is for Pressure
-    lateinit var sensorBusTemps: List<SensorBusWidgets>
-    lateinit var sensorBusPress: List<SensorBusWidgets>
+    private lateinit var sensorBusTemps: List<SensorBusWidgets>
+    private lateinit var sensorBusPress: List<SensorBusWidgets>
 
-    lateinit var cancelButton: Button
-    lateinit var setButton: Button
-    lateinit var zoneCO2Layout: View
-    lateinit var zoneCO2DamperOpeningRate: Spinner
-    lateinit var zoneCO2Threshold: Spinner
-    lateinit var zoneCO2Target: Spinner
-    lateinit var tvZoneCO2DamperOpeningRate: TextView
-    lateinit var tvZoneCO2Threshold: TextView
-    lateinit var tvZoneCO2Target: TextView
-    lateinit var llCo2Target: LinearLayout
-    lateinit var llCo2Threshold: LinearLayout
+    private lateinit var cancelButton: Button
+    private lateinit var setButton: Button
+    private lateinit var zoneCO2Layout: View
+    private lateinit var zoneCO2DamperOpeningRate: Spinner
+    private lateinit var zoneCO2Threshold: Spinner
+    private lateinit var zoneCO2Target: Spinner
+    private lateinit var tvZoneCO2DamperOpeningRate: TextView
+    private lateinit var tvZoneCO2Threshold: TextView
+    private lateinit var tvZoneCO2Target: TextView
+    private lateinit var llCo2Target: LinearLayout
+    private lateinit var llCo2Threshold: LinearLayout
 
-    lateinit var outsideDamperMinOpenDuringRecirc: Spinner
-    lateinit var tvOutsideDamperMinOpenDuringRecirc: TextView
-    lateinit var outsideDamperMinOpenDuringConditioning: Spinner
-    lateinit var tvOutsideDamperMinOpenDuringConditioning: TextView
-    lateinit var outsideDamperMinOpenDuringFanLow: Spinner
-    lateinit var tvOutsideDamperMinOpenDuringFanLow: TextView
-    lateinit var outsideDamperMinOpenDuringFanMedium: Spinner
-    lateinit var tvOutsideDamperMinOpenDuringFanMedium: TextView
-    lateinit var outsideDamperMinOpenDuringFanHigh: Spinner
-    lateinit var tvOutsideDamperMinOpenDuringFanHigh: TextView
+    private lateinit var outsideDamperMinOpenDuringRecirc: Spinner
+    private lateinit var tvOutsideDamperMinOpenDuringRecirc: TextView
+    private lateinit var outsideDamperMinOpenDuringConditioning: Spinner
+    private lateinit var tvOutsideDamperMinOpenDuringConditioning: TextView
+    private lateinit var outsideDamperMinOpenDuringFanLow: Spinner
+    private lateinit var tvOutsideDamperMinOpenDuringFanLow: TextView
+    private lateinit var outsideDamperMinOpenDuringFanMedium: Spinner
+    private lateinit var tvOutsideDamperMinOpenDuringFanMedium: TextView
+    private lateinit var outsideDamperMinOpenDuringFanHigh: Spinner
+    private lateinit var tvOutsideDamperMinOpenDuringFanHigh: TextView
 
-    lateinit var exhaustFanStage1Threshold: Spinner
-    lateinit var tvExhaustFanStage1Threshold: TextView
-    lateinit var exhaustFanStage2Threshold: Spinner
-    lateinit var tvExhaustFanStage2Threshold: TextView
-    lateinit var exhaustFanHysteresis: Spinner
-    lateinit var tvExhaustFanHysteresis: TextView
+    private lateinit var exhaustFanStage1Threshold: Spinner
+    private lateinit var tvExhaustFanStage1Threshold: TextView
+    private lateinit var exhaustFanStage2Threshold: Spinner
+    private lateinit var tvExhaustFanStage2Threshold: TextView
+    private lateinit var exhaustFanHysteresis: Spinner
+    private lateinit var tvExhaustFanHysteresis: TextView
 
-    lateinit var vocConfig: LinearLayout
-    lateinit var zoneVOCThreshold: Spinner
-    lateinit var zoneVOCTarget: Spinner
+    private lateinit var vocConfig: LinearLayout
+    private lateinit var zoneVOCThreshold: Spinner
+    private lateinit var zoneVOCTarget: Spinner
 
-    lateinit var zonePMTarget: Spinner
-    lateinit var prePurgeMinOpenText: TextView
-    lateinit var prePurgeMinOpenSpinner: Spinner
+    private lateinit var zonePMTarget: Spinner
+    private lateinit var prePurgeMinOpenText: TextView
+    private lateinit var prePurgeMinOpenSpinner: Spinner
 
-    lateinit var displayHumidity: CustomCCUSwitch
-    lateinit var displayVOC: CustomCCUSwitch
-    lateinit var displayPp2p5: CustomCCUSwitch
-    lateinit var displayCo2: CustomCCUSwitch
+    private lateinit var displayHumidity: CustomCCUSwitch
+    private lateinit var displayVOC: CustomCCUSwitch
+    private lateinit var displayPp2p5: CustomCCUSwitch
+    private lateinit var displayCo2: CustomCCUSwitch
 
 
     /**
      * Test Signal Buttons
      */
-    lateinit var relay1Test: ToggleButton
-    lateinit var relay2Test: ToggleButton
-    lateinit var relay3Test: ToggleButton
-    lateinit var relay4Test: ToggleButton
-    lateinit var relay5Test: ToggleButton
-    lateinit var relay6Test: ToggleButton
-    lateinit var relay7Test: ToggleButton
-    lateinit var relay8Test: ToggleButton
-    lateinit var analogOut1Test: Spinner
-    lateinit var analogOut2Test: Spinner
-    lateinit var analogOut3Test: Spinner
-    lateinit var analogOut4Test: Spinner
+    private lateinit var relay1Test: ToggleButton
+    private lateinit var relay2Test: ToggleButton
+    private lateinit var relay3Test: ToggleButton
+    private lateinit var relay4Test: ToggleButton
+    private lateinit var relay5Test: ToggleButton
+    private lateinit var relay6Test: ToggleButton
+    private lateinit var relay7Test: ToggleButton
+    private lateinit var relay8Test: ToggleButton
+    private lateinit var analogOut1Test: Spinner
+    private lateinit var analogOut2Test: Spinner
+    private lateinit var analogOut3Test: Spinner
+    private lateinit var analogOut4Test: Spinner
     companion object {
         const val ID = "HyperStatSplitFragment"
 
@@ -1243,8 +1243,7 @@ class HyperStatSplitFragment : BaseDialogFragment() {
         zoneCO2DamperOpeningRate.visibility = if (isDampSelected) View.VISIBLE else View.GONE
         tvZoneCO2DamperOpeningRate.visibility = if (isDampSelected) View.VISIBLE else View.GONE
 
-        var vocLayoutParams = vocConfig.layoutParams as ViewGroup.MarginLayoutParams
-
+        val vocLayoutParams = vocConfig.layoutParams as ViewGroup.MarginLayoutParams
         if (isDampSelected) {
             vocLayoutParams.topMargin = 15
             vocConfig.layoutParams = vocLayoutParams
@@ -1274,7 +1273,7 @@ class HyperStatSplitFragment : BaseDialogFragment() {
     }
 
     /**
-     * This rendor method will be called in UI change
+     * This render method will be called in UI change
      */
     private fun render(viewState: ViewState) {
 
@@ -1405,32 +1404,32 @@ class HyperStatSplitFragment : BaseDialogFragment() {
     @SuppressLint("LogNotTimber")
     private fun sendControl() {
         if (!viewModel.isProfileConfigured()) {
-            Log.i(L.TAG_CCU_HSSPLIT_CPUECON,
+            CcuLog.i(L.TAG_CCU_HSSPLIT_CPUECON,
                 "--------------HyperStat Split CPU & Economiser test signal sendControl: Not Ready")
             return
         }
         val testSignalControlMessage: HyperSplit.HyperSplitControlsMessage_t  = getControlMessage()
 
-        Log.i(L.TAG_CCU_SERIAL,
+        CcuLog.i(L.TAG_CCU_SERIAL,
             "--------------HyperStat Split CPU & Economiser Test Signal Controls Message: ------------------\n" +
                     "Node address " + meshAddress + "\n" +
-                    "setTemp Heating " +  testSignalControlMessage.getSetTempHeating() + "\n" +
-                    "setTemp Cooling " +  testSignalControlMessage.getSetTempCooling() + "\n" +
+                    "setTemp Heating " +  testSignalControlMessage.setTempHeating + "\n" +
+                    "setTemp Cooling " +  testSignalControlMessage.setTempCooling + "\n" +
                     "conditioningMode " +  testSignalControlMessage.getConditioningMode() + "\n" +
                     "Fan Mode " +  testSignalControlMessage.getFanSpeed() + "\n" +
-                    "Relay1 " +  testSignalControlMessage.getRelay1() + "\n" +
-                    "Relay2 " +  testSignalControlMessage.getRelay2() + "\n" +
-                    "Relay3 " +  testSignalControlMessage.getRelay3() + "\n" +
-                    "Relay4 " +  testSignalControlMessage.getRelay4() + "\n" +
-                    "Relay5 " +  testSignalControlMessage.getRelay5() + "\n" +
-                    "Relay6 " +  testSignalControlMessage.getRelay6() + "\n" +
-                    "Relay7 " +  testSignalControlMessage.getRelay7() + "\n" +
-                    "Relay8 " +  testSignalControlMessage.getRelay8() + "\n" +
-                    "Analog Out1 " +  testSignalControlMessage.getAnalogOut1().getPercent() + "\n" +
-                    "Analog Out2 " +  testSignalControlMessage.getAnalogOut2().getPercent() + "\n" +
-                    "Analog Out3 " +  testSignalControlMessage.getAnalogOut3().getPercent() + "\n" +
-                    "Analog Out4 " +  testSignalControlMessage.getAnalogOut4().getPercent() + "\n" +
-                    "-------------------------------------------------------------");
+                    "Relay1 " +  testSignalControlMessage.relay1 + "\n" +
+                    "Relay2 " +  testSignalControlMessage.relay2 + "\n" +
+                    "Relay3 " +  testSignalControlMessage.relay3 + "\n" +
+                    "Relay4 " +  testSignalControlMessage.relay4 + "\n" +
+                    "Relay5 " +  testSignalControlMessage.relay5 + "\n" +
+                    "Relay6 " +  testSignalControlMessage.relay6 + "\n" +
+                    "Relay7 " +  testSignalControlMessage.relay7 + "\n" +
+                    "Relay8 " +  testSignalControlMessage.relay8 + "\n" +
+                    "Analog Out1 " +  testSignalControlMessage.analogOut1.percent + "\n" +
+                    "Analog Out2 " +  testSignalControlMessage.analogOut2.percent + "\n" +
+                    "Analog Out3 " +  testSignalControlMessage.analogOut3.percent + "\n" +
+                    "Analog Out4 " +  testSignalControlMessage.analogOut4.percent + "\n" +
+                    "-------------------------------------------------------------")
         
         HyperSplitMessageSender.writeControlMessage(
             testSignalControlMessage, meshAddress.toInt(), MessageType.HYPERSPLIT_CONTROLS_MESSAGE,
@@ -1451,60 +1450,56 @@ class HyperStatSplitFragment : BaseDialogFragment() {
     }
 
     private fun getControlMessage(): HyperSplit.HyperSplitControlsMessage_t {
-        if (meshAddress != null) {
-            val ao1Min = analogOutUIs[0].vAtMinDamperSelector.selectedItem.toString().replace("V", "").toDouble()
-            val ao1Max = analogOutUIs[0].vAtMaxDamperSelector.selectedItem.toString().replace("V", "").toDouble()
+        val ao1Min = analogOutUIs[0].vAtMinDamperSelector.selectedItem.toString().replace("V", "").toDouble()
+        val ao1Max = analogOutUIs[0].vAtMaxDamperSelector.selectedItem.toString().replace("V", "").toDouble()
 
-            val ao2Min = analogOutUIs[1].vAtMinDamperSelector.selectedItem.toString().replace("V", "").toDouble()
-            val ao2Max = analogOutUIs[1].vAtMaxDamperSelector.selectedItem.toString().replace("V", "").toDouble()
+        val ao2Min = analogOutUIs[1].vAtMinDamperSelector.selectedItem.toString().replace("V", "").toDouble()
+        val ao2Max = analogOutUIs[1].vAtMaxDamperSelector.selectedItem.toString().replace("V", "").toDouble()
 
-            val ao3Min = analogOutUIs[2].vAtMinDamperSelector.selectedItem.toString().replace("V", "").toDouble()
-            val ao3Max = analogOutUIs[2].vAtMaxDamperSelector.selectedItem.toString().replace("V", "").toDouble()
+        val ao3Min = analogOutUIs[2].vAtMinDamperSelector.selectedItem.toString().replace("V", "").toDouble()
+        val ao3Max = analogOutUIs[2].vAtMaxDamperSelector.selectedItem.toString().replace("V", "").toDouble()
 
-            val ao4Min = analogOutUIs[3].vAtMinDamperSelector.selectedItem.toString().replace("V", "").toDouble()
-            val ao4Max = analogOutUIs[3].vAtMaxDamperSelector.selectedItem.toString().replace("V", "").toDouble()
+        val ao4Min = analogOutUIs[3].vAtMinDamperSelector.selectedItem.toString().replace("V", "").toDouble()
+        val ao4Max = analogOutUIs[3].vAtMaxDamperSelector.selectedItem.toString().replace("V", "").toDouble()
 
-            return HyperSplit.HyperSplitControlsMessage_t.newBuilder()
-                .setRelay1(relay1Test.isChecked)
-                .setRelay2(relay2Test.isChecked)
-                .setRelay3(relay3Test.isChecked)
-                .setRelay4(relay4Test.isChecked)
-                .setRelay5(relay5Test.isChecked)
-                .setRelay6(relay6Test.isChecked)
-                .setRelay7(relay7Test.isChecked)
-                .setRelay8(relay8Test.isChecked)
-                .setAnalogOut1(
-                    HyperSplit.HyperSplitAnalogOutputControl_t
-                        .newBuilder().setPercent(
-                            getAnalogVal(ao1Min, ao1Max, analogOut1Test.selectedItem.toString().toDouble())
-                        ).build()
-                )
-                .setAnalogOut2(
-                    HyperSplit.HyperSplitAnalogOutputControl_t
-                        .newBuilder().setPercent(
-                            getAnalogVal(ao2Min, ao2Max, analogOut2Test.selectedItem.toString().toDouble())
-                        ).build()
-                )
-                .setAnalogOut3(
-                    HyperSplit.HyperSplitAnalogOutputControl_t
-                        .newBuilder().setPercent(
-                            getAnalogVal(ao3Min, ao3Max, analogOut3Test.selectedItem.toString().toDouble())
-                        ).build()
-                )
-                .setAnalogOut4(
-                    HyperSplit.HyperSplitAnalogOutputControl_t
-                        .newBuilder().setPercent(
-                            getAnalogVal(ao4Min, ao4Max, analogOut4Test.selectedItem.toString().toDouble())
-                        ).build()
-                )
-                .setSetTempCooling(getDesiredTempCooling(meshAddress).toInt() * 2)
-                .setSetTempHeating(getDesiredTempHeating(meshAddress).toInt() * 2)
-                .setFanSpeed(HyperSplit.HyperSplitFanSpeed_e.HYPERSPLIT_FAN_SPEED_AUTO)
-                .setConditioningMode(HyperSplit.HyperSplitConditioningMode_e.HYPERSPLIT_CONDITIONING_MODE_AUTO)
-                .build()
-        } else {
-            return HyperSplit.HyperSplitControlsMessage_t.newBuilder().build()
-        }
+        return HyperSplit.HyperSplitControlsMessage_t.newBuilder()
+            .setRelay1(relay1Test.isChecked)
+            .setRelay2(relay2Test.isChecked)
+            .setRelay3(relay3Test.isChecked)
+            .setRelay4(relay4Test.isChecked)
+            .setRelay5(relay5Test.isChecked)
+            .setRelay6(relay6Test.isChecked)
+            .setRelay7(relay7Test.isChecked)
+            .setRelay8(relay8Test.isChecked)
+            .setAnalogOut1(
+                HyperSplit.HyperSplitAnalogOutputControl_t
+                    .newBuilder().setPercent(
+                        getAnalogVal(ao1Min, ao1Max, analogOut1Test.selectedItem.toString().toDouble())
+                    ).build()
+            )
+            .setAnalogOut2(
+                HyperSplit.HyperSplitAnalogOutputControl_t
+                    .newBuilder().setPercent(
+                        getAnalogVal(ao2Min, ao2Max, analogOut2Test.selectedItem.toString().toDouble())
+                    ).build()
+            )
+            .setAnalogOut3(
+                HyperSplit.HyperSplitAnalogOutputControl_t
+                    .newBuilder().setPercent(
+                        getAnalogVal(ao3Min, ao3Max, analogOut3Test.selectedItem.toString().toDouble())
+                    ).build()
+            )
+            .setAnalogOut4(
+                HyperSplit.HyperSplitAnalogOutputControl_t
+                    .newBuilder().setPercent(
+                        getAnalogVal(ao4Min, ao4Max, analogOut4Test.selectedItem.toString().toDouble())
+                    ).build()
+            )
+            .setSetTempCooling(getDesiredTempCooling(meshAddress).toInt() * 2)
+            .setSetTempHeating(getDesiredTempHeating(meshAddress).toInt() * 2)
+            .setFanSpeed(HyperSplit.HyperSplitFanSpeed_e.HYPERSPLIT_FAN_SPEED_AUTO)
+            .setConditioningMode(HyperSplit.HyperSplitConditioningMode_e.HYPERSPLIT_CONDITIONING_MODE_AUTO)
+            .build()
     }
     private fun getDesiredTempCooling(node: Short): Double {
         return CCUHsApi.getInstance()

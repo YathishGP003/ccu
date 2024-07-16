@@ -16,6 +16,7 @@ import a75f.io.alerts.AlertManager;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
+import a75f.io.logic.L;
 import a75f.io.logic.interfaces.SafeModeInterface;
 import a75f.io.messaging.handler.RemoteCommandUpdateHandler;
 import a75f.io.renatus.R;
@@ -42,9 +43,7 @@ public class SafeModeActivity extends AppCompatActivity implements SafeModeInter
         exitSafeMode = findViewById(R.id.exit_safe_mode);
         setExitSafeModeTheme(exitSafeMode);
 
-        exitSafeMode.setOnClickListener(view -> {
-            exitSafeMode();
-        });
+        exitSafeMode.setOnClickListener(view -> exitSafeMode());
 
     }
 
@@ -62,7 +61,7 @@ public class SafeModeActivity extends AppCompatActivity implements SafeModeInter
     }
 
     public void exitSafeMode(){
-        CcuLog.d("SafeMode", "exitSafeMode Complete");
+        CcuLog.d(L.TAG_CCU_SAFE_MODE, "exitSafeMode Complete");
         CCUHsApi.getInstance().writeHisValByQuery("point and safe and mode and diag and his",0.0);
         SharedPreferences crashPreference = this.getSharedPreferences("crash_preference", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = crashPreference.edit();

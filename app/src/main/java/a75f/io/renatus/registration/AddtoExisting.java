@@ -1,16 +1,15 @@
 package a75f.io.renatus.registration;
 
 import static a75f.io.logic.bo.util.CCUUtils.isRecommendedVersionCheckIsNotFalse;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.util.Patterns;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -26,6 +25,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
+
 import com.google.android.material.textfield.TextInputLayout;
 
 import org.apache.commons.lang3.StringUtils;
@@ -43,6 +43,7 @@ import a75f.io.constants.HttpConstants;
 import a75f.io.constants.SiteFieldConstants;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
+import a75f.io.logic.L;
 import a75f.io.logic.tuners.TunerEquip;
 import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.renatus.R;
@@ -123,9 +124,9 @@ public class AddtoExisting extends Fragment {
         try {
             //Creating the LayoutInflater instance
             LayoutInflater li = getLayoutInflater();
-            toastLayout = li.inflate(R.layout.custom_toast_layout, (ViewGroup) rootView.findViewById(R.id.custom_toast_layout));
-            toast_Fail = li.inflate(R.layout.custom_toast_layout_failed, (ViewGroup) rootView.findViewById(R.id.custom_toast_layout_fail));
-            ccuUpdateToast = li.inflate(R.layout.custom_layout_ccu_successful_update, (ViewGroup) rootView.findViewById(R.id.custom_toast_layout_update_ccu));
+            toastLayout = li.inflate(R.layout.custom_toast_layout, rootView.findViewById(R.id.custom_toast_layout));
+            toast_Fail = li.inflate(R.layout.custom_toast_layout_failed, rootView.findViewById(R.id.custom_toast_layout_fail));
+            ccuUpdateToast = li.inflate(R.layout.custom_layout_ccu_successful_update, rootView.findViewById(R.id.custom_toast_layout_update_ccu));
             if(!CCUHsApi.getInstance().isCCURegistered() && isRecommendedVersionCheckIsNotFalse()) {
                 if (PreferenceUtil.getUpdateCCUStatus() || PreferenceUtil.isCCUInstalling()) {
                     FragmentTransaction ft = getParentFragmentManager().beginTransaction();
@@ -193,52 +194,46 @@ public class AddtoExisting extends Fragment {
             addTextWatcher(mEt5);
             addTextWatcher(mEt6);
 
-            imageGoback.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View v) {
-                    // TODO Auto-generated method stub
-                    Intent intent = new Intent(getActivity(), RenatusLandingActivity.class);
-                    startActivity(intent);
-                }
+            imageGoback.setOnClickListener(v -> {
+                // TODO Auto-generated method stub
+                Intent intent = new Intent(getActivity(), RenatusLandingActivity.class);
+                startActivity(intent);
             });
 
-            mNext1.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View v) {
-                    mNext1.setEnabled(false);
-                    // TODO Auto-generated method stub
-                    int[] mandotaryIds = new int[]
-                            {
-                                    R.id.otp_edit_text1,
-                                    R.id.otp_edit_text2,
-                                    R.id.otp_edit_text3,
-                                    R.id.otp_edit_text4,
-                                    R.id.otp_edit_text5,
-                                    R.id.otp_edit_text6
-                            };
-                    EditText et1 = rootView.findViewById(R.id.otp_edit_text1);
-                    EditText et2 = rootView.findViewById(R.id.otp_edit_text2);
-                    EditText et3 = rootView.findViewById(R.id.otp_edit_text3);
-                    EditText et4 = rootView.findViewById(R.id.otp_edit_text4);
-                    EditText et5 = rootView.findViewById(R.id.otp_edit_text5);
-                    EditText et6 = rootView.findViewById(R.id.otp_edit_text6);
-                    if (!validateEditText(mandotaryIds)) {
-                        String OTP = et1.getText() + "" + et2.getText() + et3.getText() + "" + et4.getText() + "" + et5.getText() + et6.getText();
-                        OTPValidation(OTP);
-                    } else
-                        Toast.makeText(mContext, "Please check the Building Passcode", Toast.LENGTH_SHORT).show();
-                }
+            mNext1.setOnClickListener(v -> {
+                mNext1.setEnabled(false);
+                // TODO Auto-generated method stub
+                int[] mandatoryIds = new int[]
+                        {
+                                R.id.otp_edit_text1,
+                                R.id.otp_edit_text2,
+                                R.id.otp_edit_text3,
+                                R.id.otp_edit_text4,
+                                R.id.otp_edit_text5,
+                                R.id.otp_edit_text6
+                        };
+                EditText et1 = rootView.findViewById(R.id.otp_edit_text1);
+                EditText et2 = rootView.findViewById(R.id.otp_edit_text2);
+                EditText et3 = rootView.findViewById(R.id.otp_edit_text3);
+                EditText et4 = rootView.findViewById(R.id.otp_edit_text4);
+                EditText et5 = rootView.findViewById(R.id.otp_edit_text5);
+                EditText et6 = rootView.findViewById(R.id.otp_edit_text6);
+                if (!validateEditText(mandatoryIds)) {
+                    String OTP = et1.getText() + "" + et2.getText() + et3.getText() + "" + et4.getText() + "" + et5.getText() + et6.getText();
+                    OTPValidation(OTP);
+                } else
+                    Toast.makeText(mContext, "Please check the Building Passcode", Toast.LENGTH_SHORT).show();
             });
 
-            mNext2.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View v) {
-                    // TODO Auto-generated method stub
-                    int[] mandotaryIds = new int[]
-                            {
-                                    R.id.editFacilityEmail,
-                                    R.id.editFacilityPass
-                            };
-                    if (!validateEditText(mandotaryIds)) {
-                        goTonext();
-                    }
+            mNext2.setOnClickListener(v -> {
+                // TODO Auto-generated method stub
+                int[] mandatoryIds = new int[]
+                        {
+                                R.id.editFacilityEmail,
+                                R.id.editFacilityPass
+                        };
+                if (!validateEditText(mandatoryIds)) {
+                    goToNext();
                 }
             });
         }catch (Exception e){
@@ -252,21 +247,17 @@ public class AddtoExisting extends Fragment {
         ApiInterface apiInterface= null;
         try {
             apiInterface = ApiClient.getApiClient().create(ApiInterface.class);
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (KeyManagementException e) {
+        } catch (NoSuchAlgorithmException | KeyManagementException e) {
             e.printStackTrace();
         }
         Call<ResponseBody> signInCall = apiInterface.ValidateOTP(OTPCode);
         ApiClient.getApiResponse(signInCall, new ApiClient.ApiCallBack() {
             @Override
             public void Success(Response<ResponseBody> response) throws IOException {
-                //progressLoader.DismissProgress();
                 String responseData= response.body().string();
-                //Log.e("InsideAddtoExist","responseData_Success- "+responseData);
                 try {
                     JSONObject jsonObject=new JSONObject(responseData);
-                    if (jsonObject.getString("valid") == "true"){
+                    if (jsonObject.getString("valid").equals("true")){
                         JSONObject siteCode = jsonObject.getJSONObject("siteCode");
                         Toast toast = new Toast(Globals.getInstance().getApplicationContext());
                         toast.setGravity(Gravity.BOTTOM, 50, 50);
@@ -297,10 +288,7 @@ public class AddtoExisting extends Fragment {
             @Override
             public void Error(Throwable t)
             {
-               /* progressLoader.DismissProgress();
-                commonUtils.toastShort(t.toString(),getApplicationContext());*/
                 Toast.makeText(mContext, "Error...Please check Internet connection", Toast.LENGTH_SHORT).show();
-
             }
         });
     }
@@ -380,26 +368,13 @@ public class AddtoExisting extends Fragment {
 
         public void afterTextChanged(Editable editable) {
             switch(view.getId()){
-                /*case R.id.editSiteID:
-                    if(mSiteId.getText().length() > 0) {
-                        //mTextInputSiteId.setErrorEnabled(true);
-                        //mTextInputSiteId.setError(getString(R.string.input_siteid));
-                        mSiteId.setError(null);
-                    }else {
-                        //mTextInputSiteId.setError("");
-                        //mTextInputSiteId.setErrorEnabled(true);
-                        mSiteId.setError(null);
-                    }*/
                 case R.id.editFacilityEmail:
                     if(mSiteEmailId.getText().length() > 0) {
                         mTextInputEmail.setErrorEnabled(true);
                         mTextInputEmail.setError(getString(R.string.input_facilityemail));
                         mSiteEmailId.setError(null);
                         String emailID = mSiteEmailId.getText().toString();
-                        if(Patterns.EMAIL_ADDRESS.matcher(emailID).matches())
-                        {
-
-                        }else
+                        if(!Patterns.EMAIL_ADDRESS.matcher(emailID).matches())
                         {
                             mSiteEmailId.setError("Invalid Email Address");
                         }
@@ -430,7 +405,7 @@ public class AddtoExisting extends Fragment {
 
         for(int id: ids)
         {
-            EditText et = (EditText)getView().findViewById(id);
+            EditText et = getView().findViewById(id);
 
             if(TextUtils.isEmpty(et.getText().toString()))
             {
@@ -452,7 +427,7 @@ public class AddtoExisting extends Fragment {
         super.onDetach();
     }
 
-    private void goTonext() {
+    private void goToNext() {
         ((FreshRegistration)getActivity()).selectItem(4);
     }
 
@@ -541,27 +516,21 @@ public class AddtoExisting extends Fragment {
     private void showSiteDialog(String siteId) {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                saveExistingSite(siteId);
-                //navigateToCCUScreen();
-                Toast.makeText(getActivity(), "Thank you for confirming using this site", Toast.LENGTH_LONG).show();
+        builder.setPositiveButton(R.string.ok, (dialog, id) -> {
+            saveExistingSite(siteId);
+            //navigateToCCUScreen();
+            Toast.makeText(getActivity(), "Thank you for confirming using this site", Toast.LENGTH_LONG).show();
 
-            }
         });
 
-        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                Toast.makeText(getActivity(), "Canceled use of existing site", Toast.LENGTH_LONG).show();
-                mNext1.setEnabled(true);
-            }
+        builder.setNegativeButton(R.string.cancel, (dialog, id) -> {
+            Toast.makeText(getActivity(), "Canceled use of existing site", Toast.LENGTH_LONG).show();
+            mNext1.setEnabled(true);
         });
 
         builder.setTitle("Site");
         builder.setTitle("ADD CCU");
         builder.setMessage("Registering for site ID " + siteId);
-        /*HashMap site = CCUHsApi.getInstance().read("site");
-        builder.setMessage("Are you sure you want to add a new CCU to site " +site.get("dis"));*/
 
         AlertDialog dialog = builder.create();
         dialog.setCancelable(false);
@@ -606,7 +575,7 @@ public class AddtoExisting extends Fragment {
                     }
                     navigateToCCUScreen();
                 } else {
-                    Log.d("ADD_CCU_EXISTING", "Synchronizing the site with the 75F Cloud was not successful. Please try again or try choosing a different site for registering this CCU.");
+                    CcuLog.d(L.TAG_CCU_ADD_EXISTING, "Synchronizing the site with the 75F Cloud was not successful. Please try again or try choosing a different site for registering this CCU.");
                     if(getActivity() != null) {
                         Toast.makeText(getActivity(), "Synchronizing the site with the 75F Cloud was not successful. Please try again or try choosing a different site for registering this CCU.", Toast.LENGTH_LONG).show();
                     }

@@ -1,10 +1,8 @@
 package a75f.io.renatus;
 
 import android.app.Dialog;
-import android.content.res.Resources;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,13 +10,7 @@ import android.view.Window;
 import android.widget.Button;
 import android.widget.NumberPicker;
 import android.widget.ToggleButton;
-
-import java.lang.reflect.Field;
-
 import a75f.io.logic.bo.building.NodeType;
-import a75f.io.logic.bo.building.definitions.ProfileType;
-import a75f.io.logic.bo.building.plc.PlcProfile;
-import a75f.io.logic.bo.building.plc.PlcProfileConfiguration;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import butterknife.BindView;
@@ -48,10 +40,6 @@ public class FragmentTempMonitorConfiguration extends BaseDialogFragment
 
     @BindView(R.id.setBtn)
     Button setButton;
-
-    private ProfileType             mProfileType;
-    private PlcProfile              mPlcProfile;
-    private PlcProfileConfiguration mProfileConfig;
 
     private short    mSmartNodeAddress;
     private NodeType mNodeType;
@@ -112,51 +100,5 @@ public class FragmentTempMonitorConfiguration extends BaseDialogFragment
         super.onViewCreated(view, savedInstanceState);
 
 
-    }
-
-    private void setNumberPickerDividerColor(NumberPicker pk) {
-        Class<?> numberPickerClass = null;
-        try {
-            numberPickerClass = Class.forName("android.widget.NumberPicker");
-            Field selectionDivider = numberPickerClass.getDeclaredField("mSelectionDivider");
-            selectionDivider.setAccessible(true);
-            //if(!CCUUtils.isxlargedevice(getActivity())) {
-            selectionDivider.set(pk, getResources().getDrawable(R.drawable.line_959595));
-            //}else{
-            //   selectionDivider.set(pk, getResources().getDrawable(R.drawable.connect_192x48_orange));
-            //}
-
-        } catch (ClassNotFoundException e) {
-            Log.e("class not found",e.toString());
-        } catch (NoSuchFieldException e) {
-            Log.e("NoSuchFieldException",e.toString());
-        } catch (IllegalAccessException e) {
-            Log.e("IllegalAccessException",e.toString());
-        }catch (Exception e){
-            Log.e("dividerexception",e.getMessage().toString());
-        }
-    }
-
-
-    private void setDividerColor(NumberPicker picker) {
-        Field[] numberPickerFields = NumberPicker.class.getDeclaredFields();
-        for (Field field : numberPickerFields) {
-            if (field.getName().equals("mSelectionDivider")) {
-                field.setAccessible(true);
-                try {
-                    field.set(picker, getResources().getDrawable(R.drawable.divider_np));
-                } catch (IllegalArgumentException e) {
-                    Log.v("NP", "Illegal Argument Exception");
-                    e.printStackTrace();
-                } catch (Resources.NotFoundException e) {
-                    Log.v("NP", "Resources NotFound");
-                    e.printStackTrace();
-                } catch (IllegalAccessException e) {
-                    Log.v("NP", "Illegal Access Exception");
-                    e.printStackTrace();
-                }
-                break;
-            }
-        }
     }
 }

@@ -1,7 +1,6 @@
 package a75f.io.renatus.hyperstat.vrv
 
 import a75f.io.api.haystack.CCUHsApi
-import a75f.io.device.mesh.hyperstat.HyperStatMessageCache
 import a75f.io.logic.bo.building.vrv.VrvAirflowDirection
 import a75f.io.logic.bo.building.vrv.VrvControlMessageCache
 import a75f.io.logic.bo.building.vrv.VrvFanSpeed
@@ -13,7 +12,11 @@ import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import android.widget.LinearLayout
+import android.widget.Spinner
+import android.widget.TextView
 
 fun loadView(inflater : LayoutInflater,
              layout : LinearLayout,
@@ -216,7 +219,7 @@ private fun setUpAirflowDirectionSpinner(airflowSpinner : Spinner,
                                     view: View, position: Int, id: Long) {
             hayStack.writeDefaultVal("userIntent and airflowDirection and equipRef == \"$equipId\"", position.toDouble())
             hayStack.writeHisValByQuery("userIntent and airflowDirection and equipRef == \"$equipId\"", position.toDouble())
-            VrvControlMessageCache.getInstance().setControlsPending(nodeAddress.toInt());
+            VrvControlMessageCache.getInstance().setControlsPending(nodeAddress.toInt())
         }
 
         override fun onNothingSelected(parent: AdapterView<*>) {
@@ -264,7 +267,7 @@ private fun setUpFanSpeedSpinner(fanSpeedSp : Spinner,
 
     fanSpeedSp.adapter = adapter
     val curSelection = hayStack.readPointPriorityValByQuery("userIntent and fanSpeed and equipRef == \"$equipId\"")
-    var curFanSpeed = VrvFanSpeed.values()[curSelection.toInt()]
+    val curFanSpeed = VrvFanSpeed.values()[curSelection.toInt()]
     if (fanSpeedList.indexOf(curFanSpeed.name) <= fanSpeedList.size-1) {
         fanSpeedSp.setSelection(fanSpeedList.indexOf(curFanSpeed.name), false)
     }
@@ -276,7 +279,7 @@ private fun setUpFanSpeedSpinner(fanSpeedSp : Spinner,
             val fanSpeed = VrvFanSpeed.values().find { it.name == fanSpeedList[position] }
             hayStack.writeDefaultVal("userIntent and fanSpeed and equipRef == \"$equipId\"", fanSpeed!!.ordinal.toDouble())
             hayStack.writeHisValByQuery("userIntent and fanSpeed and equipRef == \"$equipId\"", fanSpeed.ordinal.toDouble())
-            VrvControlMessageCache.getInstance().setControlsPending(nodeAddress.toInt());
+            VrvControlMessageCache.getInstance().setControlsPending(nodeAddress.toInt())
         }
         override fun onNothingSelected(parent: AdapterView<*>) {
             // write code to perform some action

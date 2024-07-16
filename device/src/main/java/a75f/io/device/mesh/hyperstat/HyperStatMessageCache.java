@@ -1,11 +1,11 @@
 package a75f.io.device.mesh.hyperstat;
 
-import android.util.Log;
 
 import java.util.HashMap;
 import java.util.Objects;
 
 import a75f.io.device.HyperStat;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 
 public class HyperStatMessageCache {
@@ -38,7 +38,6 @@ public class HyperStatMessageCache {
      * Check if the message exists in cache for a particular node.
      * If the node does not exist , create a new Map for the node.
      * Else update node message map with the new message.
-     *
      * We need to send a message to hyperstat only if this method returns false.
      *
      * @param hyperStatAddress
@@ -67,7 +66,6 @@ public class HyperStatMessageCache {
      * Check if the message exists in cache for a particular node.
      * If the node does not exist , create a new Map for the node.
      * Else update node message map with the new message.
-     *
      * We need to send a message to hyperstat only if this method returns false.
      *
      * @param hyperStatAddress
@@ -79,10 +77,10 @@ public class HyperStatMessageCache {
 
         if (messages.containsKey(hyperStatAddress) && hyperstatMessage.containsKey(hyperStatAddress)) {
             if (!compareControlMessage(Objects.requireNonNull(hyperstatMessage.get(hyperStatAddress)),newControlMessage)) {
-                Log.d(L.TAG_CCU_SERIAL,"Messages are same as previous or analogout is less than 5%");
+                CcuLog.d(L.TAG_CCU_SERIAL,"Messages are same as previous or analogout is less than 5%");
                 return true;
             }
-            Log.d(L.TAG_CCU_SERIAL,"Messages are not same as previous or analogout is greater than 5%");
+            CcuLog.d(L.TAG_CCU_SERIAL,"Messages are not same as previous or analogout is greater than 5%");
         }
         else {
             messages.put(hyperStatAddress, new HashMap<>());
@@ -121,7 +119,7 @@ public class HyperStatMessageCache {
     }
 
     private double calculatePercentage(int oldAnalogVal, int newAnalogVal) {
-        Log.d(L.TAG_CCU_SERIAL,"oldAnalogVal = "+oldAnalogVal+" nenewAnalogVal = "
+        CcuLog.d(L.TAG_CCU_SERIAL,"oldAnalogVal = "+oldAnalogVal+" nenewAnalogVal = "
                 +newAnalogVal+"\n return ="+Math.abs((oldAnalogVal) - (newAnalogVal)));
         return Math.abs((oldAnalogVal) - (newAnalogVal));
     }

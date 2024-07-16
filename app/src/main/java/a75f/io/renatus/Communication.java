@@ -37,14 +37,12 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -53,7 +51,6 @@ import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.ToggleButton;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -77,6 +74,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import a75f.io.api.haystack.Tags;
+import a75f.io.logger.CcuLog;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.DataBbmd;
 import a75f.io.renatus.util.DataBbmdObj;
@@ -84,11 +82,8 @@ import a75f.io.renatus.util.DataFd;
 import a75f.io.renatus.util.DataFdObj;
 import a75f.io.renatus.views.CustomCCUSwitch;
 import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
-import a75f.io.renatus.util.DataFd;
-import a75f.io.renatus.util.DataFdObj;
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import timber.log.Timber;
 
 public class Communication extends Fragment {
     
@@ -291,14 +286,7 @@ public class Communication extends Fragment {
             }
         });
     
-        btnRestart.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View view)
-            {
-                CCUUiUtil.triggerRestart(getActivity());
-            }
-        });
+        btnRestart.setOnClickListener(v -> CCUUiUtil.triggerRestart(getActivity()));
         setSpinnerBackground();
         String confString = sharedPreferences.getString(BACNET_CONFIGURATION,null);
 
@@ -311,14 +299,14 @@ public class Communication extends Fragment {
             doBACnetConfigurationValidation();
             initializeBACnet();
         } catch (JSONException e) {
-            Log.d(TAG_CCU_BACNET,"Config data: "+config+", Error message: "+e.getMessage());
+            CcuLog.d(TAG_CCU_BACNET,"Config data: "+config+", Error message: "+e.getMessage());
             e.printStackTrace();
         }
 
         rgConfigurationType.setOnCheckedChangeListener((radioGroup, checkedId) -> {
             RadioButton radioButton = view.findViewById(checkedId);
             String label = radioButton.getText().toString();
-            Log.d(TAG_CCU_BACNET, "radioButton selected-->"+label);
+            CcuLog.d(TAG_CCU_BACNET, "radioButton selected-->"+label);
             handleConfigurationType(label);
         });
 
@@ -337,16 +325,14 @@ public class Communication extends Fragment {
                         EditText etBbmdPort = childView.findViewById(R.id.etFdPort);
                         EditText etBbmdMask = childView.findViewById(R.id.etFdTime);
 
-                        Log.d(TAG_CCU_BACNET, "fd entry at->" + i + "<--ip-->" + etBbmdIp.getText().toString() + "<--port-->" +
+                        CcuLog.d(TAG_CCU_BACNET, "fd entry at->" + i + "<--ip-->" + etBbmdIp.getText().toString() + "<--port-->" +
                                 etBbmdPort.getText().toString() + "<--time-->" + etBbmdMask.getText().toString());
-//                        dataFdObj.addItem(new DataFd(etBbmdIp.getText().toString(), Integer.parseInt(etBbmdPort.getText().toString()),
-//                                Integer.parseInt(etBbmdMask.getText().toString())));
                         dataFdObj.setDataFd(new DataFd(etBbmdIp.getText().toString(), Integer.parseInt(etBbmdPort.getText().toString()),
                                 Integer.parseInt(etBbmdMask.getText().toString())));
                     }
 
                     String jsonString = new Gson().toJson(dataFdObj);
-                    Log.d(TAG_CCU_BACNET, "fd output-->" + jsonString);
+                    CcuLog.d(TAG_CCU_BACNET, "fd output-->" + jsonString);
 
                     RadioButton radioButton = view.findViewById(R.id.rb_foreign_device);
                     String label = radioButton.getText().toString();
@@ -361,7 +347,7 @@ public class Communication extends Fragment {
         });
 
         tvfDAdd.setOnClickListener(view1 -> {
-            Log.d(TAG_CCU_BACNET, "add fd config");
+            CcuLog.d(TAG_CCU_BACNET, "add fd config");
             View fdView = LayoutInflater.from(getContext()).inflate(R.layout.lyt_fd_view, null);
             fdView.findViewById(R.id.tvfDRemove).setOnClickListener(view2 -> {
                 View parent = fdView.findViewById(R.id.fdViewContainer);
@@ -371,7 +357,7 @@ public class Communication extends Fragment {
         });
 
         tvBbmdAdd.setOnClickListener(view1 -> {
-            Log.d(TAG_CCU_BACNET, "add bbmd config");
+            CcuLog.d(TAG_CCU_BACNET, "add bbmd config");
             View bbmdView = LayoutInflater.from(getContext()).inflate(R.layout.lyt_bbmd_view, null);
             bbmdView.findViewById(R.id.tvBbmdRemove).setOnClickListener(view2 -> {
                 View parent = bbmdView.findViewById(R.id.bbmdViewContainer);
@@ -391,14 +377,14 @@ public class Communication extends Fragment {
                         EditText etBbmdPort = childView.findViewById(R.id.etBbmdPort);
                         EditText etBbmdMask = childView.findViewById(R.id.etBbmdTime);
 
-                        Log.d(TAG_CCU_BACNET, "bbmd entry at->" + i + "<--ip-->" + etBbmdIp.getText().toString() + "<--port-->" +
+                        CcuLog.d(TAG_CCU_BACNET, "bbmd entry at->" + i + "<--ip-->" + etBbmdIp.getText().toString() + "<--port-->" +
                                 etBbmdPort.getText().toString() + "<--mask-->" + etBbmdMask.getText().toString());
                         dataBbmdObj.addItem(new DataBbmd(etBbmdIp.getText().toString(), Integer.parseInt(etBbmdPort.getText().toString()),
                                 Integer.parseInt(etBbmdMask.getText().toString())));
                     }
 
                     String jsonString = new Gson().toJson(dataBbmdObj);
-                    Log.d(TAG_CCU_BACNET, "bbmd output-->" + jsonString);
+                    CcuLog.d(TAG_CCU_BACNET, "bbmd output-->" + jsonString);
 
                     RadioButton radioButton = view.findViewById(R.id.rb_bbmd);
                     String label = radioButton.getText().toString();
@@ -436,10 +422,6 @@ public class Communication extends Fragment {
                 etBbmdPort.setError(getString(R.string.txt_valid_number));
                 return false;
             }
-//            if (etBbmdPort.getText().toString().equals(EMPTY_STRING) || (!CCUUiUtil.isValidNumber(Integer.parseInt(etBbmdPort.getText().toString()), 4069, 65535, 1))) {
-//                etBbmdPort.setError(getString(R.string.txt_error_port));
-//                return false;
-//            }
             if (etBbmdMask.getText().toString().equals(EMPTY_STRING) || (!CCUUiUtil.isValidNumber(Integer.parseInt(etBbmdMask.getText().toString()), 0, Integer.MAX_VALUE, 1))) {
                 etBbmdMask.setError(getString(R.string.txt_valid_number));
                 return false;
@@ -462,10 +444,6 @@ public class Communication extends Fragment {
                 etBbmdIp.setError(getString(R.string.error_ip_address));
                 return false;
             }
-            /*if (etBbmdPort.getText().toString().equals(EMPTY_STRING) || (!CCUUiUtil.isValidNumber(Integer.parseInt(etBbmdPort.getText().toString()), 4069, 65535, 1))) {
-                etBbmdPort.setError(getString(R.string.txt_error_port));
-                return false;
-            }*/
             if (etBbmdMask.getText().toString().equals(EMPTY_STRING) || (!CCUUiUtil.isValidNumber(Integer.parseInt(etBbmdMask.getText().toString()), 0, Integer.MAX_VALUE, 1))) {
                 etBbmdMask.setError(getString(R.string.txt_valid_number));
                 return false;
@@ -511,7 +489,7 @@ public class Communication extends Fragment {
             etScheduleObjects.setText(String.valueOf((objectConf.getString(NUMBER_OF_SCHEDULE_OBJECTS).equals(NULL)) || (objectConf.getString(NUMBER_OF_SCHEDULE_OBJECTS).equals(EMPTY_STRING)) ? EMPTY_STRING : objectConf.getInt(NUMBER_OF_SCHEDULE_OBJECTS)));
 			etOffsetValues.setText(String.valueOf((objectConf.getString(NUMBER_OF_OFFSET_VALUES).equals(NULL)) || (objectConf.getString(NUMBER_OF_OFFSET_VALUES).equals(EMPTY_STRING)) ? EMPTY_STRING : objectConf.getInt(NUMBER_OF_OFFSET_VALUES)));
         }catch (JSONException e){
-            Log.d(TAG_CCU_BACNET, "Exception while populating");
+            CcuLog.d(TAG_CCU_BACNET, "Exception while populating");
             e.printStackTrace();
         }
     }
@@ -542,7 +520,7 @@ public class Communication extends Fragment {
             toggleZoneToVirtualDeviceMapping.setEnabled(false);
             hideView(description, tvDescription);
             hideView(location, tvLocation);
-            if(password.getText().toString().trim().equals("")){
+            if(password.getText().toString().trim().isEmpty()){
                 textInputLayout.setVisibility(View.GONE);
             }else{
                 textInputLayout.setVisibility(View.GONE);
@@ -571,82 +549,73 @@ public class Communication extends Fragment {
 
         initializeBACnet.setOnClickListener(view -> executeTask());
 
-        disableBACnet.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                toggleZoneToVirtualDeviceMapping.setEnabled(true);
-                initializeBACnet.setVisibility(View.VISIBLE);
-                disableBACnet.setVisibility(View.GONE);
-                description.setVisibility(View.VISIBLE);
-                tvDescription.setVisibility(View.GONE);
-                location.setVisibility(View.VISIBLE);
-                tvLocation.setVisibility(View.GONE);
-                textInputLayout.setVisibility(View.VISIBLE);
-                password.setVisibility(View.VISIBLE);
-                tvPassword.setVisibility(View.GONE);
-                ipAddress.setVisibility(View.VISIBLE);
-                tvIPAddress.setVisibility(View.GONE);
-                localNetworkNumber.setVisibility(View.VISIBLE);
-                tvLocalNetworkNumber.setVisibility(View.GONE);
-                virtualNetworkNumber.setVisibility(View.VISIBLE);
-                tvVirtualNetworkAddress.setVisibility(View.GONE);
-                port.setVisibility(View.VISIBLE);
-                tvPort.setVisibility(View.GONE);
-                ipDeviceInstanceNumber.setVisibility(View.VISIBLE);
-                tvIPDeviceInstanceNumber.setVisibility(View.GONE);
-                apduTimeout.setVisibility(View.VISIBLE);
-                tvAPDUTimeout.setVisibility(View.GONE);
-                numberOfAPDURetries.setVisibility(View.VISIBLE);
-                tvNumberofAPDURetries.setVisibility(View.GONE);
-                apduSegmentTimeout.setVisibility(View.VISIBLE);
-                tvApduSegmentTimeout.setVisibility(View.GONE);
-                etNotificationClassObjects.setVisibility(View.VISIBLE);
-                tvNotificationClassObjects.setVisibility(View.GONE);
-                etTrendLogObjects.setVisibility(View.VISIBLE);
-                tvTrendLogObjects.setVisibility(View.GONE);
-                etScheduleObjects.setVisibility(View.VISIBLE);
-                tvScheduleObjects.setVisibility(View.GONE);
-                etOffsetValues.setVisibility(View.VISIBLE);
-                tvOffsetValue.setVisibility(View.GONE);
-                stopRestServer();
-                sharedPreferences.edit().putBoolean(IS_BACNET_INITIALIZED, false).apply();
-                sendBroadCast(context, BROADCAST_BACNET_APP_STOP, "Stop BACnet App");
-                performConfigFileBackup();
+        disableBACnet.setOnClickListener(v -> {
+            toggleZoneToVirtualDeviceMapping.setEnabled(true);
+            initializeBACnet.setVisibility(View.VISIBLE);
+            disableBACnet.setVisibility(View.GONE);
+            description.setVisibility(View.VISIBLE);
+            tvDescription.setVisibility(View.GONE);
+            location.setVisibility(View.VISIBLE);
+            tvLocation.setVisibility(View.GONE);
+            textInputLayout.setVisibility(View.VISIBLE);
+            password.setVisibility(View.VISIBLE);
+            tvPassword.setVisibility(View.GONE);
+            ipAddress.setVisibility(View.VISIBLE);
+            tvIPAddress.setVisibility(View.GONE);
+            localNetworkNumber.setVisibility(View.VISIBLE);
+            tvLocalNetworkNumber.setVisibility(View.GONE);
+            virtualNetworkNumber.setVisibility(View.VISIBLE);
+            tvVirtualNetworkAddress.setVisibility(View.GONE);
+            port.setVisibility(View.VISIBLE);
+            tvPort.setVisibility(View.GONE);
+            ipDeviceInstanceNumber.setVisibility(View.VISIBLE);
+            tvIPDeviceInstanceNumber.setVisibility(View.GONE);
+            apduTimeout.setVisibility(View.VISIBLE);
+            tvAPDUTimeout.setVisibility(View.GONE);
+            numberOfAPDURetries.setVisibility(View.VISIBLE);
+            tvNumberofAPDURetries.setVisibility(View.GONE);
+            apduSegmentTimeout.setVisibility(View.VISIBLE);
+            tvApduSegmentTimeout.setVisibility(View.GONE);
+            etNotificationClassObjects.setVisibility(View.VISIBLE);
+            tvNotificationClassObjects.setVisibility(View.GONE);
+            etTrendLogObjects.setVisibility(View.VISIBLE);
+            tvTrendLogObjects.setVisibility(View.GONE);
+            etScheduleObjects.setVisibility(View.VISIBLE);
+            tvScheduleObjects.setVisibility(View.GONE);
+            etOffsetValues.setVisibility(View.VISIBLE);
+            tvOffsetValue.setVisibility(View.GONE);
+            stopRestServer();
+            sharedPreferences.edit().putBoolean(IS_BACNET_INITIALIZED, false).apply();
+            sendBroadCast(context, BROADCAST_BACNET_APP_STOP, "Stop BACnet App");
+            performConfigFileBackup();
+        });
+
+        toggleZoneToVirtualDeviceMapping.setOnCheckedChangeListener((buttonView, isChecked) -> {
+
+            try {
+                config.put(ZONE_TO_VIRTUAL_DEVICE_MAPPING, isChecked);
+                sharedPreferences.edit().putString(BACNET_CONFIGURATION,config.toString()).apply();
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
             }
         });
 
-        toggleZoneToVirtualDeviceMapping.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-
-                try {
-                    config.put(ZONE_TO_VIRTUAL_DEVICE_MAPPING, isChecked);
-                    sharedPreferences.edit().putString(BACNET_CONFIGURATION,config.toString()).apply();
-                } catch (JSONException e) {
-                    throw new RuntimeException(e);
-                }
+        tvzvdmHint.setOnClickListener(v -> {
+            if(!isZoneToVirtualDeviceErrorShowing)
+            {
+                zvdmHint.setVisibility(View.GONE);
+                tvzvdmHint.setError("Enabled: Zone is represented as a virtual device and" +
+                        " each endpoint is mapped to the respective " +
+                        "BACnet Object.\n\n" +
+                        "Disabled: System and Terminal profile points are exposed" +
+                        " as a flat list.");
+                isZoneToVirtualDeviceErrorShowing = true;
+            }else{
+                zvdmHint.setVisibility(View.VISIBLE);
+                tvzvdmHint.setError(null);
+                isZoneToVirtualDeviceErrorShowing = false;
             }
-        });
 
-        tvzvdmHint.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(!isZoneToVirtualDeviceErrorShowing)
-                {
-                    zvdmHint.setVisibility(View.GONE);
-                    tvzvdmHint.setError("Enabled: Zone is represented as a virtual device and" +
-                            " each endpoint is mapped to the respective " +
-                            "BACnet Object.\n\n" +
-                            "Disabled: System and Terminal profile points are exposed" +
-                            " as a flat list.");
-                    isZoneToVirtualDeviceErrorShowing = true;
-                }else{
-                    zvdmHint.setVisibility(View.VISIBLE);
-                    tvzvdmHint.setError(null);
-                    isZoneToVirtualDeviceErrorShowing = false;
-                }
-
-            }
         });
     }
 
@@ -700,7 +669,7 @@ public class Communication extends Fragment {
         SharedPreferences spDefaultPrefs = PreferenceManager.getDefaultSharedPreferences(getContext());
         SharedPreferences.Editor editor = spDefaultPrefs.edit();
         editor.putInt(key, val);
-        editor.commit();
+        editor.apply();
     }
     
 
@@ -714,7 +683,7 @@ public class Communication extends Fragment {
 
     private class EditTextWatcher implements TextWatcher {
 
-        private View view;
+        private final View view;
         EditTextWatcher(View view){
             this.view = view;
         }
@@ -734,7 +703,7 @@ public class Communication extends Fragment {
 
                 case R.id.etDescription:
                     try {
-                        Log.i(TAG_CCU_BACNET, "Key: description, Value: "+description.getText().toString());
+                        CcuLog.i(TAG_CCU_BACNET, "Key: description, Value: "+description.getText().toString());
                         String description1 = description.getText().toString();
                         deviceObject.put(DESCRIPTION,description1);
                         sharedPreferences.edit().putString(BACNET_CONFIGURATION, config.toString()).apply();
@@ -745,7 +714,7 @@ public class Communication extends Fragment {
 
                 case R.id.etLocation:
                     try {
-                        Log.i(TAG_CCU_BACNET, "Key: location, Value: "+location.getText().toString());
+                        CcuLog.i(TAG_CCU_BACNET, "Key: location, Value: "+location.getText().toString());
                         String location1 = location.getText().toString().trim();
                         deviceObject.put(LOCATION, location1);
                         sharedPreferences.edit().putString(BACNET_CONFIGURATION, config.toString()).apply();
@@ -756,7 +725,7 @@ public class Communication extends Fragment {
 
                 case R.id.etPassword:
                     try {
-                        Log.i(TAG_CCU_BACNET, "Key: location, Value: "+password.getText().toString());
+                        CcuLog.i(TAG_CCU_BACNET, "Key: location, Value: "+password.getText().toString());
                         if (!CCUUiUtil.isAlphaNumeric(password.getText().toString())) {
                             ipAddress.setError(getString(R.string.error_password));
                         } else {
@@ -771,8 +740,8 @@ public class Communication extends Fragment {
 
                 case R.id.etIP:
                     try {
-                        if (ipAddress.getText().toString().trim().length() > 0) {
-                            Log.i(TAG_CCU_BACNET, "Key: ipAddress, Value: "+ipAddress.getText().toString()+", isValid: "+CCUUiUtil.isValidIPAddress(ipAddress.getText().toString()));
+                        if (!ipAddress.getText().toString().trim().isEmpty()) {
+                            CcuLog.i(TAG_CCU_BACNET, "Key: ipAddress, Value: "+ipAddress.getText().toString()+", isValid: "+CCUUiUtil.isValidIPAddress(ipAddress.getText().toString()));
                             if (!CCUUiUtil.isValidIPAddress(ipAddress.getText().toString())) {
                                 ipAddress.setError(getString(R.string.error_ip_address));
                                 initializeBACnet.setEnabled(false);
@@ -858,8 +827,8 @@ public class Communication extends Fragment {
 
         private void validateAndSetValue(EditText view, String key, String value, JSONObject jsonObject, int min, int max,  int multiple, String error) {
             try {
-                if (value.trim().length() > 0) {
-                    Log.i(TAG_CCU_BACNET, "Key: "+key+", Value: "+value+", isValid: "+CCUUiUtil.isValidNumber(Integer.parseInt(value), min, max, multiple));
+                if (!value.trim().isEmpty()) {
+                    CcuLog.i(TAG_CCU_BACNET, "Key: "+key+", Value: "+value+", isValid: "+CCUUiUtil.isValidNumber(Integer.parseInt(value), min, max, multiple));
                     if (!CCUUiUtil.isValidNumber(Integer.parseInt(value.trim()),min,max, multiple)) {
                         view.setError(error);
                         initializeBACnet.setEnabled(false);
@@ -920,14 +889,14 @@ public class Communication extends Fragment {
             Toast.makeText(context, "Port is busy try after some time", Toast.LENGTH_SHORT).show();
             return;
         }
-        Log.d(TAG_CCU_BACNET,"5001 port is free-->");
+        CcuLog.d(TAG_CCU_BACNET,"5001 port is free-->");
         if(validateEntries()) {
             toggleZoneToVirtualDeviceMapping.setEnabled(false);
             initializeBACnet.setVisibility(View.GONE);
             disableBACnet.setVisibility(View.VISIBLE);
             hideView(description, tvDescription);
             hideView(location, tvLocation);
-            if(password.getText().toString().trim().equals("")){
+            if(password.getText().toString().trim().isEmpty()){
                 textInputLayout.setVisibility(View.GONE);
             }else{
                 textInputLayout.setVisibility(View.GONE);
@@ -979,9 +948,7 @@ public class Communication extends Fragment {
         executorService.submit(() -> {
             boolean isPortAvailable = isPortAvailable(5001);
             // Update the UI on the main thread
-            requireActivity().runOnUiThread(() -> {
-                handleClick(isPortAvailable);
-            });
+            requireActivity().runOnUiThread(() -> handleClick(isPortAvailable));
         });
     }
     @Override
@@ -1007,7 +974,7 @@ public class Communication extends Fragment {
                     while (addresses.hasMoreElements()) {
                         InetAddress addr = addresses.nextElement();
                         if (!addr.isLoopbackAddress() && addr.getHostAddress().indexOf(':') == -1) {
-                            Log.d(Tags.BACNET, "device interface and ip" + iface.getDisplayName() + "-" + addr.getHostAddress());
+                            CcuLog.d(Tags.BACNET, "device interface and ip" + iface.getDisplayName() + "-" + addr.getHostAddress());
                             deviceIpAddress = addr.getHostAddress();
                             if(iface.getName().startsWith("eth")){
                                 break;

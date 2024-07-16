@@ -11,9 +11,9 @@ import java.util.Collections;
 import java.util.List;
 
 import a75f.io.api.haystack.CCUHsApi;
-import a75f.io.data.message.MessageDbUtilKt;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
+import a75f.io.logic.L;
 import a75f.io.logic.interfaces.RemoteCommandHandleInterface;
 import a75f.io.logic.interfaces.SafeModeInterface;
 import a75f.io.messaging.MessageHandler;
@@ -38,16 +38,16 @@ public class RemoteCommandUpdateHandler implements MessageHandler
     public static final String EXIT_SAFE_MODE = "exit_safe_mode";
     private static RemoteCommandHandleInterface remoteCommandInterface = null;
     private static SafeModeInterface safeModeInterface = null;
-    public static final String DOWNLOAD_BAC_APP = "update_bacapp";//"backappInstallOrUpgrade";
-    public static final String DOWNLOAD_REMOTE_ACCESS_APP = "ota_update_remoteAccess";
-
+    public static final String OTA_UPDATE_BAC_APP = "update_bacapp";//"backappInstallOrUpgrade";
+    public static final String OTA_UPDATE_REMOTE_ACCESS_APP = "ota_update_remoteAccess";
+    public static final String OTA_UPDATE_HOME_APP = "ota_update_homeApp";
     public static final String UPDATE_CCU_LOG_LEVEL = "update_ccu_log_level";
     /**
      * Maintain Queue request for all the OTA request and process one by one
      */
 
     @Override
-    public void handleMessage(JsonObject msgObject, Context context) {
+    public void handleMessage(@NonNull JsonObject msgObject, @NonNull Context context) {
         try {
             String cmdType = msgObject.get(CMD_TYPE).getAsString();
             String cmdLevel = msgObject.get("remoteCmdLevel").getAsString();
@@ -72,7 +72,10 @@ public class RemoteCommandUpdateHandler implements MessageHandler
                                     safeModeInterface.updateRemoteCommands(cmdType, cmdLevel, "");
                                 break;
                             case UPDATE_CCU:
-                                CcuLog.d("RemoteCommand", " handle update CCU=" + msgObject.get("version").getAsString());
+                            case OTA_UPDATE_BAC_APP:
+                            case OTA_UPDATE_REMOTE_ACCESS_APP:
+                            case OTA_UPDATE_HOME_APP:
+                                CcuLog.d("RemoteCommand", " handle ota app update; type=" + cmdType + " APK=" + msgObject.get("version").getAsString());
                                 if (remoteCommandInterface != null)
                                     remoteCommandInterface.updateRemoteCommands(cmdType, cmdLevel, msgObject.get("version").getAsString());
                                 else if(safeModeInterface != null)
@@ -118,26 +121,11 @@ public class RemoteCommandUpdateHandler implements MessageHandler
                                 if (safeModeInterface != null)
                                     safeModeInterface.handleExitSafeMode();
                                 break;
-                            case DOWNLOAD_BAC_APP:
-                                    CcuLog.d("RemoteCommand", "RemoteCommand download bac app");
-                                if (remoteCommandInterface != null)
-                                    remoteCommandInterface.updateRemoteCommands(cmdType, cmdLevel, msgObject.get("version").getAsString());
-                                else if(safeModeInterface != null)
-                                    safeModeInterface.updateRemoteCommands(cmdType, cmdLevel, msgObject.get("version").getAsString());
-                                break;
-                            case DOWNLOAD_REMOTE_ACCESS_APP:
-                                CcuLog.d("RemoteCommand", "Remote command - download remote-access-app");
-                                if (remoteCommandInterface != null)
-                                    remoteCommandInterface.updateRemoteCommands(cmdType, cmdLevel, msgObject.get("version").getAsString());
-                                else if(safeModeInterface != null)
-                                    safeModeInterface.updateRemoteCommands(cmdType, cmdLevel, msgObject.get("version").getAsString());
-                                break;
                             case UPDATE_CCU_LOG_LEVEL:
                                 if (remoteCommandInterface != null)
                                     remoteCommandInterface.updateRemoteCommands(cmdType, cmdLevel, msgObject.get("loglevel").getAsString());
                                 else if(safeModeInterface != null)
                                     safeModeInterface.updateRemoteCommands(cmdType, cmdLevel, msgObject.get("loglevel").getAsString());
-
                         }
                     }
                     break;
@@ -171,8 +159,7 @@ public class RemoteCommandUpdateHandler implements MessageHandler
             }
 
         } catch(NullPointerException e) {
-            // Command parsing failed
-            e.printStackTrace();
+            CcuLog.e(L.TAG_CCU_MESSAGING, "Parsing error" , e);
         }
     }
 

@@ -9,6 +9,8 @@ import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.config.ValueConfig
 import a75f.io.domain.equips.VavStagedSystemEquip
 import a75f.io.domain.equips.VavStagedVfdSystemEquip
+import a75f.io.logger.CcuLog
+import a75f.io.logic.bo.haystack.device.ControlMote
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import io.seventyfivef.ph.core.Tags
 
@@ -61,7 +63,7 @@ open class StagedVfdRtuProfileConfig(modelDef : SeventyFiveFProfileDirective)
         analogOut2HeatStage4 = getDefaultValConfig(DomainName.analog2HeatStage4, model)
         analogOut2HeatStage5 = getDefaultValConfig(DomainName.analog2HeatStage5, model)
         analogOut2Default = getDefaultValConfig(DomainName.analog2Default, model)
-
+        unusedPorts = ControlMote.getCMUnusedPorts(Domain.hayStack)
         isDefault = true
         return this
     }
@@ -132,7 +134,7 @@ open class StagedVfdRtuProfileConfig(modelDef : SeventyFiveFProfileDirective)
         analogOut2HeatStage4.currentVal = stagedRtuEquip.analog2HeatStage4.readDefaultVal()
         analogOut2HeatStage5.currentVal = stagedRtuEquip.analog2HeatStage5.readDefaultVal()
         analogOut2Default.currentVal = stagedRtuEquip.analog2Default.readDefaultVal()
-
+        unusedPorts = ControlMote.getCMUnusedPorts(Domain.hayStack)
         isDefault = false
         return this
     }

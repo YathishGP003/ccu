@@ -2,12 +2,11 @@ package a75f.io.logic.bo.building.schedules.occupancy;
 
 import static a75f.io.logic.bo.building.schedules.Occupancy.PRECONDITIONING;
 
-import android.util.Log;
-
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Occupied;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.schedules.ScheduleUtil;
@@ -37,10 +36,7 @@ public class Preconditioning implements OccupancyTrigger {
 
         if (isStandaloneEquip && isZoneRequiresPreconditioning(equipId, occupiedSchedule)) {
             return true;
-        } else if (!isStandaloneEquip && ScheduleManager.getInstance().getSystemOccupancy() == PRECONDITIONING){
-            return true;
-        }
-        return false;
+        } else return !isStandaloneEquip && ScheduleManager.getInstance().getSystemOccupancy() == PRECONDITIONING;
     }
 
     public boolean isEnabled() {
@@ -86,7 +82,7 @@ public class Preconditioning implements OccupancyTrigger {
             }
         }
 
-        Log.d(L.TAG_CCU_SCHEDULER,
+        CcuLog.d(L.TAG_CCU_SCHEDULER,
               "isZonePreconditioningActive = " + preconRate + "," + tempDiff + "," + occupied.getMillisecondsUntilNextChange()
               + "," + currentTemp + "," + desiredTemp + "," + occupied.isPreconditioning());
     

@@ -2,7 +2,6 @@ package a75f.io.api.haystack.sync;
 
 import org.projecthaystack.HGrid;
 import org.projecthaystack.HRow;
-import org.projecthaystack.ParseException;
 import org.projecthaystack.io.HZincReader;
 
 import java.util.Iterator;
@@ -28,8 +27,8 @@ class EntitySyncErrorHandler {
                 String itemId = itemRow.getRef("id").toString();
                 String itemErrorType = itemRow.getStr("error");
                 CcuLog.d("CCU_HS", "handle400HttpError "+itemId+" "+itemErrorType);
-                if (itemId == null || itemErrorType == null) {
-                    CcuLog.d("CCU_HS", "Invalid 400 error response item "+itemRow.toString());
+                if (itemErrorType == null) {
+                    CcuLog.d("CCU_HS", "Invalid 400 error response item "+ itemRow);
                     continue;
                 }
                 if (itemErrorType.equals("NOT_FOUND") && !hsApi.isBuildingTunerPoint(itemId)) {

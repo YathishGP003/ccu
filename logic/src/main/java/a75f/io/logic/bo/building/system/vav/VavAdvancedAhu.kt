@@ -749,7 +749,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
                         cmStageStatus[stageIndex] = Pair(logicalPoint.readHisVal().toInt(), if (relayOutput) 1 else 0)
                     }
                 } catch (e: Exception) {
-                    CcuLog.e(L.TAG_CCU_SYSTEM, "as ${relay.domainName}", e)
+                    CcuLog.e(L.TAG_CCU_SYSTEM, "Error in updateOutputPorts ${relay.domainName}", e)
                 }
             }
         }

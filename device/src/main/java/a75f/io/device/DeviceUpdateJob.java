@@ -129,7 +129,7 @@ public class DeviceUpdateJob extends BaseJob implements WatchdogMonitor
                     try {
                         sleep(1500);
                     } catch (InterruptedException e) {
-                        e.printStackTrace();
+                        CcuLog.e(L.TAG_CCU_DEVICE, "error ", e);
                     }
                 });
             }
@@ -140,7 +140,7 @@ public class DeviceUpdateJob extends BaseJob implements WatchdogMonitor
         Random randomNumGenerator = new Random();
         a75f.io.device.HyperStat.HyperStatRegularUpdateMessage_t regularUpdateMessage = a75f.io.device.HyperStat.HyperStatRegularUpdateMessage_t.newBuilder()
                 .setRoomTemperature(650 + randomNumGenerator.nextInt(150))
-                .setHumidity(200 + + randomNumGenerator.nextInt(400))
+                .setHumidity(200 + randomNumGenerator.nextInt(400))
                 .setExternalThermistorInput1(randomNumGenerator.nextInt(20000))
                 .setExternalThermistorInput2(randomNumGenerator.nextInt(20000))
                 .setExternalAnalogVoltageInput1(randomNumGenerator.nextInt(10000))

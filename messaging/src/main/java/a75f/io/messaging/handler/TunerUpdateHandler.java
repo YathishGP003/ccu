@@ -1,29 +1,17 @@
 package a75f.io.messaging.handler;
 
-import android.media.MediaParser;
-
 import com.google.gson.JsonObject;
 
 import org.projecthaystack.HDict;
-import org.projecthaystack.HDictBuilder;
-import org.projecthaystack.HGridBuilder;
-import org.projecthaystack.HNum;
-import org.projecthaystack.HRef;
-import org.projecthaystack.HVal;
-import org.projecthaystack.io.HZincWriter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
-import a75f.io.api.haystack.sync.HttpUtil;
-import a75f.io.domain.api.Domain;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.tuners.TunerConstants;
@@ -33,9 +21,7 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 
 
 class TunerUpdateHandler {
-    
-    public static final int FORCE_EXPIRY_TIME_MILLIS = 1;
-    
+
     public static void updateBuildingTuner(final JsonObject msgObject, CCUHsApi hayStack) {
         
         String pointUid = "@" + msgObject.get(HayStackConstants.ID).getAsString();

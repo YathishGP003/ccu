@@ -5,6 +5,7 @@ import a75f.io.api.haystack.Equip
 import a75f.io.api.haystack.HSUtil
 import a75f.io.api.haystack.modbus.EquipmentDevice
 import a75f.io.device.modbus.buildModbusModel
+import a75f.io.domain.api.Domain
 import a75f.io.domain.service.DomainService
 import a75f.io.domain.service.ResponseCallback
 import a75f.io.logger.CcuLog
@@ -306,7 +307,7 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
                         val emrDevice = HSUtil.getDevice(emrAddr.toShort())
                         hayStack.deleteEntityTree(emrDevice?.id)
 
-                        CcuLog.i("CCU_DOMAIN", "Energy Meter Equip deleted successfully")
+                        CcuLog.i(Domain.LOG_TAG, "Energy Meter Equip deleted successfully")
                     } else if (profileType.equals(ProfileType.MODBUS_BTU)) {
                         val btuEquip = sysEquips.find { eq : Equip -> eq.profile != null && eq.profile.equals(ProfileType.MODBUS_BTU.name) }
                         val btuAddr = Integer.parseInt(btuEquip?.group)
@@ -315,7 +316,7 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
                         val btuDevice = HSUtil.getDevice(btuAddr.toShort())
                         hayStack.deleteEntityTree(btuDevice?.id)
 
-                        CcuLog.i("CCU_DOMAIN", "BTU Meter Equip deleted successfully")
+                        CcuLog.i(Domain.LOG_TAG, "BTU Meter Equip deleted successfully")
                     }
                 } catch (e: Exception) {
                     CcuLog.d(L.TAG_CCU_UI, "Exception while trying to delete Modbus equip")
@@ -337,7 +338,7 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
                 ProgressDialogUtils.hideProgressDialog()
                 _isDialogOpen.value = false
                 showToast("Modbus Equip deleted successfully", context)
-                CcuLog.i("CCU_DOMAIN", "Close Pairing dialog")
+                CcuLog.i(Domain.LOG_TAG, "Close Pairing dialog")
             }
         }
     }

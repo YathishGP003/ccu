@@ -18,6 +18,7 @@ import android.view.ViewGroup;
 import android.widget.ScrollView;
 
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.L;
 import a75f.io.renatus.R;
 
 /**
@@ -122,10 +123,7 @@ public class LogFragment extends Fragment {
 		//		                                        .findFragmentById(R.id.log_fragment);
 		msgFilter.setNext(mLogView);
 		
-		CcuLog.i("Engg UI", "Ready");
+		CcuLog.i(L.TAG_CCU_INIT, "Engg UI Ready");
 	}
-	
-	public LogView getLogView() {
-		return mLogView;
-	}
+
 }

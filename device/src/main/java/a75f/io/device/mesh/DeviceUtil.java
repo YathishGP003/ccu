@@ -1,6 +1,5 @@
 package a75f.io.device.mesh;
 
-import static a75f.io.device.mesh.MeshUtil.sendStructToNodes;
 import static a75f.io.logic.bo.building.definitions.Port.ANALOG_IN_ONE;
 import static a75f.io.logic.bo.building.definitions.Port.ANALOG_IN_TWO;
 import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_FOUR;
@@ -33,8 +32,6 @@ import static a75f.io.logic.bo.building.definitions.Port.SENSOR_VOC;
 import static a75f.io.logic.bo.building.definitions.Port.TH1_IN;
 import static a75f.io.logic.bo.building.definitions.Port.TH2_IN;
 
-import android.util.Log;
-
 import java.util.HashMap;
 import java.util.List;
 
@@ -42,13 +39,12 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Point;
-import a75f.io.api.haystack.Zone;
+import a75f.io.api.haystack.Tags;
 import a75f.io.constants.DeviceFieldConstants;
 import a75f.io.device.serial.CcuToCmOverUsbCmRelayActivationMessage_t;
-import a75f.io.device.serial.CcuToCmOverUsbSmartStatControlsMessage_t;
-import a75f.io.device.serial.CcuToCmOverUsbSnControlsMessage_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.domain.api.Domain;
+import a75f.io.domain.api.PhysicalPoint;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.Port;
@@ -79,10 +75,6 @@ public class DeviceUtil {
                 return val;
             case "10-0v":
                 return (short) (100 - val);
-           /* case "2-10v":
-                return (short) (20 + scaleAnalog(val, 80));
-            case "10-2v":
-                return (short) (100 - scaleAnalog(val, 80));*/
             default:
             String [] arrOfStr = type.split("-");
             if (arrOfStr.length == 2)
@@ -110,11 +102,7 @@ public class DeviceUtil {
         }
         return 0;
     }
-    
-    public static int scaleAnalog(short analog, int scale) {
-        return (int) ((float) scale * ((float) analog / 100.0f));
-    }
-    
+
     public static short getMaxUserTempLimits(double deadband){
         double maxCool = BuildingTunerCache.getInstance().getMaxCoolingUserLimit();
         return (short)(maxCool- deadband);
@@ -147,7 +135,7 @@ public class DeviceUtil {
                 (desiredTemp - heatingDeadband) < buildingTuner.getMinHeatingUserLimit() ||
                 (desiredTemp - heatingDeadband > buildingTuner.getMaxHeatingUserLimit())) {
             CcuLog.d(L.TAG_CCU_DEVICE,
-                     "validateDesiredTempUserLimits desiredTemp "+desiredTemp+" coolingDeadband "+coolingDeadband+"" +
+                     "validateDesiredTempUserLimits desiredTemp "+desiredTemp+" coolingDeadband "+coolingDeadband+
                              " heatingDeadband "+heatingDeadband+" maxCoolingLimit "+buildingTuner.getMaxCoolingUserLimit()+
                              " minCoolingLimit "+buildingTuner.getMinCoolingUserLimit()+
                              " minHeatingLimit "+buildingTuner.getMinHeatingUserLimit()+
@@ -195,41 +183,13 @@ public class DeviceUtil {
         }
         LSerial.getInstance().sendSeedMessage(isSmartStat, false, nodeAddr, equip.getRoomRef(), equip.getFloorRef());
     }
-    
-    /**
-     * Send control message to smartstat or smartnode , bypassing the duplicate check.
-     * @param nodeAddr
-     * @param isSmartNode
-     */
-    
-    public static void sendControlsMessage(Short nodeAddr, boolean isSmartNode) {
-        
-        Equip equip = HSUtil.getEquipForModule(nodeAddr);
-        if (equip == null) {
-            return;
-        }
-        Zone zone = new Zone.Builder().setHashMap(CCUHsApi.getInstance().readMapById(equip.getRoomRef())).build();
-        
-        if (isSmartNode) {
-            CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING SN Controls =====================");
-            CcuToCmOverUsbSnControlsMessage_t snControlsMessage =
-                LSmartNode.getControlMessage(zone, Short.parseShort(equip.getGroup()), equip.getId());
-            snControlsMessage = LSmartNode.getCurrentTimeForControlMessage(snControlsMessage);
-            sendStructToNodes(snControlsMessage);
-        } else {
-            CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING SS Controls =====================");
-            CcuToCmOverUsbSmartStatControlsMessage_t ssControlsSSMessage =
-                                    LSmartStat.getControlMessage(zone, Short.parseShort(equip.getGroup()),equip.getId());
-            ssControlsSSMessage = LSmartStat.getCurrentTimeForControlMessage(ssControlsSSMessage);
-            sendStructToNodes(ssControlsSSMessage);
-        }
-    }
-    
+
     public static short getModulatedAnalogVal(double min, double max, double val) {
         return max > min ? (short) (10 * (min + (max - min) * val/100)) : (short) (10 * (min - (min - max) * val/100));
     }
     
     public static CcuToCmOverUsbCmRelayActivationMessage_t getCMControlsMessage() {
+        CCUHsApi ccuHsApi = CCUHsApi.getInstance();
         CcuToCmOverUsbCmRelayActivationMessage_t msg = new CcuToCmOverUsbCmRelayActivationMessage_t();
         msg.messageType.set(MessageType.CCU_RELAY_ACTIVATION);
 
@@ -238,16 +198,14 @@ public class DeviceUtil {
                 L.ccu().systemProfile instanceof VavAdvancedAhu ||
                 L.ccu().systemProfile instanceof VavFullyModulatingRtu) {
 
-            msg.analog0.set((short) Domain.cmBoardDevice.getAnalog1Out().readHisVal());
-            msg.analog1.set((short) Domain.cmBoardDevice.getAnalog2Out().readHisVal());
-            msg.analog2.set((short) Domain.cmBoardDevice.getAnalog3Out().readHisVal());
-            msg.analog3.set((short) Domain.cmBoardDevice.getAnalog4Out().readHisVal());
+            msg.analog0.set(getPortValue(Domain.cmBoardDevice.getAnalog1Out(), ccuHsApi));
+            msg.analog1.set(getPortValue(Domain.cmBoardDevice.getAnalog2Out(), ccuHsApi));
+            msg.analog2.set(getPortValue(Domain.cmBoardDevice.getAnalog3Out(), ccuHsApi));
+            msg.analog3.set(getPortValue(Domain.cmBoardDevice.getAnalog4Out(), ccuHsApi));
 
             int relayBitmap = 0;
             for (int i = 1; i <= 7; i++) {
-                if (CCUHsApi.getInstance().readHisValByQuery("point and physical and deviceRef == \""
-                        + Domain.cmBoardDevice.getId() + "\" " +
-                        "and domainName == \"relay"+i+"\"") > 0) {
+                if (isRelayActivated(ccuHsApi, "relay"+i)) {
                     relayBitmap |= 1 << MeshUtil.getRelayMapping(i);
                 }
             }
@@ -273,6 +231,24 @@ public class DeviceUtil {
         return msg;
     }
 
+    private static boolean isRelayActivated(CCUHsApi ccuHsApi, String relay) {
+        String relayQuery = ("point and physical and deviceRef == \""
+                + Domain.cmBoardDevice.getId() + "\" " +
+                "and domainName == \""+relay+"\"");
+        if(ccuHsApi.readEntity(relayQuery).containsKey(Tags.WRITABLE)){
+            return ccuHsApi.readPointPriorityValByQuery(relayQuery) > 0;
+        } else {
+            return CCUHsApi.getInstance().readHisValByQuery(relayQuery) > 0;
+        }
+    }
+
+    private static short getPortValue(PhysicalPoint physicalPoint, CCUHsApi ccuHsApi) {
+        if(physicalPoint.readPoint().getMarkers().contains(Tags.WRITABLE)){
+            return (short) ccuHsApi.readPointPriorityVal(physicalPoint.readPoint().getId());
+        }
+        return (short) physicalPoint.readHisVal();
+    }
+
 
     public static double getPercentageFromVoltage(double physicalVoltage, String analogType) {
         String [] arrOfStr = analogType.split("-");
@@ -283,16 +259,16 @@ public class DeviceUtil {
             double minVoltage =  Double.parseDouble(arrOfStr[0]);
             double maxVoltage =  Double.parseDouble(arrOfStr[1]);
 
-            Log.i(L.TAG_CCU_DEVICE, "Feedback physicalVoltage"+physicalVoltage +"Min = "+minVoltage+" Max = "+maxVoltage);
+            CcuLog.i(L.TAG_CCU_DEVICE, "Feedback physicalVoltage"+physicalVoltage +"Min = "+minVoltage+" Max = "+maxVoltage);
             double feedbackPercent = ((physicalVoltage - minVoltage) / (maxVoltage - minVoltage)) * 100;
-            Log.i(L.TAG_CCU_DEVICE, "Actual Feedback Result"+ feedbackPercent);
+            CcuLog.i(L.TAG_CCU_DEVICE, "Actual Feedback Result"+ feedbackPercent);
             return feedbackPercent;
         }
-        Log.i(L.TAG_CCU_DEVICE, "invalid analogType "+analogType);
+        CcuLog.i(L.TAG_CCU_DEVICE, "invalid analogType "+analogType);
         return 0;
     }
 
-    public static String parseNodeStatusMessage(int data, int nodeAddress){
+    public static String parseNodeStatusMessage(int data){
 
         String binaryValue = String.format("%08d",(Integer.parseInt(Integer.toBinaryString(data))));
         int message = Integer.parseInt(binaryValue.substring(0,5),2);
@@ -306,7 +282,7 @@ public class DeviceUtil {
         String binaryValue = String.format("%08d",(Integer.parseInt(Integer.toBinaryString(data))));
         int message = Integer.parseInt(binaryValue.substring(0,5),2);
         int msgType = Integer.parseInt(binaryValue.substring(7),2);
-        Log.i(L.TAG_CCU_OTA_PROCESS, "getNodeStatus: message : "+message + " msgType : "+msgType);
+        CcuLog.i(L.TAG_CCU_OTA_PROCESS, "getNodeStatus: message : "+message + " msgType : "+msgType);
         if(msgType == 1)
             return getStatus(message);
         return OtaStatus.NO_INFO;

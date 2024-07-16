@@ -1,12 +1,9 @@
 package a75f.io.renatus;
 
-import static a75f.io.renatus.UtilityApplication.context;
-
 import android.app.Dialog;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -59,7 +56,6 @@ public class HyperStatMonitoringFragment extends BaseDialogFragment {
     short mNodeAddress;
     String mRoomName;
     String mFloorName;
-    Boolean misPaired;
     String mProfileName;
 
     @BindView(R.id.temperatureOffset)
@@ -174,17 +170,6 @@ public class HyperStatMonitoringFragment extends BaseDialogFragment {
             mAnalog1Sp.setEnabled(false);
             mAnalog2Sp.setEnabled(false);
         }
-     /*   mHyperStatSenseVM = new ViewModelProvider(this).get(HyperStatSenseVM.class);
-        mHyperStatSenseVM.init();
-        mHyperStatSenseVM.get().observe(this, new Observer<HyperStatSenseModel>() {
-            @Override
-            public void onChanged(HyperStatSenseModel model) {
-                   //TODO
-                Log.d("Spoo", "in onchange");
-                updateView();
-            }
-        });*/
-
     }
 
 
@@ -255,10 +240,10 @@ public class HyperStatMonitoringFragment extends BaseDialogFragment {
 
         hyperStatMonitoringProfile.getProfileConfiguration().put(mNodeAddress, monitoringConfiguration);
         if (hyperStatMonitoringConfiguration == null) {
-            Log.d(LOG_TAG, "Creating new config");
+            CcuLog.d(LOG_TAG, "Creating new config");
             hyperStatMonitoringProfile.addHyperStatMonitoringEquip(ProfileType.HYPERSTAT_MONITORING, mNodeAddress, monitoringConfiguration, mFloorName, mRoomName);
         } else {
-            Log.d(LOG_TAG, " Update config");
+            CcuLog.d(LOG_TAG, " Update config");
             hyperStatMonitoringProfile.updateHyperStatMonitoringEquip(ProfileType.HYPERSTAT_MONITORING, mNodeAddress, monitoringConfiguration, mFloorName, mRoomName);
         }
         L.ccu().zoneProfiles.add(hyperStatMonitoringProfile);

@@ -8,7 +8,7 @@ import org.projecthaystack.HGridBuilder;
 import java.util.ArrayList;
 
 public class HGridIterator {
-    private     HGrid mGrid;
+    private final HGrid mGrid;
     private int   index = 0;
     
     public HGridIterator(HGrid grid) {
@@ -30,7 +30,7 @@ public class HGridIterator {
             dictIndex++;
         }
         if (dictIndex > 0) {
-            return HGridBuilder.dictsToGrid(dictList.toArray(new HDict[dictList.size()]));
+            return HGridBuilder.dictsToGrid(dictList.toArray(new HDict[0]));
         } else {
             return null;
         }

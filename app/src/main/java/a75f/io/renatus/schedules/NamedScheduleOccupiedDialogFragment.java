@@ -14,7 +14,6 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
@@ -139,7 +138,7 @@ public class NamedScheduleOccupiedDialogFragment  extends  DialogFragment{
         prefs = new Prefs(getActivity());
         LayoutInflater inflater = LayoutInflater.from(getActivity());
         View view = inflater.inflate(R.layout.named_edit, null);
-        int daySelectionBackGround = CCUUiUtil.getDayselectionBackgroud(getContext());
+        int daySelectionBackGround = CCUUiUtil.getDaySelectionBackground(getContext());
         ImageButton deleteButton = view.findViewById(R.id.buttonDelete);
         rangeSeekBarView = view.findViewById(R.id.rangeSeekBar);
         Schedule schedule = CCUHsApi.getInstance().getScheduleById(mSchedule.getId());
@@ -277,7 +276,7 @@ public class NamedScheduleOccupiedDialogFragment  extends  DialogFragment{
             method.setAccessible(true);
             method.invoke(npEndTime, true);
         } catch (Exception e) {
-            Log.e("Crash", "Reflection Crash?");
+            CcuLog.e(L.TAG_CCU_CRASH, "Reflection Crash?");
         }
         checkBoxMonday.setOnCheckedChangeListener((buttonView, isChecked) ->
         {
@@ -416,7 +415,7 @@ public class NamedScheduleOccupiedDialogFragment  extends  DialogFragment{
                 return;
             }
 
-            if (days.size() == 0) {
+            if (days.isEmpty()) {
                 Toast.makeText(this.getContext(), "Select one or more days to apply the schedule", Toast.LENGTH_SHORT).show();
                 return;
             }
@@ -443,13 +442,13 @@ public class NamedScheduleOccupiedDialogFragment  extends  DialogFragment{
                 return;
             }
 
-            Double buildingLimitMax = Domain.buildingEquip.getBuildingLimitMax().readPriorityVal();
-            Double buildingLimitMin =  Domain.buildingEquip.getBuildingLimitMin().readPriorityVal();
+            double buildingLimitMax = Domain.buildingEquip.getBuildingLimitMax().readPriorityVal();
+            double buildingLimitMin =  Domain.buildingEquip.getBuildingLimitMin().readPriorityVal();
             Double unoccupiedZoneSetback = schedule.getUnoccupiedZoneSetback();
-            Double buildingToZoneDiff = Domain.buildingEquip.getBuildingToZoneDifferential().readPriorityVal();
+            double buildingToZoneDiff = Domain.buildingEquip.getBuildingToZoneDifferential().readPriorityVal();
             double coolingTemp = rangeSeekBarView.getCoolValue();
             double heatingTemp = rangeSeekBarView.getHeatValue();
-            String warning = null;
+            String warning;
 
             CcuLog.i(L.TAG_CCU, "buildingLimitMin "+buildingLimitMin);
             CcuLog.i(L.TAG_CCU, "heatingUserLimitMinVal "+heatingUserLimitMinVal);
@@ -484,9 +483,7 @@ public class NamedScheduleOccupiedDialogFragment  extends  DialogFragment{
                 builder.setCancelable(false);
                 builder.setTitle(R.string.warning_ns);
                 builder.setIcon(R.drawable.ic_alert);
-                builder.setNegativeButton("OKAY", (dialog1, id) -> {
-                    dialog1.dismiss();
-                });
+                builder.setNegativeButton("OKAY", (dialog1, id) -> dialog1.dismiss());
 
                 android.app.AlertDialog alert = builder.create();
                 alert.show();
@@ -585,7 +582,7 @@ public class NamedScheduleOccupiedDialogFragment  extends  DialogFragment{
         });
 
 
-        if (mDays != null && (mDays.size() > 0)) {
+        if (mDays != null && (!mDays.isEmpty())) {
 
             for(Schedule.Days d : mDays) {
                 checkDays(d);
@@ -703,9 +700,9 @@ public class NamedScheduleOccupiedDialogFragment  extends  DialogFragment{
 
     private void checkTime(Schedule.Days mDay) {
         int startTimePosition = mDay.getSthh() * 4 + mDay.getStmm() / 15;
-        CcuLog.d("Schedule", "StartTime Position: " + startTimePosition);
+        CcuLog.d(L.TAG_CCU_SCHEDULE, "StartTime Position: " + startTimePosition);
         int endTimePosition = mDay.getEthh() * 4 + mDay.getEtmm() / 15;
-        CcuLog.d("Schedule", "EndTime Position: " + endTimePosition);
+        CcuLog.d(L.TAG_CCU_SCHEDULE, "EndTime Position: " + endTimePosition);
 
         npStartTime.setValue(startTimePosition);
         npEndTime.setValue(endTimePosition);

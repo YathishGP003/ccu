@@ -1,15 +1,9 @@
 package a75f.io.logic.tuners;
-
-import android.util.Log;
-
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
 
 import a75f.io.api.haystack.CCUHsApi;
-import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.HisItem;
 import a75f.io.api.haystack.Point;
@@ -30,8 +24,7 @@ public class DabTuners {
                                            String tz){
     
         HashMap tuner = CCUHsApi.getInstance().read("point and tuner and default and dab");
-        Equip equip = HSUtil.getEquipInfo(equipRef);
-        if (tuner != null && tuner.size() > 0) {
+        if (tuner != null && !tuner.isEmpty()) {
             CcuLog.d(L.TAG_CCU_SYSTEM,"Default DAB Tuner points already exist");
             return;
         }
@@ -342,8 +335,8 @@ public class DabTuners {
     
     public static void addEquipDabTuners(CCUHsApi hayStack, String siteRef, String equipdis, String equipref,
                                          String roomRef, String floorRef, String tz) {
-        
-        Log.d("CCU", "addEquipDabTuners for " + equipdis);
+
+        CcuLog.d(L.TAG_CCU, "addEquipDabTuners for " + equipdis);
         ZoneTuners.addZoneTunersForEquip(hayStack, siteRef, equipdis, equipref, roomRef, floorRef, tz);
     
         List<HisItem> hisItems = new ArrayList<>();
@@ -552,48 +545,4 @@ public class DabTuners {
                 equipref, equipdis, false, roomRef, floorRef);
         hayStack.writeHisValueByIdWithoutCOV(hisItems);
     }
-
-    /***
-     * When BuildingTuner fails to fetch a point from remote , it should fall back to below values
-     * on non-primary CCUs.
-     * @param tags
-     * @return
-     */
-    public static double getDefaultTunerVal(String tags) {
-
-        List<String> tagList = Arrays.asList(tags.split(HSUtil.QUERY_JOINER));
-        Optional<Double> defaultVal = getDefaultTagsValMap().entrySet().stream()
-                                                            .filter(m -> {
-                                                                for (String tag : tagList) {
-                                                                    if (!m.getKey().contains(tag)) {
-                                                                        return false;
-                                                                    }
-                                                                }
-                                                                return true;
-                                                            })
-                                                            .map(m -> m.getValue())
-                                                            .findFirst();
-        return defaultVal.isPresent() ? defaultVal.get() : 0;
-    }
-
-
-    public static HashMap<String, Double> getDefaultTagsValMap() {
-        HashMap<String, Double> tagsValMap = new HashMap<>();
-        tagsValMap.put("priority,spread",TunerConstants.ZONE_PRIORITY_SPREAD);
-        tagsValMap.put("priority,multiplier",TunerConstants.ZONE_PRIORITY_MULTIPLIER);
-        tagsValMap.put("cooling,deadband,multiplier",TunerConstants.VAV_COOLING_DB_MULTPLIER);
-        tagsValMap.put("heating,deadband,multiplier",TunerConstants.VAV_HEATING_DB_MULTIPLIER);
-        tagsValMap.put("pgain",TunerConstants.VAV_PROPORTIONAL_GAIN);
-        tagsValMap.put("pspread",TunerConstants.VAV_PROPORTIONAL_SPREAD);
-        tagsValMap.put("igain",TunerConstants.VAV_INTEGRAL_GAIN);
-        tagsValMap.put("itimeout",TunerConstants.VAV_INTEGRAL_TIMEOUT);
-        tagsValMap.put("zone,co2,target",TunerConstants.ZONE_CO2_TARGET);
-        tagsValMap.put("zone,co2,threshold",TunerConstants.ZONE_CO2_THRESHOLD);
-        tagsValMap.put("zone,voc,target",TunerConstants.ZONE_VOC_TARGET);
-        tagsValMap.put("zone,voc,threshold",TunerConstants.ZONE_VOC_THRESHOLD);
-        return tagsValMap;
-    }
-
-
-
 }

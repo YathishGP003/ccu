@@ -9,31 +9,21 @@ import android.app.DownloadManager;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.content.res.AssetManager;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Environment;
-import android.preference.PreferenceManager;
 
-import a75f.io.logger.CcuLog;
-import a75f.io.logic.Globals;
-import androidx.annotation.WorkerThread;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import a75f.io.logger.CcuLog;
+import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.diag.otastatus.OtaStatus;
 import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint;
@@ -45,18 +35,13 @@ public class AppInstaller
 {
 
     static final String CCU_APK_FILE_NAME = "Renatus_new.apk";
-    static final String HOME_APK_FILE_NAME = "75FRenatus_Home.apk";
 
     public static final String DOWNLOAD_BASE_URL = "http://updates.75fahrenheit.com/";
     static final String CCU_DOWNLOAD_FILE = "Renatus_Prod_Rv.apk";
-    static final String HOME_DOWNLOAD_FILE = "75FHomeRV1.apk";
 
     static final int CCUAPP_INSTALL_CODE = 100;
     static final int HOMEAPP_INSTALL_CODE = 200;
     static final int HOMEAPP_AND_CCUAPP_INSTALL_CODE = 300;
-    static final String CCU_DOWNLOAD_FILE_DIR = "/data/app/CCUV2.apk";
-    static final String CCU_NEW_FILE = "/system/priv-app/";
-    public static final String COM_X75_APPMOVER_PACKAGE_NAME = "com.x75.appmover";
     static AppInstaller mSelf = null;
     private long mCCUAppDownloadId = -1;
     private long mHomeAppDownloadId = -1;
@@ -71,77 +56,6 @@ public class AppInstaller
         return mSelf;
     }
 
-
-    @WorkerThread
-    /***
-     *  silentInstallMoverApp()
-     *
-     *  If the mover application package doesn't exist install it.
-     *
-     *
-     */
-    public static void silentInstallMoverApp() {
-        final PackageManager packageManager = RenatusApp.getAppContext().getPackageManager();
-        ApplicationInfo applicationInfo = null;
-        try {
-            applicationInfo = packageManager.getApplicationInfo(COM_X75_APPMOVER_PACKAGE_NAME, 0);
-        }
-        catch (NameNotFoundException e) {
-            e.printStackTrace();
-        }
-        if (applicationInfo == null) {
-            CcuLog.e("upgrade", "The app wasn't installed, installing now");
-            final String libs = "";
-            try {
-                String sFilePath = moveAssetToExternalStorage("mover.apk");
-                if (!sFilePath.isEmpty())
-                {
-                    final String[] commands = {libs+"pm install -r -d "+sFilePath};
-                    RenatusApp.executeAsRoot(commands);
-                }
-                try
-                {
-                    final String[] commands = {libs+"rm "+sFilePath};
-                    RenatusApp.executeAsRoot(commands);
-                }
-                catch (Exception e)
-                {
-                    e.printStackTrace();
-                }
-
-            }
-            catch (IOException e)
-            {
-                e.printStackTrace();
-            }
-        }
-    }
-
-
-    private static String moveAssetToExternalStorage(String name) throws IOException {
-        AssetManager assetManager = RenatusApp.getAppContext().getAssets();
-        InputStream in;
-        OutputStream out;
-        String path = Environment.getExternalStorageDirectory().getPath()+"/"+name;
-        File fileToMove = new File(path);
-        if (!fileToMove.exists()) {
-            in = assetManager.open(name);
-            out = new FileOutputStream(fileToMove);
-            byte[] buffer = new byte[1024];
-            int read;
-            while ((read = in.read(buffer)) != -1)
-            {
-                out.write(buffer, 0, read);
-            }
-            in.close();
-            out.flush();
-            out.close();
-            return path;
-        }
-        else {
-            return path;
-        }
-    }
 
 
     public long getCCUAppDownloadId()
@@ -178,7 +92,6 @@ public class AppInstaller
         mHomeAppDownloadId = -1;
     }
 
-
     private synchronized long downloadFile(String url, String apkFile, Fragment currentFragment, FragmentActivity activity) {
         DownloadManager manager =
                 (DownloadManager) RenatusApp.getAppContext().getSystemService(Context.DOWNLOAD_SERVICE);
@@ -199,7 +112,7 @@ public class AppInstaller
         }
         request.setDestinationInExternalFilesDir(RenatusApp.getAppContext(), null, apkFile);
         long dowloadId = manager.enqueue(request);
-        CcuLog.d("L.TAG_CCU_DOWNLOAD", "downloading file: "+dowloadId+","+url);
+        CcuLog.d(L.TAG_CCU_DOWNLOAD, "downloading file: "+dowloadId+","+url);
         if(currentFragment != null) {
             checkDownload(dowloadId, manager, currentFragment, activity);
         }
@@ -312,10 +225,6 @@ public class AppInstaller
         timer.scheduleAtFixedRate(task, 0, 1000);
     }
 
-
-    public void downloadHomeInstall(String sFileName){
-        setHomeAppDownloadId(downloadFile(DOWNLOAD_BASE_URL+sFileName,HOME_APK_FILE_NAME, null, null));
-    }
     public void downloadCCUInstall(String sFileName, Fragment currentFragment, FragmentActivity activity) {
         if(isFIleDownloaded(getCCUAppDownloadId())) {
             long downloadId = downloadFile(DOWNLOAD_BASE_URL+sFileName, CCU_APK_FILE_NAME, currentFragment, activity);
@@ -353,7 +262,7 @@ public class AppInstaller
                     final String[] commands = {"pm install -r -d -g "+file.getAbsolutePath()};
 
                     CcuLog.d(L.TAG_CCU_DOWNLOAD, "Install AppInstall silent invokeInstallerIntent===>>>"+sFilePath+","+file.getAbsolutePath());
-                    RenatusApp.executeAsRoot(commands);
+                    RenatusApp.executeAsRoot(commands, null, true);
                     OtaStatusDiagPoint.Companion.updateCCUOtaStatus(OtaStatus.OTA_SUCCEEDED);
                     Globals.getInstance().setCcuUpdateTriggerTimeToken(0);
                 }
@@ -370,17 +279,11 @@ public class AppInstaller
             }
         }
         catch (ActivityNotFoundException e) {
-            CcuLog.d(L.TAG_CCU_DOWNLOAD, "ActivityNotFoundException ".concat(e.getMessage()));
+            CcuLog.e(L.TAG_CCU_DOWNLOAD, "ActivityNotFoundException ".concat(e.getMessage()));
 
         }catch (Exception e){
-            CcuLog.d(L.TAG_CCU_DOWNLOAD, "Exception ".concat(e.getMessage()));
+            CcuLog.e(L.TAG_CCU_DOWNLOAD, "Exception ".concat(e.getMessage()));
         }
-    }
-    
-    
-    public boolean isNewHomeAppAvailable()
-    {
-        return checkForVersionAndNotify(mHomeAppDownloadId);
     }
 
 
@@ -405,11 +308,11 @@ public class AppInstaller
             }
         }
         catch (NameNotFoundException e) {
-            CcuLog.d(L.TAG_CCU_DOWNLOAD, "***exception Called*** ".concat(e.toString()));
+            CcuLog.e(L.TAG_CCU_DOWNLOAD, "***exception Called*** ".concat(e.toString()));
             return true;
         }
         catch (NullPointerException e) {
-            CcuLog.d(L.TAG_CCU_DOWNLOAD, "***exception Called*** ".concat(e.toString()));
+            CcuLog.e(L.TAG_CCU_DOWNLOAD, "***exception Called*** ".concat(e.toString()));
         }
         return false;
     }
@@ -427,30 +330,7 @@ public class AppInstaller
     {
         return checkForVersionAndNotify(mCCUAppDownloadId);
     }
-    
-    
-    private boolean isSystemRoot()
-    {
-        ApplicationInfo applicationInfo = RenatusApp.getAppContext().getApplicationInfo();
-        boolean isSystemApp = (applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 1;
-        return isSystemApp;
-    }
-    public int getHomeAppInstalledVersion() {
-        PackageManager pm = RenatusApp.getAppContext().getPackageManager();
-        List<ApplicationInfo> l = pm.getInstalledApplications(PackageManager.GET_META_DATA);
-        String name = "com.x75fahrenheit.home";
-        for (ApplicationInfo ai : l) {
-            if (ai.packageName.contains(name)){
-                PackageInfo pinew = pm.getPackageArchiveInfo(ai.sourceDir,0);
-                CcuLog.d("CCU_HOME","home app info = "+ai.sourceDir+","+ai.packageName+","+pinew.versionCode+","+pinew.versionName);
-                if (pinew != null) {
-                    PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit().putInt("home_app_version", pinew.versionCode).commit();
-                    return pinew.versionCode;
-                }
-            }
-        }
-        return -1;
-    }
+
 
     public int getDownloadedFileVersion(long downloadId) {
         try {
@@ -458,13 +338,13 @@ public class AppInstaller
                     (DownloadManager) RenatusApp.getAppContext().getSystemService(Context.DOWNLOAD_SERVICE);
             String sFilePath = manager.getUriForDownloadedFile(downloadId).getPath();
             PackageManager pm = RenatusApp.getAppContext().getPackageManager();
-            PackageInfo packageInfo = getPackageInfo(pm, sFilePath);;
+            PackageInfo packageInfo = getPackageInfo(pm, sFilePath);
             if (packageInfo != null) {
                 return packageInfo.versionCode;
             }
         }
         catch (NullPointerException e) {
-            CcuLog.d(L.TAG_CCU_DOWNLOAD, "***exception Called*** ".concat(e.toString()));
+            CcuLog.e(L.TAG_CCU_DOWNLOAD, "***exception Called*** ".concat(e.toString()));
         }
         return 1;
     }

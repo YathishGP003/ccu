@@ -9,10 +9,6 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.DialogFragment;
-import androidx.fragment.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,15 +20,16 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
+import androidx.fragment.app.DialogFragment;
+
 import com.x75f.modbus4j.ModbusFactory;
 import com.x75f.modbus4j.ModbusMaster;
 import com.x75f.modbus4j.exception.ModbusTransportException;
 import com.x75f.modbus4j.msg.ModbusRequest;
-import com.x75f.modbus4j.msg.ModbusResponse;
 import com.x75f.modbus4j.msg.ReadCoilsRequest;
 import com.x75f.modbus4j.msg.ReadDiscreteInputsRequest;
 import com.x75f.modbus4j.msg.ReadHoldingRegistersRequest;
-import com.x75f.modbus4j.msg.ReadHoldingRegistersResponse;
 import com.x75f.modbus4j.msg.WriteCoilRequest;
 import com.x75f.modbus4j.msg.WriteRegisterRequest;
 import com.x75f.modbus4j.serial.SerialPortWrapper;
@@ -43,7 +40,6 @@ import com.x75f.modbus4j.sero.util.queue.ByteQueue;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
-import org.javolution.io.Struct;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -54,22 +50,14 @@ import java.util.List;
 import java.util.Set;
 
 import a75f.io.device.json.serializers.JsonSerializer;
-import a75f.io.device.mesh.DLog;
 import a75f.io.device.modbus.CcuToMbOverUsbReadHoldingRegistersRequest_t;
-import a75f.io.device.modbus.LModbus;
-import a75f.io.device.serial.CmToCcuOverUsbCmRegularUpdateMessage_t;
-import a75f.io.device.serial.CmToCcuOverUsbErrorReportMessage_t;
-import a75f.io.device.serial.CmToCcuOverUsbSnRegularUpdateMessage_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.renatus.R;
 import a75f.io.usbserial.SerialAction;
 import a75f.io.usbserial.SerialEvent;
-import a75f.io.usbserial.SerialInputStream;
-import a75f.io.usbserial.SerialOutputStream;
 import a75f.io.usbserial.UsbModbusService;
-import a75f.io.usbserial.UsbSerialWrapper;
 import a75f.io.usbserial.UsbService;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -202,18 +190,14 @@ public class SerialMessageFragment extends DialogFragment {
 
 
     private void initMessageSpinner() {
-        ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this.getActivity(),
+        ArrayAdapter<String> dataAdapter = new ArrayAdapter<>(this.getActivity(),
                 android.R.layout.simple_spinner_dropdown_item, messages);
         dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         msgSpinner.setAdapter(dataAdapter);
         msgSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
-                /*if (position == 0)
-                    msgSend.setText(null);
-                else
-                    fillMessageView(position);*/
-                
+
                 if (position > 3) {
                     textVal.setVisibility(View.VISIBLE);
                     writeVal.setVisibility(View.VISIBLE);
@@ -236,7 +220,7 @@ public class SerialMessageFragment extends DialogFragment {
         for (int slaveCount = 1; slaveCount < 248 ; slaveCount++) {
             slaves.add(String.valueOf(slaveCount));
         }
-        ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this.getActivity(),
+        ArrayAdapter<String> dataAdapter = new ArrayAdapter<>(this.getActivity(),
                 android.R.layout.simple_spinner_item, slaves);
         dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         slaveSpinner.setAdapter(dataAdapter);
@@ -261,8 +245,8 @@ public class SerialMessageFragment extends DialogFragment {
         for (int registerCount = 1; registerCount < 126 ; registerCount++) {
             registers.add(String.valueOf(registerCount));
         }
-        ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this.getActivity(),
-                                                                    android.R.layout.simple_spinner_item, registers);
+        ArrayAdapter<String> dataAdapter = new ArrayAdapter<>(this.getActivity(),
+                android.R.layout.simple_spinner_item, registers);
         dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         registerSpinner.setAdapter(dataAdapter);
         registerSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -280,10 +264,10 @@ public class SerialMessageFragment extends DialogFragment {
     }
     private void fillMessageView(int position) {
         try {
-            Log.d(L.TAG_CCU_MODBUS,"fillMessageView =" + position + "," + messages.get(position));
+            CcuLog.d(L.TAG_CCU_MODBUS,"fillMessageView =" + position + "," + messages.get(position));
             switch (position) {
                 case 1:
-                    Log.d(L.TAG_CCU_MODBUS, "send msg prep11=" + position);
+                    CcuLog.d(L.TAG_CCU_MODBUS, "send msg prep11=" + position);
                     
                     modbusRequest = new ReadHoldingRegistersRequest(Integer.parseInt(slaveSpinner.getSelectedItem().toString()),
                                                         Integer.parseInt(addrVal.getText().toString()),
@@ -292,7 +276,7 @@ public class SerialMessageFragment extends DialogFragment {
                     CcuLog.i(L.TAG_CCU_MODBUS,
                              "SerialMessage: modbus readHoldingRegister " + Arrays.toString(rtuMessageRequest.getMessageData()));
                     //ReadHoldingRegistersResponse response = (ReadHoldingRegistersResponse) master.send(request);
-                    Log.d(L.TAG_CCU_MODBUS, "send msg prep=" + modbusRequest.getClass() + "," + modbusRequest.toString());
+                    CcuLog.d(L.TAG_CCU_MODBUS, "send msg prep=" + modbusRequest.getClass() + "," + modbusRequest.toString());
                     break;
                 case 2:
                     modbusRequest = new ReadCoilsRequest(Integer.parseInt(slaveSpinner.getSelectedItem().toString()),
@@ -324,7 +308,7 @@ public class SerialMessageFragment extends DialogFragment {
     
             updateSendMsg(rtuMessageRequest.getMessageData());
         } catch (Exception e) {
-            CcuLog.d(L.TAG_CCU_MODBUS, e.getMessage());
+            CcuLog.e(L.TAG_CCU_MODBUS, e.getMessage());
 
         }
 
@@ -333,29 +317,7 @@ public class SerialMessageFragment extends DialogFragment {
     @OnClick(R.id.sendButton)
     public void sendMessage() {
         try {
-            
-            /*SerialInputStream is = new SerialInputStream();
-            SerialOutputStream os = new SerialOutputStream(usbService);
-            ModbusMaster master = getRtuMaster(new UsbSerialWrapper(os, is));
-            master.setTimeout(10000);
-            master.setRetries(0);
-            master.init();
-            usbService.setSerialInputStream(is);*/
-            /*new Thread(() -> {
-                if (rtuMessageRequest != null) {
-                    try {
-                        Log.d(L.TAG_CCU_MODBUS," Request: "+Arrays.toString(rtuMessageRequest.getMessageData()));
-                        ReadHoldingRegistersResponse response = (ReadHoldingRegistersResponse)master.send(modbusRequest);
-                        Log.d(L.TAG_CCU_MODBUS," Response: "+Arrays.toString(response.getData()));
-                    
-                    } catch (ModbusTransportException e) {
-                        Log.e(L.TAG_CCU_MODBUS, " ModbusTransportException "+e.getMessage());
-                    }
-                } else {
-                    Log.d(L.TAG_CCU_MODBUS, " Invalid modbusRequest");
-                }
-            }).start();*/
-            
+
             if (msgSpinner.getSelectedItemPosition() < 1) {
                 Toast.makeText(this.getActivity(), "Invalid Message", Toast.LENGTH_SHORT).show();
                 return;
@@ -364,16 +326,14 @@ public class SerialMessageFragment extends DialogFragment {
             fillMessageView(msgSpinner.getSelectedItemPosition());
             
             if (rtuMessageRequest != null) {
-                new Thread(() -> {
-                    usbService.modbusWrite(rtuMessageRequest.getMessageData());
-                }).start();
+                new Thread(() -> usbService.modbusWrite(rtuMessageRequest.getMessageData())).start();
                 Toast.makeText(this.getActivity(), "Message Sent", Toast.LENGTH_SHORT).show();
             } else {
                 Toast.makeText(this.getActivity(), "Invalid Message", Toast.LENGTH_SHORT).show();
             }
 
         } catch (Exception e) {
-            CcuLog.e("CCU", "Exception ", e);
+            CcuLog.e(L.TAG_CCU, "Exception ", e);
 
         }
 
@@ -388,7 +348,7 @@ public class SerialMessageFragment extends DialogFragment {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        Log.d(L.TAG_CCU_MODBUS, "Show Message "+msgString );
+        CcuLog.d(L.TAG_CCU_MODBUS, "Show Message "+msgString );
         msgSend.setText(msgString);
     }
 
@@ -425,9 +385,9 @@ public class SerialMessageFragment extends DialogFragment {
         for (int i = 1; i <= 240; i++) {
             if (testSlaveNode(i)) {
                 result.add(i);
-                Log.d(L.TAG_CCU_MODBUS, " Slave Exist "+i);
+                CcuLog.d(L.TAG_CCU_MODBUS, " Slave Exist "+i);
             } else {
-                Log.d(L.TAG_CCU_MODBUS, " Slave Does not Exist "+i);
+                CcuLog.d(L.TAG_CCU_MODBUS, " Slave Does not Exist "+i);
             }
         }
         return result;
@@ -476,46 +436,13 @@ public class SerialMessageFragment extends DialogFragment {
     // Called in a separate thread
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onSerialEvent(SerialEvent event) {
-        Log.d(L.TAG_CCU_MODBUS, "onSerialEvent  : " + event.getSerialAction().name());
+        CcuLog.d(L.TAG_CCU_MODBUS, "onSerialEvent  : " + event.getSerialAction().name());
         if (event.getSerialAction() == SerialAction.MESSAGE_FROM_SERIAL_PORT) {
-            /*byte[] data = (byte[]) event.getBytes();
-
-            MessageType messageType = MessageType.values()[(event.getBytes()[0] & 0xff)];
-            String msgString = null;
-            Struct msg = null;
-
-            Log.d("SERIAL test", "SerialMesgFrag22 =" + messageType.ordinal() + "," + messageType.name());
-            switch (messageType) {
-                case CM_REGULAR_UPDATE:
-                    msg = new CmToCcuOverUsbCmRegularUpdateMessage_t();
-                    break;
-                case CM_ERROR_REPORT:
-                    msg = new CmToCcuOverUsbErrorReportMessage_t();
-                    break;
-                case CM_TO_CCU_OVER_USB_SN_REBOOT:
-                    // TODO - define struct
-                    break;
-                case CM_TO_CCU_OVER_USB_SN_REGULAR_UPDATE:
-                    msg = new CmToCcuOverUsbSnRegularUpdateMessage_t();
-                    break;
-                case CM_TO_CCU_OVER_USB_SMART_STAT_REGULAR_UPDATE:
-                    //TODO - define struct
-                    break;
-            }
-            msg.setByteBuffer(ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN), 0);
-            try {
-                msgString = JsonSerializer.toJson(msg, true);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            msgRcvd.setText(null);
-            msgRcvd.setText(msgString);*/
         } else if (event.getSerialAction() == SerialAction.MESSAGE_FROM_SERIAL_MODBUS) {
             byte[] data = (byte[]) event.getBytes();
 
             MessageType messageType = MessageType.values()[(event.getBytes()[0] & 0xff)];
-            String msgString = null;
-            Struct msg = null;
+            String msgString;
             ByteQueue queue = new ByteQueue(data);
             RtuMessageParser rtuMessageParser = new RtuMessageParser(true);
             try {
@@ -524,7 +451,7 @@ public class SerialMessageFragment extends DialogFragment {
                 //msgString = msgString +"\n SlaveId :"+response.getSlaveId()+"\n FunctionCode: "+response.getFunctionCode()+"\n ExceptionMsg:"+response.getExceptionMessage();
                 msgRcvd.setText(null);
                 msgRcvd.setText(msgString);
-                Log.d(L.TAG_CCU_MODBUS,"Modbus Response ==" + msgString);
+                CcuLog.d(L.TAG_CCU_MODBUS,"Modbus Response ==" + msgString);
                 //DLog.LogdSerial("Modbus Response ==" + msgString);
             } catch (Exception e) {
                 e.printStackTrace();

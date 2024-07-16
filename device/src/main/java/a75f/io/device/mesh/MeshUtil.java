@@ -1,6 +1,14 @@
 package a75f.io.device.mesh;
 
+import static a75f.io.device.DeviceConstants.HEARTBEAT_INTERVAL;
+import static a75f.io.device.DeviceConstants.HEARTBEAT_MULTIPLIER;
+import static a75f.io.device.DeviceConstants.SIMULATION_SLEEP_TIME;
+import static a75f.io.logic.L.TAG_CCU_DEVICE;
+
+
 import org.javolution.io.Struct;
+
+import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
@@ -10,18 +18,7 @@ import a75f.io.device.serial.MessageType;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
-import a75f.io.logic.bo.util.DesiredTempDisplayMode;
 import a75f.io.logic.bo.util.TemperatureMode;
-import a75f.io.logic.bo.util.UnitUtils;
-
-import static a75f.io.device.DeviceConstants.HEARTBEAT_INTERVAL;
-import static a75f.io.device.DeviceConstants.HEARTBEAT_MULTIPLIER;
-import static a75f.io.device.DeviceConstants.SIMULATION_SLEEP_TIME;
-import static a75f.io.logic.L.TAG_CCU_DEVICE;
-
-import android.util.Log;
-
-import java.util.HashMap;
 
 /**
  * Created by samjithsadasivan on 9/19/18.
@@ -49,16 +46,15 @@ public class MeshUtil
     public static final int RELAY_BITMAP_POS_AUX2 = 7;
 
     
-    public static boolean sendHeartbeat(short temperatureOffset)
+    public static void sendHeartbeat(short temperatureOffset)
     {
         CcuToCmOverUsbCcuHeartbeatMessage_t heartbeatMessage_t = new CcuToCmOverUsbCcuHeartbeatMessage_t();
         heartbeatMessage_t.interval.set(HEARTBEAT_INTERVAL);
         heartbeatMessage_t.messageType.set(MessageType.CCU_HEARTBEAT_UPDATE);
         heartbeatMessage_t.multiplier.set(HEARTBEAT_MULTIPLIER);
         heartbeatMessage_t.temperatureOffset.set((byte) temperatureOffset);
-    
-        boolean retVal = LSerial.getInstance().sendSerialToCM(heartbeatMessage_t);
-        return retVal;
+
+         LSerial.getInstance().sendSerialToCM(heartbeatMessage_t);
     }
 
     public static boolean checkDuplicateStruct(short smartNodeAddress, Struct struct)
@@ -126,7 +122,7 @@ public class MeshUtil
         }
         catch (InterruptedException e)
         {
-            e.printStackTrace();
+            CcuLog.e(TAG_CCU_DEVICE,"Error InterruptedException", e);
         }
     }
     
@@ -165,7 +161,7 @@ public class MeshUtil
                 " == \"" + equip.getRoomRef() + "\"").intValue();
         TemperatureMode temperatureMode = TemperatureMode.values()[modeType];
 
-        HashMap<Object, Object> point = new HashMap<>();
+        HashMap<Object, Object> point;
         if(temperatureMode == TemperatureMode.HEATING){
             point = CCUHsApi.getInstance().readEntity("point and air and temp and desired and heating and sp and equipRef == \""+equipRef+"\"");
         }else if(temperatureMode == TemperatureMode.COOLING){
@@ -174,7 +170,7 @@ public class MeshUtil
             point = CCUHsApi.getInstance().readEntity("point and air and temp and desired and (avg or average) and sp and equipRef == \""+equipRef+"\"");
         }
         if (point.isEmpty()) {
-            Log.d(TAG_CCU_DEVICE, " Desired Temp point does not exist for equip , sending 0");
+            CcuLog.d(TAG_CCU_DEVICE, " Desired Temp point does not exist for equip , sending 0");
             return 0;
         }
 

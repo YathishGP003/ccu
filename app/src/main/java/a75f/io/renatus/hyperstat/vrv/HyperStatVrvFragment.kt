@@ -22,14 +22,14 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable
 
 class HyperStatVrvFragment : BaseDialogFragment() {
 
-    lateinit var tempOffset : NumberPicker
-    lateinit var humidityMinSp : Spinner
-    lateinit var humidityMaxSp : Spinner
-    lateinit var masterControllerSp : Spinner
-    lateinit var setButton : Button
-    lateinit var masterControlUnInitText : TextView
-    lateinit var autoawayToggle : ToggleButton
-    lateinit var autoForcedOccupiedToggle : ToggleButton
+    private lateinit var tempOffset : NumberPicker
+    private lateinit var humidityMinSp : Spinner
+    private lateinit var humidityMaxSp : Spinner
+    private lateinit var masterControllerSp : Spinner
+    private lateinit var setButton : Button
+    private lateinit var masterControlUnInitText : TextView
+    private lateinit var autoawayToggle : ToggleButton
+    private lateinit var autoForcedOccupiedToggle : ToggleButton
 
 
 
@@ -104,11 +104,11 @@ class HyperStatVrvFragment : BaseDialogFragment() {
         tempOffset.maxValue = tempOffsetValues.size - 1
         tempOffset.wrapSelectorWheel = false
 
-        val humidityVals = viewModel.humiditySpinnerValues()
+        val humidityVal = viewModel.humiditySpinnerValues()
         val adapterHumidity: ArrayAdapter<*> = ArrayAdapter<String?>(
             requireContext(),
             R.layout.spinner_dropdown_item,
-            humidityVals
+            humidityVal
         )
         humidityMinSp.adapter = adapterHumidity
         humidityMaxSp.adapter = adapterHumidity
@@ -181,7 +181,7 @@ class HyperStatVrvFragment : BaseDialogFragment() {
 
     private fun setUpMasterControllerSpinner() {
 
-        val coolHeatRight = viewModel.viewState.value.coolHeatRight;
+        val coolHeatRight = viewModel.viewState.value.coolHeatRight
         val masterControllerList : MutableList<String> = arrayListOf()
 
         VrvMasterController.values().forEach { mode ->
@@ -195,7 +195,7 @@ class HyperStatVrvFragment : BaseDialogFragment() {
         }
 
         val adapter:ArrayAdapter<String> = object: ArrayAdapter<String>(
-            requireActivity()!!,
+                requireActivity(),
             R.layout.spinner_zone_item,
             masterControllerList
         ){

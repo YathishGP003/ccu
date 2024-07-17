@@ -202,17 +202,6 @@ class VavAdvancedHybridAhuViewModel : AdvancedHybridAhuViewModel() {
         viewState.value = VavAdvancedAhuState.fromProfileConfigToState(profileConfiguration as VavAdvancedHybridAhuConfig)
         viewState.value.isSaveRequired = !systemEquip["profile"].toString().contentEquals("vavAdvancedHybridAhuV2")
     }
-
-     fun reset() {
-        val systemEquip = hayStack.readEntity("system and equip and not modbus and not connectModule")
-        profileConfiguration = if (systemEquip["profile"].toString().contentEquals("vavAdvancedHybridAhuV2")) {
-            VavAdvancedHybridAhuConfig(cmModel, connectModel).getActiveConfiguration() as VavAdvancedHybridAhuConfig
-        } else {
-            VavAdvancedHybridAhuConfig(cmModel, connectModel)
-        }
-        viewState.value = VavAdvancedAhuState.fromProfileConfigToState(profileConfiguration as VavAdvancedHybridAhuConfig)
-         viewState.value.isSaveRequired = !systemEquip["profile"].toString().contentEquals("vavAdvancedHybridAhuV2")
-    }
 }
 
 

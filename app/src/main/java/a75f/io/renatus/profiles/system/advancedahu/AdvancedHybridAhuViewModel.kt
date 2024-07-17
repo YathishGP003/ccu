@@ -29,12 +29,10 @@ import a75f.io.logic.bo.building.system.util.getDabConnectEquip
 import a75f.io.logic.bo.building.system.util.getVavCmEquip
 import a75f.io.logic.bo.building.system.util.getVavConnectEquip
 import a75f.io.logic.bo.building.system.vav.VavAdvancedAhu
-import a75f.io.logic.bo.building.system.vav.VavAdvancedAhu
 import a75f.io.logic.bo.building.system.vav.config.AdvancedHybridAhuConfig
 import a75f.io.renatus.R
 import a75f.io.renatus.modbus.util.ALERT
 import a75f.io.renatus.modbus.util.OK
-import android.annotation.SuppressLint
 import android.annotation.SuppressLint
 import android.content.Context
 import android.text.Spanned

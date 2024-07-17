@@ -498,7 +498,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
      */
     fun getSatControlPoint() : Double {
         val satControlType = systemEquip.cmEquip.supplyAirTempControlOn.readDefaultVal()
-        return satControlIndexToDomainPoint(satControlType.toInt(), systemEquip).readHisVal()
+        return satControlIndexToDomainPoint(satControlType.toInt(), systemEquip.cmEquip).readHisVal()
     }
 
     /**
@@ -522,7 +522,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
      */
     private fun getCo2ControlPoint() : Double {
         val co2ControlType = systemEquip.cmEquip.co2BasedDamperControlOn.readDefaultVal()
-        return co2DamperControlTypeToDomainPoint(co2ControlType.toInt(), systemEquip).readHisVal()
+        return co2DamperControlTypeToDomainPoint(co2ControlType.toInt(), systemEquip.cmEquip).readHisVal()
     }
     private fun updateSystemStatus() {
         val systemStatus = statusMessage
@@ -652,8 +652,8 @@ open class VavAdvancedAhu : VavSystemProfile() {
         heatingStages = 0
         fanStages = 0
 
-        updateStagesForRelayMapping(getCMRelayAssociationMap(systemEquip))
-        updateStagesForRelayMapping(getConnectRelayAssociationMap(systemEquip))
+        updateStagesForRelayMapping(getCMRelayAssociationMap(systemEquip.cmEquip))
+        updateStagesForRelayMapping(getConnectRelayAssociationMap(systemEquip.connectEquip1))
 
         if (heatingStages > 0) {
             heatingStages -= Stage.COOLING_5.ordinal
@@ -708,19 +708,19 @@ open class VavAdvancedAhu : VavSystemProfile() {
 
     private fun updateOutputPorts() {
         //TODO - refactor the encapsulation of relayAssociationMap and analogOutAssociationMap
-        updateRelayOutputPorts(getCMRelayAssociationMap(systemEquip), false)
-        updateAnalogOutputPorts(getCMAnalogAssociationMap(systemEquip), getAnalogOutLogicalPhysicalMap(), false)
+        updateRelayOutputPorts(getCMRelayAssociationMap(systemEquip.cmEquip), false)
+        updateAnalogOutputPorts(getCMAnalogAssociationMap(systemEquip.cmEquip), getAnalogOutLogicalPhysicalMap(), false)
 
         CcuLog.d(L.TAG_CCU_SYSTEM, "updateOutputPorts : Connect")
         if (!systemEquip.connectEquip1.equipRef.contentEquals("null")) {
             updateRelayOutputPorts(
-                    getConnectRelayAssociationMap(systemEquip),
+                    getConnectRelayAssociationMap(ahuSettings.connectEquip1),
                     true
             )
             updateAnalogOutputPorts(
-                    getConnectAnalogAssociationMap(systemEquip),
+                    getConnectAnalogAssociationMap(ahuSettings.connectEquip1),
                     getConnectAnalogOutLogicalPhysicalMap(
-                        systemEquip.connectEquip1,
+                            ahuSettings.connectEquip1,
                         Domain.connect1Device,
                     ),
                     true
@@ -862,7 +862,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
 
     private fun updateLogicalToPhysical(isConnectEquip : Boolean) {
         if (isConnectEquip) {
-            getConnectRelayAssociationMap(systemEquip).forEach { (relay, association) ->
+            getConnectRelayAssociationMap(systemEquip.connectEquip1).forEach { (relay, association) ->
                 if (relay.readDefaultVal() > 0) {
                     val domainName = connectRelayAssociationToDomainName(association.readDefaultVal().toInt())
                     val physicalPoint = getConnectRelayLogicalPhysicalMap(systemEquip.connectEquip1, Domain.connect1Device)[relay]
@@ -871,7 +871,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
             }
         } else {
             // sync logical to physical
-            getCMRelayAssociationMap(systemEquip).forEach { (relay, association) ->
+            getCMRelayAssociationMap(systemEquip.cmEquip).forEach { (relay, association) ->
                 if (relay.readDefaultVal() > 0) {
                     val domainName = relayAssociationToDomainName(association.readDefaultVal().toInt())
                     getCMRelayLogicalPhysicalMap(systemEquip.cmEquip)[relay]?.writeHisVal(getDomainPointForName(domainName, systemEquip.cmEquip).readHisVal())
@@ -919,7 +919,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
     }
     private fun updateCMPointVal(domainName: String, stageIndex : Int, pointVal : Int) {
         getDomainPointForName(domainName, systemEquip.cmEquip).writeHisVal(pointVal.toDouble())
-        getCMRelayAssociationMap(systemEquip).forEach { (relay, association) ->
+        getCMRelayAssociationMap(systemEquip.cmEquip).forEach { (relay, association) ->
             if (association.readDefaultVal() == stageIndex.toDouble() && relay.readDefaultVal() > 0) {
                 getCMRelayLogicalPhysicalMap(systemEquip.cmEquip)[relay]?.writeHisVal(pointVal.toDouble())
             }
@@ -928,7 +928,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
 
     private fun updateConnectPointVal(domainName: String, stageIndex : Int, pointVal : Int) {
         getDomainPointForName(domainName, systemEquip.connectEquip1).writeHisVal(pointVal.toDouble())
-        getConnectRelayAssociationMap(systemEquip).forEach { (relay, association) ->
+        getConnectRelayAssociationMap(systemEquip.connectEquip1).forEach { (relay, association) ->
             if (association.readDefaultVal() == stageIndex.toDouble() && relay.readDefaultVal() > 0) {
                 getConnectRelayLogicalPhysicalMap(systemEquip.connectEquip1, Domain.connect1Device)[relay]?.writeHisVal(pointVal.toDouble())
             }
@@ -952,23 +952,23 @@ open class VavAdvancedAhu : VavSystemProfile() {
 
     private fun resetOutput() {
         // Resetting the relays , analog outs will be reset based on loops
-        getCMRelayAssociationMap(systemEquip).entries.forEach { (relay, association) ->
+        getCMRelayAssociationMap(systemEquip.cmEquip).entries.forEach { (relay, association) ->
             val domainName = relayAssociationToDomainName(association.readDefaultVal().toInt())
             getDomainPointForName(domainName, systemEquip.cmEquip).writeHisVal(0.0)
             getCMRelayLogicalPhysicalMap(systemEquip.cmEquip)[relay]?.writeHisVal(0.0)
         }
 
-        updateAnalogOutputPorts(getCMAnalogAssociationMap(systemEquip), getAnalogOutLogicalPhysicalMap(), false)
+        updateAnalogOutputPorts(getCMAnalogAssociationMap(systemEquip.cmEquip), getAnalogOutLogicalPhysicalMap(), false)
 
         if (!systemEquip.connectEquip1.equipRef.contentEquals("null")) {
-            getConnectRelayAssociationMap(systemEquip).entries.forEach {(relay, association) ->
+            getConnectRelayAssociationMap(systemEquip.connectEquip1).entries.forEach {(relay, association) ->
                 val domainName = connectRelayAssociationToDomainName(association.readDefaultVal().toInt())
                 getDomainPointForName(domainName, systemEquip.connectEquip1).writeHisVal(0.0)
                 getConnectRelayLogicalPhysicalMap(systemEquip.connectEquip1, Domain.connect1Device)[relay]?.writeHisVal(0.0)
             }
 
             updateAnalogOutputPorts(
-                    getConnectAnalogAssociationMap(systemEquip),
+                    getConnectAnalogAssociationMap(systemEquip.connectEquip1),
                     getConnectAnalogOutLogicalPhysicalMap(
                             systemEquip.connectEquip1,
                             Domain.connect1Device,
@@ -983,7 +983,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
             CcuLog.i(L.TAG_CCU_SYSTEM, "Test mode is active ${Globals.getInstance().isTestMode}")
             CcuLog.i(L.TAG_CCU_SYSTEM, "Operating mode ${VavSystemController.getInstance().systemState}")
             CcuLog.i(L.TAG_CCU_SYSTEM, "Conditioning  mode $conditioningMode")
-            getCMRelayAssociationMap(systemEquip).entries.forEach { (relay, association) ->
+            getCMRelayAssociationMap(systemEquip.cmEquip).entries.forEach { (relay, association) ->
                 if (relay.readDefaultVal() > 0) {
                     val logical = relayAssociationToDomainName(association.readDefaultVal().toInt())
                     CcuLog.i(L.TAG_CCU_SYSTEM,
@@ -993,7 +993,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
                 }
             }
 
-            getCMAnalogAssociationMap(systemEquip).entries.forEach { (analogOut, association) ->
+            getCMAnalogAssociationMap(systemEquip.cmEquip).entries.forEach { (analogOut, association) ->
                 if (analogOut.readDefaultVal() > 0) {
                     val logical = analogOutAssociationToDomainName(association.readDefaultVal().toInt())
                     CcuLog.i(L.TAG_CCU_SYSTEM,
@@ -1004,7 +1004,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
             }
 
             if (!systemEquip.connectEquip1.equipRef.contentEquals("null")) {
-                getConnectRelayAssociationMap(systemEquip).entries.forEach { (relay, association) ->
+                getConnectRelayAssociationMap(systemEquip.connectEquip1).entries.forEach { (relay, association) ->
                     if (relay.readDefaultVal() > 0) {
                         val logical = connectRelayAssociationToDomainName(association.readDefaultVal().toInt())
                         CcuLog.i(L.TAG_CCU_SYSTEM,
@@ -1013,7 +1013,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
                                         "$logical : ${getDomainPointForName(logical, systemEquip.connectEquip1).readHisVal()} ")
                     }
                 }
-                getConnectAnalogAssociationMap(systemEquip).entries.forEach { (analogOut, association) ->
+                getConnectAnalogAssociationMap(systemEquip.connectEquip1).entries.forEach { (analogOut, association) ->
                     if (analogOut.readDefaultVal() > 0) {
                         val logical = connectAnalogOutAssociationToDomainName(association.readDefaultVal().toInt())
                         CcuLog.i(L.TAG_CCU_SYSTEM,
@@ -1039,7 +1039,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
     fun getUserIntentConfig(): UserIntentConfig {
         val userIntentConfig = UserIntentConfig()
 
-        getCMAnalogAssociationMap(systemEquip).forEach { (analog: Point, association: Point) ->
+        getCMAnalogAssociationMap(systemEquip.cmEquip).forEach { (analog: Point, association: Point) ->
             if (analog.readDefaultVal() > 0) {
                 val analogOutAssociationType = AdvancedAhuAnalogOutAssociationType.values()[association.readDefaultVal().toInt()]
                 if (analogOutAssociationType == AdvancedAhuAnalogOutAssociationType.SAT_HEATING) {
@@ -1057,7 +1057,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
             }
         }
         if (!userIntentConfig.isCo2DamperControlAvailable) {
-            getConnectAnalogAssociationMap(systemEquip).forEach { (analog, association) ->
+            getConnectAnalogAssociationMap(systemEquip.connectEquip1).forEach { (analog, association) ->
                 if (analog.readDefaultVal() > 0) {
                     val analogOutAssociationType = AdvancedAhuAnalogOutAssociationTypeConnect.values()[association.readDefaultVal().toInt()]
                     if (analogOutAssociationType == AdvancedAhuAnalogOutAssociationTypeConnect.CO2_DAMPER) {

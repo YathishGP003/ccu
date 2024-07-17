@@ -19,13 +19,8 @@ enum class AdvancedAhuAnalogOutAssociationType {
     PRESSURE_FAN, SAT_COOLING, SAT_HEATING, LOAD_COOLING, LOAD_HEATING, LOAD_FAN, CO2_DAMPER, COMPOSITE_SIGNAL
 }
 
-fun getCMRelayAssociationMap(equip: DomainEquip): Map<Point, Point> {
+fun getCMRelayAssociationMap(systemEquip: AdvancedHybridSystemEquip): Map<Point, Point> {
     val associations: MutableMap<Point, Point> = HashMap()
-    val systemEquip = when (equip) {
-        is AdvancedHybridSystemEquip -> equip
-        else -> throw IllegalArgumentException("Invalid system equip type")
-    }
-
     associations[systemEquip.relay1OutputEnable] = systemEquip.relay1OutputAssociation
     associations[systemEquip.relay2OutputEnable] = systemEquip.relay2OutputAssociation
     associations[systemEquip.relay3OutputEnable] = systemEquip.relay3OutputAssociation
@@ -37,14 +32,8 @@ fun getCMRelayAssociationMap(equip: DomainEquip): Map<Point, Point> {
     return associations
 }
 
-fun getCMAnalogAssociationMap(equip: DomainEquip): Map<Point, Point> {
+fun getCMAnalogAssociationMap(systemEquip: AdvancedHybridSystemEquip): Map<Point, Point> {
     val associations: MutableMap<Point, Point> = HashMap()
-
-    val systemEquip = when (equip) {
-        is AdvancedHybridSystemEquip -> equip
-        else -> throw IllegalArgumentException("Invalid system equip type")
-    }
-
     associations[systemEquip.analog1OutputEnable] = systemEquip.analog1OutputAssociation
     associations[systemEquip.analog2OutputEnable] = systemEquip.analog2OutputAssociation
     associations[systemEquip.analog3OutputEnable] = systemEquip.analog3OutputAssociation
@@ -372,11 +361,7 @@ fun relayAssociationDomainNameToType (domainName : String) : AdvancedAhuRelayAss
     }
 }
 
-fun satControlIndexToDomainPoint(index: Int, equip: DomainEquip) : Point {
-    val systemEquip = when (equip) {
-        is AdvancedHybridSystemEquip -> equip
-        else -> throw IllegalArgumentException("Invalid system equip type")
-    }
+fun satControlIndexToDomainPoint(index: Int, systemEquip: AdvancedHybridSystemEquip) : Point {
     return when(index) {
         0 -> systemEquip.supplyAirTemperature1
         1 -> systemEquip.supplyAirTemperature2
@@ -438,11 +423,7 @@ fun pressureFanControlIndexToDomainPoint(index: Int, equip: DomainEquip): Point?
     }
 }
 
-fun co2DamperControlTypeToDomainPoint(index: Int, equip: DomainEquip) : Point {
-    val systemEquip = when (equip) {
-        is AdvancedHybridSystemEquip -> equip
-        else -> throw IllegalArgumentException("Invalid system equip type")
-    }
+fun co2DamperControlTypeToDomainPoint(index: Int, systemEquip: AdvancedHybridSystemEquip) : Point {
     return when(index) {
         0 -> systemEquip.zoneAvgCo2
         1 -> systemEquip.returnAirCo2

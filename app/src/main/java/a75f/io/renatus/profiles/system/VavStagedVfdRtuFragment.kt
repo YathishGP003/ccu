@@ -8,9 +8,10 @@ import a75f.io.renatus.R
 import a75f.io.renatus.composables.DropDownWithLabel
 import a75f.io.renatus.composables.SystemAnalogOutMappingViewVavStagedVfdRtu
 import a75f.io.renatus.compose.ComposeUtil
-import a75f.io.renatus.util.ProgressDialogUtils
 import a75f.io.renatus.profiles.profileUtils.UnusedPortsFragment
 import a75f.io.renatus.profiles.profileUtils.UnusedPortsFragment.Companion.LabelUnusedPorts
+import a75f.io.renatus.util.AddProgressGif
+import a75f.io.renatus.util.highPriorityDispatcher
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -29,6 +30,8 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.painterResource
@@ -37,15 +40,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class VavStagedVfdRtuFragment : StagedRtuFragment() {
 
     private val viewModel : VavStagedVfdRtuViewModel by viewModels()
     lateinit var viewState: StagedRtuVfdViewState
-    private val SYSTEM_CONFIG_TAB: Int = 1
+
+
     companion object {
         val ID: String = VavStagedVfdRtuFragment::class.java.simpleName
         fun newInstance() : VavStagedVfdRtuFragment {
@@ -56,11 +58,10 @@ class VavStagedVfdRtuFragment : StagedRtuFragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
-        viewLifecycleOwner.lifecycleScope.launch {
-            withContext(Dispatchers.IO) {
+        viewLifecycleOwner.lifecycleScope.launch(highPriorityDispatcher){
                 viewModel.init(requireContext(), CCUHsApi.getInstance())
                 viewState = viewModel.viewState as StagedRtuVfdViewState
-            }
+
         }
         val rootView = ComposeView(requireContext())
         rootView.apply {
@@ -151,14 +152,13 @@ class VavStagedVfdRtuFragment : StagedRtuFragment() {
     @Preview
     @Composable
     fun RootView() {
-        if (!viewModel.modelLoaded) {
-            if(Globals.getInstance().getSelectedTab() == SYSTEM_CONFIG_TAB) {
-                ProgressDialogUtils.showProgressDialog(context, "Loading System Profile");
-            }
+        val modelLoaded by viewModel.modelLoaded.observeAsState(initial = false)
+        if (!modelLoaded) {
+            AddProgressGif()
             CcuLog.i(Domain.LOG_TAG, "Show Progress")
             return
         }
-        ProgressDialogUtils.hideProgressDialog()
+
         val viewState = viewModel.viewState as StagedRtuVfdViewState
         LazyColumn(modifier = Modifier
             .fillMaxSize()

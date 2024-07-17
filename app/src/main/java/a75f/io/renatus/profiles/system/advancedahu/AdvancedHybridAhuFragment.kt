@@ -597,7 +597,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
         LoadBasedFanControl(viewModel)
         HeatLoadBasedControl(viewModel)
         CompositeBasedControl(viewModel)
-        viewModel.modelLoaded = true
+        viewModel._modelLoaded.value = true
     }
 
     @Composable

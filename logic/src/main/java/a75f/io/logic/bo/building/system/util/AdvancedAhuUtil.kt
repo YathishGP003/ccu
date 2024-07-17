@@ -48,10 +48,6 @@ enum class DuctPressureSensorSource {
     MAX_PRESSURE
 }
 
-enum class DuctPressureSensorSource {
-    DUCT_STATIC_PRESSURE_SENSOR_1, DUCT_STATIC_PRESSURE_SENSOR_2, DUCT_STATIC_PRESSURE_SENSOR_3, AVERAGE_PRESSURE, MIN_PRESSURE, MAX_PRESSURE
-}
-
 data class UserIntentConfig(
         var isSatHeatingAvailable: Boolean = false,
         var isSatCoolingAvailable: Boolean = false,

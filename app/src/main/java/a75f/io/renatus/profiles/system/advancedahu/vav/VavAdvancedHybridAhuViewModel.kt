@@ -12,6 +12,7 @@ import a75f.io.logic.bo.building.system.vav.VavAdvancedAhu
 import a75f.io.logic.bo.building.system.vav.config.VavAdvancedHybridAhuConfig
 import a75f.io.renatus.modbus.util.showToast
 import a75f.io.renatus.profiles.system.advancedahu.AdvancedHybridAhuViewModel
+import a75f.io.renatus.profiles.system.advancedahu.isValidateConfiguration
 import a75f.io.renatus.util.ProgressDialogUtils
 import android.content.Context
 import androidx.compose.runtime.mutableStateOf
@@ -48,7 +49,7 @@ class VavAdvancedHybridAhuViewModel : AdvancedHybridAhuViewModel() {
         viewState = mutableStateOf(VavAdvancedAhuState.fromProfileConfigToState(profileConfiguration as VavAdvancedHybridAhuConfig))
         CcuLog.i(Domain.LOG_TAG, "VavAdvancedAhuViewModel Loaded")
         viewState.value.isSaveRequired = !systemEquip["profile"].toString().contentEquals("vavAdvancedHybridAhuV2")
-        _modelLoaded.postValue( true)
+        _modelLoaded.postValue(true)
     }
 
     private fun createNewEquip(id: String): String {
@@ -98,6 +99,13 @@ class VavAdvancedHybridAhuViewModel : AdvancedHybridAhuViewModel() {
 
     override fun saveConfiguration() {
         ((viewState.value) as VavAdvancedAhuState).fromStateToProfileConfig(profileConfiguration as VavAdvancedHybridAhuConfig)
+        val validConfig = isValidateConfiguration(this@VavAdvancedHybridAhuViewModel)
+        if (!validConfig.first) {
+            showErrorDialog(context,validConfig.second)
+            viewState.value.isSaveRequired = false
+            viewState.value.isStateChanged = false
+            return
+        }
         CcuLog.i(L.TAG_CCU_SYSTEM, profileConfiguration.toString())
         isEquipAvailable()
         viewModelScope.launch {

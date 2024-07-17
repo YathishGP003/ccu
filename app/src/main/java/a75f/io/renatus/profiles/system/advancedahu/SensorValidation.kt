@@ -1,3 +1,4 @@
+
 package a75f.io.renatus.profiles.system.advancedahu
 
 import a75f.io.device.cm.getAdvancedAhuAnalogInputMappings
@@ -12,6 +13,7 @@ import a75f.io.domain.config.AssociationConfig
 import a75f.io.domain.config.EnableConfig
 import a75f.io.logic.bo.building.system.AdvancedAhuAnalogOutAssociationType
 import a75f.io.logic.bo.building.system.AdvancedAhuRelayAssociationType
+import a75f.io.logic.bo.building.system.getDomainForAnalogOut
 import a75f.io.logic.bo.building.system.getDomainPressure
 import a75f.io.logic.bo.building.system.getPressureDomainForAnalogOut
 import a75f.io.logic.bo.building.system.relayAssociationDomainNameToType
@@ -28,21 +30,44 @@ import android.text.Spanned
 
 
 data class Sensors(var temp: List<String?>, var occupancy: List<String?>, var co2: List<String?>, var humidity: List<String?>, var analogIn1: String?, var analogIn2: String?, var th1: String?, var th2: String?, var universalInputs: List<String?>)
+private fun isAnalogOutMapped(enabled: EnableConfig, association: AssociationConfig, mappedTo: AdvancedAhuAnalogOutAssociationType) =
+        enabled.enabled && association.associationVal == mappedTo.ordinal
 
 private fun isAnalogOutMapped(enabled: EnableConfig, association: AssociationConfig, mappedTo: AdvancedAhuAnalogOutAssociationType) = enabled.enabled && association.associationVal == mappedTo.ordinal
 
 private fun isRelayMapped(enabled: EnableConfig, association: AssociationConfig, mappedTo: AdvancedAhuRelayAssociationType) = enabled.enabled && relayAssociationDomainNameToType(relayAssociationToDomainName(association.associationVal)).ordinal == mappedTo.ordinal
+private fun isRelayMapped(enabled: EnableConfig, association: AssociationConfig, mappedTo: AdvancedAhuRelayAssociationType) =
+        enabled.enabled && relayAssociationDomainNameToType(relayAssociationToDomainName(association.associationVal)).ordinal == mappedTo.ordinal
 
 private fun isAnyAnalogOutMapped(config: CmConfiguration, mappedTo: AdvancedAhuAnalogOutAssociationType): Boolean {
     return listOf(config.analogOut1Enabled to config.analogOut1Association, config.analogOut2Enabled to config.analogOut2Association, config.analogOut3Enabled to config.analogOut3Association, config.analogOut4Enabled to config.analogOut4Association).any { (enabled, association) -> isAnalogOutMapped(enabled, association, mappedTo) }
+    return listOf(
+            config.analogOut1Enabled to config.analogOut1Association,
+            config.analogOut2Enabled to config.analogOut2Association,
+            config.analogOut3Enabled to config.analogOut3Association,
+            config.analogOut4Enabled to config.analogOut4Association
+    ).any { (enabled, association) -> isAnalogOutMapped(enabled, association, mappedTo) }
 }
 
 private fun isAnyRelayMapped(config: CmConfiguration, mappedTo: AdvancedAhuRelayAssociationType): Boolean {
     return listOf(config.relay1Enabled to config.relay1Association, config.relay2Enabled to config.relay2Association, config.relay3Enabled to config.relay3Association, config.relay4Enabled to config.relay4Association, config.relay5Enabled to config.relay5Association, config.relay6Enabled to config.relay6Association, config.relay7Enabled to config.relay7Association, config.relay8Enabled to config.relay8Association).any { (enabled, association) -> isRelayMapped(enabled, association, mappedTo) }
+    return listOf(
+            config.relay1Enabled to config.relay1Association,
+            config.relay2Enabled to config.relay2Association,
+            config.relay3Enabled to config.relay3Association,
+            config.relay4Enabled to config.relay4Association,
+            config.relay5Enabled to config.relay5Association,
+            config.relay6Enabled to config.relay6Association,
+            config.relay7Enabled to config.relay7Association,
+            config.relay8Enabled to config.relay8Association
+    ).any { (enabled, association) -> isRelayMapped(enabled, association, mappedTo) }
 }
 
 private fun isPressureSensorAvailable(config: CmConfiguration): Boolean {
     return config.address0SensorAssociation.pressureAssociation?.associationVal?.let { it > 0 } == true || listOf(config.analog1InEnabled to config.analog1InAssociation, config.analog2InEnabled to config.analog2InAssociation).any { (enabled, association) -> enabled.enabled && association.associationVal in 12..20 }
+    return config.address0SensorAssociation.pressureAssociation?.associationVal?.let { it > 0 } == true ||
+            listOf(config.analog1InEnabled to config.analog1InAssociation, config.analog2InEnabled to config.analog2InAssociation)
+                    .any { (enabled, association) -> enabled.enabled && association.associationVal in 12..20 }
 }
 
 
@@ -101,7 +126,7 @@ fun findPressureDuplicate(pressureData: Triple<String?, String?, String?>): Pair
     return Pair(true, Html.fromHtml("success", Html.FROM_HTML_MODE_LEGACY))
 }
 
-fun validatePressureSequence(primary: String, mapping1: String?, mapping2: String?): Pair<Boolean, Spanned> {
+fun validatePressureSequence(primary: String, mapping1: String?, mapping2: String?) :Pair<Boolean,Spanned> {
     if (primary.contains("3_")) {
         if ((mapping1 != null && (!mapping1.contains("2_")) && mapping2 != null && (!mapping2.contains("2_"))) || (mapping1 == null && mapping2 == null)) {
             return Pair(false, Html.fromHtml("Pressure sensor should be <b>selected in sequential order</b>. Please select Pressure Sensor 2 before selecting Pressure Sensor 3 in Sensor Bus and Analog Inputs.", Html.FROM_HTML_MODE_LEGACY))
@@ -163,12 +188,19 @@ fun isValidSatSensorSelection(config: CmConfiguration): Pair<Boolean, Spanned> {
         }
         if (sensorsMapping.analogIn2 != null) {
             add(sensorsMapping.analogIn2!!)
+            return Pair(false, Html.fromHtml("Duplicate selection for <b>${getDisForDomain(primary)}</b> is not allowed.", Html.FROM_HTML_MODE_LEGACY))
         }
         if (sensorsMapping.th1 != null) {
             add(sensorsMapping.th1!!)
+        if (primary.contains("1_") && ((mapping1 != null && mapping1.contains("1_"))
+                        || (mapping2 != null && mapping2.contains("1_")))) {
+            return Pair(false, Html.fromHtml("Duplicate selection for <b>${getDisForDomain(primary)}</b> is not allowed.", Html.FROM_HTML_MODE_LEGACY))
         }
         if (sensorsMapping.th2 != null) {
             add(sensorsMapping.th2!!)
+        if (primary.contains("2_") && ((mapping1 != null && mapping1.contains("2_"))
+                        || (mapping2 != null && mapping2.contains("2_")))) {
+            return Pair(false, Html.fromHtml("Duplicate selection for <b>${getDisForDomain(primary)}</b> is not allowed.", Html.FROM_HTML_MODE_LEGACY))
         }
     }
     val duplicateSensor = findAndGetDuplicate(list)
@@ -327,6 +359,10 @@ fun validateSatSequence(sensors: Sensors): Pair<Boolean, Spanned> {
     }
     if (hasTemp2 && !hasTemp1) {
         return Pair(false, Html.fromHtml(SAT_1_MUST_ERROR, Html.FROM_HTML_MODE_LEGACY))
+        if (primary.contains("3_") && ((mapping1 != null && mapping1.contains("3_"))
+                        || (mapping2 != null && mapping2.contains("3_")))) {
+            return Pair(false,  Html.fromHtml("Duplicate selection for ${getDisForDomain(primary)}</b> is not allowed.", Html.FROM_HTML_MODE_LEGACY))
+        }
     }
     return Pair(true, Html.fromHtml("success", Html.FROM_HTML_MODE_LEGACY))
 }
@@ -337,15 +373,18 @@ fun isValidateConfiguration(viewModel: AdvancedHybridAhuViewModel): Pair<Boolean
     if (isRelayPressureFanAvailable(viewModel.profileConfiguration.cmConfiguration)) {
         if (!isAOPressureAvailable(viewModel.profileConfiguration.cmConfiguration)) {
             return Pair(false, Html.fromHtml(PRESSURE_RELAY_ERROR, Html.FROM_HTML_MODE_LEGACY))
+            return Pair(false, Html.fromHtml("Relay based Pressure Fan is mapped but <b>Pressure Fan configuration is not mapped</b>", Html.FROM_HTML_MODE_LEGACY))
         }
         if (!isPressureSensorAvailable(viewModel.profileConfiguration.cmConfiguration)) {
             return Pair(false, Html.fromHtml(NO_PRESSURE_SENSOR_ERROR, Html.FROM_HTML_MODE_LEGACY))
+            return Pair(false, Html.fromHtml("Pressure configuration mapped but <b>Pressure Sensor is not available</b>", Html.FROM_HTML_MODE_LEGACY))
         }
         isPressureAvailable = true
     }
     if (isAOPressureAvailable(viewModel.profileConfiguration.cmConfiguration)) {
         if (!isPressureSensorAvailable(viewModel.profileConfiguration.cmConfiguration)) {
             return Pair(false, Html.fromHtml(NO_PRESSURE_SENSOR_ERROR, Html.FROM_HTML_MODE_LEGACY))
+            return Pair(false, Html.fromHtml("Pressure configuration mapped but <b>Pressure Sensor is not available</b>", Html.FROM_HTML_MODE_LEGACY))
         }
         isPressureAvailable = true
     }
@@ -353,9 +392,22 @@ fun isValidateConfiguration(viewModel: AdvancedHybridAhuViewModel): Pair<Boolean
     val pressureDomainName = getDomainPressure(viewModel.profileConfiguration.cmConfiguration.sensorBus0PressureEnabled.enabled, viewModel.profileConfiguration.cmConfiguration.address0SensorAssociation.pressureAssociation!!.associationVal)
     val analogIn1DomainName = getPressureDomainForAnalogOut(viewModel.profileConfiguration.cmConfiguration.analog1InEnabled.enabled, viewModel.profileConfiguration.cmConfiguration.analog1InAssociation.associationVal)
     val analogIn2DomainName = getPressureDomainForAnalogOut(viewModel.profileConfiguration.cmConfiguration.analog2InEnabled.enabled, viewModel.profileConfiguration.cmConfiguration.analog2InAssociation.associationVal)
+    val pressureDomainName = getDomainPressure(
+            viewModel.profileConfiguration.cmConfiguration.sensorBus0PressureEnabled.enabled,
+            viewModel.profileConfiguration.cmConfiguration.address0SensorAssociation.pressureAssociation!!.associationVal
+    )
+    val analogIn1DomainName = getDomainForAnalogOut(
+            viewModel.profileConfiguration.cmConfiguration.analog1InEnabled.enabled,
+            viewModel.profileConfiguration.cmConfiguration.analog1InAssociation.associationVal
+    )
+    val analogIn2DomainName = getDomainForAnalogOut(
+            viewModel.profileConfiguration.cmConfiguration.analog2InEnabled.enabled,
+            viewModel.profileConfiguration.cmConfiguration.analog2InAssociation.associationVal
+    )
 
     if (isPressureAvailable && pressureDomainName == null && analogIn1DomainName == null && analogIn2DomainName == null) {
         return Pair(false, Html.fromHtml(NO_PRESSURE_SENSOR_ERROR, Html.FROM_HTML_MODE_LEGACY))
+        return Pair(false, Html.fromHtml("Pressure configuration mapped but <b>Pressure Sensor</b> is not available", Html.FROM_HTML_MODE_LEGACY))
     }
 
     val pressureStatus = findPressureDuplicate(Triple(pressureDomainName, analogIn1DomainName, analogIn2DomainName))
@@ -366,6 +418,7 @@ fun isValidateConfiguration(viewModel: AdvancedHybridAhuViewModel): Pair<Boolean
     if (isRelaySatCoolingAvailable(viewModel.profileConfiguration.cmConfiguration)) {
         if (!isAOCoolingSatAvailable(viewModel.profileConfiguration.cmConfiguration)) {
             return Pair(false, Html.fromHtml(COOLING_CONFIG_ERROR, Html.FROM_HTML_MODE_LEGACY))
+            return Pair(false, Html.fromHtml("Relay based SAT Cooling is mapped but <b>SAT Cooling configuration</b> is not mapped", Html.FROM_HTML_MODE_LEGACY))
         }
     }
 
@@ -400,6 +453,8 @@ fun validateConnectModule(viewModel: AdvancedHybridAhuViewModel): Pair<Boolean, 
     val duplicateSensor = findAndGetDuplicate(list)
     if (duplicateSensor != null) {
         return Pair(false, duplicateError(duplicateSensor))
+            return Pair(false, Html.fromHtml("Relay based SAT Heating is mapped but <b>SAT Heating configuration</b> is not mapped", Html.FROM_HTML_MODE_LEGACY))
+        }
     }
     return Pair(true, Html.fromHtml("Success", Html.FROM_HTML_MODE_LEGACY))
 }

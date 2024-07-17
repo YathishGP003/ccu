@@ -38,8 +38,11 @@ import android.content.Context
 import android.text.Spanned
 import androidx.appcompat.app.AlertDialog
 import androidx.compose.runtime.getValue
+import android.text.Spanned
+import androidx.appcompat.app.AlertDialog
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.seventyfivef.domainmodeler.client.ModelDirective
@@ -80,7 +83,8 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
     @SuppressLint("DefaultLocale")
     var testVoltage = List(101) { Option(it,String.format("%.1f", it * 0.1)) }
 
-    var modelLoaded by mutableStateOf(false)
+    var _modelLoaded =  MutableLiveData(false)
+    val modelLoaded: LiveData<Boolean> get() = _modelLoaded
 
     /**
      * Initialize the ViewModel
@@ -224,13 +228,6 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
                 val physicalPoint = getPhysicalPointForRelayIndex(relayIndex, false)
                 physicalPoint?.let {
                     it.writeHisVal(testCommand.toDouble())
-                   /* val cmControlMessage = getCMControlsMessage()
-                    CcuLog.d(L.TAG_CCU_DEVICE, "CM Proto Control Message: $cmControlMessage")
-                    CcuLog.i(Domain.LOG_TAG, "Send Test Command relayIndex $relayIndex $testCommand ${physicalPoint.readHisVal()}")
-                    sendControlMoteMessage(
-                        MessageType.CCU_TO_CM_OVER_USB_CM_SERIAL_CONTROLS,
-                        cmControlMessage.toByteArray()
-                    )*/
                     sendTestModeMessage()
                 }
             }

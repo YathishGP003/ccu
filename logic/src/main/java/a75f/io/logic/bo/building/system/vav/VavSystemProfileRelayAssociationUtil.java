@@ -1,6 +1,7 @@
 package a75f.io.logic.bo.building.system.vav;
 
 import java.util.HashMap;
+
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.logger.CcuLog;
@@ -19,6 +20,11 @@ public class VavSystemProfileRelayAssociationUtil {
         if (profileType == null) {
             profileType = ProfileType.valueOf(equip.getProfile());
         }
+        SystemProfile profileInstance = L.ccu().systemProfile;
+        if (profileInstance == null) {
+            return false;
+        }
+        VavSystemProfile systemProfile = getSystemProfileInstance(profileInstance);
 
         SystemProfile profileInstance = L.ccu().systemProfile;
         if (profileInstance == null) {

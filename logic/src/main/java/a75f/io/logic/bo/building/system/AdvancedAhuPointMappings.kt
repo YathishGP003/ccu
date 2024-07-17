@@ -6,6 +6,8 @@ import a75f.io.domain.equips.AdvancedHybridSystemEquip
 import a75f.io.domain.equips.ConnectModuleEquip
 import a75f.io.domain.equips.DomainEquip
 import a75f.io.logic.bo.building.system.util.DuctPressureSensorSource
+import a75f.io.domain.equips.VavAdvancedHybridSystemEquip
+import a75f.io.logic.bo.building.system.util.DuctPressureSensorSource
 
 enum class AdvancedAhuRelayAssociationType {
     LOAD_COOLING, LOAD_HEATING, LOAD_FAN, HUMIDIFIER, DEHUMIDIFIER, SAT_COOLING, SAT_HEATING, FAN_PRESSURE, OCCUPIED_ENABLE, FAN_ENABLE, AHU_FRESH_AIR_FAN_COMMAND;
@@ -391,7 +393,6 @@ fun getPressureInputSensor(sensorType: DuctPressureSensorSource, systemEquip: Ad
         DuctPressureSensorSource.DUCT_STATIC_PRESSURE_SENSOR_2 -> getSensor("2_")
         DuctPressureSensorSource.DUCT_STATIC_PRESSURE_SENSOR_3 -> getSensor("3_")
         else -> null
-    }
 }
 
 fun getPressureMappings(systemEquip: AdvancedHybridSystemEquip): Triple<Point?, Point?, Point?> {
@@ -405,6 +406,36 @@ fun getPressureMappings(systemEquip: AdvancedHybridSystemEquip): Triple<Point?, 
             )
     )
 }
+
+fun getPressureMappings(systemEquip: VavAdvancedHybridSystemEquip): Triple<Point?, Point?, Point?> {
+    return Triple(
+            getPointForPressureFromDomain(
+                    getDomainPressure(systemEquip.sensorBus0PressureEnable.readDefaultVal() > 0, systemEquip.sensorBus0PressureAssociation.readDefaultVal().toInt()), systemEquip),
+            getPointForPressureFromDomain(
+                    getDomainForAnalogOut(systemEquip.analog1InputEnable.readDefaultVal() > 0, systemEquip.analog1InputAssociation.readDefaultVal().toInt()), systemEquip),
+            getPointForPressureFromDomain(
+                    getDomainForAnalogOut(systemEquip.analog2InputEnable.readDefaultVal() > 0, systemEquip.analog2InputAssociation.readDefaultVal().toInt()), systemEquip
+            )
+    )
+}
+
+fun pressureFanControlIndexToDomainPoint(index: Int, equip: DomainEquip): Point? {
+    val systemEquip = equip as? VavAdvancedHybridSystemEquip
+            ?: throw IllegalArgumentException("Invalid system equip type")
+
+    val sourceOption = DuctPressureSensorSource.values().getOrNull(index)
+            ?: return null
+
+    return when (sourceOption) {
+        DuctPressureSensorSource.DUCT_STATIC_PRESSURE_SENSOR_1,
+        DuctPressureSensorSource.DUCT_STATIC_PRESSURE_SENSOR_2,
+        DuctPressureSensorSource.DUCT_STATIC_PRESSURE_SENSOR_3 -> getPressureInputSensor(sourceOption, systemEquip)
+        DuctPressureSensorSource.AVERAGE_PRESSURE -> systemEquip.averagePressure
+        DuctPressureSensorSource.MIN_PRESSURE -> systemEquip.minPressure
+        DuctPressureSensorSource.MAX_PRESSURE -> systemEquip.maxPressure
+    }
+}
+
 
 fun pressureFanControlIndexToDomainPoint(index: Int, equip: DomainEquip): Point? {
     val systemEquip = equip as? AdvancedHybridSystemEquip
@@ -420,8 +451,6 @@ fun pressureFanControlIndexToDomainPoint(index: Int, equip: DomainEquip): Point?
         DuctPressureSensorSource.AVERAGE_PRESSURE -> systemEquip.averagePressure
         DuctPressureSensorSource.MIN_PRESSURE -> systemEquip.minPressure
         DuctPressureSensorSource.MAX_PRESSURE -> systemEquip.maxPressure
-    }
-}
 
 fun co2DamperControlTypeToDomainPoint(index: Int, systemEquip: AdvancedHybridSystemEquip) : Point {
     return when(index) {

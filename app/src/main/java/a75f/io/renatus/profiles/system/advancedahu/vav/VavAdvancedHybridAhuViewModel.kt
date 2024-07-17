@@ -52,6 +52,7 @@ class VavAdvancedHybridAhuViewModel : AdvancedHybridAhuViewModel() {
         viewState = mutableStateOf(VavAdvancedAhuState.fromProfileConfigToState(profileConfiguration as VavAdvancedHybridAhuConfig))
         CcuLog.i(Domain.LOG_TAG, "VavAdvancedAhuViewModel Loaded")
         viewState.value.isSaveRequired = !systemEquip["profile"].toString().contentEquals("vavAdvancedHybridAhuV2")
+        _modelLoaded.postValue(true)
     }
 
     private fun createNewEquip(id: String): String {

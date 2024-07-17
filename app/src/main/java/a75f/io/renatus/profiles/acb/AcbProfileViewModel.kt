@@ -94,7 +94,8 @@ class AcbProfileViewModel : ViewModel() {
     private val _isDialogOpen = MutableLiveData<Boolean>()
     private var saveJob : Job? = null
 
-    var modelLoaded by  mutableStateOf(false)
+    var _modelLoaded =  MutableLiveData(false)
+    val modelLoaded: LiveData<Boolean> get() = _modelLoaded
     val isDialogOpen: LiveData<Boolean>
         get() = _isDialogOpen
 
@@ -131,8 +132,8 @@ class AcbProfileViewModel : ViewModel() {
 
         initializeLists()
         unusedPorts = UnusedPortsModel.initializeUnUsedPorts(deviceAddress, hayStack)
-        CcuLog.i(Domain.LOG_TAG, "VavProfileViewModel Loaded")
-        modelLoaded = true
+        CcuLog.i(Domain.LOG_TAG, "ACB ProfileViewModel Loaded")
+        _modelLoaded.postValue( true)
     }
 
     private fun initializeLists() {

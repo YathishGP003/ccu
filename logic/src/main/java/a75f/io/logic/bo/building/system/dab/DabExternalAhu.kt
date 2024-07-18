@@ -147,6 +147,7 @@ class DabExternalAhu : DabSystemProfile() {
             CCUHsApi.getInstance().deleteEntityTree(equip[Tags.ID].toString())
         }
         removeSystemEquipModbus()
+        deleteSystemConnectModule()
     }
 
     @Synchronized

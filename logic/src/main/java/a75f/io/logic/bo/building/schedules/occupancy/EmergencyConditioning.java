@@ -3,8 +3,6 @@ package a75f.io.logic.bo.building.schedules.occupancy;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
-import a75f.io.logic.bo.building.definitions.ProfileType;
-import a75f.io.logic.limits.SchedulabeLimits;
 import a75f.io.logic.tuners.BuildingTunerCache;
 
 public class EmergencyConditioning implements OccupancyTrigger {
@@ -28,12 +26,13 @@ public class EmergencyConditioning implements OccupancyTrigger {
         String conditioningMode = CCUHsApi.getInstance().
                 readDefaultStrVal("status and zone and message and equipRef == \"" + equipId + "\"");
 
-        if (zonePriority != null && zonePriority == 0 && L.ccu().systemProfile.getProfileType() != ProfileType.SYSTEM_DEFAULT) {
-            // Ensure we are skipping this check during default system profile
+        String systemStatus = CCUHsApi.getInstance().
+                readDefaultStrVal("status and system");
+        if (zonePriority != null && zonePriority == 0) {
             return (currentTemp < buildingLimitMin && currentTemp > buildingLimitMin - tempDeadLeeway &&
-                    ((conditioningMode.contains("Warming") || conditioningMode.contains("HEATING")) && L.ccu().systemProfile.isHeatingActive()) ||
+                    ((conditioningMode.contains("Warming") || conditioningMode.contains("HEATING")) && systemStatus.contains("Heating")) ||
                     currentTemp > buildingLimitMax && currentTemp < buildingLimitMax + tempDeadLeeway &&
-                            (conditioningMode.contains("Cooling") && L.ccu().systemProfile.isCoolingActive()));
+                            (conditioningMode.contains("Cooling") && systemStatus.contains("Cooling")));
         }
         CcuLog.i(L.TAG_CCU_SCHEDULER,
                 "EmergencyConditioning - " + currentTemp + " " + buildingLimitMin + "-" + buildingLimitMax + "(" + tempDeadLeeway +

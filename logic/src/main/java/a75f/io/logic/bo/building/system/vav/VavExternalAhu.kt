@@ -156,6 +156,7 @@ class VavExternalAhu : VavSystemProfile() {
             CCUHsApi.getInstance().deleteEntityTree(equip[Tags.ID].toString())
         }
         removeSystemEquipModbus()
+        deleteSystemConnectModule()
     }
 
     @Synchronized

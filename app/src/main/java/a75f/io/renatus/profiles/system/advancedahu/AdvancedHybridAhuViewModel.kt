@@ -1,11 +1,8 @@
 package a75f.io.renatus.profiles.system.advancedahu
 
 import a75f.io.api.haystack.CCUHsApi
-import a75f.io.device.cm.getCMControlsMessage
-import a75f.io.device.cm.sendControlMoteMessage
 import a75f.io.device.cm.sendTestModeMessage
 import a75f.io.device.connect.ConnectModbusSerialComm
-import a75f.io.device.serial.MessageType
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.api.PhysicalPoint
@@ -25,11 +22,16 @@ import a75f.io.logic.bo.building.system.getConnectAnalogOutLogicalPhysicalMap
 import a75f.io.logic.bo.building.system.getConnectRelayLogicalPhysicalMap
 import a75f.io.logic.bo.building.system.vav.VavAdvancedAhu
 import a75f.io.logic.bo.building.system.vav.config.AdvancedHybridAhuConfig
+import a75f.io.renatus.R
+import a75f.io.renatus.modbus.util.ALERT
+import a75f.io.renatus.modbus.util.OK
 import android.annotation.SuppressLint
 import android.content.Context
-import androidx.compose.runtime.getValue
+import android.text.Spanned
+import androidx.appcompat.app.AlertDialog
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.seventyfivef.domainmodeler.client.ModelDirective
@@ -61,7 +63,7 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
     lateinit var connectEquipBuilder: ProfileEquipBuilder
     lateinit var cmDeviceBuilder: DeviceBuilder
     lateinit var connectDeviceBuilder: DeviceBuilder
-    var isEquipPaired = false
+    private var isEquipPaired = false
     var isConnectModulePaired = false
     /**
      * This voltage values never going to be changed so hardcoded here
@@ -70,7 +72,8 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
     @SuppressLint("DefaultLocale")
     var testVoltage = List(101) { Option(it,String.format("%.1f", it * 0.1)) }
 
-    var modelLoaded by mutableStateOf(false)
+    var _modelLoaded =  MutableLiveData(false)
+    val modelLoaded: LiveData<Boolean> get() = _modelLoaded
 
     /**
      * Initialize the ViewModel
@@ -213,13 +216,6 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
                 val physicalPoint = getPhysicalPointForRelayIndex(relayIndex, false)
                 physicalPoint?.let {
                     it.writeHisVal(testCommand.toDouble())
-                   /* val cmControlMessage = getCMControlsMessage()
-                    CcuLog.d(L.TAG_CCU_DEVICE, "CM Proto Control Message: $cmControlMessage")
-                    CcuLog.i(Domain.LOG_TAG, "Send Test Command relayIndex $relayIndex $testCommand ${physicalPoint.readHisVal()}")
-                    sendControlMoteMessage(
-                        MessageType.CCU_TO_CM_OVER_USB_CM_SERIAL_CONTROLS,
-                        cmControlMessage.toByteArray()
-                    )*/
                     sendTestModeMessage()
                 }
             }
@@ -239,13 +235,6 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
                 physicalPoint?.let {
                     it.writeHisVal(testVal)
                     sendTestModeMessage()
-                    /*val cmControlMessage = getCMControlsMessage()
-                    CcuLog.d(L.TAG_CCU_DEVICE, "CM Proto Control Message: $cmControlMessage")
-                    CcuLog.i(Domain.LOG_TAG, "Send Test Command analogIndex $analogIndex $testVal ${physicalPoint.readHisVal()}")
-                    sendControlMoteMessage(
-                        MessageType.CCU_TO_CM_OVER_USB_CM_SERIAL_CONTROLS,
-                        cmControlMessage.toByteArray()
-                    )*/
                 }
             }
         }
@@ -353,7 +342,7 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
         return null
     }
 
-    fun getConnectPhysicalPointForAnalogIndex(analogIndex : Int) : PhysicalPoint? {
+    private fun getConnectPhysicalPointForAnalogIndex(analogIndex : Int) : PhysicalPoint? {
         if (isConnectModulePaired) {
             val systemEquip = Domain.systemEquip as VavAdvancedHybridSystemEquip
             val analogName = getAnalogNameForIndex(analogIndex)
@@ -379,6 +368,22 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
         isConnectModulePaired =  CCUHsApi.getInstance().readEntity(
                 "domainName == \"" + DomainName.vavAdvancedHybridAhuV2_connectModule + "\"").isNotEmpty()
     }
+
+    fun showErrorDialog(context: Context, message: Spanned) {
+        val builder = AlertDialog.Builder(context)
+        builder.setTitle(ALERT)
+        builder.setIcon(R.drawable.ic_warning)
+        builder.setMessage(message)
+        builder.setCancelable(false)
+        builder.setPositiveButton(OK) { dialog, _ ->
+            dialog.dismiss()
+        }
+        builder.create().show()
+    }
+
+
+
+
 }
 
 /**

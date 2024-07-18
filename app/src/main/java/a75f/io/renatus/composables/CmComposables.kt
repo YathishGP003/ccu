@@ -344,8 +344,6 @@ fun SaveConfig(viewModel: VavAdvancedHybridAhuViewModel) {
                     L.TAG_CCU_SYSTEM, viewModel.viewState.toString()
                 )
                 viewModel.saveConfiguration()
-                viewModel.viewState.value.isSaveRequired = false
-                viewModel.viewState.value.isStateChanged = false
             }
         }
     }

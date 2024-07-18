@@ -417,6 +417,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
             CCUHsApi.getInstance().deleteEntityTree(equip.get("id").toString());
         }
         removeSystemEquipModbus();
+        deleteSystemConnectModule();
     }
 
     public double getCmdSignal(String cmd) {

@@ -1,6 +1,7 @@
 package a75f.io.logic.bo.building.system.vav;
 
 import java.util.HashMap;
+
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.logger.CcuLog;

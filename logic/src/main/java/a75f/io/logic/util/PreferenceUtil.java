@@ -496,6 +496,6 @@ public class PreferenceUtil {
     public static void setHyperStatSplitGatewayRefMigrationDone() {
         setBooleanPreference(HSS_GATEWAY_REF_MIGRATION, true);
     }
-    
+
 
 }

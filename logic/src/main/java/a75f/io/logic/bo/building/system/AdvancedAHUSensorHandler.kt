@@ -9,23 +9,18 @@ fun updatePressureSensorDerivedPoints(equip: DomainEquip) {
         is VavAdvancedHybridSystemEquip -> equip
         else -> throw IllegalArgumentException("Invalid system equip type")
     }
-    if (systemEquip.averagePressure.pointExists()) {
-        val avgPressure = (systemEquip.ductStaticPressureSensor12.readHisVal() +
-                systemEquip.ductStaticPressureSensor22.readHisVal() +
-                systemEquip.ductStaticPressureSensor32.readHisVal()) / 3
-        systemEquip.averagePressure.writeHisVal(avgPressure)
-    }
-    if (systemEquip.minPressure.pointExists()) {
-        val minPressure = minOf(systemEquip.ductStaticPressureSensor12.readHisVal(),
-            systemEquip.ductStaticPressureSensor22.readHisVal(),
-            systemEquip.ductStaticPressureSensor32.readHisVal())
-        systemEquip.minPressure.writeHisVal(minPressure)
-    }
-    if (systemEquip.maxPressure.pointExists()) {
-        val maxPressure = maxOf(systemEquip.ductStaticPressureSensor12.readHisVal(),
-            systemEquip.ductStaticPressureSensor22.readHisVal(),
-            systemEquip.ductStaticPressureSensor32.readHisVal())
-        systemEquip.maxPressure.writeHisVal(maxPressure)
+    val (pressure, analogIn1, analogIn2) = getPressureMappings(systemEquip)
+    val availableSensors = listOfNotNull(pressure?.readHisVal(), analogIn1?.readHisVal(), analogIn2?.readHisVal())
+    if (availableSensors.isNotEmpty()) {
+        if (systemEquip.averagePressure.pointExists()) {
+            systemEquip.averagePressure.writeHisVal(availableSensors.average())
+        }
+        if (systemEquip.minPressure.pointExists()) {
+            systemEquip.minPressure.writeHisVal(availableSensors.min())
+        }
+        if (systemEquip.maxPressure.pointExists()) {
+            systemEquip.maxPressure.writeHisVal(availableSensors.max())
+        }
     }
 }
 

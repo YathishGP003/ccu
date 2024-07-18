@@ -58,6 +58,7 @@ public class VavBacnetRtu extends VavSystemProfile
             CCUHsApi.getInstance().deleteEntityTree(equip.get("id").toString());
         }
         removeSystemEquipModbus();
+        deleteSystemConnectModule();
     }
     
     @Override

@@ -175,7 +175,7 @@ public abstract class ZoneProfile
         return false;
     }
     
-    public void updateOccupancy(CCUHsApi hayStack, boolean drActivated) {
+    public void updateOccupancy(CCUHsApi hayStack) {
         if (equipScheduleHandler == null || equipOccupancyHandler == null) {
             Equip currentEquip = getEquip();
             if (currentEquip == null) {
@@ -186,7 +186,7 @@ public abstract class ZoneProfile
             equipOccupancyHandler = new EquipOccupancyHandler(hayStack, currentEquip.getId());
         }
         
-        equipOccupancyHandler.updateOccupancy(drActivated);
+        equipOccupancyHandler.updateOccupancy();
     }
     
     public EquipScheduleHandler getEquipScheduleHandler() {

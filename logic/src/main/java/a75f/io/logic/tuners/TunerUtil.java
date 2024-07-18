@@ -9,7 +9,6 @@ import java.util.HashMap;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
-import a75f.io.api.haystack.Kind;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
@@ -23,6 +22,7 @@ import a75f.io.logic.bo.building.system.vav.VavSystemProfile;
 import a75f.io.logic.bo.building.vav.VavProfile;
 
 import static a75f.io.api.haystack.HayStackConstants.DEFAULT_INIT_VAL_LEVEL;
+import static a75f.io.domain.api.Domain.buildingEquip;
 
 /**
  * Created by samjithsadasivan on 1/16/19.
@@ -34,7 +34,7 @@ public class TunerUtil
         HashMap tunerPoint = hayStack.read("point and tuner and "+query);
         if (!tunerPoint.isEmpty()) {
             ArrayList values = hayStack.readPoint(tunerPoint.get("id").toString());
-            if (values != null && values.size() > 0) {
+            if (values != null && !values.isEmpty()) {
                 for (int l = 1; l <= values.size(); l++) {
                     HashMap valMap = ((HashMap) values.get(l - 1));
                     if (valMap.get("val") != null) {
@@ -75,7 +75,7 @@ public class TunerUtil
         HashMap tunerPoint = hayStack.read("point and tuner and "+query+" and siteRef == \""+hayStack.getSiteIdRef()+"\"");
         if(tunerPoint != null && (tunerPoint.get("id" )!= null)) {
             ArrayList values = hayStack.readPoint(tunerPoint.get("id").toString());
-            if (values != null && values.size() > 0) {
+            if (values != null && !values.isEmpty()) {
                 for (int l = 16; l <= values.size(); l++) {
                     HashMap valMap = ((HashMap) values.get(l - 1));
                     if (valMap.get("val") != null) {
@@ -86,6 +86,23 @@ public class TunerUtil
         }
         return BuildingTunerFallback.getDefaultTunerVal(query);
     }
+    public static double readBuildingAndSystemTunerValByDomainName(String domainName) {
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        HashMap tunerPoint = hayStack.read("domainName== \""+ domainName +"\" and system and siteRef == \""+hayStack.getSiteIdRef()+"\"");
+        if(tunerPoint != null && (tunerPoint.get("id" )!= null)) {
+            ArrayList values = hayStack.readPoint(tunerPoint.get("id").toString());
+            if (values != null && !values.isEmpty()) {
+                for (int l = 13; l <= values.size(); l++) {
+                    HashMap valMap = ((HashMap) values.get(l - 1));
+                    if (valMap.get("val") != null) {
+                        return Double.parseDouble(valMap.get("val").toString());
+                    }
+                }
+            }
+        }
+        return buildingEquip.getZoneTemperatureDeadLeeway().readDefaultVal();
+    }
+
     
     public static double readSystemUserIntentVal(String tags) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
@@ -95,7 +112,7 @@ public class TunerUtil
             return 0;
         }
         ArrayList values = hayStack.readPoint(userIntent.get("id").toString());
-        if (values != null && values.size() > 0)
+        if (values != null && !values.isEmpty())
         {
             for (int l = 1; l <= values.size() ; l++ ) {
                 HashMap valMap = ((HashMap) values.get(l-1));
@@ -150,7 +167,7 @@ public class TunerUtil
 
             if (!cdb.isEmpty()) {
                 ArrayList values = hayStack.readPoint(cdb.get("id").toString());
-                if (values != null && values.size() > 0) {
+                if (values != null && !values.isEmpty()) {
                     for (int l = 1; l <= values.size(); l++) {
                         HashMap valMap = ((HashMap) values.get(l - 1));
                         if (valMap.get("val") != null) {
@@ -185,7 +202,7 @@ public class TunerUtil
 
             if (!hdb.isEmpty()) {
                 ArrayList values = hayStack.readPoint(hdb.get("id").toString());
-                if (values != null && values.size() > 0) {
+                if (values != null && !values.isEmpty()) {
                     for (int l = 1; l <= values.size(); l++) {
                         HashMap valMap = ((HashMap) values.get(l - 1));
                         if (valMap.get("val") != null) {
@@ -234,7 +251,7 @@ public class TunerUtil
         HashMap pgain = hayStack.read("point and tuner and pgain and not trueCFM and not trueCfm and equipRef == \""+equipRef+"\"");
         if (!pgain.isEmpty()) {
             ArrayList values = hayStack.readPoint(pgain.get("id").toString());
-            if (values != null && values.size() > 0) {
+            if (values != null && !values.isEmpty()) {
                 for (int l = 1; l <= values.size(); l++) {
                     HashMap valMap = ((HashMap) values.get(l - 1));
                     if (valMap.get("val") != null) {
@@ -270,7 +287,7 @@ public class TunerUtil
         
         if (!proportionalSpread.isEmpty()) {
             ArrayList values = hayStack.readPoint(proportionalSpread.get("id").toString());
-            if (values != null && values.size() > 0) {
+            if (values != null && !values.isEmpty()) {
                 for (int l = 1; l <= values.size(); l++) {
                     HashMap valMap = ((HashMap) values.get(l - 1));
                     if (valMap.get("val") != null) {
@@ -288,7 +305,7 @@ public class TunerUtil
         
         if (!itimeout.isEmpty()) {
             ArrayList values = hayStack.readPoint(itimeout.get("id").toString());
-            if (values != null && values.size() > 0) {
+            if (values != null && !values.isEmpty()) {
                 for (int l = 1; l <= values.size(); l++) {
                     HashMap valMap = ((HashMap) values.get(l - 1));
                     if (valMap.get("val") != null) {
@@ -316,7 +333,7 @@ public class TunerUtil
         if((cdb != null) && (cdb.get("id") != null) ) {
 
             ArrayList values = hayStack.readPoint(cdb.get("id").toString());
-            if (values != null && values.size() > 0) {
+            if (values != null && !values.isEmpty()) {
                 for (int l = 1; l <= values.size(); l++) {
                     HashMap valMap = ((HashMap) values.get(l - 1));
                     if (valMap.get("val") != null) {

@@ -285,7 +285,11 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
                 for (Parameter pam : register.getParameters()) {
                     if (pam.getUserIntentPointTags() != null) {
                         if (pam.getName().equals(point.getShortDis())) {
-                            LModbus.writeRegister(Short.parseShort(point.getGroup()), register, (int) value);
+                            if(register.parameterDefinitionType!=null && register.parameterDefinitionType.equals("float")) {
+                                LModbus.writeRegister(Short.parseShort(point.getGroup()), register, (float) value);
+                            } else {
+                                LModbus.writeRegister(Short.parseShort(point.getGroup()), register, (int) value);
+                            }
                             break;
                         }
                     }
@@ -374,8 +378,11 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
                 for (Parameter pam : register.getParameters()) {
                     if (pam.getUserIntentPointTags() != null) {
                         if (pam.getName().equals(parameter.getName())) {
-
+                            if(register.parameterDefinitionType!=null && register.parameterDefinitionType.equals("float")) {
+                                LModbus.writeRegister(Short.parseShort(point.getGroup()), register, (float) Double.parseDouble(value));
+                            } else {
                                 LModbus.writeRegister(Short.parseShort(point.getGroup()), register, (int) Double.parseDouble(value));
+                            }
                             break;
                         }
                     }

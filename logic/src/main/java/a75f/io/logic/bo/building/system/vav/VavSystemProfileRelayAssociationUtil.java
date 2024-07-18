@@ -20,11 +20,6 @@ public class VavSystemProfileRelayAssociationUtil {
         if (profileType == null) {
             profileType = ProfileType.valueOf(equip.getProfile());
         }
-        SystemProfile profileInstance = L.ccu().systemProfile;
-        if (profileInstance == null) {
-            return false;
-        }
-        VavSystemProfile systemProfile = getSystemProfileInstance(profileInstance);
 
         SystemProfile profileInstance = L.ccu().systemProfile;
         if (profileInstance == null) {

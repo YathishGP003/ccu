@@ -1,11 +1,9 @@
 package a75f.io.logic.tuners;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
-import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.domain.api.Domain;
-import a75f.io.logic.limits.SchedulabeLimits;
+import a75f.io.domain.api.DomainName;
 
 /***
  * Caches commonly used building tuners and refreshes them every minute.
@@ -45,7 +43,7 @@ public class BuildingTunerCache {
         tunerValMap.put(MAX_COOLING_USER_LIMIT, Domain.buildingEquip.getCoolingUserLimitMax().readPriorityVal());
         tunerValMap.put(MIN_HEATING_USER_LIMIT, Domain.buildingEquip.getHeatingUserLimitMin().readPriorityVal());
         tunerValMap.put(MAX_HEATING_USER_LIMIT, Domain.buildingEquip.getHeatingUserLimitMax().readPriorityVal());
-        tunerValMap.put(TEMP_DEAD_LEEWAY, Domain.buildingEquip.getZoneTemperatureDeadLeeway().readPriorityVal());
+        tunerValMap.put(TEMP_DEAD_LEEWAY, TunerUtil.readBuildingAndSystemTunerValByDomainName(DomainName.zoneTemperatureDeadLeeway));
         tunerValMap.put(BUILDING_ZONE_DIFFERENTIAL, Domain.buildingEquip.getBuildingToZoneDifferential().readPriorityVal());
        /* tunerValMap.put(COOLING_DEADBAND, SchedulabeLimits.Companion.getCoolingDeadBand());
         tunerValMap.put(HEATING_DEADBAND, SchedulabeLimits.Companion.getHeatingDeadBand());*/
@@ -79,8 +77,5 @@ public class BuildingTunerCache {
         return tunerValMap.get(MAX_HEATING_USER_LIMIT);
     }
 
-    public Double getBuildingToZoneDifferential() {
-        return tunerValMap.get(BUILDING_ZONE_DIFFERENTIAL);
-    }
 
 }

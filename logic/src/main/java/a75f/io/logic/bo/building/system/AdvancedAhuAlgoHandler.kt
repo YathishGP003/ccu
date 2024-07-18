@@ -49,7 +49,7 @@ class AdvancedAhuAlgoHandler (val equip: SystemEquip) {
             0 -> (isSystemOccupied || systemFanLoop > 0 || isReheatActive(CCUHsApi.getInstance()))
             1 -> systemFanLoop > 0
             else -> {
-                val stageThreshold = 100 * (stageIndex - 1) / fanStagesAvailable -1
+                val stageThreshold = 100 * (stageIndex - 1) / (fanStagesAvailable -1)
                 val currentState = point.readHisVal()
                 CcuLog.i(
                     L.TAG_CCU_SYSTEM, "stageIndex $stageIndex getFanRelayState: currentState: " +

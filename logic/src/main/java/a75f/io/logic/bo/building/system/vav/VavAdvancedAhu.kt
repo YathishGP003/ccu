@@ -507,11 +507,11 @@ open class VavAdvancedAhu : VavSystemProfile() {
      */
     fun getStaticPressureControlPoint() : Double {
         val pressureControlType = systemEquip.cmEquip.pressureBasedFanControlOn.readDefaultVal()
-        val controlPoint = pressureFanControlIndexToDomainPoint(pressureControlType.toInt(), systemEquip)
+        val controlPoint = pressureFanControlIndexToDomainPoint(pressureControlType.toInt(), systemEquip.cmEquip)
 
         if (controlPoint != null) {
             CcuLog.d(L.TAG_CCU_SYSTEM, "pressureControlType :$pressureControlType controlPoint: ${controlPoint.domainName}")
-            return pressureFanControlIndexToDomainPoint(pressureControlType.toInt(), systemEquip)!!.readHisVal()
+            return pressureFanControlIndexToDomainPoint(pressureControlType.toInt(), systemEquip.cmEquip)!!.readHisVal()
         }
         return 0.0
     }

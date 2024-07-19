@@ -110,36 +110,38 @@ class VavAdvancedHybridAhuViewModel : AdvancedHybridAhuViewModel() {
         isEquipAvailable(ProfileType.SYSTEM_VAV_ADVANCED_AHU)
         if (saveJob == null) {
             saveJob = viewModelScope.launch {
-            ProgressDialogUtils.showProgressDialog(context, "Saving profile configuration")
-            withContext(Dispatchers.IO) {
-                val profile = L.ccu().systemProfile
-                if (profile == null) {
-                    newEquipConfiguration()
-                } else {
-                    if (profile is VavAdvancedAhu) {
-                        updateConfiguration()
-                    } else {
+                withContext(Dispatchers.Main) {
+                    ProgressDialogUtils.showProgressDialog(context, "Saving profile configuration")
+                }
+                withContext(Dispatchers.IO) {
+                    val profile = L.ccu().systemProfile
+                    if (profile == null) {
                         newEquipConfiguration()
+                    } else {
+                        if (profile is VavAdvancedAhu) {
+                            updateConfiguration()
+                        } else {
+                            newEquipConfiguration()
+                        }
+                    }
+                    L.saveCCUState()
+                    CCUHsApi.getInstance().setCcuReady()
+                    CCUHsApi.getInstance().syncEntityTree()
+                    DomainManager.addSystemDomainEquip(hayStack)
+                    DomainManager.addCmBoardDevice(hayStack)
+                    (L.ccu().systemProfile as VavAdvancedAhu).updateDomainEquip(Domain.systemEquip as VavAdvancedHybridSystemEquip)
+                    withContext(Dispatchers.Main) {
+                        viewState.value.isSaveRequired = false
+                        viewState.value.isStateChanged = false
+                        showToast("Configuration saved successfully", context)
+                        ProgressDialogUtils.hideProgressDialog()
                     }
                 }
-                L.saveCCUState()
-                CCUHsApi.getInstance().setCcuReady()
-                CCUHsApi.getInstance().syncEntityTree()
-                DomainManager.addSystemDomainEquip(hayStack)
-                DomainManager.addCmBoardDevice(hayStack)
-                (L.ccu().systemProfile as VavAdvancedAhu).updateDomainEquip(Domain.systemEquip as VavAdvancedHybridSystemEquip)
-                withContext(Dispatchers.Main) {
-                    viewState.value.isSaveRequired = false
-                    viewState.value.isStateChanged = false
-                    showToast("Configuration saved successfully", context)
-                    ProgressDialogUtils.hideProgressDialog()
-                }
             }
-                if (ProgressDialogUtils.isDialogShowing()) {
-                    ProgressDialogUtils.hideProgressDialog()
-                }
+            if (ProgressDialogUtils.isDialogShowing()) {
+                ProgressDialogUtils.hideProgressDialog()
+            }
         }
-
     }
 
     private fun newEquipConfiguration() {

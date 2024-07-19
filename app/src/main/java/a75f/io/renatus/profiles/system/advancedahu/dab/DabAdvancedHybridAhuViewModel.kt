@@ -14,8 +14,11 @@ import a75f.io.logic.bo.building.system.dab.DabAdvancedAhu
 import a75f.io.logic.bo.building.system.dab.config.DabAdvancedHybridAhuConfig
 import a75f.io.logic.bo.building.system.util.deleteSystemConnectModule
 import a75f.io.logic.bo.building.system.util.getDabConnectEquip
+import a75f.io.logic.bo.building.system.vav.config.VavAdvancedHybridAhuConfig
 import a75f.io.renatus.modbus.util.showToast
 import a75f.io.renatus.profiles.system.advancedahu.AdvancedHybridAhuViewModel
+import a75f.io.renatus.profiles.system.advancedahu.isValidateConfiguration
+import a75f.io.renatus.profiles.system.advancedahu.vav.VavAdvancedAhuState
 import a75f.io.renatus.util.ProgressDialogUtils
 import android.content.Context
 import androidx.compose.runtime.mutableStateOf
@@ -87,34 +90,50 @@ class DabAdvancedHybridAhuViewModel : AdvancedHybridAhuViewModel() {
 
     override fun saveConfiguration() {
         ((viewState.value) as DabAdvancedAhuState).fromStateToProfileConfig(profileConfiguration as DabAdvancedHybridAhuConfig)
-        CcuLog.i(L.TAG_CCU_SYSTEM, profileConfiguration.toString())
-        isEquipAvailable(ProfileType.SYSTEM_DAB_ADVANCED_AHU)
-        viewModelScope.launch {
-            ProgressDialogUtils.showProgressDialog(context, "Saving profile configuration")
-            withContext(Dispatchers.IO) {
-                val profile = L.ccu().systemProfile
-                if (profile == null) {
-                    newEquipConfiguration()
-                } else {
-                    if (profile is DabAdvancedAhu) {
-                        updateConfiguration()
-                    } else {
-                        newEquipConfiguration()
-                    }
-                }
-                L.saveCCUState()
-                CCUHsApi.getInstance().setCcuReady()
-                CCUHsApi.getInstance().syncEntityTree()
-                DomainManager.addSystemDomainEquip(hayStack)
-                DomainManager.addCmBoardDevice(hayStack)
-                (L.ccu().systemProfile as DabAdvancedAhu).updateDomainEquip(Domain.systemEquip as DabAdvancedHybridSystemEquip)
-                withContext(Dispatchers.Main) {
-                    showToast("Configuration saved successfully", context)
-                    ProgressDialogUtils.hideProgressDialog()
-                }
-            }
+        val validConfig = isValidateConfiguration(this@DabAdvancedHybridAhuViewModel)
+        if (!validConfig.first) {
+            showErrorDialog(context,validConfig.second)
+            viewState.value.isSaveRequired = true
+            viewState.value.isStateChanged = true
+            return
         }
 
+        CcuLog.i(L.TAG_CCU_SYSTEM, profileConfiguration.toString())
+        isEquipAvailable(ProfileType.SYSTEM_DAB_ADVANCED_AHU)
+        if (saveJob == null) {
+            saveJob = viewModelScope.launch {
+                withContext(Dispatchers.Main) {
+                    ProgressDialogUtils.showProgressDialog(context, "Saving profile configuration")
+                }
+                withContext(Dispatchers.IO) {
+                    val profile = L.ccu().systemProfile
+                    if (profile == null) {
+                        newEquipConfiguration()
+                    } else {
+                        if (profile is DabAdvancedAhu) {
+                            updateConfiguration()
+                        } else {
+                            newEquipConfiguration()
+                        }
+                    }
+                    L.saveCCUState()
+                    CCUHsApi.getInstance().setCcuReady()
+                    CCUHsApi.getInstance().syncEntityTree()
+                    DomainManager.addSystemDomainEquip(hayStack)
+                    DomainManager.addCmBoardDevice(hayStack)
+                    (L.ccu().systemProfile as DabAdvancedAhu).updateDomainEquip(Domain.systemEquip as DabAdvancedHybridSystemEquip)
+                    withContext(Dispatchers.Main) {
+                        viewState.value.isSaveRequired = false
+                        viewState.value.isStateChanged = false
+                        showToast("Configuration saved successfully", context)
+                        ProgressDialogUtils.hideProgressDialog()
+                    }
+                }
+            }
+            if (ProgressDialogUtils.isDialogShowing()) {
+                ProgressDialogUtils.hideProgressDialog()
+            }
+        }
     }
 
     private fun newEquipConfiguration() {

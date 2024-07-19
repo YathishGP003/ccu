@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.ComposeView
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -25,9 +26,7 @@ import kotlinx.coroutines.withContext
  */
 
 class VavAdvancedHybridAhuFragment : AdvancedHybridAhuFragment() {
-
     override val viewModel: VavAdvancedHybridAhuViewModel by viewModels()
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
@@ -35,7 +34,7 @@ class VavAdvancedHybridAhuFragment : AdvancedHybridAhuFragment() {
         viewLifecycleOwner.lifecycleScope.launch (highPriorityDispatcher) {
             withContext(Dispatchers.Main) {
                 rootView.apply {
-                    setContent { ShowLoading() }
+                    setContent { AddProgressGif() }
                 }
             }
             viewModel.init(requireContext(), CCUHsApi.getInstance())
@@ -48,10 +47,8 @@ class VavAdvancedHybridAhuFragment : AdvancedHybridAhuFragment() {
         return rootView
     }
 
-    @Composable
-    private fun ShowLoading() {
-        AddProgressGif()
-    }
+
+
 
     @Composable
     fun RootView() {

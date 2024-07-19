@@ -21,7 +21,9 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * Created by Manjunath K on 19-05-2024.
@@ -33,26 +35,25 @@ class DabAdvancedHybridAhuFragment : AdvancedHybridAhuFragment() {
     override fun onCreateView(
             inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
-        viewLifecycleOwner.lifecycleScope.launch (highPriorityDispatcher) {
-            viewModel.init(requireContext(), CCUHsApi.getInstance())
-        }
-
         val rootView = ComposeView(requireContext())
-        rootView.apply {
-            setContent { RootView() }
-            return rootView
+        viewLifecycleOwner.lifecycleScope.launch (highPriorityDispatcher) {
+            withContext(Dispatchers.Main) {
+                rootView.apply {
+                    setContent { AddProgressGif() }
+                }
+            }
+            viewModel.init(requireContext(), CCUHsApi.getInstance())
+            withContext(Dispatchers.Main) {
+                rootView.apply {
+                    setContent { RootView() }
+                }
+            }
         }
+        return rootView
     }
 
     @Composable
     fun RootView() {
-        val modelLoaded by viewModel.modelLoaded.observeAsState(initial = false)
-        if (!modelLoaded) {
-            AddProgressGif()
-            CcuLog.i(Domain.LOG_TAG, "Show Progress")
-            return
-
-        }
         Column {
             if (viewModel.viewState.value.pendingDeleteConnect) {
                 DeleteDialog(onDismissRequest = { viewModel.viewState.value.pendingDeleteConnect = false }, onConfirmation = {

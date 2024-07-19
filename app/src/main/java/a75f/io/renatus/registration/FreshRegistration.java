@@ -62,6 +62,7 @@ import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.PreferenceConstants;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
+import a75f.io.renatus.util.RxjavaUtil;
 import a75f.io.renatus.views.CustomCCUSwitch;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 
@@ -298,7 +299,9 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             }
             if (currentFragment instanceof CongratsFragment) {
                 prefs.setBoolean("REGISTRATION", true);
-                Globals.getInstance().copyModels();
+                RxjavaUtil.executeBackground(() -> {
+                    Globals.getInstance().copyModels();
+                });
                 updateCCURegistrationInfo();
                 buttonNext.setEnabled(true);
             }

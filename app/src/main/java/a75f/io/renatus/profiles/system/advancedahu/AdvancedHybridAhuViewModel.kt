@@ -30,8 +30,6 @@ import android.content.Context
 import android.text.Spanned
 import androidx.appcompat.app.AlertDialog
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.seventyfivef.domainmodeler.client.ModelDirective
@@ -42,6 +40,7 @@ import io.seventyfivef.domainmodeler.common.point.Constraint
 import io.seventyfivef.domainmodeler.common.point.MultiStateConstraint
 import io.seventyfivef.domainmodeler.common.point.NumericConstraint
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -65,6 +64,7 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
     lateinit var connectDeviceBuilder: DeviceBuilder
     private var isEquipPaired = false
     var isConnectModulePaired = false
+    var saveJob : Job? = null
     /**
      * This voltage values never going to be changed so hardcoded here
      */
@@ -72,8 +72,6 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
     @SuppressLint("DefaultLocale")
     var testVoltage = List(101) { Option(it,String.format("%.1f", it * 0.1)) }
 
-    var _modelLoaded =  MutableLiveData(false)
-    val modelLoaded: LiveData<Boolean> get() = _modelLoaded
 
     /**
      * Initialize the ViewModel

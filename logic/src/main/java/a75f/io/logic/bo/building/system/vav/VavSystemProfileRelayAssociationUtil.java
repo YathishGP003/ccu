@@ -21,12 +21,6 @@ public class VavSystemProfileRelayAssociationUtil {
             profileType = ProfileType.valueOf(equip.getProfile());
         }
 
-        SystemProfile profileInstance = L.ccu().systemProfile;
-        if (profileInstance == null) {
-            return false;
-        }
-        VavSystemProfile systemProfile = getSystemProfileInstance(profileInstance);
-
         switch (profileType) {
             case SYSTEM_VAV_STAGED_RTU:
             case SYSTEM_VAV_STAGED_VFD_RTU:

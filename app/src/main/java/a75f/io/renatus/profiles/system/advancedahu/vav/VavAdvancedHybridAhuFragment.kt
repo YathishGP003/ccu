@@ -1,8 +1,6 @@
 package a75f.io.renatus.profiles.system.advancedahu.vav
 
 import a75f.io.api.haystack.CCUHsApi
-import a75f.io.domain.api.Domain
-import a75f.io.logger.CcuLog
 import a75f.io.logic.bo.building.system.vav.config.VavAdvancedHybridAhuConfig
 import a75f.io.renatus.composables.DeleteDialog
 import a75f.io.renatus.composables.SaveConfig
@@ -13,16 +11,14 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.platform.ComposeView
-import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * Created by Manjunath K on 14-03-2024.
@@ -30,47 +26,45 @@ import kotlinx.coroutines.launch
 
 class VavAdvancedHybridAhuFragment : AdvancedHybridAhuFragment() {
 
-
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
-        viewLifecycleOwner.lifecycleScope.launch (highPriorityDispatcher) {
-            viewModel.init(requireContext(), CCUHsApi.getInstance())
-        }
-
         val rootView = ComposeView(requireContext())
-        rootView.apply {
-            setContent { RootView() }
-            return rootView
+        viewLifecycleOwner.lifecycleScope.launch (highPriorityDispatcher) {
+            withContext(Dispatchers.Main) {
+                rootView.apply {
+                    setContent { ShowLoading() }
+                }
+            }
+            viewModel.init(requireContext(), CCUHsApi.getInstance())
+            withContext(Dispatchers.Main) {
+                rootView.apply {
+                    setContent { RootView() }
+                }
+            }
         }
+        return rootView
+    }
+
+    @Composable
+    private fun ShowLoading() {
+        AddProgressGif()
     }
 
     @Composable
     fun RootView() {
-        val modelLoaded by viewModel.modelLoaded.observeAsState(initial = false)
-        if (!modelLoaded) {
-            AddProgressGif()
-            CcuLog.i(Domain.LOG_TAG, "Show Progress")
-            return
-
-        }
-
-
-        CcuLog.i(Domain.LOG_TAG, "Hide Progress")
         Column {
             if (viewModel.viewState.value.pendingDeleteConnect) {
                 DeleteDialog(
-                    onDismissRequest = { viewModel.viewState.value.pendingDeleteConnect = false },
-                    onConfirmation = {
-                        viewModel.viewState.value.isConnectEnabled = false
-                        viewModel.viewState.value.pendingDeleteConnect = false
-                        VavAdvancedAhuState.connectConfigToState(viewModel.profileConfiguration as VavAdvancedHybridAhuConfig, viewModel.viewState.value)
-                     },
-                    toDelete = "Connect Module 1"
+                        onDismissRequest = { viewModel.viewState.value.pendingDeleteConnect = false },
+                        onConfirmation = {
+                            viewModel.viewState.value.isConnectEnabled = false
+                            viewModel.viewState.value.pendingDeleteConnect = false
+                            VavAdvancedAhuState.connectConfigToState(viewModel.profileConfiguration as VavAdvancedHybridAhuConfig, viewModel.viewState.value)
+                        },
+                        toDelete = "Connect Module 1"
                 )
             }
-            
 
             LazyColumn {
                 item { TitleLabel() }

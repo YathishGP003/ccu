@@ -44,9 +44,11 @@ class AdvancedAhuAlgoHandler (val equip: SystemEquip) {
             systemHeatingLoop > (stageThreshold - relayHysteresis).coerceAtLeast(0.0)
     }
 
-    private fun getFanRelayState(stageIndex: Int, point: Point, systemFanLoop: Double, relayHysteresis: Double, fanStagesAvailable : Int, isSystemOccupied: Boolean) : Boolean{
+    private fun getFanRelayState(stageIndex: Int, point: Point, systemFanLoop: Double,
+                                 relayHysteresis: Double, fanStagesAvailable : Int,
+                                 isSystemOccupied: Boolean, isStage1AllowToActive: Boolean) : Boolean{
         return when(stageIndex) {
-            0 -> (isSystemOccupied || systemFanLoop > 0 || isReheatActive(CCUHsApi.getInstance()))
+            0 -> (isSystemOccupied || isStage1AllowToActive || isReheatActive(CCUHsApi.getInstance()))
             1 -> systemFanLoop > 0
             else -> {
                 val stageThreshold = 100 * (stageIndex - 1) / (fanStagesAvailable -1)
@@ -108,7 +110,7 @@ class AdvancedAhuAlgoHandler (val equip: SystemEquip) {
             association: Point, coolingStages: Int,
             heatingStages: Int, fanStages: Int, systemOccupied: Boolean,
             isConnectEquip: Boolean, ahuSettings: AhuSettings,
-            ahuTuners: AhuTuners,
+            ahuTuners: AhuTuners, isStage1AllowToActive: Boolean
     ): Pair<Point, Boolean> {
 
         val associatedPointName: String
@@ -144,8 +146,9 @@ class AdvancedAhuAlgoHandler (val equip: SystemEquip) {
                 false
             }
 
-            AdvancedAhuRelayAssociationType.LOAD_FAN -> getFanRelayState(stageIndex, associatedPoint, ahuSettings.systemEquip.fanLoopOutput.readHisVal(),
-                    ahuTuners.relayDeactivationHysteresis, fanStages, systemOccupied)
+            AdvancedAhuRelayAssociationType.LOAD_FAN -> getFanRelayState(stageIndex, associatedPoint,
+                    ahuSettings.systemEquip.fanLoopOutput.readHisVal(),
+                    ahuTuners.relayDeactivationHysteresis, fanStages, systemOccupied, isStage1AllowToActive)
 
             AdvancedAhuRelayAssociationType.HUMIDIFIER -> {
                 if (systemOccupied && ahuSettings.systemEquip.conditioningMode.readPriorityVal() > 0) {
@@ -184,7 +187,7 @@ class AdvancedAhuAlgoHandler (val equip: SystemEquip) {
 
             AdvancedAhuRelayAssociationType.FAN_PRESSURE -> getFanRelayState(
                     stageIndex, associatedPoint, ahuSettings.systemEquip.fanPressureLoopOutput.readHisVal(),
-                    ahuTuners.relayDeactivationHysteresis, fanStages, systemOccupied)
+                    ahuTuners.relayDeactivationHysteresis, fanStages, systemOccupied, isStage1AllowToActive)
 
             AdvancedAhuRelayAssociationType.FAN_ENABLE -> getFanEnableRelayState(
                     ahuSettings.systemEquip.coolingLoopOutput.readHisVal(),

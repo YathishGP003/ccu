@@ -17,8 +17,8 @@ import a75f.io.logic.bo.building.system.getDomainPressure
 import a75f.io.logic.bo.building.system.getPressureDomainForAnalogOut
 import a75f.io.logic.bo.building.system.relayAssociationDomainNameToType
 import a75f.io.logic.bo.building.system.relayAssociationToDomainName
-import a75f.io.logic.bo.building.system.vav.config.CmConfiguration
-import a75f.io.logic.bo.building.system.vav.config.ConnectConfiguration
+import a75f.io.logic.bo.building.system.util.CmConfiguration
+import a75f.io.logic.bo.building.system.util.ConnectConfiguration
 import android.text.Html
 import android.text.Spanned
 

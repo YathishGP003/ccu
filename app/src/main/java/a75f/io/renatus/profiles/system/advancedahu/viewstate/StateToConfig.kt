@@ -1,8 +1,8 @@
 package a75f.io.renatus.profiles.system.advancedahu.viewstate
 
-import a75f.io.logic.bo.building.system.vav.config.AdvancedHybridAhuConfig
-import a75f.io.logic.bo.building.system.vav.config.AnalogOutMinMaxVoltage
-import a75f.io.logic.bo.building.system.vav.config.SensorAssociationConfig
+import a75f.io.logic.bo.building.system.util.AdvancedHybridAhuConfig
+import a75f.io.logic.bo.building.system.util.AnalogOutMinMaxVoltage
+import a75f.io.logic.bo.building.system.util.SensorAssociationConfig
 import a75f.io.renatus.profiles.system.advancedahu.AdvancedHybridAhuState
 import a75f.io.renatus.profiles.system.advancedahu.MinMaxVoltage
 import a75f.io.renatus.profiles.system.advancedahu.SensorState
@@ -31,7 +31,7 @@ fun updateSensorAddress(config: AdvancedHybridAhuConfig, state: AdvancedHybridAh
  * Updates the sensor association
  */
 fun updateSensorAssociation(
-    association: SensorAssociationConfig, sensorState: SensorState
+        association: SensorAssociationConfig, sensorState: SensorState
 ) {
     association.apply {
         temperatureAssociation.associationVal = sensorState.temperatureAssociation

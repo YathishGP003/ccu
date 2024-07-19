@@ -30,6 +30,7 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.renatus.profiles.system.VavStagedRtuFragment;
 import a75f.io.renatus.profiles.system.VavStagedVfdRtuFragment;
+import a75f.io.renatus.profiles.system.advancedahu.dab.DabAdvancedHybridAhuFragment;
 import a75f.io.renatus.profiles.system.advancedahu.vav.VavAdvancedHybridAhuFragment;
 import a75f.io.renatus.profiles.system.externalahu.ExternalAhuFragment;
 import a75f.io.renatus.registration.FreshRegistration;
@@ -99,7 +100,6 @@ public class SystemProfileFragment extends Fragment {
                     ((TextView) adapterView.getChildAt(0)).setTextSize(18);
                     spSystemProfile.getLayoutParams().width = 340;
                 }
-                
                 switch (i) {
                     case 0:
                         if(canAddDABProfile() && canAddVAVProfile()){
@@ -245,7 +245,7 @@ public class SystemProfileFragment extends Fragment {
                     case 11:
                         if (canAddDABProfile()) {
                             getActivity().getSupportFragmentManager().beginTransaction()
-                                    .replace(R.id.profileContainer, new DABHybridAhuProfile()).commit();
+                                    .replace(R.id.profileContainer, new DabAdvancedHybridAhuFragment()).commit();
                             if (SystemConfigMenuFragment.SystemConfigMenuFragmentHandler != null) {
                                 SystemConfigMenuFragment.SystemConfigMenuFragmentHandler.sendEmptyMessage(1);
                             }

@@ -15,6 +15,7 @@ import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.ProfileType
+import a75f.io.logic.bo.building.system.dab.DabAdvancedAhu
 import a75f.io.logic.bo.building.system.getAnalogOutLogicalPhysicalMap
 import a75f.io.logic.bo.building.system.getCMRelayLogicalPhysicalMap
 import a75f.io.logic.bo.building.system.getConnectAnalogOutLogicalPhysicalMap
@@ -26,7 +27,7 @@ import a75f.io.logic.bo.building.system.util.getDabConnectEquip
 import a75f.io.logic.bo.building.system.util.getVavCmEquip
 import a75f.io.logic.bo.building.system.util.getVavConnectEquip
 import a75f.io.logic.bo.building.system.vav.VavAdvancedAhu
-import a75f.io.logic.bo.building.system.vav.config.AdvancedHybridAhuConfig
+import a75f.io.logic.bo.building.system.util.AdvancedHybridAhuConfig
 import a75f.io.renatus.R
 import a75f.io.renatus.modbus.util.ALERT
 import a75f.io.renatus.modbus.util.OK
@@ -247,16 +248,22 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
     }
 
     fun updateTestCacheConfig(index: Int, resetCache: Boolean = false) {
-        val profile = when(L.ccu().systemProfile) {
-            is VavAdvancedAhu -> L.ccu().systemProfile as VavAdvancedAhu
-            else -> return
+        when(L.ccu().systemProfile) {
+            is VavAdvancedAhu -> {
+                if (resetCache) {
+                    (L.ccu().systemProfile as VavAdvancedAhu).testConfigs.clear()
+                    return
+                }
+                (L.ccu().systemProfile as VavAdvancedAhu).setTestConfigs(index)
+            }
+            is DabAdvancedAhu -> {
+                if (resetCache) {
+                    (L.ccu().systemProfile as DabAdvancedAhu).testConfigs.clear()
+                    return
+                }
+                (L.ccu().systemProfile as DabAdvancedAhu).setTestConfigs(index)
+            }
         }
-        if (resetCache) {
-            CcuLog.i(Domain.LOG_TAG, "Reset test configs ${profile.testConfigs}")
-            profile.testConfigs.clear()
-            return
-        }
-        profile.setTestConfigs(index)
     }
 
     fun sendConnectRelayTestCommand(relayIndex : Int, testCommand : Boolean) {

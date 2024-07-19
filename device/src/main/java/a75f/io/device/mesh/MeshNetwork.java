@@ -41,13 +41,12 @@ import a75f.io.device.serial.CcuToCmOverUsbSnControlsMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSnSettings2Message_t;
 import a75f.io.device.serial.CcuToCmOverUsbSnSettingsMessage_t;
 import a75f.io.device.serial.MessageType;
-import a75f.io.domain.api.Domain;
-import a75f.io.domain.equips.VavAdvancedHybridSystemEquip;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.system.dab.DabAdvancedAhu;
 import a75f.io.logic.bo.building.system.vav.VavAdvancedAhu;
 import a75f.io.logic.bo.building.system.vav.VavIERtu;
 import a75f.io.logic.bo.util.TemperatureMode;
@@ -319,10 +318,9 @@ public class MeshNetwork extends DeviceNetwork
             }
             
         }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }finally {
+        catch (Exception e) {
+            CcuLog.e(L.TAG_CCU_DEVICE, "Error in sending message", e);
+        } finally {
             LSerial.getInstance().setResetSeedMessage(false);
         }
     }
@@ -357,7 +355,7 @@ public class MeshNetwork extends DeviceNetwork
             return;
         }
 
-        if (ccu().systemProfile instanceof VavAdvancedAhu) {
+        if (ccu().systemProfile instanceof VavAdvancedAhu || ccu().systemProfile instanceof DabAdvancedAhu) {
             ControlMote.CcuToCmSettingsMessage_t cmSettingsMessage = ControlMoteMessageGeneratorKt.getCMSettingsMessage();
             CcuLog.d(L.TAG_CCU_DEVICE, "CM Proto Settings Message: " + cmSettingsMessage);
             ControlMoteMessageSenderKt.sendControlMoteMessage(MessageType.CCU_TO_CM_OVER_USB_CM_SERIAL_SETTINGS, cmSettingsMessage.toByteArray());

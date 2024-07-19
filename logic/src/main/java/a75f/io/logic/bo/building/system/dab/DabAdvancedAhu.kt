@@ -51,13 +51,13 @@ import a75f.io.logic.bo.building.system.util.roundOff
 import a75f.io.logic.tuners.TunerUtil
 import android.annotation.SuppressLint
 import android.content.Intent
+import java.util.BitSet
 
 /**
  * Created by Manjunath K on 19-05-2024.
  */
 
 class DabAdvancedAhu : DabSystemProfile() {
-
 
     private var heatingStages = 0
     private var coolingStages = 0
@@ -79,7 +79,6 @@ class DabAdvancedAhu : DabSystemProfile() {
     private val satHeatingPILoop = ControlLoop()
     private val staticPressureFanPILoop = ControlLoop()
 
-    //TODO - revisit.
     private val coolIndexRange = 0..4
     private val heatIndexRange = 5..9
     private val fanIndexRange = 10..14
@@ -93,6 +92,7 @@ class DabAdvancedAhu : DabSystemProfile() {
     private var satStageUpTimer = 0.0
     private var satStageDownTimer = 0.0
 
+    val testConfigs = BitSet()
 
     override fun getProfileName(): String = "DAB Advanced Hybrid AHU v2"
 
@@ -132,17 +132,22 @@ class DabAdvancedAhu : DabSystemProfile() {
         deleteSystemConnectModule()
     }
 
-
-    override fun isCoolingActive(): Boolean = (systemCoolingLoopOp > 0 || systemSatCoolingLoopOp > 0)
-    override fun isHeatingActive(): Boolean = (systemHeatingLoopOp > 0 || systemSatHeatingLoopOp > 0)
-
     override fun isCoolingAvailable(): Boolean {
-        return coolingStages > 0 || analogControlsEnabled.contains(AdvancedAhuAnalogOutAssociationType.SAT_COOLING) || analogControlsEnabled.contains(AdvancedAhuAnalogOutAssociationType.LOAD_COOLING) || analogControlsEnabled.contains(AdvancedAhuAnalogOutAssociationType.COMPOSITE_SIGNAL)
+        return coolingStages > 0 || analogControlsEnabled.contains(AdvancedAhuAnalogOutAssociationType.SAT_COOLING)
+                || analogControlsEnabled.contains(AdvancedAhuAnalogOutAssociationType.LOAD_COOLING)
+                || analogControlsEnabled.contains(AdvancedAhuAnalogOutAssociationType.COMPOSITE_SIGNAL)
     }
 
     override fun isHeatingAvailable(): Boolean {
-        return heatingStages > 0 || analogControlsEnabled.contains(AdvancedAhuAnalogOutAssociationType.SAT_HEATING) || analogControlsEnabled.contains(AdvancedAhuAnalogOutAssociationType.LOAD_HEATING) || analogControlsEnabled.contains(AdvancedAhuAnalogOutAssociationType.COMPOSITE_SIGNAL)
+        return heatingStages > 0 || analogControlsEnabled.contains(AdvancedAhuAnalogOutAssociationType.SAT_HEATING)
+                || analogControlsEnabled.contains(AdvancedAhuAnalogOutAssociationType.LOAD_HEATING)
+                || analogControlsEnabled.contains(AdvancedAhuAnalogOutAssociationType.COMPOSITE_SIGNAL)
     }
+
+    override fun isCoolingActive(): Boolean = (systemCoolingLoopOp > 0 || systemSatCoolingLoopOp > 0)
+
+    override fun isHeatingActive(): Boolean = (systemHeatingLoopOp > 0 || systemSatHeatingLoopOp > 0)
+
 
     override fun doSystemControl() {
         DabSystemController.getInstance().runDabSystemControlAlgo()
@@ -181,13 +186,14 @@ class DabAdvancedAhu : DabSystemProfile() {
         conditioningMode = SystemMode.values()[systemEquip.conditioningMode.readPriorityVal().toInt()]
         ahuSettings = getAhuSettings()
         ahuTuners = getAhuTuners()
+
         updateStagesSelected()
         updateOutsideWeatherParams()
         updateMechanicalConditioning(CCUHsApi.getInstance())
         updateDerivedSensorPoints()
 
-        cmStageStatus = Array(34) { Pair(0, 0) }
-        connectStageStatus = Array(17) { Pair(0, 0) }
+        cmStageStatus = Array(35) { Pair(0, 0) }
+        connectStageStatus = Array(20) { Pair(0, 0) }
 
         updateStageTimers()
         systemCoolingLoopOp = getSystemCoolingLoop()
@@ -211,13 +217,13 @@ class DabAdvancedAhu : DabSystemProfile() {
             systemFanLoopOp = getSystemLoopOutputValue(Tags.FAN)
         }
 
-
         systemSatCoolingLoopOp = getSystemSatCoolingLoop().coerceIn(0.0, 100.0)
         systemSatHeatingLoopOp = getSystemSatHeatingLoop().coerceIn(0.0, 100.0)
         staticPressureFanLoopOp = getSystemStaticPressureFanLoop().coerceIn(0.0, 100.0)
         systemCo2LoopOp = if (isSystemOccupiedForDcv) getCo2Loop() else 0.0
 
-        if (advancedAhuImpl.isEmergencyShutOffEnabledAndActive(ahuSettings.systemEquip, ahuSettings.connectEquip1) || conditioningMode == SystemMode.OFF) {
+        if (advancedAhuImpl.isEmergencyShutOffEnabledAndActive(ahuSettings.systemEquip, ahuSettings.connectEquip1)
+                || conditioningMode == SystemMode.OFF) {
             resetSystem()
         } else {
             updateLoopOpPoints()
@@ -241,12 +247,23 @@ class DabAdvancedAhu : DabSystemProfile() {
         }
     }
 
-    private fun getAhuSettings(): AhuSettings {
-        return AhuSettings(systemEquip = systemEquip.cmEquip, connectEquip1 = systemEquip.connectEquip1, conditioningMode = conditioningMode, isMechanicalCoolingAvailable = !(systemEquip.mechanicalCoolingAvailable.readHisVal() > 0), isMechanicalHeatingAvailable = !(systemEquip.mechanicalHeatingAvailable.readHisVal() > 0), isEmergencyShutoffActive = isEmergencyShutoffActive())
+    private fun getAhuTuners(): AhuTuners {
+        return AhuTuners(
+                relayAActivationHysteresis = systemEquip.dabRelayDeactivationHysteresis.readDefaultVal(),
+                relayDeactivationHysteresis = systemEquip.dabRelayDeactivationHysteresis.readDefaultVal(),
+                humidityHysteresis = systemEquip.dabHumidityHysteresis.readDefaultVal()
+        )
     }
 
-    private fun getAhuTuners(): AhuTuners {
-        return AhuTuners(relayAActivationHysteresis = systemEquip.dabRelayDeactivationHysteresis.readDefaultVal(), relayDeactivationHysteresis = systemEquip.dabRelayDeactivationHysteresis.readDefaultVal(), humidityHysteresis = systemEquip.dabHumidityHysteresis.readDefaultVal())
+    private fun getAhuSettings(): AhuSettings {
+        return AhuSettings(
+                systemEquip = systemEquip.cmEquip,
+                connectEquip1 = systemEquip.connectEquip1,
+                conditioningMode = conditioningMode,
+                isMechanicalCoolingAvailable = !(systemEquip.mechanicalCoolingAvailable.readHisVal() > 0),
+                isMechanicalHeatingAvailable = !(systemEquip.mechanicalHeatingAvailable.readHisVal() > 0),
+                isEmergencyShutoffActive = isEmergencyShutoffActive()
+        )
     }
 
     private fun updateLoopOpPoints() {
@@ -285,10 +302,13 @@ class DabAdvancedAhu : DabSystemProfile() {
     }
 
     private fun dumpLoops() {
-        CcuLog.d(L.TAG_CCU_SYSTEM, "systemCoolingLoopOp: $systemCoolingLoopOp systemHeatingLoopOp: $systemHeatingLoopOp systemFanLoopOp: $systemFanLoopOp systemCo2LoopOp: $systemCo2LoopOp systemSatCoolingLoopOp: $systemSatCoolingLoopOp systemSatHeatingLoopOp: $systemSatHeatingLoopOp staticPressureFanLoopOp: $staticPressureFanLoopOp")
-        satHeatingPILoop.dumpWithTag(L.TAG_CCU_SYSTEM + ":satHeatingPILoop")
-        satCoolingPILoop.dumpWithTag(L.TAG_CCU_SYSTEM + ":satCoolingPILoop")
-        staticPressureFanPILoop.dumpWithTag(L.TAG_CCU_SYSTEM + ":staticPressureFanPILoop")
+        CcuLog.d(L.TAG_CCU_SYSTEM, "systemCoolingLoopOp: $systemCoolingLoopOp " +
+                "systemHeatingLoopOp: $systemHeatingLoopOp systemFanLoopOp: $systemFanLoopOp systemCo2LoopOp: " +
+                "$systemCo2LoopOp systemSatCoolingLoopOp: $systemSatCoolingLoopOp systemSatHeatingLoopOp: " +
+                "$systemSatHeatingLoopOp staticPressureFanLoopOp: $staticPressureFanLoopOp")
+        satHeatingPILoop.dumpWithTag(L.TAG_CCU_SYSTEM+":satHeatingPILoop")
+        satCoolingPILoop.dumpWithTag(L.TAG_CCU_SYSTEM+":satCoolingPILoop")
+        staticPressureFanPILoop.dumpWithTag(L.TAG_CCU_SYSTEM+":staticPressureFanPILoop")
         logOutputs()
     }
 
@@ -638,7 +658,7 @@ class DabAdvancedAhu : DabSystemProfile() {
         associationMap.forEach { (relay: Point, association: Point) ->
             if (relay.readDefaultVal() > 0) {
                 try {
-                    val (logicalPoint, relayOutput) = advancedAhuImpl.getAdvancedAhuRelayState(association, coolingStages, heatingStages, fanStages, isSystemOccupied, isConnectEquip, ahuSettings, ahuTuners)
+                    val (logicalPoint, relayOutput) = advancedAhuImpl.getAdvancedAhuRelayState(association, coolingStages, heatingStages, fanStages, isSystemOccupied, isConnectEquip, ahuSettings, ahuTuners, isAllowToActiveStage1Fan())
                     CcuLog.d(L.TAG_CCU_SYSTEM, "New relayOutput " + relay.domainName + " " + association.domainName + " " + logicalPoint.domainName + " " + relayOutput)
                     val stageIndex = association.readDefaultVal().toInt()
                     if (isConnectEquip) {
@@ -948,7 +968,18 @@ class DabAdvancedAhu : DabSystemProfile() {
         return userIntentConfig
     }
 
-    private fun isEmergencyShutoffActive(): Boolean {
+    fun isEmergencyShutoffActive() : Boolean {
         return advancedAhuImpl.isEmergencyShutOffEnabledAndActive(systemEquip.cmEquip, systemEquip.connectEquip1)
+    }
+
+    fun getOccupancy(): Int = if (isSystemOccupied) 1 else 0
+
+    fun setTestConfigs(port: Int) {
+        testConfigs.set(port,true) // 0 - 7 Relays and 8 - 11 Analog
+        CcuLog.d(L.TAG_CCU_SYSTEM, "Test Configs set for port $port cache $testConfigs")
+    }
+
+    private fun isAllowToActiveStage1Fan(): Boolean {
+        return (systemCoolingLoopOp > 0 || systemSatCoolingLoopOp > 0 || systemFanLoopOp > 0 || systemHeatingLoopOp > 0 || systemSatHeatingLoopOp > 0 || staticPressureFanLoopOp > 0)
     }
 }

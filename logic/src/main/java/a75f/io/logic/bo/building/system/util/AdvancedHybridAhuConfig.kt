@@ -1,4 +1,4 @@
-package a75f.io.logic.bo.building.system.vav.config
+package a75f.io.logic.bo.building.system.util
 
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.Point
@@ -6,8 +6,6 @@ import a75f.io.domain.config.ValueConfig
 import a75f.io.domain.equips.AdvancedHybridSystemEquip
 import a75f.io.domain.equips.ConnectModuleEquip
 import a75f.io.logic.L
-import a75f.io.logic.bo.building.system.util.getConnectModuleDomain
-import a75f.io.logic.bo.building.system.util.getSystemDomain
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import io.seventyfivef.ph.core.Tags
 

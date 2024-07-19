@@ -1,9 +1,14 @@
 package a75f.io.renatus.profiles.system.advancedahu.dab
 
+import a75f.io.api.haystack.CCUHsApi
+import a75f.io.domain.api.Domain
+import a75f.io.logger.CcuLog
 import a75f.io.logic.bo.building.system.dab.config.DabAdvancedHybridAhuConfig
 import a75f.io.renatus.composables.DeleteDialog
 import a75f.io.renatus.composables.SaveConfig
 import a75f.io.renatus.profiles.system.advancedahu.AdvancedHybridAhuFragment
+import a75f.io.renatus.util.AddProgressGif
+import a75f.io.renatus.util.highPriorityDispatcher
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -11,8 +16,12 @@ import android.view.ViewGroup
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 
 /**
  * Created by Manjunath K on 19-05-2024.
@@ -21,7 +30,12 @@ import androidx.fragment.app.viewModels
 class DabAdvancedHybridAhuFragment : AdvancedHybridAhuFragment() {
     override val viewModel: DabAdvancedHybridAhuViewModel by viewModels()
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+    override fun onCreateView(
+            inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
+    ): View {
+        viewLifecycleOwner.lifecycleScope.launch (highPriorityDispatcher) {
+            viewModel.init(requireContext(), CCUHsApi.getInstance())
+        }
 
         val rootView = ComposeView(requireContext())
         rootView.apply {
@@ -32,6 +46,13 @@ class DabAdvancedHybridAhuFragment : AdvancedHybridAhuFragment() {
 
     @Composable
     fun RootView() {
+        val modelLoaded by viewModel.modelLoaded.observeAsState(initial = false)
+        if (!modelLoaded) {
+            AddProgressGif()
+            CcuLog.i(Domain.LOG_TAG, "Show Progress")
+            return
+
+        }
         Column {
             if (viewModel.viewState.value.pendingDeleteConnect) {
                 DeleteDialog(onDismissRequest = { viewModel.viewState.value.pendingDeleteConnect = false }, onConfirmation = {

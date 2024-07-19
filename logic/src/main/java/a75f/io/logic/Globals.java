@@ -57,6 +57,7 @@ import a75f.io.logic.bo.building.sscpu.ConventionalUnitProfile;
 import a75f.io.logic.bo.building.sse.SingleStageProfile;
 import a75f.io.logic.bo.building.sshpu.HeatPumpUnitProfile;
 import a75f.io.logic.bo.building.system.DefaultSystem;
+import a75f.io.logic.bo.building.system.dab.DabAdvancedAhu;
 import a75f.io.logic.bo.building.system.dab.DabAdvancedHybridRtu;
 import a75f.io.logic.bo.building.system.dab.DabExternalAhu;
 import a75f.io.logic.bo.building.system.dab.DabFullyModulatingRtu;
@@ -386,7 +387,10 @@ public class Globals {
                 L.ccu().systemProfile = new VavStagedRtuWithVfd();
             } else if (eq.getProfile().equals("vavAdvancedHybridAhuV2")) {
                 L.ccu().systemProfile = new VavAdvancedAhu();
-            } else if (eq.getProfile().equals("vavFullyModulatingAhu")) {
+            } else if (eq.getProfile().equals("dabAdvancedHybridAhuV2")) {
+                L.ccu().systemProfile = new DabAdvancedAhu();
+            }
+            else if (eq.getProfile().equals("vavFullyModulatingAhu")) {
                 L.ccu().systemProfile = new VavFullyModulatingRtu();
             } else {
 

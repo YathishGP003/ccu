@@ -78,7 +78,6 @@ open class VavAdvancedAhu : VavSystemProfile() {
     private val satHeatingPILoop = ControlLoop()
     private val staticPressureFanPILoop = ControlLoop()
 
-    //TODO - revisit.
     private val coolIndexRange = 0..4
     private val heatIndexRange = 5..9
     private val fanIndexRange = 10..14
@@ -89,22 +88,19 @@ open class VavAdvancedAhu : VavSystemProfile() {
 
     private var stageUpTimer = 0.0
     private var stageDownTimer = 0.0
-
     private var satStageUpTimer = 0.0
     private var satStageDownTimer = 0.0
+
     val testConfigs = BitSet()
 
     private fun initTRSystem() {
         trSystem = VavTRSystem()
     }
 
-    override fun getProfileName(): String? {
-        return "VAV Advanced Hybrid AHU v2"
-    }
+    override fun getProfileName(): String = "VAV Advanced Hybrid AHU v2"
 
-    override fun getProfileType(): ProfileType? {
-        return ProfileType.SYSTEM_VAV_ADVANCED_AHU
-    }
+    override fun getProfileType(): ProfileType = ProfileType.SYSTEM_VAV_ADVANCED_AHU
+
     override fun addSystemEquip() {
         systemEquip = Domain.systemEquip as VavAdvancedHybridSystemEquip
         advancedAhuImpl = AdvancedAhuAlgoHandler(systemEquip)
@@ -173,6 +169,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
     override fun getStaticPressure(): Double {
         return (trSystem as VavTRSystem).currentSp
     }
+
     override fun doSystemControl() {
         if (trSystem != null) {
             trSystem.processResetResponse()
@@ -247,6 +244,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
         systemSatHeatingLoopOp = getSystemSatHeatingLoop().coerceIn(0.0, 100.0)
         staticPressureFanLoopOp = getSystemStaticPressureFanLoop().coerceIn(0.0, 100.0)
         systemCo2LoopOp = if (isSystemOccupiedForDcv) getCo2Loop() else 0.0
+
         ahuSettings = getAhuSettings()
         if (advancedAhuImpl.isEmergencyShutOffEnabledAndActive(ahuSettings.systemEquip, ahuSettings.connectEquip1)
                 || conditioningMode == SystemMode.OFF) {
@@ -735,7 +733,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
                 try {
                     val (logicalPoint, relayOutput) = advancedAhuImpl.getAdvancedAhuRelayState(
                         association, coolingStages, heatingStages, fanStages,
-                        isSystemOccupied, isConnectEquip, ahuSettings, ahuTuners
+                        isSystemOccupied, isConnectEquip, ahuSettings, ahuTuners, isAllowToActiveStage1Fan()
                     )
                     CcuLog.d(
                         L.TAG_CCU_SYSTEM,
@@ -764,7 +762,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
     private fun updateAnalogOutputPorts(associationMap: Map<Point, Point>, physicalMap: Map<Point, PhysicalPoint>?, isConnectEquip: Boolean) {
         associationMap.forEach { (analogOut: Point, association: Point) ->
             if (analogOut.readDefaultVal() > 0) {
-                val domainEquip = if (isConnectEquip) systemEquip.connectEquip1 else systemEquip
+                val domainEquip = if (isConnectEquip) systemEquip.connectEquip1 else systemEquip.cmEquip
                 val (physicalValue,logicalValue) = advancedAhuImpl.getAnalogLogicalPhysicalValue(
                         analogOut, association, ahuSettings, domainEquip
                 )
@@ -1070,18 +1068,20 @@ open class VavAdvancedAhu : VavSystemProfile() {
     }
 
     fun isEmergencyShutoffActive() : Boolean {
-        return advancedAhuImpl.isEmergencyShutOffEnabledAndActive(ahuSettings.systemEquip, ahuSettings.connectEquip1)
+        return advancedAhuImpl.isEmergencyShutOffEnabledAndActive(systemEquip.cmEquip, systemEquip.connectEquip1)
     }
 
-    fun isConnectModuleAvailable(): Boolean = isConnectModuleAvailable()
-
-    fun getOccupancy(): Int {
-        return if(isSystemOccupied) 1 else 0
-    }
+    fun getOccupancy(): Int = if (isSystemOccupied) 1 else 0
 
     fun setTestConfigs(port: Int) {
         testConfigs.set(port,true) // 0 - 7 Relays and 8 - 11 Analog
         CcuLog.d(L.TAG_CCU_SYSTEM, "Test Configs set for port $port cache $testConfigs")
     }
+
+    private fun isAllowToActiveStage1Fan(): Boolean {
+        return (systemCoolingLoopOp > 0 || systemSatCoolingLoopOp > 0 || systemFanLoopOp > 0
+                || systemHeatingLoopOp > 0 || systemSatHeatingLoopOp > 0 || staticPressureFanLoopOp > 0)
+    }
+
 
 }

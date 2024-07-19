@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -492,8 +491,8 @@ public class SystemConfigFragment extends Fragment {
     }
 
     private boolean isModbusEMRPaired(){
-        return CCUHsApi.getInstance().readAllEntities("equip and modbus and emr" +
-                " and (roomRef ==\"SYSTEM\" or roomRef ==\"@SYSTEM\")").size() > 0;
+        return !CCUHsApi.getInstance().readAllEntities("equip and modbus and emr" +
+                " and (roomRef ==\"SYSTEM\" or roomRef ==\"@SYSTEM\")").isEmpty();
     }
 
     private short getModbusEMRAddress() {
@@ -503,8 +502,8 @@ public class SystemConfigFragment extends Fragment {
     }
 
     private boolean isModbusBTUPaired(){
-        return CCUHsApi.getInstance().readAllEntities("equip and modbus and btu" +
-                " and (roomRef ==\"SYSTEM\" or roomRef ==\"@SYSTEM\")").size() > 0;
+        return !CCUHsApi.getInstance().readAllEntities("equip and modbus and btu" +
+                " and (roomRef ==\"SYSTEM\" or roomRef ==\"@SYSTEM\")").isEmpty();
     }
 
     private short getModbusBTUAddress() {

@@ -11,6 +11,7 @@ import a75f.io.domain.util.ModelNames
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.system.SystemMode
 import a75f.io.logic.bo.building.system.dab.DabAdvancedAhu
+import a75f.io.logic.bo.building.system.vav.VavAdvancedAhu
 import android.annotation.SuppressLint
 import io.seventyfivef.ph.core.Tags
 
@@ -91,19 +92,19 @@ fun getConnectEquip(): ConnectModuleEquip {
     }
 }
 
-fun getConnectModuleDomain(): String {
-    return if (L.ccu().systemProfile is DabAdvancedAhu) {
-        ModelNames.dabAdvancedHybridAhuV2_connectModule
-    } else {
-        ModelNames.vavAdvancedHybridAhuV2_connectModule
+fun getConnectModuleDomain(): String? {
+    return when(L.ccu().systemProfile) {
+        is VavAdvancedAhu -> ModelNames.vavAdvancedHybridAhuV2_connectModule
+        is DabAdvancedAhu -> ModelNames.dabAdvancedHybridAhuV2_connectModule
+        else -> { null }
     }
 }
 
-fun getSystemDomain(): String {
-    return if (L.ccu().systemProfile is DabAdvancedAhu) {
-        ModelNames.dabAdvancedHybridAhuV2
-    } else {
-        ModelNames.vavAdvancedHybridAhuV2
+fun getSystemDomain(): String? {
+    return when(L.ccu().systemProfile) {
+        is VavAdvancedAhu -> ModelNames.vavAdvancedHybridAhuV2
+        is DabAdvancedAhu -> ModelNames.dabAdvancedHybridAhuV2
+        else -> { null }
     }
 }
 

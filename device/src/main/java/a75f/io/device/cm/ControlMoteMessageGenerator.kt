@@ -11,8 +11,10 @@ import a75f.io.domain.api.Domain
 import a75f.io.domain.api.toInt
 import a75f.io.domain.equips.DabAdvancedHybridSystemEquip
 import a75f.io.domain.equips.VavAdvancedHybridSystemEquip
+import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.system.AdvancedAhuAnalogOutAssociationType
+import a75f.io.logic.bo.building.system.dab.DabAdvancedAhu
 import a75f.io.logic.bo.building.system.getAnalogOut1MinMax
 import a75f.io.logic.bo.building.system.getAnalogOut2MinMax
 import a75f.io.logic.bo.building.system.getAnalogOut3MinMax
@@ -50,20 +52,36 @@ fun getCMControlsMessage(): ControlMote.CcuToCmOverUsbCmControlMessage_t {
         addPiloopSetPoint(systemEquip.airTempHeatingSp.readHisVal().toInt() * 10)
         addPiloopSetPoint(systemEquip.ductStaticPressureSetpoint.readHisVal().toInt() * 10)
         addPiloopSetPoint(systemEquip.zoneAvgCo2.readHisVal().toInt() * 10)
-        saToperatingMode = SAToperatingMode_e.forNumber(systemEquip.operatingMode.readHisVal().toInt())
-                    ?: SAToperatingMode_e.SAT_OPERATING_MODE_OFF
-        emergencyShutOff = (L.ccu().systemProfile as VavAdvancedAhu)?.isEmergencyShutoffActive()?.toInt() ?: 0 // TODO
-        unoccupiedMode = getOccupancy()
+        fillControl(this)
+        saToperatingMode = SAToperatingMode_e.forNumber(systemEquip.operatingMode.readHisVal().toInt()) ?: SAToperatingMode_e.SAT_OPERATING_MODE_OFF
     }
     return msgBuilder.build()
 }
 
-private fun getOccupancy(): ControlMote.UnoccupiedMode_e {
-    val occupancy = (L.ccu().systemProfile as VavAdvancedAhu)?.getOccupancy()  // TODO
-    return if (occupancy == 0) {
-        ControlMote.UnoccupiedMode_e.UNOCCUPIED_MODE
-    } else {
-        ControlMote.UnoccupiedMode_e.OCCUPIED_MODE
+private fun fillControl(builder: ControlMote.CcuToCmOverUsbCmControlMessage_t.Builder){
+
+    fun getOccupancy(occupancy: Int): ControlMote.UnoccupiedMode_e {
+        return if (occupancy == 0)
+            ControlMote.UnoccupiedMode_e.UNOCCUPIED_MODE
+        else
+            ControlMote.UnoccupiedMode_e.OCCUPIED_MODE
+    }
+
+    when (L.ccu().systemProfile) {
+        is VavAdvancedAhu ->  {
+            builder.apply {
+                val profile = (L.ccu().systemProfile as VavAdvancedAhu)
+                unoccupiedMode = getOccupancy(profile.getOccupancy())
+                emergencyShutOff = profile.isEmergencyShutoffActive().toInt()
+            }
+        }
+        is DabAdvancedAhu -> {
+            builder.apply {
+                val profile = (L.ccu().systemProfile as DabAdvancedAhu)
+                unoccupiedMode = getOccupancy(profile.getOccupancy())
+                emergencyShutOff = profile.isEmergencyShutoffActive().toInt()
+            }
+        }
     }
 }
 
@@ -87,24 +105,25 @@ fun getCMSettingsMessage() : ControlMote.CcuToCmSettingsMessage_t {
     return msgBuilder.build()
 }
 
-
-
 fun addTuners(builder: Builder) {
-    if (Domain.systemEquip is VavAdvancedHybridSystemEquip) {
-        val systemEquip = Domain.systemEquip as VavAdvancedHybridSystemEquip
-        builder.apply {
-            relayActivationHysteresis = systemEquip.vavRelayDeactivationHysteresis.readHisVal().toInt()
-            analogFanSpeedMultiplier = systemEquip.vavAnalogFanSpeedMultiplier.readHisVal().toInt() * 10
-            cmStageUpTimer = systemEquip.vavStageUpTimerCounter.readHisVal().toInt()
-            cmStageDownTimer = systemEquip.vavStageDownTimerCounter.readHisVal().toInt()
+    when (L.ccu().systemProfile) {
+        is VavAdvancedAhu -> {
+            val systemEquip = Domain.systemEquip as VavAdvancedHybridSystemEquip
+            builder.apply {
+                relayActivationHysteresis = systemEquip.vavRelayDeactivationHysteresis.readHisVal().toInt()
+                analogFanSpeedMultiplier = systemEquip.vavAnalogFanSpeedMultiplier.readHisVal().toInt() * 10
+                cmStageUpTimer = systemEquip.vavStageUpTimerCounter.readHisVal().toInt()
+                cmStageDownTimer = systemEquip.vavStageDownTimerCounter.readHisVal().toInt()
+            }
         }
-    } else {
-        val systemEquip = Domain.systemEquip as DabAdvancedHybridSystemEquip
-        builder.apply {
-            relayActivationHysteresis = systemEquip.dabRelayDeactivationHysteresis.readHisVal().toInt()
-            analogFanSpeedMultiplier = systemEquip.dabAnalogFanSpeedMultiplier.readHisVal().toInt() * 10
-            cmStageUpTimer = systemEquip.dabStageUpTimerCounter.readHisVal().toInt()
-            cmStageDownTimer = systemEquip.dabStageDownTimerCounter.readHisVal().toInt()
+        is DabAdvancedAhu -> {
+            val systemEquip = Domain.systemEquip as DabAdvancedHybridSystemEquip
+            builder.apply {
+                relayActivationHysteresis = systemEquip.dabRelayDeactivationHysteresis.readHisVal().toInt()
+                analogFanSpeedMultiplier = systemEquip.dabAnalogFanSpeedMultiplier.readHisVal().toInt() * 10
+                cmStageUpTimer = systemEquip.dabStageUpTimerCounter.readHisVal().toInt()
+                cmStageDownTimer = systemEquip.dabStageDownTimerCounter.readHisVal().toInt()
+            }
         }
     }
 }
@@ -295,23 +314,33 @@ fun addThermistorConfigsToSettingsMessage(builder: Builder) {
 }
 
 fun addPILoopConfiguration(builder: Builder) {
-
-     if (Domain.systemEquip is VavAdvancedHybridSystemEquip) {
-         val systemEquip = Domain.systemEquip as VavAdvancedHybridSystemEquip
-        //TODO - Needed only if SAT/PRESSURE based control needed.
-        builder.apply {
-            val piLoopConfigBuilder = ControlMote.PiLoopConfiguration_t.newBuilder()
-            //piLoopConfigBuilder.piLoopDataType = ControlMote.PiLoopDataType_e.SUPPLY_AIR_TEMPERATURE
-            piLoopConfigBuilder.enable = true
-            piLoopConfigBuilder.proportionalConstant = (systemEquip.vavProportionalKFactor.readPriorityVal() * SERIAL_COMM_SCALE).toInt() * 10
-            piLoopConfigBuilder.integralConstant = (systemEquip.vavIntegralKFactor.readPriorityVal() * SERIAL_COMM_SCALE).toInt() * 10
-            piLoopConfigBuilder.proportionalTemperatureRange = systemEquip.vavTemperatureProportionalRange.readPriorityVal().toInt() * 10
-            piLoopConfigBuilder.integrationTime = systemEquip.vavTemperatureIntegralTime.readPriorityVal().toInt()
-            addPiLoopConfiguration(piLoopConfigBuilder.build())
+    val piLoopConfigBuilder = ControlMote.PiLoopConfiguration_t.newBuilder()
+    when (L.ccu().systemProfile) {
+        is VavAdvancedAhu -> {
+            val systemEquip = Domain.systemEquip as VavAdvancedHybridSystemEquip
+            piLoopConfigBuilder.apply {
+                enable = true
+                proportionalConstant = (systemEquip.vavProportionalKFactor.readPriorityVal() * SERIAL_COMM_SCALE).toInt() * 10
+                integralConstant = (systemEquip.vavIntegralKFactor.readPriorityVal() * SERIAL_COMM_SCALE).toInt() * 10
+                proportionalTemperatureRange = systemEquip.vavTemperatureProportionalRange.readPriorityVal().toInt() * 10
+                integrationTime = systemEquip.vavTemperatureIntegralTime.readPriorityVal().toInt()
+            }
         }
 
+        is DabAdvancedAhu -> {
+            val systemEquip = Domain.systemEquip as DabAdvancedHybridSystemEquip
+            piLoopConfigBuilder.apply {
+                enable = true
+                proportionalConstant = (systemEquip.dabProportionalKFactor.readPriorityVal() * SERIAL_COMM_SCALE).toInt() * 10
+                integralConstant = (systemEquip.dabIntegralKFactor.readPriorityVal() * SERIAL_COMM_SCALE).toInt() * 10
+                proportionalTemperatureRange = systemEquip.dabTemperatureProportionalRange.readPriorityVal().toInt() * 10
+                integrationTime = systemEquip.dabTemperatureIntegralTime.readPriorityVal().toInt()
+            }
+        }
     }
-    // TODO implement for DAB Profile
+    builder.apply {
+        addPiLoopConfiguration(piLoopConfigBuilder.build())
+    }
 }
 
 fun addSensorConfigs(builder: Builder) {
@@ -325,7 +354,6 @@ fun addSensorConfigs(builder: Builder) {
             pressureSensorOp = ControlMote.PressureSensorOperation_e.
                         forNumber(systemEquip.pressureBasedFanControlOn.readDefaultVal().toInt())
         }
-
         if (systemEquip.co2BasedDamperControlOn.pointExists()) {
             damperCo2Control = ControlMote.DamperCo2Control_e.
                         forNumber(systemEquip.co2BasedDamperControlOn.readDefaultVal().toInt())
@@ -397,29 +425,31 @@ fun addTestSignals(builder: Builder) {
 
     var relayBitmap = 0
     var analogBitmap = 0
-    val config = (L.ccu().systemProfile as VavAdvancedAhu)?.testConfigs // TODO
-    for (relayPos in 0..7) {
-        if (config != null) {
+    val config = when(L.ccu().systemProfile) {
+        is VavAdvancedAhu -> (L.ccu().systemProfile as VavAdvancedAhu).testConfigs
+        is DabAdvancedAhu -> (L.ccu().systemProfile as DabAdvancedAhu).testConfigs
+        else -> { null}
+    }
+    if (config != null) {
+        for (relayPos in 0..7) {
             if (config.get(relayPos)) {
-                relayBitmap = relayBitmap or (1 shl MeshUtil.getRelayMapping(relayPos + 1 )) // add 1 to get the correct relay position
+                relayBitmap = relayBitmap or (1 shl MeshUtil.getRelayMapping(relayPos + 1)) // add 1 to get the correct relay position
             }
         }
-    }
-    for (analogPos in 8..11) {
-        if (config != null) {
+        for (analogPos in 8..11) {
             if (config.get(analogPos)) {
                 analogBitmap = analogBitmap or (1 shl (analogPos - 8)) // subtract 8 to get the correct bit position
             }
         }
+    } else {
+        CcuLog.i(L.TAG_CCU_DEVICE,"Advanced ahu Test signal is failed")
     }
-
-    val configs = ControlMote.CmTestSignals_t.newBuilder()
-    configs.apply {
+    builder.setCmTestSignals(ControlMote.CmTestSignals_t.newBuilder().apply {
         relayTestSignalsBitmap = relayBitmap
         analogOutputsTestSignalsBitmap = analogBitmap
-    }
-    builder.setCmTestSignals(configs)
+    })
 }
+
 private fun getTemperatureMapping(mapping: Int): ControlMote.CmSensorBusMappingsTemp_e {
     return when(mapping) {
         1 -> ControlMote.CmSensorBusMappingsTemp_e.SENSOR_BUS_RETURN_AIR_TEMP

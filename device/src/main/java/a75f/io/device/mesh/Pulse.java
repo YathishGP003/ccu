@@ -60,6 +60,7 @@ import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.sensors.Sensor;
 import a75f.io.logic.bo.building.sensors.SensorManager;
 import a75f.io.logic.bo.building.sensors.SensorType;
+import a75f.io.logic.bo.building.system.dab.DabAdvancedAhu;
 import a75f.io.logic.bo.building.system.vav.VavAdvancedAhu;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.bo.haystack.device.SmartStat;
@@ -648,7 +649,8 @@ public class Pulse
 		mDataReceived = true;
 		mTimeSinceCMDead = 0;
 		CCUHsApi hayStack = CCUHsApi.getInstance();
-		if (L.ccu().systemProfile instanceof VavAdvancedAhu) {
+		if (L.ccu().systemProfile instanceof VavAdvancedAhu
+				|| L.ccu().systemProfile instanceof DabAdvancedAhu) {
 			handleAdvancedAhuCmUpdate(hayStack, cmRegularUpdateMessage_t); //TODO- TEMP to be cleaned up
 		}
 		String addr = String.valueOf(L.ccu().getSmartNodeAddressBand());

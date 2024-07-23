@@ -22,7 +22,6 @@ import a75f.io.device.serial.MessageType;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.vrv.VrvControlMessageCache;
-import a75f.io.logic.bo.util.TemperatureMode;
 
 import static a75f.io.device.serial.MessageType.HYPERSTAT_CCU_DATABASE_SEED_MESSAGE;
 import static a75f.io.device.serial.MessageType.HYPERSTAT_CCU_TO_CM_SERIALIZED_MESSAGE;
@@ -39,9 +38,9 @@ public class HyperStatMessageSender {
      * @param equipRef
      */
     public static void sendSeedMessage(String zone, int address, String equipRef,
-                                       boolean checkDuplicate, TemperatureMode mode) {
+                                       boolean checkDuplicate) {
         HyperStatCcuDatabaseSeedMessage_t seedMessage = HyperStatMessageGenerator.getSeedMessage(zone, address,
-                                                                                                 equipRef, mode);
+                                                                                                 equipRef);
         if (DLog.isLoggingEnabled()) {
             CcuLog.i(L.TAG_CCU_SERIAL, "Send Proto Buf Message " + HYPERSTAT_CCU_DATABASE_SEED_MESSAGE);
             CcuLog.i(L.TAG_CCU_SERIAL, seedMessage.getSerializedSettingsData().toString());
@@ -73,9 +72,8 @@ public class HyperStatMessageSender {
      * @param equipRef
      */
     public static void sendSettingsMessage(Zone zone, int address, String equipRef) {
-        int modeType = CCUHsApi.getInstance().readHisValByQuery("zone and hvacMode and roomRef == \"" + zone.getId() + "\"").intValue();
         HyperStatSettingsMessage_t settings = HyperStatMessageGenerator.getSettingsMessage(
-                zone.getDisplayName(), address, equipRef, TemperatureMode.values()[modeType]);
+                zone.getDisplayName(), address, equipRef);
         if (DLog.isLoggingEnabled()) {
             CcuLog.i(L.TAG_CCU_SERIAL, settings.toString());
         }
@@ -111,7 +109,7 @@ public class HyperStatMessageSender {
         int modeType = CCUHsApi.getInstance().readHisValByQuery("zone and hvacMode and roomRef" +
                 " == \"" + equip.getRoomRef() + "\"").intValue();
         HyperStatControlsMessage_t controls = HyperStatMessageGenerator.getControlMessage(address,
-                equipRef, TemperatureMode.values()[modeType]).build();
+                equipRef).build();
         
         if (DLog.isLoggingEnabled()) {
             CcuLog.i(L.TAG_CCU_SERIAL, controls.toString());
@@ -192,8 +190,8 @@ public class HyperStatMessageSender {
         writeMessageBytesToUsb(address, msgType, message.toByteArray());
     }
 
-    public static void sendIduSeedSetting(String zone, int address, String equipRef, boolean checkDuplicate, TemperatureMode temperatureMode){
-        HyperStatCcuDatabaseSeedMessage_t seedMessage = HyperStatIduMessageHandler.getIduSeedMessage(zone, address, equipRef, temperatureMode);
+    public static void sendIduSeedSetting(String zone, int address, String equipRef, boolean checkDuplicate){
+        HyperStatCcuDatabaseSeedMessage_t seedMessage = HyperStatIduMessageHandler.getIduSeedMessage(zone, address, equipRef);
         if (DLog.isLoggingEnabled()) {
             CcuLog.i(L.TAG_CCU_SERIAL, "Send Proto Buf Message " + HYPERSTAT_CCU_DATABASE_SEED_MESSAGE);
             CcuLog.i(L.TAG_CCU_SERIAL, seedMessage.getSerializedSettingsData().toString());

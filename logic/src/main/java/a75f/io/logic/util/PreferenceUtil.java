@@ -49,6 +49,7 @@ public class PreferenceUtil {
     public static final String HS_MONITORING_GENERIC_FAULT_ENUM_MIGRATION = "hsMonitoringGenericFaultEnumMigration";
 
     public static final String LOCALLY_SYNC_SCHEDULE = "locallySyncedSchedules";
+    public static final String TEMP_MODE_MIGRATION = "tempModeMigration";
 
     public static final String MODBUS_ENUM_CORRECTION = "modbusEnumCorrection";
 
@@ -484,6 +485,12 @@ public class PreferenceUtil {
         setBooleanPreference(HS_MONITORING_GENERIC_FAULT_ENUM_MIGRATION, true);
     }
 
+    public static void setTempModeMigrationNotRequired() {
+        setBooleanPreference(TEMP_MODE_MIGRATION, true);
+    }
+    public static boolean isTempModeMigrationRequired() {
+        return getBooleanPreference(TEMP_MODE_MIGRATION);
+    }
     public static boolean isModbusEnumCorrectionRequired() {
         return getBooleanPreference(MODBUS_ENUM_CORRECTION);
     }

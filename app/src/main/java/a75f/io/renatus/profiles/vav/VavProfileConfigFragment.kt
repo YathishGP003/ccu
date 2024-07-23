@@ -219,9 +219,7 @@ class VavProfileConfigFragment : BaseDialogFragment() {
                     Row{
                         when(viewModel.viewState.reheatType){
                             0.0->{
-                                HeaderTextView(text = "Relay 1",padding=0)
-                                Spacer(modifier=Modifier.width(186.dp))
-                                LabelTextView(text = "Staged Electric Heater", widthValue = 250)
+                              // While reheat type is not install it should not show the Relay or Analog out ports in UI
                             }
                             1.0->{
                                 HeaderTextView(text = "Analog Out 2",padding=0)
@@ -244,9 +242,9 @@ class VavProfileConfigFragment : BaseDialogFragment() {
                                 LabelTextView(text = "Modulating Reheat", widthValue = 216)
                             }
                             5.0->{
-                                HeaderTextView(text = "Relay 1",padding=0)
-                                Spacer(modifier=Modifier.width(186.dp))
-                                LabelTextView(text = "Staged Electric Heater", widthValue = 250)
+                                HeaderTextView(text = "Analog Out 2",padding=0)
+                                Spacer(modifier=Modifier.width(147.dp))
+                                LabelTextView(text = "Modulating Reheat", widthValue = 216)
                             }
                             6.0->{
                                 HeaderTextView(text = "Relay 1",padding=0)
@@ -262,14 +260,14 @@ class VavProfileConfigFragment : BaseDialogFragment() {
                     }
                     when(viewModel.viewState.reheatType)
                     {
-                        0.0->Spacer(modifier=Modifier.width(55.dp))
-                        1.0->Spacer(modifier=Modifier.width(60.dp))
-                        2.0->Spacer(modifier=Modifier.width(60.dp))
-                        3.0->Spacer(modifier=Modifier.width(60.dp))
-                        4.0->Spacer(modifier=Modifier.width(60.dp))
-                        5.0->Spacer(modifier=Modifier.width(55.dp))
-                        6.0->Spacer(modifier=Modifier.width(55.dp))
-                        7.0->Spacer(modifier=Modifier.width(55.dp))
+                        0.0->Spacer(modifier=Modifier.width(0.dp))
+                        1.0->Spacer(modifier=Modifier.width(65.dp))
+                        2.0->Spacer(modifier=Modifier.width(65.dp))
+                        3.0->Spacer(modifier=Modifier.width(65.dp))
+                        4.0->Spacer(modifier=Modifier.width(65.dp))
+                        5.0->Spacer(modifier=Modifier.width(65.dp))
+                        6.0->Spacer(modifier=Modifier.width(60.dp))
+                        7.0->Spacer(modifier=Modifier.width(60.dp))
                     }
                     Row{
                         when (viewModel.profileType){

@@ -11,9 +11,9 @@ import a75f.io.renatus.compose.StyledTextView
 import a75f.io.renatus.compose.ToggleButtonStateful
 import a75f.io.renatus.compose.formatText
 import a75f.io.renatus.modbus.util.CANCEL
-import a75f.io.renatus.modbus.util.SET
-import a75f.io.renatus.profiles.system.advancedahu.AdvancedHybridAhuViewModel
+import a75f.io.renatus.modbus.util.SAVE
 import a75f.io.renatus.profiles.system.advancedahu.Option
+import a75f.io.renatus.profiles.system.advancedahu.vav.VavAdvancedHybridAhuViewModel
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -39,8 +40,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 /**
  * Created by Manjunath K on 27-03-2024.
@@ -51,7 +54,7 @@ fun EnableCompose(
     sensorAddress: String, default: Boolean, hide: Boolean = false, onEnabled: (Boolean) -> Unit = {}
 ) {
     Row(modifier = Modifier.width(375.dp)) {
-        Box(modifier = Modifier.weight(3f).align(Alignment.CenterVertically)) {
+        Box(modifier = Modifier.weight(3f).align(Alignment.CenterVertically).padding(start = 15.dp)) {
             StyledTextView(
                 sensorAddress, fontSize = 20
             )
@@ -77,7 +80,7 @@ fun EnableCompose(
 @Composable
 fun ConfigCompose(
     name: String,
-    defaultSelection: String,
+    defaultSelection: Option,
     items: List<Option>,
     unit: String,
     isEnabled: Boolean,
@@ -88,11 +91,11 @@ fun ConfigCompose(
             .wrapContentWidth()
             .padding(10.dp)
     ) {
-        Box(modifier = Modifier.weight(1.3f)) {
+        Box(modifier = Modifier.weight(1.5f).padding(start = 3.dp)) {
             StyledTextView(name, fontSize = 20)
         }
         Box(modifier = Modifier
-            .weight(3f)
+            .weight(4f)
             .padding(end = 20.dp)) {
             SearchSpinnerElement(
                 default = defaultSelection,
@@ -122,8 +125,8 @@ fun HumidityCompose(
             StyledTextView(name, fontSize = 20)
         }
         Box(modifier = Modifier
-            .weight(3.5f)
-            .padding(end = 20.dp)) {
+            .weight(4f)
+            .padding(end = 20.dp, start = 5.dp)) {
             StyledTextView(formatText(defaultSelection), fontSize = 20)
         }
         Box(modifier = Modifier.weight(0.5f))
@@ -135,7 +138,7 @@ fun AOTHConfig(
     name: String,
     default: Boolean,
     onEnabled: (Boolean) -> Unit = {},
-    spinnerDefault: String,
+    spinnerDefault: Option,
     items: List<Option>,
     unit: String = "",
     isEnabled: Boolean,
@@ -149,16 +152,16 @@ fun AOTHConfig(
         Box(modifier = Modifier.wrapContentWidth()) {
             ToggleButtonStateful(defaultSelection = default) { onEnabled(it) }
         }
-        Box(modifier = Modifier.weight(1.3f).padding(start = 5.dp, top = 5.dp)) {
+        Box(modifier = Modifier.weight(1.5f).padding(start = 10.dp, top = 10.dp)) {
             StyledTextView(name, fontSize = 20)
         }
-        Box(modifier = Modifier.weight(4f)) {
+        Box(modifier = Modifier.weight(4f).padding(top = 5.dp)) {
             SearchSpinnerElement(
                 default = spinnerDefault,
                 allItems = items,
                 unit = unit,
                 onSelect = { onSelect(it) },
-                width = 450,
+                width = 400,
                 isEnabled = isEnabled
             )
         }
@@ -172,7 +175,7 @@ fun RelayConfiguration(
     relayName: String,
     enabled: Boolean,
     onEnabledChanged: (Boolean) -> Unit,
-    association: String,
+    association: Option,
     relayEnums: List<Option>,
     unit: String,
     isEnabled: Boolean,
@@ -188,16 +191,16 @@ fun RelayConfiguration(
         Box(modifier = Modifier.wrapContentWidth()) {
             ToggleButtonStateful(defaultSelection = enabled) { onEnabledChanged(it) }
         }
-        Box(modifier = Modifier.weight(1.2f).padding(start = 5.dp, top = 5.dp)) {
+        Box(modifier = Modifier.weight(1.5f).padding(start = 10.dp, top = 10.dp)) {
             StyledTextView(relayName, fontSize = 20)
         }
-        Box(modifier = Modifier.weight(4f)) {
+        Box(modifier = Modifier.weight(4f).padding(top = 5.dp)) {
             SearchSpinnerElement(
                 default = association,
                 allItems = relayEnums,
                 unit = unit,
                 onSelect = { onAssociationChanged(it) },
-                width = 450,
+                width = 400,
                 isEnabled = isEnabled
             )
         }
@@ -217,23 +220,32 @@ fun RelayConfiguration(
                     }
                     onTestActivated(buttonState)
                 },
-                shape = RoundedCornerShape(10.dp),
+                shape = RoundedCornerShape(5.dp),
                 colors = ButtonDefaults.buttonColors(
                     contentColor = when (buttonState) {
                         true -> ComposeUtil.primaryColor
-                        false -> Color.Black
+                        false -> ComposeUtil.greyColor
                     }, containerColor = Color.Transparent
                 ),
                 border = BorderStroke(1.dp, color = when (buttonState) {
                     true -> ComposeUtil.primaryColor
-                    false -> Color.Black
+                    false -> ComposeUtil.greyColor
                 }),
+                    modifier = Modifier
+                            .width(72.dp)
+                            .height(44.dp),
+                    contentPadding = PaddingValues(0.dp),
             ) {
                 Text(
                     text = when (buttonState) {
                         true -> "ON"
                         false -> "OFF"
-                    }
+                    },
+                        fontSize = 20.sp,
+                        fontFamily = ComposeUtil.myFontFamily,
+                        fontWeight = FontWeight.Normal,
+                        textAlign = TextAlign.Left,
+                        modifier = Modifier.wrapContentSize(Alignment.Center)
                 )
             }
         }
@@ -246,13 +258,13 @@ fun AnalogOutConfig(
     analogOutName: String,
     enabled: Boolean,
     onEnabledChanged: (Boolean) -> Unit = {},
-    association: String,
+    association: Option,
     analogOutEnums: List<Option>,
     testSingles: List<Option>,
     unit: String = "",
     isEnabled: Boolean,
     onAssociationChanged: (Option) -> Unit = {},
-    testVal: Int,
+    testVal: Double,
     onTestSignalSelected: (Double) -> Unit = {}
 ) {
     Row(
@@ -265,43 +277,43 @@ fun AnalogOutConfig(
             ToggleButtonStateful(defaultSelection = enabled) { onEnabledChanged(it) }
         }
         Box(modifier = Modifier
-            .weight(1.2f)
-            .padding(start = 5.dp, top = 5.dp)) {
+            .weight(1.5f)
+            .padding(start = 10.dp, top = 10.dp)) {
             StyledTextView(analogOutName, fontSize = 20)
         }
         Box(modifier = Modifier
             .weight(4f)
-            .padding(end = 5.dp)) {
+            .padding(end = 5.dp,top = 5.dp)) {
             SearchSpinnerElement(
                 default = association,
                 allItems = analogOutEnums,
                 unit = unit,
                 onSelect = { onAssociationChanged(it) },
-                width = 450,
+                width = 400,
                 isEnabled = isEnabled
             )
         }
         Box(
             modifier = Modifier
-                .weight(1f)
+                .weight(1f).padding(start = 5.dp)
         ) {
             SpinnerElementOption(
                 defaultSelection = testVal.toString(),
                 items = testSingles,
                 unit = unit,
                 itemSelected = {onTestSignalSelected(it.value.toDouble()) },
-                previewWidth = 80
+                previewWidth = 60
             )
         }
     }
 }
 
 @Composable
-fun SaveConfig(viewModel: AdvancedHybridAhuViewModel) {
+fun SaveConfig(viewModel: VavAdvancedHybridAhuViewModel) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(PaddingValues(top = 20.dp)),
+            .padding(PaddingValues(top = 20.dp, bottom = 40.dp)),
         horizontalArrangement = Arrangement.End,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -309,8 +321,11 @@ fun SaveConfig(viewModel: AdvancedHybridAhuViewModel) {
             modifier = Modifier
                 .wrapContentWidth()
                 .padding(PaddingValues(bottom = 10.dp, end = 5.dp)),
-            contentAlignment = Alignment.Center
-        ) { SaveTextView(CANCEL) { } }
+            contentAlignment = Alignment.Center,
+        ) { SaveTextView(CANCEL, isChanged = viewModel.viewState.value.isStateChanged) {
+            viewModel.viewState.value.isStateChanged = false
+            viewModel.reset()
+        } }
         Divider(
             modifier = Modifier
                 .height(25.dp)
@@ -324,7 +339,7 @@ fun SaveConfig(viewModel: AdvancedHybridAhuViewModel) {
                 .padding(PaddingValues(bottom = 10.dp, end = 10.dp)),
             contentAlignment = Alignment.Center
         ) {
-            SaveTextView(SET) {
+            SaveTextView(SAVE, isChanged = viewModel.viewState.value.isSaveRequired) {
                 CcuLog.i(
                     L.TAG_CCU_SYSTEM, viewModel.viewState.toString()
                 )
@@ -356,7 +371,7 @@ fun MinMaxConfiguration(
                 minLabel, fontSize = 20, textAlignment = TextAlign.Left
             )
         }
-        Box(modifier = Modifier.weight(1f)) {
+        Box(modifier = Modifier.weight(1f).padding(top = 5.dp)) {
             SpinnerElementOption(defaultSelection = minDefault,
                 items = itemList,
                 unit = unit,

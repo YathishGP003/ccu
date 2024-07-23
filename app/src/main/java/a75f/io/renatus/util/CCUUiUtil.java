@@ -29,6 +29,8 @@ import java.util.regex.Pattern;
 
 import a75f.io.alerts.AlertManager;
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.logger.CcuLog;
+import a75f.io.logic.L;
 import a75f.io.renatus.BuildConfig;
 import a75f.io.renatus.R;
 import a75f.io.renatus.RenatusApp;
@@ -46,12 +48,10 @@ public class CCUUiUtil {
     public static int getListSelectorBackground(Context context){
         return  context.getResources().getIdentifier("@drawable/ic_listselector", "drawable", context.getPackageName());
     }
-    public static int getDayselectionBackgroud(Context context){
+    public static int getDaySelectionBackground(Context context){
         return  context.getResources().getIdentifier("@drawable/bg_weekdays_selector", "drawable", context.getPackageName());
     }
-    public static int getDrawableResouce(Context context, String name){
-        return  context.getResources().getIdentifier("@drawable/"+name, "drawable", context.getPackageName());
-    }
+
     public static void setThemeDetails(Activity activity){
         if(CCUUiUtil.isDaikinEnvironment(activity)){
             activity.setTheme(R.style.RenatusAppDaikinTheme);
@@ -144,18 +144,14 @@ public class CCUUiUtil {
         return BuildConfig.BUILD_TYPE.equals(context.getString(R.string.Daikin_Environment))||CCUUiUtil.isDaikinThemeEnabled(context);
     }
 
-    public static boolean is75FEnvironment(Context context){
-        return !BuildConfig.BUILD_TYPE.equals(context.getString(R.string.Daikin_Environment)) && !BuildConfig.BUILD_TYPE.equals(context.getString(R.string.Carrier_Environment));
-    }
-
     public static boolean isInvalidName(String enteredName){
         return enteredName.contains(".") || enteredName.contains("\\")
                || enteredName.contains("&") || enteredName.contains("#");
     }
 
     public static boolean isValidOrgName(String orgName){
-        Pattern specialCharaters = Pattern.compile("[^a-z0-9_ -]", Pattern.CASE_INSENSITIVE);
-        Matcher matcher = specialCharaters.matcher(orgName);
+        Pattern specialCharacters = Pattern.compile("[^a-z0-9_ -]", Pattern.CASE_INSENSITIVE);
+        Matcher matcher = specialCharacters.matcher(orgName);
         if(orgName.startsWith("_") || orgName.startsWith("-") || orgName.startsWith(" ") )
             return false;
         return !matcher.find();
@@ -179,7 +175,7 @@ public class CCUUiUtil {
     }
 
     public static boolean isAlphaNumeric(String str) {
-        if (str == null || str.length() == 0) {
+        if (str == null || str.isEmpty()) {
             return true;
         }
         for (int i = 0; i < str.length(); i++) {
@@ -191,6 +187,11 @@ public class CCUUiUtil {
     }
 
     public static boolean isCCUNeedsToBeUpdated(String currentAppVersionWithPatch, String recommendedVersionOfCCUWithPatch) {
+        if (recommendedVersionOfCCUWithPatch == null) {
+            CcuLog.w(L.TAG_CCU, "Recommended version is null, returning false (no update)");
+            return false;
+        }
+
         String[] currentVersionComponents = currentAppVersionWithPatch.split("\\.");
         String[] recommendedVersionComponents = recommendedVersionOfCCUWithPatch.split("\\.");
         int minLength = Math.min(currentVersionComponents.length, recommendedVersionComponents.length);
@@ -265,4 +266,5 @@ public class CCUUiUtil {
     public static int getGreyColor() {
         return ContextCompat.getColor(context, R.color.tuner_group);
     }
+
 }

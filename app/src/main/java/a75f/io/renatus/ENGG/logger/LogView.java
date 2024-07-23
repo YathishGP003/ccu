@@ -116,7 +116,7 @@ public class LogView extends TextView implements LogNode
 	 */
 	private StringBuilder appendIfNotNull(StringBuilder source, String addStr, String delimiter) {
 		if (addStr != null) {
-			if (addStr.length() == 0) {
+			if (addStr.isEmpty()) {
 				delimiter = "";
 			}
 			

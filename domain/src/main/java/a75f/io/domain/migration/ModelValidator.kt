@@ -85,7 +85,9 @@ class ModelValidator {
                 MODEL_EXTERNAL_AHU_VAV,
                 MODEL_VAV_STAGED_RTU,
                 MODEL_VAV_STAGED_VFD_RTU,
-                MODEL_VAV_MODULATING_AHU
+                MODEL_VAV_MODULATING_AHU,
+                MODEL_VAV_ADVANCED_AHU_V2_CM,
+                MODEL_VAV_ADVANCED_AHU_V2_CONNECT,
             )
         }
     }

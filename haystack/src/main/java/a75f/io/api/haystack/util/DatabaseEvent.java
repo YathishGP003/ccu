@@ -1,11 +1,8 @@
 package a75f.io.api.haystack.util;
 
 public class DatabaseEvent {
-    private DatabaseAction mDatabaseAction;
+    private final DatabaseAction mDatabaseAction;
     private byte[] mBytes;
-
-
-    public DatabaseEvent() { /* Default constructor */ }
 
 
     public DatabaseEvent(DatabaseAction mAction) {
@@ -14,19 +11,8 @@ public class DatabaseEvent {
     }
 
 
-    public DatabaseEvent(DatabaseAction mAction, byte[] bytes) {
-        this.mDatabaseAction = mAction;
-        this.mBytes = bytes;
-    }
-
-
     public DatabaseAction getSerialAction() {
         return mDatabaseAction;
-    }
-
-
-    public void setSerialAction(DatabaseAction serialAction) {
-        this.mDatabaseAction = serialAction;
     }
 
 

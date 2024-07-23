@@ -72,6 +72,7 @@ class AcbProfileViewModel : ViewModel() {
     lateinit var damperShapesList: List<String>
     lateinit var valveTypesList: List<String>
     lateinit var zonePrioritiesList: List<String>
+    lateinit var relay1AssociationList: List<String>
 
     lateinit var condensateSensorTypesList: List<String>
 
@@ -93,7 +94,8 @@ class AcbProfileViewModel : ViewModel() {
     private val _isDialogOpen = MutableLiveData<Boolean>()
     private var saveJob : Job? = null
 
-    var modelLoaded by  mutableStateOf(false)
+    var _modelLoaded =  MutableLiveData(false)
+    val modelLoaded: LiveData<Boolean> get() = _modelLoaded
     val isDialogOpen: LiveData<Boolean>
         get() = _isDialogOpen
 
@@ -130,8 +132,8 @@ class AcbProfileViewModel : ViewModel() {
 
         initializeLists()
         unusedPorts = UnusedPortsModel.initializeUnUsedPorts(deviceAddress, hayStack)
-        CcuLog.i(Domain.LOG_TAG, "VavProfileViewModel Loaded")
-        modelLoaded = true
+        CcuLog.i(Domain.LOG_TAG, "ACB ProfileViewModel Loaded")
+        _modelLoaded.postValue( true)
     }
 
     private fun initializeLists() {
@@ -140,6 +142,8 @@ class AcbProfileViewModel : ViewModel() {
         damperShapesList = getListByDomainName(DomainName.damperShape, model)
         valveTypesList = getListByDomainName(DomainName.valveType, model)
         zonePrioritiesList = getListByDomainName(DomainName.zonePriority, model)
+
+        relay1AssociationList = listOf("Water Valve (N/C)", "Water Valve (N/O)")
 
         condensateSensorTypesList = getListByDomainName(DomainName.thermistor2Type, model)
 
@@ -217,6 +221,7 @@ class AcbProfileViewModel : ViewModel() {
 
             addEquipAndPoints(deviceAddress, profileConfiguration, floorRef, zoneRef, nodeType, hayStack, model, deviceModel)
             setOutputTypes(profileConfiguration)
+            updateCondensateSensor(profileConfiguration)
             if (L.ccu().bypassDamperProfile != null) overrideForBypassDamper(profileConfiguration)
             setScheduleType(profileConfiguration)
             setMinCfmSetpointMaxVals(profileConfiguration)
@@ -230,6 +235,7 @@ class AcbProfileViewModel : ViewModel() {
             setOutputTypes(profileConfiguration)
             saveUnUsedPortStatus(profileConfiguration, deviceAddress, hayStack)
             updateCondensateSensor(profileConfiguration)
+            updateRelayAssociation(profileConfiguration)
             setMinCfmSetpointMaxVals(profileConfiguration)
             setScheduleType(profileConfiguration)
         }
@@ -323,7 +329,7 @@ class AcbProfileViewModel : ViewModel() {
 
         // Set
         val relay1 = hayStack.readHDict("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.relay1 + "\"");
-        var relay1Point = RawPoint.Builder().setHDict(relay1)
+        var relay1Point = RawPoint.Builder().setHDict(relay1).setEnabled(true)
         hayStack.updatePoint(relay1Point.setType("Relay N/C").build(), relay1.get("id").toString())
 
         var relay2 = hayStack.readHDict("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.relay2 + "\"");
@@ -366,6 +372,27 @@ class AcbProfileViewModel : ViewModel() {
             val condensateNoPoint = hayStack.read("point and domainName == \"" + DomainName.condensateNO + "\" and group == \"" + config.nodeAddress + "\"")
             if (condensateNoPoint.containsKey("id")) {
                 hayStack.updatePoint(th2InPoint.setPointRef(condensateNoPoint.get("id").toString()).build(), th2In.get("id").toString())
+            }
+        }
+
+    }
+
+    private fun updateRelayAssociation(config: AcbProfileConfiguration) {
+        val device = hayStack.readEntity("device and addr == \"" + config.nodeAddress + "\"")
+        var relay1Map = hayStack.readEntity("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.relay1 + "\"")
+        var relay1 = RawPoint.Builder().setHashMap(relay1Map)
+
+        if (profileConfiguration.relay1Association.associationVal > 0) {
+            // N/O Valve
+            val valveNoPoint = hayStack.read("point and domainName == \"" + DomainName.chilledWaterValveIsolationCmdPointNO + "\" and group == \"" + config.nodeAddress + "\"")
+            if (valveNoPoint.containsKey("id")) {
+                hayStack.updatePoint(relay1.setPointRef(valveNoPoint.get("id").toString()).build(), relay1Map.get("id").toString())
+            }
+        } else {
+            // N/C Valve
+            val valveNcPoint = hayStack.read("point and domainName == \"" + DomainName.chilledWaterValveIsolationCmdPointNC + "\" and group == \"" + config.nodeAddress + "\"")
+            if (valveNcPoint.containsKey("id")) {
+                hayStack.updatePoint(relay1.setPointRef(valveNcPoint.get("id").toString()).build(), relay1Map.get("id").toString())
             }
         }
 

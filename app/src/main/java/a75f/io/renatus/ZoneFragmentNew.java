@@ -300,7 +300,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         if (floorList != null && floorList.size() > 0) {
             lvFloorList.setContentDescription(floorList.get(0).getDisplayName());
         }
-        floorMenu = (ImageView) view.findViewById(R.id.floorMenu);
+        floorMenu = view.findViewById(R.id.floorMenu);
         floorMenu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -1512,10 +1512,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         Schedule schedule = CCUHsApi.getInstance().getScheduleById((String)v.getTag());
 
         if(OfflineModeUtilKt.isOfflineMode() && schedule.isNamedSchedule() && !isSpecial) {
-            RenatusLandingActivity.mViewPager.setAdapter(RenatusLandingActivity.mStatusPagerAdapter);
-            RenatusLandingActivity.btnTabs.getTabAt(1).select();
-            RenatusLandingActivity.mTabLayout.post(() ->
-                    RenatusLandingActivity.mTabLayout.setupWithViewPager(RenatusLandingActivity.mViewPager, true));
             TabLayout.Tab selectedTab = RenatusLandingActivity.mTabLayout.getTabAt(2);
             selectedTab.select();
         }else {

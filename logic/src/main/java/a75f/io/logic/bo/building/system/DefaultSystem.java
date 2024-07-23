@@ -120,6 +120,7 @@ public class DefaultSystem extends SystemProfile
             CCUHsApi.getInstance().deleteEntityTree(equip.get("id").toString());
         }
         removeSystemEquipModbus();
+        deleteSystemConnectModule();
     }
     
     @Override

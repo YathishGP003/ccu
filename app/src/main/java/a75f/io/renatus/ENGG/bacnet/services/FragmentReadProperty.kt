@@ -1,12 +1,11 @@
 package a75f.io.renatus.ENGG.bacnet.services
 
-import a75f.io.device.bacnet.BacnetConfigConstants
 import a75f.io.device.bacnet.BacnetConfigConstants.BACNET_CONFIGURATION
 import a75f.io.device.bacnet.BacnetConfigConstants.EMPTY_STRING
 import a75f.io.device.bacnet.BacnetConfigConstants.IP_ADDRESS
 import a75f.io.device.bacnet.BacnetConfigConstants.IP_DEVICE_INSTANCE_NUMBER
 import a75f.io.device.bacnet.BacnetConfigConstants.PORT
-import a75f.io.logic.L
+import a75f.io.logger.CcuLog
 import a75f.io.renatus.ENGG.bacnet.services.client.BaseResponse
 import a75f.io.renatus.ENGG.bacnet.services.client.CcuService
 import a75f.io.renatus.ENGG.bacnet.services.client.ServiceManager
@@ -15,9 +14,6 @@ import a75f.io.renatus.UtilityApplication
 import a75f.io.renatus.util.CCUUiUtil
 import android.os.Bundle
 import android.preference.PreferenceManager
-import android.text.Editable
-import android.text.TextWatcher
-import android.util.Log
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
@@ -34,8 +30,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.json.JSONException
 import org.json.JSONObject
-import org.jsoup.helper.HttpConnection
-import java.lang.Exception
 import java.net.ConnectException
 import java.net.SocketTimeoutException
 
@@ -66,7 +60,7 @@ class FragmentReadProperty : Fragment(R.layout.lyt_frag_read_property) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        Log.d(TAG, "--onViewCreated--")
+        CcuLog.d(TAG, "--onViewCreated--")
 
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
         val confString: String? = sharedPreferences.getString(BACNET_CONFIGURATION, null)
@@ -155,7 +149,7 @@ class FragmentReadProperty : Fragment(R.layout.lyt_frag_read_property) {
             selectedPropertyType, arrayIndex
         )
         sendRequest(bacNetDestination, rpRequest)
-        Log.d(TAG, "this is the request-->$request")
+        CcuLog.d(TAG, "this is the request-->$request")
     }
 
     private fun disableReadButton() {
@@ -179,13 +173,13 @@ class FragmentReadProperty : Fragment(R.layout.lyt_frag_read_property) {
 
     private fun validateEntries(): Boolean {
 
-        if (etMacAddress.text.toString() == BacnetConfigConstants.EMPTY_STRING || !CCUUiUtil.isValidMacAddress(
+        if (etMacAddress.text.toString() == EMPTY_STRING || !CCUUiUtil.isValidMacAddress(
                 etMacAddress.text.toString().trim { it <= ' ' })
         ) {
             etMacAddress.error = "Please input valid mac address"
             return false
         }
-        if (etDnet.text.toString() == BacnetConfigConstants.EMPTY_STRING || !CCUUiUtil.isValidNumber(
+        if (etDnet.text.toString() == EMPTY_STRING || !CCUUiUtil.isValidNumber(
                 etDnet.text.toString().toInt(), 0, Int.MAX_VALUE, 1
             )
         ) {
@@ -210,12 +204,12 @@ class FragmentReadProperty : Fragment(R.layout.lyt_frag_read_property) {
         val spin = view.findViewById(R.id.sp_object_types) as Spinner
         spin.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, position: Int, p3: Long) {
-                Log.d(TAG, "selected item is ${objectTypeArray[position]}")
+                CcuLog.d(TAG, "selected item is ${objectTypeArray[position]}")
                 selectedObjectType = objectTypeArray[position].value
             }
 
             override fun onNothingSelected(p0: AdapterView<*>?) {
-                Log.d(TAG, "onNothingSelected")
+                CcuLog.d(TAG, "onNothingSelected")
             }
 
         }
@@ -231,12 +225,12 @@ class FragmentReadProperty : Fragment(R.layout.lyt_frag_read_property) {
         val spin = view.findViewById(R.id.sp_property_types) as Spinner
         spin.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, position: Int, p3: Long) {
-                Log.d(TAG, "selected item is ${propertyTypeArray[position]}")
+                CcuLog.d(TAG, "selected item is ${propertyTypeArray[position]}")
                 selectedPropertyType = propertyTypeArray[position].value
             }
 
             override fun onNothingSelected(p0: AdapterView<*>?) {
-                Log.d(TAG, "onNothingSelected")
+                CcuLog.d(TAG, "onNothingSelected")
             }
 
         }
@@ -249,7 +243,7 @@ class FragmentReadProperty : Fragment(R.layout.lyt_frag_read_property) {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        Log.d(TAG, "--onDestroyView--")
+        CcuLog.d(TAG, "--onDestroyView--")
     }
 
     private fun sendRequest(bacNetDestination: DestinationMultiRead, rpRequest: ReadRequest) {
@@ -265,24 +259,24 @@ class FragmentReadProperty : Fragment(R.layout.lyt_frag_read_property) {
                     val result = resp.data
                     if (result != null) {
                         val readResponse = result.body()
-                        Log.d(TAG, "received response->${readResponse}")
+                        CcuLog.d(TAG, "received response->${readResponse}")
                         CoroutineScope(Dispatchers.Main).launch {
                             updateUi(readResponse)
                         }
                     } else {
-                        Log.d(TAG, "--null response--")
+                        CcuLog.d(TAG, "--null response--")
                     }
                 } else {
-                    Log.d(TAG, "--error--${resp.error}")
+                    CcuLog.d(TAG, "--error--${resp.error}")
                 }
             } catch (e: SocketTimeoutException) {
-                Log.d(TAG, "--SocketTimeoutException--${e.stackTrace}")
+                CcuLog.e(TAG, "--SocketTimeoutException--${e.stackTrace}")
                 showToastMessage("SocketTimeoutException")
             } catch (e: ConnectException) {
-                Log.d(TAG, "--ConnectException--${e.stackTrace}")
+                CcuLog.e(TAG, "--ConnectException--${e.stackTrace}")
                 showToastMessage("ConnectException")
             } catch (e: Exception) {
-                Log.d(TAG, "--connection time out--${e.stackTrace}")
+                CcuLog.e(TAG, "--connection time out--${e.stackTrace}")
             }
         }
     }

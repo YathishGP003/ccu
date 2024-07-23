@@ -888,6 +888,7 @@ public class VavStagedRtu extends VavSystemProfile
             CCUHsApi.getInstance().deleteEntityTree(equip.get("id").toString());
         }
         removeSystemEquipModbus();
+        deleteSystemConnectModule();
     }
 
     public void addCmdPoints(String equipref) {

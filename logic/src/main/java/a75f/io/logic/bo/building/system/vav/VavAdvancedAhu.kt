@@ -50,6 +50,7 @@ import a75f.io.logic.bo.building.system.util.getModulatedOutput
 import a75f.io.logic.tuners.TunerUtil
 import android.annotation.SuppressLint
 import android.content.Intent
+import java.util.BitSet
 
 open class VavAdvancedAhu : VavSystemProfile() {
 
@@ -86,6 +87,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
 
     private var satStageUpTimer = 0.0
     private var satStageDownTimer = 0.0
+    val testConfigs = BitSet()
 
     private fun initTRSystem() {
         trSystem = VavTRSystem()
@@ -232,8 +234,8 @@ open class VavAdvancedAhu : VavSystemProfile() {
         updateMechanicalConditioning(CCUHsApi.getInstance())
         updateDerivedSensorPoints()
         conditioningMode = SystemMode.values()[systemEquip.conditioningMode.readPriorityVal().toInt()]
-        cmStageStatus = Array(34) { Pair(0, 0) }
-        connectStageStatus = Array(19) { Pair(0, 0) }
+        cmStageStatus = Array(35) { Pair(0, 0) }
+        connectStageStatus = Array(20) { Pair(0, 0) }
         updateStageTimers()
         systemCoolingLoopOp = getSystemCoolingLoop()
 
@@ -371,7 +373,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
             getSingleZoneFanLoopOp(analogFanSpeedMultiplier)
         } else if ((epidemicState == EpidemicState.PREPURGE || epidemicState == EpidemicState.POSTPURGE) && L.ccu().oaoProfile != null) {
             //TODO- Part OAO. Will be replaced with domanName later.
-            val smartPurgeDabFanLoopOp = TunerUtil.readTunerValByQuery(
+            val smartPurgeFanLoopOp = TunerUtil.readTunerValByQuery(
                 "system and purge and vav and fan and loop and output",
                 L.ccu().oaoProfile.equipRef
             )
@@ -379,21 +381,21 @@ open class VavAdvancedAhu : VavSystemProfile() {
             val spSpMin = systemEquip.staticPressureSPMin.readPriorityVal()
             CcuLog.d(
                 L.TAG_CCU_SYSTEM,
-                "spSpMax :$spSpMax spSpMin: $spSpMin SP: $staticPressure,$smartPurgeDabFanLoopOp"
+                "spSpMax :$spSpMax spSpMin: $spSpMin SP: $staticPressure,$smartPurgeFanLoopOp"
             )
             val staticPressureLoopOutput = ((staticPressure - spSpMin) * 100 / (spSpMax - spSpMin)).toInt().toDouble()
             if (VavSystemController.getInstance().getSystemState() == SystemController.State.COOLING
                 && (conditioningMode == SystemMode.COOLONLY || conditioningMode == SystemMode.AUTO)) {
-                if (staticPressureLoopOutput < (spSpMax - spSpMin) * smartPurgeDabFanLoopOp) {
-                    (spSpMax - spSpMin) * smartPurgeDabFanLoopOp
+                if (staticPressureLoopOutput < (spSpMax - spSpMin) * smartPurgeFanLoopOp) {
+                    (spSpMax - spSpMin) * smartPurgeFanLoopOp
                 } else {
                     ((staticPressure - spSpMin) * 100 / (spSpMax - spSpMin)).toInt().toDouble()
                 }
             } else if (VavSystemController.getInstance().getSystemState() == SystemController.State.HEATING) {
                 (VavSystemController.getInstance().getHeatingSignal() * analogFanSpeedMultiplier).toInt()
-                    .toDouble().coerceAtLeast(smartPurgeDabFanLoopOp)
+                    .toDouble().coerceAtLeast(smartPurgeFanLoopOp)
             } else {
-                smartPurgeDabFanLoopOp
+                smartPurgeFanLoopOp
             }
         } else if (VavSystemController.getInstance().getSystemState() == SystemController.State.COOLING
             && (conditioningMode == SystemMode.COOLONLY || conditioningMode == SystemMode.AUTO)) {
@@ -509,7 +511,13 @@ open class VavAdvancedAhu : VavSystemProfile() {
      */
     fun getStaticPressureControlPoint() : Double {
         val pressureControlType = systemEquip.pressureBasedFanControlOn.readDefaultVal()
-        return pressureFanControlIndexToDomainPoint(pressureControlType.toInt(), systemEquip).readHisVal()
+        val controlPoint = pressureFanControlIndexToDomainPoint(pressureControlType.toInt(), systemEquip)
+
+        if (controlPoint != null) {
+            CcuLog.d(L.TAG_CCU_SYSTEM, "pressureControlType :$pressureControlType controlPoint: ${controlPoint.domainName}")
+            return pressureFanControlIndexToDomainPoint(pressureControlType.toInt(), systemEquip)!!.readHisVal()
+        }
+        return 0.0
     }
 
     /**
@@ -750,7 +758,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
                         cmStageStatus[stageIndex] = Pair(logicalPoint.readHisVal().toInt(), if (relayOutput) 1 else 0)
                     }
                 } catch (e: Exception) {
-                    CcuLog.e(L.TAG_CCU_SYSTEM, "Error in updateOutputPorts ${relay.domainName}", e)
+                    CcuLog.e(L.TAG_CCU_SYSTEM, "as ${relay.domainName}", e)
                 }
             }
         }
@@ -1007,7 +1015,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
             if (!systemEquip.connectEquip1.equipRef.contentEquals("null")) {
                 getConnectRelayAssociationMap(systemEquip).entries.forEach { (relay, association) ->
                     if (relay.readDefaultVal() > 0) {
-                        val logical = relayAssociationToDomainName(association.readDefaultVal().toInt())
+                        val logical = connectRelayAssociationToDomainName(association.readDefaultVal().toInt())
                         CcuLog.i(L.TAG_CCU_SYSTEM,
                                 "Connect ${relay.domainName}:${relay.readDefaultVal()} => : " +
                                         "Physical Value: ${getConnectRelayLogicalPhysicalMap(systemEquip.connectEquip1, Domain.connect1Device)[relay]!!.readHisVal()}  " +
@@ -1082,4 +1090,14 @@ open class VavAdvancedAhu : VavSystemProfile() {
         return CCUHsApi.getInstance().readEntity(
                 "domainName == \"" + DomainName.connectModuleDevice + "\"").isNotEmpty()
     }
+
+    fun getOccupancy(): Int {
+        return if(isSystemOccupied) 1 else 0
+    }
+
+    fun setTestConfigs(port: Int) {
+        testConfigs.set(port,true) // 0 - 7 Relays and 8 - 11 Analog
+        CcuLog.d(L.TAG_CCU_SYSTEM, "Test Configs set for port $port cache $testConfigs")
+    }
+
 }

@@ -23,7 +23,6 @@ import android.text.TextUtils;
 import android.text.method.NumberKeyListener;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.util.SparseArray;
 import android.util.TypedValue;
 import android.view.KeyEvent;
@@ -47,6 +46,8 @@ import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.Locale;
 
+import a75f.io.logger.CcuLog;
+import a75f.io.logic.L;
 import a75f.io.renatus.R;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
@@ -2335,8 +2336,8 @@ public class TunerNumberPicker extends LinearLayout {
          * find the correct value in the displayed values for the current
          * number.
          */
-        Log.i("TunersUI","mDisplayedValues:"+ Arrays.toString(mDisplayedValues));
-        Log.i("TunersUI","mValue:"+mValue+" mMinValue:"+mMinValue+" maxValue:"+mMaxValue);
+        CcuLog.i(L.TAG_CCU_TUNERS_UI,"mDisplayedValues:"+ Arrays.toString(mDisplayedValues));
+        CcuLog.i(L.TAG_CCU_TUNERS_UI,"mValue:"+mValue+" mMinValue:"+mMinValue+" maxValue:"+mMaxValue);
 
         try {
             String text = (mDisplayedValues == null) ? formatNumber(mValue)
@@ -2352,7 +2353,7 @@ public class TunerNumberPicker extends LinearLayout {
 
             mSelectedText.setText(text);
         } catch (Exception e) {
-            Log.i("TunersUI","NumberPickerException:"+ e.getMessage());
+            CcuLog.e(L.TAG_CCU_TUNERS_UI,"NumberPickerException:"+ e.getMessage());
             e.printStackTrace();
         }
     }

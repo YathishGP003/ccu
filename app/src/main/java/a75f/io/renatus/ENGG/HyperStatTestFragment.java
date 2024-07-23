@@ -2,7 +2,6 @@ package a75f.io.renatus.ENGG;
 
 import android.app.Dialog;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -173,18 +172,18 @@ public class HyperStatTestFragment extends BaseDialogFragment
 	@Subscribe(threadMode = ThreadMode.MAIN)
 	public void onBLEEvent(SerialEvent event)
 	{
-		Log.i(TAG, "Event Type: " + event.getSerialAction().name());
+		CcuLog.i(TAG, "Event Type: " + event.getSerialAction().name());
 		if (event.getSerialAction() == SerialAction.MESSAGE_FROM_SERIAL_PORT)
 		{
 			byte[] data = (byte[]) event.getBytes();
-			Log.i(TAG, "Data return size: " + data.length);
+			CcuLog.i(TAG, "Data return size: " + data.length);
 		}
 	}
 
 	private void initChannelSpinner() {
 
-		ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this.getActivity(),
-				                                                           android.R.layout.simple_spinner_item, channels);
+		ArrayAdapter<String> dataAdapter = new ArrayAdapter<>(this.getActivity(),
+                android.R.layout.simple_spinner_item, channels);
 		dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		channelSpinner.setAdapter(dataAdapter);
 		channelSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -205,8 +204,8 @@ public class HyperStatTestFragment extends BaseDialogFragment
 
 	private void initProfileSpinner() {
 
-		ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this.getActivity(),
-				                                                           android.R.layout.simple_spinner_item, profiles);
+		ArrayAdapter<String> dataAdapter = new ArrayAdapter<>(this.getActivity(),
+                android.R.layout.simple_spinner_item, profiles);
 		dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		profileSpinner.setAdapter(dataAdapter);
 		profileSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -223,8 +222,8 @@ public class HyperStatTestFragment extends BaseDialogFragment
 	}
 
 	private void initFanspeedSpinner() {
-		ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this.getActivity(),
-				                                                           android.R.layout.simple_spinner_item, fanSpeed);
+		ArrayAdapter<String> dataAdapter = new ArrayAdapter<>(this.getActivity(),
+                android.R.layout.simple_spinner_item, fanSpeed);
 		dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		fanspeedSpinner.setAdapter(dataAdapter);
 		fanspeedSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -242,8 +241,8 @@ public class HyperStatTestFragment extends BaseDialogFragment
 	}
 
 	private void initCondModeSpinner() {
-		ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this.getActivity(),
-				                                                           android.R.layout.simple_spinner_item, condMode);
+		ArrayAdapter<String> dataAdapter = new ArrayAdapter<>(this.getActivity(),
+                android.R.layout.simple_spinner_item, condMode);
 		dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		condModeSpinner.setAdapter(dataAdapter);
 		condModeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {

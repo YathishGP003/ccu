@@ -83,7 +83,6 @@ import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.jobs.bearertoken.BearerTokenManager;
 import a75f.io.logic.migration.MigrationHandler;
 import a75f.io.logic.tuners.TunerEquip;
-import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.logic.util.CCUProxySettings;
 import a75f.io.logic.util.MigrationUtil;
 import a75f.io.logic.util.PreferenceUtil;
@@ -259,7 +258,6 @@ public class Globals {
         CCUHsApi.getInstance().trimObjectBoxHisStore();
         importTunersAndScheduleJobs();
         handleAutoCommissioning();
-        DomainManager.INSTANCE.buildDomain(CCUHsApi.getInstance());
         updateCCUAhuRef();
         setRecoveryMode();
 
@@ -296,9 +294,11 @@ public class Globals {
                     Watchdog.getInstance().addMonitor(mScheduleProcessJob);
                     Watchdog.getInstance().start();
                     modelMigration(migrationHandler);
+                    MigrationHandler.Companion.doPostModelMigrationTasks();
                     /*temperatureMode migration should be handled after model migration*/
                     migrationHandler.temperatureModeMigration();
                 } catch (Exception e) {
+                }  catch ( Exception e) {
                     //Catch ignoring any exception here to avoid app from not loading in case of an init failure.
                     //Init would retried during next app restart.
                     CcuLog.i(L.TAG_CCU_INIT, "Init failed");
@@ -374,9 +374,8 @@ public class Globals {
             return;
         }
         HashMap<Object, Object> equip = CCUHsApi.getInstance().readEntity("equip and system and not modbus and not connectModule");
-        if (equip.containsKey("domainName")) {
-            updatingDomainEquip(CCUHsApi.getInstance());
-        }
+        DomainManager.INSTANCE.buildDomain(CCUHsApi.getInstance());
+
         boolean isDefaultSystem = false;
         if (equip != null && equip.size() > 0) {
             //BuildingTuners.getInstance().addBuildingTunerEquip();
@@ -624,14 +623,6 @@ public class Globals {
         }
     }
 
-    private void updatingDomainEquip(CCUHsApi ccuHsApi) {
-        if (Domain.systemEquip == null || Domain.systemEquip.getEquipRef().equals("null")) {
-            DomainManager.INSTANCE.addSystemDomainEquip(ccuHsApi);
-        }
-        if (Domain.cmBoardDevice == null || Domain.systemEquip.getEquipRef().equals("null")) {
-            DomainManager.INSTANCE.addCmBoardDevice(ccuHsApi);
-        }
-    }
 
     private String getDomainSafeProfile(String profile) {
         switch (profile) {

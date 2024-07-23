@@ -174,7 +174,7 @@ public class UsbConnectService extends Service
 	 *  In this particular example. byte stream is converted to String and send to UI thread to
 	 *  be treated there.
 	 */
-	private       UsbSerialInterface.UsbReadCallback mCallback   =
+	private UsbSerialInterface.UsbReadCallback mCallback   =
 			new UsbSerialInterface.UsbReadCallback()
 			{
 				@Override
@@ -511,8 +511,11 @@ public class UsbConnectService extends Service
 	}
 	
 	private void configureSerialPort() {
-		CcuLog.i(TAG, "Connect: configureSerialPort ");
 		ConnectSerialPort portSelection = ConnectSerialPort.values()[UsbSerialUtil.getPreferredConnectModuleSerialType(context)];
+        if (portSelection == ConnectSerialPort.NO_CONNECT_MODULE) {
+            CcuLog.i(TAG, "Connect: configureSerialPort No Connect Module selected");
+            return;
+        }
 		if (portSelection == ConnectSerialPort.CCU_PORT) {
 			serialPort = UsbSerialDevice.createUsbSerialDevice(device, connection);
 		} else if (portSelection == ConnectSerialPort.CM_VIRTUAL_PORT2) {

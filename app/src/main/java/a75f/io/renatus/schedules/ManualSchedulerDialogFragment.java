@@ -106,7 +106,7 @@ public class ManualSchedulerDialogFragment extends DialogFragment {
         prefs = new Prefs(getActivity());
         LayoutInflater inflater = LayoutInflater.from(getActivity());
         View view = inflater.inflate(R.layout.dialog_manualschedule, null);
-        int daySelectionBackground = CCUUiUtil.getDayselectionBackgroud(getContext());
+        int daySelectionBackground = CCUUiUtil.getDaySelectionBackground(getContext());
         ImageButton deleteButton = view.findViewById(R.id.buttonDelete);
         rangeSeekBarView = view.findViewById(R.id.rangeSeekBar);
         rangeSeekBarView.setZoneSchedule(mSchedule);

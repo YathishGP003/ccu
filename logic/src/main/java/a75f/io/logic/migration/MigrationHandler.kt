@@ -57,6 +57,14 @@ import java.util.*
 
 
 class MigrationHandler (hsApi : CCUHsApi) : Migration {
+
+    companion object {
+        fun doPostModelMigrationTasks() {
+            if (!PreferenceUtil.getRecoverHelioNodeACBTunersMigration()) VavAndAcbProfileMigration.recoverHelioNodeACBTuners(CCUHsApi.getInstance())
+            if (!PreferenceUtil.getACBRelayLogicalPointsMigration()) VavAndAcbProfileMigration.verifyACBIsoValveLogicalPoints(CCUHsApi.getInstance())
+        }
+    }
+
     override val hayStack = hsApi
 
     private val schedulerRevamp = SchedulerRevampMigration(hayStack)
@@ -113,7 +121,19 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             correctEnumsForCorruptModbusPoints(hayStack)
             PreferenceUtil.setModbusEnumCorrectionDone()
         }
+        if(!PreferenceUtil.isHisTagRemovalFromNonDmDevicesDone()) {
+            removeHisTagsFromNonDMDevices()
+            PreferenceUtil.setHisTagRemovalFromNonDmDevicesDone()
+        }
         hayStack.scheduleSync()
+    }
+
+    private fun removeHisTagsFromNonDMDevices() {
+        hayStack.readAllEntities("device and his").forEach { nonDMDeviceMap ->
+            nonDMDeviceMap.remove("his")
+            val nonDMDevice = Device.Builder().setHashMap(nonDMDeviceMap).removeMarker("his").build()
+            hayStack.updateDevice(nonDMDevice, nonDMDevice.id)
+        }
     }
 
     private fun updateAhuRefForTIEquip() {

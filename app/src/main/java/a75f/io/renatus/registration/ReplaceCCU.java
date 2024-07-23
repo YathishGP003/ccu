@@ -54,6 +54,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.device.bacnet.BacnetConfigConstants;
+import a75f.io.domain.logic.DomainManager;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.ccu.restore.CCU;

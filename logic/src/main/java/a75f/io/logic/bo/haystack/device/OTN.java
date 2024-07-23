@@ -43,7 +43,7 @@ public class OTN {
     public OTN(int address, String site, String floor, String room, String equipRef) {
         Device d = new Device.Builder()
                 .setDisplayName("OTN-"+address)
-                .addMarker("network").addMarker("node").addMarker("otn").addMarker("his")
+                .addMarker("network").addMarker("node").addMarker("otn")
                 .setAddr(address)
                 .setSiteRef(site)
                 .setFloorRef(floor)

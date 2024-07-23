@@ -704,12 +704,14 @@ public class OAOEquip
             case SYSTEM_DAB_STAGED_RTU:
             case SYSTEM_DAB_STAGED_VFD_RTU:
             case dabExternalAHUController:
+            case SYSTEM_DAB_ADVANCED_AHU:
                 return "dab";
             case SYSTEM_VAV_ANALOG_RTU:
             case SYSTEM_VAV_HYBRID_RTU:
             case SYSTEM_VAV_IE_RTU:
             case SYSTEM_VAV_STAGED_RTU:
             case SYSTEM_VAV_STAGED_VFD_RTU:
+            case SYSTEM_VAV_ADVANCED_AHU:
             case vavExternalAHUController:
                 return "vav";
         }

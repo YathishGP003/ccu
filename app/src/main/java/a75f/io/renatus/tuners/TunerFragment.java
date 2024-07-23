@@ -107,10 +107,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
     }
 
     public static TunerFragment newInstance() {
-        if( tunerFragmentReference == null ){
-            tunerFragmentReference = new TunerFragment();
-        }
-        return tunerFragmentReference;
+        return new TunerFragment();
     }
 
     @Override

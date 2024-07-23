@@ -76,6 +76,7 @@ enum UsbSerialType {
 }
 
 enum ConnectSerialPort {
+    NO_CONNECT_MODULE,
     CCU_PORT,
     CM_VIRTUAL_PORT2
 }

@@ -56,7 +56,6 @@ public class ControlMote
                            .setDisplayName("CM-device")
                            .addMarker("network")
                            .addMarker("cm")
-                           .addMarker("his")
                            .setSiteRef(siteRef)
                            .setEquipRef(systemEquipRef)
                            .build();
@@ -81,7 +80,7 @@ public class ControlMote
         }
         Device d = new Device.Builder()
                 .setDisplayName("TI-"+address)
-                .addMarker("network").addMarker("node").addMarker("ti").addMarker("his")
+                .addMarker("network").addMarker("node").addMarker("ti")
                 .setAddr(address)
                 .setSiteRef(site)
                 .setFloorRef(floor)

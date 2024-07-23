@@ -349,17 +349,17 @@ public class ZoneScheduleFragment extends DialogFragment implements ZoneSchedule
             for (int i = 0; i < days.size(); i++) {
                 Schedule.Days occupiedDaysElement = days.get(i);
                 if (occupiedDaysElement.getSthh() > occupiedDaysElement.getEthh()) {
-                    for (int j = 0; j < unoccupiedDays.size(); j++) {
-                        UnOccupiedDays daysElement1 = unoccupiedDays.get(j);
-                        if (occupiedDaysElement.getDay() == daysElement1.getDay() && occupiedDaysElement.getEthh() == daysElement1.getSthh() ){
-                            if(unoccupiedDays.get(j).getDay() == 6){
-                                unoccupiedDays.remove(j);
+                    for (int unOccupiedDayIteration = 0; unOccupiedDayIteration < unoccupiedDays.size(); unOccupiedDayIteration++) {
+                        UnOccupiedDays daysElement1 = unoccupiedDays.get(unOccupiedDayIteration);
+                        if (occupiedDaysElement.getDay() == daysElement1.getDay() && (occupiedDaysElement.getEthh() == daysElement1.getSthh() && occupiedDaysElement.getEtmm() == daysElement1.getStmm())){
+                            if(unoccupiedDays.get(unOccupiedDayIteration).getDay() == 6 && (unOccupiedDayIteration+1) == unoccupiedDays.size()){
+                                unoccupiedDays.remove(unOccupiedDayIteration);
                                 unoccupiedDays.get(0).setSthh(daysElement1.getSthh());
                                 unoccupiedDays.get(0).setStmm(daysElement1.getStmm());
-                            }else {
-                                unoccupiedDays.remove(j);
-                                unoccupiedDays.get(j).setSthh(daysElement1.getSthh());
-                                unoccupiedDays.get(j).setStmm(daysElement1.getStmm());
+                            }else if ((unOccupiedDayIteration+1 < unoccupiedDays.size() && unoccupiedDays.get(unOccupiedDayIteration+1).getDay() != daysElement1.getDay())) {
+                                unoccupiedDays.remove(unOccupiedDayIteration);
+                                unoccupiedDays.get(unOccupiedDayIteration).setSthh(daysElement1.getSthh());
+                                unoccupiedDays.get(unOccupiedDayIteration).setStmm(daysElement1.getStmm());
                             }
                         }
                     }

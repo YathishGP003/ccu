@@ -68,7 +68,7 @@ fun DeleteDialog(
                             Icons.Rounded.Warning,
                             "Warning Icon",
                             modifier = Modifier.size(60.dp),
-                            tint = Color.Gray
+                            tint = ComposeUtil.primaryColor
                         )
                         Spacer(modifier= Modifier.width(16.dp))
                         Text(buildAnnotatedString {

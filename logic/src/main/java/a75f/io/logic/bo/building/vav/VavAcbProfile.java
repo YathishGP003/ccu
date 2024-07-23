@@ -142,7 +142,11 @@ public class VavAcbProfile extends VavProfile
 
         vavEquip.getDamperCmd().writeHisVal(damper.currentPosition);
         ((VavAcbEquip)vavEquip).getChwValveCmd().writeHisVal(chwValve.currentPosition);
-        ((VavAcbEquip)vavEquip).getChwShutOffValve().writeHisVal(getShutOffValveCmd());
+        if (((VavAcbEquip)vavEquip).getChilledWaterValveIsolationCmdPointNO().pointExists()) {
+            ((VavAcbEquip)vavEquip).getChilledWaterValveIsolationCmdPointNO().writeHisVal(getShutOffValveCmdNO());
+        } else {
+            ((VavAcbEquip)vavEquip).getChilledWaterValveIsolationCmdPointNC().writeHisVal(getShutOffValveCmdNC());
+        }
 
         logLoopParams(loopOp);
 
@@ -194,18 +198,36 @@ public class VavAcbProfile extends VavProfile
             }
             vavEquip.getDamperCmd().writeHisVal(damperPos);
             vavEquip.getNormalizedDamperCmd().writeHisVal(damperPos);
-            ((VavAcbEquip)vavEquip).getChwShutOffValve().writeHisVal(0.0);
+            if (((VavAcbEquip)vavEquip).getChilledWaterValveIsolationCmdPointNO().pointExists()) {
+                ((VavAcbEquip)vavEquip).getChilledWaterValveIsolationCmdPointNO().writeHisVal(0.0);
+            } else {
+                ((VavAcbEquip)vavEquip).getChilledWaterValveIsolationCmdPointNC().writeHisVal(0.0);
+            }
+
             ((VavAcbEquip)vavEquip).getChwValveCmd().writeHisVal(0.0);
             vavEquip.getEquipStatus().writeHisVal(TEMPDEAD.ordinal());
             vavEquip.getEquipStatusMessage().writeDefaultVal("Zone Temp Dead");}
     }
 
-    private double getShutOffValveCmd() {
+    private double getShutOffValveCmdNO() {
         boolean shutOffValveCmd;
-        if (((VavAcbEquip)vavEquip).getChwShutOffValve().readHisVal() > 0.0) {
+        if (((VavAcbEquip)vavEquip).getChilledWaterValveIsolationCmdPointNO().readHisVal() > 0.0) {
             shutOffValveCmd = (chwValve.currentPosition > 0.0);
         } else {
             double relayActivationHysteresis = ((VavAcbEquip) vavEquip).getRelayActivationHysteresis().readPriorityVal();
+            if (relayActivationHysteresis == 0.0) { relayActivationHysteresis = 10.0; }
+            shutOffValveCmd = (chwValve.currentPosition > relayActivationHysteresis);
+        }
+        return shutOffValveCmd ? 1.0 : 0.0;
+    }
+
+    private double getShutOffValveCmdNC() {
+        boolean shutOffValveCmd;
+        if (((VavAcbEquip)vavEquip).getChilledWaterValveIsolationCmdPointNC().readHisVal() > 0.0) {
+            shutOffValveCmd = (chwValve.currentPosition > 0.0);
+        } else {
+            double relayActivationHysteresis = ((VavAcbEquip) vavEquip).getRelayActivationHysteresis().readPriorityVal();
+            if (relayActivationHysteresis == 0.0) { relayActivationHysteresis = 10.0; }
             shutOffValveCmd = (chwValve.currentPosition > relayActivationHysteresis);
         }
         return shutOffValveCmd ? 1.0 : 0.0;

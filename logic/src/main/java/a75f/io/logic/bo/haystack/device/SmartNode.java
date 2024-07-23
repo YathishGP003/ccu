@@ -56,7 +56,7 @@ public class SmartNode
     public SmartNode(int address, String site, String floor, String room, String equipRef) {
         Device d = new Device.Builder()
                 .setDisplayName("SN-"+address)
-                .addMarker("network").addMarker("node").addMarker(Tags.SMART_NODE).addMarker("his")
+                .addMarker("network").addMarker("node").addMarker(Tags.SMART_NODE)
                 .setAddr(address)
                 .setSiteRef(site)
                 .setFloorRef(floor)

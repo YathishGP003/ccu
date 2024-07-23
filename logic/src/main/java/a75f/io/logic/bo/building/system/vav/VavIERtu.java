@@ -148,6 +148,7 @@ public class VavIERtu extends VavSystemProfile
             CCUHsApi.getInstance().deleteEntityTree(equip.get("id").toString());
         }
         removeSystemEquipModbus();
+        deleteSystemConnectModule();
     }
 
     private synchronized void updateSystemPoints() {

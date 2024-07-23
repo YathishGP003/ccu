@@ -57,8 +57,18 @@ fun getCMControlsMessage(): ControlMote.CcuToCmOverUsbCmControlMessage_t {
         saToperatingMode = SAToperatingMode_e.forNumber(systemEquip.operatingMode.readHisVal().toInt())
                     ?: SAToperatingMode_e.SAT_OPERATING_MODE_OFF
         emergencyShutOff = (L.ccu().systemProfile as VavAdvancedAhu)?.isEmergencyShutoffActive()?.toInt() ?: 0
+        unoccupiedMode = getOccupancy()
     }
     return msgBuilder.build()
+}
+
+private fun getOccupancy(): ControlMote.UnoccupiedMode_e {
+    val occupancy = (L.ccu().systemProfile as VavAdvancedAhu)?.getOccupancy()
+    return if (occupancy == 0) {
+        ControlMote.UnoccupiedMode_e.UNOCCUPIED_MODE
+    } else {
+        ControlMote.UnoccupiedMode_e.OCCUPIED_MODE
+    }
 }
 
 fun getCMSettingsMessage() : ControlMote.CcuToCmSettingsMessage_t {
@@ -75,6 +85,8 @@ fun getCMSettingsMessage() : ControlMote.CcuToCmSettingsMessage_t {
         cmProfile = ControlMote.CMProfiles_e.CM_PROFILE_ADV_AHU
         relayActivationHysteresis = systemEquip.vavRelayDeactivationHysteresis.readHisVal().toInt()
         analogFanSpeedMultiplier = systemEquip.vavAnalogFanSpeedMultiplier.readHisVal().toInt() * 10
+        cmStageUpTimer = systemEquip.vavStageUpTimerCounter.readHisVal().toInt()
+        cmStageDownTimer = systemEquip.vavStageDownTimerCounter.readHisVal().toInt()
         addRelayConfigsToSettingsMessage(this)
         addAnalogOutConfigsToSettingsMessage(this)
         addAnalogInConfigsToSettingsMessage(this)
@@ -85,6 +97,8 @@ fun getCMSettingsMessage() : ControlMote.CcuToCmSettingsMessage_t {
         addPILoopConfiguration(this)
         addSensorConfigs(this)
         addSensorBusMappings(this)
+        addTestSignals(this)
+
     }
     return msgBuilder.build()
 }
@@ -354,7 +368,7 @@ fun addSensorBusMappings(builder: Builder) {
                 systemEquip.humiditySensorBusAdd0.readDefaultVal().toInt(),
                 systemEquip.occupancySensorBusAdd0.readDefaultVal().toInt(),
                 systemEquip.co2SensorBusAdd0.readDefaultVal().toInt(),
-                systemEquip.pressureSensorBusAdd0.readDefaultVal().toInt()
+                systemEquip.sensorBus0PressureAssociation.readDefaultVal().toInt()
         ))
 
         this.addSensorBusMapping(addAddressSensorMapping(
@@ -383,7 +397,6 @@ fun addSensorBusMappings(builder: Builder) {
     }
 }
 
-
 fun addAddressSensorMapping(
         tempMapping: Int, humidityMapping: Int, occupancyMapping: Int, co2Mapping: Int, pressureMapping: Int
 ): ControlMote.CmSensorBusMappings_t {
@@ -396,6 +409,41 @@ fun addAddressSensorMapping(
     }.build()
 }
 
+fun addTestSignals(builder: Builder) {
+    /*
+      [ Y1 Y2 G1 G2 W1 W2 AUX (mappings)]
+      CCU needs to send in this format - [ R1 R2 R3 R6 R4 R5 R7 R8 (mappings)]
+      Because in hardware it is mapper in this way. please do not change the position
+      From profile test signal config is
+       0 = R1, 1 = R2, 2 = R3, 3 = R6, 4 = R4, 5 = R5, 6 = R7, 7 = R8 AO1 = 8, AO2 = 9, AO3 = 10, AO4 = 11
+       So relays will be loops from 0 to 7 and analogs will be from 8 to 11
+  */
+
+    var relayBitmap = 0
+    var analogBitmap = 0
+    val config = (L.ccu().systemProfile as VavAdvancedAhu)?.testConfigs
+    for (relayPos in 0..7) {
+        if (config != null) {
+            if (config.get(relayPos)) {
+                relayBitmap = relayBitmap or (1 shl MeshUtil.getRelayMapping(relayPos + 1 )) // add 1 to get the correct relay position
+            }
+        }
+    }
+    for (analogPos in 8..11) {
+        if (config != null) {
+            if (config.get(analogPos)) {
+                analogBitmap = analogBitmap or (1 shl (analogPos - 8)) // subtract 8 to get the correct bit position
+            }
+        }
+    }
+
+    val configs = ControlMote.CmTestSignals_t.newBuilder()
+    configs.apply {
+        relayTestSignalsBitmap = relayBitmap
+        analogOutputsTestSignalsBitmap = analogBitmap
+    }
+    builder.setCmTestSignals(configs)
+}
 private fun getTemperatureMapping(mapping: Int): ControlMote.CmSensorBusMappingsTemp_e {
     return when(mapping) {
         1 -> ControlMote.CmSensorBusMappingsTemp_e.SENSOR_BUS_RETURN_AIR_TEMP

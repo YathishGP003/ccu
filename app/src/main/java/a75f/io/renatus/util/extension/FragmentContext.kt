@@ -1,11 +1,9 @@
 package a75f.io.renatus.util.extension
 
-import a75f.io.api.haystack.util.validateMigration
 import a75f.io.renatus.R
 import android.content.Context
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
-import java.util.*
 
 /**
  * Extension functions for fragments, contexts, activities...

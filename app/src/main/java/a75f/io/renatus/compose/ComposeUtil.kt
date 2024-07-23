@@ -27,6 +27,7 @@ class ComposeUtil {
         val greyDropDownColor = Color(android.graphics.Color.parseColor("#B6B6B6"))
         val greyDropDownScrollBarColor = Color(android.graphics.Color.parseColor("#B6B6B6"))
         val greyDropDownUnderlineColor = Color(android.graphics.Color.parseColor("#CCCCCC"))
+        val greySearchIcon = Color(android.graphics.Color.parseColor("#999999"))
         val myFontFamily = FontFamily(
             Font(R.font.lato_light, FontWeight.Light),
             Font(R.font.lato_regular, FontWeight.Normal),
@@ -89,7 +90,7 @@ class ComposeUtil {
                         modifier = Modifier.width(1200.dp).height(50.dp)
                     ) {
                         DashDivider(
-                            color = Color.Gray,
+                            color = greyDropDownUnderlineColor,
                             thickness = 2.dp,
                             modifier = Modifier
                                 .padding(16.dp)

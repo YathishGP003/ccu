@@ -1,0 +1,88 @@
+package a75f.io.renatus.util
+
+import a75f.io.logic.Globals
+import a75f.io.renatus.R
+import android.widget.ImageView
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color.Companion.White
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions
+import kotlinx.coroutines.asCoroutineDispatcher
+import java.util.concurrent.Executors
+import java.util.concurrent.ThreadFactory
+import java.util.concurrent.atomic.AtomicInteger
+
+val highPriorityDispatcher = Executors.newSingleThreadExecutor(object : ThreadFactory {
+    private val counter = AtomicInteger(0)
+
+    override fun newThread(r: Runnable): Thread {
+        return Thread(r, "HighPriorityThread-${counter.incrementAndGet()}").apply {
+            priority = Thread.MAX_PRIORITY
+        }
+    }
+}).asCoroutineDispatcher()
+
+fun isSystemTab(): Boolean {
+    return Globals.getInstance().getSelectedTab() == 1
+}
+
+@Composable
+fun GifLoader(modifier: Modifier = Modifier, gifResource: Int) {
+    AndroidView(
+        modifier = modifier,
+        factory = { context ->
+            ImageView(context).apply {
+                Glide.with(context)
+                    .asGif()
+                    .load(gifResource)
+                    .apply(RequestOptions().centerInside())
+                    .into(this)
+            }
+        }
+    )
+}
+
+@Composable
+fun AddProgressGif(){
+    if(isSystemTab()) {
+        Dialog(
+            onDismissRequest = { false },
+            DialogProperties(dismissOnBackPress = false, dismissOnClickOutside = false)
+        ) {
+            Box(
+                modifier = Modifier.wrapContentWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    GifLoader(
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .size(50.dp),
+                        gifResource = R.drawable.loader_75f
+                    )
+                    Text(
+                        text = "Loading System Profile",
+                        color = White,
+                        fontSize = 20.sp,
+                        modifier = Modifier.wrapContentWidth()
+                    )
+                }
+            }
+        }
+    }
+}

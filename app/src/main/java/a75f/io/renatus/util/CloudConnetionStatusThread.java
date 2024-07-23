@@ -8,9 +8,10 @@ import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.preference.PreferenceManager;
-import android.util.Log;
 
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
+import a75f.io.logic.L;
 import a75f.io.logic.cloud.CloudConnectionManager;
 import a75f.io.logic.cloud.CloudConnectionResponseCallback;
 import a75f.io.logic.util.OfflineModeUtilKt;
@@ -38,30 +39,21 @@ public class CloudConnetionStatusThread extends Thread {
         return (mCloudAlive <= CLOUD_DEAD_SKIP_COUNT);
     }
 
-    public boolean isWifiAlive() {
-        return mWifiAlive;
-    }
-
     @Override
     public void run() {
-        Log.d("CCU_CLOUDSTATUS", "Cloud connection status thread started with " + String.valueOf(bIsThreadRunning));
+        CcuLog.d(L.TAG_CCU_CLOUD_STATUS, "Cloud connection status thread started with " + bIsThreadRunning);
         while (!bStopThread) {
             bIsThreadRunning = true;
-            new Handler(Looper.getMainLooper()).postDelayed(new Runnable(){
-                @Override
-                public void run() {
-                    pingCloudServer();
-                }
-            }, 10);
+            new Handler(Looper.getMainLooper()).postDelayed(this::pingCloudServer, 10);
             setCloudConnectionStatus();
             try {
                 sleep(60*1000L);
             } catch (InterruptedException e) {
                 bStopThread = true;
-                Log.d("CCU_CLOUDSTATUS", "Cloud connection status thread interrupted: " + e.getMessage());
+                CcuLog.e(L.TAG_CCU_CLOUD_STATUS, "Cloud connection status thread interrupted: " + e.getMessage());
             }
         }
-        Log.d("CCU_CLOUDSTATUS", "Cloud connection status thread exited");
+        CcuLog.d(L.TAG_CCU_CLOUD_STATUS, "Cloud connection status thread exited");
         bIsThreadRunning = false;
         bStopThread = false;
     }
@@ -70,7 +62,7 @@ public class CloudConnetionStatusThread extends Thread {
         CloudConnectionResponseCallback responseCallback = new CloudConnectionResponseCallback() {
             @Override
             public void onSuccessResponse(boolean isOk) {
-                Log.i(TAG_CLOUD_CONNECTION_STATUS, "onSuccessResponse "+ isOk);
+                CcuLog.i(TAG_CLOUD_CONNECTION_STATUS, "onSuccessResponse "+ isOk);
                 if(OfflineModeUtilKt.isOfflineMode())
                     isOk = false;
                 NotificationHandler.setCloudConnectionStatus(isOk);
@@ -78,7 +70,7 @@ public class CloudConnetionStatusThread extends Thread {
 
             @Override
             public void onErrorResponse(boolean isOk) {
-                Log.i(TAG_CLOUD_CONNECTION_STATUS, "onErrorResponse");
+                CcuLog.e(TAG_CLOUD_CONNECTION_STATUS, "onErrorResponse");
                 NotificationHandler.setCloudConnectionStatus(isOk);
             }
         };
@@ -116,7 +108,15 @@ public class CloudConnetionStatusThread extends Thread {
                 if (mCloudAlive % WIFI_TOGGLE_SKIP_COUNT == 0) {
                     WifiManager wifi = (WifiManager) Globals.getInstance().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
                     wifi.setWifiEnabled(false);
-                    wifi.setWifiEnabled(true);
+                    new Handler().postDelayed(() -> {
+                        try {
+                            wifi.setWifiEnabled(true);
+                        } catch (NullPointerException e) {
+                            CcuLog.e(TAG_CLOUD_CONNECTION_STATUS, "NullPointerException while enabling Wi-Fi", e);
+                        } catch (Exception e) {
+                            CcuLog.e(TAG_CLOUD_CONNECTION_STATUS, "Exception while enabling Wi-Fi", e);
+                        }
+                    }, 1000);
                 }
                 if(mCloudAlive > (WIFI_TOGGLE_SKIP_COUNT * 20))
                     RenatusApp.rebootTablet();

@@ -70,7 +70,7 @@ object TunerUtil {
         return 0.0
     }
 
-    fun updateTunerLevels(tunerPointId: String, zoneRef: String, domainName: String, hayStack: CCUHsApi) {
+    fun updateTunerLevels(tunerPointId: String, zoneRef: String, domainName: String, hayStack: CCUHsApi, defaultVal: Double) {
 
         //CcuLog.e(Constants.TAG_DM_CCU, "updateTunerLevels : $domainName")
         //If all the level are successfully copied from a zone tuner, no need to go further.
@@ -84,7 +84,15 @@ object TunerUtil {
         if (copyFromBuildingTuner(tunerPointId, domainName, hayStack)) {
             return
         }
-        //CcuLog.e(Constants.TAG_DM_CCU, " Tuner initialization is not complete : $domainName")
+
+        CcuLog.e(Domain.LOG_TAG_TUNER, "Tuner Copy failed, copying fallback value to tuner point $domainName")
+        hayStack.pointWrite(
+            HRef.copy(tunerPointId),
+            17,
+            CCUHsApi.getInstance().ccuUserName,
+            HNum.make(defaultVal),
+            HNum.make(0)
+        )
     }
 
     private fun copyTunerLevel(

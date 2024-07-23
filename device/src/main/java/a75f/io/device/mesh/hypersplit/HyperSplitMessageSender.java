@@ -3,8 +3,6 @@ package a75f.io.device.mesh.hypersplit;
 import static a75f.io.device.serial.MessageType.HYPERSPLIT_CCU_DATABASE_SEED_MESSAGE;
 import static a75f.io.device.serial.MessageType.HYPERSTAT_CCU_TO_CM_SERIALIZED_MESSAGE;
 
-import android.util.Log;
-
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
@@ -115,7 +113,7 @@ public class HyperSplitMessageSender {
      * @param equipRef
      */
     public static void sendControlMessage(int address, String equipRef) {
-        Log.d(L.TAG_CCU_SERIAL, "sendControlMessage("+address+","+equipRef+")");
+        CcuLog.d(L.TAG_CCU_SERIAL, "sendControlMessage("+address+","+equipRef+")");
         HyperSplit.HyperSplitControlsMessage_t controls = HyperSplitMessageGenerator.getControlMessage(address,
                 equipRef).build();
 
@@ -159,7 +157,7 @@ public class HyperSplitMessageSender {
     // sendIduSeedSetting() if VRV is supported at some point
 
     private static void writeMessageBytesToUsb(int address, MessageType msgType, byte[] dataBytes) {
-        Log.d(L.TAG_CCU_SERIAL,"writeMessageBytesToUsb");
+        CcuLog.d(L.TAG_CCU_SERIAL,"writeMessageBytesToUsb");
         HyperSplitSettingsUtil.Companion.setCcuControlMessageTimer(System.currentTimeMillis());
         byte[] msgBytes = new byte[dataBytes.length + FIXED_INT_BYTES_SIZE * 2 + 1];
         //CM currently supports both legacy byte array and protobuf encoding. Message type is kept as raw byte at the start to help CM determine which type
@@ -177,7 +175,7 @@ public class HyperSplitMessageSender {
         System.arraycopy(dataBytes, 0, msgBytes,  2 * FIXED_INT_BYTES_SIZE + 1, dataBytes.length);
 
         LSerial.getInstance().sendSerialBytesToCM(msgBytes);
-        Log.d(L.TAG_CCU_SERIAL, Arrays.toString(msgBytes));
+        CcuLog.d(L.TAG_CCU_SERIAL, Arrays.toString(msgBytes));
 
     }
 

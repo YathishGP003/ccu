@@ -47,6 +47,7 @@ import a75f.io.logic.bo.building.hyperstat.common.HyperStatPointsUtil;
 import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.bo.util.CCUUtils;
+import a75f.io.logic.migration.VavAndAcbProfileMigration;
 import a75f.io.logic.migration.hyperstat.CpuPointsMigration;
 import a75f.io.logic.migration.hyperstat.MigratePointsUtil;
 import a75f.io.logic.migration.title24.Title24Migration;
@@ -153,6 +154,15 @@ public class MigrationUtil {
             PreferenceUtil.setHSMonitoringGenericFaultEnumMigration();
         }
 
+        if (!PreferenceUtil.getACBCondensateSensorMigration()) {
+            VavAndAcbProfileMigration.Companion.condensateSensorCleanupMigration(ccuHsApi);
+            PreferenceUtil.setACBCondensateSensorMigration();
+        }
+        if (!PreferenceUtil.isHyperStatSplitGatewayRefMigrationDone()) {
+            migrateHyperStatSplitGatewayRef(ccuHsApi);
+            PreferenceUtil.setHyperStatSplitGatewayRefMigrationDone();
+        }
+
         migrateAirFlowTunerPoints(ccuHsApi);
         migrateZoneScheduleTypeIfMissed(ccuHsApi);
         if(SchedulableMigrationKt.validateMigration()) {
@@ -175,6 +185,20 @@ public class MigrationUtil {
         cleanUpAndCreateZoneSchedules(ccuHsApi);
         syncZoneSchedulesFromLocal(ccuHsApi);
         ccuHsApi.scheduleSync();
+    }
+
+    private static void migrateHyperStatSplitGatewayRef(CCUHsApi hayStack) {
+        ArrayList<HashMap<Object, Object>> hsEquips = hayStack.readAllEntities("equip and hyperstatsplit");
+        HashMap<Object, Object> sysEquipMap = hayStack.readEntity("system and equip and not modbus and not connectModule");
+        if (sysEquipMap.containsKey("id") && sysEquipMap.get("id") != null) {
+            hsEquips.forEach(equipMap -> {
+                Equip hsEquip = new Equip.Builder().setHashMap(equipMap).build();
+                if (hsEquip.getGatewayRef() != sysEquipMap.get("id").toString()) {
+                    Equip updatedEquip = new Equip.Builder().setHashMap(equipMap).setGatewayRef(sysEquipMap.get("id").toString()).build();
+                    hayStack.updateEquip(updatedEquip, updatedEquip.getId());
+                }
+            });
+        }
     }
 
     private static void deleteDuplicateLimitsifAny(CCUHsApi ccuHsApi) {

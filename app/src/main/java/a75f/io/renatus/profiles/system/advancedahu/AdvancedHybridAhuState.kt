@@ -36,6 +36,9 @@ open class AdvancedHybridAhuState {
     var relay7Config by mutableStateOf(ConfigState(false, 0))
     var relay8Config by mutableStateOf(ConfigState(false, 0))
 
+   var isStateChanged by mutableStateOf(false)
+   var isSaveRequired by mutableStateOf(false)
+    var noOfAnalogOutDynamic = 0
 
     var analogOut1Enabled by mutableStateOf(false)
     var analogOut2Enabled by mutableStateOf(false)

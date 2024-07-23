@@ -52,7 +52,7 @@ class AdvancedAhuAlgoHandler (val equip: SystemEquip) {
                 val currentState = point.readHisVal()
                 CcuLog.i(
                     L.TAG_CCU_SYSTEM, "stageIndex $stageIndex getFanRelayState: currentState: " +
-                            "$currentState, stageThreshold: $stageThreshold, systemHeatingLoop: " +
+                            "$currentState, stageThreshold: $stageThreshold, systemFanLoop: " +
                             "$systemFanLoop, relayHysteresis: $relayHysteresis")
                 if (currentState.toInt() == 0) systemFanLoop > (stageThreshold +.01) else
                     systemFanLoop > (stageThreshold - relayHysteresis).coerceAtLeast(0.0)
@@ -107,12 +107,15 @@ class AdvancedAhuAlgoHandler (val equip: SystemEquip) {
     fun getAdvancedAhuRelayState(association : Point, systemEquip: VavAdvancedHybridSystemEquip, coolingStages: Int, heatingStages: Int,
                                  fanStages: Int, systemOccupied : Boolean, isConnectEquip : Boolean): Pair<Point, Boolean> {
 
-        val associatedPointName = relayAssociationToDomainName(association.readDefaultVal().toInt())
+        val associatedPointName: String
         //Get logical point from association index
         val associatedPoint = if (isConnectEquip) {
+            associatedPointName = connectRelayAssociationToDomainName(association.readDefaultVal().toInt())
             getDomainPointForName(associatedPointName, systemEquip.connectEquip1)
         } else {
+            associatedPointName = relayAssociationToDomainName(association.readDefaultVal().toInt())
             getDomainPointForName(associatedPointName, systemEquip)
+
         }
         val stageIndex = getStageIndex(associatedPoint)
         CcuLog.i(L.TAG_CCU_SYSTEM, "getRelayState: associatedPoint: $associatedPointName, stage: $stageIndex ")

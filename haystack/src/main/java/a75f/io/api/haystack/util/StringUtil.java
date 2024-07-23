@@ -1,6 +1,8 @@
 package a75f.io.api.haystack.util;
 
 
+import java.util.Locale;
+
 public class StringUtil {
 
     private StringUtil(){
@@ -14,10 +16,10 @@ public class StringUtil {
             modifiedMessage.append(space);
             if(messageWord.matches("-?\\d+(\\.\\d+)?")){
                 if(messageWord.contains(".")) {
-                    modifiedMessage.append(String.format("%,.2f", Double.parseDouble(messageWord)));
+                    modifiedMessage.append(String.format(Locale.US, "%,.2f", Double.parseDouble(messageWord)));
                 }
                 else {
-                    modifiedMessage.append(String.format("%,d", Long.parseLong(messageWord)));
+                    modifiedMessage.append(String.format(Locale.US,"%,d", Long.parseLong(messageWord)));
                 }
             }
             else{
@@ -35,10 +37,11 @@ public class StringUtil {
             modifiedMessage.append(space);
             if(messageWord.matches("-?\\d+(\\.\\d+)?")){
                 if(messageWord.contains(".")) {
-                    modifiedMessage.append(String.format("%,.3f", Double.parseDouble(messageWord)));
+                    String[] versionArray = messageWord.split("\\.");
+                    modifiedMessage.append(String.format(Locale.US, "%,d", Long.parseLong(versionArray[0]))).append(".").append(versionArray[1]);
                 }
                 else {
-                    modifiedMessage.append(String.format("%,d", Long.parseLong(messageWord)));
+                    modifiedMessage.append(String.format(Locale.US,"%,d", Long.parseLong(messageWord)));
                 }
             }
             else{

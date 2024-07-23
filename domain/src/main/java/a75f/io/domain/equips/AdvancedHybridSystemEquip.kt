@@ -33,12 +33,9 @@ open class AdvancedHybridSystemEquip (equipRef : String, connectEquipRef : Strin
     val sensorBusAddress2Enable = Point(DomainName.sensorBusAddress2Enable, equipRef)
     val sensorBusAddress3Enable = Point(DomainName.sensorBusAddress3Enable, equipRef)
 
-    val sensorBus0PressureEnable = Point(DomainName.sensorBusPressureEnable, equipRef)  // TODO correct the domainName
-    val sensorBus0PressureAssociation = Point(DomainName.pressureSensorBusAdd0, equipRef) // TODO correct the domainName
-    val pressureSensorBusAdd0 = Point(DomainName.pressureSensorBusAdd0, equipRef)
-    val pressureSensorBusAdd1 = Point(DomainName.pressureSensorBusAdd1, equipRef)
-    val pressureSensorBusAdd2 = Point(DomainName.pressureSensorBusAdd2, equipRef)
-    val pressureSensorBusAdd3 = Point(DomainName.pressureSensorBusAdd3, equipRef)
+    val sensorBus0PressureEnable = Point(DomainName.sensorBusPressureEnable, equipRef)
+    val sensorBus0PressureAssociation = Point(DomainName.pressureSensorBusAdd0, equipRef)
+
 
     val temperatureSensorBusAdd0 = Point(DomainName.temperatureSensorBusAdd0, equipRef)
     val temperatureSensorBusAdd1 = Point(DomainName.temperatureSensorBusAdd1, equipRef)

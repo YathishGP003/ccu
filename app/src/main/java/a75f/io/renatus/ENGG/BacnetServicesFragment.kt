@@ -1,12 +1,12 @@
 package a75f.io.renatus.ENGG
 
+import a75f.io.logger.CcuLog
 import a75f.io.renatus.ENGG.bacnet.services.FragmentReadProperty
 import a75f.io.renatus.ENGG.bacnet.services.FragmentReadPropertyMultiple
 import a75f.io.renatus.ENGG.bacnet.services.FragmentWhoIs
 import a75f.io.renatus.ENGG.bacnet.services.FragmentWriteProperty
 import a75f.io.renatus.R
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -46,12 +46,12 @@ class BacnetServicesFragment : Fragment() {
         val spin = view.findViewById(R.id.spinner) as Spinner
         spin.onItemSelectedListener = object : OnItemSelectedListener {
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, position: Int, p3: Long) {
-                Log.d(TAG, "selected item is ${propertyArray[position]}")
+                CcuLog.d(TAG, "selected item is ${propertyArray[position]}")
                 updateView(propertyArray[position])
             }
 
             override fun onNothingSelected(p0: AdapterView<*>?) {
-                Log.d(TAG, "onNothingSelected")
+                CcuLog.d(TAG, "onNothingSelected")
             }
 
         }
@@ -63,7 +63,7 @@ class BacnetServicesFragment : Fragment() {
     }
 
     private fun updateView(selectedView: String) {
-        Log.d(TAG, "update view -> $selectedView")
+        CcuLog.d(TAG, "update view -> $selectedView")
         var fragment: Fragment = FragmentReadProperty()
         when (selectedView) {
             READ_PROPERTY -> {

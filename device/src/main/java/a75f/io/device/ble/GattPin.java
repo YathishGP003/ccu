@@ -1,7 +1,7 @@
 package a75f.io.device.ble;
 
-import android.util.Log;
 
+import a75f.io.logger.CcuLog;
 
 /**
  * Created by ryanmattison isOn 7/24/17.
@@ -14,16 +14,8 @@ public class GattPin  {
 
     public GattPin() { /* Default Constructor */ }
 
-    public GattPin(int pin) {
-        mPin = pin;
-    }
-
     public int getPin() {
         return mPin;
-    }
-
-    public void setPin(int pin) {
-        this.mPin = pin;
     }
 
     public void fromBytes(byte[] bytes) {
@@ -34,12 +26,8 @@ public class GattPin  {
             mPin *= 10;
         }
         mPin /= 10;
-        Log.d(TAG, "BLE PIN: " + mPin);
+        CcuLog.d(TAG, "BLE PIN: " + mPin);
 
-    }
-
-    public byte[] toBytes() {
-        return new byte[0];
     }
 
     public static GattPin initialize(byte[] bytes)

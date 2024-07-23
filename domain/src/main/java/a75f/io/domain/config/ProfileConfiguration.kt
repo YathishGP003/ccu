@@ -78,7 +78,11 @@ abstract class ProfileConfiguration (var nodeAddress : Int, var nodeType : Strin
     }
     fun getDefaultEnableConfig(domainName : String, model : SeventyFiveFProfileDirective) : EnableConfig {
         val point = model.points.find { it.domainName == domainName }
-        val config = EnableConfig(domainName, point?.defaultValue?.toString()?.toBoolean() ?: false)
+        val config = if (point?.defaultValue is Integer) {
+            EnableConfig(domainName, (point?.defaultValue as Integer) > 0)
+        } else {
+            EnableConfig(domainName, point?.defaultValue?.toString()?.toBoolean() ?: false)
+        }
         config.disName = point?.name ?:""
         return config
     }

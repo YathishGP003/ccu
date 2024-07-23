@@ -1,17 +1,10 @@
 package a75f.io.renatus.util;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Typeface;
-import android.util.Log;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.NumberPicker;
-import android.widget.TextView;
 
-import java.lang.reflect.Field;
-
-import a75f.io.renatus.R;
+import a75f.io.logger.CcuLog;
+import a75f.io.logic.L;
 
 public class FontManager {
 
@@ -24,7 +17,7 @@ public class FontManager {
 
     public static String getColoredSpanned(String text, String color) {
         String input = "<font color=" + color + ">" + text + "</font>";
-        Log.i("ColorfromHex","String:"+text+" Color:"+color);
+        CcuLog.i(L.TAG_CCU_UI,"ColorFromHex String:"+text+" Color:"+color);
         return input;
     }
 

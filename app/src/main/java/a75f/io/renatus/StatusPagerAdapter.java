@@ -1,9 +1,15 @@
 package a75f.io.renatus;
 
+import android.view.ViewGroup;
+
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentStatePagerAdapter;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import a75f.io.logger.CcuLog;
 import a75f.io.renatus.schedules.SchedulerFragment;
 
 /**
@@ -12,38 +18,22 @@ import a75f.io.renatus.schedules.SchedulerFragment;
 
 public class StatusPagerAdapter extends FragmentStatePagerAdapter
 {
+	private List<Fragment> fragments;
 	public StatusPagerAdapter(FragmentManager fm)
 	{
 		super(fm);
+		fragments = new ArrayList<>();
+		fragments.add(ZoneFragmentNew.newInstance());
+		fragments.add(SystemFragment.newInstance());
+		fragments.add(SchedulerFragment.newInstance());
+		fragments.add(AlertsFragment.newInstance());
 	}
-	
-	
-	@Override
+
 	public Fragment getItem(int position)
 	{
-		// getItem is called to instantiate the fragment for the given page.
-		// Return a PlaceholderFragment (defined as a static inner class below).
-		Fragment fragment = null;
-		switch (position)
-		{
-			case 0:
-				//fragment = ZoneFragmentTemp.newInstance();
-				fragment = ZoneFragmentNew.newInstance();
-				break;
-			case 1:
-				//fragment = SystemFragment_bkp.newInstance();
-				fragment = SystemFragment.newInstance();
-				break;
-			case 2:
-				fragment = SchedulerFragment.newInstance();
-				break;
-			case 3:
-				fragment = AlertsFragment.newInstance();
-				break;
-		}
-		return fragment;
+		CcuLog.i("UI_PROFILING", "CreateItem: " + position + " " + fragments.get(position).toString());
+		return fragments.get(position);
 	}
-	
 	
 	@Override
 	public int getCount()
@@ -74,5 +64,15 @@ public class StatusPagerAdapter extends FragmentStatePagerAdapter
 				return "Alerts";
 		}
 		return null;
+	}
+
+	/**
+	 * Intercepting the destroyItem method to avoid view deletion and creation during tab switch.
+	 * Messing with android FW : but it seems like a decent quick fix that works till we upgrade to new ViewPager.
+	 */
+	@Override
+	public void destroyItem(ViewGroup container, int position, Object object) {
+		CcuLog.i("UI_PROFILING", "destroyItem: " + position + " " + object.toString());
+		//super.destroyItem(container, position, object);
 	}
 }

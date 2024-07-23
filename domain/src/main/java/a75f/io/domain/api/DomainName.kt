@@ -149,7 +149,8 @@ object DomainName {
     const val condensateNC = "condensateNC"
     const val condensateNO = "condensateNO"
     const val chilledWaterValve = "chilledWaterValveCoolCmdPoint"
-    const val chilledWaterShutOffValve = "chilledWaterValveIsolationCmdPoint"
+    const val chilledWaterValveIsolationCmdPointNO = "chilledWaterValveIsolationCmdPointNO"
+    const val chilledWaterValveIsolationCmdPointNC = "chilledWaterValveIsolationCmdPointNC"
     const val relayActivationHysteresis = "relayActivationHysteresis"
 
     //VAV-TR

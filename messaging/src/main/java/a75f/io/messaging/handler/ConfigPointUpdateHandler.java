@@ -20,6 +20,7 @@ import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.SystemProfile;
 import a75f.io.logic.bo.building.system.dab.DabFullyModulatingRtu;
 import a75f.io.logic.bo.building.system.dab.DabStagedRtu;
+import a75f.io.logic.bo.building.system.vav.VavAdvancedHybridRtu;
 import a75f.io.logic.bo.building.system.vav.VavFullyModulatingRtu;
 import a75f.io.logic.bo.building.system.vav.VavIERtu;
 import a75f.io.logic.bo.building.system.vav.VavStagedRtu;
@@ -113,7 +114,12 @@ class ConfigPointUpdateHandler {
             DomainManager.INSTANCE.addSystemDomainEquip(hayStack);
             removeWritableTagFromCMDevicePort(configPoint, hayStack, val);
         } else if (systemProfile instanceof VavStagedRtu) {
-            //((VavStagedRtu) systemProfile).setConfigEnabled(configType, val);
+
+            if (systemProfile instanceof VavAdvancedHybridRtu) {
+                ((VavStagedRtu) systemProfile).setConfigEnabled(configType, val);
+                return;
+            }
+
             boolean isVfd = systemProfile instanceof VavStagedRtuWithVfd;
             SeventyFiveFProfileDirective model = (SeventyFiveFProfileDirective) (isVfd ? ModelLoader.INSTANCE.getVavStagedVfdRtuModelDef()
                                                         :ModelLoader.INSTANCE.getVavStageRtuModelDef());
@@ -187,6 +193,10 @@ class ConfigPointUpdateHandler {
             DomainManager.INSTANCE.addSystemDomainEquip(hayStack);
         } else if (systemProfile instanceof VavStagedRtu) {
 
+            if(systemProfile instanceof VavAdvancedHybridRtu){
+                ((VavStagedRtu) systemProfile).setConfigAssociation(relayType, val);
+                return;
+            }
             boolean isVfd = systemProfile instanceof VavStagedRtuWithVfd;
             SeventyFiveFProfileDirective model = (SeventyFiveFProfileDirective) (isVfd ? ModelLoader.INSTANCE.getVavStagedVfdRtuModelDef()
                     :ModelLoader.INSTANCE.getVavStageRtuModelDef());

@@ -1,11 +1,12 @@
 package a75f.io.logic.bo.building.schedules.occupancy;
 
-import android.util.Log;
+import static a75f.io.domain.api.DomainName.occupancyMode;
 
 import org.projecthaystack.UnknownRecException;
 
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.schedules.Occupancy;
 
 public class WindowSensor implements OccupancyTrigger {
     private OccupancyUtil occupancyUtil;

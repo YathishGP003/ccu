@@ -143,7 +143,7 @@ public class ModbusEquip {
 
         Device modbusDevice = new Device.Builder()
                 .setDisplayName(modbusEquipType+"-"+equipmentInfo.getSlaveId())
-                .addMarker("network").addMarker("modbus").addMarker(modbusEquipType.toLowerCase()).addMarker("his")
+                .addMarker("network").addMarker("modbus").addMarker(modbusEquipType.toLowerCase())
                 .setAddr(equipmentInfo.getSlaveId())
                 .setSiteRef(siteRef)
                 .setFloorRef(floorRef)

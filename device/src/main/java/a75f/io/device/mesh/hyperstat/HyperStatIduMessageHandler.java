@@ -16,7 +16,6 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.vrv.IduThermister;
 import a75f.io.logic.bo.building.vrv.VrvControlMessageCache;
-import a75f.io.logic.bo.util.TemperatureMode;
 
 /**
  * Handle IDU specific message for HyperStat VRV Variant.
@@ -226,8 +225,8 @@ class HyperStatIduMessageHandler {
                                    .build();
     }
 
-    public static HyperStat.HyperStatCcuDatabaseSeedMessage_t getIduSeedMessage(String zone, int address, String equipRef, TemperatureMode temperatureMode) {
-        HyperStat.HyperStatSettingsMessage_t hyperStatSettingsMessage_t = getSettingsMessage(zone, address, equipRef, temperatureMode);
+    public static HyperStat.HyperStatCcuDatabaseSeedMessage_t getIduSeedMessage(String zone, int address, String equipRef) {
+        HyperStat.HyperStatSettingsMessage_t hyperStatSettingsMessage_t = getSettingsMessage(zone, address, equipRef);
         HyperStat.HyperStatIduControlsMessage_t hyperStatControlsMessage_t = HyperStatIduMessageHandler.getIduControlMessage(address, CCUHsApi.getInstance());
 
         CcuLog.i(L.TAG_CCU_SERIAL, "Seed Message t"+hyperStatSettingsMessage_t.toByteString().toString());

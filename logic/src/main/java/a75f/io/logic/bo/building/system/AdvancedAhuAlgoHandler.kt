@@ -52,7 +52,7 @@ class AdvancedAhuAlgoHandler (val equip: SystemEquip) {
                 val currentState = point.readHisVal()
                 CcuLog.i(
                     L.TAG_CCU_SYSTEM, "stageIndex $stageIndex getFanRelayState: currentState: " +
-                            "$currentState, stageThreshold: $stageThreshold, systemHeatingLoop: " +
+                            "$currentState, stageThreshold: $stageThreshold, systemFanLoop: " +
                             "$systemFanLoop, relayHysteresis: $relayHysteresis")
                 if (currentState.toInt() == 0) systemFanLoop > (stageThreshold +.01) else
                     systemFanLoop > (stageThreshold - relayHysteresis).coerceAtLeast(0.0)

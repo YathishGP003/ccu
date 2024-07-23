@@ -86,6 +86,8 @@ public class RemoteCommandHandlerUtil {
     private static long homeAppDownloadId = -1;
     private static String homeAppApkName = "";
 
+    private static BroadcastReceiver otaBroadcastReceiver = null;
+
     public static void handleRemoteCommand(String commands, String cmdLevel, String id) {
         CcuLog.i(L.TAG_CCU_REMOTE_COMMAND, "RemoteCommandHandlerUtil=" + commands + "," + cmdLevel);
         switch (commands) {
@@ -311,62 +313,70 @@ public class RemoteCommandHandlerUtil {
 
     public static void updateCCU(String id, Fragment currentFragment, FragmentActivity activity) {
         CcuLog.i(TAG_CCU_DOWNLOAD, "got command to install update--" + DownloadManager.EXTRA_DOWNLOAD_ID + "," + id);
-        RenatusApp.getAppContext().registerReceiver(new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                String action = intent.getAction();
-                if (DownloadManager.ACTION_DOWNLOAD_COMPLETE.equals(action)) {
-                    long downloadId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, 0);
-                    if (downloadId == AppInstaller.getHandle().getCCUAppDownloadId()) {
-                        if(CCUHsApi.getInstance().isCCURegistered()) {
-                            RxTask.executeAsync(() -> UtilityApplication.getMessagingAckJob().doMessageAck());
-                        }
-                        if (AppInstaller.getHandle().getDownloadedFileVersion(downloadId) > 1) {
-                            AppInstaller.getHandle().install(null, false, true, true);
-                        } else {
-                            CcuLog.w(TAG_CCU_DOWNLOAD, "Update command ignored, Invalid version downloaded");
-                            Globals.getInstance().setCcuUpdateTriggerTimeToken(0);
-                        }
-                    } else if(downloadId == bacAppDownloadId){
-                        String fileName = resolveApkFilename(bacAppApkName);
-                        if (fileName != null) {
-                            String[] commands = new String[]{
-                                    String.format(INSTALL_CMD, fileName)
-                            };
-                            RenatusApp.executeAsRoot(commands, BAC_APP_PACKAGE_NAME, false);
-                        }
-                    } else if(downloadId == remoteAccessAppDownloadId){
-                        String fileName = resolveApkFilename(remoteAccessApkName);
-                        if (fileName != null) {
-                            String[] commands = new String[]{
-                                    String.format(INSTALL_CMD, fileName),
-                                    String.format(APPOPS_SET_ALLOW_CMD, REMOTE_ACCESS_PACKAGE_NAME, "PROJECT_MEDIA"),                     // Screen Capture access
-                                    String.format(APPOPS_SET_ALLOW_CMD, REMOTE_ACCESS_PACKAGE_NAME, "SYSTEM_ALERT_WINDOW"),               // Overlay access
-                                    String.format(PM_GRANT_CMD, REMOTE_ACCESS_PACKAGE_NAME, "android.permission.WRITE_SECURE_SETTINGS")   // Accessibility access
-                            };
-                            RenatusApp.executeAsRoot(commands, REMOTE_ACCESS_PACKAGE_NAME, false);
-                        }
-                    } else if(downloadId == homeAppDownloadId){
-                        String fileName = resolveApkFilename(homeAppApkName);
-                        int homeAppVersion = AppInstaller.getHandle().getDownloadedFileVersion(homeAppDownloadId);
-                        if (homeAppVersion >= 1) {
-                            CcuLog.i(TAG_CCU_DOWNLOAD, String.format("Updating home app to version %d", homeAppVersion));
-                            PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit().putInt("home_app_version", homeAppVersion).commit();
-                        }
+        if (otaBroadcastReceiver == null) {
+            CcuLog.i(TAG_CCU_DOWNLOAD, "Registering OTA download BroadcastReceiver");
+            otaBroadcastReceiver = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    String action = intent.getAction();
+                    if (DownloadManager.ACTION_DOWNLOAD_COMPLETE.equals(action)) {
+                        long downloadId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, 0);
+                        if (downloadId == AppInstaller.getHandle().getCCUAppDownloadId()) {
+                            if (CCUHsApi.getInstance().isCCURegistered()) {
+                                RxTask.executeAsync(() -> UtilityApplication.getMessagingAckJob().doMessageAck());
+                            }
+                            if (AppInstaller.getHandle().getDownloadedFileVersion(downloadId) > 1) {
+                                AppInstaller.getHandle().install(null, false, true, true);
+                            } else {
+                                CcuLog.w(TAG_CCU_DOWNLOAD, "Update command ignored, Invalid version downloaded");
+                                Globals.getInstance().setCcuUpdateTriggerTimeToken(0);
+                            }
+                        } else if (downloadId == bacAppDownloadId) {
+                            String fileName = resolveApkFilename(bacAppApkName);
+                            if (fileName != null) {
+                                String[] commands = new String[]{
+                                        String.format(INSTALL_CMD, fileName)
+                                };
+                                RenatusApp.executeAsRoot(commands, BAC_APP_PACKAGE_NAME, false);
+                            }
+                        } else if (downloadId == remoteAccessAppDownloadId) {
+                            String fileName = resolveApkFilename(remoteAccessApkName);
+                            if (fileName != null) {
+                                int appVersion = AppInstaller.getHandle().getDownloadedFileVersion(remoteAccessAppDownloadId);
+                                if (appVersion >= 1) {
+                                    CcuLog.i(TAG_CCU_DOWNLOAD, String.format("Updating remote app to version %d", appVersion));
+                                }
+                                String[] commands = new String[]{
+                                        String.format(INSTALL_CMD, fileName),
+                                        String.format(APPOPS_SET_ALLOW_CMD, REMOTE_ACCESS_PACKAGE_NAME, "PROJECT_MEDIA"),                     // Screen Capture access
+                                        String.format(APPOPS_SET_ALLOW_CMD, REMOTE_ACCESS_PACKAGE_NAME, "SYSTEM_ALERT_WINDOW"),               // Overlay access
+                                        String.format(PM_GRANT_CMD, REMOTE_ACCESS_PACKAGE_NAME, "android.permission.WRITE_SECURE_SETTINGS")   // Accessibility access
+                                };
+                                RenatusApp.executeAsRoot(commands, REMOTE_ACCESS_PACKAGE_NAME, false);
+                            }
+                        } else if (downloadId == homeAppDownloadId) {
+                            String fileName = resolveApkFilename(homeAppApkName);
+                            int homeAppVersion = AppInstaller.getHandle().getDownloadedFileVersion(homeAppDownloadId);
+                            if (homeAppVersion >= 1) {
+                                CcuLog.i(TAG_CCU_DOWNLOAD, String.format("Updating home app to version %d", homeAppVersion));
+                                PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit().putInt("home_app_version", homeAppVersion).commit();
+                            }
 
-                        if (fileName != null) {
-                            String[] commands = new String[]{
-                                    String.format(UNINSTALL_CMD, LEGACY_HOME_APP_PACKAGE_NAME),
-                                    String.format(INSTALL_CMD, fileName),
-                                    String.format(SET_HOME_APP_CMD, HOME_APP_PACKAGE_NAME)
-                            };
-                            RenatusApp.executeAsRoot(commands, HOME_APP_PACKAGE_NAME, false);
+                            if (fileName != null) {
+                                String[] commands = new String[]{
+                                        String.format(UNINSTALL_CMD, LEGACY_HOME_APP_PACKAGE_NAME),
+                                        String.format(INSTALL_CMD, fileName),
+                                        String.format(SET_HOME_APP_CMD, HOME_APP_PACKAGE_NAME)
+                                };
+                                RenatusApp.executeAsRoot(commands, HOME_APP_PACKAGE_NAME, false);
+                            }
                         }
                     }
                 }
-            }
+            };
 
-        }, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+            RenatusApp.getAppContext().registerReceiver(otaBroadcastReceiver, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+        }
 
         if (id.startsWith("RENATUS_CCU") || id.startsWith("CCU") || id.startsWith("DAIKIN_CCU")) {
             if (System.currentTimeMillis() > Globals.getInstance().getCcuUpdateTriggerTimeToken() + 5 * 60 * 1000) {

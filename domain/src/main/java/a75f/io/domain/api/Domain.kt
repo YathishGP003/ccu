@@ -1,11 +1,13 @@
 package a75f.io.domain.api
 
 import a75f.io.api.haystack.CCUHsApi
+import a75f.io.api.haystack.CCUTagsDb
 import a75f.io.domain.devices.CmBoardDevice
 import a75f.io.domain.devices.ConnectDevice
 import a75f.io.domain.equips.BuildingEquip
 import a75f.io.domain.equips.DomainEquip
 import a75f.io.domain.logic.DomainManager
+import a75f.io.logger.CcuLog
 import android.annotation.SuppressLint
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import io.seventyfivef.domainmodeler.common.point.MultiStateConstraint
@@ -284,5 +286,25 @@ object Domain {
 
     fun readDevice(modelId: String) : Map<Any,Any> {
         return hayStack.readEntity("device and sourceModel==\"$modelId\" or modelId == \"$modelId\"")
+    }
+    @JvmStatic
+    fun readValAtLevelByDomain(domainName: String, level: Int) : Double {
+        val point: HashMap<Any, Any> = hayStack.readEntity("point and domainName == \"$domainName\"")
+        if (point.isNotEmpty()) {
+            val id = point["id"].toString()
+            return hayStack.readDefaultValByLevel(id, level)
+        } else {
+            CcuLog.d(CCUTagsDb.TAG_CCU_HS, "Invalid point read attempt: $domainName")
+            return 0.0
+        }
+    }
+    fun writeValAtLevelByDomain(domainName: String, level: Int, value: Double) {
+        val point: HashMap<Any, Any> = hayStack.readEntity("point and domainName == \"$domainName\"")
+        if (point.isNotEmpty()) {
+            val id = point["id"].toString()
+            hayStack.writePoint(id, level, hayStack.ccuUserName, value, 0)
+        } else {
+            CcuLog.d(CCUTagsDb.TAG_CCU_HS, "Invalid point write attempt: $domainName")
+        }
     }
 }

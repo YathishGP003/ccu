@@ -49,6 +49,7 @@ public class PreferenceUtil {
     public static final String HS_MONITORING_GENERIC_FAULT_ENUM_MIGRATION = "hsMonitoringGenericFaultEnumMigration";
 
     public static final String LOCALLY_SYNC_SCHEDULE = "locallySyncedSchedules";
+    public static final String TEMP_MODE_MIGRATION = "tempModeMigration";
 
     public static final String MODBUS_ENUM_CORRECTION = "modbusEnumCorrection";
 
@@ -56,6 +57,7 @@ public class PreferenceUtil {
     public static final String RECOVER_HELIO_NODE_ACB_TUNERS_MIGRATION = "recoverHelioNodeACBTunersMigration";
     public static final String ACB_COND_SENSOR_MIGRATION = "acbCondensateSensorMigration";
     public static final String HSS_GATEWAY_REF_MIGRATION = "hssGatewayRefMigration";
+    public static final String HIS_TAG_REMOVAL_FROM_NON_DM_DEVICES = "hisTagRemovalFromNonDmDevices";
 
     public static void setContext(Context c) {
         context= c;
@@ -483,6 +485,12 @@ public class PreferenceUtil {
         setBooleanPreference(HS_MONITORING_GENERIC_FAULT_ENUM_MIGRATION, true);
     }
 
+    public static void setTempModeMigrationNotRequired() {
+        setBooleanPreference(TEMP_MODE_MIGRATION, true);
+    }
+    public static boolean isTempModeMigrationRequired() {
+        return getBooleanPreference(TEMP_MODE_MIGRATION);
+    }
     public static boolean isModbusEnumCorrectionRequired() {
         return getBooleanPreference(MODBUS_ENUM_CORRECTION);
     }
@@ -496,6 +504,11 @@ public class PreferenceUtil {
     public static void setHyperStatSplitGatewayRefMigrationDone() {
         setBooleanPreference(HSS_GATEWAY_REF_MIGRATION, true);
     }
-
+    public static boolean isHisTagRemovalFromNonDmDevicesDone() {
+        return getBooleanPreference(HIS_TAG_REMOVAL_FROM_NON_DM_DEVICES);
+    }
+    public static void setHisTagRemovalFromNonDmDevicesDone() {
+        setBooleanPreference(HIS_TAG_REMOVAL_FROM_NON_DM_DEVICES, true);
+    }
 
 }

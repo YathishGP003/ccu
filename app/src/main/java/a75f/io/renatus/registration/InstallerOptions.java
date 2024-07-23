@@ -103,6 +103,7 @@ import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.util.RxjavaUtil;
+import a75f.io.renatus.util.TemperatureModeUtil;
 import a75f.io.renatus.views.CustomCCUSwitch;
 import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
 import a75f.io.renatus.views.MasterControl.MasterControlUtil;
@@ -179,7 +180,7 @@ public class InstallerOptions extends Fragment {
 
     private Spinner backFillTimeSpinner;
     CustomCCUSwitch switchDREnrollment;
-
+    private Spinner temperatureModeSpinner;
     private static final String TAG = InstallerOptions.class.getSimpleName();
     ArrayList<String> regAddressBands = new ArrayList<>();
     ArrayList<String> addressBand = new ArrayList<>();
@@ -433,6 +434,7 @@ public class InstallerOptions extends Fragment {
 
         setBackFillTimeSpinner(rootView);
         setUpDREnrollmentMode(ccuHsApi);
+        setUpTemperatureModeSpinner(rootView, ccuHsApi);
 
         buttonApply.setOnClickListener(view -> {
             int selectedSpinnerItem = backFillTimeSpinner.getSelectedItemPosition();
@@ -451,6 +453,23 @@ public class InstallerOptions extends Fragment {
         buttonCancel.setOnClickListener(view -> backFillTimeSpinner.setSelection(BackFillDuration.getIndex(BackFillDuration.toIntArray(), getBackFillDuration(), 24)));
 
         return rootView;
+    }
+
+    private void setUpTemperatureModeSpinner(View rootView, CCUHsApi ccuHsApi) {
+        this.temperatureModeSpinner = rootView.findViewById(R.id.spinnerTemperatureMode);
+        CCUUiUtil.setSpinnerDropDownColor(temperatureModeSpinner,this.getContext());
+        ArrayAdapter<String> temperatureModeAdapter = getAdapterValue(new TemperatureModeUtil().getTemperatureModeArray());
+        this.temperatureModeSpinner.setAdapter(temperatureModeAdapter);
+        this.temperatureModeSpinner.setSelection((int) new TemperatureModeUtil().getTemperatureMode());
+        this.temperatureModeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
+                new TemperatureModeUtil().setTemperatureMode(position);
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+            }
+        });
     }
 
     private void setUpDREnrollmentMode(CCUHsApi ccuHsApi) {
@@ -1129,4 +1148,5 @@ public class InstallerOptions extends Fragment {
     private CustomSpinnerDropDownAdapter getAdapterValue(ArrayList values) {
         return new CustomSpinnerDropDownAdapter(requireContext(), R.layout.spinner_dropdown_item, values);
     }
+
 }

@@ -49,7 +49,7 @@ class VavStagedVfdRtuViewModel : StagedRtuProfileViewModel() {
         viewState = StagedRtuVfdViewState.fromProfileConfig(vfdProfileConfig)
         CcuLog.i(Domain.LOG_TAG, "VavStagedRtuViewModel Loaded")
         viewState.unusedPortState = ControlMote.getCMUnusedPorts(Domain.hayStack)
-        modelLoaded = true
+        _modelLoaded.postValue(true)
     }
     override fun saveConfiguration() {
         viewModelScope.launch {

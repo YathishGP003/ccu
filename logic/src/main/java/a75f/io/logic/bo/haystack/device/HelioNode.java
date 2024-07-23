@@ -12,7 +12,7 @@ public class HelioNode extends SmartNode{
     public HelioNode(int address, String site, String floor, String room, String equipRef) {
             Device d = new Device.Builder()
                     .setDisplayName("HN-"+address)
-                    .addMarker("network").addMarker("node").addMarker(Tags.HELIO_NODE).addMarker("his")
+                    .addMarker("network").addMarker("node").addMarker(Tags.HELIO_NODE)
                     .setAddr(address)
                     .setSiteRef(site)
                     .setFloorRef(floor)

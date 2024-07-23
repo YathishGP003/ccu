@@ -116,7 +116,19 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             correctEnumsForCorruptModbusPoints(hayStack)
             PreferenceUtil.setModbusEnumCorrectionDone()
         }
+        if(!PreferenceUtil.isHisTagRemovalFromNonDmDevicesDone()) {
+            removeHisTagsFromNonDMDevices()
+            PreferenceUtil.setHisTagRemovalFromNonDmDevicesDone()
+        }
         hayStack.scheduleSync()
+    }
+
+    private fun removeHisTagsFromNonDMDevices() {
+        hayStack.readAllEntities("device and his").forEach { nonDMDeviceMap ->
+            nonDMDeviceMap.remove("his")
+            val nonDMDevice = Device.Builder().setHashMap(nonDMDeviceMap).removeMarker("his").build()
+            hayStack.updateDevice(nonDMDevice, nonDMDevice.id)
+        }
     }
 
     private fun updateAhuRefForTIEquip() {

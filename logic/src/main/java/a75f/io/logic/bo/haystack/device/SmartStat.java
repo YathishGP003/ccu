@@ -43,7 +43,7 @@ public class SmartStat {
     public SmartStat(int address, String site, String floor, String room, String equipRef,String profile) {
         Device d = new Device.Builder()
                 .setDisplayName("SS-"+address)
-                .addMarker("network").addMarker("his").addMarker("node").addMarker(profile)
+                .addMarker("network").addMarker("node").addMarker(profile)
                 .addMarker("smartstat")
                 .setEquipRef(equipRef)
                 .setAddr(address)

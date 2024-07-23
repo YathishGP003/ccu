@@ -1169,7 +1169,6 @@ public class CCUTagsDb extends HServer {
                 .add("id", HRef.copy(i))
                 .add("dis", d.getDisplayName())
                 .add("device", HMarker.VAL)
-                .add("his", HMarker.VAL)
                 .add("addr", d.getAddr())
                 .add("siteRef", d.getSiteRef())
                 .add("equipRef", d.getEquipRef())

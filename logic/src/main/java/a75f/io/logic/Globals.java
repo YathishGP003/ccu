@@ -298,7 +298,6 @@ public class Globals {
                     /*temperatureMode migration should be handled after model migration*/
                     migrationHandler.temperatureModeMigration();
                 } catch (Exception e) {
-                }  catch ( Exception e) {
                     //Catch ignoring any exception here to avoid app from not loading in case of an init failure.
                     //Init would retried during next app restart.
                     CcuLog.i(L.TAG_CCU_INIT, "Init failed");

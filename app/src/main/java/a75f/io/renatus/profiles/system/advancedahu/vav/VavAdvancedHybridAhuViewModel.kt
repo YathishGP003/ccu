@@ -110,9 +110,7 @@ class VavAdvancedHybridAhuViewModel : AdvancedHybridAhuViewModel() {
         isEquipAvailable(ProfileType.SYSTEM_VAV_ADVANCED_AHU)
         if (saveJob == null) {
             saveJob = viewModelScope.launch {
-                withContext(Dispatchers.Main) {
-                    ProgressDialogUtils.showProgressDialog(context, "Saving profile configuration")
-                }
+                ProgressDialogUtils.showProgressDialog(context, "Saving profile configuration")
                 withContext(Dispatchers.IO) {
                     val profile = L.ccu().systemProfile
                     if (profile == null) {
@@ -137,9 +135,6 @@ class VavAdvancedHybridAhuViewModel : AdvancedHybridAhuViewModel() {
                         ProgressDialogUtils.hideProgressDialog()
                     }
                 }
-            }
-            if (ProgressDialogUtils.isDialogShowing()) {
-                ProgressDialogUtils.hideProgressDialog()
             }
         }
     }

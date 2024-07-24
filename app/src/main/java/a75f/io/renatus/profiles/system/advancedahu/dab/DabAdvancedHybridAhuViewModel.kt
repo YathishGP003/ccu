@@ -14,11 +14,9 @@ import a75f.io.logic.bo.building.system.dab.DabAdvancedAhu
 import a75f.io.logic.bo.building.system.dab.config.DabAdvancedHybridAhuConfig
 import a75f.io.logic.bo.building.system.util.deleteSystemConnectModule
 import a75f.io.logic.bo.building.system.util.getDabConnectEquip
-import a75f.io.logic.bo.building.system.vav.config.VavAdvancedHybridAhuConfig
 import a75f.io.renatus.modbus.util.showToast
 import a75f.io.renatus.profiles.system.advancedahu.AdvancedHybridAhuViewModel
 import a75f.io.renatus.profiles.system.advancedahu.isValidateConfiguration
-import a75f.io.renatus.profiles.system.advancedahu.vav.VavAdvancedAhuState
 import a75f.io.renatus.util.ProgressDialogUtils
 import android.content.Context
 import androidx.compose.runtime.mutableStateOf
@@ -102,9 +100,7 @@ class DabAdvancedHybridAhuViewModel : AdvancedHybridAhuViewModel() {
         isEquipAvailable(ProfileType.SYSTEM_DAB_ADVANCED_AHU)
         if (saveJob == null) {
             saveJob = viewModelScope.launch {
-                withContext(Dispatchers.Main) {
-                    ProgressDialogUtils.showProgressDialog(context, "Saving profile configuration")
-                }
+                ProgressDialogUtils.showProgressDialog(context, "Saving profile configuration")
                 withContext(Dispatchers.IO) {
                     val profile = L.ccu().systemProfile
                     if (profile == null) {
@@ -129,9 +125,6 @@ class DabAdvancedHybridAhuViewModel : AdvancedHybridAhuViewModel() {
                         ProgressDialogUtils.hideProgressDialog()
                     }
                 }
-            }
-            if (ProgressDialogUtils.isDialogShowing()) {
-                ProgressDialogUtils.hideProgressDialog()
             }
         }
     }

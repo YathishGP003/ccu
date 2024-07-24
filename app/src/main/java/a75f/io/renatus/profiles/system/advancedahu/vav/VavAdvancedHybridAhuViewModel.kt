@@ -37,7 +37,7 @@ class VavAdvancedHybridAhuViewModel : AdvancedHybridAhuViewModel() {
     fun init(context: Context, hayStack: CCUHsApi) {
         super.init(context, ModelLoader.getVavAdvancedAhuCmModelV2(), ModelLoader.getVavAdvancedAhuConnectModelV2(), hayStack, ProfileType.SYSTEM_VAV_ADVANCED_AHU)
         CcuLog.i(Domain.LOG_TAG, "VavAdvancedAhuViewModel Init")
-        val systemEquip = hayStack.readEntity("system and equip and not modbus and not connectModule") //TODO - via domain
+        val systemEquip = hayStack.readEntity("system and equip and not modbus and not connectModule")
         CcuLog.i(Domain.LOG_TAG, "Current System Equip $systemEquip")
 
         profileConfiguration = if (systemEquip["profile"].toString().contentEquals("vavAdvancedHybridAhuV2")) {

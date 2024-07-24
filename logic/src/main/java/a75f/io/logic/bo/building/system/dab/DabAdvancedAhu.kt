@@ -334,30 +334,32 @@ class DabAdvancedAhu : DabSystemProfile() {
         val epidemicMode = systemEquip.epidemicModeSystemState.readHisVal()
         val epidemicState = EpidemicState.values()[epidemicMode.toInt()]
 
-        return if ((epidemicState == EpidemicState.PREPURGE || epidemicState == EpidemicState.POSTPURGE) && L.ccu().oaoProfile != null) {
+        return if ((epidemicState == EpidemicState.PREPURGE
+                        || epidemicState == EpidemicState.POSTPURGE) && L.ccu().oaoProfile != null) {
             //TODO- Part OAO. Will be replaced with domanName later.
             val smartPurgeDabFanLoopOp = TunerUtil.readTunerValByQuery("system and purge and dab and fan and loop and output", L.ccu().oaoProfile.equipRef)
             val spSpMax = systemEquip.staticPressureSPMax.readPriorityVal()
             val spSpMin = systemEquip.staticPressureSPMin.readPriorityVal()
             CcuLog.d(L.TAG_CCU_SYSTEM, "spSpMax :$spSpMax spSpMin: $spSpMin SP: $staticPressure,$smartPurgeDabFanLoopOp")
             val staticPressureLoopOutput = ((staticPressure - spSpMin) * 100 / (spSpMax - spSpMin)).toInt().toDouble()
-            if (DabSystemController.getInstance().getSystemState() == SystemController.State.COOLING && (conditioningMode == SystemMode.COOLONLY || conditioningMode == SystemMode.AUTO)) {
+            if (DabSystemController.getInstance().getSystemState() == SystemController.State.COOLING
+                    && (conditioningMode == SystemMode.COOLONLY || conditioningMode == SystemMode.AUTO)) {
                 if (staticPressureLoopOutput < (spSpMax - spSpMin) * smartPurgeDabFanLoopOp) {
                     (spSpMax - spSpMin) * smartPurgeDabFanLoopOp
                 } else {
                     ((staticPressure - spSpMin) * 100 / (spSpMax - spSpMin)).toInt().toDouble()
                 }
-            } else if (DabSystemController.getInstance().getSystemState() == SystemController.State.HEATING) {
+            } else if (DabSystemController.getInstance().getSystemState() == SystemController.State.HEATING
+                    && (conditioningMode == SystemMode.HEATONLY || conditioningMode == SystemMode.AUTO)) {
                 (DabSystemController.getInstance().getHeatingSignal() * analogFanSpeedMultiplier).toInt().toDouble().coerceAtLeast(smartPurgeDabFanLoopOp)
             } else {
                 smartPurgeDabFanLoopOp
             }
-        } else if (DabSystemController.getInstance().getSystemState() == SystemController.State.COOLING && (conditioningMode == SystemMode.COOLONLY || conditioningMode == SystemMode.AUTO)) {
-            val spSpMax = systemEquip.staticPressureSPMax.readPriorityVal()
-            val spSpMin = systemEquip.staticPressureSPMin.readPriorityVal()
-            CcuLog.d(L.TAG_CCU_SYSTEM, "spSpMax :$spSpMax spSpMin: $spSpMin SP: $staticPressure")
-            ((staticPressure - spSpMin) * 100 / (spSpMax - spSpMin)).toInt().toDouble()
-        } else if (DabSystemController.getInstance().getSystemState() == SystemController.State.HEATING) {
+        } else if (DabSystemController.getInstance().getSystemState() == SystemController.State.COOLING
+                && (conditioningMode == SystemMode.COOLONLY || conditioningMode == SystemMode.AUTO)) {
+            (DabSystemController.getInstance().getCoolingSignal() * analogFanSpeedMultiplier).toInt().toDouble()
+        } else if (DabSystemController.getInstance().getSystemState() == SystemController.State.HEATING
+                && (conditioningMode == SystemMode.HEATONLY || conditioningMode == SystemMode.AUTO)) {
             (DabSystemController.getInstance().getHeatingSignal() * analogFanSpeedMultiplier).toInt().toDouble()
         } else {
             0.0
@@ -683,7 +685,7 @@ class DabAdvancedAhu : DabSystemProfile() {
     private fun updateAnalogOutputPorts(associationMap: Map<Point, Point>, physicalMap: Map<Point, PhysicalPoint>?, isConnectEquip: Boolean) {
         associationMap.forEach { (analogOut: Point, association: Point) ->
             if (analogOut.readDefaultVal() > 0) {
-                val domainEquip = if (isConnectEquip) systemEquip.connectEquip1 else systemEquip
+                val domainEquip = if (isConnectEquip) systemEquip.connectEquip1 else systemEquip.cmEquip
                 val (physicalValue, logicalValue) = advancedAhuImpl.getAnalogLogicalPhysicalValue(analogOut, association, ahuSettings, domainEquip)
 
                 CcuLog.d(L.TAG_CCU_SYSTEM, "New analogOutValue ${analogOut.domainName} physicalValue: $physicalValue logicalValue: $logicalValue")

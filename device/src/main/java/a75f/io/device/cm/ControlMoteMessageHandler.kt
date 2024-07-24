@@ -276,6 +276,6 @@ fun updateAnalogInput(physicalPointName: String, thermistorVal: Double) {
 
 }
 
-private fun isNotAdvanceAhuProfile(): Boolean {
+fun isNotAdvanceAhuProfile(): Boolean {
     return (L.ccu().systemProfile !is VavAdvancedAhu && L.ccu().systemProfile !is DabAdvancedAhu)
 }

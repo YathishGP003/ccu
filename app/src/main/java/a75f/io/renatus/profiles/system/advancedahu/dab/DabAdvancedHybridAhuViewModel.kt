@@ -38,10 +38,10 @@ class DabAdvancedHybridAhuViewModel : AdvancedHybridAhuViewModel() {
     fun init(context: Context, hayStack: CCUHsApi) {
         super.init(context, ModelLoader.getDabAdvancedAhuCmModelV2(), ModelLoader.getDabAdvancedAhuConnectModelV2(), hayStack, ProfileType.SYSTEM_DAB_ADVANCED_AHU)
         CcuLog.i(Domain.LOG_TAG, "DabAdvancedAhuViewModel Init")
-        val systemEquip = hayStack.readEntity("system and equip and not modbus and not connectModule") //TODO - via domain
+        val systemEquip = hayStack.readEntity("system and equip and not modbus and not connectModule")
         CcuLog.i(Domain.LOG_TAG, "Current System Equip $systemEquip")
 
-        profileConfiguration = if (systemEquip["profile"].toString().contentEquals("dabAdvancedHybridAhuV2_cmBoard")) {
+        profileConfiguration = if (systemEquip["profile"].toString().contentEquals("dabAdvancedHybridAhuV2")) {
             CcuLog.i(Domain.LOG_TAG, "Get active config for systemEquip")
             DabAdvancedHybridAhuConfig(cmModel, connectModel).getActiveConfiguration() as DabAdvancedHybridAhuConfig
         } else {

@@ -139,7 +139,8 @@ object DomainManager {
         if (cmBoardDevice.isNotEmpty()) {
             CcuLog.e(Domain.LOG_TAG, "Added CM device to domain")
             Domain.cmBoardDevice = CmBoardDevice(cmBoardDevice["id"].toString())
-            if (Domain.systemEquip is VavAdvancedHybridSystemEquip) {
+            if (Domain.systemEquip is VavAdvancedHybridSystemEquip
+                    || Domain.systemEquip is DabAdvancedHybridSystemEquip) {
                 val connect1Device = hayStack.readEntity("device and connectModule")
                 if (connect1Device.isNotEmpty()) {
                     CcuLog.d(Domain.LOG_TAG, "Added Connect1 device to domain")

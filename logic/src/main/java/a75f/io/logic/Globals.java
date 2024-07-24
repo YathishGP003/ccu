@@ -298,7 +298,9 @@ public class Globals {
                     Watchdog.getInstance().start();
                     modelMigration(migrationHandler);
                     MigrationHandler.Companion.doPostModelMigrationTasks();
-                }  catch ( Exception e) {
+                    /*temperatureMode migration should be handled after model migration*/
+                    migrationHandler.temperatureModeMigration();
+                } catch (Exception e) {
                     //Catch ignoring any exception here to avoid app from not loading in case of an init failure.
                     //Init would retried during next app restart.
                     CcuLog.i(L.TAG_CCU_INIT, "Init failed");

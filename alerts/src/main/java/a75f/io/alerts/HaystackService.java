@@ -200,7 +200,7 @@ public class HaystackService {
             filter = filter.replaceAll("group==@", "group==");
         }
         filter = fixInvertedCommas(filter);
-
+        filter = removeQuotesFromIdValue(filter);
 
         CcuLog.d(TAG_CCU_ALERTS, "---findByFilter##--final filter for  readGrid->"+filter);
         HGrid hGrid = CCUHsApi.getInstance().readGrid(filter);
@@ -208,7 +208,18 @@ public class HaystackService {
         return list;
     }
 
+    private static String removeQuotesFromIdValue(String input) {
+        // Define the pattern to find "id==" followed by a quoted string
+        String pattern = "id==\"([^\"]*)\"";
+
+        // Use regex to find and replace the quoted id value
+        input = input.replaceAll(pattern, "id==$1");
+
+        return input;
+    }
+
     public static String removeFirstAndLastParentheses(String input) {
+        input = input.replaceAll("@@","@");
         if (input.startsWith("(") && input.endsWith(")")) {
             return input.substring(1, input.length() - 1);
         } else {

@@ -442,7 +442,28 @@
                 android:visibility="gone"
                 layout="@layout/custom_ccu_switch"/>
 
+            <TextView
+                android:id="@+id/textTemperatureMode"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/textUseCelsius"
+                android:layout_marginStart="76dp"
+                android:layout_marginTop="42dp"
+                android:alpha="0.87"
+                android:text="@string/temperature_mode_description"
+                android:textColor="@color/black"
+                android:textSize="25sp" />
 
+
+            <Spinner
+                android:id="@+id/spinnerTemperatureMode"
+                style="@style/customSpinnerDownArrow"
+                android:layout_width="wrap_content"
+                android:layout_height="42dp"
+                android:layout_alignParentEnd="true"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="42dp"
+                android:layout_alignBaseline="@+id/textTemperatureMode" />
 
             <TextView
                 android:id="@+id/textUseMT"

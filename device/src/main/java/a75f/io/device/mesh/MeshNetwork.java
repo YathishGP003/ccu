@@ -1,6 +1,5 @@
 package a75f.io.device.mesh;
 
-import static a75f.io.device.cm.ControlMoteMessageGeneratorKt.getCMControlsMessage;
 import static a75f.io.device.mesh.DLog.tempLogdStructAsJson;
 import static a75f.io.device.mesh.MeshUtil.checkDuplicateStruct;
 import static a75f.io.device.mesh.MeshUtil.sendStruct;
@@ -41,8 +40,6 @@ import a75f.io.device.serial.CcuToCmOverUsbSnControlsMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSnSettings2Message_t;
 import a75f.io.device.serial.CcuToCmOverUsbSnSettingsMessage_t;
 import a75f.io.device.serial.MessageType;
-import a75f.io.domain.api.Domain;
-import a75f.io.domain.equips.VavAdvancedHybridSystemEquip;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
@@ -50,7 +47,6 @@ import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.system.vav.VavAdvancedAhu;
 import a75f.io.logic.bo.building.system.vav.VavIERtu;
-import a75f.io.logic.bo.util.TemperatureMode;
 
 
 /**
@@ -175,20 +171,16 @@ public class MeshNetwork extends DeviceNetwork
                                 Equip equip = new Equip.Builder()
                                         .setHashMap(CCUHsApi.getInstance()
                                                 .read("equip and group ==\"" + d.getAddr() + "\"")).build();
-                                int modeType = CCUHsApi.getInstance().readHisValByQuery("zone and hvacMode and roomRef == \"" + equip.getRoomRef() + "\"").intValue();
-                                TemperatureMode temperatureMode = TemperatureMode.values()[modeType];
-
-
                                 if (bSeedMessage) {
                                     CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING HyperStat " +
                                             "SEEDS ===================== " + d.getAddr());
                                     if (equip.getMarkers().contains("vrv")) {
                                         CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SEEDING HyperStat IDU Controls ===================== " + d.getAddr());
-                                        HyperStatMessageSender.sendIduSeedSetting(zone.getDisplayName(), Integer.parseInt(d.getAddr()), d.getEquipRef(), false, temperatureMode);
+                                        HyperStatMessageSender.sendIduSeedSetting(zone.getDisplayName(), Integer.parseInt(d.getAddr()), d.getEquipRef(), false);
                                         HyperStatMessageSender.sendIduSeedControlMessage(Integer.parseInt(d.getAddr()), CCUHsApi.getInstance());
                                     } else {
                                         HyperStatMessageSender.sendSeedMessage(zone.getDisplayName(), Integer.parseInt(d.getAddr()),
-                                                d.getEquipRef(), false, temperatureMode);
+                                                d.getEquipRef(), false);
                                     }
                                 } else {
                                     CcuLog.d(L.TAG_CCU_DEVICE, "=================NOW SENDING HyperStat Settings ===================== " + d.getAddr());
@@ -208,7 +200,7 @@ public class MeshNetwork extends DeviceNetwork
                                         if (sendControlMessage) {
                                             HyperStat.HyperStatControlsMessage_t.Builder controls =
                                                     HyperStatMessageGenerator.getControlMessage(
-                                                            Integer.parseInt(d.getAddr()), d.getEquipRef(), temperatureMode);
+                                                            Integer.parseInt(d.getAddr()), d.getEquipRef());
                                             HyperStatMessageSender.writeControlMessage(controls.build(), Integer.parseInt(d.getAddr()),
                                                     MessageType.HYPERSTAT_CONTROLS_MESSAGE, false);
                                         }
@@ -222,13 +214,11 @@ public class MeshNetwork extends DeviceNetwork
                                 Equip hssEquip = new Equip.Builder()
                                         .setHashMap(CCUHsApi.getInstance()
                                                 .read("equip and group ==\""+d.getAddr()+ "\"")).build();
-                                int hssModeType = CCUHsApi.getInstance().readHisValByQuery("zone and hvacMode and roomRef == \"" + hssEquip.getRoomRef() + "\"").intValue();
-                                TemperatureMode hssTempMode = TemperatureMode.values()[hssModeType];
 
                                 if (bSeedMessage) {
                                     CcuLog.d(L.TAG_CCU_SERIAL,"=================NOW SENDING HyperSplit SEEDS ===================== "+d.getAddr());
                                     HyperSplitMessageSender.sendSeedMessage(zone.getDisplayName(), Integer.parseInt(d.getAddr()),
-                                            d.getEquipRef(), false, hssTempMode);
+                                            d.getEquipRef(), false);
                                     HyperSplitMessageSender.sendSettings3Message(Integer.parseInt(d.getAddr()),
                                             d.getEquipRef(), false);
                                     HyperSplitMessageSender.sendSettings4Message(Integer.parseInt(d.getAddr()),
@@ -245,7 +235,7 @@ public class MeshNetwork extends DeviceNetwork
                                     if(sendControlMessage){
                                         HyperSplit.HyperSplitControlsMessage_t.Builder controls =
                                                 HyperSplitMessageGenerator.getControlMessage(
-                                                        Integer.parseInt(d.getAddr()), d.getEquipRef(), hssTempMode);
+                                                        Integer.parseInt(d.getAddr()), d.getEquipRef());
                                         HyperSplitMessageSender.writeControlMessage(controls.build(), Integer.parseInt(d.getAddr()),
                                                 MessageType.HYPERSPLIT_CONTROLS_MESSAGE, false);
                                     }

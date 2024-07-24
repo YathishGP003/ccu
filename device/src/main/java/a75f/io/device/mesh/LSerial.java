@@ -42,7 +42,6 @@ import a75f.io.device.serial.WrmOrCmRebootIndicationMessage_t;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
-import a75f.io.logic.bo.util.TemperatureMode;
 import a75f.io.usbserial.SerialAction;
 import a75f.io.usbserial.SerialEvent;
 import a75f.io.usbserial.UsbConnectService;
@@ -543,15 +542,12 @@ public class LSerial
                      "=================NOW SEEDING NEW PROFILE=====================" + addr + "," + roomRef);
             Device d = HSUtil.getDevice(addr);
             Zone zone = HSUtil.getZone(roomRef, floorRef);
-            int modeType = CCUHsApi.getInstance().readHisValByQuery("zone and hvacMode and roomRef " +
-                    "== \"" + roomRef + "\"").intValue();
-
             if (isVRV){
                 HyperStatMessageSender.sendIduSeedSetting(zone.getDisplayName(), Integer.parseInt(d.getAddr()),
-                        d.getEquipRef(), false, TemperatureMode.values()[modeType]);
+                        d.getEquipRef(), false);
             } else {
                 HyperStatMessageSender.sendSeedMessage(zone.getDisplayName(), Integer.parseInt(d.getAddr()),
-                        d.getEquipRef(), false, TemperatureMode.values()[modeType]);
+                        d.getEquipRef(), false);
             }
             LSerial.getInstance().setNodeSeeding(false);
         }
@@ -564,11 +560,8 @@ public class LSerial
                     "=================NOW SEEDING NEW PROFILE=====================" + addr + "," + roomRef);
             Device d = HSUtil.getDevice(addr);
             Zone zone = HSUtil.getZone(roomRef, floorRef);
-            int modeType = CCUHsApi.getInstance().readHisValByQuery("zone and hvacMode and roomRef " +
-                    "== \"" + roomRef + "\"").intValue();
-
             HyperSplitMessageSender.sendSeedMessage(zone.getDisplayName(), Integer.parseInt(d.getAddr()),
-                    d.getEquipRef(), false, TemperatureMode.values()[modeType]);
+                    d.getEquipRef(), false);
 
             HyperSplitMessageSender.sendSettings3Message(Integer.parseInt(d.getAddr()),
                     d.getEquipRef(), false);

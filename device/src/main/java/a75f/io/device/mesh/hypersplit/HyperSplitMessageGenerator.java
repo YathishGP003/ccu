@@ -27,6 +27,8 @@ import a75f.io.device.HyperSplit;
 import a75f.io.device.mesh.DeviceHSUtil;
 import a75f.io.device.mesh.DeviceUtil;
 import a75f.io.device.util.DeviceConfigurationUtil;
+import a75f.io.domain.api.Domain;
+import a75f.io.domain.api.DomainName;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
@@ -36,24 +38,26 @@ import a75f.io.logic.bo.building.hvac.StandaloneFanStage;
 import a75f.io.logic.bo.building.hyperstatsplit.common.BasicSettings;
 import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.util.TemperatureMode;
+import a75f.io.logic.tuners.TunerConstants;
 
 public class HyperSplitMessageGenerator {
 
     /**
      * Generates seed message for a node from haystack data.
+     *
      * @param zone
      * @param address
      * @param equipRef
      * @return
      */
     public static HyperSplit.HyperSplitCcuDatabaseSeedMessage_t getSeedMessage(String zone, int address,
-                                                                             String equipRef, TemperatureMode temperatureMode) {
+                                                                             String equipRef) {
         // HSS Seed message has a Settings3 field, but it is not filled anymore. This is to prevent edge cases that result from excessive message length.
         // Settings3 is now sent separately from the Seed Message.
         HyperSplit.HyperSplitSettingsMessage_t hyperSplitSettingsMessage_t = getSettingsMessage(zone, address,
-                equipRef, temperatureMode);
+                equipRef);
         HyperSplit.HyperSplitControlsMessage_t hyperSplitControlsMessage_t = getControlMessage(address,
-                equipRef, temperatureMode).build();
+                equipRef).build();
         HyperSplit.HyperSplitSettingsMessage2_t hyperSplitSettingsMessage2_t = getSetting2Message(address, equipRef);
         CcuLog.i(L.TAG_CCU_SERIAL, "Seed Message t" + hyperSplitSettingsMessage_t.toByteString().toString());
         CcuLog.i(L.TAG_CCU_SERIAL, "Seed Message t" + hyperSplitControlsMessage_t.toString());
@@ -70,19 +74,21 @@ public class HyperSplitMessageGenerator {
 
     /**
      * Generate settings message for a node from haystack data.
+     *
      * @param zone
      * @param address
      * @param equipRef
      * @return
      */
     public static HyperSplit.HyperSplitSettingsMessage_t getSettingsMessage(String zone, int address,
-                                                                          String equipRef, TemperatureMode mode) {
-        boolean singleMode = mode == TemperatureMode.HEATING || mode == TemperatureMode.COOLING;
+                                                                          String equipRef) {
+        int temperatureMode = (int) Domain.readValAtLevelByDomain(DomainName.temperatureMode,
+                TunerConstants.SYSTEM_BUILDING_VAL_LEVEL);
 
-        int minCoolingUserTemp = CCUHsApi.getInstance().readPointPriorityValByQuery(HyperSplitSettingsUtil.Companion.getCoolingUserLimitByQuery(mode, "min", equipRef)).intValue();
-        int maxCoolingUserTemp = CCUHsApi.getInstance().readPointPriorityValByQuery(HyperSplitSettingsUtil.Companion.getCoolingUserLimitByQuery(mode, "max", equipRef)).intValue();
-        int minHeatingUserTemp = CCUHsApi.getInstance().readPointPriorityValByQuery(HyperSplitSettingsUtil.Companion.getHeatingUserLimitByQuery(mode, "min", equipRef)).intValue();
-        int maxHeatingUserTemp = CCUHsApi.getInstance().readPointPriorityValByQuery(HyperSplitSettingsUtil.Companion.getHeatingUserLimitByQuery(mode, "max", equipRef)).intValue();
+        int minCoolingUserTemp = CCUHsApi.getInstance().readPointPriorityValByQuery(HyperSplitSettingsUtil.Companion.getCoolingUserLimitByQuery("min", equipRef)).intValue();
+        int maxCoolingUserTemp = CCUHsApi.getInstance().readPointPriorityValByQuery(HyperSplitSettingsUtil.Companion.getCoolingUserLimitByQuery("max", equipRef)).intValue();
+        int minHeatingUserTemp = CCUHsApi.getInstance().readPointPriorityValByQuery(HyperSplitSettingsUtil.Companion.getHeatingUserLimitByQuery("min", equipRef)).intValue();
+        int maxHeatingUserTemp = CCUHsApi.getInstance().readPointPriorityValByQuery(HyperSplitSettingsUtil.Companion.getHeatingUserLimitByQuery("max", equipRef)).intValue();
 
         if (minCoolingUserTemp == 0) {
             minCoolingUserTemp = CCUHsApi.getInstance().readPointPriorityValByQuery("point and schedulable and default and cooling and user and limit and min").intValue();
@@ -104,7 +110,7 @@ public class HyperSplitMessageGenerator {
 
         HyperSplit.HyperSplitSettingsMessage_t.Builder msg = HyperSplit.HyperSplitSettingsMessage_t.newBuilder()
                 .setRoomName(zone)
-                .setHeatingDeadBand((int) (getStandaloneHeatingDeadband(equipRef, mode) * 10))
+                .setHeatingDeadBand((int) (getStandaloneHeatingDeadband(equipRef) * 10))
                 .setCoolingDeadBand((int) (getStandaloneCoolingDeadband(equipRef) * 10))
                 .setMinCoolingUserTemp(minCoolingUserTemp)
                 .setMaxCoolingUserTemp(maxCoolingUserTemp)
@@ -121,7 +127,7 @@ public class HyperSplitMessageGenerator {
                 .setCo2AlertTarget((int)readCo2ThresholdValue(equipRef))
                 .setPm25AlertTarget((int)readPm2p5TargetValue(equipRef))
                 .setVocAlertTarget((int)readVocThresholdValue(equipRef))
-                .setTemperatureMode(singleMode ? HyperSplit.HyperSplitTemperatureMode_e.HYPERSPLIT_TEMP_MODE_SINGLE
+                .setTemperatureMode(temperatureMode == 0 ? HyperSplit.HyperSplitTemperatureMode_e.HYPERSPLIT_TEMP_MODE_DUAL_FIXED_DB
                         : HyperSplit.HyperSplitTemperatureMode_e.HYPERSPLIT_TEMP_MODE_DUAL_VARIABLE_DB)
                 .setHyperstatLinearFanSpeeds(HyperSplitSettingsUtil.Companion.getLinearFanSpeedDetails(equipRef))
                 .setHyperstatStagedFanSpeeds(HyperSplitSettingsUtil.Companion.getStagedFanSpeedDetails(equipRef));
@@ -136,15 +142,14 @@ public class HyperSplitMessageGenerator {
      * @param equipRef
      * @return
      */
-    public static HyperSplit.HyperSplitControlsMessage_t.Builder getControlMessage(int address, String equipRef,
-                                                                                 TemperatureMode mode) {
+    public static HyperSplit.HyperSplitControlsMessage_t.Builder getControlMessage(int address, String equipRef) {
 
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap device = hayStack.read("device and addr == \"" + address + "\"");
 
         HyperSplit.HyperSplitControlsMessage_t.Builder controls = HyperSplit.HyperSplitControlsMessage_t.newBuilder();
-        controls.setSetTempCooling((int)(getDesiredTempCooling(equipRef, mode) * 2));
-        controls.setSetTempHeating((int)(getDesiredTempHeating(equipRef, mode) * 2));
+        controls.setSetTempCooling((int)(getDesiredTempCooling(equipRef) * 2));
+        controls.setSetTempHeating((int)(getDesiredTempHeating(equipRef) * 2));
 
         BasicSettings settings = new BasicSettings(
                 StandaloneConditioningMode.values()[(int)getConditioningMode(equipRef)],
@@ -191,17 +196,11 @@ public class HyperSplitMessageGenerator {
         return controls;
     }
 
-    public static double getDesiredTempCooling(String equipRef, TemperatureMode mode) {
+    public static double getDesiredTempCooling(String equipRef) {
         HashMap<Object, Object> desiredTempCooling;
-        if(mode == TemperatureMode.HEATING){
-            desiredTempCooling = CCUHsApi.getInstance().readEntity("desired and temp and " +
-                    "heating and equipRef == \"" + equipRef +
-                    "\"");
-        }else {
-            desiredTempCooling = CCUHsApi.getInstance().readEntity("desired and temp and " +
-                    "cooling and equipRef == \"" + equipRef +
-                    "\"");
-        }
+        desiredTempCooling = CCUHsApi.getInstance().readEntity("desired and temp and " +
+                "cooling and equipRef == \"" + equipRef +
+                "\"");
         try {
             return CCUHsApi.getInstance().readPointPriorityVal(desiredTempCooling.get("id").toString());
         } catch (NullPointerException e) {
@@ -210,17 +209,11 @@ public class HyperSplitMessageGenerator {
         return 0;
     }
 
-    public static double getDesiredTempHeating(String equipRef, TemperatureMode mode) {
+    public static double getDesiredTempHeating(String equipRef) {
         HashMap<Object, Object> desiredTempHeating;
-        if(mode == TemperatureMode.COOLING){
-            desiredTempHeating = CCUHsApi.getInstance().readEntity("desired and temp and " +
-                    "cooling and equipRef == \"" + equipRef +
-                    "\"");
-        }else {
-            desiredTempHeating = CCUHsApi.getInstance().readEntity("desired and temp and " +
-                    "heating and equipRef == \"" + equipRef +
-                    "\"");
-        }
+        desiredTempHeating = CCUHsApi.getInstance().readEntity("desired and temp and " +
+                "heating and equipRef == \"" + equipRef +
+                "\"");
         try {
             return CCUHsApi.getInstance().readPointPriorityVal(desiredTempHeating.get("id").toString());
         } catch (NullPointerException e) {
@@ -340,7 +333,7 @@ public class HyperSplitMessageGenerator {
 
     }
 
-    public static double getStandaloneHeatingDeadband(String equipRef, TemperatureMode mode) {
+    public static double getStandaloneHeatingDeadband(String equipRef) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap deadbandPoint =
                 hayStack.read("point and deadband and heating and zone and not multiplier and roomRef == \""+HSUtil.getZoneIdFromEquipId(equipRef)+
@@ -404,9 +397,7 @@ public class HyperSplitMessageGenerator {
                 " and group == \"" + address + "\"");
         String equipRef =equip.get("id").toString();
         CcuLog.d(L.TAG_CCU_SERIAL,"Reset set to true");
-        int modeType = CCUHsApi.getInstance().readHisValByQuery("zone and hvacMode and roomRef" +
-                " == \"" + equip.get("roomRef").toString() + "\"").intValue();
-        return getControlMessage(address ,equipRef, TemperatureMode.values()[modeType]).setReset(true).build();
+        return getControlMessage(address ,equipRef).setReset(true).build();
     }
 
     public static double getConditioningMode(String equipRef){

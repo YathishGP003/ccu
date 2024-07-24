@@ -8,7 +8,6 @@ import a75f.io.device.HyperStat.HyperStatSettingsMessage2_t
 import a75f.io.device.HyperStat.HyperStatSettingsMessage3_t
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.CpuAnalogOutAssociation
-import a75f.io.logic.bo.util.TemperatureMode
 import a75f.io.logic.tuners.TunerUtil
 
 /**
@@ -394,20 +393,12 @@ class HyperStatSettingsUtil {
 
             }
         // Below method returns query based on DesiredTempMode
-        fun getHeatingUserLimitByQuery(mode : TemperatureMode, query : String, equipRef : String) : String{
-            return if (mode == TemperatureMode.COOLING) {
-                "schedulable and cooling and user and limit and $query and roomRef == \""+HSUtil.getZoneIdFromEquipId(equipRef)+"\""
-            } else {
-                "schedulable and heating and user and limit and $query and roomRef == \""+HSUtil.getZoneIdFromEquipId(equipRef)+"\""
-            }
+        fun getHeatingUserLimitByQuery(query: String, equipRef: String) : String{
+            return "schedulable and heating and user and limit and $query and roomRef == \""+HSUtil.getZoneIdFromEquipId(equipRef)+"\""
         }
 
-        fun getCoolingUserLimitByQuery(mode : TemperatureMode, query : String, equipRef : String) : String{
-            return if(mode == TemperatureMode.HEATING){
-                "schedulable and heating and user and limit and $query and roomRef == \""+HSUtil.getZoneIdFromEquipId(equipRef)+"\""
-            }else{
-                "schedulable and cooling and user and limit and $query and roomRef == \""+HSUtil.getZoneIdFromEquipId(equipRef)+"\""
-            }
+        fun getCoolingUserLimitByQuery(query: String, equipRef: String) : String{
+            return "schedulable and cooling and user and limit and $query and roomRef == \""+HSUtil.getZoneIdFromEquipId(equipRef)+"\""
         }
 
         /**

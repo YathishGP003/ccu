@@ -744,7 +744,8 @@ open class VavAdvancedAhu : VavSystemProfile() {
                         heatingStages,
                         fanStages,
                         isSystemOccupied,
-                        isConnectEquip
+                        isConnectEquip,
+                        isAllowToActiveStage1Fan()
                     )
                     CcuLog.d(
                         L.TAG_CCU_SYSTEM,
@@ -1098,6 +1099,11 @@ open class VavAdvancedAhu : VavSystemProfile() {
     fun setTestConfigs(port: Int) {
         testConfigs.set(port,true) // 0 - 7 Relays and 8 - 11 Analog
         CcuLog.d(L.TAG_CCU_SYSTEM, "Test Configs set for port $port cache $testConfigs")
+    }
+
+    fun isAllowToActiveStage1Fan(): Boolean {
+        return (systemCoolingLoopOp > 0 || systemSatCoolingLoopOp > 0 || systemFanLoopOp > 0
+                || systemHeatingLoopOp > 0 || systemSatHeatingLoopOp > 0 || staticPressureFanLoopOp > 0)
     }
 
 }

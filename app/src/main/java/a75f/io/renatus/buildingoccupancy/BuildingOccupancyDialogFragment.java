@@ -44,8 +44,10 @@ public class BuildingOccupancyDialogFragment extends DialogFragment {
 
     private NumberPicker npStartTime;
     private NumberPicker npEndTime;
-    private int nMinVal = 0;
-    private int nMaxVal = 96;
+    int nMinValForStartTime = 0;
+    int nMaxValForStartTime = 95;
+    int nMinValForEndTime = 1;
+    int nMaxValForEndTime = 96;
     private CheckBox checkBoxMonday;
     private CheckBox checkBoxTuesday;
     private CheckBox checkBoxWednesday;
@@ -93,8 +95,8 @@ public class BuildingOccupancyDialogFragment extends DialogFragment {
         npStartTime = view.findViewById(R.id.np1);
         npEndTime = view.findViewById(R.id.np2);
 
-        npStartTime.setMinValue(nMinVal);
-        npStartTime.setMaxValue(nMaxVal);
+        npStartTime.setMinValue(nMinValForStartTime);
+        npStartTime.setMaxValue(nMaxValForStartTime);
         buttonSave = view.findViewById(R.id.buttonSave);
         buttonSave.setText(ADD);
         buttonCancel = view.findViewById(R.id.buttonCancel);
@@ -135,8 +137,8 @@ public class BuildingOccupancyDialogFragment extends DialogFragment {
             CcuLog.e(TAG, "Reflection error for start time");
         }
 
-        npEndTime.setMinValue(nMinVal);
-        npEndTime.setMaxValue(nMaxVal);
+        npEndTime.setMinValue(nMinValForEndTime);
+        npEndTime.setMaxValue(nMaxValForEndTime);
         npEndTime.setValue(70);
         npEndTime.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
         npEndTime.setVisibility(View.VISIBLE);

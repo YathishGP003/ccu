@@ -230,7 +230,7 @@ open class DefaultEquipBuilder : EquipBuilder {
     }
 
     open fun getSmartNodeBand(): String? {
-        val device = CCUHsApi.getInstance().readEntity("device and addr")
+        val device = CCUHsApi.getInstance().readEntity("device and node and addr")
         CcuLog.i(Domain.LOG_TAG, "Deviceband $device")
         if (device != null && device.size > 0 && device["modbus"] == null && device["addr"] != null) {
             val nodeAdd = device["addr"].toString()

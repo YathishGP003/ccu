@@ -1528,6 +1528,7 @@
     <string name="dr_enrollment">DR Enrollment</string>
     <string name="dr_enrollment_description">Enroll to demand response to optimize energy consumption and \nreduce peak demand.</string>
     <string name="demand_response_active">Demand Response Active</string>
+    <string name="temperature_mode_description">Temperature Mode</string>
 
     <!-- Named Schedule-->
     <string name="monday">MONDAY</string>

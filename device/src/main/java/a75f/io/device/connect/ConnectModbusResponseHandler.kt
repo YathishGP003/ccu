@@ -5,7 +5,7 @@ import a75f.io.device.cm.HumiditySensorBusMapping
 import a75f.io.device.cm.OccupancySensorBusMapping
 import a75f.io.device.cm.PressureSensorBusMapping
 import a75f.io.device.cm.TemperatureSensorBusMapping
-import a75f.io.device.cm.getAdvancedAhuSensorInputMappings
+import a75f.io.device.cm.getUniversalInputSensorMapping
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.PhysicalPoint
 import a75f.io.domain.equips.ConnectModuleEquip
@@ -26,7 +26,7 @@ fun handleModbusResponse(slaveId : Int, response : RtuMessageResponse, ops: Conn
         }
         ConnectModbusOps.READ_UNIVERSAL_INPUT_MAPPED_VALUES -> {
             CcuLog.i(L.TAG_CCU_SERIAL_CONNECT, "READ_UNIVERSAL_INPUT_MAPPED_VALUES response received $response")
-            updateUniversalInputMappedValues(slaveId, response)
+            updateUniversalInputMappedValues(response)
         }
         ConnectModbusOps.WRITE_RELAY_OUTPUT_MAPPED_VALUES -> {
             CcuLog.i(L.TAG_CCU_SERIAL_CONNECT, "WRITE_RELAY_OUTPUT_MAPPED_VALUES completed ")
@@ -51,7 +51,7 @@ fun handleModbusResponse(slaveId : Int, response : RtuMessageResponse, ops: Conn
     //TODO- Successful read operation ->Update heartbeat
 }
 
-fun updateUniversalInputMappedValues(slaveId : Int, response : RtuMessageResponse) {
+fun updateUniversalInputMappedValues(response: RtuMessageResponse) {
     val messageData = ByteBuffer.wrap(response.messageData.copyOfRange(MODBUS_DATA_OFFSET, response.messageData.size)).order(ByteOrder.BIG_ENDIAN)
     val universalInput1Val = messageData.float
     val universalInput2Val = messageData.float
@@ -89,7 +89,7 @@ private fun writeUniversalInputMappedVal(
         connectEquip: ConnectModuleEquip,
         physicalPoint: PhysicalPoint
 ) {
-    val universalInputMapping = getAdvancedAhuSensorInputMappings()[associationVal]
+    val universalInputMapping = getUniversalInputSensorMapping()[associationVal]
     CcuLog.i(L.TAG_CCU_SERIAL_CONNECT, "universalInputVal $sensorVal associationVal $associationVal")
     if (universalInputMapping != null) {
         physicalPoint.writeHisVal(sensorVal.toDouble())

@@ -64,16 +64,16 @@ public class OccupancyHandler implements Occupiable {
     }
     
     //Triggers that can influence the occupied mode.
-    public OccupiedTrigger getOccupiedTrigger() {
-        
+    public OccupiedTrigger getOccupiedTrigger(boolean skipDemandResponse) {
+
+        if (demandResponse.hasTriggered() && !skipDemandResponse) {
+            return OccupiedTrigger.DemandResponseOccupied;
+        }
         if (windowSensor.hasTriggered()) {
             return OccupiedTrigger.DoorWindowInput;
         }
         if (keyCardSensor.hasTriggered()) {
             return OccupiedTrigger.KeyCardInput;
-        }
-        if (demandResponse.hasTriggered()) {
-            return OccupiedTrigger.DemandResponseOccupied;
         }
         if (autoAway.hasTriggered()) {
             return OccupiedTrigger.Autoaway;
@@ -89,16 +89,16 @@ public class OccupancyHandler implements Occupiable {
     }
     
     //Triggers that can influence the unoccupied mode.
-    public UnoccupiedTrigger getUnoccupiedTrigger() {
+    public UnoccupiedTrigger getUnoccupiedTrigger(boolean skipDemandResponse) {
 
+        if (demandResponse.hasTriggered() && !skipDemandResponse) {
+            return UnoccupiedTrigger.DemandResponseUnoccupied;
+        }
         if (windowSensor.hasTriggered()) {
             return UnoccupiedTrigger.DoorWindowInput;
         }
         if (keyCardSensor.hasTriggered()) {
             return UnoccupiedTrigger.KeyCardInput;
-        }
-        if (demandResponse.hasTriggered()) {
-            return UnoccupiedTrigger.DemandResponseUnoccupied;
         }
         if (preconditioning.hasTriggered()) {
             return UnoccupiedTrigger.Preconditioning;

@@ -589,6 +589,7 @@ public class AddtoExisting extends Fragment {
     private void navigateToCCUScreen() {
         prefs.setBoolean(PreferenceConstants.ADD_CCU, true);
         prefs.setBoolean(PreferenceConstants.CCU_SETUP, true);
+        PreferenceUtil.setTempModeMigrationNotRequired();
         ((FreshRegistration) requireActivity()).selectItem(23);
     }
 }

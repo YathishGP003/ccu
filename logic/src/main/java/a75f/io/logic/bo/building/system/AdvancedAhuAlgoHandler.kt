@@ -43,12 +43,14 @@ class AdvancedAhuAlgoHandler (val equip: SystemEquip) {
             systemHeatingLoop > (stageThreshold - relayHysteresis).coerceAtLeast(0.0)
     }
 
-    private fun getFanRelayState(stageIndex: Int, point: Point, systemFanLoop: Double, relayHysteresis: Double, fanStagesAvailable : Int, isSystemOccupied: Boolean) : Boolean{
+    private fun getFanRelayState(stageIndex: Int, point: Point, systemFanLoop: Double,
+                                 relayHysteresis: Double, fanStagesAvailable : Int,
+                                 isSystemOccupied: Boolean, isStage1AllowToActive: Boolean) : Boolean{
         return when(stageIndex) {
-            0 -> (isSystemOccupied || systemFanLoop > 0 || isReheatActive(CCUHsApi.getInstance()))
+            0 -> (isSystemOccupied || isStage1AllowToActive || isReheatActive(CCUHsApi.getInstance()))
             1 -> systemFanLoop > 0
             else -> {
-                val stageThreshold = 100 * (stageIndex - 1) / fanStagesAvailable -1
+                val stageThreshold = 100 * (stageIndex - 1) / (fanStagesAvailable -1)
                 val currentState = point.readHisVal()
                 CcuLog.i(
                     L.TAG_CCU_SYSTEM, "stageIndex $stageIndex getFanRelayState: currentState: " +
@@ -104,8 +106,11 @@ class AdvancedAhuAlgoHandler (val equip: SystemEquip) {
     }
 
 
-    fun getAdvancedAhuRelayState(association : Point, systemEquip: VavAdvancedHybridSystemEquip, coolingStages: Int, heatingStages: Int,
-                                 fanStages: Int, systemOccupied : Boolean, isConnectEquip : Boolean): Pair<Point, Boolean> {
+    fun getAdvancedAhuRelayState(association : Point, systemEquip: VavAdvancedHybridSystemEquip,
+                                 coolingStages: Int, heatingStages: Int, fanStages: Int,
+                                 systemOccupied : Boolean, isConnectEquip : Boolean,
+                                 isStage1AllowToActive: Boolean
+    ): Pair<Point, Boolean> {
 
         val associatedPointName: String
         //Get logical point from association index
@@ -145,7 +150,7 @@ class AdvancedAhuAlgoHandler (val equip: SystemEquip) {
             }
 
             AdvancedAhuRelayAssociationType.LOAD_FAN -> getFanRelayState(stageIndex, associatedPoint, systemEquip.fanLoopOutput.readHisVal(),
-                systemEquip.vavRelayDeactivationHysteresis.readHisVal(), fanStages, systemOccupied)
+                systemEquip.vavRelayDeactivationHysteresis.readHisVal(), fanStages, systemOccupied, isStage1AllowToActive)
 
             AdvancedAhuRelayAssociationType.HUMIDIFIER -> {
                 if (systemOccupied && systemEquip.conditioningMode.readPriorityVal() > 0) {
@@ -187,7 +192,7 @@ class AdvancedAhuAlgoHandler (val equip: SystemEquip) {
             }
 
             AdvancedAhuRelayAssociationType.FAN_PRESSURE -> getFanRelayState(stageIndex, associatedPoint, systemEquip.fanPressureLoopOutput.readHisVal(),
-                systemEquip.vavRelayDeactivationHysteresis.readHisVal(), fanStages, systemOccupied)
+                systemEquip.vavRelayDeactivationHysteresis.readHisVal(), fanStages, systemOccupied, isStage1AllowToActive)
 
             AdvancedAhuRelayAssociationType.FAN_ENABLE -> getFanEnableRelayState(systemEquip.coolingLoopOutput.readHisVal(),
                                                             systemEquip.heatingLoopOutput.readHisVal())

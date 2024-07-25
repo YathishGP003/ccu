@@ -52,23 +52,22 @@ public class HyperSplitMessageGenerator {
      */
     public static HyperSplit.HyperSplitCcuDatabaseSeedMessage_t getSeedMessage(String zone, int address,
                                                                              String equipRef) {
+        // HSS Seed message has a Settings3 field, but it is not filled anymore. This is to prevent edge cases that result from excessive message length.
+        // Settings3 is now sent separately from the Seed Message.
         HyperSplit.HyperSplitSettingsMessage_t hyperSplitSettingsMessage_t = getSettingsMessage(zone, address,
                 equipRef);
         HyperSplit.HyperSplitControlsMessage_t hyperSplitControlsMessage_t = getControlMessage(address,
                 equipRef).build();
         HyperSplit.HyperSplitSettingsMessage2_t hyperSplitSettingsMessage2_t = getSetting2Message(address, equipRef);
-        HyperSplit.HyperSplitSettingsMessage3_t hyperSplitSettingsMessage3_t = getSetting3Message(address, equipRef);
         CcuLog.i(L.TAG_CCU_SERIAL, "Seed Message t" + hyperSplitSettingsMessage_t.toByteString().toString());
         CcuLog.i(L.TAG_CCU_SERIAL, "Seed Message t" + hyperSplitControlsMessage_t.toString());
         CcuLog.i(L.TAG_CCU_SERIAL, "Seed Message t" + hyperSplitSettingsMessage2_t);
-        CcuLog.i(L.TAG_CCU_SERIAL, "Seed Message t" + hyperSplitSettingsMessage3_t);
 
         return HyperSplit.HyperSplitCcuDatabaseSeedMessage_t.newBuilder()
                 .setEncryptionKey(ByteString.copyFrom(L.getEncryptionKey()))
                 .setSerializedSettingsData(hyperSplitSettingsMessage_t.toByteString())
                 .setSerializedHyperSplitControlsData(hyperSplitControlsMessage_t.toByteString())
                 .setSerializedHyperSplitSettings2Data(hyperSplitSettingsMessage2_t.toByteString())
-                .setSerializedHyperSplitSettings3Data(hyperSplitSettingsMessage3_t.toByteString())
                 .build();
 
     }

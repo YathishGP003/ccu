@@ -315,6 +315,9 @@ public class BuildingOccupancyFragment extends DialogFragment implements Buildin
                     });
         }else{
             ProgressDialogUtils.hideProgressDialog();
+            if (removeEntry != null && buildingOccupancy.getDays().contains(removeEntry)) {
+                buildingOccupancy.getDays().remove(removeEntry);
+            }
             buildingOccupancy.getDays().addAll(daysList);
             doScheduleUpdate(false);
             buildingOccupancy = CCUHsApi.getInstance().getBuildingOccupancy();

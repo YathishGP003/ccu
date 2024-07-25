@@ -101,10 +101,10 @@ class VavAdvancedHybridAhuViewModel : AdvancedHybridAhuViewModel() {
         val validConfig = isValidateConfiguration(this@VavAdvancedHybridAhuViewModel)
         if (!validConfig.first) {
             showErrorDialog(context,validConfig.second)
-            viewState.value.isSaveRequired = true
-            viewState.value.isStateChanged = true
             return
         }
+        viewState.value.isSaveRequired = false
+        viewState.value.isStateChanged = false
 
         CcuLog.i(L.TAG_CCU_SYSTEM, profileConfiguration.toString())
         isEquipAvailable(ProfileType.SYSTEM_VAV_ADVANCED_AHU)

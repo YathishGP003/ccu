@@ -1949,8 +1949,5 @@ fun getSensorDomainPointFromName(name : String, systemEquip : AdvancedHybridSyst
         DomainName.emergencyShutoffNC -> systemEquip.emergencyShutoffNC
         DomainName.emergencyShutoffNO -> systemEquip.emergencyShutoffNO
         else -> return null
-
-
     }
 }
-

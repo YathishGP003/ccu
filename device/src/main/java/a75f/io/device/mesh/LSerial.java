@@ -562,6 +562,10 @@ public class LSerial
             Zone zone = HSUtil.getZone(roomRef, floorRef);
             HyperSplitMessageSender.sendSeedMessage(zone.getDisplayName(), Integer.parseInt(d.getAddr()),
                     d.getEquipRef(), false);
+
+            HyperSplitMessageSender.sendSettings3Message(Integer.parseInt(d.getAddr()),
+                    d.getEquipRef(), false);
+
             HyperSplitMessageSender.sendSettings4Message(Integer.parseInt(d.getAddr()),
                     d.getEquipRef(), false);
 

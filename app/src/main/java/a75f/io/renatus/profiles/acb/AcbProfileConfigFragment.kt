@@ -274,17 +274,8 @@ class AcbProfileConfigFragment : BaseDialogFragment() {
                 Row (modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start) {
                     Spacer(modifier=Modifier.width(78.dp))
                     Row {
-                        HeaderTextView(text =  viewModel.profileConfiguration.enableIAQControl.disName,padding=10)
-                        Spacer(modifier = Modifier.width(236.dp))
-                        ToggleButtonStateful(
-                            defaultSelection = viewModel.viewState.enableIAQControl,
-                            onEnabled = { it -> viewModel.viewState.enableIAQControl = it }
-                        )
-                    }
-                    Spacer(modifier=Modifier.width(91.dp))
-                    Row {
                         HeaderTextView(text =  viewModel.profileConfiguration.enableCo2Control.disName,padding=10)
-                        Spacer(modifier = Modifier.width(156.dp))
+                        Spacer(modifier = Modifier.width(236.dp))
                         ToggleButtonStateful(
                             defaultSelection = viewModel.viewState.enableCo2Control,
                             onEnabled = { it -> viewModel.viewState.enableCo2Control = it }
@@ -326,9 +317,9 @@ class AcbProfileConfigFragment : BaseDialogFragment() {
                 val values = remember { (0..100).map { it.toString() } }
                 val valuesPickerState = rememberPickerState()
 
-                Row(modifier = Modifier.wrapContentWidth().padding(PaddingValues(start=135.dp,end=135.dp))) {
+                Row(modifier = Modifier.wrapContentWidth().padding(if (viewModel.viewState.enableCFMControl) PaddingValues(start = 100.dp, end = 100.dp) else PaddingValues(start = 135.dp, end = 135.dp))) {
                     Picker(
-                        header = "Temperature\n  Offset",
+                        header = "Temperature Offset",
                         state = valuesPickerState,
                         items = viewModel.temperatureOffsetsList,
                         onChanged = { it: String -> viewModel.viewState.temperatureOffset = it.toDouble() },
@@ -340,9 +331,9 @@ class AcbProfileConfigFragment : BaseDialogFragment() {
                     )
 
                     if (!viewModel.viewState.enableCFMControl) {
-                        Spacer(modifier = Modifier.width(60.dp))
+                        Spacer(modifier = Modifier.width(if (viewModel.viewState.enableCFMControl) 40.dp else 60.dp))
                         Picker(
-                            header = "Max Damper Pos\n    Cooling",
+                            header = "Max Damper Pos Cooling",
                             state = valuesPickerState,
                             items = viewModel.maxCoolingDamperPosList,
                             onChanged = { it: String -> viewModel.viewState.maxCoolingDamperPos = it.toDouble() },
@@ -352,9 +343,9 @@ class AcbProfileConfigFragment : BaseDialogFragment() {
                             textModifier = Modifier.padding(8.dp),
                             textStyle = TextStyle(fontSize = 15.sp, fontWeight = FontWeight.Bold)
                         )
-                        Spacer(modifier = Modifier.width(60.dp))
+                        Spacer(modifier = Modifier.width(if (viewModel.viewState.enableCFMControl) 40.dp else 60.dp))
                         Picker(
-                            header = "Min Damper Pos\n   Cooling",
+                            header = "Min Damper Pos Cooling",
                             state = valuesPickerState,
                             items = viewModel.minCoolingDamperPosList,
                             onChanged = { it: String -> viewModel.viewState.minCoolingDamperPos = it.toDouble() },
@@ -366,9 +357,9 @@ class AcbProfileConfigFragment : BaseDialogFragment() {
                         )
 
                     } else {
-                        Spacer(modifier = Modifier.width(60.dp))
+                        Spacer(modifier = Modifier.width(if (viewModel.viewState.enableCFMControl) 40.dp else 60.dp))
                         Picker(
-                            header = "Max CFM\n Cooling",
+                            header = "Max CFM Cooling",
                             state = valuesPickerState,
                             items = viewModel.maxCFMCoolingList,
                             onChanged = { it: String -> viewModel.viewState.maxCFMCooling = it.toDouble() },
@@ -378,9 +369,9 @@ class AcbProfileConfigFragment : BaseDialogFragment() {
                             textModifier = Modifier.padding(8.dp),
                             textStyle = TextStyle(fontSize = 15.sp, fontWeight = FontWeight.Bold)
                         )
-                        Spacer(modifier = Modifier.width(60.dp))
+                        Spacer(modifier = Modifier.width(if (viewModel.viewState.enableCFMControl) 40.dp else 60.dp))
                         Picker(
-                            header = "Min CFM\n Cooling",
+                            header = "Min CFM Cooling",
                             state = valuesPickerState,
                             items = viewModel.minCFMCoolingList,
                             onChanged = { it: String -> viewModel.viewState.minCFMCooling = it.toDouble() },
@@ -390,9 +381,9 @@ class AcbProfileConfigFragment : BaseDialogFragment() {
                             textModifier = Modifier.padding(8.dp),
                             textStyle = TextStyle(fontSize = 15.sp, fontWeight = FontWeight.Bold)
                         )
-                        Spacer(modifier = Modifier.width(60.dp))
+                        Spacer(modifier = Modifier.width(if (viewModel.viewState.enableCFMControl) 40.dp else 60.dp))
                         Picker(
-                            header = "Max CFM\nReheating",
+                            header = "Max CFM Reheating",
                             state = valuesPickerState,
                             items = viewModel.maxCFMReheatingList,
                             onChanged = { it: String -> viewModel.viewState.maxCFMReheating = it.toDouble() },
@@ -402,9 +393,9 @@ class AcbProfileConfigFragment : BaseDialogFragment() {
                             textModifier = Modifier.padding(8.dp),
                             textStyle = TextStyle(fontSize = 15.sp, fontWeight = FontWeight.Bold)
                         )
-                        Spacer(modifier = Modifier.width(60.dp))
+                        Spacer(modifier = Modifier.width(if (viewModel.viewState.enableCFMControl) 40.dp else 60.dp))
                         Picker(
-                            header = "Min CFM\nReheating",
+                            header = "Min CFM Reheating",
                             state = valuesPickerState,
                             items = viewModel.minCFMReheatingList,
                             onChanged = { it: String -> viewModel.viewState.minCFMReheating = it.toDouble() },
@@ -416,10 +407,10 @@ class AcbProfileConfigFragment : BaseDialogFragment() {
                         )
                     }
 
-                    Spacer(modifier = Modifier.width(60.dp))
+                    Spacer(modifier = Modifier.width(if (viewModel.viewState.enableCFMControl) 40.dp else 60.dp))
                     if(!viewModel.viewState.enableCFMControl) {
                         Picker(
-                            header = "Max Damper Pos\n   Heating",
+                            header = "Max Damper Pos Heating",
                             state = valuesPickerState,
                             items = viewModel.maxHeatingDamperPosList,
                             onChanged = { it: String ->
@@ -452,21 +443,18 @@ class AcbProfileConfigFragment : BaseDialogFragment() {
                         )
                     }
 
-                    if (!viewModel.viewState.enableCFMControl) {
-                        Spacer(modifier = Modifier.width(60.dp))
-                        Picker(
-                            header = "Min Damper Pos\n    Heating",
-                            state = valuesPickerState,
-                            items = viewModel.minHeatingDamperPosList,
-                            onChanged = { it: String -> viewModel.viewState.minHeatingDamperPos = it.toDouble() },
-                            startIndex = viewModel.minHeatingDamperPosList.indexOf(viewModel.viewState.minHeatingDamperPos.toInt().toString()),
-                            visibleItemsCount = 3,
-                            modifier = Modifier.weight(0.3f),
-                            textModifier = Modifier.padding(8.dp),
-                            textStyle = TextStyle(fontSize = 15.sp, fontWeight = FontWeight.Bold)
-                        )
-                    }
-
+                    Spacer(modifier = Modifier.width(if (viewModel.viewState.enableCFMControl) 40.dp else 60.dp))
+                    Picker(
+                        header = "Min Damper Pos Heating",
+                        state = valuesPickerState,
+                        items = viewModel.minHeatingDamperPosList,
+                        onChanged = { it: String -> viewModel.viewState.minHeatingDamperPos = it.toDouble() },
+                        startIndex = viewModel.minHeatingDamperPosList.indexOf(viewModel.viewState.minHeatingDamperPos.toInt().toString()),
+                        visibleItemsCount = 3,
+                        modifier = Modifier.weight(0.3f),
+                        textModifier = Modifier.padding(8.dp),
+                        textStyle = TextStyle(fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                    )
                 }
                 val mapOfUnUsedPorts = viewModel.viewState.unusedPortState
                 if(mapOfUnUsedPorts.isNotEmpty()) {

@@ -125,6 +125,10 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             removeHisTagsFromNonDMDevices()
             PreferenceUtil.setHisTagRemovalFromNonDmDevicesDone()
         }
+        if(!PreferenceUtil.isVavCfmOnEdgeMigrationDone()) {
+            VavAndAcbProfileMigration.addMinHeatingDamperPositionMigration(hayStack)
+            PreferenceUtil.setVavCfmOnEdgeMigrationDone()
+        }
         hayStack.scheduleSync()
     }
 

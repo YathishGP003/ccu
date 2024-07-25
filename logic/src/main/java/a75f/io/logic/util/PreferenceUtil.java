@@ -58,6 +58,7 @@ public class PreferenceUtil {
     public static final String ACB_COND_SENSOR_MIGRATION = "acbCondensateSensorMigration";
     public static final String HSS_GATEWAY_REF_MIGRATION = "hssGatewayRefMigration";
     public static final String HIS_TAG_REMOVAL_FROM_NON_DM_DEVICES = "hisTagRemovalFromNonDmDevices";
+    public static final String VAV_CFM_ON_EDGE_MIGRATION = "vavCfmOnEdgeMigration";
 
     public static void setContext(Context c) {
         context= c;
@@ -509,6 +510,12 @@ public class PreferenceUtil {
     }
     public static void setHisTagRemovalFromNonDmDevicesDone() {
         setBooleanPreference(HIS_TAG_REMOVAL_FROM_NON_DM_DEVICES, true);
+    }
+    public static boolean isVavCfmOnEdgeMigrationDone() {
+        return getBooleanPreference(VAV_CFM_ON_EDGE_MIGRATION);
+    }
+    public static void setVavCfmOnEdgeMigrationDone() {
+        setBooleanPreference(VAV_CFM_ON_EDGE_MIGRATION, true);
     }
 
 }

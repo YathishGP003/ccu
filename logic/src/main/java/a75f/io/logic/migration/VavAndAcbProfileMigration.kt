@@ -721,5 +721,80 @@ class VavAndAcbProfileMigration {
                 }
             }
         }
+
+        fun addMinHeatingDamperPositionMigration(hayStack: CCUHsApi) {
+            val domainNames = mapOf(
+                DomainName.smartnodeVAVReheatNoFan to ModelLoader.getSmartNodeVavNoFanModelDef() as SeventyFiveFProfileDirective,
+                DomainName.smartnodeVAVReheatParallelFan to ModelLoader.getSmartNodeVavParallelFanModelDef() as SeventyFiveFProfileDirective,
+                DomainName.smartnodeVAVReheatSeriesFan to ModelLoader.getSmartNodeVavSeriesModelDef() as SeventyFiveFProfileDirective,
+                DomainName.smartnodeActiveChilledBeam to ModelLoader.getSmartNodeVavAcbModelDef() as SeventyFiveFProfileDirective,
+                DomainName.helionodeVAVReheatNoFan to ModelLoader.getHelioNodeVavNoFanModelDef() as SeventyFiveFProfileDirective,
+                DomainName.helionodeVAVReheatParallelFan to ModelLoader.getHelioNodeVavParallelFanModelDef() as SeventyFiveFProfileDirective,
+                DomainName.helionodeVAVReheatSeriesFan to ModelLoader.getHelioNodeVavSeriesModelDef() as SeventyFiveFProfileDirective,
+                DomainName.helionodeActiveChilledBeam to ModelLoader.getHelioNodeVavAcbModelDef() as SeventyFiveFProfileDirective
+            )
+
+            domainNames.forEach {
+                val equips = hayStack.readAllEntities("equip and domainName == \"${it.key}\"")
+                equips.forEach { equip ->
+                    val equipId = equip["id"].toString()
+                    val minHeatingDamperPos =
+                        hayStack.readEntity("point and equipRef == \"${equipId}\" and domainName == \"${DomainName.minHeatingDamperPos}\"")
+                    if (minHeatingDamperPos.isNullOrEmpty()) {
+                        val model = it.value
+                        val profileConfiguration = if (it.key == DomainName.smartnodeActiveChilledBeam || it.key == DomainName.helionodeActiveChilledBeam) {
+                            AcbProfileConfiguration(
+                                Integer.parseInt(equip["group"].toString()),
+                                NodeType.HELIO_NODE.name,
+                                0,
+                                equip["roomRef"].toString(),
+                                equip["floorRef"].toString(),
+                                ProfileType.VAV_ACB,
+                                model
+                            ).getActiveConfiguration()
+                        } else {
+                            val profileType = when (it.key) {
+                                DomainName.smartnodeVAVReheatNoFan -> ProfileType.VAV_REHEAT
+                                DomainName.smartnodeVAVReheatParallelFan -> ProfileType.VAV_PARALLEL_FAN
+                                DomainName.smartnodeVAVReheatSeriesFan -> ProfileType.VAV_SERIES_FAN
+                                DomainName.helionodeVAVReheatNoFan -> ProfileType.VAV_REHEAT
+                                DomainName.helionodeVAVReheatParallelFan -> ProfileType.VAV_PARALLEL_FAN
+                                DomainName.helionodeVAVReheatSeriesFan -> ProfileType.VAV_SERIES_FAN
+                                else -> ProfileType.VAV_REHEAT
+                            }
+
+                            VavProfileConfiguration(
+                                Integer.parseInt(equip["group"].toString()),
+                                NodeType.HELIO_NODE.name,
+                                0,
+                                equip["roomRef"].toString(),
+                                equip["floorRef"].toString(),
+                                profileType,
+                                model
+                            ).getActiveConfiguration()
+                        }
+
+                        val equipDis = if (it.key == DomainName.smartnodeActiveChilledBeam || it.key == DomainName.helionodeActiveChilledBeam) {
+                            "${hayStack.site?.displayName}-ACB-${equip["group"]}"
+                        } else {
+                            "${hayStack.site?.displayName}-VAV-${equip["group"]}"
+                        }
+
+                        val modelPointDef = model.points.find { it.domainName.contentEquals(DomainName.minHeatingDamperPos) } as SeventyFiveFProfilePointDef
+                        val equipBuilder = ProfileEquipBuilder(hayStack)
+                        equipBuilder.createPoint(
+                            PointBuilderConfig(
+                                modelPointDef,
+                                profileConfiguration,
+                                equipId,
+                                hayStack.site!!.id,
+                                hayStack.timeZone,
+                                equipDis
+                            )
+                        )
+                    }
+                }
+            }
+        }
     }
 }

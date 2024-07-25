@@ -80,7 +80,6 @@ public abstract class VavProfile extends ZoneProfile {
     ControlLoop         coolingLoop;
     ControlLoop         heatingLoop;
     CO2Loop             co2Loop;
-    VOCLoop             vocLoop;
     GenericPIController valveController;
     Damper              damper;
     Valve valve;
@@ -109,8 +108,6 @@ public abstract class VavProfile extends ZoneProfile {
 
     double co2Target = TunerConstants.ZONE_CO2_TARGET;
     double co2Threshold = TunerConstants.ZONE_CO2_THRESHOLD;
-    double vocTarget = TunerConstants.ZONE_VOC_TARGET;
-    double vocThreshold = TunerConstants.ZONE_VOC_THRESHOLD;
     CCUHsApi hayStack= CCUHsApi.getInstance();
     String equipRef = null;
         
@@ -120,7 +117,6 @@ public abstract class VavProfile extends ZoneProfile {
         coolingLoop = new ControlLoop();
         heatingLoop = new ControlLoop();
         co2Loop = new CO2Loop();
-        vocLoop = new VOCLoop();
         valveController = new GenericPIController();
         valveController.setIntegralMaxTimeout(integralMaxTimeout);
         valveController.setMaxAllowedError(proportionalSpread);
@@ -184,8 +180,6 @@ public abstract class VavProfile extends ZoneProfile {
 
             co2Target = (int) vavEquip.getVavZoneCo2Target().readPriorityVal();
             co2Threshold = (int) vavEquip.getVavZoneCo2Threshold().readPriorityVal();
-            vocTarget = (int) vavEquip.getVavZoneVocTarget().readPriorityVal();
-            vocThreshold = (int) vavEquip.getVavZoneVocThreshold().readPriorityVal();
 
             CcuLog.i(L.TAG_CCU_ZONE,"node "+nodeAddr+" proportionalGain "+proportionalGain
                     +" integralGain "+integralGain
@@ -193,7 +187,6 @@ public abstract class VavProfile extends ZoneProfile {
                     +" integralMaxTimeout "+integralMaxTimeout
                     +" co2Target "+co2Target
                     +" co2Threshold "+co2Threshold
-                    +" vocTarget "+vocTarget
                     +" integralMaxTimeout "+integralMaxTimeout);
 
             initializeCfmController(equipId);
@@ -213,8 +206,6 @@ public abstract class VavProfile extends ZoneProfile {
 
         co2Loop.setCo2Target(co2Target);
         co2Loop.setCo2Threshold(co2Threshold);
-        vocLoop.setVOCTarget(vocTarget);
-        vocLoop.setVOCThreshold(vocThreshold);
 
         ZonePriority zonePriority = ZonePriority.values()[(int)vavEquip.getZonePriority().readPriorityVal()];
         satResetRequest.setImportanceMultiplier(((double)zonePriority.val)/10);
@@ -266,13 +257,9 @@ public abstract class VavProfile extends ZoneProfile {
 
         co2Target = (int) vavEquip.getVavZoneCo2Target().readPriorityVal();
         co2Threshold = (int) vavEquip.getVavZoneCo2Threshold().readPriorityVal();
-        vocTarget = (int) vavEquip.getVavZoneVocTarget().readPriorityVal();
-        vocThreshold = (int) vavEquip.getVavZoneVocThreshold().readPriorityVal();
 
         co2Loop.setCo2Target(co2Target);
         co2Loop.setCo2Threshold(co2Threshold);
-        vocLoop.setVOCTarget(vocTarget);
-        vocLoop.setVOCThreshold(vocThreshold);
 
         pendingTunerChange = false;
 
@@ -575,7 +562,7 @@ public abstract class VavProfile extends ZoneProfile {
     private void updateDamperWhenSystemHeating(
             CCUHsApi hayStack, String equipId, double currentCfm,
             double co2, double voc, boolean enabledCO2Control,
-            boolean enabledIAQControl, boolean occupied) {
+            boolean occupied) {
 
         if (cfmLoopState != State.HEATING) {
             cfmLoopState = State.HEATING;
@@ -594,7 +581,6 @@ public abstract class VavProfile extends ZoneProfile {
         // Max Cooling CFM is the max CFM for DCV, even in heating mode
         double maxCfmCooling = TrueCFMUtil.getMaxCFMCooling(hayStack, equipId);
         double co2CompensatedMinCfm = 0;
-        double iaqCompensatedMinCfm = 0;
 
         //CO2 loop output from 0-50% modulates min cfm (up to max cooling cfm)
         if (enabledCO2Control && occupied && co2Loop.getLoopOutput(co2) > 0) {
@@ -602,13 +588,7 @@ public abstract class VavProfile extends ZoneProfile {
             CcuLog.i(L.TAG_CCU_ZONE, "state: HEATING, co2: " + co2 + ", co2LoopOp: " + co2Loop.getLoopOutput() + ", co2CompensatedMinCfm " + co2CompensatedMinCfm);
         }
 
-        //VOC loop output from 0-50% modulates min cfm (up to max cooling cfm)
-        if (enabledIAQControl && occupied && vocLoop.getLoopOutput(voc) > 0) {
-            iaqCompensatedMinCfm = minCfmHeating + (maxCfmCooling - minCfmHeating) * Math.min(50, vocLoop.getLoopOutput()) / 50;
-            CcuLog.i(L.TAG_CCU_ZONE, "state: HEATING, voc: " + voc + ", vocLoopOp: " + vocLoop.getLoopOutput() + ", vocCompensatedMinCfm " + iaqCompensatedMinCfm);
-        }
-
-        double effectiveMinCfm = Math.max(minCfmHeating, Math.max(co2CompensatedMinCfm, iaqCompensatedMinCfm));
+        double effectiveMinCfm = Math.max(minCfmHeating, co2CompensatedMinCfm);
 
         double cfmLoopOp = 0;
 
@@ -616,7 +596,7 @@ public abstract class VavProfile extends ZoneProfile {
             True CFM with system in heating mode works a little differently.
 
             DAB-calculated damper position is left as-is UNLESS measured airflow is less than minimum CFM setpoint
-            (heating min CFM or the min CFM derived from DCV/IAQ control).
+            (heating min CFM or the min CFM derived from DCV control).
 
             If this happens, DAB-calculated damper position (including DCV minimum position) is discarded.
 
@@ -654,7 +634,7 @@ public abstract class VavProfile extends ZoneProfile {
     private void updateDamperWhenSystemCooling(
             CCUHsApi hayStack, String equipId, double currentCfm,
             double co2, double voc, boolean enabledCO2Control,
-            boolean enabledIAQControl, boolean occupied) {
+            boolean occupied) {
 
         if (cfmLoopState != State.COOLING) {
             cfmLoopState = State.COOLING;
@@ -663,7 +643,6 @@ public abstract class VavProfile extends ZoneProfile {
 
         double cfmSp;
         double co2CompensatedMinCfm = 0;
-        double iaqCompensatedMinCfm = 0;
 
         // Max cooling CFM is used as max CFM for DCV regardless of zone state
         double maxCfmCooling = TrueCFMUtil.getMaxCFMCooling(hayStack, equipId);
@@ -679,17 +658,11 @@ public abstract class VavProfile extends ZoneProfile {
                 CcuLog.i(L.TAG_CCU_ZONE, "state: COOLING, co2: " + co2 + ", co2LoopOp: " + co2Loop.getLoopOutput() + ", co2CompensatedMinCfm " + co2CompensatedMinCfm);
             }
 
-            //VOC loop output from 0-50% modulates min cfm (up to max cooling cfm)
-            if (enabledIAQControl && occupied && vocLoop.getLoopOutput(voc) > 0) {
-                iaqCompensatedMinCfm = minCfmCooling + (maxCfmCooling - minCfmCooling) * Math.min(50, vocLoop.getLoopOutput()) / 50;
-                CcuLog.i(L.TAG_CCU_ZONE, "state: COOLING, voc: " + voc + ", vocLoopOp: " + vocLoop.getLoopOutput() + ", vocCompensatedMinCfm " + iaqCompensatedMinCfm);
-            }
-
-            cfmSp = Math.max(cfmSpForCooling, Math.max(co2CompensatedMinCfm, iaqCompensatedMinCfm));
+            cfmSp = Math.max(cfmSpForCooling, co2CompensatedMinCfm);
 
             CcuLog.i(L.TAG_CCU_ZONE, " updateDamperWhenSystemCooling cfmSp "+cfmSp+" Cooling CFM required: "
                     +minCfmCooling+"-"+maxCfmCooling + ", Cooling CFM Sp: " + cfmSpForCooling
-                    +", CO2 DCV CFM Sp: " + co2CompensatedMinCfm+", IAQ DCV CFM Sp: " + iaqCompensatedMinCfm);
+                    +", CO2 DCV CFM Sp: " + co2CompensatedMinCfm);
 
         } else if (state == HEATING){
             double minCfmHeating = TrueCFMUtil.getMinCFMReheating(hayStack, equipId);
@@ -702,17 +675,11 @@ public abstract class VavProfile extends ZoneProfile {
                 CcuLog.i(L.TAG_CCU_ZONE, "state: HEATING, co2: " + co2 + ", co2LoopOp: " + co2Loop.getLoopOutput(co2) + ", co2CompensatedMinCfm " + co2CompensatedMinCfm);
             }
 
-            //VOC loop output from 0-50% modulates min cfm (up to max cooling cfm)
-            if (enabledIAQControl && occupied && vocLoop.getLoopOutput(voc) > 0) {
-                iaqCompensatedMinCfm = minCfmHeating + (maxCfmCooling - minCfmHeating) * Math.min(50, vocLoop.getLoopOutput()) / 50;
-                CcuLog.i(L.TAG_CCU_ZONE, "state: HEATING, voc: " + voc + ", vocLoopOp: " + vocLoop.getLoopOutput() + ", vocCompensatedMinCfm " + iaqCompensatedMinCfm);
-            }
-
-            cfmSp = Math.max(cfmSpForHeating, Math.max(co2CompensatedMinCfm, iaqCompensatedMinCfm));
+            cfmSp = Math.max(cfmSpForHeating, co2CompensatedMinCfm);
 
             CcuLog.i(L.TAG_CCU_ZONE, " updateDamperWhenSystemCooling cfmSp "+cfmSp+" Reheat CFM required: "
                     +minCfmHeating+"-"+maxCfmHeating + ", Heating CFM Sp: " + cfmSpForHeating
-                    +", CO2 DCV CFM Sp: " + co2CompensatedMinCfm+", IAQ DCV CFM Sp: " + iaqCompensatedMinCfm);
+                    +", CO2 DCV CFM Sp: " + co2CompensatedMinCfm);
 
         } else {
             if (!TrueCFMUtil.cfmControlNotRequired(hayStack, equipId)) {
@@ -724,17 +691,11 @@ public abstract class VavProfile extends ZoneProfile {
                     CcuLog.i(L.TAG_CCU_ZONE, "state: DEADBAND, co2: " + co2 + ", co2LoopOp: " + co2Loop.getLoopOutput(co2) + ", co2CompensatedMinCfm " + co2CompensatedMinCfm);
                 }
 
-                //VOC loop output from 0-50% modulates min cfm (up to max cooling cfm)
-                if (enabledIAQControl && occupied && vocLoop.getLoopOutput(voc) > 0) {
-                    iaqCompensatedMinCfm = minCfmHeating + (maxCfmCooling - minCfmHeating) * Math.min(50, vocLoop.getLoopOutput()) / 50;
-                    CcuLog.i(L.TAG_CCU_ZONE, "state: HEATING, voc: " + voc + ", vocLoopOp: " + vocLoop.getLoopOutput() + ", vocCompensatedMinCfm " + iaqCompensatedMinCfm);
-                }
-
-                cfmSp = Math.max(minCfmHeating, Math.max(co2CompensatedMinCfm, iaqCompensatedMinCfm));
+                cfmSp = Math.max(minCfmHeating, co2CompensatedMinCfm);
 
                 CcuLog.i(L.TAG_CCU_ZONE, " updateDamperWhenSystemCooling Deadband co2LoopOp: " + co2Loop.getLoopOutput(co2) + "cfmSp (Occupied): "+cfmSp
                         + ", Min Heating CFM Sp: " + minCfmHeating
-                        +", CO2 DCV CFM Sp: " + co2CompensatedMinCfm+", IAQ DCV CFM Sp: " + iaqCompensatedMinCfm);
+                        +", CO2 DCV CFM Sp: " + co2CompensatedMinCfm);
 
             } else {
                 cfmSp = 0;
@@ -851,7 +812,6 @@ public abstract class VavProfile extends ZoneProfile {
         double co2 = vavEquip.getZoneCO2().readHisVal();
         double voc = vavEquip.getZoneVoc().readHisVal();
         boolean enabledCO2Control = vavEquip.getEnableCo2Control().readPriorityVal() > 0.0;
-        boolean enabledIAQControl = vavEquip.getEnableIAQControl().readPriorityVal() > 0.0;
 
         String zoneId = HSUtil.getZoneIdFromEquipId(equipId);
 
@@ -860,10 +820,10 @@ public abstract class VavProfile extends ZoneProfile {
                 || (ScheduleManager.getInstance().getSystemOccupancy() == Occupancy.PRECONDITIONING);
 
         if (systemState == SystemController.State.COOLING) {
-            updateDamperWhenSystemCooling(hayStack, equipId, currentCfm, co2, voc, enabledCO2Control, enabledIAQControl, occupied);
+            updateDamperWhenSystemCooling(hayStack, equipId, currentCfm, co2, voc, enabledCO2Control, occupied);
             CcuLog.d(L.TAG_CCU_ZONE, "updateDamperWhenSystemCooling cfmControlLoop: " + cfmController.getLoopOutput() + ", damper.currentPosition: " + damper.currentPosition);
         } else if (systemState == SystemController.State.HEATING) {
-            updateDamperWhenSystemHeating(hayStack, equipId, currentCfm, co2, voc, enabledCO2Control, enabledIAQControl, occupied);
+            updateDamperWhenSystemHeating(hayStack, equipId, currentCfm, co2, voc, enabledCO2Control, occupied);
             CcuLog.d(L.TAG_CCU_ZONE, "updateDamperWhenSystemHeating cfmControlLoop: " + cfmController.getLoopOutput() + ", damper.currentPosition: " + damper.currentPosition);
         } else {
             updateDamperWhenSystemOff(hayStack, equipId, currentCfm);

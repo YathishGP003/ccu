@@ -122,6 +122,7 @@ class DabAdvancedHybridAhuViewModel : AdvancedHybridAhuViewModel() {
                         viewState.value.isSaveRequired = false
                         viewState.value.isStateChanged = false
                         showToast("Configuration saved successfully", context)
+                        saveJob = null
                         ProgressDialogUtils.hideProgressDialog()
                     }
                 }

@@ -253,7 +253,7 @@ public class DabSystemController extends SystemController
         updateSystemHumidity(allEquips);
         updateSystemTemperature(allEquips);
         updateSystemDesiredTemp();
-        if (L.ccu().systemProfile instanceof  DabExternalAhu ) {
+        if (L.ccu().systemProfile instanceof  DabExternalAhu || L.ccu().systemProfile instanceof DabAdvancedAhu) {
             CCUHsApi.getInstance().writeHisValByQuery("domainName == \""+averageHumidity+"\"", averageSystemHumidity);
             CCUHsApi.getInstance().writeHisValByQuery("domainName == \""+averageTemperature+"\"", averageSystemTemperature);
         } else {

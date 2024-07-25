@@ -174,6 +174,11 @@ object Domain {
     }
 
     @JvmStatic
+    fun readDictNullableOnEquip(domainName: String, equipRef: String) : HDict? {
+        return hayStack.readHDict("point and domainName == \"$domainName\" and equipRef == \"$equipRef\"")
+    }
+
+    @JvmStatic
     fun readPointForEquip(domainName: String, equipRef : String) : Map<Any,Any> {
         return hayStack.readEntity("point and domainName == \"$domainName\" and equipRef == \"$equipRef\"")
     }

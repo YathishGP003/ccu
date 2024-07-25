@@ -556,7 +556,7 @@ public class AddtoExisting extends Fragment {
                 boolean retVal = false;
                 if (StringUtils.isNotBlank(siteId)) {
                     retVal = CCUHsApi.getInstance().syncExistingSite(siteId);
-                    TunerEquip.INSTANCE.initialize(CCUHsApi.getInstance());
+                    TunerEquip.INSTANCE.initialize(CCUHsApi.getInstance(), false);
                     Globals.getInstance().setSiteAlreadyCreated(true);
                     CCUHsApi.getInstance().setPrimaryCcu(false);
                     CCUHsApi.getInstance().updateLocalTimeZone();

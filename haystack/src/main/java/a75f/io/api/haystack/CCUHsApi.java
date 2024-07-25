@@ -1436,6 +1436,11 @@ public class CCUHsApi
         deleteEntity(id);
     }
 
+    public void deleteWritablePointLocally(String id) {
+        deleteWritableArray(id);
+        deleteEntityLocally(id);
+    }
+
     public void deleteFloorEntityTreeLeavingRemoteFloorIntact(String id) {
         CcuLog.d(TAG_CCU_HS, "deleteFloorEntityTreeLeavingRemoteFloorIntact: " + id);
         HashMap<Object, Object> entity = CCUHsApi.getInstance().readEntity("id == " + id);
@@ -3576,6 +3581,10 @@ public class CCUHsApi
             return 0;
         }
 
+    }
+
+    public void syncEntity(String id) {
+            syncStatusService.addUnSyncedEntity(id);
     }
     public void clearAllAvailableLevelsInPoint(String id) {
         if (HSUtil.readPointPriorityValWithNull(id) != null) {

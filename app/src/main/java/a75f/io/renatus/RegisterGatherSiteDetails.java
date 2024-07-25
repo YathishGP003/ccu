@@ -118,7 +118,7 @@ public class RegisterGatherSiteDetails extends Activity {
                 .setArea(10000).build();
         String localSiteId = CCUHsApi.getInstance().addSite(s75f);
         CcuLog.i(TAG, "LocalSiteID: " + localSiteId + " tz " + s75f.getTz());
-        TunerEquip.INSTANCE.initialize(CCUHsApi.getInstance());
+        TunerEquip.INSTANCE.initialize(CCUHsApi.getInstance(), false);
         CcuLog.i(TAG, "LocalSiteID: " + localSiteId);
         CCUHsApi.getInstance().log();
         L.ccu().systemProfile = new DefaultSystem();

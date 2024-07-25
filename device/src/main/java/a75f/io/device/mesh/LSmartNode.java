@@ -1023,8 +1023,9 @@ public class LSmartNode
                         mappedVal = 0;
                     }
 
-                    if (!Globals.getInstance().isTemporaryOverrideMode())
+                    if (!Globals.getInstance().isTemporaryOverrideMode()) {
                         hayStack.writeHisValById(p.getId(), (double) mappedVal);
+                    }
 
                     CcuLog.d(TAG_CCU_DEVICE, " Set " + p.getPort() + " type " + p.getType() + " logicalVal: " + logicalVal + " mappedVal " + mappedVal);
                     Struct.Unsigned8 smartNodePort =LSmartNode.getSmartNodePort(controlsMessage.controls, p);

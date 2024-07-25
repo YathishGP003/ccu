@@ -200,9 +200,9 @@ public class HyperStatMessageGenerator {
                     mappedVal = (DeviceUtil.isAnalog(rawPoint.getPort())
                             ? DeviceUtil.mapAnalogOut(rawPoint.getType(), (short) logicalVal)
                             : DeviceUtil.mapDigitalOut(rawPoint.getType(), logicalVal > 0));
+                    hayStack.writeHisValById(rawPoint.getId(), (double) mappedVal);
                 }
 
-                hayStack.writeHisValById(rawPoint.getId(), (double) mappedVal);
                 setHyperStatPort(controls, Port.valueOf(rawPoint.getPort()), mappedVal);
             });
             CcuLog.i(L.TAG_CCU_DEVICE, "===================Device Layer==================================");

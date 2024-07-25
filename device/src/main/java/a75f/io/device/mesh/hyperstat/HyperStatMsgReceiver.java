@@ -33,6 +33,7 @@ import a75f.io.device.mesh.ThermistorUtil;
 import a75f.io.device.serial.CcuToCmOverUsbDeviceTempAckMessage_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.definitions.Port;
@@ -124,11 +125,13 @@ public class HyperStatMsgReceiver {
 
         Pulse.mDeviceUpdate.put((short) nodeAddress, Calendar.getInstance().getTimeInMillis());
 
-        DeviceHSUtil.getEnabledSensorPointsWithRefForDevice(device, hayStack)
+        if(!Globals.getInstance().isTemporaryOverrideMode()) {
+            DeviceHSUtil.getEnabledSensorPointsWithRefForDevice(device, hayStack)
                     .forEach( point -> writePortInputsToHaystackDatabase( point, regularUpdateMessage, hayStack));
-        
-        if (!regularUpdateMessage.getSensorReadingsList().isEmpty()) {
-            writeSensorInputsToHaystackDatabase(regularUpdateMessage.getSensorReadingsList(), nodeAddress);
+
+            if (!regularUpdateMessage.getSensorReadingsList().isEmpty()) {
+                writeSensorInputsToHaystackDatabase(regularUpdateMessage.getSensorReadingsList(), nodeAddress);
+            }
         }
     }
     

@@ -783,7 +783,7 @@ class DabAdvancedAhu : DabSystemProfile() {
         if (isConnectEquip) {
             getConnectRelayAssociationMap(systemEquip.connectEquip1).forEach { (relay, association) ->
                 if (relay.readDefaultVal() > 0) {
-                    val domainName = relayAssociationToDomainName(association.readDefaultVal().toInt())
+                    val domainName = connectRelayAssociationToDomainName(association.readDefaultVal().toInt())
                     val physicalPoint = getConnectRelayLogicalPhysicalMap(systemEquip.connectEquip1, Domain.connect1Device)[relay]
                     physicalPoint?.writeHisVal(getDomainPointForName(domainName, systemEquip.connectEquip1).readHisVal())
                 }
@@ -884,7 +884,7 @@ class DabAdvancedAhu : DabSystemProfile() {
 
         if (!systemEquip.connectEquip1.equipRef.contentEquals("null")) {
             getConnectRelayAssociationMap(systemEquip.connectEquip1).entries.forEach { (relay, association) ->
-                val domainName = relayAssociationToDomainName(association.readDefaultVal().toInt())
+                val domainName = connectRelayAssociationToDomainName(association.readDefaultVal().toInt())
                 getDomainPointForName(domainName, systemEquip.connectEquip1).writeHisVal(0.0)
                 getConnectRelayLogicalPhysicalMap(systemEquip.connectEquip1, Domain.connect1Device)[relay]?.writeHisVal(0.0)
             }
@@ -914,7 +914,7 @@ class DabAdvancedAhu : DabSystemProfile() {
 
             if (!systemEquip.connectEquip1.equipRef.contentEquals("null")) {
                 getConnectRelayAssociationMap(systemEquip.connectEquip1).entries.forEach { (relay, association) ->
-                    val logical = relayAssociationToDomainName(association.readDefaultVal().toInt())
+                    val logical = connectRelayAssociationToDomainName(association.readDefaultVal().toInt())
                     CcuLog.i(L.TAG_CCU_SYSTEM, "Connect ${relay.domainName}:${relay.readDefaultVal()} => : " + "Physical Value: ${getConnectRelayLogicalPhysicalMap(systemEquip.connectEquip1, Domain.connect1Device)[relay]!!.readHisVal()}  " + "$logical : ${getDomainPointForName(logical, systemEquip.connectEquip1).readHisVal()} ")
                 }
                 getConnectAnalogAssociationMap(systemEquip.connectEquip1).entries.forEach { (analogOut, association) ->

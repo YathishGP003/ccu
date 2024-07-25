@@ -16,6 +16,15 @@ public class DABSystemProfileRelayAssociationUtil {
     public static boolean getDesiredTempDisplayMode(TemperatureMode modeType){
         HashMap<Object, Object> equip = CCUHsApi.getInstance().readEntity("equip and system and not modbus and not connectModule");
         Equip eq = new Equip.Builder().setHashMap(equip).build();
+
+        if (ProfileType.getProfileTypeForName(eq.getProfile()) == ProfileType.SYSTEM_DAB_ADVANCED_AHU) {
+            if (modeType == TemperatureMode.COOLING) {
+                return L.ccu().systemProfile.isCoolingAvailable();
+            } else if (modeType == TemperatureMode.HEATING) {
+                return L.ccu().systemProfile.isHeatingAvailable();
+            }
+        }
+
         switch (ProfileType.valueOf(eq.getProfile())) {
             case SYSTEM_DAB_STAGED_RTU:
                 DabStagedRtu dabStagedRtu = new DabStagedRtu();

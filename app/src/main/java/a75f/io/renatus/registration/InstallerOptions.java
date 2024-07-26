@@ -1022,7 +1022,7 @@ public class InstallerOptions extends Fragment {
             protected Void doInBackground(Void... voids) {
 
                 if (!Globals.getInstance().siteAlreadyCreated()) {
-                    TunerEquip.INSTANCE.initialize(CCUHsApi.getInstance());
+                    TunerEquip.INSTANCE.initialize(CCUHsApi.getInstance(), false);
                     //BuildingTuners.getInstance();
                     //SchedulabeLimits.Companion.addSchedulableLimits(true,null,null);
                     DefaultSchedules.setDefaultCoolingHeatingTemp();

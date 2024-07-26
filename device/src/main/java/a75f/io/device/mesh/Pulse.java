@@ -1001,6 +1001,9 @@ public class Pulse
 				mDeviceLowSignalCount.remove(nodeAddr);
 				mDeviceLowSignalAlert.put(nodeAddr,false);
 			}
+			if (Globals.getInstance().isTemporaryOverrideMode()) {
+				return;
+			}
 			ArrayList<HashMap> phyPoints = hayStack.readAll("point and physical and sensor and deviceRef == \"" + deviceInfo.getId() + "\"");
 			boolean is2pfcu = deviceInfo.getMarkers().contains("pipe2");
 			String logicalCurTempPoint = "";

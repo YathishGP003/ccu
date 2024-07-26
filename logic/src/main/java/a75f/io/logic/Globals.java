@@ -341,7 +341,7 @@ public class Globals {
                         .getSharedPreferences(DOMAIN_MODEL_SF, Context.MODE_PRIVATE);
                 diffManger.registerOnMigrationCompletedListener(TunerEquip.INSTANCE);
                 diffManger.processModelMigration(site.get("id").toString(), modelSharedPref, modelsPath);
-                TunerEquip.INSTANCE.initialize(CCUHsApi.getInstance());
+                TunerEquip.INSTANCE.initialize(CCUHsApi.getInstance(), false);
                 migrationHandler.updateMigrationVersion();
                 copyModels();
             }

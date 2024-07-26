@@ -23,7 +23,7 @@ public class BuildingEquipTest {
 
     @Test
     public void testBuildingEquipCreation() {
-        TunerEquip.INSTANCE.initialize(hayStack);
+        TunerEquip.INSTANCE.initialize(hayStack, false);
         System.out.println(hayStack.readEntity("tuner and equip"));
     }
 }

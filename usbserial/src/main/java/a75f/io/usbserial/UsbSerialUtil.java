@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.List;
 
 import a75f.io.api.haystack.CCUHsApi;
-import a75f.io.logger.CcuLog;
 
 public class UsbSerialUtil {
     
@@ -54,7 +53,7 @@ public class UsbSerialUtil {
 
     public static int getPreferredConnectModuleSerialType(Context context) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        return sharedPreferences.getInt("connect_serial_port", 0);
+        return sharedPreferences.getInt("connect_serial_port", ConnectSerialPort.CM_VIRTUAL_PORT2.ordinal()); // Default to CM_VIRTUAL_PORT2 preferred for connect module serial port (Ref portTask 30888)
     }
 
     public static boolean isConnectDevice(UsbDevice device, Context context) {
@@ -67,12 +66,6 @@ public class UsbSerialUtil {
         }
         return device.getVendorId() == VENDOR_ID_CONNECT && device.getProductId() == PRODUCT_ID_CONNECT;
     }
-}
-
-enum UsbSerialType {
-    MODBUS,
-    CONNECT,
-    CM
 }
 
 enum ConnectSerialPort {

@@ -409,7 +409,7 @@ public class RestoreCCU {
         CcuLog.i(TAG, "Saving site details started");
         replaceCCUTracker.updateReplaceStatus(RestoreCCU.SYNC_SITE, ReplaceStatus.RUNNING.toString());
         restoreCCUHsApi.syncExistingSite(siteCode, retryCountCallback);
-        TunerEquip.INSTANCE.initialize(CCUHsApi.getInstance());
+        TunerEquip.INSTANCE.initialize(CCUHsApi.getInstance(), false);
         TunerEquip.INSTANCE.syncBuildingTuners(CCUHsApi.getInstance());
         L.saveCCUState();
         replaceCCUTracker.updateReplaceStatus(RestoreCCU.SYNC_SITE, ReplaceStatus.COMPLETED.toString());

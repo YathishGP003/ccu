@@ -621,7 +621,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
             analogStatus.append("| Heating ON ")
         }
         if (analogStatus.isNotEmpty()) {
-            analogStatus.insert(0, " ; Analog ")
+            analogStatus.insert(0, " | Analog ")
         }
         systemStatus.append(coolingStatus)
             .append(heatingStatus)

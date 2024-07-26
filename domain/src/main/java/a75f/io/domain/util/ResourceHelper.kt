@@ -10,6 +10,8 @@ import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.seventyfivef.domainmodeler.client.ModelDirective
 import io.seventyfivef.domainmodeler.client.ModelDirectiveFactory
+import io.seventyfivef.domainmodeler.client.type.ExternalModelDirective
+import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import io.seventyfivef.domainmodeler.common.ConstraintDeserializer
 import io.seventyfivef.domainmodeler.common.ModelDirectiveDeserializer
@@ -120,5 +122,17 @@ object ResourceHelper {
             return JSONObject()
         }
         return JSONObject(fileContent)
+    }
+
+    /*fun loadExternalModelDto(response: String): Any {
+
+    }*/
+
+    fun loadExternalModelDefinition(modelData : String): ExternalModelDirective? {
+        if (modelData.isNullOrEmpty())
+            return null
+        val modelDirectiveFactory = ModelDirectiveFactory(getObjectMapper())
+        val v = modelDirectiveFactory.fromJson(modelData)
+        return v as ExternalModelDirective
     }
 }

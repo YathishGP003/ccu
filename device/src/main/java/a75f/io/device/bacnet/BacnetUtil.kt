@@ -111,7 +111,7 @@ fun sendBroadCast(context: Context, intentAction: String, message: String) {
         objectConf.put(NUMBER_OF_NOTIFICATION_CLASS_OBJECTS, 1)
         objectConf.put(NUMBER_OF_TREND_LOG_OBJECTS, 1)
         objectConf.put(NUMBER_OF_SCHEDULE_OBJECTS, 1)
-        objectConf.put(NUMBER_OF_OFFSET_VALUES, 0)
+        objectConf.put(NUMBER_OF_OFFSET_VALUES, 1)
 
 
         configObject.put("device", deviceObject)

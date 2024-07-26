@@ -132,6 +132,7 @@ fun parseModbusDataFromString(json: String?): EquipmentDevice? {
 }
 
 
+const val BACNET = "BACNET"
 const val MODBUS = "MODBUS"
 const val EQUIP_TYPE = "Equipment Type"
 const val LOADING = "Loading Modbus Models"
@@ -144,15 +145,38 @@ const val PARAMETER = "PARAMETER"
 const val SAME_AS_PARENT = "Same As Parent"
 const val DISPLAY_UI = "DISPLAY IN UI"
 const val SAVING = "Saving Modbus configuration"
+const val SAVING_BACNET = "Saving Bacnet configuration"
 const val SAVED = "Saved all the configuration"
 const val NO_MODEL_DATA_FOUND = "No model data found..!"
 const val MODBUS_DEVICE_LIST_NOT_FOUND = "Modbus device list not found..!"
+const val BACNET_DEVICE_LIST_NOT_FOUND = "Bacnet device list not found..!"
 const val NO_INTERNET = "Unable to fetch equipments, please confirm your Wifi connectivity"
 const val WARNING = "Warning"
 const val ALERT = "Alert"
 const val OK = "Okay"
 const val SEARCH_MODEL = "Search model"
 const val SEARCH_SLAVE_ID = "Search Slave Id"
+const val MODELLED_VALUE = "MODELLED VALUE"
+const val DEVICE_VALUE = "DEVICE VALUE"
+
+const val BAC_PROP_PRESENT_VALUE = "Present Value"
+const val BAC_PROP_UNIT = "Unit"
+const val BAC_PROP_MIN_PRESENT_VALUE = "Min_Pres_Value"
+const val BAC_PROP_MAX_PRESENT_VALUE = "Max_Pres_Value"
+const val BAC_PROP_COV_INCREMENT = "COV_Increment"
+const val BAC_PROP_NOT_FETCHED = "Not Fetched"
+const val FETCH = "FETCH"
+const val RE_FETCH = "RE-FETCH"
+const val SEARCH_DEVICE = "Select Device"
+
+const val DEVICE_ID = "Device ID"
+const val
+        DEVICE_IP = "Device IP/ PORT"
+const val DEVICE_NETWORK = "Device Network"
+const val DEVICE_NAME = "Device Name"
+
+const val DESTINATION_IP = "Destination IP"
+const val DESTINATION_PORT = "PORT"
 
 
 

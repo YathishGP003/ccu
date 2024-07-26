@@ -34,6 +34,7 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.autocommission.AutoCommissioningState;
 import a75f.io.logic.autocommission.AutoCommissioningUtil;
 import a75f.io.logic.bo.building.CCUApplication;
+import a75f.io.logic.bo.building.bacnet.BacnetProfile;
 import a75f.io.logic.bo.building.bypassdamper.BypassDamperProfile;
 import a75f.io.logic.bo.building.ccu.CazProfile;
 import a75f.io.logic.bo.building.dab.DabProfile;
@@ -574,6 +575,11 @@ public class Globals {
                             ModbusProfile mbProfile = new ModbusProfile();
                             mbProfile.addMbEquip(Short.parseShort(eq.getGroup()), ProfileType.valueOf(eq.getProfile()));
                             L.ccu().zoneProfiles.add(mbProfile);
+                            break;
+                        case BACNET_DEFAULT:
+                            BacnetProfile bacnetProfile = new BacnetProfile();
+                            bacnetProfile.addBacAppEquip(Short.parseShort(eq.getGroup()), ProfileType.valueOf(eq.getProfile()));
+                            L.ccu().zoneProfiles.add(bacnetProfile);
                             break;
 
                     }

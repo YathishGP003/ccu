@@ -30,11 +30,53 @@ import androidx.compose.ui.unit.sp
  */
 
 @Composable
-fun RadioButtonCompose(radioOptions: List<String>, default: Int, onSelect: (String) -> Unit) {
+fun RadioButtonComposeSelectModel(radioOptions: List<String>, default: Int, onSelect: (String) -> Unit) {
     var selectedItem by remember { mutableStateOf(radioOptions[default]) }
 
     if (selectedItem != radioOptions[default]) {
          selectedItem = radioOptions[default]
+    }
+    Row(modifier = Modifier
+        .selectableGroup()
+        .fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center,
+    ) {
+        radioOptions.forEach { label ->
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .wrapContentSize()
+                    .height(56.dp)
+                    .selectable(
+                        selected = (selectedItem == label), onClick = {
+                            selectedItem = label
+                            onSelect(selectedItem)
+                        }, role = Role.RadioButton
+                    )
+                    .padding(horizontal = 16.dp),
+            ) {
+                RadioButton(
+                    modifier = Modifier.padding(end = 10.dp),
+                    selected = (selectedItem == label),
+                    onClick = null,
+                    colors = RadioButtonDefaults.colors(
+                        selectedColor = ComposeUtil.primaryColor,
+                        unselectedColor = Color.Gray
+                    )
+                )
+                Text(text = label, style =  TextStyle( fontFamily = ComposeUtil.myFontFamily,fontSize = 20.sp,  fontWeight = FontWeight.Normal))
+            }
+        }
+    }
+}
+
+@Composable
+fun RadioButtonComposeSelectModelCustom(radioOptions: List<String>, default: Int, onSelect: (String) -> Unit) {
+    var selectedItem by remember { mutableStateOf(radioOptions[default]) }
+
+    if (selectedItem != radioOptions[default]) {
+        selectedItem = radioOptions[default]
     }
     Row(modifier = Modifier
         .selectableGroup()

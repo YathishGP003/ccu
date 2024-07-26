@@ -399,6 +399,7 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
         prevoiusAhuConnectPort= UsbSerialUtil.getPreferredConnectModuleSerialType(getContext());
         advancedAhuConnectPort.setSelection(prevoiusAhuConnectPort);
         advancedAhuConnectPort.setOnItemSelectedListener(this);
+        advancedAhuConnectPort.setVisibility(View.GONE);
 
 
         resetAppBtn.setOnClickListener((View.OnClickListener) view16 -> {
@@ -661,7 +662,7 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
             case R.id.advancedAhuConnectPort:
                 if(prevoiusAhuConnectPort != advancedAhuConnectPort.getSelectedItemPosition()) {
                     prevoiusAhuConnectPort = advancedAhuConnectPort.getSelectedItemPosition();
-                    PreferenceManager.getDefaultSharedPreferences(getActivity())
+                   /* PreferenceManager.getDefaultSharedPreferences(getActivity())
                             .edit()
                             .putInt("connect_serial_port", advancedAhuConnectPort.getSelectedItemPosition())
                             .commit();
@@ -672,7 +673,7 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
                             .setNegativeButton("Cancel", (dialog1, which) -> {
                             })
                             .create();
-                    dialog.show();
+                    dialog.show();*/
                 }
                 break;
         }

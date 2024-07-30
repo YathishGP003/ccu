@@ -8,6 +8,7 @@ import a75f.io.domain.api.DomainName
 import a75f.io.domain.equips.BuildingEquip
 import a75f.io.domain.logic.TunerEquipBuilder
 import a75f.io.domain.migration.DiffManger
+import a75f.io.domain.util.ModelLoader
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.TunerSyncFailed
@@ -30,7 +31,7 @@ object TunerEquip : CCUHsApi.OnCcuRegistrationCompletedListener, DiffManger.OnMi
      * It creates/updates TunerEquip and then syncs during first time registration.
      * Subsequent restart, this just triggers a tuner sync for level 16.
      */
-    fun initialize(haystack : CCUHsApi) {
+    fun initialize(haystack : CCUHsApi, useRemoteEquip: Boolean = false) {
         CcuLog.i(L.TAG_CCU_TUNER, "Initialize Building Equip")
         val tunerEquip = haystack.readEntity("equip and tuner")
         //Building Equip does not exist, create new one.
@@ -41,7 +42,11 @@ object TunerEquip : CCUHsApi.OnCcuRegistrationCompletedListener, DiffManger.OnMi
                 return
             }
             val equipBuilder = TunerEquipBuilder(haystack)
-            equipBuilder.buildEquipAndPoints(haystack.site!!.id)
+            if(useRemoteEquip) {
+                equipBuilder.buildBuildingPointsOnly(haystack.site!!.id)
+            } else {
+                equipBuilder.buildEquipAndPoints(haystack.site!!.id)
+            }
             CcuLog.i(L.TAG_CCU_TUNER, " registerOnCcuRegistrationCompletedListener ")
             haystack.registerOnCcuRegistrationCompletedListener(this)
         } else {
@@ -68,7 +73,7 @@ object TunerEquip : CCUHsApi.OnCcuRegistrationCompletedListener, DiffManger.OnMi
         try {
             val tunerPointsDict = HDictBuilder().add(
                 "filter",
-                "point and (tuner or schedulable) and default and siteRef == $siteId"
+                "point and (tuner or schedulable) and default and not ccuRef and siteRef == $siteId"
             ).toDict()
             val tunerPointsGrid = hClient.call ("read", HGridBuilder.dictToGrid(tunerPointsDict))
             tunerPointsGrid?.dump()
@@ -116,8 +121,6 @@ object TunerEquip : CCUHsApi.OnCcuRegistrationCompletedListener, DiffManger.OnMi
                         syncEquipPointsWithDomainNameFromCloud(haystack, it, tunerEquip)
                     }
                 }
-
-
             }
         }
         val pointDictTobeSynced = remotePoints.filter { !it.domainName.isNullOrEmpty()}
@@ -146,7 +149,7 @@ object TunerEquip : CCUHsApi.OnCcuRegistrationCompletedListener, DiffManger.OnMi
     }
 
 
-    private fun syncPointArrays(points: List<HDict>, hClient: HClient, haystack: CCUHsApi) {
+    fun syncPointArrays(points: List<HDict>, hClient: HClient, haystack: CCUHsApi) {
         CcuLog.i(L.TAG_CCU_TUNER, "syncPointArrays Size ${points.size}")
         val partitionSize = 25
         val partitions: MutableList<List<HDict>> = ArrayList()
@@ -236,5 +239,13 @@ object TunerEquip : CCUHsApi.OnCcuRegistrationCompletedListener, DiffManger.OnMi
     override fun onMigrationCompletedCompleted(hsApi: CCUHsApi) {
         CcuLog.i(Domain.LOG_TAG, "invoking onMigrationCompletedCompleted")
         syncBuildingTuners(hsApi)
+    }
+
+    fun fetchTotalBuildingPointsFromModel(): Int {
+        return ModelLoader.getBuildingEquipModelDef().allPoints().size
+    }
+
+    fun fetchBuildingEquipSourceModeVersion(): String {
+        return ModelLoader.getBuildingEquipModelDef().version.toString()
     }
 }

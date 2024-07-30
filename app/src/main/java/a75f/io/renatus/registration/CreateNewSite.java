@@ -922,7 +922,7 @@ public class CreateNewSite extends Fragment {
         String localSiteId = ccuHsApi.addSite(s75f);
         CCUHsApi.getInstance().setPrimaryCcu(true);
 
-        TunerEquip.INSTANCE.initialize(CCUHsApi.getInstance());
+        TunerEquip.INSTANCE.initialize(CCUHsApi.getInstance(), false);
 
         CCUHsApi.getInstance().syncEntityTree();
         DiagEquip.getInstance().create();
@@ -984,7 +984,7 @@ public class CreateNewSite extends Fragment {
             }
         }
 
-        TunerEquip.INSTANCE.initialize(CCUHsApi.getInstance());
+        TunerEquip.INSTANCE.initialize(CCUHsApi.getInstance(), false);
 
         ccuHsApi.log();
         updateTimeZoneInVacations();

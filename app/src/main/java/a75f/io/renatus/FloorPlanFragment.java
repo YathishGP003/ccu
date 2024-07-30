@@ -65,6 +65,7 @@ import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.cloud.CloudConnectionManager;
 import a75f.io.logic.cloud.CloudConnectionResponseCallback;
 import a75f.io.logic.limits.SchedulabeLimits;
+import a75f.io.renatus.bacnet.BacNetSelectModelView;
 import a75f.io.renatus.hyperstat.ui.HyperStatFragment;
 import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
 import a75f.io.renatus.hyperstatsplit.ui.HyperStatSplitFragment;
@@ -1113,6 +1114,9 @@ public class FloorPlanFragment extends Fragment {
                 case MODBUS_DEFAULT:
                 case MODBUS_EMR_ZONE:
                     showDialogFragment(ModbusConfigView.Companion.newInstance(Short.parseShort(nodeAddress), zone.getId(), floor.getId(), profile.getProfileType(), ModbusLevel.ZONE,""), ModbusConfigView.Companion.getID());
+                    break;
+                case BACNET_DEFAULT:
+                    showDialogFragment(BacNetSelectModelView.Companion.newInstance(Short.parseShort(nodeAddress), zone.getId(), floor.getId(), profile.getProfileType(), ModbusLevel.ZONE,""), BacNetSelectModelView.Companion.getID());
                     break;
             }
         } else

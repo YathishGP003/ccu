@@ -34,6 +34,7 @@
             app:srcCompat="@drawable/angle_left_solid" />
 
         <TextView
+            android:textAllCaps="true"
             android:id="@+id/textTitleFragment"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -67,6 +68,71 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/layoutHeader"
                 android:orientation="vertical">
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/rl_bacnet_equipment"
+                    >
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        android:layout_marginEnd="114dp"
+                        android:layout_marginVertical="20dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/textBacnetEquipment"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="end"
+                            android:text="@string/title_bacnet_equipment"
+                            android:textAppearance="@style/title_bold"
+                            />
+
+                        <TextView
+                            android:textAppearance="@style/text_label_secondary"
+                            android:id="@+id/textBacnetEquipmentDes"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/description_bacnet_equipment"
+                             />
+
+                    </LinearLayout>
+
+                    <ImageView
+                        android:id="@+id/nextBacnetEq"
+                        android:layout_width="34dp"
+                        android:layout_height="34dp"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        android:src="@drawable/next_arrow_button_enabled" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_alignParentBottom="true"
+                        android:background="@color/listview_divider_color" />
+
+                    <!--<ImageView
+                        android:id="@+id/nextBacnetEq"
+                        android:layout_width="12dp"
+                        android:layout_height="20dp"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        android:layout_marginEnd="96dp"
+                        android:src="@drawable/ic_baseline_keyboard_arrow_right_24" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="0.1dp"
+                        android:layout_alignParentBottom="true"
+                        android:alpha="0.37"
+                        android:background="@color/text_color" />-->
+                </RelativeLayout>
+
 
                 <RelativeLayout
                     android:id="@+id/rl_mbequipment"
@@ -132,7 +198,6 @@
                         android:layout_marginEnd="114dp"
                         android:layout_marginVertical="20dp"
                         android:orientation="vertical">
-
                         <TextView
                             android:id="@+id/textMBEM"
                             android:layout_width="wrap_content"
@@ -141,7 +206,6 @@
                             android:gravity="end|center_vertical"
                             android:text="@string/title_modbusenergymeter"
                             android:textAppearance="@style/title_bold" />
-
                         <TextView
                             android:id="@+id/textMBEMDesc"
                             android:layout_width="wrap_content"

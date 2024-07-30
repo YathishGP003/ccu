@@ -323,7 +323,7 @@ public class RegisterGatherCCUDetails extends Activity {
             protected Void doInBackground(Void... voids) {
 
                 if(!Globals.getInstance().siteAlreadyCreated()) {
-                    TunerEquip.INSTANCE.initialize(CCUHsApi.getInstance());
+                    TunerEquip.INSTANCE.initialize(CCUHsApi.getInstance(), false);
                     DefaultSchedules.setDefaultCoolingHeatingTemp();
                 }
                 return null;

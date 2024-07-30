@@ -5,17 +5,15 @@ import a75f.io.api.haystack.HisItem
 import a75f.io.api.haystack.util.LevelData
 import a75f.io.api.haystack.util.ReadAllResponse
 import a75f.io.api.haystack.util.retrieveLevelValues
-import a75f.io.device.bacnet.BacnetConfigConstants
 import a75f.io.device.bacnet.BacnetConfigConstants.HTTP_SERVER_STATUS
-import a75f.io.device.bacnet.BacnetConfigConstants.ZONE_TO_VIRTUAL_DEVICE_MAPPING
 import a75f.io.device.bacnet.readExternalBacnetJsonFile
 import a75f.io.device.bacnet.updateBacnetHeartBeat
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
+import a75f.io.logic.interfaces.ModbusDataInterface
 import android.content.Context
 import android.content.SharedPreferences
 import android.preference.PreferenceManager
-import android.util.Log
 import io.ktor.application.call
 import io.ktor.application.install
 import io.ktor.features.CORS
@@ -39,14 +37,9 @@ import io.ktor.websocket.WebSockets
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.json.JSONException
-import org.json.JSONObject
-import org.projecthaystack.HDict
-import org.projecthaystack.HDictBuilder
 import org.projecthaystack.HGrid
 import org.projecthaystack.HGridBuilder
 import org.projecthaystack.HRow
-import org.projecthaystack.HVal
 import org.projecthaystack.UnknownRecException
 import org.projecthaystack.io.HZincReader
 import org.projecthaystack.io.HZincWriter
@@ -58,6 +51,7 @@ class HttpServer {
     private val HTTP_SERVER = "HttpServer"
 
     companion object{
+        var modbusDataInterface: ModbusDataInterface? = null
         var sharedPreferences: SharedPreferences? = null
         private var instance: HttpServer? = null
         fun getInstance(context: Context): HttpServer? {
@@ -279,7 +273,7 @@ class HttpServer {
                 get("/pointWrite") {
                     CcuLog.i(HTTP_SERVER, "called API: /pointWrite")
                     val id = call.parameters["id"]
-                    val level = call.parameters["level"]
+                    var level = call.parameters["level"]
                     var value = call.parameters["val"]
                     val who = call.parameters["who"]
                     var duration : String? = call.parameters["duration"]
@@ -292,10 +286,15 @@ class HttpServer {
                             value = "0"
                             duration = "1000"
                         }
-                        val pointGrid = CCUHsApi.getInstance().writePoint(id, level.toInt(), who, value!!.toDouble(), duration!!.toInt())
+                        if(isBacnetClientPoint(id)){
+                            level = "8"
+                        }
+                        val pointGrid = CCUHsApi.getInstance().writePoint(id, level!!.toInt(), who, value!!.toDouble(), duration!!.toInt())
                         if (pointGrid != null) {
-                            if(!pointGrid.isEmpty || !pointGrid.isErr)
-                                call.respond(HttpStatusCode.OK, BaseResponse(HttpStatusCode.OK));
+                            if(!pointGrid.isEmpty || !pointGrid.isErr){
+                                call.respond(HttpStatusCode.OK, BaseResponse(HttpStatusCode.OK))
+                                updateHeartBeatPoint(id)
+                            }
                             else
                                 call.respond(HttpStatusCode.OK, BaseResponse(HttpStatusCode.NoContent));
                         }else{
@@ -304,6 +303,32 @@ class HttpServer {
                     }
                 }
             }
+        }
+    }
+
+    private fun isBacnetClientPoint(id: String): Boolean {
+        var pointId = id
+        if(!pointId.startsWith("@")){
+            pointId = "@$pointId"
+        }
+        val pointMap = CCUHsApi.getInstance().readMapById(pointId)
+        return pointMap != null && pointMap["bacnetCur"] != null
+    }
+
+    private fun updateHeartBeatPoint(id: String){
+        var pointId = id
+        if(!pointId.startsWith("@")){
+            pointId = "@$pointId"
+        }
+        val point = CCUHsApi.getInstance().readMapById(pointId)
+        val isBacnetClientPoint = point["bacnetCur"]
+        if(isBacnetClientPoint.toString().isNotEmpty()){
+            val equipId = point["equip"]
+            val heartBeatPointId = CCUHsApi.getInstance().readEntity("point and heartbeat and equipRef== \" $equipId \"")["id"]
+            if(heartBeatPointId.toString().isNotEmpty()){
+                CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(heartBeatPointId.toString(), 1.0)
+            }
+            //modbusDataInterface?.refreshScreen(id)
         }
     }
 

@@ -32,7 +32,10 @@ import org.projecthaystack.client.HClient;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -70,6 +73,7 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
     public static DevSettings newInstance(){
         return new DevSettings();
     }
+    private final String TAG = "CCU_DEV_SETTINGS";
     private int previousControlLoopFrequency = 0;
 
     private int prevoiusAhuConnectPort = 0;
@@ -156,6 +160,15 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
 
     public @BindView(R.id.anrReportBtn) ToggleButton anrReporting;
 
+    public @BindView(R.id.recreateBuildingPoints) Button recreateBuildingPoints;
+
+    public @BindView(R.id.recreateAndSyncBuildingPointsToCloud) Button recreateAndSyncBuildingPointsToCloud;
+
+    // TODO: This is a temporary way to delete building tuners, building equip and all building entities locally for Testing.
+    public @BindView(R.id.deleteBuildingTuners) Button deleteBuildingTuners;
+    public @BindView(R.id.deleteBuildingEquipLocally) Button deleteBuildingEquipLocally;
+    public @BindView(R.id.deleteAllBuildingEntitiesLocally) Button deleteBuildingEntitiesLocally;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                                   Bundle savedInstanceState) {
@@ -168,6 +181,7 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
          super.onViewCreated(view, savedInstanceState);
+         CCUHsApi hayStack = CCUHsApi.getInstance();
 
         biskitModeBtn.setOnCheckedChangeListener((compoundButton, b) -> {
             Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
@@ -385,6 +399,7 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
         prevoiusAhuConnectPort= UsbSerialUtil.getPreferredConnectModuleSerialType(getContext());
         advancedAhuConnectPort.setSelection(prevoiusAhuConnectPort);
         advancedAhuConnectPort.setOnItemSelectedListener(this);
+        advancedAhuConnectPort.setVisibility(View.GONE);
 
 
         resetAppBtn.setOnClickListener((View.OnClickListener) view16 -> {
@@ -452,7 +467,158 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
                 // Handle case where no item is selected
             }
         });
+
+        recreateBuildingPoints.setOnClickListener(recreateButton -> {
+                String msg = "The CCU already has all the building points when compared to Model.\nContinuing with this operation will recreate the equip and all points.\nIf you want to sync the existing points with cloud, please use \"Pull Building Tuners\". ";
+                executeOperationWithConfirmation(hayStack, msg, this::reconstructLocalBuildingPoints);
+        });
+
+        recreateAndSyncBuildingPointsToCloud.setOnClickListener(recreateAndSyncButton -> {
+                String msg = "The CCU already has all the building points when compared to Model.\nContinuing with this operation will store the remote building equip in the DB, create new points and then attempt to sync it to cloud.\nIf you want to sync the existing points from cloud, please use \"Pull Building Tuners\". ";
+                executeOperationWithConfirmation(hayStack, msg, this::validateAndStartBuildingPointsSyncFromCCUToCloud);
+        });
+
+        //TODO: This is a temporary way to delete building tuners, building equip and all building entities locally for Testing.
+        deleteBuildingTuners.setOnClickListener(deleteButton -> disposable.add(RxjavaUtil.executeBackgroundTaskWithDisposable(
+                () -> ProgressDialogUtils.showProgressDialog(getActivity(),"Deleting building tuners"),
+                () -> deleteBuildingTuners(hayStack),
+                ProgressDialogUtils::hideProgressDialog
+        )));
+
+
+        deleteBuildingEquipLocally.setOnClickListener(deleteButton -> disposable.add(RxjavaUtil.executeBackgroundTaskWithDisposable(
+                () -> ProgressDialogUtils.showProgressDialog(getActivity(),"Deleting building equip locally"),
+                () -> deleteBuildingEquipLocally(hayStack),
+                ProgressDialogUtils::hideProgressDialog
+        )));
+
+        deleteBuildingEntitiesLocally.setOnClickListener(deleteButton -> disposable.add(RxjavaUtil.executeBackgroundTaskWithDisposable(
+                () -> ProgressDialogUtils.showProgressDialog(getActivity(),"Deleting building entities locally"),
+                () -> deleteBuildingEntitiesLocally(hayStack),
+                ProgressDialogUtils::hideProgressDialog
+        )));
     }
+
+    private boolean doesCcuLackBuildingPoints(CCUHsApi hayStack) {
+        return TunerEquip.INSTANCE.fetchTotalBuildingPointsFromModel() >
+                hayStack.readAllEntities("point and equipRef==\""+hayStack.readId("building and equip")+"\"").size();
+    }
+
+    private void executeOperationWithConfirmation(CCUHsApi hayStack, String msg, Consumer<CCUHsApi> operation) {
+        if(doesCcuLackBuildingPoints(hayStack) || hayStack.readId("building and equip")==null) {
+            operation.accept(hayStack);
+        } else {
+            showConfirmationDialog(hayStack, msg, operation);
+        }
+    }
+
+    private void showConfirmationDialog(CCUHsApi hayStack, String msg, Consumer<CCUHsApi> operation) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setTitle("Operation Not Required");
+        builder.setMessage(msg);
+        builder.setPositiveButton("Continue Anyway", (dialog, which) -> operation.accept(hayStack));
+        builder.setNegativeButton("Abort", (dialog, which) -> {});
+        builder.show();
+    }
+
+    private void reconstructLocalBuildingPoints(CCUHsApi hayStack) {
+        disposable.add(RxjavaUtil.executeBackgroundTaskWithDisposable(
+                () -> ProgressDialogUtils.showProgressDialog(getActivity(),"Recreating building points"),
+                () -> reconstructBuildingEquipAndPointsLocally(hayStack, false),
+                ProgressDialogUtils::hideProgressDialog
+        ));
+    }
+
+    private void reconstructBuildingEquipAndPointsLocally(CCUHsApi hayStack, boolean useRemoteEquip) {
+        CcuLog.d(TAG, "Reconstructing building equip and points");
+        String buildingEquipId = hayStack.readId("building and equip");
+        if(buildingEquipId != null) {
+            for(HashMap<Object, Object> point: hayStack.readAllEntities("point and equipRef==\"" + buildingEquipId + "\"")) {
+                hayStack.deleteWritablePointLocally(Objects.requireNonNull(point.get("id")).toString());
+            }
+            hayStack.deleteEntityLocally(buildingEquipId);
+        }
+        ArrayList<HashMap<Object, Object>> buildingPoints = hayStack.readAllEntities("point and default and (tuner or schedulable) and not ccuRef");
+        if(!buildingPoints.isEmpty()) {
+            for(HashMap<Object, Object> point: buildingPoints) {
+                hayStack.deleteWritablePointLocally(Objects.requireNonNull(point.get("id")).toString());
+            }
+        }
+        TunerEquip.INSTANCE.initialize(hayStack, useRemoteEquip);
+    }
+
+    private void validateAndStartBuildingPointsSyncFromCCUToCloud(CCUHsApi hayStack) {
+        disposable.add(RxjavaUtil.executeBackgroundTaskWithDisposable(
+                () -> ProgressDialogUtils.showProgressDialog(getActivity(),"Validating and syncing building tuners to cloud"),
+                () -> {
+                    try {
+                        HashMap<Object, Object> remoteEquip = hayStack.getRemoteBuildingTunerEquip(hayStack.getSiteIdRef().toString());
+                        if(remoteEquip ==null || remoteEquip.isEmpty()) {
+                            CcuLog.w(TAG, "Building equip not found in the cloud. Aborting building points sync from CCU to Cloud");
+                            requireActivity().runOnUiThread(() ->
+                                    showErrorDialog("Building equip not found in the cloud. Cannot continue with the operation."));
+                        } else if(!Objects.requireNonNull(remoteEquip.get("sourceModelVersion")).toString().equals(TunerEquip.INSTANCE.fetchBuildingEquipSourceModeVersion())) {
+                            CcuLog.w(TAG, "CCU's Source Model Version does not match with the remote building equip. Aborting building points sync from CCU to Cloud");
+                            requireActivity().runOnUiThread(() ->
+                                    showErrorDialog("Aborting operation since this CCU does not contain the latest building equip version. Please update the CCU to the latest version first."));
+                        } else {
+                            reconstructBuildingEquipAndPointsLocally(hayStack, true);
+                            CcuLog.i(TAG,"isCcuMissingBuildingPoints = "+ doesCcuLackBuildingPoints(hayStack));
+                            CcuLog.d(TAG,"Starting building points creation and sync from CCU to Cloud.");
+                            executeBuildingPointsSyncFromCCUToCloud(hayStack);
+                        }
+                    } catch (IndexOutOfBoundsException e) {
+                        CcuLog.e(TAG, "Building equip not found in the cloud. Aborting building points sync from CCU to Cloud");
+                        requireActivity().runOnUiThread(() -> showErrorDialog("Building equip not found in the cloud. Cannot continue with the operation."));
+                    }
+                },
+                ProgressDialogUtils::hideProgressDialog
+        ));
+    }
+
+    private void executeBuildingPointsSyncFromCCUToCloud(CCUHsApi hayStack) {
+        String buildingEquipId = hayStack.readId("building and equip");
+        String remotePointsData = hayStack.fetchRemoteEntityByQuery("point and equipRef=="+buildingEquipId+" and siteRef=="+hayStack.getSiteIdRef().toString());
+        if(remotePointsData == null) {
+            CcuLog.w(TAG, "Remote points data is null. Aborting building points sync from CCU to Cloud");
+            requireActivity().runOnUiThread(() ->
+                    showErrorDialog("Points have been created locally but failed to fetch remote points data. Cannot continue with the operation. Please try again")
+            );
+            return;
+        }
+        CcuLog.v(TAG,"Syncing missing points to cloud");
+        for(HashMap<Object,Object> point: hayStack.readAllEntities("point and equipRef==\""+buildingEquipId+"\"")) {
+            if(!remotePointsData.contains(Objects.requireNonNull(point.get("domainName")).toString())) {
+                CcuLog.i(TAG,"Attempting to sync this points since it is not found on cloud: "+point);
+                hayStack.syncEntity(Objects.requireNonNull(point.get("id")).toString());
+            }
+        }
+    }
+
+    // TODO : This method is written for dev testing. I will remove this method before sending the fix to QA
+    private void deleteBuildingTuners(CCUHsApi hayStack) {
+        List<HashMap<Object,Object>> buildingTunerPoints = hayStack.readAllEntities("point and tuner and equipRef==\""+hayStack.readId("building and equip")+"\"");
+        for(HashMap<Object,Object> point: buildingTunerPoints) {
+            hayStack.deleteEntity(Objects.requireNonNull(point.get("id")).toString());
+        }
+    }
+
+    private void deleteBuildingEquipLocally(CCUHsApi hayStack) {
+        CCUHsApi.getInstance().deleteEntityLocally(hayStack.readId("building and equip"));
+    }
+
+    private void deleteBuildingEntitiesLocally(CCUHsApi hayStack) {
+        String id = CCUHsApi.getInstance().readId("building and equip");
+        ArrayList<HashMap<Object, Object>> buildingEntities = hayStack.readAllEntities("(building and equip) or (point and equipRef==\""+id+"\")");
+        for(HashMap<Object, Object> entity: buildingEntities) {
+            if(entity.containsKey("writable")) {
+                hayStack.deleteWritablePointLocally(Objects.requireNonNull(entity.get("id")).toString());
+            } else {
+                hayStack.deleteEntityLocally(Objects.requireNonNull(entity.get("id")).toString());
+            }
+        }
+    }
+
 
     @Override
     public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2,
@@ -496,7 +662,7 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
             case R.id.advancedAhuConnectPort:
                 if(prevoiusAhuConnectPort != advancedAhuConnectPort.getSelectedItemPosition()) {
                     prevoiusAhuConnectPort = advancedAhuConnectPort.getSelectedItemPosition();
-                    PreferenceManager.getDefaultSharedPreferences(getActivity())
+                   /* PreferenceManager.getDefaultSharedPreferences(getActivity())
                             .edit()
                             .putInt("connect_serial_port", advancedAhuConnectPort.getSelectedItemPosition())
                             .commit();
@@ -507,7 +673,7 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
                             .setNegativeButton("Cancel", (dialog1, which) -> {
                             })
                             .create();
-                    dialog.show();
+                    dialog.show();*/
                 }
                 break;
         }

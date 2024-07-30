@@ -75,6 +75,21 @@ public class HyperSplitMessageSender {
     }
 
     /**
+     * Send setting3 message based on the node's state in database.
+     * Message can be called to check for a duplicate (normal case) or to send regardless (for seed message)
+     * @param address
+     * @param equipRef
+     */
+    public static void sendSettings3Message(int address, String equipRef, boolean checkDuplicate) {
+        HyperSplit.HyperSplitSettingsMessage3_t settings3 = HyperSplitMessageGenerator.getSetting3Message(address, equipRef);
+        if (DLog.isLoggingEnabled()) {
+            CcuLog.i(L.TAG_CCU_SERIAL, settings3.toString());
+        }
+
+        writeSetting3Message(settings3, address, MessageType.HYPERSPLIT_SETTINGS3_MESSAGE, checkDuplicate);
+    }
+
+    /**
      * Send setting4 message based on the node's state in database.
      * Message can be called to check for a duplicate (normal case) or to send regardless (for seed message)
      * @param address

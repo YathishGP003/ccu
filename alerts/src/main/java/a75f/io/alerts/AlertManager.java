@@ -33,6 +33,8 @@ public class AlertManager
      */
     private static AlertManager mInstance;
 
+    public AlertListListener alertListListener;
+
     // Set at creation & whenever base url changes b/c of user setting on local build.
     private String baseUrl;
 
@@ -297,5 +299,13 @@ public class AlertManager
 
     public Object getValue(String key) {
         return persistentBlockMap.get(key);
+    }
+
+    public interface AlertListListener {
+        void onAlertsChanged();
+    }
+
+    public void setAlertListListener(AlertListListener alertListListener) {
+        this.alertListListener = alertListListener;
     }
 }

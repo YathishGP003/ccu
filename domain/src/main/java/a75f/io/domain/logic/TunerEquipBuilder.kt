@@ -1,6 +1,7 @@
 package a75f.io.domain.logic
 
 import a75f.io.api.haystack.CCUHsApi
+import a75f.io.api.haystack.Equip
 import a75f.io.api.haystack.HayStackConstants
 import a75f.io.api.haystack.Site
 import a75f.io.api.haystack.sync.CcuRegistrationHandler
@@ -20,6 +21,9 @@ class TunerEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder()
     fun buildEquipAndPoints(siteRef: String) : String{
         return buildTunerEquipAndPoints(ModelLoader.getBuildingEquipModelDef(), siteRef)
     }
+    fun buildBuildingPointsOnly(siteRef: String) : String{
+        return buildBuildingPointsBasedOnRemoteEquip(ModelLoader.getBuildingEquipModelDef(), siteRef)
+    }
     fun buildTunerEquipAndPoints(modelDef: ModelDirective, siteRef : String): String {
         val hayStackEquip = buildEquip(EquipBuilderConfig(modelDef, null, siteRef, hayStack.timeZone, hayStack.site?.displayName!!))
         val equipId = hayStack.addEquip(hayStackEquip)
@@ -29,6 +33,20 @@ class TunerEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder()
         CcuLog.i(Domain.LOG_TAG," Created tuner equip ${hayStackEquip.domainName}")
         createPoints(modelDef, equipId, siteRef)
         return equipId
+    }
+
+    private fun buildBuildingPointsBasedOnRemoteEquip(modelDef: ModelDirective, siteRef: String): String {
+        val buildingEquip : Equip
+        val equipId : String
+        hayStack.getRemoteBuildingTunerEquip(siteRef)?.let {
+            buildingEquip = Equip.Builder().setHashMap(it).build()
+            equipId = hayStack.addRemoteEquip(buildingEquip, buildingEquip.id.substring(1))
+            Domain.buildingEquip = BuildingEquip(equipId)
+            createPoints(modelDef, equipId, siteRef)
+            return equipId
+        } ?: run {
+            return buildTunerEquipAndPoints(modelDef, siteRef)
+        }
     }
 
     private fun createPoints(modelDef: ModelDirective, equipRef: String, siteRef: String) {

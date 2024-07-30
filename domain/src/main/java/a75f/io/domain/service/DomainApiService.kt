@@ -3,6 +3,7 @@ package a75f.io.domain.service
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.domain.BuildConfig
 import a75f.io.logger.CcuLog
+import io.seventyfivef.domainmodeler.common.model.ExternalModelDto
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -42,6 +43,27 @@ interface DomainModelerService {
         @retrofit2.http.Path("modelId") modelId: String?,
         @retrofit2.http.Query("version") version: String?
     ): retrofit2.Call<ResponseBody>
+
+    @GET("/models/external/list")
+    fun getBacNetModelsList(
+        @retrofit2.http.Query("protocol") tagNames: String?
+    ): retrofit2.Call<ResponseBody>
+
+    @GET("/models/external/{modelId}")
+    fun getBacNetModelById(
+        @retrofit2.http.Path("modelId") modelId: String?
+    ): retrofit2.Call<ResponseBody>
+
+    @GET("/models/external/export/{modelId}")
+    fun getBacNetModelById2(
+        @retrofit2.http.Path("modelId") modelId: String?,
+        @retrofit2.http.Query("version") version: String?
+    ): retrofit2.Call<ResponseBody>
+
+    @GET("/models/external/export/{modelId}")
+    fun getBacNetModelById21(
+        @retrofit2.http.Path("modelId") modelId: String?
+    ): retrofit2.Call<ExternalModelDto>
 
 
 }

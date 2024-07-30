@@ -677,7 +677,6 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                         }
                     }
                     expandedListTextView.setText(NewexpandedListText);
-                    notifyDataSetChanged();
                 }
             }
             else if (Globals.getInstance().gettempOverCount()>0){
@@ -970,7 +969,6 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                             }
                         }
                         expandedListTextView.setText(NewexpandedListText);
-                        notifyDataSetChanged();
                     }
                 }else{
                     TempOverRiddenValue.getInstance().addOriginalValues(expandedListText,equipId+"-value-"+value);

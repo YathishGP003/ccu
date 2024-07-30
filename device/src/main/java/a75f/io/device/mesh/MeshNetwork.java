@@ -59,11 +59,11 @@ public class MeshNetwork extends DeviceNetwork
     public void sendMessage() {
         CcuLog.d(L.TAG_CCU_DEVICE, "MeshNetwork SendNodeMessage");
 
-        /*if (!LSerial.getInstance().isConnected()) {
+        if (!LSerial.getInstance().isConnected()) {
             CcuLog.d(L.TAG_CCU_DEVICE,"Device not connected !!");
             LSerial.getInstance().setResetSeedMessage(true);
             return;
-        }*/
+        }
 
         if(LSerial.getInstance().isNodesSeeding())
             return;
@@ -219,6 +219,8 @@ public class MeshNetwork extends DeviceNetwork
                                     CcuLog.d(L.TAG_CCU_SERIAL,"=================NOW SENDING HyperSplit SEEDS ===================== "+d.getAddr());
                                     HyperSplitMessageSender.sendSeedMessage(zone.getDisplayName(), Integer.parseInt(d.getAddr()),
                                             d.getEquipRef(), false);
+                                    HyperSplitMessageSender.sendSettings3Message(Integer.parseInt(d.getAddr()),
+                                            d.getEquipRef(), false);
                                     HyperSplitMessageSender.sendSettings4Message(Integer.parseInt(d.getAddr()),
                                             d.getEquipRef(), false);
                                 } else {
@@ -313,7 +315,12 @@ public class MeshNetwork extends DeviceNetwork
         {
             e.printStackTrace();
         }finally {
-            LSerial.getInstance().setResetSeedMessage(false);
+            if(bSeedMessage==true) {
+                CcuLog.d(L.TAG_CCU_DEVICE,"Resetting the Seed Message variable to avoid multiple seed messages");
+                LSerial.getInstance().setResetSeedMessage(false);
+            } else {
+                CcuLog.d(L.TAG_CCU_DEVICE,"Local seed message is false. The shared variable may have been updated to true. So skipping reset to avoid Lost Update.");
+            }
         }
     }
     

@@ -27,6 +27,7 @@ import a75f.io.api.haystack.Alert;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.tuners.TunerConstants;
+import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.views.MasterControl.MasterControlView;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
@@ -36,7 +37,7 @@ import io.reactivex.rxjava3.disposables.Disposable;
  * Created by samjithsadasivan isOn 8/7/17.
  */
 
-public class AlertsFragment extends Fragment
+public class AlertsFragment extends Fragment implements AlertManager.AlertListListener
 {
 	
 	ArrayList<Alert> alertList;
@@ -145,6 +146,10 @@ public class AlertsFragment extends Fragment
 			alert.show();
 			return true;
 		});
+
+		adapter = new AlertAdapter(alertList, getActivity());
+		listView.setAdapter(adapter);
+		AlertManager.getInstance().setAlertListListener(this);
 		CcuLog.i("UI_PROFILING","AlertsFragment.onViewCreated Done");
 		
 	}
@@ -210,8 +215,7 @@ public class AlertsFragment extends Fragment
 			AlertManager.getInstance().getAllAlertsNotInternal().forEach(alert -> {
 				if (alert.mAlertType.equalsIgnoreCase("CUSTOMER VISIBLE")) alertList.add(alert);
 			});
-			adapter = new AlertAdapter(alertList, getActivity());
-			listView.setAdapter(adapter);
+			adapter.notifyDataSetChanged();
 		}
 	}
 
@@ -221,6 +225,15 @@ public class AlertsFragment extends Fragment
 		if (menuVisible) {
 			CcuLog.d(TAG_CCU_ALERTS, "menuVisible is visible");
 			setAlertList();
+		}
+	}
+	@Override
+	public void onAlertsChanged() {
+		int isAlertFragmentCreated = RenatusLandingActivity.mTabLayout.getSelectedTabPosition();
+		if (isAlertFragmentCreated == 3 && !PreferenceUtil.getIsCcuLaunched()) {
+			getActivity().runOnUiThread(() -> {
+				setAlertList();
+			});
 		}
 	}
 }

@@ -454,9 +454,9 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
         super.onDestroy();
         mCloudConnectionStatus.stopThread();
         L.saveCCUState();
+        ccuLaunched();
         AlertManager.getInstance().clearAlertsWhenAppClose();
         appRestarted();
-        ccuLaunched();
         abortCCUDownloadProcess();
         try {
             if (mConnectionChangeReceiver != null) {

@@ -3,7 +3,6 @@ package a75f.io.renatus.profiles.vav
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.domain.api.Domain
 import a75f.io.logger.CcuLog
-import a75f.io.logic.L
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.renatus.BASE.BaseDialogFragment
@@ -13,8 +12,8 @@ import a75f.io.renatus.composables.IndeterminateLoopProgress
 import a75f.io.renatus.composables.Picker
 import a75f.io.renatus.composables.rememberPickerState
 import a75f.io.renatus.compose.*
-import a75f.io.renatus.compose.ComposeUtil.Companion.primaryColor
 import a75f.io.renatus.modbus.util.SET
+import a75f.io.renatus.profiles.OnPairingCompleteListener
 import a75f.io.renatus.profiles.profileUtils.UnusedPortsFragment
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -22,7 +21,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -33,9 +31,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Text
-import androidx.compose.runtime.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -53,7 +48,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class VavProfileConfigFragment : BaseDialogFragment() {
+class VavProfileConfigFragment : BaseDialogFragment() ,OnPairingCompleteListener {
 
     private val viewModel : VavProfileViewModel by viewModels()
     companion object {
@@ -80,6 +75,7 @@ class VavProfileConfigFragment : BaseDialogFragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             withContext(Dispatchers.IO) {
                 viewModel.init(requireArguments(), requireContext(), CCUHsApi.getInstance())
+                viewModel.setOnPairingCompleteListener(this@VavProfileConfigFragment)
             }
         }
         val rootView = ComposeView(requireContext())
@@ -89,16 +85,6 @@ class VavProfileConfigFragment : BaseDialogFragment() {
         }
 
     }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        viewModel.isDialogOpen.observe(viewLifecycleOwner) { isDialogOpen ->
-            CcuLog.i(L.TAG_CCU_UI, " isDialogOpen $isDialogOpen")
-            if (!isDialogOpen) {
-                this@VavProfileConfigFragment.closeAllBaseDialogFragments()
-            }
-        }
-    }
-
     //@Preview
     @Composable
     fun RootView() {
@@ -522,5 +508,9 @@ class VavProfileConfigFragment : BaseDialogFragment() {
             val height = 672
             dialog.window!!.setLayout(width, height)
         }
+    }
+
+    override fun onPairingComplete() {
+        this@VavProfileConfigFragment.closeAllBaseDialogFragments()
     }
 }

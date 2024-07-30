@@ -60,11 +60,11 @@ public class MeshNetwork extends DeviceNetwork
     public void sendMessage() {
         CcuLog.d(L.TAG_CCU_DEVICE, "MeshNetwork SendNodeMessage");
 
-        /*if (!LSerial.getInstance().isConnected()) {
+        if (!LSerial.getInstance().isConnected()) {
             CcuLog.d(L.TAG_CCU_DEVICE,"Device not connected !!");
             LSerial.getInstance().setResetSeedMessage(true);
             return;
-        }*/
+        }
 
         if(LSerial.getInstance().isNodesSeeding())
             return;
@@ -312,10 +312,16 @@ public class MeshNetwork extends DeviceNetwork
             }
             
         }
-        catch (Exception e) {
-            CcuLog.e(L.TAG_CCU_DEVICE, "Error in sending message", e);
-        } finally {
-            LSerial.getInstance().setResetSeedMessage(false);
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }finally {
+            if(bSeedMessage==true) {
+                CcuLog.d(L.TAG_CCU_DEVICE,"Resetting the Seed Message variable to avoid multiple seed messages");
+                LSerial.getInstance().setResetSeedMessage(false);
+            } else {
+                CcuLog.d(L.TAG_CCU_DEVICE,"Local seed message is false. The shared variable may have been updated to true. So skipping reset to avoid Lost Update.");
+            }
         }
     }
     

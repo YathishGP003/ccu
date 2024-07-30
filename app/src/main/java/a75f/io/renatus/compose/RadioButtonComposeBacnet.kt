@@ -25,28 +25,32 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-/**
- * Created by Manjunath K on 06-09-2023.
- */
-
 @Composable
-fun RadioButtonCompose(radioOptions: List<String>, default: Int, onSelect: (String) -> Unit) {
+fun RadioButtonComposeBacnet(
+    radioTexts: List<String?>,
+    radioOptions: List<Int>,
+    default: Int,
+    onSelect: (Int) -> Unit
+) {
     var selectedItem by remember { mutableStateOf(radioOptions[default]) }
 
     if (selectedItem != radioOptions[default]) {
-         selectedItem = radioOptions[default]
+        selectedItem = radioOptions[default]
     }
-    Row(modifier = Modifier
-        .selectableGroup()
-        .fillMaxWidth(),
+    Row(
+        modifier = Modifier
+            .selectableGroup()
+            .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Start,
+        horizontalArrangement = Arrangement.Start
     ) {
         radioOptions.forEach { label ->
             Row(
                 verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Start,
                 modifier = Modifier
-                    .wrapContentSize()
+                    .weight(1f)
+                    //.wrapContentSize()
                     .height(56.dp)
                     .selectable(
                         selected = (selectedItem == label), onClick = {
@@ -57,7 +61,8 @@ fun RadioButtonCompose(radioOptions: List<String>, default: Int, onSelect: (Stri
                     .padding(horizontal = 16.dp),
             ) {
                 RadioButton(
-                    modifier = Modifier.padding(end = 10.dp),
+                    modifier = Modifier
+                        .padding(end = 10.dp),
                     selected = (selectedItem == label),
                     onClick = null,
                     colors = RadioButtonDefaults.colors(
@@ -65,7 +70,15 @@ fun RadioButtonCompose(radioOptions: List<String>, default: Int, onSelect: (Stri
                         unselectedColor = Color.Gray
                     )
                 )
-                Text(text = label, style =  TextStyle( fontFamily = ComposeUtil.myFontFamily,fontSize = 20.sp,  fontWeight = FontWeight.Normal))
+                val tValue = radioTexts[label] ?: "-"
+                Text(
+                    text = tValue,
+                    style = TextStyle(
+                        fontFamily = ComposeUtil.myFontFamily,
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Normal
+                    )
+                )
             }
         }
     }

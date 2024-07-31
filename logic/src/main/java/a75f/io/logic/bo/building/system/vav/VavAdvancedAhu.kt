@@ -275,7 +275,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
         return AhuTuners(
                 relayAActivationHysteresis = systemEquip.vavRelayDeactivationHysteresis.readDefaultVal(),
                 relayDeactivationHysteresis = systemEquip.vavRelayDeactivationHysteresis.readDefaultVal(),
-                humidityHysteresis = systemEquip.vavHumidityHysteresis.readDefaultVal()
+                humidityHysteresis = systemEquip.vavHumidityHysteresis.readPriorityVal()
         )
     }
 

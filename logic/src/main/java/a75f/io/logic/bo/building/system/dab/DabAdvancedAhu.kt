@@ -251,7 +251,7 @@ class DabAdvancedAhu : DabSystemProfile() {
         return AhuTuners(
                 relayAActivationHysteresis = systemEquip.dabRelayDeactivationHysteresis.readDefaultVal(),
                 relayDeactivationHysteresis = systemEquip.dabRelayDeactivationHysteresis.readDefaultVal(),
-                humidityHysteresis = systemEquip.dabHumidityHysteresis.readDefaultVal()
+                humidityHysteresis = systemEquip.dabHumidityHysteresis.readPriorityVal()
         )
     }
 

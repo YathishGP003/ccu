@@ -131,8 +131,10 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
     private fun removeHisTagsFromNonDMDevices() {
         hayStack.readAllEntities("device and his").forEach { nonDMDeviceMap ->
             nonDMDeviceMap.remove("his")
-            val nonDMDevice = Device.Builder().setHashMap(nonDMDeviceMap).removeMarker("his").build()
-            hayStack.updateDevice(nonDMDevice, nonDMDevice.id)
+            nonDMDeviceMap["id"]?.let {
+                val nonDMDevice = Device.Builder().setHDict(hayStack.readHDictById(it.toString())).removeMarker("his").build()
+                hayStack.updateDevice(nonDMDevice, nonDMDevice.id)
+            }
         }
     }
 

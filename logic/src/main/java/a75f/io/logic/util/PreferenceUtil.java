@@ -39,6 +39,7 @@ public class PreferenceUtil {
     private static final String IS_CCU_LAUNCHED = "isCcuLaunched";
     private static final String IS_NEW_EXTERNAL_AHU = "isNewExternalAhu";
     public static final String UPDATE_HIS_ITEMS = "updateHisItems";
+    private static final String IS_CCU_REBOOT_STARTED = "isCcuRebootedStarted";
 
     public static final String MODULATING_FANSPEED_MIGRATION = "modulatingFanSpeedMigration";
     public static final String SINGLE_DUAL_MIGRATION = "singleDualMigration";
@@ -509,6 +510,13 @@ public class PreferenceUtil {
     }
     public static void setHisTagRemovalFromNonDmDevicesDone() {
         setBooleanPreference(HIS_TAG_REMOVAL_FROM_NON_DM_DEVICES, true);
+    }
+    public static boolean getIsCcuRebootStarted() {
+        return getBooleanPreference(IS_CCU_REBOOT_STARTED);
+    }
+
+    public static void setIsCcuRebootStarted(boolean isRebooted) {
+        setBooleanPreference(IS_CCU_REBOOT_STARTED, isRebooted);
     }
 
 }

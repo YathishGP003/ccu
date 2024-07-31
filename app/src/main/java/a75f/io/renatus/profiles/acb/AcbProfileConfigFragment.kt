@@ -17,6 +17,7 @@ import a75f.io.renatus.compose.SaveTextView
 import a75f.io.renatus.compose.TitleTextView
 import a75f.io.renatus.compose.ToggleButtonStateful
 import a75f.io.renatus.modbus.util.SET
+import a75f.io.renatus.profiles.OnPairingCompleteListener
 import a75f.io.renatus.profiles.profileUtils.UnusedPortsFragment
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -54,7 +55,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class AcbProfileConfigFragment : BaseDialogFragment() {
+class AcbProfileConfigFragment : BaseDialogFragment() ,OnPairingCompleteListener {
 
     private val viewModel : AcbProfileViewModel by viewModels()
     companion object {
@@ -81,6 +82,7 @@ class AcbProfileConfigFragment : BaseDialogFragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             withContext(Dispatchers.IO) {
                 viewModel.init(requireArguments(), requireContext(), CCUHsApi.getInstance())
+                viewModel.setOnPairingCompleteListener(this@AcbProfileConfigFragment)
             }
         }
         val rootView = ComposeView(requireContext())
@@ -89,14 +91,6 @@ class AcbProfileConfigFragment : BaseDialogFragment() {
             return rootView
         }
 
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        viewModel.isDialogOpen.observe(viewLifecycleOwner) { isDialogOpen ->
-            if (!isDialogOpen) {
-                this@AcbProfileConfigFragment.closeAllBaseDialogFragments()
-            }
-        }
     }
 
     @Composable
@@ -500,5 +494,9 @@ class AcbProfileConfigFragment : BaseDialogFragment() {
             val height = 672
             dialog.window!!.setLayout(width, height)
         }
+    }
+
+    override fun onPairingComplete() {
+        this@AcbProfileConfigFragment.closeAllBaseDialogFragments()
     }
 }

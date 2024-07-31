@@ -55,6 +55,7 @@ import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.cloud.RenatusServicesEnvironment;
+import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.logic.watchdog.Watchdog;
 import a75f.io.messaging.MessageHandlerSubscriber;
 import a75f.io.messaging.client.MessagingClient;
@@ -68,6 +69,7 @@ import a75f.io.renatus.ota.OtaCache;
 import a75f.io.renatus.registration.UpdateCCUFragment;
 import a75f.io.renatus.schedules.FileBackupService;
 import a75f.io.renatus.util.Prefs;
+import a75f.io.renatus.views.RebootDataCache;
 import a75f.io.restserver.server.HttpServer;
 import a75f.io.usbserial.SerialEvent;
 import a75f.io.usbserial.UsbConnectService;
@@ -273,6 +275,17 @@ public abstract class UtilityApplication extends Application {
 
         FileBackupService.scheduleFileBackupServiceJob(context);
         EveryDaySchedulerService.scheduleJobForDay(context);
+        if (PreferenceUtil.getIsCcuRebootStarted()) {
+            RebootDataCache rebootDataCache = new RebootDataCache();
+            rebootDataCache.storeRebootTimestamp(false);
+            PreferenceUtil.setIsCcuRebootStarted(false);
+        }
+        if (BuildConfig.BUILD_TYPE == "prod" || BuildConfig.BUILD_TYPE.equals("staging") || BuildConfig.BUILD_TYPE.equals("qa") || BuildConfig.BUILD_TYPE.equals("dev_qa")) {
+            RebootHandlerService.scheduleRebootJob(context , false);
+            CcuLog.i(L.TAG_CCU, "Reboot service started for build type: " + BuildConfig.BUILD_TYPE);
+        } else {
+            CcuLog.i(L.TAG_CCU, "Reboot service not started for build type: " + BuildConfig.BUILD_TYPE);
+        }
         initMessaging();
         OtaCache cache = new OtaCache();
         cache.restoreOtaRequests(context);

@@ -661,6 +661,96 @@
                     android:minWidth="76dp"
                     tools:listitem="@layout/spinner_dropdown_item" />
             </LinearLayout>
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:id="@+id/rebootLayout1"
+                android:layout_margin="10dp" >
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="10dp"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:text="Periodic reboot day on 2nd " />
+
+
+                <Spinner
+                    android:id="@+id/rebootDay"
+                    style="@style/Widget.AppCompat.Spinner.Underlined"
+                    android:layout_width="wrap_content"
+                    android:layout_height="50dp"
+                    android:entries="@array/reboot_days"
+                    android:minWidth="76dp"
+                    tools:listitem="@layout/spinner_dropdown_item" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="10dp"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:id="@+id/rebootDaysCountText"
+                    android:text="Number of Days" />
+
+
+                <Spinner
+                    android:id="@+id/rebootDaysCount"
+                    style="@style/Widget.AppCompat.Spinner.Underlined"
+                    android:layout_width="wrap_content"
+                    android:layout_height="50dp"
+                    android:minWidth="76dp"
+                    tools:listitem="@layout/spinner_dropdown_item" />
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:id="@+id/rebootLayout2"
+                android:layout_margin="10dp" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="10dp"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:text="Reboot Start Time : Hour - " />
+
+
+                <Spinner
+                    android:id="@+id/rebootHour"
+                    style="@style/Widget.AppCompat.Spinner.Underlined"
+                    android:layout_width="wrap_content"
+                    android:layout_height="50dp"
+                    android:minWidth="76dp"
+                    tools:listitem="@layout/spinner_dropdown_item" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="10dp"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:text=" Minute - " />
+                <Spinner
+                    android:id="@+id/rebootMinute"
+                    style="@style/Widget.AppCompat.Spinner.Underlined"
+                    android:layout_width="wrap_content"
+                    android:layout_height="50dp"
+                    android:minWidth="76dp"
+                    tools:listitem="@layout/spinner_dropdown_item" />
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="5dp"
+                    android:id="@+id/initiateReboot"
+                    android:textSize="20sp"
+                    android:padding="10dp"
+                    android:text="Initiate Reboot" />
+            </LinearLayout>
+
 
             <LinearLayout
                 android:layout_width="match_parent"

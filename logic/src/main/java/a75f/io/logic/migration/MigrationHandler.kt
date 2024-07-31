@@ -143,6 +143,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         if (!PreferenceUtil.getDmToDmCleanupMigration()) {
             cleanACBDuplicatePoints(CCUHsApi.getInstance())
             cleanVAVDuplicatePoints(CCUHsApi.getInstance())
+            CCUHsApi.getInstance().syncEntityTree()
             PreferenceUtil.setDmToDmCleanupMigration()
         }
         hayStack.scheduleSync()

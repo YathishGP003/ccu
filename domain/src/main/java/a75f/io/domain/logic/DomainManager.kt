@@ -297,5 +297,13 @@ object DomainManager {
         rooms?.get(hayStackPoint.roomRef)?.equips?.get(hayStackPoint.equipRef)?.
         points?.remove(hayStackPoint.domainName, Point(hayStackPoint.domainName, hayStackPoint.equipRef))
     }
+    fun removeDeviceRawPoint(hayStackPoint : a75f.io.api.haystack.RawPoint) {
+        if (Domain.site == null) {
+            return
+        }
+        Domain.site?.floors?.get(hayStackPoint.floorRef)?.
+        rooms?.get(hayStackPoint.roomRef)?.devices?.get(hayStackPoint.deviceRef)?.
+        points?.remove(hayStackPoint.domainName, Point(hayStackPoint.domainName, hayStackPoint.deviceRef))
+    }
 }
 

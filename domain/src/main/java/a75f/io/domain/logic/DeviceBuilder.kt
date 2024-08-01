@@ -77,7 +77,7 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
         return deviceBuilder.build()
     }
 
-    private fun buildRawPoint(modelDef: SeventyFiveFDevicePointDef, configuration: ProfileConfiguration, device: Device) : RawPoint{
+    fun buildRawPoint(modelDef: SeventyFiveFDevicePointDef, configuration: ProfileConfiguration, device: Device) : RawPoint{
         CcuLog.i(Domain.LOG_TAG, "buildRawPoint ${modelDef.domainName}")
         val pointBuilder = RawPoint.Builder().setDisplayName(modelDef.name)
             .setDomainName(modelDef.domainName)

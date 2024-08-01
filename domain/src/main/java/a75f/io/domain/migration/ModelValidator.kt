@@ -92,6 +92,8 @@ class ModelValidator {
                 MODEL_VAV_MODULATING_AHU,
                 MODEL_VAV_ADVANCED_AHU_V2_CM,
                 MODEL_VAV_ADVANCED_AHU_V2_CONNECT,
+                MODEL_CM_DEVICE,
+                MODEL_CONNECT_DEVICE
             )
         }
     }

@@ -68,8 +68,8 @@ import a75f.io.logic.limits.SchedulabeLimits;
 import a75f.io.renatus.bacnet.BacNetSelectModelView;
 import a75f.io.renatus.hyperstat.ui.HyperStatFragment;
 import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
-import a75f.io.renatus.hyperstatsplit.ui.HyperStatSplitFragment;
 import a75f.io.renatus.profiles.acb.AcbProfileConfigFragment;
+import a75f.io.renatus.profiles.hss.cpu.HyperStatSplitCpuFragment;
 import a75f.io.renatus.profiles.dab.DabProfileConfigFragment;
 import a75f.io.renatus.profiles.vav.VavProfileConfigFragment;
 import a75f.io.renatus.modbus.ModbusConfigView;
@@ -1093,9 +1093,9 @@ public class FloorPlanFragment extends Fragment {
                             HyperStatFragment.ID);
                     break;
                 case HYPERSTATSPLIT_CPU:
-                    showDialogFragment(HyperStatSplitFragment.newInstance(Short.parseShort(nodeAddress)
+                    showDialogFragment(HyperStatSplitCpuFragment.Companion.newInstance(Short.parseShort(nodeAddress)
                                     , zone.getId(), floor.getId(),NodeType.HYPERSTATSPLIT, profile.getProfileType()),
-                            HyperStatSplitFragment.ID);
+                            HyperStatSplitCpuFragment.Companion.getID());
                     break;
                 case MODBUS_UPS30:
                 case MODBUS_UPS80:

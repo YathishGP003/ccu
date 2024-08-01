@@ -1,5 +1,6 @@
 package a75f.io.device.mesh.hypersplit;
 
+import static a75f.io.api.haystack.Tags.DOMAIN_NAME;
 import static a75f.io.api.haystack.Tags.HYPERSTATSPLIT;
 import static a75f.io.device.mesh.Pulse.getHumidityConversion;
 
@@ -9,7 +10,10 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -27,6 +31,7 @@ import a75f.io.device.mesh.Pulse;
 import a75f.io.device.mesh.ThermistorUtil;
 import a75f.io.device.serial.CcuToCmOverUsbDeviceTempAckMessage_t;
 import a75f.io.device.serial.MessageType;
+import a75f.io.domain.api.DomainName;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
@@ -38,7 +43,6 @@ import a75f.io.logic.bo.building.hvac.StandaloneFanStage;
 import a75f.io.logic.bo.building.hyperstatsplit.common.PossibleConditioningMode;
 import a75f.io.logic.bo.building.hyperstatsplit.common.PossibleFanMode;
 import a75f.io.logic.bo.building.hyperstatsplit.common.HSSplitHaystackUtil;
-import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuEconEquip;
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuEconProfile;
 import a75f.io.logic.bo.haystack.device.HyperStatSplitDevice;
 import a75f.io.logic.bo.util.CCUUtils;
@@ -118,40 +122,16 @@ public class HyperSplitMsgReceiver {
             DeviceHSUtil.getEnabledSensorPointsWithRefForDevice(device, hayStack)
                     .forEach(point -> writePortInputsToHaystackDatabase(point, regularUpdateMessage, hayStack, equipRef));
 
-            writeSensorInputsToHaystackDatabase(regularUpdateMessage.getRegularUpdateCommon(), nodeAddress);
-        }
-    }
+            // PM2.5 sensor is the only DYNAMIC_SENSOR point for HSS
+            if (regularUpdateMessage.getRegularUpdateCommon().getPm2P5() > 0.0) {
+                HashMap<Object, Object> pm25PhyPoint = hayStack.readEntity("point and domainName == \"" + DomainName.pm25Sensor + "\" and deviceRef == \"" + device.get("id").toString() + "\"");
+                RawPoint sp = new RawPoint.Builder().setHashMap(pm25PhyPoint).build();
 
-    private static void writeSensorInputsToHaystackDatabase(HyperSplit.RegularUpdateCommon_t common, int nodeAddress) {
-
-        HyperStatSplitDevice hss = new HyperStatSplitDevice(nodeAddress);
-
-        /*
-            Onboard sensor points that are not part of base HyperLite (e.g. PM2.5) are not created with the device.
-
-            Point is only created when it appears in a regular update message.
-
-            Regular update message
-         */
-
-        if (common.getPressure() > 0) {
-            RawPoint sp = hss.getRawPoint(Port.SENSOR_PRESSURE);
-            if (sp == null) sp = hss.createSensorPoints(Port.SENSOR_PRESSURE);
-        }
-
-        if (common.getPm2P5() > 0) {
-            RawPoint sp = hss.getRawPoint(Port.SENSOR_PM2P5);
-            if (sp == null) sp = hss.createSensorPoints(Port.SENSOR_PM2P5);
-        }
-
-        if (common.getPm10() > 0) {
-            RawPoint sp = hss.getRawPoint(Port.SENSOR_PM10);
-            if (sp == null) sp = hss.createSensorPoints(Port.SENSOR_PM10);
-        }
-
-        if (common.getUltravioletIndex() > 0) {
-            RawPoint sp = hss.getRawPoint(Port.SENSOR_UVI);
-            if (sp == null) sp = hss.createSensorPoints(Port.SENSOR_UVI);
+                if (sp.getPointRef() == null || sp.getPointRef().isEmpty()) {
+                    HyperStatSplitDevice stat = new HyperStatSplitDevice();
+                    sp = stat.addEquipSensorFromRawPoint(sp, Port.SENSOR_PM2P5, nodeAddress);
+                }
+            }
         }
 
     }
@@ -185,7 +165,7 @@ public class HyperSplitMsgReceiver {
 
         if (profile instanceof HyperStatSplitCpuEconProfile) {
             HyperStatSplitCpuEconProfile hyperStatSplitCpuEconProfile = (HyperStatSplitCpuEconProfile) profile;
-            hyperStatSplitCpuEconProfile.processHyperStatSplitCPUEconProfile((HyperStatSplitCpuEconEquip) Objects.requireNonNull(hyperStatSplitCpuEconProfile.getHyperStatSplitEquip(nodeAddress)));
+            hyperStatSplitCpuEconProfile.updateZonePoints();
         }
 
     }
@@ -198,111 +178,110 @@ public class HyperSplitMsgReceiver {
 
         if (DLog.isLoggingEnabled()) {
             CcuLog.i(L.TAG_CCU_DEVICE,
-                    "writePortInputsToHaystackDatabase: logical point for " + rawPoint.getDisplayName() + " " + point + "; port " + rawPoint.getPort());
+                    "writePortInputsToHaystackDatabase: logical point for " + rawPoint.getDisplayName() + " " + point + "; domainName " + rawPoint.getDomainName());
         }
-        if (point == null) {
+        if (point == null || rawPoint.getDomainName() == null || rawPoint.getDomainName().isEmpty()) {
             return;
         }
-        if (Port.valueOf(rawPoint.getPort()) == Port.RSSI) {
+        if (rawPoint.getDomainName().equals(DomainName.rssi)) {
             writeHeartbeat(rawPoint, point, regularUpdateMessage, hayStack);
         }
-        else if (Port.valueOf(rawPoint.getPort()) == Port.SENSOR_RT) {
+        else if (rawPoint.getDomainName().equals(DomainName.currentTemp)) {
             writeRoomTemp(rawPoint, point, regularUpdateMessage, hayStack);
         }
-        else if (Port.valueOf(rawPoint.getPort()) == Port.UNIVERSAL_IN_ONE) {
+        else if (rawPoint.getDomainName().equals(DomainName.universal1In)) {
             writeUniversalInVal(rawPoint, point, hayStack,
                     regularUpdateMessage.getUniversalInput1Value());
         }
-        else if (Port.valueOf(rawPoint.getPort()) == Port.UNIVERSAL_IN_TWO) {
+        else if (rawPoint.getDomainName().equals(DomainName.universal2In)) {
             writeUniversalInVal(rawPoint, point, hayStack,
                     regularUpdateMessage.getUniversalInput2Value());
         }
-        else if (Port.valueOf(rawPoint.getPort()) == Port.UNIVERSAL_IN_THREE) {
+        else if (rawPoint.getDomainName().equals(DomainName.universal3In)) {
             writeUniversalInVal(rawPoint, point, hayStack,
                     regularUpdateMessage.getUniversalInput3Value());
         }
-        else if (Port.valueOf(rawPoint.getPort()) == Port.UNIVERSAL_IN_FOUR) {
+        else if (rawPoint.getDomainName().equals(DomainName.universal4In)) {
             writeUniversalInVal(rawPoint, point, hayStack,
                     regularUpdateMessage.getUniversalInput4Value());
         }
-        else if (Port.valueOf(rawPoint.getPort()) == Port.UNIVERSAL_IN_FIVE) {
+        else if (rawPoint.getDomainName().equals(DomainName.universal5In)) {
             writeUniversalInVal(rawPoint, point, hayStack,
                     regularUpdateMessage.getUniversalInput5Value());
         }
-        else if (Port.valueOf(rawPoint.getPort()) == Port.UNIVERSAL_IN_SIX) {
+        else if (rawPoint.getDomainName().equals(DomainName.universal6In)) {
             writeUniversalInVal(rawPoint, point, hayStack,
                     regularUpdateMessage.getUniversalInput6Value());
         }
-        else if (Port.valueOf(rawPoint.getPort()) == Port.UNIVERSAL_IN_SEVEN) {
+        else if (rawPoint.getDomainName().equals(DomainName.universal7In)) {
             writeUniversalInVal(rawPoint, point, hayStack,
                     regularUpdateMessage.getUniversalInput7Value());
         }
-        else if (Port.valueOf(rawPoint.getPort()) == Port.UNIVERSAL_IN_EIGHT) {
+        else if (rawPoint.getDomainName().equals(DomainName.universal8In)) {
             writeUniversalInVal(rawPoint, point, hayStack,
                     regularUpdateMessage.getUniversalInput8Value());
         }
-        else if (Port.valueOf(rawPoint.getPort()) == Port.SENSOR_RH) {
+        else if (rawPoint.getDomainName().equals(DomainName.humiditySensor)) {
             writeHumidityVal(rawPoint, point, regularUpdateMessage, hayStack);
         }
-        else if (Port.valueOf(rawPoint.getPort()) == Port.SENSOR_ILLUMINANCE) {
+        else if (rawPoint.getDomainName().equals(DomainName.illuminanceSensor)) {
             writeIlluminanceVal(rawPoint, point, regularUpdateMessage, hayStack);
         }
-        else if (Port.valueOf(rawPoint.getPort()) == Port.SENSOR_OCCUPANCY) {
+        else if (rawPoint.getDomainName().equals(DomainName.occupancySensor)) {
             writeOccupancyVal(rawPoint, point, regularUpdateMessage, hayStack);
         }
-        else if (Port.valueOf(rawPoint.getPort()) == Port.SENSOR_CO2) {
+        else if (rawPoint.getDomainName().equals(DomainName.co2Sensor)) {
             writeCO2Val(rawPoint, point, regularUpdateMessage, hayStack);
         }
-        else if (Port.valueOf(rawPoint.getPort()) == Port.SENSOR_VOC) {
-            writeVOCVal(rawPoint, point, regularUpdateMessage, hayStack);
-        }
-        else if (Port.valueOf(rawPoint.getPort()) == Port.SENSOR_SOUND) {
+        else if (rawPoint.getDomainName().equals(DomainName.soundSensor)) {
             writeSoundVal(rawPoint, point, regularUpdateMessage, hayStack);
         }
-        else if (Port.valueOf(rawPoint.getPort()) == Port.SENSOR_PM2P5) {
+        else if (rawPoint.getDomainName().equals(DomainName.pm25Sensor)) {
             writePm2p5Val(rawPoint, point, regularUpdateMessage, hayStack);
         }
-        else if (Port.valueOf(rawPoint.getPort()) == Port.SENSOR_PM10) {
+        else if (rawPoint.getDomainName().equals(DomainName.pm10Sensor)) {
             writePm10Val(rawPoint, point, regularUpdateMessage, hayStack);
         }
-        else if (Port.valueOf(rawPoint.getPort()) == Port.SENSOR_MAT) {
+        else if (rawPoint.getDomainName().equals(DomainName.mixedAirTempSensor)) {
             writeMixedAirTempSensorVal(rawPoint, point, regularUpdateMessage, hayStack, equipRef);
         }
-        else if (Port.valueOf(rawPoint.getPort()) == Port.SENSOR_MAH) {
+        else if (rawPoint.getDomainName().equals(DomainName.mixedAirHumiditySensor)) {
             writeMixedAirHumiditySensorVal(rawPoint, point, regularUpdateMessage, hayStack, equipRef);
         }
-        else if (Port.valueOf(rawPoint.getPort()) == Port.SENSOR_SAT) {
+        else if (rawPoint.getDomainName().equals(DomainName.supplyAirTemperature)) {
             writeSupplyAirTempSensorVal(rawPoint, point, regularUpdateMessage, hayStack, equipRef);
         }
-        else if (Port.valueOf(rawPoint.getPort()) == Port.SENSOR_SAH) {
+        else if (rawPoint.getDomainName().equals(DomainName.supplyAirHumiditySensor)) {
             writeSupplyAirHumiditySensorVal(rawPoint, point, regularUpdateMessage, hayStack, equipRef);
         }
-        else if (Port.valueOf(rawPoint.getPort()) == Port.SENSOR_OAT) {
+        else if (rawPoint.getDomainName().equals(DomainName.outsideAirTempSensor)) {
             writeOutsideAirTempSensorVal(rawPoint, point, regularUpdateMessage, hayStack, equipRef);
         }
-        else if (Port.valueOf(rawPoint.getPort()) == Port.SENSOR_OAH) {
+        else if (rawPoint.getDomainName().equals(DomainName.outsideAirHumiditySensor)) {
             writeOutsideAirHumiditySensorVal(rawPoint, point, regularUpdateMessage, hayStack, equipRef);
         }
-        else if (Port.valueOf(rawPoint.getPort()) == Port.SENSOR_PRESSURE) {
+        else if (rawPoint.getDomainName().equals(DomainName.ductStaticPressureSensor)) {
             writePressureSensorVal(rawPoint, point, regularUpdateMessage, hayStack, equipRef);
         }
         else if (Port.valueOf(rawPoint.getPort()) == Port.SENSOR_UVI) {
             writeUviSensorVal(rawPoint, point, regularUpdateMessage, hayStack);
+        } else {
+            CcuLog.d(L.TAG_CCU_DEVICE, "No handler for domainName: " + rawPoint.getDomainName());
         }
     }
 
     private static void writeSupplyAirTempSensorVal(RawPoint rawPoint, Point point, HyperSplit.HyperSplitRegularUpdateMessage_t
             regularUpdateMessage, CCUHsApi hayStack, String equipRef) {
 
-        if (isSensorBusAddressMapped(hayStack, "addr0", 0, equipRef)) {
+        if (isSensorBusAddressMapped(hayStack, 0, 0, equipRef)) {
             hayStack.writeHisValById(rawPoint.getId(), (double)regularUpdateMessage.getSensorBusReadingsConnect().getSensorAddress0Temperature());
             hayStack.writeHisValById(point.getId(), Pulse.getRoomTempConversion((double) regularUpdateMessage.getSensorBusReadingsConnect().getSensorAddress0Temperature()));
         }
-        else if (isSensorBusAddressMapped(hayStack, "addr1", 0, equipRef)) {
+        else if (isSensorBusAddressMapped(hayStack, 1, 0, equipRef)) {
             hayStack.writeHisValById(rawPoint.getId(), (double) regularUpdateMessage.getSensorBusReadingsConnect().getSensorAddress1Temperature());
             hayStack.writeHisValById(point.getId(), Pulse.getRoomTempConversion((double) regularUpdateMessage.getSensorBusReadingsConnect().getSensorAddress1Temperature()));
         }
-        else if (isSensorBusAddressMapped(hayStack, "addr2", 0, equipRef)) {
+        else if (isSensorBusAddressMapped(hayStack, 2, 0, equipRef)) {
             hayStack.writeHisValById(rawPoint.getId(), (double)regularUpdateMessage.getSensorBusReadingsConnect().getSensorAddress2Temperature());
             hayStack.writeHisValById(point.getId(), Pulse.getRoomTempConversion((double) regularUpdateMessage.getSensorBusReadingsConnect().getSensorAddress2Temperature()));
         }
@@ -314,15 +293,15 @@ public class HyperSplitMsgReceiver {
     private static void writeSupplyAirHumiditySensorVal(RawPoint rawPoint, Point point, HyperSplit.HyperSplitRegularUpdateMessage_t
             regularUpdateMessage, CCUHsApi hayStack, String equipRef) {
 
-        if (isSensorBusAddressMapped(hayStack, "addr0", 0, equipRef)) {
+        if (isSensorBusAddressMapped(hayStack, 0, 0, equipRef)) {
             hayStack.writeHisValById(rawPoint.getId(), (double)regularUpdateMessage.getSensorBusReadingsConnect().getSensorAddress0Humidity());
             hayStack.writeHisValById(point.getId(), getHumidityConversion((double) regularUpdateMessage.getSensorBusReadingsConnect().getSensorAddress0Humidity()));
         }
-        else if (isSensorBusAddressMapped(hayStack, "addr1", 0, equipRef)) {
+        else if (isSensorBusAddressMapped(hayStack, 1, 0, equipRef)) {
             hayStack.writeHisValById(rawPoint.getId(), (double)regularUpdateMessage.getSensorBusReadingsConnect().getSensorAddress1Humidity());
             hayStack.writeHisValById(point.getId(), getHumidityConversion((double) regularUpdateMessage.getSensorBusReadingsConnect().getSensorAddress1Humidity()));
         }
-        else if (isSensorBusAddressMapped(hayStack, "addr2", 0, equipRef)) {
+        else if (isSensorBusAddressMapped(hayStack, 2, 0, equipRef)) {
             hayStack.writeHisValById(rawPoint.getId(), (double)regularUpdateMessage.getSensorBusReadingsConnect().getSensorAddress2Humidity());
             hayStack.writeHisValById(point.getId(), getHumidityConversion((double) regularUpdateMessage.getSensorBusReadingsConnect().getSensorAddress2Humidity()));
         }
@@ -334,15 +313,15 @@ public class HyperSplitMsgReceiver {
     private static void writeMixedAirTempSensorVal(RawPoint rawPoint, Point point, HyperSplit.HyperSplitRegularUpdateMessage_t
             regularUpdateMessage, CCUHsApi hayStack, String equipRef) {
 
-        if (isSensorBusAddressMapped(hayStack, "addr0", 1, equipRef)) {
+        if (isSensorBusAddressMapped(hayStack, 0, 1, equipRef)) {
             hayStack.writeHisValById(rawPoint.getId(), (double)regularUpdateMessage.getSensorBusReadingsConnect().getSensorAddress0Temperature());
             hayStack.writeHisValById(point.getId(), Pulse.getRoomTempConversion((double) regularUpdateMessage.getSensorBusReadingsConnect().getSensorAddress0Temperature()));
         }
-        else if (isSensorBusAddressMapped(hayStack, "addr1", 1, equipRef)) {
+        else if (isSensorBusAddressMapped(hayStack, 1, 1, equipRef)) {
             hayStack.writeHisValById(rawPoint.getId(), (double) regularUpdateMessage.getSensorBusReadingsConnect().getSensorAddress1Temperature());
             hayStack.writeHisValById(point.getId(), Pulse.getRoomTempConversion((double) regularUpdateMessage.getSensorBusReadingsConnect().getSensorAddress1Temperature()));
         }
-        else if (isSensorBusAddressMapped(hayStack, "addr2", 1, equipRef)) {
+        else if (isSensorBusAddressMapped(hayStack, 2, 1, equipRef)) {
             hayStack.writeHisValById(rawPoint.getId(), (double)regularUpdateMessage.getSensorBusReadingsConnect().getSensorAddress2Temperature());
             hayStack.writeHisValById(point.getId(), Pulse.getRoomTempConversion((double) regularUpdateMessage.getSensorBusReadingsConnect().getSensorAddress2Temperature()));
         }
@@ -354,15 +333,15 @@ public class HyperSplitMsgReceiver {
     private static void writeMixedAirHumiditySensorVal(RawPoint rawPoint, Point point, HyperSplit.HyperSplitRegularUpdateMessage_t
             regularUpdateMessage, CCUHsApi hayStack, String equipRef) {
 
-        if (isSensorBusAddressMapped(hayStack, "addr0", 1, equipRef)) {
+        if (isSensorBusAddressMapped(hayStack, 0, 1, equipRef)) {
             hayStack.writeHisValById(rawPoint.getId(), (double)regularUpdateMessage.getSensorBusReadingsConnect().getSensorAddress0Humidity());
             hayStack.writeHisValById(point.getId(), getHumidityConversion((double) regularUpdateMessage.getSensorBusReadingsConnect().getSensorAddress0Humidity()));
         }
-        else if (isSensorBusAddressMapped(hayStack, "addr1", 1, equipRef)) {
+        else if (isSensorBusAddressMapped(hayStack, 1, 1, equipRef)) {
             hayStack.writeHisValById(rawPoint.getId(), (double)regularUpdateMessage.getSensorBusReadingsConnect().getSensorAddress1Humidity());
             hayStack.writeHisValById(point.getId(), getHumidityConversion((double) regularUpdateMessage.getSensorBusReadingsConnect().getSensorAddress1Humidity()));
         }
-        else if (isSensorBusAddressMapped(hayStack, "addr2", 1, equipRef)) {
+        else if (isSensorBusAddressMapped(hayStack, 2, 1, equipRef)) {
             hayStack.writeHisValById(rawPoint.getId(), (double)regularUpdateMessage.getSensorBusReadingsConnect().getSensorAddress2Humidity());
             hayStack.writeHisValById(point.getId(), getHumidityConversion((double) regularUpdateMessage.getSensorBusReadingsConnect().getSensorAddress2Humidity()));
         }
@@ -374,15 +353,15 @@ public class HyperSplitMsgReceiver {
     private static void writeOutsideAirTempSensorVal(RawPoint rawPoint, Point point, HyperSplit.HyperSplitRegularUpdateMessage_t
             regularUpdateMessage, CCUHsApi hayStack, String equipRef) {
 
-        if (isSensorBusAddressMapped(hayStack, "addr0", 2, equipRef)) {
+        if (isSensorBusAddressMapped(hayStack, 0, 2, equipRef)) {
             hayStack.writeHisValById(rawPoint.getId(), (double)regularUpdateMessage.getSensorBusReadingsConnect().getSensorAddress0Temperature());
             hayStack.writeHisValById(point.getId(), Pulse.getRoomTempConversion((double) regularUpdateMessage.getSensorBusReadingsConnect().getSensorAddress0Temperature()));
         }
-        else if (isSensorBusAddressMapped(hayStack, "addr1", 2, equipRef)) {
+        else if (isSensorBusAddressMapped(hayStack, 1, 2, equipRef)) {
             hayStack.writeHisValById(rawPoint.getId(), (double) regularUpdateMessage.getSensorBusReadingsConnect().getSensorAddress1Temperature());
             hayStack.writeHisValById(point.getId(), Pulse.getRoomTempConversion((double) regularUpdateMessage.getSensorBusReadingsConnect().getSensorAddress1Temperature()));
         }
-        else if (isSensorBusAddressMapped(hayStack, "addr2", 2, equipRef)) {
+        else if (isSensorBusAddressMapped(hayStack, 2, 2, equipRef)) {
             hayStack.writeHisValById(rawPoint.getId(), (double)regularUpdateMessage.getSensorBusReadingsConnect().getSensorAddress2Temperature());
             hayStack.writeHisValById(point.getId(), Pulse.getRoomTempConversion((double) regularUpdateMessage.getSensorBusReadingsConnect().getSensorAddress2Temperature()));
         }
@@ -394,15 +373,15 @@ public class HyperSplitMsgReceiver {
     private static void writeOutsideAirHumiditySensorVal(RawPoint rawPoint, Point point, HyperSplit.HyperSplitRegularUpdateMessage_t
             regularUpdateMessage, CCUHsApi hayStack, String equipRef) {
 
-        if (isSensorBusAddressMapped(hayStack, "addr0", 2, equipRef)) {
+        if (isSensorBusAddressMapped(hayStack, 0, 2, equipRef)) {
             hayStack.writeHisValById(rawPoint.getId(), (double)regularUpdateMessage.getSensorBusReadingsConnect().getSensorAddress0Humidity());
             hayStack.writeHisValById(point.getId(), getHumidityConversion((double) regularUpdateMessage.getSensorBusReadingsConnect().getSensorAddress0Humidity()));
         }
-        else if (isSensorBusAddressMapped(hayStack, "addr1", 2, equipRef)) {
+        else if (isSensorBusAddressMapped(hayStack, 1, 2, equipRef)) {
             hayStack.writeHisValById(rawPoint.getId(), (double)regularUpdateMessage.getSensorBusReadingsConnect().getSensorAddress1Humidity());
             hayStack.writeHisValById(point.getId(), getHumidityConversion((double) regularUpdateMessage.getSensorBusReadingsConnect().getSensorAddress1Humidity()));
         }
-        else if (isSensorBusAddressMapped(hayStack, "addr2", 2, equipRef)) {
+        else if (isSensorBusAddressMapped(hayStack, 2, 2, equipRef)) {
             hayStack.writeHisValById(rawPoint.getId(), (double)regularUpdateMessage.getSensorBusReadingsConnect().getSensorAddress2Humidity());
             hayStack.writeHisValById(point.getId(), getHumidityConversion((double) regularUpdateMessage.getSensorBusReadingsConnect().getSensorAddress2Humidity()));
         }
@@ -414,10 +393,12 @@ public class HyperSplitMsgReceiver {
     private static void writePressureSensorVal(RawPoint rawPoint, Point point, HyperSplit.HyperSplitRegularUpdateMessage_t
             regularUpdateMessage, CCUHsApi hayStack, String equipRef) {
 
-        // TODO: does pressure reading have a multiplier? Confirm.
-        if (isSensorBusAddressMapped(hayStack, "addr3", 0, equipRef)) {
-            hayStack.writeHisValById(rawPoint.getId(), (double)regularUpdateMessage.getSensorBusReadingsConnect().getSensorAddress3Pressure());
-            hayStack.writeHisValById(point.getId(), (double) regularUpdateMessage.getSensorBusReadingsConnect().getSensorAddress3Pressure());
+        if (isPressureSensorBusEnabled(hayStack, equipRef)) {
+            // physical and logical points are in units of in wc. Regular update message comes in Pa.
+            // Unit Conversion = 1 in wc / 248.8 Pa
+            double pressureInWc = regularUpdateMessage.getSensorBusReadingsConnect().getSensorAddress0Pressure() / 248.8;
+            hayStack.writeHisValById(rawPoint.getId(), (double) pressureInWc);
+            hayStack.writeHisValById(point.getId(), (double) pressureInWc);
         }
 
         // Pressure will only be mapped to Address 3 for HS Split
@@ -427,16 +408,38 @@ public class HyperSplitMsgReceiver {
     private static void writeUviSensorVal(RawPoint rawPoint, Point point, HyperSplit.HyperSplitRegularUpdateMessage_t
             regularUpdateMessage, CCUHsApi hayStack) {
 
-        hayStack.writeHisValById(rawPoint.getId(), (double)regularUpdateMessage.getRegularUpdateCommon().getUltravioletIndex());
+        hayStack.writeHisValById(rawPoint.getId(), (double) regularUpdateMessage.getRegularUpdateCommon().getUltravioletIndex());
         hayStack.writeHisValById(point.getId(), (double) regularUpdateMessage.getRegularUpdateCommon().getUltravioletIndex());
 
     }
 
-    private static boolean isSensorBusAddressMapped(CCUHsApi hsApi, String addr, int association, String equipRef) {
+    private static boolean isSensorBusAddressMapped(CCUHsApi hsApi, int addr, int association, String equipRef) {
 
-        return hsApi.readDefaultVal("point and " + addr + " and config and sensorBus and enabled and equipRef == \"" + equipRef + "\"") == 1.0 &&
-                hsApi.readDefaultVal("point and " + addr + " and config and sensorBus and association and equipRef == \"" + equipRef + "\"").intValue() == association;
+        switch (addr) {
+            case 0:
+                if (hsApi.readDefaultVal("point and domainName == \"" + DomainName.sensorBusAddress0Enable + "\" and equipRef == \"" + equipRef + "\"") == 1.0 &&
+                        hsApi.readDefaultVal("point and domainName == \"" + DomainName.temperatureSensorBusAdd0 + "\" and equipRef == \"" + equipRef + "\"").intValue() == association) return true;
+                break;
+            case 1:
+                if (hsApi.readDefaultVal("point and domainName == \"" + DomainName.sensorBusAddress1Enable + "\" and equipRef == \"" + equipRef + "\"") == 1.0 &&
+                        hsApi.readDefaultVal("point and domainName == \"" + DomainName.temperatureSensorBusAdd1 + "\" and equipRef == \"" + equipRef + "\"").intValue() == association) return true;
+                break;
+            case 2:
+                if (hsApi.readDefaultVal("point and domainName == \"" + DomainName.sensorBusAddress2Enable + "\" and equipRef == \"" + equipRef + "\"") == 1.0 &&
+                        hsApi.readDefaultVal("point and domainName == \"" + DomainName.temperatureSensorBusAdd2 + "\" and equipRef == \"" + equipRef + "\"").intValue() == association) return true;
+                break;
+            case 3:
+                if (hsApi.readDefaultVal("point and domainName == \"" + DomainName.sensorBusAddress3Enable + "\" and equipRef == \"" + equipRef + "\"") == 1.0 &&
+                        hsApi.readDefaultVal("point and domainName == \"" + DomainName.pressureSensorBusAdd3 + "\" and equipRef == \"" + equipRef + "\"").intValue() == association) return true;
+                break;
+        }
+        return false;
 
+    }
+
+    private static boolean isPressureSensorBusEnabled(CCUHsApi hsApi, String equipRef) {
+        return hsApi.readDefaultVal("point and domainName == \"" + DomainName.sensorBusPressureEnable + "\" and equipRef == \"" + equipRef + "\"") == 1.0
+                && hsApi.readDefaultVal("point and domainName == \"" + DomainName.pressureSensorBusAdd0 + "\" and equipRef == \"" + equipRef + "\"") > 0.0;
     }
 
     private static void writeHeartbeat(RawPoint rawPoint, Point point,
@@ -461,64 +464,67 @@ public class HyperSplitMsgReceiver {
     }
 
     private static void writeUniversalInVal(RawPoint rawPoint, Point point, CCUHsApi hayStack, int val) {
-        CcuLog.i(L.TAG_CCU_DEVICE, "writeUniversalInVal: "+rawPoint.getPort()+" " +rawPoint.getType());
+        CcuLog.i(L.TAG_CCU_DEVICE, "writeUniversalInVal: "+rawPoint.getDomainName()+" " +rawPoint.getType());
 
-        if (isUniversalInMappedToThermistor(rawPoint)) writeThermistorInVal(rawPoint, point, hayStack, val);
-        else if (isUniversalInMappedToVoltage(rawPoint)) writeVoltageInVal(rawPoint, point, hayStack, val);
-        else if (isUniversalInMappedToDigitalInNO(rawPoint)) writeDigitalNOInVal(rawPoint, point, hayStack, val);
-        else if (isUniversalInMappedToDigitalInNC(rawPoint)) writeDigitalNCInVal(rawPoint, point, hayStack, val);
-        else if (isUniversalInMappedToGenericResistiveIn(rawPoint)) writeGenericResistiveInVal(rawPoint, point, hayStack, val);
+        if (rawPoint.getEnabled() && (thermistorPoints.contains(point.getDomainName()))) writeThermistorInVal(rawPoint, point, hayStack, val);
+        else if (rawPoint.getEnabled() && (voltagePoints.containsKey(point.getDomainName()))) writeVoltageInVal(rawPoint, point, hayStack, val);
+        else if (rawPoint.getEnabled() && (digitalNoPoints.contains(point.getDomainName()))) writeDigitalNOInVal(rawPoint, point, hayStack, val);
+        else if (rawPoint.getEnabled() && (digitalNcPoints.contains(point.getDomainName()))) writeDigitalNCInVal(rawPoint, point, hayStack, val);
 
     }
 
-    // If "analogType" == 5 (Supply Air Temperature), 6 (Mixed Air Temperature), or 7 (Outside Air Temperature), process the point as a thermistor
-    // For HSS Universal Inputs, "analogType" tag maps to the UniversalInAssociation index, NOT the SensorManager index.
-    private static boolean isUniversalInMappedToThermistor(RawPoint rawPoint) {
+    private static List<String> thermistorPoints = Arrays.asList(
+            DomainName.thermistorInput,
+            DomainName.dischargeAirTemperature,
+            DomainName.mixedAirTemperature,
+            DomainName.outsideTemperature
+    );
 
-        return rawPoint.getEnabled()
-                && (rawPoint.getType().equals("5")
-                    || rawPoint.getType().equals("6")
-                    || rawPoint.getType().equals("7"));
+    private static Map<String, MinMaxVoltage> voltagePoints;
+    static {
+        Map<String, MinMaxVoltage> pointsMap = new HashMap();
+        pointsMap.put(DomainName.voltageInput, new MinMaxVoltage(0, 10, 0, 10));
+        pointsMap.put(DomainName.ductStaticPressureSensor1_1, new MinMaxVoltage(0, 10, 0, 1));
+        pointsMap.put(DomainName.ductStaticPressureSensor1_2, new MinMaxVoltage(0, 10, 0, 2));
+        pointsMap.put(DomainName.ductStaticPressureSensor1_10, new MinMaxVoltage(0, 10, 0, 10));
+        pointsMap.put(DomainName.buildingStaticPressureSensor_1, new MinMaxVoltage(0, 10, 0, 1));
+        pointsMap.put(DomainName.buildingStaticPressureSensor_2, new MinMaxVoltage(0, 10, 0, 2));
+        pointsMap.put(DomainName.buildingStaticPressureSensor_10, new MinMaxVoltage(0, 10, 0, 10));
+        pointsMap.put(DomainName.outsideAirDamperFeedback, new MinMaxVoltage(0, 10, 0, 100));
+        pointsMap.put(DomainName.currentTx10, new MinMaxVoltage(0, 10, 0, 10));
+        pointsMap.put(DomainName.currentTx20, new MinMaxVoltage(0, 10, 0, 20));
+        pointsMap.put(DomainName.currentTx30, new MinMaxVoltage(0, 10, 0, 30));
+        pointsMap.put(DomainName.currentTx50, new MinMaxVoltage(0, 10, 0, 50));
+        pointsMap.put(DomainName.currentTx60, new MinMaxVoltage(0, 10, 0, 60));
+        pointsMap.put(DomainName.currentTx100, new MinMaxVoltage(0, 10, 0, 100));
+        pointsMap.put(DomainName.currentTx120, new MinMaxVoltage(0, 10, 0, 120));
+        pointsMap.put(DomainName.currentTx150, new MinMaxVoltage(0, 10, 0, 150));
+        pointsMap.put(DomainName.currentTx200, new MinMaxVoltage(0, 10, 0, 200));
+        voltagePoints = Collections.unmodifiableMap(pointsMap);
     }
 
-    // If "analogType" == 14 (Generic Voltage), 0-4 (Current TX's), or 12,13,16 (Duct Pressures), process the point as 0-10V
-    // For HSS Universal Inputs, "analogType" tag maps to the UniversalInAssociation index, NOT the SensorManager index.
-    private static boolean isUniversalInMappedToVoltage(RawPoint rawPoint) {
-        return rawPoint.getEnabled()
-                && (rawPoint.getType().equals("0")
-                    || rawPoint.getType().equals("1")
-                    || rawPoint.getType().equals("2")
-                    || rawPoint.getType().equals("3")
-                    || rawPoint.getType().equals("4")
-                    || rawPoint.getType().equals("12")
-                    || rawPoint.getType().equals("13")
-                    || rawPoint.getType().equals("14")
-                    || rawPoint.getType().equals("16"));
-    }
+    private static List<String> digitalNoPoints = Arrays.asList(
+            DomainName.dischargeFanAMStatus,
+            DomainName.dischargeFanRunStatus,
+            DomainName.dischargeFanTripStatus,
+            DomainName.exhaustFanRunStatus,
+            DomainName.exhaustFanTripStatus,
+            DomainName.filterStatusNO,
+            DomainName.condensateStatusNO,
+            DomainName.fireAlarmStatus,
+            DomainName.highDifferentialPressureSwitch,
+            DomainName.lowDifferentialPressureSwitch,
+            DomainName.condensateStatusNO,
+            DomainName.emergencyShutoffNO,
+            DomainName.genericAlarmNO
+    );
 
-    // If "analogType" == 9 (Filter NO) or 11 (Condensate NO), or 18 (Generic fault NO) process the point as a normally open digital input.
-    // For HSS Universal Inputs, "analogType" tag maps to the UniversalInAssociation index, NOT the SensorManager index.
-    private static boolean isUniversalInMappedToDigitalInNO(RawPoint rawPoint) {
-        return rawPoint.getEnabled()
-                && (rawPoint.getType().equals("9")
-                || rawPoint.getType().equals("11")
-                || rawPoint.getType().equals("18"));
-    }
-
-    // If "analogType" == 8 (Filter NC) or 10 (Condensate NC), or 17 (Generic fault NC), process the point as a normally closed digital input.
-    // For HSS Universal Inputs, "analogType" tag maps to the UniversalInAssociation index, NOT the SensorManager index.
-    private static boolean isUniversalInMappedToDigitalInNC(RawPoint rawPoint) {
-        return rawPoint.getEnabled()
-                && (rawPoint.getType().equals("8")
-                || rawPoint.getType().equals("10")
-                || rawPoint.getType().equals("17"));
-    }
-
-    // If "analogType" == 1 (Generic Resistance), process the point as a raw resistive input.
-    // For HSS Universal Inputs, "analogType" tag maps to the UniversalInAssociation index, NOT the SensorManager index.
-    private static boolean isUniversalInMappedToGenericResistiveIn(RawPoint rawPoint) {
-        return rawPoint.getEnabled() && rawPoint.getType().equals("15");
-    }
+    private static List<String> digitalNcPoints = Arrays.asList(
+            DomainName.filterStatusNC,
+            DomainName.condensateStatusNC,
+            DomainName.emergencyShutoffNC,
+            DomainName.genericAlarmNC
+    );
 
     /*
         Bit [15] of int val should be a "1" to indicate thermistor UIN mapping.
@@ -553,49 +559,23 @@ public class HyperSplitMsgReceiver {
             // Write physical point value in mV
             hayStack.writeHisValById(rawPoint.getId(), mvReading);
             // Write logical point value after scaling to engineering units
-            hayStack.writeHisValById(point.getId(), getUniversalInVoltageConversion(rawPoint, mvReading/1000));
+            hayStack.writeHisValById(point.getId(), getUniversalInVoltageConversion(point, mvReading/1000));
         }
     }
 
 
-    private static double getUniversalInVoltageConversion(RawPoint point, double volts) {
+    private static double getUniversalInVoltageConversion(Point point, double volts) {
+        MinMaxVoltage minMaxVoltage = voltagePoints.get(point.getDomainName());
+        if (voltagePoints.containsKey(point.getDomainName())) {
+            // This should never happen, because we are hard-coding the min/max voltages right now.
+            if (minMaxVoltage.maxVoltage == minMaxVoltage.minVoltage) return volts;
 
-        // Current TX (0-10V = 0-10A)
-        if (point.getType().equals("0")) {
-            return volts;
-        }
-        // Current TX (0-10V = 0-20A)
-        else if (point.getType().equals("1")) {
-            return 2 * volts;
-        }
-        // Current TX (0-10V = 0-50A)
-        else if (point.getType().equals("2")) {
-            return 5 * volts;
-        }
-        // Current TX (0-10V = 0-100A)
-        else if (point.getType().equals("3")) {
-            return 10 * volts;
-        }
-        // Current TX (0-10V = 0-150A)
-        else if (point.getType().equals("4")) {
-            return 15 * volts;
-        }
-        // Pressure Sensor (0-10V = 0-1"wc)
-        else if (point.getType().equals("12")) {
-            return volts / 10;
-        }
-        // Pressure Sensor (0-10V = 0-2"wc)
-        else if (point.getType().equals("13")) {
-            return volts / 5;
-        }
-        // Else, leave logical point unscaled (Generic Voltage = Type 0)
-        else {
-            return volts;
+            return volts * (minMaxVoltage.maxEngVal - minMaxVoltage.minEngVal) / (minMaxVoltage.maxVoltage - minMaxVoltage.minVoltage);
         }
 
+        return volts;
     }
 
-    // TODO: verify that these bitwise operations work once we have a physical or virtual device. May need to reverse big-endian/little-endian somewhere in this method.
     /*
         Bit [15] of int val should be a "1" to indicate thermistor UIN mapping.
         Bits [14-0] represent the resistance reading (in tens of ohms).
@@ -616,7 +596,6 @@ public class HyperSplitMsgReceiver {
         }
     }
 
-    // TODO: verify that these bitwise operations work once we have a physical or virtual device. May need to reverse big-endian/little-endian somewhere in this method.
     /*
         Bit [15] of int val should be a "1" to indicate thermistor UIN mapping.
         Bits [14-0] represent the resistance reading (in tens of ohms).
@@ -634,27 +613,6 @@ public class HyperSplitMsgReceiver {
             hayStack.writeHisValById(rawPoint.getId(), ohmsReading/1000);
             // Write logical point value. For normally closed sensor, 10kOhm or above is "fault" (1), less than 10kOhm is "normal" (0)
             hayStack.writeHisValById(point.getId(), (ohmsReading < 10000)? 0.0 : 1.0);
-        }
-    }
-
-    // TODO: verify that these bitwise operations work once we have a physical or virtual device. May need to reverse big-endian/little-endian somewhere in this method.
-    /*
-        Bit [15] of int val should be a "1" to indicate thermistor UIN mapping.
-        Bits [14-0] represent the resistance reading (in tens of ohms).
-        For Generic Resistance type, there is no scaling. Logical point value is the same as physical point value.
-     */
-    private static void writeGenericResistiveInVal(RawPoint rawPoint, Point point, CCUHsApi hayStack, int val) {
-
-        // If 15th bit is "0", then HyperSplit says input is type "voltage" and not type "thermistor". That's a problem.
-        if (getBit(val, 15) == 0) {
-            CcuLog.w(L.TAG_CCU_DEVICE, "Universal input " + rawPoint + " is mapped as digital input in CCU, but stored as type Voltage in HyperStat.");
-            return;
-        } else {
-            double ohmsReading = 10.0 * getBits(val, 0, 14);
-            // Write physical point value in kOhms
-            hayStack.writeHisValById(rawPoint.getId(), ohmsReading/1000);
-            // Write logical point value in kOhms
-            hayStack.writeHisValById(point.getId(), ohmsReading/1000);
         }
     }
 
@@ -691,12 +649,6 @@ public class HyperSplitMsgReceiver {
         hayStack.writeHisValById(point.getId(), (double) regularUpdateMessage.getRegularUpdateCommon().getCo2());
     }
 
-    private static void writeVOCVal(RawPoint rawPoint, Point point, HyperSplit.HyperSplitRegularUpdateMessage_t
-            regularUpdateMessage, CCUHsApi hayStack) {
-        hayStack.writeHisValById(rawPoint.getId(), (double)regularUpdateMessage.getRegularUpdateCommon().getVoc());
-        hayStack.writeHisValById(point.getId(), (double) regularUpdateMessage.getRegularUpdateCommon().getVoc());
-    }
-
     private static void writeSoundVal(RawPoint rawPoint, Point point, HyperSplit.HyperSplitRegularUpdateMessage_t
             regularUpdateMessage, CCUHsApi hayStack) {
         hayStack.writeHisValById(rawPoint.getId(), (double)regularUpdateMessage.getRegularUpdateCommon().getSound());
@@ -730,7 +682,7 @@ public class HyperSplitMsgReceiver {
         if(currentHeatingDesiredTemp != heatingDesiredTemp || currentCoolingDesiredTemp != coolingDesiredTemp) {
             double averageDesiredTemp = (coolingDesiredTemp + heatingDesiredTemp)/2;
 
-            HashMap coolingDtPoint = hayStack.read("point and temp and desired and cooling and sp and equipRef == \""
+            HashMap coolingDtPoint = hayStack.readEntity("point and domainName == \"" + DomainName.desiredTempCooling + "\" and equipRef == \""
                     + hsEquip.getId() + "\"");
             if (!coolingDtPoint.isEmpty() && temperatureMode == TemperatureMode.COOLING) {
                 CCUHsApi.getInstance().writeHisValById(coolingDtPoint.get("id").toString(), coolingDesiredTemp);
@@ -738,7 +690,7 @@ public class HyperSplitMsgReceiver {
                 CcuLog.e(L.TAG_CCU_DEVICE, "coolingDtPoint does not exist: " + hsEquip.getDisplayName());
             }
 
-            HashMap heatingDtPoint = hayStack.read("point and temp and desired and heating and sp and equipRef == \""
+            HashMap heatingDtPoint = hayStack.read("point and domainName == \"" + DomainName.desiredTempHeating + "\" and equipRef == \""
                     + hsEquip.getId() + "\"");
             if (!heatingDtPoint.isEmpty() && temperatureMode == TemperatureMode.HEATING) {
                 CCUHsApi.getInstance().writeHisValById(heatingDtPoint.get("id").toString(), heatingDesiredTemp);
@@ -746,7 +698,7 @@ public class HyperSplitMsgReceiver {
                 CcuLog.e(L.TAG_CCU_DEVICE, "heatingDtPoint does not exist: " + hsEquip.getDisplayName());
             }
 
-            HashMap dtPoint = hayStack.read("point and temp and desired and average and sp and equipRef == \""
+            HashMap dtPoint = hayStack.read("point and domainName == \"" + DomainName.desiredTemp + "\" and equipRef == \""
                     + hsEquip.getId() + "\"");
             if (!dtPoint.isEmpty()) {
                 CCUHsApi.getInstance().writeHisValById(dtPoint.get("id").toString(), (double) message.getSetTempCooling());
@@ -928,4 +880,18 @@ public class HyperSplitMsgReceiver {
         return -1;
     }
     
+}
+
+class MinMaxVoltage {
+    double minVoltage;
+    double maxVoltage;
+    double minEngVal;
+    double maxEngVal;
+
+    public MinMaxVoltage(double minVoltage, double maxVoltage, double minEngVal, double maxEngVal) {
+        this.minVoltage = minVoltage;
+        this.maxVoltage = maxVoltage;
+        this.minEngVal = minEngVal;
+        this.maxEngVal = maxEngVal;
+    }
 }

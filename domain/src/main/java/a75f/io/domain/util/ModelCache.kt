@@ -128,4 +128,12 @@ object ModelCache {
         modelContainer[modelId] = model
         return model
     }
+
+    fun getModelByFileName( fileName : String) : ModelDirective {
+        return if (context != null) {
+            ResourceHelper.loadModel(fileName, context!!)
+        } else {
+            ResourceHelper.loadModel(fileName)
+        }
+    }
  }

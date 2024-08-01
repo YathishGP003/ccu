@@ -16,9 +16,9 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.hyperstat.ui.HyperStatFragment;
 import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
-import a75f.io.renatus.hyperstatsplit.ui.HyperStatSplitFragment;
 import a75f.io.renatus.profiles.acb.AcbProfileConfigFragment;
 import a75f.io.renatus.profiles.dab.DabProfileConfigFragment;
+import a75f.io.renatus.profiles.hss.cpu.HyperStatSplitCpuFragment;
 import a75f.io.renatus.profiles.vav.VavProfileConfigFragment;
 import a75f.io.renatus.util.CCUUiUtil;
 import butterknife.BindView;
@@ -196,8 +196,8 @@ public class AlternatePairingFragment extends BaseDialogFragment {
                                 mNodeType,ProfileType.HYPERSTAT_TWO_PIPE_FCU), HyperStatFragment.ID);
                 break;
             case HYPERSTATSPLIT_CPU:
-                showDialogFragment(HyperStatSplitFragment.newInstance(mPairingAddress,mRoomName,mFloorName,
-                                mNodeType,ProfileType.HYPERSTATSPLIT_CPU), HyperStatSplitFragment.ID);
+                showDialogFragment(HyperStatSplitCpuFragment.Companion.newInstance(mPairingAddress,mRoomName,mFloorName,
+                                mNodeType,ProfileType.HYPERSTATSPLIT_CPU), HyperStatSplitCpuFragment.Companion.getID());
                 break;
         }
     }

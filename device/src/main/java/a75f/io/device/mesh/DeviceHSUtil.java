@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
+import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 
@@ -40,7 +41,7 @@ public class DeviceHSUtil {
                                                         device.get("id") + "\"");
         
         return rawPoints.stream()
-                        .filter( p -> p.get("pointRef") != null)
+                        .filter( p -> p.get("pointRef") != null || p.containsKey(Tags.WRITABLE))
                         .filter(p -> p.get("portEnabled").toString().equals("true"))
                         .map(p -> new RawPoint.Builder().setHashMap(p).build())
                         .collect(Collectors.toList());

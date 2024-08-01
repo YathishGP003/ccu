@@ -7,6 +7,7 @@ import a75f.io.api.haystack.Point
 import a75f.io.api.haystack.RawPoint
 import a75f.io.api.haystack.Tags
 import a75f.io.domain.api.Domain
+import a75f.io.domain.api.DomainName
 import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.cutover.BuildingEquipCutOverMapping
 import a75f.io.domain.cutover.devicePointWithDomainNameExists
@@ -65,6 +66,7 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
             .setSiteRef(siteRef)
 
         modelDef.tags.filter { it.kind == TagType.MARKER && it.name.lowercase() != "addr"}.forEach{ deviceBuilder.addMarker(it.name)}
+        if (modelDef.domainName.equals(DomainName.hyperstatSplitDevice)) { deviceBuilder.addMarker("node") }
 
         deviceBuilder.addTag("sourceModel", HStr.make(modelDef.id))
         deviceBuilder.addTag(

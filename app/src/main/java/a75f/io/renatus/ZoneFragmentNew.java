@@ -102,6 +102,7 @@ import a75f.io.api.haystack.modbus.Parameter;
 import a75f.io.device.mesh.Pulse;
 import a75f.io.device.mesh.hypersplit.HyperSplitMsgReceiver;
 import a75f.io.device.mesh.hyperstat.HyperStatMsgReceiver;
+import a75f.io.domain.HyperStatSplitEquip;
 import a75f.io.domain.api.DomainName;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
@@ -1512,7 +1513,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
                             if (p.getProfile().startsWith(ProfileType.HYPERSTATSPLIT_CPU.name())) {
                                 HashMap<String, Object> cpuEconEquipPoints = HyperStatSplitZoneViewKt.getHyperStatSplitCPUEconEquipPoints(p);
-                                HyperStatSplitZoneViewKt.loadHyperStatSplitCpuEconProfile(cpuEconEquipPoints, inflater, linearLayoutZonePoints, updatedEquipId,  p.getGroup(),requireActivity());
+                                HyperStatSplitEquip updatedDomainEquip = new HyperStatSplitEquip(updatedEquipId);
+                                HyperStatSplitZoneViewKt.loadHyperStatSplitCpuEconProfile(cpuEconEquipPoints, inflater, linearLayoutZonePoints, updatedDomainEquip,  p.getGroup(),requireActivity());
                             }
                         }
                     }
@@ -1978,7 +1980,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
             if (updatedEquip.getProfile().startsWith(ProfileType.HYPERSTATSPLIT_CPU.name())) {
                 HashMap<String, Object> cpuEconEquipPoints = HyperStatSplitZoneViewKt.getHyperStatSplitCPUEconEquipPoints(updatedEquip);
-                HyperStatSplitZoneViewKt.loadHyperStatSplitCpuEconProfile(cpuEconEquipPoints, inflater, linearLayoutZonePoints, updatedEquip.getId(), updatedEquip.getGroup(),requireActivity());
+                HyperStatSplitEquip updatedDomainEquip = new HyperStatSplitEquip(updatedEquip.getId());
+                HyperStatSplitZoneViewKt.loadHyperStatSplitCpuEconProfile(cpuEconEquipPoints, inflater, linearLayoutZonePoints, updatedDomainEquip, updatedEquip.getGroup(),requireActivity());
             }
         }
 

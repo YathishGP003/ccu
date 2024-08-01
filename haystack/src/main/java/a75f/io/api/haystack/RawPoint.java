@@ -315,7 +315,12 @@ public class RawPoint extends Entity
         }
         public Builder addMarker(String marker)
         {
-            this.markers.add(marker);
+            if (!this.markers.contains(marker)) { this.markers.add(marker); }
+            return this;
+        }
+        public Builder removeMarkerIfExists(String marker)
+        {
+            if (this.markers.contains(marker)) { this.markers.remove(marker); }
             return this;
         }
         public Builder setUnit(String unit)

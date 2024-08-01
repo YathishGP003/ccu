@@ -56,8 +56,8 @@ import a75f.io.renatus.bluetooth.BLEAction;
 import a75f.io.renatus.bluetooth.BLEProvisionService;
 import a75f.io.renatus.hyperstat.ui.HyperStatFragment;
 import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
-import a75f.io.renatus.hyperstatsplit.ui.HyperStatSplitFragment;
 import a75f.io.renatus.profiles.dab.DabProfileConfigFragment;
+import a75f.io.renatus.profiles.hss.cpu.HyperStatSplitCpuFragment;
 import a75f.io.renatus.profiles.vav.BypassConfigFragment;
 import a75f.io.renatus.profiles.vav.VavProfileConfigFragment;
 import a75f.io.renatus.profiles.acb.AcbProfileConfigFragment;
@@ -472,9 +472,9 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
                                 HyperStatFragment.ID);
                         break;
                     case HYPERSTATSPLIT_CPU:
-                        showDialogFragment(HyperStatSplitFragment.newInstance(mPairingAddress,mName,mFloorName,
+                        showDialogFragment(HyperStatSplitCpuFragment.Companion.newInstance(mPairingAddress,mName,mFloorName,
                                         mNodeType,ProfileType.HYPERSTATSPLIT_CPU),
-                                HyperStatSplitFragment.ID);
+                                HyperStatSplitCpuFragment.Companion.getID());
                 }
                 
             }

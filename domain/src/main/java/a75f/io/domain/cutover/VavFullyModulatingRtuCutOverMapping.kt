@@ -109,7 +109,7 @@ object VavFullyModulatingRtuCutOverMapping {
         "satSPTrim" to "satSpTrim",
         "satTimeInterval" to "satTimeInterval",
         "satIgnoreRequest" to "satIgnoreRequest",
-        "satSPRes" to "satSpRes",
+        "satSPRes" to "satSpResMax",
         "satSPResMax" to "satSpResMax",
         "satTimeDelay" to "satTimeDelay",
 

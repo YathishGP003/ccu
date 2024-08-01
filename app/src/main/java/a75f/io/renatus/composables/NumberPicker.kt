@@ -2,6 +2,7 @@ package a75f.io.renatus.composables
 
 import a75f.io.renatus.compose.ComposeUtil.Companion.primaryColor
 import a75f.io.renatus.compose.StyledTextView
+import a75f.io.renatus.compose.SubTitle
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.Box
@@ -130,6 +131,98 @@ fun Picker(
         Divider(
             color = dividerColor,
             modifier = Modifier.offset(y = itemHeightDp * (visibleItemsMiddle + 1) + 60.dp).width(50.dp).align(Alignment.TopCenter)
+        )
+
+
+
+
+    }
+
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun TempOffsetPicker(
+    items: List<String>,
+    header : String,
+    state: PickerState = rememberPickerState(),
+    modifier: Modifier = Modifier,
+    onChanged: (String) -> Unit = {},
+    startIndex: Int = 0,
+    visibleItemsCount: Int = 3,
+    textModifier: Modifier = Modifier,
+    textStyle: TextStyle = LocalTextStyle.current,
+    dividerColor: Color = primaryColor,
+) {
+
+    val visibleItemsMiddle = visibleItemsCount / 2
+    val listScrollCount = Integer.MAX_VALUE
+    val listScrollMiddle = listScrollCount / 2
+    val listStartIndex = listScrollMiddle - listScrollMiddle % items.size - visibleItemsMiddle + startIndex
+
+    fun getItem(index: Int) = items[index % items.size]
+
+    val listState = rememberLazyListState(initialFirstVisibleItemIndex = listStartIndex)
+    val flingBehavior = rememberSnapFlingBehavior(lazyListState = listState)
+
+    val itemHeightPixels = remember { mutableStateOf(0) }
+    val itemHeightDp = pixelsToDp(itemHeightPixels.value)
+
+    val fadingEdgeGradient = remember {
+        Brush.verticalGradient(
+            0f to Color.Transparent,
+            0.5f to Color.Black,
+            1f to Color.Transparent
+        )
+    }
+
+    LaunchedEffect(listState) {
+        snapshotFlow { listState.firstVisibleItemIndex }
+            .map { index -> getItem(index + visibleItemsMiddle) }
+            .distinctUntilChanged()
+            .collect { item ->
+                state.selectedItem = item
+                onChanged(item)
+            }
+    }
+
+    Box(modifier = modifier) {
+        Box( modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            SubTitle(text = header)
+        }
+        LazyColumn(
+            state = listState,
+            flingBehavior = flingBehavior,
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(PaddingValues(top = 40.dp))
+                .height(itemHeightDp * visibleItemsCount)
+                .fadingEdge(fadingEdgeGradient)
+        ) {
+            items(listScrollCount) { index ->
+                Text(
+                    text = getItem(index),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    style = textStyle,
+                    modifier = Modifier
+                        .onSizeChanged { size -> itemHeightPixels.value = size.height }
+                        .then(textModifier)
+                )
+            }
+        }
+
+
+        Divider(
+            color = dividerColor,
+            modifier = Modifier.offset(y = itemHeightDp * visibleItemsMiddle + 40.dp).width(50.dp).align(Alignment.TopCenter)
+
+        )
+
+        Divider(
+            color = dividerColor,
+            modifier = Modifier.offset(y = itemHeightDp * (visibleItemsMiddle + 1) + 40.dp).width(50.dp).align(Alignment.TopCenter)
         )
 
 

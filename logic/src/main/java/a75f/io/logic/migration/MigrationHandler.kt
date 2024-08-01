@@ -15,6 +15,8 @@ import a75f.io.domain.cutover.VavFullyModulatingRtuCutOverMapping
 import a75f.io.domain.cutover.VavStagedRtuCutOverMapping
 import a75f.io.domain.cutover.VavStagedVfdRtuCutOverMapping
 import a75f.io.domain.cutover.VavZoneProfileCutOverMapping
+import a75f.io.domain.cutover.*
+import a75f.io.domain.equips.DabEquip
 import a75f.io.domain.equips.VavEquip
 import a75f.io.domain.logic.DeviceBuilder
 import a75f.io.domain.logic.DomainManager.addCmBoardDevice
@@ -26,6 +28,7 @@ import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.NodeType
+import a75f.io.logic.bo.building.dab.DabProfileConfiguration
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.schedules.Occupancy
 import a75f.io.logic.bo.building.schedules.occupancy.DemandResponse
@@ -83,6 +86,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
 
     override fun doMigration() {
         doVavTerminalDomainModelMigration()
+        doDabTerminalDomainModelMigration()
         doVavSystemDomainModelMigration()
         createMigrationVersionPoint(CCUHsApi.getInstance())
         addSystemDomainEquip(CCUHsApi.getInstance())
@@ -412,6 +416,79 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             // This is a problem because demandResponseSetback is supposed to get its value from a newly-added BuildingTuner point, which isn't available yet.
             // Setting the fallback value manually for now.
             vavEquip.demandResponseSetback.writeVal(17, 2.0)
+
+            deviceBuilder.doCutOverMigration(
+                device["id"].toString(),
+                deviceModel,
+                deviceDis,
+                NodeDeviceCutOverMapping.entries,
+                profileConfiguration
+            )
+        }
+    }
+
+    private fun doDabTerminalDomainModelMigration() {
+        val dabEquips = hayStack.readAllEntities("equip and zone and dab and not dualDuct")
+            .filter { it["domainName"] == null }
+            .toList()
+        if (dabEquips.isEmpty()) {
+            CcuLog.i(Domain.LOG_TAG, "DAB DM zone equip migration is complete")
+            return
+        }
+        val equipBuilder = ProfileEquipBuilder(hayStack)
+        val site = hayStack.site
+        dabEquips.forEach {
+            CcuLog.i(Domain.LOG_TAG, "Do DM zone equip migration for $it")
+            val reheatType = hayStack.readEntity("config and reheat and type and equipRef == \"${it["id"]}\"")
+            if (reheatType.isNotEmpty()) {
+                val reheatTypeVal = hayStack.readDefaultValById(reheatType["id"].toString())
+                CcuLog.i(Domain.LOG_TAG, "Update reheatType for $it - current $reheatTypeVal")
+                hayStack.writeDefaultValById(reheatType["id"].toString(), reheatTypeVal )
+            }
+            val model = when {
+                it.containsKey("dab") && it.containsKey("smartnode") -> ModelLoader.getSmartNodeDabModel()
+                else -> ModelLoader.getHelioNodeDabModel()
+            }
+            val equipDis = "${site?.displayName}-DAB-${it["group"]}"
+
+            val isHelioNode = it.containsKey("helionode")
+            val deviceModel = if (isHelioNode) ModelLoader.getHelioNodeDevice() as SeventyFiveFDeviceDirective else ModelLoader.getSmartNodeDevice() as SeventyFiveFDeviceDirective
+            val deviceDis = if (isHelioNode) "${site?.displayName}-HN-${it["group"]}" else "${site?.displayName}-SN-${it["group"]}"
+            val deviceBuilder = DeviceBuilder(hayStack, EntityMapper(model as SeventyFiveFProfileDirective))
+            val device = hayStack.readEntity("device and addr == \"" + it["group"] + "\"")
+            val profileType = ProfileType.DAB
+
+            val profileConfiguration = DabProfileConfiguration(
+                Integer.parseInt(it["group"].toString()),
+                if (isHelioNode) NodeType.HELIO_NODE.name else NodeType.SMART_NODE.name,
+                0,
+                it["roomRef"].toString(),
+                it["floorRef"].toString(),
+                profileType,
+                model
+            ).getActiveConfiguration()
+
+            equipBuilder.doCutOverMigration(it["id"].toString(), model,
+                equipDis, DabZoneProfileCutOverMapping.entries, profileConfiguration)
+
+            val dabEquip = DabEquip(it["id"].toString())
+
+            // damperSize point changed from a literal to an enum
+            val newDamper1Size = getDamperSizeEnum(dabEquip.damper1Size.readDefaultVal())
+            dabEquip.damper1Size.writeDefaultVal(newDamper1Size)
+
+            // damperSize point changed from a literal to an enum
+            val newDamper2Size = getDamperSizeEnum(dabEquip.damper2Size.readDefaultVal())
+            dabEquip.damper2Size.writeDefaultVal(newDamper2Size)
+
+            // temperature offset is now a literal (was multiplied by 10 before)
+            val newTempOffset = String.format("%.1f", dabEquip.temperatureOffset.readDefaultVal() * 0.1).toDouble()
+            dabEquip.temperatureOffset.writeDefaultVal(newTempOffset)
+
+            // At app startup, cutOver migrations currently run before upgrades.
+            // This is a problem because demandResponseSetback is supposed to get its value from a newly-added BuildingTuner point, which isn't available yet.
+            // Setting the fallback value manually for now.
+            dabEquip.demandResponseSetback.writeVal(17, 2.0)
 
             deviceBuilder.doCutOverMigration(
                 device["id"].toString(),

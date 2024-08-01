@@ -1,6 +1,7 @@
 package a75f.io.renatus;
 
-import static a75f.io.renatus.FragmentDABConfiguration.CARRIER_PROD;
+
+import static a75f.io.logic.bo.building.dab.DabProfile.CARRIER_PROD;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -21,14 +22,11 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
-import a75f.io.logger.CcuLog;
-import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.renatus.profiles.system.VavModulatingRtuFragment;
 import a75f.io.renatus.profiles.system.VavStagedRtuFragment;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.util.PreferenceUtil;
-import a75f.io.renatus.profiles.system.VavStagedRtuFragment;
 import a75f.io.renatus.profiles.system.VavStagedVfdRtuFragment;
 import a75f.io.renatus.profiles.system.advancedahu.vav.VavAdvancedHybridAhuFragment;
 import a75f.io.renatus.profiles.system.externalahu.ExternalAhuFragment;

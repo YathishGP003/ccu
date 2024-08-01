@@ -43,6 +43,8 @@ class PointsUtil(private val hayStack : CCUHsApi) {
 
     fun getModelFromEquip(equip: Equip): SeventyFiveFProfileDirective? {
         return when (equip.domainName) {
+            DomainName.smartnodeDAB -> ModelLoader.getSmartNodeDabModel() as SeventyFiveFProfileDirective
+            DomainName.helionodeDAB -> ModelLoader.getHelioNodeDabModel() as SeventyFiveFProfileDirective
             DomainName.smartnodeVAVReheatNoFan -> ModelLoader.getSmartNodeVavNoFanModelDef() as SeventyFiveFProfileDirective
             DomainName.smartnodeVAVReheatParallelFan -> ModelLoader.getSmartNodeVavParallelFanModelDef() as SeventyFiveFProfileDirective
             DomainName.smartnodeVAVReheatSeriesFan -> ModelLoader.getSmartNodeVavSeriesModelDef() as SeventyFiveFProfileDirective

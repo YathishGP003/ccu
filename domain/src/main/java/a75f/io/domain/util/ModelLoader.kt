@@ -85,6 +85,14 @@ object ModelLoader {
         return ModelCache.getModelById(MODEL_VAV_MODULATING_AHU)
     }
 
+    fun getSmartNodeDabModel() : ModelDirective {
+        return ModelCache.getModelById(MODEL_SMART_NODE_DAB)
+    }
+
+    fun getHelioNodeDabModel() : ModelDirective {
+        return ModelCache.getModelById(MODEL_HELIO_NODE_DAB)
+    }
+
     fun getModelForDomainName( domainName : String) : ModelDirective {
         return when(domainName) {
             "smartnodeVAVReheatNoFan" -> getSmartNodeVavNoFanModelDef()
@@ -98,6 +106,8 @@ object ModelLoader {
             "helionodeActiveChilledBeam" -> getHelioNodeVavAcbModelDef()
             "vavAdvancedHybridAhuV2" -> getVavAdvancedAhuCmModelV2()
             "vavAdvancedHybridAhuV2_connectModule" -> getVavAdvancedAhuConnectModelV2()
+            "smartnodeDAB" -> getSmartNodeDabModel()
+            "helionodeDAB" -> getHelioNodeDabModel()
             else -> throw IllegalStateException("Invalid Model Name")
         }
     }

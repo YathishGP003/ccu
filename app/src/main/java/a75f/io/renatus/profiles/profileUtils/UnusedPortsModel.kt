@@ -6,6 +6,7 @@ import a75f.io.api.haystack.Tags
 import a75f.io.domain.api.Domain
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
+import a75f.io.logic.bo.building.dab.DabProfileConfiguration
 import a75f.io.logic.bo.building.system.vav.config.ModulatingRtuProfileConfig
 import a75f.io.logic.bo.building.system.vav.config.StagedRtuProfileConfig
 import a75f.io.logic.bo.building.system.vav.config.StagedVfdRtuProfileConfig
@@ -14,6 +15,7 @@ import a75f.io.logic.bo.building.vav.VavProfileConfiguration
 import a75f.io.logic.bo.haystack.device.ControlMote
 import a75f.io.logic.bo.haystack.device.DeviceUtil
 import a75f.io.renatus.profiles.acb.AcbProfileViewModel
+import a75f.io.renatus.profiles.dab.DabProfileViewModel
 import a75f.io.renatus.profiles.system.StagedRtuProfileViewModel
 import a75f.io.renatus.profiles.system.VavModulatingRtuViewModel
 import a75f.io.renatus.profiles.vav.VavProfileViewModel
@@ -35,6 +37,9 @@ open class UnusedPortsModel {
                     viewModel.profileConfiguration.unusedPorts[firstUnusedPort] = it
                 }
                 is AcbProfileViewModel -> {
+                    viewModel.profileConfiguration.unusedPorts[firstUnusedPort] = it
+                }
+                is DabProfileViewModel -> {
                     viewModel.profileConfiguration.unusedPorts[firstUnusedPort] = it
                 }
             }
@@ -91,6 +96,7 @@ open class UnusedPortsModel {
             val currentPortStatus = when (profileConfiguration) {
                 is VavProfileConfiguration -> profileConfiguration.unusedPorts
                 is AcbProfileConfiguration -> profileConfiguration.unusedPorts
+                is DabProfileConfiguration -> profileConfiguration.unusedPorts
                 else -> null
             }
 

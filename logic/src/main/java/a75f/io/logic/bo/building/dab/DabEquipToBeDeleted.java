@@ -30,6 +30,7 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
+import a75f.io.domain.equips.DabEquip;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.BacnetIdKt;
 import a75f.io.logic.BacnetUtilKt;
@@ -65,7 +66,7 @@ import a75f.io.logic.util.RxTask;
  * Created by samjithsadasivan on 3/13/19.
  */
 
-public class DabEquip
+public class DabEquipToBeDeleted
 {
     public int nodeAddr;
     ProfileType profileType;
@@ -78,6 +79,8 @@ public class DabEquip
     
     CO2Loop co2Loop;
     VOCLoop  vocLoop;
+    DabEquip dabEquip;
+
     
     double   co2Target = TunerConstants.ZONE_CO2_TARGET;
     double   co2Threshold = TunerConstants.ZONE_CO2_THRESHOLD;
@@ -92,7 +95,7 @@ public class DabEquip
 
     public static final String CARRIER_PROD = "carrier_prod";
 
-    public DabEquip(ProfileType type, int node)
+    public DabEquipToBeDeleted(ProfileType type, int node)
     {
         profileType = type;
         nodeAddr = node;
@@ -110,6 +113,7 @@ public class DabEquip
         if (equipMap != null && equipMap.size() > 0)
         {
             equipRef = equipMap.get("id").toString();
+            dabEquip = new DabEquip(equipRef);
             damperController = new GenericPIController();
             damperController.setMaxAllowedError(TunerUtil.readTunerValByQuery("dab and pspread and not reheat and equipRef == \"" + equipRef + "\""));
             damperController.setIntegralGain(TunerUtil.readTunerValByQuery("dab and igain and not reheat and equipRef == \"" + equipRef + "\""));
@@ -170,7 +174,7 @@ public class DabEquip
         }
     }
 
-    public void createEntities(DabProfileConfiguration config, String floorRef, String roomRef, NodeType nodeType)
+    public void createEntities(DabProfileConfigurationOld config, String floorRef, String roomRef, NodeType nodeType)
     {
         boolean isSmartNode =String.valueOf(nodeType).equals("SMART_NODE");
         HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
@@ -622,7 +626,7 @@ public class DabEquip
         return equipRef;
     }
 
-    public void createDabConfigPoints(DabProfileConfiguration config, String equipRef, String roomRef,
+    public void createDabConfigPoints(DabProfileConfigurationOld config, String equipRef, String roomRef,
                                       String floorRef) {
         HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
         String siteRef = (String) siteMap.get(Tags.ID);
@@ -865,8 +869,8 @@ public class DabEquip
         }
     }
 
-    public DabProfileConfiguration getProfileConfiguration() {
-        DabProfileConfiguration config = new DabProfileConfiguration();
+    public DabProfileConfigurationOld getProfileConfiguration() {
+        DabProfileConfigurationOld config = new DabProfileConfigurationOld();
         config.minDamperCooling = ((int)getDamperLimit("cooling","min"));
         config.maxDamperCooling = ((int)getDamperLimit("cooling","max"));
         config.minDamperHeating = ((int)getDamperLimit("heating","min"));
@@ -935,7 +939,7 @@ public class DabEquip
         return config;
     }
     
-    public void update(DabProfileConfiguration config) {
+    public void update(DabProfileConfigurationOld config) {
         for (Output op : config.getOutputs()) {
             SmartNode.setPointEnabled(nodeAddr, op.getPort().toString(), true);
             switch (op.getPort()) {
@@ -1036,7 +1040,7 @@ public class DabEquip
 
     public double getCurrentTemp()
     {
-        return CCUHsApi.getInstance().readHisValByQuery("point and air and temp and sensor and current and group == \""+nodeAddr+"\"");
+        return dabEquip.getCurrentTemp().readHisVal();
     }
     public void setCurrentTemp(double roomTemp)
     {

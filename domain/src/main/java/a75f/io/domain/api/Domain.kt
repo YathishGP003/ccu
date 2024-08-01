@@ -312,4 +312,16 @@ object Domain {
             CcuLog.d(CCUTagsDb.TAG_CCU_HS, "Invalid point write attempt: $domainName")
         }
     }
+    fun getListOfDisNameByDomainName(domainName: String, model: SeventyFiveFProfileDirective) : List<String> {
+        val valuesList: MutableList<String> = mutableListOf()
+        val point = model.points.find { it.domainName == domainName }
+
+        if (point?.valueConstraint is MultiStateConstraint) {
+
+            (point.valueConstraint as MultiStateConstraint).allowedValues.forEach { state ->
+                valuesList.add(state.dis!!)
+            }
+        }
+        return valuesList
+    }
 }

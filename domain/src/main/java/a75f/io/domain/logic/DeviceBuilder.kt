@@ -197,7 +197,7 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
         }
     }
 
-    private fun updatePoint(
+    fun updatePoint(
         def: SeventyFiveFDevicePointDef,
         equipConfiguration: ProfileConfiguration,
         device: Device,
@@ -209,7 +209,8 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
         if (existingPoint.containsKey("portEnabled")) hayStackPoint.enabled =
             existingPoint["portEnabled"].toString() == "true"
         if (existingPoint.containsKey("analogType")) hayStackPoint.type = existingPoint["analogType"].toString()
-
+        if (existingPoint.containsKey("port")) hayStackPoint.port = existingPoint["port"].toString()
+        if (existingPoint.containsKey("writable")) hayStackPoint.markers.add(Tags.WRITABLE)
         hayStack.updatePoint(hayStackPoint, existingPoint["id"].toString())
 
         DomainManager.addRawPoint(hayStackPoint)
@@ -307,5 +308,4 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
             DomainManager.addRawPoint(hayStackPoint)
             CcuLog.d(Domain.LOG_TAG,"point created ${hayStackPoint.domainName} id = ${hayStackPoint.id} for the device: $deviceDis " )
     }
-
 }

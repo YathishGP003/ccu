@@ -16,7 +16,7 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.BacnetIdKt;
 import a75f.io.logic.BacnetUtilKt;
 import a75f.io.logic.L;
-import a75f.io.logic.bo.building.dab.DabEquip;
+import a75f.io.logic.bo.building.dab.DabProfile;
 import a75f.io.logic.bo.building.system.SystemProfile;
 import a75f.io.logic.bo.building.system.SystemState;
 import a75f.io.logic.tuners.DcwbTuners;
@@ -102,7 +102,7 @@ public abstract class DabSystemProfile extends SystemProfile
         TunerUtil.copyDefaultBuildingTunerVal(relayDeactivationHysteresisId, DomainName.dabRelayDeactivationHysteresis, hayStack);
     
         Point rebalanceHoldTime = new Point.Builder()
-                .setDisplayName(SystemTuners.getDisplayNameFromVariation(DabEquip.getDisName(HSUtil.getDis(equipref), "rebalanceHoldTime")))
+                .setDisplayName(SystemTuners.getDisplayNameFromVariation(DabProfile.getDisName(HSUtil.getDis(equipref), "rebalanceHoldTime")))
                 .setSiteRef(siteRef)
                 .setEquipRef(equipref).setHisInterpolate("cov")
                 .addMarker("tuner").addMarker("dab").addMarker("writable").addMarker("his")

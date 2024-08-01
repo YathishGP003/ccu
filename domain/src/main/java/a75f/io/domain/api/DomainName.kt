@@ -55,6 +55,8 @@ object DomainName {
     const val activeChilledBeam = "activeChilledBeam"
 
     //DAB
+    const val smartnodeDAB = "smartnodeDAB"
+    const val helionodeDAB = "helionodeDAB"
     const val dabTargetCumulativeDamper = "dabTargetCumulativeDamper"
     const val dabAnalogFanSpeedMultiplier = "dabAnalogFanSpeedMultiplier"
     const val dabHumidityHysteresis = "dabHumidityHysteresis"
@@ -83,6 +85,7 @@ object DomainName {
     const val reheatTempOffset = "reheatTempOffset"
     const val dabReheatTemperatureProportionalRange = "dabReheatTemperatureProportionalRange"
     const val dabReheatIntegralKFactor = "dabReheatIntegralKFactor"
+    const val dabReheatProportionalKFactor = "dabreheatProportionalKFactor"
     const val reheatProportionalKFactor = "reheatProportionalKFactor"
 
     //VAV
@@ -697,6 +700,8 @@ object DomainName {
 
     const val analog1MinStaticPressure = "analog1MinStaticPressure"
     const val analog1MaxStaticPressure = "analog1MaxStaticPressure"
+
+
     const val analog2MinStaticPressure = "analog2MinStaticPressure"
     const val analog2MaxStaticPressure = "analog2MaxStaticPressure"
     const val analog3MinStaticPressure = "analog3MinStaticPressure"
@@ -936,6 +941,23 @@ object DomainName {
     const val universal7In = "universal7In"
     const val universal8In = "universal8In"
 
+
+    // DAB zone
+    const val damper1Cmd = "damper1Cmd"
+    const val damper1Shape = "damper1Shape"
+    const val damper1Type = "damper1Type"
+    const val damper1Size = "damper1Size"
+    const val  normalizedDamper1Cmd = "normalizedDamper1Cmd"
+    const val dischargeAirTemp1 = "dischargeAirTemp1"
+    const val minCFMIAQ = "minCFMIAQ"
+    const val minReheatDamperPos = "minReheatDamperPos"
+
+    const val damper2Cmd = "damper2Cmd"
+    const val damper2Shape = "damper2Shape"
+    const val damper2Type = "damper2Type"
+    const val damper2Size = "damper2Size"
+    const val  normalizedDamper2Cmd = "normalizedDamper2Cmd"
+    const val dischargeAirTemp2 = "dischargeAirTemp2"
 
 }
 

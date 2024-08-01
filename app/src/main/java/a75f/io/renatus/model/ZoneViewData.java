@@ -7,6 +7,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HisItem;
 import a75f.io.domain.api.Domain;
 import a75f.io.domain.api.DomainName;
+import a75f.io.domain.equips.DabEquip;
 import a75f.io.domain.equips.VavEquip;
 import a75f.io.logic.bo.building.Thermistor;
 import a75f.io.logic.bo.building.sensors.NativeSensor;
@@ -27,46 +28,40 @@ public class ZoneViewData {
     private static final String THERMISTER_QUERY_POINT = "point and config and standalone and enable and th1 and equipRef == \"";
 
     public static HashMap getDABEquipPoints(String equipID) {
+        DabEquip dabEquip = (DabEquip) Domain.INSTANCE.getDomainEquip(equipID);
         HashMap dabPoints = new HashMap();
         dabPoints.put("Profile","DAB");
         boolean isThermister1On = (CCUHsApi.getInstance().readDefaultVal(THERMISTER_QUERY_POINT + equipID + "\"") > 0) ;
-        
-        String equipStatusPoint = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and equipRef == \""+equipID+"\"");
-        //double damperPosPoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and damper and base and equipRef == \""+equipID+"\"");
-        double damperPosPoint = CCUHsApi.getInstance().readHisValByQuery("point and damper and normalized and cmd and equipRef == \""+equipID+"\"");
-        double dischargePoint = CCUHsApi.getInstance().readHisValByQuery("point and supply and air and temp and primary and equipRef == \""+equipID+"\"");
-        double airflowCFM =  CCUHsApi.getInstance().readHisValByQuery("point and air and flow and trueCfm and dab and equipRef == \""+equipID+"\"");
-        double reheatPoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and reheat and cmd and equipRef == \""+equipID+"\"");
+        String equipStatusPoint = dabEquip.getEquipStatusMessage().readDefaultStrVal();
+        double damperPosPoint = dabEquip.getNormalizedDamper1Cmd().readHisVal(); // revisit this
+        double dischargePoint = dabEquip.getDischargeAirTemp1().readHisVal();
+        double airflowCFM =  dabEquip.getAirFlowSensor().readHisVal();
+        double reheatPoint = dabEquip.getReheatCmd().readHisVal();
         dabPoints.put(AIRFLOW_SENSOR,isThermister1On);
-        if (equipStatusPoint.length() > 0)
-        {
+        if (!equipStatusPoint.isEmpty()) {
             dabPoints.put("Status",equipStatusPoint);
         }else{
             dabPoints.put("Status","OFF");
         }
-        if (damperPosPoint > 0)
-        {
+        if (damperPosPoint > 0) {
             dabPoints.put("Damper",(int)damperPosPoint+"% Open");
         }else{
             dabPoints.put("Damper",0+"% Open");
         }
-        if (dischargePoint  != 0)
-        {
+        if (dischargePoint  != 0) {
             dabPoints.put("Supply Airflow",dischargePoint+" \u2109");
         }else{
             dabPoints.put("Supply Airflow",0+" \u2109");
         }
-        if (airflowCFM != 0.0)
-        {
+        if (airflowCFM != 0.0) {
             dabPoints.put("Airflow CFM",String.format("%.0f", airflowCFM));
         }else{
             dabPoints.put("Airflow CFM",0);
         }
-        if (reheatPoint  > 0)
-        {
-            dabPoints.put("Reheat Coil",reheatPoint+"% Open");
+        if (reheatPoint  > 0) {
+            dabPoints.put("Reheat Coil", reheatPoint+"% Open");
         }else{
-            dabPoints.put("Reheat Coil",0);
+            dabPoints.put("Reheat Coil", "0% Open");
         }
         return dabPoints;
     }

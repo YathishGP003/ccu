@@ -18,6 +18,7 @@ import a75f.io.renatus.hyperstat.ui.HyperStatFragment;
 import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
 import a75f.io.renatus.hyperstatsplit.ui.HyperStatSplitFragment;
 import a75f.io.renatus.profiles.acb.AcbProfileConfigFragment;
+import a75f.io.renatus.profiles.dab.DabProfileConfigFragment;
 import a75f.io.renatus.profiles.vav.VavProfileConfigFragment;
 import a75f.io.renatus.util.CCUUiUtil;
 import butterknife.BindView;
@@ -148,9 +149,9 @@ public class AlternatePairingFragment extends BaseDialogFragment {
                                 mProfileType), AcbProfileConfigFragment.Companion.getID());
                 break;
             case DAB:
-                showDialogFragment(FragmentDABConfiguration
-                        .newInstance(mPairingAddress, mRoomName, mNodeType, mFloorName,
-                                mProfileType), FragmentDABConfiguration.ID);
+                showDialogFragment(DabProfileConfigFragment.Companion
+                        .newInstance(mPairingAddress, mRoomName, mFloorName, mNodeType,
+                                mProfileType), DabProfileConfigFragment.Companion.getID());
                 break;
             case DUAL_DUCT:
                 showDialogFragment(FragmentDABDualDuctConfiguration

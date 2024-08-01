@@ -464,8 +464,7 @@ public class Globals {
                             L.ccu().zoneProfiles.add(acb);
                             break;
                         case DAB:
-                            DabProfile dab = new DabProfile();
-                            dab.addDabEquip(Short.parseShort(eq.getGroup()));
+                            DabProfile dab = new DabProfile(Short.parseShort(eq.getGroup()));
                             L.ccu().zoneProfiles.add(dab);
                             break;
                         case DUAL_DUCT:

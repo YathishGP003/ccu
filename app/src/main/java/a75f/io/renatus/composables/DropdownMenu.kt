@@ -59,7 +59,7 @@ import androidx.compose.ui.unit.sp
 fun DropDownWithLabel(
     label: String, list: List<String>, previewWidth: Int = 80, expandedWidth: Int = 100,
     onSelected: (Int) -> Unit, defaultSelection: Int = 0,spacerLimit:Int=80,paddingLimit:Int=0,heightValue:Int= 435
-    , isHeader : Boolean = true, isEnabled : Boolean = true) {
+    , isHeader : Boolean = true, isEnabled : Boolean = true, disabledIndices: List<Int> = emptyList()){
 
     var modifiedList = ComposeUtil.getModifiedList(list)
     Row {
@@ -133,7 +133,8 @@ fun DropDownWithLabel(
                               expanded = false
                               onSelected(selectedIndex) }, text = { Text(text = s, style = TextStyle(fontSize = 20.sp)) },
                               modifier = Modifier.background(if (index == selectedIndex) secondaryColor else Color.White),
-                              contentPadding = PaddingValues(10.dp)
+                              contentPadding = PaddingValues(10.dp),
+                              enabled = !disabledIndices.contains(index)
                           )
                        }
                     }

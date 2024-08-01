@@ -23,6 +23,7 @@ import a75f.io.logic.bo.building.system.vav.VavSystemProfile;
 import a75f.io.logic.bo.building.vav.VavProfile;
 
 import static a75f.io.api.haystack.HayStackConstants.DEFAULT_INIT_VAL_LEVEL;
+import static a75f.io.domain.api.Domain.buildingEquip;
 
 /**
  * Created by samjithsadasivan on 1/16/19.
@@ -86,7 +87,17 @@ public class TunerUtil
         }
         return BuildingTunerFallback.getDefaultTunerVal(query);
     }
-    
+
+    public static double getPriorityZoneTempDeadLeewayValue(String domainName) {
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        HashMap tunerPoint = hayStack.read("(domainName== \""+ domainName +"\" or leeway) and system and siteRef == \""+hayStack.getSiteIdRef()+"\"");
+        if(!tunerPoint.isEmpty() && (tunerPoint.get("id" )!= null)) {
+            return hayStack.readPointPriorityVal(tunerPoint.get("id").toString());
+        }
+        return buildingEquip.getZoneTemperatureDeadLeeway().readDefaultVal();
+    }
+
+
     public static double readSystemUserIntentVal(String tags) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap<Object, Object> userIntent = hayStack.readEntity("point and system and userIntent and "+tags);

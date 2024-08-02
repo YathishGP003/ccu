@@ -189,11 +189,11 @@ open class DefaultEquipBuilder : EquipBuilder {
 
         var enums = ""
         if (pointConfig.modelDef.valueConstraint.constraintType == Constraint.ConstraintType.MULTI_STATE) {
-            (pointConfig.modelDef.valueConstraint as MultiStateConstraint).allowedValues.forEachIndexed { index, value ->
+            (pointConfig.modelDef.valueConstraint as MultiStateConstraint).allowedValues.forEachIndexed { _, value ->
                 enums = if (enums.isNotEmpty()) {
-                    "$enums${getEnum(value)}=$index,"
+                    "$enums${getEnum(value)}=${value.index},"
                 } else {
-                    "${getEnum(value)}=$index,"
+                    "${getEnum(value)}=${value.index},"
                 }
             }
         }

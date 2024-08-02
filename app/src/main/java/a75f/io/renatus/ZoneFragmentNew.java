@@ -11,7 +11,7 @@ import static a75f.io.logic.bo.util.UnitUtils.StatusCelsiusVal;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusTwoDecimal;
 import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
-import static a75f.io.renatus.FragmentDABConfiguration.CARRIER_PROD;
+import static a75f.io.logic.bo.building.dab.DabProfile.CARRIER_PROD;
 import static a75f.io.renatus.schedules.ScheduleUtil.disconnectedIntervals;
 import static a75f.io.renatus.schedules.ScheduleUtil.getDayString;
 import static a75f.io.renatus.schedules.ScheduleUtil.trimZoneSchedule;
@@ -102,6 +102,7 @@ import a75f.io.api.haystack.modbus.Parameter;
 import a75f.io.device.mesh.Pulse;
 import a75f.io.device.mesh.hypersplit.HyperSplitMsgReceiver;
 import a75f.io.device.mesh.hyperstat.HyperStatMsgReceiver;
+import a75f.io.domain.HyperStatSplitEquip;
 import a75f.io.domain.api.DomainName;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
@@ -1512,7 +1513,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
                             if (p.getProfile().startsWith(ProfileType.HYPERSTATSPLIT_CPU.name())) {
                                 HashMap<String, Object> cpuEconEquipPoints = HyperStatSplitZoneViewKt.getHyperStatSplitCPUEconEquipPoints(p);
-                                HyperStatSplitZoneViewKt.loadHyperStatSplitCpuEconProfile(cpuEconEquipPoints, inflater, linearLayoutZonePoints, updatedEquipId,  p.getGroup(),requireActivity());
+                                HyperStatSplitEquip updatedDomainEquip = new HyperStatSplitEquip(updatedEquipId);
+                                HyperStatSplitZoneViewKt.loadHyperStatSplitCpuEconProfile(cpuEconEquipPoints, inflater, linearLayoutZonePoints, updatedDomainEquip,  p.getGroup(),requireActivity());
                             }
                         }
                     }
@@ -1978,7 +1980,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
             if (updatedEquip.getProfile().startsWith(ProfileType.HYPERSTATSPLIT_CPU.name())) {
                 HashMap<String, Object> cpuEconEquipPoints = HyperStatSplitZoneViewKt.getHyperStatSplitCPUEconEquipPoints(updatedEquip);
-                HyperStatSplitZoneViewKt.loadHyperStatSplitCpuEconProfile(cpuEconEquipPoints, inflater, linearLayoutZonePoints, updatedEquip.getId(), updatedEquip.getGroup(),requireActivity());
+                HyperStatSplitEquip updatedDomainEquip = new HyperStatSplitEquip(updatedEquip.getId());
+                HyperStatSplitZoneViewKt.loadHyperStatSplitCpuEconProfile(cpuEconEquipPoints, inflater, linearLayoutZonePoints, updatedDomainEquip, updatedEquip.getGroup(),requireActivity());
             }
         }
 
@@ -2795,7 +2798,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         textViewStatus.setText(dabPoints.get("Status").toString());
         textViewUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
         textViewLabel1.setText("Damper : ");
-        textViewLabel2.setText("Supply Airflow : ");
+        textViewLabel2.setText("Discharge Airflow Temp : ");
         textViewValue1.setText(dabPoints.get("Damper").toString());
         if( isCelsiusTunerAvailableStatus()) {
             textViewValue2.setText(String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(dabPoints.get("Supply Airflow").toString().replaceAll("[^0-9\\.]",""))))+ " \u00B0C");
@@ -2814,7 +2817,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             viewReheat = inflater.inflate(R.layout.zone_item_type3, null);
             TextView reheatText = viewReheat.findViewById(R.id.text_label);
             TextView reheatVal = viewReheat.findViewById(R.id.text_value);
-            reheatText.setText("      Reheat Coil : ");
+            reheatText.setText("Reheat Coil : ");
             reheatVal.setText(dabPoints.get("Reheat Coil").toString());
             linearLayoutZonePoints.addView(viewReheat);
         }

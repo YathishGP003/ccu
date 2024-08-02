@@ -1,3 +1,5 @@
+/*
+
 package a75f.io.renatus;
 
 import static a75f.io.device.bacnet.BacnetUtilKt.addBacnetTags;
@@ -64,9 +66,11 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import static a75f.io.logic.bo.building.definitions.DamperType.ZeroToTenV;
 
 
+*/
 /**
  * Created by samjithsadasivan on 3/13/19.
- */
+ *//*
+
 
 public class FragmentDABConfiguration extends BaseDialogFragment
 {
@@ -380,11 +384,13 @@ public class FragmentDABConfiguration extends BaseDialogFragment
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 damper1TypeSelected = DamperType.values()[position];
     
-              /*  if(position == 4)
+              */
+/*  if(position == 4)
                 damper1layout.setVisibility(View.INVISIBLE);
                 else
                 damper1layout.setVisibility(View.VISIBLE);
-                damper1layout.invalidate();*/
+                damper1layout.invalidate();*//*
+
             }
             
             @Override
@@ -562,7 +568,7 @@ public class FragmentDABConfiguration extends BaseDialogFragment
 
         mDabProfile.getProfileConfiguration().put(mSmartNodeAddress, dabConfig);
         if (mProfileConfig == null) {
-            mDabProfile.addDabEquip(mSmartNodeAddress, dabConfig, floorRef, zoneRef, mNodeType );
+            mDabProfile.addDabEquip(mSmartNodeAddress);
         } else {
             mDabProfile.updateDabEquip(dabConfig);
         }
@@ -773,4 +779,4 @@ public class FragmentDABConfiguration extends BaseDialogFragment
     private CustomSpinnerDropDownAdapter getAdapterValue(ArrayList values) {
         return new CustomSpinnerDropDownAdapter(requireContext(), R.layout.spinner_dropdown_item, values);
     }
-}
+}*/

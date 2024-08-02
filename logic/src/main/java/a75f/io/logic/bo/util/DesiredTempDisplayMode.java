@@ -17,14 +17,16 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Tags;
+import a75f.io.domain.HyperStatSplitEquip;
+import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode;
 import a75f.io.logic.bo.building.hyperstat.common.HyperStatAssociationUtil;
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.HyperStatCpuConfiguration;
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.HyperStatCpuEquip;
 import a75f.io.logic.bo.building.hyperstatsplit.common.HyperStatSplitAssociationUtil;
-import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuEconConfiguration;
-import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuEconEquip;
+import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuEconProfile;
+import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuProfileConfiguration;
 import a75f.io.logic.bo.building.ss4pfcu.FourPipeFanCoilUnitConfigurationUtil;
 import a75f.io.logic.bo.building.ss4pfcu.FourPipeFanCoilUnitEquip;
 import a75f.io.logic.bo.building.sscpu.ConventionalUnitLogicalMap;
@@ -335,18 +337,31 @@ public class DesiredTempDisplayMode {
     private static TemperatureMode getTemperatureModeForHSSplitCPUEcon(Equip mEquip) {
         boolean heating = false;
         boolean cooling = false;
-        HyperStatSplitCpuEconEquip hyperStatSplitCpuEconEquip = HyperStatSplitCpuEconEquip.Companion.getHyperStatSplitEquipRef(
-                Short.parseShort(mEquip.getGroup()));
-        HyperStatSplitCpuEconConfiguration config = new HyperStatSplitCpuEconConfiguration();
-        HyperStatSplitCpuEconConfiguration relayConfigurations = hyperStatSplitCpuEconEquip.getRelayConfigurations(config);
-        HyperStatSplitCpuEconConfiguration analogConfigurations = hyperStatSplitCpuEconEquip.getAnalogOutConfigurations(config);
-        if (HyperStatSplitAssociationUtil.Companion.isAnyRelayEnabledAssociatedToCooling(relayConfigurations) ||
-                HyperStatSplitAssociationUtil.Companion.isAnyAnalogOutEnabledAssociatedToCooling(analogConfigurations)) {
-            cooling = true;
-        }
-        if (HyperStatSplitAssociationUtil.Companion.isAnyRelayEnabledAssociatedToHeating(relayConfigurations) ||
-                HyperStatSplitAssociationUtil.Companion.isAnyAnalogOutEnabledAssociatedToHeating(analogConfigurations)) {
-            heating = true;
+
+        HyperStatSplitCpuEconProfile profile = (HyperStatSplitCpuEconProfile) (L.getProfile(Short.parseShort(mEquip.getGroup())));
+
+        if (profile == null) {
+            // This is a fallback for when this method is called before profiles are loaded
+            HyperStatSplitEquip hssEquip = new HyperStatSplitEquip(mEquip.getId());
+            if (hssEquip.getCoolingSignal().pointExists() || hssEquip.getCoolingStage1().pointExists() ||
+                    hssEquip.getCoolingStage2().pointExists() || hssEquip.getCoolingStage3().pointExists()) {
+                cooling = true;
+            }
+            if (hssEquip.getHeatingSignal().pointExists() || hssEquip.getHeatingStage1().pointExists() ||
+                    hssEquip.getHeatingStage2().pointExists() || hssEquip.getHeatingStage3().pointExists()) {
+                heating = true;
+            }
+        } else {
+            HyperStatSplitCpuProfileConfiguration config = profile.getDomainProfileConfiguration();
+            if (HyperStatSplitAssociationUtil.Companion.isAnyRelayEnabledAssociatedToCooling(config) ||
+                    HyperStatSplitAssociationUtil.Companion.isAnyAnalogOutEnabledAssociatedToCooling(config)) {
+                cooling = true;
+            }
+            if (HyperStatSplitAssociationUtil.Companion.isAnyRelayEnabledAssociatedToHeating(config) ||
+                    HyperStatSplitAssociationUtil.Companion.isAnyAnalogOutEnabledAssociatedToHeating(config)) {
+                heating = true;
+            }
+
         }
         return getTemperatureForStandaloneBasedOnConditioningMode(getTemperatureMode(heating, cooling), mEquip);
     }

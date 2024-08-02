@@ -1,6 +1,6 @@
 package a75f.io.logic.bo.building.system.dab;
 
-import static a75f.io.logic.bo.building.dab.DabEquip.CARRIER_PROD;
+import static a75f.io.logic.bo.building.dab.DabProfile.CARRIER_PROD;
 import static a75f.io.logic.bo.building.hvac.Stage.COOLING_1;
 import static a75f.io.logic.bo.building.hvac.Stage.COOLING_2;
 import static a75f.io.logic.bo.building.hvac.Stage.COOLING_3;

@@ -1,20 +1,13 @@
 package a75f.io.logic.bo.building.hyperstatsplit.common
 
+import a75f.io.domain.HyperStatSplitEquip
+import a75f.io.domain.config.AssociationConfig
+import a75f.io.domain.config.EnableConfig
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
-import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
-import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.AnalogOutState
-import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.CpuEconAnalogOutAssociation
-import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.CpuEconRelayAssociation
-import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.CpuEconSensorBusPressAssociation
-import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.CpuEconSensorBusTempAssociation
-import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuEconConfiguration
-import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.RelayState
-import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.SensorBusPressState
-import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.SensorBusTempState
-import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.UniversalInAssociation
-import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.UniversalInState
+import a75f.io.logic.bo.building.hyperstatsplit.profiles.SensorTempHumidityAssociationConfig
+import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.*
 
 /**
  * Created for HyperStat by Manjunath K on 30-07-2021.
@@ -25,1037 +18,208 @@ class HyperStatSplitAssociationUtil {
     companion object {
 
         //Function which checks the Relay is Associated  to Fan or Not
-        fun isRelayAssociatedToFan(relayState: RelayState): Boolean {
-            return (relayState.association == CpuEconRelayAssociation.FAN_LOW_SPEED
-                    || relayState.association == CpuEconRelayAssociation.FAN_MEDIUM_SPEED
-                    || relayState.association == CpuEconRelayAssociation.FAN_HIGH_SPEED)
+        fun isRelayAssociatedToFan(relayConfig: AssociationConfig): Boolean {
+            return (relayConfig.associationVal == CpuRelayType.FAN_LOW_SPEED.ordinal
+                    || relayConfig.associationVal == CpuRelayType.FAN_MEDIUM_SPEED.ordinal
+                    || relayConfig.associationVal == CpuRelayType.FAN_HIGH_SPEED.ordinal)
+        }
+        fun isRelayAssociatedToFanLow(relayConfig: AssociationConfig): Boolean {
+            return relayConfig.associationVal == CpuRelayType.FAN_LOW_SPEED.ordinal
+        }
+        fun isRelayAssociatedToFanMedium(relayConfig: AssociationConfig): Boolean {
+            return relayConfig.associationVal == CpuRelayType.FAN_MEDIUM_SPEED.ordinal
+        }
+        fun isRelayAssociatedToFanHigh(relayConfig: AssociationConfig): Boolean {
+            return relayConfig.associationVal == CpuRelayType.FAN_HIGH_SPEED.ordinal
         }
 
         //Function which checks the Relay is Associated  to Cooling Stage
-        fun isRelayAssociatedToCoolingStage(relayState: RelayState): Boolean {
-            return (relayState.association == CpuEconRelayAssociation.COOLING_STAGE_1
-                    || relayState.association == CpuEconRelayAssociation.COOLING_STAGE_2
-                    || relayState.association == CpuEconRelayAssociation.COOLING_STAGE_3)
-
+        fun isRelayAssociatedToCoolingStage(relayConfig: AssociationConfig): Boolean {
+            return (relayConfig.associationVal == CpuRelayType.COOLING_STAGE1.ordinal
+                    || relayConfig.associationVal == CpuRelayType.COOLING_STAGE2.ordinal
+                    || relayConfig.associationVal == CpuRelayType.COOLING_STAGE3.ordinal)
+        }
+        fun isRelayAssociatedToCoolingStage1(relayConfig: AssociationConfig): Boolean {
+            return relayConfig.associationVal == CpuRelayType.COOLING_STAGE1.ordinal
+        }
+        fun isRelayAssociatedToCoolingStage2(relayConfig: AssociationConfig): Boolean {
+            return relayConfig.associationVal == CpuRelayType.COOLING_STAGE2.ordinal
+        }
+        fun isRelayAssociatedToCoolingStage3(relayConfig: AssociationConfig): Boolean {
+            return relayConfig.associationVal == CpuRelayType.COOLING_STAGE3.ordinal
         }
 
         //Function which checks the Relay is Associated  to Heating Stage
-        fun isRelayAssociatedToHeatingStage(relayState: RelayState): Boolean {
-            return (relayState.association == CpuEconRelayAssociation.HEATING_STAGE_1
-                    || relayState.association == CpuEconRelayAssociation.HEATING_STAGE_2
-                    || relayState.association == CpuEconRelayAssociation.HEATING_STAGE_3)
+        fun isRelayAssociatedToHeatingStage(relayConfig: AssociationConfig): Boolean {
+            return (relayConfig.associationVal == CpuRelayType.HEATING_STAGE1.ordinal
+                    || relayConfig.associationVal == CpuRelayType.HEATING_STAGE2.ordinal
+                    || relayConfig.associationVal == CpuRelayType.HEATING_STAGE3.ordinal)
 
         }
-
-        // Function which returns the Relay Mapped state
-        fun getRelayAssociatedStage(state: Int): CpuEconRelayAssociation {
-            return when (state) {
-                // Order is important here
-                0 -> CpuEconRelayAssociation.COOLING_STAGE_1
-                1 -> CpuEconRelayAssociation.COOLING_STAGE_2
-                2 -> CpuEconRelayAssociation.COOLING_STAGE_3
-                3 -> CpuEconRelayAssociation.HEATING_STAGE_1
-                4 -> CpuEconRelayAssociation.HEATING_STAGE_2
-                5 -> CpuEconRelayAssociation.HEATING_STAGE_3
-                6 -> CpuEconRelayAssociation.FAN_LOW_SPEED
-                7 -> CpuEconRelayAssociation.FAN_MEDIUM_SPEED
-                8 -> CpuEconRelayAssociation.FAN_HIGH_SPEED
-                9 -> CpuEconRelayAssociation.FAN_ENABLED
-                10 -> CpuEconRelayAssociation.OCCUPIED_ENABLED
-                11 -> CpuEconRelayAssociation.HUMIDIFIER
-                12 -> CpuEconRelayAssociation.DEHUMIDIFIER
-                13 -> CpuEconRelayAssociation.EXHAUST_FAN_STAGE_1
-                14 -> CpuEconRelayAssociation.EXHAUST_FAN_STAGE_2
-                // assuming it never going to call
-                else -> CpuEconRelayAssociation.COOLING_STAGE_1
-            }
+        fun isRelayAssociatedToHeatingStage1(relayConfig: AssociationConfig): Boolean {
+            return relayConfig.associationVal == CpuRelayType.HEATING_STAGE1.ordinal
 
         }
-
-        // Function which returns the Relay Mapped state
-        fun getAnalogOutAssociatedStage(state: Int): CpuEconAnalogOutAssociation {
-            return when (state) {
-                // Order is important here
-                0 -> CpuEconAnalogOutAssociation.COOLING
-                1 -> CpuEconAnalogOutAssociation.MODULATING_FAN_SPEED
-                2 -> CpuEconAnalogOutAssociation.HEATING
-                3 -> CpuEconAnalogOutAssociation.OAO_DAMPER
-                4 -> CpuEconAnalogOutAssociation.PREDEFINED_FAN_SPEED
-
-                // assuming it never going to call
-                else -> CpuEconAnalogOutAssociation.COOLING
-            }
-        }
-
-        // Function which returns the Relay Mapped state
-        fun getUniversalInStage(state: Int): UniversalInAssociation {
-            return when (state) {
-                // Order is important here
-                0 -> UniversalInAssociation.CURRENT_TX_0_10
-                1 -> UniversalInAssociation.CURRENT_TX_0_20
-                2 -> UniversalInAssociation.CURRENT_TX_0_50
-                3 -> UniversalInAssociation.CURRENT_TX_0_100
-                4 -> UniversalInAssociation.CURRENT_TX_0_150
-                5 -> UniversalInAssociation.SUPPLY_AIR_TEMPERATURE
-                6 -> UniversalInAssociation.MIXED_AIR_TEMPERATURE
-                7 -> UniversalInAssociation.OUTSIDE_AIR_TEMPERATURE
-                8 -> UniversalInAssociation.FILTER_NC
-                9 -> UniversalInAssociation.FILTER_NO
-                10 -> UniversalInAssociation.CONDENSATE_NC
-                11 -> UniversalInAssociation.CONDENSATE_NO
-                12 -> UniversalInAssociation.DUCT_PRESSURE_0_1
-                13 -> UniversalInAssociation.DUCT_PRESSURE_0_2
-                14 -> UniversalInAssociation.GENERIC_VOLTAGE
-                15 -> UniversalInAssociation.GENERIC_RESISTANCE
-                16 -> UniversalInAssociation.DUCT_PRESSURE_0_10
-                17 -> UniversalInAssociation.GENERIC_FAULT_NC
-                18 -> UniversalInAssociation.GENERIC_FAULT_NO
-
-                // assuming it never going to call
-                else -> UniversalInAssociation.SUPPLY_AIR_TEMPERATURE
-            }
+        fun isRelayAssociatedToHeatingStage2(relayConfig: AssociationConfig): Boolean {
+            return relayConfig.associationVal == CpuRelayType.HEATING_STAGE2.ordinal
 
         }
-
-        // Function which returns the Sensor Bus Mapped state on the Temp/Humidity addresses (0-2)
-        fun getSensorBusTempStage(state: Int): CpuEconSensorBusTempAssociation {
-            return when (state) {
-                // Order is important here
-
-                0 -> CpuEconSensorBusTempAssociation.SUPPLY_AIR_TEMPERATURE_HUMIDITY
-                1 -> CpuEconSensorBusTempAssociation.MIXED_AIR_TEMPERATURE_HUMIDITY
-                2 -> CpuEconSensorBusTempAssociation.OUTSIDE_AIR_TEMPERATURE_HUMIDITY
-                // assuming it never going to call
-                else -> CpuEconSensorBusTempAssociation.SUPPLY_AIR_TEMPERATURE_HUMIDITY
-            }
-
-        }
-
-        // Function which returns the Sensor Bus Mapped state on the Pressure addresses (3)
-        fun getSensorBusPressStage(state: Int): CpuEconSensorBusPressAssociation {
-            return when (state) {
-                // Order is important here
-                0 -> CpuEconSensorBusPressAssociation.DUCT_PRESSURE
-                // assuming it never going to call
-                else -> CpuEconSensorBusPressAssociation.DUCT_PRESSURE
-            }
+        fun isRelayAssociatedToHeatingStage3(relayConfig: AssociationConfig): Boolean {
+            return relayConfig.associationVal == CpuRelayType.HEATING_STAGE3.ordinal
 
         }
 
         //Function which checks the Sensor bus address is Associated  to SUPPLY_AIR_TEMPERATURE_HUMIDITY
-        fun isSensorBusAddressAssociatedToSupplyAir(sensorBusState: SensorBusTempState): Boolean {
-            return (sensorBusState.association == CpuEconSensorBusTempAssociation.SUPPLY_AIR_TEMPERATURE_HUMIDITY && sensorBusState.enabled)
+        fun isSensorBusAddressAssociatedToSupplyAir(association: SensorTempHumidityAssociationConfig): Boolean {
+            return (association.temperatureAssociation.associationVal == CpuSensorBusType.SUPPLY_AIR.ordinal)
         }
-        //Function which checks the Sensor bus address is Associated  to MIXED_AIR_TEMPERATURE_HUMIDITY
-        fun isSensorBusAddressAssociatedToMixedAir(sensorBusState: SensorBusTempState): Boolean {
-            return (sensorBusState.association == CpuEconSensorBusTempAssociation.MIXED_AIR_TEMPERATURE_HUMIDITY && sensorBusState.enabled)
-        }
+
         //Function which checks the Sensor bus address is Associated  to OUTSIDE_AIR_TEMPERATURE_HUMIDITY
-        fun isSensorBusAddressAssociatedToOutsideAir(sensorBusState: SensorBusTempState): Boolean {
-            return (sensorBusState.association == CpuEconSensorBusTempAssociation.OUTSIDE_AIR_TEMPERATURE_HUMIDITY && sensorBusState.enabled)
-        }
-        //Function which checks the Sensor bus address is Associated  to DUCT_PRESSURE
-        fun isSensorBusAddressAssociatedToDuctPressure(sensorBusState: SensorBusPressState): Boolean {
-            return (sensorBusState.association == CpuEconSensorBusPressAssociation.DUCT_PRESSURE && sensorBusState.enabled)
+        fun isSensorBusAddressAssociatedToOutsideAir(association: SensorTempHumidityAssociationConfig): Boolean {
+            return (association.temperatureAssociation.associationVal == CpuSensorBusType.OUTSIDE_AIR.ordinal)
         }
 
-        //Function which checks the Relay is Associated  to Fan Enabled
-        fun isRelayAssociatedToFanEnabled(relayState: RelayState): Boolean {
-            return (relayState.association == CpuEconRelayAssociation.FAN_ENABLED)
+        //Function which checks the Relay is Associated to Fan Enabled
+        fun isRelayAssociatedToFanEnabled(relayConfig: AssociationConfig): Boolean {
+            return relayConfig.associationVal == CpuRelayType.FAN_ENABLED.ordinal
         }
 
-        //Function which checks the Relay is Associated  to OCCUPIED ENABLED
-        fun isRelayAssociatedToOccupiedEnabled(relayState: RelayState): Boolean {
-            return (relayState.association == CpuEconRelayAssociation.OCCUPIED_ENABLED)
+        //Function which checks the Relay is Associated to Occupied Enabled
+        fun isRelayAssociatedToOccupiedEnabled(relayConfig: AssociationConfig): Boolean {
+            return relayConfig.associationVal == CpuRelayType.OCCUPIED_ENABLED.ordinal
         }
 
-        //Function which checks the Relay is Associated  to HUMIDIFIER
-        fun isRelayAssociatedToHumidifier(relayState: RelayState): Boolean {
-            return (relayState.association == CpuEconRelayAssociation.HUMIDIFIER)
+        //Function which checks the Relay is Associated to Humidifier
+        fun isRelayAssociatedToHumidifier(relayConfig: AssociationConfig): Boolean {
+            return relayConfig.associationVal == CpuRelayType.HUMIDIFIER.ordinal
         }
 
-        //Function which checks the Relay is Associated  to DEHUMIDIFIER
-        fun isRelayAssociatedToDeHumidifier(relayState: RelayState): Boolean {
-            return (relayState.association == CpuEconRelayAssociation.DEHUMIDIFIER)
+        //Function which checks the Relay is Associated to Dehumidifier
+        fun isRelayAssociatedToDeHumidifier(relayConfig: AssociationConfig): Boolean {
+            return relayConfig.associationVal == CpuRelayType.DEHUMIDIFIER.ordinal
         }
 
-        //Function which checks the Relay is Associated  to EXHAUST_FAN_STAGE_1
-        fun isRelayAssociatedToExhaustFanStage1(relayState: RelayState): Boolean {
-            return (relayState.association == CpuEconRelayAssociation.EXHAUST_FAN_STAGE_1)
+        //Function which checks the Relay is Associated to Exhaust Fan Stage 1
+        fun isRelayAssociatedToExhaustFanStage1(relayConfig: AssociationConfig): Boolean {
+            return relayConfig.associationVal == CpuRelayType.EX_FAN_STAGE1.ordinal
         }
 
-        //Function which checks the Relay is Associated  to EXHAUST_FAN_STAGE_2
-        fun isRelayAssociatedToExhaustFanStage2(relayState: RelayState): Boolean {
-            return (relayState.association == CpuEconRelayAssociation.EXHAUST_FAN_STAGE_2)
+        //Function which checks the Relay is Associated to Fan Enabled
+        fun isRelayAssociatedToExhaustFanStage2(relayConfig: AssociationConfig): Boolean {
+            return relayConfig.associationVal == CpuRelayType.EX_FAN_STAGE2.ordinal
         }
 
-        //Function which checks the Analog out is Associated  to Cooling
-        fun isAnalogOutAssociatedToCooling(analogOut: AnalogOutState): Boolean {
-            return (analogOut.association == CpuEconAnalogOutAssociation.COOLING)
+        //Function which checks the Relay is Associated to Fan Enabled
+        fun isRelayAssociatedToDcvDamper(relayConfig: AssociationConfig): Boolean {
+            return relayConfig.associationVal == CpuRelayType.DCV_DAMPER.ordinal
+        }
+
+        //Function which checks the Analog out is Associated to COOLING
+        fun isAnalogOutAssociatedToCooling(analogOut: AssociationConfig): Boolean {
+            return (analogOut.associationVal == CpuControlType.COOLING.ordinal)
         }
 
         //Function which checks the Analog out is Associated  to FAN_SPEED
-        fun isAnalogOutAssociatedToFanSpeed(analogOut: AnalogOutState): Boolean {
-            return (analogOut.association == CpuEconAnalogOutAssociation.MODULATING_FAN_SPEED)
+        fun isAnalogOutAssociatedToFanSpeed(analogOut: AssociationConfig): Boolean {
+            return (analogOut.associationVal == CpuControlType.LINEAR_FAN.ordinal)
         }
 
-        //Function which checks the Analog out is Associated  to HEATING
-        fun isAnalogOutAssociatedToHeating(analogOut: AnalogOutState): Boolean {
-            return (analogOut.association == CpuEconAnalogOutAssociation.HEATING)
+        //Function which checks the Analog out is Associated to HEATING
+        fun isAnalogOutAssociatedToHeating(analogOut: AssociationConfig): Boolean {
+            return (analogOut.associationVal == CpuControlType.HEATING.ordinal)
         }
 
-        //Function which checks the Analog out is Associated  to OAO Damper
-        fun isAnalogOutAssociatedToOaoDamper(analogOut: AnalogOutState): Boolean {
-            return (analogOut.association == CpuEconAnalogOutAssociation.OAO_DAMPER)
+        //Function which checks the Analog out is Associated  to OAO_DAMPER
+        fun isAnalogOutAssociatedToOaoDamper(analogOut: AssociationConfig): Boolean {
+            return (analogOut.associationVal == CpuControlType.OAO_DAMPER.ordinal)
+        }
+
+        //Function which checks the Analog out is Associated  to RETURN_DAMPER
+        fun isAnalogOutAssociatedToReturnDamper(analogOut: AssociationConfig): Boolean {
+            return (analogOut.associationVal == CpuControlType.RETURN_DAMPER.ordinal)
         }
 
         //Function which checks the Analog out is Associated  to STAGED_FAN_SPEED
-        fun isAnalogOutAssociatedToStagedFanSpeed(analogOut: AnalogOutState): Boolean {
-            return (analogOut.association == CpuEconAnalogOutAssociation.PREDEFINED_FAN_SPEED)
+        fun isAnalogOutAssociatedToStagedFanSpeed(analogOut: AssociationConfig): Boolean {
+            return (analogOut.associationVal == CpuControlType.STAGED_FAN.ordinal)
         }
 
-        //Function which checks the Universal in is Associated  to SUPPLY_AIR_TEMPERATURE
-        fun isUniversalInAssociatedToSupplyAirTemperature(universalIn: UniversalInState): Boolean {
-            return (universalIn.association == UniversalInAssociation.SUPPLY_AIR_TEMPERATURE)
+        fun isAnyRelayAssociatedToCoolingStage1(config: HyperStatSplitCpuProfileConfiguration) : Boolean {
+            return isAnyRelayMapped(config,CpuRelayType.COOLING_STAGE1)
         }
-        //Function which checks the Universal in is Associated  to MIXED_AIR_TEMPERATURE
-        fun isUniversalInAssociatedToMixedAirTemperature(universalIn: UniversalInState): Boolean {
-            return (universalIn.association == UniversalInAssociation.MIXED_AIR_TEMPERATURE)
+        fun isAnyRelayAssociatedToCoolingStage2(config: HyperStatSplitCpuProfileConfiguration): Boolean {
+            return isAnyRelayMapped(config,CpuRelayType.COOLING_STAGE2)
         }
-        //Function which checks the Universal in is Associated  to OUTSIDE_AIR_TEMPERATURE
-        fun isUniversalInAssociatedToOutsideAirTemperature(universalIn: UniversalInState): Boolean {
-            return (universalIn.association == UniversalInAssociation.OUTSIDE_AIR_TEMPERATURE)
+        fun isAnyRelayAssociatedToCoolingStage3(config: HyperStatSplitCpuProfileConfiguration): Boolean {
+            return isAnyRelayMapped(config,CpuRelayType.COOLING_STAGE3)
         }
-        //Function which checks the Universal in is Associated  to CONDENSATE_NO
-        // TODO: verify this point is included
-        fun isUniversalInAssociatedToCondensateNO(universalIn: UniversalInState): Boolean {
-            return (universalIn.association == UniversalInAssociation.CONDENSATE_NO)
+        fun isAnyRelayAssociatedToFanEnabled(config: HyperStatSplitCpuProfileConfiguration): Boolean {
+            return isAnyRelayMapped(config,CpuRelayType.FAN_ENABLED)
         }
-        //Function which checks the Universal in is Associated  to CONDENSATE_NC
-        // TODO: verify this point is included
-        fun isUniversalInAssociatedToCondensateNC(universalIn: UniversalInState): Boolean {
-            return (universalIn.association == UniversalInAssociation.CONDENSATE_NC)
+
+        fun isAnyRelayAssociatedToHumidifier(config: HyperStatSplitCpuProfileConfiguration): Boolean {
+            return isAnyRelayMapped(config,CpuRelayType.HUMIDIFIER)
         }
-        //Function which checks the Universal in is Associated  to CURRENT_TX_0_10
-        fun isUniversalInAssociatedToCurrentTX10(universalIn: UniversalInState): Boolean {
-            return (universalIn.association == UniversalInAssociation.CURRENT_TX_0_10)
+
+        fun isAnyRelayAssociatedToDeHumidifier(config: HyperStatSplitCpuProfileConfiguration): Boolean {
+            return isAnyRelayMapped(config,CpuRelayType.DEHUMIDIFIER)
         }
-        //Function which checks the Universal in is Associated  to CURRENT_TX_0_20
-        fun isUniversalInAssociatedToCurrentTX20(universalIn: UniversalInState): Boolean {
-            return (universalIn.association == UniversalInAssociation.CURRENT_TX_0_20)
-        }
-        //Function which checks the Universal in is Associated  to CURRENT_TX_0_50
-        fun isUniversalInAssociatedToCurrentTX50(universalIn: UniversalInState): Boolean {
-            return (universalIn.association == UniversalInAssociation.CURRENT_TX_0_50)
-        }
-        //Function which checks the Universal in is Associated  to CURRENT_TX_0_100
-        fun isUniversalInAssociatedToCurrentTX100(universalIn: UniversalInState): Boolean {
-            return (universalIn.association == UniversalInAssociation.CURRENT_TX_0_100)
-        }
-        //Function which checks the Universal in is Associated  to CURRENT_TX_0_150
-        fun isUniversalInAssociatedToCurrentTX150(universalIn: UniversalInState): Boolean {
-            return (universalIn.association == UniversalInAssociation.CURRENT_TX_0_150)
-        }
-        //Function which checks the Universal in is Associated  to DUCT_PRESSURE_0_1
-        fun isUniversalInAssociatedToDuctPressure1In(universalIn: UniversalInState): Boolean {
-            return (universalIn.association == UniversalInAssociation.DUCT_PRESSURE_0_1)
-        }
-        //Function which checks the Universal in is Associated  to DUCT_PRESSURE_0_2
-        fun isUniversalInAssociatedToDuctPressure2In(universalIn: UniversalInState): Boolean {
-            return (universalIn.association == UniversalInAssociation.DUCT_PRESSURE_0_2)
-        }
-        //Function which checks the Universal in is Associated  to FILTER_NO
-        fun isUniversalInAssociatedToFilterNO(universalIn: UniversalInState): Boolean {
-            return (universalIn.association == UniversalInAssociation.FILTER_NO)
-        }
-        //Function which checks the Universal in is Associated  to FILTER_NC
-        fun isUniversalInAssociatedToFilterNC(universalIn: UniversalInState): Boolean {
-            return (universalIn.association == UniversalInAssociation.FILTER_NC)
-        }
-        //Function which checks the Universal in is Associated  to GENERIC_VOLTAGE
-        fun isUniversalInAssociatedToGenericVoltage(universalIn: UniversalInState): Boolean {
-            return (universalIn.association == UniversalInAssociation.GENERIC_VOLTAGE)
-        }
-        //Function which checks the Universal in is Associated  to GENERIC_RESISTANCE
-        fun isUniversalInAssociatedToGenericResistance(universalIn: UniversalInState): Boolean {
-            return (universalIn.association == UniversalInAssociation.GENERIC_RESISTANCE)
-        }
-        //Function which checks the Universal in is Associated  to DUCT_PRESSURE_0_10
-        fun isUniversalInAssociatedToDuctPressure10In(universalIn: UniversalInState): Boolean {
-            return (universalIn.association == UniversalInAssociation.DUCT_PRESSURE_0_10)
-        }
-        //Function which checks the Universal in is Associated  to GENERIC_FAULT_NO
-        fun isUniversalInAssociatedToGenericFaultNO(universalIn: UniversalInState): Boolean {
-            return (universalIn.association == UniversalInAssociation.GENERIC_FAULT_NO)
-        }
-        //Function which checks the Universal in is Associated  to GENERIC_FAULT_NC
-        fun isUniversalInAssociatedToGenericFaultNC(universalIn: UniversalInState): Boolean {
-            return (universalIn.association == UniversalInAssociation.GENERIC_FAULT_NC)
-        }
-        fun isAnyRelayAssociatedToCoolingStage1(config: HyperStatSplitCpuEconConfiguration): Boolean {
-            return isAnyRelayMapped(config,CpuEconRelayAssociation.COOLING_STAGE_1)
-        }
-        fun isAnyRelayAssociatedToCoolingStage2(config: HyperStatSplitCpuEconConfiguration): Boolean {
-            return isAnyRelayMapped(config,CpuEconRelayAssociation.COOLING_STAGE_2)
-        }
-        fun isAnyRelayAssociatedToCoolingStage3(config: HyperStatSplitCpuEconConfiguration): Boolean {
-            return isAnyRelayMapped(config,CpuEconRelayAssociation.COOLING_STAGE_3)
-        }
-        fun isAnyRelayAssociatedToHeatingStage1(config: HyperStatSplitCpuEconConfiguration): Boolean {
-            return isAnyRelayMapped(config,CpuEconRelayAssociation.HEATING_STAGE_1)
-        }
-        fun isAnyRelayAssociatedToHeatingStage2(config: HyperStatSplitCpuEconConfiguration): Boolean {
-            return isAnyRelayMapped(config,CpuEconRelayAssociation.HEATING_STAGE_2)
-        }
-        fun isAnyRelayAssociatedToHeatingStage3(config: HyperStatSplitCpuEconConfiguration): Boolean {
-            return isAnyRelayMapped(config,CpuEconRelayAssociation.HEATING_STAGE_3)
-        }
-        fun isAnyRelayAssociatedToFanLow(config: HyperStatSplitCpuEconConfiguration): Boolean {
-            return isAnyRelayMapped(config,CpuEconRelayAssociation.FAN_LOW_SPEED)
-        }
-        fun isAnyRelayAssociatedToFanMedium(config: HyperStatSplitCpuEconConfiguration): Boolean {
-            return isAnyRelayMapped(config,CpuEconRelayAssociation.FAN_MEDIUM_SPEED)
-        }
-        fun isAnyRelayAssociatedToFanHigh(config: HyperStatSplitCpuEconConfiguration): Boolean {
-            return isAnyRelayMapped(config,CpuEconRelayAssociation.FAN_HIGH_SPEED)
-        }
-        fun isAnyRelayAssociatedToFanEnabled(config: HyperStatSplitCpuEconConfiguration): Boolean {
-            return isAnyRelayMapped(config,CpuEconRelayAssociation.FAN_ENABLED)
-        }
-        fun isAnyRelayAssociatedToOccupiedEnabled(config: HyperStatSplitCpuEconConfiguration): Boolean {
-            return isAnyRelayMapped(config,CpuEconRelayAssociation.OCCUPIED_ENABLED)
-        }
-        fun isAnyRelayEnabledAssociatedToHumidifier(config: HyperStatSplitCpuEconConfiguration): Boolean {
-            return isAnyRelayMapped(config,CpuEconRelayAssociation.HUMIDIFIER)
-        }
-        fun isAnyRelayEnabledAssociatedToDeHumidifier(config: HyperStatSplitCpuEconConfiguration): Boolean {
-            return isAnyRelayMapped(config,CpuEconRelayAssociation.DEHUMIDIFIER)
-        }
-        fun isAnyRelayEnabledAssociatedToExhaustFanStage1(config: HyperStatSplitCpuEconConfiguration): Boolean {
-            return isAnyRelayMapped(config,CpuEconRelayAssociation.EXHAUST_FAN_STAGE_1)
-        }
-        fun isAnyRelayEnabledAssociatedToExhaustFanStage2(config: HyperStatSplitCpuEconConfiguration): Boolean {
-            return isAnyRelayMapped(config,CpuEconRelayAssociation.EXHAUST_FAN_STAGE_2)
-        }
-        // Function which checks that any of the relay is associated to Humidifier
-        fun isAnyRelayAssociatedToHumidifier(configuration: HyperStatSplitCpuEconConfiguration): Boolean {
+
+        private fun isAnyRelayMapped(config: HyperStatSplitCpuProfileConfiguration, association: CpuRelayType): Boolean{
             return when {
-                (isRelayAssociatedToHumidifier(configuration.relay1State)) -> true
-                (isRelayAssociatedToHumidifier(configuration.relay2State)) -> true
-                (isRelayAssociatedToHumidifier(configuration.relay3State)) -> true
-                (isRelayAssociatedToHumidifier(configuration.relay4State)) -> true
-                (isRelayAssociatedToHumidifier(configuration.relay5State)) -> true
-                (isRelayAssociatedToHumidifier(configuration.relay6State)) -> true
-                (isRelayAssociatedToHumidifier(configuration.relay7State)) -> true
-                (isRelayAssociatedToHumidifier(configuration.relay8State)) -> true
+                (config.relay1Enabled.enabled && config.relay1Association.associationVal == association.ordinal) -> true
+                (config.relay2Enabled.enabled && config.relay2Association.associationVal == association.ordinal) -> true
+                (config.relay3Enabled.enabled && config.relay3Association.associationVal == association.ordinal) -> true
+                (config.relay4Enabled.enabled && config.relay4Association.associationVal == association.ordinal) -> true
+                (config.relay5Enabled.enabled && config.relay5Association.associationVal == association.ordinal) -> true
+                (config.relay6Enabled.enabled && config.relay6Association.associationVal == association.ordinal) -> true
+                (config.relay7Enabled.enabled && config.relay7Association.associationVal == association.ordinal) -> true
+                (config.relay8Enabled.enabled && config.relay8Association.associationVal == association.ordinal) -> true
                 else -> false
             }
         }
 
-        // Function which checks that any of the relay is associated to DeHumidifier
-        fun isAnyRelayAssociatedToDeHumidifier(configuration: HyperStatSplitCpuEconConfiguration): Boolean {
+        fun isAnyAnalogAssociatedToOAO(config: HyperStatSplitCpuProfileConfiguration): Boolean {
             return when {
-                (isRelayAssociatedToDeHumidifier(configuration.relay1State)) -> true
-                (isRelayAssociatedToDeHumidifier(configuration.relay2State)) -> true
-                (isRelayAssociatedToDeHumidifier(configuration.relay3State)) -> true
-                (isRelayAssociatedToDeHumidifier(configuration.relay4State)) -> true
-                (isRelayAssociatedToDeHumidifier(configuration.relay5State)) -> true
-                (isRelayAssociatedToDeHumidifier(configuration.relay6State)) -> true
-                (isRelayAssociatedToDeHumidifier(configuration.relay7State)) -> true
-                (isRelayAssociatedToDeHumidifier(configuration.relay8State)) -> true
+                (config.analogOut1Enabled.enabled &&
+                        isAnalogOutAssociatedToOaoDamper(config.analogOut1Association)) -> true
+                (config.analogOut2Enabled.enabled &&
+                        isAnalogOutAssociatedToOaoDamper(config.analogOut2Association)) -> true
+                (config.analogOut3Enabled.enabled &&
+                        isAnalogOutAssociatedToOaoDamper(config.analogOut3Association)) -> true
+                (config.analogOut4Enabled.enabled &&
+                        isAnalogOutAssociatedToOaoDamper(config.analogOut4Association)) -> true
                 else -> false
             }
-        }
-
-        private fun isAnyRelayMapped(config: HyperStatSplitCpuEconConfiguration, association: CpuEconRelayAssociation): Boolean{
-            return when {
-                (config.relay1State.enabled && config.relay1State.association == association) -> true
-                (config.relay2State.enabled && config.relay2State.association == association) -> true
-                (config.relay3State.enabled && config.relay3State.association == association) -> true
-                (config.relay4State.enabled && config.relay4State.association == association) -> true
-                (config.relay5State.enabled && config.relay5State.association == association) -> true
-                (config.relay6State.enabled && config.relay6State.association == association) -> true
-                (config.relay7State.enabled && config.relay7State.association == association) -> true
-                (config.relay8State.enabled && config.relay8State.association == association) -> true
-                else -> false
-            }
-        }
-        fun isAnyAnalogAssociatedToCooling(config: HyperStatSplitCpuEconConfiguration): Boolean {
-            return isAnalogOutMapped(config,CpuEconAnalogOutAssociation.COOLING)
-        }
-        fun isAnyAnalogAssociatedToHeating(config: HyperStatSplitCpuEconConfiguration): Boolean {
-            return isAnalogOutMapped(config,CpuEconAnalogOutAssociation.HEATING)
-        }
-        fun isAnyAnalogAssociatedToFan(config: HyperStatSplitCpuEconConfiguration): Boolean {
-            return isAnalogOutMapped(config,CpuEconAnalogOutAssociation.MODULATING_FAN_SPEED)
-        }
-        fun isAnyAnalogAssociatedToOAO(config: HyperStatSplitCpuEconConfiguration): Boolean {
-            return isAnalogOutMapped(config,CpuEconAnalogOutAssociation.OAO_DAMPER)
-        }
-        fun isAnyAnalogAssociatedToStaged(config: HyperStatSplitCpuEconConfiguration): Boolean {
-            return isAnalogOutMapped(config,CpuEconAnalogOutAssociation.PREDEFINED_FAN_SPEED)
-        }
-        private fun isAnalogOutMapped(config: HyperStatSplitCpuEconConfiguration, association: CpuEconAnalogOutAssociation): Boolean{
-            return when {
-                (config.analogOut1State.enabled && config.analogOut1State.association == association) -> true
-                (config.analogOut2State.enabled && config.analogOut2State.association == association) -> true
-                (config.analogOut3State.enabled && config.analogOut3State.association == association) -> true
-                (config.analogOut4State.enabled && config.analogOut4State.association == association) -> true
-                else -> false
-            }
-        }
-
-        fun isAnalogAssociatedToStaged(analogOutState: AnalogOutState) : Boolean {
-            return (analogOutState.enabled && analogOutState.association == CpuEconAnalogOutAssociation.PREDEFINED_FAN_SPEED)
         }
 
         private fun isUniversalInMapped(
-            ui1: UniversalInState, ui2: UniversalInState,
-            ui3: UniversalInState, ui4: UniversalInState,
-            ui5: UniversalInState, ui6: UniversalInState,
-            ui7: UniversalInState, ui8: UniversalInState,
-            association: UniversalInAssociation
+            config: HyperStatSplitCpuProfileConfiguration,
+            association: CpuUniInType
         ): Boolean{
             return when {
-                (ui1.enabled && ui1.association == association) -> true
-                (ui2.enabled && ui2.association == association) -> true
-                (ui3.enabled && ui3.association == association) -> true
-                (ui4.enabled && ui4.association == association) -> true
-                (ui5.enabled && ui5.association == association) -> true
-                (ui6.enabled && ui6.association == association) -> true
-                (ui7.enabled && ui7.association == association) -> true
-                (ui8.enabled && ui8.association == association) -> true
+                (config.universal1InEnabled.enabled && config.universal1InAssociation.associationVal == association.ordinal) -> true
+                (config.universal2InEnabled.enabled && config.universal2InAssociation.associationVal == association.ordinal) -> true
+                (config.universal3InEnabled.enabled && config.universal3InAssociation.associationVal == association.ordinal) -> true
+                (config.universal4InEnabled.enabled && config.universal4InAssociation.associationVal == association.ordinal) -> true
+                (config.universal5InEnabled.enabled && config.universal5InAssociation.associationVal == association.ordinal) -> true
+                (config.universal6InEnabled.enabled && config.universal6InAssociation.associationVal == association.ordinal) -> true
+                (config.universal7InEnabled.enabled && config.universal7InAssociation.associationVal == association.ordinal) -> true
+                (config.universal8InEnabled.enabled && config.universal8InAssociation.associationVal == association.ordinal) -> true
 
                 else -> false
             }
         }
-        fun isAnyUniversalInMappedToSupplyAirTemperature(
-            ui1: UniversalInState, ui2: UniversalInState,
-            ui3: UniversalInState, ui4: UniversalInState,
-            ui5: UniversalInState, ui6: UniversalInState,
-            ui7: UniversalInState, ui8: UniversalInState,
-        ): Boolean {
-            return isUniversalInMapped(ui1,ui2,ui3,ui4,ui5,ui6,ui7,ui8,UniversalInAssociation.SUPPLY_AIR_TEMPERATURE)
-        }
-        fun isAnyUniversalInMappedToOutsideAirTemperature(
-            ui1: UniversalInState, ui2: UniversalInState,
-            ui3: UniversalInState, ui4: UniversalInState,
-            ui5: UniversalInState, ui6: UniversalInState,
-            ui7: UniversalInState, ui8: UniversalInState,
-        ): Boolean {
-            return isUniversalInMapped(ui1,ui2,ui3,ui4,ui5,ui6,ui7,ui8,UniversalInAssociation.OUTSIDE_AIR_TEMPERATURE)
-        }
-        fun isAnyUniversalInMappedToMixedAirTemperature(
-            ui1: UniversalInState, ui2: UniversalInState,
-            ui3: UniversalInState, ui4: UniversalInState,
-            ui5: UniversalInState, ui6: UniversalInState,
-            ui7: UniversalInState, ui8: UniversalInState,
-        ): Boolean {
-            return isUniversalInMapped(ui1,ui2,ui3,ui4,ui5,ui6,ui7,ui8,UniversalInAssociation.MIXED_AIR_TEMPERATURE)
-        }
-        fun isAnyUniversalInMappedToFilterNC(
-            ui1: UniversalInState, ui2: UniversalInState,
-            ui3: UniversalInState, ui4: UniversalInState,
-            ui5: UniversalInState, ui6: UniversalInState,
-            ui7: UniversalInState, ui8: UniversalInState,
-        ): Boolean {
-            return isUniversalInMapped(ui1,ui2,ui3,ui4,ui5,ui6,ui7,ui8,UniversalInAssociation.FILTER_NC)
-        }
-        fun isAnyUniversalInMappedToFilterNO(
-            ui1: UniversalInState, ui2: UniversalInState,
-            ui3: UniversalInState, ui4: UniversalInState,
-            ui5: UniversalInState, ui6: UniversalInState,
-            ui7: UniversalInState, ui8: UniversalInState,
-        ): Boolean {
-            return isUniversalInMapped(ui1,ui2,ui3,ui4,ui5,ui6,ui7,ui8,UniversalInAssociation.FILTER_NO)
-        }
-        fun isAnyUniversalInMappedToCondensateNC(
-            ui1: UniversalInState, ui2: UniversalInState,
-            ui3: UniversalInState, ui4: UniversalInState,
-            ui5: UniversalInState, ui6: UniversalInState,
-            ui7: UniversalInState, ui8: UniversalInState,
-        ): Boolean {
-            return isUniversalInMapped(ui1,ui2,ui3,ui4,ui5,ui6,ui7,ui8,UniversalInAssociation.CONDENSATE_NC)
-        }
-        fun isAnyUniversalInMappedToCondensateNO(
-            ui1: UniversalInState, ui2: UniversalInState,
-            ui3: UniversalInState, ui4: UniversalInState,
-            ui5: UniversalInState, ui6: UniversalInState,
-            ui7: UniversalInState, ui8: UniversalInState,
-        ): Boolean {
-            return isUniversalInMapped(ui1,ui2,ui3,ui4,ui5,ui6,ui7,ui8,UniversalInAssociation.CONDENSATE_NO)
-        }
 
-        fun isAnyUniversalInMappedToCT10(
-            ui1: UniversalInState, ui2: UniversalInState,
-            ui3: UniversalInState, ui4: UniversalInState,
-            ui5: UniversalInState, ui6: UniversalInState,
-            ui7: UniversalInState, ui8: UniversalInState,
-        ): Boolean {
-            return isUniversalInMapped(ui1,ui2,ui3,ui4,ui5,ui6,ui7,ui8,UniversalInAssociation.CURRENT_TX_0_10)
-        }
-        fun isAnyUniversalInMappedToCT20(
-            ui1: UniversalInState, ui2: UniversalInState,
-            ui3: UniversalInState, ui4: UniversalInState,
-            ui5: UniversalInState, ui6: UniversalInState,
-            ui7: UniversalInState, ui8: UniversalInState,
-        ): Boolean {
-            return isUniversalInMapped(ui1,ui2,ui3,ui4,ui5,ui6,ui7,ui8,UniversalInAssociation.CURRENT_TX_0_20)
-        }
-        fun isAnyUniversalInMappedToCT50(
-            ui1: UniversalInState, ui2: UniversalInState,
-            ui3: UniversalInState, ui4: UniversalInState,
-            ui5: UniversalInState, ui6: UniversalInState,
-            ui7: UniversalInState, ui8: UniversalInState,
-        ): Boolean {
-            return isUniversalInMapped(ui1,ui2,ui3,ui4,ui5,ui6,ui7,ui8,UniversalInAssociation.CURRENT_TX_0_50)
-        }
-        fun isAnyUniversalInMappedToCT100(
-            ui1: UniversalInState, ui2: UniversalInState,
-            ui3: UniversalInState, ui4: UniversalInState,
-            ui5: UniversalInState, ui6: UniversalInState,
-            ui7: UniversalInState, ui8: UniversalInState,
-        ): Boolean {
-            return isUniversalInMapped(ui1,ui2,ui3,ui4,ui5,ui6,ui7,ui8,UniversalInAssociation.CURRENT_TX_0_100)
-        }
-        fun isAnyUniversalInMappedToCT150(
-            ui1: UniversalInState, ui2: UniversalInState,
-            ui3: UniversalInState, ui4: UniversalInState,
-            ui5: UniversalInState, ui6: UniversalInState,
-            ui7: UniversalInState, ui8: UniversalInState,
-        ): Boolean {
-            return isUniversalInMapped(ui1,ui2,ui3,ui4,ui5,ui6,ui7,ui8,UniversalInAssociation.CURRENT_TX_0_150)
-        }
-        fun isAnyUniversalInMappedToDuctPressure0to1(
-            ui1: UniversalInState, ui2: UniversalInState,
-            ui3: UniversalInState, ui4: UniversalInState,
-            ui5: UniversalInState, ui6: UniversalInState,
-            ui7: UniversalInState, ui8: UniversalInState,
-        ): Boolean {
-            return isUniversalInMapped(ui1,ui2,ui3,ui4,ui5,ui6,ui7,ui8,UniversalInAssociation.DUCT_PRESSURE_0_1)
-        }
-        fun isAnyUniversalInMappedToDuctPressure0to2(
-            ui1: UniversalInState, ui2: UniversalInState,
-            ui3: UniversalInState, ui4: UniversalInState,
-            ui5: UniversalInState, ui6: UniversalInState,
-            ui7: UniversalInState, ui8: UniversalInState,
-        ): Boolean {
-            return isUniversalInMapped(ui1,ui2,ui3,ui4,ui5,ui6,ui7,ui8,UniversalInAssociation.DUCT_PRESSURE_0_2)
-        }
-        fun isAnyUniversalInMappedToDuctPressure0to10(
-            ui1: UniversalInState, ui2: UniversalInState,
-            ui3: UniversalInState, ui4: UniversalInState,
-            ui5: UniversalInState, ui6: UniversalInState,
-            ui7: UniversalInState, ui8: UniversalInState,
-        ): Boolean {
-            return isUniversalInMapped(ui1,ui2,ui3,ui4,ui5,ui6,ui7,ui8,UniversalInAssociation.DUCT_PRESSURE_0_10)
-        }
-        fun isAnyUniversalInMappedToGenericFaultNO(
-            ui1: UniversalInState, ui2: UniversalInState,
-            ui3: UniversalInState, ui4: UniversalInState,
-            ui5: UniversalInState, ui6: UniversalInState,
-            ui7: UniversalInState, ui8: UniversalInState,
-        ): Boolean {
-            return isUniversalInMapped(ui1,ui2,ui3,ui4,ui5,ui6,ui7,ui8,UniversalInAssociation.GENERIC_FAULT_NO)
-        }
-        fun isAnyUniversalInMappedToGenericFaultNC(
-            ui1: UniversalInState, ui2: UniversalInState,
-            ui3: UniversalInState, ui4: UniversalInState,
-            ui5: UniversalInState, ui6: UniversalInState,
-            ui7: UniversalInState, ui8: UniversalInState,
-        ): Boolean {
-            return isUniversalInMapped(ui1,ui2,ui3,ui4,ui5,ui6,ui7,ui8,UniversalInAssociation.GENERIC_FAULT_NC)
-        }
-
-        private fun isUniversalInDuplicated(
-            ui1: UniversalInState, ui2: UniversalInState,
-            ui3: UniversalInState, ui4: UniversalInState,
-            ui5: UniversalInState, ui6: UniversalInState,
-            ui7: UniversalInState, ui8: UniversalInState,
-            association: UniversalInAssociation
-        ): Boolean{
-            var nMappings = 0
-
-            if (ui1.enabled && ui1.association==association) nMappings++
-            if (ui2.enabled && ui2.association==association) nMappings++
-            if (ui3.enabled && ui3.association==association) nMappings++
-            if (ui4.enabled && ui4.association==association) nMappings++
-            if (ui5.enabled && ui5.association==association) nMappings++
-            if (ui6.enabled && ui6.association==association) nMappings++
-            if (ui7.enabled && ui7.association==association) nMappings++
-            if (ui8.enabled && ui8.association==association) nMappings++
-
-            return nMappings > 1
-        }
-        private fun isSensorBusTempDuplicated(
-            addr0: SensorBusTempState,
-            addr1: SensorBusTempState,
-            addr2: SensorBusTempState,
-            association: CpuEconSensorBusTempAssociation
-        ): Boolean{
-            var nMappings = 0
-
-            if (addr0.enabled && addr0.association==association) nMappings++
-            if (addr1.enabled && addr1.association==association) nMappings++
-            if (addr2.enabled && addr2.association==association) nMappings++
-
-            return nMappings > 1
-        }
-
-        fun isOutsideAirTemperatureDuplicated(
-            addr0State: SensorBusTempState,
-            addr1State: SensorBusTempState,
-            addr2State: SensorBusTempState,
-            uniIn1State: UniversalInState,
-            uniIn2State: UniversalInState,
-            uniIn3State: UniversalInState,
-            uniIn4State: UniversalInState,
-            uniIn5State: UniversalInState,
-            uniIn6State: UniversalInState,
-            uniIn7State: UniversalInState,
-            uniIn8State: UniversalInState
-        ): Boolean {
-            if (isSensorBusTempDuplicated(
-                    addr0State, addr1State, addr2State,
-                    CpuEconSensorBusTempAssociation.OUTSIDE_AIR_TEMPERATURE_HUMIDITY)) return true
-
-            if (isUniversalInDuplicated(
-                    uniIn1State, uniIn2State,
-                    uniIn3State, uniIn4State,
-                    uniIn5State, uniIn6State,
-                    uniIn7State, uniIn8State,
-                    UniversalInAssociation.OUTSIDE_AIR_TEMPERATURE)) return true
-
-            if (isAnySensorBusAddressMappedToOutsideAir(addr0State,addr1State,addr2State)
-                        && isAnyUniversalInMappedToOutsideAirTemperature(
-                            uniIn1State, uniIn2State,
-                            uniIn3State, uniIn4State,
-                            uniIn5State, uniIn6State,
-                            uniIn7State, uniIn8State)) return true
-
-            return false
-        }
-        fun isSupplyAirTemperatureDuplicated(
-            addr0State: SensorBusTempState,
-            addr1State: SensorBusTempState,
-            addr2State: SensorBusTempState,
-            uniIn1State: UniversalInState,
-            uniIn2State: UniversalInState,
-            uniIn3State: UniversalInState,
-            uniIn4State: UniversalInState,
-            uniIn5State: UniversalInState,
-            uniIn6State: UniversalInState,
-            uniIn7State: UniversalInState,
-            uniIn8State: UniversalInState
-        ): Boolean {
-            if (isSensorBusTempDuplicated(
-                    addr0State, addr1State, addr2State,
-                    CpuEconSensorBusTempAssociation.SUPPLY_AIR_TEMPERATURE_HUMIDITY)) return true
-
-            if (isUniversalInDuplicated(
-                    uniIn1State, uniIn2State,
-                    uniIn3State, uniIn4State,
-                    uniIn5State, uniIn6State,
-                    uniIn7State, uniIn8State,
-                    UniversalInAssociation.SUPPLY_AIR_TEMPERATURE)) return true
-
-            if (isAnySensorBusAddressMappedToSupplyAir(addr0State,addr1State,addr2State)
-                && isAnyUniversalInMappedToSupplyAirTemperature(
-                    uniIn1State, uniIn2State,
-                    uniIn3State, uniIn4State,
-                    uniIn5State, uniIn6State,
-                    uniIn7State, uniIn8State)) return true
-
-            return false
-        }
-        fun isMixedAirTemperatureDuplicated(
-            addr0State: SensorBusTempState,
-            addr1State: SensorBusTempState,
-            addr2State: SensorBusTempState,
-            uniIn1State: UniversalInState,
-            uniIn2State: UniversalInState,
-            uniIn3State: UniversalInState,
-            uniIn4State: UniversalInState,
-            uniIn5State: UniversalInState,
-            uniIn6State: UniversalInState,
-            uniIn7State: UniversalInState,
-            uniIn8State: UniversalInState
-        ): Boolean {
-            if (isSensorBusTempDuplicated(
-                    addr0State, addr1State, addr2State,
-                    CpuEconSensorBusTempAssociation.MIXED_AIR_TEMPERATURE_HUMIDITY)) return true
-
-            if (isUniversalInDuplicated(
-                    uniIn1State, uniIn2State,
-                    uniIn3State, uniIn4State,
-                    uniIn5State, uniIn6State,
-                    uniIn7State, uniIn8State,
-                    UniversalInAssociation.MIXED_AIR_TEMPERATURE)) return true
-
-            if (isAnySensorBusAddressMappedToMixedAir(addr0State,addr1State,addr2State)
-                && isAnyUniversalInMappedToMixedAirTemperature(
-                    uniIn1State, uniIn2State,
-                    uniIn3State, uniIn4State,
-                    uniIn5State, uniIn6State,
-                    uniIn7State, uniIn8State)) return true
-
-            return false
-        }
-        fun isDuctPressureDuplicated(
-            addr3State: SensorBusPressState,
-            uniIn1State: UniversalInState,
-            uniIn2State: UniversalInState,
-            uniIn3State: UniversalInState,
-            uniIn4State: UniversalInState,
-            uniIn5State: UniversalInState,
-            uniIn6State: UniversalInState,
-            uniIn7State: UniversalInState,
-            uniIn8State: UniversalInState
-        ): Boolean {
-            if (isUniversalInDuplicated(
-                    uniIn1State, uniIn2State,
-                    uniIn3State, uniIn4State,
-                    uniIn5State, uniIn6State,
-                    uniIn7State, uniIn8State,
-                    UniversalInAssociation.DUCT_PRESSURE_0_1)
-                || isUniversalInDuplicated(
-                    uniIn1State, uniIn2State,
-                    uniIn3State, uniIn4State,
-                    uniIn5State, uniIn6State,
-                    uniIn7State, uniIn8State,
-                    UniversalInAssociation.DUCT_PRESSURE_0_2)
-                || isUniversalInDuplicated(
-                    uniIn1State, uniIn2State,
-                    uniIn3State, uniIn4State,
-                    uniIn5State, uniIn6State,
-                    uniIn7State, uniIn8State,
-                    UniversalInAssociation.DUCT_PRESSURE_0_10)
-                || (isUniversalInMapped(
-                        uniIn1State, uniIn2State,
-                        uniIn3State, uniIn4State,
-                        uniIn5State, uniIn6State,
-                        uniIn7State, uniIn8State,
-                        UniversalInAssociation.DUCT_PRESSURE_0_1) &&
-                    isUniversalInMapped(
-                        uniIn1State, uniIn2State,
-                        uniIn3State, uniIn4State,
-                        uniIn5State, uniIn6State,
-                        uniIn7State, uniIn8State,
-                        UniversalInAssociation.DUCT_PRESSURE_0_2)) ||
-                    (isUniversalInMapped(
-                        uniIn1State, uniIn2State,
-                        uniIn3State, uniIn4State,
-                        uniIn5State, uniIn6State,
-                        uniIn7State, uniIn8State,
-                        UniversalInAssociation.DUCT_PRESSURE_0_2) &&
-                    isUniversalInMapped(
-                        uniIn1State, uniIn2State,
-                        uniIn3State, uniIn4State,
-                        uniIn5State, uniIn6State,
-                        uniIn7State, uniIn8State,
-                        UniversalInAssociation.DUCT_PRESSURE_0_10)) ||
-                    (isUniversalInMapped(
-                        uniIn1State, uniIn2State,
-                        uniIn3State, uniIn4State,
-                        uniIn5State, uniIn6State,
-                        uniIn7State, uniIn8State,
-                        UniversalInAssociation.DUCT_PRESSURE_0_1) &&
-                    isUniversalInMapped(
-                        uniIn1State, uniIn2State,
-                        uniIn3State, uniIn4State,
-                        uniIn5State, uniIn6State,
-                        uniIn7State, uniIn8State,
-                        UniversalInAssociation.DUCT_PRESSURE_0_10))) return true
-
-            if(isSensorBusAddressAssociatedToDuctPressure(addr3State) &&
-                        (isUniversalInMapped(
-                            uniIn1State, uniIn2State,
-                            uniIn3State, uniIn4State,
-                            uniIn5State, uniIn6State,
-                            uniIn7State, uniIn8State,
-                            UniversalInAssociation.DUCT_PRESSURE_0_1) ||
-                        isUniversalInMapped(
-                            uniIn1State, uniIn2State,
-                            uniIn3State, uniIn4State,
-                            uniIn5State, uniIn6State,
-                            uniIn7State, uniIn8State,
-                            UniversalInAssociation.DUCT_PRESSURE_0_2) ||
-                        isUniversalInMapped(
-                            uniIn1State, uniIn2State,
-                            uniIn3State, uniIn4State,
-                            uniIn5State, uniIn6State,
-                            uniIn7State, uniIn8State,
-                            UniversalInAssociation.DUCT_PRESSURE_0_10))) return true
-
-            return false
-        }
-
-        fun isFilterStatusDuplicated(
-            uniIn1State: UniversalInState,
-            uniIn2State: UniversalInState,
-            uniIn3State: UniversalInState,
-            uniIn4State: UniversalInState,
-            uniIn5State: UniversalInState,
-            uniIn6State: UniversalInState,
-            uniIn7State: UniversalInState,
-            uniIn8State: UniversalInState
-        ): Boolean {
-            if (isUniversalInDuplicated(
-                    uniIn1State, uniIn2State,
-                    uniIn3State, uniIn4State,
-                    uniIn5State, uniIn6State,
-                    uniIn7State, uniIn8State,
-                    UniversalInAssociation.FILTER_NC)) return true
-
-            if (isUniversalInDuplicated(
-                uniIn1State, uniIn2State,
-                uniIn3State, uniIn4State,
-                uniIn5State, uniIn6State,
-                uniIn7State, uniIn8State,
-                UniversalInAssociation.FILTER_NO)) return true
-
-            if (isAnyUniversalInMappedToFilterNO(
-                    uniIn1State, uniIn2State,
-                    uniIn3State, uniIn4State,
-                    uniIn5State, uniIn6State,
-                    uniIn7State, uniIn8State)
-                && isAnyUniversalInMappedToFilterNC(
-                uniIn1State, uniIn2State,
-                uniIn3State, uniIn4State,
-                uniIn5State, uniIn6State,
-                uniIn7State, uniIn8State)) return true
-
-            return false
-        }
-
-        fun isCondensateOverflowStatusDuplicated(
-            uniIn1State: UniversalInState,
-            uniIn2State: UniversalInState,
-            uniIn3State: UniversalInState,
-            uniIn4State: UniversalInState,
-            uniIn5State: UniversalInState,
-            uniIn6State: UniversalInState,
-            uniIn7State: UniversalInState,
-            uniIn8State: UniversalInState
-        ): Boolean {
-            if (isUniversalInDuplicated(
-                    uniIn1State, uniIn2State,
-                    uniIn3State, uniIn4State,
-                    uniIn5State, uniIn6State,
-                    uniIn7State, uniIn8State,
-                    UniversalInAssociation.CONDENSATE_NC)) return true
-
-            if (isUniversalInDuplicated(
-                    uniIn1State, uniIn2State,
-                    uniIn3State, uniIn4State,
-                    uniIn5State, uniIn6State,
-                    uniIn7State, uniIn8State,
-                    UniversalInAssociation.CONDENSATE_NO)) return true
-
-            if (isAnyUniversalInMappedToCondensateNO(
-                    uniIn1State, uniIn2State,
-                    uniIn3State, uniIn4State,
-                    uniIn5State, uniIn6State,
-                    uniIn7State, uniIn8State)
-                && isAnyUniversalInMappedToCondensateNC(
-                    uniIn1State, uniIn2State,
-                    uniIn3State, uniIn4State,
-                    uniIn5State, uniIn6State,
-                    uniIn7State, uniIn8State)) return true
-
-            return false
-        }
-        fun isCurrentTXDuplicated(
-            uniIn1State: UniversalInState,
-            uniIn2State: UniversalInState,
-            uniIn3State: UniversalInState,
-            uniIn4State: UniversalInState,
-            uniIn5State: UniversalInState,
-            uniIn6State: UniversalInState,
-            uniIn7State: UniversalInState,
-            uniIn8State: UniversalInState
-        ): Boolean {
-            if (isUniversalInDuplicated(
-                    uniIn1State, uniIn2State,
-                    uniIn3State, uniIn4State,
-                    uniIn5State, uniIn6State,
-                    uniIn7State, uniIn8State,
-                    UniversalInAssociation.CURRENT_TX_0_10)) return true
-
-            if (isUniversalInDuplicated(
-                    uniIn1State, uniIn2State,
-                    uniIn3State, uniIn4State,
-                    uniIn5State, uniIn6State,
-                    uniIn7State, uniIn8State,
-                    UniversalInAssociation.CURRENT_TX_0_20)) return true
-
-            if (isUniversalInDuplicated(
-                    uniIn1State, uniIn2State,
-                    uniIn3State, uniIn4State,
-                    uniIn5State, uniIn6State,
-                    uniIn7State, uniIn8State,
-                    UniversalInAssociation.CURRENT_TX_0_50)) return true
-
-            if (isUniversalInDuplicated(
-                    uniIn1State, uniIn2State,
-                    uniIn3State, uniIn4State,
-                    uniIn5State, uniIn6State,
-                    uniIn7State, uniIn8State,
-                    UniversalInAssociation.CURRENT_TX_0_100)) return true
-
-            if (isUniversalInDuplicated(
-                    uniIn1State, uniIn2State,
-                    uniIn3State, uniIn4State,
-                    uniIn5State, uniIn6State,
-                    uniIn7State, uniIn8State,
-                    UniversalInAssociation.CURRENT_TX_0_150)) return true
-
-            var nMappings = 0
-
-            if (isAnyUniversalInMappedToCT10(
-                    uniIn1State, uniIn2State,
-                    uniIn3State, uniIn4State,
-                    uniIn5State, uniIn6State,
-                    uniIn7State, uniIn8State)) nMappings++
-
-            if (isAnyUniversalInMappedToCT20(
-                    uniIn1State, uniIn2State,
-                    uniIn3State, uniIn4State,
-                    uniIn5State, uniIn6State,
-                    uniIn7State, uniIn8State)) nMappings++
-
-            if (isAnyUniversalInMappedToCT50(
-                    uniIn1State, uniIn2State,
-                    uniIn3State, uniIn4State,
-                    uniIn5State, uniIn6State,
-                    uniIn7State, uniIn8State)) nMappings++
-
-            if (isAnyUniversalInMappedToCT100(
-                    uniIn1State, uniIn2State,
-                    uniIn3State, uniIn4State,
-                    uniIn5State, uniIn6State,
-                    uniIn7State, uniIn8State)) nMappings++
-
-            if (isAnyUniversalInMappedToCT150(
-                    uniIn1State, uniIn2State,
-                    uniIn3State, uniIn4State,
-                    uniIn5State, uniIn6State,
-                    uniIn7State, uniIn8State)) nMappings++
-
-            return nMappings > 1
-        }
-
-        fun isAnySensorBusAddressMappedToMixedAir(
-            addr0: SensorBusTempState, 
-            addr1: SensorBusTempState,
-            addr2: SensorBusTempState
-        ): Boolean {
-            return isSensorBusAddressAssociatedToMixedAir(addr0)
-                    || isSensorBusAddressAssociatedToMixedAir(addr1)
-                    || isSensorBusAddressAssociatedToMixedAir(addr2)
-        }
-        fun isAnySensorBusAddressMappedToSupplyAir(
-            addr0: SensorBusTempState,
-            addr1: SensorBusTempState,
-            addr2: SensorBusTempState
-        ): Boolean {
-            return isSensorBusAddressAssociatedToSupplyAir(addr0)
-                    || isSensorBusAddressAssociatedToSupplyAir(addr1)
-                    || isSensorBusAddressAssociatedToSupplyAir(addr2)
-        }
         fun isAnySensorBusAddressMappedToOutsideAir(
-            addr0: SensorBusTempState,
-            addr1: SensorBusTempState,
-            addr2: SensorBusTempState
+            config: HyperStatSplitCpuProfileConfiguration
         ): Boolean {
-            return isSensorBusAddressAssociatedToOutsideAir(addr0)
-                    || isSensorBusAddressAssociatedToOutsideAir(addr1)
-                    || isSensorBusAddressAssociatedToOutsideAir(addr2)
-        }
-        fun isAnySensorBusAddressMappedToDuctPressure(
-            addr3: SensorBusPressState
-        ): Boolean {
-            return isSensorBusAddressAssociatedToDuctPressure(addr3)
+            return config.address0Enabled.enabled && isSensorBusAddressAssociatedToOutsideAir(config.address0SensorAssociation)
+                    || config.address1Enabled.enabled && isSensorBusAddressAssociatedToOutsideAir(config.address1SensorAssociation)
+                    || config.address2Enabled.enabled && isSensorBusAddressAssociatedToOutsideAir(config.address2SensorAssociation)
         }
 
-        // checks two Relay configurations and return based on the match
-        fun isBothRelayHasSameConfigs(relayState1: RelayState, relayState2: RelayState): Boolean {
-            when {
-                (relayState1.enabled != relayState2.enabled) -> return false
-                (relayState1.association != relayState2.association) -> return false
-            }
-            return true
-        }
-
-        // checks two Analog out configurations and return based on the match
-        fun isBothAnalogOutHasSameConfigs(analogOut1: AnalogOutState, analogOut2: AnalogOutState): Boolean {
-            when {
-                (analogOut1.enabled != analogOut2.enabled) -> return false
-                (analogOut1.association != analogOut2.association) -> return false
-                (analogOut1.voltageAtMin != analogOut2.voltageAtMin) -> return false
-                (analogOut1.voltageAtMax != analogOut2.voltageAtMax) -> return false
-                (analogOut1.voltageAtRecirculate != analogOut2.voltageAtRecirculate) -> return false
-                (analogOut1.voltageDuringEconomizer != analogOut2.voltageDuringEconomizer) -> return false
-                (isAnalogOutAssociatedToFanSpeed(analogOut1) || isAnalogOutAssociatedToStagedFanSpeed(analogOut1)) -> {
-                    when {
-                        (analogOut1.perAtFanLow != analogOut2.perAtFanLow) -> return false
-                        (analogOut1.perAtFanMedium != analogOut2.perAtFanMedium) -> return false
-                        (analogOut1.perAtFanHigh != analogOut2.perAtFanHigh) -> return false
-                    }
-                }
-            }
-            return true
-        }
-
-        // Function finds the analog out changes
-        fun findChangeInAnalogOutConfig(analogOut1: AnalogOutState, analogOut2: AnalogOutState): AnalogOutChanges{
-                when {
-                    (analogOut1.enabled != analogOut2.enabled) -> return AnalogOutChanges.ENABLED
-                    (analogOut1.association != analogOut2.association) -> return AnalogOutChanges.MAPPING
-                    (analogOut1.voltageAtMin != analogOut2.voltageAtMin) -> return AnalogOutChanges.MIN
-                    (analogOut1.voltageAtMax != analogOut2.voltageAtMax) -> return AnalogOutChanges.MAX
-                    (analogOut1.voltageAtRecirculate != analogOut2.voltageAtRecirculate) -> return AnalogOutChanges.RECIRCULATE
-                    (analogOut1.voltageDuringEconomizer != analogOut2.voltageDuringEconomizer) -> return AnalogOutChanges.ECONOMIZER
-                    (isAnalogOutAssociatedToFanSpeed(analogOut1)) -> {
-                        when {
-                            (analogOut1.perAtFanLow != analogOut2.perAtFanLow) -> return AnalogOutChanges.LOW
-                            (analogOut1.perAtFanMedium != analogOut2.perAtFanMedium) -> return AnalogOutChanges.MED
-                            (analogOut1.perAtFanHigh != analogOut2.perAtFanHigh) -> return AnalogOutChanges.HIGH
-                        }
-                    }
-                }
-                return AnalogOutChanges.NOCHANGE
-        }
-
-        // checks two SensorBusTemp configurations and return based on the match
-        fun isBothSensorBusAddressHasSameConfigs(addr1: SensorBusTempState, addr2: SensorBusTempState): Boolean {
-            when {
-                (addr1.enabled != addr2.enabled) -> return false
-                (addr1.association != addr2.association) -> return false
-            }
-            return true
-        }
-
-        // checks two SensorBusPress configurations and return based on the match
-        fun isBothSensorBusAddressHasSameConfigs(addr1: SensorBusPressState, addr2: SensorBusPressState): Boolean {
-            when {
-                (addr1.enabled != addr2.enabled) -> return false
-                (addr1.association != addr2.association) -> return false
-            }
-            return true
-        }
-
-        // checks two Universal In configurations and return based on the match
-        fun isBothUniversalInHasSameConfigs(universalIn1: UniversalInState, universalIn2: UniversalInState): Boolean {
-            when {
-                (universalIn1.enabled != universalIn2.enabled) -> return false
-                (universalIn1.association != universalIn2.association) -> return false
-            }
-            return true
-        }
-
-
-        fun getSelectedFanLevel(configuration: HyperStatSplitCpuEconConfiguration): Int {
+        fun getSelectedFanLevel(config: HyperStatSplitCpuProfileConfiguration): Int {
 
             var fanLevel = 0
             var fanEnabledStages: Triple<Boolean, Boolean, Boolean> = Triple(
@@ -1064,32 +228,32 @@ class HyperStatSplitAssociationUtil {
                 third = false   //  Fan High
             )
 
-            if(isAnyAnalogOutEnabledAssociatedToFanSpeed(configuration) || isAnyAnalogOutMappedToStagedFan(configuration)) return 21 // All options are enabled due to
+            if(isAnyAnalogOutEnabledAssociatedToFanSpeed(config) || isAnyAnalogOutMappedToStagedFan(config)) return 21 // All options are enabled due to
             // analog fan speed
 
-            if (isRelayEnabledAssociatedToFan(configuration.relay1State))
-                fanEnabledStages = updateSelectedFanLevel(configuration.relay1State.association, fanEnabledStages)
+            if (config.relay1Enabled.enabled && isRelayAssociatedToFan(config.relay1Association))
+                fanEnabledStages = updateSelectedFanLevel(config.relay1Association, fanEnabledStages)
 
-            if (isRelayEnabledAssociatedToFan(configuration.relay2State))
-                fanEnabledStages = updateSelectedFanLevel(configuration.relay2State.association, fanEnabledStages)
+            if (config.relay2Enabled.enabled && isRelayAssociatedToFan(config.relay2Association))
+                fanEnabledStages = updateSelectedFanLevel(config.relay2Association, fanEnabledStages)
 
-            if (isRelayEnabledAssociatedToFan(configuration.relay3State))
-                fanEnabledStages = updateSelectedFanLevel(configuration.relay3State.association, fanEnabledStages)
+            if (config.relay3Enabled.enabled && isRelayAssociatedToFan(config.relay3Association))
+                fanEnabledStages = updateSelectedFanLevel(config.relay3Association, fanEnabledStages)
 
-            if (isRelayEnabledAssociatedToFan(configuration.relay4State))
-                fanEnabledStages = updateSelectedFanLevel(configuration.relay4State.association, fanEnabledStages)
+            if (config.relay4Enabled.enabled && isRelayAssociatedToFan(config.relay4Association))
+                fanEnabledStages = updateSelectedFanLevel(config.relay4Association, fanEnabledStages)
 
-            if (isRelayEnabledAssociatedToFan(configuration.relay5State))
-                fanEnabledStages = updateSelectedFanLevel(configuration.relay5State.association, fanEnabledStages)
+            if (config.relay5Enabled.enabled && isRelayAssociatedToFan(config.relay5Association))
+                fanEnabledStages = updateSelectedFanLevel(config.relay5Association, fanEnabledStages)
 
-            if (isRelayEnabledAssociatedToFan(configuration.relay6State))
-                fanEnabledStages = updateSelectedFanLevel(configuration.relay6State.association, fanEnabledStages)
+            if (config.relay6Enabled.enabled && isRelayAssociatedToFan(config.relay6Association))
+                fanEnabledStages = updateSelectedFanLevel(config.relay6Association, fanEnabledStages)
 
-            if (isRelayEnabledAssociatedToFan(configuration.relay7State))
-                fanEnabledStages = updateSelectedFanLevel(configuration.relay7State.association, fanEnabledStages)
+            if (config.relay7Enabled.enabled && isRelayAssociatedToFan(config.relay7Association))
+                fanEnabledStages = updateSelectedFanLevel(config.relay7Association, fanEnabledStages)
 
-            if (isRelayEnabledAssociatedToFan(configuration.relay8State))
-                fanEnabledStages = updateSelectedFanLevel(configuration.relay8State.association, fanEnabledStages)
+            if (config.relay8Enabled.enabled && isRelayAssociatedToFan(config.relay8Association))
+                fanEnabledStages = updateSelectedFanLevel(config.relay8Association, fanEnabledStages)
 
             if (fanEnabledStages.first) fanLevel += 6
             if (fanEnabledStages.second) fanLevel += 7
@@ -1097,203 +261,199 @@ class HyperStatSplitAssociationUtil {
             return fanLevel
         }
 
+        fun getSelectedFanLevel(hssEquip: HyperStatSplitEquip): Int {
+
+            var fanLevel = 0
+            var fanEnabledStages: Triple<Boolean, Boolean, Boolean> = Triple(
+                first = false,  //  Fan low
+                second = false, //  Fan Medium
+                third = false   //  Fan High
+            )
+
+            if(hssEquip.linearFanSpeed.pointExists() || hssEquip.stagedFanSpeed.pointExists()) return 21 // All options are enabled due to
+            // analog fan speed
+
+            if (hssEquip.fanLowSpeed.pointExists()) fanLevel += 6
+            if (hssEquip.fanMediumSpeed.pointExists()) fanLevel += 7
+            if (hssEquip.fanHighSpeed.pointExists()) fanLevel += 8
+
+            return fanLevel
+        }
+
         private fun updateSelectedFanLevel(
-            association: CpuEconRelayAssociation, currentFoundDetails: Triple<Boolean, Boolean, Boolean>
+            association: AssociationConfig, currentFoundDetails: Triple<Boolean, Boolean, Boolean>
         ): Triple<Boolean, Boolean, Boolean> {
             var currentStatus = currentFoundDetails
             if (!currentStatus.first) {
                 currentStatus = currentStatus.copy(
-                    first = association.ordinal == CpuEconRelayAssociation.FAN_LOW_SPEED.ordinal
+                    first = association.associationVal == CpuRelayType.FAN_LOW_SPEED.ordinal
                 )
             }
             if (!currentStatus.second) {
                 currentStatus = currentStatus.copy(
-                    second = association.ordinal == CpuEconRelayAssociation.FAN_MEDIUM_SPEED.ordinal
+                    second = association.associationVal == CpuRelayType.FAN_MEDIUM_SPEED.ordinal
                 )
             }
             if (!currentStatus.third) {
                 currentStatus = currentStatus.copy(
-                    third = association.ordinal == CpuEconRelayAssociation.FAN_HIGH_SPEED.ordinal
+                    third = association.associationVal == CpuRelayType.FAN_HIGH_SPEED.ordinal
                 )
             }
             return currentStatus
         }
 
-        // Function which checks that any of the relay Enabled and is associated to Heating
-        fun isAnyRelayEnabledAssociatedToFan(configuration: HyperStatSplitCpuEconConfiguration): Boolean {
+        // Function which checks that any of the relay Enabled and is associated to cooling
+        fun isAnyRelayEnabledAssociatedToHeating(configuration: HyperStatSplitCpuProfileConfiguration): Boolean {
             return when {
-                (configuration.relay1State.enabled &&
-                        isRelayAssociatedToFan(configuration.relay1State)) -> true
-                (configuration.relay2State.enabled &&
-                        isRelayAssociatedToFan(configuration.relay2State)) -> true
-                (configuration.relay3State.enabled &&
-                        isRelayAssociatedToFan(configuration.relay3State)) -> true
-                (configuration.relay4State.enabled &&
-                        isRelayAssociatedToFan(configuration.relay4State)) -> true
-                (configuration.relay5State.enabled &&
-                        isRelayAssociatedToFan(configuration.relay5State)) -> true
-                (configuration.relay6State.enabled &&
-                        isRelayAssociatedToFan(configuration.relay6State)) -> true
-                (configuration.relay7State.enabled &&
-                        isRelayAssociatedToFan(configuration.relay7State)) -> true
-                (configuration.relay8State.enabled &&
-                        isRelayAssociatedToFan(configuration.relay8State)) -> true
+                (configuration.relay1Enabled.enabled &&
+                        isRelayAssociatedToHeatingStage(configuration.relay1Association)) -> true
+                (configuration.relay2Enabled.enabled &&
+                        isRelayAssociatedToHeatingStage(configuration.relay2Association)) -> true
+                (configuration.relay3Enabled.enabled &&
+                        isRelayAssociatedToHeatingStage(configuration.relay3Association)) -> true
+                (configuration.relay4Enabled.enabled &&
+                        isRelayAssociatedToHeatingStage(configuration.relay4Association)) -> true
+                (configuration.relay5Enabled.enabled &&
+                        isRelayAssociatedToHeatingStage(configuration.relay5Association)) -> true
+                (configuration.relay6Enabled.enabled &&
+                        isRelayAssociatedToHeatingStage(configuration.relay6Association)) -> true
+                (configuration.relay7Enabled.enabled &&
+                        isRelayAssociatedToHeatingStage(configuration.relay7Association)) -> true
+                (configuration.relay8Enabled.enabled &&
+                        isRelayAssociatedToHeatingStage(configuration.relay8Association)) -> true
                 else -> false
             }
-        }
-
-        // Function which checks that any of the relay Enabled and is associated to Heating
-        fun isAnyRelayEnabledAssociatedToHeating(configuration: HyperStatSplitCpuEconConfiguration): Boolean {
-            return when {
-                (configuration.relay1State.enabled &&
-                        isRelayAssociatedToHeatingStage(configuration.relay1State)) -> true
-                (configuration.relay2State.enabled &&
-                        isRelayAssociatedToHeatingStage(configuration.relay2State)) -> true
-                (configuration.relay3State.enabled &&
-                        isRelayAssociatedToHeatingStage(configuration.relay3State)) -> true
-                (configuration.relay4State.enabled &&
-                        isRelayAssociatedToHeatingStage(configuration.relay4State)) -> true
-                (configuration.relay5State.enabled &&
-                        isRelayAssociatedToHeatingStage(configuration.relay5State)) -> true
-                (configuration.relay6State.enabled &&
-                        isRelayAssociatedToHeatingStage(configuration.relay6State)) -> true
-                (configuration.relay7State.enabled &&
-                        isRelayAssociatedToHeatingStage(configuration.relay7State)) -> true
-                (configuration.relay8State.enabled &&
-                        isRelayAssociatedToHeatingStage(configuration.relay8State)) -> true
-                else -> false
-            }
-        }
-
-        // function to check the input relay is enabled and associated to fan speed
-        private fun isRelayEnabledAssociatedToFan(relayState: RelayState): Boolean {
-         return (relayState.enabled && isRelayAssociatedToFan(relayState))
         }
 
         // Function which checks that any of the relay Enabled and is associated to cooling
-        fun isAnyRelayEnabledAssociatedToCooling(configuration: HyperStatSplitCpuEconConfiguration): Boolean {
+        fun isAnyRelayEnabledAssociatedToHeating(hssEquip: HyperStatSplitEquip): Boolean {
+            return hssEquip.heatingStage1.pointExists() || hssEquip.heatingStage2.pointExists() || hssEquip.heatingStage3.pointExists()
+        }
+
+        // Function which checks that any of the relay Enabled and is associated to cooling
+        fun isAnyRelayEnabledAssociatedToCooling(configuration: HyperStatSplitCpuProfileConfiguration): Boolean {
             return when {
-                (configuration.relay1State.enabled &&
-                        isRelayAssociatedToCoolingStage(configuration.relay1State)) -> true
-                (configuration.relay2State.enabled &&
-                        isRelayAssociatedToCoolingStage(configuration.relay2State)) -> true
-                (configuration.relay3State.enabled &&
-                        isRelayAssociatedToCoolingStage(configuration.relay3State)) -> true
-                (configuration.relay4State.enabled &&
-                        isRelayAssociatedToCoolingStage(configuration.relay4State)) -> true
-                (configuration.relay5State.enabled &&
-                        isRelayAssociatedToCoolingStage(configuration.relay5State)) -> true
-                (configuration.relay6State.enabled &&
-                        isRelayAssociatedToCoolingStage(configuration.relay6State)) -> true
-                (configuration.relay7State.enabled &&
-                        isRelayAssociatedToCoolingStage(configuration.relay7State)) -> true
-                (configuration.relay8State.enabled &&
-                        isRelayAssociatedToCoolingStage(configuration.relay8State)) -> true
+                (configuration.relay1Enabled.enabled &&
+                        isRelayAssociatedToCoolingStage(configuration.relay1Association)) -> true
+                (configuration.relay2Enabled.enabled &&
+                        isRelayAssociatedToCoolingStage(configuration.relay2Association)) -> true
+                (configuration.relay3Enabled.enabled &&
+                        isRelayAssociatedToCoolingStage(configuration.relay3Association)) -> true
+                (configuration.relay4Enabled.enabled &&
+                        isRelayAssociatedToCoolingStage(configuration.relay4Association)) -> true
+                (configuration.relay5Enabled.enabled &&
+                        isRelayAssociatedToCoolingStage(configuration.relay5Association)) -> true
+                (configuration.relay6Enabled.enabled &&
+                        isRelayAssociatedToCoolingStage(configuration.relay6Association)) -> true
+                (configuration.relay7Enabled.enabled &&
+                        isRelayAssociatedToCoolingStage(configuration.relay7Association)) -> true
+                (configuration.relay8Enabled.enabled &&
+                        isRelayAssociatedToCoolingStage(configuration.relay8Association)) -> true
                 else -> false
             }
+        }
+
+        // Function which checks that any of the relay Enabled and is associated to cooling
+        fun isAnyRelayEnabledAssociatedToCooling(hssEquip: HyperStatSplitEquip): Boolean {
+            return hssEquip.coolingStage1.pointExists() || hssEquip.coolingStage2.pointExists() || hssEquip.coolingStage3.pointExists()
         }
 
         // Function which checks that any of the Analog Out is mapped to Cooling
-        fun isAnyAnalogOutEnabledAssociatedToCooling(configuration: HyperStatSplitCpuEconConfiguration): Boolean {
+        fun isAnyAnalogOutEnabledAssociatedToCooling(configuration: HyperStatSplitCpuProfileConfiguration): Boolean {
             return when {
-                (configuration.analogOut1State.enabled &&
-                        isAnalogOutAssociatedToCooling(configuration.analogOut1State)) -> true
-                (configuration.analogOut2State.enabled &&
-                        isAnalogOutAssociatedToCooling(configuration.analogOut2State)) -> true
-                (configuration.analogOut3State.enabled &&
-                        isAnalogOutAssociatedToCooling(configuration.analogOut3State)) -> true
-                (configuration.analogOut4State.enabled &&
-                        isAnalogOutAssociatedToCooling(configuration.analogOut4State)) -> true
+                (configuration.analogOut1Enabled.enabled &&
+                        configuration.analogOut1Association.associationVal.equals(CpuControlType.COOLING.ordinal)) -> true
+                (configuration.analogOut2Enabled.enabled &&
+                        configuration.analogOut2Association.associationVal.equals(CpuControlType.COOLING.ordinal)) -> true
+                (configuration.analogOut3Enabled.enabled &&
+                        configuration.analogOut3Association.associationVal.equals(CpuControlType.COOLING.ordinal)) -> true
+                (configuration.analogOut4Enabled.enabled &&
+                        configuration.analogOut4Association.associationVal.equals(CpuControlType.COOLING.ordinal)) -> true
                 else -> false
             }
         }
 
+        // Function which checks that any of the relay Enabled and is associated to cooling
+        fun isAnyAnalogOutEnabledAssociatedToCooling(hssEquip: HyperStatSplitEquip): Boolean {
+            return hssEquip.coolingSignal.pointExists()
+        }
+
         // Function which checks that any of the Analog Out is mapped to Heating
-        fun isAnyAnalogOutEnabledAssociatedToHeating(configuration: HyperStatSplitCpuEconConfiguration): Boolean {
+        fun isAnyAnalogOutEnabledAssociatedToHeating(configuration: HyperStatSplitCpuProfileConfiguration): Boolean {
             return when {
-                (configuration.analogOut1State.enabled &&
-                        isAnalogOutAssociatedToHeating(configuration.analogOut1State)) -> true
-                (configuration.analogOut2State.enabled &&
-                        isAnalogOutAssociatedToHeating(configuration.analogOut2State)) -> true
-                (configuration.analogOut3State.enabled &&
-                        isAnalogOutAssociatedToHeating(configuration.analogOut3State)) -> true
-                (configuration.analogOut4State.enabled &&
-                        isAnalogOutAssociatedToHeating(configuration.analogOut4State)) -> true
+                (configuration.analogOut1Enabled.enabled &&
+                        configuration.analogOut1Association.associationVal.equals(CpuControlType.HEATING.ordinal)) -> true
+                (configuration.analogOut2Enabled.enabled &&
+                        configuration.analogOut2Association.associationVal.equals(CpuControlType.HEATING.ordinal)) -> true
+                (configuration.analogOut3Enabled.enabled &&
+                        configuration.analogOut3Association.associationVal.equals(CpuControlType.HEATING.ordinal)) -> true
+                (configuration.analogOut4Enabled.enabled &&
+                        configuration.analogOut4Association.associationVal.equals(CpuControlType.HEATING.ordinal)) -> true
                 else -> false
             }
         }
 
         // Function which checks that any of the Analog Out is mapped to Fan speed
-        fun isAnyAnalogOutEnabledAssociatedToFanSpeed(configuration: HyperStatSplitCpuEconConfiguration): Boolean {
+        fun isAnyAnalogOutEnabledAssociatedToFanSpeed(configuration: HyperStatSplitCpuProfileConfiguration): Boolean {
             return when {
-                (configuration.analogOut1State.enabled &&
-                        isAnalogOutAssociatedToFanSpeed(configuration.analogOut1State)) -> true
-                (configuration.analogOut2State.enabled &&
-                        isAnalogOutAssociatedToFanSpeed(configuration.analogOut2State)) -> true
-                (configuration.analogOut3State.enabled &&
-                        isAnalogOutAssociatedToFanSpeed(configuration.analogOut3State)) -> true
-                (configuration.analogOut4State.enabled &&
-                        isAnalogOutAssociatedToFanSpeed(configuration.analogOut4State)) -> true
+                (configuration.analogOut1Enabled.enabled &&
+                        isAnalogOutAssociatedToFanSpeed(configuration.analogOut1Association)) -> true
+                (configuration.analogOut2Enabled.enabled &&
+                        isAnalogOutAssociatedToFanSpeed(configuration.analogOut2Association)) -> true
+                (configuration.analogOut3Enabled.enabled &&
+                        isAnalogOutAssociatedToFanSpeed(configuration.analogOut3Association)) -> true
+                (configuration.analogOut4Enabled.enabled &&
+                        isAnalogOutAssociatedToFanSpeed(configuration.analogOut4Association)) -> true
                 else -> false
             }
         }
 
-
-        // function which checks the any of the relay is associated to any conditioning
-        fun isRelayAssociatedToAnyOfConditioningModes(relayState: RelayState): Boolean{
-            if(isRelayAssociatedToCoolingStage(relayState)) return true
-            if(isRelayAssociatedToHeatingStage(relayState)) return true
-            return false
-        }
-
-        // function which checks the any of the relay is associated to cooling heating fan stage or fan enabled
-        fun isAnalogAssociatedToAnyOfConditioningModes(analogOut: AnalogOutState): Boolean{
-            if(isAnalogOutAssociatedToCooling(analogOut)) return true
-            if(isAnalogOutAssociatedToHeating(analogOut)) return true
-            return false
+        // Function which checks that any of the relay Enabled and is associated to heating
+        fun isAnyAnalogOutEnabledAssociatedToHeating(hssEquip: HyperStatSplitEquip): Boolean {
+            return hssEquip.heatingSignal.pointExists()
         }
 
         // Function returns highest selected cooling stage
-        fun getHighestCoolingStage(configuration: HyperStatSplitCpuEconConfiguration): CpuEconRelayAssociation {
+        fun getHighestCoolingStage(configuration: HyperStatSplitCpuProfileConfiguration): CpuRelayType {
             var highestValue = 0
-            highestValue = verifyCoolingState(configuration.relay1State, highestValue)
-            highestValue = verifyCoolingState(configuration.relay2State, highestValue)
-            highestValue = verifyCoolingState(configuration.relay3State, highestValue)
-            highestValue = verifyCoolingState(configuration.relay4State, highestValue)
-            highestValue = verifyCoolingState(configuration.relay5State, highestValue)
-            highestValue = verifyCoolingState(configuration.relay6State, highestValue)
-            highestValue = verifyCoolingState(configuration.relay7State, highestValue)
-            highestValue = verifyCoolingState(configuration.relay8State, highestValue)
+            highestValue = verifyCoolingState(configuration.relay1Enabled, configuration.relay1Association, highestValue)
+            highestValue = verifyCoolingState(configuration.relay2Enabled, configuration.relay2Association, highestValue)
+            highestValue = verifyCoolingState(configuration.relay3Enabled, configuration.relay3Association, highestValue)
+            highestValue = verifyCoolingState(configuration.relay4Enabled, configuration.relay4Association, highestValue)
+            highestValue = verifyCoolingState(configuration.relay5Enabled, configuration.relay5Association, highestValue)
+            highestValue = verifyCoolingState(configuration.relay6Enabled, configuration.relay6Association, highestValue)
+            highestValue = verifyCoolingState(configuration.relay7Enabled, configuration.relay7Association, highestValue)
+            highestValue = verifyCoolingState(configuration.relay8Enabled, configuration.relay8Association, highestValue)
 
-            return CpuEconRelayAssociation.values()[highestValue]
+            return CpuRelayType.values()[highestValue]
         }
 
-        private fun verifyCoolingState(state: RelayState, highestValue: Int): Int {
-            if (state.enabled && isRelayAssociatedToCoolingStage(state)
-                && state.association.ordinal > highestValue
-            ) return state.association.ordinal
+        private fun verifyCoolingState(enabled: EnableConfig, association: AssociationConfig, highestValue: Int): Int {
+            if (enabled.enabled && isRelayAssociatedToCoolingStage(association)
+                && association.associationVal > highestValue
+            ) return association.associationVal
             return highestValue
         }
 
-        fun getHighestHeatingStage(configuration: HyperStatSplitCpuEconConfiguration): CpuEconRelayAssociation {
+        fun getHighestHeatingStage(configuration: HyperStatSplitCpuProfileConfiguration): CpuRelayType {
             var highestValue = 0
-            highestValue = verifyHeatingState(configuration.relay1State, highestValue)
-            highestValue = verifyHeatingState(configuration.relay2State, highestValue)
-            highestValue = verifyHeatingState(configuration.relay3State, highestValue)
-            highestValue = verifyHeatingState(configuration.relay4State, highestValue)
-            highestValue = verifyHeatingState(configuration.relay5State, highestValue)
-            highestValue = verifyHeatingState(configuration.relay6State, highestValue)
-            highestValue = verifyHeatingState(configuration.relay7State, highestValue)
-            highestValue = verifyHeatingState(configuration.relay8State, highestValue)
+            highestValue = verifyHeatingState(configuration.relay1Enabled, configuration.relay1Association, highestValue)
+            highestValue = verifyHeatingState(configuration.relay2Enabled, configuration.relay2Association, highestValue)
+            highestValue = verifyHeatingState(configuration.relay3Enabled, configuration.relay3Association, highestValue)
+            highestValue = verifyHeatingState(configuration.relay4Enabled, configuration.relay4Association, highestValue)
+            highestValue = verifyHeatingState(configuration.relay5Enabled, configuration.relay5Association, highestValue)
+            highestValue = verifyHeatingState(configuration.relay6Enabled, configuration.relay6Association, highestValue)
+            highestValue = verifyHeatingState(configuration.relay7Enabled, configuration.relay7Association, highestValue)
+            highestValue = verifyHeatingState(configuration.relay8Enabled, configuration.relay8Association, highestValue)
 
-            return CpuEconRelayAssociation.values()[highestValue]
+            return CpuRelayType.values()[highestValue]
         }
 
-        private fun verifyHeatingState(state: RelayState, highestValue: Int): Int {
-            if (state.enabled && isRelayAssociatedToHeatingStage(state)
-                && state.association.ordinal > highestValue
+        private fun verifyHeatingState(enabled: EnableConfig, association: AssociationConfig, highestValue: Int): Int {
+            if (enabled.enabled && isRelayAssociatedToHeatingStage(association)
+                && association.associationVal > highestValue
             )
-                return state.association.ordinal
+                return association.associationVal
             return highestValue
         }
 
@@ -1301,20 +461,20 @@ class HyperStatSplitAssociationUtil {
          * Determines the lowest fan stage based on the relay states in the given CPU configuration.
          *
          * @param configuration the CPU configuration to analyze.
-         * @return the lowest fan stage, represented as a [CpuEconRelayAssociation] value.
+         * @return the lowest fan stage, represented as a [CpuRelayType] value.
          */
-        fun getLowestFanStage(configuration: HyperStatSplitCpuEconConfiguration): CpuEconRelayAssociation {
+        fun getLowestFanStage(configuration: HyperStatSplitCpuProfileConfiguration): CpuRelayType {
             var lowestValue = 0xFF
-            lowestValue = verifyFanStateLowValue(configuration.relay1State, lowestValue)
-            lowestValue = verifyFanStateLowValue(configuration.relay2State, lowestValue)
-            lowestValue = verifyFanStateLowValue(configuration.relay3State, lowestValue)
-            lowestValue = verifyFanStateLowValue(configuration.relay4State, lowestValue)
-            lowestValue = verifyFanStateLowValue(configuration.relay5State, lowestValue)
-            lowestValue = verifyFanStateLowValue(configuration.relay6State, lowestValue)
-            lowestValue = verifyFanStateLowValue(configuration.relay7State, lowestValue)
-            lowestValue = verifyFanStateLowValue(configuration.relay8State, lowestValue)
+            lowestValue = verifyFanStateLowValue(configuration.relay1Enabled, configuration.relay1Association, lowestValue)
+            lowestValue = verifyFanStateLowValue(configuration.relay2Enabled, configuration.relay2Association, lowestValue)
+            lowestValue = verifyFanStateLowValue(configuration.relay3Enabled, configuration.relay3Association, lowestValue)
+            lowestValue = verifyFanStateLowValue(configuration.relay4Enabled, configuration.relay4Association, lowestValue)
+            lowestValue = verifyFanStateLowValue(configuration.relay5Enabled, configuration.relay5Association, lowestValue)
+            lowestValue = verifyFanStateLowValue(configuration.relay6Enabled, configuration.relay6Association, lowestValue)
+            lowestValue = verifyFanStateLowValue(configuration.relay7Enabled, configuration.relay7Association, lowestValue)
+            lowestValue = verifyFanStateLowValue(configuration.relay8Enabled, configuration.relay8Association, lowestValue)
 
-            return CpuEconRelayAssociation.values().getOrNull(lowestValue) ?: CpuEconRelayAssociation.DEHUMIDIFIER
+            return CpuRelayType.values().getOrNull(lowestValue) ?: CpuRelayType.DEHUMIDIFIER
         }
 
         /**
@@ -1324,36 +484,34 @@ class HyperStatSplitAssociationUtil {
          * @param lowestValue the current lowest value.
          * @return the updated lowest value, considering the relay state.
          */
-        private fun verifyFanStateLowValue(state: RelayState, lowestValue: Int): Int {
-            if (state.enabled && isRelayAssociatedToFan(state)
-                && state.association.ordinal < lowestValue
+        private fun verifyFanStateLowValue(enabled: EnableConfig, association: AssociationConfig, lowestValue: Int): Int {
+            if (enabled.enabled && isRelayAssociatedToFan(association)
+                && association.associationVal < lowestValue
             )
-                return state.association.ordinal
+                return association.associationVal
             return lowestValue
         }
 
-        fun getHighestFanStage(configuration: HyperStatSplitCpuEconConfiguration): CpuEconRelayAssociation {
+        fun getHighestFanStage(configuration: HyperStatSplitCpuProfileConfiguration): CpuRelayType {
             var highestValue = 0
-            highestValue = verifyFanState(configuration.relay1State, highestValue)
-            highestValue = verifyFanState(configuration.relay2State, highestValue)
-            highestValue = verifyFanState(configuration.relay3State, highestValue)
-            highestValue = verifyFanState(configuration.relay4State, highestValue)
-            highestValue = verifyFanState(configuration.relay5State, highestValue)
-            highestValue = verifyFanState(configuration.relay6State, highestValue)
-            highestValue = verifyFanState(configuration.relay7State, highestValue)
-            highestValue = verifyFanState(configuration.relay8State, highestValue)
+            highestValue = verifyFanState(configuration.relay1Enabled, configuration.relay1Association, highestValue)
+            highestValue = verifyFanState(configuration.relay2Enabled, configuration.relay2Association, highestValue)
+            highestValue = verifyFanState(configuration.relay3Enabled, configuration.relay3Association, highestValue)
+            highestValue = verifyFanState(configuration.relay4Enabled, configuration.relay4Association, highestValue)
+            highestValue = verifyFanState(configuration.relay5Enabled, configuration.relay5Association, highestValue)
+            highestValue = verifyFanState(configuration.relay6Enabled, configuration.relay6Association, highestValue)
+            highestValue = verifyFanState(configuration.relay7Enabled, configuration.relay7Association, highestValue)
+            highestValue = verifyFanState(configuration.relay8Enabled, configuration.relay8Association, highestValue)
 
-            return CpuEconRelayAssociation.values()[highestValue]
+            return CpuRelayType.values()[highestValue]
         }
-        private fun verifyFanState(state: RelayState, highestValue: Int): Int {
-            if (state.enabled && isRelayAssociatedToFan(state)
-                && state.association.ordinal > highestValue
+        private fun verifyFanState(enabled: EnableConfig, association: AssociationConfig, highestValue: Int): Int {
+            if (enabled.enabled && isRelayAssociatedToFan(association)
+                && association.associationVal > highestValue
             )
-                return state.association.ordinal
+                return association.associationVal
             return highestValue
         }
-
-
 
         fun getSelectedFanModeByLevel(fanLevel: Int, selectedFan: Int): StandaloneFanStage {
             try {
@@ -1467,103 +625,21 @@ class HyperStatSplitAssociationUtil {
             return StandaloneFanStage.OFF.ordinal
         }
 
-        fun getPhysicalPointUnit(assoc: UniversalInAssociation): String {
-
-            return when (assoc) {
-
-                UniversalInAssociation.CURRENT_TX_0_10 -> "mV"
-                UniversalInAssociation.CURRENT_TX_0_20 -> "mV"
-                UniversalInAssociation.CURRENT_TX_0_50 -> "mV"
-                UniversalInAssociation.CURRENT_TX_0_100 -> "mV"
-                UniversalInAssociation.CURRENT_TX_0_150 -> "mV"
-                UniversalInAssociation.SUPPLY_AIR_TEMPERATURE -> "kOhm"
-                UniversalInAssociation.MIXED_AIR_TEMPERATURE -> "kOhm"
-                UniversalInAssociation.OUTSIDE_AIR_TEMPERATURE -> "kOhm"
-                UniversalInAssociation.FILTER_NC -> "kOhm"
-                UniversalInAssociation.FILTER_NO -> "kOhm"
-                UniversalInAssociation.CONDENSATE_NC -> "kOhm"
-                UniversalInAssociation.CONDENSATE_NO -> "kOhm"
-                UniversalInAssociation.DUCT_PRESSURE_0_1 -> "mV"
-                UniversalInAssociation.DUCT_PRESSURE_0_2 -> "mV"
-                UniversalInAssociation.GENERIC_VOLTAGE -> "mV"
-                UniversalInAssociation.GENERIC_RESISTANCE -> "kOhm"
-                UniversalInAssociation.DUCT_PRESSURE_0_10 -> "mV"
-                UniversalInAssociation.GENERIC_FAULT_NC -> "kOhm"
-                UniversalInAssociation.GENERIC_FAULT_NO -> "kOhm"
-            }
-
-        }
-
-        fun getTempPort(state: SensorBusTempState): Port {
-            return when (state.association) {
-                CpuEconSensorBusTempAssociation.SUPPLY_AIR_TEMPERATURE_HUMIDITY -> {
-                    Port.SENSOR_SAT
-                }
-
-                CpuEconSensorBusTempAssociation.OUTSIDE_AIR_TEMPERATURE_HUMIDITY -> {
-                    Port.SENSOR_OAT
-                }
-
-                CpuEconSensorBusTempAssociation.MIXED_AIR_TEMPERATURE_HUMIDITY -> {
-                    Port.SENSOR_MAT
-                }
-            }
-        }
-
-        fun getHumidityPort(state: SensorBusTempState): Port {
-            return when (state.association) {
-                CpuEconSensorBusTempAssociation.SUPPLY_AIR_TEMPERATURE_HUMIDITY -> {
-                    Port.SENSOR_SAH
-                }
-
-                CpuEconSensorBusTempAssociation.OUTSIDE_AIR_TEMPERATURE_HUMIDITY -> {
-                    Port.SENSOR_OAH
-                }
-
-                CpuEconSensorBusTempAssociation.MIXED_AIR_TEMPERATURE_HUMIDITY -> {
-                    Port.SENSOR_MAH
-                }
-            }
-        }
-
-        fun getPressPort(state: SensorBusPressState): Port {
-            return when (state.association) {
-                CpuEconSensorBusPressAssociation.DUCT_PRESSURE -> {
-                    Port.SENSOR_PRESSURE
-                }
-                // This case should never occur
-            }
-
-        }
-
-        fun isStagedFanEnabled(
-            hyperStatConfig: HyperStatSplitCpuEconConfiguration,
-            fanStage: CpuEconRelayAssociation
-        ): Boolean {
-            return  hyperStatConfig.relay1State.enabled && hyperStatConfig.relay1State.association == fanStage ||
-                    hyperStatConfig.relay2State.enabled && hyperStatConfig.relay2State.association == fanStage ||
-                    hyperStatConfig.relay3State.enabled && hyperStatConfig.relay3State.association == fanStage ||
-                    hyperStatConfig.relay4State.enabled && hyperStatConfig.relay4State.association == fanStage ||
-                    hyperStatConfig.relay5State.enabled && hyperStatConfig.relay5State.association == fanStage ||
-                    hyperStatConfig.relay6State.enabled && hyperStatConfig.relay6State.association == fanStage ||
-                    hyperStatConfig.relay7State.enabled && hyperStatConfig.relay7State.association == fanStage ||
-                    hyperStatConfig.relay8State.enabled && hyperStatConfig.relay8State.association == fanStage
-        }
-
         fun isAnyAnalogOutMappedToStagedFan(
-            hyperStatConfig: HyperStatSplitCpuEconConfiguration,
+            hyperStatConfig: HyperStatSplitCpuProfileConfiguration,
         ): Boolean {
             return when {
-                (hyperStatConfig.analogOut1State.enabled &&
-                        isAnalogOutAssociatedToStagedFanSpeed(hyperStatConfig.analogOut1State)) -> true
-                (hyperStatConfig.analogOut2State.enabled &&
-                        isAnalogOutAssociatedToStagedFanSpeed(hyperStatConfig.analogOut2State)) -> true
-                (hyperStatConfig.analogOut3State.enabled &&
-                        isAnalogOutAssociatedToStagedFanSpeed(hyperStatConfig.analogOut3State)) -> true
+                (hyperStatConfig.analogOut1Enabled.enabled &&
+                        isAnalogOutAssociatedToStagedFanSpeed(hyperStatConfig.analogOut1Association)) -> true
+                (hyperStatConfig.analogOut2Enabled.enabled &&
+                        isAnalogOutAssociatedToStagedFanSpeed(hyperStatConfig.analogOut2Association)) -> true
+                (hyperStatConfig.analogOut3Enabled.enabled &&
+                        isAnalogOutAssociatedToStagedFanSpeed(hyperStatConfig.analogOut3Association)) -> true
+                (hyperStatConfig.analogOut4Enabled.enabled &&
+                        isAnalogOutAssociatedToStagedFanSpeed(hyperStatConfig.analogOut4Association)) -> true
                 else -> false
             }
         }
 
     }
-
 }

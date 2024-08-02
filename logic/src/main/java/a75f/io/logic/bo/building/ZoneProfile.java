@@ -32,6 +32,8 @@ public abstract class ZoneProfile
     public ZoneProfile()
     {
     }
+
+    public ZoneProfile(String equipRef, short nodeAddress) {}
     
     public abstract void updateZonePoints();
     

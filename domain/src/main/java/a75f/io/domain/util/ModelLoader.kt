@@ -91,6 +91,23 @@ object ModelLoader {
         return ModelCache.getModelById(MODEL_VAV_MODULATING_AHU)
     }
 
+    fun getHyperStatSplitCpuModel() : ModelDirective {
+        return ModelCache.getModelById(MODEL_HYPERSTAT_SPLIT_CPU)
+        //return ModelCache.getModelByFileName("models/hssCpu.json")
+    }
+
+    fun getHyperStatSplitDeviceModel() : ModelDirective {
+        return ModelCache.getModelById(MODEL_HYPERSTAT_SPLIT_DEVICE)
+    }
+
+    fun getSmartNodeDabModel() : ModelDirective {
+        return ModelCache.getModelById(MODEL_SMART_NODE_DAB)
+    }
+
+    fun getHelioNodeDabModel() : ModelDirective {
+        return ModelCache.getModelById(MODEL_HELIO_NODE_DAB)
+    }
+
     fun getModelForDomainName( domainName : String) : ModelDirective {
         return when(domainName) {
             "smartnodeVAVReheatNoFan" -> getSmartNodeVavNoFanModelDef()
@@ -104,6 +121,9 @@ object ModelLoader {
             "helionodeActiveChilledBeam" -> getHelioNodeVavAcbModelDef()
             "vavAdvancedHybridAhuV2" -> getVavAdvancedAhuCmModelV2()
             "vavAdvancedHybridAhuV2_connectModule" -> getVavAdvancedAhuConnectModelV2()
+            "hyperstatSplitCpu" -> getHyperStatSplitCpuModel()
+            "smartnodeDAB" -> getSmartNodeDabModel()
+            "helionodeDAB" -> getHelioNodeDabModel()
             else -> throw IllegalStateException("Invalid Model Name")
         }
     }

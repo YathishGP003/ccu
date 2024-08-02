@@ -557,23 +557,25 @@ public class CreateNewSite extends Fragment {
     private void handleRegistrationAsync(String installerEmail) {
         CcuLog.d(TAG, "Register Button Clicked");
         RxjavaUtil.executeBackgroundTask(
-            () -> ProgressDialogUtils.showProgressDialog(getActivity(), "Registering CCU..."),
-            () -> {
-                CCUHsApi.getInstance().registerCcu(installerEmail);
-                CCUHsApi.getInstance().resyncSiteTree(); },
-            ()-> {
-                if (!CCUHsApi.getInstance().isCCURegistered()) {
-                    Toast.makeText(getActivity(), "CCU Registration Failed ", Toast.LENGTH_LONG).show();
-                } else {
-                    btnUnregisterSite.setText("Unregister");
-                    btnUnregisterSite.setEnabled(true);
-                    btnUnregisterSite.setTextColor(getResources().getColor(R.color.black_listviewtext));
-                    imgUnregisterSite.setColorFilter(getResources().getColor(R.color.black_listviewtext), PorterDuff.Mode.SRC_IN);
-                    setCompoundDrawableColor(btnUnregisterSite, R.color.black_listviewtext);
-                    Toast.makeText(getActivity(), "CCU Registered Successfully ", Toast.LENGTH_LONG).show();
-                }
-                ProgressDialogUtils.hideProgressDialog();
-            });
+                () -> ProgressDialogUtils.showProgressDialog(getActivity(), "Registering CCU..."),
+                () -> {
+                    CCUHsApi.getInstance().registerCcu(installerEmail);
+                    CCUHsApi.getInstance().resyncSiteTree();
+                    Globals.getInstance().copyModels();
+                },
+                () -> {
+                    if (!CCUHsApi.getInstance().isCCURegistered()) {
+                        Toast.makeText(getActivity(), "CCU Registration Failed ", Toast.LENGTH_LONG).show();
+                    } else {
+                        btnUnregisterSite.setText("Unregister");
+                        btnUnregisterSite.setEnabled(true);
+                        btnUnregisterSite.setTextColor(getResources().getColor(R.color.black_listviewtext));
+                        imgUnregisterSite.setColorFilter(getResources().getColor(R.color.black_listviewtext), PorterDuff.Mode.SRC_IN);
+                        setCompoundDrawableColor(btnUnregisterSite, R.color.black_listviewtext);
+                        Toast.makeText(getActivity(), "CCU Registered Successfully ", Toast.LENGTH_LONG).show();
+                    }
+                    ProgressDialogUtils.hideProgressDialog();
+                });
     }
 
     //1650 W 82nd St #200, Bloomington, MN 55431

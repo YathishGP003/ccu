@@ -25,17 +25,6 @@ public class FeedbackPointTest extends TestCase {
         hayStack.tagsDb.getBoxStore().close();
     }
 
-    // Function to test DAB feedback point creation
-
-    @Test
-    public  void testCreateDABFeedbackPoint(){
-        String feedbackPointID =  DabEquip.createFeedbackPoint(hayStack,1000,"siteDis","equipRef","siteRef","roomRef",
-                "floorRef", "tz");
-        Assert.assertNotNull(feedbackPointID);
-        HashMap<Object, Object> feedbackPoint = hayStack.readEntity("dab and damper and sensor");
-        Assert.assertFalse(feedbackPoint.isEmpty());
-
-    }
 
     // Function to test DualDuct point creation
 

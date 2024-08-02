@@ -1,10 +1,9 @@
 package a75f.io.renatus;
 
+import static a75f.io.logic.bo.building.dab.DabProfile.CARRIER_PROD;
 import static a75f.io.logic.bo.util.DesiredTempDisplayMode.setSystemModeForDab;
-import static a75f.io.renatus.FragmentDABConfiguration.CARRIER_PROD;
 
 import android.annotation.SuppressLint;
-import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -14,7 +13,6 @@ import a75f.io.device.mesh.DeviceUtil;
 import a75f.io.renatus.util.SystemProfileUtil;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.appcompat.app.AlertDialog;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -35,15 +33,12 @@ import java.util.Arrays;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.device.mesh.MeshUtil;
-import a75f.io.device.serial.CcuToCmOverUsbCmRelayActivationMessage_t;
-import a75f.io.device.serial.MessageType;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.dab.DabStagedRtu;
 import a75f.io.logic.bo.haystack.device.ControlMote;
-import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.renatus.registration.FreshRegistration;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.Prefs;

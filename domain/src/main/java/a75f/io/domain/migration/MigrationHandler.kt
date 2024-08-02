@@ -172,13 +172,44 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
         newModel: ModelDirective,
         devices: List<Device>,
         siteRef: String
-    ) {
-        if(tobeUpdated.isEmpty()) return
-        tobeUpdated.forEach { diffDomain ->
-            //yet to implement
+    ){
+        devices.forEach { device ->
+            CcuLog.d(Domain.LOG_TAG, "Update device Id: ${device.id}, domainName: ${device.domainName}")
+            val deviceHdict = haystack.readHDict("device and id == " + device.id)
+            val haystackDevice = a75f.io.api.haystack.Device.Builder().setHDict(deviceHdict).build()
+            val deviceEntity = haystack.readEntity("equip and id == " + haystackDevice.equipRef)
+            val sourceModel = deviceEntity["sourceModel"].toString()
+            val modelDirective = ModelCache.getModelById(sourceModel)
+            val profileConfiguration = getProfileConfig(deviceEntity["profile"].toString())
+            updateRef(deviceEntity, profileConfiguration)
+            val entityMapper = EntityMapper(modelDirective as SeventyFiveFProfileDirective)
+            val deviceBuilder = DeviceBuilder(haystack, entityMapper)
+            var devicePoints = haystack.readAllEntities("point and deviceRef == \"${device.id}\"")
+
+            tobeUpdated.forEach { diffDomain ->
+                val modelPointDef = newModel.points.find { it.domainName == diffDomain.domainName }
+                val point = devicePoints.find { it["domainName"].toString() == diffDomain.domainName }
+                try {
+                    if (point != null) {
+                        deviceBuilder.updatePoint(
+                            modelPointDef as SeventyFiveFDevicePointDef,
+                            profileConfiguration,
+                            haystackDevice,
+                            point)
+                    }
+                    CcuLog.d(Domain.LOG_TAG, "Device updated: ${haystackDevice.displayName} with domainName: ${diffDomain.domainName} ")
+                } catch (e: Exception) {
+                    CcuLog.d(Domain.LOG_TAG,"Exception: $e")
+                    e.printStackTrace()
+                }
+            }
+            deviceBuilder.updateDevice(
+                haystackDevice.id.toString(),
+                newModel as SeventyFiveFDeviceDirective,
+                haystackDevice.displayName
+            )
         }
     }
-
 
     private fun removeDeviceEntityData(
         tobeDeleted: MutableList<EntityConfig>,
@@ -187,8 +218,36 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
         siteRef: String
     ) {
         if(tobeDeleted.isEmpty()) return
-        tobeDeleted.forEach { diffDomain ->
-            //yet to implement
+        devices.forEach { device ->
+            val deviceHdict = haystack.readHDict("device and id == " + device.id)
+            val haystackDevice = a75f.io.api.haystack.Device.Builder().setHDict(deviceHdict).build()
+            val deviceEntity = haystack.readEntity("equip and id == " + haystackDevice.equipRef)
+            val sourceModel = deviceEntity["sourceModel"].toString()
+            val modelDirective = ModelCache.getModelById(sourceModel)
+            val profileConfiguration = getProfileConfig(deviceEntity["profile"].toString())
+            val entityMapper = EntityMapper(modelDirective as SeventyFiveFProfileDirective)
+            val deviceBuilder = DeviceBuilder(haystack , entityMapper)
+            val devicePoints = haystack.readAllEntities("point and deviceRef == \"${device.id}\"")
+            tobeDeleted.forEach { diffDomain ->
+                val point =
+                    devicePoints.find { it["domainName"].toString() == diffDomain.domainName }
+                try {
+                    if (!point.isNullOrEmpty()) {
+                        CcuLog.d(Domain.LOG_TAG , "Remove device point: ${point["domainName"]} for device ${haystackDevice.displayName}")
+                        val modelPointDef = oldModel.points.find { it.domainName == diffDomain.domainName }
+                        val pointEntity = deviceBuilder.buildRawPoint(
+                            modelPointDef as SeventyFiveFDevicePointDef ,
+                            profileConfiguration ,
+                            haystackDevice
+                        )
+                        DomainManager.removeDeviceRawPoint(pointEntity)
+                        haystack.deleteEntity(point["id"].toString())
+                    }
+                } catch (e: Exception) {
+                    CcuLog.d(Domain.LOG_TAG , "Exception: $e")
+                    e.printStackTrace()
+                }
+            }
         }
     }
 

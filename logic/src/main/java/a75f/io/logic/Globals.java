@@ -470,8 +470,7 @@ public class Globals {
                             L.ccu().zoneProfiles.add(acb);
                             break;
                         case DAB:
-                            DabProfile dab = new DabProfile();
-                            dab.addDabEquip(Short.parseShort(eq.getGroup()));
+                            DabProfile dab = new DabProfile(Short.parseShort(eq.getGroup()));
                             L.ccu().zoneProfiles.add(dab);
                             break;
                         case DUAL_DUCT:
@@ -553,8 +552,7 @@ public class Globals {
                             break;
 
                         case HYPERSTATSPLIT_CPU:
-                            HyperStatSplitCpuEconProfile cpuEcon = new HyperStatSplitCpuEconProfile();
-                            cpuEcon.addEquip(Short.parseShort(eq.getGroup()));
+                            HyperStatSplitCpuEconProfile cpuEcon = new HyperStatSplitCpuEconProfile(eq.getId(), Short.parseShort(eq.getGroup()));
                             L.ccu().zoneProfiles.add(cpuEcon);
                             break;
 
@@ -594,7 +592,7 @@ public class Globals {
 
         }
 
-        HashMap<Object, Object> oaoEquip = CCUHsApi.getInstance().readEntity("equip and oao");
+        HashMap<Object, Object> oaoEquip = CCUHsApi.getInstance().readEntity("equip and oao and not hyperstatsplit");
         if (oaoEquip != null && oaoEquip.size() > 0) {
             CcuLog.d(L.TAG_CCU, "Create Default OAO Profile");
             OAOProfile oao = new OAOProfile();
@@ -645,6 +643,8 @@ public class Globals {
                 return ProfileType.VAV_SERIES_FAN.name();
             case DomainName.activeChilledBeam:
                 return ProfileType.VAV_ACB.name();
+            case DomainName.hyperstatSplitCPU:
+                return ProfileType.HYPERSTATSPLIT_CPU.name();
             default:
                 return profile;
         }

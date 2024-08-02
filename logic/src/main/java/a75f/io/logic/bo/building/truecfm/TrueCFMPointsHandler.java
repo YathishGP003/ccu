@@ -11,7 +11,7 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Units;
 import a75f.io.logic.BacnetIdKt;
 import a75f.io.logic.BacnetUtilKt;
-import a75f.io.logic.bo.building.dab.DabProfileConfiguration;
+import a75f.io.logic.bo.building.dab.DabProfileConfigurationOld;
 
 public class TrueCFMPointsHandler {
     
@@ -194,13 +194,13 @@ public class TrueCFMPointsHandler {
         hayStack.writeHisValById(airVelocityId, 0.0);
     }
     public static void createTrueCFMDABPoints(CCUHsApi hayStack, String equipRef,
-                                              DabProfileConfiguration dabProfileConfiguration) {
+                                              DabProfileConfigurationOld dabProfileConfigurationOld) {
         HashMap<Object, Object> equipMap = hayStack.readMapById(equipRef);
         Equip equip = new Equip.Builder().setHashMap(equipMap).build();
 
-        createTrueCFMKFactorPoint(hayStack, equip, Tags.DAB, dabProfileConfiguration.kFactor, null);
+        createTrueCFMKFactorPoint(hayStack, equip, Tags.DAB, dabProfileConfigurationOld.kFactor, null);
 
-        createTrueCFMIaqMin(hayStack, equip, Tags.DAB, dabProfileConfiguration.minCFMForIAQ);
+        createTrueCFMIaqMin(hayStack, equip, Tags.DAB, dabProfileConfigurationOld.minCFMForIAQ);
 
         createTrueCfmSpPoints(hayStack, equip, Tags.DAB, null);
     }

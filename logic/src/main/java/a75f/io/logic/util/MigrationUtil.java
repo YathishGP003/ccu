@@ -2,7 +2,7 @@ package a75f.io.logic.util;
 
 
 import static a75f.io.logic.L.TAG_CCU_MIGRATION_UTIL;
-import static a75f.io.logic.bo.building.dab.DabEquip.CARRIER_PROD;
+import static a75f.io.logic.bo.building.dab.DabProfile.CARRIER_PROD;
 import static a75f.io.logic.migration.firmware.FirmwareVersionPointMigration.initFirmwareVersionPointMigration;
 import static a75f.io.logic.migration.firmware.FirmwareVersionPointMigration.initRemoteFirmwareVersionPointMigration;
 import static a75f.io.logic.util.PreferenceUtil.FIRMWARE_VERSION_POINT_MIGRATION;
@@ -40,6 +40,7 @@ import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.L;
 import a75f.io.logic.autocommission.remoteSession.RemoteSessionStatus;
 import a75f.io.logic.bo.building.ccu.RoomTempSensor;
+import a75f.io.logic.bo.building.ccu.SupplyTempSensor;
 import a75f.io.logic.bo.building.definitions.Consts;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ScheduleType;

@@ -1,10 +1,9 @@
 package a75f.io.renatus;
 
+import static a75f.io.logic.bo.building.dab.DabProfile.CARRIER_PROD;
 import static a75f.io.logic.bo.util.DesiredTempDisplayMode.setSystemModeForDab;
-import static a75f.io.renatus.FragmentDABConfiguration.CARRIER_PROD;
 
 import android.annotation.SuppressLint;
-import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -14,7 +13,6 @@ import a75f.io.device.mesh.DeviceUtil;
 import a75f.io.renatus.util.SystemProfileUtil;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.appcompat.app.AlertDialog;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;

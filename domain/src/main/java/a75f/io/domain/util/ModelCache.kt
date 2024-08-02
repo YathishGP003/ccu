@@ -78,6 +78,13 @@ object ModelCache {
 
         modelContainer[MODEL_HN_VAV_ACB] = getModelById(MODEL_HN_VAV_ACB)
         CcuLog.i(Domain.LOG_TAG, "helioNodeActiveChilledBeam equip model loaded")
+
+        modelContainer[MODEL_SMART_NODE_DAB] = getModelById(MODEL_SMART_NODE_DAB)
+        CcuLog.i(Domain.LOG_TAG, "smartnodeDAB equip model loaded")
+
+        modelContainer[MODEL_HELIO_NODE_DAB] = getModelById(MODEL_HELIO_NODE_DAB)
+        CcuLog.i(Domain.LOG_TAG, "helionodeDAB equip model loaded")
+
     }
 
     private fun loadSystemProfileModels() {
@@ -120,5 +127,13 @@ object ModelCache {
         CcuLog.i(Domain.LOG_TAG, "Model Loaded from FS ${model.name}  ${model.version?.major}.${model.version?.minor}.${model.version?.patch}")
         modelContainer[modelId] = model
         return model
+    }
+
+    fun getModelByFileName( fileName : String) : ModelDirective {
+        return if (context != null) {
+            ResourceHelper.loadModel(fileName, context!!)
+        } else {
+            ResourceHelper.loadModel(fileName)
+        }
     }
  }

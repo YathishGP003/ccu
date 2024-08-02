@@ -1,6 +1,6 @@
 package a75f.io.messaging.handler;
 
-import static a75f.io.logic.bo.building.dab.DabReheatPointsKt.updateReheatType;
+import static a75f.io.logic.bo.building.dab.DabReheatPointsKt.updateReheatTypeByDomain;
 
 import com.google.gson.JsonObject;
 
@@ -11,11 +11,10 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
+import a75f.io.domain.api.DomainName;
 import a75f.io.domain.logic.ProfileEquipBuilder;
 import a75f.io.domain.util.ModelLoader;
 import a75f.io.logger.CcuLog;
-import a75f.io.logic.BacnetIdKt;
-import a75f.io.logic.BacnetUtilKt;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.DamperType;
 import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
@@ -38,21 +37,21 @@ public class DamperReheatTypeHandler {
         int typeVal = msgObject.get("val").getAsInt();
 
         if (configPoint.getMarkers().contains(Tags.DAMPER) && configPoint.getMarkers().contains(Tags.DAB)) {
-
-            if (configPoint.getMarkers().contains(Tags.PRIMARY)) {
-                SmartNode.updatePhysicalPointType(address, Port.ANALOG_OUT_ONE.toString(),
+            HashMap<Object, Object> damperType =
+                    hayStack.readEntity("point and id == \"" + configPoint.getId() + "\"");
+            if (damperType.containsKey("domainName") && damperType.get("domainName").equals("damper1Type")) {
+                SmartNode.updateDomainPhysicalPointType(address, "analog1Out",
                         DamperType.values()[typeVal].displayName);
-            } else if (configPoint.getMarkers().contains(Tags.SECONDARY)) {
-                double reheatType = hayStack.readDefaultVal("reheat and type and group == \"" + configPoint.getGroup() + "\"");
+            } else if (damperType.containsKey("domainName") && damperType.get("domainName").equals("damper2Type")) {
+                double reheatType = hayStack.readDefaultVal("point and domainName == \"" + DomainName.reheatType + "\" and group == \"" + configPoint.getGroup() + "\"");
                 if (reheatType == 0 || (reheatType - 1) > ReheatType.Pulse.ordinal()) {
                     //When reheat is mapped to AO2 , we cant use it.
-                    SmartNode.updatePhysicalPointType(address, Port.ANALOG_OUT_TWO.toString(),
-                            DamperType.values()[typeVal].displayName);
-                    SmartNode.setPointEnabled(address, Port.ANALOG_OUT_TWO.toString(), true);
+                    SmartNode.updateDomainPhysicalPointType(address, "analog2Out", ReheatType.values()[typeVal].displayName);
+                    SmartNode.setDomainPointEnabled(address, "analog2Out", false, hayStack);
 
                     if (typeVal < DamperType.MAT.ordinal()) {
-                        HashMap<Object, Object> normalizedSecDamper = hayStack
-                                .readEntity("normalized and secondary and damper and cmd and equipRef ==\"" + configPoint.getEquipRef() + "\"");
+                        HashMap<Object, Object> normalizedSecDamper =
+                                hayStack.readEntity("point and domainName == \"" + DomainName.normalizedDamper1Cmd + "\" and equipRef == \"" + configPoint.getEquipRef() + "\"");
                         CcuLog.i("CCU_ZONE", normalizedSecDamper.toString());
                         if (!normalizedSecDamper.isEmpty()) {
                             DeviceUtil.updatePhysicalPointRef(Integer.parseInt(configPoint.getGroup()),
@@ -63,33 +62,10 @@ public class DamperReheatTypeHandler {
                 }
             }
         } else if (configPoint.getMarkers().contains(Tags.REHEAT) && configPoint.getMarkers().contains(Tags.DAB)) {
-            updateReheatType(typeVal, 40, configPoint.getEquipRef(), hayStack, BacnetIdKt.REHEATCMDID, BacnetUtilKt.ANALOG_VALUE);
+             updateReheatTypeByDomain(msgObject, typeVal, hayStack, address, configPoint);
             if (typeVal == 0) {
-                SmartNode.setPointEnabled(address, Port.RELAY_ONE.name(), false);
-                SmartNode.setPointEnabled(address, Port.RELAY_TWO.name(), false);
-            } else if ((typeVal - 1) <= ReheatType.Pulse.ordinal()) {
-                //Modulating Reheat -> Enable AnalogOut2 and disable relays
-                SmartNode.updatePhysicalPointType(address, Port.ANALOG_OUT_TWO.toString(), ReheatType.values()[typeVal - 1].displayName);
-                SmartNode.setPointEnabled(address, Port.ANALOG_OUT_TWO.toString(), true);
-                SmartNode.setPointEnabled(address, Port.RELAY_ONE.name(), false);
-                SmartNode.setPointEnabled(address, Port.RELAY_TWO.name(), false);
-            } else {
-                SmartNode.updatePhysicalPointType(address, Port.RELAY_ONE.toString(),
-                        OutputRelayActuatorType.NormallyClose.displayName);
-                SmartNode.setPointEnabled(address, Port.RELAY_ONE.toString(), true);
-                if ((typeVal - 1) == ReheatType.TwoStage.ordinal()) {
-                    SmartNode.updatePhysicalPointType(address, Port.RELAY_TWO.toString(), OutputRelayActuatorType.NormallyClose.displayName);
-                    SmartNode.setPointEnabled(address, Port.RELAY_TWO.toString(), true);
-                } else {
-                    SmartNode.setPointEnabled(address, Port.RELAY_TWO.toString(), false);
-                }
-
-                double damperType = hayStack.readDefaultVal("secondary and damper and type and group == \"" + configPoint.getGroup() + "\"");
-                if (damperType == DamperType.MAT.ordinal()) {
-                    SmartNode.setPointEnabled(address, Port.ANALOG_OUT_TWO.toString(), true);
-                    SmartNode.updatePhysicalPointType(address, Port.ANALOG_OUT_TWO.toString(),
-                            DamperType.MAT.displayName);
-                }
+                SmartNode.setDomainPointEnabled(address, Port.RELAY_ONE.name(), false, hayStack);
+                SmartNode.setDomainPointEnabled(address, Port.RELAY_TWO.name(), false, hayStack);
             }
         } else if (configPoint.getMarkers().contains(Tags.DAMPER) && configPoint.getMarkers().contains(Tags.VAV)) {
             SmartNode.updateDomainPhysicalPointType(address, "analog2Out",

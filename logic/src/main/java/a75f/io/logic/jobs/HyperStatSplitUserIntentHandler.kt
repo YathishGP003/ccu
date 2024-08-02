@@ -3,6 +3,7 @@ package a75f.io.logic.jobs
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Point
 import a75f.io.logger.CcuLog
+import a75f.io.domain.api.DomainName
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.EpidemicState
 import a75f.io.logic.interfaces.ZoneDataInterface
@@ -245,7 +246,7 @@ class HyperStatSplitUserIntentHandler {
                 if (status.isEmpty()) status = " OFF"
 
                 CCUHsApi.getInstance().writeDefaultVal(
-                    "point and status and message and writable and equipRef == \"$equipId\"", status
+                    "point and domainName == \"" + DomainName.equipStatusMessage + "\" and equipRef == \"$equipId\"", status
                 )
                 zoneDataInterface?.refreshScreen("", false)
             }
@@ -253,7 +254,7 @@ class HyperStatSplitUserIntentHandler {
 
         fun isFanModeChangeUnnecessary(equipRef: String, userIntentFanMode: Int): Boolean {
             val haystack: CCUHsApi = CCUHsApi.getInstance()
-            val currentFanMode = haystack.readPointPriorityValByQuery("zone and fan and mode and operation and equipRef == \"$equipRef\"").toInt()
+            val currentFanMode = haystack.readPointPriorityValByQuery("point and domainName == \"" + DomainName.fanOpMode + "\" and equipRef == \"$equipRef\"").toInt()
             // Ignore a change to OFF if current Fan Mode is OFF
             val isAlreadyFanOff = userIntentFanMode == StandaloneFanStage.OFF.ordinal
                     && currentFanMode == StandaloneFanStage.OFF.ordinal

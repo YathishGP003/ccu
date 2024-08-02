@@ -21,6 +21,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
@@ -55,6 +56,7 @@ import a75f.io.logic.util.RxTask;
 import a75f.io.messaging.client.MessagingClient;
 import a75f.io.renatus.BuildConfig;
 import a75f.io.renatus.R;
+import a75f.io.renatus.RebootHandlerService;
 import a75f.io.renatus.RenatusApp;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.CCUUtils;
@@ -62,6 +64,7 @@ import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.util.RxjavaUtil;
 import a75f.io.usbserial.UsbSerialUtil;
 import butterknife.BindView;
+import java.util.Calendar;
 import butterknife.ButterKnife;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 
@@ -168,7 +171,14 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
     public @BindView(R.id.deleteBuildingTuners) Button deleteBuildingTuners;
     public @BindView(R.id.deleteBuildingEquipLocally) Button deleteBuildingEquipLocally;
     public @BindView(R.id.deleteAllBuildingEntitiesLocally) Button deleteBuildingEntitiesLocally;
-
+    public @BindView(R.id.rebootDay) Spinner rebootDaySpinner;
+    public @BindView(R.id.rebootHour) Spinner rebootHourSpinner;
+    public @BindView(R.id.rebootMinute) Spinner rebootMinuteSpinner;
+    public @BindView(R.id.rebootDaysCount) Spinner rebootDaysCountSpinner;
+    public @BindView(R.id.rebootDaysCountText) TextView rebootDaysCountText;
+    public @BindView(R.id.initiateReboot) Button btnInitiateReboot;
+    public @BindView(R.id.rebootLayout1) LinearLayout rebootLayout1;
+    public @BindView(R.id.rebootLayout2) LinearLayout rebootLayout2;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                                   Bundle savedInstanceState) {
@@ -468,6 +478,76 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
             }
         });
 
+        if ( BuildConfig.BUILD_TYPE.equals("staging")
+                || BuildConfig.BUILD_TYPE.equals("qa")
+                || BuildConfig.BUILD_TYPE.equals("dev_qa")) {
+            rebootLayout1.setVisibility(View.VISIBLE);
+            rebootLayout2.setVisibility(View.VISIBLE);
+        }
+        else {
+            rebootLayout1.setVisibility(View.GONE);
+            rebootLayout2.setVisibility(View.GONE);
+        }
+
+        rebootDaySpinner.setSelection(spDefaultPrefs.getInt("rebootDay", 2));
+        rebootDaySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (position == 0) {
+                    rebootDaysCountSpinner.setVisibility(View.VISIBLE);
+                    rebootDaysCountText.setVisibility(View.VISIBLE);
+                }
+                else {
+                    rebootDaysCountSpinner.setVisibility(View.INVISIBLE);
+                    rebootDaysCountText.setVisibility(View.INVISIBLE);
+                }
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                // Handle case where no item is selected
+            }
+        });
+
+        ArrayList<Integer> noOfDaysCount = new ArrayList<>();
+        for (int val = 0;  val <= 30; val++)
+        {
+            noOfDaysCount.add(val);
+        }
+
+        ArrayAdapter<Integer> daysCountAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, noOfDaysCount);
+        rebootDaysCountSpinner.setAdapter(daysCountAdapter);
+        rebootDaysCountSpinner.setSelection(spDefaultPrefs.getInt("rebootDaysCount", 1));
+
+        ArrayList<Integer> hoursCount = new ArrayList<>();
+        for (int val = 0;  val <= 23; val++)
+        {
+            hoursCount.add(val);
+        }
+        ArrayAdapter<Integer> hoursAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, hoursCount);
+        rebootHourSpinner.setAdapter(hoursAdapter);
+        rebootHourSpinner.setSelection(spDefaultPrefs.getInt("rebootHour", 23));
+
+        ArrayList<Integer> minutesCount = new ArrayList<>();
+        for (int val = 0;  val <= 59; val++)
+        {
+            minutesCount.add(val);
+        }
+        ArrayAdapter<Integer> minutesAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_dropdown_item, minutesCount);
+        rebootMinuteSpinner.setAdapter(minutesAdapter);
+        rebootMinuteSpinner.setSelection(spDefaultPrefs.getInt("rebootMinute", 0));
+
+        btnInitiateReboot.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if ( validateForReboot() ) {
+                    spDefaultPrefs.edit().putInt("rebootMinute", rebootMinuteSpinner.getSelectedItemPosition()).apply();
+                    spDefaultPrefs.edit().putInt("rebootHour", rebootHourSpinner.getSelectedItemPosition()).apply();
+                    spDefaultPrefs.edit().putInt("rebootDay", rebootDaySpinner.getSelectedItemPosition()).apply();
+                    spDefaultPrefs.edit().putInt("rebootDaysCount", rebootDaysCountSpinner.getSelectedItemPosition()).apply();
+                    RebootHandlerService.scheduleRebootJob(getActivity(),true);
+                }
+            }
+        });
         recreateBuildingPoints.setOnClickListener(recreateButton -> {
                 String msg = "The CCU already has all the building points when compared to Model.\nContinuing with this operation will recreate the equip and all points.\nIf you want to sync the existing points with cloud, please use \"Pull Building Tuners\". ";
                 executeOperationWithConfirmation(hayStack, msg, this::reconstructLocalBuildingPoints);
@@ -497,6 +577,21 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
                 () -> deleteBuildingEntitiesLocally(hayStack),
                 ProgressDialogUtils::hideProgressDialog
         )));
+    }
+    private boolean validateForReboot() {
+        Calendar calendar = Calendar.getInstance();
+
+        int currentHour = calendar.get(Calendar.HOUR_OF_DAY); // 24-hour format
+        int currentMinute = calendar.get(Calendar.MINUTE);
+        if (currentHour >= rebootHourSpinner.getSelectedItemPosition()
+                && currentMinute >= rebootMinuteSpinner.getSelectedItemPosition()
+                && rebootDaysCountSpinner.getSelectedItemPosition() == 0
+                && rebootDaySpinner.getSelectedItemPosition() == 0) {
+            Toast.makeText(getContext(), "Reboot time is same or lesser than current time. Please select a different time.", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        return true;
     }
 
     private boolean doesCcuLackBuildingPoints(CCUHsApi hayStack) {

@@ -93,7 +93,6 @@ object ModelLoader {
 
     fun getHyperStatSplitCpuModel() : ModelDirective {
         return ModelCache.getModelById(MODEL_HYPERSTAT_SPLIT_CPU)
-        //return ModelCache.getModelByFileName("models/hssCpu.json")
     }
 
     fun getHyperStatSplitDeviceModel() : ModelDirective {

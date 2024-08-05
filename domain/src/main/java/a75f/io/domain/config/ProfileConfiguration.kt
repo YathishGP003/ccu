@@ -90,4 +90,5 @@ abstract class ProfileConfiguration (var nodeAddress : Int, var nodeType : Strin
     override fun toString(): String {
         return "nodeAddr $nodeAddress roomRef $roomRef floorRe $floorRef"
     }
+
 }

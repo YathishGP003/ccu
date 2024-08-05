@@ -11,6 +11,7 @@ import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.logic.DomainManager
 import a75f.io.domain.logic.PointBuilderConfig
 import a75f.io.logger.CcuLog
+import android.graphics.ColorSpace.Model
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfilePointDef
 import io.seventyfivef.domainmodeler.common.point.Constraint
@@ -43,6 +44,8 @@ class PointsUtil(private val hayStack : CCUHsApi) {
 
     fun getModelFromEquip(equip: Equip): SeventyFiveFProfileDirective? {
         return when (equip.domainName) {
+            DomainName.smartnodeDAB -> ModelLoader.getSmartNodeDabModel() as SeventyFiveFProfileDirective
+            DomainName.helionodeDAB -> ModelLoader.getHelioNodeDabModel() as SeventyFiveFProfileDirective
             DomainName.smartnodeVAVReheatNoFan -> ModelLoader.getSmartNodeVavNoFanModelDef() as SeventyFiveFProfileDirective
             DomainName.smartnodeVAVReheatParallelFan -> ModelLoader.getSmartNodeVavParallelFanModelDef() as SeventyFiveFProfileDirective
             DomainName.smartnodeVAVReheatSeriesFan -> ModelLoader.getSmartNodeVavSeriesModelDef() as SeventyFiveFProfileDirective
@@ -52,6 +55,7 @@ class PointsUtil(private val hayStack : CCUHsApi) {
             DomainName.helionodeVAVReheatSeriesFan -> ModelLoader.getHelioNodeVavSeriesModelDef() as SeventyFiveFProfileDirective
             DomainName.helionodeActiveChilledBeam -> ModelLoader.getHelioNodeVavAcbModelDef() as SeventyFiveFProfileDirective
             DomainName.smartnodeBypassDamper -> ModelLoader.getSmartNodeBypassDamperModelDef() as SeventyFiveFProfileDirective
+            DomainName.hyperstatSplitCPU -> ModelLoader.getHyperStatSplitCpuModel() as SeventyFiveFProfileDirective
             else -> null
         }
     }

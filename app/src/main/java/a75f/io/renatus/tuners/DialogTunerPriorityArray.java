@@ -7,7 +7,7 @@ import static a75f.io.logic.bo.util.UnitUtils.doesPointNeedRelativeDeadBandConve
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusTuner;
 import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
 import static a75f.io.logic.bo.util.UnitUtils.roundToHalf;
-import static a75f.io.renatus.FragmentDABConfiguration.CARRIER_PROD;
+import static a75f.io.logic.bo.building.dab.DabProfile.CARRIER_PROD;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -51,6 +51,15 @@ import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.TunerNumberPicker;
 import butterknife.ButterKnife;
+
+import static a75f.io.logic.bo.building.dab.DabProfile.CARRIER_PROD;
+import static a75f.io.logic.bo.util.UnitUtils.convertingDeadBandValueFtoC;
+import static a75f.io.logic.bo.util.UnitUtils.convertingRelativeValueFtoC;
+import static a75f.io.logic.bo.util.UnitUtils.doesPointNeedRelativeConversion;
+import static a75f.io.logic.bo.util.UnitUtils.doesPointNeedRelativeDeadBandConversion;
+import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusTuner;
+import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
+import static a75f.io.logic.bo.util.UnitUtils.roundToHalf;
 
 public class DialogTunerPriorityArray extends BaseDialogFragment implements PriorityItemClickListener, TunerUndoClickListener {
     public static final String ID = DialogTunerPriorityArray.class.getSimpleName();

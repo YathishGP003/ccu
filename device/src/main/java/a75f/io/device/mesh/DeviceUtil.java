@@ -40,11 +40,14 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
+import a75f.io.api.haystack.RawPoint;
+import a75f.io.api.haystack.Zone;
 import a75f.io.constants.DeviceFieldConstants;
 import a75f.io.device.serial.CcuToCmOverUsbCmRelayActivationMessage_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.domain.api.Domain;
 import a75f.io.domain.api.PhysicalPoint;
+import a75f.io.domain.api.DomainName;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.Port;
@@ -66,7 +69,14 @@ public class DeviceUtil {
                ||port.equals(Port.ANALOG_OUT_THREE.name())
                ||port.equals(Port.ANALOG_OUT_FOUR.name()));
     }
-    
+
+    public static boolean isAnalog(RawPoint rawPoint) {
+        return (rawPoint.getDomainName().equals(DomainName.analog1Out)
+                ||rawPoint.getDomainName().equals(DomainName.analog2Out)
+                ||rawPoint.getDomainName().equals(DomainName.analog3Out)
+                ||rawPoint.getDomainName().equals(DomainName.analog4Out));
+    }
+
     public static short mapAnalogOut(String type, short val) {
         val = (short)Math.min(val, 100);
         val = (short)Math.max(val, 0);

@@ -7,6 +7,7 @@ import a75f.io.api.haystack.Point
 import a75f.io.api.haystack.RawPoint
 import a75f.io.api.haystack.Tags
 import a75f.io.domain.api.Domain
+import a75f.io.domain.api.DomainName
 import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.cutover.BuildingEquipCutOverMapping
 import a75f.io.domain.cutover.devicePointWithDomainNameExists
@@ -65,6 +66,7 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
             .setSiteRef(siteRef)
 
         modelDef.tags.filter { it.kind == TagType.MARKER && it.name.lowercase() != "addr"}.forEach{ deviceBuilder.addMarker(it.name)}
+        if (modelDef.domainName.equals(DomainName.hyperstatSplitDevice)) { deviceBuilder.addMarker("node") }
 
         deviceBuilder.addTag("sourceModel", HStr.make(modelDef.id))
         deviceBuilder.addTag(
@@ -77,7 +79,7 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
         return deviceBuilder.build()
     }
 
-    private fun buildRawPoint(modelDef: SeventyFiveFDevicePointDef, configuration: ProfileConfiguration, device: Device) : RawPoint{
+    fun buildRawPoint(modelDef: SeventyFiveFDevicePointDef, configuration: ProfileConfiguration, device: Device) : RawPoint{
         CcuLog.i(Domain.LOG_TAG, "buildRawPoint ${modelDef.domainName}")
         val pointBuilder = RawPoint.Builder().setDisplayName(modelDef.name)
             .setDomainName(modelDef.domainName)
@@ -197,7 +199,7 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
         }
     }
 
-    private fun updatePoint(
+    fun updatePoint(
         def: SeventyFiveFDevicePointDef,
         equipConfiguration: ProfileConfiguration,
         device: Device,
@@ -209,7 +211,8 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
         if (existingPoint.containsKey("portEnabled")) hayStackPoint.enabled =
             existingPoint["portEnabled"].toString() == "true"
         if (existingPoint.containsKey("analogType")) hayStackPoint.type = existingPoint["analogType"].toString()
-
+        if (existingPoint.containsKey("port")) hayStackPoint.port = existingPoint["port"].toString()
+        if (existingPoint.containsKey("writable")) hayStackPoint.markers.add(Tags.WRITABLE)
         hayStack.updatePoint(hayStackPoint, existingPoint["id"].toString())
 
         DomainManager.addRawPoint(hayStackPoint)
@@ -307,5 +310,4 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
             DomainManager.addRawPoint(hayStackPoint)
             CcuLog.d(Domain.LOG_TAG,"point created ${hayStackPoint.domainName} id = ${hayStackPoint.id} for the device: $deviceDis " )
     }
-
 }

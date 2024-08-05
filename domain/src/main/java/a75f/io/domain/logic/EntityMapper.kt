@@ -117,13 +117,15 @@ class EntityMapper (private val modelDef: SeventyFiveFProfileDirective) {
             val profileConfig =
                 profileConfiguration.getAssociationConfigs().find { it.domainName == def.domainName }
 
-            profileConfig?.let {
+            profileConfig?.let { associationConfig ->
                 if (associationEnabled) {
                     val constraint = def.valueConstraint as MultiStateConstraint
                     // Add Association point
                     enabledAssociations.add(def.domainName)
                     // Add mapped associated point here
-                    enabledAssociations.add(constraint.allowedValues[it.associationVal].value)
+                    constraint.allowedValues.find { it.index == associationConfig.associationVal }?.value?.let {
+                        association -> enabledAssociations.add(association)
+                    }
                 }
             }
         }
@@ -256,7 +258,9 @@ class EntityMapper (private val modelDef: SeventyFiveFProfileDirective) {
                     }
                     is AssociationConfig -> {
                         val constraint = pointDef.valueConstraint as MultiStateConstraint
-                        customPoints.add(constraint.allowedValues[config.associationVal].value)
+                        constraint.allowedValues.find { it.index == config.associationVal }?.value?.let {
+                            association -> customPoints.add(association)
+                        }
                     }
                 }
             }
@@ -283,7 +287,7 @@ class EntityMapper (private val modelDef: SeventyFiveFProfileDirective) {
                         return (constraint.allowedValues[value.enabled.toInt()].value)
                     }
                     is AssociationConfig -> {
-                        return (constraint.allowedValues[value.associationVal].value)
+                        return constraint.allowedValues.find { it.index == value?.associationVal!! }?.value
                     }
                 }
             }
@@ -351,7 +355,7 @@ class EntityMapper (private val modelDef: SeventyFiveFProfileDirective) {
                         .find { it.domainName == associationPoint.domainName }
 
                 val constraint = associationPoint.valueConstraint as MultiStateConstraint
-                return constraint.allowedValues[profileConfig?.associationVal!!].value
+                return constraint.allowedValues.find { it.index == profileConfig?.associationVal!! }?.value
             }
         } else {
             profilePointWithPhysicalMapping.devicePointAssociation?.devicePointDomainName?.let {

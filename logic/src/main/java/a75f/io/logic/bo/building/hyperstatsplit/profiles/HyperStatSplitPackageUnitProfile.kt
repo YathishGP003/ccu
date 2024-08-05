@@ -13,7 +13,7 @@ import a75f.io.logic.bo.building.hvac.StandaloneFanStage
  * Created for HyperStat Split by Nick P on 07-24-2023.
  */
 
-abstract class HyperStatSplitPackageUnitProfile: HyperStatSplitProfile(){
+abstract class HyperStatSplitPackageUnitProfile(equipRef: String, nodeAddress: Short): HyperStatSplitProfile(equipRef, nodeAddress) {
 
     private var fanEnabledStatus = false
     /* Flags for checking if the current stage is lowest
@@ -58,11 +58,7 @@ abstract class HyperStatSplitPackageUnitProfile: HyperStatSplitProfile(){
         lowestStageFanHigh = status
     }
 
-    override fun doFanLowSpeed(
-        port: Port,
-        logicalPointId: String,
-        mediumLogicalPoint : String?,
-        highLogicalPoint : String?,
+    fun doFanLowSpeed(
         fanMode: StandaloneFanStage,
         fanLoopOutput: Int,
         relayActivationHysteresis: Int,
@@ -78,7 +74,7 @@ abstract class HyperStatSplitPackageUnitProfile: HyperStatSplitProfile(){
             else if (fanLoopOutput <= 0)
                 relayState = 0.0
             else {
-                val currentPortStatus: Double = haystack.readHisValById(logicalPointsList[port]!!)
+                val currentPortStatus: Double = hssEquip.fanLowSpeed.readHisVal()
                 relayState = if (currentPortStatus > 0) 1.0 else 0.0
             }
 
@@ -92,7 +88,7 @@ abstract class HyperStatSplitPackageUnitProfile: HyperStatSplitProfile(){
             relayState = 1.0
         }
         if (relayState != -1.0) {
-            updateLogicalPointIdValue(logicalPointId, relayState)
+            hssEquip.fanLowSpeed.writeHisVal(relayState)
             if (relayState == 1.0) {
                 relayStages[Stage.FAN_1.displayName] = 1
             }
@@ -100,10 +96,7 @@ abstract class HyperStatSplitPackageUnitProfile: HyperStatSplitProfile(){
 
     }
 
-    override fun doFanMediumSpeed(
-        port: Port,
-        logicalPointId: String,
-        superLogicalPoint : String?,
+    fun doFanMediumSpeed(
         fanMode: StandaloneFanStage,
         fanLoopOutput: Int,
         relayActivationHysteresis: Int,
@@ -119,7 +112,7 @@ abstract class HyperStatSplitPackageUnitProfile: HyperStatSplitProfile(){
             else if (fanLoopOutput <= (divider - (relayActivationHysteresis / 2)))
                 relayState = 0.0
             else {
-                val currentPortStatus: Double = haystack.readHisValById(logicalPointsList[port]!!)
+                val currentPortStatus: Double = hssEquip.fanMediumSpeed.readHisVal()
                 relayState = if (currentPortStatus > 0) 1.0 else 0.0
             }
 
@@ -139,8 +132,8 @@ abstract class HyperStatSplitPackageUnitProfile: HyperStatSplitProfile(){
             ) 1.0 else 0.0
         }
         if (relayState != -1.0) {
-            updateLogicalPointIdValue(logicalPointId, relayState)
-            CcuLog.i(L.TAG_CCU_HSSPLIT_CPUECON, "$logicalPointId = FanMediumSpeed:  $relayState")
+            hssEquip.fanMediumSpeed.writeHisVal(relayState)
+            CcuLog.i(L.TAG_CCU_HSSPLIT_CPUECON, "${hssEquip.fanMediumSpeed.id} = FanMediumSpeed:  $relayState")
             if (relayState == 1.0) {
                 relayStages[Stage.FAN_2.displayName] = 1
             }
@@ -148,9 +141,7 @@ abstract class HyperStatSplitPackageUnitProfile: HyperStatSplitProfile(){
 
     }
 
-    override fun doFanHighSpeed(
-        port: Port,
-        logicalPointId: String,
+    fun doFanHighSpeed(
         fanMode: StandaloneFanStage,
         fanLoopOutput: Int,
         relayActivationHysteresis: Int,
@@ -164,7 +155,7 @@ abstract class HyperStatSplitPackageUnitProfile: HyperStatSplitProfile(){
             else if (fanLoopOutput <= (66 - (relayActivationHysteresis / 2)))
                 relayState = 0.0
             else {
-                val currentPortStatus: Double = haystack.readHisValById(logicalPointsList[port]!!)
+                val currentPortStatus: Double = hssEquip.fanHighSpeed.readHisVal()
                 relayState = if (currentPortStatus > 0) 1.0 else 0.0
             }
 
@@ -181,60 +172,12 @@ abstract class HyperStatSplitPackageUnitProfile: HyperStatSplitProfile(){
             ) 1.0 else 0.0
         }
         if (relayState != -1.0) {
-            updateLogicalPointIdValue(logicalPointId, relayState)
-            CcuLog.i(L.TAG_CCU_HSSPLIT_CPUECON, "$logicalPointId = FanHighSpeed:  $relayState")
+            hssEquip.fanHighSpeed.writeHisVal(relayState)
+            CcuLog.i(L.TAG_CCU_HSSPLIT_CPUECON, "${hssEquip.fanHighSpeed.id} = FanHighSpeed:  $relayState")
             if (relayState == 1.0) {
                 relayStages[Stage.FAN_3.displayName] = 1
             }
         }
     }
 
-
-    // Analog Fan operation is common for all the modules
-    override fun doAnalogFanAction(
-        port: Port,
-        fanLowPercent: Int,
-        fanMediumPercent: Int,
-        fanHighPercent: Int,
-        fanMode: StandaloneFanStage,
-        conditioningMode: StandaloneConditioningMode,
-        fanLoopOutput: Int,
-        analogOutStages: HashMap<String, Int>,
-    ) {
-
-        if (fanMode != StandaloneFanStage.OFF) {
-            var fanLoopForAnalog = 0
-            if (fanMode == StandaloneFanStage.AUTO) {
-                if (conditioningMode == StandaloneConditioningMode.OFF) {
-                    updateLogicalPointIdValue(logicalPointsList[port]!!, 0.0)
-                    return
-                }
-                fanLoopForAnalog = fanLoopOutput
-            } else {
-                when {
-                    (fanMode == StandaloneFanStage.LOW_CUR_OCC
-                            || fanMode == StandaloneFanStage.LOW_OCC
-                            || fanMode == StandaloneFanStage.LOW_ALL_TIME) -> {
-                        fanLoopForAnalog = fanLowPercent
-                    }
-
-                    (fanMode == StandaloneFanStage.MEDIUM_CUR_OCC
-                            || fanMode == StandaloneFanStage.MEDIUM_OCC
-                            || fanMode == StandaloneFanStage.MEDIUM_ALL_TIME) -> {
-                        fanLoopForAnalog = fanMediumPercent
-                    }
-
-                    (fanMode == StandaloneFanStage.HIGH_CUR_OCC
-                            || fanMode == StandaloneFanStage.HIGH_OCC
-                            || fanMode == StandaloneFanStage.HIGH_ALL_TIME) -> {
-                        fanLoopForAnalog = fanHighPercent
-                    }
-                }
-            }
-            if (fanLoopForAnalog > 0) analogOutStages[AnalogOutput.FAN_SPEED.name] =
-                fanLoopForAnalog
-            updateLogicalPointIdValue(logicalPointsList[port]!!, fanLoopForAnalog.toDouble())
-            CcuLog.i(L.TAG_CCU_HSSPLIT_CPUECON, "$port = Linear Fan Speed  analogSignal   $fanLoopForAnalog")
-        }
-    }
 }

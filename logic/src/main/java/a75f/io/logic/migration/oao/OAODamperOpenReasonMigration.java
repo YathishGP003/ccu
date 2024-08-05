@@ -27,7 +27,7 @@ public class OAODamperOpenReasonMigration {
         HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
         String siteDis = (String) siteMap.get("dis");
         String[] coolingReasons = {"dcv", "mat"};
-        HashMap equipment = hayStack.read("equip and oao");
+        HashMap equipment = hayStack.read("equip and oao and not hyperstatsplit");
         if(equipment.isEmpty()){
             return;
         }

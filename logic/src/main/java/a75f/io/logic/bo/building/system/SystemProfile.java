@@ -186,7 +186,7 @@ public abstract class SystemProfile
     public void updateAhuRef(String systemEquipId) {
         ArrayList<HashMap<Object, Object>> equips = CCUHsApi.getInstance().readAllEntities("equip and zone");
         if (L.ccu().oaoProfile != null) {
-            equips.add(CCUHsApi.getInstance().read("equip and oao"));
+            equips.add(CCUHsApi.getInstance().read("equip and oao and not hyperstatsplit"));
         }
 
         equips.forEach( m -> {

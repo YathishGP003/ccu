@@ -7,7 +7,6 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
-import a75f.io.logic.bo.building.dab.DabEquip;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.heartbeat.HeartBeat;
 import a75f.io.logic.util.PreferenceUtil;
@@ -42,7 +41,6 @@ public class HeartbeatDiagMigration {
 
         //zone level and not standalone
         addHeartbeatDiagToEquip(hayStack, "ti", siteDis+"-TI-", false);
-        addHeartbeatDiagToEquip(hayStack, "dab", DabEquip.getDisName(siteDis, ""), false);
         addHeartbeatDiagToEquip(hayStack, "dualDuct", siteDis+"-DualDuct-", false);
         addHeartbeatDiagToEquip(hayStack, "emr", siteDis+"-EMR-", false);
         addHeartbeatDiagToEquip(hayStack, OAO, siteDis+"-OAO-", false);

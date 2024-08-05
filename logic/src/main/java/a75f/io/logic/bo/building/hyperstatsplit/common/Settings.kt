@@ -67,16 +67,6 @@ data class HyperStatSplitProfileTuners(
    var exhaustFanHysteresis: Int = 5, // %
 )
 
-// Used as key to hold point id
-enum class LogicalKeyID {
-   CURRENT_TEMP, DESIRED_TEMP, DESIRED_TEMP_COOLING, DESIRED_TEMP_HEATING, EQUIP_STATUS, EQUIP_STATUS_MESSAGE,
-   SCHEDULE_TYPE, EQUIP_SCHEDULE_STATUS,
-   MIN_COOLING, MAX_COOLING, MIN_HEATING, MAX_HEATING,
-   MIN_FAN_SPEED, MAX_FAN_SPEED, MIN_OAO_DAMPER, MAX_OAO_DAMPER,
-   FAN_LOW, FAN_MEDIUM, FAN_HIGH
-}
-
-
 enum class PossibleConditioningMode{
    OFF,COOLONLY,HEATONLY,BOTH
 }
@@ -85,31 +75,7 @@ enum class PossibleFanMode{
    OFF,LOW,MED,HIGH,LOW_MED_HIGH,LOW_MED,LOW_HIGH,MED_HIGH
 }
 
-enum class AnalogOutChanges{
-   NOCHANGE,ENABLED,MAPPING,MIN,MAX,LOW,MED,HIGH,RECIRCULATE,ECONOMIZER
-}
-
-
-data class PointBasicInfo(
-   val siteRef: String,
-   val gatewayRef: String,
-   val timeZone: String,
-   val siteDis: String
-)
-
 data class ConfigState(
    val enabled: Boolean,
    val association: Int
-)
-
-data class AnalogConfigState(
-   val enabled: Boolean,
-   val association: Int,
-   val voltageAtMin: Double,   // create position to value mapping here.
-   val voltageAtMax: Double,    // create position to value mapping here.
-   val perAtFanLow: Double,
-   val perAtFanMedium: Double,
-   val perAtFanHigh: Double,
-   val voltageAtRecirculate: Double,
-   val voltageDuringEconomizer: Double
 )

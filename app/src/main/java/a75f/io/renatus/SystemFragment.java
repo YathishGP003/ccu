@@ -1000,7 +1000,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 				tbSmartPostPurge.setChecked(TunerUtil.readSystemUserIntentVal("postPurge and enabled") > 0);
 				tbEnhancedVentilation.setChecked(TunerUtil.readSystemUserIntentVal("enhanced and ventilation") > 0);
 			}
-			ArrayList<HashMap<Object, Object>> equips = CCUHsApi.getInstance().readAllEntities("equip and oao");
+			ArrayList<HashMap<Object, Object>> equips = CCUHsApi.getInstance().readAllEntities("equip and oao and not hyperstatsplit");
 
 			if (equips != null && equips.size() > 0) {
 				ArrayList<OAOEquip> equipList = new ArrayList<>();

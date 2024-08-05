@@ -197,7 +197,7 @@ public class Conditional
                                                 sb.append(" (").append(pv.id.substring(0,6)).append(", ").append(pv.val).append(")");
                                         }
         } else if (grpOperation.contains("oao")){
-            ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and oao");
+            ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and oao and not hyperstatsplit");
                                         sb.append("\nEvaluating for ").append(equips.size()).append("OAO equips");
             if (!equips.isEmpty()) {
                 for (Map q : equips) {

@@ -1,6 +1,11 @@
 package a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon
 
+import a75f.io.domain.util.ModelLoader
 import a75f.io.logic.bo.building.BaseProfileConfiguration
+import a75f.io.logic.bo.building.NodeType
+import a75f.io.logic.bo.building.ZonePriority
+import a75f.io.logic.bo.building.definitions.ProfileType
+import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 
 /**
  * Models just the configuration for HyperStat Split CPU/Economiser
@@ -147,7 +152,15 @@ class HyperStatSplitCpuEconConfiguration : BaseProfileConfiguration() {
    }
 
    companion object {
-      fun default(): HyperStatSplitCpuEconConfiguration = HyperStatSplitCpuEconConfiguration()
+      fun default(): HyperStatSplitCpuProfileConfiguration = HyperStatSplitCpuProfileConfiguration(
+         0,
+         NodeType.HYPERSTATSPLIT.toString(),
+            ZonePriority.NONE.ordinal,
+            "",
+            "",
+            ProfileType.HYPERSTATSPLIT_CPU,
+         ModelLoader.getHyperStatSplitCpuModel() as SeventyFiveFProfileDirective
+      ).getDefaultConfiguration()
    }
 }
 

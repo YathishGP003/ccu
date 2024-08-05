@@ -13,7 +13,7 @@ import java.util.function.Consumer
 class Title24Migration {
     companion object {
         fun doTitle24OaoPointsMigration(haystack: CCUHsApi) {
-            val oaoEquips = haystack.readAllEntities("equip and oao")
+            val oaoEquips = haystack.readAllEntities("equip and oao and not hyperstatsplit")
             for (oaoEquipMap: HashMap<Any, Any> in oaoEquips) {
                 val oaoEquip = Equip.Builder().setHashMap(oaoEquipMap).build()
                 val outsideDamperMinOpen =

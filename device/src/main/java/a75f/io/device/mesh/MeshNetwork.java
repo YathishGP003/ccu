@@ -339,8 +339,8 @@ public class MeshNetwork extends DeviceNetwork
             VavIERtu systemProfile = (VavIERtu) L.ccu().systemProfile;
             IEDeviceHandler.getInstance().sendControl(systemProfile, CCUHsApi.getInstance());
         }
-    
-        if (/*!LSerial.getInstance().isConnected()*/ false) {
+
+        if (!LSerial.getInstance().isConnected()) {
             CcuLog.d(L.TAG_CCU_DEVICE,"Device not connected !!");
             LSerial.getInstance().setResetSeedMessage(true);
             Pulse.setCMDeadTimerIncrement(false);

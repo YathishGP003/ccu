@@ -382,6 +382,8 @@ class HyperStatSplitCpuViewModel : HyperStatSplitViewModel() {
             setScheduleType(profileConfiguration)
             HyperstatSplitReconfigurationHandler.Companion.handleNonDefaultConditioningMode(profileConfiguration as HyperStatSplitCpuProfileConfiguration, hayStack)
             HyperstatSplitReconfigurationHandler.Companion.handleNonDefaultFanMode(profileConfiguration as HyperStatSplitCpuProfileConfiguration, hayStack)
+            HyperstatSplitReconfigurationHandler.Companion.initializePrePurgeStatus(profileConfiguration, hayStack, 1.0)
+            HyperstatSplitReconfigurationHandler.Companion.initializePrePurgeStatus(profileConfiguration, hayStack, 0.0)
             L.ccu().zoneProfiles.add(hssProfile)
 
         } else {
@@ -406,7 +408,8 @@ class HyperStatSplitCpuViewModel : HyperStatSplitViewModel() {
             setScheduleType(profileConfiguration)
             HyperstatSplitReconfigurationHandler.Companion.handleNonDefaultConditioningMode(profileConfiguration as HyperStatSplitCpuProfileConfiguration, hayStack)
             HyperstatSplitReconfigurationHandler.Companion.handleNonDefaultFanMode(profileConfiguration as HyperStatSplitCpuProfileConfiguration, hayStack)
-
+            HyperstatSplitReconfigurationHandler.Companion.initializePrePurgeStatus(profileConfiguration, hayStack, 1.0)
+            HyperstatSplitReconfigurationHandler.Companion.initializePrePurgeStatus(profileConfiguration, hayStack, 0.0)
             hssProfile.refreshEquip()
         }
     }

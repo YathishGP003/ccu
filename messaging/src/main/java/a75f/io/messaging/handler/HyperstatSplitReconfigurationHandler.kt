@@ -172,6 +172,11 @@ class HyperstatSplitReconfigurationHandler {
             handleNonDefaultConditioningMode(profileConfiguration as HyperStatSplitCpuProfileConfiguration, hayStack)
             handleNonDefaultFanMode(profileConfiguration as HyperStatSplitCpuProfileConfiguration, hayStack)
 
+            initializePrePurgeStatus(profileConfiguration, hayStack, 1.0)
+            initializePrePurgeStatus(profileConfiguration, hayStack, 0.0)
+
+            hayStack.syncEntityTree()
+
         }
 
         private fun pointUpdateOwner(configPoint: Point, msgObject: JsonObject, hayStack: CCUHsApi) {
@@ -586,6 +591,16 @@ class HyperstatSplitReconfigurationHandler {
 
             if (!isFanEnabled) {
                 hayStack.writeDefaultValById(fanModeId, 0.0)
+            }
+        }
+
+        fun initializePrePurgeStatus(config: HyperStatSplitProfileConfiguration, hayStack: CCUHsApi, value: Double) {
+            if (config.prePurge.enabled) {
+                val prePurgeStatusPoint =
+                    hayStack.readEntity("point and domainName == \"" + DomainName.prePurgeStatus + "\" and group == \"" + config.nodeAddress + "\"")
+                val prePurgeStatusId = prePurgeStatusPoint.get("id").toString()
+
+                hayStack.writeHisValById(prePurgeStatusId, value)
             }
         }
 

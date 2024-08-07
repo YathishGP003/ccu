@@ -8,7 +8,11 @@ import a75f.io.device.HyperSplit.HyperSplitSettingsMessage4_t
 import a75f.io.domain.api.DomainName
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.ProfileType
+import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.CpuControlType
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.CpuEconAnalogOutAssociation
+import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.CpuRelayType
+import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.CpuSensorBusType
+import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.CpuUniInType
 import a75f.io.logic.tuners.TunerUtil
 
 
@@ -333,22 +337,23 @@ class HyperSplitSettingsUtil {
         private fun getHyperSplitRelayMapping(intAssociation: Int): HyperSplit.HyperSplitRelayMapping_t {
             // These are hard-coded. If the order of either enum changes (Haystack or Controll Message), this will need to be updated.
             if (intAssociation == 0) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_DISABLED
-            else if (intAssociation == 1) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_COOLING_STAGE_1
-            else if (intAssociation == 2) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_COOLING_STAGE_2
-            else if (intAssociation == 3) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_COOLING_STAGE_3
-            else if (intAssociation == 4) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_HEATING_STAGE_1
-            else if (intAssociation == 5) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_HEATING_STAGE_2
-            else if (intAssociation == 6) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_HEATING_STAGE_3
-            else if (intAssociation == 7) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_FAN_LOW_SPEED
-            else if (intAssociation == 8) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_FAN_MEDIUM_SPEED
-            else if (intAssociation == 9) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_FAN_HIGH_SPEED
-            else if (intAssociation == 10) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_FAN_ENABLE
-            else if (intAssociation == 11) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_OCCUPIED_ENABLE
-            else if (intAssociation == 12) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_HUMIDIFIER
-            else if (intAssociation == 13) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_DEHUMIDIFIER
-            else if (intAssociation == 14) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_EXAUST_1
-            else if (intAssociation == 15) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_EXAUST_2
-            else if (intAssociation == 16) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_DISABLED // TODO: DCV Damper
+            else if (intAssociation == CpuRelayType.COOLING_STAGE1.ordinal + 1) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_COOLING_STAGE_1
+            else if (intAssociation == CpuRelayType.COOLING_STAGE2.ordinal + 1) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_COOLING_STAGE_2
+            else if (intAssociation == CpuRelayType.COOLING_STAGE3.ordinal + 1) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_COOLING_STAGE_3
+            else if (intAssociation == CpuRelayType.HEATING_STAGE1.ordinal + 1) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_HEATING_STAGE_1
+            else if (intAssociation == CpuRelayType.HEATING_STAGE2.ordinal + 1) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_HEATING_STAGE_2
+            else if (intAssociation == CpuRelayType.HEATING_STAGE3.ordinal + 1) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_HEATING_STAGE_3
+            else if (intAssociation == CpuRelayType.FAN_LOW_SPEED.ordinal + 1) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_FAN_LOW_SPEED
+            else if (intAssociation == CpuRelayType.FAN_MEDIUM_SPEED.ordinal + 1) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_FAN_MEDIUM_SPEED
+            else if (intAssociation == CpuRelayType.FAN_HIGH_SPEED.ordinal + 1) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_FAN_HIGH_SPEED
+            else if (intAssociation == CpuRelayType.FAN_ENABLED.ordinal + 1) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_FAN_ENABLE
+            else if (intAssociation == CpuRelayType.OCCUPIED_ENABLED.ordinal + 1) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_OCCUPIED_ENABLE
+            else if (intAssociation == CpuRelayType.HUMIDIFIER.ordinal + 1) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_HUMIDIFIER
+            else if (intAssociation == CpuRelayType.DEHUMIDIFIER.ordinal + 1) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_DEHUMIDIFIER
+            else if (intAssociation == CpuRelayType.EX_FAN_STAGE1.ordinal + 1) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_EXAUST_1
+            else if (intAssociation == CpuRelayType.EX_FAN_STAGE2.ordinal + 1) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_EXAUST_2
+            else if (intAssociation == CpuRelayType.DCV_DAMPER.ordinal + 1) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_DISABLED // This will display as NONE in Connect Module UI
+            else if (intAssociation == CpuRelayType.EXTERNALLY_MAPPED.ordinal + 1) return HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_DISABLED // This will display as NONE in Connect Module UI
 
             // This should never happen
             else { return HyperSplit.HyperSplitRelayMapping_t.HYPERSPLIT_RELAY_DISABLED }
@@ -458,11 +463,13 @@ class HyperSplitSettingsUtil {
         private fun getHyperSplitAnalogOutMapping(intAssociation: Int): HyperSplit.HyperSplitAnalogOutMapping_t {
 
             if (intAssociation == 0) return HyperSplit.HyperSplitAnalogOutMapping_t.HYPERSPLIT_AOUT_DISABLED
-            else if (intAssociation == 1) return HyperSplit.HyperSplitAnalogOutMapping_t.HYPERSPLIT_AOUT_COOLING
-            else if (intAssociation == 2) return HyperSplit.HyperSplitAnalogOutMapping_t.HYPERSPLIT_AOUT_LINEAR_FAN
-            else if (intAssociation == 3) return HyperSplit.HyperSplitAnalogOutMapping_t.HYPERSPLIT_AOUT_HEATING
-            else if (intAssociation == 4) return HyperSplit.HyperSplitAnalogOutMapping_t.HYPERSPLIT_AOUT_OAO_DAMPER
-            else if (intAssociation == 5) return HyperSplit.HyperSplitAnalogOutMapping_t.HYPERSPLIT_AOUT_STAGED_FAN
+            else if (intAssociation == CpuControlType.COOLING.ordinal + 1) return HyperSplit.HyperSplitAnalogOutMapping_t.HYPERSPLIT_AOUT_COOLING
+            else if (intAssociation == CpuControlType.LINEAR_FAN.ordinal + 1) return HyperSplit.HyperSplitAnalogOutMapping_t.HYPERSPLIT_AOUT_LINEAR_FAN
+            else if (intAssociation == CpuControlType.HEATING.ordinal + 1) return HyperSplit.HyperSplitAnalogOutMapping_t.HYPERSPLIT_AOUT_HEATING
+            else if (intAssociation == CpuControlType.OAO_DAMPER.ordinal + 1) return HyperSplit.HyperSplitAnalogOutMapping_t.HYPERSPLIT_AOUT_OAO_DAMPER
+            else if (intAssociation == CpuControlType.STAGED_FAN.ordinal + 1) return HyperSplit.HyperSplitAnalogOutMapping_t.HYPERSPLIT_AOUT_STAGED_FAN
+            else if (intAssociation == CpuControlType.RETURN_DAMPER.ordinal + 1) return HyperSplit.HyperSplitAnalogOutMapping_t.HYPERSPLIT_AOUT_DISABLED // This will display as NONE in Connect Module UI
+            else if (intAssociation == CpuControlType.EXTERNALLY_MAPPED.ordinal + 1) return HyperSplit.HyperSplitAnalogOutMapping_t.HYPERSPLIT_AOUT_DISABLED // This will display as NONE in Connect Module UI
 
             // This should never happen
             else { return HyperSplit.HyperSplitAnalogOutMapping_t.HYPERSPLIT_AOUT_DISABLED }
@@ -547,19 +554,56 @@ class HyperSplitSettingsUtil {
 
         private fun getHyperSplitUniversalInMapping(intAssociation: Int): HyperSplit.HyperSplitUniversalInMapping_t {
             return when (intAssociation)  {
-                0 -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_DISABLED
-                1, 3, 4, 5, 29, 43, 45, 46, 47, 48, 49 -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_VOLTAGE
-                2, 53, 54, 55, 58, 59, 64, 73, 74, 85, 91, 92 -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_RESISTANCE
-                14 -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_SAT
-                28 -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_MAT
-                33 -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_OAT
-                41 -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_CURRENT_0_10
-                42 -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_CURRENT_0_20
-                44 -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_CURRENT_0_50
-                60 -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_FILTER_NO
-                61 -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_FILTER_NC
-                82 -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_CONDENSATE_NO
-                84 -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_CONDENSATE_NC
+                CpuUniInType.NONE.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_DISABLED
+
+                CpuUniInType.VOLTAGE_INPUT.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_VOLTAGE
+                CpuUniInType.BUILDING_STATIC_PRESSURE1.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_VOLTAGE
+                CpuUniInType.BUILDING_STATIC_PRESSURE2.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_VOLTAGE
+                CpuUniInType.BUILDING_STATIC_PRESSURE10.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_VOLTAGE
+                CpuUniInType.OUTSIDE_AIR_DAMPER_FEEDBACK.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_VOLTAGE
+                CpuUniInType.CURRENT_TX_30.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_VOLTAGE
+                CpuUniInType.CURRENT_TX_60.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_VOLTAGE
+                CpuUniInType.CURRENT_TX_100.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_VOLTAGE
+                CpuUniInType.CURRENT_TX_120.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_VOLTAGE
+                CpuUniInType.CURRENT_TX_150.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_VOLTAGE
+                CpuUniInType.CURRENT_TX_200.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_VOLTAGE
+                CpuUniInType.DOOR_WINDOW_SENSOR.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_VOLTAGE
+                CpuUniInType.DOOR_WINDOW_SENSOR_TITLE24.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_VOLTAGE
+
+                CpuUniInType.THERMISTOR_INPUT.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_RESISTANCE
+                CpuUniInType.DISCHARGE_FAN_AM_STATUS.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_RESISTANCE
+                CpuUniInType.DISCHARGE_FAN_RUN_STATUS.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_RESISTANCE
+                CpuUniInType.DISCHARGE_FAN_TRIP_STATUS.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_RESISTANCE
+                CpuUniInType.EXHAUST_FAN_RUN_STATUS.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_RESISTANCE
+                CpuUniInType.EXHAUST_FAN_TRIP_STATUS.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_RESISTANCE
+                CpuUniInType.FIRE_ALARM_STATUS.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_RESISTANCE
+                CpuUniInType.HIGH_DIFFERENTIAL_PRESSURE_SWITCH.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_RESISTANCE
+                CpuUniInType.LOW_DIFFERENTIAL_PRESSURE_SWITCH.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_RESISTANCE
+                CpuUniInType.EMERGENCY_SHUTOFF_NO.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_RESISTANCE
+                CpuUniInType.EMERGENCY_SHUTOFF_NC.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_RESISTANCE
+                CpuUniInType.GENERIC_ALARM_NO.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_RESISTANCE
+                CpuUniInType.GENERIC_ALARM_NC.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_RESISTANCE
+                CpuUniInType.DOOR_WINDOW_SENSOR_NC.ordinal, -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_RESISTANCE
+                CpuUniInType.DOOR_WINDOW_SENSOR_TITLE24_NC.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UNI_GENERIC_RESISTANCE
+
+                CpuUniInType.SUPPLY_AIR_TEMPERATURE.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_SAT
+                CpuUniInType.MIXED_AIR_TEMPERATURE.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_MAT
+                CpuUniInType.OUTSIDE_AIR_TEMPERATURE.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_OAT
+
+                CpuUniInType.DUCT_STATIC_PRESSURE1_1.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_PRESSURE_0_1
+                CpuUniInType.DUCT_STATIC_PRESSURE1_2.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_PRESSURE_0_2
+                CpuUniInType.DUCT_STATIC_PRESSURE1_10.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_PRESSURE_0_10
+
+                CpuUniInType.CURRENT_TX_10.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_CURRENT_0_10
+                CpuUniInType.CURRENT_TX_20.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_CURRENT_0_20
+                CpuUniInType.CURRENT_TX_50.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_CURRENT_0_50
+
+                CpuUniInType.FILTER_STATUS_NO.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_FILTER_NO
+                CpuUniInType.FILTER_STATUS_NC.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_FILTER_NC
+
+                CpuUniInType.CONDENSATE_STATUS_NO.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_CONDENSATE_NO
+                CpuUniInType.CONDENSATE_STATUS_NC.ordinal -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_CONDENSATE_NC
+
                 else -> HyperSplit.HyperSplitUniversalInMapping_t.HYPERSPLIT_UIN_DISABLED
             }
         }
@@ -573,48 +617,52 @@ class HyperSplitSettingsUtil {
         private fun getSensorBusConfigDetails(hsApi: CCUHsApi, equipRef: String): HyperSplit.HyperSplitSensorBusConfig_t {
             val sensorBus = HyperSplit.HyperSplitSensorBusConfig_t.newBuilder()
 
-            if (readConfig(hsApi, equipRef, "domainName == \"" + DomainName.sensorBusAddress0Enable + "\"") == 0.0) {
-                sensorBus.sensorBus1Mapping = getHyperSplitSensorBusMapping(0)
+            if (readConfig(hsApi, equipRef, "domainName == \"" + DomainName.sensorBusAddress0Enable + "\"") > 0.0) {
+                sensorBus.sensorBus1Mapping = getHyperSplitSensorBusTempMapping(
+                    readConfig(hsApi, equipRef, "domainName == \"" + DomainName.temperatureSensorBusAdd0 + "\"").toInt() + 1)
+            } else if (readConfig(hsApi, equipRef, "domainName == \"" + DomainName.sensorBusPressureEnable + "\"") > 0.0) {
+                sensorBus.sensorBus1Mapping = getHyperSplitSensorBusPressureMapping(
+                    readConfig(hsApi, equipRef, "domainName == \"" + DomainName.pressureSensorBusAdd0 + "\"").toInt())
             } else {
-                sensorBus.sensorBus1Mapping = getHyperSplitSensorBusMapping(
-                    readConfig(hsApi, equipRef, "domainName == \"" + DomainName.temperatureSensorBusAdd0 + "\"").toInt() + 1
-                )
+                sensorBus.sensorBus1Mapping = getHyperSplitSensorBusTempMapping(0)
             }
 
             if (readConfig(hsApi, equipRef, "domainName == \"" + DomainName.sensorBusAddress1Enable + "\"") == 0.0) {
-                sensorBus.sensorBus2Mapping = getHyperSplitSensorBusMapping(0)
+                sensorBus.sensorBus2Mapping = getHyperSplitSensorBusTempMapping(0)
             } else {
-                sensorBus.sensorBus2Mapping = getHyperSplitSensorBusMapping(
+                sensorBus.sensorBus2Mapping = getHyperSplitSensorBusTempMapping(
                     readConfig(hsApi, equipRef, "domainName == \"" + DomainName.temperatureSensorBusAdd1 + "\"").toInt() + 1
                 )
             }
 
             if (readConfig(hsApi, equipRef, "domainName == \"" + DomainName.sensorBusAddress2Enable + "\"") == 0.0) {
-                sensorBus.sensorBus3Mapping = getHyperSplitSensorBusMapping(0)
+                sensorBus.sensorBus3Mapping = getHyperSplitSensorBusTempMapping(0)
             } else {
-                sensorBus.sensorBus3Mapping = getHyperSplitSensorBusMapping(
+                sensorBus.sensorBus3Mapping = getHyperSplitSensorBusTempMapping(
                     readConfig(hsApi, equipRef, "domainName == \"" + DomainName.temperatureSensorBusAdd2 + "\"").toInt() + 1
                 )
             }
 
-            // addr3 has a different association enum; it is either "pressure" (3) or disabled (0)
-            if (readConfig(hsApi, equipRef, "domainName == \"" + DomainName.sensorBusAddress3Enable + "\"") == 0.0) {
-                sensorBus.sensorBus4Mapping = getHyperSplitSensorBusMapping(0)
-            } else {
-                sensorBus.sensorBus4Mapping = getHyperSplitSensorBusMapping(4)
-            }
+            // addr3 is no longer used for HSS
 
             return sensorBus.build()
 
         }
 
-        private fun getHyperSplitSensorBusMapping(intAssociation: Int): HyperSplit.HyperSplitSenorBusMapping_t {
+        private fun getHyperSplitSensorBusTempMapping(intAssociation: Int): HyperSplit.HyperSplitSenorBusMapping_t {
             return when (intAssociation) {
                 0 -> HyperSplit.HyperSplitSenorBusMapping_t.HYPERSPLIT_SBUS_DISABLED
-                1 -> HyperSplit.HyperSplitSenorBusMapping_t.HYPERSPLIT_SBUS_SAT
-                2 -> HyperSplit.HyperSplitSenorBusMapping_t.HYPERSPLIT_SBUS_MAT
-                3 -> HyperSplit.HyperSplitSenorBusMapping_t.HYPERSPLIT_SBUS_OAT
-                4 -> HyperSplit.HyperSplitSenorBusMapping_t.HYPERSPLIT_SBUS_PRESSURE
+                CpuSensorBusType.SUPPLY_AIR.ordinal + 1 -> HyperSplit.HyperSplitSenorBusMapping_t.HYPERSPLIT_SBUS_SAT
+                CpuSensorBusType.MIXED_AIR.ordinal + 1 -> HyperSplit.HyperSplitSenorBusMapping_t.HYPERSPLIT_SBUS_MAT
+                CpuSensorBusType.OUTSIDE_AIR.ordinal + 1 -> HyperSplit.HyperSplitSenorBusMapping_t.HYPERSPLIT_SBUS_OAT
+                else -> HyperSplit.HyperSplitSenorBusMapping_t.HYPERSPLIT_SBUS_DISABLED
+            }
+        }
+
+        private fun getHyperSplitSensorBusPressureMapping(intAssociation: Int): HyperSplit.HyperSplitSenorBusMapping_t {
+            return when (intAssociation) {
+                0 -> HyperSplit.HyperSplitSenorBusMapping_t.HYPERSPLIT_SBUS_DISABLED
+                1 -> HyperSplit.HyperSplitSenorBusMapping_t.HYPERSPLIT_SBUS_PRESSURE
                 else -> HyperSplit.HyperSplitSenorBusMapping_t.HYPERSPLIT_SBUS_DISABLED
             }
         }

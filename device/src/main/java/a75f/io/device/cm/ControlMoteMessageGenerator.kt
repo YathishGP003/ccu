@@ -50,10 +50,10 @@ fun getCMControlsMessage(): ControlMote.CcuToCmOverUsbCmControlMessage_t {
         addAnalogOut(cmDevice.analog3Out.readHisVal().toInt())
         addAnalogOut(cmDevice.analog4Out.readHisVal().toInt())
         relayBitMap = relayBitmap
-        addPiloopSetPoint(systemEquip.airTempCoolingSp.readHisVal().toInt() * 10)
-        addPiloopSetPoint(systemEquip.airTempHeatingSp.readHisVal().toInt() * 10)
-        addPiloopSetPoint(systemEquip.ductStaticPressureSetpoint.readHisVal().toInt() * 10)
-        addPiloopSetPoint(systemEquip.zoneAvgCo2.readHisVal().toInt() * 10)
+        addPiloopSetPoint(systemEquip.airTempCoolingSp.readHisVal().toInt() * SERIAL_COMM_SCALE)
+        addPiloopSetPoint(systemEquip.airTempHeatingSp.readHisVal().toInt() * SERIAL_COMM_SCALE)
+        addPiloopSetPoint((systemEquip.ductStaticPressureSetpoint.readHisVal() * SERIAL_COMM_SCALE).toInt())
+        addPiloopSetPoint(systemEquip.zoneAvgCo2.readHisVal().toInt() * SERIAL_COMM_SCALE)
         saToperatingMode = SAToperatingMode_e.forNumber(systemEquip.operatingMode.readHisVal().toInt())
                     ?: SAToperatingMode_e.SAT_OPERATING_MODE_OFF
         emergencyShutOff = (L.ccu().systemProfile as VavAdvancedAhu)?.isEmergencyShutoffActive()?.toInt() ?: 0

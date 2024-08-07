@@ -369,6 +369,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
             }
             Box(modifier = Modifier
                 .weight(3f)
+                .padding(start = 45.dp)
                 .align(Alignment.CenterVertically)) {
                 SearchSpinnerElement(
                     default = defaultSelection,
@@ -376,11 +377,12 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                     enabledItems = items,
                     unit = unit,
                     onSelect = { onSelect(it) },
-                    width = 470,
-                    expandedWidth = 470,
+                    width = 375,
+                    expandedWidth = 450,
                     isEnabled = isEnabled
                 )
             }
+            Box(modifier = Modifier.weight(1f))
         }
     }
 
@@ -1032,8 +1034,8 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                     enabledItems = items,
                     unit = unit,
                     onSelect = { onSelect(it) },
-                    width = 500,
-                    expandedWidth = 500,
+                    width = 375,
+                    expandedWidth = 490,
                     isEnabled = isEnabled
                 )
             }

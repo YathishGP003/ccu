@@ -22,6 +22,8 @@ import a75f.io.logic.bo.building.system.vav.config.ModulatingRtuProfileConfig
 import a75f.io.renatus.util.SystemProfileUtil
 import android.app.Activity
 import android.content.Context
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -32,22 +34,23 @@ import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.system.measureTimeMillis
 
 open class ModulatingRtuViewModel : ViewModel() {
 
     lateinit var model: SeventyFiveFProfileDirective
     private lateinit var deviceModel: SeventyFiveFDeviceDirective
-    lateinit var viewState: ModulatingRtuViewState
+    var viewState: MutableState<ModulatingRtuViewState> = mutableStateOf(ModulatingRtuViewState())
     lateinit var profileConfiguration: ModulatingRtuProfileConfig
 
     lateinit var context: Context
     lateinit var hayStack: CCUHsApi
     lateinit var relay7AssociationList: List<String>
 
-    var _modelLoaded =  MutableLiveData(false)
-    val modelLoaded: LiveData<Boolean> get() = _modelLoaded
-    lateinit var equipBuilder: ProfileEquipBuilder
-    lateinit var deviceBuilder: DeviceBuilder
+    var modelLoadedState =  MutableLiveData(false)
+    val modelLoaded: LiveData<Boolean> get() = modelLoadedState
+    private lateinit var equipBuilder: ProfileEquipBuilder
+    private lateinit var deviceBuilder: DeviceBuilder
    
     fun init(context: Context, profileModel: ModelDirective, hayStack: CCUHsApi) {
         this.hayStack = hayStack
@@ -71,7 +74,6 @@ open class ModulatingRtuViewModel : ViewModel() {
     }
 
     fun createNewEquip(id: String): String {
-        hayStack.deleteEntityTree(id)
         val equipDis = hayStack.siteName + "-${model.name}"
         val equipId = equipBuilder.buildEquipAndPoints(
             profileConfiguration,
@@ -97,14 +99,13 @@ open class ModulatingRtuViewModel : ViewModel() {
             deviceDis
         )
 
-        hayStack.syncEntityTree()
         DomainManager.addSystemDomainEquip(hayStack)
         DomainManager.addCmBoardDevice(hayStack)
         return equipId
     }
 
     open fun saveConfiguration() {
-        viewState.updateConfigFromViewState(profileConfiguration)
+        viewState.value.updateConfigFromViewState(profileConfiguration)
         val equipDis = hayStack.siteName + "-${model.name}"
         equipBuilder.updateEquipAndPoints(
             profileConfiguration,
@@ -123,7 +124,9 @@ open class ModulatingRtuViewModel : ViewModel() {
         )
         DomainManager.addSystemDomainEquip(hayStack)
         saveUnUsedPortStatusOfSystemProfile(profileConfiguration, hayStack)
-        viewState.unusedPortState = ControlMote.getCMUnusedPorts(Domain.hayStack)
+        profileConfiguration.unusedPorts.clear()
+        profileConfiguration.unusedPorts =  ControlMote.getCMUnusedPorts(Domain.hayStack)
+        viewState.value.unusedPortState = profileConfiguration.unusedPorts
     }
 
     fun updateSystemMode() {
@@ -151,7 +154,7 @@ open class ModulatingRtuViewModel : ViewModel() {
     }
 
     fun sendTestCommand(relayName: String, testCommand: Boolean) {
-        Globals.getInstance().setTestMode(true)
+        Globals.getInstance().isTestMode = true
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 val physicalPoint =
@@ -164,5 +167,17 @@ open class ModulatingRtuViewModel : ViewModel() {
                 MeshUtil.sendStructToCM(DeviceUtil.getCMControlsMessage())
             }
         }
+    }
+
+    fun setStateChanged() {
+        viewState.value.isStateChanged = true
+        viewState.value.isSaveRequired = true
+    }
+
+    fun deleteSystemProfile(systemProfileId: String){
+        val deleteTime = measureTimeMillis {
+            hayStack.deleteEntityTree(systemProfileId)
+        }
+        CcuLog.i(L.TAG_CCU_DOMAIN, "Time taken to delete entities: $deleteTime")
     }
 }

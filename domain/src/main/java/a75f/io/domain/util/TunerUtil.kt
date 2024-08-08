@@ -95,6 +95,22 @@ object TunerUtil {
         )
     }
 
+    fun updateSystemTunerLevels(tunerPointId: String, domainName: String, hayStack: CCUHsApi, defaultVal: Double) {
+
+        if (copyFromBuildingTuner(tunerPointId, domainName, hayStack)) {
+            return
+        }
+
+        CcuLog.e(Domain.LOG_TAG_TUNER, "Tuner Copy failed, copying fallback value to tuner point $domainName")
+        hayStack.pointWrite(
+            HRef.copy(tunerPointId),
+            17,
+            CCUHsApi.getInstance().ccuUserName,
+            HNum.make(defaultVal),
+            HNum.make(0)
+        )
+    }
+
     private fun copyTunerLevel(
         dstPointId: String,
         srcArray: ArrayList<HashMap<*, *>>,

@@ -91,8 +91,8 @@ class AcbProfileViewModel : ViewModel() {
 
     private var saveJob : Job? = null
 
-    var _modelLoaded =  MutableLiveData(false)
-    val modelLoaded: LiveData<Boolean> get() = _modelLoaded
+    private var modelLoadedState =  MutableLiveData(false)
+    val modelLoaded: LiveData<Boolean> get() = modelLoadedState
 
     fun init(bundle: Bundle, context: Context, hayStack : CCUHsApi) {
         deviceAddress = bundle.getShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR)
@@ -128,7 +128,7 @@ class AcbProfileViewModel : ViewModel() {
         initializeLists()
         unusedPorts = UnusedPortsModel.initializeUnUsedPorts(deviceAddress, hayStack)
         CcuLog.i(Domain.LOG_TAG, "ACB ProfileViewModel Loaded")
-        _modelLoaded.postValue( true)
+        modelLoadedState.postValue( true)
     }
 
     private fun initializeLists() {

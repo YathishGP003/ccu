@@ -66,7 +66,7 @@ public class DeviceUpdateJob extends BaseJob implements WatchdogMonitor
         //injectTestInputMessage();
     }
     
-    public void doJob()
+        public void doJob()
     {
         watchdogMonitor = false;
         ConnectModbusSerialComm.testReadOp();

@@ -8,8 +8,12 @@ import a75f.io.renatus.R
 import a75f.io.renatus.composables.DropDownWithLabel
 import a75f.io.renatus.composables.SystemAnalogOutMappingViewVavStagedVfdRtu
 import a75f.io.renatus.compose.ComposeUtil
+import a75f.io.renatus.compose.SaveTextView
+import a75f.io.renatus.modbus.util.CANCEL
+import a75f.io.renatus.modbus.util.SAVE
 import a75f.io.renatus.profiles.profileUtils.UnusedPortsFragment
 import a75f.io.renatus.profiles.profileUtils.UnusedPortsFragment.Companion.LabelUnusedPorts
+import a75f.io.renatus.profiles.profileUtils.UnusedPortsModel
 import a75f.io.renatus.util.AddProgressGif
 import a75f.io.renatus.util.highPriorityDispatcher
 import android.os.Bundle
@@ -18,7 +22,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -27,12 +33,18 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.ui.Alignment
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -45,7 +57,8 @@ import kotlinx.coroutines.launch
 class VavStagedVfdRtuFragment : StagedRtuFragment() {
 
     private val viewModel : VavStagedVfdRtuViewModel by viewModels()
-    lateinit var viewState: StagedRtuVfdViewState
+    var viewState: MutableState<StagedRtuVfdViewState> = mutableStateOf(StagedRtuVfdViewState())
+
 
 
     companion object {
@@ -60,7 +73,7 @@ class VavStagedVfdRtuFragment : StagedRtuFragment() {
     ): View {
         viewLifecycleOwner.lifecycleScope.launch(highPriorityDispatcher){
                 viewModel.init(requireContext(), CCUHsApi.getInstance())
-                viewState = viewModel.viewState as StagedRtuVfdViewState
+                viewState.value = viewModel.viewState.value as StagedRtuVfdViewState
 
         }
         val rootView = ComposeView(requireContext())
@@ -76,8 +89,8 @@ class VavStagedVfdRtuFragment : StagedRtuFragment() {
             }
 
             override fun onViewDetachedFromWindow(v: View) {
-                if (Globals.getInstance().isTestMode()) {
-                    Globals.getInstance().setTestMode(false);
+                if (Globals.getInstance().isTestMode) {
+                    Globals.getInstance().isTestMode = false
                 }
             }
         })
@@ -135,13 +148,13 @@ class VavStagedVfdRtuFragment : StagedRtuFragment() {
         }
     }
     private fun checkAssociation(associationIndex : Int): Boolean {
-        if((viewState.relay1Enabled == true && viewState.relay1Association == associationIndex)
-            || (viewState.relay2Enabled == true && viewState.relay2Association == associationIndex )
-            || (viewState.relay3Enabled == true && viewState.relay3Association == associationIndex )
-            || (viewState.relay4Enabled == true && viewState.relay4Association == associationIndex )
-            || (viewState.relay5Enabled == true && viewState.relay5Association == associationIndex )
-            || (viewState.relay6Enabled == true && viewState.relay6Association == associationIndex )
-            || (viewState.relay7Enabled == true && viewState.relay7Association == associationIndex)) {
+        if((viewState.value.relay1Enabled == true && viewState.value.relay1Association == associationIndex)
+            || (viewState.value.relay2Enabled == true && viewState.value.relay2Association == associationIndex )
+            || (viewState.value.relay3Enabled == true && viewState.value.relay3Association == associationIndex )
+            || (viewState.value.relay4Enabled == true && viewState.value.relay4Association == associationIndex )
+            || (viewState.value.relay5Enabled == true && viewState.value.relay5Association == associationIndex )
+            || (viewState.value.relay6Enabled == true && viewState.value.relay6Association == associationIndex )
+            || (viewState.value.relay7Enabled == true && viewState.value.relay7Association == associationIndex)) {
             return true
         }
         else {
@@ -159,7 +172,7 @@ class VavStagedVfdRtuFragment : StagedRtuFragment() {
             return
         }
 
-        val viewState = viewModel.viewState as StagedRtuVfdViewState
+        val viewState = viewModel.viewState.value as StagedRtuVfdViewState
         LazyColumn(modifier = Modifier
             .fillMaxSize()
             .padding(10.dp))
@@ -193,25 +206,33 @@ class VavStagedVfdRtuFragment : StagedRtuFragment() {
                             Spacer(modifier = Modifier.width(282.dp))
                             Text(text = "MAPPING", fontSize = 20.sp, color = ComposeUtil.greyColor)
                             Spacer(modifier = Modifier.width(172.dp))
-                            Text(text = "TEST SIGNAL", fontSize = 20.sp, color = ComposeUtil.greyColor,)
+                            Text(text = "TEST SIGNAL", fontSize = 20.sp, color = ComposeUtil.greyColor)
                         }
 
                         Spacer(modifier = Modifier.height(20.dp))
                         StagedRtuRelayMappingView(viewModel = viewModel)
                         Spacer(modifier = Modifier.height(15.dp))
-                        SystemAnalogOutMappingViewVavStagedVfdRtu(
-                            analogName = "Analog-Out 2",
-                            analogOutState = viewState.analogOut2Enabled,
-                            onAnalogOutEnabled = { viewState.analogOut2Enabled = it
-                                viewModel.saveConfiguration()},
-                            mappingText = "Fan Speed",
-                            analogOutValList = (0..10).map { it.toString() },
-                            analogOutVal =  (0..10).map{it}.indexOf((viewState.analogOut2FanSpeedTestSignal.toInt())/10),
-                            onAnalogOutChanged = {
-                                viewState.analogOut2FanSpeedTestSignal = it.toDouble()
-                                viewModel.sendAnalogTestSignal(it.toDouble())
-                            }
-                        )
+                    SystemAnalogOutMappingViewVavStagedVfdRtu(
+                        analogName = "Analog-Out 2",
+                        analogOutState = viewState.analogOut2Enabled,
+                        onAnalogOutEnabled = {
+                            viewState.analogOut2Enabled = it
+                            viewModel.setStateChanged()
+                            viewModel.viewState.value.unusedPortState = UnusedPortsModel.setPortState(
+                                "Analog 2 Output",
+                                it,
+                                viewModel.profileConfiguration
+                            )
+                        },
+                        mappingText = "Fan Speed",
+                        analogOutValList = (0..10).map { it.toString() },
+                        analogOutVal = (0..10).map { it }
+                            .indexOf((viewState.analogOut2FanSpeedTestSignal.toInt()) / 10),
+                        onAnalogOutChanged = {
+                            viewState.analogOut2FanSpeedTestSignal = it.toDouble()
+                            viewModel.sendAnalogTestSignal(it.toDouble())
+                        }
+                    )
                 }
             }
             }
@@ -227,7 +248,7 @@ class VavStagedVfdRtuFragment : StagedRtuFragment() {
                         list = (0..10).map { it.toString() }, isHeader = false,
                         defaultSelection = viewState.analogOut2Economizer,
                         onSelected = {viewState.analogOut2Economizer = it
-                            viewModel.saveConfiguration()},
+                            viewModel.setStateChanged()},
                         previewWidth = 100,
                         expandedWidth = 100,
                         spacerLimit = 90 )
@@ -236,7 +257,7 @@ class VavStagedVfdRtuFragment : StagedRtuFragment() {
                         list = (0..10).map { it.toString() }, isHeader = false,
                         defaultSelection = viewState.analogOut2Recirculate,
                         onSelected = {viewState.analogOut2Recirculate = it
-                            viewModel.saveConfiguration()},
+                            viewModel.setStateChanged()},
                         previewWidth = 100,
                         expandedWidth = 100,
                         spacerLimit = 179)
@@ -254,7 +275,7 @@ class VavStagedVfdRtuFragment : StagedRtuFragment() {
                         list = (0..10).map { it.toString() }, isHeader = false,
                         defaultSelection = viewState.analogOut2CoolStage1,
                         onSelected = {viewState.analogOut2CoolStage1 = it
-                            viewModel.saveConfiguration()}, isEnabled = (viewState.analogOut2Enabled && coolingStageSelected(1)),
+                            viewModel.setStateChanged()}, isEnabled = (viewState.analogOut2Enabled && coolingStageSelected(1)),
                         previewWidth = 100,
                         expandedWidth = 100,
                         spacerLimit = 90)
@@ -263,7 +284,7 @@ class VavStagedVfdRtuFragment : StagedRtuFragment() {
                         list = (0..10).map { it.toString() }, isHeader = false,
                         defaultSelection = viewState.analogOut2CoolStage2,
                         onSelected = {viewState.analogOut2CoolStage2 = it
-                            viewModel.saveConfiguration()}, isEnabled = (viewState.analogOut2Enabled && coolingStageSelected(2)),
+                            viewModel.setStateChanged()}, isEnabled = (viewState.analogOut2Enabled && coolingStageSelected(2)),
                         previewWidth = 100,
                         expandedWidth = 100,
                         spacerLimit = 179)
@@ -281,7 +302,7 @@ class VavStagedVfdRtuFragment : StagedRtuFragment() {
                         list = (0..10).map { it.toString() }, isHeader = false,
                         defaultSelection = viewState.analogOut2CoolStage3,
                         onSelected = {viewState.analogOut2CoolStage3 = it
-                            viewModel.saveConfiguration()}, isEnabled = (viewState.analogOut2Enabled && coolingStageSelected(3) ),
+                            viewModel.setStateChanged()}, isEnabled = (viewState.analogOut2Enabled && coolingStageSelected(3) ),
                         previewWidth = 100,
                         expandedWidth = 100,
                         spacerLimit = 90)
@@ -290,7 +311,7 @@ class VavStagedVfdRtuFragment : StagedRtuFragment() {
                         list = (0..10).map { it.toString() }, isHeader = false,
                         defaultSelection = viewState.analogOut2CoolStage4,
                         onSelected = {viewState.analogOut2CoolStage5 = it
-                            viewModel.saveConfiguration()}, isEnabled = (viewState.analogOut2Enabled && coolingStageSelected(4)),
+                            viewModel.setStateChanged()}, isEnabled = (viewState.analogOut2Enabled && coolingStageSelected(4)),
                         previewWidth = 100,
                         expandedWidth = 100,
                         spacerLimit = 179)
@@ -308,7 +329,7 @@ class VavStagedVfdRtuFragment : StagedRtuFragment() {
                         list = (0..10).map { it.toString() }, isHeader = false,
                         defaultSelection = viewState.analogOut2CoolStage5,
                         onSelected = {viewState.analogOut2CoolStage5 = it
-                            viewModel.saveConfiguration()}, isEnabled = (viewState.analogOut2Enabled && coolingStageSelected(5)),
+                            viewModel.setStateChanged()}, isEnabled = (viewState.analogOut2Enabled && coolingStageSelected(5)),
                         previewWidth = 100,
                         expandedWidth = 100,
                         spacerLimit = 90)
@@ -326,7 +347,7 @@ class VavStagedVfdRtuFragment : StagedRtuFragment() {
                         list = (0..10).map { it.toString() }, isHeader = false,
                         defaultSelection = viewState.analogOut2HeatStage1,
                         onSelected = {viewState.analogOut2HeatStage1 = it
-                            viewModel.saveConfiguration()}, isEnabled = (viewState.analogOut2Enabled && heatingStageSelected(1)),
+                            viewModel.setStateChanged()}, isEnabled = (viewState.analogOut2Enabled && heatingStageSelected(1)),
                         previewWidth = 100,
                         expandedWidth = 100,
                         spacerLimit = 90)
@@ -335,7 +356,7 @@ class VavStagedVfdRtuFragment : StagedRtuFragment() {
                         list = (0..10).map { it.toString() }, isHeader = false,
                         defaultSelection = viewState.analogOut2HeatStage2,
                         onSelected = {viewState.analogOut2HeatStage2 = it
-                            viewModel.saveConfiguration()}, isEnabled = (viewState.analogOut2Enabled && heatingStageSelected(2)),
+                            viewModel.setStateChanged()}, isEnabled = (viewState.analogOut2Enabled && heatingStageSelected(2)),
                         previewWidth = 100,
                         expandedWidth = 100,
                         spacerLimit = 179)
@@ -353,7 +374,7 @@ class VavStagedVfdRtuFragment : StagedRtuFragment() {
                         list = (0..10).map { it.toString() }, isHeader = false,
                         defaultSelection = viewState.analogOut2HeatStage3,
                         onSelected = {viewState.analogOut2HeatStage3 = it
-                            viewModel.saveConfiguration()}, isEnabled = (viewState.analogOut2Enabled && heatingStageSelected(3)),
+                            viewModel.setStateChanged()}, isEnabled = (viewState.analogOut2Enabled && heatingStageSelected(3)),
                         previewWidth = 100,
                         expandedWidth = 100,
                         spacerLimit = 90)
@@ -362,7 +383,7 @@ class VavStagedVfdRtuFragment : StagedRtuFragment() {
                         list = (0..10).map { it.toString() }, isHeader = false,
                         defaultSelection = viewState.analogOut2HeatStage4,
                         onSelected = {viewState.analogOut2HeatStage4 = it
-                            viewModel.saveConfiguration()}, isEnabled = (viewState.analogOut2Enabled && heatingStageSelected(4)),
+                            viewModel.setStateChanged()}, isEnabled = (viewState.analogOut2Enabled && heatingStageSelected(4)),
                         previewWidth = 100,
                         expandedWidth = 100,
                         spacerLimit = 179)
@@ -380,7 +401,7 @@ class VavStagedVfdRtuFragment : StagedRtuFragment() {
                             list = (0..10).map { it.toString() }, isHeader = false,
                             defaultSelection = viewState.analogOut2HeatStage5,
                             onSelected = {viewState.analogOut2HeatStage5 = it
-                                viewModel.saveConfiguration()}, isEnabled = (viewState.analogOut2Enabled && heatingStageSelected(5)),
+                                viewModel.setStateChanged()}, isEnabled = (viewState.analogOut2Enabled && heatingStageSelected(5)),
                             previewWidth = 100,
                             expandedWidth = 100,
                             spacerLimit = 90)
@@ -400,14 +421,14 @@ class VavStagedVfdRtuFragment : StagedRtuFragment() {
                         list = (0..10).map { it.toString() }, isHeader = false,
                         defaultSelection = viewState.analogOut2Default,
                         onSelected = {viewState.analogOut2Default = it
-                            viewModel.saveConfiguration()},
+                            viewModel.setStateChanged()},
                         previewWidth = 100,
                         expandedWidth = 100, spacerLimit = 90)
                 }
 
             }
 
-            if(viewModel.viewState.unusedPortState.isNotEmpty()) {
+            if(viewModel.viewState.value.unusedPortState.isNotEmpty()) {
                 item {
                     UnusedPortsFragment.DividerRow()
                 }
@@ -418,8 +439,53 @@ class VavStagedVfdRtuFragment : StagedRtuFragment() {
                     UnusedPortsFragment.UnUsedPortsListView(viewModel)
                 }
             }
+            item {
+                SaveConfig()
+            }
         }
 
     }
 
+    @Composable
+    fun SaveConfig() {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(PaddingValues(top = 20.dp)),
+            horizontalArrangement = Arrangement.End,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .wrapContentWidth()
+                    .padding(PaddingValues(bottom = 10.dp, end = 5.dp)),
+                contentAlignment = Alignment.Center
+            ) {
+                SaveTextView(CANCEL, viewModel.viewState.value.isStateChanged) {
+                    viewModel.reset()
+                    viewModel.viewState.value.isSaveRequired = false
+                    viewModel.viewState.value.isStateChanged = false
+                }
+            }
+            Divider(
+                modifier = Modifier
+                    .height(25.dp)
+                    .width(2.dp)
+                    .padding(bottom = 6.dp),
+                color = Color.LightGray
+            )
+            Box(
+                modifier = Modifier
+                    .wrapContentWidth()
+                    .padding(PaddingValues(bottom = 10.dp, end = 10.dp)),
+                contentAlignment = Alignment.Center
+            ) {
+                SaveTextView(SAVE, viewModel.viewState.value.isSaveRequired) {
+                    viewModel.saveConfiguration()
+                    viewModel.viewState.value.isSaveRequired = false
+                    viewModel.viewState.value.isStateChanged = false
+                }
+            }
+        }
+    }
 }

@@ -79,7 +79,7 @@ public class OTAUpdateHandlerService extends Service {
         filter.addAction(Globals.IntentActions.PUBNUB_MESSAGE);
         filter.addAction(UsbService.ACTION_USB_DETACHED);
         filter.addAction(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
-        filter.addAction(Globals.IntentActions.LSERIAL_MESSAGE);
+        filter.addAction(Globals.IntentActions.LSERIAL_MESSAGE_OTA);
         filter.addAction(Globals.IntentActions.OTA_UPDATE_START);
         filter.addAction(Globals.IntentActions.OTA_UPDATE_CM_ACK);
         filter.addAction(Globals.IntentActions.OTA_UPDATE_PACKET_REQ);

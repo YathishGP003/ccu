@@ -89,6 +89,7 @@ import a75f.io.api.haystack.modbus.Parameter;
 import a75f.io.domain.util.ModelNames;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.TaskManager;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.oao.OAOEquip;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
@@ -123,6 +124,7 @@ import a75f.io.renatus.util.SystemProfileUtil;
 import a75f.io.renatus.views.CustomCCUSwitch;
 import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
 import a75f.io.renatus.views.OaoArc;
+import io.reactivex.rxjava3.disposables.Disposable;
 
 /**
  * Created by samjithsadasivan isOn 8/7/17.
@@ -275,21 +277,17 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		CcuLog.i("UI_PROFILING", "SystemFragment.refreshScreen");
 		
 		if(getActivity() != null) {
-			getActivity().runOnUiThread(new Runnable() {
+			getActivity().runOnUiThread(() -> {
+                if (!(L.ccu().systemProfile instanceof DefaultSystem)) {
+                    checkForOao();
+                    fetchPoints();
+                    if(rootView != null){
+                        configEnergyMeterDetails(rootView);
+                        configBTUMeterDetails(rootView);
+                    }
+                }
 
-				@Override
-				public void run() {
-					if (!(L.ccu().systemProfile instanceof DefaultSystem)) {
-						checkForOao();
-						fetchPoints();
-						if(rootView != null){
-							configEnergyMeterDetails(rootView);
-							configBTUMeterDetails(rootView);
-						}
-					}
-
-				}
-			});
+            });
 		}
 		CcuLog.i("UI_PROFILING", "SystemFragment.refreshScreen Done");
 		
@@ -421,18 +419,26 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		mDrawableBreakLineRight = AppCompatResources.getDrawable(getContext(), R.drawable.ic_break_line_right_svg);
 
 		}catch (InflateException inflateException){
-			Log.d(L.TAG_CCU_UI," Problem when inflating the layout fragment_system_setting "+inflateException.getMessage());
+			CcuLog.d(L.TAG_CCU_UI," Problem when inflating the layout fragment_system_setting "+inflateException.getMessage());
 			inflateException.printStackTrace();
 		}
 		return rootView;
 	}
 
 	private void loadIntrinsicSchedule(){
-		RxjavaUtil.executeBackgroundTask(this::buildIntrinsicSchedule, () -> { updateUI();
+		Disposable intrinsicScheduleTask = TaskManager.INSTANCE.getTask();
+		CcuLog.i(L.TAG_CCU_UI, "SystemFragment.loadIntrinsicSchedule; intrinsicScheduleTask: "+intrinsicScheduleTask);
+		if (intrinsicScheduleTask != null && !intrinsicScheduleTask.isDisposed()) {
+			CcuLog.d(L.TAG_CCU_UI, "Task is already running, returning.");
+			return;
+		}
+		Disposable disposable = RxjavaUtil.executeBackgroundTask(this::buildIntrinsicSchedule, () -> { updateUI();
 		});
+		TaskManager.INSTANCE.setNewTask(disposable);
 	}
 
 	private void buildIntrinsicSchedule(){
+		CcuLog.d(L.TAG_CCU_UI, "buildIntrinsicSchedule invoked.");
 		schedule = new IntrinsicScheduleCreator().buildIntrinsicScheduleForCurrentWeek();
 	}
 
@@ -443,7 +449,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 
 
 			DAYS day = DAYS.values()[now.getDayOfWeek() - 1];
-			Log.i("Scheduler", "DAY: " + day.toString());
+			CcuLog.i("Scheduler", "DAY: " + day.toString());
 			int hh = now.getHourOfDay();
 			int mm = now.getMinuteOfHour();
 
@@ -462,7 +468,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		}
 		catch (IllegalStateException exception) {
 			// if context is null we will get this exception, some rare scenario we get this.
-			Log.d(L.TAG_CCU_UI,exception.getMessage());
+			CcuLog.d(L.TAG_CCU_UI,exception.getMessage());
 		}
 	}
 
@@ -546,7 +552,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 								   int startTimeMM, int endTimeMM, TextView textView,
 								   boolean leftBreak, boolean rightBreak, boolean intersection) {
 
-		Log.i(L.TAG_CCU_UI, "position: "+position+" tempStartTime: " + tempStartTime + " tempEndTime: " + tempEndTime + " startTimeMM: " + startTimeMM + " endTimeMM " + endTimeMM);
+		CcuLog.d(L.TAG_CCU_UI, "position: "+position+" tempStartTime: " + tempStartTime + " tempEndTime: " + tempEndTime + " startTimeMM: " + startTimeMM + " endTimeMM " + endTimeMM);
 
 		if(getContext()==null) return;
 		AppCompatTextView textViewTemp = new AppCompatTextView(getContext());
@@ -570,7 +576,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		lp.leftMargin = leftMargin;
 		lp.rightMargin = rightMargin;
 
-		Drawable drawableCompat = null;
+		Drawable drawableCompat;
 
 		if (leftBreak) {
 			drawableCompat = getResources().getDrawable(R.drawable.temperature_background_left, null);
@@ -674,6 +680,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	}
 
 	public void updateIntrinsicSchedule() {
+		CcuLog.i("UI_PROFILING", "SystemFragment.updateIntrinsicSchedule");
 		if(getActivity() != null) {
 			getActivity().runOnUiThread(this::loadIntrinsicSchedule);
 			fetchPoints();
@@ -703,7 +710,6 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 				//Leave 20% for padding.
 				mPixelsBetweenADay = mPixelsBetweenADay - (mPixelsBetweenADay * .2f);
 
-				loadIntrinsicSchedule();
 				drawCurrentTime();
 
 			}
@@ -818,10 +824,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		lastUpdatedEmr = view.findViewById(R.id.last_updated_emr);
 		configEnergyMeterDetails(view);
 
-		/**
-		 * init Modbus BTU meter  views
-		 */
-		btuMeterParams = view.findViewById(R.id.btuMeterParams);
+        btuMeterParams = view.findViewById(R.id.btuMeterParams);
 		btuMeterModelDetails = view.findViewById(R.id.btuMeterModelDetails);
 		moduleStatusBtu = view.findViewById(R.id.module_status_btu);
 		lastUpdatedBtu = view.findViewById(R.id.last_updated_btu);
@@ -1004,7 +1007,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			}
 			ArrayList<HashMap<Object, Object>> equips = CCUHsApi.getInstance().readAllEntities("equip and oao and not hyperstatsplit");
 
-			if (equips != null && equips.size() > 0) {
+			if (equips != null && !equips.isEmpty()) {
 				ArrayList<OAOEquip> equipList = new ArrayList<>();
 				for (HashMap m : equips) {
 					String nodeAddress = m.get("group").toString();
@@ -1297,7 +1300,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			}
 			systemFragmentHandler.removeCallbacksAndMessages(null);
 		}catch (Exception e){
-			e.printStackTrace();
+			CcuLog.e(L.TAG_CCU_UI, "onDestroyView: ", e);
 		}
 		super.onDestroyView();
 	}
@@ -1322,7 +1325,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		}
 	};
 	private void configEnergyMeterDetails(View view){
-		EquipmentDevice emDevice = getModbusEquip("emr");;
+		EquipmentDevice emDevice = getModbusEquip("emr");
 		if (emDevice != null) {
 			energyMeterParams.setVisibility(View.VISIBLE);
 			energyMeterModelDetails.setVisibility(View.VISIBLE);

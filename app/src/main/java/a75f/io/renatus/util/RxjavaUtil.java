@@ -62,15 +62,16 @@ public class RxjavaUtil {
      * @param backGroundFunction  - Executed using rx thread pool
      * @param postExecute  - Executed on main thread.
      */
-    public static void executeBackgroundTask( Runnable backGroundFunction,
+    public static Disposable executeBackgroundTask( Runnable backGroundFunction,
                                              Runnable postExecute) {
-        Completable.fromCallable(() -> {
+        return Completable.fromCallable(() -> {
             backGroundFunction.run();
             return true;
         })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnComplete(()-> postExecute.run())
+                .doOnError(e -> CcuLog.e(L.TAG_CCU, "Error in executeBackgroundTask", e))
                 .subscribe(
                         () -> { },
                         e -> CcuLog.e(L.TAG_CCU, ERROR_MSG)

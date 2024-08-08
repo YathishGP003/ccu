@@ -361,7 +361,8 @@ fun MinMaxConfiguration(
     minDefault: String,
     maxDefault: String,
     onMinSelected: (Option) -> Unit = {},
-    onMaxSelected: (Option) -> Unit = {}
+    onMaxSelected: (Option) -> Unit = {},
+    viewModel: AdvancedHybridAhuViewModel? = null
 ) {
     Row(
         modifier = Modifier
@@ -377,7 +378,7 @@ fun MinMaxConfiguration(
             SpinnerElementOption(defaultSelection = minDefault,
                 items = itemList,
                 unit = unit,
-                itemSelected = { onMinSelected(it) })
+                itemSelected = { onMinSelected(it) }, viewModel = viewModel)
         }
 
         Box(modifier = Modifier.weight(1f).padding(top = 10.dp)) {
@@ -389,7 +390,7 @@ fun MinMaxConfiguration(
             SpinnerElementOption(defaultSelection = maxDefault,
                 items = itemList,
                 unit = unit,
-                itemSelected = { onMaxSelected(it) })
+                itemSelected = { onMaxSelected(it) }, viewModel = viewModel)
         }
     }
 }

@@ -27,6 +27,14 @@ import kotlinx.coroutines.withContext
 
 class VavAdvancedHybridAhuFragment : AdvancedHybridAhuFragment() {
     override val viewModel: VavAdvancedHybridAhuViewModel by viewModels()
+
+    companion object {
+        lateinit var instance: VavAdvancedHybridAhuFragment
+    }
+    init {
+        instance = this
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {

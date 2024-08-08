@@ -1,8 +1,6 @@
 package a75f.io.renatus.profiles.system.advancedahu.dab
 
 import a75f.io.api.haystack.CCUHsApi
-import a75f.io.domain.api.Domain
-import a75f.io.logger.CcuLog
 import a75f.io.logic.bo.building.system.dab.config.DabAdvancedHybridAhuConfig
 import a75f.io.renatus.composables.DeleteDialog
 import a75f.io.renatus.composables.SaveConfig
@@ -16,8 +14,6 @@ import android.view.ViewGroup
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -31,6 +27,14 @@ import kotlinx.coroutines.withContext
 
 class DabAdvancedHybridAhuFragment : AdvancedHybridAhuFragment() {
     override val viewModel: DabAdvancedHybridAhuViewModel by viewModels()
+
+    companion object {
+        lateinit var instance: DabAdvancedHybridAhuFragment
+    }
+    init {
+        instance = this
+    }
+
 
     override fun onCreateView(
             inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?

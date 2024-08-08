@@ -107,6 +107,7 @@ import a75f.io.logic.bo.building.system.vav.VavStagedRtu;
 import a75f.io.logic.bo.building.system.vav.VavStagedRtuWithVfd;
 import a75f.io.logic.bo.util.DemandResponseMode;
 import a75f.io.logic.bo.util.TemperatureMode;
+import a75f.io.logic.bo.util.UnitUtils;
 import a75f.io.logic.cloudconnectivity.CloudConnectivityListener;
 import a75f.io.logic.interfaces.IntrinsicScheduleListener;
 import a75f.io.logic.interfaces.ZoneDataInterface;
@@ -1156,9 +1157,9 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 					profile.getUserIntentConfig(),
 					profile.getUnit(ductStaticPressureSetpoint),
 					profile.getUnit(airTempCoolingSp),
-					profile.systemEquip.getCmEquip().getAirTempHeatingSp().readHisVal() + "" ,
-					profile.systemEquip.getCmEquip().getAirTempCoolingSp().readHisVal() + "" ,
-					profile.getSatControlPoint() + " " + profile.getUnit(airTempCoolingSp),
+					profile.systemEquip.getCmEquip().getAirTempHeatingSp().readHisVal(),
+					profile.systemEquip.getCmEquip().getAirTempCoolingSp().readHisVal(),
+					profile.getSatControlPoint(),
 					profile.getOperatingMode(),
 					profile.systemEquip.getCmEquip().getDuctStaticPressureSetpoint().readHisVal(),
 					profile.getStaticPressureControlPoint(),
@@ -1170,9 +1171,9 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 					profile.getUserIntentConfig(),
 					profile.getUnit(ductStaticPressureSetpoint),
 					profile.getUnit(airTempCoolingSp),
-					profile.systemEquip.getCmEquip().getAirTempHeatingSp().readHisVal() + "",
-					profile.systemEquip.getCmEquip().getAirTempCoolingSp().readHisVal() + "",
-					profile.getSatControlPoint() + " " + profile.getUnit(airTempCoolingSp),
+					profile.systemEquip.getCmEquip().getAirTempHeatingSp().readHisVal() ,
+					profile.systemEquip.getCmEquip().getAirTempCoolingSp().readHisVal(),
+					profile.getSatControlPoint(),
 					profile.getOperatingMode(),
 					profile.systemEquip.getCmEquip().getDuctStaticPressureSetpoint().readHisVal(),
 					profile.getStaticPressureControlPoint(),
@@ -1187,20 +1188,31 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	@SuppressLint("SetTextI18n")
 	private void setAdvancedAhuConfiguration(
 			UserIntentConfig userIntentConfig,
-			String dspUnit, String satUnit, String heatingSpVal,
-			String CoolingSpVal, String dualSatCurrentVal, String opModeVal,
+			String dspUnit, String satUnit, double heatingSpVal,
+			double CoolingSpVal, double dualSatCurrentVal, String opModeVal,
 			double dspSetPointVal, double dspCurrentVal, double damperVal
 	) {
+		boolean isCelsiusEnabled = UnitUtils.isCelsiusTunerAvailableStatus();
 		setPointConfig.setVisibility(View.VISIBLE);
 		if (userIntentConfig.isSatHeatingAvailable()) { // heating is available
-			heatingSp.setText(" " + heatingSpVal +" "+ satUnit);
-			dualSatCurrent.setText(" " + dualSatCurrentVal+" "+ satUnit);
+			if (isCelsiusEnabled) {
+				heatingSp.setText(" "+ UnitUtils.fahrenheitToCelsiusRelative(heatingSpVal) + " °C");
+				dualSatCurrent.setText(" " +  UnitUtils.fahrenheitToCelsiusRelative(dualSatCurrentVal) + " °C");
+			} else {
+				heatingSp.setText(" " + heatingSpVal +" "+ satUnit);
+				dualSatCurrent.setText(" " + dualSatCurrentVal+" "+ satUnit);
+			}
 		} else {
 			heatConfig.setVisibility(View.INVISIBLE);
 		}
 		if (userIntentConfig.isSatCoolingAvailable()) { // Cooling is available
-			coolingSp.setText(" " + CoolingSpVal +" "+ satUnit);
-			dualSatCurrent.setText(" " + dualSatCurrentVal+" "+ satUnit);
+			if (isCelsiusEnabled) {
+				coolingSp.setText(" "+ UnitUtils.fahrenheitToCelsiusRelative(CoolingSpVal) + " °C");
+				dualSatCurrent.setText(" " +  UnitUtils.fahrenheitToCelsiusRelative(dualSatCurrentVal) + " °C");
+			}else {
+				coolingSp.setText(" " + CoolingSpVal + " " + satUnit);
+				dualSatCurrent.setText(" " + dualSatCurrentVal + " " + satUnit);
+			}
 		} else {
 			coolConfig.setVisibility(View.INVISIBLE);
 		}

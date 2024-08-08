@@ -28,6 +28,7 @@ import a75f.io.logic.bo.building.system.util.getVavCmEquip
 import a75f.io.logic.bo.building.system.util.getVavConnectEquip
 import a75f.io.logic.bo.building.system.vav.VavAdvancedAhu
 import a75f.io.logic.bo.building.system.util.AdvancedHybridAhuConfig
+import a75f.io.logic.bo.util.UnitUtils
 import a75f.io.renatus.R
 import a75f.io.renatus.modbus.util.ALERT
 import a75f.io.renatus.modbus.util.OK
@@ -49,6 +50,8 @@ import io.seventyfivef.domainmodeler.common.point.MultiStateConstraint
 import io.seventyfivef.domainmodeler.common.point.NumericConstraint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -73,6 +76,11 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
     private var isEquipPaired = false
     var isConnectModulePaired = false
     var saveJob : Job? = null
+    private val _isChecked = MutableStateFlow(UnitUtils.isCelsiusTunerAvailableStatus())
+    val isChecked: StateFlow<Boolean> = _isChecked
+    fun toggleChecked() {
+        _isChecked.value = !_isChecked.value
+    }
     /**
      * This voltage values never going to be changed so hardcoded here
      */

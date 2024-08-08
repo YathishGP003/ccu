@@ -1,12 +1,12 @@
 package a75f.io.renatus.profiles.system
 
-import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
 import a75f.io.renatus.composables.DropDownWithLabel
 import a75f.io.renatus.composables.SystemAnalogOutMappingView
 import a75f.io.renatus.composables.SystemAnalogOutMappingViewButtonComposable
 import a75f.io.renatus.compose.ComposeUtil
 import a75f.io.renatus.compose.ToggleButtonStateful
+import a75f.io.renatus.profiles.profileUtils.UnusedPortsModel
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -45,17 +45,22 @@ open class ModulatingRtuFragment : Fragment() {
         Spacer(modifier = Modifier.height(12.dp))
         SystemAnalogOutMappingView(
             analogName = "Analog-Out 1",
-            analogOutState = viewModel.viewState.isAnalog1OutputEnabled,
+            analogOutState = viewModel.viewState.value.isAnalog1OutputEnabled,
             onAnalogOutEnabled = {
-                viewModel.viewState.isAnalog1OutputEnabled = it
-                viewModel.saveConfiguration()
+                viewModel.viewState.value.isAnalog1OutputEnabled = it
+                viewModel.setStateChanged()
+                viewModel.viewState.value.unusedPortState = UnusedPortsModel.setPortState(
+                    "Analog 1 Output",
+                    it,
+                    viewModel.profileConfiguration
+                )
             },
             mappingText = "Cooling",
             analogOutValList = (0..100).map { it.toDouble().toString() },
-            analogOutVal =(0..100).map{it}.indexOf(viewModel.viewState.analogOut1CoolingTestSignal.toInt()),
+            analogOutVal =(0..100).map{it}.indexOf(viewModel.viewState.value.analogOut1CoolingTestSignal.toInt()),
             onAnalogOutChanged = {
-                viewModel.viewState.analogOut1CoolingTestSignal = it.toDouble()
-                viewModel.sendAnalogRelayTestSignal(DomainName.analog1Out, it.toDouble());
+                viewModel.viewState.value.analogOut1CoolingTestSignal = it.toDouble()
+                viewModel.sendAnalogRelayTestSignal(DomainName.analog1Out, it.toDouble())
             },
             dropDownWidthPreview = 100,
             dropdownWidthExpanded = 120,
@@ -65,17 +70,22 @@ open class ModulatingRtuFragment : Fragment() {
 
         SystemAnalogOutMappingView(
             analogName = "Analog-Out 2",
-            analogOutState = viewModel.viewState.isAnalog2OutputEnabled,
+            analogOutState = viewModel.viewState.value.isAnalog2OutputEnabled,
             onAnalogOutEnabled = {
-                viewModel.viewState.isAnalog2OutputEnabled = it
-                viewModel.saveConfiguration()
+                viewModel.viewState.value.isAnalog2OutputEnabled = it
+                viewModel.setStateChanged()
+                viewModel.viewState.value.unusedPortState = UnusedPortsModel.setPortState(
+                    "Analog 2 Output",
+                    it,
+                    viewModel.profileConfiguration
+                )
             },
             mappingText = "Fan Speed",
             analogOutValList = (0..100).map { it.toDouble().toString() },
-            analogOutVal =(0..100).map{it}.indexOf(viewModel.viewState.analogOut2FanSpeedTestSignal.toInt()),
+            analogOutVal =(0..100).map{it}.indexOf(viewModel.viewState.value.analogOut2FanSpeedTestSignal.toInt()),
             onAnalogOutChanged = {
-                viewModel.viewState.analogOut2FanSpeedTestSignal = it.toDouble()
-                viewModel.sendAnalogRelayTestSignal(DomainName.analog2Out, it.toDouble());
+                viewModel.viewState.value.analogOut2FanSpeedTestSignal = it.toDouble()
+                viewModel.sendAnalogRelayTestSignal(DomainName.analog2Out, it.toDouble())
             },
             dropDownWidthPreview = 100,
             dropdownWidthExpanded = 120,
@@ -85,17 +95,22 @@ open class ModulatingRtuFragment : Fragment() {
 
         SystemAnalogOutMappingView(
             analogName = "Analog-Out 3",
-            analogOutState = viewModel.viewState.isAnalog3OutputEnabled,
+            analogOutState = viewModel.viewState.value.isAnalog3OutputEnabled,
             onAnalogOutEnabled = {
-                viewModel.viewState.isAnalog3OutputEnabled = it
-                viewModel.saveConfiguration()
+                viewModel.viewState.value.isAnalog3OutputEnabled = it
+                viewModel.setStateChanged()
+                viewModel.viewState.value.unusedPortState = UnusedPortsModel.setPortState(
+                    "Analog 3 Output",
+                    it,
+                    viewModel.profileConfiguration
+                )
             },
             mappingText = "Heating",
             analogOutValList = (0..100).map { it.toDouble().toString() },
-            analogOutVal = (0..100).map{it}.indexOf(viewModel.viewState.analogOut3HeatingTestSignal.toInt()),
+            analogOutVal = (0..100).map{it}.indexOf(viewModel.viewState.value.analogOut3HeatingTestSignal.toInt()),
             onAnalogOutChanged = {
-                viewModel.viewState.analogOut3HeatingTestSignal = it.toDouble()
-                viewModel.sendAnalogRelayTestSignal(DomainName.analog3Out, it.toDouble());
+                viewModel.viewState.value.analogOut3HeatingTestSignal = it.toDouble()
+                viewModel.sendAnalogRelayTestSignal(DomainName.analog3Out, it.toDouble())
             },
             dropDownWidthPreview = 100,
             dropdownWidthExpanded = 120,
@@ -105,17 +120,22 @@ open class ModulatingRtuFragment : Fragment() {
 
         SystemAnalogOutMappingView(
             analogName = "Analog-Out 4",
-            analogOutState = viewModel.viewState.isAnalog4OutputEnabled,
+            analogOutState = viewModel.viewState.value.isAnalog4OutputEnabled,
             onAnalogOutEnabled = {
-                viewModel.viewState.isAnalog4OutputEnabled = it
-                viewModel.saveConfiguration()
+                viewModel.viewState.value.isAnalog4OutputEnabled = it
+                viewModel.setStateChanged()
+                viewModel.viewState.value.unusedPortState = UnusedPortsModel.setPortState(
+                    "Analog 4 Output",
+                    it,
+                    viewModel.profileConfiguration
+                )
             },
             mappingText = "OutSide Air",
             analogOutValList = (0..100).map { it.toDouble().toString() },
-            analogOutVal = (0..100).map{it}.indexOf(viewModel.viewState.analogOut4OutSideAirTestSignal.toInt()),
+            analogOutVal = (0..100).map{it}.indexOf(viewModel.viewState.value.analogOut4OutSideAirTestSignal.toInt()),
             onAnalogOutChanged = {
-                viewModel.viewState.analogOut4OutSideAirTestSignal = it.toDouble()
-                viewModel.sendAnalogRelayTestSignal(DomainName.analog4Out, it.toDouble());
+                viewModel.viewState.value.analogOut4OutSideAirTestSignal = it.toDouble()
+                viewModel.sendAnalogRelayTestSignal(DomainName.analog4Out, it.toDouble())
             },
             dropDownWidthPreview = 100,
             dropdownWidthExpanded = 120,
@@ -125,35 +145,45 @@ open class ModulatingRtuFragment : Fragment() {
 
         SystemAnalogOutMappingViewButtonComposable(
             analogName = "Relay 3",
-            analogOutState = viewModel.viewState.isRelay3OutputEnabled,
+            analogOutState = viewModel.viewState.value.isRelay3OutputEnabled,
             onAnalogOutEnabled = {
-                viewModel.viewState.isRelay3OutputEnabled = it
-                viewModel.saveConfiguration()
+                viewModel.viewState.value.isRelay3OutputEnabled = it
+                viewModel.setStateChanged()
+                viewModel.viewState.value.unusedPortState = UnusedPortsModel.setPortState(
+                    "Relay 3",
+                    it,
+                    viewModel.profileConfiguration
+                )
             },
             mappingText = "Fan Enable",
             paddingLimitEnd = 0,
             buttonState = viewModel.getRelayState(DomainName.relay3),
             onTestActivated = {
-                viewModel.sendTestCommand(DomainName.relay3, it);
+                viewModel.sendTestCommand(DomainName.relay3, it)
             }
         )
         Spacer(modifier = Modifier.height(14.dp))
         SystemRelayMappingView(
             relayText = "Relay 7",
-            relayState = viewModel.viewState.isRelay7OutputEnabled,
+            relayState = viewModel.viewState.value.isRelay7OutputEnabled,
             onRelayEnabled = {
-                viewModel.viewState.isRelay7OutputEnabled = it
-                viewModel.saveConfiguration()
+                viewModel.viewState.value.isRelay7OutputEnabled = it
+                viewModel.setStateChanged()
+                viewModel.viewState.value.unusedPortState = UnusedPortsModel.setPortState(
+                    "Relay 7",
+                    it,
+                    viewModel.profileConfiguration
+                )
             },
-            mappingSelection = viewModel.viewState.relay7Association,
+            mappingSelection = viewModel.viewState.value.relay7Association,
             mapping = viewModel.relay7AssociationList,
             onMappingChanged = {
-                viewModel.viewState.relay7Association = it
-                viewModel.saveConfiguration()
+                viewModel.viewState.value.relay7Association = it
+                viewModel.setStateChanged()
             },
             buttonState = viewModel.getRelayState(DomainName.relay7),
             onTestActivated = {
-                viewModel.sendTestCommand(DomainName.relay7, it);
+                viewModel.sendTestCommand(DomainName.relay7, it)
             },
         )
     }
@@ -187,7 +217,7 @@ open class ModulatingRtuFragment : Fragment() {
                 heightValue = 100,
                 onSelected = onMappingChanged,
                 defaultSelection = mappingSelection,
-                isEnabled = modulatingViewModel.viewState.isRelay7OutputEnabled
+                isEnabled = modulatingViewModel.viewState.value.isRelay7OutputEnabled
             )
 
             var buttonState by remember { mutableStateOf(buttonState) }

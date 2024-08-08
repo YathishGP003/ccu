@@ -13,9 +13,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import a75f.io.logger.CcuLog;
+import okhttp3.Call;
+import okhttp3.Callback;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import okhttp3.RequestBody;
+import okhttp3.Response;
 import okhttp3.ResponseBody;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -36,6 +40,32 @@ public class HttpUtil {
         return executePost(targetURL, urlParameters, CCUHsApi.getInstance().getJwt()); // TODO Matt Rudd - I hate this hack, but the executePost needs a complete rewrite
     }
 
+    public static final MediaType ZINC = MediaType.get("text/zinc; charset=utf-8");
+    private static Response postSync(String url, String params, String token) {
+        RequestBody body = RequestBody.create(params, ZINC);
+        Request request = new Request.Builder()
+                .url(url)
+                .addHeader(HttpConstants.APP_NAME_HEADER_NAME, HttpConstants.APP_NAME_HEADER_VALUE)
+                .addHeader("Content-Length", "" + params.getBytes(StandardCharsets.UTF_8).length)
+                .addHeader("Content-Language", "en-US")
+                .addHeader("Authorization", " Bearer " + token)
+                .addHeader("Content-Type", "text/zinc")
+                .addHeader("Accept", "text/zinc")
+                .post(body)
+                .build();
+
+        CcuLog.d("CCU_HTTP_REQUEST", "HttpUtil:postSync: [POST] " + url + " - Token: " + token);
+        Call call = getSharedOkHttpClient().newCall(request);
+        Response response = null;
+        try {
+            response = call.execute();
+            CcuLog.d("CCU_HTTP_RESPONSE", "HttpUtil:postSync: " + response.code() + " - [" + response.request().method() + "] " + response.request().url());
+        } catch (IOException e) {
+            CcuLog.e("CCU_HTTP_RESPONSE", "HttpUtil:postSync: Failed : " + e);
+        }
+
+        return response;
+    }
 
     public static String executePost(String targetURL, String urlParameters, String bearerToken) {
         targetURL = StringUtils.appendIfMissing(targetURL, "/");
@@ -126,88 +156,19 @@ public class HttpUtil {
      */
     public static EntitySyncResponse executeEntitySync(String targetURL, String urlParameters, String bearerToken) {
         targetURL = StringUtils.appendIfMissing(targetURL, "/");
-        if (StringUtils.isNotBlank(bearerToken)) {
-            URL url;
-            HttpURLConnection connection = null;
-            EntitySyncResponse syncResponse = new EntitySyncResponse();
-            try {
-                url = new URL(targetURL);
-
-                connection = openConnection(urlParameters, url, targetURL, HttpConstants.HTTP_METHOD_POST);
-
-                connection.setRequestMethod("POST");
-                connection.setRequestProperty("Content-Type", "text/zinc");
-                connection.setRequestProperty("Accept", "text/zinc");
-
-                final int chunkSize = 2048;
-                for (int i = 0; i < urlParameters.length(); i += chunkSize) {
-                    CcuLog.d("CCU_HS", urlParameters.substring(i, Math.min(urlParameters.length(), i + chunkSize)));
-                }
-
-                connection.setRequestProperty(HttpConstants.APP_NAME_HEADER_NAME, HttpConstants.APP_NAME_HEADER_VALUE);
-                connection.setRequestProperty("Content-Length", "" + urlParameters.getBytes(StandardCharsets.UTF_8).length);
-                connection.setRequestProperty("Content-Language", "en-US");
-                connection.setRequestProperty("Authorization", " Bearer " + bearerToken);
-                connection.setUseCaches(false);
-                connection.setDoInput(true);
-                connection.setDoOutput(true);
-                connection.setConnectTimeout(HTTP_REQUEST_TIMEOUT_MS);
-                connection.setReadTimeout(HTTP_REQUEST_TIMEOUT_MS);
-
-                CcuLog.d("CCU_HTTP_REQUEST", "HttpUtil:executeEntitySync: [POST] " + url + " - Token: " + bearerToken);
-
-                //Send request
-                DataOutputStream wr = new DataOutputStream(connection.getOutputStream());
-                wr.write(urlParameters.getBytes(StandardCharsets.UTF_8));
-                wr.flush();
-
-                int responseCode = connection.getResponseCode();
-
-                CcuLog.d("CCU_HTTP_RESPONSE", "HttpUtil:executeEntitySync: " + responseCode + " - [POST] " + url);
-
-                syncResponse.setRespCode(responseCode);
-                if (responseCode >= HTTP_RESPONSE_ERR_REQUEST) {
-
-                    BufferedReader rde = new BufferedReader(new InputStreamReader(connection.getErrorStream()));
-                    String linee;
-                    StringBuilder response = new StringBuilder();
-                    while ((linee = rde.readLine()) != null) {
-                        response.append(linee);
-                        response.append('\n');
-                    }
-                    syncResponse.setErrRespString(response.toString());
-                    CcuLog.e("CCU_HS", "Response error stream: " + response);
-                }
-
-                //Get Response
-                BufferedReader rd = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                String line;
-                StringBuilder response = new StringBuilder();
-                while ((line = rd.readLine()) != null) {
-                    response.append(line);
-                    response.append('\n');
-                }
-                syncResponse.setRespString(response.toString());
-                connection.getInputStream().close();
-                return syncResponse;
-
-            } catch (Exception e) {
-                CcuLog.e("CCU_HS", "Exception reading stream: " + e.getLocalizedMessage());
-
-                if (connection != null) {
-                    connection.disconnect();
-                }
-                e.printStackTrace();
-                return syncResponse;
-
-            } finally {
-
-                if (connection != null) {
-                    connection.disconnect();
-                }
-            }
+        Response response = postSync(targetURL, urlParameters, bearerToken);
+        if (response == null) {
+            return null;
         }
-        return null;
+
+        EntitySyncResponse syncResponse = new EntitySyncResponse();
+        syncResponse.setRespCode(response.code());
+        if (response.code() >= HTTP_RESPONSE_ERR_REQUEST) {
+            syncResponse.setErrRespString(response.body().toString());
+        } else {
+            syncResponse.setRespString(response.body().toString());
+        }
+        return syncResponse;
     }
 
     // TODO Matt Rudd - This method is a hot mess; refactor
@@ -255,6 +216,7 @@ public class HttpUtil {
                     DataOutputStream wr = new DataOutputStream(connection.getOutputStream());
                     wr.write(urlParameters.getBytes(StandardCharsets.UTF_8));
                     wr.flush();
+                    wr.close();
                 }
 
                 int responseCode = connection.getResponseCode();
@@ -282,7 +244,6 @@ public class HttpUtil {
                     response.append(line);
                     response.append('\n');
                 }
-
                 return responseCode == 200 ? response.toString() : null;
 
             } catch (Exception e) {

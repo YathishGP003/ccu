@@ -100,8 +100,15 @@ object ModelCache {
         modelContainer[MODEL_VAV_STAGED_VFD_RTU] = getModelById(MODEL_VAV_STAGED_VFD_RTU)
         CcuLog.i(Domain.LOG_TAG, "VavStagedVfd model loaded")
 
+        modelContainer[MODEL_VAV_MODULATING_AHU] = getModelById(MODEL_VAV_MODULATING_AHU)
+        CcuLog.i(Domain.LOG_TAG, "VAV fully Modulating model loaded")
+
         modelContainer[MODEL_VAV_ADVANCED_AHU_V2_CM] = getModelById(MODEL_VAV_ADVANCED_AHU_V2_CM)
         CcuLog.i(Domain.LOG_TAG, "MODEL_VAV_ADVANCED_AHU_V2 model loaded")
+
+        modelContainer[MODEL_VAV_ADVANCED_AHU_V2_CONNECT] = getModelById(
+            MODEL_VAV_ADVANCED_AHU_V2_CONNECT)
+        CcuLog.i(Domain.LOG_TAG, "MODEL_VAV_ADVANCED_AHU_V2_CONNECT model loaded")
     }
 
     private fun loadBypassDamperModels() {

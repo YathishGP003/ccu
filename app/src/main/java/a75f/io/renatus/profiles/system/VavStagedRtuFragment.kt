@@ -6,6 +6,9 @@ import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.renatus.R
 import a75f.io.renatus.compose.ComposeUtil
+import a75f.io.renatus.compose.SaveTextView
+import a75f.io.renatus.modbus.util.CANCEL
+import a75f.io.renatus.modbus.util.SAVE
 import a75f.io.renatus.profiles.profileUtils.UnusedPortsFragment
 import a75f.io.renatus.util.AddProgressGif
 import a75f.io.renatus.util.highPriorityDispatcher
@@ -14,19 +17,27 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -68,8 +79,8 @@ class VavStagedRtuFragment : StagedRtuFragment() {
             }
 
             override fun onViewDetachedFromWindow(v: View) {
-                if (Globals.getInstance().isTestMode()) {
-                    Globals.getInstance().setTestMode(false);
+                if (Globals.getInstance().isTestMode) {
+                    Globals.getInstance().isTestMode = false
                 }
             }
         })
@@ -141,7 +152,7 @@ class VavStagedRtuFragment : StagedRtuFragment() {
                     }
                 }
             }
-            if (viewModel.viewState.unusedPortState.isNotEmpty()) {
+            if (viewModel.viewState.value.unusedPortState.isNotEmpty()) {
                 item {
                     UnusedPortsFragment.DividerRow()
                 }
@@ -150,6 +161,52 @@ class VavStagedRtuFragment : StagedRtuFragment() {
                 }
                 item {
                     UnusedPortsFragment.UnUsedPortsListView(viewModel)
+                }
+            }
+            item {
+                SaveConfig()
+            }
+        }
+    }
+
+    @Composable
+    fun SaveConfig() {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(PaddingValues(top = 20.dp)),
+            horizontalArrangement = Arrangement.End,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .wrapContentWidth()
+                    .padding(PaddingValues(bottom = 10.dp, end = 5.dp)),
+                contentAlignment = Alignment.Center
+            ) {
+                SaveTextView(CANCEL, viewModel.viewState.value.isStateChanged) {
+                    viewModel.reset()
+                    viewModel.viewState.value.isSaveRequired = false
+                    viewModel.viewState.value.isStateChanged = false
+                }
+            }
+            Divider(
+                modifier = Modifier
+                    .height(25.dp)
+                    .width(2.dp)
+                    .padding(bottom = 6.dp),
+                color = Color.LightGray
+            )
+            Box(
+                modifier = Modifier
+                    .wrapContentWidth()
+                    .padding(PaddingValues(bottom = 10.dp, end = 10.dp)),
+                contentAlignment = Alignment.Center
+            ) {
+                SaveTextView(SAVE, viewModel.viewState.value.isSaveRequired) {
+                    viewModel.saveConfiguration()
+                    viewModel.viewState.value.isSaveRequired = false
+                    viewModel.viewState.value.isStateChanged = false
                 }
             }
         }

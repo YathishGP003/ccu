@@ -19,7 +19,12 @@ import io.seventyfivef.domainmodeler.common.point.Constraint
 import io.seventyfivef.domainmodeler.common.point.MultiStateConstraint
 import io.seventyfivef.domainmodeler.common.point.NumericConstraint
 import io.seventyfivef.ph.core.TagType
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.runBlocking
 import org.projecthaystack.HStr
+import kotlin.system.measureTimeMillis
 
 class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: EntityMapper) {
     fun buildDeviceAndPoints(configuration: ProfileConfiguration, modelDef: SeventyFiveFDeviceDirective, equipRef: String, siteRef : String, deviceDis: String) {
@@ -28,7 +33,10 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
         val deviceId = hayStack.addDevice(hayStackDevice)
         hayStackDevice.id = deviceId
         DomainManager.addDevice(hayStackDevice)
-        createPoints(modelDef, configuration, hayStackDevice)
+        val time = measureTimeMillis {
+            createPoints(modelDef, configuration, hayStackDevice)
+        }
+        CcuLog.i(Domain.LOG_TAG, "Time taken to create device points ${time}ms")
     }
 
     fun updateDeviceAndPoints(configuration: ProfileConfiguration, modelDef: SeventyFiveFDeviceDirective, equipRef: String, siteRef : String, deviceDis: String) {
@@ -43,16 +51,27 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
 
         hayStackDevice.id = deviceId
         DomainManager.addDevice(hayStackDevice)
-        updatePoints(modelDef, configuration, hayStackDevice)
+        val time = measureTimeMillis {
+            updatePoints(modelDef, configuration, hayStackDevice)
+        }
+        CcuLog.i(Domain.LOG_TAG, "Time taken to update device points ${time}ms")
     }
 
     private fun createPoints(modelDef: SeventyFiveFDeviceDirective, profileConfiguration: ProfileConfiguration, device: Device) {
-
-        modelDef.points.forEach {
-            val hayStackPoint = buildRawPoint(it, profileConfiguration, device)
-            val pointId = hayStack.addPoint(hayStackPoint)
-            hayStackPoint.id = pointId
-            DomainManager.addRawPoint(hayStackPoint)
+        runBlocking {
+            modelDef.points.map { point ->
+                async(Dispatchers.Default) {
+                    try {
+                        CcuLog.i(Domain.LOG_TAG, "Adding raw point ${point.domainName}")
+                        val hayStackPoint = buildRawPoint(point, profileConfiguration, device)
+                        val pointId = hayStack.addPoint(hayStackPoint)
+                        hayStackPoint.id = pointId
+                        DomainManager.addRawPoint(hayStackPoint)
+                    } catch (e: Exception) {
+                        CcuLog.e(Domain.LOG_TAG, "Error adding raw point ${point.domainName}: ${e.message}")
+                    }
+                }
+            }.awaitAll()
         }
     }
     private fun buildDevice(modelDef: SeventyFiveFDeviceDirective, configuration: ProfileConfiguration, equipRef: String, siteRef : String, deviceDis: String) : Device{
@@ -141,19 +160,30 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
     }
 
     private fun updatePoints(modelDef: SeventyFiveFDeviceDirective, profileConfiguration: ProfileConfiguration, device: Device) {
-        modelDef.points.forEach {
-            val newPoint = buildRawPoint(it, profileConfiguration, device)
-            val hayStackPointDict = hayStack.readHDict("domainName == \""+it.domainName+"\" and deviceRef == \""+device.id+"\"")
-            val hayStackPoint = Point.Builder().setHDict(hayStackPointDict).build()
-            if(hayStackPoint.markers.contains(Tags.WRITABLE)){
-                newPoint.markers.add(Tags.WRITABLE)
+        runBlocking {
+            val deferredResults = modelDef.points.map { point ->
+                async(Dispatchers.Default) {
+                    try {
+                        val newPoint = buildRawPoint(point, profileConfiguration, device)
+                        val hayStackPointDict = hayStack.readHDict("domainName == \"" + point.domainName + "\" and deviceRef == \"" + device.id + "\"")
+                        val hayStackPoint = Point.Builder().setHDict(hayStackPointDict).build()
+
+                        if (hayStackPoint.markers.contains(Tags.WRITABLE)) {
+                            newPoint.markers.add(Tags.WRITABLE)
+                        }
+
+                        if (!hayStackPoint.equals(newPoint)) {
+                            CcuLog.i(Domain.LOG_TAG, "updateHaystackPoint ${point.domainName}")
+                            hayStack.updatePoint(newPoint, hayStackPoint.id)
+                            newPoint.id = hayStackPoint.id
+                            DomainManager.addRawPoint(newPoint)
+                        }
+                    } catch (e: Exception) {
+                        CcuLog.e(Domain.LOG_TAG, "Error updating point ${point.domainName}", e)
+                    }
+                }
             }
-            if (!hayStackPoint.equals(newPoint)) {
-                CcuLog.i(Domain.LOG_TAG, "updateHaystackPoint ${it.domainName}")
-                hayStack.updatePoint(newPoint, hayStackPoint.id)
-                newPoint.id = hayStackPoint.id
-                DomainManager.addRawPoint(newPoint)
-            }
+            deferredResults.awaitAll()
         }
     }
     private fun updatePhysicalRef(configuration: ProfileConfiguration, rawPoint : RawPoint, entityMapper: EntityMapper , equipRef : String): Boolean {

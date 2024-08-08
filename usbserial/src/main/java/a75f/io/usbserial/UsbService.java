@@ -225,6 +225,9 @@ public class UsbService extends Service
 
 	private void messageToClients(byte[] data)
 	{
+		if (!CCUHsApi.getInstance().isCcuReady()) {
+			return;
+		}
 		SerialAction serialAction = SerialAction.MESSAGE_FROM_SERIAL_PORT;
 		SerialEvent serialEvent = new SerialEvent(serialAction, data);
 		EventBus.getDefault().post(serialEvent);

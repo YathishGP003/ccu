@@ -151,7 +151,7 @@ public class OTAUpdateService extends IntentService {
             moveUpdateToNextNode();
         }
         /* The OTA update is in progress, and is being notified from the CM */
-        else if(action.equals(Globals.IntentActions.LSERIAL_MESSAGE)) {
+        else if(action.equals(Globals.IntentActions.LSERIAL_MESSAGE_OTA)) {
 
             MessageType eventType = (MessageType) intent.getSerializableExtra("eventType");
             byte[] eventBytes = intent.getByteArrayExtra("eventBytes");

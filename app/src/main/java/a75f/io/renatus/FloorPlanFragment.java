@@ -60,6 +60,7 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
+import a75f.io.logic.TaskManager;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.cloud.CloudConnectionManager;
@@ -218,6 +219,7 @@ public class FloorPlanFragment extends Fragment {
         enableFloorButton();
         disableRoomModule();
         Globals.getInstance().selectedTab = 0;
+        TaskManager.INSTANCE.disposeCurrentTask();
     }
 
 

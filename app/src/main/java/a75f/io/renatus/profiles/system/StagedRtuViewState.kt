@@ -32,6 +32,8 @@ open class StagedRtuViewState {
     var relay6Test by mutableStateOf (false)
     var relay7Test by mutableStateOf (false)
     var unusedPortState by mutableStateOf(hashMapOf<String, Boolean>())
+    var isStateChanged by mutableStateOf(false)
+    var isSaveRequired by mutableStateOf(false)
     companion object {
         fun fromProfileConfig(config: StagedRtuProfileConfig): StagedRtuViewState {
             return StagedRtuViewState().apply {

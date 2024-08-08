@@ -7,8 +7,9 @@ import a75f.io.domain.config.EnableConfig
 import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.config.ValueConfig
 import a75f.io.domain.equips.VavModulatingRtuSystemEquip
-import a75f.io.logger.CcuLog
 import a75f.io.logic.bo.haystack.device.ControlMote
+import a75f.io.logic.bo.haystack.device.ControlMote.getAllUnusedPorts
+import a75f.io.logic.bo.haystack.device.ControlMote.getCMUnusedPorts
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import io.seventyfivef.ph.core.Tags
 
@@ -54,7 +55,7 @@ open class ModulatingRtuProfileConfig(val model: SeventyFiveFProfileDirective) :
         analogOut3HeatingMax = getDefaultValConfig(DomainName.analog3MaxHeating, model)
         analogOut4FreshAirMin = getDefaultValConfig(DomainName.analog4MinOutsideDamper, model)
         analogOut4FreshAirMax = getDefaultValConfig(DomainName.analog4MaxOutsideDamper, model)
-        unusedPorts = ControlMote.getCMUnusedPorts(Domain.hayStack)
+        unusedPorts = getAllUnusedPorts()
         isDefault = true
         return this
     }
@@ -118,7 +119,7 @@ open class ModulatingRtuProfileConfig(val model: SeventyFiveFProfileDirective) :
             analogOut4FreshAirMin = getDefaultValConfig(DomainName.analog4MinOutsideDamper, model)
             analogOut4FreshAirMax = getDefaultValConfig(DomainName.analog4MaxOutsideDamper, model)
         }
-        unusedPorts = ControlMote.getCMUnusedPorts(Domain.hayStack)
+        unusedPorts = getCMUnusedPorts(Domain.hayStack)
         isDefault = false
         return this
     }

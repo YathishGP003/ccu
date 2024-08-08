@@ -79,6 +79,7 @@ public class L
     public static final String TAG_CCU_REMOTE_COMMAND = "CCU_REMOTE_COMMAND";
     public static final String TAG_CCU_CLOUD_STATUS = "CCU_CLOUD_STATUS";
     public static final String TAG_CCU_UI_PROFILING = "CCU_UI_PROFILING";
+    public static final String TAG_CCU_DOMAIN = "CCU_DOMAIN";
     public static Context app()
     {
         return Globals.getInstance().getApplicationContext();

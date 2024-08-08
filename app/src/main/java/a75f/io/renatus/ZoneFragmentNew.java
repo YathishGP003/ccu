@@ -1299,6 +1299,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                             CcuLog.i("UI_PROFILING","ZoneFragmentNew.scheduleSpinner");
                             if(isItemSelectedEvent) {
                                 isItemSelectedEvent = false;
+                                isRemoteChangeApplied = false;
                                 return;
                             }
 
@@ -1765,6 +1766,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
                 if(isItemSelectedEvent) {
                     isItemSelectedEvent = false;
+                    isRemoteChangeApplied = false;
                     return;
                 }
 

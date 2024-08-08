@@ -191,6 +191,13 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                     for (int pos = (int) (100 * 10); pos >= (100 * 0); pos -= (100 * 0.1)) {
                         analogOut1Val.add(pos / 100.0 + " V");
                     }
+                } else if (damperPosition == 5) {
+                    SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
+                    edit.putString("cat-analog1",profile+"-type-0-5v");
+                    edit.commit();
+                    for (int pos = (int) (100 * 0); pos <= (100 * 5); pos += (100 * 0.1)) {
+                        analogOut1Val.add(pos / 100.0 + " V");
+                    }
                 }
                 if (reheatPosition == 1) {
                     SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
@@ -1465,7 +1472,7 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                 break;
             case "VAV_SERIES_FAN":
                 if (pointname.equals("Analog-out2"))
-                    return "Modulating Reheat";
+                    return getVavRelayMapping(pointname,listTitle);
                 else if (pointname.equals("Analog-out1"))
                     return "Modulating Damper";
                 else if (pointname.equals("relay1")) {
@@ -1479,7 +1486,7 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                 break;
             case "VAV_PARALLEL_FAN":
                 if (pointname.equals("Analog-out2"))
-                    return "Modulating Reheat";
+                    return getVavRelayMapping(pointname,listTitle);
                 else if (pointname.equals("Analog-out1"))
                     return "Modulating Damper";
                 else if (pointname.equals("relay1")) {
@@ -1494,7 +1501,7 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
             case "VAV_REHEAT":
     
                 if (pointname.equals("Analog-out2"))
-                    return "Modulating Reheat";
+                    return getVavRelayMapping(pointname,listTitle);
                 else if (pointname.equals("Analog-out1"))
                     return "Modulating Damper";
                 else if (pointname.equals("relay1") || pointname.equals("relay2")) {
@@ -1723,10 +1730,17 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                 }
                 break;
             case "DAB":
-                if (pointname.equals("Analog-out1"))
-                    return "Damper1 Type";
-                else if (pointname.equals("Analog-out2"))
-                    return "Damper2 Type";
+                if (pointname.equals("Analog-out1") || (pointname.equals("Analog-out2"))) {
+                    return getDabRelayMapping(pointname, listTitle);
+                } else if (pointname.equals("Analog1In")) {
+                    return  "Damper Feedback";
+                }
+                else if (pointname.equals("Analog2In")) {
+                    return  getDabRelayMapping(pointname, listTitle);
+                }
+                else if (pointname.equals("relay1") || pointname.equals("relay2")) {
+                    return  getDabRelayMapping(pointname, listTitle);
+                }
                 break;
             case "DUAL_DUCT":
                 DualDuctProfile mDualDuctProfile = (DualDuctProfile) L.getProfile(Short.parseShort(parseGroup(listTitle)));
@@ -1877,6 +1891,24 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
             return "Electric Reheat Stage 1";
         } else if (pointname.equals("relay2") && equip.getReheatType().readDefaultVal() == 7) {
             return "Electric Reheat Stage 2";
+        } else if (pointname.equals("Analog-out2") && ( equip.getReheatType().readDefaultVal() >= 1 && equip.getReheatType().readDefaultVal() <= 5)) {
+            return "Modulating Reheat";
+        }
+        return "Not Used";
+    }
+    private String getDabRelayMapping(String pointname, String listTitle) {
+        DabProfile dabProfile = (DabProfile) L.getProfile(Short.parseShort(parseGroup(listTitle)));
+        DabEquip equip = (DabEquip) Domain.INSTANCE.getDomainEquip(dabProfile.getEquip().getId());
+        if (pointname.equals("relay1") && ( equip.getReheatType().readDefaultVal() == 6 || equip.getReheatType().readDefaultVal() == 7)) {
+            return "Electric Reheat Stage 1";
+        } else if (pointname.equals("relay2") && equip.getReheatType().readDefaultVal() == 7) {
+            return "Electric Reheat Stage 2";
+        } else if (pointname.equals("Analog-out1") && (equip.getDamper1Type().readDefaultVal() != 4)) {
+            return "Damper1 Type";
+        } else if (pointname.equals("Analog-out2") && (equip.getDamper2Type().readDefaultVal() != 4)) {
+            return "Damper2 Type";
+        } else if ((pointname.equals("Analog-out1") || pointname.equals("Analog-out2")) && (equip.getReheatType().readDefaultVal() >= 1 && equip.getReheatType().readDefaultVal() <= 5)) {
+            return "Modulating Reheat";
         }
         return "Not Used";
     }

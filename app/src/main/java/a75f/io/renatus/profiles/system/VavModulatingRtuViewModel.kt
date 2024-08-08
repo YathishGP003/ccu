@@ -11,10 +11,13 @@ import a75f.io.logic.Globals
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.system.vav.VavFullyModulatingRtu
+import a75f.io.logic.bo.building.system.vav.VavStagedRtu
 import a75f.io.logic.bo.building.system.vav.config.ModulatingRtuProfileConfig
 import a75f.io.logic.bo.haystack.device.ControlMote
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
+import a75f.io.renatus.profiles.profileUtils.UnusedPortsModel
 import a75f.io.renatus.util.ProgressDialogUtils
+import a75f.io.renatus.util.highPriorityDispatcher
 import android.content.Context
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
@@ -25,8 +28,7 @@ open class VavModulatingRtuViewModel : ModulatingRtuViewModel() {
 
     fun init(context: Context, hayStack: CCUHsApi) {
         super.init(context, ModelLoader.getVavModulatingRtuModelDef(), hayStack)
-
-        var systemEquip = hayStack.readEntity("system and equip and not modbus and not connectModule")
+        val systemEquip = hayStack.readEntity("system and equip and not modbus and not connectModule")
         CcuLog.i(Domain.LOG_TAG, "Current System Equip $systemEquip")
 
         if (systemEquip["profile"].toString() == "vavFullyModulatingAhu"
@@ -34,38 +36,53 @@ open class VavModulatingRtuViewModel : ModulatingRtuViewModel() {
         ) {
             CcuLog.i(Domain.LOG_TAG, "Get active config for vavFullyModulatingAhu")
             profileConfiguration = ModulatingRtuProfileConfig(model).getActiveConfiguration()
+            viewState.value = ModulatingRtuViewState.fromProfileConfig(profileConfiguration)
+            CcuLog.i(Domain.LOG_TAG, "Active vavFullyModulatingAhu profile config loaded")
         } else {
-            CcuLog.i(Domain.LOG_TAG, "Get default config for vavFullyModulatingAhu")
             profileConfiguration = ModulatingRtuProfileConfig(model).getDefaultConfiguration()
-            val newEquipId = createNewEquip(systemEquip["id"].toString())
-            L.ccu().systemProfile = VavFullyModulatingRtu()
-            L.ccu().systemProfile.removeSystemEquipModbus()
-            L.ccu().systemProfile.addSystemEquip()
-            L.ccu().systemProfile.updateAhuRef(newEquipId)
+            viewState.value = ModulatingRtuViewState.fromProfileConfig(profileConfiguration)
+            CcuLog.i(Domain.LOG_TAG, "Default vavFullyModulatingAhu profile config Loaded")
         }
-        if(L.ccu().systemProfile.sysEquip == null){
-            L.ccu().systemProfile = VavFullyModulatingRtu()
-            L.ccu().systemProfile.addSystemEquip()
-        }
-        CcuLog.i(Domain.LOG_TAG, profileConfiguration.toString())
-        viewState = ModulatingRtuViewState.fromProfileConfig(profileConfiguration)
-        CcuLog.i(Domain.LOG_TAG, "VavModulatingRtuViewModel Loaded")
-        viewState.unusedPortState = ControlMote.getCMUnusedPorts(Domain.hayStack)
-        _modelLoaded.postValue(true)
+        modelLoadedState.postValue(true)
+        viewState.value.isSaveRequired = !systemEquip["profile"].toString().contentEquals("vavFullyModulatingAhu")
     }
 
     override fun saveConfiguration() {
-        viewModelScope.launch {
-            ProgressDialogUtils.showProgressDialog(context, "Saving Configuration...")
-            withContext(Dispatchers.IO) {
+        hayStack.resetCcuReady()
+        var systemEquipId : String? = null
+        ProgressDialogUtils.showProgressDialog(context, "Saving VAV Configuration")
+        viewModelScope.launch (highPriorityDispatcher) {
+            val systemEquip = hayStack.readEntity("system and equip and not modbus and not connectModule")
+            if (systemEquip["profile"].toString() != "vavFullyModulatingAhu"
+                && systemEquip["profile"].toString() != ProfileType.SYSTEM_VAV_ANALOG_RTU.name
+            ) {
+                viewState.value.updateConfigFromViewState(profileConfiguration)
+                deleteSystemProfile(systemEquip["id"].toString())
+                systemEquipId = createNewEquip(systemEquip["id"].toString())
+                L.ccu().systemProfile = VavFullyModulatingRtu()
+                L.ccu().systemProfile.removeSystemEquipModbus()
+                L.ccu().systemProfile.addSystemEquip()
+                CcuLog.i(Domain.LOG_TAG, profileConfiguration.toString())
+                UnusedPortsModel.saveUnUsedPortStatusOfSystemProfile(
+                    profileConfiguration,
+                    hayStack
+                )
+                profileConfiguration.unusedPorts.clear()
+                profileConfiguration.unusedPorts = ControlMote.getCMUnusedPorts(Domain.hayStack)
+                viewState.value.unusedPortState = profileConfiguration.unusedPorts
+            }else{
                 super.saveConfiguration()
-                DesiredTempDisplayMode.setSystemModeForVav(hayStack)
-                hayStack.syncEntityTree()
-                withContext(Dispatchers.Main) {
-                    ProgressDialogUtils.hideProgressDialog()
-                    updateSystemMode()
-                }
             }
+            withContext(Dispatchers.Main) {
+                ProgressDialogUtils.hideProgressDialog()
+            }
+
+
+            DesiredTempDisplayMode.setSystemModeForVav(hayStack)
+            updateSystemMode()
+            systemEquipId?.let { L.ccu().systemProfile.updateAhuRef(it) }
+            hayStack.syncEntityTree()
+            hayStack.setCcuReady()
         }
     }
 
@@ -104,5 +121,19 @@ open class VavModulatingRtuViewModel : ModulatingRtuViewModel() {
             ControlMote.setRelayState(tag, value)
         }
         MeshUtil.sendStructToCM(DeviceUtil.getCMControlsMessage())
+    }
+    fun reset() {
+        val systemEquip = hayStack.readEntity("system and equip and not modbus and not connectModule")
+        if (systemEquip["profile"].toString() == "vavFullyModulatingAhu"
+            || systemEquip["profile"].toString() == ProfileType.SYSTEM_VAV_ANALOG_RTU.name
+        ) {
+            profileConfiguration = ModulatingRtuProfileConfig(model).getActiveConfiguration()
+            CcuLog.i(Domain.LOG_TAG, "Active vavFullyModulatingAhu profile config Loaded")
+        }else{
+            profileConfiguration = ModulatingRtuProfileConfig(model).getDefaultConfiguration()
+            CcuLog.i(Domain.LOG_TAG, "Default vavFullyModulatingAhu profile config Loaded")
+        }
+        viewState.value = ModulatingRtuViewState.fromProfileConfig(profileConfiguration)
+        viewState.value.isSaveRequired = !systemEquip["profile"].toString().contentEquals("vavFullyModulatingAhu")
     }
 }

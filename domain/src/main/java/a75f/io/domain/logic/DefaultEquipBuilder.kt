@@ -19,14 +19,28 @@ import io.seventyfivef.domainmodeler.common.point.MultiStateConstraint
 import io.seventyfivef.domainmodeler.common.point.NumericConstraint
 import io.seventyfivef.domainmodeler.common.point.PointState
 import io.seventyfivef.ph.core.TagType
+import kotlinx.coroutines.asCoroutineDispatcher
 import org.projecthaystack.HBool
 import org.projecthaystack.HStr
 import java.util.Locale
+import java.util.concurrent.Executors
+import java.util.concurrent.ThreadFactory
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * A common implementation of EquipBuilder interface with a generic equip/point build support.
  */
 open class DefaultEquipBuilder : EquipBuilder {
+
+    protected val highPriorityDispatcher = Executors.newFixedThreadPool(4, object : ThreadFactory {
+        private val counter = AtomicInteger(0)
+
+        override fun newThread(r: Runnable): Thread {
+            return Thread(r, "HighPriorityThread-${counter.incrementAndGet()}").apply {
+                priority = Thread.MAX_PRIORITY
+            }
+        }
+    }).asCoroutineDispatcher()
 
     override fun buildEquip(equipConfig : EquipBuilderConfig) : Equip {
         val siteDisName = hayStack.site?.displayName
@@ -104,14 +118,6 @@ open class DefaultEquipBuilder : EquipBuilder {
             .setUnit(pointConfig.modelDef.defaultUnit)
             .setSiteRef(pointConfig.siteRef)
 
-        if (pointConfig.modelDef is SeventyFiveFProfilePointDef) {
-            if (pointConfig.modelDef.hisInterpolate.name.isNotEmpty()) {
-                pointBuilder.setHisInterpolate(
-                    pointConfig.modelDef.hisInterpolate.name.lowercase(Locale.ROOT)
-                )
-            }
-        }
-
         if (pointConfig.configuration?.roomRef != null) {
             pointBuilder.setRoomRef(pointConfig.configuration.roomRef)
         }
@@ -147,43 +153,35 @@ open class DefaultEquipBuilder : EquipBuilder {
             }
         }
 
-        //TODO - Support added for currently used tag types. Might need updates in future.
-        pointConfig.modelDef.tags.filter { it.kind == TagType.MARKER && it.name.lowercase() != "tz" }
-            .forEach { pointBuilder.addMarker(it.name) }
-        pointConfig.modelDef.tags.filter { it.kind == TagType.NUMBER }.forEach { tag ->
-            TagsUtil.getTagDefHVal(tag)?.let { pointBuilder.addTag(tag.name, it) }
-        }
-
-
-
-        pointConfig.modelDef.tags.filter { it.kind == TagType.NUMBER && it.name.lowercase() == "bacnetid" }.forEach{ tag ->
-            tag.defaultValue?.let {
-                val smartNodeAddressBand = getSmartNodeBand()?.toInt()
-                if(smartNodeAddressBand != null && pointConfig.configuration?.nodeAddress != null) {
-                    val nodeAdd = pointConfig.configuration.nodeAddress - smartNodeAddressBand + 1000
-                    val bacnetId = "$nodeAdd${tag.defaultValue.toString().toInt()}"
-                    pointBuilder.setBacnetId(bacnetId.toInt())
+        pointConfig.modelDef.tags.forEach { tag ->
+            when(tag.kind) {
+                TagType.MARKER -> if (tag.name.lowercase() != "tz") pointBuilder.addMarker(tag.name)
+                TagType.STR -> {
+                    if (tag.name.lowercase() == "bacnettype") {
+                        pointBuilder.setBacnetType(tag.defaultValue.toString())
+                    } else {
+                        tag.defaultValue?.let { pointBuilder.addTag(tag.name, HStr.make(tag.defaultValue.toString())) }
+                    }
                 }
+                TagType.NUMBER -> {
+                    if (tag.name.lowercase() == "bacnetid") {
+                        tag.defaultValue?.let {
+                            val smartNodeAddressBand = getSmartNodeBand()?.toInt()
+                            if(smartNodeAddressBand != null && pointConfig.configuration?.nodeAddress != null) {
+                                val nodeAdd = pointConfig.configuration.nodeAddress - smartNodeAddressBand + 1000
+                                val bacnetId = "$nodeAdd${tag.defaultValue.toString().toInt()}"
+                                pointBuilder.setBacnetId(bacnetId.toInt())
+                            }
+                        }
+                    } else {
+                        TagsUtil.getTagDefHVal(tag)?.let { pointBuilder.addTag(tag.name, it) }
+                    }
+                }
+                TagType.BOOL -> tag.defaultValue?.let { pointBuilder.addTag(tag.name, HBool.make(tag.defaultValue as Boolean)) }
+                else -> {}
             }
         }
 
-        pointConfig.modelDef.tags.filter { it.kind == TagType.STR && it.name.lowercase() == "bacnettype" }.forEach{ tag ->
-            tag.defaultValue?.let {
-                val bacnetType = tag.defaultValue.toString()
-                pointBuilder.setBacnetType(bacnetType)
-            }
-        }
-
-        pointConfig.modelDef.tags.filter { it.kind == TagType.STR && it.name.lowercase() != "bacnetid" }.forEach{ tag ->
-            tag.defaultValue?.let {
-                pointBuilder.addTag(tag.name, HStr.make(tag.defaultValue.toString()))
-            }
-        }
-        pointConfig.modelDef.tags.filter { it.kind == TagType.BOOL }.forEach{ tag ->
-            tag.defaultValue?.let {
-                pointBuilder.addTag(tag.name, HBool.make(tag.defaultValue as Boolean))
-            }
-        }
         pointConfig.tz.let { pointBuilder.addTag(Tags.TZ, HStr.make(pointConfig.tz)) }
         pointBuilder.addTag("sourcePoint", HStr.make(pointConfig.modelDef.id))
 

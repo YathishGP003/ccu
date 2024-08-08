@@ -14,6 +14,7 @@ import a75f.io.renatus.modbus.util.showToast
 import a75f.io.renatus.profiles.system.advancedahu.AdvancedHybridAhuViewModel
 import a75f.io.renatus.profiles.system.advancedahu.isValidateConfiguration
 import a75f.io.renatus.util.ProgressDialogUtils
+import a75f.io.renatus.util.highPriorityDispatcher
 import android.content.Context
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
@@ -21,6 +22,7 @@ import io.seventyfivef.ph.core.Tags
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.system.measureTimeMillis
 
 /**
  * Created by Manjunath K on 20-03-2024.
@@ -49,10 +51,10 @@ class VavAdvancedHybridAhuViewModel : AdvancedHybridAhuViewModel() {
         viewState = mutableStateOf(VavAdvancedAhuState.fromProfileConfigToState(profileConfiguration as VavAdvancedHybridAhuConfig))
         CcuLog.i(Domain.LOG_TAG, "VavAdvancedAhuViewModel Loaded")
         viewState.value.isSaveRequired = !systemEquip["profile"].toString().contentEquals("vavAdvancedHybridAhuV2")
+        modelLoadedState.postValue(true)
     }
 
-    private fun createNewEquip(id: String): String {
-        hayStack.deleteEntityTree(id)
+    private fun createNewEquip(): String {
         val cmEquipDis = "${hayStack.siteName}-${cmModel.name}"
         val cmEquipId = cmEquipBuilder.buildEquipAndPoints(
             profileConfiguration.cmConfiguration, cmModel, hayStack.site!!.id, cmEquipDis
@@ -101,6 +103,8 @@ class VavAdvancedHybridAhuViewModel : AdvancedHybridAhuViewModel() {
         val validConfig = isValidateConfiguration(this@VavAdvancedHybridAhuViewModel)
         if (!validConfig.first) {
             showErrorDialog(context,validConfig.second)
+            viewState.value.isSaveRequired = true
+            viewState.value.isStateChanged = true
             return
         }
         viewState.value.isSaveRequired = false
@@ -109,35 +113,37 @@ class VavAdvancedHybridAhuViewModel : AdvancedHybridAhuViewModel() {
         CcuLog.i(L.TAG_CCU_SYSTEM, profileConfiguration.toString())
         isEquipAvailable()
         if (saveJob == null) {
-            saveJob = viewModelScope.launch {
-                ProgressDialogUtils.showProgressDialog(context, "Saving profile configuration")
-                withContext(Dispatchers.IO) {
-                    val profile = L.ccu().systemProfile
-                    if (profile == null) {
-                        newEquipConfiguration()
+            saveJob = viewModelScope.launch(highPriorityDispatcher) {
+                hayStack.resetCcuReady()
+                withContext(Dispatchers.Main) {
+                    ProgressDialogUtils
+                        .showProgressDialog(context, "Saving profile configuration")
+                }
+                val profile = L.ccu().systemProfile
+                if (profile == null) {
+                    newEquipConfiguration()
+                } else {
+                    if (profile is VavAdvancedAhu) {
+                        updateConfiguration()
                     } else {
-                        if (profile is VavAdvancedAhu) {
-                            updateConfiguration()
-                        } else {
-                            newEquipConfiguration()
-                        }
-                    }
-                    L.saveCCUState()
-                    CCUHsApi.getInstance().setCcuReady()
-                    CCUHsApi.getInstance().syncEntityTree()
-                    DomainManager.addSystemDomainEquip(hayStack)
-                    DomainManager.addCmBoardDevice(hayStack)
-                    (L.ccu().systemProfile as VavAdvancedAhu).updateDomainEquip(Domain.systemEquip as VavAdvancedHybridSystemEquip)
-                    withContext(Dispatchers.Main) {
-                        viewState.value.isSaveRequired = false
-                        viewState.value.isStateChanged = false
-                        showToast("Configuration saved successfully", context)
+                        newEquipConfiguration()
                     }
                 }
-
-                if (ProgressDialogUtils.isDialogShowing()) {
-                    ProgressDialogUtils.hideProgressDialog()
+                L.saveCCUState()
+                DomainManager.addSystemDomainEquip(hayStack)
+                DomainManager.addCmBoardDevice(hayStack)
+                (L.ccu().systemProfile as VavAdvancedAhu).updateDomainEquip(Domain.systemEquip as VavAdvancedHybridSystemEquip)
+                withContext(Dispatchers.Main) {
+                    if (ProgressDialogUtils.isDialogShowing()) {
+                        ProgressDialogUtils.hideProgressDialog()
+                    }
                 }
+                viewState.value.isSaveRequired = false
+                viewState.value.isStateChanged = false
+                saveJob = null
+                showToast("Configuration saved successfully", context)
+                CCUHsApi.getInstance().setCcuReady()
+                CCUHsApi.getInstance().syncEntityTree()
             }
         }
 
@@ -145,7 +151,8 @@ class VavAdvancedHybridAhuViewModel : AdvancedHybridAhuViewModel() {
 
     private fun newEquipConfiguration() {
         val systemEquip = hayStack.readEntity("system and equip and not modbus and not connectModule")
-        val newEquipId = createNewEquip(systemEquip[Tags.ID].toString())
+        deleteSystemProfile(systemEquip[Tags.ID].toString())
+        val newEquipId = createNewEquip()
         L.ccu().systemProfile = VavAdvancedAhu()
         L.ccu().systemProfile.removeSystemEquipModbus()
         L.ccu().systemProfile.addSystemEquip()
@@ -217,6 +224,13 @@ class VavAdvancedHybridAhuViewModel : AdvancedHybridAhuViewModel() {
         }
         viewState.value = VavAdvancedAhuState.fromProfileConfigToState(profileConfiguration as VavAdvancedHybridAhuConfig)
          viewState.value.isSaveRequired = !systemEquip["profile"].toString().contentEquals("vavAdvancedHybridAhuV2")
+    }
+
+    private fun deleteSystemProfile(systemProfileId: String){
+        val deleteTime = measureTimeMillis {
+            hayStack.deleteEntityTree(systemProfileId)
+        }
+        CcuLog.i(L.TAG_CCU_DOMAIN, "Time taken to delete entities: $deleteTime")
     }
 }
 

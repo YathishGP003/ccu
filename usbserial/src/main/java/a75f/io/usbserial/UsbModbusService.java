@@ -193,6 +193,9 @@ public class UsbModbusService extends Service {
             };
 
     private void messageToClients(byte[] data, boolean isModbusData) {
+        if (!CCUHsApi.getInstance().isCcuReady()) {
+            return;
+        }
         SerialAction serialAction = SerialAction.MESSAGE_FROM_SERIAL_PORT;
         if (isModbusData)
             serialAction = SerialAction.MESSAGE_FROM_SERIAL_MODBUS;

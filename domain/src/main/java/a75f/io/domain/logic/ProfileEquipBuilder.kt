@@ -19,7 +19,16 @@ import io.seventyfivef.domainmodeler.client.ModelPointDef
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import io.seventyfivef.domainmodeler.common.point.MultiStateConstraint
 import io.seventyfivef.domainmodeler.common.point.PointConfiguration
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.runBlocking
 import org.projecthaystack.HStr
+import java.util.concurrent.Executors
+import java.util.concurrent.ThreadFactory
+import java.util.concurrent.atomic.AtomicInteger
+import kotlin.system.measureTimeMillis
 
 class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder() {
 
@@ -39,13 +48,18 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
             CcuLog.i(Domain.LOG_TAG, "addEquip - Invalid System equip , ahuRef cannot be applied")
         } else if (systemEquip.contains(Tags.DEFAULT)) {
             hayStackEquip.gatewayRef = systemEquip[Tags.ID].toString()
+            CcuLog.i(Domain.LOG_TAG, "Added gateway ref")
         } else {
             hayStackEquip.ahuRef = systemEquip[Tags.ID].toString()
+            CcuLog.i(Domain.LOG_TAG, "Added ahu ref")
         }
 
         val equipId = hayStack.addEquip(hayStackEquip)
         hayStackEquip.id = equipId
-        createPoints(modelDef, configuration, entityConfiguration, equipId, siteRef, equipDis)
+        val time = measureTimeMillis {
+            createPoints(modelDef, configuration, entityConfiguration, equipId, siteRef, equipDis)
+        }
+        CcuLog.i(Domain.LOG_TAG, "Time taken to createPoints: $time ms")
         DomainManager.addDomainEquip(hayStackEquip)
         DomainManager.addEquip(hayStackEquip)
         return equipId
@@ -92,9 +106,15 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
 
         //TODO - Fix crash
         //DomainManager.addEquip(hayStackEquip)
-        createPoints(modelDef, configuration, entityConfiguration, equipId, siteRef, equipDis)
+        val time = measureTimeMillis {
+            createPoints(modelDef, configuration, entityConfiguration, equipId, siteRef, equipDis)
+        }
+        CcuLog.i(Domain.LOG_TAG, "Time taken to createPoints during update: $time ms")
         if (isReconfiguration) {
-            updatePointValues(modelDef, configuration, entityConfiguration, equipId, siteRef, equipDis)
+            val updatedPointsDuration = measureTimeMillis {
+                updatePointValues(modelDef, configuration, entityConfiguration, equipId, siteRef, equipDis)
+            }
+            CcuLog.i(Domain.LOG_TAG, "Time taken to updatePointValues: $updatedPointsDuration ms")
         } else {
             updatePoints(modelDef, configuration, entityConfiguration, equipId, siteRef, equipDis)
         }
@@ -131,13 +151,23 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
 
     private fun createPoints(modelDef: SeventyFiveFProfileDirective, profileConfiguration: ProfileConfiguration, entityConfiguration: EntityConfiguration,
                              equipRef: String, siteRef: String, equipDis: String) {
+
         val tz = hayStack.timeZone
-        entityConfiguration.tobeAdded.forEach { point ->
-            CcuLog.i(Domain.LOG_TAG, "addPoint - ${point.domainName}")
-            val modelPointDef = modelDef.points.find { it.domainName == point.domainName }
-            modelPointDef?.run {
-                createPoint(PointBuilderConfig(modelPointDef, profileConfiguration, equipRef, siteRef, tz, equipDis))
+        runBlocking {
+            val deferredResults = entityConfiguration.tobeAdded.map { point ->
+                async(highPriorityDispatcher) {
+                    try {
+                        CcuLog.i(Domain.LOG_TAG, "addPoint - ${point.domainName}")
+                        val modelPointDef = modelDef.points.find { it.domainName == point.domainName }
+                        modelPointDef?.run {
+                            createPoint(PointBuilderConfig(modelPointDef, profileConfiguration, equipRef, siteRef, tz, equipDis))
+                        }
+                    } catch (e: Exception) {
+                        CcuLog.e(Domain.LOG_TAG, "Error adding point ${point.domainName}: ${e.message}")
+                    }
+                }
             }
+            deferredResults.awaitAll()
         }
     }
 
@@ -177,27 +207,31 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
 
     private fun updatePointValues(modelDef: SeventyFiveFProfileDirective, profileConfiguration: ProfileConfiguration,
                                   entityConfiguration: EntityConfiguration, equipRef: String, siteRef: String, equipDis: String) {
-        entityConfiguration.tobeUpdated.forEach { point ->
-            CcuLog.i(Domain.LOG_TAG, "updatePointValues - ${point.domainName}")
-            val existingPoint = hayStack.readEntity("domainName == \""+point.domainName+"\" and equipRef == \""+equipRef+"\"")
-            val modelPointDef = modelDef.points.find { it.domainName == point.domainName }
-            modelPointDef?.run {
-                var configVal = getConfigValue(profileConfiguration, modelPointDef , point.domainName)
-                if (configVal == null) {
-                    if (modelPointDef.tagNames.contains("writable") && modelPointDef.defaultValue is Number) {
-                        configVal = modelPointDef.defaultValue as Double
+        runBlocking {
+            entityConfiguration.tobeUpdated.forEach { point ->
+                async(Dispatchers.Default) {
+                    CcuLog.i(Domain.LOG_TAG, "updatePointValues - ${point.domainName}")
+                    val existingPoint = hayStack.readEntity("domainName == \""+point.domainName+"\" and equipRef == \""+equipRef+"\"")
+                    val modelPointDef = modelDef.points.find { it.domainName == point.domainName }
+                    modelPointDef?.run {
+                        var configVal = getConfigValue(profileConfiguration, modelPointDef , point.domainName)
+                        if (configVal == null) {
+                            if (modelPointDef.tagNames.contains("writable") && modelPointDef.defaultValue is Number) {
+                                configVal = modelPointDef.defaultValue as Double
+                            }
+                        }
+                        configVal?.let {
+                            val currentVal = hayStack.readDefaultValById(existingPoint["id"].toString())
+                            if (configVal != currentVal) {
+                                hayStack.writeDefaultValById(existingPoint["id"].toString(), configVal)
+                            }
+                        }
+                        if (existingPoint.contains("his")) {
+                            val priorityVal = hayStack.readPointPriorityVal(existingPoint["id"].toString())
+                            hayStack.writeHisValById(existingPoint["id"].toString(), priorityVal)
+                        }
                     }
-                }
-                configVal?.let {
-                    val currentVal = hayStack.readDefaultValById(existingPoint["id"].toString())
-                    if (configVal != currentVal) {
-                        hayStack.writeDefaultValById(existingPoint["id"].toString(), configVal)
-                    }
-                }
-                if (existingPoint.contains("his")) {
-                    val priorityVal = hayStack.readPointPriorityVal(existingPoint["id"].toString())
-                    hayStack.writeHisValById(existingPoint["id"].toString(), priorityVal)
-                }
+                }.await()
             }
 
         }
@@ -230,7 +264,11 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
     private fun initializeDefaultVal(point : Point, defaultVal : Number) {
         CcuLog.i(Domain.LOG_TAG,"InitializeDefaultVal ${point.domainName} - val $defaultVal")
         if (point.markers.contains("tuner")) {
-            TunerUtil.updateTunerLevels(point.id, point.roomRef,  point.domainName, hayStack, defaultVal.toDouble())
+            if (point.markers.contains(Tags.SYSTEM)) {
+                TunerUtil.updateSystemTunerLevels(point.id, point.domainName, hayStack, defaultVal.toDouble())
+            } else {
+                TunerUtil.updateTunerLevels(point.id, point.roomRef,  point.domainName, hayStack, defaultVal.toDouble())
+            }
         } else {
             hayStack.writeDefaultValById(point.id, defaultVal.toDouble())
         }

@@ -110,6 +110,7 @@ public class CCUTagsDb extends HServer {
     private static final long MAX_DB_SIZE_IN_KB_RECOVERY = 6 * 1024 * 1024;
 
     public static final String TAG_CCU_ROOM_DB = "CCU_DB";
+    public static final String TAG_CCU_DOMAIN = "CCU_DOMAIN";
 
     public ConcurrentHashMap<String, HDict> tagsMap;
     public ConcurrentHashMap<String, WriteArray>      writeArrays;
@@ -131,10 +132,6 @@ public class CCUTagsDb extends HServer {
 
     public ConcurrentHashMap<String, String> updateIdMap;
     public String updateIdMapString;
-
-    public List<HayStackEntity> allEntities;
-
-    public List<WritableArray> allWritable;
 
     private class TimeZoneInstanceCreator implements InstanceCreator<TimeZone> {
         public TimeZone createInstance(Type type) {
@@ -286,16 +283,11 @@ public class CCUTagsDb extends HServer {
         //To read all the contents of entity table and writable table of roomDB and add it to local variale for further access
         Observable.fromCallable(() -> {
                     DatabaseHelper databaseHelper = new EntityDatabaseHelper(RenatusDatabaseBuilder
-                            .getInstance(appContext));
-                    allEntities = databaseHelper.getAllEntities();
-                    CcuLog.d(TAG_CCU_ROOM_DB, "Entities read from DB = " + databaseHelper.getAllEntities().size());
+                                                            .getInstance(appContext));
+                    a75f.io.data.writablearray.DatabaseHelper writableDbHelper = new WritableArrayDatabaseHelper((RenatusDatabaseBuilder.getInstance(appContext)));
 
-                    a75f.io.data.writablearray.DatabaseHelper dbHelper = new WritableArrayDatabaseHelper((RenatusDatabaseBuilder.getInstance(appContext)));
-                    allWritable = dbHelper.getAllwritableArrays();
-                    CcuLog.d(TAG_CCU_ROOM_DB, "Writable points read from DB = " + allWritable.size());
-
-                    loadTagsMap();
-                    loadWritableArray();
+                    loadTagsMap(databaseHelper);
+                    loadWritableArray(writableDbHelper);
                     new Timer().schedule(new TimerTask() {
                         @Override
                         public void run() {
@@ -385,8 +377,10 @@ public class CCUTagsDb extends HServer {
     /*
    To read from the writaleArray table of roomdatabase and populate writeArrays
     */
-    public void loadWritableArray() {
+    public void loadWritableArray(a75f.io.data.writablearray.DatabaseHelper dbHelper) {
+        List<WritableArray> allWritable = dbHelper.getAllwritableArrays();
         if(allWritable != null) {
+            CcuLog.d(TAG_CCU_ROOM_DB, "Writable points read from DB = " + allWritable.size());
             if(writeArrays == null)
                 writeArrays = new ConcurrentHashMap();
             CcuLog.d(TAG_CCU_ROOM_DB, "writable table size = " + allWritable.size());
@@ -421,7 +415,10 @@ public class CCUTagsDb extends HServer {
     /*
     To read from the entity table of roomdatabase and populate tagsMap
      */
-    public void loadTagsMap() {
+    public void loadTagsMap(DatabaseHelper databaseHelper) {
+        List<HayStackEntity> allEntities = databaseHelper.getAllEntities();
+        CcuLog.d(TAG_CCU_ROOM_DB, "Entities read from DB = " + allEntities.size());
+
         if(allEntities != null) {
             CcuLog.d(TAG_CCU_ROOM_DB, "size  of the Entities table= " + allEntities.size());
             for (HayStackEntity entity : allEntities) {

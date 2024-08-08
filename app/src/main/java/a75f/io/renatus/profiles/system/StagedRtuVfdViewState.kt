@@ -26,7 +26,7 @@ class StagedRtuVfdViewState : StagedRtuViewState() {
     var analogOut2HeatStage5 by mutableStateOf(0)
     var analogOut2Default by mutableStateOf(0)
 
-    var analogOut2FanSpeedTestSignal by mutableStateOf (Domain.cmBoardDevice.analog2Out.readHisVal())
+    var analogOut2FanSpeedTestSignal by mutableStateOf (0.0)
 
 
     companion object {

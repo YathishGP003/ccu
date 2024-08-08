@@ -1,6 +1,12 @@
 package a75f.io.logic.migration
 
 import a75f.io.api.haystack.*
+import a75f.io.api.haystack.CCUHsApi
+import a75f.io.api.haystack.CCUTagsDb.TAG_CCU_DOMAIN
+import a75f.io.api.haystack.HayStackConstants
+import a75f.io.api.haystack.Point
+import a75f.io.api.haystack.Site
+import a75f.io.api.haystack.Tags
 import a75f.io.api.haystack.sync.HttpUtil
 import a75f.io.domain.HyperStatSplitEquip
 import a75f.io.domain.api.Domain
@@ -838,7 +844,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             pi = pm.getPackageInfo("a75f.io.renatus", 0)
             val currentAppVersion = pi.versionName.substring(pi.versionName.lastIndexOf('_') + 1)
             val migrationVersion = hayStack.readDefaultStrVal("diag and migration and version")
-            CcuLog.d("CCU_DOMAIN", "currentAppVersion: $currentAppVersion, migrationVersion: $migrationVersion")
+            CcuLog.d(TAG_CCU_DOMAIN, "currentAppVersion: $currentAppVersion, migrationVersion: $migrationVersion")
             if (currentAppVersion != migrationVersion) {
                 CCUHsApi.getInstance().writeDefaultVal("point and diag and migration", currentAppVersion)
             }

@@ -26,14 +26,16 @@ open class ModulatingRtuViewState {
     var analogOut4FreshAirMax by mutableStateOf(10)
 
     var unusedPortState by mutableStateOf(hashMapOf<String, Boolean>())
-    var analogOut1CoolingTestSignal by  mutableStateOf (Domain.cmBoardDevice.analog1Out.readHisVal())
-    var analogOut2FanSpeedTestSignal by mutableStateOf (Domain.cmBoardDevice.analog2Out.readHisVal())
-    var analogOut3HeatingTestSignal by mutableStateOf (Domain.cmBoardDevice.analog3Out.readHisVal())
-    var analogOut4OutSideAirTestSignal by mutableStateOf (Domain.cmBoardDevice.analog4Out.readHisVal())
+    var analogOut1CoolingTestSignal by  mutableStateOf (0.0)
+    var analogOut2FanSpeedTestSignal by mutableStateOf (0.0)
+    var analogOut3HeatingTestSignal by mutableStateOf (0.0)
+    var analogOut4OutSideAirTestSignal by mutableStateOf (0.0)
 
     var relay3Test by mutableStateOf (false)
     var relay7Test by mutableStateOf (false)
 
+    var isStateChanged by mutableStateOf(false)
+    var isSaveRequired by mutableStateOf(false)
 
     companion object {
         fun fromProfileConfig(config: ModulatingRtuProfileConfig): ModulatingRtuViewState {

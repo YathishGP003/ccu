@@ -19,19 +19,24 @@ import a75f.io.renatus.profiles.dab.DabProfileViewModel
 import a75f.io.renatus.profiles.system.StagedRtuProfileViewModel
 import a75f.io.renatus.profiles.system.VavModulatingRtuViewModel
 import a75f.io.renatus.profiles.vav.VavProfileViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.runBlocking
 import java.util.*
+import kotlin.system.measureTimeMillis
 
 open class UnusedPortsModel {
     companion object {
         fun saveConfiguration(viewModel: Any, firstUnusedPort: String, it: Boolean) {
             when (viewModel) {
                 is StagedRtuProfileViewModel -> {
-                    viewModel.viewState.unusedPortState[firstUnusedPort] = it
-                    viewModel.saveConfiguration()
+                    viewModel.viewState.value.unusedPortState[firstUnusedPort] = it
+                    viewModel.setStateChanged()
                 }
                 is VavModulatingRtuViewModel -> {
-                    viewModel.viewState.unusedPortState[firstUnusedPort] = it
-                    viewModel.saveConfiguration()
+                    viewModel.viewState.value.unusedPortState[firstUnusedPort] = it
+                    viewModel.setStateChanged()
                 }
                 is VavProfileViewModel -> {
                     viewModel.profileConfiguration.unusedPorts[firstUnusedPort] = it
@@ -46,6 +51,7 @@ open class UnusedPortsModel {
         }
 
         fun saveUnUsedPortStatusOfSystemProfile(profileConfiguration: Any, hayStack: CCUHsApi) {
+            CcuLog.i(L.TAG_CCU_DOMAIN, "Saving unused ports")
             val unusedPorts = when (profileConfiguration) {
                 is ModulatingRtuProfileConfig -> profileConfiguration.unusedPorts
                 is StagedVfdRtuProfileConfig -> profileConfiguration.unusedPorts
@@ -53,27 +59,46 @@ open class UnusedPortsModel {
                 else -> null
             }
             val currentPortStatus: HashMap<String, Boolean> = unusedPorts!!
+            for ((port, status) in ControlMote.getAllUnusedPorts()) {
+                if (!currentPortStatus.containsKey(port)) {
+                    currentPortStatus[port] = status
+                }
+            }
             val cmDevicePortsList = Domain.cmBoardDevice.getPortsDomainNameWithPhysicalPoint()
 
             val cmPortsDisplayNameWithDomainName = ControlMote.getCmPortsDisplayNameWithDomainName()
-            for ((unusedPort, unusedPortState) in currentPortStatus) {
-                val unusedPortDomainName = cmPortsDisplayNameWithDomainName[unusedPort] ?: continue
-                val rawPoint = cmDevicePortsList[unusedPortDomainName] ?: continue
-                val isPortUsedInAlgo = isPortUsedInAlgo(hayStack, unusedPort)
-
-                when {
-                    unusedPortState && !isPortUsedInAlgo && !rawPoint.markers.contains(Tags.WRITABLE) -> {
-                        rawPoint.markers.add(Tags.WRITABLE)
-                        hayStack.updatePoint(rawPoint, rawPoint.id)
+            val savingTime = measureTimeMillis {
+                runBlocking {
+                    val deferredResults = currentPortStatus.map { (unusedPort, unusedPortState) ->
+                        async(Dispatchers.Default) {
+                            try {
+                                val unusedPortDomainName = cmPortsDisplayNameWithDomainName[unusedPort] ?: return@async
+                                val rawPoint = cmDevicePortsList[unusedPortDomainName] ?: return@async
+                                val isPortUsedInAlgo = isPortUsedInAlgo(hayStack, unusedPort)
+                                CcuLog.d(L.TAG_CCU_DOMAIN, "$unusedPort is used? $isPortUsedInAlgo")
+                                when {
+                                    unusedPortState && !isPortUsedInAlgo && !rawPoint.markers.contains(Tags.WRITABLE) -> {
+                                        CcuLog.d(L.TAG_CCU_DOMAIN, "Adding writable tag - ${rawPoint.id}")
+                                        rawPoint.markers.add(Tags.WRITABLE)
+                                        hayStack.updatePoint(rawPoint, rawPoint.id)
+                                    }
+                                    (!unusedPortState && rawPoint.markers.contains(Tags.WRITABLE)) || isPortUsedInAlgo -> {
+                                        CcuLog.d(L.TAG_CCU_DOMAIN, "Removing writable tag - ${rawPoint.id}")
+                                        hayStack.clearAllAvailableLevelsInPoint(rawPoint.id)
+                                        rawPoint.markers.remove(Tags.WRITABLE)
+                                        hayStack.updatePoint(rawPoint, rawPoint.id)
+                                        hayStack.writeHisValById(rawPoint.id, 0.0)
+                                    }
+                                }
+                            } catch (e: Exception) {
+                                CcuLog.e(L.TAG_CCU_DOMAIN, "Error processing port $unusedPort", e)
+                            }
+                        }
                     }
-                    (!unusedPortState && rawPoint.markers.contains(Tags.WRITABLE)) || isPortUsedInAlgo -> {
-                        hayStack.clearAllAvailableLevelsInPoint(rawPoint.id)
-                        rawPoint.markers.remove(Tags.WRITABLE)
-                        hayStack.updatePoint(rawPoint, rawPoint.id)
-                        hayStack.writeHisValById(rawPoint.id, 0.0)
-                    }
+                    deferredResults.awaitAll()
                 }
             }
+            CcuLog.i(L.TAG_CCU_DOMAIN, "Saved unused ports in $savingTime ms")
         }
 
         private fun isPortUsedInAlgo(hayStack: CCUHsApi, unusedPort: String): Boolean {
@@ -130,6 +155,23 @@ open class UnusedPortsModel {
             } else {
                 hashMapOf()
             }
+        }
+
+        fun setPortState(portName: String, state: Boolean, profileConfiguration: Any) : HashMap<String, Boolean>{
+            val unusedPorts = when (profileConfiguration) {
+                is ModulatingRtuProfileConfig -> profileConfiguration.unusedPorts
+                is StagedVfdRtuProfileConfig -> profileConfiguration.unusedPorts
+                is StagedRtuProfileConfig -> profileConfiguration.unusedPorts
+                else -> null
+            }
+
+            if(unusedPorts != null && unusedPorts.containsKey(portName) && state) {
+                unusedPorts.remove(portName)
+            } else if(unusedPorts != null && !unusedPorts.containsKey(portName) && !state) {
+                unusedPorts[portName] = false
+            }
+            CcuLog.i(L.TAG_CCU_DOMAIN, "unused ports: $unusedPorts")
+            return unusedPorts!!
         }
     }
 }

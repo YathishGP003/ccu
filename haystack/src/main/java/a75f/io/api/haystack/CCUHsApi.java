@@ -1,6 +1,7 @@
 package a75f.io.api.haystack;
 
 import static android.widget.Toast.LENGTH_LONG;
+import static a75f.io.api.haystack.CCUTagsDb.TAG_CCU_DOMAIN;
 import static a75f.io.api.haystack.CCUTagsDb.TAG_CCU_HS;
 import static a75f.io.api.haystack.CCUTagsDb.TAG_CCU_OAO;
 import static a75f.io.api.haystack.CCUTagsDb.TAG_CCU_ROOM_DB;
@@ -661,7 +662,7 @@ public class CCUHsApi
 
     public void updateBuildingTunerEquip(Equip q, String id, boolean syncToServer)
     {
-        CcuLog.e("CCU_DOMAIN", "invoking updateBuildingTunerEquip");
+        CcuLog.e(TAG_CCU_DOMAIN, "invoking updateBuildingTunerEquip");
         q.setLastModifiedDateTime(HDateTime.make(System.currentTimeMillis()));
         tagsDb.updateEquip(q, id);
         if(syncToServer){
@@ -2203,7 +2204,7 @@ public class CCUHsApi
         q.setGatewayRef(systemEquipRef);
         q.setLastModifiedDateTime(HDateTime.make(System.currentTimeMillis()));
         CCUHsApi.getInstance().updateEquip(q, q.getId());
-        updateCcuRefForDiagPoints(q);
+        //updateCcuRefForDiagPoints(q);
     }
 
     private void updateCcuRefForDiagPoints(Equip diagEquip){

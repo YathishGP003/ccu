@@ -73,7 +73,7 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
             entityData.tobeAdded.forEach { item ->
                 CcuLog.d(Domain.LOG_TAG, "tobeAdded: item:${item.domainName}")
             }
-            Log.d("CCU_DOMAIN", "tobeDeleted: size:${entityData.tobeDeleted.size}")
+            Log.d(Domain.LOG_TAG, "tobeDeleted: size:${entityData.tobeDeleted.size}")
             entityData.tobeDeleted.forEach { item ->
                 CcuLog.d(Domain.LOG_TAG, "tobeDeleted: item:${item.domainName}")
             }
@@ -384,7 +384,7 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
                         )
                         val point = CCUHsApi.getInstance()
                             .readEntity("point and domainName == \"${diffDomain.domainName}\" and equipRef == \"${equip.id}\"")
-                        Log.d("CCU_DOMAIN", "updated haystack point: $hayStackPoint")
+                        Log.d(Domain.LOG_TAG, "updated haystack point: $hayStackPoint")
                         if (Domain.readEquip(newModel.id)["roomRef"].toString() == "SYSTEM") {
                             hayStackPoint.roomRef = "SYSTEM"
                             hayStackPoint.floorRef = "SYSTEM"

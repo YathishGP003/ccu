@@ -99,7 +99,7 @@ public class Globals {
     public int selectedTab;
 
     public static final class IntentActions {
-        public static final String LSERIAL_MESSAGE = "a75f.io.intent.action.LSERIAL_MESSAGE";
+        public static final String LSERIAL_MESSAGE_OTA = "a75f.io.intent.action.LSERIAL_MESSAGE_OTA";
         public static final String ACTIVITY_MESSAGE = "a75f.io.intent.action.ACTIVITY_MESSAGE";
         public static final String ACTIVITY_RESET = "a75f.io.intent.action.ACTIVITY_RESET";
         public static final String PUBNUB_MESSAGE = "a75f.io.intent.action.PUBNUB_MESSAGE";

@@ -57,6 +57,9 @@ class AlertsRepository(
    // results of AlertProcessor evaluation saved to report state for debugging screen.
    private var alertDefOccurrences: List<AlertDefOccurrence> = emptyList()
 
+   private val boxStore = haystack.tagsDb.boxStore
+   private val alertBox = boxStore.boxFor(Alert::class.java)
+
    init {
       fetchAlertsDefinitions()
    }
@@ -74,10 +77,34 @@ class AlertsRepository(
       val alertDef = alertDefsMap.remove(title)
       alertDef?.let {
          alertDefsState.removeAll(alertDef)
-         dataStore.deleteAlertsForDef(alertDef)
+         deleteAlertsDefWithFixingActiveAlerts(alertDef)
       }
       saveDefs()
       setAlertListChanged()
+   }
+
+   private fun deleteAlertsDefWithFixingActiveAlerts(alertDef: AlertDefinition) {
+
+      val alertQuery = alertBox.query()
+      val matchingAlerts = alertQuery
+         .equal(Alert_.mTitle, alertDef.alert.mTitle)
+         .build().find()
+      var fixedAlertList = mutableListOf<Alert>()
+      matchingAlerts.forEach {
+            if (!it.isFixed) {
+               fixedAlertList.add(it)
+               fixAlert(it)
+            }
+            else {
+               dataStore.deleteAlert(it)
+            }
+      }
+      if (fixedAlertList.isNotEmpty()) {
+         alertSyncHandler.sync(fixedAlertList, dataStore)
+         fixedAlertList.forEach {
+            dataStore.deleteAlert(it)
+         }
+      }
    }
 
    fun fetchAlertsDefinitions() {

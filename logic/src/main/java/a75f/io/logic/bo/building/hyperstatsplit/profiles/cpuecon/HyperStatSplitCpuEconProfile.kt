@@ -1274,16 +1274,10 @@ class HyperStatSplitCpuEconProfile(equipRef: String, nodeAddress: Short) : Hyper
         }
     }
 
-    private fun getCurrentCoolingStateActivated (): Double {
-        return if (hssEquip.coolingStage3.readHisVal() == 1.0) {
-            hssEquip.coolingStage3.readDefaultVal()
-        } else if (hssEquip.coolingStage2.readHisVal() == 1.0) {
-            hssEquip.coolingStage2.readDefaultVal()
-        } else if (hssEquip.coolingStage1.readHisVal() == 1.0) {
-            hssEquip.coolingStage1.readDefaultVal()
-        } else {
-            0.0
-        }
+    private fun isCoolingStateActivated (): Boolean {
+        return hssEquip.coolingStage3.readHisVal() > 0 ||
+                hssEquip.coolingStage2.readHisVal() > 0 ||
+                hssEquip.coolingStage1.readHisVal() > 0
     }
 
     private fun getCoolingActivatedAnalogVoltage(fanEnabledMapped: Boolean, fanLoopOutput: Int): Int {
@@ -1373,7 +1367,7 @@ class HyperStatSplitCpuEconProfile(equipRef: String, nodeAddress: Short) : Hyper
                 // We also need to ensure that the currently no cooling stage is activated since we switch on Economization Value only when the
                 // cooling stage is not activated
                 val analogEconomizerValueActivated = getPercentageFromVoltageSelected(getAnalogEconomizerValueActivated().roundToInt())
-                if(economizingLoopOutput != 0 && getCurrentCoolingStateActivated() == 0.0 && fanProtectionCounter == 0) {
+                if(economizingLoopOutput != 0 && !isCoolingStateActivated() && fanProtectionCounter == 0) {
                     logMsg = "Economization"
                     fanLoopForAnalog = analogEconomizerValueActivated
                 }

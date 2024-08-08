@@ -8,6 +8,9 @@ import a75f.io.renatus.R
 import a75f.io.renatus.composables.DropDownWithLabel
 import a75f.io.renatus.compose.ComposeUtil
 import a75f.io.renatus.compose.LabelTextView
+import a75f.io.renatus.compose.SaveTextView
+import a75f.io.renatus.modbus.util.CANCEL
+import a75f.io.renatus.modbus.util.SAVE
 import a75f.io.renatus.profiles.profileUtils.UnusedPortsFragment
 import a75f.io.renatus.profiles.profileUtils.UnusedPortsFragment.Companion.DividerRow
 import a75f.io.renatus.util.AddProgressGif
@@ -18,7 +21,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -27,12 +32,16 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -70,8 +79,8 @@ class VavModulatingRtuFragment : ModulatingRtuFragment() {
             }
 
             override fun onViewDetachedFromWindow(v: View) {
-                if (Globals.getInstance().isTestMode()) {
-                    Globals.getInstance().setTestMode(false)
+                if (Globals.getInstance().isTestMode) {
+                    Globals.getInstance().isTestMode = false
                 }
             }
         })
@@ -141,24 +150,24 @@ class VavModulatingRtuFragment : ModulatingRtuFragment() {
                 ) {
                     DropDownWithLabel(label = "Analog-Out1 at\nMin Cooling",
                         list = (0..10).map { it.toString() }, isHeader = false,
-                        defaultSelection = viewState.analogOut1CoolingMin,
+                        defaultSelection = viewState.value.analogOut1CoolingMin,
                         onSelected = {
-                            viewState.analogOut1CoolingMin = it
-                            vavModulatingViewModel.saveConfiguration()
+                            viewState.value.analogOut1CoolingMin = it
+                            vavModulatingViewModel.setStateChanged()
                         },
-                        isEnabled = viewState.isAnalog1OutputEnabled,
+                        isEnabled = viewState.value.isAnalog1OutputEnabled,
                         spacerLimit = 102,
                         previewWidth = 100,
                         expandedWidth = 120)
                     Spacer(modifier = Modifier.width(130.dp))
                     DropDownWithLabel(label = "Analog-Out1 at\nMax Cooling",
                         list = (0..10).map { it.toString() }, isHeader = false,
-                        defaultSelection = viewState.analogOut1CoolingMax,
+                        defaultSelection = viewState.value.analogOut1CoolingMax,
                         onSelected = {
-                            viewState.analogOut1CoolingMax = it
-                            vavModulatingViewModel.saveConfiguration()
+                            viewState.value.analogOut1CoolingMax = it
+                            vavModulatingViewModel.setStateChanged()
                         },
-                        isEnabled = viewState.isAnalog1OutputEnabled,
+                        isEnabled = viewState.value.isAnalog1OutputEnabled,
                         spacerLimit = 147,
                         previewWidth = 100,
                         expandedWidth = 120)
@@ -175,24 +184,24 @@ class VavModulatingRtuFragment : ModulatingRtuFragment() {
                 ) {
                     DropDownWithLabel(label = "Analog-Out2 at\nMin Static",
                         list = (0..10).map { it.toString() }, isHeader = false,
-                        defaultSelection = viewState.analogOut2StaticPressureMin,
+                        defaultSelection = viewState.value.analogOut2StaticPressureMin,
                         onSelected = {
-                            viewState.analogOut2StaticPressureMin = it
-                            vavModulatingViewModel.saveConfiguration()
+                            viewState.value.analogOut2StaticPressureMin = it
+                            vavModulatingViewModel.setStateChanged()
                         },
-                        isEnabled = viewState.isAnalog2OutputEnabled,
+                        isEnabled = viewState.value.isAnalog2OutputEnabled,
                         spacerLimit = 102,
                         previewWidth = 100,
                         expandedWidth = 120)
                     Spacer(modifier = Modifier.width(130.dp))
                     DropDownWithLabel(label = "Analog-Out2 at\nMax Static",
                         list = (0..10).map { it.toString() }, isHeader = false,
-                        defaultSelection = viewState.analogOut2StaticPressureMax,
+                        defaultSelection = viewState.value.analogOut2StaticPressureMax,
                         onSelected = {
-                            viewState.analogOut2StaticPressureMax = it
-                            vavModulatingViewModel.saveConfiguration()
+                            viewState.value.analogOut2StaticPressureMax = it
+                            vavModulatingViewModel.setStateChanged()
                         },
-                        isEnabled = viewState.isAnalog2OutputEnabled,
+                        isEnabled = viewState.value.isAnalog2OutputEnabled,
                         spacerLimit = 147,
                         previewWidth = 100,
                         expandedWidth = 120)
@@ -209,24 +218,24 @@ class VavModulatingRtuFragment : ModulatingRtuFragment() {
                 ) {
                     DropDownWithLabel(label = "Analog-Out3 at\nMin Heating",
                         list = (0..10).map { it.toString() }, isHeader = false,
-                        defaultSelection = viewState.analogOut3HeatingMin,
+                        defaultSelection = viewState.value.analogOut3HeatingMin,
                         onSelected = {
-                            viewState.analogOut3HeatingMin = it
-                            vavModulatingViewModel.saveConfiguration()
+                            viewState.value.analogOut3HeatingMin = it
+                            vavModulatingViewModel.setStateChanged()
                         },
-                        isEnabled = viewState.isAnalog3OutputEnabled,
+                        isEnabled = viewState.value.isAnalog3OutputEnabled,
                         spacerLimit = 102,
                         previewWidth = 100,
                         expandedWidth = 120)
                     Spacer(modifier = Modifier.width(130.dp))
                     DropDownWithLabel(label = "Analog-Out3 at\nMax Heating",
                         list = (0..10).map { it.toString() }, isHeader = false,
-                        defaultSelection = viewState.analogOut3HeatingMax,
+                        defaultSelection = viewState.value.analogOut3HeatingMax,
                         onSelected = {
-                            viewState.analogOut3HeatingMax = it
-                            vavModulatingViewModel.saveConfiguration()
+                            viewState.value.analogOut3HeatingMax = it
+                            vavModulatingViewModel.setStateChanged()
                         },
-                        isEnabled = viewState.isAnalog3OutputEnabled,
+                        isEnabled = viewState.value.isAnalog3OutputEnabled,
                         spacerLimit = 147,
                         previewWidth = 100,
                         expandedWidth = 120)
@@ -244,30 +253,30 @@ class VavModulatingRtuFragment : ModulatingRtuFragment() {
 
                     DropDownWithLabel(label = "Analog-Out4 at\nMin Fresh Air",
                         list = (0..10).map { it.toString() }, isHeader = false,
-                        defaultSelection = viewState.analogOut4FreshAirMin,
+                        defaultSelection = viewState.value.analogOut4FreshAirMin,
                         onSelected = {
-                            viewState.analogOut4FreshAirMin = it
-                            vavModulatingViewModel.saveConfiguration()
+                            viewState.value.analogOut4FreshAirMin = it
+                            vavModulatingViewModel.setStateChanged()
                         },
-                        isEnabled = viewState.isAnalog4OutputEnabled,
+                        isEnabled = viewState.value.isAnalog4OutputEnabled,
                         spacerLimit = 102,
                         previewWidth = 100,
                         expandedWidth = 120)
                     Spacer(modifier = Modifier.width(130.dp))
                     DropDownWithLabel(label = "Analog-Out4 at\nMax Fresh Air",
                         list = (0..10).map { it.toString() }, isHeader = false,
-                        defaultSelection = vavModulatingViewModel.viewState.analogOut4FreshAirMax,
+                        defaultSelection = vavModulatingViewModel.viewState.value.analogOut4FreshAirMax,
                         onSelected = {
-                            viewState.analogOut4FreshAirMax = it
-                            vavModulatingViewModel.saveConfiguration()
+                            viewState.value.analogOut4FreshAirMax = it
+                            vavModulatingViewModel.setStateChanged()
                         },
-                        isEnabled = viewState.isAnalog4OutputEnabled,
+                        isEnabled = viewState.value.isAnalog4OutputEnabled,
                         spacerLimit = 147,
                         previewWidth = 100,
                         expandedWidth = 120)
                 }
             }
-            if(vavModulatingViewModel.viewState.unusedPortState.isNotEmpty()) {
+            if(vavModulatingViewModel.viewState.value.unusedPortState.isNotEmpty()) {
                 item {
                     DividerRow()
                 }
@@ -278,7 +287,53 @@ class VavModulatingRtuFragment : ModulatingRtuFragment() {
                     UnusedPortsFragment.UnUsedPortsListView(vavModulatingViewModel)
                 }
             }
+
+            item {
+                SaveConfig()
+            }
         }
     }
 
+    @Composable
+    fun SaveConfig() {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(PaddingValues(top = 20.dp)),
+            horizontalArrangement = Arrangement.End,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .wrapContentWidth()
+                    .padding(PaddingValues(bottom = 10.dp, end = 5.dp)),
+                contentAlignment = Alignment.Center
+            ) {
+                SaveTextView(CANCEL, vavModulatingViewModel.viewState.value.isStateChanged) {
+                    vavModulatingViewModel.reset()
+                    vavModulatingViewModel.viewState.value.isSaveRequired = false
+                    vavModulatingViewModel.viewState.value.isStateChanged = false
+                }
+            }
+            Divider(
+                modifier = Modifier
+                    .height(25.dp)
+                    .width(2.dp)
+                    .padding(bottom = 6.dp),
+                color = Color.LightGray
+            )
+            Box(
+                modifier = Modifier
+                    .wrapContentWidth()
+                    .padding(PaddingValues(bottom = 10.dp, end = 10.dp)),
+                contentAlignment = Alignment.Center
+            ) {
+                SaveTextView(SAVE, vavModulatingViewModel.viewState.value.isSaveRequired) {
+                    vavModulatingViewModel.saveConfiguration()
+                    vavModulatingViewModel.viewState.value.isSaveRequired = false
+                    vavModulatingViewModel.viewState.value.isStateChanged = false
+                }
+            }
+        }
+    }
 }

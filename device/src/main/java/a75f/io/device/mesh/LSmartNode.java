@@ -45,6 +45,7 @@ import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.definitions.DamperType;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.ReheatType;
+import a75f.io.logic.bo.building.truecfm.TrueCFMUtil;
 import a75f.io.logic.bo.util.SystemTemperatureUtil;
 import a75f.io.logic.tuners.TunerUtil;
 
@@ -122,6 +123,11 @@ public class LSmartNode
         } else if (equip.getProfile().equals("PLC")) {
             settings.minDamperOpen.set(Short.parseShort(String.valueOf(10*CCUHsApi.getInstance().readDefaultVal("point and config and analog1 and min and output and group == \"" + address + "\"").intValue())));
             settings.maxDamperOpen.set(Short.parseShort(String.valueOf(10*CCUHsApi.getInstance().readDefaultVal("point and config and analog1 and max and output and group == \"" + address + "\"").intValue())));
+        } else if (isEquipType("vav", address) && TrueCFMUtil.isTrueCfmEnabled(CCUHsApi.getInstance(), equipRef)) {
+            // VAVs with TrueCFM enabled only have heating min/max damper positions
+            // These will only apply when System is Heating. When System is Cooling, CFM loop runs on edge with no damper limits.
+            settings.maxDamperOpen.set((short)getDamperLimit("heating", "max", address));
+            settings.minDamperOpen.set((short)getDamperLimit("heating", "min", address));
         } else {
             if (getStatus(address) == ZoneState.HEATING.ordinal()) {
                 settings.maxDamperOpen.set((short)getDamperLimit("heating", "max", address));
@@ -312,6 +318,13 @@ public class LSmartNode
         settings2.airflowCFMIntegralTime.set(enableCFM > 0 ? (short)airflowCFMIntegralTime : (short)30);
         settings2.airflowCFMIntegralKFactor.set(enableCFM > 0 ? (short)airflowCFMIntegralKFactor : (short)50);
         settings2.enableCFM.set((short)enableCFM);
+
+        if (isEquipType("vav", address)) {
+            CCUHsApi hsApi = CCUHsApi.getInstance();
+            settings2.maxDischargeAirTemperature.set(getMaxDischargeTemp(hsApi, equipRef));
+            settings2.runPILoopOnNode.set(TrueCFMUtil.isCfmOnEdgeActive(hsApi, equipRef) ? (short)1 : (short)0);
+        }
+
     }
 
     private static ProfileMap_t getProfileMap2(String profString) {
@@ -531,6 +544,11 @@ public class LSmartNode
         }
     }
 
+    public static short getMaxDischargeTemp(CCUHsApi hsApi, String equipRef) {
+        short maxDischargeTemp = hsApi.readPointPriorityValByQuery("point and domainName == \"" + DomainName.reheatZoneMaxDischargeTemp + "\" and equipRef == \"" + equipRef + "\"").shortValue();
+        return maxDischargeTemp > 0 ? maxDischargeTemp : 90;
+    }
+
     private static void fillSmartNodeControls(SmartNodeControls_t controls_t,Zone zone, short node, String equipRef){
 
 
@@ -667,6 +685,11 @@ public class LSmartNode
             controls_t.setTemperature.set((short)(getSetTemp(equipRef) > 0 ? (getSetTemp(equipRef) * 2) : 144));
             controls_t.conditioningMode.set((short) (L.ccu().systemProfile.getSystemController().getSystemState() == HEATING ? 1 : 0));
             controls_t.targetValue.set(getTargetValue(equipRef));
+
+            if (isEquipType("vav", node) && TrueCFMUtil.isCfmOnEdgeActive(hayStack, equipRef)) {
+                controls_t.cfmAirflowSetPoint.set((short)getAirflowSetpoint(hayStack, equipRef));
+                controls_t.datSetPoint.set((short)getDatSetpoint(hayStack, equipRef));
+            }
         }
     }
 
@@ -955,6 +978,14 @@ public class LSmartNode
                 return DomainName.maxCoolingDamperPos;
             }
         }
+    }
+
+    public static double getAirflowSetpoint(CCUHsApi hayStack, String equipRef) {
+        return hayStack.readHisValByQuery("point and domainName == \"" + DomainName.airFlowSetpoint + "\" and equipRef == \"" + equipRef + "\"");
+    }
+
+    public static double getDatSetpoint(CCUHsApi hayStack, String equipRef) {
+        return hayStack.readHisValByQuery("point and domainName == \"" + DomainName.dischargeAirTempSetpoint + "\" and equipRef == \"" + equipRef + "\"");
     }
 
     public static double getStatus(short nodeAddr) {

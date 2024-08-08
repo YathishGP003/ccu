@@ -15,6 +15,7 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.DamperShape;
 import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
+import a75f.io.logic.bo.building.system.vav.VavSystemProfile;
 
 public class TrueCFMUtil {
     
@@ -76,6 +77,14 @@ public class TrueCFMUtil {
             return hayStack.readDefaultVal("domainName == \"" + DomainName.enableCFMControl + "\" and equipRef == \"" + equipRef + "\"").intValue() > 0;
         }
         return hayStack.readDefaultVal("config and (trueCfm or trueCFM) and enable and equipRef ==\"" +equipRef+"\"").intValue() > 0;
+    }
+
+    public static boolean isCfmOnEdgeActive(CCUHsApi hayStack, String terminalEquipRef) {
+        if (L.ccu().systemProfile instanceof VavSystemProfile) {
+            int systemOpMode = hayStack.readHisValByQuery("point and domainName == \"" + DomainName.operatingMode + "\" and equipRef == \"" + L.ccu().systemProfile.getSystemEquipRef() + "\"").intValue();
+            return isTrueCfmEnabled(hayStack, terminalEquipRef) && systemOpMode == 1; // I can't believe there isn't an enum for this, but I couldn't find one
+        }
+        return false;
     }
     
     public static double calculateAndUpdateCfm(CCUHsApi hayStack, String equipRef, String damperOrder) {

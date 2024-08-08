@@ -86,8 +86,6 @@ open class VavAdvancedAhu : VavSystemProfile() {
     private val loadFanIndexRange = 27..31
     private lateinit var analogControlsEnabled : Set<AdvancedAhuAnalogOutAssociationType>
 
-    private var stageUpTimer = 0.0
-    private var stageDownTimer = 0.0
     private var satStageUpTimer = 0.0
     private var satStageDownTimer = 0.0
 
@@ -258,10 +256,16 @@ open class VavAdvancedAhu : VavSystemProfile() {
     }
 
     private fun updateStageTimers() {
-        if (stageUpTimer > 0) {
-            stageUpTimer--
-        } else if (stageDownTimer > 0) {
-            stageDownTimer--
+        if (ahuSettings.systemEquip.stageUpTimer > 0) {
+            ahuSettings.systemEquip.stageUpTimer--
+        } else if (ahuSettings.systemEquip.stageDownTimer > 0) {
+            ahuSettings.systemEquip.stageDownTimer--
+        }
+
+        if (ahuSettings.connectEquip1.stageUpTimer > 0) {
+            ahuSettings.connectEquip1.stageUpTimer--
+        } else if (ahuSettings.connectEquip1.stageDownTimer > 0) {
+            ahuSettings.connectEquip1.stageDownTimer--
         }
 
         if (satStageUpTimer > 0) {
@@ -269,7 +273,6 @@ open class VavAdvancedAhu : VavSystemProfile() {
         } else if (satStageDownTimer > 0) {
             satStageDownTimer--
         }
-
     }
     private fun getAhuTuners(): AhuTuners {
         return AhuTuners(
@@ -805,11 +808,11 @@ open class VavAdvancedAhu : VavSystemProfile() {
                 val associationType = relayAssociationDomainNameToType(domainName)
                 if (associationType.isConditioningStage() && isConditioningActive(associationType)) {
                     if (associationType.isLoadStage()) {
-                        if (!isStageUpTimerActive()) {
+                        if (!isStageUpTimerActive(isConnectEquip)) {
                             updatePointVal(domainName, index, status.second, isConnectEquip)
-                            activateStageUpTimer()
+                            activateStageUpTimer(isConnectEquip)
                         } else {
-                            CcuLog.d(L.TAG_CCU_SYSTEM, "Stage up ignored for $domainName counter: $stageUpTimer")
+                            CcuLog.d(L.TAG_CCU_SYSTEM, "Stage up ignored for $domainName counter: ${if(isConnectEquip) systemEquip.connectEquip1.stageUpTimer else systemEquip.cmEquip.stageUpTimer}")
                         }
                     }
                     if (associationType.isSatStage()) {
@@ -834,11 +837,11 @@ open class VavAdvancedAhu : VavSystemProfile() {
                 if (associationType.isConditioningStage() && isConditioningActive(associationType)) {
                     CcuLog.d(L.TAG_CCU_SYSTEM, "Stage down detected for $domainName")
                     if (associationType.isLoadStage()) {
-                        if (!isStageDownTimerActive()) {
+                        if (!isStageDownTimerActive(isConnectEquip)) {
                             updatePointVal(domainName, index, status.second, isConnectEquip)
-                            activateStageDownTimer()
+                            activateStageDownTimer(isConnectEquip)
                         } else {
-                            CcuLog.d(L.TAG_CCU_SYSTEM, "Stage down ignored for $domainName counter: $stageDownTimer")
+                            CcuLog.d(L.TAG_CCU_SYSTEM, "Stage down ignored for $domainName counter: ${if(isConnectEquip) systemEquip.connectEquip1.stageDownTimer else systemEquip.cmEquip.stageDownTimer}")
                         }
                     }
                     if (associationType.isSatStage()) {
@@ -890,12 +893,39 @@ open class VavAdvancedAhu : VavSystemProfile() {
             else -> false
         }
     }
-    private fun activateStageUpTimer() {
-        stageUpTimer = systemEquip.vavStageUpTimerCounter.readPriorityVal()
+
+    private fun activateStageUpTimer(isConnectEquip: Boolean) {
+        if (isConnectEquip) {
+            systemEquip.connectEquip1.stageUpTimer = systemEquip.vavStageUpTimerCounter.readPriorityVal()
+        } else {
+            systemEquip.cmEquip.stageUpTimer = systemEquip.vavStageUpTimerCounter.readPriorityVal()
+        }
     }
-    private fun activateStageDownTimer() {
-        stageDownTimer = systemEquip.vavStageDownTimerCounter.readPriorityVal()
+
+    private fun activateStageDownTimer(isConnectEquip: Boolean) {
+        if (isConnectEquip) {
+            systemEquip.connectEquip1.stageDownTimer = systemEquip.vavStageDownTimerCounter.readPriorityVal()
+        } else {
+            systemEquip.cmEquip.stageDownTimer = systemEquip.vavStageDownTimerCounter.readPriorityVal()
+        }
     }
+
+    private fun isStageUpTimerActive(isConnectEquip: Boolean): Boolean {
+        return if (isConnectEquip) {
+            systemEquip.connectEquip1.stageUpTimer > 0
+        } else {
+            systemEquip.cmEquip.stageUpTimer > 0
+        }
+    }
+
+    private fun isStageDownTimerActive(isConnectEquip: Boolean): Boolean {
+        return if (isConnectEquip) {
+            systemEquip.connectEquip1.stageDownTimer > 0
+        } else {
+            systemEquip.cmEquip.stageDownTimer > 0
+        }
+    }
+
     private fun activateSatStageUpTimer() {
         satStageUpTimer = systemEquip.vavStageUpTimerCounter.readPriorityVal()
     }
@@ -903,8 +933,6 @@ open class VavAdvancedAhu : VavSystemProfile() {
         satStageDownTimer = systemEquip.vavStageDownTimerCounter.readPriorityVal()
     }
 
-    private fun isStageUpTimerActive() : Boolean = stageUpTimer > 0
-    private fun isStageDownTimerActive() : Boolean = stageDownTimer > 0
     private fun isSatStageUpTimerActive() : Boolean = satStageUpTimer > 0
     private fun isSatStageDownTimerActive() : Boolean = satStageDownTimer > 0
 
@@ -944,8 +972,12 @@ open class VavAdvancedAhu : VavSystemProfile() {
         reset() // Resetting PI the loop variables
         resetLoops()
         resetOutput()
-        stageUpTimer = 0.0
-        stageDownTimer = 0.0
+        satStageUpTimer = 0.0
+        satStageDownTimer = 0.0
+        systemEquip.cmEquip.stageUpTimer = 0.0
+        systemEquip.cmEquip.stageDownTimer = 0.0
+        systemEquip.connectEquip1.stageUpTimer = 0.0
+        systemEquip.connectEquip1.stageDownTimer = 0.0
     }
 
     private fun resetOutput() {

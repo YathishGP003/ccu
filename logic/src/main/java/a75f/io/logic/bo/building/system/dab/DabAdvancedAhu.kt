@@ -822,12 +822,9 @@ class DabAdvancedAhu : DabSystemProfile() {
        } else {
            systemEquip.cmEquip.stageUpTimer = systemEquip.dabStageUpTimerCounter.readPriorityVal()
        }
-
-    //stageUpTimer = systemEquip.dabStageUpTimerCounter.readPriorityVal()
     }
 
     private fun activateStageDownTimer(isConnectEquip: Boolean) {
-        //stageDownTimer = systemEquip.dabStageDownTimerCounter.readPriorityVal()
         if (isConnectEquip) {
             systemEquip.connectEquip1.stageDownTimer = systemEquip.dabStageDownTimerCounter.readPriorityVal()
         } else {
@@ -901,6 +898,12 @@ class DabAdvancedAhu : DabSystemProfile() {
         reset() // Resetting PI the loop variables
         resetLoops()
         resetOutput()
+        satStageUpTimer = 0.0
+        satStageDownTimer = 0.0
+        systemEquip.cmEquip.stageUpTimer = 0.0
+        systemEquip.cmEquip.stageDownTimer = 0.0
+        systemEquip.connectEquip1.stageUpTimer = 0.0
+        systemEquip.connectEquip1.stageDownTimer = 0.0
     }
 
     private fun resetOutput() {

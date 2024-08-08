@@ -60,8 +60,10 @@ public class SnToCmOverAirSnRegularUpdateMessage_t extends Struct
 	public final Unsigned8 damper1CalibrationError = new Unsigned8(1); /* 0 is no error, 1 is error */
 	
 	public final Unsigned8 damper2CalibrationError = new Unsigned8(1); /* 0 is no error, 1 is error */
-	
-	public final Unsigned8 reserved = new Unsigned8(1);
+
+	public final Unsigned8 damperPositionCfmLoop = new Unsigned8(); // ranges from 0 to 100 in percentage
+
+	public final Unsigned8 reheatPositionAfterDat = new Unsigned8(); // ranges from 0 to 100 in percentage
 	
 	@Override
 	public ByteOrder byteOrder()

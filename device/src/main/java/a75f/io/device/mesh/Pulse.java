@@ -61,6 +61,7 @@ import a75f.io.logic.bo.building.sensors.Sensor;
 import a75f.io.logic.bo.building.sensors.SensorManager;
 import a75f.io.logic.bo.building.sensors.SensorType;
 import a75f.io.logic.bo.building.system.vav.VavAdvancedAhu;
+import a75f.io.logic.bo.building.truecfm.TrueCFMUtil;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.bo.haystack.device.SmartStat;
 import a75f.io.logic.bo.util.CCUUtils;
@@ -294,14 +295,34 @@ public class Pulse
 					    "Current Temp Refresh Logical:" + logicalCurTempPoint + " Node Address:" + nodeAddr + " currentTempVal:" + curTempVal);
 					currentTempInterface.updateTemperature(th2TempVal, nodeAddr);
 				}
-			}
-			else if(!logicalCurTempPoint.isEmpty()){
+			} else if(!logicalCurTempPoint.isEmpty()){
 				double oldCurTempVal = hayStack.readHisValById(logicalCurTempPoint);
 				hayStack.writeHisValById(logicalCurTempPoint, curTempVal);
 				if ((currentTempInterface != null) && (oldCurTempVal != curTempVal)) {
 					CcuLog.i(L.TAG_CCU_DEVICE,
 					    "Current Temp Refresh Logical:" + logicalCurTempPoint + " Node Address:" + nodeAddr + " currentTempVal:" + curTempVal);
 					currentTempInterface.updateTemperature(curTempVal, nodeAddr);
+				}
+			}
+
+			boolean isVav = isDomainEquip ?
+					(equip.getDomainName().equals(DomainName.smartnodeActiveChilledBeam)
+						|| equip.getDomainName().equals(DomainName.helionodeActiveChilledBeam)
+						|| equip.getDomainName().equals(DomainName.smartnodeVAVReheatNoFan)
+						|| equip.getDomainName().equals(DomainName.helionodeVAVReheatNoFan)
+						|| equip.getDomainName().equals(DomainName.smartnodeVAVReheatParallelFan)
+						|| equip.getDomainName().equals(DomainName.helionodeVAVReheatParallelFan)
+						|| equip.getDomainName().equals(DomainName.smartnodeVAVReheatSeriesFan)
+						|| equip.getDomainName().equals(DomainName.helionodeVAVReheatSeriesFan)
+					) : false;
+
+			if (isVav && TrueCFMUtil.isTrueCfmEnabled(hayStack, equip.getId())) {
+				if (TrueCFMUtil.isCfmOnEdgeActive(hayStack, equip.getId())) {
+					hayStack.writeHisValByQuery("point and domainName == \"" + DomainName.damperCmdCal + "\" and equipRef == \"" + equip.getId() + "\"", (double)smartNodeRegularUpdateMessage_t.update.damperPositionCfmLoop.get());
+					hayStack.writeHisValByQuery("point and domainName == \"" + DomainName.reheatCmdCal + "\" and equipRef == \"" + equip.getId() + "\"", (double)smartNodeRegularUpdateMessage_t.update.reheatPositionAfterDat.get());
+				} else {
+					hayStack.writeHisValByQuery("point and domainName == \"" + DomainName.damperCmdCal + "\" and equipRef == \"" + equip.getId() + "\"", 0.0);
+					hayStack.writeHisValByQuery("point and domainName == \"" + DomainName.reheatCmdCal + "\" and equipRef == \"" + equip.getId() + "\"", 0.0);
 				}
 			}
 		}

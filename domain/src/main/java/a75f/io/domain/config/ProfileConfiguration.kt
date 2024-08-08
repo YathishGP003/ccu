@@ -65,7 +65,6 @@ abstract class ProfileConfiguration (var nodeAddress : Int, var nodeType : Strin
             config.maxVal = (point.valueConstraint as NumericConstraint).maxValue
         }
         point?.presentationData?.get("tagValueIncrement")?.let { config.incVal = it.toString().toDouble() }
-        CcuLog.i(Domain.LOG_TAG, "defaultValConfig $domainName ${config.currentVal}")
         return config
     }
 

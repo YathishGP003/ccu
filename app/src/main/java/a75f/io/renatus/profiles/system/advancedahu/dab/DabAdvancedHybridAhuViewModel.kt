@@ -13,11 +13,13 @@ import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.system.dab.DabAdvancedAhu
 import a75f.io.logic.bo.building.system.dab.config.DabAdvancedHybridAhuConfig
 import a75f.io.logic.bo.building.system.util.deleteSystemConnectModule
+import a75f.io.logic.bo.building.system.util.deleteSystemProfile
 import a75f.io.logic.bo.building.system.util.getDabConnectEquip
 import a75f.io.renatus.modbus.util.showToast
 import a75f.io.renatus.profiles.system.advancedahu.AdvancedHybridAhuViewModel
 import a75f.io.renatus.profiles.system.advancedahu.isValidateConfiguration
 import a75f.io.renatus.util.ProgressDialogUtils
+import a75f.io.renatus.util.highPriorityDispatcher
 import android.content.Context
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
@@ -55,7 +57,6 @@ class DabAdvancedHybridAhuViewModel : AdvancedHybridAhuViewModel() {
     }
 
     private fun createNewEquip(id: String): String {
-        hayStack.deleteEntityTree(id)
         val cmEquipDis = "${hayStack.siteName}-${cmModel.name}"
         val cmEquipId = cmEquipBuilder.buildEquipAndPoints(profileConfiguration.cmConfiguration, cmModel, hayStack.site!!.id, cmEquipDis)
 
@@ -96,44 +97,53 @@ class DabAdvancedHybridAhuViewModel : AdvancedHybridAhuViewModel() {
             return
         }
 
+        viewState.value.isSaveRequired = false
+        viewState.value.isStateChanged = false
+
         CcuLog.i(L.TAG_CCU_SYSTEM, profileConfiguration.toString())
         isEquipAvailable(ProfileType.SYSTEM_DAB_ADVANCED_AHU)
         if (saveJob == null) {
-            saveJob = viewModelScope.launch {
-                ProgressDialogUtils.showProgressDialog(context, "Saving profile configuration")
-                withContext(Dispatchers.IO) {
-                    val profile = L.ccu().systemProfile
-                    if (profile == null) {
-                        newEquipConfiguration()
+            saveJob = viewModelScope.launch (highPriorityDispatcher) {
+                hayStack.resetCcuReady()
+                withContext(Dispatchers.Main) {
+                    ProgressDialogUtils
+                            .showProgressDialog(context, "Saving profile configuration")
+                }
+                val profile = L.ccu().systemProfile
+                if (profile == null) {
+                    newEquipConfiguration()
+                } else {
+                    if (profile is DabAdvancedAhu) {
+                        updateConfiguration()
                     } else {
-                        if (profile is DabAdvancedAhu) {
-                            updateConfiguration()
-                        } else {
-                            newEquipConfiguration()
-                        }
+                        newEquipConfiguration()
                     }
-                    L.saveCCUState()
-                    CCUHsApi.getInstance().setCcuReady()
-                    CCUHsApi.getInstance().syncEntityTree()
-                    DomainManager.addSystemDomainEquip(hayStack)
-                    DomainManager.addCmBoardDevice(hayStack)
-                    (L.ccu().systemProfile as DabAdvancedAhu).updateDomainEquip(Domain.systemEquip as DabAdvancedHybridSystemEquip)
-                    withContext(Dispatchers.Main) {
-                        viewState.value.isSaveRequired = false
-                        viewState.value.isStateChanged = false
-                        showToast("Configuration saved successfully", context)
-                        saveJob = null
+                }
+                L.saveCCUState()
+                DomainManager.addSystemDomainEquip(hayStack)
+                DomainManager.addCmBoardDevice(hayStack)
+                (L.ccu().systemProfile as DabAdvancedAhu).updateDomainEquip(Domain.systemEquip as DabAdvancedHybridSystemEquip)
+                withContext(Dispatchers.Main) {
+                    if (ProgressDialogUtils.isDialogShowing()) {
                         ProgressDialogUtils.hideProgressDialog()
                     }
                 }
+                viewState.value.isSaveRequired = false
+                viewState.value.isStateChanged = false
+                saveJob = null
+                showToast("Configuration saved successfully", context)
+                CCUHsApi.getInstance().setCcuReady()
+                CCUHsApi.getInstance().syncEntityTree()
             }
         }
     }
 
     private fun newEquipConfiguration() {
         val systemEquip = hayStack.readEntity("system and equip and not modbus and not connectModule")
+        deleteSystemProfile(systemEquip[Tags.ID].toString())
         val newEquipId = createNewEquip(systemEquip[Tags.ID].toString())
         L.ccu().systemProfile = DabAdvancedAhu()
+        L.ccu().systemProfile.removeSystemEquipModbus()
         L.ccu().systemProfile.addSystemEquip()
         L.ccu().systemProfile.updateAhuRef(newEquipId)
         val dabAdvancedAhuProfile = L.ccu().systemProfile as DabAdvancedAhu

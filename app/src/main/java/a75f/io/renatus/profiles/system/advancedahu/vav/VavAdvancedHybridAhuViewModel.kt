@@ -11,6 +11,7 @@ import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.system.util.deleteSystemConnectModule
+import a75f.io.logic.bo.building.system.util.deleteSystemProfile
 import a75f.io.logic.bo.building.system.vav.VavAdvancedAhu
 import a75f.io.logic.bo.building.system.vav.config.VavAdvancedHybridAhuConfig
 import a75f.io.renatus.modbus.util.showToast
@@ -217,12 +218,6 @@ class VavAdvancedHybridAhuViewModel : AdvancedHybridAhuViewModel() {
         viewState.value.isSaveRequired = !systemEquip["profile"].toString().contentEquals("vavAdvancedHybridAhuV2")
     }
 
-    private fun deleteSystemProfile(systemProfileId: String){
-        val deleteTime = measureTimeMillis {
-            hayStack.deleteEntityTree(systemProfileId)
-        }
-        CcuLog.i(L.TAG_CCU_DOMAIN, "Time taken to delete entities: $deleteTime")
-    }
 }
 
 

@@ -1,6 +1,7 @@
 package a75f.io.logic.bo.building.system.util
 
 import a75f.io.api.haystack.CCUHsApi
+import a75f.io.api.haystack.util.hayStack
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.equips.AdvancedHybridSystemEquip
@@ -8,12 +9,14 @@ import a75f.io.domain.equips.ConnectModuleEquip
 import a75f.io.domain.equips.DabAdvancedHybridSystemEquip
 import a75f.io.domain.equips.VavAdvancedHybridSystemEquip
 import a75f.io.domain.util.ModelNames
+import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.system.SystemMode
 import a75f.io.logic.bo.building.system.dab.DabAdvancedAhu
 import a75f.io.logic.bo.building.system.vav.VavAdvancedAhu
 import android.annotation.SuppressLint
 import io.seventyfivef.ph.core.Tags
+import kotlin.system.measureTimeMillis
 
 /**
  * Created by Manjunath K on 23-05-2024.
@@ -111,6 +114,13 @@ fun getSystemDomain(): String? {
 fun deleteSystemConnectModule() {
     deleteSystemConnectModule(ModelNames.vavAdvancedHybridAhuV2_connectModule)
     deleteSystemConnectModule(ModelNames.dabAdvancedHybridAhuV2_connectModule)
+}
+
+fun deleteSystemProfile(systemProfileId: String){
+    val deleteTime = measureTimeMillis {
+        hayStack.deleteEntityTree(systemProfileId)
+    }
+    CcuLog.i(L.TAG_CCU_DOMAIN, "Time taken to delete entities: $deleteTime")
 }
 
 fun deleteSystemConnectModule(modelName: String) {

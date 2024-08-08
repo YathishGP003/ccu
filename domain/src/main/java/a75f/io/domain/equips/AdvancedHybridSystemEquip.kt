@@ -350,4 +350,10 @@ open class AdvancedHybridSystemEquip(equipRef: String) : SystemEquip (equipRef) 
     val emergencyShutoffNO = Point(DomainName.emergencyShutoffNO, equipRef)
     val emergencyShutoffNC = Point(DomainName.emergencyShutoffNC, equipRef)
     val voltageInput = Point(DomainName.voltageInput, equipRef)
+
+    var stageUpTimer = 0.0
+    var stageDownTimer = 0.0
+
+    fun isStageUpTimerActive(): Boolean = stageUpTimer > 0
+    fun isStageDownTimerActive(): Boolean = stageDownTimer > 0
 }

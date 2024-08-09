@@ -230,15 +230,18 @@ class VavProfileViewModel : ViewModel() {
             if (L.ccu().bypassDamperProfile != null) overrideForBypassDamper(profileConfiguration)
             setScheduleType(profileConfiguration)
             setMinCfmSetpointMaxVals(profileConfiguration)
+            setAirflowCfmProportionalRange(profileConfiguration)
+            vavProfile.init()
             L.ccu().zoneProfiles.add(vavProfile)
 
         } else {
             equipBuilder.updateEquipAndPoints(profileConfiguration, model, hayStack.site!!.id, equipDis, true)
             if (L.ccu().bypassDamperProfile != null) overrideForBypassDamper(profileConfiguration)
-            vavProfile.init()
             setOutputTypes(profileConfiguration)
             setMinCfmSetpointMaxVals(profileConfiguration)
             setScheduleType(profileConfiguration)
+            setAirflowCfmProportionalRange(profileConfiguration)
+            vavProfile.init()
             saveUnUsedPortStatus(profileConfiguration, deviceAddress, hayStack)
         }
 
@@ -413,6 +416,17 @@ class VavProfileViewModel : ViewModel() {
             hayStack.updatePoint(minReheatingCfmPoint, minReheatingCfmMap.get("id").toString())
         }
 
+    }
+
+    // AirflowCfmProportionalRange tuner is very config-specific. Appropriate value depends on the CFM setpoints.
+    // We set this value to 1.5x the Max Cooling CFM, which is the ballpark value used by U.S. Support during commissioning.
+    private fun setAirflowCfmProportionalRange(config: VavProfileConfiguration) {
+        val equip = hayStack.read("equip and group == \"" + config.nodeAddress + "\"")
+        val vavEquip = VavEquip(equip.get("id").toString())
+
+        if (vavEquip.enableCFMControl.readDefaultVal() > 0.0) {
+            vavEquip.vavAirflowCFMProportionalRange.writeVal(8, 1.5 * vavEquip.maxCFMCooling.readPriorityVal())
+        }
     }
 
     // This logic will break if the "damperType" point enum is changed

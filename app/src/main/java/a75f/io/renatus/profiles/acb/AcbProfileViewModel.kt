@@ -49,6 +49,8 @@ import a75f.io.renatus.profiles.profileUtils.UnusedPortsModel
 import a75f.io.renatus.profiles.profileUtils.UnusedPortsModel.Companion.saveUnUsedPortStatus
 import a75f.io.api.haystack.HSUtil
 import a75f.io.api.haystack.Tags
+import a75f.io.domain.equips.VavEquip
+
 class AcbProfileViewModel : ViewModel() {
 
     lateinit var zoneRef: String
@@ -225,18 +227,22 @@ class AcbProfileViewModel : ViewModel() {
             if (L.ccu().bypassDamperProfile != null) overrideForBypassDamper(profileConfiguration)
             setScheduleType(profileConfiguration)
             setMinCfmSetpointMaxVals(profileConfiguration)
+            setAirflowCfmProportionalRange(profileConfiguration)
+            // Have to reload the profile here because we just changed the CFM proportional range
+            acbProfile.init()
             L.ccu().zoneProfiles.add(acbProfile)
 
         } else {
             equipBuilder.updateEquipAndPoints(profileConfiguration, model, hayStack.site!!.id, equipDis, true)
             if (L.ccu().bypassDamperProfile != null) overrideForBypassDamper(profileConfiguration)
 
-            acbProfile.init()
             setOutputTypes(profileConfiguration)
             saveUnUsedPortStatus(profileConfiguration, deviceAddress, hayStack)
             updateCondensateSensor(profileConfiguration)
             updateRelayAssociation(profileConfiguration)
             setMinCfmSetpointMaxVals(profileConfiguration)
+            setAirflowCfmProportionalRange(profileConfiguration)
+            acbProfile.init()
             setScheduleType(profileConfiguration)
         }
 
@@ -456,6 +462,17 @@ class AcbProfileViewModel : ViewModel() {
             hayStack.updatePoint(minReheatingCfmPoint, minReheatingCfmMap.get("id").toString())
         }
 
+    }
+
+    // AirflowCfmProportionalRange tuner is very config-specific. Appropriate value depends on the CFM setpoints.
+    // We set this value to 1.5x the Max Cooling CFM, which is the ballpark value used by U.S. Support during commissioning.
+    private fun setAirflowCfmProportionalRange(config: AcbProfileConfiguration) {
+        val equip = hayStack.read("equip and group == \"" + config.nodeAddress + "\"")
+        val vavEquip = VavEquip(equip.get("id").toString())
+
+        if (vavEquip.enableCFMControl.readDefaultVal() > 0.0) {
+            vavEquip.vavAirflowCFMProportionalRange.writeVal(8, 1.5 * vavEquip.maxCFMCooling.readPriorityVal())
+        }
     }
 
     // This logic will break if the "damperType" point enum is changed

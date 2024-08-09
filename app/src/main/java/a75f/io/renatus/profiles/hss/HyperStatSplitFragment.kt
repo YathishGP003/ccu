@@ -1075,7 +1075,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                     Text(
                         fontSize = 20.sp,
                         fontFamily = ComposeUtil.myFontFamily,
-                        modifier = Modifier.width(if (expanded.value) (expandedWidth-50).dp else (width-50).dp),
+                        modifier = Modifier.width((width-50).dp),
                         fontWeight = FontWeight.Normal,
                         text = "${ selectedItem.value.dis?: selectedItem.value.dis } $unit",
                         overflow = TextOverflow.Ellipsis,
@@ -1155,7 +1155,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                         state = lazyListState,
                         modifier = Modifier
                             .height((customHeight).dp)
-                            .width(if (expanded.value) expandedWidth.dp else width.dp)
+                            .width(expandedWidth.dp)
                             .simpleVerticalScrollbar(lazyListState)
                     ) {
                         items(filteredItems) {

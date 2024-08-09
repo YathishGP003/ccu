@@ -3,6 +3,8 @@ package a75.io.algos.tr;
 
 import java.util.ArrayList;
 
+import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Equip;
 import a75f.io.logger.CcuLog;
 
 /**
@@ -39,7 +41,7 @@ public class TrimResponseProcessor
     }
 
     public void processResetResponse() {
-        if (++minuteCounter < trSetting.getTd()) {
+        if (++minuteCounter < trSetting.getTd() || !isSystemCooling()) {
             trSetting.resetRequest();
             return;
         }
@@ -72,5 +74,11 @@ public class TrimResponseProcessor
         
         setPoint = sp;
         CcuLog.d("CCU_SYSTEM", "setpoint "+setPoint);
+    }
+
+    private boolean isSystemCooling() {
+        CCUHsApi hayStack = CCUHsApi.getInstance();
+        Equip systemEquip = new Equip.Builder().setHashMap(hayStack.readEntity("system and equip and not modbus and not connectModule")).build();
+        return CCUHsApi.getInstance().readHisValByQuery("point and domainName == \"operatingMode\" and equipRef == \"" + systemEquip.getId() + "\"").intValue() == 1;
     }
 }

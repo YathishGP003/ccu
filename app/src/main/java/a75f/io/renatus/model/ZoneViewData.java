@@ -120,6 +120,11 @@ public class ZoneViewData {
         double damperPosPoint = TrueCFMUtil.isCfmOnEdgeActive(CCUHsApi.getInstance(), vavEquip.getId()) ? vavEquip.getDamperCmdCal().readHisVal() : vavEquip.getNormalizedDamperCmd().readHisVal();
         double valvePoint = CCUHsApi.getInstance().readHisValByQuery("point and domainName == \"" + DomainName.chilledWaterValve + "\" and equipRef == \""+equipID+"\"");
         double reheatPoint = TrueCFMUtil.isCfmOnEdgeActive(CCUHsApi.getInstance(), vavEquip.getId()) ? vavEquip.getReheatCmdCal().readHisVal() : vavEquip.getReheatCmd().readHisVal();
+        if (!(damperPosPoint > 0 || reheatPoint > 0)) {
+            damperPosPoint = vavEquip.getNormalizedDamperCmd().readHisVal();
+            reheatPoint = vavEquip.getReheatCmd().readHisVal();
+        }
+
         double enteringAirPoint = vavEquip.getEnteringAirTemp().readHisVal();
         double dischargePoint = vavEquip.getDischargeAirTemp().readHisVal();
         double airflowCFM =  CCUHsApi.getInstance().readHisValByQuery("point and domainName == \"" + DomainName.airFlowSensor + "\" and equipRef == \""+equipID+"\"");

@@ -792,6 +792,14 @@ class VavAndAcbProfileMigration {
                                 equipDis
                             )
                         )
+
+                        val minHeatingDamperPoint = hayStack.readEntity("point and equipRef == \"${equipId}\" and domainName == \"${DomainName.minHeatingDamperPos}\"")
+                        if (minHeatingDamperPoint.isNotEmpty()) {
+                            val minHeatingDamperId = minHeatingDamperPoint["id"].toString()
+                            minHeatingDamperId.let {
+                                hayStack.writeDefaultValById(it, 20.0)
+                            }
+                        }
                     }
                 }
             }

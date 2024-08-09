@@ -22,7 +22,8 @@ class ModuleListActionMenuListener implements MultiChoiceModeListener
 	 *
 	 */
 	private final FloorPlanFragment floorPlanActivity;
-	private ArrayList<Short> seletedModules = new ArrayList<>();
+	public ArrayList<Short> seletedModules = new ArrayList<>();
+	private ActionMode aMode = null;
 	
 	
 	/**
@@ -42,6 +43,7 @@ class ModuleListActionMenuListener implements MultiChoiceModeListener
 		inflater.inflate(R.menu.action_menu, menu);
 		menu.findItem(R.id.renameSelection).setVisible(false);
 		seletedModules.clear();
+		aMode = mode;
 		mode.setTitle("Select Modules");
 		return true;
 	}
@@ -95,6 +97,12 @@ class ModuleListActionMenuListener implements MultiChoiceModeListener
 	{
 		floorPlanActivity.mModuleListAdapter.setMultiSelectMode(false);
 		seletedModules.clear();
+		aMode = null;
+	}
+	public void destroyActionBar() {
+		if (aMode != null) {
+			aMode.finish();
+		}
 	}
 	
 	
@@ -126,17 +134,22 @@ class ModuleListActionMenuListener implements MultiChoiceModeListener
 	public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked)
 	{
 		Short smartNodeID = Short.parseShort(floorPlanActivity.mModuleListAdapter.getItem(position));
-		if (checked)
+		if (checked && !seletedModules.contains(smartNodeID))
 		{
 			seletedModules.add(smartNodeID);
 			seletedModules.addAll(HSUtil.getSubEquipPairingAddr(String.valueOf(smartNodeID)));
-			floorPlanActivity.mModuleListAdapter.addSelected(position);
+			floorPlanActivity.mModuleListAdapter.addSelected(position, seletedModules, new ArrayList<>());
 		}
 		else
 		{
 			seletedModules.remove(smartNodeID);
-			floorPlanActivity.mModuleListAdapter.removeSelected(position);
+			floorPlanActivity.mModuleListAdapter.removeSelected(position, seletedModules, new ArrayList<>());
 		}
+		if(seletedModules.size() == 0)
+		{
+			mode.finish();
+		}
+		floorPlanActivity.mModuleListAdapter.notifyDataSetChanged();
 		final int checkedCount = seletedModules.size();
 		switch (checkedCount)
 		{

@@ -11,6 +11,7 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
+import a75f.io.api.haystack.Zone;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.CCUUtils;
 
@@ -22,6 +23,8 @@ public class DataArrayAdapter<T> extends ArrayAdapter<T>
 {
 	private int     nSelectedPostion   = 0;
 	private int[]   nSelectedPositions = null;
+	private ArrayList<Short> nSelectedModules = new ArrayList<>();
+	private ArrayList<Zone> nSelectedZones = new ArrayList<>();
 	private boolean bMultiSelect       = false;
 	private int     nColor             = Color.argb(0x55, 0x00, 0x99, 0xcc);
 	private int     nMultiColor        = Color.argb(0x33, 0x00, 0x99, 0xcc);
@@ -37,9 +40,13 @@ public class DataArrayAdapter<T> extends ArrayAdapter<T>
 	}
 	
 	
-	public DataArrayAdapter(Context context, int textViewResourceId, T[] objects)
+	public DataArrayAdapter(Context context, int textViewResourceId, ArrayList<T> objects, ArrayList<Short> moduleIds, ArrayList<Zone> zoneIds)
 	{
 		super(context, textViewResourceId, objects);
+		this.objects = objects;
+		this.nSelectedModules = moduleIds;
+		this.nSelectedZones = zoneIds;
+		listSelectorBackground = CCUUiUtil.getListSelectorBackground(context);
 		// TODO Auto-generated constructor stub
 	}
 	
@@ -95,6 +102,12 @@ public class DataArrayAdapter<T> extends ArrayAdapter<T>
 				convertView.setBackgroundColor(Color.WHITE);
 			}
 		}
+
+		if ((nSelectedModules.size() > 0 && nSelectedModules.contains(Short.parseShort(objects.get(position).toString()))) ||
+				(nSelectedZones.size() > 0 && isRoomSelected((Zone) objects.get(position)))){
+			textView_Data.setTextColor(getContext().getResources().getColor(R.color.text_color));
+			convertView.setBackgroundColor(getContext().getResources().getColor(R.color.selection_gray));
+		}
 		return convertView;
 	}
 	
@@ -122,6 +135,8 @@ public class DataArrayAdapter<T> extends ArrayAdapter<T>
 		else
 		{
 			nSelectedPositions = null;
+			nSelectedModules.clear();
+			nSelectedZones.clear();
 		}
 	}
 	
@@ -144,6 +159,45 @@ public class DataArrayAdapter<T> extends ArrayAdapter<T>
 			notifyDataSetChanged();
 		}
 	}
-	
-	
+	public void addSelected(int position, ArrayList<Short> moduleIds, ArrayList<Zone> zoneIds)
+	{
+		setMultiSelectMode(true);
+		if(!moduleIds.isEmpty()) {
+			nSelectedModules = moduleIds;
+		}
+		if (!zoneIds.isEmpty()) {
+			nSelectedZones = zoneIds;
+		}
+		if (nSelectedPositions != null)
+		{
+			nSelectedPositions[position] = 1;
+			notifyDataSetChanged();
+		}
+	}
+
+
+	public void removeSelected(int position, ArrayList<Short> moduleIds, ArrayList<Zone> zoneIds)
+	{
+		setMultiSelectMode(true);
+		if(!moduleIds.isEmpty()) {
+			nSelectedModules = moduleIds;
+		}
+		if (!zoneIds.isEmpty()) {
+			nSelectedZones = zoneIds;
+		}
+		if (nSelectedPositions != null)
+		{
+			nSelectedPositions[position] = 0;
+			notifyDataSetChanged();
+		}
+	}
+	private Boolean isRoomSelected(Zone roomData)
+	{
+		for(Zone room : nSelectedZones) {
+			if (room.getDisplayName().equals(roomData.getDisplayName())) {
+				return true;
+			}
+		}
+		return false;
+	}
 }

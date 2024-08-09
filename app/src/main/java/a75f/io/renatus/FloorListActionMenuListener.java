@@ -33,6 +33,7 @@ public class FloorListActionMenuListener implements MultiChoiceModeListener
 	
 	final private FloorPlanFragment floorPlanActivity;
 	private Menu             mMenu         = null;
+	private ActionMode aMode = null ;
 	private ArrayList<Floor> selectedFloor = new ArrayList<Floor>();
 	private Disposable deleteFloorDisposable;
 
@@ -54,6 +55,7 @@ public class FloorListActionMenuListener implements MultiChoiceModeListener
 		inflater.inflate(R.menu.action_menu, menu);
 		mMenu = menu;
 		selectedFloor.clear();
+		aMode = mode;
 		mode.setTitle("Select Floors");
 		return true;
 	}
@@ -96,6 +98,7 @@ public class FloorListActionMenuListener implements MultiChoiceModeListener
 	{
 		floorPlanActivity.mFloorListAdapter.setMultiSelectMode(false);
 		mMenu = null;
+		aMode = null;
 	}
 
 	public void dispose() {
@@ -243,6 +246,11 @@ public class FloorListActionMenuListener implements MultiChoiceModeListener
 				mode.setSubtitle("" + checkedCount + " floors selected");
 				mMenu.findItem(R.id.renameSelection).setVisible(false);
 				break;
+		}
+	}
+	public void destroyActionBar() {
+		if (aMode != null) {
+			aMode.finish();
 		}
 	}
 }

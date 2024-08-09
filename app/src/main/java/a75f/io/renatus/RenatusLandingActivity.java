@@ -396,6 +396,9 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                 TextView tabTextView = (TextView) tabLayout.getChildAt(1);
 
                 tabTextView.setTextAppearance(tabLayout.getContext(), R.attr.RenatusTabTextSelected);
+                if (btnTabs.getSelectedTabPosition() == 0 &&  mTabLayout.getSelectedTabPosition() != 0) { //This method wills when we switch from floor to other tab in settings
+                    FloorPlanFragment.getInstance().destroyActionBar();
+                }
 
             }
 

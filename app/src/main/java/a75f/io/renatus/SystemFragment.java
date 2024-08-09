@@ -19,6 +19,7 @@ import static a75f.io.logic.bo.building.system.ExternalAhuUtilKt.getModbusPointV
 import static a75f.io.logic.bo.building.system.ExternalAhuUtilKt.getOperatingMode;
 import static a75f.io.logic.bo.building.system.ExternalAhuUtilKt.getSetPoint;
 import static a75f.io.logic.bo.util.UnitUtils.StatusCelsiusVal;
+import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusTwoDecimal;
 import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
 
 import android.annotation.SuppressLint;
@@ -1196,8 +1197,8 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		setPointConfig.setVisibility(View.VISIBLE);
 		if (userIntentConfig.isSatHeatingAvailable()) { // heating is available
 			if (isCelsiusEnabled) {
-				heatingSp.setText(" "+ UnitUtils.fahrenheitToCelsiusRelative(heatingSpVal) + " °C");
-				dualSatCurrent.setText(" " +  UnitUtils.fahrenheitToCelsiusRelative(dualSatCurrentVal) + " °C");
+				heatingSp.setText(" "+ fahrenheitToCelsiusTwoDecimal(Double.parseDouble(String.valueOf(heatingSpVal))) + " °C");
+				dualSatCurrent.setText(" " +  fahrenheitToCelsiusTwoDecimal(Double.parseDouble(String.valueOf(dualSatCurrentVal))) + " °C");
 			} else {
 				heatingSp.setText(" " + heatingSpVal +" "+ satUnit);
 				dualSatCurrent.setText(" " + dualSatCurrentVal+" "+ satUnit);
@@ -1207,8 +1208,8 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		}
 		if (userIntentConfig.isSatCoolingAvailable()) { // Cooling is available
 			if (isCelsiusEnabled) {
-				coolingSp.setText(" "+ UnitUtils.fahrenheitToCelsiusRelative(CoolingSpVal) + " °C");
-				dualSatCurrent.setText(" " +  UnitUtils.fahrenheitToCelsiusRelative(dualSatCurrentVal) + " °C");
+				coolingSp.setText(" "+ fahrenheitToCelsiusTwoDecimal(Double.parseDouble(String.valueOf(CoolingSpVal)))+ " °C");
+				dualSatCurrent.setText(" " +  fahrenheitToCelsiusTwoDecimal(Double.parseDouble(String.valueOf(dualSatCurrentVal)))  + " °C");
 			}else {
 				coolingSp.setText(" " + CoolingSpVal + " " + satUnit);
 				dualSatCurrent.setText(" " + dualSatCurrentVal + " " + satUnit);

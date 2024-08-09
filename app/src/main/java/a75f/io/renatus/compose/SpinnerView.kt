@@ -82,16 +82,16 @@ fun SpinnerElement(
     var selectedIndex by remember { mutableStateOf(items.indexOf(defaultSelection)) }
     Box(
         modifier = Modifier
-            .wrapContentSize()
-            .padding(
-                PaddingValues(
-                    top = 5.dp
+                .wrapContentSize()
+                .padding(
+                        PaddingValues(
+                                top = 5.dp
+                        )
                 )
-            )
     ) {
         Column(modifier = Modifier
-            .width(200.dp)
-            .clickable(onClick = { expanded.value = true })) {
+                .width(200.dp)
+                .clickable(onClick = { expanded.value = true })) {
             Row {
                 Text(
                     fontSize = 20.sp,
@@ -105,8 +105,8 @@ fun SpinnerElement(
                     painter = painterResource(id = R.drawable.angle_down_solid),
                     contentDescription = "Custom Icon",
                     modifier = Modifier
-                        .size(28.dp)
-                        .padding(PaddingValues(top = 8.dp)),
+                            .size(28.dp)
+                            .padding(PaddingValues(top = 8.dp)),
                     colorFilter = ColorFilter.tint(primaryColor)
                 )
             }
@@ -255,7 +255,7 @@ fun getItemData(value: String, unit: String, viewModel: AdvancedHybridAhuViewMod
         val isChecked by viewModel.isChecked.collectAsState()
         if (isChecked) {
             return if (unit.equals("°F", ignoreCase = true)) {
-                val number = BigDecimal(UnitUtils.fahrenheitToCelsiusRelative(value.toDouble()))
+                val number = BigDecimal(UnitUtils.fahrenheitToCelsiusTwoDecimal(value.toDouble()))
                 Pair((number.setScale(1, RoundingMode.DOWN).toString()), "\u00B0C")
             } else {
                 Pair(value, unit)

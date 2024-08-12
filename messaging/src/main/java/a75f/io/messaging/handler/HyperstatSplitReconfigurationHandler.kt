@@ -1,6 +1,7 @@
 package a75f.io.messaging.handler
 
 import a75f.io.api.haystack.*
+import a75f.io.domain.HyperStatSplitEquip
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.logic.DeviceBuilder
@@ -166,7 +167,7 @@ class HyperstatSplitReconfigurationHandler {
 
             addLinearFanLowMedHighPoints(equipId, hayStack.site!!.id, equipDis, hayStack, profileConfiguration as HyperStatSplitCpuProfileConfiguration, equipModel)
             correctSensorBusTempPoints(profileConfiguration, hayStack)
-            addSensorBusPressureLogicalPoint(profileConfiguration, equipId, hayStack, equipModel)
+            mapSensorBusPressureLogicalPoint(profileConfiguration, equipId, hayStack, equipModel)
             setOutputTypes(profileConfiguration, hayStack)
 
             handleNonDefaultConditioningMode(profileConfiguration as HyperStatSplitCpuProfileConfiguration, hayStack)
@@ -361,29 +362,12 @@ class HyperstatSplitReconfigurationHandler {
 
         }
 
-        fun addSensorBusPressureLogicalPoint(config: HyperStatSplitProfileConfiguration, equipRef: String, hayStack: CCUHsApi, equipModel: SeventyFiveFProfileDirective) {
-            val equipBuilder = ProfileEquipBuilder(hayStack)
-            val equipDis = hayStack.siteName + "-cpuecon-" + config.nodeAddress
-            var sensorBusLogicalId : String? = null
-
+        fun mapSensorBusPressureLogicalPoint(config: HyperStatSplitProfileConfiguration, equipRef: String, hayStack: CCUHsApi, equipModel: SeventyFiveFProfileDirective) {
             if (config.sensorBusPressureEnable.enabled && config.pressureAddress0SensorAssociation.associationVal > 0) {
-                val sensorBusPressureLogicalPointDef = equipModel.points.find { it.domainName == DomainName.ductStaticPressureSensor1_2 }
-                sensorBusPressureLogicalPointDef?.run {
-                    sensorBusLogicalId = equipBuilder.createPoint(
-                        PointBuilderConfig(
-                            this,
-                            config,
-                            equipRef,
-                            hayStack.site!!.id,
-                            hayStack.timeZone,
-                            equipDis
-                        )
-                    )
-                }
-
-                val deviceMap = hayStack.readEntity("device and addr == \"" + config.nodeAddress + "\"")
-                if (!deviceMap.isNullOrEmpty()) {
-                    sensorBusLogicalId.let {
+                val hssEquip = HyperStatSplitEquip(equipRef)
+                if (hssEquip.ductStaticPressureSensor1_2.pointExists()) {
+                    hssEquip.ductStaticPressureSensor1_2.id.let {
+                        val deviceMap = hayStack.readEntity("device and addr == \"" + config.nodeAddress + "\"")
                         val pressureSensorPhysMap = hayStack.readEntity("point and domainName == \"" + DomainName.ductStaticPressureSensor + "\" and deviceRef == \"" + deviceMap["id"].toString() + "\"")
                         val pressureSensorPhysPoint = RawPoint.Builder().setHashMap(pressureSensorPhysMap).setEnabled(true).setPointRef(it).build()
                         hayStack.updatePoint(pressureSensorPhysPoint, pressureSensorPhysMap["id"].toString())

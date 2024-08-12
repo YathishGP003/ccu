@@ -377,7 +377,7 @@ class HyperStatSplitCpuViewModel : HyperStatSplitViewModel() {
 
             HyperstatSplitReconfigurationHandler.Companion.addLinearFanLowMedHighPoints(equipId, hayStack.site!!.id, equipDis, hayStack, profileConfiguration as HyperStatSplitCpuProfileConfiguration, equipModel)
             HyperstatSplitReconfigurationHandler.Companion.correctSensorBusTempPoints(profileConfiguration, hayStack)
-            HyperstatSplitReconfigurationHandler.Companion.addSensorBusPressureLogicalPoint(profileConfiguration, equipId, hayStack, equipModel)
+            HyperstatSplitReconfigurationHandler.Companion.mapSensorBusPressureLogicalPoint(profileConfiguration, equipId, hayStack, equipModel)
             HyperstatSplitReconfigurationHandler.Companion.setOutputTypes(profileConfiguration, hayStack)
             setScheduleType(profileConfiguration)
             HyperstatSplitReconfigurationHandler.Companion.handleNonDefaultConditioningMode(profileConfiguration as HyperStatSplitCpuProfileConfiguration, hayStack)
@@ -401,7 +401,7 @@ class HyperStatSplitCpuViewModel : HyperStatSplitViewModel() {
 
             HyperstatSplitReconfigurationHandler.Companion.addLinearFanLowMedHighPoints(equipId, hayStack.site!!.id, equipDis, hayStack, profileConfiguration as HyperStatSplitCpuProfileConfiguration, equipModel)
             HyperstatSplitReconfigurationHandler.Companion.correctSensorBusTempPoints(profileConfiguration, hayStack)
-            HyperstatSplitReconfigurationHandler.Companion.addSensorBusPressureLogicalPoint(profileConfiguration, equipId, hayStack, equipModel)
+            HyperstatSplitReconfigurationHandler.Companion.mapSensorBusPressureLogicalPoint(profileConfiguration, equipId, hayStack, equipModel)
             HyperstatSplitReconfigurationHandler.Companion.setOutputTypes(profileConfiguration, hayStack)
             setScheduleType(profileConfiguration)
             HyperstatSplitReconfigurationHandler.Companion.handleNonDefaultConditioningMode(profileConfiguration as HyperStatSplitCpuProfileConfiguration, hayStack)

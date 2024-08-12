@@ -671,7 +671,7 @@ public class DabSystemController extends SystemController
     }
     
     private double getEquipCo2(String equipRef) {
-        return CCUHsApi.getInstance().readHisValByQuery("point and air and co2 and sensor and current and equipRef == \"" +equipRef+"\""
+        return CCUHsApi.getInstance().readHisValByQuery("point and air and co2 and sensor and (current or space) and equipRef == \"" +equipRef+"\""
         );
     }
     

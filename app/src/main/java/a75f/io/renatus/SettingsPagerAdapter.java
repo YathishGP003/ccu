@@ -69,6 +69,11 @@ public class SettingsPagerAdapter extends FragmentStatePagerAdapter {
     @Override
     public void destroyItem(ViewGroup container, int position, Object object) {
         CcuLog.i("UI_PROFILING", "destroyItem: " + position + " " + object.toString());
+        int btnTab = RenatusLandingActivity.btnTabs.getSelectedTabPosition();
+        int tab = RenatusLandingActivity.mTabLayout.getSelectedTabPosition();
+        if(btnTab == 1 && tab == 0) { // This will run when we switch from FloorPlanFragment to zone fragment
+            FloorPlanFragment.getInstance().destroyActionBar();
+        }
         //super.destroyItem(container, position, object);
     }
 }

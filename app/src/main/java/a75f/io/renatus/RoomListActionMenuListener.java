@@ -28,7 +28,8 @@ class RoomListActionMenuListener implements MultiChoiceModeListener
 	 */
 	final private FloorPlanFragment floorPlanActivity;
 	private Menu            mMenu        = null;
-	private ArrayList<Zone> selectedRoom = new ArrayList<Zone>();
+	private ActionMode aMode = null ;
+	public ArrayList<Zone> selectedRoom = new ArrayList<Zone>();
 	private static final String INTENT_ZONE_DELETED = "a75f.io.renatus.ZONE_DELETED";
 	
 	/**
@@ -48,6 +49,7 @@ class RoomListActionMenuListener implements MultiChoiceModeListener
 		inflater.inflate(R.menu.action_menu, menu);
 		mMenu = menu;
 		selectedRoom.clear();
+		aMode = mode;
 		mode.setTitle("Select Rooms");
 		return true;
 	}
@@ -98,6 +100,7 @@ class RoomListActionMenuListener implements MultiChoiceModeListener
 		floorPlanActivity.mRoomListAdapter.setMultiSelectMode(false);
 		selectedRoom.clear();
 		mMenu = null;
+		aMode = null;
 	}
 	
 	
@@ -167,16 +170,21 @@ class RoomListActionMenuListener implements MultiChoiceModeListener
 		{
 			return;
 		}
-		if (checked)
+		if (checked && !isRoomSelected(roomData))
 		{
-			floorPlanActivity.mRoomListAdapter.addSelected(position);
 			selectedRoom.add(roomData);
+			floorPlanActivity.mRoomListAdapter.addSelected(position, new ArrayList<>(), selectedRoom);
 		}
 		else
 		{
-			floorPlanActivity.mRoomListAdapter.removeSelected(position);
-			selectedRoom.remove(roomData);
+			removeRoomSelected(roomData);
+			floorPlanActivity.mRoomListAdapter.removeSelected(position, new ArrayList<>(), selectedRoom);
 		}
+		if(selectedRoom.size() == 0)
+		{
+			mode.finish();
+		}
+		floorPlanActivity.mRoomListAdapter.notifyDataSetChanged();
 		final int checkedCount = selectedRoom.size();
 		switch (checkedCount)
 		{
@@ -194,5 +202,33 @@ class RoomListActionMenuListener implements MultiChoiceModeListener
 		}
 		//mMenu.findItem(R.id.restartSelection).setVisible(((checkedCount > 0) && (CCULicensing.getHandle().UseDevMode() *//*SystemSettingsData.getTier() == CCU_TIER.DEV*//*)));
 		floorPlanActivity.mRoomListAdapter.notifyDataSetChanged();
+	}
+
+	private Boolean isRoomSelected(Zone roomData)
+	{
+		if(selectedRoom.isEmpty()) {
+			return false;
+		}
+		for(Zone room : selectedRoom) {
+			if (room.getDisplayName().equals(roomData.getDisplayName())) {
+				return true;
+			}
+		}
+		return false;
+	}
+	private void removeRoomSelected(Zone roomData) {
+		//This method is used to remove the selected room from the selectedRoom list by index
+		// default remove method not working because of object structure changed
+		for(int i = 0; i < selectedRoom.size(); i++) {
+			if (selectedRoom.get(i).getDisplayName().equals(roomData.getDisplayName())) {
+				selectedRoom.remove(i);
+			}
+		}
+	}
+
+	public void destroyActionBar() {
+		if (aMode != null) {
+			aMode.finish();
+		}
 	}
 }

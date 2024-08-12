@@ -128,9 +128,12 @@ public class FloorPlanFragment extends Fragment {
     ArrayList<Zone> roomList = new ArrayList<>();
     private Zone roomToRename;
     private Floor floorToRename;
+    private static FloorPlanFragment instance;
     List<Floor> siteFloorList = new CopyOnWriteArrayList<>();
     List<String> siteRoomList = new CopyOnWriteArrayList<>();
     private FloorListActionMenuListener floorListActionMenuListener;
+    private RoomListActionMenuListener roomListActionMenuListener;
+    private ModuleListActionMenuListener moduleListActionMenuListener;
 
     private final BroadcastReceiver mPairingReceiver = new BroadcastReceiver() {
         @Override
@@ -187,6 +190,12 @@ public class FloorPlanFragment extends Fragment {
 
     public FloorPlanFragment() {
     }
+    public static FloorPlanFragment getInstance() {
+        if (instance == null) {
+           instance = new FloorPlanFragment();
+        }
+        return instance;
+    }
 
 
     public static FloorPlanFragment newInstance() {
@@ -210,6 +219,7 @@ public class FloorPlanFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.floorplan, container, false);
         ButterKnife.bind(this, rootView);
+        instance = this;
         return rootView;
     }
 
@@ -230,9 +240,11 @@ public class FloorPlanFragment extends Fragment {
         floorListActionMenuListener = new FloorListActionMenuListener(this);
         floorListView.setMultiChoiceModeListener(floorListActionMenuListener);
         roomListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
-        roomListView.setMultiChoiceModeListener(new RoomListActionMenuListener(this));
+        roomListActionMenuListener = new RoomListActionMenuListener(this);
+        roomListView.setMultiChoiceModeListener(roomListActionMenuListener);
         moduleListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
-        moduleListView.setMultiChoiceModeListener(new ModuleListActionMenuListener(this));
+        moduleListActionMenuListener = new ModuleListActionMenuListener(this);
+        moduleListView.setMultiChoiceModeListener(moduleListActionMenuListener);
     }
 
 
@@ -271,6 +283,11 @@ public class FloorPlanFragment extends Fragment {
         updateFloors();
         CcuLog.i("UI_PROFILING", "FloorPlanFragment.refreshScreen Done");
 
+    }
+    public void destroyActionBar() {
+            floorListActionMenuListener.destroyActionBar();
+            roomListActionMenuListener.destroyActionBar();
+            moduleListActionMenuListener.destroyActionBar();
     }
 
 
@@ -313,7 +330,7 @@ public class FloorPlanFragment extends Fragment {
     }
 
     private void updateRooms(ArrayList<Zone> zones) {
-        mRoomListAdapter = new DataArrayAdapter<>(this.getActivity(), R.layout.listviewitem, zones);
+        mRoomListAdapter = new DataArrayAdapter<>(this.getActivity(), R.layout.listviewitem, zones, new ArrayList<>(), roomListActionMenuListener.selectedRoom);
         roomListView.setAdapter(mRoomListAdapter);
         enableRoomBtn();
         if (mRoomListAdapter.getCount() > 0) {
@@ -434,7 +451,7 @@ public class FloorPlanFragment extends Fragment {
         CcuLog.d(L.TAG_CCU_UI, "Zone Selected " + zone.getDisplayName());
         List<Equip> zoneEquips = HSUtil.getEquipsWithoutSubEquips(zone.getId());
         if (zoneEquips != null && (!zoneEquips.isEmpty())) {
-            mModuleListAdapter = new DataArrayAdapter<>(FloorPlanFragment.this.getActivity(), R.layout.listviewitem, createAddressList(zoneEquips));
+            mModuleListAdapter = new DataArrayAdapter<>(FloorPlanFragment.this.getActivity(), R.layout.listviewitem, createAddressList(zoneEquips), moduleListActionMenuListener.seletedModules, new ArrayList<>());
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {

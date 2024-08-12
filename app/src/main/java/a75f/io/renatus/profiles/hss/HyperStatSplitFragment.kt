@@ -369,6 +369,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
             }
             Box(modifier = Modifier
                 .weight(3f)
+                .padding(start = 45.dp)
                 .align(Alignment.CenterVertically)) {
                 SearchSpinnerElement(
                     default = defaultSelection,
@@ -376,11 +377,12 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                     enabledItems = items,
                     unit = unit,
                     onSelect = { onSelect(it) },
-                    width = 470,
-                    expandedWidth = 470,
+                    width = 375,
+                    expandedWidth = 450,
                     isEnabled = isEnabled
                 )
             }
+            Box(modifier = Modifier.weight(1f))
         }
     }
 
@@ -1032,8 +1034,8 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                     enabledItems = items,
                     unit = unit,
                     onSelect = { onSelect(it) },
-                    width = 500,
-                    expandedWidth = 500,
+                    width = 375,
+                    expandedWidth = 490,
                     isEnabled = isEnabled
                 )
             }
@@ -1073,7 +1075,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                     Text(
                         fontSize = 20.sp,
                         fontFamily = ComposeUtil.myFontFamily,
-                        modifier = Modifier.width(if (expanded.value) (expandedWidth-50).dp else (width-50).dp),
+                        modifier = Modifier.width((width-50).dp),
                         fontWeight = FontWeight.Normal,
                         text = "${ selectedItem.value.dis?: selectedItem.value.dis } $unit",
                         overflow = TextOverflow.Ellipsis,
@@ -1153,7 +1155,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                         state = lazyListState,
                         modifier = Modifier
                             .height((customHeight).dp)
-                            .width(if (expanded.value) expandedWidth.dp else width.dp)
+                            .width(expandedWidth.dp)
                             .simpleVerticalScrollbar(lazyListState)
                     ) {
                         items(filteredItems) {

@@ -117,20 +117,20 @@ public class HyperSplitMsgReceiver {
         String equipRef = (String)device.get("equipRef");
 
         Pulse.mDeviceUpdate.put((short) nodeAddress, Calendar.getInstance().getTimeInMillis());
+        if(Globals.getInstance().isTemporaryOverrideMode()) {
+            Pulse.updateRssiPointIfAvailable(hayStack, device.get("id").toString(), regularUpdateMessage.getRegularUpdateCommon().getRssi(), regularUpdateMessage.getRegularUpdateCommon().getRssi(), nodeAddress);
+            return;
+        }
+        DeviceHSUtil.getEnabledSensorPointsWithRefForDevice(device, hayStack)
+                .forEach(point -> writePortInputsToHaystackDatabase(point, regularUpdateMessage, hayStack, equipRef));
+        // PM2.5 sensor is the only DYNAMIC_SENSOR point for HSS
+        if (regularUpdateMessage.getRegularUpdateCommon().getPm2P5() > 0.0) {
+            HashMap<Object, Object> pm25PhyPoint = hayStack.readEntity("point and domainName == \"" + DomainName.pm25Sensor + "\" and deviceRef == \"" + device.get("id").toString() + "\"");
+            RawPoint sp = new RawPoint.Builder().setHashMap(pm25PhyPoint).build();
 
-        if(!Globals.getInstance().isTemporaryOverrideMode()) {
-            DeviceHSUtil.getEnabledSensorPointsWithRefForDevice(device, hayStack)
-                    .forEach(point -> writePortInputsToHaystackDatabase(point, regularUpdateMessage, hayStack, equipRef));
-
-            // PM2.5 sensor is the only DYNAMIC_SENSOR point for HSS
-            if (regularUpdateMessage.getRegularUpdateCommon().getPm2P5() > 0.0) {
-                HashMap<Object, Object> pm25PhyPoint = hayStack.readEntity("point and domainName == \"" + DomainName.pm25Sensor + "\" and deviceRef == \"" + device.get("id").toString() + "\"");
-                RawPoint sp = new RawPoint.Builder().setHashMap(pm25PhyPoint).build();
-
-                if (sp.getPointRef() == null || sp.getPointRef().isEmpty()) {
-                    HyperStatSplitDevice stat = new HyperStatSplitDevice();
-                    sp = stat.addEquipSensorFromRawPoint(sp, Port.SENSOR_PM2P5, nodeAddress);
-                }
+            if (sp.getPointRef() == null || sp.getPointRef().isEmpty()) {
+                HyperStatSplitDevice stat = new HyperStatSplitDevice();
+                sp = stat.addEquipSensorFromRawPoint(sp, Port.SENSOR_PM2P5, nodeAddress);
             }
         }
 

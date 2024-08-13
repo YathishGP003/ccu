@@ -135,10 +135,10 @@ public class Pulse
 				mDeviceLowSignalCount.remove(nodeAddr);
 				mDeviceLowSignalAlert.put(nodeAddr,false);
 			}
-			if (Globals.getInstance().isTemporaryOverrideMode()) {
+			if(Globals.getInstance().isTemporaryOverrideMode()) {
+				updateRssiPointIfAvailable(hayStack, device.get("id").toString(), rssi, 1, nodeAddr);
 				return;
 			}
-
 			HashMap equipMap = hayStack.read("equip and id == " + device.get("equipRef"));
 			Equip equip = new Equip.Builder().setHashMap(equipMap).build();
 			boolean isDomainEquip = equipMap.containsKey("domainName") ? !equip.getDomainName().equals(null) : false;
@@ -279,7 +279,6 @@ public class Pulse
 						break;
 				}
 			}
-			
 			SmartNodeSensorReading_t[] sensorReadings = smartNodeRegularUpdateMessage_t.update.sensorReadings;
 			if (sensorReadings.length > 0) {
 				handleSensorEvents(sensorReadings, nodeAddr, deviceInfo, isDomainEquip);
@@ -999,7 +998,8 @@ public class Pulse
 				mDeviceLowSignalCount.remove(nodeAddr);
 				mDeviceLowSignalAlert.put(nodeAddr,false);
 			}
-			if (Globals.getInstance().isTemporaryOverrideMode()) {
+			if(Globals.getInstance().isTemporaryOverrideMode()) {
+				updateRssiPointIfAvailable(hayStack, deviceInfo.getId(), rssi, 1, nodeAddr);
 				return;
 			}
 			ArrayList<HashMap> phyPoints = hayStack.readAll("point and physical and sensor and deviceRef == \"" + deviceInfo.getId() + "\"");
@@ -1605,5 +1605,16 @@ public class Pulse
 			return DeviceUtil.getPortFromDomainName(physicalPoint.get("domainName").toString());
 		}
 		return Port.valueOf(physicalPoint.get("port").toString());
+	}
+
+	public static void updateRssiPointIfAvailable(CCUHsApi hayStack, String deviceRef, int rssi, int heartbeat, int nodeAddr) {
+		HashMap<Object, Object> rssiMap = hayStack.readEntity("point and physical and sensor and deviceRef== \""+ deviceRef + "\" and (port==\"RSSI\" or domainName==\"rssi\")");
+		if(!rssiMap.isEmpty() && rssiMap.get("pointRef")!=null && !rssiMap.get("pointRef").toString().isEmpty()) {
+			hayStack.writeHisValueByIdWithoutCOV(rssiMap.get("id").toString(), (double)rssi);
+			hayStack.writeHisValueByIdWithoutCOV(rssiMap.get("pointRef").toString(), (double)heartbeat);
+			if(currentTempInterface != null) {
+				currentTempInterface.refreshHeartBeatStatus(String.valueOf(nodeAddr));
+			}
+		}
 	}
 }

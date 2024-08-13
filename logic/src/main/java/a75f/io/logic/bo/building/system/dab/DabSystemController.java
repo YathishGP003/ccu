@@ -671,7 +671,7 @@ public class DabSystemController extends SystemController
     }
     
     private double getEquipCo2(String equipRef) {
-        return CCUHsApi.getInstance().readHisValByQuery("point and air and co2 and sensor and current and equipRef == \"" +equipRef+"\""
+        return CCUHsApi.getInstance().readHisValByQuery("point and air and co2 and sensor and (current or space) and equipRef == \"" +equipRef+"\""
         );
     }
     
@@ -682,7 +682,7 @@ public class DabSystemController extends SystemController
         
         for (HashMap<Object, Object> equip : allEquips)
         {
-            double humidityVal = CCUHsApi.getInstance().readHisValByQuery("point and air and humidity and sensor and current " +
+            double humidityVal = CCUHsApi.getInstance().readHisValByQuery("point and air and humidity and sensor and (current or space) " +
                                                                 "and equipRef == \""+ equip.get("id")+"\""
             );
             
@@ -739,7 +739,7 @@ public class DabSystemController extends SystemController
             if(equip.getMarkers().contains("dab") || equip.getMarkers().contains("dualDuct") ||
                     equip.getMarkers().contains("otn") || equip.getMarkers().contains("ti")) {
                 double tempVal = CCUHsApi.getInstance().readHisValByQuery(
-                        "point and air and temp and sensor and current and equipRef == \"" + equipMap.get("id") + "\""
+                        "point and air and temp and sensor and (current or space) and equipRef == \"" + equipMap.get("id") + "\""
                 );
                 hasTi = hasTi || equip.getMarkers().contains("ti") || equip.getMarkers().contains("otn");
                 if (!deadZones.contains(equip.getId()) && (tempVal > 0)) {

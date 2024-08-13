@@ -180,7 +180,10 @@ public class ZoneRecyclerBacnetParamAdapter extends RecyclerView.Adapter<ZoneRec
         if(BacNetConstants.ObjectType.valueOf(objectType).getValue() == 2){
             dataType = BacNetConstants.DataTypes.BACNET_DT_REAL.ordinal()+1;
             selectedValueAsPerType = selectedValue;
-        }else{
+        }else if(BacNetConstants.ObjectType.valueOf(objectType).getValue() == 5){
+            dataType = BacNetConstants.DataTypes.BACNET_DT_ENUM.ordinal()+1;
+            selectedValueAsPerType = selectedValue; //String.valueOf(Integer.parseInt(selectedValue)+1);
+        }else {
             dataType = BacNetConstants.DataTypes.BACNET_DT_UNSIGNED.ordinal()+1;
             selectedValueAsPerType = String.valueOf(Integer.parseInt(selectedValue)+1);
         }

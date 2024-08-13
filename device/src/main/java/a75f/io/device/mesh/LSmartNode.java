@@ -101,12 +101,12 @@ public class LSmartNode
         {
             double coolingDeadband =
                     CCUHsApi.getInstance().readPointPriorityValByQuery("cooling and deadband and schedulable and roomRef == \""+zone.getId()+"\"");
-            settings.maxUserTem.set(DeviceUtil.getMaxUserTempLimits(coolingDeadband));
+            settings.maxUserTem.set(DeviceUtil.getMaxUserTempLimits(coolingDeadband,zone.getId()));
     
             double heatingDeadband =
                     CCUHsApi.getInstance().readPointPriorityValByQuery("heating and deadband and schedulable and roomRef == \""+zone.getId()+"\"");
             
-            settings.minUserTemp.set(DeviceUtil.getMinUserTempLimits(heatingDeadband));
+            settings.minUserTemp.set(DeviceUtil.getMinUserTempLimits(heatingDeadband, zone.getId()));
         } catch (Exception e) {
             //Equips not having user temps are bound to throw exception
             settings.maxUserTem.set((short) 75);

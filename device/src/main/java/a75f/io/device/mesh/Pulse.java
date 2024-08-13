@@ -504,14 +504,13 @@ public class Pulse
 			hdb = occ.getHeatingDeadBand();
 		}
 
-		BuildingTunerCache buildingTuner = BuildingTunerCache.getInstance();
 		double coolingDeadband = CCUHsApi.getInstance().readPointPriorityValByQuery("zone and cooling and deadband and not multiplier and roomRef == \""+equip.getRoomRef()+"\"");
 		double heatingDeadband = CCUHsApi.getInstance().readPointPriorityValByQuery("zone and heating and deadband and not multiplier and roomRef == \""+equip.getRoomRef()+"\"");
 
 
 		 coolingDesiredTemp = DeviceUtil.getValidDesiredCoolingTemp(
-				dt,coolingDeadband,buildingTuner.getMaxCoolingUserLimit(),
-				buildingTuner.getMinCoolingUserLimit()
+				 dt,coolingDeadband,DeviceUtil.getMaxCoolingUserLimit(zoneId),
+				DeviceUtil.getMinCoolingUserLimit(zoneId)
 		);
 		HashMap<Object, Object> coolingDtPoint = CCUHsApi.getInstance().readEntity("point and air and temp and desired and cooling and sp and equipRef == \""+equip.getId()+"\"");
 		HashMap<Object, Object> heatingDtPoint = CCUHsApi.getInstance().readEntity("point and air and temp and desired and heating and sp and equipRef == \""+equip.getId()+"\"");
@@ -527,13 +526,13 @@ public class Pulse
 		}
 		else {
 			coolingDesiredTemp = DeviceUtil.getValidDesiredCoolingTemp(
-					dt, coolingDeadband, buildingTuner.getMaxCoolingUserLimit(),
-					buildingTuner.getMinCoolingUserLimit()
+					dt, coolingDeadband, DeviceUtil.getMaxCoolingUserLimit(zoneId),
+					DeviceUtil.getMinCoolingUserLimit(zoneId)
 			);
 
 			heatingDesiredTemp = DeviceUtil.getValidDesiredHeatingTemp(
-					dt, heatingDeadband, buildingTuner.getMaxHeatingUserLimit(),
-					buildingTuner.getMinHeatingUserLimit()
+					dt, heatingDeadband, DeviceUtil.getMaxHeatingUserLimit(zoneId),
+					DeviceUtil.getMinHeatingUserLimit(zoneId)
 			);
 			averageTemp = dt;
 		}
@@ -573,6 +572,7 @@ public class Pulse
     private static void updateSmartStatDesiredTemp(int node, Double dt, boolean sendAck) {
         HashMap equipMap = CCUHsApi.getInstance().read("equip and group == \""+node+"\"");
         Equip equip = new Equip.Builder().setHashMap(equipMap).build();
+		String zoneId = HSUtil.getZoneIdFromEquipId(equip.getId());
 		if( equip == null ) return;
 		double coolingDesiredTemp = 0;
 		double heatingDesiredTemp= 0;
@@ -591,13 +591,13 @@ public class Pulse
 			heatingDesiredTemp = dt;
 		}else {
 			coolingDesiredTemp = DeviceUtil.getValidDesiredCoolingTemp(
-					dt, coolingDeadband, buildingTuner.getMaxCoolingUserLimit(),
-					buildingTuner.getMinCoolingUserLimit()
+					dt, coolingDeadband, DeviceUtil.getMaxCoolingUserLimit(zoneId),
+					DeviceUtil.getMinCoolingUserLimit(zoneId)
 			);
 
 			heatingDesiredTemp = DeviceUtil.getValidDesiredHeatingTemp(
-					dt, heatingDeadband, buildingTuner.getMaxHeatingUserLimit(),
-					buildingTuner.getMinHeatingUserLimit()
+					dt, heatingDeadband, DeviceUtil.getMaxHeatingUserLimit(zoneId),
+					DeviceUtil.getMinHeatingUserLimit(zoneId)
 			);
 		}
 

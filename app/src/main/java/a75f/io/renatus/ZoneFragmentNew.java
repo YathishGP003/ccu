@@ -2550,14 +2550,17 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         for (BacnetPoint bacnetPoint : bacnetPoints){
             CcuLog.d(BACNET, "bacnet tags: " + bacnetPoint.getEquipTagNames());
             boolean isWritable = false;
+            String objectTypeFromProtocolData = bacnetPoint.getProtocolData().getBacnet().getObjectType();
             String objectType = BacNetConstants.ObjectType.OBJECT_ANALOG_VALUE.getKey();
             List<String> spinnerValues = new ArrayList<>();
             if(bacnetPoint.getEquipTagNames().contains("writable")){
                 isWritable = true;
                 PresentationData presentationData = bacnetPoint.getPresentationData();
                 ValueConstraint valueConstraint = bacnetPoint.getValueConstraint();
-                if(valueConstraint.getConstraintType().equalsIgnoreCase("MULTI_STATE")){
+                if(objectTypeFromProtocolData.equalsIgnoreCase("MultiStateValue")){
                     objectType = BacNetConstants.ObjectType.OBJECT_MULTI_STATE_VALUE.getKey();
+                }else if(objectTypeFromProtocolData.equalsIgnoreCase("BinaryValue")){
+                    objectType = BacNetConstants.ObjectType.OBJECT_BINARY_VALUE.getKey();
                 }else{
                     objectType = BacNetConstants.ObjectType.OBJECT_ANALOG_VALUE.getKey();
                 }

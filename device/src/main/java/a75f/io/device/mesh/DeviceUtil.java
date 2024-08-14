@@ -113,13 +113,13 @@ public class DeviceUtil {
         return 0;
     }
 
-    public static short getMaxUserTempLimits(double deadband){
-        double maxCool = BuildingTunerCache.getInstance().getMaxCoolingUserLimit();
+    public static short getMaxUserTempLimits(double deadband, String zoneId){
+        double maxCool = CCUHsApi.getInstance().readPointPriorityValByQuery("cooling and user and limit and max and roomRef == \""+zoneId+"\"");
         return (short)(maxCool- deadband);
     }
     
-    public static short getMinUserTempLimits(double deadband){
-        double maxHeat =  BuildingTunerCache.getInstance().getMinHeatingUserLimit();
+    public static short getMinUserTempLimits(double deadband, String zoneId){
+        double maxHeat = CCUHsApi.getInstance().readPointPriorityValByQuery("heating and user and limit and min and roomRef == \""+zoneId+"\"");
         return (short)(maxHeat+ deadband);
     }
     
@@ -409,6 +409,20 @@ public class DeviceUtil {
             default: return null;
         }
     }
+    public static double getMaxCoolingUserLimit(String zoneId){
+        return  CCUHsApi.getInstance().readPointPriorityValByQuery("cooling and user and limit and max and roomRef == \""+zoneId+"\"");
+    }
 
+    public static double getMinCoolingUserLimit(String zoneId){
+        return  CCUHsApi.getInstance().readPointPriorityValByQuery("cooling and user and limit and min and roomRef == \""+zoneId+"\"");
+    }
+
+    public static double getMaxHeatingUserLimit(String zoneId){
+        return  CCUHsApi.getInstance().readPointPriorityValByQuery("heating and user and limit and max and roomRef == \""+zoneId+"\"");
+    }
+
+    public static double getMinHeatingUserLimit(String zoneId){
+        return  CCUHsApi.getInstance().readPointPriorityValByQuery("heating and user and limit and min and roomRef == \""+zoneId+"\"");
+    }
 
 }

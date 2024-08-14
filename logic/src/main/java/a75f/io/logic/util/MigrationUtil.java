@@ -131,9 +131,14 @@ public class MigrationUtil {
             updateAllZoneSchedulesLocally(ccuHsApi);
             PreferenceUtil.setZonesLocallySynced();
         }
+
+        if (!PreferenceUtil.getHsUserIntentAndWritableMarkerPointsMigration()) {
+            migrateUserIntentMarker();
+            PreferenceUtil.setHsUserIntentAndWritableMarkerPointsMigration();
+        }
+
         boolean firmwarePointMigrationState = initFirmwareVersionPointMigration();
         removeWritableTagForFloor();
-        migrateUserIntentMarker();
         migrateTIProfileEnum(CCUHsApi.getInstance());
         migrateSenseToMonitoring(ccuHsApi);
         if (!PreferenceUtil.getModulatingFanSpeedMigrationStatus()) {
@@ -143,11 +148,6 @@ public class MigrationUtil {
         if (!PreferenceUtil.getVavReheatRelayActivationHysteresisValueMigration()) {
             setVavReheatRelayActivationHysteresisDefaultValues(ccuHsApi);
             PreferenceUtil.setVavReheatRelayActivationHysteresisValueMigration();
-        }
-
-        if (!PreferenceUtil.getHssOpModeWritableMarkerMigration()) {
-            removeHyperStatSplitOperatingModeWritableMarker(ccuHsApi);
-            PreferenceUtil.setHssOpModeWritableMarkerMigration();
         }
 
         if (!PreferenceUtil.getHyperStatThermistorConfigMigration()) {
@@ -667,6 +667,10 @@ public class MigrationUtil {
                         "conditioning and mode", Objects.requireNonNull(objectObjectHashMap.get(Tags.ID)).toString());
                 HashMap<Object, Object> operatingMode = CCUHsApi.getInstance()
                         .readEntity("operating and mode and writable and equipRef== \"" + objectObjectHashMap.get("id") + "\"");
+                HashMap<Object, Object> zoneOccupancy = CCUHsApi.getInstance()
+                        .readEntity("zone and occupancy and not auto and not sensor and writable and equipRef== \"" + objectObjectHashMap.get("id") + "\"");
+                HashMap<Object, Object> autoAwayOccupancyDetection = CCUHsApi.getInstance()
+                        .readEntity("auto and away and occupancy and writable and equipRef== \"" + objectObjectHashMap.get("id") + "\"");
 
                 if (!fanMode.isEmpty() && !fanMode.containsKey("userIntent")) {
                     MigratePointsUtil.Companion.updateMarkers(
@@ -689,20 +693,19 @@ public class MigrationUtil {
                             new String[]{"writable"},
                             null);
                 }
-            }
-        });
-    }
-
-    private static void removeHyperStatSplitOperatingModeWritableMarker(CCUHsApi hayStack) {
-         // Right now, there's not a good way to differentiate HSS and HS op mode via tags. That makes the queries a bit more complicated than usual.
-        ArrayList<HashMap<Object, Object>> hssEquips = hayStack.readAllEntities("equip and hyperstatsplit");
-        hssEquips.forEach(equip -> {
-            if (equip.containsKey("id") && equip.get("id") != null) {
-                HashMap<Object, Object> opModeMap = hayStack.readEntity("operating and mode and writable and equipRef == \"" + equip.get("id") + "\"");
-                if (!(opModeMap == null || opModeMap.isEmpty())) {
-                    opModeMap.remove("writable");
-                    Point opModePoint = new Point.Builder().setHashMap(opModeMap).build();
-                    hayStack.updatePoint(opModePoint, opModeMap.get("id").toString());
+                if (!zoneOccupancy.isEmpty()) {
+                    MigratePointsUtil.Companion.updateMarkers(
+                            zoneOccupancy,
+                            new String[]{},
+                            new String[]{"writable"},
+                            null);
+                }
+                if (!autoAwayOccupancyDetection.isEmpty()) {
+                    MigratePointsUtil.Companion.updateMarkers(
+                            autoAwayOccupancyDetection,
+                            new String[]{},
+                            new String[]{"writable"},
+                            null);
                 }
             }
         });

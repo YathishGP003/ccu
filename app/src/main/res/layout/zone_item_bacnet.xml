@@ -25,7 +25,7 @@
             android:gravity="center_vertical"
             android:textColor="@color/dark_gray"
             android:textSize="22sp"
-            android:maxLines="1"
+            android:maxLines="2"
             tools:text="Line Voltage 1 2 3 4 5 6 7 8 9 10 11 12
 13 14 15 17 18 19 20 21 22 23 24 25 26 27 " />
 
@@ -52,7 +52,7 @@
             android:layout_gravity="center_vertical"
             android:layout_marginStart="5dp"
             android:layout_marginEnd="5dp"
-            android:gravity="start"
+            android:gravity="start|top"
             android:textColor="@color/outer_temp_text_darker_gray"
             android:textSize="22sp"
             tools:text="120"
@@ -64,7 +64,7 @@
             style="@style/customSpinnerDownArrow"
             android:layout_width="0dp"
             android:layout_height="40dp"
-            android:layout_gravity="center_vertical"
+            android:layout_gravity="top"
             android:layout_marginStart="5dp"
             android:layout_marginEnd="5dp"
             android:gravity="center_vertical"

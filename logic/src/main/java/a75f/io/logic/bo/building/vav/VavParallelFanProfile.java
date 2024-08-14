@@ -254,6 +254,8 @@ public class VavParallelFanProfile extends VavProfile
     }
     
     private void updateZoneDead() {
+        CcuLog.d(L.TAG_CCU_ZONE,"Zone Temp Dead "+nodeAddr+" roomTemp : "+vavEquip.getCurrentTemp().readHisVal());
+        state = TEMPDEAD;
         if (vavEquip.getEquipStatus().readHisVal() != state.ordinal()) {
 
             double damperMin = (int) (state == HEATING ? vavEquip.getMinHeatingDamperPos().readPriorityVal()

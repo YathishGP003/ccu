@@ -45,7 +45,7 @@ public class PreferenceUtil {
     public static final String SINGLE_DUAL_MIGRATION = "singleDualMigration";
 
     public static final String VAV_REHEAT_RELAY_ACTIVATION_HYSTERESIS_VALUE_MIGRATION = "vavReheatRelayActivationHysteresisValueMigration";
-    public static final String HSS_OP_MODE_WRITABLE_MARKER_MIGRATION = "hssOpModeWritableMarkerMigration";
+    public static final String HS_USER_INTENT_AND_WRITABLE_MARKER_POINTS_MIGRATION = "hsUserIntentAndWritableMarkerPointMigration";
     public static final String HS_TH_CONFIG_MIGRATION = "hsThConfigMigration";
     public static final String HS_MONITORING_GENERIC_FAULT_ENUM_MIGRATION = "hsMonitoringGenericFaultEnumMigration";
 
@@ -430,12 +430,12 @@ public class PreferenceUtil {
         setBooleanPreference(VAV_REHEAT_RELAY_ACTIVATION_HYSTERESIS_VALUE_MIGRATION, true);
     }
 
-    public static boolean getHssOpModeWritableMarkerMigration() {
-        return getBooleanPreference(HSS_OP_MODE_WRITABLE_MARKER_MIGRATION);
+    public static boolean getHsUserIntentAndWritableMarkerPointsMigration() {
+        return getBooleanPreference(HS_USER_INTENT_AND_WRITABLE_MARKER_POINTS_MIGRATION);
     }
 
-    public static void setHssOpModeWritableMarkerMigration() {
-        setBooleanPreference(HSS_OP_MODE_WRITABLE_MARKER_MIGRATION, true);
+    public static void setHsUserIntentAndWritableMarkerPointsMigration() {
+        setBooleanPreference(HS_USER_INTENT_AND_WRITABLE_MARKER_POINTS_MIGRATION, true);
     }
 
 

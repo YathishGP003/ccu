@@ -409,7 +409,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             ).getActiveConfiguration()
 
             equipBuilder.doCutOverMigration(it["id"].toString(), model,
-                                    equipDis, VavZoneProfileCutOverMapping.entries, profileConfiguration)
+                                    equipDis, VavZoneProfileCutOverMapping.entries, profileConfiguration, equipHashMap = it)
 
             val vavEquip = VavEquip(it["id"].toString())
 
@@ -478,7 +478,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             ).getActiveConfiguration()
 
             equipBuilder.doCutOverMigration(it["id"].toString(), model,
-                equipDis, DabZoneProfileCutOverMapping.entries, profileConfiguration)
+                equipDis, DabZoneProfileCutOverMapping.entries, profileConfiguration, equipHashMap = it)
 
             val dabEquip = DabEquip(it["id"].toString())
 
@@ -673,7 +673,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             ).getActiveConfiguration()
 
             equipBuilder.doCutOverMigration(it["id"].toString(), model,
-                equipDis, HyperStatSplitCpuCutOverMapping.entries, profileConfiguration)
+                equipDis, HyperStatSplitCpuCutOverMapping.entries, profileConfiguration, equipHashMap = it)
 
             val hssEquip = HyperStatSplitEquip(it["id"].toString())
 

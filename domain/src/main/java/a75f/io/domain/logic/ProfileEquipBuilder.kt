@@ -337,10 +337,31 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
         CcuLog.i(Domain.LOG_TAG," Updated Equip point ${pointConfig.modelDef.domainName}")
     }
 
-    private fun updateEquip(equipRef: String, modelDef: SeventyFiveFProfileDirective, equipDis: String, isSystem: Boolean, siteRef: String, profileConfiguration: ProfileConfiguration) {
-        val equip = buildEquip(EquipBuilderConfig(modelDef, profileConfiguration, siteRef, hayStack.timeZone))
+    private fun updateEquip(
+        equipRef: String,
+        modelDef: SeventyFiveFProfileDirective,
+        equipDis: String,
+        isSystem: Boolean,
+        siteRef: String,
+        profileConfiguration: ProfileConfiguration,
+        equipHashMap : HashMap<Any, Any>
+    ) {
+        val equip = buildEquip(
+            EquipBuilderConfig(
+                modelDef,
+                profileConfiguration,
+                siteRef,
+                hayStack.timeZone
+            )
+        )
+        if(equipHashMap.containsKey("ahuRef")){
+            equip.ahuRef = equipHashMap["ahuRef"].toString()
+        }
+        if(equipHashMap.containsKey("gatewayRef")){
+            equip.gatewayRef = equipHashMap["gatewayRef"].toString()
+        }
         equip.displayName = equipDis
-        if(isSystem) {
+        if (isSystem) {
             equip.group = "99"
         }
         hayStack.updateEquip(equip, equipRef)
@@ -348,7 +369,7 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
     }
     fun doCutOverMigration(equipRef: String, modelDef : SeventyFiveFProfileDirective, equipDis : String,
                            mapping : Map<String, String>, profileConfiguration: ProfileConfiguration,
-    isSystem: Boolean = false) {
+    isSystem: Boolean = false, equipHashMap: HashMap<Any, Any> = HashMap()) {
         CcuLog.i(Domain.LOG_TAG, "doCutOverMigration for $equipDis")
         var equipPoints =
             hayStack.readAllEntities("point and equipRef == \"$equipRef\"")
@@ -404,8 +425,8 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
             Domain.LOG_TAG, "CutOver migration for ${modelDef.domainName} Total points DB: ${equipPoints.size} " +
                     " Model: ${modelDef.points.size} Map: ${mapping.size} ")
         CcuLog.i(Domain.LOG_TAG, " Deleted $delete Updated $update added $add pass $pass")
-
-        updateEquip(equipRef, modelDef, equipDis, isSystem, site!!.id, profileConfiguration)
+        CcuLog.i(Domain.LOG_TAG, "equipHashMap: $equipHashMap")
+        updateEquip(equipRef, modelDef, equipDis, isSystem, site!!.id, profileConfiguration, equipHashMap)
         CcuLog.i(Domain.LOG_TAG, " Cut-Over migration completed for Equip ${modelDef.domainName}")
     }
 

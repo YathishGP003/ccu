@@ -1204,7 +1204,8 @@
     <string name="text_rightArrow">f061</string>
 
     <!--Modbus Option-->
-    <string name="title_external">MB</string>
+    <string name="title_external">External Equipment</string>
+    <string name="sub_title_modbus">MODBUS/BACnet</string>
     <string name="title_modbus">Modbus</string>
     <!--<string name="title_modbus_energy_proportional_distribution">Energy Proportional Distribution</string>-->
     <string name="title_equipment_type">Equipment Type</string>
@@ -1347,11 +1348,13 @@
 
     <string name="usb_permission_priv_app_msg">USB Permission not granted, Renatus App may need to be reinstalled with System Privileges</string>
     <!-- Modbus Module type screen-->
-    <string name="label_modbusselectdevicetype">Modbus | Select Module Type</string>
+    <string name="label_modbusselectdevicetype">Modbus/BACNET | Select Module Type</string>
     <string name="title_modbusequipment">Modbus Equipment</string>
     <string name="description_modbusequipment">Hook up a Modbus equipment to monitor electricity consumption.</string>
     <string name="title_modbusenergymeter">Modbus Energy Meter</string>
     <string name="description_modbusenergymeter">Hook up a Modbus energy meter to monitor electricity consumption.</string>
+    <string name="title_bacnet_equipment">BACnet Equipment</string>
+    <string name="description_bacnet_equipment">Hook up a BACnet server to monitor the values</string>
 
     <string name="label_modbus_energy_meter">MODBUS ENERGY METER</string>
     <string name="title_modbus_energy_proportional_distribution">Energy Proportional Distribution</string>
@@ -1745,5 +1748,16 @@
         <item>info</item>
         <item>warn</item>
         <item>error</item>
+    </string-array>
+
+    <string-array name="reboot_days">
+        <item>Any</item>
+        <item>Sunday</item>
+        <item>Monday</item>
+        <item>Tuesday</item>
+        <item>Wednesday</item>
+        <item>Thursday</item>
+        <item>Friday</item>
+        <item>Saturday</item>
     </string-array>
     </resources>

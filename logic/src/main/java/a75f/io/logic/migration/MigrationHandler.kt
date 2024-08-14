@@ -2,31 +2,41 @@ package a75f.io.logic.migration
 
 import a75f.io.api.haystack.*
 import a75f.io.api.haystack.CCUHsApi
+import a75f.io.api.haystack.CCUTagsDb.TAG_CCU_DOMAIN
 import a75f.io.api.haystack.HayStackConstants
 import a75f.io.api.haystack.Point
 import a75f.io.api.haystack.Site
 import a75f.io.api.haystack.Tags
 import a75f.io.api.haystack.sync.HttpUtil
+import a75f.io.domain.HyperStatSplitEquip
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.Domain.writeValAtLevelByDomain
 import a75f.io.domain.api.DomainName
+import a75f.io.domain.cutover.HyperStatSplitCpuCutOverMapping
+import a75f.io.domain.cutover.HyperStatSplitDeviceCutoverMapping
 import a75f.io.domain.cutover.NodeDeviceCutOverMapping
 import a75f.io.domain.cutover.VavFullyModulatingRtuCutOverMapping
 import a75f.io.domain.cutover.VavStagedRtuCutOverMapping
 import a75f.io.domain.cutover.VavStagedVfdRtuCutOverMapping
 import a75f.io.domain.cutover.VavZoneProfileCutOverMapping
+import a75f.io.domain.cutover.*
+import a75f.io.domain.equips.DabEquip
 import a75f.io.domain.equips.VavEquip
 import a75f.io.domain.logic.DeviceBuilder
 import a75f.io.domain.logic.DomainManager.addCmBoardDevice
 import a75f.io.domain.logic.DomainManager.addSystemDomainEquip
 import a75f.io.domain.logic.EntityMapper
+import a75f.io.domain.logic.PointBuilderConfig
 import a75f.io.domain.logic.ProfileEquipBuilder
 import a75f.io.domain.util.*
 import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.NodeType
+import a75f.io.logic.bo.building.dab.DabProfileConfiguration
 import a75f.io.logic.bo.building.definitions.ProfileType
+import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.CpuUniInType
+import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuProfileConfiguration
 import a75f.io.logic.bo.building.schedules.Occupancy
 import a75f.io.logic.bo.building.schedules.occupancy.DemandResponse
 import a75f.io.logic.bo.building.system.vav.config.ModulatingRtuProfileConfig
@@ -44,6 +54,7 @@ import a75f.io.logic.util.PreferenceUtil
 import a75f.io.logic.util.createOfflineModePoint
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
+import io.seventyfivef.domainmodeler.client.ModelPointDef
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import org.projecthaystack.HDict
@@ -83,7 +94,9 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
 
     override fun doMigration() {
         doVavTerminalDomainModelMigration()
+        doDabTerminalDomainModelMigration()
         doVavSystemDomainModelMigration()
+        doHyperStatSplitCpuDomainModelMigration()
         createMigrationVersionPoint(CCUHsApi.getInstance())
         addSystemDomainEquip(CCUHsApi.getInstance())
         addCmBoardDevice(hayStack)
@@ -135,8 +148,10 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
     private fun removeHisTagsFromNonDMDevices() {
         hayStack.readAllEntities("device and his").forEach { nonDMDeviceMap ->
             nonDMDeviceMap.remove("his")
-            val nonDMDevice = Device.Builder().setHashMap(nonDMDeviceMap).removeMarker("his").build()
-            hayStack.updateDevice(nonDMDevice, nonDMDevice.id)
+            nonDMDeviceMap["id"]?.let {
+                val nonDMDevice = Device.Builder().setHDict(hayStack.readHDictById(it.toString())).removeMarker("his").build()
+                hayStack.updateDevice(nonDMDevice, nonDMDevice.id)
+            }
         }
     }
 
@@ -398,7 +413,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             ).getActiveConfiguration()
 
             equipBuilder.doCutOverMigration(it["id"].toString(), model,
-                                    equipDis, VavZoneProfileCutOverMapping.entries, profileConfiguration)
+                                    equipDis, VavZoneProfileCutOverMapping.entries, profileConfiguration, equipHashMap = it)
 
             val vavEquip = VavEquip(it["id"].toString())
 
@@ -414,6 +429,79 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             // This is a problem because demandResponseSetback is supposed to get its value from a newly-added BuildingTuner point, which isn't available yet.
             // Setting the fallback value manually for now.
             vavEquip.demandResponseSetback.writeVal(17, 2.0)
+
+            deviceBuilder.doCutOverMigration(
+                device["id"].toString(),
+                deviceModel,
+                deviceDis,
+                NodeDeviceCutOverMapping.entries,
+                profileConfiguration
+            )
+        }
+    }
+
+    private fun doDabTerminalDomainModelMigration() {
+        val dabEquips = hayStack.readAllEntities("equip and zone and dab and not dualDuct")
+            .filter { it["domainName"] == null }
+            .toList()
+        if (dabEquips.isEmpty()) {
+            CcuLog.i(Domain.LOG_TAG, "DAB DM zone equip migration is complete")
+            return
+        }
+        val equipBuilder = ProfileEquipBuilder(hayStack)
+        val site = hayStack.site
+        dabEquips.forEach {
+            CcuLog.i(Domain.LOG_TAG, "Do DM zone equip migration for $it")
+            val reheatType = hayStack.readEntity("config and reheat and type and equipRef == \"${it["id"]}\"")
+            if (reheatType.isNotEmpty()) {
+                val reheatTypeVal = hayStack.readDefaultValById(reheatType["id"].toString())
+                CcuLog.i(Domain.LOG_TAG, "Update reheatType for $it - current $reheatTypeVal")
+                hayStack.writeDefaultValById(reheatType["id"].toString(), reheatTypeVal )
+            }
+            val model = when {
+                it.containsKey("dab") && it.containsKey("smartnode") -> ModelLoader.getSmartNodeDabModel()
+                else -> ModelLoader.getHelioNodeDabModel()
+            }
+            val equipDis = "${site?.displayName}-DAB-${it["group"]}"
+
+            val isHelioNode = it.containsKey("helionode")
+            val deviceModel = if (isHelioNode) ModelLoader.getHelioNodeDevice() as SeventyFiveFDeviceDirective else ModelLoader.getSmartNodeDevice() as SeventyFiveFDeviceDirective
+            val deviceDis = if (isHelioNode) "${site?.displayName}-HN-${it["group"]}" else "${site?.displayName}-SN-${it["group"]}"
+            val deviceBuilder = DeviceBuilder(hayStack, EntityMapper(model as SeventyFiveFProfileDirective))
+            val device = hayStack.readEntity("device and addr == \"" + it["group"] + "\"")
+            val profileType = ProfileType.DAB
+
+            val profileConfiguration = DabProfileConfiguration(
+                Integer.parseInt(it["group"].toString()),
+                if (isHelioNode) NodeType.HELIO_NODE.name else NodeType.SMART_NODE.name,
+                0,
+                it["roomRef"].toString(),
+                it["floorRef"].toString(),
+                profileType,
+                model
+            ).getActiveConfiguration()
+
+            equipBuilder.doCutOverMigration(it["id"].toString(), model,
+                equipDis, DabZoneProfileCutOverMapping.entries, profileConfiguration, equipHashMap = it)
+
+            val dabEquip = DabEquip(it["id"].toString())
+
+            // damperSize point changed from a literal to an enum
+            val newDamper1Size = getDamperSizeEnum(dabEquip.damper1Size.readDefaultVal())
+            dabEquip.damper1Size.writeDefaultVal(newDamper1Size)
+
+            // damperSize point changed from a literal to an enum
+            val newDamper2Size = getDamperSizeEnum(dabEquip.damper2Size.readDefaultVal())
+            dabEquip.damper2Size.writeDefaultVal(newDamper2Size)
+
+            // temperature offset is now a literal (was multiplied by 10 before)
+            val newTempOffset = String.format("%.1f", dabEquip.temperatureOffset.readDefaultVal() * 0.1).toDouble()
+            dabEquip.temperatureOffset.writeDefaultVal(newTempOffset)
+
+            // At app startup, cutOver migrations currently run before upgrades.
+            // This is a problem because demandResponseSetback is supposed to get its value from a newly-added BuildingTuner point, which isn't available yet.
+            // Setting the fallback value manually for now.
+            dabEquip.demandResponseSetback.writeVal(17, 2.0)
 
             deviceBuilder.doCutOverMigration(
                 device["id"].toString(),
@@ -558,6 +646,201 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         )
     }
 
+    private fun doHyperStatSplitCpuDomainModelMigration() {
+        val hssEquips = hayStack.readAllEntities("equip and hyperstatsplit and cpu")
+            .filter { it["domainName"] == null }
+            .toList()
+        if (hssEquips.isEmpty()) {
+            CcuLog.i(Domain.LOG_TAG, "HyperStat Split CPU DM equip migration is complete")
+            return
+        }
+        val equipBuilder = ProfileEquipBuilder(hayStack)
+        val site = hayStack.site
+        hssEquips.forEach {
+            CcuLog.i(Domain.LOG_TAG, "Do DM zone equip migration for $it")
+
+            val model = ModelLoader.getHyperStatSplitCpuModel()
+            val equipDis = "${site?.displayName}-cpuecon-${it["group"]}"
+            val deviceModel = ModelLoader.getHyperStatSplitDeviceModel() as SeventyFiveFDeviceDirective
+            val deviceDis = "${site?.displayName}-HSS-${it["group"]}"
+            val deviceBuilder = DeviceBuilder(hayStack, EntityMapper(model as SeventyFiveFProfileDirective))
+            val device = hayStack.readEntity("device and addr == \"" + it["group"] + "\"")
+
+            val profileConfiguration = HyperStatSplitCpuProfileConfiguration(
+                Integer.parseInt(it["group"].toString()),
+                NodeType.HYPERSTATSPLIT.name,
+                0,
+                it["roomRef"].toString(),
+                it["floorRef"].toString(),
+                ProfileType.HYPERSTATSPLIT_CPU,
+                model
+            ).getActiveConfiguration()
+
+            equipBuilder.doCutOverMigration(it["id"].toString(), model,
+                equipDis, HyperStatSplitCpuCutOverMapping.entries, profileConfiguration, equipHashMap = it)
+
+            val hssEquip = HyperStatSplitEquip(it["id"].toString())
+
+            hssEquip.temperatureOffset.writeDefaultVal(0.1 * hssEquip.temperatureOffset.readDefaultVal())
+
+            if (hssEquip.oaoDamper.pointExists()) {
+                hssEquip.enableOutsideAirOptimization.writeDefaultVal(1.0)
+            }
+
+            if (hssEquip.universalIn1Association.pointExists()) {
+                hssEquip.universalIn1Association.writeDefaultVal(migrateUniversalInValue(hssEquip.universalIn1Association.readDefaultVal().toInt()))
+            }
+
+            if (hssEquip.universalIn2Association.pointExists()) {
+                hssEquip.universalIn2Association.writeDefaultVal(migrateUniversalInValue(hssEquip.universalIn2Association.readDefaultVal().toInt()))
+            }
+
+            if (hssEquip.universalIn3Association.pointExists()) {
+                hssEquip.universalIn3Association.writeDefaultVal(migrateUniversalInValue(hssEquip.universalIn3Association.readDefaultVal().toInt()))
+            }
+
+            if (hssEquip.universalIn4Association.pointExists()) {
+                hssEquip.universalIn4Association.writeDefaultVal(migrateUniversalInValue(hssEquip.universalIn4Association.readDefaultVal().toInt()))
+            }
+
+            if (hssEquip.universalIn5Association.pointExists()) {
+                hssEquip.universalIn5Association.writeDefaultVal(migrateUniversalInValue(hssEquip.universalIn5Association.readDefaultVal().toInt()))
+            }
+
+            if (hssEquip.universalIn6Association.pointExists()) {
+                hssEquip.universalIn6Association.writeDefaultVal(migrateUniversalInValue(hssEquip.universalIn6Association.readDefaultVal().toInt()))
+            }
+
+            if (hssEquip.universalIn7Association.pointExists()) {
+                hssEquip.universalIn7Association.writeDefaultVal(migrateUniversalInValue(hssEquip.universalIn7Association.readDefaultVal().toInt()))
+            }
+
+            if (hssEquip.universalIn8Association.pointExists()) {
+                hssEquip.universalIn8Association.writeDefaultVal(migrateUniversalInValue(hssEquip.universalIn8Association.readDefaultVal().toInt()))
+            }
+
+            if (hssEquip.standalonePrePurgeOccupiedTimeOffsetTuner.pointExists()) {
+                val prePurgeOffsetMap = hayStack.readMapById(hssEquip.standalonePrePurgeOccupiedTimeOffsetTuner.id)
+                val prePurgeOffsetPoint = Point.Builder().setHashMap(prePurgeOffsetMap).addMarker("tuner").build()
+                hayStack.updatePoint(prePurgeOffsetPoint, prePurgeOffsetPoint.id)
+            }
+
+            if (hssEquip.standalonePrePurgeFanSpeedTuner.pointExists()) {
+                val prePurgeFanSpeedMap = hayStack.readMapById(hssEquip.standalonePrePurgeFanSpeedTuner.id)
+                val prePurgeFanSpeedPoint = Point.Builder().setHashMap(prePurgeFanSpeedMap).addMarker("tuner").build()
+                hayStack.updatePoint(prePurgeFanSpeedPoint, prePurgeFanSpeedPoint.id)
+            }
+
+            if (hssEquip.prePurgeEnable.readPriorityVal() > 0.0 && !hssEquip.prePurgeStatus.pointExists()) {
+                val prePurgeStatus = model.points.find { it.domainName == DomainName.prePurgeStatus }
+                prePurgeStatus.run {
+                    equipBuilder.createPoint(
+                        PointBuilderConfig(
+                            this as ModelPointDef,
+                            profileConfiguration,
+                            hssEquip.getId(),
+                            site?.id ?: "",
+                            hayStack.timeZone,
+                            equipDis
+                        )
+                    )
+                }
+            }
+
+            if (hssEquip.temperatureSensorBusAdd0.pointExists()) {
+                val humiditySensorBusAdd0Def = model.points.find { it.domainName == DomainName.humiditySensorBusAdd0 }
+                humiditySensorBusAdd0Def.run {
+                    val humiditySensorBusAdd0Id = equipBuilder.createPoint(
+                        PointBuilderConfig(
+                            this as ModelPointDef,
+                            profileConfiguration,
+                            hssEquip.getId(),
+                            site?.id ?: "",
+                            hayStack.timeZone,
+                            equipDis
+                        )
+                    )
+                }
+                hssEquip.humiditySensorBusAdd0.writeDefaultVal(hssEquip.temperatureSensorBusAdd0.readDefaultVal())
+            }
+
+            if (hssEquip.temperatureSensorBusAdd1.pointExists()) {
+                val humiditySensorBusAdd1Def = model.points.find { it.domainName == DomainName.humiditySensorBusAdd1 }
+                humiditySensorBusAdd1Def.run {
+                    val humiditySensorBusAdd1Id = equipBuilder.createPoint(
+                        PointBuilderConfig(
+                            this as ModelPointDef,
+                            profileConfiguration,
+                            hssEquip.getId(),
+                            site?.id ?: "",
+                            hayStack.timeZone,
+                            equipDis
+                        )
+                    )
+                }
+                hssEquip.humiditySensorBusAdd1.writeDefaultVal(hssEquip.temperatureSensorBusAdd1.readDefaultVal())
+            }
+
+            if (hssEquip.temperatureSensorBusAdd2.pointExists()) {
+                val humiditySensorBusAdd2Def = model.points.find { it.domainName == DomainName.humiditySensorBusAdd2 }
+                humiditySensorBusAdd2Def.run {
+                    val humiditySensorBusAdd2Id = equipBuilder.createPoint(
+                        PointBuilderConfig(
+                            this as ModelPointDef,
+                            profileConfiguration,
+                            hssEquip.getId(),
+                            site?.id ?: "",
+                            hayStack.timeZone,
+                            equipDis
+                        )
+                    )
+                }
+                hssEquip.humiditySensorBusAdd2.writeDefaultVal(hssEquip.temperatureSensorBusAdd2.readDefaultVal())
+            }
+
+            // Sensor Bus Pressure now has a "None" option at index 0.
+            // So, if this point exists, its association should be 1.
+            if (hssEquip.sensorBusPressureEnable.readDefaultVal() > 0.0) {
+                hssEquip.pressureSensorBusAdd0.writeDefaultVal(1.0)
+            }
+
+            deviceBuilder.doCutOverMigration(
+                device.get("id").toString(),
+                deviceModel,
+                deviceDis,
+                HyperStatSplitDeviceCutoverMapping.entries,
+                profileConfiguration
+            )
+
+            Globals.getInstance().copyModels()
+        }
+    }
+
+    private fun migrateUniversalInValue(value: Int): Double {
+        return when (value) {
+            0 -> CpuUniInType.CURRENT_TX_10.ordinal.toDouble()
+            1 -> CpuUniInType.CURRENT_TX_20.ordinal.toDouble()
+            2 -> CpuUniInType.CURRENT_TX_50.ordinal.toDouble()
+            3 -> CpuUniInType.CURRENT_TX_100.ordinal.toDouble()
+            4 -> CpuUniInType.CURRENT_TX_150.ordinal.toDouble()
+            5 -> CpuUniInType.SUPPLY_AIR_TEMPERATURE.ordinal.toDouble()
+            6 -> CpuUniInType.MIXED_AIR_TEMPERATURE.ordinal.toDouble()
+            7 -> CpuUniInType.OUTSIDE_AIR_TEMPERATURE.ordinal.toDouble()
+            8 -> CpuUniInType.FILTER_STATUS_NC.ordinal.toDouble()
+            9 -> CpuUniInType.FILTER_STATUS_NO.ordinal.toDouble()
+            10 -> CpuUniInType.CONDENSATE_STATUS_NC.ordinal.toDouble()
+            11 -> CpuUniInType.CONDENSATE_STATUS_NO.ordinal.toDouble()
+            12 -> CpuUniInType.DUCT_STATIC_PRESSURE1_1.ordinal.toDouble()
+            13 -> CpuUniInType.DUCT_STATIC_PRESSURE1_2.ordinal.toDouble()
+            14 -> CpuUniInType.VOLTAGE_INPUT.ordinal.toDouble()
+            15 -> CpuUniInType.THERMISTOR_INPUT.ordinal.toDouble()
+            16 -> CpuUniInType.DUCT_STATIC_PRESSURE1_10.ordinal.toDouble()
+            17 -> CpuUniInType.GENERIC_ALARM_NC.ordinal.toDouble()
+            18 -> CpuUniInType.GENERIC_ALARM_NO.ordinal.toDouble()
+            else -> CpuUniInType.NONE.ordinal.toDouble()
+        }
+    }
+
     fun updateMigrationVersion(){
         val pm = Globals.getInstance().applicationContext.packageManager
         val pi: PackageInfo
@@ -565,7 +848,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             pi = pm.getPackageInfo("a75f.io.renatus", 0)
             val currentAppVersion = pi.versionName.substring(pi.versionName.lastIndexOf('_') + 1)
             val migrationVersion = hayStack.readDefaultStrVal("diag and migration and version")
-            CcuLog.d("CCU_DOMAIN", "currentAppVersion: $currentAppVersion, migrationVersion: $migrationVersion")
+            CcuLog.d(TAG_CCU_DOMAIN, "currentAppVersion: $currentAppVersion, migrationVersion: $migrationVersion")
             if (currentAppVersion != migrationVersion) {
                 CCUHsApi.getInstance().writeDefaultVal("point and diag and migration", currentAppVersion)
             }

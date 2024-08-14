@@ -55,4 +55,6 @@ object  BacnetConfigConstants {
     const val PORT_VAL = "47808"
     const val VENDOR_ID_VALUE = 1181
     const val VENDOR_NAME_VALUE = "75F"
+
+
 }

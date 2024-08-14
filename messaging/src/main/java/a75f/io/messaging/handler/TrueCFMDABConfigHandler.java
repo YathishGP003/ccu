@@ -8,29 +8,30 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Point;
+import a75f.io.domain.logic.ProfileEquipBuilder;
+import a75f.io.domain.util.ModelLoader;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.dab.DabProfile;
 import a75f.io.logic.bo.building.dab.DabProfileConfiguration;
-import a75f.io.logic.bo.building.truecfm.TrueCFMPointsHandler;
 
 public class TrueCFMDABConfigHandler {
     public static void updateDABConfigPoint(JsonObject msgObject, Point configPoint, CCUHsApi hayStack) {
-        HashMap<Object, Object> equipMap = CCUHsApi.getInstance().readMapById(configPoint.getEquipRef());
-        Equip equip = new Equip.Builder().setHashMap(equipMap).build();
         double value = msgObject.get("val").getAsDouble();
         if(value == CCUHsApi.getInstance().readDefaultValById(configPoint.getId())) {
             CcuLog.d(L.TAG_CCU_PUBNUB, "updateDABConfigPoint - Message is not handled");
             return;
         }
-        DabProfileConfiguration dabProfileConfiguration = new DabProfileConfiguration();
-        if (value > 0) {
-            dabProfileConfiguration.minCFMForIAQ = 100;
-            dabProfileConfiguration.kFactor = 2;
-            TrueCFMPointsHandler.createTrueCFMDABPoints(hayStack, equip.getId(), dabProfileConfiguration);
-        } else {
-            TrueCFMPointsHandler.deleteTrueCFMPoints(hayStack, equip.getId());
-        }
-        writePointFromJson(configPoint, msgObject, hayStack);
+        short address = Short.parseShort(configPoint.getGroup());
+        DabProfile profile = (DabProfile) L.getProfile(address);
+        Equip equip = profile.getEquip();
+        DabProfileConfiguration config = (DabProfileConfiguration) profile.getDomainProfileConfiguration();
+        config.enableCFMControl.setEnabled(value > 0);
+        ProfileEquipBuilder equipBuilder = new ProfileEquipBuilder(hayStack);
+        equipBuilder.updateEquipAndPoints(config,
+                ModelLoader.INSTANCE.getModelForDomainName(equip.getDomainName()),
+                equip.getSiteRef(),
+                equip.getDisplayName(), true);
     }
     private static void writePointFromJson(Point configPoint, JsonObject msgObject, CCUHsApi hayStack) {
         String who = msgObject.get(HayStackConstants.WRITABLE_ARRAY_WHO).getAsString();

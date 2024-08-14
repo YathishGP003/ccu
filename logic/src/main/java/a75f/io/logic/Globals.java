@@ -34,6 +34,7 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.autocommission.AutoCommissioningState;
 import a75f.io.logic.autocommission.AutoCommissioningUtil;
 import a75f.io.logic.bo.building.CCUApplication;
+import a75f.io.logic.bo.building.bacnet.BacnetProfile;
 import a75f.io.logic.bo.building.bypassdamper.BypassDamperProfile;
 import a75f.io.logic.bo.building.ccu.CazProfile;
 import a75f.io.logic.bo.building.dab.DabProfile;
@@ -98,7 +99,7 @@ public class Globals {
     public int selectedTab;
 
     public static final class IntentActions {
-        public static final String LSERIAL_MESSAGE = "a75f.io.intent.action.LSERIAL_MESSAGE";
+        public static final String LSERIAL_MESSAGE_OTA = "a75f.io.intent.action.LSERIAL_MESSAGE_OTA";
         public static final String ACTIVITY_MESSAGE = "a75f.io.intent.action.ACTIVITY_MESSAGE";
         public static final String ACTIVITY_RESET = "a75f.io.intent.action.ACTIVITY_RESET";
         public static final String PUBNUB_MESSAGE = "a75f.io.intent.action.PUBNUB_MESSAGE";
@@ -463,8 +464,7 @@ public class Globals {
                             L.ccu().zoneProfiles.add(acb);
                             break;
                         case DAB:
-                            DabProfile dab = new DabProfile();
-                            dab.addDabEquip(Short.parseShort(eq.getGroup()));
+                            DabProfile dab = new DabProfile(Short.parseShort(eq.getGroup()));
                             L.ccu().zoneProfiles.add(dab);
                             break;
                         case DUAL_DUCT:
@@ -546,8 +546,7 @@ public class Globals {
                             break;
 
                         case HYPERSTATSPLIT_CPU:
-                            HyperStatSplitCpuEconProfile cpuEcon = new HyperStatSplitCpuEconProfile();
-                            cpuEcon.addEquip(Short.parseShort(eq.getGroup()));
+                            HyperStatSplitCpuEconProfile cpuEcon = new HyperStatSplitCpuEconProfile(eq.getId(), Short.parseShort(eq.getGroup()));
                             L.ccu().zoneProfiles.add(cpuEcon);
                             break;
 
@@ -575,6 +574,11 @@ public class Globals {
                             mbProfile.addMbEquip(Short.parseShort(eq.getGroup()), ProfileType.valueOf(eq.getProfile()));
                             L.ccu().zoneProfiles.add(mbProfile);
                             break;
+                        case BACNET_DEFAULT:
+                            BacnetProfile bacnetProfile = new BacnetProfile();
+                            bacnetProfile.addBacAppEquip(Short.parseShort(eq.getGroup()), ProfileType.valueOf(eq.getProfile()));
+                            L.ccu().zoneProfiles.add(bacnetProfile);
+                            break;
 
                     }
                 }
@@ -582,7 +586,7 @@ public class Globals {
 
         }
 
-        HashMap<Object, Object> oaoEquip = CCUHsApi.getInstance().readEntity("equip and oao");
+        HashMap<Object, Object> oaoEquip = CCUHsApi.getInstance().readEntity("equip and oao and not hyperstatsplit");
         if (oaoEquip != null && oaoEquip.size() > 0) {
             CcuLog.d(L.TAG_CCU, "Create Default OAO Profile");
             OAOProfile oao = new OAOProfile();
@@ -633,6 +637,8 @@ public class Globals {
                 return ProfileType.VAV_SERIES_FAN.name();
             case DomainName.activeChilledBeam:
                 return ProfileType.VAV_ACB.name();
+            case DomainName.hyperstatSplitCPU:
+                return ProfileType.HYPERSTATSPLIT_CPU.name();
             default:
                 return profile;
         }

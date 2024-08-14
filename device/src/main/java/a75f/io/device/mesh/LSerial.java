@@ -195,12 +195,15 @@ public class LSerial
             }
 
             // Pass event to external handlers
-            Intent eventIntent = new Intent(Globals.IntentActions.LSERIAL_MESSAGE);
-            eventIntent.putExtra("eventType", messageType);
-            eventIntent.putExtra("eventBytes", data);
-
-            context.sendBroadcast(eventIntent);
-            //context.startService(eventIntent);
+            if (messageType == MessageType.CM_TO_CCU_OVER_USB_FIRMWARE_UPDATE_ACK ||
+                    messageType == MessageType.CM_TO_CCU_OVER_USB_FIRMWARE_PACKET_REQUEST ||
+                    messageType == MessageType.CM_TO_CCU_OTA_STATUS ||
+                    messageType == MessageType.CM_TO_CCU_OVER_USB_SN_REBOOT) {
+                Intent eventIntent = new Intent(Globals.IntentActions.LSERIAL_MESSAGE_OTA);
+                eventIntent.putExtra("eventType", messageType);
+                eventIntent.putExtra("eventBytes", data);
+                context.sendBroadcast(eventIntent);
+            }
         }else if (event.getSerialAction() == SerialAction.MESSAGE_FROM_SERIAL_MODBUS) {
             byte[] data = event.getBytes();
             ModbusPulse.handleModbusPulseData(data, (event.getBytes()[0] & 0xff));

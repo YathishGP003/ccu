@@ -40,7 +40,7 @@ fun RadioButtonCompose(radioOptions: List<String>, default: Int, onSelect: (Stri
         .selectableGroup()
         .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center,
+        horizontalArrangement = Arrangement.Start,
     ) {
         radioOptions.forEach { label ->
             Row(

@@ -13,6 +13,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color.Companion.White
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -30,7 +32,7 @@ val highPriorityDispatcher = Executors.newSingleThreadExecutor(object : ThreadFa
 
     override fun newThread(r: Runnable): Thread {
         return Thread(r, "HighPriorityThread-${counter.incrementAndGet()}").apply {
-            priority = Thread.MAX_PRIORITY
+            priority = Thread.MAX_PRIORITY - 1
         }
     }
 }).asCoroutineDispatcher()
@@ -63,7 +65,7 @@ fun AddProgressGif(){
             DialogProperties(dismissOnBackPress = false, dismissOnClickOutside = false)
         ) {
             Box(
-                modifier = Modifier.wrapContentWidth(),
+                modifier = Modifier.wrapContentWidth().semantics { contentDescription = "testgifBox" },
                 contentAlignment = Alignment.Center
             ) {
                 Column(
@@ -72,14 +74,15 @@ fun AddProgressGif(){
                     GifLoader(
                         modifier = Modifier
                             .padding(16.dp)
-                            .size(50.dp),
+                            .size(50.dp)
+                            .semantics { contentDescription = "testgifLoader" },
                         gifResource = R.drawable.loader_75f
                     )
                     Text(
                         text = "Loading System Profile",
                         color = White,
                         fontSize = 20.sp,
-                        modifier = Modifier.wrapContentWidth()
+                        modifier = Modifier.wrapContentWidth().semantics { contentDescription = "testgifTest" }
                     )
                 }
             }

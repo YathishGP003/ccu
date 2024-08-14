@@ -136,10 +136,10 @@ public class Pulse
 				mDeviceLowSignalCount.remove(nodeAddr);
 				mDeviceLowSignalAlert.put(nodeAddr,false);
 			}
-			if (Globals.getInstance().isTemporaryOverrideMode()) {
+			if(Globals.getInstance().isTemporaryOverrideMode()) {
+				updateRssiPointIfAvailable(hayStack, device.get("id").toString(), rssi, 1, nodeAddr);
 				return;
 			}
-
 			HashMap equipMap = hayStack.read("equip and id == " + device.get("equipRef"));
 			Equip equip = new Equip.Builder().setHashMap(equipMap).build();
 			boolean isDomainEquip = equipMap.containsKey("domainName") ? !equip.getDomainName().equals(null) : false;
@@ -280,7 +280,6 @@ public class Pulse
 						break;
 				}
 			}
-			
 			SmartNodeSensorReading_t[] sensorReadings = smartNodeRegularUpdateMessage_t.update.sensorReadings;
 			if (sensorReadings.length > 0) {
 				handleSensorEvents(sensorReadings, nodeAddr, deviceInfo, isDomainEquip);
@@ -525,14 +524,13 @@ public class Pulse
 			hdb = occ.getHeatingDeadBand();
 		}
 
-		BuildingTunerCache buildingTuner = BuildingTunerCache.getInstance();
 		double coolingDeadband = CCUHsApi.getInstance().readPointPriorityValByQuery("zone and cooling and deadband and not multiplier and roomRef == \""+equip.getRoomRef()+"\"");
 		double heatingDeadband = CCUHsApi.getInstance().readPointPriorityValByQuery("zone and heating and deadband and not multiplier and roomRef == \""+equip.getRoomRef()+"\"");
 
 
 		 coolingDesiredTemp = DeviceUtil.getValidDesiredCoolingTemp(
-				dt,coolingDeadband,buildingTuner.getMaxCoolingUserLimit(),
-				buildingTuner.getMinCoolingUserLimit()
+				 dt,coolingDeadband,DeviceUtil.getMaxCoolingUserLimit(zoneId),
+				DeviceUtil.getMinCoolingUserLimit(zoneId)
 		);
 		HashMap<Object, Object> coolingDtPoint = CCUHsApi.getInstance().readEntity("point and air and temp and desired and cooling and sp and equipRef == \""+equip.getId()+"\"");
 		HashMap<Object, Object> heatingDtPoint = CCUHsApi.getInstance().readEntity("point and air and temp and desired and heating and sp and equipRef == \""+equip.getId()+"\"");
@@ -548,13 +546,13 @@ public class Pulse
 		}
 		else {
 			coolingDesiredTemp = DeviceUtil.getValidDesiredCoolingTemp(
-					dt, coolingDeadband, buildingTuner.getMaxCoolingUserLimit(),
-					buildingTuner.getMinCoolingUserLimit()
+					dt, coolingDeadband, DeviceUtil.getMaxCoolingUserLimit(zoneId),
+					DeviceUtil.getMinCoolingUserLimit(zoneId)
 			);
 
 			heatingDesiredTemp = DeviceUtil.getValidDesiredHeatingTemp(
-					dt, heatingDeadband, buildingTuner.getMaxHeatingUserLimit(),
-					buildingTuner.getMinHeatingUserLimit()
+					dt, heatingDeadband, DeviceUtil.getMaxHeatingUserLimit(zoneId),
+					DeviceUtil.getMinHeatingUserLimit(zoneId)
 			);
 			averageTemp = dt;
 		}
@@ -594,6 +592,7 @@ public class Pulse
     private static void updateSmartStatDesiredTemp(int node, Double dt, boolean sendAck) {
         HashMap equipMap = CCUHsApi.getInstance().read("equip and group == \""+node+"\"");
         Equip equip = new Equip.Builder().setHashMap(equipMap).build();
+		String zoneId = HSUtil.getZoneIdFromEquipId(equip.getId());
 		if( equip == null ) return;
 		double coolingDesiredTemp = 0;
 		double heatingDesiredTemp= 0;
@@ -612,13 +611,13 @@ public class Pulse
 			heatingDesiredTemp = dt;
 		}else {
 			coolingDesiredTemp = DeviceUtil.getValidDesiredCoolingTemp(
-					dt, coolingDeadband, buildingTuner.getMaxCoolingUserLimit(),
-					buildingTuner.getMinCoolingUserLimit()
+					dt, coolingDeadband, DeviceUtil.getMaxCoolingUserLimit(zoneId),
+					DeviceUtil.getMinCoolingUserLimit(zoneId)
 			);
 
 			heatingDesiredTemp = DeviceUtil.getValidDesiredHeatingTemp(
-					dt, heatingDeadband, buildingTuner.getMaxHeatingUserLimit(),
-					buildingTuner.getMinHeatingUserLimit()
+					dt, heatingDeadband, DeviceUtil.getMaxHeatingUserLimit(zoneId),
+					DeviceUtil.getMinHeatingUserLimit(zoneId)
 			);
 		}
 
@@ -1020,7 +1019,8 @@ public class Pulse
 				mDeviceLowSignalCount.remove(nodeAddr);
 				mDeviceLowSignalAlert.put(nodeAddr,false);
 			}
-			if (Globals.getInstance().isTemporaryOverrideMode()) {
+			if(Globals.getInstance().isTemporaryOverrideMode()) {
+				updateRssiPointIfAvailable(hayStack, deviceInfo.getId(), rssi, 1, nodeAddr);
 				return;
 			}
 			ArrayList<HashMap> phyPoints = hayStack.readAll("point and physical and sensor and deviceRef == \"" + deviceInfo.getId() + "\"");
@@ -1626,5 +1626,16 @@ public class Pulse
 			return DeviceUtil.getPortFromDomainName(physicalPoint.get("domainName").toString());
 		}
 		return Port.valueOf(physicalPoint.get("port").toString());
+	}
+
+	public static void updateRssiPointIfAvailable(CCUHsApi hayStack, String deviceRef, int rssi, int heartbeat, int nodeAddr) {
+		HashMap<Object, Object> rssiMap = hayStack.readEntity("point and physical and sensor and deviceRef== \""+ deviceRef + "\" and (port==\"RSSI\" or domainName==\"rssi\")");
+		if(!rssiMap.isEmpty() && rssiMap.get("pointRef")!=null && !rssiMap.get("pointRef").toString().isEmpty()) {
+			hayStack.writeHisValueByIdWithoutCOV(rssiMap.get("id").toString(), (double)rssi);
+			hayStack.writeHisValueByIdWithoutCOV(rssiMap.get("pointRef").toString(), (double)heartbeat);
+			if(currentTempInterface != null) {
+				currentTempInterface.refreshHeartBeatStatus(String.valueOf(nodeAddr));
+			}
+		}
 	}
 }

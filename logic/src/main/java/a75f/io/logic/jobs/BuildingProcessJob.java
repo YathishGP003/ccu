@@ -59,10 +59,6 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
         
         if (!CCUHsApi.getInstance().isCcuReady()) {
             CcuLog.d(L.TAG_CCU_JOB,"CCU not ready ! <-BuildingProcessJob ");
-            //Make sure his data in synced every other minute to avoid device appearing offline for long.
-            if (DateTime.now().getMinuteOfDay() % 2 == 0) {
-                doHisSync();
-            }
             return;
         }
         

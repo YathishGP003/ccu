@@ -90,6 +90,7 @@ public class HSUtil {
         for (HashMap<Object, Object> m : equips) {
             equipList.add(new Equip.Builder().setHashMap(m).build());
         }
+        CcuLog.d(CCUTagsDb.TAG_CCU_HS, "Floor layout Equip list: " + equipList);
         return equipList;
     }
 
@@ -389,7 +390,7 @@ public class HSUtil {
 
     public static boolean isVAVTrueCFMConfig(String id, CCUHsApi hayStack) {
         HashMap<Object, Object> pointEntity = hayStack.readMapById(id);
-        if (pointEntity.containsKey("domainName")) {
+        if (pointEntity.containsKey("vav") && pointEntity.containsKey("domainName")) {
             return pointEntity.get("domainName").equals("enableCFMControl");
         } else {
             return ((pointEntity.containsKey(Tags.ENABLE)) && (pointEntity.containsKey(Tags.CFM) || pointEntity.containsKey("trueCFM")) && (pointEntity.containsKey(Tags.VAV)));
@@ -406,7 +407,11 @@ public class HSUtil {
 
     public static boolean isDABTrueCFMConfig(String id, CCUHsApi hayStack) {
         HashMap<Object, Object> pointEntity = hayStack.readMapById(id);
-        return (pointEntity.containsKey(Tags.ENABLE) && (pointEntity.containsKey(Tags.CFM) || pointEntity.containsKey("trueCFM")) && pointEntity.containsKey(Tags.DAB));
+        if (pointEntity.containsKey("dab") && pointEntity.containsKey("domainName")) {
+            return pointEntity.get("domainName").equals("enableCFMControl");
+        } else {
+            return (pointEntity.containsKey(Tags.ENABLE) && (pointEntity.containsKey(Tags.CFM) || pointEntity.containsKey("trueCFM")) && pointEntity.containsKey(Tags.DAB));
+        }
     }
 
     public static boolean isMaxCFMCoolingConfigPoint(String id, CCUHsApi hayStack) {

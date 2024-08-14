@@ -29,10 +29,11 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun ToggleButton(
     defaultSelection : Boolean,
+    modifier: Modifier = Modifier.wrapContentSize().padding(end = 30.dp),
     onEnabled: (Boolean) -> Unit,
 ) {
     Box(
-        modifier = Modifier.wrapContentSize().padding(end = 30.dp),
+        modifier = modifier,
         contentAlignment = Alignment.Center
     ) {
         Switch(

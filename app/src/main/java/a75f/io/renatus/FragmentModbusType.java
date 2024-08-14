@@ -20,6 +20,7 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.lights.LightProfile;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
+import a75f.io.renatus.bacnet.BacNetSelectModelView;
 import a75f.io.renatus.modbus.ModbusConfigView;
 import a75f.io.renatus.modbus.util.ModbusLevel;
 
@@ -28,6 +29,7 @@ public class FragmentModbusType  extends BaseDialogFragment {
     public static final String MID = FragmentModbusType.class.getSimpleName();
     View modbusequip;
     View modbusem;
+    View bacnetEm;
     Zone mZone;
     LightProfile mLightProfile;
     short        mNodeAddress;
@@ -61,6 +63,7 @@ public class FragmentModbusType  extends BaseDialogFragment {
         getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
         modbusequip  = view.findViewById(R.id.rl_mbequipment);
         modbusem = view.findViewById(R.id.rl_mbenergymeter);
+        bacnetEm = view.findViewById(R.id.rl_bacnet_equipment);
         mNodeAddress = getArguments().getShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR);
         mRoomName = getArguments().getString(FragmentCommonBundleArgs.ARG_NAME);
         mFloorName = getArguments().getString(FragmentCommonBundleArgs.FLOOR_NAME);
@@ -77,6 +80,9 @@ public class FragmentModbusType  extends BaseDialogFragment {
             showDialogFragment(ModbusConfigView.Companion.newInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.MODBUS_EMR,ModbusLevel.ZONE,"emr"), ModbusConfigView.Companion.getID());
         });
         (view.findViewById(R.id.imageGoback)).setOnClickListener((v)->removeDialogFragment(MID));
+        bacnetEm.setOnClickListener(v -> {
+            showDialogFragment(BacNetSelectModelView.Companion.newInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.BACNET_DEFAULT,ModbusLevel.ZONE,""), BacNetSelectModelView.Companion.getID());
+        });
         return view;
     }
 

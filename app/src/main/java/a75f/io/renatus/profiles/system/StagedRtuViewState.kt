@@ -1,8 +1,6 @@
 package a75f.io.renatus.profiles.system
 
 import a75f.io.logic.bo.building.system.vav.config.StagedRtuProfileConfig
-import a75f.io.logic.bo.building.vav.VavProfileConfiguration
-import a75f.io.renatus.profiles.vav.VavConfigViewState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -34,6 +32,8 @@ open class StagedRtuViewState {
     var relay6Test by mutableStateOf (false)
     var relay7Test by mutableStateOf (false)
     var unusedPortState by mutableStateOf(hashMapOf<String, Boolean>())
+    var isStateChanged by mutableStateOf(false)
+    var isSaveRequired by mutableStateOf(false)
     companion object {
         fun fromProfileConfig(config: StagedRtuProfileConfig): StagedRtuViewState {
             return StagedRtuViewState().apply {

@@ -28,7 +28,7 @@
         android:id="@+id/lt_column2"
         android:layout_width="wrap_content"
         android:layout_marginTop="16dp"
-        android:layout_marginLeft="56dp"
+        android:layout_marginStart="56dp"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
         <TextView

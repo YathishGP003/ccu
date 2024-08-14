@@ -78,6 +78,13 @@ object ModelCache {
 
         modelContainer[MODEL_HN_VAV_ACB] = getModelById(MODEL_HN_VAV_ACB)
         CcuLog.i(Domain.LOG_TAG, "helioNodeActiveChilledBeam equip model loaded")
+
+        modelContainer[MODEL_SMART_NODE_DAB] = getModelById(MODEL_SMART_NODE_DAB)
+        CcuLog.i(Domain.LOG_TAG, "smartnodeDAB equip model loaded")
+
+        modelContainer[MODEL_HELIO_NODE_DAB] = getModelById(MODEL_HELIO_NODE_DAB)
+        CcuLog.i(Domain.LOG_TAG, "helionodeDAB equip model loaded")
+
     }
 
     private fun loadSystemProfileModels() {
@@ -93,8 +100,15 @@ object ModelCache {
         modelContainer[MODEL_VAV_STAGED_VFD_RTU] = getModelById(MODEL_VAV_STAGED_VFD_RTU)
         CcuLog.i(Domain.LOG_TAG, "VavStagedVfd model loaded")
 
+        modelContainer[MODEL_VAV_MODULATING_AHU] = getModelById(MODEL_VAV_MODULATING_AHU)
+        CcuLog.i(Domain.LOG_TAG, "VAV fully Modulating model loaded")
+
         modelContainer[MODEL_VAV_ADVANCED_AHU_V2_CM] = getModelById(MODEL_VAV_ADVANCED_AHU_V2_CM)
         CcuLog.i(Domain.LOG_TAG, "MODEL_VAV_ADVANCED_AHU_V2 model loaded")
+
+        modelContainer[MODEL_VAV_ADVANCED_AHU_V2_CONNECT] = getModelById(
+            MODEL_VAV_ADVANCED_AHU_V2_CONNECT)
+        CcuLog.i(Domain.LOG_TAG, "MODEL_VAV_ADVANCED_AHU_V2_CONNECT model loaded")
     }
 
     private fun loadBypassDamperModels() {
@@ -120,5 +134,13 @@ object ModelCache {
         CcuLog.i(Domain.LOG_TAG, "Model Loaded from FS ${model.name}  ${model.version?.major}.${model.version?.minor}.${model.version?.patch}")
         modelContainer[modelId] = model
         return model
+    }
+
+    fun getModelByFileName( fileName : String) : ModelDirective {
+        return if (context != null) {
+            ResourceHelper.loadModel(fileName, context!!)
+        } else {
+            ResourceHelper.loadModel(fileName)
+        }
     }
  }

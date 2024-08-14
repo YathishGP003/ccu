@@ -57,6 +57,9 @@ class AlertsRepository(
    // results of AlertProcessor evaluation saved to report state for debugging screen.
    private var alertDefOccurrences: List<AlertDefOccurrence> = emptyList()
 
+   private val boxStore = haystack.tagsDb.boxStore
+   private val alertBox = boxStore.boxFor(Alert::class.java)
+
    init {
       fetchAlertsDefinitions()
    }
@@ -74,9 +77,34 @@ class AlertsRepository(
       val alertDef = alertDefsMap.remove(title)
       alertDef?.let {
          alertDefsState.removeAll(alertDef)
-         dataStore.deleteAlertsForDef(alertDef)
+         deleteAlertsDefWithFixingActiveAlerts(alertDef)
       }
       saveDefs()
+      setAlertListChanged()
+   }
+
+   private fun deleteAlertsDefWithFixingActiveAlerts(alertDef: AlertDefinition) {
+
+      val alertQuery = alertBox.query()
+      val matchingAlerts = alertQuery
+         .equal(Alert_.mTitle, alertDef.alert.mTitle)
+         .build().find()
+      var fixedAlertList = mutableListOf<Alert>()
+      matchingAlerts.forEach {
+            if (!it.isFixed) {
+               fixedAlertList.add(it)
+               fixAlert(it)
+            }
+            else {
+               dataStore.deleteAlert(it)
+            }
+      }
+      if (fixedAlertList.isNotEmpty()) {
+         alertSyncHandler.sync(fixedAlertList, dataStore)
+         fixedAlertList.forEach {
+            dataStore.deleteAlert(it)
+         }
+      }
    }
 
    fun fetchAlertsDefinitions() {
@@ -149,6 +177,7 @@ class AlertsRepository(
       if (alert.mTitle.equals("CCU RESTART", ignoreCase = true)) {
          dataStore.cancelAppRestarted()
       }
+      setAlertListChanged()
    }
 
    fun deleteAlert(alert: Alert): Completable? {
@@ -164,18 +193,20 @@ class AlertsRepository(
             .doOnComplete { removeAlert(alert) }
             .doOnError { throwable: Throwable? -> CcuLog.e(TAG_CCU_ALERTS, "Delete alert failed " + alert._id, throwable) }
       }
+      setAlertListChanged()
    }
 
    private fun removeAlert(alert: Alert) {
       dataStore.deleteAlert(alert)
       alertDefsState.remove(alert)
+      setAlertListChanged()
    }
 
 
    fun deleteAlertInternal(id: String) {
       val alert = dataStore.getAlert(id)
       alert?.let { dataStore.deleteAlert(alert._id) }
-
+      setAlertListChanged()
    }
 
    /**
@@ -205,6 +236,7 @@ class AlertsRepository(
          }
          addAlert(alert)
       }
+      setAlertListChanged()
    }
 
    fun generateAlertBlockly(title: String, msg: String, equipRef: String, creator: String, blockId: String) {
@@ -227,6 +259,7 @@ class AlertsRepository(
          alert.setCreator(creator)
          alert.setBlockId(blockId)
          addAlert(alert)
+         setAlertListChanged()
       }
    }
 
@@ -307,6 +340,7 @@ class AlertsRepository(
             fixAlert(a)
          }
       }
+      setAlertListChanged()
    }
 
    /**
@@ -334,6 +368,7 @@ class AlertsRepository(
             removeAlert(a)
          }
       }
+      setAlertListChanged()
    }
 
    // syncs all alerts in data store with syneced == false
@@ -403,6 +438,7 @@ class AlertsRepository(
          }
       }
       saveDefs()
+      setAlertListChanged()
    }
    fun handleAlertBoxItemsExceedingThreshold() {
       if(alertBoxSizeAboveThreshold()) {
@@ -433,5 +469,12 @@ class AlertsRepository(
 
    fun checkIfAppRestarted() : Boolean {
       return dataStore.isAppRestarted()
+   }
+/// This method is only for dynamically updating the list of alerts when we are in Alerts page
+   private fun setAlertListChanged() {
+      val instance = AlertManager.getInstance()
+      if (instance.alertListListener != null ) {
+         instance.alertListListener.onAlertsChanged()
+      }
    }
 }

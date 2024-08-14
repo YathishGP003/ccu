@@ -10,6 +10,7 @@ import java.util.OptionalDouble;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Tags;
+import a75f.io.domain.api.DomainName;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 
@@ -79,13 +80,11 @@ public class DabTrueCfmHandler {
             CcuLog.i(L.TAG_CCU_SYSTEM, " UpdateCFMDamper for equip : "+dabEquip.get("dis"));
             String equipRef = Objects.requireNonNull(dabEquip.get("id")).toString();
     
-            HashMap<Object, Object> primaryDamperPosPoint = hayStack.readEntity(
-                "point and damper and normalized and primary and cmd "
-                + "and equipRef == \"" + equipRef + "\"");
+            HashMap<Object, Object> primaryDamperPosPoint = hayStack.readEntity("point and domainName == \"" + DomainName.normalizedDamper1Cmd + "\" " +
+                    "and equipRef == \""+equipRef+"\"");
     
-            HashMap<Object, Object> secondaryDamperPosPoint = hayStack.readEntity(
-                "point and damper and normalized and secondary and cmd " +
-                "and equipRef == \"" + equipRef + "\"");
+            HashMap<Object, Object> secondaryDamperPosPoint = hayStack.readEntity("point and domainName == \"" + DomainName.normalizedDamper2Cmd + "\" " +
+                    "and equipRef == \""+equipRef+"\"");
             
             // If TrueCFM is not enabled, just copy the current damper pos and move to the
             // next equip.

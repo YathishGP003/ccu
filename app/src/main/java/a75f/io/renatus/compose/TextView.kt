@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -44,6 +45,24 @@ fun HeaderTextView(text: String, padding : Int = 5, fontSize : Int = 22) {
             fontSize = fontSize.sp,
             color = Color.Black,
             textAlign = TextAlign.Center,
+        ),
+        text = text
+    )
+}
+
+@Composable
+fun HeaderTextViewCustom(text: String, padding : Int = 5) {
+    val textColor = Color(0xFF666666)
+    Text(
+        modifier = Modifier
+            .wrapContentSize()
+            .padding(padding.dp),
+        style = TextStyle(
+            fontFamily = myFontFamily,
+            fontWeight = FontWeight.Bold,
+            fontSize = 20.sp,
+            color = textColor,
+            textAlign = TextAlign.Left,
         ),
         text = text
     )
@@ -101,6 +120,38 @@ fun BoldHeader(text: String) {
 }
 
 @Composable
+fun HeaderLeftAlignedTextViewNew(text: String) {
+    Text(
+        modifier = Modifier
+            .wrapContentSize(),
+        style = TextStyle(
+            fontFamily = myFontFamily,
+            fontWeight = FontWeight.ExtraBold,
+            fontSize = 24.sp,
+            color = Color.Black,
+            textAlign = TextAlign.Left,
+        ),
+        text = text
+    )
+}
+
+@Composable
+fun HeaderLeftAlignedTextViewNew(text: String, fontSize : Int = 22) {
+    Text(
+        modifier = Modifier
+            .wrapContentSize(),
+        style = TextStyle(
+            fontFamily = myFontFamily,
+            fontWeight = FontWeight.ExtraBold,
+            fontSize = fontSize.sp,
+            color = Color.Black,
+            textAlign = TextAlign.Left,
+        ),
+        text = text
+    )
+}
+
+@Composable
 fun LabelTextView(text: String,widthValue:Int =210) {
         Text(
             modifier = Modifier
@@ -114,6 +165,55 @@ fun LabelTextView(text: String,widthValue:Int =210) {
             ),
             text = text
         )
+}
+
+@Composable
+fun LabelTextView(text: String,widthValue:Int =210, fontSize : Int = 20) {
+    Text(
+        modifier = Modifier
+            .padding(PaddingValues(start = 20.dp))
+            .width(widthValue.dp),
+        style = TextStyle(
+            fontFamily = myFontFamily,
+            fontWeight = FontWeight.Normal,
+            fontSize = fontSize.sp,
+            color = Color.Black
+        ),
+        text = text
+    )
+}
+
+@Composable
+fun LabelTextView(text: String,widthValue:Int =210, fontSize : Int = 20, textAlignment: TextAlign = TextAlign.Center) {
+    Text(
+        modifier = Modifier
+            .padding(PaddingValues(start = 20.dp))
+            .width(widthValue.dp),
+        style = TextStyle(
+            fontFamily = myFontFamily,
+            fontWeight = FontWeight.Normal,
+            fontSize = fontSize.sp,
+            color = Color.Black,
+            textAlign = textAlignment
+        ),
+        text = text
+    )
+}
+
+@Composable
+fun LabelTextView(text: AnnotatedString,widthValue:Int =210, fontSize : Int = 20) {
+    Text(
+        modifier = Modifier
+            .padding(PaddingValues(start = 20.dp))
+            .width(widthValue.dp),
+        style = TextStyle(
+            fontFamily = myFontFamily,
+            fontWeight = FontWeight.Normal,
+            fontSize = fontSize.sp,
+            color = Color.Black
+        ),
+        text = text
+    )
 }
 
 @Composable
@@ -211,6 +311,23 @@ fun TitleTextView(text: String) {
 }
 
 @Composable
+fun TitleTextViewCustom(text: String, color: Color) {
+    Text(
+        modifier = Modifier
+            .padding(top = 0.dp, start = 10.dp, end = 10.dp, bottom = 10.dp)
+            .wrapContentSize(),
+        style = TextStyle(
+            textAlign = TextAlign.Center,
+            fontFamily = myFontFamily,
+            fontWeight = FontWeight.Bold,
+            fontSize = 33.5.sp,
+            color = color
+        ),
+        text = text
+    )
+}
+
+@Composable
 fun SubTitle(text: String, fontSizeCustom : Double = 19.5, topPaddingValue: Int = 10, startPaddingValue : Int = 5) {
 
     Text(
@@ -222,6 +339,24 @@ fun SubTitle(text: String, fontSizeCustom : Double = 19.5, topPaddingValue: Int 
             fontWeight = FontWeight.Normal,
             fontFamily = myFontFamily,
             fontSize =  fontSizeCustom.sp,
+            color = greyColor
+        ),
+        text = text
+    )
+}
+
+@Composable
+fun SubTitle(text: String) {
+
+    Text(
+        modifier = Modifier
+            .height(50.dp)
+            .padding(start = 5.dp, top = 10.dp),
+        style = TextStyle(
+            textAlign = TextAlign.Center,
+            fontWeight = FontWeight.Normal,
+            fontFamily = myFontFamily,
+            fontSize =  19.5.sp,
             color = greyColor
         ),
         text = text
@@ -330,6 +465,56 @@ fun TextViewWithClick(text: MutableState<String>, onClick: () -> Unit, enableCli
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TextViewWithClickCustom(text: MutableState<String>, onClick: () -> Unit, enableClick: Boolean, isCompress: Boolean) {
+    val modifier = Modifier.clickable(onClick = {
+        if (enableClick)
+            onClick()
+    })
+    if (isCompress)
+        modifier.width(200.dp)
+
+    Column {
+
+        TextField(
+            value = text.value,
+            onValueChange = { text.value = it },
+            enabled = false,
+            readOnly = !enableClick,
+            modifier = modifier.fillMaxHeight().width(300.dp),
+            maxLines = 1,
+            textStyle = TextStyle(
+                fontFamily = myFontFamily,
+                fontSize = 22.sp,
+                color = Color.Black,
+                textAlign = TextAlign.Start
+            ),
+            colors = TextFieldDefaults.textFieldColors(
+                focusedIndicatorColor = primaryColor,
+                textColor = primaryColor,
+                placeholderColor = primaryColor,
+                unfocusedIndicatorColor = primaryColor,
+                disabledIndicatorColor = Color.Transparent,
+                containerColor = Color.Transparent,
+                cursorColor = primaryColor,
+                disabledTextColor = Color.Black,
+                disabledLabelColor = Color.Black
+            ),
+            trailingIcon = {
+                Image(
+                    painter = painterResource(id = R.drawable.angle_down_solid),
+                    colorFilter = ColorFilter.tint(primaryColor),
+                    contentDescription = "Custom Icon",
+                    modifier = Modifier.size(20.dp)
+
+                )
+            },
+        )
+        Divider(
+            Modifier.width(280.dp).padding(top = 0.dp, start = 0.dp).offset(x = 5.dp, y = (-10).dp))
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

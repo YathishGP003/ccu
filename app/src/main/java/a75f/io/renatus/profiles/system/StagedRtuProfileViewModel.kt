@@ -20,9 +20,6 @@ import a75f.io.logic.bo.building.system.vav.config.StagedRtuProfileConfig
 import a75f.io.renatus.util.SystemProfileUtil
 import android.app.Activity
 import android.content.Context
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.seventyfivef.domainmodeler.client.ModelDirective
@@ -33,14 +30,17 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import a75f.io.logic.bo.haystack.device.ControlMote
 import a75f.io.renatus.profiles.profileUtils.UnusedPortsModel.Companion.saveUnUsedPortStatusOfSystemProfile
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import kotlin.system.measureTimeMillis
 
 open class StagedRtuProfileViewModel : ViewModel() {
 
     lateinit var model : SeventyFiveFProfileDirective
     lateinit var deviceModel : SeventyFiveFDeviceDirective
-    open lateinit var viewState: StagedRtuViewState
+    open var viewState: MutableState<StagedRtuViewState> = mutableStateOf(StagedRtuViewState())
     lateinit var profileConfiguration: StagedRtuProfileConfig
 
     lateinit var context : Context
@@ -53,9 +53,8 @@ open class StagedRtuProfileViewModel : ViewModel() {
     lateinit var relay5AssociationList : List<String>
     lateinit var relay6AssociationList : List<String>
     lateinit var relay7AssociationList : List<String>
-    private lateinit var unusedPorts: HashMap<String, Boolean>
-    var _modelLoaded =  MutableLiveData(false)
-    val modelLoaded: LiveData<Boolean> get() = _modelLoaded
+    var modelLoadedState =  MutableLiveData(false)
+    val modelLoaded: LiveData<Boolean> get() = modelLoadedState
     lateinit var equipBuilder : ProfileEquipBuilder
     lateinit var deviceBuilder: DeviceBuilder
     fun init(context: Context, profileModel : ModelDirective, hayStack : CCUHsApi) {
@@ -92,7 +91,6 @@ open class StagedRtuProfileViewModel : ViewModel() {
     }
 
     fun createNewEquip(id : String) : String{
-        hayStack.deleteEntityTree(id)
         val equipDis = "${hayStack.siteName}-${model.name}"
         val equipId = equipBuilder.buildEquipAndPoints(profileConfiguration, model, hayStack.site!!.id, equipDis)
 
@@ -113,14 +111,13 @@ open class StagedRtuProfileViewModel : ViewModel() {
             deviceDis
         )
 
-        hayStack.syncEntityTree()
         DomainManager.addSystemDomainEquip(hayStack)
         DomainManager.addCmBoardDevice(hayStack)
         return equipId
     }
 
     open fun saveConfiguration() {
-        viewState.updateConfigFromViewState(profileConfiguration)
+        viewState.value.updateConfigFromViewState(profileConfiguration)
         val equipDis = "${hayStack.siteName}-${model.name}"
         equipBuilder.updateEquipAndPoints(profileConfiguration, model, hayStack.site!!.id, equipDis, isReconfiguration = true)
 
@@ -133,7 +130,9 @@ open class StagedRtuProfileViewModel : ViewModel() {
         )
         DomainManager.addSystemDomainEquip(hayStack)
         saveUnUsedPortStatusOfSystemProfile(profileConfiguration, hayStack)
-        viewState.unusedPortState = ControlMote.getCMUnusedPorts(Domain.hayStack)
+        profileConfiguration.unusedPorts.clear()
+        profileConfiguration.unusedPorts = ControlMote.getCMUnusedPorts(Domain.hayStack)
+        viewState.value.unusedPortState = profileConfiguration.unusedPorts
     }
 
     fun getRelayState(relayName: String) : Boolean {
@@ -171,5 +170,17 @@ open class StagedRtuProfileViewModel : ViewModel() {
         ) {
             SystemProfileUtil.showConditioningDisabledDialog(context as Activity, mode)
         }
+    }
+
+    fun setStateChanged() {
+        viewState.value.isStateChanged = true
+        viewState.value.isSaveRequired = true
+    }
+
+    fun deleteSystemProfile(systemProfileId: String){
+        val deleteTime = measureTimeMillis {
+            hayStack.deleteEntityTree(systemProfileId)
+        }
+        CcuLog.i(L.TAG_CCU_DOMAIN, "Time taken to delete entities: $deleteTime")
     }
 }

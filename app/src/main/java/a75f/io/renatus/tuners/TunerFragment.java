@@ -725,7 +725,7 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
             equipArrayList.addAll(HSUtil.getEquips(z.getId()));
         }
         for(Equip equip : equipArrayList){
-            moduleTuners.addAll(CCUHsApi.getInstance().readAll("tuner and equipRef == \"" + equip.getId() + "\""));
+            moduleTuners.addAll(CCUHsApi.getInstance().readAll("tuner and tunerGroup and equipRef == \"" + equip.getId() + "\""));
         }
 
 

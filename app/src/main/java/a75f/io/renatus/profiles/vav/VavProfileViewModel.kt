@@ -1,10 +1,8 @@
 package a75f.io.renatus.profiles.vav
 
 import a75f.io.api.haystack.CCUHsApi
-import a75f.io.api.haystack.HSUtil
 import a75f.io.api.haystack.Point
 import a75f.io.api.haystack.RawPoint
-import a75f.io.api.haystack.Tags
 import a75f.io.device.mesh.LSerial
 import a75f.io.device.mesh.LSmartNode
 import a75f.io.domain.equips.VavEquip
@@ -32,15 +30,13 @@ import a75f.io.logic.getSchedule
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.FloorPlanFragment
 import a75f.io.renatus.modbus.util.showToast
+import a75f.io.renatus.profiles.OnPairingCompleteListener
 import a75f.io.renatus.profiles.profileUtils.UnusedPortsModel
 import a75f.io.renatus.profiles.profileUtils.UnusedPortsModel.Companion.saveUnUsedPortStatus
 import a75f.io.renatus.util.ProgressDialogUtils
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -93,14 +89,12 @@ class VavProfileViewModel : ViewModel() {
     lateinit var minCFMReheatingList: List<String>
     private lateinit var unusedPorts: HashMap<String, Boolean>
 
+    private lateinit var pairingCompleteListener: OnPairingCompleteListener
 
-    private val _isDialogOpen = MutableLiveData<Boolean>()
     private var saveJob : Job? = null
 
-    var _modelLoaded =  MutableLiveData(false)
-    val modelLoaded: LiveData<Boolean> get() = _modelLoaded
-    val isDialogOpen: LiveData<Boolean>
-        get() = _isDialogOpen
+    var modelLoadedState =  MutableLiveData(false)
+    val modelLoaded: LiveData<Boolean> get() = modelLoadedState
 
     fun init(bundle: Bundle, context: Context, hayStack : CCUHsApi) {
         deviceAddress = bundle.getShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR)
@@ -141,7 +135,7 @@ class VavProfileViewModel : ViewModel() {
         initializeLists()
         unusedPorts = UnusedPortsModel.initializeUnUsedPorts(deviceAddress, hayStack)
         CcuLog.i(Domain.LOG_TAG, "VavProfileViewModel Loaded")
-        _modelLoaded.postValue(true)
+        modelLoadedState.postValue(true)
         CcuLog.i(Domain.LOG_TAG, "model calue set to true")
     }
 
@@ -202,7 +196,7 @@ class VavProfileViewModel : ViewModel() {
                         showToast("VAV Configuration saved successfully", context)
                         CcuLog.i(Domain.LOG_TAG, "Close Pairing dialog")
                         ProgressDialogUtils.hideProgressDialog()
-                        _isDialogOpen.postValue(false)
+                        pairingCompleteListener.onPairingComplete()
                     }
 
                 }
@@ -211,7 +205,7 @@ class VavProfileViewModel : ViewModel() {
                 // We don't know why this happens.
                 if (ProgressDialogUtils.isDialogShowing()) {
                     ProgressDialogUtils.hideProgressDialog()
-                    _isDialogOpen.postValue(false)
+                    pairingCompleteListener.onPairingComplete()
                 }
             }
         }
@@ -452,6 +446,10 @@ class VavProfileViewModel : ViewModel() {
             5 -> LSmartNode.PULSE
             else -> { "0-10v" }
         }
+    }
+
+    fun setOnPairingCompleteListener(completeListener: OnPairingCompleteListener) {
+        this.pairingCompleteListener = completeListener
     }
 
 

@@ -125,13 +125,14 @@ public class HyperStatMsgReceiver {
 
         Pulse.mDeviceUpdate.put((short) nodeAddress, Calendar.getInstance().getTimeInMillis());
 
-        if(!Globals.getInstance().isTemporaryOverrideMode()) {
-            DeviceHSUtil.getEnabledSensorPointsWithRefForDevice(device, hayStack)
-                    .forEach( point -> writePortInputsToHaystackDatabase( point, regularUpdateMessage, hayStack));
-
-            if (!regularUpdateMessage.getSensorReadingsList().isEmpty()) {
-                writeSensorInputsToHaystackDatabase(regularUpdateMessage.getSensorReadingsList(), nodeAddress);
-            }
+        if(Globals.getInstance().isTemporaryOverrideMode()) {
+            Pulse.updateRssiPointIfAvailable(hayStack, device.get("id").toString(), regularUpdateMessage.getRssi(), 1, nodeAddress);
+            return;
+        }
+        DeviceHSUtil.getEnabledSensorPointsWithRefForDevice(device, hayStack)
+                .forEach( point -> writePortInputsToHaystackDatabase( point, regularUpdateMessage, hayStack));
+        if (!regularUpdateMessage.getSensorReadingsList().isEmpty()) {
+            writeSensorInputsToHaystackDatabase(regularUpdateMessage.getSensorReadingsList(), nodeAddress);
         }
     }
     
@@ -188,8 +189,7 @@ public class HyperStatMsgReceiver {
         }
         if (Port.valueOf(rawPoint.getPort()) == Port.RSSI) {
             writeHeartbeat(rawPoint, point, regularUpdateMessage, hayStack);
-        }
-        else if (Port.valueOf(rawPoint.getPort()) == Port.SENSOR_RT) {
+        } else if (Port.valueOf(rawPoint.getPort()) == Port.SENSOR_RT) {
             writeRoomTemp(rawPoint, point, regularUpdateMessage, hayStack);
         } else if (Port.valueOf(rawPoint.getPort()) == Port.TH1_IN) {
             writeThermistorVal(rawPoint, point, hayStack,

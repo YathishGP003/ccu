@@ -1,16 +1,13 @@
 package a75f.io.logic.bo.building.system.vav.config
 
-import a75f.io.domain.equips.StagedRtuEquip
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.config.AssociationConfig
 import a75f.io.domain.config.EnableConfig
-import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.config.ValueConfig
-import a75f.io.domain.equips.VavStagedSystemEquip
 import a75f.io.domain.equips.VavStagedVfdSystemEquip
-import a75f.io.logger.CcuLog
 import a75f.io.logic.bo.haystack.device.ControlMote
+import a75f.io.logic.bo.haystack.device.ControlMote.getAllUnusedPorts
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import io.seventyfivef.ph.core.Tags
 
@@ -63,7 +60,7 @@ open class StagedVfdRtuProfileConfig(modelDef : SeventyFiveFProfileDirective)
         analogOut2HeatStage4 = getDefaultValConfig(DomainName.analog2HeatStage4, model)
         analogOut2HeatStage5 = getDefaultValConfig(DomainName.analog2HeatStage5, model)
         analogOut2Default = getDefaultValConfig(DomainName.analog2Default, model)
-        unusedPorts = ControlMote.getCMUnusedPorts(Domain.hayStack)
+        unusedPorts = getAllUnusedPorts()
         isDefault = true
         return this
     }

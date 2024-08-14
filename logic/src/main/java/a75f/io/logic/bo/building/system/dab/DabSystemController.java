@@ -543,27 +543,15 @@ public class DabSystemController extends SystemController
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap<String, Double> damperPosMap = new HashMap<>();
         for (HashMap<Object, Object> dabEquip : dabEquips) {
-            HashMap<Object, Object> primaryDamper = hayStack.readEntity(
-                "point and damper and base and primary and cmd and equipRef == \"" +
-                dabEquip.get("id").toString() + "\""
-            );
+            HashMap<Object, Object> primaryDamper = hayStack.readEntity("point and domainName == \"" + DomainName.damper1Cmd + "\" and equipRef == \""+dabEquip.get("id").toString()+"\"");
             double primaryDamperPos = hayStack.readHisValById(primaryDamper.get("id").toString());
-    
-            HashMap<Object, Object> secondaryDamper = hayStack.readEntity(
-                "point and damper and base and secondary and cmd and equipRef == \""
-                + dabEquip.get("id").toString() + "\""
-            );
+
+            HashMap<Object, Object> secondaryDamper = hayStack.readEntity("point and domainName == \"" + DomainName.damper2Cmd + "\" and equipRef == \""+dabEquip.get("id").toString()+"\"");
             double secondaryDamperPos = hayStack.readHisValById(secondaryDamper.get("id").toString());
-            
-            HashMap<Object, Object> normalizedPrimaryDamper = hayStack.readEntity(
-                "point and damper and normalized and primary and cmd and equipRef == \"" +
-                dabEquip.get("id").toString() + "\""
-            );
-            HashMap<Object, Object> normalizedSecondaryDamper = hayStack.readEntity(
-                "point and damper and normalized and secondary and " + "cmd and equipRef == \"" +
-                dabEquip.get("id").toString() + "\""
-            );
-            
+
+            HashMap<Object, Object> normalizedPrimaryDamper = hayStack.readEntity("point and domainName == \"" + DomainName.normalizedDamper1Cmd + "\" and equipRef == \""+dabEquip.get("id").toString()+"\"");
+            HashMap<Object, Object> normalizedSecondaryDamper = hayStack.readEntity("point and domainName == \"" + DomainName.normalizedDamper2Cmd + "\" and equipRef == \""+dabEquip.get("id").toString()+"\"");
+
             damperPosMap.put(normalizedPrimaryDamper.get("id").toString(), primaryDamperPos);
             damperPosMap.put(normalizedSecondaryDamper.get("id").toString(), secondaryDamperPos);
         }
@@ -600,7 +588,7 @@ public class DabSystemController extends SystemController
     }
     
     public double getEquipCurrentTemp(String equipRef) {
-        return CCUHsApi.getInstance().readHisValByQuery("point and air and temp and sensor and current and equipRef == \"" +equipRef+"\""
+        return CCUHsApi.getInstance().readHisValByQuery("point and air and temp and sensor and  (current or space) and equipRef == \"" +equipRef+"\""
         );
     }
     public double getCMCurrentTemp(String equipRef) {
@@ -638,9 +626,9 @@ public class DabSystemController extends SystemController
             equipDynamicPriority = SystemConstants.FORCED_OCCUPIED_ZONE_PRIORITY_VAL;
         } else {
             double zonePrioritySpread = TunerUtil.readTunerValByQuery(
-                "point and tuner and zone and priority and spread and " + "equipRef == \"" + equipRef + "\"");
+                "point and tuner and zone and priority and spread and equipRef == \"" + equipRef + "\"");
             double zonePriorityMultiplier = TunerUtil.readTunerValByQuery(
-                "point and tuner and zone and priority and multiplier " + "and equipRef == \"" + equipRef + "\"");
+                "point and tuner and zone and priority and multiplier and equipRef == \"" + equipRef + "\"");
             equipDynamicPriority = p.val * Math.pow(zonePriorityMultiplier, (zoneLoad / zonePrioritySpread) > 10 ? 10
                                                                                 : (zoneLoad / zonePrioritySpread));
             equipDynamicPriority = CCUUtils.roundToTwoDecimal(equipDynamicPriority);
@@ -683,7 +671,7 @@ public class DabSystemController extends SystemController
     }
     
     private double getEquipCo2(String equipRef) {
-        return CCUHsApi.getInstance().readHisValByQuery("point and air and co2 and sensor and current and equipRef == \"" +equipRef+"\""
+        return CCUHsApi.getInstance().readHisValByQuery("point and air and co2 and sensor and (current or space) and equipRef == \"" +equipRef+"\""
         );
     }
     
@@ -694,7 +682,7 @@ public class DabSystemController extends SystemController
         
         for (HashMap<Object, Object> equip : allEquips)
         {
-            double humidityVal = CCUHsApi.getInstance().readHisValByQuery("point and air and humidity and sensor and current " +
+            double humidityVal = CCUHsApi.getInstance().readHisValByQuery("point and air and humidity and sensor and (current or space) " +
                                                                 "and equipRef == \""+ equip.get("id")+"\""
             );
             
@@ -751,7 +739,7 @@ public class DabSystemController extends SystemController
             if(equip.getMarkers().contains("dab") || equip.getMarkers().contains("dualDuct") ||
                     equip.getMarkers().contains("otn") || equip.getMarkers().contains("ti")) {
                 double tempVal = CCUHsApi.getInstance().readHisValByQuery(
-                        "point and air and temp and sensor and current and equipRef == \"" + equipMap.get("id") + "\""
+                        "point and air and temp and sensor and (current or space) and equipRef == \"" + equipMap.get("id") + "\""
                 );
                 hasTi = hasTi || equip.getMarkers().contains("ti") || equip.getMarkers().contains("otn");
                 if (!deadZones.contains(equip.getId()) && (tempVal > 0)) {
@@ -789,7 +777,7 @@ public class DabSystemController extends SystemController
     public boolean hasTemp(Equip q) {
         try
         {
-            return CCUHsApi.getInstance().readHisValByQuery("point and current and temp and equipRef == \"" + q.getId()
+            return CCUHsApi.getInstance().readHisValByQuery("point and  (current or space) and temp and equipRef == \"" + q.getId()
                                                             + "\"") > 0;
         } catch (Exception e) {
             return false;
@@ -863,15 +851,8 @@ public class DabSystemController extends SystemController
         HashMap<String, Double> normalizedDamperPosMap = new HashMap<>();
         double targetPercent = (100 - maxDamperPos) * 100 / maxDamperPos;
         for (HashMap<Object, Object> dabEquip : dabEquips) {
-            HashMap<Object, Object> normalizedPrimaryDamper = hayStack.readEntity(
-                "point and damper and normalized and primary and cmd and equipRef == \""
-                                                                + dabEquip.get("id").toString() + "\""
-            );
-            HashMap<Object, Object> normalizedSecondaryamper = hayStack.readEntity(
-                "point and damper and normalized and secondary and cmd and equipRef == \""
-                                                                + dabEquip.get("id").toString() + "\""
-            );
-            
+            HashMap<Object, Object> normalizedPrimaryDamper = hayStack.readEntity("point and domainName == \"" + DomainName.normalizedDamper1Cmd + "\"  and equipRef == \""+dabEquip.get("id").toString()+"\"");
+            HashMap<Object, Object> normalizedSecondaryamper = hayStack.readEntity("point and domainName == \"" + DomainName.normalizedDamper2Cmd + "\" and equipRef == \""+dabEquip.get("id").toString()+"\"");
             double primaryDamperPos;
             double secondaryDamperPos;
             double normalizedPrimaryDamperPos;
@@ -909,20 +890,16 @@ public class DabSystemController extends SystemController
             if (deadZones.contains(dabEquip.get("id").toString())) {
                 continue;
             }
-            HashMap<Object, Object> damper = CCUHsApi.getInstance()
-                                     .readEntity("point and damper and base and primary and cmd and equipRef == \"" +
-                                                 Objects.requireNonNull(dabEquip.get("id")) + "\""
-            );
+            HashMap<Object, Object> damper = CCUHsApi.getInstance().readEntity("point and domainName == \"" + DomainName.damper1Cmd + "\" " +
+                    "and equipRef == \""+Objects.requireNonNull(dabEquip.get("id"))+"\"");
             
             double damperPos = CCUHsApi.getInstance().readHisValById(Objects.requireNonNull(damper.get("id")).toString());
             if (damperPos >= maxDamperPos) {
                 maxDamperPos = damperPos;
             }
     
-            damper = CCUHsApi.getInstance()
-                             .readEntity("point and damper and base and secondary and cmd and equipRef == \"" +
-                                         Objects.requireNonNull(dabEquip.get("id")) + "\""
-            );
+            damper = CCUHsApi.getInstance().readEntity("point and domainName == \"" + DomainName.damper2Cmd + "\" " +
+                    "and equipRef == \""+Objects.requireNonNull(dabEquip.get("id"))+"\"");
     
             damperPos = CCUHsApi.getInstance().readHisValById(Objects.requireNonNull(damper.get("id")).toString());
             if (damperPos >= maxDamperPos) {
@@ -984,13 +961,10 @@ public class DabSystemController extends SystemController
         int weightedDamperOpeningSum = 0;
         for (HashMap<Object, Object> dabEquip : dabEquips) {
             
-            HashMap<Object, Object> damperPosPrimary = hayStack.readEntity(
-                "point and damper and normalized and primary and cmd and equipRef == \"" + dabEquip.get("id").toString() +
-                "\""
-            );
-            HashMap<Object, Object> damperSizePrimary = hayStack.readEntity(
-                "point and config and damper and primary and size and equipRef == \"" + dabEquip.get("id").toString() + "\""
-            );
+            HashMap<Object, Object> damperPosPrimary = hayStack.readEntity("point and domainName == \"" + DomainName.normalizedDamper1Cmd + "\" " +
+                    "and equipRef == \""+dabEquip.get("id").toString()+"\"");
+            HashMap<Object, Object> damperSizePrimary = hayStack.readEntity("point and domainName == \"" + DomainName.damper1Size + "\" " +
+                    "and equipRef == \""+dabEquip.get("id").toString()+"\"");
             
             double damperPosVal = normalizedDamperPosMap.get(damperPosPrimary.get("id").toString());
             double damperSizeVal = hayStack.readDefaultValById(damperSizePrimary.get("id").toString());
@@ -998,14 +972,10 @@ public class DabSystemController extends SystemController
             weightedDamperOpeningSum += (damperPosVal * damperSizeVal);
             damperSizeSum += damperSizeVal;
             
-            HashMap<Object, Object> damperPosSecondary = hayStack.readEntity(
-                "point and damper and normalized and secondary and cmd and equipRef == \""
-                                                        + dabEquip.get("id").toString() + "\""
-            );
-            HashMap<Object, Object> damperSizeSecondary = hayStack.readEntity(
-                "point and config and damper and secondary and size and equipRef == \""
-                                                         + dabEquip.get("id").toString() + "\""
-            );
+            HashMap<Object, Object> damperPosSecondary = hayStack.readEntity("point and domainName == \"" + DomainName.normalizedDamper2Cmd + "\"" +
+                    " and equipRef == \""+dabEquip.get("id").toString()+"\"");
+            HashMap<Object, Object> damperSizeSecondary = hayStack.readEntity("point and domainName == \"" + DomainName.damper2Size + "\" " +
+                    "and equipRef == \""+dabEquip.get("id").toString()+"\"");
             
             damperPosVal = normalizedDamperPosMap.get(damperPosSecondary.get("id").toString());
             damperSizeVal = hayStack.readDefaultValById(damperSizeSecondary.get("id").toString());
@@ -1025,10 +995,8 @@ public class DabSystemController extends SystemController
         HashMap<String, Double> adjustedDamperOpeningMap = new HashMap<>();
         for (HashMap dabEquip : dabEquips) {
             
-            HashMap<Object, Object> damperPosPrimary = hayStack.readEntity(
-                "point and damper and normalized and primary and cmd and equipRef == \""
-                                                                            + dabEquip.get("id").toString() + "\""
-             );
+            HashMap<Object, Object> damperPosPrimary = hayStack.readEntity("point and domainName == \"" + DomainName.normalizedDamper1Cmd + "\"" +
+                    " and equipRef == \""+dabEquip.get("id").toString()+"\"");
             double primaryDamperVal = normalizedDamperPosMap.get(damperPosPrimary.get("id").toString());
             primaryDamperVal = Math.max(primaryDamperVal, MIN_DAMPER_FOR_CUMULATIVE_CALCULATION);
             double adjustedDamperPos = primaryDamperVal + (primaryDamperVal * percent) / 100;
@@ -1041,10 +1009,8 @@ public class DabSystemController extends SystemController
                 adjustedDamperOpeningMap.put(damperPosPrimary.get("id").toString(), adjustedDamperPos);
             }
             
-            HashMap<Object, Object> damperPosSecondary = hayStack.readEntity(
-                "point and damper and normalized and secondary and cmd and equipRef == \""
-                                                                             + dabEquip.get("id").toString() + "\""
-            );
+            HashMap<Object, Object> damperPosSecondary = hayStack.readEntity("point and domainName == \"" + DomainName.normalizedDamper2Cmd + "\" " +
+                    "and equipRef == \""+dabEquip.get("id").toString()+"\"");
             double secondaryDamperVal = normalizedDamperPosMap.get(damperPosSecondary.get("id").toString());
             secondaryDamperVal = Math.max(secondaryDamperVal, MIN_DAMPER_FOR_CUMULATIVE_CALCULATION);
             adjustedDamperPos = secondaryDamperVal + (secondaryDamperVal * percent) / 100;
@@ -1066,18 +1032,12 @@ public class DabSystemController extends SystemController
         CCUHsApi hayStack = CCUHsApi.getInstance();
         for (HashMap<Object, Object> dabEquip : dabEquips) {
             String equipRef = dabEquip.get("id").toString();
-            HashMap<Object, Object> primaryDamperPosPoint = hayStack.readEntity(
-                                                "point and damper and normalized and primary and cmd "
-                                                + "and equipRef == \"" + equipRef + "\""
-            );
+            HashMap<Object, Object> primaryDamperPosPoint = hayStack.readEntity("point and domainName == \"" + DomainName.normalizedDamper1Cmd + "\" and equipRef == \""+equipRef+"\"");
             
             double limitedPrimaryDamperPos = normalizedDamperPosMap.get(primaryDamperPosPoint.get("id").toString());
             limitedPrimaryDamperPos = CCUUtils.roundToTwoDecimal(limitedPrimaryDamperPos);
             
-            HashMap<Object, Object> secondoryDamperPosPoint = hayStack.readEntity(
-                                                "point and damper and normalized and secondary and cmd " +
-                                                "and equipRef == \"" + equipRef + "\""
-            );
+            HashMap<Object, Object> secondoryDamperPosPoint = hayStack.readEntity("point and domainName == \"" + DomainName.normalizedDamper2Cmd + "\" and equipRef == \""+equipRef+"\"");
             
             double limitedSecondaryDamperPos = normalizedDamperPosMap.get(secondoryDamperPosPoint.get("id").toString());
             limitedSecondaryDamperPos = CCUUtils.roundToTwoDecimal(limitedSecondaryDamperPos);
@@ -1173,10 +1133,10 @@ public class DabSystemController extends SystemController
     }
 
     private double getSupplyAirTemp(HashMap equip, CCUHsApi hayStack) {
-        double supplyAirTemp1 = hayStack.readHisValByQuery("supply and air and temp " +
+        double supplyAirTemp1 = hayStack.readHisValByQuery("(domainName == \"" + DomainName.dischargeAirTemp1 + "\" and equipRef == \""+equip.get("id")+"\") or supply and air and temp " +
                                         "and primary and equipRef == \""+equip.get("id")+"\"");
-        double supplyAirTemp2 = hayStack.readHisValByQuery("supply and air and temp " +
-                                        "and secondary and equipRef == \""+equip.get("id")+"\"");
+        double supplyAirTemp2 = hayStack.readHisValByQuery("(domainName == \"" + DomainName.dischargeAirTemp2 + "\" and equipRef == \""+equip.get("id")+"\") or supply and air and temp " +
+                                        "and secondary and equipRef == \""+equip.get("id")+"\" ");
 
         if (!isSupplyAirTempValid(supplyAirTemp1)) {
             supplyAirTemp1 = 0;

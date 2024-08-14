@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableRow xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="12dp"
+    android:layout_marginRight="20dp"
+    android:orientation="horizontal">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:weightSum="3"
+        android:orientation="horizontal">
+
+        <TextView
+            android:fontFamily="@font/lato_regular"
+            android:layout_weight="2"
+            android:id="@+id/tvParamLabel"
+            style="@style/label_black"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="@dimen/dp_10"
+            android:gravity="center_vertical"
+            android:textColor="@color/dark_gray"
+            android:textSize="22sp"
+            android:maxLines="2"
+            tools:text="Line Voltage 1 2 3 4 5 6 7 8 9 10 11 12
+13 14 15 17 18 19 20 21 22 23 24 25 26 27 " />
+
+        <!--<TextView
+            style="@style/label_grey"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="5dp"
+            android:layout_marginEnd="5dp"
+            android:gravity="start"
+            android:text=":"
+            android:textColor="@color/dark_gray"
+            android:textSize="22sp"
+            tools:text=":" />-->
+
+        <TextView
+            android:fontFamily="@font/lato_regular"
+            android:layout_weight="1"
+            android:id="@+id/tvParamValue"
+            style="@style/label_grey"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="5dp"
+            android:layout_marginEnd="5dp"
+            android:gravity="start|top"
+            android:textColor="@color/outer_temp_text_darker_gray"
+            android:textSize="22sp"
+            tools:text="120"
+            android:visibility="gone"/>
+
+        <Spinner
+            android:layout_weight="1"
+            android:id="@+id/spValue"
+            style="@style/customSpinnerDownArrow"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_gravity="top"
+            android:layout_marginStart="5dp"
+            android:layout_marginEnd="5dp"
+            android:gravity="center_vertical"
+            android:textSize="22sp"
+            android:visibility="visible" />
+
+    </LinearLayout>
+
+    <!--<LinearLayout
+        android:id="@+id/spinner_container"
+        android:orientation="horizontal"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="6">
+
+        <TextView
+            android:text="Present value : "
+            style="@style/label_black"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="@dimen/dp_10"
+            android:gravity="center_vertical"
+            android:textColor="@color/dark_gray"
+            android:textSize="22sp"
+            tools:text="Present value : " />
+
+        <Spinner
+            android:id="@+id/spValue"
+            style="@style/customSpinnerDownArrow"
+            android:layout_width="250dp"
+            android:layout_height="40dp"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="5dp"
+            android:layout_marginEnd="5dp"
+            android:gravity="center_vertical"
+            android:textSize="22sp"
+            android:visibility="visible" />
+    </LinearLayout>-->
+
+
+</TableRow>

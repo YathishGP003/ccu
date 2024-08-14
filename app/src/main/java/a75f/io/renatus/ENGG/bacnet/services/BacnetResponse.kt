@@ -91,7 +91,7 @@ data class ObjectIdentifierBacNetResp(
     val objectType: String,
 
     @SerializedName("object_instance")
-    private val objectInstance: String
+    val objectInstance: String
 )
 
 data class BacnetError(
@@ -131,7 +131,9 @@ data class WriteResponse(
     @SerializedName("reject")
     val errorReject: BacnetAppErrorReject?,
     @SerializedName("a_side_error")
-    val errorASide: BacnetAppASideError?
+    val errorASide: BacnetAppASideError?,
+    @SerializedName("bacapp_error")
+    val bacappError: BacnetError?,
 )
 
 data class WhoIsResponse(
@@ -151,7 +153,9 @@ data class WhoIsResponseItem(
     @SerializedName("port_number")
     val portNumber: String,
     @SerializedName("network_number")
-    val networkNumber: String
+    val networkNumber: String,
+    @SerializedName("mac_address")
+    val macAddress: String?,
 )
 
 

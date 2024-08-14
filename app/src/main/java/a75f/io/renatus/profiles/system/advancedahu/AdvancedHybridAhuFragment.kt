@@ -173,6 +173,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
         Row {
             EnableCompose(ADDRESS_0, viewModel.viewState.value.sensorAddress0.enabled) {
                 viewModel.viewState.value.sensorAddress0.enabled = it
+                setStateChanged(viewModel)
             }
             Column {
                 ConfigCompose(
@@ -236,6 +237,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
         Row {
             EnableCompose(ADDRESS_1, viewModel.viewState.value.sensorAddress1.enabled) {
                 viewModel.viewState.value.sensorAddress1.enabled = it
+                setStateChanged(viewModel)
             }
             Column {
                 ConfigCompose(
@@ -278,6 +280,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
         Row {
             EnableCompose(ADDRESS_2, viewModel.viewState.value.sensorAddress2.enabled) {
                 viewModel.viewState.value.sensorAddress2.enabled = it
+                setStateChanged(viewModel)
             }
             Column {
                 ConfigCompose(
@@ -320,6 +323,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
         Row {
             EnableCompose(ADDRESS_3, viewModel.viewState.value.sensorAddress3.enabled) {
                 viewModel.viewState.value.sensorAddress3.enabled = it
+                setStateChanged(viewModel)
             }
             Column {
                 ConfigCompose(
@@ -597,6 +601,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
         LoadBasedFanControl(viewModel)
         HeatLoadBasedControl(viewModel)
         CompositeBasedControl(viewModel)
+        viewModel.modelLoadedState.value = true
     }
 
     @Composable

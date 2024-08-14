@@ -60,15 +60,18 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
+import a75f.io.logic.TaskManager;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.cloud.CloudConnectionManager;
 import a75f.io.logic.cloud.CloudConnectionResponseCallback;
 import a75f.io.logic.limits.SchedulabeLimits;
+import a75f.io.renatus.bacnet.BacNetSelectModelView;
 import a75f.io.renatus.hyperstat.ui.HyperStatFragment;
 import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
-import a75f.io.renatus.hyperstatsplit.ui.HyperStatSplitFragment;
 import a75f.io.renatus.profiles.acb.AcbProfileConfigFragment;
+import a75f.io.renatus.profiles.hss.cpu.HyperStatSplitCpuFragment;
+import a75f.io.renatus.profiles.dab.DabProfileConfigFragment;
 import a75f.io.renatus.profiles.vav.VavProfileConfigFragment;
 import a75f.io.renatus.modbus.ModbusConfigView;
 import a75f.io.renatus.modbus.util.ModbusLevel;
@@ -125,9 +128,12 @@ public class FloorPlanFragment extends Fragment {
     ArrayList<Zone> roomList = new ArrayList<>();
     private Zone roomToRename;
     private Floor floorToRename;
+    private static FloorPlanFragment instance;
     List<Floor> siteFloorList = new CopyOnWriteArrayList<>();
     List<String> siteRoomList = new CopyOnWriteArrayList<>();
     private FloorListActionMenuListener floorListActionMenuListener;
+    private RoomListActionMenuListener roomListActionMenuListener;
+    private ModuleListActionMenuListener moduleListActionMenuListener;
 
     private final BroadcastReceiver mPairingReceiver = new BroadcastReceiver() {
         @Override
@@ -184,6 +190,12 @@ public class FloorPlanFragment extends Fragment {
 
     public FloorPlanFragment() {
     }
+    public static FloorPlanFragment getInstance() {
+        if (instance == null) {
+           instance = new FloorPlanFragment();
+        }
+        return instance;
+    }
 
 
     public static FloorPlanFragment newInstance() {
@@ -207,6 +219,7 @@ public class FloorPlanFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.floorplan, container, false);
         ButterKnife.bind(this, rootView);
+        instance = this;
         return rootView;
     }
 
@@ -216,6 +229,7 @@ public class FloorPlanFragment extends Fragment {
         enableFloorButton();
         disableRoomModule();
         Globals.getInstance().selectedTab = 0;
+        TaskManager.INSTANCE.disposeCurrentTask();
     }
 
 
@@ -226,9 +240,11 @@ public class FloorPlanFragment extends Fragment {
         floorListActionMenuListener = new FloorListActionMenuListener(this);
         floorListView.setMultiChoiceModeListener(floorListActionMenuListener);
         roomListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
-        roomListView.setMultiChoiceModeListener(new RoomListActionMenuListener(this));
+        roomListActionMenuListener = new RoomListActionMenuListener(this);
+        roomListView.setMultiChoiceModeListener(roomListActionMenuListener);
         moduleListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
-        moduleListView.setMultiChoiceModeListener(new ModuleListActionMenuListener(this));
+        moduleListActionMenuListener = new ModuleListActionMenuListener(this);
+        moduleListView.setMultiChoiceModeListener(moduleListActionMenuListener);
     }
 
 
@@ -267,6 +283,11 @@ public class FloorPlanFragment extends Fragment {
         updateFloors();
         CcuLog.i("UI_PROFILING", "FloorPlanFragment.refreshScreen Done");
 
+    }
+    public void destroyActionBar() {
+            floorListActionMenuListener.destroyActionBar();
+            roomListActionMenuListener.destroyActionBar();
+            moduleListActionMenuListener.destroyActionBar();
     }
 
 
@@ -309,7 +330,7 @@ public class FloorPlanFragment extends Fragment {
     }
 
     private void updateRooms(ArrayList<Zone> zones) {
-        mRoomListAdapter = new DataArrayAdapter<>(this.getActivity(), R.layout.listviewitem, zones);
+        mRoomListAdapter = new DataArrayAdapter<>(this.getActivity(), R.layout.listviewitem, zones, new ArrayList<>(), roomListActionMenuListener.selectedRoom);
         roomListView.setAdapter(mRoomListAdapter);
         enableRoomBtn();
         if (mRoomListAdapter.getCount() > 0) {
@@ -430,7 +451,7 @@ public class FloorPlanFragment extends Fragment {
         CcuLog.d(L.TAG_CCU_UI, "Zone Selected " + zone.getDisplayName());
         List<Equip> zoneEquips = HSUtil.getEquipsWithoutSubEquips(zone.getId());
         if (zoneEquips != null && (!zoneEquips.isEmpty())) {
-            mModuleListAdapter = new DataArrayAdapter<>(FloorPlanFragment.this.getActivity(), R.layout.listviewitem, createAddressList(zoneEquips));
+            mModuleListAdapter = new DataArrayAdapter<>(FloorPlanFragment.this.getActivity(), R.layout.listviewitem, createAddressList(zoneEquips), moduleListActionMenuListener.seletedModules, new ArrayList<>());
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -1030,8 +1051,11 @@ public class FloorPlanFragment extends Fragment {
                             .newInstance(Short.parseShort(nodeAddress), zone.getId(), NodeType.SMART_NODE, floor.getId()), FragmentPLCConfiguration.ID);
                     break;
                 case DAB:
-                    showDialogFragment(FragmentDABConfiguration
-                            .newInstance(Short.parseShort(nodeAddress), zone.getId(), NodeType.SMART_NODE, floor.getId(), profile.getProfileType()), FragmentDABConfiguration.ID);
+                    Equip equipDab = profile.getEquip();
+                    CcuLog.i(L.TAG_CCU_UI, "equip domainName "+equipDab.getDomainName()+" "+profile.getProfileType());
+                    NodeType nodeTypeDab = equipDab.getDomainName().contains("helionode") ? NodeType.HELIO_NODE : NodeType.SMART_NODE;
+                    showDialogFragment(DabProfileConfigFragment.Companion
+                            .newInstance(Short.parseShort(nodeAddress), zone.getId(), floor.getId(), nodeTypeDab, profile.getProfileType()), DabProfileConfigFragment.Companion.getID());
                     break;
                 case DUAL_DUCT:
                     showDialogFragment(FragmentDABDualDuctConfiguration
@@ -1088,9 +1112,9 @@ public class FloorPlanFragment extends Fragment {
                             HyperStatFragment.ID);
                     break;
                 case HYPERSTATSPLIT_CPU:
-                    showDialogFragment(HyperStatSplitFragment.newInstance(Short.parseShort(nodeAddress)
+                    showDialogFragment(HyperStatSplitCpuFragment.Companion.newInstance(Short.parseShort(nodeAddress)
                                     , zone.getId(), floor.getId(),NodeType.HYPERSTATSPLIT, profile.getProfileType()),
-                            HyperStatSplitFragment.ID);
+                            HyperStatSplitCpuFragment.Companion.getID());
                     break;
                 case MODBUS_UPS30:
                 case MODBUS_UPS80:
@@ -1113,6 +1137,9 @@ public class FloorPlanFragment extends Fragment {
                 case MODBUS_DEFAULT:
                 case MODBUS_EMR_ZONE:
                     showDialogFragment(ModbusConfigView.Companion.newInstance(Short.parseShort(nodeAddress), zone.getId(), floor.getId(), profile.getProfileType(), ModbusLevel.ZONE,""), ModbusConfigView.Companion.getID());
+                    break;
+                case BACNET_DEFAULT:
+                    showDialogFragment(BacNetSelectModelView.Companion.newInstance(Short.parseShort(nodeAddress), zone.getId(), floor.getId(), profile.getProfileType(), ModbusLevel.ZONE,""), BacNetSelectModelView.Companion.getID());
                     break;
             }
         } else

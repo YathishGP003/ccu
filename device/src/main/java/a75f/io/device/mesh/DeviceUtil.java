@@ -40,11 +40,14 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
+import a75f.io.api.haystack.RawPoint;
+import a75f.io.api.haystack.Zone;
 import a75f.io.constants.DeviceFieldConstants;
 import a75f.io.device.serial.CcuToCmOverUsbCmRelayActivationMessage_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.domain.api.Domain;
 import a75f.io.domain.api.PhysicalPoint;
+import a75f.io.domain.api.DomainName;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.Port;
@@ -66,7 +69,14 @@ public class DeviceUtil {
                ||port.equals(Port.ANALOG_OUT_THREE.name())
                ||port.equals(Port.ANALOG_OUT_FOUR.name()));
     }
-    
+
+    public static boolean isAnalog(RawPoint rawPoint) {
+        return (rawPoint.getDomainName().equals(DomainName.analog1Out)
+                ||rawPoint.getDomainName().equals(DomainName.analog2Out)
+                ||rawPoint.getDomainName().equals(DomainName.analog3Out)
+                ||rawPoint.getDomainName().equals(DomainName.analog4Out));
+    }
+
     public static short mapAnalogOut(String type, short val) {
         val = (short)Math.min(val, 100);
         val = (short)Math.max(val, 0);
@@ -103,13 +113,13 @@ public class DeviceUtil {
         return 0;
     }
 
-    public static short getMaxUserTempLimits(double deadband){
-        double maxCool = BuildingTunerCache.getInstance().getMaxCoolingUserLimit();
+    public static short getMaxUserTempLimits(double deadband, String zoneId){
+        double maxCool = CCUHsApi.getInstance().readPointPriorityValByQuery("cooling and user and limit and max and roomRef == \""+zoneId+"\"");
         return (short)(maxCool- deadband);
     }
     
-    public static short getMinUserTempLimits(double deadband){
-        double maxHeat =  BuildingTunerCache.getInstance().getMinHeatingUserLimit();
+    public static short getMinUserTempLimits(double deadband, String zoneId){
+        double maxHeat = CCUHsApi.getInstance().readPointPriorityValByQuery("heating and user and limit and min and roomRef == \""+zoneId+"\"");
         return (short)(maxHeat+ deadband);
     }
     
@@ -399,6 +409,20 @@ public class DeviceUtil {
             default: return null;
         }
     }
+    public static double getMaxCoolingUserLimit(String zoneId){
+        return  CCUHsApi.getInstance().readPointPriorityValByQuery("cooling and user and limit and max and roomRef == \""+zoneId+"\"");
+    }
 
+    public static double getMinCoolingUserLimit(String zoneId){
+        return  CCUHsApi.getInstance().readPointPriorityValByQuery("cooling and user and limit and min and roomRef == \""+zoneId+"\"");
+    }
+
+    public static double getMaxHeatingUserLimit(String zoneId){
+        return  CCUHsApi.getInstance().readPointPriorityValByQuery("heating and user and limit and max and roomRef == \""+zoneId+"\"");
+    }
+
+    public static double getMinHeatingUserLimit(String zoneId){
+        return  CCUHsApi.getInstance().readPointPriorityValByQuery("heating and user and limit and min and roomRef == \""+zoneId+"\"");
+    }
 
 }

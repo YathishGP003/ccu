@@ -37,6 +37,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -70,6 +71,7 @@ import java.net.ServerSocket;
 import java.util.Enumeration;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -656,7 +658,7 @@ public class Communication extends Fragment {
 
         if(etTrendLogObjects.getText().toString().equals(EMPTY_STRING) || (!CCUUiUtil.isValidNumber(Integer.parseInt(etTrendLogObjects.getText().toString()), 0, 10, 1)))  return false;
 
-        if(etOffsetValues.getText().toString().equals(EMPTY_STRING) || (!CCUUiUtil.isValidNumber(Integer.parseInt(etOffsetValues.getText().toString()), 0, 100, 1)))  return false;
+        if(etOffsetValues.getText().toString().equals(EMPTY_STRING) || (!CCUUiUtil.isValidNumber(Integer.parseInt(etOffsetValues.getText().toString()), 1, 100, 1)))  return false;
         return !etScheduleObjects.getText().toString().equals(EMPTY_STRING) && (CCUUiUtil.isValidNumber(Integer.parseInt(etScheduleObjects.getText().toString()), 0, 10, 1));
     }
 
@@ -754,7 +756,11 @@ public class Communication extends Fragment {
                                 if(validateEntries()){
                                     initializeBACnet.setEnabled(true);
                                     initializeBACnet.setClickable(true);
-                                    initializeBACnet.setTextColor(R.attr.orange_75f);
+
+                                    TypedValue typedValue = new TypedValue();
+                                    requireActivity().getTheme().resolveAttribute(R.attr.orange_75f, typedValue, true);
+                                    int color = typedValue.data;
+                                    initializeBACnet.setTextColor(color);
                                 }else{
                                     initializeBACnet.setEnabled(false);
                                     initializeBACnet.setClickable(false);
@@ -768,7 +774,11 @@ public class Communication extends Fragment {
                             if(validateEntries()){
                                 initializeBACnet.setEnabled(true);
                                 initializeBACnet.setClickable(true);
-                                initializeBACnet.setTextColor(R.attr.orange_75f);
+
+                                TypedValue typedValue = new TypedValue();
+                                requireActivity().getTheme().resolveAttribute(R.attr.orange_75f, typedValue, true);
+                                int color = typedValue.data;
+                                initializeBACnet.setTextColor(color);
                             }else{
                                 initializeBACnet.setEnabled(false);
                                 initializeBACnet.setClickable(false);

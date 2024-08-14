@@ -22,7 +22,7 @@ import a75f.io.domain.api.DomainName.systemStaticPressureMinimum
  */
 
 class ExternalAhuConfiguration (profileType : String)
-    : ProfileConfiguration(-1, "CONTROL_MOTO", 0, "SYSTEM", "SYSTEM",  profileType ) {
+    : ProfileConfiguration(99, "CONTROL_MOTO", 0, "SYSTEM", "SYSTEM",  profileType ) {
 
     var setPointControl = EnableConfig(satSetpointControlEnable)
     var dualSetPointControl = EnableConfig(dualSetpointControlEnable)
@@ -88,7 +88,7 @@ class ExternalAhuConfiguration (profileType : String)
     }
 
     override fun toString(): String {
-        return "setPointControl ${setPointControl.enabled} dualSetPointControl ${dualSetPointControl.enabled} " +
+        return "group $nodeAddress setPointControl ${setPointControl.enabled} dualSetPointControl ${dualSetPointControl.enabled} " +
                 "fanStaticSetPointControl ${fanStaticSetPointControl.enabled} dcvControl ${dcvControl.enabled} " +
                 "occupancyMode ${occupancyMode.enabled} humidifierControl ${humidifierControl.enabled} dehumidifierControl " +
                 "${dehumidifierControl.enabled} heatingMinSp ${heatingMinSp.currentVal} " +

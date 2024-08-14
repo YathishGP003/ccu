@@ -42,6 +42,7 @@ import a75f.io.renatus.modbus.util.showErrorDialog
 import a75f.io.renatus.modbus.util.showToast
 import a75f.io.renatus.util.ProgressDialogUtils
 import a75f.io.renatus.util.RxjavaUtil
+import a75f.io.renatus.util.highPriorityDispatcher
 import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
@@ -49,8 +50,12 @@ import android.content.Intent
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
 import com.google.gson.JsonParseException
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.text.DecimalFormat
 import kotlin.properties.Delegates
 
@@ -208,11 +213,9 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
 
     fun saveConfiguration() {
         if (checkValidConfiguration()) {
-            RxjavaUtil.executeBackgroundTask({
-                ProgressDialogUtils.showProgressDialog(
-                    context, "Saving Profile Configuration..."
-                )
-            }, {
+            hayStack.resetCcuReady()
+            ProgressDialogUtils.showProgressDialog(context, "Saving Profile Configuration")
+            viewModelScope.launch (highPriorityDispatcher) {
                 if (L.ccu().systemProfile != null) {
                     if (profileType != L.ccu().systemProfile.profileType) {
                         L.ccu().systemProfile!!.deleteSystemEquip()
@@ -226,16 +229,17 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
                     addEquip()
                     saveExternalEquip()
                 }
-            }, {
                 L.saveCCUState()
-                CCUHsApi.getInstance().setCcuReady()
-                CCUHsApi.getInstance().syncEntityTree()
                 context.sendBroadcast(Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED))
-                ProgressDialogUtils.hideProgressDialog()
+                withContext(Dispatchers.Main) {
+                    ProgressDialogUtils.hideProgressDialog()
+                }
                 equipModel.value.isDevicePaired = true
-                showToast("Configuration saved successfully", context)
                 configModel.value.isStateChanged = false
-            })
+                showToast("Configuration saved successfully", context)
+                hayStack.syncEntityTree()
+                hayStack.setCcuReady()
+            }
         }
     }
 

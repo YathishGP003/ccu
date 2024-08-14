@@ -1854,11 +1854,11 @@ class HyperStatPointsUtil(
     fun addProfilePoints() {
         val occupancyDetectionMarkers = arrayOf (
             Tags.OCCUPANCY, Tags.HIS, Tags.SP, Tags.ZONE,
-            Tags.DETECTION,Tags.AUTO,Tags.AWAY,Tags.WRITABLE
+            Tags.DETECTION,Tags.AUTO,Tags.AWAY
         )
         val occupancyMarkers = arrayOf (
             Tags.OCCUPANCY, Tags.MODE,  Tags.HIS,
-            Tags.SP,  Tags.ZONE,Tags.WRITABLE
+            Tags.SP,  Tags.ZONE
         )
         val operatingModeMarkers = arrayOf (
             Tags.MODE, Tags.HIS, Tags.SP,

@@ -11,6 +11,7 @@ import a75f.io.domain.api.Point
 import a75f.io.domain.api.Site
 import a75f.io.domain.devices.CmBoardDevice
 import a75f.io.domain.devices.ConnectDevice
+import a75f.io.domain.equips.DabEquip
 import a75f.io.domain.equips.DefaultSystemEquip
 import a75f.io.domain.equips.DomainEquip
 import a75f.io.domain.equips.VavAdvancedHybridSystemEquip
@@ -72,6 +73,7 @@ object DomainManager {
                 CcuLog.i(Domain.LOG_TAG, "Build domain $it")
                 when{
                     it.contains("vav") -> Domain.equips[it["id"].toString()] = VavEquip(it["id"].toString())
+                    it.contains("dab") -> Domain.equips[it["id"].toString()] = DabEquip(it["id"].toString())
                 }
             }
 
@@ -150,6 +152,7 @@ object DomainManager {
     fun addDomainEquip(equip: a75f.io.api.haystack.Equip) {
         when {
             equip.markers.contains("vav") -> Domain.equips[equip.id] = VavEquip(equip.id)
+            equip.markers.contains("dab") -> Domain.equips[equip.id] = DabEquip(equip.id)
         }
     }
 
@@ -293,6 +296,14 @@ object DomainManager {
         Domain.site?.floors?.get(hayStackPoint.floorRef)?.
         rooms?.get(hayStackPoint.roomRef)?.equips?.get(hayStackPoint.equipRef)?.
         points?.remove(hayStackPoint.domainName, Point(hayStackPoint.domainName, hayStackPoint.equipRef))
+    }
+    fun removeDeviceRawPoint(hayStackPoint : a75f.io.api.haystack.RawPoint) {
+        if (Domain.site == null) {
+            return
+        }
+        Domain.site?.floors?.get(hayStackPoint.floorRef)?.
+        rooms?.get(hayStackPoint.roomRef)?.devices?.get(hayStackPoint.deviceRef)?.
+        points?.remove(hayStackPoint.domainName, Point(hayStackPoint.domainName, hayStackPoint.deviceRef))
     }
 }
 

@@ -78,16 +78,24 @@ class ModelValidator {
                 MODEL_HN_VAV_PARALLEL_FAN,
                 MODEL_SN_VAV_ACB,
                 MODEL_HN_VAV_ACB,
+                MODEL_HYPERSTAT_SPLIT_CPU,
                 MODEL_SN_BYPASS_DAMPER,
                 MODEL_SMART_NODE_DEVICE,
                 MODEL_HELIO_NODE_DEVICE,
+                MODEL_HYPERSTAT_SPLIT_DEVICE,
                 MODEL_EXTERNAL_AHU_DAB,
                 MODEL_EXTERNAL_AHU_VAV,
                 MODEL_VAV_STAGED_RTU,
                 MODEL_VAV_STAGED_VFD_RTU,
                 MODEL_VAV_MODULATING_AHU,
+                MODEL_EXTERNAL_AHU_VAV,
+                MODEL_SMART_NODE_DAB,
+                MODEL_HELIO_NODE_DAB,
+                MODEL_VAV_MODULATING_AHU,
                 MODEL_VAV_ADVANCED_AHU_V2_CM,
                 MODEL_VAV_ADVANCED_AHU_V2_CONNECT,
+                MODEL_CM_DEVICE,
+                MODEL_CONNECT_DEVICE
             )
         }
     }

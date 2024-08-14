@@ -53,7 +53,7 @@ public class Preconditioning implements OccupancyTrigger {
         if (occupied != null && occupied.getVacation() != null) {
             return false;
         }
-        double currentTemp = CCUHsApi.getInstance().readHisValByQuery("current and air and temp and equipRef == \""+equipId+"\"");
+        double currentTemp = CCUHsApi.getInstance().readHisValByQuery("(space or current) and air and temp and equipRef == \""+equipId+"\"");
         double desiredTemp = CCUHsApi.getInstance().readHisValByQuery("desired and air and temp and average and equipRef == \""+equipId+"\"");
         double tempDiff = currentTemp - desiredTemp;
         double preconRate = TunerUtil.readTunerValByQuery("standalone and preconditioning and rate and " +

@@ -1,7 +1,7 @@
 package a75f.io.renatus;
 
 import static a75f.io.device.bacnet.BacnetUtilKt.addBacnetTags;
-import static a75f.io.renatus.FragmentDABConfiguration.CARRIER_PROD;
+import static a75f.io.logic.bo.building.dab.DabProfile.CARRIER_PROD;
 
 import android.app.Dialog;
 import android.content.Intent;
@@ -17,7 +17,6 @@ import android.widget.Button;
 import android.widget.NumberPicker;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.ToggleButton;
 
 import androidx.annotation.Nullable;
 

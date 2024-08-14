@@ -253,11 +253,11 @@ public class TempOverrideFragment extends Fragment {
                                 tunerList.add(siteName+"-CM-"+t.get("dis").toString());
                             }
                         } else if (t.get("domainName").toString().startsWith(("analog"))) {
-                            tunerList.add(t.get("dis").toString());
+                            tunerList.add(t.get("dis").toString()+"-"+m.get("addr").toString());
                         } else if (t.get("domainName").toString().startsWith(("relay"))) {
-                            tunerList.add(t.get("dis").toString());
+                            tunerList.add(t.get("dis").toString()+"-"+m.get("addr").toString());
                         } else if (t.get("domainName").toString().startsWith(("th"))) {
-                            tunerList.add(t.get("dis").toString());
+                            tunerList.add(t.get("dis").toString()+"-"+m.get("addr").toString());
                         }
                     } else if (NewexpandedListText.toLowerCase().startsWith("analog")) {
                         tunerList.add(t.get("dis").toString());
@@ -383,7 +383,8 @@ public class TempOverrideFragment extends Fragment {
                     if (m.get("dis").toString().contains("cmBoardDevice")) {
                         pointMap.put(siteName+"-CM-"+t.get("dis").toString(), t.get("id").toString());
                     } else {
-                        pointMap.put(t.get("dis").toString(), t.get("id").toString());
+                        String val = (t.containsKey("domainName")) ? t.get("dis").toString()+"-"+m.get("addr").toString() : t.get("dis").toString();
+                        pointMap.put(val, t.get("id").toString());
                     }
                     //pointMap.put(t.get("dis").toString(), t.get("id").toString());
                 }

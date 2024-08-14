@@ -102,12 +102,12 @@ public class LSmartNode
         {
             double coolingDeadband =
                     CCUHsApi.getInstance().readPointPriorityValByQuery("cooling and deadband and schedulable and roomRef == \""+zone.getId()+"\"");
-            settings.maxUserTem.set(DeviceUtil.getMaxUserTempLimits(coolingDeadband));
+            settings.maxUserTem.set(DeviceUtil.getMaxUserTempLimits(coolingDeadband,zone.getId()));
     
             double heatingDeadband =
                     CCUHsApi.getInstance().readPointPriorityValByQuery("heating and deadband and schedulable and roomRef == \""+zone.getId()+"\"");
             
-            settings.minUserTemp.set(DeviceUtil.getMinUserTempLimits(heatingDeadband));
+            settings.minUserTemp.set(DeviceUtil.getMinUserTempLimits(heatingDeadband, zone.getId()));
         } catch (Exception e) {
             //Equips not having user temps are bound to throw exception
             settings.maxUserTem.set((short) 75);
@@ -144,7 +144,9 @@ public class LSmartNode
                 || equip.getProfile().equals(ProfileType.VAV_ACB.name())
                 || equip.getProfile().equals(ProfileType.VAV_REHEAT.name());
 
-        if (isVav) {
+        boolean isDab = equip.getProfile().equals(ProfileType.DAB.name());
+
+        if (isVav || isDab) {
             settings.temperatureOffset.set((short)(10*getTempOffset(address)));
         } else {
             settings.temperatureOffset.set((short)(getTempOffset(address)));
@@ -429,9 +431,9 @@ public class LSmartNode
         CCUHsApi hsApi = CCUHsApi.getInstance();
         Equip equip = new Equip.Builder().setHashMap(hsApi.readEntity("equip and group == \"" + address + "\"")).build();
         if (equip.getMarkers().contains("dab")) {
-            int damperConfig = hsApi.readDefaultVal("point and config and dab and damper and primary and type and group == \""+address+"\"").intValue();
-            int damper2Config = hsApi.readDefaultVal("point and config and dab and damper and secondary and type and group == \""+address+"\"").intValue();
-            int reheatConfig = hsApi.readDefaultVal("point and config and type and reheat and group == \""+address+"\"").intValue() - 1;
+            int damperConfig = hsApi.readDefaultVal("point and domainName == \"" + DomainName.damper1Type + "\" and group == \""+address+"\"").intValue();
+            int damper2Config = hsApi.readDefaultVal("point and domainName == \"" + DomainName.damper2Type + "\" and group == \""+address+"\"").intValue();
+            int reheatConfig = hsApi.readDefaultVal("point and domainName == \"" + DomainName.reheatType + "\" and group == \""+address+"\"").intValue() - 1;
             setupDamperActuator(settings, damperConfig, damper2Config, reheatConfig, "dab");
         } else if (equip.getMarkers().contains("vav")) {
             int damperConfig = hsApi.readDefaultVal("point and config and vav and  damper and type and group == \""+address+"\"").intValue();
@@ -630,9 +632,9 @@ public class LSmartNode
                         //Analog2 on DAB profile could be mapped to reheat or damper2. When damper 2 is MAT, type is not configured via
                         //analog.
                         if (p.getPort().equals(ANALOG_OUT_TWO)) {
-                            double damperType = hayStack.readDefaultVal("secondary and damper and type and group == \""+node+"\"");
+                            double damperType = hayStack.readDefaultVal("point and domainName == \"" + DomainName.damper2Type + "\" and group == \""+node+"\"");
                             if (damperType == DamperType.MAT.ordinal()) {
-                                double damperPos = hayStack.readHisValByQuery("normalized and damper and secondary and cmd and group == \""+node+"\"");
+                                double damperPos = hayStack.readHisValByQuery("point and domainName == \"" + DomainName.normalizedDamper2Cmd + "\"  and group == \""+node+"\"");
                                 controls_t.damperPosition.set((short)damperPos);
                             }
                         }

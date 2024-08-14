@@ -39,12 +39,13 @@ public class PreferenceUtil {
     private static final String IS_CCU_LAUNCHED = "isCcuLaunched";
     private static final String IS_NEW_EXTERNAL_AHU = "isNewExternalAhu";
     public static final String UPDATE_HIS_ITEMS = "updateHisItems";
+    private static final String IS_CCU_REBOOT_STARTED = "isCcuRebootedStarted";
 
     public static final String MODULATING_FANSPEED_MIGRATION = "modulatingFanSpeedMigration";
     public static final String SINGLE_DUAL_MIGRATION = "singleDualMigration";
 
     public static final String VAV_REHEAT_RELAY_ACTIVATION_HYSTERESIS_VALUE_MIGRATION = "vavReheatRelayActivationHysteresisValueMigration";
-    public static final String HSS_OP_MODE_WRITABLE_MARKER_MIGRATION = "hssOpModeWritableMarkerMigration";
+    public static final String HS_USER_INTENT_AND_WRITABLE_MARKER_POINTS_MIGRATION = "hsUserIntentAndWritableMarkerPointMigration";
     public static final String HS_TH_CONFIG_MIGRATION = "hsThConfigMigration";
     public static final String HS_MONITORING_GENERIC_FAULT_ENUM_MIGRATION = "hsMonitoringGenericFaultEnumMigration";
 
@@ -430,12 +431,12 @@ public class PreferenceUtil {
         setBooleanPreference(VAV_REHEAT_RELAY_ACTIVATION_HYSTERESIS_VALUE_MIGRATION, true);
     }
 
-    public static boolean getHssOpModeWritableMarkerMigration() {
-        return getBooleanPreference(HSS_OP_MODE_WRITABLE_MARKER_MIGRATION);
+    public static boolean getHsUserIntentAndWritableMarkerPointsMigration() {
+        return getBooleanPreference(HS_USER_INTENT_AND_WRITABLE_MARKER_POINTS_MIGRATION);
     }
 
-    public static void setHssOpModeWritableMarkerMigration() {
-        setBooleanPreference(HSS_OP_MODE_WRITABLE_MARKER_MIGRATION, true);
+    public static void setHsUserIntentAndWritableMarkerPointsMigration() {
+        setBooleanPreference(HS_USER_INTENT_AND_WRITABLE_MARKER_POINTS_MIGRATION, true);
     }
 
 
@@ -510,6 +511,13 @@ public class PreferenceUtil {
     }
     public static void setHisTagRemovalFromNonDmDevicesDone() {
         setBooleanPreference(HIS_TAG_REMOVAL_FROM_NON_DM_DEVICES, true);
+    }
+    public static boolean getIsCcuRebootStarted() {
+        return getBooleanPreference(IS_CCU_REBOOT_STARTED);
+    }
+
+    public static void setIsCcuRebootStarted(boolean isRebooted) {
+        setBooleanPreference(IS_CCU_REBOOT_STARTED, isRebooted);
     }
     public static boolean isVavCfmOnEdgeMigrationDone() {
         return getBooleanPreference(VAV_CFM_ON_EDGE_MIGRATION);

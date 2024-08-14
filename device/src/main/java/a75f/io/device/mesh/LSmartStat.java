@@ -148,8 +148,14 @@ public class LSmartStat {
         }
         double hdb = StandaloneTunerUtil.getStandaloneHeatingDeadband(equipId);
         double cdb = StandaloneTunerUtil.getStandaloneCoolingDeadband(equipId);
-        settings_t.minUserTemp.set(DeviceUtil.getMinUserTempLimits(hdb));
-        settings_t.maxUserTemp.set(DeviceUtil.getMaxUserTempLimits(cdb));
+        settings_t.minUserTemp.set(DeviceUtil.getMinUserTempLimits(hdb, zone.getId()));
+        settings_t.maxUserTemp.set(DeviceUtil.getMaxUserTempLimits(cdb, zone.getId()));
+        if (settings_t.maxUserTemp.get() <= 0){   // if exception happens in getting the max and min temp from the zone, then set the default values
+            settings_t.maxUserTemp.set((short) 75);
+        }
+        if (settings_t.minUserTemp.get() <= hdb){
+            settings_t.minUserTemp.set((short) 69);
+        }
         settings_t.temperatureOffset.set((byte)getTempOffset(address));
         try {
             Log.d("LSmartStat","sch status="+equipId+","+zone.getId());

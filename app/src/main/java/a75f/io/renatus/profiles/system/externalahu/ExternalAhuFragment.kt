@@ -44,9 +44,9 @@ import a75f.io.renatus.modbus.util.LOADING
 import a75f.io.renatus.modbus.util.MODBUS
 import a75f.io.renatus.modbus.util.OnItemSelect
 import a75f.io.renatus.modbus.util.SAME_AS_PARENT
+import a75f.io.renatus.modbus.util.SAVE
 import a75f.io.renatus.modbus.util.SEARCH_MODEL
 import a75f.io.renatus.modbus.util.SEARCH_SLAVE_ID
-import a75f.io.renatus.modbus.util.SET
 import a75f.io.renatus.modbus.util.SLAVE_ID
 import a75f.io.renatus.util.ProgressDialogUtils
 import android.os.Bundle
@@ -621,7 +621,7 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
                     .padding(PaddingValues(bottom = 10.dp, end = 10.dp)),
                 contentAlignment = Alignment.Center
             ) {
-                SaveTextView(SET, viewModel.configModel.value.isStateChanged) { viewModel.saveConfiguration() }
+                SaveTextView(SAVE, viewModel.configModel.value.isStateChanged) { viewModel.saveConfiguration() }
             }
         }
     }

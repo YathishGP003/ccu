@@ -13,7 +13,7 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.Units;
 import a75f.io.logic.bo.util.DemandResponseMode;
 
-import static a75f.io.logic.bo.building.dab.DabEquip.getDisName;
+import static a75f.io.logic.bo.building.dab.DabProfile.getDisName;
 import static a75f.io.logic.tuners.TunerConstants.DEFAULT_DAB_MODE_CHANGEOVER_HYSTERESIS;
 import static a75f.io.logic.tuners.TunerConstants.DEFAULT_STAGE_DOWN_TIMER_COUNTER;
 import static a75f.io.logic.tuners.TunerConstants.DEFAULT_STAGE_UP_TIMER_COUNTER;

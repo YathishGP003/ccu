@@ -48,8 +48,8 @@ import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+import static a75f.io.logic.bo.building.dab.DabProfile.CARRIER_PROD;
 import static a75f.io.logic.bo.util.DesiredTempDisplayMode.setSystemModeForDab;
-import static a75f.io.renatus.FragmentDABConfiguration.CARRIER_PROD;
 import static a75f.io.renatus.util.RxjavaUtil.executeBackground;
 
 /**

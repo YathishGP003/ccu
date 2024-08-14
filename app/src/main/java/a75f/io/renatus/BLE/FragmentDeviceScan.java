@@ -340,14 +340,19 @@ public class FragmentDeviceScan extends BaseDialogFragment
                     .setReportDelay(0)
                     .build();
 
+            if (mBluetoothLeScanner == null) {
+                mBluetoothLeScanner = mBluetoothAdapter.getBluetoothLeScanner();
+            }
             mBluetoothLeScanner.startScan(filters, scanSettings, mScanCallback);
             CcuLog.d(L.TAG_CCU_BLE,"Scan Started");
         }
         else
         {
             mScanning = false;
-            mBluetoothLeScanner.flushPendingScanResults(mScanCallback);
-            mBluetoothLeScanner.stopScan(mScanCallback);
+            if(mBluetoothLeScanner != null) {
+                mBluetoothLeScanner.flushPendingScanResults(mScanCallback);
+                mBluetoothLeScanner.stopScan(mScanCallback);
+            }
             CcuLog.d(L.TAG_CCU_BLE,"Scan Stopped");
         }
     }

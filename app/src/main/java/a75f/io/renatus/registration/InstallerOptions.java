@@ -318,7 +318,7 @@ public class InstallerOptions extends Fragment {
             addressBand.add(String.valueOf(addr));
         }
 
-        ArrayList<HashMap> equipments = ccuHsApi.readAll("equip and zone or equip and oao or equip and connectModule");
+        ArrayList<HashMap> equipments = ccuHsApi.readAll("equip and zone or (equip and oao and not hyperstatsplit) or equip and connectModule");
         if (equipments.isEmpty())
             getRegisteredAddressBand(); // doing this when no equips available
         else

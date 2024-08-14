@@ -5,6 +5,7 @@ import a75f.io.renatus.compose.GrayLabelTextColor
 import a75f.io.renatus.compose.LabelTextView
 import a75f.io.renatus.compose.ToggleButtonStateful
 import a75f.io.renatus.profiles.acb.AcbProfileViewModel
+import a75f.io.renatus.profiles.dab.DabProfileViewModel
 import a75f.io.renatus.profiles.profileUtils.UnusedPortsModel.Companion.saveConfiguration
 import a75f.io.renatus.profiles.system.StagedRtuProfileViewModel
 import a75f.io.renatus.profiles.system.VavModulatingRtuViewModel
@@ -34,10 +35,11 @@ open class UnusedPortsFragment : Fragment() {
         @Composable
         fun ShowUnUsedPorts(viewModel: Any) {
             val mapOfUnUsedPorts = when (viewModel) {
-                is StagedRtuProfileViewModel -> TreeMap(viewModel.viewState.unusedPortState)
-                is VavModulatingRtuViewModel -> TreeMap(viewModel.viewState.unusedPortState)
+                is StagedRtuProfileViewModel -> TreeMap(viewModel.viewState.value.unusedPortState)
+                is VavModulatingRtuViewModel -> TreeMap(viewModel.viewState.value.unusedPortState)
                 is VavProfileViewModel -> TreeMap(viewModel.viewState.unusedPortState)
                 is AcbProfileViewModel -> TreeMap(viewModel.viewState.unusedPortState)
+                is DabProfileViewModel -> TreeMap(viewModel.viewState.unusedPortState)
                 else -> null
             }
 

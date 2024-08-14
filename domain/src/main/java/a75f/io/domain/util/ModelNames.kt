@@ -45,4 +45,6 @@ object ModelNames {
     const val vavAdvancedHybridAhuV2_connectModule = "vavAdvancedHybridAhuV2_connectModule"
     const val dabAdvancedHybridAhuV2 = "dabAdvancedHybridAhuV2"
     const val vavAdvancedHybridAhuV2 = "vavAdvancedHybridAhuV2"
+    const val connectModuleDevice = "connectModuleDevice"
+
 }

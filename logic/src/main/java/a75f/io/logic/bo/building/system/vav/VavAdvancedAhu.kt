@@ -130,19 +130,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
         if (systemEquip.isNotEmpty()) {
             hayStack.deleteEntity(systemEquip["id"].toString())
         }
-        deleteSystemConnectModule(hayStack)
-    }
-
-    private fun deleteSystemConnectModule(hayStack: CCUHsApi) {
-        val connectSystemEquip = hayStack.readEntity("domainName == \"" + DomainName.vavAdvancedHybridAhuV2_connectModule + "\"")
-        if (connectSystemEquip.isNotEmpty()) {
-            hayStack.deleteEntityTree(connectSystemEquip["id"].toString())
-        }
-
-        val connectDevice = getConnectDevice()
-        if (connectDevice.isNotEmpty()) {
-            hayStack.deleteEntityTree(connectDevice["id"].toString())
-        }
+        deleteSystemConnectModule()
     }
 
     override fun isCoolingAvailable(): Boolean {

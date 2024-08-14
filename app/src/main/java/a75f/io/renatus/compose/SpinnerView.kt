@@ -252,7 +252,7 @@ fun SpinnerElementOption(
 @Composable
 fun getItemData(value: String, unit: String, viewModel: AdvancedHybridAhuViewModel? = null): Pair<String, String> {
     if (viewModel != null) {
-        val isChecked by viewModel.isChecked.collectAsState()
+        val isChecked by viewModel.isCelsiusChecked.collectAsState()
         if (isChecked) {
             return if (unit.equals("°F", ignoreCase = true)) {
                 val number = BigDecimal(UnitUtils.fahrenheitToCelsiusTwoDecimal(value.toDouble()))

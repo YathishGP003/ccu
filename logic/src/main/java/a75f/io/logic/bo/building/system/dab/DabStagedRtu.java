@@ -666,7 +666,7 @@ public class DabStagedRtu extends DabSystemProfile
     
     @Override
     public synchronized void deleteSystemEquip() {
-        HashMap equip = CCUHsApi.getInstance().read("equip and system and not modbus");
+        HashMap equip = CCUHsApi.getInstance().read("system and equip and not modbus and not connectModule");
         if (equip.get("profile").equals(ProfileType.SYSTEM_DAB_STAGED_RTU.name())) {
             CCUHsApi.getInstance().deleteEntityTree(equip.get("id").toString());
         }

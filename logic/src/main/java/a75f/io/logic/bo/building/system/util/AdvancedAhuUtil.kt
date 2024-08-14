@@ -1,9 +1,7 @@
 package a75f.io.logic.bo.building.system.util
 
 import a75f.io.api.haystack.CCUHsApi
-import a75f.io.api.haystack.util.hayStack
 import a75f.io.domain.api.Domain
-import a75f.io.domain.api.DomainName
 import a75f.io.domain.equips.AdvancedHybridSystemEquip
 import a75f.io.domain.equips.ConnectModuleEquip
 import a75f.io.domain.equips.DabAdvancedHybridSystemEquip
@@ -16,6 +14,7 @@ import a75f.io.logic.bo.building.system.dab.DabAdvancedAhu
 import a75f.io.logic.bo.building.system.vav.VavAdvancedAhu
 import android.annotation.SuppressLint
 import io.seventyfivef.ph.core.Tags
+import java.util.ArrayList
 import kotlin.system.measureTimeMillis
 
 /**
@@ -64,9 +63,18 @@ fun roundOff(value: Double): Double {
     return String.format("%.2f", value).toDouble()
 }
 
-fun getConnectDevice(): HashMap<Any, Any> {
-    return CCUHsApi.getInstance().readEntity("domainName == \"" + DomainName.connectModuleDevice + "\"")
+fun readEntity(domainName: String): HashMap<Any, Any> {
+    return CCUHsApi.getInstance().readEntity("domainName == \"$domainName\"")
 }
+
+fun getConnectDevice(): HashMap<Any, Any> {
+    return readEntity(ModelNames.connectModuleDevice)
+}
+fun getAllConnectDevice(): ArrayList<HashMap<Any, Any>> {
+    return CCUHsApi.getInstance().readAllEntities("domainName == \"" + ModelNames.connectModuleDevice + "\"")
+}
+
+fun getDis(name: String): String = "${CCUHsApi.getInstance().siteName}-$name"
 
 fun isConnectModuleAvailable(): Boolean = getConnectDevice().isNotEmpty()
 
@@ -116,9 +124,12 @@ fun deleteSystemConnectModule() {
     deleteSystemConnectModule(ModelNames.dabAdvancedHybridAhuV2_connectModule)
 }
 
-fun deleteSystemProfile(systemProfileId: String){
+fun deleteCurrentSystemProfile() {
     val deleteTime = measureTimeMillis {
-        hayStack.deleteEntityTree(systemProfileId)
+        val systemEquip = getCurrentSystemEquip()
+        if (systemEquip.isNotEmpty()) {
+            CCUHsApi.getInstance().deleteEntityTree(systemEquip[Tags.ID].toString())
+        }
     }
     CcuLog.i(L.TAG_CCU_DOMAIN, "Time taken to delete entities: $deleteTime")
 }
@@ -126,7 +137,7 @@ fun deleteSystemProfile(systemProfileId: String){
 fun deleteSystemConnectModule(modelName: String) {
     val hayStack = CCUHsApi.getInstance()
 
-    val connectEquip = hayStack.readEntity("domainName == \"$modelName\"")
+    val connectEquip = readEntity(modelName)
     if (connectEquip.isNotEmpty()) {
         hayStack.deleteEntityTree(connectEquip[Tags.ID].toString())
     }
@@ -137,18 +148,14 @@ fun deleteSystemConnectModule(modelName: String) {
     }
 }
 
-fun getVavCmEquip(): HashMap<Any, Any> {
-    return CCUHsApi.getInstance().readEntity("domainName == \"" + ModelNames.vavAdvancedHybridAhuV2 + "\"")
-}
+fun getVavCmEquip(): HashMap<Any, Any> = readEntity(ModelNames.vavAdvancedHybridAhuV2)
 
-fun getDabCmEquip(): HashMap<Any, Any> {
-    return CCUHsApi.getInstance().readEntity("domainName == \"" + ModelNames.dabAdvancedHybridAhuV2 + "\"")
-}
+fun getDabCmEquip(): HashMap<Any, Any> = readEntity(ModelNames.dabAdvancedHybridAhuV2)
 
-fun getVavConnectEquip(): HashMap<Any, Any> {
-    return CCUHsApi.getInstance().readEntity("domainName == \"" + ModelNames.vavAdvancedHybridAhuV2_connectModule + "\"")
-}
+fun getVavConnectEquip(): HashMap<Any, Any> = readEntity(ModelNames.vavAdvancedHybridAhuV2_connectModule)
 
-fun getDabConnectEquip(): HashMap<Any, Any> {
-    return CCUHsApi.getInstance().readEntity("domainName == \"" + ModelNames.dabAdvancedHybridAhuV2_connectModule + "\"")
+fun getDabConnectEquip(): HashMap<Any, Any> = readEntity(ModelNames.dabAdvancedHybridAhuV2_connectModule)
+
+fun getCurrentSystemEquip(): HashMap<Any, Any> {
+    return CCUHsApi.getInstance().readEntity("system and equip and not modbus and not connectModule")
 }

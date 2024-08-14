@@ -424,12 +424,6 @@ object DomainName {
     const val th1In = "th1In"
     const val th2In = "th2In"
 
-    const val vavAdvancedHybridAhuV2 = "vavAdvancedHybridAhuV2"
-    const val vavAdvancedHybridAhuV2_connectModule = "vavAdvancedHybridAhuV2_connectModule"
-    const val connectModuleDevice = "connectModuleDevice"
-
-    const val dabAdvancedHybridAhuV2_connectModule = "dabAdvancedHybridAhuV2_connectModule"
-
     const val smartnodeVAVReheatNoFan = "smartnodeVAVReheatNoFan"
     const val smartnodeVAVReheatParallelFan = "smartnodeVAVReheatParallelFan"
     const val smartnodeVAVReheatSeriesFan = "smartnodeVAVReheatSeriesFan"

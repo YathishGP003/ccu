@@ -7,6 +7,7 @@ import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.api.PhysicalPoint
 import a75f.io.domain.logic.DeviceBuilder
+import a75f.io.domain.logic.DomainManager
 import a75f.io.domain.logic.EntityMapper
 import a75f.io.domain.logic.ProfileEquipBuilder
 import a75f.io.domain.logic.toDouble
@@ -20,14 +21,18 @@ import a75f.io.logic.bo.building.system.getAnalogOutLogicalPhysicalMap
 import a75f.io.logic.bo.building.system.getCMRelayLogicalPhysicalMap
 import a75f.io.logic.bo.building.system.getConnectAnalogOutLogicalPhysicalMap
 import a75f.io.logic.bo.building.system.getConnectRelayLogicalPhysicalMap
+import a75f.io.logic.bo.building.system.util.AdvancedHybridAhuConfig
+import a75f.io.logic.bo.building.system.util.deleteSystemConnectModule
 import a75f.io.logic.bo.building.system.util.getAdvancedAhuSystemEquip
+import a75f.io.logic.bo.building.system.util.getAllConnectDevice
+import a75f.io.logic.bo.building.system.util.getConnectDevice
 import a75f.io.logic.bo.building.system.util.getConnectEquip
 import a75f.io.logic.bo.building.system.util.getDabCmEquip
 import a75f.io.logic.bo.building.system.util.getDabConnectEquip
+import a75f.io.logic.bo.building.system.util.getDis
 import a75f.io.logic.bo.building.system.util.getVavCmEquip
 import a75f.io.logic.bo.building.system.util.getVavConnectEquip
 import a75f.io.logic.bo.building.system.vav.VavAdvancedAhu
-import a75f.io.logic.bo.building.system.util.AdvancedHybridAhuConfig
 import a75f.io.logic.bo.util.UnitUtils
 import a75f.io.renatus.R
 import a75f.io.renatus.modbus.util.ALERT
@@ -48,6 +53,7 @@ import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfilePointDef
 import io.seventyfivef.domainmodeler.common.point.Constraint
 import io.seventyfivef.domainmodeler.common.point.MultiStateConstraint
 import io.seventyfivef.domainmodeler.common.point.NumericConstraint
+import io.seventyfivef.ph.core.Tags
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -62,40 +68,47 @@ import kotlinx.coroutines.withContext
 open class AdvancedHybridAhuViewModel : ViewModel() {
 
     open var viewState = mutableStateOf(AdvancedHybridAhuState())
+
+    private lateinit var cmDeviceBuilder: DeviceBuilder
+    private lateinit var cmDeviceModel: SeventyFiveFDeviceDirective
+
+    lateinit var context: Context
+
     lateinit var cmModel: SeventyFiveFProfileDirective
     lateinit var connectModel: SeventyFiveFProfileDirective
-    lateinit var cmDeviceModel: SeventyFiveFDeviceDirective
     lateinit var connectDeviceModel: SeventyFiveFDeviceDirective
-    lateinit var context: Context
     lateinit var profileConfiguration: AdvancedHybridAhuConfig
     lateinit var hayStack: CCUHsApi
     lateinit var cmEquipBuilder: ProfileEquipBuilder
     lateinit var connectEquipBuilder: ProfileEquipBuilder
-    lateinit var cmDeviceBuilder: DeviceBuilder
     lateinit var connectDeviceBuilder: DeviceBuilder
+
     private var isEquipPaired = false
+    private val celsiusEnabled = MutableStateFlow(UnitUtils.isCelsiusTunerAvailableStatus())
+
     var isConnectModulePaired = false
-    var saveJob : Job? = null
-    private val _isChecked = MutableStateFlow(UnitUtils.isCelsiusTunerAvailableStatus())
-    val isChecked: StateFlow<Boolean> = _isChecked
+    var saveJob: Job? = null
+    val isCelsiusChecked: StateFlow<Boolean> = celsiusEnabled
+
     fun toggleChecked() {
-        _isChecked.value = !_isChecked.value
+        celsiusEnabled.value = !celsiusEnabled.value
     }
+
     /**
      * This voltage values never going to be changed so hardcoded here
      */
     var minMaxVoltage = List(11) { Option(it, it.toString()) }
-    @SuppressLint("DefaultLocale")
-    var testVoltage = List(101) { Option(it,String.format("%.1f", it * 0.1)) }
 
-    var modelLoadedState =  MutableLiveData(false)
+    @SuppressLint("DefaultLocale")
+    var testVoltage = List(101) { Option(it, String.format("%.1f", it * 0.1)) }
+
+    var modelLoadedState = MutableLiveData(false)
     val modelLoaded: LiveData<Boolean> get() = modelLoadedState
 
     /**
      * Initialize the ViewModel
      */
-    fun init(context: Context, cmProfileModel: ModelDirective,
-             connectProfileModel : ModelDirective, hayStack: CCUHsApi, profile: ProfileType) {
+    fun init(context: Context, cmProfileModel: ModelDirective, connectProfileModel: ModelDirective, hayStack: CCUHsApi, profile: ProfileType) {
 
         CcuLog.i(Domain.LOG_TAG, "Advanced AHU Init")
 
@@ -122,6 +135,122 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
         CcuLog.i(Domain.LOG_TAG, "Advanced AHU Loaded")
     }
 
+
+    fun addAdvanceAHUEquip(): String {
+        deleteSystemConnectModule()
+        val ahuEquipId = cmEquipBuilder.buildEquipAndPoints(
+                configuration = profileConfiguration.cmConfiguration,
+                modelDef = cmModel,
+                siteRef = hayStack.site!!.id,
+                equipDis = getDis(cmModel.name)
+        )
+
+        val cmDevice = hayStack.readEntity("cm and device")
+        if (cmDevice.isNotEmpty()) {
+            hayStack.deleteEntityTree(cmDevice["id"].toString())
+        }
+
+        cmDeviceBuilder.buildDeviceAndPoints(
+                configuration = profileConfiguration.cmConfiguration,
+                modelDef = cmDeviceModel,
+                equipRef = ahuEquipId,
+                siteRef = hayStack.site!!.id,
+                deviceDis = getDis(cmDeviceModel.name)
+        )
+
+        DomainManager.addSystemDomainEquip(hayStack)
+        DomainManager.addCmBoardDevice(hayStack)
+        return ahuEquipId
+    }
+
+    fun addConnectModule() {
+
+        if (profileConfiguration.connectConfiguration.connectEnabled) {
+            val connectEquipId = connectEquipBuilder.buildEquipAndPoints(
+                    configuration = profileConfiguration.connectConfiguration,
+                    modelDef = connectModel,
+                    siteRef = hayStack.site!!.id,
+                    equipDis = getDis(connectModel.name)
+            )
+
+            val connectDevice = getConnectDevice()
+            if (connectDevice.isNotEmpty()) {
+                hayStack.deleteEntityTree(connectDevice["id"].toString())
+            }
+            connectDeviceBuilder.buildDeviceAndPoints(
+                    configuration = profileConfiguration.connectConfiguration,
+                    modelDef = connectDeviceModel,
+                    equipRef = connectEquipId,
+                    siteRef = hayStack.site!!.id,
+                    deviceDis = getDis(connectDeviceModel.name)
+            )
+        }
+    }
+
+
+     fun updateConfiguration(existingConnectEquip: HashMap<Any,Any>, connectModelName: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            launch {
+                cmEquipBuilder.updateEquipAndPoints(
+                        configuration = profileConfiguration.cmConfiguration,
+                        modelDef = cmModel,
+                        siteRef = hayStack.site!!.id,
+                        equipDis = getDis(cmModel.name),
+                        isReconfiguration = true
+                )
+            }
+
+            launch { removeInvalidEquip() }
+
+            launch {
+
+                if (profileConfiguration.connectConfiguration.connectEnabled) {
+                    if (existingConnectEquip.isNotEmpty()) {
+                        connectEquipBuilder.updateEquipAndPoints(
+                                configuration = profileConfiguration.connectConfiguration,
+                                modelDef = connectModel,
+                                siteRef = hayStack.site!!.id,
+                                equipDis = getDis(connectModel.name),
+                                isReconfiguration = true
+                        )
+                    } else {
+
+                        val connectEquipId = connectEquipBuilder.buildEquipAndPoints(
+                                configuration = profileConfiguration.connectConfiguration,
+                                modelDef = connectModel,
+                                siteRef = hayStack.site!!.id,
+                                equipDis = getDis(connectModel.name)
+                        )
+
+                        connectDeviceBuilder.buildDeviceAndPoints(
+                                configuration = profileConfiguration.connectConfiguration,
+                                modelDef = connectDeviceModel,
+                                equipRef = connectEquipId,
+                                siteRef = hayStack.site!!.id,
+                                deviceDis = getDis(connectDeviceModel.name)
+                        )
+                    }
+                }
+                else {
+                    deleteSystemConnectModule(connectModelName)
+                }
+            }
+        }
+
+
+    }
+
+    fun removeInvalidEquip() {
+        // Remove connect modules if there is no any id's attached to for them
+        // this is to fix some bug found while QE
+        val connectDevices = getAllConnectDevice()
+        connectDevices.forEach { connectDevice ->
+            if (connectDevice.containsKey(Tags.ID) && connectDevice[Tags.ID] != null) {
+                hayStack.deleteEntityTree(connectDevice[Tags.ID].toString())
+            }
+        }
+
+    }
 
     /**
      * Get the Allowed values name for the given domain name
@@ -164,9 +293,7 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
         return if (point.defaultUnit != null) point.defaultUnit!! else ""
     }
 
-    private fun getPointByDomainName(
-        modelDefinition: SeventyFiveFProfileDirective, domainName: String
-    ): SeventyFiveFProfilePointDef? {
+    private fun getPointByDomainName(modelDefinition: SeventyFiveFProfileDirective, domainName: String): SeventyFiveFProfilePointDef? {
         return modelDefinition.points.find { (it.domainName.contentEquals(domainName)) }
     }
 
@@ -179,10 +306,7 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
     fun isDampersEnabled() = isAnyAnalogMappedToControl(ControlType.CO2_BASED_DAMPER_CONTROL)
     fun isCompositeEnabled() = isAnyAnalogMappedToControl(ControlType.COMPOSITE)
     private fun isAnyAnalogMappedToControl(type: ControlType): Boolean {
-        return ((this.viewState.value.analogOut1Enabled && this.viewState.value.analogOut1Association == type.ordinal)
-                || (this.viewState.value.analogOut2Enabled && this.viewState.value.analogOut2Association == type.ordinal)
-                || (this.viewState.value.analogOut3Enabled && this.viewState.value.analogOut3Association == type.ordinal)
-                || (this.viewState.value.analogOut4Enabled && this.viewState.value.analogOut4Association == type.ordinal))
+        return ((this.viewState.value.analogOut1Enabled && this.viewState.value.analogOut1Association == type.ordinal) || (this.viewState.value.analogOut2Enabled && this.viewState.value.analogOut2Association == type.ordinal) || (this.viewState.value.analogOut3Enabled && this.viewState.value.analogOut3Association == type.ordinal) || (this.viewState.value.analogOut4Enabled && this.viewState.value.analogOut4Association == type.ordinal))
     }
 
     fun isConnectCoolingLoadEnabled() = isAnyConnectAnalogMappedToControl(ConnectControlType.LOAD_BASED_COOLING_CONTROL)
@@ -191,24 +315,20 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
     fun isConnectCompositeEnabled() = isAnyConnectAnalogMappedToControl(ConnectControlType.COMPOSITE)
     fun isConnectDampersEnabled() = isAnyConnectAnalogMappedToControl(ConnectControlType.CO2_BASED_DAMPER_CONTROL)
     private fun isAnyConnectAnalogMappedToControl(type: ConnectControlType): Boolean {
-        return ((this.viewState.value.connectAnalogOut1Enabled && this.viewState.value.connectAnalogOut1Association == type.ordinal)
-                || (this.viewState.value.connectAnalogOut2Enabled && this.viewState.value.connectAnalogOut2Association == type.ordinal)
-                || (this.viewState.value.connectAnalogOut3Enabled && this.viewState.value.connectAnalogOut3Association == type.ordinal)
-                || (this.viewState.value.connectAnalogOut4Enabled && this.viewState.value.connectAnalogOut4Association == type.ordinal))
+        return ((this.viewState.value.connectAnalogOut1Enabled && this.viewState.value.connectAnalogOut1Association == type.ordinal) || (this.viewState.value.connectAnalogOut2Enabled && this.viewState.value.connectAnalogOut2Association == type.ordinal) || (this.viewState.value.connectAnalogOut3Enabled && this.viewState.value.connectAnalogOut3Association == type.ordinal) || (this.viewState.value.connectAnalogOut4Enabled && this.viewState.value.connectAnalogOut4Association == type.ordinal))
     }
 
-    fun isAnalogEnabledAndMapped(type: ControlType, enabled: Boolean, association: Int) =
-        (enabled && association == type.ordinal)
+    fun isAnalogEnabledAndMapped(type: ControlType, enabled: Boolean, association: Int) = (enabled && association == type.ordinal)
 
-    fun isAnalogEnabledAndMapped(type: ConnectControlType, enabled: Boolean, association: Int) =
-        (enabled && association == type.ordinal)
+    fun isAnalogEnabledAndMapped(type: ConnectControlType, enabled: Boolean, association: Int) = (enabled && association == type.ordinal)
 
     open fun saveConfiguration() {
         // Implemented at sub class
     }
+
     fun getModelDefaultValue(relayState: ConfigState): Int {
         lateinit var domainName: String
-        when(relayState) {
+        when (relayState) {
             viewState.value.relay1Config -> domainName = DomainName.relay1OutputAssociation
             viewState.value.relay2Config -> domainName = DomainName.relay2OutputAssociation
             viewState.value.relay3Config -> domainName = DomainName.relay3OutputAssociation
@@ -218,10 +338,10 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
             viewState.value.relay7Config -> domainName = DomainName.relay7OutputAssociation
             viewState.value.relay8Config -> domainName = DomainName.relay8OutputAssociation
         }
-        return profileConfiguration.cmConfiguration. getDefaultValConfig(domainName, profileConfiguration.cmModel).currentVal.toInt()
+        return profileConfiguration.cmConfiguration.getDefaultValConfig(domainName, profileConfiguration.cmModel).currentVal.toInt()
     }
 
-    fun sendCMRelayTestCommand(relayIndex : Int, testCommand : Boolean) {
+    fun sendCMRelayTestCommand(relayIndex: Int, testCommand: Boolean) {
         if (!isEquipPaired) {
             CcuLog.i(Domain.LOG_TAG, "System Equip does not exist")
             return
@@ -239,7 +359,7 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
         }
     }
 
-    fun sendCMAnalogTestCommand(analogIndex : Int, testVal : Double) {
+    fun sendCMAnalogTestCommand(analogIndex: Int, testVal: Double) {
         if (!isEquipPaired) {
             CcuLog.i(Domain.LOG_TAG, "System Equip does not exist")
             return
@@ -258,7 +378,7 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
     }
 
     fun updateTestCacheConfig(index: Int, resetCache: Boolean = false) {
-        when(L.ccu().systemProfile) {
+        when (L.ccu().systemProfile) {
             is VavAdvancedAhu -> {
                 if (resetCache) {
                     (L.ccu().systemProfile as VavAdvancedAhu).testConfigs.clear()
@@ -266,6 +386,7 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
                 }
                 (L.ccu().systemProfile as VavAdvancedAhu).setTestConfigs(index)
             }
+
             is DabAdvancedAhu -> {
                 if (resetCache) {
                     (L.ccu().systemProfile as DabAdvancedAhu).testConfigs.clear()
@@ -276,7 +397,7 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
         }
     }
 
-    fun sendConnectRelayTestCommand(relayIndex : Int, testCommand : Boolean) {
+    fun sendConnectRelayTestCommand(relayIndex: Int, testCommand: Boolean) {
         if (!isConnectModulePaired) {
             CcuLog.i(Domain.LOG_TAG, "System Equip does not exist")
             return
@@ -294,7 +415,7 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
         }
     }
 
-    fun sendConnectAnalogTestCommand(analogIndex : Int, testVal : Double) {
+    fun sendConnectAnalogTestCommand(analogIndex: Int, testVal: Double) {
         if (!isConnectModulePaired) {
             CcuLog.i(Domain.LOG_TAG, "System Equip does not exist")
             return
@@ -312,7 +433,7 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
         }
     }
 
-    fun getPhysicalPointForRelayIndex(relayIndex : Int, isConnect: Boolean) : PhysicalPoint? {
+    fun getPhysicalPointForRelayIndex(relayIndex: Int, isConnect: Boolean): PhysicalPoint? {
         if (isEquipPaired) {
             val relayName = getRelayNameForIndex(relayIndex)
             if (isConnect && isConnectModulePaired) {
@@ -323,7 +444,8 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
         }
         return null
     }
-    fun getConnectPhysicalPointForRelayIndex(relayIndex : Int) : PhysicalPoint? {
+
+    fun getConnectPhysicalPointForRelayIndex(relayIndex: Int): PhysicalPoint? {
         if (isEquipPaired) {
             val relayName = getRelayNameForIndex(relayIndex)
             return getConnectRelayLogicalPhysicalMap(getConnectEquip(), Domain.connect1Device).values.find { it.domainName == relayName }
@@ -332,8 +454,8 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
     }
 
 
-    private fun getRelayNameForIndex(relayIndex: Int) : String {
-        return when(relayIndex) {
+    private fun getRelayNameForIndex(relayIndex: Int): String {
+        return when (relayIndex) {
             0 -> DomainName.relay1
             1 -> DomainName.relay2
             2 -> DomainName.relay3
@@ -346,7 +468,7 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
         }
     }
 
-    fun getPhysicalPointForAnalogIndex(analogIndex : Int) : PhysicalPoint? {
+    fun getPhysicalPointForAnalogIndex(analogIndex: Int): PhysicalPoint? {
         if (isEquipPaired) {
             val systemEquip = getAdvancedAhuSystemEquip()
             val analogName = getAnalogNameForIndex(analogIndex)
@@ -355,18 +477,18 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
         return null
     }
 
-    private fun getConnectPhysicalPointForAnalogIndex(analogIndex : Int) : PhysicalPoint? {
+    private fun getConnectPhysicalPointForAnalogIndex(analogIndex: Int): PhysicalPoint? {
         if (isConnectModulePaired) {
             val connectEquip1 = getConnectEquip()
             val analogName = getAnalogNameForIndex(analogIndex)
-            return getConnectAnalogOutLogicalPhysicalMap(connectEquip1,Domain.connect1Device).values.find { it.domainName == analogName }
+            return getConnectAnalogOutLogicalPhysicalMap(connectEquip1, Domain.connect1Device).values.find { it.domainName == analogName }
         }
         return null
     }
 
 
-    private fun getAnalogNameForIndex(analogIndex: Int) : String {
-        return when(analogIndex) {
+    private fun getAnalogNameForIndex(analogIndex: Int): String {
+        return when (analogIndex) {
             0 -> DomainName.analog1Out
             1 -> DomainName.analog2Out
             2 -> DomainName.analog3Out

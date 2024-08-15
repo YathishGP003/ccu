@@ -364,6 +364,7 @@ class HyperStatSplitCpuEconProfile(equipRef: String, nodeAddress: Short) : Hyper
             economizingLoopOutput = 0
             dcvAvailable = false
             dcvLoopOutput = 0
+            if (hssEquip.dcvDamper.pointExists()) doDcvForDcvDamper()
             outsideAirLoopOutput = 0
             matThrottle = false
             outsideAirFinalLoopOutput = 0
@@ -472,6 +473,26 @@ class HyperStatSplitCpuEconProfile(equipRef: String, nodeAddress: Short) : Hyper
             hssEquip.matThrottle.writeHisVal(matThrottleNumber)
 
         }
+
+    }
+
+    private fun doDcvForDcvDamper() {
+
+        dcvAvailable = false
+        var zoneSensorCO2 = hssEquip.zoneCO2.readHisVal()
+        var zoneCO2Threshold = hssEquip.co2Threshold.readDefaultVal()
+        var co2DamperOpeningRate = hssEquip.co2DamperOpeningRate.readDefaultVal()
+        CcuLog.d(L.TAG_CCU_HSSPLIT_CPUECON, "zoneSensorCO2: " + zoneSensorCO2 + ", zoneCO2Threshold: " + zoneCO2Threshold + ", co2DamperOpeningRate: " + co2DamperOpeningRate)
+        if (occupancyStatus == Occupancy.OCCUPIED || occupancyStatus == Occupancy.FORCEDOCCUPIED || occupancyStatus == Occupancy.AUTOFORCEOCCUPIED) {
+            if (zoneSensorCO2 > zoneCO2Threshold) {
+                dcvAvailable = true
+                dcvLoopOutput = Math.max(0, Math.min(((zoneSensorCO2 - zoneCO2Threshold) / co2DamperOpeningRate).toInt(), 100))
+            }
+        }
+
+        val dcvAvailableNum = if (dcvAvailable) 1.0 else 0.0
+        hssEquip.dcvAvailable.writeHisVal(dcvAvailableNum)
+        hssEquip.dcvLoopOutput.writeHisVal(dcvLoopOutput.toDouble())
 
     }
 

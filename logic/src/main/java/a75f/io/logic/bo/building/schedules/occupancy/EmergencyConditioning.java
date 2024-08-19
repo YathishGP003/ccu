@@ -1,6 +1,8 @@
 package a75f.io.logic.bo.building.schedules.occupancy;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.HSUtil;
 import a75f.io.domain.api.DomainName;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
@@ -26,13 +28,14 @@ public class EmergencyConditioning implements OccupancyTrigger {
         double buildingLimitMin = BuildingTunerCache.getInstance().getBuildingLimitMin();
         double buildingLimitMax = BuildingTunerCache.getInstance().getBuildingLimitMax();
         double tempDeadLeeway = BuildingTunerCache.getInstance().getTempDeadLeeway();
+        Equip equip = HSUtil.getEquip(hayStack, equipId);
 
         // Get the conditioning mode for the equip
         double conditioningMode = CCUHsApi.getInstance().
                 readDefaultVal("(conditioning and mode and equipRef == \"" + equipId + "\"" + ")"+ " or " +
                         "(point and domainName == \"" + DomainName.conditioningMode + "\"" +  "and equipRef == \"" + equipId + "\"" + ")");
 
-        if (zonePriority != null && zonePriority == 0 && L.ccu().systemProfile.getProfileType() != ProfileType.SYSTEM_DEFAULT) {
+        if (zonePriority != null && zonePriority == 0 && L.ccu().systemProfile.getProfileType() != ProfileType.SYSTEM_DEFAULT && !equip.getMarkers().contains("standalone")) {
             // Check if the system is in heating or cooling range for emergency conditioning to enter
             // Check if the equip is in heating range
             boolean isWithinHeatingRange = currentTemp < buildingLimitMin

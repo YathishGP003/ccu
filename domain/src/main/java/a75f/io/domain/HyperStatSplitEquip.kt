@@ -286,7 +286,7 @@ open class HyperStatSplitEquip (equipRef : String) : DomainEquip(equipRef) {
     val standalonePrePurgeOccupiedTimeOffsetTuner = Point(DomainName.standalonePrePurgeOccupiedTimeOffsetTuner, equipRef)
     val standalonePrePurgeFanSpeedTuner = Point(DomainName.standalonePrePurgeFanSpeedTuner, equipRef)
     val prePurgeOutsideDamperOpen = Point(DomainName.prePurgeOutsideDamperOpen, equipRef)
-    val minFanRuntimePostConditioning = Point(DomainName.standaloneMinFanRuntimePostConditioning, equipRef)
+    val minFanRuntimePostConditioning = Point(DomainName.minFanRuntimePostConditioning, equipRef)
 
     val otaStatusHyperLite = Point(DomainName.otaStatusHyperlite, equipRef)
     val otaStatusConnectModule = Point(DomainName.otaStatusConnectModule, equipRef)

@@ -58,6 +58,9 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
         }
         
         if (!CCUHsApi.getInstance().isCcuReady()) {
+            if (Globals.getInstance().isSafeMode()) {
+                handleSync();
+            }
             CcuLog.d(L.TAG_CCU_JOB,"CCU not ready ! <-BuildingProcessJob ");
             return;
         }

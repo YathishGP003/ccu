@@ -155,9 +155,11 @@ public class SyncWorker extends Worker {
             pointListBatches.forEach(entityList -> {
                 ArrayList<HDict> entities = new ArrayList<>();
                 for (String deletedId : entityList) {
-                    HDictBuilder b = new HDictBuilder();
-                    b.add("id", HRef.make(deletedId.replace("@", "")));
-                    entities.add(b.toDict());
+                    if (deletedId != "null") {
+                        HDictBuilder b = new HDictBuilder();
+                        b.add("id", HRef.make(deletedId.replace("@", "")));
+                        entities.add(b.toDict());
+                    }
                 }
                 HGrid gridData = HGridBuilder.dictsToGrid(entities.toArray(new HDict[0]));
 

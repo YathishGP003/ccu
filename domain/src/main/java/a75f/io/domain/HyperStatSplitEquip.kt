@@ -180,12 +180,12 @@ open class HyperStatSplitEquip (equipRef : String) : DomainEquip(equipRef) {
     val economizingAvailable = Point(DomainName.economizingAvailable, equipRef)
     val matThrottle = Point(DomainName.matThrottle, equipRef)
 
-    val dischargeAirTemperature = Point(DomainName.dischargeAirTemperature, equipRef) // TODO: clarify
-    val mixedAirTemperature = Point(DomainName.mixedAirTemperature, equipRef) // TODO: clarify
-    val outsideTemperature = Point(DomainName.outsideTemperature, equipRef) // TODO: clarify
-    val supplyAirHumidity = Point(DomainName.supplyAirHumidity, equipRef) // TODO: clarify
-    val mixedAirHumidity = Point(DomainName.mixedAirHumidity, equipRef) // TODO: clarify
-    val outsideHumidity = Point(DomainName.outsideHumidity, equipRef) // TODO: clarify
+    val dischargeAirTemperature = Point(DomainName.dischargeAirTemperature, equipRef)
+    val mixedAirTemperature = Point(DomainName.mixedAirTemperature, equipRef)
+    val outsideTemperature = Point(DomainName.outsideTemperature, equipRef)
+    val supplyAirHumidity = Point(DomainName.supplyAirHumidity, equipRef)
+    val mixedAirHumidity = Point(DomainName.mixedAirHumidity, equipRef)
+    val outsideHumidity = Point(DomainName.outsideHumidity, equipRef)
     val ductStaticPressureSensor = Point(DomainName.ductStaticPressureSensor, equipRef)
 
     val fanEnable = Point(DomainName.fanEnable, equipRef)
@@ -221,9 +221,9 @@ open class HyperStatSplitEquip (equipRef : String) : DomainEquip(equipRef) {
     val filterStatusNC = Point(DomainName.filterStatusNC, equipRef)
     val condensateStatusNO = Point(DomainName.condensateStatusNO, equipRef)
     val condensateStatusNC = Point(DomainName.condensateStatusNC, equipRef)
-    val ductStaticPressureSensor1_1 = Point(DomainName.ductStaticPressureSensor0_1, equipRef) // TODO: clarify
-    val ductStaticPressureSensor1_2 = Point(DomainName.ductStaticPressureSensor0_2, equipRef) // TODO: clarify
-    val ductStaticPressureSensor1_10 = Point(DomainName.ductStaticPressureSensor0_10, equipRef) // TODO: clarify
+    val ductStaticPressureSensor1_1 = Point(DomainName.ductStaticPressureSensor1_1, equipRef)
+    val ductStaticPressureSensor1_2 = Point(DomainName.ductStaticPressureSensor1_2, equipRef)
+    val ductStaticPressureSensor1_10 = Point(DomainName.ductStaticPressureSensor1_10, equipRef)
 
     val enableOutsideAirOptimization = Point(DomainName.enableOutsideAirOptimization, equipRef)
 
@@ -286,7 +286,7 @@ open class HyperStatSplitEquip (equipRef : String) : DomainEquip(equipRef) {
     val standalonePrePurgeOccupiedTimeOffsetTuner = Point(DomainName.standalonePrePurgeOccupiedTimeOffsetTuner, equipRef)
     val standalonePrePurgeFanSpeedTuner = Point(DomainName.standalonePrePurgeFanSpeedTuner, equipRef)
     val prePurgeOutsideDamperOpen = Point(DomainName.prePurgeOutsideDamperOpen, equipRef)
-    val minFanRuntimePostConditioning = Point(DomainName.standaloneMinFanRuntimePostConditioning, equipRef)
+    val minFanRuntimePostConditioning = Point(DomainName.minFanRuntimePostConditioning, equipRef)
 
     val otaStatusHyperLite = Point(DomainName.otaStatusHyperlite, equipRef)
     val otaStatusConnectModule = Point(DomainName.otaStatusConnectModule, equipRef)

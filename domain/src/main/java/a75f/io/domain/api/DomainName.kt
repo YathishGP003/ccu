@@ -245,7 +245,6 @@ object DomainName {
     const val systemPrePurgeFanSpeedTuner = "systemPrePurgeFanSpeedTuner"
     const val standalonePrePurgeFanSpeedTuner = "standalonePrePurgeFanSpeedTuner"
     const val prePurgeOutsideDamperOpen = "prePurgeOutsideDamperOpen"
-    const val standaloneMinFanRuntimePostConditioning = "standaloneMinFanRuntimePostConditioning"
     const val co2DamperOpeningRate = "co2DamperOpeningRate"
     const val systemPostPurgeRuntimeTuner = "systemPostPurgeRuntimeTuner"
     const val economizingMinTemperature = "economizingMinTemperature"

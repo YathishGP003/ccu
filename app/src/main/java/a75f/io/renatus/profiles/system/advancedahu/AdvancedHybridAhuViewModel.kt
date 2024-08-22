@@ -235,6 +235,8 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
                     deleteSystemConnectModule(connectModelName)
                 }
             }
+            DomainManager.addSystemDomainEquip(hayStack)
+            DomainManager.addCmBoardDevice(hayStack)
         }
 
 

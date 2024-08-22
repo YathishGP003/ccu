@@ -312,11 +312,10 @@ public class MeshNetwork extends DeviceNetwork
             }
             
         }
-        catch (Exception e)
-        {
+        catch (Exception e)  {
             e.printStackTrace();
-        }finally {
-            if(bSeedMessage==true) {
+        } finally {
+            if (bSeedMessage) {
                 CcuLog.d(L.TAG_CCU_DEVICE,"Resetting the Seed Message variable to avoid multiple seed messages");
                 LSerial.getInstance().setResetSeedMessage(false);
             } else {

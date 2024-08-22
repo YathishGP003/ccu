@@ -118,8 +118,6 @@ public class UsbConnectService extends Service
 					// User accepted our USB connection. Try to open the device as a serial port
 					Intent intent = new Intent(ACTION_USB_CONNECT_PERMISSION_GRANTED);
 					arg0.sendBroadcast(intent);
-					//connection = usbManager.openDevice(device);
-					//new ConnectionThread().start();
 				} else {
 					// User not accepted our USB connection. Send an Intent to the Main Activity
 				
@@ -424,7 +422,7 @@ public class UsbConnectService extends Service
 			while (true) {
 				try {
 					if (!serialPortConnected) {
-						CcuLog.i(TAG, "Serial Port is not connected sleeping");
+						CcuLog.i(TAG, "connect module Serial Port is not connected sleeping");
 						if (reconnectCounter++ >= 30) {
 							CcuLog.i(TAG, "findSerialPortDevice");
 							findSerialPortDevice();
@@ -504,7 +502,7 @@ public class UsbConnectService extends Service
 				configureSerialPort();
 			} catch (Exception e) {
 				//Unstable USB connections would result in configuration failures.
-				CcuLog.e(TAG, "Connect: configureSerialPort Failed ", e);
+				CcuLog.e(TAG, "Connect: configureSerialPort Failed "+e.getMessage(), e);
 				serialPortConnected = false;
 			}
 		}
@@ -562,7 +560,7 @@ public class UsbConnectService extends Service
 				context.sendBroadcast(intent);
 			}
 		} else {
-			CcuLog.e(TAG, "CM Connect: configureSerialPort Failed ");
+			CcuLog.e(TAG, "CM Connect: serialPort is null configureSerialPort Failed ");
 			// No driver for given device, even generic CDC driver could not be loaded
 			Intent intent = new Intent(ACTION_USB_NOT_SUPPORTED);
 			context.sendBroadcast(intent);

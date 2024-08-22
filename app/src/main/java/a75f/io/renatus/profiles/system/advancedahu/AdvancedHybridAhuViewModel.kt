@@ -200,8 +200,6 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
                 )
             }
 
-            launch { removeInvalidEquip() }
-
             launch {
 
                 if (profileConfiguration.connectConfiguration.connectEnabled) {
@@ -237,19 +235,6 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
             }
             DomainManager.addSystemDomainEquip(hayStack)
             DomainManager.addCmBoardDevice(hayStack)
-        }
-
-
-    }
-
-    fun removeInvalidEquip() {
-        // Remove connect modules if there is no any id's attached to for them
-        // this is to fix some bug found while QE
-        val connectDevices = getAllConnectDevice()
-        connectDevices.forEach { connectDevice ->
-            if (connectDevice.containsKey(Tags.ID) && connectDevice[Tags.ID] != null) {
-                hayStack.deleteEntityTree(connectDevice[Tags.ID].toString())
-            }
         }
 
     }

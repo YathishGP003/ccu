@@ -134,7 +134,9 @@ public class SystemConfigMenuFragment extends Fragment {
                         if (!(oaoFragmentOpen || (bypassFragmentOpen && bypassHasUnsavedChanges))) ProgressDialogUtils.showProgressDialog(getContext(), "Loading OAO Profile");
                     } else {
                         // If Bypass Damper has been unpaired, fragment will now be a BypassFragment instead. In this case, no need to check for unsaved changes.
-                        ProgressDialogUtils.showProgressDialog(getContext(), "Loading OAO Profile");
+                        if (!oaoFragmentOpen) {
+                            ProgressDialogUtils.showProgressDialog(getContext(), "Loading OAO Profile");
+                        }
                     }
 
                 }

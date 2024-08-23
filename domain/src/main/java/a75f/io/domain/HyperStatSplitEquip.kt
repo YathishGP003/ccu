@@ -8,7 +8,7 @@ open class HyperStatSplitEquip (equipRef : String) : DomainEquip(equipRef) {
 
     val currentTemp = Point(DomainName.currentTemp, equipRef)
     val zoneHumidity = Point(DomainName.zoneHumidity, equipRef)
-    val zoneCO2 = Point(DomainName.zoneCO2, equipRef)
+    val zoneCO2 = Point(DomainName.zoneCo2, equipRef)
     val zonePm25 = Point(DomainName.zonePm25, equipRef)
     val zoneIlluminance = Point(DomainName.zoneIlluminance, equipRef)
     val zoneOccupancy = Point(DomainName.zoneOccupancy, equipRef)

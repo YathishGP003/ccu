@@ -98,7 +98,7 @@ android {
 
 dependencies {
     implementation project(':haystack')
-    implementation(group: 'io.seventyfivef', name: 'domain-modeler-api', version: '0.1.20-SNAPSHOT')
+    implementation(group: 'io.seventyfivef', name: 'domain-modeler-api', version: '0.1.23')
 
     implementation 'androidx.core:core-ktx:1.7.0'
     implementation 'androidx.appcompat:appcompat:1.6.1'

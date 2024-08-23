@@ -33,6 +33,7 @@ import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.api.haystack.util.SchedulableMigrationKt;
+import a75f.io.domain.api.DomainName;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.BuildConfig;
 import a75f.io.logic.DefaultSchedules;
@@ -40,11 +41,9 @@ import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.L;
 import a75f.io.logic.autocommission.remoteSession.RemoteSessionStatus;
 import a75f.io.logic.bo.building.ccu.RoomTempSensor;
-import a75f.io.logic.bo.building.ccu.SupplyTempSensor;
 import a75f.io.logic.bo.building.definitions.Consts;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ScheduleType;
-import a75f.io.logic.bo.building.hyperstat.common.HyperStatPointsUtil;
 import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.bo.util.CCUUtils;
@@ -53,7 +52,6 @@ import a75f.io.logic.migration.hyperstat.CpuPointsMigration;
 import a75f.io.logic.migration.hyperstat.MigratePointsUtil;
 import a75f.io.logic.migration.title24.Title24Migration;
 import a75f.io.logic.tuners.TunerConstants;
-import kotlin.Pair;
 
 public class MigrationUtil {
     private static final String TAG = "MIGRATION_UTIL";
@@ -90,8 +88,6 @@ public class MigrationUtil {
             PreferenceUtil.setCcuRefTagMigrationForDiag(true);
             CcuLog.i(TAG, "ccuRef migration for diag and system equip completed");
         }
-
-
 
 
         if (!PreferenceUtil.getTemperatureTIPortEnabled()) {
@@ -179,12 +175,17 @@ public class MigrationUtil {
                 updateDisForPointsDabToVvt(CCUHsApi.getInstance());
                 PreferenceUtil.setCarrierDabToVvtMigrationDone();
         }
+        if (!PreferenceUtil.getZoneCo2Migration()) {
+            DomainNameMigrationKt.updateDomain("zoneCO2", DomainName.zoneCo2);
+            PreferenceUtil.setZoneCo2Migration();
+        }
         removeHisTagForEquipStatusMessage(ccuHsApi);
         SchedulableMigrationKt.deleteDuplication( ccuHsApi.readAllEntities("room"));
         createMissingScheduleAblePoints(ccuHsApi);
         deleteDuplicateLimitsifAny(ccuHsApi);
         cleanUpAndCreateZoneSchedules(ccuHsApi);
         syncZoneSchedulesFromLocal(ccuHsApi);
+
         ccuHsApi.scheduleSync();
     }
 
@@ -557,16 +558,6 @@ public class MigrationUtil {
     }
 
 
-    private static void pushPointToHS(HyperStatPointsUtil hyperStatPointsUtil, Pair<Point, Object> pointDetails ){
-        String pointId = hyperStatPointsUtil.addPointToHaystack(pointDetails.getFirst());
-        if (pointDetails.getFirst().getMarkers().contains("his")) {
-            hyperStatPointsUtil.addDefaultHisValueForPoint(pointId, pointDetails.getSecond());
-        }
-        if (pointDetails.getFirst().getMarkers().contains("writable")) {
-            hyperStatPointsUtil.addDefaultValueForPoint(pointId, pointDetails.getSecond());
-        }
-    }
-
     /**
      * A duplicate alert exists when an older, *unsynced* alert with the same title and equipId also exists.
      * This will only keep the oldest alert, while deleting the others.
@@ -628,9 +619,6 @@ public class MigrationUtil {
             });
         });
     }
-
-
-
 
 
     private static void removeWritableTagForFloor() {
@@ -1325,5 +1313,7 @@ public class MigrationUtil {
         MigrationUtil.createZoneSchedulesIfMissing(hayStack);
         CcuLog.d(TAG_CCU_MIGRATION_UTIL, "cleanUpAndCreateZoneSchedules completed");
     }
+
+
 
 }

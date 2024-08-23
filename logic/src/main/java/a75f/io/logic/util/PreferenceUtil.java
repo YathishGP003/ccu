@@ -59,6 +59,7 @@ public class PreferenceUtil {
     public static final String ACB_COND_SENSOR_MIGRATION = "acbCondensateSensorMigration";
     public static final String HSS_GATEWAY_REF_MIGRATION = "hssGatewayRefMigration";
     public static final String HIS_TAG_REMOVAL_FROM_NON_DM_DEVICES = "hisTagRemovalFromNonDmDevices";
+    public static final String ZONE_CO2_MIGRATION = "ZONE_CO2_MIGRATION";
 
     public static void setContext(Context c) {
         context= c;
@@ -519,4 +520,10 @@ public class PreferenceUtil {
         setBooleanPreference(IS_CCU_REBOOT_STARTED, isRebooted);
     }
 
+    public static boolean getZoneCo2Migration() {
+        return getBooleanPreference(ZONE_CO2_MIGRATION);
+    }
+    public static void setZoneCo2Migration() {
+        setBooleanPreference(ZONE_CO2_MIGRATION, true);
+    }
 }

@@ -405,8 +405,8 @@ public class SmartNode
     }
 
     public RawPoint addDomainEquipSensorFromRawPoint(RawPoint deviceSensor, Port p) {
+        CcuLog.e(L.TAG_CCU_DEVICE,"adding sensor point for "+p);
         Equip q = new Equip.Builder().setHashMap(CCUHsApi.getInstance().read("equip and group == \""+smartNodeAddress+"\"")).build();
-
         PointsUtil pointsUtil = new PointsUtil(CCUHsApi.getInstance());
         String pointRef = pointsUtil.createDynamicSensorEquipPoint(q, getEquipDomainNameFromPort(p), getConfigurationFromEquip(q, pointsUtil));
         updatePhysicalPointRef(smartNodeAddress, p, pointRef);
@@ -508,14 +508,14 @@ public class SmartNode
     }
     
     public static void updatePhysicalPointRef(int addr, String port, String pointRef) {
-        CcuLog.d("CCU"," Update Physical point "+port);
+        CcuLog.d(L.TAG_CCU_DEVICE," Update Physical point "+port);
         
         HashMap device = CCUHsApi.getInstance().read("device and addr == \""+addr+"\"");
         if (device.isEmpty())
         {
+            CcuLog.d(L.TAG_CCU_DEVICE," Update Physical point "+port);
             return ;
         }
-        
         HashMap point = CCUHsApi.getInstance().read("point and physical and deviceRef == \"" + device.get("id").toString() + "\""+" and port == \""+port+"\"");
         RawPoint p = new RawPoint.Builder().setHashMap(point).build();
         p.setPointRef(pointRef);
@@ -524,11 +524,10 @@ public class SmartNode
     }
 
     public static void updatePhysicalPointRef(int addr, Port port, String pointRef) {
-        CcuLog.d("CCU"," Update Physical point "+port);
+        CcuLog.d(L.TAG_CCU_DEVICE," Update Physical point "+port);
 
         HashMap device = CCUHsApi.getInstance().read("device and addr == \""+addr+"\"");
-        if (device.isEmpty())
-        {
+        if (device.isEmpty()) {
             return ;
         }
 
@@ -540,12 +539,13 @@ public class SmartNode
 
         RawPoint p = new RawPoint.Builder().setHashMap(point).build();
         p.setPointRef(pointRef);
+        CcuLog.i(L.TAG_CCU_DEVICE, "setting point ref for " + port + " to " + pointRef);
         CCUHsApi.getInstance().updatePoint(p,p.getId());
 
     }
     
     public static void setPointEnabled(int addr, String port, boolean enabled) {
-        CcuLog.d("CCU"," Enabled Physical point "+port+" "+enabled);
+        CcuLog.d(L.TAG_CCU_DEVICE," Enabled Physical point "+port+" "+enabled);
         
         HashMap device = CCUHsApi.getInstance().read("device and addr == \""+addr+"\"");
         if (device.isEmpty())
@@ -648,7 +648,7 @@ public class SmartNode
     public static String getEquipDomainNameFromPort(Port p) {
         switch(p) {
             case SENSOR_RH: return DomainName.zoneHumidity;
-            case SENSOR_CO2: return DomainName.zoneCO2;
+            case SENSOR_CO2: return DomainName.zoneCo2;
             case SENSOR_VOC: return DomainName.zoneVoc;
             case SENSOR_ILLUMINANCE: return DomainName.zoneIlluminance;
             case SENSOR_SOUND: return DomainName.zoneSound;

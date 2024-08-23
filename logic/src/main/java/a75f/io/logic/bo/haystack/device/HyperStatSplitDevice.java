@@ -1,23 +1,5 @@
 package a75f.io.logic.bo.haystack.device;
 
-import static a75f.io.api.haystack.Tags.UNIVERSAL1;
-import static a75f.io.api.haystack.Tags.UNIVERSAL2;
-import static a75f.io.api.haystack.Tags.UNIVERSAL3;
-import static a75f.io.api.haystack.Tags.UNIVERSAL4;
-import static a75f.io.api.haystack.Tags.UNIVERSAL5;
-import static a75f.io.api.haystack.Tags.UNIVERSAL6;
-import static a75f.io.api.haystack.Tags.UNIVERSAL7;
-import static a75f.io.api.haystack.Tags.UNIVERSAL8;
-import static a75f.io.logic.BacnetUtilKt.ANALOG_VALUE;
-import static a75f.io.logic.BacnetUtilKt.BINARY_VALUE;
-import static a75f.io.logic.BacnetUtilKt.CO2;
-import static a75f.io.logic.BacnetUtilKt.CO2EQUIVALENT;
-import static a75f.io.logic.BacnetUtilKt.HUMIDITY;
-import static a75f.io.logic.BacnetUtilKt.ILLUMINANCE;
-import static a75f.io.logic.BacnetUtilKt.OCCUPANCY;
-import static a75f.io.logic.BacnetUtilKt.SOUND;
-import static a75f.io.logic.BacnetUtilKt.VOC;
-import static a75f.io.logic.BacnetUtilKt.addBacnetTags;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -27,18 +9,10 @@ import a75f.io.domain.api.DomainName;
 import a75f.io.domain.config.ProfileConfiguration;
 import a75f.io.domain.util.PointsUtil;
 import a75f.io.logic.bo.building.NodeType;
-import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
-import a75f.io.logic.L;
-import a75f.io.logic.bo.building.definitions.Consts;
-import a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType;
-import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuProfileConfiguration;
-import a75f.io.logic.bo.building.firmware.FirmwareVersion;
-import a75f.io.logic.bo.building.heartbeat.HeartBeat;
-import a75f.io.logic.bo.building.hyperstatsplit.common.HyperstatSplitProfileNames;
 
 /**
  * Models a HyperStat Split device Haystack entity.
@@ -139,7 +113,7 @@ public class HyperStatSplitDevice {
     public static String getEquipDomainNameFromPort(Port p) {
         switch(p) {
             case SENSOR_RH: return DomainName.zoneHumidity;
-            case SENSOR_CO2: return DomainName.zoneCO2;
+            case SENSOR_CO2: return DomainName.zoneCo2;
             case SENSOR_VOC: return DomainName.zoneVoc;
             case SENSOR_ILLUMINANCE: return DomainName.zoneIlluminance;
             case SENSOR_SOUND: return DomainName.zoneSound;

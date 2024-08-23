@@ -38,6 +38,7 @@ import a75f.io.device.util.DeviceConfigurationUtil;
 import a75f.io.domain.BypassDamperEquip;
 import a75f.io.domain.VavAcbEquip;
 import a75f.io.domain.api.DomainName;
+import a75f.io.domain.equips.VavEquip;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
@@ -257,22 +258,37 @@ public class LSmartNode
 
         if (equip.getProfile().equals("VAV_ACB")) {
             VavAcbEquip acbEquip = new VavAcbEquip(equipRef);
-            kFactor = (int)(100 * acbEquip.getKFactor().readPriorityVal());
-            minCFMCooling = (int)(acbEquip.getMinCFMCooling().readPriorityVal());
-            maxCFMCooling = (int)(acbEquip.getMaxCFMCooling().readPriorityVal());
-            minCFMReheating = (int)(acbEquip.getMinCFMReheating().readPriorityVal());
-            maxCFMReheating = (int)(acbEquip.getMaxCFMReheating().readPriorityVal());
-            damperShape = DamperShape_t.values()[(int)(acbEquip.getDamperShape().readPriorityVal())];
-            condensateSensor = CondensateSensor_t.values()[(int)(acbEquip.getThermistor2Type().readPriorityVal())];
-            damperSize = getDamperSizeInInches((int)(acbEquip.getDamperSize().readPriorityVal()));
-            airflowCFMProportionalRange = (int)(acbEquip.getVavAirflowCFMProportionalRange().readPriorityVal()); // fallback
-            airflowCFMProportionalKFactor = (int)(100 * acbEquip.getVavAirflowCFMProportionalKFactor().readPriorityVal()); // fallback
-            airflowCFMIntegralTime = (int)(acbEquip.getVavAirflowCFMIntegralTime().readPriorityVal()); // fallback
-            airflowCFMIntegralKFactor = (int)(100 * acbEquip.getVavAirflowCFMIntegralKFactor().readPriorityVal()); // fallback
-            enableCFM = (int)(acbEquip.getEnableCFMControl().readPriorityVal());
+            kFactor = (int) (100 * acbEquip.getKFactor().readPriorityVal());
+            minCFMCooling = (int) (acbEquip.getMinCFMCooling().readPriorityVal());
+            maxCFMCooling = (int) (acbEquip.getMaxCFMCooling().readPriorityVal());
+            minCFMReheating = (int) (acbEquip.getMinCFMReheating().readPriorityVal());
+            maxCFMReheating = (int) (acbEquip.getMaxCFMReheating().readPriorityVal());
+            damperShape = DamperShape_t.values()[(int) (acbEquip.getDamperShape().readPriorityVal())];
+            condensateSensor = CondensateSensor_t.values()[(int) (acbEquip.getThermistor2Type().readPriorityVal())];
+            damperSize = getDamperSizeInInches((int) (acbEquip.getDamperSize().readPriorityVal()));
+            airflowCFMProportionalRange = (int) (acbEquip.getVavAirflowCFMProportionalRange().readPriorityVal()); // fallback
+            airflowCFMProportionalKFactor = (int) (100 * acbEquip.getVavAirflowCFMProportionalKFactor().readPriorityVal()); // fallback
+            airflowCFMIntegralTime = (int) (acbEquip.getVavAirflowCFMIntegralTime().readPriorityVal()); // fallback
+            airflowCFMIntegralKFactor = (int) (100 * acbEquip.getVavAirflowCFMIntegralKFactor().readPriorityVal()); // fallback
+            enableCFM = (int) (acbEquip.getEnableCFMControl().readPriorityVal());
 
-            settings2.relayBitmap.relay1.set((int)acbEquip.getRelay1OutputAssociation().readDefaultVal());
+            settings2.relayBitmap.relay1.set((int) acbEquip.getRelay1OutputAssociation().readDefaultVal());
             // Relay 2 will always be zero, because relay 2 is not used in ACB and no relay 2 association point will exist
+
+        } else if (isEquipType("vav", address)) {
+            VavEquip vavEquip = new VavEquip(equipRef);
+            kFactor = (int) (100 * vavEquip.getKFactor().readPriorityVal());
+            minCFMCooling = (int) (vavEquip.getMinCFMCooling().readPriorityVal());
+            maxCFMCooling = (int) (vavEquip.getMaxCFMCooling().readPriorityVal());
+            minCFMReheating = (int) (vavEquip.getMinCFMReheating().readPriorityVal());
+            maxCFMReheating = (int) (vavEquip.getMaxCFMReheating().readPriorityVal());
+            damperShape = DamperShape_t.values()[(int) (vavEquip.getDamperShape().readPriorityVal())];
+            damperSize = getDamperSizeInInches((int) (vavEquip.getDamperSize().readPriorityVal()));
+            airflowCFMProportionalRange = (int) (vavEquip.getVavAirflowCFMProportionalRange().readPriorityVal()); // fallback
+            airflowCFMProportionalKFactor = (int) (100 * vavEquip.getVavAirflowCFMProportionalKFactor().readPriorityVal()); // fallback
+            airflowCFMIntegralTime = (int) (vavEquip.getVavAirflowCFMIntegralTime().readPriorityVal()); // fallback
+            airflowCFMIntegralKFactor = (int) (100 * vavEquip.getVavAirflowCFMIntegralKFactor().readPriorityVal()); // fallback
+            enableCFM = (int) (vavEquip.getEnableCFMControl().readPriorityVal());
 
         } else if (equip.getProfile().equals("PLC")) {
             CCUHsApi hsApi = CCUHsApi.getInstance();

@@ -289,6 +289,8 @@ class HttpServer {
                         if(isBacnetClientPoint(id)){
                             level = "8"
                         }
+                        CCUHsApi.getInstance()
+                            .writeHisValById(id, value!!.toDouble())
                         val pointGrid = CCUHsApi.getInstance().writePoint(id, level!!.toInt(), who, value!!.toDouble(), duration!!.toInt())
                         if (pointGrid != null) {
                             if(!pointGrid.isEmpty || !pointGrid.isErr){

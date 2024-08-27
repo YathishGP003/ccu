@@ -81,7 +81,7 @@ public class FragmentModbusType  extends BaseDialogFragment {
         });
         (view.findViewById(R.id.imageGoback)).setOnClickListener((v)->removeDialogFragment(MID));
         bacnetEm.setOnClickListener(v -> {
-            showDialogFragment(BacNetSelectModelView.Companion.newInstance(mNodeAddress, mRoomName, mFloorName, ProfileType.BACNET_DEFAULT,ModbusLevel.ZONE,""), BacNetSelectModelView.Companion.getID());
+            showDialogFragment(BacNetSelectModelView.Companion.newInstance(String.valueOf(mNodeAddress), mRoomName, mFloorName, ProfileType.BACNET_DEFAULT,ModbusLevel.ZONE,""), BacNetSelectModelView.Companion.getID());
         });
         return view;
     }

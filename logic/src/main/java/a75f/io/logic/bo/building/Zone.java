@@ -9,6 +9,7 @@ import java.util.HashSet;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.bacnet.BacnetProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.RoomDataInterface;
 
@@ -93,25 +94,16 @@ public class Zone
         return desiredTemperature;*/
     }
     
-    @JsonIgnore
-    public void removeNodeAndClearAssociations(Short selectedModule)
+    public HashSet<Long> getNodes()
     {
+        HashSet<Long> addresses = new HashSet<>();
         for (ZoneProfile zp : mZoneProfiles)
         {
-            if (zp.getProfileConfiguration(selectedModule) != null)
-            {
-                zp.removeProfileConfiguration(selectedModule);
+            if (zp instanceof BacnetProfile) {
+                addresses.add(((BacnetProfile) zp).getSlaveId());
+            } else {
+                zp.getNodeAddresses().forEach(a -> addresses.add((long) a));
             }
-            L.removeHSDeviceEntities(selectedModule);
-        }
-    }
-    
-    public HashSet<Short> getNodes()
-    {
-        HashSet<Short> addresses = new HashSet<Short>();
-        for (ZoneProfile zp : mZoneProfiles)
-        {
-            addresses.addAll(zp.getNodeAddresses());
         }
         return addresses;
     }

@@ -576,7 +576,7 @@ public class Globals {
                             break;
                         case BACNET_DEFAULT:
                             BacnetProfile bacnetProfile = new BacnetProfile();
-                            bacnetProfile.addBacAppEquip(Short.parseShort(eq.getGroup()), ProfileType.valueOf(eq.getProfile()));
+                            bacnetProfile.addBacAppEquip(Long.parseLong(eq.getGroup()), ProfileType.valueOf(eq.getProfile()));
                             L.ccu().zoneProfiles.add(bacnetProfile);
                             break;
 

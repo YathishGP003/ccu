@@ -94,12 +94,12 @@ class BacNetSelectModelView : BaseDialogFragment() {
         val ID: String = ModelSelectionFragment::class.java.simpleName
 
         fun newInstance(
-            meshAddress: Short, roomName: String, floorName: String, profileType: ProfileType,
+            meshAddress: String, roomName: String, floorName: String, profileType: ProfileType,
             level: ModbusLevel, filer: String
         ): BacNetSelectModelView {
             val fragment = BacNetSelectModelView()
             val bundle = Bundle()
-            bundle.putShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR, meshAddress)
+            bundle.putString(FragmentCommonBundleArgs.ARG_PAIRING_ADDR, meshAddress)
             bundle.putString(FragmentCommonBundleArgs.ARG_NAME, roomName)
             bundle.putString(FragmentCommonBundleArgs.FLOOR_NAME, floorName)
             bundle.putInt(FragmentCommonBundleArgs.PROFILE_TYPE, profileType.ordinal)
@@ -130,6 +130,7 @@ class BacNetSelectModelView : BaseDialogFragment() {
             }
         }
         viewModel.deviceIp = getDataFromSf(requireContext(), BacnetConfigConstants.IP_ADDRESS)
+        CcuLog.d(TAG, "device ip--->${viewModel.deviceIp}")
         viewModel.devicePort = getDataFromSf(requireContext(), BacnetConfigConstants.PORT)
         isBacNetInitialized = isBacNetInitialized(requireContext())
         if (!isBacNetInitialized) {

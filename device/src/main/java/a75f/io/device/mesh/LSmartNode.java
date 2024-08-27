@@ -455,14 +455,16 @@ public class LSmartNode
             int damperConfig = hsApi.readDefaultVal("point and config and vav and  damper and type and group == \""+address+"\"").intValue();
 
             int reheatConfig;
+            boolean isACB = false;
             if (equip.getDomainName().equals(DomainName.smartnodeActiveChilledBeam) || equip.getDomainName().equals(DomainName.helionodeActiveChilledBeam)) {
+                isACB = true;
                 reheatConfig = hsApi.readDefaultVal("point and domainName == \"" + DomainName.valveType + "\" and group == \""+address+"\"").intValue();
             } else {
                 reheatConfig = hsApi.readDefaultVal("point and config and type and reheat and group == \""+address+"\"").intValue();
             }
 
             // With DM integration, reheatType enum is incremented by 1. ("notInstalled" was -1, now it's zero). This is why we are subtracting 1 from the value here.
-            setupDamperActuator(settings, damperConfig, 0, reheatConfig-1, "vav");
+            setupDamperActuator(settings, damperConfig, 0, reheatConfig-1, isACB ? "acb" : "vav");
         }
     }
 
@@ -490,11 +492,12 @@ public class LSmartNode
         settings.outsideAirOptimizationDamperActuatorType.set(Objects.requireNonNull(damperTypeMap.get(DamperType.values()[damperConfig])));
 
         //ReheatType migration should address this, but the value can be -2 or -1 based on this code runs before or after migration.
-        if (profileType.equals("vav") && reheatConfig >= 0){
+        if ((profileType.equals("vav") || profileType.equals("acb")) && reheatConfig >= 0){
             settings.returnAirDamperActuatorType.set(Objects.requireNonNull(reheatTypeMap.get(ReheatType.values()[reheatConfig])));
+        } else if (profileType.equals("vav") && reheatConfig == -1) {
+            settings.returnAirDamperActuatorType.set(DamperActuator_t.DAMPER_ACTUATOR_NOT_PRESENT);
         } else {
             settings.returnAirDamperActuatorType.set(getReheatType(damper2Config,reheatConfig,damperTypeMap));
-
         }
     }
     private static DamperActuator_t getReheatType(int damper2Config, int reheatConfig, Map<DamperType, DamperActuator_t> damperTypeMap) {

@@ -506,8 +506,6 @@ public class CreateNewSite extends Fragment {
                 CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.make(localId));
                 L.saveCCUState();
                 CCUHsApi.getInstance().updateDeviceRefOfSettingPoints(localId);
-                CCUUtils.updateCcuSpecificEntitiesWithCcuRef(CCUHsApi.getInstance(), true);
-
                 handleRegistrationAsync(installerEmail);
             }
         };
@@ -559,6 +557,7 @@ public class CreateNewSite extends Fragment {
         RxjavaUtil.executeBackgroundTask(
                 () -> ProgressDialogUtils.showProgressDialog(getActivity(), "Registering CCU..."),
                 () -> {
+                    CCUUtils.updateCcuSpecificEntitiesWithCcuRef(CCUHsApi.getInstance(), true);
                     CCUHsApi.getInstance().registerCcu(installerEmail);
                     CCUHsApi.getInstance().resyncSiteTree();
                     Globals.getInstance().copyModels();

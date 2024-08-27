@@ -20,6 +20,7 @@ import a75f.io.renatus.compose.TitleTextView
 import a75f.io.renatus.compose.ToggleButtonStateful
 import a75f.io.renatus.modbus.util.SET
 import a75f.io.renatus.profiles.profileUtils.UnusedPortsFragment
+import a75f.io.renatus.util.highPriorityDispatcher
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -83,16 +84,20 @@ class DabProfileConfigFragment : BaseDialogFragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        viewLifecycleOwner.lifecycleScope.launch {
-            withContext(Dispatchers.IO) {
-                viewModel.init(requireArguments(), requireContext(), CCUHsApi.getInstance())
-            }
-        }
         val rootView = ComposeView(requireContext())
-        rootView.apply {
-            setContent { RootView() }
-            return rootView
+        rootView.setContent {
+            ShowProgressBar()
+            CcuLog.i(Domain.LOG_TAG, "Show Progress")
         }
+        viewLifecycleOwner.lifecycleScope.launch(highPriorityDispatcher) {
+                viewModel.init(requireArguments(), requireContext(), CCUHsApi.getInstance())
+                withContext(Dispatchers.Main) {
+                    rootView.setContent {
+                        RootView()
+                    }
+                }
+        }
+        return rootView
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -106,11 +111,6 @@ class DabProfileConfigFragment : BaseDialogFragment() {
 
     @Composable
     fun RootView() {
-        if (!viewModel.isModelLoaded) {
-            ShowProgressBar()
-            CcuLog.i(Domain.LOG_TAG, "Show Progress")
-            return
-        }
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()

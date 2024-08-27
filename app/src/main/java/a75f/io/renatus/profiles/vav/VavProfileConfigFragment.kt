@@ -74,10 +74,8 @@ class VavProfileConfigFragment : BaseDialogFragment() ,OnPairingCompleteListener
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         viewLifecycleOwner.lifecycleScope.launch {
-            withContext(Dispatchers.IO) {
                 viewModel.init(requireArguments(), requireContext(), CCUHsApi.getInstance())
                 viewModel.setOnPairingCompleteListener(this@VavProfileConfigFragment)
-            }
         }
         val rootView = ComposeView(requireContext())
         rootView.apply {

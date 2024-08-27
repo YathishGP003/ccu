@@ -237,7 +237,6 @@ public class Globals {
         CcuLog.i(L.TAG_CCU_INIT, "Initialize Haystack");
         renatusServicesUrls = urls;
         CCUHsApi hsApi = new CCUHsApi(this.mApplicationContext, urls.getHaystackUrl(), urls.getCaretakerUrl(), urls.getGatewayUrl());
-        ModelCache.INSTANCE.init(this.mApplicationContext);
     }
 
     public void startTimerTask() {
@@ -276,7 +275,7 @@ public class Globals {
                 MigrationHandler migrationHandler = new MigrationHandler(CCUHsApi.getInstance());
                 try {
                     CcuLog.i(L.TAG_CCU_INIT, "Run Migrations");
-                    ModelCache.INSTANCE.init(mApplicationContext);
+                    ModelCache.INSTANCE.init(mApplicationContext, CCUHsApi.getInstance());
                     HashMap<Object, Object> site = CCUHsApi.getInstance().readEntity("site");
                     if (!isSafeMode()) {
                         migrationHandler.doMigration();

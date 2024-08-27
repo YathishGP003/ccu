@@ -1,6 +1,7 @@
 package a75f.io.renatus;
 
 import static a75f.io.device.bacnet.BacnetConfigConstants.IS_BACNET_INITIALIZED;
+import static a75f.io.logic.L.isSimulation;
 import static a75f.io.logic.util.PreferenceUtil.getDataSyncProcessing;
 import static a75f.io.logic.util.PreferenceUtil.getSyncStartTime;
 import static a75f.io.usbserial.UsbServiceActions.ACTION_USB_PRIV_APP_PERMISSION_DENIED;
@@ -572,6 +573,7 @@ public abstract class UtilityApplication extends Application {
 
 
     public static boolean isAdvancedAhuProfile() {
+        if (isSimulation()) return false;
         try {
             HashMap<Object, Object> equip = CCUHsApi.getInstance().readEntity("equip and system and not modbus and not connectModule");
             if (!equip.isEmpty() && equip.get("profile").toString().equals("vavAdvancedHybridAhuV2")) {

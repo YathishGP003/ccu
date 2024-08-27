@@ -76,7 +76,7 @@ public class OTAUpdateService extends IntentService {
 
     private static final String TAG = "OTA_PROCESS";
 
-    private static final String DOWNLOAD_BASE_URL = "http://updates.75fahrenheit.com/";
+    private static final String DOWNLOAD_BASE_URL = "https://updates.75f.io/";
     private static final File DOWNLOAD_DIR = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
 
     private static final long RETRY_TIME = 5 * 60000;

@@ -192,7 +192,13 @@ android {
         jvmTarget = JavaVersion.VERSION_1_8.toString()
     }
 }
-
+tasks.whenTaskAdded { task ->
+    if (task.name == 'assembleDev_qa') {
+        task.dependsOn 'testDev_qaUnitTest'
+    } else if (task.name == 'assembleQa') {
+        task.dependsOn 'testQaUnitTest'
+    }
+}
 dependencies {
     implementation project(path: ':modbusbox')
     implementation project(path: ':domain')

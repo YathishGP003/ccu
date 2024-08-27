@@ -82,7 +82,7 @@ public class TrueCFMUtil {
 
     public static boolean isCfmOnEdgeActive(CCUHsApi hayStack, String terminalEquipRef) {
         if (L.ccu().systemProfile instanceof VavSystemProfile) {
-            int systemOpMode = hayStack.readHisValByQuery("point and domainName == \"" + DomainName.operatingMode + "\" and equipRef == \"" + L.ccu().systemProfile.getSystemEquipRef() + "\"").intValue();
+            int systemOpMode = hayStack.readHisValByQuery("point and operating and mode and equipRef == \"" + L.ccu().systemProfile.getSystemEquipRef() + "\"").intValue();
             return isTrueCfmEnabled(hayStack, terminalEquipRef) && systemOpMode == 1; // I can't believe there isn't an enum for this, but I couldn't find one
         }
         return false;

@@ -17,7 +17,6 @@ object RenatusDatabaseBuilder {
             context.applicationContext,
             RenatusDatabase::class.java,
             "renatusDb"
-        ).fallbackToDestructiveMigration()
-            .addMigrations(RenatusDatabase.MIGRATION_4_5)
+            ).addMigrations(RenatusDatabase.MIGRATION_4_5)
             .build()
 }

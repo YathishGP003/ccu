@@ -6,6 +6,7 @@ import a75f.io.data.message.Message
 import a75f.io.data.message.MessageDao
 import a75f.io.data.writablearray.WritableArray
 import a75f.io.data.writablearray.WritableArrayDao
+import android.util.Log
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
@@ -30,7 +31,13 @@ abstract class RenatusDatabase : RoomDatabase(){
 companion object {
      val MIGRATION_4_5: Migration = object : Migration(4, 5) {
         override fun migrate(database: SupportSQLiteDatabase) {
-            database.execSQL("ALTER TABLE messages ADD COLUMN logLevel TEXT")
+            Log.d("RenatusDatabase", "Migrating from 4 to 5")
+            try {
+                database.execSQL("ALTER TABLE messages ADD COLUMN logLevel TEXT")
+            } catch (e: Exception) {
+                e.printStackTrace()
+                database.execSQL("DROP TABLE messages")
+            }
         }
     }
 }

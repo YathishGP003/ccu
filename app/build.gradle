@@ -218,7 +218,13 @@ android {
         kotlinCompilerExtensionVersion '1.3.2'
     }
 }
-
+tasks.whenTaskAdded { task ->
+    if (task.name == 'assembleDev_qa') {
+        task.dependsOn 'testDev_qaUnitTest'
+    } else if (task.name == 'assembleQa') {
+        task.dependsOn 'testQaUnitTest'
+    }
+}
 dependencies {
     implementation files('libs/RootTools.aar')
     implementation files('libs/RootShell.aar')

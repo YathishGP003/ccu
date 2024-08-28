@@ -545,7 +545,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                 for (int j = 0; j < zoneEquips.size(); j++) {
                                     Equip tempEquip = new Equip.Builder().setHashMap(zoneEquips.get(j)).build();
                                     int statusVal = CCUHsApi.getInstance().readHisValByQuery("point and status and not ota and his and not writable and equipRef ==\""+tempEquip.getId()+"\"").intValue();
-                                    if (statusVal != ZoneState.TEMPDEAD.ordinal()) {
+                                    if (statusVal != ZoneState.TEMPDEAD.ordinal() && statusVal != ZoneState.RFDEAD.ordinal()) {
                                         double avgTemp = CCUHsApi.getInstance().readHisValByQuery("temp and sensor and (current or space) and equipRef == \"" + tempEquip.getId() + "\"");
                                         currentTempSensor = (currentTempSensor + avgTemp);
                                     } else {
@@ -887,7 +887,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             }
 
             int statusVal = CCUHsApi.getInstance().readHisValByQuery("point and not ota and status and his and not writable and equipRef ==\""+avgTempEquip.getId()+"\"").intValue();
-            if (statusVal != ZoneState.TEMPDEAD.ordinal()) {
+            if (statusVal != ZoneState.TEMPDEAD.ordinal() && statusVal != ZoneState.RFDEAD.ordinal()) {
                 currentAverageTemp = (currentAverageTemp + avgTemp);
             } else {
                 noTempSensor++;
@@ -1910,11 +1910,14 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         int modeType = CCUHsApi.getInstance().readHisValByQuery("zone and hvacMode and roomRef == \"" + zoneId + "\"").intValue();
 
         linearLayoutZonePoints.removeAllViews();
+        int noTempSensor = 0;
         for (int k = 0; k < openZoneMap.size(); k++) {
             Equip updatedEquip = new Equip.Builder().setHashMap(openZoneMap.get(k)).build();
             int statusVal = CCUHsApi.getInstance().readHisValByQuery("point and not ota and status and his and not writable and equipRef ==\""+updatedEquip.getId()+"\"").intValue();
-            if (statusVal != ZoneState.TEMPDEAD.ordinal()) {
+            if (statusVal != ZoneState.TEMPDEAD.ordinal() && statusVal != ZoneState.RFDEAD.ordinal()) {
                 currentTemp += CCUHsApi.getInstance().readHisValByQuery("temp and sensor and (current or space) and equipRef == \"" + updatedEquip.getId() + "\"");
+            } else {
+               noTempSensor++;
             }
 
             if (updatedEquip.getProfile().startsWith("DAB")) {
@@ -1992,7 +1995,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             namedScheduleView.setVisibility(View.GONE);
         }
         if(openZoneMap.size() > 0) {
-            avgTemp = (float)currentTemp / openZoneMap.size();
+            avgTemp = (float)currentTemp / (openZoneMap.size() - noTempSensor);
         }
         if(heatingDesired != 0 && coolingDesired !=0)
             seekArc.setData(seekArc.isDetailedView(), buildingLimitMin, buildingLimitMax, heatLowerLimitVal, heatUpperLimitVal,

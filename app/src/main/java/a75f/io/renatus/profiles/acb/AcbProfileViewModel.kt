@@ -28,8 +28,6 @@ import a75f.io.renatus.util.ProgressDialogUtils
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.seventyfivef.domainmodeler.client.ModelDirective
@@ -44,6 +42,7 @@ import a75f.io.logic.bo.building.definitions.ReheatType.*
 import a75f.io.renatus.profiles.OnPairingCompleteListener
 import a75f.io.renatus.profiles.profileUtils.UnusedPortsModel
 import a75f.io.renatus.profiles.profileUtils.UnusedPortsModel.Companion.saveUnUsedPortStatus
+import a75f.io.renatus.util.highPriorityDispatcher
 
 class AcbProfileViewModel : ViewModel() {
 
@@ -88,11 +87,7 @@ class AcbProfileViewModel : ViewModel() {
     private lateinit var unusedPorts: HashMap<String, Boolean>
 
     private lateinit var pairingCompleteListener: OnPairingCompleteListener
-
     private var saveJob : Job? = null
-
-    private var modelLoadedState =  MutableLiveData(false)
-    val modelLoaded: LiveData<Boolean> get() = modelLoadedState
 
     fun init(bundle: Bundle, context: Context, hayStack : CCUHsApi) {
         deviceAddress = bundle.getShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR)
@@ -112,23 +107,19 @@ class AcbProfileViewModel : ViewModel() {
             acbProfile = L.getProfile(deviceAddress) as VavAcbProfile
             profileConfiguration = AcbProfileConfiguration(deviceAddress.toInt(), nodeType.name, 0,
                 zoneRef, floorRef, profileType, model).getActiveConfiguration()
+
+            viewState = AcbConfigViewState.fromAcbProfileConfig(profileConfiguration)
+            unusedPorts = UnusedPortsModel.initializeUnUsedPorts(deviceAddress, hayStack)
         } else {
             profileConfiguration = AcbProfileConfiguration(deviceAddress.toInt(), nodeType.name, 0,
                 zoneRef, floorRef, profileType, model).getDefaultConfiguration()
-
+            viewState = AcbConfigViewState.fromAcbProfileConfig(profileConfiguration)
         }
-
         CcuLog.i(Domain.LOG_TAG, profileConfiguration.toString())
-
-        viewState = AcbConfigViewState.fromAcbProfileConfig(profileConfiguration)
-
         this.context = context
         this.hayStack = hayStack
-
         initializeLists()
-        unusedPorts = UnusedPortsModel.initializeUnUsedPorts(deviceAddress, hayStack)
-        CcuLog.i(Domain.LOG_TAG, "ACB ProfileViewModel Loaded")
-        modelLoadedState.postValue( true)
+        CcuLog.i(Domain.LOG_TAG, "ACB Config Loaded")
     }
 
     private fun initializeLists() {
@@ -169,31 +160,26 @@ class AcbProfileViewModel : ViewModel() {
 
     fun saveConfiguration() {
         if (saveJob == null) {
-            saveJob = viewModelScope.launch {
-                ProgressDialogUtils.showProgressDialog(context, "Saving ACB Configuration")
-                withContext(Dispatchers.IO) {
-                    CCUHsApi.getInstance().resetCcuReady()
-
-                    setUpAcbProfile()
-                    CcuLog.i(Domain.LOG_TAG, "AcbProfile Setup complete")
-                    L.saveCCUState()
-
-                    hayStack.syncEntityTree()
-                    CCUHsApi.getInstance().setCcuReady()
-                    CcuLog.i(Domain.LOG_TAG, "Send seed for $deviceAddress")
-                    LSerial.getInstance()
-                        .sendSeedMessage(false, false, deviceAddress, zoneRef, floorRef)
-                    CcuLog.i(Domain.LOG_TAG, "AcbProfile Pairing complete")
-
-                    withContext(Dispatchers.Main) {
-                        context.sendBroadcast(Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED))
-                        showToast("ACB Configuration saved successfully", context)
-                        CcuLog.i(Domain.LOG_TAG, "Close Pairing dialog")
-                        ProgressDialogUtils.hideProgressDialog()
-                       pairingCompleteListener.onPairingComplete()
-                    }
-
+            ProgressDialogUtils.showProgressDialog(context, "Saving ACB Configuration")
+            saveJob = viewModelScope.launch(highPriorityDispatcher) {
+                CCUHsApi.getInstance().resetCcuReady()
+                setUpAcbProfile()
+                CcuLog.i(Domain.LOG_TAG, "AcbProfile Setup complete")
+                withContext(Dispatchers.Main) {
+                    context.sendBroadcast(Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED))
+                    showToast("ACB Configuration saved successfully", context)
+                    CcuLog.i(Domain.LOG_TAG, "Close Pairing dialog")
+                    ProgressDialogUtils.hideProgressDialog()
+                    pairingCompleteListener.onPairingComplete()
                 }
+
+                L.saveCCUState()
+                hayStack.syncEntityTree()
+                CCUHsApi.getInstance().setCcuReady()
+                CcuLog.i(Domain.LOG_TAG, "Send seed for $deviceAddress")
+                LSerial.getInstance()
+                    .sendSeedMessage(false, false, deviceAddress, zoneRef, floorRef)
+                CcuLog.i(Domain.LOG_TAG, "AcbProfile Pairing complete")
 
                 // This check is needed because the dialog sometimes fails to close inside the coroutine.
                 // We don't know why this happens.
@@ -289,53 +275,25 @@ class AcbProfileViewModel : ViewModel() {
         }
     }
 
-    private fun updateEquipAndPoints(
-        addr: Short,
-        config: ProfileConfiguration,
-        floorRef: String?,
-        roomRef: String?,
-        nodeType: NodeType?,
-        hayStack: CCUHsApi,
-        equipModel: SeventyFiveFProfileDirective,
-        deviceModel: SeventyFiveFDeviceDirective
-    ) {
-        val equipBuilder = ProfileEquipBuilder(hayStack)
-        val equipDis = hayStack.siteName + "-ACB-" + config.nodeAddress
-        CcuLog.i(Domain.LOG_TAG, " updateEquipAndPoints")
-        val equipId = equipBuilder.updateEquipAndPoints(profileConfiguration, model, hayStack.site!!.id, equipDis)
-        val entityMapper = EntityMapper(equipModel)
-        val deviceBuilder = DeviceBuilder(hayStack, entityMapper)
-        val deviceDis = hayStack.siteName + "-SN-" + config.nodeAddress
-        CcuLog.i(Domain.LOG_TAG, " updateDeviceAndPoints")
-        deviceBuilder.updateDeviceAndPoints(
-            config,
-            deviceModel,
-            equipId,
-            hayStack.site!!.id,
-            deviceDis
-        )
-        acbProfile = VavAcbProfile(equipId, addr)
-    }
-
     // "analogType" tag is used by control message code and cannot easily be replaced with a domain name query.
     // We are setting this value upon equip creation/reconfiguration for now.
     private fun setOutputTypes(config: AcbProfileConfiguration) {
         val device = hayStack.readEntity("device and addr == \"" + config.nodeAddress + "\"")
 
         // Set
-        val relay1 = hayStack.readHDict("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.relay1 + "\"");
-        var relay1Point = RawPoint.Builder().setHDict(relay1).setEnabled(true)
+        val relay1 = hayStack.readHDict("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.relay1 + "\"")
+        val relay1Point = RawPoint.Builder().setHDict(relay1).setEnabled(true)
         hayStack.updatePoint(relay1Point.setType("Relay N/C").build(), relay1.get("id").toString())
 
-        var relay2 = hayStack.readHDict("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.relay2 + "\"");
-        var relay2Point = RawPoint.Builder().setHDict(relay2)
+        val relay2 = hayStack.readHDict("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.relay2 + "\"")
+        val relay2Point = RawPoint.Builder().setHDict(relay2)
         hayStack.updatePoint(relay2Point.setType("Relay N/C").build(), relay2.get("id").toString())
 
-        var analogOut1 = hayStack.readHDict("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.analog1Out + "\"");
-        var analog1Point = RawPoint.Builder().setHDict(analogOut1)
+        val analogOut1 = hayStack.readHDict("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.analog1Out + "\"")
+        val analog1Point = RawPoint.Builder().setHDict(analogOut1)
         hayStack.updatePoint(analog1Point.setType(getDamperTypeString(config)).build(), analogOut1.get("id").toString())
 
-        val analogOut2 = hayStack.readHDict("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.analog2Out + "\"");
+        val analogOut2 = hayStack.readHDict("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.analog2Out + "\"")
 
         val valueType = config.valveType.currentVal.toInt() - 1
         val analog2OpEnabled = valueType == ZeroToTenV.ordinal ||

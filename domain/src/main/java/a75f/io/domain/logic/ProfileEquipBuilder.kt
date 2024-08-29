@@ -14,7 +14,6 @@ import a75f.io.domain.cutover.BuildingEquipCutOverMapping
 import a75f.io.domain.cutover.getDomainNameFromDis
 import a75f.io.domain.util.TunerUtil
 import a75f.io.logger.CcuLog
-import android.util.Log
 import io.seventyfivef.domainmodeler.client.ModelDirective
 import io.seventyfivef.domainmodeler.client.ModelPointDef
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective

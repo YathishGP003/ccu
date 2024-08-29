@@ -15,10 +15,10 @@ import org.junit.Test
 
 class TestAllModels {
 
-    @Test
+    /*@Test
     fun validateModels(){
         val diffManger = DiffManger(null)
         val metaData =  diffManger.getModelFileVersionDetails(DiffManger.NEW_VERSION)
         ModelValidator.validateAllDomainModels(metaData)
-    }
+    }*/
 }

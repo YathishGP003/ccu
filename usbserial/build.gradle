@@ -82,4 +82,5 @@ dependencies {
     testImplementation 'junit:junit:4.13.1'
     implementation 'org.greenrobot:eventbus:3.0.0'
     implementation project(':haystack')
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
 }

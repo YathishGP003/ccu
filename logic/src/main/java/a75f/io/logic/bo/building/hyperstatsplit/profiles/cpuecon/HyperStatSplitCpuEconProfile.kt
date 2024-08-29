@@ -1101,7 +1101,15 @@ class HyperStatSplitCpuEconProfile(equipRef: String, nodeAddress: Short) : Hyper
         if (basicSettings.fanMode == StandaloneFanStage.AUTO
             && basicSettings.conditioningMode == StandaloneConditioningMode.OFF ) {
             logIt("Cond is Off , Fan is Auto  : ")
-            hssEquip.linearFanSpeed.writeHisVal(0.0)
+
+            if (HyperStatSplitAssociationUtil.isRelayAssociatedToFanLow(relayAssociation)) {
+                hssEquip.fanLowSpeed.writeHisVal(0.0)
+            } else if (HyperStatSplitAssociationUtil.isRelayAssociatedToFanMedium(relayAssociation)) {
+                hssEquip.fanMediumSpeed.writeHisVal(0.0)
+            } else if (HyperStatSplitAssociationUtil.isRelayAssociatedToFanHigh(relayAssociation)) {
+                hssEquip.fanHighSpeed.writeHisVal(0.0)
+            }
+
             return
         }
         val highestStage = HyperStatSplitAssociationUtil.getHighestFanStage(config)

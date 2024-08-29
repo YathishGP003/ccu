@@ -1,5 +1,7 @@
 package a75f.io.api.haystack.sync;
 
+import static a75f.io.api.haystack.CCUTagsDb.TAG_CCU_HS;
+
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.constants.HttpConstants;
 
@@ -156,6 +158,11 @@ public class HttpUtil {
      */
     public static EntitySyncResponse executeEntitySync(String targetURL, String urlParameters, String bearerToken) {
         targetURL = StringUtils.appendIfMissing(targetURL, "/");
+        //TODO: Delete this logs after qa testing is done successfully
+        final int chunkSize = 2048;
+        for (int i = 0; i < urlParameters.length(); i += chunkSize) {
+            CcuLog.d(TAG_CCU_HS, urlParameters.substring(i, Math.min(urlParameters.length(), i + chunkSize)));
+        }
         Response response = postSync(targetURL, urlParameters, bearerToken);
         if (response == null) {
             return null;

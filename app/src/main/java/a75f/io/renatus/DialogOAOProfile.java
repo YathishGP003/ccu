@@ -75,7 +75,6 @@ public class DialogOAOProfile extends BaseDialogFragment
     String zoneRef;
     
     static int CT_INDEX_START = 8;
-     private boolean isSavingOAOProfile = false;
     
     @BindView(R.id.oaDamperAtMin)         Spinner oaDamperAtMin;
     @BindView(R.id.returnDamperAtMin)     Spinner returnDamperAtMin;
@@ -179,10 +178,9 @@ public class DialogOAOProfile extends BaseDialogFragment
         titleTextView.setText("ECONOMIZER (OAO) "+"("+mSmartNodeAddress+")");
 
         mProfile = L.ccu().oaoProfile;
-        setOAOSavingInProgress(false); //Initialize the state of saving OAO profile
+        
         setButton.setOnClickListener(v -> {
 
-            setOAOSavingInProgress(true);
             setButton.setEnabled(false);
             ProgressDialogUtils.showProgressDialog(getActivity(),"Saving OAO Configuration");
 
@@ -317,12 +315,8 @@ public class DialogOAOProfile extends BaseDialogFragment
         setSpinnerDropdown();
 
         new Handler().postDelayed(() -> {
-            if (ProgressDialogUtils.isDialogShowing() && !isSavingOAOProfile) { ProgressDialogUtils.hideProgressDialog(); }
+            if (ProgressDialogUtils.isDialogShowing()) { ProgressDialogUtils.hideProgressDialog(); }
         }, 4000);
-    }
-    //This method is used to set the state of saving OAO profile. While saving we will allow to close the progress dialog only after the saving is done.
-    private void setOAOSavingInProgress(boolean state) {
-        isSavingOAOProfile = state;
     }
 
     private void deleteOAOEquip() {

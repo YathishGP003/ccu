@@ -339,10 +339,10 @@ public class OTAUpdateService extends IntentService {
             short versionMinor = msg.smartNodeMinorFirmwareVersion.get();
             HashMap ccu = CCUHsApi.getInstance().read("ccu");
             String ccuName = ccu.get("dis").toString();
-            AlertGenerateHandler.handleMessage(FIRMWARE_OTA_UPDATE_ENDED, "Firmware OTA update for"+" "+ccuName+" "+
+           AlertGenerateHandler.handleDeviceMessage(FIRMWARE_OTA_UPDATE_ENDED, "Firmware OTA update for"+" "+ccuName+" "+
                     "ended for "+mFirmwareDeviceType.getUpdateFileName()+" "+ mCurrentLwMeshAddress+" "+"with version"+" "+versionMajor +
                     // changed Smart node to Smart Device as it is indicating the general name (US:9387)
-                    "." + versionMinor);
+                    "." + versionMinor, getDeviceId(String.valueOf(mFirmwareDeviceType), mCurrentLwMeshAddress));
            CcuLog.d(TAG, mUpdateWaitingToComplete + " - "+versionMajor+" - "+versionMinor);
             if (mUpdateWaitingToComplete && versionMatches(versionMajor, versionMinor)) {
                 CcuLog.d(TAG, "[UPDATE] [SUCCESSFUL]"
@@ -366,6 +366,24 @@ public class OTAUpdateService extends IntentService {
 
             moveUpdateToNextNode();
         }
+    }
+
+    private String getDeviceId(String deviceType, int deviceMeshAddress){
+        if(deviceType.equals(FirmwareComponentType_t.CONTROL_MOTE_DEVICE_TYPE.toString())) {
+
+            HashMap<Object, Object> device =  (CCUHsApi.getInstance().readEntity("device and cm"));
+            if((device.get("addr") == null)){
+                //Non-Dm system profiles will not have addr
+                return CCUHsApi.getInstance().readId("device and cm");
+            }
+            //Dm system profiles will  have addr
+            return CCUHsApi.getInstance().readId("(device and addr==\""+ device.get("addr") +"\") or device and cm");
+        }else if(deviceType.equals(FirmwareComponentType_t.CONNECT_MODULE_DEVICE_TYPE.toString())) {
+            int deviceAdresss = (int) (CCUHsApi.getInstance().readEntity("device and addr and connectModule")).get("addr");
+            return CCUHsApi.getInstance().readId("device and addr==\""+ deviceAdresss +"\"");
+        }
+        // For terminal devices
+        return CCUHsApi.getInstance().readId("device and addr==\""+ deviceMeshAddress +"\"");
     }
 
     /**
@@ -642,9 +660,8 @@ public class OTAUpdateService extends IntentService {
         //TODO notify something (PubNub?) that an update has started
         HashMap ccu = CCUHsApi.getInstance().read("ccu");
         String ccuName = ccu.get("dis").toString();
-
-        AlertGenerateHandler.handleMessage(FIRMWARE_OTA_UPDATE_STARTED, "Firmware OTA update for"+" "+ccuName+" "+
-                "started for "+deviceType.getUpdateFileName()+" "+mCurrentLwMeshAddress+" "+"with version"+" "+versionMajor + "." + versionMinor);
+        AlertGenerateHandler.handleDeviceMessage(FIRMWARE_OTA_UPDATE_STARTED, "Firmware OTA update for"+" "+ccuName+" "+
+                "started for "+deviceType.getUpdateFileName()+" "+mCurrentLwMeshAddress+" "+"with version"+" "+versionMajor + "." + versionMinor , getDeviceId(String.valueOf(deviceType), mCurrentLwMeshAddress));
         mUpdateInProgress = true;
         mLastSentPacket = -1;
 

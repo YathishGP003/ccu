@@ -244,8 +244,7 @@ public class Globals {
         new RestoreCCUHsApi();
         PreferenceUtil.setContext(this.mApplicationContext);
         CCUHsApi.getInstance().testHarnessEnabled = testHarness;
-        AlertManager.getInstance(mApplicationContext, renatusServicesUrls.getAlertsUrl())
-                .fetchPredefinedAlertsIfEmpty();
+        AlertManager.getInstance(mApplicationContext, renatusServicesUrls.getAlertsUrl()).initiateAlertOperations(getScheduledThreadPool());
 
         //set SN address band
         try {
@@ -317,8 +316,6 @@ public class Globals {
                     mProcessJob.scheduleJob("BuildingProcessJob", DEFAULT_HEARTBEAT_INTERVAL, TASK_SEPARATION, TASK_SEPARATION_TIMEUNIT);
                     mScheduleProcessJob.scheduleJob("Schedule Process Job", DEFAULT_HEARTBEAT_INTERVAL, TASK_SEPARATION + 15, TASK_SEPARATION_TIMEUNIT);
                     BearerTokenManager.getInstance().scheduleJob();
-                    mAlertProcessJob = new AlertProcessJob(mApplicationContext);
-                    getScheduledThreadPool().scheduleAtFixedRate(mAlertProcessJob.getJobRunnable(), TASK_SEPARATION + 30, DEFAULT_HEARTBEAT_INTERVAL, TASK_SEPARATION_TIMEUNIT);
                 }
             }
         }.start();

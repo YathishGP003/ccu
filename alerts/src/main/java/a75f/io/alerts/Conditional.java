@@ -151,6 +151,8 @@ public class Conditional
             pointValList = new ArrayList<>();
             pointList = new ArrayList<>();
             equipList = new ArrayList<>();
+            equipToPoint.clear();
+            equipToStatus.clear();
             ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("zone and equip");
                                     sb.append("\nEvaluating for ").append(equips.size()).append(" equips");
             for (Map q : equips) {
@@ -356,6 +358,8 @@ public class Conditional
                 pointList = new ArrayList<>();
                 pointValList = new ArrayList<>();
                 equipList = new ArrayList<>();
+                equipToPoint.clear();
+                equipToStatus.clear();
                 lastValue.clear();
                 presentValue.clear();
                 ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("zone and equip");

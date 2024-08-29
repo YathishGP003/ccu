@@ -1,4 +1,8 @@
-apply plugin: 'com.android.library'
+
+plugins {
+    id 'com.android.library'
+    id 'org.jetbrains.kotlin.android'
+}
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
@@ -62,6 +66,9 @@ android {
         }
     }
 
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
 }
 tasks.whenTaskAdded { task ->
     if (task.name == 'assembleDev_qa') {

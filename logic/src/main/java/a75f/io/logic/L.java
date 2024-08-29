@@ -81,6 +81,8 @@ public class L
     public static final String TAG_CCU_CLOUD_STATUS = "CCU_CLOUD_STATUS";
     public static final String TAG_CCU_UI_PROFILING = "CCU_UI_PROFILING";
     public static final String TAG_CCU_DOMAIN = "CCU_DOMAIN";
+    public static final String TAG_CCU_FILES = "CCU_FILES";
+
     public static Context app()
     {
         return Globals.getInstance().getApplicationContext();

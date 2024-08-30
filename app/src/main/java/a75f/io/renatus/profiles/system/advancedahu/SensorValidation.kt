@@ -193,16 +193,38 @@ fun isValidSatSensorSelection(config: CmConfiguration): Pair<Boolean, Spanned> {
             add(sensorsMapping.th2!!)
         }
     }
-    val duplicateSensor = findAndGetDuplicate(list)
-    if (duplicateSensor != null) {
-        return Pair(false, duplicateError(duplicateSensor))
-    }
 
     val satSequence = validateSatSequence(sensorsMapping)
     if (!satSequence.first) {
         return satSequence
     }
+
+    if (isAOHeatingSatAvailable(config)) {
+        if (!isSatSensorAvailable(sensorsMapping))
+            return Pair(false, Html.fromHtml(NO_SAT_HEATING_SENSOR, Html.FROM_HTML_MODE_LEGACY))
+    }
+    if (isAOCoolingSatAvailable(config)) {
+        if (!isSatSensorAvailable(sensorsMapping))
+            return Pair(false, Html.fromHtml(NO_SAT_COOLING_SENSOR, Html.FROM_HTML_MODE_LEGACY))
+    }
+
+    val duplicateSensor = findAndGetDuplicate(list)
+    if (duplicateSensor != null) {
+        return Pair(false, duplicateError(duplicateSensor))
+    }
     return Pair(true, Html.fromHtml("success", Html.FROM_HTML_MODE_LEGACY))
+}
+
+private fun isSatSensorAvailable(sensors: Sensors): Boolean {
+    val satSensors = getSatSensors(sensors)
+    for (item in satSensors) {
+        when (item) {
+            DomainName.supplyAirTemperature1,
+            DomainName.supplyAirTemperature2,
+            DomainName.supplyAirTemperature3 -> return true
+        }
+    }
+    return false
 }
 
 fun findAndGetDuplicate(list: MutableList<String?>): String? {
@@ -325,13 +347,19 @@ fun getSensorMapping(config: ConnectConfiguration): Sensors {
     return sensors
 }
 
-fun validateSatSequence(sensors: Sensors): Pair<Boolean, Spanned> {
+
+fun getSatSensors(sensors: Sensors): MutableList<String?> {
     val satSensors = mutableListOf<String?>()
     satSensors.addAll(sensors.temp)
     satSensors.add(sensors.analogIn1)
     satSensors.add(sensors.analogIn2)
     satSensors.add(sensors.th1)
     satSensors.add(sensors.th2)
+    return satSensors
+}
+
+fun validateSatSequence(sensors: Sensors): Pair<Boolean, Spanned> {
+    val satSensors = getSatSensors(sensors)
     var hasTemp1 = false
     var hasTemp2 = false
     var hasTemp3 = false

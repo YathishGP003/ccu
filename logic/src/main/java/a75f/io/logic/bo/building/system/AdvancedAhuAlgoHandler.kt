@@ -9,6 +9,7 @@ import a75f.io.domain.equips.SystemEquip
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.oao.OAOProfile
+import a75f.io.logic.bo.building.schedules.Occupancy
 import a75f.io.logic.bo.building.system.util.AhuSettings
 import a75f.io.logic.bo.building.system.util.AhuTuners
 

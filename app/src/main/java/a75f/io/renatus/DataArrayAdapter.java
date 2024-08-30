@@ -23,7 +23,7 @@ public class DataArrayAdapter<T> extends ArrayAdapter<T>
 {
 	private int     nSelectedPostion   = 0;
 	private int[]   nSelectedPositions = null;
-	private ArrayList<Short> nSelectedModules = new ArrayList<>();
+	private ArrayList<Long> nSelectedModules = new ArrayList<>();
 	private ArrayList<Zone> nSelectedZones = new ArrayList<>();
 	private boolean bMultiSelect       = false;
 	private int     nColor             = Color.argb(0x55, 0x00, 0x99, 0xcc);
@@ -40,7 +40,7 @@ public class DataArrayAdapter<T> extends ArrayAdapter<T>
 	}
 	
 	
-	public DataArrayAdapter(Context context, int textViewResourceId, ArrayList<T> objects, ArrayList<Short> moduleIds, ArrayList<Zone> zoneIds)
+	public DataArrayAdapter(Context context, int textViewResourceId, ArrayList<T> objects, ArrayList<Long> moduleIds, ArrayList<Zone> zoneIds)
 	{
 		super(context, textViewResourceId, objects);
 		this.objects = objects;
@@ -103,7 +103,7 @@ public class DataArrayAdapter<T> extends ArrayAdapter<T>
 			}
 		}
 
-		if ((nSelectedModules.size() > 0 && nSelectedModules.contains(Short.parseShort(objects.get(position).toString()))) ||
+		if ((nSelectedModules.size() > 0 && nSelectedModules.contains(Long.parseLong(objects.get(position).toString()))) ||
 				(nSelectedZones.size() > 0 && isRoomSelected((Zone) objects.get(position)))){
 			textView_Data.setTextColor(getContext().getResources().getColor(R.color.text_color));
 			convertView.setBackgroundColor(getContext().getResources().getColor(R.color.selection_gray));
@@ -159,7 +159,7 @@ public class DataArrayAdapter<T> extends ArrayAdapter<T>
 			notifyDataSetChanged();
 		}
 	}
-	public void addSelected(int position, ArrayList<Short> moduleIds, ArrayList<Zone> zoneIds)
+	public void addSelected(int position, ArrayList<Long> moduleIds, ArrayList<Zone> zoneIds)
 	{
 		setMultiSelectMode(true);
 		if(!moduleIds.isEmpty()) {
@@ -176,7 +176,7 @@ public class DataArrayAdapter<T> extends ArrayAdapter<T>
 	}
 
 
-	public void removeSelected(int position, ArrayList<Short> moduleIds, ArrayList<Zone> zoneIds)
+	public void removeSelected(int position, ArrayList<Long> moduleIds, ArrayList<Zone> zoneIds)
 	{
 		setMultiSelectMode(true);
 		if(!moduleIds.isEmpty()) {

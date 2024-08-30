@@ -126,6 +126,17 @@ public class UsbService extends Service
 				if (!serialPortConnected && UsbSerialUtil.isCMDevice(attachedDevice, context)) {
 					CcuLog.d(TAG_CCU_USB,"CM Serial device connected "+ attachedDevice);
 					scheduleUsbConnectedEvent(); // A USB device has been attached. Try to open it as a Serial port
+					int vendorId = attachedDevice.getVendorId();
+					int productId = attachedDevice.getProductId();
+					String manufacturerName = attachedDevice.getManufacturerName();
+					String productName = attachedDevice.getProductName();
+					String version = attachedDevice.getVersion();
+					String serialNumber = attachedDevice.getSerialNumber();
+					String logMessage = String.format(
+							"CM is Attached - VID: %d, PID: %d, Manufacturer: %s, Product Name: %s, Version: %s, Serial Number: %s",
+							vendorId, productId, manufacturerName, productName, version, serialNumber
+					);
+					UsbUtil.writeUsbEvent(logMessage);
 				}
 			} else if (arg1.getAction().equals(ACTION_USB_DETACHED)) {
 				UsbDevice detachedDevice = arg1.getParcelableExtra(UsbManager.EXTRA_DEVICE);
@@ -141,6 +152,17 @@ public class UsbService extends Service
 					// Usb device was disconnected. send an intent to the Main Activity
 					Intent intent = new Intent(ACTION_USB_DISCONNECTED);
 					arg0.sendBroadcast(intent);
+					int vendorId = detachedDevice.getVendorId();
+					int productId = detachedDevice.getProductId();
+					String manufacturerName = detachedDevice.getManufacturerName();
+					String productName = detachedDevice.getProductName();
+					String version = detachedDevice.getVersion();
+					String serialNumber = detachedDevice.getSerialNumber();
+					String logMessage = String.format(
+							"CM is Detached - VID: %d, PID: %d, Manufacturer: %s, Product Name: %s, Version: %s, Serial Number: %s",
+							vendorId, productId, manufacturerName, productName, version, serialNumber
+					);
+					UsbUtil.writeUsbEvent(logMessage);
 				}
 			}
 			CcuLog.d(TAG_CCU_USB,"UsbService: OnReceive == "+arg1.getAction()+","+serialPortConnected);

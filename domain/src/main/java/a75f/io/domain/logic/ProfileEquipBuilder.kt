@@ -19,15 +19,9 @@ import io.seventyfivef.domainmodeler.client.ModelPointDef
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import io.seventyfivef.domainmodeler.common.point.MultiStateConstraint
 import io.seventyfivef.domainmodeler.common.point.PointConfiguration
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
-import org.projecthaystack.HStr
-import java.util.concurrent.Executors
-import java.util.concurrent.ThreadFactory
-import java.util.concurrent.atomic.AtomicInteger
 import kotlin.system.measureTimeMillis
 
 class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder() {
@@ -209,7 +203,7 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
                                   entityConfiguration: EntityConfiguration, equipRef: String, siteRef: String, equipDis: String) {
         runBlocking {
             entityConfiguration.tobeUpdated.forEach { point ->
-                async(Dispatchers.Default) {
+                async(highPriorityDispatcher) {
                     CcuLog.i(Domain.LOG_TAG, "updatePointValues - ${point.domainName}")
                     val existingPoint = hayStack.readEntity("domainName == \""+point.domainName+"\" and equipRef == \""+equipRef+"\"")
                     val modelPointDef = modelDef.points.find { it.domainName == point.domainName }
@@ -237,11 +231,16 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
         }
     }
     private fun deletePoints(entityConfiguration: EntityConfiguration, equipRef: String) {
-        entityConfiguration.tobeDeleted.forEach { point ->
-            CcuLog.i(Domain.LOG_TAG, "deletePoint - ${point.domainName}")
-            val existingPoint = hayStack.readEntity("domainName == \""+point.domainName+"\" and equipRef == \""+equipRef+"\"")
-            if(existingPoint.isNotEmpty()){
-                hayStack.deleteEntity(existingPoint["id"].toString())
+       runBlocking {
+            entityConfiguration.tobeDeleted.forEach { point ->
+                async(highPriorityDispatcher) {
+                    CcuLog.i(Domain.LOG_TAG, "deletePoint - ${point.domainName}")
+                    val existingPoint =
+                        hayStack.readEntity("domainName == \"" + point.domainName + "\" and equipRef == \"" + equipRef + "\"")
+                    if (existingPoint.isNotEmpty()) {
+                        hayStack.deleteEntity(existingPoint["id"].toString())
+                    }
+                }.await()
             }
         }
     }

@@ -240,7 +240,6 @@ public class Globals {
         CcuLog.i(L.TAG_CCU_INIT, "Initialize Haystack");
         renatusServicesUrls = urls;
         CCUHsApi hsApi = new CCUHsApi(this.mApplicationContext, urls.getHaystackUrl(), urls.getCaretakerUrl(), urls.getGatewayUrl());
-        ModelCache.INSTANCE.init(this.mApplicationContext);
     }
 
     public void startTimerTask() {
@@ -248,8 +247,7 @@ public class Globals {
         new RestoreCCUHsApi();
         PreferenceUtil.setContext(this.mApplicationContext);
         CCUHsApi.getInstance().testHarnessEnabled = testHarness;
-        AlertManager.getInstance(mApplicationContext, renatusServicesUrls.getAlertsUrl())
-                .fetchPredefinedAlertsIfEmpty();
+        AlertManager.getInstance(mApplicationContext, renatusServicesUrls.getAlertsUrl()).initiateAlertOperations(getScheduledThreadPool());
 
         //set SN address band
         try {
@@ -279,7 +277,7 @@ public class Globals {
                 MigrationHandler migrationHandler = new MigrationHandler(CCUHsApi.getInstance());
                 try {
                     CcuLog.i(L.TAG_CCU_INIT, "Run Migrations");
-                    ModelCache.INSTANCE.init(mApplicationContext);
+                    ModelCache.INSTANCE.init(mApplicationContext, CCUHsApi.getInstance());
                     HashMap<Object, Object> site = CCUHsApi.getInstance().readEntity("site");
                     if (!isSafeMode()) {
                         migrationHandler.doMigration();
@@ -321,8 +319,6 @@ public class Globals {
                     mProcessJob.scheduleJob("BuildingProcessJob", DEFAULT_HEARTBEAT_INTERVAL, TASK_SEPARATION, TASK_SEPARATION_TIMEUNIT);
                     mScheduleProcessJob.scheduleJob("Schedule Process Job", DEFAULT_HEARTBEAT_INTERVAL, TASK_SEPARATION + 15, TASK_SEPARATION_TIMEUNIT);
                     BearerTokenManager.getInstance().scheduleJob();
-                    mAlertProcessJob = new AlertProcessJob(mApplicationContext);
-                    getScheduledThreadPool().scheduleAtFixedRate(mAlertProcessJob.getJobRunnable(), TASK_SEPARATION + 30, DEFAULT_HEARTBEAT_INTERVAL, TASK_SEPARATION_TIMEUNIT);
                 }
             }
         }.start();
@@ -582,7 +578,7 @@ public class Globals {
                             break;
                         case BACNET_DEFAULT:
                             BacnetProfile bacnetProfile = new BacnetProfile();
-                            bacnetProfile.addBacAppEquip(Short.parseShort(eq.getGroup()), ProfileType.valueOf(eq.getProfile()));
+                            bacnetProfile.addBacAppEquip(Long.parseLong(eq.getGroup()), ProfileType.valueOf(eq.getProfile()));
                             L.ccu().zoneProfiles.add(bacnetProfile);
                             break;
 

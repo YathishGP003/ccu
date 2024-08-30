@@ -131,6 +131,21 @@ public class UsbConnectService extends Service
 					CcuLog.d(TAG,"CM Serial device connected "+attachedDevice.toString());
 					scheduleUsbConnectedEvent(); // A USB device has been attached. Try to open it as a Serial port
 				}
+				ConnectSerialPort portSelection = ConnectSerialPort.values()[UsbSerialUtil.getPreferredConnectModuleSerialType(context)];
+				if ((portSelection == ConnectSerialPort.CCU_PORT && UsbSerialUtil.isConnectDevice(attachedDevice, context))
+						|| (portSelection == ConnectSerialPort.CM_VIRTUAL_PORT2 && UsbSerialUtil.isCMDevice(attachedDevice, context))) {
+					int vendorId = attachedDevice.getVendorId();
+					int productId = attachedDevice.getProductId();
+					String manufacturerName = attachedDevice.getManufacturerName();
+					String productName = attachedDevice.getProductName();
+					String version = attachedDevice.getVersion();
+					String serialNumber = attachedDevice.getSerialNumber();
+					String logMessage = String.format(
+							"Connect Module is Attached - VID: %d, PID: %d, Manufacturer: %s, Product Name: %s, Version: %s, Serial Number: %s",
+							vendorId, productId, manufacturerName, productName, version, serialNumber
+					);
+					UsbUtil.writeUsbEvent(logMessage);
+				}
 			} else if (arg1.getAction().equals(ACTION_USB_DETACHED)) {
 				UsbDevice detachedDevice = arg1.getParcelableExtra(UsbManager.EXTRA_DEVICE);
 
@@ -147,6 +162,17 @@ public class UsbConnectService extends Service
 					// Usb device was disconnected. send an intent to the Main Activity
 					Intent intent = new Intent(ACTION_USB_CONNECT_DISCONNECTED);
 					arg0.sendBroadcast(intent);
+					int vendorId = detachedDevice.getVendorId();
+					int productId = detachedDevice.getProductId();
+					String manufacturerName = detachedDevice.getManufacturerName();
+					String productName = detachedDevice.getProductName();
+					String version = detachedDevice.getVersion();
+					String serialNumber = detachedDevice.getSerialNumber();
+					String logMessage = String.format(
+							"Connect Module is Detached - VID: %d, PID: %d, Manufacturer: %s, Product Name: %s, Version: %s, Serial Number: %s",
+							vendorId, productId, manufacturerName, productName, version, serialNumber
+					);
+					UsbUtil.writeUsbEvent(logMessage);
 				}
 			}
 			CcuLog.d(TAG,"UsbService: OnReceive == "+arg1.getAction()+","+serialPortConnected);

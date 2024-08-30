@@ -11,6 +11,9 @@ class PointWriteCache private constructor() {
         CcuLog.i(POINT_WRITE_TAG, "Add Point Id to PointWriteCache: "+id +" PointWriteCache size :"+pointWriteCache.size)
         if (pointWriteCache.containsKey(id)) {
             val pointWriteArray = pointWriteCache[id]?.toMutableList() ?: mutableListOf()
+            pointWriteArray.removeIf {
+                it.getInt("level") == pointWriteDict.getInt("level")
+            }
             pointWriteArray.add(pointWriteDict)
             pointWriteCache[id] = pointWriteArray.toTypedArray()
         } else {

@@ -22,6 +22,7 @@ import a75f.io.logic.bo.building.dab.getDevicePointDict
 import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.definitions.ReheatType
+import a75f.io.logic.bo.haystack.device.ControlMote
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.logic.getSchedule
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
@@ -30,6 +31,7 @@ import a75f.io.renatus.FloorPlanFragment
 import a75f.io.renatus.modbus.util.showToast
 import a75f.io.renatus.profiles.profileUtils.UnusedPortsModel
 import a75f.io.renatus.util.ProgressDialogUtils
+import a75f.io.renatus.util.highPriorityDispatcher
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
@@ -44,6 +46,7 @@ import androidx.lifecycle.viewModelScope
 import io.seventyfivef.domainmodeler.client.ModelDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -59,7 +62,6 @@ class DabProfileViewModel : ViewModel() {
 
     private lateinit var dabProfile: DabProfile
     lateinit var profileConfiguration: DabProfileConfiguration
-    var isModelLoaded by mutableStateOf(false)
     private lateinit var model: SeventyFiveFProfileDirective
     private lateinit var deviceModel: SeventyFiveFDeviceDirective
     lateinit var viewState: DabConfigViewState
@@ -113,24 +115,21 @@ class DabProfileViewModel : ViewModel() {
                 deviceAddress.toInt(), nodeType.name, 0,
                 zoneRef, floorRef, profileType, model
             ).getActiveConfiguration()
+            CcuLog.i(Domain.LOG_TAG, profileConfiguration.toString())
+            viewState = DabConfigViewState.fromDabProfileConfig(profileConfiguration)
         } else {
             profileConfiguration = DabProfileConfiguration(
                 deviceAddress.toInt(), nodeType.name, 0,
                 zoneRef, floorRef, profileType, model
             ).getDefaultConfiguration()
+            CcuLog.i(Domain.LOG_TAG, profileConfiguration.toString())
+            viewState = DabConfigViewState.fromDabProfileConfig(profileConfiguration)
         }
-
-        CcuLog.i(Domain.LOG_TAG, profileConfiguration.toString())
-        viewState = DabConfigViewState.fromDabProfileConfig(profileConfiguration)
-
         this.context = requireContext
         this.hayStack = hayStack
 
         initializeLists()
-        unusedPorts = UnusedPortsModel.initializeUnUsedPorts(deviceAddress, hayStack)
         CcuLog.i(Domain.LOG_TAG, "DabProfileViewModel Loaded")
-
-        isModelLoaded = true
     }
 
     private fun initializeLists() {
@@ -175,28 +174,14 @@ class DabProfileViewModel : ViewModel() {
 
     fun saveConfiguration() {
         if (saveJob == null) {
-            saveJob = viewModelScope.launch {
-                if(BuildConfig.BUILD_TYPE == CARRIER_PROD){
-                    ProgressDialogUtils.showProgressDialog(context,"Saving VVT-C Configuration")
-                }else{
-                    ProgressDialogUtils.showProgressDialog(context, "Saving DAB Configuration")
-                }
-                withContext(Dispatchers.IO) {
-                    CCUHsApi.getInstance().resetCcuReady()
-
+            CCUHsApi.getInstance().resetCcuReady()
+            if(BuildConfig.BUILD_TYPE == CARRIER_PROD){
+                ProgressDialogUtils.showProgressDialog(context,"Saving VVT-C Configuration")
+            }else{
+                ProgressDialogUtils.showProgressDialog(context, "Saving DAB Configuration")
+            }
+            saveJob = viewModelScope.launch(highPriorityDispatcher) {
                     setUpDabProfile()
-                    CcuLog.i(Domain.LOG_TAG, "DAB Profile Setup complete")
-                    L.saveCCUState()
-
-                    hayStack.syncEntityTree()
-                    CCUHsApi.getInstance().setCcuReady()
-                    CcuLog.i(Domain.LOG_TAG, "Send seed for $deviceAddress")
-                    LSerial.getInstance()
-                        .sendSeedMessage(false, false, deviceAddress, zoneRef, floorRef)
-
-                    DesiredTempDisplayMode.setModeType(zoneRef, CCUHsApi.getInstance())
-                    CcuLog.i(Domain.LOG_TAG, "DabProfile Pairing complete")
-
                     withContext(Dispatchers.Main) {
                         context.sendBroadcast(Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED))
                         if(BuildConfig.BUILD_TYPE == CARRIER_PROD) {
@@ -204,24 +189,26 @@ class DabProfileViewModel : ViewModel() {
                         }else{
                             showToast("DAB Configuration saved successfully", context)
                         }
-                        CcuLog.i(Domain.LOG_TAG, "Close Pairing dialog")
-                        ProgressDialogUtils.hideProgressDialog()
-                        _isDialogOpen.postValue(false)
+                        if (ProgressDialogUtils.isDialogShowing()) {
+                            ProgressDialogUtils.hideProgressDialog()
+                            CcuLog.i(Domain.LOG_TAG, "Closing DAB dialog")
+                            _isDialogOpen.postValue(false)
+                        }
                     }
-
-                }
-
-                if (ProgressDialogUtils.isDialogShowing()) {
-                    ProgressDialogUtils.hideProgressDialog()
-                    _isDialogOpen.postValue(false)
-                }
+                    L.saveCCUState()
+                    CCUHsApi.getInstance().setCcuReady()
+                    hayStack.syncEntityTree()
+                    CcuLog.i(Domain.LOG_TAG, "Send seed for $deviceAddress")
+                    LSerial.getInstance()
+                        .sendSeedMessage(false, false, deviceAddress, zoneRef, floorRef)
+                    DesiredTempDisplayMode.setModeType(zoneRef, CCUHsApi.getInstance())
+                    CcuLog.i(Domain.LOG_TAG, "DabProfile Pairing complete")
             }
         }
     }
 
     private fun setUpDabProfile() {
         viewState.updateConfigFromViewState(profileConfiguration)
-        val equipBuilder = ProfileEquipBuilder(hayStack)
         val equipDis =  if (BuildConfig.BUILD_TYPE.equals(CARRIER_PROD, ignoreCase = true)) {
             hayStack.siteName + "-VVT-C-" + profileConfiguration.nodeAddress
         }else{
@@ -244,6 +231,7 @@ class DabProfileViewModel : ViewModel() {
             setScheduleType(profileConfiguration)
             L.ccu().zoneProfiles.add(dabProfile)
         } else {
+            val equipBuilder = ProfileEquipBuilder(hayStack)
             equipBuilder.updateEquipAndPoints(
                 profileConfiguration,
                 model,
@@ -254,8 +242,10 @@ class DabProfileViewModel : ViewModel() {
             if (L.ccu().bypassDamperProfile != null) { overrideForBypassDamper(profileConfiguration); }
             dabProfile.init()
             setOutputTypes(hayStack, profileConfiguration, deviceBuilder, deviceModel)
-            UnusedPortsModel.saveUnUsedPortStatus(profileConfiguration, deviceAddress, hayStack)
             setScheduleType(profileConfiguration)
+            CoroutineScope(Dispatchers.Default).launch {
+                UnusedPortsModel.saveUnUsedPortStatus(profileConfiguration, deviceAddress, hayStack)
+            }
         }
 
     }
@@ -299,8 +289,6 @@ class DabProfileViewModel : ViewModel() {
             hayStack.site!!.id,
             deviceDis
         )
-        CcuLog.i(Domain.LOG_TAG, " add Profile")
-
         dabProfile = DabProfile(addr)
     }
 
@@ -440,7 +428,7 @@ class DabProfileViewModel : ViewModel() {
             }
         }
 
-        analog1In["analogType"] = getDamperTypeString(config.damper1Type.currentVal.toInt());
+        analog1In["analogType"] = getDamperTypeString(config.damper1Type.currentVal.toInt())
         deviceBuilder.updatePoint(analog1InDef!!, config, device, analog1In)
     }
 
@@ -467,7 +455,7 @@ class DabProfileViewModel : ViewModel() {
         }
     }
 
-    fun setPortConfiguration(
+    private fun setPortConfiguration(
         rawPoint: HashMap<Any, Any>,
         analogType: String?,
         port: String?,

@@ -1,7 +1,5 @@
 package a75f.io.device.alerts;
 
-import a75f.io.alerts.AlertManager;
-
 import static a75f.io.alerts.AlertsConstantsKt.CM_DEAD;
 import static a75f.io.alerts.AlertsConstantsKt.CM_ERROR_REPORT;
 import static a75f.io.alerts.AlertsConstantsKt.CM_RESET;
@@ -13,6 +11,8 @@ import static a75f.io.alerts.AlertsConstantsKt.DEVICE_RESTART;
 import static a75f.io.alerts.AlertsConstantsKt.FIRMWARE_OTA_UPDATE_ENDED;
 import static a75f.io.alerts.AlertsConstantsKt.FIRMWARE_OTA_UPDATE_STARTED;
 import static a75f.io.alerts.AlertsConstantsKt.FSV_REBOOT;
+
+import a75f.io.alerts.AlertManager;
 
 /**
  * Created by mahesh on 26-11-2019.
@@ -41,29 +41,32 @@ public class AlertGenerateHandler {
                 case CM_RESET:
                     AlertManager.getInstance().generateAlert(CM_RESET, msg);
                     break;
-                case DEVICE_REBOOT:
-                    AlertManager.getInstance().generateAlert(DEVICE_REBOOT, msg);
-                    break;
-                case FIRMWARE_OTA_UPDATE_STARTED:
-                    AlertManager.getInstance().generateAlert(FIRMWARE_OTA_UPDATE_STARTED, msg);
-                    break;
-                case FIRMWARE_OTA_UPDATE_ENDED:
-                    AlertManager.getInstance().generateAlert(FIRMWARE_OTA_UPDATE_ENDED, msg);
-                    break;
                 case CM_DEAD:
                     AlertManager.getInstance().generateCMDeadAlert(CM_DEAD, msg);
-                    break;
-                case DEVICE_DEAD:
-                    AlertManager.getInstance().generateAlert(DEVICE_DEAD, msg);
-                    break;
-                case DEVICE_LOW_SIGNAL:
-                    AlertManager.getInstance().generateAlert(DEVICE_LOW_SIGNAL, msg);
                     break;
             }
     }
 
-    public static void handleDeviceMessage(String cmd, String msg, String equipRef) {
-        AlertManager.getInstance().generateAlert(DEVICE_DEAD, msg, equipRef);
+    public static void handleDeviceMessage(String cmd, String msg, String deviceRef) {
+        AlertManager alertManager = AlertManager.getInstance();
+        switch (cmd) {
+            case DEVICE_REBOOT:
+                alertManager.fixActiveDeviceRebootAlert(deviceRef);
+                alertManager.generateAlert(DEVICE_REBOOT, msg, deviceRef);
+                break;
+            case DEVICE_DEAD:
+                alertManager.generateAlert(DEVICE_DEAD, msg, deviceRef);
+                break;
+            case DEVICE_LOW_SIGNAL:
+                alertManager.generateAlert(DEVICE_LOW_SIGNAL, msg, deviceRef);
+                break;
+            case FIRMWARE_OTA_UPDATE_STARTED:
+                alertManager.generateAlert(FIRMWARE_OTA_UPDATE_STARTED, msg, deviceRef);
+                break;
+            case FIRMWARE_OTA_UPDATE_ENDED:
+                alertManager.generateAlert(FIRMWARE_OTA_UPDATE_ENDED, msg, deviceRef);
+                break;
+        }
     }
 
 }

@@ -128,7 +128,8 @@ open class UnusedPortsModel {
             val devicePorts = DeviceUtil.getPortsForDevice(deviceAddress, hayStack)
             devicePorts?.forEach { devicePort ->
                 currentPortStatus?.get(devicePort.displayName)?.let { portValue ->
-                    if (portValue && !devicePort.markers.contains(Tags.WRITABLE)) {
+                    // In terminal profile, while saving unused ports, we need to check if the port is used in the algo
+                    if (portValue && !devicePort.markers.contains(Tags.WRITABLE) && !devicePort.enabled) {
                         devicePort.markers.add(Tags.WRITABLE)
                     } else if ((!portValue || devicePort.enabled) && devicePort.markers.contains(
                             Tags.WRITABLE)) {

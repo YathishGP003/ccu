@@ -1,26 +1,27 @@
 package a75f.io.renatus.profiles.vav
 
 import a75f.io.api.haystack.CCUHsApi
-import a75f.io.domain.api.Domain
 import a75f.io.logger.CcuLog
+import a75f.io.logic.L
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.renatus.BASE.BaseDialogFragment
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.composables.DropDownWithLabel
-import a75f.io.renatus.composables.IndeterminateLoopProgress
 import a75f.io.renatus.composables.Picker
 import a75f.io.renatus.composables.rememberPickerState
 import a75f.io.renatus.compose.*
 import a75f.io.renatus.modbus.util.SET
 import a75f.io.renatus.profiles.OnPairingCompleteListener
 import a75f.io.renatus.profiles.profileUtils.UnusedPortsFragment
+import a75f.io.renatus.util.highPriorityDispatcher
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -31,11 +32,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.runtime.*
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
@@ -49,7 +48,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class VavProfileConfigFragment : BaseDialogFragment() ,OnPairingCompleteListener {
+class VavProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener {
 
     private val viewModel : VavProfileViewModel by viewModels()
     companion object {
@@ -73,28 +72,37 @@ class VavProfileConfigFragment : BaseDialogFragment() ,OnPairingCompleteListener
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
-        viewLifecycleOwner.lifecycleScope.launch {
-            withContext(Dispatchers.IO) {
-                viewModel.init(requireArguments(), requireContext(), CCUHsApi.getInstance())
-                viewModel.setOnPairingCompleteListener(this@VavProfileConfigFragment)
+        val rootView = ComposeView(requireContext())
+        rootView.setContent {
+            ShowProgressBar()
+        }
+        viewLifecycleOwner.lifecycleScope.launch(highPriorityDispatcher) {
+            viewModel.init(requireArguments(), requireContext(), CCUHsApi.getInstance())
+            viewModel.setOnPairingCompleteListener(this@VavProfileConfigFragment)
+            withContext(Dispatchers.Main) {
+                rootView.setContent {
+                    RootView()
+                }
             }
         }
-        val rootView = ComposeView(requireContext())
-        rootView.apply {
-            setContent { RootView() }
-            return rootView
-        }
+        return rootView
+    }
 
+    @Composable
+    fun ShowProgressBar() {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            CircularProgressIndicator(color = ComposeUtil.primaryColor)
+            Spacer(modifier = Modifier.height(10.dp))
+            Text(text = "Loading Profile Configuration")
+        }
     }
     //@Preview
     @Composable
     fun RootView() {
-        val modelLoaded by viewModel.modelLoaded.observeAsState(initial = false)
-        if (!modelLoaded) {
-            IndeterminateLoopProgress(bottomText = "Loading Profile Configuration")
-            CcuLog.i(Domain.LOG_TAG, "Show Progress")
-            return
-        }
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -206,7 +214,7 @@ class VavProfileConfigFragment : BaseDialogFragment() ,OnPairingCompleteListener
                     Row{
                         when(viewModel.viewState.reheatType){
                             0.0->{
-                              // While reheat type is not install it should not show the Relay or Analog out ports in UI
+                                // While reheat type is not install it should not show the Relay or Analog out ports in UI
                             }
                             1.0->{
                                 HeaderTextView(text = "Analog Out 2",padding=0)
@@ -284,7 +292,7 @@ class VavProfileConfigFragment : BaseDialogFragment() ,OnPairingCompleteListener
                         Spacer(modifier = Modifier.width(220.dp))
                         ToggleButtonStateful(
                             defaultSelection = viewModel.viewState.autoForceOccupied,
-                            onEnabled = { it -> viewModel.viewState.autoForceOccupied = it }
+                            onEnabled = { viewModel.viewState.autoForceOccupied = it }
                         )
                     }
                     Spacer(modifier=Modifier.width(83.dp))
@@ -293,7 +301,7 @@ class VavProfileConfigFragment : BaseDialogFragment() ,OnPairingCompleteListener
                         Spacer(modifier = Modifier.width(250.dp))
                         ToggleButtonStateful(
                             defaultSelection = viewModel.viewState.autoAway,
-                            onEnabled = { it -> viewModel.viewState.autoAway = it }
+                            onEnabled = { viewModel.viewState.autoAway = it }
                         )
                     }
                 }
@@ -306,7 +314,7 @@ class VavProfileConfigFragment : BaseDialogFragment() ,OnPairingCompleteListener
                         Spacer(modifier = Modifier.width(238.dp))
                         ToggleButtonStateful(
                             defaultSelection = viewModel.viewState.enableIAQControl,
-                            onEnabled = { it -> viewModel.viewState.enableIAQControl = it }
+                            onEnabled = { viewModel.viewState.enableIAQControl = it }
                         )
                     }
                     Spacer(modifier=Modifier.width(83.dp))
@@ -315,7 +323,7 @@ class VavProfileConfigFragment : BaseDialogFragment() ,OnPairingCompleteListener
                         Spacer(modifier = Modifier.width(158.dp))
                         ToggleButtonStateful(
                             defaultSelection = viewModel.viewState.enableCo2Control,
-                            onEnabled = { it -> viewModel.viewState.enableCo2Control = it }
+                            onEnabled = { viewModel.viewState.enableCo2Control = it }
                         )
                     }
                 }
@@ -328,7 +336,7 @@ class VavProfileConfigFragment : BaseDialogFragment() ,OnPairingCompleteListener
                         Spacer(modifier = Modifier.width(228.dp))
                         ToggleButtonStateful(
                             defaultSelection = viewModel.viewState.enableCFMControl,
-                            onEnabled = { it -> viewModel.viewState.enableCFMControl = it }
+                            onEnabled = { viewModel.viewState.enableCFMControl = it }
                         )
                     }
                     Spacer(modifier=Modifier.width(85.dp))
@@ -339,7 +347,7 @@ class VavProfileConfigFragment : BaseDialogFragment() ,OnPairingCompleteListener
                                 list = viewModel.kFactorsList,
                                 previewWidth = 130,
                                 expandedWidth = 150,
-                                onSelected = { selectedIndex -> viewModel.viewState.kFactor = viewModel.kFactorsList.get(selectedIndex).toDouble() },
+                                onSelected = { selectedIndex -> viewModel.viewState.kFactor = viewModel.kFactorsList[selectedIndex].toDouble() },
                                 defaultSelection = viewModel.kFactorsList.indexOf(("%.2f").format(viewModel.viewState.kFactor)),
                                 paddingLimit = 10,
                                 spacerLimit = 180,
@@ -351,8 +359,6 @@ class VavProfileConfigFragment : BaseDialogFragment() ,OnPairingCompleteListener
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-
-                val values = remember { (0..100).map { it.toString() } }
                 val valuesPickerState = rememberPickerState()
 
                 Row(modifier = Modifier

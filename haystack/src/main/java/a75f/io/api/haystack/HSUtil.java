@@ -123,13 +123,13 @@ public class HSUtil {
         return equipList;
     }
 
-    public static List<Short> getSubEquipPairingAddr(String parentEquipPairingAddr) {
+    public static List<Long> getSubEquipPairingAddr(String parentEquipPairingAddr) {
         HashMap<Object, Object> parentEquipMap =
                 CCUHsApi.getInstance().readEntity("equip and not equipRef and group == \"" + parentEquipPairingAddr + "\"");
         List<Equip> subEquipList = getSubEquips(parentEquipMap.get("id").toString());
-        List<Short> subEquipAddrList = new ArrayList<>();
+        List<Long> subEquipAddrList = new ArrayList<>();
         for (Equip subEquip : subEquipList) {
-            subEquipAddrList.add(Short.parseShort(subEquip.getGroup()));
+            subEquipAddrList.add(Long.parseLong(subEquip.getGroup()));
         }
         return subEquipAddrList;
     }

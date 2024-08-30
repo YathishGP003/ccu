@@ -1,5 +1,6 @@
 package a75f.io.domain.util
 
+import a75f.io.api.haystack.CCUHsApi
 import a75f.io.domain.api.Domain
 import a75f.io.logger.CcuLog
 import android.annotation.SuppressLint
@@ -7,6 +8,8 @@ import android.content.Context
 import io.seventyfivef.domainmodeler.client.ModelDirective
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 
 @SuppressLint("StaticFieldLeak")
@@ -17,15 +20,47 @@ object ModelCache {
     private const val BUILDING_EQUIP_MODEL = "assets/75f/models/657739fbd1743f797c4c2ca4.json"
 
     var context : Context? = null
-    fun init(context: Context) {
+    fun init(context: Context, haystack: CCUHsApi) {
         this.context = context
-        loadSystemModelsAsync()
-        loadTerminalModelsAsync()
-        CcuLog.i(Domain.LOG_TAG, "Load BuildingEquipModel")
-        val buildingEquipModel = ResourceHelper.loadModel(BUILDING_EQUIP_MODEL, context)
-        modelContainer[MODEL_BUILDING_EQUIP] = buildingEquipModel
-        CcuLog.i(Domain.LOG_TAG, "BuildingEquipModel loaded Version: ${buildingEquipModel.version.toString()}")
-        loadDeviceModels()
+        val terminalDomainEquip =  haystack.readAllEntities("equip and zone and not standalone and sourceModel")
+        if(terminalDomainEquip.isNotEmpty()){
+            loadModels(haystack)
+        }else{
+            loadSystemModelsAsync()
+            loadTerminalModelsAsync()
+            loadBuildingEquipModel()
+            loadDeviceModels()
+        }
+    }
+
+    private fun loadModels(haystack: CCUHsApi) {
+        val domainEquips =  haystack.readAllEntities("(equip or device) and sourceModel")
+        val modelIds = HashSet<String>()
+        for (equip in domainEquips) {
+            if (equip.containsKey("sourceModel")) {
+                modelIds.add(equip["sourceModel"].toString())
+            }
+        }
+        CoroutineScope(Dispatchers.IO).launch {
+            val deferredResults = modelIds.map { modelId ->
+                async {
+                    try {
+                        getModelById(modelId)
+                    } catch (e: Exception) {
+                        CcuLog.e(Domain.LOG_TAG, "Error fetching model for id: $modelId", e)
+                    }
+                }
+            }
+            deferredResults.awaitAll()
+            CcuLog.i(Domain.LOG_TAG, "uniqueEquips: $modelIds\nmodels in cache: $modelContainer\n")
+        }
+    }
+
+    private fun loadStandAloneModelsAsync() {
+        CcuLog.i(Domain.LOG_TAG, "Load StandaloneModelsAsync")
+        CoroutineScope(Dispatchers.IO).launch {
+            loadStandAloneModels()
+        }
     }
 
     private fun loadSystemModelsAsync() {
@@ -52,6 +87,9 @@ object ModelCache {
 
         modelContainer[MODEL_CM_DEVICE] = getModelById(MODEL_CM_DEVICE)
         CcuLog.i(Domain.LOG_TAG, "cmBoardDevice loaded")
+
+        modelContainer[MODEL_HYPERSTAT_SPLIT_DEVICE] = getModelById(MODEL_HYPERSTAT_SPLIT_DEVICE)
+        CcuLog.i(Domain.LOG_TAG, "hyperstat split device model loaded")
 
         modelContainer[MODEL_CONNECT_DEVICE] = getModelById(MODEL_CONNECT_DEVICE)
         CcuLog.i(Domain.LOG_TAG, "cmBoardDevice loaded")
@@ -125,6 +163,10 @@ object ModelCache {
         modelContainer[MODEL_SN_BYPASS_DAMPER] = getModelById(MODEL_SN_BYPASS_DAMPER)
     }
 
+    private fun loadStandAloneModels() {
+        modelContainer[MODEL_HYPERSTAT_SPLIT_CPU] = getModelById(MODEL_HYPERSTAT_SPLIT_CPU)
+    }
+
     /**
      * Could directly used in Unit tests without calling init() to set the context.
      */
@@ -146,4 +188,19 @@ object ModelCache {
         return model
     }
 
+    fun getModelByFileName( fileName : String) : ModelDirective {
+        return if (context != null) {
+            ResourceHelper.loadModel(fileName, context!!)
+        } else {
+            ResourceHelper.loadModel(fileName)
+        }
+    }
+
+    private fun loadBuildingEquipModel() {
+        CcuLog.i(Domain.LOG_TAG, "Load BuildingEquipModel")
+        val buildingEquipModel = ResourceHelper.loadModel(BUILDING_EQUIP_MODEL, context!!)
+        modelContainer[MODEL_BUILDING_EQUIP] = buildingEquipModel
+        CcuLog.i(Domain.LOG_TAG, "BuildingEquipModel loaded Version: ${buildingEquipModel.version.toString()}")
+    }
+ }
 }

@@ -80,9 +80,23 @@ fun List<Alert>.find(alertDefOccurrence: AlertDefOccurrence): Alert? {
    return null
 }
 
+fun List<AlertDefOccurrence>.find(alert: Alert): AlertDefOccurrence? {
+   forEach { alertDefOccurrence ->
+      if (alertDefOccurrence.alertDef.alert.mTitle == alert.mTitle
+              && alert.equipId == alertDefOccurrence.equipRef?.replaceFirst("@","")) {
+         return alertDefOccurrence
+      }
+   }
+   return null
+}
+
 /** Returns whether there is a matching alert for this alert def occurrence */
 operator fun List<Alert>.contains(alertDefOccurrence: AlertDefOccurrence) =
    this.find(alertDefOccurrence) != null
+
+// This method is used to find if an alert is present in the list of AlertDefOccurrence
+operator fun List<AlertDefOccurrence>.contains(alert: Alert) =
+   this.find(alert) != null
 
 /** Returns all alert def occurrences marked as fixed, i.e not occurring */
 fun AlertDefsState.getFixedAlerts() = filter { it.value.progress.isFixed() } .map { it.value.occurrence }

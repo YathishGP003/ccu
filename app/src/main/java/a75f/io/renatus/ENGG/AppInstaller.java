@@ -36,7 +36,7 @@ public class AppInstaller
 
     static final String CCU_APK_FILE_NAME = "Renatus_new.apk";
 
-    public static final String DOWNLOAD_BASE_URL = "http://updates.75fahrenheit.com/";
+    public static final String DOWNLOAD_BASE_URL = "https://updates.75f.io/";
     static final String CCU_DOWNLOAD_FILE = "Renatus_Prod_Rv.apk";
 
     static final int CCUAPP_INSTALL_CODE = 100;

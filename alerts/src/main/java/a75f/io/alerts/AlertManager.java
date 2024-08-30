@@ -9,6 +9,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import a75f.io.alerts.cloud.AlertsService;
 import a75f.io.alerts.cloud.ServiceGenerator;
@@ -26,7 +28,7 @@ import io.reactivex.rxjava3.core.Completable;
  * AlertManager provides APIs to process and access alerts.
  */
 
-public class AlertManager
+public class AlertManager implements CCUHsApi.EntityDeletedListener
 {
     /** There will always be an instance, but there may be no service.  That occurs when
      * there is no bearer token.
@@ -81,6 +83,7 @@ public class AlertManager
     private AlertManager(Context appContext, String alertsApiBase) {
         this.appContext = appContext;
         setAlertsApiBase(alertsApiBase);
+        CCUHsApi.getInstance().registerEntityDeletedListener(this);
     }
 
     public static AlertManager getInstance(Context c, String alertsApiBase) {
@@ -272,6 +275,15 @@ public class AlertManager
         }
     }
 
+    // This method is called when a device is rebooted and there is an existing active DEVICE REBOOT ALERT
+    // It fixes the existing active alert, so that a new DEVICE REBOOT alert can be generated for the same device.
+    public void fixActiveDeviceRebootAlert(String deviceRef) {
+        if (! repoCheck()) return;
+        for (Alert a: repo.getDeviceRebootActiveAlert(deviceRef.replace("@",""))) {
+            fixAlert(a);
+        }
+    }
+
     public void generateCrashAlert(String title, String msg){
         if (! repoCheck()) return;
         repo.generateCrashAlertWithMessage(title,msg);
@@ -307,5 +319,32 @@ public class AlertManager
 
     public void setAlertListListener(AlertListListener alertListListener) {
         this.alertListListener = alertListListener;
+    }
+
+    // This overridden method is called when a device is deleted to fix all the alerts associated with the device
+    @Override
+    public void onDeviceDeleted(String deviceRef) {
+        if (! repoCheck()) return;
+        for(Alert alert: repo.getActiveAlertsByRef(deviceRef.replace("@",""))) {
+            CcuLog.d(TAG_CCU_ALERTS, "Device deleted: " + deviceRef + " Fixing alert: " + alert.mTitle);
+            fixAlert(alert);
+        }
+    }
+
+    /* This method is called when the CCU is opened.
+    *  It fetches the alert definitions, processes the active predefined and legacy custom alerts
+    *  and schedule the alert definitions' evaluation after every minute
+    * */
+    public void initiateAlertOperations(ScheduledExecutorService taskExecutor) {
+        new Thread("AlertOperationsInitiated") {
+            @Override
+            public void run() {
+                CcuLog.d(TAG_CCU_ALERTS, "Alert Operations Init started: ");
+                fetchPredefinedAlertsIfEmpty();
+                repo.processAlertsOnAppOpen();
+                taskExecutor.scheduleAtFixedRate(new AlertProcessJob(appContext).getJobRunnable(), 60, 60, TimeUnit.SECONDS);
+                CcuLog.d(TAG_CCU_ALERTS, "Alert Operations Init completed: ");
+            }
+        }.start();
     }
 }

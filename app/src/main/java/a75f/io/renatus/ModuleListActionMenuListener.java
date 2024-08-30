@@ -22,9 +22,9 @@ class ModuleListActionMenuListener implements MultiChoiceModeListener
 	 *
 	 */
 	private final FloorPlanFragment floorPlanActivity;
-	public ArrayList<Short> seletedModules = new ArrayList<>();
+	ArrayList<Long> seletedModules = new ArrayList<>();
 	private ActionMode aMode = null;
-	
+
 	
 	/**
 	 * @param floorPlanFragment
@@ -108,7 +108,7 @@ class ModuleListActionMenuListener implements MultiChoiceModeListener
 	
 	private void deleteSelectedFSV()
 	{
-		for(Short selectedModule : seletedModules)
+		for(Long selectedModule : seletedModules)
 		{
 			L.removeHSDeviceEntities(selectedModule);
 		}
@@ -133,7 +133,7 @@ class ModuleListActionMenuListener implements MultiChoiceModeListener
 	@Override
 	public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked)
 	{
-		Short smartNodeID = Short.parseShort(floorPlanActivity.mModuleListAdapter.getItem(position));
+		Long smartNodeID = Long.parseLong(floorPlanActivity.mModuleListAdapter.getItem(position));
 		if (checked && !seletedModules.contains(smartNodeID))
 		{
 			seletedModules.add(smartNodeID);

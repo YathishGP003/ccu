@@ -174,7 +174,7 @@ public class FloorListActionMenuListener implements MultiChoiceModeListener
 			for (Zone sZone: HSUtil.getZones(floorId))
 			{
 				for (Device d : HSUtil.getDevices(sZone.getId())) {
-					L.removeHSDeviceEntities(Short.parseShort(d.getAddr()));
+					L.removeHSDeviceEntities(Long.parseLong(d.getAddr()));
 				}
                 ArrayList<HashMap> schedules = CCUHsApi.getInstance().readAll("schedule and roomRef == "+ sZone.getId() );
                 for (HashMap schedule : schedules)

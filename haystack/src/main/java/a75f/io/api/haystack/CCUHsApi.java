@@ -90,6 +90,10 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 public class CCUHsApi
 {
 
+    public interface EntityDeletedListener {
+        void onDeviceDeleted(String deviceRef);
+    }
+
     public static final String TAG = CCUHsApi.class.getSimpleName();
     private SharedPreferences defaultSharedPrefs;
     public static boolean CACHED_HIS_QUERY = false ;
@@ -125,6 +129,7 @@ public class CCUHsApi
     private static double mCurrentTemperature =-1;
     private static double mCurrentHumidity =-1;
     private final List<OnCcuRegistrationCompletedListener> onCcuRegistrationCompletedListeners = new ArrayList<>();
+    private final List<EntityDeletedListener> entityDeletedListeners = new ArrayList<>();
     public static CCUHsApi getInstance() {
         if (instance == null) {
             throw new IllegalStateException("Hay stack api is not initialized");
@@ -160,6 +165,10 @@ public class CCUHsApi
             finishInitRemainingTasks();
 
         }
+    }
+
+    public void registerEntityDeletedListener(EntityDeletedListener listener) {
+        entityDeletedListeners.add(listener);
     }
 
     private void finishInitRemainingTasks(){
@@ -1541,6 +1550,9 @@ public class CCUHsApi
                 deleteEntityItem(point.get("id").toString());
             }
             deleteEntityItem(id);
+            for(EntityDeletedListener listener: entityDeletedListeners) {
+                listener.onDeviceDeleted(id);
+            }
         } else if (entity.get("point") != null) {
             if (entity.get("writable") != null) {
                 deleteWritableArray(entity.get("id").toString());
@@ -3445,7 +3457,6 @@ public class CCUHsApi
     public interface OnCcuRegistrationCompletedListener {
         void onRegistrationCompleted(CCUHsApi hsApi);
     }
-
     public void registerOnCcuRegistrationCompletedListener(OnCcuRegistrationCompletedListener listener) {
         if (isCCURegistered()) {
             CcuLog.i(TAG_CCU_HS,"CCU Already registered "+listener);
@@ -3457,6 +3468,7 @@ public class CCUHsApi
     public void unRegisterOnCcuRegistrationCompletedListener(OnCcuRegistrationCompletedListener listener) {
         onCcuRegistrationCompletedListeners.remove(listener);
     }
+
     public Context getContext() {
         return context;
     }

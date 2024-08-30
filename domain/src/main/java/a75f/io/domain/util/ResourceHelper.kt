@@ -1,5 +1,6 @@
 package a75f.io.domain.util
 
+import a75f.io.domain.api.Domain
 import a75f.io.logger.CcuLog
 import android.content.Context
 import androidx.annotation.Nullable
@@ -86,18 +87,18 @@ object ResourceHelper {
     }
 
     fun loadModel(fileName : String) : ModelDirective {
-        CcuLog.i("CCU_DM", "loadModel $fileName")
+        CcuLog.i(Domain.LOG_TAG, "loadModel $fileName")
         @Nullable val modelData: String? = loadString(fileName)
         val modelDirectiveFactory = ModelDirectiveFactory(getObjectMapper())
         return modelDirectiveFactory.fromJson(modelData!!)
     }
     fun loadModel(fileName : String, context : Context) : ModelDirective {
-        CcuLog.i("CCU_DM", "loadModel $fileName $context")
+        CcuLog.i(Domain.LOG_TAG, "loadModel $fileName $context")
         val inputStream = context.assets.open(fileName)
         @Nullable val modelData: String? = loadString(inputStream)
         val model = JSONObject(modelData)
         val versionData = model.getJSONObject("version")
-        CcuLog.i("CCU_DM", "Model Version $versionData")
+        CcuLog.i(Domain.LOG_TAG, "Model Version $versionData")
         val modelDirectiveFactory = ModelDirectiveFactory(getObjectMapper())
         return modelDirectiveFactory.fromJson(modelData!!)
     }

@@ -15,6 +15,7 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.bo.building.CCUApplication;
 import a75f.io.logic.bo.building.Zone;
 import a75f.io.logic.bo.building.ZoneProfile;
+import a75f.io.logic.bo.building.bacnet.BacnetProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.util.RxTask;
 
@@ -80,6 +81,8 @@ public class L
     public static final String TAG_CCU_CLOUD_STATUS = "CCU_CLOUD_STATUS";
     public static final String TAG_CCU_UI_PROFILING = "CCU_UI_PROFILING";
     public static final String TAG_CCU_DOMAIN = "CCU_DOMAIN";
+    public static final String TAG_CCU_FILES = "CCU_FILES";
+
     public static Context app()
     {
         return Globals.getInstance().getApplicationContext();
@@ -211,7 +214,7 @@ public class L
     }
 
 
-    public static void removeHSDeviceEntities(Short node) {
+    public static void removeHSDeviceEntities(Long node) {
         CCUHsApi hsApi = CCUHsApi.getInstance();
         if (L.ccu().oaoProfile != null && L.ccu().oaoProfile.getNodeAddress() == node) {
             L.ccu().oaoProfile = null;
@@ -247,6 +250,24 @@ public class L
         return null;
     }
 
+    public static ZoneProfile getProfile(long addr) {
+        for (ZoneProfile p : L.ccu().zoneProfiles) {
+            if(p instanceof BacnetProfile){
+                if(((BacnetProfile) p).getSlaveId() == addr){
+                    return p;
+                }
+            }else{
+                for (Short node : p.getNodeAddresses()) {
+                    if (node == addr) {
+                        return p;
+                    }
+                }
+            }
+        }
+        CcuLog.d("CCU","Profile Not found for "+addr);
+        return null;
+    }
+
     public static void removeProfile(short addr) {
         ZoneProfile deleteProfile = null;
         for(ZoneProfile p : L.ccu().zoneProfiles) {
@@ -254,6 +275,29 @@ public class L
                 if (node == addr) {
                     deleteProfile = p;
                     break;
+                }
+            }
+        }
+        if (deleteProfile != null)
+        {
+            L.ccu().zoneProfiles.remove(deleteProfile);
+        }
+    }
+
+    public static void removeProfile(long addr) {
+        ZoneProfile deleteProfile = null;
+        for(ZoneProfile p : L.ccu().zoneProfiles) {
+            if(p instanceof BacnetProfile){
+                if(((BacnetProfile) p).getSlaveId() == addr){
+                    deleteProfile = p;
+                    break;
+                }
+            }else{
+                for (Short node : p.getNodeAddresses()) {
+                    if (node == addr) {
+                        deleteProfile = p;
+                        break;
+                    }
                 }
             }
         }

@@ -47,6 +47,8 @@ import a75f.io.logic.bo.util.DemandResponseMode
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.logic.diag.DiagEquip
 import a75f.io.logic.diag.DiagEquip.createMigrationVersionPoint
+import a75f.io.logic.migration.VavAndAcbProfileMigration.Companion.cleanACBDuplicatePoints
+import a75f.io.logic.migration.VavAndAcbProfileMigration.Companion.cleanVAVDuplicatePoints
 import a75f.io.logic.migration.modbus.correctEnumsForCorruptModbusPoints
 import a75f.io.logic.migration.scheduler.SchedulerRevampMigration
 import a75f.io.logic.tuners.TunerConstants
@@ -137,6 +139,12 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         if(!PreferenceUtil.isHisTagRemovalFromNonDmDevicesDone()) {
             removeHisTagsFromNonDMDevices()
             PreferenceUtil.setHisTagRemovalFromNonDmDevicesDone()
+        }
+        if (!PreferenceUtil.getDmToDmCleanupMigration()) {
+            cleanACBDuplicatePoints(CCUHsApi.getInstance())
+            cleanVAVDuplicatePoints(CCUHsApi.getInstance())
+            CCUHsApi.getInstance().syncEntityTree()
+            PreferenceUtil.setDmToDmCleanupMigration()
         }
         hayStack.scheduleSync()
     }

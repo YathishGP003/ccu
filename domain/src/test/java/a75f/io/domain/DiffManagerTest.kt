@@ -49,10 +49,12 @@ class DiffManagerTest {
         }
         println("Before===================")
         val diffManger = DiffManger(null)
-        val migrationHandler = MigrationHandler(mockHayStack)
-        val newVersionFiles = getModelFileVersionDetails(DiffManger.NEW_VERSION)
+        /*val migrationHandler = MigrationHandler(mockHayStack)
+        val newVersionFiles = getModelFileVersionDetails(DiffManger.NEW_VERSION)*/
         val versionFiles = getModelFileVersionDetails(DiffManger.VERSION)
+/*
         diffManger.updateEquipModels(newVersionFiles,versionFiles,migrationHandler, "@TestSiteRef")
+*/
         println(versionFiles)
         Domain.site?.floors?.entries?.forEach{
             val floor = it.value

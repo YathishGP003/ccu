@@ -1,4 +1,8 @@
-apply plugin: 'com.android.library'
+
+plugins {
+    id 'com.android.library'
+    id 'org.jetbrains.kotlin.android'
+}
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
@@ -62,6 +66,9 @@ android {
         }
     }
 
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
 }
 tasks.whenTaskAdded { task ->
     if (task.name == 'assembleDev_qa') {
@@ -75,4 +82,5 @@ dependencies {
     testImplementation 'junit:junit:4.13.1'
     implementation 'org.greenrobot:eventbus:3.0.0'
     implementation project(':haystack')
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
 }

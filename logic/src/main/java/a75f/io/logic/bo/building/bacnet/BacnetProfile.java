@@ -17,13 +17,13 @@ public class BacnetProfile extends ZoneProfile {
 
     BacnetEquip bacnetEquip;
 
-    public void addBacAppEquip(String configParam, String modelConfig, String deviceId, short slaveId, String floorRef, String roomRef, BacnetModelDetailResponse equipmentDevice,
+    public void addBacAppEquip(String configParam, String modelConfig, String deviceId, String slaveId, String floorRef, String roomRef, BacnetModelDetailResponse equipmentDevice,
                                ProfileType profileType, String moduleLevel,String modelVersion) {
-        bacnetEquip = new BacnetEquip(profileType, slaveId);
+        bacnetEquip = new BacnetEquip(profileType, Long.parseLong(slaveId));
         bacnetEquip.createEntities(configParam, modelConfig, deviceId, slaveId, floorRef, roomRef, equipmentDevice,null, moduleLevel, modelVersion);
     }
 
-    public void addBacAppEquip(short slaveId, ProfileType profileType) {
+    public void addBacAppEquip(long slaveId, ProfileType profileType) {
         bacnetEquip = new BacnetEquip(profileType, slaveId);
         bacnetEquip.init(slaveId);
     }
@@ -48,11 +48,10 @@ public class BacnetProfile extends ZoneProfile {
 
     @Override
     public Set<Short> getNodeAddresses() {
-        return new HashSet<Short>() {{
-            add(bacnetEquip.slaveId);
-        }};
+        return new HashSet<>();
     }
-    public short getSlaveId(){
+
+    public Long getSlaveId(){
         return bacnetEquip.slaveId;
     }
 

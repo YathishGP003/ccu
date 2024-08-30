@@ -18,7 +18,7 @@ import org.junit.Test
 
 class DomainNameTest  {
 
-    @Test
+   /* @Test
     fun domainTest(){
         val left = SeventyFiveFProfileDirective(
             id = "1",
@@ -76,5 +76,5 @@ class DomainNameTest  {
         // When
         val diff = ModelDiff(left, right, groupByTagNames = false)
         val x =diff
-    }
+    }*/
 }

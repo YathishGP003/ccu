@@ -155,10 +155,10 @@ class DabAdvancedAhu : DabSystemProfile() {
     }
 
     private fun initializePILoop() {
-        val proportionalGain = systemEquip.dabProportionalKFactor.readPriorityVal()
-        val integralGain = systemEquip.dabIntegralKFactor.readPriorityVal()
-        val proportionalRange = systemEquip.dabTemperatureProportionalRange.readPriorityVal()
-        val integralTime = systemEquip.dabTemperatureIntegralTime.readPriorityVal()
+        val proportionalGain = systemEquip.dabSupplyAirProportionalKFactor.readPriorityVal()
+        val integralGain = systemEquip.dabSupplyAirIntegralKFactor.readPriorityVal()
+        val proportionalRange = systemEquip.dabSupplyAirTemperatureProportionalRange.readPriorityVal()
+        val integralTime = systemEquip.dabSupplyAirTemperatureIntegralTime.readPriorityVal()
 
         satCoolingPILoop.apply {
             setProportionalGain(proportionalGain)
@@ -173,10 +173,10 @@ class DabAdvancedAhu : DabSystemProfile() {
             integralMaxTimeout = integralTime.toInt()
         }
         staticPressureFanPILoop.apply {
-            setProportionalGain(proportionalGain)
-            setIntegralGain(integralGain)
-            proportionalSpread = proportionalRange
-            integralMaxTimeout = integralTime.toInt()
+            setProportionalGain(systemEquip.dabDuctStaticProportionalKFactor.readPriorityVal())
+            setIntegralGain(systemEquip.dabDuctStaticIntegralKFactor.readPriorityVal())
+            proportionalSpread = systemEquip.dabDuctStaticPressureProportionalRange.readPriorityVal()
+            integralMaxTimeout = systemEquip.dabDuctStaticPressureIntegralTime.readPriorityVal().toInt()
         }
     }
 

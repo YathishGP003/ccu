@@ -203,4 +203,3 @@ object ModelCache {
         CcuLog.i(Domain.LOG_TAG, "BuildingEquipModel loaded Version: ${buildingEquipModel.version.toString()}")
     }
  }
-}

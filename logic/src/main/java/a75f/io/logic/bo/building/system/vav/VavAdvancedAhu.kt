@@ -166,10 +166,10 @@ open class VavAdvancedAhu : VavSystemProfile() {
     }
 
     private fun initializePILoop() {
-        val proportionalGain = systemEquip.vavProportionalKFactor.readPriorityVal()
-        val integralGain = systemEquip.vavIntegralKFactor.readPriorityVal()
-        val proportionalRange = systemEquip.vavTemperatureProportionalRange.readPriorityVal()
-        val integralTime = systemEquip.vavTemperatureIntegralTime.readPriorityVal()
+        val proportionalGain = systemEquip.vavSupplyAirProportionalKFactor.readPriorityVal()
+        val integralGain = systemEquip.vavSupplyAirIntegralKFactor.readPriorityVal()
+        val proportionalRange = systemEquip.vavSupplyAirTemperatureProportionalRange.readPriorityVal()
+        val integralTime = systemEquip.vavSupplyAirTemperatureIntegralTime.readPriorityVal()
         satCoolingPILoop.apply {
             setProportionalGain(proportionalGain)
             setIntegralGain(integralGain)
@@ -183,10 +183,10 @@ open class VavAdvancedAhu : VavSystemProfile() {
             integralMaxTimeout = integralTime.toInt()
         }
         staticPressureFanPILoop.apply {
-            setProportionalGain(proportionalGain)
-            setIntegralGain(integralGain)
-            proportionalSpread = proportionalRange
-            integralMaxTimeout = integralTime.toInt()
+            setProportionalGain(systemEquip.vavDuctStaticProportionalKFactor.readPriorityVal())
+            setIntegralGain(systemEquip.vavDuctStaticIntegralKFactor.readPriorityVal())
+            proportionalSpread = systemEquip.vavDuctStaticPressureProportionalRange.readPriorityVal()
+            integralMaxTimeout = systemEquip.vavDuctStaticPressureIntegralTime.readPriorityVal().toInt()
         }
     }
 

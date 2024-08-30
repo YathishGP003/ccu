@@ -485,9 +485,9 @@ public class LSmartNode
         reheatTypeMap.put(ReheatType.TwoToTenV, DamperActuator_t.DAMPER_ACTUATOR_2_10V);
         reheatTypeMap.put(ReheatType.TenToTwov, DamperActuator_t.DAMPER_ACTUATOR_10_2V);
         reheatTypeMap.put(ReheatType.TenToZeroV, DamperActuator_t.DAMPER_ACTUATOR_10_0V);
-        reheatTypeMap.put(ReheatType.Pulse, DamperActuator_t.DAMPER_ACTUATOR_MAT_REHEAT_PULSED);
-        reheatTypeMap.put(ReheatType.OneStage, DamperActuator_t.DAMPER_ACTUATOR_MAT_REHEAT_ONE_STAGE);
-        reheatTypeMap.put(ReheatType.TwoStage, DamperActuator_t.DAMPER_ACTUATOR_MAT_REHEAT_TWO_STAGE);
+        reheatTypeMap.put(ReheatType.Pulse, DamperActuator_t.DAMPER_ACTUATOR_NOT_PRESENT_REHEAT_PULSED);
+        reheatTypeMap.put(ReheatType.OneStage, DamperActuator_t.DAMPER_ACTUATOR_NOT_PRESENT_REHEAT_ONE_STAGE);
+        reheatTypeMap.put(ReheatType.TwoStage, DamperActuator_t.DAMPER_ACTUATOR_NOT_PRESENT_REHEAT_TWO_STAGE);
 
         settings.outsideAirOptimizationDamperActuatorType.set(Objects.requireNonNull(damperTypeMap.get(DamperType.values()[damperConfig])));
 

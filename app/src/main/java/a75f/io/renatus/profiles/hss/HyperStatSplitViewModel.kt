@@ -12,13 +12,12 @@ import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.HyperStatSplitProfile
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.HyperStatSplitProfileConfiguration
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
+import a75f.io.renatus.profiles.OnPairingCompleteListener
 import android.content.Context
 import android.os.Bundle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
@@ -46,12 +45,8 @@ open class HyperStatSplitViewModel : ViewModel() {
     lateinit var context: Context
     lateinit var hayStack: CCUHsApi
 
-    protected val _isDialogOpen = MutableLiveData<Boolean>()
+    lateinit var pairingCompleteListener: OnPairingCompleteListener
     protected var saveJob : Job? = null
-
-    var modelLoaded by  mutableStateOf(false)
-    val isDialogOpen: LiveData<Boolean>
-        get() = _isDialogOpen
     var openDuplicateDialog by mutableStateOf(false)
     var openMissingDialog by mutableStateOf(false)
     var openCancelDialog by mutableStateOf(false)
@@ -200,5 +195,10 @@ open class HyperStatSplitViewModel : ViewModel() {
     }
 
     open fun hasUnsavedChanges() : Boolean { return false }
+
+
+    fun setOnPairingCompleteListener(completeListener: OnPairingCompleteListener) {
+        this.pairingCompleteListener = completeListener
+    }
 
 }

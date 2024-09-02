@@ -198,6 +198,13 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
                         equipDis = getDis(cmModel.name),
                         isReconfiguration = true
                 )
+                cmDeviceBuilder.updateDeviceAndPoints(
+                        configuration = profileConfiguration.cmConfiguration,
+                        cmDeviceModel,
+                        Domain.systemEquip.equipRef,
+                        hayStack.site!!.id,
+                        deviceDis = getDis(cmDeviceModel.name),
+                )
             }
 
             launch {
@@ -210,6 +217,13 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
                                 siteRef = hayStack.site!!.id,
                                 equipDis = getDis(connectModel.name),
                                 isReconfiguration = true
+                        )
+                        connectDeviceBuilder.updateDeviceAndPoints(
+                                configuration = profileConfiguration.connectConfiguration,
+                                modelDef = connectDeviceModel,
+                                equipRef = existingConnectEquip[Tags.ID].toString(),
+                                siteRef = hayStack.site!!.id,
+                                deviceDis = getDis(connectDeviceModel.name)
                         )
                     } else {
 

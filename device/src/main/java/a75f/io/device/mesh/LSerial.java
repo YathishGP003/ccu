@@ -242,7 +242,7 @@ public class LSerial
         DLog.Logd("Message Type: " + pojoClass.getSimpleName());
         DLog.Logd("Data return size: " + data.length);
         //Log hexadecimal
-        DLog.Logd("Incoming Hexadecimal: " + struct.toString());
+//        DLog.Logd("Incoming Hexadecimal: " + struct.toString());
         if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M)
             LogdStructAsJson(struct);
         return struct;

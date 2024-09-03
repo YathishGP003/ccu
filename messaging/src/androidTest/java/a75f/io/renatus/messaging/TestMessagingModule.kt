@@ -11,6 +11,6 @@ import dagger.hilt.testing.TestInstallIn
 @TestInstallIn (components = [SingletonComponent::class],
     replaces = [MessagingModule::class])
 class TestMessagingModule {
-    @Provides
-    fun provideMessageDatabaseHelper() : DatabaseHelper = TestMessageDatabaseHelper()
+
+   // fun provideMessageDatabaseHelper() : DatabaseHelper = TestMessageDatabaseHelper()
 }

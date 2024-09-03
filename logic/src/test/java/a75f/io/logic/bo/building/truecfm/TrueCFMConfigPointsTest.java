@@ -20,14 +20,16 @@ import a75f.io.api.haystack.mock.MockCcuHsApi;
 public class TrueCFMConfigPointsTest {
     CCUHsApi hayStack;
     Equip equip;
+/*
     VavProfileConfiguration vavProfileConfiguration;
+*/
 
 
     @Before
     public void setUp() {
         hayStack = new MockCcuHsApi();
         equip=new Equip();
-        vavProfileConfiguration=new VavProfileConfiguration();
+        /*vavProfileConfiguration=new VavProfileConfiguration();*/
     }
 
     @After

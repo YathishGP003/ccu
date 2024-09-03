@@ -21,7 +21,8 @@
             android:exported="true"/>
 
         <receiver
-            android:name=".RemoteAccessSessionBroadCastReceiver">
+            android:name=".RemoteAccessSessionBroadCastReceiver"
+            android:exported="true">
             <intent-filter>
                 <action android:name="com.remote.SESSION_PROGRESS" />
             </intent-filter>

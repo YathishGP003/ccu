@@ -1,10 +1,9 @@
 package a75f.io.renatus;
-
-import static a75f.io.alerts.AlertProcessor.TAG_CCU_ALERTS;
 import static a75f.io.logic.L.TAG_CCU_DOWNLOAD;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -29,8 +28,6 @@ import dagger.hilt.android.HiltAndroidApp;
 @HiltAndroidApp
 public class RenatusApp extends UtilityApplication
 {
-
-	private static final String    TAG           = RenatusApp.class.getSimpleName();
 	static Context mContext = null;
 
 	@Override
@@ -161,7 +158,7 @@ public class RenatusApp extends UtilityApplication
 
 	public static void setIntentToRestartCCU() {
 		Intent intent = new Intent(getAppContext(), SplashActivity.class);
-		PendingIntent pending = PendingIntent.getActivity(getAppContext(), 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+		PendingIntent pending = PendingIntent.getActivity(getAppContext(), 0, intent, PendingIntent.FLAG_IMMUTABLE);
 		AlarmManager alarmManager = (AlarmManager) getAppContext().getSystemService(Context.ALARM_SERVICE);
 		alarmManager.set(AlarmManager.RTC, System.currentTimeMillis() + 5000, pending);
 	}
@@ -191,15 +188,19 @@ public class RenatusApp extends UtilityApplication
 		CCUHsApi.getInstance().tagsDb.persistUnsyncedCachedItems();
 		boolean persistImmediate = true;
 		CCUHsApi.getInstance().saveTagsData(persistImmediate);
-		setIntentToRestartCCU();
-
-		CcuLog.d("CCU_DEBUG", "************Houston, CCU Is Going Down-CloseApp!!!************");
 		NotificationHandler.clearAllNotifications();
-		android.os.Process.killProcess(android.os.Process.myPid());
-		System.exit(0);
+		CcuLog.d("CCU_DEBUG", "CCU_MESSAGING ************Houston, CCU Is Going Down-CloseApp!!!************");
+		triggerRebirth(getAppContext());
 	}
-
-	public void debugLog(String tag, String value){
-		CcuLog.d(TAG_CCU_ALERTS, "tag =>"+tag+"<==value==>"+value);
+	public static void triggerRebirth(Context context) {
+		PackageManager packageManager = context.getPackageManager();
+		Intent intent = packageManager.getLaunchIntentForPackage(context.getPackageName());
+		ComponentName componentName = intent.getComponent();
+		Intent mainIntent = Intent.makeRestartActivityTask(componentName);
+		// Required for API 34 and later
+		// Ref: https://developer.android.com/about/versions/14/behavior-changes-14#safer-intents
+		mainIntent.setPackage(context.getPackageName());
+		context.startActivity(mainIntent);
+		Runtime.getRuntime().exit(0);
 	}
 }

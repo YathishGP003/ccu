@@ -34,7 +34,7 @@ public class RebootHandlerService extends BroadcastReceiver {
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         Intent serviceIntent = new Intent(context, a75f.io.renatus.RebootHandlerService.class);
         serviceIntent.setAction("CCU_REBOOT_15_DAYS");
-        PendingIntent seekAlarmIntent = PendingIntent.getBroadcast(context, 0, serviceIntent, 0);
+        PendingIntent seekAlarmIntent = PendingIntent.getBroadcast(context, 0, serviceIntent, PendingIntent.FLAG_IMMUTABLE);
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(Globals.getInstance().getApplicationContext());
 
         int selectedDay = Calendar.MONDAY;

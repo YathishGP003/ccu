@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 import javax.inject.Singleton
 
-class TestMessageDatabaseHelper : DatabaseHelper{
+ abstract class TestMessageDatabaseHelper : DatabaseHelper{
     override suspend fun insert(message: Message) {
         TODO("Not yet implemented")
     }

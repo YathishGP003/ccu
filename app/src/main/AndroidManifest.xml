@@ -5,27 +5,42 @@
 
     <uses-feature android:name="android.hardware.usb.host"/>
     <uses-feature android:name="android.hardware.bluetooth_le" android:required="true"/>
+    <uses-feature android:name="android.hardware.bluetooth" android:required="true"/>
     <uses-permission android:name="android.permission.ACCESS_ALL_DOWNLOADS"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.ACCESS_SUPERUSER"/>
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
-    <uses-permission android:name="android.permission.BLUETOOTH"/>
-    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
-    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT"/>
-    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.BLUETOOTH_SCAN"  android:usesPermissionFlags="neverForLocation" />
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" />
+    <uses-permission android:name="android.permission.BLUETOOTH_PRIVILEGED"
+        tools:ignore="ProtectedPermissions" />
+
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
     <uses-permission android:name="android.permission.DOWNLOAD_WITHOUT_NOTIFICATION"/>
     <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.MANAGE_USB" tools:ignore="ProtectedPermissions"></uses-permission>
+    <uses-permission android:name="android.permission.MANAGE_USB" tools:ignore="ProtectedPermissions"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.READ_LOGS" tools:ignore="ProtectedPermissions"/>
     <uses-permission android:name="android.permission.REBOOT" tools:ignore="protectedPermissions"/>
     <uses-permission android:name="android.permission.SET_TIME" tools:ignore="ProtectedPermissions"/>
     <uses-permission android:name="android.permission.SET_TIME_ZONE" tools:ignore="ProtectedPermissions"/>
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        tools:ignore="ScopedStorage" />
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
+        tools:ignore="ScopedStorage" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.USB_PERMISSION" />
+
+
 
 
     <application
@@ -43,12 +58,22 @@
         <service android:name=".bluetooth.BLEProvisionService"/>
         <service android:name=".ota.OTAUpdateHandlerService"/>
         <service android:name=".ota.OTAUpdateService"/>
-        <service android:name="a75f.io.usbserial.UsbService" android:enabled="true"></service>
-        <service android:name="a75f.io.usbserial.UsbModbusService" android:enabled="true"></service>
-        <service android:name="a75f.io.usbserial.UsbConnectService" android:enabled="true"></service>
+        <service
+            android:name="a75f.io.usbserial.UsbService"
+            android:enabled="true"
+            android:foregroundServiceType="connectedDevice" />
+        <service
+            android:name="a75f.io.usbserial.UsbModbusService"
+            android:enabled="true"
+            android:foregroundServiceType="connectedDevice" />
+        <service
+            android:name="a75f.io.usbserial.UsbConnectService"
+            android:enabled="true"
+            android:foregroundServiceType="connectedDevice" />
 
         <!-- TODO we don't want this and shouldn't need it, we should monitor the USB connection, not kick the application whenever it restarts -->
-        <receiver android:name=".util.Receiver.ConnectionChangeReceiver">
+        <receiver android:name=".util.Receiver.ConnectionChangeReceiver"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
             </intent-filter>
@@ -67,7 +92,8 @@
 
         <activity
                 android:name=".SplashActivity"
-                android:launchMode="singleTask"
+            android:exported="true"
+            android:launchMode="singleTask"
                 >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -75,6 +101,13 @@
                 <action android:name="a75f.io.renatus.SPLASH_ACTIVITY"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
+            </intent-filter>
+            <meta-data
+                android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
+                android:resource="@xml/filter" />
         </activity>
         <activity
                 android:name=".registration.FreshRegistration"
@@ -125,7 +158,8 @@
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />
 
-        <service android:name=".WeatherDataDownloadService"/>
+        <service android:name=".WeatherDataDownloadService"
+            tools:ignore="Instantiatable" />
 
     </application>
 

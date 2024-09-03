@@ -97,7 +97,7 @@ object DomainName {
     const val dabSupplyAirTemperatureIntegralTime = "dabSupplyAirTemperatureIntegralTime"
     const val dabSupplyAirTemperatureIntegralKFactor = "dabSupplyAirTemperatureIntegralKFactor"
 
-    const val dabDuctStaticProportionalKFactor = "dabDuctStaticProportionalKFactor"
+    const val dabDuctStaticPressureProportionalKFactor = "dabDuctStaticPressureProportionalKFactor"
     const val dabDuctStaticPressureProportionalRange = "dabDuctStaticPressureProportionalRange"
     const val dabDuctStaticPressureIntegralTime = "dabDuctStaticPressureIntegralTime"
     const val dabDuctStaticIntegralKFactor = "dabDuctStaticIntegralKFactor"

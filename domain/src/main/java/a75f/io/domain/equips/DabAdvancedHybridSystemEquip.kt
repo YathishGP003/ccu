@@ -16,7 +16,7 @@ class DabAdvancedHybridSystemEquip (equipRef : String, connectEquipRef : String)
     val dabSupplyAirIntegralKFactor = Point(DomainName.dabSupplyAirTemperatureIntegralKFactor, equipRef)
     val dabSupplyAirTemperatureIntegralTime = Point(DomainName.dabSupplyAirTemperatureIntegralTime, equipRef)
 
-    val dabDuctStaticProportionalKFactor = Point(DomainName.dabDuctStaticProportionalKFactor, equipRef)
+    val dabDuctStaticProportionalKFactor = Point(DomainName.dabDuctStaticPressureProportionalKFactor, equipRef)
     val dabDuctStaticPressureProportionalRange = Point(DomainName.dabDuctStaticPressureProportionalRange, equipRef)
     val dabDuctStaticPressureIntegralTime = Point(DomainName.dabDuctStaticPressureIntegralTime, equipRef)
     val dabDuctStaticIntegralKFactor = Point(DomainName.dabDuctStaticIntegralKFactor, equipRef)

@@ -20,7 +20,7 @@ import a75f.io.api.haystack.mock.MockCcuHsApi;
 public class TrueCFMTunersTest {
     CCUHsApi hayStack;
     Equip equip;
-    VavProfileConfiguration vavProfileConfiguration;
+/*    VavProfileConfiguration vavProfileConfiguration;
 
 
     @Before
@@ -30,7 +30,7 @@ public class TrueCFMTunersTest {
         vavProfileConfiguration=new VavProfileConfiguration();
 
 
-    }
+    }*/
 
     @After
     public void tearDown() throws Exception {

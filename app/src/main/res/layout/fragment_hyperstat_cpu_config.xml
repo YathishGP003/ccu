@@ -1327,7 +1327,7 @@
                 android:layout_marginEnd="48dp">
 
                 <TextView
-                    android:layout_width="300px"
+                    android:layout_width="280dp"
                     android:layout_height="wrap_content"
                     android:text="@string/humidity"
                     android:textAppearance="@style/text_label" />
@@ -1367,7 +1367,7 @@
                 android:layout_marginEnd="48dp">
 
                 <TextView
-                    android:layout_width="300px"
+                    android:layout_width="280dp"
                     android:layout_height="wrap_content"
                     android:text="@string/voc"
                     android:textAppearance="@style/text_label" />
@@ -1383,7 +1383,7 @@
                         layout="@layout/custom_ccu_switch"/>
                 </LinearLayout>
                 <TextView
-                    android:layout_width="300px"
+                    android:layout_width="280dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="105dp"
                     android:text="@string/p2pm"

@@ -104,6 +104,7 @@
         android:id="@+id/container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="#ffffff"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
 </LinearLayout>

@@ -3,15 +3,14 @@ package a75f.io.renatus.profiles.hss.cpu
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.domain.api.Domain
 import a75f.io.logger.CcuLog
-import a75f.io.logic.L
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.composables.CancelDialog
 import a75f.io.renatus.composables.DuplicatePointDialog
-import a75f.io.renatus.composables.IndeterminateLoopProgress
 import a75f.io.renatus.composables.MissingPointDialog
 import a75f.io.renatus.compose.ComposeUtil
+import a75f.io.renatus.profiles.OnPairingCompleteListener
 import a75f.io.renatus.profiles.hss.HyperStatSplitFragment
 import a75f.io.renatus.util.highPriorityDispatcher
 import android.os.Bundle
@@ -38,7 +37,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class HyperStatSplitCpuFragment : HyperStatSplitFragment() {
+class HyperStatSplitCpuFragment : HyperStatSplitFragment(), OnPairingCompleteListener {
 
     private val viewModel: HyperStatSplitCpuViewModel by viewModels()
 
@@ -70,6 +69,7 @@ class HyperStatSplitCpuFragment : HyperStatSplitFragment() {
         }
         viewLifecycleOwner.lifecycleScope.launch(highPriorityDispatcher) {
             viewModel.init(requireArguments(), requireContext(), CCUHsApi.getInstance())
+            viewModel.setOnPairingCompleteListener(this@HyperStatSplitCpuFragment)
             withContext(Dispatchers.Main) {
                 rootView.setContent {
                     RootView()
@@ -77,15 +77,6 @@ class HyperStatSplitCpuFragment : HyperStatSplitFragment() {
             }
         }
         return rootView
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        viewModel.isDialogOpen.observe(viewLifecycleOwner) { isDialogOpen ->
-            CcuLog.i(L.TAG_CCU_UI, " isDialogOpen $isDialogOpen")
-            if (!isDialogOpen) {
-                this@HyperStatSplitCpuFragment.closeAllBaseDialogFragments()
-            }
-        }
     }
 
     @Composable
@@ -159,6 +150,10 @@ class HyperStatSplitCpuFragment : HyperStatSplitFragment() {
         StagedFanControl(viewModel)
         OAODamperControl(viewModel)
         ReturnDamperControl(viewModel)
+    }
+
+    override fun onPairingComplete() {
+        this@HyperStatSplitCpuFragment.closeAllBaseDialogFragments()
     }
 
 }

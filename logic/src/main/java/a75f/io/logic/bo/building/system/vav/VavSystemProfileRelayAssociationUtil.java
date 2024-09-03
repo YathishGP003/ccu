@@ -26,6 +26,7 @@ public class VavSystemProfileRelayAssociationUtil {
         }
         VavSystemProfile systemProfile = getSystemProfileInstance(profileInstance);
 
+
         switch (profileType) {
             case SYSTEM_VAV_STAGED_RTU:
             case SYSTEM_VAV_STAGED_VFD_RTU:

@@ -32,7 +32,7 @@ public class EveryDaySchedulerService extends BroadcastReceiver {
     public static void scheduleJobForDay(Context context){
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         Intent serviceIntent = new Intent(context, EveryDaySchedulerService.class);
-        PendingIntent seekAlarmIntent = PendingIntent.getBroadcast(context, 0, serviceIntent, 0);
+        PendingIntent seekAlarmIntent = PendingIntent.getBroadcast(context, 0, serviceIntent, PendingIntent.FLAG_IMMUTABLE);
         Calendar startTime = Calendar.getInstance();
         startTime.setTimeInMillis(System.currentTimeMillis());
         startTime.set(Calendar.HOUR_OF_DAY, 0);

@@ -65,7 +65,6 @@ class HyperStatSplitCpuViewModel : HyperStatSplitViewModel() {
 
         initializeLists()
         CcuLog.i(Domain.LOG_TAG, "HSS initialized")
-        modelLoaded = true
     }
 
     private fun initializeLists() {
@@ -204,7 +203,7 @@ class HyperStatSplitCpuViewModel : HyperStatSplitViewModel() {
                         showToast("HSS Configuration saved successfully", context)
                         CcuLog.i(Domain.LOG_TAG, "Close Pairing dialog")
                         ProgressDialogUtils.hideProgressDialog()
-                        _isDialogOpen.postValue(false)
+                        pairingCompleteListener.onPairingComplete()
                     }
                     L.saveCCUState()
                     hayStack.syncEntityTree()
@@ -220,7 +219,7 @@ class HyperStatSplitCpuViewModel : HyperStatSplitViewModel() {
                     // We don't know why this happens.
                     if (ProgressDialogUtils.isDialogShowing()) {
                         ProgressDialogUtils.hideProgressDialog()
-                        _isDialogOpen.postValue(false)
+                        pairingCompleteListener.onPairingComplete()
                     }
                 }
             }

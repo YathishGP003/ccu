@@ -3,11 +3,15 @@ package a75f.io.renatus;
 import android.Manifest;
 import android.app.Activity;
 import android.content.pm.PackageManager;
+import android.os.Build;
+
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import a75f.io.usbserial.UsbService;
 
 class PermissionHandler {
     
@@ -17,7 +21,10 @@ class PermissionHandler {
         List<String> permissionsNeeded = new ArrayList<>();
         permissionsNeeded.addAll(getExternalStoragePermissions(activityContext));
         permissionsNeeded.addAll(getLocationPermissions(activityContext));
-        permissionsNeeded.addAll(getMiscPermissions(activityContext));
+       // permissionsNeeded.addAll(getMiscPermissions(activityContext));
+        permissionsNeeded.addAll(getBluetoothPermission(activityContext));
+
+
         if (permissionsNeeded.isEmpty()) {
             return true;
         } else {
@@ -74,5 +81,26 @@ class PermissionHandler {
             listPermissionsNeeded.add(android.Manifest.permission.RECORD_AUDIO);
         }*/
         return listPermissionsNeeded;
+    }
+
+    private List<String> getBluetoothPermission(Activity activityContext) {
+        List<String> listPermissionsNeeded = new ArrayList<>();
+
+
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.N) {
+            if (ContextCompat.checkSelfPermission(activityContext, android.Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED ||
+                    ContextCompat.checkSelfPermission(activityContext, android.Manifest.permission.BLUETOOTH_ADVERTISE) != PackageManager.PERMISSION_GRANTED ||
+                    ContextCompat.checkSelfPermission(activityContext, Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
+                // Request necessary permissions
+                listPermissionsNeeded.add(Manifest.permission.BLUETOOTH_CONNECT);
+                listPermissionsNeeded.add(android.Manifest.permission.BLUETOOTH_ADVERTISE);
+                listPermissionsNeeded.add(android.Manifest.permission.BLUETOOTH_SCAN);
+                listPermissionsNeeded.add(Manifest.permission.BLUETOOTH_ADMIN);
+                listPermissionsNeeded.add(Manifest.permission.BLUETOOTH);
+
+            }
+        }
+        return listPermissionsNeeded;
+
     }
 }

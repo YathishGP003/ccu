@@ -29,6 +29,7 @@ import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.BuildConfig
 import a75f.io.renatus.FloorPlanFragment
 import a75f.io.renatus.modbus.util.showToast
+import a75f.io.renatus.profiles.OnPairingCompleteListener
 import a75f.io.renatus.profiles.profileUtils.UnusedPortsModel
 import a75f.io.renatus.util.ProgressDialogUtils
 import a75f.io.renatus.util.highPriorityDispatcher
@@ -36,11 +37,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.seventyfivef.domainmodeler.client.ModelDirective
@@ -88,11 +84,8 @@ class DabProfileViewModel : ViewModel() {
 
     lateinit var kFactorsList: List<String>
 
-    private val _isDialogOpen = MutableLiveData<Boolean>()
+    private lateinit var pairingCompleteListener: OnPairingCompleteListener
     private var saveJob: Job? = null
-    val isDialogOpen: LiveData<Boolean>
-        get() = _isDialogOpen
-    private lateinit var unusedPorts: HashMap<String, Boolean>
     fun init(bundle: Bundle, requireContext: Context, hayStack: CCUHsApi) {
 
         deviceAddress = bundle.getShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR)
@@ -192,7 +185,7 @@ class DabProfileViewModel : ViewModel() {
                         if (ProgressDialogUtils.isDialogShowing()) {
                             ProgressDialogUtils.hideProgressDialog()
                             CcuLog.i(Domain.LOG_TAG, "Closing DAB dialog")
-                            _isDialogOpen.postValue(false)
+                            pairingCompleteListener.onPairingComplete()
                         }
                     }
                     L.saveCCUState()
@@ -466,5 +459,9 @@ class DabProfileViewModel : ViewModel() {
         if(port != null) rawPoint["port"] = port else rawPoint.remove("port")
         rawPoint["portEnabled"] = portEnabled
         if(pointRef != null) rawPoint["pointRef"] = pointRef else rawPoint.remove("pointRef")
+    }
+
+    fun setOnPairingCompleteListener(completeListener: OnPairingCompleteListener) {
+        this.pairingCompleteListener = completeListener
     }
 }

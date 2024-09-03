@@ -205,16 +205,18 @@ public class SplashActivity extends AppCompatActivity implements Globals.OnCcuIn
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
         if (requestCode == CCU_PERMISSION_REQUEST_ID) {
             for (int result : grantResults) {
                 if (result == PackageManager.PERMISSION_DENIED) {
-                    Toast.makeText(this, R.string.toast_msg_permission_denial, Toast.LENGTH_LONG).show();
-                    break;
+                        Toast.makeText(this, R.string.toast_msg_permission_denial, Toast.LENGTH_LONG).show();
+                        break;
                 }
             }
         }
         Globals.getInstance().registerOnCcuInitCompletedListener(this);
     }
+
 
     private int getViewPagerPosition() {
         String profileType = prefs.getString("PROFILE");
@@ -262,5 +264,6 @@ public class SplashActivity extends AppCompatActivity implements Globals.OnCcuIn
             Globals.getInstance().unRegisterOnCcuInitCompletedListener(this);
         });
     }
+
 }
 

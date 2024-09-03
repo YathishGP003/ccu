@@ -776,7 +776,7 @@ public abstract class UtilityApplication extends Application {
             String ccuId = CCUHsApi.getInstance().getCcuId().substring(1);
             String messagingUrl = RenatusServicesEnvironment.instance.getUrls().getMessagingUrl();
             messagingAckJob = new MessagingAckJob(ccuId, messagingUrl);
-            Globals.getInstance().getScheduledThreadPool().scheduleAtFixedRate(messagingAckJob.getJobRunnable(), TASK_SEPARATION + 30, MESSAGING_ACK_INTERVAL, TASK_SEPARATION_TIMEUNIT);
+            Globals.getInstance().getScheduledThreadPool().scheduleWithFixedDelay(messagingAckJob.getJobRunnable(), TASK_SEPARATION + 30, MESSAGING_ACK_INTERVAL, TASK_SEPARATION_TIMEUNIT);
         }
     }
 

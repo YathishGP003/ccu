@@ -26,6 +26,7 @@ object ModelCache {
         if(terminalDomainEquip.isNotEmpty()){
             loadModels(haystack)
         }else{
+            loadStandAloneModelsAsync()
             loadSystemModelsAsync()
             loadTerminalModelsAsync()
             loadBuildingEquipModel()

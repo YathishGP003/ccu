@@ -19,6 +19,7 @@ import a75f.io.renatus.compose.SaveTextView
 import a75f.io.renatus.compose.TitleTextView
 import a75f.io.renatus.compose.ToggleButtonStateful
 import a75f.io.renatus.modbus.util.SET
+import a75f.io.renatus.profiles.OnPairingCompleteListener
 import a75f.io.renatus.profiles.profileUtils.UnusedPortsFragment
 import a75f.io.renatus.util.highPriorityDispatcher
 import android.os.Bundle
@@ -54,7 +55,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class DabProfileConfigFragment : BaseDialogFragment() {
+class DabProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener {
 
     private val viewModel: DabProfileViewModel by viewModels()
 
@@ -91,6 +92,7 @@ class DabProfileConfigFragment : BaseDialogFragment() {
         }
         viewLifecycleOwner.lifecycleScope.launch(highPriorityDispatcher) {
                 viewModel.init(requireArguments(), requireContext(), CCUHsApi.getInstance())
+                viewModel.setOnPairingCompleteListener(this@DabProfileConfigFragment)
                 withContext(Dispatchers.Main) {
                     rootView.setContent {
                         RootView()
@@ -98,15 +100,6 @@ class DabProfileConfigFragment : BaseDialogFragment() {
                 }
         }
         return rootView
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        viewModel.isDialogOpen.observe(viewLifecycleOwner) { isDialogOpen ->
-            CcuLog.i(L.TAG_CCU_UI, " isDialogOpen $isDialogOpen")
-            if (!isDialogOpen) {
-                this@DabProfileConfigFragment.closeAllBaseDialogFragments()
-            }
-        }
     }
 
     @Composable
@@ -528,5 +521,9 @@ class DabProfileConfigFragment : BaseDialogFragment() {
             val height = 672
             dialog.window!!.setLayout(width, height)
         }
+    }
+
+    override fun onPairingComplete() {
+        this@DabProfileConfigFragment.closeAllBaseDialogFragments()
     }
 }

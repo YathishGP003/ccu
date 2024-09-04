@@ -61,6 +61,7 @@ import a75f.io.logic.tuners.DabTuners;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.logic.util.RxTask;
+import a75f.io.util.ExecutorTask;
 
 /**
  * Created by samjithsadasivan on 3/13/19.
@@ -202,7 +203,7 @@ public class DabEquipToBeDeleted
                                   .setGroup(String.valueOf(nodeAddr));
         equipRef = CCUHsApi.getInstance().addEquip(b.build());
 
-        RxTask.executeAsync(() -> DabTuners.addEquipDabTuners( hayStack,
+        ExecutorTask.executeBackground(() -> DabTuners.addEquipDabTuners( hayStack,
                                                                siteRef,
                                                                equipDis,
                                                                equipRef,

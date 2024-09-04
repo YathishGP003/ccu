@@ -18,6 +18,7 @@ import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.bacnet.BacnetProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.util.RxTask;
+import a75f.io.util.ExecutorTask;
 
 /**
  * Created by Yinten isOn 9/4/2017.
@@ -323,6 +324,6 @@ public class L
     }
     
     public static void saveCCUStateAsync() {
-        RxTask.executeAsync(() -> Globals.getInstance().saveTags());
+        ExecutorTask.executeBackground(() -> Globals.getInstance().saveTags());
     }
 }

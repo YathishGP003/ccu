@@ -25,6 +25,7 @@ import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint;
 import a75f.io.logic.tuners.PlcTuners;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.logic.util.RxTask;
+import a75f.io.util.ExecutorTask;
 
 /**
  * Created by samjithsadasivan on 2/25/19.
@@ -118,7 +119,7 @@ public class PlcEquip {
 
         equipRef = hayStack.addEquip(b);
     
-        RxTask.executeAsync(() -> PlcTuners.addPlcEquipTuners(hayStack,
+        ExecutorTask.executeBackground(() -> PlcTuners.addPlcEquipTuners(hayStack,
                                                               siteRef,
                                                               siteDis + "-PID-" + nodeAddr,
                                                               equipRef,

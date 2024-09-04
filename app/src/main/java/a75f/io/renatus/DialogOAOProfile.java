@@ -51,6 +51,7 @@ import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.util.RxjavaUtil;
 import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
+import a75f.io.util.ExecutorTask;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -184,7 +185,7 @@ public class DialogOAOProfile extends BaseDialogFragment
 
                     setButton.setEnabled(false);
 
-                    RxjavaUtil.executeBackgroundTask( () ->
+                    ExecutorTask.executeAsync( () ->
                                     ProgressDialogUtils.showProgressDialog(getActivity(), "Saving OAO Configuration"),
                             () -> {
                                 setUpOAOProfile();

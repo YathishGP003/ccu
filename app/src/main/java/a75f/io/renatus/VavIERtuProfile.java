@@ -38,6 +38,8 @@ import a75f.io.renatus.util.SystemProfileUtil;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
+
+import a75f.io.util.ExecutorTask;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
@@ -124,7 +126,7 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
             refreshUI();
         } else {
     
-            disposable.add(RxjavaUtil.executeBackgroundTaskWithDisposable(
+            ExecutorTask.executeAsync(
                 () -> ProgressDialogUtils.showProgressDialog(getActivity(),"Loading System Profile"),
                 () -> {
                     if (systemProfile != null) {
@@ -139,7 +141,7 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
                     refreshUI();
                     ProgressDialogUtils.hideProgressDialog();
                 }
-            ));
+            );
         }
 
         if(isFromReg){
@@ -442,7 +444,7 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
     }
     
     private void setSelectionBackground(String analog, boolean selected) {
-        disposable.add(RxjavaUtil.executeBackgroundTaskWithDisposable(
+        ExecutorTask.executeAsync(
             () -> ProgressDialogUtils.showProgressDialog(getActivity(),"Saving VAV System Configuration"),
             () -> systemProfile.setConfigEnabled(analog, selected ? 1: 0),
             () -> {
@@ -451,7 +453,7 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
                 }
                 ProgressDialogUtils.hideProgressDialog();
             }
-        ));
+        );
     }
     
     private void setUserIntentBackground(String query, double val) {

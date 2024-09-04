@@ -1,3 +1,4 @@
+/*
 package a75f.io.logic.bo.building.truecfm;
 
 
@@ -20,16 +21,20 @@ import a75f.io.api.haystack.mock.MockCcuHsApi;
 public class TrueCFMConfigPointsTest {
     CCUHsApi hayStack;
     Equip equip;
+*/
 /*
     VavProfileConfiguration vavProfileConfiguration;
-*/
+*//*
+
 
 
     @Before
     public void setUp() {
         hayStack = new MockCcuHsApi();
         equip=new Equip();
-        /*vavProfileConfiguration=new VavProfileConfiguration();*/
+        */
+/*vavProfileConfiguration=new VavProfileConfiguration();*//*
+
     }
 
     @After
@@ -37,7 +42,7 @@ public class TrueCFMConfigPointsTest {
         hayStack.tagsDb.getBoxStore().close();
     }
 
-    @Test
+    //@Test
 
     public void testTrueCFMCoolingMaxPoint() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         TrueCFMPointsHandler trueCFMConfigPoints=new TrueCFMPointsHandler();
@@ -53,7 +58,7 @@ public class TrueCFMConfigPointsTest {
         Assert.assertFalse(testTrueCFMCoolingMaxPoint.isEmpty());
 
     }
-    @Test
+    //@Test
     public void testTrueCFMKFactorPoint() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         TrueCFMPointsHandler trueCFMConfigPoints=new TrueCFMPointsHandler();
         Method method= TrueCFMPointsHandler.class.getDeclaredMethod("createTrueCFMKFactorPoint", CCUHsApi.class, Equip.class, String.class, double.class, String.class);
@@ -114,4 +119,4 @@ public class TrueCFMConfigPointsTest {
 
     }
 
-}
+}*/

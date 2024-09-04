@@ -42,6 +42,7 @@ import a75f.io.renatus.EquipTempExpandableListAdapter;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.util.RxjavaUtil;
+import a75f.io.util.ExecutorTask;
 
 public class HaystackExplorer extends Fragment
 {
@@ -372,7 +373,7 @@ public class HaystackExplorer extends Fragment
                     if (isCurrentTempPoint(p)) {
                         CcuLog.d(L.TAG_CCU_UI, "Set "+p.getDomainName()+" Equip "+p.getEquipRef());
                         Equip q = HSUtil.getEquipInfo(p.getEquipRef());
-                        RxjavaUtil.executeBackground( () -> {
+                        ExecutorTask.executeBackground( () -> {
                             CmToCcuOverUsbSnRegularUpdateMessage_t msg = new CmToCcuOverUsbSnRegularUpdateMessage_t();
                             msg.update.smartNodeAddress.set(Integer.parseInt(q.getGroup()));
                             msg.update.roomTemperature.set((int)val);

@@ -109,6 +109,7 @@ import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
 import a75f.io.renatus.views.MasterControl.MasterControlUtil;
 import a75f.io.renatus.views.MasterControl.MasterControlView;
 import a75f.io.renatus.views.TempLimit.TempLimitView;
+import a75f.io.util.ExecutorTask;
 
 public class InstallerOptions extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
@@ -1099,7 +1100,7 @@ public class InstallerOptions extends Fragment {
     }
 
     private void getRegisteredAddressBand() {
-        RxjavaUtil.executeBackgroundTask(
+        ExecutorTask.executeAsync(
                 ()-> regAddressBands.clear(),
                 ()->{
                     HClient hClient = new HClient(CCUHsApi.getInstance().getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);

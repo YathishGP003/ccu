@@ -45,6 +45,7 @@ import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.util.RxjavaUtil;
 import a75f.io.renatus.views.CustomCCUSwitch;
+import a75f.io.util.ExecutorTask;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnCheckedChanged;
@@ -237,7 +238,7 @@ public class Fragment2PipeFanCoilUnitConfig extends BaseDialogFragment implement
 
             setButton.setEnabled(false);
 
-            compositeDisposable.add(RxjavaUtil.executeBackgroundTaskWithDisposable(
+            ExecutorTask.executeAsync(
                     ()->{
                         ProgressDialogUtils.showProgressDialog(getActivity(),"Saving 2PFCU Configuration");},
                     ()->{
@@ -254,7 +255,7 @@ public class Fragment2PipeFanCoilUnitConfig extends BaseDialogFragment implement
                         Fragment2PipeFanCoilUnitConfig.this.closeAllBaseDialogFragments();
                         getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
                     }
-            ));
+            );
 
         });
         view.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {

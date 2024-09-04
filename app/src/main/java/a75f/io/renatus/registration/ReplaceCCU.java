@@ -74,6 +74,7 @@ import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.util.RxjavaUtil;
+import a75f.io.util.ExecutorTask;
 
 public class ReplaceCCU extends Fragment implements CCUSelect {
 
@@ -221,7 +222,7 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
                     Globals.getInstance().getApplicationContext().getSharedPreferences(ReplaceCCUTracker.REPLACING_CCU_INFO,
                             Context.MODE_PRIVATE);
             CCU ccu =  new Gson().fromJson(sharedPreferences.getString("CCU", ""), CCU.class);
-            RxjavaUtil.executeBackground(() -> initRestoreCCUProcess(ccu));
+            ExecutorTask.executeBackground(() -> initRestoreCCUProcess(ccu));
 
         }
         return rootView;
@@ -231,7 +232,7 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
     List<CCU> ccuList;
 
     private void getAllCCUs(String siteCode, JSONArray ccuArray) {
-        RxjavaUtil.executeBackgroundTask( () -> ProgressDialogUtils.showProgressDialog(getActivity(),
+        ExecutorTask.executeAsync( () -> ProgressDialogUtils.showProgressDialog(getActivity(),
                 "Getting list of CCUs..."),
                 () -> {
                     RestoreCCU restoreCCU = new RestoreCCU();
@@ -384,7 +385,7 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
                         Context.MODE_PRIVATE).edit();
                 editor.putString("CCU", new Gson().toJson(ccu));
                 editor.commit();
-                RxjavaUtil.executeBackground(() -> initRestoreCCUProcess(ccu));
+                ExecutorTask.executeBackground(() -> initRestoreCCUProcess(ccu));
 
             }
             @Override

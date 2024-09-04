@@ -84,6 +84,7 @@ import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.util.RxjavaUtil;
 import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
+import a75f.io.util.ExecutorTask;
 
 public class CreateNewSite extends Fragment {
     private static final String TAG = CreateNewSite.class.getSimpleName();
@@ -328,7 +329,7 @@ public class CreateNewSite extends Fragment {
                 String installerEmail = mSiteInstallerEmailId.getText().toString();
                 String installerOrg = mSiteOrg.getText().toString();
                 String ccuName = mSiteCCU.getText().toString();
-                RxjavaUtil.executeBackgroundTask(
+                ExecutorTask.executeAsync(
                         () -> {},
                         () -> {
                             CcuLog.i("UI_PROFILING","Add Save Site to DB ");
@@ -554,7 +555,7 @@ public class CreateNewSite extends Fragment {
 
     private void handleRegistrationAsync(String installerEmail) {
         CcuLog.d(TAG, "Register Button Clicked");
-        RxjavaUtil.executeBackgroundTask(
+        ExecutorTask.executeAsync(
                 () -> ProgressDialogUtils.showProgressDialog(getActivity(), "Registering CCU..."),
                 () -> {
                     CCUUtils.updateCcuSpecificEntitiesWithCcuRef(CCUHsApi.getInstance(), true);

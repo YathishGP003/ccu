@@ -30,4 +30,18 @@ public class ExecutorTask {
             //service.shutdown();
         });
     }
+
+    /**
+     * Execute a task in background and post the result on main thread.
+     * @param background
+     * @param postExecute
+     * @return
+     */
+    public static Future executeAsync(Runnable background, Runnable postExecute) {
+        return service.submit(() -> {
+            background.run();
+            mainHandler.post(postExecute);
+            //service.shutdown();
+        });
+    }
 }

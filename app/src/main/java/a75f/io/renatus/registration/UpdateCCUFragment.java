@@ -49,6 +49,7 @@ import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.util.RxjavaUtil;
 import a75f.io.renatus.util.remotecommand.RemoteCommandHandlerUtil;
+import a75f.io.util.ExecutorTask;
 
 public class UpdateCCUFragment extends DialogFragment {
 
@@ -450,7 +451,7 @@ public class UpdateCCUFragment extends DialogFragment {
     }
     public void checkIsCCUHasRecommendedVersion(FragmentActivity activity, FragmentManager parentFragmentManager,
                                                        View toastLayout, Context context, FragmentActivity fragmentActivity) {
-        RxjavaUtil.executeBackgroundTaskWithDisposable(()-> ProgressDialogUtils.showProgressDialog(activity,"Checking for recommended version"),
+        ExecutorTask.executeAsync(()-> ProgressDialogUtils.showProgressDialog(activity,"Checking for recommended version"),
                 ()->{String response = getRecommendedCCUVersion();
                     boolean isCCCUHasRecommendedVersion = isCCUHasRecommendedVersion(parentFragmentManager, response);
                     if(isCCCUHasRecommendedVersion){

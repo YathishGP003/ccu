@@ -18,6 +18,7 @@ import a75f.io.api.haystack.Site;
 import a75f.io.logic.bo.util.RenatusLogicIntentActions;
 import a75f.io.logic.util.RxTask;
 import a75f.io.messaging.MessageHandler;
+import a75f.io.util.ExecutorTask;
 
 public class SiteSyncHandler implements MessageHandler
 {
@@ -41,7 +42,7 @@ public class SiteSyncHandler implements MessageHandler
             //SiteSyncHandler should take care of only the Site entity updates.
             if (remoteSite != null && !remoteSite.equals(hayStack.getSite())) {
                 if(!remoteSite.getTz().equals(hayStack.getSite().getTz()))
-                    RxTask.executeAsync(() -> hayStack.updateTimeZoneInBackground(remoteSite.getTz()) );
+                    ExecutorTask.executeBackground(() -> hayStack.updateTimeZoneInBackground(remoteSite.getTz()) );
 
                 hayStack.updateSiteLocal(remoteSite, hayStack.getSiteIdRef().toString());
                 Intent locationUpdateIntent = new Intent(RenatusLogicIntentActions.ACTION_SITE_LOCATION_UPDATED);

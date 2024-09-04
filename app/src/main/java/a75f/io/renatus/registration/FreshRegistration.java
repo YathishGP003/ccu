@@ -64,6 +64,7 @@ import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.util.RxjavaUtil;
 import a75f.io.renatus.views.CustomCCUSwitch;
+import a75f.io.util.ExecutorTask;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 
 public class FreshRegistration extends AppCompatActivity implements VerticalTabAdapter.OnItemClickListener, SwitchFragment {
@@ -299,7 +300,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             }
             if (currentFragment instanceof CongratsFragment) {
                 prefs.setBoolean("REGISTRATION", true);
-                RxjavaUtil.executeBackground(() -> {
+                ExecutorTask.executeBackground(() -> {
                     Globals.getInstance().copyModels();
                 });
                 updateCCURegistrationInfo();

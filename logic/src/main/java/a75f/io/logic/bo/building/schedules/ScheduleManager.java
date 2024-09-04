@@ -72,6 +72,7 @@ import a75f.io.logic.interfaces.BuildingScheduleListener;
 import a75f.io.logic.interfaces.ZoneDataInterface;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.logic.util.RxjavaUtil;
+import a75f.io.util.ExecutorTask;
 
 public class ScheduleManager {
 
@@ -417,7 +418,7 @@ public class ScheduleManager {
 
     public void updateLimitsAndDeadBand() {
 
-        RxjavaUtil.executeBackground(()->{
+        ExecutorTask.executeBackground(()->{
             try {
                 for (ZoneProfile profile : L.ccu().zoneProfiles) {
                     Equip equip = profile.getEquip();

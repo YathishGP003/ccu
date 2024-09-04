@@ -16,6 +16,7 @@ import a75f.io.logic.bo.building.hyperstat.profiles.pipe2.Pipe2RelayAssociation
 import a75f.io.logic.bo.building.hyperstatsplit.common.BasicSettings
 import a75f.io.logic.tuners.TunerConstants
 import a75f.io.logic.util.RxjavaUtil
+import a75f.io.util.ExecutorTask
 import org.projecthaystack.HNum
 import org.projecthaystack.HRef
 import kotlin.collections.set
@@ -281,7 +282,7 @@ class HyperStatSplitUserIntentHandler {
         fun updateHyperStatSplitUIPoints(equipRef: String, command: String, value: Double, who: String) {
 
             val haystack: CCUHsApi = CCUHsApi.getInstance()
-            RxjavaUtil.executeBackgroundTask(
+            ExecutorTask.executeAsync(
                 { },
                 {
                     val currentData = haystack.readEntity(

@@ -26,6 +26,7 @@ import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.tuners.TITuners;
 import a75f.io.logic.util.RxTask;
+import a75f.io.util.ExecutorTask;
 
 /**
  * Created by Anilkumar on 8/19/19.
@@ -82,7 +83,7 @@ public class CazEquip
                 .setGroup(String.valueOf(nodeAddr));
         equipRef = CCUHsApi.getInstance().addEquip(b.build());
     
-        RxTask.executeAsync(() -> TITuners.addEquipTiTuners( CCUHsApi.getInstance(),
+        ExecutorTask.executeBackground(() -> TITuners.addEquipTiTuners( CCUHsApi.getInstance(),
                                                              siteRef,
                                                              siteDis + "-TI-" + nodeAddr,
                                                              equipRef,

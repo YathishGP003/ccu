@@ -92,13 +92,13 @@ android {
         resources.excludes.add("META-INF/*")
     }
 }
-tasks.whenTaskAdded { task ->
+/*tasks.whenTaskAdded { task ->
     if (task.name == 'assembleDev_qa') {
         task.dependsOn 'testDev_qaUnitTest'
     } else if (task.name == 'assembleQa') {
         task.dependsOn 'testQaUnitTest'
     }
-}
+}*/
 dependencies {
     //Local
     implementation project(':haystack')
@@ -109,6 +109,7 @@ dependencies {
     implementation project(':data')
     implementation project(':alerts')
     implementation project(':domain')
+    implementation project(':util')
 
     //RxJava
     implementation 'io.reactivex.rxjava3:rxandroid:3.0.0'

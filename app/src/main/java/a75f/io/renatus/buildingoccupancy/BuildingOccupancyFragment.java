@@ -57,6 +57,7 @@ import a75f.io.renatus.schedules.ScheduleUtil;
 import a75f.io.renatus.util.NetworkUtil;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.util.RxjavaUtil;
+import a75f.io.util.ExecutorTask;
 
 
 public class BuildingOccupancyFragment extends DialogFragment implements BuildingOccupancyDialogListener, BuildingOccupancyListener {
@@ -272,7 +273,7 @@ public class BuildingOccupancyFragment extends DialogFragment implements Buildin
         if (spillsMap != null && !spillsMap.isEmpty() && position != ManualSchedulerDialogFragment.NO_REPLACE) {
             ProgressDialogUtils.showProgressDialog(getActivity(),
                     "Fetching Zone Schedules...");
-            RxjavaUtil.executeBackgroundTask(
+            ExecutorTask.executeAsync(
                     () -> errorMessage = buildingOccupancyViewModel.getWarningMessage(spillsMap),
                     ()-> {
                         ProgressDialogUtils.hideProgressDialog();

@@ -65,6 +65,7 @@ import a75f.io.renatus.util.CCUUtils;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.util.RxjavaUtil;
 import a75f.io.usbserial.UsbSerialUtil;
+import a75f.io.util.ExecutorTask;
 import butterknife.BindView;
 import java.util.Calendar;
 import butterknife.ButterKnife;
@@ -258,7 +259,7 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
             }
         }.start());
 
-        pullDataBtn.setOnClickListener(view14 -> disposable.add(RxjavaUtil.executeBackgroundTaskWithDisposable(
+        pullDataBtn.setOnClickListener(view14 -> ExecutorTask.executeAsync(
                 () -> ProgressDialogUtils.showProgressDialog(getActivity(),"Pulling building tuners to CCU"),
                 () -> {
                     Site site = CCUHsApi.getInstance().getSite();
@@ -267,15 +268,15 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
                     TunerEquip.INSTANCE.syncBuildingTuners(CCUHsApi.getInstance());
                 },
                 ProgressDialogUtils::hideProgressDialog
-        )));
+        ));
         
         deleteHis.setOnClickListener(view15 -> {
             CcuLog.d(L.TAG_CCU," deleteHis data ");
-            disposable.add(RxjavaUtil.executeBackgroundTaskWithDisposable(
+            ExecutorTask.executeAsync(
                     () -> ProgressDialogUtils.showProgressDialog(getActivity(),"Deleting history data"),
                     () -> CCUHsApi.getInstance().deleteHistory(),
                     ProgressDialogUtils::hideProgressDialog
-            ));
+            );
         });
 
         clearHisData.setOnClickListener(view15 -> {
@@ -561,24 +562,24 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
         });
 
         //TODO: This is a temporary way to delete building tuners, building equip and all building entities locally for Testing.
-        deleteBuildingTuners.setOnClickListener(deleteButton -> disposable.add(RxjavaUtil.executeBackgroundTaskWithDisposable(
+        deleteBuildingTuners.setOnClickListener(deleteButton -> ExecutorTask.executeAsync(
                 () -> ProgressDialogUtils.showProgressDialog(getActivity(),"Deleting building tuners"),
                 () -> deleteBuildingTuners(hayStack),
                 ProgressDialogUtils::hideProgressDialog
-        )));
+        ));
 
 
-        deleteBuildingEquipLocally.setOnClickListener(deleteButton -> disposable.add(RxjavaUtil.executeBackgroundTaskWithDisposable(
+        deleteBuildingEquipLocally.setOnClickListener(deleteButton -> ExecutorTask.executeAsync(
                 () -> ProgressDialogUtils.showProgressDialog(getActivity(),"Deleting building equip locally"),
                 () -> deleteBuildingEquipLocally(hayStack),
                 ProgressDialogUtils::hideProgressDialog
-        )));
+        ));
 
-        deleteBuildingEntitiesLocally.setOnClickListener(deleteButton -> disposable.add(RxjavaUtil.executeBackgroundTaskWithDisposable(
+        deleteBuildingEntitiesLocally.setOnClickListener(deleteButton -> ExecutorTask.executeAsync(
                 () -> ProgressDialogUtils.showProgressDialog(getActivity(),"Deleting building entities locally"),
                 () -> deleteBuildingEntitiesLocally(hayStack),
                 ProgressDialogUtils::hideProgressDialog
-        )));
+        ));
     }
     private boolean validateForReboot() {
         Calendar calendar = Calendar.getInstance();
@@ -619,11 +620,11 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
     }
 
     private void reconstructLocalBuildingPoints(CCUHsApi hayStack) {
-        disposable.add(RxjavaUtil.executeBackgroundTaskWithDisposable(
+        ExecutorTask.executeAsync(
                 () -> ProgressDialogUtils.showProgressDialog(getActivity(),"Recreating building points"),
                 () -> reconstructBuildingEquipAndPointsLocally(hayStack, false),
                 ProgressDialogUtils::hideProgressDialog
-        ));
+        );
     }
 
     private void reconstructBuildingEquipAndPointsLocally(CCUHsApi hayStack, boolean useRemoteEquip) {
@@ -645,7 +646,7 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
     }
 
     private void validateAndStartBuildingPointsSyncFromCCUToCloud(CCUHsApi hayStack) {
-        disposable.add(RxjavaUtil.executeBackgroundTaskWithDisposable(
+        ExecutorTask.executeAsync(
                 () -> ProgressDialogUtils.showProgressDialog(getActivity(),"Validating and syncing building tuners to cloud"),
                 () -> {
                     try {
@@ -670,7 +671,7 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
                     }
                 },
                 ProgressDialogUtils::hideProgressDialog
-        ));
+        );
     }
 
     private void executeBuildingPointsSyncFromCCUToCloud(CCUHsApi hayStack) {

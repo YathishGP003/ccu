@@ -36,6 +36,7 @@ import a75f.io.logic.tuners.DualDuctTuners;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.logic.util.RxTask;
+import a75f.io.util.ExecutorTask;
 
 public class DualDuctEquip {
     
@@ -157,7 +158,7 @@ public class DualDuctEquip {
         
         createEquip(siteRef, equipDis, roomRef, floorRef, ahuRef, tz, nodeType);
     
-        RxTask.executeAsync(() -> DualDuctTuners.addEquipTuners(hayStack, siteRef, equipDis, equipRef, roomRef,
+        ExecutorTask.executeBackground(() -> DualDuctTuners.addEquipTuners(hayStack, siteRef, equipDis, equipRef, roomRef,
                                                                 floorRef, tz));
         
         createLogicalPoints(siteRef, equipDis, roomRef, floorRef, tz , config, nodeType);

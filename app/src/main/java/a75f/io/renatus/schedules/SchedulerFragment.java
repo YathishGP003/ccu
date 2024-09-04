@@ -82,6 +82,7 @@ import a75f.io.renatus.util.Marker;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.util.RxjavaUtil;
 import a75f.io.renatus.views.RangeBar;
+import a75f.io.util.ExecutorTask;
 
 public class SchedulerFragment extends DialogFragment implements ManualScheduleDialogListener, BuildingScheduleListener, NamedScheduleOccupiedDialogFragment.NamedScheduleOccupiedDialogFragmentListener
 , UnOccupiedZoneSetBackDialogFragment.UnOccupiedZoneSetBackListener {
@@ -746,7 +747,7 @@ public class SchedulerFragment extends DialogFragment implements ManualScheduleD
 
     private void loadSpecialSchedules(){
         final List<HashMap<Object, Object>>[] specialScheduleList = new List[]{null};
-        RxjavaUtil.executeBackgroundTask(() -> specialScheduleList[0] = SchedulerFragment.this.getSpecialSchedule(),
+        ExecutorTask.executeAsync(() -> specialScheduleList[0] = SchedulerFragment.this.getSpecialSchedule(),
                 ()-> setSpecialScheduleAdapter(specialScheduleList[0]));
 
 

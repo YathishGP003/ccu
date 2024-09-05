@@ -5,8 +5,6 @@ import a75f.io.domain.api.PhysicalPoint
 import a75f.io.domain.api.Point
 import a75f.io.domain.devices.ConnectDevice
 import a75f.io.domain.equips.ConnectModuleEquip
-import a75f.io.domain.equips.DomainEquip
-import a75f.io.domain.equips.VavAdvancedHybridSystemEquip
 
 /**
  * Created by Manjunath K on 22-05-2024.
@@ -17,40 +15,34 @@ enum class AdvancedAhuAnalogOutAssociationTypeConnect {
     LOAD_COOLING, LOAD_HEATING, LOAD_FAN, COMPOSITE_SIGNAL, CO2_DAMPER
 }
 
-fun getConnectRelayAssociationMap(equip: DomainEquip) : Map<Point, Point> {
+fun getConnectRelayAssociationMap(connectEquip1: ConnectModuleEquip) : Map<Point, Point> {
     val associations: MutableMap<Point, Point> = HashMap()
-    val systemEquip = when (equip) {
-        is VavAdvancedHybridSystemEquip -> equip
-        else -> throw IllegalArgumentException("Invalid system equip type")
-    }
-    if (systemEquip.connectEquip1.equipRef.contentEquals("null")) {
+    if (connectEquip1.equipRef.contentEquals("null")) {
         return associations
     }
-    associations[systemEquip.connectEquip1.relay1OutputEnable] = systemEquip.connectEquip1.relay1OutputAssociation
-    associations[systemEquip.connectEquip1.relay2OutputEnable] = systemEquip.connectEquip1.relay2OutputAssociation
-    associations[systemEquip.connectEquip1.relay3OutputEnable] = systemEquip.connectEquip1.relay3OutputAssociation
-    associations[systemEquip.connectEquip1.relay4OutputEnable] = systemEquip.connectEquip1.relay4OutputAssociation
-    associations[systemEquip.connectEquip1.relay5OutputEnable] = systemEquip.connectEquip1.relay5OutputAssociation
-    associations[systemEquip.connectEquip1.relay6OutputEnable] = systemEquip.connectEquip1.relay6OutputAssociation
-    associations[systemEquip.connectEquip1.relay7OutputEnable] = systemEquip.connectEquip1.relay7OutputAssociation
-    associations[systemEquip.connectEquip1.relay8OutputEnable] = systemEquip.connectEquip1.relay8OutputAssociation
+
+    associations[connectEquip1.relay1OutputEnable] = connectEquip1.relay1OutputAssociation
+    associations[connectEquip1.relay2OutputEnable] = connectEquip1.relay2OutputAssociation
+    associations[connectEquip1.relay3OutputEnable] = connectEquip1.relay3OutputAssociation
+    associations[connectEquip1.relay4OutputEnable] = connectEquip1.relay4OutputAssociation
+    associations[connectEquip1.relay5OutputEnable] = connectEquip1.relay5OutputAssociation
+    associations[connectEquip1.relay6OutputEnable] = connectEquip1.relay6OutputAssociation
+    associations[connectEquip1.relay7OutputEnable] = connectEquip1.relay7OutputAssociation
+    associations[connectEquip1.relay8OutputEnable] = connectEquip1.relay8OutputAssociation
     return associations
 }
 
 
-fun getConnectAnalogAssociationMap(equip: DomainEquip): Map<Point, Point> {
+fun getConnectAnalogAssociationMap(connectEquip1: ConnectModuleEquip): Map<Point, Point> {
     val associations: MutableMap<Point, Point> = HashMap()
-    val systemEquip = when (equip) {
-        is VavAdvancedHybridSystemEquip -> equip
-        else -> throw IllegalArgumentException("Invalid system equip type")
-    }
-    if (systemEquip.connectEquip1.equipRef.contentEquals("null")) {
+
+    if (connectEquip1.equipRef.contentEquals("null")) {
         return associations
     }
-    associations[systemEquip.connectEquip1.analog1OutputEnable] = systemEquip.connectEquip1.analog1OutputAssociation
-    associations[systemEquip.connectEquip1.analog2OutputEnable] = systemEquip.connectEquip1.analog2OutputAssociation
-    associations[systemEquip.connectEquip1.analog3OutputEnable] = systemEquip.connectEquip1.analog3OutputAssociation
-    associations[systemEquip.connectEquip1.analog4OutputEnable] = systemEquip.connectEquip1.analog4OutputAssociation
+    associations[connectEquip1.analog1OutputEnable] = connectEquip1.analog1OutputAssociation
+    associations[connectEquip1.analog2OutputEnable] = connectEquip1.analog2OutputAssociation
+    associations[connectEquip1.analog3OutputEnable] = connectEquip1.analog3OutputAssociation
+    associations[connectEquip1.analog4OutputEnable] = connectEquip1.analog4OutputAssociation
 
     return associations
 }

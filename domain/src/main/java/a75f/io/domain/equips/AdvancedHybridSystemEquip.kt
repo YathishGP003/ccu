@@ -6,9 +6,10 @@ import a75f.io.domain.api.Point
 /**
  * Created by Manjunath K on 19-05-2024.
  */
-open class AdvancedHybridSystemEquip (equipRef : String, connectEquipRef : String) : VavSystemEquip (equipRef) {
-
-    val connectEquip1 = ConnectModuleEquip(connectEquipRef)
+/**
+ * This class contains common properties between vav & dab for advanced ahu profile
+ */
+open class AdvancedHybridSystemEquip(equipRef: String) : SystemEquip (equipRef) {
 
     val relay1OutputEnable = Point(DomainName.relay1OutputEnable ,equipRef)
     val relay2OutputEnable = Point(DomainName.relay2OutputEnable ,equipRef)
@@ -349,4 +350,10 @@ open class AdvancedHybridSystemEquip (equipRef : String, connectEquipRef : Strin
     val emergencyShutoffNO = Point(DomainName.emergencyShutoffNO, equipRef)
     val emergencyShutoffNC = Point(DomainName.emergencyShutoffNC, equipRef)
     val voltageInput = Point(DomainName.voltageInput, equipRef)
+
+    var stageUpTimer = 0.0
+    var stageDownTimer = 0.0
+
+    fun isStageUpTimerActive(): Boolean = stageUpTimer > 0
+    fun isStageDownTimerActive(): Boolean = stageDownTimer > 0
 }

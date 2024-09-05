@@ -28,6 +28,7 @@ import a75f.io.renatus.profiles.system.VavStagedRtuFragment;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.renatus.profiles.system.VavStagedVfdRtuFragment;
+import a75f.io.renatus.profiles.system.advancedahu.dab.DabAdvancedHybridAhuFragment;
 import a75f.io.renatus.profiles.system.advancedahu.vav.VavAdvancedHybridAhuFragment;
 import a75f.io.renatus.profiles.system.externalahu.ExternalAhuFragment;
 import a75f.io.renatus.registration.FreshRegistration;
@@ -97,7 +98,6 @@ public class SystemProfileFragment extends Fragment {
                     ((TextView) adapterView.getChildAt(0)).setTextSize(18);
                     spSystemProfile.getLayoutParams().width = 340;
                 }
-                
                 switch (i) {
                     case 0:
                         if(canAddDABProfile() && canAddVAVProfile()){
@@ -239,7 +239,21 @@ public class SystemProfileFragment extends Fragment {
                                     systemProfileSelectorAdapter.getPosition(L.ccu().systemProfile.getProfileName()) : 0);
                         }
                         break;
+
                     case 11:
+                        if (canAddDABProfile()) {
+                            getActivity().getSupportFragmentManager().beginTransaction()
+                                    .replace(R.id.profileContainer, new DabAdvancedHybridAhuFragment()).commit();
+                            if (SystemConfigMenuFragment.SystemConfigMenuFragmentHandler != null) {
+                                SystemConfigMenuFragment.SystemConfigMenuFragmentHandler.sendEmptyMessage(1);
+                            }
+                        }else {
+                            Toast.makeText(getActivity(),"Unpair all VAV Zones and try",Toast.LENGTH_LONG).show();
+                            spSystemProfile.setSelection(L.ccu().systemProfile != null ?
+                                    systemProfileSelectorAdapter.getPosition(L.ccu().systemProfile.getProfileName()) : 0);
+                        }
+                        break;
+                    case 12:
                         if (canAddDABProfile()) {
                             getActivity().getSupportFragmentManager().beginTransaction()
                                     .replace(R.id.profileContainer, new ExternalAhuFragment(ProfileType.dabExternalAHUController),"dabExternalAHUController").commit();
@@ -254,7 +268,7 @@ public class SystemProfileFragment extends Fragment {
                         }
                         break;
 
-                    case 12:
+                    case 13:
                         if (canAddVAVProfile()) {
                             getActivity().getSupportFragmentManager().beginTransaction()
                                     .replace(R.id.profileContainer, new VavIERtuProfile()).commit();

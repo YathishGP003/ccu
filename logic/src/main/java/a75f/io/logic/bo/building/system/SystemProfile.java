@@ -35,6 +35,7 @@ import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.system.dab.DabSystemController;
 import a75f.io.logic.bo.building.system.dab.DabSystemProfile;
+import a75f.io.logic.bo.building.system.util.AdvancedAhuUtilKt;
 import a75f.io.logic.bo.building.system.vav.VavSystemController;
 import a75f.io.logic.bo.building.system.vav.VavSystemProfile;
 import a75f.io.logic.bo.util.DemandResponseMode;
@@ -197,7 +198,7 @@ public abstract class SystemProfile
                 || q.getMarkers().contains("vrv") || q.getMarkers().contains("otn")) {
                 q.setAhuRef(systemEquipId);
             } else if (q.getMarkers().contains("smartstat") || q.getMarkers().contains("emr") || q.getMarkers().contains("pid") ||
-                       q.getMarkers().contains("modbus") || q.getMarkers().contains("monitoring") || q.getMarkers().contains("hyperstat") || q.getMarkers().contains("hyperstatsplit")){
+                       q.getMarkers().contains("modbus") || q.getMarkers().contains("monitoring") || q.getMarkers().contains("hyperstat") ||q.getMarkers().contains("hyperstatsplit")) {
                 //All the standalone zone equips will have a gatewayRef
                 q.setGatewayRef(systemEquipId);
             }else {
@@ -938,22 +939,10 @@ public abstract class SystemProfile
 
         }
 
-
     }
 
     public void deleteSystemConnectModule() {
-        // We don't know exactly when in the System equip deletion/creation cycle this will be invoked.
-        // So, it needs its own Haystack API instance to prevent crashes if "hayStack" is null
-        CCUHsApi hs = CCUHsApi.getInstance();
-        HashMap<Object, Object> connectSystemEquip = hs.readEntity("domainName == \"" + DomainName.vavAdvancedHybridAhuV2_connectModule + "\"");
-        if (connectSystemEquip != null && connectSystemEquip.size() > 0) {
-            hs.deleteEntityTree(connectSystemEquip.get("id").toString());
-        }
-
-        HashMap<Object, Object> connectDevice = hs.readEntity("domainName == \"" + DomainName.connectModuleDevice + "\"");
-        if (connectDevice != null && connectDevice.size() > 0) {
-            hs.deleteEntityTree(connectDevice.get("id").toString());
-        }
+        AdvancedAhuUtilKt.deleteSystemConnectModule();
     }
 
     public void createDemandResponseConfigPoints(String equipDis, String siteRef, String equipRef, String tz, CCUHsApi hayStack) {

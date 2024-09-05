@@ -25,9 +25,10 @@ public enum ProfileType
                 return SYSTEM_VAV_STAGED_VFD_RTU;
             case "vavAdvancedHybridAhuV2":
                 return SYSTEM_VAV_ADVANCED_AHU;
-            case "vavAdvancedHybridAhuV2_connectModule":
             case "vavFullyModulatingAhu":
                 return SYSTEM_VAV_ANALOG_RTU;
+            case "dabAdvancedHybridAhuV2":
+                return SYSTEM_DAB_ADVANCED_AHU;
         }
         return null;
     }

@@ -1,11 +1,13 @@
 package a75f.io.renatus.compose
 
+import a75f.io.logic.bo.util.UnitUtils
 import a75f.io.renatus.R
 import a75f.io.renatus.compose.ComposeUtil.Companion.greyDropDownColor
 import a75f.io.renatus.compose.ComposeUtil.Companion.greyDropDownUnderlineColor
 import a75f.io.renatus.compose.ComposeUtil.Companion.greySearchIcon
 import a75f.io.renatus.compose.ComposeUtil.Companion.primaryColor
 import a75f.io.renatus.compose.ComposeUtil.Companion.secondaryColor
+import a75f.io.renatus.profiles.system.advancedahu.AdvancedHybridAhuViewModel
 import a75f.io.renatus.profiles.system.advancedahu.Option
 import android.annotation.SuppressLint
 import androidx.compose.animation.core.animateFloatAsState
@@ -37,6 +39,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -56,6 +59,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import java.math.BigDecimal
+import java.math.RoundingMode
 
 /**
  * Created by Manjunath K on 12-06-2023.
@@ -77,16 +82,16 @@ fun SpinnerElement(
     var selectedIndex by remember { mutableStateOf(items.indexOf(defaultSelection)) }
     Box(
         modifier = Modifier
-            .wrapContentSize()
-            .padding(
-                PaddingValues(
-                    top = 5.dp
+                .wrapContentSize()
+                .padding(
+                        PaddingValues(
+                                top = 5.dp
+                        )
                 )
-            )
     ) {
         Column(modifier = Modifier
-            .width(200.dp)
-            .clickable(onClick = { expanded.value = true })) {
+                .width(200.dp)
+                .clickable(onClick = { expanded.value = true })) {
             Row {
                 Text(
                     fontSize = 20.sp,
@@ -100,8 +105,8 @@ fun SpinnerElement(
                     painter = painterResource(id = R.drawable.angle_down_solid),
                     contentDescription = "Custom Icon",
                     modifier = Modifier
-                        .size(28.dp)
-                        .padding(PaddingValues(top = 8.dp)),
+                            .size(28.dp)
+                            .padding(PaddingValues(top = 8.dp)),
                     colorFilter = ColorFilter.tint(primaryColor)
                 )
             }
@@ -157,7 +162,8 @@ fun SpinnerElementOption(
     items: List<Option>,
     unit: String,
     itemSelected: (Option) -> Unit,
-    previewWidth : Int = 130
+    previewWidth : Int = 130,
+    viewModel: AdvancedHybridAhuViewModel? = null
 ) {
     val selectedItem = remember { mutableStateOf(defaultSelection) }
     val expanded = remember { mutableStateOf(false) }
@@ -176,12 +182,13 @@ fun SpinnerElementOption(
                 .wrapContentWidth()
                 .clickable(onClick = { expanded.value = true })) {
             Row {
+                val data = getItemData(selectedItem.value, unit, viewModel)
                 Text(
                     fontSize = 20.sp,
                     fontFamily = ComposeUtil.myFontFamily,
                     modifier = Modifier.width(previewWidth.dp),
                     fontWeight = FontWeight.Normal,
-                    text = "${selectedItem.value} $unit",
+                    text = "${data.first} ${data.second}",
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 1
                 )
@@ -217,14 +224,15 @@ fun SpinnerElementOption(
                         contentPadding = PaddingValues(10.dp),
                         text = {
                             Row {
+                                val dataItem = getItemData(item.value, unit, viewModel)
                                 Text(
                                     fontSize = 20.sp,
                                     fontFamily = ComposeUtil.myFontFamily,
                                     modifier = Modifier.padding(end = 10.dp),
                                     fontWeight = FontWeight.Normal,
-                                    text = item.value
+                                    text = dataItem.first
                                 )
-                                Text(fontSize = 20.sp, fontWeight = FontWeight.Normal, text = unit)
+                                Text(fontSize = 20.sp, fontWeight = FontWeight.Normal, text = dataItem.second)
                             }
                         }, onClick = {
                             selectedItem.value = item.value
@@ -239,6 +247,22 @@ fun SpinnerElementOption(
             }
         }
     }
+}
+
+@Composable
+fun getItemData(value: String, unit: String, viewModel: AdvancedHybridAhuViewModel? = null): Pair<String, String> {
+    if (viewModel != null) {
+        val isChecked by viewModel.isCelsiusChecked.collectAsState()
+        if (isChecked) {
+            return if (unit.equals("°F", ignoreCase = true)) {
+                val number = BigDecimal(UnitUtils.fahrenheitToCelsiusTwoDecimal(value.toDouble()))
+                Pair((number.setScale(1, RoundingMode.DOWN).toString()), "\u00B0C")
+            } else {
+                Pair(value, unit)
+            }
+        }
+    }
+    return Pair(value, unit)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

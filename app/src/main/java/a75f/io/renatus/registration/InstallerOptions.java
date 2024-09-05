@@ -86,6 +86,8 @@ import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BackfillUtilKt;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.system.dab.DabAdvancedAhu;
+import a75f.io.logic.bo.building.system.vav.VavAdvancedAhu;
 import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.bo.util.DemandResponseMode;
 import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint;
@@ -98,6 +100,8 @@ import a75f.io.renatus.R;
 import a75f.io.renatus.RenatusApp;
 import a75f.io.renatus.UtilityApplication;
 import a75f.io.renatus.buildingoccupancy.BuildingOccupancyFragment;
+import a75f.io.renatus.profiles.system.advancedahu.dab.DabAdvancedHybridAhuFragment;
+import a75f.io.renatus.profiles.system.advancedahu.vav.VavAdvancedHybridAhuFragment;
 import a75f.io.renatus.tuners.TunerFragment;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.Prefs;
@@ -406,7 +410,7 @@ public class InstallerOptions extends Fragment {
 
         toggleCelsius.setOnCheckedChangeListener((buttonView, isChecked) -> {
             HashMap<Object, Object> useCelsius = ccuHsApi.readEntity("displayUnit");
-
+            intimateAdvanceAhu();
             if (!useCelsius.isEmpty()) {
                 if (isChecked) {
                     ccuHsApi.writePoint(useCelsius.get("id").toString(), TunerConstants.TUNER_BUILDING_VAL_LEVEL,
@@ -453,6 +457,15 @@ public class InstallerOptions extends Fragment {
         buttonCancel.setOnClickListener(view -> backFillTimeSpinner.setSelection(BackFillDuration.getIndex(BackFillDuration.toIntArray(), getBackFillDuration(), 24)));
 
         return rootView;
+    }
+
+    private void intimateAdvanceAhu() {
+        if (ccu().systemProfile instanceof VavAdvancedAhu && VavAdvancedHybridAhuFragment.Companion.getInstance() != null) {
+            VavAdvancedHybridAhuFragment.Companion.getInstance().getViewModel().toggleChecked();
+        }
+        if (ccu().systemProfile instanceof DabAdvancedAhu && DabAdvancedHybridAhuFragment.Companion.getInstance() != null) {
+            DabAdvancedHybridAhuFragment.Companion.getInstance().getViewModel().toggleChecked();
+        }
     }
 
     private void setUpTemperatureModeSpinner(View rootView, CCUHsApi ccuHsApi) {

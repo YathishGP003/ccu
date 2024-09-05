@@ -1,17 +1,17 @@
-package a75f.io.renatus.profiles.system.advancedahu.vav
+package a75f.io.renatus.profiles.system.advancedahu.dab
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.domain.api.Domain
-import a75f.io.domain.equips.VavAdvancedHybridSystemEquip
+import a75f.io.domain.equips.DabAdvancedHybridSystemEquip
 import a75f.io.domain.util.ModelLoader
 import a75f.io.domain.util.ModelNames
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.ProfileType
+import a75f.io.logic.bo.building.system.dab.DabAdvancedAhu
+import a75f.io.logic.bo.building.system.dab.config.DabAdvancedHybridAhuConfig
 import a75f.io.logic.bo.building.system.util.deleteCurrentSystemProfile
 import a75f.io.logic.bo.building.system.util.getCurrentSystemEquip
-import a75f.io.logic.bo.building.system.util.getVavConnectEquip
-import a75f.io.logic.bo.building.system.vav.VavAdvancedAhu
-import a75f.io.logic.bo.building.system.vav.config.VavAdvancedHybridAhuConfig
+import a75f.io.logic.bo.building.system.util.getDabConnectEquip
 import a75f.io.renatus.modbus.util.showToast
 import a75f.io.renatus.profiles.system.advancedahu.AdvancedHybridAhuViewModel
 import a75f.io.renatus.profiles.system.advancedahu.isValidateConfiguration
@@ -25,30 +25,29 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /**
- * Created by Manjunath K on 20-03-2024.
+ * Created by Manjunath K on 19-05-2024.
  */
 
-class VavAdvancedHybridAhuViewModel : AdvancedHybridAhuViewModel() {
+class DabAdvancedHybridAhuViewModel : AdvancedHybridAhuViewModel() {
+
     init {
-        viewState = mutableStateOf(VavAdvancedAhuState())
+        viewState = mutableStateOf(DabAdvancedAhuState())
+    }
+    fun init(context: Context, hayStack: CCUHsApi) {
+        super.init(context, ModelLoader.getDabAdvancedAhuCmModelV2(), ModelLoader.getDabAdvancedAhuConnectModelV2(), hayStack, ProfileType.SYSTEM_DAB_ADVANCED_AHU)
+        val systemEquip = getCurrentSystemEquip()
+        profileConfiguration = if (systemEquip["profile"].toString().contentEquals("dabAdvancedHybridAhuV2")) {
+            DabAdvancedHybridAhuConfig(cmModel, connectModel).getActiveConfiguration() as DabAdvancedHybridAhuConfig
+        } else {
+            DabAdvancedHybridAhuConfig(cmModel, connectModel)
+        }
+        viewState = mutableStateOf(DabAdvancedAhuState.fromProfileConfigToState(profileConfiguration as DabAdvancedHybridAhuConfig))
     }
 
-    fun init(context: Context, hayStack: CCUHsApi) {
-        super.init(context, ModelLoader.getVavAdvancedAhuCmModelV2(), ModelLoader.getVavAdvancedAhuConnectModelV2(), hayStack, ProfileType.SYSTEM_VAV_ADVANCED_AHU)
-        val systemEquip = getCurrentSystemEquip()
-        profileConfiguration = if (systemEquip["profile"].toString().contentEquals("vavAdvancedHybridAhuV2")) {
-            VavAdvancedHybridAhuConfig(cmModel, connectModel).getActiveConfiguration() as VavAdvancedHybridAhuConfig
-        } else {
-            VavAdvancedHybridAhuConfig(cmModel, connectModel)
-        }
-        viewState = mutableStateOf(VavAdvancedAhuState.fromProfileConfigToState(profileConfiguration as VavAdvancedHybridAhuConfig))
-        viewState.value.isSaveRequired = !systemEquip["profile"].toString().contentEquals("vavAdvancedHybridAhuV2")
-        modelLoadedState.postValue(true)
-    }
 
     override fun saveConfiguration() {
-        ((viewState.value) as VavAdvancedAhuState).fromStateToProfileConfig(profileConfiguration as VavAdvancedHybridAhuConfig)
-        val validConfig = isValidateConfiguration(this@VavAdvancedHybridAhuViewModel)
+        ((viewState.value) as DabAdvancedAhuState).fromStateToProfileConfig(profileConfiguration as DabAdvancedHybridAhuConfig)
+        val validConfig = isValidateConfiguration(this@DabAdvancedHybridAhuViewModel)
         if (!validConfig.first) {
             showErrorDialog(context,validConfig.second)
             viewState.value.isSaveRequired = true
@@ -58,22 +57,22 @@ class VavAdvancedHybridAhuViewModel : AdvancedHybridAhuViewModel() {
         viewState.value.isSaveRequired = false
         viewState.value.isStateChanged = false
 
-        isEquipAvailable(ProfileType.SYSTEM_VAV_ADVANCED_AHU)
+        isEquipAvailable(ProfileType.SYSTEM_DAB_ADVANCED_AHU)
         if (saveJob == null) {
             ProgressDialogUtils.showProgressDialog(context, "Saving profile configuration")
-            saveJob = viewModelScope.launch(highPriorityDispatcher) {
+            saveJob = viewModelScope.launch (highPriorityDispatcher) {
                 hayStack.resetCcuReady()
                 val profile = L.ccu().systemProfile
                 if (profile == null) {
                     newEquipConfiguration()
                 } else {
-                    if (profile is VavAdvancedAhu) {
-                        updateConfiguration(getVavConnectEquip(), ModelNames.vavAdvancedHybridAhuV2_connectModule)
+                    if (profile is DabAdvancedAhu) {
+                        updateConfiguration(getDabConnectEquip(), ModelNames.dabAdvancedHybridAhuV2_connectModule)
                     } else {
                         newEquipConfiguration()
                     }
                 }
-                (L.ccu().systemProfile as VavAdvancedAhu).updateDomainEquip(Domain.systemEquip as VavAdvancedHybridSystemEquip)
+                (L.ccu().systemProfile as DabAdvancedAhu).updateDomainEquip(Domain.systemEquip as DabAdvancedHybridSystemEquip)
                 withContext(Dispatchers.Main) {
                     if (ProgressDialogUtils.isDialogShowing()) {
                         ProgressDialogUtils.hideProgressDialog()
@@ -100,28 +99,24 @@ class VavAdvancedHybridAhuViewModel : AdvancedHybridAhuViewModel() {
                 addConnectModule()
             }
             val newEquipId = addAdvanceAHUEquip()
-            L.ccu().systemProfile = VavAdvancedAhu()
+            L.ccu().systemProfile = DabAdvancedAhu()
             L.ccu().systemProfile.addSystemEquip()
             L.ccu().systemProfile.updateAhuRef(newEquipId)
-            val vavAdvancedAhuProfile = L.ccu().systemProfile as VavAdvancedAhu
-            vavAdvancedAhuProfile.updateStagesSelected()
+            val dabAdvancedAhuProfile = L.ccu().systemProfile as DabAdvancedAhu
+            dabAdvancedAhuProfile.updateStagesSelected()
             launch { L.ccu().systemProfile.removeSystemEquipModbus() }
         }
         newEquipJob.join()
     }
 
-
     override fun reset() {
-        val systemEquip = getCurrentSystemEquip()
-        profileConfiguration = if (systemEquip["profile"].toString().contentEquals("vavAdvancedHybridAhuV2")) {
-            VavAdvancedHybridAhuConfig(cmModel, connectModel).getActiveConfiguration() as VavAdvancedHybridAhuConfig
+        val systemEquip = hayStack.readEntity("system and equip and not modbus and not connectModule")
+        profileConfiguration = if (systemEquip["profile"].toString().contentEquals("dabAdvancedHybridAhuV2")) {
+            DabAdvancedHybridAhuConfig(cmModel, connectModel).getActiveConfiguration() as DabAdvancedHybridAhuConfig
         } else {
-            VavAdvancedHybridAhuConfig(cmModel, connectModel)
+            DabAdvancedHybridAhuConfig(cmModel, connectModel)
         }
-        viewState.value = VavAdvancedAhuState.fromProfileConfigToState(profileConfiguration as VavAdvancedHybridAhuConfig)
-        viewState.value.isSaveRequired = !systemEquip["profile"].toString().contentEquals("vavAdvancedHybridAhuV2")
+        viewState.value = DabAdvancedAhuState.fromProfileConfigToState(profileConfiguration as DabAdvancedHybridAhuConfig)
+        viewState.value.isSaveRequired = !systemEquip["profile"].toString().contentEquals("dabAdvancedHybridAhuV2")
     }
-
 }
-
-

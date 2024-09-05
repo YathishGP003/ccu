@@ -91,6 +91,9 @@ object ModelCache {
 
         modelContainer[MODEL_HYPERSTAT_SPLIT_DEVICE] = getModelById(MODEL_HYPERSTAT_SPLIT_DEVICE)
         CcuLog.i(Domain.LOG_TAG, "hyperstat split device model loaded")
+
+        modelContainer[MODEL_CONNECT_DEVICE] = getModelById(MODEL_CONNECT_DEVICE)
+        CcuLog.i(Domain.LOG_TAG, "cmBoardDevice loaded")
     }
     
     private fun loadVavZoneEquipModels() {
@@ -147,6 +150,13 @@ object ModelCache {
 
         modelContainer[MODEL_VAV_ADVANCED_AHU_V2_CONNECT] = getModelById(
             MODEL_VAV_ADVANCED_AHU_V2_CONNECT)
+        CcuLog.i(Domain.LOG_TAG, "MODEL_VAV_ADVANCED_AHU_V2_CONNECT model loaded")
+
+        modelContainer[MODEL_DAB_ADVANCED_AHU_V2_CM] = getModelById(MODEL_DAB_ADVANCED_AHU_V2_CM)
+        CcuLog.i(Domain.LOG_TAG, "MODEL_VAV_ADVANCED_AHU_V2 model loaded")
+
+        modelContainer[MODEL_DAB_ADVANCED_AHU_V2_CONNECT] = getModelById(
+                MODEL_DAB_ADVANCED_AHU_V2_CONNECT)
         CcuLog.i(Domain.LOG_TAG, "MODEL_VAV_ADVANCED_AHU_V2_CONNECT model loaded")
     }
 

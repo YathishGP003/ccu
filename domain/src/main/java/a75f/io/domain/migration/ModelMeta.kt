@@ -1,5 +1,32 @@
 package a75f.io.domain.migration
 
+import a75f.io.domain.util.MODEL_BUILDING_EQUIP
+import a75f.io.domain.util.MODEL_CM_DEVICE
+import a75f.io.domain.util.MODEL_CONNECT_DEVICE
+import a75f.io.domain.util.MODEL_DAB_ADVANCED_AHU_V2_CM
+import a75f.io.domain.util.MODEL_DAB_ADVANCED_AHU_V2_CONNECT
+import a75f.io.domain.util.MODEL_EXTERNAL_AHU_DAB
+import a75f.io.domain.util.MODEL_EXTERNAL_AHU_VAV
+import a75f.io.domain.util.MODEL_HELIO_NODE_DAB
+import a75f.io.domain.util.MODEL_HELIO_NODE_DEVICE
+import a75f.io.domain.util.MODEL_HN_VAV_ACB
+import a75f.io.domain.util.MODEL_HN_VAV_NO_FAN
+import a75f.io.domain.util.MODEL_HN_VAV_PARALLEL_FAN
+import a75f.io.domain.util.MODEL_HN_VAV_SERIES_FAN
+import a75f.io.domain.util.MODEL_HYPERSTAT_SPLIT_CPU
+import a75f.io.domain.util.MODEL_HYPERSTAT_SPLIT_DEVICE
+import a75f.io.domain.util.MODEL_SMART_NODE_DAB
+import a75f.io.domain.util.MODEL_SMART_NODE_DEVICE
+import a75f.io.domain.util.MODEL_SN_BYPASS_DAMPER
+import a75f.io.domain.util.MODEL_SN_VAV_ACB
+import a75f.io.domain.util.MODEL_SN_VAV_NO_FAN
+import a75f.io.domain.util.MODEL_SN_VAV_PARALLEL_FAN
+import a75f.io.domain.util.MODEL_SN_VAV_SERIES_FAN
+import a75f.io.domain.util.MODEL_VAV_ADVANCED_AHU_V2_CM
+import a75f.io.domain.util.MODEL_VAV_ADVANCED_AHU_V2_CONNECT
+import a75f.io.domain.util.MODEL_VAV_MODULATING_AHU
+import a75f.io.domain.util.MODEL_VAV_STAGED_RTU
+import a75f.io.domain.util.MODEL_VAV_STAGED_VFD_RTU
 import io.seventyfivef.domainmodeler.common.Version
 
 /**
@@ -12,3 +39,37 @@ const val MINOR = "minor"
 const val PATCH = "patch"
 const val ID = "id"
 const val MODEL_VERSION = "version"
+
+fun getRequiredModels(): List<String> {
+    return listOf(
+            MODEL_BUILDING_EQUIP,
+            MODEL_SN_VAV_NO_FAN,
+            MODEL_SN_VAV_SERIES_FAN,
+            MODEL_SN_VAV_PARALLEL_FAN,
+            MODEL_HN_VAV_NO_FAN,
+            MODEL_HN_VAV_SERIES_FAN,
+            MODEL_HN_VAV_PARALLEL_FAN,
+            MODEL_SN_VAV_ACB,
+            MODEL_HN_VAV_ACB,
+            MODEL_HYPERSTAT_SPLIT_CPU,
+            MODEL_SN_BYPASS_DAMPER,
+            MODEL_SMART_NODE_DEVICE,
+            MODEL_HELIO_NODE_DEVICE,
+            MODEL_HYPERSTAT_SPLIT_DEVICE,
+            MODEL_EXTERNAL_AHU_DAB,
+            MODEL_EXTERNAL_AHU_VAV,
+            MODEL_VAV_STAGED_RTU,
+            MODEL_VAV_STAGED_VFD_RTU,
+            MODEL_VAV_MODULATING_AHU,
+            MODEL_EXTERNAL_AHU_VAV,
+            MODEL_SMART_NODE_DAB,
+            MODEL_HELIO_NODE_DAB,
+            MODEL_VAV_MODULATING_AHU,
+            MODEL_VAV_ADVANCED_AHU_V2_CM,
+            MODEL_VAV_ADVANCED_AHU_V2_CONNECT,
+            MODEL_DAB_ADVANCED_AHU_V2_CM,
+            MODEL_DAB_ADVANCED_AHU_V2_CONNECT,
+            MODEL_CM_DEVICE,
+            MODEL_CONNECT_DEVICE
+    )
+}

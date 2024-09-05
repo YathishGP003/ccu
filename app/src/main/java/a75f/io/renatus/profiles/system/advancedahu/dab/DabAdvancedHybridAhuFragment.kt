@@ -1,7 +1,7 @@
-package a75f.io.renatus.profiles.system.advancedahu.vav
+package a75f.io.renatus.profiles.system.advancedahu.dab
 
 import a75f.io.api.haystack.CCUHsApi
-import a75f.io.logic.bo.building.system.vav.config.VavAdvancedHybridAhuConfig
+import a75f.io.logic.bo.building.system.dab.config.DabAdvancedHybridAhuConfig
 import a75f.io.renatus.composables.DeleteDialog
 import a75f.io.renatus.composables.SaveConfig
 import a75f.io.renatus.profiles.system.advancedahu.AdvancedHybridAhuFragment
@@ -22,21 +22,22 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /**
- * Created by Manjunath K on 14-03-2024.
+ * Created by Manjunath K on 19-05-2024.
  */
 
-class VavAdvancedHybridAhuFragment : AdvancedHybridAhuFragment() {
-    override val viewModel: VavAdvancedHybridAhuViewModel by viewModels()
+class DabAdvancedHybridAhuFragment : AdvancedHybridAhuFragment() {
+    override val viewModel: DabAdvancedHybridAhuViewModel by viewModels()
 
     companion object {
-        lateinit var instance: VavAdvancedHybridAhuFragment
+        lateinit var instance: DabAdvancedHybridAhuFragment
     }
     init {
         instance = this
     }
 
+
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
+            inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         val rootView = ComposeView(requireContext())
         viewLifecycleOwner.lifecycleScope.launch (highPriorityDispatcher) {
@@ -55,23 +56,17 @@ class VavAdvancedHybridAhuFragment : AdvancedHybridAhuFragment() {
         return rootView
     }
 
-
-
-
     @Composable
     fun RootView() {
         Column {
             if (viewModel.viewState.value.pendingDeleteConnect) {
-                DeleteDialog(
-                        onDismissRequest = { viewModel.viewState.value.pendingDeleteConnect = false },
-                        onConfirmation = {
-                            viewModel.viewState.value.isConnectEnabled = false
-                            viewModel.viewState.value.pendingDeleteConnect = false
-                            VavAdvancedAhuState.connectConfigToState(viewModel.profileConfiguration as VavAdvancedHybridAhuConfig, viewModel.viewState.value)
-                        },
-                        toDelete = "Connect Module 1"
-                )
+                DeleteDialog(onDismissRequest = { viewModel.viewState.value.pendingDeleteConnect = false }, onConfirmation = {
+                    viewModel.viewState.value.isConnectEnabled = false
+                    viewModel.viewState.value.pendingDeleteConnect = false
+                    DabAdvancedAhuState.connectConfigToState(viewModel.profileConfiguration as DabAdvancedHybridAhuConfig, viewModel.viewState.value)
+                }, toDelete = "Connect Module 1")
             }
+
 
             LazyColumn {
                 item { TitleLabel() }
@@ -96,4 +91,5 @@ class VavAdvancedHybridAhuFragment : AdvancedHybridAhuFragment() {
             }
         }
     }
+
 }

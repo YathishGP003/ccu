@@ -115,7 +115,7 @@ public class DefaultSystem extends SystemProfile
     
     @Override
     public void deleteSystemEquip() {
-        HashMap equip = CCUHsApi.getInstance().read("equip and system and not modbus");
+        HashMap equip = CCUHsApi.getInstance().read("system and equip and not modbus and not connectModule");
         if (equip.get("profile").equals(ProfileType.SYSTEM_DEFAULT.name())) {
             CCUHsApi.getInstance().deleteEntityTree(equip.get("id").toString());
         }

@@ -1,45 +1,26 @@
 package a75f.io.renatus.schedules;
 
-import static a75f.io.api.haystack.util.TimeUtil.getEndTimeHr;
-import static a75f.io.api.haystack.util.TimeUtil.getEndTimeMin;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusRelative;
 import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
 import static a75f.io.renatus.schedules.ScheduleUtil.disconnectedIntervals;
 
-import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.graphics.Typeface;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
-import android.text.Html;
-import android.util.TypedValue;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.Space;
 import android.widget.TextView;
 
-import androidx.appcompat.content.res.AppCompatResources;
-import androidx.appcompat.widget.AppCompatImageView;
-import androidx.appcompat.widget.AppCompatTextView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
-import androidx.core.view.ViewCompat;
 import androidx.core.widget.NestedScrollView;
-import androidx.core.widget.TextViewCompat;
 import androidx.fragment.app.DialogFragment;
-import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
-import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
@@ -54,15 +35,14 @@ import java.util.Objects;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.DAYS;
 import a75f.io.api.haystack.HSUtil;
-import a75f.io.api.haystack.MockTime;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Zone;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.schedule.ScheduleGroup;
 import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.renatus.R;
-import a75f.io.renatus.util.FontManager;
 import a75f.io.renatus.views.MasterControl.MasterControlUtil;
 
 public class NamedSchedule extends DialogFragment {
@@ -71,57 +51,20 @@ public class NamedSchedule extends DialogFragment {
     private static final String PARAM_SCHED_NAME = "PARAM_SCHED_NAME";
     private static final String PARAM_SCHED_SET = "PARAM_SCHED_SET";
     private static final String TAG = "NAMED_SCHEDULE";
-
-    TextView textViewMonday;
-    TextView textViewTuesday;
-    TextView textViewWednesday;
-    TextView textViewThursday;
-    TextView textViewFriday;
-    TextView textViewSaturday;
-    TextView textViewSunday;
-    View view00;
-    View view02;
-    View view04;
-    View view06;
-    View view08;
-    View view10;
-    View view12;
-    View view14;
-    View view16;
-    View view18;
-    View view20;
-    View view22;
-    View view24;
-    View view01;
-    View view03;
-    View view05;
-    View view07;
-    View view09;
-    View view11;
-    View view13;
-    View view15;
-    View view17;
-    View view19;
-    View view21;
-    View view23;
-    private Drawable mDrawableBreakLineLeft;
-    private Drawable mDrawableBreakLineRight;
     TextView textViewScheduletitle;
+    TextView scheduleGroupTitle;
     Schedule schedule;
     ConstraintLayout constraintScheduler;
-    ArrayList<View> viewTimeLines;
-    String mScheduleId;
     String colorMinTemp = "";
     String colorMaxTemp = "";
     NestedScrollView scheduleScrollView;
-    private float mPixelsBetweenAnHour;
-    private float mPixelsBetweenADay;
     private OnExitListener mOnExitListener;
     private OnCancelButtonClickListener OnCancel;
     Button setButton;
     Button cancelButton;
     ImageView closeButton;
     private boolean NamedScheduleScreenCheck = false;
+    private String mScheduleId;
 
     @Override
     public void onStop() {
@@ -130,7 +73,7 @@ public class NamedSchedule extends DialogFragment {
 
     }
 
-    public void setOnExitListener(NamedSchedule.OnExitListener onExitListener) {
+    public void setOnExitListener(OnExitListener onExitListener) {
         this.mOnExitListener = onExitListener;
 
     }
@@ -173,8 +116,7 @@ public class NamedSchedule extends DialogFragment {
 
         if (dialog != null) {
             int width = 1165;
-            int height = 646;
-            Objects.requireNonNull(dialog.getWindow()).setLayout(width, height);
+            Objects.requireNonNull(dialog.getWindow()).setLayout(width, ViewGroup.LayoutParams.WRAP_CONTENT);
         }
     }
 
@@ -182,6 +124,7 @@ public class NamedSchedule extends DialogFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.named_schedule_preview, container, false);
         initialiseViews(rootView);
+        loadSchedule();
 
         setButton = rootView.findViewById(R.id.setButton);
         closeButton = rootView.findViewById(R.id.btnCloseNamed);
@@ -198,7 +141,7 @@ public class NamedSchedule extends DialogFragment {
             closeButton.setVisibility(View.VISIBLE);
             closeButton.setOnClickListener(view -> dismiss());
         }
-
+        prepareNamedScheduleLayout();
         setButton.setOnClickListener(v -> {
             NamedScheduleScreenCheck = true;
             if (validateNamedSchedule()) {
@@ -235,101 +178,59 @@ public class NamedSchedule extends DialogFragment {
             }
         });
 
-        ViewTreeObserver vto = constraintScheduler.getViewTreeObserver();
-        vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            @Override
-            public void onGlobalLayout() {
-                constraintScheduler.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                View viewHourOne = viewTimeLines.get(1);
-                View viewHourTwo = viewTimeLines.get(2);
-                mPixelsBetweenAnHour = viewHourTwo.getX() - viewHourOne.getX();
-                mPixelsBetweenADay = (float) constraintScheduler.getHeight() / 7;
-                mPixelsBetweenADay = mPixelsBetweenADay - (mPixelsBetweenADay * .2f);
-                if (mPixelsBetweenAnHour == 0) throw new NullPointerException();
-                loadSchedule();
-                drawCurrentTime();
-            }
-        });
         return rootView;
+    }
+
+    private void prepareNamedScheduleLayout() {
+        ScheduleGroupFragment scheduleGroupFragment = new
+                ScheduleGroupFragment().showNamedSchedulePreviewLayout(
+                        CCUHsApi.getInstance().getScheduleById((getArguments()).getString(PARAM_SCHEDULE_ID)));
+        FragmentTransaction fragmentTransaction = getChildFragmentManager().beginTransaction();
+        fragmentTransaction.replace(R.id.namedScheduleLayout, scheduleGroupFragment).commit();
     }
 
     private void initialiseViews(View rootView) {
         constraintScheduler = rootView.findViewById(R.id.constraintLt_Scheduler);
         textViewScheduletitle = rootView.findViewById(R.id.scheduleTitle);
+        scheduleGroupTitle = rootView.findViewById(R.id.namedScheduleGroupTitle);
         scheduleScrollView = rootView.findViewById(R.id.scheduleScrollView);
         scheduleScrollView.post(() -> scheduleScrollView.smoothScrollTo(0, 0));
-        mDrawableBreakLineLeft = AppCompatResources.getDrawable(requireContext(), R.drawable.ic_break_line_left_svg);
-        mDrawableBreakLineRight = AppCompatResources.getDrawable(requireContext(), R.drawable.ic_break_line_right_svg);
-        textViewMonday = rootView.findViewById(R.id.textViewMonday);
-        textViewTuesday = rootView.findViewById(R.id.textViewTuesday);
-        textViewWednesday = rootView.findViewById(R.id.textViewWednesday);
-        textViewThursday = rootView.findViewById(R.id.textViewThursday);
-        textViewFriday = rootView.findViewById(R.id.textViewFriday);
-        textViewSaturday = rootView.findViewById(R.id.textViewSaturday);
-        textViewSunday = rootView.findViewById(R.id.textViewSunday);
-
-        //Time lines with 2 hrs Interval 00:00 to 24:00
-        view00 = rootView.findViewById(R.id.view00);
-        view02 = rootView.findViewById(R.id.view02);
-        view04 = rootView.findViewById(R.id.view04);
-        view06 = rootView.findViewById(R.id.view06);
-        view08 = rootView.findViewById(R.id.view08);
-        view10 = rootView.findViewById(R.id.view10);
-        view12 = rootView.findViewById(R.id.view12);
-        view14 = rootView.findViewById(R.id.view14);
-        view16 = rootView.findViewById(R.id.view16);
-        view18 = rootView.findViewById(R.id.view18);
-        view20 = rootView.findViewById(R.id.view20);
-        view22 = rootView.findViewById(R.id.view22);
-        view24 = rootView.findViewById(R.id.view24);
-
-        //Time lines with 1hr Inerval 00:00 to 24:00
-        view01 = rootView.findViewById(R.id.view01);
-        view03 = rootView.findViewById(R.id.view03);
-        view05 = rootView.findViewById(R.id.view05);
-        view07 = rootView.findViewById(R.id.view07);
-        view09 = rootView.findViewById(R.id.view09);
-        view11 = rootView.findViewById(R.id.view11);
-        view13 = rootView.findViewById(R.id.view13);
-        view15 = rootView.findViewById(R.id.view15);
-        view17 = rootView.findViewById(R.id.view17);
-        view19 = rootView.findViewById(R.id.view19);
-        view21 = rootView.findViewById(R.id.view21);
-        view23 = rootView.findViewById(R.id.view23);
-
-
-        //collecting each timeline to arraylist
-        viewTimeLines = new ArrayList<>();
-        viewTimeLines.add(view00);
-        viewTimeLines.add(view01);
-        viewTimeLines.add(view02);
-        viewTimeLines.add(view03);
-        viewTimeLines.add(view04);
-        viewTimeLines.add(view05);
-        viewTimeLines.add(view06);
-        viewTimeLines.add(view07);
-        viewTimeLines.add(view08);
-        viewTimeLines.add(view09);
-        viewTimeLines.add(view10);
-        viewTimeLines.add(view11);
-        viewTimeLines.add(view12);
-        viewTimeLines.add(view13);
-        viewTimeLines.add(view14);
-        viewTimeLines.add(view15);
-        viewTimeLines.add(view16);
-        viewTimeLines.add(view17);
-        viewTimeLines.add(view18);
-        viewTimeLines.add(view19);
-        viewTimeLines.add(view20);
-        viewTimeLines.add(view21);
-        viewTimeLines.add(view22);
-        viewTimeLines.add(view23);
-        viewTimeLines.add(view24);
 
         colorMinTemp = String.valueOf(ContextCompat.getColor(requireContext(), R.color.min_temp));
         colorMaxTemp = String.valueOf(ContextCompat.getColor(requireContext(), R.color.max_temp));
     }
+    private void loadSchedule() {
+        if (getArguments() != null && getArguments().containsKey(PARAM_SCHEDULE_ID)) {
+            mScheduleId = getArguments().getString(PARAM_SCHEDULE_ID);
+            schedule = CCUHsApi.getInstance().getScheduleById(mScheduleId);
+        } else {
+            schedule = CCUHsApi.getInstance().getSystemSchedule(false).get(0);
+            CcuLog.d(L.TAG_CCU_UI, " Loaded System Schedule - NamedSchedule " + schedule.toString());
+        }
+        CcuLog.d(TAG, "PARAM_SCHEDULE_ID " + mScheduleId);
+        String namedScheduleDis = getArguments().getString(PARAM_SCHED_NAME);
+        String title;
+        String scheduledName = getArguments().getString(PARAM_SCHED_NAME);
+        boolean isScheduledSet = getArguments().getBoolean(PARAM_SCHED_SET);
 
+        if (!isScheduledSet) {
+            if (scheduledName != null && namedScheduleDis != null && !namedScheduleDis.isEmpty() && namedScheduleDis.length() > 20) {
+                title = scheduledName.substring(0, 20) + "...";
+            } else {
+                title = scheduledName;
+            }
+        } else {
+            if (scheduledName != null && namedScheduleDis != null && namedScheduleDis.length() > 20) {
+                title = "Preview : " + scheduledName.substring(0, 20) + "...";
+            } else {
+                title = "Preview : " + scheduledName;
+            }
+        }
+
+        textViewScheduletitle.setText(title);
+        scheduleGroupTitle.setText(ScheduleGroup.values()[schedule.getScheduleGroup()].getGroup());
+
+    }
 
     private void separateOverNightSchedule(ArrayList<Interval> zoneIntervals) {
         for (int i = 0; i < zoneIntervals.size(); i++) {
@@ -347,7 +248,7 @@ public class NamedSchedule extends DialogFragment {
 
     private boolean validateNamedSchedule() {
         Schedule systemSchedule = CCUHsApi.getInstance().getSystemSchedule(false).get(0);
-        ArrayList<Interval> intervalSpills = new ArrayList<>();
+        List<List<CommonTimeSlotFinder.TimeSlot>> intervalSpills = new ArrayList<>();
         CCUHsApi hsApi = CCUHsApi.getInstance();
         ArrayList<Interval> systemIntervals = systemSchedule.getMergedIntervals();
         StringBuilder warningMessage = new StringBuilder("No such Schedule");
@@ -382,9 +283,8 @@ public class NamedSchedule extends DialogFragment {
                         systemIntervals.add(nextWeekDaySystemInterval);
                     }
                 }
-                updateIntervalSpills(intervalSpills, zoneIntervals, systemIntervals);
-                if (!intervalSpills.isEmpty()) {
-                    addIntervalSpillWarning(warningMessage, intervalSpills);
+                updateIntervalSpills(intervalSpills);
+                if (addIntervalSpillWarning(warningMessage, hsApi, namedSchedule)) {
                     isValid = false;
                 }
                 if (!deadbandValidation(roomRef, warningMessage, namedSchedule)) {
@@ -446,36 +346,31 @@ public class NamedSchedule extends DialogFragment {
         return true;
     }
 
-    private void addIntervalSpillWarning(StringBuilder warningMessage, ArrayList<Interval> intervalSpills) {
-        StringBuilder spillZones = new StringBuilder();
-        for (Interval i : intervalSpills) {
-            spillZones.append(ScheduleUtil.getDayString(i.getStart().getDayOfWeek())).append(" ").append("").append(i.getStart().hourOfDay().get()).append(":").append(i.getStart().minuteOfHour().get() == 0 ? "00" : i.getStart().minuteOfHour().get()).append(" - ").append(getEndTimeHr(i.getEnd().hourOfDay().get(), i.getEnd().minuteOfHour().get())).append(":").append(getEndTimeMin(i.getEnd().hourOfDay().get(), i.getEnd().minuteOfHour().get()) == 0 ? "00" : i.getEnd().minuteOfHour().get()).append(" \n");
+    private boolean addIntervalSpillWarning(StringBuilder warningMessage, CCUHsApi ccuHsApi, Schedule namedSchedule) {
+        CommonTimeSlotFinder commonTimeSlotFinder = new CommonTimeSlotFinder();
+        List<List<CommonTimeSlotFinder.TimeSlot>> commonIntervals = commonTimeSlotFinder.getCommonTimeSlot(
+                schedule.getScheduleGroup(),
+                ccuHsApi.getSystemSchedule(false).get(0).getDays(),
+                namedSchedule.getDays(),
+                false
+        );
 
+        List<List<CommonTimeSlotFinder.TimeSlot>> uncommonIntervals = commonTimeSlotFinder.getUnCommonTimeSlot(
+                schedule.getScheduleGroup(),
+                commonIntervals,
+                namedSchedule.getDays()
+        );
+        if (commonTimeSlotFinder.isUncommonIntervalsHasAnySpills(uncommonIntervals)) {
+            warningMessage.append(getText(R.string.warning_msg)).append("\n\t").
+                    append(commonTimeSlotFinder.getSpilledZones(namedSchedule, uncommonIntervals)).append("\n\n");
+            return true;
+        } else {
+            return false;
         }
-
-        warningMessage.append(getText(R.string.warning_msg)).append("\n\t").append(spillZones).append("\n\n");
     }
 
-    private void updateIntervalSpills(ArrayList<Interval> intervalSpills, ArrayList<Interval> zoneIntervals, ArrayList<Interval> systemIntervals) {
+    private void updateIntervalSpills(List<List<CommonTimeSlotFinder.TimeSlot>> intervalSpills) {
 
-        for (Interval z : zoneIntervals) {
-            boolean needToAdd = true;
-            for (Interval s : systemIntervals) {
-                if (s.contains(z)) {
-                    needToAdd = false;
-                    break;
-                } else if (s.overlaps(z)) {
-                    needToAdd = false;
-                    for (Interval i : disconnectedIntervals(systemIntervals, z)) {
-                        if (!intervalSpills.contains(i)) intervalSpills.add(i);
-                    }
-                }
-            }
-            if (needToAdd) {
-                intervalSpills.add(z);
-                CcuLog.d(TAG, " Zone Interval not contained " + z);
-            }
-        }
     }
 
     private boolean isValidDesiredTemp(StringBuilder desiredTempWarning, Schedule namedSchedule) {
@@ -502,18 +397,75 @@ public class NamedSchedule extends DialogFragment {
     }
 
     private boolean isValidUserLimit(StringBuilder userLimitWarning, Schedule namedSchedule) {
+        StringBuilder warningMessage = new StringBuilder();
+        boolean isValid = true;
+        String[] dayName = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
+
         for (Schedule.Days namedSchedDay : namedSchedule.getDays()) {
-            if (!(MasterControlUtil.validateNamed(namedSchedDay.getHeatingUserLimitMin(), namedSchedDay.getCoolingUserLimitMax(), namedSchedule.getUnoccupiedZoneSetback()))) {
-                String[] dayName = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
-                if (isCelsiusTunerAvailableStatus()) {
-                    userLimitWarning.append("\t\t").append(dayName[namedSchedDay.getDay()]).append("-").append(namedSchedDay.getSthh()).append(":").append(namedSchedDay.getStmm()).append("-").append(namedSchedDay.getEthh()).append(":").append(namedSchedDay.getEtmm()).append("(Heating User Limit Min  - ").append(fahrenheitToCelsius(namedSchedDay.getHeatingUserLimitMin())).append("°C").append("Cooling User Limit Max  - ").append(fahrenheitToCelsius(namedSchedDay.getCoolingUserLimitMax())).append("°C").append(")").append("\n\t\t");
-                } else {
-                    userLimitWarning.append("\t\t").append(dayName[namedSchedDay.getDay()]).append("-").append(namedSchedDay.getSthh()).append(":").append(namedSchedDay.getStmm()).append("-").append(namedSchedDay.getEthh()).append(":").append(namedSchedDay.getEtmm()).append("(Heating User Limit Min - ").append(namedSchedDay.getHeatingUserLimitMin()).append("°F").append("Cooling User Limit Max - ").append(namedSchedDay.getCoolingUserLimitMax()).append("°F").append(")").append("\n\t\t");
+            // Check if the day should be validated based on the schedule group
+            if (shouldValidateDay(namedSchedule.getScheduleGroup(), namedSchedDay.getDay())) {
+                if (!MasterControlUtil.validateNamed(
+                        namedSchedDay.getHeatingUserLimitMin(),
+                        namedSchedDay.getCoolingUserLimitMax(),
+                        namedSchedule.getUnoccupiedZoneSetback())) {
+
+                    isValid = false;
+                    String dayString = getDayString(namedSchedule.getScheduleGroup(), namedSchedDay.getDay(), dayName);
+                    appendWarningMessage(warningMessage, dayString, namedSchedDay, isCelsiusTunerAvailableStatus());
                 }
-                return false;
             }
         }
-        return true;
+
+        if (!isValid) {
+            userLimitWarning.append(warningMessage);
+        }
+
+        return isValid;
+    }
+
+    // Determine if the day should be validated based on the schedule group
+    private boolean shouldValidateDay(int scheduleGroup, int day) {
+        if(scheduleGroup == ScheduleGroup.EVERYDAY.ordinal()) {
+            return day == DAYS.MONDAY.ordinal();
+        } else if(scheduleGroup == ScheduleGroup.WEEKDAY_WEEKEND.ordinal()) {
+            return day == DAYS.MONDAY.ordinal() || day == DAYS.SATURDAY.ordinal();
+        } else if(scheduleGroup == ScheduleGroup.WEEKDAY_SATURDAY_SUNDAY.ordinal()) {
+            return day == DAYS.MONDAY.ordinal() || day == DAYS.SATURDAY.ordinal() || day == DAYS.SUNDAY.ordinal();
+        } else {
+            return true;
+        }
+    }
+
+    // Get the day string based on the schedule group
+    private String getDayString(int scheduleGroup, int day, String[] dayName) {
+        if (scheduleGroup == ScheduleGroup.EVERYDAY.ordinal()) {
+            return "AllDays";
+        } else if (scheduleGroup == ScheduleGroup.WEEKDAY_WEEKEND.ordinal()) {
+            return (day == DAYS.MONDAY.ordinal()) ? "Weekday" : "Weekend";
+        } else if (scheduleGroup == ScheduleGroup.WEEKDAY_SATURDAY_SUNDAY.ordinal()) {
+            return (day == DAYS.MONDAY.ordinal()) ? "Weekday" :
+                    (day == DAYS.SATURDAY.ordinal()) ? "Saturday" : "Weekend";
+        } else {
+            return dayName[day];
+        }
+    }
+
+    // Append the warning message based on the day and temperature settings
+    private void appendWarningMessage(StringBuilder warningMessage, String dayString, Schedule.Days namedSchedDay, boolean isCelsius) {
+        String timeRange = String.format("%02d:%02d-%02d:%02d",
+                namedSchedDay.getSthh(), namedSchedDay.getStmm(),
+                namedSchedDay.getEthh(), namedSchedDay.getEtmm());
+        if (isCelsius) {
+            warningMessage.append("\t\t").append(dayString).append("-").append(timeRange)
+                    .append("(Heating User Limit Min - ").append(fahrenheitToCelsius(namedSchedDay.getHeatingUserLimitMin())).append("°C")
+                    .append(" Cooling User Limit Max - ").append(fahrenheitToCelsius(namedSchedDay.getCoolingUserLimitMax())).append("°C)")
+                    .append("\n\t\t");
+        } else {
+            warningMessage.append("\t\t").append(dayString).append("-").append(timeRange)
+                    .append("(Heating User Limit Min - ").append(namedSchedDay.getHeatingUserLimitMin()).append("°F")
+                    .append(" Cooling User Limit Max - ").append(namedSchedDay.getCoolingUserLimitMax()).append("°F)")
+                    .append("\n\t\t");
+        }
     }
 
     private void invalidUserLimitError(StringBuilder warningMessage, StringBuilder userLimitWarning) {
@@ -525,18 +477,30 @@ public class NamedSchedule extends DialogFragment {
     }
 
     private boolean isDeadBandValid(StringBuilder deadBandWarningMsg, Schedule namedSchedule) {
+        StringBuilder warningMessage = new StringBuilder();
+        boolean isValid = true;
+        String[] dayName = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
+
         for (Schedule.Days namedSchedDay : namedSchedule.getDays()) {
-            if (!MasterControlUtil.validateNamedDeadBand(namedSchedDay.getHeatingUserLimitMin(), namedSchedDay.getHeatingUserLimitMax(), namedSchedDay.getCoolingUserLimitMin(), namedSchedDay.getCoolingUserLimitMax(), namedSchedDay.getHeatingDeadBand(), namedSchedDay.getCoolingDeadBand())) {
-                String[] dayName = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
-                if (isCelsiusTunerAvailableStatus()) {
-                    deadBandWarningMsg.append("\t\t").append(dayName[namedSchedDay.getDay()]).append("-").append(namedSchedDay.getSthh()).append(":").append(namedSchedDay.getStmm()).append("-").append(namedSchedDay.getEthh()).append(":").append(namedSchedDay.getEtmm()).append("(Heating Lim Min|Max - ").append(fahrenheitToCelsius(namedSchedDay.getHeatingUserLimitMin())).append("°C").append("|").append(fahrenheitToCelsius(namedSchedDay.getHeatingUserLimitMax())).append("°C").append(";").append("\nCooling Lim Min|Max- ").append(fahrenheitToCelsius(namedSchedDay.getCoolingUserLimitMin())).append("°C").append("|").append(fahrenheitToCelsius(namedSchedDay.getCoolingUserLimitMax())).append("°C").append(")").append("\nCooling deadBand- ").append(fahrenheitToCelsius(namedSchedDay.getCoolingDeadBand())).append("°C").append(" Heating deadBand- ").append(fahrenheitToCelsius(namedSchedDay.getHeatingDeadBand())).append("°C").append("\n\t\t");
-                } else {
-                    deadBandWarningMsg.append("\t\t").append(dayName[namedSchedDay.getDay()]).append("-").append(namedSchedDay.getSthh()).append(":").append(namedSchedDay.getStmm()).append("-").append(namedSchedDay.getEthh()).append(":").append(namedSchedDay.getEtmm()).append("( Heating Lim Min|Max - ").append(namedSchedDay.getHeatingUserLimitMin()).append("°F").append("|").append(namedSchedDay.getHeatingUserLimitMax()).append("°F").append(";").append("\nCooling Lim Min|Max- ").append(namedSchedDay.getHeatingUserLimitMin()).append("°F").append("|").append(namedSchedDay.getCoolingUserLimitMax()).append("°F").append("\nCooling deadBand- ").append(namedSchedDay.getCoolingDeadBand()).append("°F").append("  Heating deadBand- ").append(namedSchedDay.getHeatingDeadBand()).append("°F").append("|").append(namedSchedDay.getCoolingUserLimitMax()).append("°F").append(")").append("\n\t\t");
+            // Check if the day should be validated based on the schedule group
+            if (shouldValidateDay(namedSchedule.getScheduleGroup(), namedSchedDay.getDay())) {
+                if (!MasterControlUtil.validateNamedDeadBand(namedSchedDay.getHeatingUserLimitMin(),
+                        namedSchedDay.getHeatingUserLimitMax(), namedSchedDay.getCoolingUserLimitMin(),
+                        namedSchedDay.getCoolingUserLimitMax(), namedSchedDay.getHeatingDeadBand(),
+                        namedSchedDay.getCoolingDeadBand())) {
+
+                    isValid = false;
+                    String dayString = getDayString(namedSchedule.getScheduleGroup(), namedSchedDay.getDay(), dayName);
+                    appendWarningMessage(warningMessage, dayString, namedSchedDay, isCelsiusTunerAvailableStatus());
                 }
-                return false;
             }
         }
-        return true;
+
+        if (!isValid) {
+            deadBandWarningMsg.append(warningMessage);
+        }
+
+        return isValid;
     }
 
     private void invalidDeadBandError(StringBuilder warningMessage, StringBuilder deadBandWarning) {
@@ -548,7 +512,7 @@ public class NamedSchedule extends DialogFragment {
     }
 
     private void showWarningMessage(StringBuilder warningMessage) {
-        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(getActivity());
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setMessage(warningMessage.toString())
                 .setCancelable(false)
                 .setTitle(R.string.warning_ns)
@@ -557,244 +521,6 @@ public class NamedSchedule extends DialogFragment {
         builder.create().show();
     }
 
-    private void loadSchedule() {
-        if (getArguments() != null && getArguments().containsKey(PARAM_SCHEDULE_ID)) {
-            mScheduleId = getArguments().getString(PARAM_SCHEDULE_ID);
-            schedule = CCUHsApi.getInstance().getScheduleById(mScheduleId);
-        } else {
-            schedule = CCUHsApi.getInstance().getSystemSchedule(false).get(0);
-            CcuLog.d(L.TAG_CCU_UI, " Loaded System Schedule - NamedSchedule " + schedule.toString());
-        }
-        CcuLog.d(TAG, "PARAM_SCHEDULE_ID " + mScheduleId);
-        String namedScheduleDis = getArguments().getString(PARAM_SCHED_NAME);
-        String title;
-        String scheduledName = getArguments().getString(PARAM_SCHED_NAME);
-        boolean isScheduledSet = getArguments().getBoolean(PARAM_SCHED_SET);
-
-        if (!isScheduledSet) {
-            if (scheduledName != null && namedScheduleDis != null && !namedScheduleDis.isEmpty() && namedScheduleDis.length() > 20) {
-                title = scheduledName.substring(0, 20) + "...";
-            } else {
-                title = scheduledName;
-            }
-        } else {
-            if (scheduledName != null && namedScheduleDis != null && namedScheduleDis.length() > 20) {
-                title = "Preview : " + scheduledName.substring(0, 20) + "...";
-            } else {
-                title = "Preview : " + scheduledName;
-            }
-        }
-
-        textViewScheduletitle.setText(title);
-        updateUI();
-    }
-
-    private void updateUI() {
-        schedule.populateIntersections();
-
-        new Handler(Looper.getMainLooper()).post(() -> {
-
-            hasTextViewChildren();
-            ArrayList<Schedule.Days> days = schedule.getDays();
-            days.sort(Comparator.comparingInt(Schedule.Days::getSthh));
-            days.sort(Comparator.comparingInt(Schedule.Days::getDay));
-
-            for (int i = 0; i < 7; i++) {
-                drawSchedule(i, 0, 0, 0, 23, 0, 59, DAYS.values()[i], false, false);
-            }
-
-            for (int i = 0; i < days.size(); i++) {
-                Schedule.Days daysElement = days.get(i);
-                drawSchedule(i, daysElement.getCoolingVal(), daysElement.getHeatingVal(), daysElement.getSthh(), daysElement.getEthh(), daysElement.getStmm(), daysElement.getEtmm(), DAYS.values()[daysElement.getDay()], daysElement.isIntersection(), true);
-            }
-        });
-    }
-
-    private void hasTextViewChildren() {
-        for (int i = constraintScheduler.getChildCount() - 1; i >= 0; i--) {
-            if (constraintScheduler.getChildAt(i).getTag() != null)
-                constraintScheduler.removeViewAt(i);
-        }
-    }
-
-    @SuppressLint("LogNotTimber")
-    private void drawCurrentTime() {
-        DateTime now = new DateTime(MockTime.getInstance().getMockTime());
-        DAYS day = DAYS.values()[now.getDayOfWeek() - 1];
-        CcuLog.i(L.TAG_CCU_SCHEDULER, "DAY: " + day.toString());
-        int hh = now.getHourOfDay();
-        int mm = now.getMinuteOfHour();
-        AppCompatImageView imageView = new AppCompatImageView(requireActivity());
-        imageView.setImageResource(R.drawable.ic_time_marker_svg);
-        imageView.setId(View.generateViewId());
-        imageView.setScaleType(ImageView.ScaleType.FIT_XY);
-        ConstraintLayout.LayoutParams lp = new ConstraintLayout.LayoutParams(0, (int) mPixelsBetweenADay);
-        lp.bottomToBottom = getTextViewFromDay(day).getId();
-        lp.topToTop = getTextViewFromDay(day).getId();
-        lp.startToStart = viewTimeLines.get(hh).getId();
-        lp.leftMargin = (int) ((mm / 60.0) * mPixelsBetweenAnHour);
-        constraintScheduler.addView(imageView, lp);
-    }
-
-    private void drawScheduleBlock(int position, String strminTemp, String strmaxTemp, Typeface typeface, int tempStartTime, int tempEndTime, int startTimeMM, int endTimeMM, TextView textView, boolean leftBreak, boolean rightBreak, boolean intersection, boolean isOccupied) {
-
-        CcuLog.i(TAG, "position: " + position + " tempStartTime: " + tempStartTime + " tempEndTime: " + tempEndTime + " startTimeMM: " + startTimeMM + " endTimeMM " + endTimeMM);
-
-        if (getContext() == null) return;
-        AppCompatTextView textViewTemp = new AppCompatTextView(getContext());
-
-        textViewTemp.setGravity(Gravity.CENTER_HORIZONTAL);
-        String celsiusUnitMin = FontManager.getColoredSpanned("°C", colorMinTemp);
-        String celsiusUnitMax = FontManager.getColoredSpanned("°C", colorMaxTemp);
-        String farenUnitMin = FontManager.getColoredSpanned("°F", colorMinTemp);
-        String farenUnitMax = FontManager.getColoredSpanned("°F", colorMaxTemp);
-        if (isOccupied) {
-            if (isCelsiusTunerAvailableStatus()) {
-                textViewTemp.setText(Html.fromHtml(strminTemp + celsiusUnitMin + " " + strmaxTemp + celsiusUnitMax, Html.FROM_HTML_MODE_LEGACY));
-            } else {
-                textViewTemp.setText(Html.fromHtml(strminTemp + farenUnitMin + " " + strmaxTemp + farenUnitMax, Html.FROM_HTML_MODE_LEGACY));
-            }
-        }
-        if (typeface != null) textViewTemp.setTypeface(typeface);
-        TextViewCompat.setAutoSizeTextTypeWithDefaults(textViewTemp, TextViewCompat.AUTO_SIZE_TEXT_TYPE_UNIFORM);
-        textViewTemp.setMaxLines(2);
-        textViewTemp.setContentDescription(textView.getText().toString() + "_" + tempStartTime + ":" + startTimeMM + "-" + tempEndTime + ":" + endTimeMM);
-        textViewTemp.setId(ViewCompat.generateViewId());
-        textViewTemp.setTag(position);
-
-        ConstraintLayout.LayoutParams lp = new ConstraintLayout.LayoutParams(0, (int) mPixelsBetweenADay);
-        lp.baselineToBaseline = textView.getId();
-
-
-        int leftMargin = startTimeMM > 0 ? (int) ((startTimeMM / 60.0) * mPixelsBetweenAnHour) : lp.leftMargin;
-        int rightMargin = endTimeMM > 0 ? (int) (((60 - endTimeMM) / 60.0) * mPixelsBetweenAnHour) : lp.rightMargin;
-
-        lp.leftMargin = leftMargin;
-        lp.rightMargin = rightMargin;
-        Drawable drawableCompat;
-        if (leftBreak) {
-            drawableCompat = ContextCompat.getDrawable(requireContext(), R.drawable.occupancy_background_left);
-            if (intersection) {
-                Drawable rightGreyBar = ContextCompat.getDrawable(requireContext(), R.drawable.vline);
-                if (isOccupied)
-                    textViewTemp.setCompoundDrawablesWithIntrinsicBounds(mDrawableBreakLineLeft, null, rightGreyBar, null);
-            } else if (isOccupied)
-                textViewTemp.setCompoundDrawablesWithIntrinsicBounds(mDrawableBreakLineLeft, null, null, null);
-            Space space = new Space(getActivity());
-            space.setId(View.generateViewId());
-            float px = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4, getResources().getDisplayMetrics());
-            ConstraintLayout.LayoutParams spaceLP = new ConstraintLayout.LayoutParams((int) px, 10);
-            spaceLP.rightToLeft = viewTimeLines.get(tempStartTime).getId();
-            constraintScheduler.addView(space, spaceLP);
-            if (endTimeMM > 0) tempEndTime++;
-            lp.startToStart = space.getId();
-            lp.endToEnd = viewTimeLines.get(tempEndTime).getId();
-        } else if (rightBreak) {
-            drawableCompat = ContextCompat.getDrawable(requireContext(), R.drawable.occupancy_background_left);
-            if (isOccupied)
-                textViewTemp.setCompoundDrawablesWithIntrinsicBounds(null, null, mDrawableBreakLineRight, null);
-            Space space = new Space(getActivity());
-            space.setId(View.generateViewId());
-            float px = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4, getResources().getDisplayMetrics());
-            ConstraintLayout.LayoutParams spaceLP = new ConstraintLayout.LayoutParams((int) px, 10);
-            spaceLP.leftToRight = viewTimeLines.get(tempEndTime).getId();
-            constraintScheduler.addView(space, spaceLP);
-            lp.startToStart = viewTimeLines.get(tempStartTime).getId();
-            lp.endToEnd = space.getId();
-        } else {
-            if (intersection) {
-                Drawable rightGreyBar = ContextCompat.getDrawable(requireContext(), R.drawable.vline);
-                textViewTemp.setCompoundDrawablesWithIntrinsicBounds(null, null, rightGreyBar, null);
-            }
-            drawableCompat = ContextCompat.getDrawable(requireContext(), isOccupied ? R.drawable.occupancy_background_left : R.drawable.occupancy_background_unoccupied);
-            if (endTimeMM > 0) tempEndTime++;
-            lp.startToStart = viewTimeLines.get(tempStartTime).getId();
-            lp.endToEnd = viewTimeLines.get(tempEndTime).getId();
-        }
-
-        textViewTemp.setBackground(drawableCompat);
-        constraintScheduler.addView(textViewTemp, lp);
-
-
-        textViewTemp.setOnClickListener(v -> {
-            if (!isOccupied) {
-                FragmentTransaction fragmentTransaction = getChildFragmentManager().beginTransaction();
-                NamedScheduleUnoccupiedDailog namedScheduleUnoccupiedDailog = NamedScheduleUnoccupiedDailog.newInstance(mScheduleId, (int) v.getTag());
-                namedScheduleUnoccupiedDailog.show(fragmentTransaction, "popup");
-
-            } else {
-                // force refresh schedule
-                if (mScheduleId != null) {
-                    schedule = CCUHsApi.getInstance().getScheduleById(mScheduleId);
-                    ArrayList<Schedule.Days> days = schedule.getDays();
-                    FragmentTransaction fragmentTransaction = getChildFragmentManager().beginTransaction();
-                    Fragment namedSchedulefragment = getChildFragmentManager().findFragmentByTag("popup");
-                    if (namedSchedulefragment != null) {
-                        fragmentTransaction.remove(namedSchedulefragment);
-                    }
-                    NamedScheduleDialogFragment namedScheduleDialogFragment = NamedScheduleDialogFragment.newInstance(mScheduleId, (int) v.getTag());
-                    namedScheduleDialogFragment.show(fragmentTransaction, "popup");
-                    try {
-                        days.sort(Comparator.comparingInt(Schedule.Days::getSthh));
-                        days.sort(Comparator.comparingInt(Schedule.Days::getDay));
-                    } catch (ArrayIndexOutOfBoundsException e) {
-                        CcuLog.e(L.TAG_CCU_SCHEDULER, e.getMessage());
-                    }
-                }
-            }
-        });
-
-    }
-
-
-    private TextView getTextViewFromDay(DAYS day) {
-        switch (day) {
-            case MONDAY:
-                return textViewMonday;
-
-            case TUESDAY:
-                return textViewTuesday;
-
-            case WEDNESDAY:
-                return textViewWednesday;
-
-            case THURSDAY:
-                return textViewThursday;
-
-            case FRIDAY:
-                return textViewFriday;
-
-            case SATURDAY:
-                return textViewSaturday;
-
-            default:
-                return textViewSunday;
-        }
-    }
-
-
-    private void drawSchedule(int position, double heatingTemp, double coolingTemp, int startTimeHH, int endTimeHH, int startTimeMM, int endTimeMM, DAYS day, boolean intersection, boolean isOccupied) {
-        if (isCelsiusTunerAvailableStatus()) {
-            coolingTemp = (fahrenheitToCelsius(coolingTemp));
-            heatingTemp = (fahrenheitToCelsius(heatingTemp));
-        }
-        String strminTemp = FontManager.getColoredSpanned(Double.toString(coolingTemp), colorMinTemp);
-        String strmaxTemp = FontManager.getColoredSpanned(Double.toString(heatingTemp), colorMaxTemp);
-
-        Typeface typeface = Typeface.DEFAULT;
-        try {
-            typeface = Typeface.createFromAsset(requireActivity().getAssets(), "fonts/lato_regular.ttf");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        if (startTimeHH > endTimeHH || (startTimeHH == endTimeHH && startTimeMM > endTimeMM)) {
-            drawScheduleBlock(position, strminTemp, strmaxTemp, typeface, startTimeHH, 24, startTimeMM, 0, getTextViewFromDay(day), false, true, intersection, isOccupied);
-            drawScheduleBlock(position, strminTemp, strmaxTemp, typeface, 0, endTimeHH, 0, endTimeMM, getTextViewFromDay(day.getNextDay()), true, false, intersection, isOccupied);
-        } else {
-            drawScheduleBlock(position, strminTemp, strmaxTemp, typeface, startTimeHH, endTimeHH, startTimeMM, endTimeMM, getTextViewFromDay(day), false, false, intersection, isOccupied);
-        }
-    }
 
     @Override
     public void onDestroy() {

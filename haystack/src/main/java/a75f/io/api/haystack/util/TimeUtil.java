@@ -3,6 +3,7 @@ package a75f.io.api.haystack.util;
 import org.projecthaystack.HDateTime;
 import org.projecthaystack.ParseException;
 
+import a75f.io.api.haystack.DAYS;
 import a75f.io.logger.CcuLog;
 
 
@@ -95,4 +96,17 @@ public class TimeUtil {
         }
         return dateTimeInMillis;
     }
+
+    public static boolean isCurrentDayWeekDay(int day) {
+        return day == DAYS.MONDAY.ordinal() || day == DAYS.TUESDAY.ordinal() ||
+                day == DAYS.WEDNESDAY.ordinal() || day == DAYS.THURSDAY.ordinal() ||
+                day == DAYS.FRIDAY.ordinal();
+    }
+    public static boolean isCurrentDaySaturday(int day) {
+        return day == DAYS.SATURDAY.ordinal();
+    }
+    public static boolean isCurrentDaySunday(int day) {
+        return day == DAYS.SUNDAY.ordinal();
+    }
+
 }

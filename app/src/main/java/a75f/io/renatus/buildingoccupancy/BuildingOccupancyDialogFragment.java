@@ -69,7 +69,7 @@ public class BuildingOccupancyDialogFragment extends DialogFragment {
     public interface BuildingOccupancyDialogListener{
         void onClickCancel();
         boolean onClickSave(int position, int startTimeHour, int endTimeHour, int startTimeMinute, int endTimeMinute,
-                            ArrayList<DAYS> days);
+                            ArrayList<DAYS> days, boolean isDelete);
     }
 
     private BuildingOccupancyDialogListener buildingOccupancyDialogListener;
@@ -264,7 +264,7 @@ public class BuildingOccupancyDialogFragment extends DialogFragment {
             }
 
             if (!buildingOccupancyDialogListener.onClickSave(mDay == null ? NO_REPLACE : mPosition, startHour, endHour,
-                    startMinutes, endMinutes, days)) {
+                    startMinutes, endMinutes, days, false)) {
                 return;
             }
 
@@ -311,7 +311,8 @@ public class BuildingOccupancyDialogFragment extends DialogFragment {
         alertDialog.findViewById(R.id.btnCancel).setOnClickListener(view -> alertDialog.dismiss());
         alertDialog.findViewById(R.id.btnProceed).setOnClickListener(view -> {
             ProgressDialogUtils.showProgressDialog(getActivity(),"Deleting schedule...");
-            buildingOccupancyDialogListener.onClickSave(mPosition, 0, 0, 0, 0, null);
+            buildingOccupancyDialogListener.onClickSave(mPosition, 0, 0,
+                    0, 0, null, true);
             alertDialog.dismiss();
             dismiss();
         });

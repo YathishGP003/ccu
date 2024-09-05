@@ -53,13 +53,14 @@ import a75f.io.renatus.R;
 import a75f.io.renatus.buildingoccupancy.BuildingOccupancyDialogFragment.BuildingOccupancyDialogListener;
 import a75f.io.renatus.buildingoccupancy.viewmodels.BuildingOccupancyViewModel;
 import a75f.io.renatus.schedules.ManualSchedulerDialogFragment;
-import a75f.io.renatus.schedules.ScheduleUtil;
+import a75f.io.renatus.schedules.ScheduleImpactDialogFragment;
 import a75f.io.renatus.util.NetworkUtil;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.util.RxjavaUtil;
 
 
-public class BuildingOccupancyFragment extends DialogFragment implements BuildingOccupancyDialogListener, BuildingOccupancyListener {
+public class BuildingOccupancyFragment extends DialogFragment implements BuildingOccupancyDialogListener,
+        BuildingOccupancyListener, ScheduleImpactDialogFragment.BuildingOccupancyDialogListener{
 
 
     private TextView addEntry;
@@ -82,7 +83,8 @@ public class BuildingOccupancyFragment extends DialogFragment implements Buildin
 
     private BuildingOccupancy buildingOccupancy;
     private BuildingOccupancyViewModel buildingOccupancyViewModel;
-    String errorMessage;
+    List<ScheduleImpactDialogFragment.ScheduleImpact> scheduleImpacts = new ArrayList<>();
+    List<BuildingOccupancy.Days> daysList;
     AlertDialog alert;
 
 
@@ -211,14 +213,19 @@ public class BuildingOccupancyFragment extends DialogFragment implements Buildin
         buildingOccupancy = CCUHsApi.getInstance().getBuildingOccupancy();
         drawBuildingOccupancy();
     }
-
-    BuildingOccupancy.Days removeEntry = null;
+    private void showScheduleImpactDialogFragment(List<ScheduleImpactDialogFragment.ScheduleImpact> scheduleImpacts) {
+        ScheduleImpactDialogFragment dialogFragment = new ScheduleImpactDialogFragment(scheduleImpacts, this);
+        dialogFragment.show(getChildFragmentManager(), "dialog");
+    }
+    BuildingOccupancy.Days removeEntry;
+    Integer position;
     public boolean onClickSave(int position, int startTimeHour, int endTimeHour, int startTimeMinute, int endTimeMinute,
-                               ArrayList<DAYS> days){
+                               ArrayList<DAYS> days, boolean isDelete) {
+        this.position = position;
 
         boolean isCloudConnected = CCUHsApi.getInstance().readHisValByQuery("cloud and connected and diag and point") > 0;
 
-        if( (!NetworkUtil.isNetworkConnected(getActivity()) || !isCloudConnected ) && !OfflineModeUtilKt.isOfflineMode()){
+        if ((!NetworkUtil.isNetworkConnected(getActivity()) || !isCloudConnected) && !OfflineModeUtilKt.isOfflineMode()) {
             Toast.makeText(getActivity(), "Building Occupancy cannot be edited when CCU is offline. Please " +
                     "connect to network.", Toast.LENGTH_LONG).show();
             return false;
@@ -239,12 +246,12 @@ public class BuildingOccupancyFragment extends DialogFragment implements Buildin
             removeEntry = null;
         }
 
-        CcuLog.d(L.TAG_CCU_UI," onClickSave "+"startTime "+startTimeHour+":"+startTimeMinute+" endTime "+endTimeHour+":"+endTimeMinute+" removeEntry "+removeEntry);
+        CcuLog.d(L.TAG_CCU_UI, " onClickSave " + "startTime " + startTimeHour + ":" + startTimeMinute + " endTime " + endTimeHour + ":" + endTimeMinute + " removeEntry " + removeEntry);
 
-        List<BuildingOccupancy.Days> daysList = buildingOccupancyViewModel.constructBuildingOccupancyDays(startTimeHour,
-                endTimeHour,  startTimeMinute, endTimeMinute, days);
+        daysList = buildingOccupancyViewModel.constructBuildingOccupancyDays(startTimeHour,
+                endTimeHour, startTimeMinute, endTimeMinute, days);
         for (BuildingOccupancy.Days d : daysList) {
-            CcuLog.d(L.TAG_CCU_UI, " daysArrayList  "+d);
+            CcuLog.d(L.TAG_CCU_UI, " daysArrayList  " + d);
         }
 
         boolean intersection = buildingOccupancy.checkIntersection(daysList);
@@ -263,65 +270,44 @@ public class BuildingOccupancyFragment extends DialogFragment implements Buildin
             alert = builder.create();
             alert.show();
             return false;
-
         }
-
-        HashMap<String, ArrayList<Interval>> spillsMap =days == null ? buildingOccupancyViewModel.getRemoveScheduleSpills(buildingOccupancy):
-                buildingOccupancyViewModel.getScheduleSpills(daysList,buildingOccupancy);
-
-        if (spillsMap != null && !spillsMap.isEmpty() && position != ManualSchedulerDialogFragment.NO_REPLACE) {
-            ProgressDialogUtils.showProgressDialog(getActivity(),
-                    "Fetching Zone Schedules...");
-            RxjavaUtil.executeBackgroundTask(
-                    () -> errorMessage = buildingOccupancyViewModel.getWarningMessage(spillsMap),
-                    ()-> {
-                        ProgressDialogUtils.hideProgressDialog();
-                        if (errorMessage != null && !errorMessage.isEmpty()) {
-                            if (errorMessage.contains("Named Schedule")) {
-                                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                                builder.setMessage(errorMessage)
-                                        .setCancelable(false)
-                                        .setTitle("Schedule Errors")
-                                        .setIcon(R.drawable.ic_dialog_alert)
-                                        .setNegativeButton("Re-Edit", (dialog, id) -> showDialog(position));
-                                alert = builder.create();
-                                alert.show();
-                            } else if (errorMessage.contains("zone")) {
-                                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                                builder.setMessage(errorMessage)
-                                        .setCancelable(false)
-                                        .setTitle("Schedule Errors")
-                                        .setIcon(R.drawable.ic_dialog_alert)
-                                        .setNegativeButton("Re-Edit", (dialog, id) -> showDialog(position))
-                                        .setPositiveButton("Force-Trim", (dialog, id) -> {
-                                            buildingOccupancy.getDays().addAll(daysList);
-                                            ScheduleUtil.trimZoneSchedules(spillsMap);
-                                            buildingOccupancy.getDays().remove(removeEntry);
-                                            doScheduleUpdate(false);
-                                        });
-                                alert = builder.create();
-                                alert.show();
-                            }
-                        } else {
-                            String warningMessageNull = "Building Occupancy cannot be edited when CCU is offline. Please connect to network.";
-                            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                            builder.setMessage(warningMessageNull)
-                                    .setCancelable(false)
-                                    .setIcon(R.drawable.ic_dialog_alert)
-                                    .setPositiveButton("OK", (dialog, id) -> buildingOccupancy = CCUHsApi.getInstance().getBuildingOccupancy());
-                            alert = builder.create();
-                            alert.show();
-                        }
-                    });
-        }else{
-            ProgressDialogUtils.hideProgressDialog();
-            if (removeEntry != null && buildingOccupancy.getDays().contains(removeEntry)) {
-                buildingOccupancy.getDays().remove(removeEntry);
-            }
+        // For adding timeslot or expanding timeslot checking spill is unnecessary
+        if(position == ManualSchedulerDialogFragment.NO_REPLACE ||
+                buildingOccupancyViewModel.isTimeSlotExpanded(removeEntry, startTimeHour,
+                        endTimeHour, startTimeMinute, endTimeMinute) && !isDelete){
             buildingOccupancy.getDays().addAll(daysList);
             doScheduleUpdate(false);
             buildingOccupancy = CCUHsApi.getInstance().getBuildingOccupancy();
+            ProgressDialogUtils.hideProgressDialog();
+            return true;
+        } else {
+            RxjavaUtil.executeBackgroundTask(
+                    () -> ProgressDialogUtils.showProgressDialog(getActivity(),
+                            "Fetching Zone Schedules..."),
+                    () -> {
+                        scheduleImpacts.clear();
+                        HashMap<String, ArrayList<Interval>> spillsMap = days == null ? buildingOccupancyViewModel.getRemoveScheduleSpills(buildingOccupancy) :
+                                buildingOccupancyViewModel.getScheduleSpills(daysList, buildingOccupancy);
+                        if (spillsMap != null && !spillsMap.isEmpty() && position != ManualSchedulerDialogFragment.NO_REPLACE) {
+                            scheduleImpacts = buildingOccupancyViewModel.getWarningMessage(spillsMap);
+                        } else {
+                            if (removeEntry != null && buildingOccupancy.getDays().contains(removeEntry)) {
+                                buildingOccupancy.getDays().remove(removeEntry);
+                            }
+                            buildingOccupancy.getDays().addAll(daysList);
+                            doScheduleUpdate(false);
+                            buildingOccupancy = CCUHsApi.getInstance().getBuildingOccupancy();
+                        }
+                    },
+
+                    () -> {
+                        if (scheduleImpacts != null && !scheduleImpacts.isEmpty()) {
+                            showScheduleImpactDialogFragment(scheduleImpacts);
+                        }
+                        ProgressDialogUtils.hideProgressDialog();
+                    });
         }
+
         return true;
     }
     @Override
@@ -611,5 +597,19 @@ public class BuildingOccupancyFragment extends DialogFragment implements Buildin
         buildingOccupancyDialogFragment.show(fragmentTransaction, "popup");
     }
 
+    @Override
+    public void onForceTrimSchedule() {
+        buildingOccupancy.getDays().addAll(daysList);
+        buildingOccupancy.getDays().remove(removeEntry);
+        RxjavaUtil.executeBackground(()->{
+            doScheduleUpdate(false);
+            buildingOccupancyViewModel.forceTrimScheduleTowardsCommonTimeslot(CCUHsApi.getInstance());
+        });
 
+    }
+
+    @Override
+    public void onReEditSchedule() {
+        showDialog(position);
+    }
 }

@@ -1761,4 +1761,14 @@
         <item>Friday</item>
         <item>Saturday</item>
     </string-array>
-    </resources>
+    <string name="everyday">EVERYDAY</string>
+    <string name="weekday">WEEKDAY</string>
+
+    <string name="weekend">WEEKEND</string>
+    <string name="special_schedule_confirmation">Are you sure you want to delete the Special Schedule: %1$s? </string>
+    <string name="delete_vacation_confirmation">Are you sure you want to delete the vacation: %1$s?</string>
+    <string name="default_schedule_title">Default - %1$s</string>
+    <string name="edit_schedule">EDIT SCHEDULE</string>
+    <string name="zone_vacations">Zone Vacations</string>
+    <string name="vacations">Vacations</string>
+</resources>

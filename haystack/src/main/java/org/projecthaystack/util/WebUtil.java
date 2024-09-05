@@ -7,6 +7,10 @@
 //
 package org.projecthaystack.util;
 
+import org.projecthaystack.HDict;
+import org.projecthaystack.HGrid;
+import a75f.io.logger.CcuLog;
+
 public class WebUtil
 {
   public static boolean isToken(String s)
@@ -40,6 +44,15 @@ public class WebUtil
     m['}']  = false;  m[' '] = false;  m['\t'] = false;
     tokenChars = m;
   }
-
+  public static int getResponsePageSize(HGrid response, int pageSize) {
+    HDict meta = response.meta();
+    if (meta.has("total")) {
+      int entitySize = (int) Double.parseDouble(meta.get("total").toString());
+      CcuLog.i("CCU_HCLIENT", "Total Entity size " + entitySize);
+      return entitySize / pageSize;
+    }
+    CcuLog.i("CCU_HCLIENT", "No total field in metadata");
+    return 0;
+  }
 
 }

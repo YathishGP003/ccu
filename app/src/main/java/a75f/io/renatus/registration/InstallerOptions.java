@@ -80,6 +80,7 @@ import a75f.io.api.haystack.SettingPoint;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.domain.api.Domain;
+import a75f.io.domain.api.DomainName;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.Globals;
@@ -761,6 +762,9 @@ public class InstallerOptions extends Fragment {
             ArrayList<String> deadBand = new ArrayList<>();
             ArrayList<String> zonediff = new ArrayList<>();
 
+            double minDeadBandVal = Double.parseDouble(Domain.readPoint(DomainName.coolingDeadband).get("minVal").toString());
+            double maxDeadBandVal = Double.parseDouble(Domain.readPoint(DomainName.coolingDeadband).get("maxVal").toString());
+
             if(isCelsiusTunerAvailableStatus()){
                 for (int val = 32;  val <= 140; val += 1) {
                     list.add(val+"\u00B0F  (" + fahrenheitToCelsius(val) + "\u00B0C)");
@@ -774,7 +778,7 @@ public class InstallerOptions extends Fragment {
                 for (int val = 50;  val <= 100; val += 1) {
                     coolingLimit.add(val+"\u00B0F  (" + fahrenheitToCelsius(val) + "\u00B0C)");
                 }
-                for (double val = 0;  val <= 10; val += 0.5) {
+                for (double val = minDeadBandVal;  val <= maxDeadBandVal; val += 0.5) {
                     deadBand.add(val+"\u00B0F  (" + (fahrenheitToCelsiusRelative(val)) + "\u00B0C)");
                 }
                 for (int val = 0;  val <= 20; val += 1) {
@@ -795,7 +799,7 @@ public class InstallerOptions extends Fragment {
                 for (int val = 50;  val <= 100; val += 1) {
                     coolingLimit.add(val+"\u00B0F");
                 }
-                for (double val = 0;  val <= 10; val += 0.5) {
+                for (double val = minDeadBandVal;  val <= maxDeadBandVal; val += 0.5) {
                     deadBand.add(val+"\u00B0F");
                 }
                 for (int val = 0;  val <= 20; val += 1) {

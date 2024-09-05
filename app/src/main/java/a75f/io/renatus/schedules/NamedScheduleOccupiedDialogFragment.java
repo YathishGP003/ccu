@@ -38,6 +38,7 @@ import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.DAYS;
+import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.domain.api.Domain;
 import a75f.io.logger.CcuLog;
@@ -226,13 +227,19 @@ public class NamedScheduleOccupiedDialogFragment  extends  DialogFragment{
         ArrayList<String> heatingAndCoolingLimit = new ArrayList<>();
         ArrayList<String> deadBand = new ArrayList<>();
 
+        double minDeadBandVal = ScheduleUtil.getDeadBandValue("minVal", mSchedule.getRoomRef());
+        double maxDeadBandVal = ScheduleUtil.getDeadBandValue("maxVal", mSchedule.getRoomRef());
+
         if(isCelsiusTunerAvailableStatus()){
             for (int val = 50;  val <= 100; val += 1) {
                 heatingAndCoolingLimit.add( fahrenheitToCelsius(val) + "\u00B0C");
             }
 
-            double minVal = convertingRelativeValueFtoC(0);
-            double maxVal = convertingRelativeValueFtoC(10);
+            double minVal = convertingRelativeValueFtoC(minDeadBandVal);
+            if(minVal < 0.5){
+                minVal = 0.5;
+            }
+            double maxVal = convertingRelativeValueFtoC(maxDeadBandVal);
             for (double val = minVal;  val <= maxVal; val += 0.5) {
                 deadBand.add( ((val)) + "\u00B0C");
             }
@@ -241,7 +248,7 @@ public class NamedScheduleOccupiedDialogFragment  extends  DialogFragment{
             for (int val = 50;  val <= 100; val += 1) {
                 heatingAndCoolingLimit.add(val+"\u00B0F");
             }
-            for (double val = 0;  val <= 10; val += 0.5) {
+            for (double val = minDeadBandVal;  val <= maxDeadBandVal; val += 0.5) {
                 deadBand.add((val) + "\u00B0F");
             }
         }
@@ -709,13 +716,19 @@ public class NamedScheduleOccupiedDialogFragment  extends  DialogFragment{
         ArrayList<String> heatingAndCoolingLimit = new ArrayList<>();
         ArrayList<String> deadBand = new ArrayList<>();
 
+        double minDeadBandVal = ScheduleUtil.getDeadBandValue("minVal", mSchedule.getRoomRef());
+        double maxDeadBandVal = ScheduleUtil.getDeadBandValue("maxVal", mSchedule.getRoomRef());
+
         if(isCelsiusTunerAvailableStatus()){
             for (int val = 50;  val <= 100; val += 1) {
                 heatingAndCoolingLimit.add(fahrenheitToCelsius(val) + "\u00B0C");
             }
 
-            double minVal = convertingRelativeValueFtoC(0);
-            double maxVal = convertingRelativeValueFtoC(10);
+            double minVal = convertingRelativeValueFtoC(minDeadBandVal);
+            if(minVal < 0.5){
+                minVal = 0.5;
+            }
+            double maxVal = convertingRelativeValueFtoC(maxDeadBandVal);
             for (double val = minVal;  val <= maxVal; val += 0.5) {
                 deadBand.add( ((val)) + "\u00B0C");
             }
@@ -725,7 +738,7 @@ public class NamedScheduleOccupiedDialogFragment  extends  DialogFragment{
                 heatingAndCoolingLimit.add(val+"\u00B0F");
             }
 
-            for (double val = 0;  val <= 10; val += 0.5) {
+            for (double val = minDeadBandVal;  val <= maxDeadBandVal; val += 0.5) {
                 deadBand.add(val+"\u00B0F");
             }
         }

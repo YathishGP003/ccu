@@ -709,7 +709,6 @@ public class HClient extends HProj
   public HGrid call(String op, HGrid req)
   {
     CcuLog.d("CCU_HCLIENT", "HClient Op: " + op);
-    CcuLog.d("CCU_HCLIENT", "HClient Req: ");
     req.dump();
     HGrid res = postGrid(op, req);
     if (res != null && res.isErr()) {

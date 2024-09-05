@@ -47,7 +47,7 @@ import a75f.io.logger.CcuLog;
 public class Schedule extends Entity
 {
     private static final DateTimeFormatter SS_DATE_TIME_FORMATTER  =  DateTimeFormat.forPattern("yyyy-MM-dd");
-
+    private static final String SCHEDULE_GROUP = "scheduleGroup";
     public boolean isBuildingSchedule()
     {
         return getMarkers().contains("building") && !getMarkers().contains("named");
@@ -871,6 +871,7 @@ public class Schedule extends Entity
     private String ccuRef;
 
     private String org;
+    private int scheduleGroup;
 
     public String getCcuRef() {
         return ccuRef;
@@ -995,7 +996,10 @@ public class Schedule extends Entity
         b.append(mRoomRef);
         return b.toString();
     }
-    
+    public Integer getScheduleGroup()
+    {
+        return scheduleGroup;
+    }
     //Get existing intervals for selected days
     public ArrayList<Interval> getScheduledIntervalsForDays(ArrayList<Days> daysSorted) {
         ArrayList<Interval> daysIntervals = new ArrayList<Interval>();
@@ -1342,63 +1346,52 @@ public class Schedule extends Entity
     public boolean getDisabled() {
         return mMarkers.contains("disabled");
     }
-    
-    public void setDaysCoolVal(double val, boolean alldays)
-    {
-        if (alldays) {
-            for (Days d : mDays) {
-                d.mCoolingVal = val;
-            }
-        } else
-        {
-            int day = DateTime.now().dayOfWeek().get() - 1;
-            Calendar calender = Calendar.getInstance();
-            int hrs = calender.get(Calendar.HOUR_OF_DAY) * 60;
-            int min = calender.get(Calendar.MINUTE) ;
-            int curTime = hrs + min;
-            for (Days d : mDays) {
-                if (d.mDay == day)
-                {
-                    int startSchTime = (d.mSthh * 60) + d.mStmm;
-                    int endSchTime = (d.mEthh * 60) + d.mEtmm;
-                    if (curTime > startSchTime && curTime < endSchTime) {
-                        d.mCoolingVal = val;
-                        CcuLog.d("CCU_JOB", " Set mCoolingVal : " + val + " day " + day);
-                        break;
-                    }
-                }
-            }
-            
-        }
+
+    public void setDaysCoolVal(double val, boolean allDays) {
+        setDaysTemperatureVal(val, true);
     }
-    
-    public void setDaysHeatVal(double val, boolean alldays)
-    {
-        if (alldays) {
-            for (Days d : mDays) {
-                d.mHeatingVal = val;
-            }
-        } else
-        {
-            int day = DateTime.now().dayOfWeek().get() - 1;
-            Calendar calender = Calendar.getInstance();
-            int hrs = calender.get(Calendar.HOUR_OF_DAY) * 60;
-            int min = calender.get(Calendar.MINUTE) ;
-            int curTime = hrs + min;
-            for (Days d : mDays) {
-                if (d.mDay == day)
-                {
-                    int startSchTime = (d.mSthh * 60) + d.mStmm;
-                    int endSchTime = (d.mEthh * 60) + d.mEtmm;
-                    if (curTime > startSchTime && curTime < endSchTime) {
-                        d.mHeatingVal = val;
-                        CcuLog.d("CCU_JOB", " Set mHeatingVal : " + val + " day " + day);
-                        break;
-                    }
+
+    public void setDaysHeatVal(double val, boolean allDays) {
+        setDaysTemperatureVal(val, false);
+    }
+
+    private void setDaysTemperatureVal(double val, boolean isCooling) {
+        int day = DateTime.now().dayOfWeek().get() - 1;
+        Calendar calendar = Calendar.getInstance();
+        int curTime = calendar.get(Calendar.HOUR_OF_DAY) * 60 + calendar.get(Calendar.MINUTE);
+
+        for (Days d : mDays) {
+            boolean isInScheduleTime = curTime > (d.mSthh * 60 + d.mStmm) && curTime < (d.mEthh * 60 + d.mEtmm);
+            if (isMatchingDay(d, day) && isInScheduleTime) {
+                if (isCooling) {
+                    d.mCoolingVal = val;
+                } else {
+                    d.mHeatingVal = val;
                 }
+                CcuLog.d("CCU_JOB", (isCooling ? "Set mCoolingVal" : "Set mHeatingVal") + " : " + val + " day " + d.mDay);
             }
         }
     }
+
+    // Here schedule group 0 is for Seven Days, 1 is for Weekday+Saturday+Sunday,
+    // 2 is for Weekday+Weekend, 3 for Everyday
+    private boolean isMatchingDay(Days d, int day) {
+        switch (scheduleGroup) {
+            case 0:
+                return d.mDay == day;
+            case 1:
+                return (TimeUtil.isCurrentDayWeekDay(day) && d.mDay >= DAYS.MONDAY.ordinal() && d.mDay <= DAYS.FRIDAY.ordinal())
+                        || (TimeUtil.isCurrentDaySaturday(day) && d.mDay == DAYS.SATURDAY.ordinal())
+                        || (!TimeUtil.isCurrentDayWeekDay(day) && !TimeUtil.isCurrentDaySaturday(day) && d.mDay == DAYS.SUNDAY.ordinal());
+            case 2:
+                return (TimeUtil.isCurrentDayWeekDay(day) && d.mDay >= DAYS.MONDAY.ordinal() && d.mDay <= DAYS.FRIDAY.ordinal())
+                        || ((TimeUtil.isCurrentDaySaturday(day) || TimeUtil.isCurrentDaySunday(day))
+                        && (d.mDay == DAYS.SATURDAY.ordinal() || d.mDay == DAYS.SUNDAY.ordinal()));
+            default:
+                return true;
+        }
+    }
+
     public static int getCurrentDayOfWeekWithMondayAsStart() {
         Calendar calendar = GregorianCalendar.getInstance();
         switch (calendar.get(Calendar.DAY_OF_WEEK))
@@ -1434,7 +1427,7 @@ public class Schedule extends Entity
         private HDateTime createdDateTime;
         private HDateTime lastModifiedDateTime;
         private String lastModifiedBy;
-
+        private int scheduleGroup;
     
         public Schedule.Builder setmRoomRef(String mRoomRef)
         {
@@ -1502,6 +1495,10 @@ public class Schedule extends Entity
             this.mTZ = tz;
             return this;
         }
+        public Schedule.Builder setScheduleGroup(int scheduleGroup) {
+            this.scheduleGroup = scheduleGroup;
+            return this;
+        }
 
         public Schedule build()
         {
@@ -1523,6 +1520,7 @@ public class Schedule extends Entity
             s.setCreatedDateTime(createdDateTime);
             s.setLastModifiedDateTime(lastModifiedDateTime);
             s.setLastModifiedBy(lastModifiedBy);
+            s.setScheduleGroup(scheduleGroup);
             return s;
         }
 
@@ -1600,6 +1598,9 @@ public class Schedule extends Entity
                 } else if (pair.getValue() != null && pair.getValue().toString().equals("marker"))
                 {
                     this.mMarkers.add(pair.getKey().toString());
+                }
+                else if (pair.getKey().equals(SCHEDULE_GROUP)) {
+                    this.scheduleGroup = (int)Double.parseDouble(pair.getValue().toString());
                 }
             }
             return this;
@@ -1991,8 +1992,12 @@ public class Schedule extends Entity
             defaultSchedule.add(marker);
         }
 
-        if(getUnoccupiedZoneSetback() != null)
+        if(getUnoccupiedZoneSetback() != null) {
             defaultSchedule.add("unoccupiedZoneSetback", getUnoccupiedZoneSetback());
+        }
+        if(getScheduleGroup() != null) {
+            defaultSchedule.add(SCHEDULE_GROUP, getScheduleGroup());
+        }
 
         return defaultSchedule.toDict();
     }
@@ -2115,6 +2120,9 @@ public class Schedule extends Entity
         if (getLastModifiedBy() != null) {
             defaultSchedule.add("lastModifiedBy", getLastModifiedBy());
         }
+        if(getScheduleGroup() != null){
+            defaultSchedule.add(SCHEDULE_GROUP, getScheduleGroup());
+        }
         for (String marker : getMarkers())
         {
             defaultSchedule.add(marker);
@@ -2125,6 +2133,9 @@ public class Schedule extends Entity
 
     public void setUnoccupiedZoneSetback(Double unoccupiedZoneSetback){
         this.unoccupiedZoneSetback = unoccupiedZoneSetback;
+    }
+    public void setScheduleGroup(Integer scheduleGroup){
+        this.scheduleGroup = scheduleGroup;
     }
 
     public HDict getNamedScheduleHDict()
@@ -2158,7 +2169,6 @@ public class Schedule extends Entity
                 hDictDay.add(Tags.COOLING_DEADBAND, HNum.make(day.getCoolingDeadBand()));
             if (day.heatingDeadBand != null)
                 hDictDay.add(Tags.HEATING_DEADBAND, HNum.make(day.getHeatingDeadBand()));
-
             //need boolean & string support
             if (day.mSunset) hDictDay.add("sunset", day.mSunset);
             if (day.mSunrise) hDictDay.add("sunrise", day.mSunrise);
@@ -2191,6 +2201,9 @@ public class Schedule extends Entity
         for (String marker : getMarkers())
         {
             namedSchedule.add(marker);
+        }
+        if(getScheduleGroup() != null){
+            namedSchedule.add(SCHEDULE_GROUP, getScheduleGroup());
         }
 
 

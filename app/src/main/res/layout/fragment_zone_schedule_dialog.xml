@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
+    android:layout_width="1165dp"
     android:layout_height="match_parent"
     xmlns:tools="http://schemas.android.com/tools"
-    android:padding="32dp">
+    android:padding="40dp">
 
     <ScrollView
         android:layout_width="match_parent"
@@ -16,33 +16,27 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <ImageButton
-                android:id="@+id/buttonDelete"
-                android:layout_width="wrap_content"
-                android:layout_height="48dp"
-                android:background="@android:color/transparent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@android:drawable/ic_menu_delete"
-                app:tint="?orange_75f" />
 
             <TextView
-                android:id="@+id/textViewDesiredTemp"
+                android:id="@+id/textViewAddOrEdit"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Desired Temperature"
-                android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
-                app:layout_constraintBottom_toBottomOf="@+id/buttonDelete"
+                android:text="7 DAY"
+                android:textAppearance="@style/title_bold"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <!--<View-->
-            <!--android:id="@+id/viewPlaceHolder"-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="60dp"-->
-            <!--android:layout_marginTop="8dp"-->
-            <!--app:layout_constraintTop_toBottomOf="@+id/textViewDesiredTemp"-->
-            <!--tools:layout_editor_absoluteX="0dp" />-->
+            <TextView
+                android:id="@+id/textViewDesiredTemp"
+                android:paddingTop="24dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Desired Temperature"
+                android:textAppearance="@style/text_label_bold_secondary"
+                app:layout_constraintTop_toBottomOf="@+id/textViewAddOrEdit"
+                app:layout_constraintLeft_toLeftOf="parent"
+                 />
+
 
             <a75f.io.renatus.views.RangeBarView
                 android:id="@+id/rangeSeekBar"
@@ -60,8 +54,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:text="Set Schedule"
-                android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
+                android:text="Duration"
+                android:textAppearance="@style/text_label_bold_secondary"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/rangeSeekBar" />
 
@@ -107,7 +101,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:text="Applies To"
-                android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
+                android:textAppearance="@style/text_label_bold_secondary"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/ltNumberPicker" />
 
@@ -117,106 +111,90 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:padding="8dp"
-                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textViewAppliesto">
 
-                <CheckBox
-                    android:id="@+id/checkBoxMon"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:button="@null"
-                    android:gravity="center"
-                    android:minWidth="36dp"
-                    android:minHeight="36dp"
-                    android:padding="5dp"
-                    android:text="M"
-                    android:textSize="20dp"
-                    android:textStyle="bold" />
+                    <CheckBox
+                        android:id="@+id/firstRadioChip"
+                        android:layout_width="50dp"
+                        android:layout_height="48dp"
+                        android:button="@null"
+                        android:background="@drawable/radio_group_chips"
+                        android:gravity="center"
+                        android:textSize="20px"
+                        android:layout_marginEnd="24dp"
+                        android:textColor="@color/radio_chip_selector"
+                        android:text="M" />
+                    <CheckBox
+                        android:id="@+id/secondRadioChip"
+                        android:layout_width="50dp"
+                        android:layout_height="48dp"
+                        android:button="@null"
+                        android:background="@drawable/radio_group_chips"
+                        android:gravity="center"
+                        android:textSize="20px"
+                        android:layout_marginEnd="24dp"
+                        android:textColor="@color/radio_chip_selector"
+                        android:text="T" />
 
-                <CheckBox
-                    android:id="@+id/checkBoxTue"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="24dp"
-                    android:button="@null"
-                    android:gravity="center"
-                    android:minWidth="36dp"
-                    android:minHeight="36dp"
-                    android:padding="5dp"
-                    android:text="T"
-                    android:textSize="20dp"
-                    android:textStyle="bold" />
 
-                <CheckBox
-                    android:id="@+id/checkBoxWed"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="24dp"
-                    android:button="@null"
-                    android:gravity="center"
-                    android:minWidth="36dp"
-                    android:minHeight="36dp"
-                    android:padding="5dp"
-                    android:text="W"
-                    android:textSize="20dp"
-                    android:textStyle="bold" />
+                    <CheckBox
+                        android:id="@+id/thirdRadioChip"
+                        android:layout_width="50dp"
+                        android:layout_height="48dp"
+                        android:button="@null"
+                        android:gravity="center"
+                        android:background="@drawable/radio_group_chips"
+                        android:textSize="20px"
+                        android:layout_marginEnd="24dp"
+                        android:textColor="@color/radio_chip_selector"
+                        android:text="W" />
+                    <CheckBox
+                        android:id="@+id/fourthRadioChip"
+                        android:layout_width="50dp"
+                        android:layout_height="48dp"
+                        android:button="@null"
+                        android:gravity="center"
+                        android:background="@drawable/radio_group_chips"
+                        android:textSize="20px"
+                        android:layout_marginEnd="24dp"
+                        android:textColor="@color/radio_chip_selector"
+                        android:text="T" />
+                    <CheckBox
+                        android:id="@+id/fifthRadioChip"
+                        android:layout_width="50dp"
+                        android:layout_height="48dp"
+                        android:button="@null"
+                        android:gravity="center"
+                        android:background="@drawable/radio_group_chips"
+                        android:textSize="20px"
+                        android:layout_marginEnd="24dp"
+                        android:textColor="@color/radio_chip_selector"
+                        android:text="F" />
+                    <CheckBox
+                        android:id="@+id/sixthRadioChip"
+                        android:layout_width="50dp"
+                        android:layout_height="48dp"
+                        android:button="@null"
+                        android:gravity="center"
+                        android:background="@drawable/radio_group_chips"
+                        android:textSize="20px"
+                        android:layout_marginEnd="24dp"
+                        android:textColor="@color/radio_chip_selector"
+                        android:text="SA" />
+                    <CheckBox
+                        android:id="@+id/seventhRadioChip"
+                        android:layout_width="50dp"
+                        android:layout_height="48dp"
+                        android:button="@null"
+                        android:gravity="center"
+                        android:background="@drawable/radio_group_chips"
+                        android:textSize="20px"
+                        android:layout_marginEnd="24dp"
+                        android:textColor="@color/radio_chip_selector"
+                        android:text="SU" />
 
-                <CheckBox
-                    android:id="@+id/checkBoxThu"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="24dp"
-                    android:button="@null"
-                    android:gravity="center"
-                    android:minWidth="36dp"
-                    android:minHeight="36dp"
-                    android:padding="5dp"
-                    android:text="Th"
-                    android:textSize="20dp"
-                    android:textStyle="bold" />
 
-                <CheckBox
-                    android:id="@+id/checkBoxFri"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="24dp"
-                    android:button="@null"
-                    android:gravity="center"
-                    android:minWidth="36dp"
-                    android:minHeight="36dp"
-                    android:padding="5dp"
-                    android:text="F"
-                    android:textSize="20dp"
-                    android:textStyle="bold" />
-
-                <CheckBox
-                    android:id="@+id/checkBoxSat"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="24dp"
-                    android:button="@null"
-                    android:gravity="center"
-                    android:minWidth="36dp"
-                    android:minHeight="36dp"
-                    android:padding="5dp"
-                    android:text="Sa"
-                    android:textSize="20dp"
-                    android:textStyle="bold" />
-
-                <CheckBox
-                    android:id="@+id/checkBoxSun"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="24dp"
-                    android:button="@null"
-                    android:gravity="center"
-                    android:minWidth="36dp"
-                    android:minHeight="36dp"
-                    android:padding="5dp"
-                    android:text="Su"
-                    android:textSize="20dp"
-                    android:textStyle="bold" />
             </LinearLayout>
 
 
@@ -248,7 +226,7 @@
                     android:layout_height="wrap_content">
                     <TextView
                         android:id="@+id/user_limits"
-                        style="@style/text_appearance"
+                        style="@style/text_label_bold_secondary"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="30dp"
@@ -261,7 +239,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
-                        android:paddingLeft="450dp"
+                        android:paddingLeft="440dp"
                         android:layout_marginStart="20dp"
                         android:textSize="20dp"
                         android:text="@string/follow_building_user_limits"
@@ -350,7 +328,7 @@
 
                 </LinearLayout>
                 <TextView
-                    style="@style/ToggleLimits"
+                    style="@style/text_label_bold_secondary"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="20dp"
@@ -395,40 +373,51 @@
 
                 </LinearLayout>
                 <LinearLayout
-                    android:layout_width="wrap_content"
+                    android:layout_marginTop="24dp"
+                    android:id="@+id/buttonLayout"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:layout_constraintRight_toRightOf="parent"
-                    android:layout_gravity="right">
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent">
+
+                    <ImageButton
+                        android:id="@+id/buttonDelete"
+                        android:layout_width="wrap_content"
+                        android:layout_height="48dp"
+                        android:background="@android:color/transparent"
+                        app:srcCompat="@android:drawable/ic_menu_delete"
+                        app:layout_constraintBottom_toBottomOf="@+id/buttonCancel"
+                        app:tint="?orange_75f" />
+
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:layout_weight="1" />
+
                     <Button
                         android:id="@+id/buttonCancel"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="24dp"
                         android:background="@null"
                         android:fontFamily="@font/lato_regular"
                         android:text="CANCEL"
                         android:textColor="?orange_75f"
-                        android:textSize="20dp"
-                        app:layout_constraintRight_toLeftOf="@+id/buttonSave"
-                        app:layout_constraintRight_toRightOf="parent"
-                        android:layout_gravity="right"
-                        />
+                        android:textSize="20sp" />
+
                     <Button
                         android:id="@+id/buttonSave"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="24dp"
-                        android:background="@null"
                         android:layout_marginRight="50dp"
+                        android:background="@null"
                         android:fontFamily="@font/lato_regular"
                         android:text="SAVE"
                         android:textColor="?orange_75f"
-                        android:textSize="20dp"
-                        app:layout_constraintRight_toRightOf="parent"
-                        android:layout_gravity="right"/>
-
-
+                        android:textSize="20sp" />
                 </LinearLayout>
+
 
 
             </LinearLayout>

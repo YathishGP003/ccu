@@ -1,16 +1,13 @@
 package a75f.io.renatus;
 
 import android.view.ViewGroup;
-
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentStatePagerAdapter;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import a75f.io.logger.CcuLog;
-import a75f.io.renatus.schedules.SchedulerFragment;
+import a75f.io.renatus.schedules.ScheduleGroupFragment;
 
 /**
  * Created by samjithsadasivan isOn 8/7/17.
@@ -25,7 +22,7 @@ public class StatusPagerAdapter extends FragmentStatePagerAdapter
 		fragments = new ArrayList<>();
 		fragments.add(ZoneFragmentNew.newInstance());
 		fragments.add(SystemFragment.newInstance());
-		fragments.add(SchedulerFragment.newInstance());
+		fragments.add(new ScheduleGroupFragment());
 		fragments.add(AlertsFragment.newInstance());
 	}
 

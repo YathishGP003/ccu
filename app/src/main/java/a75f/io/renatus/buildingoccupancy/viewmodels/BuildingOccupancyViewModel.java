@@ -7,23 +7,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.LocalTime;
-import org.projecthaystack.HDict;
-import org.projecthaystack.HDictBuilder;
-import org.projecthaystack.HGrid;
-import org.projecthaystack.HGridBuilder;
-import org.projecthaystack.HRow;
-import org.projecthaystack.client.HClient;
-import org.projecthaystack.io.HZincReader;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -31,9 +21,6 @@ import java.util.concurrent.Future;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.DAYS;
-import a75f.io.api.haystack.Equip;
-import a75f.io.api.haystack.Floor;
-import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.MockTime;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
@@ -41,16 +28,26 @@ import a75f.io.api.haystack.Zone;
 import a75f.io.api.haystack.schedule.BuildingOccupancy;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.schedule.PossibleScheduleImpactTable;
+import a75f.io.logic.schedule.ScheduleGroup;
 import a75f.io.logic.util.OfflineModeUtilKt;
+import a75f.io.renatus.schedules.CommonTimeSlotFinder;
+import a75f.io.renatus.schedules.ScheduleImpactDialogFragment.ScheduleImpact;
 import a75f.io.renatus.schedules.ScheduleUtil;
-import a75f.io.renatus.schedules.SchedulerFragment;
+import a75f.io.renatus.schedules.ZoneScheduleSpillGenerator;
+import a75f.io.renatus.util.Marker;
 import a75f.io.renatus.views.MasterControl.MasterControlUtil;
 
-public class BuildingOccupancyViewModel {
+public class BuildingOccupancyViewModel  {
 
     private String getDayString(DateTime d) {
         return ScheduleUtil.getDayString(d.getDayOfWeek());
     }
+    public Map<String, Schedule> activeZoneScheduleList = new LinkedHashMap<>();
+    LinkedHashMap<String, ArrayList<Interval>> spillsMap = new LinkedHashMap<>();
+
+    LinkedHashMap<String, ArrayList<Interval>> finalSpillsMap = spillsMap;
+    List<ZoneScheduleSpillGenerator.ZoneScheduleSpill> zoneScheduleSpills = new ArrayList<>();
 
     public List<BuildingOccupancy.Days> constructBuildingOccupancyDays(int startTimeHour, int endTimeHour,
                                                                        int startTimeMinute, int endTimeMinute,
@@ -77,7 +74,7 @@ public class BuildingOccupancyViewModel {
             List<Interval> overlaps = buildingOccupancy.getOverLapInterval(day);
             for (Interval overlap : overlaps) {
                 CcuLog.d(L.TAG_CCU_UI," overLap "+overlap);
-                overlapDays.append(getDayString(overlap.getStart())).append("(").append(overlap.getStart().hourOfDay().get()).append(":").append(overlap.getStart().minuteOfHour().get() == 0 ? "00" : overlap.getStart().minuteOfHour().get()).append(" - ").append(getEndTimeHr(overlap.getEnd().hourOfDay().get(), overlap.getEnd().minuteOfHour().get())).append(":").append(getEndTimeMin(overlap.getEnd().hourOfDay().get(),
+                overlapDays.append(getDayString(overlap.getStart() )).append("(").append(overlap.getStart().hourOfDay().get()).append(":").append(overlap.getStart().minuteOfHour().get() == 0 ? "00" : overlap.getStart().minuteOfHour().get()).append(" - ").append(getEndTimeHr(overlap.getEnd().hourOfDay().get(), overlap.getEnd().minuteOfHour().get())).append(":").append(getEndTimeMin(overlap.getEnd().hourOfDay().get(),
                         overlap.getEnd().minuteOfHour().get()) == 0 ? "00" : overlap.getEnd().minuteOfHour().get()).append(") ");
             }
         }
@@ -132,17 +129,16 @@ public class BuildingOccupancyViewModel {
     }
 
     public HashMap<String, ArrayList<Interval>> getScheduleSpills(List<BuildingOccupancy.Days> daysList, BuildingOccupancy buildingOccupancy) {
-
-        LinkedHashMap<String, ArrayList<Interval>> spillsMap = new LinkedHashMap<>();
+        activeZoneScheduleList.clear();
+        finalSpillsMap.clear();
+        spillsMap.clear();
+        zoneScheduleSpills.clear();
         ExecutorService executor = Executors.newSingleThreadExecutor();
         ArrayList<Schedule> scheduleList = new ArrayList<>();
-        Map<String, Schedule> activeScheduleList = new LinkedHashMap<>();
-        ArrayList<Zone> zoneList = new ArrayList<>();
+        HashMap<String, Zone> zoneList = new HashMap<>();
+        HashMap<String, HashMap<Object, Object>> floorList = new HashMap<>();
         HashMap<Object,Object> siteMap = CCUHsApi.getInstance().readEntity(Tags.SITE);
         String siteRef = siteMap.get("id").toString();
-        Map<String, List<Zone>> zoneMap = new LinkedHashMap<>();
-
-        LinkedHashMap<String, ArrayList<Interval>> finalSpillsMap = spillsMap;
         Future<LinkedHashMap<String, ArrayList<Interval>>> future = executor.submit(() -> {
 
             if(OfflineModeUtilKt.isOfflineMode()){
@@ -153,6 +149,8 @@ public class BuildingOccupancyViewModel {
 
                 ArrayList<HashMap<Object, Object>> zones = CCUHsApi.getInstance().readAllEntities
                         ("room");
+                ArrayList<HashMap<Object, Object>> floors = CCUHsApi.getInstance().readAllEntities
+                        ("floor");
 
                 for (HashMap<Object, Object> schedule:schedules) {
                     scheduleList.add(CCUHsApi.getInstance().getScheduleById(schedule.get("id").toString()));
@@ -160,164 +158,54 @@ public class BuildingOccupancyViewModel {
                 for (HashMap<Object, Object> schedule:namedSchedule) {
                     scheduleList.add(CCUHsApi.getInstance().getScheduleById(schedule.get("id").toString()));
                 }
+                for (HashMap<Object, Object> floor : floors) {
+                    floorList.put(floor.get("id").toString(), floor);
+                }
 
                 for (HashMap<Object, Object> m : zones)
                 {
-                    zoneList.add(new Zone.Builder().setHashMap(m).build());
+                    zoneList.put(m.get("id").toString(), new Zone.Builder().setHashMap(m).build());
+                }
+                Map<String, String> scheduleToZoneMap = new HashMap<>();
+
+                for (Zone zone : zoneList.values()) {
+                    scheduleToZoneMap.put(zone.getScheduleRef().replace("@", ""), zone.getId());
+                }
+
+
+                for (Schedule schedule : scheduleList) {
+                    String cleanedScheduleId = schedule.getId().replace("@", "");
+                    if (scheduleToZoneMap.containsKey(cleanedScheduleId)) {
+                        activeZoneScheduleList.put(schedule.getId(), schedule);
+                    }
+                }
+
+                for (Schedule schedule : activeZoneScheduleList.values()) {
+                    String roomRef;
+                    if (schedule.isNamedSchedule()) {
+                        roomRef = scheduleToZoneMap.get(schedule.getId().replace("@", ""));
+                    } else {
+                        roomRef = schedule.getRoomRef();
+                    }
+                    HashMap<Object, Object> floor = floorList.get(zoneList.get(roomRef).getFloorRef());
+                    HashMap<Object, Object> equip = CCUHsApi.getInstance().readEntity("equip and roomRef == \"" + roomRef+"\"");
+
+                    zoneScheduleSpills.add(new ZoneScheduleSpillGenerator.ZoneScheduleSpill(
+                            roomRef, zoneList.get(roomRef).getDisplayName(), equip.get(Tags.PROFILE).toString(),
+                            floor.get(Tags.DIS).toString(), schedule));
+                    handleSpills(schedule, roomRef, buildingOccupancy, daysList);
                 }
 
             }else {
-                HClient hClient = new HClient(CCUHsApi.getInstance().getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
-                HDict tDict = new HDictBuilder().add("filter", "schedule and days and siteRef == " + siteRef).toDict();
-                HGrid schedulePoint = hClient.call("read", HGridBuilder.dictToGrid(tDict));
+                ZoneScheduleSpillGenerator zoneScheduleSpillGenerator = new ZoneScheduleSpillGenerator();
+                zoneScheduleSpills = zoneScheduleSpillGenerator.generateSpill();
 
-                HDict queryDictionary = new HDictBuilder().add("filter",
-                        "named and schedule and organization == \"" +
-                                Objects.requireNonNull(CCUHsApi.getInstance().getSite()).getOrganization() + "\"").toDict();
-                HGrid namedSchedules = hClient.call("read", HGridBuilder.dictToGrid(queryDictionary));
-
-
-                HDict roomDict = new HDictBuilder().add("filter", "room and siteRef == " + siteRef).toDict();
-                HGrid roomPoint = hClient.call("read", HGridBuilder.dictToGrid(roomDict));
-
-                CcuLog.d(L.TAG_CCU_SCHEDULER, "org =" + CCUHsApi.getInstance().getSite().getOrganization());
-
-            if (roomPoint != null) {
-                Iterator hZincReaderIterator = roomPoint.iterator();
-                while (hZincReaderIterator.hasNext()) {
-                    HDict dict = (HDict) hZincReaderIterator.next();
-                    HashMap<Object, Object> map = new HashMap<>();
-                    Iterator it = dict.iterator();
-                    while (it.hasNext()) {
-                        Map.Entry entry = (Map.Entry) it.next();
-                        map.put(entry.getKey().toString(), entry.getValue().toString());
-                    }
-                    String floorRef = map.get("floorRef").toString();
-                    zoneMap.putIfAbsent(floorRef, new ArrayList<>());
-                    zoneMap.get(floorRef).add(new Zone.Builder().setHashMap(map).build());
-                }
-                for(List<Zone> zones: zoneMap.values()) {
-                    zoneList.addAll(zones);
-                }
-                zoneMap.clear();
-            }
-
-
-                if (schedulePoint != null) {
-                    Iterator it = schedulePoint.iterator();
-                    while (it.hasNext()) {
-                        HRow r = (HRow) it.next();
-                        scheduleList.add(new Schedule.Builder().setHDict(new HDictBuilder().add(r).toDict()).build());
-                    }
-                }
-                if (namedSchedules != null) {
-                    Iterator it = namedSchedules.iterator();
-                    while (it.hasNext()) {
-                        HRow r = (HRow) it.next();
-                        Schedule schedule = new Schedule.Builder().setHDict(new HDictBuilder().add(r).toDict()).build();
-                        if (schedule.getMarkers().contains("default")
-                                && !schedule.getmSiteId().equals(CCUHsApi.getInstance().getSiteIdRef().toString().replace("@", ""))) {
-                            continue;
-                        }
-                        scheduleList.add(schedule);
-                    }
-                } else {
-                    CcuLog.d(L.TAG_CCU_SCHEDULER, "Named sched is null");
-                }
-
-                CcuLog.i(L.TAG_CCU_SCHEDULER, "Retrieved schedule list of size " + scheduleList.size() + " for site " + siteRef);
-            }
-
-            for (Zone zone:zoneList) {
-                for (Schedule schedule: scheduleList) {
-                    if((schedule.getId().replace("@","")).equals(zone.getScheduleRef().replace("@",""))){
-                        activeScheduleList.put(schedule.getId(), schedule);
-                    }
+                for (ZoneScheduleSpillGenerator.ZoneScheduleSpill zoneScheduleSpill : zoneScheduleSpills) {
+                    Schedule schedule = zoneScheduleSpill.getSchedule();
+                    activeZoneScheduleList.put(schedule.getId(), schedule);
+                    handleSpills(schedule, zoneScheduleSpill.getZoneRef(), buildingOccupancy, daysList);
                 }
             }
-
-
-
-
-               for (Schedule schedule : activeScheduleList.values()) {
-                    ArrayList<Interval> intervalSpills = new ArrayList<>();
-                    ArrayList<Interval> zoneIntervals = schedule.getScheduledIntervals();
-                   separateOvernightSchedules(zoneIntervals);
-
-                    for (Interval v : zoneIntervals) {
-                        CcuLog.d(L.TAG_CCU_UI, "Zone interval " + v);
-                    }
-
-                    List<Interval> systemIntervals = buildingOccupancy.getMergedIntervals();
-                    if (daysList != null) {
-                        systemIntervals.addAll(buildingOccupancy.getScheduledIntervals(daysList));
-                    }
-                    ArrayList<Interval> splitSchedules = new ArrayList<>();
-                    for (Interval v : systemIntervals) {
-                        if (v.getStart().getDayOfWeek() == 7 && v.getEnd().getDayOfWeek() == 1) {
-                            long now = MockTime.getInstance().getMockTime();
-                            DateTime startTime = new DateTime(now)
-                                    .withHourOfDay(0)
-                                    .withMinuteOfHour(0)
-                                    .withSecondOfMinute(0).withMillisOfSecond(0).withDayOfWeek(1);
-
-                            DateTime endTime = new DateTime(now).withHourOfDay(v.getEnd().getHourOfDay())
-                                    .withMinuteOfHour(v.getEnd().getMinuteOfHour())
-                                    .withSecondOfMinute(v.getEnd().getSecondOfMinute())
-                                    .withMillisOfSecond(v.getEnd().getMillisOfSecond()).withDayOfWeek(1);
-                            splitSchedules.add(new Interval(startTime, endTime));
-                        }
-                    }
-                    systemIntervals.addAll(splitSchedules);
-                    for (Interval v : systemIntervals) {
-                        CcuLog.d(L.TAG_CCU_UI, "Merged System interval " + v);
-                    }
-
-                    for (Interval z : zoneIntervals) {
-                        boolean contains = false;
-                        for (Interval s : systemIntervals) {
-                            if (s.contains(z)) {
-                                contains = true;
-                                break;
-                            }
-                        }
-
-                        if (!contains) {
-                            for (Interval s : systemIntervals) {
-                                if (s.overlaps(z)) {
-                                    for (Interval i : SchedulerFragment.newInstance().disconnectedIntervals(systemIntervals, z)) {
-                                        if (!intervalSpills.contains(i)) {
-                                            intervalSpills.add(i);
-                                        }
-                                    }
-                                    contains = true;
-                                    break;
-                                }
-                            }
-                        }
-
-                        if (!contains) {
-                            intervalSpills.add(z);
-                            CcuLog.d(L.TAG_CCU_UI, " Zone Interval not contained " + z);
-                        }
-
-
-                    }
-
-                    if (!intervalSpills.isEmpty()) {
-                        if(schedule.isNamedSchedule()){
-                            for (Zone zone:zoneList) {
-                                if(schedule.getId().replace("@","").equals(zone.getScheduleRef().replace("@",""))){
-                                    finalSpillsMap.put(StringUtils.prependIfMissing(zone.getId(),"@"),intervalSpills);
-                                }
-                            }
-                        }
-                        else if(schedule.getRoomRef() != null) {
-                            finalSpillsMap.put(schedule.getRoomRef(), intervalSpills);
-                        }
-                    }
-                }
-
             return finalSpillsMap;
         });
 
@@ -335,6 +223,124 @@ public class BuildingOccupancyViewModel {
         return spillsMap;
     }
 
+    private void handleSpills(Schedule schedule, String zoneRef, BuildingOccupancy buildingOccupancy, List<BuildingOccupancy.Days> daysList) {
+        ArrayList<Interval> intervalSpills = new ArrayList<>();
+        ArrayList<Interval> zoneIntervals = schedule.getScheduledIntervals();
+        separateOvernightSchedules(zoneIntervals);
+
+        for (Interval v : zoneIntervals) {
+            CcuLog.d(L.TAG_CCU_UI, "Zone interval " + v);
+        }
+
+        List<Interval> systemIntervals = buildingOccupancy.getMergedIntervals();
+        if (daysList != null) {
+            systemIntervals.addAll(buildingOccupancy.getScheduledIntervals(daysList));
+        }
+        ArrayList<Interval> splitSchedules = new ArrayList<>();
+        for (Interval v : systemIntervals) {
+            if (v.getStart().getDayOfWeek() == 7 && v.getEnd().getDayOfWeek() == 1) {
+                long now = MockTime.getInstance().getMockTime();
+                DateTime startTime = new DateTime(now)
+                        .withHourOfDay(0)
+                        .withMinuteOfHour(0)
+                        .withSecondOfMinute(0).withMillisOfSecond(0).withDayOfWeek(1);
+
+                DateTime endTime = new DateTime(now).withHourOfDay(v.getEnd().getHourOfDay())
+                        .withMinuteOfHour(v.getEnd().getMinuteOfHour())
+                        .withSecondOfMinute(v.getEnd().getSecondOfMinute())
+                        .withMillisOfSecond(v.getEnd().getMillisOfSecond()).withDayOfWeek(1);
+                splitSchedules.add(new Interval(startTime, endTime));
+            }
+        }
+        systemIntervals.addAll(splitSchedules);
+        for (Interval v : systemIntervals) {
+            CcuLog.d(L.TAG_CCU_UI, "Merged System interval " + v);
+        }
+
+        for (Interval z : zoneIntervals) {
+            boolean contains = false;
+            for (Interval s : systemIntervals) {
+                if (s.contains(z)) {
+                    contains = true;
+                    break;
+                }
+            }
+
+            if (!contains) {
+                for (Interval s : systemIntervals) {
+                    if (s.overlaps(z)) {
+                        for (Interval i : disconnectedIntervals(systemIntervals, z)) {
+                            if (!intervalSpills.contains(i)) {
+                                intervalSpills.add(i);
+                            }
+                        }
+                        contains = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!contains) {
+                intervalSpills.add(z);
+                CcuLog.d(L.TAG_CCU_UI, " Zone Interval not contained " + z);
+            }
+
+
+        }
+
+        if (!intervalSpills.isEmpty()) {
+            finalSpillsMap.put(StringUtils.prependIfMissing(zoneRef, "@"), intervalSpills);
+        }
+    }
+
+    private List<Interval> disconnectedIntervals(List<Interval> intervals, Interval r) {
+        List<Interval> result = new ArrayList<>();
+        List<Marker> markers = new ArrayList<>();
+
+        for (Interval i : intervals) {
+            markers.add(new Marker(i.getStartMillis(), true));
+            markers.add(new Marker(i.getEndMillis(), false));
+        }
+
+        markers.sort(Comparator.comparingLong(a -> a.val));
+
+        int overlap = 0;
+        boolean endReached = false;
+
+        if (!markers.isEmpty() && markers.get(0).val > r.getStartMillis()) {
+            result.add(new Interval(r.getStartMillis(), markers.get(0).val));
+        }
+
+        for (int i = 0; i < markers.size() - 1; i++) {
+            Marker m = markers.get(i);
+
+            overlap += m.start ? 1 : -1;
+            Marker next = markers.get(i + 1);
+
+            if (m.val != next.val && overlap == 0 && next.val > r.getStartMillis()) {
+                long start = Math.max(m.val, r.getStartMillis());
+                long end = next.val;
+                if (next.val > r.getEndMillis()) {
+                    end = r.getEndMillis();
+                    endReached = true;
+                }
+                if (end > start) {
+                    result.add(new Interval(start, end));
+                }
+                if (endReached)
+                    break;
+            }
+        }
+
+        if (!endReached) {
+            Marker m = markers.get(markers.size() - 1);
+            if (r.getEndMillis() > m.val) {
+                result.add(new Interval(m.val, r.getEndMillis()));
+            }
+        }
+
+        return result;
+    }
     private void separateOvernightSchedules(ArrayList<Interval> zoneIntervals) {
         int size = zoneIntervals.size();
         for (int i = 0; i < size; i++) {
@@ -351,153 +357,141 @@ public class BuildingOccupancyViewModel {
         }
     }
 
-    public String getWarningMessage(HashMap<String, ArrayList<Interval>> spillsMap){
+    public List<ScheduleImpact> getWarningMessage(HashMap<String, ArrayList<Interval>> spillsMap) {
+        List<ScheduleImpact> scheduleImpacts = new ArrayList<>();
         StringBuilder spillZones = new StringBuilder();
         StringBuilder spillNamedZones = new StringBuilder();
         ArrayList<String> namedHeaders = new ArrayList<>();
         ArrayList<String> zoneHeaders = new ArrayList<>();
-        String Warning;
+        List<ScheduleImpact> Warning;
 
         ExecutorService executor = Executors.newSingleThreadExecutor();
-        Future<String> result = executor.submit(() -> {
+        Future<List<ScheduleImpact>> result = executor.submit(() -> {
             String schedules = "";
-            for (String zone : spillsMap.keySet()) {
-                for (Interval i : spillsMap.get(zone)) {
-                    Zone z = new Zone();
-                    Floor f = new Floor();
-                    List<Equip> equipList = new ArrayList<>();
+            for (ZoneScheduleSpillGenerator.ZoneScheduleSpill zoneScheduleSpill : zoneScheduleSpills) {
+                String zoneRef = zoneScheduleSpill.getZoneRef();
+                ArrayList<Interval> intervals = spillsMap.get(zoneRef);
 
-                    if(OfflineModeUtilKt.isOfflineMode()){
-                        ArrayList<HashMap<Object, Object>> equipMaps = CCUHsApi.getInstance().
-                                readAllEntities("equip and roomRef ==  \"" +zone + "\"");
-                        if(equipMaps != null) {
-                            for (HashMap equip : equipMaps) {
-                                equipList.add(new Equip.Builder().setHashMap(equip).build());
-                            }
-                        }
-                        HashMap<Object, Object> zoneMap = CCUHsApi.getInstance().readMapById(zone);
-                        z = new Zone.Builder().setHashMap(zoneMap).build();
-                        HashMap<Object, Object> floorMap = CCUHsApi.getInstance().readMapById(z.getFloorRef());
-                        f = new Floor.Builder().setHashMap(floorMap).build();
-                    }else {
+                if (intervals == null) {
+                    // Log and skip if no intervals are found for this zoneRef
+                    CcuLog.i("ZoneScheduleSpillGenerator","No intervals found for zoneRef: " + zoneRef);
+                    continue;
+                }
 
-                        HClient hClient = new HClient(CCUHsApi.getInstance().getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
-                        HDict equipDict = new HDictBuilder().add("filter", "equip and roomRef == " + zone).toDict();
-                        HGrid equipGrid = hClient.call("read", HGridBuilder.dictToGrid(equipDict));
-                        if (equipGrid != null) {
-                            List<HashMap> equipMaps = CCUHsApi.getInstance().HGridToList(equipGrid);
-                            for (HashMap equip : equipMaps) {
-                                equipList.add(new Equip.Builder().setHashMap(equip).build());
-                            }
-                        }
-                        String response = CCUHsApi.getInstance().fetchRemoteEntity(zone);
+                for (Interval i : intervals) {
+                    String zoneDis = zoneScheduleSpill.getZoneDis();
+                    String zoneProfile = zoneScheduleSpill.getZoneProfile();
+                    String floorDis = zoneScheduleSpill.getFloorDis();
+                    Schedule schedule = zoneScheduleSpill.getSchedule();
 
+                    if (!MasterControlUtil.isNonTempModule(zoneProfile)) {
+                        StringBuilder scheduleImpactConstructor = new StringBuilder();
+                        scheduleImpactConstructor.append(ScheduleUtil.getDayString(i.getStart().getDayOfWeek(), schedule.getScheduleGroup()))
+                                .append(" (").append(i.getStart().hourOfDay().get()).append(":")
+                                .append(i.getStart().minuteOfHour().get() == 0 ? "00" : i.getStart().minuteOfHour().get())
+                                .append(" - ").append(getEndTimeHr(i.getEnd().hourOfDay().get(), i.getEnd().minuteOfHour().get()))
+                                .append(":").append(getEndTimeMin(i.getEnd().hourOfDay().get(), i.getEnd().minuteOfHour().get()) == 0 ? "00" : i.getEnd().minuteOfHour().get()).append(") \n");
 
-                        if (response != null) {
-                            HZincReader hZincReader = new HZincReader(response);
-                            Iterator hZincReaderIterator = hZincReader.readGrid().iterator();
-                            while (hZincReaderIterator.hasNext()) {
-                                HDict dict = (HDict) hZincReaderIterator.next();
-                                HashMap<Object, Object> map = new HashMap<>();
-                                Iterator it = dict.iterator();
-                                while (it.hasNext()) {
-                                    Map.Entry entry = (Map.Entry) it.next();
-                                    map.put(entry.getKey().toString(), entry.getValue().toString());
-                                }
-                                z = new Zone.Builder().setHashMap(map).build();
-
-                            }
-                        }
-                        String floorResponse = CCUHsApi.getInstance().fetchRemoteEntity(z.getFloorRef());
-                        if (floorResponse != null) {
-                            HZincReader hZincReader = new HZincReader(floorResponse);
-                            Iterator hZincReaderIterator = hZincReader.readGrid().iterator();
-                            while (hZincReaderIterator.hasNext()) {
-                                HDict dict = (HDict) hZincReaderIterator.next();
-                                HashMap<Object, Object> map = new HashMap<>();
-                                Iterator it = dict.iterator();
-                                while (it.hasNext()) {
-                                    Map.Entry entry = (Map.Entry) it.next();
-                                    map.put(entry.getKey().toString(), entry.getValue().toString());
-                                }
-                                f = new Floor.Builder().setHashMap(map).build();
-
-                            }
-                        }
-                    }
-
-                    if(!equipList.isEmpty() && !MasterControlUtil.isNonTempModule(equipList.get(0).getProfile())) {
-                        Schedule schedule = CCUHsApi.getInstance().getScheduleById(z.getScheduleRef());
-                        if(schedule == null){
-                             schedule = CCUHsApi.getInstance().getRemoteSchedule(z.getScheduleRef());
-                        }
                         if (schedule.isNamedSchedule()) {
                             schedules = schedules.concat("named");
-                            if (!namedHeaders.contains(f.getDisplayName())) {
-                                spillNamedZones.append("\t").append(f.getDisplayName()).append("->\n");
-                                namedHeaders.add(f.getDisplayName());
+                            if (!namedHeaders.contains(floorDis)) {
+                                spillNamedZones.append("\t").append(floorDis).append("->\n");
+                                namedHeaders.add(floorDis);
                             }
-                            spillNamedZones.append("\t\t\tZone ").append(z.getDisplayName()).append(" ")
-                                    .append(ScheduleUtil.getDayString(i.getStart().getDayOfWeek()))
+                            scheduleImpacts.add(new ScheduleImpact(floorDis, zoneDis,
+                                    scheduleImpactConstructor.toString(), getScheduleGroup(schedule.getScheduleGroup(), true)));
+                            spillNamedZones.append("\t\t\tZone ").append(zoneDis).append(" ")
+                                    .append(ScheduleUtil.getDayString(i.getStart().getDayOfWeek(), schedule.getScheduleGroup()))
                                     .append(" (").append(i.getStart().hourOfDay().get()).append(":")
                                     .append(i.getStart().minuteOfHour().get() == 0 ? "00" : i.getStart().minuteOfHour().get())
                                     .append(" - ").append(getEndTimeHr(i.getEnd().hourOfDay().get(), i.getEnd().minuteOfHour().get()))
-                                    .append(":").append(getEndTimeMin(i.getEnd().hourOfDay().get(), i.getEnd().minuteOfHour().get()) == 0 ? "00" : i.getEnd().minuteOfHour().get()).append(") \n");
+                                    .append(":").append(getEndTimeMin(i.getEnd().hourOfDay().get(),
+                                            i.getEnd().minuteOfHour().get()) == 0 ? "00" : i.getEnd().minuteOfHour().get()).append(")");
                         } else {
                             schedules = schedules.concat(Tags.ZONE);
-                            if (!zoneHeaders.contains(f.getDisplayName())) {
-                                spillZones.append("\t").append(f.getDisplayName()).append("->\n");
-                                zoneHeaders.add(f.getDisplayName());
+                            if (!zoneHeaders.contains(floorDis)) {
+                                spillZones.append("\t").append(floorDis).append("->\n");
+                                zoneHeaders.add(floorDis);
                             }
-                            spillZones.append("\t\t\tZone ").append(z.getDisplayName()).append(" ").append(ScheduleUtil.getDayString(i.getStart().getDayOfWeek())).append(" (").append(i.getStart().hourOfDay().get()).append(":").append(i.getStart().minuteOfHour().get() == 0 ? "00" : i.getStart().minuteOfHour().get()).append(" - ").append(getEndTimeHr(i.getEnd().hourOfDay().get(), i.getEnd().minuteOfHour().get())).append(":").append(getEndTimeMin(i.getEnd().hourOfDay().get(), i.getEnd().minuteOfHour().get()) == 0 ? "00" : i.getEnd().minuteOfHour().get()).append(") \n");
+                            scheduleImpacts.add(new ScheduleImpact(floorDis, zoneDis,
+                                    scheduleImpactConstructor.toString(), getScheduleGroup(schedule.getScheduleGroup(), false)));
+                            spillZones.append("\t\t\tZone ").append(zoneDis).append(" ")
+                                    .append(ScheduleUtil.getDayString(i.getStart().getDayOfWeek(), schedule.getScheduleGroup()))
+                                    .append(" (").append(i.getStart().hourOfDay().get()).append(":")
+                                    .append(i.getStart().minuteOfHour().get() == 0 ? "00" : i.getStart().minuteOfHour().get())
+                                    .append(" - ").append(getEndTimeHr(i.getEnd().hourOfDay().get(), i.getEnd().minuteOfHour().get()))
+                                    .append(":").append(getEndTimeMin(i.getEnd().hourOfDay().get(),
+                                            i.getEnd().minuteOfHour().get()) == 0 ? "00" : i.getEnd().minuteOfHour().get()).append(") \n");
                         }
                     }
                 }
             }
 
-            String returnVal = "";
-            String namedSchedulesWarning;
-            String zoneSchedulesWarning = "";
-            if (schedules.contains("named")) {
-                namedSchedulesWarning = "Named Schedule for below zone(s) is outside updated " +
-                        "building occupancy.\n"
-                        + ((spillNamedZones.toString()).isEmpty() ? "" : "\tThe Schedule is " +
-                        "outside by \n\t" + spillNamedZones + "\n");
-                if (schedules.contains("zone")) {
-                    zoneSchedulesWarning = "Zone Schedule for below zone(s) is outside updated " +
-                            "building occupancy.\n" + (spillZones.toString().isEmpty() ? "" : "\tThe Schedule " +
-                            "is outside by \n\t" + spillZones);
-                }
-                returnVal = namedSchedulesWarning + zoneSchedulesWarning;
-
-            } else if (schedules.contains("zone")) {
-                zoneSchedulesWarning = "Zone Schedule for below zone(s) is outside updated " +
-                        "building occupancy.\n" + (spillZones.toString().isEmpty() ? "" : "\tThe Schedule " +
-                        "is outside by \n\t" + spillZones);
-                returnVal = zoneSchedulesWarning;
-
-            }
-            return returnVal;
+            return scheduleImpacts;
         });
 
-
         try {
-            Warning  =  result.get();
+            Warning = result.get();
             executor.shutdown();
             return Warning;
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt(); // Preserve the interrupted status
         } catch (ExecutionException e) {
-           e.printStackTrace();
+            e.printStackTrace();
         } finally {
             executor.shutdown();
         }
-      return null;
+        return null;
+    }
 
+    private PossibleScheduleImpactTable getScheduleGroup(Integer scheduleGroup, boolean isNamedSchedule) {
+        if (scheduleGroup == ScheduleGroup.EVERYDAY.ordinal()){
+            if(isNamedSchedule){
+                return PossibleScheduleImpactTable.NAMED_EVERYDAY;
+            } else {
+                return PossibleScheduleImpactTable.EVERYDAY;
+            }
+        } else if(scheduleGroup == ScheduleGroup.WEEKDAY_SATURDAY_SUNDAY.ordinal()){
+            if(isNamedSchedule){
+                return PossibleScheduleImpactTable.NAMED_WEEKDAY_SATURDAY_SUNDAY;
+            } else {
+                return PossibleScheduleImpactTable.WEEKDAY_SATURDAY_SUNDAY;
+            }
+        } else if(scheduleGroup == ScheduleGroup.WEEKDAY_WEEKEND.ordinal()){
+            if(isNamedSchedule){
+                return PossibleScheduleImpactTable.NAMED_WEEKDAY_WEEKEND;
+            } else {
+                return PossibleScheduleImpactTable.WEEKDAY_WEEKEND;
+            }
+        } else {
+            if(isNamedSchedule){
+                return PossibleScheduleImpactTable.NAMED_SEVEN_DAY;
+            } else {
+                return PossibleScheduleImpactTable.SEVEN_DAY;
+            }
+        }
     }
 
     public HashMap<String,ArrayList<Interval>> getRemoveScheduleSpills(BuildingOccupancy buildingOccupancy) {
         return getScheduleSpills(null,buildingOccupancy);
     }
 
+
+    public void forceTrimScheduleTowardsCommonTimeslot(CCUHsApi ccuHsApi) {
+        Schedule buildingOccupancy = ccuHsApi.getSystemSchedule(false).get(0);
+        CcuLog.d(L.TAG_CCU_SCHEDULE, "Trimming schedule for building occupancy "+buildingOccupancy.getDays());
+        CommonTimeSlotFinder commonTimeSlotFinder = new CommonTimeSlotFinder();
+        for(Schedule zoneSchedule : activeZoneScheduleList.values()) {
+            CcuLog.d(L.TAG_CCU_SCHEDULE, "Trimming schedule for zone : " + zoneSchedule.getDis() + "Schedule Days :" + zoneSchedule.getDays());
+            List<List<CommonTimeSlotFinder.TimeSlot>> commonTimeslot = commonTimeSlotFinder.
+                    getCommonTimeSlot(zoneSchedule.getScheduleGroup(), buildingOccupancy.getDays(),
+                            zoneSchedule.getDays(), true);
+            commonTimeSlotFinder.trimScheduleTowardCommonTimeSlotAndSync(zoneSchedule, commonTimeslot, ccuHsApi);
+        }
+    }
+
+    public boolean isTimeSlotExpanded(BuildingOccupancy.Days removeEntry, int startTimeHour, int endTimeHour, int startTimeMinute, int endTimeMinute) {
+        return (removeEntry.getSthh() > startTimeHour) || (removeEntry.getSthh() >= startTimeHour && removeEntry.getStmm() > startTimeMinute)
+                || (removeEntry.getEthh() < endTimeHour) ||  (removeEntry.getEthh() <= endTimeHour && removeEntry.getEtmm() < endTimeMinute);
+    }
 }

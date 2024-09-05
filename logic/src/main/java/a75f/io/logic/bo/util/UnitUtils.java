@@ -89,7 +89,9 @@ public class UnitUtils {
     {
         return 0.5 * Math.round(d * 2);
     }
-
+    public static float roundToHalf(float val) {
+        return (float) (0.5 * Math.round(val * 2));
+    }
     public static double fahrenheitToCelsiusTuner(double value) {
 
         double conversionToCel = ((value - 32) * 0.5555555555);

@@ -152,7 +152,7 @@ class BacNetSelectModelView : BaseDialogFragment() {
         }
 
         if(viewModel.bacnetRequestFailed.value){
-            Toast.makeText(requireContext(), "Failed to fetch data check bacnet configuration", Toast.LENGTH_LONG).show()
+            Toast.makeText(requireContext(), "Failed to fetch the required model or model not found", Toast.LENGTH_LONG).show()
             viewModel.bacnetRequestFailed.value = false
         }
 

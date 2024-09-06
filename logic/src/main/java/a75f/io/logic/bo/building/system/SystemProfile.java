@@ -15,6 +15,7 @@ import java.util.TimerTask;
 
 import a75.io.algos.tr.TRSystem;
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.HayStackConstants;
@@ -940,6 +941,33 @@ public abstract class SystemProfile
         }
 
     }
+     public void deleteOAODamperEquip() {
+        if((ccu().oaoProfile != null)) {
+            CCUHsApi hayStack = CCUHsApi.getInstance();
+            Device oaoSN = HSUtil.getDevice((short) ccu().oaoProfile.getNodeAddress());
+            hayStack.deleteEntityTree(ccu().oaoProfile.getEquipRef());
+            hayStack.deleteEntityTree((oaoSN.getId()));
+            ccu().oaoProfile = null;
+            CcuLog.i(L.TAG_CCU_SYSTEM, "OAO Equip deleted successfully");
+        }
+        else {
+            CcuLog.i(L.TAG_CCU_SYSTEM, "OAO Equip not found");
+        }
+    }
+    public void deleteBypassDamperEquip() {
+        if(ccu().bypassDamperProfile != null) {
+            CCUHsApi hayStack = CCUHsApi.getInstance();
+            Device bypassDamper = HSUtil.getDevice((short) ccu().bypassDamperProfile.getNodeAddr());
+            hayStack.deleteEntityTree(ccu().bypassDamperProfile.getEquipRef());
+            hayStack.deleteEntityTree((bypassDamper.getId()));
+            ccu().bypassDamperProfile = null;
+            CcuLog.i(L.TAG_CCU_SYSTEM, "BypassDamper Equip deleted successfully");
+        }
+        else {
+            CcuLog.i(L.TAG_CCU_SYSTEM, "BypassDamper Equip not found");
+        }
+    }
+
 
     public void deleteSystemConnectModule() {
         AdvancedAhuUtilKt.deleteSystemConnectModule();

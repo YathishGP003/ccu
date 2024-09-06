@@ -42,6 +42,7 @@ import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.ccu.restore.RestoreCCU;
+import a75f.io.logic.util.onLoadingCompleteListener;
 import a75f.io.messaging.client.MessagingClient;
 import a75f.io.renatus.DABFullyAHUProfile;
 import a75f.io.renatus.DABHybridAhuProfile;
@@ -765,8 +766,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             container.setLayoutParams(paramsPager);
         }
         if (position == 12) {
-
-            fragment = new VavStagedVfdRtuFragment();
+            fragment = new VavStagedVfdRtuFragment(onLoadingCompleteListener.INSTANCE);
 
             Bundle data = new Bundle();
             data.putBoolean("REGISTRATION_WIZARD", true);

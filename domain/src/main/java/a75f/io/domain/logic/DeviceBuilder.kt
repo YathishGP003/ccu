@@ -291,7 +291,7 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
                     delete++
                     //DB point does not exist in model. Should be deleted.
                     CcuLog.e(Domain.LOG_TAG, " Cut-Over migration : Redundant Point $dbPoint")
-                    //hayStack.deleteEntityTree(dbPoint["id"].toString())
+                    hayStack.deleteEntityTree(dbPoint["id"].toString())
                 } else {
                     update++
                     CcuLog.e(Domain.LOG_TAG, " Cut-Over migration Update with domainName $modelPointName : $dbPoint")

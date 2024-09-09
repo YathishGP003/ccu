@@ -28,7 +28,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
@@ -102,7 +101,6 @@ import a75f.io.renatus.tuners.TunerFragment;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
-import a75f.io.renatus.util.RxjavaUtil;
 import a75f.io.renatus.util.TemperatureModeUtil;
 import a75f.io.renatus.views.CustomCCUSwitch;
 import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
@@ -1012,43 +1010,26 @@ public class InstallerOptions extends Fragment {
     }
 
     private void goToNext() {
-        new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected void onPreExecute() {
-                super.onPreExecute();
-                //showProgressDialog();
-            }
-
-            @Override
-            protected Void doInBackground(Void... voids) {
-
-                if (!Globals.getInstance().siteAlreadyCreated()) {
-                    TunerEquip.INSTANCE.initialize(CCUHsApi.getInstance(), false);
-                    //BuildingTuners.getInstance();
-                    //SchedulabeLimits.Companion.addSchedulableLimits(true,null,null);
-                    DefaultSchedules.setDefaultCoolingHeatingTemp();
+        ExecutorTask.executeAsync(
+                () -> {
+                    if (!Globals.getInstance().siteAlreadyCreated()) {
+                        TunerEquip.INSTANCE.initialize(CCUHsApi.getInstance(), false);
+                        //BuildingTuners.getInstance();
+                        //SchedulabeLimits.Companion.addSchedulableLimits(true,null,null);
+                        DefaultSchedules.setDefaultCoolingHeatingTemp();
 //                    DefaultSchedules.generateDefaultSchedule(false, null);
+                    }
+
+                    L.saveCCUState();
+                    CCUHsApi.getInstance().log();
+                    CCUHsApi.getInstance().syncEntityTree();
+                },
+                () -> {
+                    prefs.setBoolean("PROFILE_SETUP", false);
+                    prefs.setBoolean("CCU_SETUP", true);
+                    ((FreshRegistration) getActivity()).selectItem(5);
                 }
-
-                L.saveCCUState();
-                CCUHsApi.getInstance().log();
-                CCUHsApi.getInstance().syncEntityTree();
-
-
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute(Void nul) {
-                super.onPostExecute(nul);
-                //hideProgressDialog();
-                prefs.setBoolean("PROFILE_SETUP", false);
-                prefs.setBoolean("CCU_SETUP", true);
-                ((FreshRegistration) getActivity()).selectItem(5);
-
-            }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-
+        );
     }
 
     @Override

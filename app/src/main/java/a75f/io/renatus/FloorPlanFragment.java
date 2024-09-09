@@ -6,7 +6,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -78,6 +77,7 @@ import a75f.io.renatus.modbus.util.ModbusLevel;
 import a75f.io.renatus.util.HttpsUtils.HTTPUtils;
 import a75f.io.renatus.util.NetworkUtil;
 import a75f.io.renatus.util.ProgressDialogUtils;
+import a75f.io.util.ExecutorTask;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -348,49 +348,44 @@ public class FloorPlanFragment extends Fragment {
     @SuppressLint("StaticFieldLeak")
     public void getBuildingFloorsZones(String enableKeyboard) {
         loadExistingZones();
-        new AsyncTask<String, Void, Void>() {
+        ExecutorTask.executeBackground( () -> {
+            if (!HTTPUtils.isNetworkConnected()) {
+                return;
+            }
+            HClient hClient = new HClient(CCUHsApi.getInstance().getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
+            String siteUID = CCUHsApi.getInstance().getSiteIdRef().toString();
 
-            @Override
-            protected Void doInBackground(String... strings) {
-                if (!HTTPUtils.isNetworkConnected()) {
-                    return null;
-                }
-                HClient hClient = new HClient(CCUHsApi.getInstance().getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
-                String siteUID = CCUHsApi.getInstance().getSiteIdRef().toString();
+            if (siteUID == null) {
+                return;
+            }
+            //for floor
+            HDict tDict = new HDictBuilder().add("filter", "floor and siteRef == " + siteUID).toDict();
+            HGrid floorPoint = hClient.call("read", HGridBuilder.dictToGrid(tDict));
+            if (floorPoint == null) {
+                return;
+            }
+            Iterator it = floorPoint.iterator();
 
-                if (siteUID == null) {
-                    return null;
-                }
-                //for floor
-                HDict tDict = new HDictBuilder().add("filter", "floor and siteRef == " + siteUID).toDict();
-                HGrid floorPoint = hClient.call("read", HGridBuilder.dictToGrid(tDict));
-                if (floorPoint == null) {
-                    return null;
-                }
-                Iterator it = floorPoint.iterator();
-
-                siteFloorList.clear();
+            siteFloorList.clear();
+            while (it.hasNext()) {
                 while (it.hasNext()) {
-                    while (it.hasNext()) {
-                        HashMap<Object, Object> map = new HashMap<>();
-                        HRow r = (HRow) it.next();
-                        HRow.RowIterator ri = (HRow.RowIterator) r.iterator();
-                        while (ri.hasNext()) {
-                            HDict.MapEntry m = (HDict.MapEntry) ri.next();
-                            map.put(m.getKey(), m.getValue());
-                        }
-                        siteFloorList.add(new Floor.Builder().setHashMap(map).build());
+                    HashMap<Object, Object> map = new HashMap<>();
+                    HRow r = (HRow) it.next();
+                    HRow.RowIterator ri = (HRow.RowIterator) r.iterator();
+                    while (ri.hasNext()) {
+                        HDict.MapEntry m = (HDict.MapEntry) ri.next();
+                        map.put(m.getKey(), m.getValue());
                     }
+                    siteFloorList.add(new Floor.Builder().setHashMap(map).build());
                 }
+            }
 
-                //for zones
-                HDict zDict = new HDictBuilder().add("filter", "room and not oao and siteRef == " + siteUID).toDict();
+            //for zones
+            HDict zDict = new HDictBuilder().add("filter", "room and not oao and siteRef == " + siteUID).toDict();
 
-                try {
-                    HGrid zonePoint = hClient.call("read", HGridBuilder.dictToGrid(zDict));
-                    if (zonePoint == null) {
-                        return null;
-                    }
+            try {
+                HGrid zonePoint = hClient.call("read", HGridBuilder.dictToGrid(zDict));
+                if (zonePoint != null) {
                     Iterator zit = zonePoint.iterator();
                     siteRoomList.clear();
                     while (zit.hasNext()) {
@@ -400,16 +395,12 @@ public class FloorPlanFragment extends Fragment {
                             siteRoomList.add(zr.getStr("dis"));
                         }
                     }
-
-                } catch (CallException e) {
-                    CcuLog.d(L.TAG_CCU_UI, "Failed to fetch room data " + e.getMessage());
-                    e.printStackTrace();
                 }
-
-
-                return null;
+            } catch (CallException e) {
+                CcuLog.d(L.TAG_CCU_UI, "Failed to fetch room data " + e.getMessage());
+                e.printStackTrace();
             }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        });
     }
 
     private void loadExistingZones() {

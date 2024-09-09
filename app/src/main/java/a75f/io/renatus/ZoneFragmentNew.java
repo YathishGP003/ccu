@@ -24,7 +24,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -154,6 +153,7 @@ import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.SeekArc;
 import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
 import a75f.io.restserver.server.HttpServer;
+import a75f.io.util.ExecutorTask;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
@@ -536,40 +536,29 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                     CcuLog.i(LOG_TAG + "CurrentTemp", "SensorCurrentTemp:" + currentTemp + " Node:" + nodeAddress + " zoneNodes:" + zoneNodes);
                     if (zoneNodes != null && zoneNodes.size() > 0 && zoneNodes.contains(nodeAddress)) {
                         SeekArc tempSeekArc = seekArcArrayList.get(i);
-                        new AsyncTask<String, Void, Double>() {
-                            @Override
-                            protected Double doInBackground(final String... params) {
-                                currentTempSensor = 0;
-                                noTempSensor = 0;
-                                ArrayList<HashMap> zoneEquips = gridItem.getZoneEquips();
-                                for (int j = 0; j < zoneEquips.size(); j++) {
-                                    Equip tempEquip = new Equip.Builder().setHashMap(zoneEquips.get(j)).build();
-                                    int statusVal = CCUHsApi.getInstance().readHisValByQuery("point and status and not ota and his and not writable and equipRef ==\""+tempEquip.getId()+"\"").intValue();
-                                    if (statusVal != ZoneState.TEMPDEAD.ordinal() && statusVal != ZoneState.RFDEAD.ordinal()) {
-                                        double avgTemp = CCUHsApi.getInstance().readHisValByQuery("temp and sensor and (current or space) and equipRef == \"" + tempEquip.getId() + "\"");
-                                        currentTempSensor = (currentTempSensor + avgTemp);
-                                    } else {
-                                        noTempSensor++;
-                                    }
-                                }
-                                if (currentTempSensor > 0 && zoneEquips.size() > 1) {
-                                    currentTempSensor = currentTempSensor / (zoneEquips.size() - noTempSensor);
-                                    DecimalFormat decimalFormat = new DecimalFormat("#.#");
-                                    currentTempSensor = Double.parseDouble(decimalFormat.format(Math.round(currentTempSensor * 10.0) / 10.0));
-                                }
-                                if (currentTempSensor > 0) {
-                                    return currentTempSensor;
-                                }
-                                return null;
-                            }
-
-                            @Override
-                            protected void onPostExecute(final Double result) {
-                                if (result != null) {
-                                    tempSeekArc.setCurrentTemp((float) (result.doubleValue()));
+                        ExecutorTask.executeBackground(() -> {
+                            currentTempSensor = 0;
+                            noTempSensor = 0;
+                            ArrayList<HashMap> zoneEquips = gridItem.getZoneEquips();
+                            for (int j = 0; j < zoneEquips.size(); j++) {
+                                Equip tempEquip = new Equip.Builder().setHashMap(zoneEquips.get(j)).build();
+                                int statusVal = CCUHsApi.getInstance().readHisValByQuery("point and status and not ota and his and not writable and equipRef ==\""+tempEquip.getId()+"\"").intValue();
+                                if (statusVal != ZoneState.TEMPDEAD.ordinal() && statusVal != ZoneState.RFDEAD.ordinal()) {
+                                    double avgTemp = CCUHsApi.getInstance().readHisValByQuery("temp and sensor and (current or space) and equipRef == \"" + tempEquip.getId() + "\"");
+                                    currentTempSensor = (currentTempSensor + avgTemp);
+                                } else {
+                                    noTempSensor++;
                                 }
                             }
-                        }.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, "");
+                            if (currentTempSensor > 0 && zoneEquips.size() > 1) {
+                                currentTempSensor = currentTempSensor / (zoneEquips.size() - noTempSensor);
+                                DecimalFormat decimalFormat = new DecimalFormat("#.#");
+                                currentTempSensor = Double.parseDouble(decimalFormat.format(Math.round(currentTempSensor * 10.0) / 10.0));
+                            }
+                            if (currentTempSensor > 0) {
+                                getActivity().runOnUiThread(() -> tempSeekArc.setCurrentTemp((float) (currentTempSensor)));
+                            }
+                        });
                         break;
                     }
                 }

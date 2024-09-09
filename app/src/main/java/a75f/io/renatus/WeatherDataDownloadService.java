@@ -1,7 +1,6 @@
 package a75f.io.renatus;
 
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 
 import org.apache.commons.lang3.StringUtils;
@@ -12,6 +11,7 @@ import java.util.HashMap;
 import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.atomic.AtomicReference;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Site;
@@ -21,6 +21,7 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.cloud.RenatusServicesEnvironment;
 import a75f.io.renatus.util.CCUUtils;
+import a75f.io.util.ExecutorTask;
 
 public class WeatherDataDownloadService {
 
@@ -76,84 +77,79 @@ public class WeatherDataDownloadService {
         }
         String weatherRef = site.get("weatherRef").toString();
 
+        AtomicReference<JSONObject> jsonResponse = new AtomicReference<>();
+        ExecutorTask.executeAsync(
+                () -> {
+                    String requestUrl = String.format("%s/current/%s", weatherUrl, weatherRef);
+                    CcuLog.i(L.TAG_CCU_WEATHER, "weatherURL: "+requestUrl+", weatherRef: "+weatherRef+", token: "+bearerToken);
+                    String response = HttpUtil.executeJson(
+                            requestUrl,
+                            null,
+                            bearerToken,
+                            false,
+                            HttpConstants.HTTP_METHOD_GET
+                    );
 
-        AsyncTask<Void, Integer, JSONObject> downloader = new AsyncTask<Void, Integer, JSONObject>() {
-            @Override
-            protected void onPostExecute(JSONObject response) {
-                JSONObject current;
-                try {
                     if (response != null) {
-                        current = response.getJSONObject("currentWeather");
-
-                        mCurrentTemp = current.getDouble("airTemp");
-                        mCurrentHumidity = CCUUtils.roundToTwoDecimal(current.getDouble("humidity"));
-                        mOutsideAirEnthalpy = CCUUtils.calculateAirEnthalpy(mCurrentTemp, mCurrentHumidity);
-
-                        mSummary = StringUtils.capitalize(current.getString("description"));
-                        micon = current.getString("icon");
-
-                        // Convert mm/min to mm/hr
-                        mPrecipIntensity = current.getDouble("precipitation") * 60;
-
-                        cloudCover = current.getDouble("cloudage");
-                        windSpeed = current.getDouble("windSpeed");
-                        windGust = current.getDouble("windGust");
-                        windBearing = current.getDouble("windBearing");
-
-                        maxtemp = current.getDouble("maxDailyTemp");
-                        mintemp = current.getDouble("minDailyTemp");
-
-                        mSunriseTime = CCUUtils.getTimeFromTimeStamp(current.getLong("sunrise"), "UTC");
-                        mSunsetTime = CCUUtils.getTimeFromTimeStamp(current.getLong("sunset"), "UTC");
-
-                        SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
-                        edit.putFloat("outside_cur_temp", (float) mCurrentTemp);
-                        edit.putFloat("outside_hum", (float) mCurrentHumidity);
-                        edit.putFloat("outside_precip",(float) mPrecipIntensity);
-                        edit.apply();
-
-                        CcuLog.i(L.TAG_CCU_WEATHER,
-                                "sunrise today at=" + mSunriseTime + ",sunset today at=" + mSunsetTime +
-                                "CCU_WEATHER"+"max temp is =" + maxtemp + ",min temp is=" + mintemp
-                        );
-                    } else {
-                        mCurrentTemp = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).getFloat("outside_cur_temp", (float) mCurrentTemp);
-                        mCurrentHumidity = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).getFloat("outside_hum", (float) mCurrentHumidity);
-                        mOutsideAirEnthalpy = CCUUtils.calculateAirEnthalpy(mCurrentTemp, mCurrentHumidity);
-                        mPrecipIntensity = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).getFloat("outside_precip", (float) mPrecipIntensity);
+                        try {
+                            jsonResponse.set(new JSONObject(response));
+                        } catch (JSONException e) {
+                            CcuLog.e(L.TAG_CCU_WEATHER, "Unable to parse JSON to retrieve weather data "+ e.getMessage());
+                        }
                     }
-                } catch (JSONException | NullPointerException e) {
-                    CcuLog.i(L.TAG_CCU_WEATHER,"Failed to process weather response. Exception: " + e.getMessage());
-                }
-            }
-
-            @Override
-            protected JSONObject doInBackground(Void... params) {
-                JSONObject jsonResponse = null;
-                String requestUrl = String.format("%s/current/%s", weatherUrl, weatherRef);
-                CcuLog.i(L.TAG_CCU_WEATHER, "weatherURL: "+requestUrl+", weatherRef: "+weatherRef+", token: "+bearerToken);
-                String response = HttpUtil.executeJson(
-                        requestUrl,
-                        null,
-                        bearerToken,
-                        false,
-                        HttpConstants.HTTP_METHOD_GET
-                );
-
-                if (response != null) {
+                },
+                () -> {
                     try {
-                        jsonResponse = new JSONObject(response);
-                    } catch (JSONException e) {
-                        CcuLog.e(L.TAG_CCU_WEATHER, "Unable to parse JSON to retrieve weather data "+ e.getMessage());
+                        if (jsonResponse.get() != null) {
+                            JSONObject current = jsonResponse.get().getJSONObject("currentWeather");
+                            refreshWeatherData(current);
+                        } else {
+                            mCurrentTemp = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).getFloat("outside_cur_temp", (float) mCurrentTemp);
+                            mCurrentHumidity = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).getFloat("outside_hum", (float) mCurrentHumidity);
+                            mOutsideAirEnthalpy = CCUUtils.calculateAirEnthalpy(mCurrentTemp, mCurrentHumidity);
+                            mPrecipIntensity = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).getFloat("outside_precip", (float) mPrecipIntensity);
+                        }
+                    } catch (JSONException | NullPointerException e) {
+                        CcuLog.i(L.TAG_CCU_WEATHER,"Failed to process weather response. Exception: " + e.getMessage());
                     }
                 }
-
-                return jsonResponse;
-            }
-        };
-        downloader.execute();
+        );
     }
-    
+
+    private static void refreshWeatherData(JSONObject current) throws JSONException {
+
+        mCurrentTemp = current.getDouble("airTemp");
+        mCurrentHumidity = CCUUtils.roundToTwoDecimal(current.getDouble("humidity"));
+        mOutsideAirEnthalpy = CCUUtils.calculateAirEnthalpy(mCurrentTemp, mCurrentHumidity);
+
+        mSummary = StringUtils.capitalize(current.getString("description"));
+        micon = current.getString("icon");
+
+        // Convert mm/min to mm/hr
+        mPrecipIntensity = current.getDouble("precipitation") * 60;
+
+        cloudCover = current.getDouble("cloudage");
+        windSpeed = current.getDouble("windSpeed");
+        windGust = current.getDouble("windGust");
+        windBearing = current.getDouble("windBearing");
+
+        maxtemp = current.getDouble("maxDailyTemp");
+        mintemp = current.getDouble("minDailyTemp");
+
+        mSunriseTime = CCUUtils.getTimeFromTimeStamp(current.getLong("sunrise"), "UTC");
+        mSunsetTime = CCUUtils.getTimeFromTimeStamp(current.getLong("sunset"), "UTC");
+
+        SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
+        edit.putFloat("outside_cur_temp", (float) mCurrentTemp);
+        edit.putFloat("outside_hum", (float) mCurrentHumidity);
+        edit.putFloat("outside_precip",(float) mPrecipIntensity);
+        edit.apply();
+
+        CcuLog.i(L.TAG_CCU_WEATHER,
+                "sunrise today at=" + mSunriseTime + ",sunset today at=" + mSunsetTime +
+                        "CCU_WEATHER"+"max temp is =" + maxtemp + ",min temp is=" + mintemp
+        );
+    }
     
     public static String getSummary() {
         return mSummary;

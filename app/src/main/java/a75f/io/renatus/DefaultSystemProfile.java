@@ -1,7 +1,6 @@
 package a75f.io.renatus;
 
 import android.annotation.SuppressLint;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -16,6 +15,7 @@ import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.renatus.registration.FreshRegistration;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
+import a75f.io.util.ExecutorTask;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -54,33 +54,21 @@ public class DefaultSystemProfile extends Fragment
             prefs = new Prefs(getContext().getApplicationContext());
             if (L.ccu().systemProfile instanceof DefaultSystem) {
             } else {
-
-                new AsyncTask<String, Void, Void>() {
-
-                    @Override
-                    protected void onPreExecute() {
-                        ProgressDialogUtils.showProgressDialog(getActivity(),"Loading System Profile");
-                        super.onPreExecute();
-                    }
-                    @Override
-                    protected Void doInBackground(final String... params) {
-                        if (systemProfile != null) {
+                ExecutorTask.executeAsync(
+                        () -> ProgressDialogUtils.showProgressDialog(getActivity(),"Loading System Profile"),
+                        () ->   {
+                            if (systemProfile != null) {
                             systemProfile.deleteSystemEquip();
                             L.ccu().systemProfile = null;
-                        }
-                        systemProfile = new DefaultSystem();
-                        L.ccu().systemProfile = systemProfile;
+                            }
+                            systemProfile = new DefaultSystem();
+                            L.ccu().systemProfile = systemProfile;
+                            CCUHsApi.getInstance().saveTagsData();
+                            CCUHsApi.getInstance().syncEntityTree();
+                        },
+                        () -> ProgressDialogUtils.hideProgressDialog()
+                    );
 
-                        return null;
-                    }
-
-                    @Override
-                    protected void onPostExecute(final Void result) {
-                        CCUHsApi.getInstance().saveTagsData();
-                        CCUHsApi.getInstance().syncEntityTree();
-                        ProgressDialogUtils.hideProgressDialog();
-                    }
-                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
             }
         if(isFromReg){
             mNext.setVisibility(View.VISIBLE);

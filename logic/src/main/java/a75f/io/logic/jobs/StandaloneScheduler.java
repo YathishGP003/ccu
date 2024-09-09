@@ -1,6 +1,5 @@
 package a75f.io.logic.jobs;
 
-import android.os.AsyncTask;
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
 
@@ -22,6 +21,7 @@ import a75f.io.logic.bo.building.ZoneTempState;
 import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.tuners.TunerConstants;
+import a75f.io.util.ExecutorTask;
 
 public class StandaloneScheduler {
 
@@ -189,10 +189,9 @@ public class StandaloneScheduler {
     }
 
     public static void updateOperationalPoints(final String equipRef, final String cmd, final double val) {
-        new AsyncTask<String, Void, Void>() {
-            @Override
-            protected Void doInBackground( final String ... params ) {
 
+        ExecutorTask.executeAsync(
+            () -> {
                 CCUHsApi hayStack = CCUHsApi.getInstance();
                 HashMap cdb = hayStack.read("point and standalone and "+cmd+" and equipRef == \""+equipRef+"\"");
                 if(cdb != null && (cdb.get("id") != null)) {
@@ -212,24 +211,19 @@ public class StandaloneScheduler {
                             hayStack.writeHisValById(id, val);
                         }
                     }
-                    if(p.getMarkers().contains("conditioning") && p.getMarkers().contains("userIntent")) {
+                    if (p.getMarkers().contains("conditioning") && p.getMarkers().contains("userIntent")) {
                         String zoneId = HSUtil.getZoneIdFromEquipId(equipRef);
                         DesiredTempDisplayMode.setModeTypeOnUserIntentChange(zoneId, CCUHsApi.getInstance());
                     }
                 }
-
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute( final Void result ) {
-                // continue what you are doing...
+            },
+            () -> {
                 if (zoneDataInterface != null) {
                     CcuLog.i("PubNub","Zone Data updateOperationalPoints Refresh");
                     zoneDataInterface.refreshScreen("", false);
                 }
             }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
+        );
     }
 
 	public static void updateStandaloneEquipStatus(String equipId,String status) {

@@ -9,7 +9,6 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
-import android.os.AsyncTask;
 import android.os.CountDownTimer;
 import androidx.annotation.ColorInt;
 import androidx.core.content.ContextCompat;
@@ -27,6 +26,7 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.definitions.RoomDataInterface;
 import a75f.io.renatus.R;
+import a75f.io.util.ExecutorTask;
 
 
 public class SeekArc extends View implements RoomDataInterface
@@ -887,29 +887,13 @@ public class SeekArc extends View implements RoomDataInterface
                         cy + mTempTextHeight - (bounds.height() / 2), mProgressTextPaint);
             }*/
     
-            if (zoneProfile != null)
-            {
+            if (zoneProfile != null) {
                 curTemp = Double.toString(zoneProfile.getDisplayCurrentTemp());
-                if (mDesireTemp != 0 && mDesireTemp != L.getDesiredTemp(zoneProfile))
-                {
-                    new AsyncTask<Void, Void, Void>() {
-                        @Override
-                        protected Void doInBackground( final Void ... params ) {
-                            L.setDesiredTemp(mDesireTemp, zoneProfile); //TODO - Optimize
-                            return null;
-                        }
-        
-                        @Override
-                        protected void onPostExecute( final Void result ) {
-                            // continue what you are doing...
-                        }
-                    }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-                    
+                if (mDesireTemp != 0 && mDesireTemp != L.getDesiredTemp(zoneProfile)) {
+                    ExecutorTask.executeBackground(() -> L.setDesiredTemp(mDesireTemp, zoneProfile));
                     CcuLog.d(L.TAG_CCU_VAV_TEMP, " mDesireTemp " + mDesireTemp);
                 }
-            }
-            else
-            {
+            } else {
                 curTemp = Double.toString(originalCurrentTemp);
             }
             mProgressTextPaint.getTextBounds(curTemp, 0, curTemp.length(), bounds);

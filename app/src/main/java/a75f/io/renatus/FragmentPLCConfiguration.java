@@ -2,7 +2,6 @@ package a75f.io.renatus;
 
 import android.app.Dialog;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -38,6 +37,7 @@ import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.views.CustomCCUSwitch;
 import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
+import a75f.io.util.ExecutorTask;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -444,31 +444,24 @@ public class FragmentPLCConfiguration extends BaseDialogFragment
                     return;
                 }
 
-                new AsyncTask<String, Void, Void>() {
-                    @Override
-                    protected void onPreExecute() {
+                ExecutorTask.executeAsync(
+                    () -> {
                         setButton.setEnabled(false);
                         ProgressDialogUtils.showProgressDialog(getActivity(),"Saving PLC Configuration");
-                        super.onPreExecute();
-                    }
-
-                    @Override
-                    protected Void doInBackground( final String ... params ) {
+                    },
+                    () -> {
                         CCUHsApi.getInstance().resetCcuReady();
                         setupPlcProfile();
                         L.saveCCUState();
                         CCUHsApi.getInstance().setCcuReady();
-                        return null;
-                    }
-
-                    @Override
-                    protected void onPostExecute( final Void result ) {
+                    },
+                    () -> {
                         ProgressDialogUtils.hideProgressDialog();
                         FragmentPLCConfiguration.this.closeAllBaseDialogFragments();
                         getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
                         LSerial.getInstance().sendSeedMessage(false,false, mSmartNodeAddress, zoneRef,floorRef);
                     }
-                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
+                );
             }
         });
         configSpinnerDropIconColor();

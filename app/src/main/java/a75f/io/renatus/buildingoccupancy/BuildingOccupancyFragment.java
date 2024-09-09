@@ -523,7 +523,10 @@ public class BuildingOccupancyFragment extends DialogFragment implements Buildin
     }
 
     private void drawCurrentTime() {
-
+        if(!isAdded() || getActivity()==null || getContext()==null) {
+            CcuLog.w(L.TAG_CCU_UI, "BuildingOccupancyFragment is not attached to the activity or context is null. Cancelling the drawCurrentTime operation.");
+            return;
+        }
         DateTime now = new DateTime(MockTime.getInstance().getMockTime());
 
 

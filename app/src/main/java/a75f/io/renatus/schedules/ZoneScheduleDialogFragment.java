@@ -991,7 +991,7 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
             ProgressDialogUtils.showProgressDialog(getActivity(),"Deleting schedule...");
             mListener.onClickSave(mPosition, 74, 72, 0, 0, 0, 0, null,
                     72.0, 67.0, 77.0, 72.0, 2.0,
-                    2.0, false, null, true);
+                    2.0, followBuilding.isChecked(), null, true);
             alertDialog.dismiss();
             new Handler().postDelayed(ProgressDialogUtils::hideProgressDialog, 1000);
             dismiss();

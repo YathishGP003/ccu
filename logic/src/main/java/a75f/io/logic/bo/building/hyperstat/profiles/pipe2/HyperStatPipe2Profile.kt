@@ -129,10 +129,9 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
         val averageDesiredTemp = getAverageTemp(userIntents)
 
         val fanModeSaved = FanModeCacheStorage().getFanModeFromCache(equip.equipRef!!)
-        val actualFanMode = HSHaystackUtil.getPipe2ActualFanMode(equip.node.toString(), fanModeSaved)
         val basicSettings = fetchBasicSettings(equip)
         logIt("Before fall back ${basicSettings.fanMode} ${basicSettings.conditioningMode}")
-        val updatedFanMode = fallBackFanMode(equip, equip.equipRef!!, fanModeSaved, actualFanMode, basicSettings)
+        val updatedFanMode = fallBackFanMode(equip, equip.equipRef!!, fanModeSaved, basicSettings)
         basicSettings.fanMode = updatedFanMode
         logIt("After fall back ${basicSettings.fanMode} ${basicSettings.conditioningMode}")
         heatingThreshold = hyperStatTuners.heatingThreshold

@@ -4,6 +4,7 @@ import a75f.io.api.haystack.CCUHsApi
 import a75f.io.domain.api.Domain
 import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
+import a75f.io.logic.util.onLoadingCompleteListener
 import a75f.io.renatus.R
 import a75f.io.renatus.compose.ComposeUtil
 import a75f.io.renatus.compose.SaveTextView
@@ -40,21 +41,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 
-class VavStagedRtuFragment : StagedRtuFragment() {
+class VavStagedRtuFragment(loadingListener: onLoadingCompleteListener) : StagedRtuFragment() {
 
     private val viewModel: VavStagedRtuViewModel by viewModels()
+    private val listener : onLoadingCompleteListener = loadingListener
 
     companion object {
         val ID: String = VavStagedRtuFragment::class.java.simpleName
         fun newInstance(): VavStagedRtuFragment {
-            return VavStagedRtuFragment()
+            return VavStagedRtuFragment({ this })
         }
     }
 
@@ -86,7 +87,6 @@ class VavStagedRtuFragment : StagedRtuFragment() {
         })
     }
 
-    @Preview
     @Composable
     fun RootView() {
         val modelLoaded by viewModel.modelLoaded.observeAsState(initial = false)
@@ -95,7 +95,7 @@ class VavStagedRtuFragment : StagedRtuFragment() {
             CcuLog.i(Domain.LOG_TAG, "Show Progress")
             return
         }
-
+       listener.onLoadingComplete()
         CcuLog.i(Domain.LOG_TAG, "Hide progress")
 
         LazyColumn(

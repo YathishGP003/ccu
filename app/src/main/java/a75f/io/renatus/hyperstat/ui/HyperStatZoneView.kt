@@ -300,7 +300,7 @@ private fun handleFanMode(equipId: String, selectedPosition: Int, nodeAddress: S
         updateHyperStatUIPoints(equipId, "zone and sp and fan and operation and mode", actualFanMode.toDouble(),
                 CCUHsApi.getInstance().ccuUserName)
         if (selectedPosition != 0 && selectedPosition % 3 == 0)
-            cacheStorage.saveFanModeInCache(equipId, selectedPosition)
+            cacheStorage.saveFanModeInCache(equipId, actualFanMode) // while saving the fan mode, we need to save the actual fan mode instead of selected position
         else
             cacheStorage.removeFanModeFromCache(equipId)
     }

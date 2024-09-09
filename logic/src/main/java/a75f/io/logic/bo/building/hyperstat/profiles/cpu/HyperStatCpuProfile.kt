@@ -125,10 +125,9 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
         val averageDesiredTemp = getAverageTemp(userIntents)
 
         val fanModeSaved = FanModeCacheStorage().getFanModeFromCache(equip.equipRef!!)
-        val actualFanMode = getActualFanMode(equip.node.toString(), fanModeSaved)
         val basicSettings = fetchBasicSettings(equip)
         CcuLog.d(L.TAG_CCU_HSCPU,"Before fall back ${basicSettings.fanMode} ${basicSettings.conditioningMode}")
-        val updatedFanMode = fallBackFanMode(equip, equip.equipRef!!, fanModeSaved, actualFanMode, basicSettings)
+        val updatedFanMode = fallBackFanMode(equip, equip.equipRef!!, fanModeSaved, basicSettings)
         basicSettings.fanMode = updatedFanMode
         CcuLog.d(L.TAG_CCU_HSCPU,"After fall back ${basicSettings.fanMode} ${basicSettings.conditioningMode}")
         hyperstatCPUAlgorithm.initialise(tuners = hyperStatTuners)

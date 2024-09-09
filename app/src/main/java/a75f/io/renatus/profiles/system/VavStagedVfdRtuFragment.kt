@@ -4,6 +4,7 @@ import a75f.io.api.haystack.CCUHsApi
 import a75f.io.domain.api.Domain
 import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
+import a75f.io.logic.util.onLoadingCompleteListener
 import a75f.io.renatus.R
 import a75f.io.renatus.composables.DropDownWithLabel
 import a75f.io.renatus.composables.SystemAnalogOutMappingViewVavStagedVfdRtu
@@ -47,24 +48,24 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 
-class VavStagedVfdRtuFragment : StagedRtuFragment() {
+class VavStagedVfdRtuFragment(loadingListener: onLoadingCompleteListener) : StagedRtuFragment() {
 
     private val viewModel : VavStagedVfdRtuViewModel by viewModels()
     var viewState: MutableState<StagedRtuVfdViewState> = mutableStateOf(StagedRtuVfdViewState())
+    private val listener : onLoadingCompleteListener = loadingListener
 
 
 
     companion object {
         val ID: String = VavStagedVfdRtuFragment::class.java.simpleName
         fun newInstance() : VavStagedVfdRtuFragment {
-            return VavStagedVfdRtuFragment()
+            return VavStagedVfdRtuFragment({this})
         }
     }
 
@@ -162,7 +163,6 @@ class VavStagedVfdRtuFragment : StagedRtuFragment() {
         }
     }
 
-    @Preview
     @Composable
     fun RootView() {
         val modelLoaded by viewModel.modelLoaded.observeAsState(initial = false)
@@ -171,7 +171,7 @@ class VavStagedVfdRtuFragment : StagedRtuFragment() {
             CcuLog.i(Domain.LOG_TAG, "Show Progress")
             return
         }
-
+        listener.onLoadingComplete()
         val viewState = viewModel.viewState.value as StagedRtuVfdViewState
         LazyColumn(modifier = Modifier
             .fillMaxSize()

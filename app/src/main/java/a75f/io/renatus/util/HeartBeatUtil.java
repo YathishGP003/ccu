@@ -136,12 +136,15 @@ public class HeartBeatUtil {
     }
 
     public static boolean isZoneAlive(ArrayList<HashMap> equips){
-        for(HashMap equip : equips){
+        if (equips == null || equips.isEmpty()) {
+            return false;
+        }
+        for (HashMap equip : equips) {
             String address = equip.get("group").toString();
-            if(isModuleAlive(address)){
-                return true;
+            if (!isModuleAlive(address)) {
+                return false; // Return false if any module is not alive
             }
         }
-        return false;
+        return true; // Return true if all modules are alive
     }
 }

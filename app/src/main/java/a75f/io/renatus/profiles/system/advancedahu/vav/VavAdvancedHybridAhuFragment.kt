@@ -2,6 +2,7 @@ package a75f.io.renatus.profiles.system.advancedahu.vav
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.logic.bo.building.system.vav.config.VavAdvancedHybridAhuConfig
+import a75f.io.logic.util.onLoadingCompleteListener
 import a75f.io.renatus.composables.DeleteDialog
 import a75f.io.renatus.composables.SaveConfig
 import a75f.io.renatus.profiles.system.advancedahu.AdvancedHybridAhuFragment
@@ -25,7 +26,8 @@ import kotlinx.coroutines.withContext
  * Created by Manjunath K on 14-03-2024.
  */
 
-class VavAdvancedHybridAhuFragment : AdvancedHybridAhuFragment() {
+class VavAdvancedHybridAhuFragment(loadingListener: onLoadingCompleteListener) : AdvancedHybridAhuFragment() {
+    private val listener : onLoadingCompleteListener = loadingListener
     override val viewModel: VavAdvancedHybridAhuViewModel by viewModels()
 
     companion object {
@@ -34,7 +36,6 @@ class VavAdvancedHybridAhuFragment : AdvancedHybridAhuFragment() {
     init {
         instance = this
     }
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
@@ -60,6 +61,7 @@ class VavAdvancedHybridAhuFragment : AdvancedHybridAhuFragment() {
 
     @Composable
     fun RootView() {
+        listener.onLoadingComplete()
         Column {
             if (viewModel.viewState.value.pendingDeleteConnect) {
                 DeleteDialog(

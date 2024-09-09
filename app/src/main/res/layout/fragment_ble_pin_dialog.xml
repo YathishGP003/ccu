@@ -10,7 +10,7 @@
         android:id="@+id/ble_dialog_enter_pin_textview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Please enter pin displayed on 75F device"
+        android:text="Please enter pin displayed on the device"
         android:textSize="28dp"></TextView>
 
 

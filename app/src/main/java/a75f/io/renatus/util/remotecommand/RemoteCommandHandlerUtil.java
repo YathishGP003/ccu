@@ -75,7 +75,7 @@ public class RemoteCommandHandlerUtil {
     private static final String SET_HOME_APP_CMD = "cmd package set-home-activity --user 0 \"%s/.MainActivity\"";
     private static final String APPOPS_SET_ALLOW_CMD = "appops set %s %s allow";
     private static final String PM_GRANT_CMD = "pm grant %s %s";
-    private static final String BAC_APP_PACKAGE_NAME = "com.example.ccu_bacapp";
+    private static final String BAC_APP_PACKAGE_NAME = "io.seventyfivef.bacapp";
     private static final String REMOTE_ACCESS_PACKAGE_NAME = "io.seventyfivef.remoteaccess";
     private static final String HOME_APP_PACKAGE_NAME_OBSOLETE = "io.seventyfivef.home";
     private static final String HOME_APP_PACKAGE_NAME = "com.x75frenatus.home";
@@ -337,6 +337,8 @@ public class RemoteCommandHandlerUtil {
                             String fileName = resolveApkFilename(bacAppApkName);
                             if (fileName != null) {
                                 String[] commands = new String[]{
+                                        // uninstall the bacapp with older package name
+                                        String.format(UNINSTALL_CMD, "com.example.ccu_bacapp"),
                                         String.format(INSTALL_CMD, fileName)
                                 };
                                 RenatusApp.executeAsRoot(commands, BAC_APP_PACKAGE_NAME, false, false);

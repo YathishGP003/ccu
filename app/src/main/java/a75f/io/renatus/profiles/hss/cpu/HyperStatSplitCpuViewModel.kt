@@ -25,14 +25,17 @@ import a75f.io.renatus.FloorPlanFragment
 import a75f.io.renatus.modbus.util.showToast
 import a75f.io.renatus.profiles.hss.HyperStatSplitViewModel
 import a75f.io.renatus.util.ProgressDialogUtils
+import a75f.io.renatus.util.highPriorityDispatcher
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.lifecycle.viewModelScope
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 
 class HyperStatSplitCpuViewModel : HyperStatSplitViewModel() {
@@ -61,8 +64,7 @@ class HyperStatSplitCpuViewModel : HyperStatSplitViewModel() {
         this.hayStack = hayStack
 
         initializeLists()
-
-        modelLoaded = true
+        CcuLog.i(Domain.LOG_TAG, "HSS initialized")
     }
 
     private fun initializeLists() {
@@ -113,7 +115,7 @@ class HyperStatSplitCpuViewModel : HyperStatSplitViewModel() {
     }
 
     private fun isUniversalInDuplicated(type: CpuUniInType): Boolean {
-        var nInstances : Int = 0
+        var nInstances = 0
 
         if (this.viewState.value.universalIn1Config.enabled && this.viewState.value.universalIn1Config.association == type.ordinal) nInstances++
         if (this.viewState.value.universalIn2Config.enabled && this.viewState.value.universalIn2Config.association == type.ordinal) nInstances++
@@ -136,7 +138,7 @@ class HyperStatSplitCpuViewModel : HyperStatSplitViewModel() {
     }
 
     private fun isSensorBusDuplicated(type: CpuEconSensorBusTempAssociation): Boolean {
-        var nInstances : Int = 0
+        var nInstances = 0
 
         if (this.viewState.value.sensorAddress0.enabled && this.viewState.value.sensorAddress0.association == type.ordinal) nInstances++
         if (this.viewState.value.sensorAddress1.enabled && this.viewState.value.sensorAddress1.association == type.ordinal) nInstances++
@@ -190,39 +192,34 @@ class HyperStatSplitCpuViewModel : HyperStatSplitViewModel() {
     override fun saveConfiguration() {
         if (validateProfileConfig()) {
             if (saveJob == null) {
-                saveJob = viewModelScope.launch {
-                    ProgressDialogUtils.showProgressDialog(context, "Saving HyperStat Split Configuration")
-                    withContext(Dispatchers.IO) {
-                        CCUHsApi.getInstance().resetCcuReady()
+                ProgressDialogUtils.showProgressDialog(context, "Saving HyperStat Split Configuration")
+                saveJob = viewModelScope.launch(highPriorityDispatcher) {
+                    CCUHsApi.getInstance().resetCcuReady()
+                    setUpHyperStatSplitProfile()
+                    CcuLog.i(Domain.LOG_TAG, "HSS Profile Setup complete")
 
-                        setUpHyperStatSplitProfile()
-                        CcuLog.i(Domain.LOG_TAG, "HSS Profile Setup complete")
-                        L.saveCCUState()
-
-                        hayStack.syncEntityTree()
-                        CCUHsApi.getInstance().setCcuReady()
-                        CcuLog.i(Domain.LOG_TAG, "Send seed for $deviceAddress")
-                        LSerial.getInstance()
-                            .sendHyperSplitSeedMessage(deviceAddress, zoneRef, floorRef)
-
-                        DesiredTempDisplayMode.setModeType(zoneRef, CCUHsApi.getInstance())
-                        CcuLog.i(Domain.LOG_TAG, "HSS Profile Pairing complete")
-
-                        withContext(Dispatchers.Main) {
-                            context.sendBroadcast(Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED))
-                            showToast("HSS Configuration saved successfully", context)
-                            CcuLog.i(Domain.LOG_TAG, "Close Pairing dialog")
-                            ProgressDialogUtils.hideProgressDialog()
-                            _isDialogOpen.postValue(false)
-                        }
-
+                    withContext(Dispatchers.Main) {
+                        context.sendBroadcast(Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED))
+                        showToast("HSS Configuration saved successfully", context)
+                        CcuLog.i(Domain.LOG_TAG, "Close Pairing dialog")
+                        ProgressDialogUtils.hideProgressDialog()
+                        pairingCompleteListener.onPairingComplete()
                     }
+                    L.saveCCUState()
+                    hayStack.syncEntityTree()
+                    CCUHsApi.getInstance().setCcuReady()
+                    CcuLog.i(Domain.LOG_TAG, "Send seed for $deviceAddress")
+                    LSerial.getInstance()
+                        .sendHyperSplitSeedMessage(deviceAddress, zoneRef, floorRef)
+
+                    DesiredTempDisplayMode.setModeType(zoneRef, CCUHsApi.getInstance())
+                    CcuLog.i(Domain.LOG_TAG, "HSS Profile Pairing complete")
 
                     // This check is needed because the dialog sometimes fails to close inside the coroutine.
                     // We don't know why this happens.
                     if (ProgressDialogUtils.isDialogShowing()) {
                         ProgressDialogUtils.hideProgressDialog()
-                        _isDialogOpen.postValue(false)
+                        pairingCompleteListener.onPairingComplete()
                     }
                 }
             }
@@ -374,17 +371,52 @@ class HyperStatSplitCpuViewModel : HyperStatSplitViewModel() {
         if (profileConfiguration.isDefault) {
 
             val equipId = addEquipAndPoints(deviceAddress, profileConfiguration, floorRef, zoneRef, nodeType, hayStack, equipModel, deviceModel)
-
-            HyperstatSplitReconfigurationHandler.Companion.addLinearFanLowMedHighPoints(equipId, hayStack.site!!.id, equipDis, hayStack, profileConfiguration as HyperStatSplitCpuProfileConfiguration, equipModel)
-            HyperstatSplitReconfigurationHandler.Companion.correctSensorBusTempPoints(profileConfiguration, hayStack)
-            HyperstatSplitReconfigurationHandler.Companion.addSensorBusPressureLogicalPoint(profileConfiguration, equipId, hayStack, equipModel)
-            HyperstatSplitReconfigurationHandler.Companion.setOutputTypes(profileConfiguration, hayStack)
-            setScheduleType(profileConfiguration)
-            HyperstatSplitReconfigurationHandler.Companion.handleNonDefaultConditioningMode(profileConfiguration as HyperStatSplitCpuProfileConfiguration, hayStack)
-            HyperstatSplitReconfigurationHandler.Companion.handleNonDefaultFanMode(profileConfiguration as HyperStatSplitCpuProfileConfiguration, hayStack)
-            HyperstatSplitReconfigurationHandler.Companion.initializePrePurgeStatus(profileConfiguration, hayStack, 1.0)
-            HyperstatSplitReconfigurationHandler.Companion.initializePrePurgeStatus(profileConfiguration, hayStack, 0.0)
-            L.ccu().zoneProfiles.add(hssProfile)
+            CoroutineScope(highPriorityDispatcher).launch {
+                runBlocking {
+                    HyperstatSplitReconfigurationHandler.Companion.addLinearFanLowMedHighPoints(
+                        equipId,
+                        hayStack.site!!.id,
+                        equipDis,
+                        hayStack,
+                        profileConfiguration as HyperStatSplitCpuProfileConfiguration,
+                        equipModel
+                    )
+                    HyperstatSplitReconfigurationHandler.Companion.correctSensorBusTempPoints(
+                        profileConfiguration,
+                        hayStack
+                    )
+                    HyperstatSplitReconfigurationHandler.Companion.mapSensorBusPressureLogicalPoint(
+                        profileConfiguration,
+                        equipId,
+                        hayStack,
+                        equipModel
+                    )
+                    HyperstatSplitReconfigurationHandler.Companion.setOutputTypes(
+                        profileConfiguration,
+                        hayStack
+                    )
+                    setScheduleType(profileConfiguration)
+                    HyperstatSplitReconfigurationHandler.Companion.handleNonDefaultConditioningMode(
+                        profileConfiguration as HyperStatSplitCpuProfileConfiguration,
+                        hayStack
+                    )
+                    HyperstatSplitReconfigurationHandler.Companion.handleNonDefaultFanMode(
+                        profileConfiguration as HyperStatSplitCpuProfileConfiguration,
+                        hayStack
+                    )
+                    HyperstatSplitReconfigurationHandler.Companion.initializePrePurgeStatus(
+                        profileConfiguration,
+                        hayStack,
+                        1.0
+                    )
+                    HyperstatSplitReconfigurationHandler.Companion.initializePrePurgeStatus(
+                        profileConfiguration,
+                        hayStack,
+                        0.0
+                    )
+                    L.ccu().zoneProfiles.add(hssProfile)
+                }
+            }
 
         } else {
             val equipId = equipBuilder.updateEquipAndPoints(profileConfiguration, equipModel, hayStack.site!!.id, equipDis, true)
@@ -400,17 +432,52 @@ class HyperStatSplitCpuViewModel : HyperStatSplitViewModel() {
                 hayStack.site!!.id,
                 deviceDis
             )
-
-            HyperstatSplitReconfigurationHandler.Companion.addLinearFanLowMedHighPoints(equipId, hayStack.site!!.id, equipDis, hayStack, profileConfiguration as HyperStatSplitCpuProfileConfiguration, equipModel)
-            HyperstatSplitReconfigurationHandler.Companion.correctSensorBusTempPoints(profileConfiguration, hayStack)
-            HyperstatSplitReconfigurationHandler.Companion.addSensorBusPressureLogicalPoint(profileConfiguration, equipId, hayStack, equipModel)
-            HyperstatSplitReconfigurationHandler.Companion.setOutputTypes(profileConfiguration, hayStack)
-            setScheduleType(profileConfiguration)
-            HyperstatSplitReconfigurationHandler.Companion.handleNonDefaultConditioningMode(profileConfiguration as HyperStatSplitCpuProfileConfiguration, hayStack)
-            HyperstatSplitReconfigurationHandler.Companion.handleNonDefaultFanMode(profileConfiguration as HyperStatSplitCpuProfileConfiguration, hayStack)
-            HyperstatSplitReconfigurationHandler.Companion.initializePrePurgeStatus(profileConfiguration, hayStack, 1.0)
-            HyperstatSplitReconfigurationHandler.Companion.initializePrePurgeStatus(profileConfiguration, hayStack, 0.0)
-            hssProfile.refreshEquip()
+            CoroutineScope(highPriorityDispatcher).launch {
+                runBlocking {
+                    HyperstatSplitReconfigurationHandler.Companion.addLinearFanLowMedHighPoints(
+                        equipId,
+                        hayStack.site!!.id,
+                        equipDis,
+                        hayStack,
+                        profileConfiguration as HyperStatSplitCpuProfileConfiguration,
+                        equipModel
+                    )
+                    HyperstatSplitReconfigurationHandler.Companion.correctSensorBusTempPoints(
+                        profileConfiguration,
+                        hayStack
+                    )
+                    HyperstatSplitReconfigurationHandler.Companion.mapSensorBusPressureLogicalPoint(
+                        profileConfiguration,
+                        equipId,
+                        hayStack,
+                        equipModel
+                    )
+                    HyperstatSplitReconfigurationHandler.Companion.setOutputTypes(
+                        profileConfiguration,
+                        hayStack
+                    )
+                    setScheduleType(profileConfiguration)
+                    HyperstatSplitReconfigurationHandler.Companion.handleNonDefaultConditioningMode(
+                        profileConfiguration as HyperStatSplitCpuProfileConfiguration,
+                        hayStack
+                    )
+                    HyperstatSplitReconfigurationHandler.Companion.handleNonDefaultFanMode(
+                        profileConfiguration as HyperStatSplitCpuProfileConfiguration,
+                        hayStack
+                    )
+                    HyperstatSplitReconfigurationHandler.Companion.initializePrePurgeStatus(
+                        profileConfiguration,
+                        hayStack,
+                        1.0
+                    )
+                    HyperstatSplitReconfigurationHandler.Companion.initializePrePurgeStatus(
+                        profileConfiguration,
+                        hayStack,
+                        0.0
+                    )
+                    hssProfile.refreshEquip()
+                }
+            }
         }
     }
 

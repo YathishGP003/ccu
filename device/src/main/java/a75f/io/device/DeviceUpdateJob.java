@@ -2,6 +2,7 @@ package a75f.io.device;
 
 import static java.lang.Thread.sleep;
 import static a75f.io.device.serial.MessageType.HYPERSTAT_CM_TO_CCU_SERIALIZED_MESSAGE;
+import static a75f.io.logic.bo.building.system.util.AdvancedAhuUtilKt.isConnectModuleAvailable;
 
 import android.content.Context;
 
@@ -25,7 +26,6 @@ import a75f.io.domain.api.Domain;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
-import a75f.io.logic.bo.building.system.vav.VavAdvancedAhu;
 import a75f.io.logic.watchdog.WatchdogMonitor;
 import a75f.io.usbserial.SerialAction;
 import a75f.io.usbserial.SerialEvent;
@@ -55,7 +55,7 @@ public class DeviceUpdateJob extends BaseJob implements WatchdogMonitor
     public DeviceUpdateJob()
     {
         super();
-        deviceNw = new MeshNetwork();//TODO- TPpoEMP
+        deviceNw = new MeshNetwork();
         modbusNetwork = new ModbusNetwork();
     
         deviceStatusUpdateJob = new DeviceStatusUpdateJob();
@@ -84,16 +84,12 @@ public class DeviceUpdateJob extends BaseJob implements WatchdogMonitor
         if (jobLock.tryLock()) {
             try {
                 if (Globals.getInstance().getBuildingProcessStatus()) {
-                    if (L.ccu().systemProfile instanceof VavAdvancedAhu) {
-                        VavAdvancedAhu profile = (VavAdvancedAhu) L.ccu().systemProfile;
-                        if (profile.isConnectModuleAvailable()) {
-                            ConnectModbusSerialComm.sendSettingConfig();
-                            ConnectModbusSerialComm.sendControlsMessage(Domain.connect1Device);
-                            ConnectModbusSerialComm.getRegularUpdate();
-                        } else {
-                            CcuLog.e(L.TAG_CCU_DEVICE, "Connect device not found");
-                        }
-
+                    if (isConnectModuleAvailable()) {
+                        ConnectModbusSerialComm.sendSettingConfig();
+                        ConnectModbusSerialComm.sendControlsMessage(Domain.connect1Device);
+                        ConnectModbusSerialComm.getRegularUpdate();
+                    } else {
+                        CcuLog.e(L.TAG_CCU_DEVICE, "Connect module not available");
                     }
                     deviceNw.sendMessage();
                     deviceNw.sendSystemControl();
@@ -102,8 +98,6 @@ public class DeviceUpdateJob extends BaseJob implements WatchdogMonitor
                     }
                     BacnetUtilKt.checkBacnetHealth();
                     modbusNetwork.sendMessage();
-
-
                     CcuLog.d(L.TAG_CCU_JOB, "<-DeviceUpdateJob ");
             }
             catch (Exception e) {

@@ -34,16 +34,16 @@ import a75f.io.renatus.profiles.OnPairingCompleteListener
 import a75f.io.renatus.profiles.profileUtils.UnusedPortsModel
 import a75f.io.renatus.profiles.profileUtils.UnusedPortsModel.Companion.saveUnUsedPortStatus
 import a75f.io.renatus.util.ProgressDialogUtils
+import a75f.io.renatus.util.highPriorityDispatcher
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.seventyfivef.domainmodeler.client.ModelDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -90,11 +90,7 @@ class VavProfileViewModel : ViewModel() {
     private lateinit var unusedPorts: HashMap<String, Boolean>
 
     private lateinit var pairingCompleteListener: OnPairingCompleteListener
-
     private var saveJob : Job? = null
-
-    var modelLoadedState =  MutableLiveData(false)
-    val modelLoaded: LiveData<Boolean> get() = modelLoadedState
 
     fun init(bundle: Bundle, context: Context, hayStack : CCUHsApi) {
         deviceAddress = bundle.getShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR)
@@ -113,30 +109,19 @@ class VavProfileViewModel : ViewModel() {
             vavProfile = L.getProfile(deviceAddress) as VavProfile
             profileConfiguration = VavProfileConfiguration(deviceAddress.toInt(), nodeType.name, 0,
                 zoneRef, floorRef , profileType, model ).getActiveConfiguration()
+            viewState = VavConfigViewState.fromVavProfileConfig(profileConfiguration)
+            unusedPorts = UnusedPortsModel.initializeUnUsedPorts(deviceAddress, hayStack)
         } else {
             profileConfiguration = VavProfileConfiguration(deviceAddress.toInt(), nodeType.name, 0,
                 zoneRef, floorRef , profileType, model ).getDefaultConfiguration()
-            /*vavProfile = when (profileType) {
-                ProfileType.VAV_PARALLEL_FAN -> VavParallelFanProfile()
-                ProfileType.VAV_SERIES_FAN -> VavSeriesFanProfile()
-                else -> VavReheatProfile()
-            }*/
+            viewState = VavConfigViewState.fromVavProfileConfig(profileConfiguration)
         }
-
         CcuLog.i(Domain.LOG_TAG, profileConfiguration.toString())
-
-
-
-        viewState = VavConfigViewState.fromVavProfileConfig(profileConfiguration)
-
         this.context = context
         this.hayStack = hayStack
 
         initializeLists()
-        unusedPorts = UnusedPortsModel.initializeUnUsedPorts(deviceAddress, hayStack)
-        CcuLog.i(Domain.LOG_TAG, "VavProfileViewModel Loaded")
-        modelLoadedState.postValue(true)
-        CcuLog.i(Domain.LOG_TAG, "model calue set to true")
+        CcuLog.i(Domain.LOG_TAG, "Vav profile cofig Loaded")
     }
 
     private fun initializeLists() {
@@ -173,33 +158,26 @@ class VavProfileViewModel : ViewModel() {
 
     fun saveConfiguration() {
         if (saveJob == null) {
-            saveJob = viewModelScope.launch {
-                ProgressDialogUtils.showProgressDialog(context, "Saving VAV Configuration")
-                withContext(Dispatchers.IO) {
-                    CCUHsApi.getInstance().resetCcuReady()
-
-                    setUpVavProfile()
-                    CcuLog.i(Domain.LOG_TAG, "VavProfile Setup complete")
-                    L.saveCCUState()
-
-                    hayStack.syncEntityTree()
-                    CCUHsApi.getInstance().setCcuReady()
-                    CcuLog.i(Domain.LOG_TAG, "Send seed for $deviceAddress")
-                    LSerial.getInstance()
-                        .sendSeedMessage(false, false, deviceAddress, zoneRef, floorRef)
-
-                    DesiredTempDisplayMode.setModeType(zoneRef, CCUHsApi.getInstance())
-                    CcuLog.i(Domain.LOG_TAG, "VavProfile Pairing complete")
-
-                    withContext(Dispatchers.Main) {
-                        context.sendBroadcast(Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED))
-                        showToast("VAV Configuration saved successfully", context)
-                        CcuLog.i(Domain.LOG_TAG, "Close Pairing dialog")
-                        ProgressDialogUtils.hideProgressDialog()
-                        pairingCompleteListener.onPairingComplete()
-                    }
-
+            ProgressDialogUtils.showProgressDialog(context, "Saving VAV Configuration")
+            saveJob = viewModelScope.launch(highPriorityDispatcher) {
+                CCUHsApi.getInstance().resetCcuReady()
+                setUpVavProfile()
+                CcuLog.i(Domain.LOG_TAG, "VavProfile Setup complete")
+                withContext(Dispatchers.Main) {
+                    context.sendBroadcast(Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED))
+                    showToast("VAV Configuration saved successfully", context)
+                    CcuLog.i(Domain.LOG_TAG, "Close Pairing dialog")
+                    ProgressDialogUtils.hideProgressDialog()
+                    pairingCompleteListener.onPairingComplete()
                 }
+                L.saveCCUState()
+                hayStack.syncEntityTree()
+                CCUHsApi.getInstance().setCcuReady()
+                CcuLog.i(Domain.LOG_TAG, "Send seed for $deviceAddress")
+                LSerial.getInstance()
+                    .sendSeedMessage(false, false, deviceAddress, zoneRef, floorRef)
+                DesiredTempDisplayMode.setModeType(zoneRef, CCUHsApi.getInstance())
+                CcuLog.i(Domain.LOG_TAG, "VavProfile Pairing complete")
 
                 // This check is needed because the dialog sometimes fails to close inside the coroutine.
                 // We don't know why this happens.
@@ -233,10 +211,12 @@ class VavProfileViewModel : ViewModel() {
             if (L.ccu().bypassDamperProfile != null) overrideForBypassDamper(profileConfiguration)
             setOutputTypes(profileConfiguration)
             setMinCfmSetpointMaxVals(profileConfiguration)
-            setScheduleType(profileConfiguration)
             setAirflowCfmProportionalRange(profileConfiguration)
             vavProfile.init()
-            saveUnUsedPortStatus(profileConfiguration, deviceAddress, hayStack)
+            CoroutineScope(Dispatchers.IO).launch {
+                setScheduleType(profileConfiguration)
+                saveUnUsedPortStatus(profileConfiguration, deviceAddress, hayStack)
+            }
         }
 
     }

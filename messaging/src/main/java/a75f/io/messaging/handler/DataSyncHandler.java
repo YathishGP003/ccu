@@ -17,6 +17,7 @@ import org.projecthaystack.HVal;
 import org.projecthaystack.MapImpl;
 import org.projecthaystack.ParseException;
 import org.projecthaystack.client.HClient;
+import org.projecthaystack.util.WebUtil;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -78,7 +79,7 @@ public class DataSyncHandler {
             return SyncStatus.NULL_RESPONSE;
         }
         readChangesResponse.add(readChanges);
-        int responsePageSize = getResponsePageSize(readChanges);
+        int responsePageSize = WebUtil.getResponsePageSize(readChanges, PAGE_SIZE);
         logIt("Response page size " + responsePageSize);
         if (responsePageSize > 0) {
             for (pageNo = 1; pageNo <= responsePageSize; pageNo++) {
@@ -103,16 +104,7 @@ public class DataSyncHandler {
         return SyncStatus.COMPLETED;
     }
 
-    private int getResponsePageSize(HGrid readChanges) {
-        HDict meta = readChanges.meta();
-        if (meta.has("total")) {
-            int entitySize = (int) Double.parseDouble(meta.get("total").toString());
-            logIt("Total Entity size " + entitySize);
-            return entitySize / PAGE_SIZE;
-        }
-        logIt("No total field in metadata");
-        return 0;
-    }
+
 
     private void syncReadChangesApiResponseToCCU(HGrid readChanges, CCUHsApi ccuHsApi) {
         List<HashMap> entitiesToSync = ccuHsApi.HGridToList(readChanges);

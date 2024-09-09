@@ -49,6 +49,7 @@ import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.modbus.util.UtilSourceKt;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.ProgressDialogUtils;
+import a75f.io.renatus.util.RxjavaUtil;
 import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -75,7 +76,8 @@ public class DialogOAOProfile extends BaseDialogFragment
     String zoneRef;
     
     static int CT_INDEX_START = 8;
-    
+     private boolean isSavingOAOProfile = false;
+
     @BindView(R.id.oaDamperAtMin)         Spinner oaDamperAtMin;
     @BindView(R.id.returnDamperAtMin)     Spinner returnDamperAtMin;
     @BindView(R.id.oaDamperMinOpenDuringRecirc)       Spinner      oaDamperMinOpenDuringRecirc;
@@ -178,28 +180,30 @@ public class DialogOAOProfile extends BaseDialogFragment
         titleTextView.setText("ECONOMIZER (OAO) "+"("+mSmartNodeAddress+")");
 
         mProfile = L.ccu().oaoProfile;
-        
+        setOAOSavingInProgress(false); //Initialize the state of saving OAO profile
         setButton.setOnClickListener(v -> {
 
+            setOAOSavingInProgress(true);
             setButton.setEnabled(false);
-            ProgressDialogUtils.showProgressDialog(getActivity(),"Saving OAO Configuration");
 
-            new Thread(() -> {
-                setUpOAOProfile();
-                L.saveCCUState();
-                LSerial.getInstance().sendOAOSeedMessage();
-            }).start();
+                    RxjavaUtil.executeBackgroundTask( () ->
+                                    ProgressDialogUtils.showProgressDialog(getActivity(), "Saving OAO Configuration"),
+                            () -> {
+                                setUpOAOProfile();
+                                L.saveCCUState();
+                                LSerial.getInstance().sendOAOSeedMessage();
+                            },
+                            () -> {
+                                ProgressDialogUtils.hideProgressDialog();
+                                DialogOAOProfile.this.closeAllBaseDialogFragments();
+                                SystemConfigFragment.SystemConfigFragmentHandler.sendEmptyMessage(6);
+                                getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
+                                UtilSourceKt.showToast("OAO Equip Created Successfully", requireContext());
+                                ProgressDialogUtils.showProgressDialog(getContext(), "Loading OAO Profile");
+                            }
+                            );
 
-            new Handler().postDelayed(() -> {
-                ProgressDialogUtils.hideProgressDialog();
-                DialogOAOProfile.this.closeAllBaseDialogFragments();
-                SystemConfigFragment.SystemConfigFragmentHandler.sendEmptyMessage(6);
-                getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
-                UtilSourceKt.showToast("OAO Equip Created Successfully", requireContext());
-                ProgressDialogUtils.showProgressDialog(getContext(), "Loading OAO Profile");
-            }, 12000);
-
-        });
+            });
 
         unpairButton.setOnClickListener(v -> {
             unpairButton.setEnabled(false);
@@ -315,8 +319,12 @@ public class DialogOAOProfile extends BaseDialogFragment
         setSpinnerDropdown();
 
         new Handler().postDelayed(() -> {
-            if (ProgressDialogUtils.isDialogShowing()) { ProgressDialogUtils.hideProgressDialog(); }
+            if (ProgressDialogUtils.isDialogShowing() && !isSavingOAOProfile) { ProgressDialogUtils.hideProgressDialog(); }
         }, 4000);
+    }
+    //This method is used to set the state of saving OAO profile. While saving we will allow to close the progress dialog only after the saving is done.
+    private void setOAOSavingInProgress(boolean state) {
+        isSavingOAOProfile = state;
     }
 
     private void deleteOAOEquip() {

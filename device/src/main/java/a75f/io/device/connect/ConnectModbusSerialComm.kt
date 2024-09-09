@@ -1,14 +1,12 @@
 package a75f.io.device.connect
 
-import a75f.io.device.connect.ConnectModbusSerialComm.toHexString
 import a75f.io.device.mesh.LSerial
 import a75f.io.device.serial.MessageType
-import a75f.io.domain.api.Domain
 import a75f.io.domain.devices.ConnectDevice
-import a75f.io.domain.equips.VavAdvancedHybridSystemEquip
 import a75f.io.logger.CcuLog
 import a75f.io.logic.BuildConfig
 import a75f.io.logic.L
+import a75f.io.logic.bo.building.system.util.getConnectEquip
 import com.x75f.modbus4j.msg.ModbusResponse
 import com.x75f.modbus4j.msg.ReadInputRegistersRequest
 import com.x75f.modbus4j.msg.WriteRegistersRequest
@@ -55,14 +53,14 @@ object ConnectModbusSerialComm {
     // Read 8 Float values over 8 registers
     // Register type : Holding Register (0x04)
     private fun writeRelayOutputMappedValues(byteArray: ByteArray) {
-        val request = WriteRegistersRequest(ADVANCED_AHU_CONNECT1_SLAVE_ADDR, RELAY_MAPPED_VAL_START_ADDR, byteArray);
+        val request = WriteRegistersRequest(ADVANCED_AHU_CONNECT1_SLAVE_ADDR, RELAY_MAPPED_VAL_START_ADDR, byteArray)
         sendRequestAndLockComm(RtuMessageRequest(request), ConnectModbusOps.WRITE_RELAY_OUTPUT_MAPPED_VALUES)
     }
 
     // Read 5 Float values over 8 registers
     // Register type : Input Register (0x03)
     private fun writeAnalogOutputMappedValues(byteArray: ByteArray) {
-        val request = WriteRegistersRequest(ADVANCED_AHU_CONNECT1_SLAVE_ADDR, AOUT_MAPPED_VAL_START_ADDR, byteArray);
+        val request = WriteRegistersRequest(ADVANCED_AHU_CONNECT1_SLAVE_ADDR, AOUT_MAPPED_VAL_START_ADDR, byteArray)
         sendRequestAndLockComm(RtuMessageRequest(request), ConnectModbusOps.WRITE_ANALOG_OUTPUT_MAPPED_VALUES)
     }
 
@@ -102,13 +100,10 @@ object ConnectModbusSerialComm {
 
     @JvmStatic
     fun sendSettingConfig() {
-        val systemEquip = Domain.systemEquip as VavAdvancedHybridSystemEquip
-        systemEquip?.let {
-            writeUniversalInputMappingConfig(getUniversalInputMappingConfig(it.connectEquip1))
-            writeRelayMappingConfig(getRelayMappingConfig(it.connectEquip1))
-            writeAnalogOutMappingConfig(getAnalogOutMappingConfig(it.connectEquip1))
-        }
-
+        val connectEquip1 = getConnectEquip()
+        writeUniversalInputMappingConfig(getUniversalInputMappingConfig(connectEquip1))
+        writeRelayMappingConfig(getRelayMappingConfig(connectEquip1))
+        writeAnalogOutMappingConfig(getAnalogOutMappingConfig(connectEquip1))
     }
 
     @JvmStatic
@@ -147,10 +142,10 @@ object ConnectModbusSerialComm {
         }
     }
 
-    fun ByteArray.toHexString() = joinToString(" ") { "%02x".format(it) }
+    private fun ByteArray.toHexString() = joinToString(" ") { "%02x".format(it) }
 
     private fun getModbusConnectMessage(requestBytes: ByteArray): ByteArray {
-        var msgBytes = ByteArray(requestBytes.size + 1)
+        val msgBytes = ByteArray(requestBytes.size + 1)
         msgBytes[0] = MessageType.MODBUS_MESSAGE.ordinal.toByte()
         System.arraycopy(requestBytes, 0, msgBytes, 1, requestBytes.size)
         return msgBytes

@@ -19,7 +19,9 @@ import a75f.io.renatus.compose.SaveTextView
 import a75f.io.renatus.compose.TitleTextView
 import a75f.io.renatus.compose.ToggleButtonStateful
 import a75f.io.renatus.modbus.util.SET
+import a75f.io.renatus.profiles.OnPairingCompleteListener
 import a75f.io.renatus.profiles.profileUtils.UnusedPortsFragment
+import a75f.io.renatus.util.highPriorityDispatcher
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -53,7 +55,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class DabProfileConfigFragment : BaseDialogFragment() {
+class DabProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener {
 
     private val viewModel: DabProfileViewModel by viewModels()
 
@@ -83,34 +85,25 @@ class DabProfileConfigFragment : BaseDialogFragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        viewLifecycleOwner.lifecycleScope.launch {
-            withContext(Dispatchers.IO) {
-                viewModel.init(requireArguments(), requireContext(), CCUHsApi.getInstance())
-            }
-        }
         val rootView = ComposeView(requireContext())
-        rootView.apply {
-            setContent { RootView() }
-            return rootView
+        rootView.setContent {
+            ShowProgressBar()
+            CcuLog.i(Domain.LOG_TAG, "Show Progress")
         }
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        viewModel.isDialogOpen.observe(viewLifecycleOwner) { isDialogOpen ->
-            CcuLog.i(L.TAG_CCU_UI, " isDialogOpen $isDialogOpen")
-            if (!isDialogOpen) {
-                this@DabProfileConfigFragment.closeAllBaseDialogFragments()
-            }
+        viewLifecycleOwner.lifecycleScope.launch(highPriorityDispatcher) {
+                viewModel.init(requireArguments(), requireContext(), CCUHsApi.getInstance())
+                viewModel.setOnPairingCompleteListener(this@DabProfileConfigFragment)
+                withContext(Dispatchers.Main) {
+                    rootView.setContent {
+                        RootView()
+                    }
+                }
         }
+        return rootView
     }
 
     @Composable
     fun RootView() {
-        if (!viewModel.isModelLoaded) {
-            ShowProgressBar()
-            CcuLog.i(Domain.LOG_TAG, "Show Progress")
-            return
-        }
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -528,5 +521,9 @@ class DabProfileConfigFragment : BaseDialogFragment() {
             val height = 672
             dialog.window!!.setLayout(width, height)
         }
+    }
+
+    override fun onPairingComplete() {
+        this@DabProfileConfigFragment.closeAllBaseDialogFragments()
     }
 }

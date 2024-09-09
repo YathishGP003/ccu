@@ -4,9 +4,14 @@ import a75f.io.alerts.AlertProcessor.TAG_CCU_ALERTS
 import a75f.io.alerts.AlertProcessor.TAG_CCU_DEV_DEBUG
 import a75f.io.alerts.cloud.AlertsService
 import a75f.io.alerts.model.AlertDefOccurrence
+import a75f.io.alerts.model.AlertDefOccurrenceState
+import a75f.io.alerts.model.AlertDefProgress
 import a75f.io.alerts.model.AlertDefProgress.Partial
 import a75f.io.alerts.model.AlertDefsMap
 import a75f.io.alerts.model.AlertDefsState
+import a75f.io.alerts.model.AlertsDefStateKey
+import a75f.io.alerts.model.contains
+import a75f.io.alerts.model.getActiveAlerts
 import a75f.io.alerts.model.minus
 import a75f.io.alerts.model.plusAssign
 import a75f.io.alerts.model.remove
@@ -153,6 +158,10 @@ class AlertsRepository(
    fun getActiveCrashAlert() = dataStore.getActiveCrashAlert()
 
    fun getAlertsByCreator(creator: String): List<Alert> = dataStore.getAlertsByCreator(creator)
+
+   fun getActiveAlertsByRef(deviceRef: String): List<Alert> = dataStore.getActiveAlertsByRef(deviceRef)
+
+   fun getDeviceRebootActiveAlert(deviceRef: String) = dataStore.getDeviceRebootActiveAlert(deviceRef)
 
    /**
     * @return Looks like this returns all alerts with severity not equal to an INTERNAL status
@@ -476,5 +485,65 @@ class AlertsRepository(
       if (instance.alertListListener != null ) {
          instance.alertListListener.onAlertsChanged()
       }
+   }
+
+   /*This method is used to put the active predefined and custom alerts stored in the database to the runtime alert list
+   * This is called when the app is opened
+   * If the alert belongs to the alert definition with groupType - alert, then it is not added to the runtime alert list
+   * Such alerts are handled by the CCU only and no conditional is provided in the def.
+   * We shall check if the device ref for the alert still exist in the database, if not we shall fix the alert for zone based device alerts
+   */
+   fun processAlertsOnAppOpen() {
+      CcuLog.d(TAG_CCU_ALERTS, "Started processing predefined alerts and legacy custom alerts when app is opened")
+      // get all active predefined and legacy custom alerts
+      dataStore.getActivePredefinedAndLegacyCustomAlerts().forEach { alert ->
+         // if the alert is a zone based device alert, check if the device ref still exists in the database, if not, fix the alert
+         if(isZoneBasedDeviceAlert(alert)) {
+            if(haystack.readId("id==@${alert.equipId}")==null) {
+               CcuLog.d(TAG_CCU_ALERTS, "Device ref ${alert.equipId} does not exist in the database, fixing the alert with Title: ${alert.mTitle}")
+               AlertManager.getInstance().fixAlert(alert)
+            }
+         }
+         // otherwise for all the active alerts with groupType != 'alert', fetch them in the runtime variable alertDefsState in Raised State
+         else {
+            if (alertDefsMap.values.map { it._id }.toSet().contains(alert.alertDefId) && !alertDefsState.getActiveAlerts().contains(alert) && isGroupTypeNotAlert(alert)) {
+               alertDefsState[AlertsDefStateKey(alert.mTitle, "@"+alert.equipId)] = AlertDefOccurrenceState(
+                  AlertDefOccurrence(alertDefsMap[alert.mTitle]!!,
+                     isMuted = false,
+                     testPositive = true,
+                     evaluationString = alert.mMessage,
+                     pointId = alert.ref,
+                     equipRef = "@"+alert.equipId
+                  )
+                  , AlertDefProgress.Raised(
+                     timeRaised = DateTime(alert.startTime),
+                     timeFixed = null))
+            }
+         }
+      }
+      CcuLog.d(TAG_CCU_ALERTS, "Finished processing predefined alerts and legacy custom alerts when app is opened")
+   }
+
+   // This method identifies if the alert is device based alert and specific to zones
+   private fun isZoneBasedDeviceAlert(alert: Alert): Boolean {
+      return alert.mTitle!=null && alert.mTitle in listOf(
+         DEVICE_DEAD,
+         DEVICE_REBOOT,
+         DEVICE_LOW_SIGNAL,
+         FIRMWARE_OTA_UPDATE_STARTED,
+         FIRMWARE_OTA_UPDATE_ENDED
+      )
+   }
+
+   // The alertDefinitions that have groupType as "alert" are evaluated directly by CCU based on conditions
+   // that are not provided in the alert definitions.
+   // Such alerts are not evaluated every minute by the CCU and so we shall not add them to the runtime alert list
+   private fun isGroupTypeNotAlert(alert: Alert): Boolean {
+         alertDefsMap[alert.mTitle]?.conditionals?.forEach {
+         if(it.grpOperation == "alert") {
+            return false
+         }
+      }
+      return true
    }
 }

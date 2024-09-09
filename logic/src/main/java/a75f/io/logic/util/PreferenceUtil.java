@@ -57,9 +57,12 @@ public class PreferenceUtil {
     public static final String ACB_RELAY_LOGICAL_POINTS_MIGRATION = "acbRelayLogicalPointsMigration";
     public static final String RECOVER_HELIO_NODE_ACB_TUNERS_MIGRATION = "recoverHelioNodeACBTunersMigration";
     public static final String ACB_COND_SENSOR_MIGRATION = "acbCondensateSensorMigration";
+    public static final String DM_TO_DM_CLEANUP_MIGRATION = "dmToDmCleanupMigration";
     public static final String HSS_GATEWAY_REF_MIGRATION = "hssGatewayRefMigration";
     public static final String HIS_TAG_REMOVAL_FROM_NON_DM_DEVICES = "hisTagRemovalFromNonDmDevices";
     public static final String VAV_CFM_ON_EDGE_MIGRATION = "vavCfmOnEdgeMigration";
+    public static final String DEAD_BAND_MIGRATION = "deadBandMigration";
+    public static final String ZONE_CO2_MIGRATION = "ZONE_CO2_MIGRATION";
 
     public static void setContext(Context c) {
         context= c;
@@ -479,8 +482,17 @@ public class PreferenceUtil {
     public static void setACBCondensateSensorMigration() {
         setBooleanPreference(ACB_COND_SENSOR_MIGRATION, true);
     }
+
     public static boolean getHSMonitoringGenericFaultEnumMigration() {
         return getBooleanPreference(HS_MONITORING_GENERIC_FAULT_ENUM_MIGRATION);
+    }
+
+    public static boolean getDmToDmCleanupMigration() {
+        return getBooleanPreference(DM_TO_DM_CLEANUP_MIGRATION);
+    }
+
+    public static void setDmToDmCleanupMigration() {
+        setBooleanPreference(DM_TO_DM_CLEANUP_MIGRATION, true);
     }
 
     public static void setHSMonitoringGenericFaultEnumMigration() {
@@ -526,4 +538,16 @@ public class PreferenceUtil {
         setBooleanPreference(VAV_CFM_ON_EDGE_MIGRATION, true);
     }
 
+    public static boolean isDeadBandMigrationRequired() {
+        return getBooleanPreference(DEAD_BAND_MIGRATION);
+    }
+    public static void setDeadBandMigrationNotRequired() {
+        setBooleanPreference(DEAD_BAND_MIGRATION, true);
+    }
+    public static boolean getZoneCo2Migration() {
+        return getBooleanPreference(ZONE_CO2_MIGRATION);
+    }
+    public static void setZoneCo2Migration() {
+        setBooleanPreference(ZONE_CO2_MIGRATION, true);
+    }
 }

@@ -21,7 +21,7 @@ class BacnetServicesUtils {
     ) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val service = ServiceManager.CcuServiceFactory.makeCcuService(ipAddress)
+                val service = ServiceManager.makeCcuService(ipAddress)
                 val response = service.write(bacnetWriteRequest)
                 val resp = BaseResponse(response)
                 if (response.isSuccessful) {

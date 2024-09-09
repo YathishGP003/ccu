@@ -12,6 +12,7 @@ import a75f.io.domain.api.Site
 import a75f.io.domain.devices.CmBoardDevice
 import a75f.io.domain.devices.ConnectDevice
 import a75f.io.domain.equips.DabEquip
+import a75f.io.domain.equips.DabAdvancedHybridSystemEquip
 import a75f.io.domain.equips.DefaultSystemEquip
 import a75f.io.domain.equips.DomainEquip
 import a75f.io.domain.equips.VavAdvancedHybridSystemEquip
@@ -109,6 +110,11 @@ object DomainManager {
                         CcuLog.i(Domain.LOG_TAG, "Add vavAdvancedHybridAhuV2 systemEquip to domain  : ConnectEquip ${connectEquip["id"]}")
                         VavAdvancedHybridSystemEquip(systemEquip["id"].toString(), connectEquip["id"].toString())
                     }
+                    "dabAdvancedHybridAhuV2" -> {
+                        val connectEquip = hayStack.readEntity("system and equip and connectModule")
+                        CcuLog.i(Domain.LOG_TAG, "Add dabAdvancedHybridAhuV2 systemEquip to domain  : ConnectEquip ${connectEquip["id"]}")
+                        DabAdvancedHybridSystemEquip(systemEquip["id"].toString(), connectEquip["id"].toString())
+                    }
 
                     "vavFullyModulatingAhu" -> {
                         CcuLog.i(Domain.LOG_TAG, "Add vavFullyModulatingAhu systemEquip to domain ")
@@ -135,7 +141,8 @@ object DomainManager {
         if (cmBoardDevice.isNotEmpty()) {
             CcuLog.e(Domain.LOG_TAG, "Added CM device to domain")
             Domain.cmBoardDevice = CmBoardDevice(cmBoardDevice["id"].toString())
-            if (Domain.systemEquip is VavAdvancedHybridSystemEquip) {
+            if (Domain.systemEquip is VavAdvancedHybridSystemEquip
+                    || Domain.systemEquip is DabAdvancedHybridSystemEquip) {
                 val connect1Device = hayStack.readEntity("device and connectModule")
                 if (connect1Device.isNotEmpty()) {
                     CcuLog.d(Domain.LOG_TAG, "Added Connect1 device to domain")
@@ -175,7 +182,7 @@ object DomainManager {
         }
     }
 
-    fun addSystemDevice(hayStack: CCUHsApi,ccuId: String) {
+    private fun addSystemDevice(hayStack: CCUHsApi, ccuId: String) {
         val devices = hayStack.readAllEntities("device and roomRef == \"SYSTEM\" and not smartnode") // this query should not pick up OAO or Bypass Smart Nodes
         devices.forEach { device ->
             val deviceId = device["id"]

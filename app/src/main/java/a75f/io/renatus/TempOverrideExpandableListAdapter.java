@@ -37,6 +37,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Zone;
 import a75f.io.device.mesh.ThermistorUtil;
+import a75f.io.domain.VavAcbEquip;
 import a75f.io.domain.equips.DabEquip;
 import a75f.io.domain.equips.VavEquip;
 import a75f.io.domain.api.Domain;
@@ -73,9 +74,11 @@ import a75f.io.logic.bo.building.system.dab.DabFullyModulatingRtu;
 import a75f.io.logic.bo.building.system.dab.DabStagedRtu;
 import a75f.io.logic.bo.building.system.vav.VavFullyModulatingRtu;
 import a75f.io.logic.bo.building.system.vav.VavStagedRtu;
+import a75f.io.logic.bo.building.vav.VavAcbProfile;
 import a75f.io.logic.bo.building.vav.VavProfile;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.CCUUtils;
+import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
 
 import static a75f.io.device.mesh.LSmartNode.PULSE;
 import static a75f.io.renatus.TempOverrideFragment.getPointVal;
@@ -313,7 +316,105 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                     targetVal.add(pos / 100.0 + " V");
                 }
             }
-            else{
+            else if (profile.equals("VAV_ACB")) {
+                VavAcbProfile vavAcbProfile = (VavAcbProfile) L.getProfile(Short.parseShort(parseGroup(listTitle)));
+                VavAcbEquip equip = new VavAcbEquip(vavAcbProfile.getEquip().getId());
+                ArrayAdapter<String> damperTypesAdapter;
+                ArrayList<String> damperTypes = new ArrayList<>();
+                for (DamperType damper : DamperType.values()) {
+                    damperTypes.add(damper.displayName);
+                }
+                damperTypesAdapter = getAdapterValue(damperTypes);
+                damperTypesAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+
+                int damperPosition = damperTypesAdapter.getPosition(DamperType.values()[(int)equip.getDamperType().readDefaultVal()].displayName);
+
+                if (damperPosition == 0) {
+                    SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
+                    edit.putString("cat-analog1",profile+"-type-0-10v");
+                    edit.commit();
+                    for (int pos = (int) (100 * 0); pos <= (100 * 10); pos += (100 * 0.1)) {
+                        analogOut1Val.add(pos / 100.0 + " V");
+                    }
+                } else if (damperPosition == 1) {
+                    SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
+                    edit.putString("cat-analog1",profile+"-type-2-10v");
+                    edit.commit();
+                    for (int pos = (int) (100 * 2); pos <= (100 * 10); pos += (100 * 0.1)) {
+                        analogOut1Val.add(pos / 100.0 + " V");
+                    }
+                } else if (damperPosition == 2) {
+                    SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
+                    edit.putString("cat-analog1",profile+"-type-10-2v");
+                    edit.commit();
+                    for (int pos = (int) (100 * 10); pos >= (100 * 2); pos -= (100 * 0.1)) {
+                        analogOut1Val.add(pos / 100.0 + " V");
+                    }
+                } else if (damperPosition == 3) {
+                    SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
+                    edit.putString("cat-analog1",profile+"-type-10-0v");
+                    edit.commit();
+                    for (int pos = (int) (100 * 10); pos >= (100 * 0); pos -= (100 * 0.1)) {
+                        analogOut1Val.add(pos / 100.0 + " V");
+                    }
+                } else if (damperPosition == 5) {
+                    SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
+                    edit.putString("cat-analog1",profile+"-type-0-5v");
+                    edit.commit();
+                    for (int pos = (int) (100 * 0); pos <= (100 * 5); pos += (100 * 0.1)) {
+                        analogOut1Val.add(pos / 100.0 + " V");
+                    }
+                }
+
+                ArrayAdapter<String> valveTypesAdapter;
+                ArrayList<String> valveTypes = new ArrayList<>();
+                for (ReheatType actuator : ReheatType.values()) {
+                    valveTypes.add(actuator.displayName);
+                }
+                valveTypesAdapter = getAdapterValue(valveTypes);
+                valveTypesAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+                int valveType = (int)equip.getValveType().readDefaultVal();
+                int valvePosition;
+                if (valveType < 7) {
+                    valvePosition = valveTypesAdapter.getPosition(ReheatType.values()[valveType].displayName);
+                } else {
+                    valvePosition = 6;
+                }
+                
+                if (valvePosition == 1) {
+                    SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
+                    edit.putString("cat-analog2",profile+"-type-0-10v");
+                    edit.commit();
+                    for (int pos = (int) (100 * 0); pos <= (100 * 10); pos += (100 * 0.1)) {
+                        analogOut2Val.add(pos / 100.0 + " V");
+                    }
+                } else if (valvePosition == 2) {
+                    SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
+                    edit.putString("cat-analog2",profile+"-type-2-10v");
+                    edit.commit();
+                    for (int pos = (int) (100 * 2); pos <= (100 * 10); pos += (100 * 0.1)) {
+                        analogOut2Val.add(pos / 100.0 + " V");
+                    }
+                } else if (valvePosition == 3) {
+                    SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
+                    edit.putString("cat-analog2",profile+"-type-10-2v");
+                    edit.commit();
+                    for (int pos = (int) (100 * 10); pos >= (100 * 2); pos -= (100 * 0.1)) {
+                        analogOut2Val.add(pos / 100.0 + " V");
+                    }
+                } else if (valvePosition == 4) {
+                    SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(RenatusApp.getAppContext()).edit();
+                    edit.putString("cat-analog2",profile+"-type-10-0v");
+                    edit.commit();
+                    for (int pos = (int) (100 * 10); pos >= (100 * 0); pos -= (100 * 0.1)) {
+                        analogOut2Val.add(pos / 100.0 + " V");
+                    }
+                }
+                for (int pos = (int) (100 * 0); pos <= (100 * 10); pos += (100 * 0.1)) {
+                    targetVal.add(pos / 100.0 + " V");
+                }
+
+            } else{
                 for (int pos = (int)(100*0); pos <= (100*10); pos+=(100*0.1)) {
                     targetVal.add(pos /100.0 +" V");
                 }
@@ -1511,6 +1612,16 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                 else if (pointname.equals("Thermistor2"))
                     return "Supply Airflow";
                 break;
+            case "VAV_ACB":
+                if (pointname.equals("relay1") || pointname.equals("Analog-out2"))
+                    return getVavAcbRelayMapping(pointname,listTitle);
+                else if (pointname.equals("Analog-out1"))
+                    return "Modulating Damper";
+                else if (pointname.equals("Thermistor1"))
+                    return "Discharge Airflow";
+                else if (pointname.equals("Thermistor2"))
+                    return "Supply Airflow";
+                break;
             case "SMARTSTAT_CONVENTIONAL_PACK_UNIT":
                 ConventionalUnitProfile mCPUProfile = (ConventionalUnitProfile) L.getProfile(Short.parseShort(parseGroup(listTitle)));
                 ConventionalUnitConfiguration cpuProfileConfig = (ConventionalUnitConfiguration) mCPUProfile.getProfileConfiguration(Short.parseShort(parseGroup(listTitle)));
@@ -1896,6 +2007,17 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
         }
         return "Not Used";
     }
+    private String getVavAcbRelayMapping(String pointName, String listTitle) {
+        VavAcbProfile vavAcbProfile = (VavAcbProfile) L.getProfile(Short.parseShort(parseGroup(listTitle)));
+        VavAcbEquip equip = new VavAcbEquip(vavAcbProfile.getEquip().getId());
+        if (pointName.equals("relay1")) {
+          if(equip.getRelay1OutputAssociation().readDefaultVal() == 0)  return "Water Valve (N/C)";
+          else return "Water Valve (N/O)";
+        } else if (pointName.equals("Analog-out2") && (equip.getValveType().readDefaultVal() > 0)) {
+            return "Modulating Valve";
+        }
+        return "Not Used";
+    }
     private String getDabRelayMapping(String pointname, String listTitle) {
         DabProfile dabProfile = (DabProfile) L.getProfile(Short.parseShort(parseGroup(listTitle)));
         DabEquip equip = (DabEquip) Domain.INSTANCE.getDomainEquip(dabProfile.getEquip().getId());
@@ -2078,4 +2200,7 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
         return true;
     }
 
+    private CustomSpinnerDropDownAdapter getAdapterValue(ArrayList values) {
+        return new CustomSpinnerDropDownAdapter(mFragment.getContext(), R.layout.spinner_dropdown_item, values);
+    }
 }

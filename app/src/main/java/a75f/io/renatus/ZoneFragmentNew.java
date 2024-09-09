@@ -14,7 +14,6 @@ import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
 import static a75f.io.logic.bo.building.dab.DabProfile.CARRIER_PROD;
 import static a75f.io.renatus.schedules.ScheduleUtil.disconnectedIntervals;
 import static a75f.io.renatus.schedules.ScheduleUtil.getDayString;
-import static a75f.io.renatus.schedules.ScheduleUtil.trimZoneSchedule;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
@@ -30,6 +29,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.text.Html;
+import android.text.Spanned;
 import android.view.ActionMode;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -57,6 +57,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
+import androidx.core.text.HtmlCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -127,6 +128,7 @@ import a75f.io.logic.jobs.HyperStatSplitUserIntentHandler;
 import a75f.io.logic.jobs.HyperStatUserIntentHandler;
 import a75f.io.logic.jobs.StandaloneScheduler;
 import a75f.io.logic.jobs.SystemScheduleUtil;
+import a75f.io.logic.schedule.ScheduleGroup;
 import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.logic.util.OfflineModeUtilKt;
@@ -143,15 +145,18 @@ import a75f.io.renatus.hyperstatsplit.ui.HyperStatSplitZoneViewKt;
 import a75f.io.renatus.modbus.ZoneRecyclerModbusParamAdapter;
 import a75f.io.renatus.modbus.util.UtilSourceKt;
 import a75f.io.renatus.model.ZoneViewData;
+import a75f.io.renatus.schedules.CommonTimeSlotFinder;
 import a75f.io.renatus.schedules.NamedSchedule;
+import a75f.io.renatus.schedules.ScheduleGroupFragment;
 import a75f.io.renatus.schedules.ScheduleUtil;
-import a75f.io.renatus.schedules.SchedulerFragment;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.GridItem;
 import a75f.io.renatus.util.HeartBeatUtil;
 import a75f.io.renatus.util.NonTempControl;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.SeekArc;
+import a75f.io.renatus.views.AlertDialogAdapter;
+import a75f.io.renatus.views.AlertDialogData;
 import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
 import a75f.io.restserver.server.HttpServer;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
@@ -545,7 +550,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                 for (int j = 0; j < zoneEquips.size(); j++) {
                                     Equip tempEquip = new Equip.Builder().setHashMap(zoneEquips.get(j)).build();
                                     int statusVal = CCUHsApi.getInstance().readHisValByQuery("point and status and not ota and his and not writable and equipRef ==\""+tempEquip.getId()+"\"").intValue();
-                                    if (statusVal != ZoneState.TEMPDEAD.ordinal()) {
+                                    if (statusVal != ZoneState.TEMPDEAD.ordinal() && statusVal != ZoneState.RFDEAD.ordinal()) {
                                         double avgTemp = CCUHsApi.getInstance().readHisValByQuery("temp and sensor and (current or space) and equipRef == \"" + tempEquip.getId() + "\"");
                                         currentTempSensor = (currentTempSensor + avgTemp);
                                     } else {
@@ -887,7 +892,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             }
 
             int statusVal = CCUHsApi.getInstance().readHisValByQuery("point and not ota and status and his and not writable and equipRef ==\""+avgTempEquip.getId()+"\"").intValue();
-            if (statusVal != ZoneState.TEMPDEAD.ordinal()) {
+            if (statusVal != ZoneState.TEMPDEAD.ordinal() && statusVal != ZoneState.RFDEAD.ordinal()) {
                 currentAverageTemp = (currentAverageTemp + avgTemp);
             } else {
                 noTempSensor++;
@@ -1272,17 +1277,16 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
                     vacationImageButton.setOnClickListener(vacationImageView ->
                     {
-                        SchedulerFragment schedulerFragment = SchedulerFragment.newInstance((String) vacationImageView.getTag(), true, zoneId,
-                                false);
+                        ScheduleGroupFragment schedulerFragment = new ScheduleGroupFragment().showVacationsLayout(zoneId, mSchedule);
                         FragmentManager childFragmentManager = getFragmentManager();
                         childFragmentManager.beginTransaction();
                         schedulerFragment.show(childFragmentManager, "dialog");
 
-                        schedulerFragment.setOnExitListener(() -> {
+                        /*schedulerFragment.setOnExitListener(() -> {
                             Toast.makeText(vacationImageView.getContext(), "Refresh View", Toast.LENGTH_LONG).show();
                             mSchedule = Schedule.getScheduleByEquipId(equipId[0]);
                             ScheduleManager.getInstance().updateSchedules(equipOpen);
-                        });
+                        });*/
                     });
                     specialScheduleImageButton.setOnClickListener(splScheduleImageView ->
                             imageButtonClickListener(splScheduleImageView, zoneId, equipId, ZoneFragmentNew.this.getChildFragmentManager(),true));
@@ -1539,18 +1543,22 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             TabLayout.Tab selectedTab = RenatusLandingActivity.mTabLayout.getTabAt(2);
             selectedTab.select();
         }else {
-            SchedulerFragment schedulerFragment = SchedulerFragment.newInstance((String) v.getTag(), false, zoneId, isSpecial);
-
+            ScheduleGroupFragment scheduleGroupFragment;
+            if(isSpecial) {
+                scheduleGroupFragment = new ScheduleGroupFragment().showSpecialScheduleLayout(zoneId, mSchedule);
+            } else {
+                scheduleGroupFragment = new ScheduleGroupFragment(schedule, schedule.getScheduleGroup());
+            }
             FragmentManager childFragmentManager = childFragmentManager2;
             childFragmentManager.beginTransaction();
-            schedulerFragment.show(childFragmentManager, "dialog");
+            scheduleGroupFragment.show(childFragmentManager, "dialog");
 
-
-            schedulerFragment.setOnExitListener(() -> {
+            //TODO WHY WE NEED BELOW CODE?
+            /*schedulerFragment.setOnExitListener(() -> {
                 Toast.makeText(v.getContext(), "Refresh View", Toast.LENGTH_LONG).show();
                 mSchedule = Schedule.getScheduleByEquipId(equipId[0]);
                 ScheduleManager.getInstance().updateSchedules(equipOpen);
-            });
+            });*/
         }
 
     }
@@ -1687,45 +1695,44 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         specialScheduleImageButton.setTag(mSchedule.getId());
         vacationImageButton.setOnClickListener(v ->
         {
-            SchedulerFragment schedulerFragment = SchedulerFragment.newInstance((String) v.getTag(), true, zoneId,
-                    false);
+            ScheduleGroupFragment schedulerFragment = new ScheduleGroupFragment().showVacationsLayout(mSchedule.getRoomRef(), mSchedule);
+
             FragmentManager childFragmentManager = getFragmentManager();
             childFragmentManager.beginTransaction();
             schedulerFragment.show(childFragmentManager, "dialog");
 
-            schedulerFragment.setOnExitListener(() -> {
+           /* schedulerFragment.setOnExitListener(() -> {
                 Toast.makeText(v.getContext(), "Refresh View", Toast.LENGTH_LONG).show();
                 mSchedule = Schedule.getScheduleByEquipId(equipId);
                 ScheduleManager.getInstance().updateSchedules(equipOpen);
-            });
+            });*/
         });
         scheduleImageButton.setOnClickListener(v ->
         {
-            SchedulerFragment schedulerFragment = SchedulerFragment.newInstance((String) v.getTag(), false, zoneId,
-                    false);
+            ScheduleGroupFragment schedulerFragment = new ScheduleGroupFragment(mSchedule, mSchedule.getScheduleGroup());
+
             FragmentManager childFragmentManager = getFragmentManager();
             childFragmentManager.beginTransaction();
             schedulerFragment.show(childFragmentManager, "dialog");
 
-            schedulerFragment.setOnExitListener(() -> {
+            /*schedulerFragment.setOnExitListener(() -> {
                 Toast.makeText(v.getContext(), "Refresh View", Toast.LENGTH_LONG).show();
                 mSchedule = Schedule.getScheduleByEquipId(equipId);
                 ScheduleManager.getInstance().updateSchedules(equipOpen);
-            });
+            });*/
         });
         specialScheduleImageButton.setOnClickListener(v ->
         {
-            SchedulerFragment schedulerFragment = SchedulerFragment.newInstance((String) v.getTag(), false, zoneId,
-                    true);
+            ScheduleGroupFragment schedulerFragment = new ScheduleGroupFragment().showSpecialScheduleLayout(zoneId, mSchedule);
             FragmentManager childFragmentManager = getChildFragmentManager();
             childFragmentManager.beginTransaction();
             schedulerFragment.show(childFragmentManager, "dialog");
 
-            schedulerFragment.setOnExitListener(() -> {
+            /*schedulerFragment.setOnExitListener(() -> {
                 Toast.makeText(v.getContext(), "Refresh View", Toast.LENGTH_LONG).show();
                 mSchedule = Schedule.getScheduleByEquipId(equipId);
                 ScheduleManager.getInstance().updateSchedules(equipOpen);
-            });
+            });*/
         });
         if(mScheduleType >= 2){
             if(!isSelectedScheduleAvailable) {
@@ -1910,11 +1917,14 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         int modeType = CCUHsApi.getInstance().readHisValByQuery("zone and hvacMode and roomRef == \"" + zoneId + "\"").intValue();
 
         linearLayoutZonePoints.removeAllViews();
+        int noTempSensor = 0;
         for (int k = 0; k < openZoneMap.size(); k++) {
             Equip updatedEquip = new Equip.Builder().setHashMap(openZoneMap.get(k)).build();
             int statusVal = CCUHsApi.getInstance().readHisValByQuery("point and not ota and status and his and not writable and equipRef ==\""+updatedEquip.getId()+"\"").intValue();
-            if (statusVal != ZoneState.TEMPDEAD.ordinal()) {
+            if (statusVal != ZoneState.TEMPDEAD.ordinal() && statusVal != ZoneState.RFDEAD.ordinal()) {
                 currentTemp += CCUHsApi.getInstance().readHisValByQuery("temp and sensor and (current or space) and equipRef == \"" + updatedEquip.getId() + "\"");
+            } else {
+               noTempSensor++;
             }
 
             if (updatedEquip.getProfile().startsWith("DAB")) {
@@ -1992,7 +2002,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             namedScheduleView.setVisibility(View.GONE);
         }
         if(openZoneMap.size() > 0) {
-            avgTemp = (float)currentTemp / openZoneMap.size();
+            avgTemp = (float)currentTemp / (openZoneMap.size() - noTempSensor);
         }
         if(heatingDesired != 0 && coolingDesired !=0)
             seekArc.setData(seekArc.isDetailedView(), buildingLimitMin, buildingLimitMax, heatLowerLimitVal, heatUpperLimitVal,
@@ -2592,9 +2602,16 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 String defaultValById = String.valueOf(CCUHsApi.getInstance().readDefaultValById(pointId));
                 CcuLog.d(BACNET, "pointName: " + pointName + "pointId: " + pointId + "value: " + value
                         + "hisValue: " + hisValue + "defaultValById: " + defaultValById);
+                String curretValue = "";
+                if(!isWritable){
+                    parameterList.add(pointName + " : " + hisValue);
+                    curretValue = hisValue;
+                }else{
+                    parameterList.add(pointName + " : " + defaultValById);
+                    curretValue = defaultValById;
+                }
 
-                parameterList.add(pointName + " : " + defaultValById);
-                BacnetZoneViewItem bacnetZoneViewItem = new BacnetZoneViewItem(pointName, defaultValById,
+                BacnetZoneViewItem bacnetZoneViewItem = new BacnetZoneViewItem(pointName, curretValue,
                         bacnetConfig, true, bacnetPoint, isWritable, spinnerValues, objectType);
                 listBacnetZoneViewItems.add(bacnetZoneViewItem);
             }
@@ -4631,26 +4648,41 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             spillZones.append(
                     getDayString(i.getStart().getDayOfWeek()) + " (" + i.getStart().hourOfDay().get() + ":" + (i.getStart().minuteOfHour().get() == 0 ? "00" : i.getStart().minuteOfHour().get()) + " - " + i.getEnd().hourOfDay().get() + ":" + (i.getEnd().minuteOfHour().get() == 0 ? "00" : i.getEnd().minuteOfHour().get()) + ") \n");
         }
-        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(getActivity());
-        builder.setMessage("Zone Schedule is outside building schedule currently set. " +
-                        "Proceed with trimming the zone schedules to be within the building occupancy \n" + spillZones)
-                .setCancelable(false)
-                .setTitle("Schedule Errors")
-                .setIcon(R.drawable.ic_dialog_alert)
-                .setNegativeButton("Cancel", (dialog, id) -> {
-                    listener.onDialogClick(false);
-                    dialog.dismiss();
-                })
-                .setPositiveButton("Force-Trim", (dialog, id) -> {
-                    HashMap<String, ArrayList<Interval>> spillsMap = new HashMap<>();
-                    spillsMap.put(zoneSchedule.getRoomRef(), intervalSpills);
-                    trimZoneSchedule(zoneSchedule, spillsMap);
-                    listener.onDialogClick(true);
-                    CCUHsApi.getInstance().scheduleSync();
-                });
-        AlertDialog alert = builder.create();
-        alert.show();
+        CommonTimeSlotFinder commonTimeSlotFinder = new CommonTimeSlotFinder();
+        List<List<CommonTimeSlotFinder.TimeSlot>> commonTimeSlot =  commonTimeSlotFinder.
+                getCommonTimeSlot(zoneSchedule.getScheduleGroup(), CCUHsApi.getInstance().getSystemSchedule(false).get(0).getDays(),
+                        zoneSchedule.getDays(), true);
+        List<List<CommonTimeSlotFinder.TimeSlot>> uncommonIntervals =
+                commonTimeSlotFinder.getUnCommonTimeSlot(zoneSchedule.getScheduleGroup(), commonTimeSlot, zoneSchedule.getDays());
+        Spanned message = HtmlCompat.fromHtml(
+                "Force trim will erase the following time slot(s) of  <b>"
+                        + ScheduleGroup.values()[zoneSchedule.getScheduleGroup()].getGroup() +
+                        "</b> schedule group. Are you sure you want to proceed?"
+                ,
+                HtmlCompat.FROM_HTML_MODE_LEGACY);
+
+        new AlertDialogAdapter(
+                requireContext(),
+                new AlertDialogData(
+                        "Zone Schedule is outside Building Occupancy",
+                        message,
+                        commonTimeSlotFinder.getSpilledZones(zoneSchedule, uncommonIntervals),
+                        "Force-Trim & Save",
+                        v -> {
+                            ScheduleUtil.trimScheduleTowardCommonTimeSlot(zoneSchedule, commonTimeSlot, commonTimeSlotFinder,
+                                    CCUHsApi.getInstance());
+                            listener.onDialogClick(true);
+                        },
+                        "Cancel",
+                        v -> listener.onDialogClick(false),
+                        false,
+                        false,
+                        R.drawable.ic_dialog_alert
+                )
+        ).showCustomDialog();
+
     }
+
 
     boolean isRoomsScheduleRefAvailable(String equipId) {
         HDict equipDict = CCUHsApi.getInstance().readHDictById(equipId);

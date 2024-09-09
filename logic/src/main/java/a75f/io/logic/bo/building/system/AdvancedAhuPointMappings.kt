@@ -2,9 +2,9 @@ package a75f.io.logic.bo.building.system
 
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.api.Point
+import a75f.io.domain.equips.AdvancedHybridSystemEquip
 import a75f.io.domain.equips.ConnectModuleEquip
 import a75f.io.domain.equips.DomainEquip
-import a75f.io.domain.equips.VavAdvancedHybridSystemEquip
 import a75f.io.logic.bo.building.system.util.DuctPressureSensorSource
 
 enum class AdvancedAhuRelayAssociationType {
@@ -19,22 +19,8 @@ enum class AdvancedAhuAnalogOutAssociationType {
     PRESSURE_FAN, SAT_COOLING, SAT_HEATING, LOAD_COOLING, LOAD_HEATING, LOAD_FAN, CO2_DAMPER, COMPOSITE_SIGNAL
 }
 
-data class UserIntentConfig(
-        var isSatHeatingAvailable: Boolean = false,
-        var isSatCoolingAvailable: Boolean = false,
-        var isPressureControlAvailable: Boolean = false,
-        var isCo2DamperControlAvailable: Boolean = false,
-)
-
-
-
-fun getCMRelayAssociationMap(equip: DomainEquip): Map<Point, Point> {
+fun getCMRelayAssociationMap(systemEquip: AdvancedHybridSystemEquip): Map<Point, Point> {
     val associations: MutableMap<Point, Point> = HashMap()
-    val systemEquip = when (equip) {
-        is VavAdvancedHybridSystemEquip -> equip
-        else -> throw IllegalArgumentException("Invalid system equip type")
-    }
-
     associations[systemEquip.relay1OutputEnable] = systemEquip.relay1OutputAssociation
     associations[systemEquip.relay2OutputEnable] = systemEquip.relay2OutputAssociation
     associations[systemEquip.relay3OutputEnable] = systemEquip.relay3OutputAssociation
@@ -46,14 +32,8 @@ fun getCMRelayAssociationMap(equip: DomainEquip): Map<Point, Point> {
     return associations
 }
 
-fun getCMAnalogAssociationMap(equip: DomainEquip): Map<Point, Point> {
+fun getCMAnalogAssociationMap(systemEquip: AdvancedHybridSystemEquip): Map<Point, Point> {
     val associations: MutableMap<Point, Point> = HashMap()
-
-    val systemEquip = when (equip) {
-        is VavAdvancedHybridSystemEquip -> equip
-        else -> throw IllegalArgumentException("Invalid system equip type")
-    }
-
     associations[systemEquip.analog1OutputEnable] = systemEquip.analog1OutputAssociation
     associations[systemEquip.analog2OutputEnable] = systemEquip.analog2OutputAssociation
     associations[systemEquip.analog3OutputEnable] = systemEquip.analog3OutputAssociation
@@ -113,7 +93,7 @@ enum class AdvancedAhuThermistorAssociationType {
 }
 
 
-fun thermistorAssociationDomainName(associationIndex: Int, equip: VavAdvancedHybridSystemEquip): Point? {
+fun thermistorAssociationDomainName(associationIndex: Int, equip: AdvancedHybridSystemEquip): Point? {
     when (associationIndex) {
         1 -> return equip.thermistorInput
         2 -> return equip.chilledWaterInletTemp
@@ -381,11 +361,7 @@ fun relayAssociationDomainNameToType (domainName : String) : AdvancedAhuRelayAss
     }
 }
 
-fun satControlIndexToDomainPoint(index: Int, equip: DomainEquip) : Point {
-    val systemEquip = when (equip) {
-        is VavAdvancedHybridSystemEquip -> equip
-        else -> throw IllegalArgumentException("Invalid system equip type")
-    }
+fun satControlIndexToDomainPoint(index: Int, systemEquip: AdvancedHybridSystemEquip) : Point {
     return when(index) {
         0 -> systemEquip.supplyAirTemperature1
         1 -> systemEquip.supplyAirTemperature2
@@ -397,7 +373,7 @@ fun satControlIndexToDomainPoint(index: Int, equip: DomainEquip) : Point {
     }
 }
 
-fun getPressureInputSensor(sensorType: DuctPressureSensorSource, systemEquip: VavAdvancedHybridSystemEquip): Point? {
+fun getPressureInputSensor(sensorType: DuctPressureSensorSource, systemEquip: AdvancedHybridSystemEquip): Point? {
     val (pressure, analogIn1, analogIn2) = getPressureMappings(systemEquip) // Reads if enabled only else it will be null
 
     fun getSensor(type: String): Point? {
@@ -418,7 +394,7 @@ fun getPressureInputSensor(sensorType: DuctPressureSensorSource, systemEquip: Va
     }
 }
 
-fun getPressureMappings(systemEquip: VavAdvancedHybridSystemEquip): Triple<Point?, Point?, Point?> {
+fun getPressureMappings(systemEquip: AdvancedHybridSystemEquip): Triple<Point?, Point?, Point?> {
     return Triple(
             getPointForPressureFromDomain(
                     getDomainPressure(systemEquip.sensorBus0PressureEnable.readDefaultVal() > 0, systemEquip.sensorBus0PressureAssociation.readDefaultVal().toInt()), systemEquip),
@@ -431,7 +407,7 @@ fun getPressureMappings(systemEquip: VavAdvancedHybridSystemEquip): Triple<Point
 }
 
 fun pressureFanControlIndexToDomainPoint(index: Int, equip: DomainEquip): Point? {
-    val systemEquip = equip as? VavAdvancedHybridSystemEquip
+    val systemEquip = equip as? AdvancedHybridSystemEquip
             ?: throw IllegalArgumentException("Invalid system equip type")
 
     val sourceOption = DuctPressureSensorSource.values().getOrNull(index)
@@ -447,11 +423,7 @@ fun pressureFanControlIndexToDomainPoint(index: Int, equip: DomainEquip): Point?
     }
 }
 
-fun co2DamperControlTypeToDomainPoint(index: Int, equip: DomainEquip) : Point {
-    val systemEquip = when (equip) {
-        is VavAdvancedHybridSystemEquip -> equip
-        else -> throw IllegalArgumentException("Invalid system equip type")
-    }
+fun co2DamperControlTypeToDomainPoint(index: Int, systemEquip: AdvancedHybridSystemEquip) : Point {
     return when(index) {
         0 -> systemEquip.zoneAvgCo2
         1 -> systemEquip.returnAirCo2
@@ -460,7 +432,7 @@ fun co2DamperControlTypeToDomainPoint(index: Int, equip: DomainEquip) : Point {
     }
 }
 
-fun getDomainPointForName(name: String, systemEquip: VavAdvancedHybridSystemEquip): Point {
+fun getDomainPointForName(name: String, systemEquip: AdvancedHybridSystemEquip): Point {
     return when (name) {
         DomainName.loadCoolingStage1 -> systemEquip.loadCoolingStage1
         DomainName.loadCoolingStage2 -> systemEquip.loadCoolingStage2
@@ -593,7 +565,7 @@ fun getDomainPressure(
     }
     return null
 }
-fun getPointForPressureFromDomain(domainName: String?, systemEquip: VavAdvancedHybridSystemEquip): Point? {
+fun getPointForPressureFromDomain(domainName: String?, systemEquip: AdvancedHybridSystemEquip): Point? {
     if (domainName != null) {
         return when (domainName) {
             DomainName.ductStaticPressureSensor1_1 -> systemEquip.ductStaticPressureSensor11

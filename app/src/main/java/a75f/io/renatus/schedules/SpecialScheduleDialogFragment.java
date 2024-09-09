@@ -166,6 +166,9 @@ public class SpecialScheduleDialogFragment extends DialogFragment {
 
         setSpinnerDropDownIconColor();
 
+        double minDeadBandValue = ScheduleUtil.getDeadBandValue("minVal", roomRef);
+        double maxDeadBandValue = ScheduleUtil.getDeadBandValue("maxVal", roomRef);
+
         if(isCelsiusTunerAvailableStatus()){
             for (int val = 50;  val <= 100; val += 1) {
                 heatingLimit.add(fahrenheitToCelsius(val) + "\u00B0C");
@@ -173,8 +176,11 @@ public class SpecialScheduleDialogFragment extends DialogFragment {
             for (int val = 50;  val <= 100; val += 1) {
                 coolingLimit.add( fahrenheitToCelsius(val) + "\u00B0C");
             }
-            double minVal = convertingRelativeValueFtoC(0);
-            double maxVal = convertingRelativeValueFtoC(10);
+            double minVal = convertingRelativeValueFtoC(minDeadBandValue);
+            if(minVal < 0.5){
+                minVal = 0.5;
+            }
+            double maxVal = convertingRelativeValueFtoC(maxDeadBandValue);
             for (double val = minVal;  val <= maxVal; val += 0.5) {
                 deadBand.add(((val)) + "\u00B0C");
             }
@@ -187,7 +193,7 @@ public class SpecialScheduleDialogFragment extends DialogFragment {
             for (int val = 50;  val <= 100; val += 1) {
                 coolingLimit.add(val+"\u00B0F");
             }
-            for (double val = 0;  val <= 10; val += 0.5) {
+            for (double val = minDeadBandValue;  val <= maxDeadBandValue; val += 0.5) {
                 deadBand.add(val+"\u00B0F");
             }
         }

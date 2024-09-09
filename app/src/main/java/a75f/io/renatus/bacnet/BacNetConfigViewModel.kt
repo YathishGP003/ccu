@@ -115,7 +115,7 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
     @SuppressLint("StaticFieldLeak")
     lateinit var context: Context
 
-    private var selectedSlaveId by Delegates.notNull<Short>()
+    private var selectedSlaveId by Delegates.notNull<Long>()
     private var domainService = DomainService()
     private val _isDialogOpen = MutableLiveData<Boolean>()
     val isDialogOpen: LiveData<Boolean>
@@ -222,7 +222,7 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
     }
 
     fun holdBundleValues(bundle: Bundle) {
-        selectedSlaveId = bundle.getShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR)
+        selectedSlaveId = bundle.getString(FragmentCommonBundleArgs.ARG_PAIRING_ADDR)?.toLong() ?: 0
         zoneRef = bundle.getString(FragmentCommonBundleArgs.ARG_NAME)!!
         floorRef = bundle.getString(FragmentCommonBundleArgs.FLOOR_NAME)!!
         filer = bundle.getString(FragmentCommonBundleArgs.MODBUS_FILTER)!!
@@ -314,7 +314,7 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
         return true
     }
 
-    private fun getBacnetEquipMap(slaveId: Short): HashMap<Any, Any>? {
+    private fun getBacnetEquipMap(slaveId: String): HashMap<Any, Any>? {
         return CCUHsApi.getInstance()
             .readEntity("equip and bacnet and not equipRef and group == \"$slaveId\"")
     }
@@ -431,14 +431,14 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
     }*/
 
     private fun setUpBacnetProfile() {
-        CcuLog.d(TAG, "setUpBacnetProfile node address $deviceId")
-        val parentMap = getBacnetEquipMap(deviceId.value.toShort())
+        CcuLog.d(TAG, "setUpBacnetProfile node address ${deviceId.value}")
+        val parentMap = getBacnetEquipMap(deviceId.value)
         if (parentMap.isNullOrEmpty()) {
 
             bacnetProfile = BacnetProfile()
             val configParam = "deviceId:${deviceId.value},destinationIp:${destinationIp.value},destinationPort:${destinationPort.value},macAddress:${destinationMacAddress.value}"
             val modelConfig = "modelName:${modelName.value},modelId:${getModelIdByName(modelName.value)}"
-            bacnetProfile.addBacAppEquip(configParam, modelConfig, deviceId.value, deviceId.value.toShort(), floorRef, zoneRef,
+            bacnetProfile.addBacAppEquip(configParam, modelConfig, deviceId.value, deviceId.value, floorRef, zoneRef,
                 bacnetModel.value.equipDevice.value,
                 profileType,moduleLevel,bacnetModel.value.version.value)
 
@@ -481,7 +481,8 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
 
         deviceValue.value = false
         bacnetPropertiesFetched.value = false
-        service = ServiceManager.CcuServiceFactory.makeCcuService(ipAddress = deviceIp)
+        CcuLog.d(TAG, "--------------fetchData--isDestinationIpInvalidValid-----$deviceIp--------")
+        service = ServiceManager.makeCcuService(ipAddress = deviceIp)
         val destination =
             DestinationMultiRead(destinationIp.value, destinationPort.value, deviceId.value, "2", destinationMacAddress.value)
         val readAccessSpecification = mutableListOf<ReadRequestMultiple>()
@@ -593,7 +594,7 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
     }
 
     private fun fetchConnectedDeviceGlobally() {
-        service = ServiceManager.CcuServiceFactory.makeCcuService(deviceIp)
+        service = ServiceManager.makeCcuService(deviceIp)
         CcuLog.d(TAG, "fetchConnectedDevice for ${deviceId.value} -- ${destinationIp.value} -- ${destinationPort.value} -- ${destinationMacAddress.value}")
         try {
             val broadCastValue = "global"

@@ -21,16 +21,18 @@ public class SystemProfileUtil {
     }
 
     public static void showConditioningDisabledDialog(Activity context, SystemMode mode) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(context, getDialogStyle());
-        String str = "Conditioning Mode changed from '" + mode.name() + "' to '" + SystemMode.OFF.name() + "' based " +
-                     "on changed equipment selection.\nPlease select appropriate conditioning mode from System Settings.";
-        builder.setCancelable(false)
-               .setPositiveButton("OK", (dialog, id) -> dialog.cancel())
-               .setTitle("System Conditioning Mode Changed")
-               .setMessage(str);
-    
-        AlertDialog dlg = builder.create();
-        dlg.show();
+        context.runOnUiThread(() -> {
+            AlertDialog.Builder builder = new AlertDialog.Builder(context, getDialogStyle());
+            String str = "Conditioning Mode changed from '" + mode.name() + "' to '" + SystemMode.OFF.name() + "' based " +
+                    "on changed equipment selection.\nPlease select appropriate conditioning mode from System Settings.";
+            builder.setCancelable(false)
+                    .setPositiveButton("OK", (dialog, id) -> dialog.cancel())
+                    .setTitle("System Conditioning Mode Changed")
+                    .setMessage(str);
+
+            AlertDialog dlg = builder.create();
+            dlg.show();
+        });
         SystemProfileUtil.setUserIntentBackground("conditioning and mode", SystemMode.OFF.ordinal());
     }
     private static int getDialogStyle() {

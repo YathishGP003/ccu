@@ -1,7 +1,7 @@
 package a75f.io.renatus.profiles.system.advancedahu.viewstate
 
-import a75f.io.logic.bo.building.system.vav.config.AdvancedHybridAhuConfig
-import a75f.io.logic.bo.building.system.vav.config.AnalogOutMinMaxVoltage
+import a75f.io.logic.bo.building.system.util.AdvancedHybridAhuConfig
+import a75f.io.logic.bo.building.system.util.AnalogOutMinMaxVoltage
 import a75f.io.renatus.profiles.system.advancedahu.AdvancedHybridAhuState
 import a75f.io.renatus.profiles.system.advancedahu.ConfigState
 import a75f.io.renatus.profiles.system.advancedahu.MinMaxVoltage

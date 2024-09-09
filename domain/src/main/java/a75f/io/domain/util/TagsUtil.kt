@@ -1,5 +1,6 @@
 package a75f.io.domain.util
 
+import a75f.io.domain.api.Domain
 import a75f.io.logger.CcuLog
 import io.seventyfivef.domainmodeler.client.ModelTagDef
 import io.seventyfivef.ph.core.TagType
@@ -15,7 +16,7 @@ object TagsUtil {
                 if (tag.kind == TagType.NUMBER && tag.defaultValue != null) {
                     return HNum.make(tag.defaultValue as Int)
                 }
-                CcuLog.i("CCU_DM", "Unknown tag type $tag")
+                CcuLog.i(Domain.LOG_TAG, "Unknown tag type $tag")
                 null
             }
         }

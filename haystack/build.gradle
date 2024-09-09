@@ -12,7 +12,7 @@ android {
 
     defaultConfig {
         minSdkVersion 24
-        targetSdkVersion 26
+        targetSdkVersion 31
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
@@ -103,7 +103,11 @@ android {
         jvmTarget = JavaVersion.VERSION_1_8.toString()
     }
 }
-
+tasks.whenTaskAdded { task ->
+    if (task.name == 'assembleDev_qa') {
+        task.dependsOn 'testDev_qaUnitTest'
+    }
+}
 dependencies {
     testImplementation 'junit:junit:4.13.1'
     testImplementation 'org.mockito:mockito-core:3.7.7'

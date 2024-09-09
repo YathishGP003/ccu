@@ -62,7 +62,7 @@ import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.messaging.handler.RemoteCommandUpdateHandler;
 import a75f.io.renatus.ENGG.RenatusEngineeringActivity;
 import a75f.io.renatus.registration.CustomViewPager;
-import a75f.io.renatus.schedules.SchedulerFragment;
+import a75f.io.renatus.schedules.ScheduleGroupFragment;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.CloudConnetionStatusThread;
 import a75f.io.renatus.util.Prefs;
@@ -367,7 +367,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                     floorMenu.setVisibility(View.GONE);
                     startCountDownTimer(INTERVAL);
                     mViewPager.getAdapter().notifyDataSetChanged();
-                }   else if (i == 2 && mViewPager.getAdapter().instantiateItem(mViewPager, i) instanceof SchedulerFragment){
+                }   else if (i == 2 && mViewPager.getAdapter().instantiateItem(mViewPager, i) instanceof ScheduleGroupFragment){
                     if (isBuildingPassWordRequired()) {
                         showRequestPasswordAlert("Building Settings Authentication", getString(R.string.BUILDING_SETTINGS_PASSWORD_KEY), i);
                     }

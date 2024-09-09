@@ -26,6 +26,7 @@ import java.util.Locale
 import java.util.concurrent.Executors
 import java.util.concurrent.ThreadFactory
 import java.util.concurrent.atomic.AtomicInteger
+import kotlin.math.abs
 
 /**
  * A common implementation of EquipBuilder interface with a generic equip/point build support.
@@ -166,11 +167,21 @@ open class DefaultEquipBuilder : EquipBuilder {
                 TagType.NUMBER -> {
                     if (tag.name.lowercase() == "bacnetid") {
                         tag.defaultValue?.let {
-                            val smartNodeAddressBand = getSmartNodeBand()?.toInt()
-                            if(smartNodeAddressBand != null && pointConfig.configuration?.nodeAddress != null) {
-                                val nodeAdd = pointConfig.configuration.nodeAddress - smartNodeAddressBand + 1000
-                                val bacnetId = "$nodeAdd${tag.defaultValue.toString().toInt()}"
-                                pointBuilder.setBacnetId(bacnetId.toInt())
+                            if (pointConfig.configuration?.roomRef != null) {
+                                if (pointConfig.configuration.roomRef.lowercase() == "system") {
+                                    val nodeAdd = pointConfig.configuration.nodeAddress
+                                    val bacnetId = "$nodeAdd${tag.defaultValue.toString().toInt()}"
+                                    pointBuilder.setBacnetId(abs(bacnetId.toInt()))
+                                } else {
+                                    val smartNodeAddressBand = getSmartNodeBand()?.toInt()
+                                    if (smartNodeAddressBand != null && pointConfig.configuration.nodeAddress != null) {
+                                        val nodeAdd =
+                                            pointConfig.configuration.nodeAddress - smartNodeAddressBand + 1000
+                                        val bacnetId =
+                                            "$nodeAdd${tag.defaultValue.toString().toInt()}"
+                                        pointBuilder.setBacnetId(abs(bacnetId.toInt()))
+                                    }
+                                }
                             }
                         }
                     } else {

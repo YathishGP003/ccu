@@ -53,6 +53,12 @@ class AlertsDataStore @JvmOverloads constructor(
       return alertQuery.build().find()
    }
 
+   fun getActivePredefinedAndLegacyCustomAlerts(): List<Alert> {
+      val alertQuery = alertBox.query()
+      alertQuery.equal(Alert_.isFixed, false).isNull(Alert_.creator)
+      return alertQuery.build().find()
+   }
+
    fun getAlertDefinitions(): List<AlertDefinition> {
       val alertsDefString = alertsSharedPrefs.getString(PREFS_ALERTS_PREDEFINED, "")
       CcuLog.d(TAG_CCU_ALERTS, "Parsing Alerts:  $alertsDefString, with $parser")
@@ -223,6 +229,23 @@ class AlertsDataStore @JvmOverloads constructor(
       val alertQuery = alertBox.query()
       alertQuery.equal(Alert_.isFixed, false)
          .equal(Alert_.mTitle, "CCU CRASH")
+         .orderDesc(Alert_.startTime)
+      return alertQuery.build().find()
+   }
+
+   fun getActiveAlertsByRef(ref: String): List<Alert> {
+      val alertQuery = alertBox.query()
+      alertQuery.equal(Alert_.isFixed, false)
+         .equal(Alert_.equipId, ref)
+         .orderDesc(Alert_.startTime)
+      return alertQuery.build().find()
+   }
+
+   fun getDeviceRebootActiveAlert(deviceRef: String): List<Alert> {
+      val alertQuery = alertBox.query()
+      alertQuery.equal(Alert_.isFixed, false)
+         .equal(Alert_.mTitle, DEVICE_REBOOT)
+         .equal(Alert_.equipId, deviceRef)
          .orderDesc(Alert_.startTime)
       return alertQuery.build().find()
    }

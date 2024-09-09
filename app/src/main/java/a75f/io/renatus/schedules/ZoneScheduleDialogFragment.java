@@ -13,7 +13,6 @@ import static a75f.io.renatus.views.MasterControl.MasterControlUtil.getAdapterVa
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 
@@ -23,6 +22,7 @@ import androidx.appcompat.app.AlertDialog;
 import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -31,14 +31,17 @@ import android.widget.CheckBox;
 import android.widget.ImageButton;
 import android.widget.NumberPicker;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
-
+import java.util.Arrays;
+import java.util.Collections;
 import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.DAYS;
@@ -48,6 +51,7 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.domain.api.Domain;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.schedule.ScheduleGroup;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.Prefs;
@@ -67,6 +71,7 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
     private int mPosition;
     private Schedule mSchedule;
     Prefs prefs;
+    private String addOrEdit;
 
     private ZoneScheduleDialogListener mListener;
 
@@ -74,14 +79,14 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
         boolean onClickSave(int position, double minTemp, double maxTemp, int startTimeHour, int endTimeHour, int startTimeMinute, int endTimeMinute,
                             ArrayList<DAYS> days, Double heatingUserLimitMaxVal, Double heatingUserLimitMinVal,
                             Double coolingUserLimitMaxVal, Double coolingUserLimitMinVal, Double heatingDeadBandVal,
-                            Double coolingDeadBandVal, boolean followBuilding, Schedule.Days mDay);
+                            Double coolingDeadBandVal, boolean followBuilding, Schedule.Days mDay, boolean isDelete);
 
-        void onClickCancel(String scheduleId);
     }
 
     public ZoneScheduleDialogFragment(ZoneScheduleDialogListener mListener, Schedule schedule) {
         this.mListener = mListener;
         this.mSchedule = schedule;
+        this.addOrEdit = "Add Schedule";
 
     }
 
@@ -99,6 +104,14 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
         this.mDay = day;
         this.mListener = mListener;
         this.mSchedule = schedule;
+        this.addOrEdit = "Edit " + getLabelToEdit()+"(" + day.getSthh() +":" +day.getStmm() + " to " + mDay.getEthh() + ":"+ mDay.getEtmm() + ")";
+    }
+
+    private String getLabelToEdit() {
+        if(mSchedule.getScheduleGroup() == ScheduleGroup.SEVEN_DAY.ordinal()){
+            return DAYS.values()[mDay.getDay()].name();
+        }
+        return getLabels(mSchedule.getScheduleGroup(), mDay, mDays).get(0).toString();
     }
 
     public ZoneScheduleDialogFragment(ZoneScheduleDialogListener mListener, int position, ArrayList<Schedule.Days> days,Schedule schedule) {
@@ -106,17 +119,30 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
         this.mListener = mListener;
         this.mDays = days;
         this.mSchedule = schedule;
+        this.addOrEdit = getLabelsForOverNightSchedule();
+    }
+
+    /*check days condatain mon and sat for weeke weekend*/
+    private String getLabelsForOverNightSchedule() {
+        List daysList = getLabels(mSchedule.getScheduleGroup(), mDay, mDays);
+        if (daysList.size() == 1) {
+            return  "Edit " + daysList.get(0) + " (" + mDays.get(0).getSthh() + ":" + mDays.get(0).getStmm() + " to " + mDays.get(0).getEthh() + ":" + mDays.get(0).getEtmm() + ")";
+        } else {
+            return  "Edit " + daysList + " (" + mDays.get(0).getSthh() + ":" + mDays.get(0).getStmm() + " to " + mDays.get(0).getEthh() + ":" + mDays.get(0).getEtmm() + ")";
+        }
     }
 
     NumberPicker npStartTime;
     NumberPicker npEndTime;
-    CheckBox checkBoxMonday;
-    CheckBox checkBoxTuesday;
-    CheckBox checkBoxWednesday;
-    CheckBox checkBoxThursday;
-    CheckBox checkBoxFriday;
-    CheckBox checkBoxSaturday;
-    CheckBox checkBoxSunday;
+    CheckBox radioButtonFirst;
+    CheckBox radioButtonSecond;
+    CheckBox radioButtonThird;
+    CheckBox radioButtonFourth;
+    CheckBox radioButtonFifth;
+    CheckBox radioButtonSixth;
+    CheckBox radioButtonSeventh;
+    TextView addOrEditTextView;
+    TextView textViewFollowBuilding;
 
     Button buttonSave;
     Button buttonCancel;
@@ -126,13 +152,13 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
     int nMinValForEndTime = 1;
     int nMaxValForEndTime = 96;
 
-    Boolean booleanIsMonday = false;
-    Boolean booleanIsTuesday = false;
-    Boolean booleanIsWednesday = false;
-    Boolean booleanIsThursday = false;
-    Boolean booleanIsFriday = false;
-    Boolean booleanIsSaturday = false;
-    Boolean booleanIsSunday = false;
+    Boolean isFirstRadioChipSelected = false;
+    Boolean isSecondRadioChipSelected = false;
+    Boolean isThirdRadioChipSelected = false;
+    Boolean isFourthRadioChipSelected = false;
+    Boolean isFifthRadioChipSelected = false;
+    Boolean isSixthRadioChipSelected = false;
+    Boolean isSeventhRadioChipSelected = false;
 
     Spinner heatingUserLimitMax;
     Spinner coolingUserLimitMax;
@@ -155,9 +181,8 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
         int daySelectionBackGround = CCUUiUtil.getDaySelectionBackground(getContext());
         ImageButton deleteButton = view.findViewById(R.id.buttonDelete);
         rangeSeekBarView = view.findViewById(R.id.rangeSeekBar);
-        Schedule schedule = CCUHsApi.getInstance().getScheduleById(mSchedule.getId());
         rangeSeekBarView.setZoneSchedule(mSchedule);
-        if(!schedule.getMarkers().contains(Tags.FOLLOW_BUILDING)) {
+        if(!mSchedule.getMarkers().contains(Tags.FOLLOW_BUILDING)) {
             rangeSeekBarView.setmDay(mDay);
         }
         rangeSeekBarView.setEnabled(false);
@@ -173,13 +198,15 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
         buttonSave = view.findViewById(R.id.buttonSave);
         buttonCancel = view.findViewById(R.id.buttonCancel);
 
-        checkBoxMonday = view.findViewById(R.id.checkBoxMon);
-        checkBoxTuesday = view.findViewById(R.id.checkBoxTue);
-        checkBoxWednesday = view.findViewById(R.id.checkBoxWed);
-        checkBoxThursday = view.findViewById(R.id.checkBoxThu);
-        checkBoxFriday = view.findViewById(R.id.checkBoxFri);
-        checkBoxSaturday = view.findViewById(R.id.checkBoxSat);
-        checkBoxSunday = view.findViewById(R.id.checkBoxSun);
+        addOrEditTextView = view.findViewById(R.id.textViewAddOrEdit);
+        addOrEditTextView.setText(addOrEdit);
+        radioButtonFirst = view.findViewById(R.id.firstRadioChip);
+        radioButtonSecond = view.findViewById(R.id.secondRadioChip);
+        radioButtonThird = view.findViewById(R.id.thirdRadioChip);
+        radioButtonFourth = view.findViewById(R.id.fourthRadioChip);
+        radioButtonFifth = view.findViewById(R.id.fifthRadioChip);
+        radioButtonSixth = view.findViewById(R.id.sixthRadioChip);
+        radioButtonSeventh = view.findViewById(R.id.seventhRadioChip);
         npStartTime = view.findViewById(R.id.np1);
         npEndTime = view.findViewById(R.id.np2);
         heatingUserLimitMin = view.findViewById(R.id.heatinglimmin);
@@ -189,17 +216,27 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
         heatingDeadBand = view.findViewById(R.id.heatingdeadband);
         coolingDeadBand = view.findViewById(R.id.coolingdeadband);
         followBuilding = view.findViewById(R.id.following_building_toggle);
-
-        setSpinnerDropDownIconColor();
-        if (mDay != null || mDays != null){
-            checkBoxMonday.setEnabled(false);
-            checkBoxTuesday.setEnabled(false);
-            checkBoxWednesday.setEnabled(false);
-            checkBoxThursday.setEnabled(false);
-            checkBoxFriday.setEnabled(false);
-            checkBoxSaturday.setEnabled(false);
-            checkBoxSunday.setEnabled(false);
+        textViewFollowBuilding = view.findViewById(R.id.follow_building);
+        if(mSchedule.isZoneSchedule()){
+            followBuilding.setVisibility(View.VISIBLE);
+            textViewFollowBuilding.setVisibility(View.VISIBLE);
+        } else {
+            followBuilding.setVisibility(View.GONE);
+            textViewFollowBuilding.setVisibility(View.GONE);
         }
+        setSpinnerDropDownIconColor();
+        setUpRadioChips(mSchedule.getScheduleGroup(), getLabels(mSchedule.getScheduleGroup(), mDay, mDays));
+
+        if (mDay != null || mDays != null){
+            radioButtonFirst.setEnabled(false);
+            radioButtonSecond.setEnabled(false);
+            radioButtonThird.setEnabled(false);
+            radioButtonFourth.setEnabled(false);
+            radioButtonFifth.setEnabled(false);
+            radioButtonSixth.setEnabled(false);
+            radioButtonSeventh.setEnabled(false);
+        }
+        setSaveButtonText();
 
         npStartTime.setMinValue(nMinValForStartTime);
         npStartTime.setMaxValue(nMaxValForStartTime);
@@ -237,13 +274,18 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
         ArrayList<String> heatingAndCoolingLimit = new ArrayList<>();
         ArrayList<String> deadBand = new ArrayList<>();
 
+        double minValForDeadBand = ScheduleUtil.getDeadBandValue("minVal", mSchedule.getRoomRef());
+        double maxValForDeadBand = ScheduleUtil.getDeadBandValue("maxVal", mSchedule.getRoomRef());
         if(isCelsiusTunerAvailableStatus()){
             for (int val = 50;  val <= 100; val += 1) {
                 heatingAndCoolingLimit.add( fahrenheitToCelsius(val) + "\u00B0C");
             }
 
-            double minVal = convertingRelativeValueFtoC(0);
-            double maxVal = convertingRelativeValueFtoC(10);
+            double minVal = convertingRelativeValueFtoC(minValForDeadBand);
+            if(minVal < 0.5){
+                minVal = 0.5;
+            }
+            double maxVal = convertingRelativeValueFtoC(maxValForDeadBand);
             for (double val = minVal;  val <= maxVal; val += 0.5) {
                 deadBand.add( ((val)) + "\u00B0C");
             }
@@ -252,7 +294,7 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
             for (int val = 50;  val <= 100; val += 1) {
                 heatingAndCoolingLimit.add(val+"\u00B0F");
             }
-            for (double val = 0;  val <= 10; val += 0.5) {
+            for (double val = minValForDeadBand;  val <= maxValForDeadBand; val += 0.5) {
                 deadBand.add((val) + "\u00B0F");
             }
         }
@@ -275,7 +317,7 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
         coolingDeadBand.setAdapter(deadBandAdapter);
         heatingDeadBand.setAdapter(deadBandAdapter);
 
-        if(schedule.getMarkers().contains(Tags.FOLLOW_BUILDING)){
+        if(mSchedule.getMarkers().contains(Tags.FOLLOW_BUILDING)){
             heatingUserLimitMax.setEnabled(false);
             heatingUserLimitMin.setEnabled(false);
             coolingUserLimitMax.setEnabled(false);
@@ -378,109 +420,38 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
         } catch (Exception e) {
             CcuLog.e(L.TAG_CCU_CRASH, "Reflection Crash?");
         }
-        checkBoxMonday.setOnCheckedChangeListener((buttonView, isChecked) ->
-        {
-            // update your model (or other business logic) based on isChecked
-            if (isChecked) {
-                booleanIsMonday = true;
-                checkBoxMonday.setTextColor(Color.parseColor("#ffffff"));
-                //checkBoxMonday.setBackground(getResources().getDrawable(R.drawable.bg_weekdays_selector));
-                checkBoxMonday.setBackgroundResource(daySelectionBackGround);
-            } else {
-                booleanIsMonday = false;
-                checkBoxMonday.setTextColor(Color.parseColor("#000000"));
-                checkBoxMonday.setBackground(null);
-            }
+        radioButtonFirst.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            isFirstRadioChipSelected = isChecked;
+            radioButtonFirst.setChecked(isChecked);
         });
-        checkBoxTuesday.setOnCheckedChangeListener((buttonView, isChecked) ->
-        {
-            // update your model (or other business logic) based on isChecked
-            if (isChecked) {
-                booleanIsTuesday = true;
-                checkBoxTuesday.setTextColor(Color.parseColor("#ffffff"));
-                checkBoxTuesday.setBackgroundResource(daySelectionBackGround);
-            } else {
-                booleanIsTuesday = false;
-                checkBoxTuesday.setTextColor(Color.parseColor("#000000"));
-                checkBoxTuesday.setBackground(null);
-            }
+        radioButtonSecond.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            isSecondRadioChipSelected = isChecked;
+            radioButtonSecond.setChecked(isChecked);
         });
-        checkBoxWednesday.setOnCheckedChangeListener((buttonView, isChecked) ->
-        {
-            // update your model (or other business logic) based on isChecked
-            if (isChecked) {
-                booleanIsWednesday = true;
-                checkBoxWednesday.setTextColor(Color.parseColor("#ffffff"));
-                checkBoxWednesday.setBackgroundResource(daySelectionBackGround);
-            } else {
-                booleanIsWednesday = false;
-                checkBoxWednesday.setTextColor(Color.parseColor("#000000"));
-                checkBoxWednesday.setBackground(null);
-            }
+        radioButtonThird.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            isThirdRadioChipSelected = isChecked;
+            radioButtonThird.setChecked(isChecked);
         });
-        checkBoxThursday.setOnCheckedChangeListener((buttonView, isChecked) ->
-        {
-            // update your model (or other business logic) based on isChecked
-            if (isChecked) {
-                booleanIsThursday = true;
-                checkBoxThursday.setTextColor(Color.parseColor("#ffffff"));
-                checkBoxThursday.setBackgroundResource(daySelectionBackGround);
-            } else {
-                booleanIsThursday = false;
-                checkBoxThursday.setTextColor(Color.parseColor("#000000"));
-                checkBoxThursday.setBackground(null);
-            }
+        radioButtonFourth.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            isFourthRadioChipSelected = isChecked;
+            radioButtonFourth.setChecked(isChecked);
         });
-        checkBoxFriday.setOnCheckedChangeListener((buttonView, isChecked) ->
-        {
-            // update your model (or other business logic) based on isChecked
-            if (isChecked) {
-                booleanIsFriday = true;
-                checkBoxFriday.setTextColor(Color.parseColor("#ffffff"));
-                checkBoxFriday.setBackgroundResource(daySelectionBackGround);
-            } else {
-                booleanIsFriday = false;
-                checkBoxFriday.setTextColor(Color.parseColor("#000000"));
-                checkBoxFriday.setBackground(null);
-            }
+        radioButtonFifth.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            isFifthRadioChipSelected = isChecked;
+            radioButtonFifth.setChecked(isChecked);
         });
-        checkBoxSaturday.setOnCheckedChangeListener((buttonView, isChecked) ->
-        {
-            // update your model (or other business logic) based on isChecked
-            if (isChecked) {
-                booleanIsSaturday = true;
-                checkBoxSaturday.setTextColor(Color.parseColor("#ffffff"));
-                checkBoxSaturday.setBackgroundResource(daySelectionBackGround);
-            } else {
-                booleanIsSaturday = false;
-                checkBoxSaturday.setTextColor(Color.parseColor("#000000"));
-                checkBoxSaturday.setBackground(null);
-            }
+        radioButtonSixth.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            isSixthRadioChipSelected = isChecked;
+            radioButtonSixth.setChecked(isChecked);
         });
-        checkBoxSunday.setOnCheckedChangeListener((buttonView, isChecked) ->
-        {
-            // update your model (or other business logic) based on isChecked
-            if (isChecked) {
-                booleanIsSunday = true;
-                checkBoxSunday.setTextColor(Color.parseColor("#ffffff"));
-                checkBoxSunday.setBackgroundResource(daySelectionBackGround);
-            } else {
-                booleanIsSunday = false;
-                checkBoxSunday.setTextColor(Color.parseColor("#000000"));
-                checkBoxSunday.setBackground(null);
-            }
+        radioButtonSeventh.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            isSeventhRadioChipSelected = isChecked;
+            radioButtonSeventh.setChecked(isChecked);
         });
 
         buttonSave.setOnClickListener(view1 ->
         {
-            ArrayList<DAYS> days = new ArrayList<>();
-            if (booleanIsMonday) days.add(DAYS.MONDAY);
-            if (booleanIsTuesday) days.add(DAYS.TUESDAY);
-            if (booleanIsWednesday) days.add(DAYS.WEDNESDAY);
-            if (booleanIsThursday) days.add(DAYS.THURSDAY);
-            if (booleanIsFriday) days.add(DAYS.FRIDAY);
-            if (booleanIsSaturday) days.add(DAYS.SATURDAY);
-            if (booleanIsSunday) days.add(DAYS.SUNDAY);
+            ArrayList<DAYS> days = getDaysByScheduleGroupAndCheckBoxSelected();
 
             int startHour = (npStartTime.getValue() - (npStartTime.getValue() % 4)) / 4;
             int startMinutes = (npStartTime.getValue() % 4) * 15;
@@ -515,6 +486,13 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
                 return;
             }
 
+            if ((startHour > endHour || (startHour == endHour && startMinutes > endMinutes))
+                    && mSchedule.getScheduleGroup() != ScheduleGroup.SEVEN_DAY.ordinal()) {
+                Toast.makeText(ZoneScheduleDialogFragment.this.getContext(),
+                        "Overnight schedule creation is only permitted for 7 day schedule group", Toast.LENGTH_LONG).show();
+                return;
+            }
+
             if (days.isEmpty()) {
                 Toast.makeText(ZoneScheduleDialogFragment.this.getContext(), "Select one or more days to apply the schedule", Toast.LENGTH_SHORT).show();
                 return;
@@ -534,7 +512,7 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
                                     rangeSeekBarView.getHeatValue(), startHour, endHour, startMinutes,
                                     endMinutes, days, heatingUserLimitMaxVal, heatingUserLimitMinVal, coolingUserLimitMaxVal,
                                     coolingUserLimitMinVal, heatingDeadBandVal, coolingDeadBandVal,
-                                    followBuilding.isChecked(), mDay);
+                                    followBuilding.isChecked(), mDay, false);
 
                             dismiss();
                         })
@@ -574,7 +552,7 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
                         rangeSeekBarView.getHeatValue(), startHour, endHour, startMinutes, endMinutes,
                         days, heatingUserLimitMaxVal, heatingUserLimitMinVal, coolingUserLimitMaxVal,
                         coolingUserLimitMinVal, heatingDeadBandVal, coolingDeadBandVal,
-                        followBuilding.isChecked(), mDay)) {
+                        followBuilding.isChecked(), mDay, false)) {
                     return;
                 }
                 dismiss();
@@ -680,16 +658,12 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
         });
 
         buttonCancel.setOnClickListener(view12 ->{
-            mListener.onClickCancel(mSchedule.getId());
             dismiss();
         });
 
 
         if (mDays != null && (!mDays.isEmpty())) {
-
-            for(Schedule.Days d : mDays) {
-                checkDays(d);
-            }
+            checkDays(mDays, null, mSchedule.getScheduleGroup());
             new CountDownTimer(150, 150) {
                 @Override
                 public void onTick(long l) {
@@ -703,7 +677,7 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
 
         }else if(mDay != null){
 
-            checkDays(mDay);
+            checkDays(null, mDay, mSchedule.getScheduleGroup());
             checkTime(mDay);
             new CountDownTimer(150, 150) {
                 @Override
@@ -734,6 +708,177 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
                 .create();
 
     }
+
+    private void setSaveButtonText() {
+        if(mDay != null || mDays != null){
+            buttonSave.setText("SAVE");
+        } else {
+            buttonSave.setText("ADD");
+        }
+    }
+
+    private ArrayList<DAYS> getDaysByScheduleGroupAndCheckBoxSelected() {
+        ArrayList<DAYS> days = new ArrayList<>();
+        int scheduleGroup = mSchedule.getScheduleGroup();
+        if (scheduleGroup == ScheduleGroup.EVERYDAY.ordinal()) {
+            if(isFirstRadioChipSelected) {
+                days.add(DAYS.MONDAY);
+                days.add(DAYS.TUESDAY);
+                days.add(DAYS.WEDNESDAY);
+                days.add(DAYS.THURSDAY);
+                days.add(DAYS.FRIDAY);
+                days.add(DAYS.SATURDAY);
+                days.add(DAYS.SUNDAY);
+            }
+        } else if(scheduleGroup == ScheduleGroup.WEEKDAY_WEEKEND.ordinal()){
+
+            if(isFirstRadioChipSelected) {
+                if(mDay == null || mDay.getDay() == 0) {
+                    days.add(DAYS.MONDAY);
+                    days.add(DAYS.TUESDAY);
+                    days.add(DAYS.WEDNESDAY);
+                    days.add(DAYS.THURSDAY);
+                    days.add(DAYS.FRIDAY);
+                } else {
+                    days.add(DAYS.SATURDAY);
+                    days.add(DAYS.SUNDAY);
+                }
+            }
+            if(isSecondRadioChipSelected) {
+                days.add(DAYS.SATURDAY);
+                days.add(DAYS.SUNDAY);
+            }
+        } else if (scheduleGroup == ScheduleGroup.WEEKDAY_SATURDAY_SUNDAY.ordinal()) {
+            if(isFirstRadioChipSelected) {
+                if (mDay == null || mDay.getDay() == 0) {
+                    days.add(DAYS.MONDAY);
+                    days.add(DAYS.TUESDAY);
+                    days.add(DAYS.WEDNESDAY);
+                    days.add(DAYS.THURSDAY);
+                    days.add(DAYS.FRIDAY);
+                } else if (mDay.getDay() == 5) {
+                    days.add(DAYS.SATURDAY);
+                } else {
+                    days.add(DAYS.SUNDAY);
+                }
+            }
+            if(isSecondRadioChipSelected) {
+                days.add(DAYS.SATURDAY);
+            }
+            if(isThirdRadioChipSelected) {
+                days.add(DAYS.SUNDAY);
+            }
+        } else {
+            if(isFirstRadioChipSelected) {
+                days.add(DAYS.MONDAY);
+            }
+            if(isSecondRadioChipSelected) {
+                days.add(DAYS.TUESDAY);
+            }
+            if(isThirdRadioChipSelected) {
+                days.add(DAYS.WEDNESDAY);
+            }
+            if(isFourthRadioChipSelected) {
+                days.add(DAYS.THURSDAY);
+            }
+            if(isFifthRadioChipSelected) {
+                days.add(DAYS.FRIDAY);
+            }
+            if(isSixthRadioChipSelected) {
+                days.add(DAYS.SATURDAY);
+            }
+            if(isSeventhRadioChipSelected) {
+                days.add(DAYS.SUNDAY);
+            }
+        }
+        return days;
+    }
+
+    public List<String> getLabels(int scheduleGroup, Schedule.Days mDay, ArrayList<Schedule.Days> mDays) {
+        List<String> labels = new ArrayList<>();
+        List<String> abbreviatedDayNames = Arrays.asList("M", "T", "W", "Th", "F", "Sa", "Su");
+
+        if (scheduleGroup == ScheduleGroup.EVERYDAY.ordinal()) {
+            labels.add("Everyday");
+            return labels;
+        } else if (scheduleGroup == ScheduleGroup.WEEKDAY_WEEKEND.ordinal()) {
+            if (mDay != null) {
+                labels.add(mDay.getDay() == 5 || mDay.getDay() == 6 ? "Weekend" : "Weekday");
+            } else {
+                labels.add("Weekday");
+                labels.add("Weekend");
+            }
+            return labels;
+        } else if (scheduleGroup == ScheduleGroup.WEEKDAY_SATURDAY_SUNDAY.ordinal()) {
+            if (mDay != null) {
+                switch (mDay.getDay()) {
+                    case 5:
+                        labels.add("Saturday");
+                        break;
+                    case 6:
+                        labels.add("Sunday");
+                        break;
+                    default:
+                        labels.add("Weekday");
+                        break;
+                }
+            } else {
+                labels.add("Weekday");
+                labels.add("SA");
+                labels.add("SU");
+            }
+            return labels;
+        } else {
+            if (mDay != null) {
+                labels.add(abbreviatedDayNames.get(mDay.getDay()));
+            } else if (mDays != null) {
+                for (Schedule.Days day : mDays) {
+                    labels.add(abbreviatedDayNames.get(day.getDay()));
+                }
+            }else {
+                labels.add("M");
+                labels.add("T");
+                labels.add("W");
+                labels.add("TH");
+                labels.add("F");
+                labels.add("SA");
+                labels.add("SU");
+                return labels;
+            }
+            return labels;
+        }
+
+    }
+
+
+    private void setUpRadioChips(Integer scheduleGroup, List<String> labels) {
+        List<CheckBox> radioButtons = new ArrayList<>();
+        Collections.addAll(radioButtons, radioButtonFirst, radioButtonSecond,
+                radioButtonThird, radioButtonFourth, radioButtonFifth, radioButtonSixth, radioButtonSeventh);
+        for (int i = 0; i < radioButtons.size(); i++) {
+            CheckBox radioButton = radioButtons.get(i);
+            if (i < labels.size()) {
+                radioButton.setText(labels.get(i));
+                radioButton.setVisibility(View.VISIBLE);
+                ViewGroup.LayoutParams layoutParams = radioButton.getLayoutParams();
+
+                if (scheduleGroup == ScheduleGroup.SEVEN_DAY.ordinal()) {
+                    layoutParams.width = 50;
+                } else if (scheduleGroup == ScheduleGroup.WEEKDAY_WEEKEND.ordinal() || scheduleGroup == ScheduleGroup.EVERYDAY.ordinal()) {
+                    layoutParams.width = 129;
+                } else {
+                    layoutParams.width = (i == 1 || i == 2) ? 50 : 129;
+                }
+
+                radioButton.setLayoutParams(layoutParams);
+            } else {
+                radioButton.setVisibility(View.GONE);
+            }
+        }
+
+
+    }
+
 
     private String displayDayName(ArrayList<Integer> dayIndexArr) {
         StringBuilder daysName = new StringBuilder();
@@ -846,7 +991,7 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
             ProgressDialogUtils.showProgressDialog(getActivity(),"Deleting schedule...");
             mListener.onClickSave(mPosition, 74, 72, 0, 0, 0, 0, null,
                     72.0, 67.0, 77.0, 72.0, 2.0,
-                    2.0, false, null);
+                    2.0, followBuilding.isChecked(), null, true);
             alertDialog.dismiss();
             new Handler().postDelayed(ProgressDialogUtils::hideProgressDialog, 1000);
             dismiss();
@@ -878,13 +1023,18 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
         ArrayList<String> heatingAndCoolingLimit = new ArrayList<>();
         ArrayList<String> deadBand = new ArrayList<>();
 
+        double minDeadBandValue = ScheduleUtil.getDeadBandValue("minVal", mSchedule.getRoomRef());
+        double maxDeadBandValue = ScheduleUtil.getDeadBandValue("maxVal", mSchedule.getRoomRef());
         if(isCelsiusTunerAvailableStatus()){
             for (int val = 50;  val <= 100; val += 1) {
                 heatingAndCoolingLimit.add(fahrenheitToCelsius(val) + "\u00B0C");
-           }
+            }
 
-            double minVal = convertingRelativeValueFtoC(0);
-            double maxVal = convertingRelativeValueFtoC(10);
+            double minVal = convertingRelativeValueFtoC(minDeadBandValue);
+            if(minVal < 0.5){
+                minVal = 0.5;
+            }
+            double maxVal = convertingRelativeValueFtoC(maxDeadBandValue);
             for (double val = minVal;  val <= maxVal; val += 0.5) {
                 deadBand.add( ((val)) + "\u00B0C");
             }
@@ -894,7 +1044,7 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
                 heatingAndCoolingLimit.add(val+"\u00B0F");
             }
 
-            for (double val = 0;  val <= 10; val += 0.5) {
+            for (double val = minDeadBandValue;  val <= maxDeadBandValue; val += 0.5) {
                 deadBand.add(val+"\u00B0F");
             }
         }
@@ -927,29 +1077,37 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
             coolingDeadBand.setSelection(deadBandAdapter.getPosition(
                     getAdapterValDeadBand(HSUtil.getLevelValueFrom16(coolDB.get("id").toString()), true)));
         }else{
-        heatingUserLimitMax.setSelection(heatingAdapter.getPosition(
-                getAdapterVal(mDay.getHeatingUserLimitMax(), true)));
-        heatingUserLimitMin.setSelection(heatingAdapter.getPosition(
-                getAdapterVal(mDay.getHeatingUserLimitMin(), true)));
-        coolingUserLimitMax.setSelection(coolingAdapter.getPosition(
-                getAdapterVal(mDay.getCoolingUserLimitMax(), true)));
-        coolingUserLimitMin.setSelection(coolingAdapter.getPosition(
-                getAdapterVal(mDay.getCoolingUserLimitMin(), true)));
-        heatingDeadBand.setSelection(deadBandAdapter.getPosition(
-                getAdapterValDeadBand(mDay.getHeatingDeadBand(), true)));
-        coolingDeadBand.setSelection(deadBandAdapter.getPosition(
-                getAdapterValDeadBand(mDay.getCoolingDeadBand(), true)));
+            heatingUserLimitMax.setSelection(heatingAdapter.getPosition(
+                    getAdapterVal(mDay.getHeatingUserLimitMax(), true)));
+            heatingUserLimitMin.setSelection(heatingAdapter.getPosition(
+                    getAdapterVal(mDay.getHeatingUserLimitMin(), true)));
+            coolingUserLimitMax.setSelection(coolingAdapter.getPosition(
+                    getAdapterVal(mDay.getCoolingUserLimitMax(), true)));
+            coolingUserLimitMin.setSelection(coolingAdapter.getPosition(
+                    getAdapterVal(mDay.getCoolingUserLimitMin(), true)));
+            heatingDeadBand.setSelection(deadBandAdapter.getPosition(
+                    getAdapterValDeadBand(mDay.getHeatingDeadBand(), true)));
+            coolingDeadBand.setSelection(deadBandAdapter.getPosition(
+                    getAdapterValDeadBand(mDay.getCoolingDeadBand(), true)));
+        }
     }
-    }
-    private void checkDays(Schedule.Days days) {
-
-        if (days.getDay() == DAYS.MONDAY.ordinal()) checkBoxMonday.setChecked(true);
-        else if (days.getDay() == DAYS.TUESDAY.ordinal()) checkBoxTuesday.setChecked(true);
-        else if (days.getDay() == DAYS.WEDNESDAY.ordinal()) checkBoxWednesday.setChecked(true);
-        else if (days.getDay() == DAYS.THURSDAY.ordinal()) checkBoxThursday.setChecked(true);
-        else if (days.getDay() == DAYS.FRIDAY.ordinal()) checkBoxFriday.setChecked(true);
-        else if (days.getDay() == DAYS.SATURDAY.ordinal()) checkBoxSaturday.setChecked(true);
-        else if (days.getDay() == DAYS.SUNDAY.ordinal()) checkBoxSunday.setChecked(true);
+    private void checkDays(ArrayList<Schedule.Days> mDays, Schedule.Days days, int scheduleGroup) {
+        List<CheckBox> radioButtons = Arrays.asList(
+                radioButtonFirst,
+                radioButtonSecond,
+                radioButtonThird,
+                radioButtonFourth,
+                radioButtonFifth,
+                radioButtonSixth,
+                radioButtonSeventh
+        );
+        if(mDay!= null) {
+            radioButtonFirst.setChecked(true);
+        } else {
+            for (int i = 0; i < mDays.size() && i < radioButtons.size(); i++) {
+                radioButtons.get(i).setChecked(true);
+            }
+        }
     }
 
 

@@ -35,7 +35,7 @@ open class VavEquip (equipRef : String) : DomainEquip(equipRef){
     val equipScheduleStatus = Point(DomainName.equipScheduleStatus, equipRef)
 
     val dischargeAirTemp = Point(DomainName.dischargeAirTemp, equipRef)
-    val zoneCO2 = Point(DomainName.zoneCO2, equipRef)
+    val zoneCO2 = Point(DomainName.zoneCo2, equipRef)
     val enteringAirTemp = Point(DomainName.enteringAirTemp, equipRef)
     val pressureSensor = Point(DomainName.pressureSensor, equipRef)
     val zoneVoc = Point(DomainName.zoneVoc, equipRef)

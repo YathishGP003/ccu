@@ -32,7 +32,7 @@ val highPriorityDispatcher = Executors.newSingleThreadExecutor(object : ThreadFa
 
     override fun newThread(r: Runnable): Thread {
         return Thread(r, "HighPriorityThread-${counter.incrementAndGet()}").apply {
-            priority = Thread.MAX_PRIORITY - 1
+            priority = Thread.MAX_PRIORITY
         }
     }
 }).asCoroutineDispatcher()

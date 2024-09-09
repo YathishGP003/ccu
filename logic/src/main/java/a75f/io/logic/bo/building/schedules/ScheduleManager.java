@@ -43,6 +43,7 @@ import a75f.io.api.haystack.Occupied;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.util.TimeUtil;
+import a75f.io.domain.api.DomainName;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
@@ -774,11 +775,11 @@ public class ScheduleManager {
     }
 
     private void postSystemOccupancy(CCUHsApi hayStack) {
-        double systemOccupancyValue = CCUHsApi.getInstance().readHisValByQuery("point and system and his and occupancy and mode");
+        double systemOccupancyValue = CCUHsApi.getInstance().readHisValByQuery("point and domainName == \"" + DomainName.systemOccupancyMode+"\" or point and system and his and (occupancy or occupied) and mode");
         if (systemOccupancyValue != systemOccupancy.ordinal()){
             Globals.getInstance().getApplicationContext().sendBroadcast(new Intent(ACTION_STATUS_CHANGE));
         }
-        hayStack.writeHisValByQuery("point and system and his and occupancy and mode",
+        hayStack.writeHisValByQuery("point and domainName == \"" + DomainName.systemOccupancyMode+"\" or point and system and his and (occupancy or occupied) and mode",
                 (double) systemOccupancy.ordinal());
     }
 

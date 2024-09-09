@@ -203,7 +203,7 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
         return retVal;
     }
     
-    
+
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
     {
@@ -216,6 +216,7 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
         mBLERoomNameBuffer = mBLERoomName.getOrderedBuffer();
         bleDialogEnterPinEdittext.setVisibility(View.VISIBLE);
         setTitle("Pairing " + mBLERoomName.roomName.get());
+
     }
     
     

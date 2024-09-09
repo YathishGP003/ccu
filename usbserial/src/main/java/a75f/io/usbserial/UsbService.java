@@ -2,6 +2,7 @@ package a75f.io.usbserial;
 
 import static com.felhr.usbserial.UsbSerialDevice.TAG_SERIAL_DEBUG;
 
+import android.annotation.SuppressLint;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
@@ -10,15 +11,14 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.hardware.usb.IUsbManager;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.RemoteException;
-import android.os.ServiceManager;
+import android.widget.Toast;
 
 import com.felhr.usbserial.CDCSerialDevice;
 import com.felhr.usbserial.UsbSerialDevice;
@@ -37,7 +37,10 @@ import java.util.concurrent.TimeUnit;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logger.CcuLog;
 
-import static java.lang.Thread.sleep;
+import com.hoho.android.usbserial.driver.UsbSerialDriver;
+import com.hoho.android.usbserial.driver.UsbSerialProber;
+
+import static a75f.io.usbserial.UsbModbusService.TAG;
 
 /**
  * Created by rmatt isOn 7/30/2017.
@@ -126,6 +129,17 @@ public class UsbService extends Service
 				if (!serialPortConnected && UsbSerialUtil.isCMDevice(attachedDevice, context)) {
 					CcuLog.d(TAG_CCU_USB,"CM Serial device connected "+ attachedDevice);
 					scheduleUsbConnectedEvent(); // A USB device has been attached. Try to open it as a Serial port
+					int vendorId = attachedDevice.getVendorId();
+					int productId = attachedDevice.getProductId();
+					String manufacturerName = attachedDevice.getManufacturerName();
+					String productName = attachedDevice.getProductName();
+					String version = attachedDevice.getVersion();
+					String serialNumber = attachedDevice.getSerialNumber();
+					String logMessage = String.format(
+							"CM is Attached - VID: %d, PID: %d, Manufacturer: %s, Product Name: %s, Version: %s, Serial Number: %s",
+							vendorId, productId, manufacturerName, productName, version, serialNumber
+					);
+					UsbUtil.writeUsbEvent(logMessage);
 				}
 			} else if (arg1.getAction().equals(ACTION_USB_DETACHED)) {
 				UsbDevice detachedDevice = arg1.getParcelableExtra(UsbManager.EXTRA_DEVICE);
@@ -141,6 +155,17 @@ public class UsbService extends Service
 					// Usb device was disconnected. send an intent to the Main Activity
 					Intent intent = new Intent(ACTION_USB_DISCONNECTED);
 					arg0.sendBroadcast(intent);
+					int vendorId = detachedDevice.getVendorId();
+					int productId = detachedDevice.getProductId();
+					String manufacturerName = detachedDevice.getManufacturerName();
+					String productName = detachedDevice.getProductName();
+					String version = detachedDevice.getVersion();
+					String serialNumber = detachedDevice.getSerialNumber();
+					String logMessage = String.format(
+							"CM is Detached - VID: %d, PID: %d, Manufacturer: %s, Product Name: %s, Version: %s, Serial Number: %s",
+							vendorId, productId, manufacturerName, productName, version, serialNumber
+					);
+					UsbUtil.writeUsbEvent(logMessage);
 				}
 			}
 			CcuLog.d(TAG_CCU_USB,"UsbService: OnReceive == "+arg1.getAction()+","+serialPortConnected);
@@ -245,7 +270,7 @@ public class UsbService extends Service
 		serialPortConnected = false;
 		UsbService.SERVICE_CONNECTED = true;
 		setFilter();
-		usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
+		usbManager = (UsbManager) context.getSystemService(Context.USB_SERVICE);
 		
 		try {
 			findSerialPortDevice();
@@ -299,25 +324,52 @@ public class UsbService extends Service
 	private void findSerialPortDevice() {
 		// This snippet will try to open the first encountered usb device connected, excluding usb root hubs
 		HashMap<String, UsbDevice> usbDevices = usbManager.getDeviceList();
+
+
+		if(usbDevices == null) {
+			Toast.makeText(context,"connection failed: device not found",Toast.LENGTH_SHORT).show();
+			return;
+		}
+
+
+
+
+
+
+
+
 		CcuLog.d(TAG_CCU_USB,"findSerialPortDevice = "+usbDevices.size());
 		if (!usbDevices.isEmpty()) {
 			boolean keep = true;
 			for (Map.Entry<String, UsbDevice> entry : usbDevices.entrySet()) {
 				device = entry.getValue();
 				if (UsbSerialUtil.isCMDevice(device, getApplicationContext())) {
-					boolean success = grantRootPermissionToUSBDevice(device);
-					connection = usbManager.openDevice(device);
-					if (success) {
-						new ConnectionThread().start();
-						Intent intent = new Intent(ACTION_USB_PERMISSION_GRANTED);
-						UsbService.this.getApplicationContext().sendBroadcast(intent);
-						keep = true;
-					} else {
-						Intent intent = new Intent(ACTION_USB_PERMISSION_NOT_GRANTED);
-						UsbService.this.getApplicationContext().sendBroadcast(intent);
-						keep = false;
+
+					UsbSerialDriver driver = UsbSerialProber.getDefaultProber().probeDevice(device);
+
+
+					if(driver == null) {
+						Toast.makeText(context,"NO driver for device",Toast.LENGTH_SHORT).show();
+						return;
 					}
-					CcuLog.d(TAG_CCU_USB, "Opened Serial CM device instance "+device.getVendorId()+" "+success);
+					//usbSerialPort = driver.getPorts().get(portNum);
+					UsbDeviceConnection usbConnection = usbManager.openDevice(driver.getDevice());
+
+					if(usbConnection == null && !usbManager.hasPermission(driver.getDevice())) {
+						int flags = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ? PendingIntent.FLAG_MUTABLE : 0;
+						Intent intent = new Intent(ACTION_USB_PERMISSION);
+
+						PendingIntent usbPermissionIntent = PendingIntent.getBroadcast(this, 0, intent, flags);
+						usbManager.requestPermission(driver.getDevice(), usbPermissionIntent);
+						return;
+					}
+
+					connection = usbManager.openDevice(device);
+					new ConnectionThread().start();
+					Intent intent = new Intent(ACTION_USB_PERMISSION_GRANTED);
+					UsbService.this.getApplicationContext().sendBroadcast(intent);
+					keep = true;
+					CcuLog.d(TAG_CCU_USB, "Opened Serial CM device instance "+device.getVendorId());
 				} else {
 					connection = null;
 					device = null;
@@ -352,45 +404,13 @@ public class UsbService extends Service
 			for (Map.Entry<String, UsbDevice> entry : usbDevices.entrySet()) {
 				device = entry.getValue();
 				if (UsbSerialUtil.isCMDevice(device, getApplicationContext())) {
-					boolean success = grantRootPermissionToUSBDevice(device);
 					connection = usbManager.openDevice(device);
-					if (success) {
-						new ConnectionThread().start();
-						CcuLog.d(TAG_CCU_USB, "Opened Serial CM device "+device.toString());
-					} else {
-						CcuLog.w(TAG_CCU_USB, "Failed to open Serial CM device "+device.toString());
-					}
+					new ConnectionThread().start();
+					CcuLog.d(TAG_CCU_USB, "Opened Serial CM device "+device.toString());
 				}
 				sleep(100);
 			}
 		}
-	}
-	
-	private void openAndConfigureDevice(UsbDevice device) {
-		boolean success = grantRootPermissionToUSBDevice(device);
-		connection = usbManager.openDevice(device);
-		if (success) {
-			new ConnectionThread().start();
-		}
-		CcuLog.d(TAG_CCU_USB, "Opened Serial CM device instance for " +device.getDeviceName());
-	}
-
-	private boolean grantRootPermissionToUSBDevice(UsbDevice device)
-	{
-		IBinder b = ServiceManager.getService(Context.USB_SERVICE);
-		IUsbManager service = IUsbManager.Stub.asInterface(b);
-		CcuLog.i(TAG_CCU_USB, "Try connecting!");
-		// There is a device connected to our Android device. Try to open it as a Serial Port.
-		try
-		{
-			service.grantDevicePermission(device, getApplicationInfo().uid);
-			return true;
-		}
-		catch (RemoteException e)
-		{
-			e.printStackTrace();
-		}
-		return false;
 	}
 
 
@@ -413,10 +433,10 @@ public class UsbService extends Service
 	/*
 	 * Request user permission. The response will be received in the BroadcastReceiver
 	 */
-	private void requestUserPermission()
+    public void requestUserPermission()
 	{
 		PendingIntent mPendingIntent =
-				PendingIntent.getBroadcast(this, 0, new Intent(ACTION_USB_PERMISSION), 0);
+				PendingIntent.getBroadcast(this, 0, new Intent(ACTION_USB_PERMISSION), PendingIntent.FLAG_IMMUTABLE);
 		usbManager.requestPermission(device, mPendingIntent);
 	}
 
@@ -592,6 +612,7 @@ public class UsbService extends Service
 				// Everything went as expected. Send an intent to MainActivity
 				Intent intent = new Intent(ACTION_USB_READY);
 				context.sendBroadcast(intent);
+				CcuLog.i(TAG_CCU_USB, "CM: configureSerialPort success!");
 			} else {
 				CcuLog.i(TAG_CCU_USB, "CM: configureSerialPort Open Failed!");
 				// Serial port could not be opened, maybe an I/O error or if CDC driver was chosen, it does not really fit

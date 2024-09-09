@@ -19,6 +19,7 @@ import a75f.io.renatus.compose.ToggleButtonStateful
 import a75f.io.renatus.modbus.util.SET
 import a75f.io.renatus.profiles.OnPairingCompleteListener
 import a75f.io.renatus.profiles.profileUtils.UnusedPortsFragment
+import a75f.io.renatus.util.highPriorityDispatcher
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -39,9 +40,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
@@ -55,7 +53,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class AcbProfileConfigFragment : BaseDialogFragment() ,OnPairingCompleteListener {
+class AcbProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener {
 
     private val viewModel : AcbProfileViewModel by viewModels()
     companion object {
@@ -79,18 +77,21 @@ class AcbProfileConfigFragment : BaseDialogFragment() ,OnPairingCompleteListener
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
-        viewLifecycleOwner.lifecycleScope.launch {
-            withContext(Dispatchers.IO) {
-                viewModel.init(requireArguments(), requireContext(), CCUHsApi.getInstance())
-                viewModel.setOnPairingCompleteListener(this@AcbProfileConfigFragment)
-            }
-        }
         val rootView = ComposeView(requireContext())
         rootView.apply {
-            setContent { RootView() }
-            return rootView
+            setContent {
+                ShowProgressBar()
+                CcuLog.i(Domain.LOG_TAG, "Show Progress")
+            }
         }
-
+        viewLifecycleOwner.lifecycleScope.launch(highPriorityDispatcher) {
+            viewModel.init(requireArguments(), requireContext(), CCUHsApi.getInstance())
+            viewModel.setOnPairingCompleteListener(this@AcbProfileConfigFragment)
+            withContext(Dispatchers.Main) {
+                rootView.setContent { RootView() }
+            }
+        }
+        return rootView
     }
 
     @Composable
@@ -100,7 +101,7 @@ class AcbProfileConfigFragment : BaseDialogFragment() ,OnPairingCompleteListener
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            CircularProgressIndicator(color = ComposeUtil.primaryColor,)
+            CircularProgressIndicator(color = ComposeUtil.primaryColor)
             Spacer(modifier = Modifier.height(10.dp))
             Text(text = "Loading Profile Configuration")
         }
@@ -109,12 +110,6 @@ class AcbProfileConfigFragment : BaseDialogFragment() ,OnPairingCompleteListener
     //@Preview
     @Composable
     fun RootView() {
-        val modelLoaded by viewModel.modelLoaded.observeAsState(initial = false)
-        if (!modelLoaded) {
-            ShowProgressBar()
-            CcuLog.i(Domain.LOG_TAG, "Show Progress")
-            return
-        }
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -250,7 +245,7 @@ class AcbProfileConfigFragment : BaseDialogFragment() ,OnPairingCompleteListener
                         Spacer(modifier = Modifier.width(218.dp))
                         ToggleButtonStateful(
                             defaultSelection = viewModel.viewState.autoForceOccupied,
-                            onEnabled = { it -> viewModel.viewState.autoForceOccupied = it }
+                            onEnabled = { viewModel.viewState.autoForceOccupied = it }
                         )
                     }
                     Spacer(modifier=Modifier.width(91.dp))
@@ -259,7 +254,7 @@ class AcbProfileConfigFragment : BaseDialogFragment() ,OnPairingCompleteListener
                         Spacer(modifier = Modifier.width(247.dp))
                         ToggleButtonStateful(
                             defaultSelection = viewModel.viewState.autoAway,
-                            onEnabled = { it -> viewModel.viewState.autoAway = it }
+                            onEnabled = { viewModel.viewState.autoAway = it }
                         )
                     }
                 }
@@ -272,7 +267,7 @@ class AcbProfileConfigFragment : BaseDialogFragment() ,OnPairingCompleteListener
                         Spacer(modifier = Modifier.width(236.dp))
                         ToggleButtonStateful(
                             defaultSelection = viewModel.viewState.enableCo2Control,
-                            onEnabled = { it -> viewModel.viewState.enableCo2Control = it }
+                            onEnabled = { viewModel.viewState.enableCo2Control = it }
                         )
                     }
                 }
@@ -285,7 +280,7 @@ class AcbProfileConfigFragment : BaseDialogFragment() ,OnPairingCompleteListener
                         Spacer(modifier = Modifier.width(226.dp))
                         ToggleButtonStateful(
                             defaultSelection = viewModel.viewState.enableCFMControl,
-                            onEnabled = { it -> viewModel.viewState.enableCFMControl = it }
+                            onEnabled = { viewModel.viewState.enableCFMControl = it }
                         )
                     }
                     Spacer(modifier=Modifier.width(94.dp))
@@ -296,7 +291,7 @@ class AcbProfileConfigFragment : BaseDialogFragment() ,OnPairingCompleteListener
                                 list = viewModel.kFactorsList,
                                 previewWidth = 130,
                                 expandedWidth = 150,
-                                onSelected = { selectedIndex -> viewModel.viewState.kFactor = viewModel.kFactorsList.get(selectedIndex).toDouble() },
+                                onSelected = { selectedIndex -> viewModel.viewState.kFactor = viewModel.kFactorsList[selectedIndex].toDouble() },
                                 defaultSelection = viewModel.kFactorsList.indexOf(("%.2f").format(viewModel.viewState.kFactor)),
                                 paddingLimit = 10,
                                 spacerLimit = 175,
@@ -308,7 +303,6 @@ class AcbProfileConfigFragment : BaseDialogFragment() ,OnPairingCompleteListener
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                val values = remember { (0..100).map { it.toString() } }
                 val valuesPickerState = rememberPickerState()
 
                 Row(modifier = Modifier.wrapContentWidth().padding(if (viewModel.viewState.enableCFMControl) PaddingValues(start = 100.dp, end = 100.dp) else PaddingValues(start = 135.dp, end = 135.dp))) {

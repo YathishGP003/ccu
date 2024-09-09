@@ -1026,7 +1026,7 @@ public class FloorPlanFragment extends Fragment {
 
         Floor floor = getSelectedFloor();
         Zone zone = getSelectedZone();
-        ZoneProfile profile = L.getProfile(Short.parseShort(nodeAddress));
+        ZoneProfile profile = L.getProfile(Long.parseLong(nodeAddress));
         if (profile != null) {
 
             switch (profile.getProfileType()) {
@@ -1139,7 +1139,7 @@ public class FloorPlanFragment extends Fragment {
                     showDialogFragment(ModbusConfigView.Companion.newInstance(Short.parseShort(nodeAddress), zone.getId(), floor.getId(), profile.getProfileType(), ModbusLevel.ZONE,""), ModbusConfigView.Companion.getID());
                     break;
                 case BACNET_DEFAULT:
-                    showDialogFragment(BacNetSelectModelView.Companion.newInstance(Short.parseShort(nodeAddress), zone.getId(), floor.getId(), profile.getProfileType(), ModbusLevel.ZONE,""), BacNetSelectModelView.Companion.getID());
+                    showDialogFragment(BacNetSelectModelView.Companion.newInstance(nodeAddress, zone.getId(), floor.getId(), profile.getProfileType(), ModbusLevel.ZONE,""), BacNetSelectModelView.Companion.getID());
                     break;
             }
         } else

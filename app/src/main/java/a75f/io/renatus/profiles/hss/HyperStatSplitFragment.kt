@@ -92,7 +92,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
     }
 
     @Composable
-    fun Title(viewModel: HyperStatSplitViewModel) {
+    fun Title(viewModel: HyperStatSplitCpuViewModel) {
         Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
             when (viewModel.profileType) {
                 ProfileType.HYPERSTATSPLIT_CPU -> TitleTextView("CPU & ECONOMIZER")
@@ -104,7 +104,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
     override fun getIdString() : String { return "" }
 
     @Composable
-    fun TempOffset(viewModel: HyperStatSplitViewModel) {
+    fun TempOffset(viewModel: HyperStatSplitCpuViewModel) {
         val valuesPickerState = rememberPickerState()
         Column(modifier = Modifier.padding(start = 400.dp, end = 400.dp)) {
             TempOffsetPicker(
@@ -226,7 +226,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
     }
 
     @Composable
-    fun SensorConfig(viewModel: HyperStatSplitViewModel) {
+    fun SensorConfig(viewModel: HyperStatSplitCpuViewModel) {
         val temperatureEnums = viewModel.getAllowedValues(DomainName.temperatureSensorBusAdd0, viewModel.equipModel)
         val humidityEnums = viewModel.getAllowedValues(DomainName.humiditySensorBusAdd0, viewModel.equipModel)
         val pressureEnum = viewModel.getAllowedValues(DomainName.pressureSensorBusAdd0, viewModel.equipModel)
@@ -907,7 +907,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
     }
 
     @Composable
-    fun UniversalInConfig(viewModel: HyperStatSplitViewModel) {
+    fun UniversalInConfig(viewModel: HyperStatSplitCpuViewModel) {
         val universalEnum = viewModel.getAllowedValues(DomainName.universalIn1Association, viewModel.equipModel)
 
         Row(modifier = Modifier.fillMaxWidth()) {
@@ -2364,7 +2364,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
     }
 
     @Composable
-    fun DisplayInDeviceConfig(viewModel: HyperStatSplitViewModel) {
+    fun DisplayInDeviceConfig(viewModel: HyperStatSplitCpuViewModel) {
         Column(modifier = Modifier.padding(start = 25.dp, top = 25.dp)) {
             BoldStyledTextView("Display in Device Home Screen", fontSize = 20)
             Spacer(modifier = Modifier.height(10.dp))
@@ -2441,7 +2441,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
     }
 
     @Composable
-    fun SaveConfig(viewModel: HyperStatSplitViewModel) {
+    fun SaveConfig(viewModel: HyperStatSplitCpuViewModel) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()

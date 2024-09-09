@@ -372,7 +372,7 @@ abstract class HyperStatSplitProfile(equipRef: String, nodeAddress: Short) : Zon
             relayStatus = 1.0
         }
 
-        hssEquip.dcvLoopOutput.writeHisVal(relayStatus)
+        hssEquip.dcvDamper.writeHisVal(relayStatus)
         logIt("$relayPort = DcvDamper  $relayStatus")
 
     }

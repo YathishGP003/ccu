@@ -23,7 +23,6 @@ import android.widget.LinearLayout;
 import android.widget.NumberPicker;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.ToggleButton;
 
 import androidx.annotation.Nullable;
 
@@ -34,7 +33,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
-import a75f.io.api.haystack.HSUtil;
 import a75f.io.device.mesh.LSerial;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;

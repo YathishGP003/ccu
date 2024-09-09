@@ -7,7 +7,7 @@ android {
 
     defaultConfig {
         minSdkVersion 24
-        targetSdkVersion 26
+        targetSdkVersion 31
         versionCode 1
         versionName "1.0"
         /*javaCompileOptions {
@@ -84,7 +84,11 @@ android {
         jvmTarget = JavaVersion.VERSION_1_8.toString()
     }
 }
-
+tasks.whenTaskAdded { task ->
+    if (task.name == 'assembleDev_qa') {
+        task.dependsOn 'testDev_qaUnitTest'
+    }
+}
 dependencies {
     implementation 'joda-time:joda-time:2.9.9'
     // Optional -- UI testing with UI Automator

@@ -62,7 +62,7 @@ public class HyperSplitMessageGenerator {
         HyperSplit.HyperSplitControlsMessage_t hyperSplitControlsMessage_t = getControlMessage(address,
                 equipRef).build();
         HyperSplit.HyperSplitSettingsMessage2_t hyperSplitSettingsMessage2_t = getSetting2Message(address, equipRef);
-        CcuLog.i(L.TAG_CCU_SERIAL, "Seed Message t" + hyperSplitSettingsMessage_t.toByteString().toString());
+        CcuLog.i(L.TAG_CCU_SERIAL, "Seed Message t" + hyperSplitSettingsMessage_t.toString());
         CcuLog.i(L.TAG_CCU_SERIAL, "Seed Message t" + hyperSplitControlsMessage_t.toString());
         CcuLog.i(L.TAG_CCU_SERIAL, "Seed Message t" + hyperSplitSettingsMessage2_t);
 
@@ -381,9 +381,10 @@ public class HyperSplitMessageGenerator {
     }
 
     public static double readVocThresholdValue(String equipRef) {
-        return CCUHsApi.getInstance().readDefaultVal(
+        double vocThreshold = CCUHsApi.getInstance().readDefaultVal(
                 "point and domainName == \"" + DomainName.vocThreshold + "\" and equipRef == \""+equipRef+ "\""
         );
+        return vocThreshold > 0 ? vocThreshold : 4000;
     }
 
     public static double readPm2p5TargetValue(String equipRef) {

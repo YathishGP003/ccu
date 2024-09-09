@@ -955,7 +955,7 @@
 
 
     <style name="ToggleButton_HyperStat">
-        <item name="android:layout_marginStart">-13dp</item>
+        <item name="android:layout_marginStart">-12dp</item>
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_gravity">center_vertical</item>
@@ -1184,5 +1184,20 @@
     <item name="android:foreground">@drawable/custom_spinner_down</item>
     <item name="android:layout_gravity">center_vertical</item>
     </style>
-
+    <style name="text_label_bold_secondary" parent="@android:style/TextAppearance">
+        <item name="android:textSize">20sp</item>
+        <item name="lineHeight">24sp</item>
+        <item name="android:textColor">@color/black</item>
+        <item name="fontWeight">700</item>
+        <item name="android:fontFamily">@font/lato_bold</item>
+        <item name="android:gravity">center_vertical</item>
+    </style>
+    <style name="text_label_primary" parent="@android:style/TextAppearance">
+        <item name="android:textSize">20sp</item>
+        <item name="lineHeight">24sp</item>
+        <item name="android:textColor">?orange_75f</item>
+        <item name="fontWeight">400</item>
+        <item name="android:fontFamily">@font/lato_regular</item>
+        <item name="android:gravity">center_vertical</item>
+    </style>
 </resources>

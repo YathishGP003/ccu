@@ -67,15 +67,18 @@ import a75f.io.renatus.UtilityApplication;
 import a75f.io.renatus.util.CCUUtils;
 
 public class RemoteCommandHandlerUtil {
-    private static final String INSTALL_CMD = "pm install -r -d -g %s";
+    private static final String REMOUNT_RW = "mount -o rw,remount /system";
+    private static final String REMOVE_FILE = "rm -f %s";
+    private static final String MOVE_FILE = "mv %s %s";
+    private static final String INSTALL_CMD = "pm install -r -d -g --user 0 %s";
     private static final String UNINSTALL_CMD = "pm uninstall --user 0 %s";
     private static final String SET_HOME_APP_CMD = "cmd package set-home-activity --user 0 \"%s/.MainActivity\"";
     private static final String APPOPS_SET_ALLOW_CMD = "appops set %s %s allow";
     private static final String PM_GRANT_CMD = "pm grant %s %s";
-    private static final String BAC_APP_PACKAGE_NAME = "com.example.ccu_bacapp";
+    private static final String BAC_APP_PACKAGE_NAME = "io.seventyfivef.bacapp";
     private static final String REMOTE_ACCESS_PACKAGE_NAME = "io.seventyfivef.remoteaccess";
-    private static final String HOME_APP_PACKAGE_NAME = "io.seventyfivef.home";
-    private static final String LEGACY_HOME_APP_PACKAGE_NAME = "com.x75frenatus.home";
+    private static final String HOME_APP_PACKAGE_NAME_OBSOLETE = "io.seventyfivef.home";
+    private static final String HOME_APP_PACKAGE_NAME = "com.x75frenatus.home";
 
     private static long bacAppDownloadId = -1;
     private static String bacAppApkName = "";
@@ -92,7 +95,6 @@ public class RemoteCommandHandlerUtil {
         CcuLog.i(L.TAG_CCU_REMOTE_COMMAND, "RemoteCommandHandlerUtil=" + commands + "," + cmdLevel);
         switch (commands) {
             case RESTART_CCU:
-                AlertManager.getInstance().generateAlert(AlertsConstantsKt.CCU_RESTART, "CCU Restart request sent for  - " + CCUHsApi.getInstance().getCcuName());
                 RenatusApp.restartApp();
                 break;
             case RESTART_TABLET:
@@ -172,8 +174,8 @@ public class RemoteCommandHandlerUtil {
                             HyperSplitMessageSender.sendRestartModuleCommand(Integer.parseInt(equip.getGroup()));
                         }
                         break;
-                        default:
-                            CcuLog.i(L.TAG_CCU_REMOTE_COMMAND,"Command is not valid" + commands);
+                    default:
+                        CcuLog.i(L.TAG_CCU_REMOTE_COMMAND,"Command is not valid" + commands);
                         break;
                 }
                 break;
@@ -335,9 +337,11 @@ public class RemoteCommandHandlerUtil {
                             String fileName = resolveApkFilename(bacAppApkName);
                             if (fileName != null) {
                                 String[] commands = new String[]{
+                                        // uninstall the bacapp with older package name
+                                        String.format(UNINSTALL_CMD, "com.example.ccu_bacapp"),
                                         String.format(INSTALL_CMD, fileName)
                                 };
-                                RenatusApp.executeAsRoot(commands, BAC_APP_PACKAGE_NAME, false);
+                                RenatusApp.executeAsRoot(commands, BAC_APP_PACKAGE_NAME, false, false);
                             }
                         } else if (downloadId == remoteAccessAppDownloadId) {
                             String fileName = resolveApkFilename(remoteAccessApkName);
@@ -352,7 +356,7 @@ public class RemoteCommandHandlerUtil {
                                         String.format(APPOPS_SET_ALLOW_CMD, REMOTE_ACCESS_PACKAGE_NAME, "SYSTEM_ALERT_WINDOW"),               // Overlay access
                                         String.format(PM_GRANT_CMD, REMOTE_ACCESS_PACKAGE_NAME, "android.permission.WRITE_SECURE_SETTINGS")   // Accessibility access
                                 };
-                                RenatusApp.executeAsRoot(commands, REMOTE_ACCESS_PACKAGE_NAME, false);
+                                RenatusApp.executeAsRoot(commands, REMOTE_ACCESS_PACKAGE_NAME, false, false);
                             }
                         } else if (downloadId == homeAppDownloadId) {
                             String fileName = resolveApkFilename(homeAppApkName);
@@ -363,12 +367,25 @@ public class RemoteCommandHandlerUtil {
                             }
 
                             if (fileName != null) {
+                                // Get apk filename
+                                String[] pieces = fileName.split("/");
+                                String baseName = pieces[pieces.length - 1];
                                 String[] commands = new String[]{
-                                        String.format(UNINSTALL_CMD, LEGACY_HOME_APP_PACKAGE_NAME),
-                                        String.format(INSTALL_CMD, fileName),
-                                        String.format(SET_HOME_APP_CMD, HOME_APP_PACKAGE_NAME)
+                                        REMOUNT_RW,
+                                        String.format(UNINSTALL_CMD, HOME_APP_PACKAGE_NAME),            // Necessary because the signing key changed
+                                        String.format(REMOVE_FILE, "/system/priv-app/75fHome*.apk"),
+
+                                        String.format(UNINSTALL_CMD, HOME_APP_PACKAGE_NAME_OBSOLETE),   // Necessary because a few have been installed in the field
+                                        String.format(REMOVE_FILE, "/system/priv-app/HomeApp*.apk"),
+
+                                        String.format(MOVE_FILE, fileName, "/system/priv-app"),
+                                        String.format("chmod 644 /system/priv-app/%s", baseName),
+                                        String.format("chown root.root /system/priv-app/%s", baseName),
+                                        String.format(INSTALL_CMD, String.format("/system/priv-app/%s", baseName)),
+                                        String.format(SET_HOME_APP_CMD, HOME_APP_PACKAGE_NAME),
                                 };
-                                RenatusApp.executeAsRoot(commands, HOME_APP_PACKAGE_NAME, false);
+
+                                RenatusApp.executeAsRoot(commands, null, false, true);
                             }
                         }
                     }

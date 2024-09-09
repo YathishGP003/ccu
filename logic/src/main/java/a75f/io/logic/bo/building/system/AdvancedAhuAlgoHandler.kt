@@ -2,14 +2,16 @@ package a75f.io.logic.bo.building.system
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.domain.api.Point
+import a75f.io.domain.equips.AdvancedHybridSystemEquip
 import a75f.io.domain.equips.ConnectModuleEquip
 import a75f.io.domain.equips.DomainEquip
 import a75f.io.domain.equips.SystemEquip
-import a75f.io.domain.equips.VavAdvancedHybridSystemEquip
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.oao.OAOProfile
+import a75f.io.logic.bo.building.schedules.Occupancy
 import a75f.io.logic.bo.building.system.util.AhuSettings
+import a75f.io.logic.bo.building.system.util.AhuTuners
 
 /**
  * Common implementation of utility methods for VAV and DAB advanced AHUs
@@ -105,100 +107,100 @@ class AdvancedAhuAlgoHandler (val equip: SystemEquip) {
         return isSystemOccupied && systemCo2Loop > 0
     }
 
-
-    fun getAdvancedAhuRelayState(association : Point, systemEquip: VavAdvancedHybridSystemEquip,
-                                 coolingStages: Int, heatingStages: Int, fanStages: Int,
-                                 systemOccupied : Boolean, isConnectEquip : Boolean,
-                                 isStage1AllowToActive: Boolean
+    fun getAdvancedAhuRelayState(
+            association: Point, coolingStages: Int,
+            heatingStages: Int, fanStages: Int, systemOccupied: Boolean,
+            isConnectEquip: Boolean, ahuSettings: AhuSettings,
+            ahuTuners: AhuTuners, isStage1AllowToActive: Boolean
     ): Pair<Point, Boolean> {
 
         val associatedPointName: String
         //Get logical point from association index
         val associatedPoint = if (isConnectEquip) {
             associatedPointName = connectRelayAssociationToDomainName(association.readDefaultVal().toInt())
-            getDomainPointForName(associatedPointName, systemEquip.connectEquip1)
+            getDomainPointForName(associatedPointName, ahuSettings.connectEquip1)
         } else {
             associatedPointName = relayAssociationToDomainName(association.readDefaultVal().toInt())
-            getDomainPointForName(associatedPointName, systemEquip)
+            getDomainPointForName(associatedPointName, ahuSettings.systemEquip)
 
         }
         val stageIndex = getStageIndex(associatedPoint)
         CcuLog.i(L.TAG_CCU_SYSTEM, "getRelayState: associatedPoint: $associatedPointName, stage: $stageIndex ")
         val pointVal =  when (relayAssociationDomainNameToType(associatedPointName)) {
-            AdvancedAhuRelayAssociationType.LOAD_COOLING -> if (systemEquip.mechanicalCoolingAvailable.readHisVal() > 0) {
+            AdvancedAhuRelayAssociationType.LOAD_COOLING -> if (!ahuSettings.isMechanicalCoolingAvailable) {
                 getCoolingRelayState(
-                    stageIndex,
-                    associatedPoint,
-                    systemEquip.coolingLoopOutput.readHisVal(),
-                    L.ccu().oaoProfile,
-                    systemEquip.vavRelayDeactivationHysteresis.readHisVal(),
-                    coolingStages
+                    stageIndex, associatedPoint, ahuSettings.systemEquip.coolingLoopOutput.readHisVal(),
+                    L.ccu().oaoProfile, ahuTuners.relayAActivationHysteresis, coolingStages
                 )
             } else {
                 CcuLog.i(L.TAG_CCU_SYSTEM, "mechanicalCooling Not available")
                 false
             }
 
-            AdvancedAhuRelayAssociationType.LOAD_HEATING -> if (systemEquip.mechanicalHeatingAvailable.readHisVal() > 0) {
+            AdvancedAhuRelayAssociationType.LOAD_HEATING -> if (!ahuSettings.isMechanicalHeatingAvailable) {
                 getHeatingRelayState(
-                    stageIndex, associatedPoint, systemEquip.heatingLoopOutput.readHisVal(),
-                    systemEquip.vavRelayDeactivationHysteresis.readHisVal(), heatingStages
+                    stageIndex, associatedPoint, ahuSettings.systemEquip.heatingLoopOutput.readHisVal(),
+                    ahuTuners.relayDeactivationHysteresis, heatingStages
                 )
             } else {
                 CcuLog.i(L.TAG_CCU_SYSTEM, "mechanicalHeating Not available")
                 false
             }
 
-            AdvancedAhuRelayAssociationType.LOAD_FAN -> getFanRelayState(stageIndex, associatedPoint, systemEquip.fanLoopOutput.readHisVal(),
-                systemEquip.vavRelayDeactivationHysteresis.readHisVal(), fanStages, systemOccupied, isStage1AllowToActive)
+            AdvancedAhuRelayAssociationType.LOAD_FAN -> getFanRelayState(stageIndex, associatedPoint,
+                    ahuSettings.systemEquip.fanLoopOutput.readHisVal(),
+                    ahuTuners.relayDeactivationHysteresis, fanStages, systemOccupied, isStage1AllowToActive)
 
             AdvancedAhuRelayAssociationType.HUMIDIFIER -> {
-                if (systemOccupied && systemEquip.conditioningMode.readPriorityVal() > 0) {
-                    getHumidifierRelayState(associatedPoint, systemEquip.averageHumidity.readHisVal(),
-                        systemEquip.systemtargetMinInsideHumidity.readPriorityVal(), systemEquip.vavHumidityHysteresis.readHisVal())
+                if (systemOccupied && ahuSettings.systemEquip.conditioningMode.readPriorityVal() > 0) {
+                    getHumidifierRelayState(associatedPoint, ahuSettings.systemEquip.averageHumidity.readHisVal(),
+                            ahuSettings.systemEquip.systemtargetMinInsideHumidity.readPriorityVal(), ahuTuners.humidityHysteresis)
                 } else {
                     false
                 }
             }
 
             AdvancedAhuRelayAssociationType.DEHUMIDIFIER ->
-                if (systemOccupied && systemEquip.conditioningMode.readPriorityVal() > 0) {
-                    getDehumidifierRelayState(associatedPoint, systemEquip.averageHumidity.readHisVal(),
-                        systemEquip.systemtargetMaxInsideHumidity.readPriorityVal(), systemEquip.vavHumidityHysteresis.readHisVal())
+                if (systemOccupied && ahuSettings.systemEquip.conditioningMode.readPriorityVal() > 0) {
+                    getDehumidifierRelayState(associatedPoint, ahuSettings.systemEquip.averageHumidity.readHisVal(),
+                    ahuSettings.systemEquip.systemtargetMaxInsideHumidity.readPriorityVal(), ahuTuners.humidityHysteresis)
                 } else {
                     false
                 }
 
-            AdvancedAhuRelayAssociationType.SAT_COOLING -> if (systemEquip.mechanicalCoolingAvailable.readHisVal() > 0) {
+            AdvancedAhuRelayAssociationType.SAT_COOLING -> if (!ahuSettings.isMechanicalCoolingAvailable) {
                 getCoolingRelayState(
-                    stageIndex,
-                    associatedPoint,
-                    systemEquip.satCoolingLoopOutput.readHisVal(),
-                    L.ccu().oaoProfile,
-                    systemEquip.vavRelayDeactivationHysteresis.readHisVal(),
-                    coolingStages
+                    stageIndex, associatedPoint, ahuSettings.systemEquip.satCoolingLoopOutput.readHisVal(),
+                    L.ccu().oaoProfile, ahuTuners.relayDeactivationHysteresis, coolingStages
                 )
             } else {
                 CcuLog.i(L.TAG_CCU_SYSTEM, "mechanicalCooling Not available")
                 false
             }
 
-            AdvancedAhuRelayAssociationType.SAT_HEATING -> if (systemEquip.mechanicalHeatingAvailable.readHisVal() > 0) {
-                getHeatingRelayState(stageIndex, associatedPoint, systemEquip.satHeatingLoopOutput.readHisVal(),
-                    systemEquip.vavRelayDeactivationHysteresis.readHisVal(), heatingStages)
+            AdvancedAhuRelayAssociationType.SAT_HEATING -> if (!ahuSettings.isMechanicalHeatingAvailable) {
+                getHeatingRelayState(stageIndex, associatedPoint, ahuSettings.systemEquip.satHeatingLoopOutput.readHisVal(),
+                        ahuTuners.relayDeactivationHysteresis, heatingStages)
             } else {
                 CcuLog.i(L.TAG_CCU_SYSTEM, "mechanicalHeating Not available")
                 false
             }
 
-            AdvancedAhuRelayAssociationType.FAN_PRESSURE -> getFanRelayState(stageIndex, associatedPoint, systemEquip.fanPressureLoopOutput.readHisVal(),
-                systemEquip.vavRelayDeactivationHysteresis.readHisVal(), fanStages, systemOccupied, isStage1AllowToActive)
+            AdvancedAhuRelayAssociationType.FAN_PRESSURE -> getFanRelayState(
+                    stageIndex, associatedPoint, ahuSettings.systemEquip.fanPressureLoopOutput.readHisVal(),
+                    ahuTuners.relayDeactivationHysteresis, fanStages, systemOccupied, isStage1AllowToActive)
 
-            AdvancedAhuRelayAssociationType.FAN_ENABLE -> getFanEnableRelayState(systemEquip.coolingLoopOutput.readHisVal(),
-                                                            systemEquip.heatingLoopOutput.readHisVal())
-            AdvancedAhuRelayAssociationType.OCCUPIED_ENABLE -> getOccupiedEnableRelayState(systemOccupied, systemEquip.coolingLoopOutput.readHisVal(),
-                                                            systemEquip.heatingLoopOutput.readHisVal(), systemEquip.fanLoopOutput.readHisVal())
-            AdvancedAhuRelayAssociationType.AHU_FRESH_AIR_FAN_COMMAND -> getAhuFreshAirFanRunCommandRelayState(systemOccupied, systemEquip.co2LoopOutput.readHisVal())
+            AdvancedAhuRelayAssociationType.FAN_ENABLE -> getFanEnableRelayState(
+                    ahuSettings.systemEquip.coolingLoopOutput.readHisVal(),
+                    ahuSettings.systemEquip.heatingLoopOutput.readHisVal()
+            )
+            AdvancedAhuRelayAssociationType.OCCUPIED_ENABLE -> getOccupiedEnableRelayState(
+                    systemOccupied, ahuSettings.systemEquip.coolingLoopOutput.readHisVal(),
+                    ahuSettings.systemEquip.heatingLoopOutput.readHisVal(),
+                    ahuSettings.systemEquip.fanLoopOutput.readHisVal()
+            )
+            AdvancedAhuRelayAssociationType.AHU_FRESH_AIR_FAN_COMMAND -> getAhuFreshAirFanRunCommandRelayState(
+                    systemOccupied, ahuSettings.systemEquip.co2LoopOutput.readHisVal())
         }
         return Pair(associatedPoint, pointVal)
     }
@@ -210,7 +212,7 @@ class AdvancedAhuAlgoHandler (val equip: SystemEquip) {
             systemEquip: DomainEquip
     ) : Pair<Double,Double> {
         return when (systemEquip) {
-            is VavAdvancedHybridSystemEquip -> {
+            is AdvancedHybridSystemEquip -> {
                 val analogOutAssociationType = AdvancedAhuAnalogOutAssociationType.values()[association.readDefaultVal().toInt()]
                     CcuLog.i(L.TAG_CCU_SYSTEM, "getAnalogOutValue- association: ${association.domainName}, analogOutAssociationType: $analogOutAssociationType")
                 Pair (
@@ -235,19 +237,19 @@ class AdvancedAhuAlgoHandler (val equip: SystemEquip) {
 
 
 
-    fun getEnabledAnalogControls() : Set<AdvancedAhuAnalogOutAssociationType> {
+    fun getEnabledAnalogControls(systemEquip: AdvancedHybridSystemEquip, connectEquip1: ConnectModuleEquip) : Set<AdvancedAhuAnalogOutAssociationType> {
         val enabledControls = mutableSetOf<AdvancedAhuAnalogOutAssociationType>()
-        getCMAnalogAssociationMap(equip).forEach { (analogOut: Point, association: Point) ->
+        getCMAnalogAssociationMap(systemEquip).forEach { (analogOut: Point, association: Point) ->
             if (analogOut.readDefaultVal() > 0) { // is config enabled
                 val analogOutAssociationType = AdvancedAhuAnalogOutAssociationType.values()[association.readDefaultVal().toInt()]
                 enabledControls.add(analogOutAssociationType)
             }
         }
-        getAnalogAssociation(enabledControls, equip)
+        getAnalogAssociation(enabledControls, connectEquip1)
         return enabledControls
     }
 
-    private fun isEmergencyShutOffEnabledAndActivated(systemEquip: VavAdvancedHybridSystemEquip): Boolean {
+    private fun isEmergencyShutOffEnabledAndActivated(systemEquip: AdvancedHybridSystemEquip): Boolean {
         if (systemEquip.thermistor1InputEnable.readDefaultVal() == 1.0 &&
             isMappedToEmergencyShutoff(systemEquip.thermistor1InputAssociation.readDefaultVal().toInt())) {
             val mapping = thermistorAssociationDomainName(systemEquip.thermistor1InputAssociation.readDefaultVal().toInt(), systemEquip)
@@ -265,11 +267,13 @@ class AdvancedAhuAlgoHandler (val equip: SystemEquip) {
         return false
     }
 
-    fun isEmergencyShutOffEnabledAndActive(): Boolean {
-        if (isEmergencyShutOffEnabledAndActivated(equip as VavAdvancedHybridSystemEquip)) {
+    fun isEmergencyShutOffEnabledAndActive(
+            systemEquip: AdvancedHybridSystemEquip, connectEquip1: ConnectModuleEquip
+    ): Boolean {
+        if (isEmergencyShutOffEnabledAndActivated(systemEquip)) {
             return true
         }
-        if (isConnectEmergencyShutOffEnabledAndActivated(equip.connectEquip1)) {
+        if (isConnectEmergencyShutOffEnabledAndActivated(connectEquip1)) {
             return true
         }
         return false

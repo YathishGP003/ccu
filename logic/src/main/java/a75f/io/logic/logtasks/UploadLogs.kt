@@ -1,7 +1,9 @@
 package a75f.io.logic.logtasks
 
 import a75f.io.api.haystack.CCUHsApi
+import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
+import a75f.io.logic.L
 import a75f.io.logic.cloud.RemoteFileStorageManager
 import a75f.io.logic.cloudservice.ServiceGenerator
 import a75f.io.logic.filesystem.FileSystemTools
@@ -56,11 +58,18 @@ class UploadLogs(
 
       val bacAppLogFile = fileSystemTools.getBacAppLogs( "ccu/bacnet", "logs.txt")
 
-      val listOfFiles: List<File> = if (bacAppLogFile != null) {
-         listOf(logFile, prefsFile, messageFile, bacAppLogFile , entityFile )
+      val ccuInfo = fileSystemTools.writeCcuInfo("CCU_Info_$dateStr.txt")
 
-      } else {
-         listOf(logFile, prefsFile, messageFile, entityFile)
+      val usbEventsLogFile = fileSystemTools.getFile("Renatus_USB_Events_Log.txt")
+
+      val listOfFiles: List<File> = mutableListOf<File>().apply {
+         add(logFile)
+         add(prefsFile)
+         add(messageFile)
+         add(entityFile)
+         add(ccuInfo)
+         bacAppLogFile?.let { add(it) }
+         usbEventsLogFile?.let { add(it) }
       }
 
       // This specific file id format is a requirement (Earth(CCU)-4726)
@@ -84,5 +93,7 @@ class UploadLogs(
          container = "cculogs",
          siteId = siteId,
          fileId = fileId)
+
+      CcuLog.i(L.TAG_CCU, "file uploaded")
    }
 }

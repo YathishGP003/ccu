@@ -47,6 +47,8 @@ import a75f.io.logic.bo.util.DemandResponseMode
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.logic.diag.DiagEquip
 import a75f.io.logic.diag.DiagEquip.createMigrationVersionPoint
+import a75f.io.logic.migration.VavAndAcbProfileMigration.Companion.cleanACBDuplicatePoints
+import a75f.io.logic.migration.VavAndAcbProfileMigration.Companion.cleanVAVDuplicatePoints
 import a75f.io.logic.migration.modbus.correctEnumsForCorruptModbusPoints
 import a75f.io.logic.migration.scheduler.SchedulerRevampMigration
 import a75f.io.logic.tuners.TunerConstants
@@ -138,11 +140,41 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             removeHisTagsFromNonDMDevices()
             PreferenceUtil.setHisTagRemovalFromNonDmDevicesDone()
         }
+
+        if(!PreferenceUtil.isDeadBandMigrationRequired()){
+            migrateDeadBandPoints(hayStack)
+            PreferenceUtil.setDeadBandMigrationNotRequired()
+        }
+        if (!PreferenceUtil.getDmToDmCleanupMigration()) {
+            cleanACBDuplicatePoints(CCUHsApi.getInstance())
+            cleanVAVDuplicatePoints(CCUHsApi.getInstance())
+            CCUHsApi.getInstance().syncEntityTree()
+            PreferenceUtil.setDmToDmCleanupMigration()
+        }
         if(!PreferenceUtil.isVavCfmOnEdgeMigrationDone()) {
             VavAndAcbProfileMigration.addMinHeatingDamperPositionMigration(hayStack)
             PreferenceUtil.setVavCfmOnEdgeMigrationDone()
         }
         hayStack.scheduleSync()
+    }
+
+    private fun migrateDeadBandPoints(hayStack: CCUHsApi) {
+        val listOfZones = hayStack.readAllEntities("room")
+        val minDeadBandVal = "0.5"
+        listOfZones.forEach { zoneMap ->
+            val zone = Zone.Builder().setHashMap(zoneMap).build()
+            val zoneId = zone.id
+            val heatingDeadBandPoint = hayStack.readEntity("schedulable and heating and deadband and roomRef == \"$zoneId\"")
+            val coolingDeadBandPoint = hayStack.readEntity("schedulable and cooling and deadband and roomRef == \"$zoneId\"")
+            if (heatingDeadBandPoint.isNotEmpty()) {
+                val deadBand = Point.Builder().setHashMap(heatingDeadBandPoint).setMinVal(minDeadBandVal).build()
+                hayStack.updatePoint(deadBand, deadBand.id)
+            }
+            if (coolingDeadBandPoint.isNotEmpty()) {
+                val deadBand = Point.Builder().setHashMap(coolingDeadBandPoint).setMinVal(minDeadBandVal).build()
+                hayStack.updatePoint(deadBand, deadBand.id)
+            }
+        }
     }
 
     private fun removeHisTagsFromNonDMDevices() {

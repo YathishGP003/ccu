@@ -200,18 +200,6 @@ open class PhysicalPoint(domainName : String, val deviceRef: String) : Entity (d
     override fun equals(other: Any?)
             = (other is Point) && this.domainName == other.domainName
 }
-/*private fun  <T : Entity> getEntity(entityMap : HashMap<Any, Any>, clazz: KClass<T>) : Entity?{
-    val domainName = entityMap["domainName"].toString()
-    val id = entityMap["id"].toString()
-    return when(clazz) {
-        Floor::class -> Floor(domainName, id)
-        Room::class -> Room(domainName, id)
-        Equip::class -> Equip(domainName, id)
-        Device::class -> Device(domainName, id)
-        Point::class -> Point(domainName, id)
-        else -> null
-    }
-}*/
 
 fun Boolean.toInt() = if (this) 1 else 0
 

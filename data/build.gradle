@@ -12,7 +12,7 @@ android {
 
     defaultConfig {
         minSdkVersion 24
-        targetSdkVersion 26
+        targetSdkVersion 31
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
@@ -79,7 +79,11 @@ android {
 configurations {
     customImplementation.extendsFrom implementation
 }
-
+tasks.whenTaskAdded { task ->
+    if (task.name == 'assembleDev_qa') {
+        task.dependsOn 'testDev_qaUnitTest'
+    }
+}
 dependencies {
     customImplementation fileTree(dir: 'libs', include: ['*.jar'])
     customImplementation("io.seventyfivef:domain-modeler-lib:$domainModelLibVersion")  {

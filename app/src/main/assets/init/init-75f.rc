@@ -1,0 +1,3 @@
+# Run 75F init script
+on property:dev.bootcomplete=1
+    exec u:r:shell:s0 shell shell input log adb sdcard_rw sdcard_r net_bt_admin net_bt inet net_bw_stats -- /system/bin/sh /system/bin/75f-init.sh

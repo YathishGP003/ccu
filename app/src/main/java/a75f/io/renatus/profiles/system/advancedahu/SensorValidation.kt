@@ -1,3 +1,4 @@
+
 package a75f.io.renatus.profiles.system.advancedahu
 
 import a75f.io.device.cm.getAdvancedAhuAnalogInputMappings
@@ -16,8 +17,8 @@ import a75f.io.logic.bo.building.system.getDomainPressure
 import a75f.io.logic.bo.building.system.getPressureDomainForAnalogOut
 import a75f.io.logic.bo.building.system.relayAssociationDomainNameToType
 import a75f.io.logic.bo.building.system.relayAssociationToDomainName
-import a75f.io.logic.bo.building.system.vav.config.CmConfiguration
-import a75f.io.logic.bo.building.system.vav.config.ConnectConfiguration
+import a75f.io.logic.bo.building.system.util.CmConfiguration
+import a75f.io.logic.bo.building.system.util.ConnectConfiguration
 import android.text.Html
 import android.text.Spanned
 
@@ -27,22 +28,43 @@ import android.text.Spanned
  */
 
 
-data class Sensors(var temp: List<String?>, var occupancy: List<String?>, var co2: List<String?>, var humidity: List<String?>, var analogIn1: String?, var analogIn2: String?, var th1: String?, var th2: String?, var universalInputs: List<String?>)
+data class Sensors(
+        var temp: List<String?>, var occupancy: List<String?>, var co2: List<String?>,
+        var humidity: List<String?>, var analogIn1: String?, var analogIn2: String?,
+        var th1: String?, var th2: String?, var universalInputs: List<String?>)
 
-private fun isAnalogOutMapped(enabled: EnableConfig, association: AssociationConfig, mappedTo: AdvancedAhuAnalogOutAssociationType) = enabled.enabled && association.associationVal == mappedTo.ordinal
+private fun isAnalogOutMapped(enabled: EnableConfig, association: AssociationConfig, mappedTo: AdvancedAhuAnalogOutAssociationType) =
+        enabled.enabled && association.associationVal == mappedTo.ordinal
 
-private fun isRelayMapped(enabled: EnableConfig, association: AssociationConfig, mappedTo: AdvancedAhuRelayAssociationType) = enabled.enabled && relayAssociationDomainNameToType(relayAssociationToDomainName(association.associationVal)).ordinal == mappedTo.ordinal
+private fun isRelayMapped(enabled: EnableConfig, association: AssociationConfig, mappedTo: AdvancedAhuRelayAssociationType) =
+        enabled.enabled && relayAssociationDomainNameToType(relayAssociationToDomainName(association.associationVal)).ordinal == mappedTo.ordinal
 
 private fun isAnyAnalogOutMapped(config: CmConfiguration, mappedTo: AdvancedAhuAnalogOutAssociationType): Boolean {
-    return listOf(config.analogOut1Enabled to config.analogOut1Association, config.analogOut2Enabled to config.analogOut2Association, config.analogOut3Enabled to config.analogOut3Association, config.analogOut4Enabled to config.analogOut4Association).any { (enabled, association) -> isAnalogOutMapped(enabled, association, mappedTo) }
+    return listOf(
+            config.analogOut1Enabled to config.analogOut1Association,
+            config.analogOut2Enabled to config.analogOut2Association,
+            config.analogOut3Enabled to config.analogOut3Association,
+            config.analogOut4Enabled to config.analogOut4Association
+    ).any { (enabled, association) -> isAnalogOutMapped(enabled, association, mappedTo) }
 }
 
 private fun isAnyRelayMapped(config: CmConfiguration, mappedTo: AdvancedAhuRelayAssociationType): Boolean {
-    return listOf(config.relay1Enabled to config.relay1Association, config.relay2Enabled to config.relay2Association, config.relay3Enabled to config.relay3Association, config.relay4Enabled to config.relay4Association, config.relay5Enabled to config.relay5Association, config.relay6Enabled to config.relay6Association, config.relay7Enabled to config.relay7Association, config.relay8Enabled to config.relay8Association).any { (enabled, association) -> isRelayMapped(enabled, association, mappedTo) }
+    return listOf(
+            config.relay1Enabled to config.relay1Association,
+            config.relay2Enabled to config.relay2Association,
+            config.relay3Enabled to config.relay3Association,
+            config.relay4Enabled to config.relay4Association,
+            config.relay5Enabled to config.relay5Association,
+            config.relay6Enabled to config.relay6Association,
+            config.relay7Enabled to config.relay7Association,
+            config.relay8Enabled to config.relay8Association
+    ).any { (enabled, association) -> isRelayMapped(enabled, association, mappedTo) }
 }
 
 private fun isPressureSensorAvailable(config: CmConfiguration): Boolean {
-    return config.address0SensorAssociation.pressureAssociation?.associationVal?.let { it > 0 } == true || listOf(config.analog1InEnabled to config.analog1InAssociation, config.analog2InEnabled to config.analog2InAssociation).any { (enabled, association) -> enabled.enabled && association.associationVal in 12..20 }
+    return config.address0SensorAssociation.pressureAssociation?.associationVal?.let { it > 0 } == true ||
+            listOf(config.analog1InEnabled to config.analog1InAssociation, config.analog2InEnabled to config.analog2InAssociation)
+                    .any { (enabled, association) -> enabled.enabled && association.associationVal in 12..20 }
 }
 
 
@@ -101,7 +123,7 @@ fun findPressureDuplicate(pressureData: Triple<String?, String?, String?>): Pair
     return Pair(true, Html.fromHtml("success", Html.FROM_HTML_MODE_LEGACY))
 }
 
-fun validatePressureSequence(primary: String, mapping1: String?, mapping2: String?): Pair<Boolean, Spanned> {
+fun validatePressureSequence(primary: String, mapping1: String?, mapping2: String?) :Pair<Boolean,Spanned> {
     if (primary.contains("3_")) {
         if ((mapping1 != null && (!mapping1.contains("2_")) && mapping2 != null && (!mapping2.contains("2_"))) || (mapping1 == null && mapping2 == null)) {
             return Pair(false, Html.fromHtml("Pressure sensor should be <b>selected in sequential order</b>. Please select Pressure Sensor 2 before selecting Pressure Sensor 3 in Sensor Bus and Analog Inputs.", Html.FROM_HTML_MODE_LEGACY))
@@ -171,16 +193,38 @@ fun isValidSatSensorSelection(config: CmConfiguration): Pair<Boolean, Spanned> {
             add(sensorsMapping.th2!!)
         }
     }
-    val duplicateSensor = findAndGetDuplicate(list)
-    if (duplicateSensor != null) {
-        return Pair(false, duplicateError(duplicateSensor))
-    }
 
     val satSequence = validateSatSequence(sensorsMapping)
     if (!satSequence.first) {
         return satSequence
     }
+
+    if (isAOHeatingSatAvailable(config)) {
+        if (!isSatSensorAvailable(sensorsMapping))
+            return Pair(false, Html.fromHtml(NO_SAT_HEATING_SENSOR, Html.FROM_HTML_MODE_LEGACY))
+    }
+    if (isAOCoolingSatAvailable(config)) {
+        if (!isSatSensorAvailable(sensorsMapping))
+            return Pair(false, Html.fromHtml(NO_SAT_COOLING_SENSOR, Html.FROM_HTML_MODE_LEGACY))
+    }
+
+    val duplicateSensor = findAndGetDuplicate(list)
+    if (duplicateSensor != null) {
+        return Pair(false, duplicateError(duplicateSensor))
+    }
     return Pair(true, Html.fromHtml("success", Html.FROM_HTML_MODE_LEGACY))
+}
+
+private fun isSatSensorAvailable(sensors: Sensors): Boolean {
+    val satSensors = getSatSensors(sensors)
+    for (item in satSensors) {
+        when (item) {
+            DomainName.supplyAirTemperature1,
+            DomainName.supplyAirTemperature2,
+            DomainName.supplyAirTemperature3 -> return true
+        }
+    }
+    return false
 }
 
 fun findAndGetDuplicate(list: MutableList<String?>): String? {
@@ -253,6 +297,7 @@ fun getSensorMapping(config: CmConfiguration): Sensors {
     return sensors
 }
 
+
 fun getSensorMapping(config: ConnectConfiguration): Sensors {
     val sensors = Sensors(emptyList(), emptyList(), emptyList(), emptyList(), null, null, null, null, emptyList())
     val temp = mutableListOf<String?>()
@@ -302,13 +347,19 @@ fun getSensorMapping(config: ConnectConfiguration): Sensors {
     return sensors
 }
 
-fun validateSatSequence(sensors: Sensors): Pair<Boolean, Spanned> {
+
+fun getSatSensors(sensors: Sensors): MutableList<String?> {
     val satSensors = mutableListOf<String?>()
     satSensors.addAll(sensors.temp)
     satSensors.add(sensors.analogIn1)
     satSensors.add(sensors.analogIn2)
     satSensors.add(sensors.th1)
     satSensors.add(sensors.th2)
+    return satSensors
+}
+
+fun validateSatSequence(sensors: Sensors): Pair<Boolean, Spanned> {
+    val satSensors = getSatSensors(sensors)
     var hasTemp1 = false
     var hasTemp2 = false
     var hasTemp3 = false
@@ -373,9 +424,9 @@ fun isValidateConfiguration(viewModel: AdvancedHybridAhuViewModel): Pair<Boolean
         }
     }
 
-    val satSensorValidation = isValidSatSensorSelection(viewModel.profileConfiguration.cmConfiguration)
-    if (!satSensorValidation.first) {
-        return satSensorValidation
+    val otherSensorStatus = isValidSatSensorSelection(viewModel.profileConfiguration.cmConfiguration)
+    if (!otherSensorStatus.first) {
+        return otherSensorStatus
     }
 
     val connectModuleStatus = validateConnectModule(viewModel)

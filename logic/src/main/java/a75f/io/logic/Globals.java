@@ -1,4 +1,5 @@
 package a75f.io.logic;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
@@ -6,6 +7,7 @@ import android.preference.PreferenceManager;
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
 import org.projecthaystack.client.HClient;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -56,6 +58,7 @@ import a75f.io.logic.bo.building.sscpu.ConventionalUnitProfile;
 import a75f.io.logic.bo.building.sse.SingleStageProfile;
 import a75f.io.logic.bo.building.sshpu.HeatPumpUnitProfile;
 import a75f.io.logic.bo.building.system.DefaultSystem;
+import a75f.io.logic.bo.building.system.dab.DabAdvancedAhu;
 import a75f.io.logic.bo.building.system.dab.DabAdvancedHybridRtu;
 import a75f.io.logic.bo.building.system.dab.DabExternalAhu;
 import a75f.io.logic.bo.building.system.dab.DabFullyModulatingRtu;
@@ -69,8 +72,6 @@ import a75f.io.logic.bo.building.system.vav.VavFullyModulatingRtu;
 import a75f.io.logic.bo.building.system.vav.VavIERtu;
 import a75f.io.logic.bo.building.system.vav.VavStagedRtu;
 import a75f.io.logic.bo.building.system.vav.VavStagedRtuWithVfd;
-
-
 import a75f.io.logic.bo.building.vav.VavAcbProfile;
 import a75f.io.logic.bo.building.vav.VavParallelFanProfile;
 import a75f.io.logic.bo.building.vav.VavReheatProfile;
@@ -83,6 +84,8 @@ import a75f.io.logic.jobs.BuildingProcessJob;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.jobs.bearertoken.BearerTokenManager;
 import a75f.io.logic.migration.MigrationHandler;
+import a75f.io.logic.migration.heartbeat.HeartbeatDiagMigration;
+import a75f.io.logic.migration.heartbeat.HeartbeatMigration;
 import a75f.io.logic.tuners.TunerEquip;
 import a75f.io.logic.util.CCUProxySettings;
 import a75f.io.logic.util.MigrationUtil;
@@ -237,7 +240,6 @@ public class Globals {
         CcuLog.i(L.TAG_CCU_INIT, "Initialize Haystack");
         renatusServicesUrls = urls;
         CCUHsApi hsApi = new CCUHsApi(this.mApplicationContext, urls.getHaystackUrl(), urls.getCaretakerUrl(), urls.getGatewayUrl());
-        ModelCache.INSTANCE.init(this.mApplicationContext);
     }
 
     public void startTimerTask() {
@@ -245,8 +247,7 @@ public class Globals {
         new RestoreCCUHsApi();
         PreferenceUtil.setContext(this.mApplicationContext);
         CCUHsApi.getInstance().testHarnessEnabled = testHarness;
-        AlertManager.getInstance(mApplicationContext, renatusServicesUrls.getAlertsUrl())
-                .fetchPredefinedAlertsIfEmpty();
+        AlertManager.getInstance(mApplicationContext, renatusServicesUrls.getAlertsUrl()).initiateAlertOperations(getScheduledThreadPool());
 
         //set SN address band
         try {
@@ -276,7 +277,7 @@ public class Globals {
                 MigrationHandler migrationHandler = new MigrationHandler(CCUHsApi.getInstance());
                 try {
                     CcuLog.i(L.TAG_CCU_INIT, "Run Migrations");
-                    ModelCache.INSTANCE.init(mApplicationContext);
+                    ModelCache.INSTANCE.init(mApplicationContext, CCUHsApi.getInstance());
                     HashMap<Object, Object> site = CCUHsApi.getInstance().readEntity("site");
                     if (!isSafeMode()) {
                         migrationHandler.doMigration();
@@ -318,8 +319,6 @@ public class Globals {
                     mProcessJob.scheduleJob("BuildingProcessJob", DEFAULT_HEARTBEAT_INTERVAL, TASK_SEPARATION, TASK_SEPARATION_TIMEUNIT);
                     mScheduleProcessJob.scheduleJob("Schedule Process Job", DEFAULT_HEARTBEAT_INTERVAL, TASK_SEPARATION + 15, TASK_SEPARATION_TIMEUNIT);
                     BearerTokenManager.getInstance().scheduleJob();
-                    mAlertProcessJob = new AlertProcessJob(mApplicationContext);
-                    getScheduledThreadPool().scheduleAtFixedRate(mAlertProcessJob.getJobRunnable(), TASK_SEPARATION + 30, DEFAULT_HEARTBEAT_INTERVAL, TASK_SEPARATION_TIMEUNIT);
                 }
             }
         }.start();
@@ -387,7 +386,10 @@ public class Globals {
                 L.ccu().systemProfile = new VavStagedRtuWithVfd();
             } else if (eq.getProfile().equals("vavAdvancedHybridAhuV2")) {
                 L.ccu().systemProfile = new VavAdvancedAhu();
-            } else if (eq.getProfile().equals("vavFullyModulatingAhu")) {
+            } else if (eq.getProfile().equals("dabAdvancedHybridAhuV2")) {
+                L.ccu().systemProfile = new DabAdvancedAhu();
+            }
+            else if (eq.getProfile().equals("vavFullyModulatingAhu")) {
                 L.ccu().systemProfile = new VavFullyModulatingRtu();
             } else {
 
@@ -576,7 +578,7 @@ public class Globals {
                             break;
                         case BACNET_DEFAULT:
                             BacnetProfile bacnetProfile = new BacnetProfile();
-                            bacnetProfile.addBacAppEquip(Short.parseShort(eq.getGroup()), ProfileType.valueOf(eq.getProfile()));
+                            bacnetProfile.addBacAppEquip(Long.parseLong(eq.getGroup()), ProfileType.valueOf(eq.getProfile()));
                             L.ccu().zoneProfiles.add(bacnetProfile);
                             break;
 

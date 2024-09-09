@@ -29,7 +29,7 @@ import a75f.io.logic.bo.building.heartbeat.HeartBeat;
 
 public class BacnetEquip {
     ProfileType profileType;
-    public short slaveId;
+    public long slaveId;
     String equipRef = null;
     CCUHsApi hayStack = CCUHsApi.getInstance();
 
@@ -41,12 +41,12 @@ public class BacnetEquip {
 
     private static final String CONST_LOGICAL = "logical";
 
-    public BacnetEquip(ProfileType type, short node) {
+    public BacnetEquip(ProfileType type, long node) {
         profileType = type;
         slaveId = node;
     }
 
-    public void init(short slaveId) {
+    public void init(long slaveId) {
         if (equipRef == null) {
             HashMap equip = hayStack.read("equip and bacnet and group == \"" + slaveId + "\"");
             if (equip.isEmpty()) {
@@ -57,7 +57,7 @@ public class BacnetEquip {
         }
     }
 
-    public String createEntities(String configParam, String modelConfig, String deviceId, short slaveId1, String floorRef, String roomRef,
+    public String createEntities(String configParam, String modelConfig, String deviceId, String slaveId1, String floorRef, String roomRef,
                                  BacnetModelDetailResponse equipmentInfo, String parentEquipId,String moduleLevel,String modelVersion) {
         CcuLog.d(TAG, "##--bacnet client starting points creation--");
         HashMap siteMap = hayStack.read(Tags.SITE);
@@ -123,7 +123,7 @@ public class BacnetEquip {
         String equipmentRef = hayStack.addEquip(bacNetEquip.build());
 
         CCUHsApi.getInstance().addPoint(HeartBeat.getHeartBeatPoint(equipDis, equipmentRef,
-                siteRef, roomRef, floorRef, slaveId, "bacnet", tz));
+                siteRef, roomRef, floorRef, (int) slaveId, "bacnet", tz));
 
         Point equipScheduleType = new Point.Builder()
                     .setDisplayName(siteDis+"-"+bacNetEquipType+"-"+slaveId+"-scheduleType")
@@ -144,7 +144,7 @@ public class BacnetEquip {
         Device bacnetDevice = new Device.Builder()
                 .setDisplayName(bacNetEquipType+"-"+slaveId)
                 .addMarker("network").addMarker("bacnet").addMarker(bacNetEquipType.toLowerCase()).addMarker("his").addMarker("node")
-                .setAddr(slaveId)
+                .setAddr((int) slaveId)
                 .setSiteRef(siteRef)
                 .setFloorRef(floorRef)
                 .setEquipRef(equipmentRef)

@@ -2,6 +2,7 @@ package a75f.io.logic.migration
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Equip
+import a75f.io.api.haystack.Point
 import a75f.io.api.haystack.RawPoint
 import a75f.io.api.haystack.Tags
 import a75f.io.domain.api.DomainName
@@ -721,6 +722,174 @@ class VavAndAcbProfileMigration {
                 }
             }
         }
+
+        fun cleanVAVDuplicatePoints(hayStack: CCUHsApi) {
+            val domainNames = listOf(
+                DomainName.smartnodeVAVReheatNoFan,
+                DomainName.smartnodeVAVReheatParallelFan,
+                DomainName.smartnodeVAVReheatSeriesFan,
+                DomainName.helionodeVAVReheatNoFan,
+                DomainName.helionodeVAVReheatParallelFan,
+                DomainName.helionodeVAVReheatSeriesFan
+            )
+            domainNames.forEach { profileName ->
+                val equips = hayStack.readAllEntities("equip and domainName == \"$profileName\"")
+                equips.forEach { equip ->
+                    cleanCFMPoints(hayStack, equip)
+                }
+            }
+        }
+
+        fun cleanACBDuplicatePoints(hayStack: CCUHsApi) {
+            val domainNames =
+                listOf(DomainName.smartnodeActiveChilledBeam, DomainName.helionodeActiveChilledBeam)
+            domainNames.forEach { profileName ->
+                val equips = hayStack.readAllEntities("equip and domainName == \"$profileName\"")
+                equips.forEach { equip ->
+                    val device = hayStack.readEntity("device and equipRef == \"${equip["id"]}\"")
+                    cleanCondensatePoints(hayStack, equip, device)
+                    cleanRelayEnablePoints(hayStack, equip)
+                    cleanValvePoints(hayStack, equip, device)
+                    cleanCFMPoints(hayStack, equip)
+                }
+            }
+        }
+
+        private fun cleanCondensatePoints(
+            hayStack: CCUHsApi,
+            equip: Map<Any, Any>,
+            device: Map<Any, Any>
+        ) {
+            // For ACB Condensate, the correct point is the one mapped to th2In on the device.
+            // All other points with this domainName are points that failed to delete earlier.
+
+            val th2In = hayStack.readEntity("point and deviceRef == \"${device["id"]}\" and domainName == \"${DomainName.th2In}\"")
+            val correctCondensatePointId = th2In.get("pointRef").toString()
+
+            val allCondensatePoints = hayStack.readAllEntities("point and equipRef == \"${equip["id"]}\" and (domainName == \"${DomainName.condensateNO}\" or domainName == \"${DomainName.condensateNC}\")")
+            allCondensatePoints.forEach { condensatePoint ->
+                if (condensatePoint["id"].toString() != correctCondensatePointId) {
+                    hayStack.deleteEntity(condensatePoint["id"].toString())
+                }
+            }
+        }
+
+        private fun cleanValvePoints(
+            hayStack: CCUHsApi,
+            equip: Map<Any, Any>,
+            device: Map<Any, Any>
+        ) {
+            // For ACB Condensate, the correct point is the one mapped to th2In on the device.
+            // All other points with this domainName are points that failed to delete earlier.
+
+            val relay1 = hayStack.readEntity("point and deviceRef == \"${device["id"]}\" and domainName == \"${DomainName.relay1}\"")
+            val correctValvePointId = relay1.get("pointRef").toString()
+
+            val allValvePoints = hayStack.readAllEntities("point and equipRef == \"${equip["id"]}\" and (domainName == \"${DomainName.chilledWaterValveIsolationCmdPointNO}\" or domainName == \"${DomainName.chilledWaterValveIsolationCmdPointNC}\")")
+            allValvePoints.forEach { valvePoint ->
+                if (valvePoint["id"].toString() != correctValvePointId) {
+                    hayStack.deleteEntity(valvePoint["id"].toString())
+                }
+            }
+        }
+
+        private fun cleanRelayEnablePoints(hayStack: CCUHsApi, equip: Map<Any, Any>) {
+            val relay1OutputEnableList = hayStack.readAllEntities("point and equipRef == \"${equip["id"]}\" and domainName == \"${DomainName.relay1OutputEnable}\"")
+            if (relay1OutputEnableList.size > 1) {
+                val firstRelay1OutputEnable = relay1OutputEnableList.removeFirst()
+                relay1OutputEnableList.forEach { relay1OutputEnable ->
+                    hayStack.deleteEntity(relay1OutputEnable["id"].toString())
+                }
+
+                hayStack.writeDefaultValById(firstRelay1OutputEnable["id"].toString(), 1.0)
+            }
+
+            val relay2OutputEnableList = hayStack.readAllEntities("point and equipRef == \"${equip["id"]}\" and domainName == \"${DomainName.relay2OutputEnable}\"")
+            if (relay2OutputEnableList.size > 1) {
+                val firstRelay2OutputEnable = relay2OutputEnableList.removeFirst()
+                relay2OutputEnableList.forEach { relay2OutputEnable ->
+                    hayStack.deleteEntity(relay2OutputEnable["id"].toString())
+                }
+
+                hayStack.writeDefaultValById(firstRelay2OutputEnable["id"].toString(), 0.0)
+            }
+
+            // Relay 2 Output Association should not exist. It only is created if Relay2OutputEnable is created with the defaultVal of 1 during a migration.
+            val relay2OutputAssociationList = hayStack.readAllEntities("point and equipRef == \"${equip["id"]}\" and domainName == \"${DomainName.relay2OutputAssociation}\"")
+            relay2OutputAssociationList.forEach { relay2OutputAssociation ->
+                hayStack.deleteEntity(relay2OutputAssociation["id"].toString())
+            }
+        }
+
+        private fun cleanCFMPoints(hayStack: CCUHsApi, equip: Map<Any, Any>) {
+            val enableCFM = hayStack.readDefaultVal("point and equipRef == \"${equip["id"]}\" and domainName == \"${DomainName.enableCFMControl}\"") > 0
+            val pointsToDeleteAll : List<String>
+            val pointsToDeleteDuplicates : List<String>
+
+            if (enableCFM) {
+                pointsToDeleteAll = listOf(
+                    DomainName.minCoolingDamperPos,
+                    DomainName.maxCoolingDamperPos
+                )
+
+                pointsToDeleteDuplicates = listOf(
+                    DomainName.minHeatingDamperPos,
+                    DomainName.maxHeatingDamperPos,
+                    DomainName.minCFMCooling,
+                    DomainName.maxCFMCooling,
+                    DomainName.minCFMReheating,
+                    DomainName.maxCFMReheating,
+                    DomainName.kFactor,
+                    DomainName.airVelocity,
+                    DomainName.airFlowSensor,
+                    DomainName.airFlowSetpoint,
+                    DomainName.vavAirflowCFMProportionalRange,
+                    DomainName.vavAirflowCFMProportionalKFactor,
+                    DomainName.vavAirflowCFMIntegralKFactor,
+                    DomainName.vavAirflowCFMIntegralTime
+                )
+            } else {
+                pointsToDeleteAll = listOf(
+                    DomainName.minCFMCooling,
+                    DomainName.maxCFMCooling,
+                    DomainName.minCFMReheating,
+                    DomainName.maxCFMReheating,
+                    DomainName.kFactor,
+                    DomainName.airVelocity,
+                    DomainName.airFlowSensor,
+                    DomainName.airFlowSetpoint,
+                    DomainName.vavAirflowCFMProportionalRange,
+                    DomainName.vavAirflowCFMProportionalKFactor,
+                    DomainName.vavAirflowCFMIntegralKFactor,
+                    DomainName.vavAirflowCFMIntegralTime
+                )
+
+                pointsToDeleteDuplicates = listOf(
+                    DomainName.minCoolingDamperPos,
+                    DomainName.minHeatingDamperPos,
+                    DomainName.maxCoolingDamperPos,
+                    DomainName.maxHeatingDamperPos
+                )
+            }
+
+            pointsToDeleteAll.forEach { domainName ->
+                val points = hayStack.readAllEntities("point and equipRef == \"${equip["id"]}\" and domainName == \"$domainName\"")
+                points.forEach { point ->
+                    hayStack.deleteEntity(point["id"].toString())
+                }
+            }
+
+            pointsToDeleteDuplicates.forEach { domainName ->
+                val pointMaps = hayStack.readAllEntities("point and equipRef == \"${equip["id"]}\" and domainName == \"$domainName\"")
+                val points = pointMaps.map { Point.Builder().setHashMap(it).build() }
+
+                if (points.size > 1) {
+                    var sortedPoints = points.sortedBy { it.createdDateTime }
+                    sortedPoints.drop(1).forEach { point -> hayStack.deleteEntity(point.id) }
+                }
+            }
+        }
+
 
         fun addMinHeatingDamperPositionMigration(hayStack: CCUHsApi) {
             val domainNames = mapOf(

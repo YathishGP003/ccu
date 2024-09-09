@@ -1,4 +1,8 @@
-apply plugin: 'com.android.library'
+
+plugins {
+    id 'com.android.library'
+    id 'org.jetbrains.kotlin.android'
+}
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
@@ -6,7 +10,7 @@ android {
 
     defaultConfig {
         minSdkVersion 24
-        targetSdkVersion 26
+        targetSdkVersion 31
         versionCode 1
         versionName "1.0"
 
@@ -62,11 +66,20 @@ android {
         }
     }
 
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
 }
-
+tasks.whenTaskAdded { task ->
+    if (task.name == 'assembleDev_qa') {
+        task.dependsOn 'testDev_qaUnitTest'
+    }
+}
 dependencies {
     implementation project(path: ':modbus4j')
     testImplementation 'junit:junit:4.13.1'
     implementation 'org.greenrobot:eventbus:3.0.0'
     implementation project(':haystack')
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    implementation 'com.github.mik3y:usb-serial-for-android:3.7.0'
 }

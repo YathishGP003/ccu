@@ -39,7 +39,7 @@ public class BearerTokenManager{
         Context appContext = Globals.getInstance().getApplicationContext();
         AlarmManager alarmMgr = (AlarmManager)appContext.getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(appContext, BearerTokenManagerService.class);
-        PendingIntent alarmIntent = PendingIntent.getService(appContext, 0, intent, 0);
+        PendingIntent alarmIntent = PendingIntent.getService(appContext, 0, intent, PendingIntent.FLAG_IMMUTABLE);
         alarmMgr.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime()
                         + REFRESH_INITIAL_DELAY_MILLIS, AlarmManager.INTERVAL_DAY, alarmIntent);
     }

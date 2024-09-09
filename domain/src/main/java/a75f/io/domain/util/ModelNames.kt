@@ -41,4 +41,10 @@ object ModelNames {
     const val BUILDING_EQUIP = "building_equip"
     const val DAB_EXTERNAL_AHU_CONTROLLER = "dabExternalAHUController"
     const val VAV_EXTERNAL_AHU_CONTROLLER = "vavExternalAHUController"
+    const val dabAdvancedHybridAhuV2_connectModule = "dabAdvancedHybridAhuV2_connectModule"
+    const val vavAdvancedHybridAhuV2_connectModule = "vavAdvancedHybridAhuV2_connectModule"
+    const val dabAdvancedHybridAhuV2 = "dabAdvancedHybridAhuV2"
+    const val vavAdvancedHybridAhuV2 = "vavAdvancedHybridAhuV2"
+    const val connectModuleDevice = "connectModuleDevice"
+
 }

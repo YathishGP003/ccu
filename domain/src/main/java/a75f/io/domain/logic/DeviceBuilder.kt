@@ -12,6 +12,7 @@ import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.cutover.BuildingEquipCutOverMapping
 import a75f.io.domain.cutover.devicePointWithDomainNameExists
 import a75f.io.domain.cutover.getDeviceDomainNameFromDis
+import a75f.io.domain.util.highPriorityDispatcher
 import a75f.io.logger.CcuLog
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDevicePointDef
@@ -60,7 +61,7 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
     private fun createPoints(modelDef: SeventyFiveFDeviceDirective, profileConfiguration: ProfileConfiguration, device: Device) {
         runBlocking {
             modelDef.points.map { point ->
-                async(Dispatchers.Default) {
+                async(highPriorityDispatcher) {
                     try {
                         CcuLog.i(Domain.LOG_TAG, "Adding raw point ${point.domainName}")
                         val hayStackPoint = buildRawPoint(point, profileConfiguration, device)
@@ -162,7 +163,7 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
     private fun updatePoints(modelDef: SeventyFiveFDeviceDirective, profileConfiguration: ProfileConfiguration, device: Device) {
         runBlocking {
             val deferredResults = modelDef.points.map { point ->
-                async(Dispatchers.Default) {
+                async(highPriorityDispatcher) {
                     try {
                         val newPoint = buildRawPoint(point, profileConfiguration, device)
                         val hayStackPointDict = hayStack.readHDict("domainName == \"" + point.domainName + "\" and deviceRef == \"" + device.id + "\"")
@@ -290,7 +291,7 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
                     delete++
                     //DB point does not exist in model. Should be deleted.
                     CcuLog.e(Domain.LOG_TAG, " Cut-Over migration : Redundant Point $dbPoint")
-                    //hayStack.deleteEntityTree(dbPoint["id"].toString())
+                    hayStack.deleteEntityTree(dbPoint["id"].toString())
                 } else {
                     update++
                     CcuLog.e(Domain.LOG_TAG, " Cut-Over migration Update with domainName $modelPointName : $dbPoint")

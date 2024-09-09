@@ -110,7 +110,18 @@ public class UsbModbusService extends Service {
                 UsbDevice attachedDevice = arg1.getParcelableExtra(UsbManager.EXTRA_DEVICE);
                 if (UsbSerialUtil.isModbusDevice(attachedDevice, context) && !serialPortConnected) {
                     CcuLog.d(TAG,"Modbus Serial device connected "+attachedDevice.toString());
-                     scheduleUsbConnectedEvent();
+                    scheduleUsbConnectedEvent();
+                    int vendorId = attachedDevice.getVendorId();
+                    int productId = attachedDevice.getProductId();
+                    String manufacturerName = attachedDevice.getManufacturerName();
+                    String productName = attachedDevice.getProductName();
+                    String version = attachedDevice.getVersion();
+                    String serialNumber = attachedDevice.getSerialNumber();
+                    String logMessage = String.format(
+                            "Modbus USB Attached - VID: %d, PID: %d, Manufacturer: %s, Product Name: %s, Version: %s, Serial Number: %s",
+                            vendorId, productId, manufacturerName, productName, version, serialNumber
+                    );
+                    UsbUtil.writeUsbEvent(logMessage);
                 }
             } else if (arg1.getAction().equals(ACTION_USB_DETACHED)) {
                 // Usb device was disconnected. send an intent to the Main Activity
@@ -125,6 +136,18 @@ public class UsbModbusService extends Service {
                     serialPortConnected = false;
                     Intent intent = new Intent(ACTION_USB_MODBUS_DISCONNECTED);
                     arg0.sendBroadcast(intent);
+
+                    int vendorId = detachedDevice.getVendorId();
+                    int productId = detachedDevice.getProductId();
+                    String manufacturerName = detachedDevice.getManufacturerName();
+                    String productName = detachedDevice.getProductName();
+                    String version = detachedDevice.getVersion();
+                    String serialNumber = detachedDevice.getSerialNumber();
+                    String logMessage = String.format(
+                            "Modbus USB Detached - VID: %d, PID: %d, Manufacturer: %s, Product Name: %s, Version: %s, Serial Number: %s",
+                            vendorId, productId, manufacturerName, productName, version, serialNumber
+                    );
+                    UsbUtil.writeUsbEvent(logMessage);
                 }
             }
             CcuLog.d(TAG,"UsbModbusService: OnReceive == "+arg1.getAction()+","+serialPortConnected);
@@ -352,7 +375,10 @@ public class UsbModbusService extends Service {
     }
 
     private boolean grantRootPermissionToUSBDevice(UsbDevice device) {
-        IBinder b = ServiceManager.getService(Context.USB_SERVICE);
+
+        return true;
+
+       /* IBinder b = ServiceManager.getService(Context.USB_SERVICE);
         IUsbManager service = IUsbManager.Stub.asInterface(b);
         CcuLog.i(TAG_CCU_SERIAL, "Try connecting!");
         // There is a device connected to our Android device. Try to open it as a Serial Port.
@@ -362,7 +388,7 @@ public class UsbModbusService extends Service {
         } catch (RemoteException e) {
             e.printStackTrace();
         }
-        return false;
+        return false;*/
     }
 
 

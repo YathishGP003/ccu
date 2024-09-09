@@ -3,30 +3,41 @@ package a75f.io.renatus.profiles.hss.cpu
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.domain.api.Domain
 import a75f.io.logger.CcuLog
-import a75f.io.logic.L
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.composables.CancelDialog
 import a75f.io.renatus.composables.DuplicatePointDialog
-import a75f.io.renatus.composables.IndeterminateLoopProgress
 import a75f.io.renatus.composables.MissingPointDialog
+import a75f.io.renatus.compose.ComposeUtil
+import a75f.io.renatus.profiles.OnPairingCompleteListener
 import a75f.io.renatus.profiles.hss.HyperStatSplitFragment
+import a75f.io.renatus.util.highPriorityDispatcher
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
-class HyperStatSplitCpuFragment : HyperStatSplitFragment() {
+class HyperStatSplitCpuFragment : HyperStatSplitFragment(), OnPairingCompleteListener {
 
     private val viewModel: HyperStatSplitCpuViewModel by viewModels()
 
@@ -51,26 +62,25 @@ class HyperStatSplitCpuFragment : HyperStatSplitFragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
-        viewModel.init(requireArguments(), requireContext(), CCUHsApi.getInstance())
         val rootView = ComposeView(requireContext())
-        rootView.apply {
-            setContent { RootView() }
-            return rootView
+        rootView.setContent {
+            ShowProgressBar()
+            CcuLog.i(Domain.LOG_TAG, "Show Progress")
         }
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        viewModel.isDialogOpen.observe(viewLifecycleOwner) { isDialogOpen ->
-            CcuLog.i(L.TAG_CCU_UI, " isDialogOpen $isDialogOpen")
-            if (!isDialogOpen) {
-                this@HyperStatSplitCpuFragment.closeAllBaseDialogFragments()
+        viewLifecycleOwner.lifecycleScope.launch(highPriorityDispatcher) {
+            viewModel.init(requireArguments(), requireContext(), CCUHsApi.getInstance())
+            viewModel.setOnPairingCompleteListener(this@HyperStatSplitCpuFragment)
+            withContext(Dispatchers.Main) {
+                rootView.setContent {
+                    RootView()
+                }
             }
         }
+        return rootView
     }
 
     @Composable
     fun RootView() {
-
         if (viewModel.openCancelDialog) {
             CancelDialog(
                 onDismissRequest = { viewModel.openCancelDialog = false },
@@ -93,12 +103,6 @@ class HyperStatSplitCpuFragment : HyperStatSplitFragment() {
         }
 
         Column {
-            if (!viewModel.modelLoaded) {
-                IndeterminateLoopProgress(bottomText = "Loading Profile Configuration")
-                CcuLog.i(Domain.LOG_TAG, "Show Progress")
-                return
-            }
-
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
@@ -126,6 +130,19 @@ class HyperStatSplitCpuFragment : HyperStatSplitFragment() {
     }
 
     @Composable
+    fun ShowProgressBar() {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            CircularProgressIndicator(color = ComposeUtil.primaryColor)
+            Spacer(modifier = Modifier.height(10.dp))
+            Text(text = "Loading Profile Configuration")
+        }
+    }
+
+    @Composable
     fun AnalogOutDynamicConfig(viewModel: HyperStatSplitCpuViewModel) {
         CoolingControl(viewModel)
         HeatingControl(viewModel)
@@ -133,6 +150,10 @@ class HyperStatSplitCpuFragment : HyperStatSplitFragment() {
         StagedFanControl(viewModel)
         OAODamperControl(viewModel)
         ReturnDamperControl(viewModel)
+    }
+
+    override fun onPairingComplete() {
+        this@HyperStatSplitCpuFragment.closeAllBaseDialogFragments()
     }
 
 }

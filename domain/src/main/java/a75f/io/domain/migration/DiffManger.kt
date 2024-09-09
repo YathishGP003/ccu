@@ -51,7 +51,7 @@ class DiffManger(var context: Context?) {
             return
         }
         val newFileIterator = newVersionFiles.iterator()
-        val requiredModels = ModelValidator.getRequiredModels()
+        val requiredModels = getRequiredModels()
         val newModelMetaList: MutableList<ModelMeta> = mutableListOf()
         while (newFileIterator.hasNext()) {
             val item = newFileIterator.next()
@@ -165,7 +165,7 @@ class DiffManger(var context: Context?) {
      * Function reads an version files and returns all the model id's list
      *  @return List<String> all the models id's list from version file
      */
-    fun getModelFileVersionDetails(fileName: String): MutableList<ModelMeta> {
+    private fun getModelFileVersionDetails(fileName: String): MutableList<ModelMeta> {
         val versionDetails = ResourceHelper.getModelVersion(fileName)
         val models = mutableListOf<ModelMeta>()
         versionDetails.keys().forEach {
@@ -184,8 +184,8 @@ class DiffManger(var context: Context?) {
         return models
     }
 
-    fun getModelMeta(fileName: String): MutableList<ModelMeta> {
-        val versionDetails = ResourceHelper.readFile(fileName);
+    private fun getModelMeta(fileName: String): MutableList<ModelMeta> {
+        val versionDetails = ResourceHelper.readFile(fileName)
         val models = mutableListOf<ModelMeta>()
         versionDetails.keys().forEach {
             val versionModel = versionDetails.getJSONObject(it)
@@ -245,7 +245,7 @@ class DiffManger(var context: Context?) {
 
     private fun getModelDirective(modelId: String, modelsPath: String): ModelDirective? {
         @Nullable val modelData: String = File(modelsPath + File.separator + "${modelId}.json").readText()
-        if (modelData.isNullOrEmpty())
+        if (modelData.isEmpty())
             return null
         val modelDirectiveFactory = ModelDirectiveFactory(ResourceHelper.getObjectMapper())
         return modelDirectiveFactory.fromJson(modelData)
@@ -257,18 +257,6 @@ class DiffManger(var context: Context?) {
 
     fun registerOnMigrationCompletedListener(listener: OnMigrationCompletedListener) {
         migrationCompletedListener = listener
-    }
-
-    fun saveModelsInSharedPref(sharedPref: SharedPreferences) {
-        val versionDetails = ResourceHelper.getModelVersion(ASSETS_VERSION_FILE_PATH)
-        sharedPref.edit().putString("modelsVersion", versionDetails.toString()).apply()
-
-        versionDetails.keys().forEach {
-            val modelId = versionDetails.getJSONObject(it).get("id").toString()
-            val modelData: String? = ResourceHelper.loadString("$NEW_FILE_PATH$modelId.json")
-            CcuLog.e(Domain.LOG_TAG, "modelId: $modelId")
-            sharedPref.edit().putString(modelId, modelData).apply()
-        }
     }
 
     private fun isModelsFolderExists(path: String): Boolean {

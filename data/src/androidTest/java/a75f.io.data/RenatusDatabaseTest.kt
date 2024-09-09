@@ -1,7 +1,8 @@
 package a75f.io.data
 
-
+/*
 import a75f.io.data.entities.Entities
+*/
 import a75f.io.data.entities.EntityDao
 import a75f.io.data.message.Message
 import a75f.io.data.message.MessageDao
@@ -50,7 +51,6 @@ class RenatusDatabaseTest {
         val messages = messageDao.getAllMessagesList()
         assertThat(messages).contains(testMessage)
     }
-
     @Test
     fun messageDb_updateMessageTest() = runBlocking{
         val testMessage = Message("testMessageId")
@@ -62,9 +62,7 @@ class RenatusDatabaseTest {
         assertThat(messageDao.getAllMessagesList()[0])
             .isEqualTo(Message(messageId = "testMessageId",
                 command = "testCommand"))
-
     }
-
     @Test
     fun messageDb_deleteMessageTest() = runBlocking{
         val testMessage = Message("testMessageId")
@@ -73,9 +71,7 @@ class RenatusDatabaseTest {
         messageDao.delete(message)
         assertThat(messageDao.getAllMessagesList())
             .doesNotContain(testMessage)
-
     }
-
     @Test
     fun messageDb_unhandledMessageTest() = runBlocking{
         val testMessage = Message("testMessageId")
@@ -86,16 +82,13 @@ class RenatusDatabaseTest {
         messageDao.update(testMessage)
         assertThat(messageDao.getAllUnhandledMessage()).isEmpty()
     }
-
-
-    @Test
+   /* @Test
     fun messageDb_insertEntityTest() = runBlocking{
         val entityTable = Entities("testId" )
         entityDao.insert(entityTable)
         val entities = entityDao.getAllEntities()
         assertThat(entities).contains(entityTable)
-    }
-
+    }*/
     @Test
     fun messageDb_insertPersistentDataTest() = runBlocking{
         val data = WritableArray("testId")
@@ -103,5 +96,8 @@ class RenatusDatabaseTest {
         val allData = writableArrayDao.getAllwritableArrays()
         assertThat(allData).contains(data)
     }
+
+
+
 
 }

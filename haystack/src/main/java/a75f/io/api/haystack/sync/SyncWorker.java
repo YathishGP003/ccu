@@ -155,7 +155,7 @@ public class SyncWorker extends Worker {
             pointListBatches.forEach(entityList -> {
                 ArrayList<HDict> entities = new ArrayList<>();
                 for (String deletedId : entityList) {
-                    if (deletedId != "null") {
+                    if (!(deletedId == null) && !deletedId.equals("null")) {
                         HDictBuilder b = new HDictBuilder();
                         b.add("id", HRef.make(deletedId.replace("@", "")));
                         entities.add(b.toDict());

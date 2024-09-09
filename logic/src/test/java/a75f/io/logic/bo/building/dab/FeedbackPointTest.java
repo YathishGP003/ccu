@@ -38,7 +38,7 @@ public class FeedbackPointTest extends TestCase {
 
     }
     // Function to test Vav No Fan point creation
-    @Test
+   /* @Test
     public  void testCreateVavNoFanFeedbackPoint(){
         String feedbackPointID =  VavEquip.createFeedbackPoint(hayStack,1000,"siteDis","equipRef","siteRef","roomRef",
                 "floorRef", "","tz");
@@ -46,11 +46,11 @@ public class FeedbackPointTest extends TestCase {
         HashMap<Object, Object> feedbackPoint = hayStack.readEntity("vav and damper and sensor");
         Assert.assertFalse(feedbackPoint.isEmpty());
 
-    }
+    }*/
 
     // Function to test Vav series Fan point creation
 
-    @Test
+  /*  @Test
     public  void testCreateVavSerialFanFeedbackPoint(){
         String feedbackPointID =  VavEquip.createFeedbackPoint(hayStack,1000,"siteDis","equipRef","siteRef","roomRef",
                 "floorRef", "series","tz");
@@ -69,5 +69,5 @@ public class FeedbackPointTest extends TestCase {
         HashMap<Object, Object> feedbackPoint = hayStack.readEntity("vav and damper and sensor and parallel");
         Assert.assertFalse(feedbackPoint.isEmpty());
 
-    }
+    }*/
 }

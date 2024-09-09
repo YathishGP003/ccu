@@ -82,7 +82,7 @@ class FragmentWriteProperty : Fragment() {
                 val networkObject = config.getJSONObject("network")
                 ipAddress = networkObject.getString(BacnetConfigConstants.IP_ADDRESS)
                 port = networkObject.getInt(BacnetConfigConstants.PORT)
-                service = ServiceManager.CcuServiceFactory.makeCcuService(ipAddress)
+                service = ServiceManager.makeCcuService(ipAddress)
                 val deviceObject = config.getJSONObject("device")
                 deviceId = deviceObject.getString(BacnetConfigConstants.IP_DEVICE_INSTANCE_NUMBER)
             } catch (e: JSONException) {

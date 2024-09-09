@@ -6,6 +6,7 @@ import a75f.io.data.message.MessageDatabaseHelper
 import a75f.io.data.writablearray.WritableArrayDatabaseHelper
 import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
+import a75f.io.logic.L
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Environment
@@ -212,7 +213,7 @@ class FileSystemTools(private val appContext: Context) {
             for (assetName in assetsList) {
                 if (!assetName.contains(".")) {
                     CcuLog.d(
-                        "CCU_FILES", "found folder: $assetName and " +
+                        L.TAG_CCU_FILES, "found folder: $assetName and " +
                                 "calling copyModels with source: $source/$assetName and destination: $destination"
                     )
                     copyModels(context, "$source/$assetName", destination)
@@ -228,7 +229,7 @@ class FileSystemTools(private val appContext: Context) {
                 CcuLog.d("CCU_FILES", "File copied: $assetName")
             }
         } catch (ex: Exception) {
-            CcuLog.e("CCU_FILES", "Error copying assets folder: ${ex.message}")
+            CcuLog.e(L.TAG_CCU_FILES, "Error copying assets folder: ${ex.message}")
             ex.printStackTrace()
         }
     }
@@ -247,8 +248,93 @@ class FileSystemTools(private val appContext: Context) {
         if (directory.exists() && directory.isDirectory) {
             directory.listFiles()?.forEach { file ->
                 file.delete()
-                CcuLog.d("CCU_FILES", "delete file: ${file.name}")
+                CcuLog.d(L.TAG_CCU_FILES, "delete file: ${file.name}")
             }
         }
     }
+
+    fun writeCcuInfo(fileName: String) : File{
+        val commands = listOf(
+            "echo -n 'Kernel Version:' && cat /proc/version",
+            "echo -n 'Build Number:' && getprop ro.build.display.id",
+            "echo -n 'Tablet Serial Number:' && getprop ro.serialno",
+            "echo -n 'SELinux Status:' && getprop ro.boot.selinux",
+            "echo -n 'Hardware Chipset (SoC):' && getprop ro.boot.hardware",
+            "echo -n 'Build Type:' && getprop ro.build.type",
+            "echo 'Network Configuration:' && ifconfig",
+            "echo '\\nMtklog folder details:' && su root du -sh /sdcard/mtklog",
+            "echo '\\nRenatus App size:' && du -sh /data/data/a75f.io.renatus",
+            "echo '\\nHome App(old) size:' && su root du -sh /data/data/com.x75frenatus.home",
+            "echo '\\nHome App(new) size:' && su root du -sh /data/data/io.seventyfivef.home",
+            "echo '\\nBacApp App size:' && su root du -sh /data/data/io.seventyfivef.bacapp",
+            "echo '\\nRemote Access App size:' && su root du -sh /data/data/io.seventyfivef.remoteaccess",
+            "echo '\\nMemory details:' && cat /proc/meminfo",
+            "echo '\\nfree memory:' && free -h",
+            "echo '\\nvm stat:' && vmstat",
+            "echo '\\nHome App default launcher status:' && su root cmd shortcut get-default-launcher",
+            "echo '\\nRenatus App running status:' && su root ps | grep a75f.io.renatus",
+            "echo '\\nHome App(old) running status:' && su root ps | grep com.x75frenatus.home",
+            "echo '\\nHome App(new) running status:' && su root ps | grep io.seventyfivef.home",
+            "echo '\\nRemote Access App running status:' && su root ps | grep io.seventyfivef.remoteaccess",
+            "echo '\\nBacApp Running status:' && su root ps | grep io.seventyfivef.bacapp",
+            "echo '\\nRenatus App info:' && su root dumpsys package a75f.io.renatus",
+            "echo '\\nBacApp info:' && su root dumpsys package io.seventyfivef.bacapp",
+            "echo '\\nHome app(old) info:' && su root dumpsys package com.x75frenatus.home",
+            "echo '\\nHome app(new) info:' && su root dumpsys package io.seventyfivef.home",
+            "echo '\\nRemote access app info:' && su root dumpsys package io.seventyfivef.remoteaccess"
+        )
+
+        val log = StringBuilder()
+
+        for (command in commands) {
+            try {
+                executeCommand(command, log)
+            } catch (e: Exception) {
+                CcuLog.e(L.TAG_CCU_FILES, "Exception while executing command: $command", e)
+            }
+        }
+
+        return writeStringToFileInLogsDir(log.toString(), fileName)
+    }
+
+    private fun executeCommand(command: String, log: StringBuilder) {
+        CcuLog.d(L.TAG_CCU_FILES, "Executing command: $command")
+
+        val process = Runtime.getRuntime().exec(arrayOf("/system/bin/sh", "-c", command))
+
+        BufferedReader(InputStreamReader(process.inputStream)).use { bufferedReader ->
+            var line: String?
+            while (bufferedReader.readLine().also { line = it } != null) {
+                log.append(line).append("\n")
+            }
+        }
+
+        BufferedReader(InputStreamReader(process.errorStream)).use { errorReader ->
+            var errorLine: String?
+            while (errorReader.readLine().also { errorLine = it } != null) {
+                log.append(errorLine).append("\n")
+            }
+        }
+
+        val exitCode = process.waitFor()
+        if (exitCode != 0) {
+            CcuLog.e(L.TAG_CCU_FILES, "Command execution failed with exit code: $exitCode, command: $command")
+        }
+    }
+
+    fun getFile(fileName: String): File? {
+        if (!logDir.exists()) {
+            logDir.mkdirs()
+        }
+
+        val usbEventLogFile = File(logDir,  fileName)
+
+        if (!usbEventLogFile.exists()) {
+            CcuLog.i(L.TAG_CCU_FILES, "----usbEventLogFile file not present")
+            return null
+        }
+
+        return usbEventLogFile
+    }
+
 }

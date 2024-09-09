@@ -389,6 +389,10 @@ public class HisSyncHandler
 
             EntitySyncResponse response = CCUHsApi.getInstance().hisWriteManyToHaystackService(hisWriteMetadata, hDicts);
 
+            if (response == null) {
+                CcuLog.e(TAG, "Invalid response for hisWrite");
+                return;
+            }
             CcuLog.e(TAG, "response " + response.getRespCode() + " : " + response.getErrRespString());
             if (response.getRespCode() == HttpUtil.HTTP_RESPONSE_OK && !hisItemList.isEmpty()) {
                 try {

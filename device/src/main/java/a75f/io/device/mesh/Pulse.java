@@ -60,6 +60,7 @@ import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.sensors.Sensor;
 import a75f.io.logic.bo.building.sensors.SensorManager;
 import a75f.io.logic.bo.building.sensors.SensorType;
+import a75f.io.logic.bo.building.system.dab.DabAdvancedAhu;
 import a75f.io.logic.bo.building.system.vav.VavAdvancedAhu;
 import a75f.io.logic.bo.building.truecfm.TrueCFMUtil;
 import a75f.io.logic.bo.haystack.device.SmartNode;
@@ -129,8 +130,9 @@ public class Pulse
 					mDeviceLowSignalAlert.put(nodeAddr,true);
 					HashMap ccu = CCUHsApi.getInstance().read("ccu");
 					String ccuName = ccu.get("dis").toString();
-					AlertGenerateHandler.handleMessage(DEVICE_LOW_SIGNAL,
-							"For"+" "+ccuName + " ," + deviceInfo.getDisplayName() + " is having an issue and has reported low signal for last 50 updates. If you continue to receive this alert, "+CCUUtils.getSupportMsgContent(Globals.getInstance().getApplicationContext()));
+					AlertGenerateHandler.handleDeviceMessage(DEVICE_LOW_SIGNAL,
+							"For"+" "+ccuName + " ," + deviceInfo.getDisplayName() + " is having an issue and has reported low signal for last 50 updates. If you continue to receive this alert, "+CCUUtils.getSupportMsgContent(Globals.getInstance().getApplicationContext()),
+							deviceInfo.getId());
 				}
 			} else {
 				mDeviceLowSignalCount.remove(nodeAddr);
@@ -668,7 +670,8 @@ public class Pulse
 		mDataReceived = true;
 		mTimeSinceCMDead = 0;
 		CCUHsApi hayStack = CCUHsApi.getInstance();
-		if (L.ccu().systemProfile instanceof VavAdvancedAhu) {
+		if (L.ccu().systemProfile instanceof VavAdvancedAhu
+				|| L.ccu().systemProfile instanceof DabAdvancedAhu) {
 			handleAdvancedAhuCmUpdate(hayStack, cmRegularUpdateMessage_t); //TODO- TEMP to be cleaned up
 		}
 		String addr = String.valueOf(L.ccu().getSmartNodeAddressBand());
@@ -878,7 +881,7 @@ public class Pulse
 						CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : pointID - th2 " + phyPoint.get("id").toString() );
 						Object physicalPointName = phyPoint.get("domainName");
 						if (physicalPointName != null) {
-							ControlMoteMessageHandlerKt.updateThermistorInput(physicalPointName.toString(), val, Domain.systemEquip);
+							ControlMoteMessageHandlerKt.updateThermistorInput(physicalPointName.toString(), val);
 						} else {
 							CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : Advanced AHU invalid thermistor mapping");
 						}
@@ -891,7 +894,7 @@ public class Pulse
 						//val = 9000;
 						physicalPointName = phyPoint.get("domainName");
 						if (physicalPointName != null) {
-							ControlMoteMessageHandlerKt.updateAnalogInput(physicalPointName.toString(), val/1000, Domain.systemEquip);
+							ControlMoteMessageHandlerKt.updateAnalogInput(physicalPointName.toString(), val/1000);
 						} else {
 							CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : Advanced AHU invalid thermistor mapping");
 						}
@@ -901,7 +904,7 @@ public class Pulse
 						val = cmRegularUpdateMessage_t.analogSense2.get();
 						physicalPointName = phyPoint.get("domainName");
 						if (physicalPointName != null) {
-							ControlMoteMessageHandlerKt.updateAnalogInput(physicalPointName.toString(), val/1000, Domain.systemEquip);
+							ControlMoteMessageHandlerKt.updateAnalogInput(physicalPointName.toString(), val/1000);
 						} else {
 							CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : Advanced AHU invalid thermistor mapping for "+phyPoint);
 						}
@@ -913,7 +916,7 @@ public class Pulse
 						///val = 16359;//TODO-TEST
 						physicalPointName = phyPoint.get("domainName");
 						if (physicalPointName != null) {
-							ControlMoteMessageHandlerKt.updateThermistorInput(physicalPointName.toString(), val, Domain.systemEquip);
+							ControlMoteMessageHandlerKt.updateThermistorInput(physicalPointName.toString(), val);
 						} else {
 							CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : Advanced AHU invalid thermistor mapping "+phyPoint);
 						}
@@ -1011,9 +1014,9 @@ public class Pulse
 					mDeviceLowSignalAlert.put(nodeAddr,true);
 					HashMap ccu = CCUHsApi.getInstance().read("ccu");
 					String ccuName = ccu.get("dis").toString();
-					AlertGenerateHandler.handleMessage(DEVICE_LOW_SIGNAL,
+					AlertGenerateHandler.handleDeviceMessage(DEVICE_LOW_SIGNAL,
 							"For"+" "+ccuName + " ," + deviceInfo.getDisplayName() + " is having an issue and has " +
-									"reported low signal for last 50 updates. If you continue to receive this alert, "+CCUUtils.getSupportMsgContent(Globals.getInstance().getApplicationContext()));
+									"reported low signal for last 50 updates. If you continue to receive this alert, "+CCUUtils.getSupportMsgContent(Globals.getInstance().getApplicationContext()), deviceInfo.getId());
 				}
 			} else {
 				mDeviceLowSignalCount.remove(nodeAddr);
@@ -1169,7 +1172,8 @@ public class Pulse
 			str += ", device:"+ Arrays.toString(wrmOrCMReootMsgs.deviceId).replaceAll("[\\[\\]]","");
 			str += ", serialnumber:"+ Arrays.toString(wrmOrCMReootMsgs.deviceSerial).replaceAll("[\\[\\]]","");
 
-			AlertGenerateHandler.handleMessage(DEVICE_REBOOT,"Device reboot info - "+str);
+			AlertGenerateHandler.handleDeviceMessage(DEVICE_REBOOT,"Device reboot info - "+str,
+					CCUHsApi.getInstance().readId("device and addr == \""+address+"\""));
 		}
 	}
 	public static void smartDevicesRebootMessage(SnRebootIndicationMessage_t snRebootIndicationMsgs){
@@ -1214,7 +1218,9 @@ public class Pulse
 				str += ", device:" + snRebootIndicationMsgs.smartNodeDeviceId;
 				str += ", serialnumber:" + snRebootIndicationMsgs.smartNodeSerialNumber;
 				CcuLog.i(L.TAG_CCU_DEVICE, "Reboot Alert: "+str);
-				AlertGenerateHandler.handleMessage(DEVICE_REBOOT,"Device reboot info - "+str);
+
+				AlertGenerateHandler.handleDeviceMessage(DEVICE_REBOOT,"Device reboot info - "+str,
+						CCUHsApi.getInstance().readId("device and addr == \""+address+"\""));
 			}catch (Exception e){
 				CcuLog.e(L.TAG_CCU_DEVICE, "error", e);
 			}
@@ -1556,9 +1562,8 @@ public class Pulse
              if ((currentTime - lastUpdateTime) > ( zoneDeadTime *60 * 1000)){
 				 HashMap ccu = CCUHsApi.getInstance().read("ccu");
 				 String ccuName = ccu.get("dis").toString();
-
 				 AlertGenerateHandler.handleDeviceMessage(DEVICE_DEAD, "For"+" "+ccuName + "," +d.getDisplayName() +" has " +
-						 "stopped reporting data. "+CCUUtils.getSupportMsgContent(Globals.getInstance().getApplicationContext()), d.getEquipRef());
+						 "stopped reporting data. "+CCUUtils.getSupportMsgContent(Globals.getInstance().getApplicationContext()), d.getId());
 				 mDeviceUpdate.remove(address);
 				 break;
 			 } else {

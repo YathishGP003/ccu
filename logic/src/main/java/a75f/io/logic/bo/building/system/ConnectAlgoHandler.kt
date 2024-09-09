@@ -3,7 +3,6 @@ package a75f.io.logic.bo.building.system
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.api.Point
 import a75f.io.domain.equips.ConnectModuleEquip
-import a75f.io.domain.equips.SystemEquip
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.system.util.AhuSettings
@@ -11,13 +10,13 @@ import a75f.io.logic.bo.building.system.util.getComposeMidPoint
 import a75f.io.logic.bo.building.system.util.getModulatedOutput
 
 
-fun getAnalogAssociation(enabledControls: MutableSet<AdvancedAhuAnalogOutAssociationType>, equip: SystemEquip) {
+fun getAnalogAssociation(enabledControls: MutableSet<AdvancedAhuAnalogOutAssociationType>, connectEquip1: ConnectModuleEquip) {
 
     /**
      * Connect module Analog association enum is not same as cm model enum.
      * so this function adds cm model analog map to based on the cooling heating enabled in connect module
      */
-    getConnectAnalogAssociationMap(equip).forEach { (analogOut: Point, association: Point) ->
+    getConnectAnalogAssociationMap(connectEquip1).forEach { (analogOut: Point, association: Point) ->
         if (analogOut.readDefaultVal() > 0) { // is config enabled
             when (AdvancedAhuAnalogOutAssociationTypeConnect.values()[association.readDefaultVal().toInt()]) {
                 AdvancedAhuAnalogOutAssociationTypeConnect.LOAD_HEATING -> enabledControls.add(AdvancedAhuAnalogOutAssociationType.LOAD_HEATING)
@@ -35,19 +34,19 @@ fun getAnalogAssociation(enabledControls: MutableSet<AdvancedAhuAnalogOutAssocia
          controlType: AdvancedAhuAnalogOutAssociationTypeConnect,
          ahuSettings: AhuSettings
  ) : Double {
-    val loopOutput = getConnectLoopOutput (ahuSettings.systemEquip.connectEquip1, controlType, enable, ahuSettings)
+    val loopOutput = getConnectLoopOutput (ahuSettings.connectEquip1, controlType, enable, ahuSettings)
     return when (enable.domainName) {
         DomainName.analog1OutputEnable -> {
-            getConnectAnalogModulation(loopOutput, controlType, getConnectAnalogOut1MinMax(controlType, ahuSettings.systemEquip.connectEquip1,ahuSettings), ahuSettings)
+            getConnectAnalogModulation(loopOutput, controlType, getConnectAnalogOut1MinMax(controlType, ahuSettings.connectEquip1,ahuSettings), ahuSettings)
         }
         DomainName.analog2OutputEnable -> {
-            getConnectAnalogModulation(loopOutput, controlType, getConnectAnalogOut2MinMax(controlType, ahuSettings.systemEquip.connectEquip1,ahuSettings), ahuSettings)
+            getConnectAnalogModulation(loopOutput, controlType, getConnectAnalogOut2MinMax(controlType, ahuSettings.connectEquip1,ahuSettings), ahuSettings)
         }
         DomainName.analog3OutputEnable -> {
-            getConnectAnalogModulation(loopOutput, controlType, getConnectAnalogOut3MinMax(controlType, ahuSettings.systemEquip.connectEquip1,ahuSettings), ahuSettings)
+            getConnectAnalogModulation(loopOutput, controlType, getConnectAnalogOut3MinMax(controlType, ahuSettings.connectEquip1,ahuSettings), ahuSettings)
         }
         DomainName.analog4OutputEnable -> {
-            getConnectAnalogModulation(loopOutput, controlType, getConnectAnalogOut4MinMax(controlType, ahuSettings.systemEquip.connectEquip1,ahuSettings), ahuSettings)
+            getConnectAnalogModulation(loopOutput, controlType, getConnectAnalogOut4MinMax(controlType, ahuSettings.connectEquip1,ahuSettings), ahuSettings)
         }
         else -> 0.0
     }
@@ -59,8 +58,8 @@ fun getConnectLogicalOutput(
         source: Point,
         ahuSettings: AhuSettings
 ) : Double {
-    val loopOutput = getConnectLoopOutput(ahuSettings.systemEquip.connectEquip1, controlType, source, ahuSettings)
-    val minMax = getMinMax(source, controlType, ahuSettings.systemEquip.connectEquip1, ahuSettings)
+    val loopOutput = getConnectLoopOutput(ahuSettings.connectEquip1, controlType, source, ahuSettings)
+    val minMax = getMinMax(source, controlType, ahuSettings.connectEquip1, ahuSettings)
     return when (controlType) {
         AdvancedAhuAnalogOutAssociationTypeConnect.COMPOSITE_SIGNAL -> {
             if (ahuSettings.isMechanicalCoolingAvailable || ahuSettings.isMechanicalHeatingAvailable

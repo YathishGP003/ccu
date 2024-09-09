@@ -7,7 +7,7 @@ import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.config.ValueConfig
 
 open class VavNoFanTestConfiguration (nodeAddress: Int, nodeType: String, priority: Int, roomRef : String, floorRef : String)
-    : ProfileConfiguration(nodeAddress, nodeType, priority, roomRef, floorRef) {
+    : ProfileConfiguration(nodeAddress, nodeType, priority, roomRef, floorRef,"") {
 
     var damperType = AssociationConfig(DomainName.damperType)
     var damperSize = AssociationConfig(DomainName.damperSize)
@@ -63,6 +63,11 @@ open class VavNoFanTestConfiguration (nodeAddress: Int, nodeType: String, priori
         var associations = mutableListOf<AssociationConfig>()
         return associations
     }
+
+    override fun getDependencies(): List<ValueConfig> {
+        TODO("Not yet implemented")
+    }
+
     override fun getEnableConfigs() : List<EnableConfig> {
         var enabled = mutableListOf<EnableConfig>()
         return enabled

@@ -12,7 +12,7 @@ android {
 
     defaultConfig {
         minSdkVersion 24
-        targetSdkVersion 26
+        targetSdkVersion 31
         versionCode 1
         versionName "1.0"
 
@@ -192,7 +192,11 @@ android {
         jvmTarget = JavaVersion.VERSION_1_8.toString()
     }
 }
-
+tasks.whenTaskAdded { task ->
+    if (task.name == 'assembleDev_qa') {
+        task.dependsOn 'testDev_qaUnitTest'
+    }
+}
 dependencies {
     implementation project(path: ':modbusbox')
     implementation project(path: ':domain')
@@ -228,7 +232,7 @@ dependencies {
     testImplementation "io.objectbox:objectbox-windows:$objectboxVersion"
     implementation 'org.apache.commons:commons-collections4:4.4'
     implementation project(':data')
-    implementation(group: 'io.seventyfivef', name: 'domain-modeler-api', version: '0.1.20-SNAPSHOT')
+    implementation(group: 'io.seventyfivef', name: 'domain-modeler-api', version: '0.1.23')
     implementation 'com.fasterxml.jackson.core:jackson-core:2.8.6'
     implementation 'com.fasterxml.jackson.core:jackson-annotations:2.8.6'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.8.6'

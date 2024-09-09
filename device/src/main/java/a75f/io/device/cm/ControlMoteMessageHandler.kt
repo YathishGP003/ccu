@@ -3,12 +3,13 @@ package a75f.io.device.cm
 import a75f.io.device.ControlMote
 import a75f.io.device.ControlMote.CM_SensorBusReadings_t
 import a75f.io.device.mesh.ThermistorUtil
-import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
-import a75f.io.domain.equips.DomainEquip
-import a75f.io.domain.equips.VavAdvancedHybridSystemEquip
+import a75f.io.domain.equips.AdvancedHybridSystemEquip
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
+import a75f.io.logic.bo.building.system.dab.DabAdvancedAhu
+import a75f.io.logic.bo.building.system.util.getAdvancedAhuSystemEquip
+import a75f.io.logic.bo.building.system.vav.VavAdvancedAhu
 
 fun handleCMRegularUpdate(data : ByteArray) {
 
@@ -51,12 +52,11 @@ fun printSensorBusData(readings : CM_SensorBusReadings_t) {
 }
 
 fun updateSensorBusData(readings: CM_SensorBusReadings_t) {
-    if (Domain.systemEquip !is VavAdvancedHybridSystemEquip) {
+    if (isNotAdvanceAhuProfile()) {
         CcuLog.e(L.TAG_CCU_SERIAL, "CM updateSensorBusData : Skipped AdvancedAHU not configured.")
         return
     }
-    val systemEquip = Domain.systemEquip as VavAdvancedHybridSystemEquip
-
+    val systemEquip = getAdvancedAhuSystemEquip()
     if (systemEquip.sensorBus0PressureEnable.readDefaultVal() > 0) {
         CcuLog.i(L.TAG_CCU_SERIAL, "CM updateSensorBusData : readings.sensorAddress0Pressure "+readings.sensorAddress0Pressure)
         updatePressureSensorPoint(systemEquip.sensorBus0PressureAssociation.readDefaultVal().toInt(), readings.sensorAddress0Pressure.toDouble(), systemEquip)
@@ -142,7 +142,7 @@ fun updateSensorBusData(readings: CM_SensorBusReadings_t) {
 
 }
 
-fun updatePressureSensorPoint(pressureSensorMapping : Int, sensorVal : Double, systemEquip: VavAdvancedHybridSystemEquip) {
+fun updatePressureSensorPoint(pressureSensorMapping : Int, sensorVal : Double, systemEquip: AdvancedHybridSystemEquip) {
     val scaledSensorVal = sensorVal * 0.0040146 //Convert from Pa to inch of wc
     when (pressureSensorMapping) {
         PressureSensorBusMapping.ductStaticPressure12.ordinal -> systemEquip.ductStaticPressureSensor12.writeHisVal(scaledSensorVal)
@@ -154,7 +154,7 @@ fun updatePressureSensorPoint(pressureSensorMapping : Int, sensorVal : Double, s
     }
 }
 
-fun updateTemperatureSensorPoint(tempSensorMapping : Int, sensorVal: Double, systemEquip: VavAdvancedHybridSystemEquip) {
+fun updateTemperatureSensorPoint(tempSensorMapping : Int, sensorVal: Double, systemEquip: AdvancedHybridSystemEquip) {
     val scaledSensorVal = sensorVal / 10
     when (tempSensorMapping) {
         TemperatureSensorBusMapping.returnAirTempature.ordinal -> systemEquip.returnAirTemperature.writeHisVal(scaledSensorVal)
@@ -168,7 +168,7 @@ fun updateTemperatureSensorPoint(tempSensorMapping : Int, sensorVal: Double, sys
     }
 }
 
-fun updateHumiditySensorPoint(humiditySensorMapping : Int, sensorVal: Double, systemEquip: VavAdvancedHybridSystemEquip) {
+fun updateHumiditySensorPoint(humiditySensorMapping : Int, sensorVal: Double, systemEquip: AdvancedHybridSystemEquip) {
     val scaledSensorVal = sensorVal / 10
     when (humiditySensorMapping) {
         HumiditySensorBusMapping.returnAirHumidity.ordinal -> systemEquip.returnAirHumidity.writeHisVal(scaledSensorVal)
@@ -182,7 +182,7 @@ fun updateHumiditySensorPoint(humiditySensorMapping : Int, sensorVal: Double, sy
     }
 }
 
-fun updateOccupancySensorPoint(occupancySensorMapping : Int, sensorVal: Double, systemEquip: VavAdvancedHybridSystemEquip) {
+fun updateOccupancySensorPoint(occupancySensorMapping : Int, sensorVal: Double, systemEquip: AdvancedHybridSystemEquip) {
     when (occupancySensorMapping) {
         OccupancySensorBusMapping.occupancySensor1.ordinal -> systemEquip.occupancySensor1.writeHisVal(sensorVal)
         OccupancySensorBusMapping.occupancySensor2.ordinal -> systemEquip.occupancySensor2.writeHisVal(sensorVal)
@@ -193,7 +193,7 @@ fun updateOccupancySensorPoint(occupancySensorMapping : Int, sensorVal: Double, 
     }
 }
 
-fun updateCo2SensorPoint(co2SensorMapping : Int, sensorVal: Double, systemEquip: VavAdvancedHybridSystemEquip) {
+fun updateCo2SensorPoint(co2SensorMapping : Int, sensorVal: Double, systemEquip: AdvancedHybridSystemEquip) {
     when (co2SensorMapping) {
         Co2SensorBusMapping.returnAirCo2.ordinal -> systemEquip.returnAirCo2.writeHisVal(sensorVal)
         Co2SensorBusMapping.mixedAirCo2.ordinal -> systemEquip.mixedAirCo2.writeHisVal(sensorVal)
@@ -228,11 +228,12 @@ fun doAnalogConversion(analogVal : Double, inputMapping : AnalogInput) : Double 
     }
 }
 
-fun updateThermistorInput(physicalPointName : String, thermistorVal : Double, equip: DomainEquip) {
-    val systemEquip = when (equip) {
-        is VavAdvancedHybridSystemEquip -> equip
-        else -> throw IllegalArgumentException("Invalid system equip type")
+fun updateThermistorInput(physicalPointName: String, thermistorVal: Double) {
+    if (isNotAdvanceAhuProfile()) {
+        CcuLog.e(L.TAG_CCU_SERIAL, "CM updateThermistorInput : Skipped AdvancedAHU not configured.")
+        return
     }
+    val systemEquip = getAdvancedAhuSystemEquip()
     val thermistorAssociation = when(physicalPointName){
         DomainName.th1In -> systemEquip.thermistor1InputAssociation.readDefaultVal().toInt()
         DomainName.th2In -> systemEquip.thermistor2InputAssociation.readDefaultVal().toInt()
@@ -251,11 +252,12 @@ fun updateThermistorInput(physicalPointName : String, thermistorVal : Double, eq
 
 }
 
-fun updateAnalogInput(physicalPointName : String, thermistorVal : Double, equip: DomainEquip) {
-    val systemEquip = when (equip) {
-        is VavAdvancedHybridSystemEquip -> equip
-        else -> throw IllegalArgumentException("Invalid system equip type")
+fun updateAnalogInput(physicalPointName: String, thermistorVal: Double) {
+    if (isNotAdvanceAhuProfile()) {
+        CcuLog.e(L.TAG_CCU_SERIAL, "CM updateAnalogInput : Skipped AdvancedAHU not configured.")
+        return
     }
+    val systemEquip = getAdvancedAhuSystemEquip()
     val analogAssociation = when(physicalPointName){
         DomainName.analog1In -> systemEquip.analog1InputAssociation.readDefaultVal().toInt()
         DomainName.analog2In -> systemEquip.analog2InputAssociation.readDefaultVal().toInt()
@@ -272,4 +274,8 @@ fun updateAnalogInput(physicalPointName : String, thermistorVal : Double, equip:
         getSensorDomainPointFromName(analogMapping.domainName, systemEquip)?.writeHisVal(convertedAnalogInVal)
     }?: CcuLog.e(L.TAG_CCU_SERIAL, "CM updateAnalogInput : Invalid analog association $analogAssociation")
 
+}
+
+fun isNotAdvanceAhuProfile(): Boolean {
+    return (L.ccu().systemProfile !is VavAdvancedAhu && L.ccu().systemProfile !is DabAdvancedAhu)
 }

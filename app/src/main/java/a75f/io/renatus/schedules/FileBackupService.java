@@ -13,7 +13,7 @@ public class FileBackupService {
     public static void scheduleFileBackupServiceJob(Context context){
         AlarmManager fileBackupAlarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         Intent fileBakupIntent = new Intent(context, FileBackupJobReceiver.class);
-        PendingIntent fileBackupAlarmIntent = PendingIntent.getBroadcast(context, 0, fileBakupIntent, 0);
+        PendingIntent fileBackupAlarmIntent = PendingIntent.getBroadcast(context, 0, fileBakupIntent, PendingIntent.FLAG_IMMUTABLE);
         Calendar backUpTime = Calendar.getInstance();
         backUpTime.setTimeInMillis(System.currentTimeMillis());
         backUpTime.set(Calendar.HOUR_OF_DAY, 0);

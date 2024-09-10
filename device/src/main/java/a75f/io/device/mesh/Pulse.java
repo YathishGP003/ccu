@@ -319,6 +319,7 @@ public class Pulse
 
 			if (isVav && TrueCFMUtil.isTrueCfmEnabled(hayStack, equip.getId())) {
 				if (TrueCFMUtil.isCfmOnEdgeActive(hayStack, equip.getId())) {
+					CcuLog.d(L.TAG_CCU_SERIAL, "Update calculated damper/reheat positions: damperCmdCal = " + smartNodeRegularUpdateMessage_t.update.damperPositionCfmLoop.get() + ", reheatCmdCal = " + smartNodeRegularUpdateMessage_t.update.reheatPositionAfterDat.get());
 					hayStack.writeHisValByQuery("point and domainName == \"" + DomainName.damperCmdCal + "\" and equipRef == \"" + equip.getId() + "\"", (double)smartNodeRegularUpdateMessage_t.update.damperPositionCfmLoop.get());
 					hayStack.writeHisValByQuery("point and domainName == \"" + DomainName.reheatCmdCal + "\" and equipRef == \"" + equip.getId() + "\"", (double)smartNodeRegularUpdateMessage_t.update.reheatPositionAfterDat.get());
 				} else {

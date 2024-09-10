@@ -40,6 +40,20 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/layoutCreateNewSite">
     </FrameLayout>
+    <TextView
+        android:id="@+id/ethernetConnectionStatus"
+        android:layout_width="match_parent"
+        android:layout_height="45dp"
+        android:text="Ethernet Connection Status"
+        android:textColor="@color/white"
+        android:textSize="20sp"
+        android:fontFamily="@font/lato"
+        android:gravity="center"
+        android:visibility="invisible"
+        android:background="#FC323131"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
 
     <RelativeLayout
         android:id="@+id/layoutHeader"

@@ -25,7 +25,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
-import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.api.haystack.sync.HttpUtil;
@@ -33,6 +32,7 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.interfaces.BuildingOccupancyListener;
 import a75f.io.logic.interfaces.ZoneDataInterface;
+import a75f.io.logic.util.CommonTimeSlotFinder;
 import a75f.io.messaging.MessageHandler;
 
 public class UpdateEntityHandler implements MessageHandler {
@@ -80,7 +80,7 @@ public class UpdateEntityHandler implements MessageHandler {
                     }
                 }
             } else if (entity.containsKey(Tags.BUILDING) && entity.containsKey(Tags.OCCUPANCY)) {
-                updateBuildingOccupancy(uid);
+                updateBuildingOccupancy(uid, ccuHsApi);
             }
         });
 
@@ -216,17 +216,17 @@ public class UpdateEntityHandler implements MessageHandler {
         return validMessage.get();
     }
 
-    private static void updateBuildingOccupancy(String uid){
+    private static void updateBuildingOccupancy(String uid, CCUHsApi ccuHsApi){
         String response = getResponseString(uid);
         if (response != null) {
             HZincReader hZincReader = new HZincReader(response);
             Iterator hZincReaderIterator = hZincReader.readGrid().iterator();
             while (hZincReaderIterator.hasNext()) {
                 HDict schedule = (HDict) hZincReaderIterator.next();
-                CCUHsApi.getInstance().updateHDictNoSync(uid,
+                ccuHsApi.updateHDictNoSync(uid,
                         new HDictBuilder().add(schedule).toDict());
-                final Schedule s = new Schedule.Builder().setHDict(new HDictBuilder().add(schedule).toDict()).build();
-                UpdateScheduleHandler.trimZoneSchedules(s);
+                CommonTimeSlotFinder commonTimeSlotFinder = new CommonTimeSlotFinder();
+                commonTimeSlotFinder.forceTrimScheduleTowardsCommonTimeslot(ccuHsApi);
             }
         }
         refreshBuildingOccupancyScreen();

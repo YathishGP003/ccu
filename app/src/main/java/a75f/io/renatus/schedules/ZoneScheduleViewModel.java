@@ -17,7 +17,7 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
-import a75f.io.renatus.util.Marker;
+import a75f.io.logic.schedule.Marker;
 
 public class ZoneScheduleViewModel {
 

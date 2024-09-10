@@ -5,6 +5,7 @@ import static a75f.io.api.haystack.util.SchedulableMigrationKt.validateMigration
 import static a75f.io.device.bacnet.BacnetModelBuilderKt.buildBacnetModel;
 import static a75f.io.device.modbus.ModbusModelBuilderKt.buildModbusModel;
 import static a75f.io.logic.bo.building.schedules.ScheduleManager.getScheduleStateString;
+import static a75f.io.logic.bo.building.schedules.ScheduleUtil.disconnectedIntervals;
 import static a75f.io.logic.bo.util.DesiredTempDisplayMode.setPointStatusMessage;
 import static a75f.io.logic.bo.util.RenatusLogicIntentActions.ACTION_SITE_LOCATION_UPDATED;
 import static a75f.io.logic.bo.util.UnitUtils.StatusCelsiusVal;
@@ -12,7 +13,6 @@ import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusTwoDecimal;
 import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
 import static a75f.io.logic.bo.building.dab.DabProfile.CARRIER_PROD;
-import static a75f.io.renatus.schedules.ScheduleUtil.disconnectedIntervals;
 import static a75f.io.renatus.schedules.ScheduleUtil.getDayString;
 
 import android.annotation.SuppressLint;
@@ -145,7 +145,7 @@ import a75f.io.renatus.hyperstatsplit.ui.HyperStatSplitZoneViewKt;
 import a75f.io.renatus.modbus.ZoneRecyclerModbusParamAdapter;
 import a75f.io.renatus.modbus.util.UtilSourceKt;
 import a75f.io.renatus.model.ZoneViewData;
-import a75f.io.renatus.schedules.CommonTimeSlotFinder;
+import a75f.io.logic.util.CommonTimeSlotFinder;
 import a75f.io.renatus.schedules.NamedSchedule;
 import a75f.io.renatus.schedules.ScheduleGroupFragment;
 import a75f.io.renatus.schedules.ScheduleUtil;
@@ -189,7 +189,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
     private TextView note;
     private static Runnable weatherUpdate;
     private Handler weatherUpdateHandler;
-    public RecyclerView recyclerView;
     GridLayout gridlayout;
     TableLayout tableLayout;
     private Animation in = null;

@@ -24,6 +24,7 @@ class SchedulabeLimits {
             val siteRef: String = siteMap[Tags.ID].toString()
             val tz = siteMap["tz"].toString()
             var equipDis = ""
+            var floorRef = ""
             val tuner: HashMap<Any, Any> = hayStack.readEntity("equip and tuner")
             var ref =""
             if (isBuilding) {
@@ -35,7 +36,7 @@ class SchedulabeLimits {
                 }
                 if (zoneDis != null) {
                     val room = CCUHsApi.getInstance().readMapById(roomRef)
-                    val floorRef = room["floorRef"].toString()
+                    floorRef = room["floorRef"].toString()
                     val floor = CCUHsApi.getInstance().readMapById(floorRef)
                     val siteMap = CCUHsApi.getInstance().readEntity(Tags.SITE)
                     val siteDis = siteMap["dis"].toString()
@@ -56,7 +57,7 @@ class SchedulabeLimits {
                         .setMinVal("32").setMaxVal("140").setIncrementVal("1")
                         .setUnit("\u00B0F")
                         .setTz(tz)
-                addTagsBasedOnCondition(isBuilding, buildingLimitMax, ref)
+                addTagsBasedOnCondition(isBuilding, buildingLimitMax, ref, floorRef)
                 val buildingLimitMaxId = hayStack.addPoint(buildingLimitMax.build())
                 hayStack.writePointForCcuUser(buildingLimitMaxId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, 110.0, 0)
                 hayStack.writeHisValById(buildingLimitMaxId, 110.0)
@@ -69,7 +70,7 @@ class SchedulabeLimits {
                         .setMinVal("32").setMaxVal("140").setIncrementVal("1")
                         .setUnit("\u00B0F")
                         .setTz(tz)
-                addTagsBasedOnCondition(isBuilding, buildingLimitMin, ref)
+                addTagsBasedOnCondition(isBuilding, buildingLimitMin, ref, floorRef)
                 val buildingLimitMinId = hayStack.addPoint(buildingLimitMin.build())
                 hayStack.writePointForCcuUser(buildingLimitMinId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, 50.0, 0)
                 hayStack.writeHisValById(buildingLimitMinId, 50.0)
@@ -85,7 +86,7 @@ class SchedulabeLimits {
                     .addMarker("sp")
                     .setMinVal("0").setMaxVal("20").setIncrementVal("1")
                     .setTz(tz).setUnit(Units.FAHRENHEIT)
-                addTagsBasedOnCondition(isBuilding, buildingToZoneDifferential, ref)
+                addTagsBasedOnCondition(isBuilding, buildingToZoneDifferential, ref, floorRef)
                 val buildingToZoneDifferentialId =
                     hayStack.addPoint(buildingToZoneDifferential.build())
                 hayStack.writePointForCcuUser(
@@ -109,7 +110,7 @@ class SchedulabeLimits {
                     .setMinVal("50").setMaxVal("100").setIncrementVal("1")
                     .setUnit("\u00B0F")
                     .setTz(tz)
-            addTagsBasedOnCondition(isBuilding, coolingUserLimitMin, ref)
+            addTagsBasedOnCondition(isBuilding, coolingUserLimitMin, ref, floorRef)
             val coolingUserLimitMinId = hayStack.addPoint(coolingUserLimitMin.build())
             hayStack.writePointForCcuUser(coolingUserLimitMinId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.ZONE_COOLING_USERLIMIT_MIN, 0)
             hayStack.writeHisValById(coolingUserLimitMinId, TunerConstants.ZONE_COOLING_USERLIMIT_MIN)
@@ -131,7 +132,7 @@ class SchedulabeLimits {
                     .setMinVal("50").setMaxVal("100").setIncrementVal("1").addMarker("cur")
                     .setUnit("\u00B0F")
                     .setTz(tz)
-            addTagsBasedOnCondition(isBuilding, coolingUserLimitMax, ref)
+            addTagsBasedOnCondition(isBuilding, coolingUserLimitMax, ref, floorRef)
             val coolingUserLimitMaxId = hayStack.addPoint(coolingUserLimitMax.build())
             hayStack.writePointForCcuUser(coolingUserLimitMaxId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.ZONE_COOLING_USERLIMIT_MAX, 0)
             hayStack.writeHisValById(coolingUserLimitMaxId, TunerConstants.ZONE_COOLING_USERLIMIT_MAX)
@@ -154,7 +155,7 @@ class SchedulabeLimits {
                     .setMinVal("50").setMaxVal("100").setIncrementVal("1")
                     .setUnit("\u00B0F")
                     .setTz(tz)
-            addTagsBasedOnCondition(isBuilding, heatingUserLimitMin, ref)
+            addTagsBasedOnCondition(isBuilding, heatingUserLimitMin, ref, floorRef)
             val heatingUserLimitMinId = hayStack.addPoint(heatingUserLimitMin.build())
             hayStack.writePointForCcuUser(heatingUserLimitMinId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.ZONE_HEATING_USERLIMIT_MIN, 0)
             hayStack.writeHisValById(heatingUserLimitMinId, TunerConstants.ZONE_HEATING_USERLIMIT_MIN)
@@ -176,7 +177,7 @@ class SchedulabeLimits {
                     .setMinVal("50").setMaxVal("100").setIncrementVal("1")
                     .setUnit("\u00B0F")
                     .setTz(tz)
-            addTagsBasedOnCondition(isBuilding, heatingUserLimitMax, ref)
+            addTagsBasedOnCondition(isBuilding, heatingUserLimitMax, ref, floorRef)
             val heatingUserLimitMaxId = hayStack.addPoint(heatingUserLimitMax.build())
             hayStack.writePointForCcuUser(heatingUserLimitMaxId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL, TunerConstants.ZONE_HEATING_USERLIMIT_MAX, 0)
             hayStack.writeHisValById(heatingUserLimitMaxId, TunerConstants.ZONE_HEATING_USERLIMIT_MAX)
@@ -200,7 +201,7 @@ class SchedulabeLimits {
                     .setMinVal("0.5").setMaxVal("10.0").setIncrementVal("0.5")
                     .setUnit("\u00B0F")
                     .setTz(tz)
-            addTagsBasedOnCondition(isBuilding, coolingDb, ref)
+            addTagsBasedOnCondition(isBuilding, coolingDb, ref, floorRef)
             val coolingDbId = hayStack.addPoint(coolingDb.build())
             hayStack.writePointForCcuUser(coolingDbId, TunerConstants.DEFAULT_VAL_LEVEL, TunerConstants.VAV_COOLING_DB, 0)
             hayStack.writeHisValById(coolingDbId, TunerConstants.VAV_COOLING_DB)
@@ -224,7 +225,7 @@ class SchedulabeLimits {
                     .setMinVal("0.5").setMaxVal("10.0").setIncrementVal("0.5")
                     .setUnit("\u00B0F")
                     .setTz(tz)
-            addTagsBasedOnCondition(isBuilding, heatingDb, ref)
+            addTagsBasedOnCondition(isBuilding, heatingDb, ref, floorRef)
             val heatingDbId = hayStack.addPoint(heatingDb.build())
             hayStack.writePointForCcuUser(heatingDbId, TunerConstants.DEFAULT_VAL_LEVEL, TunerConstants.VAV_COOLING_DB, 0)
             hayStack.writeHisValById(heatingDbId, TunerConstants.VAV_COOLING_DB)
@@ -246,7 +247,7 @@ class SchedulabeLimits {
                     .setMinVal("0").setMaxVal("20").setIncrementVal("1")
                     .setUnit("\u00B0F")
                     .setTz(tz)
-            addTagsBasedOnCondition(isBuilding, unoccupiedZoneSetback, ref)
+            addTagsBasedOnCondition(isBuilding, unoccupiedZoneSetback, ref, floorRef)
             val unoccupiedZoneSetbackId = hayStack.addPoint(unoccupiedZoneSetback.build())
             hayStack.writePointForCcuUser(unoccupiedZoneSetbackId, TunerConstants.DEFAULT_VAL_LEVEL, TunerConstants.ZONE_UNOCCUPIED_SETBACK, 0)
             hayStack.writeHisValById(unoccupiedZoneSetbackId, TunerConstants.ZONE_UNOCCUPIED_SETBACK)
@@ -260,11 +261,12 @@ class SchedulabeLimits {
             }
         }
 
-        private fun addTagsBasedOnCondition(isBuilding: Boolean, point: Point.Builder, reference: String) {
+        private fun addTagsBasedOnCondition(isBuilding: Boolean, point: Point.Builder, reference: String, floorRef : String) {
             if (isBuilding) {
                 point.addMarker("default").setEquipRef(reference)
             } else {
                 point.addMarker("zone").setRoomRef(reference)
+                point.setFloorRef(floorRef)
             }
         }
     }

@@ -380,7 +380,7 @@ public class MigrationUtil {
                                                   HashMap<Object, Object> equipMap, String deadBand, String floorRef) {
         CcuLog.i(TAG_CCU_MIGRATION_UTIL,"createSchedulableDeadband");
         Point deadBandPoint = new Point.Builder()
-                .setDisplayName(equipMap.get("dis").toString()+deadBand+"Deadband")
+                .setDisplayName(equipMap.get("dis").toString()+"-"+deadBand+"Deadband")
                 .setSiteRef(equipMap.get("siteRef").toString())
                 .setHisInterpolate("cov")
                 .addMarker("writable")
@@ -1009,6 +1009,9 @@ public class MigrationUtil {
             Double scheduleTypeToBeSet = 2.0 ;
             Schedule roomSchedule = ccuHsApi.getScheduleById(scheduleId);
             HashMap<Object, Object> defaultSchedule = ccuHsApi.readEntity("default and schedule");
+            if(roomSchedule == null){
+                continue;
+            }
             if(defaultSchedule.isEmpty() || roomSchedule.isZoneSchedule()){
                 scheduleTypeToBeSet = 1.0;
             }

@@ -13,6 +13,7 @@ import a75f.io.logic.L
 import a75f.io.logic.bo.building.schedules.ScheduleManager
 import a75f.io.logic.schedule.ScheduleGroup
 import a75f.io.logic.schedule.SpecialSchedule
+import a75f.io.logic.util.CommonTimeSlotFinder
 import a75f.io.renatus.R
 import a75f.io.renatus.schedules.ScheduleUtil.getDayString
 import a75f.io.renatus.schedules.ScheduleUtil.isAllDaysNotPresentInBuildingOccupancy
@@ -579,8 +580,8 @@ class ScheduleGroupModel (application: Application) : AndroidViewModel(applicati
         return mScheduleGroup != hayStack.getScheduleById(mSchedule.id).scheduleGroup
     }
 
-    fun getOverlapDaysBasedOnScheduleGroup(daysArrayList: ArrayList<Schedule.Days>): StringBuilder {
-        val overlapDays = StringBuilder()
+    fun getOverlapDaysBasedOnScheduleGroup(daysArrayList: ArrayList<Schedule.Days>): List<String> {
+        val overlapDaysList = mutableMapOf<String, MutableList<String>>()
         val daysArrayListToCheckOverlap = when (mScheduleGroup) {
             ScheduleGroup.EVERYDAY.ordinal -> {
                 daysArrayList.filter { it.day == DAYS.MONDAY.ordinal }
@@ -602,17 +603,16 @@ class ScheduleGroupModel (application: Application) : AndroidViewModel(applicati
             val overlaps = mSchedule.getOverLapInterval(day)
             for (overlap in overlaps) {
                 CcuLog.d(L.TAG_CCU_UI, " overLap $overlap")
-                overlapDays.append(
-                    "${
-                        getDayString(
-                            overlap.start.dayOfWeek,
-                            mScheduleGroup
-                        )
-                    }(${overlap.start.hourOfDay().get()}:${
+                val dayString = getDayString(
+                    overlap.start.dayOfWeek,
+                    mScheduleGroup
+                )
+                val overLapMessage = (
+                    "(${overlap.start.hourOfDay().get()}:${
                         if (overlap.start.minuteOfHour()
                                 .get() == 0
                         ) "00" else overlap.start.minuteOfHour().get()
-                    }) - ${
+                    } - ${
                         getEndTimeHr(
                             overlap.end.hourOfDay().get(),
                             overlap.end.minuteOfHour().get()
@@ -623,11 +623,16 @@ class ScheduleGroupModel (application: Application) : AndroidViewModel(applicati
                                 overlap.end.minuteOfHour().get()
                             ) == 0
                         ) "00" else overlap.end.minuteOfHour().get()
-                    }) "
+                    })"
                 )
+                overlapDaysList.getOrPut(dayString) { mutableListOf() }.add(overLapMessage)
+
             }
         }
-        return overlapDays
+        val resultList = overlapDaysList.map { (day, intervals) ->
+            "$day ${intervals.joinToString(", ")}"
+            }
+        return resultList
     }
 
     fun forceTrimSchedule(

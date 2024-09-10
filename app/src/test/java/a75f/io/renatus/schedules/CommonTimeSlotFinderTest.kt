@@ -8,6 +8,7 @@ import a75f.io.api.haystack.Tags
 import a75f.io.api.haystack.mock.MockCcuHsApi
 import a75f.io.logic.DefaultSchedules
 import a75f.io.logic.schedule.ScheduleGroup
+import a75f.io.logic.util.CommonTimeSlotFinder
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before

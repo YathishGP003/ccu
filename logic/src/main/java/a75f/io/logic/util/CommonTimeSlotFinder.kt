@@ -1,14 +1,16 @@
-package a75f.io.renatus.schedules
+package a75f.io.logic.util
+
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.DAYS
 import a75f.io.api.haystack.Schedule
 import a75f.io.api.haystack.util.TimeUtil.getEndTimeHr
 import a75f.io.api.haystack.util.TimeUtil.getEndTimeMin
+import a75f.io.logger.CcuLog
 import a75f.io.logic.DefaultSchedules
+import a75f.io.logic.L
+import a75f.io.logic.bo.building.schedules.ScheduleUtil
 import a75f.io.logic.schedule.ScheduleGroup
-import a75f.io.renatus.schedules.ScheduleUtil.getDayString
-import a75f.io.renatus.util.RxjavaUtil
 import org.joda.time.Interval
 
 class CommonTimeSlotFinder {
@@ -92,7 +94,7 @@ class CommonTimeSlotFinder {
 
         return uncommonIntervals.filter { (it.startHour * 60 + it.startMinute) != (it.endHour * 60 + it.endMinute) }.distinct()
     }
-    fun getCommonIntervals(schedule: Map<String, List<TimeSlot>>): List<TimeSlot> {
+    private fun getCommonIntervals(schedule: Map<String, List<TimeSlot>>): List<TimeSlot> {
         if (schedule.isEmpty()) return emptyList()
 
         var commonIntervals = schedule.values.first().toMutableList()
@@ -653,9 +655,9 @@ class CommonTimeSlotFinder {
         val result = when (mSchedule.scheduleGroup) {
             ScheduleGroup.EVERYDAY.ordinal -> {
                 listOfNotNull(
-                "All Days ${
-                    uncommonIntervals[0].takeIf { it.isNotEmpty() }?.joinToString(", ") { "(${it})" } ?: ""
-                }"
+                    "All Days ${
+                        uncommonIntervals[0].takeIf { it.isNotEmpty() }?.joinToString(", ") { "(${it})" } ?: ""
+                    }"
                 )
             }
 
@@ -747,9 +749,23 @@ class CommonTimeSlotFinder {
 
         for ((_, intervals) in spillsMap) {
             for (interval in intervals) {
-                val dayString = getDayString(interval.start.dayOfWeek)
-                val spillMessage = "(${interval.start.hourOfDay().get()}:" +
-                        "${if (interval.start.minuteOfHour().get() == 0) "00"
+                if(isIntervalNotSpilled(interval)) continue
+                if(isOverNightSchedule(interval)){
+                    if(interval.start.hourOfDay == 23 && interval.start.minuteOfHour == 59){ continue }
+                    val dayString = getDayString(interval.start.dayOfWeek)
+                    val spillMessage = "(${interval.start.hourOfDay().get()}:" +
+                            "${ if (interval.start.minuteOfHour().get() == 0) "00"
+                            else interval.start.minuteOfHour().get()} -" +
+                            " 24:" + "00)"
+                    spillZonesMessages.getOrPut(dayString) { mutableListOf() }.add(spillMessage)
+                }
+
+                val dayString = if(isOverNightSchedule(interval)){getDayString(interval.start.dayOfWeek + 1)}
+                else getDayString(interval.start.dayOfWeek)
+                val spillMessage = "(${ if(isOverNightSchedule(interval)) "00"
+                else interval.start.hourOfDay().get()}:" +
+                        "${ if (interval.start.minuteOfHour().get() == 0 ||
+                            isOverNightSchedule(interval)) "00"
                         else interval.start.minuteOfHour().get()} -" +
                         " ${getEndTimeHr(interval.end.hourOfDay().get(),
                             interval.end.minuteOfHour().get())}:" +
@@ -767,6 +783,17 @@ class CommonTimeSlotFinder {
         }
 
         return resultList
+    }
+    private fun isOverNightSchedule(interval: Interval): Boolean {
+        return interval.start.hourOfDay > interval.end.hourOfDay ||
+                (interval.start.hourOfDay == interval.end.hourOfDay &&
+                        interval.start.minuteOfHour > interval.end.minuteOfHour)
+    }
+
+    private fun isIntervalNotSpilled(interval: Interval): Boolean {
+        return interval.start.hourOfDay == 23 && interval.start.minuteOfHour == 59 &&
+                (interval.end.hourOfDay == 0 && interval.end.minuteOfHour == 0 ||
+                        interval.end.hourOfDay == 24)
     }
 
     fun trimScheduleTowardCommonTimeSlotAndSync(schedule:Schedule, commonIntervals: List<List<TimeSlot>>,
@@ -953,6 +980,7 @@ class CommonTimeSlotFinder {
                 }
             }
         }
+
         RxjavaUtil.executeBackground {
             if (schedule.isZoneSchedule) {
                 ccuHsApi.updateZoneSchedule(schedule, schedule.roomRef)
@@ -1316,5 +1344,76 @@ class CommonTimeSlotFinder {
         return uncommonIntervals.any { intervalList ->
             intervalList.isNotEmpty() && intervalList.all { it.isValidInterval() }
         }
+    }
+
+    fun forceTrimScheduleTowardsCommonTimeslot(ccuHsApi: CCUHsApi) {
+        val buildingOccupancy = ccuHsApi.getSystemSchedule(false)[0]
+        val activeZoneScheduleList = ArrayList<Schedule>()
+        CcuLog.d(
+            L.TAG_CCU_SCHEDULE,
+            "Trimming schedule for building occupancy " + buildingOccupancy.days
+        )
+        val zones = ccuHsApi.readAllEntities("room")
+        for(zone in zones) {
+            if (zone.containsKey("scheduleRef")) {
+                var zoneSchedule =
+                    CCUHsApi.getInstance().getScheduleById(zone["scheduleRef"].toString())
+                if (zoneSchedule == null) {
+                    // Handling Crash here.
+                    zoneSchedule =
+                        CCUHsApi.getInstance().getRemoteSchedule(zone["scheduleRef"].toString())
+                    CcuLog.d("CCU_MESSAGING", "Fetching the schedule from remote $zoneSchedule")
+                    if (zoneSchedule == null) {
+                        CcuLog.d(
+                            "CCU_MESSAGING",
+                            "The schedule retrieved from the remote source is also null."
+                        )
+                        continue
+                    }
+                }
+                activeZoneScheduleList.add(zoneSchedule)
+            }
+        }
+        for (zoneSchedule in activeZoneScheduleList) {
+            if(zoneSchedule.scheduleGroup == ScheduleGroup.SEVEN_DAY.ordinal) {
+                val spillsMap : HashMap<String, ArrayList<Interval>> = ScheduleUtil.getScheduleSpills(zoneSchedule.days, zoneSchedule)
+                forceTrimSevenDaySchedule(
+                    zoneSchedule,
+                    spillsMap!!
+                )
+                ccuHsApi.updateScheduleNoSync(zoneSchedule, zoneSchedule.roomRef)
+            } else {
+                val commonTimeslot: List<List<TimeSlot>> = getCommonTimeSlot(
+                    zoneSchedule.scheduleGroup, buildingOccupancy.getDays(),
+                    zoneSchedule.days, true
+                )
+                trimScheduleTowardCommonTimeSlotAndSync(
+                    zoneSchedule,
+                    commonTimeslot,
+                    ccuHsApi
+                )
+            }
+            CcuLog.d(
+                L.TAG_CCU_SCHEDULE,
+                "Trimming schedule for zone : " + zoneSchedule.dis +
+                        "Schedule Days :" + zoneSchedule.days +"Schedule Group : " +
+                        zoneSchedule.scheduleGroup
+            )
+        }
+        ccuHsApi.syncEntityTree()
+    }
+    fun getDayString(day: Int): String {
+        when (day) {
+            1 -> return "Monday"
+            2 -> return "Tuesday"
+            3 -> return "Wednesday"
+            4 -> return "Thursday"
+            5 -> return "Friday"
+            6 -> return "Saturday"
+            7 -> return "Sunday"
+            /*Overnight schedule*/
+            8 -> return "Monday"
+        }
+        return ""
     }
 }

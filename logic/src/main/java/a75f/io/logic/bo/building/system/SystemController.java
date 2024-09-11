@@ -16,6 +16,7 @@ import a75f.io.api.haystack.Occupied;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.tuners.BuildingTunerCache;
+import a75f.io.logic.tuners.TunerUtil;
 
 import static a75f.io.logic.bo.building.system.SystemController.State.OFF;
 
@@ -119,6 +120,32 @@ public abstract class SystemController
         if (currentTemp > (buildingLimitMax + tempDeadLeeway) || (currentTemp < buildingLimitMin - tempDeadLeeway)) {
             CcuLog.e(L.TAG_CCU_SYSTEM, "Equip dead! "+equipRef+" , Current temp "+currentTemp);
             return true;
+        }
+        return false;
+    }
+
+    public boolean isRFDead(String equip) {
+
+        if (equip == null) {
+            CcuLog.e(L.TAG_CCU_SYSTEM, "Profile does not have linked equip , assume RF is dead");
+            return true;
+        }
+
+        HashMap<Object, Object> point = CCUHsApi.getInstance().readEntity("point and (heartbeat or heartBeat) and equipRef == \""+equip+"\"");
+        if(!point.isEmpty()){
+            HisItem hisItem = CCUHsApi.getInstance().curRead(point.get("id").toString());
+            if (hisItem == null) {
+                CcuLog.e(L.TAG_CCU_SYSTEM, "RF dead! , Heartbeat does not exist for "+equip);
+                return true;
+            }
+            double zoneDeadTime = TunerUtil.readTunerValByQuery("zone and dead and time", equip);
+            if (zoneDeadTime == 0) {
+                CcuLog.e(L.TAG_CCU_SYSTEM, "Invalid value for zoneDeadTime tuner, use default "+equip);
+                zoneDeadTime = 15;
+            }
+            if ((System.currentTimeMillis() - hisItem.getDateInMillis()) > zoneDeadTime * 60 * 1000) {
+                return true;
+            }
         }
         return false;
     }

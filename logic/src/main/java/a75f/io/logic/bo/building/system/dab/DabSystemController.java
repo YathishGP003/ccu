@@ -184,7 +184,7 @@ public class DabSystemController extends SystemController
         deadZones.clear();
         allEquips.forEach( equip -> {
             String equipId = equip.get(Tags.ID).toString();
-            if (isZoneDead(equipId)) {
+            if (isZoneDead(equipId) || isRFDead(equipId)) {
                 deadZones.add(equipId);
             }
         });

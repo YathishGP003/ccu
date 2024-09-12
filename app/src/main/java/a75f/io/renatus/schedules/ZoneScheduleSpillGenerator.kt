@@ -48,7 +48,7 @@ class ZoneScheduleSpillGenerator {
             pageNo = 1
             while (pageNo <= responsePageSize) {
                 val nextReadChangesResponse =
-                    hClient.call("read", combinedDetailsResponse, pageNo, pageSize)
+                    hClient.call("read", combinedDetailsGrid, pageNo, pageSize)
                 finalResponse.add(nextReadChangesResponse)
                 CcuLog.d(TAG_ZONE_SCHEDULE_SPILL, "iteration response size " + finalResponse.size)
                 pageNo++

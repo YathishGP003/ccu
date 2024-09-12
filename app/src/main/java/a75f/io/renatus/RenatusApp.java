@@ -203,4 +203,8 @@ public class RenatusApp extends UtilityApplication
 		context.startActivity(mainIntent);
 		Runtime.getRuntime().exit(0);
 	}
+
+	public void debugLog(String key, String value){
+		CcuLog.d("CCU_ALERTS", "debugLog -> key: " + key + ", value: " + value);
+	}
 }

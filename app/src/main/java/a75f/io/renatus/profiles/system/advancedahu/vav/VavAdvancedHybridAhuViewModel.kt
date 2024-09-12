@@ -84,8 +84,8 @@ class VavAdvancedHybridAhuViewModel : AdvancedHybridAhuViewModel() {
                 viewState.value.isStateChanged = false
                 saveJob = null
                 showToast("Configuration saved successfully", context)
-                CCUHsApi.getInstance().setCcuReady()
-                CCUHsApi.getInstance().syncEntityTree()
+                hayStack.setCcuReady()
+                hayStack.syncEntityTree()
             }
         }
     }

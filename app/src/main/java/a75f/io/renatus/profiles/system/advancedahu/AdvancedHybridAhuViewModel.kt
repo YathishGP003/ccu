@@ -40,6 +40,7 @@ import a75f.io.renatus.modbus.util.OK
 import android.annotation.SuppressLint
 import android.content.Context
 import android.text.Spanned
+import android.util.Log
 import androidx.appcompat.app.AlertDialog
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.LiveData
@@ -189,67 +190,62 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
 
 
      fun updateConfiguration(existingConnectEquip: HashMap<Any,Any>, connectModelName: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            launch {
-                cmEquipBuilder.updateEquipAndPoints(
-                        configuration = profileConfiguration.cmConfiguration,
-                        modelDef = cmModel,
-                        siteRef = hayStack.site!!.id,
-                        equipDis = getDis(cmModel.name),
-                        isReconfiguration = true
-                )
-                cmDeviceBuilder.updateDeviceAndPoints(
-                        configuration = profileConfiguration.cmConfiguration,
-                        cmDeviceModel,
-                        Domain.systemEquip.equipRef,
-                        hayStack.site!!.id,
-                        deviceDis = getDis(cmDeviceModel.name),
-                )
-            }
 
-            launch {
+         cmEquipBuilder.updateEquipAndPoints(
+                 configuration = profileConfiguration.cmConfiguration,
+                 modelDef = cmModel,
+                 siteRef = hayStack.site!!.id,
+                 equipDis = getDis(cmModel.name),
+                 isReconfiguration = true
+         )
+         cmDeviceBuilder.updateDeviceAndPoints(
+                 configuration = profileConfiguration.cmConfiguration,
+                 cmDeviceModel,
+                 Domain.systemEquip.equipRef,
+                 hayStack.site!!.id,
+                 deviceDis = getDis(cmDeviceModel.name),
+         )
 
-                if (profileConfiguration.connectConfiguration.connectEnabled) {
-                    if (existingConnectEquip.isNotEmpty()) {
-                        connectEquipBuilder.updateEquipAndPoints(
-                                configuration = profileConfiguration.connectConfiguration,
-                                modelDef = connectModel,
-                                siteRef = hayStack.site!!.id,
-                                equipDis = getDis(connectModel.name),
-                                isReconfiguration = true
-                        )
-                        connectDeviceBuilder.updateDeviceAndPoints(
-                                configuration = profileConfiguration.connectConfiguration,
-                                modelDef = connectDeviceModel,
-                                equipRef = existingConnectEquip[Tags.ID].toString(),
-                                siteRef = hayStack.site!!.id,
-                                deviceDis = getDis(connectDeviceModel.name)
-                        )
-                    } else {
+         if (profileConfiguration.connectConfiguration.connectEnabled) {
+             if (existingConnectEquip.isNotEmpty()) {
+                 connectEquipBuilder.updateEquipAndPoints(
+                         configuration = profileConfiguration.connectConfiguration,
+                         modelDef = connectModel,
+                         siteRef = hayStack.site!!.id,
+                         equipDis = getDis(connectModel.name),
+                         isReconfiguration = true
+                 )
+                 connectDeviceBuilder.updateDeviceAndPoints(
+                         configuration = profileConfiguration.connectConfiguration,
+                         modelDef = connectDeviceModel,
+                         equipRef = existingConnectEquip[Tags.ID].toString(),
+                         siteRef = hayStack.site!!.id,
+                         deviceDis = getDis(connectDeviceModel.name)
+                 )
+             } else {
 
-                        val connectEquipId = connectEquipBuilder.buildEquipAndPoints(
-                                configuration = profileConfiguration.connectConfiguration,
-                                modelDef = connectModel,
-                                siteRef = hayStack.site!!.id,
-                                equipDis = getDis(connectModel.name)
-                        )
+                 val connectEquipId = connectEquipBuilder.buildEquipAndPoints(
+                         configuration = profileConfiguration.connectConfiguration,
+                         modelDef = connectModel,
+                         siteRef = hayStack.site!!.id,
+                         equipDis = getDis(connectModel.name)
+                 )
 
-                        connectDeviceBuilder.buildDeviceAndPoints(
-                                configuration = profileConfiguration.connectConfiguration,
-                                modelDef = connectDeviceModel,
-                                equipRef = connectEquipId,
-                                siteRef = hayStack.site!!.id,
-                                deviceDis = getDis(connectDeviceModel.name)
-                        )
-                    }
-                }
-                else {
-                    deleteSystemConnectModule(connectModelName)
-                }
-            }
-            DomainManager.addSystemDomainEquip(hayStack)
-            DomainManager.addCmBoardDevice(hayStack)
-        }
+                 connectDeviceBuilder.buildDeviceAndPoints(
+                         configuration = profileConfiguration.connectConfiguration,
+                         modelDef = connectDeviceModel,
+                         equipRef = connectEquipId,
+                         siteRef = hayStack.site!!.id,
+                         deviceDis = getDis(connectDeviceModel.name)
+                 )
+             }
+         }
+         else {
+             deleteSystemConnectModule(connectModelName)
+         }
+
+         DomainManager.addSystemDomainEquip(hayStack)
+         DomainManager.addCmBoardDevice(hayStack)
 
     }
 

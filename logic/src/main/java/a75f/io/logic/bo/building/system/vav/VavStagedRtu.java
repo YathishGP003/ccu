@@ -125,6 +125,7 @@ public class VavStagedRtu extends VavSystemProfile
     public void addSystemEquip() {
         systemEquip = (VavStagedSystemEquip) Domain.systemEquip;
         initTRSystem();
+        updateStagesSelected();
     }
     
     @Override

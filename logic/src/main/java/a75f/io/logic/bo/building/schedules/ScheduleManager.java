@@ -453,10 +453,11 @@ public class ScheduleManager {
                             int min = calender.get(Calendar.MINUTE);
                             int curTime = hrs + min;
                             for (Schedule.Days d : mDays) {
-                                if (d.getDay() == day) {
-                                    int startSchTime = (d.getSthh() * 60) + d.getStmm();
-                                    int endSchTime = (d.getEthh() * 60) + d.getEtmm();
-                                    if (curTime > startSchTime && curTime < endSchTime) {
+                                int startSchTime = (d.getSthh() * 60) + d.getStmm();
+                                int endSchTime = (d.getEthh() * 60) + d.getEtmm();
+
+                                if (d.getDay() == day || isOvernightSchedule(startSchTime,endSchTime,day,d.getDay())) {
+                                    if (isScheduleOccupied(curTime, startSchTime, endSchTime,day,d.getDay())) {
                                         if (isHeatingOrCoolingLimitsNull(d)) {
                                             continue;
                                         }
@@ -467,7 +468,10 @@ public class ScheduleManager {
                                         saveDeadBandChange("heating", d.getHeatingDeadBand(), roomRef);
                                         saveDeadBandChange("cooling", d.getCoolingDeadBand(), roomRef);
                                     } else {
-                                        clearLevel10(roomRef);
+                                        //For multiple schedules in a day we need to check if the day is occupied or not
+                                        if (!occ.isOccupied()) {
+                                            clearLevel10(roomRef);
+                                        }
                                     }
                                 }
                             }
@@ -508,6 +512,35 @@ public class ScheduleManager {
                 e.printStackTrace();
             }
         });
+    }
+    /*
+        * This method will return that overnight schedule or not
+        * If it is overnight schedule then it will check the schedule is overnight on previous day or not
+        * If my current day is monday and schedule is overnight then it will check the schedule is overnight on sunday or not
+     */
+    private boolean isOvernightSchedule(int startSchTime, int endSchTime, int day, int dDay) {
+        boolean isOvernight = false;
+        if (startSchTime > endSchTime) {
+            if (day == 0) {
+                isOvernight = dDay == 6; // this is to check the schedule is overnight or not on sunday
+            }
+            else {
+                isOvernight = dDay == day - 1;
+            }
+        }
+        return isOvernight;
+    }
+
+    // This method will return that current schedule is occupied or not
+    private boolean isScheduleOccupied(int curTime, int startSchTime, int endSchTime, int day, int dDay) {
+        if (startSchTime > endSchTime) { //To check the schedule is overnight or not
+            if(curTime < startSchTime && day != dDay) {
+                startSchTime = 0;
+            } else {
+                endSchTime = 24 * 60 ;
+            }
+        }
+        return (curTime > startSchTime && curTime < endSchTime);
     }
 
     private void clearLevel10(String roomRef) {

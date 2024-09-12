@@ -5,16 +5,18 @@ import a75f.io.api.haystack.HayStackConstants
 import a75f.io.api.haystack.Schedule
 import a75f.io.api.haystack.Tags
 import a75f.io.logger.CcuLog
-import a75f.io.logic.L.TAG_CCU_SCHEDULE
+import a75f.io.logic.L.TAG_ZONE_SCHEDULE_SPILL
 import org.projecthaystack.HDict
 import org.projecthaystack.HDictBuilder
 import org.projecthaystack.HGrid
 import org.projecthaystack.HGridBuilder
 import org.projecthaystack.HRow
 import org.projecthaystack.client.HClient
+import org.projecthaystack.util.WebUtil
 
 class ZoneScheduleSpillGenerator {
     private val ccuHsApi = CCUHsApi.getInstance()
+    private val pageSize = 100
     data class ZoneScheduleSpill(
         val zoneRef: String,
         val zoneDis: String,
@@ -23,23 +25,36 @@ class ZoneScheduleSpillGenerator {
         val schedule: Schedule
     )
     fun generateSpill() : List<ZoneScheduleSpill>{
-        CcuLog.d(TAG_CCU_SCHEDULE, "Schedule Spill Generation started")
+        var pageNo = 0
+        CcuLog.d(TAG_ZONE_SCHEDULE_SPILL, "Schedule Spill Generation started")
         val finalResponse = mutableListOf<HGrid>()
-        val equipFilter = "equip and roomRef != \"" + "SYSTEM" + "\" and siteRef == " + ccuHsApi.siteIdRef
-        val namedScheduleFilter = "named and schedule and organization == \"" +
-                CCUHsApi.getInstance().site!!.getOrganization() + "\""
-        val scheduleFilter = "schedule and days and siteRef == " + ccuHsApi.siteIdRef
-        val roomFloorFilter = "(room or floor) and siteRef == " + ccuHsApi.siteIdRef
-        val combinedFilter : List<String> = listOf(equipFilter, namedScheduleFilter, scheduleFilter, roomFloorFilter)
-        combinedFilter.forEach { filter ->
-            val combinedDetails = HDictBuilder().add("filter", filter).toDict()
-            val combinedDetailsGrid = HGridBuilder.dictToGrid(combinedDetails)
-            val hClient = HClient(ccuHsApi.hsUrl, HayStackConstants.USER, HayStackConstants.PASS)
-            val combinedDetailsResponse: HGrid = hClient.call("read", combinedDetailsGrid)
-            finalResponse.add(combinedDetailsResponse)
-        }
-        CcuLog.d(TAG_CCU_SCHEDULE, "Imported Schedules, Rooms, Floors, Equips")
 
+        val organization = ccuHsApi.site!!.getOrganization()
+        val siteIdRef = ccuHsApi.siteIdRef
+        val combinedFilter= """((schedule and days) or (room) or (floor) or (equip and roomRef != "SYSTEM")) and siteRef == $siteIdRef or (named and schedule and organization == "$organization")"""
+
+        val combinedDetails = HDictBuilder().add("filter", combinedFilter).toDict()
+        val combinedDetailsGrid = HGridBuilder.dictToGrid(combinedDetails)
+        val hClient = HClient(ccuHsApi.hsUrl, HayStackConstants.USER, HayStackConstants.PASS)
+        val combinedDetailsResponse: HGrid = hClient.call("read", combinedDetailsGrid, pageNo, pageSize)
+        ccuHsApi.HGridToList(combinedDetailsResponse)
+
+        finalResponse.add(combinedDetailsResponse)
+        val responsePageSize = WebUtil.getResponsePageSize(combinedDetailsResponse, pageSize)
+        CcuLog.d(TAG_ZONE_SCHEDULE_SPILL, "Response received from backend:" +
+                " no of remaining pages to be fetched $responsePageSize")
+
+        if (responsePageSize > 0) {
+            pageNo = 1
+            while (pageNo <= responsePageSize) {
+                val nextReadChangesResponse =
+                    hClient.call("read", combinedDetailsResponse, pageNo, pageSize)
+                finalResponse.add(nextReadChangesResponse)
+                CcuLog.d(TAG_ZONE_SCHEDULE_SPILL, "iteration response size " + finalResponse.size)
+                pageNo++
+            }
+        }
+        CcuLog.d(TAG_ZONE_SCHEDULE_SPILL, "Imported Schedules, Rooms, Floors, Equips")
 
         val listOfRooms = mutableListOf<HashMap<Any, Any>>()
         val listOfFloors = mutableListOf<HashMap<Any, Any>>()
@@ -61,19 +76,31 @@ class ZoneScheduleSpillGenerator {
                 }
             }
         }
-        CcuLog.d(TAG_CCU_SCHEDULE, "Separated Schedules, Rooms, Floors, Equips")
+        CcuLog.d(TAG_ZONE_SCHEDULE_SPILL, "Separated Schedules, Rooms, Floors, Equips")
 
         listOfRooms.forEach { room ->
             val zoneRef = room[Tags.ID].toString()
             val zoneDis = room[Tags.DIS].toString()
-            val zoneProfile = listOfEquips.filter { it[Tags.ROOMREF] == room[Tags.ID] }[0][Tags.PROFILE].toString()
+            val filteredEquips = listOfEquips.filter { it[Tags.ROOMREF] == room[Tags.ID] }
+
+            val zoneProfile = if (filteredEquips.isNotEmpty()) {
+                filteredEquips[0][Tags.PROFILE]?.toString() ?: ""
+            } else {
+                ""
+            }
+            if(zoneProfile.isEmpty()){
+                CcuLog.d(TAG_ZONE_SCHEDULE_SPILL,
+                    "Zone Profile is empty for zone $zoneDis so avoiding this zone to calculate spill"
+                )
+                return@forEach
+            }
             val floorDis = listOfFloors.filter { it[Tags.ID] == room[Tags.FLOORREF] }[0][Tags.DIS].toString()
             val schedule = listOfSchedules.filter { room[Tags.SCHEDULE_REF] == it[Tags.ID] }[0]
             val scheduleDict = Schedule.Builder().setHDict(schedule).build()
             val zoneScheduleSpill = ZoneScheduleSpill(zoneRef, zoneDis, zoneProfile, floorDis, scheduleDict)
             zoneScheduleSpillList.add(zoneScheduleSpill)
         }
-        CcuLog.d(TAG_CCU_SCHEDULE, "Generated Zone Schedule Spill")
+        CcuLog.d(TAG_ZONE_SCHEDULE_SPILL, "Generated Zone Schedule Spill")
         return zoneScheduleSpillList
     }
 

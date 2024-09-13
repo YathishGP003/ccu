@@ -216,9 +216,11 @@ public class WifiFragment extends Fragment /*implements InstallType */  implemen
                 }
             }
         });
+        ConnectivityManager connManager = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfoForEthernet = connManager.getNetworkInfo(ConnectivityManager.TYPE_ETHERNET);
 
         if (isFreshRegister) {
-            ((FreshRegistration) getActivity()).setToggleWifi(mainWifiObj.isWifiEnabled());
+            ((FreshRegistration) getActivity()).setToggleWifi(mainWifiObj.isWifiEnabled(), networkInfoForEthernet.isConnected());
         }
         if (mainWifiObj.isWifiEnabled()) {
             mainWifiObj.startScan();
@@ -242,8 +244,10 @@ public class WifiFragment extends Fragment /*implements InstallType */  implemen
     public void showScanResult() {
 
         try {
+            ConnectivityManager connManager = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo networkInfoForEthernet = connManager.getNetworkInfo(ConnectivityManager.TYPE_ETHERNET);
             if (isFreshRegister) {
-                ((FreshRegistration) getActivity()).setToggleWifi(mainWifiObj.isWifiEnabled());
+                ((FreshRegistration) getActivity()).setToggleWifi(mainWifiObj.isWifiEnabled(), networkInfoForEthernet.isConnected());
             }
             distinctNetworks = new HashMap<>();
             for (int i = 0; i < results.size(); i++) {
@@ -259,7 +263,6 @@ public class WifiFragment extends Fragment /*implements InstallType */  implemen
             CcuLog.i(TAG, "NW:" + distinctNetworks.toString() + " keyset:" + wifiset);
             wifinetworks.clear();
             wifinetworks = new ArrayList<>(wifiset);
-            ConnectivityManager connManager = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
             NetworkInfo networkInfo = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
             if (networkInfo.isConnected()) {
                 final WifiManager wifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);

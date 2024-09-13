@@ -19,6 +19,7 @@ import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -115,19 +116,38 @@ public class UsbConnectService extends Service
 		public void onReceive(Context arg0, Intent arg1)
 		{
 			if (arg1.getAction().equals(ACTION_USB_PERMISSION)) {
-				CcuLog.d(TAG,"OnReceive == "+arg1.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false));
-				boolean granted = arg1.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false);
-				if (granted) {
-					// User accepted our USB connection. Try to open the device as a serial port
-					Intent intent = new Intent(ACTION_USB_CONNECT_PERMISSION_GRANTED);
-					arg0.sendBroadcast(intent);
+
+				if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.N) {
+					CcuLog.d(TAG,"OnReceive == "+arg1.getExtras().getBoolean(UsbManager.EXTRA_PERMISSION_GRANTED));
+					boolean granted = arg1.getExtras().getBoolean(UsbManager.EXTRA_PERMISSION_GRANTED);
+					if (granted) {
+						// User accepted our USB connection. Try to open the device as a serial port
+						Intent intent = new Intent(ACTION_USB_CONNECT_PERMISSION_GRANTED);
+						arg0.sendBroadcast(intent);
+						connection = usbManager.openDevice(device);
+						new ConnectionThread().start();
+					} else {
+						// User not accepted our USB connection. Send an Intent to the Main Activity
+						CcuLog.d(TAG,"USB PERMISSION NOT GRANTED == "+arg1.getAction());
+						Intent intent = new Intent(ACTION_USB_CONNECT_PERMISSION_NOT_GRANTED);
+						arg0.sendBroadcast(intent);
+					}
 
 				} else {
-					// User not accepted our USB connection. Send an Intent to the Main Activity
-				
-					CcuLog.d(TAG,"USB PERMISSION NOT GRANTED == "+arg1.getAction());
-					Intent intent = new Intent(ACTION_USB_CONNECT_PERMISSION_NOT_GRANTED);
-					arg0.sendBroadcast(intent);
+					CcuLog.d(TAG,"OnReceive == "+arg1.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false));
+					boolean granted = arg1.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false);
+					if (granted) {
+						// User accepted our USB connection. Try to open the device as a serial port
+						Intent intent = new Intent(ACTION_USB_CONNECT_PERMISSION_GRANTED);
+						arg0.sendBroadcast(intent);
+
+					} else {
+						// User not accepted our USB connection. Send an Intent to the Main Activity
+
+						CcuLog.d(TAG, "USB PERMISSION NOT GRANTED == " + arg1.getAction());
+						Intent intent = new Intent(ACTION_USB_CONNECT_PERMISSION_NOT_GRANTED);
+						arg0.sendBroadcast(intent);
+					}
 				}
 			} else if (arg1.getAction().equals(ACTION_USB_ATTACHED)) {
 				UsbDevice attachedDevice = arg1.getParcelableExtra(UsbManager.EXTRA_DEVICE);
@@ -342,20 +362,36 @@ public class UsbConnectService extends Service
 				if (portSelection == ConnectSerialPort.CCU_PORT) {
 					CcuLog.d(TAG,"isConnectDevice = "+device);
 					if (UsbSerialUtil.isConnectDevice(device, context)) {
-						connection = usbManager.openDevice(device);
-						handleUsbOpen(true);
-						keep = true;
-						CcuLog.d(TAG, "Opened Serial CCU-USB device instance " + device.getVendorId() );
+						if ( Build.VERSION.SDK_INT <= Build.VERSION_CODES.N){
+							boolean success = grantRootPermissionToUSBDevice(device);
+							connection = usbManager.openDevice(device);
+							handleUsbOpen(success);
+							keep = success;
+							CcuLog.d(TAG, "Opened Serial CCU-USB device instance " + device.getVendorId() + " " + success);
+						} else {
+							connection = usbManager.openDevice(device);
+							handleUsbOpen(true);
+							keep = true;
+							CcuLog.d(TAG, "Opened Serial CCU-USB device instance " + device.getVendorId());
+						}
 					} else {
 						connection = null;
 						device = null;
 					}
 				} else if (portSelection == ConnectSerialPort.CM_VIRTUAL_PORT2) {
 					if (UsbSerialUtil.isCMDevice(device, getApplicationContext())) {
-						connection = usbManager.openDevice(device);
-						handleUsbOpen(true);
-						keep = true;
-						CcuLog.d(TAG, "Opened Serial CM device instance for connect" + device.getVendorId() );
+						if ( Build.VERSION.SDK_INT <= Build.VERSION_CODES.N){
+							boolean success = grantRootPermissionToUSBDevice(device);
+							connection = usbManager.openDevice(device);
+							handleUsbOpen(success);
+							keep = success;
+							CcuLog.d(TAG, "Opened Serial CCU-USB device instance " + device.getVendorId() + " " + success);
+						} else {
+							connection = usbManager.openDevice(device);
+							handleUsbOpen(true);
+							keep = true;
+							CcuLog.d(TAG, "Opened Serial CCU-USB device instance " + device.getVendorId());
+						}
 					} else {
 						connection = null;
 						device = null;
@@ -582,6 +618,24 @@ public class UsbConnectService extends Service
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+	}
+
+	private boolean grantRootPermissionToUSBDevice(UsbDevice device)
+	{
+		IBinder b = ServiceManager.getService(Context.USB_SERVICE);
+		IUsbManager service = IUsbManager.Stub.asInterface(b);
+		CcuLog.i(TAG, "Try connecting!");
+		// There is a device connected to our Android device. Try to open it as a Serial Port.
+		try
+		{
+			service.grantDevicePermission(device, getApplicationInfo().uid);
+			return true;
+		}
+		catch (RemoteException e)
+		{
+			e.printStackTrace();
+		}
+		return false;
 	}
 }
 

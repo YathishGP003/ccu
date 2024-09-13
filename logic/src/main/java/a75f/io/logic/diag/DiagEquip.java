@@ -38,6 +38,7 @@ import a75f.io.logic.autocommission.remoteSession.RemoteSessionStatus;
 
 public class DiagEquip
 {
+    private static final String TAG = "DiagEquip";
     private static final String CMD_UPDATE_CCU = "update_ccu";
     private static DiagEquip instance = null;
     private static final String SHARED_PREFERENCE_NAME = "remote_status_pref";
@@ -68,7 +69,9 @@ public class DiagEquip
                           .addMarker("equip").addMarker("diag")
                           .setTz(tz).build();
         String equipRef = CCUHsApi.getInstance().addEquip(b);
+        b.setId(equipRef);
         addPoints(equipRef, "DiagEquip");
+        createAppVersionPoints(CCUHsApi.getInstance(), b);
         return equipRef;
     }
 
@@ -367,6 +370,9 @@ public class DiagEquip
         updateRemoteSessionStatusPoint();
         setDiagHisVal("log and level", CCUHsApi.getInstance().readHisValByQuery(Queries.LOG_LEVEL_QUERY));
 
+        updateAppVersionPoint("com.x75frenatus.home", "home");
+        updateAppVersionPoint("io.seventyfivef.remoteaccess", "remoteAccess");
+        updateAppVersionPoint("com.example.ccu_bacapp", "bacnet");
     }
 
     private void updateRemoteSessionStatusPoint() {
@@ -443,4 +449,62 @@ public class DiagEquip
                 BuildConfig.BUILD_TYPE.equalsIgnoreCase("dev_qa");
     }
 
+    public static void createAppVersionPoints(CCUHsApi hayStack, Equip diagEquip) {
+        CcuLog.i(TAG," createAppVersionPoints - Creating App version points. ");
+        Point homeAppVersion = new Point.Builder()
+                .setDisplayName(diagEquip.getDisplayName()+"-homeAppVersion")
+                .setEquipRef(diagEquip.getId())
+                .setSiteRef(diagEquip.getSiteRef())
+                .addMarker("diag").addMarker("version").addMarker("writable")
+                .addMarker("home")
+                .setUnit("")
+                .setTz(diagEquip.getTz())
+                .setKind(Kind.STRING)
+                .build();
+        hayStack.addPoint(homeAppVersion);
+
+        Point remoteAccessAppVersion = new Point.Builder()
+                .setDisplayName(diagEquip.getDisplayName()+"-remoteAccessAppVersion")
+                .setEquipRef(diagEquip.getId())
+                .setSiteRef(diagEquip.getSiteRef())
+                .addMarker("diag").addMarker("version").addMarker("writable")
+                .addMarker("remoteAccess")
+                .setUnit("")
+                .setTz(diagEquip.getTz())
+                .setKind(Kind.STRING)
+                .build();
+        hayStack.addPoint(remoteAccessAppVersion);
+
+        Point bacnetAppVersion = new Point.Builder()
+                .setDisplayName(diagEquip.getDisplayName()+"-bacnetAppVersion")
+                .setEquipRef(diagEquip.getId())
+                .setSiteRef(diagEquip.getSiteRef())
+                .addMarker("diag").addMarker("version").addMarker("writable")
+                .addMarker("bacnet")
+                .setUnit("")
+                .setTz(diagEquip.getTz())
+                .setKind(Kind.STRING)
+                .build();
+        hayStack.addPoint(bacnetAppVersion);
+    }
+
+    public static void updateAppVersionPoint(String appPackageName, String appTag) {
+        CcuLog.i(TAG," updateAppVersionPoint - Updating App version point. "+appPackageName+","+appTag);
+        PackageManager pm = Globals.getInstance().getApplicationContext().getPackageManager();
+        PackageInfo pi;
+        try {
+            pi = pm.getPackageInfo(appPackageName, 0);
+            String version = pi.versionName.substring(pi.versionName.lastIndexOf('_')+1,pi.versionName.length() - 2);
+            String prevVersion = CCUHsApi.getInstance().readDefaultStrVal("point and diag and version and "+appTag);
+            String hisVersion = pi.versionName.substring(pi.versionName.lastIndexOf('_')+1);
+            CcuLog.d(TAG,"version ="+version+","+pi.versionName+","+pi.versionName.substring(pi.versionName.lastIndexOf('_')+1)+",prevVer="+prevVersion+prevVersion.equals( hisVersion));
+            if(!prevVersion.equals( hisVersion)) {
+                CCUHsApi.getInstance().writeDefaultVal("point and diag and version and "+appTag, hisVersion);
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            CcuLog.e(TAG, "Error getting package info for " + appPackageName);
+            e.printStackTrace();
+        }
+
+    }
 }

@@ -71,6 +71,9 @@ public class RestoreCCU {
       RetryCountCallback retryCountCallback = retryCount -> CcuLog.d(TAG, "retrying to get CCU list with the retry count "+retryCount);
         HGrid ccuGrid = getCcuHGrid(siteCode, retryCountCallback);
         Iterator ccuGridIterator = ccuGrid.iterator();
+        if(!ccuGridIterator.hasNext()){
+            return new ArrayList<>();
+        }
         List<String> equipRefs = new LinkedList<>();
         /*
         key - ccuId

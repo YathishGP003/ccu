@@ -770,25 +770,53 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
             }
         } else {
             if(isFirstRadioChipSelected) {
-                days.add(DAYS.MONDAY);
+                if(mDays == null || mDays.contains(DAYS.MONDAY)) {
+                    days.add(DAYS.MONDAY);
+                } else {
+                    days.add(DAYS.values()[mDays.get(0).getDay()]);
+                }
             }
             if(isSecondRadioChipSelected) {
-                days.add(DAYS.TUESDAY);
+                if(mDays == null || mDays.contains(DAYS.TUESDAY)) {
+                    days.add(DAYS.TUESDAY);
+                } else {
+                    days.add(DAYS.values()[mDays.get(1).getDay()]);
+                }
             }
             if(isThirdRadioChipSelected) {
-                days.add(DAYS.WEDNESDAY);
+                if(mDays == null || mDays.contains(DAYS.WEDNESDAY)) {
+                    days.add(DAYS.WEDNESDAY);
+                } else {
+                    days.add(DAYS.values()[mDays.get(2).getDay()]);
+                }
             }
             if(isFourthRadioChipSelected) {
-                days.add(DAYS.THURSDAY);
+                if(mDays == null || mDays.contains(DAYS.THURSDAY)) {
+                    days.add(DAYS.THURSDAY);
+                } else {
+                    days.add(DAYS.values()[mDays.get(3).getDay()]);
+                }
             }
             if(isFifthRadioChipSelected) {
-                days.add(DAYS.FRIDAY);
+                if(mDays == null || mDays.contains(DAYS.FRIDAY)) {
+                    days.add(DAYS.FRIDAY);
+                } else {
+                    days.add(DAYS.values()[mDays.get(4).getDay()]);
+                }
             }
             if(isSixthRadioChipSelected) {
-                days.add(DAYS.SATURDAY);
+                if(mDays == null || mDays.contains(DAYS.SATURDAY)) {
+                    days.add(DAYS.SATURDAY);
+                } else {
+                    days.add(DAYS.values()[mDays.get(5).getDay()]);
+                }
             }
             if(isSeventhRadioChipSelected) {
-                days.add(DAYS.SUNDAY);
+                if(mDays == null || mDays.contains(DAYS.SUNDAY)) {
+                    days.add(DAYS.SUNDAY);
+                } else {
+                    days.add(DAYS.values()[mDays.get(6).getDay()]);
+                }
             }
         }
         return days;

@@ -15,6 +15,7 @@ import a75f.io.logic.bo.util.UnitUtils.roundToHalf
 import a75f.io.logic.interfaces.BuildingScheduleListener
 import a75f.io.logic.schedule.ScheduleGroup
 import a75f.io.logic.schedule.SpecialSchedule
+import a75f.io.logic.util.CommonTimeSlotFinder
 import a75f.io.logic.util.isOfflineMode
 import a75f.io.messaging.handler.UpdateScheduleHandler
 import a75f.io.renatus.R
@@ -69,7 +70,8 @@ const val ID_DIALOG_OCCUPIED_SCHEDULE = 1
 const val ID_DIALOG_UN_OCCUPIED_SCHEDULE = 2
 class ScheduleGroupFragment(schedule: Schedule?, scheduleGroup: Int?) : DialogFragment(),
     ScheduleGroupChangeOver.OnScheduleUpdate, ZoneScheduleDialogFragment.ZoneScheduleDialogListener,
-    UnOccupiedZoneSetBackDialogFragment.UnOccupiedZoneSetBackListener,BuildingScheduleListener  {
+    UnOccupiedZoneSetBackDialogFragment.UnOccupiedZoneSetBackListener  {
+    private var isGroupShifted: Boolean = false
     private var isZoneNeedsToBeTrimmedOnDefaultZoneSchedule: Boolean = true
     var radioGroupUpdateRequired: Boolean = true
     private var zoneScheduleViewModel: ZoneScheduleViewModel = ZoneScheduleViewModel()
@@ -352,6 +354,7 @@ class ScheduleGroupFragment(schedule: Schedule?, scheduleGroup: Int?) : DialogFr
         }
 
         radioGroup.setOnCheckedChangeListener(RadioGroup.OnCheckedChangeListener { _, checkedId ->
+            isGroupShifted = true
             if (radioGroupSelectedId == checkedId || (scheduleGroupModel.mSchedule.isNamedSchedule && !isNamedDialogOpen)) {
                 return@OnCheckedChangeListener
             }
@@ -411,7 +414,7 @@ class ScheduleGroupFragment(schedule: Schedule?, scheduleGroup: Int?) : DialogFr
         val commonIntervals = commonTimeSlotFinder.getCommonTimeSlot(
             schedule.scheduleGroup,
             hayStack.getSystemSchedule(false)[0].days,
-            scheduleGroupModel.mSchedule.days,  (scheduleGroupModel.isNewGroupSelected() && isZoneNeedsToBeTrimmedOnDefaultZoneSchedule)
+            scheduleGroupModel.mSchedule.days,  ((scheduleGroupModel.isNewGroupSelected() && scheduleGroupFragment.isZoneNeedsToBeTrimmedOnDefaultZoneSchedule) || (isGroupShifted && isZoneNeedsToBeTrimmedOnDefaultZoneSchedule))
         )
         val uncommonIntervals = commonTimeSlotFinder.getUnCommonTimeSlot(schedule.scheduleGroup, commonIntervals, scheduleGroupModel.mSchedule.days)
         if (commonTimeSlotFinder.isUncommonIntervalsHasAnySpills(uncommonIntervals)) {
@@ -1290,11 +1293,11 @@ class ScheduleGroupFragment(schedule: Schedule?, scheduleGroup: Int?) : DialogFr
 
             val overlappingMessage = HtmlCompat.fromHtml("The current settings cannot be" +
                     " overridden because the following duration of the schedules are" +
-                    " overlapping <br><br>$overlapDays", HtmlCompat.FROM_HTML_MODE_LEGACY)
+                    " overlapping", HtmlCompat.FROM_HTML_MODE_LEGACY)
             AlertDialogAdapter(requireContext(), AlertDialogData(
                 null,
                 overlappingMessage,
-                null,
+                overlapDays,
                 null,
                 null
                 ,
@@ -1320,7 +1323,12 @@ class ScheduleGroupFragment(schedule: Schedule?, scheduleGroup: Int?) : DialogFr
         scheduleGroupModel.mSchedule.days.addAll(daysArrayList)
 
         if(scheduleGroupModel.mScheduleGroup == ScheduleGroup.SEVEN_DAY.ordinal){
-            spillsMap = zoneScheduleViewModel.getScheduleSpills(scheduleGroupModel.mSchedule.days, scheduleGroupModel.mSchedule)
+            val daysArrayListToCalculate = if(scheduleGroupModel.isNewGroupSelected() || isGroupShifted) {
+                scheduleGroupModel.mSchedule.days
+            } else {
+                daysArrayList
+            }
+            spillsMap = zoneScheduleViewModel.getScheduleSpills(daysArrayListToCalculate, scheduleGroupModel.mSchedule)
         } else {
             val commonIntervals = commonTimeSlotFinder.getCommonTimeSlot(
                 scheduleGroupModel.mSchedule.scheduleGroup,
@@ -1365,7 +1373,7 @@ class ScheduleGroupFragment(schedule: Schedule?, scheduleGroup: Int?) : DialogFr
                 },
                 "Re-Edit",
                 {
-                    if(scheduleGroupModel.isNewGroupSelected()) {
+                    if(scheduleGroupModel.isNewGroupSelected() || isGroupShifted) {
                         scheduleGroupModel.mSchedule.days.clear()
                         scheduleGroupModel.mSchedule.days.addAll(
                             DefaultSchedules.getDefaultDays(scheduleGroupModel.mRoomRef,DAYS.MONDAY.ordinal,
@@ -1397,8 +1405,10 @@ class ScheduleGroupFragment(schedule: Schedule?, scheduleGroup: Int?) : DialogFr
         if (scheduleFragment != null) {
             ft.remove(scheduleFragment)
         }
-        val newFragment = ZoneScheduleDialogFragment(this, position, days[0], scheduleGroupModel.mSchedule)
+
+        val newFragment = ZoneScheduleDialogFragment(this, position, days, scheduleGroupModel.mSchedule)
         newFragment.show(ft, "popup")
+
     }
 
     override fun onClickSaveSchedule(unOccupiedZoneSetback: Double, schedule: Schedule) {
@@ -1408,21 +1418,5 @@ class ScheduleGroupFragment(schedule: Schedule?, scheduleGroup: Int?) : DialogFr
 
     override fun onClickCancelSaveSchedule(scheduleId: String?) {
         RangeBar.setUnOccupiedFragment(true)
-    }
-
-    override fun onResume() {
-        super.onResume()
-        UpdateScheduleHandler.setBuildingScheduleListener(this)
-    }
-
-    override fun refreshScreen() {
-        val schedule = scheduleGroupModel.getScheduleById(mSchedule!!.id)
-        scheduleGroupModel.saveScheduleInModel(schedule!!, schedule!!.scheduleGroup)
-        updateUI()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        UpdateScheduleHandler.setBuildingScheduleListener(null)
     }
 }

@@ -3,7 +3,6 @@ package a75f.io.messaging.handler;
 import static a75f.io.logic.util.PreferenceUtil.setDataSyncStopped;
 import static a75f.io.messaging.handler.UpdateScheduleHandler.refreshIntrinsicSchedulesScreen;
 import static a75f.io.messaging.handler.UpdateScheduleHandler.refreshSchedulesScreen;
-import static a75f.io.messaging.handler.UpdateScheduleHandler.trimZoneSchedules;
 
 import com.google.gson.JsonObject;
 import org.projecthaystack.HDateTime;
@@ -42,6 +41,7 @@ import a75f.io.logic.BuildConfig;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.jobs.SystemScheduleUtil;
+import a75f.io.logic.util.CommonTimeSlotFinder;
 import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.messaging.exceptions.MessageHandlingFailed;
 
@@ -392,7 +392,8 @@ public class DataSyncHandler {
         Schedule systemSchedule = ccuHsApi.getSystemSchedule(false).get(0); // check it
         if (!systemSchedule.equals(schedule)) {
             ccuHsApi.updateScheduleNoSync(schedule, null);
-            trimZoneSchedules(schedule);
+            CommonTimeSlotFinder commonTimeSlotFinder = new CommonTimeSlotFinder();
+            commonTimeSlotFinder.forceTrimScheduleTowardsCommonTimeslot(ccuHsApi);
             ccuHsApi.scheduleSync();
         }
     }

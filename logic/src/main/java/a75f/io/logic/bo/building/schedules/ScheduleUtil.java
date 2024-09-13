@@ -13,19 +13,23 @@ import static a75f.io.logic.bo.building.schedules.Occupancy.KEYCARD_AUTOAWAY;
 import static a75f.io.logic.bo.building.schedules.Occupancy.NO_CONDITIONING;
 import static a75f.io.logic.bo.building.schedules.Occupancy.OCCUPIED;
 import static a75f.io.logic.bo.building.schedules.Occupancy.VACATION;
+import a75f.io.logic.schedule.Marker;
 
 import android.os.StrictMode;
 
 import org.joda.time.DateTime;
+import org.joda.time.Interval;
 import org.projecthaystack.HDict;
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
@@ -500,5 +504,184 @@ public class ScheduleUtil {
             }
         }
         return true;
+    }
+
+    public static Schedule trimZoneSchedule(Schedule schedule, HashMap<String, ArrayList<Interval>> spillsMap) {
+
+        ArrayList<Interval> spills = spillsMap.get(schedule.getRoomRef());
+        if (spills == null) {
+            CcuLog.d(L.TAG_CCU_UI, "Schedule spills invalid for " + schedule + " in " + spillsMap);
+            return schedule;
+        }
+        CcuLog.d(L.TAG_CCU_UI, "Trim spills for " + schedule + " in " + spillsMap);
+        HashMap<Schedule.Days, ArrayList<Interval>> validSpills = new HashMap<>();
+        CopyOnWriteArrayList<Schedule.Days> days = new CopyOnWriteArrayList<>(schedule.getDays());
+        CopyOnWriteArrayList<Schedule.Days> conflictDays = new CopyOnWriteArrayList<>();
+        for (Schedule.Days d : days) {
+            Interval i = schedule.getScheduledInterval(d);
+
+            for (Interval spill : spills) {
+                if (!i.contains(spill)) {
+                    continue;
+                }
+                if (spill.getStartMillis() <= i.getStartMillis() &&
+                        spill.getEndMillis() >= i.getEndMillis()) {
+                    conflictDays.add(d);
+                    continue;
+                }
+                validSpills.put(d, disconnectedIntervals(spills, i));
+                conflictDays.add(d);
+            }
+        }
+        for (Map.Entry<Schedule.Days, ArrayList<Interval>> entry : validSpills.entrySet()) {
+            for (Interval in : entry.getValue()) {
+                Schedule.Days d = entry.getKey();
+                Schedule.Days dayBO = new Schedule.Days();
+                if(in.getStart().getHourOfDay() == 23 && in.getStart().getMinuteOfHour() == 59 &&
+                        in.getEnd().getHourOfDay() == 0 && in.getEnd().getMinuteOfHour() == 0){
+                    continue;
+                }
+                dayBO.setSthh(in.getStart().getHourOfDay());
+                dayBO.setStmm(in.getStart().getMinuteOfHour());
+
+                if(in.getEnd().getHourOfDay() == 0){
+                    dayBO.setEthh(24);
+                    dayBO.setEtmm(0);
+                }else {
+                    dayBO.setEthh(in.getEnd().getHourOfDay());
+                    dayBO.setEtmm(in.getEnd().getMinuteOfHour());
+                }
+                dayBO.setHeatingVal(d.getHeatingVal());
+                dayBO.setCoolingVal(d.getCoolingVal());
+                dayBO.setSunset(false);
+                dayBO.setSunrise(false);
+                dayBO.setDay(in.getStart().getDayOfWeek() - 1);
+                dayBO.setHeatingUserLimitMin(d.getHeatingUserLimitMin());
+                dayBO.setHeatingUserLimitMax(d.getHeatingUserLimitMax());
+                dayBO.setCoolingUserLimitMin(d.getCoolingUserLimitMin());
+                dayBO.setCoolingUserLimitMax(d.getCoolingUserLimitMax());
+                dayBO.setHeatingDeadBand(d.getHeatingDeadBand());
+                dayBO.setCoolingDeadBand(d.getCoolingDeadBand());
+                schedule.getDays().remove(d);
+                schedule.getDays().add(dayBO);
+            }
+        }
+
+        for (Schedule.Days d : conflictDays) {
+            schedule.getDays().remove(d);
+        }
+        return schedule;
+    }
+
+    public static ArrayList<Interval> disconnectedIntervals(List<Interval> intervals, Interval r) {
+        ArrayList<Interval> result = new ArrayList<>();
+
+        ArrayList<Marker> markers = new ArrayList<>();
+
+        for (Interval i : intervals) {
+            markers.add(new Marker(i.getStartMillis(), true));
+            markers.add(new Marker(i.getEndMillis(), false));
+        }
+
+        markers.sort((a, b) -> Long.compare(a.val, b.val));
+
+
+        int overlap = 0;
+        boolean endReached = false;
+
+        if (markers.get(0).val > r.getStartMillis()) {
+            result.add(new Interval(r.getStartMillis(), markers.get(0).val));
+        }
+
+        for (int i = 0; i < markers.size() - 1; i++) {
+            Marker m = markers.get(i);
+
+            overlap += m.start ? 1 : -1;
+            Marker next = markers.get(i + 1);
+
+            if (m.val != next.val && overlap == 0 && next.val > r.getStartMillis()) {
+                long start = Math.max(m.val, r.getStartMillis());
+                long end = next.val;
+                if (next.val > r.getEndMillis()) {
+                    end = r.getEndMillis();
+                    endReached = true;
+                }
+                // End instance must be greater than start instance
+                if (start != end && end > start) {
+                    result.add(new Interval(start, end));
+                }
+                if (endReached)
+                    break;
+            }
+        }
+
+        if (!endReached) {
+            Marker m = markers.get(markers.size() - 1);
+            if (m.val != r.getEndMillis() && m.val < r.getEndMillis()) {
+                result.add(new Interval(m.val, r.getEndMillis()));
+            }
+        }
+
+        return result;
+    }
+    public static HashMap<String, ArrayList<Interval>> getScheduleSpills(ArrayList<Schedule.Days> daysArrayList, Schedule schedule) {
+
+        LinkedHashMap<String, ArrayList<Interval>> spillsMap = new LinkedHashMap<>();
+        if (schedule.isZoneSchedule() || schedule.isNamedSchedule()) {
+            Schedule systemSchedule = CCUHsApi.getInstance().getSystemSchedule(false).get(0);
+            ArrayList<Interval> intervalSpills = new ArrayList<>();
+            ArrayList<Interval> systemIntervals = systemSchedule.getMergedIntervals(daysArrayList);
+
+            for (Interval v : systemIntervals) {
+                CcuLog.d(L.TAG_CCU_UI, "Merged System interval " + v);
+            }
+
+            ArrayList<Interval> zoneIntervals = schedule.getScheduledIntervals(daysArrayList);
+
+            int size = zoneIntervals.size();
+            if(!daysArrayList.isEmpty() && daysArrayList.get(0).getSthh() > daysArrayList.get(0).getEthh()) {
+                for(int i =0; i<size; i++){
+                    Interval it = zoneIntervals.get(i);
+                    DateTime initialEnding = it.getStart().withTime(23,59,59, 0);
+                    DateTime subsequentStart = it.getEnd().withTime(0,0,0,0);
+                    Interval iStart = new Interval(it.getStart(),initialEnding);
+                    Interval iEnd = new Interval(subsequentStart,it.getEnd());
+                    zoneIntervals.set(i, iStart);
+                    zoneIntervals.add(iEnd);
+                }
+
+                zoneIntervals.sort((p1, p2) -> Long.compare(p1.getStartMillis(), p2.getStartMillis()));
+            }
+
+            for (Interval v : zoneIntervals) {
+                CcuLog.d(L.TAG_CCU_UI, "Zone interval " + v);
+            }
+
+            for (Interval z : zoneIntervals) {
+                boolean add = true;
+                for (Interval s : systemIntervals) {
+                    if (s.contains(z)) {
+                        add = false;
+                        break;
+                    } else if (s.overlaps(z)) {
+                        add = false;
+                        for (Interval i : disconnectedIntervals(systemIntervals, z)) {
+                            if (!intervalSpills.contains(i)) {
+                                intervalSpills.add(i);
+                            }
+                        }
+                    }
+                }
+                if (add) {
+                    intervalSpills.add(z);
+                    CcuLog.d(L.TAG_CCU_UI, " Zone Interval not contained " + z);
+                }
+            }
+            if (!intervalSpills.isEmpty()) {
+                spillsMap.put(schedule.getRoomRef(), intervalSpills);
+            }
+
+        }
+        return spillsMap;
     }
 }

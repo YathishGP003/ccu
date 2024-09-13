@@ -43,6 +43,7 @@ public class VavStagedRtuWithVfd extends VavStagedRtu
     public void addSystemEquip() {
         systemEquip = (VavStagedVfdSystemEquip) Domain.systemEquip;
         initTRSystem();
+        updateStagesSelected();
     }
     
     @Override

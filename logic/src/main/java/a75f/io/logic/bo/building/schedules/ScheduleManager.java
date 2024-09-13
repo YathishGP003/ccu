@@ -71,6 +71,7 @@ import a75f.io.logic.bo.util.DesiredTempDisplayMode;
 import a75f.io.logic.bo.util.TemperatureMode;
 import a75f.io.logic.interfaces.BuildingScheduleListener;
 import a75f.io.logic.interfaces.ZoneDataInterface;
+import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.logic.util.RxjavaUtil;
 
@@ -453,10 +454,11 @@ public class ScheduleManager {
                             int min = calender.get(Calendar.MINUTE);
                             int curTime = hrs + min;
                             for (Schedule.Days d : mDays) {
-                                if (d.getDay() == day) {
-                                    int startSchTime = (d.getSthh() * 60) + d.getStmm();
-                                    int endSchTime = (d.getEthh() * 60) + d.getEtmm();
-                                    if (curTime > startSchTime && curTime < endSchTime) {
+                                int startSchTime = (d.getSthh() * 60) + d.getStmm();
+                                int endSchTime = (d.getEthh() * 60) + d.getEtmm();
+
+                                if (d.getDay() == day || isOvernightSchedule(startSchTime,endSchTime,day,d.getDay())) {
+                                    if (isScheduleOccupied(curTime, startSchTime, endSchTime,day,d.getDay())) {
                                         if (isHeatingOrCoolingLimitsNull(d)) {
                                             continue;
                                         }
@@ -467,13 +469,25 @@ public class ScheduleManager {
                                         saveDeadBandChange("heating", d.getHeatingDeadBand(), roomRef);
                                         saveDeadBandChange("cooling", d.getCoolingDeadBand(), roomRef);
                                     } else {
-                                        clearLevel10(roomRef);
+                                        //For multiple schedules in a day we need to check if the day is occupied or not
+                                        if (!occ.isOccupied()) {
+                                            clearLevel10(roomRef);
+                                        }
                                     }
                                 }
                             }
                         } else {
                             clearLevel10(roomRef);
                             clearUnoccupiedSetbackChange(roomRef);
+                            // while changing from name schedule to zone schedule we need to update his data
+                            BuildingTunerCache buildingTunerCache = BuildingTunerCache.getInstance();
+                            updateHisUserLimitChange("max and heating ", buildingTunerCache.getMaxHeatingUserLimit() ,roomRef);
+                            updateHisUserLimitChange("min and heating ", buildingTunerCache.getMinHeatingUserLimit() ,roomRef);
+                            updateHisUserLimitChange("max and cooling ", buildingTunerCache.getMaxCoolingUserLimit() ,roomRef);
+                            updateHisUserLimitChange("min and cooling ", buildingTunerCache.getMinCoolingUserLimit() ,roomRef);
+                            updateHisDeadBandChange("heating",roomRef);
+                            updateHisDeadBandChange("cooling",roomRef);
+                            updateHisUnOccupiedSetBackPoint(buildingTunerCache.getUnoccupiedZoneSetback(), roomRef);
                         }
                     } else if (equipSchedule.getMarkers().contains("specialschedule")) {
                         Set<Schedule.Days> combinedSpecialSchedules = Schedule.combineSpecialSchedules(equip.getRoomRef().
@@ -508,6 +522,35 @@ public class ScheduleManager {
                 e.printStackTrace();
             }
         });
+    }
+    /*
+        * This method will return that overnight schedule or not
+        * If it is overnight schedule then it will check the schedule is overnight on previous day or not
+        * If my current day is monday and schedule is overnight then it will check the schedule is overnight on sunday or not
+     */
+    private boolean isOvernightSchedule(int startSchTime, int endSchTime, int day, int dDay) {
+        boolean isOvernight = false;
+        if (startSchTime > endSchTime) {
+            if (day == 0) {
+                isOvernight = dDay == 6; // this is to check the schedule is overnight or not on sunday
+            }
+            else {
+                isOvernight = dDay == day - 1;
+            }
+        }
+        return isOvernight;
+    }
+
+    // This method will return that current schedule is occupied or not
+    private boolean isScheduleOccupied(int curTime, int startSchTime, int endSchTime, int day, int dDay) {
+        if (startSchTime > endSchTime) { //To check the schedule is overnight or not
+            if(curTime < startSchTime && day != dDay) {
+                startSchTime = 0;
+            } else {
+                endSchTime = 24 * 60 ;
+            }
+        }
+        return (curTime > startSchTime && curTime < endSchTime);
     }
 
     private void clearLevel10(String roomRef) {
@@ -1404,5 +1447,24 @@ public class ScheduleManager {
                 || (L.ccu().systemProfile instanceof VavStagedRtu && !(L.ccu().systemProfile instanceof VavAdvancedHybridRtu))
                 || L.ccu().systemProfile instanceof VavStagedRtuWithVfd
                 || L.ccu().systemProfile instanceof VavFullyModulatingRtu;
+    }
+
+    private void updateHisUserLimitChange(String tag, double value, String roomRef) {
+        HashMap<Object, Object> userLimit =
+                CCUHsApi.getInstance().readEntity("schedulable and point and limit and user and " + tag + "and roomRef == \"" + roomRef + "\"" );
+        CCUHsApi.getInstance().writeHisValById(userLimit.get("id").toString(), value);
+    }
+
+    private void updateHisDeadBandChange(String tag, String roomRef) {
+        HashMap<Object, Object> deadBand =
+                CCUHsApi.getInstance().readEntity("schedulable and point and " +tag+ " and deadband and roomRef == \"" + roomRef + "\"" );
+        double value = CCUHsApi.getInstance().readPointPriorityValByQuery("deadband and "+tag+" and base and default");
+        CCUHsApi.getInstance().writeHisValById(deadBand.get("id").toString(), value);
+    }
+
+    private void updateHisUnOccupiedSetBackPoint(double value, String roomRef) {
+        HashMap<Object, Object> unOccupiedZoneSetBack =
+                CCUHsApi.getInstance().readEntity("schedulable and unoccupied and zone and roomRef == \"" + roomRef + "\"" );
+        CCUHsApi.getInstance().writeHisValById(unOccupiedZoneSetBack.get("id").toString(), value);
     }
 }

@@ -3,7 +3,6 @@ package a75f.io.renatus.schedules;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusRelative;
 import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
-import static a75f.io.renatus.schedules.ScheduleUtil.disconnectedIntervals;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -42,6 +41,7 @@ import a75f.io.logic.L;
 import a75f.io.logic.schedule.ScheduleGroup;
 import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.TunerUtil;
+import a75f.io.logic.util.CommonTimeSlotFinder;
 import a75f.io.renatus.R;
 import a75f.io.renatus.views.MasterControl.MasterControlUtil;
 

@@ -293,7 +293,7 @@ public class VavSystemController extends SystemController
             Equip equip = new Equip.Builder().setHashMap(equipMap).build();
             hasTi = hasTi || equip.getMarkers().contains("ti") || equip.getMarkers().contains("otn");
 
-            if (isZoneDead(equip.getId())) {
+            if (isZoneDead(equip.getId()) || isRFDead(equip.getId())) {
                 zoneDeadCount++;
             } else if (hasTemp(equip)) {
                 double zoneCurTemp = getEquipCurrentTemp(equip.getId());
@@ -722,7 +722,7 @@ public class VavSystemController extends SystemController
                     "temp and sensor and (current or space) and equipRef == \"" + equipMap.get("id") + "\""
                 );
                 hasTi = hasTi || equip.getMarkers().contains("ti") || equip.getMarkers().contains("otn");
-                if (!isZoneDead(equip.getId()) && (tempVal > 0)) {
+                if (!isZoneDead(equip.getId()) && (tempVal > 0) && !isRFDead(equip.getId())) {
                     tempSum += tempVal;
                     tempZones++;
                 }
@@ -786,7 +786,7 @@ public class VavSystemController extends SystemController
     
             double damperPos = damperPosMap.get(normalizedDamper.get("id").toString());
             double normalizedDamperPos;
-            if (isZoneDead(equip.get("id").toString())) {
+            if (isZoneDead(equip.get("id").toString()) || isRFDead(equip.get("id").toString())) {
                 normalizedDamperPos = damperPos;
             } else {
                 normalizedDamperPos = (damperPos + damperPos * targetPercent / 100);
@@ -804,7 +804,7 @@ public class VavSystemController extends SystemController
     public double getMaxDamperPos(ArrayList<HashMap<Object, Object>> vavEquips) {
         double maxDamperPos = 0;
         for (HashMap<Object, Object> equip : vavEquips) {
-            if (isZoneDead(equip.get("id").toString())) {
+            if (isZoneDead(equip.get("id").toString()) || isRFDead(equip.get("id").toString())) {
                 continue;
             }
             HashMap<Object, Object> damper = CCUHsApi.getInstance().readEntity("point and damper and base and cmd and " +
@@ -910,7 +910,7 @@ public class VavSystemController extends SystemController
             );
             double damperPosVal = normalizedDamperPosMap.get(damperPos.get("id").toString());
             
-            if (isZoneDead(equip.get("id").toString())) {
+            if (isZoneDead(equip.get("id").toString()) || isRFDead(equip.get("id").toString())) {
                 adjustedDamperOpeningMap.put(damperPos.get("id").toString() , damperPosVal);
             } else {
                 damperPosVal = Math.max(damperPosVal, MIN_DAMPER_FOR_CUMULATIVE_CALCULATION);

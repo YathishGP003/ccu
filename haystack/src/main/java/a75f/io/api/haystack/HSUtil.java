@@ -622,8 +622,8 @@ public class HSUtil {
         double existingVal = HSUtil.getPriorityLevelVal(pointId, HayStackConstants.USER_APP_WRITE_LEVEL);
         if (existingVal != val) {
             hsApi.writePointForCcuUser(pointId, 10, val, 0);
-            hsApi.writeHisValById(pointId, val);
         }
+        hsApi.writeHisValById(pointId, val);
 
     }
 

@@ -83,6 +83,7 @@ class AlertDialogAdapter(private val context: Context, private val alertDialogDa
             740,
             ViewGroup.LayoutParams.WRAP_CONTENT
         )
+        dialogView.setCancelable(alertDialogData.isCancelable)
         dialogView.show()
     }
 }

@@ -917,7 +917,7 @@ public class HClient extends HProj
   private AuthClientContext auth;
 
   private String getUri(String uri, String op) {
-    if (op.equalsIgnoreCase("readChanges")) {
+    if (op.equalsIgnoreCase("readChanges") || op.equalsIgnoreCase("read")) {
       return uri.replace("v1", "v2");
     }
     return uri;

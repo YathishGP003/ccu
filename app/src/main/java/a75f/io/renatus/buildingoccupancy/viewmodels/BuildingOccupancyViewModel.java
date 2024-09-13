@@ -31,11 +31,10 @@ import a75f.io.logic.L;
 import a75f.io.logic.schedule.PossibleScheduleImpactTable;
 import a75f.io.logic.schedule.ScheduleGroup;
 import a75f.io.logic.util.OfflineModeUtilKt;
-import a75f.io.renatus.schedules.CommonTimeSlotFinder;
 import a75f.io.renatus.schedules.ScheduleImpactDialogFragment.ScheduleImpact;
 import a75f.io.renatus.schedules.ScheduleUtil;
 import a75f.io.renatus.schedules.ZoneScheduleSpillGenerator;
-import a75f.io.renatus.util.Marker;
+import a75f.io.logic.schedule.Marker;
 import a75f.io.renatus.views.MasterControl.MasterControlUtil;
 
 public class BuildingOccupancyViewModel  {
@@ -477,18 +476,6 @@ public class BuildingOccupancyViewModel  {
     }
 
 
-    public void forceTrimScheduleTowardsCommonTimeslot(CCUHsApi ccuHsApi) {
-        Schedule buildingOccupancy = ccuHsApi.getSystemSchedule(false).get(0);
-        CcuLog.d(L.TAG_CCU_SCHEDULE, "Trimming schedule for building occupancy "+buildingOccupancy.getDays());
-        CommonTimeSlotFinder commonTimeSlotFinder = new CommonTimeSlotFinder();
-        for(Schedule zoneSchedule : activeZoneScheduleList.values()) {
-            CcuLog.d(L.TAG_CCU_SCHEDULE, "Trimming schedule for zone : " + zoneSchedule.getDis() + "Schedule Days :" + zoneSchedule.getDays());
-            List<List<CommonTimeSlotFinder.TimeSlot>> commonTimeslot = commonTimeSlotFinder.
-                    getCommonTimeSlot(zoneSchedule.getScheduleGroup(), buildingOccupancy.getDays(),
-                            zoneSchedule.getDays(), true);
-            commonTimeSlotFinder.trimScheduleTowardCommonTimeSlotAndSync(zoneSchedule, commonTimeslot, ccuHsApi);
-        }
-    }
 
     public boolean isTimeSlotExpanded(BuildingOccupancy.Days removeEntry, int startTimeHour, int endTimeHour, int startTimeMinute, int endTimeMinute) {
         return (removeEntry.getSthh() > startTimeHour) || (removeEntry.getSthh() >= startTimeHour && removeEntry.getStmm() > startTimeMinute)

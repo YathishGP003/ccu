@@ -47,6 +47,7 @@ import a75f.io.api.haystack.schedule.BuildingOccupancy;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.interfaces.BuildingOccupancyListener;
+import a75f.io.logic.util.CommonTimeSlotFinder;
 import a75f.io.logic.util.OfflineModeUtilKt;
 import a75f.io.messaging.handler.UpdateEntityHandler;
 import a75f.io.renatus.R;
@@ -606,7 +607,8 @@ public class BuildingOccupancyFragment extends DialogFragment implements Buildin
         buildingOccupancy.getDays().remove(removeEntry);
         RxjavaUtil.executeBackground(()->{
             doScheduleUpdate(false);
-            buildingOccupancyViewModel.forceTrimScheduleTowardsCommonTimeslot(CCUHsApi.getInstance());
+            CommonTimeSlotFinder commonTimeSlotFinder = new CommonTimeSlotFinder();
+            commonTimeSlotFinder.forceTrimScheduleTowardsCommonTimeslot(CCUHsApi.getInstance());
         });
 
     }

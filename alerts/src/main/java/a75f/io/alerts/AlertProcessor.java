@@ -95,7 +95,9 @@ public class AlertProcessor
                     String jsForTesting = def.alertBuilder.getSnippet();
                     //evaluateJs(def.alertBuilder);
                     alertJsUtil.def = def;
+                    CcuLog.d(TAG_CCU_ALERTS, "---------starting evaluation------"+def.alert.mTitle);
                     def.evaluateJs(def, jsForTesting, mContext, alertJsUtil);
+                    CcuLog.d(TAG_CCU_ALERTS, "---------ending evaluation------"+def.alert.mTitle);
                 }else {
                     def.evaluate(defaultSharedPrefs);
 

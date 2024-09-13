@@ -1,17 +1,20 @@
 package a75f.io.logic.migration
 
-import a75f.io.api.haystack.*
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.CCUTagsDb.TAG_CCU_DOMAIN
+import a75f.io.api.haystack.Device
+import a75f.io.api.haystack.Equip
 import a75f.io.api.haystack.HayStackConstants
 import a75f.io.api.haystack.Point
 import a75f.io.api.haystack.Site
 import a75f.io.api.haystack.Tags
+import a75f.io.api.haystack.Zone
 import a75f.io.api.haystack.sync.HttpUtil
 import a75f.io.domain.HyperStatSplitEquip
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.Domain.writeValAtLevelByDomain
 import a75f.io.domain.api.DomainName
+import a75f.io.domain.cutover.DabZoneProfileCutOverMapping
 import a75f.io.domain.cutover.HyperStatSplitCpuCutOverMapping
 import a75f.io.domain.cutover.HyperStatSplitDeviceCutoverMapping
 import a75f.io.domain.cutover.NodeDeviceCutOverMapping
@@ -19,7 +22,6 @@ import a75f.io.domain.cutover.VavFullyModulatingRtuCutOverMapping
 import a75f.io.domain.cutover.VavStagedRtuCutOverMapping
 import a75f.io.domain.cutover.VavStagedVfdRtuCutOverMapping
 import a75f.io.domain.cutover.VavZoneProfileCutOverMapping
-import a75f.io.domain.cutover.*
 import a75f.io.domain.equips.DabEquip
 import a75f.io.domain.equips.VavEquip
 import a75f.io.domain.logic.DeviceBuilder
@@ -28,7 +30,7 @@ import a75f.io.domain.logic.DomainManager.addSystemDomainEquip
 import a75f.io.domain.logic.EntityMapper
 import a75f.io.domain.logic.PointBuilderConfig
 import a75f.io.domain.logic.ProfileEquipBuilder
-import a75f.io.domain.util.*
+import a75f.io.domain.util.ModelLoader
 import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.logic.L
@@ -66,7 +68,6 @@ import org.projecthaystack.HGridBuilder
 import org.projecthaystack.HRow
 import org.projecthaystack.io.HZincReader
 import org.projecthaystack.io.HZincWriter
-import java.util.*
 
 
 class MigrationHandler (hsApi : CCUHsApi) : Migration {
@@ -140,7 +141,14 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             removeHisTagsFromNonDMDevices()
             PreferenceUtil.setHisTagRemovalFromNonDmDevicesDone()
         }
-
+        if (!PreferenceUtil.getAppVersionPointsMigration()) {
+            val diagEquipMap = hayStack.readEntity("equip and diag")
+            if (diagEquipMap.isNotEmpty()) {
+                val diagEquip = Equip.Builder().setHashMap(diagEquipMap).build()
+                DiagEquip.createAppVersionPoints(hayStack, diagEquip)
+            }
+            PreferenceUtil.setAppVersionPointsMigration()
+        }
         if(!PreferenceUtil.isDeadBandMigrationRequired()){
             migrateDeadBandPoints(hayStack)
             PreferenceUtil.setDeadBandMigrationNotRequired()

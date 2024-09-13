@@ -62,6 +62,8 @@ public class PreferenceUtil {
     public static final String HIS_TAG_REMOVAL_FROM_NON_DM_DEVICES = "hisTagRemovalFromNonDmDevices";
     public static final String DEAD_BAND_MIGRATION = "deadBandMigration";
     public static final String ZONE_CO2_MIGRATION = "ZONE_CO2_MIGRATION";
+    public static final String APP_VERSION_POINTS_MIGRATION = "appVersionPointsMigration";
+
 
     public static void setContext(Context c) {
         context= c;
@@ -542,5 +544,13 @@ public class PreferenceUtil {
     }
     public static void setZoneCo2Migration() {
         setBooleanPreference(ZONE_CO2_MIGRATION, true);
+    }
+
+    public static boolean getAppVersionPointsMigration() {
+        return getBooleanPreference(APP_VERSION_POINTS_MIGRATION);
+    }
+
+    public static void setAppVersionPointsMigration() {
+        setBooleanPreference(APP_VERSION_POINTS_MIGRATION, true);
     }
 }

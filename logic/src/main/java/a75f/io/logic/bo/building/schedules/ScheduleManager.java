@@ -71,6 +71,7 @@ import a75f.io.logic.bo.util.DesiredTempDisplayMode;
 import a75f.io.logic.bo.util.TemperatureMode;
 import a75f.io.logic.interfaces.BuildingScheduleListener;
 import a75f.io.logic.interfaces.ZoneDataInterface;
+import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.logic.util.RxjavaUtil;
 
@@ -478,6 +479,15 @@ public class ScheduleManager {
                         } else {
                             clearLevel10(roomRef);
                             clearUnoccupiedSetbackChange(roomRef);
+                            // while changing from name schedule to zone schedule we need to update his data
+                            BuildingTunerCache buildingTunerCache = BuildingTunerCache.getInstance();
+                            updateHisUserLimitChange("max and heating ", buildingTunerCache.getMaxHeatingUserLimit() ,roomRef);
+                            updateHisUserLimitChange("min and heating ", buildingTunerCache.getMinHeatingUserLimit() ,roomRef);
+                            updateHisUserLimitChange("max and cooling ", buildingTunerCache.getMaxCoolingUserLimit() ,roomRef);
+                            updateHisUserLimitChange("min and cooling ", buildingTunerCache.getMinCoolingUserLimit() ,roomRef);
+                            updateHisDeadBandChange("heating",roomRef);
+                            updateHisDeadBandChange("cooling",roomRef);
+                            updateHisUnOccupiedSetBackPoint(buildingTunerCache.getUnoccupiedZoneSetback(), roomRef);
                         }
                     } else if (equipSchedule.getMarkers().contains("specialschedule")) {
                         Set<Schedule.Days> combinedSpecialSchedules = Schedule.combineSpecialSchedules(equip.getRoomRef().
@@ -1437,5 +1447,24 @@ public class ScheduleManager {
                 || (L.ccu().systemProfile instanceof VavStagedRtu && !(L.ccu().systemProfile instanceof VavAdvancedHybridRtu))
                 || L.ccu().systemProfile instanceof VavStagedRtuWithVfd
                 || L.ccu().systemProfile instanceof VavFullyModulatingRtu;
+    }
+
+    private void updateHisUserLimitChange(String tag, double value, String roomRef) {
+        HashMap<Object, Object> userLimit =
+                CCUHsApi.getInstance().readEntity("schedulable and point and limit and user and " + tag + "and roomRef == \"" + roomRef + "\"" );
+        CCUHsApi.getInstance().writeHisValById(userLimit.get("id").toString(), value);
+    }
+
+    private void updateHisDeadBandChange(String tag, String roomRef) {
+        HashMap<Object, Object> deadBand =
+                CCUHsApi.getInstance().readEntity("schedulable and point and " +tag+ " and deadband and roomRef == \"" + roomRef + "\"" );
+        double value = CCUHsApi.getInstance().readPointPriorityValByQuery("deadband and "+tag+" and base and default");
+        CCUHsApi.getInstance().writeHisValById(deadBand.get("id").toString(), value);
+    }
+
+    private void updateHisUnOccupiedSetBackPoint(double value, String roomRef) {
+        HashMap<Object, Object> unOccupiedZoneSetBack =
+                CCUHsApi.getInstance().readEntity("schedulable and unoccupied and zone and roomRef == \"" + roomRef + "\"" );
+        CCUHsApi.getInstance().writeHisValById(unOccupiedZoneSetBack.get("id").toString(), value);
     }
 }

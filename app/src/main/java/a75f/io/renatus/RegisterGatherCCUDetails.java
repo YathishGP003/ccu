@@ -210,11 +210,10 @@ public class RegisterGatherCCUDetails extends Activity {
                 HGrid schedulePoint = hClient.call("read", HGridBuilder.dictToGrid(tDict));
                 if(schedulePoint == null) {
                     CcuLog.w("RegisterGatherCCUDetails","HGrid(schedulePoint) is null.");
-                    RegisterGatherCCUDetails.this.runOnUiThread( (new Thread(() -> {
-                        // Display the text we just generated within the LogView.
-                        Toast.makeText(RegisterGatherCCUDetails.this,"Couldn't find the node address, Please choose the node address which is not used already.", Toast.LENGTH_LONG).show();
-
-                    })));
+                    RegisterGatherCCUDetails.this.runOnUiThread( () ->
+                            Toast.makeText(RegisterGatherCCUDetails.this,
+                                    "Couldn't find the node address, Please choose the node " +
+                                            "address which is not used already.", Toast.LENGTH_LONG).show());
                     return;
                 }
                 Iterator it = schedulePoint.iterator();

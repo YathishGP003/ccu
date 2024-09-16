@@ -187,8 +187,7 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
                 pauseAlert.setVisibility(View.INVISIBLE);
                 pauseStatus.setText("");
                 pauseSync.setText(" PAUSE SYNCING");
-                new Thread(this::resumeRestoreCCUProcess).start();
-
+                ExecutorTask.executeBackground( () -> resumeRestoreCCUProcess());
             }
         });
 

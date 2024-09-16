@@ -16,6 +16,7 @@ import a75f.io.logic.bo.building.EpidemicState;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.watchdog.WatchdogMonitor;
+import a75f.io.util.ExecutorTask;
 
 /**
  * Created by samjithsadasivan on 9/14/18.
@@ -169,19 +170,15 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
     }
     
     private void doHisSync() {
-    
-        new Thread() {
-            @Override
-            public void run() {
-                try {
-                    CCUHsApi.getInstance().syncHisDataWithPeriodicPurge();
-                } catch (Exception e) {
-                    //This is bad. But the system could still continue to work in standalone mode controlling
-                    //the hvac system even if there are failures in data synchronization with backend.
-                    CcuLog.e(L.TAG_CCU_JOB, "His Sync Failed !", e);
-                }
+        ExecutorTask.executeBackground( () -> {
+            try {
+                CCUHsApi.getInstance().syncHisDataWithPeriodicPurge();
+            } catch (Exception e) {
+                //This is bad. But the system could still continue to work in standalone mode controlling
+                //the hvac system even if there are failures in data synchronization with backend.
+                CcuLog.e(L.TAG_CCU_JOB, "His Sync Failed !", e);
             }
-        }.start();
+        });
     }
     private void syncCachedPointWrites() {
         PointWriteHandler.Companion.getInstance().processPointWrites(

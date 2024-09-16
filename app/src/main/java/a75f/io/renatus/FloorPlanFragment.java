@@ -139,7 +139,7 @@ public class FloorPlanFragment extends Fragment {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (ACTION_BLE_PAIRING_COMPLETED.equals(intent.getAction())) {
-                new Thread(() -> {
+                ExecutorTask.executeBackground(() -> {
                     try {
                         if (mFloorListAdapter.getSelectedPostion() == -1) {
 
@@ -154,7 +154,7 @@ public class FloorPlanFragment extends Fragment {
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-                }).start();
+                });
             }
         }
     };
@@ -671,8 +671,10 @@ public class FloorPlanFragment extends Fragment {
             HashMap<Object, Object> defaultNamedSchedule =  CCUHsApi.getInstance().readEntity
                     ("named and schedule and default and siteRef == "+CCUHsApi.getInstance().getSiteIdRef().toString());
             if(defaultNamedSchedule.isEmpty()) {
-                new Thread(() -> CCUHsApi.getInstance().importNamedSchedulebySite(new HClient(CCUHsApi.getInstance().getHSUrl(),
-                        HayStackConstants.USER, HayStackConstants.PASS), new Site.Builder().setHashMap(CCUHsApi.getInstance().readEntity("site")).build())).start();
+                ExecutorTask.executeBackground(() -> {
+                    CCUHsApi.getInstance().importNamedSchedulebySite(new HClient(CCUHsApi.getInstance().getHSUrl(),
+                            HayStackConstants.USER, HayStackConstants.PASS), new Site.Builder().setHashMap(CCUHsApi.getInstance().readEntity("site")).build());
+                });
             }
 
 

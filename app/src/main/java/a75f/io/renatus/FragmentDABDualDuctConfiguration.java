@@ -516,7 +516,7 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
     }
     
     private void sendSeedMessage() {
-        new Thread(() -> LSerial.getInstance().sendSeedMessage(false, false, mSmartNodeAddress, zoneRef, floorRef)).start();
+        ExecutorTask.executeBackground(() -> LSerial.getInstance().sendSeedMessage(false, false, mSmartNodeAddress, zoneRef, floorRef));
     }
     
     private DualDuctProfileConfiguration createDualDuctConfig() {

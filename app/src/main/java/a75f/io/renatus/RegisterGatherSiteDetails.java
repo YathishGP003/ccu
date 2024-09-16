@@ -22,6 +22,7 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.logic.tuners.TunerEquip;
 import a75f.io.renatus.util.CCUUiUtil;
+import a75f.io.util.ExecutorTask;
 
 public class RegisterGatherSiteDetails extends Activity {
 
@@ -63,17 +64,10 @@ public class RegisterGatherSiteDetails extends Activity {
                 String siteCity = mSiteCity.getText().toString();
                 String siteZip = mSiteZip.getText().toString();
 
-                new Thread() {
-                    @Override
-                    public void run() {
-                        super.run();
-
-                        saveSite(siteName, siteCity, siteZip);
-
-                        runOnUiThread(RegisterGatherSiteDetails.this::next);
-                    }
-                }.start();
-
+                ExecutorTask.executeBackground( () -> {
+                    saveSite(siteName, siteCity, siteZip);
+                    runOnUiThread(RegisterGatherSiteDetails.this::next);
+                });
             }
         });
     }

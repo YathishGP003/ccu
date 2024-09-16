@@ -88,6 +88,7 @@ import a75f.io.logic.util.CCUProxySettings;
 import a75f.io.logic.util.MigrationUtil;
 import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.logic.watchdog.Watchdog;
+import a75f.io.util.ExecutorTask;
 
 /*
     This is used to keep track of global static associated with application context.
@@ -267,58 +268,54 @@ public class Globals {
 
 
     private void importTunersAndScheduleJobs() {
-
-        new Thread() {
-            @Override
-            public void run() {
-                MigrationHandler migrationHandler = new MigrationHandler(CCUHsApi.getInstance());
-                try {
-                    CcuLog.i(L.TAG_CCU_INIT, "Run Migrations");
-                    ModelCache.INSTANCE.init(mApplicationContext, CCUHsApi.getInstance());
-                    HashMap<Object, Object> site = CCUHsApi.getInstance().readEntity("site");
-                    if (!isSafeMode()) {
-                        migrationHandler.doMigration();
-                        MigrationUtil.doMigrationTasksIfRequired();
-                        CcuLog.i(L.TAG_CCU_INIT, "Load Profiles");
-                        isInitCompleted = true;
-                        Site siteObject = new Site.Builder().setHashMap(site).build();
-                        CCUHsApi.getInstance().importNamedSchedulebySite(new HClient(CCUHsApi.getInstance().getHSUrl(),
-                                HayStackConstants.USER, HayStackConstants.PASS), siteObject);
-                    }
-                    CcuLog.i(L.TAG_CCU_INIT, "Schedule Jobs");
-                    //TunerUpgrades.migrateAutoAwaySetbackTuner(CCUHsApi.getInstance());
-
-                    CcuLog.i(L.TAG_CCU_INIT, "Init Watchdog");
-                    Watchdog.getInstance().addMonitor(mProcessJob);
-                    Watchdog.getInstance().addMonitor(mScheduleProcessJob);
-                    Watchdog.getInstance().start();
-                    modelMigration(migrationHandler);
-                    MigrationHandler.Companion.doPostModelMigrationTasks();
-                    /*temperatureMode migration should be handled after model migration*/
-                    migrationHandler.temperatureModeMigration();
-                } catch (Exception e) {
-                    //Catch ignoring any exception here to avoid app from not loading in case of an init failure.
-                    //Init would retried during next app restart.
-                    CcuLog.i(L.TAG_CCU_INIT, "Init failed");
-                    e.printStackTrace();
-                } finally {
-                    CcuLog.i(L.TAG_CCU_INIT, "Init Completed");
-
-                    try {
-                        loadEquipProfiles();
-                    } catch (Exception e) {
-                        CcuLog.i(L.TAG_CCU_INIT, "Failed to load profiles", e);
-                    }
+        ExecutorTask.executeBackground(() -> {
+            MigrationHandler migrationHandler = new MigrationHandler(CCUHsApi.getInstance());
+            try {
+                CcuLog.i(L.TAG_CCU_INIT, "Run Migrations");
+                ModelCache.INSTANCE.init(mApplicationContext, CCUHsApi.getInstance());
+                HashMap<Object, Object> site = CCUHsApi.getInstance().readEntity("site");
+                if (!isSafeMode()) {
+                    migrationHandler.doMigration();
+                    MigrationUtil.doMigrationTasksIfRequired();
+                    CcuLog.i(L.TAG_CCU_INIT, "Load Profiles");
                     isInitCompleted = true;
-                    DEFAULT_HEARTBEAT_INTERVAL = Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
-                            .getInt("control_loop_frequency", 60);
-                    initCompletedListeners.forEach(OnCcuInitCompletedListener::onInitCompleted);
-                    mProcessJob.scheduleJob("BuildingProcessJob", DEFAULT_HEARTBEAT_INTERVAL, TASK_SEPARATION, TASK_SEPARATION_TIMEUNIT);
-                    mScheduleProcessJob.scheduleJob("Schedule Process Job", DEFAULT_HEARTBEAT_INTERVAL, TASK_SEPARATION + 15, TASK_SEPARATION_TIMEUNIT);
-                    BearerTokenManager.getInstance().scheduleJob();
+                    Site siteObject = new Site.Builder().setHashMap(site).build();
+                    CCUHsApi.getInstance().importNamedSchedulebySite(new HClient(CCUHsApi.getInstance().getHSUrl(),
+                            HayStackConstants.USER, HayStackConstants.PASS), siteObject);
                 }
+                CcuLog.i(L.TAG_CCU_INIT, "Schedule Jobs");
+                //TunerUpgrades.migrateAutoAwaySetbackTuner(CCUHsApi.getInstance());
+
+                CcuLog.i(L.TAG_CCU_INIT, "Init Watchdog");
+                Watchdog.getInstance().addMonitor(mProcessJob);
+                Watchdog.getInstance().addMonitor(mScheduleProcessJob);
+                Watchdog.getInstance().start();
+                modelMigration(migrationHandler);
+                MigrationHandler.Companion.doPostModelMigrationTasks();
+                /*temperatureMode migration should be handled after model migration*/
+                migrationHandler.temperatureModeMigration();
+            } catch (Exception e) {
+                //Catch ignoring any exception here to avoid app from not loading in case of an init failure.
+                //Init would retried during next app restart.
+                CcuLog.i(L.TAG_CCU_INIT, "Init failed");
+                e.printStackTrace();
+            } finally {
+                CcuLog.i(L.TAG_CCU_INIT, "Init Completed");
+
+                try {
+                    loadEquipProfiles();
+                } catch (Exception e) {
+                    CcuLog.i(L.TAG_CCU_INIT, "Failed to load profiles", e);
+                }
+                isInitCompleted = true;
+                DEFAULT_HEARTBEAT_INTERVAL = Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
+                        .getInt("control_loop_frequency", 60);
+                initCompletedListeners.forEach(OnCcuInitCompletedListener::onInitCompleted);
+                mProcessJob.scheduleJob("BuildingProcessJob", DEFAULT_HEARTBEAT_INTERVAL, TASK_SEPARATION, TASK_SEPARATION_TIMEUNIT);
+                mScheduleProcessJob.scheduleJob("Schedule Process Job", DEFAULT_HEARTBEAT_INTERVAL, TASK_SEPARATION + 15, TASK_SEPARATION_TIMEUNIT);
+                BearerTokenManager.getInstance().scheduleJob();
             }
-        }.start();
+        });
 
         if (isTestMode()) {
             setTestMode(false);

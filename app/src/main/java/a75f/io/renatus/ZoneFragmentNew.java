@@ -3869,37 +3869,32 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
     public void setPointVal(String coolid, double coolval, String heatid, double heatval, String avgid, double avgval) {
 
-        Thread thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
+        ExecutorTask.executeBackground( () -> {
+            CCUHsApi hayStack = CCUHsApi.getInstance();
+            Point coolpoint = new Point.Builder().setHashMap(hayStack.readMapById(coolid)).build();
+            Point heatpoint = new Point.Builder().setHashMap(hayStack.readMapById(heatid)).build();
+            Point avgpoint = new Point.Builder().setHashMap(hayStack.readMapById(avgid)).build();
 
-                CCUHsApi hayStack = CCUHsApi.getInstance();
-                Point coolpoint = new Point.Builder().setHashMap(hayStack.readMapById(coolid)).build();
-                Point heatpoint = new Point.Builder().setHashMap(hayStack.readMapById(heatid)).build();
-                Point avgpoint = new Point.Builder().setHashMap(hayStack.readMapById(avgid)).build();
+            if (coolpoint.getMarkers().contains("writable")) {
+                CcuLog.d(L.TAG_CCU_UI, "Set Writbale Val " + coolpoint.getDisplayName() + ": " + coolid + "," + heatpoint.getDisplayName() + "," + heatval + "," + avgpoint.getDisplayName());
+                SystemScheduleUtil.handleManualDesiredTempUpdate(coolpoint, heatpoint, avgpoint, coolval, heatval
+                        , avgval, "CCU");
 
-                if (coolpoint.getMarkers().contains("writable")) {
-                    CcuLog.d(L.TAG_CCU_UI, "Set Writbale Val " + coolpoint.getDisplayName() + ": " + coolid + "," + heatpoint.getDisplayName() + "," + heatval + "," + avgpoint.getDisplayName());
-                    SystemScheduleUtil.handleManualDesiredTempUpdate(coolpoint, heatpoint, avgpoint, coolval, heatval
-                            , avgval, "CCU");
+            }
 
-                }
-
-                if (coolpoint.getMarkers().contains("his") && (coolval != 0)) {
-                    CcuLog.d(L.TAG_CCU_UI, "Set His Val " + coolid + ": " + coolval);
-                    hayStack.writeHisValById(coolid, coolval);
-                }
-                if (heatpoint.getMarkers().contains("his") && (heatval != 0)) {
-                    CcuLog.d(L.TAG_CCU_UI, "Set His Val " + heatid + ": " + heatval);
-                    hayStack.writeHisValById(heatid, heatval);
-                }
-                if (avgpoint.getMarkers().contains("his") && (ScheduleManager.getInstance().getSystemOccupancy() == Occupancy.OCCUPIED)) {
-                    CcuLog.d(L.TAG_CCU_UI, "Set His Val " + avgid + ": " + avgval);
-                    hayStack.writeHisValById(avgid, avgval);
-                }
+            if (coolpoint.getMarkers().contains("his") && (coolval != 0)) {
+                CcuLog.d(L.TAG_CCU_UI, "Set His Val " + coolid + ": " + coolval);
+                hayStack.writeHisValById(coolid, coolval);
+            }
+            if (heatpoint.getMarkers().contains("his") && (heatval != 0)) {
+                CcuLog.d(L.TAG_CCU_UI, "Set His Val " + heatid + ": " + heatval);
+                hayStack.writeHisValById(heatid, heatval);
+            }
+            if (avgpoint.getMarkers().contains("his") && (ScheduleManager.getInstance().getSystemOccupancy() == Occupancy.OCCUPIED)) {
+                CcuLog.d(L.TAG_CCU_UI, "Set His Val " + avgid + ": " + avgval);
+                hayStack.writeHisValById(avgid, avgval);
             }
         });
-        thread.start();
     }
 
 

@@ -37,6 +37,7 @@ import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.interfaces.BuildingScheduleListener;
 import a75f.io.logic.interfaces.IntrinsicScheduleListener;
 import a75f.io.messaging.MessageHandler;
+import a75f.io.util.ExecutorTask;
 
 public class UpdateScheduleHandler implements MessageHandler
 {
@@ -114,17 +115,11 @@ public class UpdateScheduleHandler implements MessageHandler
                     if (!systemSchedule.equals(s))
                     {
                         CcuLog.d(L.TAG_CCU_PUBNUB, "Building Schedule Changed : Trim Zones Schedules!!");
-                        new Thread(new Runnable()
-                        {
-                            @Override
-                            public void run()
-                            {
-                                CCUHsApi.getInstance().updateScheduleNoSync(s, null);
-                                trimZoneSchedules(s);
-                                CCUHsApi.getInstance().scheduleSync();
-                            }
-                        }).start();
-                        
+                        ExecutorTask.executeBackground( () -> {
+                            CCUHsApi.getInstance().updateScheduleNoSync(s, null);
+                            trimZoneSchedules(s);
+                            CCUHsApi.getInstance().scheduleSync();
+                        });
                     }
                 }
                 else if (s.getMarkers().contains("zone") && !s.getMarkers().contains("building") && s.getRoomRef() != null)

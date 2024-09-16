@@ -32,6 +32,7 @@ import a75f.io.renatus.safemode.SafeModeActivity;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.PreferenceConstants;
 import a75f.io.renatus.util.Prefs;
+import a75f.io.util.ExecutorTask;
 
 public class SplashActivity extends AppCompatActivity implements Globals.OnCcuInitCompletedListener{
 
@@ -97,20 +98,13 @@ public class SplashActivity extends AppCompatActivity implements Globals.OnCcuIn
             int recovery = SystemProperties.getInt("renatus_recovery",0);
             Intent i;
             if(Globals.getInstance().isSafeMode()){
-                new Thread() {
-                    @Override
-                    public void run() {
-                        //We are already in safe mode. No reason to crash again and go into a loop, especially
-                        //if the system went to safe mode due to OOM.
-                        try {
-                            UploadLogs.instanceOf().saveCcuLogs();
-                        } catch (Exception e) {
-                            CcuLog.e(TAG,"Failed to save logs while in safe mode");
-                        }
+                ExecutorTask.executeBackground( () -> {
+                    try {
+                        UploadLogs.instanceOf().saveCcuLogs();
+                    } catch (Exception e) {
+                        CcuLog.e(TAG,"Failed to save logs while in safe mode");
                     }
-                }.start();
-
-
+                });
                 i = new Intent(SplashActivity.this, SafeModeActivity.class);
                 i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             }

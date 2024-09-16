@@ -332,26 +332,18 @@ public class ScheduleManager {
             return;
         }
 
-        new Thread() {
-            @Override
-            public void run() {
-                processSchedules();
-                CcuLog.d(TAG_CCU_SCHEDULER,"<- updateSchedules");
-            }
-        }.start();
-
+        ExecutorTask.executeBackground( () -> {
+            processSchedules();
+            CcuLog.d(TAG_CCU_SCHEDULER,"<- updateSchedules");
+        });
     }
+
     public void updateSchedules(final Equip equip) {
         CcuLog.d(TAG_CCU_SCHEDULER,"updateSchedules ->"+equip.getDisplayName());
-
-        new Thread() {
-            @Override
-            public void run() {
-                processZoneEquipSchedule(equip);
-                CcuLog.d(TAG_CCU_SCHEDULER,"<- updateSchedules for equip done"+equip.getDisplayName());
-            }
-        }.start();
-
+        ExecutorTask.executeBackground( () -> {
+            processZoneEquipSchedule(equip);
+            CcuLog.d(TAG_CCU_SCHEDULER,"<- updateSchedules for equip done"+equip.getDisplayName());
+        });
     }
 
     /**

@@ -231,20 +231,16 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
             input.setTextSize(20);
             alert.setView(input);
 
-            alert.setPositiveButton("Ok", (dialog, whichButton) -> new Thread() {
-                @Override
-                public void run() {
-                    try {
-                        fileSystemTools.writeLogCat(input.getText().toString() + ".txt");
-                    }
-                    catch (IOException | SecurityException ex) {
-                        ex.printStackTrace();
-                        getActivity().runOnUiThread(() -> showErrorDialog(
-                                "Unable to save log file: " + ex.getMessage()));
-                    }
+            alert.setPositiveButton("Ok", (dialog, whichButton) -> ExecutorTask.executeBackground( () -> {
+                try {
+                    fileSystemTools.writeLogCat(input.getText().toString() + ".txt");
                 }
-            }.start());
-
+                catch (IOException | SecurityException ex) {
+                    ex.printStackTrace();
+                    getActivity().runOnUiThread(() -> showErrorDialog(
+                            "Unable to save log file: " + ex.getMessage()));
+                }
+            }));
             alert.setNegativeButton("Cancel", (dialog, whichButton) -> {
                 // Canceled.
             });
@@ -252,12 +248,7 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
             alert.show();
         });
 
-        logUploadBtn.setOnClickListener( v -> new Thread() {
-            @Override
-            public void run() {
-                UploadLogs.instanceOf().saveCcuLogs();
-            }
-        }.start());
+        logUploadBtn.setOnClickListener( v -> ExecutorTask.executeBackground(() -> UploadLogs.instanceOf().saveCcuLogs()));
 
         pullDataBtn.setOnClickListener(view14 -> ExecutorTask.executeAsync(
                 () -> ProgressDialogUtils.showProgressDialog(getActivity(),"Pulling building tuners to CCU"),

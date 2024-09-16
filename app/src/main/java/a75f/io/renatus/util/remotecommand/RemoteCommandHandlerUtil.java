@@ -103,13 +103,10 @@ public class RemoteCommandHandlerUtil {
                 RenatusApp.rebootTablet();
                 break;
             case SAVE_CCU_LOGS:
-                new Thread() {
-                    @Override
-                    public void run() {
-                        saveImportantDataBeforeSaveLogs();
-                        UploadLogs.instanceOf().saveCcuLogs();
-                    }
-                }.start();
+                ExecutorTask.executeBackground( () -> {
+                    saveImportantDataBeforeSaveLogs();
+                    UploadLogs.instanceOf().saveCcuLogs();
+                });
                 break;
             case RESET_PASSWORD:
                 CCUUtils.resetPasswords(RenatusApp.getAppContext());

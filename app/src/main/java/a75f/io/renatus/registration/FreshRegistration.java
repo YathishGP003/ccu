@@ -1270,34 +1270,27 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
 
     private void registerCcuInBackground() {
         String installerEmail = prefs.getString("installerEmail");
-        /*
-         * This RxJava here is not a great pattern, but maybe the best in a bad situation.
-         * We should not move on from this screen, or, probably earlier screens,
-         * until we know registration is successful.
-         *
-         * We don't hold onto the Disposable b/c we can't destroy it.  We need to let this call
-         * continue even after the Activity is destroyed!  So that registration is successful.
-         */
-        CCUHsApi.getInstance().registerCcuAsync(installerEmail)
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(
-                    () -> {
-                        if (Globals.getInstance().isAckdMessagingEnabled()) {
-                            MessagingClient.getInstance().init();
-                        }
-                        UtilityApplication.scheduleMessagingAckJob();
-                        CCUHsApi.getInstance().syncEntityWithPointWriteDelayed(15);
-                    },  // ignore success
-                    error -> {
-                        // A Toast rather than a dialog is necessary since the interface does not wait
-                        // for the response here.  We should fix that when we rewrite Registration.
-                        Context context = FreshRegistration.this;
-                        if (context != null) {
-                            Toast.makeText(context, "Error registering CCU.  Please try again", Toast.LENGTH_LONG).show();
-                        }
-                        CcuLog.w("CCU_HS", "Unexpected error registering CCU.", error);
+
+        ExecutorTask.executeBackground( () ->  {
+            try {
+                CCUHsApi.getInstance().registerCcu(installerEmail);
+                if (Globals.getInstance().isAckdMessagingEnabled()) {
+                    MessagingClient.getInstance().init();
+                }
+                UtilityApplication.scheduleMessagingAckJob();
+                CCUHsApi.getInstance().syncEntityWithPointWriteDelayed(15);
+            } catch (Exception e) {
+                CcuLog.w("CCU_HS", "Unexpected error registering CCU.", e);
+                runOnUiThread( () -> {
+                    // A Toast rather than a dialog is necessary since the interface does not wait
+                    // for the response here.  We should fix that when we rewrite Registration.
+                    Context context = FreshRegistration.this;
+                    if (context != null) {
+                        Toast.makeText(context, "Error registering CCU.  Please try again", Toast.LENGTH_LONG).show();
                     }
-            );
+                });
+            }
+        });
     }
 
     private synchronized boolean pingCloudServer() {

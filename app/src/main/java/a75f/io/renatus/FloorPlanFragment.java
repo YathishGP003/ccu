@@ -262,7 +262,6 @@ public class FloorPlanFragment extends Fragment {
 
     @Override public void onStop() {
         super.onStop();
-        floorListActionMenuListener.dispose();
     }
 
     // callback from FloorListActionMenuListener

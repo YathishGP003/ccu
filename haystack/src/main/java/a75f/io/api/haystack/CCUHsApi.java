@@ -81,10 +81,7 @@ import a75f.io.constants.CcuFieldConstants;
 import a75f.io.constants.HttpConstants;
 import a75f.io.data.entities.EntityDBUtilKt;
 import a75f.io.logger.CcuLog;
-import io.reactivex.rxjava3.core.Completable;
-import io.reactivex.rxjava3.core.Observable;
-import io.reactivex.rxjava3.schedulers.Schedulers;
-
+import a75f.io.util.ExecutorTask;
 
 
 public class CCUHsApi
@@ -1907,22 +1904,19 @@ public class CCUHsApi
                 }
             }
         }
-        Observable.fromCallable(() -> {
-                    try {
-                        HashMap<Object, Object> buildingEquip = readEntity("tuner and equip");
-                        if (!buildingEquip.isEmpty()) {
-                            importSchedulables(hClient, siteId, hsApi, buildingEquip.get("id").toString());
-                        } else {
-                            CcuLog.i(TAG, "Schedulables not imported "+buildingEquip);
-                        }
-                    } catch (Exception e) {
-                        //A failure here is ignored since we will retry doing next restart.
-                        CcuLog.i(TAG, "Import building schedulable failed ");
-                    }
-                    return true;
-                })
-                .subscribeOn(Schedulers.io())
-                .subscribe();
+        ExecutorTask.executeBackground( () -> {
+            try {
+                HashMap<Object, Object> buildingEquip = readEntity("tuner and equip");
+                if (!buildingEquip.isEmpty()) {
+                    importSchedulables(hClient, siteId, hsApi, buildingEquip.get("id").toString());
+                } else {
+                    CcuLog.i(TAG, "Schedulables not imported "+buildingEquip);
+                }
+            } catch (Exception e) {
+                //A failure here is ignored since we will retry doing next restart.
+                CcuLog.i(TAG, "Import building schedulable failed ");
+            }
+        });
         CcuLog.i(TAG," importBuildingTuners Completed");
     }
 
@@ -2677,14 +2671,6 @@ public class CCUHsApi
         return spDefaultPrefs.getBoolean("75fNetworkAvailable", false);
     }
 
-    public Completable registerCcuAsync(String installerEmail) {
-        return Completable.create(emitter -> {
-            registerCcu(installerEmail);
-            emitter.onComplete();
-        })
-                .subscribeOn(Schedulers.io());
-    }
-
     public void registerCcu(String installerEmail) {
 
         HashMap site = CCUHsApi.getInstance().read("site");
@@ -3186,22 +3172,18 @@ public class CCUHsApi
     }
 
     public void importSchedule(String id) {
-        Observable.fromCallable(() -> {
-                    String response = fetchRemoteEntity(id);
-                    if (response != null) {
-                        HZincReader hZincReader = new HZincReader(response);
-                        Iterator hZincReaderIterator = hZincReader.readGrid().iterator();
-                        while (hZincReaderIterator.hasNext()) {
-                            HRow row = (HRow) hZincReaderIterator.next();
-                            tagsDb.addHDict((row.get("id").toString()).replace("@", ""), row);
-                            CcuLog.i(TAG_CCU_HS, "Schedule Imported " + row);
-                        }
-                    }
-                    return true;
-                })
-                .subscribeOn(Schedulers.io())
-                .subscribe();
-
+        ExecutorTask.executeBackground( () -> {
+            String response = fetchRemoteEntity(id);
+            if (response != null) {
+                HZincReader hZincReader = new HZincReader(response);
+                Iterator hZincReaderIterator = hZincReader.readGrid().iterator();
+                while (hZincReaderIterator.hasNext()) {
+                    HRow row = (HRow) hZincReaderIterator.next();
+                    tagsDb.addHDict((row.get("id").toString()).replace("@", ""), row);
+                    CcuLog.i(TAG_CCU_HS, "Schedule Imported " + row);
+                }
+            }
+        });
     }
 
     public void updateSchedulable(HGrid zoneScheduleGrid,boolean isZone) {
@@ -3228,8 +3210,7 @@ public class CCUHsApi
     }
 
     public boolean importPointArrays(List<HDict> hDicts) {
-
-        Observable.fromCallable(() -> {
+        ExecutorTask.executeBackground( () -> {
             HClient hClient = new HClient(CCUHsApi.getInstance().getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
             if (hClient == null) {
                 hClient = new HClient(getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
@@ -3248,7 +3229,7 @@ public class CCUHsApi
                 //We cannot proceed adding new CCU to existing Site without fetching all the point array values.
                 if (writableArrayPoints == null) {
                     CcuLog.e(TAG, "Failed to fetch point array values while importing existing data.");
-                    return false;
+                    return;
                 }
 
                 ArrayList<HDict> hDictList = new ArrayList<>();
@@ -3259,58 +3240,54 @@ public class CCUHsApi
                     String id = row.get("id").toString();
                     String kind = row.get("kind").toString();
                     HVal data = row.get("data");
-                  //  CcuLog.i(TAG, "Import point array " + row);
+                    //  CcuLog.i(TAG, "Import point array " + row);
                     if (data instanceof HList && ((HList) data).size() > 0) {
                         HList dataList = (HList) data;
 
                         for (int i = 0; i < dataList.size(); i++) {
                             HDict dataElement = (HDict) dataList.get(i);
 
-                        String who = dataElement.getStr("who");
-                        String level = dataElement.get("level").toString();
-                        HVal val = dataElement.get("val");
-                        Object lastModifiedTimeTag = dataElement.get("lastModifiedDateTime", false);
+                            String who = dataElement.getStr("who");
+                            String level = dataElement.get("level").toString();
+                            HVal val = dataElement.get("val");
+                            Object lastModifiedTimeTag = dataElement.get("lastModifiedDateTime", false);
 
-                        HDictBuilder pid = new HDictBuilder().add("id", HRef.copy(id))
-                                .add("level", Integer.parseInt(level))
-                                .add("who", who)
-                                .add("val", kind.equals(Kind.STRING.getValue()) ?
-                                        HStr.make(val.toString()) : val);
-                        HDateTime lastModifiedDateTime;
-                        if (lastModifiedTimeTag != null) {
-                            lastModifiedDateTime = (HDateTime) lastModifiedTimeTag;
-                        } else {
-                            lastModifiedDateTime = HDateTime.make(System.currentTimeMillis());
+                            HDictBuilder pid = new HDictBuilder().add("id", HRef.copy(id))
+                                    .add("level", Integer.parseInt(level))
+                                    .add("who", who)
+                                    .add("val", kind.equals(Kind.STRING.getValue()) ?
+                                            HStr.make(val.toString()) : val);
+                            HDateTime lastModifiedDateTime;
+                            if (lastModifiedTimeTag != null) {
+                                lastModifiedDateTime = (HDateTime) lastModifiedTimeTag;
+                            } else {
+                                lastModifiedDateTime = HDateTime.make(System.currentTimeMillis());
+                            }
+                            pid.add("lastModifiedDateTime", lastModifiedDateTime);
+                            hDictList.add(pid.toDict());
+                            try {
+                                HDict rec = hsClient.readById(HRef.copy(id));
+                                //save points on tagsDb
+                                tagsDb.onPointWrite(rec, Integer.parseInt(level),
+                                        kind.equals(Kind.STRING.getValue()) ? HStr.make(val.toString()) :
+                                                val, who, HNum.make(0), rec, lastModifiedDateTime);
+
+                                //save his data to local cache
+                                tagsDb.saveHisItems(hsClient.readById(HRef.copy(id)),
+                                        new HHisItem[]{HHisItem.make(HDateTime.make(System.currentTimeMillis()),
+                                                HStr.make(String.valueOf(HSUtil.getPriorityVal(id))))},
+                                        true);
+                            } catch (UnknownRecException e) {
+                                CcuLog.e(TAG, "Import point array failed " + id, e);
+                            }
+
                         }
-                        pid.add("lastModifiedDateTime", lastModifiedDateTime);
-                        hDictList.add(pid.toDict());
-                        try {
-                            HDict rec = hsClient.readById(HRef.copy(id));
-                            //save points on tagsDb
-                            tagsDb.onPointWrite(rec, Integer.parseInt(level),
-                                    kind.equals(Kind.STRING.getValue()) ? HStr.make(val.toString()) :
-                                            val, who, HNum.make(0), rec, lastModifiedDateTime);
-
-                            //save his data to local cache
-                            tagsDb.saveHisItems(hsClient.readById(HRef.copy(id)),
-                                    new HHisItem[]{HHisItem.make(HDateTime.make(System.currentTimeMillis()),
-                                            HStr.make(String.valueOf(HSUtil.getPriorityVal(id))))},
-                                    true);
-                        } catch (UnknownRecException e) {
-                            CcuLog.e(TAG, "Import point array failed "+id, e);
-                        }
-
                     }
-                }
 
                 }
-
                 hClient.call("pointWriteMany", HGridBuilder.dictsToGrid(hDictList.toArray(new HDict[hDictList.size()])));
             }
-            return true;
-        })
-        .subscribeOn(Schedulers.io())
-                .subscribe();
+        });
         return true;
     }
 

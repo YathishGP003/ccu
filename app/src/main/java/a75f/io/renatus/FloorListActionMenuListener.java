@@ -9,7 +9,6 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.concurrent.Callable;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
@@ -21,12 +20,8 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.cloud.CloudConnectionManager;
 import a75f.io.logic.cloud.CloudConnectionResponseCallback;
-import a75f.io.modbusbox.EquipsManager;
 import a75f.io.renatus.util.NetworkUtil;
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
-import io.reactivex.rxjava3.core.Completable;
-import io.reactivex.rxjava3.disposables.Disposable;
-import io.reactivex.rxjava3.schedulers.Schedulers;
+import a75f.io.util.ExecutorTask;
 
 public class FloorListActionMenuListener implements MultiChoiceModeListener
 {
@@ -35,7 +30,6 @@ public class FloorListActionMenuListener implements MultiChoiceModeListener
 	private Menu             mMenu         = null;
 	private ActionMode aMode = null ;
 	private ArrayList<Floor> selectedFloor = new ArrayList<Floor>();
-	private Disposable deleteFloorDisposable;
 
 	/**
 	 * @param floorPlanFragment
@@ -101,12 +95,6 @@ public class FloorListActionMenuListener implements MultiChoiceModeListener
 		aMode = null;
 	}
 
-	public void dispose() {
-		if (deleteFloorDisposable != null) {
-			deleteFloorDisposable.dispose();
-		}
-	}
-
 	private void deleteSelectedFloors() {
 		if (!NetworkUtil.isNetworkConnected(floorPlanActivity.getActivity())) {
 			Toast.makeText(floorPlanActivity.getActivity(), "Floor cannot be deleted when CCU is offline. Please " +
@@ -126,32 +114,23 @@ public class FloorListActionMenuListener implements MultiChoiceModeListener
 					return;
 				}
 
-				Completable task = Completable.fromCallable((Callable<Void>) () -> {
-					deleteSelectedFloorsAsync();
-					return null;
+				ExecutorTask.executeBackground(() -> {
+					try {
+						deleteSelectedFloorsAsync();
+						floorPlanActivity.getActivity().runOnUiThread(() -> {
+							selectedFloor.clear();
+							floorPlanActivity.refreshScreen();
+							floorPlanActivity.hideWait();
+						});
+					} catch (Exception e) {
+						CcuLog.e("CCU_UI", "Unable to delete floor", e);
+						floorPlanActivity.getActivity().runOnUiThread(() -> {
+							Toast.makeText(floorPlanActivity.getActivity(), "Error deleting floor",
+									Toast.LENGTH_LONG).show();
+							floorPlanActivity.hideWait();
+						});
+					}
 				});
-
-				deleteFloorDisposable = task
-						.subscribeOn(Schedulers.io())
-						.observeOn(AndroidSchedulers.mainThread())
-						.subscribe(
-								() -> {
-									int floorSelectedIndex = floorPlanActivity.mFloorListAdapter.getSelectedPostion();
-									selectedFloor.clear();
-									floorPlanActivity.refreshScreen();
-									floorPlanActivity.hideWait();
-									/*
-									if(floorPlanActivity.floorList.size() == 0 || floorSelectedIndex == -1){
-										floorPlanActivity.systemDeviceOnClick();
-									}
-									 */
-								},
-								error -> {
-									Toast.makeText(floorPlanActivity.requireContext(), "Error deleting floor",
-													Toast.LENGTH_LONG).show();
-									floorPlanActivity.hideWait();
-									CcuLog.w("CCU_UI", "Unable to delete floor", error);
-								});
 			}
 
 			@Override

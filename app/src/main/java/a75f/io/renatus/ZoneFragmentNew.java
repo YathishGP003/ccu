@@ -1195,7 +1195,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
                     try {
                         if( isCelsiusTunerAvailableStatus()) {
-
                             Observable.fromCallable(() -> ScheduleManager.getInstance().getMultiModuleZoneStatusMessage(zoneId))
                                     .subscribeOn(Schedulers.io())
                                     .observeOn(AndroidSchedulers.mainThread())

@@ -2,6 +2,7 @@ package a75.io.algos.tr;
 
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
@@ -78,7 +79,7 @@ public class TrimResponseProcessor
 
     private boolean isSystemCooling() {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        Equip systemEquip = new Equip.Builder().setHashMap(hayStack.readEntity("system and equip and not modbus and not connectModule")).build();
-        return CCUHsApi.getInstance().readHisValByQuery("point and domainName == \"operatingMode\" and equipRef == \"" + systemEquip.getId() + "\"").intValue() == 1;
+        HashMap<Object, Object> systemEquip = hayStack.readEntity("system and equip and not modbus and not connectModule");
+        return CCUHsApi.getInstance().readHisValByQuery("point and domainName == \"operatingMode\" and equipRef == \"" + systemEquip.get("id").toString() + "\"").intValue() == 1;
     }
 }

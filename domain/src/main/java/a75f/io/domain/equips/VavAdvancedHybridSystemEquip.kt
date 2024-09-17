@@ -10,8 +10,15 @@ import a75f.io.domain.api.Point
 class VavAdvancedHybridSystemEquip (equipRef : String, connectEquipRef : String) : VavSystemEquip (equipRef) {
     val cmEquip = AdvancedHybridSystemEquip(equipRef)
     val connectEquip1 = ConnectModuleEquip(connectEquipRef)
-    val vavProportionalKFactor = Point(DomainName.vavProportionalKFactor, equipRef)
-    val vavTemperatureProportionalRange = Point(DomainName.vavTemperatureProportionalRange, equipRef)
-    val vavIntegralKFactor = Point(DomainName.vavIntegralKFactor, equipRef)
-    val vavTemperatureIntegralTime = Point(DomainName.vavTemperatureIntegralTime, equipRef)
+
+    val vavSupplyAirProportionalKFactor = Point(DomainName.vavSupplyAirTemperatureProportionalKFactor, equipRef)
+    val vavSupplyAirTemperatureProportionalRange = Point(DomainName.vavSupplyAirTemperatureProportionalRange, equipRef)
+    val vavSupplyAirIntegralKFactor = Point(DomainName.vavSupplyAirTemperatureIntegralKFactor, equipRef)
+    val vavSupplyAirTemperatureIntegralTime = Point(DomainName.vavSupplyAirTemperatureIntegralTime, equipRef)
+
+    val vavDuctStaticProportionalKFactor = Point(DomainName.vavDuctStaticPressureProportionalKFactor, equipRef)
+    val vavDuctStaticPressureProportionalRange = Point(DomainName.vavDuctStaticPressureProportionalRange, equipRef)
+    val vavDuctStaticPressureIntegralTime = Point(DomainName.vavDuctStaticPressureIntegralTime, equipRef)
+    val vavDuctStaticIntegralKFactor = Point(DomainName.vavDuctStaticPressureIntegralKFactor, equipRef)
+
 }

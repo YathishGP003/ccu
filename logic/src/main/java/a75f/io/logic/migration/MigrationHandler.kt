@@ -851,8 +851,6 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                 HyperStatSplitDeviceCutoverMapping.entries,
                 profileConfiguration
             )
-
-            Globals.getInstance().copyModels()
         }
     }
 

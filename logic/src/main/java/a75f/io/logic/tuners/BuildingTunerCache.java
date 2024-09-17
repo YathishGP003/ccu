@@ -22,6 +22,7 @@ public class BuildingTunerCache {
     private static final String MAX_HEATING_USER_LIMIT = "maxHeatingUserLimit";
 
     private static final String BUILDING_ZONE_DIFFERENTIAL = "buildingToZoneDifferential";
+    private static final String UNOCCUPIED_ZONE_SETBACK = "unoccupiedZoneSetback";
 
     
     private static BuildingTunerCache instance = null;
@@ -48,6 +49,7 @@ public class BuildingTunerCache {
         tunerValMap.put(MAX_HEATING_USER_LIMIT, Domain.buildingEquip.getHeatingUserLimitMax().readPriorityVal());
         tunerValMap.put(TEMP_DEAD_LEEWAY, TunerUtil.getPriorityZoneTempDeadLeewayValue(DomainName.zoneTemperatureDeadLeeway));
         tunerValMap.put(BUILDING_ZONE_DIFFERENTIAL, Domain.buildingEquip.getBuildingToZoneDifferential().readPriorityVal());
+        tunerValMap.put(UNOCCUPIED_ZONE_SETBACK, Domain.buildingEquip.getUnoccupiedZoneSetback().readPriorityVal());
        /* tunerValMap.put(COOLING_DEADBAND, SchedulabeLimits.Companion.getCoolingDeadBand());
         tunerValMap.put(HEATING_DEADBAND, SchedulabeLimits.Companion.getHeatingDeadBand());*/
     }
@@ -82,6 +84,10 @@ public class BuildingTunerCache {
 
     public Double getBuildingToZoneDifferential() {
         return tunerValMap.get(BUILDING_ZONE_DIFFERENTIAL);
+    }
+
+    public Double getUnoccupiedZoneSetback() {
+        return tunerValMap.get(UNOCCUPIED_ZONE_SETBACK);
     }
 
 }

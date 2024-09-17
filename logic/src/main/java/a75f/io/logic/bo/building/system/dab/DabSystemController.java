@@ -184,7 +184,7 @@ public class DabSystemController extends SystemController
         deadZones.clear();
         allEquips.forEach( equip -> {
             String equipId = equip.get(Tags.ID).toString();
-            if (isZoneDead(equipId)) {
+            if (isZoneDead(equipId) || isRFDead(equipId)) {
                 deadZones.add(equipId);
             }
         });
@@ -253,7 +253,7 @@ public class DabSystemController extends SystemController
         updateSystemHumidity(allEquips);
         updateSystemTemperature(allEquips);
         updateSystemDesiredTemp();
-        if (L.ccu().systemProfile instanceof  DabExternalAhu ) {
+        if (L.ccu().systemProfile instanceof  DabExternalAhu || L.ccu().systemProfile instanceof DabAdvancedAhu) {
             CCUHsApi.getInstance().writeHisValByQuery("domainName == \""+averageHumidity+"\"", averageSystemHumidity);
             CCUHsApi.getInstance().writeHisValByQuery("domainName == \""+averageTemperature+"\"", averageSystemTemperature);
         } else {

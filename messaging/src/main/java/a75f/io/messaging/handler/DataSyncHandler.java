@@ -3,7 +3,6 @@ package a75f.io.messaging.handler;
 import static a75f.io.logic.util.PreferenceUtil.setDataSyncStopped;
 import static a75f.io.messaging.handler.UpdateScheduleHandler.refreshIntrinsicSchedulesScreen;
 import static a75f.io.messaging.handler.UpdateScheduleHandler.refreshSchedulesScreen;
-import static a75f.io.messaging.handler.UpdateScheduleHandler.trimZoneSchedules;
 
 import com.google.gson.JsonObject;
 import org.projecthaystack.HDateTime;
@@ -17,6 +16,7 @@ import org.projecthaystack.HVal;
 import org.projecthaystack.MapImpl;
 import org.projecthaystack.ParseException;
 import org.projecthaystack.client.HClient;
+import org.projecthaystack.util.WebUtil;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -41,6 +41,7 @@ import a75f.io.logic.BuildConfig;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.jobs.SystemScheduleUtil;
+import a75f.io.logic.util.CommonTimeSlotFinder;
 import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.messaging.exceptions.MessageHandlingFailed;
 
@@ -78,7 +79,7 @@ public class DataSyncHandler {
             return SyncStatus.NULL_RESPONSE;
         }
         readChangesResponse.add(readChanges);
-        int responsePageSize = getResponsePageSize(readChanges);
+        int responsePageSize = WebUtil.getResponsePageSize(readChanges, PAGE_SIZE);
         logIt("Response page size " + responsePageSize);
         if (responsePageSize > 0) {
             for (pageNo = 1; pageNo <= responsePageSize; pageNo++) {
@@ -103,16 +104,7 @@ public class DataSyncHandler {
         return SyncStatus.COMPLETED;
     }
 
-    private int getResponsePageSize(HGrid readChanges) {
-        HDict meta = readChanges.meta();
-        if (meta.has("total")) {
-            int entitySize = (int) Double.parseDouble(meta.get("total").toString());
-            logIt("Total Entity size " + entitySize);
-            return entitySize / PAGE_SIZE;
-        }
-        logIt("No total field in metadata");
-        return 0;
-    }
+
 
     private void syncReadChangesApiResponseToCCU(HGrid readChanges, CCUHsApi ccuHsApi) {
         List<HashMap> entitiesToSync = ccuHsApi.HGridToList(readChanges);
@@ -400,7 +392,8 @@ public class DataSyncHandler {
         Schedule systemSchedule = ccuHsApi.getSystemSchedule(false).get(0); // check it
         if (!systemSchedule.equals(schedule)) {
             ccuHsApi.updateScheduleNoSync(schedule, null);
-            trimZoneSchedules(schedule);
+            CommonTimeSlotFinder commonTimeSlotFinder = new CommonTimeSlotFinder();
+            commonTimeSlotFinder.forceTrimScheduleTowardsCommonTimeslot(ccuHsApi);
             ccuHsApi.scheduleSync();
         }
     }

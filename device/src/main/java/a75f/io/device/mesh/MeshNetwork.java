@@ -45,6 +45,7 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.system.dab.DabAdvancedAhu;
 import a75f.io.logic.bo.building.system.vav.VavAdvancedAhu;
 import a75f.io.logic.bo.building.system.vav.VavIERtu;
 
@@ -311,11 +312,10 @@ public class MeshNetwork extends DeviceNetwork
             }
             
         }
-        catch (Exception e)
-        {
+        catch (Exception e)  {
             e.printStackTrace();
-        }finally {
-            if(bSeedMessage==true) {
+        } finally {
+            if (bSeedMessage) {
                 CcuLog.d(L.TAG_CCU_DEVICE,"Resetting the Seed Message variable to avoid multiple seed messages");
                 LSerial.getInstance().setResetSeedMessage(false);
             } else {
@@ -354,7 +354,7 @@ public class MeshNetwork extends DeviceNetwork
             return;
         }
 
-        if (ccu().systemProfile instanceof VavAdvancedAhu) {
+        if (ccu().systemProfile instanceof VavAdvancedAhu || ccu().systemProfile instanceof DabAdvancedAhu) {
             ControlMote.CcuToCmSettingsMessage_t cmSettingsMessage = ControlMoteMessageGeneratorKt.getCMSettingsMessage();
             CcuLog.d(L.TAG_CCU_DEVICE, "CM Proto Settings Message: " + cmSettingsMessage);
             ControlMoteMessageSenderKt.sendControlMoteMessage(MessageType.CCU_TO_CM_OVER_USB_CM_SERIAL_SETTINGS, cmSettingsMessage.toByteArray());

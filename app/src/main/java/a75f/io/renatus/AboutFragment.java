@@ -459,6 +459,10 @@ public class AboutFragment extends Fragment {
         }
     };
     private void updateAboutFragmentUI(String response) {
+        if(!isAdded() || getActivity()==null || getContext()==null) {
+            CcuLog.w(L.TAG_CCU_UI, "AboutFragment is not attached to the activity or context is null. Cancelling the ui update operation.");
+            return;
+        }
         if (response != null) {
             try {
                 JSONArray array = new JSONArray(response);

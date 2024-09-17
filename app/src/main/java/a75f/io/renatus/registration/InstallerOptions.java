@@ -79,12 +79,15 @@ import a75f.io.api.haystack.SettingPoint;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.domain.api.Domain;
+import a75f.io.domain.api.DomainName;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BackfillUtilKt;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.system.dab.DabAdvancedAhu;
+import a75f.io.logic.bo.building.system.vav.VavAdvancedAhu;
 import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.bo.util.DemandResponseMode;
 import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint;
@@ -97,6 +100,8 @@ import a75f.io.renatus.R;
 import a75f.io.renatus.RenatusApp;
 import a75f.io.renatus.UtilityApplication;
 import a75f.io.renatus.buildingoccupancy.BuildingOccupancyFragment;
+import a75f.io.renatus.profiles.system.advancedahu.dab.DabAdvancedHybridAhuFragment;
+import a75f.io.renatus.profiles.system.advancedahu.vav.VavAdvancedHybridAhuFragment;
 import a75f.io.renatus.tuners.TunerFragment;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.Prefs;
@@ -405,7 +410,7 @@ public class InstallerOptions extends Fragment {
 
         toggleCelsius.setOnCheckedChangeListener((buttonView, isChecked) -> {
             HashMap<Object, Object> useCelsius = ccuHsApi.readEntity("displayUnit");
-
+            intimateAdvanceAhu();
             if (!useCelsius.isEmpty()) {
                 if (isChecked) {
                     ccuHsApi.writePoint(useCelsius.get("id").toString(), TunerConstants.TUNER_BUILDING_VAL_LEVEL,
@@ -452,6 +457,15 @@ public class InstallerOptions extends Fragment {
         buttonCancel.setOnClickListener(view -> backFillTimeSpinner.setSelection(BackFillDuration.getIndex(BackFillDuration.toIntArray(), getBackFillDuration(), 24)));
 
         return rootView;
+    }
+
+    private void intimateAdvanceAhu() {
+        if (ccu().systemProfile instanceof VavAdvancedAhu && VavAdvancedHybridAhuFragment.Companion.getInstance() != null) {
+            VavAdvancedHybridAhuFragment.Companion.getInstance().getViewModel().toggleChecked();
+        }
+        if (ccu().systemProfile instanceof DabAdvancedAhu && DabAdvancedHybridAhuFragment.Companion.getInstance() != null) {
+            DabAdvancedHybridAhuFragment.Companion.getInstance().getViewModel().toggleChecked();
+        }
     }
 
     private void setUpTemperatureModeSpinner(View rootView, CCUHsApi ccuHsApi) {
@@ -747,6 +761,9 @@ public class InstallerOptions extends Fragment {
             ArrayList<String> deadBand = new ArrayList<>();
             ArrayList<String> zonediff = new ArrayList<>();
 
+            double minDeadBandVal = Double.parseDouble(Domain.readPoint(DomainName.coolingDeadband).get("minVal").toString());
+            double maxDeadBandVal = Double.parseDouble(Domain.readPoint(DomainName.coolingDeadband).get("maxVal").toString());
+
             if(isCelsiusTunerAvailableStatus()){
                 for (int val = 32;  val <= 140; val += 1) {
                     list.add(val+"\u00B0F  (" + fahrenheitToCelsius(val) + "\u00B0C)");
@@ -760,7 +777,7 @@ public class InstallerOptions extends Fragment {
                 for (int val = 50;  val <= 100; val += 1) {
                     coolingLimit.add(val+"\u00B0F  (" + fahrenheitToCelsius(val) + "\u00B0C)");
                 }
-                for (double val = 0;  val <= 10; val += 0.5) {
+                for (double val = minDeadBandVal;  val <= maxDeadBandVal; val += 0.5) {
                     deadBand.add(val+"\u00B0F  (" + (fahrenheitToCelsiusRelative(val)) + "\u00B0C)");
                 }
                 for (int val = 0;  val <= 20; val += 1) {
@@ -781,7 +798,7 @@ public class InstallerOptions extends Fragment {
                 for (int val = 50;  val <= 100; val += 1) {
                     coolingLimit.add(val+"\u00B0F");
                 }
-                for (double val = 0;  val <= 10; val += 0.5) {
+                for (double val = minDeadBandVal;  val <= maxDeadBandVal; val += 0.5) {
                     deadBand.add(val+"\u00B0F");
                 }
                 for (int val = 0;  val <= 20; val += 1) {

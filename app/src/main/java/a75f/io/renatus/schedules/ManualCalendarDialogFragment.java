@@ -44,23 +44,20 @@ public class ManualCalendarDialogFragment extends DialogFragment implements View
     public ManualCalendarDialogFragment() {}
 
 
-    public interface ManualCalendarDialogListener
-    {
+    public interface ManualCalendarDialogListener {
         boolean onClickSave(String id, String vacationName, DateTime startDate, DateTime endDate);
-
-        boolean onClickCancel(DialogFragment dialog);
     }
 
     private ManualCalendarDialogListener mListener;
 
     @SuppressLint("ValidFragment")
-    public ManualCalendarDialogFragment(String id, String name, DateTime startDate, DateTime endDate,String roomRef, ManualCalendarDialogListener mListener)
+    public ManualCalendarDialogFragment(Schedule schedule,String roomRef, ManualCalendarDialogListener mListener)
     {
         this.mListener = mListener;
-        this.mStartDate = startDate;
-        this.mEndDate = endDate;
-        this.mId = id;
-        this.mVacationName = name;
+        this.mStartDate = schedule != null ?schedule.getStartDate() : null;
+        this.mEndDate = schedule != null ?schedule.getEndDate(): null;
+        this.mId = schedule != null ?schedule.getId(): null;
+        this.mVacationName = schedule != null ? schedule.getDis(): null;
         this.roomRef = roomRef;
     }
 

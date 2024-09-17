@@ -799,7 +799,8 @@ public abstract class UtilityApplication extends Application {
         if (isSimulation()) return false;
         try {
             HashMap<Object, Object> equip = CCUHsApi.getInstance().readEntity("equip and system and not modbus and not connectModule");
-            if (!equip.isEmpty() && equip.get("profile").toString().equals("vavAdvancedHybridAhuV2")) {
+            if (!equip.isEmpty() && (equip.get("profile").toString().equals("vavAdvancedHybridAhuV2")
+                    || equip.get("profile").toString().equals("dabAdvancedHybridAhuV2"))) {
                 return true;
             }
         } catch (Exception e){

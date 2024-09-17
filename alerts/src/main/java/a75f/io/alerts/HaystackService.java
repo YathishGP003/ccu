@@ -45,6 +45,7 @@ public class HaystackService {
     // return array of values
     public String hisReadManyInterpolateWithDateRange(Object hisPointIdObj, String startDate, String endDate, Object  contextHelper) {
         String hisPointId = hisPointIdObj.toString();
+        CcuLog.d(TAG_CCU_ALERTS, "---hisReadManyInterpolateWithDateRange start- hisPointId " + hisPointId + "<--startDate-->" + startDate + "<--endDate-->" + endDate);
         long startDateInMillis = convertStringToMilliseconds(startDate, "yyyy-MM-dd");
         long endDateInMillis = convertStringToMilliseconds(endDate, "yyyy-MM-dd");
 
@@ -58,11 +59,14 @@ public class HaystackService {
         Double[] values = hisItems.stream()
                 .map(HisItem::getVal)
                 .toArray(Double[]::new);
-        return new Gson().toJson(values);
+
+        String resultValues = new Gson().toJson(values);
+        CcuLog.d(TAG_CCU_ALERTS, "---hisReadManyInterpolateWithDateRange end- resultValues " + resultValues );
+        return resultValues;
     }
 
     public String hisReadManyInterpolateWithInterval(String hisPointId, String rangeValue, String rangeUnit, Object contextHelper) {
-        CcuLog.d(TAG_CCU_ALERTS, "---hisReadManyInterpolateWithInterval##$--hisPointId-" + hisPointId + "<--rangeValue-->" + rangeValue + "<--rangeUnit-->" + rangeUnit);
+        CcuLog.d(TAG_CCU_ALERTS, "---hisReadManyInterpolateWithInterval start ##$--hisPointId-" + hisPointId + "<--rangeValue-->" + rangeValue + "<--rangeUnit-->" + rangeUnit);
         int totalMinutes = 0;
         if (rangeUnit.equalsIgnoreCase("min")) {
             totalMinutes = Integer.parseInt(rangeValue);
@@ -74,12 +78,12 @@ public class HaystackService {
             totalMinutes = 24 * 60 * Integer.parseInt(rangeValue);
             return hisReadManyInterpolateWithInterval(hisPointId, Long.parseLong(String.valueOf(totalMinutes)), contextHelper);
         }
-        return "";
+        return "[]";
     }
 
     // return array of values
     public String hisReadManyInterpolateWithInterval(String hisPointId, long minutes, Object contextHelper) {
-        CcuLog.d(TAG_CCU_ALERTS, "---hisReadManyInterpolateWithInterval##--hisPointId-"+hisPointId + "<--minutes-->"+minutes);
+        CcuLog.d(TAG_CCU_ALERTS, "---hisReadManyInterpolateWithInterval start ##--hisPointId-"+hisPointId + "<--minutes-->"+minutes);
         long endDateInMillis = System.currentTimeMillis();
         long startDateInMillis = endDateInMillis - (minutes * 60 * 1000);
 
@@ -93,7 +97,10 @@ public class HaystackService {
         Double[] values = hisItems.stream()
                 .map(HisItem::getVal)
                 .toArray(Double[]::new);
-        return new Gson().toJson(values);
+
+        String resultValues = new Gson().toJson(values);
+        CcuLog.d(TAG_CCU_ALERTS, "---hisReadManyInterpolateWithInterval end ##--result-"+resultValues);
+        return resultValues;
     }
 
     public void pointWrite(String id, int level, double value, boolean override, Object contextHelper) {
@@ -132,36 +139,46 @@ public class HaystackService {
 
     // returns list of entities
     public String findByFilter(String filter, Object contextHelper) {
-        CcuLog.d(TAG_CCU_ALERTS, "---findByFilter##--original filter-" + filter);
+        CcuLog.d(TAG_CCU_ALERTS, "---findByFilter start----" + filter);
         List<HashMap> list = findByFilterCustom(filter, contextHelper);
+        CcuLog.d(TAG_CCU_ALERTS, "---findByFilter end result----" + list.size());
         return new Gson().toJson(list);
     }
 
     // returns single entity
     public String findEntityByFilter(String filter, Object contextHelper) {
-        CcuLog.d(TAG_CCU_ALERTS, "---findEntityByFilter##--original filter-" + filter);
+        CcuLog.d(TAG_CCU_ALERTS, "---findEntityByFilter start-" + filter);
         List<HashMap> list = findByFilterCustom(filter, contextHelper);
         if(!list.isEmpty()){
-            return new Gson().toJson(list.get(0));
+            String resultString = new Gson().toJson(list.get(0));
+            CcuLog.d(TAG_CCU_ALERTS, "---findEntityByFilter end-" + resultString);
+            return resultString;
         }else{
-            return "";
+            CcuLog.d(TAG_CCU_ALERTS, "---findEntityByFilter end- []");
+            return "[]";
         }
     }
 
     public Integer findValueByFilter(String filter, Object contextHelper) {
-        CcuLog.d(TAG_CCU_ALERTS, "---findValueByFilter##--original filter-" + filter);
+        CcuLog.d(TAG_CCU_ALERTS, "---findValueByFilter start-" + filter);
         List<HashMap> list = findByFilterCustom(filter, contextHelper);
 
         if(!list.isEmpty()){
             String entityId = list.get(0).get("id").toString();
-            return fetchValueById(entityId, contextHelper);
+            Integer result = fetchValueById(entityId, contextHelper);
+            CcuLog.d(TAG_CCU_ALERTS, "---findValueByFilter end result-" + result);
+            return result;
         }else{
+            CcuLog.d(TAG_CCU_ALERTS, "---findValueByFilter end result- is null");
             return null;
         }
     }
 
     public String findById(String id, Object contextHelper) {
-        return new Gson().toJson(CCUHsApi.getInstance().read(id));
+        CcuLog.d(TAG_CCU_ALERTS, "---findById start-" + id);
+        String result = new Gson().toJson(CCUHsApi.getInstance().read(id));
+        CcuLog.d(TAG_CCU_ALERTS, "---findById end-" + id);
+        return result;
     }
 
     public int fetchValueByHisReadMany(String id, Object contextHelper) {
@@ -236,6 +253,7 @@ public class HaystackService {
     // if writable tag is there, return value of highest level
     // if writable tag is not there, check for his item and return latest value
     public Integer fetchValueById(String filter, Object contextHelper) {
+        CcuLog.d(TAG_CCU_ALERTS, "---fetchValueById start--filter-"+filter);
         Integer output = null;
         try {
             output = (int)(CCUHsApi.getInstance().readHisValById(filter).doubleValue());
@@ -243,6 +261,7 @@ public class HaystackService {
         }catch (Exception e){
             e.printStackTrace();
         }
+        CcuLog.d(TAG_CCU_ALERTS, "---fetchValueById end--filter-"+filter + "<--output-->"+output);
         return output;
     }
 

@@ -221,8 +221,6 @@ android {
 tasks.whenTaskAdded { task ->
     if (task.name == 'assembleDev_qa') {
         task.dependsOn 'testDev_qaUnitTest'
-    } else if (task.name == 'assembleQa') {
-        task.dependsOn 'testQaUnitTest'
     }
 }
 dependencies {
@@ -255,6 +253,7 @@ dependencies {
 
     implementation project(path: ':modbus4j')
     testImplementation 'junit:junit:4.13.1'
+    testImplementation 'org.mockito:mockito-core:3.7.7'
     androidTestImplementation 'androidx.annotation:annotation:1.0.0'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test:rules:1.1.1'

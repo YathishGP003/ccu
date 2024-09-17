@@ -15,6 +15,7 @@ import java.util.TimerTask;
 
 import a75.io.algos.tr.TRSystem;
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.HayStackConstants;
@@ -35,6 +36,7 @@ import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.system.dab.DabSystemController;
 import a75f.io.logic.bo.building.system.dab.DabSystemProfile;
+import a75f.io.logic.bo.building.system.util.AdvancedAhuUtilKt;
 import a75f.io.logic.bo.building.system.vav.VavSystemController;
 import a75f.io.logic.bo.building.system.vav.VavSystemProfile;
 import a75f.io.logic.bo.util.DemandResponseMode;
@@ -198,7 +200,7 @@ public abstract class SystemProfile
                 || q.getMarkers().contains("vrv") || q.getMarkers().contains("otn")) {
                 q.setAhuRef(systemEquipId);
             } else if (q.getMarkers().contains("smartstat") || q.getMarkers().contains("emr") || q.getMarkers().contains("pid") ||
-                       q.getMarkers().contains("modbus") || q.getMarkers().contains("monitoring") || q.getMarkers().contains("hyperstat") || q.getMarkers().contains("hyperstatsplit")){
+                       q.getMarkers().contains("modbus") || q.getMarkers().contains("monitoring") || q.getMarkers().contains("hyperstat") ||q.getMarkers().contains("hyperstatsplit")) {
                 //All the standalone zone equips will have a gatewayRef
                 q.setGatewayRef(systemEquipId);
             }else {
@@ -939,22 +941,37 @@ public abstract class SystemProfile
 
         }
 
-
+    }
+     public void deleteOAODamperEquip() {
+        if((ccu().oaoProfile != null)) {
+            CCUHsApi hayStack = CCUHsApi.getInstance();
+            Device oaoSN = HSUtil.getDevice((short) ccu().oaoProfile.getNodeAddress());
+            hayStack.deleteEntityTree(ccu().oaoProfile.getEquipRef());
+            hayStack.deleteEntityTree((oaoSN.getId()));
+            ccu().oaoProfile = null;
+            CcuLog.i(L.TAG_CCU_SYSTEM, "OAO Equip deleted successfully");
+        }
+        else {
+            CcuLog.i(L.TAG_CCU_SYSTEM, "OAO Equip not found");
+        }
+    }
+    public void deleteBypassDamperEquip() {
+        if(ccu().bypassDamperProfile != null) {
+            CCUHsApi hayStack = CCUHsApi.getInstance();
+            Device bypassDamper = HSUtil.getDevice((short) ccu().bypassDamperProfile.getNodeAddr());
+            hayStack.deleteEntityTree(ccu().bypassDamperProfile.getEquipRef());
+            hayStack.deleteEntityTree((bypassDamper.getId()));
+            ccu().bypassDamperProfile = null;
+            CcuLog.i(L.TAG_CCU_SYSTEM, "BypassDamper Equip deleted successfully");
+        }
+        else {
+            CcuLog.i(L.TAG_CCU_SYSTEM, "BypassDamper Equip not found");
+        }
     }
 
-    public void deleteSystemConnectModule() {
-        // We don't know exactly when in the System equip deletion/creation cycle this will be invoked.
-        // So, it needs its own Haystack API instance to prevent crashes if "hayStack" is null
-        CCUHsApi hs = CCUHsApi.getInstance();
-        HashMap<Object, Object> connectSystemEquip = hs.readEntity("domainName == \"" + DomainName.vavAdvancedHybridAhuV2_connectModule + "\"");
-        if (connectSystemEquip != null && connectSystemEquip.size() > 0) {
-            hs.deleteEntityTree(connectSystemEquip.get("id").toString());
-        }
 
-        HashMap<Object, Object> connectDevice = hs.readEntity("domainName == \"" + DomainName.connectModuleDevice + "\"");
-        if (connectDevice != null && connectDevice.size() > 0) {
-            hs.deleteEntityTree(connectDevice.get("id").toString());
-        }
+    public void deleteSystemConnectModule() {
+        AdvancedAhuUtilKt.deleteSystemConnectModule();
     }
 
     public void createDemandResponseConfigPoints(String equipDis, String siteRef, String equipRef, String tz, CCUHsApi hayStack) {

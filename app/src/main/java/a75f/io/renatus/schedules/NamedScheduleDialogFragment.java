@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.logic.bo.util.UnitUtils;
+import a75f.io.logic.schedule.ScheduleGroup;
 import a75f.io.renatus.R;
 
 import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
@@ -78,7 +79,7 @@ public class NamedScheduleDialogFragment extends DialogFragment {
         heatingDeadband = view.findViewById(R.id.heatingDeadband);
         coolingDeadBand = view.findViewById(R.id.coolingDeadband);
 
-        String header = DAYS.get(days.getDay()) + "(" + days.getSthh() +":" +days.getStmm() +
+        String header = ScheduleUtil.getNamedScheduleHeader(schedule.getScheduleGroup(), Integer.parseInt(getArguments().getString(PARAM_DAY))) + "(" + days.getSthh() +":" +days.getStmm() +
                 " to "+ days.getEthh() +":" +days.getEtmm() +  ") | "   ;
 
         day.setText(header);

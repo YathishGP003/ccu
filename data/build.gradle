@@ -82,8 +82,6 @@ configurations {
 tasks.whenTaskAdded { task ->
     if (task.name == 'assembleDev_qa') {
         task.dependsOn 'testDev_qaUnitTest'
-    } else if (task.name == 'assembleQa') {
-        task.dependsOn 'testQaUnitTest'
     }
 }
 dependencies {

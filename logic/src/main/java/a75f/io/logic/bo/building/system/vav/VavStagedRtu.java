@@ -125,6 +125,7 @@ public class VavStagedRtu extends VavSystemProfile
     public void addSystemEquip() {
         systemEquip = (VavStagedSystemEquip) Domain.systemEquip;
         initTRSystem();
+        updateStagesSelected();
     }
     
     @Override
@@ -883,7 +884,7 @@ public class VavStagedRtu extends VavSystemProfile
 
     @Override
     public void deleteSystemEquip() {
-        HashMap equip = CCUHsApi.getInstance().read("equip and system and not modbus");
+        HashMap equip = CCUHsApi.getInstance().read("system and equip and not modbus and not connectModule");
         if (ProfileType.getProfileTypeForName(equip.get("profile").toString()).name().equals(ProfileType.SYSTEM_VAV_STAGED_RTU.name())) {
             CCUHsApi.getInstance().deleteEntityTree(equip.get("id").toString());
         }

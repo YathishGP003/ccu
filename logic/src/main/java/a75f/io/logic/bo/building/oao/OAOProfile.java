@@ -17,6 +17,7 @@ import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
+import a75f.io.logic.bo.building.system.dab.DabAdvancedAhu;
 import a75f.io.logic.bo.building.system.dab.DabAdvancedHybridRtu;
 import a75f.io.logic.bo.building.system.dab.DabExternalAhu;
 import a75f.io.logic.bo.building.system.dab.DabStagedRtu;
@@ -185,7 +186,8 @@ public class OAOProfile
                 || L.ccu().systemProfile instanceof VavExternalAhu
                 || (L.ccu().systemProfile instanceof VavStagedRtu && !(L.ccu().systemProfile instanceof VavAdvancedHybridRtu))
                 || L.ccu().systemProfile instanceof VavFullyModulatingRtu
-                || L.ccu().systemProfile instanceof VavAdvancedAhu);
+                || L.ccu().systemProfile instanceof VavAdvancedAhu
+                || L.ccu().systemProfile instanceof DabAdvancedAhu);
     }
     public void doEpidemicControl(){
         epidemicState = EpidemicState.OFF;

@@ -21,7 +21,6 @@ class AcbConfigViewState {
     var autoAway by mutableStateOf (false)
     var autoForceOccupied by mutableStateOf (false)
     var enableCo2Control by mutableStateOf (false)
-    var enableIAQControl by mutableStateOf (false)
     var enableCFMControl by mutableStateOf (false)
 
     var temperatureOffset by mutableStateOf (0.0)
@@ -55,7 +54,6 @@ class AcbConfigViewState {
                 this.autoAway = config.autoAway.enabled
                 this.autoForceOccupied = config.autoForceOccupied.enabled
                 this.enableCo2Control = config.enableCo2Control.enabled
-                this.enableIAQControl = config.enableIAQControl.enabled
                 this.enableCFMControl = config.enableCFMControl.enabled
 
                 this.temperatureOffset = config.temperatureOffset.currentVal
@@ -93,7 +91,6 @@ class AcbConfigViewState {
         config.autoAway.enabled = this.autoAway
         config.autoForceOccupied.enabled = this.autoForceOccupied
         config.enableCo2Control.enabled = this.enableCo2Control
-        config.enableIAQControl.enabled = this.enableIAQControl
         config.enableCFMControl.enabled = this.enableCFMControl
 
         config.temperatureOffset.currentVal = this.temperatureOffset

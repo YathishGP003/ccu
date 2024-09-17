@@ -81,13 +81,18 @@ object ModelLoader {
         return ModelCache.getModelById(MODEL_VAV_ADVANCED_AHU_V2_CONNECT)
     }
 
+    fun getDabAdvancedAhuCmModelV2() : ModelDirective {
+        return ModelCache.getModelById(MODEL_DAB_ADVANCED_AHU_V2_CM)
+    }
+    fun getDabAdvancedAhuConnectModelV2() : ModelDirective {
+        return ModelCache.getModelById(MODEL_DAB_ADVANCED_AHU_V2_CONNECT)
+    }
     fun getVavModulatingRtuModelDef() : ModelDirective {
         return ModelCache.getModelById(MODEL_VAV_MODULATING_AHU)
     }
 
     fun getHyperStatSplitCpuModel() : ModelDirective {
         return ModelCache.getModelById(MODEL_HYPERSTAT_SPLIT_CPU)
-        //return ModelCache.getModelByFileName("models/hssCpu.json")
     }
 
     fun getHyperStatSplitDeviceModel() : ModelDirective {

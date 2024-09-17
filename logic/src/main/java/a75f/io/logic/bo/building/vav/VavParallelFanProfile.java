@@ -222,13 +222,8 @@ public class VavParallelFanProfile extends VavProfile
     private void updateIaqCompensatedMinDamperPos(boolean occupied) {
         
         double co2 = vavEquip.getZoneCO2().readHisVal();
-        double voc = vavEquip.getZoneVoc().readHisVal();
-        
         boolean  enabledCO2Control = vavEquip.getEnableCo2Control().readDefaultVal() > 0 ;
-        boolean  enabledIAQControl = vavEquip.getEnableIAQControl().readDefaultVal() > 0 ;
-
         if (enabledCO2Control) { CcuLog.e(L.TAG_CCU_ZONE, "DCV Tuners: co2Target " + co2Loop.getCo2Target() + ", co2Threshold " + co2Loop.getCo2Threshold()); }
-        if (enabledIAQControl) { CcuLog.e(L.TAG_CCU_ZONE, "IAQ Tuners: vocTarget " + vocLoop.getVocTarget() + ", vocThreshold " + vocLoop.getVocThreshold()); }
 
         double epidemicMode = CCUHsApi.getInstance().readHisValByQuery("point and sp and system and epidemic and state and mode and equipRef ==\""+L.ccu().systemProfile.getSystemEquipRef()+"\"");
         EpidemicState epidemicState = EpidemicState.values()[(int) epidemicMode];
@@ -243,12 +238,6 @@ public class VavParallelFanProfile extends VavProfile
         if (enabledCO2Control && occupied && co2Loop.getLoopOutput(co2) > 0) {
             damper.iaqCompensatedMinPos = damper.iaqCompensatedMinPos + (damper.maxPosition - damper.minPosition) * Math.min(50, co2Loop.getLoopOutput()) / 50;
             CcuLog.d(L.TAG_CCU_ZONE, "CO2LoopOp :" + co2Loop.getLoopOutput() + ", adjusted minposition " + damper.iaqCompensatedMinPos);
-        }
-        
-        //VOC loop output from 0-50% modulates damper min position.
-        if (enabledIAQControl && occupied && vocLoop.getLoopOutput(voc) > 0) {
-            damper.iaqCompensatedMinPos = damper.iaqCompensatedMinPos + (damper.maxPosition - damper.iaqCompensatedMinPos) * Math.min(50, vocLoop.getLoopOutput()) / 50;
-            CcuLog.d(L.TAG_CCU_ZONE, "VOCLoopOp :" + vocLoop.getLoopOutput() + ", adjusted minposition " + damper.iaqCompensatedMinPos);
         }
         
     }

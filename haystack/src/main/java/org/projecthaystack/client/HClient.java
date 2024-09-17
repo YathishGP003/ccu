@@ -709,7 +709,6 @@ public class HClient extends HProj
   public HGrid call(String op, HGrid req)
   {
     CcuLog.d("CCU_HCLIENT", "HClient Op: " + op);
-    CcuLog.d("CCU_HCLIENT", "HClient Req: ");
     req.dump();
     HGrid res = postGrid(op, req);
     if (res != null && res.isErr()) {
@@ -918,7 +917,7 @@ public class HClient extends HProj
   private AuthClientContext auth;
 
   private String getUri(String uri, String op) {
-    if (op.equalsIgnoreCase("readChanges")) {
+    if (op.equalsIgnoreCase("readChanges") || op.equalsIgnoreCase("read")) {
       return uri.replace("v1", "v2");
     }
     return uri;

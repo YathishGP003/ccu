@@ -28,6 +28,9 @@ class ComposeUtil {
         val greyDropDownScrollBarColor = Color(android.graphics.Color.parseColor("#B6B6B6"))
         val greyDropDownUnderlineColor = Color(android.graphics.Color.parseColor("#CCCCCC"))
         val greySearchIcon = Color(android.graphics.Color.parseColor("#999999"))
+        val grey05 = Color(android.graphics.Color.parseColor("#EBECED"))
+        val grey06 = Color(android.graphics.Color.parseColor("#F9F9F9"))
+        val textColor = Color(android.graphics.Color.parseColor("#333333"))
         val myFontFamily = FontFamily(
             Font(R.font.lato_light, FontWeight.Light),
             Font(R.font.lato_regular, FontWeight.Normal),

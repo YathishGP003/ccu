@@ -14,7 +14,6 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import org.joda.time.Interval;
 
@@ -33,10 +32,9 @@ import a75f.io.logic.bo.building.definitions.ScheduleType;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.jobs.StandaloneScheduler;
 import a75f.io.logic.jobs.SystemScheduleUtil;
+import a75f.io.renatus.schedules.ScheduleGroupFragment;
 import a75f.io.renatus.schedules.ScheduleUtil;
-import a75f.io.renatus.schedules.SchedulerFragment;
 import a75f.io.util.ExecutorTask;
-
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
@@ -133,20 +131,11 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
             scheduleImageButton.setTag(mSchedule.getId());
             scheduleImageButton.setOnClickListener(v ->
                                                    {
-                                                       SchedulerFragment schedulerFragment    = SchedulerFragment.newInstance((String) v.getTag());
+                                                       ScheduleGroupFragment schedulerFragment    = new ScheduleGroupFragment(mSchedule, mSchedule.getScheduleGroup());
                                                        FragmentManager   childFragmentManager = mFragment.getFragmentManager();
                                                        childFragmentManager.beginTransaction()
                                                                            .add(R.id.zone_fragment_temp, schedulerFragment)
                                                                            .addToBackStack("schedule").commit();
-
-                                                       schedulerFragment.setOnExitListener(() -> {
-                                                           Toast.makeText(v.getContext(), "Refresh View", Toast.LENGTH_LONG).show();
-                                                           mSchedule = Schedule.getScheduleByEquipId(equipId);
-                                                           //CCUHsApi.getInstance().updateZoneSchedule(mSchedule, zoneId)
-                                                           ScheduleManager.getInstance().updateSchedules();
-                                                           
-                                                           
-                                                       });
                                                    });
             
             scheduleSpinner.setSelection(mScheduleType);
@@ -376,19 +365,11 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
                    .setTitle("Schedule Errors")
                    .setIcon(R.drawable.ic_dialog_alert)
                    .setNegativeButton("Edit", (dialog, id) -> {
-                       SchedulerFragment schedulerFragment    = SchedulerFragment.newInstance(zoneSchedule.getId());
+                       ScheduleGroupFragment schedulerFragment    = new ScheduleGroupFragment(mSchedule, mSchedule.getScheduleGroup());
                        FragmentManager   childFragmentManager = mFragment.getFragmentManager();
                        childFragmentManager.beginTransaction()
                                            .add(R.id.zone_fragment_temp, schedulerFragment)
                                            .addToBackStack("schedule").commit();
-
-                       schedulerFragment.setOnExitListener(() -> {
-                           mSchedule = CCUHsApi.getInstance().getScheduleById(zoneSchedule.getId());
-                           if (checkContainment(mSchedule))
-                           {
-                               ScheduleManager.getInstance().updateSchedules();
-                           }
-                       });
                    })
                    .setPositiveButton("Force-Trim", (dialog, id) -> {
                        HashMap<String, ArrayList<Interval>> spillsMap = new HashMap<>();

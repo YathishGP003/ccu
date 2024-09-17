@@ -13,6 +13,7 @@ import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -297,7 +298,12 @@ public class UsbModbusService extends Service {
                 device = entry.getValue();
                 CcuLog.e(TAG, "UsbModbusService.findModbusSerialPortDevice: assigned value to device from deviceList= " + device);
                 if (UsbSerialUtil.isModbusDevice(device, getApplicationContext())) {
-                    boolean success = grantRootPermissionToUSBDevice(device);
+                    boolean success = false;
+                    if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.N) {
+                        success = grantRootPermissionToUSBDevice(device);
+                    }else {
+                        success = true;
+                    }
                     connection = usbManager.openDevice(device);
                     if (connection != null) {
                         if (success) {
@@ -354,7 +360,12 @@ public class UsbModbusService extends Service {
                 device = entry.getValue();
                 CcuLog.e(TAG, "UsbModbusService.scanSerialPortSilentlyForMbDevice(): assigned value to device while iterating usb devices= " + device);
                 if (UsbSerialUtil.isModbusDevice(device, context)) {
-                    boolean success = grantRootPermissionToUSBDevice(device);
+                    boolean success = false;
+                    if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.N) {
+                        success = grantRootPermissionToUSBDevice(device);
+                    }else {
+                        success = true;
+                    }
                     if(connection != null)
                     {
                         CcuLog.d(TAG, "Closing the connection "+connection);
@@ -375,10 +386,7 @@ public class UsbModbusService extends Service {
     }
 
     private boolean grantRootPermissionToUSBDevice(UsbDevice device) {
-
-        return true;
-
-       /* IBinder b = ServiceManager.getService(Context.USB_SERVICE);
+       IBinder b = ServiceManager.getService(Context.USB_SERVICE);
         IUsbManager service = IUsbManager.Stub.asInterface(b);
         CcuLog.i(TAG_CCU_SERIAL, "Try connecting!");
         // There is a device connected to our Android device. Try to open it as a Serial Port.
@@ -388,7 +396,7 @@ public class UsbModbusService extends Service {
         } catch (RemoteException e) {
             e.printStackTrace();
         }
-        return false;*/
+        return false;
     }
 
 

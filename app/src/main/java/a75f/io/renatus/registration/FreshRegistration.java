@@ -1,12 +1,17 @@
 package a75f.io.renatus.registration;
 
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -42,6 +47,7 @@ import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.ccu.restore.RestoreCCU;
+import a75f.io.logic.util.onLoadingCompleteListener;
 import a75f.io.messaging.client.MessagingClient;
 import a75f.io.renatus.DABFullyAHUProfile;
 import a75f.io.renatus.DABHybridAhuProfile;
@@ -81,6 +87,9 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
     Button buttonNext;
     Prefs prefs;
     WifiManager mainWifiObj;
+    TextView ethernetStatus;
+    EthernetNetworkChangeReceiver mEthernetNetworkReceiver;
+    int selectedPosition = 0;
 
     int[] menu_icons = new int[]{
             R.drawable.ic_goarrow_svg,
@@ -110,6 +119,10 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
 
         imageRefresh = findViewById(R.id.imageRefresh);
         toggleWifi = findViewById(R.id.toggleWifi);
+        ethernetStatus = findViewById(R.id.ethernetConnectionStatus);
+        ConnectivityManager connManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        mEthernetNetworkReceiver = new EthernetNetworkChangeReceiver();
+        registerReceiver(mEthernetNetworkReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
 
         showIcons(false);
         verticalTabAdapter = new VerticalTabAdapter(this, menu_icons, listView_icons, this, 0);
@@ -276,9 +289,9 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             if (currentFragment instanceof WifiFragment) {
                 buttonNext.setEnabled(true);
                 String INSTALL_TYPE = prefs.getString("INSTALL_TYPE");
-                ConnectivityManager connManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
                 NetworkInfo networkInfo = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-                if (networkInfo.isConnected()) {
+                NetworkInfo networkInfoForEthernet = connManager.getNetworkInfo(ConnectivityManager.TYPE_ETHERNET);
+                if (networkInfo.isConnected() || networkInfoForEthernet.isConnected()) {
                     switch (INSTALL_TYPE) {
                         case "CREATENEW":
                             selectItem(3);
@@ -400,7 +413,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
         }
     }
 
-    public void setToggleWifi(boolean status) {
+    public void setToggleWifi(boolean status, boolean ethernetStatus) {
         toggleWifi.setChecked(status);
         if (status) {
             buttonNext.setVisibility(View.VISIBLE);
@@ -408,6 +421,9 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
         } else {
             buttonNext.setVisibility(View.GONE);
             imageRefresh.setImageResource(R.drawable.ic_refresh_disable);
+        }
+        if (ethernetStatus) {
+            buttonNext.setVisibility(View.VISIBLE);
         }
     }
 
@@ -419,7 +435,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
     public void selectItem(int position) {
         Fragment fragment;
         FragmentManager fragmentManager = getSupportFragmentManager();
-
+        selectedPosition = position;
         showIcons(position != 0);
 
         CcuLog.i(L.TAG_CCU_UI, "Tab Position:" + position);
@@ -766,8 +782,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             container.setLayoutParams(paramsPager);
         }
         if (position == 12) {
-
-            fragment = new VavStagedVfdRtuFragment();
+            fragment = new VavStagedVfdRtuFragment(onLoadingCompleteListener.INSTANCE);
 
             Bundle data = new Bundle();
             data.putBoolean("REGISTRATION_WIZARD", true);
@@ -1192,6 +1207,23 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             paramsPager.rightMargin = 0;
             container.setLayoutParams(paramsPager);
         }
+        if(position == 0) {
+            ethernetStatus.setText("Internet connection is active via Ethernet.");
+        }
+        else {
+            ethernetStatus.setText("Connected to the internet via Ethernet.");
+        }
+        ConnectivityManager connManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfoForEthernet = connManager.getNetworkInfo(ConnectivityManager.TYPE_ETHERNET);
+
+        if (position >= 0 && position <= 2 && networkInfoForEthernet.isConnected()) {
+            ethernetStatus.setVisibility(View.VISIBLE);
+            if(!hasInternetConnection(this)) {
+                ethernetStatus.setText("No internet access via Ethernet, please check your connection.");
+            }
+        } else {
+            ethernetStatus.setVisibility(View.INVISIBLE);
+        }
     }
 
     private void loadReplaceCCUFragment(FragmentManager fragmentManager) {
@@ -1331,6 +1363,58 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
         }else {
             imageView_logo.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_logo_svg, null));
             findViewById(R.id.main_layout).setBackgroundResource(R.drawable.bg_logoscreen);
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (mEthernetNetworkReceiver != null) {
+            unregisterReceiver(mEthernetNetworkReceiver);
+        }
+    }
+    public static boolean hasInternetConnection(Context context) {
+        ConnectivityManager connectivityManager =
+                (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        if (connectivityManager != null) {
+                Network network = connectivityManager.getActiveNetwork();
+                if (network != null) {
+                    NetworkCapabilities networkCapabilities =
+                            connectivityManager.getNetworkCapabilities(network);
+                    return networkCapabilities != null &&
+                            networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
+                            networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED);
+                }
+        }
+        return false;
+    }
+
+    public class EthernetNetworkChangeReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            ConnectivityManager connManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo networkInfoForEthernet = connManager.getNetworkInfo(ConnectivityManager.TYPE_ETHERNET);
+
+            if (networkInfoForEthernet.isConnected()) {
+                ethernetStatus.setVisibility(View.VISIBLE);
+                if (hasInternetConnection(context)) {
+                   if(selectedPosition == 0) {
+                       ethernetStatus.setText("Internet connection is active via Ethernet.");
+                   }
+                   else {
+                       ethernetStatus.setText("Connected to the internet via Ethernet.");
+                   }
+                } else {
+                    ethernetStatus.setText("No internet access via Ethernet, please check your connection.");
+                }
+            } else {
+                if( selectedPosition == 2 ) { // Dynamic update in Wifi Fragment
+                    buttonNext.setVisibility(View.GONE);
+                }
+                ethernetStatus.setVisibility(View.INVISIBLE);
+            }
         }
     }
 }

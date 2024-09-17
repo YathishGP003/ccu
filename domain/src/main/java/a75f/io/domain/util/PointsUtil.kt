@@ -25,9 +25,9 @@ class PointsUtil(private val hayStack : CCUHsApi) {
     fun createDynamicSensorEquipPoint(equip: Equip, domainName: String, config: ProfileConfiguration): String? {
 
         val tz = hayStack.timeZone
-        CcuLog.i(Domain.LOG_TAG, "add Dynamic Sensor Equip point - ${domainName}")
+        CcuLog.i(Domain.LOG_TAG, "add Dynamic Sensor Equip point - $domainName")
 
-        val sensor = hayStack.readEntity("point and domainName == \"$domainName\" and equipRef == \"${equip.equipRef}\"")
+        val sensor = hayStack.readEntity("point and domainName == \"$domainName\" and equipRef == \"${equip.id}\"")
         if (sensor.isNotEmpty()) {
             CcuLog.i(Domain.LOG_TAG, "$domainName is already present for equip ${equip.equipRef}")
             return sensor[Tags.ID].toString()

@@ -1,11 +1,10 @@
-package a75f.io.logic.bo.building.system.vav.config
+package a75f.io.logic.bo.building.system.util
 
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.Point
 import a75f.io.domain.config.ValueConfig
-import a75f.io.domain.api.DomainName
+import a75f.io.domain.equips.AdvancedHybridSystemEquip
 import a75f.io.domain.equips.ConnectModuleEquip
-import a75f.io.domain.equips.VavAdvancedHybridSystemEquip
 import a75f.io.logic.L
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import io.seventyfivef.ph.core.Tags
@@ -26,15 +25,17 @@ open class AdvancedHybridAhuConfig(val cmModel: SeventyFiveFProfileDirective, co
      * Get Active configuration values from model
      */
     open fun getActiveConfiguration(): AdvancedHybridAhuConfig {
-        val cmEquip = Domain.hayStack.readEntity("domainName == \"" + DomainName.vavAdvancedHybridAhuV2 + "\"")
+        val cmEquip = Domain.hayStack.readEntity("domainName == \"" + getSystemDomain() + "\"")
         if (cmEquip.isEmpty()) {
             return this
         }
 
-        val connectEquip = Domain.hayStack.readEntity("domainName == \"" + DomainName.vavAdvancedHybridAhuV2_connectModule + "\"")
+        val connectEquip = Domain.hayStack.readEntity("domainName == \"" + getConnectModuleDomain() + "\"")
         val connectEquipRef = if (connectEquip.isNotEmpty()) connectEquip[Tags.ID].toString() else ""
 
-        val advancedHybridAhuEquip = VavAdvancedHybridSystemEquip(cmEquip[Tags.ID].toString(), connectEquipRef)
+        val advancedHybridAhuEquip = AdvancedHybridSystemEquip(cmEquip[Tags.ID].toString())
+        val connectEquip1 = ConnectModuleEquip(connectEquipRef)
+
         cmConfiguration.getDefaultConfiguration()
         getActiveEnabledConfigs(advancedHybridAhuEquip)
         getActiveAssociationConfigs(advancedHybridAhuEquip)
@@ -42,12 +43,12 @@ open class AdvancedHybridAhuConfig(val cmModel: SeventyFiveFProfileDirective, co
 
         connectConfiguration.getDefaultConfiguration()
 
-        if (advancedHybridAhuEquip.connectEquip1.getId() != "") {
+        if (connectEquip1.getId() != "") {
             connectConfiguration.connectEnabled = true
             connectConfiguration.nodeAddress = Integer.parseInt(connectEquip["group"].toString())
-            getActiveEnabledConfigs(advancedHybridAhuEquip.connectEquip1)
-            getActiveAssociationConfigs(advancedHybridAhuEquip.connectEquip1)
-            getActiveDynamicConfigs(advancedHybridAhuEquip.connectEquip1)
+            getActiveEnabledConfigs(connectEquip1)
+            getActiveAssociationConfigs(connectEquip1)
+            getActiveDynamicConfigs(connectEquip1)
         }
 
         cmConfiguration.isDefault = false
@@ -58,7 +59,7 @@ open class AdvancedHybridAhuConfig(val cmModel: SeventyFiveFProfileDirective, co
     /**
      * Get active enabled configuration values from model
      */
-    private fun getActiveEnabledConfigs(equip: VavAdvancedHybridSystemEquip) {
+    private fun getActiveEnabledConfigs(equip: AdvancedHybridSystemEquip) {
         cmConfiguration.apply {
             address0Enabled.enabled = equip.sensorBusAddress0Enable.readDefaultVal() > 0
             address1Enabled.enabled = equip.sensorBusAddress1Enable.readDefaultVal() > 0
@@ -127,7 +128,7 @@ open class AdvancedHybridAhuConfig(val cmModel: SeventyFiveFProfileDirective, co
     /**
      * Get Active configuration values from model
      */
-    private fun getActiveAssociationConfigs(equip: VavAdvancedHybridSystemEquip) {
+    private fun getActiveAssociationConfigs(equip: AdvancedHybridSystemEquip) {
         getSensorAssociationConfigs(equip)
 
         cmConfiguration.apply {
@@ -301,7 +302,7 @@ open class AdvancedHybridAhuConfig(val cmModel: SeventyFiveFProfileDirective, co
     /**
      * Get active configuration values from model
      */
-    private fun getSensorAssociationConfigs(equip: VavAdvancedHybridSystemEquip) {
+    private fun getSensorAssociationConfigs(equip: AdvancedHybridSystemEquip) {
         cmConfiguration.apply {
             address0SensorAssociation.temperatureAssociation.associationVal =
                 equip.temperatureSensorBusAdd0.readDefaultVal().toInt()
@@ -393,7 +394,7 @@ open class AdvancedHybridAhuConfig(val cmModel: SeventyFiveFProfileDirective, co
     /**
      * Get active dynamic configuration values from model
      */
-    private fun getActiveDynamicConfigs(equip: VavAdvancedHybridSystemEquip) {
+    private fun getActiveDynamicConfigs(equip: AdvancedHybridSystemEquip) {
         cmConfiguration.apply {
 
             staticMinPressure.currentVal = getDefault(equip.staticPressureMin, equip, staticMinPressure)
@@ -496,7 +497,7 @@ open class AdvancedHybridAhuConfig(val cmModel: SeventyFiveFProfileDirective, co
     /**
      * Function to get the point value if config exist else return the current value model default value
      */
-    private fun getDefault(point: Point, equip: VavAdvancedHybridSystemEquip, valueConfig: ValueConfig): Double {
+    private fun getDefault(point: Point, equip: AdvancedHybridSystemEquip, valueConfig: ValueConfig): Double {
         return if(Domain.readPointForEquip(point.domainName,equip.equipRef).isEmpty())
             valueConfig.currentVal
         else

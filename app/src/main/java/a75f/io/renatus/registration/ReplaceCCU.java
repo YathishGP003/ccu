@@ -239,7 +239,11 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
                 },
                 ()-> {
                     ProgressDialogUtils.hideProgressDialog();
-                    showCCUListDialog();
+                    if (ccuList.size() > 0) {
+                        showCCUListDialog();
+                    } else {
+                        showNoCCUFoundDialog();
+                    }
                 }
         );
     }
@@ -289,6 +293,16 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
         alertDialog.setCancelable(false);
         alertDialog.show();
         close.setOnClickListener(view -> { alertDialog.dismiss(); });
+    }
+    private void showNoCCUFoundDialog() {
+        alertDialog = new AlertDialog.Builder(getActivity()).create();
+        alertDialog.setTitle("Error");
+        alertDialog.setMessage("There are no CCUs present at this site.");
+        alertDialog.setIcon(R.drawable.ic_dialog_alert);
+        alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, "OKAY", (dialogInterface, i) -> {
+            alertDialog.dismiss();
+        });
+        alertDialog.show();
     }
 
     private void addTextWatcher(final EditText editText) {

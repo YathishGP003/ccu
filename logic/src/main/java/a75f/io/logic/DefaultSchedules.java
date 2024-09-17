@@ -23,6 +23,7 @@ import a75f.io.api.haystack.Queries;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.schedule.ScheduleGroup;
 import a75f.io.logic.tuners.BuildingTunerCache;
 
 public class DefaultSchedules {
@@ -41,13 +42,17 @@ public class DefaultSchedules {
         }
         HRef siteId = CCUHsApi.getInstance().getSiteIdRef();
 
-        HDict[] days = new HDict[5];
+        HDict[] days = new HDict[7];
 
         days[0] = getDefaultForDay(DAYS.MONDAY.ordinal(), zoneId);
         days[1] = getDefaultForDay(DAYS.TUESDAY.ordinal(), zoneId);
         days[2] = getDefaultForDay(DAYS.WEDNESDAY.ordinal(), zoneId);
         days[3] = getDefaultForDay(DAYS.THURSDAY.ordinal(), zoneId);
         days[4] = getDefaultForDay(DAYS.FRIDAY.ordinal(), zoneId);
+        if(zone){
+            days[5] = getDefaultForDay(DAYS.SATURDAY.ordinal(), zoneId);
+            days[6] = getDefaultForDay(DAYS.SUNDAY.ordinal(), zoneId);
+        }
 
         HList hList = HList.make(days);
 
@@ -72,9 +77,8 @@ public class DefaultSchedules {
             defaultSchedule.add(Tags.FOLLOW_BUILDING);
             defaultSchedule.add(Tags.UNOCCUPIED_ZONE_SETBACK, getZoneScheduablePoint(Queries.ZONE_UNOCCUPIED_ZONE_SETBACK,
                     zoneId) == null ? 5.0 : getZoneScheduablePoint(Queries.ZONE_UNOCCUPIED_ZONE_SETBACK, zoneId));
-
+            defaultSchedule.add("scheduleGroup", ScheduleGroup.WEEKDAY_WEEKEND.ordinal());
         }
-        
 
         CCUHsApi.getInstance().addSchedule(localId.toVal(), defaultSchedule.toDict());
         return localId.toCode();
@@ -249,7 +253,41 @@ public class DefaultSchedules {
         return 0;
     }
 
-    private static Double getZoneScheduablePoint(String query, String roomRef){
+    public static Double getZoneScheduablePoint(String query, String roomRef){
         return CCUHsApi.getInstance().readPointPriorityValByQuery(query+ " \""+roomRef+"\"");
+    }
+
+    public static ArrayList<Schedule.Days> getDefaultDays(String zoneId,int startDay, int endDay, int startHour,
+                                                        int startMinute, int endHour, int endMinute) {
+        ArrayList<Schedule.Days> days = new ArrayList<>();
+        double heatingUserLimitMin = getValidZonePoint(getZoneScheduablePoint(Queries.ZONE_HEATING_USER_LIMIT_MIN, zoneId), 67.0);
+        double heatingUserLimitMax = getValidZonePoint(getZoneScheduablePoint(Queries.ZONE_HEATING_USER_LIMIT_MAX, zoneId), 72.0);
+        double coolingUserLimitMin = getValidZonePoint(getZoneScheduablePoint(Queries.ZONE_COOLING_USER_LIMIT_MIN, zoneId), 72.0);
+        double coolingUserLimitMax = getValidZonePoint(getZoneScheduablePoint(Queries.ZONE_COOLING_USER_LIMIT_MAX, zoneId), 77.0);
+        double coolingDeadBand = getValidZonePoint(getZoneScheduablePoint(Queries.ZONE_COOLING_DEADBAND, zoneId), 2.0);
+        double heatingDeadBand = getValidZonePoint(getZoneScheduablePoint(Queries.ZONE_HEATING_DEADBAND, zoneId), 2.0);
+
+        for (int i = startDay; i <= endDay; i++){
+            Schedule.Days day = new Schedule.Days();
+            day.setDay(i);
+            day.setSthh(startHour);
+            day.setStmm(startMinute);
+            day.setEthh(endHour);
+            day.setEtmm(endMinute);
+            day.setCoolingVal(DEFAULT_COOLING_TEMP);
+            day.setHeatingVal(DEFAULT_HEATING_TEMP);
+            day.setHeatingUserLimitMin(heatingUserLimitMin);
+            day.setHeatingUserLimitMax(heatingUserLimitMax);
+            day.setCoolingUserLimitMin(coolingUserLimitMin);
+            day.setCoolingUserLimitMax(coolingUserLimitMax);
+            day.setCoolingDeadBand(coolingDeadBand);
+            day.setHeatingDeadBand(heatingDeadBand);
+            days.add(day);
+        }
+        return days;
+    }
+
+    private static double getValidZonePoint(Double zonePoint, double defaultValue) {
+        return (zonePoint == 0.0 || zonePoint == null) ? defaultValue : zonePoint;
     }
 }

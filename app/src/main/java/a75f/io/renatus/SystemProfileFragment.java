@@ -3,6 +3,7 @@ package a75f.io.renatus;
 
 import static a75f.io.logic.bo.building.dab.DabProfile.CARRIER_PROD;
 
+import android.app.AlertDialog;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,11 +24,13 @@ import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logic.L;
+import a75f.io.logic.util.onLoadingCompleteListener;
 import a75f.io.renatus.profiles.system.VavModulatingRtuFragment;
 import a75f.io.renatus.profiles.system.VavStagedRtuFragment;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.renatus.profiles.system.VavStagedVfdRtuFragment;
+import a75f.io.renatus.profiles.system.advancedahu.dab.DabAdvancedHybridAhuFragment;
 import a75f.io.renatus.profiles.system.advancedahu.vav.VavAdvancedHybridAhuFragment;
 import a75f.io.renatus.profiles.system.externalahu.ExternalAhuFragment;
 import a75f.io.renatus.registration.FreshRegistration;
@@ -42,7 +45,7 @@ import butterknife.ButterKnife;
  * Created by samjithsadasivan isOn 8/7/17.
  */
 
-public class SystemProfileFragment extends Fragment {
+public class SystemProfileFragment extends Fragment implements onLoadingCompleteListener {
     @BindView(R.id.spinnerSystemProfile)
     Spinner spSystemProfile;
 
@@ -51,8 +54,13 @@ public class SystemProfileFragment extends Fragment {
 
     @BindView(R.id.spinnerLayout)
     LinearLayout spinnerLayout;
+    boolean showDialogRequired = false;
+
+    boolean checkDialogRequired = false;
 
     private boolean isFreshRegister;
+
+    onLoadingCompleteListener dialogListener = this;
 
     public SystemProfileFragment() {
     }
@@ -96,8 +104,24 @@ public class SystemProfileFragment extends Fragment {
                     ((TextView) adapterView.getChildAt(0)).setTextColor(getResources().getColor(R.color.black));
                     ((TextView) adapterView.getChildAt(0)).setTextSize(18);
                     spSystemProfile.getLayoutParams().width = 340;
+
+                    if(adapterView.getSelectedItemPosition() == 0){
+                        if (!getSystemEquipOAOAndBypassDamper()  && L.ccu().systemProfile .getProfileName() != "Default" && !showDialogRequired && canAddDABProfile() && canAddVAVProfile()) {
+
+                            checkDialogRequired = true;
+                            spSystemProfile.setSelection(L.ccu().systemProfile != null ?
+                                    systemProfileSelectorAdapter.getPosition(L.ccu().systemProfile.getProfileName()) : 0);
+                            // checking the Profile type DM or Non DM.Non DM profile we not have loading while selecting the profile.
+                            //so i am showing the Alert dialog to the user to confirm the profile change.
+                            //For DM system profile i have added the listener after loading screen completed it will show the dialog
+                            if(getProfileType()) {
+                                showAlertDialog();
+                                checkDialogRequired = false;
+                            }
+                            return;
+                        }
+                    }
                 }
-                
                 switch (i) {
                     case 0:
                         if(canAddDABProfile() && canAddVAVProfile()){
@@ -115,10 +139,7 @@ public class SystemProfileFragment extends Fragment {
                     case 1:
                         if (canAddVAVProfile()) {
                             getActivity().getSupportFragmentManager().beginTransaction()
-                                    .replace(R.id.profileContainer, new VavStagedRtuFragment()).commit();
-                            if (SystemConfigMenuFragment.SystemConfigMenuFragmentHandler != null) {
-                                SystemConfigMenuFragment.SystemConfigMenuFragmentHandler.sendEmptyMessage(1);
-                            }
+                                    .replace(R.id.profileContainer, new VavStagedRtuFragment(dialogListener)).commit();
                         } else {
                             Toast.makeText(getActivity(),"Unpair all DAB Zones and try",Toast.LENGTH_LONG).show();
                             spSystemProfile.setSelection(L.ccu().systemProfile != null ?
@@ -129,10 +150,7 @@ public class SystemProfileFragment extends Fragment {
                     case 2:
                         if (canAddVAVProfile()) {
                             getActivity().getSupportFragmentManager().beginTransaction()
-                                    .replace(R.id.profileContainer, new VavModulatingRtuFragment()).commit();
-                            if (SystemConfigMenuFragment.SystemConfigMenuFragmentHandler != null) {
-                                SystemConfigMenuFragment.SystemConfigMenuFragmentHandler.sendEmptyMessage(1);
-                            }
+                                    .replace(R.id.profileContainer, new VavModulatingRtuFragment(dialogListener)).commit();
                         } else {
                             Toast.makeText(getActivity(),"Unpair all DAB Zones and try",Toast.LENGTH_LONG).show();
                             spSystemProfile.setSelection(L.ccu().systemProfile != null ?
@@ -142,10 +160,7 @@ public class SystemProfileFragment extends Fragment {
                     case 3:
                         if (canAddVAVProfile()) {
                             getActivity().getSupportFragmentManager().beginTransaction()
-                                    .replace(R.id.profileContainer, new VavStagedVfdRtuFragment()).commit();
-                            if (SystemConfigMenuFragment.SystemConfigMenuFragmentHandler != null) {
-                                SystemConfigMenuFragment.SystemConfigMenuFragmentHandler.sendEmptyMessage(1);
-                            }
+                                    .replace(R.id.profileContainer, new VavStagedVfdRtuFragment(dialogListener)).commit();
                         } else {
                             Toast.makeText(getActivity(),"Unpair all DAB Zones and try",Toast.LENGTH_LONG).show();
                             spSystemProfile.setSelection(L.ccu().systemProfile != null ?
@@ -168,7 +183,7 @@ public class SystemProfileFragment extends Fragment {
                     case 5:
                         if (canAddVAVProfile()) {
                             getActivity().getSupportFragmentManager().beginTransaction()
-                                    .replace(R.id.profileContainer, new VavAdvancedHybridAhuFragment()).commit();
+                                    .replace(R.id.profileContainer, new VavAdvancedHybridAhuFragment(dialogListener)).commit();
                         } else {
                             Toast.makeText(getActivity(), "Unpair all DAB Zones and try", Toast.LENGTH_LONG).show();
                             spSystemProfile.setSelection(L.ccu().systemProfile != null ?
@@ -239,14 +254,25 @@ public class SystemProfileFragment extends Fragment {
                                     systemProfileSelectorAdapter.getPosition(L.ccu().systemProfile.getProfileName()) : 0);
                         }
                         break;
+
                     case 11:
+                        if (canAddDABProfile()) {
+                            getActivity().getSupportFragmentManager().beginTransaction()
+                                    .replace(R.id.profileContainer, new DabAdvancedHybridAhuFragment()).commit();
+                            if (SystemConfigMenuFragment.SystemConfigMenuFragmentHandler != null) {
+                                SystemConfigMenuFragment.SystemConfigMenuFragmentHandler.sendEmptyMessage(1);
+                            }
+                        }else {
+                            Toast.makeText(getActivity(),"Unpair all VAV Zones and try",Toast.LENGTH_LONG).show();
+                            spSystemProfile.setSelection(L.ccu().systemProfile != null ?
+                                    systemProfileSelectorAdapter.getPosition(L.ccu().systemProfile.getProfileName()) : 0);
+                        }
+                        break;
+                    case 12:
                         if (canAddDABProfile()) {
                             getActivity().getSupportFragmentManager().beginTransaction()
                                     .replace(R.id.profileContainer, new ExternalAhuFragment(ProfileType.dabExternalAHUController),"dabExternalAHUController").commit();
                             PreferenceUtil.setIsNewExternalAhu(true);
-                            if (SystemConfigMenuFragment.SystemConfigMenuFragmentHandler != null) {
-                                SystemConfigMenuFragment.SystemConfigMenuFragmentHandler.sendEmptyMessage(1);
-                            }
                         } else {
                             Toast.makeText(getActivity(), "Unpair all VAV Zones and try", Toast.LENGTH_LONG).show();
                             spSystemProfile.setSelection(L.ccu().systemProfile != null ?
@@ -254,7 +280,7 @@ public class SystemProfileFragment extends Fragment {
                         }
                         break;
 
-                    case 12:
+                    case 13:
                         if (canAddVAVProfile()) {
                             getActivity().getSupportFragmentManager().beginTransaction()
                                     .replace(R.id.profileContainer, new VavIERtuProfile()).commit();
@@ -277,7 +303,15 @@ public class SystemProfileFragment extends Fragment {
         spSystemProfile.setSelection(L.ccu().systemProfile != null ?
                 systemProfileSelectorAdapter.getPosition(L.ccu().systemProfile.getProfileName()) : 0);
     }
-    
+    private boolean getProfileType() {
+        HashMap profileList = CCUHsApi.getInstance().read("system and equip and not modbus ");
+        //Non -DM profile and vavExternalAHUController and dabExternalAHUController we not have loading while selecting the profile
+        if(profileList.get("domainName") == null || profileList.get("domainName").equals("vavExternalAHUController") || profileList.get("domainName").equals("dabExternalAHUController")){
+            return true;
+        }
+        return false;
+    }
+
     private boolean canAddVAVProfile() {
         ArrayList<HashMap> zoneEquips = CCUHsApi.getInstance().readAll("equip and zone");
         for (HashMap equip : zoneEquips) {
@@ -287,7 +321,30 @@ public class SystemProfileFragment extends Fragment {
         }
         return true;
     }
-    
+    public boolean getSystemEquipOAOAndBypassDamper() {
+        ArrayList<HashMap> SystemEquip = CCUHsApi.getInstance().readAll("equip and (oao or bypassDamper)");
+        for (HashMap equip : SystemEquip) {
+            if (equip.get("oao") != null  || equip.get("bypassDamper") != null){
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private void showAlertDialog() {
+                new AlertDialog.Builder(getActivity())
+                        .setTitle("Confirmation")
+                        .setMessage("Changing the system profile to Default will delete the OAO/Bypass Damper profile.")
+                        .setNegativeButton("Cancel", (dialog, which) -> {
+                            dialog.dismiss();
+                            showDialogRequired = false;
+                        })
+                        .setPositiveButton("Proceed", (dialog, which) -> {
+                            spSystemProfile.setSelection(0);
+                            showDialogRequired = true;
+                        })
+                        .create().show();
+            }
     
     private boolean canAddDABProfile() {
         ArrayList<HashMap> zoneEquips = CCUHsApi.getInstance().readAll("equip and zone");
@@ -310,5 +367,13 @@ public class SystemProfileFragment extends Fragment {
     private CustomSpinnerDropDownAdapter getAdapterValue(ArrayList values) {
         return new CustomSpinnerDropDownAdapter(requireContext(), R.layout.spinner_dropdown_item, values);
     }
-    
-}
+
+    @Override
+    public void onLoadingComplete() {
+        if(checkDialogRequired){
+            checkDialogRequired = false;
+            showAlertDialog();
+        }
+    }
+
+    }

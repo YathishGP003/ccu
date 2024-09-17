@@ -11,12 +11,17 @@ import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.DAYS;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Zone;
 import a75f.io.api.haystack.schedule.BuildingOccupancy;
+import a75f.io.domain.api.Domain;
+import a75f.io.domain.api.DomainName;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
-import a75f.io.renatus.util.Marker;
+import a75f.io.logic.schedule.ScheduleGroup;
+import a75f.io.logic.util.CommonTimeSlotFinder;
+import a75f.io.renatus.util.RxjavaUtil;
 
 public class ScheduleUtil {
     public static void trimZoneSchedules(HashMap<String, ArrayList<Interval>> spillsMap) {
@@ -25,8 +30,8 @@ public class ScheduleUtil {
 
             Zone z = new Zone.Builder().setHashMap(CCUHsApi.getInstance().readMapById(zoneId)).build();
             HashMap<Object, Object> scheduleHashMap = CCUHsApi.getInstance().readEntity("schedule and not " +
-                    "vacation and not special and roomRef == " +z.getId());
-            if(scheduleHashMap.isEmpty())
+                    "vacation and not special and roomRef == " + z.getId());
+            if (scheduleHashMap.isEmpty())
                 continue;
             Schedule zoneSchedule = CCUHsApi.getInstance().getScheduleById(scheduleHashMap.get("id").toString());
             ArrayList<Interval> spills = spillsMap.get(zoneId);
@@ -61,81 +66,18 @@ public class ScheduleUtil {
         }
     }
 
-    public static void trimZoneSchedule(Schedule s, HashMap<String, ArrayList<Interval>> spillsMap) {
 
-        ArrayList<Interval> spills = spillsMap.get(s.getRoomRef());
-        if (spills == null) {
-            CcuLog.d(L.TAG_CCU_UI,"Schedule spills invalid for "+ s +" in "+ spillsMap);
-            return;
-        }
-        CcuLog.d(L.TAG_CCU_UI,"Trim spills for "+ s +" in "+ spillsMap);
-        HashMap<Schedule.Days, ArrayList<Interval>> validSpills = new HashMap<>();
-        CopyOnWriteArrayList<Schedule.Days> days = new CopyOnWriteArrayList<>(s.getDays());
-        CopyOnWriteArrayList<Schedule.Days> conflictDays = new CopyOnWriteArrayList<>();
-        for (Schedule.Days d : days) {
-            Interval i = s.getScheduledInterval(d);
-
-            for (Interval spill : spills) {
-                if (!i.contains(spill)) {
-                    continue;
-                }
-                if (spill.getStartMillis() <= i.getStartMillis() &&
-                        spill.getEndMillis() >= i.getEndMillis()) {
-                    conflictDays.add(d);
-                    continue;
-                }
-                validSpills.put(d, disconnectedIntervals(spills, i));
-                conflictDays.add(d);
-            }
-        }
-        for (Map.Entry<Schedule.Days, ArrayList<Interval>> entry : validSpills.entrySet()) {
-            for (Interval in : entry.getValue()) {
-                Schedule.Days d = entry.getKey();
-                Schedule.Days dayBO = new Schedule.Days();
-                dayBO.setEthh(in.getEnd().getHourOfDay());
-                dayBO.setSthh(in.getStart().getHourOfDay());
-                dayBO.setEtmm(in.getEnd().getMinuteOfHour());
-                dayBO.setStmm(in.getStart().getMinuteOfHour());
-                dayBO.setHeatingVal(d.getHeatingVal());
-                dayBO.setCoolingVal(d.getCoolingVal());
-                dayBO.setSunset(false);
-                dayBO.setSunrise(false);
-                dayBO.setDay(d.getDay());
-                dayBO.setHeatingUserLimitMin(d.getHeatingUserLimitMin());
-                dayBO.setHeatingUserLimitMax(d.getHeatingUserLimitMax());
-                dayBO.setCoolingUserLimitMin(d.getCoolingUserLimitMin());
-                dayBO.setCoolingUserLimitMax(d.getCoolingUserLimitMax());
-                dayBO.setHeatingDeadBand(d.getHeatingDeadBand());
-                dayBO.setCoolingDeadBand(d.getCoolingDeadBand());
-                s.getDays().remove(d);
-                s.getDays().add(dayBO);
-            }
-
-        }
-
-        for (Schedule.Days d : conflictDays) {
-            s.getDays().remove(d);
-        }
-
-        if(s.isNamedSchedule())
-            CCUHsApi.getInstance().updateSchedule(s);
-        else
-            CCUHsApi.getInstance().updateZoneSchedule(s, s.getRoomRef());
-    }
-
-    public static Interval OverNightEnding(Interval Ending)
-    {
+    public static Interval OverNightEnding(Interval Ending) {
         DateTime initialEnding = Ending.getStart().withTime(23, 59, 59, 0);
         return new Interval(Ending.getStart(), initialEnding);
     }
-    public static Interval OverNightStarting(Interval Start)
-    {
+
+    public static Interval OverNightStarting(Interval Start) {
         DateTime subsequentStart = Start.getEnd().withTime(0, 0, 0, 0);
         return new Interval(subsequentStart, Start.getEnd());
     }
 
-    public static Interval AddingNextWeekDayForOverNight(Schedule interval)
-    {
+    public static Interval AddingNextWeekDayForOverNight(Schedule interval) {
         ArrayList<Interval> allIntervals = interval.getScheduledIntervals(interval.getDaysSorted());
         Interval AddingNewData = null;
         //overnight scenario
@@ -170,57 +112,6 @@ public class ScheduleUtil {
         return AddingNewData;
     }
 
-    public static ArrayList<Interval> disconnectedIntervals(List<Interval> intervals, Interval r) {
-        ArrayList<Interval> result = new ArrayList<>();
-
-        ArrayList<Marker> markers = new ArrayList<>();
-
-        for (Interval i : intervals) {
-            markers.add(new Marker(i.getStartMillis(), true));
-            markers.add(new Marker(i.getEndMillis(), false));
-        }
-
-        markers.sort((a, b) -> Long.compare(a.val, b.val));
-
-
-        int overlap = 0;
-        boolean endReached = false;
-
-        if (markers.get(0).val > r.getStartMillis()) {
-            result.add(new Interval(r.getStartMillis(), markers.get(0).val));
-        }
-
-        for (int i = 0; i < markers.size() - 1; i++) {
-            Marker m = markers.get(i);
-
-            overlap += m.start ? 1 : -1;
-            Marker next = markers.get(i + 1);
-
-            if (m.val != next.val && overlap == 0 && next.val > r.getStartMillis()) {
-                long start = Math.max(m.val, r.getStartMillis());
-                long end = next.val;
-                if (next.val > r.getEndMillis()) {
-                    end = r.getEndMillis();
-                    endReached = true;
-                }
-                // End instance must be greater than start instance
-                if (start != end && end > start) {
-                    result.add(new Interval(start, end));
-                }
-                if (endReached)
-                    break;
-            }
-        }
-
-        if (!endReached) {
-            Marker m = markers.get(markers.size() - 1);
-            if (m.val != r.getEndMillis() && m.val < r.getEndMillis()) {
-                result.add(new Interval(m.val, r.getEndMillis()));
-            }
-        }
-
-        return result;
-    }
 
     public static String getDayString(int day) {
         switch (day) {
@@ -240,5 +131,101 @@ public class ScheduleUtil {
                 return "Sunday";
         }
         return "";
+    }
+
+    public static String getNamedScheduleHeader(Integer scheduleGroup, int day) {
+        if (scheduleGroup == ScheduleGroup.SEVEN_DAY.ordinal()) {
+            return DAYS.values()[day].name();
+        } else if (scheduleGroup == ScheduleGroup.WEEKDAY_WEEKEND.ordinal()) {
+            if (day == DAYS.SATURDAY.ordinal() || day == DAYS.SUNDAY.ordinal()) {
+                return "Weekend";
+            } else {
+                return "Weekday";
+            }
+        } else if (scheduleGroup == ScheduleGroup.WEEKDAY_SATURDAY_SUNDAY.ordinal()) {
+            if (day == DAYS.SATURDAY.ordinal()) {
+                return "Saturday";
+            } else if (day == DAYS.SUNDAY.ordinal()) {
+                return "Sunday";
+            } else {
+                return "Weekday";
+            }
+        } else {
+            return "Everyday";
+        }
+    }
+
+    public static boolean isWeekDaysSatAndSunNotPresentInBuildingOccupancy(List<Integer> daysPresent) {
+        return !daysPresent.containsAll(DAYS.getWeekDaysOrdinal()) &&
+                !daysPresent.contains(DAYS.SATURDAY.ordinal()) &&
+                !daysPresent.contains(DAYS.SUNDAY.ordinal());
+    }
+
+    public static boolean isAnyDaysNotPresentInBuildingOccupancy(List<Integer> presentDays) {
+        return presentDays.size() < DAYS.values().length;
+    }
+
+    public static boolean isWeekDaysWeekendNotPresentInBuildingOccupancy(List<Integer> daysPresent) {
+        return !daysPresent.containsAll(DAYS.getWeekDaysOrdinal()) &&
+                !daysPresent.containsAll(DAYS.getWeekEndsOrdinal());
+    }
+
+    public static boolean isAllDaysNotPresentInBuildingOccupancy(List<Integer> presentDays) {
+        return presentDays.isEmpty();
+    }
+
+    public static void trimScheduleTowardCommonTimeSlot(Schedule zoneSchedule,
+                                                        List<List<CommonTimeSlotFinder.TimeSlot>> commonTimeSlot,
+                                                        CommonTimeSlotFinder commonTimeSlotFinder, CCUHsApi ccuHsApi) {
+        RxjavaUtil.executeBackground(() -> commonTimeSlotFinder.trimScheduleTowardCommonTimeSlotAndSync(zoneSchedule, commonTimeSlot, ccuHsApi));
+    }
+
+    public static String getDayString(int day, int mScheduleGroup) {
+        switch (day) {
+            case 1:
+            case 2:
+            case 3:
+            case 4:
+            case 5:
+                if (mScheduleGroup == ScheduleGroup.EVERYDAY.ordinal()) {
+                    return "All Days";
+                } else if (mScheduleGroup == ScheduleGroup.WEEKDAY_WEEKEND.ordinal() ||
+                        mScheduleGroup == ScheduleGroup.WEEKDAY_SATURDAY_SUNDAY.ordinal()) {
+                    return "Weekday";
+                } else {
+                    return getDayString(day);
+                }
+            case 6:
+                if (mScheduleGroup == ScheduleGroup.EVERYDAY.ordinal()) {
+                    return "All Days";
+                } else if (mScheduleGroup == ScheduleGroup.WEEKDAY_WEEKEND.ordinal()) {
+                    return "Weekend";
+                }  else {
+                    return "Saturday";
+                }
+            case 7:
+                if (mScheduleGroup == ScheduleGroup.EVERYDAY.ordinal()) {
+                    return "All Days";
+                } else if (mScheduleGroup == ScheduleGroup.WEEKDAY_WEEKEND.ordinal()) {
+                    return "Weekend";
+                } else {
+                    return "Sunday";
+                }
+            default:
+                return "";
+        }
+    }
+
+    /*Both heating and cooling deadband's min values are same*/
+    public static double getDeadBandValue(String val, String roomRef){
+        if(roomRef == "" || roomRef == null){
+            if(val == "minVal"){
+                return Double.parseDouble(Domain.readPoint(DomainName.coolingDeadband).get("minVal").toString());
+            } else {
+                return Double.parseDouble(Domain.readPoint(DomainName.coolingDeadband).get("maxVal").toString());
+            }
+        }
+        return Double.parseDouble(CCUHsApi.getInstance().readEntity(
+                "deadband and (heating or cooling) and roomRef == \"" + roomRef + "\"").get(val).toString());
     }
 }

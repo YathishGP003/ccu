@@ -6,12 +6,13 @@ import a75f.io.device.cm.OccupancySensorBusMapping
 import a75f.io.device.cm.PressureSensorBusMapping
 import a75f.io.device.cm.TemperatureSensorBusMapping
 import a75f.io.device.cm.getUniversalInputSensorMapping
+import a75f.io.device.cm.isNotAdvanceAhuProfile
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.PhysicalPoint
 import a75f.io.domain.equips.ConnectModuleEquip
-import a75f.io.domain.equips.VavAdvancedHybridSystemEquip
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
+import a75f.io.logic.bo.building.system.util.getConnectEquip
 import com.x75f.modbus4j.serial.rtu.RtuMessageResponse
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -67,12 +68,11 @@ fun updateUniversalInputMappedValues(response: RtuMessageResponse) {
             "$universalInput4Val universalInput5Val $universalInput5Val universalInput6Val " +
             "$universalInput6Val universalInput7Val $universalInput7Val universalInput8Val $universalInput8Val")
 
-    if (Domain.systemEquip !is VavAdvancedHybridSystemEquip) {
+    if (isNotAdvanceAhuProfile()) {
         CcuLog.e(L.TAG_CCU_SERIAL, "CM updateSensorBusData : Skipped AdvancedAHU not configured.")
         return
     }
-    val systemEquip = Domain.systemEquip as VavAdvancedHybridSystemEquip
-    val connectEquip = systemEquip.connectEquip1
+    val connectEquip = getConnectEquip()
     writeUniversalInputMappedVal(connectEquip.universalIn1Association.readDefaultVal().toInt(), universalInput1Val, connectEquip, Domain.connect1Device.universal1In)
     writeUniversalInputMappedVal(connectEquip.universalIn2Association.readDefaultVal().toInt(), universalInput2Val, connectEquip, Domain.connect1Device.universal2In)
     writeUniversalInputMappedVal(connectEquip.universalIn3Association.readDefaultVal().toInt(), universalInput3Val, connectEquip, Domain.connect1Device.universal3In)
@@ -133,12 +133,12 @@ fun updateAnalogOutputMappedValues(slaveId : Int, response : RtuMessageResponse)
 
 fun updateSensorBusValues(slaveId: Int, response: RtuMessageResponse) {
 
-    if (Domain.systemEquip !is VavAdvancedHybridSystemEquip) {
+    if (isNotAdvanceAhuProfile()) {
         CcuLog.e(L.TAG_CCU_SERIAL_CONNECT, "CM updateSensorBusData : Skipped AdvancedAHU not configured.")
         return
     }
-    val systemEquip = Domain.systemEquip as VavAdvancedHybridSystemEquip
-    val connectEquip = systemEquip.connectEquip1
+
+    val connectEquip = getConnectEquip()
     val messageData = response.messageData.copyOfRange(MODBUS_DATA_OFFSET, response.messageData.size)
     if (connectEquip.sensorBusAddress0Enable.readDefaultVal() > 0) {
         CcuLog.i(L.TAG_CCU_SERIAL, "CM updateSensorBusData sensorBusAddress0Enabled")

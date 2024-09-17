@@ -5,6 +5,7 @@ import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.HayStackConstants
 import a75f.io.api.haystack.Tags
 import a75f.io.domain.api.Domain
+import a75f.io.domain.api.DomainName
 import a75f.io.domain.api.PhysicalPoint
 import a75f.io.domain.api.Point
 import a75f.io.domain.api.readPoint
@@ -155,10 +156,10 @@ class DabAdvancedAhu : DabSystemProfile() {
     }
 
     private fun initializePILoop() {
-        val proportionalGain = systemEquip.dabProportionalKFactor.readPriorityVal()
-        val integralGain = systemEquip.dabIntegralKFactor.readPriorityVal()
-        val proportionalRange = systemEquip.dabTemperatureProportionalRange.readPriorityVal()
-        val integralTime = systemEquip.dabTemperatureIntegralTime.readPriorityVal()
+        val proportionalGain = systemEquip.dabSupplyAirProportionalKFactor.readPriorityVal()
+        val integralGain = systemEquip.dabSupplyAirIntegralKFactor.readPriorityVal()
+        val proportionalRange = systemEquip.dabSupplyAirTemperatureProportionalRange.readPriorityVal()
+        val integralTime = systemEquip.dabSupplyAirTemperatureIntegralTime.readPriorityVal()
 
         satCoolingPILoop.apply {
             setProportionalGain(proportionalGain)
@@ -173,10 +174,10 @@ class DabAdvancedAhu : DabSystemProfile() {
             integralMaxTimeout = integralTime.toInt()
         }
         staticPressureFanPILoop.apply {
-            setProportionalGain(proportionalGain)
-            setIntegralGain(integralGain)
-            proportionalSpread = proportionalRange
-            integralMaxTimeout = integralTime.toInt()
+            setProportionalGain(systemEquip.dabDuctStaticProportionalKFactor.readPriorityVal())
+            setIntegralGain(systemEquip.dabDuctStaticIntegralKFactor.readPriorityVal())
+            proportionalSpread = systemEquip.dabDuctStaticPressureProportionalRange.readPriorityVal()
+            integralMaxTimeout = systemEquip.dabDuctStaticPressureIntegralTime.readPriorityVal().toInt()
         }
     }
 
@@ -699,10 +700,10 @@ class DabAdvancedAhu : DabSystemProfile() {
 
                 if (isConnectEquip) {
                     val domainName = connectAnalogOutAssociationToDomainName(association.readDefaultVal().toInt())
-                    getDomainPointForName(domainName, systemEquip.connectEquip1).writeHisVal(logicalValue)
+                    getDomainPointForName(domainName, systemEquip.connectEquip1).writeHisVal(roundOff(logicalValue))
                 } else {
                     val domainName = analogOutAssociationToDomainName(association.readDefaultVal().toInt())
-                    getDomainPointForName(domainName, systemEquip.cmEquip).writeHisVal(logicalValue)
+                    getDomainPointForName(domainName, systemEquip.cmEquip).writeHisVal(roundOff(logicalValue))
                 }
             }
         }
@@ -892,6 +893,16 @@ class DabAdvancedAhu : DabSystemProfile() {
         domainName.readPoint(systemEquip.equipRef).let {
             return it["unit"].toString()
         }
+    }
+
+    fun getSatUnit(): String {
+        if (systemEquip.cmEquip.airTempHeatingSp.pointExists()) {
+            return getUnit(DomainName.airTempHeatingSp)
+        }
+        if (systemEquip.cmEquip.airTempCoolingSp.pointExists()) {
+            return getUnit(DomainName.airTempCoolingSp)
+        }
+        return ""
     }
 
     private fun resetSystem() {

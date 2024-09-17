@@ -92,6 +92,23 @@ object DomainName {
     const val dabReheatProportionalKFactor = "dabreheatProportionalKFactor"
     const val reheatProportionalKFactor = "reheatProportionalKFactor"
 
+    const val dabSupplyAirTemperatureProportionalKFactor = "dabSupplyAirTemperatureProportionalKFactor"
+    const val dabSupplyAirTemperatureProportionalRange = "dabSupplyAirTemperatureProportionalRange"
+    const val dabSupplyAirTemperatureIntegralTime = "dabSupplyAirTemperatureIntegralTime"
+    const val dabSupplyAirTemperatureIntegralKFactor = "dabSupplyAirTemperatureIntegralKFactor"
+
+    const val dabDuctStaticPressureProportionalKFactor = "dabDuctStaticPressureProportionalKFactor"
+    const val dabDuctStaticPressureProportionalRange = "dabDuctStaticPressureProportionalRange"
+    const val dabDuctStaticPressureIntegralTime = "dabDuctStaticPressureIntegralTime"
+    const val dabDuctStaticIntegralKFactor = "dabDuctStaticIntegralKFactor"
+
+    /*
+
+    dabDuctStaticPressureIntegralTime
+    dabDuctStaticPressureProportionalKFactor
+    dabDuctStaticPressureIntegralKFactor
+    dabDuctStaticPressureProportionalRange*/
+
     //VAV
     const val vavTargetCumulativeDamper = "vavTargetCumulativeDamper"
     const val vavAnalogFanSpeedMultiplier = "vavAnalogFanSpeedMultiplier"
@@ -107,6 +124,16 @@ object DomainName {
     const val vavTemperatureIntegralTime = "vavTemperatureIntegralTime"
     const val vavOutsideTempCoolingLockout = "vavOutsideTempCoolingLockout"
     const val vavOutsideTempHeatingLockout = "vavOutsideTempHeatingLockout"
+
+    const val vavSupplyAirTemperatureProportionalKFactor = "vavSupplyAirTemperatureProportionalKFactor"
+    const val vavSupplyAirTemperatureProportionalRange = "vavSupplyAirTemperatureProportionalRange"
+    const val vavSupplyAirTemperatureIntegralTime = "vavSupplyAirTemperatureIntegralTime"
+    const val vavSupplyAirTemperatureIntegralKFactor = "vavSupplyAirTemperatureIntegralKFactor"
+
+    const val vavDuctStaticPressureProportionalKFactor = "vavDuctStaticPressureProportionalKFactor"
+    const val vavDuctStaticPressureProportionalRange = "vavDuctStaticPressureProportionalRange"
+    const val vavDuctStaticPressureIntegralTime = "vavDuctStaticPressureIntegralTime"
+    const val vavDuctStaticPressureIntegralKFactor = "vavDuctStaticPressureIntegralKFactor"
 
     //VAV-Zone
     const val damperType = "damperType"

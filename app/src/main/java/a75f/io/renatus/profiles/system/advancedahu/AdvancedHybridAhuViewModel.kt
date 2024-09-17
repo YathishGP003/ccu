@@ -40,7 +40,6 @@ import a75f.io.renatus.modbus.util.OK
 import android.annotation.SuppressLint
 import android.content.Context
 import android.text.Spanned
-import android.util.Log
 import androidx.appcompat.app.AlertDialog
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.LiveData

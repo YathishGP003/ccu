@@ -94,10 +94,10 @@ fun getCMSettingsMessage() : ControlMote.CcuToCmSettingsMessage_t {
         addAnalogOutConfigsToSettingsMessage(this)
         addAnalogInConfigsToSettingsMessage(this)
         addThermistorConfigsToSettingsMessage(this)
-        addPILoopConfiguration(this)
-        addPILoopConfiguration(this)
-        addPILoopConfiguration(this)
-        addPILoopConfiguration(this)
+        addPISatLoopConfiguration(this)         // Sat Cooling loop configuration
+        addPISatLoopConfiguration(this)         // Sat Heating loop configuration
+        addPIPressureLoopConfiguration(this)    // Pressure fan loop configuration
+        addPISatLoopConfiguration(this)         // Right now this is unused dummy values
         addSensorConfigs(this)
         addSensorBusMappings(this)
         addTestSignals(this)
@@ -313,17 +313,17 @@ fun addThermistorConfigsToSettingsMessage(builder: Builder) {
     }
 }
 
-fun addPILoopConfiguration(builder: Builder) {
+fun addPISatLoopConfiguration(builder: Builder) {
     val piLoopConfigBuilder = ControlMote.PiLoopConfiguration_t.newBuilder()
     when (L.ccu().systemProfile) {
         is VavAdvancedAhu -> {
             val systemEquip = Domain.systemEquip as VavAdvancedHybridSystemEquip
             piLoopConfigBuilder.apply {
                 enable = true
-                proportionalConstant = (systemEquip.vavProportionalKFactor.readPriorityVal() * SERIAL_COMM_SCALE).toInt() * 10
-                integralConstant = (systemEquip.vavIntegralKFactor.readPriorityVal() * SERIAL_COMM_SCALE).toInt() * 10
-                proportionalTemperatureRange = systemEquip.vavTemperatureProportionalRange.readPriorityVal().toInt() * 10
-                integrationTime = systemEquip.vavTemperatureIntegralTime.readPriorityVal().toInt()
+                proportionalConstant = (systemEquip.vavSupplyAirProportionalKFactor.readPriorityVal() * SERIAL_COMM_SCALE).toInt() * 10
+                integralConstant = (systemEquip.vavSupplyAirIntegralKFactor.readPriorityVal() * SERIAL_COMM_SCALE).toInt() * 10
+                proportionalTemperatureRange = systemEquip.vavSupplyAirTemperatureProportionalRange.readPriorityVal().toInt() * 10
+                integrationTime = systemEquip.vavSupplyAirTemperatureIntegralTime.readPriorityVal().toInt()
             }
         }
 
@@ -331,10 +331,40 @@ fun addPILoopConfiguration(builder: Builder) {
             val systemEquip = Domain.systemEquip as DabAdvancedHybridSystemEquip
             piLoopConfigBuilder.apply {
                 enable = true
-                proportionalConstant = (systemEquip.dabProportionalKFactor.readPriorityVal() * SERIAL_COMM_SCALE).toInt() * 10
-                integralConstant = (systemEquip.dabIntegralKFactor.readPriorityVal() * SERIAL_COMM_SCALE).toInt() * 10
-                proportionalTemperatureRange = systemEquip.dabTemperatureProportionalRange.readPriorityVal().toInt() * 10
-                integrationTime = systemEquip.dabTemperatureIntegralTime.readPriorityVal().toInt()
+                proportionalConstant = (systemEquip.dabSupplyAirProportionalKFactor.readPriorityVal() * SERIAL_COMM_SCALE).toInt() * 10
+                integralConstant = (systemEquip.dabSupplyAirIntegralKFactor.readPriorityVal() * SERIAL_COMM_SCALE).toInt() * 10
+                proportionalTemperatureRange = systemEquip.dabSupplyAirTemperatureProportionalRange.readPriorityVal().toInt() * 10
+                integrationTime = systemEquip.dabSupplyAirTemperatureIntegralTime.readPriorityVal().toInt()
+            }
+        }
+    }
+    builder.apply {
+        addPiLoopConfiguration(piLoopConfigBuilder.build())
+    }
+}
+
+fun addPIPressureLoopConfiguration(builder: Builder) {
+    val piLoopConfigBuilder = ControlMote.PiLoopConfiguration_t.newBuilder()
+    when (L.ccu().systemProfile) {
+        is VavAdvancedAhu -> {
+            val systemEquip = Domain.systemEquip as VavAdvancedHybridSystemEquip
+            piLoopConfigBuilder.apply {
+                enable = true
+                proportionalConstant = (systemEquip.vavDuctStaticProportionalKFactor.readPriorityVal() * SERIAL_COMM_SCALE).toInt() * 10
+                integralConstant = (systemEquip.vavDuctStaticIntegralKFactor.readPriorityVal() * SERIAL_COMM_SCALE).toInt() * 10
+                proportionalTemperatureRange = systemEquip.vavDuctStaticPressureProportionalRange.readPriorityVal().toInt() * 10
+                integrationTime = systemEquip.vavDuctStaticPressureIntegralTime.readPriorityVal().toInt()
+            }
+        }
+
+        is DabAdvancedAhu -> {
+            val systemEquip = Domain.systemEquip as DabAdvancedHybridSystemEquip
+            piLoopConfigBuilder.apply {
+                enable = true
+                proportionalConstant = (systemEquip.dabDuctStaticProportionalKFactor.readPriorityVal() * SERIAL_COMM_SCALE).toInt() * 10
+                integralConstant = (systemEquip.dabDuctStaticIntegralKFactor.readPriorityVal() * SERIAL_COMM_SCALE).toInt() * 10
+                proportionalTemperatureRange = systemEquip.dabDuctStaticPressureProportionalRange.readPriorityVal().toInt() * 10
+                integrationTime = systemEquip.dabDuctStaticPressureIntegralTime.readPriorityVal().toInt()
             }
         }
     }

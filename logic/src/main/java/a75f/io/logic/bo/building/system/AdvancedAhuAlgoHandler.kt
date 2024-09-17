@@ -10,6 +10,7 @@ import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.oao.OAOProfile
 import a75f.io.logic.bo.building.schedules.Occupancy
+import a75f.io.logic.bo.building.schedules.ScheduleManager
 import a75f.io.logic.bo.building.system.util.AhuSettings
 import a75f.io.logic.bo.building.system.util.AhuTuners
 
@@ -95,13 +96,11 @@ class AdvancedAhuAlgoHandler (val equip: SystemEquip) {
         }
     }
 
-    private fun getFanEnableRelayState(systemCoolingLoop: Double, systemHeatingLoop: Double) : Boolean{
-        return systemCoolingLoop > 0 || systemHeatingLoop > 0
+    private fun getFanEnableRelayState(loadBasedFanLoop: Double, pressureFanLoop: Double) : Boolean{
+        return ScheduleManager.getInstance().systemOccupancy == Occupancy.OCCUPIED || loadBasedFanLoop > 0 || pressureFanLoop > 0
     }
 
-    private fun getOccupiedEnableRelayState(isSystemOccupied: Boolean, systemCoolingLoop: Double, systemHeatingLoop: Double, systemFanLoop: Double) : Boolean{
-        return isSystemOccupied || systemCoolingLoop > 0 || systemHeatingLoop > 0 || systemFanLoop > 0
-    }
+    private fun getOccupiedEnableRelayState() = ScheduleManager.getInstance().systemOccupancy == Occupancy.OCCUPIED
 
     private fun getAhuFreshAirFanRunCommandRelayState(isSystemOccupied: Boolean, systemCo2Loop : Double) : Boolean{
         return isSystemOccupied && systemCo2Loop > 0
@@ -191,14 +190,10 @@ class AdvancedAhuAlgoHandler (val equip: SystemEquip) {
                     ahuTuners.relayDeactivationHysteresis, fanStages, systemOccupied, isStage1AllowToActive)
 
             AdvancedAhuRelayAssociationType.FAN_ENABLE -> getFanEnableRelayState(
-                    ahuSettings.systemEquip.coolingLoopOutput.readHisVal(),
-                    ahuSettings.systemEquip.heatingLoopOutput.readHisVal()
+                    ahuSettings.systemEquip.fanLoopOutput.readHisVal(),
+                    ahuSettings.systemEquip.fanPressureLoopOutput.readHisVal()
             )
-            AdvancedAhuRelayAssociationType.OCCUPIED_ENABLE -> getOccupiedEnableRelayState(
-                    systemOccupied, ahuSettings.systemEquip.coolingLoopOutput.readHisVal(),
-                    ahuSettings.systemEquip.heatingLoopOutput.readHisVal(),
-                    ahuSettings.systemEquip.fanLoopOutput.readHisVal()
-            )
+            AdvancedAhuRelayAssociationType.OCCUPIED_ENABLE -> getOccupiedEnableRelayState()
             AdvancedAhuRelayAssociationType.AHU_FRESH_AIR_FAN_COMMAND -> getAhuFreshAirFanRunCommandRelayState(
                     systemOccupied, ahuSettings.systemEquip.co2LoopOutput.readHisVal())
         }

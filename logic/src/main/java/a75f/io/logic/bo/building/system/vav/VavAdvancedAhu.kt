@@ -166,10 +166,10 @@ open class VavAdvancedAhu : VavSystemProfile() {
     }
 
     private fun initializePILoop() {
-        val proportionalGain = systemEquip.vavProportionalKFactor.readPriorityVal()
-        val integralGain = systemEquip.vavIntegralKFactor.readPriorityVal()
-        val proportionalRange = systemEquip.vavTemperatureProportionalRange.readPriorityVal()
-        val integralTime = systemEquip.vavTemperatureIntegralTime.readPriorityVal()
+        val proportionalGain = systemEquip.vavSupplyAirProportionalKFactor.readPriorityVal()
+        val integralGain = systemEquip.vavSupplyAirIntegralKFactor.readPriorityVal()
+        val proportionalRange = systemEquip.vavSupplyAirTemperatureProportionalRange.readPriorityVal()
+        val integralTime = systemEquip.vavSupplyAirTemperatureIntegralTime.readPriorityVal()
         satCoolingPILoop.apply {
             setProportionalGain(proportionalGain)
             setIntegralGain(integralGain)
@@ -183,10 +183,10 @@ open class VavAdvancedAhu : VavSystemProfile() {
             integralMaxTimeout = integralTime.toInt()
         }
         staticPressureFanPILoop.apply {
-            setProportionalGain(proportionalGain)
-            setIntegralGain(integralGain)
-            proportionalSpread = proportionalRange
-            integralMaxTimeout = integralTime.toInt()
+            setProportionalGain(systemEquip.vavDuctStaticProportionalKFactor.readPriorityVal())
+            setIntegralGain(systemEquip.vavDuctStaticIntegralKFactor.readPriorityVal())
+            proportionalSpread = systemEquip.vavDuctStaticPressureProportionalRange.readPriorityVal()
+            integralMaxTimeout = systemEquip.vavDuctStaticPressureIntegralTime.readPriorityVal().toInt()
         }
     }
 
@@ -763,10 +763,10 @@ open class VavAdvancedAhu : VavSystemProfile() {
 
                 if (isConnectEquip) {
                     val domainName = connectAnalogOutAssociationToDomainName(association.readDefaultVal().toInt())
-                    getDomainPointForName(domainName, systemEquip.connectEquip1).writeHisVal(logicalValue)
+                    getDomainPointForName(domainName, systemEquip.connectEquip1).writeHisVal(roundOff(logicalValue))
                 } else {
                     val domainName = analogOutAssociationToDomainName(association.readDefaultVal().toInt())
-                    getDomainPointForName(domainName, systemEquip.cmEquip).writeHisVal(logicalValue)
+                    getDomainPointForName(domainName, systemEquip.cmEquip).writeHisVal(roundOff(logicalValue))
                 }
             }
         }
@@ -954,6 +954,16 @@ open class VavAdvancedAhu : VavSystemProfile() {
         domainName.readPoint(systemEquip.equipRef).let {
             return it["unit"].toString()
         }
+    }
+
+    fun getSatUnit(): String {
+        if (systemEquip.cmEquip.airTempHeatingSp.pointExists()) {
+            return getUnit(DomainName.airTempHeatingSp)
+        }
+        if (systemEquip.cmEquip.airTempCoolingSp.pointExists()) {
+            return getUnit(DomainName.airTempCoolingSp)
+        }
+        return ""
     }
 
     private fun resetSystem() {

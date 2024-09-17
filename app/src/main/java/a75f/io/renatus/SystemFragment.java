@@ -1157,7 +1157,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			setAdvancedAhuConfiguration(
 					profile.getUserIntentConfig(),
 					profile.getUnit(ductStaticPressureSetpoint),
-					profile.getUnit(airTempCoolingSp),
+					profile.getSatUnit(),
 					profile.systemEquip.getCmEquip().getAirTempHeatingSp().readHisVal(),
 					profile.systemEquip.getCmEquip().getAirTempCoolingSp().readHisVal(),
 					profile.getSatControlPoint(),
@@ -1171,7 +1171,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			setAdvancedAhuConfiguration(
 					profile.getUserIntentConfig(),
 					profile.getUnit(ductStaticPressureSetpoint),
-					profile.getUnit(airTempCoolingSp),
+					profile.getSatUnit(),
 					profile.systemEquip.getCmEquip().getAirTempHeatingSp().readHisVal() ,
 					profile.systemEquip.getCmEquip().getAirTempCoolingSp().readHisVal(),
 					profile.getSatControlPoint(),
@@ -1186,7 +1186,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		}
 	}
 
-	@SuppressLint("SetTextI18n")
+	@SuppressLint({"SetTextI18n", "DefaultLocale"})
 	private void setAdvancedAhuConfiguration(
 			UserIntentConfig userIntentConfig,
 			String dspUnit, String satUnit, double heatingSpVal,
@@ -1227,7 +1227,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		if (userIntentConfig.isPressureControlAvailable()) { // Static Pressure control is available
 			DecimalFormat df = new DecimalFormat("0.00");
 			dspSetPoint.setText(" " + df.format(dspSetPointVal) +" "+ dspUnit);
-			dspCurrent.setText(" " + df.format(dspCurrentVal)+" "+ dspUnit);
+			dspCurrent.setText(" " + String.format("%.2f", dspCurrentVal)+" "+ dspUnit);
 		} else {
 			dspSetPoint.setVisibility(View.GONE);
 			dspCurrent.setVisibility(View.GONE);

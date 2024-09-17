@@ -230,4 +230,7 @@ public class Tags
     public static final String PROFILE = "profile";
     public static final String SCHEDULE_REF = "scheduleRef";
 
+    public static final String ADDR = "addr";
+    public static final String CONNECTMODULE = "connectModule";
+
 }

@@ -6,6 +6,10 @@ import a75f.io.domain.equips.AdvancedHybridSystemEquip
 import a75f.io.domain.equips.ConnectModuleEquip
 import a75f.io.domain.equips.DabAdvancedHybridSystemEquip
 import a75f.io.domain.equips.VavAdvancedHybridSystemEquip
+import a75f.io.domain.util.ModelLoader.getDabAdvancedAhuCmModelV2
+import a75f.io.domain.util.ModelLoader.getDabAdvancedAhuConnectModelV2
+import a75f.io.domain.util.ModelLoader.getVavAdvancedAhuCmModelV2
+import a75f.io.domain.util.ModelLoader.getVavAdvancedAhuConnectModelV2
 import a75f.io.domain.util.ModelNames
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
@@ -13,6 +17,7 @@ import a75f.io.logic.bo.building.system.SystemMode
 import a75f.io.logic.bo.building.system.dab.DabAdvancedAhu
 import a75f.io.logic.bo.building.system.vav.VavAdvancedAhu
 import android.annotation.SuppressLint
+import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import io.seventyfivef.ph.core.Tags
 import java.util.ArrayList
 import kotlin.system.measureTimeMillis
@@ -159,3 +164,11 @@ fun getDabConnectEquip(): HashMap<Any, Any> = readEntity(ModelNames.dabAdvancedH
 fun getCurrentSystemEquip(): HashMap<Any, Any> {
     return CCUHsApi.getInstance().readEntity("system and equip and not modbus and not connectModule")
 }
+
+fun getAdvanceAhuModels():  Pair<SeventyFiveFProfileDirective, SeventyFiveFProfileDirective> {
+    return when (L.ccu().systemProfile) {
+        is DabAdvancedAhu -> Pair(getDabAdvancedAhuCmModelV2() as SeventyFiveFProfileDirective, getDabAdvancedAhuConnectModelV2() as SeventyFiveFProfileDirective)
+        else -> Pair(getVavAdvancedAhuCmModelV2() as SeventyFiveFProfileDirective, getVavAdvancedAhuConnectModelV2() as SeventyFiveFProfileDirective)
+    }
+}
+

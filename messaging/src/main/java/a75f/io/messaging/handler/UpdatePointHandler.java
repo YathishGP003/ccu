@@ -122,7 +122,8 @@ public class UpdatePointHandler implements MessageHandler
         
         if (HSUtil.isSystemConfigOutputPoint(pointUid, CCUHsApi.getInstance())
                 || HSUtil.isSystemConfigHumidifierType(pointUid, CCUHsApi.getInstance())
-                || HSUtil.isSystemConfigIE(pointUid, CCUHsApi.getInstance())) {
+                || HSUtil.isSystemConfigIE(pointUid, CCUHsApi.getInstance())
+                || HSUtil.isAdvanceAhuV2(pointUid, CCUHsApi.getInstance())) {
             ConfigPointUpdateHandler.updateConfigPoint(msgObject, localPoint, CCUHsApi.getInstance());
             updatePoints(localPoint);
             return;

@@ -17,6 +17,7 @@ import a75f.io.logic.bo.building.system.getDomainPressure
 import a75f.io.logic.bo.building.system.getPressureDomainForAnalogOut
 import a75f.io.logic.bo.building.system.relayAssociationDomainNameToType
 import a75f.io.logic.bo.building.system.relayAssociationToDomainName
+import a75f.io.logic.bo.building.system.util.AdvancedHybridAhuConfig
 import a75f.io.logic.bo.building.system.util.CmConfiguration
 import a75f.io.logic.bo.building.system.util.ConnectConfiguration
 import android.text.Html
@@ -380,28 +381,28 @@ fun validateSatSequence(sensors: Sensors): Pair<Boolean, Spanned> {
     return Pair(true, Html.fromHtml("success", Html.FROM_HTML_MODE_LEGACY))
 }
 
-fun isValidateConfiguration(viewModel: AdvancedHybridAhuViewModel): Pair<Boolean, Spanned> {
+fun isValidateConfiguration(profileConfiguration: AdvancedHybridAhuConfig): Pair<Boolean, Spanned> {
 
     var isPressureAvailable = false
-    if (isRelayPressureFanAvailable(viewModel.profileConfiguration.cmConfiguration)) {
-        if (!isAOPressureAvailable(viewModel.profileConfiguration.cmConfiguration)) {
+    if (isRelayPressureFanAvailable(profileConfiguration.cmConfiguration)) {
+        if (!isAOPressureAvailable(profileConfiguration.cmConfiguration)) {
             return Pair(false, Html.fromHtml(PRESSURE_RELAY_ERROR, Html.FROM_HTML_MODE_LEGACY))
         }
-        if (!isPressureSensorAvailable(viewModel.profileConfiguration.cmConfiguration)) {
+        if (!isPressureSensorAvailable(profileConfiguration.cmConfiguration)) {
             return Pair(false, Html.fromHtml(NO_PRESSURE_SENSOR_ERROR, Html.FROM_HTML_MODE_LEGACY))
         }
         isPressureAvailable = true
     }
-    if (isAOPressureAvailable(viewModel.profileConfiguration.cmConfiguration)) {
-        if (!isPressureSensorAvailable(viewModel.profileConfiguration.cmConfiguration)) {
+    if (isAOPressureAvailable(profileConfiguration.cmConfiguration)) {
+        if (!isPressureSensorAvailable(profileConfiguration.cmConfiguration)) {
             return Pair(false, Html.fromHtml(NO_PRESSURE_SENSOR_ERROR, Html.FROM_HTML_MODE_LEGACY))
         }
         isPressureAvailable = true
     }
 
-    val pressureDomainName = getDomainPressure(viewModel.profileConfiguration.cmConfiguration.sensorBus0PressureEnabled.enabled, viewModel.profileConfiguration.cmConfiguration.address0SensorAssociation.pressureAssociation!!.associationVal)
-    val analogIn1DomainName = getPressureDomainForAnalogOut(viewModel.profileConfiguration.cmConfiguration.analog1InEnabled.enabled, viewModel.profileConfiguration.cmConfiguration.analog1InAssociation.associationVal)
-    val analogIn2DomainName = getPressureDomainForAnalogOut(viewModel.profileConfiguration.cmConfiguration.analog2InEnabled.enabled, viewModel.profileConfiguration.cmConfiguration.analog2InAssociation.associationVal)
+    val pressureDomainName = getDomainPressure(profileConfiguration.cmConfiguration.sensorBus0PressureEnabled.enabled, profileConfiguration.cmConfiguration.address0SensorAssociation.pressureAssociation!!.associationVal)
+    val analogIn1DomainName = getPressureDomainForAnalogOut(profileConfiguration.cmConfiguration.analog1InEnabled.enabled, profileConfiguration.cmConfiguration.analog1InAssociation.associationVal)
+    val analogIn2DomainName = getPressureDomainForAnalogOut(profileConfiguration.cmConfiguration.analog2InEnabled.enabled, profileConfiguration.cmConfiguration.analog2InAssociation.associationVal)
 
     if (isPressureAvailable && pressureDomainName == null && analogIn1DomainName == null && analogIn2DomainName == null) {
         return Pair(false, Html.fromHtml(NO_PRESSURE_SENSOR_ERROR, Html.FROM_HTML_MODE_LEGACY))
@@ -412,32 +413,32 @@ fun isValidateConfiguration(viewModel: AdvancedHybridAhuViewModel): Pair<Boolean
         return pressureStatus
     }
 
-    if (isRelaySatCoolingAvailable(viewModel.profileConfiguration.cmConfiguration)) {
-        if (!isAOCoolingSatAvailable(viewModel.profileConfiguration.cmConfiguration)) {
+    if (isRelaySatCoolingAvailable(profileConfiguration.cmConfiguration)) {
+        if (!isAOCoolingSatAvailable(profileConfiguration.cmConfiguration)) {
             return Pair(false, Html.fromHtml(COOLING_CONFIG_ERROR, Html.FROM_HTML_MODE_LEGACY))
         }
     }
 
-    if (isRelaySatHeatingAvailable(viewModel.profileConfiguration.cmConfiguration)) {
-        if (!isAOHeatingSatAvailable(viewModel.profileConfiguration.cmConfiguration)) {
+    if (isRelaySatHeatingAvailable(profileConfiguration.cmConfiguration)) {
+        if (!isAOHeatingSatAvailable(profileConfiguration.cmConfiguration)) {
             return Pair(false, Html.fromHtml(HEATING_CONFIG_ERROR, Html.FROM_HTML_MODE_LEGACY))
         }
     }
 
-    val otherSensorStatus = isValidSatSensorSelection(viewModel.profileConfiguration.cmConfiguration)
+    val otherSensorStatus = isValidSatSensorSelection(profileConfiguration.cmConfiguration)
     if (!otherSensorStatus.first) {
         return otherSensorStatus
     }
 
-    val connectModuleStatus = validateConnectModule(viewModel)
+    val connectModuleStatus = validateConnectModule(profileConfiguration)
     if (!connectModuleStatus.first) {
         return connectModuleStatus
     }
     return Pair(true, Html.fromHtml("Success", Html.FROM_HTML_MODE_LEGACY))
 }
 
-fun validateConnectModule(viewModel: AdvancedHybridAhuViewModel): Pair<Boolean, Spanned> {
-    val sensorsMapping = getSensorMapping(viewModel.profileConfiguration.connectConfiguration)
+fun validateConnectModule(profileConfiguration: AdvancedHybridAhuConfig): Pair<Boolean, Spanned> {
+    val sensorsMapping = getSensorMapping(profileConfiguration.connectConfiguration)
     val list = mutableListOf<String?>()
     list.apply {
         addAll(sensorsMapping.temp)

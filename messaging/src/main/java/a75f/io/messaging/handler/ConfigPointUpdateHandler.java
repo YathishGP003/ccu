@@ -1,5 +1,8 @@
 package a75f.io.messaging.handler;
 
+import static a75f.io.messaging.handler.AdvanceAhuReconfigHandlerKt.isAdvanceAhuV2Profile;
+import static a75f.io.messaging.handler.AdvanceAhuReconfigHandlerKt.reconfigureAdvanceAhuV2;
+
 import com.google.gson.JsonObject;
 
 import java.util.HashMap;
@@ -18,8 +21,10 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.SystemProfile;
+import a75f.io.logic.bo.building.system.dab.DabAdvancedAhu;
 import a75f.io.logic.bo.building.system.dab.DabFullyModulatingRtu;
 import a75f.io.logic.bo.building.system.dab.DabStagedRtu;
+import a75f.io.logic.bo.building.system.vav.VavAdvancedAhu;
 import a75f.io.logic.bo.building.system.vav.VavAdvancedHybridRtu;
 import a75f.io.logic.bo.building.system.vav.VavFullyModulatingRtu;
 import a75f.io.logic.bo.building.system.vav.VavIERtu;
@@ -47,6 +52,8 @@ class ConfigPointUpdateHandler {
         } else if ((configPoint.getMarkers().contains(Tags.ASSOCIATION) )
             || configPoint.getMarkers().contains(Tags.HUMIDIFIER)) {
             updateConfigAssociation(msgObject, configPoint, hayStack);
+        } else if (isAdvanceAhuV2Profile()) {
+            reconfigureAdvanceAhuV2(msgObject, configPoint);
         }
     }
     
@@ -86,6 +93,8 @@ class ConfigPointUpdateHandler {
 
         SystemProfile systemProfile = L.ccu().systemProfile;
         double val = msgObject.get("val").getAsDouble();
+
+
 
         if (systemProfile instanceof DabFullyModulatingRtu) {
             ((DabFullyModulatingRtu) systemProfile).setConfigEnabled(configType, val);
@@ -151,10 +160,13 @@ class ConfigPointUpdateHandler {
             equipBuilder.updateEquipAndPoints(config, model, hayStack.getSite().getId(),systemEquip.get("dis").toString() , true);
             DomainManager.INSTANCE.addSystemDomainEquip(hayStack);
             removeWritableTagFromCMDevicePort(configPoint, hayStack, val);
+        } else if (isAdvanceAhuV2Profile()) {
+            reconfigureAdvanceAhuV2(msgObject, configPoint);
         }
+
     }
 
-    private static void removeWritableTagFromCMDevicePort(Point configPoint, CCUHsApi hayStack, double val) {
+     static void removeWritableTagFromCMDevicePort(Point configPoint, CCUHsApi hayStack, double val) {
         RawPoint cmDevicePort = Domain.cmBoardDevice.getPortsDomainNameWithPhysicalPoint().get(
                 ControlMote.getSystemEquipPointsDomainNameWithCmPortsDomainName().get(configPoint.getDomainName()));
         if(cmDevicePort != null  && val == 1 && cmDevicePort.getMarkers().contains(Tags.WRITABLE)){
@@ -222,13 +234,13 @@ class ConfigPointUpdateHandler {
             HashMap<Object, Object> systemEquip = hayStack.readMapById(Domain.systemEquip.getEquipRef());
             equipBuilder.updateEquipAndPoints(config, model, hayStack.getSite().getId(),systemEquip.get("dis").toString() , true);
             DomainManager.INSTANCE.addSystemDomainEquip(hayStack);
+        } else if (L.ccu().systemProfile instanceof DabAdvancedAhu
+                || L.ccu().systemProfile instanceof VavAdvancedAhu) {
+            reconfigureAdvanceAhuV2(msgObject, configPoint);
         }
         writePointFromJson(configPoint.getId(), msgObject, hayStack);
     }
-    
-    private static void updateIEAddress(JsonObject msgObject, Point configPoint, CCUHsApi haystack) {
-        writePointStrValFromJson(configPoint.getId(), msgObject, haystack );
-    }
+
     
     /***
      * When cooling/heating is disabled remotely via reconfiguration, and the system cannot operate any more
@@ -257,15 +269,7 @@ class ConfigPointUpdateHandler {
         int level = msgObject.get("level").getAsInt();
         hayStack.writePointLocal(id, level, who, val, duration);
     }
-    
-    private static void writePointStrValFromJson(String id, JsonObject msgObject, CCUHsApi hayStack) {
-        String who = msgObject.get("who").getAsString();
-        String val = msgObject.get("val").getAsString().replaceAll("\"", "").trim();
-        int duration = msgObject.get("duration") != null ? msgObject.get("duration").getAsInt() : 0;
-        int level = msgObject.get("level").getAsInt();
-        hayStack.writePointStrValLocal(id, level, who, val, duration);
-    }
-    
+
     private static String getOutputTagFromConfig(Point configPoint) {
         
         if (configPoint.getMarkers().contains(Tags.ANALOG1)) {

@@ -35,7 +35,6 @@ class AcbProfileConfiguration (nodeAddress: Int, nodeType: String, priority: Int
     lateinit var autoForceOccupied: EnableConfig
     lateinit var autoAway: EnableConfig
     lateinit var enableCo2Control: EnableConfig
-    lateinit var enableIAQControl: EnableConfig
     lateinit var enableCFMControl: EnableConfig
 
     lateinit var maxCoolingDamperPos: ValueConfig
@@ -68,7 +67,6 @@ class AcbProfileConfiguration (nodeAddress: Int, nodeType: String, priority: Int
         autoAway = getDefaultEnableConfig(DomainName.autoAway, model)
         autoForceOccupied = getDefaultEnableConfig(DomainName.autoForceOccupied, model)
         enableCo2Control = getDefaultEnableConfig(DomainName.enableCo2Control, model)
-        enableIAQControl = getDefaultEnableConfig(DomainName.enableIAQControl, model)
         enableCFMControl = getDefaultEnableConfig(DomainName.enableCFMControl, model)
 
         temperatureOffset = getDefaultValConfig(DomainName.temperatureOffset, model)
@@ -125,11 +123,11 @@ class AcbProfileConfiguration (nodeAddress: Int, nodeType: String, priority: Int
         autoAway.enabled = vavEquip.autoAway.readDefaultVal() > 0
         autoForceOccupied.enabled = vavEquip.autoForceOccupied.readDefaultVal() > 0
         enableCo2Control.enabled = vavEquip.enableCo2Control.readDefaultVal() > 0
-        enableIAQControl.enabled = vavEquip.enableIAQControl.readDefaultVal() > 0
         enableCFMControl.enabled = vavEquip.enableCFMControl.readDefaultVal() > 0
 
         temperatureOffset.currentVal = vavEquip.temperatureOffset.readDefaultVal()
 
+        minHeatingDamperPos.currentVal = vavEquip.minHeatingDamperPos.readDefaultVal()
         maxHeatingDamperPos.currentVal = vavEquip.maxHeatingDamperPos.readDefaultVal()
 
         if (enableCFMControl.enabled) {
@@ -137,7 +135,6 @@ class AcbProfileConfiguration (nodeAddress: Int, nodeType: String, priority: Int
 
             minCoolingDamperPos = getDefaultValConfig(DomainName.minCoolingDamperPos, model)
             maxCoolingDamperPos = getDefaultValConfig(DomainName.maxCoolingDamperPos, model)
-            minHeatingDamperPos = getDefaultValConfig(DomainName.minHeatingDamperPos, model)
 
             if (L.ccu().bypassDamperProfile != null) {
                 minCoolingDamperPos.currentVal = 10.0
@@ -153,7 +150,6 @@ class AcbProfileConfiguration (nodeAddress: Int, nodeType: String, priority: Int
 
             minCoolingDamperPos.currentVal = vavEquip.minCoolingDamperPos.readPriorityVal()
             maxCoolingDamperPos.currentVal = vavEquip.maxCoolingDamperPos.readDefaultVal()
-            minHeatingDamperPos.currentVal = vavEquip.minHeatingDamperPos.readPriorityVal()
 
             maxCFMCooling = getDefaultValConfig(DomainName.maxCFMCooling, model)
             minCFMCooling = getDefaultValConfig(DomainName.minCFMCooling, model)
@@ -192,7 +188,6 @@ class AcbProfileConfiguration (nodeAddress: Int, nodeType: String, priority: Int
             add(autoAway)
             add(autoForceOccupied)
             add(enableCo2Control)
-            add(enableIAQControl)
             add(enableCFMControl)
         }
     }
@@ -220,7 +215,7 @@ class AcbProfileConfiguration (nodeAddress: Int, nodeType: String, priority: Int
     override fun toString(): String {
         return " temperatureOffset ${temperatureOffset.currentVal} damperType ${damperType.currentVal} damperSize ${damperSize.currentVal}"+
             "damperShape ${damperShape.currentVal} valveType ${valveType.currentVal} condensateSensorType ${condensateSensorType.enabled} " +
-                "autoForceOccupied ${autoForceOccupied.enabled} autoAway ${autoAway.enabled} enableIAQControl ${enableIAQControl.enabled} " +
+                "autoForceOccupied ${autoForceOccupied.enabled} autoAway ${autoAway.enabled} " +
                 "enableCo2Control ${enableCo2Control.enabled} enableCFMControl ${enableCFMControl.enabled} maxCoolingDamperPos ${maxCoolingDamperPos.currentVal}" +
                 " minCoolingDamperPos ${minCoolingDamperPos.currentVal} maxHeatingDamperPos ${maxHeatingDamperPos.currentVal}" +
                 "minHeatingDamperPos ${minHeatingDamperPos.currentVal} kFactor ${kFactor.currentVal} maxCFMCooling ${maxCFMCooling.currentVal}" +

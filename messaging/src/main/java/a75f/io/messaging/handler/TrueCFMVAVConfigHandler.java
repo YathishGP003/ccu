@@ -8,6 +8,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Point;
+import a75f.io.domain.equips.VavEquip;
 import a75f.io.domain.logic.ProfileEquipBuilder;
 import a75f.io.domain.util.ModelLoader;
 import a75f.io.logger.CcuLog;
@@ -53,6 +54,11 @@ public class TrueCFMVAVConfigHandler {
             CCUHsApi.getInstance().writeDefaultVal("vav and (trueCfm or trueCFM) and min and cooling and group == \""+equip.getGroup()+"\"", maxCfmValue);
         }
         writePointFromJson(configPoint, msgObject, hayStack);
+    }
+
+    public static void updateAirflowCFMProportionalRange(JsonObject msgObject, Point configPoint, CCUHsApi hayStack) {
+        VavEquip vavEquip = new VavEquip(configPoint.getEquipRef());
+        vavEquip.getVavAirflowCFMProportionalRange().writeVal(8, 1.5 * msgObject.get("val").getAsDouble());
     }
 
     public static void updateMinReheatingConfigPoint(JsonObject msgObject, Point configPoint, CCUHsApi hayStack) {

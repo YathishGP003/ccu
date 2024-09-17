@@ -13,6 +13,7 @@ import a75f.io.logic.bo.building.Thermistor;
 import a75f.io.logic.bo.building.sensors.NativeSensor;
 import a75f.io.logic.bo.building.sensors.Sensor;
 import a75f.io.logic.bo.building.sensors.SensorManager;
+import a75f.io.logic.bo.building.truecfm.TrueCFMUtil;
 import a75f.io.logic.jobs.StringConstants;
 
 /**
@@ -111,9 +112,14 @@ public class ZoneViewData {
         boolean isThermister1On = (CCUHsApi.getInstance().readDefaultVal(THERMISTER_QUERY_POINT + equipID + "\"") > 0);
 
         String equipStatusPoint = vavEquip.getEquipStatusMessage().readDefaultStrVal();
-        double damperPosPoint = vavEquip.getNormalizedDamperCmd().readHisVal();
+        double damperPosPoint = TrueCFMUtil.isCfmOnEdgeActive(CCUHsApi.getInstance(), vavEquip.getId()) ? vavEquip.getDamperCmdCal().readHisVal() : vavEquip.getNormalizedDamperCmd().readHisVal();
         double valvePoint = CCUHsApi.getInstance().readHisValByQuery("point and domainName == \"" + DomainName.chilledWaterValve + "\" and equipRef == \""+equipID+"\"");
-        double reheatPoint = vavEquip.getReheatCmd().readHisVal();
+        double reheatPoint = TrueCFMUtil.isCfmOnEdgeActive(CCUHsApi.getInstance(), vavEquip.getId()) ? vavEquip.getReheatCmdCal().readHisVal() : vavEquip.getReheatCmd().readHisVal();
+        if (!(damperPosPoint > 0 || reheatPoint > 0)) {
+            damperPosPoint = vavEquip.getNormalizedDamperCmd().readHisVal();
+            reheatPoint = vavEquip.getReheatCmd().readHisVal();
+        }
+
         double enteringAirPoint = vavEquip.getEnteringAirTemp().readHisVal();
         double dischargePoint = vavEquip.getDischargeAirTemp().readHisVal();
         double airflowCFM =  CCUHsApi.getInstance().readHisValByQuery("point and domainName == \"" + DomainName.airFlowSensor + "\" and equipRef == \""+equipID+"\"");

@@ -628,8 +628,14 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
         }
 
         // added on 05-12-2022 If either one of the tuner value is 0 then we will not do water sampling
-        if(waitTimeToDoSampling == 0 || onTimeToDoSampling == 0){
-            logIt( "No water sampling, because tuner value is zero!")
+        if (waitTimeToDoSampling == 0 || onTimeToDoSampling == 0) {
+            //resetting the water valve value value only when the tuner value is zero
+            if ((relayOutputPoints.containsKey(Pipe2RelayAssociation.WATER_VALVE.ordinal) && (getCurrentLogicalPointStatus(relayOutputPoints[Pipe2RelayAssociation.WATER_VALVE.ordinal]!!).toInt() != 0)) ||(analogOutputPoints.containsKey(Pipe2AnalogOutAssociation.WATER_VALVE.ordinal)  && (getCurrentLogicalPointStatus(analogOutputPoints[Pipe2AnalogOutAssociation.WATER_VALVE.ordinal]!!).toInt() != 0))) {
+                equip.waterSamplingStartTime = 0
+                equip.lastWaterValveTurnedOnTime = System.currentTimeMillis()
+                resetWaterValue(relayStages, equip)
+            }
+            logIt("No water sampling, because tuner value is zero!")
             return
         }
         logIt( "waitTimeToDoSampling:  $waitTimeToDoSampling onTimeToDoSampling: $onTimeToDoSampling")

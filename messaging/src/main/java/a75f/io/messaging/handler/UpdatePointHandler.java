@@ -202,6 +202,7 @@ public class UpdatePointHandler implements MessageHandler
 
         if(HSUtil.isMaxCFMCoolingConfigPoint(pointUid, CCUHsApi.getInstance())){
             TrueCFMVAVConfigHandler.updateMinCoolingConfigPoint(msgObject, localPoint, hayStack);
+            TrueCFMVAVConfigHandler.updateAirflowCFMProportionalRange(msgObject, localPoint, hayStack);
         }
 
         if(HSUtil.isMaxCFMReheatingConfigPoint(pointUid, CCUHsApi.getInstance())){

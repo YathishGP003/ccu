@@ -241,8 +241,14 @@ public class LSerial
         struct.setByteBuffer(ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN), 0);
         DLog.Logd("Message Type: " + pojoClass.getSimpleName());
         DLog.Logd("Data return size: " + data.length);
+
         //Log hexadecimal
-//        DLog.Logd("Incoming Hexadecimal: " + struct.toString());
+        try {
+            DLog.Logd("Incoming Hexadecimal: " + struct.toString());
+        } catch (IndexOutOfBoundsException e) {
+            DLog.Logd("Can't log " + pojoClass.getSimpleName() + "; received message is shorter than struct stored in CCU");
+        }
+
         if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M)
             LogdStructAsJson(struct);
         return struct;

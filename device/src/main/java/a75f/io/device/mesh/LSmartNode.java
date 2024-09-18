@@ -38,6 +38,7 @@ import a75f.io.device.util.DeviceConfigurationUtil;
 import a75f.io.domain.BypassDamperEquip;
 import a75f.io.domain.VavAcbEquip;
 import a75f.io.domain.api.DomainName;
+import a75f.io.domain.equips.VavEquip;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
@@ -45,6 +46,7 @@ import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.definitions.DamperType;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.ReheatType;
+import a75f.io.logic.bo.building.truecfm.TrueCFMUtil;
 import a75f.io.logic.bo.util.SystemTemperatureUtil;
 import a75f.io.logic.tuners.TunerUtil;
 
@@ -122,6 +124,11 @@ public class LSmartNode
         } else if (equip.getProfile().equals("PLC")) {
             settings.minDamperOpen.set(Short.parseShort(String.valueOf(10*CCUHsApi.getInstance().readDefaultVal("point and config and analog1 and min and output and group == \"" + address + "\"").intValue())));
             settings.maxDamperOpen.set(Short.parseShort(String.valueOf(10*CCUHsApi.getInstance().readDefaultVal("point and config and analog1 and max and output and group == \"" + address + "\"").intValue())));
+        } else if (isEquipType("vav", address) && TrueCFMUtil.isTrueCfmEnabled(CCUHsApi.getInstance(), equipRef)) {
+            // VAVs with TrueCFM enabled only have heating min/max damper positions
+            // These will only apply when System is Heating. When System is Cooling, CFM loop runs on edge with no damper limits.
+            settings.maxDamperOpen.set((short)getDamperLimit("heating", "max", address));
+            settings.minDamperOpen.set((short)getDamperLimit("heating", "min", address));
         } else {
             if (getStatus(address) == ZoneState.HEATING.ordinal()) {
                 settings.maxDamperOpen.set((short)getDamperLimit("heating", "max", address));
@@ -251,22 +258,37 @@ public class LSmartNode
 
         if (equip.getProfile().equals("VAV_ACB")) {
             VavAcbEquip acbEquip = new VavAcbEquip(equipRef);
-            kFactor = (int)(100 * acbEquip.getKFactor().readPriorityVal());
-            minCFMCooling = (int)(acbEquip.getMinCFMCooling().readPriorityVal());
-            maxCFMCooling = (int)(acbEquip.getMaxCFMCooling().readPriorityVal());
-            minCFMReheating = (int)(acbEquip.getMinCFMReheating().readPriorityVal());
-            maxCFMReheating = (int)(acbEquip.getMaxCFMReheating().readPriorityVal());
-            damperShape = DamperShape_t.values()[(int)(acbEquip.getDamperShape().readPriorityVal())];
-            condensateSensor = CondensateSensor_t.values()[(int)(acbEquip.getThermistor2Type().readPriorityVal())];
-            damperSize = getDamperSizeInInches((int)(acbEquip.getDamperSize().readPriorityVal()));
-            airflowCFMProportionalRange = (int)(acbEquip.getVavAirflowCFMProportionalRange().readPriorityVal()); // fallback
-            airflowCFMProportionalKFactor = (int)(100 * acbEquip.getVavAirflowCFMProportionalKFactor().readPriorityVal()); // fallback
-            airflowCFMIntegralTime = (int)(acbEquip.getVavAirflowCFMIntegralTime().readPriorityVal()); // fallback
-            airflowCFMIntegralKFactor = (int)(100 * acbEquip.getVavAirflowCFMIntegralKFactor().readPriorityVal()); // fallback
-            enableCFM = (int)(acbEquip.getEnableCFMControl().readPriorityVal());
+            kFactor = (int) (100 * acbEquip.getKFactor().readPriorityVal());
+            minCFMCooling = (int) (acbEquip.getMinCFMCooling().readPriorityVal());
+            maxCFMCooling = (int) (acbEquip.getMaxCFMCooling().readPriorityVal());
+            minCFMReheating = (int) (acbEquip.getMinCFMReheating().readPriorityVal());
+            maxCFMReheating = (int) (acbEquip.getMaxCFMReheating().readPriorityVal());
+            damperShape = DamperShape_t.values()[(int) (acbEquip.getDamperShape().readPriorityVal())];
+            condensateSensor = CondensateSensor_t.values()[(int) (acbEquip.getThermistor2Type().readPriorityVal())];
+            damperSize = getDamperSizeInInches((int) (acbEquip.getDamperSize().readPriorityVal()));
+            airflowCFMProportionalRange = (int) (acbEquip.getVavAirflowCFMProportionalRange().readPriorityVal()); // fallback
+            airflowCFMProportionalKFactor = (int) (100 * acbEquip.getVavAirflowCFMProportionalKFactor().readPriorityVal()); // fallback
+            airflowCFMIntegralTime = (int) (acbEquip.getVavAirflowCFMIntegralTime().readPriorityVal()); // fallback
+            airflowCFMIntegralKFactor = (int) (100 * acbEquip.getVavAirflowCFMIntegralKFactor().readPriorityVal()); // fallback
+            enableCFM = (int) (acbEquip.getEnableCFMControl().readPriorityVal());
 
-            settings2.relayBitmap.relay1.set((int)acbEquip.getRelay1OutputAssociation().readDefaultVal());
+            settings2.relayBitmap.relay1.set((int) acbEquip.getRelay1OutputAssociation().readDefaultVal());
             // Relay 2 will always be zero, because relay 2 is not used in ACB and no relay 2 association point will exist
+
+        } else if (isEquipType("vav", address)) {
+            VavEquip vavEquip = new VavEquip(equipRef);
+            kFactor = (int) (100 * vavEquip.getKFactor().readPriorityVal());
+            minCFMCooling = (int) (vavEquip.getMinCFMCooling().readPriorityVal());
+            maxCFMCooling = (int) (vavEquip.getMaxCFMCooling().readPriorityVal());
+            minCFMReheating = (int) (vavEquip.getMinCFMReheating().readPriorityVal());
+            maxCFMReheating = (int) (vavEquip.getMaxCFMReheating().readPriorityVal());
+            damperShape = DamperShape_t.values()[(int) (vavEquip.getDamperShape().readPriorityVal())];
+            damperSize = getDamperSizeInInches((int) (vavEquip.getDamperSize().readPriorityVal()));
+            airflowCFMProportionalRange = (int) (vavEquip.getVavAirflowCFMProportionalRange().readPriorityVal()); // fallback
+            airflowCFMProportionalKFactor = (int) (100 * vavEquip.getVavAirflowCFMProportionalKFactor().readPriorityVal()); // fallback
+            airflowCFMIntegralTime = (int) (vavEquip.getVavAirflowCFMIntegralTime().readPriorityVal()); // fallback
+            airflowCFMIntegralKFactor = (int) (100 * vavEquip.getVavAirflowCFMIntegralKFactor().readPriorityVal()); // fallback
+            enableCFM = (int) (vavEquip.getEnableCFMControl().readPriorityVal());
 
         } else if (equip.getProfile().equals("PLC")) {
             CCUHsApi hsApi = CCUHsApi.getInstance();
@@ -314,6 +336,13 @@ public class LSmartNode
         settings2.airflowCFMIntegralTime.set(enableCFM > 0 ? (short)airflowCFMIntegralTime : (short)30);
         settings2.airflowCFMIntegralKFactor.set(enableCFM > 0 ? (short)airflowCFMIntegralKFactor : (short)50);
         settings2.enableCFM.set((short)enableCFM);
+
+        if (isEquipType("vav", address)) {
+            CCUHsApi hsApi = CCUHsApi.getInstance();
+            settings2.maxDischargeAirTemperature.set(getMaxDischargeTemp(hsApi, equipRef));
+            settings2.runPILoopOnNode.set(TrueCFMUtil.isCfmOnEdgeActive(hsApi, equipRef) ? (short)1 : (short)0);
+        }
+
     }
 
     private static ProfileMap_t getProfileMap2(String profString) {
@@ -426,14 +455,16 @@ public class LSmartNode
             int damperConfig = hsApi.readDefaultVal("point and config and vav and  damper and type and group == \""+address+"\"").intValue();
 
             int reheatConfig;
+            boolean isACB = false;
             if (equip.getDomainName().equals(DomainName.smartnodeActiveChilledBeam) || equip.getDomainName().equals(DomainName.helionodeActiveChilledBeam)) {
+                isACB = true;
                 reheatConfig = hsApi.readDefaultVal("point and domainName == \"" + DomainName.valveType + "\" and group == \""+address+"\"").intValue();
             } else {
                 reheatConfig = hsApi.readDefaultVal("point and config and type and reheat and group == \""+address+"\"").intValue();
             }
 
             // With DM integration, reheatType enum is incremented by 1. ("notInstalled" was -1, now it's zero). This is why we are subtracting 1 from the value here.
-            setupDamperActuator(settings, damperConfig, 0, reheatConfig-1, "vav");
+            setupDamperActuator(settings, damperConfig, 0, reheatConfig-1, isACB ? "acb" : "vav");
         }
     }
 
@@ -454,18 +485,19 @@ public class LSmartNode
         reheatTypeMap.put(ReheatType.TwoToTenV, DamperActuator_t.DAMPER_ACTUATOR_2_10V);
         reheatTypeMap.put(ReheatType.TenToTwov, DamperActuator_t.DAMPER_ACTUATOR_10_2V);
         reheatTypeMap.put(ReheatType.TenToZeroV, DamperActuator_t.DAMPER_ACTUATOR_10_0V);
-        reheatTypeMap.put(ReheatType.Pulse, DamperActuator_t.DAMPER_ACTUATOR_MAT_REHEAT_PULSED);
-        reheatTypeMap.put(ReheatType.OneStage, DamperActuator_t.DAMPER_ACTUATOR_MAT_REHEAT_ONE_STAGE);
-        reheatTypeMap.put(ReheatType.TwoStage, DamperActuator_t.DAMPER_ACTUATOR_MAT_REHEAT_TWO_STAGE);
+        reheatTypeMap.put(ReheatType.Pulse, DamperActuator_t.DAMPER_ACTUATOR_NOT_PRESENT_REHEAT_PULSED);
+        reheatTypeMap.put(ReheatType.OneStage, DamperActuator_t.DAMPER_ACTUATOR_NOT_PRESENT_REHEAT_ONE_STAGE);
+        reheatTypeMap.put(ReheatType.TwoStage, DamperActuator_t.DAMPER_ACTUATOR_NOT_PRESENT_REHEAT_TWO_STAGE);
 
         settings.outsideAirOptimizationDamperActuatorType.set(Objects.requireNonNull(damperTypeMap.get(DamperType.values()[damperConfig])));
 
         //ReheatType migration should address this, but the value can be -2 or -1 based on this code runs before or after migration.
-        if (profileType.equals("vav") && reheatConfig >= 0){
+        if ((profileType.equals("vav") || profileType.equals("acb")) && reheatConfig >= 0){
             settings.returnAirDamperActuatorType.set(Objects.requireNonNull(reheatTypeMap.get(ReheatType.values()[reheatConfig])));
+        } else if (profileType.equals("vav") && reheatConfig == -1) {
+            settings.returnAirDamperActuatorType.set(DamperActuator_t.DAMPER_ACTUATOR_NOT_PRESENT);
         } else {
             settings.returnAirDamperActuatorType.set(getReheatType(damper2Config,reheatConfig,damperTypeMap));
-
         }
     }
     private static DamperActuator_t getReheatType(int damper2Config, int reheatConfig, Map<DamperType, DamperActuator_t> damperTypeMap) {
@@ -531,6 +563,11 @@ public class LSmartNode
             case 5: settings.outsideAirOptimizationDamperActuatorType.set(DamperActuator_t.DAMPER_ACTUATOR_0_5V); break;
             default: settings.outsideAirOptimizationDamperActuatorType.set(DAMPER_ACTUATOR_NOT_PRESENT);
         }
+    }
+
+    public static short getMaxDischargeTemp(CCUHsApi hsApi, String equipRef) {
+        short maxDischargeTemp = hsApi.readPointPriorityValByQuery("point and domainName == \"" + DomainName.reheatZoneMaxDischargeTemp + "\" and equipRef == \"" + equipRef + "\"").shortValue();
+        return maxDischargeTemp > 0 ? maxDischargeTemp : 90;
     }
 
     private static void fillSmartNodeControls(SmartNodeControls_t controls_t,Zone zone, short node, String equipRef){
@@ -669,6 +706,11 @@ public class LSmartNode
             controls_t.setTemperature.set((short)(getSetTemp(equipRef) > 0 ? (getSetTemp(equipRef) * 2) : 144));
             controls_t.conditioningMode.set((short) (L.ccu().systemProfile.getSystemController().getSystemState() == HEATING ? 1 : 0));
             controls_t.targetValue.set(getTargetValue(equipRef));
+
+            if (isEquipType("vav", node) && TrueCFMUtil.isCfmOnEdgeActive(hayStack, equipRef)) {
+                controls_t.cfmAirflowSetPoint.set((short)getAirflowSetpoint(hayStack, equipRef));
+                controls_t.datSetPoint.set((short)getDatSetpoint(hayStack, equipRef));
+            }
         }
     }
 
@@ -957,6 +999,14 @@ public class LSmartNode
                 return DomainName.maxCoolingDamperPos;
             }
         }
+    }
+
+    public static double getAirflowSetpoint(CCUHsApi hayStack, String equipRef) {
+        return hayStack.readHisValByQuery("point and domainName == \"" + DomainName.airFlowSetpoint + "\" and equipRef == \"" + equipRef + "\"");
+    }
+
+    public static double getDatSetpoint(CCUHsApi hayStack, String equipRef) {
+        return hayStack.readHisValByQuery("point and domainName == \"" + DomainName.dischargeAirTempSetpoint + "\" and equipRef == \"" + equipRef + "\"");
     }
 
     public static double getStatus(short nodeAddr) {

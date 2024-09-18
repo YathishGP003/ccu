@@ -25,4 +25,6 @@ public class SmartNodeControls_t extends Struct
 	public final Unsigned8 reset            = new Unsigned8(1); /* force a reset of the device remotely when set to 1 */
 	public final Unsigned8 reserved         = new Unsigned8(2);
 	public final Signed16 targetValue = new Signed16();
+	public final Unsigned16 cfmAirflowSetPoint = new Unsigned16(); // range of values 0-5000 CFM.
+	public final Unsigned8 datSetPoint = new Unsigned8();
 }

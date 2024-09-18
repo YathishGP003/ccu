@@ -159,6 +159,10 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             CCUHsApi.getInstance().syncEntityTree()
             PreferenceUtil.setDmToDmCleanupMigration()
         }
+        if(!PreferenceUtil.isVavCfmOnEdgeMigrationDone()) {
+            VavAndAcbProfileMigration.addMinHeatingDamperPositionMigration(hayStack)
+            PreferenceUtil.setVavCfmOnEdgeMigrationDone()
+        }
         hayStack.scheduleSync()
     }
 

@@ -55,8 +55,10 @@ open class VavEquip (equipRef : String) : DomainEquip(equipRef){
     val otaStatus = Point(DomainName.otaStatus, equipRef)
     val kFactor = Point(DomainName.kFactor, equipRef)
     val reheatCmd = Point(DomainName.reheatCmd, equipRef)
+    val reheatCmdCal = Point(DomainName.reheatCmdCal, equipRef)
 
     val damperCmd = Point(DomainName.damperCmd, equipRef)
+    val damperCmdCal = Point(DomainName.damperCmdCal, equipRef)
     val damperFeedback = Point(DomainName.damperFeedback, equipRef)
 
     val normalizedDamperCmd = Point(DomainName.normalizedDamperCmd, equipRef)

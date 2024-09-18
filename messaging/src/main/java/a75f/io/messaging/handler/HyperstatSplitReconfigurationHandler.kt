@@ -17,6 +17,7 @@ import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.hyperstatsplit.common.FanModeCacheStorage
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.HyperStatSplitProfileConfiguration
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.CpuEconSensorBusTempAssociation
+import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuEconProfile
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuProfileConfiguration
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import android.util.Log
@@ -69,6 +70,8 @@ class HyperstatSplitReconfigurationHandler {
             }
 
             if (isDynamicConfigPoint(configPoint)) handleDynamicConfig(configPoint, hayStack)
+
+            (L.getProfile(configPoint.group.toShort()) as HyperStatSplitCpuEconProfile).refreshEquip()
             hayStack.scheduleSync()
 
         }

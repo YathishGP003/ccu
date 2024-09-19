@@ -165,7 +165,7 @@ public class SyncWorker extends Worker {
 
                 EntitySyncResponse response = HttpUtil.executeEntitySync(CCUHsApi.getInstance().getHSUrl() + ENDPOINT_REMOVE_ENTITY,
                         HZincWriter.gridToString(gridData), CCUHsApi.getInstance().getJwt());
-                if (response == null || response.getRespString() == null) {
+                if (response == null || response.getRespString() == null || response.getRespString().isEmpty()) {
                     return;
                 }
                 deletedSyncedItems.addAll(entityList);

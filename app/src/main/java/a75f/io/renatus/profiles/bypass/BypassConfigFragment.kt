@@ -19,6 +19,7 @@ import a75f.io.renatus.compose.TitleTextView
 import a75f.io.renatus.compose.VerticalDivider
 import a75f.io.renatus.profiles.bypass.BypassConfigViewModel
 import a75f.io.renatus.util.ProgressDialogUtils
+import a75f.io.renatus.util.highPriorityDispatcher
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -85,11 +86,10 @@ class BypassConfigFragment : BaseDialogFragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
-        viewLifecycleOwner.lifecycleScope.launch {
-            withContext(Dispatchers.IO) {
-                viewModel.init(requireArguments(), requireContext(), CCUHsApi.getInstance())
-            }
+        viewLifecycleOwner.lifecycleScope.launch(highPriorityDispatcher) {
             withContext(Dispatchers.Main) {
+                //Initialize the view model inside the main thread due to crash  because of  states are updated after compose fetch the value from viewmodel - 32051
+                viewModel.init(requireArguments(), requireContext(), CCUHsApi.getInstance())
                 viewModel.isDialogOpen.observe(viewLifecycleOwner) { isDialogOpen ->
                     CcuLog.i(L.TAG_CCU_UI, " isDialogOpen $isDialogOpen")
                     if (!isDialogOpen) {

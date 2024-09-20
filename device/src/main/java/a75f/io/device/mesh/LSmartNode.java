@@ -494,7 +494,7 @@ public class LSmartNode
         //ReheatType migration should address this, but the value can be -2 or -1 based on this code runs before or after migration.
         if ((profileType.equals("vav") || profileType.equals("acb")) && reheatConfig >= 0){
             settings.returnAirDamperActuatorType.set(Objects.requireNonNull(reheatTypeMap.get(ReheatType.values()[reheatConfig])));
-        } else if (profileType.equals("vav") && reheatConfig == -1) {
+        } else if ((profileType.equals("vav") || profileType.equals("acb")) && reheatConfig == -1) {
             settings.returnAirDamperActuatorType.set(DamperActuator_t.DAMPER_ACTUATOR_NOT_PRESENT);
         } else {
             settings.returnAirDamperActuatorType.set(getReheatType(damper2Config,reheatConfig,damperTypeMap));

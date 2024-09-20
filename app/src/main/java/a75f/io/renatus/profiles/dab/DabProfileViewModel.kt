@@ -19,6 +19,7 @@ import a75f.io.logic.bo.building.dab.DabProfile
 import a75f.io.logic.bo.building.dab.DabProfile.CARRIER_PROD
 import a75f.io.logic.bo.building.dab.DabProfileConfiguration
 import a75f.io.logic.bo.building.dab.getDevicePointDict
+import a75f.io.logic.bo.building.definitions.DamperType
 import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.definitions.ReheatType
@@ -358,16 +359,29 @@ class DabProfileViewModel : ViewModel() {
             analogType = getDamperTypeString(config.damper1Type.currentVal.toInt()),
             port = Port.ANALOG_OUT_ONE.toString(),
             portEnabled = (damperType1 != 4.0),
-            pointRef = if(damperType1 != 4.0) normalizedDamper1Cmd["id"].toString() else  null
+            pointRef = if(damperType1 != 4.0) normalizedDamper1Cmd["id"].toString() else null
         )
         deviceBuilder.updatePoint(analog1Def!!, config, device, analog1out)
+        fun getAnalog2PointRef() : String? {
+            if (reheatType >= 0 ) {
+                if (reheatType <= ReheatType.OneStage.ordinal) {
+                    return reheatCmdPoint["id"].toString()
+                }
+                if (damperType2.toInt() != DamperType.MAT.ordinal) {
+                    return normalizedDamper2Cmd["id"].toString()
+                }
+            } else {
+                return normalizedDamper2Cmd["id"].toString()
+            }
+            return null
+        }
 
         setPortConfiguration(
             rawPoint = analog2out,
             analogType = if(reheatType == -1) getDamperTypeString(config.damper2Type.currentVal.toInt()) else getReheatTypeString(config),
             port = Port.ANALOG_OUT_TWO.toString(),
             portEnabled = if((damperType2 == 4.0 && reheatType == -1)) false else if(damperType2 == 4.0 && analog2OpEnabled) true else if(damperType2 == 4.0 && reheatType == 0) false  else if(damperType2 != 4.0) true else false,
-            pointRef = if(damperType2 == 4.0 && analog2OpEnabled) normalizedDamper2Cmd["id"].toString() else  if((damperType2 == 4.0 && reheatType >=5)) reheatCmdPoint["id"].toString() else if(damperType2 != 4.0) normalizedDamper2Cmd["id"].toString() else null
+            pointRef = getAnalog2PointRef()
         )
         deviceBuilder.updatePoint(analog2Def!!, config, device, analog2out)
 

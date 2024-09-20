@@ -92,12 +92,6 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
     
     private final CompositeDisposable disposable = new CompositeDisposable();
     
-    public static VavAnalogRtuProfile newInstance()
-    {
-        return new VavAnalogRtuProfile();
-    }
-    
-    
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState)

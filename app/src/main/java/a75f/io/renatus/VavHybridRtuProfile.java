@@ -1,8 +1,6 @@
 package a75f.io.renatus;
 
 import android.annotation.SuppressLint;
-import android.content.DialogInterface;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 
@@ -13,7 +11,7 @@ import a75f.io.logic.bo.building.system.vav.VavSystemController;
 import a75f.io.renatus.util.SystemProfileUtil;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.appcompat.app.AlertDialog;
+
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -34,8 +32,6 @@ import java.util.Arrays;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.device.mesh.MeshUtil;
-import a75f.io.device.serial.CcuToCmOverUsbCmRelayActivationMessage_t;
-import a75f.io.device.serial.MessageType;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
@@ -43,13 +39,13 @@ import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.vav.VavAdvancedHybridRtu;
 import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.tuners.TunerConstants;
-import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.renatus.registration.FreshRegistration;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.views.CustomCCUSwitch;
 import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
+import a75f.io.util.ExecutorTask;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -164,16 +160,9 @@ public class VavHybridRtuProfile extends Fragment implements AdapterView.OnItemS
                 setUpCheckBoxes();
                 setUpSpinners();
             } else {
-                new AsyncTask<String, Void, Void>() {
-
-                    @Override
-                    protected void onPreExecute() {
-                        ProgressDialogUtils.showProgressDialog(getActivity(),"Loading System Profile");
-                        super.onPreExecute();
-                    }
-
-                    @Override
-                    protected Void doInBackground(final String... params) {
+                ExecutorTask.executeAsync(
+                    () -> ProgressDialogUtils.showProgressDialog(getActivity(),"Loading System Profile"),
+                    () -> {
                         if (systemProfile != null) {
                             systemProfile.deleteSystemEquip();
                             L.ccu().systemProfile = null;
@@ -182,18 +171,15 @@ public class VavHybridRtuProfile extends Fragment implements AdapterView.OnItemS
                         systemProfile.addSystemEquip();
                         L.ccu().systemProfile = systemProfile;
                         setSystemModeForVav(CCUHsApi.getInstance());
-                        return null;
-                    }
-
-                    @Override
-                    protected void onPostExecute(final Void result) {
+                    },
+                    () -> {
                         setUpCheckBoxes();
                         setUpSpinners();
                         ProgressDialogUtils.hideProgressDialog();
                         CCUHsApi.getInstance().saveTagsData();
                         CCUHsApi.getInstance().syncEntityTree();
                     }
-                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
+                );
             }
         }
 
@@ -587,65 +573,32 @@ public class VavHybridRtuProfile extends Fragment implements AdapterView.OnItemS
     
     @SuppressLint("StaticFieldLeak") private void setConfigEnabledBackground(String config, double val)
     {
-        new AsyncTask<String, Void, Void>()
-        {
-            @Override
-            protected Void doInBackground(final String... params)
-            {
-                systemProfile.setConfigEnabled(config, val);
-                return null;
-            }
-            
-            @Override
-            protected void onPostExecute(final Void result)
-            {
-                systemProfile.updateStagesSelected();
-                if (val == 0) {
-                    updateSystemMode();
+        ExecutorTask.executeAsync(
+                () -> systemProfile.setConfigEnabled(config, val),
+                () -> {
+                    systemProfile.updateStagesSelected();
+                    if (val == 0) {
+                        updateSystemMode();
+                    }
                 }
-            }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        );
     }
     
     @SuppressLint("StaticFieldLeak") private void setConfigAssociationBackground(String config, double val)
     {
-        new AsyncTask<String, Void, Void>()
-        {
-            @Override
-            protected void onPreExecute() {
-                ProgressDialogUtils.showProgressDialog(getActivity(),"Saving VAV Configuration");
-                super.onPreExecute();
-            }
-            @Override
-            protected Void doInBackground(final String... params)
-            {
-                systemProfile.setConfigAssociation(config, val);
-                return null;
-            }
-            
-            @Override
-            protected void onPostExecute(final Void result)
-            {
-                systemProfile.updateStagesSelected();
-                ProgressDialogUtils.hideProgressDialog();
-                updateSystemMode();
-            }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
+        ExecutorTask.executeAsync(
+                () -> ProgressDialogUtils.showProgressDialog(getActivity(),"Saving VAV Configuration"),
+                () -> systemProfile.setConfigAssociation(config, val),
+                () -> {
+                    systemProfile.updateStagesSelected();
+                    ProgressDialogUtils.hideProgressDialog();
+                    updateSystemMode();
+                }
+        );
     }
     
     @SuppressLint("StaticFieldLeak") private void setConfigBackground(String tags, int level, double val) {
-        new AsyncTask<String, Void, Void>() {
-            @Override
-            protected Void doInBackground( final String ... params ) {
-                systemProfile.setConfigVal(tags, val);
-                return null;
-            }
-            
-            @Override
-            protected void onPostExecute( final Void result ) {
-                // continue what you are doing...
-            }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
+        ExecutorTask.executeBackground(() -> systemProfile.setConfigVal(tags, val));
     }
     
     private void sendAnalogRelayTestSignal(String tag, double val) {

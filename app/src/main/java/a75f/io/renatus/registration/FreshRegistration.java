@@ -11,7 +11,6 @@ import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -59,19 +58,17 @@ import a75f.io.renatus.R;
 import a75f.io.renatus.RenatusLandingActivity;
 import a75f.io.renatus.SystemFragment;
 import a75f.io.renatus.UtilityApplication;
-import a75f.io.renatus.VavAnalogRtuProfile;
 import a75f.io.renatus.VavHybridRtuProfile;
 import a75f.io.renatus.VavIERtuProfile;
-import a75f.io.renatus.VavStagedRtuProfile;
+import a75f.io.renatus.profiles.system.VavModulatingRtuFragment;
+import a75f.io.renatus.profiles.system.VavStagedRtuFragment;
 import a75f.io.renatus.profiles.system.VavStagedVfdRtuFragment;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.PreferenceConstants;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
-import a75f.io.renatus.util.RxjavaUtil;
 import a75f.io.renatus.views.CustomCCUSwitch;
 import a75f.io.util.ExecutorTask;
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 
 public class FreshRegistration extends AppCompatActivity implements VerticalTabAdapter.OnItemClickListener, SwitchFragment {
     VerticalTabAdapter verticalTabAdapter;
@@ -179,10 +176,10 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             if (currentFragment instanceof DefaultSystemProfile) {
                 selectItem(5);
             }
-            if (currentFragment instanceof VavStagedRtuProfile) {
+            if (currentFragment instanceof VavStagedRtuFragment) {
                 selectItem(5);
             }
-            if (currentFragment instanceof VavAnalogRtuProfile) {
+            if (currentFragment instanceof VavModulatingRtuFragment) {
                 selectItem(5);
             }
             if (currentFragment instanceof VavStagedVfdRtuFragment) {
@@ -702,7 +699,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
         }
         if (position == 10) {
 
-            fragment = new VavStagedRtuProfile();
+            fragment = new VavStagedRtuFragment(onLoadingCompleteListener.INSTANCE);
 
             Bundle data = new Bundle();
             data.putBoolean("REGISTRATION_WIZARD", true);
@@ -743,7 +740,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
         if (position == 11) {
 
 
-            fragment = new VavAnalogRtuProfile();
+            fragment = new VavModulatingRtuFragment(onLoadingCompleteListener.INSTANCE);
 
             Bundle data = new Bundle();
             data.putBoolean("REGISTRATION_WIZARD", true);

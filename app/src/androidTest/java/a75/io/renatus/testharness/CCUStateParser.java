@@ -22,7 +22,6 @@ import java.util.Iterator;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Site;
-import a75f.io.api.haystack.sync.EntityPullHandler;
 import a75f.io.device.json.serializers.JsonSerializer;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;

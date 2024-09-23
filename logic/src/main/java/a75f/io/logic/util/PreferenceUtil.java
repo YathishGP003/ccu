@@ -31,7 +31,13 @@ public class PreferenceUtil {
     private static final String CLEAN_OTHER_CCU_ZONE_SCHEDULES = "removeOtherCcuZoneSchedules";
     private static final String DATA_MIGRATION_POP_UP = "dataMigrationPopUp";
     private static final String SR_MIGRATION_POINT = "srMigrationPoint";
-    public static final String ZONE_EQUIP_CONFIG_POINT_MIGRATION = "zoneEquipPointFloorRefRoomRefMigration";
+
+    /**
+      * Below preference key is being changed from "zoneEquipPointFloorRefRoomRefMigration" to "zoneEquipPointFloorRefRoomRefMigration_v2"
+      * This is done to let the migration code run once for those points which were not corrected in the previous migration due to "@" prefix in the floorRef/roomRef.
+      * In the future, we can remove the older key from the shared preference file if deemed necessary.
+    **/
+    public static final String ZONE_EQUIP_CONFIG_POINT_MIGRATION = "zoneEquipPointFloorRefRoomRefMigration_v2";
     public static final String TITLE_24_OAO_POINTS_MIGRATION = "title24OaoPointsMigration";
     public static final String TITLE_24_HSS_POINTS_MIGRATION = "title24HssPointsMigration";
 

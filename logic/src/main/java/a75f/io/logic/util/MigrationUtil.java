@@ -1121,8 +1121,8 @@ public class MigrationUtil {
                     "equipRef== \""+ equip.getId() +"\"");
             for( HashMap<Object, Object> configPointMap : configPointList){
                 Point equipPoint = new Point.Builder().setHashMap(configPointMap).build();
-                if(equipPoint.getFloorRef().equalsIgnoreCase("SYSTEM") ||
-                        (equipPoint.getRoomRef().equalsIgnoreCase("SYSTEM"))) {
+                if(equipPoint.getFloorRef().replace("@","").equalsIgnoreCase("SYSTEM") ||
+                        (equipPoint.getRoomRef().replace("@","").equalsIgnoreCase("SYSTEM"))) {
                     equipPoint.setFloorRef(equip.getFloorRef());
                     equipPoint.setRoomRef(equip.getRoomRef());
                     haystack.updatePoint(equipPoint, equipPoint.getId());

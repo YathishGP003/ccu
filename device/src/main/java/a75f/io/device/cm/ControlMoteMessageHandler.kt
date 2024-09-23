@@ -2,14 +2,21 @@ package a75f.io.device.cm
 
 import a75f.io.device.ControlMote
 import a75f.io.device.ControlMote.CM_SensorBusReadings_t
+import a75f.io.device.mesh.Pulse
 import a75f.io.device.mesh.ThermistorUtil
+import a75f.io.device.serial.CmToCcuOverUsbCmRegularUpdateMessage_t
+import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
+import a75f.io.domain.api.Point
 import a75f.io.domain.equips.AdvancedHybridSystemEquip
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
+import a75f.io.logic.bo.building.system.AdvancedAhuAnalogOutAssociationType
+import a75f.io.logic.bo.building.system.AdvancedAhuRelayMappings
 import a75f.io.logic.bo.building.system.dab.DabAdvancedAhu
 import a75f.io.logic.bo.building.system.util.getAdvancedAhuSystemEquip
 import a75f.io.logic.bo.building.system.vav.VavAdvancedAhu
+import a75f.io.logic.bo.util.CCUUtils
 
 fun handleCMRegularUpdate(data : ByteArray) {
 
@@ -22,19 +29,77 @@ fun handleCMRegularUpdate(data : ByteArray) {
 
     val updateMsg = ControlMote.CmToCcuOverUsbCmSerialRegularUpdate_t.parseFrom(messageArray)
     CcuLog.d(L.TAG_CCU_SERIAL, "CM handleCMRegularUpdate updateMsg :$updateMsg")
-
     updateMsg?.let { msg ->
         if (msg.hasSensorBusReadings()) {
             printSensorBusData(msg.sensorBusReadings)
             updateSensorBusData(msg.sensorBusReadings)
         }
-
         if (msg.hasRelayBitMapStatus()) {
             CcuLog.d(L.TAG_CCU_SERIAL, "CM handleCMRegularUpdate : relayBitMapStatus "+updateMsg.relayBitMapStatus)
+            updateRelayFeedBackStatus(updateMsg.relayBitMapStatus)
         }
-        msg.analogOutStatusList.forEach {
-            CcuLog.d(L.TAG_CCU_SERIAL, "CM handleCMRegularUpdate : analogOutStatus $it")
+        updateAnalogOutFeedback(msg.analogOutStatusList)
+        updateLoopFeedback(msg.piloopOutputList)
+    }
+}
+
+
+fun handleAdvancedAhuCmUpdate(messageT: CmToCcuOverUsbCmRegularUpdateMessage_t) {
+    try {
+        val cmDevice = Domain.cmBoardDevice
+        if (cmDevice.deviceRef.isNotEmpty()) {
+
+            val th1RawValue = messageT.thermistor1.get().toDouble()
+            val th2RawValue = messageT.thermistor2.get().toDouble()
+            val analog1InRawValue = messageT.analogSense1.get().toDouble()
+            val analog2InRawValue = messageT.analogSense2.get().toDouble()
+            val humidity = CCUUtils.roundToOneDecimal(messageT.humidity.get().toDouble())
+            val roomTemperature = messageT.roomTemperature.get().toDouble()
+
+            CcuLog.d(L.TAG_CCU_DEVICE, "Cm Regular Update : th1 : $th1RawValue th2 : $th2RawValue"
+                    + " analog1 : $analog1InRawValue analog2 : $analog2InRawValue humidity: $humidity " +
+                    "roomTemperature : $roomTemperature"  )
+
+            updateThermistorInput(cmDevice.th1In.domainName, th1RawValue)
+            cmDevice.th1In.writeHisVal(th1RawValue / 100)
+
+            updateThermistorInput(cmDevice.th2In.domainName, th2RawValue)
+            cmDevice.th1In.writeHisVal(th2RawValue / 100)
+
+            updateAnalogInput(cmDevice.analog1In.domainName, analog1InRawValue / 1000)
+            cmDevice.analog1In.writeHisVal(analog1InRawValue / 100)
+
+            updateAnalogInput(cmDevice.analog2In.domainName, analog2InRawValue / 1000)
+            cmDevice.analog2In.writeHisVal(analog2InRawValue / 100)
+
+            val equip = getAdvancedAhuSystemEquip()
+            updateCurrentTemp(roomTemperature, equip)
+            updateHumidity(humidity, equip)
+
+        } else {
+            CcuLog.e(L.TAG_CCU_DEVICE, "handleAdvancedAhuCmUpdate : cmDevice.deviceRef is empty")
         }
+    } catch (exception: UninitializedPropertyAccessException) {
+        CcuLog.e(L.TAG_CCU_DEVICE, "handleAdvancedAhuCmUpdate : Exception $exception")
+    }
+}
+
+private fun updateCurrentTemp(roomTemperature: Double, equip: AdvancedHybridSystemEquip) {
+    if (equip.cmCurrentTemp.pointExists()) {
+        val currentTemp = Pulse.getCMRoomTempConversion(roomTemperature, 0.0)
+        CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : Cm Current temp $currentTemp")
+        equip.cmCurrentTemp.writeHisVal(currentTemp)
+    } else {
+        CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : cmCurrentTemp point not found")
+    }
+}
+
+private fun updateHumidity(humidity: Double, equip: AdvancedHybridSystemEquip) {
+    if (equip.outsideHumidity.pointExists()) {
+        CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : Humidity $humidity")
+        equip.outsideHumidity.writeHisVal(humidity)
+    } else {
+        CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : outsideHumidity point not found")
     }
 }
 
@@ -138,8 +203,6 @@ fun updateSensorBusData(readings: CM_SensorBusReadings_t) {
            updateCo2SensorPoint(systemEquip.co2SensorBusAdd3.readDefaultVal().toInt(), readings.sensorAddress3Co2.toDouble(), systemEquip)
         }
     }
-
-
 }
 
 fun updatePressureSensorPoint(pressureSensorMapping : Int, sensorVal : Double, systemEquip: AdvancedHybridSystemEquip) {
@@ -228,17 +291,18 @@ fun doAnalogConversion(analogVal : Double, inputMapping : AnalogInput) : Double 
     }
 }
 
-fun updateThermistorInput(physicalPointName: String, thermistorVal: Double) {
+// Updating logical value for thermistor input
+fun updateThermistorInput(physicalPointDomainName: String, thermistorVal: Double) {
     if (isNotAdvanceAhuProfile()) {
         CcuLog.e(L.TAG_CCU_SERIAL, "CM updateThermistorInput : Skipped AdvancedAHU not configured.")
         return
     }
     val systemEquip = getAdvancedAhuSystemEquip()
-    val thermistorAssociation = when(physicalPointName){
+    val thermistorAssociation = when(physicalPointDomainName){
         DomainName.th1In -> systemEquip.thermistor1InputAssociation.readDefaultVal().toInt()
         DomainName.th2In -> systemEquip.thermistor2InputAssociation.readDefaultVal().toInt()
         else -> {
-            CcuLog.e(L.TAG_CCU_SERIAL, "CM updateThermistorInput : Invalid physical point name $physicalPointName")
+            CcuLog.e(L.TAG_CCU_SERIAL, "CM updateThermistorInput : Invalid physical point name $physicalPointDomainName")
             return
         }
     }
@@ -252,17 +316,18 @@ fun updateThermistorInput(physicalPointName: String, thermistorVal: Double) {
 
 }
 
-fun updateAnalogInput(physicalPointName: String, thermistorVal: Double) {
+// Updating logical value for Analog input
+fun updateAnalogInput(physicalPointDomainName: String, thermistorVal: Double) {
     if (isNotAdvanceAhuProfile()) {
         CcuLog.e(L.TAG_CCU_SERIAL, "CM updateAnalogInput : Skipped AdvancedAHU not configured.")
         return
     }
     val systemEquip = getAdvancedAhuSystemEquip()
-    val analogAssociation = when(physicalPointName){
+    val analogAssociation = when(physicalPointDomainName){
         DomainName.analog1In -> systemEquip.analog1InputAssociation.readDefaultVal().toInt()
         DomainName.analog2In -> systemEquip.analog2InputAssociation.readDefaultVal().toInt()
         else -> {
-            CcuLog.e(L.TAG_CCU_SERIAL, "CM updateAnalogInput : Invalid physical point name $physicalPointName")
+            CcuLog.e(L.TAG_CCU_SERIAL, "CM updateAnalogInput : Invalid physical point name $physicalPointDomainName")
             return
         }
     }
@@ -279,3 +344,106 @@ fun updateAnalogInput(physicalPointName: String, thermistorVal: Double) {
 fun isNotAdvanceAhuProfile(): Boolean {
     return (L.ccu().systemProfile !is VavAdvancedAhu && L.ccu().systemProfile !is DabAdvancedAhu)
 }
+
+fun updateRelayFeedBackStatus(status: Int) {
+    if (isNotAdvanceAhuProfile()) {
+        CcuLog.e(L.TAG_CCU_SERIAL, "CM updateAnalogInput : Skipped AdvancedAHU not configured.")
+        return
+    }
+    val equip = getAdvancedAhuSystemEquip()
+    val relayStatus = status.toString(radix = 2).padStart(8, '0').toCharArray()
+    fun getRelayStatus(pos: Int) = relayStatus[pos].toString().toInt()
+    CcuLog.e(L.TAG_CCU_DEVICE, "cm relay feedback status: $status = ReceivedStatus: ${Integer.toBinaryString(status)} ")
+
+    updateRelayFeedback(getRelayStatus(7), equip, equip.relay1OutputAssociation,1)
+    updateRelayFeedback(getRelayStatus(6), equip, equip.relay2OutputAssociation,2)
+    updateRelayFeedback(getRelayStatus(5), equip, equip.relay3OutputAssociation,3)
+    updateRelayFeedback(getRelayStatus(4), equip, equip.relay6OutputAssociation,6)
+    updateRelayFeedback(getRelayStatus(3), equip, equip.relay4OutputAssociation,4)
+    updateRelayFeedback(getRelayStatus(2), equip, equip.relay5OutputAssociation,5)
+    updateRelayFeedback(getRelayStatus(1), equip, equip.relay7OutputAssociation,7)
+    updateRelayFeedback(getRelayStatus(0), equip, equip.relay8OutputAssociation,8)
+}
+
+fun updateAnalogOutFeedback(analogFeedback: MutableList<Int>) {
+    if (isNotAdvanceAhuProfile()) {
+        CcuLog.e(L.TAG_CCU_SERIAL, "CM updateAnalogInput : Skipped AdvancedAHU not configured.")
+        return
+    }
+    val equip = getAdvancedAhuSystemEquip()
+    updateAnalogFeedback(analogFeedback[0], equip, equip.analog1OutputAssociation,0)
+    updateAnalogFeedback(analogFeedback[1], equip, equip.analog2OutputAssociation,1)
+    updateAnalogFeedback(analogFeedback[2], equip, equip.analog3OutputAssociation,2)
+    updateAnalogFeedback(analogFeedback[3], equip, equip.analog4OutputAssociation,3)
+}
+
+fun updateAnalogFeedback(status: Int, equip: AdvancedHybridSystemEquip, associationPoint: Point, position: Int) {
+    CcuLog.e(L.TAG_CCU_DEVICE, "updateAnalogFeedback : $position  status $status")
+    when(L.ccu().systemProfile) {
+        is VavAdvancedAhu -> (L.ccu().systemProfile as VavAdvancedAhu).setAnalogStatus(position, status.toDouble())
+        is DabAdvancedAhu -> (L.ccu().systemProfile as DabAdvancedAhu).setAnalogStatus(position, status.toDouble())
+    }
+
+    if (!associationPoint.pointExists()) return
+    val association = associationPoint.readDefaultVal().toInt()
+    if (association > 3 ) {
+        CcuLog.e(L.TAG_CCU_DEVICE, "updateAnalogFeedback : Not sat $association")
+        return
+    }
+    when (association) {
+        AdvancedAhuAnalogOutAssociationType.PRESSURE_FAN.ordinal -> writeStatus(equip.pressureBasedFanControlFeedback, status)
+        AdvancedAhuAnalogOutAssociationType.SAT_COOLING.ordinal -> writeStatus(equip.satBasedCoolingControlFeedback, status)
+        AdvancedAhuAnalogOutAssociationType.SAT_HEATING.ordinal -> writeStatus(equip.satBasedHeatingControlFeedback, status)
+    }
+}
+
+fun updateRelayFeedback(status: Int, equip: AdvancedHybridSystemEquip, associationPoint: Point, position: Int) {
+
+    // To show test signal status we need to save it
+    when(L.ccu().systemProfile) {
+        is VavAdvancedAhu -> (L.ccu().systemProfile as VavAdvancedAhu).setCMRelayStatus(position, status)
+        is DabAdvancedAhu -> (L.ccu().systemProfile as DabAdvancedAhu).setCMRelayStatus(position, status)
+    }
+    if (!associationPoint.pointExists()) return
+    val association = associationPoint.readDefaultVal().toInt()
+
+    if (association < 17 || association > 31) {
+        CcuLog.e(L.TAG_CCU_DEVICE, "updateRelayFeedback : Not sat $association")
+        return
+    }
+
+    CcuLog.e(L.TAG_CCU_DEVICE, "updateRelayFeedback : status $status assoc $association")
+    when (AdvancedAhuRelayMappings.values()[association]) {
+        AdvancedAhuRelayMappings.SAT_COOLING_STAGE_1 -> writeStatus(equip.satCoolingStage1Feedback, status)
+        AdvancedAhuRelayMappings.SAT_COOLING_STAGE_2 -> writeStatus(equip.satCoolingStage2Feedback, status)
+        AdvancedAhuRelayMappings.SAT_COOLING_STAGE_3 -> writeStatus(equip.satCoolingStage3Feedback, status)
+        AdvancedAhuRelayMappings.SAT_COOLING_STAGE_4 -> writeStatus(equip.satCoolingStage4Feedback, status)
+        AdvancedAhuRelayMappings.SAT_COOLING_STAGE_5 -> writeStatus(equip.satCoolingStage5Feedback, status)
+        AdvancedAhuRelayMappings.SAT_HEATING_STAGE_1 -> writeStatus(equip.satHeatingStage1Feedback, status)
+        AdvancedAhuRelayMappings.SAT_HEATING_STAGE_2 -> writeStatus(equip.satHeatingStage2Feedback, status)
+        AdvancedAhuRelayMappings.SAT_HEATING_STAGE_3 -> writeStatus(equip.satHeatingStage3Feedback, status)
+        AdvancedAhuRelayMappings.SAT_HEATING_STAGE_4 -> writeStatus(equip.satHeatingStage4Feedback, status)
+        AdvancedAhuRelayMappings.SAT_HEATING_STAGE_5 -> writeStatus(equip.satHeatingStage5Feedback, status)
+        AdvancedAhuRelayMappings.FAN_PRESSURE_STAGE_1 -> writeStatus(equip.fanPressureStage1Feedback, status)
+        AdvancedAhuRelayMappings.FAN_PRESSURE_STAGE_2 -> writeStatus(equip.fanPressureStage2Feedback, status)
+        AdvancedAhuRelayMappings.FAN_PRESSURE_STAGE_3 -> writeStatus(equip.fanPressureStage3Feedback, status)
+        AdvancedAhuRelayMappings.FAN_PRESSURE_STAGE_4 -> writeStatus(equip.fanPressureStage4Feedback, status)
+        AdvancedAhuRelayMappings.FAN_PRESSURE_STAGE_5 -> writeStatus(equip.fanPressureStage5Feedback, status)
+        else -> { /* DO NOTHING **/ }
+    }
+}
+
+fun updateLoopFeedback(loops: MutableList<Int>) {
+    CcuLog.d(L.TAG_CCU_SERIAL, "CM handleCMRegularUpdate : piloopOutputList $loops")
+    if (isNotAdvanceAhuProfile()) {
+        CcuLog.d(L.TAG_CCU_SERIAL, "CM updateAnalogInput : Skipped AdvancedAHU not configured.")
+        return
+    }
+
+    val equip = getAdvancedAhuSystemEquip()
+    if (equip.coolingLoopOutputFeedback.pointExists()) writeStatus(equip.coolingLoopOutputFeedback, loops[0])
+    if (equip.heatingLoopOutputFeedback.pointExists()) writeStatus(equip.heatingLoopOutputFeedback, loops[1])
+    if (equip.fanLoopOutputFeedback.pointExists()) writeStatus(equip.fanLoopOutputFeedback, loops[2])
+}
+
+fun writeStatus(feedback: Point, status: Int) = feedback.writeHisVal(status.toDouble())

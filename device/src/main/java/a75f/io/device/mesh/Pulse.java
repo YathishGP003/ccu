@@ -673,7 +673,8 @@ public class Pulse
 		CCUHsApi hayStack = CCUHsApi.getInstance();
 		if (L.ccu().systemProfile instanceof VavAdvancedAhu
 				|| L.ccu().systemProfile instanceof DabAdvancedAhu) {
-			handleAdvancedAhuCmUpdate(hayStack, cmRegularUpdateMessage_t); //TODO- TEMP to be cleaned up
+			ControlMoteMessageHandlerKt.handleAdvancedAhuCmUpdate(cmRegularUpdateMessage_t);
+			//handleAdvancedAhuCmUpdate(hayStack, cmRegularUpdateMessage_t); //TODO- TEMP to be cleaned up
 		}
 		String addr = String.valueOf(L.ccu().getSmartNodeAddressBand());
 		addr = addr.substring(0, addr.length()-2).concat("99");
@@ -1626,7 +1627,7 @@ public class Pulse
 		else
 			return 0;
 	}
-	private static Port getPhysicalPointPort(Map<Object, Object> physicalPoint) {
+	static Port getPhysicalPointPort(Map<Object, Object> physicalPoint) {
 		CcuLog.d(L.TAG_CCU_DEVICE, "getPhysicalPort "+physicalPoint);
 		if (physicalPoint.get("domainName") != null) {
 			return DeviceUtil.getPortFromDomainName(physicalPoint.get("domainName").toString());

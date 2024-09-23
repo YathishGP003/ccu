@@ -107,7 +107,7 @@ public class OTAUpdateService extends IntentService {
     public static final Queue<Intent> otaRequestsQueue = new LinkedList<>();
     private boolean retryHandlerStarted = false;
     private Timer retryHandler;
-    static boolean zoneLevelUpdate = false;
+    static boolean systemAndZoneLevelUpdate = false;
     public OTAUpdateService() {
         super("OTAUpdateService");
     }
@@ -371,20 +371,11 @@ public class OTAUpdateService extends IntentService {
 
     private String getDeviceId(String deviceType, int deviceMeshAddress) {
         if (deviceType.equals(FirmwareComponentType_t.CONTROL_MOTE_DEVICE_TYPE.toString())) {
-
-            HashMap<Object, Object> device = CCUHsApi.getInstance().readEntity("device and cm");
-            if ((device.get("addr") == null)) {
-                //Non-Dm system profiles will not have addr
-                return CCUHsApi.getInstance().readId("device and cm");
-            }
-            //Dm system profiles will  have addr
-            return CCUHsApi.getInstance().readId("(device and addr==\"" + device.get("addr") + "\") or device and cm");
+            return CCUHsApi.getInstance().readId("(device and domainName == \"cmBoardDevice\" ) or device and cm ");
         }
-        // connect module  we can use for hyperstatsplit also ,checking the zone level OTA means i am not sending the connect module ID
-        else if (deviceType.equals(FirmwareComponentType_t.CONNECT_MODULE_DEVICE_TYPE.toString()) && !zoneLevelUpdate) {
-            zoneLevelUpdate = false;
-            String deviceAddress = CCUHsApi.getInstance().readEntity("device and addr and connectModule").get("addr").toString();
-            return CCUHsApi.getInstance().readId("device and addr==\"" + deviceAddress + "\"");
+        // connect module  we can use for hyperstatsplit also ,checking the system ,zone,module  level OTA means i am not sending the connect module ID
+        else if (deviceType.equals(FirmwareComponentType_t.CONNECT_MODULE_DEVICE_TYPE.toString()) && !systemAndZoneLevelUpdate) {
+            return CCUHsApi.getInstance().readId("device and domainName == \"connectModuleDevice\"");
         }
         // For terminal devices
         return CCUHsApi.getInstance().readId("device and addr==\"" + deviceMeshAddress + "\"");
@@ -398,6 +389,7 @@ public class OTAUpdateService extends IntentService {
      */
     private void handleOtaUpdateStartRequest(Intent intent) {
         otaRequestProcessInProgress = true;
+        systemAndZoneLevelUpdate = false;
         CcuLog.i(TAG, "handleOtaUpdateStartRequest: called started a request");
         deleteFilesByDeviceType(DOWNLOAD_DIR);
         String id = intent.getStringExtra(ID);
@@ -407,8 +399,8 @@ public class OTAUpdateService extends IntentService {
         currentRunningRequestType = intent.getStringExtra(CMD_TYPE);
 
         //when we connect hyperstatsplit using connect module,we can able to give OTA for connect module,so we need to check the level
-        if(cmdLevel.equals("zone")){
-            zoneLevelUpdate = true;
+        if(cmdLevel.equals("zone")||cmdLevel.equals("module")){
+            systemAndZoneLevelUpdate = true;
         }
 
         if(id == null || firmwareVersion == null) {
@@ -493,6 +485,11 @@ public class OTAUpdateService extends IntentService {
                 //update everything
                 HashMap<Object, Object> deviceList= CCUHsApi.getInstance().readEntity("device and cm");
                 HashMap equipment =  CCUHsApi.getInstance().readEntity("equip and oao and not hyperstatsplit");
+                //OTA is not supported in system level for Connect Module
+                if (deviceType.equals(FirmwareComponentType_t.CONNECT_MODULE_DEVICE_TYPE)) {
+                    systemAndZoneLevelUpdate = true;
+                    CcuLog.i(TAG, "No Connect Module device found or OTA is not support in system level ");
+                }
 
                 if(!equipment.isEmpty()){
                     Device OAOdevice = HSUtil.getDevice(Short.parseShort(equipment.get(Tags.GROUP).toString()));

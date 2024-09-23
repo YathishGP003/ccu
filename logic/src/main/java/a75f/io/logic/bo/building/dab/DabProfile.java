@@ -117,6 +117,11 @@ public class DabProfile extends ZoneProfile
             heatingLoop.setIntegralMaxTimeout((int) dabEquip.getDabReheatTemperatureIntegralTime().readPriorityVal());
             heatingLoop.setProportionalGain(dabEquip.getDabReheatProportionalKFactor().readPriorityVal());
             heatingLoop.setIntegralGain(dabEquip.getDabReheatIntegralKFactor().readPriorityVal());
+            CcuLog.d(L.TAG_CCU_ZONE,
+                    "DAB Reheat Tuners: DabReheatProportionalKFactor " + dabEquip.getDabReheatProportionalKFactor() +
+                            ", DabReheatIntegralKFactor " + dabEquip.getDabReheatIntegralKFactor() +
+                            ", DabReheatTemperatureProportionalRange " + dabEquip.getDabReheatTemperatureProportionalRange() +
+                            ", DabReheatTemperatureIntegralTime " + dabEquip.getDabReheatTemperatureIntegralTime());
         }
 
     }

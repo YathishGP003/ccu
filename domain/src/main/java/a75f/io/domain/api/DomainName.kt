@@ -89,7 +89,7 @@ object DomainName {
     const val reheatTempOffset = "reheatTempOffset"
     const val dabReheatTemperatureProportionalRange = "dabReheatTemperatureProportionalRange"
     const val dabReheatIntegralKFactor = "dabReheatIntegralKFactor"
-    const val dabReheatProportionalKFactor = "dabreheatProportionalKFactor"
+    const val dabReheatProportionalKFactor = "dabReheatProportionalKFactor"
     const val reheatProportionalKFactor = "reheatProportionalKFactor"
 
     const val dabSupplyAirTemperatureProportionalKFactor = "dabSupplyAirTemperatureProportionalKFactor"

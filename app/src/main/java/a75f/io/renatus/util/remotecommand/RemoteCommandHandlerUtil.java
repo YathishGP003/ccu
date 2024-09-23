@@ -376,7 +376,7 @@ public class RemoteCommandHandlerUtil {
                                         String.format(REMOVE_FILE, "/system/priv-app/75fHome*.apk"),
 
                                         String.format(UNINSTALL_CMD, HOME_APP_PACKAGE_NAME_OBSOLETE),   // Necessary because a few have been installed in the field
-                                        String.format(REMOVE_FILE, "/system/priv-app/HomeApp*.apk"),
+                                        String.format(REMOVE_FILE, "/system/priv-app/Home*.apk"),
 
                                         String.format(MOVE_FILE, fileName, "/system/priv-app"),
                                         String.format("chmod 644 /system/priv-app/%s", baseName),

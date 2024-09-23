@@ -170,10 +170,16 @@ public class HttpUtil {
 
         EntitySyncResponse syncResponse = new EntitySyncResponse();
         syncResponse.setRespCode(response.code());
-        if (response.code() >= HTTP_RESPONSE_ERR_REQUEST) {
-            syncResponse.setErrRespString(response.body().toString());
-        } else {
-            syncResponse.setRespString(response.body().toString());
+        try {
+          if (response.code() >= HTTP_RESPONSE_ERR_REQUEST) {
+                syncResponse.setErrRespString(response.body().string());
+          } else {
+                syncResponse.setRespString(response.body().string());
+          }
+        } catch (IOException e) {
+            CcuLog.e(TAG_CCU_HS, "Exception reading stream: " + e);
+            syncResponse.setErrRespString("");
+            syncResponse.setRespString("");
         }
         return syncResponse;
     }

@@ -35,6 +35,7 @@ class PointWriteHandler {
             ccuHsApi.hsUrl + ENDPOINT_POINT_WRITE_MANY,
             HZincWriter.gridToString(pointWriteGrid), ccuHsApi.jwt
         )
+        CcuLog.d(PointWriteCache.POINT_WRITE_TAG, "PointWriteMany Request : "+HZincWriter.gridToString(pointWriteGrid))
         if(pointWriteManyResponse == null) {
             CcuLog.i(PointWriteCache.POINT_WRITE_TAG, "PointWriteMany Failed due to response is null" )
             return

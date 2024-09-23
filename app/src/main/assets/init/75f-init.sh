@@ -33,10 +33,8 @@ log -p v -t "$TAG" "Current home app installation"
 log -p v -t "$TAG" "$RESULTS"
 
 CURRENT_INSTALLATION=`dumpsys package com.x75frenatus.home| grep codePath | grep apk | sed 's/^ *codePath=//'`
-LEGACY_HOME_APP=`ls -1 /system/priv-app/*.apk 2>/dev/null| grep 75fHome | head -n 1`
 HOME_APP=`ls -1 /system/priv-app/*.apk 2>/dev/null| grep HomeApp | head -n 1`
 
-log -p v -t "$TAG" "Legacy home apk: [$LEGACY_HOME_APP]"
 log -p v -t "$TAG" "Home apk: [$HOME_APP]"
 log -p v -t "$TAG" "Current installation: [$CURRENT_INSTALLATION]"
 
@@ -47,31 +45,48 @@ if [ "$HOME_APP" != "" ]
 then
   log -p v -t "$TAG" "Found home app apk $HOME_APP"
 
+  # ******************************************************************
+  # * We have a home app with the latest naming convention, uninstall
+  # * old home app versions beginning with 'HomeRenatus' or '75fHome'.
+  # * Generally we'll either have 0 or 1 here.
+  # ******************************************************************
+  LEGACY_FILES=`ls /system/priv-app/*.apk 2>/dev/null| grep -i -e 75fHome -e HomeRenatus`
+  if [ $? -eq 0 ]
+  then
+    # Make the file system writable so that we can remove the file
+    OUTPUT=`mount -o rw,remount /system 2>&1`
+    if [ $? -ne 0 ]
+    then
+      log -p v -t "$TAG" "Re-mount failed, unexpected behavior may occur: $OUTPUT"
+    fi
+
+    OUTPUT=`mount | grep "/system "`
+    log -p v -t "$TAG" "Mount state: $OUTPUT"
+
+    log -p v -t "$TAG" "Uninstalling legacy home app com.x75frenatus.home"
+
+    RESULT=`/system/bin/pm uninstall --user 0 com.x75frenatus.home 2>&1`
+    STATUS=$?
+    log -p v -t "$TAG" "Status $STATUS Resulting output: $RESULT"
+
+    # ******************************************************************
+    # * Remove each of the found APKs
+    # ******************************************************************
+    for LEGACY_HOME_APP in $LEGACY_FILES
+    do
+      log -p v -t "$TAG" "Removing old APK $LEGACY_HOME_APP"
+      rm -f $LEGACY_HOME_APP
+    done
+
+      # Restore the file system to read only
+      mount -o ro,remount /system
+  fi
+
   # ****************************************************************
   # * If the apk in priv-app is different than what is installed
   # ****************************************************************
   if [ "$HOME_APP" != "$CURRENT_INSTALLATION" ]
   then
-    # *******************************************
-    # * Get rid of the old Home App
-    # *******************************************
-    if [ "$LEGACY_HOME_APP" != "" ]
-    then
-      log -p v -t "$TAG" "Uninstalling legacy home app apk $LEGACY_HOME_APP"
-
-      # Make the file system writable so that we can remove the file
-      mount -o rw,remount /system
-
-      RESULT=`/system/bin/pm uninstall --user 0 com.x75frenatus.home 2>&1`
-      STATUS=$?
-      log -p v -t "$TAG" "Status $STATUS Resulting output: $RESULT"
-      log -p v -t "$TAG" "Removing old APK"
-      rm -f $LEGACY_HOME_APP
-
-      # Restore the file system to read only
-      mount -o ro,remount /system
-    fi
-
     # *******************************************************************************
     # * Perform the actual install
     # * We do not know, at this point, if a previous installation succeeded or failed
@@ -85,6 +100,8 @@ then
   else
     log -p v -t "$TAG" "Home app version has already been installed"
   fi
+else
+  log -p v -t "$TAG" "CCU tablet is still running the legacy home app"
 fi
 
 # *****************************************************************************************

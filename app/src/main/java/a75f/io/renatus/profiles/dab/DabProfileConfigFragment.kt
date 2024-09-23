@@ -367,9 +367,7 @@ class DabProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                         .padding(PaddingValues(start = 80.dp, end = 80.dp))
                 ) {
 
-                    if (viewModel.viewState.reheatType.toInt() == 6
-                        || viewModel.viewState.reheatType.toInt() == 7
-                    ) {
+                    if (viewModel.viewState.reheatType.toInt() != 0) {
                         Spacer(modifier = Modifier.width(60.dp))
                         Picker(
                             header = "Min Reheat \nDamper Pos",

@@ -244,8 +244,6 @@ object HyperStatSplitCpuCutOverMapping {
         "constantTempAlertTime" to "constantTempAlertTime",
         "standaloneCoolingPreconditioningRate" to "standaloneCoolingPreconditioningRate",
         "standaloneHeatingPreconditioningRate" to "standaloneHeatingPreconditioningRate",
-        "standaloneCoolingDeadband" to "coolingDeadband",
-        "standaloneHeatingDeadband" to "heatingDeadband",
         "standaloneCoolingDeadbandMultiplier" to "standaloneCoolingDeadbandMultiplier",
         "standaloneHeatingDeadbandMultiplier" to "standaloneHeatingDeadbandMultiplier",
         "standaloneRelayActivationHysteresis" to "standaloneRelayActivationHysteresis",

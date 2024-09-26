@@ -219,13 +219,14 @@ public class ScheduleUtil {
     /*Both heating and cooling deadband's min values are same*/
     public static double getDeadBandValue(String val, String roomRef){
         if(roomRef == "" || roomRef == null){
+            String buildingEquipRef = Domain.buildingEquip.getEquipRef();
             if(val == "minVal"){
-                return Double.parseDouble(Domain.readPoint(DomainName.coolingDeadband).get("minVal").toString());
+                return Double.parseDouble(Domain.readPointForEquip(DomainName.coolingDeadband, buildingEquipRef).get("minVal").toString());
             } else {
-                return Double.parseDouble(Domain.readPoint(DomainName.coolingDeadband).get("maxVal").toString());
+                return Double.parseDouble(Domain.readPointForEquip(DomainName.coolingDeadband, buildingEquipRef).get("maxVal").toString());
             }
         }
         return Double.parseDouble(CCUHsApi.getInstance().readEntity(
-                "deadband and (heating or cooling) and roomRef == \"" + roomRef + "\"").get(val).toString());
+                "schedulable and deadband and (heating or cooling) and roomRef == \"" + roomRef + "\"").get(val).toString());
     }
 }

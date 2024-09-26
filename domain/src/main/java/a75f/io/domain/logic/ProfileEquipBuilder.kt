@@ -40,7 +40,7 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
         val systemEquip = hayStack.readEntity("system and equip and not modbus and not connectModule")
         if (systemEquip.isEmpty()) {
             CcuLog.i(Domain.LOG_TAG, "addEquip - Invalid System equip , ahuRef cannot be applied")
-        } else if (systemEquip.contains(Tags.DEFAULT)) {
+        } else if (isStandAloneEquip(hayStackEquip)) {
             hayStackEquip.gatewayRef = systemEquip[Tags.ID].toString()
             CcuLog.i(Domain.LOG_TAG, "Added gateway ref")
         } else {
@@ -435,5 +435,9 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
                 .replace("\\s".toRegex(),"")
                 .substringAfterLast("-")
             ).equals(domainName, ignoreCase = true) }
+    }
+
+    private fun isStandAloneEquip(equip : Equip) : Boolean {
+        return equip.markers.contains(Tags.STANDALONE)
     }
 }

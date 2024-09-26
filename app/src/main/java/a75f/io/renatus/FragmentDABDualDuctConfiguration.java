@@ -123,7 +123,8 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
     String zoneRef;
     
     ArrayAdapter<Double> analogOutAdapter = null;
-    
+    private boolean isUserInitiatedSelectionAO1 = true;
+    private boolean isUserInitiatedSelectionAO2 = true;
     public static FragmentDABDualDuctConfiguration newInstance(short smartNodeAddress, String roomName, NodeType nodeType, String floorName, ProfileType profileType)
     {
         FragmentDABDualDuctConfiguration fragment = new FragmentDABDualDuctConfiguration();
@@ -193,9 +194,12 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
         analog1OutSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                DualDuctAnalogActuator actuator = DualDuctAnalogActuator.values()[position];
-                analog1OutSpinner.setSelection(position);
-                handleAnalog1Selection(actuator);
+                if(isUserInitiatedSelectionAO1){
+                    DualDuctAnalogActuator actuator = DualDuctAnalogActuator.values()[position];
+                    analog1OutSpinner.setSelection(position);
+                    handleAnalog1Selection(actuator);
+                }
+                isUserInitiatedSelectionAO1 = true;
             }
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
@@ -206,9 +210,12 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
         analog2OutSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                DualDuctAnalogActuator actuator = DualDuctAnalogActuator.values()[position];
-                analog2OutSpinner.setSelection(position);
-                handleAnalog2Selection(actuator);
+                if(isUserInitiatedSelectionAO2){
+                    DualDuctAnalogActuator actuator = DualDuctAnalogActuator.values()[position];
+                    analog2OutSpinner.setSelection(position);
+                    handleAnalog2Selection(actuator);
+                }
+                isUserInitiatedSelectionAO2 = true;
             }
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
@@ -433,7 +440,8 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
     }
     
     private void restoreViews() {
-        
+        isUserInitiatedSelectionAO1 = false;
+        isUserInitiatedSelectionAO2 = false;
         analog1OutSpinner.setSelection(mProfileConfig.getAnalogOut1Config(), false);
         DualDuctAnalogActuator analog1Selection = DualDuctAnalogActuator.values()[mProfileConfig.getAnalogOut1Config()];
         handleAnalog1Selection(analog1Selection);

@@ -237,7 +237,7 @@ class AlertsRepository(
 
       if (alertDef.alert.ismEnabled() && !alertDef.isMuted(ccuId, null)) {
          alertDef.alert.setmMessage(msg)
-         alertDef.alert.setmNotificationMsg(msg)
+         alertDef.alert.setmNotificationMsg(alertDef.alert.mNotificationMsg)
          val alert = AlertBuilder.build(alertDef, AlertFormatter.getFormattedMessage(alertDef,this), haystack,equipRef,null)
          if (isOtaAlert(title)){
             alert.setFixed(true)
@@ -259,7 +259,6 @@ class AlertsRepository(
 
       if (alertDef.alert.ismEnabled() && !alertDef.isMuted(ccuId, null)) {
          alertDef.alert.setmMessage(msg)
-         alertDef.alert.setmNotificationMsg(msg)
          val alert = AlertBuilder.build(alertDef, AlertFormatter.getFormattedMessage(alertDef,this), haystack,equipRef,null)
          if (isOtaAlert(title)){
             alert.setFixed(true)

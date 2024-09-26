@@ -143,6 +143,7 @@ public class AlertProcessor
                 return false;
             }else{
                 CcuLog.d(TAG_CCU_ALERTS, "---triggerAlert-blockId5005@@-"+blockId + " notificationMsg: " + notificationMsg + " message: " + message + " entityId: " + entityId + "-current thread->"+Thread.currentThread().getName());
+                def.alert.setmNotificationMsg(notificationMsg);
                 Alert alert = AlertBuilder.build(def, message, CCUHsApi.getInstance(),entityId,"");
                 alert.blockId = blockId;
                 String tempId = entityId.replaceFirst("@","");

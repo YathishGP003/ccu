@@ -158,7 +158,7 @@ public class LSerial
                 msg.setByteBuffer(ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN), 0);
                 LogdStructAsJson(msg);
             }else if(messageType == MessageType.CM_TO_CCU_OVER_USB_CM4_REGULAR_UPDATE){
-                Pulse.rebootMessageFromCM(fromBytes(data, WrmOrCmRebootIndicationMessage_t.class));
+                ControlMoteMessageHandlerKt.handleCMRegularUpdate(data);
             }else if(messageType == MessageType.CM_TO_CCU_OVER_USB_SN_REBOOT){
                 DLog.LogdSerial("Event Type CM_TO_CCU_OVER_USB_SN_REBOOT DEVICE_REBOOT:"+data.length+","+data.toString());
                 Pulse.smartDevicesRebootMessage(fromBytes(data, SnRebootIndicationMessage_t.class));

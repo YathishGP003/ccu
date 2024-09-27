@@ -224,7 +224,6 @@ class AcbProfileViewModel : ViewModel() {
             updateRelayAssociation(profileConfiguration)
             setMinCfmSetpointMaxVals(profileConfiguration)
             setAirflowCfmProportionalRange(profileConfiguration)
-            acbProfile.init()
             setScheduleType(profileConfiguration)
         }
 

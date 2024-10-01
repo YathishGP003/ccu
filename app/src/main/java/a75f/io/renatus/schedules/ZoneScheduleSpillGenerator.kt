@@ -16,7 +16,9 @@ import org.projecthaystack.util.WebUtil
 
 class ZoneScheduleSpillGenerator {
     private val ccuHsApi = CCUHsApi.getInstance()
+    private val finalResponse = mutableListOf<HGrid>()
     private val pageSize = 100
+
     data class ZoneScheduleSpill(
         val zoneRef: String,
         val zoneDis: String,
@@ -24,36 +26,21 @@ class ZoneScheduleSpillGenerator {
         val floorDis: String,
         val schedule: Schedule
     )
+
     fun generateSpill() : List<ZoneScheduleSpill>{
-        var pageNo = 0
+        finalResponse.clear()
         CcuLog.d(TAG_ZONE_SCHEDULE_SPILL, "Schedule Spill Generation started")
-        val finalResponse = mutableListOf<HGrid>()
 
-        val organization = ccuHsApi.site!!.getOrganization()
         val siteIdRef = ccuHsApi.siteIdRef
-        val combinedFilter= """((schedule and days) or (room) or (floor) or (equip and roomRef != "SYSTEM")) and siteRef == $siteIdRef or (named and schedule and organization == "$organization")"""
+        val organization = ccuHsApi.site!!.getOrganization()
 
-        val combinedDetails = HDictBuilder().add("filter", combinedFilter).toDict()
-        val combinedDetailsGrid = HGridBuilder.dictToGrid(combinedDetails)
-        val hClient = HClient(ccuHsApi.hsUrl, HayStackConstants.USER, HayStackConstants.PASS)
-        val combinedDetailsResponse: HGrid = hClient.call("read", combinedDetailsGrid, pageNo, pageSize)
-        ccuHsApi.HGridToList(combinedDetailsResponse)
+        val combinedFilter= """((schedule and days) or (room) or (floor) or (equip and roomRef != "SYSTEM")) and siteRef == $siteIdRef"""
+        val namedScheduleFilter = """(named and schedule and organization == "$organization")"""
 
-        finalResponse.add(combinedDetailsResponse)
-        val responsePageSize = WebUtil.getResponsePageSize(combinedDetailsResponse, pageSize)
-        CcuLog.d(TAG_ZONE_SCHEDULE_SPILL, "Response received from backend:" +
-                " no of remaining pages to be fetched $responsePageSize")
+        fetchScheduleDataFromCloud(combinedFilter)
+        CcuLog.d(TAG_ZONE_SCHEDULE_SPILL, "Named Schedules download started")
+        fetchScheduleDataFromCloud(namedScheduleFilter)
 
-        if (responsePageSize > 0) {
-            pageNo = 1
-            while (pageNo <= responsePageSize) {
-                val nextReadChangesResponse =
-                    hClient.call("read", combinedDetailsGrid, pageNo, pageSize)
-                finalResponse.add(nextReadChangesResponse)
-                CcuLog.d(TAG_ZONE_SCHEDULE_SPILL, "iteration response size " + finalResponse.size)
-                pageNo++
-            }
-        }
         CcuLog.d(TAG_ZONE_SCHEDULE_SPILL, "Imported Schedules, Rooms, Floors, Equips")
 
         val listOfRooms = mutableListOf<HashMap<Any, Any>>()
@@ -102,6 +89,31 @@ class ZoneScheduleSpillGenerator {
         }
         CcuLog.d(TAG_ZONE_SCHEDULE_SPILL, "Generated Zone Schedule Spill")
         return zoneScheduleSpillList
+    }
+
+    private fun fetchScheduleDataFromCloud(query: String){
+        var pageNo = 0
+
+        val combinedDetails = HDictBuilder().add("filter", query).toDict()
+        val combinedDetailsGrid = HGridBuilder.dictToGrid(combinedDetails)
+        val hClient = HClient(ccuHsApi.hsUrl, HayStackConstants.USER, HayStackConstants.PASS)
+        val combinedDetailsResponse: HGrid = hClient.call("read", combinedDetailsGrid, pageNo, pageSize)
+
+        finalResponse.add(combinedDetailsResponse)
+        val responsePageSize = WebUtil.getResponsePageSize(combinedDetailsResponse, pageSize)
+        CcuLog.d(TAG_ZONE_SCHEDULE_SPILL, "Response received from backend:" +
+                " no of remaining pages to be fetched $responsePageSize")
+
+        if (responsePageSize > 0) {
+            pageNo = 1
+            while (pageNo <= responsePageSize) {
+                val nextScheduleQueryResponse =
+                    hClient.call("read", combinedDetailsGrid, pageNo, pageSize)
+                finalResponse.add(nextScheduleQueryResponse)
+                CcuLog.d(TAG_ZONE_SCHEDULE_SPILL, "iteration response size " + finalResponse.size)
+                pageNo++
+            }
+        }
     }
 
     private fun findSchedulesInResponse(finalList: HGrid, listOfSchedules: MutableList<HDict>) {

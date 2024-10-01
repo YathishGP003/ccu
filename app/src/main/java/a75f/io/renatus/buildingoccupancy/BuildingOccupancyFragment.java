@@ -292,6 +292,12 @@ public class BuildingOccupancyFragment extends DialogFragment implements Buildin
                         if (spillsMap != null && !spillsMap.isEmpty() && position != ManualSchedulerDialogFragment.NO_REPLACE) {
                             scheduleImpacts = buildingOccupancyViewModel.getWarningMessage(spillsMap);
                         } else {
+                            if ((!NetworkUtil.isNetworkConnected(getActivity()) || !isCloudConnected) && !OfflineModeUtilKt.isOfflineMode()) {
+                                ProgressDialogUtils.hideProgressDialog();
+                                Toast.makeText(getActivity(), "Building Occupancy cannot be edited when CCU is offline. Please " +
+                                        "connect to network.", Toast.LENGTH_LONG).show();
+                                return;
+                            }
                             if (removeEntry != null && buildingOccupancy.getDays().contains(removeEntry)) {
                                 buildingOccupancy.getDays().remove(removeEntry);
                             }

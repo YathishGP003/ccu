@@ -417,7 +417,8 @@ class ScheduleGroupModel (application: Application) : AndroidViewModel(applicati
 
         when (scheduleGroup) {
             ScheduleGroup.EVERYDAY.ordinal -> {
-                for (mScheduleDay in mSchedule.getDays()) {
+                val scheduleDays = ArrayList(mSchedule.getDays())
+                for(mScheduleDay in scheduleDays){
                     if ((mScheduleDay.day == DAYS.MONDAY.ordinal || mScheduleDay.day == DAYS.TUESDAY.ordinal ||
                                 mScheduleDay.day == DAYS.WEDNESDAY.ordinal || mScheduleDay.day == DAYS.THURSDAY.ordinal ||
                                 mScheduleDay.day == DAYS.FRIDAY.ordinal || mScheduleDay.day == DAYS.SATURDAY.ordinal || mScheduleDay.day == DAYS.SUNDAY.ordinal)
@@ -430,7 +431,8 @@ class ScheduleGroupModel (application: Application) : AndroidViewModel(applicati
             }
 
             ScheduleGroup.WEEKDAY_WEEKEND.ordinal -> {
-                for(mScheduleDay in mSchedule.getDays()){
+                val scheduleDays = ArrayList(mSchedule.getDays())
+                for(mScheduleDay in scheduleDays){
                     if(days.day == DAYS.MONDAY.ordinal){
                         if((mScheduleDay.day == DAYS.MONDAY.ordinal || mScheduleDay.day == DAYS.TUESDAY.ordinal ||
                                     mScheduleDay.day == DAYS.WEDNESDAY.ordinal || mScheduleDay.day == DAYS.THURSDAY.ordinal ||
@@ -448,7 +450,8 @@ class ScheduleGroupModel (application: Application) : AndroidViewModel(applicati
                 }
             }
             ScheduleGroup.WEEKDAY_SATURDAY_SUNDAY.ordinal -> {
-                for(mScheduleDay in mSchedule.getDays()){
+                val scheduleDays = ArrayList(mSchedule.getDays())
+                for(mScheduleDay in scheduleDays){
                     if(days.day == DAYS.MONDAY.ordinal){
                         if((mScheduleDay.day == DAYS.MONDAY.ordinal || mScheduleDay.day == DAYS.TUESDAY.ordinal ||
                                     mScheduleDay.day == DAYS.WEDNESDAY.ordinal || mScheduleDay.day == DAYS.THURSDAY.ordinal ||

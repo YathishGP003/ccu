@@ -42,10 +42,10 @@ public class SmartNodeSettings2_t extends Struct {
 
     public class RelayBitmap_t extends Struct
     {
-        public final Unsigned16 relay1 = new Unsigned16(1); // This bit is based on relay type( NO: 1 or NC: 0)
-        public final Unsigned16 relay2 = new Unsigned16(1); //This bit is based on relay type( NO: 1 or NC: 0)
-        public final Unsigned16 relay3 = new Unsigned16(1); //This bit is based on relay type( NO: 1 or NC: 0)
-        public final Unsigned16 relay4 = new Unsigned16(1); //This bit is based on relay type( NO: 1 or NC: 0)
+        public final Unsigned8 relay1 = new Unsigned8(1); // This bit is based on relay type( NO: 1 or NC: 0)
+        public final Unsigned8 relay2 = new Unsigned8(1); //This bit is based on relay type( NO: 1 or NC: 0)
+        public final Unsigned8 relay3 = new Unsigned8(1); //This bit is based on relay type( NO: 1 or NC: 0)
+        public final Unsigned8 relay4 = new Unsigned8(1); //This bit is based on relay type( NO: 1 or NC: 0)
     }
 
 }

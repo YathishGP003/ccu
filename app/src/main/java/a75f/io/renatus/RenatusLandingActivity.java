@@ -3,6 +3,7 @@ package a75f.io.renatus;
 import static a75f.io.device.bacnet.BacnetConfigConstants.BACNET_CONFIGURATION;
 import static a75f.io.device.bacnet.BacnetConfigConstants.IS_BACNET_CONFIG_FILE_CREATED;
 import static a75f.io.device.bacnet.BacnetUtilKt.populateBacnetConfigurationObject;
+import static a75f.io.renatus.CcuRefReceiver.REQUEST_CCU_REF_ACTION;
 import static a75f.io.renatus.Communication.isPortAvailable;
 import static a75f.io.renatus.UtilityApplication.context;
 import static a75f.io.renatus.registration.UpdateCCUFragment.abortCCUDownloadProcess;
@@ -88,6 +89,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
     private ImageView floorMenu;
     static CloudConnetionStatusThread mCloudConnectionStatus = null;
     private BroadcastReceiver mConnectionChangeReceiver;
+    private CcuRefReceiver mCcuRefReceiver = null;
     private ImageView powerByLogoForCarrier;
 
     /**
@@ -121,6 +123,12 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
         intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
 
         this.registerReceiver(mConnectionChangeReceiver, intentFilter);
+
+        // * Register the receiver that the RemoteApp uses to request CCU info
+        mCcuRefReceiver = new CcuRefReceiver();
+        IntentFilter raaIntentFilter = new IntentFilter();
+        raaIntentFilter.addAction(REQUEST_CCU_REF_ACTION);
+        registerReceiver(mCcuRefReceiver, raaIntentFilter);
 
         if (!isFinishing()) {
             setContentView(R.layout.activity_renatus_landing);
@@ -467,6 +475,10 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
             }
             if (mUsbEventReceiver != null) {
                 unregisterReceiver(mUsbEventReceiver);
+            }
+            if (mCcuRefReceiver != null) {
+                this.unregisterReceiver(mCcuRefReceiver);
+                mCcuRefReceiver = null;
             }
         } catch (Exception e) {
             // already unregistered

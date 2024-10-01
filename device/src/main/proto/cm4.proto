@@ -320,4 +320,5 @@ message CmToCcuOverUsbCmSerialRegularUpdate_t {
   optional CM_SensorBusReadings_t sensorBusReadings = 1;
   optional uint32 relayBitMapStatus =  2; // Relay status bitmap
   repeated uint32 analogOutStatus = 3;// [packed = true, (nanopb).max_count = 4, (nanopb).fixed_count = false]; // Four analog out values in 1/10 volts
+  repeated uint32 piloopOutput = 4;// [packed = true, (nanopb).max_count = 4, (nanopb).fixed_count = false]; // Four pi loops outputs. In Adv AHU, Pi loop [0] = Adv AHU Cooling loop, Pi loop [1] = Adv AHU Heating loop, Pi loop [2] = Adv AHU Pressure loop , Pi loop [3] = Unused currently
 }

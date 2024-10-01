@@ -234,7 +234,6 @@ class DabProfileViewModel : ViewModel() {
                 true
             )
             if (L.ccu().bypassDamperProfile != null) { overrideForBypassDamper(profileConfiguration); }
-            dabProfile.init()
             setOutputTypes(hayStack, profileConfiguration, deviceBuilder, deviceModel)
             setScheduleType(profileConfiguration)
             CoroutineScope(Dispatchers.Default).launch {

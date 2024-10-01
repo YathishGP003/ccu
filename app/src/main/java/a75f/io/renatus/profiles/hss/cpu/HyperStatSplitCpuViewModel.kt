@@ -37,6 +37,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import java.util.HashMap
 
 class HyperStatSplitCpuViewModel : HyperStatSplitViewModel() {
 
@@ -197,14 +198,6 @@ class HyperStatSplitCpuViewModel : HyperStatSplitViewModel() {
                     CCUHsApi.getInstance().resetCcuReady()
                     setUpHyperStatSplitProfile()
                     CcuLog.i(Domain.LOG_TAG, "HSS Profile Setup complete")
-
-                    withContext(Dispatchers.Main) {
-                        context.sendBroadcast(Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED))
-                        showToast("HSS Configuration saved successfully", context)
-                        CcuLog.i(Domain.LOG_TAG, "Close Pairing dialog")
-                        ProgressDialogUtils.hideProgressDialog()
-                        pairingCompleteListener.onPairingComplete()
-                    }
                     L.saveCCUState()
                     hayStack.syncEntityTree()
                     CCUHsApi.getInstance().setCcuReady()
@@ -214,6 +207,15 @@ class HyperStatSplitCpuViewModel : HyperStatSplitViewModel() {
 
                     DesiredTempDisplayMode.setModeType(zoneRef, CCUHsApi.getInstance())
                     CcuLog.i(Domain.LOG_TAG, "HSS Profile Pairing complete")
+                    //delete deadband points in equip level
+                    deletingDeadBandPointsInEquipLevel()
+                    withContext(Dispatchers.Main) {
+                        context.sendBroadcast(Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED))
+                        showToast("HSS Configuration saved successfully", context)
+                        CcuLog.i(Domain.LOG_TAG, "Close Pairing dialog")
+                        ProgressDialogUtils.hideProgressDialog()
+                        pairingCompleteListener.onPairingComplete()
+                    }
 
                     // This check is needed because the dialog sometimes fails to close inside the coroutine.
                     // We don't know why this happens.
@@ -224,6 +226,25 @@ class HyperStatSplitCpuViewModel : HyperStatSplitViewModel() {
                 }
             }
         }
+
+    }
+
+    // this function is added to delete the deadband points because in  model we have deaband points
+    // If we remove in the model this method will be removed as well
+    private fun deletingDeadBandPointsInEquipLevel() {
+
+        val equipRef = hssProfile.hsSplitHaystackUtil.equipRef
+        val coolingDeadBand: HashMap<Any, Any>? = CCUHsApi.getInstance()
+            .readEntity("cooling and deadband and not multiplier  and equipRef == \"$equipRef\"")
+        val heatingDeadBand: HashMap<Any, Any>? = CCUHsApi.getInstance()
+            .readEntity("heating and deadband and not multiplier  and equipRef == \"$equipRef\"")
+        if (!coolingDeadBand.isNullOrEmpty()) {
+            CCUHsApi.getInstance().deleteEntity(coolingDeadBand["id"].toString())
+        }
+        if (!heatingDeadBand.isNullOrEmpty()) {
+            CCUHsApi.getInstance().deleteEntity(heatingDeadBand["id"].toString())
+        }
+        CcuLog.i(Domain.LOG_TAG, "Deleted Equip level Deadband points")
     }
 
     /*

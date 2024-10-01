@@ -100,14 +100,8 @@ object DomainName {
     const val dabDuctStaticPressureProportionalKFactor = "dabDuctStaticPressureProportionalKFactor"
     const val dabDuctStaticPressureProportionalRange = "dabDuctStaticPressureProportionalRange"
     const val dabDuctStaticPressureIntegralTime = "dabDuctStaticPressureIntegralTime"
-    const val dabDuctStaticIntegralKFactor = "dabDuctStaticIntegralKFactor"
+    const val dabDuctStaticPressureIntegralKFactor = "dabDuctStaticPressureIntegralKFactor"
 
-    /*
-
-    dabDuctStaticPressureIntegralTime
-    dabDuctStaticPressureProportionalKFactor
-    dabDuctStaticPressureIntegralKFactor
-    dabDuctStaticPressureProportionalRange*/
 
     //VAV
     const val vavTargetCumulativeDamper = "vavTargetCumulativeDamper"

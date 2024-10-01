@@ -125,7 +125,7 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
                     else
                         equipModel.value.subEquips = mutableListOf()
                 }
-            } else {
+            } else if(modelName.value.contentEquals("Select Model")) {
                 ProgressDialogUtils.showProgressDialog(context, LOADING)
                 readDeviceModels()
             }
@@ -391,9 +391,9 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
         }
     }
 
-    fun isExistingProfile() : Boolean {
+    fun isExistingProfile(filter: String) : Boolean {
         val parentMap = getModbusEquipMap(equipModel.value.slaveId.value.toShort())
-        return !parentMap.isNullOrEmpty()
+        return !parentMap.isNullOrEmpty() && parentMap.containsKey(filter)
     }
 
     private fun updateModbusProfile() {

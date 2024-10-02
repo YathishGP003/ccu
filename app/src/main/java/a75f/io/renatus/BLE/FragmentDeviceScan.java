@@ -35,6 +35,7 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.FragmentActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -238,19 +239,29 @@ public class FragmentDeviceScan extends BaseDialogFragment
                     }, 10000);
 
 
-                    // Initializes list view adapter.
-                    getActivity().runOnUiThread(() -> {
-                        mLeDeviceListAdapter = new LeDeviceListAdapter();
-                        setListViewEmptyView();
-                        mBLEDeviceListListView.setAdapter(mLeDeviceListAdapter);
-                        mBLEDeviceListListView.setOnItemClickListener((adapterView, view, position, id) -> {
-                            final BluetoothDevice device = mLeDeviceListAdapter.getDevice(position);
-                            CcuLog.d(L.TAG_CCU_BLE,"Clicked on the device "+device);
-                            finish(device);
-                            scanLeDevice(false);
+                    try {
+                        // Initializes list view adapter.
+                        getActivity().runOnUiThread(() -> {
+                            FragmentActivity fragmentActivity = FragmentDeviceScan.this.getActivity();
+                            if (fragmentActivity == null) {
+                                return;
+                            }
+                            mLeDeviceListAdapter = new LeDeviceListAdapter(fragmentActivity);
+                            setListViewEmptyView();
+                            mBLEDeviceListListView.setAdapter(mLeDeviceListAdapter);
+                            mBLEDeviceListListView.setOnItemClickListener((adapterView, view, position, id) -> {
+                                final BluetoothDevice device = mLeDeviceListAdapter.getDevice(position);
+                                CcuLog.d(L.TAG_CCU_BLE,"Clicked on the device "+device);
+                                finish(device);
+                                scanLeDevice(false);
+                            });
+                            scanLeDevice(true);
                         });
-                        scanLeDevice(true);
-                    });
+                    } catch (NullPointerException e) {
+                        CcuLog.e(L.TAG_CCU_BLE, "Scanning has been interrupted. Fragment not attached to the activity.", e);
+                        e.printStackTrace();
+                    }
+
                 }
             }
         });
@@ -415,11 +426,11 @@ public class FragmentDeviceScan extends BaseDialogFragment
         private LayoutInflater             mInflator;
         
         
-        public LeDeviceListAdapter()
+        public LeDeviceListAdapter(FragmentActivity fragmentActivity)
         {
             super();
             mLeDevices = new ArrayList<>();
-            mInflator = FragmentDeviceScan.this.getActivity().getLayoutInflater();
+            mInflator = fragmentActivity.getLayoutInflater();
         }
         
         

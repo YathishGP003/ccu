@@ -12,12 +12,10 @@ import a75f.io.logic.DefaultSchedules
 import a75f.io.logic.L
 import a75f.io.logic.bo.util.UnitUtils
 import a75f.io.logic.bo.util.UnitUtils.roundToHalf
-import a75f.io.logic.interfaces.BuildingScheduleListener
 import a75f.io.logic.schedule.ScheduleGroup
 import a75f.io.logic.schedule.SpecialSchedule
 import a75f.io.logic.util.CommonTimeSlotFinder
 import a75f.io.logic.util.isOfflineMode
-import a75f.io.messaging.handler.UpdateScheduleHandler
 import a75f.io.renatus.R
 import a75f.io.renatus.util.FontManager
 import a75f.io.renatus.util.ProgressDialogUtils
@@ -346,7 +344,7 @@ class ScheduleGroupFragment(schedule: Schedule?, scheduleGroup: Int?) : DialogFr
                 R.id.radio_seven_day,
                 null
             ).getScheduleGroupById(radioGroup.checkedRadioButtonId).ordinal
-            validateSchedule(scheduleGroupModel.mSchedule!!, this, null, null)
+            validateSchedule(scheduleGroupModel.mSchedule, this, null, null)
         }
 
         cancelZoneSchedule.setOnClickListener {

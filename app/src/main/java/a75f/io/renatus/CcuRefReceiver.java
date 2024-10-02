@@ -36,6 +36,7 @@ public class CcuRefReceiver extends BroadcastReceiver {
                     responseIntent.putExtra("siteId", instance.getSiteIdRef().toVal());
                     responseIntent.putExtra("bearerToken", instance.getJwt());
                     context.sendBroadcast(responseIntent);
+                    CcuLog.i("CcuRefReceiver", "CCU information broadcast to RemoteApp");
                 } else {
                     CcuLog.w("CcuRefReceiver", "CCU information incomplete, not sending RAA broadcast");
                 }

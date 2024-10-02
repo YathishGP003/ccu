@@ -24,7 +24,6 @@ import a75f.io.logic.bo.building.system.getConnectRelayLogicalPhysicalMap
 import a75f.io.logic.bo.building.system.util.AdvancedHybridAhuConfig
 import a75f.io.logic.bo.building.system.util.deleteSystemConnectModule
 import a75f.io.logic.bo.building.system.util.getAdvancedAhuSystemEquip
-import a75f.io.logic.bo.building.system.util.getAllConnectDevice
 import a75f.io.logic.bo.building.system.util.getConnectDevice
 import a75f.io.logic.bo.building.system.util.getConnectEquip
 import a75f.io.logic.bo.building.system.util.getDabCmEquip
@@ -346,7 +345,7 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
             withContext(Dispatchers.IO) {
                 Globals.getInstance().isTestMode = true
                 updateTestCacheConfig(relayIndex)
-                val physicalPoint = getPhysicalPointForRelayIndex(relayIndex, false)
+                val physicalPoint = getPhysicalPointForRelayIndex(relayIndex)
                 physicalPoint?.let {
                     it.writeHisVal(testCommand.toDouble())
                     sendTestModeMessage()
@@ -429,20 +428,16 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
         }
     }
 
-    fun getPhysicalPointForRelayIndex(relayIndex: Int, isConnect: Boolean): PhysicalPoint? {
+    fun getPhysicalPointForRelayIndex(relayIndex: Int): PhysicalPoint? {
         if (isEquipPaired) {
             val relayName = getRelayNameForIndex(relayIndex)
-            if (isConnect && isConnectModulePaired) {
-                getConnectRelayLogicalPhysicalMap(getConnectEquip(), Domain.connect1Device).values.find { it.domainName == relayName }
-            } else {
-                return getCMRelayLogicalPhysicalMap(getAdvancedAhuSystemEquip()).values.find { it.domainName == relayName }
-            }
+            return getCMRelayLogicalPhysicalMap(getAdvancedAhuSystemEquip()).values.find { it.domainName == relayName }
         }
         return null
     }
 
     fun getConnectPhysicalPointForRelayIndex(relayIndex: Int): PhysicalPoint? {
-        if (isEquipPaired) {
+        if (isConnectModulePaired) {
             val relayName = getRelayNameForIndex(relayIndex)
             return getConnectRelayLogicalPhysicalMap(getConnectEquip(), Domain.connect1Device).values.find { it.domainName == relayName }
         }

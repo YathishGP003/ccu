@@ -16,6 +16,7 @@ schedules:
 jobs:
 - job: Job_1
   displayName: Build APK QA
+  condition: eq(variables['isQA'], 'true')
   pool:
     vmImage: ubuntu-latest
   steps:
@@ -27,14 +28,16 @@ jobs:
   - task: Gradle@2
     displayName: 'gradlew assembleQA'
     inputs:
-      tasks: assembleQA
+      tasks: 'assembleQA'
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: qaApk'
     inputs:
       PathtoPublish: '$(System.DefaultWorkingDirectory)/app/build/outputs/apk/qa/'
       ArtifactName: qaApk
+
 - job: Job_2
   displayName: Build APK Stagig
+  condition: eq(variables['isStaging'], 'true')
   pool:
     vmImage: ubuntu-latest
   steps:
@@ -54,12 +57,20 @@ jobs:
       ArtifactName: StagingApk
 
 - job: Job_3
-  displayName: Build APK PROD
+  displayName: Build APK Prod
+  condition: eq(variables['isProd'], 'true')
+  pool:
+    vmImage: ubuntu-latest
   steps:
+  - task: JavaToolInstaller@0
+    inputs:
+      versionSpec: '11'
+      jdkArchitectureOption: 'x64'
+      jdkSourceOption: 'PreInstalled'       
   - task: Gradle@2
     displayName: 'gradlew assembleProd'
     inputs:
-      tasks: assembleProd
+      tasks: 'assembleProd'
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: ProdApk'
     inputs:
@@ -68,6 +79,7 @@ jobs:
 
 - job: Job_4
   displayName: Build APK Daikin
+  condition: eq(variables['isDaikin'], 'true')
   pool:
     vmImage: ubuntu-latest
   steps:
@@ -79,7 +91,7 @@ jobs:
   - task: Gradle@2
     displayName: 'gradlew assembleDaikin_prod'
     inputs:
-      tasks: assembleDaikin_prod
+      tasks: 'assembleDaikin_prod'
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: Daikin_prodApk'
     inputs:
@@ -88,6 +100,7 @@ jobs:
       
 - job: Job_5
   displayName: Build APK Carrier
+  condition: eq(variables['isCarrier'], 'true')
   pool:
     vmImage: ubuntu-latest
   steps:
@@ -99,7 +112,7 @@ jobs:
   - task: Gradle@2
     displayName: 'gradlew assembleCarrier_prod'
     inputs:
-      tasks: assembleCarrier_prod
+      tasks: 'assembleCarrier_prod'
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: Carrier_prodApk'
     inputs:
@@ -108,6 +121,7 @@ jobs:
 
 - job: Job_6
   displayName: Build APK Airoverse
+  condition: eq(variables['isAiroverse'], 'true')
   pool:
     vmImage: ubuntu-latest
   steps:
@@ -119,9 +133,30 @@ jobs:
   - task: Gradle@2
     displayName: 'gradlew assembleAiroverse_prod'
     inputs:
-      tasks: assembleAiroverse_prod
+      tasks: 'assembleAiroverse_prod'
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: Airoverse_prodApk'
     inputs:
       PathtoPublish: '$(System.DefaultWorkingDirectory)/app/build/outputs/apk/airoverse_prod/'
       ArtifactName: Airoverse_prodApk
+
+- job: Job_7
+  displayName: Upload APK
+  dependsOn: [Job_1, Job_2, Job_3, Job_4, Job_5, Job_6]
+  condition: always()
+  pool:
+    vmImage: windows-2019
+  steps:
+  - task: DownloadBuildArtifacts@1
+    inputs:
+      buildType: 'current'
+      downloadType: 'specific'
+      itemPattern: '**/*.apk'
+      downloadPath: '$(Build.ArtifactStagingDirectory)'
+  - task: AzureFileCopy@6
+    inputs:
+      SourcePath: 'D:\a\1\a\**\'
+      azureSubscription: 'Access Azure Resources'
+      Destination: 'AzureBlob'
+      storage: 'updateslegacy75f'
+      ContainerName: '$web'

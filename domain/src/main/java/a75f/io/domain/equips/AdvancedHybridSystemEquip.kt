@@ -351,9 +351,31 @@ open class AdvancedHybridSystemEquip(equipRef: String) : SystemEquip (equipRef) 
     val emergencyShutoffNC = Point(DomainName.emergencyShutoffNC, equipRef)
     val voltageInput = Point(DomainName.voltageInput, equipRef)
 
+    val coolingLoopOutputFeedback = Point(DomainName.coolingLoopOutputFeedback, equipRef)
+    val heatingLoopOutputFeedback = Point(DomainName.heatingLoopOutputFeedback, equipRef)
+    val fanLoopOutputFeedback = Point(DomainName.fanLoopOutputFeedback, equipRef)
+
+    val satCoolingStage1Feedback = Point(DomainName.satCoolingStage1Feedback, equipRef)
+    val satCoolingStage2Feedback = Point(DomainName.satCoolingStage2Feedback, equipRef)
+    val satCoolingStage3Feedback = Point(DomainName.satCoolingStage3Feedback, equipRef)
+    val satCoolingStage4Feedback = Point(DomainName.satCoolingStage4Feedback, equipRef)
+    val satCoolingStage5Feedback = Point(DomainName.satCoolingStage5Feedback, equipRef)
+    val satHeatingStage1Feedback = Point(DomainName.satHeatingStage1Feedback, equipRef)
+    val satHeatingStage2Feedback = Point(DomainName.satHeatingStage2Feedback, equipRef)
+    val satHeatingStage3Feedback = Point(DomainName.satHeatingStage3Feedback, equipRef)
+    val satHeatingStage4Feedback = Point(DomainName.satHeatingStage4Feedback, equipRef)
+    val satHeatingStage5Feedback = Point(DomainName.satHeatingStage5Feedback, equipRef)
+    val fanPressureStage1Feedback = Point(DomainName.fanPressureStage1Feedback, equipRef)
+    val fanPressureStage2Feedback = Point(DomainName.fanPressureStage2Feedback, equipRef)
+    val fanPressureStage3Feedback = Point(DomainName.fanPressureStage3Feedback, equipRef)
+    val fanPressureStage4Feedback = Point(DomainName.fanPressureStage4Feedback, equipRef)
+    val fanPressureStage5Feedback = Point(DomainName.fanPressureStage5Feedback, equipRef)
+
+    val pressureBasedFanControlFeedback = Point(DomainName.pressureBasedFanControlFeedback, equipRef)
+    val satBasedCoolingControlFeedback = Point(DomainName.satBasedCoolingControlFeedback, equipRef)
+    val satBasedHeatingControlFeedback = Point(DomainName.satBasedHeatingControlFeedback, equipRef)
+
     var stageUpTimer = 0.0
     var stageDownTimer = 0.0
 
-    fun isStageUpTimerActive(): Boolean = stageUpTimer > 0
-    fun isStageDownTimerActive(): Boolean = stageDownTimer > 0
 }

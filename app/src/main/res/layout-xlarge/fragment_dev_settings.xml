@@ -783,39 +783,52 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/testDeleteButtonsLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
                 android:layout_margin="10dp"
-                >
+                android:orientation="horizontal"
+                android:visibility="gone">
+
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:padding="10dp"
+                    android:text="Test Buttons:"
                     android:textSize="20sp"
-                    android:textStyle="bold"
-                    android:text="Test Buttons:" />
+                    android:textStyle="bold" />
+
                 <Button
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
                     android:id="@+id/deleteBuildingTuners"
-                    android:textSize="15sp"
-                    android:padding="10dp"
-                    android:text="Delete Building Tuners" />
-                <Button
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:padding="10dp"
+                    android:text="Delete Building Tuners"
+                    android:textSize="12sp" />
+
+                <Button
                     android:id="@+id/deleteBuildingEquipLocally"
-                    android:textSize="15sp"
-                    android:padding="10dp"
-                    android:text="Delete Building Equip locally" />
-                <Button
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:id="@+id/deleteAllBuildingEntitiesLocally"
-                    android:textSize="15sp"
                     android:padding="10dp"
-                    android:text="Delete Building Equip and Points locally" />
+                    android:text="Delete Building Equip locally"
+                    android:textSize="12sp" />
+
+                <Button
+                    android:id="@+id/deleteAllBuildingEntitiesLocally"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="10dp"
+                    android:text="Delete Building Entities locally"
+                    android:textSize="12sp" />
+
+                <Button
+                    android:id="@+id/duplicateBuildingEntitiesLocally"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="10dp"
+                    android:text="Duplicate Building Entities locally"
+                    android:textSize="12sp" />
 
             </LinearLayout>
 

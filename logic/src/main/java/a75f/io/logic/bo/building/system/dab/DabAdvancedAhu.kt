@@ -87,13 +87,12 @@ class DabAdvancedAhu : DabSystemProfile() {
     private val satHeatIndexRange = 22..26
     private val loadFanIndexRange = 27..31
     private lateinit var analogControlsEnabled: Set<AdvancedAhuAnalogOutAssociationType>
-
-    /*private var stageUpTimer = 0.0
-    private var stageDownTimer = 0.0*/
     private var satStageUpTimer = 0.0
     private var satStageDownTimer = 0.0
 
     val testConfigs = BitSet()
+    val cmRelayStatus = BitSet()
+    val analogStatus = arrayOf(0.0, 0.0, 0.0, 0.0, 0.0)
 
     override fun getProfileName(): String = "DAB Advanced Hybrid AHU v2"
 
@@ -500,11 +499,11 @@ class DabAdvancedAhu : DabSystemProfile() {
     override fun getStatusMessage(): String {
         if (advancedAhuImpl.isEmergencyShutOffEnabledAndActive(systemEquip.cmEquip, systemEquip.connectEquip1)) return "Emergency Shut Off mode is active"
         val systemStatus = StringBuilder().apply {
-            append(if (systemEquip.cmEquip.loadFanStage1.readHisVal() > 0 || systemEquip.cmEquip.fanPressureStage1.readHisVal() > 0 || systemEquip.connectEquip1.loadFanStage1.readHisVal() > 0) "1" else "")
-            append(if (systemEquip.cmEquip.loadFanStage2.readHisVal() > 0 || systemEquip.cmEquip.fanPressureStage2.readHisVal() > 0 || systemEquip.connectEquip1.loadFanStage2.readHisVal() > 0) ",2" else "")
-            append(if (systemEquip.cmEquip.loadFanStage3.readHisVal() > 0 || systemEquip.cmEquip.fanPressureStage3.readHisVal() > 0 || systemEquip.connectEquip1.loadFanStage3.readHisVal() > 0) ",3" else "")
-            append(if (systemEquip.cmEquip.loadFanStage4.readHisVal() > 0 || systemEquip.cmEquip.fanPressureStage4.readHisVal() > 0 || systemEquip.connectEquip1.loadFanStage4.readHisVal() > 0) ",4" else "")
-            append(if (systemEquip.cmEquip.loadFanStage5.readHisVal() > 0 || systemEquip.cmEquip.fanPressureStage5.readHisVal() > 0 || systemEquip.connectEquip1.loadFanStage5.readHisVal() > 0) ",5" else "")
+            append(if (systemEquip.cmEquip.loadFanStage1.readHisVal() > 0 || systemEquip.cmEquip.fanPressureStage1Feedback.readHisVal() > 0 || systemEquip.connectEquip1.loadFanStage1.readHisVal() > 0) "1" else "")
+            append(if (systemEquip.cmEquip.loadFanStage2.readHisVal() > 0 || systemEquip.cmEquip.fanPressureStage2Feedback.readHisVal() > 0 || systemEquip.connectEquip1.loadFanStage2.readHisVal() > 0) ",2" else "")
+            append(if (systemEquip.cmEquip.loadFanStage3.readHisVal() > 0 || systemEquip.cmEquip.fanPressureStage3Feedback.readHisVal() > 0 || systemEquip.connectEquip1.loadFanStage3.readHisVal() > 0) ",3" else "")
+            append(if (systemEquip.cmEquip.loadFanStage4.readHisVal() > 0 || systemEquip.cmEquip.fanPressureStage4Feedback.readHisVal() > 0 || systemEquip.connectEquip1.loadFanStage4.readHisVal() > 0) ",4" else "")
+            append(if (systemEquip.cmEquip.loadFanStage5.readHisVal() > 0 || systemEquip.cmEquip.fanPressureStage5Feedback.readHisVal() > 0 || systemEquip.connectEquip1.loadFanStage5.readHisVal() > 0) ",5" else "")
         }
         if (systemStatus.isNotEmpty()) {
             if (systemStatus[0] == ',') {
@@ -514,11 +513,11 @@ class DabAdvancedAhu : DabSystemProfile() {
             systemStatus.append(" ON ")
         }
         val coolingStatus = StringBuilder().apply {
-            append(if (systemEquip.cmEquip.loadCoolingStage1.readHisVal() > 0 || systemEquip.cmEquip.satCoolingStage1.readHisVal() > 0 || systemEquip.connectEquip1.loadCoolingStage1.readHisVal() > 0) "1" else "")
-            append(if (systemEquip.cmEquip.loadCoolingStage2.readHisVal() > 0 || systemEquip.cmEquip.satCoolingStage2.readHisVal() > 0 || systemEquip.connectEquip1.loadCoolingStage2.readHisVal() > 0) ",2" else "")
-            append(if (systemEquip.cmEquip.loadCoolingStage3.readHisVal() > 0 || systemEquip.cmEquip.satCoolingStage3.readHisVal() > 0 || systemEquip.connectEquip1.loadCoolingStage3.readHisVal() > 0) ",3" else "")
-            append(if (systemEquip.cmEquip.loadCoolingStage4.readHisVal() > 0 || systemEquip.cmEquip.satCoolingStage4.readHisVal() > 0 || systemEquip.connectEquip1.loadCoolingStage4.readHisVal() > 0) ",4" else "")
-            append(if (systemEquip.cmEquip.loadCoolingStage5.readHisVal() > 0 || systemEquip.cmEquip.satCoolingStage5.readHisVal() > 0 || systemEquip.connectEquip1.loadCoolingStage5.readHisVal() > 0) ",5" else "")
+            append(if (systemEquip.cmEquip.loadCoolingStage1.readHisVal() > 0 || systemEquip.cmEquip.satCoolingStage1Feedback.readHisVal() > 0 || systemEquip.connectEquip1.loadCoolingStage1.readHisVal() > 0) "1" else "")
+            append(if (systemEquip.cmEquip.loadCoolingStage2.readHisVal() > 0 || systemEquip.cmEquip.satCoolingStage2Feedback.readHisVal() > 0 || systemEquip.connectEquip1.loadCoolingStage2.readHisVal() > 0) ",2" else "")
+            append(if (systemEquip.cmEquip.loadCoolingStage3.readHisVal() > 0 || systemEquip.cmEquip.satCoolingStage3Feedback.readHisVal() > 0 || systemEquip.connectEquip1.loadCoolingStage3.readHisVal() > 0) ",3" else "")
+            append(if (systemEquip.cmEquip.loadCoolingStage4.readHisVal() > 0 || systemEquip.cmEquip.satCoolingStage4Feedback.readHisVal() > 0 || systemEquip.connectEquip1.loadCoolingStage4.readHisVal() > 0) ",4" else "")
+            append(if (systemEquip.cmEquip.loadCoolingStage5.readHisVal() > 0 || systemEquip.cmEquip.satCoolingStage5Feedback.readHisVal() > 0 || systemEquip.connectEquip1.loadCoolingStage5.readHisVal() > 0) ",5" else "")
         }
         if (coolingStatus.isNotEmpty()) {
             if (coolingStatus[0] == ',') {
@@ -529,11 +528,11 @@ class DabAdvancedAhu : DabSystemProfile() {
         }
 
         val heatingStatus = StringBuilder().apply {
-            append(if (systemEquip.cmEquip.loadHeatingStage1.readHisVal() > 0 || systemEquip.cmEquip.satHeatingStage1.readHisVal() > 0 || systemEquip.connectEquip1.loadHeatingStage1.readHisVal() > 0) "1" else "")
-            append(if (systemEquip.cmEquip.loadHeatingStage2.readHisVal() > 0 || systemEquip.cmEquip.satHeatingStage2.readHisVal() > 0 || systemEquip.connectEquip1.loadHeatingStage2.readHisVal() > 0) ",2" else "")
-            append(if (systemEquip.cmEquip.loadHeatingStage3.readHisVal() > 0 || systemEquip.cmEquip.satHeatingStage3.readHisVal() > 0 || systemEquip.connectEquip1.loadHeatingStage3.readHisVal() > 0) ",3" else "")
-            append(if (systemEquip.cmEquip.loadHeatingStage4.readHisVal() > 0 || systemEquip.cmEquip.satHeatingStage4.readHisVal() > 0 || systemEquip.connectEquip1.loadHeatingStage4.readHisVal() > 0) ",4" else "")
-            append(if (systemEquip.cmEquip.loadHeatingStage5.readHisVal() > 0 || systemEquip.cmEquip.satHeatingStage5.readHisVal() > 0 || systemEquip.connectEquip1.loadHeatingStage5.readHisVal() > 0) ",5" else "")
+            append(if (systemEquip.cmEquip.loadHeatingStage1.readHisVal() > 0 || systemEquip.cmEquip.satHeatingStage1Feedback.readHisVal() > 0 || systemEquip.connectEquip1.loadHeatingStage1.readHisVal() > 0) "1" else "")
+            append(if (systemEquip.cmEquip.loadHeatingStage2.readHisVal() > 0 || systemEquip.cmEquip.satHeatingStage2Feedback.readHisVal() > 0 || systemEquip.connectEquip1.loadHeatingStage2.readHisVal() > 0) ",2" else "")
+            append(if (systemEquip.cmEquip.loadHeatingStage3.readHisVal() > 0 || systemEquip.cmEquip.satHeatingStage3Feedback.readHisVal() > 0 || systemEquip.connectEquip1.loadHeatingStage3.readHisVal() > 0) ",3" else "")
+            append(if (systemEquip.cmEquip.loadHeatingStage4.readHisVal() > 0 || systemEquip.cmEquip.satHeatingStage4Feedback.readHisVal() > 0 || systemEquip.connectEquip1.loadHeatingStage4.readHisVal() > 0) ",4" else "")
+            append(if (systemEquip.cmEquip.loadHeatingStage5.readHisVal() > 0 || systemEquip.cmEquip.satHeatingStage5Feedback.readHisVal() > 0 || systemEquip.connectEquip1.loadHeatingStage5.readHisVal() > 0) ",5" else "")
         }
         if (heatingStatus.isNotEmpty()) {
             if (heatingStatus[0] == ',') {
@@ -946,25 +945,33 @@ class DabAdvancedAhu : DabSystemProfile() {
         try {
             CcuLog.i(L.TAG_CCU_SYSTEM, "Test mode is active ${Globals.getInstance().isTestMode}")
             CcuLog.i(L.TAG_CCU_SYSTEM, "Operating mode ${DabSystemController.getInstance().systemState}")
-            CcuLog.i(L.TAG_CCU_SYSTEM, "Conditioning  mode $conditioningMode")
+            CcuLog.i(L.TAG_CCU_SYSTEM, "Conditioning  mode $conditioningMode CM Relay Status $cmRelayStatus")
             getCMRelayAssociationMap(systemEquip.cmEquip).entries.forEach { (relay, association) ->
-                val logical = relayAssociationToDomainName(association.readDefaultVal().toInt())
-                CcuLog.i(L.TAG_CCU_SYSTEM, "CM ${relay.domainName}:${relay.readDefaultVal()}  => : " + "Physical Value: ${getCMRelayLogicalPhysicalMap(systemEquip.cmEquip)[relay]!!.readHisVal()}   " + "$logical : ${getDomainPointForName(logical, systemEquip.cmEquip).readHisVal()} ")
+                if (relay.readDefaultVal() > 0) {
+                    val logical = relayAssociationToDomainName(association.readDefaultVal().toInt())
+                    CcuLog.i(L.TAG_CCU_SYSTEM, "CM ${relay.domainName}:${relay.readDefaultVal()}  => : " + "Physical Value: ${getCMRelayLogicalPhysicalMap(systemEquip.cmEquip)[relay]!!.readHisVal()}   " + "$logical : ${getDomainPointForName(logical, systemEquip.cmEquip).readHisVal()} ")
+                }
             }
 
             getCMAnalogAssociationMap(systemEquip.cmEquip).entries.forEach { (analogOut, association) ->
-                val logical = analogOutAssociationToDomainName(association.readDefaultVal().toInt())
-                CcuLog.i(L.TAG_CCU_SYSTEM, "CM ${analogOut.domainName}:${analogOut.readDefaultVal()} =>:  " + "Physical Value: ${getAnalogOutLogicalPhysicalMap()[analogOut]!!.readHisVal()}   " + "$logical : ${getDomainPointForName(logical, systemEquip.cmEquip).readHisVal()}")
+                if (analogOut.readDefaultVal() > 0) {
+                    val logical = analogOutAssociationToDomainName(association.readDefaultVal().toInt())
+                    CcuLog.i(L.TAG_CCU_SYSTEM, "CM ${analogOut.domainName}:${analogOut.readDefaultVal()} =>:  " + "Physical Value: ${getAnalogOutLogicalPhysicalMap()[analogOut]!!.readHisVal()}   " + "$logical : ${getDomainPointForName(logical, systemEquip.cmEquip).readHisVal()}")
+                }
             }
 
             if (!systemEquip.connectEquip1.equipRef.contentEquals("null")) {
                 getConnectRelayAssociationMap(systemEquip.connectEquip1).entries.forEach { (relay, association) ->
-                    val logical = connectRelayAssociationToDomainName(association.readDefaultVal().toInt())
-                    CcuLog.i(L.TAG_CCU_SYSTEM, "Connect ${relay.domainName}:${relay.readDefaultVal()} => : " + "Physical Value: ${getConnectRelayLogicalPhysicalMap(systemEquip.connectEquip1, Domain.connect1Device)[relay]!!.readHisVal()}  " + "$logical : ${getDomainPointForName(logical, systemEquip.connectEquip1).readHisVal()} ")
+                    if (relay.readDefaultVal() > 0) {
+                        val logical = connectRelayAssociationToDomainName(association.readDefaultVal().toInt())
+                        CcuLog.i(L.TAG_CCU_SYSTEM, "Connect ${relay.domainName}:${relay.readDefaultVal()} => : " + "Physical Value: ${getConnectRelayLogicalPhysicalMap(systemEquip.connectEquip1, Domain.connect1Device)[relay]!!.readHisVal()}  " + "$logical : ${getDomainPointForName(logical, systemEquip.connectEquip1).readHisVal()} ")
+                    }
                 }
                 getConnectAnalogAssociationMap(systemEquip.connectEquip1).entries.forEach { (analogOut, association) ->
-                    val logical = connectAnalogOutAssociationToDomainName(association.readDefaultVal().toInt())
-                    CcuLog.i(L.TAG_CCU_SYSTEM, "Connect ${analogOut.domainName}: ${analogOut.readDefaultVal()} => : " + "Physical Value: ${getConnectAnalogOutLogicalPhysicalMap(systemEquip.connectEquip1, Domain.connect1Device)[analogOut]!!.readHisVal()}  " + "$logical : ${getDomainPointForName(logical, systemEquip.connectEquip1).readHisVal()} ")
+                    if (analogOut.readDefaultVal() > 0) {
+                        val logical = connectAnalogOutAssociationToDomainName(association.readDefaultVal().toInt())
+                        CcuLog.i(L.TAG_CCU_SYSTEM, "Connect ${analogOut.domainName}: ${analogOut.readDefaultVal()} => : " + "Physical Value: ${getConnectAnalogOutLogicalPhysicalMap(systemEquip.connectEquip1, Domain.connect1Device)[analogOut]!!.readHisVal()}  " + "$logical : ${getDomainPointForName(logical, systemEquip.connectEquip1).readHisVal()} ")
+                    }
                 }
             }
         } catch (e: Exception) {
@@ -1025,6 +1032,9 @@ class DabAdvancedAhu : DabSystemProfile() {
         testConfigs.set(port,true) // 0 - 7 Relays and 8 - 11 Analog
         CcuLog.d(L.TAG_CCU_SYSTEM, "Test Configs set for port $port cache $testConfigs")
     }
+
+    fun setCMRelayStatus(relay: Int, status: Int) = cmRelayStatus.set(relay, (status == 1))
+    fun setAnalogStatus(analog: Int, status: Double)  { analogStatus[analog] = ((status / 10)) }
 
     private fun isAllowToActiveStage1Fan(): Boolean {
         return (systemCoolingLoopOp > 0 || systemSatCoolingLoopOp > 0 || systemFanLoopOp > 0 || systemHeatingLoopOp > 0 || systemSatHeatingLoopOp > 0 || staticPressureFanLoopOp > 0)

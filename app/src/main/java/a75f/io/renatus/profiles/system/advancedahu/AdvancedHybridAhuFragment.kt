@@ -2,6 +2,9 @@ package a75f.io.renatus.profiles.system.advancedahu
 
 import a75f.io.domain.api.DomainName
 import a75f.io.logic.Globals
+import a75f.io.logic.L
+import a75f.io.logic.bo.building.system.dab.DabAdvancedAhu
+import a75f.io.logic.bo.building.system.vav.VavAdvancedAhu
 import a75f.io.renatus.R
 import a75f.io.renatus.composables.AOTHConfig
 import a75f.io.renatus.composables.AnalogOutConfig
@@ -494,7 +497,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                             setStateChanged(viewModel)
                         },
                         isEnabled = relayConfig.enabled,
-                        testState = viewModel.getPhysicalPointForRelayIndex(index, false)?.let { it.readHisVal() > 0 } ?: false,
+                        testState = getRelayStatus(index), //viewModel.getPhysicalPointForRelayIndex(index)?.let { it.readHisVal() > 0 } ?: false,
                         onTestActivated = {viewModel.sendCMRelayTestCommand(index, it)})
                 }
             }
@@ -579,7 +582,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                             }
                             setStateChanged(viewModel)
                         },
-                        testVal = ((viewModel.getPhysicalPointForAnalogIndex(index)?.readHisVal())?.div(10))?: 0.0,
+                        testVal = getAnalogStatus(index),
                         onTestSignalSelected = {viewModel.sendCMAnalogTestCommand(index, (it * 10))})
                 }
             }
@@ -2164,10 +2167,25 @@ open class AdvancedHybridAhuFragment : Fragment() {
                             }
                             setStateChanged(viewModel)
                         },
-                        testVal = viewModel.getPhysicalPointForAnalogIndex(index)?.readHisVal()?.div(10) ?: 0.0,
+                        testVal =  viewModel.getPhysicalPointForAnalogIndex(index)?.readHisVal()?.div(10) ?: 0.0,
                         onTestSignalSelected = {viewModel.sendConnectAnalogTestCommand(index, it * 10)})
                 }
             }
+        }
+    }
+
+    private fun getRelayStatus(relay: Int): Boolean {
+        return when(L.ccu().systemProfile) {
+            is VavAdvancedAhu -> (L.ccu().systemProfile as VavAdvancedAhu).cmRelayStatus.get(relay)
+            is DabAdvancedAhu -> (L.ccu().systemProfile as DabAdvancedAhu).cmRelayStatus.get(relay)
+            else -> { false }
+        }
+    }
+    private fun getAnalogStatus(analog: Int): Double {
+        return when(L.ccu().systemProfile) {
+            is VavAdvancedAhu -> (L.ccu().systemProfile as VavAdvancedAhu).analogStatus[analog]
+            is DabAdvancedAhu -> (L.ccu().systemProfile as DabAdvancedAhu).analogStatus[analog]
+            else -> { 0.0 }
         }
     }
 

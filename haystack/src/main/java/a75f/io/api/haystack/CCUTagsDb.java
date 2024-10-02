@@ -1619,7 +1619,7 @@ public class CCUTagsDb extends HServer {
 
         HayStackEntity entity = new HayStackEntity(key,map);
         EntityDBUtilKt.insert(entity,this.appContext);
-        tagsMap.put(localId, hDict);
+        tagsMap.put(key, hDict);
     }
 
     public static class WriteArray {

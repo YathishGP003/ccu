@@ -212,7 +212,6 @@ class VavProfileViewModel : ViewModel() {
             setOutputTypes(profileConfiguration)
             setMinCfmSetpointMaxVals(profileConfiguration)
             setAirflowCfmProportionalRange(profileConfiguration)
-            vavProfile.init()
             CoroutineScope(Dispatchers.IO).launch {
                 setScheduleType(profileConfiguration)
                 saveUnUsedPortStatus(profileConfiguration, deviceAddress, hayStack)

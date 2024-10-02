@@ -981,14 +981,13 @@ class CommonTimeSlotFinder {
             }
         }
 
-        RxjavaUtil.executeBackground {
-            if (schedule.isZoneSchedule) {
-                ccuHsApi.updateZoneSchedule(schedule, schedule.roomRef)
-            } else {
-                ccuHsApi.updateSchedule(schedule)
-            }
-            ccuHsApi.syncEntityTree()
+        // Threading this below operation will cause concurrent modification exception
+        if (schedule.isZoneSchedule) {
+            ccuHsApi.updateZoneSchedule(schedule, schedule.roomRef)
+        } else {
+            ccuHsApi.updateSchedule(schedule)
         }
+        ccuHsApi.syncEntityTree()
     }
 
     fun forceTrimWeekdayWeekEndSchedule(
@@ -1379,9 +1378,9 @@ class CommonTimeSlotFinder {
                 val spillsMap : HashMap<String, ArrayList<Interval>> = ScheduleUtil.getScheduleSpills(zoneSchedule.days, zoneSchedule)
                 forceTrimSevenDaySchedule(
                     zoneSchedule,
-                    spillsMap!!
+                    spillsMap
                 )
-                ccuHsApi.updateScheduleNoSync(zoneSchedule, zoneSchedule.roomRef)
+                ccuHsApi.updateZoneSchedule(zoneSchedule, zoneSchedule.roomRef)
             } else {
                 val commonTimeslot: List<List<TimeSlot>> = getCommonTimeSlot(
                     zoneSchedule.scheduleGroup, buildingOccupancy.getDays(),

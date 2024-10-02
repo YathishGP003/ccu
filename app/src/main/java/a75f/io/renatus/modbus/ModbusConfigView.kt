@@ -212,7 +212,7 @@ class ModbusConfigView : BaseDialogFragment() {
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        if (viewModel.isExistingProfile() && viewModel.floorRef.equals("SYSTEM") && viewModel.zoneRef.equals("SYSTEM")) { SaveTextView("UNPAIR") { viewModel.unpair() } }
+                        if (viewModel.isExistingProfile(filter) && viewModel.floorRef.equals("SYSTEM") && viewModel.zoneRef.equals("SYSTEM")) { SaveTextView("UNPAIR") { viewModel.unpair() } }
                         SaveTextView(SET) { viewModel.saveConfiguration() }
                     }
 
@@ -328,7 +328,7 @@ class ModbusConfigView : BaseDialogFragment() {
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        if (viewModel.isExistingProfile() && viewModel.floorRef.equals("SYSTEM") && viewModel.zoneRef.equals(
+                        if (viewModel.isExistingProfile(filter) && viewModel.floorRef.equals("SYSTEM") && viewModel.zoneRef.equals(
                                 "SYSTEM"
                             )
                         ) {

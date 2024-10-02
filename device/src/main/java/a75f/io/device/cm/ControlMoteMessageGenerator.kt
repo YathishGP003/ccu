@@ -43,7 +43,7 @@ fun getCMControlsMessage(): ControlMote.CcuToCmOverUsbCmControlMessage_t {
     }
 
     msgBuilder.apply {
-        addAnalogOut(cmDevice.analog1Out.readHisVal() .toInt())
+        addAnalogOut(cmDevice.analog1Out.readHisVal().toInt())
         addAnalogOut(cmDevice.analog2Out.readHisVal().toInt())
         addAnalogOut(cmDevice.analog3Out.readHisVal().toInt())
         addAnalogOut(cmDevice.analog4Out.readHisVal().toInt())

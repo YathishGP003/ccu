@@ -24,7 +24,7 @@ public class AlertBuilder
         alert.setStartTime(GregorianCalendar.getInstance().getTimeInMillis());
         alert.setmTitle(def.alert.mTitle);
         alert.setmMessage(message);
-        alert.setmNotificationMsg(message);
+        alert.setmNotificationMsg(def.alert.mNotificationMsg);
         alert.setmSeverity(def.alert.mSeverity);
         alert.setmAlertType(def.alert.mAlertType);
         alert.setRef(pointId);

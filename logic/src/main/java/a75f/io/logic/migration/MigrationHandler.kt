@@ -118,7 +118,29 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
 
             DiagEquip.addLogLevelPoint(CCUHsApi.getInstance())
         }
-        VavAndAcbProfileMigration.migrateVavAndAcbProfilesToCorrectPortEnabledStatus(hayStack)
+        if (!PreferenceUtil.getAppVersionPointsMigration()) {
+            val diagEquipMap = hayStack.readEntity("equip and diag")
+            if (diagEquipMap.isNotEmpty()) {
+                val diagEquip = Equip.Builder().setHashMap(diagEquipMap).build()
+                DiagEquip.createAppVersionPoints(hayStack, diagEquip)
+            }
+            PreferenceUtil.setAppVersionPointsMigration()
+        }
+
+        try {
+            VavAndAcbProfileMigration.migrateVavAndAcbProfilesToCorrectPortEnabledStatus(hayStack)
+            if (!PreferenceUtil.getDmToDmCleanupMigration()) {
+                cleanACBDuplicatePoints(CCUHsApi.getInstance())
+                cleanVAVDuplicatePoints(CCUHsApi.getInstance())
+                CCUHsApi.getInstance().syncEntityTree()
+                PreferenceUtil.setDmToDmCleanupMigration()
+            }
+        } catch (e: Exception) {
+            //TODO - This is temporary fix till vav model issue is resolved in the next releases.
+            //For now, we make sure it does not stop other migrations even if this fails.
+            CcuLog.e(L.TAG_CCU_MIGRATION_UTIL, "Error in migrateVavAndAcbProfilesToCorrectPortEnabledStatus: ${e.message}")
+        }
+
         updateAhuRefForTIEquip()
         clearLevel4ValuesOfDesiredTempIfDurationIs0()
         if (schedulerRevamp.isMigrationRequired()) {
@@ -140,14 +162,6 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         if(!PreferenceUtil.isHisTagRemovalFromNonDmDevicesDone()) {
             removeHisTagsFromNonDMDevices()
             PreferenceUtil.setHisTagRemovalFromNonDmDevicesDone()
-        }
-        if (!PreferenceUtil.getAppVersionPointsMigration()) {
-            val diagEquipMap = hayStack.readEntity("equip and diag")
-            if (diagEquipMap.isNotEmpty()) {
-                val diagEquip = Equip.Builder().setHashMap(diagEquipMap).build()
-                DiagEquip.createAppVersionPoints(hayStack, diagEquip)
-            }
-            PreferenceUtil.setAppVersionPointsMigration()
         }
         if(!PreferenceUtil.isDeadBandMigrationRequired()){
             migrateDeadBandPoints(hayStack)

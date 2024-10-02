@@ -23,6 +23,7 @@ import org.projecthaystack.HStr;
 import org.projecthaystack.HVal;
 import org.projecthaystack.UnknownRecException;
 import org.projecthaystack.client.HClient;
+import org.projecthaystack.io.HGridFormat;
 import org.projecthaystack.server.HStdOps;
 
 import java.util.ArrayList;
@@ -236,9 +237,11 @@ public class RestoreCCUHsApi {
             throw new NullHGridException("Null occurred while fetching zone points");
         }
 
-        List<HashMap> pointMaps = ccuHsApi.HGridToList(pointsGrid);
         List<Point> points = new ArrayList<>();
-        pointMaps.forEach(m -> points.add(new Point.Builder().setHashMap(m).build()));
+        Iterator pointsGridIterator = pointsGrid.iterator();
+        while(pointsGridIterator!=null && pointsGridIterator.hasNext()) {
+            points.add(new Point.Builder().setHDict((HRow) pointsGridIterator.next()).build());
+        }
         CCUHsApi hsApi = CCUHsApi.getInstance();
         for (Point point : points) {
             String pointId = StringUtils.prependIfMissing(point.getId(), "@");
@@ -409,9 +412,11 @@ public class RestoreCCUHsApi {
             throw new NullHGridException("Null occurred while fetching points for the equip Id: "+ equipRow.get("id").toString());
         }
 
-        List<HashMap> pointMaps = ccuHsApi.HGridToList(pointsGrid);
         List<Point> points = new ArrayList<>();
-        pointMaps.forEach(m -> points.add(new Point.Builder().setHashMap(m).build()));
+        Iterator pointsGridIterator = pointsGrid.iterator();
+        while(pointsGridIterator!=null && pointsGridIterator.hasNext()) {
+            points.add(new Point.Builder().setHDict((HRow) pointsGridIterator.next()).build());
+        }
 
         addEquipAndPoints(equips, points);
         writeValueToEquipPoints(equips, hClient, retryCountCallback);
@@ -910,8 +915,10 @@ public class RestoreCCUHsApi {
         if (schedulableZonePointsGrid == null) {
             throw new NullHGridException("Null occurred while importing schedulable zone points");
         }
-        List<HashMap> zonepointMaps = ccuHsApi.HGridToList(schedulableZonePointsGrid);
-        zonepointMaps.forEach(m -> points.add(new Point.Builder().setHashMap(m).build()));
+        Iterator pointsGridIterator = schedulableZonePointsGrid.iterator();
+        while(pointsGridIterator!=null && pointsGridIterator.hasNext()) {
+            points.add(new Point.Builder().setHDict((HRow) pointsGridIterator.next()).build());
+        }
 
 
         for (Point point : points) {

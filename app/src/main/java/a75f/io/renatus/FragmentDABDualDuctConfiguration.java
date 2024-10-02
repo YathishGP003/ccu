@@ -5,7 +5,6 @@ import static a75f.io.logic.bo.building.dab.DabProfile.CARRIER_PROD;
 
 import android.app.Dialog;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -45,6 +44,7 @@ import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.views.CustomCCUSwitch;
 import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
+import a75f.io.util.ExecutorTask;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -498,44 +498,33 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
         setButton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
-                
-                new AsyncTask<Void, Void, Void>() {
-                    
-                    @Override
-                    protected void onPreExecute() {
-                        setButton.setEnabled(false);
-                        ProgressDialogUtils.showProgressDialog(getActivity(), "Saving DualDuct Configuration");
-                        super.onPreExecute();
-                    }
-                    
-                    @Override
-                    protected Void doInBackground( final Void ... params ) {
-                        CCUHsApi.getInstance().resetCcuReady();
-                        setupDualDuctZoneProfile();
-                        L.saveCCUState();
-                        CCUHsApi.getInstance().setCcuReady();
-                        DesiredTempDisplayMode.setModeType(zoneRef, CCUHsApi.getInstance());
-                        return null;
-                    }
-                    
-                    @Override
-                    protected void onPostExecute( final Void result ) {
-                        addBacnetTags(requireContext(), floorRef, zoneRef);
-                        ProgressDialogUtils.hideProgressDialog();
-                        //FragmentDABDualDuctConfiguration.this.dismissProgressDialog();
-                        setRetainInstance(true);
-                        FragmentDABDualDuctConfiguration.this.closeAllBaseDialogFragments();
-                        getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
-                        sendSeedMessage();
-                    }
-                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-                
+                ExecutorTask.executeAsync(
+                        () -> {
+                            setButton.setEnabled(false);
+                            ProgressDialogUtils.showProgressDialog(getActivity(), "Saving DualDuct Configuration");
+                        },
+                        () -> {
+                            CCUHsApi.getInstance().resetCcuReady();
+                            setupDualDuctZoneProfile();
+                            L.saveCCUState();
+                            CCUHsApi.getInstance().setCcuReady();
+                            DesiredTempDisplayMode.setModeType(zoneRef, CCUHsApi.getInstance());
+                        },
+                        () -> {
+                            addBacnetTags(requireContext(), floorRef, zoneRef);
+                            ProgressDialogUtils.hideProgressDialog();
+                            setRetainInstance(true);
+                            FragmentDABDualDuctConfiguration.this.closeAllBaseDialogFragments();
+                            getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
+                            sendSeedMessage();
+                        }
+                );
             }
         });
     }
     
     private void sendSeedMessage() {
-        new Thread(() -> LSerial.getInstance().sendSeedMessage(false, false, mSmartNodeAddress, zoneRef, floorRef)).start();
+        ExecutorTask.executeBackground(() -> LSerial.getInstance().sendSeedMessage(false, false, mSmartNodeAddress, zoneRef, floorRef));
     }
     
     private DualDuctProfileConfiguration createDualDuctConfig() {

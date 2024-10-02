@@ -2,7 +2,6 @@ package a75f.io.renatus;
 
 import android.app.Dialog;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -35,6 +34,7 @@ import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.views.CustomCCUSwitch;
 import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
+import a75f.io.util.ExecutorTask;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -198,31 +198,24 @@ public class HyperStatMonitoringFragment extends BaseDialogFragment {
 
     @OnClick(R.id.setBtn)
     void setOnClick(View v) {
-        new AsyncTask<String, Void, Void>() {
-            @Override
-            protected void onPreExecute() {
+        ExecutorTask.executeAsync(
+            () -> {
                 mSetbtn.setEnabled(false);
                 ProgressDialogUtils.showProgressDialog(getActivity(), "Saving HyperStat Monitoring Configuration");
-                super.onPreExecute();
-            }
-
-            @Override
-            protected Void doInBackground(final String... params) {
+            },
+            () -> {
                 CCUHsApi.getInstance().resetCcuReady();
                 setUpMonitoringProfile();
                 L.saveCCUState();
                 CCUHsApi.getInstance().setCcuReady();
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute(final Void result) {
+            },
+            () -> {
                 ProgressDialogUtils.hideProgressDialog();
                 HyperStatMonitoringFragment.this.closeAllBaseDialogFragments();
                 getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
                 LSerial.getInstance().sendHyperStatSeedMessage(mNodeAddress, mRoomName, mFloorName, false);
             }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
+        );
     }
 
     private void setUpMonitoringProfile() {

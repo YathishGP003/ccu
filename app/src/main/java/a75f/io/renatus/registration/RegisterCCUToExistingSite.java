@@ -53,6 +53,7 @@ import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.util.RxjavaUtil;
+import a75f.io.util.ExecutorTask;
 
 public class RegisterCCUToExistingSite extends DialogFragment {
 
@@ -189,7 +190,7 @@ public class RegisterCCUToExistingSite extends DialogFragment {
     }
 
     private void next(String ccuName, String installerEmail, String managerEmail) {
-        RxjavaUtil.executeBackgroundTask(
+        ExecutorTask.executeAsync(
                 ()-> ProgressDialogUtils.showProgressDialog(getActivity(),"Adding CCU"),
                 ()->{
                     mAddCCU.setClickable(false);
@@ -233,7 +234,7 @@ public class RegisterCCUToExistingSite extends DialogFragment {
     }
 
     private void getRegisteredAddressBand() {
-        RxjavaUtil.executeBackgroundTask(
+        ExecutorTask.executeAsync(
                 ()-> regAddressBands.clear(),
                 ()->{
                     HClient hClient = new HClient(CCUHsApi.getInstance().getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);

@@ -80,6 +80,7 @@ import a75f.io.renatus.util.CustomSelectionAdapter;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.util.RxjavaUtil;
 import a75f.io.renatus.util.remotecommand.RemoteCommandHandlerUtil;
+import a75f.io.util.ExecutorTask;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -381,7 +382,7 @@ public class AboutFragment extends Fragment {
     }
 
     public void checkIsCCUHasRecommendedVersion(FragmentActivity activity) {
-        RxjavaUtil.executeBackgroundTaskWithDisposable(()->{
+        ExecutorTask.executeAsync(()->{
                     ProgressDialogUtils.showProgressDialog(activity,"Checking for recommended version");
                 },
                 ()->{String response = getRecommendedCCUVersion();

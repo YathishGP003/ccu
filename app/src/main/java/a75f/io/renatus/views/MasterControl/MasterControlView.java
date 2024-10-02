@@ -6,7 +6,6 @@ import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Color;
-import android.os.AsyncTask;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.View;
@@ -187,18 +186,7 @@ public class MasterControlView extends LinearLayout {
             dialog.dismiss();
         }
 
-        new AsyncTask<String, Void, Void>() {
-            @Override
-            protected Void doInBackground(final String... params) {
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute(final Void result) {
-                super.onPostExecute(result);
-                Toast.makeText(getContext(),"Building limits has been successfully updated",Toast.LENGTH_LONG).show();
-            }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
+        Toast.makeText(getContext(),"Building limits has been successfully updated",Toast.LENGTH_LONG).show();
     }
     public static double getTuner(String id) {
         CCUHsApi hayStack = CCUHsApi.getInstance();

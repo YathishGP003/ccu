@@ -75,11 +75,10 @@ import a75f.io.data.writablearray.WritableArray;
 import a75f.io.data.writablearray.WritableArrayDBUtilKt;
 import a75f.io.data.writablearray.WritableArrayDatabaseHelper;
 import a75f.io.logger.CcuLog;
+import a75f.io.util.ExecutorTask;
 import io.objectbox.Box;
 import io.objectbox.BoxStore;
 import io.objectbox.query.QueryBuilder;
-import io.reactivex.rxjava3.core.Observable;
-import io.reactivex.rxjava3.schedulers.Schedulers;
 
 /**
  * Created by samjithsadasivan on 8/31/18.
@@ -282,26 +281,23 @@ public class CCUTagsDb extends HServer {
     }
     private void loadEntitiesFromRoomDb() {
         //To read all the contents of entity table and writable table of roomDB and add it to local variale for further access
-        Observable.fromCallable(() -> {
-                    DatabaseHelper databaseHelper = new EntityDatabaseHelper(RenatusDatabaseBuilder
-                                                            .getInstance(appContext));
-                    a75f.io.data.writablearray.DatabaseHelper writableDbHelper = new WritableArrayDatabaseHelper((RenatusDatabaseBuilder.getInstance(appContext)));
+        ExecutorTask.executeBackground( () -> {
+            DatabaseHelper databaseHelper = new EntityDatabaseHelper(RenatusDatabaseBuilder
+                    .getInstance(appContext));
+            a75f.io.data.writablearray.DatabaseHelper writableDbHelper = new WritableArrayDatabaseHelper((RenatusDatabaseBuilder.getInstance(appContext)));
 
-                    loadTagsMap(databaseHelper);
-                    loadWritableArray(writableDbHelper);
-                    new Timer().schedule(new TimerTask() {
-                        @Override
-                        public void run() {
-                            DatabaseAction databaseAction = DatabaseAction.MESSAGE_DATABASE_LOADED_SUCCESS;
-                            DatabaseEvent databaseEvent = new DatabaseEvent(databaseAction);
-                            EventBus.getDefault().postSticky(databaseEvent);
-                            CcuLog.i(TAG_CCU_ROOM_DB, "------------------data loading completed--------------");
-                        }
-                    }, 1000);
-                    return true;
-                })
-                .subscribeOn(Schedulers.io())
-                .subscribe();
+            loadTagsMap(databaseHelper);
+            loadWritableArray(writableDbHelper);
+            new Timer().schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    DatabaseAction databaseAction = DatabaseAction.MESSAGE_DATABASE_LOADED_SUCCESS;
+                    DatabaseEvent databaseEvent = new DatabaseEvent(databaseAction);
+                    EventBus.getDefault().postSticky(databaseEvent);
+                    CcuLog.i(TAG_CCU_ROOM_DB, "------------------data loading completed--------------");
+                }
+            }, 1000);
+        });
     }
     
     public void initBoxStore() {

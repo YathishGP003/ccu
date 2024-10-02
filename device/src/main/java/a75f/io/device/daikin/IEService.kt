@@ -1,12 +1,15 @@
 package a75f.io.device.daikin
 
-import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
 import org.simpleframework.xml.Element
 import org.simpleframework.xml.Root
 import retrofit2.Response
-import retrofit2.http.*
+import retrofit2.http.Body
+import retrofit2.http.GET
+import retrofit2.http.Headers
+import retrofit2.http.PUT
+import retrofit2.http.Path
 
 
 interface IEService {

@@ -34,6 +34,7 @@ import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.util.RxjavaUtil;
 import a75f.io.renatus.views.CustomCCUSwitch;
 import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
+import a75f.io.util.ExecutorTask;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -149,7 +150,7 @@ public class FragmentOTNTempInfConfiguration extends BaseDialogFragment {
     @OnClick(R.id.setBtn)
     void setOnClick(View v) {
         mSetbtn.setEnabled(false);
-        compositeDisposable.add(RxjavaUtil.executeBackgroundTaskWithDisposable(
+        ExecutorTask.executeAsync(
                 ()-> ProgressDialogUtils.showProgressDialog(getActivity(), "Saving OTN Configuration"),
                 ()->{
                     setupOTNProfile();
@@ -163,7 +164,7 @@ public class FragmentOTNTempInfConfiguration extends BaseDialogFragment {
                     FragmentOTNTempInfConfiguration.this.closeAllBaseDialogFragments();
                     getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
                 }
-        ));
+        );
     }
 
     private void setupOTNProfile() {

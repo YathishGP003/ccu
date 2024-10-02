@@ -16,12 +16,13 @@ import a75f.io.logic.util.ConnectionUtil;
 import a75f.io.logic.util.RxTask;
 import a75f.io.logic.util.backupfiles.FileConstants;
 import a75f.io.logic.util.backupfiles.FileOperationsUtil;
+import a75f.io.util.ExecutorTask;
 
 public class FileBackupJobReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         if (ConnectionUtil.isNetworkConnected()) {
-            RxTask.executeAsync (FileBackupJobReceiver::performConfigFileBackup);
+            ExecutorTask.executeBackground(FileBackupJobReceiver::performConfigFileBackup);
         }
     }
     public static void performConfigFileBackup(){

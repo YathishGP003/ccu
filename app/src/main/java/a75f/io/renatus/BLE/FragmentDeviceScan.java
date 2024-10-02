@@ -48,6 +48,7 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.renatus.AlternatePairingFragment;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.R;
+import a75f.io.util.ExecutorTask;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -216,7 +217,7 @@ public class FragmentDeviceScan extends BaseDialogFragment
     private void searchDevices() {
         CcuLog.d(L.TAG_CCU_BLE, "ble searching...");
         bluetoothStateReceiver = new BluetoothStateReceiver();
-        new Thread(() -> {
+        ExecutorTask.executeBackground(() -> {
             if (mBluetoothAdapter != null) {
                 if (!mBluetoothAdapter.isEnabled()) {
                     // Ensures Bluetooth is enabled isOn the device.  If Bluetooth is not currently enabled,
@@ -263,7 +264,7 @@ public class FragmentDeviceScan extends BaseDialogFragment
 
                 }
             }
-        }).start();
+        });
     }
     View.OnClickListener connectManuallyListener = view -> {
         AlternatePairingFragment alternatePairingFragment = new AlternatePairingFragment(

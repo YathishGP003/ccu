@@ -57,6 +57,7 @@ import a75f.io.logic.migration.hyperstat.CpuPointsMigration;
 import a75f.io.logic.migration.hyperstat.MigratePointsUtil;
 import a75f.io.logic.migration.title24.Title24Migration;
 import a75f.io.logic.tuners.TunerConstants;
+import a75f.io.util.ExecutorTask;
 
 public class MigrationUtil {
     private static final String TAG = "MIGRATION_UTIL";
@@ -1204,7 +1205,7 @@ public class MigrationUtil {
     }
 
     private static void updateHisValue(CCUHsApi haystack) {
-        RxjavaUtil.executeBackground(() -> {
+        ExecutorTask.executeBackground(() -> {
             CcuLog.d(TAG_CCU_MIGRATION_UTIL, "updateHisValue migration started");
             ArrayList<HashMap<Object, Object>> writablePoints = haystack.readAllEntities("point and writable");
             for (HashMap<Object, Object> map : writablePoints) {

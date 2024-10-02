@@ -37,6 +37,7 @@ import a75f.io.renatus.modbus.util.parseModbusDataFromString
 import a75f.io.renatus.modbus.util.showToast
 import a75f.io.renatus.util.ProgressDialogUtils
 import a75f.io.renatus.util.RxjavaUtil
+import a75f.io.util.ExecutorTask
 import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
@@ -346,7 +347,7 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
     fun saveConfiguration() {
         if (isValidConfiguration()) {
             populateSlaveId()
-            RxjavaUtil.executeBackgroundTask({
+            ExecutorTask.executeAsync({
                 ProgressDialogUtils.showProgressDialog(context, SAVING)
             }, {
                 CCUHsApi.getInstance().resetCcuReady()

@@ -1,7 +1,6 @@
 package a75f.io.api.haystack;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -16,25 +15,16 @@ import org.projecthaystack.HVal;
 import org.projecthaystack.io.HZincReader;
 
 import java.lang.reflect.Type;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
 import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
 
-import a75f.io.data.RenatusDatabaseBuilder;
 import a75f.io.data.WriteArray;
-import a75f.io.data.entities.DatabaseHelper;
 import a75f.io.data.entities.EntityDBUtilKt;
-import a75f.io.data.entities.EntityDatabaseHelper;
 import a75f.io.data.entities.HayStackEntity;
 import a75f.io.data.writablearray.WritableArray;
 import a75f.io.data.writablearray.WritableArrayDBUtilKt;
-import a75f.io.data.writablearray.WritableArrayDatabaseHelper;
 import a75f.io.logger.CcuLog;
-import io.reactivex.rxjava3.core.Observable;
-import io.reactivex.rxjava3.schedulers.Schedulers;
 
 public class TagDbMigration {
 

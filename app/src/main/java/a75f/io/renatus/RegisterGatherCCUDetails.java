@@ -3,7 +3,6 @@ package a75f.io.renatus;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
@@ -48,6 +47,7 @@ import a75f.io.logic.tuners.TunerEquip;
 import a75f.io.renatus.registration.FreshRegistration;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.Prefs;
+import a75f.io.util.ExecutorTask;
 
 import static a75f.io.logic.L.ccu;
 
@@ -202,46 +202,32 @@ public class RegisterGatherCCUDetails extends Activity {
     @SuppressLint("StaticFieldLeak")
     private void getRegisteredAddressBands() {
         regAddressBands.clear();
-        new AsyncTask<String, Void,Void>(){
-
-            @Override
-            protected Void doInBackground(String... strings) {
+        ExecutorTask.executeAsync(
+            () -> {
                 HClient hClient = new HClient(CCUHsApi.getInstance().getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
                 String siteUID = CCUHsApi.getInstance().getSiteIdRef().toString();
                 HDict tDict = new HDictBuilder().add("filter", "equip and group and siteRef == " + siteUID).toDict();
                 HGrid schedulePoint = hClient.call("read", HGridBuilder.dictToGrid(tDict));
                 if(schedulePoint == null) {
                     CcuLog.w("RegisterGatherCCUDetails","HGrid(schedulePoint) is null.");
-                    RegisterGatherCCUDetails.this.runOnUiThread( (new Thread(() -> {
-                        // Display the text we just generated within the LogView.
-                        Toast.makeText(RegisterGatherCCUDetails.this,"Couldn't find the node address, Please choose the node address which is not used already.", Toast.LENGTH_LONG).show();
-
-                    })));
-                    return null;
+                    RegisterGatherCCUDetails.this.runOnUiThread( () ->
+                            Toast.makeText(RegisterGatherCCUDetails.this,
+                                    "Couldn't find the node address, Please choose the node " +
+                                            "address which is not used already.", Toast.LENGTH_LONG).show());
+                    return;
                 }
                 Iterator it = schedulePoint.iterator();
-                while (it.hasNext())
-                {
+                while (it.hasNext()) {
                     HRow r = (HRow) it.next();
-
                     if (r.getStr("group") != null) {
                         regAddressBands.add(r.getStr("group"));
                     }
                 }
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute(Void aVoid) {
-                super.onPostExecute(aVoid);
-
-                //remove registered SmartNodeAddressBand
-                for(int i = 0; i < regAddressBands.size(); i++)
-                {
-                    for(int j = 0; j < addressBand.size(); j++)
-                    {
-                        if(regAddressBands.get(i).equals(addressBand.get(j)))
-                        {
+            },
+            () -> {
+                for(int i = 0; i < regAddressBands.size(); i++) {
+                    for(int j = 0; j < addressBand.size(); j++) {
+                        if(regAddressBands.get(i).equals(addressBand.get(j))) {
                             addressBand.remove(regAddressBands.get(i));
                         }
                     }
@@ -253,38 +239,25 @@ public class RegisterGatherCCUDetails extends Activity {
                 addressBandSelected = addressBand.get(0);
                 L.ccu().setSmartNodeAddressBand(Short.parseShort(addressBandSelected));
             }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+       );
     }
 
     private void loadCCUs() {
-        @SuppressLint("StaticFieldLeak")
-        AsyncTask<Void, Void, HGrid> loadCCUGrids = new AsyncTask<Void, Void, HGrid>() {
-            @Override
-            protected void onPreExecute() {
-                super.onPreExecute();
-                showProgressDialog();
-            }
 
-            @Override
-            protected HGrid doInBackground(Void... voids) {
-                //CCUHsApi.getInstance().getSiteId();
-                return CCUHsApi.getInstance().getCCUs();
-            }
-
-            @Override
-            protected void onPostExecute(HGrid hGrid) {
-                super.onPostExecute(hGrid);
+        ExecutorTask.executeAsync(
+            () -> showProgressDialog(),
+            () -> mCCUS = CCUHsApi.getInstance().getCCUs(),
+            () -> {
                 hideProgressDialog();
-                if (hGrid == null || hGrid.isEmpty() || hGrid.isErr()) {
+                if (mCCUS == null || mCCUS.isEmpty() || mCCUS.isErr()) {
                     //Toast.makeText(RegisterGatherCCUDetails.this, "No CCUs available, please create one", Toast.LENGTH_SHORT).show();
                 } else {
-                    mCCUS = hGrid;
                     showCCUButton();
                 }
-            }
-        };
 
-        loadCCUGrids.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            }
+
+        );
     }
 
     private void showCCUButton() {
@@ -308,56 +281,26 @@ public class RegisterGatherCCUDetails extends Activity {
                                                  });
     }
 
-
-    @SuppressLint("StaticFieldLeak")
     private void next() {
-
-        new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected void onPreExecute() {
-                super.onPreExecute();
-                showProgressDialog();
-            }
-
-            @Override
-            protected Void doInBackground(Void... voids) {
-
+        ExecutorTask.executeAsync(
+            () -> showProgressDialog(),
+            () -> {
                 if(!Globals.getInstance().siteAlreadyCreated()) {
                     TunerEquip.INSTANCE.initialize(CCUHsApi.getInstance(), false);
                     DefaultSchedules.setDefaultCoolingHeatingTemp();
                 }
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute(Void nul) {
-                super.onPostExecute(nul);
+            },
+            () -> {
                 hideProgressDialog();
                 prefs.setBoolean("CCU_SETUP", true);
 
-                // Create the object of
-                // AlertDialog Builder class
                 AlertDialog.Builder builder
                         = new AlertDialog
                         .Builder(RegisterGatherCCUDetails.this);
-                //site = CCUHsApi.getInstance().read("site");
-                // Set the message show for the Alert time
                 builder.setMessage("Are you sure you want to add "+mCCUNameET.getText().toString()+" to site "+site.get("dis"));
-
-                // Set Alert Title
                 builder.setTitle("ADD CCU");
-
-                // Set Cancelable false
-                // for when the user clicks on the outside
-                // the Dialog Box then it will remain show
                 builder.setCancelable(false);
-
-                // Set the positive button with yes name
-                // OnClickListener method is use of
-                // DialogInterface interface.
-
-                builder
-                        .setPositiveButton(
+                builder.setPositiveButton(
                                 "Yes",
                                 (dialog, which) -> {
                                     L.saveCCUState();
@@ -373,19 +316,15 @@ public class RegisterGatherCCUDetails extends Activity {
                                     finish();
                                 });
 
-                 builder.setNegativeButton("No",(dialog,which)->{
-                     mCreateNewCCU.setClickable(true);
-                     dialog.dismiss();
-                 });
-                // Create the Alert dialog
+                builder.setNegativeButton("No",(dialog,which)->{
+                    mCreateNewCCU.setClickable(true);
+                    dialog.dismiss();
+                });
+
                 AlertDialog alertDialog = builder.create();
-
-                // Show the Alert Dialog box
                 alertDialog.show();
-
             }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-
+        );
     }
 
     private CharSequence[] getCCUStringArray() {

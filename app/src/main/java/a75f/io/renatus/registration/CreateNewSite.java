@@ -14,7 +14,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -58,6 +57,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.TimeZone;
+import java.util.concurrent.atomic.AtomicReference;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
@@ -82,8 +82,8 @@ import a75f.io.renatus.R;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
-import a75f.io.renatus.util.RxjavaUtil;
 import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
+import a75f.io.util.ExecutorTask;
 
 public class CreateNewSite extends Fragment {
     private static final String TAG = CreateNewSite.class.getSimpleName();
@@ -328,7 +328,7 @@ public class CreateNewSite extends Fragment {
                 String installerEmail = mSiteInstallerEmailId.getText().toString();
                 String installerOrg = mSiteOrg.getText().toString();
                 String ccuName = mSiteCCU.getText().toString();
-                RxjavaUtil.executeBackgroundTask(
+                ExecutorTask.executeAsync(
                         () -> {},
                         () -> {
                             CcuLog.i("UI_PROFILING","Add Save Site to DB ");
@@ -554,7 +554,7 @@ public class CreateNewSite extends Fragment {
 
     private void handleRegistrationAsync(String installerEmail) {
         CcuLog.d(TAG, "Register Button Clicked");
-        RxjavaUtil.executeBackgroundTask(
+        ExecutorTask.executeAsync(
                 () -> ProgressDialogUtils.showProgressDialog(getActivity(), "Registering CCU..."),
                 () -> {
                     CCUUtils.updateCcuSpecificEntitiesWithCcuRef(CCUHsApi.getInstance(), true);
@@ -649,45 +649,36 @@ public class CreateNewSite extends Fragment {
         //Otherwise pubnubs generated due to unregister may arrive before the response itself and CCU
         //handling it can lead to inconsistencies.
         CCUHsApi.getInstance().setCcuUnregistered();
-
-        AsyncTask<Void, Void, String> ccuUnReg = new AsyncTask<Void, Void, String>() {
-
-            @Override
-            protected String doInBackground(Void... voids) {
-                return hayStack.removeCCURemote(ccuId);
-            }
-
-            @Override
-            protected void onPostExecute(String response) {
-                super.onPostExecute(response);
+        AtomicReference<String> response = new AtomicReference<>("");
+        ExecutorTask.executeAsync(
+            () -> response.set(hayStack.removeCCURemote(ccuId)),
+            () -> {
                 ProgressDialogUtils.hideProgressDialog();
-                if( (response != null) && (!response.isEmpty())){
-                        HZincReader zReader = new HZincReader(response);
-                        Iterator it = zReader.readGrid().iterator();
-                        while (it.hasNext())
+                if( (response.get() != null) && (!response.get().isEmpty())){
+                    HZincReader zReader = new HZincReader(response.get());
+                    Iterator it = zReader.readGrid().iterator();
+                    while (it.hasNext())
+                    {
+                        HRow row = (HRow) it.next();
+                        String removedCCUId = row.get("removeCCUId").toString();
+                        if (removedCCUId != null && !removedCCUId.isEmpty())
                         {
-                            HRow row = (HRow) it.next();
-                            String ccuId = row.get("removeCCUId").toString();
-                            if (ccuId != null && !ccuId.isEmpty())
-                            {
-                                btnUnregisterSite.setText("Register");
-                                btnUnregisterSite.setTextColor(CCUUiUtil.getPrimaryThemeColor(getContext()));
-                                btnEditSite.setEnabled(false);
-                                imgUnregisterSite.setColorFilter(CCUUiUtil.getPrimaryThemeColor(getContext()));
-                                CCUHsApi.getInstance().setJwt("");
-                                Toast.makeText(getActivity(), "CCU unregistered successfully " +ccuId, Toast.LENGTH_LONG).show();
-                            } else {
-                                Toast.makeText(getActivity(), "Failed to unregistered the CCU", Toast.LENGTH_LONG).show();
-                            }
+                            btnUnregisterSite.setText("Register");
+                            btnUnregisterSite.setTextColor(CCUUiUtil.getPrimaryThemeColor(getContext()));
+                            btnEditSite.setEnabled(false);
+                            imgUnregisterSite.setColorFilter(CCUUiUtil.getPrimaryThemeColor(getContext()));
+                            CCUHsApi.getInstance().setJwt("");
+                            Toast.makeText(getActivity(), "CCU unregistered successfully " +removedCCUId, Toast.LENGTH_LONG).show();
+                        } else {
+                            Toast.makeText(getActivity(), "Failed to unregistered the CCU", Toast.LENGTH_LONG).show();
                         }
+                    }
                 } else {
                     Toast.makeText(getActivity(), "Failed to remove CCU", Toast.LENGTH_LONG).show();
                     CCUHsApi.getInstance().setCcuRegistered();
                 }
             }
-        };
-
-        ccuUnReg.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        );
     }
 
     /**

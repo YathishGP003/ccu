@@ -41,6 +41,7 @@ import a75f.io.messaging.handler.UpdatePointHandler;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
+import a75f.io.util.ExecutorTask;
 
 public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRecyclerModbusParamAdapter.ViewHolder> implements ModbusDataInterface {
 
@@ -124,14 +125,14 @@ public class ZoneRecyclerModbusParamAdapter extends RecyclerView.Adapter<ZoneRec
                         viewHolder.spValue.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                             @Override
                             public void onItemSelected(AdapterView<?> adapterView, View view, int pos, long id) {
-                                new Thread(() -> {
+                                ExecutorTask.executeBackground( () -> {
                                     if (modbusParam.get(position).getCommands() != null && modbusParam.get(position).getCommands().size() > 0) {
                                         Command command = (Command) adapterView.getSelectedItem();
                                         writePoint(p, command.getBitValues(), modbusParam.get(position));
                                     } else {
                                         writePoint(p, adapterView.getItemAtPosition(pos).toString(), modbusParam.get(position));
                                     }
-                                }).start();
+                                });
                             }
 
                             @Override

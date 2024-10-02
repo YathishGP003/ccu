@@ -1,6 +1,5 @@
 package a75f.io.renatus.ENGG;
 
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.method.DigitsKeyListener;
 import android.text.method.KeyListener;
@@ -41,7 +40,7 @@ import a75f.io.renatus.BuildConfig;
 import a75f.io.renatus.EquipTempExpandableListAdapter;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.ProgressDialogUtils;
-import a75f.io.renatus.util.RxjavaUtil;
+import a75f.io.util.ExecutorTask;
 
 public class HaystackExplorer extends Fragment
 {
@@ -223,33 +222,23 @@ public class HaystackExplorer extends Fragment
     }
     
     private void deleteEntity(String entityId, boolean schedule) {
-    
-        new AsyncTask<Void, Void, Void>() {
-        
-            @Override
-            protected void onPreExecute() {
-                ProgressDialogUtils.showProgressDialog(getActivity(), "Deleting ...");
-                super.onPreExecute();
-            }
-        
-            @Override
-            protected Void doInBackground( final Void ... params ) {
-                if (schedule) {
-                    CCUHsApi.getInstance().deleteEntityItem(entityId);
-                } else {
-                    CCUHsApi.getInstance().deleteEntityTree(entityId);
+        ExecutorTask.executeAsync(
+                () -> ProgressDialogUtils.showProgressDialog(getActivity(), "Deleting ..."),
+                () -> {
+                    if (schedule) {
+                        CCUHsApi.getInstance().deleteEntityItem(entityId);
+                    } else {
+                        CCUHsApi.getInstance().deleteEntityTree(entityId);
+                    }
+                    updateAllData();
+                    CCUHsApi.getInstance().syncEntityTree();
+                },
+                () -> {
+                    ProgressDialogUtils.hideProgressDialog();
+                    expandableListAdapter.notifyDataSetChanged();
                 }
-                updateAllData();
-                CCUHsApi.getInstance().syncEntityTree();
-                return null;
-            }
-        
-            @Override
-            protected void onPostExecute( final Void result ) {
-                ProgressDialogUtils.hideProgressDialog();
-                expandableListAdapter.notifyDataSetChanged();
-            }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
+        );
     }
     
     private void updateAllData() {
@@ -351,45 +340,35 @@ public class HaystackExplorer extends Fragment
     }
     
     public void setPointVal(String id, double val) {
-        new AsyncTask<String, Void, Void>() {
-            @Override
-            protected Void doInBackground( final String ... params ) {
-    
-                CCUHsApi hayStack = CCUHsApi.getInstance();
-                Point p = new Point.Builder().setHDict(hayStack.readHDictById(id)).build();
-                if (p.getMarkers().contains("writable"))
-                {
-                    CcuLog.d(L.TAG_CCU_UI, "Set Writbale Val "+p.getDisplayName()+": " +val);
-                    //CCUHsApi.getInstance().pointWrite(HRef.copy(id), TunerConstants.MANUAL_OVERRIDE_VAL_LEVEL, "manual", HNum.make(val) , HNum.make(2 * 60 * 60 * 1000, "ms"));
-                    SystemScheduleUtil.handleDesiredTempUpdate(p, true, val);
-    
-                }
-    
-                if (p.getMarkers().contains("his"))
-                {
-                    CcuLog.d(L.TAG_CCU_UI, "Set His Val "+id+": " +val);
-                    CcuLog.d(L.TAG_CCU_UI, "domainName "+p.getDomainName());
-                    if (isCurrentTempPoint(p)) {
-                        CcuLog.d(L.TAG_CCU_UI, "Set "+p.getDomainName()+" Equip "+p.getEquipRef());
-                        Equip q = HSUtil.getEquipInfo(p.getEquipRef());
-                        RxjavaUtil.executeBackground( () -> {
-                            CmToCcuOverUsbSnRegularUpdateMessage_t msg = new CmToCcuOverUsbSnRegularUpdateMessage_t();
-                            msg.update.smartNodeAddress.set(Integer.parseInt(q.getGroup()));
-                            msg.update.roomTemperature.set((int)val);
-                            Pulse.regularSNUpdate(msg);
-                        });
-                    } else {
-                        hayStack.writeHisValueByIdWithoutCOV(id, val);
-                    }
-                }
-                return null;
+        ExecutorTask.executeBackground(() -> {
+            CCUHsApi hayStack = CCUHsApi.getInstance();
+            Point p = new Point.Builder().setHDict(hayStack.readHDictById(id)).build();
+            if (p.getMarkers().contains("writable"))
+            {
+                CcuLog.d(L.TAG_CCU_UI, "Set Writbale Val "+p.getDisplayName()+": " +val);
+                //CCUHsApi.getInstance().pointWrite(HRef.copy(id), TunerConstants.MANUAL_OVERRIDE_VAL_LEVEL, "manual", HNum.make(val) , HNum.make(2 * 60 * 60 * 1000, "ms"));
+                SystemScheduleUtil.handleDesiredTempUpdate(p, true, val);
+
             }
-            
-            @Override
-            protected void onPostExecute( final Void result ) {
-                // continue what you are doing...
+
+            if (p.getMarkers().contains("his"))
+            {
+                CcuLog.d(L.TAG_CCU_UI, "Set His Val "+id+": " +val);
+                CcuLog.d(L.TAG_CCU_UI, "domainName "+p.getDomainName());
+                if (isCurrentTempPoint(p)) {
+                    CcuLog.d(L.TAG_CCU_UI, "Set "+p.getDomainName()+" Equip "+p.getEquipRef());
+                    Equip q = HSUtil.getEquipInfo(p.getEquipRef());
+                    ExecutorTask.executeBackground( () -> {
+                        CmToCcuOverUsbSnRegularUpdateMessage_t msg = new CmToCcuOverUsbSnRegularUpdateMessage_t();
+                        msg.update.smartNodeAddress.set(Integer.parseInt(q.getGroup()));
+                        msg.update.roomTemperature.set((int)val);
+                        Pulse.regularSNUpdate(msg);
+                    });
+                } else {
+                    hayStack.writeHisValueByIdWithoutCOV(id, val);
+                }
             }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
+        });
     }
 
     private boolean isCurrentTempPoint(Point point) {

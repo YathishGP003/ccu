@@ -51,6 +51,7 @@ import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.util.RxjavaUtil;
 import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
+import a75f.io.util.ExecutorTask;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -186,7 +187,7 @@ public class DialogOAOProfile extends BaseDialogFragment
             setOAOSavingInProgress(true);
             setButton.setEnabled(false);
 
-                    RxjavaUtil.executeBackgroundTask( () ->
+                    ExecutorTask.executeAsync( () ->
                                     ProgressDialogUtils.showProgressDialog(getActivity(), "Saving OAO Configuration"),
                             () -> {
                                 setUpOAOProfile();
@@ -207,24 +208,24 @@ public class DialogOAOProfile extends BaseDialogFragment
 
         unpairButton.setOnClickListener(v -> {
             unpairButton.setEnabled(false);
-            ProgressDialogUtils.showProgressDialog(getActivity(),"Deleting OAO Equip");
-
-            new Thread(() -> {
-                deleteOAOEquip();
-                L.saveCCUState();
-                CCUHsApi.getInstance().syncEntityTree();
-            }).start();
-
-            new Handler().postDelayed(() -> {
-                ProgressDialogUtils.hideProgressDialog();
-                try {
-                    DialogOAOProfile.this.closeAllBaseDialogFragments();
-                } catch (Exception e) {
-                    CcuLog.e(L.TAG_CCU_OAO, "Exception when closing Bypass Damper dialog: " + e);
-                }
-                SystemConfigFragment.SystemConfigFragmentHandler.sendEmptyMessage(1);
-                UtilSourceKt.showToast("OAO Equip Deleted Successfully", requireContext());
-            }, 12000);
+            ExecutorTask.executeAsync(
+                    () -> ProgressDialogUtils.showProgressDialog(getActivity(), "Deleting OAO Equip"),
+                    () -> {
+                        deleteOAOEquip();
+                        L.saveCCUState();
+                        CCUHsApi.getInstance().syncEntityTree();
+                    },
+                    () -> {
+                        ProgressDialogUtils.hideProgressDialog();
+                        try {
+                            DialogOAOProfile.this.closeAllBaseDialogFragments();
+                        } catch (Exception e) {
+                            CcuLog.e(L.TAG_CCU_OAO, "Exception when closing Bypass Damper dialog: " + e);
+                        }
+                        SystemConfigFragment.SystemConfigFragmentHandler.sendEmptyMessage(1);
+                        UtilSourceKt.showToast("OAO Equip Deleted Successfully", requireContext());
+                    }
+            );
         });
     
         ArrayList<Integer> voltsArray = new ArrayList<>();

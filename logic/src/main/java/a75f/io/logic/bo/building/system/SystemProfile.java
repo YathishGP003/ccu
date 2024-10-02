@@ -44,6 +44,7 @@ import a75f.io.logic.tuners.SystemTuners;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.logic.util.RxjavaUtil;
+import a75f.io.util.ExecutorTask;
 
 /**
  * Created by Yinten isOn 8/15/2017.
@@ -754,7 +755,7 @@ public abstract class SystemProfile
                 "and cooling and lockout and equipRef ==\""
                 +ccu().systemProfile.getSystemEquipRef()+"\"");
         if (!coolingLockoutPoint.isEmpty()) {
-            RxjavaUtil.executeBackground(() ->hayStack.writePointForCcuUser(coolingLockoutPoint.get("id").toString(),
+            ExecutorTask.executeBackground(() ->hayStack.writePointForCcuUser(coolingLockoutPoint.get("id").toString(),
                     HayStackConstants.SYSTEM_POINT_LEVEL, val, 0));
         }
     }
@@ -765,7 +766,7 @@ public abstract class SystemProfile
                 +ccu().systemProfile.getSystemEquipRef()+"\"");
 
         if (!heatingLockoutPoint.isEmpty()) {
-            RxjavaUtil.executeBackground(() ->hayStack.writePointForCcuUser(heatingLockoutPoint.get("id").toString(),
+            ExecutorTask.executeBackground(() ->hayStack.writePointForCcuUser(heatingLockoutPoint.get("id").toString(),
                     HayStackConstants.SYSTEM_POINT_LEVEL, val, 0));
         }
     }

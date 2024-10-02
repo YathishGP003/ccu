@@ -1,6 +1,5 @@
 package a75f.io.renatus.registration;
 
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,6 +17,7 @@ import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.renatus.ENGG.LocalConnectionViewKt;
 import a75f.io.renatus.R;
 import a75f.io.renatus.util.Prefs;
+import a75f.io.util.ExecutorTask;
 
 
 public class InstallTypeFragment extends Fragment {
@@ -113,21 +113,12 @@ public class InstallTypeFragment extends Fragment {
             
             if (L.ccu().systemProfile instanceof DefaultSystem) {
             } else {
-
-                new AsyncTask<String, Void, Void>() {
-                    @Override
-                    protected Void doInBackground(final String... params) {
-                        if (systemProfile != null) {
-                            systemProfile.deleteSystemEquip();
-                            L.ccu().systemProfile = null;
-                        }
-                        return null;
+                ExecutorTask.executeBackground(() -> {
+                    if (systemProfile != null) {
+                        systemProfile.deleteSystemEquip();
+                        L.ccu().systemProfile = null;
                     }
-
-                    @Override
-                    protected void onPostExecute(final Void result) {
-                    }
-                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
+                });
             }
     
             HashMap buildingSchedule = CCUHsApi.getInstance().read("schedule and building and siteRef == \"" + siteId +

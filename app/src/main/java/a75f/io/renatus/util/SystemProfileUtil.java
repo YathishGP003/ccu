@@ -8,16 +8,17 @@ import a75f.io.renatus.R;
 import androidx.appcompat.app.AlertDialog;
 import static a75f.io.renatus.UtilityApplication.context;
 import a75f.io.renatus.BuildConfig;
+import a75f.io.util.ExecutorTask;
 
 import static a75f.io.renatus.util.RxjavaUtil.executeBackground;
 
 public class SystemProfileUtil {
     
     public static void setUserIntentBackground(String query, double val) {
-        executeBackground(() -> TunerUtil.writeSystemUserIntentVal(query, val));
+        ExecutorTask.executeBackground(() -> TunerUtil.writeSystemUserIntentVal(query, val));
     }
     public static void setUserIntentByDomain(String domainName, double val) {
-        executeBackground(() -> TunerUtil.writeSystemUserIntentVal("domainName == \""+domainName+"\"", val));
+        ExecutorTask.executeBackground(() -> TunerUtil.writeSystemUserIntentVal("domainName == \""+domainName+"\"", val));
     }
 
     public static void showConditioningDisabledDialog(Activity context, SystemMode mode) {

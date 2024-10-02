@@ -34,6 +34,7 @@ import a75f.io.renatus.hyperstat.HyperStatProfileSelectionFragment;
 import a75f.io.renatus.hyperstatsplit.HyperStatSplitProfileSelectionFragment;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.RxjavaUtil;
+import a75f.io.util.ExecutorTask;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -130,7 +131,7 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
         if (isModbusPaired()) {
             return;
         }
-        RxjavaUtil.executeBackground(() -> ModelLoader.INSTANCE.getSmartNodeDevice());
+        ExecutorTask.executeBackground(() -> ModelLoader.INSTANCE.getSmartNodeDevice());
         DialogSmartNodeProfiling wrmProfiling = DialogSmartNodeProfiling.newInstance(mNodeAddress, mRoomName, mFloorName, misPaired, NodeType.SMART_NODE);
         showDialogFragment(wrmProfiling, DialogSmartNodeProfiling.ID);
     }
@@ -139,7 +140,7 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
         if (isModbusPaired()) {
             return;
         }
-        RxjavaUtil.executeBackground(() -> ModelLoader.INSTANCE.getHelioNodeDevice());
+        ExecutorTask.executeBackground(() -> ModelLoader.INSTANCE.getHelioNodeDevice());
         DialogSmartNodeProfiling wrmProfiling = DialogHelioNodeProfiling.newInstance(mNodeAddress, mRoomName, mFloorName, misPaired, NodeType.HELIO_NODE);
         showDialogFragment(wrmProfiling, DialogHelioNodeProfiling.ID);
     }

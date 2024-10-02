@@ -1,8 +1,6 @@
 package a75f.io.renatus;
 
 import android.annotation.SuppressLint;
-import android.os.AsyncTask;
-import android.util.Log;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -17,7 +15,7 @@ import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Zone;
 import a75f.io.device.bacnet.BacnetUtilKt;
 import a75f.io.logic.L;
-import a75f.io.modbusbox.EquipsManager;
+import a75f.io.util.ExecutorTask;
 
 
 class RoomListActionMenuListener implements MultiChoiceModeListener
@@ -122,20 +120,14 @@ class RoomListActionMenuListener implements MultiChoiceModeListener
 					INTENT_ZONE_DELETED,
 					sZone.getId());
 		}
-		new AsyncTask<String, Void, Void>() {
-			@Override
-			protected Void doInBackground( final String ... params ) {
-				CCUHsApi.getInstance().syncEntityTree();
-				L.saveCCUState();
-				return null;
-			}
-			
-			@Override
-			protected void onPostExecute( final Void result ) {
-				// continue what you are doing...
-				floorPlanActivity.getBuildingFloorsZones("");
-			}
-		}.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
+		ExecutorTask.executeAsync(
+			() -> {
+                CCUHsApi.getInstance().syncEntityTree();
+                L.saveCCUState();
+		    },
+			()-> floorPlanActivity.getBuildingFloorsZones("")
+
+		);
 	}
 	
 	

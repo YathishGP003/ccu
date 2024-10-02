@@ -79,6 +79,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.Future;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.DAYS;
@@ -126,6 +127,7 @@ import a75f.io.renatus.util.SystemProfileUtil;
 import a75f.io.renatus.views.CustomCCUSwitch;
 import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
 import a75f.io.renatus.views.OaoArc;
+import a75f.io.util.ExecutorTask;
 import io.reactivex.rxjava3.disposables.Disposable;
 
 /**
@@ -428,15 +430,14 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	}
 
 	private void loadIntrinsicSchedule(){
-		Disposable intrinsicScheduleTask = TaskManager.INSTANCE.getTask();
+		Future intrinsicScheduleTask = TaskManager.INSTANCE.getTask();
 		CcuLog.i(L.TAG_CCU_UI, "SystemFragment.loadIntrinsicSchedule; intrinsicScheduleTask: "+intrinsicScheduleTask);
-		if (intrinsicScheduleTask != null && !intrinsicScheduleTask.isDisposed()) {
+		if (intrinsicScheduleTask != null && !intrinsicScheduleTask.isDone()) {
 			CcuLog.d(L.TAG_CCU_UI, "Task is already running, returning.");
 			return;
 		}
-		Disposable disposable = RxjavaUtil.executeBackgroundTask(this::buildIntrinsicSchedule, () -> { updateUI();
-		});
-		TaskManager.INSTANCE.setNewTask(disposable);
+		Future future = ExecutorTask.executeAsync(this::buildIntrinsicSchedule, () -> { updateUI();});
+		TaskManager.INSTANCE.setNewTask(future);
 	}
 
 	private void buildIntrinsicSchedule(){

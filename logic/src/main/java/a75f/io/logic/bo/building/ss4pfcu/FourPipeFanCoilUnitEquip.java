@@ -34,6 +34,7 @@ import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint;
 import a75f.io.logic.tuners.StandAloneTuners;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.util.RxTask;
+import a75f.io.util.ExecutorTask;
 
 public class FourPipeFanCoilUnitEquip  {
     int nodeAddr;
@@ -89,7 +90,7 @@ public class FourPipeFanCoilUnitEquip  {
 
         String equipRef = CCUHsApi.getInstance().addEquip(b.build());
     
-        RxTask.executeAsync(() -> StandAloneTuners.addEquipStandaloneTuners(CCUHsApi.getInstance(),
+        ExecutorTask.executeBackground(() -> StandAloneTuners.addEquipStandaloneTuners(CCUHsApi.getInstance(),
                                                                             siteRef,
                                                                             siteDis + "-4PFCU-" + nodeAddr,
                                                                             equipRef,

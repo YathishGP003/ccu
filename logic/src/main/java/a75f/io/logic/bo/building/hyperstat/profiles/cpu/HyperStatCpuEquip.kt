@@ -18,6 +18,7 @@ import a75f.io.logic.bo.haystack.device.HyperStatDevice
 import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint.Companion.addOTAStatusPoint
 import a75f.io.logic.tuners.HyperstatCpuTuners
 import a75f.io.logic.util.RxTask
+import a75f.io.util.ExecutorTask
 
 /**
  * Models CPU Equipment in its interface, calls through to datastore (haystack)
@@ -132,7 +133,7 @@ class HyperStatCpuEquip(val node: Short): HyperStatEquip() {
     private fun createHyperStatTunerPoints(
         equipRef: String, equipDis: String, roomRef: String, floorRef: String,
     ) {
-        RxTask.executeAsync {
+        ExecutorTask.executeBackground {
             HyperstatCpuTuners.addHyperstatModuleTuners(
                 CCUHsApi.getInstance(), basicInfo.siteRef,
                 equipRef, equipDis, basicInfo.timeZone, roomRef, floorRef

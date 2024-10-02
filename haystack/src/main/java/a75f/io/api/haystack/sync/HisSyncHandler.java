@@ -26,9 +26,8 @@ import a75f.io.api.haystack.HisItem;
 import a75f.io.api.haystack.HisItemCache;
 import a75f.io.api.haystack.Kind;
 import a75f.io.logger.CcuLog;
-import io.reactivex.rxjava3.core.Observable;
+import a75f.io.util.ExecutorTask;
 import io.reactivex.rxjava3.exceptions.OnErrorNotImplementedException;
-import io.reactivex.rxjava3.schedulers.Schedulers;
 
 public class HisSyncHandler
 {
@@ -102,13 +101,13 @@ public class HisSyncHandler
 
         if (ccuHsApi.getAppAliveMinutes() % cacheSyncFrequency == 0) {
             CcuLog.d(TAG,"syncDBHisData");
-            //Device sync is initiated concurrently on Rx thread
-            Observable.fromCallable(() -> {
-                        syncHistorizedDevicePoints(syncAllData, numberOfHisEntryPerPoint);
-                        return true;
-                    }).doOnError(throwable -> CcuLog.d(TAG, "Historized device points sync failed: " + throwable.getMessage()))
-                    .subscribeOn(Schedulers.io())
-                    .subscribe();
+            ExecutorTask.executeBackground(() -> {
+                try {
+                    syncHistorizedDevicePoints(syncAllData, numberOfHisEntryPerPoint);
+                } catch (Exception e) {
+                    CcuLog.d(TAG, "Historized device points sync failed: ", e);
+                }
+            });
 
             //Equip sync is still happening on the hisSync thread to avoid multiple sync sessions.
             syncHistorizedEquipPoints(syncAllData, numberOfHisEntryPerPoint);

@@ -67,6 +67,7 @@ import a75f.io.renatus.util.CCUUtils;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.util.RxjavaUtil;
 import a75f.io.usbserial.UsbSerialUtil;
+import a75f.io.util.ExecutorTask;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
@@ -234,20 +235,16 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
             input.setTextSize(20);
             alert.setView(input);
 
-            alert.setPositiveButton("Ok", (dialog, whichButton) -> new Thread() {
-                @Override
-                public void run() {
-                    try {
-                        fileSystemTools.writeLogCat(input.getText().toString() + ".txt");
-                    }
-                    catch (IOException | SecurityException ex) {
-                        ex.printStackTrace();
-                        getActivity().runOnUiThread(() -> showErrorDialog(
-                                "Unable to save log file: " + ex.getMessage()));
-                    }
+            alert.setPositiveButton("Ok", (dialog, whichButton) -> ExecutorTask.executeBackground( () -> {
+                try {
+                    fileSystemTools.writeLogCat(input.getText().toString() + ".txt");
                 }
-            }.start());
-
+                catch (IOException | SecurityException ex) {
+                    ex.printStackTrace();
+                    getActivity().runOnUiThread(() -> showErrorDialog(
+                            "Unable to save log file: " + ex.getMessage()));
+                }
+            }));
             alert.setNegativeButton("Cancel", (dialog, whichButton) -> {
                 // Canceled.
             });
@@ -255,14 +252,9 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
             alert.show();
         });
 
-        logUploadBtn.setOnClickListener( v -> new Thread() {
-            @Override
-            public void run() {
-                UploadLogs.instanceOf().saveCcuLogs();
-            }
-        }.start());
+        logUploadBtn.setOnClickListener( v -> ExecutorTask.executeBackground(() -> UploadLogs.instanceOf().saveCcuLogs()));
 
-        pullDataBtn.setOnClickListener(view14 -> disposable.add(RxjavaUtil.executeBackgroundTaskWithDisposable(
+        pullDataBtn.setOnClickListener(view14 -> ExecutorTask.executeAsync(
                 () -> ProgressDialogUtils.showProgressDialog(getActivity(),"Pulling building tuners to CCU"),
                 () -> {
                     Site site = CCUHsApi.getInstance().getSite();
@@ -271,15 +263,15 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
                     TunerEquip.INSTANCE.syncBuildingTuners(CCUHsApi.getInstance());
                 },
                 ProgressDialogUtils::hideProgressDialog
-        )));
+        ));
         
         deleteHis.setOnClickListener(view15 -> {
             CcuLog.d(L.TAG_CCU," deleteHis data ");
-            disposable.add(RxjavaUtil.executeBackgroundTaskWithDisposable(
+            ExecutorTask.executeAsync(
                     () -> ProgressDialogUtils.showProgressDialog(getActivity(),"Deleting history data"),
                     () -> CCUHsApi.getInstance().deleteHistory(),
                     ProgressDialogUtils::hideProgressDialog
-            ));
+            );
         });
 
         clearHisData.setOnClickListener(view15 -> {
@@ -569,30 +561,29 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
         }
 
         //TODO: This is a temporary way to delete building tuners, building equip and all building entities locally for Testing.
-        deleteBuildingTuners.setOnClickListener(deleteButton -> disposable.add(RxjavaUtil.executeBackgroundTaskWithDisposable(
+        deleteBuildingTuners.setOnClickListener(deleteButton -> ExecutorTask.executeAsync(
                 () -> ProgressDialogUtils.showProgressDialog(getActivity(),"Deleting building tuners"),
                 () -> deleteBuildingTuners(hayStack),
                 ProgressDialogUtils::hideProgressDialog
-        )));
+        ));
 
 
-        deleteBuildingEquipLocally.setOnClickListener(deleteButton -> disposable.add(RxjavaUtil.executeBackgroundTaskWithDisposable(
+        deleteBuildingEquipLocally.setOnClickListener(deleteButton -> ExecutorTask.executeAsync(
                 () -> ProgressDialogUtils.showProgressDialog(getActivity(),"Deleting building equip locally"),
                 () -> deleteBuildingEquipLocally(hayStack),
                 ProgressDialogUtils::hideProgressDialog
-        )));
+        ));
 
-        deleteBuildingEntitiesLocally.setOnClickListener(deleteButton -> disposable.add(RxjavaUtil.executeBackgroundTaskWithDisposable(
+        deleteBuildingEntitiesLocally.setOnClickListener(deleteButton -> ExecutorTask.executeAsync(
                 () -> ProgressDialogUtils.showProgressDialog(getActivity(),"Deleting building entities locally"),
                 () -> deleteBuildingEntitiesLocally(hayStack),
                 ProgressDialogUtils::hideProgressDialog
-        )));
-
-        duplicateBuildingEntitiesLocally.setOnClickListener(duplicateButton -> disposable.add(RxjavaUtil.executeBackgroundTaskWithDisposable(
+        ));
+        duplicateBuildingEntitiesLocally.setOnClickListener(duplicateButton -> ExecutorTask.executeAsync(
                 () -> ProgressDialogUtils.showProgressDialog(getActivity(), "Duplicating building entities locally"),
                 () -> new TunerEquipBuilder(hayStack).buildEquipAndPoints(hayStack.getSiteIdRef().toString()),
                 ProgressDialogUtils::hideProgressDialog
-        )));
+        ));
     }
     private boolean validateForReboot() {
         Calendar calendar = Calendar.getInstance();
@@ -638,7 +629,7 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
     }
 
     private void reconstructLocalBuildingPoints(CCUHsApi hayStack) {
-        disposable.add(RxjavaUtil.executeBackgroundTaskWithDisposable(
+        ExecutorTask.executeAsync(
                 () -> ProgressDialogUtils.showProgressDialog(getActivity(),"Recreating building points"),
                 () -> {
                     String formattedDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z").format(new Date(Calendar.getInstance().getTimeInMillis()));
@@ -651,7 +642,7 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
                     updateDevSettingPreference("btn1_recreate_building_points_locally", (recreateBuildingPointsOperationSuccess?"success_":"failed_")+formattedDate);
                 },
                 ProgressDialogUtils::hideProgressDialog
-        ));
+        );
     }
 
     private void reconstructBuildingEquipAndPointsLocally(CCUHsApi hayStack, boolean useRemoteEquip) {
@@ -661,7 +652,7 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
     }
 
     private void validateAndStartBuildingPointsSyncFromCCUToCloud(CCUHsApi hayStack) {
-        disposable.add(RxjavaUtil.executeBackgroundTaskWithDisposable(
+        ExecutorTask.executeAsync(
                 () -> ProgressDialogUtils.showProgressDialog(getActivity(),"Validating and syncing building tuners to cloud"),
                 () -> {
                    String formattedDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z").format(new Date(Calendar.getInstance().getTimeInMillis()));
@@ -695,7 +686,7 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
                     }
                 },
                 ProgressDialogUtils::hideProgressDialog
-        ));
+        );
     }
 
     private boolean executeBuildingPointsSyncFromCCUToCloud(CCUHsApi hayStack) {

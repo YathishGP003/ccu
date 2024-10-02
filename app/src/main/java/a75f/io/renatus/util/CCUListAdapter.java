@@ -29,6 +29,7 @@ import a75f.io.renatus.BuildConfig;
 import a75f.io.renatus.R;
 import a75f.io.renatus.registration.CCUSelect;
 import a75f.io.renatus.registration.UpdateCCUFragment;
+import a75f.io.util.ExecutorTask;
 
 public class CCUListAdapter extends RecyclerView.Adapter<CCUListAdapter.CCUView> {
 
@@ -98,7 +99,7 @@ public class CCUListAdapter extends RecyclerView.Adapter<CCUListAdapter.CCUView>
     }
 
     public void checkIsCCUHasRecommendedVersion(CCU ccu){
-        RxjavaUtil.executeBackgroundTaskWithDisposable(
+        ExecutorTask.executeAsync(
                 ()-> ProgressDialogUtils.showProgressDialog(context, "Checking for File size"),
                 ()-> {
                     try {

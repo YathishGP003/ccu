@@ -16,8 +16,6 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
-import io.reactivex.rxjava3.core.Observable;
-import io.reactivex.rxjava3.schedulers.Schedulers;
 
 
 class TunerUpdateHandler {
@@ -74,19 +72,17 @@ class TunerUpdateHandler {
     
         CcuLog.i(L.TAG_CCU_PUBNUB,
                  "Propagate tuners for point : "+tunerPoint.getDisplayName()+" to "+equipTuners.size()+" equips : query "+tunerQuery);
-        Observable.fromIterable(equipTuners)
-                  .subscribeOn(Schedulers.io())
-                  .map(point -> point.get(Tags.ID).toString())
-                  .subscribe(id -> writePointFromJson(id, msgObject, hayStack, false));
+        equipTuners.stream()
+                   .map( point -> point.get(Tags.ID).toString())
+                   .forEach( id -> writePointFromJson(id, msgObject, hayStack, false));
     }
 
     private static void propagateTunerByDomainName(String domainName, JsonObject msgObject, CCUHsApi hayStack) {
         ArrayList<HashMap<Object, Object>> equipTuners = hayStack.readAllEntities("tuner and not default and domainName == \""+domainName+"\"");
         CcuLog.e(L.TAG_CCU_PUBNUB,"Tuner count for propagation "+equipTuners.size());
-        Observable.fromIterable(equipTuners)
-                .subscribeOn(Schedulers.io())
-                .map(point -> point.get(Tags.ID).toString())
-                .subscribe(id -> writePointFromJson(id, msgObject, hayStack, false));
+        equipTuners.stream()
+                   .map(point -> point.get(Tags.ID).toString())
+                   .forEach(id -> writePointFromJson(id, msgObject, hayStack, false));
     }
     
     private static void writePointFromJson(String id, JsonObject msgObject, CCUHsApi hayStack,

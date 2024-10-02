@@ -37,6 +37,7 @@ import a75f.io.logic.jobs.StandaloneScheduler;
 import a75f.io.logic.tuners.StandAloneTuners;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.util.RxTask;
+import a75f.io.util.ExecutorTask;
 
 public class ConventionalUnitLogicalMap {
 
@@ -88,7 +89,7 @@ public class ConventionalUnitLogicalMap {
             profile = "cpu";
         String equipRef = CCUHsApi.getInstance().addEquip(b.build());
     
-        RxTask.executeAsync(() -> StandAloneTuners.addEquipStandaloneTuners(CCUHsApi.getInstance(),
+        ExecutorTask.executeBackground(() -> StandAloneTuners.addEquipStandaloneTuners(CCUHsApi.getInstance(),
                                                                             siteRef,
                                                                             siteDis + "-CPU-" + nodeAddr,
                                                                             equipRef,

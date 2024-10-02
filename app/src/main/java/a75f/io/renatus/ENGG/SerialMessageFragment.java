@@ -59,6 +59,7 @@ import a75f.io.usbserial.SerialAction;
 import a75f.io.usbserial.SerialEvent;
 import a75f.io.usbserial.UsbModbusService;
 import a75f.io.usbserial.UsbService;
+import a75f.io.util.ExecutorTask;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -326,7 +327,7 @@ public class SerialMessageFragment extends DialogFragment {
             fillMessageView(msgSpinner.getSelectedItemPosition());
             
             if (rtuMessageRequest != null) {
-                new Thread(() -> usbService.modbusWrite(rtuMessageRequest.getMessageData())).start();
+                ExecutorTask.executeBackground(() -> usbService.modbusWrite(rtuMessageRequest.getMessageData()));
                 Toast.makeText(this.getActivity(), "Message Sent", Toast.LENGTH_SHORT).show();
             } else {
                 Toast.makeText(this.getActivity(), "Invalid Message", Toast.LENGTH_SHORT).show();

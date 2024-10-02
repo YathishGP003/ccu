@@ -25,6 +25,7 @@ import a75f.io.logic.bo.haystack.device.HyperStatDevice
 import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint.Companion.addOTAStatusPoint
 import a75f.io.logic.tuners.HyperStatHpuTuners
 import a75f.io.logic.util.RxTask
+import a75f.io.util.ExecutorTask
 
 /**
  * Created by Manjunath K on 02-01-2023.
@@ -130,7 +131,7 @@ class HyperStatHpuEquip(val node: Short): HyperStatEquip() {
     private fun createHyperStatTunerPoints(
         equipRef: String, equipDis: String, roomRef: String, floorRef: String,
     ) {
-        RxTask.executeAsync {
+        ExecutorTask.executeBackground {
             HyperStatHpuTuners.addHyperStatModuleTuners(
                 CCUHsApi.getInstance(), basicInfo.siteRef,
                 equipRef, equipDis, basicInfo.timeZone, roomRef, floorRef

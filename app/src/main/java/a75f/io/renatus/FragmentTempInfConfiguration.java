@@ -3,7 +3,6 @@ package a75f.io.renatus;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
 import android.view.LayoutInflater;
@@ -33,6 +32,7 @@ import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
+import a75f.io.util.ExecutorTask;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -171,34 +171,24 @@ public class FragmentTempInfConfiguration extends BaseDialogFragment
         setButton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
-            
-                new AsyncTask<String, Void, Void>() {
-                
-                    @Override
-                    protected void onPreExecute() {
-                        setButton.setEnabled(false);
-                        ProgressDialogUtils.showProgressDialog(getActivity(),"Saving CCU As a Zone Configuration");
-                        super.onPreExecute();
-                    }
-                
-                    @Override
-                    protected Void doInBackground(final String... params) {
-                        setupCcuAsZoneProfile();
-                        L.saveCCUState();
-                        DesiredTempDisplayMode.setModeType(zoneRef, CCUHsApi.getInstance());
-                        return null;
-                    }
-                
-                    @Override
-                    protected void onPostExecute( final Void result ) {
-                        ProgressDialogUtils.hideProgressDialog();
-                        //FragmentTempInfConfiguration.this.dismissProgressDialog();
-                        setRetainInstance(true);
-                        FragmentTempInfConfiguration.this.closeAllBaseDialogFragments();
-                        getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
-                    }
-                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
-            
+
+                ExecutorTask.executeAsync(
+                        () -> {
+                            setButton.setEnabled(false);
+                            ProgressDialogUtils.showProgressDialog(getActivity(),"Saving CCU As a Zone Configuration");
+                        },
+                        () -> {
+                            setupCcuAsZoneProfile();
+                            L.saveCCUState();
+                            DesiredTempDisplayMode.setModeType(zoneRef, CCUHsApi.getInstance());
+                        },
+                        () -> {
+                            ProgressDialogUtils.hideProgressDialog();
+                            setRetainInstance(true);
+                            FragmentTempInfConfiguration.this.closeAllBaseDialogFragments();
+                            getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
+                        }
+                );
             }
         });
     }

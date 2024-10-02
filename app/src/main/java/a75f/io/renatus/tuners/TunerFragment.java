@@ -71,6 +71,7 @@ import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.RxjavaUtil;
 import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
+import a75f.io.util.ExecutorTask;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 
 
@@ -676,10 +677,10 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
         TunerFragment tunerFragment = weakReference.get();
 
         if (tunerFragment != null && tunerFragment.isAdded()) {
-            disposable.add(RxjavaUtil.executeBackgroundTaskWithDisposable(()->{},
+            ExecutorTask.executeAsync(()->{},
                     () -> processData(id, level, val, reason),
                     TunerUtil::refreshEquipTuners // after update is processed, notify any affected equips to refresh cached tuners next time their algo runs
-            ));
+            );
         }
     }
 

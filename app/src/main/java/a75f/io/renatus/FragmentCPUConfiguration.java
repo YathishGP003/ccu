@@ -4,7 +4,6 @@ import static a75f.io.device.bacnet.BacnetUtilKt.addBacnetTags;
 
 import android.app.Dialog;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
@@ -47,6 +46,7 @@ import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.views.CustomCCUSwitch;
+import a75f.io.util.ExecutorTask;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnCheckedChanged;
@@ -290,35 +290,27 @@ public class FragmentCPUConfiguration extends BaseDialogFragment implements Comp
         setButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-            
-                new AsyncTask<String, Void, Void>() {
-                
-                    @Override
-                    protected void onPreExecute() {
-                        setButton.setEnabled(false);
-                        ProgressDialogUtils.showProgressDialog(getActivity(),"Saving CPU Configuration");
-                        super.onPreExecute();
-                    }
-                    @Override
-                    protected Void doInBackground(final String... params) {
-                        CCUHsApi.getInstance().resetCcuReady();
-                        setupCPUZoneProfile();
-                        L.saveCCUState();
-                        CCUHsApi.getInstance().setCcuReady();
-                        DesiredTempDisplayMode.setModeType(roomRef, CCUHsApi.getInstance());
-                        return null;
-                    }
-                
-                    @Override
-                    protected void onPostExecute(final Void result) {
-                        addBacnetTags(requireContext(), floorRef, roomRef);
-                        ProgressDialogUtils.hideProgressDialog();
-                        FragmentCPUConfiguration.this.closeAllBaseDialogFragments();
-                        getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
-                        LSerial.getInstance().sendSeedMessage(true,false, mSmartNodeAddress, roomRef,floorRef);
-                    }
-                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
-            
+
+                ExecutorTask.executeAsync(
+                        () -> {
+                            setButton.setEnabled(false);
+                            ProgressDialogUtils.showProgressDialog(getActivity(),"Saving CPU Configuration");
+                        },
+                        () -> {
+                            CCUHsApi.getInstance().resetCcuReady();
+                            setupCPUZoneProfile();
+                            L.saveCCUState();
+                            CCUHsApi.getInstance().setCcuReady();
+                            DesiredTempDisplayMode.setModeType(roomRef, CCUHsApi.getInstance());
+                        },
+                        () -> {
+                            addBacnetTags(requireContext(), floorRef, roomRef);
+                            ProgressDialogUtils.hideProgressDialog();
+                            FragmentCPUConfiguration.this.closeAllBaseDialogFragments();
+                            getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
+                            LSerial.getInstance().sendSeedMessage(true,false, mSmartNodeAddress, roomRef,floorRef);
+                        }
+                );
             }
         });
         

@@ -192,11 +192,11 @@ android {
         jvmTarget = JavaVersion.VERSION_1_8.toString()
     }
 }
-tasks.whenTaskAdded { task ->
+/*tasks.whenTaskAdded { task ->
     if (task.name == 'assembleDev_qa') {
         task.dependsOn 'testDev_qaUnitTest'
     }
-}
+}*/
 dependencies {
     implementation project(path: ':modbusbox')
     implementation project(path: ':domain')
@@ -244,6 +244,8 @@ dependencies {
 
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.0"
+
+    implementation project(':util')
 }
 repositories {
     mavenCentral()

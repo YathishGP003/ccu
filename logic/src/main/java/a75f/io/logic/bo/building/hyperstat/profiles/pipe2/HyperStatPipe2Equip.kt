@@ -21,6 +21,7 @@ import a75f.io.logic.bo.haystack.device.HyperStatDevice
 import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint.Companion.addOTAStatusPoint
 import a75f.io.logic.tuners.HyperStat2PipeTuners
 import a75f.io.logic.util.RxTask
+import a75f.io.util.ExecutorTask
 
 /**
  * Created by Manjunath K on 01-08-2022.
@@ -134,7 +135,7 @@ class HyperStatPipe2Equip(val node: Short): HyperStatEquip()  {
     private fun createHyperstatTunerPoints(
         equipRef: String, equipDis: String, roomRef: String, floorRef: String,
     ) {
-        RxTask.executeAsync {
+        ExecutorTask.executeBackground {
             HyperStat2PipeTuners.addHyperstatModuleTuners(
                 CCUHsApi.getInstance(), basicInfo.siteRef,
                 equipRef, equipDis, basicInfo.timeZone, roomRef, floorRef

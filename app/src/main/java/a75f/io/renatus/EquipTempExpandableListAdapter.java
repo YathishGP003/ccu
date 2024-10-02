@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Typeface;
-import android.os.AsyncTask;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,6 +34,7 @@ import a75f.io.logic.jobs.StandaloneScheduler;
 import a75f.io.logic.jobs.SystemScheduleUtil;
 import a75f.io.renatus.schedules.ScheduleGroupFragment;
 import a75f.io.renatus.schedules.ScheduleUtil;
+import a75f.io.util.ExecutorTask;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
@@ -448,20 +448,11 @@ public class EquipTempExpandableListAdapter extends BaseExpandableListAdapter
 
 
     private void setScheduleType(String id, ScheduleType schedule) {
-        new AsyncTask<String, Void, Void>() {
-            @Override
-            protected Void doInBackground( final String ... params ) {
-                CCUHsApi.getInstance().writeDefaultValById(id, (double)schedule.ordinal());
-                CCUHsApi.getInstance().writeHisValById(id, (double)schedule.ordinal());
-                SystemScheduleUtil.handleScheduleTypeUpdate(new Point.Builder().setHashMap(CCUHsApi.getInstance().readMapById(id)).build());
-                return null;
-            }
-            
-            @Override
-            protected void onPostExecute( final Void result ) {
-                // continue what you are doing...
-            }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
+        ExecutorTask.executeBackground(() -> {
+            CCUHsApi.getInstance().writeDefaultValById(id, (double) schedule.ordinal());
+            CCUHsApi.getInstance().writeHisValById(id, (double) schedule.ordinal());
+            SystemScheduleUtil.handleScheduleTypeUpdate(new Point.Builder().setHashMap(CCUHsApi.getInstance().readMapById(id)).build());
+        });
     }
     
 }

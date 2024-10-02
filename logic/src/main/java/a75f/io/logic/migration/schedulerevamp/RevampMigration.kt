@@ -6,6 +6,7 @@ import a75f.io.api.haystack.util.*
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.util.RxjavaUtil
+import a75f.io.util.ExecutorTask
 import org.apache.commons.lang3.StringUtils
 import org.projecthaystack.HDictBuilder
 import org.projecthaystack.HGridBuilder
@@ -57,7 +58,7 @@ fun handleMessage(){
         CCUHsApi.getInstance().updateSchedulable(buildingLimitGrid, false)
 
 
-        RxjavaUtil.executeBackgroundTask({ importSchedules() },
+        ExecutorTask.executeAsync({ importSchedules() },
             { doPointWriteForSchedulable() },
             { setDiagMigrationVal() })
     }

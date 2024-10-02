@@ -65,6 +65,7 @@ import a75f.io.renatus.ENGG.AppInstaller;
 import a75f.io.renatus.RenatusApp;
 import a75f.io.renatus.UtilityApplication;
 import a75f.io.renatus.util.CCUUtils;
+import a75f.io.util.ExecutorTask;
 
 public class RemoteCommandHandlerUtil {
     private static final String REMOUNT_RW = "mount -o rw,remount /system";
@@ -102,13 +103,10 @@ public class RemoteCommandHandlerUtil {
                 RenatusApp.rebootTablet();
                 break;
             case SAVE_CCU_LOGS:
-                new Thread() {
-                    @Override
-                    public void run() {
-                        saveImportantDataBeforeSaveLogs();
-                        UploadLogs.instanceOf().saveCcuLogs();
-                    }
-                }.start();
+                ExecutorTask.executeBackground( () -> {
+                    saveImportantDataBeforeSaveLogs();
+                    UploadLogs.instanceOf().saveCcuLogs();
+                });
                 break;
             case RESET_PASSWORD:
                 CCUUtils.resetPasswords(RenatusApp.getAppContext());
@@ -325,7 +323,7 @@ public class RemoteCommandHandlerUtil {
                         long downloadId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, 0);
                         if (downloadId == AppInstaller.getHandle().getCCUAppDownloadId()) {
                             if (CCUHsApi.getInstance().isCCURegistered()) {
-                                RxTask.executeAsync(() -> UtilityApplication.getMessagingAckJob().doMessageAck());
+                                ExecutorTask.executeBackground(() -> UtilityApplication.getMessagingAckJob().doMessageAck());
                             }
                             if (AppInstaller.getHandle().getDownloadedFileVersion(downloadId) > 1) {
                                 AppInstaller.getHandle().install(null, false, true, true);

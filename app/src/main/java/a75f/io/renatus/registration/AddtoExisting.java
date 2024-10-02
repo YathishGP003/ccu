@@ -2,10 +2,8 @@ package a75f.io.renatus.registration;
 
 import static a75f.io.logic.bo.util.CCUUtils.isRecommendedVersionCheckIsNotFalse;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -35,6 +33,8 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import a75f.io.api.haystack.BuildConfig;
 import a75f.io.api.haystack.CCUHsApi;
@@ -53,6 +53,7 @@ import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.util.retrofit.ApiClient;
 import a75f.io.renatus.util.retrofit.ApiInterface;
+import a75f.io.util.ExecutorTask;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Response;
@@ -432,49 +433,34 @@ public class AddtoExisting extends Fragment {
     }
 
     public void loadExistingSite(final String siteId) {
-        @SuppressLint("StaticFieldLeak")
-        AsyncTask<Void, Void, String> getHSClientTask = new AsyncTask<Void, Void, String>() {
 
-            @Override
-            protected void onPreExecute() {
-                super.onPreExecute();
-                ProgressDialogUtils.showProgressDialog(getActivity(), "Loading Site...");
-            }
+        AtomicReference<String> siteIdResponse = new AtomicReference<>();
 
-            @Override
-            protected String doInBackground(Void... voids) {
-                String siteIdResponse = null;
-
-                if (StringUtils.isNotBlank(siteId)) {
-                    String httpResponse = HttpUtil.executeJson(
-                            CCUHsApi.getInstance().getAuthenticationUrl() + "sites/" + siteId,
-                            "", BuildConfig.CARETAKER_API_KEY,
-                            true, HttpConstants.HTTP_METHOD_GET
-                    );
-                    if (StringUtils.isNotBlank(httpResponse)) {
-                        siteIdResponse = getSiteIdFromJson(httpResponse);
+        ExecutorTask.executeAsync(
+                () -> ProgressDialogUtils.showProgressDialog(getActivity(), "Loading Site..."),
+                () -> {
+                    if (StringUtils.isNotBlank(siteId)) {
+                        String httpResponse = HttpUtil.executeJson(
+                                CCUHsApi.getInstance().getAuthenticationUrl() + "sites/" + siteId,
+                                "", BuildConfig.CARETAKER_API_KEY,
+                                true, HttpConstants.HTTP_METHOD_GET
+                        );
+                        if (StringUtils.isNotBlank(httpResponse)) {
+                            siteIdResponse.set(getSiteIdFromJson(httpResponse));
+                        }
                     }
-                } else {
-                    Toast.makeText(getActivity(), "Unable to load site provided. Please try again or provide a different site ID.", Toast.LENGTH_LONG).show();
+                },
+                () -> {
+                    ProgressDialogUtils.hideProgressDialog();
+
+                    if (StringUtils.isNotBlank(siteIdResponse.get())) {
+                        Toast.makeText(getActivity(), "Site found", Toast.LENGTH_LONG).show();
+                        showSiteDialog(siteIdResponse.get());
+                    } else {
+                        Toast.makeText(getActivity(), "Site not found", Toast.LENGTH_LONG).show();
+                    }
                 }
-
-                return siteIdResponse;
-            }
-
-            @Override
-            protected void onPostExecute (String siteId){
-                super.onPostExecute(siteId);
-                ProgressDialogUtils.hideProgressDialog();
-
-                if (StringUtils.isNotBlank(siteId)) {
-                    Toast.makeText(getActivity(), "Site found", Toast.LENGTH_LONG).show();
-                    showSiteDialog(siteId);
-                } else {
-                    Toast.makeText(getActivity(), "Site not found", Toast.LENGTH_LONG).show();
-                }
-            }
-        };
-        getHSClientTask.execute();
+        );
     }
 
     // TODO Matt Rudd - This is duplicated in RegisterGatherDetails, but most of this class is duplicated
@@ -540,50 +526,34 @@ public class AddtoExisting extends Fragment {
     private void saveExistingSite(String siteId) {
 
         CcuLog.d("ADD_CCU_EXISTING","Existing site ID used to register for existing site is: " + siteId);
-
-        @SuppressLint("StaticFieldLeak")
-        AsyncTask<String, Void, Boolean> syncSiteTask = new AsyncTask<String, Void, Boolean>() {
-
-            @Override
-            protected void onPreExecute() {
-                super.onPreExecute();
-                ProgressDialogUtils.showProgressDialog(requireContext(), "Saving site...This may take upto 5~10 mins");
-            }
-
-            @Override
-            protected Boolean doInBackground(String... strings) {
-                String siteId = strings[0];
-                boolean retVal = false;
-                if (StringUtils.isNotBlank(siteId)) {
-                    retVal = CCUHsApi.getInstance().syncExistingSite(siteId);
-                    TunerEquip.INSTANCE.initialize(CCUHsApi.getInstance(), false);
-                    Globals.getInstance().setSiteAlreadyCreated(true);
-                    CCUHsApi.getInstance().setPrimaryCcu(false);
-                    CCUHsApi.getInstance().updateLocalTimeZone();
-                }
-                return retVal;
-            }
-
-            @Override
-            protected void onPostExecute(Boolean success) {
-                super.onPostExecute(success);
-                ProgressDialogUtils.hideProgressDialog();
-
-                if (success) {
-                    if(getActivity() != null) {
-                        Toast.makeText(getActivity(), "Synchronizing the site with the 75F Cloud was successful.", Toast.LENGTH_LONG).show();
+        AtomicBoolean siteSyncStatus = new AtomicBoolean(false);
+        ExecutorTask.executeAsync(
+                () -> ProgressDialogUtils.showProgressDialog(requireContext(), "Saving site...This may take upto 5~10 mins"),
+                () -> {
+                    if (StringUtils.isNotBlank(siteId)) {
+                        siteSyncStatus.set(CCUHsApi.getInstance().syncExistingSite(siteId));
+                        TunerEquip.INSTANCE.initialize(CCUHsApi.getInstance(), false);
+                        Globals.getInstance().setSiteAlreadyCreated(true);
+                        CCUHsApi.getInstance().setPrimaryCcu(false);
+                        CCUHsApi.getInstance().updateLocalTimeZone();
                     }
-                    navigateToCCUScreen();
-                } else {
-                    CcuLog.d(L.TAG_CCU_ADD_EXISTING, "Synchronizing the site with the 75F Cloud was not successful. Please try again or try choosing a different site for registering this CCU.");
-                    if(getActivity() != null) {
-                        Toast.makeText(getActivity(), "Synchronizing the site with the 75F Cloud was not successful. Please try again or try choosing a different site for registering this CCU.", Toast.LENGTH_LONG).show();
+                },
+                () -> {
+                    ProgressDialogUtils.hideProgressDialog();
+                    if (siteSyncStatus.get()) {
+                        if(getActivity() != null) {
+                            Toast.makeText(getActivity(), "Synchronizing the site with the 75F Cloud was successful.", Toast.LENGTH_LONG).show();
+                        }
+                        navigateToCCUScreen();
+                    } else {
+                        CcuLog.d(L.TAG_CCU_ADD_EXISTING, "Synchronizing the site with the 75F Cloud was not successful. Please try again or try choosing a different site for registering this CCU.");
+                        if(getActivity() != null) {
+                            Toast.makeText(getActivity(), "Synchronizing the site with the 75F Cloud was not successful. Please try again or try choosing a different site for registering this CCU.", Toast.LENGTH_LONG).show();
+                        }
                     }
-                }
-            }
-        };
 
-        syncSiteTask.execute(siteId);
+                }
+        );
     }
 
     private void navigateToCCUScreen() {

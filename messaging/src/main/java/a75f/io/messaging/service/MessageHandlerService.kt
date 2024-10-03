@@ -86,6 +86,7 @@ class MessageHandlerService @Inject constructor(private val appContext: Context,
             CcuLog.i(L.TAG_CCU_MESSAGING, "Handler Found for ${message.command}")
             try {
                 if (shouldUpdateMessageBeforeHandling(message)) {
+                    CcuLog.d(L.TAG_CCU_MESSAGING, "updateMessageHandled $message")
                     updateMessageHandled(message, context)
                 }
                 messageHandler.handleMessage(messageToJson(message), context)
@@ -137,10 +138,12 @@ class MessageHandlerService @Inject constructor(private val appContext: Context,
      * Only the commands which can result in an app closure are considered here.
      */
     private fun shouldUpdateMessageBeforeHandling(message : Message) : Boolean {
+        CcuLog.d(L.TAG_CCU_MESSAGING, "shouldUpdateMessageBeforeHandling $message")
         return message.remoteCmdType != null &&
             (message.remoteCmdType == RemoteCommandUpdateHandler.RESTART_CCU
                     || message.remoteCmdType == RemoteCommandUpdateHandler.RESTART_TABLET
-                    || message.command == AutoCommissioningStateHandler.CMD)
+                    || message.command == AutoCommissioningStateHandler.CMD
+                    || message.command == RemoteCommandUpdateHandler.OTA_UPDATE_HOME_APP)
     }
 
     private fun isUpdateCcuCommand(message: Message) : Boolean {

@@ -44,6 +44,7 @@ import a75f.io.api.haystack.HisItem;
 import a75f.io.api.haystack.Queries;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
+import a75f.io.data.message.MessageDbUtilKt;
 import a75f.io.device.mesh.LSerial;
 import a75f.io.device.mesh.LSmartNode;
 import a75f.io.device.mesh.LSmartStat;
@@ -121,7 +122,15 @@ public class RemoteCommandHandlerUtil {
                 break;
             case UPDATE_CCU:
                 OtaStatusDiagPoint.Companion.updateCCUOtaStatus(OtaStatus.OTA_REQUEST_RECEIVED);
-                updateCCU(id, null, null);
+                String curVersion = CCUHsApi.getInstance().readDefaultStrVal("point and diag and app and version");
+                String[] versionPart = id.split("_");
+                String downloadApkVersion = versionPart[versionPart.length-1].replace(".apk","");
+                if(curVersion.equals(downloadApkVersion)) {
+                    CcuLog.d(TAG_CCU_DOWNLOAD, "Update command ignored for same version download; Current Version=" + curVersion + ", Download Version=" + downloadApkVersion);
+                    MessageDbUtilKt.updateAllRemoteCommandsHandled(Globals.getInstance().getApplicationContext(), "update_ccu");
+                } else {
+                    updateCCU(id, null, null);
+                }
                 break;
             case RESTART_MODULE:
 

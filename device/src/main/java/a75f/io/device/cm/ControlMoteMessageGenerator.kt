@@ -362,7 +362,7 @@ fun addPIPressureLoopConfiguration(builder: Builder) {
             piLoopConfigBuilder.apply {
                 enable = true
                 proportionalConstant = (systemEquip.dabDuctStaticProportionalKFactor.readPriorityVal() * SERIAL_COMM_SCALE).toInt() * 10
-                integralConstant = (systemEquip.dabDuctStaticIntegralKFactor.readPriorityVal() * SERIAL_COMM_SCALE).toInt() * 10
+                integralConstant = (systemEquip.dabDuctStaticPressureIntegralKFactor.readPriorityVal() * SERIAL_COMM_SCALE).toInt() * 10
                 proportionalTemperatureRange = systemEquip.dabDuctStaticPressureProportionalRange.readPriorityVal().toInt() * 10
                 integrationTime = systemEquip.dabDuctStaticPressureIntegralTime.readPriorityVal().toInt()
             }

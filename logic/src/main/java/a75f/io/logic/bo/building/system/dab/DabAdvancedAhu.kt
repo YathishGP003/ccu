@@ -174,7 +174,7 @@ class DabAdvancedAhu : DabSystemProfile() {
         }
         staticPressureFanPILoop.apply {
             setProportionalGain(systemEquip.dabDuctStaticProportionalKFactor.readPriorityVal())
-            setIntegralGain(systemEquip.dabDuctStaticIntegralKFactor.readPriorityVal())
+            setIntegralGain(systemEquip.dabDuctStaticPressureIntegralKFactor.readPriorityVal())
             proportionalSpread = systemEquip.dabDuctStaticPressureProportionalRange.readPriorityVal()
             integralMaxTimeout = systemEquip.dabDuctStaticPressureIntegralTime.readPriorityVal().toInt()
         }

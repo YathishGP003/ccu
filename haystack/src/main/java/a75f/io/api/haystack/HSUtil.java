@@ -325,6 +325,19 @@ public class HSUtil {
                 && pointEntity.containsKey("ie");
     }
 
+    public static boolean isAdvanceAhuV2(String id, CCUHsApi hayStack) {
+        HashMap<Object, Object> pointEntity = hayStack.readMapById(id);
+        HashMap equip = hayStack.readMapById(pointEntity.get("equipRef").toString());
+        if (!equip.isEmpty()) {
+            String profile = equip.get("profile").toString();
+            return profile.equalsIgnoreCase("vavAdvancedHybridAhuV2")
+                    || profile.equalsIgnoreCase("dabAdvancedHybridAhuV2")
+                    || profile.equalsIgnoreCase("vavAdvancedHybridAhuV2_connectModule")
+                    || profile.equalsIgnoreCase("dabAdvancedHybridAhuV2_connectModule");
+        }
+        return false;
+    }
+
     public static boolean isSSEConfig(String id, CCUHsApi hayStack) {
         HashMap<Object, Object> pointEntity = hayStack.readMapById(id);
         return pointEntity.containsKey(Tags.SSE)

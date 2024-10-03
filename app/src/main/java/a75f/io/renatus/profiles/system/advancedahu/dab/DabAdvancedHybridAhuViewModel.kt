@@ -47,7 +47,7 @@ class DabAdvancedHybridAhuViewModel : AdvancedHybridAhuViewModel() {
 
     override fun saveConfiguration() {
         ((viewState.value) as DabAdvancedAhuState).fromStateToProfileConfig(profileConfiguration as DabAdvancedHybridAhuConfig)
-        val validConfig = isValidateConfiguration(this@DabAdvancedHybridAhuViewModel)
+        val validConfig = isValidateConfiguration(profileConfiguration)
         if (!validConfig.first) {
             showErrorDialog(context,validConfig.second)
             viewState.value.isSaveRequired = true

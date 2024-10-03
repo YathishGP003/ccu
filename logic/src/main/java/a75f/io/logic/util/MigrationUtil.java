@@ -230,42 +230,42 @@ public class MigrationUtil {
     private static void findMissingSchedulableLimits(ArrayList<HashMap<Object,
             Object>> scheduleAbleLimits, String roomRef,String floorRef, CCUHsApi ccuHsApi) {
         CcuLog.i("CCU_SCHEDULABLE","findMissingSchedulableLimits roomRef "+roomRef);
-        HashMap<Object, Object> equipMap = ccuHsApi.readEntity(
-                "equip and roomRef == \""+ roomRef +"\"");
+        HashMap<Object, Object> roomMap = ccuHsApi.readMapById(roomRef);
+        String disName = getSchedulablePrefixDis(roomMap, ccuHsApi);
         if (notContainsSchedulableLimits(scheduleAbleLimits, "heating", "deadband")) {
             CcuLog.i("CCU_SCHEDULABLE","create Heating deadband");
-            createSchedulableDeadband(roomRef, ccuHsApi, equipMap, "heating",floorRef);
+            createSchedulableDeadband(roomRef, ccuHsApi, roomMap, "heating",floorRef, disName);
         }
         if (notContainsSchedulableLimits(scheduleAbleLimits, "cooling", "deadband")) {
             CcuLog.i("CCU_SCHEDULABLE","create cooling deadband");
-            createSchedulableDeadband(roomRef, ccuHsApi, equipMap, "cooling",floorRef);
+            createSchedulableDeadband(roomRef, ccuHsApi, roomMap, "cooling",floorRef, disName);
         }
         if (notContainsSchedulableLimits(scheduleAbleLimits, "unoccupied", "setback")) {
             CcuLog.i("CCU_SCHEDULABLE","create unoccupied setback");
-            createUnOccupiedSetBackPoint(roomRef, ccuHsApi, equipMap,floorRef);
+            createUnOccupiedSetBackPoint(roomRef, ccuHsApi, roomMap,floorRef, disName);
         }
         if (notContainsSchedulableLimits(scheduleAbleLimits, "heating", "min")) {
             CcuLog.i("CCU_SCHEDULABLE","create Heating min");
-            createHeatingLimitMinPoint(roomRef, ccuHsApi, equipMap,floorRef);
+            createHeatingLimitMinPoint(roomRef, ccuHsApi, roomMap,floorRef,disName);
         }
         if (notContainsSchedulableLimits(scheduleAbleLimits, "heating", "max")) {
             CcuLog.i("CCU_SCHEDULABLE","create Heating max");
-            createHeatingLimitMaxPoint(roomRef, ccuHsApi, equipMap,floorRef);
+            createHeatingLimitMaxPoint(roomRef, ccuHsApi, roomMap,floorRef,disName);
         }
         if (notContainsSchedulableLimits(scheduleAbleLimits, "cooling", "max")) {
             CcuLog.i("CCU_SCHEDULABLE","create cooling max");
-            createCoolingLimitMaxPoint(roomRef, ccuHsApi, equipMap,floorRef);
+            createCoolingLimitMaxPoint(roomRef, ccuHsApi, roomMap,floorRef,disName);
         }
         if (notContainsSchedulableLimits(scheduleAbleLimits, "cooling", "min")) {
             CcuLog.i("CCU_SCHEDULABLE","create cooling min");
-            createCoolingLimitMinPoint(roomRef, ccuHsApi, equipMap,floorRef);
+            createCoolingLimitMinPoint(roomRef, ccuHsApi, roomMap,floorRef,disName);
         }
     }
-    private static void createCoolingLimitMaxPoint(String roomRef, CCUHsApi ccuHsApi, HashMap<Object, Object> equipMap,
-                                                   String floorRef) {
+    private static void createCoolingLimitMaxPoint(String roomRef, CCUHsApi ccuHsApi, HashMap<Object, Object> roomMap,
+                                                   String floorRef, String prefixDis) {
         Point coolingUserLimitMax = new Point.Builder()
-                .setDisplayName(equipMap.get("dis").toString()+"-coolingUserLimitMax")
-                .setSiteRef(equipMap.get("siteRef").toString())
+                .setDisplayName(prefixDis +"-coolingUserLimitMax")
+                .setSiteRef(roomMap.get("siteRef").toString())
                 .setHisInterpolate("cov")
                 .addMarker("schedulable").addMarker("writable").addMarker("his")
                 .addMarker("cooling").addMarker("user").addMarker("limit").addMarker("max").addMarker("sp")
@@ -279,16 +279,18 @@ public class MigrationUtil {
         ccuHsApi.writeHisValById(coolingUserLimitMaxId, TunerConstants.ZONE_COOLING_USERLIMIT_MAX);
         HashMap<Object, Object> buildingPoint = ccuHsApi.readEntity("schedulable and cooling and user " +
                 "and limit and max and default");
-        double pointVal =  HSUtil.getPriorityLevelVal(buildingPoint.get("id").toString(), 16);
-        if (pointVal > 0)
-            ccuHsApi.writePointForCcuUser(coolingUserLimitMaxId, TunerConstants.SYSTEM_BUILDING_VAL_LEVEL,
-                    pointVal, 0);
+        if (buildingPoint != null && !buildingPoint.isEmpty()) {
+            double pointVal =  HSUtil.getPriorityLevelVal(buildingPoint.get("id").toString(), 16);
+            if (pointVal > 0)
+                ccuHsApi.writePointForCcuUser(coolingUserLimitMaxId, TunerConstants.SYSTEM_BUILDING_VAL_LEVEL,
+                        pointVal, 0);
+        }
     }
-    private static void createCoolingLimitMinPoint(String roomRef, CCUHsApi ccuHsApi, HashMap<Object, Object> equipMap,
-                                                   String floorRef) {
+    private static void createCoolingLimitMinPoint(String roomRef, CCUHsApi ccuHsApi, HashMap<Object, Object> roomMap,
+                                                   String floorRef, String prefixDis) {
         Point coolingUserLimitMin = new Point.Builder()
-                .setDisplayName(equipMap.get("dis").toString()+"-coolingUserLimitMin")
-                .setSiteRef(equipMap.get("siteRef").toString())
+                .setDisplayName(prefixDis +"-coolingUserLimitMin")
+                .setSiteRef(roomMap.get("siteRef").toString())
                 .setHisInterpolate("cov")
                 .addMarker("writable").addMarker("his").setMinVal("70").setMaxVal("77")
                 .setIncrementVal("1").addMarker("schedulable").addMarker("cur")
@@ -303,16 +305,18 @@ public class MigrationUtil {
         ccuHsApi.writeHisValById(coolingUserLimitMinId, TunerConstants.ZONE_COOLING_USERLIMIT_MIN);
         HashMap<Object, Object> buildingPoint = ccuHsApi.readEntity("schedulable and cooling and user " +
                 "and limit and min and default");
-        double pointVal =  HSUtil.getPriorityLevelVal(buildingPoint.get("id").toString(), 16);
-        if (pointVal > 0)
-            ccuHsApi.writePointForCcuUser(coolingUserLimitMinId, TunerConstants.SYSTEM_BUILDING_VAL_LEVEL,
-                    pointVal, 0);
+        if (buildingPoint != null && !buildingPoint.isEmpty()) {
+            double pointVal =  HSUtil.getPriorityLevelVal(buildingPoint.get("id").toString(), 16);
+            if (pointVal > 0)
+                ccuHsApi.writePointForCcuUser(coolingUserLimitMinId, TunerConstants.SYSTEM_BUILDING_VAL_LEVEL,
+                        pointVal, 0);
+        }
     }
     private static void createHeatingLimitMaxPoint(String roomRef, CCUHsApi ccuHsApi,
-                                                   HashMap<Object, Object> equipMap, String floorRef) {
+                                                   HashMap<Object, Object> roomMap, String floorRef, String prefixDis) {
         Point heatingUserLimitMax = new Point.Builder()
-                .setDisplayName(equipMap.get("dis").toString()+"-heatingUserLimitMax")
-                .setSiteRef(equipMap.get("siteRef").toString())
+                .setDisplayName(prefixDis +"-heatingUserLimitMax")
+                .setSiteRef(roomMap.get("siteRef").toString())
                 .setHisInterpolate("cov")
                 .addMarker("schedulable").addMarker("writable").addMarker("his").addMarker("cur")
                 .addMarker("heating").addMarker("user").addMarker("limit").addMarker("max").addMarker("sp")
@@ -326,16 +330,18 @@ public class MigrationUtil {
         ccuHsApi.writeHisValById(heatingUserLimitMaxId, TunerConstants.ZONE_HEATING_USERLIMIT_MAX);
         HashMap<Object, Object> buildingPoint = ccuHsApi.readEntity("schedulable and heating and user " +
                 "and limit and max and default");
-        double pointVal = HSUtil.getPriorityLevelVal(buildingPoint.get("id").toString(), 16);
-        if (pointVal > 0)
-            ccuHsApi.writePointForCcuUser(heatingUserLimitMaxId, TunerConstants.SYSTEM_BUILDING_VAL_LEVEL,
-                    pointVal, 0);
+        if (buildingPoint != null && !buildingPoint.isEmpty()) {
+            double pointVal = HSUtil.getPriorityLevelVal(buildingPoint.get("id").toString(), 16);
+            if (pointVal > 0)
+                ccuHsApi.writePointForCcuUser(heatingUserLimitMaxId, TunerConstants.SYSTEM_BUILDING_VAL_LEVEL,
+                        pointVal, 0);
+        }
     }
     private static void createHeatingLimitMinPoint(String roomRef, CCUHsApi ccuHsApi,
-                                                   HashMap<Object, Object> equipMap,String floorRef) {
+                                                   HashMap<Object, Object> roomMap,String floorRef, String prefixDis) {
         Point heatingUserLimitMin = new Point.Builder()
-                .setDisplayName(equipMap.get("dis").toString()+"-heatingUserLimitMin")
-                .setSiteRef(equipMap.get("siteRef").toString())
+                .setDisplayName(prefixDis +"-heatingUserLimitMin")
+                .setSiteRef(roomMap.get("siteRef").toString())
                 .setHisInterpolate("cov")
                 .addMarker("schedulable").addMarker("writable").addMarker("his").addMarker("cur")
                 .addMarker("heating").addMarker("user").addMarker("limit").addMarker("min").addMarker("sp")
@@ -349,16 +355,18 @@ public class MigrationUtil {
         ccuHsApi.writeHisValById(heatingUserLimitMinId, TunerConstants.ZONE_HEATING_USERLIMIT_MIN);
         HashMap<Object, Object> buildingPoint = ccuHsApi.readEntity("schedulable and heating and user " +
                 "and limit and min and default");
-        double pointVal = HSUtil.getPriorityLevelVal(buildingPoint.get("id").toString(), 16);
-        if (pointVal > 0)
-            ccuHsApi.writePointForCcuUser(heatingUserLimitMinId, TunerConstants.SYSTEM_BUILDING_VAL_LEVEL,
-                    pointVal, 0);
+        if (buildingPoint != null && !buildingPoint.isEmpty()) {
+            double pointVal = HSUtil.getPriorityLevelVal(buildingPoint.get("id").toString(), 16);
+            if (pointVal > 0)
+                ccuHsApi.writePointForCcuUser(heatingUserLimitMinId, TunerConstants.SYSTEM_BUILDING_VAL_LEVEL,
+                        pointVal, 0);
+        }
     }
-    private static void createUnOccupiedSetBackPoint(String roomRef, CCUHsApi ccuHsApi, HashMap<Object, Object> equipMap,
-                                                     String floorRef) {
+    private static void createUnOccupiedSetBackPoint(String roomRef, CCUHsApi ccuHsApi, HashMap<Object, Object> roomMap,
+                                                     String floorRef, String prefixDis) {
         Point unoccupiedZoneSetback = new Point.Builder()
-                .setDisplayName(equipMap.get("dis").toString()+"-unoccupiedZoneSetback")
-                .setSiteRef(equipMap.get("siteRef").toString())
+                .setDisplayName(prefixDis +"-unoccupiedZoneSetback")
+                .setSiteRef(roomMap.get("siteRef").toString())
                 .setHisInterpolate("cov")
                 .addMarker("schedulable").addMarker("writable").addMarker("his").addMarker("cur")
                 .addMarker("unoccupied").addMarker("setback").addMarker("sp")
@@ -372,17 +380,19 @@ public class MigrationUtil {
         ccuHsApi.writeHisValById(unoccupiedZoneSetbackId, TunerConstants.ZONE_UNOCCUPIED_SETBACK);
         HashMap<Object, Object> buildingPoint = ccuHsApi.readEntity("schedulable and unoccupied and setback " +
                 "and default");
-        double pointVal = HSUtil.getPriorityLevelVal(buildingPoint.get("id").toString(), 16);
-        if (pointVal > 0)
-            ccuHsApi.writePointForCcuUser(unoccupiedZoneSetbackId, TunerConstants.SYSTEM_BUILDING_VAL_LEVEL,
-                    pointVal , 0);
+        if (buildingPoint != null && !buildingPoint.isEmpty()) {
+            double pointVal = HSUtil.getPriorityLevelVal(buildingPoint.get("id").toString(), 16);
+            if (pointVal > 0)
+                ccuHsApi.writePointForCcuUser(unoccupiedZoneSetbackId, TunerConstants.SYSTEM_BUILDING_VAL_LEVEL,
+                        pointVal, 0);
+        }
     }
     private static void createSchedulableDeadband(String roomRef, CCUHsApi ccuHsApi,
-                                                  HashMap<Object, Object> equipMap, String deadBand, String floorRef) {
+                                                  HashMap<Object, Object> roomMap, String deadBand, String floorRef, String prefixDis) {
         CcuLog.i(TAG_CCU_MIGRATION_UTIL,"createSchedulableDeadband");
         Point deadBandPoint = new Point.Builder()
-                .setDisplayName(equipMap.get("dis").toString()+"-"+deadBand+"Deadband")
-                .setSiteRef(equipMap.get("siteRef").toString())
+                .setDisplayName(prefixDis +"-"+deadBand+"Deadband")
+                .setSiteRef(roomMap.get("siteRef").toString())
                 .setHisInterpolate("cov")
                 .addMarker("writable")
                 .addMarker("his")
@@ -398,10 +408,12 @@ public class MigrationUtil {
         ccuHsApi.writeHisValById(deadBandId, TunerConstants.VAV_COOLING_DB);
         HashMap<Object, Object> buildingPoint = ccuHsApi.readEntity("schedulable and "+
                 deadBand + " and deadband and default");
-        double pointVal = HSUtil.getPriorityLevelVal(buildingPoint.get("id").toString(), 16);
-        if (pointVal > 0)
-            ccuHsApi.writePointForCcuUser(deadBandId, TunerConstants.SYSTEM_BUILDING_VAL_LEVEL,
-                    pointVal , 0);
+        if (buildingPoint != null && !buildingPoint.isEmpty()) {
+            double pointVal = HSUtil.getPriorityLevelVal(buildingPoint.get("id").toString(), 16);
+            if (pointVal > 0)
+                ccuHsApi.writePointForCcuUser(deadBandId, TunerConstants.SYSTEM_BUILDING_VAL_LEVEL,
+                        pointVal, 0);
+        }
     }
     private static boolean notContainsSchedulableLimits(ArrayList<HashMap<Object, Object>> listOfMaps,
                                                         String tag1, String tag2) {
@@ -1321,6 +1333,12 @@ public class MigrationUtil {
         CcuLog.d(TAG_CCU_MIGRATION_UTIL, "creating new zone schedule");
         MigrationUtil.createZoneSchedulesIfMissing(hayStack);
         CcuLog.d(TAG_CCU_MIGRATION_UTIL, "cleanUpAndCreateZoneSchedules completed");
+    }
+    private static String getSchedulablePrefixDis(HashMap<Object,Object> roomMap, CCUHsApi ccuHsApi) {
+        HashMap<Object, Object> floor = ccuHsApi.readMapById(roomMap.get("floorRef").toString());
+        HashMap<Object, Object> siteMap = ccuHsApi.readEntity(Tags.SITE);
+        String siteDis = siteMap.get("dis").toString();
+        return siteDis + "-" + floor.get("dis").toString() + "-" + roomMap.get("dis");
     }
 
 

@@ -14,6 +14,9 @@ import a75f.io.domain.HyperStatSplitEquip
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.Domain.writeValAtLevelByDomain
 import a75f.io.domain.api.DomainName
+import a75f.io.domain.config.DefaultProfileConfiguration
+import a75f.io.domain.config.ExternalAhuConfiguration
+import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.cutover.DabZoneProfileCutOverMapping
 import a75f.io.domain.cutover.HyperStatSplitCpuCutOverMapping
 import a75f.io.domain.cutover.HyperStatSplitDeviceCutoverMapping
@@ -30,6 +33,7 @@ import a75f.io.domain.logic.DomainManager.addSystemDomainEquip
 import a75f.io.domain.logic.EntityMapper
 import a75f.io.domain.logic.PointBuilderConfig
 import a75f.io.domain.logic.ProfileEquipBuilder
+import a75f.io.domain.util.ModelCache
 import a75f.io.domain.util.ModelLoader
 import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
@@ -60,6 +64,7 @@ import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import io.seventyfivef.domainmodeler.client.ModelPointDef
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
+import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDevicePointDef
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import org.projecthaystack.HDict
 import org.projecthaystack.HDictBuilder
@@ -177,6 +182,16 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             VavAndAcbProfileMigration.addMinHeatingDamperPositionMigration(hayStack)
             PreferenceUtil.setVavCfmOnEdgeMigrationDone()
         }
+        try {
+            if(!PreferenceUtil.getMigrateHisInterpolateForDevicePoints()) {
+                migrateHisInterpolateForDevicePoints()
+                PreferenceUtil.setMigrateHisInterpolateForDevicePoints()
+            }
+        } catch (e: Exception) {
+            //For now, we make sure it does not stop other migrations even if this fails.
+            CcuLog.e(L.TAG_CCU_MIGRATION_UTIL, "Error in migrateHisInterpolate $e")
+        }
+
         hayStack.scheduleSync()
     }
 
@@ -917,4 +932,48 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         }
     }
 
+    private fun migrateHisInterpolateForDevicePoints() {
+        CcuLog.i(L.TAG_CCU_MIGRATION_UTIL,"Migrate His Interpolate for Device Points!!")
+        val devices= hayStack.readAllEntities("device and not modbus and not ccu")
+        devices.forEach { device ->
+            CcuLog.d(L.TAG_CCU_MIGRATION_UTIL,"device id ${device["id"]} device name ${device["dis"]}")
+
+            val devicePointsList = hayStack.readAllEntities("deviceRef == \"${device["id"]}\"")
+            val haystackDevice = Device.Builder().setHDict(hayStack.readHDictById(device["id"].toString())).build()
+            val deviceModel = ModelCache.getModelById(device["sourceModel"].toString())
+
+            val equip = hayStack.read("id == ${device["equipRef"]}")
+            val profileType = equip["profile"].toString()
+            val equipModel = ModelCache.getModelById(equip["sourceModel"].toString())
+            val profileConfiguration = getProfileConfig(profileType)
+
+            val entityMapper = EntityMapper(equipModel as SeventyFiveFProfileDirective)
+            val deviceBuilder = DeviceBuilder(hayStack, entityMapper)
+
+            devicePointsList.forEach { point ->
+                if (!point.containsKey("hisInterpolate")) {
+                    CcuLog.d(L.TAG_CCU_DOMAIN,"hisInterpolate not found for device point ${point["dis"]}. Updating hisInterpolate tag.....")
+                    val modelPointDef = deviceModel.points.find { it.domainName == point["domainName"].toString() }
+                     deviceBuilder.updatePoint(modelPointDef as SeventyFiveFDevicePointDef ,profileConfiguration, haystackDevice,point)
+                }
+            }
+        }
+    }
+
+    private fun getProfileConfig(profileType: String) : ProfileConfiguration {
+        return when(profileType) {
+            "dabExternalAHUController", "vavExternalAHUController" -> {
+                val profile = ExternalAhuConfiguration(profileType)
+                profile
+            }else -> {
+                /*
+                 This is not a robust solution, but it works for now.
+                 Right now, existing configuration classes reside in the :logic package and aren't accessible here.
+                 Created a DefaultConfiguration class that holds the few fields (group, roomRef, floorRef, profile) that are needed inside the :domain package.
+             */
+                val profile = DefaultProfileConfiguration(1000, "", 0, "", "", profileType)
+                profile
+            }
+        }
+    }
 }

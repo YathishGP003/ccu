@@ -70,6 +70,7 @@ public class PreferenceUtil {
     public static final String DEAD_BAND_MIGRATION = "deadBandMigration";
     public static final String ZONE_CO2_MIGRATION = "ZONE_CO2_MIGRATION";
     public static final String APP_VERSION_POINTS_MIGRATION = "appVersionPointsMigration";
+    public static final String MIGRATE_HIS_INTERPOLATE_FOR_DEVICE_POINTS = "migrateHisInterpolateForDevicePoints";
 
 
     public static void setContext(Context c) {
@@ -565,5 +566,13 @@ public class PreferenceUtil {
 
     public static void setAppVersionPointsMigration() {
         setBooleanPreference(APP_VERSION_POINTS_MIGRATION, true);
+    }
+
+    public static boolean getMigrateHisInterpolateForDevicePoints() {
+        return getBooleanPreference(MIGRATE_HIS_INTERPOLATE_FOR_DEVICE_POINTS);
+    }
+
+    public static void setMigrateHisInterpolateForDevicePoints() {
+        setBooleanPreference(MIGRATE_HIS_INTERPOLATE_FOR_DEVICE_POINTS, true);
     }
 }

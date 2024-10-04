@@ -296,7 +296,7 @@ public class CCUTagsDb extends HServer {
                     EventBus.getDefault().postSticky(databaseEvent);
                     CcuLog.i(TAG_CCU_ROOM_DB, "------------------data loading completed--------------");
                 }
-            }, 1000);
+            }, 2000);
         });
     }
     

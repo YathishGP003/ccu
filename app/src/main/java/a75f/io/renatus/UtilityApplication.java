@@ -549,11 +549,17 @@ public abstract class UtilityApplication extends Application {
                 BuildConfig.BUILD_TYPE.equals("carrier_prod") ||
                 BuildConfig.BUILD_TYPE.equals("airoverse_prod")) {
             Thread.setDefaultUncaughtExceptionHandler((paramThread, paramThrowable) -> {
-                handleSafeMode(paramThrowable);
-                RaygunClient.send(paramThrowable);
-                paramThrowable.printStackTrace();
-                CcuLog.e(L.TAG_CCU, "LifeCycleEvent App Crash");
-                RenatusApp.closeApp();
+                try {
+                    CcuLog.e(L.TAG_CCU, "LifeCycleEvent App Crash");
+                    handleSafeMode(paramThrowable);
+                    RaygunClient.send(paramThrowable);
+                    paramThrowable.printStackTrace();
+                    RenatusApp.closeApp();
+                } catch (Exception e) {
+                    //An exception here could lead to ANR, so catch it and let the app get relaunched.
+                    e.printStackTrace();
+                    CcuLog.e(L.TAG_CCU, "Exception while handling safe mode");
+                }
             });
         }
         CcuLog.i("UI_PROFILING", "UtilityApplication.initializeCrashReporting Done");

@@ -316,6 +316,10 @@ object Domain {
             CcuLog.d(CCUTagsDb.TAG_CCU_HS, "Invalid point write attempt: $domainName")
         }
     }
+    @JvmStatic
+    fun reaPriorityValByDomainName(domainName: String, equipRef: String): Double {
+        return hayStack.readPointPriorityValByQuery("point and domainName == \"$domainName\" and equipRef == \"$equipRef\"")
+    }
     fun getListOfDisNameByDomainName(domainName: String, model: SeventyFiveFProfileDirective) : List<String> {
         val valuesList: MutableList<String> = mutableListOf()
         val point = model.points.find { it.domainName == domainName }

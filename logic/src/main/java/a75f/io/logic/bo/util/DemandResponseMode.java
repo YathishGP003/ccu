@@ -6,13 +6,13 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Kind;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
+import a75f.io.domain.api.Domain;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.schedules.occupancy.DemandResponse;
 import a75f.io.logic.interfaces.ZoneDataInterface;
 import a75f.io.logic.tuners.BuildingTunerUtil;
 import a75f.io.logic.tuners.TunerConstants;
-import a75f.io.logic.tuners.TunerUtil;
 
 public class DemandResponseMode {
     static String demandResponseEnrollmentQuery = "demand and response and enable";
@@ -68,9 +68,11 @@ public class DemandResponseMode {
         hayStack.writePointForCcuUser(demandResponseSetbackId, TunerConstants.SYSTEM_DEFAULT_VAL_LEVEL,2.0, 0);
         hayStack.writeHisValById(demandResponseSetbackId, 2.0);
     }
-    public static double getDemandResponseSetBackIfActive(CCUHsApi hayStack) {
+    // TODO : USE DOMAIN NAME ONCE FOR ALL SYSTEM PROFILES DM-INTEGRATION IS DONE
+    public static double getSystemLevelDemandResponseSetBackIfActive(CCUHsApi hayStack) {
         if(DemandResponse.isDRModeActivated(hayStack)){
-            return TunerUtil.readTunerValByQuery("demand and response and setback and system");
+            return CCUHsApi.getInstance().readPointPriorityValByQuery("demand and response " +
+                    "and setback and equipRef == \""+Domain.systemEquip.getEquipRef()+"\"");
         }
         return 0;
     }

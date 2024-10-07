@@ -833,14 +833,14 @@ public class ScheduleManager {
                     if(preconRate == 0)
                         preconRate = getCoolingPreconditioningRate();
                     preconDegree = L.ccu().systemProfile.getAverageTemp() - nextOccupied.getCoolingVal()
-                            - DemandResponseMode.getDemandResponseSetBackIfActive(hayStack);
+                            - DemandResponseMode.getSystemLevelDemandResponseSetBackIfActive(hayStack);
                 } else if (L.ccu().systemProfile.getSystemController()
                                                 .getConditioningForecast(nextOccupied) == SystemController.State.HEATING) {
                     if(preconRate == 0)
                         preconRate = getHeatingPreconditioningRate();
 
                     preconDegree = nextOccupied.getHeatingVal() - L.ccu().systemProfile.getAverageTemp()
-                            - DemandResponseMode.getDemandResponseSetBackIfActive(hayStack);
+                            - DemandResponseMode.getSystemLevelDemandResponseSetBackIfActive(hayStack);
                 }
             }
         }
@@ -1336,24 +1336,34 @@ public class ScheduleManager {
     }
 
     public double getSystemCoolingDesiredTemp(){
-        double setback = CCUHsApi.getInstance().readPointPriorityValByQuery("default and unocc and setback");
+        double unOccupiedSetback = CCUHsApi.getInstance().readPointPriorityValByQuery("default and unocc and setback");
+        double demandResponseSetback = DemandResponseMode.getSystemLevelDemandResponseSetBackIfActive(CCUHsApi.getInstance());
+
         if(currentOccupiedInfo != null)
-            return (systemOccupancy == UNOCCUPIED || systemOccupancy == VACATION) ?
-                        currentOccupiedInfo.getCoolingVal() + setback : currentOccupiedInfo.getCoolingVal();
+            return (systemOccupancy == DEMAND_RESPONSE_UNOCCUPIED ||
+                    systemOccupancy == UNOCCUPIED || systemOccupancy == VACATION) ?
+                        currentOccupiedInfo.getCoolingVal() + unOccupiedSetback + demandResponseSetback : currentOccupiedInfo.getCoolingVal() + demandResponseSetback;
         else if(nextOccupiedInfo != null)
-            return (systemOccupancy == UNOCCUPIED || systemOccupancy == VACATION)?
-                        nextOccupiedInfo.getCoolingVal() + setback : nextOccupiedInfo.getCoolingVal();
+            return (systemOccupancy == DEMAND_RESPONSE_UNOCCUPIED ||
+                    systemOccupancy == UNOCCUPIED || systemOccupancy == VACATION)?
+                        nextOccupiedInfo.getCoolingVal() + unOccupiedSetback + demandResponseSetback: nextOccupiedInfo.getCoolingVal() + demandResponseSetback;
         else return 0;
     }
 
     public double getSystemHeatingDesiredTemp(){
-        double setback = CCUHsApi.getInstance().readPointPriorityValByQuery("default and unocc and setback");
+        double unOccupiedSetback = CCUHsApi.getInstance().readPointPriorityValByQuery("default and unocc and setback");
+        double demandResponseSetback = DemandResponseMode.getSystemLevelDemandResponseSetBackIfActive(CCUHsApi.getInstance());
+
         if(currentOccupiedInfo != null)
-            return (systemOccupancy == UNOCCUPIED || systemOccupancy == VACATION) ?
-                        currentOccupiedInfo.getHeatingVal() - setback : currentOccupiedInfo.getHeatingVal();
+            return (systemOccupancy == DEMAND_RESPONSE_UNOCCUPIED ||
+                    systemOccupancy == UNOCCUPIED || systemOccupancy == VACATION) ?
+                        currentOccupiedInfo.getHeatingVal() - unOccupiedSetback -
+                                demandResponseSetback : currentOccupiedInfo.getHeatingVal() - demandResponseSetback;
         else if (nextOccupiedInfo != null)
-            return (systemOccupancy == UNOCCUPIED || systemOccupancy == VACATION) ?
-                        nextOccupiedInfo.getHeatingVal() - setback : nextOccupiedInfo.getHeatingVal();
+            return (systemOccupancy == DEMAND_RESPONSE_UNOCCUPIED ||
+                    systemOccupancy == UNOCCUPIED || systemOccupancy == VACATION) ?
+                        nextOccupiedInfo.getHeatingVal() - unOccupiedSetback -
+                                demandResponseSetback: nextOccupiedInfo.getHeatingVal() -demandResponseSetback;
         else return 0;
     }
 

@@ -16,12 +16,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Text
@@ -33,6 +32,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -113,7 +114,8 @@ class ScheduleImpactDialogFragment(
                         text = getHeaderText(isNamedScheduledZoneExists, isZoneScheduledZoneExists),
                         color = ComposeUtil.textColor,
                         fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(start = 18.dp),
+                        modifier = Modifier.padding(start = 18.dp)
+                            .wrapContentWidth().semantics { contentDescription = "buildingOccupancyAlertHeader" },
                         fontSize = 24.sp
                     )
                     Text(
@@ -129,8 +131,10 @@ class ScheduleImpactDialogFragment(
             LazyColumn(modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 36.dp)) {
+                var index = 0
                 items(groupedTableContent.entries.toList()) { (scheduleType, tableContent) ->
-                    ScheduleTypeGroupSection(scheduleType, tableContent)
+                    ScheduleTypeGroupSection(scheduleType, tableContent, index)
+                    index++
                 }
             }
         }
@@ -144,8 +148,9 @@ class ScheduleImpactDialogFragment(
 }
 
 @Composable
-private fun ScheduleTypeGroupSection(scheduleType: PossibleScheduleImpactTable, tableContent: TableContent
-                                     ) {
+private fun ScheduleTypeGroupSection(
+    scheduleType: PossibleScheduleImpactTable, tableContent: TableContent, index: Int
+) {
     val scheduleTypeGroup = scheduleType.group
     val descriptionText = buildAnnotatedString {
         withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
@@ -164,10 +169,11 @@ private fun ScheduleTypeGroupSection(scheduleType: PossibleScheduleImpactTable, 
             color = ComposeUtil.textColor,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 24.dp),
+                .padding(top = 24.dp)
+                .wrapContentWidth().semantics { contentDescription = "buildingOccupancyAlertTitle$index" },
             fontSize = 20.sp
         )
-        ScheduleImpactDialog(tableContent, 80.dp * (tableContent.columnData[0].listOfColumnContent.size) + 54.dp)
+        ScheduleImpactDialog(tableContent, 80.dp * (tableContent.columnData[0].listOfColumnContent.size) + 54.dp, index)
     }
 }
 

@@ -426,9 +426,10 @@ public class RestoreCCUHsApi {
     public void importDevice(HRow deviceRow, RetryCountCallback retryCountCallback){
        CcuLog.i(TAG, "Import device started for "+deviceRow.get("dis").toString());
         List<Device> devices = new ArrayList<>();
-        List<HashMap> deviceMap = ccuHsApi.HGridToList(deviceRow.grid());
-        deviceMap.forEach(equip -> devices.add(new Device.Builder().setHashMap(equip).build()));
-
+        Iterator deviceIterator = deviceRow.iterator();
+        if(deviceIterator != null && deviceIterator.hasNext()) {
+             devices.add(new Device.Builder().setHDict(deviceRow).build());
+        }
         HClient hClient = new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
         HDict ccuDict = new HDictBuilder().add("filter",
                 "point and deviceRef == " + StringUtils.prependIfMissing(deviceRow.get("id").toString()
@@ -437,9 +438,11 @@ public class RestoreCCUHsApi {
         if(systemPointsGrid == null){
             throw new NullHGridException("Null occurred while fetching points for "+deviceRow.get("id").toString());
         }
-        List<HashMap> pointMaps = ccuHsApi.HGridToList(systemPointsGrid);
         List<RawPoint> points = new ArrayList<>();
-        pointMaps.forEach(m -> points.add(new RawPoint.Builder().setHashMap(m).build()));
+        Iterator pointsGridIterator = systemPointsGrid.iterator();
+        while(pointsGridIterator!=null && pointsGridIterator.hasNext()) {
+            points.add(new RawPoint.Builder().setHDict((HRow) pointsGridIterator.next()).build());
+        }
 
         addDeviceAndPoints(devices, points);
         writeValueToDevicePoints(devices, hClient, retryCountCallback);

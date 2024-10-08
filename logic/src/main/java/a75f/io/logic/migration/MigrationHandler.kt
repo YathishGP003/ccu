@@ -133,6 +133,16 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         }
 
         try {
+            if(!PreferenceUtil.getMigrateHisInterpolateForDevicePoints()) {
+                migrateHisInterpolateForDevicePoints()
+                PreferenceUtil.setMigrateHisInterpolateForDevicePoints()
+            }
+        } catch (e: Exception) {
+            //For now, we make sure it does not stop other migrations even if this fails.
+            CcuLog.e(L.TAG_CCU_MIGRATION_UTIL, "Error in migrateHisInterpolate $e")
+        }
+
+        try {
             VavAndAcbProfileMigration.migrateVavAndAcbProfilesToCorrectPortEnabledStatus(hayStack)
             if (!PreferenceUtil.getDmToDmCleanupMigration()) {
                 cleanACBDuplicatePoints(CCUHsApi.getInstance())
@@ -182,16 +192,6 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             VavAndAcbProfileMigration.addMinHeatingDamperPositionMigration(hayStack)
             PreferenceUtil.setVavCfmOnEdgeMigrationDone()
         }
-        try {
-            if(!PreferenceUtil.getMigrateHisInterpolateForDevicePoints()) {
-                migrateHisInterpolateForDevicePoints()
-                PreferenceUtil.setMigrateHisInterpolateForDevicePoints()
-            }
-        } catch (e: Exception) {
-            //For now, we make sure it does not stop other migrations even if this fails.
-            CcuLog.e(L.TAG_CCU_MIGRATION_UTIL, "Error in migrateHisInterpolate $e")
-        }
-
         hayStack.scheduleSync()
     }
 
@@ -934,13 +934,23 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
 
     private fun migrateHisInterpolateForDevicePoints() {
         CcuLog.i(L.TAG_CCU_MIGRATION_UTIL,"Migrate His Interpolate for Device Points!!")
-        val devices= hayStack.readAllEntities("device and not modbus and not ccu")
+        val devices= hayStack.readAllEntities("device and domainName and not modbus and not ccu") // DM integrated devices
         devices.forEach { device ->
             CcuLog.d(L.TAG_CCU_MIGRATION_UTIL,"device id ${device["id"]} device name ${device["dis"]}")
 
             val devicePointsList = hayStack.readAllEntities("deviceRef == \"${device["id"]}\"")
             val haystackDevice = Device.Builder().setHDict(hayStack.readHDictById(device["id"].toString())).build()
-            val deviceModel = ModelCache.getModelById(device["sourceModel"].toString())
+            val deviceModel =  if(device["sourceModel"] == null) { // If sourceModel is not found, fetch model by using domainName
+                try {
+                    ModelLoader.getModelForDomainName(device["domainName"].toString())
+                } catch (e: Exception) {
+                    CcuLog.e(L.TAG_CCU_DOMAIN, "Error while fetching sourceModel for device ${device["dis"]}. Skipping hisInterpolate migration.....")
+                    return@forEach
+                }
+            }
+            else {
+                ModelCache.getModelById(device["sourceModel"].toString())
+            }
 
             val equip = hayStack.read("id == ${device["equipRef"]}")
             val profileType = equip["profile"].toString()

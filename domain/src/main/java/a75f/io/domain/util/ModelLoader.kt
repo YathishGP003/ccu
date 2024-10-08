@@ -123,6 +123,11 @@ object ModelLoader {
             "hyperstatSplitCpu" -> getHyperStatSplitCpuModel()
             "smartnodeDAB" -> getSmartNodeDabModel()
             "helionodeDAB" -> getHelioNodeDabModel()
+            "helionodeDevice" -> getHelioNodeDevice()
+            "smartnodeDevice" -> getSmartNodeDevice()
+            "cmDevice" -> getCMDeviceModel()
+            "connectModuleDevice" -> getConnectModuleDeviceModel()
+            "hyperstatSplitDevice" -> getHyperStatSplitDeviceModel()
             else -> throw IllegalStateException("Invalid Model Name")
         }
     }

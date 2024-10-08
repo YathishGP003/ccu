@@ -58,6 +58,9 @@ open class StagedRtuProfileViewModel : ViewModel() {
     val modelLoaded: LiveData<Boolean> get() = modelLoadedState
     lateinit var equipBuilder : ProfileEquipBuilder
     lateinit var deviceBuilder: DeviceBuilder
+    val ProfileNameRTU : String = "VAV Staged RTU"
+    val ProfileNameVFD : String = "VAV Staged RTU with VFD Fan"
+
     fun init(context: Context, profileModel : ModelDirective, hayStack : CCUHsApi) {
 
         CcuLog.i(
@@ -137,26 +140,37 @@ open class StagedRtuProfileViewModel : ViewModel() {
     }
 
     fun getRelayState(relayName: String) : Boolean {
-        val physicalPoint = L.ccu().systemProfile.logicalPhysicalMap.values.find { it.domainName == relayName }
-        return physicalPoint?.readHisVal() == 1.0
+        if((L.ccu().systemProfile.profileName == ProfileNameRTU || L.ccu().systemProfile.profileName == ProfileNameVFD) && !viewState.value.isSaveRequired) {
+            val physicalPoint = L.ccu().systemProfile.logicalPhysicalMap.values.find { it.domainName == relayName }
+            return physicalPoint?.readHisVal() == 1.0
+        }
+        return false
     }
 
     fun sendTestCommand(relayName : String, testCommand : Boolean) {
-        Globals.getInstance().isTestMode = true
-        viewModelScope.launch {
-            withContext(Dispatchers.IO) {
-                val physicalPoint = L.ccu().systemProfile.logicalPhysicalMap.values.find { it.domainName == relayName }
-                physicalPoint?.writeHisVal(testCommand.toDouble())
-                CcuLog.i(Domain.LOG_TAG, "Send Test Command $relayName $testCommand ${physicalPoint?.readHisVal()}")
-                MeshUtil.sendStructToCM(DeviceUtil.getCMControlsMessage())
+        if ((L.ccu().systemProfile.profileName == ProfileNameRTU || L.ccu().systemProfile.profileName == ProfileNameVFD) && !viewState.value.isSaveRequired) {
+            Globals.getInstance().isTestMode = true
+            viewModelScope.launch {
+                withContext(Dispatchers.IO) {
+                    val physicalPoint =
+                        L.ccu().systemProfile.logicalPhysicalMap.values.find { it.domainName == relayName }
+                    physicalPoint?.writeHisVal(testCommand.toDouble())
+                    CcuLog.i(
+                        Domain.LOG_TAG,
+                        "Send Test Command $relayName $testCommand ${physicalPoint?.readHisVal()}"
+                    )
+                    MeshUtil.sendStructToCM(DeviceUtil.getCMControlsMessage())
+                }
             }
         }
     }
-
+     //this function is only for VFD Profile
     fun sendAnalogTestSignal(value: Double) {
-        Globals.getInstance().isTestMode = true
-        Domain.cmBoardDevice.analog2Out.writeHisVal(10 * value)
-        MeshUtil.sendStructToCM(DeviceUtil.getCMControlsMessage())
+        if(L.ccu().systemProfile.profileName == ProfileNameVFD) {
+            Globals.getInstance().isTestMode = true
+            Domain.cmBoardDevice.analog2Out.writeHisVal(10 * value)
+            MeshUtil.sendStructToCM(DeviceUtil.getCMControlsMessage())
+        }
     }
 
     fun updateSystemMode() {

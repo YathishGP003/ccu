@@ -11,7 +11,6 @@ import a75f.io.logic.Globals
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.system.vav.VavFullyModulatingRtu
-import a75f.io.logic.bo.building.system.vav.VavStagedRtu
 import a75f.io.logic.bo.building.system.vav.config.ModulatingRtuProfileConfig
 import a75f.io.logic.bo.haystack.device.ControlMote
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
@@ -87,40 +86,48 @@ open class VavModulatingRtuViewModel : ModulatingRtuViewModel() {
     }
 
     override fun sendAnalogRelayTestSignal(tag: String, value: Double) {
-        val systemProfile = L.ccu().systemProfile as VavFullyModulatingRtu
-        Globals.getInstance().setTestMode(true)
-        if (tag.contains("analog")) {
-            when(tag){
-                DomainName.analog1Out ->
-                    Domain.cmBoardDevice.analog1Out.writeHisVal(
-                        DeviceUtil.getModulatedAnalogVal(
-                        systemProfile.systemEquip.analog1MinCooling.readPriorityVal(),
-                        systemProfile.systemEquip.analog1MaxCooling.readPriorityVal(),
-                        value).toDouble())
-                DomainName.analog2Out ->
-                    Domain.cmBoardDevice.analog2Out.writeHisVal(
-                        DeviceUtil.getModulatedAnalogVal(
-                        systemProfile.systemEquip.analog2MinStaticPressure.readPriorityVal(),
-                        systemProfile.systemEquip.analog2MaxStaticPressure.readPriorityVal(),
-                        value).toDouble())
-                DomainName.analog3Out ->
-                    Domain.cmBoardDevice.analog3Out.writeHisVal(
-                        DeviceUtil.getModulatedAnalogVal(
-                        systemProfile.systemEquip.analog3MinHeating.readPriorityVal(),
-                        systemProfile.systemEquip.analog3MaxHeating.readPriorityVal(),
-                        value
-                    ).toDouble())
-                DomainName.analog4Out ->
-                    Domain.cmBoardDevice.analog4Out.writeHisVal(
-                        DeviceUtil.getModulatedAnalogVal(
-                        systemProfile.systemEquip.analog4MinOutsideDamper.readPriorityVal(),
-                        systemProfile.systemEquip.analog4MaxOutsideDamper.readPriorityVal(),
-                        value).toDouble())
+        if(L.ccu().systemProfile.profileName == ProfileName) {
+            val systemProfile = L.ccu().systemProfile as VavFullyModulatingRtu
+            Globals.getInstance().setTestMode(true)
+            if (tag.contains("analog")) {
+                when (tag) {
+                    DomainName.analog1Out ->
+                        Domain.cmBoardDevice.analog1Out.writeHisVal(
+                            DeviceUtil.getModulatedAnalogVal(
+                                systemProfile.systemEquip.analog1MinCooling.readPriorityVal(),
+                                systemProfile.systemEquip.analog1MaxCooling.readPriorityVal(),
+                                value
+                            ).toDouble())
+
+                    DomainName.analog2Out ->
+                        Domain.cmBoardDevice.analog2Out.writeHisVal(
+                            DeviceUtil.getModulatedAnalogVal(
+                                systemProfile.systemEquip.analog2MinStaticPressure.readPriorityVal(),
+                                systemProfile.systemEquip.analog2MaxStaticPressure.readPriorityVal(),
+                                value
+                            ).toDouble())
+
+                    DomainName.analog3Out ->
+                        Domain.cmBoardDevice.analog3Out.writeHisVal(
+                            DeviceUtil.getModulatedAnalogVal(
+                                systemProfile.systemEquip.analog3MinHeating.readPriorityVal(),
+                                systemProfile.systemEquip.analog3MaxHeating.readPriorityVal(),
+                                value
+                            ).toDouble())
+
+                    DomainName.analog4Out ->
+                        Domain.cmBoardDevice.analog4Out.writeHisVal(
+                            DeviceUtil.getModulatedAnalogVal(
+                                systemProfile.systemEquip.analog4MinOutsideDamper.readPriorityVal(),
+                                systemProfile.systemEquip.analog4MaxOutsideDamper.readPriorityVal(),
+                                value
+                            ).toDouble())
+                }
+            } else if (tag.contains("relay")) {
+                ControlMote.setRelayState(tag, value)
             }
-        } else if (tag.contains("relay")) {
-            ControlMote.setRelayState(tag, value)
+            MeshUtil.sendStructToCM(DeviceUtil.getCMControlsMessage())
         }
-        MeshUtil.sendStructToCM(DeviceUtil.getCMControlsMessage())
     }
     fun reset() {
         val systemEquip = hayStack.readEntity("system and equip and not modbus and not connectModule")

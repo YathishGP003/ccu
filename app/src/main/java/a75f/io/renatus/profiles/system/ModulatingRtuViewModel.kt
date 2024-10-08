@@ -51,6 +51,8 @@ open class ModulatingRtuViewModel : ViewModel() {
     val modelLoaded: LiveData<Boolean> get() = modelLoadedState
     private lateinit var equipBuilder: ProfileEquipBuilder
     private lateinit var deviceBuilder: DeviceBuilder
+
+    val ProfileName : String = "VAV Fully Modulating AHU"
    
     fun init(context: Context, profileModel: ModelDirective, hayStack: CCUHsApi) {
         this.hayStack = hayStack
@@ -149,22 +151,27 @@ open class ModulatingRtuViewModel : ViewModel() {
     }
 
     fun getRelayState(relayName: String) : Boolean {
-        val physicalPoint = L.ccu().systemProfile.logicalPhysicalMap.values.find { it.domainName == relayName }
-        return physicalPoint?.readHisVal() == 1.0
+        if(L.ccu().systemProfile.profileName == ProfileName) {
+            val physicalPoint = L.ccu().systemProfile.logicalPhysicalMap.values.find { it.domainName == relayName }
+            return physicalPoint?.readHisVal() == 1.0
+        }
+        return false
     }
 
     fun sendTestCommand(relayName: String, testCommand: Boolean) {
         Globals.getInstance().isTestMode = true
-        viewModelScope.launch {
-            withContext(Dispatchers.IO) {
-                val physicalPoint =
-                    L.ccu().systemProfile.logicalPhysicalMap.values.find { it.domainName == relayName }
-                physicalPoint?.writeHisVal(testCommand.toDouble())
-                CcuLog.i(
-                    Domain.LOG_TAG,
-                    "Send Test Command $relayName $testCommand ${physicalPoint?.readHisVal()}"
-                )
-                MeshUtil.sendStructToCM(DeviceUtil.getCMControlsMessage())
+        if (L.ccu().systemProfile.profileName == ProfileName) {
+            viewModelScope.launch {
+                withContext(Dispatchers.IO) {
+                    val physicalPoint =
+                        L.ccu().systemProfile.logicalPhysicalMap.values.find { it.domainName == relayName }
+                    physicalPoint?.writeHisVal(testCommand.toDouble())
+                    CcuLog.i(
+                        Domain.LOG_TAG,
+                        "Send Test Command $relayName $testCommand ${physicalPoint?.readHisVal()}"
+                    )
+                    MeshUtil.sendStructToCM(DeviceUtil.getCMControlsMessage())
+                }
             }
         }
     }

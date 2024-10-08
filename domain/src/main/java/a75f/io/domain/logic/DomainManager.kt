@@ -15,6 +15,7 @@ import a75f.io.domain.equips.DabEquip
 import a75f.io.domain.equips.DabAdvancedHybridSystemEquip
 import a75f.io.domain.equips.DefaultSystemEquip
 import a75f.io.domain.equips.DomainEquip
+import a75f.io.domain.equips.OtnEquip
 import a75f.io.domain.equips.VavAdvancedHybridSystemEquip
 import a75f.io.domain.equips.VavModulatingRtuSystemEquip
 import a75f.io.domain.equips.VavStagedSystemEquip
@@ -75,6 +76,7 @@ object DomainManager {
                 when{
                     it.contains("vav") -> Domain.equips[it["id"].toString()] = VavEquip(it["id"].toString())
                     it.contains("dab") -> Domain.equips[it["id"].toString()] = DabEquip(it["id"].toString())
+                    it.contains("otn") -> Domain.equips[it["id"].toString()] = OtnEquip(it["id"].toString())
                 }
             }
 

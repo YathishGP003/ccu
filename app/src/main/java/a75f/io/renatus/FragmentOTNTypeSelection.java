@@ -15,11 +15,13 @@ import java.util.ArrayList;
 
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
+import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.Zone;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
+import a75f.io.renatus.profiles.otn.OtnProfileConfigFragment;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -80,9 +82,9 @@ public class FragmentOTNTypeSelection extends BaseDialogFragment {
         if (checkForSingleModule()){
             return;
         }
-        showDialogFragment(FragmentOTNTempInfConfiguration.newInstance(mNodeAddress, mRoomName,
-                mFloorName, ProfileType.OTN),
-                FragmentOTNTempInfConfiguration.ID);
+        showDialogFragment(OtnProfileConfigFragment.Companion.newInstance(mNodeAddress, mRoomName,
+                mFloorName, NodeType.OTN, ProfileType.OTN),
+                OtnProfileConfigFragment.Companion.getID());
     }
 
     @Optional

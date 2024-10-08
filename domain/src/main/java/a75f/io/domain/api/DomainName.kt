@@ -1136,5 +1136,8 @@ object DomainName {
     const val pressureBasedFanControlFeedback = "pressureBasedFanControlFeedback"
     const val satBasedCoolingControlFeedback = "satBasedCoolingControlFeedback"
     const val satBasedHeatingControlFeedback = "satBasedHeatingControlFeedback"
+
+    const val autoawayEnable = "autoawayEnable"
+    const val autoForceOccupiedEnable = "autoForceOccupiedEnable"
 }
 

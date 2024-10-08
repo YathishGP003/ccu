@@ -113,6 +113,16 @@ object ModelLoader {
         return ModelCache.getModelById(MODEL_HELIO_NODE_DAB)
     }
 
+    fun getOtnTiModel() : ModelDirective {
+        return ModelCache.getModelById(MODEL_OTN_TI)
+    }
+
+    fun getOtnDeviceModel() : ModelDirective {
+        return ModelCache.getModelById(MODEL_OTN_DEVICE)
+    }
+
+
+
     fun getModelForDomainName( domainName : String) : ModelDirective {
         return when(domainName) {
             "smartnodeVAVReheatNoFan" -> getSmartNodeVavNoFanModelDef()

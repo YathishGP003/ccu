@@ -58,6 +58,7 @@ public class OTNProfile extends ZoneProfile {
 
     @Override
     public void updateZonePoints() {
+        CcuLog.d(L.TAG_CCU_ZONE, "updateZonePoints : " + mOTNEquip.mNodeAddr);
         if(isRFDead()){
             handleRFDead(mOTNEquip);
             return;

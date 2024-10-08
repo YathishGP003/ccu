@@ -94,6 +94,9 @@ object ModelCache {
 
         modelContainer[MODEL_CONNECT_DEVICE] = getModelById(MODEL_CONNECT_DEVICE)
         CcuLog.i(Domain.LOG_TAG, "cmBoardDevice loaded")
+
+        modelContainer[MODEL_OTN_DEVICE] = getModelById(MODEL_OTN_DEVICE)
+        CcuLog.i(Domain.LOG_TAG, "otnDevice loaded")
     }
     
     private fun loadVavZoneEquipModels() {
@@ -166,6 +169,8 @@ object ModelCache {
 
     private fun loadStandAloneModels() {
         modelContainer[MODEL_HYPERSTAT_SPLIT_CPU] = getModelById(MODEL_HYPERSTAT_SPLIT_CPU)
+        modelContainer[MODEL_OTN_TI] = getModelById(MODEL_OTN_TI)
+        CcuLog.i(Domain.LOG_TAG, "Otn profile model loaded")
     }
 
     /**

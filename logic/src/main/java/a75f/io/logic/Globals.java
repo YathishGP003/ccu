@@ -534,8 +534,7 @@ public class Globals {
                             L.ccu().zoneProfiles.add(hyperStatMonitoringProfile);
                             break;
                         case OTN:
-                            OTNProfile otnProfile = new OTNProfile();
-                            otnProfile.addOTNEquip(Short.parseShort(eq.getGroup()));
+                            OTNProfile otnProfile = new OTNProfile(eq.getId(), Short.parseShort(eq.getGroup()));
                             L.ccu().zoneProfiles.add(otnProfile);
                             break;
                         case HYPERSTAT_VRV:

@@ -27,8 +27,8 @@ class OtnProfileConfiguration(nodeAddress: Int, nodeType: String, priority: Int,
 
     fun getDefaultConfiguration() : OtnProfileConfiguration {
         zonePriority = getDefaultValConfig(DomainName.zonePriority, model)
-        autoAway = getDefaultEnableConfig(DomainName.autoawayEnable, model) //TODO
-        autoForceOccupied = getDefaultEnableConfig(DomainName.autoForceOccupiedEnable, model) //TODO
+        autoAway = getDefaultEnableConfig(DomainName.autoAway, model)
+        autoForceOccupied = getDefaultEnableConfig(DomainName.autoForceOccupied, model)
         temperatureOffset = getDefaultValConfig(DomainName.temperatureOffset, model)
         isDefault = true
 

@@ -180,10 +180,10 @@ public class FragmentOTNTempInfConfiguration extends BaseDialogFragment {
 
         if(mOTNConfig == null ){
             CcuLog.d(LOG_TAG, "Creating new config");
-            mOTNProfile.addOTNEquip(ProfileType.OTN,mNodeAddress,otn,floorRef,zoneRef);
+            //mOTNProfile.addOTNEquip(ProfileType.OTN,mNodeAddress,otn,floorRef,zoneRef);
         }else{
             CcuLog.d(LOG_TAG, "Updating config");
-            mOTNProfile.updateOTN(ProfileType.OTN,mNodeAddress,otn,floorRef,zoneRef);
+            //mOTNProfile.updateOTN(ProfileType.OTN,mNodeAddress,otn,floorRef,zoneRef);
         }
         L.ccu().zoneProfiles.add(mOTNProfile);
 

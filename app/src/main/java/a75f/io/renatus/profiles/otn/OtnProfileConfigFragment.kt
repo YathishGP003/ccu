@@ -154,7 +154,7 @@ class OtnProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                 val valuesPickerState = rememberPickerState()
                 Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                     Picker(
-                        header = "ROOM TEMP OFFSET",
+                        header = "Room Temp Offset",
                         state = valuesPickerState,
                         items = viewModel.temperatureOffsetsList,
                         onChanged = { it: String ->

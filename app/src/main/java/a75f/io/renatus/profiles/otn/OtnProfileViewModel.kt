@@ -168,8 +168,7 @@ class OtnProfileViewModel : ViewModel() {
         )
         val entityMapper = EntityMapper(equipModel)
         val deviceBuilder = DeviceBuilder(hayStack, entityMapper)
-        val deviceName = when(nodeType) { NodeType.HELIO_NODE -> "-HN-" else -> "-SN-"}
-        val deviceDis = hayStack.siteName + deviceName + config.nodeAddress
+        val deviceDis = hayStack.siteName + "-OTN-" + config.nodeAddress
         CcuLog.i(Domain.LOG_TAG, " buildDeviceAndPoints")
         deviceBuilder.buildDeviceAndPoints(
             config,
@@ -179,7 +178,7 @@ class OtnProfileViewModel : ViewModel() {
             deviceDis
         )
         CcuLog.i(Domain.LOG_TAG, " add Profile")
-        profile = OTNProfile()
+        profile = OTNProfile(equipId, deviceAddress)
     }
 
     fun setOnPairingCompleteListener(completeListener: OnPairingCompleteListener) {

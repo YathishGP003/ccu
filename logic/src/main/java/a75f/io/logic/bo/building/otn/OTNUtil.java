@@ -15,7 +15,7 @@ public class OTNUtil {
     public static HashMap getOTNPoints(String equipID) {
         HashMap points = new HashMap();
         points.put("Profile", "Temperature Influencing");
-        String equipStatusPoint = CCUHsApi.getInstance().readDefaultStrVal("point and status and " +
+        String equipStatusPoint = CCUHsApi.getInstance().readDefaultStrVal("point and " +
                 "message and equipRef == \"" + equipID + "\"");
         double humidity = CCUHsApi.getInstance().readHisValByQuery("point and air and humidity " +
                 "and sensor " +

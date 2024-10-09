@@ -6,10 +6,11 @@ import a75f.io.domain.api.Point
 class OtnEquip(equipRef : String) : DomainEquip(equipRef){
 
     val zonePriority = Point(DomainName.zonePriority, equipRef)
-    val autoForceOccupied = Point(DomainName.autoForceOccupiedEnable, equipRef) //TODO
-    val autoAway = Point(DomainName.autoawayEnable, equipRef) //TODO
+    val autoForceOccupied = Point(DomainName.autoForceOccupied, equipRef)
+    val autoAway = Point(DomainName.autoAway, equipRef)
     val temperatureOffset = Point(DomainName.temperatureOffset, equipRef)
 
+    val currentTemp = Point(DomainName.currentTemp, equipRef)
     val desiredTempCooling = Point(DomainName.desiredTempCooling, equipRef)
     val desiredTempHeating = Point(DomainName.desiredTempHeating, equipRef)
 

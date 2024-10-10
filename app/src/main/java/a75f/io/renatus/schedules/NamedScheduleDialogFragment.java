@@ -79,7 +79,8 @@ public class NamedScheduleDialogFragment extends DialogFragment {
         heatingDeadband = view.findViewById(R.id.heatingDeadband);
         coolingDeadBand = view.findViewById(R.id.coolingDeadband);
 
-        String header = ScheduleUtil.getNamedScheduleHeader(schedule.getScheduleGroup(), Integer.parseInt(getArguments().getString(PARAM_DAY))) + "(" + days.getSthh() +":" +days.getStmm() +
+        String header = ScheduleUtil.getNamedScheduleHeader(schedule.getScheduleGroup(),
+                days.getDay()) + "(" + days.getSthh() +":" +days.getStmm() +
                 " to "+ days.getEthh() +":" +days.getEtmm() +  ") | "   ;
 
         day.setText(header);

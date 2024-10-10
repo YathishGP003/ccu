@@ -43,6 +43,7 @@ import a75f.io.renatus.views.CustomSpinnerDropDownAdapter
 import android.app.Activity
 import android.content.Context
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.widget.AdapterView
 import android.widget.AdapterView.OnItemSelectedListener
@@ -231,14 +232,24 @@ private fun setSpinnerListenerForHyperstat(
     view: View, spinnerType: HSZoneStatus, equipId: String,
     nodeAddress: String, profileType: ProfileType
 ) {
+    var userClickCheck = false
+    // adding this listener to check the user click or not ,because this OnItemSelectedListener will be called at same times when we refresh the screen
+    val touchListener = View.OnTouchListener { v, event ->
+        if (event?.action == MotionEvent.ACTION_UP || event?.action == MotionEvent.ACTION_DOWN) {
+            userClickCheck = true
+        }
+        false
+    }
+    (view as Spinner).setOnTouchListener(touchListener)
+
     val onItemSelectedListener: OnItemSelectedListener = object : OnItemSelectedListener {
         override fun onItemSelected(parent: AdapterView<*>?, view: View, position: Int, id: Long) {
             when (spinnerType) {
                 HSZoneStatus.CONDITIONING_MODE -> handleConditionMode(
-                    position, equipId, nodeAddress,profileType
+                    position, equipId, nodeAddress,profileType,userClickCheck
                 )
                 HSZoneStatus.FAN_MODE -> handleFanMode(
-                    equipId, position, nodeAddress,profileType
+                    equipId, position, nodeAddress,profileType , userClickCheck
                 )
                 HSZoneStatus.TARGET_HUMIDITY -> handleHumidityMode(
                     position, equipId
@@ -259,53 +270,60 @@ private fun handleConditionMode(
     selectedPosition: Int,
     equipId: String,
     nodeAddress: String,
-    profileType: ProfileType
+    profileType: ProfileType,
+    userClickCheck : Boolean
 ) {
-    var actualConditioningMode = -1
+    if(userClickCheck) {
+        var actualConditioningMode = -1
 
-    // CPU Profile has combination of conditioning modes
-    if(profileType == ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT
-        || profileType == ProfileType.HYPERSTAT_HEAT_PUMP_UNIT) {
-        actualConditioningMode  = getActualConditioningMode(nodeAddress, selectedPosition)
-    }
-    else if(profileType == ProfileType.HYPERSTAT_TWO_PIPE_FCU) {
-        // 2 Pipe profile will be always has all conditioning modes
-        actualConditioningMode = StandaloneConditioningMode.values()[selectedPosition].ordinal
-    }
-    if(actualConditioningMode != -1) {
-        updateHyperStatUIPoints(
-            equipId, "zone and sp and conditioning and mode", actualConditioningMode.toDouble(),
-            CCUHsApi.getInstance().ccuUserName
-        )
+        // CPU Profile has combination of conditioning modes
+        if (profileType == ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT
+            || profileType == ProfileType.HYPERSTAT_HEAT_PUMP_UNIT) {
+            actualConditioningMode  = getActualConditioningMode(nodeAddress, selectedPosition)
+        }
+        else if(profileType == ProfileType.HYPERSTAT_TWO_PIPE_FCU) {
+            // 2 Pipe profile will be always has all conditioning modes
+            actualConditioningMode = StandaloneConditioningMode.values()[selectedPosition].ordinal
+        }
+        if(actualConditioningMode != -1) {
+            updateHyperStatUIPoints(
+                equipId, "zone and sp and conditioning and mode", actualConditioningMode.toDouble(),
+                CCUHsApi.getInstance().ccuUserName
+            )
 
+        }
     }
 }
 
 // Save the fan mode in cache
-private fun handleFanMode(equipId: String, selectedPosition: Int, nodeAddress: String , profileType: ProfileType) {
-    val cacheStorage = FanModeCacheStorage()
-    val actualFanMode: Int = when (profileType) {
-        ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT -> {
-            getActualFanMode(nodeAddress, selectedPosition)
+private fun handleFanMode(equipId: String, selectedPosition: Int, nodeAddress: String , profileType: ProfileType ,userClickCheck : Boolean) {
+    if (userClickCheck) {
+        val cacheStorage = FanModeCacheStorage()
+        val actualFanMode: Int = when (profileType) {
+            ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT -> {
+                getActualFanMode(nodeAddress, selectedPosition)
+            }
+
+            ProfileType.HYPERSTAT_HEAT_PUMP_UNIT -> {
+                getHpuActualFanMode(nodeAddress, selectedPosition)
+            }
+
+            ProfileType.HYPERSTAT_TWO_PIPE_FCU -> {
+                getPipe2ActualFanMode(nodeAddress, selectedPosition)
+            }
+
+            else -> { -1 }
         }
-        ProfileType.HYPERSTAT_HEAT_PUMP_UNIT -> {
-            getHpuActualFanMode(nodeAddress, selectedPosition)
-        }
-        ProfileType.HYPERSTAT_TWO_PIPE_FCU -> {
-            getPipe2ActualFanMode(nodeAddress, selectedPosition)
-        }
-        else -> { -1 }
-    }
-    if(actualFanMode != -1) {
-        updateHyperStatUIPoints(equipId, "zone and sp and fan and operation and mode", actualFanMode.toDouble(),
+        if (actualFanMode != -1) {
+            updateHyperStatUIPoints(equipId, "zone and sp and fan and operation and mode", actualFanMode.toDouble(),
                 CCUHsApi.getInstance().ccuUserName)
-        if (selectedPosition != 0 && selectedPosition % 3 == 0)
-            cacheStorage.saveFanModeInCache(equipId, actualFanMode) // while saving the fan mode, we need to save the actual fan mode instead of selected position
-        else
-            cacheStorage.removeFanModeFromCache(equipId)
+            if (selectedPosition != 0 && selectedPosition % 3 == 0)
+                cacheStorage.saveFanModeInCache(equipId, actualFanMode) // while saving the fan mode, we need to save the actual fan mode instead of selected position
+            else
+                cacheStorage.removeFanModeFromCache(equipId)
+        }
     }
 }
-
 private fun handleHumidityMode(selectedPosition: Int, equipId: String) {
     updateHyperStatUIPoints(
         equipId, "target and humidifier", (selectedPosition + 1).toDouble(), CCUHsApi.getInstance().ccuUserName

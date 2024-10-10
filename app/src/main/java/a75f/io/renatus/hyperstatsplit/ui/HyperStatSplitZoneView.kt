@@ -35,6 +35,7 @@ import android.widget.AdapterView.OnItemSelectedListener
 import java.util.*
 import a75f.io.domain.HyperStatSplitEquip
 import a75f.io.domain.api.DomainName
+import android.view.MotionEvent
 
 fun loadHyperStatSplitCpuEconProfile(
     cpuEconEquipPoints: HashMap<*, *>, inflater: LayoutInflater,
@@ -226,14 +227,25 @@ private fun setUpHumidifierDeHumidifier(
 private fun setSpinnerListenerForHyperstatSplit(
     view: View, spinnerType: HSSplitZoneStatus, hssEquip: HyperStatSplitEquip, profileType: ProfileType
 ) {
+    var userClickCheck = false
+    // adding this listener to check the user click or not ,because this OnItemSelectedListener will be called at same times when we refresh the screen
+    val touchListener = View.OnTouchListener { v, event ->
+        if (event?.action == MotionEvent.ACTION_UP || event?.action == MotionEvent.ACTION_DOWN) {
+
+            userClickCheck = true
+        }
+        false
+    }
+    (view as Spinner).setOnTouchListener(touchListener)
+
     val onItemSelectedListener: OnItemSelectedListener = object : OnItemSelectedListener {
         override fun onItemSelected(parent: AdapterView<*>?, view: View, position: Int, id: Long) {
             when (spinnerType) {
                 HSSplitZoneStatus.CONDITIONING_MODE -> handleConditionMode(
-                    position, hssEquip, profileType
+                    position, hssEquip, profileType ,userClickCheck
                 )
                 HSSplitZoneStatus.FAN_MODE -> handleFanMode(
-                    hssEquip, position, profileType
+                    hssEquip, position, profileType,userClickCheck
                 )
                 HSSplitZoneStatus.TARGET_HUMIDITY -> handleHumidityMode(
                     position, hssEquip.getId()
@@ -253,40 +265,49 @@ private fun setSpinnerListenerForHyperstatSplit(
 private fun handleConditionMode(
     selectedPosition: Int,
     hssEquip: HyperStatSplitEquip,
-    profileType: ProfileType
+    profileType: ProfileType,
+    userClickCheck: Boolean
 ) {
-    var actualConditioningMode = -1
+    if(userClickCheck) {
+        var actualConditioningMode = -1
 
-    // CPU/Economizer Profile has combination of conditioning modes
-    if(profileType == ProfileType.HYPERSTATSPLIT_CPU) {
-        actualConditioningMode  = getActualConditioningMode(hssEquip, selectedPosition)
-    }
-    if(actualConditioningMode != -1) {
-        updateHyperStatSplitUIPoints(
-            hssEquip.getId(), "domainName == \"" + DomainName.conditioningMode + "\"",
-            actualConditioningMode.toDouble(), CCUHsApi.getInstance().ccuUserName
-        )
-        val roomRef = HSUtil.getZoneIdFromEquipId(hssEquip.getId())
-        DesiredTempDisplayMode.setModeTypeOnUserIntentChange(roomRef, CCUHsApi.getInstance())
+        // CPU/Economizer Profile has combination of conditioning modes
+        if(profileType == ProfileType.HYPERSTATSPLIT_CPU) {
+            actualConditioningMode = getActualConditioningMode(hssEquip, selectedPosition)
+        }
+        if(actualConditioningMode != -1) {
+            updateHyperStatSplitUIPoints(
+                hssEquip.getId(), "domainName == \"" + DomainName.conditioningMode + "\"",
+                actualConditioningMode.toDouble(), CCUHsApi.getInstance().ccuUserName
+            )
+            val roomRef = HSUtil.getZoneIdFromEquipId(hssEquip.getId())
+            DesiredTempDisplayMode.setModeTypeOnUserIntentChange(roomRef, CCUHsApi.getInstance())
+        }
     }
 }
 
 
 // Save the fan mode in cache
-private fun handleFanMode(hssEquip: HyperStatSplitEquip, selectedPosition: Int, profileType: ProfileType) {
-    val cacheStorage = FanModeCacheStorage()
-    val actualFanMode: Int = when (profileType) {
-        ProfileType.HYPERSTATSPLIT_CPU -> {
-            getActualFanMode(hssEquip, selectedPosition)
+private fun handleFanMode(hssEquip: HyperStatSplitEquip, selectedPosition: Int, profileType: ProfileType ,userClickCheck: Boolean
+
+) {
+    if (userClickCheck) {
+        val cacheStorage = FanModeCacheStorage()
+        val actualFanMode: Int = when (profileType) {
+            ProfileType.HYPERSTATSPLIT_CPU -> {
+                getActualFanMode(hssEquip, selectedPosition)
+            }
+            else -> { -1 }
         }
-        else -> { -1 }
-    }
-    if(actualFanMode != -1) {
-        updateHyperStatSplitUIPoints(hssEquip.getId(), "domainName == \"" + DomainName.fanOpMode + "\"", actualFanMode.toDouble(), CCUHsApi.getInstance().ccuUserName)
-        if (selectedPosition != 0 && selectedPosition % 3 == 0)
-            cacheStorage.saveFanModeInCache(hssEquip.getId(), selectedPosition)
-        else
-            cacheStorage.removeFanModeFromCache(hssEquip.getId())
+        if (actualFanMode != -1) {
+            updateHyperStatSplitUIPoints(
+                hssEquip.getId(), "domainName == \"" + DomainName.fanOpMode + "\"",
+                actualFanMode.toDouble(), CCUHsApi.getInstance().ccuUserName)
+            if (selectedPosition != 0 && selectedPosition % 3 == 0)
+                cacheStorage.saveFanModeInCache(hssEquip.getId(), selectedPosition)
+            else
+                cacheStorage.removeFanModeFromCache(hssEquip.getId())
+        }
     }
 }
 

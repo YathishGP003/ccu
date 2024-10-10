@@ -154,7 +154,7 @@ private fun ScheduleTypeGroupSection(
     val scheduleTypeGroup = scheduleType.group
     val descriptionText = buildAnnotatedString {
         withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-            append("${tableContent.columnData[0].listOfColumnContent.size}")
+            append("${tableContent.columnData[0].columnSize}")
         }
         append(" zones following ${getScheduleType(scheduleType)} with ")
         withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
@@ -229,12 +229,12 @@ private fun prepareTableContent(scheduleImpacts: List<ScheduleImpact>): Map<Poss
         val floorNames = entry.value.map { it.floorName }
         val zoneNames = entry.value.map { it.zoneName }
         val impactedSlots = entry.value.map { it.impactedSlots }
-
+        val uniqueZoneNameSize = zoneNames.toSet().size
         TableContent(
             columnData = listOf(
-                TableColumns("Floor Name", floorNames),
-                TableColumns("Zone Name", zoneNames),
-                TableColumns("Impacted Slots", impactedSlots)
+                TableColumns("Floor Name", floorNames, uniqueZoneNameSize),
+                TableColumns("Zone Name", zoneNames, uniqueZoneNameSize),
+                TableColumns("Impacted Slots", impactedSlots, uniqueZoneNameSize)
             )
         )
     }

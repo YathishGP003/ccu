@@ -27,7 +27,8 @@ data class TableContent(
 
 data class TableColumns(
     val titleOfColumn: String?,
-    val listOfColumnContent: List<String>
+    val listOfColumnContent: List<String>,
+    val columnSize: Int
 )
 @Composable
 fun ScheduleImpactDialog(tableContent: TableContent, heightDp: Dp, index: Int) {

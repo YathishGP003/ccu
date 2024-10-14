@@ -158,7 +158,8 @@ public class MessagingListener implements ServerSentEvent.Listener {
                 && messageObject.has("command")
                 && RemoteCommandUpdateHandler.CMD.equals(messageObject.get("command").getAsString())
                 && (RemoteCommandUpdateHandler.RESTART_CCU.equals(messageObject.get(RemoteCommandUpdateHandler.CMD_TYPE).getAsString())
-                    || RemoteCommandUpdateHandler.RESTART_TABLET.equals(messageObject.get(RemoteCommandUpdateHandler.CMD_TYPE).getAsString()));
+                    || RemoteCommandUpdateHandler.RESTART_TABLET.equals(messageObject.get(RemoteCommandUpdateHandler.CMD_TYPE).getAsString())
+                    || RemoteCommandUpdateHandler.OTA_UPDATE_HOME_APP.equals(messageObject.get(RemoteCommandUpdateHandler.CMD_TYPE).getAsString()));
 
     }
 

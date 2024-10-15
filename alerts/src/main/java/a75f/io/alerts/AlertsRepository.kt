@@ -112,6 +112,10 @@ class AlertsRepository(
       }
    }
 
+   fun deleteAlertsForSequencerDef(alertDef : AlertDefinition){
+      dataStore.deleteAlertsForDef(alertDef)
+   }
+
    fun fetchAlertsDefinitions() {
       if (!haystack.siteSynced() || !haystack.authorised) {
          return
@@ -158,6 +162,8 @@ class AlertsRepository(
    fun getActiveCrashAlert() = dataStore.getActiveCrashAlert()
 
    fun getAlertsByCreator(creator: String): List<Alert> = dataStore.getAlertsByCreator(creator)
+
+   fun getAlertsByCreatorAndBlockId(creator: String, blockId: String): List<Alert> = dataStore.getAlertsByCreatorAndBlockId(creator, blockId)
 
    fun getActiveAlertsByRef(deviceRef: String): List<Alert> = dataStore.getActiveAlertsByRef(deviceRef)
 
@@ -269,6 +275,32 @@ class AlertsRepository(
          addAlert(alert)
          setAlertListChanged()
       }
+   }
+
+   fun generateAlertSequencerBlockly(
+      title: String,
+      msg: String,
+      equipRef: String,
+      creator: String,
+      blockId: String,
+      alertDef: AlertDefinition
+   ) {
+      //val ccuId = haystack.ccuRef.toVal()
+      val alert = AlertBuilder.build(
+         alertDef,
+         AlertFormatter.getFormattedMessage(alertDef, this),
+         haystack,
+         equipRef,
+         null
+      )
+      if (isOtaAlert(title)) {
+         alert.setFixed(true)
+         alert.setEndTime(DateTime().millis)
+      }
+      alert.setCreator(creator)
+      alert.setBlockId(blockId)
+      alert.mAlertType = alertDef.alert.mAlertType
+      addAlert(alert)
    }
 
    fun isOtaAlert(title: String): Boolean{
@@ -544,5 +576,11 @@ class AlertsRepository(
          }
       }
       return true
+   }
+
+   fun fixAlertByDef(alertDef : AlertDefinition ) {
+      dataStore.findAlerts(alertDef).forEach {
+         fixAlert(it)
+      }
    }
 }

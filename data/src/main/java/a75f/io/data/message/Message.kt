@@ -41,5 +41,7 @@ data class Message(@PrimaryKey val messageId: String,
     @ColumnInfo(name = MESSAGE_ATTRIBUTE_AUTO_CX_STATE)
     var autoCXState: Int = 0,
     @ColumnInfo(name = MESSAGE_ATTRIBUTE_LOG_LEVEL)
-                   var loglevel: String? = ""
+                   var loglevel: String? = "",
+    @ColumnInfo(name = MESSAGE_ATTRIBUTE_SEQUENCE_ID)
+    var sequenceId: String? = null,
 )

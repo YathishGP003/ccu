@@ -10,6 +10,7 @@ import static a75f.io.messaging.handler.RemoteCommandUpdateHandler.RESTART_CCU;
 import static a75f.io.messaging.handler.RemoteCommandUpdateHandler.RESTART_MODULE;
 import static a75f.io.messaging.handler.RemoteCommandUpdateHandler.RESTART_TABLET;
 import static a75f.io.messaging.handler.RemoteCommandUpdateHandler.SAVE_CCU_LOGS;
+import static a75f.io.messaging.handler.RemoteCommandUpdateHandler.SAVE_SEQUENCER_LOGS;
 import static a75f.io.messaging.handler.RemoteCommandUpdateHandler.UPDATE_CCU;
 import static a75f.io.messaging.handler.RemoteCommandUpdateHandler.UPDATE_CCU_LOG_LEVEL;
 import static a75f.io.renatus.ENGG.AppInstaller.DOWNLOAD_BASE_URL;
@@ -108,6 +109,15 @@ public class RemoteCommandHandlerUtil {
                     saveImportantDataBeforeSaveLogs();
                     UploadLogs.instanceOf().saveCcuLogs();
                 });
+                break;
+            case SAVE_SEQUENCER_LOGS: {
+                new Thread() {
+                    @Override
+                    public void run() {
+                        UploadLogs.instanceOf().saveCcuSequencerLogs(id);
+                    }
+                }.start();
+            }
                 break;
             case RESET_PASSWORD:
                 CCUUtils.resetPasswords(RenatusApp.getAppContext());

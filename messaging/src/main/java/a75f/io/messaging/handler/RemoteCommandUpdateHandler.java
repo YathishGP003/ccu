@@ -45,6 +45,7 @@ public class RemoteCommandUpdateHandler implements MessageHandler
     /**
      * Maintain Queue request for all the OTA request and process one by one
      */
+    public static final String SAVE_SEQUENCER_LOGS = "save_sequencer_logs";
 
     @Override
     public void handleMessage(@NonNull JsonObject msgObject, @NonNull Context context) {
@@ -54,6 +55,8 @@ public class RemoteCommandUpdateHandler implements MessageHandler
             String systemId = cmdLevel.equals("system")? (msgObject.get("id").isJsonNull() ? "":msgObject.get("id").getAsString()) : "";
             String ccuUID = CCUHsApi.getInstance().getCcuRef().toString().replace("@","");
             String messageId = msgObject.get("messageId").getAsString();
+            String ccuId = msgObject.get("id").getAsString();
+            String sequenceId = msgObject.get("sequenceId").getAsString();
 
             CcuLog.d("RemoteCommand","handle Msgs="+cmdType+","+cmdLevel+","+systemId+","+remoteCommandInterface);
             switch (cmdLevel){
@@ -109,6 +112,14 @@ public class RemoteCommandUpdateHandler implements MessageHandler
                                     remoteCommandInterface.updateRemoteCommands(cmdType, cmdLevel, "");
                                 else if(safeModeInterface != null)
                                     safeModeInterface.updateRemoteCommands(cmdType, cmdLevel, "");
+                                break;
+                            case SAVE_SEQUENCER_LOGS: {
+                                CcuLog.d("RemoteCommand", " handle save sequencer logs");
+                                if (remoteCommandInterface != null)
+                                    remoteCommandInterface.updateRemoteCommands(cmdType, cmdLevel, ccuId+"_"+sequenceId);
+                                else if (safeModeInterface != null)
+                                    safeModeInterface.updateRemoteCommands(cmdType, cmdLevel, ccuId+"_"+sequenceId);
+                            }
                                 break;
                             case RESET_PASSWORD:
                                 if (remoteCommandInterface != null)

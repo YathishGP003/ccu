@@ -1,0 +1,601 @@
+package a75f.io.sitesequencer;
+
+
+import com.eclipsesource.v8.V8;
+import com.eclipsesource.v8.V8Array;
+import com.eclipsesource.v8.V8Function;
+import com.eclipsesource.v8.V8Object;
+import com.eclipsesource.v8.V8Value;
+import com.google.gson.Gson;
+
+import org.projecthaystack.HDateTime;
+import org.projecthaystack.HDateTimeRange;
+import org.projecthaystack.HGrid;
+import org.projecthaystack.HNum;
+import org.projecthaystack.HRef;
+import org.projecthaystack.HTimeZone;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.HayStackConstants;
+import a75f.io.api.haystack.HisItem;
+import a75f.io.logger.CcuLog;
+import a75f.io.sitesequencer.log.LogLevel;
+import a75f.io.sitesequencer.log.LogOperation;
+import a75f.io.sitesequencer.log.SequencerLogsCallback;
+
+public class HaystackService {
+
+    private static final String TAG = SequencerParser.TAG_CCU_SITE_SEQUENCER;
+
+    private static final String MSG_NO_ENTITY = "No entity found for given filter";
+
+    private static final String MSG_NO_VALUE = "No value Found for given filter, please check query";
+    private static final String MSG_NO_ENTITY_FOR_ID = "No Entity found for given id, please check query";
+    private static final String MSG_CALCULATING = "calculating";
+    static final String MSG_SUCCESS = "success";
+    private static final String MSG_FAILED = "failed";
+
+    private static final String MSG_ERROR_NO_ENTITIES = "Error in finding Entities, please check query";
+    private static final String MSG_ERROR_NO_ENTITY = "Error in finding Entity, please check query";
+
+    private V8Function fetchFunction;
+    private V8Array v8Array;
+
+
+    private SequencerLogsCallback sequenceLogsCallback;
+
+    HaystackService(SequencerLogsCallback sequenceLogsCallback){
+        this.sequenceLogsCallback = sequenceLogsCallback;
+    }
+
+    // return array of values
+    public String hisReadManyInterpolateWithDateRange(Object hisPointIdObj, String startDate, String endDate, Object  contextHelper) {
+        String hisPointId = hisPointIdObj.toString();
+        String message = String.format(Locale.ENGLISH, "read, his values for  point with id = %s, startDate = %s, endDate = %s", hisPointId, startDate, endDate);
+        sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("HIS_READMANY_INTERPOLATE"), message, MSG_CALCULATING);
+        long startDateInMillis = convertStringToMilliseconds(startDate, "yyyy-MM-dd");
+        long endDateInMillis = convertStringToMilliseconds(endDate, "yyyy-MM-dd");
+
+        HDateTimeRange dateTimeRange = HDateTimeRange.make(HDateTime.make(startDateInMillis).date,
+                HDateTime.make(endDateInMillis).date, HTimeZone.DEFAULT);
+
+        List<HisItem> hisItems = CCUHsApi.getInstance()
+                .hisRead(hisPointId, dateTimeRange
+                );
+
+        Double[] values = hisItems.stream()
+                .map(HisItem::getVal)
+                .toArray(Double[]::new);
+        String finalMessage = String.format(Locale.ENGLISH, "found values %s", Arrays.toString(values));
+        sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("HIS_READMANY_INTERPOLATE"), finalMessage, MSG_SUCCESS);
+        return new Gson().toJson(values);
+    }
+
+    public String hisReadManyInterpolateWithInterval(String hisPointId, String rangeValue, String rangeUnit, Object contextHelper) {
+        String message = String.format(Locale.ENGLISH, "read, his values for  point with id = %s, rangeValue = %s, rangeUnit = %s", hisPointId, rangeValue, rangeUnit);
+        sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("HIS_READMANY_INTERPOLATE"), message, MSG_CALCULATING);
+        CcuLog.d(TAG, "---hisReadManyInterpolateWithInterval##$--hisPointId-" + hisPointId + "<--rangeValue-->" + rangeValue + "<--rangeUnit-->" + rangeUnit);
+        int totalMinutes = 0;
+        if (rangeUnit.equalsIgnoreCase("min")) {
+            totalMinutes = Integer.parseInt(rangeValue);
+            return hisReadManyInterpolateWithInterval(hisPointId, Long.parseLong(String.valueOf(totalMinutes)), contextHelper);
+        } else if (rangeUnit.equalsIgnoreCase("hour")) {
+            totalMinutes = 60 * Integer.parseInt(rangeValue);
+            return hisReadManyInterpolateWithInterval(hisPointId, Long.parseLong(String.valueOf(totalMinutes)), contextHelper);
+        } else if (rangeUnit.equalsIgnoreCase("day")) {
+            totalMinutes = 24 * 60 * Integer.parseInt(rangeValue);
+            return hisReadManyInterpolateWithInterval(hisPointId, Long.parseLong(String.valueOf(totalMinutes)), contextHelper);
+        }
+        sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("HIS_READMANY_INTERPOLATE"), "failed to get values", MSG_FAILED);
+        return "";
+    }
+
+    // return array of values
+    public String hisReadManyInterpolateWithInterval(String hisPointId, long minutes, Object contextHelper) {
+        String message = String.format(Locale.ENGLISH, "read his values for  point with id = %s, minutes = %d", hisPointId, minutes);
+        sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("HIS_READMANY_INTERPOLATE"), message, MSG_CALCULATING);
+        CcuLog.d(TAG, "---hisReadManyInterpolateWithInterval##--hisPointId-"+hisPointId + "<--minutes-->"+minutes);
+        long endDateInMillis = System.currentTimeMillis();
+        long startDateInMillis = endDateInMillis - (minutes * 60 * 1000);
+
+        HDateTimeRange dateTimeRange = HDateTimeRange.make(HDateTime.make(startDateInMillis).date,
+                HDateTime.make(endDateInMillis).date, HTimeZone.DEFAULT);
+
+        List<HisItem> hisItems = CCUHsApi.getInstance()
+                .hisRead(hisPointId, dateTimeRange
+                );
+
+        Double[] values = hisItems.stream()
+                .map(HisItem::getVal)
+                .toArray(Double[]::new);
+        String finalMessage = String.format(Locale.ENGLISH, "found values %s", Arrays.toString(values));
+        sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("HIS_READMANY_INTERPOLATE"), finalMessage, MSG_SUCCESS);
+        return new Gson().toJson(values);
+    }
+
+    public void pointWrite(String id, int level, double value, boolean override, Object contextHelper) {
+        String message = String.format("writing point with id = %s, level = %d, value = %s", id, level, value);
+        sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("POINT_WRITE"), message, MSG_CALCULATING);
+        CcuLog.d(TAG, "---pointWrite##--id-"+id + "<--level-->"+level+"<--override-->"+override);
+        CCUHsApi.getInstance().pointWrite(HRef.copy(id), level, "Seq_Demo", HNum.make(value), HNum.make(0));
+    }
+
+    public void pointWriteMany(String[] ids, int level, double value, boolean override, Object contextHelper) {
+        CcuLog.d(TAG, "---pointWriteMany##--id-"+ids.length + "<--level-->"+level+"<--override-->"+override);
+        for(int i=0;i<ids.length; i++){
+            String message = String.format("writing point with, id = %s, level = %d, value = %s", HRef.copy(ids[i]), level, value);
+            sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("POINT_WRITE"), message, MSG_CALCULATING);
+            CCUHsApi.getInstance().pointWrite(HRef.copy(ids[i]), level, "Seq_Demo", HNum.make(value), HNum.make(0));
+        }
+    }
+
+    public void pointWriteMany(V8Array ids, int level, double value, boolean override, Object contextHelper) {
+        CcuLog.d(TAG, "---pointWriteMany##--id-"+ids.length() + "<--level-->"+level+"<--override-->"+override);
+        for(int i=0;i<ids.length(); i++){
+            String pointId = ids.getString(i);
+            String message = String.format("writing point with, id = %s, level = %d, value = %s", HRef.copy(pointId), level, value);
+            sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("POINT_WRITE"), message, MSG_CALCULATING);
+            CCUHsApi.getInstance().pointWrite(HRef.copy(pointId), level, "Seq_Demo", HNum.make(value), HNum.make(0));
+        }
+        ids.close();
+    }
+
+    public boolean hisWriteMany(Map<String, Double> mapOfPointIds, Object contextHelper) {
+        CcuLog.d(TAG, "---hisWriteMany##--id-" + mapOfPointIds.size());
+        sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("HIS_WRITE_MANY"), mapOfPointIds.toString(), MSG_CALCULATING);
+        if (!mapOfPointIds.isEmpty()) {
+            for (Map.Entry<String, Double> entry : mapOfPointIds.entrySet()) {
+                String key = entry.getKey();
+                Double value = entry.getValue();
+                CcuLog.d(TAG, "---hisWriteMany##--id-" + key + "<--value-->" + value);
+                CCUHsApi.getInstance().writeHisValById(key, value);
+                sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("HIS_WRITE_MANY"), "writing --> " + value + "<--at-->" + key, MSG_SUCCESS);
+            }
+            return true;
+        }
+        sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("HIS_WRITE_MANY"), "failed during his write many", MSG_FAILED);
+        return false;
+    }
+
+    public boolean hisWriteMany(String[] ids, Double value, Object contextHelper) {
+        Map<String, Double> idValueMap = Arrays.stream(ids).collect(Collectors.toMap(key -> key, key -> value, (a, b) -> b));
+        return hisWriteMany(idValueMap, contextHelper);
+    }
+
+    // returns list of entities
+    public String findByFilter(String filter, Object contextHelper) {
+        sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("FIND_BY_FILTER"), filter, MSG_CALCULATING);
+        CcuLog.d(TAG, "---findByFilter##--original filter-" + filter);
+        List<HashMap> list = findByFilterCustom(filter, contextHelper);
+        if (list.size() > 0) {
+            sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("FIND_BY_FILTER"), getCustomMessage(list.size()), MSG_SUCCESS);
+        } else {
+            sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("FIND_BY_FILTER"), MSG_ERROR_NO_ENTITIES, MSG_FAILED);
+        }
+        String result = new Gson().toJson(list);
+        CcuLog.d(TAG, "---findByFilter##--original filter result->" + result);
+        return result;
+    }
+
+
+    // returns single entity
+    public String findEntityByFilter(String filter, Object contextHelper) {
+        CcuLog.d(TAG, "---findEntityByFilter##--original filter-" + filter);
+        sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("FIND_ENTITY_BY_FILTER"), filter, MSG_CALCULATING);
+        List<HashMap> list = findByFilterCustom(filter, contextHelper);
+        if(!list.isEmpty()){
+            String result = new Gson().toJson(list.get(0));
+            sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("FIND_ENTITY_BY_FILTER"), getCustomMessageEntityId(result), MSG_SUCCESS);
+            return result;
+        }else{
+            sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("FIND_ENTITY_BY_FILTER"), MSG_ERROR_NO_ENTITY, MSG_FAILED);
+            return "[]";
+        }
+    }
+
+    public Integer findValueByFilter(String filter, Object contextHelper) {
+        CcuLog.d(TAG, "---findValueByFilter##--original filter-" + filter);
+        sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("FETCH_VALUE_BY_ID"), filter, MSG_CALCULATING);
+        List<HashMap> list = findByFilterCustom(filter, contextHelper);
+
+        if(!list.isEmpty()){
+            String entityId = list.get(0).get("id").toString();
+            int val = fetchValueByIdOnly(entityId, contextHelper);
+            sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("FETCH_VALUE_BY_ID"), getCustomMessageValue(val), MSG_SUCCESS);
+            return val;
+        }else{
+            sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("FIND_BY_FILTER"), MSG_NO_VALUE, MSG_FAILED);
+            return null;
+        }
+    }
+
+    public String findById(String id, Object contextHelper) {
+        sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("FIND_BY_ID"), "looking entity for id-->"+id, MSG_CALCULATING);
+        CcuLog.d(TAG, "---findById##--id->" + id);
+        HashMap result = CCUHsApi.getInstance().read(id);
+        if(result != null){
+            String entityResult = new Gson().toJson(result);
+            sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("FETCH_VALUE_BY_ID"), getCustomMessageEntityId(entityResult), MSG_SUCCESS);
+            return entityResult;
+        }else{
+            sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("FIND_BY_ID"), MSG_NO_ENTITY_FOR_ID, MSG_FAILED);
+            return "";
+        }
+    }
+
+    public int fetchValueByHisReadMany(String id, Object contextHelper) {
+        sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("FETCH_VALUE_BY_HIS_READ_MANY"), "looking value for id-->"+id, MSG_CALCULATING);
+        return fetchValueByIdOnly(id, contextHelper);
+    }
+
+    public int fetchValueByPointWriteMany(String id, Double level, Object contextHelper) {
+        sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("FETCH_VALUE_BY_POINT_WRITE_MANY"), "looking value for id-->"+id, MSG_CALCULATING);
+        int returnedValue = (int) (CCUHsApi.getInstance().readDefaultValByLevel(id, (int) (level.doubleValue()))).doubleValue();
+        sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("FETCH_VALUE_BY_POINT_WRITE_MANY"), "value is "+returnedValue, MSG_SUCCESS);
+        return returnedValue;
+    }
+
+
+
+    private static long convertStringToMilliseconds(String dateString, String format) {
+        SimpleDateFormat sdf = new SimpleDateFormat(format);
+        try {
+            Date date = sdf.parse(dateString);
+            return date.getTime();
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return -1; // Handle the parsing error accordingly
+        }
+    }
+
+    private List<HashMap> findByFilterCustom(String filter, Object contextHelper) {
+        CcuLog.d(TAG, "---findByFilterCustom##--original filter-"+filter);
+        filter = removeFirstAndLastParentheses(filter);
+
+          // below code need to be fixed
+        if(filter.contains("port")){
+            filter = filter.replaceAll("port==@", "port==");
+        }
+        if(filter.contains("dis")){
+            filter = filter.replaceAll("dis==@", "dis==");
+        }
+        if(filter.contains("group")){
+            filter = filter.replaceAll("group==@", "group==");
+        }
+        filter = fixInvertedCommas(filter);
+        filter = removeQuotesFromIdValue(filter);
+
+        CcuLog.d(TAG, "---findByFilter##--final filter for  readGrid->"+filter);
+        HGrid hGrid = CCUHsApi.getInstance().readGrid(filter);
+        List<HashMap> list = CCUHsApi.getInstance().HGridToListPlainString(hGrid);
+        return list;
+    }
+
+    private static String removeQuotesFromIdValue(String input) {
+        // Define the pattern to find "id==" followed by a quoted string
+        String pattern = "id==\"([^\"]*)\"";
+
+        // Use regex to find and replace the quoted id value
+        input = input.replaceAll(pattern, "id==$1");
+
+        return input;
+    }
+
+    private static String removeFirstAndLastParentheses(String input) {
+        input = input.replaceAll("@@","@");
+        if (input.startsWith("(") && input.endsWith(")")) {
+            return input.substring(1, input.length() - 1);
+        } else {
+            return input;
+        }
+    }
+
+    public void hisWrite(String id, Double val, Object contextHelper) {
+        sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("HIS_WRITE"), "id-->"+id+"<--val-->"+val, MSG_CALCULATING);
+        CcuLog.d(TAG, "---hisWrite##--id-"+id+"<--val-->"+val);
+        CCUHsApi.getInstance().writeHisValById(id, val);
+    }
+
+    // if writable tag is there, return value of highest level
+    // if writable tag is not there, check for his item and return latest value
+    public Integer fetchValueByIdOnly(String filter, Object contextHelper) {
+        sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("FETCH_VALUE_BY_ID"), "looking value for id-->"+filter, MSG_CALCULATING);
+        Integer output = null;
+        try {
+            if(CCUHsApi.getInstance().readMapById(filter).get("writable") != null) {
+                output = (int)(CCUHsApi.getInstance().readDefaultValById(filter).doubleValue());
+            }else{
+                output = (int)(CCUHsApi.getInstance().readHisValById(filter).doubleValue());
+            }
+            CcuLog.d(TAG, "---fetchValueById###--id-"+filter+"<---->"+output);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("FETCH_VALUE_BY_ID"), "value -->"+output, MSG_CALCULATING);
+        if(contextHelper instanceof V8Object){
+            ((V8Object) contextHelper).close();
+        }
+        return output;
+    }
+
+    // fetch values for given level for all point ids
+    public String fetchValueByIds(String[] ids, String level, Object contextHelper) {
+        CcuLog.d(TAG, "---fetchValueById##--id-"+ids.length + "<--level-->"+level);
+        Double[] values = new Double[ids.length];
+        for(int i=0;i<ids.length; i++){
+            CcuLog.d(TAG, "---fetchValueById##--id-"+ids[i] + "<--level-->"+level);
+            values[i] = CCUHsApi.getInstance().readHisValById(ids[i]).doubleValue();
+        }
+        return new Gson().toJson(values);
+    }
+    public Double[] fetchValueByIdsList(ArrayList<String> ids, String level, Object contextHelper) {
+        CcuLog.d(TAG, "---fetchValueByIdThree ids list size##--id-" + ids.size() + "<--level-->" + level);
+        Double[] values = new Double[ids.size()]; // Initialize the array to hold values
+
+        for (int i = 0; i < ids.size(); i++) {
+            String value = ids.get(i);    // Retrieve the string value
+            CcuLog.d(TAG, "---fetchValueById##--id-" + value + "<--level-->" + level);
+            values[i] = fetchValueOfPoint(value, level);//CCUHsApi.getInstance().readHisValById(value).doubleValue();
+        }
+        if(contextHelper instanceof V8Object){
+            ((V8Object) contextHelper).close();
+        }
+        return values;//new Gson().toJson(values);
+    }
+
+    public V8Function fetchValueById(V8 v8) {
+        if (fetchFunction == null) {
+            fetchFunction = new V8Function(v8, (receiver, parameters) -> {
+                V8Array resultArray = null;
+                try {
+                    int paramCount = parameters.length();
+                    CcuLog.d(TAG, "---fetchValueById##--paramCount-" + paramCount + "<--parameters-->" + parameters);
+
+                    if (paramCount == 2 && parameters.getType(0) == V8Value.STRING) {
+                        String filter = parameters.getString(0);
+                        Object contextHelper = parameters.get(1);
+                        return fetchValueByIdOnly(filter, contextHelper);
+                    }
+
+                    if (paramCount == 3 && parameters.getType(0) == V8Value.V8_ARRAY) {
+                        V8Array ids = parameters.getArray(0);
+                        ArrayList<String> idList = convertV8ArrayToList(ids);
+                        ids.close(); // Release the V8Array
+                        if (ids.isReleased()) {
+                            CcuLog.d(TAG, "-------------fetchValueById##--ids is released");
+                        } else {
+                            CcuLog.d(TAG, "-------------fetchValueById##--ids is not released");
+                        }
+                        String level = parameters.getString(1);
+                        Object contextHelper = parameters.get(2);
+
+                        Double[] resultArrayOfDoubles = fetchValueByIdsList(idList, level, contextHelper);
+                        resultArray = convertDoubleArrayToV8Array(v8, resultArrayOfDoubles);
+                        return resultArray;
+                    }
+
+                    throw new IllegalArgumentException("Invalid arguments for fetchValueById");
+                } finally {
+                    CcuLog.d(TAG, "-------------fetchValueById##--release resources if something is not returned back to java script");
+                }
+            });
+        }
+        return fetchFunction;
+    }
+
+    private V8Array convertDoubleArrayToV8Array(V8 v8, Double[] doubleArray) {
+        V8Array v8Array = new V8Array(v8);
+        for (Double value : doubleArray) {
+            v8Array.push(value);
+        }
+        return v8Array;
+    }
+
+    public ArrayList<String> convertV8ArrayToList(V8Array v8Array) {
+        ArrayList<String> list = new ArrayList<>();
+
+        for (int i = 0; i < v8Array.length(); i++) {
+            // Assuming the V8Array contains strings
+            if (v8Array.getType(i) == V8Array.STRING) {
+                list.add(v8Array.getString(i));
+            } else {
+                throw new IllegalArgumentException("V8Array contains non-string element at index " + i);
+            }
+        }
+
+        return list;
+    }
+
+    private Double fetchValueOfPoint(String pointId, String level){
+        Double output = null;
+        try {
+            if(CCUHsApi.getInstance().readMapById(pointId).get("writable") != null) {
+                output = fetchValueByGivenLevel(pointId, level);
+            }else{
+                output = (CCUHsApi.getInstance().readHisValById(pointId));
+            }
+            CcuLog.d(TAG, "---fetchValueOfPoint###--id-"+pointId+"<---->"+output);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return output;
+    }
+
+    private Double fetchValueByGivenLevel(String pointId, String level) {
+        int levelInArray = 1;
+        if (level.equalsIgnoreCase("default")) {
+            levelInArray = HayStackConstants.DEFAULT_POINT_LEVEL - 1;
+        } else if (level.equalsIgnoreCase("highest")) {
+            levelInArray = 17;
+        } else {
+            levelInArray = Integer.parseInt(level) - 1;
+        }
+        ArrayList<HashMap> values = CCUHsApi.getInstance().readPoint(pointId);
+        if (values != null && values.size() > 0) {
+            HashMap valMap = values.get(levelInArray);
+            return valMap.get("val") == null ? 0 : Double.parseDouble(valMap.get("val").toString());
+        } else {
+            return 0.0;
+        }
+    }
+
+    public void printThis(String obj){
+        CcuLog.d(TAG, "printThis---obj--"+obj);
+    }
+
+
+    public static String checkSiteRef(String inputString) {
+        CcuLog.d(TAG, "checkSiteRef--"+inputString);
+        //String inputString = "(heating and stage1 and system and cmd) and siteRef==@b74fac48-d267-43fd-9bc6-7df1ed244661 and ccuRef==@b74fac48-d267-43fd-9bc6-7df1ed244662";
+
+        // Define the regular expression pattern to match the siteRef value
+        Pattern pattern = Pattern.compile("siteRef==@([a-f0-9-]+)");
+
+        // Create a Matcher object
+        Matcher matcher = pattern.matcher(inputString);
+
+        // Check if the pattern is found
+        if (matcher.find()) {
+            // Extract the siteRef value
+            String siteRefValue = matcher.group(1);
+
+            // Format the siteRef value and replace it in the original string
+            return inputString.replace(matcher.group(), "siteRef==\"@" + siteRefValue + "\"");
+        }
+        return inputString;
+    }
+
+    public static String checkCcuRef(String inputString) {
+        CcuLog.d(TAG, "checkCcuRef--"+inputString);
+        //String inputString = "(heating and stage1 and system and cmd) and siteRef==@b74fac48-d267-43fd-9bc6-7df1ed244661 and ccuRef==@b74fac48-d267-43fd-9bc6-7df1ed244662";
+
+        // Define the regular expression pattern to match the siteRef value
+        Pattern pattern = Pattern.compile("ccuRef==@([a-f0-9-]+)");
+
+        // Create a Matcher object
+        Matcher matcher = pattern.matcher(inputString);
+
+        // Check if the pattern is found
+        if (matcher.find()) {
+            // Extract the siteRef value
+            String siteRefValue = matcher.group(1);
+
+            // Format the siteRef value and replace it in the original string
+            return inputString.replace(matcher.group(), "ccuRef==\"@" + siteRefValue + "\"");
+        }
+        return inputString;
+    }
+
+    public static String checkCcuPort(String inputString) {
+        CcuLog.d(TAG, "checkCcuPort--"+inputString);
+        inputString = inputString.replaceAll("@","");
+
+        // Define the regular expression pattern to match the siteRef value
+        Pattern pattern = Pattern.compile("port==([^\\\\s]+)");
+
+        // Create a Matcher object
+        Matcher matcher = pattern.matcher(inputString);
+
+        // Check if the pattern is found
+        if (matcher.find()) {
+            // Extract the siteRef value
+            String siteRefValue = matcher.group(1);
+
+            // Format the siteRef value and replace it in the original string
+            return inputString.replace(matcher.group(), "port==\"" + siteRefValue + "\"");
+        }
+        return inputString;
+    }
+
+    public static String checkCcuDis(String inputString) {
+        inputString = inputString.replaceAll("@","");
+
+        // Define the regular expression pattern to match the siteRef value
+        Pattern pattern = Pattern.compile("dis==([^\\\\s]+)");
+
+        // Create a Matcher object
+        Matcher matcher = pattern.matcher(inputString);
+
+        // Check if the pattern is found
+        if (matcher.find()) {
+            // Extract the siteRef value
+            String siteRefValue = matcher.group(1);
+
+            // Format the siteRef value and replace it in the original string
+            String formattedString = inputString.replace(matcher.group(), "dis==\"" + siteRefValue + "\"");
+            // Print the modified string
+            return formattedString;
+        }
+        return inputString;
+    }
+
+    private static String fixInvertedCommas(String input) {
+        // Define the pattern
+        Pattern pattern = Pattern.compile("==([^\\s]+)");
+
+        // Match the pattern against the input
+        Matcher matcher = pattern.matcher(input);
+
+        // StringBuffer to build the modified string
+        StringBuffer result = new StringBuffer();
+
+        // Find and replace the pattern
+        while (matcher.find()) {
+            // Extract the value after "=="
+            String extractedValue = matcher.group(1);
+
+            // Add inverted commas around the extracted value
+            String replacement = "==\"" + extractedValue + "\"";
+
+            // Replace the matched part with the modified value
+            matcher.appendReplacement(result, replacement);
+        }
+
+        // Append the remaining part of the input
+        matcher.appendTail(result);
+        String finalResult = result.toString();
+        // Print the modified string
+        return finalResult;
+    }
+
+    private String getCustomMessage(int size){
+        return "list size is " + size;
+    }
+
+    private String getCustomMessageValue(int value){
+        return "value is " + value;
+    }
+
+    private String getCustomMessageEntityId(String entity){
+        return "entity found with id ->" + entity;
+    }
+
+    private String getMsgNoEntity(){
+        return "No entity found for given filter";
+    }
+
+    public void release() {
+        if (fetchFunction != null) {
+            fetchFunction.close(); // Release the V8Function
+            fetchFunction = null; // Clear reference
+        }
+
+        if (v8Array != null) {
+            v8Array.close(); // Release the V8Array
+            v8Array = null; // Clear reference
+        }
+    }
+}

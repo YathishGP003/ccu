@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="a75f.io.sitesequencer" >
+
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
+<!--    <service
+        android:name=".SequencerJobService"
+        android:permission="android.permission.BIND_JOB_SERVICE">
+        <intent-filter>
+            <action android:name="android.app.job.JobService" />
+        </intent-filter>
+    </service>-->
+
+</manifest>

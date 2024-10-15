@@ -8,6 +8,8 @@ import a75f.io.logic.cloud.RemoteFileStorageManager
 import a75f.io.logic.cloudservice.ServiceGenerator
 import a75f.io.logic.filesystem.FileSystemTools
 import a75f.io.logic.reportNull
+import a75f.io.sitesequencer.TAG_CCU_SITE_SEQUENCER
+import android.os.Environment
 import java.io.File
 
 /**
@@ -95,5 +97,49 @@ class UploadLogs(
          fileId = fileId)
 
       CcuLog.i(L.TAG_CCU, "file uploaded")
+   }
+
+   fun saveCcuSequencerLogs(id: String) {
+      CcuLog.i(TAG_CCU_SITE_SEQUENCER, "saveCcuSequencerLogs id -> $id")
+      if(id.isEmpty() || id.isBlank() || !id.contains("_")) {
+         CcuLog.i(TAG_CCU_SITE_SEQUENCER, "saveCcuSequencerLogs id is empty -> $id")
+         return
+      }
+      val fileName = "seq_@$id.json"
+      val dateStr = fileSystemTools.timeStamp()
+      val ccuGuid = haystackApi.ccuId ?: "ccu-id-missing"
+      val ccuGuidTrimmed = if (id.startsWith("@")) id.drop(1) else id
+      val logDir = "ccu/sequencer"
+      val seqFile = fileSystemTools.getBacAppLogs( logDir, fileName)
+      val listOfFiles: List<File> = mutableListOf<File>().apply {
+         seqFile?.let { add(it) }
+      }
+      if(listOfFiles.isEmpty()){
+            CcuLog.i(TAG_CCU_SITE_SEQUENCER, "No sequencer logs found")
+            return
+      }
+      // This specific file id format is a requirement (Earth(CCU)-4726)
+      val fileId = ccuGuidTrimmed + "_" + dateStr + ".zip"
+      val zipFile = fileSystemTools.zipFiles(listOfFiles, fileId)
+      val siteRef = haystackApi.siteIdRef.toString()
+
+      if (siteRef == null) {
+         // not the exact way I intended to use reportNull, but it works to report a bug
+         siteRef.reportNull("null", "siteId missing while trying to save log")
+         CcuLog.i(TAG_CCU_SITE_SEQUENCER, "saveCcuSequencerLogs site ref is null")
+         return
+      }
+
+      // drop the "@"
+      val siteId = if (siteRef.startsWith("@")) siteRef.drop(1) else siteRef
+
+      fileStorageManager.uploadFile(
+         zipFile!!,
+         mimeType =  "application/zip",
+         container = "seqlogs",
+         siteId = siteId,
+         fileId = fileId)
+
+      CcuLog.i(TAG_CCU_SITE_SEQUENCER, "sequencer log files uploaded")
    }
 }

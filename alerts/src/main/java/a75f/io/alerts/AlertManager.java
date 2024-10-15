@@ -140,6 +140,12 @@ public class AlertManager implements CCUHsApi.EntityDeletedListener
         repo.generateAlertBlockly(title,msg, equipRef, creator, blockId);
     }
 
+    public void generateAlertSequencerBlockly(String title, String msg, String equipRef,
+                                              String creator, String blockId, AlertDefinition alertDef){
+        if (! repoCheck()) return;
+        repo.generateAlertSequencerBlockly(title,msg, equipRef, creator, blockId, alertDef);
+    }
+
     public void generateCMDeadAlert(String title, String msg){
         if (! repoCheck()) return;
         repo.generateCMDeadAlert(title,msg);
@@ -165,6 +171,12 @@ public class AlertManager implements CCUHsApi.EntityDeletedListener
         if (! repoCheck()) return Collections.emptyList();
 
         return repo.getAlertsByCreator(creator);
+    }
+
+    public List<Alert> getActiveAlertsByCreatorAndBlockId(String creator, String blockId) {
+        if (! repoCheck()) return Collections.emptyList();
+
+        return repo.getAlertsByCreatorAndBlockId(creator, blockId);
     }
 
     public List<Alert> getUnsyncedAlerts() {
@@ -219,6 +231,16 @@ public class AlertManager implements CCUHsApi.EntityDeletedListener
     public void deleteAlertDefinition(String _id) {
         if (! repoCheck()) return;
         repo.deleteAlertDefinition(_id);
+    }
+
+    public void deleteAlertsForDef(AlertDefinition alertDef){
+        if (! repoCheck()) return;
+        repo.deleteAlertsForSequencerDef(alertDef);
+    }
+
+    public void fixAlertByDef(AlertDefinition alertDef){
+        if (! repoCheck()) return;
+        repo.fixAlertByDef(alertDef);
     }
 
     // This method seems to mark an alert as fixed if it has been synced, and

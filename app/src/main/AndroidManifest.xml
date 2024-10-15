@@ -153,6 +153,10 @@
         <service android:name=".WeatherDataDownloadService"
             tools:ignore="Instantiatable" />
 
+        <receiver
+            android:name="a75f.io.sitesequencer.SequencerAlarmReceiver"
+            android:exported="false" />
+
     </application>
 
 </manifest>

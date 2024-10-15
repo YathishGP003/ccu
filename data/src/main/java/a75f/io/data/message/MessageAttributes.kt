@@ -20,4 +20,5 @@ const val MESSAGE_ATTRIBUTE_ERR_MESSAGE = "error"
 const val MESSAGE_ATTRIBUTE_AUTO_CX_STOP_TIME = "stopDateTime"
 const val MESSAGE_ATTRIBUTE_AUTO_CX_STATE = "state"
 const val MESSAGE_ATTRIBUTE_LOG_LEVEL = "logLevel"
+const val MESSAGE_ATTRIBUTE_SEQUENCE_ID = "sequenceId"
 

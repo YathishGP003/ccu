@@ -20,7 +20,7 @@ import java.lang.reflect.Type
 import java.util.*
 
 
-@Database(entities = [Message::class,HayStackEntity ::class, WritableArray :: class], version = 5, exportSchema = false)
+@Database(entities = [Message::class,HayStackEntity ::class, WritableArray :: class], version = 6, exportSchema = false)
 @TypeConverters(Converters::class, WriteArrayTypeConverter::class)
 abstract class RenatusDatabase : RoomDatabase(){
     abstract fun messageDao(): MessageDao
@@ -34,6 +34,17 @@ companion object {
             Log.d("RenatusDatabase", "Migrating from 4 to 5")
             try {
                 database.execSQL("ALTER TABLE messages ADD COLUMN logLevel TEXT")
+            } catch (e: Exception) {
+                e.printStackTrace()
+                database.execSQL("DROP TABLE messages")
+            }
+        }
+    }
+    val MIGRATION_5_6: Migration = object : Migration(5, 6) {
+        override fun migrate(database: SupportSQLiteDatabase) {
+            Log.d("RenatusDatabase", "Migrating from 5 to 6")
+            try {
+                database.execSQL("ALTER TABLE messages ADD COLUMN sequenceId TEXT")
             } catch (e: Exception) {
                 e.printStackTrace()
                 database.execSQL("DROP TABLE messages")

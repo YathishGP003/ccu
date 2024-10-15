@@ -102,6 +102,13 @@ class AlertsDataStore @JvmOverloads constructor(
          .forEach { deleteAlert(it) }
    }
 
+   fun findAlerts(alertDef: AlertDefinition): MutableList<Alert> {
+      val alertQuery = alertBox.query()
+      alertQuery.equal(Alert_.isFixed, false)
+         .equal(Alert_.mTitle, alertDef.alert.mTitle)
+      return alertQuery.build().find()
+   }
+
    fun cancelAppRestarted() {
       alertsSharedPrefs.edit().putBoolean(PREFS_ALERTS_APP_RESTART, false).apply()
       CCUHsApi.getInstance().writeHisValByQuery("app and restart",0.0)
@@ -220,6 +227,15 @@ class AlertsDataStore @JvmOverloads constructor(
       val alertQuery = alertBox.query()
       alertQuery.equal(Alert_.isFixed, false)
          .equal(Alert_.creator, creator)
+         .orderDesc(Alert_.startTime)
+      return alertQuery.build().find()
+   }
+
+   fun getAlertsByCreatorAndBlockId(creator: String, blockId: String): List<Alert> {
+      val alertQuery = alertBox.query()
+      alertQuery.equal(Alert_.isFixed, false)
+         .equal(Alert_.creator, creator)
+         .equal(Alert_.blockId, blockId)
          .orderDesc(Alert_.startTime)
       return alertQuery.build().find()
    }

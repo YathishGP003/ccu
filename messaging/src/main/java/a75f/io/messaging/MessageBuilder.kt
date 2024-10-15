@@ -9,6 +9,7 @@ import a75f.io.data.message.MESSAGE_ATTRIBUTE_LEVEL
 import a75f.io.data.message.MESSAGE_ATTRIBUTE_LOG_LEVEL
 import a75f.io.data.message.MESSAGE_ATTRIBUTE_MESSAGE_ID
 import a75f.io.data.message.MESSAGE_ATTRIBUTE_REMOTE_CMD_TYPE
+import a75f.io.data.message.MESSAGE_ATTRIBUTE_SEQUENCE_ID
 import a75f.io.data.message.MESSAGE_ATTRIBUTE_SITE_ID
 import a75f.io.data.message.MESSAGE_ATTRIBUTE_VERSION
 import a75f.io.data.message.MESSAGE_ATTRIBUTE_WHO
@@ -80,6 +81,10 @@ fun jsonToMessage(msgJson : JsonObject) : Message {
 
     if(messagePojo.remoteCmdType.equals(RemoteCommandUpdateHandler.UPDATE_CCU_LOG_LEVEL)){
         messagePojo.loglevel = messageContent.asJsonObject.get(MESSAGE_ATTRIBUTE_LOG_LEVEL)?.asString
+    }
+
+    if(messagePojo.remoteCmdType.equals(RemoteCommandUpdateHandler.SAVE_SEQUENCER_LOGS)){
+        messagePojo.sequenceId = messageContent.asJsonObject.get(MESSAGE_ATTRIBUTE_SEQUENCE_ID)?.asString
     }
 
     return messagePojo

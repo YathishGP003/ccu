@@ -91,6 +91,8 @@ import a75f.io.logic.util.CCUProxySettings;
 import a75f.io.logic.util.MigrationUtil;
 import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.logic.watchdog.Watchdog;
+import a75f.io.sitesequencer.SequenceManager;
+import a75f.io.sitesequencer.SequencerSchedulerUtil;
 import a75f.io.util.ExecutorTask;
 
 /*
@@ -249,6 +251,8 @@ public class Globals {
         PreferenceUtil.setContext(this.mApplicationContext);
         CCUHsApi.getInstance().testHarnessEnabled = testHarness;
         AlertManager.getInstance(mApplicationContext, renatusServicesUrls.getAlertsUrl()).initiateAlertOperations(getScheduledThreadPool());
+        SequenceManager.getInstance(mApplicationContext, renatusServicesUrls.getSequencerUrl())
+                .fetchPredefinedSequencesIfEmpty();
 
         //set SN address band
         try {

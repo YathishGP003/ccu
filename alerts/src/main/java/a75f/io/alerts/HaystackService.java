@@ -249,7 +249,6 @@ public class HaystackService {
         CCUHsApi.getInstance().writeHisValById(id, val);
     }
 
-
     // if writable tag is there, return value of highest level
     // if writable tag is not there, check for his item and return latest value
     public Integer fetchValueById(String filter, Object contextHelper) {

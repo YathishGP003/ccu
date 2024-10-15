@@ -5,4 +5,5 @@ include ':app', ':logic', ':device', ':usbserial', ':alerts', ':algos', ':haysta
 include ':restserver'
 include ':data'
 include ':domain'
+include ':sitesequencer'
 include ':util'

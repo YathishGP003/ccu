@@ -107,6 +107,7 @@ dependencies {
     implementation project(':data')
     implementation project(':alerts')
     implementation project(':domain')
+    implementation project(':sitesequencer')
     implementation project(':util')
 
     //RxJava

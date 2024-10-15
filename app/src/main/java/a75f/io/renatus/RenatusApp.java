@@ -20,6 +20,7 @@ import java.io.InputStream;
 import a75f.io.alerts.AlertManager;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logger.CcuLog;
+import a75f.io.sitesequencer.log.SequenceLogs;
 import dagger.hilt.android.HiltAndroidApp;
 /**
  * Created by ryanmattison isOn 7/24/17.
@@ -204,7 +205,7 @@ public class RenatusApp extends UtilityApplication
 		Runtime.getRuntime().exit(0);
 	}
 
-	public void debugLog(String key, String value){
-		CcuLog.d("CCU_ALERTS", "debugLog -> key: " + key + ", value: " + value);
+	public void debugLog(String key, String value) {
+		CcuLog.d("CCU_SITE_SEQUENCER", key + "<-->" +value);
 	}
 }

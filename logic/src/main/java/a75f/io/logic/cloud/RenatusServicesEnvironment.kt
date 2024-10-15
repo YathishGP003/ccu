@@ -79,7 +79,8 @@ class RenatusServicesEnvironment(
             BuildConfig.WEATHER_API_BASE,
             BuildConfig.GATEWAY_API_BASE,
             BuildConfig.CCU_VERSION_API_BASE,
-            BuildConfig.CCU_FILE_SIZE_API_BASE
+            BuildConfig.CCU_FILE_SIZE_API_BASE,
+            BuildConfig.SEQUENCER_API_BASE
          )
       }
 
@@ -95,6 +96,7 @@ class RenatusServicesEnvironment(
             HTTP + baseIp + WEATHER_EXT,
             HTTP + baseIp ,
             HTTP + baseIp + CCU_VERSION_EXT,
+            HTTP + baseIp +CCU_VERSION_EXT,
             HTTP + baseIp +CCU_VERSION_EXT
          )
       }
@@ -157,7 +159,8 @@ data class RenatusServicesUrls(
    val weatherUrl: String,
    val gatewayUrl : String,
    val recommendedCCUVersion : String,
-   val getCCUFileSize : String
+   val getCCUFileSize : String,
+   val sequencerUrl: String
 ) {
    // useful for local environment
    val base: String

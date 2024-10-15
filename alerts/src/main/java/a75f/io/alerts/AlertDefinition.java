@@ -62,7 +62,7 @@ import a75f.io.logger.CcuLog;
 
 public class AlertDefinition
 {
-    String _id;
+    public String _id;
     
     public ArrayList<Conditional> conditionals;
     public String                 offset;

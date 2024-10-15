@@ -497,7 +497,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                             setStateChanged(viewModel)
                         },
                         isEnabled = relayConfig.enabled,
-                        testState = getRelayStatus(index), //viewModel.getPhysicalPointForRelayIndex(index)?.let { it.readHisVal() > 0 } ?: false,
+                        testState = getRelayStatus(index + 1), //viewModel.getPhysicalPointForRelayIndex(index)?.let { it.readHisVal() > 0 } ?: false,
                         onTestActivated = {viewModel.sendCMRelayTestCommand(index, it)})
                 }
             }

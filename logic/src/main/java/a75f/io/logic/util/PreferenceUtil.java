@@ -63,7 +63,11 @@ public class PreferenceUtil {
     public static final String ACB_RELAY_LOGICAL_POINTS_MIGRATION = "acbRelayLogicalPointsMigration";
     public static final String RECOVER_HELIO_NODE_ACB_TUNERS_MIGRATION = "recoverHelioNodeACBTunersMigration";
     public static final String ACB_COND_SENSOR_MIGRATION = "acbCondensateSensorMigration";
-    public static final String DM_TO_DM_CLEANUP_MIGRATION = "dmToDmCleanupMigration";
+    /**
+     * Below preference key is being changed from "dmToDmCleanupMigration" to "dmToDmCleanupMigration_v2"
+     * This is done to let the migration code run once for those points which were not corrected in the previous migration as part of the bug 31099.
+     **/
+    public static final String DM_TO_DM_CLEANUP_MIGRATION = "dmToDmCleanupMigration_v2";
     public static final String HSS_GATEWAY_REF_MIGRATION = "hssGatewayRefMigration";
     public static final String HIS_TAG_REMOVAL_FROM_NON_DM_DEVICES = "hisTagRemovalFromNonDmDevices";
     public static final String VAV_CFM_ON_EDGE_MIGRATION = "vavCfmOnEdgeMigration";

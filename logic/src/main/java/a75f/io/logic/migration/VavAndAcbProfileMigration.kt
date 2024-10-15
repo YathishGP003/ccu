@@ -1,29 +1,28 @@
 package a75f.io.logic.migration
 
+
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Equip
 import a75f.io.api.haystack.Point
 import a75f.io.api.haystack.RawPoint
 import a75f.io.api.haystack.Tags
+import a75f.io.domain.VavAcbEquip
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.equips.VavEquip
 import a75f.io.domain.logic.EntityMapper
+import a75f.io.domain.logic.PointBuilderConfig
+import a75f.io.domain.logic.ProfileEquipBuilder
 import a75f.io.domain.util.ModelLoader
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.definitions.ReheatType
+import a75f.io.logic.bo.building.vav.AcbProfileConfiguration
 import a75f.io.logic.bo.building.vav.VavProfileConfiguration
 import a75f.io.logic.bo.haystack.device.DeviceUtil
-import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
-
-
-import a75f.io.domain.VavAcbEquip
-import a75f.io.domain.logic.PointBuilderConfig
-import a75f.io.domain.logic.ProfileEquipBuilder
-import a75f.io.logic.bo.building.vav.AcbProfileConfiguration
 import a75f.io.logic.util.PreferenceUtil
+import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfilePointDef
 
 class VavAndAcbProfileMigration {
@@ -795,24 +794,25 @@ class VavAndAcbProfileMigration {
 
         private fun cleanRelayEnablePoints(hayStack: CCUHsApi, equip: Map<Any, Any>) {
             val relay1OutputEnableList = hayStack.readAllEntities("point and equipRef == \"${equip["id"]}\" and domainName == \"${DomainName.relay1OutputEnable}\"")
-            if (relay1OutputEnableList.size > 1) {
-                val firstRelay1OutputEnable = relay1OutputEnableList.removeFirst()
+            relay1OutputEnableList.removeFirstOrNull()?.let { enablePoint ->
+                hayStack.writeDefaultValById(enablePoint["id"].toString(), 1.0)
+            }
+            if (relay1OutputEnableList.size > 0) {
                 relay1OutputEnableList.forEach { relay1OutputEnable ->
                     hayStack.deleteEntity(relay1OutputEnable["id"].toString())
                 }
-
-                hayStack.writeDefaultValById(firstRelay1OutputEnable["id"].toString(), 1.0)
             }
 
             val relay2OutputEnableList = hayStack.readAllEntities("point and equipRef == \"${equip["id"]}\" and domainName == \"${DomainName.relay2OutputEnable}\"")
-            if (relay2OutputEnableList.size > 1) {
-                val firstRelay2OutputEnable = relay2OutputEnableList.removeFirst()
+            relay2OutputEnableList.removeFirstOrNull()?.let { enablePoint ->
+                hayStack.writeDefaultValById(enablePoint["id"].toString(), 0.0)
+            }
+            if (relay2OutputEnableList.isNotEmpty()) {
                 relay2OutputEnableList.forEach { relay2OutputEnable ->
                     hayStack.deleteEntity(relay2OutputEnable["id"].toString())
                 }
-
-                hayStack.writeDefaultValById(firstRelay2OutputEnable["id"].toString(), 0.0)
             }
+
 
             // Relay 2 Output Association should not exist. It only is created if Relay2OutputEnable is created with the defaultVal of 1 during a migration.
             val relay2OutputAssociationList = hayStack.readAllEntities("point and equipRef == \"${equip["id"]}\" and domainName == \"${DomainName.relay2OutputAssociation}\"")

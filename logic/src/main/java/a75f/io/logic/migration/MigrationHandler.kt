@@ -81,6 +81,17 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         fun doPostModelMigrationTasks() {
             if (!PreferenceUtil.getRecoverHelioNodeACBTunersMigration()) VavAndAcbProfileMigration.recoverHelioNodeACBTuners(CCUHsApi.getInstance())
             if (!PreferenceUtil.getACBRelayLogicalPointsMigration()) VavAndAcbProfileMigration.verifyACBIsoValveLogicalPoints(CCUHsApi.getInstance())
+            try{
+                if (!PreferenceUtil.getDmToDmCleanupMigration()) {
+                    cleanACBDuplicatePoints(CCUHsApi.getInstance())
+                    cleanVAVDuplicatePoints(CCUHsApi.getInstance())
+                    CCUHsApi.getInstance().syncEntityTree()
+                    PreferenceUtil.setDmToDmCleanupMigration()
+                }
+            } catch (e: Exception) {
+                //TODO - This is temporary fix till vav model issue is resolved in the next releases.
+                //For now, we make sure it does not stop other migrations even if this fails.
+            }
         }
     }
 
@@ -144,12 +155,6 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
 
         try {
             VavAndAcbProfileMigration.migrateVavAndAcbProfilesToCorrectPortEnabledStatus(hayStack)
-            if (!PreferenceUtil.getDmToDmCleanupMigration()) {
-                cleanACBDuplicatePoints(CCUHsApi.getInstance())
-                cleanVAVDuplicatePoints(CCUHsApi.getInstance())
-                CCUHsApi.getInstance().syncEntityTree()
-                PreferenceUtil.setDmToDmCleanupMigration()
-            }
         } catch (e: Exception) {
             //TODO - This is temporary fix till vav model issue is resolved in the next releases.
             //For now, we make sure it does not stop other migrations even if this fails.
@@ -181,12 +186,6 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         if(!PreferenceUtil.isDeadBandMigrationRequired()){
             migrateDeadBandPoints(hayStack)
             PreferenceUtil.setDeadBandMigrationNotRequired()
-        }
-        if (!PreferenceUtil.getDmToDmCleanupMigration()) {
-            cleanACBDuplicatePoints(CCUHsApi.getInstance())
-            cleanVAVDuplicatePoints(CCUHsApi.getInstance())
-            CCUHsApi.getInstance().syncEntityTree()
-            PreferenceUtil.setDmToDmCleanupMigration()
         }
         if(!PreferenceUtil.isVavCfmOnEdgeMigrationDone()) {
             VavAndAcbProfileMigration.addMinHeatingDamperPositionMigration(hayStack)

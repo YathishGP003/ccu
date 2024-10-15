@@ -86,6 +86,12 @@ object DomainManager {
                 Domain.equips[it["id"].toString()] = BypassDamperEquip(it["id"].toString())
             }
 
+        hayStack.readAllEntities("otn and equip")
+            .forEach {
+                CcuLog.i(Domain.LOG_TAG, "Build domain $it")
+                Domain.equips[it["id"].toString()] = OtnEquip(it["id"].toString())
+            }
+
 
         Domain.equips.forEach {
             CcuLog.i(Domain.LOG_TAG, "Added equip to domain ${it.key}")

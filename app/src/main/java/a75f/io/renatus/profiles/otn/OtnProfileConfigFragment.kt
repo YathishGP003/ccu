@@ -7,6 +7,7 @@ import a75f.io.renatus.BASE.BaseDialogFragment
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.composables.DropDownWithLabel
 import a75f.io.renatus.composables.Picker
+import a75f.io.renatus.composables.TempOffsetPicker
 import a75f.io.renatus.composables.rememberPickerState
 import a75f.io.renatus.compose.ComposeUtil
 import a75f.io.renatus.compose.HeaderTextView
@@ -153,7 +154,7 @@ class OtnProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                 Spacer(modifier=Modifier.height(40.dp))
                 val valuesPickerState = rememberPickerState()
                 Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                    Picker(
+                    TempOffsetPicker(
                         header = "Room Temp Offset",
                         state = valuesPickerState,
                         items = viewModel.temperatureOffsetsList,

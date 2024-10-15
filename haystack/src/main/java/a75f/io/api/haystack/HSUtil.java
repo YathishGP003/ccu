@@ -338,6 +338,10 @@ public class HSUtil {
         return false;
     }
 
+    public static boolean skipUserIntentForV2(Point localPoint) {
+        return !(localPoint.getMarkers().contains("userIntent"));
+    }
+
     public static boolean isSSEConfig(String id, CCUHsApi hayStack) {
         HashMap<Object, Object> pointEntity = hayStack.readMapById(id);
         return pointEntity.containsKey(Tags.SSE)

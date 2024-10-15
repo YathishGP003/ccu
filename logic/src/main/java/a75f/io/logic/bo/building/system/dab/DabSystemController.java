@@ -1065,14 +1065,7 @@ public class DabSystemController extends SystemController
             }
             CcuLog.d(L.TAG_CCU_SYSTEM,
                      "setDamperLimits : Equip " + dabEquip.get("dis") + " minLimit " + minLimit + " maxLimit " + maxLimit);
-            
-            limitedPrimaryDamperPos = Math.min(limitedPrimaryDamperPos, maxLimit);
-            limitedPrimaryDamperPos = Math.max(limitedPrimaryDamperPos, minLimit);
-            hayStack.writeHisValById(primaryDamperPosPoint.get("id").toString(), limitedPrimaryDamperPos);
-            
-            limitedSecondaryDamperPos = Math.min(limitedSecondaryDamperPos, maxLimit);
-            limitedSecondaryDamperPos = Math.max(limitedSecondaryDamperPos, minLimit);
-            hayStack.writeHisValById(secondoryDamperPosPoint.get("id").toString(), limitedSecondaryDamperPos);
+
 
             if (hayStack.readHisValByQuery("reheat and cmd and equipRef ==\""+equipRef+"\"") > 0) {
                 double reheatMinDamper = hayStack.readDefaultVal("config and reheat and min and damper and equipRef ==\""+equipRef+"\"");
@@ -1087,6 +1080,14 @@ public class DabSystemController extends SystemController
                     CcuLog.d(L.TAG_CCU_SYSTEM, " reheatMinDamper applied to secondary "+reheatMinDamper);
                 }
             }
+            
+            limitedPrimaryDamperPos = Math.min(limitedPrimaryDamperPos, maxLimit);
+            limitedPrimaryDamperPos = Math.max(limitedPrimaryDamperPos, minLimit);
+            hayStack.writeHisValById(primaryDamperPosPoint.get("id").toString(), limitedPrimaryDamperPos);
+
+            limitedSecondaryDamperPos = Math.min(limitedSecondaryDamperPos, maxLimit);
+            limitedSecondaryDamperPos = Math.max(limitedSecondaryDamperPos, minLimit);
+            hayStack.writeHisValById(secondoryDamperPosPoint.get("id").toString(), limitedSecondaryDamperPos);
 
             CcuLog.d(L.TAG_CCU_SYSTEM,
                      " limitedPrimaryDamperPos : " + limitedPrimaryDamperPos + ",  " +

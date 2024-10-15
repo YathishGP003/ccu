@@ -1,0 +1,41 @@
+package a75f.io.domain.cutover
+
+object OtnEquipCutOverMapping {
+
+    val entries = linkedMapOf(
+        "zonePrioritySpread" to "tiZonePrioritySpread",
+        "humidity" to "zoneHumidity",
+        "occupancyDetection" to "occupancyDetection",
+        "zonePriority" to "zonePriority",
+        "Demand Response Setback" to "demandResponseSetback",
+        "heartBeat" to "heartBeat",
+        "autoawayEnabled" to "autoAway",
+        "desiredTemp" to "desiredTemp",
+        "zonePriorityMultiplier" to "tiZonePriorityMultiplier",
+        "zoneDeadTime" to "zoneDeadTime",
+        "zonePrioritySpread" to "tiZonePrioritySpread",
+        "currentTemp" to "currentTemp",
+        "autoAwayTime" to "autoAwayTime",
+        "autoAwaySetback" to "autoAwaySetback",
+        "temperatureOffset" to "temperatureOffset",
+        "equipStatus" to "equipStatus",
+        "equipStatusMessage" to "equipStatusMessage",
+        "equipScheduleStatus" to "equipScheduleStatus",
+        //"heatingAirflowTemp" to "heatingAirflowTemp",
+        //"coolingAirflowTemp" to "coolingAirflowTemp",
+        "forcedOccupiedTime" to "forcedOccupiedTime",
+        "integralKFactor" to "tiIntegralKFactor",
+        "proportionalKFactor" to "tiProportionalKFactor",
+        "desiredTempCooling" to "desiredTempCooling",
+        "desiredTempHeating" to "desiredTempHeating",
+        "constantTempAlertTime" to "constantTempAlertTime",
+        "temperatureIntegralTimes" to "tiTemperatureIntegralTime",
+        "temperatureProportionalRanges" to "tiTemperatureIntegralTime",
+        //"occupancySensor" to "occupancySensor",
+        "occupancy" to "occupancyMode",
+        "scheduleType" to "scheduleType",
+        "zoneDynamicPriority" to "zoneDynamicPriority",
+        "abnormalCurTempRiseTrigger" to "abnormalCurTempRiseTrigger",
+        "autoForceOccupiedEnabled" to "autoForceOccupied",
+    )
+}

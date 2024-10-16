@@ -8,6 +8,11 @@ import static a75f.io.logic.bo.util.UnitUtils.convertingRelativeValueFtoC;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
 import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
 import static a75f.io.logic.bo.util.UnitUtils.roundToPointFive;
+import static a75f.io.renatus.schedules.ScheduleUtil.SAT_OR_SUN;
+import static a75f.io.renatus.schedules.ScheduleUtil.WEEK_DAY_SATURDAY_OR_SUN;
+import static a75f.io.renatus.schedules.ScheduleUtil.WEEK_DAY_SIZE;
+import static a75f.io.renatus.schedules.ScheduleUtil.WEEK_DAY_WEEK_END_SIZE;
+import static a75f.io.renatus.schedules.ScheduleUtil.WEEK_END_SIZE;
 import static a75f.io.renatus.views.MasterControl.MasterControlUtil.getAdapterVal;
 import static a75f.io.renatus.views.MasterControl.MasterControlUtil.getAdapterValDeadBand;
 
@@ -508,7 +513,7 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
                                 sDays.setCoolingVal((double) rangeSeekBarView.getCoolValue());
                                 sDays.setHeatingVal((double)rangeSeekBarView.getHeatValue());
                             }
-                            mListener.onClickSave(mDay == null ? NO_REPLACE : mPosition, rangeSeekBarView.getCoolValue(),
+                            mListener.onClickSave((mDay == null && (mDays == null ||(mDays!= null && mDays.size() == 0))) ? NO_REPLACE : mPosition, rangeSeekBarView.getCoolValue(),
                                     rangeSeekBarView.getHeatValue(), startHour, endHour, startMinutes,
                                     endMinutes, days, heatingUserLimitMaxVal, heatingUserLimitMinVal, coolingUserLimitMaxVal,
                                     coolingUserLimitMinVal, heatingDeadBandVal, coolingDeadBandVal,
@@ -548,7 +553,7 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
             }
 
             if(warning == null) {
-                if (!mListener.onClickSave(mDay == null ? NO_REPLACE : mPosition, rangeSeekBarView.getCoolValue(),
+                if (!mListener.onClickSave((mDay == null && (mDays == null || (mDays != null && mDays.size() == 0))) ? NO_REPLACE : mPosition, rangeSeekBarView.getCoolValue(),
                         rangeSeekBarView.getHeatValue(), startHour, endHour, startMinutes, endMinutes,
                         days, heatingUserLimitMaxVal, heatingUserLimitMinVal, coolingUserLimitMaxVal,
                         coolingUserLimitMinVal, heatingDeadBandVal, coolingDeadBandVal,
@@ -733,7 +738,12 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
         } else if(scheduleGroup == ScheduleGroup.WEEKDAY_WEEKEND.ordinal()){
 
             if(isFirstRadioChipSelected) {
-                if(mDay == null || mDay.getDay() == 0) {
+                // when re-edit happens then days are added in mDays
+                if(mDays != null && mDays.size() > 0) {
+                    for(Schedule.Days day : mDays) {
+                        days.add(DAYS.values()[day.getDay()]);
+                    }
+                } else if(mDay == null || mDay.getDay() == 0) {
                     days.add(DAYS.MONDAY);
                     days.add(DAYS.TUESDAY);
                     days.add(DAYS.WEDNESDAY);
@@ -750,7 +760,11 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
             }
         } else if (scheduleGroup == ScheduleGroup.WEEKDAY_SATURDAY_SUNDAY.ordinal()) {
             if(isFirstRadioChipSelected) {
-                if (mDay == null || mDay.getDay() == 0) {
+                if(mDays != null && mDays.size() > 0) {
+                    for(Schedule.Days day : mDays) {
+                        days.add(DAYS.values()[day.getDay()]);
+                    }
+                } else if (mDay == null || mDay.getDay() == 0) {
                     days.add(DAYS.MONDAY);
                     days.add(DAYS.TUESDAY);
                     days.add(DAYS.WEDNESDAY);
@@ -831,8 +845,18 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
             return labels;
         } else if (scheduleGroup == ScheduleGroup.WEEKDAY_WEEKEND.ordinal()) {
             if (mDay != null) {
-                labels.add(mDay.getDay() == 5 || mDay.getDay() == 6 ? "Weekend" : "Weekday");
-            } else {
+                labels.add(mDay.getDay() == DAYS.SATURDAY.ordinal() || mDay.getDay() ==
+                        DAYS.SUNDAY.ordinal() ? "Weekend" : "Weekday");
+            } else if(mDays != null){
+                if(mDays.size() == WEEK_DAY_SIZE){
+                    labels.add("Weekday");
+                } else if (mDays.size() == WEEK_END_SIZE) {
+                    labels.add("Weekend");
+                }else if (mDays.size() == WEEK_DAY_WEEK_END_SIZE) {
+                    labels.add("Weekday");
+                    labels.add("Weekend");
+                }
+            } else{
                 labels.add("Weekday");
                 labels.add("Weekend");
             }
@@ -849,6 +873,19 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
                     default:
                         labels.add("Weekday");
                         break;
+                }
+            } else if(mDays != null){
+                if(mDays.size() == WEEK_DAY_SIZE){
+                    labels.add("Weekday");
+                } else if (mDays.size() == WEEK_END_SIZE) {
+                    labels.add("Saturday");
+                    labels.add("Sunday");
+                } else if(mDays.size() == SAT_OR_SUN){
+                    if(mDays.get(0).getDay() == DAYS.SATURDAY.ordinal()){
+                        labels.add("Saturday");
+                    } else if(mDays.get(0).getDay() == DAYS.SUNDAY.ordinal()) {
+                        labels.add("Sunday");
+                    }
                 }
             } else {
                 labels.add("Weekday");
@@ -1132,8 +1169,31 @@ public class ZoneScheduleDialogFragment extends DialogFragment {
         if(mDay!= null) {
             radioButtonFirst.setChecked(true);
         } else {
-            for (int i = 0; i < mDays.size() && i < radioButtons.size(); i++) {
-                radioButtons.get(i).setChecked(true);
+            if(scheduleGroup == ScheduleGroup.SEVEN_DAY.ordinal()) {
+                for (int i = 0; i < mDays.size() && i < radioButtons.size(); i++) {
+                    radioButtons.get(i).setChecked(true);
+                }
+            } else if (scheduleGroup == ScheduleGroup.WEEKDAY_WEEKEND.ordinal()) {
+                if(mDays.size() == WEEK_DAY_SIZE || mDays.size() == WEEK_END_SIZE) {
+                    radioButtonFirst.setChecked(true);
+                } else if (mDays.size() == WEEK_DAY_WEEK_END_SIZE) {
+                    radioButtonFirst.setChecked(true);
+                    radioButtonSecond.setChecked(true);
+                }
+            } else if (scheduleGroup == ScheduleGroup.WEEKDAY_SATURDAY_SUNDAY.ordinal()) {
+                if(mDays.size() == WEEK_DAY_SIZE || mDays.size() == SAT_OR_SUN) {
+                    radioButtonFirst.setChecked(true);
+                } else if (mDays.size() == WEEK_END_SIZE) {
+                    radioButtonFirst.setChecked(true);
+                    radioButtonSecond.setChecked(true);
+                }  else if (mDays.size() == WEEK_DAY_SATURDAY_OR_SUN) {
+                    radioButtonFirst.setChecked(true);
+                    radioButtonSecond.setChecked(true);
+                }else if (mDays.size() == WEEK_DAY_WEEK_END_SIZE) {
+                    radioButtonFirst.setChecked(true);
+                    radioButtonSecond.setChecked(true);
+                    radioButtonThird.setChecked(true);
+                }
             }
         }
     }

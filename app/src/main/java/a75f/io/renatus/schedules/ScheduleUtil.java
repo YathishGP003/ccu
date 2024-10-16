@@ -24,6 +24,14 @@ import a75f.io.logic.util.CommonTimeSlotFinder;
 import a75f.io.renatus.util.RxjavaUtil;
 
 public class ScheduleUtil {
+    public static int SAT_OR_SUN = 1;
+
+    public static int WEEK_END_SIZE = 2;
+    public static int WEEK_DAY_SIZE = 5;
+
+    public static int WEEK_DAY_SATURDAY_OR_SUN = 6;
+    public static int WEEK_DAY_WEEK_END_SIZE = 7;
+
     public static void trimZoneSchedules(HashMap<String, ArrayList<Interval>> spillsMap) {
 
         for (String zoneId : spillsMap.keySet()) {

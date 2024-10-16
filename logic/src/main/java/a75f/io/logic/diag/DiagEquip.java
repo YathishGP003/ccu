@@ -373,6 +373,7 @@ public class DiagEquip
         updateAppVersionPoint("com.x75frenatus.home", "home");
         updateAppVersionPoint("io.seventyfivef.remoteaccess", "remoteAccess");
         updateAppVersionPoint("com.example.ccu_bacapp", "bacnet");
+        updateAppVersionPoint("io.seventyfivef.bacapp", "bacnet");
     }
 
     private void updateRemoteSessionStatusPoint() {

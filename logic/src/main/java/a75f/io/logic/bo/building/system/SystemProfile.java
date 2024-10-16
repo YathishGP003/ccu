@@ -24,7 +24,6 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.domain.api.DomainName;
 import a75f.io.domain.api.PhysicalPoint;
-import a75f.io.domain.equips.DomainEquip;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.BacnetIdKt;
 import a75f.io.logic.BacnetUtilKt;
@@ -43,7 +42,6 @@ import a75f.io.logic.bo.util.DemandResponseMode;
 import a75f.io.logic.tuners.SystemTuners;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerUtil;
-import a75f.io.logic.util.RxjavaUtil;
 import a75f.io.util.ExecutorTask;
 
 /**
@@ -780,13 +778,19 @@ public abstract class SystemProfile
         }
         return outsideAirTemp;
     }
-    
+
     public double getCoolingLockoutVal() {
-        return TunerUtil.readTunerValByQuery("outsideTemp and cooling and lockout", equipRef);
+        if(isVavSystemProfile()) {
+            return TunerUtil.readTunerValByQuery("((domainName == \"vavOutsideTempCoolingLockout\") or (outsideTemp and cooling and lockout))", getSystemEquipRef());
+        }
+        return TunerUtil.readTunerValByQuery("((domainName == \"dabOutsideTempCoolingLockout\") or (outsideTemp and cooling and lockout))", getSystemEquipRef());
     }
     
     public double getHeatingLockoutVal() {
-        return TunerUtil.readTunerValByQuery("outsideTemp and heating and lockout", equipRef);
+        if(isVavSystemProfile()) {
+            return TunerUtil.readTunerValByQuery("((domainName == \"vavOutsideTempHeatingLockout\") or (outsideTemp and heating and lockout))", getSystemEquipRef());
+        }
+        return TunerUtil.readTunerValByQuery("((domainName == \"dabOutsideTempHeatingLockout\") or (outsideTemp and heating and lockout))", getSystemEquipRef());
     }
 
     public void updateBypassSatLockouts(CCUHsApi hayStack) {
@@ -981,5 +985,12 @@ public abstract class SystemProfile
 
     public Map<a75f.io.domain.api.Point, PhysicalPoint> getLogicalPhysicalMap() {
         return new HashMap<a75f.io.domain.api.Point, PhysicalPoint>();
+    }
+
+    public boolean isVavSystemProfile() {
+        if(ccu().systemProfile.getProfileName().contains("VAV")) {
+            return true;
+        }
+        return false;
     }
 }

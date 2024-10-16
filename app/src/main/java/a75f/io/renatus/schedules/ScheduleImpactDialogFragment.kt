@@ -119,7 +119,7 @@ class ScheduleImpactDialogFragment(
                         fontSize = 24.sp
                     )
                     Text(
-                        text = "for below zones",
+                        text = getBottomText(isNamedScheduledZoneExists),
                         color = ComposeUtil.textColor,
                         fontWeight = FontWeight.Normal,
                         modifier = Modifier.padding(start = 18.dp),
@@ -223,6 +223,14 @@ private fun getHeaderText(isNamedScheduledZoneExists: Boolean, isZoneScheduledZo
         else -> "Zone Schedule is outside Building Occupancy"
     }
 }
+
+    private fun getBottomText(isNamedScheduledZoneExists: Boolean): String {
+        return when {
+            isNamedScheduledZoneExists -> "for below zones"
+            else -> "Force trimming will affect the zones listed below," +
+                    " and they will move to an unoccupied state for those respective days."
+        }
+    }
 
 private fun prepareTableContent(scheduleImpacts: List<ScheduleImpact>): Map<PossibleScheduleImpactTable, TableContent> {
     return scheduleImpacts.groupBy { it.scheduleType }.mapValues { entry ->

@@ -307,7 +307,7 @@ public class FragmentDeviceScan extends BaseDialogFragment
 
     private boolean isDeviceSupportsAlternatePairing() {
         return mNodeType == NodeType.SMART_NODE || mNodeType.equals(NodeType.HELIO_NODE) ||
-                mNodeType.equals(NodeType.HYPER_STAT);
+                mNodeType.equals(NodeType.HYPER_STAT) || mNodeType.equals(NodeType.HYPERSTATSPLIT);
     }
 
 

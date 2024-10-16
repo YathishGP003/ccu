@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -61,6 +62,9 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
 
     @BindView(R.id.pairinginstruct_daikin)
     ImageView pairinginstructDaikin;
+
+    @BindView(R.id.pairingInstructionMainLayout)
+    RelativeLayout pairingInstructionMainLayout;
 
     public static FragmentBLEInstructionScreen getInstance(short nodeAddress, String roomName,
                                                            String floorName,
@@ -481,14 +485,16 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
         }
         else if (mNodeType == NodeType.HYPERSTATSPLIT) {
             title.setText(R.string.title_pairhssplit);
-            if (CCUUiUtil.isDaikinEnvironment(requireContext()))
-                pairinginstruct.setImageResource(R.drawable.daikenhsspairscreen);
-            else if (CCUUiUtil.isCarrierThemeEnabled(requireContext()))
-                pairinginstruct.setImageResource(R.drawable.carrierhspairingscreen);
-            else if (CCUUiUtil.isAiroverseThemeEnabled(requireContext()))
-                pairinginstruct.setImageResource(R.drawable.image_auto_pairing_screen_hs_airoverse);
-            else
-                pairinginstruct.setImageResource(R.drawable.monitoringpairscreen);
+            if (CCUUiUtil.isCarrierThemeEnabled(requireContext()))
+                pairinginstruct.setImageResource(R.drawable.hyperstatsplit_carrier_pairing_steps);
+            else if (CCUUiUtil.isAiroverseThemeEnabled(requireContext())) {
+                pairinginstruct.setImageResource(R.drawable.hyperstat_split_pairing_screen_airoverse);
+                pairingInstructionMainLayout.setBackgroundResource(R.drawable.bg_logoscreen);
+            }
+            else {
+                pairinginstruct.setImageResource(R.drawable.hyperstat_split_pairing_screen);
+                pairingInstructionMainLayout.setBackgroundResource(R.drawable.bg_logoscreen);
+            }
         }
     }
     

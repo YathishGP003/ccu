@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import androidx.annotation.Nullable;
 import a75f.io.logic.bo.building.NodeType;
@@ -19,6 +20,7 @@ import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
 import a75f.io.renatus.profiles.acb.AcbProfileConfigFragment;
 import a75f.io.renatus.profiles.dab.DabProfileConfigFragment;
 import a75f.io.renatus.profiles.hss.cpu.HyperStatSplitCpuFragment;
+import a75f.io.renatus.profiles.vav.BypassConfigFragment;
 import a75f.io.renatus.profiles.vav.VavProfileConfigFragment;
 import a75f.io.renatus.util.CCUUiUtil;
 import butterknife.BindView;
@@ -43,6 +45,8 @@ public class AlternatePairingFragment extends BaseDialogFragment {
     TextView title;
     @BindView(R.id.pair_button)
     Button pairButton;
+    @BindView(R.id.manualPairingLayout)
+    RelativeLayout manualPairingLayout;
 
     public AlternatePairingFragment(NodeType nodeType, Short pairingAddress, String roomName,
                                     String floorName, ProfileType profileType) {
@@ -91,15 +95,15 @@ public class AlternatePairingFragment extends BaseDialogFragment {
         }
         else if (mNodeType == NodeType.HYPERSTATSPLIT) {
             title.setText(R.string.title_pair_hss_manual);
-            if (CCUUiUtil.isDaikinEnvironment(requireContext()))
-                imageView.setImageResource(R.drawable.manual_pairing_hyperstat_daikin);
-            else if (CCUUiUtil.isCarrierThemeEnabled(requireContext()))
-                imageView.setImageResource(R.drawable.alternate_pairing_hyperstat_carrier);
-            else
-                imageView.setImageResource(R.drawable.manual_pairing_hyperstat);
+            if (CCUUiUtil.isCarrierThemeEnabled(requireContext())) {
+                imageView.setImageResource(R.drawable.hyperstat_split_carrier_manual);
+            } else {
+                imageView.setImageResource(R.drawable.hyperstat_split_pairing_steps_manual);
+                manualPairingLayout.setBackgroundResource(R.drawable.bg_logoscreen);
+            }
         }
 
-        if(CCUUiUtil.isCarrierThemeEnabled(requireContext())){
+        if(CCUUiUtil.isCarrierThemeEnabled(requireContext()) || mNodeType == NodeType.HYPERSTATSPLIT){
             // To update pairing address in carrier themed UI we need to add some extra margin
             // For Hyperstat profile we have added some extra margins as the image res didnt fit for SN and HS
             int leftMargin;
@@ -109,15 +113,19 @@ public class AlternatePairingFragment extends BaseDialogFragment {
                 leftMargin = 507;
                 topMargin = 295;
             }
-            else {
+            else if(mNodeType == NodeType.HYPERSTATSPLIT){
+                leftMargin = 490;
+                topMargin = 265;
+            } else{
                 leftMargin = 490;
                 topMargin = 275;
             }
-                ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams)
-                        dynamicNodeAddress.getLayoutParams();
-                params.leftMargin = leftMargin;
-                params.topMargin = topMargin;
-                dynamicNodeAddress.setLayoutParams(params);
+
+            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams)
+                    dynamicNodeAddress.getLayoutParams();
+            params.leftMargin = leftMargin;
+            params.topMargin = topMargin;
+            dynamicNodeAddress.setLayoutParams(params);
 
         }
         dynamicNodeAddress.setText(mPairingAddress.toString());
@@ -198,6 +206,10 @@ public class AlternatePairingFragment extends BaseDialogFragment {
             case HYPERSTATSPLIT_CPU:
                 showDialogFragment(HyperStatSplitCpuFragment.Companion.newInstance(mPairingAddress,mRoomName,mFloorName,
                                 mNodeType,ProfileType.HYPERSTATSPLIT_CPU), HyperStatSplitCpuFragment.Companion.getID());
+                break;
+            case BYPASS_DAMPER:
+                showDialogFragment(BypassConfigFragment.Companion.newInstance(mPairingAddress, mRoomName,
+                        mFloorName, mNodeType, mProfileType) , BypassConfigFragment.Companion.getID());
                 break;
         }
     }

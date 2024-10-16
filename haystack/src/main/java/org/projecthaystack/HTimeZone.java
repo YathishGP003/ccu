@@ -7,6 +7,7 @@
 //
 package org.projecthaystack;
 
+import android.os.Build;
 import android.util.Log;
 
 import java.util.HashMap;
@@ -208,8 +209,16 @@ public final class HTimeZone
         if (def == null) CcuLog.w("CCU_HS", "WARN: invalid haystack.tz system property: " + defName);
       }
 
+
       // if we still don't have a default, try to use Java's
-      if (def == null) def = HTimeZone.make(TimeZone.getDefault());
+      if (def == null) {
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.N) {
+          def = HTimeZone.make(TimeZone.getDefault());
+        } else {
+          def = HTimeZone.make(TimeZone.getTimeZone("UTC"));
+          CcuLog.w("CCU_HTimeZone", "Default is : " + def.name);
+        }
+      }
     }
     catch (Exception e)
     {

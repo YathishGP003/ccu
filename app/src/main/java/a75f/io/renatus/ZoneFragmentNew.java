@@ -2657,7 +2657,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         textViewValue2.setText(vavPoints.get("Reheat Coil").toString());
         textViewLabel3.setText("Discharge Airflow : ");
         if( isCelsiusTunerAvailableStatus()) {
-            textViewValue4.setText(String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(vavPoints.get("Entering Airflow").toString().replaceAll("[^0-9\\.]",""))))+ " \u00B0C");
+            textViewValue3.setText(String.valueOf(fahrenheitToCelsiusTwoDecimal(Double.parseDouble(vavPoints.get("Discharge Airflow").toString().replaceAll("[^0-9\\.]",""))))+ " \u00B0C");
         } else {
             textViewValue3.setText(vavPoints.get("Discharge Airflow").toString());
         }

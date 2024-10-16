@@ -39,7 +39,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.fragment.app.FragmentStatePagerAdapter;
 import androidx.viewpager.widget.PagerAdapter;
@@ -108,11 +107,13 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
     public static CustomViewPager mViewPager;
     public static TabLayout mTabLayout, btnTabs;
     private Prefs prefs;
-
+    BackgroundServiceInitiator backgroundServiceInitiator;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        backgroundServiceInitiator = new BackgroundServiceInitiator(this);
+        backgroundServiceInitiator.initServices();
         Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
         executorService = Executors.newFixedThreadPool(1);
         CcuLog.i("UI_PROFILING","LandingActivity.onCreate");
@@ -483,6 +484,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
         } catch (Exception e) {
             // already unregistered
         }
+        backgroundServiceInitiator.unbindServices();
         CcuLog.e(L.TAG_CCU, "LifeCycleEvent LandingActivity Destroyed");
     }
 
@@ -708,5 +710,4 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
         mStatusPagerAdapter = new StatusPagerAdapter(getSupportFragmentManager());
         mViewPager.setAdapter(mStatusPagerAdapter);
     }
-
 }

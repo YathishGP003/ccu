@@ -1,7 +1,6 @@
 package a75f.io.renatus;
 
 import static a75f.io.device.bacnet.BacnetConfigConstants.IS_BACNET_INITIALIZED;
-import static a75f.io.logic.L.isSimulation;
 import static a75f.io.logic.util.PreferenceUtil.getDataSyncProcessing;
 import static a75f.io.logic.util.PreferenceUtil.getSyncStartTime;
 import static a75f.io.usbserial.UsbServiceActions.ACTION_USB_PRIV_APP_PERMISSION_DENIED;
@@ -11,7 +10,6 @@ import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
@@ -21,7 +19,6 @@ import android.net.ConnectivityManager;
 import android.net.DhcpInfo;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
-import android.os.Bundle;
 import android.os.IBinder;
 import android.widget.Toast;
 
@@ -75,7 +72,6 @@ import a75f.io.messaging.service.MessageCleanUpWork;
 import a75f.io.messaging.service.MessageRetryHandlerWork;
 import a75f.io.messaging.service.MessagingAckJob;
 import a75f.io.modbusbox.EquipsManager;
-import a75f.io.renatus.ota.OTAUpdateHandlerService;
 import a75f.io.renatus.ota.OtaCache;
 import a75f.io.renatus.registration.UpdateCCUFragment;
 import a75f.io.renatus.schedules.FileBackupService;
@@ -86,7 +82,6 @@ import a75f.io.usbserial.SerialEvent;
 import a75f.io.usbserial.UsbConnectService;
 import a75f.io.usbserial.UsbModbusService;
 import a75f.io.usbserial.UsbService;
-import a75f.io.usbserial.UsbServiceActions;
 
 /**
  * Created by rmatt isOn 7/19/2017.
@@ -112,127 +107,13 @@ public abstract class UtilityApplication extends Application {
     private static final String INIT_BIN_DIR = "/system/bin/";
     private static final String INIT_RC_DIR = "/system/etc/init/";
 
-    private boolean isRoomDbReady = false;
+    public static boolean isRoomDbReady = false;
     @Inject
     MessageHandlerSubscriber messageHandlerSubscriber;
 
-    private final BroadcastReceiver mUsbReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            switch (intent.getAction()) {
-                case UsbService.ACTION_USB_PERMISSION_GRANTED: // USB PERMISSION GRANTED
-
-                    NotificationHandler.setCMConnectionStatus(true);
-                    LSerial.getInstance().setResetSeedMessage(true);
-                    Toast.makeText(context, "USB Ready", Toast.LENGTH_SHORT).show();
-                    break;
-                case UsbService.ACTION_USB_PERMISSION_NOT_GRANTED: // USB PERMISSION NOT GRANTED
-                    NotificationHandler.setCMConnectionStatus(false);
-                    Toast.makeText(context, "USB Permission not granted", Toast.LENGTH_SHORT).show();
-                    break;
-                case UsbService.ACTION_NO_USB: // NO USB CONNECTED
-                    NotificationHandler.setCMConnectionStatus(false);
-                    Toast.makeText(context, "No USB connected", Toast.LENGTH_SHORT).show();
-                    break;
-                case UsbService.ACTION_USB_DISCONNECTED: // USB DISCONNECTED
-                    NotificationHandler.setCMConnectionStatus(false);
-                    Toast.makeText(context, "USB disconnected", Toast.LENGTH_SHORT).show();
-                    break;
-                case UsbModbusService.ACTION_USB_MODBUS_DISCONNECTED: // USB DISCONNECTED
-                    //NotificationHandler.setCMConnectionStatus(false);
-                    Toast.makeText(context, "USB Modbus disconnected", Toast.LENGTH_SHORT).show();
-                    break;
-                case UsbConnectService.ACTION_USB_CONNECT_DISCONNECTED: // USB DISCONNECTED
-                    //NotificationHandler.setCMConnectionStatus(false);
-                    Toast.makeText(context, "USB Connect disconnected", Toast.LENGTH_SHORT).show();
-                    break;
-                case UsbService.ACTION_USB_NOT_SUPPORTED: // USB NOT SUPPORTED
-                    NotificationHandler.setCMConnectionStatus(false);
-                    Toast.makeText(context, "USB device not supported", Toast.LENGTH_SHORT).show();
-                    break;
-                case ACTION_USB_PRIV_APP_PERMISSION_DENIED:
-                    NotificationHandler.setCMConnectionStatus(false);
-                    Toast.makeText(context, R.string.usb_permission_priv_app_msg, Toast.LENGTH_LONG).show();
-                    break;
-            }
-        }
-    };
-
-    private UsbService usbService;
-    private UsbModbusService usbModbusService;
-
-    private UsbConnectService usbConnectService;
-
     private DeviceUpdateJob deviceUpdateJob;
     private static Prefs prefs;
-    private static final String LOG_PREFIX = "CCU_UTILITYAPP";
-    private final ServiceConnection usbConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName arg0, IBinder arg1) {
-            try {
-                CcuLog.d(LOG_PREFIX, "utility Application -" + arg1.isBinderAlive() + "," + arg1.toString() + "," + arg0.getClassName() + "," + arg1.getInterfaceDescriptor());
-                if (arg1.isBinderAlive()) {
-                    usbService = ((UsbService.UsbBinder) arg1).getService();
-                    LSerial.getInstance().setUSBService(usbService);
 
-                    //TODO: research what cts and dsr changes are.  For now no handler will be used, because I'm uncertain if the information is relevant.
-                    usbService.setHandler(null);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName arg0) {
-            usbService = null;
-        }
-    };
-    
-    private final ServiceConnection usbModbusConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName arg0, IBinder arg1) {
-            try {
-                CcuLog.d(LOG_PREFIX, "utility Application -" + arg1.isBinderAlive() + "," + arg1.toString() + "," + arg0.getClassName() + "," + arg1.getInterfaceDescriptor());
-                if (arg1.isBinderAlive()) {
-                    //Todo : modbus USB Serial to tested with real device
-                    usbModbusService = ((UsbModbusService.UsbBinder) arg1).getService();
-                    LSerial.getInstance().setModbusUSBService(usbModbusService);
-                    usbModbusService.setHandler(null);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        
-        @Override
-        public void onServiceDisconnected(ComponentName arg0) {
-            usbModbusService = null;
-        }
-    };
-
-    private final ServiceConnection usbConnectConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName arg0, IBinder arg1) {
-            try {
-                CcuLog.d(LOG_PREFIX, "utility Application -" + arg1.isBinderAlive() + "," + arg1.toString() + "," + arg0.getClassName() + "," + arg1.getInterfaceDescriptor());
-                if (arg1.isBinderAlive()) {
-                    usbConnectService = ((UsbConnectService.UsbBinder) arg1).getService();
-                    LSerial.getInstance().setUsbConnectService(usbConnectService);
-
-                    //TODO: research what cts and dsr changes are.  For now no handler will be used, because I'm uncertain if the information is relevant.
-                    usbConnectService.setHandler(null);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName arg0) {
-            usbService = null;
-        }
-    };
     @Override
     public void onCreate() {
         super.onCreate();
@@ -279,18 +160,11 @@ public abstract class UtilityApplication extends Application {
 
         RaygunClient.setUser(userNameForCrashReportsFromHaystack());
 
-        setUsbFilters();  // Start listening notifications from UsbService
-        startService(new Intent(this, OTAUpdateHandlerService.class));  // Start OTA update event + timer handler service
-        startService(UsbService.class, usbConnection, null); // Start UsbService(if it was not started before) and
-
-        startUsbModbusService(UsbModbusService.class, usbModbusConnection, null); // Start UsbService(if it was not
-        startConnectService(UsbConnectService.class, usbConnectConnection, null);
         wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         deviceUpdateJob = new DeviceUpdateJob();
         deviceUpdateJob.scheduleJob("DeviceUpdateJob",Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
                 .getInt("control_loop_frequency",60), 15, TimeUnit.SECONDS);
         Watchdog.getInstance().addMonitor(deviceUpdateJob);
-
 
         FileBackupService.scheduleFileBackupServiceJob(context);
         EveryDaySchedulerService.scheduleJobForDay(context);
@@ -667,79 +541,9 @@ public abstract class UtilityApplication extends Application {
     }
 
 
-    private void setUsbFilters() {
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(UsbService.ACTION_USB_PERMISSION_GRANTED);
-        filter.addAction(UsbService.ACTION_NO_USB);
-        filter.addAction(UsbService.ACTION_USB_DISCONNECTED);
-        filter.addAction(UsbService.ACTION_USB_NOT_SUPPORTED);
-        filter.addAction(UsbService.ACTION_USB_PERMISSION_NOT_GRANTED);
-        filter.addAction(UsbModbusService.ACTION_USB_MODBUS_DISCONNECTED);
-        filter.addAction(UsbServiceActions.ACTION_USB_PRIV_APP_PERMISSION_DENIED);
-        filter.addAction(UsbServiceActions.ACTION_USB_REQUIRES_TABLET_REBOOT);
-        filter.addAction(UsbConnectService.ACTION_USB_CONNECT_DISCONNECTED);
-        registerReceiver(mUsbReceiver, filter);
-    }
-
-
-    private void startService(Class<?> service, ServiceConnection serviceConnection, Bundle extras) {
-        if (!UsbService.SERVICE_CONNECTED) {
-            Intent startService = new Intent(this, service);
-            if (extras != null && !extras.isEmpty()) {
-                Set<String> keys = extras.keySet();
-                for (String key : keys) {
-                    String extra = extras.getString(key);
-                    startService.putExtra(key, extra);
-                }
-            }
-            this.startService(startService);
-        }
-        Intent bindingIntent = new Intent(this, service);
-        bindService(bindingIntent, serviceConnection, Context.BIND_AUTO_CREATE);
-    }
-    
-    private void startUsbModbusService(Class<?> service, ServiceConnection serviceConnection, Bundle extras) {
-        if (!UsbModbusService.SERVICE_CONNECTED) {
-            Intent startService = new Intent(this, service);
-            if (extras != null && !extras.isEmpty()) {
-                Set<String> keys = extras.keySet();
-                for (String key : keys) {
-                    String extra = extras.getString(key);
-                    startService.putExtra(key, extra);
-                }
-            }
-            this.startService(startService);
-        }
-        Intent bindingIntent = new Intent(this, service);
-        bindService(bindingIntent, serviceConnection, Context.BIND_AUTO_CREATE);
-    }
-
-    private void startConnectService(Class<?> service, ServiceConnection serviceConnection, Bundle extras) {
-        if (isAdvancedAhuProfile()) {
-            CcuLog.i(L.TAG_CCU, "Connect module service is started");
-            if (!UsbConnectService.SERVICE_CONNECTED) {
-                Intent startService = new Intent(this, service);
-                if (extras != null && !extras.isEmpty()) {
-                    Set<String> keys = extras.keySet();
-                    for (String key : keys) {
-                        String extra = extras.getString(key);
-                        startService.putExtra(key, extra);
-                    }
-                }
-                this.startService(startService);
-            }
-            Intent bindingIntent = new Intent(this, service);
-            bindService(bindingIntent, serviceConnection, Context.BIND_AUTO_CREATE);
-        } else {
-            CcuLog.i(L.TAG_CCU, "Connect module service is not required");
-        }
-    }
-
     @Override
     public void onTerminate() {
         EventBus.getDefault().unregister(this);
-        unregisterReceiver(mUsbReceiver);
-        unbindService(usbConnection);
         CcuLog.e(L.TAG_CCU, "LifeCycleEvent App Terminated");
         UtilityApplication.stopRestServer();
         super.onTerminate();
@@ -801,18 +605,4 @@ public abstract class UtilityApplication extends Application {
     }
 
 
-    public static boolean isAdvancedAhuProfile() {
-        if (isSimulation()) return false;
-        try {
-            HashMap<Object, Object> equip = CCUHsApi.getInstance().readEntity("equip and system and not modbus and not connectModule");
-            if (!equip.isEmpty() && (equip.get("profile").toString().equals("vavAdvancedHybridAhuV2")
-                    || equip.get("profile").toString().equals("dabAdvancedHybridAhuV2"))) {
-                return true;
-            }
-        } catch (Exception e){
-            // Just not to block anything
-            e.printStackTrace();
-        }
-        return false;
-    }
 }

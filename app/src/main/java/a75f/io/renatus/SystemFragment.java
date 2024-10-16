@@ -98,7 +98,10 @@ import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.dab.DabAdvancedAhu;
+import a75f.io.logic.bo.building.system.dab.DabAdvancedHybridRtu;
 import a75f.io.logic.bo.building.system.dab.DabExternalAhu;
+import a75f.io.logic.bo.building.system.dab.DabStagedRtu;
+import a75f.io.logic.bo.building.system.dab.DabStagedRtuWithVfd;
 import a75f.io.logic.bo.building.system.util.UserIntentConfig;
 import a75f.io.logic.bo.building.system.vav.VavAdvancedAhu;
 import a75f.io.logic.bo.building.system.vav.VavAdvancedHybridRtu;
@@ -964,6 +967,8 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 
 	private boolean isDMSupportProfile(){
 		return (L.ccu().systemProfile instanceof DabExternalAhu
+				|| (L.ccu().systemProfile instanceof DabStagedRtu && !(L.ccu().systemProfile instanceof DabAdvancedHybridRtu))
+				|| L.ccu().systemProfile instanceof DabStagedRtuWithVfd
 				|| L.ccu().systemProfile instanceof VavExternalAhu
 				|| (L.ccu().systemProfile instanceof VavStagedRtu && !(L.ccu().systemProfile instanceof VavAdvancedHybridRtu))
 				|| L.ccu().systemProfile instanceof VavAdvancedAhu

@@ -29,6 +29,12 @@ public enum ProfileType
                 return SYSTEM_VAV_ANALOG_RTU;
             case "dabAdvancedHybridAhuV2":
                 return SYSTEM_DAB_ADVANCED_AHU;
+            case "dabStagedRtu":
+                return SYSTEM_DAB_STAGED_RTU;
+            case "dabStagedRtuVfdFan":
+                return SYSTEM_DAB_STAGED_VFD_RTU;
+            case "SYSTEM_DAB_HYBRID_RTU":
+                return SYSTEM_DAB_HYBRID_RTU;
         }
         return null;
     }

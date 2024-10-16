@@ -51,6 +51,9 @@ import a75f.io.domain.api.DomainName;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.Port;
+import a75f.io.logic.bo.building.system.dab.DabAdvancedHybridRtu;
+import a75f.io.logic.bo.building.system.dab.DabStagedRtu;
+import a75f.io.logic.bo.building.system.dab.DabStagedRtuWithVfd;
 import a75f.io.logic.bo.building.system.vav.VavAdvancedAhu;
 import a75f.io.logic.bo.building.system.vav.VavAdvancedHybridRtu;
 import a75f.io.logic.bo.building.system.vav.VavFullyModulatingRtu;
@@ -206,7 +209,9 @@ public class DeviceUtil {
         if ((L.ccu().systemProfile instanceof VavStagedRtu && !(L.ccu().systemProfile instanceof VavAdvancedHybridRtu)) ||
                 L.ccu().systemProfile instanceof VavStagedRtuWithVfd ||
                 L.ccu().systemProfile instanceof VavAdvancedAhu ||
-                L.ccu().systemProfile instanceof VavFullyModulatingRtu) {
+                L.ccu().systemProfile instanceof VavFullyModulatingRtu ||
+                (L.ccu().systemProfile instanceof DabStagedRtu && !(L.ccu().systemProfile instanceof DabAdvancedHybridRtu)) ||
+                L.ccu().systemProfile instanceof DabStagedRtuWithVfd) {
 
             msg.analog0.set(getPortValue(Domain.cmBoardDevice.getAnalog1Out(), ccuHsApi));
             msg.analog1.set(getPortValue(Domain.cmBoardDevice.getAnalog2Out(), ccuHsApi));

@@ -253,7 +253,11 @@ public class DabSystemController extends SystemController
         updateSystemHumidity(allEquips);
         updateSystemTemperature(allEquips);
         updateSystemDesiredTemp();
-        if (L.ccu().systemProfile instanceof  DabExternalAhu || L.ccu().systemProfile instanceof DabAdvancedAhu) {
+        if (L.ccu().systemProfile instanceof  DabExternalAhu ||
+                (L.ccu().systemProfile instanceof DabStagedRtu && !(L.ccu().systemProfile instanceof DabAdvancedHybridRtu)) ||
+                L.ccu().systemProfile instanceof DabStagedRtuWithVfd ||
+                L.ccu().systemProfile instanceof DabFullyModulatingRtu ||
+                L.ccu().systemProfile instanceof DabAdvancedAhu) {
             CCUHsApi.getInstance().writeHisValByQuery("domainName == \""+averageHumidity+"\"", averageSystemHumidity);
             CCUHsApi.getInstance().writeHisValByQuery("domainName == \""+averageTemperature+"\"", averageSystemTemperature);
         } else {
@@ -480,9 +484,13 @@ public class DabSystemController extends SystemController
     
     private void writeAlgoVariablesToDb() {
 
-        if (L.ccu().systemProfile instanceof DabExternalAhu) {
+        if (L.ccu().systemProfile instanceof DabExternalAhu ||
+                (L.ccu().systemProfile instanceof DabStagedRtu && !(L.ccu().systemProfile instanceof DabAdvancedHybridRtu)) ||
+                L.ccu().systemProfile instanceof DabStagedRtuWithVfd ||
+                L.ccu().systemProfile instanceof DabFullyModulatingRtu
+        ) {
             Domain.writeHisValByDomain(systemCI, comfortIndex);
-            Domain.writeHisValByDomain(DomainName.weightedAverageChangeOverLoadMA, weightedAverageChangeOverLoadMA);
+            Domain.writeHisValByDomain(DomainName.weightedAverageLoadMA, weightedAverageChangeOverLoadMA);
             Domain.writeHisValByDomain(DomainName.weightedAverageCoolingLoadPostML, weightedAverageCoolingLoadPostML);
             Domain.writeHisValByDomain(DomainName.weightedAverageHeatingLoadPostML, weightedAverageHeatingLoadPostML);
         } else {

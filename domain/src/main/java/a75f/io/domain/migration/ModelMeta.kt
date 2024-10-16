@@ -5,6 +5,8 @@ import a75f.io.domain.util.MODEL_CM_DEVICE
 import a75f.io.domain.util.MODEL_CONNECT_DEVICE
 import a75f.io.domain.util.MODEL_DAB_ADVANCED_AHU_V2_CM
 import a75f.io.domain.util.MODEL_DAB_ADVANCED_AHU_V2_CONNECT
+import a75f.io.domain.util.MODEL_DAB_STAGED_RTU
+import a75f.io.domain.util.MODEL_DAB_STAGED_VFD_RTU
 import a75f.io.domain.util.MODEL_EXTERNAL_AHU_DAB
 import a75f.io.domain.util.MODEL_EXTERNAL_AHU_VAV
 import a75f.io.domain.util.MODEL_HELIO_NODE_DAB
@@ -62,6 +64,8 @@ fun getRequiredModels(): List<String> {
             MODEL_VAV_STAGED_VFD_RTU,
             MODEL_VAV_MODULATING_AHU,
             MODEL_EXTERNAL_AHU_VAV,
+            MODEL_DAB_STAGED_RTU,
+            MODEL_DAB_STAGED_VFD_RTU,
             MODEL_SMART_NODE_DAB,
             MODEL_HELIO_NODE_DAB,
             MODEL_VAV_MODULATING_AHU,

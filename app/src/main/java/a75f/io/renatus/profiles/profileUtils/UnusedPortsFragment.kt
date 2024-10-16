@@ -7,6 +7,8 @@ import a75f.io.renatus.compose.ToggleButtonStateful
 import a75f.io.renatus.profiles.acb.AcbProfileViewModel
 import a75f.io.renatus.profiles.dab.DabProfileViewModel
 import a75f.io.renatus.profiles.profileUtils.UnusedPortsModel.Companion.saveConfiguration
+import a75f.io.renatus.profiles.system.DabStagedRtuViewModel
+import a75f.io.renatus.profiles.system.DabStagedVfdRtuViewModel
 import a75f.io.renatus.profiles.system.StagedRtuProfileViewModel
 import a75f.io.renatus.profiles.system.VavModulatingRtuViewModel
 import a75f.io.renatus.profiles.vav.VavProfileViewModel
@@ -40,6 +42,8 @@ open class UnusedPortsFragment : Fragment() {
                 is VavProfileViewModel -> TreeMap(viewModel.viewState.unusedPortState)
                 is AcbProfileViewModel -> TreeMap(viewModel.viewState.unusedPortState)
                 is DabProfileViewModel -> TreeMap(viewModel.viewState.unusedPortState)
+                is DabStagedRtuViewModel -> TreeMap(viewModel.viewState.value.unusedPortState)
+                is DabStagedVfdRtuViewModel -> TreeMap(viewModel.viewState.value.unusedPortState)
                 else -> null
             }
 

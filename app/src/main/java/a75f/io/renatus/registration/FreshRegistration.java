@@ -51,7 +51,7 @@ import a75f.io.messaging.client.MessagingClient;
 import a75f.io.renatus.DABFullyAHUProfile;
 import a75f.io.renatus.DABHybridAhuProfile;
 import a75f.io.renatus.DABStagedProfile;
-import a75f.io.renatus.DABStagedRtuWithVfdProfile;
+//import a75f.io.renatus.DABStagedRtuWithVfdProfile;
 import a75f.io.renatus.DefaultSystemProfile;
 import a75f.io.renatus.FloorPlanFragment;
 import a75f.io.renatus.R;
@@ -60,6 +60,7 @@ import a75f.io.renatus.SystemFragment;
 import a75f.io.renatus.UtilityApplication;
 import a75f.io.renatus.VavHybridRtuProfile;
 import a75f.io.renatus.VavIERtuProfile;
+import a75f.io.renatus.profiles.system.DabStagedVfdRtuFragment;
 import a75f.io.renatus.profiles.system.VavModulatingRtuFragment;
 import a75f.io.renatus.profiles.system.VavStagedRtuFragment;
 import a75f.io.renatus.profiles.system.VavStagedVfdRtuFragment;
@@ -194,7 +195,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             if (currentFragment instanceof DABFullyAHUProfile) {
                 selectItem(5);
             }
-            if (currentFragment instanceof DABStagedRtuWithVfdProfile) {
+            if (currentFragment instanceof DabStagedVfdRtuFragment) {
                 selectItem(5);
             }
             if (currentFragment instanceof DABHybridAhuProfile) {
@@ -935,7 +936,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
         }
         if (position == 16) {
 
-            fragment = new DABStagedRtuWithVfdProfile();
+            fragment = new DabStagedVfdRtuFragment();
 
             Bundle data = new Bundle();
             data.putBoolean("REGISTRATION_WIZARD", true);

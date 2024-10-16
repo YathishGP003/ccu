@@ -126,6 +126,7 @@ public class UpdatePointHandler implements MessageHandler
                 || (HSUtil.skipUserIntentForV2(localPoint) && HSUtil.isAdvanceAhuV2(pointUid, CCUHsApi.getInstance()))) {
             ConfigPointUpdateHandler.updateConfigPoint(msgObject, localPoint, CCUHsApi.getInstance());
             updatePoints(localPoint);
+            hayStack.scheduleSync();
             return;
         }
 

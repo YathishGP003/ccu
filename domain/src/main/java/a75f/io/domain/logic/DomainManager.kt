@@ -12,6 +12,8 @@ import a75f.io.domain.api.Site
 import a75f.io.domain.devices.CmBoardDevice
 import a75f.io.domain.devices.ConnectDevice
 import a75f.io.domain.equips.DabEquip
+import a75f.io.domain.equips.DabStagedSystemEquip
+import a75f.io.domain.equips.DabStagedVfdSystemEquip
 import a75f.io.domain.equips.DabAdvancedHybridSystemEquip
 import a75f.io.domain.equips.DefaultSystemEquip
 import a75f.io.domain.equips.DomainEquip
@@ -119,6 +121,16 @@ object DomainManager {
                     "vavFullyModulatingAhu" -> {
                         CcuLog.i(Domain.LOG_TAG, "Add vavFullyModulatingAhu systemEquip to domain ")
                         VavModulatingRtuSystemEquip(systemEquip["id"].toString())
+                    }
+
+                    "dabStagedRtu" -> {
+                        CcuLog.i(Domain.LOG_TAG, "Add dabStagedRtu systemEquip to domain ")
+                        DabStagedSystemEquip(systemEquip["id"].toString())
+                    }
+
+                    "dabStagedRtuVfdFan" -> {
+                        CcuLog.i(Domain.LOG_TAG, "Add dabStagedRtuVfdFan systemEquip to domain ")
+                        DabStagedVfdSystemEquip(systemEquip["id"].toString())
                     }
 
                     else -> {

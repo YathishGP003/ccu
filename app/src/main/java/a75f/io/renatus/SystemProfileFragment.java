@@ -24,6 +24,8 @@ import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logic.L;
+import a75f.io.renatus.profiles.system.DabStagedRtuFragment;
+import a75f.io.renatus.profiles.system.DabStagedVfdRtuFragment;
 import a75f.io.logic.util.onLoadingCompleteListener;
 import a75f.io.renatus.profiles.system.VavModulatingRtuFragment;
 import a75f.io.renatus.profiles.system.VavStagedRtuFragment;
@@ -204,7 +206,7 @@ public class SystemProfileFragment extends Fragment implements onLoadingComplete
                     case 7:
                         if (canAddDABProfile()) {
                             getActivity().getSupportFragmentManager().beginTransaction()
-                                    .replace(R.id.profileContainer, new DABStagedProfile()).commit();
+                                    .replace(R.id.profileContainer, new DabStagedRtuFragment()).commit();
                             if (SystemConfigMenuFragment.SystemConfigMenuFragmentHandler != null) {
                                 SystemConfigMenuFragment.SystemConfigMenuFragmentHandler.sendEmptyMessage(1);
                             }
@@ -231,7 +233,7 @@ public class SystemProfileFragment extends Fragment implements onLoadingComplete
                     case 9:
                         if (canAddDABProfile()) {
                             getActivity().getSupportFragmentManager().beginTransaction()
-                                    .replace(R.id.profileContainer, new DABStagedRtuWithVfdProfile()).commit();
+                                    .replace(R.id.profileContainer, new DabStagedVfdRtuFragment()).commit();
                             if (SystemConfigMenuFragment.SystemConfigMenuFragmentHandler != null) {
                                 SystemConfigMenuFragment.SystemConfigMenuFragmentHandler.sendEmptyMessage(1);
                             }

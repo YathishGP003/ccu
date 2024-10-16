@@ -395,7 +395,9 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
                     if (modelPoint != null) {
                         updatePoint(PointBuilderConfig(modelPoint, null, equipRef, site!!.id, site!!.tz, equipDis), dbPoint)
                     } else {
+                        delete++
                         CcuLog.e(Domain.LOG_TAG, " Model point does not exist for domain name $modelPointName")
+                        hayStack.deleteEntityTree(dbPoint["id"].toString())
                     }
                 }
             }

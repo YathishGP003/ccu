@@ -292,33 +292,6 @@ public class TempOverrideFragment extends Fragment {
 
                     newTunerList.clear();
                     for(Object point : tunerList) {
-                        if (point.toString().contains("Analog1In") || point.toString().contains("Analog 1 Input")){
-                            if (!newTunerList.contains(point)) {
-
-                                newTunerList.add(point);
-                            }
-                        }
-                    }
-
-                    for(Object point : tunerList) {
-                        if (point.toString().contains("Analog2In") || point.toString().contains("Analog 2 Input")){
-                            if (!newTunerList.contains(point)) {
-
-                                newTunerList.add(point);
-                            }
-                        }
-                    }
-
-                    for(Object point : tunerList) {
-                        if (point.toString().contains("Analog3In") || point.toString().contains("Analog 3 Input")){
-                            if (!newTunerList.contains(point)) {
-
-                                newTunerList.add(point);
-                            }
-                        }
-                    }
-
-                    for(Object point : tunerList) {
                         if (point.toString().contains("Analog1Out") || point.toString().contains("analog1Out") || point.toString().contains("Analog 1 Output")){
                             if (!newTunerList.contains(point)) {
 

@@ -392,6 +392,10 @@ public class Globals {
             }
             else if (eq.getProfile().equals("vavFullyModulatingAhu")) {
                 L.ccu().systemProfile = new VavFullyModulatingRtu();
+            } else if (eq.getProfile().equals("dabStagedRtu")) {
+                L.ccu().systemProfile = new DabStagedRtu();
+            } else if (eq.getProfile().equals("dabStagedRtuVfdFan")) {
+                L.ccu().systemProfile = new DabStagedRtuWithVfd();
             } else {
 
                 switch (ProfileType.valueOf(getDomainSafeProfile(eq.getProfile()))) {

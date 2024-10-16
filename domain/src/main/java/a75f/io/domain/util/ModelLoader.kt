@@ -68,6 +68,12 @@ object ModelLoader {
     fun getVavStagedVfdRtuModelDef() : ModelDirective {
         return ModelCache.getModelById(MODEL_VAV_STAGED_VFD_RTU)
     }
+    fun getDabStageRtuModelDef() : ModelDirective {
+        return ModelCache.getModelById(MODEL_DAB_STAGED_RTU)
+    }
+    fun getDabStagedVfdRtuModelDef() : ModelDirective {
+        return ModelCache.getModelById(MODEL_DAB_STAGED_VFD_RTU)
+    }
     fun getDabExternalAhuModel() : ModelDirective {
         return ModelCache.getModelById(MODEL_EXTERNAL_AHU_DAB)
     }

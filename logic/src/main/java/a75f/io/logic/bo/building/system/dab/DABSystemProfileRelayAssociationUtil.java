@@ -10,13 +10,23 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Stage;
+import a75f.io.logic.bo.building.system.SystemProfile;
+import a75f.io.logic.bo.building.system.vav.VavAdvancedHybridRtu;
+import a75f.io.logic.bo.building.system.vav.VavFullyModulatingRtu;
+import a75f.io.logic.bo.building.system.vav.VavStagedRtu;
+import a75f.io.logic.bo.building.system.vav.VavStagedRtuWithVfd;
+import a75f.io.logic.bo.building.system.vav.VavSystemProfile;
 import a75f.io.logic.bo.util.TemperatureMode;
 
 public class DABSystemProfileRelayAssociationUtil {
     public static boolean getDesiredTempDisplayMode(TemperatureMode modeType){
         HashMap<Object, Object> equip = CCUHsApi.getInstance().readEntity("equip and system and not modbus and not connectModule");
         Equip eq = new Equip.Builder().setHashMap(equip).build();
-
+        SystemProfile profileInstance = L.ccu().systemProfile;
+        //This will be needed for profiles not migrated to DM.
+        if (profileInstance == null) {
+            return false;
+        }
         if (ProfileType.getProfileTypeForName(eq.getProfile()) == ProfileType.SYSTEM_DAB_ADVANCED_AHU) {
             if (modeType == TemperatureMode.COOLING) {
                 return L.ccu().systemProfile.isCoolingAvailable();
@@ -24,22 +34,14 @@ public class DABSystemProfileRelayAssociationUtil {
                 return L.ccu().systemProfile.isHeatingAvailable();
             }
         }
+        DabSystemProfile systemProfile = getSystemProfileInstance(profileInstance);
 
-        switch (ProfileType.valueOf(eq.getProfile())) {
+        switch (ProfileType.getProfileTypeForName(eq.getProfile())) {
             case SYSTEM_DAB_STAGED_RTU:
-                DabStagedRtu dabStagedRtu = new DabStagedRtu();
-                return getAnyDabStagedRtuRelayAssociation(dabStagedRtu, false,
-                        modeType);
-
-            case SYSTEM_DAB_ANALOG_RTU:
-                DabFullyModulatingRtu dabFullyModulatingRtu = new DabFullyModulatingRtu();
-                return modeType == TemperatureMode.COOLING ? dabFullyModulatingRtu.getConfigEnabled
-                        ("analog1") == 1.0 : dabFullyModulatingRtu.getConfigEnabled("analog3") == 1.0;
-
             case SYSTEM_DAB_STAGED_VFD_RTU:
-                DabStagedRtuWithVfd dabStagedRtuWithVfd = new DabStagedRtuWithVfd();
-                return getAnyDabStagedRtuRelayAssociation(dabStagedRtuWithVfd,
-                        false, modeType);
+            case SYSTEM_DAB_ANALOG_RTU:
+            return modeType == TemperatureMode.COOLING ?
+                    systemProfile.isCoolingAvailable() : systemProfile.isHeatingAvailable();
 
             case SYSTEM_DAB_HYBRID_RTU:
                 DabAdvancedHybridRtu dabAdvancedHybridRtu = new DabAdvancedHybridRtu();
@@ -48,6 +50,20 @@ public class DABSystemProfileRelayAssociationUtil {
 
         }
         return false;
+    }
+
+    private static DabSystemProfile getSystemProfileInstance(SystemProfile systemProfile) {
+
+        if (systemProfile instanceof DabStagedRtu) {
+            return (DabStagedRtu)systemProfile;
+        } else if (systemProfile instanceof DabStagedRtuWithVfd) {
+            return (DabStagedRtuWithVfd)systemProfile;
+        } else if (systemProfile instanceof DabFullyModulatingRtu) {
+            return  (DabFullyModulatingRtu)systemProfile;
+        } else if (systemProfile instanceof DabAdvancedHybridRtu) {
+            return  (DabAdvancedHybridRtu)systemProfile;
+        }
+        return (DabSystemProfile) systemProfile;
     }
 
     private static boolean getAnyDabStagedRtuRelayAssociation(DabStagedRtu dabStagedRtu,

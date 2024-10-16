@@ -47,6 +47,8 @@ object DomainName {
     const val buildingLimitAlertTimer = "buildingLimitAlertTimer"
     const val temperatureMode = "temperatureMode"
 
+    const val dabAdvancedHybridAhuV2_connectModule = "dabAdvancedHybridAhuV2_connectModule"
+    const val connectModuleDevice = "connectModuleDevice"
 
     // Profiles
     const val vavReheatNoFan = "vavReheatNoFan"
@@ -586,6 +588,7 @@ object DomainName {
     const val systemEnhancedVentilationEnable = "systemEnhancedVentilationEnable"
     const val co2WeightedAverage = "co2WeightedAverage"
     const val weightedAverageChangeOverLoadMA = "weightedAverageChangeOverLoadMA"
+    const val weightedAverageLoadMA = "weightedAverageLoadMA"
 
     const val analog1OutputEnable = "analog1OutputEnable"
     const val analog2OutputEnable = "analog2OutputEnable"

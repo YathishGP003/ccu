@@ -8,15 +8,12 @@ import static a75f.io.logic.bo.building.ZoneState.TEMPDEAD;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
-import a75f.io.api.haystack.HSUtil;
-import a75f.io.api.haystack.Occupied;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.EpidemicState;
 import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.schedules.Occupancy;
-import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.schedules.ScheduleUtil;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
@@ -129,6 +126,8 @@ public class VavSeriesFanProfile extends VavProfile
             }
             if (conditioning == SystemController.State.COOLING ) {
                 loopOp = (int) coolingLoop.getLoopOutput(roomTemp, setTempCooling);
+                vavEquip.getCoolingLoopOutput().writePointValue(loopOp);
+                loopOp = (int) vavEquip.getCoolingLoopOutput().readHisVal();
             }
         } else if (roomTemp < setTempHeating && systemMode != SystemMode.OFF) {
             //Zone is in heating
@@ -142,7 +141,8 @@ public class VavSeriesFanProfile extends VavProfile
             } else if (conditioning == SystemController.State.HEATING) {
                 loopOp = heatingLoopOp;
             }
-            
+            vavEquip.getHeatingLoopOutput().writePointValue(loopOp);
+            loopOp = (int) vavEquip.getHeatingLoopOutput().readHisVal();
         } else {
             //Zone is in deadband
             handleDeadband();
@@ -159,7 +159,8 @@ public class VavSeriesFanProfile extends VavProfile
     
         updateTRResponse(node);
         vavEquip.getDamperCmd().writeHisVal(damper.currentPosition);
-        vavEquip.getReheatCmd().writeHisVal(valve.currentPosition);
+        vavEquip.getReheatCmd().writePointValue(valve.currentPosition);
+        valve.currentPosition = (int) vavEquip.getReheatCmd().readHisVal();
         setStatus(state.ordinal(), VavSystemController.getInstance().isEmergencyMode() && (state == HEATING ? buildingLimitMinBreached()
                                                                                                          : state == COOLING ? buildingLimitMaxBreached() : false));
         updateLoopParams();
@@ -262,13 +263,14 @@ public class VavSeriesFanProfile extends VavProfile
                 damperPos = vavEquip.getDamperCmd().readHisVal() > 0 ? vavEquip.getDamperCmd().readHisVal() : damperMin;
             }
             vavEquip.getDamperCmd().writeHisVal(damperPos);
-            vavEquip.getNormalizedDamperCmd().writeHisVal(damperPos);
-            vavEquip.getReheatCmd().writeHisVal(0);
+            vavEquip.getNormalizedDamperCmd().writePointValue(damperPos);
+            vavEquip.getReheatCmd().writePointValue(0);
             vavEquip.getEquipStatus().writeHisVal((double) TEMPDEAD.ordinal());
             vavEquip.getEquipStatusMessage().writeDefaultVal("Zone Temp Dead : "+getFanStatusMessage().replace(", ", "" ));
             vavEquip.getSeriesFanCmd().writeHisVal(0);
         }
     }
+
     private void handleRFDead() {
         CcuLog.d(L.TAG_CCU_ZONE,"RF Signal Dead : equipRef: "+vavEquip.getEquipRef());
         vavEquip.getEquipStatus().writeHisVal((double) RFDEAD.ordinal());

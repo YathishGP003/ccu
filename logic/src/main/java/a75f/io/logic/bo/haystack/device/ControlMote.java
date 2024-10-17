@@ -542,7 +542,7 @@ public class ControlMote
         HashMap<String, String> portsNameWithDomainName = getCmPortsDisplayNameWithDomainName();
         for (String value : cmPortsWithSystemEquipDomainName.values()) {
             RawPoint cmPortPoint = portsList.get(portsNameWithDomainName.get(value));
-            cmUnusedPorts.put(value, cmPortPoint.getMarkers().contains(Tags.WRITABLE));
+            cmUnusedPorts.put(value, cmPortPoint.getMarkers().contains(Tags.UNUSED));
         }
         CcuLog.i(L.TAG_CCU_DOMAIN, "Got unused ports+ "+cmUnusedPorts);
         return cmUnusedPorts;

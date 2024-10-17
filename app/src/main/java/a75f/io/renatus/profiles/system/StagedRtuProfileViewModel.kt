@@ -168,7 +168,7 @@ open class StagedRtuProfileViewModel : ViewModel() {
     fun sendAnalogTestSignal(value: Double) {
         if(L.ccu().systemProfile.profileName == ProfileNameVFD) {
             Globals.getInstance().isTestMode = true
-            Domain.cmBoardDevice.analog2Out.writeHisVal(10 * value)
+            Domain.cmBoardDevice.analog2Out.writePointValue(10 * value)
             MeshUtil.sendStructToCM(DeviceUtil.getCMControlsMessage())
         }
     }

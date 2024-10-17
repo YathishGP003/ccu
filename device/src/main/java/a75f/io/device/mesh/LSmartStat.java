@@ -28,6 +28,7 @@ import a75f.io.device.serial.SmartStatFanSpeed_t;
 import a75f.io.device.serial.SmartStatProfileMap_t;
 import a75f.io.device.serial.SmartStatSettings_t;
 import a75f.io.device.util.DeviceConfigurationUtil;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Output;
@@ -208,16 +209,25 @@ public class LSmartStat {
                     HashMap logicalOpPoint = hayStack.read("point and id == " + p.getPointRef());
                     Log.d("LSmartStat", "getCtrlMsgs=" + p.getDisplayName() + "," + p.getPointRef() + "," + logicalOpPoint.get("id") + "," + p.getType());
                     if (logicalOpPoint.get("id") != null) {
-                        double logicalVal = hayStack.readHisValById(logicalOpPoint.get("id").toString());
+                        double logicalVal;
+                        if (logicalOpPoint.containsKey(Tags.WRITABLE)) {
+                            logicalVal = hayStack.readPointPriorityVal(logicalOpPoint.get("id").toString());
+                            CcuLog.d(L.TAG_CCU_DEVICE, "test-writable READ LSmartStat fillSmartStatControls: writable id->"+logicalOpPoint.get("id").toString()+"<logicalVal:>"+logicalVal);
+                        } else {
+                            logicalVal = hayStack.readHisValById(logicalOpPoint.get("id").toString());
+                            CcuLog.d(L.TAG_CCU_DEVICE, "test-writable READ LSmartStat fillSmartStatControls: not writable id->"+logicalOpPoint.get("id").toString()+"<logicalVal:>"+logicalVal);
+                        }
+
+
                         short mappedVal;
                         //Mapping not required during override.
                         if (Globals.getInstance().isTemporaryOverrideMode()) {
                             mappedVal = (short)hayStack.readHisValById(opPoint.get("id").toString()).intValue();
                         } else {
                             mappedVal = (mapDigitalOut(p.getType(), logicalVal > 0));
-                            hayStack.writeHisValById(p.getId(), (double) mappedVal);
                         }
-
+                        hayStack.writeHisValById(p.getId(), (double) mappedVal);
+                        CcuLog.d(L.TAG_CCU_DEVICE, "test-writable WRITE LSmartStat fillSmartStatControls: writeHisValById id->"+logicalOpPoint.get("id").toString()+"<mappedVal:>"+mappedVal);
                         LSmartStat.getSmartStatPort(controls, p.getPort()).set(mappedVal);
                     }
 

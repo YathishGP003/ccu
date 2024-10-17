@@ -144,20 +144,16 @@ public class VavFullyModulatingRtu extends VavSystemProfile
             systemCoolingLoopOp = 0;
         }
 
-        if(AutoCommissioningUtil.isAutoCommissioningStarted()) {
-            writeSystemLoopOutputValue(Tags.COOLING,systemCoolingLoopOp);
-            systemCoolingLoopOp = getSystemLoopOutputValue(Tags.COOLING);
-        }
-
         int signal;
         double analogMin, analogMax;
-        setSystemLoopOp("cooling", systemCoolingLoopOp);
+        systemEquip.getCoolingLoopOutput().writePointValue(systemCoolingLoopOp);
+        systemCoolingLoopOp = systemEquip.getCoolingLoopOutput().readHisVal();
         if (systemEquip.getAnalog1OutputEnable().readPriorityVal() > 0)
         {
             analogMin = systemEquip.getAnalog1MinCooling().readPriorityVal();
             analogMax = systemEquip.getAnalog1MaxCooling().readPriorityVal();
             CcuLog.d(L.TAG_CCU_SYSTEM, "analog1Min: "+analogMin+" analog1Max: "+analogMax+" SAT: "+getSystemSAT());
-    
+            CcuLog.d("CCU_DEVICE", "test-writable write signal analog1Min: "+analogMin+" analog1Max: "+analogMax+" SAT: "+getSystemSAT()+ "<systemCoolingLoopOp-->"+systemCoolingLoopOp);
             if (isCoolingLockoutActive()) {
                 signal = (int)(analogMin * ANALOG_SCALE);
             } else {
@@ -170,10 +166,10 @@ public class VavFullyModulatingRtu extends VavSystemProfile
         } else {
             signal = 0;
         }
-        
 
+        CcuLog.d("CCU_DEVICE", "test-writable write signal :=======signal value====>"+signal + "<--point name :> "+systemEquip.getCoolingSignal().getDis() + "<--point id :-->"+systemEquip.getCoolingSignal().getId());
         systemEquip.getCoolingSignal().writeHisVal(signal);
-        Domain.cmBoardDevice.getAnalog1Out().writeHisVal(signal);
+        Domain.cmBoardDevice.getAnalog1Out().writePointValue(signal);
 
     
         if (VavSystemController.getInstance().getSystemState() == HEATING)
@@ -183,12 +179,8 @@ public class VavFullyModulatingRtu extends VavSystemProfile
             systemHeatingLoopOp = 0;
         }
 
-        if(AutoCommissioningUtil.isAutoCommissioningStarted()) {
-            writeSystemLoopOutputValue(Tags.HEATING,systemHeatingLoopOp);
-            systemHeatingLoopOp = getSystemLoopOutputValue(Tags.HEATING);
-        }
-
-        setSystemLoopOp("heating", systemHeatingLoopOp);
+        systemEquip.getHeatingLoopOutput().writePointValue(systemHeatingLoopOp);
+        systemHeatingLoopOp = systemEquip.getHeatingLoopOutput().readHisVal();
         if (systemEquip.getAnalog3OutputEnable().readPriorityVal() > 0)
         {
             analogMin = systemEquip.getAnalog3MinHeating().readPriorityVal();
@@ -209,7 +201,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
         }
 
         systemEquip.getHeatingSignal().writeHisVal(signal);
-        Domain.cmBoardDevice.getAnalog3Out().writeHisVal(signal);
+        Domain.cmBoardDevice.getAnalog3Out().writePointValue(signal);
 
         double analogFanSpeedMultiplier = systemEquip.getVavAnalogFanSpeedMultiplier().readPriorityVal();
         double epidemicMode = systemEquip.getEpidemicModeSystemState().readHisVal();
@@ -246,14 +238,9 @@ public class VavFullyModulatingRtu extends VavSystemProfile
             systemFanLoopOp = 0;
         }
         systemFanLoopOp = Math.min(systemFanLoopOp, 100);
+        systemEquip.getFanLoopOutput().writePointValue(systemFanLoopOp);
+        systemFanLoopOp = systemEquip.getFanLoopOutput().readHisVal();
 
-        if(AutoCommissioningUtil.isAutoCommissioningStarted()) {
-            writeSystemLoopOutputValue(Tags.FAN,systemFanLoopOp);
-            systemFanLoopOp = getSystemLoopOutputValue(Tags.FAN);
-        }
-
-        setSystemLoopOp("fan", systemFanLoopOp);
-        
         if (systemEquip.getAnalog2OutputEnable().readPriorityVal() > 0)
         {
             analogMin = systemEquip.getAnalog2MinStaticPressure().readPriorityVal();
@@ -274,12 +261,13 @@ public class VavFullyModulatingRtu extends VavSystemProfile
         }
 
         systemEquip.getFanSignal().writeHisVal(signal);
-        Domain.cmBoardDevice.getAnalog2Out().writeHisVal(signal);
+        Domain.cmBoardDevice.getAnalog2Out().writePointValue(signal);
         
         systemCo2LoopOp = VavSystemController.getInstance().getSystemState() == SystemController.State.OFF
                                          ? 0 :(SystemConstants.CO2_CONFIG_MAX - getSystemCO2()) * 100 / 200 ;
-        setSystemLoopOp("co2", systemCo2LoopOp);
-    
+        systemEquip.getCo2LoopOutput().writePointValue(systemCo2LoopOp);
+        systemCo2LoopOp = systemEquip.getCo2LoopOutput().readHisVal();
+
         CcuLog.d(L.TAG_CCU_SYSTEM, "systemCoolingLoopOp "+systemCoolingLoopOp+ " systemHeatingLoopOp "+ systemHeatingLoopOp
                                    + "systemFanLoopOp "+systemFanLoopOp+" systemCo2LoopOp "+systemCo2LoopOp);
         
@@ -299,7 +287,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
         }
 
         systemEquip.getOutsideAirDamper().writeHisVal(signal);
-        Domain.cmBoardDevice.getAnalog4Out().writeHisVal(signal);
+        Domain.cmBoardDevice.getAnalog4Out().writePointValue(signal);
 
         if (systemEquip.getRelay3OutputEnable().readPriorityVal() > 0)
         {
@@ -318,7 +306,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
             signal = 0;
         }
         systemEquip.getFanEnable().writeHisVal(signal);
-        Domain.cmBoardDevice.getRelay3().writeHisVal(signal);
+        Domain.cmBoardDevice.getRelay3().writePointValue(signal);
         
         if (systemEquip.getRelay7OutputEnable().readPriorityVal() > 0 && systemMode != SystemMode.OFF
                                                 && isSystemOccupied())
@@ -364,11 +352,11 @@ public class VavFullyModulatingRtu extends VavSystemProfile
             CcuLog.d(L.TAG_CCU_SYSTEM,"humidity :"+humidity+" targetMinHumidity: "+targetMinHumidity+" humidityHysteresis: "+humidityHysteresis+
                                       " targetMaxHumidity: "+targetMaxHumidity+" signal: "+signal*100);
 
-            Domain.cmBoardDevice.getRelay7().writeHisVal(signal);
+            Domain.cmBoardDevice.getRelay7().writePointValue(signal);
         } else {
             systemEquip.getHumidifier().writeHisVal(0);
             systemEquip.getDehumidifier().writeHisVal(0);
-            Domain.cmBoardDevice.getRelay7().writeHisVal(0);
+            Domain.cmBoardDevice.getRelay7().writePointValue(0);
         }
     
         setSystemPoint("operating and mode", VavSystemController.getInstance().systemState.ordinal());
@@ -384,7 +372,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
             systemEquip.getEquipScheduleStatus().writeDefaultVal(scheduleStatus);
         }
     }
-    
+
     @Override
     public String getStatusMessage(){
         StringBuilder status = new StringBuilder();

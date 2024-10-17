@@ -923,6 +923,16 @@ public class PlcEquip {
         return hayStack.readHisValByQuery("point and control and variable and equipRef == \"" + equipRef + "\"");
     }
 
+    public boolean isEquipPointWritable() {
+        HashMap equip = hayStack.read("point and equipRef == \"" + equipRef + "\"");
+        if (equip != null) {
+            if(equip.containsKey("writable")){
+                return true;
+            }
+        }
+        return false;
+    }
+
     public void setControlVariable(double controlVariable) {
         hayStack.writeHisValByQuery("point and control and variable and equipRef == \"" + equipRef + "\"", controlVariable);
 
@@ -963,5 +973,21 @@ public class PlcEquip {
 
     public boolean isEnabledZeroErrorMidpoint() {
         return hayStack.readDefaultVal("point and config and enabled and zero and error and midpoint and group == \"" + nodeAddr + "\"") > 0;
+    }
+
+    public void writeDefaultVal(Object defaultVal) {
+        if (defaultVal instanceof String) {
+            hayStack.writeDefaultValById(equipRef, (String) defaultVal);
+        } else if (defaultVal instanceof Double) {
+            hayStack.writeDefaultValById(equipRef, (Double) defaultVal);
+        }
+    }
+
+    public Double readPriorityVal(){
+        return hayStack.readPointPriorityVal(equipRef);
+    }
+
+    public Double readHisVal(){
+        return hayStack.readHisValById(equipRef);
     }
 }

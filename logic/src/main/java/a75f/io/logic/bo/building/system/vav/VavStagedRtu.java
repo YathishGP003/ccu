@@ -182,21 +182,12 @@ public class VavStagedRtu extends VavSystemProfile
             systemCoolingLoopOp = 0;
         }
 
-        if(AutoCommissioningUtil.isAutoCommissioningStarted()) {
-            writeSystemLoopOutputValue(Tags.COOLING, systemCoolingLoopOp);
-            systemCoolingLoopOp = getSystemLoopOutputValue(Tags.COOLING);
-        }
-
         if (VavSystemController.getInstance().getSystemState() == HEATING) {
             systemHeatingLoopOp = VavSystemController.getInstance().getHeatingSignal();
         } else {
             systemHeatingLoopOp = 0;
         }
 
-        if(AutoCommissioningUtil.isAutoCommissioningStarted()) {
-            writeSystemLoopOutputValue(Tags.HEATING, systemHeatingLoopOp);
-            systemHeatingLoopOp = getSystemLoopOutputValue(Tags.HEATING);
-        }
 
         double analogFanSpeedMultiplier = systemEquip.getVavAnalogFanSpeedMultiplier().readPriorityVal();
         double epidemicMode = systemEquip.getEpidemicModeSystemState().readHisVal();
@@ -241,19 +232,19 @@ public class VavStagedRtu extends VavSystemProfile
         }
         systemFanLoopOp = Math.min(systemFanLoopOp, 100);
 
-        if(AutoCommissioningUtil.isAutoCommissioningStarted()) {
-            writeSystemLoopOutputValue(Tags.FAN, systemFanLoopOp);
-            systemFanLoopOp = getSystemLoopOutputValue(Tags.FAN);
-        }
 
         systemCo2LoopOp = VavSystemController.getInstance().getSystemState() == SystemController.State.OFF
                                   ? 0 : (SystemConstants.CO2_CONFIG_MAX - getSystemCO2()) * 100 / 200 ;
 
-        systemEquip.getCoolingLoopOutput().writeHisVal(systemCoolingLoopOp);
-        systemEquip.getHeatingLoopOutput().writeHisVal(systemHeatingLoopOp);
-        systemEquip.getFanLoopOutput().writeHisVal(systemFanLoopOp);
-        systemEquip.getCo2LoopOutput().writeHisVal(systemCo2LoopOp);
-    
+        systemEquip.getCoolingLoopOutput().writePointValue(systemCoolingLoopOp);
+        systemCoolingLoopOp = systemEquip.getCoolingLoopOutput().readHisVal();
+        systemEquip.getHeatingLoopOutput().writePointValue(systemHeatingLoopOp);
+        systemHeatingLoopOp = systemEquip.getHeatingLoopOutput().readHisVal();
+        systemEquip.getFanLoopOutput().writePointValue(systemFanLoopOp);
+        systemFanLoopOp = systemEquip.getFanLoopOutput().readHisVal();
+        systemEquip.getCo2LoopOutput().writePointValue(systemCo2LoopOp);
+        systemCo2LoopOp = systemEquip.getCo2LoopOutput().readHisVal();
+
         CcuLog.d(L.TAG_CCU_SYSTEM, "systemCoolingLoopOp "+systemCoolingLoopOp+
                                    " systemHeatingLoopOp "+ systemHeatingLoopOp+" " + "systemFanLoopOp "+systemFanLoopOp);
     
@@ -279,7 +270,7 @@ public class VavStagedRtu extends VavSystemProfile
         }
     
     }
-    
+
     /**
      * Each of the 7 relays could be mapped to any of the 17 logical stages ( Cooling1-5, Heating1-5,Fan1-5,
      * Humidifier, dehumidifier.
@@ -423,7 +414,12 @@ public class VavStagedRtu extends VavSystemProfile
     }
     
     private void setStageStatus(Stage stage, double relayState) {
-        getDomainPointForStage(stage).writeHisVal(relayState);
+        a75f.io.domain.api.Point point = getDomainPointForStage(stage);
+        if(point.isWritable()){
+            point.writePointValue(relayState);
+        }else{
+            point.writeHisVal(relayState);
+        }
     }
     
     private Set<a75f.io.domain.api.Point> getRelayMappingForStage(Stage stage) {
@@ -495,14 +491,14 @@ public class VavStagedRtu extends VavSystemProfile
                         if(epidemicState == EpidemicState.PREPURGE || epidemicState == EpidemicState.POSTPURGE)
                             relayState = systemFanLoopOp > 0 ? 1 : 0;
                         else
-                            relayState =  (systemCoolingLoopOp > 0 || systemHeatingLoopOp > 0) ? 1 :0;
+                            relayState =  (systemCoolingLoopOp > 0 || systemHeatingLoopOp > 0 || systemFanLoopOp > 0) ? 1 :0;
                     } else {
                         relayState = 0;
                     }
                     break;
                 case FAN_2:
                     if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_STAGED_VFD_RTU) {
-                        relayState =  (systemCoolingLoopOp > 0 || systemHeatingLoopOp > 0) ? 1 :0;
+                        relayState =  (systemCoolingLoopOp > 0 || systemHeatingLoopOp > 0 || systemFanLoopOp > 0) ? 1 :0;
                     } else {
                         relayState = systemFanLoopOp > 0 ? 1 : 0;
                     }
@@ -672,7 +668,7 @@ public class VavStagedRtu extends VavSystemProfile
                 Stage mappedStage = Stage.values()[(int) association.readDefaultVal()];
                 newState = getStageStatus(mappedStage);
                 //ControlMote.setRelayState(relay, newState);
-                getLogicalPhysicalMap().get(relay).writeHisVal(newState);
+                getLogicalPhysicalMap().get(relay).writePointValue(newState);
             }
         });
     }

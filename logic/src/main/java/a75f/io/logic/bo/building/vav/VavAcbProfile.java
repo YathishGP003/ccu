@@ -103,6 +103,8 @@ public class VavAcbProfile extends VavProfile
             if (conditioning == SystemController.State.COOLING) {
                 loopOp = (int) coolingLoop.getLoopOutput(roomTemp, setTempCooling);
                 chwValve.currentPosition = condensate ? 0 : loopOp;
+                vavEquip.getCoolingLoopOutput().writePointValue(loopOp);
+                loopOp = (int) vavEquip.getCoolingLoopOutput().readHisVal();
             } else {
                 // Damper and CHW Valve go to minimum if system is in heating
                 chwValve.currentPosition = 0;
@@ -197,7 +199,7 @@ public class VavAcbProfile extends VavProfile
                 damperPos = vavEquip.getDamperCmd().readHisVal() > 0 ? vavEquip.getDamperCmd().readHisVal() : damperMin;
             }
             vavEquip.getDamperCmd().writeHisVal(damperPos);
-            vavEquip.getNormalizedDamperCmd().writeHisVal(damperPos);
+            vavEquip.getNormalizedDamperCmd().writePointValue(damperPos);
             if (((VavAcbEquip)vavEquip).getChilledWaterValveIsolationCmdPointNO().pointExists()) {
                 ((VavAcbEquip)vavEquip).getChilledWaterValveIsolationCmdPointNO().writeHisVal(0.0);
             } else {

@@ -92,7 +92,7 @@ private fun writeUniversalInputMappedVal(
     val universalInputMapping = getUniversalInputSensorMapping()[associationVal]
     CcuLog.i(L.TAG_CCU_SERIAL_CONNECT, "universalInputVal $sensorVal associationVal $associationVal")
     if (universalInputMapping != null) {
-        physicalPoint.writeHisVal(sensorVal.toDouble())
+        physicalPoint.writePointValue(sensorVal.toDouble())
         Domain.writeHisValByDomain(universalInputMapping.domainName, sensorVal.toDouble(), connectEquip.equipRef)
     } else {
         CcuLog.e(L.TAG_CCU_SERIAL_CONNECT, "universalInputMapping not found for associationVal $associationVal")

@@ -1,6 +1,7 @@
 package a75f.io.domain.api
 
 import a75f.io.api.haystack.RawPoint
+import a75f.io.logger.CcuLog
 import java.util.Objects
 
 /**
@@ -101,6 +102,7 @@ class Ccu(domainName : String, id : String) : Entity(domainName) {
 open class Point(domainName : String, val equipRef: String) : Entity(domainName) {
 
     var id = ""
+    var dis = ""
    /* constructor(domainName: String, equipRef : String, id: String = "") : this(domainName, id) {
         this.equipRef = equipRef
     }*/
@@ -109,7 +111,9 @@ open class Point(domainName : String, val equipRef: String) : Entity(domainName)
         // If a query returned null before, we want to search again for the point id next time (rather than accepting the null id)
         // This matters for dynamic sensor points that could be queried before the point is actually created
         if (id.isEmpty() || id.equals("null")) {
-            id = domainName.readPoint(equipRef)["id"].toString()
+            val point = domainName.readPoint(equipRef)
+            id = point["id"].toString()
+            dis = point["dis"].toString()
         }
         /*if (id.isEmpty()) {
             throw IllegalStateException("Invalid point domain name")
@@ -123,6 +127,16 @@ open class Point(domainName : String, val equipRef: String) : Entity(domainName)
         }
         return id.isNotEmpty() && id != "null" && id != "@null"
     }
+
+    fun isWritable(): Boolean {
+        return try {
+            requireId()
+            domainName.readPoint(equipRef)["writable"] != null
+        } catch (e: IllegalStateException) {
+            false
+        }
+    }
+
     fun readHisVal() : Double {
         requireId()
         return Domain.hayStack.readHisValById(id)
@@ -148,6 +162,21 @@ open class Point(domainName : String, val equipRef: String) : Entity(domainName)
             Domain.hayStack.writeDefaultValById(id, defaultVal)
         }
     }
+
+    fun writePointValue(value: Double) {
+        requireId()
+        CcuLog.d("CCU_DEVICE", "test-writable writePointValue:=======value====> $value <--id--> $id <--iswritable-->${isWritable()} <--default value-->${readDefaultVal()}<--dis-->$dis")
+        if (isWritable()) {
+            if (value != readDefaultVal()) {
+                writeDefaultVal(value)
+            }
+            CcuLog.d("CCU_DEVICE", "test-writable writePointValue:=======readPriorityVal()====> ${readPriorityVal()} for <--id-->$id<--dis-->$dis")
+            writeHisVal(readPriorityVal())
+        } else {
+            writeHisVal(value)
+        }
+    }
+
     fun readDefaultVal() : Double {
         requireId()
         return Domain.hayStack.readDefaultValById(id)
@@ -173,11 +202,14 @@ open class Point(domainName : String, val equipRef: String) : Entity(domainName)
 
 open class PhysicalPoint(domainName : String, val deviceRef: String) : Entity (domainName) {
     var id = ""
+    var dis = ""
     private fun requireId() {
         // If a query returned null before, we want to search again for the point id next time (rather than accepting the null id)
         // This matters for dynamic sensor points that could be queried before the point is actually created
         if (id.isEmpty() || id.equals("null")) {
-            id = domainName.readPhysicalPoint(deviceRef)["id"].toString()
+            val physicalPointMap = domainName.readPhysicalPoint(deviceRef)
+            id = physicalPointMap["id"].toString()
+            dis = physicalPointMap["dis"].toString()
         }
         if (id.isEmpty()) {
             throw IllegalStateException("Invalid point domain name")
@@ -190,6 +222,55 @@ open class PhysicalPoint(domainName : String, val deviceRef: String) : Entity (d
     fun writeHisVal(hisVal : Double) {
         requireId()
         Domain.hayStack.writeHisValById(id, hisVal)
+    }
+
+    fun writePointValue(value: Double) {
+        requireId()
+        CcuLog.d("CCU_DEVICE", "test-writable physical writePointValue:=======value====> $value <--id--> $id <--iswritable-->${isWritable()} <--default value-->${readDefaultVal()}<--dis-->$dis")
+        if (isWritable()) {
+            if (value != readDefaultVal()) {
+                writeDefaultVal(value)
+            }
+            val priorityValue = readPriorityVal()
+            CcuLog.d("CCU_DEVICE", "test-writable physical writePointValue:=======readPriorityVal()====> $priorityValue for <--id-->$id<--dis-->$dis")
+            writeHisVal(priorityValue)
+        } else {
+            writeHisVal(value)
+        }
+    }
+
+    fun readPriorityVal() : Double {
+        requireId()
+        val priorityVal = Domain.hayStack.readPointPriorityVal(id)
+        if (priorityVal == 0.0) {
+            id = domainName.readPoint(deviceRef)["id"].toString()
+            return Domain.hayStack.readPointPriorityVal(id)
+        }
+        return priorityVal
+    }
+
+    fun writeDefaultVal(defaultVal : Any) {
+        requireId()
+        if (defaultVal is String) {
+            Domain.hayStack.writeDefaultValById(id, defaultVal)
+        } else if (defaultVal is Double) {
+            Domain.hayStack.writeDefaultValById(id, defaultVal)
+        }
+    }
+
+    fun readDefaultVal() : Double {
+        requireId()
+        return Domain.hayStack.readDefaultValById(id)
+    }
+
+    fun isWritable(): Boolean {
+        return try {
+            requireId()
+            //use Domain.hayStack.readHDictById(id)
+            domainName.readPhysicalPoint(deviceRef)["writable"] != null
+        } catch (e: IllegalStateException) {
+            false
+        }
     }
 
     fun readPoint() : RawPoint {

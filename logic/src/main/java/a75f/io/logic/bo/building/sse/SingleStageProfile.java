@@ -214,7 +214,20 @@ public class SingleStageProfile extends ZoneProfile
         return CCUHsApi.getInstance().readHisValByQuery("point and sse and cmd and his and "+cmd+" and group == \"" + node + "\"");
     }
     public void setCmdSignal(String cmd, double val, short node) {
-        CCUHsApi.getInstance().writeHisValByQuery("point and sse and cmd and his and "+cmd+" and group == \"" + node + "\"", val);
+        if(cmd.equalsIgnoreCase("cooling and stage1")
+                || cmd.equalsIgnoreCase("heating and stage1")
+                || cmd.equalsIgnoreCase("fan and stage1")){
+            HashMap point = getPoint(cmd, node);
+            if(point != null && isPointWritable(point)){
+                CCUHsApi.getInstance().writeDefaultValById(point.get("id").toString(), val);
+                double value = CCUHsApi.getInstance().readPointPriorityVal(point.get("id").toString());
+                CCUHsApi.getInstance().writeHisValByQuery("point and sse and cmd and his and "+cmd+" and group == \"" + node + "\"", value);
+            }else{
+                CCUHsApi.getInstance().writeHisValByQuery("point and sse and cmd and his and "+cmd+" and group == \"" + node + "\"", val);
+            }
+        }else{
+            CCUHsApi.getInstance().writeHisValByQuery("point and sse and cmd and his and "+cmd+" and group == \"" + node + "\"", val);
+        }
     }
     public void reset(short node){
         setCmdSignal("cooling and stage1",0,node);
@@ -255,6 +268,19 @@ public class SingleStageProfile extends ZoneProfile
 
     private boolean isOccupied(boolean occupied, boolean forceOccupied, boolean autoForceOccupied) {
         return occupied || autoForceOccupied || forceOccupied;
+    }
+
+    public boolean isPointWritable(HashMap equip) {
+        if (equip != null) {
+            if(equip.containsKey("writable")){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private HashMap getPoint(String filter, short node){
+        return CCUHsApi.getInstance().read("point and " + filter + " and group == \"" + node + "\"");
     }
 
 }

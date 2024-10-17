@@ -18,6 +18,10 @@ object RenatusDatabaseBuilder {
             RenatusDatabase::class.java,
             "renatusDb"
             ).addMigrations(RenatusDatabase.MIGRATION_4_5)
-            .addMigrations(RenatusDatabase.MIGRATION_5_6)
-            .build()
+                    .addMigrations(RenatusDatabase.MIGRATION_4_6)
+                    .addMigrations(RenatusDatabase.MIGRATION_4_7)
+                    .addMigrations(RenatusDatabase.MIGRATION_5_6)
+                    .addMigrations(RenatusDatabase.MIGRATION_5_7)
+                    .addMigrations(RenatusDatabase.MIGRATION_6_7)
+                    .build()
 }

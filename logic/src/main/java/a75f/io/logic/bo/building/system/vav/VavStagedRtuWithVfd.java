@@ -118,13 +118,15 @@ public class VavStagedRtuWithVfd extends VavStagedRtu
                 double smartPurgeFanLoopOp = TunerUtil.readTunerValByQuery("system and postPurge and fan and speed", L.ccu().oaoProfile.getEquipRef());
                 signal = Math.max(signal,smartPurgeFanLoopOp / ANALOG_SCALE);
             }
-            
+
             signal = ANALOG_SCALE * signal;
         }
 
-        vfdSystemEquip.getFanSignal().writeHisVal(signal);
+        vfdSystemEquip.getFanSignal().writePointValue(signal);
+        signal = vfdSystemEquip.getFanSignal().readHisVal();
         //ControlMote.setAnalogOut("analog2", signal);
-        Domain.cmBoardDevice.getAnalog2Out().writeHisVal(signal);
+        Domain.cmBoardDevice.getAnalog2Out().writePointValue(signal);
+        signal = Domain.cmBoardDevice.getAnalog2Out().readHisVal();
         CcuLog.d(L.TAG_CCU_SYSTEM, " analog2 Signal : "+ signal);
     }
     

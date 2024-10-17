@@ -9,11 +9,15 @@ import a75f.io.data.message.MESSAGE_ATTRIBUTE_LEVEL
 import a75f.io.data.message.MESSAGE_ATTRIBUTE_LOG_LEVEL
 import a75f.io.data.message.MESSAGE_ATTRIBUTE_MESSAGE_ID
 import a75f.io.data.message.MESSAGE_ATTRIBUTE_REMOTE_CMD_TYPE
+import a75f.io.data.message.MESSAGE_ATTRIBUTE_ROUTING_DETAILS
 import a75f.io.data.message.MESSAGE_ATTRIBUTE_SEQUENCE_ID
 import a75f.io.data.message.MESSAGE_ATTRIBUTE_SITE_ID
+import a75f.io.data.message.MESSAGE_ATTRIBUTE_TARGET
+import a75f.io.data.message.MESSAGE_ATTRIBUTE_TARGET_SCOPE
 import a75f.io.data.message.MESSAGE_ATTRIBUTE_VERSION
 import a75f.io.data.message.MESSAGE_ATTRIBUTE_WHO
 import a75f.io.data.message.Message
+import a75f.io.logger.CcuLog
 import a75f.io.messaging.exceptions.InvalidMessageFormatException
 import a75f.io.messaging.handler.AutoCommissioningStateHandler
 import a75f.io.messaging.handler.CREATE_CUSTOM_ALERT_DEF_CMD
@@ -27,6 +31,7 @@ import a75f.io.messaging.handler.RemoveEntityHandler
 import a75f.io.messaging.handler.SchedulerRevampMigrationHandler
 import a75f.io.messaging.handler.SiteSyncHandler
 import a75f.io.messaging.handler.UPDATE_CUSTOM_ALERT_DEF_CMD
+import a75f.io.messaging.handler.UpdatePointHandler
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonObject
@@ -82,6 +87,24 @@ fun jsonToMessage(msgJson : JsonObject) : Message {
     if(messagePojo.remoteCmdType.equals(RemoteCommandUpdateHandler.UPDATE_CCU_LOG_LEVEL)){
         messagePojo.loglevel = messageContent.asJsonObject.get(MESSAGE_ATTRIBUTE_LOG_LEVEL)?.asString
     }
+
+    if(messageContent.asJsonObject.has(MESSAGE_ATTRIBUTE_ROUTING_DETAILS)) {
+
+        messagePojo.target_id =
+            messageContent.asJsonObject.get(MESSAGE_ATTRIBUTE_ROUTING_DETAILS)?.asJsonObject?.get(
+                MESSAGE_ATTRIBUTE_TARGET
+            )?.asJsonObject?.get(MESSAGE_ATTRIBUTE_ID)?.asString
+
+        CcuLog.d("MessageBuilder", "target id : ${messagePojo.target_id}")
+
+        messagePojo.target_scope =
+            messageContent.asJsonObject.get(MESSAGE_ATTRIBUTE_ROUTING_DETAILS)?.asJsonObject?.get(
+                MESSAGE_ATTRIBUTE_TARGET
+            )?.asJsonObject?.get(MESSAGE_ATTRIBUTE_TARGET_SCOPE)?.asString
+
+        CcuLog.d("MessageBuilder", "target scope : ${messagePojo.target_scope}")
+    }
+
 
     if(messagePojo.remoteCmdType.equals(RemoteCommandUpdateHandler.SAVE_SEQUENCER_LOGS)){
         messagePojo.sequenceId = messageContent.asJsonObject.get(MESSAGE_ATTRIBUTE_SEQUENCE_ID)?.asString

@@ -6,8 +6,6 @@ import static a75f.io.logic.bo.building.ZoneState.HEATING;
 import static a75f.io.logic.bo.building.ZoneState.RFDEAD;
 import static a75f.io.logic.bo.building.ZoneState.TEMPDEAD;
 
-import android.util.Log;
-
 import org.projecthaystack.UnknownRecException;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -93,6 +91,9 @@ public class VavReheatProfile extends VavProfile
             }
             if (conditioning == SystemController.State.COOLING) {
                 loopOp = (int) coolingLoop.getLoopOutput(roomTemp, setTempCooling);
+
+                vavEquip.getCoolingLoopOutput().writePointValue(loopOp);
+                loopOp = (int) vavEquip.getCoolingLoopOutput().readHisVal();
             }
         } else if (roomTemp < setTempHeating && systemMode != SystemMode.OFF) {
             //Zone is in heating
@@ -106,6 +107,8 @@ public class VavReheatProfile extends VavProfile
             } else if (conditioning == SystemController.State.HEATING) {
                 loopOp = heatingLoopOp;
             }
+            vavEquip.getHeatingLoopOutput().writePointValue(loopOp);
+            loopOp = (int) vavEquip.getHeatingLoopOutput().readHisVal();
         } else {
             //Zone is in deadband
             if (state != DEADBAND) {
@@ -139,7 +142,8 @@ public class VavReheatProfile extends VavProfile
         valve.applyLimits();
 
         vavEquip.getDamperCmd().writeHisVal(damper.currentPosition);
-        vavEquip.getReheatCmd().writeHisVal(valve.currentPosition);
+        vavEquip.getReheatCmd().writePointValue(valve.currentPosition);
+        valve.currentPosition = (int) vavEquip.getReheatCmd().readHisVal();
 
         logLoopParams(nodeAddr, roomTemp, loopOp);
 
@@ -178,12 +182,13 @@ public class VavReheatProfile extends VavProfile
                 damperPos = vavEquip.getDamperCmd().readHisVal() > 0 ? vavEquip.getDamperCmd().readHisVal() : damperMin;
             }
             vavEquip.getDamperCmd().writeHisVal(damperPos);
-            vavEquip.getNormalizedDamperCmd().writeHisVal(damperPos);
-            vavEquip.getReheatCmd().writeHisVal(0);
+            vavEquip.getNormalizedDamperCmd().writePointValue(damperPos);
+            vavEquip.getReheatCmd().writePointValue(0);
             vavEquip.getEquipStatus().writeHisVal((double) TEMPDEAD.ordinal());
             vavEquip.getEquipStatusMessage().writeDefaultVal("Zone Temp Dead");
         }
     }
+
     private void handleRFDead() {
         CcuLog.d(L.TAG_CCU_ZONE,"RF Signal Dead : equipRef: "+vavEquip.getEquipRef());
         vavEquip.getEquipStatus().writeHisVal(RFDEAD.ordinal());

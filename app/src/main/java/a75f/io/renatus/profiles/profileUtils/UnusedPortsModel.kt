@@ -87,15 +87,17 @@ open class UnusedPortsModel {
                                 val isPortUsedInAlgo = isPortUsedInAlgo(hayStack, unusedPort)
                                 CcuLog.d(L.TAG_CCU_DOMAIN, "$unusedPort is used? $isPortUsedInAlgo")
                                 when {
-                                    unusedPortState && !isPortUsedInAlgo && !rawPoint.markers.contains(Tags.WRITABLE) -> {
+                                    unusedPortState && !isPortUsedInAlgo && !rawPoint.markers.contains(Tags.UNUSED) -> {
                                         CcuLog.d(L.TAG_CCU_DOMAIN, "Adding writable tag - ${rawPoint.id}")
                                         rawPoint.markers.add(Tags.WRITABLE)
+                                        rawPoint.markers.add(Tags.UNUSED)
                                         hayStack.updatePoint(rawPoint, rawPoint.id)
                                     }
-                                    (!unusedPortState && rawPoint.markers.contains(Tags.WRITABLE)) || isPortUsedInAlgo -> {
+                                    (!unusedPortState && rawPoint.markers.contains(Tags.UNUSED)) || isPortUsedInAlgo -> {
                                         CcuLog.d(L.TAG_CCU_DOMAIN, "Removing writable tag - ${rawPoint.id}")
                                         hayStack.clearAllAvailableLevelsInPoint(rawPoint.id)
                                         rawPoint.markers.remove(Tags.WRITABLE)
+                                        rawPoint.markers.remove(Tags.UNUSED)
                                         hayStack.updatePoint(rawPoint, rawPoint.id)
                                         hayStack.writeHisValById(rawPoint.id, 0.0)
                                     }
@@ -139,12 +141,14 @@ open class UnusedPortsModel {
             devicePorts?.forEach { devicePort ->
                 currentPortStatus?.get(devicePort.displayName)?.let { portValue ->
                     // In terminal profile, while saving unused ports, we need to check if the port is used in the algo
-                    if (portValue && !devicePort.markers.contains(Tags.WRITABLE) && !devicePort.enabled) {
+                    if (portValue && !devicePort.markers.contains(Tags.UNUSED) && !devicePort.enabled) {
                         devicePort.markers.add(Tags.WRITABLE)
+                        devicePort.markers.add(Tags.UNUSED)
                     } else if ((!portValue || devicePort.enabled) && devicePort.markers.contains(
-                            Tags.WRITABLE)) {
+                            Tags.UNUSED)) {
                         hayStack.clearAllAvailableLevelsInPoint(devicePort.id)
                         devicePort.markers.remove(Tags.WRITABLE)
+                        devicePort.markers.remove(Tags.UNUSED)
                         hayStack.writeHisValById(devicePort.id, 0.0)
                     }
                     hayStack.updatePoint(devicePort, devicePort.id)

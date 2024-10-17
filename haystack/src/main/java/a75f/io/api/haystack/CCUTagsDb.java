@@ -1940,4 +1940,9 @@ public class CCUTagsDb extends HServer {
             appContext.sendBroadcast(intent);
         }
     }
+
+    public void updateHDict(String localId, HDict hDict) {//rename
+        updateEntity(hDict,localId);
+
+    }
 }

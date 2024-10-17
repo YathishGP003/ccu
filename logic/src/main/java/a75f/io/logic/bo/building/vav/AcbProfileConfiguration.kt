@@ -163,7 +163,7 @@ class AcbProfileConfiguration (nodeAddress: Int, nodeType: String, priority: Int
         }
         val devicePorts = DeviceUtil.getUnusedPortsForDevice(nodeAddress.toShort(), Domain.hayStack)
         devicePorts?.forEach { disabledPort ->
-            unusedPorts[disabledPort.displayName] = disabledPort.markers.contains(Tags.WRITABLE)
+            unusedPorts[disabledPort.displayName] = disabledPort.markers.contains(a75f.io.api.haystack.Tags.UNUSED)
         }
         isDefault = false
         return this

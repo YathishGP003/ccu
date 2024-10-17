@@ -104,8 +104,16 @@ public class PlcProfile extends ZoneProfile
         }
         double curCv = Math.round(100*controlVariable)/100;
         int eStatus = (int)(Math.round(100*controlVariable)/100);
-        if(plcEquip.getControlVariable() != curCv )
-            plcEquip.setControlVariable(curCv);
+        if(plcEquip.getControlVariable() != curCv ){
+            if(plcEquip.isEquipPointWritable()){
+                plcEquip.writeDefaultVal(curCv);
+                double value = plcEquip.readPriorityVal();
+                plcEquip.setControlVariable(value);
+                curCv = plcEquip.readHisVal();
+            }else {
+                plcEquip.setControlVariable(curCv);
+            }
+        }
         plcEquip.setEquipStatus(getStatusMessage(plcEquip.equipRef, eStatus, CCUHsApi.getInstance()));
         outputSignal = eStatus;
     

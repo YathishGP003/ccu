@@ -172,21 +172,33 @@ public class HyperSplitMessageGenerator {
 
                 // Points written from CCU algos will fall under this block.
                 // Updating the physical point value based on logical point value is done here.
-                if (!rawPoint.getMarkers().contains(Tags.WRITABLE)) {
-                    double logicalVal = hayStack.readHisValById(rawPoint.getPointRef());
+//                if (!rawPoint.getMarkers().contains(Tags.WRITABLE)) {
+//
+//                } else {
+//                    // Points written from Sequencer will fall under this block.
+//                    // Sequencer writes directly to the physical point, so we just need to read it here.
+//                    mappedVal = (short) hayStack.readPointPriorityVal(rawPoint.getId());
+//                    CcuLog.d(L.TAG_CCU_DEVICE, "test-writable READ hs split ##getControlMessage: writable id->"+rawPoint.getId()+"<value:>"+mappedVal);
+//                }
+                //CcuLog.d(L.TAG_CCU_DEVICE, "test-writable WRITE hs split ##getControlMessage: writeHisValById id->"+rawPoint.getId()+"<value:>"+mappedVal);
 
-                    if (Globals.getInstance().isTemporaryOverrideMode()) {
-                        mappedVal = (short)logicalVal;
-                    } else {
-                        mappedVal = (DeviceUtil.isAnalog(rawPoint)
-                                ? DeviceUtil.mapAnalogOut(rawPoint.getType(), (short) logicalVal)
-                                : DeviceUtil.mapDigitalOut(rawPoint.getType(), logicalVal > 0));
-                        hayStack.writeHisValById(rawPoint.getId(), (double) mappedVal);
-                    }
+                double logicalVal = hayStack.readHisValById(rawPoint.getPointRef());
+                CcuLog.d(L.TAG_CCU_DEVICE, "test-writable READ hs split ##getControlMessage: not writable id->"+rawPoint.getId()+"<logicalVal:>"+logicalVal);
+                if (Globals.getInstance().isTemporaryOverrideMode()) {
+                    mappedVal = (short)logicalVal;
                 } else {
-                    // Points written from Sequencer will fall under this block.
-                    // Sequencer writes directly to the physical point, so we just need to read it here.
-                    mappedVal = (short) hayStack.readPointPriorityVal(rawPoint.getId());
+                    mappedVal = (DeviceUtil.isAnalog(rawPoint)
+                            ? DeviceUtil.mapAnalogOut(rawPoint.getType(), (short) logicalVal)
+                            : DeviceUtil.mapDigitalOut(rawPoint.getType(), logicalVal > 0));
+                }
+                CcuLog.d(L.TAG_CCU_DEVICE, "test-writable READ hs split ##getControlMessage: not writable id->"+rawPoint.getId()+"<mappedVal:>"+mappedVal);
+
+                if(rawPoint.getMarkers().contains(Tags.WRITABLE)){
+                    hayStack.writeDefaultVal(rawPoint.getId(), (double) mappedVal);
+                    double value = hayStack.readPointPriorityVal(rawPoint.getId());
+                    hayStack.writeHisValById(rawPoint.getId(), value);
+                }else{
+                    hayStack.writeHisValById(rawPoint.getId(), (double) mappedVal);
                 }
                 setHyperSplitPort(controls, rawPoint, mappedVal);
             });
@@ -199,20 +211,23 @@ public class HyperSplitMessageGenerator {
                         // Updating the physical point value based on logical point value is done here.
                         if (!rawPoint.getMarkers().contains(Tags.WRITABLE)) {
                             double logicalVal = hayStack.readHisValById(rawPoint.getPointRef());
+                            CcuLog.d(L.TAG_CCU_DEVICE, "test-writable READ hs split $$getControlMessage: not writable id->"+rawPoint.getId()+"<logicalVal:>"+logicalVal);
                             mappedVal = (DeviceUtil.isAnalog(rawPoint)
                                     ? DeviceUtil.mapAnalogOut(rawPoint.getType(), (short) logicalVal)
                                     : DeviceUtil.mapDigitalOut(rawPoint.getType(), logicalVal > 0));
-                            hayStack.writeHisValById(rawPoint.getId(), (double) mappedVal);
                             CcuLog.i(L.TAG_CCU_DEVICE,
                                     rawPoint.getType()+" "+logicalVal+" domainName "+rawPoint.getDomainName() +" =  "+mappedVal);
+                            CcuLog.d(L.TAG_CCU_DEVICE, "test-writable READ hs split $$getControlMessage: not writable id->"+rawPoint.getId()+"<mappedVal:>"+mappedVal);
                         } else {
                             // Points written from Sequencer will fall under this block.
                             // Sequencer writes directly to the physical point, so we just need to read it here.
                             mappedVal = (short) hayStack.readPointPriorityVal(rawPoint.getId());
+                            CcuLog.d(L.TAG_CCU_DEVICE, "test-writable READ hs split $$getControlMessage: writable id->"+rawPoint.getId()+"<mappedVal:>"+mappedVal);
                             CcuLog.i(L.TAG_CCU_DEVICE,
                                     rawPoint.getType()+" writing externally mapped val: domainName "+rawPoint.getDomainName() +" =  "+mappedVal);
                         }
-
+                        CcuLog.d(L.TAG_CCU_DEVICE, "test-writable WRITE hs split $$getControlMessage: writeHisValById id->"+rawPoint.getId()+"<mappedVal:>"+mappedVal);
+                        hayStack.writeHisValById(rawPoint.getId(), (double) mappedVal);
                         setHyperSplitPort(controls, rawPoint, mappedVal);
                     });
             CcuLog.i(L.TAG_CCU_DEVICE, "=====================================================");

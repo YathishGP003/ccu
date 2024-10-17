@@ -218,7 +218,10 @@ class ConfigPointUpdateHandler {
         if(cmDevicePort != null  && val == 1 && cmDevicePort.getMarkers().contains(Tags.WRITABLE)){
             CcuLog.d(L.TAG_CCU_PUBNUB,"remove Writable Tag From CMDevicePort "+cmDevicePort.getDisplayName());
             hayStack.clearAllAvailableLevelsInPoint(cmDevicePort.getId());
-            cmDevicePort.getMarkers().remove(Tags.WRITABLE);
+            if(cmDevicePort.getMarkers().contains(Tags.UNUSED)) {
+                cmDevicePort.getMarkers().remove(Tags.WRITABLE);
+                cmDevicePort.getMarkers().remove(Tags.UNUSED);
+            }
             hayStack.writeHisValById(cmDevicePort.getId(), 0.0);
             hayStack.updatePoint(cmDevicePort, cmDevicePort.getId());
         }

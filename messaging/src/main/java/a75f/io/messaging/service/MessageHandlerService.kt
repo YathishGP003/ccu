@@ -80,7 +80,6 @@ class MessageHandlerService @Inject constructor(private val appContext: Context,
         }
     }
     private fun doHandleMessage(message: Message, context: Context) {
-
         val messageHandler = messageHandlers.find { it.command.contains(message.command) }
         if (messageHandler != null) {
             CcuLog.i(L.TAG_CCU_MESSAGING, "Handler Found for ${message.command}")
@@ -100,6 +99,7 @@ class MessageHandlerService @Inject constructor(private val appContext: Context,
             //All the handlers do not have proper exception handling. We will use an umbrella
             //handler to avoid app crashing due to an invalid message.
             } catch (e : Exception) {
+                e.printStackTrace()
                 CcuLog.e(L.TAG_CCU_MESSAGING, "Failed to handle this message $message, and the reason is  ${e.message}")
                 updateMessageFailed(message, e)
             }
@@ -163,5 +163,25 @@ class MessageHandlerService @Inject constructor(private val appContext: Context,
             }
         }
         return false
+    }
+
+    fun ignoreUpdateEntity(msg: Message) : Boolean {
+
+        if (msg.command.equals("updateEntity")) {
+            if (msg.target_scope.equals("CCU") &&
+               ! (msg.target_id.equals(CCUHsApi.getInstance().ccuId.replace("@", "")))) {
+                return true;
+            }
+            else if (msg.target_scope.equals("SITE") &&
+               ! (msg.target_id.equals(CCUHsApi.getInstance().site?.id?.replace("@", "")))) {
+                return true;
+            }
+            else if (msg.target_scope.equals("ORGANIZATION") &&
+               ! (msg.target_id.equals(CCUHsApi.getInstance().site?.organization))) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

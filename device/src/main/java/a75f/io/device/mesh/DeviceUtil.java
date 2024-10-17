@@ -213,13 +213,13 @@ public class DeviceUtil {
                 (L.ccu().systemProfile instanceof DabStagedRtu && !(L.ccu().systemProfile instanceof DabAdvancedHybridRtu)) ||
                 L.ccu().systemProfile instanceof DabStagedRtuWithVfd) {
 
-            msg.analog0.set(getPortValue(Domain.cmBoardDevice.getAnalog1Out(), ccuHsApi));
-            msg.analog1.set(getPortValue(Domain.cmBoardDevice.getAnalog2Out(), ccuHsApi));
-            msg.analog2.set(getPortValue(Domain.cmBoardDevice.getAnalog3Out(), ccuHsApi));
-            msg.analog3.set(getPortValue(Domain.cmBoardDevice.getAnalog4Out(), ccuHsApi));
+            msg.analog0.set(getPortValueAndUpdateHisData(Domain.cmBoardDevice.getAnalog1Out(), ccuHsApi));
+            msg.analog1.set(getPortValueAndUpdateHisData(Domain.cmBoardDevice.getAnalog2Out(), ccuHsApi));
+            msg.analog2.set(getPortValueAndUpdateHisData(Domain.cmBoardDevice.getAnalog3Out(), ccuHsApi));
+            msg.analog3.set(getPortValueAndUpdateHisData(Domain.cmBoardDevice.getAnalog4Out(), ccuHsApi));
 
             int relayBitmap = 0;
-            for (int i = 1; i <= 7; i++) {
+            for (int i = 1; i <= 8; i++) {
                 if (isRelayActivated(ccuHsApi, "relay"+i)) {
                     relayBitmap |= 1 << MeshUtil.getRelayMapping(i);
                 }
@@ -250,11 +250,19 @@ public class DeviceUtil {
         String relayQuery = ("point and physical and deviceRef == \""
                 + Domain.cmBoardDevice.getId() + "\" " +
                 "and domainName == \""+relay+"\"");
-        if(ccuHsApi.readEntity(relayQuery).containsKey(Tags.WRITABLE)){
-            return ccuHsApi.readPointPriorityValByQuery(relayQuery) > 0;
+        HashMap map = ccuHsApi.readEntity(relayQuery);
+        CcuLog.d("CCU_DEVICE", "test-writable isRelayActivated read:=======relay====<--dis-->> "+ relay + "<-iswritable->"+map.containsKey(Tags.WRITABLE) + "<--is unused-->"+map.containsKey(Tags.UNUSED));
+        double value;
+        if(map.containsKey(Tags.WRITABLE) && map.containsKey(Tags.UNUSED)){
+            value = ccuHsApi.readPointPriorityValByQuery(relayQuery);
+            CcuLog.d("CCU_DEVICE", "test-writable isRelayActivated read:=======relay====<--dis-->> "+ relay + "<--readPointPriorityVal-->"+value);
+            CcuLog.d("CCU_DEVICE", "test-writable isRelayActivated write:=======relay====<--dis-->> "+ relay + "<--writeHisValById-->"+value);
+            ccuHsApi.writeHisValById(map.get("id").toString(), value);
         } else {
-            return CCUHsApi.getInstance().readHisValByQuery(relayQuery) > 0;
+            value = CCUHsApi.getInstance().readHisValByQuery(relayQuery);
+            CcuLog.d("CCU_DEVICE", "test-writable isRelayActivated read 2 :=======relay====<--dis-->> "+ relay + "<--readHisValByQuery-->"+value);
         }
+        return value > 0;
     }
 
     private static short getPortValue(PhysicalPoint physicalPoint, CCUHsApi ccuHsApi) {
@@ -264,6 +272,19 @@ public class DeviceUtil {
         return (short) physicalPoint.readHisVal();
     }
 
+    private static short getPortValueAndUpdateHisData(PhysicalPoint physicalPoint, CCUHsApi ccuHsApi) {
+        double value;
+        if (physicalPoint.readPoint().getMarkers().contains(Tags.WRITABLE)) {
+            value = ccuHsApi.readPointPriorityVal(physicalPoint.readPoint().getId());
+            CcuLog.d(L.TAG_CCU_DEVICE, "test-writable Physical READ getPortValueAndUpdateHisData: writable id->"+physicalPoint.readPoint().getId()+"<value:>"+value+"<-dis->"+physicalPoint.readPoint().getDisplayName());
+        } else {
+            value = physicalPoint.readHisVal();
+            CcuLog.d(L.TAG_CCU_DEVICE, "test-writable Physical READ getPortValueAndUpdateHisData: not writable id->"+physicalPoint.readPoint().getId()+"<value:>"+value+"<-dis->"+physicalPoint.readPoint().getDisplayName());
+        }
+        CcuLog.d(L.TAG_CCU_DEVICE, "test-writable Physical WRITE getPortValueAndUpdateHisData: write his value ->"+physicalPoint.readPoint().getId()+"<value:>"+value+"<-dis->"+physicalPoint.readPoint().getDisplayName());
+        ccuHsApi.writeHisValById(physicalPoint.readPoint().getId(), value);
+        return (short) value;
+    }
 
     public static double getPercentageFromVoltage(double physicalVoltage, String analogType) {
         String [] arrOfStr = analogType.split("-");

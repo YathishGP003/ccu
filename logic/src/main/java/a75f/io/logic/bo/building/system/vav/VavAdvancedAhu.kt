@@ -284,20 +284,32 @@ open class VavAdvancedAhu : VavSystemProfile() {
     }
 
     private fun updateLoopOpPoints() {
-        systemEquip.coolingLoopOutput.writeHisVal(systemCoolingLoopOp)
-        systemEquip.heatingLoopOutput.writeHisVal(systemHeatingLoopOp)
-        systemEquip.fanLoopOutput.writeHisVal(systemFanLoopOp)
-        systemEquip.co2LoopOutput.writeHisVal(systemCo2LoopOp)
-        systemEquip.cmEquip.satCoolingLoopOutput.writeHisVal(systemSatCoolingLoopOp)
-        systemEquip.cmEquip.satHeatingLoopOutput.writeHisVal(systemSatHeatingLoopOp)
-        systemEquip.cmEquip.fanPressureLoopOutput.writeHisVal(staticPressureFanLoopOp)
+        systemEquip.coolingLoopOutput.writePointValue(systemCoolingLoopOp)
+        systemCoolingLoopOp = systemEquip.coolingLoopOutput.readHisVal()
+        systemEquip.heatingLoopOutput.writePointValue(systemHeatingLoopOp)
+        systemHeatingLoopOp = systemEquip.heatingLoopOutput.readHisVal()
+        systemEquip.fanLoopOutput.writePointValue(systemFanLoopOp)
+        systemFanLoopOp = systemEquip.fanLoopOutput.readHisVal()
+        systemEquip.co2LoopOutput.writePointValue(systemCo2LoopOp)
+        systemCo2LoopOp = systemEquip.co2LoopOutput.readHisVal()
+        systemEquip.cmEquip.satCoolingLoopOutput.writePointValue(systemSatCoolingLoopOp)
+        systemSatCoolingLoopOp = systemEquip.cmEquip.satCoolingLoopOutput.readHisVal()
+        systemEquip.cmEquip.satHeatingLoopOutput.writePointValue(systemSatHeatingLoopOp)
+        systemSatHeatingLoopOp = systemEquip.cmEquip.satHeatingLoopOutput.readHisVal()
+        systemEquip.cmEquip.fanPressureLoopOutput.writePointValue(staticPressureFanLoopOp)
+        staticPressureFanLoopOp = systemEquip.cmEquip.fanPressureLoopOutput.readHisVal()
         systemEquip.operatingMode.writeHisVal(VavSystemController.getInstance().systemState.ordinal.toDouble())
-        systemEquip.cmEquip.co2BasedDamperControl.writeHisVal(systemCo2LoopOp)
+        systemEquip.cmEquip.co2BasedDamperControl.writePointValue(systemCo2LoopOp)
+        systemCo2LoopOp = systemEquip.cmEquip.co2BasedDamperControl.readHisVal()
         systemEquip.connectEquip1.let {
-            it.coolingLoopOutput.writeHisVal(systemCoolingLoopOp)
-            it.heatingLoopOutput.writeHisVal(systemHeatingLoopOp)
-            it.fanLoopOutput.writeHisVal(systemFanLoopOp)
-            it.co2LoopOutput.writeHisVal(systemCo2LoopOp)
+            it.coolingLoopOutput.writePointValue(systemCoolingLoopOp)
+            systemCoolingLoopOp = it.coolingLoopOutput.readHisVal()
+            it.heatingLoopOutput.writePointValue(systemHeatingLoopOp)
+            systemHeatingLoopOp = it.heatingLoopOutput.readHisVal()
+            it.fanLoopOutput.writePointValue(systemFanLoopOp)
+            systemFanLoopOp = it.fanLoopOutput.readHisVal()
+            it.co2LoopOutput.writePointValue(systemCo2LoopOp)
+            systemCo2LoopOp = it.co2LoopOutput.readHisVal()
         }
     }
 
@@ -762,7 +774,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
                 )
 
                 CcuLog.d(L.TAG_CCU_SYSTEM, "New analogOutValue ${analogOut.domainName} physicalValue: $physicalValue logicalValue: $logicalValue")
-                physicalMap?.get(analogOut)?.writeHisVal(physicalValue )
+                physicalMap?.get(analogOut)?.writePointValue(physicalValue )
 
                 if (isConnectEquip) {
                     val domainName = connectAnalogOutAssociationToDomainName(association.readDefaultVal().toInt())
@@ -858,7 +870,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
                 if (relay.readDefaultVal() > 0) {
                     val domainName = connectRelayAssociationToDomainName(association.readDefaultVal().toInt())
                     val physicalPoint = getConnectRelayLogicalPhysicalMap(systemEquip.connectEquip1, Domain.connect1Device)[relay]
-                    physicalPoint?.writeHisVal(getDomainPointForName(domainName, systemEquip.connectEquip1).readHisVal())
+                    physicalPoint?.writePointValue(getDomainPointForName(domainName, systemEquip.connectEquip1).readHisVal())
                 }
             }
         } else {
@@ -866,7 +878,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
             getCMRelayAssociationMap(systemEquip.cmEquip).forEach { (relay, association) ->
                 if (relay.readDefaultVal() > 0) {
                     val domainName = relayAssociationToDomainName(association.readDefaultVal().toInt())
-                    getCMRelayLogicalPhysicalMap(systemEquip.cmEquip)[relay]?.writeHisVal(getDomainPointForName(domainName, systemEquip.cmEquip).readHisVal())
+                    getCMRelayLogicalPhysicalMap(systemEquip.cmEquip)[relay]?.writePointValue(getDomainPointForName(domainName, systemEquip.cmEquip).readHisVal())
                 }
             }
         }
@@ -938,7 +950,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
         getDomainPointForName(domainName, systemEquip.cmEquip).writeHisVal(pointVal.toDouble())
         getCMRelayAssociationMap(systemEquip.cmEquip).forEach { (relay, association) ->
             if (association.readDefaultVal() == stageIndex.toDouble() && relay.readDefaultVal() > 0) {
-                getCMRelayLogicalPhysicalMap(systemEquip.cmEquip)[relay]?.writeHisVal(pointVal.toDouble())
+                getCMRelayLogicalPhysicalMap(systemEquip.cmEquip)[relay]?.writePointValue(pointVal.toDouble())
             }
         }
     }
@@ -947,7 +959,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
         getDomainPointForName(domainName, systemEquip.connectEquip1).writeHisVal(pointVal.toDouble())
         getConnectRelayAssociationMap(systemEquip.connectEquip1).forEach { (relay, association) ->
             if (association.readDefaultVal() == stageIndex.toDouble() && relay.readDefaultVal() > 0) {
-                getConnectRelayLogicalPhysicalMap(systemEquip.connectEquip1, Domain.connect1Device)[relay]?.writeHisVal(pointVal.toDouble())
+                getConnectRelayLogicalPhysicalMap(systemEquip.connectEquip1, Domain.connect1Device)[relay]?.writePointValue(pointVal.toDouble())
             }
         }
     }
@@ -986,7 +998,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
         getCMRelayAssociationMap(systemEquip.cmEquip).entries.forEach { (relay, association) ->
             val domainName = relayAssociationToDomainName(association.readDefaultVal().toInt())
             getDomainPointForName(domainName, systemEquip.cmEquip).writeHisVal(0.0)
-            getCMRelayLogicalPhysicalMap(systemEquip.cmEquip)[relay]?.writeHisVal(0.0)
+            getCMRelayLogicalPhysicalMap(systemEquip.cmEquip)[relay]?.writePointValue(0.0)
         }
 
         updateAnalogOutputPorts(getCMAnalogAssociationMap(systemEquip.cmEquip), getAnalogOutLogicalPhysicalMap(), false)
@@ -995,7 +1007,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
             getConnectRelayAssociationMap(systemEquip.connectEquip1).entries.forEach {(relay, association) ->
                 val domainName = connectRelayAssociationToDomainName(association.readDefaultVal().toInt())
                 getDomainPointForName(domainName, systemEquip.connectEquip1).writeHisVal(0.0)
-                getConnectRelayLogicalPhysicalMap(systemEquip.connectEquip1, Domain.connect1Device)[relay]?.writeHisVal(0.0)
+                getConnectRelayLogicalPhysicalMap(systemEquip.connectEquip1, Domain.connect1Device)[relay]?.writePointValue(0.0)
             }
 
             updateAnalogOutputPorts(

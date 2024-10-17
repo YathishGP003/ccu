@@ -40,8 +40,15 @@ data class Message(@PrimaryKey val messageId: String,
     var autoCXStopTime: String? = "",
     @ColumnInfo(name = MESSAGE_ATTRIBUTE_AUTO_CX_STATE)
     var autoCXState: Int = 0,
+
     @ColumnInfo(name = MESSAGE_ATTRIBUTE_LOG_LEVEL)
                    var loglevel: String? = "",
     @ColumnInfo(name = MESSAGE_ATTRIBUTE_SEQUENCE_ID)
     var sequenceId: String? = null,
+
+    @ColumnInfo(name = MESSAGE_ATTRIBUTE_TARGET_ID)
+    var target_id: String? = null,
+
+    @ColumnInfo(name = MESSAGE_ATTRIBUTE_TARGET_SCOPE)
+    var target_scope: String? = null,
 )

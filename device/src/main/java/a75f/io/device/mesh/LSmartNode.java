@@ -592,7 +592,15 @@ public class LSmartNode
                         hayStack.writeHisValById(opPoint.get("id").toString(), 0.0);
                         continue;
                     }
-                    double logicalVal = hayStack.readHisValById(logicalOpPoint.get("id").toString());
+
+                    double logicalVal;
+                    if (logicalOpPoint.containsKey(Tags.WRITABLE)) {
+                        logicalVal = hayStack.readPointPriorityVal(logicalOpPoint.get("id").toString());
+                        CcuLog.d(L.TAG_CCU_DEVICE, "test-writable READ LSmartNode fillSmartNodeControls: writable id->"+logicalOpPoint.get("id").toString()+"<logicalVal:>"+logicalVal);
+                    } else {
+                        logicalVal = hayStack.readHisValById(logicalOpPoint.get("id").toString());
+                        CcuLog.d(L.TAG_CCU_DEVICE, "test-writable READ LSmartNode fillSmartNodeControls: not writable id->"+logicalOpPoint.get("id").toString()+"<logicalVal:>"+logicalVal);
+                    }
 
                     short mappedVal = 0;
                     if (isEquipType("vav", node))
@@ -676,30 +684,35 @@ public class LSmartNode
                     if (Globals.getInstance().isTemporaryOverrideMode()) {
                         double physicalVal = hayStack.readHisValById(p.getId());
                         mappedVal = (short) physicalVal;
-                    } else {
-                        hayStack.writeHisValById(p.getId(), (double) mappedVal);
                     }
 
                     CcuLog.d(TAG_CCU_DEVICE, "Set "+logicalOpPoint.get("dis") +" "+ p.getPort() + " type " + p.getType() + " logicalVal: " + logicalVal + " mappedVal " + mappedVal);
                     Struct.Unsigned8 port = getDevicePort(device, controls_t, p);
                     if (port != null) {
+                        hayStack.writeHisValById(p.getId(), (double) mappedVal);
+                        CcuLog.d(L.TAG_CCU_DEVICE, "test-writable WRITE LSmartNode fillSmartNodeControls: writeHisValById id->"+p.getId()+"<mappedVal:>"+mappedVal);
                         port.set(mappedVal);
                     } else {
                         CcuLog.d(L.TAG_CCU_DEVICE, "Unknown port info for "+p.getDisplayName());
                     }
 
-                } else if (opPoint.containsKey(Tags.WRITABLE)) {
+                } else if (opPoint.containsKey(Tags.WRITABLE) ||
+                        (opPoint.containsKey(Tags.WRITABLE) && opPoint.containsKey(Tags.UNUSED))) {
                     RawPoint p = new RawPoint.Builder().setHashMap(opPoint).build();
                     double rawPointValue = hayStack.readPointPriorityVal(opPoint.get("id").toString());
                     CcuLog.d(TAG_CCU_DEVICE, " Raw Point: " + p.getDisplayName() +
-                                    " is unused port and has value: " +rawPointValue);
+                            " is unused port and has value: " +rawPointValue);
                     Struct.Unsigned8 port = getDevicePort(device, controls_t, p);
+                    CcuLog.d(L.TAG_CCU_DEVICE, "test-writable READ LSmartNode @@fillSmartNodeControls: writable id->"+p.getId().toString()+"<rawPointValue:>"+rawPointValue);
+                    CcuLog.d(L.TAG_CCU_DEVICE, "test-writable WRITE LSmartNode @@fillSmartNodeControls: writeHisValById id->"+p.getId()+"<rawPointValue:>"+rawPointValue);
                     if (port != null) {
                         port.set((short) rawPointValue);
                     }
+                    hayStack.writeHisValById(opPoint.get("id").toString(), rawPointValue);
                 }
-                    else {
+                else {
                     //Disabled output port should reset its val
+                    CcuLog.d(L.TAG_CCU_DEVICE, "test-writable WRITE LSmartNode && fillSmartNodeControls: writeHisValById id->"+opPoint.get("id")+"<rawPointValue:>"+0);
                     hayStack.writeHisValById(opPoint.get("id").toString(), 0.0);
                 }
             }

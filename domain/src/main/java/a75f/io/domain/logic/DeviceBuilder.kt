@@ -172,6 +172,9 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
                         if (hayStackPoint.markers.contains(Tags.WRITABLE)) {
                             newPoint.markers.add(Tags.WRITABLE)
                         }
+                        if (hayStackPoint.markers.contains(Tags.UNUSED)) {
+                            newPoint.markers.add(Tags.UNUSED)
+                        }
 
                         if (!hayStackPoint.equals(newPoint)) {
                             CcuLog.i(Domain.LOG_TAG, "updateHaystackPoint ${point.domainName}")

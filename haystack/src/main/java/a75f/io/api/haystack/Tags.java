@@ -232,5 +232,6 @@ public class Tags
 
     public static final String ADDR = "addr";
     public static final String CONNECTMODULE = "connectModule";
+    public static final String UNUSED = "unused";
 
 }

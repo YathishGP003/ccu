@@ -24,6 +24,7 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.SystemProfile;
 import a75f.io.logic.bo.building.system.dab.DabAdvancedAhu;
+import a75f.io.logic.bo.building.system.dab.DabAdvancedHybridRtu;
 import a75f.io.logic.bo.building.system.dab.DabFullyModulatingRtu;
 import a75f.io.logic.bo.building.system.dab.DabStagedRtu;
 import a75f.io.logic.bo.building.system.dab.DabStagedRtuWithVfd;
@@ -103,6 +104,10 @@ class ConfigPointUpdateHandler {
         if (systemProfile instanceof DabFullyModulatingRtu) {
             ((DabFullyModulatingRtu) systemProfile).setConfigEnabled(configType, val);
         } else if (systemProfile instanceof DabStagedRtu) {
+            if (systemProfile instanceof DabAdvancedHybridRtu) {
+                ((DabStagedRtu) systemProfile).setConfigEnabled(configType, val);
+                return;
+            }
 
             boolean isVfd = systemProfile instanceof DabStagedRtuWithVfd;
             SeventyFiveFProfileDirective model = (SeventyFiveFProfileDirective) (isVfd ? ModelLoader.INSTANCE.getDabStagedVfdRtuModelDef()
@@ -233,6 +238,11 @@ class ConfigPointUpdateHandler {
         if (systemProfile instanceof DabFullyModulatingRtu) {
             ((DabFullyModulatingRtu) systemProfile).setHumidifierConfigVal(relayType+" and humidifier and type", val);
         } else if (systemProfile instanceof DabStagedRtu) {
+            if(systemProfile instanceof DabAdvancedHybridRtu){
+                ((DabStagedRtu) systemProfile).setConfigAssociation(relayType, val);
+                return;
+            }
+
             boolean isVfd = systemProfile instanceof DabStagedRtuWithVfd;
             SeventyFiveFProfileDirective equipModel = (SeventyFiveFProfileDirective) (isVfd ? ModelLoader.INSTANCE.getDabStagedVfdRtuModelDef()
                     :ModelLoader.INSTANCE.getDabStageRtuModelDef());

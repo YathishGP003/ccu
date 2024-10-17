@@ -55,8 +55,6 @@ public class RemoteCommandUpdateHandler implements MessageHandler
             String systemId = cmdLevel.equals("system")? (msgObject.get("id").isJsonNull() ? "":msgObject.get("id").getAsString()) : "";
             String ccuUID = CCUHsApi.getInstance().getCcuRef().toString().replace("@","");
             String messageId = msgObject.get("messageId").getAsString();
-            String ccuId = msgObject.get("id").getAsString();
-            String sequenceId = msgObject.get("sequenceId").getAsString();
 
             CcuLog.d("RemoteCommand","handle Msgs="+cmdType+","+cmdLevel+","+systemId+","+remoteCommandInterface);
             switch (cmdLevel){
@@ -114,6 +112,8 @@ public class RemoteCommandUpdateHandler implements MessageHandler
                                     safeModeInterface.updateRemoteCommands(cmdType, cmdLevel, "");
                                 break;
                             case SAVE_SEQUENCER_LOGS: {
+                                String ccuId = msgObject.get("id").getAsString();
+                                String sequenceId = msgObject.get("sequenceId").getAsString();
                                 CcuLog.d("RemoteCommand", " handle save sequencer logs");
                                 if (remoteCommandInterface != null)
                                     remoteCommandInterface.updateRemoteCommands(cmdType, cmdLevel, ccuId+"_"+sequenceId);

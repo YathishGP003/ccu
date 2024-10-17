@@ -386,8 +386,10 @@ public class HaystackService {
                         resultArray = convertDoubleArrayToV8Array(v8, resultArrayOfDoubles);
                         return resultArray;
                     }
-
-                    throw new IllegalArgumentException("Invalid arguments for fetchValueById");
+                    sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("FETCH_VALUE_BY_ID"), "Invalid arguments for fetchValueById-->", MSG_FAILED);
+                    CcuLog.d(TAG, "-------------fetchValueById##--Invalid arguments for fetchValueById"+ parameters);
+                    return null;
+                    //throw new IllegalArgumentException("Invalid arguments for fetchValueById");
                 } finally {
                     CcuLog.d(TAG, "-------------fetchValueById##--release resources if something is not returned back to java script");
                 }

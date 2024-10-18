@@ -931,18 +931,25 @@ public class VavSystemController extends SystemController
                                               +equip.get("id").toString()+"\"");
             double normalizedDamperPos = normalizedDamperMap.get(damperPos.get("id").toString());
             double minLimit = 0, maxLimit = 0;
-            if (getStatus(equip.get("group").toString()) == ZoneState.COOLING.ordinal()) {
-                minLimit = hayStack.readDefaultVal("point and zone and config and vav and min and damper " +
-                                                   "and cooling and equipRef == \""+equip.get("id").toString()+"\"");
-                maxLimit = hayStack.readDefaultVal("point and zone and config and vav and max and damper" +
-                                                   " and cooling and equipRef == \""+equip.get("id").toString()+"\"");
-            } else if (getStatus(equip.get("group").toString()) == ZoneState.HEATING.ordinal()
-                      || getStatus(equip.get("group").toString()) == ZoneState.DEADBAND.ordinal()
-                      || getStatus(equip.get("group").toString()) == ZoneState.TEMPDEAD.ordinal()) {
-                minLimit = hayStack.readDefaultVal("point and zone and config and vav and min and damper" +
-                                                   " and heating and equipRef == \""+equip.get("id").toString()+"\"");
-                maxLimit = hayStack.readDefaultVal("point and zone and config and vav and max and damper " +
-                                                   "and heating and equipRef == \""+equip.get("id").toString()+"\"");
+            if (systemState == COOLING) {
+                if (getStatus(equip.get("group").toString()) == ZoneState.COOLING.ordinal()) {
+                    minLimit = hayStack.readDefaultVal("point and zone and config and min and damper " +
+                            "and cooling and equipRef == \"" + equip.get("id").toString() + "\"");
+                    maxLimit = hayStack.readDefaultVal("point and zone and config and max and damper" +
+                            " and cooling and equipRef == \"" + equip.get("id").toString() + "\"");
+                } else if (getStatus(equip.get("group").toString()) == ZoneState.HEATING.ordinal()
+                        || getStatus(equip.get("group").toString()) == ZoneState.DEADBAND.ordinal()
+                        || getStatus(equip.get("group").toString()) == ZoneState.TEMPDEAD.ordinal()) {
+                    minLimit = hayStack.readDefaultVal("point and zone and config and min and damper" +
+                            " and heating and equipRef == \"" + equip.get("id").toString() + "\"");
+                    maxLimit = hayStack.readDefaultVal("point and zone and config and max and damper " +
+                            "and heating and equipRef == \"" + equip.get("id").toString() + "\"");
+                }
+            } else {
+                minLimit = hayStack.readDefaultVal("point and zone and config and min and damper" +
+                        " and heating and equipRef == \"" + equip.get("id").toString() + "\"");
+                maxLimit = hayStack.readDefaultVal("point and zone and config and max and damper " +
+                        "and heating and equipRef == \"" + equip.get("id").toString() + "\"");
             }
             //MaxLimit point does not exist when trueCFM is enabled.
             if (maxLimit == 0) {

@@ -495,6 +495,7 @@ public class FloorPlanFragment extends Fragment {
 
     @OnClick(R.id.addFloorBtn)
     public void handleFloorBtn() {
+        floorListActionMenuListener.destroyActionBar();
         floorToRename = null;
         isConnectedToServer(FloorHandledCondition.ALLOW_NEW_FLOOR, null);
     }
@@ -526,6 +527,7 @@ public class FloorPlanFragment extends Fragment {
     @OnEditorAction(R.id.addFloorEdit)
     public boolean handleFloorChange(TextView v, int actionId, KeyEvent event) {
         if (actionId == EditorInfo.IME_ACTION_DONE) {
+            floorListActionMenuListener.destroyActionBar();
             if (floorToRename != null) {
                 isConnectedToServer(FloorHandledCondition.ADD_RENAMED_FLOOR, null);
             } else {
@@ -593,12 +595,14 @@ public class FloorPlanFragment extends Fragment {
                             floorToRename = null;
                             L.saveCCUState();
                             CCUHsApi.getInstance().syncEntityTree();
+                            floorListView.requestFocusFromTouch();
                             siteFloorList.add(hsFloor);
                             dialog.dismiss();
                         });
                         adb.setNegativeButton(getResources().getString(R.string.cancel), (dialog, which) -> {
                             hideKeyboard();
                             refreshScreen();
+                            floorListView.requestFocusFromTouch();
                             dialog.dismiss();
                         });
                         adb.show();
@@ -644,6 +648,7 @@ public class FloorPlanFragment extends Fragment {
                         floorToRename = null;
                         L.saveCCUState();
                         CCUHsApi.getInstance().syncEntityTree();
+                        floorListView.requestFocusFromTouch();
                         siteFloorList.add(hsFloor);
                         dialog.dismiss();
                     });
@@ -666,6 +671,7 @@ public class FloorPlanFragment extends Fragment {
             selectFloor(HSUtil.getFloors().size() - 1);
             L.saveCCUState();
             CCUHsApi.getInstance().syncEntityTree();
+            floorListView.requestFocusFromTouch();
 
             hideKeyboard();
             Toast.makeText(getActivity().getApplicationContext(),
@@ -753,6 +759,7 @@ public class FloorPlanFragment extends Fragment {
 
     @OnClick(R.id.addRoomBtn)
     public void handleRoomBtn() {
+        floorListActionMenuListener.destroyActionBar();
         roomToRename = null;
         enableRoomEdit();
         addRoomEdit.setText("");
@@ -797,6 +804,7 @@ public class FloorPlanFragment extends Fragment {
     @OnEditorAction(R.id.addRoomEdit)
     public boolean handleRoomChange(TextView v, int actionId, KeyEvent event) {
         if (actionId == EditorInfo.IME_ACTION_DONE) {
+            floorListActionMenuListener.destroyActionBar();
             int maxZoneNameLength = 24;
             if (roomToRename != null) {
                 if (addRoomEdit.getText().toString().trim().length() > 0) {
@@ -904,6 +912,8 @@ public class FloorPlanFragment extends Fragment {
 
     @OnClick(R.id.pairModuleBtn)
     public void startPairing() {
+        floorListActionMenuListener.destroyActionBar();
+        roomListActionMenuListener.destroyActionBar();
         addModulelt.setVisibility(View.GONE);
         addModulelt.setEnabled(false);
         disableForMilliSeconds();

@@ -121,6 +121,8 @@ public class FloorListActionMenuListener implements MultiChoiceModeListener
 							selectedFloor.clear();
 							floorPlanActivity.refreshScreen();
 							floorPlanActivity.hideWait();
+							//request focus to list view
+							floorPlanActivity.floorListView.requestFocusFromTouch();
 						});
 					} catch (Exception e) {
 						CcuLog.e("CCU_UI", "Unable to delete floor", e);

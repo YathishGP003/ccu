@@ -192,10 +192,10 @@ public class Pulse
 						CcuLog.d(L.TAG_CCU_DEVICE, "regularSmartNodeUpdate : roomTemp " + curTempVal);
 						break;
 					case TH2_IN:
-						if (isMATDamperConfigured(logPoint, nodeAddr, "secondary", hayStack)) {
+						if (isMATDamperConfigured(logPoint, nodeAddr, DomainName.damper2Type, hayStack)) {
 							CcuLog.d(L.TAG_CCU_DEVICE, "regularSmartNodeUpdate : update DAB-dat2");
 							hayStack.writeHisValById(logPoint.get("id").toString(),
-							                         (double)smartNodeRegularUpdateMessage_t.update.airflow1Temperature.get()/10);
+							                         (double)smartNodeRegularUpdateMessage_t.update.airflow2Temperature.get()/10);
 						} else {
 							val = smartNodeRegularUpdateMessage_t.update.externalThermistorInput2.get();
 							isTh2Enabled = phyPoint.get("portEnabled").toString().equals("true");
@@ -259,7 +259,7 @@ public class Pulse
 						}
 						break;
 					case TH1_IN:
-						if (isMATDamperConfigured(logPoint, nodeAddr, "primary", hayStack)) {
+						if (isMATDamperConfigured(logPoint, nodeAddr, DomainName.damper1Type, hayStack)) {
 							CcuLog.d(L.TAG_CCU_DEVICE, "regularSmartNodeUpdate : update DAB-dat1");
 							hayStack.writeHisValById(logPoint.get("id").toString(),
 							                         (double)smartNodeRegularUpdateMessage_t.update.airflow1Temperature.get()/10);
@@ -344,10 +344,12 @@ public class Pulse
         return i * (maxPressure - minPressure) + minPressure;
 	}
 
-	private static boolean isMATDamperConfigured(HashMap logicalPoint, Short nodeAddr, String primary,
+	private static boolean isMATDamperConfigured(HashMap logicalPoint, Short nodeAddr, String domainName,
 	                                             CCUHsApi hayStack) {
 		return logicalPoint.containsKey(Tags.DAB) && hayStack.readDefaultVal(
-			"damper and type and "+primary+" and group == \""+nodeAddr+"\"").intValue() == DamperType.MAT.ordinal();
+				"point and domainName == \""+domainName+"\" " +
+						" and group == \""+nodeAddr+"\"").intValue() == DamperType.MAT.ordinal();
+
 	}
 
 	private static void handleSensorEvents(SmartNodeSensorReading_t[] sensorReadings, short addr,Device device, boolean isDomainEquip) {

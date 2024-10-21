@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.Globals;
 import a75f.io.renatus.tuners.TunerFragment;
 
 /**
@@ -73,6 +74,11 @@ public class SettingsPagerAdapter extends FragmentStatePagerAdapter {
         int tab = RenatusLandingActivity.mTabLayout.getSelectedTabPosition();
         if(btnTab == 1 && tab == 0) { // This will run when we switch from FloorPlanFragment to zone fragment
             FloorPlanFragment.getInstance().destroyActionBar();
+        }
+        //Resetting the temporary override mode
+        if (btnTab == 1) {
+            Globals.getInstance().resetTempOverCount();
+            Globals.getInstance().setTemporaryOverrideMode(false);
         }
         //super.destroyItem(container, position, object);
     }

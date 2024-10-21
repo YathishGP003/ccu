@@ -192,6 +192,7 @@ public class HyperStatMessageGenerator {
         controls.setUnoccupiedMode(isInUnOccupiedMode(equipRef));
 
         if (!device.isEmpty()) {
+            CcuLog.i(L.TAG_CCU_DEVICE, "===================Device Layer==================================");
             DeviceHSUtil.getEnabledCmdPointsWithRefForDevice(device, hayStack).forEach(rawPoint -> {
                 double logicalVal;
                 if(rawPoint.getMarkers().contains(Tags.WRITABLE)){
@@ -202,8 +203,8 @@ public class HyperStatMessageGenerator {
                     CcuLog.d(L.TAG_CCU_DEVICE, "test-writable READ hyperstat ##getControlMessage: not writable id->"+rawPoint.getId()+"<logicalVal:>"+logicalVal+"<-dis->"+rawPoint.getDisplayName());
                 }
                 int mappedVal;
-                if (Globals.getInstance().isTemporaryOverrideMode()) {
-                    mappedVal = (short)logicalVal;
+                if (Globals.getInstance().isTemporaryOverrideMode()) { //Mapping not required during override.
+                    mappedVal =  hayStack.readHisValById(rawPoint.getId()).shortValue();
                 } else {
                     mappedVal = (DeviceUtil.isAnalog(rawPoint.getPort())
                             ? DeviceUtil.mapAnalogOut(rawPoint.getType(), (short) logicalVal)
@@ -218,28 +219,11 @@ public class HyperStatMessageGenerator {
                 }
 
                 CcuLog.d(L.TAG_CCU_DEVICE, "test-writable WRITE hyperstat ##getControlMessage: writeHisValById id->"+rawPoint.getId()+"<mappedVal:>"+mappedVal+"<-dis->"+rawPoint.getDisplayName());
+
+                CcuLog.i(L.TAG_CCU_DEVICE,
+                        rawPoint.getType()+" "+logicalVal+" Port "+rawPoint.getPort() +" =  "+mappedVal);
                 setHyperStatPort(controls, Port.valueOf(rawPoint.getPort()), mappedVal);
             });
-            CcuLog.i(L.TAG_CCU_DEVICE, "===================Device Layer==================================");
-               DeviceHSUtil.getEnabledCmdPointsWithRefForDevice(device, hayStack)
-                       .forEach( rawPoint -> {
-                           double logicalVal;
-                           if(rawPoint.getMarkers().contains(Tags.WRITABLE)){
-                               logicalVal = hayStack.readPointPriorityVal(rawPoint.getId());
-                               CcuLog.d(L.TAG_CCU_DEVICE, "test-writable READ hyperstat $$getControlMessage: writable id->"+rawPoint.getId()+"<logicalVal:>"+logicalVal+"<-dis->"+rawPoint.getDisplayName());
-                           }else{
-                               logicalVal = hayStack.readHisValById(rawPoint.getPointRef());
-                               CcuLog.d(L.TAG_CCU_DEVICE, "test-writable READ hyperstat $$getControlMessage: not writable id->"+rawPoint.getId()+"<logicalVal:>"+logicalVal+"<-dis->"+rawPoint.getDisplayName());
-                           }
-                           int mappedVal = (DeviceUtil.isAnalog(rawPoint.getPort())
-                                   ? DeviceUtil.mapAnalogOut(rawPoint.getType(), (short) logicalVal)
-                                   : DeviceUtil.mapDigitalOut(rawPoint.getType(), logicalVal > 0));
-                           hayStack.writeHisValById(rawPoint.getId(), (double) mappedVal);
-                           CcuLog.d(L.TAG_CCU_DEVICE, "test-writable WRITE hyperstat $$getControlMessage: writeHisValById id->"+rawPoint.getId()+"<mappedVal:>"+mappedVal+"<-dis->"+rawPoint.getDisplayName());
-                           CcuLog.i(L.TAG_CCU_DEVICE,
-                                   rawPoint.getType()+" "+logicalVal+" Port "+rawPoint.getPort() +" =  "+mappedVal);
-                           setHyperStatPort(controls, Port.valueOf(rawPoint.getPort()), mappedVal);
-                       });
             CcuLog.i(L.TAG_CCU_DEVICE, "=====================================================");
         }
         return controls;

@@ -107,7 +107,7 @@ public class OTAUpdateService extends IntentService {
     public static final Queue<Intent> otaRequestsQueue = new LinkedList<>();
     private boolean retryHandlerStarted = false;
     private Timer retryHandler;
-    static boolean systemAndZoneLevelUpdate = false;
+    static boolean ZoneAndModuleLevelUpdate = false;
     public OTAUpdateService() {
         super("OTAUpdateService");
     }
@@ -374,7 +374,7 @@ public class OTAUpdateService extends IntentService {
             return CCUHsApi.getInstance().readId("(device and domainName == \"cmBoardDevice\" ) or device and cm ");
         }
         // connect module  we can use for hyperstatsplit also ,checking the system ,zone,module  level OTA means i am not sending the connect module ID
-        else if (deviceType.equals(FirmwareComponentType_t.CONNECT_MODULE_DEVICE_TYPE.toString()) && !systemAndZoneLevelUpdate) {
+        else if (deviceType.equals(FirmwareComponentType_t.CONNECT_MODULE_DEVICE_TYPE.toString()) && !ZoneAndModuleLevelUpdate) {
             return CCUHsApi.getInstance().readId("device and domainName == \"connectModuleDevice\"");
         }
         // For terminal devices
@@ -389,7 +389,8 @@ public class OTAUpdateService extends IntentService {
      */
     private void handleOtaUpdateStartRequest(Intent intent) {
         otaRequestProcessInProgress = true;
-        systemAndZoneLevelUpdate = false;
+        ZoneAndModuleLevelUpdate = false;
+        OtaStatusDiagPoint.Companion.setConnectModuleUpdateInZoneOrModuleLevel(false);
         CcuLog.i(TAG, "handleOtaUpdateStartRequest: called started a request");
         deleteFilesByDeviceType(DOWNLOAD_DIR);
         String id = intent.getStringExtra(ID);
@@ -399,9 +400,6 @@ public class OTAUpdateService extends IntentService {
         currentRunningRequestType = intent.getStringExtra(CMD_TYPE);
 
         //when we connect hyperstatsplit using connect module,we can able to give OTA for connect module,so we need to check the level
-        if(cmdLevel.equals("zone")||cmdLevel.equals("module")){
-            systemAndZoneLevelUpdate = true;
-        }
 
         if(id == null || firmwareVersion == null) {
             return;
@@ -487,7 +485,6 @@ public class OTAUpdateService extends IntentService {
                 HashMap equipment =  CCUHsApi.getInstance().readEntity("equip and oao and not hyperstatsplit");
                 //OTA is not supported in system level for Connect Module
                 if (deviceType.equals(FirmwareComponentType_t.CONNECT_MODULE_DEVICE_TYPE)) {
-                    systemAndZoneLevelUpdate = true;
                     CcuLog.i(TAG, "No Connect Module device found or OTA is not support in system level ");
                 }
 
@@ -507,7 +504,7 @@ public class OTAUpdateService extends IntentService {
                 for(Floor floor : HSUtil.getFloors()) {
                     for(Zone zone : HSUtil.getZones(floor.getId())) {
                         for(Device device : HSUtil.getDevices(zone.getId())) {
-
+                            isConnectModuleUpdate(device, deviceType);
                             if(shouldBeCheckedForUpdate(device, deviceType)) {
                                 CcuLog.d(TAG, "[VALIDATION] Adding device " + device.getAddr() + " to update");
                                 mLwMeshAddresses.add(Integer.parseInt(device.getAddr()));
@@ -521,6 +518,7 @@ public class OTAUpdateService extends IntentService {
             case "zone":
                 //update all nodes in the same zone as the specified node
                 for(Device device : HSUtil.getDevices("@"+id)) {
+                    isConnectModuleUpdate(device, deviceType);
                     if(shouldBeCheckedForUpdate(device, deviceType)) {
                         CcuLog.d(TAG, "[VALIDATION] Adding device " + device.getAddr() + " to update");
                         mLwMeshAddresses.add(Integer.parseInt(device.getAddr()));
@@ -533,7 +531,8 @@ public class OTAUpdateService extends IntentService {
                 //update just the one node
                 Equip equip = HSUtil.getEquipInfo("@"+id);
                 Device device = HSUtil.getDevice(Short.parseShort(equip.getGroup()));
-                    if(shouldBeCheckedForUpdate(device, deviceType)) {
+                isConnectModuleUpdate(device, deviceType);
+                if(shouldBeCheckedForUpdate(device, deviceType)) {
                         CcuLog.d(TAG, "[VALIDATION] Adding device " + equip.getGroup() + " to update");
                         mLwMeshAddresses.add(Integer.parseInt(equip.getGroup()));
                     }
@@ -1127,5 +1126,13 @@ public class OTAUpdateService extends IntentService {
 
     public static boolean isCmOtaInProgress(){
         return  (mCurrentLwMeshAddress ==  (L.ccu().getSmartNodeAddressBand() + 99));
+    }
+
+    private void isConnectModuleUpdate(Device device, FirmwareComponentType_t deviceType) {
+        if(deviceType.equals(FirmwareComponentType_t.CONNECT_MODULE_DEVICE_TYPE) && device.getMarkers().contains(Tags.HYPERSTATSPLIT)) {
+            OtaStatusDiagPoint.Companion.setConnectModuleUpdateInZoneOrModuleLevel(true);
+            ZoneAndModuleLevelUpdate = true;
+            CcuLog.i(TAG, "Connect Module device found  in zone or Module level ");
+        }
     }
 }

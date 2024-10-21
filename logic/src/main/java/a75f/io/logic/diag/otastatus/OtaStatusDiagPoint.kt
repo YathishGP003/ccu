@@ -14,7 +14,12 @@ import a75f.io.logic.L
 class OtaStatusDiagPoint {
     companion object {
         private const val OTA_STATUS = "otaStatus"
+        private var connectmoduleUpdateLevel = false
 
+
+        fun setConnectModuleUpdateInZoneOrModuleLevel(value: Boolean) {
+            connectmoduleUpdateLevel = value
+        }
         /**
          * Function to create an ota status point for module
          * returns point
@@ -139,10 +144,16 @@ class OtaStatusDiagPoint {
             val hsApi = CCUHsApi.getInstance()
             nodes.forEach { i ->
                 if (isCMDevice(i)) {
-                    val systemEquip: HashMap<*, *> = CCUHsApi.getInstance().readEntity("system and equip and not modbus and not connectModule")
+                    val systemEquip: HashMap<*, *> = hsApi.readEntity("system and equip and not modbus and not connectModule")
                     hsApi.writeHisValByQuery("ota and status and equipRef ==\"${systemEquip[Tags.ID].toString()}\"",status.ordinal.toDouble())
-                } else {
-                    hsApi.writeHisValByQuery("ota and status and group ==\"$i\"",status.ordinal.toDouble())
+                } else{
+                    //hyperstatsplit we have two OTA point -->  connect module and Hyperstatsplit
+                    if(connectmoduleUpdateLevel) {
+                        hsApi.writeHisValByQuery(" ota and status and domainName ==\"otaStatusConnectModule\" and  group ==\"$i\"",status.ordinal.toDouble())
+                    }
+                    else {
+                        hsApi.writeHisValByQuery("ota and status and not connectModule and group ==\"$i\"",status.ordinal.toDouble())
+                    }
                 }
                 CcuLog.d(L.TAG_CCU_OTA_PROCESS, "multiple updates updated $i : $status ${status.ordinal.toDouble()}")
             }
@@ -154,7 +165,13 @@ class OtaStatusDiagPoint {
                 val systemEquip: HashMap<*, *> = CCUHsApi.getInstance().readEntity("system and equip and not modbus and not connectModule")
                 hsApi.writeHisValByQuery("ota and status and equipRef ==\"${systemEquip[Tags.ID].toString()}\"",status.ordinal.toDouble())
             } else {
-                hsApi.writeHisValByQuery("ota and status and group ==\"$node\"",status.ordinal.toDouble())
+                //hyperstatsplit we have two OTA point -->  connect module and Hyperstatsplit
+                if(connectmoduleUpdateLevel) {
+                    CCUHsApi.getInstance().writeHisValByQuery(" ota and status and domainName ==\"otaStatusConnectModule\" and  group ==\"$node\"",status.ordinal.toDouble())
+                }
+                else {
+                    CCUHsApi.getInstance().writeHisValByQuery("ota and status and not connectModule and group ==\"$node\"", status.ordinal.toDouble())
+                }
             }
             CcuLog.d(L.TAG_CCU_OTA_PROCESS, "updateOtaStatusPoint updated $node : $status ${status.ordinal.toDouble()}")
         }
@@ -168,7 +185,12 @@ class OtaStatusDiagPoint {
                 val systemEquip: HashMap<*, *> = CCUHsApi.getInstance().readEntity("system and equip and not modbus and not connectModule")
                 CCUHsApi.getInstance().readHisValByQuery("ota and status and equipRef ==\"${systemEquip[Tags.ID].toString()}\"")
             } else {
-                CCUHsApi.getInstance().readHisValByQuery("ota and status and group ==\"$node\"")
+                if(connectmoduleUpdateLevel) {
+                  CCUHsApi.getInstance().readHisValByQuery("ota and status and domainName ==\"otaStatusConnectModule\" and  group ==\"$node\"")
+                }
+                else {
+                    CCUHsApi.getInstance().readHisValByQuery("ota and status and not connectModule and group ==\"$node\"")
+                }
             }
 
         }

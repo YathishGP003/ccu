@@ -86,6 +86,7 @@ class DabAdvancedHybridAhuViewModel : AdvancedHybridAhuViewModel() {
                 hayStack.syncEntityTree()
                 hayStack.setCcuReady()
             }
+
         }
     }
 

@@ -1,6 +1,7 @@
 package a75f.io.device.cm
 
 import a75f.io.api.haystack.CCUHsApi
+import a75f.io.api.haystack.RawPoint
 import a75f.io.device.ControlMote
 import a75f.io.device.ControlMote.CcuToCmSettingsMessage_t.Builder
 import a75f.io.device.ControlMote.CmAnalogInMappingStages_e
@@ -30,13 +31,12 @@ fun getCMControlsMessage(): ControlMote.CcuToCmOverUsbCmControlMessage_t {
     val cmDevice = Domain.cmBoardDevice
     val msgBuilder = ControlMote.CcuToCmOverUsbCmControlMessage_t.newBuilder()
     var relayBitmap = 0
-
     for (relayPos in 1..8) {
         if (CCUHsApi.getInstance().readHisValByQuery(
-                "point and physical and deviceRef == \""
-                        + Domain.cmBoardDevice.getId() + "\" " +
-                        "and domainName == \"relay" + relayPos + "\""
-            ) > 0
+                        "point and physical and deviceRef == \""
+                                + Domain.cmBoardDevice.getId() + "\" " +
+                                "and domainName == \"relay" + relayPos + "\""
+                ) > 0
         ) {
             relayBitmap = relayBitmap or (1 shl MeshUtil.getRelayMapping(relayPos))
         }

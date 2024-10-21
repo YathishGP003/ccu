@@ -88,6 +88,7 @@ class VavAdvancedHybridAhuViewModel : AdvancedHybridAhuViewModel() {
                 hayStack.syncEntityTree()
             }
         }
+
     }
 
     private suspend fun newEquipConfiguration() {

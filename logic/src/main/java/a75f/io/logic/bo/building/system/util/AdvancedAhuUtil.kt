@@ -172,3 +172,11 @@ fun getAdvanceAhuModels():  Pair<SeventyFiveFProfileDirective, SeventyFiveFProfi
     }
 }
 
+fun isConnectModuleExist(): Boolean {
+    if(L.ccu().systemProfile is VavAdvancedAhu)
+        return getVavConnectEquip().isNotEmpty()
+    if(L.ccu().systemProfile is DabAdvancedAhu)
+        return getDabConnectEquip().isNotEmpty()
+    return false
+}
+

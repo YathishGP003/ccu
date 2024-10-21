@@ -653,11 +653,11 @@ class DabAdvancedAhu : DabSystemProfile() {
     }
 
     private fun updateOutputPorts() {
-        //TODO - refactor the encapsulation of relayAssociationMap and analogOutAssociationMap
+        CcuLog.d(L.TAG_CCU_SYSTEM, "CM  status")
         updateRelayOutputPorts(getCMRelayAssociationMap(systemEquip.cmEquip), false)
         updateAnalogOutputPorts(getCMAnalogAssociationMap(systemEquip.cmEquip), getAnalogOutLogicalPhysicalMap(), false)
 
-        CcuLog.d(L.TAG_CCU_SYSTEM, "updateOutputPorts : Connect")
+        CcuLog.d(L.TAG_CCU_SYSTEM, "Connect module status")
         if (!systemEquip.connectEquip1.equipRef.contentEquals("null")) {
             updateRelayOutputPorts(getConnectRelayAssociationMap(systemEquip.connectEquip1), true)
             updateAnalogOutputPorts(getConnectAnalogAssociationMap(systemEquip.connectEquip1), getConnectAnalogOutLogicalPhysicalMap(
@@ -710,6 +710,8 @@ class DabAdvancedAhu : DabSystemProfile() {
                     val domainName = analogOutAssociationToDomainName(association.readDefaultVal().toInt())
                     getDomainPointForName(domainName, systemEquip.cmEquip).writeHisVal(roundOff(logicalValue))
                 }
+            } else {
+                physicalMap?.get(analogOut)?.writePointValue(0.0)
             }
         }
     }
@@ -793,19 +795,25 @@ class DabAdvancedAhu : DabSystemProfile() {
 
     private fun updateLogicalToPhysical(isConnectEquip: Boolean) {
         if (isConnectEquip) {
+            val physicalMap = getConnectRelayLogicalPhysicalMap(systemEquip.connectEquip1, Domain.connect1Device)
             getConnectRelayAssociationMap(systemEquip.connectEquip1).forEach { (relay, association) ->
+                val physicalPoint = physicalMap[relay]
                 if (relay.readDefaultVal() > 0) {
                     val domainName = connectRelayAssociationToDomainName(association.readDefaultVal().toInt())
-                    val physicalPoint = getConnectRelayLogicalPhysicalMap(systemEquip.connectEquip1, Domain.connect1Device)[relay]
                     physicalPoint?.writePointValue(getDomainPointForName(domainName, systemEquip.connectEquip1).readHisVal())
+                } else {
+                    physicalPoint?.writePointValue(0.0)
                 }
             }
         } else {
             // sync logical to physical
+            val physicalPointMap = getCMRelayLogicalPhysicalMap(systemEquip.cmEquip)
             getCMRelayAssociationMap(systemEquip.cmEquip).forEach { (relay, association) ->
                 if (relay.readDefaultVal() > 0) {
                     val domainName = relayAssociationToDomainName(association.readDefaultVal().toInt())
-                    getCMRelayLogicalPhysicalMap(systemEquip.cmEquip)[relay]?.writePointValue(getDomainPointForName(domainName, systemEquip.cmEquip).readHisVal())
+                    physicalPointMap[relay]?.writePointValue(getDomainPointForName(domainName, systemEquip.cmEquip).readHisVal())
+                } else {
+                    physicalPointMap[relay]?.writePointValue(0.0)
                 }
             }
         }
@@ -924,25 +932,27 @@ class DabAdvancedAhu : DabSystemProfile() {
 
     private fun resetOutput() {
         // Resetting the relays , analog outs will be reset based on loops
+        val cmRelayPhysicalMap = getCMRelayLogicalPhysicalMap(systemEquip.cmEquip)
         getCMRelayAssociationMap(systemEquip.cmEquip).entries.forEach { (relay, association) ->
             val domainName = relayAssociationToDomainName(association.readDefaultVal().toInt())
             getDomainPointForName(domainName, systemEquip.cmEquip).writeHisVal(0.0)
-            getCMRelayLogicalPhysicalMap(systemEquip.cmEquip)[relay]?.writePointValue(0.0)
+            cmRelayPhysicalMap[relay]?.writePointValue(0.0)
         }
 
         updateAnalogOutputPorts(getCMAnalogAssociationMap(systemEquip.cmEquip), getAnalogOutLogicalPhysicalMap(), false)
 
         if (!systemEquip.connectEquip1.equipRef.contentEquals("null")) {
+            val physicalMap = getConnectRelayLogicalPhysicalMap(systemEquip.connectEquip1, Domain.connect1Device)
             getConnectRelayAssociationMap(systemEquip.connectEquip1).entries.forEach { (relay, association) ->
                 val domainName = connectRelayAssociationToDomainName(association.readDefaultVal().toInt())
-                getDomainPointForName(domainName, systemEquip.connectEquip1).writeHisVal(0.0)
-                getConnectRelayLogicalPhysicalMap(systemEquip.connectEquip1, Domain.connect1Device)[relay]?.writePointValue(0.0)
+                getDomainPointForName(domainName, systemEquip.connectEquip1).writePointValue(0.0)
+                physicalMap[relay]?.writePointValue(0.0)
             }
-
             updateAnalogOutputPorts(getConnectAnalogAssociationMap(systemEquip.connectEquip1), getConnectAnalogOutLogicalPhysicalMap(
                     systemEquip.connectEquip1,
                     Domain.connect1Device,
             ), true)
+
         }
     }
 

@@ -31,6 +31,7 @@ import a75f.io.logic.bo.building.system.util.getDabConnectEquip
 import a75f.io.logic.bo.building.system.util.getDis
 import a75f.io.logic.bo.building.system.util.getVavCmEquip
 import a75f.io.logic.bo.building.system.util.getVavConnectEquip
+import a75f.io.logic.bo.building.system.util.isConnectModuleExist
 import a75f.io.logic.bo.building.system.vav.VavAdvancedAhu
 import a75f.io.logic.bo.util.UnitUtils
 import a75f.io.renatus.R
@@ -244,7 +245,7 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
 
          DomainManager.addSystemDomainEquip(hayStack)
          DomainManager.addCmBoardDevice(hayStack)
-
+         resetPhysicalPorts()
     }
 
     /**
@@ -512,6 +513,31 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
 
     open fun reset() {}
 
+    private fun resetPhysicalPorts() {
+        getCMRelayLogicalPhysicalMap(getAdvancedAhuSystemEquip()).forEach {
+            if (it.key.readDefaultVal() == 0.0) {
+                it.value.writePointValue(0.0)
+            }
+        }
+        getAnalogOutLogicalPhysicalMap(getAdvancedAhuSystemEquip()).forEach {
+            if (it.key.readDefaultVal() == 0.0) {
+                it.value.writePointValue(0.0)
+            }
+        }
+
+        if (isConnectModuleExist()) {
+            getConnectRelayLogicalPhysicalMap(getConnectEquip(), Domain.connect1Device).forEach {
+                if (it.key.readDefaultVal() == 0.0) {
+                    it.value.writePointValue(0.0)
+                }
+            }
+            getConnectAnalogOutLogicalPhysicalMap(getConnectEquip(), Domain.connect1Device).forEach {
+                if (it.key.readDefaultVal() == 0.0) {
+                    it.value.writePointValue(0.0)
+                }
+            }
+        }
+    }
 
 }
 

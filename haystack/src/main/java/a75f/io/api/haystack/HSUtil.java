@@ -344,8 +344,8 @@ public class HSUtil {
 
     public static boolean isSSEConfig(String id, CCUHsApi hayStack) {
         HashMap<Object, Object> pointEntity = hayStack.readMapById(id);
-        return pointEntity.containsKey(Tags.SSE) && pointEntity.containsKey(Tags.CMD)
-                /*&& pointEntity.containsKey(Tags.CONFIG)*/;
+        return pointEntity.containsKey(Tags.SSE) && (pointEntity.containsKey(Tags.CMD)
+                || pointEntity.containsKey(Tags.CONFIG));
     }
 
     public static boolean isDcwbConfig(String id, CCUHsApi hayStack) {

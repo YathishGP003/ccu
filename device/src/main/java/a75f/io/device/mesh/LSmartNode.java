@@ -593,14 +593,7 @@ public class LSmartNode
                         continue;
                     }
 
-                    double logicalVal;
-                    if (logicalOpPoint.containsKey(Tags.WRITABLE)) {
-                        logicalVal = hayStack.readPointPriorityVal(logicalOpPoint.get("id").toString());
-                        CcuLog.d(L.TAG_CCU_DEVICE, "test-writable READ LSmartNode fillSmartNodeControls: writable id->"+logicalOpPoint.get("id").toString()+"<logicalVal:>"+logicalVal);
-                    } else {
-                        logicalVal = hayStack.readHisValById(logicalOpPoint.get("id").toString());
-                        CcuLog.d(L.TAG_CCU_DEVICE, "test-writable READ LSmartNode fillSmartNodeControls: not writable id->"+logicalOpPoint.get("id").toString()+"<logicalVal:>"+logicalVal);
-                    }
+                    double logicalVal = hayStack.readHisValById(logicalOpPoint.get("id").toString());
 
                     short mappedVal = 0;
                     if (isEquipType("vav", node))
@@ -689,8 +682,13 @@ public class LSmartNode
                     CcuLog.d(TAG_CCU_DEVICE, "Set "+logicalOpPoint.get("dis") +" "+ p.getPort() + " type " + p.getType() + " logicalVal: " + logicalVal + " mappedVal " + mappedVal);
                     Struct.Unsigned8 port = getDevicePort(device, controls_t, p);
                     if (port != null) {
+                        if(p.getMarkers().contains("writable")){
+                            CcuLog.d(L.TAG_CCU_DEVICE, "test-writable WRITE LSmartNode fillSmartNodeControls: writeDefaultValById id->"+p.getId()+"<mappedVal:>"+mappedVal);
+                            hayStack.writeDefaultValById(p.getId(), (double) mappedVal);
+                            mappedVal = (short) hayStack.readPointPriorityVal(p.getId());
+                            CcuLog.d(L.TAG_CCU_DEVICE, "test-writable READ LSmartNode fillSmartNodeControls: readPointPriorityVal id->"+p.getId()+"<mappedVal:>"+mappedVal);
+                        }
                         hayStack.writeHisValById(p.getId(), (double) mappedVal);
-                        CcuLog.d(L.TAG_CCU_DEVICE, "test-writable WRITE LSmartNode fillSmartNodeControls: writeHisValById id->"+p.getId()+"<mappedVal:>"+mappedVal);
                         port.set(mappedVal);
                     } else {
                         CcuLog.d(L.TAG_CCU_DEVICE, "Unknown port info for "+p.getDisplayName());

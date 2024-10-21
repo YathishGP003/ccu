@@ -253,7 +253,7 @@ public class DeviceUtil {
         HashMap map = ccuHsApi.readEntity(relayQuery);
         CcuLog.d("CCU_DEVICE", "test-writable isRelayActivated read:=======relay====<--dis-->> "+ relay + "<-iswritable->"+map.containsKey(Tags.WRITABLE) + "<--is unused-->"+map.containsKey(Tags.UNUSED));
         double value;
-        if(map.containsKey(Tags.WRITABLE) && map.containsKey(Tags.UNUSED)){
+        if(map.containsKey(Tags.WRITABLE)){
             value = ccuHsApi.readPointPriorityValByQuery(relayQuery);
             CcuLog.d("CCU_DEVICE", "test-writable isRelayActivated read:=======relay====<--dis-->> "+ relay + "<--readPointPriorityVal-->"+value);
             CcuLog.d("CCU_DEVICE", "test-writable isRelayActivated write:=======relay====<--dis-->> "+ relay + "<--writeHisValById-->"+value);

@@ -20,14 +20,18 @@ import a75f.io.logic.bo.util.TemperatureMode;
 
 public class DABSystemProfileRelayAssociationUtil {
     public static boolean getDesiredTempDisplayMode(TemperatureMode modeType){
-        HashMap<Object, Object> equip = CCUHsApi.getInstance().readEntity("equip and system and not modbus and not connectModule");
-        Equip eq = new Equip.Builder().setHashMap(equip).build();
-        SystemProfile profileInstance = L.ccu().systemProfile;
+        HashMap<Object, Object> equips = CCUHsApi.getInstance().readEntity("equip and system and not modbus and not connectModule");
+        Equip equip = new Equip.Builder().setHashMap(equips).build();
+        ProfileType profileType = ProfileType.getProfileTypeForName(equip.getProfile());
         //This will be needed for profiles not migrated to DM.
+        if (profileType == null) {
+            profileType = ProfileType.valueOf(equip.getProfile());
+        }
+        SystemProfile profileInstance = L.ccu().systemProfile;
         if (profileInstance == null) {
             return false;
         }
-        if (ProfileType.getProfileTypeForName(eq.getProfile()) == ProfileType.SYSTEM_DAB_ADVANCED_AHU) {
+        if (profileType == ProfileType.SYSTEM_DAB_ADVANCED_AHU) {
             if (modeType == TemperatureMode.COOLING) {
                 return L.ccu().systemProfile.isCoolingAvailable();
             } else if (modeType == TemperatureMode.HEATING) {
@@ -36,7 +40,7 @@ public class DABSystemProfileRelayAssociationUtil {
         }
         DabSystemProfile systemProfile = getSystemProfileInstance(profileInstance);
 
-        switch (ProfileType.getProfileTypeForName(eq.getProfile())) {
+        switch (profileType) {
             case SYSTEM_DAB_STAGED_RTU:
             case SYSTEM_DAB_STAGED_VFD_RTU:
             case SYSTEM_DAB_ANALOG_RTU:

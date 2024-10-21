@@ -1117,7 +1117,7 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                                 }
                             } else if (NewexpandedListText.startsWith("relay")
                             || NewexpandedListText.contains("Relay")) {
-                                String overridenData = TempOverRiddenValue.getInstance().getOverriddenValues().get(equipId+getThermistorIndex(expandedListText));
+                                String overridenData = TempOverRiddenValue.getInstance().getOverriddenValues().get(equipId+getRelayIndex(expandedListText));
                                 String relayPos = (expandedListText.substring(siteName.length() + 6, siteName.length() + 7));
                                 // post domain model migration support
                                 if(expandedListText.contains("-CM-")) {

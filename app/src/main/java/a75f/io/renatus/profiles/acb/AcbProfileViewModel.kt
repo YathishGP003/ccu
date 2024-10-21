@@ -1,10 +1,7 @@
 package a75f.io.renatus.profiles.acb
 
 import a75f.io.api.haystack.CCUHsApi
-import a75f.io.api.haystack.Point
-import a75f.io.api.haystack.RawPoint
 import a75f.io.device.mesh.LSerial
-import a75f.io.device.mesh.LSmartNode
 import a75f.io.domain.VavAcbEquip
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.Domain.getListByDomainName
@@ -38,14 +35,15 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.properties.Delegates
-import a75f.io.logic.bo.building.definitions.ReheatType.*
 import a75f.io.renatus.profiles.OnPairingCompleteListener
 import a75f.io.renatus.profiles.profileUtils.UnusedPortsModel
 import a75f.io.renatus.profiles.profileUtils.UnusedPortsModel.Companion.saveUnUsedPortStatus
+import a75f.io.messaging.handler.ACBConfigHandler
 import a75f.io.api.haystack.HSUtil
 import a75f.io.api.haystack.Tags
 import a75f.io.domain.equips.VavEquip
 import a75f.io.renatus.util.highPriorityDispatcher
+
 
 class AcbProfileViewModel : ViewModel() {
 
@@ -204,12 +202,12 @@ class AcbProfileViewModel : ViewModel() {
         if (profileConfiguration.isDefault) {
 
             addEquipAndPoints(deviceAddress, profileConfiguration, floorRef, zoneRef, nodeType, hayStack, model, deviceModel)
-            setOutputTypes(profileConfiguration)
-            updateCondensateSensor(profileConfiguration)
+            ACBConfigHandler.setOutputTypes(hayStack, profileConfiguration)
+            ACBConfigHandler.updateCondensateSensor(hayStack, profileConfiguration)
             if (L.ccu().bypassDamperProfile != null) overrideForBypassDamper(profileConfiguration)
             setScheduleType(profileConfiguration)
-            setMinCfmSetpointMaxVals(profileConfiguration)
-            setAirflowCfmProportionalRange(profileConfiguration)
+            ACBConfigHandler.setMinCfmSetpointMaxVals(hayStack, profileConfiguration)
+            ACBConfigHandler.setAirflowCfmProportionalRange(hayStack, profileConfiguration)
             // Have to reload the profile here because we just changed the CFM proportional range
             acbProfile.init()
             L.ccu().zoneProfiles.add(acbProfile)
@@ -218,12 +216,13 @@ class AcbProfileViewModel : ViewModel() {
             equipBuilder.updateEquipAndPoints(profileConfiguration, model, hayStack.site!!.id, equipDis, true)
             if (L.ccu().bypassDamperProfile != null) overrideForBypassDamper(profileConfiguration)
 
-            setOutputTypes(profileConfiguration)
+            ACBConfigHandler.setOutputTypes(hayStack, profileConfiguration)
             saveUnUsedPortStatus(profileConfiguration, deviceAddress, hayStack)
-            updateCondensateSensor(profileConfiguration)
-            updateRelayAssociation(profileConfiguration)
-            setMinCfmSetpointMaxVals(profileConfiguration)
-            setAirflowCfmProportionalRange(profileConfiguration)
+            ACBConfigHandler.updateCondensateSensor(hayStack, profileConfiguration)
+            ACBConfigHandler.updateRelayAssociation(hayStack, profileConfiguration)
+            ACBConfigHandler.setMinCfmSetpointMaxVals(hayStack, profileConfiguration)
+            ACBConfigHandler.setAirflowCfmProportionalRange(hayStack, profileConfiguration)
+            acbProfile.init()
             setScheduleType(profileConfiguration)
         }
 
@@ -281,80 +280,32 @@ class AcbProfileViewModel : ViewModel() {
         }
     }
 
-    // "analogType" tag is used by control message code and cannot easily be replaced with a domain name query.
-    // We are setting this value upon equip creation/reconfiguration for now.
-    private fun setOutputTypes(config: AcbProfileConfiguration) {
-        val device = hayStack.readEntity("device and addr == \"" + config.nodeAddress + "\"")
-
-        // Set
-        val relay1 = hayStack.readHDict("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.relay1 + "\"")
-        val relay1Point = RawPoint.Builder().setHDict(relay1).setEnabled(true)
-        hayStack.updatePoint(relay1Point.setType("Relay N/C").build(), relay1.get("id").toString())
-
-        val relay2 = hayStack.readHDict("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.relay2 + "\"")
-        val relay2Point = RawPoint.Builder().setHDict(relay2)
-        hayStack.updatePoint(relay2Point.setType("Relay N/C").build(), relay2.get("id").toString())
-
-        val analogOut1 = hayStack.readHDict("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.analog1Out + "\"")
-        val analog1Point = RawPoint.Builder().setHDict(analogOut1)
-        hayStack.updatePoint(analog1Point.setType(getDamperTypeString(config)).build(), analogOut1.get("id").toString())
-
-        val analogOut2 = hayStack.readHDict("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.analog2Out + "\"")
-
-        val valueType = config.valveType.currentVal.toInt() - 1
-        val analog2OpEnabled = valueType == ZeroToTenV.ordinal ||
-                valueType == TwoToTenV.ordinal ||
-                valueType == TenToZeroV.ordinal ||
-                valueType == TenToTwov.ordinal  ||
-                valueType == Pulse.ordinal
-
-        val analog2Point = RawPoint.Builder().setHDict(analogOut2)
-            .setType(getValveTypeString(config)).setEnabled(analog2OpEnabled).build()
-
-        hayStack.updatePoint(analog2Point, analogOut2.get("id").toString())
-
-    }
-
-    private fun updateCondensateSensor(config: AcbProfileConfiguration) {
-        val device = hayStack.read("device and addr == \"" + config.nodeAddress + "\"")
-        var th2In = hayStack.read("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.th2In + "\"")
-        var th2InPoint = RawPoint.Builder().setHashMap(th2In)
-
-        if (profileConfiguration.condensateSensorType.enabled) {
-            // N/C Condensation Sensor
-            val condensateNcPoint = hayStack.read("point and domainName == \"" + DomainName.condensateNC + "\" and group == \"" + config.nodeAddress + "\"")
-            if (condensateNcPoint.containsKey("id")) {
-                hayStack.updatePoint(th2InPoint.setPointRef(condensateNcPoint.get("id").toString()).build(), th2In.get("id").toString())
-            }
-        } else {
-            // N/O Condensation Sensor
-            val condensateNoPoint = hayStack.read("point and domainName == \"" + DomainName.condensateNO + "\" and group == \"" + config.nodeAddress + "\"")
-            if (condensateNoPoint.containsKey("id")) {
-                hayStack.updatePoint(th2InPoint.setPointRef(condensateNoPoint.get("id").toString()).build(), th2In.get("id").toString())
-            }
-        }
-
-    }
-
-    private fun updateRelayAssociation(config: AcbProfileConfiguration) {
-        val device = hayStack.readEntity("device and addr == \"" + config.nodeAddress + "\"")
-        var relay1Map = hayStack.readEntity("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.relay1 + "\"")
-        var relay1 = RawPoint.Builder().setHashMap(relay1Map)
-
-        if (profileConfiguration.relay1Association.associationVal > 0) {
-            // N/O Valve
-            val valveNoPoint = hayStack.read("point and domainName == \"" + DomainName.chilledWaterValveIsolationCmdPointNO + "\" and group == \"" + config.nodeAddress + "\"")
-            if (valveNoPoint.containsKey("id")) {
-                hayStack.updatePoint(relay1.setPointRef(valveNoPoint.get("id").toString()).build(), relay1Map.get("id").toString())
-            }
-        } else {
-            // N/C Valve
-            val valveNcPoint = hayStack.read("point and domainName == \"" + DomainName.chilledWaterValveIsolationCmdPointNC + "\" and group == \"" + config.nodeAddress + "\"")
-            if (valveNcPoint.containsKey("id")) {
-                hayStack.updatePoint(relay1.setPointRef(valveNcPoint.get("id").toString()).build(), relay1Map.get("id").toString())
-            }
-        }
-
+    private fun updateEquipAndPoints(
+        addr: Short,
+        config: ProfileConfiguration,
+        floorRef: String?,
+        roomRef: String?,
+        nodeType: NodeType?,
+        hayStack: CCUHsApi,
+        equipModel: SeventyFiveFProfileDirective,
+        deviceModel: SeventyFiveFDeviceDirective
+    ) {
+        val equipBuilder = ProfileEquipBuilder(hayStack)
+        val equipDis = hayStack.siteName + "-ACB-" + config.nodeAddress
+        CcuLog.i(Domain.LOG_TAG, " updateEquipAndPoints")
+        val equipId = equipBuilder.updateEquipAndPoints(profileConfiguration, model, hayStack.site!!.id, equipDis)
+        val entityMapper = EntityMapper(equipModel)
+        val deviceBuilder = DeviceBuilder(hayStack, entityMapper)
+        val deviceDis = hayStack.siteName + "-SN-" + config.nodeAddress
+        CcuLog.i(Domain.LOG_TAG, " updateDeviceAndPoints")
+        deviceBuilder.updateDeviceAndPoints(
+            config,
+            deviceModel,
+            equipId,
+            hayStack.site!!.id,
+            deviceDis
+        )
+        acbProfile = VavAcbProfile(equipId, addr)
     }
 
     private fun setScheduleType(config: AcbProfileConfiguration) {
@@ -393,64 +344,6 @@ class AcbProfileViewModel : ViewModel() {
         acbEquip.vavTemperatureProportionalRange.writeVal(14, hayStack.ccuUserName, 1.5, 0)
         acbEquip.vavTemperatureProportionalRange.writeHisVal(1.5)
 
-    }
-
-    // Previously, maxVal of (heating or cooling) Min CFM setpoint was set to the value of
-    // the corresponding Max CFM setpoint. To recreate this logic, we need to manually edit the maxVal
-    // tag on these points after they are created.
-    private fun setMinCfmSetpointMaxVals(config: AcbProfileConfiguration) {
-        val equip = hayStack.read("equip and group == \"" + config.nodeAddress + "\"")
-        val vavEquip = VavAcbEquip(equip.get("id").toString())
-
-        if (vavEquip.enableCFMControl.readDefaultVal() > 0.0) {
-            val maxCoolingCfm = vavEquip.maxCFMCooling.readDefaultVal()
-            val maxReheatingCfm = vavEquip.maxCFMReheating.readDefaultVal()
-
-            val minCoolingCfmMap = hayStack.readEntity("point and domainName == \"" + DomainName.minCFMCooling + "\"" + " and equipRef == \"" + vavEquip.equipRef + "\"")
-            val minCoolingCfmPoint = Point.Builder().setHashMap(minCoolingCfmMap).setMaxVal(maxCoolingCfm.toString()).build()
-            hayStack.updatePoint(minCoolingCfmPoint, minCoolingCfmMap.get("id").toString())
-
-            val minReheatingCfmMap = hayStack.readEntity("point and domainName == \"" + DomainName.minCFMReheating + "\"" + " and equipRef == \"" + vavEquip.equipRef + "\"")
-            val minReheatingCfmPoint = Point.Builder().setHashMap(minReheatingCfmMap).setMaxVal(maxReheatingCfm.toString()).build()
-            hayStack.updatePoint(minReheatingCfmPoint, minReheatingCfmMap.get("id").toString())
-        }
-
-    }
-
-    // AirflowCfmProportionalRange tuner is very config-specific. Appropriate value depends on the CFM setpoints.
-    // We set this value to 1.5x the Max Cooling CFM, which is the ballpark value used by U.S. Support during commissioning.
-    private fun setAirflowCfmProportionalRange(config: AcbProfileConfiguration) {
-        val equip = hayStack.read("equip and group == \"" + config.nodeAddress + "\"")
-        val vavEquip = VavEquip(equip.get("id").toString())
-
-        if (vavEquip.enableCFMControl.readDefaultVal() > 0.0) {
-            vavEquip.vavAirflowCFMProportionalRange.writeVal(8, 1.5 * vavEquip.maxCFMCooling.readPriorityVal())
-        }
-    }
-
-    // This logic will break if the "damperType" point enum is changed
-    private fun getDamperTypeString(config: AcbProfileConfiguration) : String {
-        return when(config.damperType.currentVal.toInt()) {
-            0 -> "0-10v"
-            1 -> "2-10v"
-            2 -> "10-2v"
-            3 -> "10-0v"
-            4 -> LSmartNode.MAT
-            5 -> "0-5v"
-            else -> { "0-10v" }
-        }
-    }
-
-    // This logic will break if the "reheatType" enum is changed
-    private fun getValveTypeString(config: AcbProfileConfiguration) : String {
-        return when(config.valveType.currentVal.toInt()) {
-            1 -> "0-10v"
-            2 -> "2-10v"
-            3 -> "10-2v"
-            4 -> "10-0v"
-            5 -> LSmartNode.PULSE
-            else -> { "0" }
-        }
     }
 
     fun setOnPairingCompleteListener(completeListener: OnPairingCompleteListener) {

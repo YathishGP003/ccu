@@ -523,6 +523,22 @@ public class SmartNode
        
     }
 
+    public static void updateDomainPhysicalPointRef(int addr, String domainName, String pointRef) {
+        CcuLog.d("CCU"," Update Physical point "+domainName);
+
+        HashMap device = CCUHsApi.getInstance().read("device and addr == \""+addr+"\"");
+        if (device.isEmpty())
+        {
+            return ;
+        }
+
+        HashMap point = CCUHsApi.getInstance().read("point and physical and deviceRef == \"" + device.get("id").toString() + "\""+" and domainName == \""+domainName+"\"");
+        RawPoint p = new RawPoint.Builder().setHashMap(point).build();
+        p.setPointRef(pointRef);
+        CCUHsApi.getInstance().updatePoint(p,p.getId());
+
+    }
+
     public static void updatePhysicalPointRef(int addr, Port port, String pointRef) {
         CcuLog.d(L.TAG_CCU_DEVICE," Update Physical point "+port);
 

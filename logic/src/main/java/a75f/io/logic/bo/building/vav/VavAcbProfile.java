@@ -17,9 +17,12 @@ import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Occupied;
 import a75f.io.domain.VavAcbEquip;
 import a75f.io.domain.api.DomainName;
+import a75f.io.domain.config.ProfileConfiguration;
+import a75f.io.domain.util.ModelLoader;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.EpidemicState;
+import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Valve;
@@ -31,6 +34,7 @@ import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.vav.VavSystemController;
 import a75f.io.logic.bo.building.truecfm.TrueCFMUtil;
 import a75f.io.logic.tuners.TunerUtil;
+import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective;
 
 /**
  * Created by samjithsadasivan on 8/23/18.
@@ -313,5 +317,20 @@ public class VavAcbProfile extends VavProfile
     @Override
     public ZoneState getState() {
         return state;
+    }
+
+
+    @Override
+    public ProfileConfiguration getDomainProfileConfiguration() {
+        Equip equip = getEquip();
+        NodeType nodeType = equip.getDomainName().contains("helionode") ? NodeType.HELIO_NODE : NodeType.SMART_NODE;
+        return new AcbProfileConfiguration(nodeAddr, nodeType.name(),
+                (int) vavEquip.getZonePriority().readPriorityVal(),
+                equip.getRoomRef(),
+                equip.getFloorRef() ,
+                profileType,
+                (SeventyFiveFProfileDirective) ModelLoader.INSTANCE.getModelForDomainName(equip.getDomainName()))
+                .getActiveConfiguration();
+
     }
 }

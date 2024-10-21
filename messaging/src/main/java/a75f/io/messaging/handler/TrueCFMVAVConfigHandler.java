@@ -8,11 +8,14 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Point;
+import a75f.io.domain.api.DomainName;
 import a75f.io.domain.equips.VavEquip;
 import a75f.io.domain.logic.ProfileEquipBuilder;
 import a75f.io.domain.util.ModelLoader;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.vav.AcbProfileConfiguration;
+import a75f.io.logic.bo.building.vav.VavAcbProfile;
 import a75f.io.logic.bo.building.vav.VavProfile;
 import a75f.io.logic.bo.building.vav.VavProfileConfiguration;
 
@@ -25,14 +28,32 @@ public class TrueCFMVAVConfigHandler {
         }
         short address = Short.parseShort(configPoint.getGroup());
         VavProfile profile = (VavProfile) L.getProfile(address);
-        Equip equip = profile.getEquip();
-        VavProfileConfiguration config = (VavProfileConfiguration) profile.getDomainProfileConfiguration();
-        config.enableCFMControl.setEnabled(value > 0);
-        ProfileEquipBuilder equipBuilder = new ProfileEquipBuilder(hayStack);
-        equipBuilder.updateEquipAndPoints(config,
-                ModelLoader.INSTANCE.getModelForDomainName(equip.getDomainName()),
-                equip.getSiteRef(),
-                equip.getDisplayName(), true);
+
+        if (profile instanceof VavAcbProfile) {
+            Equip equip = profile.getEquip();
+            AcbProfileConfiguration config = (AcbProfileConfiguration) profile.getDomainProfileConfiguration();
+            config.enableCFMControl.setEnabled(value > 0);
+            ProfileEquipBuilder equipBuilder = new ProfileEquipBuilder(hayStack);
+            equipBuilder.updateEquipAndPoints(config,
+                    ModelLoader.INSTANCE.getModelForDomainName(equip.getDomainName()),
+                    equip.getSiteRef(),
+                    equip.getDisplayName(), true);
+
+            ACBConfigHandler.Companion.setMinCfmSetpointMaxVals(hayStack, config);
+            ACBConfigHandler.Companion.setAirflowCfmProportionalRange(hayStack, config);
+        } else {
+            Equip equip = profile.getEquip();
+            VavProfileConfiguration config = (VavProfileConfiguration) profile.getDomainProfileConfiguration();
+            config.enableCFMControl.setEnabled(value > 0);
+            ProfileEquipBuilder equipBuilder = new ProfileEquipBuilder(hayStack);
+            equipBuilder.updateEquipAndPoints(config,
+                    ModelLoader.INSTANCE.getModelForDomainName(equip.getDomainName()),
+                    equip.getSiteRef(),
+                    equip.getDisplayName(), true);
+
+            VavConfigHandler.Companion.setMinCfmSetpointMaxVals(hayStack, config);
+            VavConfigHandler.Companion.setAirflowCfmProportionalRange(hayStack, config);
+        }
 
         //writePointFromJson(configPoint, msgObject, hayStack);
     }
@@ -45,13 +66,13 @@ public class TrueCFMVAVConfigHandler {
         HashMap<Object, Object> equipMap = CCUHsApi.getInstance().readMapById(configPoint.getEquipRef());
         Equip equip = new Equip.Builder().setHashMap(equipMap).build();
         double maxCfmValue = msgObject.get("val").getAsDouble();
-        Double minCfmValue = CCUHsApi.getInstance().readDefaultVal("point and zone and config and vav and (trueCfm or trueCFM) and min and cooling and equipRef == \""+equip.getId()+"\"");
-        HashMap<Object,Object> entity = CCUHsApi.getInstance().readEntity("vav and (trueCfm or trueCFM) and min and cooling and group == \""+equip.getGroup()+"\"");
+        Double minCfmValue = CCUHsApi.getInstance().readDefaultVal("point and domainName == \"" + DomainName.minCFMCooling + "\" and equipRef == \""+equip.getId()+"\"");
+        HashMap<Object,Object> entity = CCUHsApi.getInstance().readEntity("point and domainName == \"" + DomainName.minCFMCooling + "\" and equipRef == \""+equip.getId()+"\"");
         String maxValForMinCFM = String.valueOf(maxCfmValue);
         Point updatedPoint = new Point.Builder().setHashMap(entity).setMaxVal(maxValForMinCFM).build();
         CCUHsApi.getInstance().updatePointWithoutUpdatingLastModifiedTime(updatedPoint, updatedPoint.getId());
         if (minCfmValue > maxCfmValue) {
-            CCUHsApi.getInstance().writeDefaultVal("vav and (trueCfm or trueCFM) and min and cooling and group == \""+equip.getGroup()+"\"", maxCfmValue);
+            CCUHsApi.getInstance().writeDefaultVal("point and domainName == \"" + DomainName.minCFMCooling + "\" and equipRef == \""+equip.getId()+"\"", maxCfmValue);
         }
         writePointFromJson(configPoint, msgObject, hayStack);
     }
@@ -65,13 +86,13 @@ public class TrueCFMVAVConfigHandler {
         HashMap<Object, Object> equipMap = CCUHsApi.getInstance().readMapById(configPoint.getEquipRef());
         Equip equip = new Equip.Builder().setHashMap(equipMap).build();
         double maxHeatingCfmValue = msgObject.get("val").getAsDouble();
-        Double minHeatingCfmValue = CCUHsApi.getInstance().readDefaultVal("point and zone and config and vav and (trueCfm or trueCFM) and min and heating and equipRef == \""+equip.getId()+"\"");
-        HashMap<Object,Object> entity = CCUHsApi.getInstance().readEntity("vav and (trueCfm or trueCFM) and min and heating and group == \""+equip.getGroup()+"\"");
+        Double minHeatingCfmValue = CCUHsApi.getInstance().readDefaultVal("point and domainName == \"" + DomainName.minCFMReheating + "\" and equipRef == \""+equip.getId()+"\"");
+        HashMap<Object,Object> entity = CCUHsApi.getInstance().readEntity("point and domainName == \"" + DomainName.minCFMReheating + "\" and equipRef == \""+equip.getId()+"\"");
         String minHeatingCFMValue = String.valueOf(maxHeatingCfmValue);
         Point updatedPoint = new Point.Builder().setHashMap(entity).setMaxVal(minHeatingCFMValue).build();
         CCUHsApi.getInstance().updatePointWithoutUpdatingLastModifiedTime(updatedPoint, updatedPoint.getId());
         if (minHeatingCfmValue > maxHeatingCfmValue) {
-            CCUHsApi.getInstance().writeDefaultVal("vav and (trueCfm or trueCFM) and min and heating and group == \""+equip.getGroup()+"\"", maxHeatingCfmValue);
+            CCUHsApi.getInstance().writeDefaultVal("point and domainName == \"" + DomainName.minCFMReheating + "\" and equipRef == \""+equip.getId()+"\"", maxHeatingCfmValue);
         }
         writePointFromJson(configPoint, msgObject, hayStack);
     }

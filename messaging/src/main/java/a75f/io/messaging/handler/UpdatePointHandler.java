@@ -182,6 +182,7 @@ public class UpdatePointHandler implements MessageHandler
     
         if (HSUtil.isDamperReheatTypeConfig(pointUid, hayStack)) {
             DamperReheatTypeHandler.updatePoint(msgObject, localPoint, hayStack);
+            hayStack.scheduleSync();
             return;
         }
 
@@ -204,14 +205,30 @@ public class UpdatePointHandler implements MessageHandler
         if(HSUtil.isMaxCFMCoolingConfigPoint(pointUid, CCUHsApi.getInstance())){
             TrueCFMVAVConfigHandler.updateMinCoolingConfigPoint(msgObject, localPoint, hayStack);
             TrueCFMVAVConfigHandler.updateAirflowCFMProportionalRange(msgObject, localPoint, hayStack);
+            hayStack.scheduleSync();
+            return;
         }
 
         if(HSUtil.isMaxCFMReheatingConfigPoint(pointUid, CCUHsApi.getInstance())){
             TrueCFMVAVConfigHandler.updateMinReheatingConfigPoint(msgObject, localPoint, hayStack);
+            hayStack.scheduleSync();
+            return;
         }
 
         if (HSUtil.isACBRelay1TypeConfig(pointUid, CCUHsApi.getInstance())) {
-            ACBRelayConfigHandler.Companion.updateACBRelay1Type(msgObject, localPoint, hayStack);
+            ACBUpdatePointHandler.Companion.updateACBRelay1Type(msgObject, localPoint, hayStack);
+            hayStack.scheduleSync();
+            return;
+        }
+
+        if (HSUtil.isACBCondensateTypeConfig(pointUid, CCUHsApi.getInstance())) {
+            ACBUpdatePointHandler.Companion.updateACBCondensateType(msgObject, localPoint, hayStack);
+            hayStack.scheduleSync();
+            return;
+        }
+
+        if (HSUtil.isACBValveTypeConfig(pointUid, CCUHsApi.getInstance())) {
+            ACBUpdatePointHandler.Companion.updateACBValveType(msgObject, localPoint, hayStack);
             hayStack.scheduleSync();
         }
 

@@ -68,7 +68,7 @@ public class DamperReheatTypeHandler {
                 SmartNode.setDomainPointEnabled(address, Port.RELAY_TWO.name(), false, hayStack);
             }
         } else if (configPoint.getMarkers().contains(Tags.DAMPER) && configPoint.getMarkers().contains(Tags.VAV)) {
-            SmartNode.updateDomainPhysicalPointType(address, "analog2Out",
+            SmartNode.updateDomainPhysicalPointType(address, "analog1Out",
                     DamperType.values()[typeVal].displayName);
         } else if (configPoint.getMarkers().contains(Tags.REHEAT) && configPoint.getMarkers().contains(Tags.VAV)) {
 
@@ -80,21 +80,26 @@ public class DamperReheatTypeHandler {
                  }
             } else if (typeVal-1 <= ReheatType.Pulse.ordinal()) {
                 //Modulating Reheat -> Enable AnalogOut2 and disable relays
-                SmartNode.updateDomainPhysicalPointType(address, "analog2Out", ReheatType.values()[typeVal].displayName);
+                SmartNode.updateDomainPhysicalPointType(address, "analog2Out", ReheatType.values()[typeVal-1].displayName);
                 SmartNode.setDomainPointEnabled(address, "analog2Out", true, hayStack);
 
                 SmartNode.setDomainPointEnabled(address, "relay1", false, hayStack);
+
                 if(isVavNoFan(hayStack, configPoint)){
                     SmartNode.setDomainPointEnabled(address, "relay2", false, hayStack);
                 }
             } else {
+                HashMap<Object, Object> reheatCmd = hayStack.readEntity("point and domainName == \"" + DomainName.reheatCmd + "\" and equipRef == \"" + configPoint.getEquipRef() + "\"");
+
                 SmartNode.setDomainPointEnabled(address, "analog2Out", false, hayStack);
                 SmartNode.updateDomainPhysicalPointType(address, "relay1",
                         OutputRelayActuatorType.NormallyClose.displayName);
                 SmartNode.setDomainPointEnabled(address, "relay1", true, hayStack);
+                SmartNode.updateDomainPhysicalPointRef(address, "relay1", reheatCmd.get("id").toString());
                 if (typeVal -1 == ReheatType.TwoStage.ordinal()) {
                     SmartNode.updateDomainPhysicalPointType(address, "relay2", OutputRelayActuatorType.NormallyClose.displayName);
                     SmartNode.setDomainPointEnabled(address, "relay2", true, hayStack);
+                    SmartNode.updateDomainPhysicalPointRef(address, "relay2", reheatCmd.get("id").toString());
                 }else {
                     if (isVavNoFan(hayStack, configPoint)) {
                         SmartNode.setDomainPointEnabled(address, "relay2", false, hayStack);

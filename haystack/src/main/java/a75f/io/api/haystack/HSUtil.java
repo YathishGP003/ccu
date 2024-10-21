@@ -433,12 +433,12 @@ public class HSUtil {
 
     public static boolean isMaxCFMCoolingConfigPoint(String id, CCUHsApi hayStack) {
         HashMap<Object, Object> pointEntity = hayStack.readMapById(id);
-        return ((pointEntity.containsKey(Tags.MAX)) && (pointEntity.containsKey(Tags.CFM) || pointEntity.containsKey("trueCFM")) && (pointEntity.containsKey(Tags.COOLING)));
+        return pointEntity.containsKey(Tags.DOMAIN_NAME) && pointEntity.get(Tags.DOMAIN_NAME).equals("maxCFMCooling");
     }
 
     public static boolean isMaxCFMReheatingConfigPoint(String id, CCUHsApi hayStack) {
         HashMap<Object, Object> pointEntity = hayStack.readMapById(id);
-        return ((pointEntity.containsKey(Tags.MAX)) && (pointEntity.containsKey(Tags.CFM) || pointEntity.containsKey("trueCFM")) && (pointEntity.containsKey(Tags.HEATING)));
+        return pointEntity.containsKey(Tags.DOMAIN_NAME) && pointEntity.get(Tags.DOMAIN_NAME).equals("maxCFMReheating");
     }
 
     public static boolean isACBRelay1TypeConfig(String id, CCUHsApi hayStack) {
@@ -447,6 +447,34 @@ public class HSUtil {
             HashMap<Object, Object> equipEntity = hayStack.readMapById(pointEntity.get("equipRef").toString());
             if (equipEntity.containsKey(Tags.DOMAIN_NAME)) {
                 return pointEntity.get(Tags.DOMAIN_NAME).toString().equals("relay1OutputAssociation") &&
+                        (equipEntity.get(Tags.DOMAIN_NAME).toString().equals("smartnodeActiveChilledBeam") || equipEntity.get(Tags.DOMAIN_NAME).toString().equals("helionodeActiveChilledBeam")
+                        );
+            }
+        }
+
+        return false;
+    }
+
+    public static boolean isACBCondensateTypeConfig(String id, CCUHsApi hayStack) {
+        HashMap<Object, Object> pointEntity = hayStack.readMapById(id);
+        if (pointEntity.containsKey(Tags.DOMAIN_NAME) && pointEntity.containsKey(Tags.EQUIPREF)) {
+            HashMap<Object, Object> equipEntity = hayStack.readMapById(pointEntity.get("equipRef").toString());
+            if (equipEntity.containsKey(Tags.DOMAIN_NAME)) {
+                return pointEntity.get(Tags.DOMAIN_NAME).toString().equals("thermistor2Type") &&
+                        (equipEntity.get(Tags.DOMAIN_NAME).toString().equals("smartnodeActiveChilledBeam") || equipEntity.get(Tags.DOMAIN_NAME).toString().equals("helionodeActiveChilledBeam")
+                        );
+            }
+        }
+
+        return false;
+    }
+
+    public static boolean isACBValveTypeConfig(String id, CCUHsApi hayStack) {
+        HashMap<Object, Object> pointEntity = hayStack.readMapById(id);
+        if (pointEntity.containsKey(Tags.DOMAIN_NAME) && pointEntity.containsKey(Tags.EQUIPREF)) {
+            HashMap<Object, Object> equipEntity = hayStack.readMapById(pointEntity.get("equipRef").toString());
+            if (equipEntity.containsKey(Tags.DOMAIN_NAME)) {
+                return pointEntity.get(Tags.DOMAIN_NAME).toString().equals("valveType") &&
                         (equipEntity.get(Tags.DOMAIN_NAME).toString().equals("smartnodeActiveChilledBeam") || equipEntity.get(Tags.DOMAIN_NAME).toString().equals("helionodeActiveChilledBeam")
                         );
             }

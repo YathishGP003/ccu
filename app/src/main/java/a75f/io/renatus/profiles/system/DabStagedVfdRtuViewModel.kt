@@ -6,6 +6,7 @@ import a75f.io.domain.logic.DomainManager
 import a75f.io.domain.util.ModelLoader
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
+import a75f.io.logic.bo.building.dab.DabProfile.CARRIER_PROD
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.system.dab.DabStagedRtuWithVfd
 import a75f.io.logic.bo.building.system.vav.VavStagedRtu
@@ -13,6 +14,7 @@ import a75f.io.logic.bo.building.system.vav.VavStagedRtuWithVfd
 import a75f.io.logic.bo.building.system.vav.config.StagedVfdRtuProfileConfig
 import a75f.io.logic.bo.haystack.device.ControlMote
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
+import a75f.io.renatus.BuildConfig
 import a75f.io.renatus.profiles.profileUtils.UnusedPortsModel
 import a75f.io.renatus.util.ProgressDialogUtils
 import a75f.io.renatus.util.highPriorityDispatcher
@@ -54,7 +56,11 @@ class DabStagedVfdRtuViewModel : DabStagedRtuBaseViewModel() {
     override fun saveConfiguration() {
         hayStack.resetCcuReady()
         var systemEquipId : String? = null
-        ProgressDialogUtils.showProgressDialog(context, "Saving DAB VFD Configuration")
+        if(BuildConfig.BUILD_TYPE == CARRIER_PROD){
+            ProgressDialogUtils.showProgressDialog(context,"Saving VVT-C VFD Configuration")
+        }else{
+            ProgressDialogUtils.showProgressDialog(context, "Saving DAB VFD Configuration")
+        }
         viewModelScope.launch (highPriorityDispatcher) {
             val systemEquip = hayStack.readEntity("system and equip and not modbus and not connectModule")
             if (systemEquip["profile"].toString() != "dabStagedRtuVfdFan" &&

@@ -29,8 +29,14 @@ public class DabStagedRtuWithVfd extends DabStagedRtu
 {
     private static final int ANALOG_SCALE = 10;
     private static final int MAX_RELAY_COUNT = 8;
-    
-    public String getProfileName() { return "DAB Staged RTU with VFD Fan"; }
+
+    public String getProfileName() {
+        if(BuildConfig.BUILD_TYPE.equalsIgnoreCase(CARRIER_PROD)){
+            return "VVT-C Staged RTU with VFD Fan";
+        } else {
+            return "DAB Staged RTU with VFD Fan";
+        }
+    }
     
     @Override
     public ProfileType getProfileType() {

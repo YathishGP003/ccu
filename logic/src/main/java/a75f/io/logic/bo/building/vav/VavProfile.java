@@ -573,7 +573,8 @@ public abstract class VavProfile extends ZoneProfile {
         vavEquip.getAirFlowSetpoint().writeHisVal(0);
 
         if (state == DEADBAND) {
-            damper.currentPosition = (int)vavEquip.getMinHeatingDamperPos().readDefaultVal();
+            double damperMin = vavEquip.getMinHeatingDamperPos().readDefaultVal();
+            damper.currentPosition = (int)Math.max(damperMin, damper.currentPosition);
         }
     }
     

@@ -529,6 +529,20 @@ public class DabAdvancedHybridRtu extends DabStagedRtu
         updateRelays();
     }
 
+    public boolean isStageEnabled(Stage s) {
+        for (int i = 1; i < 8; i++)
+        {
+            if (getConfigEnabled("relay" + i) > 0)
+            {
+                int val = (int) getConfigAssociation("relay" + i);
+                if (val == s.ordinal())  {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     public double getNewRelayState(int relayNum, EpidemicState epidemicState, double relayDeactHysteresis,
                                    SystemMode systemMode, Stage stage) {
         double relayState = 0;
@@ -660,6 +674,21 @@ public class DabAdvancedHybridRtu extends DabStagedRtu
         }
         CcuLog.d(L.TAG_CCU_SYSTEM, stage+ " Relay: "+relayNum+", threshold: "+stageThreshold+", state : "+relayState);
         return relayState;
+    }
+
+    public double getStageStatus(Stage stage) {
+        if (stage.getValue() <= COOLING_5.getValue()) {
+            return getCmdSignal("cooling and stage" + (stage.ordinal() + 1));
+        } else if (stage.getValue() >= HEATING_1.getValue() && stage.getValue() <= HEATING_5.getValue()) {
+            return getCmdSignal("heating and stage" + (stage.ordinal() - COOLING_5.ordinal()));
+        } else if (stage.getValue() >= FAN_1.getValue() && stage.getValue() <= FAN_5.getValue()) {
+            return getCmdSignal("fan and stage" + (stage.ordinal() - HEATING_5.ordinal()));
+        } else if (stage.getValue() == HUMIDIFIER.getValue()) {
+            return getCmdSignal("humidifier");
+        }  else if (stage.getValue() == DEHUMIDIFIER.getValue()) {
+            return getCmdSignal("dehumidifier");
+        }
+        return 0;
     }
 
     private void updateRelays() {

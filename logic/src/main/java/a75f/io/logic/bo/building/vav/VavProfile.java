@@ -2,6 +2,7 @@ package a75f.io.logic.bo.building.vav;
 
 import static a75f.io.logic.bo.building.ZonePriority.NONE;
 import static a75f.io.logic.bo.building.ZoneState.COOLING;
+import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
 import static a75f.io.logic.bo.building.ZoneState.HEATING;
 import static a75f.io.logic.bo.building.system.SystemController.State;
 
@@ -313,8 +314,11 @@ public abstract class VavProfile extends ZoneProfile {
     
     protected void setDamperLimits(short node, Damper d) {
         if (vavEquip.getEnableCFMControl().readDefaultVal() > 0.0) {
-            d.minPosition = 0;
-            d.maxPosition = 100;
+            SystemController.State conditioning = L.ccu().systemProfile.getSystemController().getSystemState();
+            d.minPosition = (int) (conditioning == State.HEATING ? vavEquip.getMinHeatingDamperPos().readPriorityVal()
+                    : 0);
+            d.maxPosition = (int) (conditioning == State.HEATING ? vavEquip.getMaxHeatingDamperPos().readPriorityVal()
+                    : 100);
         } else {
             d.minPosition = (int) (state == HEATING ? vavEquip.getMinHeatingDamperPos().readPriorityVal()
                     : vavEquip.getMinCoolingDamperPos().readPriorityVal());
@@ -559,70 +563,19 @@ public abstract class VavProfile extends ZoneProfile {
         return (int)(heatingLoop - REHEAT_THRESHOLD_HEATING_LOOP) * 2;
     }
 
-    private void updateDamperWhenSystemHeating(
-            CCUHsApi hayStack, String equipId, double currentCfm,
-            double co2, double voc, boolean enabledCO2Control,
-            boolean occupied) {
+    private void updateDamperWhenSystemHeating(double currentCfm, boolean occupied) {
 
         if (cfmLoopState != State.HEATING) {
             cfmLoopState = State.HEATING;
             cfmController.reset();
         }
 
-        boolean isMinCfmRequiredInDeadband = getEquipOccupancyHandler().getCurrentOccupiedMode().equals(Occupancy.OCCUPIED)
-                || getEquipOccupancyHandler().getCurrentOccupiedMode().equals(Occupancy.FORCEDOCCUPIED)
-                || getEquipOccupancyHandler().getCurrentOccupiedMode().equals(Occupancy.AUTOFORCEOCCUPIED);
+        vavEquip.getAirFlowSetpoint().writeHisVal(0);
 
-        CcuLog.i(L.TAG_CCU_ZONE, "occupancyMode = " + getEquipOccupancyHandler().getCurrentOccupiedMode());
-        CcuLog.i(L.TAG_CCU_ZONE, "isMinCfmRequiredInDeadband = " + isMinCfmRequiredInDeadband);
-
-        double minCfmHeating = TrueCFMUtil.getMinCFMReheating(hayStack, equipId);
-
-        // Max Cooling CFM is the max CFM for DCV, even in heating mode
-        double maxCfmCooling = TrueCFMUtil.getMaxCFMCooling(hayStack, equipId);
-        double co2CompensatedMinCfm = 0;
-
-        //CO2 loop output from 0-50% modulates min cfm (up to max cooling cfm)
-        if (enabledCO2Control && occupied && co2Loop.getLoopOutput(co2) > 0) {
-            co2CompensatedMinCfm = minCfmHeating + (maxCfmCooling - minCfmHeating) * Math.min(50, co2Loop.getLoopOutput()) / 50;
-            CcuLog.i(L.TAG_CCU_ZONE, "state: HEATING, co2: " + co2 + ", co2LoopOp: " + co2Loop.getLoopOutput() + ", co2CompensatedMinCfm " + co2CompensatedMinCfm);
+        if (state == DEADBAND) {
+            double damperMin = vavEquip.getMinHeatingDamperPos().readDefaultVal();
+            damper.currentPosition = (int)Math.max(damperMin, damper.currentPosition);
         }
-
-        double effectiveMinCfm = Math.max(minCfmHeating, co2CompensatedMinCfm);
-
-        double cfmLoopOp = 0;
-
-        /*
-            True CFM with system in heating mode works a little differently.
-
-            DAB-calculated damper position is left as-is UNLESS measured airflow is less than minimum CFM setpoint
-            (heating min CFM or the min CFM derived from DCV control).
-
-            If this happens, DAB-calculated damper position (including DCV minimum position) is discarded.
-
-            When minimum CFM is being enforced (e.g. during Occupied), it will be written to the Haystack point. Otherwise, setpoint will be zero.
-         */
-        if (isMinCfmRequiredInDeadband) {
-            cfmLoopOp = cfmController.getLoopOutput(effectiveMinCfm, currentCfm);
-            if (cfmLoopOp > damper.currentPosition) {
-                damper.currentPosition = (int)cfmLoopOp;
-                CcuLog.i(L.TAG_CCU_ZONE, "Using cfmLoopOp ("+cfmLoopOp+") as damper position.");
-            } else {
-                CcuLog.i(L.TAG_CCU_ZONE, "Ignoring cfmLoopOp, using existing damper command ("+damper.currentPosition+")");
-            }
-            vavEquip.getAirFlowSetpoint().writeHisVal(effectiveMinCfm);
-        } else {
-            if (state == HEATING || state == COOLING) {
-                cfmLoopOp = cfmController.getLoopOutput(effectiveMinCfm, currentCfm);
-            } else {
-                cfmLoopOp = 0;
-            }
-            vavEquip.getAirFlowSetpoint().writeHisVal(0);
-        }
-
-
-        CcuLog.i(L.TAG_CCU_ZONE,
-                " updateDamperSystemHeating cfmLoopOp "+cfmLoopOp+" Min CFM Heating:"+minCfmHeating+" Min CFM after DCV:"+effectiveMinCfm);
     }
     
     private void updateDamperForMinCfm(double cfmLoopOp) {
@@ -821,10 +774,12 @@ public abstract class VavProfile extends ZoneProfile {
 
         if (systemState == SystemController.State.COOLING) {
             updateDamperWhenSystemCooling(hayStack, equipId, currentCfm, co2, voc, enabledCO2Control, occupied);
-            CcuLog.d(L.TAG_CCU_ZONE, "updateDamperWhenSystemCooling cfmControlLoop: " + cfmController.getLoopOutput() + ", damper.currentPosition: " + damper.currentPosition);
+            CcuLog.d(L.TAG_CCU_ZONE, "updateDamperWhenSystemCooling cfmControlLoop: " + cfmController.getLoopOutput()
+                    + ", CfmAirflow "+currentCfm+", damper.currentPosition: " + damper.currentPosition);
         } else if (systemState == SystemController.State.HEATING) {
-            updateDamperWhenSystemHeating(hayStack, equipId, currentCfm, co2, voc, enabledCO2Control, occupied);
-            CcuLog.d(L.TAG_CCU_ZONE, "updateDamperWhenSystemHeating cfmControlLoop: " + cfmController.getLoopOutput() + ", damper.currentPosition: " + damper.currentPosition);
+            updateDamperWhenSystemHeating(currentCfm, occupied);
+            CcuLog.d(L.TAG_CCU_ZONE, "updateDamperWhenSystemHeating cfmControlLoop: " + cfmController.getLoopOutput()
+                    + ", CfmAirflow "+currentCfm+ ", damper.currentPosition: " + damper.currentPosition);
         } else {
             updateDamperWhenSystemOff(hayStack, equipId, currentCfm);
         }

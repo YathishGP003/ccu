@@ -359,6 +359,11 @@ public class RestoreCCU {
                         }
                     }
                 }
+                else if (equipRow.has(Tags.BACNET)) { // For Bacnet Client Equipment we didn't have device.
+                    replaceCCUTracker.updateReplaceStatus(equipId, ReplaceStatus.COMPLETED.toString());
+                    equipResponseCallback.onEquipRestoreComplete(deviceCount.decrementAndGet());
+                    return;
+                }
                 getDevicesFromEquips(equipId, equipRow.get(Tags.ID).toString(), deviceCount, equipResponseCallback,
                         replaceCCUTracker, retryCountCallback);
             }

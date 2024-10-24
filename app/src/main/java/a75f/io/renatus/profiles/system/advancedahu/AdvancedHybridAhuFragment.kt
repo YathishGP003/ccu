@@ -2167,7 +2167,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                             }
                             setStateChanged(viewModel)
                         },
-                        testVal =  viewModel.getPhysicalPointForAnalogIndex(index)?.readHisVal()?.div(10) ?: 0.0,
+                        testVal =  viewModel.getConnectPhysicalPointForAnalogIndex(index)?.readHisVal()?.div(10) ?: 0.0,
                         onTestSignalSelected = {viewModel.sendConnectAnalogTestCommand(index, it * 10)})
                 }
             }

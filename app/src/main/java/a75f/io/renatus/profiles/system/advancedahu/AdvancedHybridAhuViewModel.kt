@@ -469,7 +469,7 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
         return null
     }
 
-    private fun getConnectPhysicalPointForAnalogIndex(analogIndex: Int): PhysicalPoint? {
+    fun getConnectPhysicalPointForAnalogIndex(analogIndex: Int): PhysicalPoint? {
         if (isConnectModulePaired) {
             val connectEquip1 = getConnectEquip()
             val analogName = getAnalogNameForIndex(analogIndex)

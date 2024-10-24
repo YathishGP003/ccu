@@ -29,6 +29,7 @@ public abstract class ZoneProfile
     private EquipOccupancyHandler equipOccupancyHandler = null;
     private EquipScheduleHandler equipScheduleHandler = null;
     public String RFDead = "RF Signal Dead";
+    public String ZoneTempDead = "Zone Temp Dead";
     public ZoneProfile()
     {
     }

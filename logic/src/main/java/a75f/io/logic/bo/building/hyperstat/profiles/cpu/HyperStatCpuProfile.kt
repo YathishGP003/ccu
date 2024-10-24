@@ -25,6 +25,7 @@ import a75f.io.logic.bo.building.hyperstat.common.UserIntents
 import a75f.io.logic.bo.building.hyperstat.profiles.HyperStatPackageUnitProfile
 import a75f.io.logic.bo.building.schedules.Occupancy
 import a75f.io.logic.jobs.HyperStatUserIntentHandler
+import a75f.io.logic.jobs.HyperStatUserIntentHandler.Companion.hyperStatStatus
 import a75f.io.logic.tuners.TunerUtil
 import com.fasterxml.jackson.annotation.JsonIgnore
 import kotlin.math.roundToInt
@@ -744,9 +745,10 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
         if (equip.hsHaystackUtil.getEquipStatus() != state.ordinal.toDouble())
             equip.hsHaystackUtil.setEquipStatus(state.ordinal.toDouble())
         val curStatus = equip.hsHaystackUtil.getEquipLiveStatus()
-        if (curStatus != "Zone Temp Dead") {
-            equip.hsHaystackUtil.writeDefaultVal("status and message and writable", "Zone Temp Dead")
+        if (curStatus != ZoneTempDead) {
+            equip.hsHaystackUtil.writeDefaultVal("status and message and writable", ZoneTempDead)
         }
+        hyperStatStatus[equip.equipRef.toString()] = ZoneTempDead
         equip.haystack.writeHisValByQuery(
             "point and not ota and status and his and group == \"${equip.node}\"",
             ZoneState.TEMPDEAD.ordinal.toDouble()
@@ -763,6 +765,7 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
         if (curStatus != RFDead) {
             equip.hsHaystackUtil.writeDefaultVal("status and message and writable", RFDead)
         }
+        hyperStatStatus[equip.equipRef.toString()] = RFDead
         equip.haystack.writeHisValByQuery(
             "point and not ota and status and his and group == \"${equip.node}\"",
             ZoneState.RFDEAD.ordinal.toDouble()

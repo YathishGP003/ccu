@@ -18,6 +18,7 @@ import a75f.io.logic.bo.building.hyperstat.common.*
 import a75f.io.logic.bo.building.hyperstat.profiles.HyperStatFanCoilUnit
 import a75f.io.logic.bo.building.schedules.Occupancy
 import a75f.io.logic.jobs.HyperStatUserIntentHandler
+import a75f.io.logic.jobs.HyperStatUserIntentHandler.Companion.hyperStatStatus
 import a75f.io.logic.tuners.TunerUtil
 import com.fasterxml.jackson.annotation.JsonIgnore
 
@@ -301,12 +302,13 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
             equip.hsHaystackUtil.setEquipStatus(state.ordinal.toDouble())
 
         val curStatus = equip.hsHaystackUtil.getEquipLiveStatus()
-        if (curStatus != "Zone Temp Dead") {
+        if (curStatus != ZoneTempDead) {
             equip.hsHaystackUtil.writeDefaultVal(
                 "status and message and writable",
-                "Zone Temp Dead"
+                ZoneTempDead
             )
         }
+        hyperStatStatus[equip.equipRef.toString()] = ZoneTempDead
         equip.haystack.writeHisValByQuery(
             "point and not ota and status and his and group == \"${equip.node}\"",
             ZoneState.TEMPDEAD.ordinal.toDouble()
@@ -323,6 +325,7 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
         if (curStatus != RFDead) {
             equip.hsHaystackUtil.writeDefaultVal("status and message and writable", RFDead)
         }
+        hyperStatStatus[equip.equipRef.toString()] = RFDead
         equip.haystack.writeHisValByQuery(
             "point and not ota and status and his and group == \"${equip.node}\"",
             ZoneState.RFDEAD.ordinal.toDouble()

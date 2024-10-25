@@ -75,6 +75,8 @@ import org.projecthaystack.HGridBuilder
 import org.projecthaystack.HRow
 import org.projecthaystack.io.HZincReader
 import org.projecthaystack.io.HZincWriter
+import org.joda.time.DateTime
+import java.util.HashMap
 
 
 class MigrationHandler (hsApi : CCUHsApi) : Migration {
@@ -183,6 +185,10 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             correctEnumsForCorruptModbusPoints(hayStack)
             PreferenceUtil.setModbusEnumCorrectionDone()
         }
+        if(!PreferenceUtil.isBackFillValueUpdateRequired()) {
+            updatingBackfillDefaultValues(hayStack)
+            PreferenceUtil.setBackFillValueUpdateDone()
+        }
         if(!PreferenceUtil.isHisTagRemovalFromNonDmDevicesDone()) {
             removeHisTagsFromNonDMDevices()
             PreferenceUtil.setHisTagRemovalFromNonDmDevicesDone()
@@ -196,6 +202,27 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             PreferenceUtil.setVavCfmOnEdgeMigrationDone()
         }
         hayStack.scheduleSync()
+    }
+
+    private fun updatingBackfillDefaultValues(hayStack: CCUHsApi) {
+        val systemEquip = hayStack.read("system and equip and not modbus and not connectModule")
+        val backFillPoint =
+            hayStack.read("point and (backfill or domainName == \"backfillDuration\") and system and equipRef == \"${systemEquip["id"]}\"")
+        val lastUpdatedTime = DateTime.parse(
+            CCUHsApi.getInstance().readPointPriorityLatestTime(backFillPoint["id"] as String?)
+                .substring(0, 19)
+        )
+        val createdTime =
+            DateTime.parse(backFillPoint["createdDateTime"].toString().substring(0,19));
+        if (createdTime.equals(lastUpdatedTime)) {
+            hayStack.writeDefaultValById(backFillPoint["id"].toString(), 24.0)
+            CcuLog.i(L.TAG_CCU_MIGRATION_UTIL, "Updated backfill default value")
+        } else {
+            CcuLog.i(
+                L.TAG_CCU_MIGRATION_UTIL,
+                "backfill default value is already updated by user so no need to update"
+            )
+        }
     }
 
     private fun migrateDeadBandPoints(hayStack: CCUHsApi) {

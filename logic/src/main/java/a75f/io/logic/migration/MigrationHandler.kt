@@ -62,6 +62,8 @@ import a75f.io.logic.migration.scheduler.SchedulerRevampMigration
 import a75f.io.logic.tuners.TunerConstants
 import a75f.io.logic.util.PreferenceUtil
 import a75f.io.logic.util.createOfflineModePoint
+import android.content.Context
+import android.content.SharedPreferences
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import io.seventyfivef.domainmodeler.client.ModelPointDef
@@ -201,7 +203,19 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             VavAndAcbProfileMigration.addMinHeatingDamperPositionMigration(hayStack)
             PreferenceUtil.setVavCfmOnEdgeMigrationDone()
         }
+        clearOtaCachePreferences() // While migrating to new version, we need to clear the ota cache preferences
         hayStack.scheduleSync()
+    }
+
+    private fun clearOtaCachePreferences() {
+        CcuLog.d(L.TAG_CCU_MIGRATION_UTIL,"Clearing OtaCache Preferences")
+        try {
+            var sharedPreferences: SharedPreferences = Globals.getInstance().applicationContext.getSharedPreferences("otaCache" , Context.MODE_PRIVATE)
+            sharedPreferences.edit().clear().apply()
+        }
+        catch (e : Exception) {
+            CcuLog.e(L.TAG_CCU_MIGRATION_UTIL,"Failed to clear OtaCache ${e.printStackTrace()}")
+        }
     }
 
     private fun updatingBackfillDefaultValues(hayStack: CCUHsApi) {

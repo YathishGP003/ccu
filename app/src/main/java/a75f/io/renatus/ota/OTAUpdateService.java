@@ -31,6 +31,7 @@ import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Queue;
 import java.util.Set;
@@ -543,6 +544,8 @@ public class OTAUpdateService extends IntentService {
 
             resetUpdateVariables();
             otaRequestProcessInProgress = false;
+            OtaCache cache = new OtaCache();
+            cache.removeRequest(currentRequest); // Before moving to next request, remove the current request from cache
             CcuLog.d(TAG, "[RESET] OTA Resetting the Update Variables & moving for next request");
             processOtaRequest();
             return;
@@ -1046,9 +1049,14 @@ public class OTAUpdateService extends IntentService {
 
         CcuLog.i(TAG, "addRequest: "+ otaRequestsQueue);
         if (otaRequest != null) {
-            otaRequestsQueue.add(otaRequest);
-            OtaCache cache = new OtaCache();
-            cache.saveRequest(otaRequest);
+            if (!isOtaRequestPresentInCache(otaRequest)) {
+                otaRequestsQueue.add(otaRequest);
+                OtaCache cache = new OtaCache();
+                cache.saveRequest(otaRequest);
+            }
+            else {
+                CcuLog.i(TAG, "Request already present in cache. Skipping the request");
+            }
              startRetryHandler();
             CcuLog.i(TAG, "Current Requests size : "+otaRequestsQueue.size());
             processOtaRequest();
@@ -1059,7 +1067,8 @@ public class OTAUpdateService extends IntentService {
     void processOtaRequest(){
         CcuLog.i(TAG,"processOtaRequest Called " + otaRequestsQueue.size() + " otaRequestProcessInProgress"+otaRequestProcessInProgress );
         try {
-            if (!otaRequestsQueue.isEmpty() && !otaRequestProcessInProgress){
+            CcuLog.d(TAG,"CM Connection Status -> "+LSerial.getInstance().isConnected());
+            if (!otaRequestsQueue.isEmpty() && !otaRequestProcessInProgress && LSerial.getInstance().isConnected()){
                 handleOtaUpdateStartRequest(Objects.requireNonNull(otaRequestsQueue.poll()));
             }
         } catch (Exception e){
@@ -1126,6 +1135,31 @@ public class OTAUpdateService extends IntentService {
 
     public static boolean isCmOtaInProgress(){
         return  (mCurrentLwMeshAddress ==  (L.ccu().getSmartNodeAddressBand() + 99));
+    }
+
+    public static void resetOtaRequestProcessInProgress() {
+        otaRequestProcessInProgress = false;
+        mUpdateInProgress = false;
+        new OTAUpdateService().resetUpdateVariables();
+    }
+
+    //This method is used to check if the request is already present in cache and avoid duplicate request
+    private boolean isOtaRequestPresentInCache(Intent newRequest){
+        OtaCache cache = new OtaCache();
+        LinkedTreeMap<String, LinkedTreeMap<String,String>> otaRequests = cache.getRequestMap();
+
+        if (otaRequests.isEmpty()){
+            return false;
+        }
+        for (Map.Entry<String, LinkedTreeMap<String, String>> entry : otaRequests.entrySet()) {
+            LinkedTreeMap<String, String> request = entry.getValue();
+            if(request.get(ID).equals(newRequest.getStringExtra(ID)) &&
+                     request.get(CMD_TYPE).equals(newRequest.getStringExtra(CMD_TYPE)) &&
+                        request.get(FIRMWARE_VERSION).equals(newRequest.getStringExtra(FIRMWARE_VERSION)) ){
+                return true;
+            }
+        }
+        return false;
     }
 
     private void isConnectModuleUpdate(Device device, FirmwareComponentType_t deviceType) {

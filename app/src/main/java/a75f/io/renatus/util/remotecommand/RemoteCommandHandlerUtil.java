@@ -66,6 +66,7 @@ import a75f.io.logic.util.RxTask;
 import a75f.io.renatus.ENGG.AppInstaller;
 import a75f.io.renatus.RenatusApp;
 import a75f.io.renatus.UtilityApplication;
+import a75f.io.renatus.ota.OTAUpdateService;
 import a75f.io.renatus.util.CCUUtils;
 import a75f.io.util.ExecutorTask;
 
@@ -128,6 +129,7 @@ public class RemoteCommandHandlerUtil {
                 msg.messageType.set(MessageType.CCU_TO_CM_OVER_USB_CM_RESET);
                 msg.reset.set((short) 1);
                 MeshUtil.sendStructToCM(msg);
+                OTAUpdateService.resetOtaRequestProcessInProgress();
                 LSerial.getInstance().setResetSeedMessage(true);
                 break;
             case UPDATE_CCU:

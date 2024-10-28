@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
-import a75f.io.api.haystack.Equip;
+import a75f.io.domain.api.DomainName;
 import a75f.io.logger.CcuLog;
 
 /**
@@ -80,6 +80,7 @@ public class TrimResponseProcessor
     private boolean isSystemCooling() {
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap<Object, Object> systemEquip = hayStack.readEntity("system and equip and not modbus and not connectModule");
-        return CCUHsApi.getInstance().readHisValByQuery("point and domainName == \"operatingMode\" and equipRef == \"" + systemEquip.get("id").toString() + "\"").intValue() == 1;
+        return CCUHsApi.getInstance().readHisValByQuery("point and (domainName == \""+DomainName.operatingMode+"\") " +
+                "or (operating and mode) and equipRef == \"" + systemEquip.get("id").toString() + "\"").intValue() == 1;
     }
 }

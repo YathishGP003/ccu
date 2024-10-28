@@ -330,8 +330,7 @@ public abstract class VavSystemProfile extends SystemProfile
      * @return
      */
     public boolean isReheatActive(CCUHsApi hayStack) {
-        ArrayList<HashMap<Object, Object>> reheatPoints = hayStack
-                                                              .readAllEntities("point and vav and reheat and cmd");
+        ArrayList<HashMap<Object, Object>> reheatPoints = hayStack.readAllEntities("domainName == \"" + DomainName.reheatCmd + "\"");
         for (HashMap<Object, Object> point : reheatPoints) {
             if (point.isEmpty()) {
                 continue;

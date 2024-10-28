@@ -1,6 +1,7 @@
 package a75f.io.logic.bo.building.system
 
 import a75f.io.api.haystack.CCUHsApi
+import a75f.io.domain.api.DomainName
 import a75f.io.domain.api.Point
 import a75f.io.domain.equips.AdvancedHybridSystemEquip
 import a75f.io.domain.equips.ConnectModuleEquip
@@ -276,7 +277,7 @@ class AdvancedAhuAlgoHandler (val equip: SystemEquip) {
 
     private fun isReheatActive(hayStack: CCUHsApi): Boolean {
         val reheatPoints = hayStack
-            .readAllEntities("point and vav and reheat and cmd")
+            .readAllEntities("domainName == \""+ DomainName.reheatCmd+"\"")
 
         for (point in reheatPoints) {
             val reheatPos = hayStack.readHisValById(point["id"].toString())

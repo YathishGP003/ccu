@@ -319,9 +319,20 @@ public class Pulse
 
 			if (isVav && TrueCFMUtil.isTrueCfmEnabled(hayStack, equip.getId())) {
 				if (TrueCFMUtil.isCfmOnEdgeActive(hayStack, equip.getId())) {
-					CcuLog.d(L.TAG_CCU_SERIAL, "Update calculated damper/reheat positions: damperCmdCal = " + smartNodeRegularUpdateMessage_t.update.damperPositionCfmLoop.get() + ", reheatCmdCal = " + smartNodeRegularUpdateMessage_t.update.reheatPositionAfterDat.get());
-					hayStack.writeHisValByQuery("point and domainName == \"" + DomainName.damperCmdCal + "\" and equipRef == \"" + equip.getId() + "\"", (double)smartNodeRegularUpdateMessage_t.update.damperPositionCfmLoop.get());
-					hayStack.writeHisValByQuery("point and domainName == \"" + DomainName.reheatCmdCal + "\" and equipRef == \"" + equip.getId() + "\"", (double)smartNodeRegularUpdateMessage_t.update.reheatPositionAfterDat.get());
+					double damperCmd = smartNodeRegularUpdateMessage_t.update.damperPositionCfmLoop.get();
+					double reheatCmd =  smartNodeRegularUpdateMessage_t.update.reheatPositionAfterDat.get();
+					// old regular message will not send any feedback so reading CCU calculated
+					// Why 127 a75f.io.device.mesh.LSerial.modifyByteArray
+					if (smartNodeRegularUpdateMessage_t.update.damperPositionCfmLoop.get() == 127) {
+						damperCmd = hayStack.readHisValByQuery("point and domainName == \"" + DomainName.damperCmd + "\" and equipRef == \"" + equip.getId() + "\"");
+					}
+					if (smartNodeRegularUpdateMessage_t.update.reheatPositionAfterDat.get() == 127) {
+						reheatCmd = hayStack.readHisValByQuery("point and domainName == \"" + DomainName.reheatCmd + "\" and equipRef == \"" + equip.getId() + "\"");
+					}
+
+					CcuLog.d(L.TAG_CCU_SERIAL, "Update calculated damper/reheat positions: damperCmd: "+damperCmd +" reheatCmd: "+reheatCmd );
+					hayStack.writeHisValByQuery("point and domainName == \"" + DomainName.damperCmdCal + "\" and equipRef == \"" + equip.getId() + "\"",damperCmd);
+					hayStack.writeHisValByQuery("point and domainName == \"" + DomainName.reheatCmdCal + "\" and equipRef == \"" + equip.getId() + "\"",reheatCmd);
 				} else {
 					hayStack.writeHisValByQuery("point and domainName == \"" + DomainName.damperCmdCal + "\" and equipRef == \"" + equip.getId() + "\"", 0.0);
 					hayStack.writeHisValByQuery("point and domainName == \"" + DomainName.reheatCmdCal + "\" and equipRef == \"" + equip.getId() + "\"", 0.0);

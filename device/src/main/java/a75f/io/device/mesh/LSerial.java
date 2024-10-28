@@ -128,7 +128,11 @@ public class LSerial
             }
             else if (messageType == MessageType.CM_TO_CCU_OVER_USB_SN_REGULAR_UPDATE)
             {
-                Pulse.regularSNUpdate(fromBytes(data, CmToCcuOverUsbSnRegularUpdateMessage_t.class));
+                if (data.length == 43) {
+                    Pulse.regularSNUpdate(fromBytes((modifyByteArray(data)), CmToCcuOverUsbSnRegularUpdateMessage_t.class));
+                } else {
+                    Pulse.regularSNUpdate(fromBytes((data), CmToCcuOverUsbSnRegularUpdateMessage_t.class));
+                }
             }
             else if (messageType == MessageType.CM_TO_CCU_OVER_USB_SMART_STAT_REGULAR_UPDATE)
             {
@@ -590,6 +594,23 @@ public class LSerial
     private static boolean isHyperSplitMessage(MessageType messageType) {
         return messageType == MessageType.HYPERSPLIT_REGULAR_UPDATE_MESSAGE ||
                 messageType == MessageType.HYPERSTAT_LOCAL_CONTROLS_OVERRIDE_MESSAGE;
+    }
+
+    private static byte[] modifyByteArray(byte[] currentData) {
+
+        /*
+         * New 2 fields are introduced as part of True CFM feature at position 42, 43
+         * As it is introduced at middle it is not backward compatible so adding 2 additional bytes for new fields
+         *
+         */
+        byte[] modifiedData = new byte[45];
+        System.arraycopy(currentData, 0, modifiedData, 0, 43);
+        modifiedData[43] = modifiedData[41]; // moving cmLqi as they are shifted
+        modifiedData[44] = modifiedData[42]; // RSSI
+        modifiedData[41] = 127; // clear feedback points as they have wrong values
+        modifiedData[42] = 127; //
+        DLog.Logd("Converted Byte array "+Arrays.toString(modifiedData));
+        return modifiedData;
     }
 
 }

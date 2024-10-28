@@ -20,6 +20,7 @@ import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
 import a75f.io.renatus.profiles.acb.AcbProfileConfigFragment;
 import a75f.io.renatus.profiles.dab.DabProfileConfigFragment;
 import a75f.io.renatus.profiles.hss.cpu.HyperStatSplitCpuFragment;
+import a75f.io.renatus.profiles.plc.PlcProfileConfigFragment;
 import a75f.io.renatus.profiles.vav.BypassConfigFragment;
 import a75f.io.renatus.profiles.vav.VavProfileConfigFragment;
 import a75f.io.renatus.util.CCUUiUtil;
@@ -177,9 +178,9 @@ public class AlternatePairingFragment extends BaseDialogFragment {
                             FragmentEMRConfiguration.ID);
                     break;
             case PLC:
-                showDialogFragment(FragmentPLCConfiguration
-                        .newInstance(mPairingAddress, mRoomName, mNodeType, mFloorName),
-                        FragmentPLCConfiguration.ID);
+                showDialogFragment(PlcProfileConfigFragment.Companion
+                            .newInstance(mPairingAddress, mRoomName, mFloorName, mNodeType, ProfileType.PLC),
+                        PlcProfileConfigFragment.Companion.getID());
                 break;
             case HYPERSTAT_MONITORING:
                 showDialogFragment(HyperStatMonitoringFragment.newInstance(mPairingAddress,

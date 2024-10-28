@@ -47,7 +47,6 @@ import a75f.io.renatus.FragmentDABDualDuctConfiguration;
 import a75f.io.renatus.FragmentEMRConfiguration;
 import a75f.io.renatus.FragmentHMPConfiguration;
 import a75f.io.renatus.FragmentHeatPumpConfiguration;
-import a75f.io.renatus.FragmentPLCConfiguration;
 import a75f.io.renatus.FragmentSSEConfiguration;
 import a75f.io.renatus.FragmentTempInfConfiguration;
 import a75f.io.renatus.HyperStatMonitoringFragment;
@@ -58,6 +57,7 @@ import a75f.io.renatus.hyperstat.ui.HyperStatFragment;
 import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
 import a75f.io.renatus.profiles.dab.DabProfileConfigFragment;
 import a75f.io.renatus.profiles.hss.cpu.HyperStatSplitCpuFragment;
+import a75f.io.renatus.profiles.plc.PlcProfileConfigFragment;
 import a75f.io.renatus.profiles.vav.BypassConfigFragment;
 import a75f.io.renatus.profiles.vav.VavProfileConfigFragment;
 import a75f.io.renatus.profiles.acb.AcbProfileConfigFragment;
@@ -428,8 +428,9 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
                                 BypassConfigFragment.Companion.getID());
                         break;
                     case PLC:
-                        showDialogFragment(FragmentPLCConfiguration
-                                .newInstance(mPairingAddress, mName, mNodeType, mFloorName), FragmentPLCConfiguration.ID);
+                        showDialogFragment(PlcProfileConfigFragment.Companion
+                                .newInstance(mPairingAddress, mName, mFloorName, mNodeType, ProfileType.PLC),
+                                PlcProfileConfigFragment.Companion.getID());
                         break;
                     case EMR:
                         showDialogFragment(FragmentEMRConfiguration

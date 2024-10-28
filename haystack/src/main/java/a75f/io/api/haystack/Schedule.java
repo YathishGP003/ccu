@@ -7,6 +7,8 @@ import static a75f.io.api.haystack.util.TimeUtil.getEndSec;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
+import org.joda.time.LocalDate;
+import org.joda.time.LocalTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.projecthaystack.HDateTime;
@@ -194,10 +196,38 @@ public class Schedule extends Entity
         return getSpecialScheduleDaysForRunningWeek(zoneId);
     }
 
-    private static List<Schedule.Days> getSpecialScheduleDaysForBuilding(){
-        return getSpecialScheduleDaysForRunningWeek(null);
-    }
+    private static Schedule.Days getSpecialScheduleDays(HashMap<Object, Object> specialSchedule) {
+        HDict range = (HDict) specialSchedule.get(Tags.RANGE);
+        int beginHour = getInt(range.get(Tags.STHH).toString());
+        int beginMin = getInt(range.get(Tags.STMM).toString());
+        int endHour = getInt(range.get(Tags.ETHH).toString());
+        int endMin = getInt(range.get(Tags.ETMM).toString());
+        int dayNumber = 0; //0-6 (Monday-Sunday) Schedule->days->day
+        //based on the startdate of the special schedule, get the day of the week
+        String beginDate = range.get(Tags.STDT).toString();
+        LocalDate startDate = LocalDate.parse(beginDate);
+        int dayOfWeek = startDate.getDayOfWeek();
+        dayNumber = dayOfWeek - 1;
 
+        HDictBuilder hDictDay = new HDictBuilder()
+                .add(Tags.DAY, HNum.make(dayNumber))
+                .add(Tags.STHH, HNum.make(beginHour))
+                .add(Tags.STMM, HNum.make(beginMin))
+                .add(Tags.ETHH, HNum.make(endHour))
+                .add(Tags.ETMM, HNum.make(endMin))
+                .add(Tags.COOLVAL, HNum.make(Double.parseDouble(range.get(Tags.COOLVAL).toString())))
+                .add(Tags.HEATVAL, HNum.make(Double.parseDouble(range.get(Tags.HEATVAL).toString())));
+
+          if (range.has(Tags.COOLING_USER_LIMIT_MAX)) {
+            hDictDay.add(Tags.COOLING_USER_LIMIT_MAX, HNum.make(Double.parseDouble(range.get(Tags.COOLING_USER_LIMIT_MAX).toString())));
+            hDictDay.add(Tags.COOLING_USER_LIMIT_MIN, HNum.make(Double.parseDouble(range.get(Tags.COOLING_USER_LIMIT_MIN).toString())));
+            hDictDay.add(Tags.HEATING_USER_LIMIT_MAX, HNum.make(Double.parseDouble(range.get(Tags.HEATING_USER_LIMIT_MAX).toString())));
+            hDictDay.add(Tags.HEATING_USER_LIMIT_MIN, HNum.make(Double.parseDouble(range.get(Tags.HEATING_USER_LIMIT_MIN).toString())));
+            hDictDay.add(Tags.COOLING_DEADBAND, HNum.make(Double.parseDouble(range.get("coolingDeadband") != null ? range.get("coolingDeadband").toString() : "2.0")));
+            hDictDay.add(Tags.HEATING_DEADBAND, HNum.make(Double.parseDouble(range.get("heatingDeadband") != null ? range.get("heatingDeadband").toString() : "2.0")));
+           }
+            return Schedule.Days.parseSingleDay(hDictDay.toDict());
+        }
     private static Schedule createScheduleForSpecialSchedule(List<Schedule.Days> specialScheduleForZone, boolean isZone){
         Schedule specialSchedule = null;
         if(specialScheduleForZone.size() > 0){
@@ -492,14 +522,27 @@ public class Schedule extends Entity
             return dayResult;
         };
     }
-    public static Set<Schedule.Days> combineSpecialSchedules(String zoneId){
-        Set<Schedule.Days> specialScheduleForZone = new TreeSet<>(sortSchedules());
-        specialScheduleForZone.addAll(getSpecialScheduleDaysForZone(zoneId.startsWith("@")? zoneId : "@"+zoneId));
-
-        Set<Schedule.Days> specialScheduleForBuilding =  new TreeSet<>(sortSchedules());
-        specialScheduleForBuilding.addAll(getSpecialScheduleDaysForBuilding());
-
-        Set<Schedule.Days> combinedSpecialSchedules =  new TreeSet<>(sortSchedules());
+    public static Set<Days> combineSpecialSchedules(String zoneId){
+        Set<Days> specialScheduleForZone = new TreeSet<>(sortSchedules());
+        Set<Days> specialScheduleForBuilding =  new TreeSet<>(sortSchedules());
+         if(!(zoneId.contains("@"))){
+            zoneId = "@" + zoneId;
+         }
+         //Zone level special schedules
+        List<HashMap<Object, Object>> specialScheduleZone = CCUHsApi.getInstance().getSpecialSchedules(zoneId);
+        for(HashMap<Object, Object> specialSchedule : specialScheduleZone){
+            if(isSpecialScheduleForCurrentDay(specialSchedule)){
+                specialScheduleForZone.add(getSpecialScheduleDays(specialSchedule));
+            }
+        }
+        //Building level special schedules
+        List<HashMap<Object, Object>> specialScheduleBuilding = CCUHsApi.getInstance().getSpecialSchedules(null);
+        for(HashMap<Object, Object> specialSchedule : specialScheduleBuilding){
+            if(isSpecialScheduleForCurrentDay(specialSchedule)){
+                specialScheduleForBuilding.add(getSpecialScheduleDays(specialSchedule));
+            }
+        }
+        Set<Days> combinedSpecialSchedules =  new TreeSet<>(sortSchedules());
         if(!specialScheduleForZone.isEmpty() && !specialScheduleForBuilding.isEmpty()){
             combinedSpecialSchedules.addAll(schedulesWithPriority(specialScheduleForZone, specialScheduleForBuilding));
         }
@@ -512,6 +555,17 @@ public class Schedule extends Entity
         return combinedSpecialSchedules;
     }
 
+    private static boolean isSpecialScheduleForCurrentDay(HashMap<Object, Object> specialSchedule){
+        HDict range = (HDict) specialSchedule.get(Tags.RANGE);
+        int beginHour = getInt(range.get(Tags.STHH).toString());
+        int beginMin = getInt(range.get(Tags.STMM).toString());
+        String beginDate = range.get(Tags.STDT).toString();
+        LocalDate startDate = LocalDate.parse(beginDate);  // Assuming the date is in ISO format (YYYY-MM-DD)
+        LocalTime startTime = LocalTime.parse(beginHour+ ":" + beginMin);
+        LocalDate currentDate = LocalDate.now();
+        LocalTime currentTime = LocalTime.now();
+        return startDate.equals(currentDate) && !currentTime.isBefore(startTime);
+    }
     public static Schedule getScheduleForZoneScheduleProcessing(String zoneId)
     {
         Set<Schedule.Days> combinedSpecialSchedules =  combineSpecialSchedules(zoneId);
@@ -1776,6 +1830,7 @@ public class Schedule extends Entity
         public void setHeatingUserLimitMax(Double heatingUserLimitMax) {
             this.heatingUserLimitMax = heatingUserLimitMax;
         }
+
 
         public Double getCoolingUserLimitMin() {
             return coolingUserLimitMin;

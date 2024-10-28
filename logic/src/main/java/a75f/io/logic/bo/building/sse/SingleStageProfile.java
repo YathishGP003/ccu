@@ -270,11 +270,9 @@ public class SingleStageProfile extends ZoneProfile
         return occupied || autoForceOccupied || forceOccupied;
     }
 
-    public boolean isPointWritable(HashMap equip) {
-        if (equip != null) {
-            if(equip.containsKey("writable")){
-                return true;
-            }
+    public boolean isPointWritable(HashMap pointId) {
+        if (pointId != null) {
+            return pointId.containsKey("writable");
         }
         return false;
     }

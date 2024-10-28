@@ -923,12 +923,10 @@ public class PlcEquip {
         return hayStack.readHisValByQuery("point and control and variable and equipRef == \"" + equipRef + "\"");
     }
 
-    public boolean isEquipPointWritable() {
-        HashMap equip = hayStack.read("point and equipRef == \"" + equipRef + "\"");
-        if (equip != null) {
-            if(equip.containsKey("writable")){
-                return true;
-            }
+    public boolean isEquipPointWritable(String pointId) {
+        HashMap pointMap = hayStack.readMapById(pointId);
+        if (pointMap != null) {
+            return pointMap.containsKey("writable");
         }
         return false;
     }
@@ -936,6 +934,14 @@ public class PlcEquip {
     public void setControlVariable(double controlVariable) {
         hayStack.writeHisValByQuery("point and control and variable and equipRef == \"" + equipRef + "\"", controlVariable);
 
+    }
+
+    public String getControlPointId(){
+        return hayStack.readId("point and control and variable and equipRef == \"" + equipRef + "\"");
+    }
+
+    public boolean isControlVariableHasWritable(String pointId) {
+        return isEquipPointWritable(pointId);
     }
 
     public void setEquipStatus(String message) {
@@ -975,19 +981,19 @@ public class PlcEquip {
         return hayStack.readDefaultVal("point and config and enabled and zero and error and midpoint and group == \"" + nodeAddr + "\"") > 0;
     }
 
-    public void writeDefaultVal(Object defaultVal) {
+    public void writeDefaultValForControl(Object defaultVal, String pointId) {
         if (defaultVal instanceof String) {
-            hayStack.writeDefaultValById(equipRef, (String) defaultVal);
+            hayStack.writeDefaultValById(pointId, (String) defaultVal);
         } else if (defaultVal instanceof Double) {
-            hayStack.writeDefaultValById(equipRef, (Double) defaultVal);
+            hayStack.writeDefaultValById(pointId, (Double) defaultVal);
         }
     }
 
-    public Double readPriorityVal(){
-        return hayStack.readPointPriorityVal(equipRef);
+    public Double readControlPriorityVal(String pointId){
+        return hayStack.readPointPriorityVal(pointId);
     }
 
-    public Double readHisVal(){
-        return hayStack.readHisValById(equipRef);
+    public Double readHisVal(String pointId){
+        return hayStack.readHisValById(pointId);
     }
 }

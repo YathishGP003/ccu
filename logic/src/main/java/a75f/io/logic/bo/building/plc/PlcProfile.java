@@ -102,15 +102,16 @@ public class PlcProfile extends ZoneProfile
                 controlVariable = 0;
             }
         }
+        String pointId = plcEquip.getControlPointId();
         double curCv = Math.round(100*controlVariable)/100;
         int eStatus = (int)(Math.round(100*controlVariable)/100);
         if(plcEquip.getControlVariable() != curCv ){
-            if(plcEquip.isEquipPointWritable()){
-                plcEquip.writeDefaultVal(curCv);
-                double value = plcEquip.readPriorityVal();
+            if(plcEquip.isControlVariableHasWritable(pointId)) {
+                plcEquip.writeDefaultValForControl(curCv, pointId);
+                double value = plcEquip.readControlPriorityVal(pointId);
                 plcEquip.setControlVariable(value);
-                curCv = plcEquip.readHisVal();
-            }else {
+                curCv = plcEquip.readHisVal(pointId);
+            } else {
                 plcEquip.setControlVariable(curCv);
             }
         }

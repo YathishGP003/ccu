@@ -3,11 +3,13 @@ package a75f.io.messaging.handler;
 import com.google.gson.JsonObject;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Point;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.plc.PlcRelayConfigHandler;
+import a75f.io.logic.tuners.TunerConstants;
 
 
 /*
@@ -63,8 +65,19 @@ public class PIReConfigHandler {
 
     private static void writePointFromJson(Point configPoint, JsonObject msgObject, CCUHsApi hayStack) {
         try {
-            String who = msgObject.get(HayStackConstants.WRITABLE_ARRAY_WHO).getAsString();
+
+            String val_String = msgObject.get(HayStackConstants.WRITABLE_ARRAY_VAL).getAsString();
             int level = msgObject.get(HayStackConstants.WRITABLE_ARRAY_LEVEL).getAsInt();
+            String id = configPoint.getId();
+            if (val_String.isEmpty()) {
+                //When a level is deleted, it currently generates a pubnub with empty value.
+                //Handle it here.
+                hayStack.clearPointArrayLevel(id, level, false);
+                hayStack.writeHisValById(id, HSUtil.getPriorityVal(id));
+                return;
+            }
+            String who = msgObject.get(HayStackConstants.WRITABLE_ARRAY_WHO).getAsString();
+
             double val = msgObject.get(HayStackConstants.WRITABLE_ARRAY_VAL).getAsDouble();
             int duration = msgObject.get(HayStackConstants.WRITABLE_ARRAY_DURATION) != null ? msgObject.get(
                     HayStackConstants.WRITABLE_ARRAY_DURATION).getAsInt() : 0;

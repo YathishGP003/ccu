@@ -429,6 +429,7 @@ class HyperstatSplitReconfigurationHandler {
             var relay1Point = RawPoint.Builder().setHDict(relay1).setType("Relay N/O").setEnabled(config.relay1Enabled.enabled)
             if (config.relay1Enabled.enabled && config.relay1Association.associationVal == CpuRelayType.EXTERNALLY_MAPPED.ordinal) {
                 relay1Point.addMarker(Tags.WRITABLE);
+                relay1Point.addMarker(Tags.UNUSED)
             } else {
                 relay1Point.removeMarkerIfExists(Tags.WRITABLE)
                 hayStack.clearAllAvailableLevelsInPoint(relay1[Tags.ID].toString())
@@ -439,8 +440,10 @@ class HyperstatSplitReconfigurationHandler {
             var relay2Point = RawPoint.Builder().setHDict(relay2).setType("Relay N/O").setEnabled(config.relay2Enabled.enabled)
             if (config.relay2Enabled.enabled && config.relay2Association.associationVal == CpuRelayType.EXTERNALLY_MAPPED.ordinal) {
                 relay2Point.addMarker(Tags.WRITABLE)
+                relay2Point.addMarker(Tags.UNUSED)
             } else {
                 relay2Point.removeMarkerIfExists(Tags.WRITABLE)
+                relay2Point.removeMarkerIfExists(Tags.UNUSED)
                 hayStack.clearAllAvailableLevelsInPoint(relay2[Tags.ID].toString())
             }
             hayStack.updatePoint(relay2Point.build(), relay2[Tags.ID].toString())
@@ -449,8 +452,10 @@ class HyperstatSplitReconfigurationHandler {
             var relay3Point = RawPoint.Builder().setHDict(relay3).setType("Relay N/O").setEnabled(config.relay3Enabled.enabled)
             if (config.relay3Enabled.enabled && config.relay3Association.associationVal == CpuRelayType.EXTERNALLY_MAPPED.ordinal) {
                 relay3Point.addMarker(Tags.WRITABLE)
+                relay3Point.addMarker(Tags.UNUSED)
             } else {
                 relay3Point.removeMarkerIfExists(Tags.WRITABLE)
+                relay3Point.removeMarkerIfExists(Tags.UNUSED)
                 hayStack.clearAllAvailableLevelsInPoint(relay3[Tags.ID].toString())
             }
             hayStack.updatePoint(relay3Point.build(), relay3[Tags.ID].toString())
@@ -459,8 +464,10 @@ class HyperstatSplitReconfigurationHandler {
             var relay4Point = RawPoint.Builder().setHDict(relay4).setType("Relay N/O").setEnabled(config.relay4Enabled.enabled)
             if (config.relay4Enabled.enabled && config.relay4Association.associationVal == CpuRelayType.EXTERNALLY_MAPPED.ordinal) {
                 relay4Point.addMarker(Tags.WRITABLE)
+                relay4Point.addMarker(Tags.UNUSED)
             } else {
                 relay4Point.removeMarkerIfExists(Tags.WRITABLE)
+                relay4Point.removeMarkerIfExists(Tags.UNUSED)
                 hayStack.clearAllAvailableLevelsInPoint(relay4[Tags.ID].toString())
             }
             hayStack.updatePoint(relay4Point.build(), relay4[Tags.ID].toString())
@@ -469,8 +476,10 @@ class HyperstatSplitReconfigurationHandler {
             var relay5Point = RawPoint.Builder().setHDict(relay5).setType("Relay N/O").setEnabled(config.relay5Enabled.enabled)
             if (config.relay5Enabled.enabled && config.relay5Association.associationVal == CpuRelayType.EXTERNALLY_MAPPED.ordinal) {
                 relay5Point.addMarker(Tags.WRITABLE)
+                relay5Point.addMarker(Tags.UNUSED)
             } else {
                 relay5Point.removeMarkerIfExists(Tags.WRITABLE)
+                relay5Point.removeMarkerIfExists(Tags.UNUSED)
                 hayStack.clearAllAvailableLevelsInPoint(relay5[Tags.ID].toString())
             }
             hayStack.updatePoint(relay5Point.build(), relay5[Tags.ID].toString())
@@ -479,8 +488,10 @@ class HyperstatSplitReconfigurationHandler {
             var relay6Point = RawPoint.Builder().setHDict(relay6).setType("Relay N/O").setEnabled(config.relay6Enabled.enabled)
             if (config.relay6Enabled.enabled && config.relay6Association.associationVal == CpuRelayType.EXTERNALLY_MAPPED.ordinal) {
                 relay6Point.addMarker(Tags.WRITABLE)
+                relay6Point.addMarker(Tags.UNUSED)
             } else {
                 relay6Point.removeMarkerIfExists(Tags.WRITABLE)
+                relay6Point.removeMarkerIfExists(Tags.UNUSED)
                 hayStack.clearAllAvailableLevelsInPoint(relay6[Tags.ID].toString())
             }
             hayStack.updatePoint(relay6Point.build(), relay6[Tags.ID].toString())
@@ -489,8 +500,10 @@ class HyperstatSplitReconfigurationHandler {
             var relay7Point = RawPoint.Builder().setHDict(relay7).setType("Relay N/O").setEnabled(config.relay7Enabled.enabled)
             if (config.relay7Enabled.enabled && config.relay7Association.associationVal == CpuRelayType.EXTERNALLY_MAPPED.ordinal) {
                 relay7Point.addMarker(Tags.WRITABLE)
+                relay7Point.addMarker(Tags.UNUSED)
             } else {
                 relay7Point.removeMarkerIfExists(Tags.WRITABLE)
+                relay7Point.removeMarkerIfExists(Tags.UNUSED)
                 hayStack.clearAllAvailableLevelsInPoint(relay7[Tags.ID].toString())
             }
             hayStack.updatePoint(relay7Point.build(), relay7[Tags.ID].toString())
@@ -499,8 +512,10 @@ class HyperstatSplitReconfigurationHandler {
             var relay8Point = RawPoint.Builder().setHDict(relay8).setType("Relay N/O").setEnabled(config.relay8Enabled.enabled)
             if (config.relay8Enabled.enabled && config.relay8Association.associationVal == CpuRelayType.EXTERNALLY_MAPPED.ordinal) {
                 relay8Point.addMarker(Tags.WRITABLE)
+                relay8Point.addMarker(Tags.UNUSED)
             } else {
                 relay8Point.removeMarkerIfExists(Tags.WRITABLE)
+                relay8Point.removeMarkerIfExists(Tags.UNUSED)
                 hayStack.clearAllAvailableLevelsInPoint(relay8[Tags.ID].toString())
             }
             hayStack.updatePoint(relay8Point.build(), relay8[Tags.ID].toString())
@@ -509,8 +524,10 @@ class HyperstatSplitReconfigurationHandler {
             var analogOut1Point = RawPoint.Builder().setHDict(analogOut1).setType(config.analogOut1TypeToString()).setEnabled(config.analogOut1Enabled.enabled)
             if (config.analogOut1Enabled.enabled && config.analogOut1Association.associationVal == CpuControlType.EXTERNALLY_MAPPED.ordinal) {
                 analogOut1Point.addMarker(Tags.WRITABLE)
+                analogOut1Point.addMarker(Tags.UNUSED)
             } else {
                 analogOut1Point.removeMarkerIfExists(Tags.WRITABLE)
+                analogOut1Point.removeMarkerIfExists(Tags.UNUSED)
                 hayStack.clearAllAvailableLevelsInPoint(analogOut1[Tags.ID].toString())
             }
             hayStack.updatePoint(analogOut1Point.build(), analogOut1[Tags.ID].toString())
@@ -519,8 +536,10 @@ class HyperstatSplitReconfigurationHandler {
             var analogOut2Point = RawPoint.Builder().setHDict(analogOut2).setType(config.analogOut2TypeToString()).setEnabled(config.analogOut2Enabled.enabled)
             if (config.analogOut2Enabled.enabled && config.analogOut2Association.associationVal == CpuControlType.EXTERNALLY_MAPPED.ordinal) {
                 analogOut2Point.addMarker(Tags.WRITABLE)
+                analogOut2Point.addMarker(Tags.UNUSED)
             } else {
                 analogOut2Point.removeMarkerIfExists(Tags.WRITABLE)
+                analogOut2Point.removeMarkerIfExists(Tags.UNUSED)
                 hayStack.clearAllAvailableLevelsInPoint(analogOut2[Tags.ID].toString())
             }
             hayStack.updatePoint(analogOut2Point.build(), analogOut2[Tags.ID].toString())
@@ -529,8 +548,10 @@ class HyperstatSplitReconfigurationHandler {
             var analogOut3Point = RawPoint.Builder().setHDict(analogOut3).setType(config.analogOut3TypeToString()).setEnabled(config.analogOut3Enabled.enabled)
             if (config.analogOut3Enabled.enabled && config.analogOut3Association.associationVal == CpuControlType.EXTERNALLY_MAPPED.ordinal) {
                 analogOut3Point.addMarker(Tags.WRITABLE)
+                analogOut3Point.addMarker(Tags.UNUSED)
             } else {
                 analogOut3Point.removeMarkerIfExists(Tags.WRITABLE)
+                analogOut3Point.removeMarkerIfExists(Tags.UNUSED)
                 hayStack.clearAllAvailableLevelsInPoint(analogOut3[Tags.ID].toString())
             }
             hayStack.updatePoint(analogOut3Point.build(), analogOut3[Tags.ID].toString())
@@ -539,8 +560,10 @@ class HyperstatSplitReconfigurationHandler {
             var analogOut4Point = RawPoint.Builder().setHDict(analogOut4).setType(config.analogOut4TypeToString()).setEnabled(config.analogOut4Enabled.enabled)
             if (config.analogOut4Enabled.enabled && config.analogOut4Association.associationVal == CpuControlType.EXTERNALLY_MAPPED.ordinal) {
                 analogOut4Point.addMarker(Tags.WRITABLE)
+                analogOut4Point.addMarker(Tags.UNUSED)
             } else {
                 analogOut4Point.removeMarkerIfExists(Tags.WRITABLE)
+                analogOut4Point.removeMarkerIfExists(Tags.UNUSED)
                 hayStack.clearAllAvailableLevelsInPoint(analogOut4[Tags.ID].toString())
             }
             hayStack.updatePoint(analogOut4Point.build(), analogOut4[Tags.ID].toString())

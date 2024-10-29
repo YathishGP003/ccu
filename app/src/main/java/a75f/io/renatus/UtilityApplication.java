@@ -113,6 +113,7 @@ public abstract class UtilityApplication extends Application {
 
     private DeviceUpdateJob deviceUpdateJob;
     private static Prefs prefs;
+    protected static BackgroundServiceInitiator backgroundServiceInitiator;
 
     @Override
     public void onCreate() {
@@ -130,7 +131,7 @@ public abstract class UtilityApplication extends Application {
         initializeCrashReporting();
         EventBus.getDefault().register(this);
         Globals.getInstance().setApplicationContext(this);
-
+        backgroundServiceInitiator = new BackgroundServiceInitiator(this);
 
     }
 

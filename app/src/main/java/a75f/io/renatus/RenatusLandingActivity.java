@@ -107,13 +107,10 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
     public static CustomViewPager mViewPager;
     public static TabLayout mTabLayout, btnTabs;
     private Prefs prefs;
-    BackgroundServiceInitiator backgroundServiceInitiator;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        backgroundServiceInitiator = new BackgroundServiceInitiator(this);
-        backgroundServiceInitiator.initServices();
         Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
         executorService = Executors.newFixedThreadPool(1);
         CcuLog.i("UI_PROFILING","LandingActivity.onCreate");
@@ -484,7 +481,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
         } catch (Exception e) {
             // already unregistered
         }
-        backgroundServiceInitiator.unbindServices();
+        RenatusApp.backgroundServiceInitiator.unbindServices();
         CcuLog.e(L.TAG_CCU, "LifeCycleEvent LandingActivity Destroyed");
     }
 

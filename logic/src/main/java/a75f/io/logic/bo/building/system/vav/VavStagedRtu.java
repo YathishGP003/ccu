@@ -306,7 +306,7 @@ public class VavStagedRtu extends VavSystemProfile
             CcuLog.d(L.TAG_CCU_SYSTEM, "Relays mapped to stage "+stage+" "+Arrays.toString(relaySet.toArray()));
             for (a75f.io.domain.api.Point relay : relaySet) {
                 //double curRelayState = ControlMote.getRelayState(relay);
-                double curRelayState = getLogicalPhysicalMap().get(relay).readHisVal();
+                double curRelayState = getLogicalPhysicalMap().get(relay).readPointValue();
                 stageStatus[stage.ordinal()] = (int) curRelayState;
                 if (stageUpTimerCounter == 0 && stageDownTimerCounter == 0) {
                     double relayState = tempStatus[stage.ordinal()];
@@ -335,7 +335,7 @@ public class VavStagedRtu extends VavSystemProfile
             Set<a75f.io.domain.api.Point> relaySet = getRelayMappingForStage(stage);
             CcuLog.d(L.TAG_CCU_SYSTEM, "Relays mapped to stage "+stage+" "+Arrays.toString(relaySet.toArray()));
             for (a75f.io.domain.api.Point relay : relaySet) {
-                double curRelayState = getLogicalPhysicalMap().get(relay).readHisVal();
+                double curRelayState = getLogicalPhysicalMap().get(relay).readPointValue();
                 if (stageUpTimerCounter == 0 && stageDownTimerCounter == 0) {
                     double relayState = tempStatus[stage.ordinal()];
                     if (curRelayState == 0 && relayState > 0) {

@@ -1240,7 +1240,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
                     namedScheduleView.setOnClickListener(view -> {
                         String scheduleDis = (mSchedule.getDis());
-                        String scheduleName = (scheduleDis.contains("Default") && !scheduleDis.contains("Temporary")) ?
+                        String scheduleName = (mSchedule.getMarkers().contains("default")) ?
                                 "Default - "+CCUHsApi.getInstance().getSiteName() :scheduleDis;
 
                         NamedSchedule namedSchedule =
@@ -1252,7 +1252,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
 
                     if ((mSchedule.isZoneSchedule() && !mSchedule.isBuildingSchedule())
-                            || (mSchedule.isNamedSchedule() && mSchedule.getDis().contains("Default") && !mSchedule.getDis().contains("Temporary")
+                            || (mSchedule.isNamedSchedule() && mSchedule.getMarkers().contains("default")
                             && !namedScheds.isEmpty() && OfflineModeUtilKt.isOfflineMode())){
                         scheduleImageButton.setVisibility(View.VISIBLE);
                     } else {
@@ -1345,15 +1345,16 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                     scheduleImageButton.setVisibility(View.GONE);
                                     namedScheduleView.setVisibility(View.VISIBLE);
                                     HashMap<Object, Object> room = CCUHsApi.getInstance().readMapById(zoneId);
-                                    String namedScheduleId = namedScheds.get(position - 2).get("id").toString();
-                                    String scheduleDis = (namedScheds.get(position - 2).get("dis").toString());
+                                    HashMap<Object,Object> nameScheduleMap = namedScheds.get(position - 2);
+                                    String namedScheduleId = nameScheduleMap.get("id").toString();
+                                    String scheduleDis = (nameScheduleMap.get("dis").toString());
 
-                                    if (scheduleDis.contains("Default") && !scheduleDis.contains("Temporary") &&
+                                    if (nameScheduleMap.get("default") != null &&
                                             OfflineModeUtilKt.isOfflineMode()) {
                                         scheduleImageButton.setVisibility(View.VISIBLE);
                                     }
 
-                                    String scheduleName = (scheduleDis.contains("Default") && !scheduleDis.contains("Temporary")) ?
+                                    String scheduleName = (nameScheduleMap.get("default") != null) ?
                                             "Default - " + CCUHsApi.getInstance().getSiteName() : scheduleDis;
 
                                     if (!namedScheduleId.equals(room.get("scheduleRef").toString())) {
@@ -1363,7 +1364,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                         FragmentManager childFragmentManager = getChildFragmentManager();
                                         namedSchedule.show(childFragmentManager, "dialog");
                                         scheduleSpinner.setSelection(position);
-                                        if (scheduleDis.contains("Default") && !scheduleDis.contains("Temporary")
+                                        if (nameScheduleMap.get("default") != null
                                                 && OfflineModeUtilKt.isOfflineMode()) {
                                             scheduleImageButton.setVisibility(View.VISIBLE);
                                         } else
@@ -1667,7 +1668,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         namedScheduleView.setOnClickListener(view -> {
 
             String scheduleDis = (mSchedule.getDis());
-            String scheduleName = (scheduleDis.contains("Default") && !scheduleDis.contains("Temporary")) ?
+            String scheduleName = (mSchedule.getMarkers().contains("default")) ?
                     "Default - "+CCUHsApi.getInstance().getSiteName() :scheduleDis;
 
             NamedSchedule namedSchedule =
@@ -1744,7 +1745,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             scheduleSpinner.setSelection(mScheduleType -1, false);
         }
         if (mSchedule.isZoneSchedule()
-                || (mSchedule.isNamedSchedule() && mSchedule.getDis().contains("Default") && !mSchedule.getDis().contains("Temporary")  && !namedScheds.isEmpty()
+                || (mSchedule.isNamedSchedule() && mSchedule.getMarkers().contains("default") && !namedScheds.isEmpty()
         && OfflineModeUtilKt.isOfflineMode())){
             scheduleImageButton.setVisibility(View.VISIBLE);
         } else {
@@ -1822,13 +1823,14 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                        namedScheduleView.setVisibility(View.VISIBLE);
                        scheduleImageButton.setVisibility(View.GONE);
                        HashMap<Object, Object> room = CCUHsApi.getInstance().readMapById(zoneId);
-                       String namedScheduleId = namedScheds.get(position - 2).get("id").toString();
-                       String scheduleDis = (namedScheds.get(position - 2).get("dis").toString());
-                       if (scheduleDis.contains("Default") && !scheduleDis.contains("Temporary") && OfflineModeUtilKt.isOfflineMode()) {
+                       HashMap<Object,Object> nameScheduleMap = namedScheds.get(position - 2);
+                       String namedScheduleId = nameScheduleMap.get("id").toString();
+                       String scheduleDis = (nameScheduleMap.get("dis").toString());
+                       if (nameScheduleMap.get("default") != null && OfflineModeUtilKt.isOfflineMode()) {
                            scheduleImageButton.setVisibility(View.VISIBLE);
                        }
 
-                       String scheduleName = (scheduleDis.contains("Default") && !scheduleDis.contains("Temporary")) ?
+                       String scheduleName = (nameScheduleMap.get("default") != null) ?
                                "Default - " + CCUHsApi.getInstance().getSiteName() : scheduleDis;
 
 
@@ -1847,7 +1849,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                namedScheduleView.setVisibility(View.VISIBLE);
                                vacationImageButton.setTag(mSchedule.getId());
                                specialScheduleImageButton.setTag(mSchedule.getId());
-                               if (scheduleDis.contains("Default") && !scheduleDis.contains("Temporary") &&
+                               if (nameScheduleMap.get("default") != null &&
                                        OfflineModeUtilKt.isOfflineMode()) {
                                    scheduleImageButton.setVisibility(View.VISIBLE);
                                } else

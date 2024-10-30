@@ -91,11 +91,13 @@ import a75f.io.logic.bo.building.system.vav.VavAdvancedAhu;
 import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.bo.util.DemandResponseMode;
 import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint;
+import a75f.io.logic.interfaces.MasterControlLimitListener;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerEquip;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.logic.util.OfflineModeUtilKt;
 import a75f.io.messaging.exceptions.ScheduleMigrationNotComplete;
+import a75f.io.messaging.handler.UpdatePointHandler;
 import a75f.io.renatus.R;
 import a75f.io.renatus.RenatusApp;
 import a75f.io.renatus.UtilityApplication;
@@ -114,7 +116,7 @@ import a75f.io.renatus.views.MasterControl.MasterControlView;
 import a75f.io.renatus.views.TempLimit.TempLimitView;
 import a75f.io.util.ExecutorTask;
 
-public class InstallerOptions extends Fragment {
+public class InstallerOptions extends Fragment implements MasterControlLimitListener {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -257,6 +259,8 @@ public class InstallerOptions extends Fragment {
         isFreshRegister = getActivity() instanceof FreshRegistration;
         CCU_ID = prefs.getString("CCU_ID");
         utilityApplication = new RenatusApp();
+
+        UpdatePointHandler.setMasterControlLimitListener(this);
 
         imageGoback = rootView.findViewById(R.id.imageGoback);
         mAddressBandSpinner = rootView.findViewById(R.id.spinnerAddress);
@@ -1148,4 +1152,10 @@ public class InstallerOptions extends Fragment {
         return new CustomSpinnerDropDownAdapter(requireContext(), R.layout.spinner_dropdown_item, values);
     }
 
+    @Override
+    public void onMasterControlLimitChanged() {
+        if(imageTemp != null){
+            imageTemp.updateData();
+        }
+    }
 }

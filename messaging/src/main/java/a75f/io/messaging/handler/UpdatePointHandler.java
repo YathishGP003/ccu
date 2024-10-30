@@ -37,6 +37,7 @@ import a75f.io.logic.bo.building.vrv.VrvControlMessageCache;
 import a75f.io.logic.bo.util.DemandResponseMode;
 import a75f.io.logic.bo.util.DesiredTempDisplayMode;
 import a75f.io.logic.interfaces.IntrinsicScheduleListener;
+import a75f.io.logic.interfaces.MasterControlLimitListener;
 import a75f.io.logic.interfaces.ModbusDataInterface;
 import a75f.io.logic.interfaces.ModbusWritableDataInterface;
 import a75f.io.logic.interfaces.ZoneDataInterface;
@@ -55,6 +56,7 @@ public class UpdatePointHandler implements MessageHandler
     private static IntrinsicScheduleListener intrinsicScheduleListener = null;
     private static ModbusDataInterface modbusDataInterface = null;
     private static ModbusWritableDataInterface modbusWritableDataInterface = null;
+    private static MasterControlLimitListener masterControlLimitListener = null;
 
     public static void handlePointUpdateMessage(final JsonObject msgObject, Long timeToken, Boolean isDataSync) throws MessageHandlingFailed {
         String pointUid = "@" + msgObject.get("id").getAsString();
@@ -72,6 +74,9 @@ public class UpdatePointHandler implements MessageHandler
             TunerUpdateHandler.updateBuildingTuner(msgObject, CCUHsApi.getInstance());
             if (buildingTunerPoint.containsKey("displayUnit") && zoneDataInterface != null) {
                 zoneDataInterface.refreshScreen("", true);
+            }
+            if(masterControlLimitListener != null){
+                masterControlLimitListener.onMasterControlLimitChanged();
             }
             return;
         } else if (hayStack.readMapById(pointUid).containsKey(Tags.TUNER)) {
@@ -414,6 +419,7 @@ public class UpdatePointHandler implements MessageHandler
     public static void setIntrinsicScheduleListener(IntrinsicScheduleListener in){ intrinsicScheduleListener = in;}
     public static void setSystemDataInterface(ZoneDataInterface in) { zoneDataInterface = in; }
     public static void setModbusWritableDataInterface(ModbusWritableDataInterface in) { modbusWritableDataInterface = in; }
+    public static void setMasterControlLimitListener(MasterControlLimitListener listener) {masterControlLimitListener = listener; }
     private static boolean canIgnorePointUpdate(String pbSource, String pointUid, CCUHsApi hayStack) {
         HashMap ccu = hayStack.read("ccu");
         String ccuName = ccu.get("dis").toString();

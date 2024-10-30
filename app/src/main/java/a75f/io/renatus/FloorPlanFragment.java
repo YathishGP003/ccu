@@ -668,7 +668,7 @@ public class FloorPlanFragment extends Fragment {
             floorList.add(hsFloor);
             floorList.sort(new FloorComparator());
             updateFloors();
-            selectFloor(HSUtil.getFloors().size() - 1);
+            selectFloor(floorList.indexOf(hsFloor));
             L.saveCCUState();
             CCUHsApi.getInstance().syncEntityTree();
             floorListView.requestFocusFromTouch();

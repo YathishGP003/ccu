@@ -239,6 +239,19 @@ open class PhysicalPoint(domainName : String, val deviceRef: String) : Entity (d
         }
     }
 
+    /**
+     * Gets the value written by CCU algo for writbale points.
+     * Otherwise just reads the history value.
+     */
+    fun readPointValue() : Double {
+        requireId()
+        return if (isWritable()) {
+            readDefaultVal()
+        } else {
+            readHisVal()
+        }
+    }
+
     fun readPriorityVal() : Double {
         requireId()
         val priorityVal = Domain.hayStack.readPointPriorityVal(id)

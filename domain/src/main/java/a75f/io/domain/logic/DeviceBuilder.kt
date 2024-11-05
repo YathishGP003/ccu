@@ -24,6 +24,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
+import org.projecthaystack.HDateTime
 import org.projecthaystack.HStr
 import kotlin.system.measureTimeMillis
 
@@ -247,6 +248,8 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
         if (existingPoint.containsKey("analogType")) hayStackPoint.type = existingPoint["analogType"].toString()
         if (existingPoint.containsKey("port")) hayStackPoint.port = existingPoint["port"].toString()
         if (existingPoint.containsKey("writable")) hayStackPoint.markers.add(Tags.WRITABLE)
+        hayStackPoint.createdDateTime = HDateTime.make(existingPoint["createdDateTime"].toString())
+        hayStackPoint.lastModifiedBy = hayStack.ccuUserName
         hayStack.updatePoint(hayStackPoint, existingPoint["id"].toString())
 
         DomainManager.addRawPoint(hayStackPoint)
@@ -262,6 +265,8 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
             "${modelDef.version?.major}" +
                     ".${modelDef.version?.minor}.${modelDef.version?.patch}"
         )
+        device.createdDateTime = HDateTime.make(deviceDict["createdDateTime"].toString())
+        device.lastModifiedBy = hayStack.ccuUserName
         hayStack.updateDevice(device, device.id)
         CcuLog.i(Domain.LOG_TAG, " Updated Device ${device.addr}-${device.domainName}")
     }

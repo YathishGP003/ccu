@@ -22,6 +22,7 @@ import io.seventyfivef.domainmodeler.common.point.PointConfiguration
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
+import org.projecthaystack.HDateTime
 import kotlin.system.measureTimeMillis
 
 class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder() {
@@ -328,6 +329,8 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
         hayStackPoint.roomRef = existingPoint["roomRef"].toString()
         hayStackPoint.floorRef = existingPoint["floorRef"].toString()
         hayStackPoint.group = existingPoint["group"].toString()
+        hayStackPoint.createdDateTime = HDateTime.make(existingPoint["createdDateTime"].toString())
+        hayStackPoint.lastModifiedBy = hayStack.getCCUUserName();
         hayStack.updatePoint(hayStackPoint, existingPoint["id"].toString())
 
         //TODO- Not changing the value during migration as it might change user configurations
@@ -363,6 +366,8 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
         if (isSystem) {
             equip.group = "99"
         }
+        equip.createdDateTime = HDateTime.make(equipHashMap["createdDateTime"].toString())
+        equip.lastModifiedBy = hayStack.getCCUUserName();
         hayStack.updateEquip(equip, equipRef)
         CcuLog.i(Domain.LOG_TAG, " Updated Equip ${equip.group}-${equip.domainName}")
     }

@@ -226,6 +226,12 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             CCUHsApi.getInstance().readPointPriorityLatestTime(backFillPoint["id"] as String?)
                 .substring(0, 19)
         )
+        if(backFillPoint["createdDateTime"] == null) {
+            CcuLog.i(L.TAG_CCU_MIGRATION_UTIL, "Updated the fallback default value for backfill point")
+            hayStack.writeDefaultValById(backFillPoint["id"].toString(), 24.0)
+            CcuLog.i(L.TAG_CCU_MIGRATION_UTIL, "Updated backfill default value")
+            return
+        }
         val createdTime =
             DateTime.parse(backFillPoint["createdDateTime"].toString().substring(0,19));
         if (createdTime.equals(lastUpdatedTime)) {
@@ -660,11 +666,11 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             when {
                 (it["profile"].toString() == "SYSTEM_DAB_STAGED_RTU" ||
                         it["domainName"].toString() == "dabStagedRtu") -> {
-                    migrateDabStagedSystemProfile(it["id"].toString(), equipBuilder, site, deviceModel, deviceDis)
+                    migrateDabStagedSystemProfile(it["id"].toString(), equipBuilder, site, deviceModel, deviceDis,equipHashMap = it)
                 }
                 (it["profile"].toString() == "SYSTEM_DAB_STAGED_VFD_RTU" ||
                         it["domainName"].toString() == "dabStagedRtuVfdFan") -> {
-                    migrateDabStagedVfdSystemProfile(it["id"].toString(), equipBuilder, site, deviceModel, deviceDis)
+                    migrateDabStagedVfdSystemProfile(it["id"].toString(), equipBuilder, site, deviceModel, deviceDis, equipHashMap = it)
                 }
                 else -> {}
             }
@@ -673,13 +679,13 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
     }
 
     private fun migrateDabStagedSystemProfile (equipId : String, equipBuilder: ProfileEquipBuilder, site: Site,
-                                               deviceModel : SeventyFiveFDeviceDirective, deviceDis : String) {
+                                               deviceModel : SeventyFiveFDeviceDirective, deviceDis : String, equipHashMap: HashMap<Any, Any>) {
 
         val model = ModelLoader.getDabStageRtuModelDef()
         val equipDis = "${site.displayName}-${model.name}"
         val profileConfig = StagedRtuProfileConfig(model as SeventyFiveFProfileDirective)
         equipBuilder.doCutOverMigration(equipId, model,
-            equipDis, DabStagedRtuCutOverMapping.entries , profileConfig.getDefaultConfiguration(), isSystem = true)
+            equipDis, DabStagedRtuCutOverMapping.entries , profileConfig.getDefaultConfiguration(), isSystem = true,equipHashMap = equipHashMap)
 
         val entityMapper = EntityMapper(model)
         val deviceBuilder = DeviceBuilder(hayStack, entityMapper)
@@ -717,15 +723,15 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             when {
                 (it["profile"].toString() == "SYSTEM_VAV_STAGED_RTU" ||
                     it["domainName"].toString() == "vavStagedRtu") -> {
-                    migrateVavStagedSystemProfile(it["id"].toString(), equipBuilder, site, deviceModel, deviceDis)
+                    migrateVavStagedSystemProfile(it["id"].toString(), equipBuilder, site, deviceModel, deviceDis,equipHashMap = it)
                 }
                 (it["profile"].toString() == "SYSTEM_VAV_STAGED_VFD_RTU" ||
                         it["domainName"].toString() == "vavStagedRtuVfdFan") -> {
-                   migrateVavStagedVfdSystemProfile(it["id"].toString(), equipBuilder, site, deviceModel, deviceDis)
+                   migrateVavStagedVfdSystemProfile(it["id"].toString(), equipBuilder, site, deviceModel, deviceDis,equipHashMap = it)
                 }
                 (it["profile"].toString() == "SYSTEM_VAV_ANALOG_RTU" ||
                         it["domainName"].toString() == "vavFullyModulatingAhu") -> {
-                    migrateVavFullyModulatingSystemProfile(it["id"].toString(), equipBuilder, site, deviceModel, deviceDis)
+                    migrateVavFullyModulatingSystemProfile(it["id"].toString(), equipBuilder, site, deviceModel, deviceDis,equipHashMap = it)
                 }
                 else -> {}
             }
@@ -734,13 +740,13 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
     }
 
     private fun migrateVavStagedSystemProfile (equipId : String, equipBuilder: ProfileEquipBuilder, site: Site,
-                                               deviceModel : SeventyFiveFDeviceDirective, deviceDis : String) {
+                                               deviceModel : SeventyFiveFDeviceDirective, deviceDis : String, equipHashMap: HashMap<Any, Any>) {
 
         val model = ModelLoader.getVavStageRtuModelDef()
         val equipDis = "${site.displayName}-${model.name}"
         val profileConfig = StagedRtuProfileConfig(model as SeventyFiveFProfileDirective)
         equipBuilder.doCutOverMigration(equipId, model,
-            equipDis, VavStagedRtuCutOverMapping.entries , profileConfig.getDefaultConfiguration(), isSystem = true)
+            equipDis, VavStagedRtuCutOverMapping.entries , profileConfig.getDefaultConfiguration(), isSystem = true,equipHashMap = equipHashMap)
 
         val entityMapper = EntityMapper(model)
         val deviceBuilder = DeviceBuilder(hayStack, entityMapper)
@@ -761,14 +767,14 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
     }
 
     private fun migrateVavStagedVfdSystemProfile (equipId : String, equipBuilder: ProfileEquipBuilder, site: Site,
-                                               deviceModel : SeventyFiveFDeviceDirective, deviceDis : String) {
+                                               deviceModel : SeventyFiveFDeviceDirective, deviceDis : String, equipHashMap: HashMap<Any, Any>) {
 
         val model = ModelLoader.getVavStagedVfdRtuModelDef()
         val equipDis = "${site.displayName}-${model.name}"
         val profileConfig = StagedVfdRtuProfileConfig(model as SeventyFiveFProfileDirective)
         equipBuilder.doCutOverMigration(equipId, model,
             equipDis, VavStagedVfdRtuCutOverMapping.entries , profileConfig.getDefaultConfiguration()
-            ,isSystem = true)
+            ,isSystem = true,equipHashMap = equipHashMap)
 
         val entityMapper = EntityMapper(model)
         val deviceBuilder = DeviceBuilder(hayStack, entityMapper)
@@ -789,14 +795,14 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
     }
 
     private fun migrateDabStagedVfdSystemProfile (equipId : String, equipBuilder: ProfileEquipBuilder, site: Site,
-                                                  deviceModel : SeventyFiveFDeviceDirective, deviceDis : String) {
+                                                  deviceModel : SeventyFiveFDeviceDirective, deviceDis : String,equipHashMap: HashMap<Any, Any>) {
 
         val model = ModelLoader.getDabStagedVfdRtuModelDef()
         val equipDis = "${site.displayName}-${model.name}"
         val profileConfig = StagedVfdRtuProfileConfig(model as SeventyFiveFProfileDirective)
         equipBuilder.doCutOverMigration(equipId, model,
             equipDis, DabStagedVfdRtuCutOverMapping.entries , profileConfig.getDefaultConfiguration()
-            ,isSystem = true)
+            ,isSystem = true,equipHashMap)
 
         val entityMapper = EntityMapper(model)
         val deviceBuilder = DeviceBuilder(hayStack, entityMapper)
@@ -817,14 +823,14 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
     }
 
     private fun migrateVavFullyModulatingSystemProfile (equipId : String, equipBuilder: ProfileEquipBuilder, site: Site,
-                                                  deviceModel : SeventyFiveFDeviceDirective, deviceDis : String) {
+                                                  deviceModel : SeventyFiveFDeviceDirective, deviceDis : String, equipHashMap: HashMap<Any, Any>) {
         CcuLog.i(Domain.LOG_TAG, "VavFullyModulatingSystemProfile equipID: $equipId")
         val model = ModelLoader.getVavModulatingRtuModelDef()
         val equipDis = "${site.displayName}-${model.name}"
         val profileConfig = ModulatingRtuProfileConfig(model as SeventyFiveFProfileDirective)
         equipBuilder.doCutOverMigration(equipId, model,
             equipDis, VavFullyModulatingRtuCutOverMapping.entries , profileConfig.getDefaultConfiguration()
-            ,isSystem = true)
+            ,isSystem = true,equipHashMap = equipHashMap)
 
         val entityMapper = EntityMapper(model)
         val deviceBuilder = DeviceBuilder(hayStack, entityMapper)

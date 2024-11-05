@@ -87,13 +87,13 @@ open class UnusedPortsModel {
                                 val isPortUsedInAlgo = isPortUsedInAlgo(hayStack, unusedPort)
                                 CcuLog.d(L.TAG_CCU_DOMAIN, "$unusedPort is used? $isPortUsedInAlgo")
                                 when {
-                                    unusedPortState && !isPortUsedInAlgo && !rawPoint.markers.contains(Tags.UNUSED) -> {
+                                    unusedPortState && !rawPoint.markers.contains(Tags.UNUSED) -> {
                                         CcuLog.d(L.TAG_CCU_DOMAIN, "Adding writable tag - ${rawPoint.id}")
                                         rawPoint.markers.add(Tags.WRITABLE)
                                         rawPoint.markers.add(Tags.UNUSED)
                                         hayStack.updatePoint(rawPoint, rawPoint.id)
                                     }
-                                    (!unusedPortState && rawPoint.markers.contains(Tags.UNUSED)) || isPortUsedInAlgo -> {
+                                    (!unusedPortState && rawPoint.markers.contains(Tags.UNUSED)) -> {
                                         CcuLog.d(L.TAG_CCU_DOMAIN, "Removing writable tag - ${rawPoint.id}")
                                         hayStack.clearAllAvailableLevelsInPoint(rawPoint.id)
                                         rawPoint.markers.remove(Tags.WRITABLE)

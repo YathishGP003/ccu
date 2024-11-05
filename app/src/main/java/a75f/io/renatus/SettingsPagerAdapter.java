@@ -77,8 +77,7 @@ public class SettingsPagerAdapter extends FragmentStatePagerAdapter {
         }
         //Resetting the temporary override mode
         if (btnTab == 1) {
-            Globals.getInstance().resetTempOverCount();
-            Globals.getInstance().setTemporaryOverrideMode(false);
+            TempOverrideFragment.newInstance().reSettingTempModeValues();
         }
         //super.destroyItem(container, position, object);
     }

@@ -76,29 +76,8 @@ jobs:
     inputs:
       PathtoPublish: '$(System.DefaultWorkingDirectory)/app/build/outputs/apk/prod/'
       ArtifactName: ProdApk
-
-- job: Job_4
-  displayName: Build APK Daikin
-  condition: eq(variables['isDaikin'], 'true')
-  pool:
-    vmImage: ubuntu-latest
-  steps:
-  - task: JavaToolInstaller@0
-    inputs:
-      versionSpec: '11'
-      jdkArchitectureOption: 'x64'
-      jdkSourceOption: 'PreInstalled'         
-  - task: Gradle@2
-    displayName: 'gradlew assembleDaikin_prod'
-    inputs:
-      tasks: 'assembleDaikin_prod'
-  - task: PublishBuildArtifacts@1
-    displayName: 'Publish Artifact: Daikin_prodApk'
-    inputs:
-      PathtoPublish: '$(System.DefaultWorkingDirectory)/app/build/outputs/apk/daikin_prod/'
-      ArtifactName: Daikin_prodApk
       
-- job: Job_5
+- job: Job_4
   displayName: Build APK Carrier
   condition: eq(variables['isCarrier'], 'true')
   pool:
@@ -119,7 +98,7 @@ jobs:
       PathtoPublish: '$(System.DefaultWorkingDirectory)/app/build/outputs/apk/carrier_prod/'
       ArtifactName: Carrier_prodApk
 
-- job: Job_6
+- job: Job_5
   displayName: Build APK Airoverse
   condition: eq(variables['isAiroverse'], 'true')
   pool:
@@ -140,23 +119,5 @@ jobs:
       PathtoPublish: '$(System.DefaultWorkingDirectory)/app/build/outputs/apk/airoverse_prod/'
       ArtifactName: Airoverse_prodApk
 
-- job: Job_7
-  displayName: Upload APK
-  dependsOn: [Job_1, Job_2, Job_3, Job_4, Job_5, Job_6]
-  condition: always()
-  pool:
-    vmImage: windows-2019
-  steps:
-  - task: DownloadBuildArtifacts@1
-    inputs:
-      buildType: 'current'
-      downloadType: 'specific'
-      itemPattern: '**/*.apk'
-      downloadPath: '$(Build.ArtifactStagingDirectory)'
-  - task: AzureFileCopy@6
-    inputs:
-      SourcePath: 'D:\a\1\a\**\'
-      azureSubscription: 'Access Azure Resources'
-      Destination: 'AzureBlob'
-      storage: 'updateslegacy75f'
-      ContainerName: '$web'
+
+

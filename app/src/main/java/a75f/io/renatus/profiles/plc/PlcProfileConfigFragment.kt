@@ -252,7 +252,7 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start) {
                     Spacer(modifier = Modifier.width(50.dp))
                     DropDownWithLabel(
-                        label = "Analog-Out1 1 at Min Output",
+                        label = "Analog-Out1 at Min Output",
                         list = (1..10).toList().map { it.toString() },
                         previewWidth = 165,
                         expandedWidth = 185,
@@ -269,7 +269,7 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start) {
                     Spacer(modifier = Modifier.width(50.dp))
                     DropDownWithLabel(
-                        label = "Analog-Out1 1 at Max Output",
+                        label = "Analog-Out1 at Max Output",
                         list = (1..10).toList().map { it.toString() },
                         previewWidth = 165,
                         expandedWidth = 185,

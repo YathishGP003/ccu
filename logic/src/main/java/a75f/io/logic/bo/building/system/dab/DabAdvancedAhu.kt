@@ -273,20 +273,20 @@ class DabAdvancedAhu : DabSystemProfile() {
     }
 
     private fun updateLoopOpPoints() {
-        systemEquip.coolingLoopOutput.writeHisVal(systemCoolingLoopOp)
-        systemEquip.heatingLoopOutput.writeHisVal(systemHeatingLoopOp)
-        systemEquip.fanLoopOutput.writeHisVal(systemFanLoopOp)
-        systemEquip.co2LoopOutput.writeHisVal(systemCo2LoopOp)
-        systemEquip.cmEquip.satCoolingLoopOutput.writeHisVal(systemSatCoolingLoopOp)
-        systemEquip.cmEquip.satHeatingLoopOutput.writeHisVal(systemSatHeatingLoopOp)
-        systemEquip.cmEquip.fanPressureLoopOutput.writeHisVal(staticPressureFanLoopOp)
-        systemEquip.operatingMode.writeHisVal(DabSystemController.getInstance().systemState.ordinal.toDouble())
-        systemEquip.cmEquip.co2BasedDamperControl.writeHisVal(systemCo2LoopOp)
+        systemEquip.coolingLoopOutput.writePointValue(systemCoolingLoopOp)
+        systemEquip.heatingLoopOutput.writePointValue(systemHeatingLoopOp)
+        systemEquip.fanLoopOutput.writePointValue(systemFanLoopOp)
+        systemEquip.co2LoopOutput.writePointValue(systemCo2LoopOp)
+        systemEquip.cmEquip.satCoolingLoopOutput.writePointValue(systemSatCoolingLoopOp)
+        systemEquip.cmEquip.satHeatingLoopOutput.writePointValue(systemSatHeatingLoopOp)
+        systemEquip.cmEquip.fanPressureLoopOutput.writePointValue(staticPressureFanLoopOp)
+        systemEquip.operatingMode.writePointValue(DabSystemController.getInstance().systemState.ordinal.toDouble())
+        systemEquip.cmEquip.co2BasedDamperControl.writePointValue(systemCo2LoopOp)
         systemEquip.connectEquip1.let {
-            it.coolingLoopOutput.writeHisVal(systemCoolingLoopOp)
-            it.heatingLoopOutput.writeHisVal(systemHeatingLoopOp)
-            it.fanLoopOutput.writeHisVal(systemFanLoopOp)
-            it.co2LoopOutput.writeHisVal(systemCo2LoopOp)
+            it.coolingLoopOutput.writePointValue(systemCoolingLoopOp)
+            it.heatingLoopOutput.writePointValue(systemHeatingLoopOp)
+            it.fanLoopOutput.writePointValue(systemFanLoopOp)
+            it.co2LoopOutput.writePointValue(systemCo2LoopOp)
         }
     }
 

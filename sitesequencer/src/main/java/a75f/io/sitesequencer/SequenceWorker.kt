@@ -57,14 +57,14 @@ class SequenceWorker(context: Context, params: WorkerParameters) :
             val frequency = inputData.getString("frequency")
             CcuLog.d(TAG, "fetch sequence with seqId: $seqId")
             val siteSequencerDefinition = SequenceManager.getInstance().getSequenceById(seqId!!)
-            if (siteSequencerDefinition != null) {
+            if (siteSequencerDefinition != null && siteSequencerDefinition.enabled) {
                 if (!frequency.isNullOrEmpty() && frequency == "EVERY_MONTH" || frequency == "WEEKLY") {
                     SequencerSchedulerUtil.scheduleJob(context, siteSequencerDefinition)
                 }
 
                 CcuLog.d(
                     TAG,
-                    "##starting evaluation for seqId: $seqId <--name--> ${siteSequencerDefinition.seqName} using j2v8"
+                    "##starting evaluation for seqId: $seqId <--name--> ${siteSequencerDefinition.seqName} using j2v8 --isEnabled->${siteSequencerDefinition.enabled}"
                 )
                 sequencerJsUtil.def = siteSequencerDefinition
                 sequenceLogs = SequenceLogs(

@@ -29,7 +29,7 @@ class SequencerSchedulerUtil {
                 var isJobCreated = isAlarmScheduled(context, siteSequencerDefinition.seqId.hashCode()) //isJobExists(siteSequencerDefinition.seqId, context)
                 CcuLog.d(
                     TAG,
-                    "isJobCreated: $isJobCreated for seq id ->: ${siteSequencerDefinition.seqId}")
+                    "isJobCreated: $isJobCreated for seq id ->: ${siteSequencerDefinition.seqId} -isEnabled-${siteSequencerDefinition.enabled}")
                 //if (!isJobCreated) {
                     scheduleJob(context, siteSequencerDefinition)
                 //}

@@ -89,7 +89,9 @@ class SiteSequencerRepository(
     fun addSequencerDefinition(sequenceDef: SiteSequencerDefinition) {
         sequencerDefsMap[sequenceDef.seqId] = sequenceDef
         saveDefs()
-        SequencerSchedulerUtil.createJob(haystack.context, sequenceDef)
+        if(sequenceDef.enabled) {
+            SequencerSchedulerUtil.createJob(haystack.context, sequenceDef)
+        }
     }
 
     fun getSequenceById(seqId: String): SiteSequencerDefinition? {
@@ -134,7 +136,9 @@ class SiteSequencerRepository(
                 SequencerParser.TAG_CCU_SITE_SEQUENCER,
                 "Predefined sequences Fetched: ${it.seqId} <-->${it.seqName} now scheduling based on frequency: ${it.quartzCronRequest.frequency}\""
             )
-            SequencerSchedulerUtil.createJob(haystack.context, it)
+            if(it.enabled){
+                SequencerSchedulerUtil.createJob(haystack.context, it)
+            }
         }
     }
 

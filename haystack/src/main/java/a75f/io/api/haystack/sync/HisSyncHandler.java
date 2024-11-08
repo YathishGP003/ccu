@@ -15,7 +15,9 @@ import org.projecthaystack.HVal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.locks.Lock;
@@ -54,7 +56,8 @@ public class HisSyncHandler
     private boolean nonCovSyncPending = false;
 
     private long lastPurgeTime  = 0;
-    
+
+    private Set<String> sensorsPendingSync = new HashSet<>();
     public HisSyncHandler(CCUHsApi api) {
         ccuHsApi = api;
     }
@@ -113,7 +116,10 @@ public class HisSyncHandler
             syncHistorizedEquipPoints(syncAllData, numberOfHisEntryPerPoint);
 
             syncHistorizedZonePoints(syncAllData, numberOfHisEntryPerPoint);
-
+            if (syncAllData) {
+                CcuLog.d(TAG,"Clear sensorsPendingSync");
+                sensorsPendingSync.clear();
+            }
             ccuHsApi.tagsDb.persistUnsyncedCachedItems();
 
         }
@@ -424,7 +430,7 @@ public class HisSyncHandler
                 || pointToSync.containsKey("rssi")
                 || (pointToSync.containsKey("system") && pointToSync.containsKey("clock"))
                 || (pointToSync.containsKey("occupancy") && pointToSync.containsKey("detection"))
-                || pointToSync.containsKey("sensor") && !pointToSync.containsKey("modbus")
+                || !sensorsPendingSync.contains(pointToSync.get("id").toString())
                 || (pointToSync.containsKey("outside") && pointToSync.containsKey("temp")
                 && pointToSync.containsKey("system"));
     }
@@ -534,5 +540,8 @@ public class HisSyncHandler
     public void setNonCovSyncPending() {
         nonCovSyncPending = true;
     }
-    
+
+    public void addSensorPendingSync(String sensorId) {
+        sensorsPendingSync.add(sensorId);
+    }
 }

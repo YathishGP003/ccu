@@ -228,11 +228,11 @@ public class HyperStatMsgReceiver {
         double receivedRoomTemp = Pulse.getRoomTempConversion((double) regularUpdateMessage.getRoomTemperature());
         double curRoomTemp = hayStack.readHisValById(point.getId());
         if (curRoomTemp != receivedRoomTemp) {
-            hayStack.writeHisValById(point.getId(), Pulse.getRoomTempConversion((double) regularUpdateMessage.getRoomTemperature()));
             if (currentTempInterface != null) {
                 currentTempInterface.updateTemperature(curRoomTemp, Short.parseShort(point.getGroup()));
             }
         }
+        hayStack.writeHisValById(point.getId(), Pulse.getRoomTempConversion((double) regularUpdateMessage.getRoomTemperature()));
     }
 
     /**

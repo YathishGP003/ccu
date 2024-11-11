@@ -430,9 +430,10 @@ public class HisSyncHandler
                 || pointToSync.containsKey("rssi")
                 || (pointToSync.containsKey("system") && pointToSync.containsKey("clock"))
                 || (pointToSync.containsKey("occupancy") && pointToSync.containsKey("detection"))
-                || !sensorsPendingSync.contains(pointToSync.get("id").toString())
+                || (pointToSync.containsKey("sensor") && !pointToSync.containsKey("modbus")
+                    && !sensorsPendingSync.contains(pointToSync.get("id").toString()))
                 || (pointToSync.containsKey("outside") && pointToSync.containsKey("temp")
-                && pointToSync.containsKey("system"));
+                    && pointToSync.containsKey("system"));
     }
 
     private HDict[] hDictListToArray(List<HDict> hDictList) {

@@ -113,6 +113,13 @@ object ModelLoader {
         return ModelCache.getModelById(MODEL_HELIO_NODE_DAB)
     }
 
+    fun getSmartNodePidModel() : ModelDirective {
+        return ModelCache.getModelById(MODEL_SMARTNODE_PID)
+    }
+    fun getHelioNodePidModel() : ModelDirective {
+        return ModelCache.getModelById(MODEL_HELIONODE_PID)
+    }
+
     fun getModelForDomainName( domainName : String) : ModelDirective {
         return when(domainName) {
             "smartnodeVAVReheatNoFan" -> getSmartNodeVavNoFanModelDef()
@@ -134,6 +141,9 @@ object ModelLoader {
             "cmDevice" -> getCMDeviceModel()
             "connectModuleDevice" -> getConnectModuleDeviceModel()
             "hyperstatSplitDevice" -> getHyperStatSplitDeviceModel()
+            "vavStagedRtu" -> getVavStageRtuModelDef()
+            "smartnodePID" -> getSmartNodePidModel()
+            "helionodePID" -> getHelioNodePidModel()
             else -> throw IllegalStateException("Invalid Model Name")
         }
     }

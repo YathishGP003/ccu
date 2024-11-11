@@ -1318,7 +1318,7 @@ public class CCUHsApi
             hsClient.hisWrite(HRef.copy(id), new HHisItem[]{HHisItem.make(HDateTime.make(System.currentTimeMillis()), HNum.make(val))});
         } else {
             HDict point = readHDictById(id);
-            if (point != null && point.get("sensor") != null) {
+            if (point != null && point.get("sensor", false) != null) {
                 hisSyncHandler.addSensorPendingSync(id);
             }
         }

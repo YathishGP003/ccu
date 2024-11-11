@@ -164,9 +164,9 @@ class DabProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                             previewWidth = 60,
                             expandedWidth = 80,
                             onSelected = { selectedIndex ->
-                                viewModel.viewState.damper1Size = selectedIndex.toDouble()
+                                viewModel.viewState.damper1Size = viewModel.damper1SizesList[selectedIndex].toDouble()
                             },
-                            defaultSelection = viewModel.viewState.damper1Size.toInt(),
+                            defaultSelection = viewModel.damper1SizesList.indexOf(viewModel.viewState.damper1Size.toInt().toString()),
                             spacerLimit = 20,
                             heightValue = 268
                         )
@@ -223,9 +223,9 @@ class DabProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                             previewWidth = 60,
                             expandedWidth = 80,
                             onSelected = { selectedIndex ->
-                                viewModel.viewState.damper2Size = selectedIndex.toDouble()
+                                viewModel.viewState.damper2Size = viewModel.damper2SizesList[selectedIndex].toDouble()
                             },
-                            defaultSelection = viewModel.viewState.damper2Size.toInt(),
+                            defaultSelection = viewModel.damper2SizesList.indexOf(viewModel.viewState.damper2Size.toInt().toString()),
                             spacerLimit = 20,
                             heightValue = 268
                         )

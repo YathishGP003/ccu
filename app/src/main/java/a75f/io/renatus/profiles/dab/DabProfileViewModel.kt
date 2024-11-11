@@ -117,6 +117,8 @@ class DabProfileViewModel : ViewModel() {
                 zoneRef, floorRef, profileType, model
             ).getDefaultConfiguration()
             CcuLog.i(Domain.LOG_TAG, profileConfiguration.toString())
+            profileConfiguration.damper1Size.currentVal = 4.0
+            profileConfiguration.damper2Size.currentVal = 4.0
             viewState = DabConfigViewState.fromDabProfileConfig(profileConfiguration)
         }
         this.context = requireContext

@@ -201,11 +201,6 @@ class HyperStatSplitCpuViewModel : HyperStatSplitViewModel() {
                     L.saveCCUState()
                     hayStack.syncEntityTree()
                     CCUHsApi.getInstance().setCcuReady()
-                    CcuLog.i(Domain.LOG_TAG, "Send seed for $deviceAddress")
-                    LSerial.getInstance()
-                        .sendHyperSplitSeedMessage(deviceAddress, zoneRef, floorRef)
-
-                    DesiredTempDisplayMode.setModeType(zoneRef, CCUHsApi.getInstance())
                     CcuLog.i(Domain.LOG_TAG, "HSS Profile Pairing complete")
                     //delete deadband points in equip level
                     deletingDeadBandPointsInEquipLevel()
@@ -216,7 +211,10 @@ class HyperStatSplitCpuViewModel : HyperStatSplitViewModel() {
                         ProgressDialogUtils.hideProgressDialog()
                         pairingCompleteListener.onPairingComplete()
                     }
-
+                    CcuLog.i(Domain.LOG_TAG, "Send seed for $deviceAddress")
+                    LSerial.getInstance()
+                        .sendHyperSplitSeedMessage(deviceAddress, zoneRef, floorRef)
+                    DesiredTempDisplayMode.setModeType(zoneRef, CCUHsApi.getInstance())
                     // This check is needed because the dialog sometimes fails to close inside the coroutine.
                     // We don't know why this happens.
                     if (ProgressDialogUtils.isDialogShowing()) {

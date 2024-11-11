@@ -1,5 +1,6 @@
 package a75f.io.renatus.profiles.plc
 
+import a75f.io.api.haystack.CCUHsApi
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.renatus.BASE.BaseDialogFragment
@@ -36,6 +37,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.dp
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -43,7 +45,7 @@ import kotlinx.coroutines.withContext
 
 class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener {
 
-    //private val viewModel : VavProfileViewModel by viewModels()
+    private val viewModel : PlcProfileViewModel by viewModels()
     companion object {
         val ID: String = PlcProfileConfigFragment::class.java.simpleName
 
@@ -70,8 +72,8 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
             ShowProgressBar()
         }
         viewLifecycleOwner.lifecycleScope.launch(highPriorityDispatcher) {
-            //viewModel.init(requireArguments(), requireContext(), CCUHsApi.getInstance())
-            //viewModel.setOnPairingCompleteListener(this@PlcProfileConfigFragment)
+            viewModel.init(requireArguments(), requireContext(), CCUHsApi.getInstance())
+            viewModel.setOnPairingCompleteListener(this@PlcProfileConfigFragment)
             withContext(Dispatchers.Main) {
                 rootView.setContent {
                     RootView()
@@ -111,14 +113,14 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                     Spacer(modifier = Modifier.width(50.dp))
                     DropDownWithLabel(
                         label = "Analog-in 1 Input Sensor",
-                        list = (1..10).toList().map { it.toString() },
-                        previewWidth = 165,
-                        expandedWidth = 185,
+                        list = viewModel.analog1InputType,
+                        previewWidth = 195,
+                        expandedWidth = 195,
                         onSelected = { selectedIndex ->
-                            //viewModel.viewState.reheatType = selectedIndex.toDouble()
+                            viewModel.viewState.analog1InputType = selectedIndex.toDouble()
                         },
-                        //defaultSelection = viewModel.viewState.reheatType.toInt(),
-                        spacerLimit = 110,
+                        defaultSelection = viewModel.viewState.analog1InputType.toInt(),
+                        spacerLimit = 80,
                         heightValue = 268
                     )
                     Spacer(modifier = Modifier.width(85.dp))
@@ -142,26 +144,26 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                     Spacer(modifier = Modifier.width(50.dp))
                     DropDownWithLabel(
                         label = "TH-in1 Input Sensor",
-                        list = (1..10).toList().map { it.toString() },
-                        previewWidth = 165,
-                        expandedWidth = 185,
+                        list = viewModel.thermistor1InputType,
+                        previewWidth = 195,
+                        expandedWidth = 195,
                         onSelected = { selectedIndex ->
-                            //viewModel.viewState.reheatType = selectedIndex.toDouble()
+                            viewModel.viewState.thermistor1InputType = selectedIndex.toDouble()
                         },
-                        //defaultSelection = viewModel.viewState.reheatType.toInt(),
-                        spacerLimit = 160,
+                        defaultSelection = viewModel.viewState.thermistor1InputType.toInt(),
+                        spacerLimit = 130,
                         heightValue = 268
                     )
                     Spacer(modifier = Modifier.width(85.dp))
                     DropDownWithLabel(
                         label = "Expected Error Range",
-                        list = (0..100).toList().map { (it.toFloat()/10).toString() },
+                        list = viewModel.pidProportionalRange,
                         previewWidth = 130,
                         expandedWidth = 150,
                         onSelected = { selectedIndex ->
-                            //viewModel.viewState.zonePriority = selectedIndex.toDouble()
+                            viewModel.viewState.pidProportionalRange = selectedIndex.toDouble()
                         },
-                        //defaultSelection = viewModel.viewState.zonePriority.toInt(),
+                        defaultSelection = viewModel.viewState.pidProportionalRange.toInt(),
                         spacerLimit = 80,
                         heightValue = 211
                     )
@@ -173,36 +175,36 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                     Spacer(modifier = Modifier.width(50.dp))
                     DropDownWithLabel(
                         label = "Native Sensor Input",
-                        list = (1..10).toList().map { it.toString() },
-                        previewWidth = 165,
-                        expandedWidth = 185,
+                        list = viewModel.nativeSensorType,
+                        previewWidth = 195,
+                        expandedWidth = 195,
                         onSelected = { selectedIndex ->
-                            //viewModel.viewState.reheatType = selectedIndex.toDouble()
+                            viewModel.viewState.nativeSensorType = selectedIndex.toDouble()
                         },
-                        //defaultSelection = viewModel.viewState.reheatType.toInt(),
-                        spacerLimit = 165,
+                        defaultSelection = viewModel.viewState.nativeSensorType.toInt(),
+                        spacerLimit = 135,
                         heightValue = 268
                     )
                 }
                 Spacer(modifier = Modifier.height(30.dp))
                 Row {
                     Spacer(modifier = Modifier.width(50.dp))
-                    HeaderTextView(text = "Expected Zero Error at Midpoint"/*viewModel.profileConfiguration.autoAway.disName*/, padding = 10)
+                    HeaderTextView(text = "Expected Zero Error at Midpoint", padding = 10)
                     Spacer(modifier = Modifier.width(100.dp))
                     ToggleButtonStateful(
-                        defaultSelection = false,//viewModel.viewState.autoAway,
-                        onEnabled = {/* viewModel.viewState.autoAway = it*/ }
+                        defaultSelection = viewModel.viewState.expectZeroErrorAtMidpoint,
+                        onEnabled = { viewModel.viewState.expectZeroErrorAtMidpoint = it }
                     )
                 }
 
                 Spacer(modifier = Modifier.height(30.dp))
                 Row {
                     Spacer(modifier = Modifier.width(50.dp))
-                    HeaderTextView(text = "Invert Control Loop Output"/*viewModel.profileConfiguration.autoAway.disName*/, padding = 10)
+                    HeaderTextView(text = "Invert Control Loop Output", padding = 10)
                     Spacer(modifier = Modifier.width(155.dp))
                     ToggleButtonStateful(
-                        defaultSelection = false,//viewModel.viewState.autoAway,
-                        onEnabled = {/* viewModel.viewState.autoAway = it*/ }
+                        defaultSelection = viewModel.viewState.invertControlLoopoutput,
+                        onEnabled = { viewModel.viewState.invertControlLoopoutput = it }
                     )
                 }
 
@@ -212,8 +214,8 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                     HeaderTextView(text = "Use Analog-in2 for dynamic setpoint"/*viewModel.profileConfiguration.autoAway.disName*/, padding = 10)
                     Spacer(modifier = Modifier.width(55.dp))
                     ToggleButtonStateful(
-                        defaultSelection = false,//viewModel.viewState.autoAway,
-                        onEnabled = {/* viewModel.viewState.autoAway = it*/ }
+                        defaultSelection = viewModel.viewState.useAnalogIn2ForSetpoint,
+                        onEnabled = { viewModel.viewState.useAnalogIn2ForSetpoint = it }
                     )
                 }
 
@@ -223,26 +225,26 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                     Spacer(modifier = Modifier.width(50.dp))
                     DropDownWithLabel(
                         label = "Analog-in2 Input Sensor",
-                        list = (1..10).toList().map { it.toString() },
-                        previewWidth = 165,
-                        expandedWidth = 185,
+                        list = viewModel.analog2InputType,
+                        previewWidth = 195,
+                        expandedWidth = 195,
                         onSelected = { selectedIndex ->
-                            //viewModel.viewState.reheatType = selectedIndex.toDouble()
+                            viewModel.viewState.analog2InputType = selectedIndex.toDouble()
                         },
-                        //defaultSelection = viewModel.viewState.reheatType.toInt(),
-                        spacerLimit = 112,
+                        defaultSelection = viewModel.viewState.analog2InputType.toInt(),
+                        spacerLimit = 82,
                         heightValue = 268
                     )
                     Spacer(modifier = Modifier.width(95.dp))
                     DropDownWithLabel(
                         label = "Setpoint Sensor Offset",
-                        list = (0..100).toList().map { (it.toFloat()/10).toString() },
+                        list = viewModel.setpointSensorOffset,
                         previewWidth = 130,
                         expandedWidth = 150,
                         onSelected = { selectedIndex ->
-                            //viewModel.viewState.zonePriority = selectedIndex.toDouble()
+                            viewModel.viewState.setpointSensorOffset = selectedIndex.toDouble()
                         },
-                        //defaultSelection = viewModel.viewState.zonePriority.toInt(),
+                        defaultSelection = viewModel.viewState.setpointSensorOffset.toInt(),
                         spacerLimit = 50,
                         heightValue = 211
                     )
@@ -253,14 +255,14 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                     Spacer(modifier = Modifier.width(50.dp))
                     DropDownWithLabel(
                         label = "Analog-Out1 at Min Output",
-                        list = (1..10).toList().map { it.toString() },
+                        list = viewModel.analog1MinOutput,
                         previewWidth = 165,
                         expandedWidth = 185,
                         onSelected = { selectedIndex ->
-                            //viewModel.viewState.reheatType = selectedIndex.toDouble()
+                            viewModel.viewState.analog1MinOutput = selectedIndex.toDouble()
                         },
-                        //defaultSelection = viewModel.viewState.reheatType.toInt(),
-                        spacerLimit = 50,
+                        defaultSelection = viewModel.viewState.analog1MinOutput.toInt(),
+                        spacerLimit = 65,
                         heightValue = 268
                     )
                 }
@@ -270,14 +272,14 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                     Spacer(modifier = Modifier.width(50.dp))
                     DropDownWithLabel(
                         label = "Analog-Out1 at Max Output",
-                        list = (1..10).toList().map { it.toString() },
+                        list = viewModel.analog1MaxOutput,
                         previewWidth = 165,
                         expandedWidth = 185,
                         onSelected = { selectedIndex ->
-                            //viewModel.viewState.reheatType = selectedIndex.toDouble()
+                            viewModel.viewState.analog1MaxOutput = selectedIndex.toDouble()
                         },
-                        //defaultSelection = viewModel.viewState.reheatType.toInt(),
-                        spacerLimit = 45,
+                        defaultSelection = viewModel.viewState.analog1MaxOutput.toInt(),
+                        spacerLimit = 60,
                         heightValue = 268
                     )
                 }
@@ -286,19 +288,19 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
 
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start) {
                     Spacer(modifier = Modifier.width(50.dp))
-                    HeaderTextView(text = "Relay 1"/*viewModel.profileConfiguration.autoAway.disName*/, padding = 10)
+                    HeaderTextView(text = "Relay 1", padding = 10)
                     Spacer(modifier = Modifier.width(100.dp))
                     ToggleButtonStateful(
-                        defaultSelection = false,//viewModel.viewState.autoAway,
-                        onEnabled = {/* viewModel.viewState.autoAway = it*/ }
+                        defaultSelection = viewModel.viewState.relay1,
+                        onEnabled = { viewModel.viewState.relay1 = it }
                     )
 
                     Spacer(modifier = Modifier.width(375.dp))
-                    HeaderTextView(text = "Relay 2"/*viewModel.profileConfiguration.autoAway.disName*/, padding = 10)
+                    HeaderTextView(text = "Relay 2", padding = 10)
                     Spacer(modifier = Modifier.width(100.dp))
                     ToggleButtonStateful(
-                        defaultSelection = false,//viewModel.viewState.autoAway,
-                        onEnabled = {/* viewModel.viewState.autoAway = it*/ }
+                        defaultSelection = viewModel.viewState.relay2,
+                        onEnabled = { viewModel.viewState.relay2 = it }
                     )
                 }
 
@@ -307,26 +309,26 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                     Spacer(modifier = Modifier.width(50.dp))
                     DropDownWithLabel(
                         label = "Turn ON Relay 1",
-                        list = (1..100).toList().map { it.toString() },
+                        list = viewModel.relay1OnThreshold,
                         previewWidth = 165,
                         expandedWidth = 185,
                         onSelected = { selectedIndex ->
-                            //viewModel.viewState.reheatType = selectedIndex.toDouble()
+                            viewModel.viewState.relay1OnThreshold = selectedIndex.toDouble()
                         },
-                        //defaultSelection = viewModel.viewState.reheatType.toInt(),
+                        defaultSelection = viewModel.viewState.relay1OnThreshold.toInt(),
                         spacerLimit = 200,
                         heightValue = 268
                     )
                     Spacer(modifier = Modifier.width(85.dp))
                     DropDownWithLabel(
                         label = "Turn ON Relay 2",
-                        list = (0..100).toList().map { (it.toFloat()/10).toString() },
+                        list = viewModel.relay2OnThreshold,
                         previewWidth = 130,
                         expandedWidth = 150,
                         onSelected = { selectedIndex ->
-                            //viewModel.viewState.zonePriority = selectedIndex.toDouble()
+                            viewModel.viewState.relay2OnThreshold = selectedIndex.toDouble()
                         },
-                        //defaultSelection = viewModel.viewState.zonePriority.toInt(),
+                        defaultSelection = viewModel.viewState.relay2OnThreshold.toInt(),
                         spacerLimit = 120,
                         heightValue = 211
                     )
@@ -338,26 +340,26 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                     Spacer(modifier = Modifier.width(50.dp))
                     DropDownWithLabel(
                         label = "Turn OFF Relay 1",
-                        list = (1..100).toList().map { it.toString() },
+                        list = viewModel.relay1OffThreshold,
                         previewWidth = 165,
                         expandedWidth = 185,
                         onSelected = { selectedIndex ->
-                            //viewModel.viewState.reheatType = selectedIndex.toDouble()
+                            viewModel.viewState.relay1OffThreshold = selectedIndex.toDouble()
                         },
-                        //defaultSelection = viewModel.viewState.reheatType.toInt(),
+                        defaultSelection = viewModel.viewState.relay1OffThreshold.toInt(),
                         spacerLimit = 190,
                         heightValue = 268
                     )
                     Spacer(modifier = Modifier.width(85.dp))
                     DropDownWithLabel(
                         label = "Turn OFF Relay 2",
-                        list = (0..100).toList().map { (it.toFloat()/10).toString() },
+                        list = viewModel.relay2OffThreshold,
                         previewWidth = 130,
                         expandedWidth = 150,
                         onSelected = { selectedIndex ->
-                            //viewModel.viewState.zonePriority = selectedIndex.toDouble()
+                            viewModel.viewState.relay2OffThreshold = selectedIndex.toDouble()
                         },
-                        //defaultSelection = viewModel.viewState.zonePriority.toInt(),
+                        defaultSelection = viewModel.viewState.relay2OffThreshold.toInt(),
                         spacerLimit = 110,
                         heightValue = 211
                     )
@@ -370,7 +372,7 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                     contentAlignment = Alignment.CenterEnd
                 ) {
                     SaveTextView(SET) {
-                        //viewModel.saveConfiguration()
+                        viewModel.saveConfiguration()
                     }
                 }
 

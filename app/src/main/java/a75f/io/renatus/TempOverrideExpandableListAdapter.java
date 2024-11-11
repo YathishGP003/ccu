@@ -57,6 +57,7 @@ import a75f.io.logic.bo.building.hyperstat.profiles.cpu.HyperStatCpuProfile;
 import a75f.io.logic.bo.building.hyperstatmonitoring.HyperStatMonitoringConfiguration;
 import a75f.io.logic.bo.building.hyperstatmonitoring.HyperStatMonitoringProfile;
 import a75f.io.logic.bo.building.plc.PlcProfile;
+import a75f.io.logic.bo.building.plc.PlcProfileConfig;
 import a75f.io.logic.bo.building.plc.PlcProfileConfiguration;
 import a75f.io.logic.bo.building.sensors.Sensor;
 import a75f.io.logic.bo.building.sensors.SensorManager;

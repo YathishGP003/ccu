@@ -1139,5 +1139,30 @@ object DomainName {
     const val pressureBasedFanControlFeedback = "pressureBasedFanControlFeedback"
     const val satBasedCoolingControlFeedback = "satBasedCoolingControlFeedback"
     const val satBasedHeatingControlFeedback = "satBasedHeatingControlFeedback"
+
+    //PLC
+    const val analog1InputType = "analog1InputType"
+    //target value ?
+    const val dynamicTargetValue = "dynamicTargetValue"
+    const val thermistor1InputType = "thermistor1InputType"
+    const val pidProportionalRange = "pidProportionalRange"
+    const val nativeSensorType = "nativeSensorType"
+    const val expectZeroErrorAtMidpoint = "expectZeroErrorAtMidpoint"
+    const val invertControlLoopoutput = "invertControlLoopoutput"
+    const val useAnalogIn2ForSetpoint = "useAnalogIn2ForSetpoint"
+    const val analog2InputType = "analog2InputType"
+    const val setpointSensorOffset = "setpointSensorOffset"
+    const val analog1MinOutput = "analog1MinOutput"
+    const val analog1MaxOutput = "analog1MaxOutput"
+    const val relay1OnThreshold = "relay1OnThreshold"
+    const val relay1OffThreshold = "relay1OffThreshold"
+    const val relay2OnThreshold = "relay2OnThreshold"
+    const val relay2OffThreshold = "relay2OffThreshold"
+    const val relay1Cmd = "relay1Cmd"
+    const val relay2Cmd = "relay2Cmd"
+
+
+
+
 }
 

@@ -24,7 +24,6 @@ import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint;
 import a75f.io.logic.tuners.PlcTuners;
 import a75f.io.logic.tuners.TunerUtil;
-import a75f.io.logic.util.RxTask;
 import a75f.io.util.ExecutorTask;
 
 /**

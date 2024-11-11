@@ -1,7 +1,5 @@
 package a75f.io.logic.bo.building.plc;
 
-import android.util.Log;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -24,7 +22,12 @@ public class PlcProfile extends ZoneProfile
 {
     PlcEquip plcEquip;
     int outputSignal = 0;
-    
+
+    public PlcProfile() {}
+    public PlcProfile(short addr) {
+        plcEquip = new PlcEquip(ProfileType.PLC, addr);
+        plcEquip.init();
+    }
     public void addPlcEquip(short addr, PlcProfileConfiguration config, String floorRef,
                             String roomRef, String processVariable, String dynamicTargetTag, NodeType nodeType) {
         plcEquip = new PlcEquip(getProfileType(), addr);

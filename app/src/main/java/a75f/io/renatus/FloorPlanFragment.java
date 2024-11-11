@@ -62,6 +62,7 @@ import a75f.io.logic.L;
 import a75f.io.logic.TaskManager;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.ZoneProfile;
+import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.cloud.CloudConnectionManager;
 import a75f.io.logic.cloud.CloudConnectionResponseCallback;
 import a75f.io.logic.limits.SchedulabeLimits;
@@ -71,6 +72,7 @@ import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
 import a75f.io.renatus.profiles.acb.AcbProfileConfigFragment;
 import a75f.io.renatus.profiles.hss.cpu.HyperStatSplitCpuFragment;
 import a75f.io.renatus.profiles.dab.DabProfileConfigFragment;
+import a75f.io.renatus.profiles.plc.PlcProfileConfigFragment;
 import a75f.io.renatus.profiles.vav.VavProfileConfigFragment;
 import a75f.io.renatus.modbus.ModbusConfigView;
 import a75f.io.renatus.modbus.util.ModbusLevel;
@@ -1058,8 +1060,8 @@ public class FloorPlanFragment extends Fragment {
                             .newInstance(Short.parseShort(nodeAddress), zone.getId(), floor.getId(), nodeTypeHN, profile.getProfileType()), AcbProfileConfigFragment.Companion.getID());
                     break;
                 case PLC:
-                    showDialogFragment(FragmentPLCConfiguration
-                            .newInstance(Short.parseShort(nodeAddress), zone.getId(), NodeType.SMART_NODE, floor.getId()), FragmentPLCConfiguration.ID);
+                    showDialogFragment(PlcProfileConfigFragment.Companion
+                            .newInstance(Short.parseShort(nodeAddress), zone.getId(), floor.getId(), NodeType.SMART_NODE, ProfileType.PLC), FragmentPLCConfiguration.ID);
                     break;
                 case DAB:
                     Equip equipDab = profile.getEquip();

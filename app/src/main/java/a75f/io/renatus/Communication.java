@@ -973,6 +973,7 @@ public class Communication extends Fragment {
         String deviceIpAddress = "";
         try {
             Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+            boolean foundPreferredNetwork = false;
             while (interfaces.hasMoreElements()) {
                 NetworkInterface iface = interfaces.nextElement();
                 // filters out 127.0.0.1 and inactive interfaces
@@ -987,10 +988,14 @@ public class Communication extends Fragment {
                             CcuLog.d(Tags.BACNET, "device interface and ip" + iface.getDisplayName() + "-" + addr.getHostAddress());
                             deviceIpAddress = addr.getHostAddress();
                             if(iface.getName().startsWith("eth")){
+                                foundPreferredNetwork = true;
                                 break;
                             }
                         }
                     }
+                }
+                if (foundPreferredNetwork) {
+                    break;
                 }
             }
         } catch (Exception e) {

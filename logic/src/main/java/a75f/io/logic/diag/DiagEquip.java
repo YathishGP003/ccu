@@ -370,10 +370,10 @@ public class DiagEquip
         updateRemoteSessionStatusPoint();
         setDiagHisVal("log and level", CCUHsApi.getInstance().readHisValByQuery(Queries.LOG_LEVEL_QUERY));
 
-        updateAppVersionPoint("com.x75frenatus.home", "home");
-        updateAppVersionPoint("io.seventyfivef.remoteaccess", "remoteAccess");
-        updateAppVersionPoint("com.example.ccu_bacapp", "bacnet");
-        updateAppVersionPoint("io.seventyfivef.bacapp", "bacnet");
+        updateAppVersionPoint(L.HOME_APP_PACKAGE_NAME, "home");
+        updateAppVersionPoint(L.REMOTE_ACCESS_PACKAGE_NAME, "remoteAccess");
+        updateAppVersionPoint(L.BAC_APP_PACKAGE_NAME_OBSOLETE, "bacnet");
+        updateAppVersionPoint(L.BAC_APP_PACKAGE_NAME, "bacnet");
     }
 
     private void updateRemoteSessionStatusPoint() {

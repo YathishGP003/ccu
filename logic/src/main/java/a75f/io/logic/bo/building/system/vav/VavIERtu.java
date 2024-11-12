@@ -98,6 +98,9 @@ public class VavIERtu extends VavSystemProfile
         VavSystemController.getInstance().runVavSystemControlAlgo();
         updateSystemPoints();
         setTrTargetVals();
+        if (trSystem != null) {
+            trSystem.resetRequests();
+        }
     }
 
     public void addSystemEquip() {

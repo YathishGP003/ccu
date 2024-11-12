@@ -229,7 +229,7 @@ public class Pulse
 						CcuLog.i(L.TAG_CCU_DEVICE, "regularSNUpdate: "+val);
 						boolean isPressureOnAI1 = hayStack.readDefaultVal("point and domainName == \"" + DomainName.pressureSensorType + "\" and equipRef == \"" + equip.getId() + "\"") > 0.0;
 						double oldDisAnalogVal = hayStack.readHisValById(logPoint.get("id").toString());
-						double curDisAnalogVal = (isBypassDamper && isPressureOnAI1) ? getPressureConversion(equip, val) : getAnalogConversion(phyPoint, logPoint, val);
+						double curDisAnalogVal = (isBypassDamper && isPressureOnAI1) ? getPressureConversion(equip, val) : Math.round(getAnalogConversion(phyPoint, logPoint, val));
 						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
 						CcuLog.i(L.TAG_CCU_DEVICE, " Feedback regularSNUpdate: id "+logPoint.get("id").toString());
 						if (oldDisAnalogVal != curDisAnalogVal) {
@@ -244,7 +244,7 @@ public class Pulse
 						val = smartNodeRegularUpdateMessage_t.update.externalAnalogVoltageInput2.get();
 						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
 						double oldDynamicVar = hayStack.readHisValById(logPoint.get("id").toString());
-						double dynamicVar = getAnalogConversion(phyPoint, logPoint, val);
+						double dynamicVar =  Math.round(getAnalogConversion(phyPoint, logPoint, val));
 						if (oldDynamicVar != dynamicVar) {
 							if (logPointInfo.getMarkers().contains("pid")) {
 								hayStack.writeHisValueByIdWithoutCOV(logPoint.get("id").toString(), dynamicVar + getPiOffsetValue(nodeAddr));
@@ -253,7 +253,7 @@ public class Pulse
 								}
 							} else if (isBypassDamper) {
 								// For Bypass Damper, AI2 maps to Damper Feedback
-								hayStack.writeHisValueByIdWithoutCOV(logPoint.get("id").toString(), getAnalogConversion(phyPoint, logPoint, val));
+								hayStack.writeHisValueByIdWithoutCOV(logPoint.get("id").toString(), (double) Math.round(getAnalogConversion(phyPoint, logPoint, val)));
 							} else
 								hayStack.writeHisValueByIdWithoutCOV(logPoint.get("id").toString(), dynamicVar);
 						}

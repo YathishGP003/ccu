@@ -263,7 +263,7 @@ public class VavAcbProfile extends VavProfile
     }
     
     private void handleDeadband() {
-        
+        deadbandTransitionState = state;
         state = DEADBAND;
         chwValve.currentPosition = 0;
         heatingLoop.setDisabled();

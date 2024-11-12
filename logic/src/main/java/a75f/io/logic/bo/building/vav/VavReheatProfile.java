@@ -221,7 +221,7 @@ public class VavReheatProfile extends VavProfile
     }
     
     private void handleDeadband() {
-        
+        deadbandTransitionState = state;
         state = DEADBAND;
         valveController.reset();
         valve.currentPosition = 0;

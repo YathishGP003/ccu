@@ -47,6 +47,7 @@ public class HaystackService {
     private static final String MSG_CALCULATING = "calculating";
     static final String MSG_SUCCESS = "success";
     private static final String MSG_FAILED = "failed";
+    private static final String WHO = "CCU_SEQUENCER";
 
     private static final String MSG_ERROR_NO_ENTITIES = "Error in finding Entities, please check query";
     private static final String MSG_ERROR_NO_ENTITY = "Error in finding Entity, please check query";
@@ -61,8 +62,11 @@ public class HaystackService {
 
     private SequencerLogsCallback sequenceLogsCallback;
 
-    HaystackService(SequencerLogsCallback sequenceLogsCallback){
+    private String reason;
+
+    HaystackService(SequencerLogsCallback sequenceLogsCallback, String lastRunId, String sequenceId){
         this.sequenceLogsCallback = sequenceLogsCallback;
+        reason = "Run Id : " + lastRunId+ " - " + "Sequence Id : " + sequenceId;
     }
 
     // return array of values
@@ -134,7 +138,7 @@ public class HaystackService {
         String message = String.format("writing point with id = %s, level = %d, value = %s", id, level, value);
         sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("POINT_WRITE"), message, MSG_CALCULATING);
         CcuLog.d(TAG, "---pointWrite##--id-"+id + "<--level-->"+level+"<--override-->"+override + "<-value->"+value);
-        CCUHsApi.getInstance().pointWrite(HRef.copy(id), level, "Seq_Demo", HNum.make(value), HNum.make(0));
+        CCUHsApi.getInstance().pointWrite(HRef.copy(id), level, WHO, HNum.make(value), HNum.make(0), reason);
     }
 
     public void pointWriteMany(V8Array ids, int level, double value, boolean override, Object contextHelper) {
@@ -143,7 +147,7 @@ public class HaystackService {
             String pointId = ids.getString(i);
             String message = String.format("writing point with, id = %s, level = %d, value = %s", HRef.copy(pointId), level, value);
             sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("POINT_WRITE"), message, MSG_CALCULATING);
-            CCUHsApi.getInstance().pointWrite(HRef.copy(pointId), level, "Seq_Demo", HNum.make(value), HNum.make(0));
+            CCUHsApi.getInstance().pointWrite(HRef.copy(pointId), level, WHO, HNum.make(value), HNum.make(0), reason);
         }
         ids.close();
     }

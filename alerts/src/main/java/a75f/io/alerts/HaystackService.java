@@ -105,7 +105,7 @@ public class HaystackService {
 
     public void pointWrite(String id, int level, double value, boolean override, Object contextHelper) {
         CcuLog.d(TAG_CCU_ALERTS, "---pointWrite##--id-"+id + "<--level-->"+level+"<--override-->"+override);
-        CCUHsApi.getInstance().pointWrite(HRef.copy(id), level, "Seq_Demo", HNum.make(value), HNum.make(0));
+        CCUHsApi.getInstance().pointWrite(HRef.copy(id), level, "CCU_ALERTS_SEQUENCER", HNum.make(value), HNum.make(0));
     }
 
     // TODO: 15-04-2024 - needed this for sequence runner

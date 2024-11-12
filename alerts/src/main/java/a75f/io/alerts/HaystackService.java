@@ -105,7 +105,7 @@ public class HaystackService {
 
     public void pointWrite(String id, int level, double value, boolean override, Object contextHelper) {
         CcuLog.d(TAG_CCU_ALERTS, "---pointWrite##--id-"+id + "<--level-->"+level+"<--override-->"+override);
-        CCUHsApi.getInstance().pointWrite(HRef.copy(id), level, "Seq_Demo", HNum.make(value), HNum.make(0));
+        CCUHsApi.getInstance().pointWrite(HRef.copy(id), level, "CCU_ALERTS_SEQUENCER", HNum.make(value), HNum.make(0));
     }
 
     // TODO: 15-04-2024 - needed this for sequence runner
@@ -159,13 +159,13 @@ public class HaystackService {
         }
     }
 
-    public Integer findValueByFilter(String filter, Object contextHelper) {
+    public Double findValueByFilter(String filter, Object contextHelper) {
         CcuLog.d(TAG_CCU_ALERTS, "---findValueByFilter start-" + filter);
         List<HashMap> list = findByFilterCustom(filter, contextHelper);
 
         if(!list.isEmpty()){
             String entityId = list.get(0).get("id").toString();
-            Integer result = fetchValueById(entityId, contextHelper);
+            Double result = fetchValueById(entityId, contextHelper);
             CcuLog.d(TAG_CCU_ALERTS, "---findValueByFilter end result-" + result);
             return result;
         }else{
@@ -181,12 +181,12 @@ public class HaystackService {
         return result;
     }
 
-    public int fetchValueByHisReadMany(String id, Object contextHelper) {
+    public Double fetchValueByHisReadMany(String id, Object contextHelper) {
         return fetchValueById(id, contextHelper);
     }
 
-    public int fetchValueByPointWriteMany(String id, Double level, Object contextHelper) {
-        return (int) (CCUHsApi.getInstance().readDefaultValByLevel(id, (int) (level.doubleValue()))).doubleValue();
+    public Double fetchValueByPointWriteMany(String id, Double level, Object contextHelper) {
+        return (CCUHsApi.getInstance().readDefaultValByLevel(id, (int) (level.doubleValue())));
     }
 
 
@@ -251,11 +251,15 @@ public class HaystackService {
 
     // if writable tag is there, return value of highest level
     // if writable tag is not there, check for his item and return latest value
-    public Integer fetchValueById(String filter, Object contextHelper) {
+    public Double fetchValueById(String filter, Object contextHelper) {
         CcuLog.d(TAG_CCU_ALERTS, "---fetchValueById start--filter-"+filter);
-        Integer output = null;
+        Double output = null;
         try {
-            output = (int)(CCUHsApi.getInstance().readHisValById(filter).doubleValue());
+            if(CCUHsApi.getInstance().readMapById(filter).get("writable") != null) {
+                output = CCUHsApi.getInstance().readPointPriorityVal(filter);
+            }else{
+                output = CCUHsApi.getInstance().readHisValById(filter);
+            }
             CcuLog.d(TAG_CCU_ALERTS, "---fetchValueById###--id-"+filter+"<---->"+output);
         }catch (Exception e){
             e.printStackTrace();

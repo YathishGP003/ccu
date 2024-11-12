@@ -144,6 +144,12 @@ public class HyperStatMessageGenerator {
             .setHyperstatStagedFanSpeeds(HyperStatSettingsUtil.Companion.getStagedFanSpeedDetails(equipRef))
                 .setTemperatureMode(temperatureMode == 0 ? HyperStat.HyperStatTemperatureMode_e.HYPERSTAT_TEMP_MODE_DUAL_FIXED_DB
                         : HyperStat.HyperStatTemperatureMode_e.HYPERSTAT_TEMP_MODE_DUAL_VARIABLE_DB)
+                .setMiscSettings1(4) //  Sending value 4 because firmware expects it to be 4
+            //sending MiscSettings1 always 001
+            // bit 0: enableExternal10kTemperatureSensor
+            // bit 1: disableTouch
+            // bit 2: brightnessVariationEnable
+
             .build();
 
 

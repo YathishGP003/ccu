@@ -207,6 +207,36 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         hayStack.scheduleSync()
     }
 
+    fun doDabDamperSizeMigration() {
+        val damperSizeMap = mapOf(
+            0.0 to 4.0,
+            1.0 to 6.0,
+            2.0 to 8.0,
+            3.0 to 10.0,
+            4.0 to 12.0,
+            5.0 to 14.0,
+            6.0 to 16.0,
+            7.0 to 18.0,
+            8.0 to 20.0,
+            9.0 to 22.0
+        )
+        val dabEquips = hayStack.readAllEntities("equip and zone and dab and not dualDuct")
+            .filter { it["domainName"] != null }
+            .toList()
+
+        dabEquips.forEach {
+            val dabEquip = DabEquip(it["id"].toString())
+
+            val damper1Size = dabEquip.damper1Size.readPriorityVal()
+            dabEquip.damper1Size.writeDefaultVal(damperSizeMap[damper1Size] ?: 4.0)
+            CcuLog.d(L.TAG_CCU_DOMAIN, "Damper1 Size: ${dabEquip.damper1Size.readPriorityVal()}")
+            val damper2Size = dabEquip.damper2Size.readPriorityVal()
+            dabEquip.damper2Size.writeDefaultVal(damperSizeMap[damper2Size] ?: 4.0)
+            CcuLog.d(L.TAG_CCU_DOMAIN, "Damper2 Size: ${dabEquip.damper2Size.readPriorityVal()}")
+        }
+    }
+
+
     private fun clearOtaCachePreferences() {
         CcuLog.d(L.TAG_CCU_MIGRATION_UTIL,"Clearing OtaCache Preferences")
         try {

@@ -26,6 +26,7 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import java.util.UUID
 import java.util.function.Consumer
 
 class SequenceWorker(context: Context, params: WorkerParameters) :
@@ -57,14 +58,14 @@ class SequenceWorker(context: Context, params: WorkerParameters) :
             val frequency = inputData.getString("frequency")
             CcuLog.d(TAG, "fetch sequence with seqId: $seqId")
             val siteSequencerDefinition = SequenceManager.getInstance().getSequenceById(seqId!!)
-            if (siteSequencerDefinition != null) {
+            if (siteSequencerDefinition != null && siteSequencerDefinition.enabled) {
                 if (!frequency.isNullOrEmpty() && frequency == "EVERY_MONTH" || frequency == "WEEKLY") {
                     SequencerSchedulerUtil.scheduleJob(context, siteSequencerDefinition)
                 }
 
                 CcuLog.d(
                     TAG,
-                    "##starting evaluation for seqId: $seqId <--name--> ${siteSequencerDefinition.seqName} using j2v8"
+                    "##starting evaluation for seqId: $seqId <--name--> ${siteSequencerDefinition.seqName} using j2v8 --isEnabled->${siteSequencerDefinition.enabled}"
                 )
                 sequencerJsUtil.def = siteSequencerDefinition
                 sequenceLogs = SequenceLogs(
@@ -287,40 +288,6 @@ class SequenceWorker(context: Context, params: WorkerParameters) :
         val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
         return dateFormat.format(currentDateTime)
     }
-
-    private suspend fun evaluateJs(
-        def: SiteSequencerDefinition,
-        javascriptSnippet: String?,
-        mContext: Context?,
-        alertJsUtil: SequencerJsUtil?,
-        sequenceLogUtil: SequencerLogsCallback
-    ) {
-        val rhino = org.mozilla.javascript.Context.enter()
-        rhino.optimizationLevel = -1
-        val scope: Scriptable = rhino.initStandardObjects()
-        scope.put("print", scope, org.mozilla.javascript.Context.javaToJS(ConsolePrint(), scope))
-        val jsObject =
-            org.mozilla.javascript.Context.javaToJS(HaystackService(sequenceLogUtil), scope)
-        ScriptableObject.putProperty(scope, "haystack", jsObject)
-        val persistBlockService =
-            org.mozilla.javascript.Context.javaToJS(
-                PersistBlockService.getInstance(def.seqId),
-                scope
-            )
-        ScriptableObject.putProperty(scope, "persistBlock", persistBlockService)
-        val alertJsUtilJsObject = org.mozilla.javascript.Context.javaToJS(alertJsUtil, scope)
-        ScriptableObject.putProperty(scope, "alerts", alertJsUtilJsObject)
-        ScriptableObject.putProperty(scope, "ctx", mContext)
-        try {
-            rhino.evaluateString(scope, javascriptSnippet, "JavaScript", 1, null)
-        } catch (exception: RhinoException) {
-            exception.printStackTrace()
-            CcuLog.e(TAG, exception.message)
-        } finally {
-            org.mozilla.javascript.Context.exit()
-        }
-    }
-
     private suspend fun evaluateJsJ2v8(
         def: SiteSequencerDefinition,
         javascriptSnippet: String?,
@@ -330,7 +297,8 @@ class SequenceWorker(context: Context, params: WorkerParameters) :
     ) {
         V8.createV8Runtime(null, mContext.applicationInfo.dataDir).use { runtime ->
             runtime.use { runtime ->
-                val haystackService = HaystackService(sequenceLogUtil)
+                val lastRunId = UUID.randomUUID().toString()
+                val haystackService = HaystackService(sequenceLogUtil, lastRunId, def.seqId)
                 val haystackServiceObject = V8Object(runtime)
 
                 registerAllMethods(haystackService, haystackServiceObject)

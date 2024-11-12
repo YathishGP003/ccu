@@ -36,7 +36,9 @@ import a75f.io.logic.tuners.TunerUtil;
 
 public abstract class VavSystemProfile extends SystemProfile
 {
-    
+
+    protected boolean setupModeActive = false;
+
     public void addSystemLoopOpPoints(String equipRef)
     {
         CCUHsApi hayStack = CCUHsApi.getInstance();
@@ -420,5 +422,9 @@ public abstract class VavSystemProfile extends SystemProfile
         trSystem.spTRResponse.setI((int)((VavTRSystem)trSystem).getSpTRTunerVal("ignoreRequest", "staticPressure"));
         trSystem.spTRResponse.setT((int)((VavTRSystem)trSystem).getSpTRTunerVal("timeInterval", "staticPressure"));
         trSystem.spTRResponse.setTd((int)((VavTRSystem)trSystem).getSpTRTunerVal("timeDelay", "staticPressure"));
+    }
+
+    protected int getSystemSATRequests() {
+        return (int) trSystem.getSystemSATTRProcessor().trSetting.getR();
     }
 }

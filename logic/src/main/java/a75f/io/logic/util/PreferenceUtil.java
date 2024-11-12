@@ -76,6 +76,7 @@ public class PreferenceUtil {
     public static final String APP_VERSION_POINTS_MIGRATION = "appVersionPointsMigration";
     public static final String MIGRATE_HIS_INTERPOLATE_FOR_DEVICE_POINTS = "migrateHisInterpolateForDeviceEntities";
     public static final String BACKFILL_DEFAULT_VALUE_MIGRATION = "backFillDefaultValueMigration";
+    public static final String DAB_DAMPER_SIZE_MIGRATION = "dabDamperSizeMigration";
 
 
 
@@ -587,5 +588,13 @@ public class PreferenceUtil {
 
     public static void setBackFillValueUpdateDone() {
         setBooleanPreference(BACKFILL_DEFAULT_VALUE_MIGRATION, true);
+    }
+
+    public static boolean getDamperSizeMigrationFlagStatus() {
+        return getBooleanPreference(DAB_DAMPER_SIZE_MIGRATION);
+    }
+
+    public static void setDamperSizeMigrationFlagStatus() {
+        setBooleanPreference(DAB_DAMPER_SIZE_MIGRATION, true);
     }
 }

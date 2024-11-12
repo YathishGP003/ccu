@@ -145,7 +145,9 @@ public class VavSeriesFanProfile extends VavProfile
             loopOp = (int) vavEquip.getHeatingLoopOutput().readHisVal();
         } else {
             //Zone is in deadband
-            handleDeadband();
+            if (state != DEADBAND) {
+                handleDeadband();
+            }
         }
         return loopOp;
     }
@@ -195,7 +197,7 @@ public class VavSeriesFanProfile extends VavProfile
     }
     
     private void handleDeadband() {
-    
+        deadbandTransitionState = state;
         state = DEADBAND;
         valve.currentPosition = 0;
         heatingLoop.setDisabled();

@@ -165,6 +165,9 @@ open class VavAdvancedAhu : VavSystemProfile() {
         VavSystemController.getInstance().runVavSystemControlAlgo()
         updateSystemPoints()
         setTrTargetVals()
+        if (trSystem != null) {
+            trSystem.resetRequests()
+        }
     }
 
     private fun initializePILoop() {

@@ -47,11 +47,7 @@ import a75f.io.logic.bo.building.definitions.ScheduleType;
 import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.bo.util.CCUUtils;
-import a75f.io.logic.migration.VavAndAcbProfileMigration;
-import a75f.io.logic.bo.util.DesiredTempDisplayMode;
-import a75f.io.logic.ccu.restore.RestoreCCU;
-import a75f.io.logic.diag.DiagEquip;
-import a75f.io.logic.limits.SchedulabeLimits;
+import a75f.io.logic.migration.MigrationHandler;
 import a75f.io.logic.migration.VavAndAcbProfileMigration;
 import a75f.io.logic.migration.hyperstat.CpuPointsMigration;
 import a75f.io.logic.migration.hyperstat.MigratePointsUtil;
@@ -191,7 +187,12 @@ public class MigrationUtil {
         deleteDuplicateLimitsifAny(ccuHsApi);
         cleanUpAndCreateZoneSchedules(ccuHsApi);
         syncZoneSchedulesFromLocal(ccuHsApi);
-
+        if(!PreferenceUtil.getDamperSizeMigrationFlagStatus()) {
+            CcuLog.d(TAG, "doDabDamperSizeMigration started");
+            new MigrationHandler(ccuHsApi).doDabDamperSizeMigration();
+            PreferenceUtil.setDamperSizeMigrationFlagStatus();
+            CcuLog.d(TAG, "doDabDamperSizeMigration ended");
+        }
         ccuHsApi.scheduleSync();
     }
 

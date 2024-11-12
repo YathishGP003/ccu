@@ -54,6 +54,9 @@ public class VavStagedRtuWithVfd extends VavStagedRtu
         VavSystemController.getInstance().runVavSystemControlAlgo();
         updateSystemPoints();
         setTrTargetVals();
+        if (trSystem != null) {
+            trSystem.resetRequests();
+        }
     }
     
     @Override

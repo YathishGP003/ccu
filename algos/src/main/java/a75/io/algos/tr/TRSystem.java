@@ -67,4 +67,9 @@ public abstract class TRSystem
     public TrimResponseProcessor getSystemHwstTRProcessor(){
         return hwstTRProcessor;
     }
+
+    @JsonIgnore
+    public void resetRequests(){
+
+    }
 }

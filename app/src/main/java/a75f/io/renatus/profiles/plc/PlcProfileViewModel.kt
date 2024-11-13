@@ -57,7 +57,7 @@ class PlcProfileViewModel : ViewModel() {
     lateinit var hayStack : CCUHsApi
 
     lateinit var analog1InputType: List<String>
-    lateinit var targetValue: List<String>
+    lateinit var pidTargetValue: List<String>
     lateinit var thermistor1InputType: List<String>
     lateinit var pidProportionalRange: List<String>
     lateinit var nativeSensorType: List<String>
@@ -108,7 +108,7 @@ class PlcProfileViewModel : ViewModel() {
 
     private fun initializeLists() {
         analog1InputType = getListByDomainName(DomainName.analog1InputType, model)
-        //targetValue = getListByDomainName(DomainName.targetValue, model)
+        pidTargetValue = getListByDomainName(DomainName.pidTargetValue, model)
         thermistor1InputType = getListByDomainName(DomainName.thermistor1InputType, model)
         pidProportionalRange = getListByDomainName(DomainName.pidProportionalRange, model)
         nativeSensorType = getListByDomainName(DomainName.nativeSensorType, model)

@@ -8,7 +8,7 @@ import androidx.compose.runtime.setValue
 class PlcProfileViewState {
 
     var analog1InputType by mutableStateOf (0.0)
-    var targetValue by mutableStateOf (0.0)
+    var pidTargetValue by mutableStateOf (0.0)
     var thermistor1InputType by mutableStateOf (0.0)
     var pidProportionalRange by mutableStateOf (0.0)
     var nativeSensorType by mutableStateOf (0.0)
@@ -23,8 +23,8 @@ class PlcProfileViewState {
     var analog1MinOutput by mutableStateOf (0.0)
     var analog1MaxOutput by mutableStateOf (0.0)
 
-    var relay1 by mutableStateOf (false)
-    var relay2 by mutableStateOf (false)
+    var relay1OutputEnable by mutableStateOf (false)
+    var relay2OutputEnable by mutableStateOf (false)
     
     var relay1OnThreshold by mutableStateOf (0.0)
     var relay2OnThreshold by mutableStateOf (0.0)
@@ -36,7 +36,7 @@ class PlcProfileViewState {
         fun fromPlcProfileConfig(config : PlcProfileConfig) : PlcProfileViewState {
             return PlcProfileViewState().apply {
                 this.analog1InputType = config.analog1InputType.currentVal
-                //this.targetValue = config.targetValue.currentVal
+                this.pidTargetValue = config.pidTargetValue.currentVal
                 this.thermistor1InputType = config.thermistor1InputType.currentVal
                 this.pidProportionalRange = config.pidProportionalRange.currentVal
                 this.nativeSensorType = config.nativeSensorType.currentVal
@@ -50,8 +50,8 @@ class PlcProfileViewState {
                 this.analog1MinOutput = config.analog1MinOutput.currentVal
                 this.analog1MaxOutput = config.analog1MaxOutput.currentVal
 
-                this.relay1 = config.relay1.enabled
-                this.relay2 = config.relay2.enabled
+                this.relay1OutputEnable = config.relay1OutputEnable.enabled
+                this.relay2OutputEnable = config.relay2OutputEnable.enabled
 
                 this.relay1OnThreshold = config.relay1OnThreshold.currentVal
                 this.relay2OnThreshold = config.relay2OnThreshold.currentVal
@@ -63,7 +63,7 @@ class PlcProfileViewState {
 
     fun updateConfigFromViewState(config : PlcProfileConfig) {
         config.analog1InputType.currentVal = this.analog1InputType
-        //config.targetValue.currentVal = this.targetValue
+        config.pidTargetValue.currentVal = this.pidTargetValue
         config.thermistor1InputType.currentVal = this.thermistor1InputType
         config.pidProportionalRange.currentVal = this.pidProportionalRange
         config.nativeSensorType.currentVal = this.nativeSensorType
@@ -77,8 +77,8 @@ class PlcProfileViewState {
         config.analog1MinOutput.currentVal = this.analog1MinOutput
         config.analog1MaxOutput.currentVal = this.analog1MaxOutput
 
-        config.relay1.enabled = this.relay1
-        config.relay2.enabled = this.relay2
+        config.relay1OutputEnable.enabled = this.relay1OutputEnable
+        config.relay2OutputEnable.enabled = this.relay2OutputEnable
 
         config.relay1OnThreshold.currentVal = this.relay1OnThreshold
         config.relay2OnThreshold.currentVal = this.relay2OnThreshold

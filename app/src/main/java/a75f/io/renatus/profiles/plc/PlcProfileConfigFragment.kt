@@ -1,6 +1,7 @@
 package a75f.io.renatus.profiles.plc
 
 import a75f.io.api.haystack.CCUHsApi
+import a75f.io.logger.CcuLog
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.renatus.BASE.BaseDialogFragment
@@ -33,6 +34,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
@@ -103,6 +105,10 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                 .fillMaxSize()
                 .padding(20.dp),
         ) {
+            CcuLog.d("PLC", "viewModel.viewState.pidTargetValue ${viewModel.viewState.pidTargetValue}")
+            viewModel.pidTargetValue.forEach {
+                CcuLog.d("PLC", "viewModel.viewState.pidTargetValue $it")
+            }
             item {
                 Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                     TitleTextView("PI LOOP CONTROLLER")
@@ -111,49 +117,70 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
 
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start) {
                     Spacer(modifier = Modifier.width(50.dp))
-                    DropDownWithLabel(
-                        label = "Analog-in 1 Input Sensor",
-                        list = viewModel.analog1InputType,
-                        previewWidth = 195,
-                        expandedWidth = 195,
-                        onSelected = { selectedIndex ->
-                            viewModel.viewState.analog1InputType = selectedIndex.toDouble()
-                        },
-                        defaultSelection = viewModel.viewState.analog1InputType.toInt(),
-                        spacerLimit = 80,
-                        heightValue = 268
-                    )
+                    key(viewModel.viewState.thermistor1InputType,
+                             viewModel.viewState.nativeSensorType) {
+                        DropDownWithLabel(
+                            label = "Analog-in 1 Input Sensor",
+                            list = viewModel.analog1InputType,
+                            previewWidth = 195,
+                            expandedWidth = 195,
+                            onSelected = { selectedIndex ->
+                                viewModel.viewState.analog1InputType = selectedIndex.toDouble()
+                                if (selectedIndex > 0) {
+                                    viewModel.viewState.thermistor1InputType = 0.0
+                                    viewModel.viewState.nativeSensorType = 0.0
+                                }
+                            },
+                            defaultSelection = viewModel.viewState.analog1InputType.toInt(),
+                            spacerLimit = 80,
+                            heightValue = 268
+                        )
+                    }
                     Spacer(modifier = Modifier.width(85.dp))
-                    DropDownWithLabel(
-                        label = "Target Value",
-                        list = (0..100).toList().map { (it.toFloat()/10).toString() },
-                        previewWidth = 130,
-                        expandedWidth = 150,
-                        onSelected = { selectedIndex ->
-                            //viewModel.viewState.zonePriority = selectedIndex.toDouble()
-                        },
-                        //defaultSelection = viewModel.viewState.zonePriority.toInt(),
-                        spacerLimit = 180,
-                        heightValue = 211
-                    )
+                    key(viewModel.viewState.analog1InputType,
+                        viewModel.viewState.thermistor1InputType,
+                        viewModel.viewState.nativeSensorType) {
+                        DropDownWithLabel(
+                            label = "Target Value",
+                            list = viewModel.pidTargetValue,
+                            previewWidth = 130,
+                            expandedWidth = 150,
+                            onSelected = { selectedIndex ->
+                                viewModel.viewState.pidTargetValue =
+                                    viewModel.pidTargetValue[selectedIndex].toDouble()
+                            },
+                            defaultSelection = viewModel.pidTargetValue.indexOf(
+                                viewModel.viewState.pidTargetValue.toInt().toString()
+                            ),
+                            spacerLimit = 180,
+                            heightValue = 211
+                        )
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(30.dp))
 
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start) {
                     Spacer(modifier = Modifier.width(50.dp))
-                    DropDownWithLabel(
-                        label = "TH-in1 Input Sensor",
-                        list = viewModel.thermistor1InputType,
-                        previewWidth = 195,
-                        expandedWidth = 195,
-                        onSelected = { selectedIndex ->
-                            viewModel.viewState.thermistor1InputType = selectedIndex.toDouble()
-                        },
-                        defaultSelection = viewModel.viewState.thermistor1InputType.toInt(),
-                        spacerLimit = 130,
-                        heightValue = 268
-                    )
+                    key(viewModel.viewState.analog1InputType,
+                        viewModel.viewState.nativeSensorType) {
+                        DropDownWithLabel(
+                            label = "TH-in1 Input Sensor",
+                            list = viewModel.thermistor1InputType,
+                            previewWidth = 195,
+                            expandedWidth = 195,
+                            onSelected = { selectedIndex ->
+                                viewModel.viewState.thermistor1InputType = selectedIndex.toDouble()
+                                if (selectedIndex > 0) {
+                                    viewModel.viewState.analog1InputType = 0.0
+                                    viewModel.viewState.nativeSensorType = 0.0
+                                }
+                            },
+                            defaultSelection = viewModel.viewState.thermistor1InputType.toInt(),
+                            spacerLimit = 130,
+                            heightValue = 268
+                        )
+                    }
                     Spacer(modifier = Modifier.width(85.dp))
                     DropDownWithLabel(
                         label = "Expected Error Range",
@@ -173,18 +200,25 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
 
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start) {
                     Spacer(modifier = Modifier.width(50.dp))
-                    DropDownWithLabel(
-                        label = "Native Sensor Input",
-                        list = viewModel.nativeSensorType,
-                        previewWidth = 195,
-                        expandedWidth = 195,
-                        onSelected = { selectedIndex ->
-                            viewModel.viewState.nativeSensorType = selectedIndex.toDouble()
-                        },
-                        defaultSelection = viewModel.viewState.nativeSensorType.toInt(),
-                        spacerLimit = 135,
-                        heightValue = 268
-                    )
+                    key(viewModel.viewState.analog1InputType,
+                        viewModel.viewState.thermistor1InputType) {
+                        DropDownWithLabel(
+                            label = "Native Sensor Input",
+                            list = viewModel.nativeSensorType,
+                            previewWidth = 195,
+                            expandedWidth = 195,
+                            onSelected = { selectedIndex ->
+                                viewModel.viewState.nativeSensorType = selectedIndex.toDouble()
+                                if (selectedIndex > 0) {
+                                    viewModel.viewState.analog1InputType = 0.0
+                                    viewModel.viewState.thermistor1InputType = 0.0
+                                }
+                            },
+                            defaultSelection = viewModel.viewState.nativeSensorType.toInt(),
+                            spacerLimit = 135,
+                            heightValue = 268
+                        )
+                    }
                 }
                 Spacer(modifier = Modifier.height(30.dp))
                 Row {
@@ -211,7 +245,7 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                 Spacer(modifier = Modifier.height(30.dp))
                 Row {
                     Spacer(modifier = Modifier.width(50.dp))
-                    HeaderTextView(text = "Use Analog-in2 for dynamic setpoint"/*viewModel.profileConfiguration.autoAway.disName*/, padding = 10)
+                    HeaderTextView(text = "Use Analog-in2 for dynamic setpoint", padding = 10)
                     Spacer(modifier = Modifier.width(55.dp))
                     ToggleButtonStateful(
                         defaultSelection = viewModel.viewState.useAnalogIn2ForSetpoint,
@@ -291,16 +325,16 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                     HeaderTextView(text = "Relay 1", padding = 10)
                     Spacer(modifier = Modifier.width(100.dp))
                     ToggleButtonStateful(
-                        defaultSelection = viewModel.viewState.relay1,
-                        onEnabled = { viewModel.viewState.relay1 = it }
+                        defaultSelection = viewModel.viewState.relay1OutputEnable,
+                        onEnabled = { viewModel.viewState.relay1OutputEnable = it }
                     )
 
                     Spacer(modifier = Modifier.width(375.dp))
                     HeaderTextView(text = "Relay 2", padding = 10)
                     Spacer(modifier = Modifier.width(100.dp))
                     ToggleButtonStateful(
-                        defaultSelection = viewModel.viewState.relay2,
-                        onEnabled = { viewModel.viewState.relay2 = it }
+                        defaultSelection = viewModel.viewState.relay2OutputEnable,
+                        onEnabled = { viewModel.viewState.relay2OutputEnable = it }
                     )
                 }
 
@@ -313,9 +347,9 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                         previewWidth = 165,
                         expandedWidth = 185,
                         onSelected = { selectedIndex ->
-                            viewModel.viewState.relay1OnThreshold = selectedIndex.toDouble()
+                            viewModel.viewState.relay1OnThreshold = viewModel.relay1OnThreshold[selectedIndex].toDouble()
                         },
-                        defaultSelection = viewModel.viewState.relay1OnThreshold.toInt(),
+                        defaultSelection = viewModel.relay1OnThreshold.indexOf(viewModel.viewState.relay1OnThreshold.toInt().toString()),
                         spacerLimit = 200,
                         heightValue = 268
                     )
@@ -326,9 +360,9 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                         previewWidth = 130,
                         expandedWidth = 150,
                         onSelected = { selectedIndex ->
-                            viewModel.viewState.relay2OnThreshold = selectedIndex.toDouble()
+                            viewModel.viewState.relay2OnThreshold = viewModel.relay2OnThreshold[selectedIndex].toDouble()
                         },
-                        defaultSelection = viewModel.viewState.relay2OnThreshold.toInt(),
+                        defaultSelection = viewModel.relay2OnThreshold.indexOf(viewModel.viewState.relay2OnThreshold.toInt().toString()),
                         spacerLimit = 120,
                         heightValue = 211
                     )
@@ -344,9 +378,9 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                         previewWidth = 165,
                         expandedWidth = 185,
                         onSelected = { selectedIndex ->
-                            viewModel.viewState.relay1OffThreshold = selectedIndex.toDouble()
+                            viewModel.viewState.relay1OffThreshold = viewModel.relay1OffThreshold[selectedIndex].toDouble()
                         },
-                        defaultSelection = viewModel.viewState.relay1OffThreshold.toInt(),
+                        defaultSelection = viewModel.relay1OffThreshold.indexOf(viewModel.viewState.relay1OffThreshold.toInt().toString()),
                         spacerLimit = 190,
                         heightValue = 268
                     )
@@ -357,9 +391,9 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                         previewWidth = 130,
                         expandedWidth = 150,
                         onSelected = { selectedIndex ->
-                            viewModel.viewState.relay2OffThreshold = selectedIndex.toDouble()
+                            viewModel.viewState.relay2OffThreshold = viewModel.relay2OffThreshold[selectedIndex].toDouble()
                         },
-                        defaultSelection = viewModel.viewState.relay2OffThreshold.toInt(),
+                        defaultSelection = viewModel.relay2OffThreshold.indexOf(viewModel.viewState.relay2OffThreshold.toInt().toString()),
                         spacerLimit = 110,
                         heightValue = 211
                     )

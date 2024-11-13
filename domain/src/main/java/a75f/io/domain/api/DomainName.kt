@@ -1142,7 +1142,7 @@ object DomainName {
 
     //PLC
     const val analog1InputType = "analog1InputType"
-    //target value ?
+    const val pidTargetValue = "pidTargetValue"
     const val dynamicTargetValue = "dynamicTargetValue"
     const val thermistor1InputType = "thermistor1InputType"
     const val pidProportionalRange = "pidProportionalRange"

@@ -14,7 +14,7 @@ class PlcProfileConfig (nodeAddress: Int, nodeType: String, priority: Int, roomR
     : ProfileConfiguration(nodeAddress, nodeType, priority, roomRef, floorRef, profileType.name) {
 
     lateinit var analog1InputType: ValueConfig
-    lateinit var targetValue: ValueConfig
+    lateinit var pidTargetValue: ValueConfig
     lateinit var thermistor1InputType: ValueConfig
     lateinit var pidProportionalRange: ValueConfig
     lateinit var nativeSensorType: ValueConfig
@@ -28,8 +28,8 @@ class PlcProfileConfig (nodeAddress: Int, nodeType: String, priority: Int, roomR
     lateinit var analog1MinOutput: ValueConfig
     lateinit var analog1MaxOutput: ValueConfig
 
-    lateinit var relay1: EnableConfig
-    lateinit var relay2: EnableConfig
+    lateinit var relay1OutputEnable: EnableConfig
+    lateinit var relay2OutputEnable: EnableConfig
     lateinit var relay1OnThreshold: ValueConfig
     lateinit var relay2OnThreshold: ValueConfig
     lateinit var relay1OffThreshold: ValueConfig
@@ -37,7 +37,7 @@ class PlcProfileConfig (nodeAddress: Int, nodeType: String, priority: Int, roomR
 
     fun getDefaultConfiguration() : PlcProfileConfig {
         analog1InputType = getDefaultValConfig(DomainName.analog1InputType, model)
-        //targetValue = getDefaultValConfig(DomainName.targetValue, model)
+        pidTargetValue = getDefaultValConfig(DomainName.pidTargetValue, model)
         thermistor1InputType = getDefaultValConfig(DomainName.thermistor1InputType, model)
         pidProportionalRange = getDefaultValConfig(DomainName.pidProportionalRange, model)
         nativeSensorType = getDefaultValConfig(DomainName.nativeSensorType, model)
@@ -51,15 +51,13 @@ class PlcProfileConfig (nodeAddress: Int, nodeType: String, priority: Int, roomR
         analog1MinOutput = getDefaultValConfig(DomainName.analog1MinOutput, model)
         analog1MaxOutput = getDefaultValConfig(DomainName.analog1MaxOutput, model)
 
-        relay1 = getDefaultEnableConfig(DomainName.relay1, model)
-        relay2 = getDefaultEnableConfig(DomainName.relay2, model)
+        relay1OutputEnable = getDefaultEnableConfig(DomainName.relay1OutputEnable, model)
+        relay2OutputEnable = getDefaultEnableConfig(DomainName.relay2OutputEnable, model)
         relay1OnThreshold = getDefaultValConfig(DomainName.relay1OnThreshold, model)
         relay2OnThreshold = getDefaultValConfig(DomainName.relay2OnThreshold, model)
         relay1OffThreshold = getDefaultValConfig(DomainName.relay1OffThreshold, model)
         relay2OffThreshold = getDefaultValConfig(DomainName.relay2OffThreshold, model)
-
         isDefault = true
-
         return this
     }
 
@@ -73,7 +71,7 @@ class PlcProfileConfig (nodeAddress: Int, nodeType: String, priority: Int, roomR
 
         getDefaultConfiguration()
         analog1InputType.currentVal = plcEquip.analog1InputType.readDefaultVal()
-        //targetValue.currentVal = plcEquip.targetValue.readDefaultVal()
+        pidTargetValue.currentVal = plcEquip.pidTargetValue.readDefaultVal()
         thermistor1InputType.currentVal = plcEquip.thermistor1InputType.readDefaultVal()
         pidProportionalRange.currentVal = plcEquip.pidProportionalRange.readDefaultVal()
         nativeSensorType.currentVal = plcEquip.nativeSensorType.readDefaultVal()
@@ -87,8 +85,8 @@ class PlcProfileConfig (nodeAddress: Int, nodeType: String, priority: Int, roomR
         analog1MinOutput.currentVal = plcEquip.analog1MinOutput.readDefaultVal()
         analog1MaxOutput.currentVal = plcEquip.analog1MaxOutput.readDefaultVal()
 
-        relay1.enabled = plcEquip.relay1.readDefaultVal() > 0
-        relay2.enabled = plcEquip.relay2.readDefaultVal() > 0
+        relay1OutputEnable.enabled = plcEquip.relay1OutputEnable.readDefaultVal() > 0
+        relay2OutputEnable.enabled = plcEquip.relay2OutputEnable.readDefaultVal() > 0
 
         relay1OnThreshold.currentVal = plcEquip.relay1OnThreshold.readDefaultVal()
         relay2OnThreshold.currentVal = plcEquip.relay2OnThreshold.readDefaultVal()
@@ -108,15 +106,15 @@ class PlcProfileConfig (nodeAddress: Int, nodeType: String, priority: Int, roomR
             add(expectZeroErrorAtMidpoint)
             add(invertControlLoopoutput)
             add(useAnalogIn2ForSetpoint)
-            add(relay1)
-            add(relay2)
+            add(relay1OutputEnable)
+            add(relay2OutputEnable)
         }
     }
 
     override fun getValueConfigs(): List<ValueConfig> {
         return mutableListOf<ValueConfig>().apply {
             add(analog1InputType)
-            //add(targetValue)
+            add(pidTargetValue)
             add(thermistor1InputType)
             add(pidProportionalRange)
             add(nativeSensorType)
@@ -132,11 +130,11 @@ class PlcProfileConfig (nodeAddress: Int, nodeType: String, priority: Int, roomR
     }
 
     override fun toString(): String {
-        return " analog1InputType ${analog1InputType.currentVal}  thermistor1InputType ${thermistor1InputType.currentVal}"+
+        return " analog1InputType ${analog1InputType.currentVal}  pidTargetValue ${pidTargetValue.currentVal} thermistor1InputType ${thermistor1InputType.currentVal}"+
             "pidProportionalRange ${pidProportionalRange.currentVal} nativeSensorType ${nativeSensorType.currentVal} expectZeroErrorAtMidpoint ${expectZeroErrorAtMidpoint.enabled}"+
                 "invertControlLoopoutput ${invertControlLoopoutput.enabled} useAnalogIn2ForSetpoint ${useAnalogIn2ForSetpoint.enabled} analog2InputType ${analog2InputType.currentVal}" +
                 "setpointSensorOffset ${setpointSensorOffset.currentVal} analog1MinOutput ${analog1MinOutput.currentVal} analog1MaxOutput ${analog1MaxOutput.currentVal}" +
-                "relay1 ${relay1.enabled} relay2 ${relay2.enabled} relay1OnThreshold ${relay1OnThreshold.currentVal} relay2OnThreshold ${relay2OnThreshold.currentVal}" +
+                "relay1OutputEnable ${relay1OutputEnable.enabled} relay2OutputEnable ${relay2OutputEnable.enabled} relay1OnThreshold ${relay1OnThreshold.currentVal} relay2OnThreshold ${relay2OnThreshold.currentVal}" +
                 "relay1OffThreshold ${relay1OffThreshold.currentVal} relay2OffThreshold ${relay2OffThreshold.currentVal}"
     }
 

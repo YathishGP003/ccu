@@ -18,10 +18,15 @@ import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.vav.AcbProfileConfiguration
 import a75f.io.logic.bo.building.vav.VavAcbProfile
 import a75f.io.logic.getSchedule
+import a75f.io.messaging.handler.ACBConfigHandler
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.FloorPlanFragment
 import a75f.io.renatus.modbus.util.showToast
+import a75f.io.renatus.profiles.OnPairingCompleteListener
+import a75f.io.renatus.profiles.profileUtils.UnusedPortsModel
+import a75f.io.renatus.profiles.profileUtils.UnusedPortsModel.Companion.saveUnUsedPortStatus
 import a75f.io.renatus.util.ProgressDialogUtils
+import a75f.io.renatus.util.highPriorityDispatcher
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -35,14 +40,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.properties.Delegates
-import a75f.io.renatus.profiles.OnPairingCompleteListener
-import a75f.io.renatus.profiles.profileUtils.UnusedPortsModel
-import a75f.io.renatus.profiles.profileUtils.UnusedPortsModel.Companion.saveUnUsedPortStatus
-import a75f.io.messaging.handler.ACBConfigHandler
-import a75f.io.api.haystack.HSUtil
-import a75f.io.api.haystack.Tags
-import a75f.io.domain.equips.VavEquip
-import a75f.io.renatus.util.highPriorityDispatcher
 
 
 class AcbProfileViewModel : ViewModel() {
@@ -309,14 +306,13 @@ class AcbProfileViewModel : ViewModel() {
     }
 
     private fun setScheduleType(config: AcbProfileConfiguration) {
-        val scheduleTypePoint = hayStack.readEntity("point and domainName == \"" + DomainName.scheduleType + "\" and group == \"" + config.nodeAddress + "\"")
-        val scheduleTypeId = scheduleTypePoint.get("id").toString()
-
-        val roomSchedule = getSchedule(zoneRef, floorRef)
-        if(roomSchedule.isZoneSchedule) {
-            hayStack.writeDefaultValById(scheduleTypeId, 1.0)
-        } else {
-            hayStack.writeDefaultValById(scheduleTypeId, 2.0)
+        hayStack.readEntity("point and domainName == \"" + DomainName.scheduleType + "\" and group == \"" + config.nodeAddress + "\"")["id"]?.let { scheduleTypeId ->
+            val roomSchedule = getSchedule(zoneRef, floorRef)
+            if(roomSchedule.isZoneSchedule) {
+                hayStack.writeDefaultValById(scheduleTypeId.toString(), 1.0)
+            } else {
+                hayStack.writeDefaultValById(scheduleTypeId.toString(), 2.0)
+            }
         }
     }
 

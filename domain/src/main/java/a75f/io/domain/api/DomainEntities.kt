@@ -156,6 +156,9 @@ open class Point(domainName : String, val equipRef: String) : Entity(domainName)
     }
     fun writeDefaultVal(defaultVal : Any) {
         requireId()
+        if (id == "null") {
+            return
+        }
         if (defaultVal is String) {
             Domain.hayStack.writeDefaultValById(id, defaultVal)
         } else if (defaultVal is Double) {
@@ -188,10 +191,16 @@ open class Point(domainName : String, val equipRef: String) : Entity(domainName)
 
     fun writeVal(level: Int, value : Double) {
         requireId()
+        if(id == "null") {
+            return
+        }
         Domain.hayStack.writePointForCcuUser(id, level, value, 0, null)
     }
     fun writeVal(level: Int, who: String?, writableVal: Double?, duration: Int) {
         requireId()
+        if(id == "null") {
+            return
+        }
         Domain.hayStack.writePoint(id, level, who, writableVal, duration)
     }
 

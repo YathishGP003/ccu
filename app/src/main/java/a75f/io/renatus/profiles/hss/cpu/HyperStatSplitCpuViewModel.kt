@@ -37,7 +37,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
-import java.util.HashMap
 
 class HyperStatSplitCpuViewModel : HyperStatSplitViewModel() {
 
@@ -537,14 +536,13 @@ class HyperStatSplitCpuViewModel : HyperStatSplitViewModel() {
     }
 
     private fun setScheduleType(config: HyperStatSplitProfileConfiguration) {
-        val scheduleTypePoint = hayStack.readEntity("point and domainName == \"" + DomainName.scheduleType + "\" and group == \"" + config.nodeAddress + "\"")
-        val scheduleTypeId = scheduleTypePoint.get("id").toString()
-
-        val roomSchedule = getSchedule(zoneRef, floorRef)
-        if(roomSchedule.isZoneSchedule) {
-            hayStack.writeDefaultValById(scheduleTypeId, 1.0)
-        } else {
-            hayStack.writeDefaultValById(scheduleTypeId, 2.0)
+        hayStack.readEntity("point and domainName == \"" + DomainName.scheduleType + "\" and group == \"" + config.nodeAddress + "\"")["id"]?.let { scheduleTypeId ->
+            val roomSchedule = getSchedule(zoneRef, floorRef)
+            if(roomSchedule.isZoneSchedule) {
+                hayStack.writeDefaultValById(scheduleTypeId.toString(), 1.0)
+            } else {
+                hayStack.writeDefaultValById(scheduleTypeId.toString(), 2.0)
+            }
         }
     }
 

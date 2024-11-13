@@ -3,7 +3,6 @@ package a75f.io.api.haystack;
 import static a75f.io.api.haystack.util.SchedulableMigrationKt.doPointWriteForSchedulable;
 
 import android.content.Context;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -23,7 +22,6 @@ import org.projecthaystack.HStr;
 import org.projecthaystack.HVal;
 import org.projecthaystack.UnknownRecException;
 import org.projecthaystack.client.HClient;
-import org.projecthaystack.io.HGridFormat;
 import org.projecthaystack.server.HStdOps;
 
 import java.util.ArrayList;
@@ -845,7 +843,8 @@ public class RestoreCCUHsApi {
         if (site != null && site.getOrganization() != null) {
             String org = site.getOrganization();
             HDict zoneScheduleDict = new HDictBuilder().add("filter",
-                    "named and schedule and organization == \""+org+"\"").toDict();
+                    "named and schedule and organization == \""+org+"\" and " +
+                            "(not siteRef or siteRef == \"" + site.getId().replace("@","") + "\")").toDict();
             HGrid zoneScheduleGrid = invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(zoneScheduleDict),
                     retryCountCallback);
 

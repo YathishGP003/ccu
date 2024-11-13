@@ -53,8 +53,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.RetryCountCallback;
 import a75f.io.device.bacnet.BacnetConfigConstants;
-import a75f.io.domain.logic.DomainManager;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.ccu.restore.CCU;
@@ -62,7 +62,6 @@ import a75f.io.logic.ccu.restore.EquipResponseCallback;
 import a75f.io.logic.ccu.restore.ReplaceCCUTracker;
 import a75f.io.logic.ccu.restore.ReplaceStatus;
 import a75f.io.logic.ccu.restore.RestoreCCU;
-import a75f.io.api.haystack.RetryCountCallback;
 import a75f.io.logic.cloud.FileBackupManager;
 import a75f.io.logic.cloud.OtpManager;
 import a75f.io.logic.cloud.RenatusServicesEnvironment;
@@ -71,11 +70,11 @@ import a75f.io.logic.cloud.ResponseCallback;
 import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.messaging.client.MessagingClient;
 import a75f.io.renatus.R;
+import a75f.io.renatus.UtilityApplication;
 import a75f.io.renatus.util.CCUListAdapter;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
-import a75f.io.renatus.util.RxjavaUtil;
 import a75f.io.sitesequencer.SequenceManager;
 import a75f.io.util.ExecutorTask;
 
@@ -520,6 +519,7 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
                 ReplaceCCU.this.loadRenatusLandingIntent();
                 ReplaceCCU.this.updatePreference();
                 MessagingClient.getInstance().init();
+                UtilityApplication.scheduleMessagingAckJob();
                 CCUHsApi.getInstance().updateLocalTimeZone();
                 RenatusServicesUrls renatusServicesUrls = RenatusServicesEnvironment.getInstance().getUrls();
                 SequenceManager.getInstance(Globals.getInstance().getApplicationContext(), renatusServicesUrls.getSequencerUrl())
@@ -557,9 +557,11 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
     private void replaceEquipsParallelly(ReplaceCCUTracker replaceCCUTracker, EquipResponseCallback equipResponseCallback,
                                          ConcurrentHashMap<String, ?> currentReplacementProgress,
                                          RetryCountCallback retryCountCallback) {
+        performSiteSyncIfNotCompleted(currentReplacementProgress, equipResponseCallback, replaceCCUTracker, retryCountCallback);
         executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() -1);
         for (String equipId : currentReplacementProgress.keySet()) {
-            if(currentReplacementProgress.get(equipId).toString().equals(ReplaceStatus.COMPLETED.toString())){
+            if(currentReplacementProgress.get(equipId).toString().equals(ReplaceStatus.COMPLETED.toString())
+                    || equipId.equalsIgnoreCase(RestoreCCU.SYNC_SITE)){
                 continue;
             }
             if (equipId.equalsIgnoreCase(RestoreCCU.CONFIG_FILES)) {
@@ -620,5 +622,18 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
         prefs.setString(BacnetConfigConstants.BACNET_CONFIGURATION, bacnet_pref.getString(BacnetConfigConstants.BACNET_CONFIGURATION,null));
         prefs.setBoolean(BacnetConfigConstants.IS_BACNET_INITIALIZED, bacnet_pref.getBoolean(BacnetConfigConstants.IS_BACNET_INITIALIZED,false));
         prefs.setBoolean(BacnetConfigConstants.IS_BACNET_CONFIG_FILE_CREATED, bacnet_pref.getBoolean(BacnetConfigConstants.IS_BACNET_CONFIG_FILE_CREATED,false));
+    }
+
+    private void performSiteSyncIfNotCompleted(ConcurrentHashMap<String, ?> currentReplacementProgress,
+                                              EquipResponseCallback equipResponseCallback,
+                                              ReplaceCCUTracker replaceCCUTracker, RetryCountCallback retryCountCallback) {
+        if(currentReplacementProgress.get(RestoreCCU.SYNC_SITE).toString().equals(ReplaceStatus.COMPLETED.toString())){
+            CcuLog.d(TAG_CCU_REPLACE, "SYNC_SITE operation is already completed. Skipping the operation.");
+            return;
+        }
+        CcuLog.d(TAG_CCU_REPLACE, "Performing SYNC_SITE operation.");
+        restoreCCU.syncExistingSite(ccu.getSiteCode(), deviceCount, equipResponseCallback,
+                replaceCCUTracker, retryCountCallback);
+        CcuLog.d(TAG_CCU_REPLACE, "SYNC_SITE operation executed.");
     }
 }

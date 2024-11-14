@@ -258,7 +258,7 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
         CcuLog.i(Domain.LOG_TAG," Updated Equip point ${def.domainName}")
     }
     fun updateDevice(deviceRef: String, modelDef : SeventyFiveFDeviceDirective, deviceDis: String) {
-        var deviceDict = hayStack.readHDictById(deviceRef)
+        val deviceDict = hayStack.readHDictById(deviceRef)
         val device = Device.Builder().setHDict(deviceDict).build()
         device.domainName = modelDef.domainName
         device.displayName = deviceDis
@@ -267,7 +267,7 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
             "${modelDef.version?.major}" +
                     ".${modelDef.version?.minor}.${modelDef.version?.patch}"
         )
-        deviceDict["createdDateTime"]?.let {
+        deviceDict.get("createdDateTime",false)?.let {
             device.createdDateTime = HDateTime.make(deviceDict["createdDateTime"].toString())
         }
         device.lastModifiedBy = hayStack.ccuUserName

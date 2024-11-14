@@ -136,7 +136,9 @@ public class AlertProcessor
     AlertJsUtil alertJsUtil = new AlertJsUtil(new AlertJsCallback() {
         @Override
         public boolean triggerAlert(String blockId, String notificationMsg, String message, String entityId, Object contextHelper, AlertDefinition def) {
-
+            if(entityId.contains("@@")) {
+                entityId = entityId.replaceAll("@@", "@");
+            }
             HashMap<Object, Object> map = CCUHsApi.getInstance().readMapById(entityId);
             if(map == null || map.isEmpty()){
                 CcuLog.d(TAG_CCU_ALERTS, "---triggerAlert-blockId5005@@ invalid id->"+entityId);

@@ -19,9 +19,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
-import org.mozilla.javascript.RhinoException
-import org.mozilla.javascript.Scriptable
-import org.mozilla.javascript.ScriptableObject
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -215,8 +212,11 @@ class SequenceWorker(context: Context, params: WorkerParameters) :
             val sequenceAlert = SequencerSchedulerUtil.findAlertByBlockId(def, blockId)
             if (sequenceAlert != null) {
                 val alertDefinition = SequencerSchedulerUtil.createAlertDefinition(sequenceAlert)
+                alertDefinition.alert.mMessage = message
+                alertDefinition.alert.mNotificationMsg = notificationMsg
                 val tempId = entityId!!.replaceFirst("@".toRegex(), "")
-                mapOfPastAlerts["$blockId:$tempId"] = AlertData(sequenceAlert.title, sequenceAlert.message, entityId, "sequencer", blockId, alertDefinition)
+                mapOfPastAlerts["$blockId:$tempId"] = AlertData(sequenceAlert.title,
+                    message.toString(), entityId, "sequencer", blockId, alertDefinition)
             } else {
                 CcuLog.d(TAG, "sequenceAlert not found for blockId: $blockId")
             }
@@ -260,7 +260,7 @@ class SequenceWorker(context: Context, params: WorkerParameters) :
         for (alert in alertData) {
             CcuLog.d(
                 TAG,
-                "##create alert title -> ${alert.title} <-blockId-> ${alert.blockId} <entityId> ${alert.entityId}"
+                "##create alert title -> ${alert.title} <-blockId-> ${alert.blockId} <entityId> ${alert.entityId} <message>${alert.message} <notificationMessage>${alert.alertDefinition.alert.mNotificationMsg}"
             )
             sequenceLogs.addLog(
                 SequenceMethodLog(

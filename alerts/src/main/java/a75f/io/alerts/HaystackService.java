@@ -216,6 +216,9 @@ public class HaystackService {
         if(filter.contains("group")){
             filter = filter.replaceAll("group==@", "group==");
         }
+        if(filter.contains("domainName")){
+            filter = filter.replaceAll("domainName==@", "domainName==");
+        }
         filter = fixInvertedCommas(filter);
         filter = removeQuotesFromIdValue(filter);
 

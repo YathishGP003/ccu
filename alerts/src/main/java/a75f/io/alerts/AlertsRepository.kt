@@ -288,7 +288,7 @@ class AlertsRepository(
       //val ccuId = haystack.ccuRef.toVal()
       val alert = AlertBuilder.build(
          alertDef,
-         AlertFormatter.getFormattedMessage(alertDef, this),
+         msg,
          haystack,
          equipRef,
          null

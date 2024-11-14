@@ -44,9 +44,9 @@ data class SequenceAlert(
     @SerializedName("title")
     val title: String,
     @SerializedName("message")
-    val message: String,
+    var message: String,
     @SerializedName("notificationMessage")
-    val notificationMessage: String,
+    var notificationMessage: String,
     @SerializedName("severity")
     val severity: String,
     @SerializedName("enabled")

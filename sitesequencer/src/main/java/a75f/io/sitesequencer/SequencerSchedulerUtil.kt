@@ -399,7 +399,8 @@ class SequencerSchedulerUtil {
             return null
         }
 
-        fun createAlertDefinition(sequenceAlert : SequenceAlert): AlertDefinition {
+        fun createAlertDefinition(
+            sequenceAlert: SequenceAlert, ): AlertDefinition {
             val alertDefinition = AlertDefinition()
             val testAlert = Alert()
             testAlert.mTitle = sequenceAlert.title

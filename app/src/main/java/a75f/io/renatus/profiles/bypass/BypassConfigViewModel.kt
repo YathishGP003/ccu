@@ -339,12 +339,12 @@ class BypassConfigViewModel : ViewModel() {
                 val eq = childEquipsIterator.next()
 
                 hayStack.readEntity("point and config and damper and cooling and min and not analog1 and not analog2 and equipRef == \"" + eq.id + "\"")["id"]?.let { minCoolingDamperPosPointId ->
-                    hayStack.writePointForCcuUser(minCoolingDamperPosPointId.toString(), 7, 10.0, 0, "Bypass Damper Added")
+                    hayStack.writePointForCcuUser(minCoolingDamperPosPointId.toString(), 8, 10.0, 0, "Bypass Damper Added")
                     hayStack.writeHisValById(minCoolingDamperPosPointId.toString(), 10.0)
                 }
 
                 hayStack.readEntity("point and config and damper and heating and min and not analog1 and not analog2 and equipRef == \"" + eq.id + "\"")["id"]?.let { minHeatingDamperPosPointId ->
-                    hayStack.writePointForCcuUser(minHeatingDamperPosPointId.toString(), 7, 10.0, 0, "Bypass Damper Added")
+                    hayStack.writePointForCcuUser(minHeatingDamperPosPointId.toString(), 8, 10.0, 0, "Bypass Damper Added")
                     hayStack.writeHisValById(minHeatingDamperPosPointId.toString(), 10.0)
                 }
 
@@ -384,26 +384,6 @@ class BypassConfigViewModel : ViewModel() {
             val childEquipsIterator = childEquips.iterator()
             while(childEquipsIterator.hasNext()) {
                 val eq = childEquipsIterator.next()
-
-                val minCoolingDamperPosPoint = hayStack.readEntity("point and config and damper and cooling and min and not analog1 and not analog2 and equipRef == \"" + eq.id + "\"")
-                if (minCoolingDamperPosPoint.isNotEmpty()) {
-                    minCoolingDamperPosPoint["id"]?.let { minCoolingDamperPosPointId ->
-                        hayStack.getHSClient().pointWrite(HRef.copy(minCoolingDamperPosPointId.toString()), 7, hayStack.ccuUserName, null, HNum.make(1), HDateTime.make(System.currentTimeMillis()))
-                        val b: HDictBuilder = HDictBuilder().add("id", HRef.copy(minCoolingDamperPosPointId.toString())).add("level",7).add("who",CCUHsApi.getInstance().getCCUUserName()).add("duration", HNum.make(0, "ms")).add("val", null as? HVal).add("reason", "Bypass Damper Unpaired")
-                        PointWriteCache.getInstance().writePoint(minCoolingDamperPosPointId.toString(), b.toDict())
-                        hayStack.writeHisValById(minCoolingDamperPosPointId.toString(), HSUtil.getPriorityVal(minCoolingDamperPosPointId.toString()))
-                    }
-                }
-
-                val minHeatingDamperPosPoint = hayStack.readEntity("point and config and damper and heating and min and not analog1 and not analog2 and equipRef == \"" + eq.id + "\"")
-                if (minHeatingDamperPosPoint.isNotEmpty()) {
-                    minHeatingDamperPosPoint["id"]?.let {minHeatingDamperPosPointId ->
-                        hayStack.getHSClient().pointWrite(HRef.copy(minHeatingDamperPosPointId.toString()), 7, hayStack.ccuUserName, null, HNum.make(1), HDateTime.make(System.currentTimeMillis()))
-                        val b: HDictBuilder = HDictBuilder().add("id", HRef.copy(minHeatingDamperPosPointId.toString())).add("level",7).add("who",CCUHsApi.getInstance().getCCUUserName()).add("duration", HNum.make(0, "ms")).add("val", null as? HVal).add("reason", "Bypass Damper Unpaired")
-                        PointWriteCache.getInstance().writePoint(minHeatingDamperPosPointId.toString(), b.toDict())
-                        hayStack.writeHisValById(minHeatingDamperPosPointId.toString(), HSUtil.getPriorityVal(minHeatingDamperPosPointId.toString()))
-                    }
-                }
 
                 if (eq.markers.contains("dualDuct")) {
                     //val pGainPoint = hayStack.readEntity("point and tuner and dualDuct and pgain and not reheat and equipRef == \"" + eq.id + "\"")

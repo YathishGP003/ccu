@@ -320,16 +320,6 @@ class AcbProfileViewModel : ViewModel() {
         val equip = hayStack.read("equip and group == \"" + config.nodeAddress + "\"")
         val acbEquip = VavAcbEquip(equip.get("id").toString())
 
-        if (!(acbEquip.enableCFMControl.readDefaultVal() > 0.0)) {
-            acbEquip.minCoolingDamperPos.writeVal(7, hayStack.ccuUserName, acbEquip.minCoolingDamperPos.readDefaultVal(), 0)
-            acbEquip.minCoolingDamperPos.writeDefaultVal(20.0)
-            acbEquip.minCoolingDamperPos.writeHisVal(10.0)
-
-            acbEquip.minHeatingDamperPos.writeVal(7, hayStack.ccuUserName, acbEquip.minHeatingDamperPos.readDefaultVal(), 0)
-            acbEquip.minHeatingDamperPos.writeDefaultVal(20.0)
-            acbEquip.minHeatingDamperPos.writeHisVal(10.0)
-        }
-
         // Right now, framework is not copying from System Tuner correctly. Duct-tape fix for this case.
         acbEquip.vavProportionalKFactor.writeVal(14, hayStack.ccuUserName, 0.7, 0)
         acbEquip.vavProportionalKFactor.writeHisVal(0.7)

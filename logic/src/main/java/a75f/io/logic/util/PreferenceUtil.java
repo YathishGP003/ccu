@@ -77,6 +77,7 @@ public class PreferenceUtil {
     public static final String MIGRATE_HIS_INTERPOLATE_FOR_DEVICE_POINTS = "migrateHisInterpolateForDeviceEntities";
     public static final String BACKFILL_DEFAULT_VALUE_MIGRATION = "backFillDefaultValueMigration";
     public static final String DAB_DAMPER_SIZE_MIGRATION = "dabDamperSizeMigration";
+    public static final String BACNET_ID_MIGRATION = "bacnetIdUpdateMigration";
 
 
 
@@ -596,5 +597,13 @@ public class PreferenceUtil {
 
     public static void setDamperSizeMigrationFlagStatus() {
         setBooleanPreference(DAB_DAMPER_SIZE_MIGRATION, true);
+    }
+
+    public static boolean isBacnetIdMigrationDone() {
+        return getBooleanPreference(BACNET_ID_MIGRATION);
+    }
+
+    public static void setBacnetIdMigrationDone() {
+        setBooleanPreference(BACNET_ID_MIGRATION, true);
     }
 }

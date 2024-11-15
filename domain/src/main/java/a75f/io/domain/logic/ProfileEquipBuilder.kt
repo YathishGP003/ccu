@@ -323,15 +323,18 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
         CcuLog.i(Domain.LOG_TAG," Created Equip point ${pointConfig.modelDef.domainName}")
         return pointId
     }
-    private fun updatePoint(pointConfig: PointBuilderConfig, existingPoint : HashMap<Any, Any>) {
+
+    fun updatePoint(pointConfig: PointBuilderConfig, existingPoint : HashMap<Any, Any>) {
         val hayStackPoint = buildPoint(pointConfig)
         hayStackPoint.id = existingPoint["id"].toString()
         hayStackPoint.roomRef = existingPoint["roomRef"].toString()
         hayStackPoint.floorRef = existingPoint["floorRef"].toString()
         hayStackPoint.group = existingPoint["group"].toString()
         existingPoint["createdDateTime"]?.let {
-            hayStackPoint.createdDateTime = HDateTime.make(existingPoint["createdDateTime"].toString())
+            hayStackPoint.createdDateTime =
+                HDateTime.make(existingPoint["createdDateTime"].toString())
         }
+        existingPoint["ccuRef"]?.let { hayStackPoint.ccuRef = existingPoint["ccuRef"].toString() }
         hayStackPoint.lastModifiedBy = hayStack.getCCUUserName();
         hayStack.updatePoint(hayStackPoint, existingPoint["id"].toString())
 
@@ -402,7 +405,7 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
                     //println("Cut-Over migration Update $dbPoint")
                     val modelPoint = modelDef.points.find { it.domainName.equals(modelPointName, true)}
                     if (modelPoint != null) {
-                        updatePoint(PointBuilderConfig(modelPoint, null, equipRef, site!!.id, site!!.tz, equipDis), dbPoint)
+                        updatePoint(PointBuilderConfig(modelPoint, profileConfiguration, equipRef, site!!.id, site.tz, equipDis), dbPoint)
                     } else {
                         delete++
                         CcuLog.e(Domain.LOG_TAG, " Model point does not exist for domain name $modelPointName")

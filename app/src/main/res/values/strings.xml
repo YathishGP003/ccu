@@ -1260,12 +1260,15 @@
     <string name="txt_device_password">Device Password</string>
     <string name="txt_device_password_hint">Hint: Alpha-Numeric Characters</string>
     <string name="txt_IPAddress">IP Address <font color="#e5561a">*</font></string>
+    <string name="txt_BBMD_IPAddress">BBMD IP Address <font color="#e5561a">*</font></string>
+    <string name="txt_FD_IPAddress">BBMD IP Address <font color="#e5561a">*</font></string>
     <string name="txt_LocalNetworkAddress">Local Network Number <font color="#e5561a">*</font></string>
     <string name="txt_localNetworkAddressHint">In between 1 to 65535</string>
     <string name="txt_virtualNetworkAddress">Virtual Network Number <font color="#e5561a">*</font></string>
     <string name="txt_virtualNetworkAddressHint">In between 1 to 65535</string>
     <string name="txt_port">Port <font color="#e5561a">*</font></string>
     <string name="txt_port_hint">Recommended: 47808 to 47823</string>
+    <string name="txt_auto_hint">Auto will work if time is greater than 0 </string>
     <string name="txt_error_port">Port should be within 4096 to 65535</string>
     <string name="txt_valid_number">Please input valid number</string>
     <string name="txt_ip_device_instance_number">IP Device Instance Number  <font color="#e5561a">*</font></string>
@@ -1717,7 +1720,7 @@
     <string name="txt_add">ADD</string>
     <string name="txt_remove">REMOVE</string>
     <string name="txt_mask">Mask <font color="#e5561a">*</font></string>
-    <string name="txt_mask_hint">Recommended 0 to 32</string>
+    <string name="txt_mask_hint">Recommended 1 to 32</string>
     <string name="supply_airflow_temp">Supply Airflow Temperature:</string>
     <string name="duct_static_pressure">Duct Static pressure:</string>
     <string name="current">Current </string>

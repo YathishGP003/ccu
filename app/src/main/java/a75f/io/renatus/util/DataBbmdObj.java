@@ -15,4 +15,7 @@ public class DataBbmdObj {
     public void addItem(DataBbmd item) {
         listOfDataBbmd.add(item);
     }
+    public ArrayList<DataBbmd> getListOfDataBbmd() {
+        return listOfDataBbmd;
+    }
 }

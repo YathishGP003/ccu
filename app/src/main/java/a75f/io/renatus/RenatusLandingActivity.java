@@ -1,11 +1,19 @@
 package a75f.io.renatus;
 
 import static a75f.io.device.bacnet.BacnetConfigConstants.BACNET_CONFIGURATION;
+import static a75f.io.device.bacnet.BacnetConfigConstants.BACNET_DEVICE_TYPE;
+import static a75f.io.device.bacnet.BacnetConfigConstants.BACNET_DEVICE_TYPE_BBMD;
+import static a75f.io.device.bacnet.BacnetConfigConstants.BACNET_DEVICE_TYPE_FD;
+import static a75f.io.device.bacnet.BacnetConfigConstants.BACNET_DEVICE_TYPE_NEITHER;
+import static a75f.io.device.bacnet.BacnetConfigConstants.BACNET_FD_AUTO_STATE;
+import static a75f.io.device.bacnet.BacnetConfigConstants.BACNET_FD_CONFIGURATION;
 import static a75f.io.device.bacnet.BacnetConfigConstants.IS_BACNET_CONFIG_FILE_CREATED;
 import static a75f.io.device.bacnet.BacnetUtilKt.populateBacnetConfigurationObject;
 import static a75f.io.renatus.CcuRefReceiver.REQUEST_CCU_REF_ACTION;
 import static a75f.io.renatus.Communication.isPortAvailable;
 import static a75f.io.renatus.UtilityApplication.context;
+import static a75f.io.renatus.bacnet.BacnetBackgroundTaskHandler.BACNET_FD_INTERVAL;
+import static a75f.io.renatus.bacnet.BacnetBackgroundTaskHandler.BACNET_FD_IS_AUTO_ENABLED;
 import static a75f.io.renatus.registration.UpdateCCUFragment.abortCCUDownloadProcess;
 import static a75f.io.usbserial.UsbServiceActions.ACTION_USB_REQUIRES_TABLET_REBOOT;
 
@@ -15,9 +23,14 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
+import android.preference.PreferenceManager;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.SpannableString;
@@ -35,6 +48,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -46,6 +60,7 @@ import androidx.viewpager.widget.ViewPager;
 
 import com.google.android.material.tabs.TabItem;
 import com.google.android.material.tabs.TabLayout;
+import com.google.gson.Gson;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -61,16 +76,19 @@ import a75f.io.logic.interfaces.RemoteCommandHandleInterface;
 import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.messaging.handler.RemoteCommandUpdateHandler;
 import a75f.io.renatus.ENGG.RenatusEngineeringActivity;
+import a75f.io.renatus.bacnet.BacnetBackgroundTaskHandler;
+import a75f.io.renatus.bacnet.BacnetConfigChange;
 import a75f.io.renatus.registration.CustomViewPager;
 import a75f.io.renatus.schedules.ScheduleGroupFragment;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.CloudConnetionStatusThread;
+import a75f.io.renatus.util.DataFdObj;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.Receiver.ConnectionChangeReceiver;
 import a75f.io.renatus.util.remotecommand.RemoteCommandHandlerUtil;
 import a75f.io.usbserial.UsbServiceActions;
 
-public class RenatusLandingActivity extends AppCompatActivity implements RemoteCommandHandleInterface {
+public class RenatusLandingActivity extends AppCompatActivity implements RemoteCommandHandleInterface, BacnetConfigChange {
 
     private static final String TAG = "LandingActivityLog";
     private static CountDownTimer countDownTimer;
@@ -90,6 +108,8 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
     private BroadcastReceiver mConnectionChangeReceiver;
     private CcuRefReceiver mCcuRefReceiver = null;
     private ImageView powerByLogoForCarrier;
+
+    private BacnetBackgroundTaskHandler bacnetBackgroundTaskHandler;
 
     /**
      * The {@link PagerAdapter} that will provide
@@ -253,6 +273,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
         populateBACnetConfiguration();
         intializeBACnet();
         ccuLaunched();
+        checkBacnetDeviceType();
     }
 
     @Override
@@ -482,6 +503,9 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
             // already unregistered
         }
         RenatusApp.backgroundServiceInitiator.unbindServices();
+        if(bacnetBackgroundTaskHandler != null) {
+            bacnetBackgroundTaskHandler.stopHandler();
+        }
         CcuLog.e(L.TAG_CCU, "LifeCycleEvent LandingActivity Destroyed");
     }
 
@@ -706,5 +730,55 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
         mViewPager.setAdapter(null);
         mStatusPagerAdapter = new StatusPagerAdapter(getSupportFragmentManager());
         mViewPager.setAdapter(mStatusPagerAdapter);
+    }
+
+    @Override
+    public void submitConfiguration(String configurationType, boolean isAutoEnabled, int timeInSeconds) {
+        CcuLog.d(TAG, "submitConfiguration--->"+isAutoEnabled);
+        if(bacnetBackgroundTaskHandler == null){
+            bacnetBackgroundTaskHandler = new BacnetBackgroundTaskHandler();
+        }
+        bacnetBackgroundTaskHandler.sendBroadCastToBacApp();
+        bacnetBackgroundTaskHandler.removeOldMessages(1);
+
+        if(timeInSeconds > 0) {
+            Message message = Message.obtain();
+            message.what = 1;
+            Bundle bundle = new Bundle();
+            bundle.putInt(BACNET_FD_INTERVAL, timeInSeconds);
+            bundle.putBoolean(BACNET_FD_IS_AUTO_ENABLED, isAutoEnabled);
+            message.setData(bundle);
+            CcuLog.d(TAG, "submitConfiguration--isAutoEnabled->"+isAutoEnabled + "<---time in secnds-->"+timeInSeconds);
+            bacnetBackgroundTaskHandler.sendMessageDelayed(message, timeInSeconds * 1000L);
+        }else{
+            CcuLog.d(TAG, "submitConfiguration--isAutoEnabled->"+isAutoEnabled + "<---time in is 0 or less stop handler-->"+timeInSeconds);
+            //bacnetBackgroundTaskHandler.stopHandler();
+            bacnetBackgroundTaskHandler.removeCallBacks();
+        }
+    }
+
+    private void checkBacnetDeviceType() {
+        CcuLog.d(TAG, "---check if fd configuration is present---");
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        String bacnetDeviceType = sharedPreferences.getString(BACNET_DEVICE_TYPE, null);
+        if(bacnetDeviceType != null){
+            if(bacnetDeviceType.equalsIgnoreCase(BACNET_DEVICE_TYPE_FD)){
+                CcuLog.d(TAG, "---bacnet configuration is ---"+BACNET_DEVICE_TYPE_FD);
+                String config = sharedPreferences.getString(BACNET_FD_CONFIGURATION, null);
+                DataFdObj dataFdObj = new Gson().fromJson(config, DataFdObj.class);
+                boolean isAutoEnabled = sharedPreferences.getBoolean(BACNET_FD_AUTO_STATE, false);
+                CcuLog.d(TAG, "---fd configuration isAutoEnabled---" + isAutoEnabled + "--config--" + config + "<--dataFdObj-->"+dataFdObj);
+                if (config != null && dataFdObj != null) {
+                    int time = dataFdObj.getDataFd().getBbmdMask();
+                    if (time > 0) {
+                        submitConfiguration("fd", isAutoEnabled, time);
+                    }
+                }
+            }else if(bacnetDeviceType.equalsIgnoreCase(BACNET_DEVICE_TYPE_BBMD)){
+                CcuLog.d(TAG, "---bacnet configuration is ---"+BACNET_DEVICE_TYPE_BBMD);
+            }else{
+                CcuLog.d(TAG, "---bacnet configuration is ---"+BACNET_DEVICE_TYPE_NEITHER);
+            }
+        }
     }
 }

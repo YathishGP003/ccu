@@ -622,6 +622,11 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
         prefs.setString(BacnetConfigConstants.BACNET_CONFIGURATION, bacnet_pref.getString(BacnetConfigConstants.BACNET_CONFIGURATION,null));
         prefs.setBoolean(BacnetConfigConstants.IS_BACNET_INITIALIZED, bacnet_pref.getBoolean(BacnetConfigConstants.IS_BACNET_INITIALIZED,false));
         prefs.setBoolean(BacnetConfigConstants.IS_BACNET_CONFIG_FILE_CREATED, bacnet_pref.getBoolean(BacnetConfigConstants.IS_BACNET_CONFIG_FILE_CREATED,false));
+
+        prefs.setBoolean(BacnetConfigConstants.BACNET_FD_AUTO_STATE, bacnet_pref.getBoolean(BacnetConfigConstants.BACNET_FD_AUTO_STATE,false));
+        prefs.setString(BacnetConfigConstants.BACNET_BBMD_CONFIGURATION, bacnet_pref.getString(BacnetConfigConstants.BACNET_BBMD_CONFIGURATION,null));
+        prefs.setString(BacnetConfigConstants.BACNET_FD_CONFIGURATION, bacnet_pref.getString(BacnetConfigConstants.BACNET_FD_CONFIGURATION,null));
+        prefs.setString(BacnetConfigConstants.BACNET_DEVICE_TYPE, bacnet_pref.getString(BacnetConfigConstants.BACNET_DEVICE_TYPE,null));
     }
 
     private void performSiteSyncIfNotCompleted(ConcurrentHashMap<String, ?> currentReplacementProgress,

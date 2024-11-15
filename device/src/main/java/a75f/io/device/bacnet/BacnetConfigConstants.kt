@@ -10,10 +10,17 @@ object  BacnetConfigConstants {
     const val BACNET_CONFIGURATION = "BACnet_Config"
     const val IS_BACNET_CONFIG_FILE_CREATED = "isBACnetConfigFileCreated"
     const val IS_BACNET_INITIALIZED = "isBACnetinitialized"
+    const val BACNET_DEVICE_TYPE = "bacnetDeviceType"
+    const val BACNET_DEVICE_TYPE_BBMD = "bbmd"
+    const val BACNET_DEVICE_TYPE_FD = "fd"
+    const val BACNET_DEVICE_TYPE_NEITHER = "neither"
+    const val BACNET_BBMD_CONFIGURATION = "bacnetBbmdConfiguration"
+    const val BACNET_FD_CONFIGURATION = "bacnetFdConfiguration"
     const val HTTP_SERVER_STATUS = "httpServerStatus"
     const val BACNET_HEART_BEAT = "BACnet_HeartBeat"
     const val BACNET_ID = "bacnetId"
     const val BACNET_TYPE = "bacnetType"
+    const val BACNET_FD_AUTO_STATE = "fdAutoState"
 
 
 

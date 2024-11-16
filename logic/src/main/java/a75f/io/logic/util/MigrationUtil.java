@@ -1220,12 +1220,17 @@ public class MigrationUtil {
     private static void updateHisValue(CCUHsApi haystack) {
         ExecutorTask.executeBackground(() -> {
             CcuLog.d(TAG_CCU_MIGRATION_UTIL, "updateHisValue migration started");
-            ArrayList<HashMap<Object, Object>> writablePoints = haystack.readAllEntities("point and writable");
+            ArrayList<HashMap<Object, Object>> writablePoints = haystack.readAllEntities("point and writable and his");
             for (HashMap<Object, Object> map : writablePoints) {
                 try{
                     if (map.containsKey("id") && map.get("id") != null) {
-                        double pointPriorityVal = haystack.readPointPriorityVal(map.get("id").toString());
-                        haystack.writeHisValById(map.get("id").toString(), pointPriorityVal);
+                        String pointId = map.get("id").toString();
+                        double pointPriorityVal = haystack.readPointPriorityVal(pointId);
+                        double pointHisVal = haystack.readHisValById(pointId);
+                        if(pointPriorityVal != pointHisVal){
+                        haystack.writeHisValById(pointId, pointPriorityVal);
+                        CcuLog.d(TAG_CCU_MIGRATION_UTIL, "point updated: " + map.get("id").toString());
+                        }
                     }
                 } catch (NumberFormatException e){
                     CcuLog.d(TAG_CCU_MIGRATION_UTIL, "point not updated: " + map.get("id").toString());

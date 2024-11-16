@@ -73,13 +73,23 @@ public class TrueCFMVAVConfigHandler {
         CCUHsApi.getInstance().updatePointWithoutUpdatingLastModifiedTime(updatedPoint, updatedPoint.getId());
         if (minCfmValue > maxCfmValue) {
             CCUHsApi.getInstance().writeDefaultVal("point and domainName == \"" + DomainName.minCFMCooling + "\" and equipRef == \""+equip.getId()+"\"", maxCfmValue);
+            writeHisValue(entity.get("id").toString(), hayStack);
         }
         writePointFromJson(configPoint, msgObject, hayStack);
+    }
+
+    public static void writeHisValue(String id, CCUHsApi hayStack) {
+        HashMap<Object, Object> entity = hayStack.readMapById(id);
+        if(entity.containsKey("his")) {
+            Double val = hayStack.readPointPriorityVal(id);
+            hayStack.writeHisValById(id, val);
+        }
     }
 
     public static void updateAirflowCFMProportionalRange(JsonObject msgObject, Point configPoint, CCUHsApi hayStack) {
         VavEquip vavEquip = new VavEquip(configPoint.getEquipRef());
         vavEquip.getVavAirflowCFMProportionalRange().writeVal(8, 1.5 * msgObject.get("val").getAsDouble());
+        writeHisValue(vavEquip.getVavAirflowCFMProportionalRange().getId(), hayStack);
     }
 
     public static void updateMinReheatingConfigPoint(JsonObject msgObject, Point configPoint, CCUHsApi hayStack) {
@@ -93,6 +103,7 @@ public class TrueCFMVAVConfigHandler {
         CCUHsApi.getInstance().updatePointWithoutUpdatingLastModifiedTime(updatedPoint, updatedPoint.getId());
         if (minHeatingCfmValue > maxHeatingCfmValue) {
             CCUHsApi.getInstance().writeDefaultVal("point and domainName == \"" + DomainName.minCFMReheating + "\" and equipRef == \""+equip.getId()+"\"", maxHeatingCfmValue);
+            writeHisValue(entity.get("id").toString(), hayStack);
         }
         writePointFromJson(configPoint, msgObject, hayStack);
     }
@@ -104,6 +115,7 @@ public class TrueCFMVAVConfigHandler {
         int duration = msgObject.get(HayStackConstants.WRITABLE_ARRAY_DURATION) != null ? msgObject.get(
                 HayStackConstants.WRITABLE_ARRAY_DURATION).getAsInt() : 0;
         hayStack.writePointLocal(configPoint.getId(), level, who, val, duration);
+        writeHisValue(configPoint.getId(), hayStack);
     }
 }
 

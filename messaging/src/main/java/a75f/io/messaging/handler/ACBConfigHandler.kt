@@ -138,10 +138,12 @@ class ACBConfigHandler {
         // We set this value to 1.5x the Max Cooling CFM, which is the ballpark value used by U.S. Support during commissioning.
         fun setAirflowCfmProportionalRange(hayStack: CCUHsApi, config: AcbProfileConfiguration) {
             val equip = hayStack.readEntity("equip and group == \"" + config.nodeAddress + "\"")
-            val vavEquip = VavEquip(equip.get("id").toString())
+            val AcbEquip = VavEquip(equip.get("id").toString())
 
-            if (vavEquip.enableCFMControl.readDefaultVal() > 0.0) {
-                vavEquip.vavAirflowCFMProportionalRange.writeVal(8, 1.5 * vavEquip.maxCFMCooling.readPriorityVal())
+            if (AcbEquip.enableCFMControl.readDefaultVal() > 0.0) {
+                AcbEquip.vavAirflowCFMProportionalRange.writeVal(8, 1.5 * AcbEquip.maxCFMCooling.readPriorityVal())
+                //for only writing the his value
+                TrueCFMVAVConfigHandler.writeHisValue(AcbEquip.vavAirflowCFMProportionalRange.id,hayStack)
             }
         }
 

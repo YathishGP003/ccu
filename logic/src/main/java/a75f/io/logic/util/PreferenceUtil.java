@@ -44,7 +44,7 @@ public class PreferenceUtil {
     public static final String CARRIER_POINT_MIGRATION_DAB_TO_VVT = "carrierPointDabToVvtMigration";
     private static final String IS_CCU_LAUNCHED = "isCcuLaunched";
     private static final String IS_NEW_EXTERNAL_AHU = "isNewExternalAhu";
-    public static final String UPDATE_HIS_ITEMS = "updateHisItems";
+    public static final String UPDATE_HIS_ITEMS = "updateHisItemsNew";
     private static final String IS_CCU_REBOOT_STARTED = "isCcuRebootedStarted";
 
     public static final String MODULATING_FANSPEED_MIGRATION = "modulatingFanSpeedMigration";

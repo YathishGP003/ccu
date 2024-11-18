@@ -88,32 +88,6 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
 
     val TAG_CCU_BYPASS_RECOVER = "CCU_BYPASS_RECOVER"
 
-    fun doPostModelMigrationTasks() {
-        if (!PreferenceUtil.getRecoverHelioNodeACBTunersMigration()) VavAndAcbProfileMigration.recoverHelioNodeACBTuners(CCUHsApi.getInstance())
-        if (!PreferenceUtil.getACBRelayLogicalPointsMigration()) VavAndAcbProfileMigration.verifyACBIsoValveLogicalPoints(CCUHsApi.getInstance())
-        try{
-            if (!PreferenceUtil.getDmToDmCleanupMigration()) {
-                cleanACBDuplicatePoints(CCUHsApi.getInstance())
-                cleanVAVDuplicatePoints(CCUHsApi.getInstance())
-                CCUHsApi.getInstance().syncEntityTree()
-                PreferenceUtil.setDmToDmCleanupMigration()
-            }
-        } catch (e: Exception) {
-            //TODO - This is temporary fix till vav model issue is resolved in the next releases.
-            //For now, we make sure it does not stop other migrations even if this fails.
-        }
-        if(!PreferenceUtil.getRestoreBypassDamperAfterReplace()) {
-            try {
-                if(restoreMissingBypassDamperAfterReplace()) {
-                    PreferenceUtil.setRestoreBypassDamperAfterReplace()
-                } else {
-                    CcuLog.e(TAG_CCU_BYPASS_RECOVER, "Failed to restore missing bypass damper after replace. Operation failed and not setting the preference")
-                }
-            } catch (e: Exception) {
-                CcuLog.d(TAG_CCU_BYPASS_RECOVER, "Some exception occurred. CCU Bypass Recovery operation stopped abruptly.")
-            }
-        }
-    }
 
     override val hayStack = hsApi
 
@@ -317,6 +291,17 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         } catch (e: Exception) {
             //TODO - This is temporary fix till vav model issue is resolved in the next releases.
             //For now, we make sure it does not stop other migrations even if this fails.
+        }
+        if(!PreferenceUtil.getRestoreBypassDamperAfterReplace()) {
+            try {
+                if(restoreMissingBypassDamperAfterReplace()) {
+                    PreferenceUtil.setRestoreBypassDamperAfterReplace()
+                } else {
+                    CcuLog.e(TAG_CCU_BYPASS_RECOVER, "Failed to restore missing bypass damper after replace. Operation failed and not setting the preference")
+                }
+            } catch (e: Exception) {
+                CcuLog.d(TAG_CCU_BYPASS_RECOVER, "Some exception occurred. CCU Bypass Recovery operation stopped abruptly.")
+            }
         }
         CcuLog.d(L.TAG_CCU_MIGRATION_UTIL,"doPostModelMigrationTasks: check isMigrationOngoing $isMigrationOngoing")
         if(isMigrationOngoing) {

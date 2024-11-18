@@ -74,6 +74,12 @@ class MessageHandlerSubscriber @Inject constructor(){
                 MessageHandlerFactory.Command.SCHEDULE_MIGRATED
             )
         )
+
+        handlerService.registerMessageHandler(
+            MessageHandlerFactory.createInstance(
+                MessageHandlerFactory.Command.fixAlert
+            )
+        )
         handlerService.registerMessageHandler(
             MessageHandlerFactory.createInstance(
                 MessageHandlerFactory.Command.sequenceCreated

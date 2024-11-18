@@ -369,4 +369,9 @@ public class AlertManager implements CCUHsApi.EntityDeletedListener
             }
         }.start();
     }
+
+    public void fixAlertLocally(Alert a) {
+        if (! repoCheck()) return;
+        repo.fixAlertLocally(a);
+    }
 }

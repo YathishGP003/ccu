@@ -75,6 +75,7 @@ public class PreferenceUtil {
     public static final String ZONE_CO2_MIGRATION = "ZONE_CO2_MIGRATION";
     public static final String APP_VERSION_POINTS_MIGRATION = "appVersionPointsMigration";
     public static final String MIGRATE_HIS_INTERPOLATE_FOR_DEVICE_POINTS = "migrateHisInterpolateForDeviceEntities";
+    public static final String MIGRATE_ANALOG_INPUT_TYPE_FOR_VAV_DEVICE_POINT = "migrateAnalogInputTypeForVavDevicePoint";
     public static final String BACKFILL_DEFAULT_VALUE_MIGRATION = "backFillDefaultValueMigration";
     public static final String DAB_DAMPER_SIZE_MIGRATION = "dabDamperSizeMigration";
     public static final String BACNET_ID_MIGRATION = "bacnetIdUpdateMigration";
@@ -582,6 +583,14 @@ public class PreferenceUtil {
 
     public static void setMigrateHisInterpolateForDevicePoints() {
         setBooleanPreference(MIGRATE_HIS_INTERPOLATE_FOR_DEVICE_POINTS, true);
+    }
+
+    public static boolean getMigrateAnalogInputTypeForVavDevicePoint() {
+        return getBooleanPreference(MIGRATE_ANALOG_INPUT_TYPE_FOR_VAV_DEVICE_POINT);
+    }
+
+    public static void setMigrateAnalogInputTypeForVavDevicePoint() {
+        setBooleanPreference(MIGRATE_ANALOG_INPUT_TYPE_FOR_VAV_DEVICE_POINT, true);
     }
     public static boolean isBackFillValueUpdateRequired() {
         return getBooleanPreference(BACKFILL_DEFAULT_VALUE_MIGRATION);

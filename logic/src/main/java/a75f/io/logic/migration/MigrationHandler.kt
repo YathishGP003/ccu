@@ -6,6 +6,7 @@ import a75f.io.api.haystack.Device
 import a75f.io.api.haystack.Equip
 import a75f.io.api.haystack.HayStackConstants
 import a75f.io.api.haystack.Point
+import a75f.io.api.haystack.RawPoint
 import a75f.io.api.haystack.Site
 import a75f.io.api.haystack.Tags
 import a75f.io.api.haystack.Zone
@@ -208,6 +209,15 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         if(!PreferenceUtil.isBacnetIdMigrationDone()) {
             updateBacnetProperties(hayStack)
             PreferenceUtil.setBacnetIdMigrationDone()
+        }
+        if(!PreferenceUtil.getMigrateAnalogInputTypeForVavDevicePoint()) {
+           try {
+                migrateAnalogTypeForVavAnalog1In()
+                PreferenceUtil.setMigrateAnalogInputTypeForVavDevicePoint()
+              } catch (e: Exception) {
+                //For now, we make sure it does not stop other migrations even if this fails.
+                CcuLog.e(L.TAG_CCU_MIGRATION_UTIL, "Error in migrateAnalogTypeForVAVanalog1In $e")
+           }
         }
         hayStack.scheduleSync()
     }
@@ -1099,6 +1109,32 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             CcuLog.i(L.TAG_CCU_MIGRATION_UTIL,"Temperature mode migration Initiated")
             writeValAtLevelByDomain(DomainName.temperatureMode, TunerConstants.SYSTEM_BUILDING_VAL_LEVEL,1.0)
             PreferenceUtil.setTempModeMigrationNotRequired()
+        }
+    }
+
+    private fun migrateAnalogTypeForVavAnalog1In() {
+        CcuLog.i(L.TAG_CCU_MIGRATION_UTIL,"Migrate Analog Type for VAV Analog1In!!")
+        hayStack.readAllEntities("equip and zone and vav and domainName").forEach { equip ->
+            val device = hayStack.read("device and equipRef == \"${equip["id"]}\"")
+            val analog1In = hayStack.read("domainName == \"${DomainName.analog1In}\" and deviceRef == \"${device["id"]}\"")
+            val damperType = hayStack.readPointPriorityValByQuery("domainName == \"${DomainName.damperType}\" and equipRef == \"${equip["id"]}\"")
+            if (analog1In.isNotEmpty()) {
+                val analog1InPoint = RawPoint.Builder().setHDict(hayStack.readHDictById(analog1In["id"].toString())).build()
+                analog1InPoint.type = getDamperTypeString(damperType.toInt())
+                hayStack.updatePoint(analog1InPoint , analog1In["id"].toString())
+                CcuLog.d(L.TAG_CCU_MIGRATION_UTIL,"Analog1In type updated for device ${device["dis"]}")
+            }
+        }
+    }
+    private fun getDamperTypeString(index: Int) : String {
+        return when(index) {
+            0 -> "0-10v"
+            1 -> "2-10v"
+            2 -> "10-2v"
+            3 -> "10-0v"
+            4 -> "Smart Damper"
+            5 -> "0-5v"
+            else -> { "0-10v" }
         }
     }
 

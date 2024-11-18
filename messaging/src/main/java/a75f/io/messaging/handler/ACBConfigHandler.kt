@@ -43,6 +43,10 @@ class ACBConfigHandler {
 
             hayStack.updatePoint(analog2Point, analogOut2.get("id").toString())
 
+            val analogIn1 = hayStack.readHDict("point and deviceRef == \""+ device["id"] +"\" and domainName == \"" + DomainName.analog1In + "\"")
+            val analog1InPoint = RawPoint.Builder().setHDict(analogIn1)
+            hayStack.updatePoint(analog1InPoint.setType(getDamperTypeString(config)).build(), analogIn1["id"].toString())
+
         }
 
         // This logic will break if the "damperType" point enum is changed

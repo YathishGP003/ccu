@@ -1,14 +1,19 @@
 package a75f.io.renatus.profiles.plc
 
 import a75f.io.api.haystack.CCUHsApi
+import a75f.io.api.haystack.Point
 import a75f.io.device.mesh.LSerial
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.Domain.getListByDomainName
 import a75f.io.domain.api.DomainName
+import a75f.io.domain.api.EntityConfig
 import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.logic.DeviceBuilder
+import a75f.io.domain.logic.DomainManager
 import a75f.io.domain.logic.EntityMapper
+import a75f.io.domain.logic.PointBuilderConfig
 import a75f.io.domain.logic.ProfileEquipBuilder
+import a75f.io.domain.util.ModelLoader
 import a75f.io.domain.util.ModelLoader.getHelioNodePidModel
 import a75f.io.domain.util.ModelLoader.getSmartNodeDevice
 import a75f.io.domain.util.ModelLoader.getSmartNodePidModel
@@ -23,6 +28,8 @@ import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.FloorPlanFragment
 import a75f.io.renatus.modbus.util.showToast
 import a75f.io.renatus.profiles.OnPairingCompleteListener
+import a75f.io.renatus.profiles.profileUtils.UnusedPortsModel
+import a75f.io.renatus.profiles.profileUtils.UnusedPortsModel.Companion.saveUnUsedPortStatus
 import a75f.io.renatus.util.ProgressDialogUtils
 import a75f.io.renatus.util.highPriorityDispatcher
 import android.content.Context
@@ -30,8 +37,11 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import io.seventyfivef.domainmodeler.client.ModelDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
+import io.seventyfivef.domainmodeler.common.point.MultiStateConstraint
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -71,6 +81,7 @@ class PlcProfileViewModel : ViewModel() {
     lateinit var relay2OnThreshold: List<String>
     lateinit var relay2OffThreshold: List<String>
 
+    private lateinit var unusedPorts: HashMap<String, Boolean>
     private lateinit var pairingCompleteListener: OnPairingCompleteListener
     private var saveJob : Job? = null
 
@@ -85,7 +96,7 @@ class PlcProfileViewModel : ViewModel() {
                 "nodeType:$nodeType deviceAddress:$deviceAddress")
         model = getProfileDomainModel()
         CcuLog.i(Domain.LOG_TAG, "PlcProfileViewModel EquipModel Loaded")
-        deviceModel = getSmartNodeDevice() as SeventyFiveFDeviceDirective
+        deviceModel = getDeviceDomainModel() as SeventyFiveFDeviceDirective
         CcuLog.i(Domain.LOG_TAG, "PlcProfileViewModel Device Model Loaded")
 
         if (L.getProfile(deviceAddress) != null && L.getProfile(deviceAddress) is PlcProfile) {
@@ -93,6 +104,7 @@ class PlcProfileViewModel : ViewModel() {
             profileConfiguration = PlcProfileConfig(deviceAddress.toInt(), nodeType.name, 0,
                 zoneRef, floorRef , profileType, model ).getActiveConfiguration()
             viewState = PlcProfileViewState.fromPlcProfileConfig(profileConfiguration)
+            unusedPorts = UnusedPortsModel.initializeUnUsedPorts(deviceAddress, hayStack)
         } else {
             profileConfiguration = PlcProfileConfig(deviceAddress.toInt(), nodeType.name, 0,
                 zoneRef, floorRef , profileType, model ).getDefaultConfiguration()
@@ -162,6 +174,7 @@ class PlcProfileViewModel : ViewModel() {
         val equipBuilder = ProfileEquipBuilder(hayStack)
         val equipDis = hayStack.siteName + "-PID-" + profileConfiguration.nodeAddress
 
+        addBaseProfileConfigs()
         if (profileConfiguration.isDefault) {
 
             addEquipAndPoints(deviceAddress, profileConfiguration, nodeType, hayStack, model, deviceModel)
@@ -170,12 +183,13 @@ class PlcProfileViewModel : ViewModel() {
 
         } else {
             equipBuilder.updateEquipAndPoints(profileConfiguration, model, hayStack.site!!.id, equipDis, true)
-            /*CoroutineScope(Dispatchers.IO).launch {
+            CoroutineScope(Dispatchers.IO).launch {
                 saveUnUsedPortStatus(profileConfiguration, deviceAddress, hayStack)
-            }*/
+            }
 
         }
-
+        updateProcessVariablePoint(profileConfiguration.nodeAddress)
+        //createProcessVariable(equipBuilder, hayStack, profileConfiguration.nodeAddress)ModelCache.kt
     }
 
 
@@ -225,4 +239,61 @@ class PlcProfileViewModel : ViewModel() {
         this.pairingCompleteListener = completeListener
     }
 
+    private fun addBaseProfileConfigs() {
+        val processVariablePoint = getProcessVariableMappedPoint()
+        CcuLog.i(Domain.LOG_TAG, "processVariablePoint $processVariablePoint")
+        processVariablePoint ?: return
+
+        profileConfiguration.baseConfigs.add(EntityConfig(processVariablePoint))
+
+        CcuLog.i(
+            Domain.LOG_TAG, "processVariablePoint size" +
+                    " ${profileConfiguration.getBaseProfileConfigs().size}"
+        )
+    }
+
+    private fun updateProcessVariablePoint(nodeAddress: Int) {
+        val processVariablePoint = getProcessVariableMappedPoint()
+        processVariablePoint ?: return
+
+        val equip = hayStack.readHDict("equip and group == \"${nodeAddress}\"")
+        val equipId = equip["id"].toString()
+        val processVariableDbPoint = hayStack.readHDict(
+            "point and domainName == \"$processVariablePoint\" and equipRef == \"$equipId\"")
+        CcuLog.i(Domain.LOG_TAG, "processVariableBasePoint found $processVariableDbPoint")
+
+        if (processVariableDbPoint["dis"].toString().contains("processVariable")) {
+            CcuLog.i(Domain.LOG_TAG, "ProcessVariable name is updated")
+            return
+        }
+        val pointDis = equip["dis"].toString()+"-processVariable-"+processVariableDbPoint["dis"].toString().substringAfterLast("-")
+        val point = Point.Builder().setHDict(processVariableDbPoint).build()
+        point.displayName = pointDis
+        hayStack.updatePoint(point, point.id)
+        CcuLog.i(Domain.LOG_TAG, "ProcessVariable name is updated " + point.displayName)
+    }
+
+    private fun getProcessVariableMappedPoint() : String? {
+        if (viewState.analog1InputType > 0) {
+            val analog1InputPoint = model.points.find { it.domainName == DomainName.analog1InputType }
+            return (analog1InputPoint?.valueConstraint as MultiStateConstraint).allowedValues[viewState.analog1InputType.toInt()].value
+        } else if (viewState.thermistor1InputType > 0) {
+            val thermistor1InputPoint = model.points.find { it.domainName == DomainName.thermistor1InputType }
+            return (thermistor1InputPoint?.valueConstraint as MultiStateConstraint).allowedValues[viewState.thermistor1InputType.toInt()].value
+        } else if (viewState.nativeSensorType > 0) {
+            val nativeSensorTypePoint = model.points.find { it.domainName == DomainName.nativeSensorType }
+            return (nativeSensorTypePoint?.valueConstraint as MultiStateConstraint).allowedValues[viewState.nativeSensorType.toInt()].value
+        } else {
+            CcuLog.i(Domain.LOG_TAG, "Invalid UI Config : No process variable selected")
+            return null
+        }
+    }
+
+    private fun getDeviceDomainModel() : ModelDirective {
+        return if (nodeType == NodeType.SMART_NODE) {
+            ModelLoader.getSmartNodeDevice()
+        } else {
+            ModelLoader.getHelioNodeDevice()
+        }
+    }
 }

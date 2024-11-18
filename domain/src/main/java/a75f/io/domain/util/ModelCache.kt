@@ -23,7 +23,7 @@ object ModelCache {
     fun init(context: Context, haystack: CCUHsApi) {
         this.context = context
         val terminalDomainEquip =  haystack.readAllEntities("equip and zone and not standalone and sourceModel")
-        if(terminalDomainEquip.isNotEmpty()){
+        /*if(terminalDomainEquip.isNotEmpty()){
             loadModels(haystack)
         }else{
             loadStandAloneModelsAsync()
@@ -31,7 +31,7 @@ object ModelCache {
             loadTerminalModelsAsync()
             loadBuildingEquipModel()
             loadDeviceModels()
-        }
+        }*/
     }
 
     private fun loadModels(haystack: CCUHsApi) {

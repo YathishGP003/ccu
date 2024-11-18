@@ -33,6 +33,10 @@ class EntityMapper (private val modelDef: SeventyFiveFProfileDirective) {
     fun getEntityConfiguration(configuration: ProfileConfiguration) : EntityConfiguration{
         val entityConfiguration = EntityConfiguration()
         entityConfiguration.tobeAdded.addAll(getBasePoints().map { EntityConfig(it.domainName)})
+        configuration.getBaseProfileConfigs().forEach {
+            entityConfiguration.tobeAdded.add(it)
+            CcuLog.i(Domain.LOG_TAG, "Profile base config ${it.domainName} added")
+        }
         CcuLog.i(Domain.LOG_TAG, "All base points "+entityConfiguration.tobeAdded.map { it.domainName }.joinToString { "," })
 
         // There can be same associations for multiple points So checking the duplicates

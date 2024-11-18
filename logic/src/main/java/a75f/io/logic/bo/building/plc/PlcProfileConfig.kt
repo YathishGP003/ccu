@@ -2,11 +2,14 @@ package a75f.io.logic.bo.building.plc
 
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
+import a75f.io.domain.api.EntityConfig
 import a75f.io.domain.config.EnableConfig
 import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.config.ValueConfig
 import a75f.io.domain.equips.PlcEquip
+import a75f.io.logger.CcuLog
 import a75f.io.logic.bo.building.definitions.ProfileType
+import a75f.io.logic.bo.haystack.device.DeviceUtil
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import io.seventyfivef.ph.core.Tags
 
@@ -34,7 +37,8 @@ class PlcProfileConfig (nodeAddress: Int, nodeType: String, priority: Int, roomR
     lateinit var relay2OnThreshold: ValueConfig
     lateinit var relay1OffThreshold: ValueConfig
     lateinit var relay2OffThreshold: ValueConfig
-
+    var baseConfigs = mutableListOf<EntityConfig>()
+    lateinit var unusedPorts: HashMap<String, Boolean>
     fun getDefaultConfiguration() : PlcProfileConfig {
         analog1InputType = getDefaultValConfig(DomainName.analog1InputType, model)
         pidTargetValue = getDefaultValConfig(DomainName.pidTargetValue, model)
@@ -58,6 +62,7 @@ class PlcProfileConfig (nodeAddress: Int, nodeType: String, priority: Int, roomR
         relay1OffThreshold = getDefaultValConfig(DomainName.relay1OffThreshold, model)
         relay2OffThreshold = getDefaultValConfig(DomainName.relay2OffThreshold, model)
         isDefault = true
+        unusedPorts = hashMapOf()
         return this
     }
 
@@ -92,6 +97,12 @@ class PlcProfileConfig (nodeAddress: Int, nodeType: String, priority: Int, roomR
         relay2OnThreshold.currentVal = plcEquip.relay2OnThreshold.readDefaultVal()
         relay1OffThreshold.currentVal = plcEquip.relay1OffThreshold.readDefaultVal()
         relay2OffThreshold.currentVal = plcEquip.relay2OffThreshold.readDefaultVal()
+
+        val devicePorts = DeviceUtil.getUnusedPortsForDevice(nodeAddress.toShort(), Domain.hayStack)
+        devicePorts?.forEach { disabledPort ->
+            unusedPorts[disabledPort.displayName] = disabledPort.markers.contains(a75f.io.api.haystack.Tags.UNUSED)
+        }
+        CcuLog.i(Domain.LOG_TAG, "unusedPorts $unusedPorts")
 
         isDefault = false
         return this
@@ -129,13 +140,16 @@ class PlcProfileConfig (nodeAddress: Int, nodeType: String, priority: Int, roomR
         }
     }
 
+    override fun getBaseProfileConfigs(): MutableList<EntityConfig> {
+        return baseConfigs
+    }
     override fun toString(): String {
         return " analog1InputType ${analog1InputType.currentVal}  pidTargetValue ${pidTargetValue.currentVal} thermistor1InputType ${thermistor1InputType.currentVal}"+
             "pidProportionalRange ${pidProportionalRange.currentVal} nativeSensorType ${nativeSensorType.currentVal} expectZeroErrorAtMidpoint ${expectZeroErrorAtMidpoint.enabled}"+
                 "invertControlLoopoutput ${invertControlLoopoutput.enabled} useAnalogIn2ForSetpoint ${useAnalogIn2ForSetpoint.enabled} analog2InputType ${analog2InputType.currentVal}" +
                 "setpointSensorOffset ${setpointSensorOffset.currentVal} analog1MinOutput ${analog1MinOutput.currentVal} analog1MaxOutput ${analog1MaxOutput.currentVal}" +
                 "relay1OutputEnable ${relay1OutputEnable.enabled} relay2OutputEnable ${relay2OutputEnable.enabled} relay1OnThreshold ${relay1OnThreshold.currentVal} relay2OnThreshold ${relay2OnThreshold.currentVal}" +
-                "relay1OffThreshold ${relay1OffThreshold.currentVal} relay2OffThreshold ${relay2OffThreshold.currentVal}"
+                "relay1OffThreshold ${relay1OffThreshold.currentVal} relay2OffThreshold ${relay2OffThreshold.currentVal} ${getBaseProfileConfigs().size}"
     }
 
 }

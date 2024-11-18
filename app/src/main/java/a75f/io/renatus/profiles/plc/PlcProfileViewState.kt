@@ -31,6 +31,7 @@ class PlcProfileViewState {
     var relay1OffThreshold by mutableStateOf (0.0)
     var relay2OffThreshold by mutableStateOf (0.0)
 
+    var unusedPortState by mutableStateOf(hashMapOf<String, Boolean>())
 
     companion object {
         fun fromPlcProfileConfig(config : PlcProfileConfig) : PlcProfileViewState {
@@ -57,6 +58,8 @@ class PlcProfileViewState {
                 this.relay2OnThreshold = config.relay2OnThreshold.currentVal
                 this.relay1OffThreshold = config.relay1OffThreshold.currentVal
                 this.relay2OffThreshold = config.relay2OffThreshold.currentVal
+
+                this.unusedPortState = config.unusedPorts
             }
         }
     }
@@ -84,5 +87,7 @@ class PlcProfileViewState {
         config.relay2OnThreshold.currentVal = this.relay2OnThreshold
         config.relay1OffThreshold.currentVal = this.relay1OffThreshold
         config.relay2OffThreshold.currentVal = this.relay2OffThreshold
+
+        config.unusedPorts = this.unusedPortState
     }
 }

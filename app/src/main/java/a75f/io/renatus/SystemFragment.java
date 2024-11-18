@@ -88,12 +88,11 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.modbus.EquipmentDevice;
 import a75f.io.api.haystack.modbus.Parameter;
 import a75f.io.domain.api.Domain;
+import a75f.io.domain.OAOEquip;
 import a75f.io.domain.util.ModelNames;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.TaskManager;
-import a75f.io.logic.bo.building.definitions.ProfileType;
-import a75f.io.logic.bo.building.oao.OAOEquip;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.system.DefaultSystem;
 import a75f.io.logic.bo.building.system.SystemMode;
@@ -1018,13 +1017,13 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 				ArrayList<OAOEquip> equipList = new ArrayList<>();
 				for (HashMap m : equips) {
 					String nodeAddress = m.get("group").toString();
-					equipList.add(new OAOEquip(ProfileType.OAO, Short.parseShort(nodeAddress)));
+					equipList.add(new OAOEquip(m.get("id").toString()));
 					updatedTimeOao.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
 					oaoArc.updateStatus(HeartBeatUtil.isModuleAlive(nodeAddress));
 				}
 
-				double returnAirCO2 = equipList.get(0).getHisVal("return and air and co2 and sensor");
-				double co2Threshold = equipList.get(0).getConfigNumVal("co2 and threshold");
+				double returnAirCO2 = equipList.get(0).getReturnAirCo2().readHisVal();
+				double co2Threshold = equipList.get(0).getCo2Threshold().readDefaultVal();
 
 				int angel = (int)co2Threshold / 20;
 				if (angel < 0){

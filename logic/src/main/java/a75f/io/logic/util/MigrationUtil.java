@@ -114,10 +114,6 @@ public class MigrationUtil {
             updateHisValue(CCUHsApi.getInstance());
         }
 
-        if (!PreferenceUtil.isTitle24OaoPointsMigrationDone()) {
-            Title24Migration.Companion.doTitle24OaoPointsMigration(CCUHsApi.getInstance());
-            PreferenceUtil.setTitle24OaoPointsMigrationDone();
-        }
         if (!PreferenceUtil.isTitle24HssPointsMigrationDone()) {
             Title24Migration.Companion.doTitle24HsPointMigration(CCUHsApi.getInstance());
             Title24Migration.Companion.doTitle24HssPointsMigration(CCUHsApi.getInstance());

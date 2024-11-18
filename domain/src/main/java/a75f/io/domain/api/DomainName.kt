@@ -262,6 +262,17 @@ object DomainName {
     const val tiProportionalKFactor = "tiProportionalKFactor"
 
     //OAO
+    const val outsideDamperMinDrive = "outsideDamperMinDrive"
+    const val outsideDamperMaxDrive = "outsideDamperMaxDrive"
+    const val returnDamperMinDrive = "returnDamperMinDrive"
+    const val returnDamperMaxDrive = "returnDamperMaxDrive"
+    const val usePerRoomCO2Sensing = "usePerRoomCo2Sensing"
+    const val returnDamperMinOpen = "returnDamperMinOpen"
+    const val systemPurgeOutsideDamperMinPos = "systemPurgeOutsideDamperMinPos"
+    const val enhancedVentilationOutsideDamperMinOpen = "enhancedVentilationOutsideDamperMinOpen"
+    const val currentTransformerType = "currentTransformerType"
+    const val returnDamperCmd = "returnDamperCmd"
+    const val outsideDamperCmd = "outsideDamperCmd"
 
     const val outsideDamperMixedAirMinimum = "outsideDamperMixedAirMinimum"
     const val economizingToMainCoolingLoopMap = "economizingToMainCoolingLoopMap"
@@ -456,7 +467,7 @@ object DomainName {
     const val helionodeVAVReheatSeriesFan = "helionodeVAVReheatSeriesFan"
     const val helionodeActiveChilledBeam = "helionodeActiveChilledBeam"
     const val smartnodeBypassDamper = "smartnodeBypassDamper"
-
+    const val smartnodeOAO = "smartnodeOAO"
     const val ductStaticPressureSensor = "ductStaticPressureSensor"
     const val ductStaticPressureSetpoint = "ductStaticPressureSetpoint"
     const val pressureSensorType = "pressureSensorType"

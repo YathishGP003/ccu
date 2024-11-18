@@ -2,6 +2,7 @@ package a75f.io.domain.logic
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.domain.BypassDamperEquip
+import a75f.io.domain.OAOEquip
 import a75f.io.domain.equips.BuildingEquip
 import a75f.io.domain.equips.VavEquip
 import a75f.io.domain.api.Device
@@ -48,6 +49,8 @@ object DomainManager {
             addSystemEquip(hayStack, it["id"].toString())
             addSystemDevice(hayStack, it["id"].toString())
             addBypassEquip(hayStack, it["id"].toString())
+            addOaoEquip(hayStack, it["id"].toString())
+            addOaoDevice(hayStack, it["id"].toString())
         }
 
         val floors = hayStack.readAllEntities("floor")
@@ -101,6 +104,11 @@ object DomainManager {
                 Domain.equips[it["id"].toString()] = BypassDamperEquip(it["id"].toString())
             }
 
+        hayStack.readAllEntities("oao and equip")
+            .forEach {
+                CcuLog.i(Domain.LOG_TAG, "Build domain $it")
+                Domain.equips[it["id"].toString()] = OAOEquip(it["id"].toString())
+            }
 
         Domain.equips.forEach {
             CcuLog.i(Domain.LOG_TAG, "Added equip to domain ${it.key}")
@@ -254,6 +262,46 @@ object DomainManager {
                     val domainName = point["domainName"]
                     domainName?.let {
                         Domain.site?.ccus?.get(ccuId)?.bypassEquips?.get(equipId.toString())?.addPoint(point)
+                    }
+                }
+            }
+        }
+    }
+
+    fun addOaoEquip(hayStack: CCUHsApi, ccuId: String) {
+        val oaoEquip = hayStack.readAllEntities("oao and equip")
+        oaoEquip.forEach { equip->
+            val equipId = equip["id"]
+            equipId?.let {
+                Domain.site?.ccus?.get(ccuId)?.addOaoEquip(equip)
+                val points =
+                    hayStack.readAllEntities("point and equipRef == \"$equipId\"")
+                points.forEach { point ->
+                    val domainName = point["domainName"]
+                    domainName?.let {
+                        Domain.site?.ccus?.get(ccuId)?.equips?.get(equipId.toString())?.addPoint(point)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun addOaoDevice(hayStack: CCUHsApi, ccuId: String) {
+        val oaoEquip = hayStack.readEntity("oao and equip")
+        if(!oaoEquip.contains("id"))
+            return
+        val oaoEquipId = oaoEquip["id"].toString()
+        val devices = hayStack.readAllEntities("point and equipRef == \"$oaoEquipId\"")
+        devices.forEach { device ->
+            val deviceId = device["id"]
+            deviceId?.let {
+                Domain.site?.ccus?.get(ccuId)?.addDevice(device)
+                val points =
+                    hayStack.readAllEntities("point and deviceRef == \"$deviceId\"")
+                points.forEach { point ->
+                    val domainName = point["domainName"]
+                    domainName?.let {
+                        Domain.site?.ccus?.get(ccuId)?.devices?.get(deviceId)?.addPoint(point)
                     }
                 }
             }

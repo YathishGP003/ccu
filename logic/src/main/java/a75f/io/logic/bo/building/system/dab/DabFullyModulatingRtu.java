@@ -502,10 +502,9 @@ public class DabFullyModulatingRtu extends DabSystemProfile
         
         if((epidemicState == EpidemicState.PREPURGE || epidemicState == EpidemicState.POSTPURGE) && (L.ccu().oaoProfile != null)){
             
-            double smartPurgeDabFanLoopOp = TunerUtil.readTunerValByQuery("system and purge and dab and fan and loop and output", L.ccu().oaoProfile.getEquipRef());
+            double smartPurgeDabFanLoopOp = L.ccu().oaoProfile.getOAOEquip().getSystemPurgeDabMinFanLoopOutput().readPriorityVal();
             if(L.ccu().oaoProfile.isEconomizingAvailable()) {
-                double economizingToMainCoolingLoopMap = TunerUtil.readTunerValByQuery("oao and economizing and main and cooling and loop and map",
-                                                                                       L.ccu().oaoProfile.getEquipRef());
+                double economizingToMainCoolingLoopMap = L.ccu().oaoProfile.getOAOEquip().getEconomizingToMainCoolingLoopMap().readPriorityVal();
                 systemFanLoopOp = Math.max(Math.max(systemCoolingLoopOp * 100 / economizingToMainCoolingLoopMap, systemHeatingLoopOp), smartPurgeDabFanLoopOp);
             }else if(dabSystem.getSystemState() == COOLING){
                 systemFanLoopOp = Math.max(systemCoolingLoopOp * analogFanSpeedMultiplier, smartPurgeDabFanLoopOp);
@@ -518,8 +517,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
             //When the system is economizing we need to ramp up the fan faster to take advantage of the free cooling. In such a case
             //systemFanLoopOutput = systemCoolingLoopOutput * 100/economizingToMainCoolingLoopMap
             if (L.ccu().oaoProfile != null && L.ccu().oaoProfile.isEconomizingAvailable()) {
-                double economizingToMainCoolingLoopMap = TunerUtil.readTunerValByQuery("oao and economizing and main and cooling and loop and map",
-                                                                                       L.ccu().oaoProfile.getEquipRef());
+                double economizingToMainCoolingLoopMap = L.ccu().oaoProfile.getOAOEquip().getEconomizingToMainCoolingLoopMap().readPriorityVal();
                 systemFanLoopOp = dabSystem.getCoolingSignal() * 100/economizingToMainCoolingLoopMap ;
             } else {
                 systemFanLoopOp = (int) (dabSystem.getCoolingSignal() * analogFanSpeedMultiplier);

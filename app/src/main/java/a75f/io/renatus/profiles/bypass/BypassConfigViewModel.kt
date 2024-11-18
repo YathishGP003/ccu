@@ -99,7 +99,6 @@ class BypassConfigViewModel : ViewModel() {
         get() = _isDialogOpen
 
     fun init(bundle: Bundle, context: Context, hayStack : CCUHsApi) {
-        openCancelDialog = false
         deviceAddress = bundle.getShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR)
         zoneRef = bundle.getString(FragmentCommonBundleArgs.ARG_NAME)!!
         floorRef = bundle.getString(FragmentCommonBundleArgs.FLOOR_NAME)!!

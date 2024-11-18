@@ -98,6 +98,12 @@ class Ccu(domainName : String, id : String) : Entity(domainName) {
         bypassEquips[id] = Equip(domainName, id)
     }
 
+    fun addOaoEquip(entityMap : HashMap<Any, Any>) {
+        val domainName = entityMap["domainName"].toString()
+        val id = entityMap["id"].toString()
+        equips[id] = Equip(domainName, id)
+    }
+
 }
 open class Point(domainName : String, val equipRef: String) : Entity(domainName) {
 

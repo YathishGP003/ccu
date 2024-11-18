@@ -18,6 +18,7 @@ import a75f.io.renatus.profiles.acb.AcbProfileViewModel
 import a75f.io.renatus.profiles.dab.DabProfileViewModel
 import a75f.io.renatus.profiles.system.DabStagedRtuViewModel
 import a75f.io.renatus.profiles.system.DabStagedVfdRtuViewModel
+import a75f.io.renatus.profiles.oao.OAOViewModel
 import a75f.io.renatus.profiles.system.StagedRtuProfileViewModel
 import a75f.io.renatus.profiles.system.VavModulatingRtuViewModel
 import a75f.io.renatus.profiles.vav.VavProfileViewModel
@@ -56,6 +57,9 @@ open class UnusedPortsModel {
                 is DabStagedVfdRtuViewModel -> {
                     viewModel.profileConfiguration.unusedPorts[firstUnusedPort] = it
                     viewModel.setStateChanged()
+                }
+                is OAOViewModel -> {
+                    viewModel.profileConfiguration.unusedPorts[firstUnusedPort] = it
                 }
             }
         }

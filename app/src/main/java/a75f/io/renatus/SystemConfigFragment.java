@@ -27,6 +27,7 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.modbus.ModbusConfigView;
 import a75f.io.renatus.modbus.util.ModbusLevel;
+import a75f.io.renatus.profiles.oao.OAOProfileFragment;
 import a75f.io.renatus.profiles.vav.BypassConfigFragment;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import butterknife.BindView;
@@ -135,11 +136,12 @@ public class SystemConfigFragment extends Fragment {
                                 SystemConfigMenuFragment.SystemConfigNavigationHandler.sendEmptyMessage(1);
                             }
                             if (L.ccu().oaoProfile != null) {
-                                if (isTransactionSafe && !(fragment instanceof DialogOAOProfile)) {
-                                    fragmentClass = DialogOAOProfile.class;
+                                if (isTransactionSafe && !(fragment instanceof OAOProfileFragment)) {
+                                    fragmentClass = OAOProfileFragment.class;
+
                                     try {
-                                        short meshAddress = (short)L.ccu().oaoProfile.getNodeAddress();
-                                        fragment = DialogOAOProfile.newInstance(meshAddress, "SYSTEM", "SYSTEM");
+                                        short meshAddress = Short.parseShort(L.ccu().oaoProfile.getNodeAddress()+"");
+                                        fragment = OAOProfileFragment.Companion.newInstance(meshAddress, "SYSTEM", "SYSTEM", NodeType.SMART_NODE, ProfileType.OAO);
                                     } catch (Exception e) {
                                         e.printStackTrace();
                                     }
@@ -330,10 +332,12 @@ public class SystemConfigFragment extends Fragment {
                         }
                         if (L.ccu().oaoProfile != null) {
                             if (isTransactionSafe) {
-                                fragmentClass = DialogOAOProfile.class;
+                                fragmentClass = OAOProfileFragment.class;
                                 try {
-                                    short meshAddress = (short) L.ccu().oaoProfile.getNodeAddress();
-                                    fragment = DialogOAOProfile.newInstance(meshAddress, "SYSTEM", "SYSTEM");
+                                    short meshAddress =Short.parseShort(L.ccu().oaoProfile.getNodeAddress()+"");
+                                    fragment = OAOProfileFragment.Companion.newInstance(meshAddress,
+                                            "SYSTEM", "SYSTEM", NodeType.SMART_NODE,
+                                            ProfileType.OAO);
                                 } catch (Exception e) {
                                     e.printStackTrace();
                                 }

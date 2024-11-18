@@ -69,6 +69,7 @@ object ModelCache {
         CoroutineScope(Dispatchers.IO).launch {
             loadSystemProfileModels()
             loadBypassDamperModels()
+            loadOAOModelAsync()
         }
     }
 
@@ -76,6 +77,13 @@ object ModelCache {
         CcuLog.i(Domain.LOG_TAG, "Load loadTerminalModelsAsync")
         CoroutineScope(Dispatchers.IO).launch {
             loadVavZoneEquipModels()
+        }
+    }
+
+    private fun loadOAOModelAsync() {
+        CcuLog.i(Domain.LOG_TAG, "Load loadOAOModelAsync")
+        CoroutineScope(Dispatchers.IO).launch {
+            loadOAOModel()
         }
     }
 
@@ -166,6 +174,10 @@ object ModelCache {
 
     private fun loadStandAloneModels() {
         modelContainer[MODEL_HYPERSTAT_SPLIT_CPU] = getModelById(MODEL_HYPERSTAT_SPLIT_CPU)
+    }
+
+    private fun loadOAOModel() {
+        modelContainer[MODEL_SN_OAO] = getModelById(MODEL_SN_OAO)
     }
 
     /**

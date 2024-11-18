@@ -242,7 +242,7 @@ public class VavStagedRtu extends VavSystemProfile
             systemFanLoopOp = getSingleZoneFanLoopOp(analogFanSpeedMultiplier);
         } else if((epidemicState == EpidemicState.PREPURGE || epidemicState == EpidemicState.POSTPURGE ) && (L.ccu().oaoProfile != null)) {
             //TODO- Part OAO. Will be replaced with domanName later.
-            double smartPurgeDabFanLoopOp = TunerUtil.readTunerValByQuery("system and purge and vav and fan and loop and output", L.ccu().oaoProfile.getEquipRef());
+            double smartPurgeDabFanLoopOp = L.ccu().oaoProfile.getOAOEquip().getSystemPurgeVavMinFanLoopOutput().readPriorityVal();
             double spSpMax = systemEquip.getStaticPressureSPMax().readPriorityVal();
             double spSpMin = systemEquip.getStaticPressureSPMin().readPriorityVal();
 

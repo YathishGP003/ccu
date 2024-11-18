@@ -270,17 +270,22 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
                 haystack.updateEquip(hayStackEquip, it.id)
                 hayStackEquip.id = it.id
                 DomainManager.addBypassEquip(Domain.hayStack, Domain.hayStack.ccuId)
+                CcuLog.d(Domain.LOG_TAG, "DM-DM Bypass Equip updated: ${hayStackEquip.domainName}")
             } else if (Domain.readEquip(newModel.id)["roomRef"].toString() == "SYSTEM") {
                 hayStackEquip.roomRef = "SYSTEM"
                 hayStackEquip.floorRef = "SYSTEM"
+                equipMap["ahuRef"]?.let { hayStackEquip.ahuRef = it.toString() }
                 haystack.updateEquip(hayStackEquip, it.id)
                 DomainManager.addSystemEquip(Domain.hayStack, Domain.hayStack.ccuId)
+                DomainManager.addOaoEquip(Domain.hayStack, Domain.hayStack.ccuId)
+                CcuLog.d(Domain.LOG_TAG, "DM-DM system Equip updated: ${hayStackEquip.domainName}")
             }else{
                 hayStackEquip.ahuRef = equipMap["ahuRef"]?.toString()
                 hayStackEquip.gatewayRef = equipMap["gatewayRef"]?.toString()
                 haystack.updateEquip(hayStackEquip, it.id)
                 hayStackEquip.id = it.id
                 DomainManager.addEquip(hayStackEquip)
+                CcuLog.d(Domain.LOG_TAG, "DM-DM Equip updated: ${hayStackEquip.domainName}")
             }
         }
     }
@@ -304,6 +309,7 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
                     hayStackEquip.id = it.id
                     if (Domain.readEquip(newModel.id)["roomRef"].toString() == "SYSTEM") {
                         DomainManager.addSystemEquip(Domain.hayStack, Domain.hayStack.ccuId)
+                        DomainManager.addOaoEquip(Domain.hayStack, Domain.hayStack.ccuId)
                     }else{
                         DomainManager.addEquip(hayStackEquip)
                     }
@@ -364,6 +370,7 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
                     hayStackEquip.id = it.id
                     if (Domain.readEquip(newModel.id)["roomRef"].toString() == "SYSTEM") {
                         DomainManager.addSystemEquip(Domain.hayStack, Domain.hayStack.ccuId)
+                        DomainManager.addOaoEquip(Domain.hayStack, Domain.hayStack.ccuId)
                     }else{
                         DomainManager.addEquip(hayStackEquip)
                     }

@@ -125,9 +125,6 @@ class BypassConfigFragment : BaseDialogFragment() {
             CancelDialog(
                 onDismissRequest = { viewModel.openCancelDialog = false },
                 onConfirmation = {
-                    if (viewModel.nextDestination == 6 && L.ccu().oaoProfile != null) {
-                        ProgressDialogUtils.showProgressDialog(context, "Loading OAO Profile")
-                    }
                     viewModel.cancelConfirm()
                     SystemConfigFragment.SystemConfigFragmentHandler.sendEmptyMessage(viewModel.nextDestination)
                     viewModel.openCancelDialog = false

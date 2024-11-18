@@ -597,7 +597,9 @@ public class Globals {
         if (oaoEquip != null && oaoEquip.size() > 0) {
             CcuLog.d(L.TAG_CCU, "Create Default OAO Profile");
             OAOProfile oao = new OAOProfile();
-            oao.addOaoEquip(Short.parseShort(oaoEquip.get("group").toString()));
+            oao.addOAOEquip(oaoEquip.get("id").toString()
+                    , Short.parseShort(oaoEquip.get("group").toString())
+                    , ProfileType.OAO);
             L.ccu().oaoProfile = oao;
         }
 

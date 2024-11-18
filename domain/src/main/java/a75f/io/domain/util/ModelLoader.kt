@@ -120,6 +120,10 @@ object ModelLoader {
         return ModelCache.getModelById(MODEL_CCU_DIAG_EQUIP)
     }
 
+    fun getSmartNodeOAOModelDef() : ModelDirective {
+        return ModelCache.getModelById(MODEL_SN_OAO)
+    }
+
     fun getModelForDomainName( domainName : String) : ModelDirective {
         return when(domainName) {
             "smartnodeVAVReheatNoFan" -> getSmartNodeVavNoFanModelDef()
@@ -142,6 +146,7 @@ object ModelLoader {
             "connectModuleDevice" -> getConnectModuleDeviceModel()
             "hyperstatSplitDevice" -> getHyperStatSplitDeviceModel()
             DomainName.ccuConfiguration -> getCCUBaseConfigurationModel()
+            "smartnodeOAO" -> getSmartNodeOAOModelDef()
             else -> throw IllegalStateException("Invalid Model Name")
         }
     }

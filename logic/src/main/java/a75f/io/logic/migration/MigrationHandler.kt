@@ -12,6 +12,7 @@ import a75f.io.api.haystack.Tags
 import a75f.io.api.haystack.Zone
 import a75f.io.api.haystack.sync.HttpUtil
 import a75f.io.domain.HyperStatSplitEquip
+import a75f.io.domain.OAOEquip
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.Domain.writeValAtLevelByDomain
 import a75f.io.domain.api.DomainName
@@ -24,6 +25,7 @@ import a75f.io.domain.cutover.DabZoneProfileCutOverMapping
 import a75f.io.domain.cutover.HyperStatSplitCpuCutOverMapping
 import a75f.io.domain.cutover.HyperStatSplitDeviceCutoverMapping
 import a75f.io.domain.cutover.NodeDeviceCutOverMapping
+import a75f.io.domain.cutover.OaoCutOverMapping
 import a75f.io.domain.cutover.VavFullyModulatingRtuCutOverMapping
 import a75f.io.domain.cutover.VavStagedRtuCutOverMapping
 import a75f.io.domain.cutover.VavStagedVfdRtuCutOverMapping
@@ -45,9 +47,13 @@ import a75f.io.logic.L
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.bypassdamper.BypassDamperProfileConfiguration
 import a75f.io.logic.bo.building.dab.DabProfileConfiguration
+import a75f.io.logic.bo.building.dab.getDevicePointDict
+import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType
+import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.CpuUniInType
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuProfileConfiguration
+import a75f.io.logic.bo.building.oao.OAOProfileConfiguration
 import a75f.io.logic.bo.building.schedules.Occupancy
 import a75f.io.logic.bo.building.schedules.occupancy.DemandResponse
 import a75f.io.logic.bo.building.system.vav.config.ModulatingRtuProfileConfig
@@ -116,6 +122,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         CCUBaseConfigurationMigrationHandler().doCCUBaseConfigurationMigration(hayStack)
         DiagEquipMigrationHandler().doDiagEquipMigration(hayStack)
         doDabSystemDomainModelMigration()
+        doOAOProfileMigration()
         createMigrationVersionPoint(CCUHsApi.getInstance())
         addSystemDomainEquip(CCUHsApi.getInstance())
         addCmBoardDevice(hayStack)
@@ -1103,6 +1110,115 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             else -> CpuUniInType.NONE.ordinal.toDouble()
         }
     }
+
+    private fun doOAOProfileMigration() {
+        val oao = hayStack.readEntity("equip and oao")
+        if (oao.isNotEmpty() && oao.containsKey("domainName")) {
+            CcuLog.i(Domain.LOG_TAG, "OAO equip is already migrated")
+            return
+        }
+
+        val CT_INDEX_START = 8
+        val equipBuilder = ProfileEquipBuilder(hayStack)
+        val site = hayStack.site
+        CcuLog.i(Domain.LOG_TAG, "Do OAO migration for oao")
+        val model = ModelLoader.getSmartNodeOAOModelDef()
+        val equipDis = "${site?.displayName}-OAO-${oao["group"]}"
+        val deviceModel =  ModelLoader.getSmartNodeDevice() as SeventyFiveFDeviceDirective
+        val deviceBuilder = DeviceBuilder(hayStack, EntityMapper(model as SeventyFiveFProfileDirective))
+        val device = hayStack.readEntity("device and addr == \"" + oao["group"] + "\"")
+        val deviceDis = "${site?.displayName}-SN-${oao["group"]}"
+        val profileType = ProfileType.OAO
+
+        val oaoConfiguration = OAOProfileConfiguration(
+            Integer.parseInt(oao["group"].toString()),
+            NodeType.SMART_NODE.name,
+            0,
+            oao["roomRef"].toString(),
+            oao["floorRef"].toString(),
+            profileType,
+            model
+        ).getActiveConfiguration()
+
+        CcuLog.d(L.TAG_CCU_DOMAIN ,"oao migration configuration: $oaoConfiguration, deviceDis: $deviceDis, equipDis: $equipDis")
+        equipBuilder.doCutOverMigration(oao["id"].toString(), model,
+            equipDis, OaoCutOverMapping.entries, oaoConfiguration, equipHashMap = oao)
+
+        deviceBuilder.doCutOverMigration(
+            device["id"].toString(),
+            deviceModel,
+            deviceDis,
+            NodeDeviceCutOverMapping.entries,
+            oaoConfiguration
+        )
+
+        val oaoEquip = OAOEquip(oao["id"].toString())
+        oaoEquip.currentTransformerType.writeDefaultVal(oaoEquip.currentTransformerType.readDefaultVal() - CT_INDEX_START)
+
+        fun getSystemProfileType(): String {
+            val profileType = L.ccu().systemProfile.profileType
+            return when (profileType) {
+                ProfileType.SYSTEM_DAB_ANALOG_RTU, ProfileType.SYSTEM_DAB_HYBRID_RTU, ProfileType.SYSTEM_DAB_STAGED_RTU, ProfileType.SYSTEM_DAB_STAGED_VFD_RTU, ProfileType.dabExternalAHUController, ProfileType.SYSTEM_DAB_ADVANCED_AHU -> "dab"
+                ProfileType.SYSTEM_VAV_ANALOG_RTU, ProfileType.SYSTEM_VAV_HYBRID_RTU, ProfileType.SYSTEM_VAV_IE_RTU, ProfileType.SYSTEM_VAV_STAGED_RTU, ProfileType.SYSTEM_VAV_STAGED_VFD_RTU, ProfileType.SYSTEM_VAV_ADVANCED_AHU, ProfileType.vavExternalAHUController -> "vav"
+                else -> {
+                    "default"
+                }
+            }
+        }
+
+        val deviceEntityId =
+            hayStack.readEntity("device and addr == \"${oaoConfiguration.nodeAddress}\"")["id"].toString()
+        val device1 = Device.Builder().setHDict(hayStack.readHDictById(deviceEntityId)).build()
+
+        fun updateDevicePoint(domainName: String, port: String, analogType: Any) {
+            val pointDef = deviceModel.points.find { it.domainName == domainName }
+            pointDef?.let {
+                val pointDict = getDevicePointDict(domainName, deviceEntityId, hayStack).apply {
+                    this["port"] = port
+                    this["analogType"] = analogType
+                }
+                deviceBuilder.updatePoint(it, oaoConfiguration, device1, pointDict)
+            }
+        }
+
+        //Update analog input points
+        updateDevicePoint(DomainName.analog1In, Port.ANALOG_IN_ONE.name, 5)
+        updateDevicePoint(
+            DomainName.analog2In,
+            Port.ANALOG_IN_TWO.name,
+            8 + oaoEquip.currentTransformerType.readDefaultVal().toInt()
+        )
+
+        //Update analog output points
+        updateDevicePoint(
+            DomainName.analog1Out,
+            Port.ANALOG_OUT_ONE.name,
+            "${oaoEquip.outsideDamperMinDrive.readDefaultVal()} - ${oaoEquip.outsideDamperMaxDrive.readDefaultVal()}"
+        )
+        updateDevicePoint(
+            DomainName.analog2Out,
+            Port.ANALOG_OUT_TWO.name,
+            "${oaoEquip.returnDamperMinDrive.readDefaultVal()} - ${oaoEquip.returnDamperMaxDrive.readDefaultVal()}"
+        )
+
+        //Update TH input points
+        updateDevicePoint(DomainName.th1In, Port.TH1_IN.name, 0)
+        updateDevicePoint(DomainName.th2In, Port.TH2_IN.name, 0)
+
+        //Update relay points
+        updateDevicePoint(
+            DomainName.relay1,
+            Port.RELAY_ONE.name,
+            OutputRelayActuatorType.NormallyClose.displayName
+        )
+        updateDevicePoint(
+            DomainName.relay2,
+            Port.RELAY_TWO.name,
+            OutputRelayActuatorType.NormallyClose.displayName
+        )
+
+    }
+
 
     fun updateMigrationVersion(){
         val pm = Globals.getInstance().applicationContext.packageManager

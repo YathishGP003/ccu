@@ -693,8 +693,9 @@ public abstract class SystemProfile
         
         if (ccu().oaoProfile != null) {
             //Successfully read weather info. Update to OAO weather point
-            ccu().oaoProfile.getOAOEquip().setHisVal("outsideWeather and air and temp", externalTemp);
-            ccu().oaoProfile.getOAOEquip().setHisVal("outsideWeather and air and humidity", externalHumidity);
+            ccu().oaoProfile.getOAOEquip().getWeatherOutsideTemp().writeHisVal(externalTemp);
+            ccu().oaoProfile.getOAOEquip().getWeatherOutsideHumidity().writeHisVal(externalHumidity);
+            CcuLog.i(L.TAG_CCU_OAO, "Setting external temp and humidity to OAO");
         }
 
         // Update weather points on all HyperStat Split equips
@@ -785,7 +786,7 @@ public abstract class SystemProfile
         if (outsideAirTemp == 0 && ccu().oaoProfile != null) {
             //We could be here when weather API fails or the device is offline and oao is paired.
             //Try to read LocalOAT fed by the thermistor.
-            outsideAirTemp = hayStack.readHisValByQuery("oao and outside and temp");
+            outsideAirTemp = ccu().oaoProfile.getOAOEquip().getOutsideTemperature().readHisVal();
         }
         return outsideAirTemp;
     }

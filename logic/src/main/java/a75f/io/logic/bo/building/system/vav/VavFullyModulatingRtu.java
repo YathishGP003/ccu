@@ -256,7 +256,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
         if (isSingleZoneTIMode(CCUHsApi.getInstance())) {
             systemFanLoopOp = getSingleZoneFanLoopOp(analogFanSpeedMultiplier);
         } else if((epidemicState == EpidemicState.PREPURGE || epidemicState == EpidemicState.POSTPURGE) && (L.ccu().oaoProfile != null)){
-            double smartPurgeVAVFanLoopOp = TunerUtil.readTunerValByQuery("system and purge and vav and fan and loop and output", L.ccu().oaoProfile.getEquipRef());
+            double smartPurgeVAVFanLoopOp = L.ccu().oaoProfile.getOAOEquip().getSystemPurgeVavMinFanLoopOutput().readPriorityVal();
             double spSpMax = systemEquip.getStaticPressureSPMax().readPriorityVal();
             double spSpMin = systemEquip.getStaticPressureSPMin().readPriorityVal();
             double staticPressureLoopOutput = (int) ((getStaticPressure() - spSpMin) * 100 / (spSpMax - spSpMin)) ;

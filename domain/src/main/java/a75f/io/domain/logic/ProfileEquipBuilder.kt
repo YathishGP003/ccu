@@ -368,6 +368,8 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
         )
         if(equipHashMap.containsKey("ahuRef")){
             equip.ahuRef = equipHashMap["ahuRef"].toString()
+        }else{
+            CcuLog.d(Domain.LOG_TAG, "ahuRef not found in equipHashMap")
         }
         if(equipHashMap.containsKey("gatewayRef")){
             equip.gatewayRef = equipHashMap["gatewayRef"].toString()
@@ -526,6 +528,7 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
                 pass++
             }
         }
+
         CcuLog.i(Domain.LOG_TAG, "Added $add pass $pass")
     }
     private fun pointWithDomainNameExists(dbPoints : List<Map<Any, Any>>, domainName : String, mapping : Map <String, String>) : Boolean{

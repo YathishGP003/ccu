@@ -22,7 +22,6 @@ import io.seventyfivef.ph.core.TagType
 import kotlinx.coroutines.asCoroutineDispatcher
 import org.projecthaystack.HBool
 import org.projecthaystack.HStr
-import java.util.Locale
 import java.util.concurrent.Executors
 import java.util.concurrent.ThreadFactory
 import java.util.concurrent.atomic.AtomicInteger

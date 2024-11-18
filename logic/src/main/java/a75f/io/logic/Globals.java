@@ -298,7 +298,7 @@ public class Globals {
                 Watchdog.getInstance().addMonitor(mScheduleProcessJob);
                 Watchdog.getInstance().start();
                 modelMigration(migrationHandler);
-                MigrationHandler.Companion.doPostModelMigrationTasks();
+                migrationHandler.doPostModelMigrationTasks();
                 /*temperatureMode migration should be handled after model migration*/
                 migrationHandler.temperatureModeMigration();
             } catch (Exception e) {

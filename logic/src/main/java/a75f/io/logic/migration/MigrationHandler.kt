@@ -18,11 +18,11 @@ import a75f.io.domain.api.DomainName
 import a75f.io.domain.config.DefaultProfileConfiguration
 import a75f.io.domain.config.ExternalAhuConfiguration
 import a75f.io.domain.config.ProfileConfiguration
+import a75f.io.domain.cutover.DabStagedRtuCutOverMapping
+import a75f.io.domain.cutover.DabStagedVfdRtuCutOverMapping
 import a75f.io.domain.cutover.DabZoneProfileCutOverMapping
 import a75f.io.domain.cutover.HyperStatSplitCpuCutOverMapping
 import a75f.io.domain.cutover.HyperStatSplitDeviceCutoverMapping
-import a75f.io.domain.cutover.DabStagedRtuCutOverMapping
-import a75f.io.domain.cutover.DabStagedVfdRtuCutOverMapping
 import a75f.io.domain.cutover.NodeDeviceCutOverMapping
 import a75f.io.domain.cutover.VavFullyModulatingRtuCutOverMapping
 import a75f.io.domain.cutover.VavStagedRtuCutOverMapping
@@ -43,6 +43,7 @@ import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.NodeType
+import a75f.io.logic.bo.building.bypassdamper.BypassDamperProfileConfiguration
 import a75f.io.logic.bo.building.dab.DabProfileConfiguration
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.CpuUniInType
@@ -72,33 +73,44 @@ import io.seventyfivef.domainmodeler.client.ModelPointDef
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDevicePointDef
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
+import org.joda.time.DateTime
 import org.projecthaystack.HDict
 import org.projecthaystack.HDictBuilder
 import org.projecthaystack.HGrid
 import org.projecthaystack.HGridBuilder
+import org.projecthaystack.HRef
 import org.projecthaystack.HRow
 import org.projecthaystack.io.HZincReader
 import org.projecthaystack.io.HZincWriter
-import org.joda.time.DateTime
-import java.util.HashMap
 
 
 class MigrationHandler (hsApi : CCUHsApi) : Migration {
 
-    companion object {
-        fun doPostModelMigrationTasks() {
-            if (!PreferenceUtil.getRecoverHelioNodeACBTunersMigration()) VavAndAcbProfileMigration.recoverHelioNodeACBTuners(CCUHsApi.getInstance())
-            if (!PreferenceUtil.getACBRelayLogicalPointsMigration()) VavAndAcbProfileMigration.verifyACBIsoValveLogicalPoints(CCUHsApi.getInstance())
-            try{
-                if (!PreferenceUtil.getDmToDmCleanupMigration()) {
-                    cleanACBDuplicatePoints(CCUHsApi.getInstance())
-                    cleanVAVDuplicatePoints(CCUHsApi.getInstance())
-                    CCUHsApi.getInstance().syncEntityTree()
-                    PreferenceUtil.setDmToDmCleanupMigration()
+    val TAG_CCU_BYPASS_RECOVER = "CCU_BYPASS_RECOVER"
+
+    fun doPostModelMigrationTasks() {
+        if (!PreferenceUtil.getRecoverHelioNodeACBTunersMigration()) VavAndAcbProfileMigration.recoverHelioNodeACBTuners(CCUHsApi.getInstance())
+        if (!PreferenceUtil.getACBRelayLogicalPointsMigration()) VavAndAcbProfileMigration.verifyACBIsoValveLogicalPoints(CCUHsApi.getInstance())
+        try{
+            if (!PreferenceUtil.getDmToDmCleanupMigration()) {
+                cleanACBDuplicatePoints(CCUHsApi.getInstance())
+                cleanVAVDuplicatePoints(CCUHsApi.getInstance())
+                CCUHsApi.getInstance().syncEntityTree()
+                PreferenceUtil.setDmToDmCleanupMigration()
+            }
+        } catch (e: Exception) {
+            //TODO - This is temporary fix till vav model issue is resolved in the next releases.
+            //For now, we make sure it does not stop other migrations even if this fails.
+        }
+        if(!PreferenceUtil.getRestoreBypassDamperAfterReplace()) {
+            try {
+                if(restoreMissingBypassDamperAfterReplace()) {
+                    PreferenceUtil.setRestoreBypassDamperAfterReplace()
+                } else {
+                    CcuLog.e(TAG_CCU_BYPASS_RECOVER, "Failed to restore missing bypass damper after replace. Operation failed and not setting the preference")
                 }
             } catch (e: Exception) {
-                //TODO - This is temporary fix till vav model issue is resolved in the next releases.
-                //For now, we make sure it does not stop other migrations even if this fails.
+                CcuLog.d(TAG_CCU_BYPASS_RECOVER, "Some exception occurred. CCU Bypass Recovery operation stopped abruptly.")
             }
         }
     }
@@ -1282,6 +1294,187 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                         equipDis
                     ), point
                 )
+            }
+        }
+    }
+
+    // This method is to be used in case of CCUs which have been replaced and post which, the bypassDamper data is not available in the new CCU.
+    private fun restoreMissingBypassDamperAfterReplace(): Boolean {
+        // Perform the operation only on a replaced CCU and if the bypassDamper does not exist in the new CCU.
+        if(validateBypassDamperRecoveryForReplacedCcu()) {
+            /** If the value return while fetching the bypassDamper equip for this CCU which is missing ahuRef is null, that means,
+             * there was error occurred while fetching the remote equip. To ensure retrial return false and not set the preference
+             */
+            CcuLog.i(TAG_CCU_BYPASS_RECOVER, "This is a replaced CCU. No bypassDamper found locally. Will be checking the cloud now.")
+            val remoteBypassDamperEquip = hayStack.readRemoteEntitiesByQuery("equip and domainName == \"${DomainName.smartnodeBypassDamper}\" and not ahuRef and ccuRef==\"${hayStack.ccuId.replace("@","")}\" and siteRef == \"${hayStack.site?.id?.replace("@","")}\"")
+                ?. firstOrNull()
+                ?: return false
+            CcuLog.i(TAG_CCU_BYPASS_RECOVER,"bypassDamper equip with no ahuRef found in cloud for the current ccuID. Continuing with the recovery process.")
+            /** If the value return while fetching the bypassDamper equip for this CCU which is missing ahuRef is empty, that means,
+             * the bypassDamper does not exist before the CCU was replaced. In this case, return true and set the preference
+             * since no migration is required.
+             */
+            if (remoteBypassDamperEquip.isEmpty) {
+                CcuLog.i(TAG_CCU_BYPASS_RECOVER,"bypassDamper does not exist before the CCU was replaced. No migration required. Setting preference.")
+                return true
+            }
+            CcuLog.d(TAG_CCU_BYPASS_RECOVER,"remoteBypassDamper equip = $remoteBypassDamperEquip")
+            val equipRef = remoteBypassDamperEquip.id().toString()
+
+            /** The operation is considered to be a failure if the equipPoints or devicePoints or the device itself is null.
+             * In this case, return false and not set the preference.
+             */
+            val remoteBypassDamperEquipPoints = hayStack.readRemoteEntitiesByQuery("point and equipRef == $equipRef")
+                ?: return false
+            val remoteBypassDamperDevice = hayStack.readRemoteEntitiesByQuery("device and equipRef == $equipRef")
+                ?. firstOrNull()
+                ?: return false
+            CcuLog.d(TAG_CCU_BYPASS_RECOVER,"remoteBypassDamper device = $remoteBypassDamperDevice")
+            val remoteBypassDamperDevicePoints = hayStack.readRemoteEntitiesByQuery("point and deviceRef == ${remoteBypassDamperDevice.id()}")
+                ?: return false
+
+            CcuLog.i(TAG_CCU_BYPASS_RECOVER, "No null response found for the fetching of the remote bypassDamper entities. Proceeding with their restoration.")
+            /** The equips and points are fetched successfully. Now, we can proceed with the migration.
+             * First, we will build the equip, device and points in the CCU again using the model based building operations.
+             * Then we will update those entities with the existing id of fetched entities.
+             * Finally, we will import the priority array for the points.
+             */
+            val bypassDamperEquipModel = ModelLoader.getSmartNodeBypassDamperModelDef() as SeventyFiveFProfileDirective
+
+            val profileConfiguration = BypassDamperProfileConfiguration (
+                Integer.parseInt(remoteBypassDamperEquip["group"].toString()),
+                NodeType.SMART_NODE.name ,
+                0,
+                remoteBypassDamperEquip["roomRef"].toString(),
+                remoteBypassDamperEquip["floorRef"].toString(),
+                ProfileType.BYPASS_DAMPER,
+                bypassDamperEquipModel
+            ).getDefaultConfiguration()
+
+            restoreBypassDamperEquipAndPoints(remoteBypassDamperEquip, remoteBypassDamperEquipPoints, profileConfiguration)
+            restoreBypassDamperDeviceAndPoints(remoteBypassDamperDevice, remoteBypassDamperDevicePoints, profileConfiguration)
+        }
+        return true
+    }
+
+    private fun validateBypassDamperRecoveryForReplacedCcu() : Boolean {
+        return PreferenceUtil.getCcuInstallType().equals("REPLACECCU")
+                && hayStack.readId("equip and system and not modbus and not connect and profile == \"SYSTEM_DEFAULT\"") == null
+                && hayStack.readId("domainName == \"${DomainName.smartnodeBypassDamper}\"") == null
+    }
+
+    private fun restoreBypassDamperEquipAndPoints(remoteBypassDamperEquip: HDict, remoteBypassDamperEquipPoints: List<HDict>, profileConfiguration: BypassDamperProfileConfiguration) {
+        CcuLog.i(TAG_CCU_BYPASS_RECOVER, "Restoring bypassDamper equip and points and writable arrays")
+        val pointIdList = mutableListOf<HDict>()
+        val equipBuilder = ProfileEquipBuilder(hayStack)
+
+        CcuLog.d(TAG_CCU_BYPASS_RECOVER,"total remoteBypassDamperEquipPoints = ${remoteBypassDamperEquipPoints.size}")
+        CcuLog.d(TAG_CCU_BYPASS_RECOVER, "remoteBypassDamperEquipPoints = $remoteBypassDamperEquipPoints")
+
+        CcuLog.i(TAG_CCU_BYPASS_RECOVER, "Restoring bypassDamper equip ${remoteBypassDamperEquip.getStr("dis")} with domainName ${remoteBypassDamperEquip.getStr("domainName")} and id ${remoteBypassDamperEquip.id()}")
+        val bypassEquip = equipBuilder.buildEquip( EquipBuilderConfig(
+            profileConfiguration.model,
+            profileConfiguration,
+            hayStack.siteIdRef.toString(),
+            hayStack.timeZone,
+            remoteBypassDamperEquip.getStr("dis"))
+        )
+
+        bypassEquip.id = remoteBypassDamperEquip.id().toString()
+        bypassEquip.ahuRef = hayStack.readId("equip and system and not modbus and not connect")
+
+        hayStack.addRemoteEquip(bypassEquip, bypassEquip.id.replace("@",""))
+        hayStack.syncStatusService.addUpdatedEntity(bypassEquip.id.toString())
+
+        val remotePointMapWithDomainName = remoteBypassDamperEquipPoints.associateBy { it.get("domainName").toString() }
+        val toBeUpdatePoints = mutableListOf<String>()
+
+        profileConfiguration.model.points.forEach { pointMetaData ->
+            val pointBuilderConfig = PointBuilderConfig(
+                pointMetaData,
+                profileConfiguration,
+                bypassEquip.id,
+                hayStack.siteIdRef.toString(),
+                hayStack.timeZone,
+                remoteBypassDamperEquip.dis()
+            )
+            CcuLog.d(TAG_CCU_BYPASS_RECOVER,"pointMetaData for equipPoint = $pointMetaData")
+            if(remotePointMapWithDomainName.containsKey(pointMetaData.domainName)) {
+                CcuLog.d(TAG_CCU_BYPASS_RECOVER,"point model id: ${pointMetaData.domainName}")
+                CcuLog.d(TAG_CCU_BYPASS_RECOVER,"remote point found in Model: ${remotePointMapWithDomainName[pointMetaData.domainName]}")
+                val equipPoint = equipBuilder.buildPoint(pointBuilderConfig)
+                equipPoint.id = remotePointMapWithDomainName[pointMetaData.domainName]!!.id().toString()
+                hayStack.addRemotePoint(equipPoint, equipPoint.id.toString().replace("@",""))
+                hayStack.syncStatusService.addUpdatedEntity(equipPoint.id)
+                if(pointMetaData.tagNames.contains("writable")) {
+                    pointIdList.add(HDictBuilder().add("id", HRef.copy(equipPoint.id)).toDict())
+                }
+                toBeUpdatePoints.add(equipPoint.id)
+            } else {
+                CcuLog.d(TAG_CCU_BYPASS_RECOVER,"remote point not found in Model: ${pointMetaData.domainName}. Adding new point")
+                equipBuilder.createPoint(pointBuilderConfig)
+            }
+        }
+        deleteRemotePointsIfNotAvailableInModel(remoteBypassDamperEquipPoints, toBeUpdatePoints)
+        CcuLog.d(TAG_CCU_BYPASS_RECOVER,"Total equip points to have their priority array synced: ${pointIdList.size}")
+        CcuLog.d(TAG_CCU_BYPASS_RECOVER,"pointIdList for equipPoints = $pointIdList")
+        CcuLog.i(TAG_CCU_BYPASS_RECOVER, "Executing importPointArrays for equip points.")
+        hayStack.importPointArrays(pointIdList)
+    }
+
+    private fun restoreBypassDamperDeviceAndPoints(remoteBypassDamperDevice: HDict, remoteBypassDamperDevicePoints: List<HDict>, profileConfiguration: BypassDamperProfileConfiguration) {
+        CcuLog.i(TAG_CCU_BYPASS_RECOVER, "Restoring bypassDamper device and points and writable arrays")
+        val pointIdList = mutableListOf<HDict>()
+        val deviceBuilder = DeviceBuilder(hayStack, EntityMapper(profileConfiguration.model))
+        val smartNodeDeviceModel = ModelLoader.getSmartNodeDevice() as SeventyFiveFDeviceDirective
+
+        CcuLog.i(TAG_CCU_BYPASS_RECOVER, "Restoring bypassDamper device ${remoteBypassDamperDevice.getStr("dis")} with domainName ${remoteBypassDamperDevice.getStr("domainName")} and id ${remoteBypassDamperDevice.id()}")
+        val deviceIterator = remoteBypassDamperDevice.iterator() as Iterator<Map.Entry<Any, Any>>
+        val deviceMap = HashMap<Any, Any>()
+        while (deviceIterator.hasNext()) {
+            val mapEntry= deviceIterator.next()
+            deviceMap[mapEntry.key] = mapEntry.value
+        }
+        val device = Device.Builder().setHashMap(deviceMap).build()
+        device.id = remoteBypassDamperDevice.id().toString()
+        hayStack.addRemoteDevice(device, device.id.replace("@",""))
+
+        deviceBuilder.updateDevice(device.id, smartNodeDeviceModel, device.displayName)
+
+        val remotePointMapWithDomainName = remoteBypassDamperDevicePoints.associateBy { it.getStr("domainName") }
+        val toBeUpdatePoints = mutableListOf<String>()
+
+        smartNodeDeviceModel.points.forEach { pointMetaData ->
+            CcuLog.d(TAG_CCU_BYPASS_RECOVER,"pointMetaData for devicePoint = $pointMetaData")
+            if(remotePointMapWithDomainName.containsKey(pointMetaData.domainName)) {
+                CcuLog.d(TAG_CCU_BYPASS_RECOVER,"point model id: ${pointMetaData.domainName}")
+                CcuLog.d(TAG_CCU_BYPASS_RECOVER,"remote point found in Model: ${remotePointMapWithDomainName[pointMetaData.domainName]}")
+                val devicePoint = deviceBuilder.buildRawPoint(pointMetaData, profileConfiguration, device)
+                devicePoint.id = remotePointMapWithDomainName[pointMetaData.domainName]?.id().toString()
+                hayStack.addRemotePoint(devicePoint, devicePoint.id.replace("@",""))
+                hayStack.syncStatusService.addUpdatedEntity(devicePoint.id.toString())
+                if(pointMetaData.tagNames.contains("writable")){
+                    pointIdList.add(HDictBuilder().add("id", HRef.copy(devicePoint.id)).toDict())
+                }
+                toBeUpdatePoints.add(devicePoint.id)
+            } else {
+                CcuLog.d(TAG_CCU_BYPASS_RECOVER,"remote point not found in Model: ${pointMetaData.domainName}. Adding new point")
+                deviceBuilder.createPoint(pointMetaData, profileConfiguration, device, device.displayName)
+            }
+        }
+        deleteRemotePointsIfNotAvailableInModel(remoteBypassDamperDevicePoints, toBeUpdatePoints)
+        CcuLog.d(TAG_CCU_BYPASS_RECOVER,"Total device points to have their priority array synced: ${pointIdList.size}")
+        CcuLog.d(TAG_CCU_BYPASS_RECOVER,"pointIdList for devicePoints = $pointIdList")
+        CcuLog.i(TAG_CCU_BYPASS_RECOVER, "Executing importPointArrays for devicePoints.")
+        hayStack.importPointArrays(pointIdList)
+    }
+
+    private fun deleteRemotePointsIfNotAvailableInModel(remotePoints: List<HDict>, updatedPointIdList: List<String>) {
+        CcuLog.w(TAG_CCU_BYPASS_RECOVER, "Deleting remote points if not available in model")
+        remotePoints.forEach { remotePoint ->
+            if(!updatedPointIdList.contains(remotePoint.id().toString())) {
+                CcuLog.w(TAG_CCU_BYPASS_RECOVER, "Deleting remote point ${remotePoint.getStr("dis")} with id ${remotePoint.id()}")
+                hayStack.deleteRemoteEntity(remotePoint.id().toString())
             }
         }
     }

@@ -3423,4 +3423,18 @@ public class CCUHsApi
             CcuLog.d(TAG, "Available levels are  cleared for point " + id);
         }
     }
+
+    public List<HDict> readRemoteEntitiesByQuery(String query) {
+        String response = CCUHsApi.getInstance().fetchRemoteEntityByQuery(query);
+        if(response == null || response.isEmpty()){
+            CcuLog.d(TAG, "Failed to read remote entity : " + response);
+            return null;
+        }
+        Iterator it = new HZincReader(response).readGrid().iterator();
+        List<HDict> dictList = new ArrayList<>();
+        while(it.hasNext()) {
+            dictList.add(new HDictBuilder().add((HRow) it.next()).toDict());
+        }
+        return dictList;
+    }
 }

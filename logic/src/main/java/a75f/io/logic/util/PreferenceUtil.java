@@ -79,6 +79,8 @@ public class PreferenceUtil {
     public static final String BACKFILL_DEFAULT_VALUE_MIGRATION = "backFillDefaultValueMigration";
     public static final String DAB_DAMPER_SIZE_MIGRATION = "dabDamperSizeMigration";
     public static final String BACNET_ID_MIGRATION = "bacnetIdUpdateMigration";
+    private static final String INSTALL_TYPE = "INSTALL_TYPE";
+    private static final String RESTORE_BYPASS_DAMPER_AFTER_REPLACE = "restoreBypassDamperAfterReplace";
 
 
 
@@ -614,5 +616,17 @@ public class PreferenceUtil {
 
     public static void setBacnetIdMigrationDone() {
         setBooleanPreference(BACNET_ID_MIGRATION, true);
+    }
+
+    public static String getCcuInstallType() {
+        return getStringPreference(INSTALL_TYPE);
+    }
+
+    public static boolean getRestoreBypassDamperAfterReplace() {
+        return getBooleanPreference(RESTORE_BYPASS_DAMPER_AFTER_REPLACE);
+    }
+
+    public static void setRestoreBypassDamperAfterReplace() {
+        setBooleanPreference(RESTORE_BYPASS_DAMPER_AFTER_REPLACE, true);
     }
 }

@@ -1227,9 +1227,9 @@ public class MigrationUtil {
                         String pointId = map.get("id").toString();
                         double pointPriorityVal = haystack.readPointPriorityVal(pointId);
                         double pointHisVal = haystack.readHisValById(pointId);
-                        if(pointPriorityVal != pointHisVal){
-                        haystack.writeHisValById(pointId, pointPriorityVal);
-                        CcuLog.d(TAG_CCU_MIGRATION_UTIL, "point updated: " + map.get("id").toString());
+                        if (pointPriorityVal != pointHisVal) {
+                            haystack.writeHisValById(pointId, pointPriorityVal);
+                            CcuLog.d(TAG_CCU_MIGRATION_UTIL, "point updated: " + map.get("id").toString());
                         }
                     }
                 } catch (NumberFormatException e){

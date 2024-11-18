@@ -141,9 +141,7 @@ class ACBConfigHandler {
             val AcbEquip = VavEquip(equip.get("id").toString())
 
             if (AcbEquip.enableCFMControl.readDefaultVal() > 0.0) {
-                AcbEquip.vavAirflowCFMProportionalRange.writeVal(8, 1.5 * AcbEquip.maxCFMCooling.readPriorityVal())
-                //for only writing the his value
-                TrueCFMVAVConfigHandler.writeHisValue(AcbEquip.vavAirflowCFMProportionalRange.id,hayStack)
+                AcbEquip.vavAirflowCFMProportionalRange.writePointValue(1.5*AcbEquip.maxCFMCooling.readPriorityVal())
             }
         }
 

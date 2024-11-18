@@ -31,6 +31,7 @@ import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.sync.PointWriteCache;
+import a75f.io.domain.api.Domain;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.vrv.VrvControlMessageCache;
@@ -244,7 +245,7 @@ public class UpdatePointHandler implements MessageHandler
             DemandResponseMode.handleDRMessageUpdate(pointEntity, hayStack, msgObject, zoneDataInterface);
             return;
         }
-        if (HSUtil.isPointBackfillConfigPoint(pointUid, CCUHsApi.getInstance())) {
+        if (HSUtil.isPointBackfillConfigPoint(pointEntity)) {
             JsonElement backFillVal = msgObject.get("val");
             if (!backFillVal.isJsonNull()){
                 updateBackfillDuration(backFillVal.getAsDouble());
@@ -421,8 +422,7 @@ public class UpdatePointHandler implements MessageHandler
     public static void setModbusWritableDataInterface(ModbusWritableDataInterface in) { modbusWritableDataInterface = in; }
     public static void setMasterControlLimitListener(MasterControlLimitListener listener) {masterControlLimitListener = listener; }
     private static boolean canIgnorePointUpdate(String pbSource, String pointUid, CCUHsApi hayStack) {
-        HashMap ccu = hayStack.read("ccu");
-        String ccuName = ccu.get("dis").toString();
+        String ccuName = hayStack.getCcuName();
     
         //Notification for update from the same CCU by using ccu_deviceId format..
         if (pbSource.equals(hayStack.getCCUUserName())) {

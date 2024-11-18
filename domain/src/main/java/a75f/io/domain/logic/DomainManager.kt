@@ -6,9 +6,11 @@ import a75f.io.domain.equips.BuildingEquip
 import a75f.io.domain.equips.VavEquip
 import a75f.io.domain.api.Device
 import a75f.io.domain.api.Domain
+import a75f.io.domain.api.DomainName
 import a75f.io.domain.api.Equip
 import a75f.io.domain.api.Point
 import a75f.io.domain.api.Site
+import a75f.io.domain.devices.CCUDevice
 import a75f.io.domain.devices.CmBoardDevice
 import a75f.io.domain.devices.ConnectDevice
 import a75f.io.domain.equips.DabEquip
@@ -16,6 +18,8 @@ import a75f.io.domain.equips.DabStagedSystemEquip
 import a75f.io.domain.equips.DabStagedVfdSystemEquip
 import a75f.io.domain.equips.DabAdvancedHybridSystemEquip
 import a75f.io.domain.equips.DefaultSystemEquip
+import a75f.io.domain.equips.CCUDiagEquip
+import a75f.io.domain.equips.CCUEquip
 import a75f.io.domain.equips.DomainEquip
 import a75f.io.domain.equips.VavAdvancedHybridSystemEquip
 import a75f.io.domain.equips.VavModulatingRtuSystemEquip
@@ -68,6 +72,17 @@ object DomainManager {
         addDomainEquips(hayStack)
         addSystemDomainEquip(hayStack)
         addCmBoardDevice(hayStack)
+        addCCUDevice(hayStack)
+        addDiagEquip(hayStack)
+        addCCUEquip(hayStack)
+    }
+
+    fun addCCUEquip(hayStack: CCUHsApi) {
+        val ccuEquip = hayStack.readEntityByDomainName(DomainName.ccuConfiguration)
+        if (ccuEquip.isNotEmpty()) {
+            CcuLog.e(Domain.LOG_TAG, "Added CCU Equip to domain")
+                Domain.ccuEquip = CCUEquip(ccuEquip["id"].toString())
+        }
     }
 
     private fun addDomainEquips(hayStack: CCUHsApi) {
@@ -168,6 +183,21 @@ object DomainManager {
 
     }
 
+    fun addDiagEquip(hayStack: CCUHsApi) {
+        val diagEquip = hayStack.readEntity("diag and equip")
+        if (diagEquip.isNotEmpty()) {
+            CcuLog.e(Domain.LOG_TAG, "Added Diag to domain")
+            Domain.diagEquip = CCUDiagEquip(diagEquip["id"].toString())
+        }
+    }
+
+    fun addCCUDevice(hayStack: CCUHsApi) {
+        val ccuDevice = hayStack.readEntity("device and ccu")
+        if (ccuDevice.isNotEmpty()) {
+            CcuLog.e(Domain.LOG_TAG, "Added CCU device to domain")
+            Domain.ccuDevice = CCUDevice(ccuDevice["id"].toString())
+        }
+    }
     fun addDomainEquip(equip: a75f.io.api.haystack.Equip) {
         when {
             equip.markers.contains("vav") -> Domain.equips[equip.id] = VavEquip(equip.id)

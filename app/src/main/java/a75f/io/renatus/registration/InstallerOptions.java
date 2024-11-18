@@ -75,7 +75,6 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Schedule;
-import a75f.io.api.haystack.SettingPoint;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.domain.api.Domain;
@@ -338,22 +337,18 @@ public class InstallerOptions extends Fragment implements MasterControlLimitList
                 CcuLog.d(L.TAG_CCU, "AddressBandSelected : " + mAddressBandSpinner.getSelectedItem());
                 if (i >= 0) {
                     addressBandSelected = mAddressBandSpinner.getSelectedItem().toString();
-                    L.ccu().setSmartNodeAddressBand(Short.parseShort(addressBandSelected));
+                    L.ccu().setAddressBand(Short.parseShort(addressBandSelected));
                     if (!isFreshRegister){
-                        HashMap band = ccuHsApi.read("point and snband");
-                        if(!addressBandSelected.equals(band.get("val").toString()) && regAddressBands.contains(addressBandSelected)) {
+                        String addressBand = Domain.ccuEquip.getAddressBandValue();
+                        if(addressBand != null && !addressBandSelected.equals(addressBand) && regAddressBands.contains(addressBandSelected)) {
                             Toast toast = new Toast(Globals.getInstance().getApplicationContext());
                             toast.setGravity(Gravity.BOTTOM, 50, 50);
                             toast.setView(toastWarning);
                             toast.setDuration(Toast.LENGTH_LONG);
                             toast.show();
                         }
-                        SettingPoint.Builder sp = new SettingPoint.Builder().setHashMap(band);
-                        sp.setVal(addressBandSelected);
-                        SettingPoint snBand = sp.build();
-
-                        ccuHsApi.updateSettingPoint(snBand, snBand.getId());
-                        regAddressBands.remove(band.get("val"));
+                        Domain.ccuEquip.updateAddressBand(addressBandSelected);
+                        regAddressBands.remove(addressBand);
                         regAddressBands.add(addressBandSelected);
                         try {
                             String confString = prefs.getString(BACNET_CONFIGURATION);
@@ -381,18 +376,6 @@ public class InstallerOptions extends Fragment implements MasterControlLimitList
 
         if (isFreshRegister) mNext.setVisibility(View.VISIBLE);
         else mNext.setVisibility(View.GONE);
-        HashMap ccu = ccuHsApi.read("ccu");
-        mNext.setOnClickListener(v -> {
-            if (ccu.isEmpty()) {
-                Toast.makeText(getContext(), "CCU device does not exist. Please clear app data and retry " +
-                                             "registration", Toast.LENGTH_LONG).show();
-                return;
-            }
-            mNext.setEnabled(false);
-            createInstallerPoints(ccu, prefs);
-            // TODO Auto-generated method stub
-            goToNext();
-        });
 
         if (!isFreshRegister) {
             ArrayList<HashMap> equips = ccuHsApi.readAll("equip and zone");
@@ -490,17 +473,10 @@ public class InstallerOptions extends Fragment implements MasterControlLimitList
     }
 
     private void setUpDREnrollmentMode(CCUHsApi ccuHsApi) {
-        switchDREnrollment.setChecked(DemandResponseMode.isDREnrollmentSelected(ccuHsApi));
+        switchDREnrollment.setChecked(DemandResponseMode.isDREnrollmentSelected());
         switchDREnrollment.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (isChecked) {
-                CcuLog.i(L.TAG_CCU_DR_MODE,"Demand response point created");
-                DemandResponseMode.handleDRActivationConfiguration(true, ccuHsApi);
-                DemandResponseMode.setDREnrollmentStatus(ccuHsApi, true);
-            } else {
-                CcuLog.i(L.TAG_CCU_DR_MODE,"Demand response point deleted");
-                DemandResponseMode.handleDRActivationConfiguration(false, ccuHsApi);
-                DemandResponseMode.setDREnrollmentStatus(ccuHsApi, false);
-            }
+            CcuLog.i(L.TAG_CCU_DR_MODE,"Demand response point status is : "+isChecked);
+            DemandResponseMode.handleDRActivationConfiguration(isChecked, ccuHsApi);
         });
     }
 
@@ -526,44 +502,6 @@ public class InstallerOptions extends Fragment implements MasterControlLimitList
         transaction.replace(R.id.buildingOccupancyFragmentContainer, childFragment).commit();
     }
 
-    public void createInstallerPoints(HashMap ccu, Prefs prefs) {
-        String ccuId = ccu.get("id").toString();
-        ccuId = ccuId.replace("@", "");
-        String ccuName = ccu.get("dis").toString();
-        CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.make(ccuId));
-        HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
-
-        if(!prefs.getString("INSTALL_TYPE").equals("ADDCCU")) {
-            SettingPoint snBand = new SettingPoint.Builder()
-                    .setDeviceRef(ccuId)
-                    .setSiteRef(siteMap.get("id").toString())
-                    .setDisplayName(ccuName + "-smartNodeBand")
-                    .addMarker("snband").addMarker("sp").setVal(addressBandSelected).build();
-            CCUHsApi.getInstance().addPoint(snBand);
-        }
-        OtaStatusDiagPoint.Companion.addOTAStatusPoint(
-                siteMap.get("dis").toString()+"-CCU",
-                ccu.get("equipRef").toString(),
-                ccu.get("siteRef").toString(),
-                siteMap.get(Tags.TZ).toString(),
-                CCUHsApi.getInstance()
-        );
-
-        SettingPoint bacnetConfig = new SettingPoint.Builder()
-                .setDeviceRef(ccuId)
-                .setSiteRef(siteMap.get("id").toString())
-                .setDisplayName(ccuName + "-bacnetConfig")
-                .addMarker("bacnet").addMarker("config").addMarker("sp")/*.setVal(radioGroup_config.getCheckedRadioButtonId() == R.id.rbAuto ? "0" :"1")*/.build();
-        CCUHsApi.getInstance().addPoint(bacnetConfig);
-        SettingPoint bacnetIp = new SettingPoint.Builder()
-                .setDeviceRef(ccuId)
-                .setSiteRef(siteMap.get("id").toString())
-                .setDisplayName(ccuName + "-bacnetIp")
-                .addMarker("bacnet").addMarker("ipconfig").addMarker("sp")/*.setProtocol(editIPAddr.getText() != null ? editIPAddr.getText().toString() : "")*/.build();
-        CCUHsApi.getInstance().addPoint(bacnetIp);
-
-        BackfillUtilKt.addBackFillDurationPointIfNotExists(CCUHsApi.getInstance());
-    }
 
     public void setToggleCheck() {
         boolean newValue = isCelsiusTunerAvailableStatus();
@@ -1107,7 +1045,7 @@ public class InstallerOptions extends Fragment implements MasterControlLimitList
                 ()->{
                     HClient hClient = new HClient(CCUHsApi.getInstance().getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
                     String siteUID = CCUHsApi.getInstance().getSiteIdRef().toString();
-                    HDict tDict = new HDictBuilder().add("filter", "snband and siteRef == " + siteUID).toDict();
+                    HDict tDict = new HDictBuilder().add("filter", "domainName == \"" + DomainName.addressBand + "\" and siteRef == " + siteUID).toDict();
                     HGrid addressPoint = hClient.call("read", HGridBuilder.dictToGrid(tDict));
                     if(addressPoint == null) {
                         CcuLog.w(L.TAG_CCU_REGISTER_GATHER_DETAILS,"HGrid(schedulePoint) is null.");
@@ -1120,8 +1058,8 @@ public class InstallerOptions extends Fragment implements MasterControlLimitList
                     while (it.hasNext())
                     {
                         HRow r = (HRow) it.next();
-                        if (r.getStr("val") != null) {
-                            regAddressBands.add(r.getStr("val"));
+                        if (r.has("val")) {
+                            regAddressBands.add(r.get("val").toString());
                         }
                     }
                 },
@@ -1134,18 +1072,18 @@ public class InstallerOptions extends Fragment implements MasterControlLimitList
         analogAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         mAddressBandSpinner.setAdapter(analogAdapter);
 
-        HashMap ccu = CCUHsApi.getInstance().read("ccu");
+        boolean isCcuDeviceExists = Domain.ccuDevice.isCCUExists();
         //if ccu exists
-        if (!ccu.isEmpty()) {
+        if (isCcuDeviceExists) {
             for (String addBand : addressBand) {
-                String addB = String.valueOf(L.ccu().getSmartNodeAddressBand());
+                String addB = String.valueOf(L.ccu().getAddressBand());
                 if (addBand.equals(addB)) {
                     mAddressBandSpinner.setSelection(analogAdapter.getPosition(addBand),false);
                     break;
                 }
             }
         } else {
-            ccu().setSmartNodeAddressBand((short) 1000);
+            ccu().setAddressBand((short) 1000);
         }
     }
     private CustomSpinnerDropDownAdapter getAdapterValue(ArrayList values) {

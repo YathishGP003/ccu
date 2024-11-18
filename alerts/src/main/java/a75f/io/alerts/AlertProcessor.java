@@ -235,7 +235,7 @@ public class AlertProcessor
 
     private boolean isInAutoCommissioningMode() {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        return hayStack.readPointPriorityValByQuery("point and diag and auto and commissioning") == 1.0;
+        return hayStack.readPointPriorityValByQuery("domainName == \"autoCommissioning\"") == 1.0;
     }
 
     /**

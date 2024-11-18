@@ -60,6 +60,8 @@ import a75f.io.logic.diag.DiagEquip
 import a75f.io.logic.diag.DiagEquip.createMigrationVersionPoint
 import a75f.io.logic.migration.VavAndAcbProfileMigration.Companion.cleanACBDuplicatePoints
 import a75f.io.logic.migration.VavAndAcbProfileMigration.Companion.cleanVAVDuplicatePoints
+import a75f.io.logic.migration.ccuanddiagequipmigration.CCUBaseConfigurationMigrationHandler
+import a75f.io.logic.migration.ccuanddiagequipmigration.DiagEquipMigrationHandler
 import a75f.io.logic.migration.modbus.correctEnumsForCorruptModbusPoints
 import a75f.io.logic.migration.scheduler.SchedulerRevampMigration
 import a75f.io.logic.tuners.TunerConstants
@@ -111,6 +113,8 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         doDabTerminalDomainModelMigration()
         doVavSystemDomainModelMigration()
         doHyperStatSplitCpuDomainModelMigration()
+        CCUBaseConfigurationMigrationHandler().doCCUBaseConfigurationMigration(hayStack)
+        DiagEquipMigrationHandler().doDiagEquipMigration(hayStack)
         doDabSystemDomainModelMigration()
         createMigrationVersionPoint(CCUHsApi.getInstance())
         addSystemDomainEquip(CCUHsApi.getInstance())
@@ -129,16 +133,6 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                 migrationToHandleInfluenceOfUserIntentOnSentPoints()
                 PreferenceUtil.setSingleDualMigrationStatus()
             }
-
-            DiagEquip.addLogLevelPoint(CCUHsApi.getInstance())
-        }
-        if (!PreferenceUtil.getAppVersionPointsMigration()) {
-            val diagEquipMap = hayStack.readEntity("equip and diag")
-            if (diagEquipMap.isNotEmpty()) {
-                val diagEquip = Equip.Builder().setHashMap(diagEquipMap).build()
-                DiagEquip.createAppVersionPoints(hayStack, diagEquip)
-            }
-            PreferenceUtil.setAppVersionPointsMigration()
         }
 
         try {
@@ -158,7 +152,6 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             //For now, we make sure it does not stop other migrations even if this fails.
             CcuLog.e(L.TAG_CCU_MIGRATION_UTIL, "Error in migrateVavAndAcbProfilesToCorrectPortEnabledStatus: ${e.message}")
         }
-
         updateAhuRefForTIEquip()
         clearLevel4ValuesOfDesiredTempIfDurationIs0()
         if (schedulerRevamp.isMigrationRequired()) {
@@ -185,6 +178,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             removeHisTagsFromNonDMDevices()
             PreferenceUtil.setHisTagRemovalFromNonDmDevicesDone()
         }
+
         if(!PreferenceUtil.isDeadBandMigrationRequired()){
             migrateDeadBandPoints(hayStack)
             PreferenceUtil.setDeadBandMigrationNotRequired()
@@ -372,7 +366,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
 
     private fun isAutoAwayMappedToDemandResponseLevel(levelRow: HRow?): Boolean {
         return levelRow!!.getInt("level") == HayStackConstants.DEMAND_RESPONSE_LEVEL &&
-                ! DemandResponse.isDRModeActivated(hayStack)
+                ! DemandResponse.isDRModeActivated()
     }
 
     private fun isLevelToBeCleared(levelRow: HRow?): Boolean {
@@ -1116,10 +1110,10 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         try {
             pi = pm.getPackageInfo("a75f.io.renatus", 0)
             val currentAppVersion = pi.versionName.substring(pi.versionName.lastIndexOf('_') + 1)
-            val migrationVersion = hayStack.readDefaultStrVal("diag and migration and version")
+            val migrationVersion = Domain.readStrPointValueByDomainName(DomainName.migrationVersion)
             CcuLog.d(TAG_CCU_DOMAIN, "currentAppVersion: $currentAppVersion, migrationVersion: $migrationVersion")
             if (currentAppVersion != migrationVersion) {
-                CCUHsApi.getInstance().writeDefaultVal("point and diag and migration", currentAppVersion)
+                Domain.writeDefaultValByDomain(DomainName.migrationVersion, currentAppVersion)
             }
         } catch (e: PackageManager.NameNotFoundException) {
             e.printStackTrace()

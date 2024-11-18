@@ -66,7 +66,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import a75f.io.alerts.AlertManager;
-import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.domain.api.Domain;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
@@ -511,7 +511,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
 
     private void appRestarted() {
         AlertManager.getInstance().getRepo().setRestartAppToTrue();
-        CCUHsApi.getInstance().writeHisValByQuery("app and restart",1.0);
+        Domain.diagEquip.getAppRestart().writeHisVal(1.0);
     }
 
     private void ccuLaunched(){

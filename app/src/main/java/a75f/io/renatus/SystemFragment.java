@@ -34,7 +34,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.Html;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.InflateException;
@@ -88,6 +87,7 @@ import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.modbus.EquipmentDevice;
 import a75f.io.api.haystack.modbus.Parameter;
+import a75f.io.domain.api.Domain;
 import a75f.io.domain.util.ModelNames;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
@@ -724,8 +724,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 
 		prefs = new Prefs(getActivity());
 		ccuName = view.findViewById(R.id.ccuName);
-		HashMap<Object, Object> ccu = CCUHsApi.getInstance().readEntity("device and ccu");
-		ccuName.setText(ccu.get("dis").toString());
+		ccuName.setText(Domain.ccuDevice.getCcuDisName());
 		profileTitle = view.findViewById(R.id.profileTitle);
 		oaoArc = view.findViewById(R.id.oaoArc);
 		purgeLayout = view.findViewById(R.id.purgelayout);
@@ -981,9 +980,9 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 
 	private void setUpDRModeActivationLayout() {
 		CCUHsApi ccuHsApi = CCUHsApi.getInstance();
-		if (DemandResponseMode.isDREnrollmentSelected(ccuHsApi)) {
+		if (DemandResponseMode.isDREnrollmentSelected()) {
 			drActivationLayout.setVisibility(View.VISIBLE);
-			switchActivation.setChecked(DemandResponseMode.isDRModeActivated(ccuHsApi));
+			switchActivation.setChecked(DemandResponseMode.isDRModeActivated());
 		} else {
 			drActivationLayout.setVisibility(View.GONE);
 		}
@@ -991,10 +990,10 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			if(buttonView.isPressed()) {
 				if (isChecked) {
 					CcuLog.i(L.TAG_CCU_DR_MODE, "Demand response Activation enabled");
-					DemandResponseMode.setDRModeActivationStatus(ccuHsApi, true);
+					DemandResponseMode.setDRModeActivationStatus(true);
 				} else {
 					CcuLog.i(L.TAG_CCU_DR_MODE, "Demand response Activation disabled");
-					DemandResponseMode.setDRModeActivationStatus(ccuHsApi, false);
+					DemandResponseMode.setDRModeActivationStatus(false);
 				}
 			}
 		});
@@ -1119,7 +1118,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 						configureExternalAhu();
 					}
 				}
-				switchActivation.setChecked(DemandResponseMode.isDRModeActivated(CCUHsApi.getInstance()));
+				switchActivation.setChecked(DemandResponseMode.isDRModeActivated());
 				if (L.ccu().systemProfile != null) {
 					profileTitle.setText(L.ccu().systemProfile.getProfileName());
 				}

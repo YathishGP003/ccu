@@ -20,4 +20,7 @@ public class CcuFieldConstants {
 
     public static final String SOURCE_MODEL_VERSION = "sourceModelVersion";
     public static final String BUILDING_TUNER_ID = "buildingTunerId";
+    public static final String DOMAIN_NAME = "domainName";
+    public static final String CREATED_DATE = "createdDate";
+    public static final String LAST_MODIFIED_DATE = "lastModifiedDate";
 }

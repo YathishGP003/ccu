@@ -111,7 +111,7 @@ class AlertsDataStore @JvmOverloads constructor(
 
    fun cancelAppRestarted() {
       alertsSharedPrefs.edit().putBoolean(PREFS_ALERTS_APP_RESTART, false).apply()
-      CCUHsApi.getInstance().writeHisValByQuery("app and restart",0.0)
+      CCUHsApi.getInstance().writeHisValByQuery("domainName == \"appRestart\"", 0.0)
    }
 
    fun isAppRestarted() =

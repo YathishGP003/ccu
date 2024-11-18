@@ -111,7 +111,17 @@ class BuildingEquipTest {
         equipBuilder.buildTunerEquipAndPoints(dmModel, "@TestSiteRef")
 
         println(mockHayStack.readEntity("tuner and equip"))
-        println(mockHayStack.getCcuRegisterJson("a", "b", "c", "d", "e", "f", "g", "h", null))
+        println(mockHayStack.getCcuRegisterJson(
+            "a",
+            "b",
+            "c",
+            "d",
+            "e",
+            "f",
+            "g",
+            "h",
+            null
+        ))
     }
     // TODO : Need to fix this test
     fun tunerEquipUpgradeTest() {

@@ -22,8 +22,14 @@ import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Kind;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
+import a75f.io.domain.api.Domain;
 import a75f.io.domain.api.DomainName;
 import a75f.io.domain.api.PhysicalPoint;
+import a75f.io.domain.devices.CCUDevice;
+import a75f.io.domain.equips.DomainEquip;
+import a75f.io.domain.logic.CCUDeviceBuilder;
+import a75f.io.domain.logic.DiagEquipConfigurationBuilder;
+import a75f.io.domain.util.ModelLoader;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.BacnetIdKt;
 import a75f.io.logic.BacnetUtilKt;
@@ -185,9 +191,10 @@ public abstract class SystemProfile
     }
 
     public void updateAhuRef(String systemEquipId) {
-        ArrayList<HashMap<Object, Object>> equips = CCUHsApi.getInstance().readAllEntities("equip and zone");
+        CCUHsApi ccuHsApi = CCUHsApi.getInstance();
+        ArrayList<HashMap<Object, Object>> equips = ccuHsApi.readAllEntities("equip and zone");
         if (L.ccu().oaoProfile != null) {
-            equips.add(CCUHsApi.getInstance().read("equip and oao and not hyperstatsplit"));
+            equips.add(ccuHsApi.read("equip and oao and not hyperstatsplit"));
         }
 
         equips.forEach( m -> {
@@ -206,18 +213,24 @@ public abstract class SystemProfile
                 // some sort of retry mechanism.
                 CcuLog.e(L.TAG_CCU_SYSTEM, "Invalid profile, AhuRef is not updated for " + q.getDisplayName());
             }
-            CCUHsApi.getInstance().updateEquip(q, q.getId());
+            ccuHsApi.updateEquip(q, q.getId());
         });
         
-        ArrayList<HashMap<Object, Object>> modbusEquips = CCUHsApi.getInstance().readAllEntities("equip and modbus");
+        ArrayList<HashMap<Object, Object>> modbusEquips = ccuHsApi.readAllEntities("equip and modbus");
         modbusEquips.forEach( equipMap -> {
             Equip equip = new Equip.Builder().setHashMap(equipMap).build();
             equip.setGatewayRef(systemEquipId);
-            CCUHsApi.getInstance().updateEquip(equip, equip.getId());
+            ccuHsApi.updateEquip(equip, equip.getId());
         });
-        
-        CCUHsApi.getInstance().updateDiagGatewayRef(systemEquipId);
-        CCUHsApi.getInstance().updateCCUahuRef(systemEquipId);
+
+        DiagEquipConfigurationBuilder diagEquipConfigurationBuilder = new DiagEquipConfigurationBuilder(ccuHsApi);
+        diagEquipConfigurationBuilder.updateDiagGatewayRef(systemEquipId);
+
+        CCUDeviceBuilder ccuDeviceBuilder = new CCUDeviceBuilder();
+        CCUDevice ccuDeviceObj = Domain.ccuDevice;
+        ccuDeviceBuilder.buildCCUDevice(ccuDeviceObj.getEquipRef(), ccuDeviceObj.getSiteRef(),
+                ccuDeviceObj.getCcuDisName(), ccuDeviceObj.getInstallerEmail(),
+                ccuDeviceObj.getManagerEmail(), systemEquipId, true);
     }
 
     public void addSystemTuners() {
@@ -504,38 +517,35 @@ public abstract class SystemProfile
         String outsideHumidityId = CCUHsApi.getInstance().addPoint(outsideHumidity);
         CCUHsApi.getInstance().writeHisValById(outsideHumidityId, 0.0);
 
-        addBackFillDurationPointIfNotExists(CCUHsApi.getInstance());
-        createDemandResponseConfigPoints(equipDis, siteRef, equipref, tz, CCUHsApi.getInstance());
-        createOfflineModePoint();
-
     }
 
     //VAV & DAB System profile common points are added here.
     public void addRTUSystemPoints(String siteRef, String equipref, String equipDis, String tz) {
+        CCUHsApi ccuHsApi = CCUHsApi.getInstance();
         addDefaultSystemPoints(siteRef, equipref, equipDis, tz);
         Point systemOccupancy =
                 new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis + "-" + "occupancy")).setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("occupancy").addMarker("mode").addMarker("his").addMarker("sp")
                                    .setEnums(Occupancy.getEnumStringDefinition()).setTz(tz).build();
-        String sysOccupancyId = CCUHsApi.getInstance().addPoint(systemOccupancy);
-        CCUHsApi.getInstance().writeHisValById(sysOccupancyId, 0.0);
+        String sysOccupancyId = ccuHsApi.addPoint(systemOccupancy);
+        ccuHsApi.writeHisValById(sysOccupancyId, 0.0);
         Point systemOperatingMode = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis + "-" + "operatingMode"))
                 .setBacnetId(BacnetIdKt.OPERATIONMODEID).setBacnetType(BacnetUtilKt.MULTI_STATE_VALUE)
                 .setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").
                 addMarker("operating").addMarker("mode").addMarker("his").addMarker("sp").setEnums("off,cooling,heating").setTz(tz).build();
-        CCUHsApi.getInstance().addPoint(systemOperatingMode);
+        ccuHsApi.addPoint(systemOperatingMode);
         Point ciRunning = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis + "-" + "systemCI")).setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("ci").addMarker("running").addMarker("his").addMarker("sp").setTz(tz).build();
-        CCUHsApi.getInstance().addPoint(ciRunning);
+        ccuHsApi.addPoint(ciRunning);
         Point averageHumidity = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis + "-" + "averageHumidity"))
                 .setBacnetId(BacnetIdKt.AVERAGEHUMIDITYID).setBacnetType(BacnetUtilKt.ANALOG_VALUE).setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("average").addMarker("humidity").addMarker("his").addMarker("sp").setUnit("%").setTz(tz).build();
-        CCUHsApi.getInstance().addPoint(averageHumidity);
+        ccuHsApi.addPoint(averageHumidity);
         Point cmHumidity = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis + "-" + "cmHumidity")).setSiteRef(siteRef).setEquipRef(equipref).
                 setHisInterpolate("cov").addMarker("system").addMarker("cm").addMarker("humidity").addMarker("his").addMarker("sp").
                 setTz(tz).setUnit("%").setBacnetId(BacnetIdKt.HUMIDITYID).setBacnetType(BacnetUtilKt.ANALOG_VALUE).build();
-        String cmHumidityId = CCUHsApi.getInstance().addPoint(cmHumidity);
-        CCUHsApi.getInstance().writeHisValById(cmHumidityId, 0.0);
+        String cmHumidityId = ccuHsApi.addPoint(cmHumidity);
+        ccuHsApi.writeHisValById(cmHumidityId, 0.0);
         Point averageTemperature = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis + "-" + "averageTemperature"))
                 .setBacnetId(BacnetIdKt.AVERAGETEMPERATUREID).setBacnetType(BacnetUtilKt.ANALOG_VALUE).setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("average").addMarker("temp").addMarker("his").addMarker("sp").setUnit("\u00B0F").setTz(tz).build();
-        CCUHsApi.getInstance().addPoint(averageTemperature);
+        ccuHsApi.addPoint(averageTemperature);
         addCMPoints(siteRef, equipref, equipDis, tz);
         addNewSystemUserIntentPoints(equipref);
     }
@@ -552,33 +562,33 @@ public abstract class SystemProfile
         if(!verifyPointsAvailability("epidemic and mode and state",equipref)){
 
             Point epidemicModeSystemState = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis + "-" + "epidemicModeSystemState")).setSiteRef(siteRef).setEquipRef(equipref).setHisInterpolate("cov").addMarker("system").addMarker("epidemic").addMarker("mode").addMarker("state").addMarker("his").addMarker("sp").setEnums("off,prepurge,postpurge,enhancedventilation").setTz(tz).build();
-            String epidemicModeSystemStateId = CCUHsApi.getInstance().addPoint(epidemicModeSystemState);
-            CCUHsApi.getInstance().writeHisValById(epidemicModeSystemStateId, 0.0);
+            String epidemicModeSystemStateId = hayStack.addPoint(epidemicModeSystemState);
+            hayStack.writeHisValById(epidemicModeSystemStateId, 0.0);
         }
         if(!verifyPointsAvailability("userIntent and prePurge and enabled",equipref)) {
             Point smartPrePurgePoint = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis + "-" + "systemPrePurgeEnabled")).setSiteRef(siteRef).setEquipRef(equipref).addMarker("sp").addMarker("system").setHisInterpolate("cov").addMarker("userIntent").addMarker("writable").addMarker("his").addMarker("prePurge").addMarker("enabled").setEnums("false,true").setTz(tz).build();
-            String smartPrePurgePointId = CCUHsApi.getInstance().addPoint(smartPrePurgePoint);
-            CCUHsApi.getInstance().writePointForCcuUser(smartPrePurgePointId, TunerConstants.UI_DEFAULT_VAL_LEVEL, 0.0, 0);
-            CCUHsApi.getInstance().writeHisValById(smartPrePurgePointId, 0.0);
+            String smartPrePurgePointId = hayStack.addPoint(smartPrePurgePoint);
+            hayStack.writePointForCcuUser(smartPrePurgePointId, TunerConstants.UI_DEFAULT_VAL_LEVEL, 0.0, 0);
+            hayStack.writeHisValById(smartPrePurgePointId, 0.0);
         }
         if(!verifyPointsAvailability("userIntent and postPurge and enabled",equipref)) {
             Point smartPostPurgePoint = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis + "-" + "systemPostPurgeEnabled")).setSiteRef(siteRef).setEquipRef(equipref).addMarker("sp").addMarker("system").setHisInterpolate("cov").addMarker("userIntent").addMarker("writable").addMarker("his").addMarker("postPurge").addMarker("enabled").setEnums("false,true").setTz(tz).build();
-            String smartPostPurgePointId = CCUHsApi.getInstance().addPoint(smartPostPurgePoint);
-            CCUHsApi.getInstance().writePointForCcuUser(smartPostPurgePointId, TunerConstants.UI_DEFAULT_VAL_LEVEL, 0.0, 0);
-            CCUHsApi.getInstance().writeHisValById(smartPostPurgePointId, 0.0);
+            String smartPostPurgePointId = hayStack.addPoint(smartPostPurgePoint);
+            hayStack.writePointForCcuUser(smartPostPurgePointId, TunerConstants.UI_DEFAULT_VAL_LEVEL, 0.0, 0);
+            hayStack.writeHisValById(smartPostPurgePointId, 0.0);
         }
 
         if(!verifyPointsAvailability("userIntent and enhanced and ventilation and enabled",equipref)) {
             Point enhancedVentilationPoint = new Point.Builder().setDisplayName(SystemTuners.getDisplayNameFromVariation(equipDis + "-" + "systemEnhancedVentilationEnabled")).setSiteRef(siteRef).setEquipRef(equipref).addMarker("sp").addMarker("system").setHisInterpolate("cov").addMarker("userIntent").addMarker("writable").addMarker("his").addMarker("enhanced").addMarker("ventilation").addMarker("enabled").setEnums("false,true").setTz(tz).build();
-            String enhancedVentilationPointId = CCUHsApi.getInstance().addPoint(enhancedVentilationPoint);
-            CCUHsApi.getInstance().writePointForCcuUser(enhancedVentilationPointId, TunerConstants.UI_DEFAULT_VAL_LEVEL, 0.0, 0);
-            CCUHsApi.getInstance().writeHisValById(enhancedVentilationPointId, 0.0);
+            String enhancedVentilationPointId = hayStack.addPoint(enhancedVentilationPoint);
+            hayStack.writePointForCcuUser(enhancedVentilationPointId, TunerConstants.UI_DEFAULT_VAL_LEVEL, 0.0, 0);
+            hayStack.writeHisValById(enhancedVentilationPointId, 0.0);
         }
 
-        addBackFillDurationPointIfNotExists(CCUHsApi.getInstance());
+        addBackFillDurationPointIfNotExists(hayStack);
         createOfflineModePoint();
 
-        createOutsideTempLockoutPoints(CCUHsApi.getInstance(), siteRef, equipref, equipDis, tz);
+        createOutsideTempLockoutPoints(hayStack, siteRef, equipref, equipDis, tz);
     }
 
     private void createOutsideTempLockoutPoints(CCUHsApi hayStack, String siteRef, String equipref, String equipDis,
@@ -643,7 +653,7 @@ public abstract class SystemProfile
     
     private void addLockoutTempTuners(CCUHsApi hayStack, String siteRef, String equipref, String equipDis,
                                       String profileTag, String tz) {
-        HashMap<Object, Object> coolingLockoutTemp = CCUHsApi.getInstance()
+        HashMap<Object, Object> coolingLockoutTemp = hayStack
                                                              .readEntity("tuner and system and outsideTemp " +
                                                                      "and cooling and lockout and equipRef == \""+equipref+"\"");
         
@@ -653,7 +663,7 @@ public abstract class SystemProfile
             
         }
         
-        HashMap<Object, Object> heatingLockoutTemp = CCUHsApi.getInstance()
+        HashMap<Object, Object> heatingLockoutTemp = hayStack
                                                              .readEntity("tuner and system and outsideTemp " +
                                                                      "and heating and lockout and equipRef == \""+equipref+"\"");
         
@@ -664,6 +674,7 @@ public abstract class SystemProfile
     }
     
     public void updateOutsideWeatherParams() {
+        hayStack = CCUHsApi.getInstance();
         double externalTemp = 0;
         double externalHumidity = 0;
         try {
@@ -673,8 +684,8 @@ public abstract class SystemProfile
                 externalHumidity = Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
                         .getInt("outside_humidity", 0);
             } else {
-                externalTemp = CCUHsApi.getInstance().getExternalTemp();
-                externalHumidity = CCUHsApi.getInstance().getExternalHumidity();
+                externalTemp = hayStack.getExternalTemp();
+                externalHumidity = hayStack.getExternalHumidity();
             }
         } catch (Exception e) {
             CcuLog.d(L.TAG_CCU_OAO, " Failed to read external Temp or Humidity ",e);
@@ -687,17 +698,17 @@ public abstract class SystemProfile
         }
 
         // Update weather points on all HyperStat Split equips
-        ArrayList<HashMap<Object, Object>> hssEquips = CCUHsApi.getInstance().readAllEntities("equip and hyperstatsplit");
+        ArrayList<HashMap<Object, Object>> hssEquips = hayStack.readAllEntities("equip and hyperstatsplit");
         if (!hssEquips.isEmpty()) {
             for(HashMap<Object, Object> hssEquip : hssEquips) {
                 String equipId = hssEquip.get(Tags.ID).toString();
-                CCUHsApi.getInstance().writeHisValByQuery("outsideWeather and air and temp and equipRef == \"" + equipId + "\"", externalTemp);
-                CCUHsApi.getInstance().writeHisValByQuery("outsideWeather and air and humidity and equipRef == \"" + equipId + "\"", externalHumidity);
+                hayStack.writeHisValByQuery("outsideWeather and air and temp and equipRef == \"" + equipId + "\"", externalTemp);
+                hayStack.writeHisValByQuery("outsideWeather and air and humidity and equipRef == \"" + equipId + "\"", externalHumidity);
             }
         }
 
-        CCUHsApi.getInstance().writeHisValByQuery("system and outside and temp and not lockout", externalTemp);
-        CCUHsApi.getInstance().writeHisValByQuery("system and outside and humidity", externalHumidity);
+        hayStack.writeHisValByQuery("system and outside and temp and not lockout", externalTemp);
+        hayStack.writeHisValByQuery("system and outside and humidity", externalHumidity);
 
     }
     
@@ -882,7 +893,7 @@ public abstract class SystemProfile
         CcuLog.e("CCU_BYPASS", "Updating conditioning: isBypassHeatingLockoutActive " + isBypassHeatingLockoutActive + ", isBypassCoolingLockoutActive " + isBypassCoolingLockoutActive);
 
         double outsideAirTemp = getOutsideAirTemp(hayStack);
-        if (isOutsideTempCoolingLockoutEnabled(CCUHsApi.getInstance())) {
+        if (isOutsideTempCoolingLockoutEnabled(hayStack)) {
             mechanicalCoolingAvailable = outsideAirTemp > getCoolingLockoutVal() && !isBypassCoolingLockoutActive;
         } else {
             mechanicalCoolingAvailable = !isBypassCoolingLockoutActive;
@@ -890,7 +901,7 @@ public abstract class SystemProfile
         hayStack.writeHisValByQuery("system and cooling and available", mechanicalCoolingAvailable ?
                                                                                            1.0 : 0);
     
-        if (isOutsideTempHeatingLockoutEnabled(CCUHsApi.getInstance())) {
+        if (isOutsideTempHeatingLockoutEnabled(hayStack)) {
             mechanicalHeatingAvailable = outsideAirTemp < getHeatingLockoutVal() && !isBypassHeatingLockoutActive;
         } else {
             mechanicalHeatingAvailable = !isBypassHeatingLockoutActive;
@@ -978,10 +989,6 @@ public abstract class SystemProfile
         AdvancedAhuUtilKt.deleteSystemConnectModule();
     }
 
-    public void createDemandResponseConfigPoints(String equipDis, String siteRef, String equipRef, String tz, CCUHsApi hayStack) {
-        DemandResponseMode demandResponseMode = new DemandResponseMode();
-        demandResponseMode.createDemandResponseEnrollmentPoint(equipDis, siteRef, equipRef, tz, hayStack);
-    }
 
     public Map<a75f.io.domain.api.Point, PhysicalPoint> getLogicalPhysicalMap() {
         return new HashMap<a75f.io.domain.api.Point, PhysicalPoint>();

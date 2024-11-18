@@ -48,6 +48,7 @@ public class RestoreCCUHsApi {
     private SyncStatusService syncStatusService;
     private HisSyncHandler hisSyncHandler;
     private CCUHsApi ccuHsApi;
+    private String siteManager = "SITE_MANAGER";
 
     public static final String TAG = "CCU_REPLACE";
 
@@ -344,7 +345,7 @@ public class RestoreCCUHsApi {
 
         List<String> diagEquipPointList = new LinkedList<>();
         HDict diagVersionDict = new HDictBuilder().add("filter",
-                "diag and version and app and " + equipRefString).toDict();
+                "domainName == \"appVersion\" and "+ equipRefString).toDict();
         HGrid diagVersionGrid = invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(diagVersionDict),
                 retryCountCallback);
         if(diagVersionGrid == null){
@@ -395,9 +396,8 @@ public class RestoreCCUHsApi {
     }
 
     public void importEquip(HRow equipRow, RetryCountCallback retryCountCallback){
-       CcuLog.i(TAG, "Import Equip started for "+equipRow.get("dis").toString());
+        CcuLog.i(TAG, "Import Equip started for "+equipRow.get("dis").toString());
         List<Equip> equips = new ArrayList<>();
-        String siteManager = "SITE_MANAGER";
         List<HashMap> equipMaps = ccuHsApi.HGridToList(equipRow.grid());
         equipMaps.forEach(m -> equips.add(new Equip.Builder().setHashMap(m).build()));
 
@@ -410,15 +410,40 @@ public class RestoreCCUHsApi {
             throw new NullHGridException("Null occurred while fetching points for the equip Id: "+ equipRow.get("id").toString());
         }
 
+        List<HashMap> pointMaps = ccuHsApi.HGridToList(pointsGrid);
         List<Point> points = new ArrayList<>();
-        Iterator pointsGridIterator = pointsGrid.iterator();
-        while(pointsGridIterator!=null && pointsGridIterator.hasNext()) {
-            points.add(new Point.Builder().setHDict((HRow) pointsGridIterator.next()).build());
-        }
+        List<SettingPoint> settingPoints = new ArrayList<>();
 
+        Iterator pointsGridIterator = pointsGrid.iterator();
+
+        while(pointsGridIterator!=null && pointsGridIterator.hasNext()) {
+            HRow pointRow = (HRow) pointsGridIterator.next();
+            if(!pointRow.has(Tags.SETTING)){
+            points.add(new Point.Builder().setHDict(pointRow).build());
+            }
+        }
+        pointMaps.forEach(map ->{
+            if(map.containsKey(Tags.SETTING)){
+                settingPoints.add(new SettingPoint.Builder().setHashMap(map).build());
+            }
+        });
         addEquipAndPoints(equips, points);
+        addSettingPoints(settingPoints);
         writeValueToEquipPoints(equips, hClient, retryCountCallback);
-       CcuLog.i(TAG, "Import Equip completed for "+equipRow.get("dis").toString());
+        CcuLog.i(TAG, "Import Equip completed for "+equipRow.get("dis").toString());
+    }
+
+    private void addSettingPoints(List<SettingPoint> settingPoints) {
+        settingPoints.forEach(settingPoint -> {
+            String pointId = StringUtils.prependIfMissing(settingPoint.getId(), "@");
+            HashMap<Object, Object> point = ccuHsApi.readMapById(pointId);
+            if (point.isEmpty()) {
+                String pointLuid = ccuHsApi.addRemotePoint(settingPoint, settingPoint.getId().replace("@", ""));
+                ccuHsApi.setSynced(pointLuid);
+            } else {
+                CcuLog.i(TAG, "Point already imported " + settingPoint.getId());
+            }
+        });
     }
 
     public void importDevice(HRow deviceRow, RetryCountCallback retryCountCallback){
@@ -935,6 +960,22 @@ public class RestoreCCUHsApi {
         }
         doPointWriteForSchedulable();
        CcuLog.i(TAG, " Importing schedulable zone points completed");
+    }
+
+    public HGrid readCCUEquipAndItsPoints(String ccuId, String siteCode, RetryCountCallback retryCountCallback) {
+        CcuLog.i(TAG, "Reading CCU Equip started");
+        String ccuEquipDomainName = "ccuConfiguration";
+
+        HClient hClient = new HClient(ccuHsApi.getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
+        HDict ccuEquipDict = new HDictBuilder().add("filter",
+                "domainName == \"" + ccuEquipDomainName +"\" and ccuRef == "+ ccuId +" and siteRef == "+ siteCode).toDict();
+        HGrid ccuEquipGrid = invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(ccuEquipDict), retryCountCallback);
+        return ccuEquipGrid;
+    }
+
+    public boolean isCCUEquip(String equipId, String domainName){
+        HashMap<Object, Object> ccuEquipMap = ccuHsApi.readMapById(equipId);
+        return ccuEquipMap.containsKey("domainName") && ccuEquipMap.get("domainName").equals(domainName);
     }
 
 }

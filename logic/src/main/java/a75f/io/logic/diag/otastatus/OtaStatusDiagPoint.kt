@@ -4,6 +4,7 @@ import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Kind
 import a75f.io.api.haystack.Point
 import a75f.io.api.haystack.Tags
+import a75f.io.domain.api.Domain
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 
@@ -276,15 +277,15 @@ class OtaStatusDiagPoint {
         }
 
         private fun isCMDevice(nodeAddress: Int) : Boolean {
-            return nodeAddress == ( L.ccu().smartNodeAddressBand + 99 )
+            return nodeAddress == ( L.ccu().addressBand + 99 )
         }
 
 
         fun updateCCUOtaStatus(status: OtaStatus) {
             val hsApi = CCUHsApi.getInstance()
-            val diag = hsApi.readEntity("diag and equip")
+            val diagEquipId = Domain.diagEquip.getId()
             updateOtaStatusPoint(
-                hsApi, diag[Tags.ID].toString(),
+                hsApi, diagEquipId,
                 status
             )
         }

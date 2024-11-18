@@ -27,6 +27,7 @@ import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.SettingPoint;
 import a75f.io.api.haystack.Zone;
+import a75f.io.domain.api.DomainName;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.BuildConfig;
 import a75f.io.logic.R;
@@ -82,8 +83,8 @@ public class CCUUtils
 
     public static Date getLastReceivedTimeForCloudConnectivity(){
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        Map<Object, Object> cloudConnectivityPoint = hayStack.readEntity("cloud and connected and diag and point");
-        if(cloudConnectivityPoint.isEmpty()){
+        Map<Object, Object> cloudConnectivityPoint = hayStack.readEntityByDomainName(DomainName.ccuHeartbeat);
+        if(cloudConnectivityPoint.isEmpty()) {
             return null;
         }
         HisItem heartBeatHisItem = hayStack.curRead(cloudConnectivityPoint.get("id").toString());
@@ -274,6 +275,7 @@ public class CCUUtils
                 }
             }
         }
+        String ccuId = ccuHsApi.getCcuId();
         CcuLog.d(TAG_CCU_REF,"Executed updateDeviceAndPointsWithUpdatedCcuRef");
     }
 

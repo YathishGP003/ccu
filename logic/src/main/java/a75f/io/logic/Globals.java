@@ -29,6 +29,8 @@ import a75f.io.api.haystack.Zone;
 import a75f.io.data.message.MessageDbUtilKt;
 import a75f.io.domain.api.Domain;
 import a75f.io.domain.api.DomainName;
+import a75f.io.domain.devices.CCUDevice;
+import a75f.io.domain.logic.CCUDeviceBuilder;
 import a75f.io.domain.logic.DomainManager;
 import a75f.io.domain.migration.DiffManger;
 import a75f.io.domain.util.ModelCache;
@@ -84,8 +86,6 @@ import a75f.io.logic.jobs.BuildingProcessJob;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.jobs.bearertoken.BearerTokenManager;
 import a75f.io.logic.migration.MigrationHandler;
-import a75f.io.logic.migration.heartbeat.HeartbeatDiagMigration;
-import a75f.io.logic.migration.heartbeat.HeartbeatMigration;
 import a75f.io.logic.tuners.TunerEquip;
 import a75f.io.logic.util.CCUProxySettings;
 import a75f.io.logic.util.MigrationUtil;
@@ -257,10 +257,10 @@ public class Globals {
         //set SN address band
         try {
             String addrBand = getSmartNodeBand();
-            L.ccu().setSmartNodeAddressBand(addrBand == null ? 1000 : Short.parseShort(addrBand));
+            L.ccu().setAddressBand(addrBand == null ? 1000 : Short.parseShort(addrBand));
         } catch (NumberFormatException e) {
             CcuLog.i(L.TAG_CCU_INIT, "Failerd to read device address band ", e);
-            L.ccu().setSmartNodeAddressBand((short) 1000);
+            L.ccu().setAddressBand((short) 1000);
         }
         CCUHsApi.getInstance().trimObjectBoxHisStore();
         importTunersAndScheduleJobs();
@@ -658,10 +658,10 @@ public class Globals {
             String nodeAdd = device.get("addr").toString();
             return nodeAdd.substring(0, nodeAdd.length() - 2).concat("00");
         } else {
-            HashMap<Object, Object> band = CCUHsApi.getInstance().readEntity("point and snband");
+            HashMap<Object, Object> addressBand = (HashMap<Object, Object>) Domain.readPoint(DomainName.addressBand);
             CcuLog.i(Domain.LOG_TAG, "Deviceband " + device);
-            if (band != null && band.size() > 0 && band.get("val") != null) {
-                return band.get("val").toString();
+            if (addressBand != null && addressBand.size() > 0 && addressBand.get("val") != null) {
+                return addressBand.get("val").toString();
             }
         }
         return null;
@@ -718,12 +718,16 @@ public class Globals {
         String systemProf = systemProfile.get("id").toString();
 
         if (!(systemProf.equals(ahuRef))) {
-            CCUHsApi.getInstance().updateCCUahuRef(systemProf);
+            CCUDeviceBuilder ccuDeviceBuilder = new CCUDeviceBuilder();
+            CCUDevice ccuDeviceObj = Domain.ccuDevice;
+            ccuDeviceBuilder.buildCCUDevice(ccuDeviceObj.getEquipRef(), ccuDeviceObj.getSiteRef(), ccuDeviceObj.getCcuDisName(),
+                    ccuDeviceObj.getInstallerEmail(), ccuDeviceObj.getManagerEmail(),
+                    ahuRef, true);
         }
     }
 
     private void handleAutoCommissioning() {
-        String autoCommissioningPointId = CCUHsApi.getInstance().readId("point and diag and auto and commissioning");
+        String autoCommissioningPointId = AutoCommissioningUtil.getAutoCommissioningPointId();
         if (autoCommissioningPointId != null && AutoCommissioningUtil.isAutoCommissioningStarted()) {
             long scheduledStopDatetimeInMillis = PreferenceUtil.getScheduledStopDatetime(AutoCommissioningUtil.SCHEDULEDSTOPDATETIME);
             AutoCommissioningUtil.handleAutoCommissioningState(scheduledStopDatetimeInMillis);

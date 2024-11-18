@@ -65,7 +65,7 @@ public class Preconditioning implements OccupancyTrigger {
          *Then calculate the absolute tempDiff to determine the preconditioning time.
          */
         // Check if Demand Response mode is activated
-        if (DemandResponse.isDRModeActivated(CCUHsApi.getInstance())) {
+        if (DemandResponse.isDRModeActivated()) {
             double demandResponseSetback = TunerUtil.readTunerValByQuery("demand and response and setback", equipId);
             double tempAdjustment = (tempDiff > 0) ? occupied.getCoolingVal() : occupied.getHeatingVal();
             if (tempDiff > 0) {

@@ -13,6 +13,8 @@ import a75f.io.domain.api.DomainName
 import a75f.io.domain.util.TagsUtil
 import a75f.io.logger.CcuLog
 import android.annotation.SuppressLint
+import io.seventyfivef.domainmodeler.client.ModelDirective
+import io.seventyfivef.domainmodeler.client.type.SeventyFiveFEquipPointDef
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfilePointDef
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFTunerPointDef
 import io.seventyfivef.domainmodeler.common.point.Constraint
@@ -53,7 +55,13 @@ open class DefaultEquipBuilder : EquipBuilder {
                 .setProfile(equipConfig.profileConfiguration?.profileType)
                 .setDomainName(equipConfig.modelDef.domainName)
 
-        if (!equipConfig.modelDef.name.equals("buildingEquip")) { equipBuilder.setDisplayName(equipConfig.disPrefix) }
+        if (!(equipConfig.modelDef.name.contentEquals("buildingEquip"))) {
+            equipBuilder.setDisplayName(equipConfig.disPrefix)
+        }
+        if (equipConfig.modelDef.name.contentEquals("diagEquip") ||
+                    equipConfig.modelDef.name.contentEquals("ccuConfiguration")) {
+            equipBuilder.setDisplayName("${equipConfig.disPrefix}")
+        }
 
         if (equipConfig.profileConfiguration?.roomRef != null) {
             equipBuilder.setRoomRef(equipConfig.profileConfiguration.roomRef)
@@ -153,6 +161,11 @@ open class DefaultEquipBuilder : EquipBuilder {
                 pointBuilder.setHisInterpolate(pointConfig.modelDef.hisInterpolate.name.lowercase())
             }
         }
+        if (pointConfig.modelDef is SeventyFiveFEquipPointDef) {
+            if (pointConfig.modelDef.hisInterpolate.name.isNotEmpty()) {
+                pointBuilder.setHisInterpolate(pointConfig.modelDef.hisInterpolate.name.lowercase())
+            }
+        }
 
         pointConfig.modelDef.tags.forEach { tag ->
             when(tag.kind) {
@@ -245,12 +258,43 @@ open class DefaultEquipBuilder : EquipBuilder {
             val nodeAdd = device["addr"].toString()
             return nodeAdd.substring(0, nodeAdd.length - 2) + "00"
         } else {
-            val band = CCUHsApi.getInstance().readEntity("point and snband")
+            val band = Domain.readPoint(DomainName.addressBand)
             CcuLog.i(Domain.LOG_TAG, "Deviceband $device")
-            if (band != null && band.size > 0 && band["val"] != null) {
+            if (band != null && band.isNotEmpty() && band["val"] != null) {
                 return band["val"].toString()
             }
         }
         return null
+    }
+
+    /*Once testing is completed we can remove isDiagEquip parameter to make this function clean*/
+    fun createPoints(modelDef: ModelDirective, equipRef: String, siteRef: String, isDiagEquip: Boolean) {
+        val tz = hayStack.timeZone
+        val equipDis = hayStack.readMapById(equipRef)["dis"].toString()
+        modelDef.points.forEach {
+            createPoint(PointBuilderConfig(it, null, equipRef, siteRef, tz, equipDis))
+            CcuLog.i(Domain.LOG_TAG," Created "+if(isDiagEquip){"CCUDiagEquip"} else {"CCU_Configuration"}+" point ${it.domainName}")
+        }
+    }
+    private fun createPoint(pointConfig: PointBuilderConfig) {
+        val hayStackPoint = buildPoint(pointConfig)
+        val pointId = hayStack.addPoint(hayStackPoint)
+        hayStackPoint.id = pointId
+        DomainManager.addPoint(hayStackPoint)
+
+        pointConfig.modelDef.run {
+            if ("writable" in tagNames && defaultValue is Number) {
+                hayStack.writeDefaultValById(pointId, (defaultValue as Number).toDouble())
+                CcuLog.i(Domain.LOG_TAG, "write Default Val for point ${hayStackPoint.domainName} value $defaultValue")
+            }
+        }
+
+        pointConfig.modelDef.run {
+            if ("his" in tagNames) {
+                val priorityVal = hayStack.readPointPriorityVal(pointId)
+                hayStack.writeHisValById(pointId, priorityVal)
+                CcuLog.i(Domain.LOG_TAG, "write his Val for point ${hayStackPoint.domainName} value $priorityVal")
+            }
+        }
     }
 }

@@ -56,6 +56,7 @@ import a75f.io.device.serial.CcuToCmOverUsbCmResetMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSmartStatControlsMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSnControlsMessage_t;
 import a75f.io.device.serial.MessageType;
+import a75f.io.domain.api.Domain;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
@@ -130,7 +131,7 @@ public class RemoteCommandHandlerUtil {
                 break;
             case UPDATE_CCU:
                 OtaStatusDiagPoint.Companion.updateCCUOtaStatus(OtaStatus.OTA_REQUEST_RECEIVED);
-                String curVersion = CCUHsApi.getInstance().readDefaultStrVal("point and diag and app and version");
+                String curVersion = Domain.diagEquip.getAppVersion().readDefaultStrVal();
                 String[] versionPart = id.split("_");
                 String downloadApkVersion = versionPart[versionPart.length-1].replace(".apk","");
                 if(curVersion.equals(downloadApkVersion)) {
@@ -242,7 +243,7 @@ public class RemoteCommandHandlerUtil {
         }
         if(logLevelValue == -1)
             return;
-        CCUHsApi.getInstance().writeHisValByQuery(Queries.LOG_LEVEL_QUERY,logLevelValue);
+        Domain.ccuEquip.getLogLevel().writeHisVal(logLevelValue);
         CCUHsApi.getInstance().setCcuLogLevel(logLevelValue);
     }
 

@@ -94,8 +94,7 @@ public class Pulse
 
 		if(mTimeSinceCMDead > 15){
 			mTimeSinceCMDead = 0;
-			HashMap ccu = CCUHsApi.getInstance().read("ccu");
-			String ccuName = ccu.get("dis").toString();
+			String ccuName = Domain.ccuDevice.getCcuDisName();
 			AlertGenerateHandler.handleMessage(CM_DEAD, ccuName +" has stopped reporting data properly and needs to " +
 					"be serviced. "+CCUUtils.getSupportMsgContent(Globals.getInstance().getApplicationContext()));
 		}
@@ -128,8 +127,7 @@ public class Pulse
 				mLowSignalCount = (int)mDeviceLowSignalCount.get(nodeAddr);
 				if (!(boolean)mDeviceLowSignalAlert.get(nodeAddr) && mLowSignalCount >= 50) {
 					mDeviceLowSignalAlert.put(nodeAddr,true);
-					HashMap ccu = CCUHsApi.getInstance().read("ccu");
-					String ccuName = ccu.get("dis").toString();
+					String ccuName = Domain.ccuDevice.getCcuDisName();
 					AlertGenerateHandler.handleDeviceMessage(DEVICE_LOW_SIGNAL,
 							"For"+" "+ccuName + " ," + deviceInfo.getDisplayName() + " is having an issue and has reported low signal for last 50 updates. If you continue to receive this alert, "+CCUUtils.getSupportMsgContent(Globals.getInstance().getApplicationContext()),
 							deviceInfo.getId());
@@ -689,7 +687,7 @@ public class Pulse
 			ControlMoteMessageHandlerKt.handleAdvancedAhuCmUpdate(cmRegularUpdateMessage_t);
 			//handleAdvancedAhuCmUpdate(hayStack, cmRegularUpdateMessage_t); //TODO- TEMP to be cleaned up
 		}
-		String addr = String.valueOf(L.ccu().getSmartNodeAddressBand());
+		String addr = String.valueOf(L.ccu().getAddressBand());
 		addr = addr.substring(0, addr.length()-2).concat("99");
 		HashMap device = hayStack.read("device and addr == \""+Short.parseShort(addr)+"\"");
 		double curTempVal = 0.0;
@@ -1027,8 +1025,7 @@ public class Pulse
 				mLowSignalCount = (int)mDeviceLowSignalCount.get(nodeAddr);
 				if (!(boolean)mDeviceLowSignalAlert.get(nodeAddr) && mLowSignalCount >= 50){
 					mDeviceLowSignalAlert.put(nodeAddr,true);
-					HashMap ccu = CCUHsApi.getInstance().read("ccu");
-					String ccuName = ccu.get("dis").toString();
+					String ccuName = Domain.ccuDevice.getCcuDisName();
 					AlertGenerateHandler.handleDeviceMessage(DEVICE_LOW_SIGNAL,
 							"For"+" "+ccuName + " ," + deviceInfo.getDisplayName() + " is having an issue and has " +
 									"reported low signal for last 50 updates. If you continue to receive this alert, "+CCUUtils.getSupportMsgContent(Globals.getInstance().getApplicationContext()), deviceInfo.getId());
@@ -1151,7 +1148,7 @@ public class Pulse
 	public static void rebootMessageFromCM(WrmOrCmRebootIndicationMessage_t wrmOrCMReootMsgs){
 		CcuLog.d(L.TAG_CCU_DEVICE,"Reboot Messages from CM for = "+wrmOrCMReootMsgs.wrmAddress+","+wrmOrCMReootMsgs.rebootCause);
 		short address = (short)wrmOrCMReootMsgs.wrmAddress.get();
-		if(address == 0x00 || (address == 0x01) || (address == L.ccu().getSmartNodeAddressBand()+99)){
+		if(address == 0x00 || (address == 0x01) || (address == L.ccu().getAddressBand()+99)){
 			LSerial.getInstance().setResetSeedMessage(true);
 
 			String firmwareVersion = wrmOrCMReootMsgs.majorFirmwareVersion+"."+wrmOrCMReootMsgs.minorFirmwareVersion;
@@ -1575,8 +1572,7 @@ public class Pulse
 			 double zoneDeadTime = TunerUtil.readTunerValByQuery("zone and dead and time",d.getEquipRef());
 			 zoneDeadTime = zoneDeadTime > 0 ? zoneDeadTime : 15;
              if ((currentTime - lastUpdateTime) > ( zoneDeadTime *60 * 1000)){
-				 HashMap ccu = CCUHsApi.getInstance().read("ccu");
-				 String ccuName = ccu.get("dis").toString();
+				 String ccuName = Domain.ccuDevice.getCcuDisName();
 				 AlertGenerateHandler.handleDeviceMessage(DEVICE_DEAD, "For"+" "+ccuName + "," +d.getDisplayName() +" has " +
 						 "stopped reporting data. "+CCUUtils.getSupportMsgContent(Globals.getInstance().getApplicationContext()), d.getId());
 				 mDeviceUpdate.remove(address);

@@ -1,5 +1,6 @@
 package a75f.io.domain.util
 
+import a75f.io.domain.api.DomainName
 import io.seventyfivef.domainmodeler.client.ModelDirective
 
 /**
@@ -112,6 +113,12 @@ object ModelLoader {
     fun getHelioNodeDabModel() : ModelDirective {
         return ModelCache.getModelById(MODEL_HELIO_NODE_DAB)
     }
+    fun getCCUBaseConfigurationModel() : ModelDirective {
+        return ModelCache.getModelById(MODEL_CCU_BASE_CONFIGURATION)
+    }
+    fun getDiagEquipModel() : ModelDirective {
+        return ModelCache.getModelById(MODEL_CCU_DIAG_EQUIP)
+    }
 
     fun getModelForDomainName( domainName : String) : ModelDirective {
         return when(domainName) {
@@ -134,6 +141,7 @@ object ModelLoader {
             "cmDevice" -> getCMDeviceModel()
             "connectModuleDevice" -> getConnectModuleDeviceModel()
             "hyperstatSplitDevice" -> getHyperStatSplitDeviceModel()
+            DomainName.ccuConfiguration -> getCCUBaseConfigurationModel()
             else -> throw IllegalStateException("Invalid Model Name")
         }
     }

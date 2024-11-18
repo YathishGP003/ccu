@@ -66,7 +66,8 @@ public class Parameter {
         return false;
     }
 
-
+    @SerializedName("displayInUiDefault")
+    @Expose
     private boolean displayInUI = false;
     private int registerAddress;
     private String registerNumber;

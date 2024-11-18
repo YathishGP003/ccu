@@ -375,6 +375,7 @@ class ModbusConfigView : BaseDialogFragment() {
                     }
                 }
             }
+            viewModel.updateSelectAll()
         }
     }
 

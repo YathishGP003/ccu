@@ -467,6 +467,9 @@ object DomainName {
     const val helionodeVAVReheatSeriesFan = "helionodeVAVReheatSeriesFan"
     const val helionodeActiveChilledBeam = "helionodeActiveChilledBeam"
     const val smartnodeBypassDamper = "smartnodeBypassDamper"
+    const val smartnodeSSE = "smartnodeSSE"
+    const val helionodeSSE = "helionodeSSE"
+
     const val smartnodeOAO = "smartnodeOAO"
     const val ductStaticPressureSensor = "ductStaticPressureSensor"
     const val ductStaticPressureSetpoint = "ductStaticPressureSetpoint"
@@ -1181,5 +1184,8 @@ object DomainName {
     const val offlineMode = "offlineMode"
     const val logLevel = "logLevel"
 
+
+    //SSE
+    const val externalAirTempSensor = "externalAirTempSensor"
 }
 

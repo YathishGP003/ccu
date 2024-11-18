@@ -18,6 +18,7 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Tags;
 import a75f.io.domain.HyperStatSplitEquip;
+import a75f.io.domain.api.DomainName;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode;
@@ -166,13 +167,18 @@ public class DesiredTempDisplayMode {
     private static TemperatureMode getTemperatureModeForSSEProfile(Equip mEquip, CCUHsApi ccuHsApi) {
         boolean heating = false;
         boolean cooling = false;
-        int relayState = ccuHsApi.readDefaultVal("config and relay1 and equipRef" +
-                " == \"" + mEquip.getId() + "\"").intValue();
-        if (SSERelayAssociationUtil.isRelayAssociatedToHeating(relayState)) {
-            heating = true;
-        }
-        if (SSERelayAssociationUtil.isRelayAssociatedToCooling(relayState)) {
-            cooling = true;
+        int relay1OutputAssociationState = ccuHsApi.readDefaultVal("point and domainName == \""+ DomainName.relay1OutputAssociation +"\"" +
+                " and equipRef == \"" + mEquip.getId() + "\"").intValue();
+        int isRelay1Enabled = ccuHsApi.readDefaultVal("point and domainName == \""+ DomainName.relay1OutputEnable +"\"" +
+                " and equipRef == \"" + mEquip.getId() + "\"").intValue();
+        if(isRelay1Enabled == 1){
+            if (relay1OutputAssociationState == 0) {
+                heating = true;
+            } else if (relay1OutputAssociationState == 1) {
+                cooling = true;
+            }
+        }else{
+            return DUAL;
         }
         return getTemperatureMode(heating, cooling);
     }

@@ -118,6 +118,7 @@ open class DefaultEquipBuilder : EquipBuilder {
     @SuppressLint("SuspiciousIndentation")
     override fun buildPoint(pointConfig: PointBuilderConfig): Point {
         CcuLog.i(Domain.LOG_TAG, "buildPoint ${pointConfig.modelDef.domainName}")
+        CcuLog.i(Domain.LOG_TAG, "configuration ${pointConfig.configuration}")
         //TODO - Ref validation, zone/system equip differentiator.
         val pointBuilder = Point.Builder().setDisplayName("${pointConfig.disPrefix}-${getDisplayNameFromVariation(pointConfig.modelDef.name)}")
             .setDomainName(pointConfig.modelDef.domainName)

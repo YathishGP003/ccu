@@ -169,6 +169,8 @@ open class Point(domainName : String, val equipRef: String) : Entity(domainName)
             Domain.hayStack.writeDefaultValById(id, defaultVal)
         } else if (defaultVal is Double) {
             Domain.hayStack.writeDefaultValById(id, defaultVal)
+        } else if (defaultVal is Int) {
+            Domain.hayStack.writeDefaultValById(id, defaultVal.toDouble())
         }
     }
 

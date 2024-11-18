@@ -10,6 +10,7 @@ import a75f.io.renatus.profiles.oao.OAOViewModel
 import a75f.io.renatus.profiles.profileUtils.UnusedPortsModel.Companion.saveConfiguration
 import a75f.io.renatus.profiles.system.DabStagedRtuViewModel
 import a75f.io.renatus.profiles.system.DabStagedVfdRtuViewModel
+import a75f.io.renatus.profiles.sse.SseProfileViewModel
 import a75f.io.renatus.profiles.system.StagedRtuProfileViewModel
 import a75f.io.renatus.profiles.system.VavModulatingRtuViewModel
 import a75f.io.renatus.profiles.vav.VavProfileViewModel
@@ -46,6 +47,7 @@ open class UnusedPortsFragment : Fragment() {
                 is DabStagedRtuViewModel -> TreeMap(viewModel.viewState.value.unusedPortState)
                 is DabStagedVfdRtuViewModel -> TreeMap(viewModel.viewState.value.unusedPortState)
                 is OAOViewModel -> TreeMap(viewModel.viewState.unusedPortState)
+                is SseProfileViewModel -> TreeMap(viewModel.viewState.unusedPortState)
                 else -> null
             }
 

@@ -22,6 +22,7 @@ import a75f.io.renatus.profiles.dab.DabProfileConfigFragment;
 import a75f.io.renatus.profiles.hss.cpu.HyperStatSplitCpuFragment;
 import a75f.io.renatus.profiles.vav.BypassConfigFragment;
 import a75f.io.renatus.profiles.oao.OAOProfileFragment;
+import a75f.io.renatus.profiles.sse.SseProfileConfigFragment;
 import a75f.io.renatus.profiles.vav.VavProfileConfigFragment;
 import a75f.io.renatus.util.CCUUiUtil;
 import butterknife.BindView;
@@ -141,9 +142,9 @@ public class AlternatePairingFragment extends BaseDialogFragment {
     private void openBLEPairing() {
         switch (mProfileType) {
             case SSE:
-                showDialogFragment(FragmentSSEConfiguration
-                        .newInstance(mPairingAddress, mRoomName, mNodeType,
-                                mFloorName,mProfileType), FragmentSSEConfiguration.ID);
+                showDialogFragment(SseProfileConfigFragment.Companion
+                        .newInstance(mPairingAddress, mRoomName, mFloorName, mNodeType,
+                                mProfileType), SseProfileConfigFragment.Companion.getID());
                 break;
             case VAV_REHEAT:
             case VAV_SERIES_FAN:

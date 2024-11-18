@@ -22,6 +22,7 @@ import a75f.io.domain.equips.DefaultSystemEquip
 import a75f.io.domain.equips.CCUDiagEquip
 import a75f.io.domain.equips.CCUEquip
 import a75f.io.domain.equips.DomainEquip
+import a75f.io.domain.equips.SseEquip
 import a75f.io.domain.equips.VavAdvancedHybridSystemEquip
 import a75f.io.domain.equips.VavModulatingRtuSystemEquip
 import a75f.io.domain.equips.VavStagedSystemEquip
@@ -95,7 +96,8 @@ object DomainManager {
                 when{
                     it.contains("vav") -> Domain.equips[it["id"].toString()] = VavEquip(it["id"].toString())
                     it.contains("dab") -> Domain.equips[it["id"].toString()] = DabEquip(it["id"].toString())
-                }
+                    it.contains("sse") -> Domain.equips[it["id"].toString()] = SseEquip(it["id"].toString())
+                           }
             }
 
         hayStack.readAllEntities("bypassDamper and equip")
@@ -210,6 +212,7 @@ object DomainManager {
         when {
             equip.markers.contains("vav") -> Domain.equips[equip.id] = VavEquip(equip.id)
             equip.markers.contains("dab") -> Domain.equips[equip.id] = DabEquip(equip.id)
+            equip.markers.contains("sse") -> Domain.equips[equip.id] = SseEquip(equip.id)
         }
     }
 

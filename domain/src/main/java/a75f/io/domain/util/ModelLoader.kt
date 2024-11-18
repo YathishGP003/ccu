@@ -124,6 +124,14 @@ object ModelLoader {
         return ModelCache.getModelById(MODEL_SN_OAO)
     }
 
+    fun getSmartNodeSSEModel() : ModelDirective {
+        return ModelCache.getModelById(MODEL_SMART_NODE_SSE)
+    }
+
+    fun getHelioNodeSSEModel() : ModelDirective {
+        return ModelCache.getModelById(MODEL_HELIO_NODE_SSE)
+    }
+
     fun getModelForDomainName( domainName : String) : ModelDirective {
         return when(domainName) {
             "smartnodeVAVReheatNoFan" -> getSmartNodeVavNoFanModelDef()
@@ -147,6 +155,8 @@ object ModelLoader {
             "hyperstatSplitDevice" -> getHyperStatSplitDeviceModel()
             DomainName.ccuConfiguration -> getCCUBaseConfigurationModel()
             "smartnodeOAO" -> getSmartNodeOAOModelDef()
+            "smartnodeSSE" -> getSmartNodeSSEModel()
+            "helionodeSSE" -> getHelioNodeSSEModel()
             else -> throw IllegalStateException("Invalid Model Name")
         }
     }

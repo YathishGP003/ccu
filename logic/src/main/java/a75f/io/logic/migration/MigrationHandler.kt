@@ -26,11 +26,13 @@ import a75f.io.domain.cutover.HyperStatSplitCpuCutOverMapping
 import a75f.io.domain.cutover.HyperStatSplitDeviceCutoverMapping
 import a75f.io.domain.cutover.NodeDeviceCutOverMapping
 import a75f.io.domain.cutover.OaoCutOverMapping
+import a75f.io.domain.cutover.SseZoneProfileCutOverMapping
 import a75f.io.domain.cutover.VavFullyModulatingRtuCutOverMapping
 import a75f.io.domain.cutover.VavStagedRtuCutOverMapping
 import a75f.io.domain.cutover.VavStagedVfdRtuCutOverMapping
 import a75f.io.domain.cutover.VavZoneProfileCutOverMapping
 import a75f.io.domain.equips.DabEquip
+import a75f.io.domain.equips.SseEquip
 import a75f.io.domain.equips.VavEquip
 import a75f.io.domain.logic.DeviceBuilder
 import a75f.io.domain.logic.DomainManager.addCmBoardDevice
@@ -56,6 +58,7 @@ import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.HyperStatSplitC
 import a75f.io.logic.bo.building.oao.OAOProfileConfiguration
 import a75f.io.logic.bo.building.schedules.Occupancy
 import a75f.io.logic.bo.building.schedules.occupancy.DemandResponse
+import a75f.io.logic.bo.building.sse.SseProfileConfiguration
 import a75f.io.logic.bo.building.system.vav.config.ModulatingRtuProfileConfig
 import a75f.io.logic.bo.building.system.vav.config.StagedRtuProfileConfig
 import a75f.io.logic.bo.building.system.vav.config.StagedVfdRtuProfileConfig
@@ -123,6 +126,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         DiagEquipMigrationHandler().doDiagEquipMigration(hayStack)
         doDabSystemDomainModelMigration()
         doOAOProfileMigration()
+        doSseStandaloneDomainModelMigration()
         createMigrationVersionPoint(CCUHsApi.getInstance())
         addSystemDomainEquip(CCUHsApi.getInstance())
         addCmBoardDevice(hayStack)
@@ -1616,6 +1620,110 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             if(!updatedPointIdList.contains(remotePoint.id().toString())) {
                 CcuLog.w(TAG_CCU_BYPASS_RECOVER, "Deleting remote point ${remotePoint.getStr("dis")} with id ${remotePoint.id()}")
                 hayStack.deleteRemoteEntity(remotePoint.id().toString())
+            }
+        }
+    }
+
+    private fun doSseStandaloneDomainModelMigration() {
+        CcuLog.i(L.TAG_CCU_DOMAIN, "SSE standalone equip migration is started")
+        val sseEquips = hayStack.readAllEntities("equip and zone and sse")
+            .filter { it["domainName"] == null }
+            .toList()
+        if (sseEquips.isEmpty()) {
+            CcuLog.i(Domain.LOG_TAG, "SSE DM standalone equip migration is complete")
+            return
+        }
+        val equipBuilder = ProfileEquipBuilder(hayStack)
+        val site = hayStack.site
+        sseEquips.forEach {
+            CcuLog.i(Domain.LOG_TAG, "Do DM SSE standalone equip migration for $it")
+            val model = when {
+                it.containsKey("sse") && it.containsKey("smartnode") -> ModelLoader.getSmartNodeSSEModel()
+                else -> ModelLoader.getHelioNodeSSEModel()
+            }
+            val equipDis = "${site?.displayName}-SSE-${it["group"]}"
+            val isHelioNode = it.containsKey("helionode")
+            val deviceModel =
+                if (isHelioNode) ModelLoader.getHelioNodeDevice() as SeventyFiveFDeviceDirective
+                else ModelLoader.getSmartNodeDevice() as SeventyFiveFDeviceDirective
+            val deviceDis =
+                if (isHelioNode) "${site?.displayName}-HN-${it["group"]}" else "${site?.displayName}-SN-${it["group"]}"
+            val deviceBuilder =
+                DeviceBuilder(hayStack, EntityMapper(model as SeventyFiveFProfileDirective))
+            val device = hayStack.readEntity("device and addr == \"" + it["group"] + "\"")
+            val profileType = ProfileType.SSE
+
+            val profileConfiguration = SseProfileConfiguration(
+                Integer.parseInt(it["group"].toString()),
+                if (isHelioNode) NodeType.HELIO_NODE.name else NodeType.SMART_NODE.name,
+                0,
+                it["roomRef"].toString(),
+                it["floorRef"].toString(),
+                profileType,
+                model
+            ).getActiveConfiguration()
+
+            equipBuilder.doCutOverMigration(
+                it["id"].toString(),
+                model,
+                equipDis,
+                SseZoneProfileCutOverMapping.entries,
+                profileConfiguration,
+                equipHashMap = it
+            )
+
+            val sseEquip = SseEquip(it["id"].toString())
+            // temperature offset is now a literal (was multiplied by 10 before)
+            val newTempOffset =
+                String.format("%.1f", sseEquip.temperatureOffset.readDefaultVal() * 0.1).toDouble()
+            sseEquip.temperatureOffset.writeDefaultVal(newTempOffset)
+            sseEquip.demandResponseSetback.writeVal(17, 2.0)
+            deviceBuilder.doCutOverMigration(
+                device["id"].toString(),
+                deviceModel,
+                deviceDis,
+                NodeDeviceCutOverMapping.entries,
+                profileConfiguration
+            )
+
+            val relay1OutputEnable = sseEquip.relay1OutputState.readDefaultVal()
+
+            if(relay1OutputEnable > 0) {
+                CcuLog.i(L.TAG_CCU_DOMAIN, "Relay1 is enabled, so creating relay1OutputAssociation point")
+                val relay1OutputAssociationDef =
+                    model.points.find { it.domainName == "relay1OutputAssociation" }
+                relay1OutputAssociationDef?.run {
+                    equipBuilder.createPoint(
+                        PointBuilderConfig(
+                            relay1OutputAssociationDef, profileConfiguration,
+                            it["id"].toString(), site?.id.toString(), site?.tz, equipDis
+                        )
+                    )
+                }
+                val coolingStage1 = hayStack
+                    .readEntity("point and group == \"" + it["group"].toString() + "\" and " +
+                            "domainName == \"" + DomainName.coolingStage1 + "\"")
+                CcuLog.i(L.TAG_CCU_DOMAIN, "coolingStage1 point: $coolingStage1")
+                if(coolingStage1.isNotEmpty()) {
+                    sseEquip.relay1OutputAssociation.writeDefaultVal(1.0)
+                }
+                sseEquip.relay1OutputState.writeDefaultVal(1)
+            }
+
+            val relay2OutputEnable = sseEquip.relay2OutputState.readDefaultVal()
+
+            if(relay2OutputEnable > 0) {
+                CcuLog.i(L.TAG_CCU_DOMAIN, "Relay2 is enabled, so creating relay2OutputAssociation point")
+                val relay2OutputAssociationDef =
+                    model.points.find { it.domainName == "relay2OutputAssociation" }
+                relay2OutputAssociationDef?.run {
+                    equipBuilder.createPoint(
+                        PointBuilderConfig(
+                            relay2OutputAssociationDef, profileConfiguration,
+                            it["id"].toString(), site?.id.toString(), site?.tz, equipDis
+                        )
+                    )
+                }
             }
         }
     }

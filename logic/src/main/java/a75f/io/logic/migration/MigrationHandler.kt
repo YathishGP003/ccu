@@ -118,6 +118,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
     override val hayStack = hsApi
 
     private val schedulerRevamp = SchedulerRevampMigration(hayStack)
+    private var isMigrationOngoing = false
 
     override fun isMigrationRequired(): Boolean {
         val appVersion = getAppVersion()
@@ -144,6 +145,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             CcuLog.i(L.TAG_CCU_MIGRATION_UTIL, "---- Migration Not Required ----")
             return
         }
+        isMigrationOngoing = true
         if (hayStack.readEntity(Tags.SITE).isNotEmpty()) {
             createOfflineModePoint()
             // After DM integration skipping migration for DR mode
@@ -300,6 +302,29 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                 "backfill default value is already updated by user so no need to update"
             )
         }
+    }
+
+    fun doPostModelMigrationTasks() {
+        if (!PreferenceUtil.getRecoverHelioNodeACBTunersMigration()) VavAndAcbProfileMigration.recoverHelioNodeACBTuners(hayStack)
+        if (!PreferenceUtil.getACBRelayLogicalPointsMigration()) VavAndAcbProfileMigration.verifyACBIsoValveLogicalPoints(hayStack)
+        try{
+            if (!PreferenceUtil.getDmToDmCleanupMigration()) {
+                cleanACBDuplicatePoints(hayStack)
+                cleanVAVDuplicatePoints(hayStack)
+                hayStack.syncEntityTree()
+                PreferenceUtil.setDmToDmCleanupMigration()
+            }
+        } catch (e: Exception) {
+            //TODO - This is temporary fix till vav model issue is resolved in the next releases.
+            //For now, we make sure it does not stop other migrations even if this fails.
+        }
+        CcuLog.d(L.TAG_CCU_MIGRATION_UTIL,"doPostModelMigrationTasks: check isMigrationOngoing $isMigrationOngoing")
+        if(isMigrationOngoing) {
+            CcuLog.d(L.TAG_CCU_MIGRATION_UTIL,"Version update detected, performing minCFMPoints' maxVal update")
+            updateMinCfmPointMaxVal(Pair(DomainName.minCFMCooling, DomainName.maxCFMCooling))
+            updateMinCfmPointMaxVal(Pair(DomainName.minCFMReheating, DomainName.maxCFMReheating))
+        }
+        isMigrationOngoing = false
     }
 
     private fun migrateDeadBandPoints(hayStack: CCUHsApi) {
@@ -1293,6 +1318,27 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                         site.tz,
                         equipDis
                     ), point
+                )
+            }
+        }
+    }
+
+    private fun updateMinCfmPointMaxVal(minMaxCfmDomainNames: Pair<String, String>) {
+        CcuLog.d(L.TAG_CCU_MIGRATION_UTIL,"executing updateMinCfmPointMaxVal")
+        hayStack.readAllEntities(" point and zone and config and domainName == \"${minMaxCfmDomainNames.first}\" ").forEach { minCfmMap ->
+            val maxCfmVal = hayStack.readPointPriorityValByQuery(
+                " domainName == \"${minMaxCfmDomainNames.second}\" and equipRef == \"${
+                    minCfmMap["equipRef"]
+                }\" "
+            )
+            CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "Point value for ${minMaxCfmDomainNames.second}: $maxCfmVal")
+            if (maxCfmVal != minCfmMap["maxVal"].toString().toDouble()) {
+                CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "Updating point for ${minMaxCfmDomainNames.first}")
+                hayStack.updatePoint(
+                    Point.Builder()
+                        .setHDict(hayStack.readHDictById(minCfmMap["id"].toString()))
+                        .setMaxVal(maxCfmVal.toString()).build(),
+                    minCfmMap["id"].toString()
                 )
             }
         }

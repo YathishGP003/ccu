@@ -85,6 +85,7 @@ import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 import a75f.io.renatus.bacnet.BacnetConfigChange;
@@ -216,6 +217,8 @@ public class Communication extends Fragment {
     @BindView(R.id.iv_refresh_ip)
     ImageView ivRefreshView;
 
+    @BindView(R.id.tvBacAppVersion) TextView tvBacAppVersion;
+
     SharedPreferences sharedPreferences;
     JSONObject config;
     JSONObject networkObject;
@@ -338,6 +341,12 @@ public class Communication extends Fragment {
         bbmdInputContainer.setVisibility(View.GONE);
 
         fdInputView.setVisibility(View.GONE);
+
+        String bacAppVersion = CCUHsApi.getInstance().readDefaultStrVal("point and diag and version and bacnet");
+        if (bacAppVersion.isEmpty()) {
+            bacAppVersion = "Not Installed";
+        }
+        tvBacAppVersion.setText(bacAppVersion);
 
         tvFdSubmit.setOnClickListener(view1 -> {
             if (validateFdData()) {

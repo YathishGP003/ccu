@@ -1251,6 +1251,7 @@
 
 
     <string name="title_bacnet_config">BACnet CONFIG</string>
+    <string name="title_bacapp_version">BACapp Version - </string>
     <string name="title_bacnet_initialize">INITIALIZE BACNET</string>
     <string name="title_disable_bacnet">DISABLE BACNET</string>
     <string name="txt_ipDeviceObjectName">IP Device Object Name</string>

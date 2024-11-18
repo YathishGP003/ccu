@@ -13,8 +13,6 @@ import android.os.BatteryManager;
 import android.os.Environment;
 import android.os.StatFs;
 
-import org.projecthaystack.HDict;
-
 import java.io.File;
 import java.util.HashMap;
 
@@ -22,6 +20,7 @@ import a75f.io.alerts.AlertManager;
 import a75f.io.api.haystack.BuildConfig;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
+import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Kind;
 import a75f.io.api.haystack.Point;
 import a75f.io.data.message.MessageDbUtilKt;
@@ -43,6 +42,7 @@ public class DiagEquip
     private static DiagEquip instance = null;
     private static final String SHARED_PREFERENCE_NAME = "remote_status_pref";
     private static final String KEY_SCREEN_SHARING_STATUS = "screen_sharing_status";
+    private static int countOfBacnetAppVersionNotFound = 0;
     private DiagEquip(){
     }
 
@@ -160,10 +160,11 @@ public class DiagEquip
         updateRemoteSessionStatusPoint();
         ccuEquip.getLogLevel().writeHisVal(ccuEquip.getLogLevel().readHisVal());
 
-        updateAppVersionPoint("com.x75frenatus.home", ccuDiagEquip.getHomeAppVersion());
-        updateAppVersionPoint("io.seventyfivef.remoteaccess", ccuDiagEquip.getRemoteAccessAppVersion());
-        updateAppVersionPoint("com.example.ccu_bacapp", ccuDiagEquip.getBacnetAppVersion());
-        updateAppVersionPoint("io.seventyfivef.bacapp", ccuDiagEquip.getBacnetAppVersion());
+        countOfBacnetAppVersionNotFound = 0;
+        updateAppVersionPoint(L.HOME_APP_PACKAGE_NAME, ccuDiagEquip.getHomeAppVersion());
+        updateAppVersionPoint(L.REMOTE_ACCESS_PACKAGE_NAME, ccuDiagEquip.getRemoteAccessAppVersion());
+        updateAppVersionPoint(L.BAC_APP_PACKAGE_NAME_OBSOLETE, ccuDiagEquip.getBacnetAppVersion());
+        updateAppVersionPoint(L.BAC_APP_PACKAGE_NAME, ccuDiagEquip.getBacnetAppVersion());
 
     }
 
@@ -217,8 +218,29 @@ public class DiagEquip
             }
         } catch (PackageManager.NameNotFoundException e) {
             CcuLog.e(TAG, "Error getting package info for " + appPackageName);
+            handleAppVersionWhenPackageNotFound(appVersionPoint);
             e.printStackTrace();
         }
 
+    }
+
+    private static void handleAppVersionWhenPackageNotFound(a75f.io.domain.api.Point appVersionPoint) {
+        try {
+            CcuLog.d(TAG, " handleAppVersionWhenPackageNotFound - Package not found for " + appVersionPoint.getDomainName());
+            if (appVersionPoint.getDomainName().equals(DomainName.bacnetAppVersion)) {
+                countOfBacnetAppVersionNotFound++;
+            }
+            String prevVersion = appVersionPoint.readDefaultStrVal();
+            if (!prevVersion.isEmpty() && (!appVersionPoint.getDomainName().equals(DomainName.bacnetAppVersion) || countOfBacnetAppVersionNotFound == 2)) {
+                String id = appVersionPoint.getId();
+                CcuLog.d(TAG, "Clearing out the version for " + appVersionPoint.getDomainName() + " since package not found.");
+                CCUHsApi.getInstance().clearPointArrayLevel(id, HayStackConstants.DEFAULT_POINT_LEVEL, false);
+                if (appVersionPoint.getDomainName().equals(DomainName.bacnetAppVersion)) {
+                    countOfBacnetAppVersionNotFound = 0; // we needs to reset the count
+                }
+            }
+        } catch (Exception e) {
+            CcuLog.e(TAG, "Error handling app version when package not found for " + e);
+        }
     }
 }

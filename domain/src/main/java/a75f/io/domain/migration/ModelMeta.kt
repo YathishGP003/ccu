@@ -78,9 +78,9 @@ fun getRequiredModels(): List<String> {
             MODEL_DAB_ADVANCED_AHU_V2_CONNECT,
             MODEL_CM_DEVICE,
             MODEL_CONNECT_DEVICE,
-            MODEL_SN_OAO
+            MODEL_SN_OAO,
 
-            MODEL_CONNECT_DEVICE,
+
             MODEL_SMART_NODE_SSE,
             MODEL_HELIO_NODE_SSE
     )

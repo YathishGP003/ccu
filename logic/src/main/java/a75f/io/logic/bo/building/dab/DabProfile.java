@@ -60,8 +60,6 @@ public class DabProfile extends ZoneProfile
 
     double   co2Target = TunerConstants.ZONE_CO2_TARGET;
     double   co2Threshold = TunerConstants.ZONE_CO2_THRESHOLD;
-    double   vocTarget = TunerConstants.ZONE_VOC_TARGET;
-    double   vocThreshold = TunerConstants.ZONE_VOC_THRESHOLD;
 
     private boolean pendingTunerChange;
     public boolean hasPendingTunerChange() { return pendingTunerChange; }
@@ -71,7 +69,6 @@ public class DabProfile extends ZoneProfile
     public static final String CARRIER_PROD = "carrier_prod";
 
     double co2;
-    double voc;
     
     Damper damper = new Damper();
 
@@ -104,14 +101,10 @@ public class DabProfile extends ZoneProfile
 
             co2Target = (int) dabEquip.getDabZoneCO2Target().readPriorityVal();
             co2Threshold = (int) dabEquip.getDabZoneCo2Threshold().readPriorityVal();
-            vocTarget = (int) dabEquip.getDabZoneVocTarget().readPriorityVal();
-            vocThreshold = (int) dabEquip.getDabZoneVocThreshold().readPriorityVal();
 
             co2Loop.setCo2Target(co2Target);
             co2Loop.setCo2Threshold(co2Threshold);
 
-            vocLoop.setVOCTarget(vocTarget);
-            vocLoop.setVOCThreshold(vocThreshold);
 
             heatingLoop.setProportionalSpread((int) dabEquip.getDabReheatTemperatureProportionalRange().readPriorityVal());
             heatingLoop.setIntegralMaxTimeout((int) dabEquip.getDabReheatTemperatureIntegralTime().readPriorityVal());
@@ -174,7 +167,6 @@ public class DabProfile extends ZoneProfile
         vocLoop = getVOCLoop();
         
         co2 = dabEquip.getZoneCO2().readHisVal();
-        voc = dabEquip.getZoneVoc().readHisVal();
 
         heatingLoop = getHeatingLoop();
 
@@ -288,12 +280,10 @@ public class DabProfile extends ZoneProfile
     }
     private void updateDamperIAQCompensation() {
         boolean  enabledCO2Control = dabEquip.getEnableCo2Control().readDefaultVal() > 0 ;
-        boolean  enabledIAQControl = dabEquip.getEnableIAQControl().readDefaultVal() > 0 ;
         String zoneId = HSUtil.getZoneIdFromEquipId(dabEquip.getId());
         boolean occupied = ScheduleUtil.isZoneOccupied(CCUHsApi.getInstance(), zoneId, Occupancy.OCCUPIED);
 
         if (enabledCO2Control) { CcuLog.e(L.TAG_CCU_ZONE, "DCV Tuners: co2Target " + co2Loop.getCo2Target() + ", co2Threshold " + co2Loop.getCo2Threshold()); }
-        if (enabledIAQControl) { CcuLog.e(L.TAG_CCU_ZONE, "IAQ Tuners: vocTarget " + vocLoop.getVocTarget() + ", vocThreshold " + vocLoop.getVocThreshold()); }
 
         double epidemicMode = CCUHsApi.getInstance().readHisValByQuery("point and sp and system and epidemic and state and mode and equipRef ==\""+L.ccu().systemProfile.getSystemEquipRef()+"\"");
         EpidemicState epidemicState = EpidemicState.values()[(int) epidemicMode];
@@ -307,13 +297,6 @@ public class DabProfile extends ZoneProfile
         {
             damper.iaqCompensatedMinPos = damper.iaqCompensatedMinPos + (damper.maxPosition - damper.iaqCompensatedMinPos) * co2Loop.getLoopOutput() / 100;
             CcuLog.d(L.TAG_CCU_ZONE, "CO2LoopOp :" + co2Loop.getLoopOutput() + ", adjusted minposition " + damper.iaqCompensatedMinPos);
-        }
-    
-        //VOC loop output from 0-100% modulates damper min position.
-        if (enabledIAQControl && occupied && vocLoop.getLoopOutput(voc) > 0)
-        {
-            damper.iaqCompensatedMinPos = damper.iaqCompensatedMinPos + (damper.maxPosition - damper.iaqCompensatedMinPos) * vocLoop.getLoopOutput() / 100;
-            CcuLog.d(L.TAG_CCU_ZONE,"VOCLoopOp :"+vocLoop.getLoopOutput()+", adjusted minposition "+damper.iaqCompensatedMinPos+" damper.minPosition "+damper.minPosition);
         }
     }
     
@@ -375,13 +358,8 @@ public class DabProfile extends ZoneProfile
 
             co2Target = (int) dabEquip.getDabZoneCO2Target().readPriorityVal();
             co2Threshold = (int)  dabEquip.getDabZoneCo2Threshold().readPriorityVal();
-            vocTarget = (int) dabEquip.getDabZoneVocTarget().readPriorityVal();
-            vocThreshold = (int) dabEquip.getDabZoneVocThreshold().readPriorityVal();
-
             co2Loop.setCo2Target(co2Target);
             co2Loop.setCo2Threshold(co2Threshold);
-            vocLoop.setVOCTarget(vocTarget);
-            vocLoop.setVOCThreshold(vocThreshold);
             heatingLoop.setProportionalSpread((int) dabEquip.getDabReheatTemperatureProportionalRange().readPriorityVal());
             heatingLoop.setIntegralMaxTimeout((int) dabEquip.getDabReheatTemperatureIntegralTime().readPriorityVal());
             heatingLoop.setProportionalGain(dabEquip.getDabReheatProportionalKFactor().readPriorityVal());

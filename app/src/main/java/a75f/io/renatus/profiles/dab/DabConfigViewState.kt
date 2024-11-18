@@ -48,7 +48,6 @@ class DabConfigViewState {
                 this.zonePriority =  config.zonePriority.currentVal
 
                 this.enableCo2Control = config.enableCo2Control.enabled
-                this.enableIAQControl = config.enableIAQControl.enabled
                 this.autoAway = config.autoAway.enabled
                 this.autoForceOccupied = config.autoForceOccupied.enabled
 
@@ -80,7 +79,6 @@ class DabConfigViewState {
         config.zonePriority.currentVal = this.zonePriority
 
         config.enableCo2Control.enabled = this.enableCo2Control
-        config.enableIAQControl.enabled = this.enableIAQControl
         config.autoAway.enabled = this.autoAway
         config.autoForceOccupied.enabled = this.autoForceOccupied
 

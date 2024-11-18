@@ -22,7 +22,7 @@ import a75f.io.logic.bo.building.hvac.Stage
         objectType: String,
         nodeAddress: Int
     ) {
-        val nodeAdd = nodeAddress - L.ccu().smartNodeAddressBand + 1000
+        val nodeAdd = nodeAddress - L.ccu().addressBand + 1000
         val bacnetId = "$nodeAdd$objectId"
         point.bacnetId = bacnetId.toInt()
         point.bacnetType = objectType

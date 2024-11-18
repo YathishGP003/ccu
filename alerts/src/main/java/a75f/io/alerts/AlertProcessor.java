@@ -3,24 +3,36 @@ package a75f.io.alerts;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.AssetManager;
+import android.os.Environment;
 import android.preference.PreferenceManager;
 
+import com.google.gson.Gson;
+
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import a75f.io.alerts.log.CustomLogUtil;
+import a75f.io.alerts.log.FullLogs;
+import a75f.io.alerts.log.LogLevel;
+import a75f.io.alerts.log.LogOperation;
+import a75f.io.alerts.log.SequenceLogs;
+import a75f.io.alerts.log.SequenceMethodLog;
+import a75f.io.alerts.log.SequencerLogsCallbackImpl;
 import a75f.io.alerts.model.AlertDefOccurrence;
 import a75f.io.api.haystack.Alert;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logger.CcuLog;
-//import org.mozilla.javascript.Context;
 
 /*
   Created by samjithsadasivan on 4/24/18.
@@ -47,6 +59,9 @@ public class AlertProcessor
 
     private final SharedPreferences defaultSharedPrefs;
 
+    private SequenceLogs sequenceLogs;
+    private FullLogs fullLogs;
+
     private Context mContext;
 
     AlertProcessor(Context c) {
@@ -66,7 +81,7 @@ public class AlertProcessor
     public List<AlertDefOccurrence> evaluateAlertDefinitions(List<AlertDefinition> alertDefs) {
 
         //AlertManager.getInstance().fixAlert("CCU IN SAFE MODE", "CCU is in safe mode", false);
-
+        fullLogs = new FullLogs();
         mapOfPastAlerts.clear();
         List<AlertDefOccurrence> occurrences = new ArrayList<>();
 
@@ -88,6 +103,8 @@ public class AlertProcessor
                 }
                 Conditional.GrpOperator alertDefType = Conditional.GrpOperator.fromValue(def.conditionals.get(0).grpOperation); // See the note in ::inspectAlertDef regarding unique grpOperations
                 if(def.alertBuilder != null){
+                    sequenceLogs = new SequenceLogs(def._id, def._id, Objects.requireNonNull(CCUHsApi.getInstance().getSite()).getId(),
+                            CCUHsApi.getInstance().getCcuId(), CCUHsApi.getInstance().getCcuName());
                     // new alert definition found use rhino processor to generate alert
                     CcuLog.d(TAG_CCU_ALERTS, "new alert definition found evaluating alert-->"+def.alert.mTitle);
                     //String jsForTesting = loadLocalJs(mContext, "test1.js");
@@ -95,9 +112,15 @@ public class AlertProcessor
                     String jsForTesting = def.alertBuilder.getSnippet();
                     //evaluateJs(def.alertBuilder);
                     alertJsUtil.def = def;
-                    CcuLog.d(TAG_CCU_ALERTS, "---------starting evaluation------"+def.alert.mTitle);
-                    def.evaluateJs(def, jsForTesting, mContext, alertJsUtil);
+                    CcuLog.d(TAG_CCU_ALERTS, "---------starting evaluation using j2v8------"+def.alert.mTitle);
+                    sequenceLogs.addLog(new SequenceMethodLog(LogLevel.INFO, LogOperation.GENERIC_INFO,
+                            "Starting sequence evaluation using j2v8", "pending", new Date().toString(), new Date().toString()));
+                    def.evaluateJsJ2v8(def, jsForTesting, mContext, alertJsUtil, new SequencerLogsCallbackImpl(sequenceLogs));
+
+                    sequenceLogs.addLog(new SequenceMethodLog(LogLevel.INFO, LogOperation.GENERIC_INFO,
+                            "Ending sequence evaluation using j2v8", "success", new Date().toString(), new Date().toString()));
                     CcuLog.d(TAG_CCU_ALERTS, "---------ending evaluation------"+def.alert.mTitle);
+                    fullLogs.addLog(sequenceLogs);
                 }else {
                     def.evaluate(defaultSharedPrefs);
 
@@ -129,10 +152,17 @@ public class AlertProcessor
             Alert tempAlert = (Alert) v;
             AlertManager.getInstance().generateAlertBlockly(tempAlert.mTitle, tempAlert.mMessage, tempAlert.equipId, "blockly", tempAlert.blockId);
         });
+        // generate log file once all blockly alerts are done
+        if(sequenceLogs != null){
+            String fileName = "blocklyAlert_" + CCUHsApi.getInstance().getCcuId() + "_" + CCUHsApi.getInstance().getSite().getId() + ".json";
+            File logDir = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + CustomLogUtil.LOGS_DIR_ALERTS);
+            CustomLogUtil.Companion.dumpLogs(mContext, fileName, new Gson().toJson(fullLogs), logDir, TAG_CCU_ALERTS);
+        }
         return occurrences;
     }
 
     HashMap mapOfPastAlerts = new HashMap<String, Alert>();
+
     AlertJsUtil alertJsUtil = new AlertJsUtil(new AlertJsCallback() {
         @Override
         public boolean triggerAlert(String blockId, String notificationMsg, String message, String entityId, Object contextHelper, AlertDefinition def) {
@@ -144,7 +174,7 @@ public class AlertProcessor
                 CcuLog.d(TAG_CCU_ALERTS, "---triggerAlert-blockId5005@@ invalid id->"+entityId);
                 return false;
             }else{
-                CcuLog.d(TAG_CCU_ALERTS, "---triggerAlert-blockId5005@@-"+blockId + " notificationMsg: " + notificationMsg + " message: " + message + " entityId: " + entityId + "-current thread->"+Thread.currentThread().getName());
+                CcuLog.d(TAG_CCU_ALERTS, "---triggerAlert-blockId5006@@-"+blockId + " notificationMsg: " + notificationMsg + " message: " + message + " entityId: " + entityId + "-current thread->"+Thread.currentThread().getName());
                 def.alert.setmNotificationMsg(notificationMsg);
                 Alert alert = AlertBuilder.build(def, message, CCUHsApi.getInstance(),entityId,"");
                 alert.blockId = blockId;
@@ -205,7 +235,7 @@ public class AlertProcessor
 
     private boolean isInAutoCommissioningMode() {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        return hayStack.readPointPriorityValByQuery("point and diag and auto and commissioning") == 1.0;
+        return hayStack.readPointPriorityValByQuery("domainName == \"autoCommissioning\"") == 1.0;
     }
 
     /**

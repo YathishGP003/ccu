@@ -7,6 +7,7 @@ import a75f.io.domain.api.Domain
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.dab.DabProfileConfiguration
+import a75f.io.logic.bo.building.sse.SseProfileConfiguration
 import a75f.io.logic.bo.building.system.vav.config.ModulatingRtuProfileConfig
 import a75f.io.logic.bo.building.system.vav.config.StagedRtuProfileConfig
 import a75f.io.logic.bo.building.system.vav.config.StagedVfdRtuProfileConfig
@@ -18,6 +19,8 @@ import a75f.io.renatus.profiles.acb.AcbProfileViewModel
 import a75f.io.renatus.profiles.dab.DabProfileViewModel
 import a75f.io.renatus.profiles.system.DabStagedRtuViewModel
 import a75f.io.renatus.profiles.system.DabStagedVfdRtuViewModel
+import a75f.io.renatus.profiles.sse.SseProfileViewModel
+import a75f.io.renatus.profiles.oao.OAOViewModel
 import a75f.io.renatus.profiles.system.StagedRtuProfileViewModel
 import a75f.io.renatus.profiles.system.VavModulatingRtuViewModel
 import a75f.io.renatus.profiles.vav.VavProfileViewModel
@@ -56,6 +59,12 @@ open class UnusedPortsModel {
                 is DabStagedVfdRtuViewModel -> {
                     viewModel.profileConfiguration.unusedPorts[firstUnusedPort] = it
                     viewModel.setStateChanged()
+                }
+                is OAOViewModel -> {
+                    viewModel.profileConfiguration.unusedPorts[firstUnusedPort] = it
+                }
+                is SseProfileViewModel -> {
+                    viewModel.profileConfiguration.unusedPorts[firstUnusedPort] = it
                 }
             }
         }
@@ -134,6 +143,7 @@ open class UnusedPortsModel {
                 is VavProfileConfiguration -> profileConfiguration.unusedPorts
                 is AcbProfileConfiguration -> profileConfiguration.unusedPorts
                 is DabProfileConfiguration -> profileConfiguration.unusedPorts
+                is SseProfileConfiguration -> profileConfiguration.unusedPorts
                 else -> null
             }
 

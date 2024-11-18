@@ -262,6 +262,17 @@ object DomainName {
     const val tiProportionalKFactor = "tiProportionalKFactor"
 
     //OAO
+    const val outsideDamperMinDrive = "outsideDamperMinDrive"
+    const val outsideDamperMaxDrive = "outsideDamperMaxDrive"
+    const val returnDamperMinDrive = "returnDamperMinDrive"
+    const val returnDamperMaxDrive = "returnDamperMaxDrive"
+    const val usePerRoomCO2Sensing = "usePerRoomCo2Sensing"
+    const val returnDamperMinOpen = "returnDamperMinOpen"
+    const val systemPurgeOutsideDamperMinPos = "systemPurgeOutsideDamperMinPos"
+    const val enhancedVentilationOutsideDamperMinOpen = "enhancedVentilationOutsideDamperMinOpen"
+    const val currentTransformerType = "currentTransformerType"
+    const val returnDamperCmd = "returnDamperCmd"
+    const val outsideDamperCmd = "outsideDamperCmd"
 
     const val outsideDamperMixedAirMinimum = "outsideDamperMixedAirMinimum"
     const val economizingToMainCoolingLoopMap = "economizingToMainCoolingLoopMap"
@@ -408,7 +419,6 @@ object DomainName {
     const val zoneOccupancy = "zoneOccupancy"
 
     const val dischargeAirTempSetpoint = "dischargeAirTempSetpoint"
-    const val otaStatus = "otaStatus"
     const val reheatCmd = "reheatCmd"
     const val reheatCmdCal = "reheatCmdCal"
     const val damperCmd = "damperCmd"
@@ -457,7 +467,10 @@ object DomainName {
     const val helionodeVAVReheatSeriesFan = "helionodeVAVReheatSeriesFan"
     const val helionodeActiveChilledBeam = "helionodeActiveChilledBeam"
     const val smartnodeBypassDamper = "smartnodeBypassDamper"
+    const val smartnodeSSE = "smartnodeSSE"
+    const val helionodeSSE = "helionodeSSE"
 
+    const val smartnodeOAO = "smartnodeOAO"
     const val ductStaticPressureSensor = "ductStaticPressureSensor"
     const val ductStaticPressureSetpoint = "ductStaticPressureSetpoint"
     const val pressureSensorType = "pressureSensorType"
@@ -938,16 +951,12 @@ object DomainName {
     const val heatingSignal = "heatingSignal"
     const val analog4MinOutsideDamper = "analog4MinOutsideDamper"
     const val analog4MaxOutsideDamper = "analog4MaxOutsideDamper"
-    const val backfillDuration = "backfillDuration"
     const val outsideAirDamper = "outsideAirDamper"
     const val weightedAverageCoolingLoad = "weightedAverageCoolingLoad"
     const val weightedAverageHeatingLoad = "weightedAverageHeatingLoad"
     const val satTRSp = "satTRSp"
     const val co2TRSp = "co2TRSp"
     const val staticPressureTRSp = "staticPressureTRSp"
-    const val demandResponseEnrollment = "demandResponseEnrollment"
-    const val demandResponseActivation = "demandResponseActivation"
-    const val offlineMode = "offlineMode"
     const val vavFullyModulatingAhu = "vavFullyModulatingAhu"
     const val humidifier = "humidifier"
     const val dehumidifier = "dehumidifier"
@@ -1139,5 +1148,44 @@ object DomainName {
     const val pressureBasedFanControlFeedback = "pressureBasedFanControlFeedback"
     const val satBasedCoolingControlFeedback = "satBasedCoolingControlFeedback"
     const val satBasedHeatingControlFeedback = "satBasedHeatingControlFeedback"
+
+    // Diag equip points
+    const val diagEquip = "diagEquip"
+    const val ccuConfiguration = "ccuConfiguration"
+    const val batteryLevel = "batteryLevel"
+    const val chargingStatus = "chargingStatus"
+    const val powerConnected = "powerConnected"
+    const val wifiRssi = "wifiRssi"
+    const val ccuHeartbeat = "ccuHeartbeat"
+    const val wifiLinkSpeed = "wifiLinkSpeed"
+    const val wifiSignalStrength = "wifiSignalStrength"
+    const val availableMemory = "availableMemory"
+    const val totalMemory = "totalMemory"
+    const val isLowMemory = "isLowMemory"
+    const val serialConnection = "serialConnection"
+    const val appRestart = "appRestart"
+    const val appVersion = "appVersion"
+    const val otaStatus = "otaStatus"
+    const val safeModeStatus = "safeModeStatus"
+    const val availableInternalDiskStorage = "availableInternalDiskStorage"
+    const val autoCommissioning = "autoCommissioning"
+    const val migrationVersion = "migrationVersion"
+    const val remoteSessionStatus = "remoteSessionStatus"
+    const val bacnetAppVersion = "bacnetAppVersion"
+    const val remoteAccessAppVersion = "remoteAccessAppVersion"
+    const val homeAppVersion = "homeAppVersion"
+
+
+    // CCU Specific points
+    const val backfillDuration = "backfillDuration"
+    const val demandResponseActivation = "demandResponseActivation"
+    const val demandResponseEnrollment = "demandResponseEnrollment"
+    const val addressBand = "addressBand"
+    const val offlineMode = "offlineMode"
+    const val logLevel = "logLevel"
+
+
+    //SSE
+    const val externalAirTempSensor = "externalAirTempSensor"
 }
 

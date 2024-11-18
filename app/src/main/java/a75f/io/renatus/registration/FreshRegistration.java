@@ -41,6 +41,8 @@ import androidx.fragment.app.FragmentTransaction;
 import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.constants.CcuFieldConstants;
+import a75f.io.domain.util.ModelLoader;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.Globals;
@@ -70,6 +72,9 @@ import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.views.CustomCCUSwitch;
 import a75f.io.util.ExecutorTask;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.seventyfivef.domainmodeler.client.ModelDirective;
+import io.seventyfivef.domainmodeler.common.Version;
 
 public class FreshRegistration extends AppCompatActivity implements VerticalTabAdapter.OnItemClickListener, SwitchFragment {
     VerticalTabAdapter verticalTabAdapter;
@@ -1267,9 +1272,6 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             if (!Globals.getInstance().siteAlreadyCreated()) {
                 DefaultSchedules.generateDefaultSchedule(false, null);
             }
-            InstallerOptions installerOptions = new InstallerOptions();
-            HashMap<Object, Object> ccu = CCUHsApi.getInstance().readEntity("ccu");
-            installerOptions.createInstallerPoints(ccu, prefs);
             prefs.setBoolean(PreferenceConstants.CCU_SETUP, true);
             prefs.setBoolean(PreferenceConstants.PROFILE_SETUP, true);
             ProgressDialogUtils.hideProgressDialog();

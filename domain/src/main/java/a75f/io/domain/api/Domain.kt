@@ -2,9 +2,12 @@ package a75f.io.domain.api
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.CCUTagsDb
+import a75f.io.domain.devices.CCUDevice
 import a75f.io.domain.devices.CmBoardDevice
 import a75f.io.domain.devices.ConnectDevice
 import a75f.io.domain.equips.BuildingEquip
+import a75f.io.domain.equips.CCUDiagEquip
+import a75f.io.domain.equips.CCUEquip
 import a75f.io.domain.equips.DomainEquip
 import a75f.io.domain.logic.DomainManager
 import a75f.io.logger.CcuLog
@@ -15,11 +18,7 @@ import io.seventyfivef.domainmodeler.common.point.NumericConstraint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.asCoroutineDispatcher
 import org.projecthaystack.HDict
-import java.util.concurrent.Executors
-import java.util.concurrent.ThreadFactory
-import java.util.concurrent.atomic.AtomicInteger
 
 @SuppressLint("StaticFieldLeak")
 object Domain {
@@ -35,6 +34,9 @@ object Domain {
     var equips = mutableMapOf<String, DomainEquip>()
     lateinit var cmBoardDevice: CmBoardDevice
     lateinit var connect1Device: ConnectDevice //This would be preset only when advanced ahu is configured
+    lateinit var diagEquip: CCUDiagEquip
+    lateinit var ccuDevice : CCUDevice // This is physical entity, this will be deleted and added when ccu is registered and unregistered
+    lateinit var ccuEquip: CCUEquip
 
     /**
      * Retrieve the domain object of a point by it id and equipRef.
@@ -173,6 +175,12 @@ object Domain {
     }
 
     @JvmStatic
+    fun readEquipDict(domainName: String) : HDict {
+        return hayStack.readHDict("equip and domainName == \"$domainName\"")
+    }
+
+
+    @JvmStatic
     fun readDictOnEquip(domainName: String, equipRef: String) : HDict {
         return hayStack.readHDict("point and domainName == \"$domainName\" and equipRef == \"$equipRef\"")
     }
@@ -266,6 +274,9 @@ object Domain {
     fun readStrPointValueByDomainName(domainName: String, equipRef : String): String {
         return hayStack.readDefaultStrVal("point and domainName == \"$domainName\" and equipRef == \"$equipRef\"")
     }
+    fun readStrPointValueByDomainName(domainName: String): String {
+        return hayStack.readDefaultStrVal("point and domainName == \"$domainName\"")
+    }
     @JvmStatic
     fun readDefaultValByDomain(domainName: String): Double {
         return hayStack.readDefaultVal("point and domainName == \"$domainName\"")
@@ -288,7 +299,14 @@ object Domain {
     fun writeDefaultValByDomain(domainName: String, value: String, equipRef: String) {
         return hayStack.writeDefaultVal("point and domainName == \"$domainName\" and equipRef == \"$equipRef\"", value)
     }
-
+    @JvmStatic
+    fun writeDefaultValByDomain(domainName: String, value: String) {
+        return hayStack.writeDefaultVal("point and domainName == \"$domainName\"", value)
+    }
+    @JvmStatic
+    fun readHisValByDomain(domainName: String) : Double {
+        return hayStack.readHisValByQuery("point and domainName == \"$domainName\"")
+    }
     fun readEquip(modelId: String) : Map<Any,Any> {
         return hayStack.readEntity("equip and sourceModel==\"$modelId\" or modelId == \"$modelId\"")
     }
@@ -331,5 +349,34 @@ object Domain {
             }
         }
         return valuesList
+    }
+
+    /*we should make sure domain equip's are initialised before accessing Domain equips
+    * If we are accessing while creating new site its better to access with safe check */
+    fun checkSystemEquipInitialisedAndGetId() : String {
+        return if(Domain::systemEquip.isInitialized) {
+            systemEquip.getId()
+        } else {
+            ""
+        }
+    }
+    fun checkCCUDeviceInitialisedAndGet() : CCUDevice? {
+        return if(Domain::ccuDevice.isInitialized) {
+            ccuDevice
+        } else {
+            null
+        }
+    }
+
+    fun checkCCUEquipInitialisedAndGet() : CCUDiagEquip?{
+        return if(Domain::ccuEquip.isInitialized) {
+            diagEquip
+        } else {
+            null
+        }
+    }
+
+    fun isDiagEquipInitialised() : Boolean {
+        return Domain::diagEquip.isInitialized
     }
 }

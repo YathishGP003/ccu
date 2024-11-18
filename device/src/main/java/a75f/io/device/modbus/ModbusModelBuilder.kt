@@ -162,6 +162,11 @@ private fun getParameter(physicalPoint: RawPoint, rawMap: HashMap<Any, Any>): Pa
         if (isWritable)
             param.userIntentPointTags.add(getUserIntentPointTags(marker, null))
     }
+    logicalPoint.tags.forEach { (marker , value) ->
+        param.logicalPointTags.add(getLogicalPointTags(marker, value.toString()))
+        if (isWritable)
+            param.userIntentPointTags.add(getUserIntentPointTags(marker, value.toString()))
+    }
     addTagValues(param,logicalPoint.unit,UNIT,isWritable)
     addTagValues(param,logicalPoint.hisInterpolate,HIS_INTERPOLATE,isWritable)
     addTagValues(param,logicalPoint.minVal,MIN_VAL,isWritable)

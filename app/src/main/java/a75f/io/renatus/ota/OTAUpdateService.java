@@ -64,6 +64,7 @@ import a75f.io.device.serial.FirmwareDeviceType_t;
 import a75f.io.device.serial.MessageConstants;
 import a75f.io.device.serial.MessageType;
 import a75f.io.device.serial.SnRebootIndicationMessage_t;
+import a75f.io.domain.api.Domain;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.BuildConfig;
 import a75f.io.logic.Globals;
@@ -346,7 +347,7 @@ public class OTAUpdateService extends IntentService {
         if ( msg.currentState.get() == OtaState.FIRMWARE_RECEIVED.ordinal()
                 || msg.currentState.get() == OtaState.FIRMWARE_COPY_AVAILABLE.ordinal()) {
             OtaStatusDiagPoint.Companion.updateOtaStatusPoint(OtaStatus.OTA_CCU_TO_CM_FIRMWARE_RECEIVED, mCurrentLwMeshAddress);
-            short currentBand = L.ccu().getSmartNodeAddressBand();
+            short currentBand = L.ccu().getAddressBand();
             if (mCurrentLwMeshAddress != (currentBand + 99)){
                 OtaStatusDiagPoint.Companion.updateOtaStatusPoint(OtaStatus.OTA_CM_TO_DEVICE_PACKET_STARTED, mCurrentLwMeshAddress);
             }
@@ -383,8 +384,7 @@ public class OTAUpdateService extends IntentService {
 
             short versionMajor = msg.smartNodeMajorFirmwareVersion.get();
             short versionMinor = msg.smartNodeMinorFirmwareVersion.get();
-            HashMap ccu = CCUHsApi.getInstance().read("ccu");
-            String ccuName = ccu.get("dis").toString();
+            String ccuName = Domain.ccuDevice.getCcuDisName();
            AlertGenerateHandler.handleDeviceMessage(FIRMWARE_OTA_UPDATE_ENDED, "Firmware OTA update for"+" "+ccuName+" "+
                     "ended for "+mFirmwareDeviceType.getUpdateFileName()+" "+ mCurrentLwMeshAddress+" "+"with version"+" "+versionMajor +
                     // changed Smart node to Smart Device as it is indicating the general name (US:9387)
@@ -543,7 +543,7 @@ public class OTAUpdateService extends IntentService {
 
 
                 if(deviceList.containsKey( deviceType.getHsMarkerName())){
-                        mLwMeshAddresses.add( 99 + L.ccu().getSmartNodeAddressBand());
+                        mLwMeshAddresses.add( 99 + L.ccu().getAddressBand());
                     }
 
                 for(Floor floor : HSUtil.getFloors()) {
@@ -710,8 +710,7 @@ public class OTAUpdateService extends IntentService {
         CcuLog.d(TAG, "[STARTUP] Starting to update device with address " + mCurrentLwMeshAddress);
 
         //TODO notify something (PubNub?) that an update has started
-        HashMap ccu = CCUHsApi.getInstance().read("ccu");
-        String ccuName = ccu.get("dis").toString();
+        String ccuName = Domain.ccuDevice.getCcuDisName();
         AlertGenerateHandler.handleDeviceMessage(FIRMWARE_OTA_UPDATE_STARTED, "Firmware OTA update for"+" "+ccuName+" "+
                 "started for "+deviceType.getUpdateFileName()+" "+mCurrentLwMeshAddress+" "+"with version"+" "+versionMajor + "." + versionMinor , getDeviceId(String.valueOf(deviceType), mCurrentLwMeshAddress));
         mUpdateInProgress = true;
@@ -1190,7 +1189,7 @@ public class OTAUpdateService extends IntentService {
     }
 
     public static boolean isCmOtaInProgress(){
-        return  (mCurrentLwMeshAddress ==  (L.ccu().getSmartNodeAddressBand() + 99));
+        return  (mCurrentLwMeshAddress ==  (L.ccu().getAddressBand() + 99));
     }
 
     public static void resetOtaRequestProcessInProgress() {
@@ -1226,6 +1225,6 @@ public class OTAUpdateService extends IntentService {
         }
     }
     private boolean isCMDevice(int nodeAddress) {
-        return nodeAddress == ( L.ccu().getSmartNodeAddressBand() + 99 );
+        return nodeAddress == ( L.ccu().getAddressBand() + 99 );
     }
 }

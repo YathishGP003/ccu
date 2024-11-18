@@ -4,6 +4,8 @@ import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Equip
 import a75f.io.api.haystack.Point
 import a75f.io.api.haystack.Tags
+import a75f.io.domain.api.Domain
+import a75f.io.domain.api.DomainName
 import a75f.io.logic.tuners.SystemTuners
 import a75f.io.logic.tuners.TunerConstants
 import java.util.*
@@ -58,9 +60,8 @@ fun verifyBackFillPointAvailability(equipRef: String?): Boolean {
 
 fun updateBackfillDuration(currentBackFillTime: Double) {
     val ccuHsApi = CCUHsApi.getInstance()
-    val backFIllQuery = "backfill and duration"
-    if (isBackfillPointExisting(ccuHsApi)) {
-        ccuHsApi.writeDefaultVal(backFIllQuery, currentBackFillTime)
+    if (isBackfillPointExisting()) {
+        Domain.ccuEquip.backFillDuration.writeDefaultVal(currentBackFillTime)
         backfillPref.saveBackfillConfig(
             currentBackFillTime.toInt(),
             Arrays.binarySearch(
@@ -72,6 +73,6 @@ fun updateBackfillDuration(currentBackFillTime: Double) {
         addBackFillDurationPointIfNotExists(ccuHsApi)
     }
 }
-private fun isBackfillPointExisting(ccuHsApi: CCUHsApi): Boolean {
-    return ccuHsApi.readEntity("backfill and duration").isNotEmpty()
+private fun isBackfillPointExisting(): Boolean {
+    return Domain.readPoint(DomainName.backfillDuration).isNotEmpty()
 }

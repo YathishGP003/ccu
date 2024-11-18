@@ -57,6 +57,10 @@ class VavConfigHandler {
                 .setType(getReheatTypeString(config)).setEnabled(analog2OpEnabled).build()
             hayStack.updatePoint(analog2Point, analogOut2["id"].toString())
 
+            val analogIn1 = hayStack.readHDict("point and deviceRef == \""+ device["id"] +"\" and domainName == \"" + DomainName.analog1In + "\"")
+            val analog1InPoint = RawPoint.Builder().setHDict(analogIn1)
+            hayStack.updatePoint(analog1InPoint.setType(getDamperTypeString(config)).build(), analogIn1["id"].toString())
+
         }
 
         // This logic will break if the "damperType" point enum is changed

@@ -331,10 +331,11 @@ public class FragmentSSEConfiguration  extends BaseDialogFragment implements Com
 
         mSSEProfile.getProfileConfiguration().put(mSmartNodeAddress, sseConfig);
         if (mProfileConfig == null) {
-            mSSEProfile.addSSEEquip(mSmartNodeAddress, sseConfig, floorRef, roomRef, mNodeType);
+            //eventually this file will be removed
+            //mSSEProfile.addSSEEquip(mSmartNodeAddress, sseConfig, floorRef, roomRef, mNodeType);
         } else
         {
-            mSSEProfile.updateSSEEquip(sseConfig);
+           // mSSEProfile.updateSSEEquip(sseConfig);
         }
         L.ccu().zoneProfiles.add(mSSEProfile);
         CcuLog.d("SSEConfig", "Set Config: Profiles - "+L.ccu().zoneProfiles.size());

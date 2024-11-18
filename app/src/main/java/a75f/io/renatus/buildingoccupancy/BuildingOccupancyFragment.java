@@ -44,6 +44,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.DAYS;
 import a75f.io.api.haystack.MockTime;
 import a75f.io.api.haystack.schedule.BuildingOccupancy;
+import a75f.io.domain.api.Domain;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.interfaces.BuildingOccupancyListener;
@@ -225,7 +226,7 @@ public class BuildingOccupancyFragment extends DialogFragment implements Buildin
                                ArrayList<DAYS> days, boolean isDelete) {
         this.position = position;
 
-        boolean isCloudConnected = CCUHsApi.getInstance().readHisValByQuery("cloud and connected and diag and point") > 0;
+        boolean isCloudConnected = Domain.diagEquip.getCcuHeartbeat().readHisVal() > 0;
 
         if ((!NetworkUtil.isNetworkConnected(getActivity()) || !isCloudConnected) && !OfflineModeUtilKt.isOfflineMode()) {
             Toast.makeText(getActivity(), "Building Occupancy cannot be edited when CCU is offline. Please " +

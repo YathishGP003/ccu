@@ -2,7 +2,7 @@ package a75f.io.logic.bo.building.oao;
 
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
 
-public class OAOProfileConfiguration extends BaseProfileConfiguration
+public class OAOProfileConfigurationToBeDeleted extends BaseProfileConfiguration
 {
     
     public double outsideDamperAtMinDrive;

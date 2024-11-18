@@ -13,18 +13,18 @@ public class DemandResponse implements OccupancyTrigger {
 
     @Override
     public boolean isEnabled() {
-        return DemandResponseMode.isDREnrollmentSelected(hayStack);
+        return DemandResponseMode.isDREnrollmentSelected();
     }
 
     @Override
     public boolean hasTriggered() {
-        return isDRModeActivated(hayStack);
+        return isDRModeActivated();
     }
 
-    public static boolean isDRModeActivated(CCUHsApi hayStack) {
-        if(!DemandResponseMode.isDREnrollmentSelected(hayStack)){
+    public static boolean isDRModeActivated() {
+        if(!DemandResponseMode.isDREnrollmentSelected()){
             return false;
         }
-        return DemandResponseMode.isDRModeActivated(hayStack);
+        return DemandResponseMode.isDRModeActivated();
     }
 }

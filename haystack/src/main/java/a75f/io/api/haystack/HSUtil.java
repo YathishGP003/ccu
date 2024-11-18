@@ -701,9 +701,9 @@ public class HSUtil {
         return null;
     }
 
-    public static boolean isPointBackfillConfigPoint(String id, CCUHsApi ccuHsApi) {
-        HashMap<Object, Object> pointEntity = ccuHsApi.readMapById(id);
-        return ((pointEntity.containsKey(Tags.BACKFILL)) && (pointEntity.containsKey(Tags.DURATION)));
+    public static boolean isPointBackfillConfigPoint(HashMap pointEntity) {
+        return ((pointEntity.containsKey(Tags.DOMAIN_NAME)) &&
+                (pointEntity.get(Tags.DOMAIN_NAME).toString().equals("backfillDuration")));
     }
 
     public static boolean isBypassDamperPresentInSystem(CCUHsApi ccuHsApi) {
@@ -737,6 +737,19 @@ public class HSUtil {
 
         }
         return b.toDict();
+    }
+
+    public static HashMap<Object, Object> hDictToMap(HDict hDict) {
+        HashMap<Object, Object> hashMap = new HashMap<>();
+
+        if (hDict != null) {
+            Iterator iterator = hDict.iterator();
+            while (iterator != null && iterator.hasNext()) {
+                Map.Entry entry = (Map.Entry) iterator.next();
+                hashMap.put(entry.getKey(), entry.getValue());
+            }
+        }
+        return hashMap;
     }
 
     public static boolean isDomainEquip(String equipRef, CCUHsApi hayStack) {

@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.domain.api.Domain;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.autocommission.remoteSession.RemoteSessionStatus;
 
@@ -82,6 +83,6 @@ public class RemoteAccessSessionBroadCastReceiver extends BroadcastReceiver {
         editor.putInt(KEY_SCREEN_SHARING_STATUS, (int) val);
         editor.apply();
 
-        CCUHsApi.getInstance().writeHisValByQuery("point and diag and remote and status", val);
+        Domain.diagEquip.getRemoteSessionStatus().writeHisVal(val);
     }
 }

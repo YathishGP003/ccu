@@ -6,7 +6,7 @@ class MessageHandlerFactory {
     enum class Command{
         UpdateEntity, UpdatePoint, UpdateSchedule, SiteSync, RemoveEntity, RemoteCommand,
         PredefinedAlert, CustomAlert, AlertRemoval, AlertDefRemoval, AutoCommissioningMode,
-        SCHEDULE_MIGRATED, sequenceCreated, sequenceUpdated, sequenceDeleted
+        SCHEDULE_MIGRATED, sequenceCreated, sequenceUpdated, sequenceDeleted,fixAlert
     }
     companion object {
         fun createInstance(handlerCmd: Command) : MessageHandler =
@@ -26,6 +26,7 @@ class MessageHandlerFactory {
                 Command.sequenceCreated -> SiteSequencerMessageHandler.SequenceCreatedHandler()
                 Command.sequenceUpdated -> SiteSequencerMessageHandler.SequenceUpdatedHandler()
                 Command.sequenceDeleted -> SiteSequencerMessageHandler.SequenceDeletedHandler()
+                Command.fixAlert -> FixAlertHandler()
             }
     }
 }

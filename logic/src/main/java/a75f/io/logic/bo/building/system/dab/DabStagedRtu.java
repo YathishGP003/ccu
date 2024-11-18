@@ -141,11 +141,9 @@ public class DabStagedRtu extends DabSystemProfile
         double epidemicMode = systemEquip.getEpidemicModeSystemState().readHisVal();
         EpidemicState epidemicState = EpidemicState.values()[(int) epidemicMode];
         if((epidemicState == EpidemicState.PREPURGE || epidemicState == EpidemicState.POSTPURGE) && L.ccu().oaoProfile != null){
-            //TODO- Part OAO. Will be replaced with domanName later.
-            double smartPurgeDabFanLoopOp = TunerUtil.readTunerValByQuery("system and purge and dab and fan and loop and output", L.ccu().oaoProfile.getEquipRef());
+            double smartPurgeDabFanLoopOp = L.ccu().oaoProfile.getOAOEquip().getSystemPurgeDabMinFanLoopOutput().readPriorityVal();
             if(L.ccu().oaoProfile.isEconomizingAvailable()) {
-                double economizingToMainCoolingLoopMap = TunerUtil.readTunerValByQuery("oao and economizing and main and cooling and loop and map",
-                        L.ccu().oaoProfile.getEquipRef());
+                double economizingToMainCoolingLoopMap =  L.ccu().oaoProfile.getOAOEquip().getEconomizingToMainCoolingLoopMap().readPriorityVal();
                 systemFanLoopOp = Math.max(Math.max(systemCoolingLoopOp * 100 / economizingToMainCoolingLoopMap, systemHeatingLoopOp), smartPurgeDabFanLoopOp);
             } else if(currentConditioning == COOLING) {
                 systemFanLoopOp = Math.max(systemCoolingLoopOp * analogFanSpeedMultiplier, smartPurgeDabFanLoopOp);
@@ -387,7 +385,7 @@ public class DabStagedRtu extends DabSystemProfile
         });
         return relaySet;
     }
-    
+
     private void updateRelays() {
         getRelayAssiciationMap().forEach( (relay, association) -> {
             double newState = 0;

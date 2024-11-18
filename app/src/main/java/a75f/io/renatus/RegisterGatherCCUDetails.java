@@ -4,6 +4,8 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 
@@ -30,23 +32,25 @@ import org.projecthaystack.client.HClient;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Objects;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HayStackConstants;
-import a75f.io.api.haystack.SettingPoint;
-import a75f.io.api.haystack.Tags;
+import a75f.io.constants.CcuFieldConstants;
+import a75f.io.domain.api.Domain;
+import a75f.io.domain.api.DomainName;
+import a75f.io.domain.logic.CCUBaseConfigurationBuilder;
+import a75f.io.domain.logic.DiagEquipConfigurationBuilder;
+import a75f.io.domain.util.ModelLoader;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.system.DefaultSystem;
-import a75f.io.logic.diag.DiagEquip;
-import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint;
 import a75f.io.logic.tuners.TunerEquip;
 import a75f.io.renatus.registration.FreshRegistration;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.Prefs;
+import io.seventyfivef.domainmodeler.client.ModelDirective;
 import a75f.io.util.ExecutorTask;
 
 import static a75f.io.logic.L.ccu;
@@ -86,8 +90,8 @@ public class RegisterGatherCCUDetails extends Activity {
         mCreateNewCCU = findViewById(R.id.create_new);
 
         site = CCUHsApi.getInstance().read("site");
-        String ccuFmEmail = site.get("fmEmail") != null ? site.get("fmEmail").toString() : "";
-        String ccuInstallerEmail = site.get("installerEmail") != null ? site.get("installerEmail").toString() : "";
+        String ccuFmEmail = site.get(CcuFieldConstants.FACILITY_MANAGER_EMAIL) != null ? site.get(CcuFieldConstants.FACILITY_MANAGER_EMAIL).toString() : "";
+        String ccuInstallerEmail = site.get(CcuFieldConstants.INSTALLER_EMAIL) != null ? site.get(CcuFieldConstants.INSTALLER_EMAIL).toString() : "";
         mInstallerEmailET.setText(ccuInstallerEmail);
         mManagerEmailET.setText(ccuFmEmail);
         mManagerEmailET.setEnabled(ccuFmEmail.isEmpty());
@@ -101,7 +105,7 @@ public class RegisterGatherCCUDetails extends Activity {
         analogAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         
         mAddressBandSpinner.setAdapter(analogAdapter);
-        ccu().setSmartNodeAddressBand((short)1000);
+        ccu().setAddressBand((short)1000);
         mAddressBandSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
         {
             @Override
@@ -111,7 +115,7 @@ public class RegisterGatherCCUDetails extends Activity {
                 if (i > 0)
                 {
                     addressBandSelected = mAddressBandSpinner.getSelectedItem().toString();
-                    L.ccu().setSmartNodeAddressBand(Short.parseShort(addressBandSelected));
+                    L.ccu().setAddressBand(Short.parseShort(addressBandSelected));
                 }
                 
             }
@@ -165,30 +169,13 @@ public class RegisterGatherCCUDetails extends Activity {
                 }
                 L.saveCCUState();
                 L.ccu().setCCUName(ccuName);
-                String localId = CCUHsApi.getInstance().createCCU(ccuName, installerEmail, DiagEquip.getInstance().create(), managerEmail);
+                String ccuId = getCcuId(ccuName, installerEmail, managerEmail);
                 L.ccu().systemProfile = new DefaultSystem();
-                CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.make(localId));
+                CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.make(ccuId));
                 CCUHsApi.getInstance().registerCcu(installerEmail);
-                prefs.setString("installerEmail", installerEmail);
-
-                HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
-                SettingPoint snBand = new SettingPoint.Builder()
-                        .setDeviceRef(localId)
-                        .setSiteRef(siteMap.get("id").toString())
-                        .setDisplayName(ccuName + "-smartNodeBand")
-                        .addMarker("snband").addMarker("sp").setVal(addressBandSelected).build();
-
-                HashMap ccu  = CCUHsApi.getInstance().readEntity("device and ccu");
-
-
-                OtaStatusDiagPoint.Companion.addOTAStatusPoint(
-                        Objects.requireNonNull(ccu.get("dis")) +"-CCU",
-                        Objects.requireNonNull(ccu.get("equipRef")).toString(),
-                        Objects.requireNonNull(ccu.get("siteRef")).toString(),
-                        Objects.requireNonNull(siteMap.get(Tags.TZ)).toString(),
-                        CCUHsApi.getInstance()
-                );
-                CCUHsApi.getInstance().addPoint(snBand);
+                prefs.setString(CcuFieldConstants.INSTALLER_EMAIL, installerEmail);
+                Domain.ccuEquip.updateAddressBand(addressBandSelected);
+                L.ccu().setAddressBand(Short.parseShort(addressBandSelected));
                 next();
             }else{
                 Toast.makeText(RegisterGatherCCUDetails.this, "Please provide proper details",
@@ -199,6 +186,17 @@ public class RegisterGatherCCUDetails extends Activity {
         loadCCUs();
     }
 
+    @NonNull
+    private static String getCcuId(String ccuName, String installerEmail, String managerEmail) {
+        DiagEquipConfigurationBuilder diagEquipConfigurationBuilder = new DiagEquipConfigurationBuilder(CCUHsApi.getInstance());
+        CCUBaseConfigurationBuilder ccuBaseConfigurationBuilder = new CCUBaseConfigurationBuilder(CCUHsApi.getInstance());
+        ModelDirective ccuBaseConfigurationModel = ModelLoader.INSTANCE.getCCUBaseConfigurationModel();
+        String diagEquipId = diagEquipConfigurationBuilder.createDiagEquipAndPoints(ccuName);
+        String ccuId = ccuBaseConfigurationBuilder.createCCUBaseConfiguration(ccuName,
+                installerEmail, managerEmail, diagEquipId, ccuBaseConfigurationModel);
+        return ccuId;
+    }
+
     @SuppressLint("StaticFieldLeak")
     private void getRegisteredAddressBands() {
         regAddressBands.clear();
@@ -206,7 +204,8 @@ public class RegisterGatherCCUDetails extends Activity {
             () -> {
                 HClient hClient = new HClient(CCUHsApi.getInstance().getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
                 String siteUID = CCUHsApi.getInstance().getSiteIdRef().toString();
-                HDict tDict = new HDictBuilder().add("filter", "equip and group and siteRef == " + siteUID).toDict();
+                HDict tDict = new HDictBuilder().add("filter", "domainName == \"" +
+                        DomainName.addressBand + "\" and siteRef == " + siteUID).toDict();
                 HGrid schedulePoint = hClient.call("read", HGridBuilder.dictToGrid(tDict));
                 if(schedulePoint == null) {
                     CcuLog.w("RegisterGatherCCUDetails","HGrid(schedulePoint) is null.");
@@ -217,10 +216,11 @@ public class RegisterGatherCCUDetails extends Activity {
                     return;
                 }
                 Iterator it = schedulePoint.iterator();
-                while (it.hasNext()) {
+                while (it.hasNext())
+                {
                     HRow r = (HRow) it.next();
-                    if (r.getStr("group") != null) {
-                        regAddressBands.add(r.getStr("group"));
+                    if (r.has("val")) {
+                        regAddressBands.add(r.get("val").toString());
                     }
                 }
             },
@@ -237,7 +237,7 @@ public class RegisterGatherCCUDetails extends Activity {
 
                 mAddressBandSpinner.setAdapter(analogAdapter);
                 addressBandSelected = addressBand.get(0);
-                L.ccu().setSmartNodeAddressBand(Short.parseShort(addressBandSelected));
+                L.ccu().setAddressBand(Short.parseShort(addressBandSelected));
             }
        );
     }

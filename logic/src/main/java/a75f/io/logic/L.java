@@ -134,7 +134,7 @@ public class L
     
     public static short generateSmartNodeAddress()
     {
-        short currentBand = L.ccu().getSmartNodeAddressBand();
+        short currentBand = L.ccu().getAddressBand();
         ArrayList<HashMap<Object,Object>> nodes = CCUHsApi.getInstance().readAllEntities("device and node");
         if (nodes.size() == 0) {
             return currentBand;

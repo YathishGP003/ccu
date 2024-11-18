@@ -3,7 +3,6 @@ package a75f.io.renatus.profiles.dab
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.domain.api.Domain
 import a75f.io.logger.CcuLog
-import a75f.io.logic.L
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.dab.DabEquipToBeDeleted.CARRIER_PROD
 import a75f.io.logic.bo.building.definitions.ProfileType
@@ -285,17 +284,8 @@ class DabProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start) {
                     Spacer(modifier = Modifier.width(78.dp))
                     Row {
-                        HeaderTextView(text = "Enable IAQ Control", padding = 10)
-                        Spacer(modifier = Modifier.width(248.dp))
-                        ToggleButtonStateful(
-                            defaultSelection = viewModel.viewState.enableIAQControl,
-                            onEnabled = { viewModel.viewState.enableIAQControl = it }
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(83.dp))
-                    Row {
                         HeaderTextView(text = "Enable CO2 Control", padding = 10)
-                        Spacer(modifier = Modifier.width(178.dp))
+                        Spacer(modifier = Modifier.width(240.dp))
                         ToggleButtonStateful(
                             defaultSelection = viewModel.viewState.enableCo2Control,
                             onEnabled = { viewModel.viewState.enableCo2Control = it }

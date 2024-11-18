@@ -578,6 +578,23 @@ class AlertsRepository(
       return true
    }
 
+
+   // "Resolve" an alert
+   fun fixAlertLocally(alert: Alert) {
+
+      alert.setEndTime(DateTime().millis)
+      alert.setFixed(true)
+      alert.setSyncStatus(true)
+      dataStore.updateAlert(alert)
+      alertDefsState.remove(alert)
+
+      // special handling in preferences for "CCU RESTART" alert.  Is that restart alert, or that it was restarted?
+      if (alert.mTitle.equals("CCU RESTART", ignoreCase = true)) {
+         dataStore.cancelAppRestarted()
+      }
+      setAlertListChanged()
+   }
+
    fun fixAlertByDef(alertDef : AlertDefinition ) {
       dataStore.findAlerts(alertDef).forEach {
          fixAlert(it)

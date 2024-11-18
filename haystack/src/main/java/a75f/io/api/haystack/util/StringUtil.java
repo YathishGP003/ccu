@@ -50,4 +50,11 @@ public class StringUtil {
         }
         return modifiedMessage.toString().trim();
     }
+    public static String addAtSymbolIfMissing(String input) {
+        if (input.startsWith("@")) {
+            return input;
+        } else {
+            return "@" + input;
+        }
+    }
 }

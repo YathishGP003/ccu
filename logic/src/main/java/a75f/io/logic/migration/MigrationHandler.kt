@@ -1117,8 +1117,8 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
 
     private fun doOAOProfileMigration() {
         val oao = hayStack.readEntity("equip and oao")
-        if (oao.isNotEmpty() && oao.containsKey("domainName")) {
-            CcuLog.i(Domain.LOG_TAG, "OAO equip is already migrated")
+        if (oao.isEmpty() || (oao.isNotEmpty() && oao.containsKey("domainName"))) {
+            CcuLog.i(Domain.LOG_TAG, "OAO equip is not found or OAO equip is already migrated")
             return
         }
 

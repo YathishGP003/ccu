@@ -10,7 +10,6 @@ import a75f.io.domain.api.Point
 
 class CCUDiagEquip (equipRef : String) : DomainEquip(equipRef) {
 
-    val ccuDiagEquip = Domain.readEquipDict(DomainName.diagEquip)
     val batteryLevel = Point(DomainName.batteryLevel, equipRef)
     val chargingStatus = Point(DomainName.chargingStatus, equipRef)
     val powerConnected = Point(DomainName.powerConnected, equipRef)

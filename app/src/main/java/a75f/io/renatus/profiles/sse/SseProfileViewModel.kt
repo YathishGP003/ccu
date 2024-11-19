@@ -121,15 +121,22 @@ open class SseProfileViewModel : ViewModel() {
         temperatureOffsetsList = Domain.getListByDomainName(DomainName.temperatureOffset, model)
     }
 
-    fun sendTestCommand() {
+    fun sendTestCommand(relayName: String, isOn: Boolean, viewModel: SseProfileViewModel) {
+
+        if (relayName == DomainName.relay1) {
+            relayHisWrite(DomainName.relay1, if (isOn) 1.0 else 0.0)
+        } else {
+            relayHisWrite(DomainName.relay2, if (isOn) 1.0 else 0.0)
+        }
+
         val msg = CcuToCmOverUsbSnControlsMessage_t()
         msg.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SN_CONTROLS)
         msg.smartNodeAddress.set(sseProfile.equip.group.toInt())
         msg.controls.setTemperature.set(
             (sseProfile.desiredTemp * 2).toInt().toShort()
         )
-        msg.controls.digitalOut1.set((if (profileConfiguration.relay1EnabledState.enabled)  1 else 0).toShort())
-        msg.controls.digitalOut2.set((if (profileConfiguration.relay2EnabledState.enabled) 1 else 0).toShort())
+        msg.controls.digitalOut1.set((if (viewModel.viewState.testRelay1) 1 else 0).toShort())
+        msg.controls.digitalOut2.set((if (viewModel.viewState.testRelay2) 1 else 0).toShort())
         MeshUtil.sendStructToCM(msg)
 
         if (profileConfiguration.relay1EnabledState.enabled || profileConfiguration.relay2EnabledState.enabled) {
@@ -368,5 +375,16 @@ open class SseProfileViewModel : ViewModel() {
 
     private fun getDeviceRef(): String? {
         return CCUHsApi.getInstance().readId("device and addr == \"$deviceAddress\"") ?: null
+    }
+
+    private fun relayHisWrite(relayName: String, value: Double) {
+        if (getDeviceRef() == null) {
+            CcuLog.i(Domain.LOG_TAG, "Device not found")
+        }
+        CCUHsApi.getInstance()
+            .writeHisValByQuery(
+                "domainName == \"" + relayName + "\" and deviceRef == \""
+                        + getDeviceRef() + "\"", value
+            )
     }
 }

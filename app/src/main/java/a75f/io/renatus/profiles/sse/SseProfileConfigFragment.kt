@@ -330,7 +330,10 @@ class SseProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                 viewModel.viewState.relay1AssociationIndex.value = it
             },
             buttonState = viewModel.getRelayState(DomainName.relay1),
-            onTestActivated = { viewModel.sendTestCommand() }
+            onTestActivated = {
+                viewModel.viewState.testRelay1 = it
+                viewModel.sendTestCommand(DomainName.relay1, it, viewModel)
+            }
         )
         Spacer(modifier = Modifier.height(10.dp))
         SystemRelayMappingView(
@@ -345,7 +348,10 @@ class SseProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                 viewModel.viewState.relay2AssociationIndex.value = it
             },
             buttonState = viewModel.getRelayState(DomainName.relay2),
-            onTestActivated = { viewModel.sendTestCommand() }
+            onTestActivated = {
+                viewModel.viewState.testRelay2 = it
+                viewModel.sendTestCommand(DomainName.relay2, it, viewModel)
+            }
         )
     }
 

@@ -21,6 +21,8 @@ class SseConfigViewState {
 
     var unusedPortState by mutableStateOf(hashMapOf<String, Boolean>())
 
+    var testRelay1 by mutableStateOf (false)
+    var testRelay2 by mutableStateOf (false)
 
     companion object {
         fun fromSseProfileConfig(config: SseProfileConfiguration): SseConfigViewState {

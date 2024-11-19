@@ -394,10 +394,9 @@ public class Pulse
 			CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartNodeUpdate : "+t+" : "+val);
 			switch (t) {
 				case HUMIDITY:
-					double oldHumidityVal = CCUHsApi.getInstance().readHisValById(sp.getId());
 					double curHumidityVal = getHumidityConversion(val);
 					CCUHsApi.getInstance().writeHisValById(sp.getId(), val );
-					if(oldHumidityVal != curHumidityVal && sp.getPointRef() != null)
+					if(sp.getPointRef() != null)
 						CCUHsApi.getInstance().writeHisValById(sp.getPointRef(), curHumidityVal);
 					break;
 				case PRESSURE:

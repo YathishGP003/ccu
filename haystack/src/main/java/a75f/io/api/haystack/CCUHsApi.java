@@ -1325,12 +1325,18 @@ public class CCUHsApi
      */
     public void writeHisValById(String id, Double val)
     {
-        //long time = System.currentTimeMillis();
+        long time = System.currentTimeMillis();
         HisItem item = curRead(id);
         Double prevVal = item == null ? 0 : item.getVal();
-        if((item == null)|| (!item.initialized) || !prevVal.equals(val))
+        if((item == null)|| (!item.initialized) || !prevVal.equals(val)) {
             hsClient.hisWrite(HRef.copy(id), new HHisItem[]{HHisItem.make(HDateTime.make(System.currentTimeMillis()), HNum.make(val))});
-        //CcuLog.i("CCU_HS","writeHisValById "+id+" timeMS: "+(System.currentTimeMillis()- time));
+        } else {
+            HDict point = readHDictById(id);
+            if (point != null && point.get("sensor", false) != null) {
+                hisSyncHandler.addSensorPendingSync(id);
+            }
+        }
+        CcuLog.i("CCU_HS","writeHisValById "+id+" timeMS: "+(System.currentTimeMillis()- time));
     }
 
     /**

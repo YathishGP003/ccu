@@ -33,6 +33,7 @@ enum class LogOperation(val key: String, val value: String) {
     FIND_BY_ID(HAYSTACK_SERVICE, "findById"),
     POINT_WRITE(HAYSTACK_SERVICE, "pointWrite"),
     POINT_WRITE_MANY(HAYSTACK_SERVICE, "pointWriteMany"),
+    CLEAR_POINT_VALUES(HAYSTACK_SERVICE, "pointWriteMany"),
     FETCH_VALUE_BY_ID(HAYSTACK_SERVICE, "fetchValueById"),
     FETCH_VALUE_BY_HIS_READ_MANY(HAYSTACK_SERVICE, "fetchValueByHisReadMany"),
     FETCH_VALUE_BY_POINT_WRITE_MANY(HAYSTACK_SERVICE, "fetchValueByPointWriteMany"),

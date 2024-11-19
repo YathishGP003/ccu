@@ -638,4 +638,18 @@ public class HaystackService {
             v8Array = null; // Clear reference
         }
     }
+
+    public void clearPointValueMany(V8Array ids, int level, Object contextHelper) {
+        CcuLog.d(TAG, "---clearPointValueMany##--id-"+ids.length() + "<--level-->"+level);
+        sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("CLEAR_POINT_VALUES"), "clearPointValueMany-->", MSG_CALCULATING);
+        for(int i=0;i<ids.length(); i++){
+            String pointId = ids.getString(i);
+            CcuLog.d(TAG, "---clearPointValueMany##--id-"+ids.length() + "<--level-->"+level + "<--pointId-->"+pointId);
+            String message = String.format("writing point with, id = %s, level = %d, value = %s", HRef.copy(pointId), level, 0);
+            sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("POINT_WRITE"), message, MSG_CALCULATING);
+            CCUHsApi.getInstance().pointWrite(HRef.copy(pointId), level, WHO, null, HNum.make(0), reason);
+        }
+        ids.close();
+        sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("CLEAR_POINT_VALUES"), "clearPointValueMany-->", MSG_SUCCESS);
+    }
 }

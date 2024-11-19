@@ -9,6 +9,8 @@ import a75f.io.domain.util.ModelLoader
 import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.logic.L
+import a75f.io.logic.bo.building.definitions.ProfileType
+import a75f.io.logic.bo.building.system.util.readEntity
 import io.seventyfivef.domainmodeler.client.ModelDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import io.seventyfivef.ph.core.Tags
@@ -60,8 +62,45 @@ class CCUBaseConfigurationMigrationHandler {
 
         updateCCUEquipPoints(ccuModel, hayStack)
         deleteOldAddressBandPoint(hayStack)
+        deleteNonDmDrActivationPoint(hayStack)
+
+        deleteCCURelatedPointsFromDefaultSystemProfile(hayStack)
 
     }
+
+    private fun deleteCCURelatedPointsFromDefaultSystemProfile(hayStack: CCUHsApi) {
+        val systemEquip = hayStack.readEntity("system and equip and not modbus and not connectModule")
+        CcuLog.i(L.TAG_CCU_MIGRATION_UTIL, "systemEquip $systemEquip")
+        if (systemEquip.isNotEmpty() && (systemEquip.containsKey("profile") &&
+                    systemEquip["profile"].toString() == ProfileType.SYSTEM_DEFAULT.name)) {
+            val queries = mapOf(
+                "backfill and duration and not domainName" to "backfill duration point",
+                "offline and mode and not domainName" to "offline mode point",
+                "demand and response and enable and not domainName" to "demand response enrollment point",
+                "demand and response and activation and not domainName" to "demand response activation point",
+                "ota and status and not domainName and equipRef == \"${systemEquip[Tags.ID]}\"" to "ota status point"
+            )
+
+            for ((query, logMessage) in queries) {
+                val point = hayStack.readEntity(query)
+                if (point.isNotEmpty()) {
+                    hayStack.deleteEntity(point[Tags.ID].toString())
+                    CcuLog.i(L.TAG_CCU_MIGRATION_UTIL, "Deleted $logMessage")
+                }
+            }
+        }
+    }
+
+
+    private fun deleteNonDmDrActivationPoint(hayStack: CCUHsApi) {
+        val nonDmDrActivationPoint = hayStack.readEntity("demand and activation and not domainName")
+        if (nonDmDrActivationPoint.isNotEmpty()) {
+            hayStack.deleteEntity(nonDmDrActivationPoint[Tags.ID].toString())
+            CcuLog.i(L.TAG_CCU_MIGRATION_UTIL, "Deleted non-DM demand response activation point")
+        }
+
+    }
+
     private fun deleteOldAddressBandPoint(hayStack: CCUHsApi) {
         val snBandPoint = hayStack.readEntity("snband")
         if (snBandPoint.isNotEmpty()) {

@@ -299,8 +299,12 @@ public class Globals {
                 Watchdog.getInstance().start();
                 modelMigration(migrationHandler);
                 migrationHandler.doPostModelMigrationTasks();
-                /*temperatureMode migration should be handled after model migration*/
+
+                /*Below migration scripts should be handled after model migration*/
                 migrationHandler.temperatureModeMigration();
+                /*checkBacnetIdMigrationRequired migration script will update source model version
+                 of system Equip, This will affect DM TO DM migration*/
+                migrationHandler.checkBacnetIdMigrationRequired();
             } catch (Exception e) {
                 //Catch ignoring any exception here to avoid app from not loading in case of an init failure.
                 //Init would retried during next app restart.

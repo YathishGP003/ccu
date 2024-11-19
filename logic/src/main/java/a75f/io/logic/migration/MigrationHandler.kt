@@ -199,16 +199,6 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             PreferenceUtil.setVavCfmOnEdgeMigrationDone()
         }
         clearOtaCachePreferences() // While migrating to new version, we need to clear the ota cache preferences
-        if(!PreferenceUtil.isBacnetIdMigrationDone()) {
-            try {
-                updateBacnetProperties(hayStack)
-                PreferenceUtil.setBacnetIdMigrationDone()
-            } catch (e: Exception) {
-                //For now, we make sure it does not stop other migrations even if this fails.
-                e.printStackTrace()
-                CcuLog.e(L.TAG_CCU_MIGRATION_UTIL, "Error in migrateBacnetIdForVavDevices $e")
-            }
-        }
         if(!PreferenceUtil.getMigrateAnalogInputTypeForVavDevicePoint()) {
            try {
                 migrateAnalogTypeForVavAnalog1In()
@@ -1729,6 +1719,19 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                         )
                     )
                 }
+            }
+        }
+    }
+
+    fun checkBacnetIdMigrationRequired() {
+        if(!PreferenceUtil.isBacnetIdMigrationDone()) {
+            try {
+                updateBacnetProperties(CCUHsApi.getInstance());
+                PreferenceUtil.setBacnetIdMigrationDone();
+            } catch (e : Exception) {
+                //For now, we make sure it does not stop other migrations even if this fails.
+                e.printStackTrace();
+                CcuLog.e(L.TAG_CCU_MIGRATION_UTIL, "Error in migrateBacnetIdForVavDevices $e")
             }
         }
     }

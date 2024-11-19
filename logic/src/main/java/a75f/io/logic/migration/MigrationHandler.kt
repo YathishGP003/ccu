@@ -200,8 +200,14 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         }
         clearOtaCachePreferences() // While migrating to new version, we need to clear the ota cache preferences
         if(!PreferenceUtil.isBacnetIdMigrationDone()) {
-            updateBacnetProperties(hayStack)
-            PreferenceUtil.setBacnetIdMigrationDone()
+            try {
+                updateBacnetProperties(hayStack)
+                PreferenceUtil.setBacnetIdMigrationDone()
+            } catch (e: Exception) {
+                //For now, we make sure it does not stop other migrations even if this fails.
+                e.printStackTrace()
+                CcuLog.e(L.TAG_CCU_MIGRATION_UTIL, "Error in migrateBacnetIdForVavDevices $e")
+            }
         }
         if(!PreferenceUtil.getMigrateAnalogInputTypeForVavDevicePoint()) {
            try {
@@ -1366,26 +1372,26 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                     L.TAG_CCU_DOMAIN,
                     "Updating bacnetId for the system point(${point["dis"]})."
                 )
-                val modelPointDef = systemModel.points.find {
-                    it.domainName == point["domainName"].toString()
+                systemModel.points.find { it.domainName == point["domainName"] }?.let { pointDef ->
+                    profileEquipBuilder.updatePoint(
+                        PointBuilderConfig(
+                            pointDef,
+                            profileConfig,
+                            hsSystemEquip["id"].toString(),
+                            site.id,
+                            site.tz,
+                            equipDis
+                        ), point
+                    )
+
                 }
-                profileEquipBuilder.updatePoint(
-                    PointBuilderConfig(
-                        modelPointDef!!,
-                        profileConfig,
-                        hsSystemEquip["id"].toString(),
-                        site.id,
-                        site.tz,
-                        equipDis
-                    ), point
-                )
             }
         } else {
             CcuLog.i(Domain.LOG_TAG, "system profile is not migrated - $hsSystemEquip")
         }
 
         // migration for terminal equip and points
-        val equips = hayStack.readAllEntities("equip and not system and not modbus and domainName and not building")
+        val equips = hayStack.readAllEntities("equip and not system and not modbus and domainName and not building and not diag and not config")
         equips.forEach { equip ->
             val equipModel = ModelCache.getModelById(equip["sourceModel"].toString())
             val equipDis = equip["dis"].toString()
@@ -1405,19 +1411,18 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                     L.TAG_CCU_DOMAIN,
                     "Updating bacnetId for the point(${point["dis"]})."
                 )
-                val modelPointDef = equipModel.points.find {
-                    it.domainName == point["domainName"].toString()
+                equipModel.points.find { it.domainName == point["domainName"] }?.let { pointDef ->
+                    profileEquipBuilder.updatePoint(
+                        PointBuilderConfig(
+                            pointDef,
+                            profileConfiguration,
+                            equipId,
+                            site!!.id,
+                            site.tz,
+                            equipDis
+                        ), point
+                    )
                 }
-                profileEquipBuilder.updatePoint(
-                    PointBuilderConfig(
-                        modelPointDef!!,
-                        profileConfiguration,
-                        equipId,
-                        site!!.id,
-                        site.tz,
-                        equipDis
-                    ), point
-                )
             }
         }
     }

@@ -1,9 +1,9 @@
 package a75f.io.renatus.profiles.plc
 
 import a75f.io.api.haystack.CCUHsApi
-import a75f.io.logger.CcuLog
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
+import a75f.io.logic.bo.building.sensors.SensorManager
 import a75f.io.renatus.BASE.BaseDialogFragment
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.composables.DropDownWithLabel
@@ -35,7 +35,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
@@ -124,6 +128,9 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                             onSelected = { selectedIndex ->
                                 viewModel.viewState.analog1InputType = selectedIndex.toDouble()
                                 if (selectedIndex > 0) {
+                                    // Update the target value and error range based on the selected input type
+                                    viewModel.pidTargetValue = viewModel.returnTargetValue(selectedIndex)
+                                    viewModel.pidProportionalRange = viewModel.returnErrorValue(selectedIndex)
                                     viewModel.viewState.thermistor1InputType = 0.0
                                     viewModel.viewState.nativeSensorType = 0.0
                                 }
@@ -147,8 +154,10 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                                     viewModel.pidTargetValue[selectedIndex].toDouble()
                             },
                             defaultSelection = viewModel.pidTargetValue.indexOf(
-                                viewModel.viewState.pidTargetValue.toInt().toString()
-                            ),
+                                viewModel.viewState.pidTargetValue.toDouble().toString()
+                            ).let { index ->
+                                if (index >= 0) index else 0 // Fallback to 0 when 0 is present instead of 0.0
+                            },
                             spacerLimit = 180,
                             heightValue = 211
                         )
@@ -185,9 +194,14 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                         previewWidth = 130,
                         expandedWidth = 150,
                         onSelected = { selectedIndex ->
-                            viewModel.viewState.pidProportionalRange = selectedIndex.toDouble()
+                            viewModel.viewState.pidProportionalRange =
+                                viewModel.pidProportionalRange[selectedIndex].toDouble()
                         },
-                        defaultSelection = viewModel.viewState.pidProportionalRange.toInt(),
+                        defaultSelection = viewModel.pidProportionalRange.indexOf(
+                            viewModel.viewState.pidProportionalRange.toDouble().toString()
+                        ).let { index ->
+                            if (index >= 0) index else 0 // Fallback to 0 when 0 is present instead of 0.0
+                        },
                         spacerLimit = 80,
                         heightValue = 211
                     )

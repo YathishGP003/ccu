@@ -23,6 +23,7 @@ import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.plc.PlcProfile
 import a75f.io.logic.bo.building.plc.PlcProfileConfig
+import a75f.io.logic.bo.building.sensors.SensorManager
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.FloorPlanFragment
@@ -84,6 +85,8 @@ class PlcProfileViewModel : ViewModel() {
     private lateinit var unusedPorts: HashMap<String, Boolean>
     private lateinit var pairingCompleteListener: OnPairingCompleteListener
     private var saveJob : Job? = null
+    private var targetVal = ArrayList<String>()
+    private var errorVal = ArrayList<String>()
 
     fun init(bundle: Bundle, context: Context, hayStack : CCUHsApi) {
         deviceAddress = bundle.getShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR)
@@ -118,11 +121,78 @@ class PlcProfileViewModel : ViewModel() {
         CcuLog.i(Domain.LOG_TAG, "Plc profile cofig Loaded")
     }
 
+    /**
+     * Generates and returns a list of target values for the specified sensor index.
+     *
+     * The function retrieves the corresponding sensor from the external sensor list
+     * using the provided `selectedIndex`. It then computes a range of target values
+     * based on the sensor's minimum value, maximum value, and increment value. These
+     * values are scaled and added to the `targetVal` list, which is cleared before
+     * being repopulated.
+     *
+     * @param selectedIndex The index of the sensor to retrieve target values for.
+     *                      If `selectedIndex` is 0, the function returns the existing
+     *                      `targetVal` list without modification.
+     * @return An `ArrayList<String>` containing the computed target values for the specified sensor.
+     */
+    fun returnTargetValue(selectedIndex: Int): ArrayList<String> {
+        if (selectedIndex == 0) {
+            return targetVal
+        }
+        val r = SensorManager.getInstance().externalSensorList[selectedIndex - 1]
+        targetVal.clear()
+
+        val minVal = (100 * r.minEngineeringValue).toInt()
+        val maxVal = (100 * r.maxEngineeringValue).toInt()
+        val increment = (100 * r.incrementEgineeringValue).toInt()
+
+        for (pos in minVal..maxVal step increment) {
+            targetVal.add((pos / 100.0).toString())
+        }
+
+        return targetVal
+    }
+
+    /**
+     * Returns a list of error values based on the selected index.
+     *
+     * This function calculates error values using the sensor's engineering values and increments,
+     * and stores them in the `errorVal` list. If the selected index is 0, the function simply returns
+     * the existing `errorVal` list. Otherwise, it clears the list, recalculates values based on the
+     * specified sensor, and removes the first element to avoid division by zero in future calculations.
+     *
+     * @param selectedIndex The index of the selected sensor. If 0, the existing list is returned.
+     * @return A list of error values as strings, excluding the first element (0.0).
+     */
+    fun returnErrorValue(selectedIndex: Int): ArrayList<String> {
+        if (selectedIndex == 0) {
+            return errorVal
+        }
+        val r = SensorManager.getInstance().externalSensorList[selectedIndex - 1]
+        errorVal.clear()
+
+        val minVal = (100 * r.minEngineeringValue).toInt()
+        val maxVal = (100 * r.maxEngineeringValue).toInt()
+        val increment = (100 * r.incrementEgineeringValue).toInt()
+
+        for (pos in minVal..maxVal step increment) {
+            errorVal.add((pos / 100.0).toString())
+        }
+
+        // Since the first element is 0, we cannot use it in the calculation of PI loop value
+        // since it will cause division by zero
+        errorVal.removeAt(0)
+
+        return errorVal
+    }
+
     private fun initializeLists() {
         analog1InputType = getListByDomainName(DomainName.analog1InputType, model)
-        pidTargetValue = getListByDomainName(DomainName.pidTargetValue, model)
+        // Get the target list based on the selected sensor type
+        pidTargetValue = returnTargetValue(viewState.analog1InputType.toInt())
         thermistor1InputType = getListByDomainName(DomainName.thermistor1InputType, model)
-        pidProportionalRange = getListByDomainName(DomainName.pidProportionalRange, model)
+        // Get the error list based on the selected sensor type
+        pidProportionalRange = returnErrorValue(viewState.analog1InputType.toInt())
         nativeSensorType = getListByDomainName(DomainName.nativeSensorType, model)
 
         analog2InputType = getListByDomainName(DomainName.analog2InputType, model)

@@ -853,6 +853,22 @@ public class CCUHsApi
         }
         return null;
     }
+    /**
+     * Read the all entities for the given query in HDict format
+     */
+    public List<HDict> readAllHDictByQuery(String query) {
+        List<HDict> hDictList = new ArrayList<>();
+        try {
+            HGrid grid = hsClient.readAll(query);
+            for (int i = 0; i < grid.numRows(); i++) {
+                hDictList.add(grid.row(i));
+            }
+        } catch (Exception e) {
+            CcuLog.e(TAG_CCU_HS, "Error fetching entities for query: " + query, e);
+        }
+        return hDictList;
+    }
+
 
     public HGrid readHDictByIds(HRef[] ids) {
         try {

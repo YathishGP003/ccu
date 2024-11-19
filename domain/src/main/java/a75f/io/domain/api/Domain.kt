@@ -311,8 +311,11 @@ object Domain {
         return hayStack.readEntity("equip and sourceModel==\"$modelId\" or modelId == \"$modelId\"")
     }
 
-    fun readDevice(modelId: String) : Map<Any,Any> {
-        return hayStack.readEntity("device and sourceModel==\"$modelId\" or modelId == \"$modelId\"")
+    /* using new model version to fetch the device  which is not migrated to new model version
+      specifically for bypass damper and DAB devices
+    */
+    fun readNonDmDevice(modelId: String, newModelVersion: String) : Map<Any,Any> {
+        return hayStack.readEntity("device and sourceModelVersion!=\"$newModelVersion\" and sourceModel==\"$modelId\" or modelId == \"$modelId\"")
     }
     @JvmStatic
     fun readValAtLevelByDomain(domainName: String, level: Int) : Double {

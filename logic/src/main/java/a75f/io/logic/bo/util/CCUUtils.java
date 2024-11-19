@@ -260,9 +260,9 @@ public class CCUUtils
 
     public static void updateDeviceAndPointsWithUpdatedCcuRef(CCUHsApi ccuHsApi, boolean isCcuReregistration) {
         CcuLog.d(TAG_CCU_REF,"Executing updateDeviceAndPointsWithUpdatedCcuRef");
-        ArrayList<HashMap<Object, Object>> deviceList = ccuHsApi.readAllEntities("device and not ccu");
-        for(HashMap<Object, Object> deviceMap : deviceList){
-            Device device = new Device.Builder().setHashMap(deviceMap).build();
+        List<HDict> deviceDictList = ccuHsApi.readAllHDictByQuery("device and not ccu");
+        for (HDict deviceDict : deviceDictList) {
+            Device device = new Device.Builder().setHDict(deviceDict).build();
             if(device != null && (isCcuReregistration || device.getCcuRef() == null)) {
                 ccuHsApi.updateDevice(device, device.getId());
             }

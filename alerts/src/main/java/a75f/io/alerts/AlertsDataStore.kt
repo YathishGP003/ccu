@@ -200,7 +200,14 @@ class AlertsDataStore @JvmOverloads constructor(
          // We do not allow adding alerts if there is already an active alert of the same type (title) and same equip (same test/requirement as on server)
          // CCU Crash alert can be added if there is an existing crash alert.
 
-         if((a.creator == "blockly" || a.creator == "sequencer") && a.alertDefId != null && a.alertDefId == alert.alertDefId && a.equipId == alert.equipId && alert.mTitle != "CCU CRASH"){
+         if (a.creator == "blockly" && a.alertDefId != null && a.alertDefId == alert.alertDefId && a.equipId == alert.equipId && alert.mTitle != "CCU CRASH") {
+            return
+         }
+
+         if (a.creator == "sequencer" && a.alertDefId != null && a.alertDefId == alert.alertDefId
+            && a.blockId != null && a.blockId == alert.blockId
+            && a.equipId == alert.equipId && alert.mTitle != "CCU CRASH"
+         ) {
             return
          }
 

@@ -215,7 +215,7 @@ class SequenceWorker(context: Context, params: WorkerParameters) :
                 alertDefinition.alert.mMessage = message
                 alertDefinition.alert.mNotificationMsg = notificationMsg
                 val tempId = entityId!!.replaceFirst("@".toRegex(), "")
-                mapOfPastAlerts["$blockId:$tempId"] = AlertData(sequenceAlert.title,
+                mapOfPastAlerts["${alertDefinition.alert.alertDefId}:$blockId:$tempId"] = AlertData(sequenceAlert.title,
                     message.toString(), entityId, "sequencer", blockId, alertDefinition)
             } else {
                 CcuLog.d(TAG, "sequenceAlert not found for blockId: $blockId")
@@ -232,7 +232,7 @@ class SequenceWorker(context: Context, params: WorkerParameters) :
             AlertManager.getInstance()
                 .getActiveAlertsByCreatorAndBlockId("sequencer", sequenceAlert.alertBlockId)
                 .forEach(Consumer { alert: Alert ->
-                    val keyFromDb = alert.blockId + ":" + alert.equipId
+                    val keyFromDb = alert.alertDefId + ":"+ alert.blockId +":" + alert.equipId
                     if (!mapOfPastAlerts.containsKey(keyFromDb)) {
 
                         CcuLog.d(

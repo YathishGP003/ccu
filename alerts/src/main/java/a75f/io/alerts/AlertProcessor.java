@@ -171,15 +171,15 @@ public class AlertProcessor
             }
             HashMap<Object, Object> map = CCUHsApi.getInstance().readMapById(entityId);
             if(map == null || map.isEmpty()){
-                CcuLog.d(TAG_CCU_ALERTS, "---triggerAlert-blockId5005@@ invalid id->"+entityId);
+                CcuLog.d(TAG_CCU_ALERTS, "---triggerAlert-DefId5005@@ invalid id->"+entityId);
                 return false;
             }else{
-                CcuLog.d(TAG_CCU_ALERTS, "---triggerAlert-blockId5006@@-"+blockId + " notificationMsg: " + notificationMsg + " message: " + message + " entityId: " + entityId + "-current thread->"+Thread.currentThread().getName());
+                CcuLog.d(TAG_CCU_ALERTS, "---triggerAlert-DefId5006@@-"+def._id + " notificationMsg: " + notificationMsg + " message: " + message + " entityId: " + entityId + "-current thread->"+Thread.currentThread().getName());
                 def.alert.setmNotificationMsg(notificationMsg);
                 Alert alert = AlertBuilder.build(def, message, CCUHsApi.getInstance(),entityId,"");
-                alert.blockId = blockId;
+                alert.blockId = def._id;
                 String tempId = entityId.replaceFirst("@","");
-                mapOfPastAlerts.put(blockId+":"+tempId, alert);
+                mapOfPastAlerts.put(def._id+":"+tempId, alert);
                 return true;
             }
         }

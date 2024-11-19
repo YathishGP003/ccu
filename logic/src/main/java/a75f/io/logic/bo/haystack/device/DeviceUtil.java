@@ -99,17 +99,6 @@ public class DeviceUtil {
         return null;
     }
 
-    public static List<RawPoint> getEnabledCmdPointsWithRefForDevice(HashMap device, CCUHsApi hayStack) {
-        ArrayList<HashMap> rawPoints = hayStack.readAll("point and physical and cmd and deviceRef == \"" +
-                device.get("id") + "\"");
-
-        return rawPoints.stream()
-                .filter( p -> p.get("pointRef") != null)
-                .filter(p -> p.get("portEnabled").toString().equals("true"))
-                .map(p -> new RawPoint.Builder().setHashMap(p).build())
-                .collect(Collectors.toList());
-
-    }
     /*Not version tag is used to ignore firmware version point in the collection*/
     public static List<RawPoint> getPortsForDevice(Short deviceAddress, CCUHsApi hayStack) {
         HashMap<Object, Object> device = hayStack.readEntity("device and addr == \""+deviceAddress+"\"");
@@ -130,13 +119,18 @@ public class DeviceUtil {
         if (rawPoints != null && !rawPoints.isEmpty()) {
             return rawPoints.stream()
                     .filter(rawPoint -> rawPoint.getDomainName() != null
-                            && !(rawPoint.getDomainName().equals(DomainName.analog1In)
-                            || rawPoint.getDomainName().equals(DomainName.analog2In)
-                            || rawPoint.getDomainName().equals(DomainName.th1In)
-                            || rawPoint.getDomainName().equals(DomainName.th2In)) && !rawPoint.getEnabled())
+                            && !isInputPort(rawPoint) && !rawPoint.getEnabled())
                     .collect(Collectors.toList());
         } else {
             return null;
         }
+    }
+    private static boolean isInputPort(RawPoint rawPoint) {
+        return rawPoint.getDomainName().equals(DomainName.analog1In)
+                || rawPoint.getDomainName().equals(DomainName.analog2In)
+                || rawPoint.getDomainName().equals(DomainName.th1In)
+                || rawPoint.getDomainName().equals(DomainName.th2In)
+                || rawPoint.getDomainName().equals(DomainName.currentTemp)
+                || rawPoint.getDomainName().equals(DomainName.desiredTemp);
     }
 }

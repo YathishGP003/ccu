@@ -14,6 +14,7 @@ import a75f.io.renatus.compose.TitleTextView
 import a75f.io.renatus.compose.ToggleButtonStateful
 import a75f.io.renatus.modbus.util.SET
 import a75f.io.renatus.profiles.OnPairingCompleteListener
+import a75f.io.renatus.profiles.profileUtils.UnusedPortsFragment
 import a75f.io.renatus.util.highPriorityDispatcher
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -105,10 +106,6 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                 .fillMaxSize()
                 .padding(20.dp),
         ) {
-            CcuLog.d("PLC", "viewModel.viewState.pidTargetValue ${viewModel.viewState.pidTargetValue}")
-            viewModel.pidTargetValue.forEach {
-                CcuLog.d("PLC", "viewModel.viewState.pidTargetValue $it")
-            }
             item {
                 Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                     TitleTextView("PI LOOP CONTROLLER")
@@ -397,6 +394,14 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                         spacerLimit = 110,
                         heightValue = 211
                     )
+                }
+                Spacer(modifier = Modifier.height(30.dp))
+
+                val mapOfUnUsedPorts = viewModel.viewState.unusedPortState
+                if(mapOfUnUsedPorts.isNotEmpty()) {
+                    UnusedPortsFragment.DividerRow()
+                    UnusedPortsFragment.LabelUnusedPorts()
+                    UnusedPortsFragment.UnUsedPortsListView(viewModel)
                 }
                 Spacer(modifier = Modifier.height(30.dp))
                 Box(

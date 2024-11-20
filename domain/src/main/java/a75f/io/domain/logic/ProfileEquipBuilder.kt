@@ -44,7 +44,7 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
         val systemEquip = hayStack.readEntity("system and equip and not modbus and not connectModule")
         if (systemEquip.isEmpty()) {
             CcuLog.i(Domain.LOG_TAG, "addEquip - Invalid System equip , ahuRef cannot be applied")
-        } else if (isStandAloneEquip(hayStackEquip)) {
+        } else if (isStandAloneEquip(hayStackEquip) || isDiagEquip(hayStackEquip)) {
             hayStackEquip.gatewayRef = systemEquip[Tags.ID].toString()
             CcuLog.i(Domain.LOG_TAG, "Added gateway ref")
         } else {
@@ -387,7 +387,7 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
     }
     fun doCutOverMigration(equipRef: String, modelDef : ModelDirective, equipDis : String,
                            mapping : Map<String, String>, profileConfiguration: ProfileConfiguration?,
-    isSystem: Boolean = false, equipHashMap: HashMap<Any, Any> = HashMap()) {
+    isSystem: Boolean = false, equipHashMap: HashMap<Any, Any>) {
         CcuLog.i(Domain.LOG_TAG, "doCutOverMigration for $equipDis")
         var equipPoints =
             hayStack.readAllEntities("point and equipRef == \"$equipRef\"")
@@ -541,5 +541,9 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
 
     private fun isStandAloneEquip(equip : Equip) : Boolean {
         return equip.markers.contains(Tags.STANDALONE)
+    }
+
+    private fun isDiagEquip(equip : Equip) : Boolean {
+        return equip.markers.contains(Tags.DIAG)
     }
 }

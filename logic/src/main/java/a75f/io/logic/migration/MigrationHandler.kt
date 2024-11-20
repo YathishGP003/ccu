@@ -65,7 +65,6 @@ import a75f.io.logic.bo.building.system.vav.config.StagedVfdRtuProfileConfig
 import a75f.io.logic.bo.building.vav.VavProfileConfiguration
 import a75f.io.logic.bo.util.DemandResponseMode
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
-import a75f.io.logic.diag.DiagEquip
 import a75f.io.logic.diag.DiagEquip.createMigrationVersionPoint
 import a75f.io.logic.migration.VavAndAcbProfileMigration.Companion.cleanACBDuplicatePoints
 import a75f.io.logic.migration.VavAndAcbProfileMigration.Companion.cleanVAVDuplicatePoints
@@ -182,7 +181,21 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             PreferenceUtil.setModbusEnumCorrectionDone()
         }
         if(!PreferenceUtil.isBackFillValueUpdateRequired()) {
-            updatingBackfillDefaultValues(hayStack)
+            val backFillDurationDomainPoint = Domain.ccuEquip.backFillDuration
+            try {
+                updatingBackFillDefaultValues(hayStack, backFillDurationDomainPoint)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                //For now, we make sure it does not stop other migrations even if this fails.
+                CcuLog.e(L.TAG_CCU_MIGRATION_UTIL, "Error in updatingBackfillDefaultValues $e")
+                try {
+                    backFillDurationDomainPoint.writeDefaultVal(24.0)
+                } catch (e: Exception) {
+                    CcuLog.e(L.TAG_CCU_MIGRATION_UTIL, "Error in updatingBackfillDefaultValues in catch block $e")
+                }
+
+            }
+
             PreferenceUtil.setBackFillValueUpdateDone()
         }
         if(!PreferenceUtil.isHisTagRemovalFromNonDmDevicesDone()) {
@@ -252,24 +265,38 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         }
     }
 
-    private fun updatingBackfillDefaultValues(hayStack: CCUHsApi) {
-        val systemEquip = hayStack.read("system and equip and not modbus and not connectModule")
-        val backFillPoint =
-            hayStack.read("point and (backfill or domainName == \"backfillDuration\") and system and equipRef == \"${systemEquip["id"]}\"")
-        val lastUpdatedTime = DateTime.parse(
-            CCUHsApi.getInstance().readPointPriorityLatestTime(backFillPoint["id"] as String?)
-                .substring(0, 19)
-        )
+    private fun updatingBackFillDefaultValues(hayStack: CCUHsApi, backFillPointDomain: a75f.io.domain.api.Point) {
+        if(backFillPointDomain.id == "") {
+            CcuLog.e(L.TAG_CCU_MIGRATION_UTIL, "backFillDuration point not exist")
+            return
+        }
+        val backFillPoint = hayStack.readEntity(backFillPointDomain.id)
+
+        if(backFillPoint.isEmpty()) {
+            CcuLog.e(L.TAG_CCU_MIGRATION_UTIL, "backFillDuration point Map not exist")
+            return
+        }
+
+        val lastUpdatedTimeForBackFillPoint = hayStack.readPointPriorityLatestTime(backFillPointDomain.id)
+
+        if(lastUpdatedTimeForBackFillPoint == null) {
+            CcuLog.i(L.TAG_CCU_MIGRATION_UTIL, "lastUpdatedTimeForBackFillPoint not found" +
+                    " so Updated the fallback default value for backfill point")
+            backFillPointDomain.writeDefaultVal(24.0)
+            return
+        }
+
+        val lastUpdatedTime = DateTime.parse(lastUpdatedTimeForBackFillPoint.substring(0, 19))
         if(backFillPoint["createdDateTime"] == null) {
             CcuLog.i(L.TAG_CCU_MIGRATION_UTIL, "Updated the fallback default value for backfill point")
-            hayStack.writeDefaultValById(backFillPoint["id"].toString(), 24.0)
+            backFillPointDomain.writeDefaultVal(24.0)
             CcuLog.i(L.TAG_CCU_MIGRATION_UTIL, "Updated backfill default value")
             return
         }
         val createdTime =
-            DateTime.parse(backFillPoint["createdDateTime"].toString().substring(0,19));
+            DateTime.parse(backFillPoint["createdDateTime"].toString().substring(0,19))
         if (createdTime.equals(lastUpdatedTime)) {
-            hayStack.writeDefaultValById(backFillPoint["id"].toString(), 24.0)
+            backFillPointDomain.writeDefaultVal(24.0)
             CcuLog.i(L.TAG_CCU_MIGRATION_UTIL, "Updated backfill default value")
         } else {
             CcuLog.i(

@@ -703,8 +703,8 @@ public class InstallerOptions extends Fragment implements MasterControlLimitList
             ArrayList<String> deadBand = new ArrayList<>();
             ArrayList<String> zonediff = new ArrayList<>();
 
-            double minDeadBandVal = Double.parseDouble(Domain.readPoint(DomainName.coolingDeadband).get("minVal").toString());
-            double maxDeadBandVal = Double.parseDouble(Domain.readPoint(DomainName.coolingDeadband).get("maxVal").toString());
+            double minDeadBandVal = Double.parseDouble(Domain.readPointForEquip(DomainName.coolingDeadband,Domain.buildingEquip.getEquipRef()).get("minVal").toString());
+            double maxDeadBandVal = Double.parseDouble(Domain.readPointForEquip(DomainName.coolingDeadband,Domain.buildingEquip.getEquipRef()).get("maxVal").toString());
 
             if(isCelsiusTunerAvailableStatus()){
                 for (int val = 32;  val <= 140; val += 1) {

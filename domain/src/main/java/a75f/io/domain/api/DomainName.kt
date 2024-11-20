@@ -57,6 +57,7 @@ object DomainName {
     const val activeChilledBeam = "activeChilledBeam"
     const val hyperstatSplitCPU = "hyperstatSplitCPU"
 
+
     // Devices
     const val hyperstatSplitDevice = "hyperstatSplitDevice"
 
@@ -1160,7 +1161,9 @@ object DomainName {
     const val relay2OffThreshold = "relay2OffThreshold"
     const val relay1Cmd = "relay1Cmd"
     const val relay2Cmd = "relay2Cmd"
-
+    const val controlVariable = "controlVariable"
+    const val smartnodePID = "smartnodePID"
+    const val helionodePID = "helionodePID"
 
 
 

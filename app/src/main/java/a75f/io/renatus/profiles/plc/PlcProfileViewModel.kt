@@ -248,7 +248,6 @@ class PlcProfileViewModel : ViewModel() {
         if (profileConfiguration.isDefault) {
 
             addEquipAndPoints(deviceAddress, profileConfiguration, nodeType, hayStack, model, deviceModel)
-            //vavProfile.init()
             L.ccu().zoneProfiles.add(plcProfile)
 
         } else {
@@ -258,6 +257,7 @@ class PlcProfileViewModel : ViewModel() {
             }
 
         }
+        plcProfile.init()
         updateProcessVariablePoint(profileConfiguration.nodeAddress)
         //createProcessVariable(equipBuilder, hayStack, profileConfiguration.nodeAddress)ModelCache.kt
     }

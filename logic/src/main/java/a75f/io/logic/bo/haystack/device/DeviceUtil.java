@@ -131,6 +131,7 @@ public class DeviceUtil {
                 || rawPoint.getDomainName().equals(DomainName.th1In)
                 || rawPoint.getDomainName().equals(DomainName.th2In)
                 || rawPoint.getDomainName().equals(DomainName.currentTemp)
-                || rawPoint.getDomainName().equals(DomainName.desiredTemp);
+                || rawPoint.getDomainName().equals(DomainName.desiredTemp)
+                || rawPoint.getDomainName().toLowerCase().contains("sensor");
     }
 }

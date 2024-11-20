@@ -3,6 +3,7 @@ package a75f.io.renatus.model;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -479,10 +480,13 @@ public class ZoneViewData {
         if (piSensorValue > 0) {
             plcPoints.put("Pi Sensor Value",piSensorValue);
         }
+        Map<Object, Object> targetDetails = Collections.emptyMap();
         if(analog2Config == 1) {
             plcPoints.put("Dynamic Setpoint",true);
+            plcEquip.getDynamicTargetValue().getPoint();
             targetValue = plcEquip.getDynamicTargetValue().readDefaultVal();
         }else {
+            targetDetails = plcEquip.getPidTargetValue().getPoint();
             if(analog2Config == 0)
                 plcPoints.put("Dynamic Setpoint",false);
         }
@@ -497,7 +501,6 @@ public class ZoneViewData {
 
         HashMap<Object, Object> inputDetails = CCUHsApi.getInstance().readEntity(
             "point and domainName == \""+processVariable+"\" and equipRef == \""+equipID+"\"");
-        Map<Object, Object> targetDetails = plcEquip.getPidTargetValue().getPoint();
 
         CcuLog.d(L.TAG_CCU_UI, "inputDetails = " + inputDetails+" targetDetails = "+targetDetails);
         plcPoints.put("Unit Type", StringUtils.substringAfterLast(inputDetails.get("dis").toString(), "-"));

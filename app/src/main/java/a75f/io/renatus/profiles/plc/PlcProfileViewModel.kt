@@ -255,11 +255,9 @@ class PlcProfileViewModel : ViewModel() {
             CoroutineScope(Dispatchers.IO).launch {
                 saveUnUsedPortStatus(profileConfiguration, deviceAddress, hayStack)
             }
-
         }
-        plcProfile.init()
         updateProcessVariablePoint(profileConfiguration.nodeAddress)
-        //createProcessVariable(equipBuilder, hayStack, profileConfiguration.nodeAddress)ModelCache.kt
+        plcProfile.init()
     }
 
 
@@ -293,7 +291,7 @@ class PlcProfileViewModel : ViewModel() {
             deviceDis
         )
         CcuLog.i(Domain.LOG_TAG, " add Profile")
-        plcProfile = PlcProfile(deviceAddress)
+        plcProfile = PlcProfile(deviceAddress, equipId)
 
     }
 
@@ -312,9 +310,15 @@ class PlcProfileViewModel : ViewModel() {
     private fun addBaseProfileConfigs() {
         val processVariablePoint = getProcessVariableMappedPoint()
         CcuLog.i(Domain.LOG_TAG, "processVariablePoint $processVariablePoint")
-        processVariablePoint ?: return
+        processVariablePoint?.let {
+            profileConfiguration.baseConfigs.add(EntityConfig(processVariablePoint))
+        }
 
-        profileConfiguration.baseConfigs.add(EntityConfig(processVariablePoint))
+        val analog2InputTypePoint = getAnalog2InputTypeMappedPoint()
+        CcuLog.i(Domain.LOG_TAG, "analog2InputTypePoint $analog2InputTypePoint")
+        analog2InputTypePoint?.let {
+            profileConfiguration.baseConfigs.add(EntityConfig(analog2InputTypePoint))
+        }
 
         CcuLog.i(
             Domain.LOG_TAG, "processVariablePoint size" +
@@ -355,6 +359,16 @@ class PlcProfileViewModel : ViewModel() {
             return (nativeSensorTypePoint?.valueConstraint as MultiStateConstraint).allowedValues[viewState.nativeSensorType.toInt()].value
         } else {
             CcuLog.i(Domain.LOG_TAG, "Invalid UI Config : No process variable selected")
+            return null
+        }
+    }
+
+    private fun getAnalog2InputTypeMappedPoint() : String? {
+        if (viewState.analog2InputType > 0) {
+            val analog2InputTypePoint = model.points.find { it.domainName == DomainName.analog2InputType }
+            return (analog2InputTypePoint?.valueConstraint as MultiStateConstraint).allowedValues[viewState.analog2InputType.toInt()].value
+        } else {
+            CcuLog.i(Domain.LOG_TAG, "Invalid UI Config : analog2 input not found")
             return null
         }
     }

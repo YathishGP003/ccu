@@ -103,7 +103,7 @@ class DabStagedVfdRtuViewModel : DabStagedRtuBaseViewModel() {
             }
             val stagedRtu = L.ccu().systemProfile as DabStagedRtuWithVfd
             stagedRtu.updateStagesSelected()
-            DesiredTempDisplayMode.setSystemModeForVav(hayStack)
+            DesiredTempDisplayMode.setSystemModeForDab(hayStack)
             updateSystemMode()
             systemEquipId?.let { L.ccu().systemProfile.updateAhuRef(it) }
             hayStack.syncEntityTree()

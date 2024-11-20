@@ -17,6 +17,7 @@ import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.vav.AcbProfileConfiguration
 import a75f.io.logic.bo.building.vav.VavAcbProfile
+import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.logic.getSchedule
 import a75f.io.messaging.handler.ACBConfigHandler
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
@@ -177,6 +178,7 @@ class AcbProfileViewModel : ViewModel() {
                 CcuLog.i(Domain.LOG_TAG, "Send seed for $deviceAddress")
                 LSerial.getInstance()
                     .sendSeedMessage(false, false, deviceAddress, zoneRef, floorRef)
+                DesiredTempDisplayMode.setModeType(zoneRef, CCUHsApi.getInstance())
                 CcuLog.i(Domain.LOG_TAG, "AcbProfile Pairing complete")
 
                 // This check is needed because the dialog sometimes fails to close inside the coroutine.

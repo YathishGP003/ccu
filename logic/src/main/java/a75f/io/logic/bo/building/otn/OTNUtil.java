@@ -20,7 +20,7 @@ public class OTNUtil {
         double humidity = CCUHsApi.getInstance().readHisValByQuery("point and air and humidity " +
                 "and sensor " +
                 "and equipRef == \"" + equipID + "\"");
-        double forceoccupied = CCUHsApi.getInstance().readHisValByQuery("point and occupancy and" +
+        double forceoccupied = CCUHsApi.getInstance().readHisValByQuery("point and (occupancy or occupied) and" +
                 " mode and equipRef == \"" + equipID + "\"");
 
         CcuLog.d(LOG_TAG, "equipStatusPoint =" + equipStatusPoint +

@@ -47,6 +47,8 @@ import a75f.io.logic.bo.building.dab.DabProfileConfiguration
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.CpuUniInType
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuProfileConfiguration
+import a75f.io.logic.bo.building.otn.OtnProfileConfiguration
+import a75f.io.logic.bo.building.plc.PlcEquip
 import a75f.io.logic.bo.building.schedules.Occupancy
 import a75f.io.logic.bo.building.schedules.occupancy.DemandResponse
 import a75f.io.logic.bo.building.system.vav.config.ModulatingRtuProfileConfig
@@ -1136,7 +1138,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             val equipDis = "${site?.displayName}-OTN-${it["group"]}"
             val profileType = ProfileType.OTN
 
-            val profileConfiguration = VavProfileConfiguration(
+            val profileConfiguration = OtnProfileConfiguration(
                 Integer.parseInt(it["group"].toString()),
                 NodeType.OTN.name,
                 0,
@@ -1149,7 +1151,6 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             equipBuilder.doCutOverMigration(it["id"].toString(), model,
                 equipDis, OtnEquipCutOverMapping.entries, profileConfiguration, equipHashMap = it)
 
-            //val vavEquip = VavEquip(it["id"].toString())
             // At app startup, cutover migrations currently run before upgrades.
             // This is a problem because demandResponseSetback is supposed to get its value from a newly-added BuildingTuner point, which isn't available yet.
             // Setting the fallback value manually for now.
@@ -1166,6 +1167,9 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                 NodeDeviceCutOverMapping.entries,
                 profileConfiguration
             )
+
+            val otnEquip = OtnEquip(it["id"].toString())
+            otnEquip.temperatureOffset.writeDefaultVal(0.1 * otnEquip.temperatureOffset.readDefaultVal())
         }
     }
 

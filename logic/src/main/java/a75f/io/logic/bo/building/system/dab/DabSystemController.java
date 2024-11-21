@@ -267,13 +267,15 @@ public class DabSystemController extends SystemController
     
     private boolean isEmergencyCoolingRequired() {
         return systemState != HEATING &&
-               (buildingLimitMaxBreached("dab") || buildingLimitMaxBreached("dualDuct")) &&
+               (buildingLimitMaxBreached("dab") || buildingLimitMaxBreached("dualDuct")
+                || buildingLimitMaxBreached("otn")) &&
                conditioningMode != SystemMode.OFF;
     }
     
     private boolean isEmergencyHeatingRequired() {
         return systemState != COOLING &&
-               (buildingLimitMinBreached("dab") || buildingLimitMinBreached("dualDuct")) &&
+               (buildingLimitMinBreached("dab") || buildingLimitMinBreached("dualDuct")
+                       || buildingLimitMaxBreached("otn")) &&
                conditioningMode != SystemMode.OFF;
     }
 

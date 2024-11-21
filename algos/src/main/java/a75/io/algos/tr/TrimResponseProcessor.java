@@ -65,7 +65,6 @@ public class TrimResponseProcessor
         } else {
             sp += trSetting.getSPtrim();
         }
-        trSetting.resetRequest();
         
         if (sp < trSetting.getSPmin()) {
             sp = trSetting.getSPmin();
@@ -75,6 +74,10 @@ public class TrimResponseProcessor
         
         setPoint = sp;
         CcuLog.d("CCU_SYSTEM", "setpoint "+setPoint);
+    }
+
+    public void resetRequests() {
+        trSetting.resetRequest();
     }
 
     private boolean isSystemCooling() {

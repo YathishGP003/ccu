@@ -202,7 +202,8 @@ public class LSerial
             if (messageType == MessageType.CM_TO_CCU_OVER_USB_FIRMWARE_UPDATE_ACK ||
                     messageType == MessageType.CM_TO_CCU_OVER_USB_FIRMWARE_PACKET_REQUEST ||
                     messageType == MessageType.CM_TO_CCU_OTA_STATUS ||
-                    messageType == MessageType.CM_TO_CCU_OVER_USB_SN_REBOOT) {
+                    messageType == MessageType.CM_TO_CCU_OVER_USB_SN_REBOOT ||
+                    messageType == MessageType.CM_ERROR_REPORT) {
                 Intent eventIntent = new Intent(Globals.IntentActions.LSERIAL_MESSAGE_OTA);
                 eventIntent.putExtra("eventType", messageType);
                 eventIntent.putExtra("eventBytes", data);

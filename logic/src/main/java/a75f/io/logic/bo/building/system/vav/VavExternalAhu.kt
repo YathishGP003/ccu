@@ -129,6 +129,9 @@ class VavExternalAhu : VavSystemProfile() {
         VavSystemController.getInstance().runVavSystemControlAlgo()
         updateSystemPoints()
         setTrTargetVals()
+        if (trSystem != null) {
+            trSystem.resetRequests()
+        }
     }
     override fun getSystemSAT(): Int = (trSystem as VavTRSystem).currentSAT
 

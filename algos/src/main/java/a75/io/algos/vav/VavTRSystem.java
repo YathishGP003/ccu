@@ -127,6 +127,16 @@ public class VavTRSystem extends TRSystem
         CcuLog.d("CCU_SYSTEM", "processResetResponse SAT : " + satTRProcessor.getSetPoint() + ", CO2 : " +
                       co2TRProcessor.getSetPoint()+", SP : "+spTRProcessor.getSetPoint()+" HWST : "+spTRProcessor.getSetPoint());
     }
+
+    @Override
+    public void resetRequests()
+    {
+        CcuLog.d("CCU_SYSTEM", "ResetRequests ");
+        satTRProcessor.resetRequests();
+        co2TRProcessor.resetRequests();
+        spTRProcessor.resetRequests();
+        hwstTRProcessor.resetRequests();
+    }
     
     public void updateSATRequest(TrimResponseRequest req)
     {

@@ -43,6 +43,10 @@ class ACBConfigHandler {
 
             hayStack.updatePoint(analog2Point, analogOut2.get("id").toString())
 
+            val analogIn1 = hayStack.readHDict("point and deviceRef == \""+ device["id"] +"\" and domainName == \"" + DomainName.analog1In + "\"")
+            val analog1InPoint = RawPoint.Builder().setHDict(analogIn1)
+            hayStack.updatePoint(analog1InPoint.setType(getDamperTypeString(config)).build(), analogIn1["id"].toString())
+
         }
 
         // This logic will break if the "damperType" point enum is changed
@@ -138,10 +142,10 @@ class ACBConfigHandler {
         // We set this value to 1.5x the Max Cooling CFM, which is the ballpark value used by U.S. Support during commissioning.
         fun setAirflowCfmProportionalRange(hayStack: CCUHsApi, config: AcbProfileConfiguration) {
             val equip = hayStack.readEntity("equip and group == \"" + config.nodeAddress + "\"")
-            val vavEquip = VavEquip(equip.get("id").toString())
+            val AcbEquip = VavEquip(equip.get("id").toString())
 
-            if (vavEquip.enableCFMControl.readDefaultVal() > 0.0) {
-                vavEquip.vavAirflowCFMProportionalRange.writeVal(8, 1.5 * vavEquip.maxCFMCooling.readPriorityVal())
+            if (AcbEquip.enableCFMControl.readDefaultVal() > 0.0) {
+                AcbEquip.vavAirflowCFMProportionalRange.writePointValue(1.5*AcbEquip.maxCFMCooling.readPriorityVal())
             }
         }
 

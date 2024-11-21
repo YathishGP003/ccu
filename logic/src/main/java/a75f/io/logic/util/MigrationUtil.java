@@ -8,6 +8,7 @@ import static a75f.io.logic.migration.firmware.FirmwareVersionPointMigration.ini
 import static a75f.io.logic.util.PreferenceUtil.FIRMWARE_VERSION_POINT_MIGRATION;
 
 
+import org.projecthaystack.HDict;
 import org.projecthaystack.HDictBuilder;
 import org.projecthaystack.HGrid;
 import org.projecthaystack.HRow;
@@ -33,7 +34,9 @@ import a75f.io.api.haystack.Schedule;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.api.haystack.util.SchedulableMigrationKt;
+import a75f.io.domain.api.Domain;
 import a75f.io.domain.api.DomainName;
+import a75f.io.domain.equips.CCUDiagEquip;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.BuildConfig;
 import a75f.io.logic.DefaultSchedules;
@@ -48,10 +51,7 @@ import a75f.io.logic.bo.haystack.device.ControlMote;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.migration.VavAndAcbProfileMigration;
-import a75f.io.logic.bo.util.DesiredTempDisplayMode;
-import a75f.io.logic.ccu.restore.RestoreCCU;
-import a75f.io.logic.diag.DiagEquip;
-import a75f.io.logic.limits.SchedulabeLimits;
+import a75f.io.logic.migration.MigrationHandler;
 import a75f.io.logic.migration.VavAndAcbProfileMigration;
 import a75f.io.logic.migration.hyperstat.CpuPointsMigration;
 import a75f.io.logic.migration.hyperstat.MigratePointsUtil;
@@ -114,10 +114,6 @@ public class MigrationUtil {
             updateHisValue(CCUHsApi.getInstance());
         }
 
-        if (!PreferenceUtil.isTitle24OaoPointsMigrationDone()) {
-            Title24Migration.Companion.doTitle24OaoPointsMigration(CCUHsApi.getInstance());
-            PreferenceUtil.setTitle24OaoPointsMigrationDone();
-        }
         if (!PreferenceUtil.isTitle24HssPointsMigrationDone()) {
             Title24Migration.Companion.doTitle24HsPointMigration(CCUHsApi.getInstance());
             Title24Migration.Companion.doTitle24HssPointsMigration(CCUHsApi.getInstance());
@@ -191,7 +187,12 @@ public class MigrationUtil {
         deleteDuplicateLimitsifAny(ccuHsApi);
         cleanUpAndCreateZoneSchedules(ccuHsApi);
         syncZoneSchedulesFromLocal(ccuHsApi);
-
+        if(!PreferenceUtil.getDamperSizeMigrationFlagStatus()) {
+            CcuLog.d(TAG, "doDabDamperSizeMigration started");
+            new MigrationHandler(ccuHsApi).doDabDamperSizeMigration();
+            PreferenceUtil.setDamperSizeMigrationFlagStatus();
+            CcuLog.d(TAG, "doDabDamperSizeMigration ended");
+        }
         ccuHsApi.scheduleSync();
     }
 
@@ -1188,19 +1189,19 @@ public class MigrationUtil {
 
         CCUHsApi ccuHsApi = CCUHsApi.getInstance();
 
-        Map<Object,Object> diagEquip = ccuHsApi.readEntity("equip and diag");
+        HashMap<Object, Object> diagEquipDict = ccuHsApi.readEntityByDomainName(DomainName.diagEquip);
 
-        if(!diagEquip.isEmpty())    {
-
+        if(!diagEquipDict.isEmpty()) {
+            CCUDiagEquip diagEquip = Domain.diagEquip;
             Map<Object,Object> remoteSessionStatusDiagPoint = ccuHsApi.readEntity("remote and status " +
                     " and diag and point");
 
             if(remoteSessionStatusDiagPoint.isEmpty())  {
 
-                String equipRef = Objects.requireNonNull(diagEquip.get("id")).toString();
-                String equipDis = "DiagEquip";
-                String siteRef = Objects.requireNonNull(diagEquip.get("siteRef")).toString();
-                String tz = Objects.requireNonNull(diagEquip.get("tz")).toString();
+                String equipRef = Objects.requireNonNull(diagEquip.getId()).toString();
+                String equipDis = diagEquip.getDisplayName();
+                String siteRef = Objects.requireNonNull(diagEquip.getSiteRef()).toString();
+                String tz = Objects.requireNonNull(diagEquip.getTz()).toString();
 
                 Point remoteSessionStatus = new Point.Builder()
                         .setDisplayName(equipDis+"-remoteSessionStatus")
@@ -1219,12 +1220,17 @@ public class MigrationUtil {
     private static void updateHisValue(CCUHsApi haystack) {
         ExecutorTask.executeBackground(() -> {
             CcuLog.d(TAG_CCU_MIGRATION_UTIL, "updateHisValue migration started");
-            ArrayList<HashMap<Object, Object>> writablePoints = haystack.readAllEntities("point and writable");
+            ArrayList<HashMap<Object, Object>> writablePoints = haystack.readAllEntities("point and writable and his");
             for (HashMap<Object, Object> map : writablePoints) {
                 try{
                     if (map.containsKey("id") && map.get("id") != null) {
-                        double pointPriorityVal = haystack.readPointPriorityVal(map.get("id").toString());
-                        haystack.writeHisValById(map.get("id").toString(), pointPriorityVal);
+                        String pointId = map.get("id").toString();
+                        double pointPriorityVal = haystack.readPointPriorityVal(pointId);
+                        double pointHisVal = haystack.readHisValById(pointId);
+                        if (pointPriorityVal != pointHisVal) {
+                            haystack.writeHisValById(pointId, pointPriorityVal);
+                            CcuLog.d(TAG_CCU_MIGRATION_UTIL, "point updated: " + map.get("id").toString());
+                        }
                     }
                 } catch (NumberFormatException e){
                     CcuLog.d(TAG_CCU_MIGRATION_UTIL, "point not updated: " + map.get("id").toString());

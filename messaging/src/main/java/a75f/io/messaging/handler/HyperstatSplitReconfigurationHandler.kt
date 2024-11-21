@@ -1,6 +1,11 @@
 package a75f.io.messaging.handler
 
-import a75f.io.api.haystack.*
+import a75f.io.api.haystack.CCUHsApi
+import a75f.io.api.haystack.HSUtil
+import a75f.io.api.haystack.HayStackConstants
+import a75f.io.api.haystack.Point
+import a75f.io.api.haystack.RawPoint
+import a75f.io.api.haystack.Tags
 import a75f.io.domain.HyperStatSplitEquip
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
@@ -571,23 +576,23 @@ class HyperstatSplitReconfigurationHandler {
         }
 
         fun handleNonDefaultConditioningMode(config: HyperStatSplitCpuProfileConfiguration, hayStack: CCUHsApi) {
-            val conditioningModePoint = hayStack.readEntity("point and domainName == \"" + DomainName.conditioningMode + "\" and group == \"" + config.nodeAddress + "\"")
-            val conditioningModeId = conditioningModePoint.get("id").toString()
+            hayStack.readEntity("point and domainName == \"" + DomainName.conditioningMode + "\" and group == \"" + config.nodeAddress + "\"")["id"]?.let { conditioningModeIdObject ->
+                val conditioningModeId = conditioningModeIdObject.toString()
+                val isCoolingAvailable = config.isAnalogCoolingEnabled() || config.isCoolStage1Enabled() || config.isCoolStage2Enabled() || config.isCoolStage3Enabled()
+                val isHeatingAvailable = config.isAnalogHeatingEnabled() || config.isHeatStage1Enabled() || config.isHeatStage2Enabled() || config.isHeatStage3Enabled()
 
-            val isCoolingAvailable = config.isAnalogCoolingEnabled() || config.isCoolStage1Enabled() || config.isCoolStage2Enabled() || config.isCoolStage3Enabled()
-            val isHeatingAvailable = config.isAnalogHeatingEnabled() || config.isHeatStage1Enabled() || config.isHeatStage2Enabled() || config.isHeatStage3Enabled()
-
-            if (!isCoolingAvailable && !isHeatingAvailable) {
-                // If there are no cooling or heating outputs mapped, set the Conditioning Mode to OFF
-                hayStack.writeDefaultValById(conditioningModeId, StandaloneConditioningMode.OFF.ordinal.toDouble())
-            } else if (!isCoolingAvailable) {
-                // If there are only heating outputs mapped, set the Conditioning Mode to HEAT-ONLY
-                hayStack.writeDefaultValById(conditioningModeId, StandaloneConditioningMode.HEAT_ONLY.ordinal.toDouble())
-            } else if (!isHeatingAvailable) {
-                // If there are only cooling outputs mapped, set the Conditioning Mode to COOL-ONLY
-                hayStack.writeDefaultValById(conditioningModeId, StandaloneConditioningMode.COOL_ONLY.ordinal.toDouble())
+                if (!isCoolingAvailable && !isHeatingAvailable) {
+                    // If there are no cooling or heating outputs mapped, set the Conditioning Mode to OFF
+                    hayStack.writeDefaultValById(conditioningModeId, StandaloneConditioningMode.OFF.ordinal.toDouble())
+                } else if (!isCoolingAvailable) {
+                    // If there are only heating outputs mapped, set the Conditioning Mode to HEAT-ONLY
+                    hayStack.writeDefaultValById(conditioningModeId, StandaloneConditioningMode.HEAT_ONLY.ordinal.toDouble())
+                } else if (!isHeatingAvailable) {
+                    // If there are only cooling outputs mapped, set the Conditioning Mode to COOL-ONLY
+                    hayStack.writeDefaultValById(conditioningModeId, StandaloneConditioningMode.COOL_ONLY.ordinal.toDouble())
+                }
+                // If both cooling and heating outputs are mapped, keep the default value of AUTO
             }
-            // If both cooling and heating outputs are mapped, keep the default value of AUTO
         }
 
         fun handleNonDefaultFanMode(config: HyperStatSplitCpuProfileConfiguration, hayStack: CCUHsApi) {

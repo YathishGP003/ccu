@@ -26,14 +26,14 @@ import a75f.io.logic.tuners.OAOTuners;
 import a75f.io.logic.tuners.SystemTuners;
 import a75f.io.logic.util.OfflineModeUtilKt;
 
-public class OAOEquip
+public class OAOEquipTobeDeleted
 {
     public int nodeAddr;
     ProfileType profileType;
     CCUHsApi hayStack = CCUHsApi.getInstance();
     String equipRef = null;
     
-    public OAOEquip(ProfileType type, int node)
+    public OAOEquipTobeDeleted(ProfileType type, int node)
     {
         profileType = type;
         nodeAddr = node;
@@ -45,7 +45,7 @@ public class OAOEquip
         {
             equipRef = equipMap.get("id").toString();
             OAOTuners.updateOaoSystemTuners(hayStack, equipMap.get("siteRef").toString(), equipRef,
-                                            equipMap.get("dis").toString(),equipMap.get("tz").toString(),getSystemProfileType());
+                                          equipMap.get("dis").toString(),equipMap.get("tz").toString(),getSystemProfileType());
             updateNewConfigParams(equipMap.get("siteRef").toString(), equipRef, equipMap.get("dis").toString(),equipMap.get("tz").toString());
         } else {
             throw new IllegalStateException("Equip should be created before init");
@@ -53,7 +53,7 @@ public class OAOEquip
     }
     
     
-    public void createEntities(OAOProfileConfiguration config, String floorRef, String roomRef, NodeType nodeType)
+    public void createEntities(OAOProfileConfigurationToBeDeleted config, String floorRef, String roomRef, NodeType nodeType)
     {
         boolean isSmartNode =String.valueOf(nodeType).equals("SMART_NODE");
         HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
@@ -406,7 +406,7 @@ public class OAOEquip
         CCUHsApi.getInstance().syncEntityTree();
     }
     
-    public void createConfigPoints(OAOProfileConfiguration config, String equipRef)
+    public void createConfigPoints(OAOProfileConfigurationToBeDeleted config, String equipRef)
     {
         HashMap siteMap = CCUHsApi.getInstance().read(Tags.SITE);
         String siteRef = (String) siteMap.get(Tags.ID);
@@ -628,8 +628,8 @@ public class OAOEquip
         hayStack.writeHisValByQuery("point and oao and "+tags+" and group == \""+nodeAddr+'\"', val);
     }
     
-    public OAOProfileConfiguration getProfileConfiguration() {
-        OAOProfileConfiguration config = new OAOProfileConfiguration();
+    public OAOProfileConfigurationToBeDeleted getProfileConfiguration() {
+        OAOProfileConfigurationToBeDeleted config = new OAOProfileConfigurationToBeDeleted();
       
         config.outsideDamperAtMinDrive = getConfigNumVal("outside and damper and min and drive");
         config.outsideDamperAtMaxDrive = getConfigNumVal("outside and damper and max and drive");
@@ -656,7 +656,7 @@ public class OAOEquip
         return config;
     }
     
-    public void update(OAOProfileConfiguration config) {
+    public void update(OAOProfileConfigurationToBeDeleted config) {
     
         SmartNode.updatePhysicalPointType(nodeAddr, Port.ANALOG_OUT_ONE.name(), config.outsideDamperAtMinDrive+"-"+config.outsideDamperAtMaxDrive);
         SmartNode.updatePhysicalPointType(nodeAddr, Port.ANALOG_OUT_TWO.name(), config.returnDamperAtMinDrive+"-"+config.returnDamperAtMaxDrive);

@@ -13,7 +13,7 @@ open class AdvancedHybridAhuState {
 
     var isConnectEnabled by mutableStateOf(false)
     var pendingDeleteConnect by mutableStateOf(false)
-    var connectAddress by mutableStateOf(L.ccu().smartNodeAddressBand + 98)
+    var connectAddress by mutableStateOf(L.ccu().addressBand + 98)
 
     var sensorAddress0 by mutableStateOf(SensorState(false))
     var sensorAddress1 by mutableStateOf(SensorState(false))

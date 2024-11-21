@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.domain.api.Domain;
 import a75f.io.logic.Globals;
 import a75f.io.logic.bo.building.BackfillPref;
 import a75f.io.renatus.R;
@@ -69,7 +70,7 @@ public class BackFillViewModel {
         int backfillIndex;
         CCUHsApi ccuHsApi = CCUHsApi.getInstance();
         if (!ccuHsApi.readEntity(backfillQuery).isEmpty()) {
-            Double value = ccuHsApi.readDefaultVal(backfillQuery);
+            Double value = Domain.ccuEquip.getBackFillDuration().readDefaultVal();
             backfillIndex = BackFillDuration.getIndex(BackFillDuration.toIntArray(),value.intValue(), BACKFIELD_DEFAULT_DURATION);
             if (backFillTimeArrayAdapter.isEnabled(backfillIndex)) {
                 return backfillIndex;

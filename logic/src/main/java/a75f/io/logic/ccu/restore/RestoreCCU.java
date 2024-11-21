@@ -28,6 +28,8 @@ import a75f.io.api.haystack.RestoreCCUHsApi;
 import a75f.io.api.haystack.RetryCountCallback;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.exception.NullHGridException;
+import a75f.io.domain.api.Domain;
+import a75f.io.domain.api.DomainName;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.tuners.TunerEquip;
@@ -122,10 +124,23 @@ public class RestoreCCU {
     public void restoreCCUDevice(CCU ccu){
         RetryCountCallback retryCountCallback = retryCount -> CcuLog.d(TAG, "Retry count while restoring CCU device "+ retryCount);
         restoreCCUHsApi.readCCUDevice(ccu.getCcuId(), retryCountCallback);
-        getSettingPointsOfCCUDevice(ccu.getCcuId(), retryCountCallback);
+        getCCUEquipAndPoints(ccu, retryCountCallback);
         getDiagEquipOfCCU(ccu.getCcuId(), ccu.getSiteCode(), retryCountCallback);
         L.saveCCUState();
     }
+
+    private void getCCUEquipAndPoints(CCU ccu, RetryCountCallback retryCountCallback) {
+        HGrid ccuEquipGrid = restoreCCUHsApi.readCCUEquipAndItsPoints(ccu.getCcuId(), ccu.getSiteCode(), retryCountCallback);
+        if(ccuEquipGrid == null){
+            throw new NullHGridException("Null occurred while fetching diag equip.");
+        }
+        Iterator ccuEquipGridIterator = ccuEquipGrid.iterator();
+        while(ccuEquipGridIterator.hasNext()) {
+            HRow ccuEquipRow = (HRow) ccuEquipGridIterator.next();
+            getEquipAndPoints(ccuEquipRow, retryCountCallback);
+        }
+    }
+
 
     public void restoreSystemProfile(CCU ccu, AtomicInteger deviceCount, EquipResponseCallback equipResponseCallback,
                                      ReplaceCCUTracker replaceCCUTracker, RetryCountCallback retryCountCallback){
@@ -274,7 +289,7 @@ public class RestoreCCU {
         CcuLog.i(TAG, "Restoring Diag equip is completed");
 
     }
-
+//
     public void restoreEquip(String equipId, AtomicInteger deviceCount, EquipResponseCallback equipResponseCallback,
                              ReplaceCCUTracker replaceCCUTracker, RetryCountCallback retryCountCallback){
         replaceCCUTracker.updateReplaceStatus(equipId, ReplaceStatus.RUNNING.toString());
@@ -282,15 +297,22 @@ public class RestoreCCU {
         if(equipGrid  == null){
             throw new NullHGridException("Null occurred while fetching modbus");
         }
-        getDeviceFromEquip(equipId, equipGrid, deviceCount, equipResponseCallback, replaceCCUTracker,
-                retryCountCallback);
+        if(restoreCCUHsApi.isCCUEquip(equipId, DomainName.ccuConfiguration)){
+            /*For ccu Equip there is no device mapped so just complete the replace process
+            * once equip is imported*/
+            replaceCCUTracker.updateReplaceStatus(equipId, ReplaceStatus.COMPLETED.toString());
+            equipResponseCallback.onEquipRestoreComplete(deviceCount.decrementAndGet());
+        } else{
+            getDeviceFromEquip(equipId, equipGrid, deviceCount, equipResponseCallback, replaceCCUTracker,
+                    retryCountCallback);
+        }
         L.saveCCUState();
     }
 
     public void setStartingPairAddress(AtomicInteger deviceCount, EquipResponseCallback equipResponseCallback,
                                        ReplaceCCUTracker replaceCCUTracker){
         replaceCCUTracker.updateReplaceStatus(RestoreCCU.PAIRING_ADDRESS, ReplaceStatus.RUNNING.toString());
-        HashMap pointMaps = CCUHsApi.getInstance().readEntity("point and snband");
+        HashMap pointMaps = (HashMap) Domain.readPoint(DomainName.addressBand);
         int pairingAddress = 1000;
         if(!pointMaps.containsKey("val")){
             ArrayList<HashMap<Object, Object>> devices = CCUHsApi.getInstance().readAllEntities("device and addr");
@@ -306,7 +328,7 @@ public class RestoreCCU {
         else {
             pairingAddress = Integer.parseInt(pointMaps.get("val").toString());
         }
-        L.ccu().setSmartNodeAddressBand((short) pairingAddress);
+        L.ccu().setAddressBand((short) pairingAddress);
         L.saveCCUState();
         replaceCCUTracker.updateReplaceStatus(RestoreCCU.PAIRING_ADDRESS, ReplaceStatus.COMPLETED.toString());
         equipResponseCallback.onEquipRestoreComplete(deviceCount.decrementAndGet());

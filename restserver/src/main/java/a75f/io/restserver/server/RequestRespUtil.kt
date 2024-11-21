@@ -25,6 +25,7 @@ fun repackagePoints(tempGrid: HGrid, isVirtualZoneEnabled: Boolean, group: Strin
         var isEquip = false
         var extractedEquipRef = ""
         var isSystem = false
+        var isConnect = false
         while (rowIterator.hasNext()) {
             val e: HDict.MapEntry = (rowIterator.next() as HDict.MapEntry)
             when (e.value!!) {
@@ -34,6 +35,9 @@ fun repackagePoints(tempGrid: HGrid, isVirtualZoneEnabled: Boolean, group: Strin
                 is Boolean -> hDictBuilder.add(e.key.toString(), e.value as Boolean)
                 is HVal -> hDictBuilder.add(e.key.toString(), e.value as HVal)
                 else -> hDictBuilder.add(e.key.toString(), e.value.toString())
+            }
+            if (e.key.toString() == "connectModule") {
+                isConnect = true
             }
             if (e.key.toString() == "system") {
                 isSystem = true
@@ -100,7 +104,11 @@ fun repackagePoints(tempGrid: HGrid, isVirtualZoneEnabled: Boolean, group: Strin
                 }
             }
         }else{
-            hDictBuilder.add("dis", lastLiteralFromDis)
+            if(isConnect){
+                hDictBuilder.add("dis", "connect-$lastLiteralFromDis")
+            }else{
+                hDictBuilder.add("dis", lastLiteralFromDis)
+            }
         }
         mutableDictList.add(hDictBuilder.toDict())
     }

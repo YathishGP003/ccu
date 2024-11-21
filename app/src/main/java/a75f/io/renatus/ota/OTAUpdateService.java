@@ -15,6 +15,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Environment;
+import android.os.Handler;
 
 import androidx.annotation.Nullable;
 
@@ -37,6 +38,9 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
@@ -52,6 +56,7 @@ import a75f.io.device.mesh.MeshUtil;
 import a75f.io.device.serial.CcuToCmOverUsbFirmwareMetadataMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbFirmwarePacketMessage_t;
 import a75f.io.device.serial.CmToCcuOtaStatus_t;
+import a75f.io.device.serial.CmToCcuOverUsbErrorReportMessage_t;
 import a75f.io.device.serial.CmToCcuOverUsbFirmwarePacketRequest_t;
 import a75f.io.device.serial.CmToCcuOverUsbFirmwareUpdateAckMessage_t;
 import a75f.io.device.serial.FirmwareComponentType_t;
@@ -59,6 +64,7 @@ import a75f.io.device.serial.FirmwareDeviceType_t;
 import a75f.io.device.serial.MessageConstants;
 import a75f.io.device.serial.MessageType;
 import a75f.io.device.serial.SnRebootIndicationMessage_t;
+import a75f.io.domain.api.Domain;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.BuildConfig;
 import a75f.io.logic.Globals;
@@ -67,6 +73,7 @@ import a75f.io.logic.bo.util.ByteArrayUtils;
 import a75f.io.logic.diag.otastatus.OtaState;
 import a75f.io.logic.diag.otastatus.OtaStatus;
 import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint;
+import a75f.io.renatus.util.HeartBeatUtil;
 import a75f.io.usbserial.UsbService;
 
 public class OTAUpdateService extends IntentService {
@@ -174,7 +181,43 @@ public class OTAUpdateService extends IntentService {
                  case CM_TO_CCU_OVER_USB_SN_REBOOT:
                     handleNodeReboot(eventBytes);
                     break;
+
+                case CM_ERROR_REPORT:
+                    handleErrorReport(eventBytes);
+                    break;
             }
+        }
+    }
+
+    private void handleErrorReport(byte[] eventBytes) {
+        try {
+            CmToCcuOverUsbErrorReportMessage_t msg = new CmToCcuOverUsbErrorReportMessage_t();
+            msg.setByteBuffer(ByteBuffer.wrap(eventBytes).order(ByteOrder.LITTLE_ENDIAN), 0);
+            CcuLog.d(TAG, "Error Report from CM_to_CCU : Error type : " + msg.errorType.get() + " Detail " + msg.errorDetail.get());
+            switch (msg.errorType.get()){
+                case FIRMWARE_METADATA_INVALID:
+                    CcuLog.d(TAG, "Error Handling from CM_to_CCU: Firmware metadata invalid");
+                    moveUpdateToNextNode();
+                    break;
+
+                case CCU_UPDATE_NODE_NOT_IN_DBASE:
+                    CcuLog.d(TAG, "Error Handling from CM_to_CCU: CCU update node not in database");
+                    Handler handler = new Handler();
+                    // Create a Runnable that will call sendFirmwareMetadata after the delay
+                    handler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            sendFirmwareMetadata(mFirmwareDeviceType);
+                            CcuLog.d(TAG, "Error Handling from CM_to_CCU: Sending firmware metadata after 1 minute");
+                        }
+                    }, 60000);
+                    break;
+
+                default:
+                    break;
+            }
+        } catch (Exception e) {
+            CcuLog.e(TAG, "Error parsing error report message: " + e.getMessage());
         }
     }
 
@@ -223,6 +266,7 @@ public class OTAUpdateService extends IntentService {
     private void handleOtaUpdateAck(byte[] eventBytes) {
         CmToCcuOverUsbFirmwareUpdateAckMessage_t msg = new CmToCcuOverUsbFirmwareUpdateAckMessage_t();
         msg.setByteBuffer(ByteBuffer.wrap(eventBytes).order(ByteOrder.LITTLE_ENDIAN), 0);
+        CcuLog.d(TAG, " CM has acknowledged update "+msg.messageType.get());
 
         CcuLog.i(TAG,"msg.lwMeshAddress.get()  "+msg.lwMeshAddress.get()+"   "+mCurrentLwMeshAddress);
         if(msg.lwMeshAddress.get() == mCurrentLwMeshAddress) {
@@ -289,6 +333,7 @@ public class OTAUpdateService extends IntentService {
             }
         } else {
             CcuLog.i(L.TAG_CCU_OTA_PROCESS, " OTA request device is not found..!");
+            moveUpdateToNextNode();
         }
     }
 
@@ -302,7 +347,7 @@ public class OTAUpdateService extends IntentService {
         if ( msg.currentState.get() == OtaState.FIRMWARE_RECEIVED.ordinal()
                 || msg.currentState.get() == OtaState.FIRMWARE_COPY_AVAILABLE.ordinal()) {
             OtaStatusDiagPoint.Companion.updateOtaStatusPoint(OtaStatus.OTA_CCU_TO_CM_FIRMWARE_RECEIVED, mCurrentLwMeshAddress);
-            short currentBand = L.ccu().getSmartNodeAddressBand();
+            short currentBand = L.ccu().getAddressBand();
             if (mCurrentLwMeshAddress != (currentBand + 99)){
                 OtaStatusDiagPoint.Companion.updateOtaStatusPoint(OtaStatus.OTA_CM_TO_DEVICE_PACKET_STARTED, mCurrentLwMeshAddress);
             }
@@ -339,8 +384,7 @@ public class OTAUpdateService extends IntentService {
 
             short versionMajor = msg.smartNodeMajorFirmwareVersion.get();
             short versionMinor = msg.smartNodeMinorFirmwareVersion.get();
-            HashMap ccu = CCUHsApi.getInstance().read("ccu");
-            String ccuName = ccu.get("dis").toString();
+            String ccuName = Domain.ccuDevice.getCcuDisName();
            AlertGenerateHandler.handleDeviceMessage(FIRMWARE_OTA_UPDATE_ENDED, "Firmware OTA update for"+" "+ccuName+" "+
                     "ended for "+mFirmwareDeviceType.getUpdateFileName()+" "+ mCurrentLwMeshAddress+" "+"with version"+" "+versionMajor +
                     // changed Smart node to Smart Device as it is indicating the general name (US:9387)
@@ -499,7 +543,7 @@ public class OTAUpdateService extends IntentService {
 
 
                 if(deviceList.containsKey( deviceType.getHsMarkerName())){
-                        mLwMeshAddresses.add( 99 + L.ccu().getSmartNodeAddressBand());
+                        mLwMeshAddresses.add( 99 + L.ccu().getAddressBand());
                     }
 
                 for(Floor floor : HSUtil.getFloors()) {
@@ -666,8 +710,7 @@ public class OTAUpdateService extends IntentService {
         CcuLog.d(TAG, "[STARTUP] Starting to update device with address " + mCurrentLwMeshAddress);
 
         //TODO notify something (PubNub?) that an update has started
-        HashMap ccu = CCUHsApi.getInstance().read("ccu");
-        String ccuName = ccu.get("dis").toString();
+        String ccuName = Domain.ccuDevice.getCcuDisName();
         AlertGenerateHandler.handleDeviceMessage(FIRMWARE_OTA_UPDATE_STARTED, "Firmware OTA update for"+" "+ccuName+" "+
                 "started for "+deviceType.getUpdateFileName()+" "+mCurrentLwMeshAddress+" "+"with version"+" "+versionMajor + "." + versionMinor , getDeviceId(String.valueOf(deviceType), mCurrentLwMeshAddress));
         mUpdateInProgress = true;
@@ -800,7 +843,7 @@ public class OTAUpdateService extends IntentService {
         if (packets == null) {
             CcuLog.d(TAG, "[STARTUP] Failed to move binary file to RAM");
             OtaStatusDiagPoint.Companion.updateOtaStatusPoint(OtaStatus.OTA_CCU_TO_CM_FAILED, mCurrentLwMeshAddress);
-            resetUpdateVariables();
+            moveUpdateToNextNode();
             return;
         }
 
@@ -989,6 +1032,14 @@ public class OTAUpdateService extends IntentService {
             completeUpdate();
             return;
         }
+        if( !HeartBeatUtil.isModuleAlive(mLwMeshAddresses.get(0).toString()) && !isCMDevice(mLwMeshAddresses.get(0)) ) {
+            CcuLog.d(TAG, "[UPDATE] [FAILED] [Node Address:" + mLwMeshAddresses.get(0) + "] Skipping update due to RF Signal Dead ");
+            OtaStatusDiagPoint.Companion.updateOtaStatusPoint(OtaStatus.OTA_CCU_TO_CM_FAILED, mLwMeshAddresses.get(0));
+            mLwMeshAddresses.remove(0);
+            moveUpdateToNextNode();
+            return;
+        }
+
         OTAUpdateHandlerService.lastOTAUpdateTime = System.currentTimeMillis();
         mCurrentLwMeshAddress = mLwMeshAddresses.get(0);
         OtaStatusDiagPoint.Companion.updateOtaStatusPoint(OtaStatus.OTA_UPDATE_STARTED, mCurrentLwMeshAddress);
@@ -1068,8 +1119,12 @@ public class OTAUpdateService extends IntentService {
         CcuLog.i(TAG,"processOtaRequest Called " + otaRequestsQueue.size() + " otaRequestProcessInProgress"+otaRequestProcessInProgress );
         try {
             CcuLog.d(TAG,"CM Connection Status -> "+LSerial.getInstance().isConnected());
-            if (!otaRequestsQueue.isEmpty() && !otaRequestProcessInProgress && LSerial.getInstance().isConnected()){
-                handleOtaUpdateStartRequest(Objects.requireNonNull(otaRequestsQueue.poll()));
+            if (!otaRequestProcessInProgress && LSerial.getInstance().isConnected()){
+                if(mLwMeshAddresses != null && !mLwMeshAddresses.isEmpty()) {
+                    moveUpdateToNextNode();
+                } else if (!otaRequestsQueue.isEmpty()) {
+                    handleOtaUpdateStartRequest(Objects.requireNonNull(otaRequestsQueue.poll()));
+                }
             }
         } catch (Exception e){
             e.printStackTrace();
@@ -1134,7 +1189,7 @@ public class OTAUpdateService extends IntentService {
     }
 
     public static boolean isCmOtaInProgress(){
-        return  (mCurrentLwMeshAddress ==  (L.ccu().getSmartNodeAddressBand() + 99));
+        return  (mCurrentLwMeshAddress ==  (L.ccu().getAddressBand() + 99));
     }
 
     public static void resetOtaRequestProcessInProgress() {
@@ -1168,5 +1223,8 @@ public class OTAUpdateService extends IntentService {
             ZoneAndModuleLevelUpdate = true;
             CcuLog.i(TAG, "Connect Module device found  in zone or Module level ");
         }
+    }
+    private boolean isCMDevice(int nodeAddress) {
+        return nodeAddress == ( L.ccu().getAddressBand() + 99 );
     }
 }

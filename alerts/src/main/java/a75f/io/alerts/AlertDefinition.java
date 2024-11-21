@@ -5,17 +5,18 @@ import static a75f.io.alerts.AlertProcessor.TAG_CCU_ALERTS;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import com.eclipsesource.v8.V8;
+import com.eclipsesource.v8.V8Object;
 import com.google.gson.annotations.SerializedName;
 
 import org.jetbrains.annotations.Nullable;
-import org.mozilla.javascript.RhinoException;
-import org.mozilla.javascript.Scriptable;
-import org.mozilla.javascript.ScriptableObject;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import a75f.io.alerts.log.SequencerLogsCallback;
 import a75f.io.alerts.model.AlertScope;
 import a75f.io.alerts.model.AlertScopeEquip;
 import a75f.io.api.haystack.Alert;
@@ -224,35 +225,73 @@ public class AlertDefinition
         });
         return mutedEquipIds;
     }
+    void evaluateJsJ2v8(
+            AlertDefinition def,
+            String javascriptSnippet,
+            Context mContext,
+            AlertJsUtil alertJsUtil,
+            SequencerLogsCallback sequenceLogUtil
+    ) {
+        try (V8 runtime = V8.createV8Runtime(null, mContext.getApplicationInfo().dataDir)) {
 
+            HaystackService haystackService = new HaystackService(sequenceLogUtil);
+            V8Object haystackServiceObject = new V8Object(runtime);
 
+            registerAllMethods(haystackService, haystackServiceObject);
+            haystackServiceObject.add("fetchValueById", haystackService.fetchValueById(runtime));
+            runtime.add("haystack", haystackServiceObject);
 
-    void evaluateJs(AlertDefinition def, String javascriptSnippet, Context mContext, AlertJsUtil alertJsUtil) {
+            PersistBlockService persistBlockService = PersistBlockService.getInstance(def._id);
+            V8Object persistBlockServiceObject = new V8Object(runtime);
+            registerAllMethods(persistBlockService, persistBlockServiceObject);
+            runtime.add("persistBlock", persistBlockServiceObject);
 
-        org.mozilla.javascript.Context rhino = org.mozilla.javascript.Context.enter();
-        rhino.setOptimizationLevel(-1);
-        Scriptable scope = rhino.initStandardObjects();
+            V8Object alertJsUtilJsObject = new V8Object(runtime);
+            registerAllMethods(alertJsUtil, alertJsUtilJsObject);
+            runtime.add("alerts", alertJsUtilJsObject);
 
-        scope.put("print", scope,  org.mozilla.javascript.Context.javaToJS(new AlertProcessor.ConsolePrint(), scope));
+            V8Object contextJsObject = new V8Object(runtime);
+            CustomContext customContext = new CustomContext(sequenceLogUtil);
+            registerAllMethods(customContext, contextJsObject);
+            runtime.add("ctx", contextJsObject);
 
+            // Execute the JavaScript snippet
+            runtime.executeVoidScript(javascriptSnippet);
 
-        Object jsObject = org.mozilla.javascript.Context.javaToJS(HaystackService.getInstance(), scope);
-        ScriptableObject.putProperty(scope, "haystack", jsObject);
+            // Release resources
+            haystackService.release();
+            haystackServiceObject.close();
+            persistBlockServiceObject.close();
+            alertJsUtilJsObject.close();
+            contextJsObject.close();
 
-        Object persistBlockService = org.mozilla.javascript.Context.javaToJS(PersistBlockService.getInstance(def._id), scope);
-        ScriptableObject.putProperty(scope, "persistBlock", persistBlockService);
+            // Log release status
+            if (haystackServiceObject.isReleased()) {
+                CcuLog.d(TAG_CCU_ALERTS, "haystackServiceObject is released");
+            }
+            if (persistBlockServiceObject.isReleased()) {
+                CcuLog.d(TAG_CCU_ALERTS, "persistBlockServiceObject is released");
+            }
+            if (alertJsUtilJsObject.isReleased()) {
+                CcuLog.d(TAG_CCU_ALERTS, "alertJsUtilJsObject is released");
+            }
+            if (contextJsObject.isReleased()) {
+                CcuLog.d(TAG_CCU_ALERTS, "contextJsObject is released");
+            }
+            if (runtime.isReleased()) {
+                CcuLog.d(TAG_CCU_ALERTS, "runtime is released");
+            }
+        }
+    }
 
-        Object alertJsUtilJsObject = org.mozilla.javascript.Context.javaToJS(alertJsUtil, scope);
-        ScriptableObject.putProperty(scope, "alerts", alertJsUtilJsObject);
+    public void registerAllMethods(Object javaObject, V8Object v8Object){
+        Class<?> clazz = javaObject.getClass();
+        for (Method method : clazz.getMethods()) {
+            String methodName = method.getName();
+            Class<?>[] parameterTypes = method.getParameterTypes();
 
-        ScriptableObject.putProperty(scope, "ctx", mContext);
-        try {
-            rhino.evaluateString(scope, javascriptSnippet, "JavaScript", 1, null);
-        } catch (RhinoException exception) {
-            exception.printStackTrace();
-            CcuLog.e(TAG_CCU_ALERTS, exception.getMessage());
-        } finally {
-            org.mozilla.javascript.Context.exit();
+            // Register the method with V8, mapping method name and parameter types
+            v8Object.registerJavaMethod(javaObject, methodName, methodName, parameterTypes);
         }
     }
 }

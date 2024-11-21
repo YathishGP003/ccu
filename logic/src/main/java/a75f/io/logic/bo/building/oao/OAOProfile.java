@@ -4,13 +4,15 @@ import static a75f.io.domain.api.DomainName.systemEnhancedVentilationEnable;
 import static a75f.io.domain.api.DomainName.systemPostPurgeEnable;
 import static a75f.io.domain.api.DomainName.systemPrePurgeEnable;
 
+import org.projecthaystack.HDict;
+
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Occupied;
+import a75f.io.domain.OAOEquip;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
-import a75f.io.logic.bo.building.BaseProfileConfiguration;
 import a75f.io.logic.bo.building.EpidemicState;
-import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Stage;
 import a75f.io.logic.bo.building.schedules.Occupancy;
@@ -50,6 +52,9 @@ public class OAOProfile
     EpidemicState epidemicState = EpidemicState.OFF;
     SystemMode systemMode;
     OAOEquip oaoEquip;
+    public int nodeAddr;
+    ProfileType profileType;
+    String equipRef = null;
     
     public boolean isEconomizingAvailable()
     {
@@ -76,38 +81,25 @@ public class OAOProfile
         this.matThrottle = matThrottle;
     }
 
-    public void addOaoEquip(short addr, OAOProfileConfiguration config, String floorRef, String roomRef, NodeType nodeType) {
-        oaoEquip = new OAOEquip(getProfileType(), addr);
-        oaoEquip.createEntities(config, floorRef, roomRef, nodeType);
+    public void addOAOEquip(String equipRef, Short addr, ProfileType profileType) {
+        oaoEquip = new OAOEquip(equipRef);
+        this.nodeAddr = addr;
+        this.equipRef =equipRef;
+        this.profileType = profileType;
     }
-    
-    public void addOaoEquip(short addr) {
-        oaoEquip = new OAOEquip(getProfileType(), addr);
-        oaoEquip.init();
-        oaoEquip.update((OAOProfileConfiguration)getProfileConfiguration(addr));
-    }
-    
-    public void updateOaoEquip(OAOProfileConfiguration config) {
-        oaoEquip.update(config);
-        oaoEquip.init();
-    }
-    
+
+
     public ProfileType getProfileType()
     {
         return ProfileType.OAO;
     }
     
-    public BaseProfileConfiguration getProfileConfiguration(short address)
-    {
-        return oaoEquip.getProfileConfiguration();
-    }
-    
     public int getNodeAddress() {
-        return oaoEquip.nodeAddr;
+        return nodeAddr;
     }
     
     public String getEquipRef() {
-        return oaoEquip.equipRef;
+        return this.equipRef;
     }
     
     public void doOAO() {
@@ -121,11 +113,11 @@ public class OAOProfile
         
         outsideAirLoopOutput = Math.max(economizingLoopOutput, outsideAirCalculatedMinDamper);
         
-        double outsideDamperMatTarget = TunerUtil.readTunerValByQuery("oao and outside and damper and mat and target",oaoEquip.equipRef);
-        double outsideDamperMatMin = TunerUtil.readTunerValByQuery("oao and outside and damper and mat and min",oaoEquip.equipRef);
+        double outsideDamperMatTarget = oaoEquip.getOutsideDamperMixedAirTarget().readPriorityVal();
+        double outsideDamperMatMin = oaoEquip.getOutsideDamperMixedAirMinimum().readPriorityVal();
 
-        double returnDamperMinOpen = oaoEquip.getConfigNumVal("oao and return and damper and min and open");
-        double matTemp  = oaoEquip.getHisVal("mixed and air and temp and sensor");
+        double returnDamperMinOpen = oaoEquip.getReturnDamperMinOpen().readDefaultVal();
+        double matTemp  = oaoEquip.getMixedAirTemperature().readHisVal();
     
         CcuLog.d(L.TAG_CCU_OAO,"outsideAirLoopOutput "+outsideAirLoopOutput+" outsideDamperMatTarget "+outsideDamperMatTarget+" outsideDamperMatMin "+outsideDamperMatMin
                             +" matTemp "+matTemp);
@@ -156,31 +148,30 @@ public class OAOProfile
     
         CcuLog.d(L.TAG_CCU_OAO," economizingLoopOutput "+economizingLoopOutput+" outsideAirCalculatedMinDamper "+outsideAirCalculatedMinDamper
                                             +" outsideAirFinalLoopOutput "+outsideAirFinalLoopOutput+","+returnAirFinalOutput);
-    
-        oaoEquip.setHisVal("outside and air and final and loop", outsideAirFinalLoopOutput);
-        oaoEquip.setHisVal("outside and air and damper and cmd", outsideAirFinalLoopOutput);
-        oaoEquip.setHisVal("return and air and damper and cmd", returnAirFinalOutput);
-        
-        double exhaustFanHysteresis = oaoEquip.getConfigNumVal("config and exhaust and fan and hysteresis");
-        double exhaustFanStage1Threshold = oaoEquip.getConfigNumVal("config and exhaust and fan and stage1 and threshold");
-        double exhaustFanStage2Threshold = oaoEquip.getConfigNumVal("config and exhaust and fan and stage2 and threshold");
+
+        oaoEquip.getOutsideAirFinalLoopOutput().writeHisVal(outsideAirFinalLoopOutput);
+        oaoEquip.getOutsideDamperCmd().writeHisVal(outsideAirFinalLoopOutput);
+        oaoEquip.getReturnDamperCmd().writeHisVal(returnAirFinalOutput);
+
+        double exhaustFanHysteresis = oaoEquip.getExhaustFanHysteresis().readDefaultVal();
+        double exhaustFanStage1Threshold = oaoEquip.getExhaustFanStage1Threshold().readDefaultVal();
+        double exhaustFanStage2Threshold = oaoEquip.getExhaustFanStage2Threshold().readDefaultVal();
         if (outsideAirFinalLoopOutput > exhaustFanStage1Threshold) {
-            oaoEquip.setHisVal("cmd and exhaust and fan and stage1",1);
+              oaoEquip.getExhaustFanStage1Threshold().writeHisVal(1);
         } else if (outsideAirFinalLoopOutput < (exhaustFanStage1Threshold - exhaustFanHysteresis)){
-            oaoEquip.setHisVal("cmd and exhaust and fan and stage1",0);
+            oaoEquip.getExhaustFanStage1Threshold().writeHisVal(0);
         }
     
         if (outsideAirFinalLoopOutput > exhaustFanStage2Threshold) {
-            oaoEquip.setHisVal("cmd and exhaust and fan and stage2",1);
+            oaoEquip.getExhaustFanStage2Threshold().writeHisVal(1);
         } else if (outsideAirFinalLoopOutput < (exhaustFanStage2Threshold - exhaustFanHysteresis)) {
-            oaoEquip.setHisVal("cmd and exhaust and fan and stage2",0);
+            oaoEquip.getExhaustFanStage2Threshold().writeHisVal(0);
         }
-        oaoEquip.setHisVal("mat and available", isMatThrottle() ? 1 : 0);
+        oaoEquip.getMatThrottle().writeHisVal(isMatThrottle() ? 1 : 0);
     }
 
     /**
      * Enabled for profiles with domain name on points
-     * @return
      */
     private boolean isDMMigrated(){
         return (L.ccu().systemProfile instanceof DabExternalAhu
@@ -246,23 +237,23 @@ public class OAOProfile
             if (dabStagedProfile.isStageEnabled(Stage.FAN_3) || dabStagedProfile.isStageEnabled(Stage.FAN_4) || dabStagedProfile.isStageEnabled(Stage.FAN_5)) {
                 // 3+ Stages mapped: Stage 1 = LOW, Stage 2 = MEDIUM, Stage 3+ = HIGH
                 if (dabStagedProfile.getStageStatus(Stage.FAN_3) > 0.0 || dabStagedProfile.getStageStatus(Stage.FAN_4) > 0.0 || dabStagedProfile.getStageStatus(Stage.FAN_5) > 0.0) {
-                    outsideDamperMinOpenFromFan = oaoEquip.getConfigNumVal("not purge and not enhanced and outside and damper and min and open and fan and high");
+                    outsideDamperMinOpenFromFan = oaoEquip.getOutsideDamperMinOpenDuringFanHigh().readDefaultVal();
                 } else if (dabStagedProfile.getStageStatus(Stage.FAN_2) > 0.0) {
-                    outsideDamperMinOpenFromFan = oaoEquip.getConfigNumVal("not purge and not enhanced and outside and damper and min and open and fan and medium");
+                    outsideDamperMinOpenFromFan = oaoEquip.getOutsideDamperMinOpenDuringFanMedium().readDefaultVal();
                 } else if (dabStagedProfile.getStageStatus(Stage.FAN_1) > 0.0) {
-                    outsideDamperMinOpenFromFan = oaoEquip.getConfigNumVal("not purge and not enhanced and outside and damper and min and open and fan and low");
+                    outsideDamperMinOpenFromFan = oaoEquip.getOutsideDamperMinOpenDuringFanLow().readDefaultVal();
                 }
             } else if (dabStagedProfile.isStageEnabled(Stage.FAN_2)) {
                 // 2 stages mapped: Stage 2 = HIGH, Stage 1 = MEDIUM
                 if (dabStagedProfile.getStageStatus(Stage.FAN_2) > 0.0) {
-                    outsideDamperMinOpenFromFan = oaoEquip.getConfigNumVal("not purge and not enhanced and outside and damper and min and open and fan and high");
+                    outsideDamperMinOpenFromFan = oaoEquip.getOutsideDamperMinOpenDuringFanHigh().readDefaultVal();
                 } else if (dabStagedProfile.getStageStatus(Stage.FAN_1) > 0.0) {
-                    outsideDamperMinOpenFromFan = oaoEquip.getConfigNumVal("not purge and not enhanced and outside and damper and min and open and fan and medium");
+                    outsideDamperMinOpenFromFan = oaoEquip.getOutsideDamperMinOpenDuringFanMedium().readDefaultVal();
                 }
             } else if (dabStagedProfile.isStageEnabled(Stage.FAN_1)) {
                 // 1 stage mapped: Stage 1 = HIGH
                 if (dabStagedProfile.getStageStatus(Stage.FAN_1) > 0.0) {
-                    outsideDamperMinOpenFromFan = oaoEquip.getConfigNumVal("not purge and not enhanced and outside and damper and min and open and fan and high");
+                    outsideDamperMinOpenFromFan = oaoEquip.getOutsideDamperMinOpenDuringFanHigh().readDefaultVal();
                 }
             }
         } else if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_STAGED_RTU ||
@@ -273,23 +264,23 @@ public class OAOProfile
             if (vavStagedProfile.isStageEnabled(Stage.FAN_3) || vavStagedProfile.isStageEnabled(Stage.FAN_4) || vavStagedProfile.isStageEnabled(Stage.FAN_5)) {
                 // 3+ Stages mapped: Stage 1 = LOW, Stage 2 = MEDIUM, Stage 3+ = HIGH
                 if (vavStagedProfile.getStageStatus(Stage.FAN_3) > 0.0 || vavStagedProfile.getStageStatus(Stage.FAN_4) > 0.0 || vavStagedProfile.getStageStatus(Stage.FAN_5) > 0.0) {
-                    outsideDamperMinOpenFromFan = oaoEquip.getConfigNumVal("not purge and not enhanced and outside and damper and min and open and fan and high");
+                    outsideDamperMinOpenFromFan = oaoEquip.getOutsideDamperMinOpenDuringFanHigh().readDefaultVal();
                 } else if (vavStagedProfile.getStageStatus(Stage.FAN_2) > 0.0) {
-                    outsideDamperMinOpenFromFan = oaoEquip.getConfigNumVal("not purge and not enhanced and outside and damper and min and open and fan and medium");
+                    outsideDamperMinOpenFromFan = oaoEquip.getOutsideDamperMinOpenDuringFanMedium().readDefaultVal();
                 } else if (vavStagedProfile.getStageStatus(Stage.FAN_1) > 0.0) {
-                    outsideDamperMinOpenFromFan = oaoEquip.getConfigNumVal("not purge and not enhanced and outside and damper and min and open and fan and low");
+                    outsideDamperMinOpenFromFan = oaoEquip.getOutsideDamperMinOpenDuringFanLow().readDefaultVal();
                 }
             } else if (vavStagedProfile.isStageEnabled(Stage.FAN_2)) {
                 // 2 stages mapped: Stage 2 = HIGH, Stage 1 = MEDIUM
                 if (vavStagedProfile.getStageStatus(Stage.FAN_2) > 0.0) {
-                    outsideDamperMinOpenFromFan = oaoEquip.getConfigNumVal("not purge and not enhanced and outside and damper and min and open and fan and high");
+                    outsideDamperMinOpenFromFan = oaoEquip.getOutsideDamperMinOpenDuringFanHigh().readDefaultVal();
                 } else if (vavStagedProfile.getStageStatus(Stage.FAN_1) > 0.0) {
-                    outsideDamperMinOpenFromFan = oaoEquip.getConfigNumVal("not purge and not enhanced and outside and damper and min and open and fan and medium");
+                    outsideDamperMinOpenFromFan = oaoEquip.getOutsideDamperMinOpenDuringFanMedium().readDefaultVal();
                 }
             } else if (vavStagedProfile.isStageEnabled(Stage.FAN_1)) {
                 // 1 stage mapped: Stage 1 = HIGH
                 if (vavStagedProfile.getStageStatus(Stage.FAN_1) > 0.0) {
-                    outsideDamperMinOpenFromFan = oaoEquip.getConfigNumVal("not purge and not enhanced and outside and damper and min and open and fan and high");
+                    outsideDamperMinOpenFromFan = oaoEquip.getOutsideDamperMinOpenDuringFanHigh().readDefaultVal();
                 }
             }
 
@@ -298,23 +289,23 @@ public class OAOProfile
         double outsideDamperMinOpenFromConditioning;
         if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_HYBRID_RTU) {
             DabAdvancedHybridRtu dabHybridRtu = (DabAdvancedHybridRtu) L.ccu().systemProfile;
-            if (dabHybridRtu.isCoolingActive() || dabHybridRtu.isHeatingActive() || dabHybridRtu.isModulatingCoolingActive() || dabHybridRtu.isModulatingHeatingActive() || oaoEquip.getHisVal("economizing and loop and output") > 0.0) {
-                outsideDamperMinOpenFromConditioning = oaoEquip.getConfigNumVal("not purge and not enhanced and outside and damper and min and open and conditioning");
+            if (dabHybridRtu.isCoolingActive() || dabHybridRtu.isHeatingActive() || dabHybridRtu.isModulatingCoolingActive() || dabHybridRtu.isModulatingHeatingActive() || oaoEquip.getEconomizingLoopOutput().readHisVal() > 0.0) {
+                outsideDamperMinOpenFromConditioning = oaoEquip.getOutsideDamperMinOpenDuringConditioning().readDefaultVal();
             } else {
-                outsideDamperMinOpenFromConditioning = oaoEquip.getConfigNumVal("not purge and not enhanced and outside and damper and min and open and recirc");
+                outsideDamperMinOpenFromConditioning = oaoEquip.getOutsideDamperMinOpenDuringRecirculation().readDefaultVal();
             }
         } else if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_HYBRID_RTU) {
             VavAdvancedHybridRtu vavHybridRtu = (VavAdvancedHybridRtu) L.ccu().systemProfile;
-            if (vavHybridRtu.isCoolingActive() || vavHybridRtu.isHeatingActive() || vavHybridRtu.isModulatingCoolingActive() || vavHybridRtu.isModulatingHeatingActive() || oaoEquip.getHisVal("economizing and loop and output") > 0.0) {
-                outsideDamperMinOpenFromConditioning = oaoEquip.getConfigNumVal("not purge and not enhanced and outside and damper and min and open and conditioning");
+            if (vavHybridRtu.isCoolingActive() || vavHybridRtu.isHeatingActive() || vavHybridRtu.isModulatingCoolingActive() || vavHybridRtu.isModulatingHeatingActive() || oaoEquip.getEconomizingLoopOutput().readHisVal() > 0.0) {
+                outsideDamperMinOpenFromConditioning = oaoEquip.getOutsideDamperMinOpenDuringConditioning().readDefaultVal();
             } else {
-                outsideDamperMinOpenFromConditioning = oaoEquip.getConfigNumVal("not purge and not enhanced and outside and damper and min and open and recirc");
+                outsideDamperMinOpenFromConditioning = oaoEquip.getOutsideDamperMinOpenDuringRecirculation().readDefaultVal();
             }
         } else {
-            if (L.ccu().systemProfile.isCoolingActive() || L.ccu().systemProfile.isHeatingActive() || oaoEquip.getHisVal("economizing and loop and output") > 0.0) {
-                outsideDamperMinOpenFromConditioning = oaoEquip.getConfigNumVal("not purge and not enhanced and outside and damper and min and open and conditioning");
+            if (L.ccu().systemProfile.isCoolingActive() || L.ccu().systemProfile.isHeatingActive() || oaoEquip.getEconomizingLoopOutput().readHisVal() > 0.0) {
+                outsideDamperMinOpenFromConditioning = oaoEquip.getOutsideDamperMinOpenDuringConditioning().readDefaultVal();
             } else {
-                outsideDamperMinOpenFromConditioning = oaoEquip.getConfigNumVal("not purge and not enhanced and outside and damper and min and open and recirc");
+                outsideDamperMinOpenFromConditioning = oaoEquip.getOutsideDamperMinOpenDuringRecirculation().readDefaultVal();
             }
         }
 
@@ -329,10 +320,11 @@ public class OAOProfile
 
     public void doEconomizing() {
 
+        //TODO: This needs to changed with domainName
         double externalTemp = CCUHsApi.getInstance().readHisValByQuery("system and outside and temp and not lockout");
         double externalHumidity = CCUHsApi.getInstance().readHisValByQuery("system and outside and humidity");
         
-        double economizingToMainCoolingLoopMap = TunerUtil.readTunerValByQuery("oao and economizing and main and cooling and loop and map", oaoEquip.equipRef);
+        double economizingToMainCoolingLoopMap = oaoEquip.getEconomizingToMainCoolingLoopMap().readPriorityVal();
         
         if (canDoEconomizing(externalTemp, externalHumidity)) {
             
@@ -355,28 +347,25 @@ public class OAOProfile
             setEconomizingAvailable(false);
             economizingLoopOutput = 0;
         }
-        oaoEquip.setHisVal("economizing and available", economizingAvailable?1:0);
-        oaoEquip.setHisVal("economizing and loop and output", economizingLoopOutput);
+        oaoEquip.getEconomizingAvailable().writeHisVal(isEconomizingAvailable() ? 1 : 0);
+        oaoEquip.getEconomizingLoopOutput().writeHisVal(economizingLoopOutput);
     }
     
     /**
      * Evaluates outside temperature and humidity to determine if free-cooling can be used.
-     * @param externalTemp
-     * @param externalHumidity
-     * @return
+     * @param externalTemp  external temperature
+     * @param externalHumidity external humidity
      */
     private boolean canDoEconomizing(double externalTemp, double externalHumidity) {
     
-        double economizingMinTemp = TunerUtil.readTunerValByQuery("oao and economizing and min and " +
-                                                                  "temp",oaoEquip.equipRef);
+        double economizingMinTemp = oaoEquip.getEconomizingMinTemperature().readPriorityVal();
     
         double insideEnthalpy = getAirEnthalpy(L.ccu().systemProfile.getSystemController().getAverageSystemTemperature(),
                                                L.ccu().systemProfile.getSystemController().getAverageSystemHumidity());
         
         double outsideEnthalpy = getAirEnthalpy(externalTemp, externalHumidity);
-        
-        oaoEquip.setHisVal("inside and enthalpy", insideEnthalpy);
-        oaoEquip.setHisVal("outside and enthalpy", outsideEnthalpy);
+        oaoEquip.getInsideEnthalpy().writeHisVal(insideEnthalpy);
+        oaoEquip.getOutsideEnthalpy().writeHisVal(outsideEnthalpy);
     
     
         CcuLog.d(L.TAG_CCU_OAO," canDoEconomizing externalTemp "+externalTemp+" externalHumidity "+externalHumidity);
@@ -405,20 +394,19 @@ public class OAOProfile
     
     /**
      *  Checks the external temp against drybulb threshold tuner.
-     * @param externalTemp
-     * @param externalHumidity
-     * @return
+     * @param externalTemp external temperature
+     * @param externalHumidity external humidity
+     * @param economizingMinTemp economizing min temp
      */
     private boolean isDryBulbTemperatureGoodForEconomizing(double externalTemp, double externalHumidity, double economizingMinTemp) {
-        double dryBulbTemperatureThreshold = TunerUtil.readTunerValByQuery("oao and economizing and dry and bulb and " +
-                                                                           "threshold", oaoEquip.equipRef);
+        double dryBulbTemperatureThreshold = oaoEquip.getEconomizingDryBulbThreshold().readPriorityVal();
         double outsideAirTemp = externalTemp;
     
         /* Both the weather parameters may be zero when CCU cant reach remote weather service
          * Then fallback to Local Outside Air Temp.
          */
         if (externalHumidity == 0 && externalTemp == 0) {
-            outsideAirTemp  = oaoEquip.getHisVal("outside and air and temp");
+            outsideAirTemp  = oaoEquip.getOutsideTemperature().readHisVal();
         }
         
         if (outsideAirTemp > economizingMinTemp) {
@@ -429,19 +417,16 @@ public class OAOProfile
     
     /**
      * Checks if the outside whether is suitable for economizing.
-     * @param externalTemp
-     * @param externalHumidity
-     * @return
+     * @param externalTemp external temperature
+     * @param externalHumidity external humidity
+     * @param economizingMinTemp economizing min temp
      */
     private boolean isOutsideWeatherSuitableForEconomizing(double externalTemp, double externalHumidity,
                                                            double economizingMinTemp) {
         
-        double economizingMaxTemp = TunerUtil.readTunerValByQuery("oao and economizing and max and " +
-                                                                  "temp",oaoEquip.equipRef);
-        double economizingMinHumidity = TunerUtil.readTunerValByQuery("oao and economizing and min and " +
-                                                                      "humidity",oaoEquip.equipRef);
-        double economizingMaxHumidity = TunerUtil.readTunerValByQuery("oao and economizing and max and " +
-                                                                      "humidity",oaoEquip.equipRef);
+        double economizingMaxTemp = oaoEquip.getEconomizingMaxTemperature().readPriorityVal();
+        double economizingMinHumidity = oaoEquip.getEconomizingMinHumidity().readPriorityVal();
+        double economizingMaxHumidity = oaoEquip.getEconomizingMaxHumidity().readPriorityVal();
         
         if (externalTemp > economizingMinTemp
             && externalTemp < economizingMaxTemp
@@ -461,7 +446,7 @@ public class OAOProfile
     
         CcuLog.d(L.TAG_CCU_OAO," insideEnthalpy "+insideEnthalpy+", outsideEnthalpy "+outsideEnthalpy);
     
-        double enthalpyDuctCompensationOffset = TunerUtil.readTunerValByQuery("oao and enthalpy and duct and compensation and offset",oaoEquip.equipRef);
+        double enthalpyDuctCompensationOffset = oaoEquip.getEnthalpyDuctCompensationOffset().readPriorityVal();
         
         return insideEnthalpy > outsideEnthalpy + enthalpyDuctCompensationOffset;
     
@@ -470,7 +455,7 @@ public class OAOProfile
     public void doDcvControl(double outsideDamperMinOpen) {
         setDcvAvailable(false);
         double dcvCalculatedMinDamper = 0;
-        boolean usePerRoomCO2Sensing = oaoEquip.getConfigNumVal("config and oao and co2 and sensing") > 0? true : false;
+        boolean usePerRoomCO2Sensing = oaoEquip.getUsePerRoomCO2Sensing().readDefaultVal() > 0;
         boolean isCo2levelUnderThreshold = true;
         if (usePerRoomCO2Sensing)
         {
@@ -478,9 +463,9 @@ public class OAOProfile
             CcuLog.d(L.TAG_CCU_OAO,"usePerRoomCO2Sensing dcvCalculatedMinDamper "+dcvCalculatedMinDamper);
             
         } else {
-            double returnAirCO2  = oaoEquip.getHisVal("return and air and co2 and sensor");
-            double co2Threshold = oaoEquip.getConfigNumVal("co2 and threshold");
-            double co2DamperOpeningRate = TunerUtil.readTunerValByQuery("oao and co2 and damper and opening and rate",oaoEquip.equipRef);
+            double returnAirCO2  = oaoEquip.getReturnAirCo2().readHisVal();
+            double co2Threshold = oaoEquip.getCo2Threshold().readDefaultVal();
+            double co2DamperOpeningRate = oaoEquip.getCo2DamperOpeningRate().readPriorityVal();
             
             if (returnAirCO2 > co2Threshold) {
                 dcvCalculatedMinDamper = (returnAirCO2 - co2Threshold)/co2DamperOpeningRate;
@@ -488,7 +473,7 @@ public class OAOProfile
             }
             CcuLog.d(L.TAG_CCU_OAO," dcvCalculatedMinDamper "+dcvCalculatedMinDamper+" returnAirCO2 "+returnAirCO2+" co2Threshold "+co2Threshold);
         }
-        oaoEquip.setHisVal("co2 and weighted and average", L.ccu().systemProfile.getWeightedAverageCO2());
+        oaoEquip.getCo2WeightedAverage().writeHisVal(L.ccu().systemProfile.getWeightedAverageCO2());
         Occupancy systemOccupancy = ScheduleManager.getInstance().getSystemOccupancy();
         switch (systemOccupancy) {
             case OCCUPIED:
@@ -513,8 +498,8 @@ public class OAOProfile
                     outsideAirCalculatedMinDamper = outsideDamperMinOpen;
                 break;
         }
-        oaoEquip.setHisVal("outside and air and calculated and min and damper", outsideAirCalculatedMinDamper);
-        oaoEquip.setHisVal("dcv and available", isDcvAvailable() ? 1 : 0);
+        oaoEquip.getOutsideAirCalculatedMinDamper().writeHisVal(outsideAirCalculatedMinDamper);
+        oaoEquip.getDcvAvailable().writeHisVal(isDcvAvailable() ? 1 : 0);
     }
     
     public static double getAirEnthalpy(double averageTemp, double averageHumidity) {
@@ -546,36 +531,39 @@ public class OAOProfile
     }
 
     private void handleSmartPrePurgeControl(){
-        double smartPrePurgeRunTime = TunerUtil.readTunerValByQuery("prePurge and runtime and oao and system", oaoEquip.equipRef);
-        double smartPrePurgeOccupiedTimeOffset = TunerUtil.readTunerValByQuery("prePurge and occupied and time and offset and oao and system", oaoEquip.equipRef);
+        double smartPrePurgeRunTime = oaoEquip.getSystemPrePurgeRuntimeTuner().readPriorityVal();
+        double smartPrePurgeOccupiedTimeOffset = oaoEquip.getSystemPrePurgeOccupiedTimeOffsetTuner().readPriorityVal();
         Occupied occuSchedule = ScheduleManager.getInstance().getNextOccupiedTimeInMillis();
         int minutesToOccupancy = occuSchedule != null ? (int)occuSchedule.getMillisecondsUntilNextChange()/60000 : -1;
         if((minutesToOccupancy != -1) && (smartPrePurgeOccupiedTimeOffset >= minutesToOccupancy) && (minutesToOccupancy >= (smartPrePurgeOccupiedTimeOffset - smartPrePurgeRunTime))) {
-            outsideAirCalculatedMinDamper = oaoEquip.getConfigNumVal("userIntent and purge and outside and damper and pos and min and open");
+            outsideAirCalculatedMinDamper = oaoEquip.getSystemPurgeOutsideDamperMinPos().readDefaultVal();
+
+            //TODO: This needs to changed with domainName
             CCUHsApi.getInstance().writeHisValByQuery("point and sp and system and epidemic and mode and state", (double)EpidemicState.PREPURGE.ordinal());
             epidemicState = EpidemicState.PREPURGE;
         }
     }
     private void handleSmartPostPurgeControl(){
-        double smartPostPurgeRunTime = TunerUtil.readTunerValByQuery("postPurge and runtime and oao and system", oaoEquip.equipRef);
-        double smartPostPurgeOccupiedTimeOffset = TunerUtil.readTunerValByQuery("postPurge and occupied and time and offset and oao and system", oaoEquip.equipRef);
+        double smartPostPurgeRunTime = oaoEquip.getSystemPostPurgeRuntimeTuner().readPriorityVal();
+        double smartPostPurgeOccupiedTimeOffset = oaoEquip.getSystemPostPurgeOccupiedTimeOffsetTuner().readPriorityVal();
         Occupied occuSchedule = ScheduleManager.getInstance().getPrevOccupiedTimeInMillis();
         if(occuSchedule != null)
             CcuLog.d(L.TAG_CCU_OAO, "System Unoccupied, check postpurge22 = "+occuSchedule.getMillisecondsUntilPrevChange()+","+(occuSchedule.getMillisecondsUntilPrevChange())/60000+","+smartPostPurgeOccupiedTimeOffset+","+smartPostPurgeRunTime);
         int minutesInUnoccupied = occuSchedule != null ? (int)(occuSchedule.getMillisecondsUntilPrevChange()/60000) : -1;
         if( (epidemicState == EpidemicState.OFF) && (minutesInUnoccupied != -1) && (minutesInUnoccupied  >= smartPostPurgeOccupiedTimeOffset) && (minutesInUnoccupied <= (smartPostPurgeRunTime + smartPostPurgeOccupiedTimeOffset))) {
-            outsideAirCalculatedMinDamper = oaoEquip.getConfigNumVal("userIntent and purge and outside and damper and pos and min and open");
+            outsideAirCalculatedMinDamper = oaoEquip.getSystemPurgeOutsideDamperMinPos().readDefaultVal();
+            //TODO: This needs to changed with domainName
             CCUHsApi.getInstance().writeHisValByQuery("point and sp and system and epidemic and mode and state", (double)EpidemicState.POSTPURGE.ordinal());
             epidemicState = EpidemicState.POSTPURGE;
         }
     }
     private void handleEnhancedVentilationControl(){
         epidemicState = EpidemicState.ENHANCED_VENTILATION;
-        outsideAirCalculatedMinDamper = CCUHsApi.getInstance().readDefaultVal("enhanced and ventilation and outside and damper and pos and min and open and equipRef ==\""+oaoEquip.equipRef+"\"");
+        outsideAirCalculatedMinDamper = oaoEquip.getEnhancedVentilationOutsideDamperMinOpen().readDefaultVal();
+        //TODO: This needs to changed with domainName
         CCUHsApi.getInstance().writeHisValByQuery("point and sp and system and epidemic and mode and state", (double)EpidemicState.ENHANCED_VENTILATION.ordinal());
         CcuLog.d(L.TAG_CCU_OAO, "System occupied, check enhanced ventilation = "+outsideAirCalculatedMinDamper+","+epidemicState.name());
     }
-    
     public OAOEquip getOAOEquip() {
         return oaoEquip;
     }

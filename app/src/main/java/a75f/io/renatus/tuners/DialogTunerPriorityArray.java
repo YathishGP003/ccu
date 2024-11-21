@@ -41,6 +41,7 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Zone;
+import a75f.io.domain.api.Domain;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.BuildConfig;
 import a75f.io.logic.L;
@@ -153,7 +154,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
     private void setUpTunerColumns(View view, LayoutInflater inflater) {
 
         viewStub = view.findViewById(R.id.viewStub);
-        HashMap ccu = CCUHsApi.getInstance().read("ccu");
+        String ccuDisName = Domain.ccuDevice.getCcuDisName();
         HashMap site = CCUHsApi.getInstance().read("site");
 
         String selectedTunerDis = tunerItemSelected.get("dis").toString();
@@ -183,7 +184,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
             if (!equips.isEmpty()) {
                 for (HashMap equip : equips) {
                     View columnView = inflater.inflate(R.layout.tuner_priority_column, viewStub, false);
-                    ((TextView) columnView.findViewById(R.id.textLabelBuilding)).setText(ccu.get("dis").toString());
+                    ((TextView) columnView.findViewById(R.id.textLabelBuilding)).setText(ccuDisName);
                     ((TextView) columnView.findViewById(R.id.textLabelZone)).setText(HSUtil.getDis(equip.get("roomRef").toString()));
                     ((TextView) columnView.findViewById(R.id.textLabelModule)).setText(HSUtil.getDis(equip.get("equipRef").toString()).substring(HSUtil.getDis(equip.get("equipRef").toString()).indexOf("-") + 1));
                     ((TextView) columnView.findViewById(R.id.textRow8)).setText(getTunerValue(equip.get("id").toString(), "8"));
@@ -197,7 +198,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
             } else {
                 View columnView = inflater.inflate(R.layout.tuner_priority_column, viewStub, false);
                 ((TextView) columnView.findViewById(R.id.textLabelBuilding)).setText(site.get("dis").toString());
-                ((TextView) columnView.findViewById(R.id.textLabelZone)).setText(ccu.get("dis").toString());
+                ((TextView) columnView.findViewById(R.id.textLabelZone)).setText(ccuDisName);
                 columnView.findViewById(R.id.textLabelModule).setVisibility(View.GONE);
                 ((TextView) columnView.findViewById(R.id.textRow8)).setText(getTunerValue(tunerItemSelected.get("id").toString(), "8"));
                 ((TextView) columnView.findViewById(R.id.textRow10)).setText(getTunerValue(tunerItemSelected.get("id").toString(), "10"));
@@ -215,7 +216,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
 
                     View columnView = inflater.inflate(R.layout.tuner_priority_column, viewStub, false);
                     ((TextView) columnView.findViewById(R.id.textLabelBuilding)).setText(site.get("dis").toString());
-                    ((TextView) columnView.findViewById(R.id.textLabelZone)).setText(ccu.get("dis").toString());
+                    ((TextView) columnView.findViewById(R.id.textLabelZone)).setText(ccuDisName);
                     columnView.findViewById(R.id.textLabelModule).setVisibility(View.GONE);
                     ((TextView) columnView.findViewById(R.id.textRow8)).setText(getTunerValue(tunerItemSelected.get("id").toString(), "8"));
                     ((TextView) columnView.findViewById(R.id.textRow10)).setText(getTunerValue(tunerItemSelected.get("id").toString(), "10"));
@@ -243,7 +244,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                     Collections.reverse(equipsFinal);
                     for (HashMap moduleTuner : equipsFinal) {
                         View columnView = inflater.inflate(R.layout.tuner_priority_column, viewStub, false);
-                        ((TextView) columnView.findViewById(R.id.textLabelBuilding)).setText(ccu.get("dis").toString());
+                        ((TextView) columnView.findViewById(R.id.textLabelBuilding)).setText(ccuDisName);
                         ((TextView) columnView.findViewById(R.id.textLabelZone)).setText(HSUtil.getDis(moduleTuner.get("roomRef").toString()));
                         ((TextView) columnView.findViewById(R.id.textLabelModule)).setText(HSUtil.getDis(moduleTuner.get("equipRef").toString()).substring(HSUtil.getDis(moduleTuner.get("equipRef").toString()).indexOf("-") + 1));
                         ((TextView) columnView.findViewById(R.id.textRow8)).setText(getTunerValue(moduleTuner.get("id").toString(), "8"));
@@ -257,7 +258,7 @@ public class DialogTunerPriorityArray extends BaseDialogFragment implements Prio
                 case "Module": {
                     HashMap moduleTuner = CCUHsApi.getInstance().read("tuner and equipRef == \"" + tunerItemSelected.get("equipRef").toString() + "\"");
                     View columnView = inflater.inflate(R.layout.tuner_priority_column, viewStub, false);
-                    ((TextView) columnView.findViewById(R.id.textLabelBuilding)).setText(ccu.get("dis").toString());
+                    ((TextView) columnView.findViewById(R.id.textLabelBuilding)).setText(ccuDisName);
                     ((TextView) columnView.findViewById(R.id.textLabelZone)).setText(HSUtil.getDis(moduleTuner.get("roomRef").toString()));
                     ((TextView) columnView.findViewById(R.id.textLabelModule)).setText(HSUtil.getDis(moduleTuner.get("equipRef").toString()).substring(HSUtil.getDis(moduleTuner.get("equipRef").toString()).indexOf("-") + 1));
                     ((TextView) columnView.findViewById(R.id.textRow8)).setText(getTunerValue(tunerItemSelected.get("id").toString(), "8"));

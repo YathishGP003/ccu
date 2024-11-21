@@ -445,7 +445,7 @@ public class HyperSplitMsgReceiver {
     private static void writeHeartbeat(RawPoint rawPoint, Point point,
                                        HyperSplit.HyperSplitRegularUpdateMessage_t regularUpdateMessage, CCUHsApi hayStack){
         hayStack.writeHisValueByIdWithoutCOV(rawPoint.getId(), (double)regularUpdateMessage.getRegularUpdateCommon().getRssi());
-        hayStack.writeHisValueByIdWithoutCOV(point.getId(), (double)regularUpdateMessage.getRegularUpdateCommon().getRssi());
+        hayStack.writeHisValueByIdWithoutCOV(point.getId(), 1.0);
     }
 
     private static void writeRoomTemp(RawPoint rawPoint, Point point,

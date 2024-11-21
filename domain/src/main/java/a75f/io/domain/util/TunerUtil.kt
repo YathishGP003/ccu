@@ -2,38 +2,35 @@ package a75f.io.domain.util
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.HSUtil
-import a75f.io.api.haystack.HSUtil.isEquipHasEquipsWithAhuRefOnThisCcu
-import a75f.io.api.haystack.sync.HttpUtil
-import a75f.io.domain.api.Domain
 import a75f.io.api.haystack.Tags
 import a75f.io.api.haystack.sync.PointWriteCache
+import a75f.io.domain.api.Domain
 import a75f.io.domain.util.Constants.TAG_DM_CCU
 import a75f.io.logger.CcuLog
 import org.projecthaystack.HDateTime
-import org.projecthaystack.HDict
 import org.projecthaystack.HDictBuilder
-import org.projecthaystack.HGridBuilder
 import org.projecthaystack.HNum
 import org.projecthaystack.HRef
 import org.projecthaystack.HVal
-import org.projecthaystack.io.HZincWriter
 
 object TunerUtil {
 
     fun updateSystemTunerVal(tags: String, tunerVal: Double?, reason: String, hayStack: CCUHsApi) {
         val tunerPoint = hayStack.readEntity("tuner and tunerGroup and system and roomRef == \"SYSTEM\" and ccuRef == \"" + hayStack.ccuId + "\" and " + tags)
-        val tunerId = tunerPoint.get("id").toString()
-        val systemEquipId = tunerPoint.get("equipRef").toString()
-        if (tunerVal == null) {
-            hayStack.getHSClient().pointWrite(HRef.copy(tunerId), 14, hayStack.ccuUserName, HNum.make(getTuner(tunerId)), HNum.make(1), HDateTime.make(System.currentTimeMillis()))
-            val b: HDictBuilder = HDictBuilder().add("id", HRef.copy(tunerId)).add("level",14).add("who",CCUHsApi.getInstance().getCCUUserName()).add("duration", HNum.make(0, "ms")).add("val", null as? HVal).add("reason", reason)
-            PointWriteCache.getInstance().writePoint(tunerId, b.toDict())
-            hayStack.writeHisValById(tunerId, HSUtil.getPriorityVal(tunerId))
-        } else {
-            hayStack.writePointForCcuUser(tunerId, 14, tunerVal, 0, reason)
-            hayStack.writeHisValById(tunerId, tunerVal)
+        tunerPoint["id"]?.let { tunerPointId ->
+            val tunerId = tunerPointId.toString()
+            val systemEquipId = tunerPoint.get("equipRef").toString()
+            if (tunerVal == null) {
+                hayStack.getHSClient().pointWrite(HRef.copy(tunerId), 14, hayStack.ccuUserName, HNum.make(getTuner(tunerId)), HNum.make(1), HDateTime.make(System.currentTimeMillis()))
+                val b: HDictBuilder = HDictBuilder().add("id", HRef.copy(tunerId)).add("level",14).add("who",CCUHsApi.getInstance().getCCUUserName()).add("duration", HNum.make(0, "ms")).add("val", null as? HVal).add("reason", reason)
+                PointWriteCache.getInstance().writePoint(tunerId, b.toDict())
+                hayStack.writeHisValById(tunerId, HSUtil.getPriorityVal(tunerId))
+            } else {
+                hayStack.writePointForCcuUser(tunerId, 14, tunerVal, 0, reason)
+                hayStack.writeHisValById(tunerId, tunerVal)
+            }
+            if (HSUtil.isEquipHasEquipsWithAhuRefOnThisCcu(systemEquipId)) updateChildEquipsTunerVal(systemEquipId, tags, tunerVal, reason, hayStack)
         }
-        if (isEquipHasEquipsWithAhuRefOnThisCcu(systemEquipId)) updateChildEquipsTunerVal(systemEquipId, tags, tunerVal, reason, hayStack)
     }
 
     fun updateChildEquipsTunerVal(systemEquipId: String, tags: String, tunerVal: Double?, reason: String, hayStack: CCUHsApi) {
@@ -41,16 +38,18 @@ object TunerUtil {
         val childEquipsIterator = childEquips.iterator()
         while (childEquipsIterator.hasNext()) {
             val childEquipId = childEquipsIterator.next().id.toString()
-            val childTunerId = hayStack.readEntity("point and tuner and equipRef == \"" + childEquipId + "\" and " + tags).get("id").toString()
-            if (childTunerId != null) {
-                if (tunerVal == null) {
-                    hayStack.getHSClient().pointWrite(HRef.copy(childTunerId), 14, hayStack.ccuUserName, HNum.make(getTuner(childTunerId)), HNum.make(1), HDateTime.make(System.currentTimeMillis()))
-                    val b: HDictBuilder = HDictBuilder().add("id", HRef.copy(childTunerId)).add("level",14).add("who",CCUHsApi.getInstance().getCCUUserName()).add("duration", HNum.make(0, "ms")).add("val", null as? HVal).add("reason", reason)
-                    PointWriteCache.getInstance().writePoint(childTunerId, b.toDict())
-                    hayStack.writeHisValById(childTunerId, HSUtil.getPriorityVal(childTunerId))
-                } else {
-                    hayStack.writePointForCcuUser(childTunerId, 14, tunerVal, 0, reason)
-                    hayStack.writeHisValById(childTunerId, tunerVal)
+            hayStack.readEntity("point and tuner and equipRef == \"" + childEquipId + "\" and " + tags)["id"]?.let { childTunerIdObject ->
+                val childTunerId = childTunerIdObject.toString()
+                if (childTunerId != null) {
+                    if (tunerVal == null) {
+                        hayStack.getHSClient().pointWrite(HRef.copy(childTunerId), 14, hayStack.ccuUserName, HNum.make(getTuner(childTunerId)), HNum.make(1), HDateTime.make(System.currentTimeMillis()))
+                        val b: HDictBuilder = HDictBuilder().add("id", HRef.copy(childTunerId)).add("level",14).add("who",CCUHsApi.getInstance().getCCUUserName()).add("duration", HNum.make(0, "ms")).add("val", null as? HVal).add("reason", reason)
+                        PointWriteCache.getInstance().writePoint(childTunerId, b.toDict())
+                        hayStack.writeHisValById(childTunerId, HSUtil.getPriorityVal(childTunerId))
+                    } else {
+                        hayStack.writePointForCcuUser(childTunerId, 14, tunerVal, 0, reason)
+                        hayStack.writeHisValById(childTunerId, tunerVal)
+                    }
                 }
             }
         }

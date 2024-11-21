@@ -38,6 +38,7 @@ import a75f.io.logic.bo.building.system.vav.config.ModulatingRtuProfileConfig;
 import a75f.io.logic.bo.building.system.vav.config.StagedRtuProfileConfig;
 import a75f.io.logic.bo.building.system.vav.config.StagedVfdRtuProfileConfig;
 import a75f.io.logic.bo.haystack.device.ControlMote;
+import a75f.io.logic.bo.util.DesiredTempDisplayMode;
 import a75f.io.logic.tuners.TunerUtil;
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective;
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective;
@@ -145,7 +146,12 @@ class ConfigPointUpdateHandler {
             deviceBuilder.updateDeviceAndPoints(config, deviceModel, Domain.systemEquip.getEquipRef(), hayStack.getSite().getId(), hayStack.getSiteName() + "-" + deviceModel.getName());
             DomainManager.INSTANCE.addSystemDomainEquip(hayStack);
             removeWritableTagFromCMDevicePort(configPoint, hayStack, val);
-
+            if (isVfd) {
+                ((DabStagedRtuWithVfd) systemProfile).updateStagesSelected();
+            } else {
+                ((DabStagedRtu) systemProfile).updateStagesSelected();
+            }
+            DesiredTempDisplayMode.setSystemModeForDab(hayStack);
         } else if (systemProfile instanceof VavFullyModulatingRtu) {
             SeventyFiveFProfileDirective model = (SeventyFiveFProfileDirective) ModelLoader.INSTANCE.getVavModulatingRtuModelDef();
             ModulatingRtuProfileConfig config = new ModulatingRtuProfileConfig(model).getActiveConfiguration();
@@ -168,6 +174,9 @@ class ConfigPointUpdateHandler {
             equipBuilder.updateEquipAndPoints(config, model, hayStack.getSite().getId(), systemEquip.get("dis").toString(), true);
             DomainManager.INSTANCE.addSystemDomainEquip(hayStack);
             removeWritableTagFromCMDevicePort(configPoint, hayStack, val);
+            if (configPoint.getDomainName().contains(DomainName.analog1OutputEnable) || configPoint.getDomainName().contains(DomainName.analog3OutputEnable)) {
+                DesiredTempDisplayMode.setSystemModeForVav(hayStack);
+            }
         } else if (systemProfile instanceof VavStagedRtu) {
 
             if (systemProfile instanceof VavAdvancedHybridRtu) {
@@ -206,6 +215,12 @@ class ConfigPointUpdateHandler {
             equipBuilder.updateEquipAndPoints(config, model, hayStack.getSite().getId(),systemEquip.get("dis").toString() , true);
             DomainManager.INSTANCE.addSystemDomainEquip(hayStack);
             removeWritableTagFromCMDevicePort(configPoint, hayStack, val);
+            if (isVfd) {
+                ((VavStagedRtuWithVfd) systemProfile).updateStagesSelected();
+            } else {
+                ((VavStagedRtu) systemProfile).updateStagesSelected();
+            }
+            DesiredTempDisplayMode.setSystemModeForVav(hayStack);
         } else if (isAdvanceAhuV2Profile()) {
             reconfigureAdvanceAhuV2(msgObject, configPoint);
         }
@@ -275,6 +290,12 @@ class ConfigPointUpdateHandler {
             equipBuilder.updateEquipAndPoints(config, equipModel, hayStack.getSite().getId(),systemEquip.get("dis").toString() , true);
             deviceBuilder.updateDeviceAndPoints(config, deviceModel, Domain.systemEquip.getEquipRef(), hayStack.getSite().getId(), hayStack.getSiteName() + "-" + deviceModel.getName());
             DomainManager.INSTANCE.addSystemDomainEquip(hayStack);
+            if (isVfd) {
+                ((DabStagedRtuWithVfd) systemProfile).updateStagesSelected();
+            } else {
+                ((DabStagedRtu) systemProfile).updateStagesSelected();
+            }
+            DesiredTempDisplayMode.setSystemModeForDab(hayStack);
         } else if (systemProfile instanceof VavFullyModulatingRtu) {
             SeventyFiveFProfileDirective model = (SeventyFiveFProfileDirective) ModelLoader.INSTANCE.getVavModulatingRtuModelDef();
             ModulatingRtuProfileConfig config = new ModulatingRtuProfileConfig(model).getActiveConfiguration();
@@ -316,6 +337,12 @@ class ConfigPointUpdateHandler {
             HashMap<Object, Object> systemEquip = hayStack.readMapById(Domain.systemEquip.getEquipRef());
             equipBuilder.updateEquipAndPoints(config, model, hayStack.getSite().getId(),systemEquip.get("dis").toString() , true);
             DomainManager.INSTANCE.addSystemDomainEquip(hayStack);
+            if (isVfd) {
+                ((VavStagedRtuWithVfd) systemProfile).updateStagesSelected();
+            } else {
+                ((VavStagedRtu) systemProfile).updateStagesSelected();
+            }
+            DesiredTempDisplayMode.setSystemModeForVav(hayStack);
         } else if (L.ccu().systemProfile instanceof DabAdvancedAhu
                 || L.ccu().systemProfile instanceof VavAdvancedAhu) {
             reconfigureAdvanceAhuV2(msgObject, configPoint);

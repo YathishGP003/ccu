@@ -54,7 +54,6 @@ public class CcuRegistrationHandler {
                 && StringUtils.isNotBlank(equipRef)
                 && StringUtils.isNotBlank(facilityManagerEmail)
                 && StringUtils.isNotBlank(installerEmail)) {
-
             JSONObject ccuUpdateJson = CCUHsApi.getInstance().getCcuRegisterJson(
                     id,
                     siteRef,
@@ -64,8 +63,7 @@ public class CcuRegistrationHandler {
                     equipRef,
                     ccu.get(CcuFieldConstants.FACILITY_MANAGER_EMAIL).toString(),
                     ccu.get(CcuFieldConstants.INSTALLER_EMAIL).toString(),
-                    buildTunerId
-                    );
+                    buildTunerId);
 
             if (ccuUpdateJson != null) {
                 // TODO Matt Rudd - Add the ability to call put in order to sync the CCU

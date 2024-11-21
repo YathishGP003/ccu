@@ -28,7 +28,6 @@ import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.projecthaystack.HDate;
 import org.projecthaystack.HDateTime;
 import org.projecthaystack.HDict;
 import org.projecthaystack.HDictBuilder;
@@ -59,7 +58,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TimeZone;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import a75f.io.api.haystack.exception.NullHGridException;
@@ -410,7 +408,7 @@ public class CCUHsApi
             if (q.getMarkers() != null && q.getMarkers().contains(SYSTEM)) {
                 q.setBacnetId(0);
                 q.setBacnetType(DEVICE);
-            } else if (q.getRoomRef() != null) {
+            } else if (q.getRoomRef() != null && q.getRoomRef() != "SYSTEM") {
                 q.setBacnetId(HSUtil.generateBacnetId(q.getGroup()));
                 q.setBacnetType(DEVICE);
             }
@@ -855,6 +853,22 @@ public class CCUHsApi
         }
         return null;
     }
+    /**
+     * Read the all entities for the given query in HDict format
+     */
+    public List<HDict> readAllHDictByQuery(String query) {
+        List<HDict> hDictList = new ArrayList<>();
+        try {
+            HGrid grid = hsClient.readAll(query);
+            for (int i = 0; i < grid.numRows(); i++) {
+                hDictList.add(grid.row(i));
+            }
+        } catch (Exception e) {
+            CcuLog.e(TAG_CCU_HS, "Error fetching entities for query: " + query, e);
+        }
+        return hDictList;
+    }
+
 
     public HGrid readHDictByIds(HRef[] ids) {
         try {
@@ -1311,12 +1325,18 @@ public class CCUHsApi
      */
     public void writeHisValById(String id, Double val)
     {
-        //long time = System.currentTimeMillis();
+        long time = System.currentTimeMillis();
         HisItem item = curRead(id);
         Double prevVal = item == null ? 0 : item.getVal();
-        if((item == null)|| (!item.initialized) || !prevVal.equals(val))
+        if((item == null)|| (!item.initialized) || !prevVal.equals(val)) {
             hsClient.hisWrite(HRef.copy(id), new HHisItem[]{HHisItem.make(HDateTime.make(System.currentTimeMillis()), HNum.make(val))});
-        //CcuLog.i("CCU_HS","writeHisValById "+id+" timeMS: "+(System.currentTimeMillis()- time));
+        } else {
+            HDict point = readHDictById(id);
+            if (point != null && point.get("sensor", false) != null) {
+                hisSyncHandler.addSensorPendingSync(id);
+            }
+        }
+        CcuLog.i("CCU_HS","writeHisValById "+id+" timeMS: "+(System.currentTimeMillis()- time));
     }
 
     /**
@@ -1370,7 +1390,7 @@ public class CCUHsApi
             String    id     = point.get("id").toString();
             HisItem previtem = curRead(id);
             Double prevVal = previtem == null ? 0 : previtem.getVal();
-            if((previtem == null) || (!previtem.initialized) || !prevVal.equals(val) || query.contains("and diag")) {
+            if((previtem == null) || (!previtem.initialized) || !prevVal.equals(val) || point.containsKey("diag")) {
                 HisItem item = new HisItem(id, new Date(), val);
                 hisWrite(item);
             }
@@ -1918,90 +1938,6 @@ public class CCUHsApi
         tagsDb.updateConfig(ccu, id);
     }
 
-    public String createCCU(String ccuName, String installerEmail, String equipRef, String managerEmail)
-    {
-        HashMap equip = CCUHsApi.getInstance().read("equip and system and not modbus and not connectModule");
-        String ahuRef = equip.size() > 0 ? equip.get("id").toString() : "";
-
-        HDictBuilder hDictBuilder = new HDictBuilder();
-        CcuLog.d(TAG_CCU_HS, "Site Ref: " + getSiteIdRef());
-        String localId = UUID.randomUUID().toString();
-        hDictBuilder.add("id", HRef.make(localId));
-        hDictBuilder.add("ccu");
-        hDictBuilder.add("dis", HStr.make(ccuName));
-        hDictBuilder.add("installerEmail", HStr.make(installerEmail));
-        hDictBuilder.add("fmEmail", HStr.make(managerEmail));
-        hDictBuilder.add("siteRef", getSiteIdRef());
-        hDictBuilder.add("equipRef", equipRef);
-        hDictBuilder.add("createdDate", HDateTime.make(System.currentTimeMillis()).date);
-        hDictBuilder.add("lastModifiedDateTime", HDateTime.make(System.currentTimeMillis()));
-        hDictBuilder.add("gatewayRef", ahuRef);
-        hDictBuilder.add("ahuRef", ahuRef);
-        hDictBuilder.add("device");
-        tagsDb.addHDict(localId, hDictBuilder.toDict());
-        syncStatusService.addUnSyncedEntity(StringUtils.prependIfMissing(localId, "@"));
-        addCCURefForDiagAndSystemEntities();
-        return localId;
-    }
-
-    public void updateCCU(String ccuName, String installerEmail, String ahuRef, String managerEmail)
-    {
-        CcuLog.d(TAG_CCU_HS,"updateCCUahuRef "+ahuRef);
-        HashMap ccu = read("device and ccu");
-
-        if (ccu.size() == 0) {
-            return;
-        }
-        final String id = ccu.get("id").toString();
-
-        HDictBuilder hDictBuilder = new HDictBuilder();
-        hDictBuilder.add("id", HRef.copy(id));
-        hDictBuilder.add("ccu");
-        hDictBuilder.add("dis", HStr.make(ccuName));
-        hDictBuilder.add("fmEmail", HStr.make(managerEmail));
-        hDictBuilder.add("installerEmail", HStr.make(installerEmail));
-        hDictBuilder.add("siteRef", getSiteIdRef());
-        hDictBuilder.add("equipRef", ccu.get("equipRef").toString());
-        hDictBuilder.add("createdDate", HDate.make(ccu.get("createdDate").toString()));
-        hDictBuilder.add("gatewayRef", ahuRef);
-        hDictBuilder.add("ahuRef", ahuRef);
-        hDictBuilder.add("lastModifiedDateTime", HDateTime.make(System.currentTimeMillis()));
-        hDictBuilder.add("device");
-        tagsDb.addHDict(id.replace("@",""), hDictBuilder.toDict());
-
-        syncStatusService.addUpdatedEntity(StringUtils.prependIfMissing(id, "@"));
-        CCUHsApi.getInstance().scheduleSync();
-    }
-
-
-    public void unRegisterCCU(String ccuName, String installerEmail, String ahuRef, String managerEmail)
-    {
-        CcuLog.d(TAG_CCU_HS,"updateCCUahuRef "+ahuRef);
-        HashMap ccu = read("device and ccu");
-
-        if (ccu.size() == 0) {
-            return;
-        }
-        final String id = ccu.get("id").toString();
-
-        HDictBuilder hDictBuilder = new HDictBuilder();
-        hDictBuilder.add("id", HRef.copy(id));
-        hDictBuilder.add("ccu");
-        hDictBuilder.add("dis", HStr.make(ccuName));
-        hDictBuilder.add("fmEmail", HStr.make(managerEmail));
-        hDictBuilder.add("installerEmail", HStr.make(installerEmail));
-        hDictBuilder.add("siteRef", getSiteIdRef());
-        hDictBuilder.add("equipRef", ccu.get("equipRef").toString());
-        hDictBuilder.add("createdDate", HDate.make(ccu.get("createdDate").toString()));
-        hDictBuilder.add("gatewayRef", ahuRef);
-        hDictBuilder.add("ahuRef", ahuRef);
-        hDictBuilder.add("device");
-        tagsDb.addHDict(id.replace("@",""), hDictBuilder.toDict());
-
-        syncStatusService.addUpdatedEntity(StringUtils.prependIfMissing(id, "@"));
-
-        CCUHsApi.getInstance().syncEntityTree();
-    }
     public void addCCURefForDiagAndSystemEntities(){
         List<HashMap<Object, Object>> equipMapList = readAllEntities("equip and (diag or (system and not modbus))");
         for(HashMap<Object, Object> equipMap : equipMapList) {
@@ -2025,18 +1961,6 @@ public class CCUHsApi
             }
         }
     }
-    public void updateDiagGatewayRef(String systemEquipRef){
-        HashMap diag = read("equip and diag");
-
-        if (diag.size() == 0) {
-            return;
-        }
-        Equip q = new Equip.Builder().setHashMap(diag).build();
-        q.setGatewayRef(systemEquipRef);
-        q.setLastModifiedDateTime(HDateTime.make(System.currentTimeMillis()));
-        CCUHsApi.getInstance().updateEquip(q, q.getId());
-        //updateCcuRefForDiagPoints(q);
-    }
 
     private void updateCcuRefForDiagPoints(Equip diagEquip){
         ArrayList<HashMap<Object, Object>> equipPoints = readAllEntities("point and equipRef == \"" + diagEquip.getId()+"\"");
@@ -2044,34 +1968,6 @@ public class CCUHsApi
             Point point = new Point.Builder().setHashMap(equipPoint).build();
             updatePoint(point, point.getId());
         }
-    }
-    public void updateCCUahuRef(String ahuRef) {
-
-        CcuLog.d(TAG_CCU_HS,"updateCCUahuRef "+ahuRef);
-        HashMap ccu = read("device and ccu");
-
-        if (ccu.size() == 0) {
-            return;
-        }
-
-        String id = ccu.get("id").toString();
-
-        HDictBuilder hDictBuilder = new HDictBuilder();
-        hDictBuilder.add("id", HRef.copy(id));
-        hDictBuilder.add("ccu");
-        hDictBuilder.add("dis", HStr.make(ccu.get("dis").toString()));
-        hDictBuilder.add("fmEmail", HStr.make(ccu.get("fmEmail").toString()));
-        hDictBuilder.add("installerEmail", HStr.make(ccu.get("installerEmail").toString()));
-        hDictBuilder.add("siteRef", getSiteIdRef());
-        hDictBuilder.add("equipRef", ccu.get("equipRef").toString());
-        hDictBuilder.add("createdDate", HDate.make(ccu.get("createdDate").toString()));
-        hDictBuilder.add("gatewayRef", ahuRef);
-        hDictBuilder.add("ahuRef", ahuRef);
-        hDictBuilder.add("device");
-        tagsDb.addHDict(id.replace("@",""), hDictBuilder.toDict());
-
-        syncStatusService.addUpdatedEntity(StringUtils.prependIfMissing(id, "@"));
-
     }
 
     /**
@@ -2109,7 +2005,7 @@ public class CCUHsApi
      */
     public HRef getCcuRef() {
         HRef siteRef = null;
-        HDict hDict = new HDictBuilder().add("filter", "ccu").toDict();
+        HDict hDict = new HDictBuilder().add("filter", "ccu and device").toDict();
         HGrid site  = getHSClient().call("read", HGridBuilder.dictToGrid(hDict));
         if (site != null && site.numRows() > 0) {
             siteRef = site.row(0).getRef("id");
@@ -2506,10 +2402,10 @@ public class CCUHsApi
 
             String ccuLuid = Objects.toString(ccu.get(CcuFieldConstants.ID),"");
             if (! entitySynced(ccuLuid)) {
-                String facilityManagerEmail = site.get("fmEmail").toString();
+                String facilityManagerEmail = site.get(CcuFieldConstants.FACILITY_MANAGER_EMAIL).toString();
                 String installEmail = installerEmail;
                 if (StringUtils.isBlank(installEmail)) {
-                    installEmail = site.get("installerEmail").toString();
+                    installEmail = site.get(CcuFieldConstants.INSTALLER_EMAIL).toString();
                 }
                 String dis = ccu.get("dis").toString();
                 String ahuRef = ccu.get("ahuRef").toString();
@@ -2574,7 +2470,6 @@ public class CCUHsApi
 
             ccuJsonRequest.put(CcuFieldConstants.DESCRIPTION, ccuDescription);
             ccuJsonRequest.put(CcuFieldConstants.SITEREF, siteRef);
-
             if (StringUtils.isNotBlank(ahuRef)) {
                 ccuJsonRequest.put(CcuFieldConstants.AHUREF, ahuRef);
             }
@@ -2610,7 +2505,7 @@ public class CCUHsApi
     }
 
     public void completeRegistration(String ccuRegistrationResponse, String ccuId) {
-        CcuLog.d("CCURegInfo", "completeRegistration");
+        CcuLog.d("CCURegInfo", "completeRegistration"+ccuRegistrationResponse);
         try {
             JSONObject ccuRegistrationResponseJson = new JSONObject(ccuRegistrationResponse);
             String ccuGuid = ccuRegistrationResponseJson.getString("id");
@@ -2929,15 +2824,6 @@ public class CCUHsApi
             if (!entityId.isEmpty()) {
                 syncStatusService.addUnSyncedEntity(entityId);
             }
-        });
-    }
-
-    public void updateDeviceRefOfSettingPoints(String newCcuId) {
-        List<HashMap<Object, Object>> allSettingPoints = readAllEntities("point and setting");
-        allSettingPoints.forEach( pointMap -> {
-            SettingPoint settingPoint = new SettingPoint.Builder().setHashMap(pointMap).build();
-            settingPoint.setDeviceRef(newCcuId);
-            updateSettingPoint(settingPoint, settingPoint.getId());
         });
     }
 
@@ -3385,11 +3271,11 @@ public class CCUHsApi
                 return ccuLogLevel;
             }
             if(!isCCURegistered())
+            return 0;
+            HashMap<Object, Object>  logLevel = readEntityByDomainName("logLevel");
+            if(logLevel.isEmpty())
                 return 0;
-            HashMap<Object, Object>  entity = CCUHsApi.getInstance().readEntity("log and level and diag");
-            if(entity.isEmpty())
-                return 0;
-            ccuLogLevel =  CCUHsApi.getInstance().readHisValById(entity.get("id").toString()).intValue();
+            ccuLogLevel =  CCUHsApi.getInstance().readHisValById(logLevel.get("id").toString()).intValue();
             return ccuLogLevel;
         } catch (IllegalStateException e) {
             CcuLog.e("CcuLog", "hayStack is not initialized");
@@ -3422,5 +3308,30 @@ public class CCUHsApi
         } else {
             CcuLog.d(TAG, "Available levels are  cleared for point " + id);
         }
+    }
+
+    public String defaultStrValByDomainName(String domainName) {
+        return readDefaultStrVal("point and domainName == \""+domainName+"\"");
+    }
+    public void writeDefaultStrValByDomainName(String domainName, String val) {
+        writeDefaultVal("point and domainName == \""+domainName+"\"", val);
+    }
+
+    public HashMap<Object, Object> readEntityByDomainName (String domainName) {
+        return readEntity("domainName == \""+domainName+"\"");
+    }
+
+    public List<HDict> readRemoteEntitiesByQuery(String query) {
+        String response = CCUHsApi.getInstance().fetchRemoteEntityByQuery(query);
+        if(response == null || response.isEmpty()){
+            CcuLog.d(TAG, "Failed to read remote entity : " + response);
+            return null;
+        }
+        Iterator it = new HZincReader(response).readGrid().iterator();
+        List<HDict> dictList = new ArrayList<>();
+        while(it.hasNext()) {
+            dictList.add(new HDictBuilder().add((HRow) it.next()).toDict());
+        }
+        return dictList;
     }
 }

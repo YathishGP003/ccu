@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import a75f.io.constants.CcuFieldConstants;
+
 /**
  * Created by samjithsadasivan on 9/4/18.
  */
@@ -269,11 +271,11 @@ public class Site extends Entity
                 {
                     this.organization = pair.getValue().toString();
                 }
-                else if(pair.getKey().equals("fmEmail"))
+                else if(pair.getKey().equals(CcuFieldConstants.FACILITY_MANAGER_EMAIL))
                 {
                     this.fcManagerEmail = pair.getValue().toString();
                 }
-                else if(pair.getKey().equals("installerEmail"))
+                else if(pair.getKey().equals(CcuFieldConstants.INSTALLER_EMAIL))
                 {
                     this.installerEmail = pair.getValue().toString();
                 }

@@ -348,12 +348,12 @@
           "type": 9
         },
         {
-        "id": "10:2172204557650419496",
-                   "name": "displayInUiDefault",
-                   "type": 1,
-                   "flags": 4
-                 },
-                 {
+           "id": "10:2172204557650419496",
+           "name": "displayInUiDefault",
+           "type": 1,
+           "flags": 4
+         },
+        {
           "id": "11:1923871058791032913",
           "name": "displayInUI",
           "type": 1,

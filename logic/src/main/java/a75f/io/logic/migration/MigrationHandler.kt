@@ -6,35 +6,41 @@ import a75f.io.api.haystack.Device
 import a75f.io.api.haystack.Equip
 import a75f.io.api.haystack.HayStackConstants
 import a75f.io.api.haystack.Point
+import a75f.io.api.haystack.RawPoint
 import a75f.io.api.haystack.Site
 import a75f.io.api.haystack.Tags
 import a75f.io.api.haystack.Zone
 import a75f.io.api.haystack.sync.HttpUtil
 import a75f.io.domain.HyperStatSplitEquip
+import a75f.io.domain.OAOEquip
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.Domain.writeValAtLevelByDomain
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.config.DefaultProfileConfiguration
 import a75f.io.domain.config.ExternalAhuConfiguration
 import a75f.io.domain.config.ProfileConfiguration
+import a75f.io.domain.cutover.DabStagedRtuCutOverMapping
+import a75f.io.domain.cutover.DabStagedVfdRtuCutOverMapping
 import a75f.io.domain.cutover.DabZoneProfileCutOverMapping
 import a75f.io.domain.cutover.HyperStatSplitCpuCutOverMapping
 import a75f.io.domain.cutover.HyperStatSplitDeviceCutoverMapping
-import a75f.io.domain.cutover.DabStagedRtuCutOverMapping
-import a75f.io.domain.cutover.DabStagedVfdRtuCutOverMapping
 import a75f.io.domain.cutover.NodeDeviceCutOverMapping
 import a75f.io.domain.cutover.OtnEquipCutOverMapping
+import a75f.io.domain.cutover.OaoCutOverMapping
+import a75f.io.domain.cutover.SseZoneProfileCutOverMapping
 import a75f.io.domain.cutover.VavFullyModulatingRtuCutOverMapping
 import a75f.io.domain.cutover.VavStagedRtuCutOverMapping
 import a75f.io.domain.cutover.VavStagedVfdRtuCutOverMapping
 import a75f.io.domain.cutover.VavZoneProfileCutOverMapping
 import a75f.io.domain.equips.DabEquip
 import a75f.io.domain.equips.OtnEquip
+import a75f.io.domain.equips.SseEquip
 import a75f.io.domain.equips.VavEquip
 import a75f.io.domain.logic.DeviceBuilder
 import a75f.io.domain.logic.DomainManager.addCmBoardDevice
 import a75f.io.domain.logic.DomainManager.addSystemDomainEquip
 import a75f.io.domain.logic.EntityMapper
+import a75f.io.domain.logic.EquipBuilderConfig
 import a75f.io.domain.logic.PointBuilderConfig
 import a75f.io.domain.logic.ProfileEquipBuilder
 import a75f.io.domain.util.ModelCache
@@ -43,24 +49,31 @@ import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.NodeType
+import a75f.io.logic.bo.building.bypassdamper.BypassDamperProfileConfiguration
 import a75f.io.logic.bo.building.dab.DabProfileConfiguration
+import a75f.io.logic.bo.building.dab.getDevicePointDict
+import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType
+import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.CpuUniInType
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuProfileConfiguration
 import a75f.io.logic.bo.building.otn.OtnProfileConfiguration
 import a75f.io.logic.bo.building.plc.PlcEquip
+import a75f.io.logic.bo.building.oao.OAOProfileConfiguration
 import a75f.io.logic.bo.building.schedules.Occupancy
 import a75f.io.logic.bo.building.schedules.occupancy.DemandResponse
+import a75f.io.logic.bo.building.sse.SseProfileConfiguration
 import a75f.io.logic.bo.building.system.vav.config.ModulatingRtuProfileConfig
 import a75f.io.logic.bo.building.system.vav.config.StagedRtuProfileConfig
 import a75f.io.logic.bo.building.system.vav.config.StagedVfdRtuProfileConfig
 import a75f.io.logic.bo.building.vav.VavProfileConfiguration
 import a75f.io.logic.bo.util.DemandResponseMode
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
-import a75f.io.logic.diag.DiagEquip
 import a75f.io.logic.diag.DiagEquip.createMigrationVersionPoint
 import a75f.io.logic.migration.VavAndAcbProfileMigration.Companion.cleanACBDuplicatePoints
 import a75f.io.logic.migration.VavAndAcbProfileMigration.Companion.cleanVAVDuplicatePoints
+import a75f.io.logic.migration.ccuanddiagequipmigration.CCUBaseConfigurationMigrationHandler
+import a75f.io.logic.migration.ccuanddiagequipmigration.DiagEquipMigrationHandler
 import a75f.io.logic.migration.modbus.correctEnumsForCorruptModbusPoints
 import a75f.io.logic.migration.scheduler.SchedulerRevampMigration
 import a75f.io.logic.tuners.TunerConstants
@@ -74,40 +87,26 @@ import io.seventyfivef.domainmodeler.client.ModelPointDef
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDevicePointDef
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
+import org.joda.time.DateTime
 import org.projecthaystack.HDict
 import org.projecthaystack.HDictBuilder
 import org.projecthaystack.HGrid
 import org.projecthaystack.HGridBuilder
+import org.projecthaystack.HRef
 import org.projecthaystack.HRow
 import org.projecthaystack.io.HZincReader
 import org.projecthaystack.io.HZincWriter
-import org.joda.time.DateTime
-import java.util.HashMap
 
 
 class MigrationHandler (hsApi : CCUHsApi) : Migration {
 
-    companion object {
-        fun doPostModelMigrationTasks() {
-            if (!PreferenceUtil.getRecoverHelioNodeACBTunersMigration()) VavAndAcbProfileMigration.recoverHelioNodeACBTuners(CCUHsApi.getInstance())
-            if (!PreferenceUtil.getACBRelayLogicalPointsMigration()) VavAndAcbProfileMigration.verifyACBIsoValveLogicalPoints(CCUHsApi.getInstance())
-            try{
-                if (!PreferenceUtil.getDmToDmCleanupMigration()) {
-                    cleanACBDuplicatePoints(CCUHsApi.getInstance())
-                    cleanVAVDuplicatePoints(CCUHsApi.getInstance())
-                    CCUHsApi.getInstance().syncEntityTree()
-                    PreferenceUtil.setDmToDmCleanupMigration()
-                }
-            } catch (e: Exception) {
-                //TODO - This is temporary fix till vav model issue is resolved in the next releases.
-                //For now, we make sure it does not stop other migrations even if this fails.
-            }
-        }
-    }
+    val TAG_CCU_BYPASS_RECOVER = "CCU_BYPASS_RECOVER"
+
 
     override val hayStack = hsApi
 
     private val schedulerRevamp = SchedulerRevampMigration(hayStack)
+    private var isMigrationOngoing = false
 
     override fun isMigrationRequired(): Boolean {
         val appVersion = getAppVersion()
@@ -117,7 +116,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
          * Individual migration handlers should have proper check in place to avoid creating duplicate
          * entities during version downgrades.
          */
-        CcuLog.i(L.TAG_CCU_SCHEDULER," isMigrationRequired $appVersion $migrationVersion")
+        CcuLog.i(L.TAG_CCU_SCHEDULER, " isMigrationRequired $appVersion $migrationVersion")
         return appVersion != migrationVersion
     }
 
@@ -126,8 +125,12 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         doDabTerminalDomainModelMigration()
         doVavSystemDomainModelMigration()
         doHyperStatSplitCpuDomainModelMigration()
+        CCUBaseConfigurationMigrationHandler().doCCUBaseConfigurationMigration(hayStack)
+        DiagEquipMigrationHandler().doDiagEquipMigration(hayStack)
         doDabSystemDomainModelMigration()
         doOtnTerminalDomainModelMigration()
+        doOAOProfileMigration()
+        doSseStandaloneDomainModelMigration()
         createMigrationVersionPoint(CCUHsApi.getInstance())
         addSystemDomainEquip(CCUHsApi.getInstance())
         addCmBoardDevice(hayStack)
@@ -135,29 +138,20 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             CcuLog.i(L.TAG_CCU_MIGRATION_UTIL, "---- Migration Not Required ----")
             return
         }
+        isMigrationOngoing = true
         if (hayStack.readEntity(Tags.SITE).isNotEmpty()) {
             createOfflineModePoint()
             // After DM integration skipping migration for DR mode
 //            migrationForDRMode()
             migrateEquipStatusEnums()
-            if(!PreferenceUtil.getSingleDualMigrationStatus()) {
+            if (!PreferenceUtil.getSingleDualMigrationStatus()) {
                 migrationToHandleInfluenceOfUserIntentOnSentPoints()
                 PreferenceUtil.setSingleDualMigrationStatus()
             }
-
-            DiagEquip.addLogLevelPoint(CCUHsApi.getInstance())
-        }
-        if (!PreferenceUtil.getAppVersionPointsMigration()) {
-            val diagEquipMap = hayStack.readEntity("equip and diag")
-            if (diagEquipMap.isNotEmpty()) {
-                val diagEquip = Equip.Builder().setHashMap(diagEquipMap).build()
-                DiagEquip.createAppVersionPoints(hayStack, diagEquip)
-            }
-            PreferenceUtil.setAppVersionPointsMigration()
         }
 
         try {
-            if(!PreferenceUtil.getMigrateHisInterpolateForDevicePoints()) {
+            if (!PreferenceUtil.getMigrateHisInterpolateForDevicePoints()) {
                 migrateHisInterpolateForDevicePoints()
                 PreferenceUtil.setMigrateHisInterpolateForDevicePoints()
             }
@@ -171,70 +165,163 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         } catch (e: Exception) {
             //TODO - This is temporary fix till vav model issue is resolved in the next releases.
             //For now, we make sure it does not stop other migrations even if this fails.
-            CcuLog.e(L.TAG_CCU_MIGRATION_UTIL, "Error in migrateVavAndAcbProfilesToCorrectPortEnabledStatus: ${e.message}")
+            CcuLog.e(
+                L.TAG_CCU_MIGRATION_UTIL,
+                "Error in migrateVavAndAcbProfilesToCorrectPortEnabledStatus: ${e.message}"
+            )
         }
-
         updateAhuRefForTIEquip()
         clearLevel4ValuesOfDesiredTempIfDurationIs0()
         if (schedulerRevamp.isMigrationRequired()) {
             val ccuHsApi = CCUHsApi.getInstance()
             createMigrationVersionPoint(ccuHsApi)
-            val remoteScheduleAblePoint = ccuHsApi.fetchRemoteEntityByQuery("schedulable and" +
-                    " heating and limit and max and default") ?: return
+            val remoteScheduleAblePoint = ccuHsApi.fetchRemoteEntityByQuery(
+                "schedulable and" +
+                        " heating and limit and max and default"
+            ) ?: return
             val sGrid = HZincReader(remoteScheduleAblePoint).readGrid()
             val it = sGrid.iterator()
-            if(!it.hasNext()) {
+            if (!it.hasNext()) {
                 syncZoneSchedulesToCloud(ccuHsApi)
             }
             schedulerRevamp.doMigration()
         }
-        if(!PreferenceUtil.isModbusEnumCorrectionRequired()) {
+        if (!PreferenceUtil.isModbusEnumCorrectionRequired()) {
             correctEnumsForCorruptModbusPoints(hayStack)
             PreferenceUtil.setModbusEnumCorrectionDone()
         }
-        if(!PreferenceUtil.isBackFillValueUpdateRequired()) {
-            updatingBackfillDefaultValues(hayStack)
+        if (!PreferenceUtil.isBackFillValueUpdateRequired()) {
+            val backFillDurationDomainPoint = Domain.ccuEquip.backFillDuration
+            try {
+                updatingBackFillDefaultValues(hayStack, backFillDurationDomainPoint)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                //For now, we make sure it does not stop other migrations even if this fails.
+                CcuLog.e(L.TAG_CCU_MIGRATION_UTIL, "Error in updatingBackfillDefaultValues $e")
+                try {
+                    backFillDurationDomainPoint.writeDefaultVal(24.0)
+                } catch (e: Exception) {
+                    CcuLog.e(
+                        L.TAG_CCU_MIGRATION_UTIL,
+                        "Error in updatingBackfillDefaultValues in catch block $e"
+                    )
+                }
+
+            }
+
             PreferenceUtil.setBackFillValueUpdateDone()
         }
-        if(!PreferenceUtil.isHisTagRemovalFromNonDmDevicesDone()) {
+        if (!PreferenceUtil.isHisTagRemovalFromNonDmDevicesDone()) {
             removeHisTagsFromNonDMDevices()
             PreferenceUtil.setHisTagRemovalFromNonDmDevicesDone()
         }
-        if(!PreferenceUtil.isDeadBandMigrationRequired()){
+
+        if (!PreferenceUtil.isDeadBandMigrationRequired()) {
             migrateDeadBandPoints(hayStack)
             PreferenceUtil.setDeadBandMigrationNotRequired()
         }
-        if(!PreferenceUtil.isVavCfmOnEdgeMigrationDone()) {
+        if (!PreferenceUtil.isVavCfmOnEdgeMigrationDone()) {
             VavAndAcbProfileMigration.addMinHeatingDamperPositionMigration(hayStack)
             PreferenceUtil.setVavCfmOnEdgeMigrationDone()
         }
         clearOtaCachePreferences() // While migrating to new version, we need to clear the ota cache preferences
+        if (!PreferenceUtil.getMigrateAnalogInputTypeForVavDevicePoint()) {
+            try {
+                migrateAnalogTypeForVavAnalog1In()
+                PreferenceUtil.setMigrateAnalogInputTypeForVavDevicePoint()
+            } catch (e: Exception) {
+                //For now, we make sure it does not stop other migrations even if this fails.
+                CcuLog.e(L.TAG_CCU_MIGRATION_UTIL, "Error in migrateAnalogTypeForVAVanalog1In $e")
+            }
+        }
         hayStack.scheduleSync()
     }
 
-    private fun clearOtaCachePreferences() {
-        CcuLog.d(L.TAG_CCU_MIGRATION_UTIL,"Clearing OtaCache Preferences")
-        try {
-            var sharedPreferences: SharedPreferences = Globals.getInstance().applicationContext.getSharedPreferences("otaCache" , Context.MODE_PRIVATE)
-            sharedPreferences.edit().clear().apply()
-        }
-        catch (e : Exception) {
-            CcuLog.e(L.TAG_CCU_MIGRATION_UTIL,"Failed to clear OtaCache ${e.printStackTrace()}")
+    fun doDabDamperSizeMigration() {
+        val damperSizeMap = mapOf(
+            0.0 to 4.0,
+            1.0 to 6.0,
+            2.0 to 8.0,
+            3.0 to 10.0,
+            4.0 to 12.0,
+            5.0 to 14.0,
+            6.0 to 16.0,
+            7.0 to 18.0,
+            8.0 to 20.0,
+            9.0 to 22.0
+        )
+        val dabEquips = hayStack.readAllEntities("equip and zone and dab and not dualDuct")
+            .filter { it["domainName"] != null }
+            .toList()
+
+        dabEquips.forEach {
+            val dabEquip = DabEquip(it["id"].toString())
+
+            val damper1Size = dabEquip.damper1Size.readPriorityVal()
+            dabEquip.damper1Size.writeDefaultVal(damperSizeMap[damper1Size] ?: 4.0)
+            CcuLog.d(L.TAG_CCU_DOMAIN, "Damper1 Size: ${dabEquip.damper1Size.readPriorityVal()}")
+            val damper2Size = dabEquip.damper2Size.readPriorityVal()
+            dabEquip.damper2Size.writeDefaultVal(damperSizeMap[damper2Size] ?: 4.0)
+            CcuLog.d(L.TAG_CCU_DOMAIN, "Damper2 Size: ${dabEquip.damper2Size.readPriorityVal()}")
         }
     }
 
-    private fun updatingBackfillDefaultValues(hayStack: CCUHsApi) {
-        val systemEquip = hayStack.read("system and equip and not modbus and not connectModule")
-        val backFillPoint =
-            hayStack.read("point and (backfill or domainName == \"backfillDuration\") and system and equipRef == \"${systemEquip["id"]}\"")
-        val lastUpdatedTime = DateTime.parse(
-            CCUHsApi.getInstance().readPointPriorityLatestTime(backFillPoint["id"] as String?)
-                .substring(0, 19)
-        )
+
+    private fun clearOtaCachePreferences() {
+        CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "Clearing OtaCache Preferences")
+        try {
+            var sharedPreferences: SharedPreferences =
+                Globals.getInstance().applicationContext.getSharedPreferences(
+                    "otaCache",
+                    Context.MODE_PRIVATE
+                )
+            sharedPreferences.edit().clear().apply()
+        } catch (e: Exception) {
+            CcuLog.e(L.TAG_CCU_MIGRATION_UTIL, "Failed to clear OtaCache ${e.printStackTrace()}")
+        }
+    }
+
+    private fun updatingBackFillDefaultValues(
+        hayStack: CCUHsApi,
+        backFillPointDomain: a75f.io.domain.api.Point
+    ) {
+        if (backFillPointDomain.id == "") {
+            CcuLog.e(L.TAG_CCU_MIGRATION_UTIL, "backFillDuration point not exist")
+            return
+        }
+        val backFillPoint = hayStack.readEntity(backFillPointDomain.id)
+
+        if (backFillPoint.isEmpty()) {
+            CcuLog.e(L.TAG_CCU_MIGRATION_UTIL, "backFillDuration point Map not exist")
+            return
+        }
+
+        val lastUpdatedTimeForBackFillPoint =
+            hayStack.readPointPriorityLatestTime(backFillPointDomain.id)
+
+        if (lastUpdatedTimeForBackFillPoint == null) {
+            CcuLog.i(
+                L.TAG_CCU_MIGRATION_UTIL, "lastUpdatedTimeForBackFillPoint not found" +
+                        " so Updated the fallback default value for backfill point"
+            )
+            backFillPointDomain.writeDefaultVal(24.0)
+            return
+        }
+
+        val lastUpdatedTime = DateTime.parse(lastUpdatedTimeForBackFillPoint.substring(0, 19))
+        if (backFillPoint["createdDateTime"] == null) {
+            CcuLog.i(
+                L.TAG_CCU_MIGRATION_UTIL,
+                "Updated the fallback default value for backfill point"
+            )
+            backFillPointDomain.writeDefaultVal(24.0)
+            CcuLog.i(L.TAG_CCU_MIGRATION_UTIL, "Updated backfill default value")
+            return
+        }
         val createdTime =
-            DateTime.parse(backFillPoint["createdDateTime"].toString().substring(0,19));
+            DateTime.parse(backFillPoint["createdDateTime"].toString().substring(0, 19))
         if (createdTime.equals(lastUpdatedTime)) {
-            hayStack.writeDefaultValById(backFillPoint["id"].toString(), 24.0)
+            backFillPointDomain.writeDefaultVal(24.0)
             CcuLog.i(L.TAG_CCU_MIGRATION_UTIL, "Updated backfill default value")
         } else {
             CcuLog.i(
@@ -244,20 +331,76 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         }
     }
 
+    fun doPostModelMigrationTasks() {
+        if (!PreferenceUtil.getRecoverHelioNodeACBTunersMigration()) VavAndAcbProfileMigration.recoverHelioNodeACBTuners(
+            hayStack
+        )
+        if (!PreferenceUtil.getACBRelayLogicalPointsMigration()) VavAndAcbProfileMigration.verifyACBIsoValveLogicalPoints(
+            hayStack
+        )
+        try {
+            if (!PreferenceUtil.getDmToDmCleanupMigration()) {
+                cleanACBDuplicatePoints(hayStack)
+                cleanVAVDuplicatePoints(hayStack)
+                hayStack.syncEntityTree()
+                PreferenceUtil.setDmToDmCleanupMigration()
+            }
+        } catch (e: Exception) {
+            //TODO - This is temporary fix till vav model issue is resolved in the next releases.
+            //For now, we make sure it does not stop other migrations even if this fails.
+        }
+        if (!PreferenceUtil.getRestoreBypassDamperAfterReplace()) {
+            try {
+                if (restoreMissingBypassDamperAfterReplace()) {
+                    PreferenceUtil.setRestoreBypassDamperAfterReplace()
+                } else {
+                    CcuLog.e(
+                        TAG_CCU_BYPASS_RECOVER,
+                        "Failed to restore missing bypass damper after replace. Operation failed and not setting the preference"
+                    )
+                }
+            } catch (e: Exception) {
+                CcuLog.d(
+                    TAG_CCU_BYPASS_RECOVER,
+                    "Some exception occurred. CCU Bypass Recovery operation stopped abruptly."
+                )
+            }
+        }
+        CcuLog.d(
+            L.TAG_CCU_MIGRATION_UTIL,
+            "doPostModelMigrationTasks: check isMigrationOngoing $isMigrationOngoing"
+        )
+        if (isMigrationOngoing) {
+            CcuLog.d(
+                L.TAG_CCU_MIGRATION_UTIL,
+                "Version update detected, performing minCFMPoints' maxVal update"
+            )
+            updateMinCfmPointMaxVal(Pair(DomainName.minCFMCooling, DomainName.maxCFMCooling))
+            updateMinCfmPointMaxVal(Pair(DomainName.minCFMReheating, DomainName.maxCFMReheating))
+        }
+        isMigrationOngoing = false
+    }
+
     private fun migrateDeadBandPoints(hayStack: CCUHsApi) {
         val listOfZones = hayStack.readAllEntities("room")
         val minDeadBandVal = "0.5"
         listOfZones.forEach { zoneMap ->
             val zone = Zone.Builder().setHashMap(zoneMap).build()
             val zoneId = zone.id
-            val heatingDeadBandPoint = hayStack.readEntity("schedulable and heating and deadband and roomRef == \"$zoneId\"")
-            val coolingDeadBandPoint = hayStack.readEntity("schedulable and cooling and deadband and roomRef == \"$zoneId\"")
+            val heatingDeadBandPoint =
+                hayStack.readEntity("schedulable and heating and deadband and roomRef == \"$zoneId\"")
+            val coolingDeadBandPoint =
+                hayStack.readEntity("schedulable and cooling and deadband and roomRef == \"$zoneId\"")
             if (heatingDeadBandPoint.isNotEmpty()) {
-                val deadBand = Point.Builder().setHashMap(heatingDeadBandPoint).setMinVal(minDeadBandVal).build()
+                val deadBand =
+                    Point.Builder().setHashMap(heatingDeadBandPoint).setMinVal(minDeadBandVal)
+                        .build()
                 hayStack.updatePoint(deadBand, deadBand.id)
             }
             if (coolingDeadBandPoint.isNotEmpty()) {
-                val deadBand = Point.Builder().setHashMap(coolingDeadBandPoint).setMinVal(minDeadBandVal).build()
+                val deadBand =
+                    Point.Builder().setHashMap(coolingDeadBandPoint).setMinVal(minDeadBandVal)
+                        .build()
                 hayStack.updatePoint(deadBand, deadBand.id)
             }
         }
@@ -267,7 +410,8 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         hayStack.readAllEntities("device and his").forEach { nonDMDeviceMap ->
             nonDMDeviceMap.remove("his")
             nonDMDeviceMap["id"]?.let {
-                val nonDMDevice = Device.Builder().setHDict(hayStack.readHDictById(it.toString())).removeMarker("his").build()
+                val nonDMDevice = Device.Builder().setHDict(hayStack.readHDictById(it.toString()))
+                    .removeMarker("his").build()
                 hayStack.updateDevice(nonDMDevice, nonDMDevice.id)
             }
         }
@@ -275,7 +419,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
 
     private fun updateAhuRefForTIEquip() {
         val tiEquipMap = hayStack.readEntity("equip and ti")
-        if(tiEquipMap.isNotEmpty()) {
+        if (tiEquipMap.isNotEmpty()) {
             val equip = Equip.Builder().setHashMap(tiEquipMap).build()
             equip.ahuRef = hayStack.readId("equip and system and not modbus")
             hayStack.updateEquip(equip, equip.id)
@@ -283,28 +427,41 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
     }
 
     private fun clearLevel4ValuesOfDesiredTempIfDurationIs0() {
-        val listOfDesiredTempPoints: List<HashMap<Any, Any>> = hayStack.readAllEntities("desired and temp and (heating or cooling)")
+        val listOfDesiredTempPoints: List<HashMap<Any, Any>> =
+            hayStack.readAllEntities("desired and temp and (heating or cooling)")
         listOfDesiredTempPoints.forEach { desiredTempPoint ->
-            val desiredTempPointId : String = desiredTempPoint["id"].toString()
-            val priorityGrid : HGrid? = hayStack.readPointArrRemote(desiredTempPointId)
+            val desiredTempPointId: String = desiredTempPoint["id"].toString()
+            val priorityGrid: HGrid? = hayStack.readPointArrRemote(desiredTempPointId)
             var isCleared = false
             priorityGrid?.let { grid ->
                 val iterator: MutableIterator<HRow?>? = grid.iterator() as MutableIterator<HRow?>?
-                while (iterator!=null && iterator.hasNext()) {
+                while (iterator != null && iterator.hasNext()) {
                     val r: HRow? = iterator.next()
-                    if ((isLevelCleanable(r) && isLevelToBeCleared(r)) || isAutoAwayMappedToDemandResponseLevel(r)) {
-                        hayStack.clearPointArrayLevel(desiredTempPointId, r!!.getInt("level"), false)
+                    if ((isLevelCleanable(r) && isLevelToBeCleared(r)) || isAutoAwayMappedToDemandResponseLevel(
+                            r
+                        )
+                    ) {
+                        hayStack.clearPointArrayLevel(
+                            desiredTempPointId,
+                            r!!.getInt("level"),
+                            false
+                        )
                         isCleared = true
                     }
                 }
             }
-            if(isCleared) { hayStack.writeHisValById(desiredTempPointId, hayStack.readPointPriorityVal(desiredTempPointId)) }
+            if (isCleared) {
+                hayStack.writeHisValById(
+                    desiredTempPointId,
+                    hayStack.readPointPriorityVal(desiredTempPointId)
+                )
+            }
         }
     }
 
     private fun isAutoAwayMappedToDemandResponseLevel(levelRow: HRow?): Boolean {
         return levelRow!!.getInt("level") == HayStackConstants.DEMAND_RESPONSE_LEVEL &&
-                ! DemandResponse.isDRModeActivated(hayStack)
+                !DemandResponse.isDRModeActivated()
     }
 
     private fun isLevelToBeCleared(levelRow: HRow?): Boolean {
@@ -316,15 +473,17 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
     private fun isLevelCleanable(levelRow: HRow?): Boolean {
         return levelRow!!.getInt("level").let { level ->
             level == HayStackConstants.AUTO_AWAY_LEVEL ||
-            level == HayStackConstants.FORCE_OVERRIDE_LEVEL ||
-            level == HayStackConstants.OCCUPANT_USER_WRITE_LEVEL ||
-            level == HayStackConstants.USER_APP_WRITE_LEVEL }
+                    level == HayStackConstants.FORCE_OVERRIDE_LEVEL ||
+                    level == HayStackConstants.OCCUPANT_USER_WRITE_LEVEL ||
+                    level == HayStackConstants.USER_APP_WRITE_LEVEL
+        }
     }
 
     private fun migrationToHandleInfluenceOfUserIntentOnSentPoints() {
-        val standaloneEquips = hayStack.readAllEntities("equip and (hyperstat or smartstat or hyperstatsplit)")
+        val standaloneEquips =
+            hayStack.readAllEntities("equip and (hyperstat or smartstat or hyperstatsplit)")
         val roomRefs = getRoomRefsForAllStandaloneProfiles(standaloneEquips)
-        roomRefs.forEach{roomRef ->
+        roomRefs.forEach { roomRef ->
             DesiredTempDisplayMode.setModeTypeOnUserIntentChange(roomRef, hayStack)
         }
     }
@@ -332,7 +491,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
     private fun getRoomRefsForAllStandaloneProfiles(standaloneEquips: ArrayList<HashMap<Any, Any>>):
             List<String> {
         val roomRefs: MutableList<String> = mutableListOf()
-        standaloneEquips.forEach {standaloneEquip ->
+        standaloneEquips.forEach { standaloneEquip ->
             roomRefs.add(standaloneEquip["roomRef"].toString())
         }
         return roomRefs.distinct()
@@ -340,9 +499,11 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
 
 
     private fun migrateEquipStatusEnums() {
-        val equipStatusPointList = hayStack.readAllEntities("status and not ota and not message" +
-                " and zone and his and enum and not modbus")
-        equipStatusPointList.forEach{equipStatusMap ->
+        val equipStatusPointList = hayStack.readAllEntities(
+            "status and not ota and not message" +
+                    " and zone and his and enum and not modbus"
+        )
+        equipStatusPointList.forEach { equipStatusMap ->
             val equipStatusPoint = Point.Builder().setHashMap(equipStatusMap).build()
             if (!equipStatusPoint.enums.toString().contains("rfdead")) {
                 equipStatusPoint.enums = "deadband,cooling,heating,tempdead,rfdead"
@@ -370,14 +531,15 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             hayStack.deleteEntityItem(demandResponseMode["id"].toString())
         }
         if (demandResponseEnrollment.isEmpty()) {
-            demandResponse.createDemandResponseEnrollmentPoint(displayName, siteRef, id, tz, hayStack
+            demandResponse.createDemandResponseEnrollmentPoint(
+                displayName, siteRef, id, tz, hayStack
             )
         }
         migrateDemandResponseSetbackTunerForAllTempZones(hayStack)
         migrateDemandResponseForOccupancyEnum(hayStack)
     }
 
-    private  fun migrateDemandResponseForOccupancyEnum(ccuHsApi: CCUHsApi) {
+    private fun migrateDemandResponseForOccupancyEnum(ccuHsApi: CCUHsApi) {
         val occModePoints = ccuHsApi.readAllEntities("occupancy and mode and enum and not modbus")
         occModePoints.forEach { occMode ->
             val occModePoint = Point.Builder().setHashMap(occMode).build()
@@ -464,15 +626,14 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
     }
 
 
-
-    private fun getAppVersion() : String {
+    private fun getAppVersion(): String {
         val pm = Globals.getInstance().applicationContext.packageManager
         val pi: PackageInfo
         try {
             pi = pm.getPackageInfo("a75f.io.renatus", 0)
             return pi.versionName.substring(
-                    pi.versionName.lastIndexOf('_') + 1,
-                    pi.versionName.length
+                pi.versionName.lastIndexOf('_') + 1,
+                pi.versionName.length
             )
         } catch (e: PackageManager.NameNotFoundException) {
             // TODO Auto-generated catch block
@@ -483,8 +644,8 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
 
     private fun doVavTerminalDomainModelMigration() {
         val vavEquips = hayStack.readAllEntities("equip and zone and vav")
-                                .filter { it["domainName"] == null }
-                                .toList()
+            .filter { it["domainName"] == null }
+            .toList()
         if (vavEquips.isEmpty()) {
             CcuLog.i(Domain.LOG_TAG, "VAV DM zone equip migration is complete")
             return
@@ -493,7 +654,8 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         val site = hayStack.site
         vavEquips.forEach {
             CcuLog.i(Domain.LOG_TAG, "Do DM zone equip migration for $it")
-            val reheatType = hayStack.readEntity("config and reheat and type and equipRef == \"${it["id"]}\"")
+            val reheatType =
+                hayStack.readEntity("config and reheat and type and equipRef == \"${it["id"]}\"")
             if (reheatType.isNotEmpty()) {
                 val reheatTypeVal = hayStack.readDefaultValById(reheatType["id"].toString())
                 CcuLog.i(Domain.LOG_TAG, "Update reheatType for $it - current $reheatTypeVal")
@@ -510,9 +672,12 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             val equipDis = "${site?.displayName}-VAV-${it["group"]}"
 
             val isHelioNode = it.containsKey("helionode")
-            val deviceModel = if (isHelioNode) ModelLoader.getHelioNodeDevice() as SeventyFiveFDeviceDirective else ModelLoader.getSmartNodeDevice() as SeventyFiveFDeviceDirective
-            val deviceDis = if (isHelioNode) "${site?.displayName}-HN-${it["group"]}" else "${site?.displayName}-SN-${it["group"]}"
-            val deviceBuilder = DeviceBuilder(hayStack, EntityMapper(model as SeventyFiveFProfileDirective))
+            val deviceModel =
+                if (isHelioNode) ModelLoader.getHelioNodeDevice() as SeventyFiveFDeviceDirective else ModelLoader.getSmartNodeDevice() as SeventyFiveFDeviceDirective
+            val deviceDis =
+                if (isHelioNode) "${site?.displayName}-HN-${it["group"]}" else "${site?.displayName}-SN-${it["group"]}"
+            val deviceBuilder =
+                DeviceBuilder(hayStack, EntityMapper(model as SeventyFiveFProfileDirective))
             val device = hayStack.readEntity("device and addr == \"" + it["group"] + "\"")
             val profileType = when {
                 it.containsKey("series") -> ProfileType.VAV_SERIES_FAN
@@ -530,8 +695,14 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                 model
             ).getActiveConfiguration()
 
-            equipBuilder.doCutOverMigration(it["id"].toString(), model,
-                                    equipDis, VavZoneProfileCutOverMapping.entries, profileConfiguration, equipHashMap = it)
+            equipBuilder.doCutOverMigration(
+                it["id"].toString(),
+                model,
+                equipDis,
+                VavZoneProfileCutOverMapping.entries,
+                profileConfiguration,
+                equipHashMap = it
+            )
 
             val vavEquip = VavEquip(it["id"].toString())
 
@@ -540,7 +711,8 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             vavEquip.damperSize.writeDefaultVal(newDamperSize)
 
             // temperature offset is now a literal (was multiplied by 10 before)
-            val newTempOffset = String.format("%.1f", vavEquip.temperatureOffset.readDefaultVal() * 0.1).toDouble()
+            val newTempOffset =
+                String.format("%.1f", vavEquip.temperatureOffset.readDefaultVal() * 0.1).toDouble()
             vavEquip.temperatureOffset.writeDefaultVal(newTempOffset)
 
             // At app startup, cutover migrations currently run before upgrades.
@@ -570,11 +742,12 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         val site = hayStack.site
         dabEquips.forEach {
             CcuLog.i(Domain.LOG_TAG, "Do DM zone equip migration for $it")
-            val reheatType = hayStack.readEntity("config and reheat and type and equipRef == \"${it["id"]}\"")
+            val reheatType =
+                hayStack.readEntity("config and reheat and type and equipRef == \"${it["id"]}\"")
             if (reheatType.isNotEmpty()) {
                 val reheatTypeVal = hayStack.readDefaultValById(reheatType["id"].toString())
                 CcuLog.i(Domain.LOG_TAG, "Update reheatType for $it - current $reheatTypeVal")
-                hayStack.writeDefaultValById(reheatType["id"].toString(), reheatTypeVal )
+                hayStack.writeDefaultValById(reheatType["id"].toString(), reheatTypeVal)
             }
             val model = when {
                 it.containsKey("dab") && it.containsKey("smartnode") -> ModelLoader.getSmartNodeDabModel()
@@ -583,9 +756,12 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             val equipDis = "${site?.displayName}-DAB-${it["group"]}"
 
             val isHelioNode = it.containsKey("helionode")
-            val deviceModel = if (isHelioNode) ModelLoader.getHelioNodeDevice() as SeventyFiveFDeviceDirective else ModelLoader.getSmartNodeDevice() as SeventyFiveFDeviceDirective
-            val deviceDis = if (isHelioNode) "${site?.displayName}-HN-${it["group"]}" else "${site?.displayName}-SN-${it["group"]}"
-            val deviceBuilder = DeviceBuilder(hayStack, EntityMapper(model as SeventyFiveFProfileDirective))
+            val deviceModel =
+                if (isHelioNode) ModelLoader.getHelioNodeDevice() as SeventyFiveFDeviceDirective else ModelLoader.getSmartNodeDevice() as SeventyFiveFDeviceDirective
+            val deviceDis =
+                if (isHelioNode) "${site?.displayName}-HN-${it["group"]}" else "${site?.displayName}-SN-${it["group"]}"
+            val deviceBuilder =
+                DeviceBuilder(hayStack, EntityMapper(model as SeventyFiveFProfileDirective))
             val device = hayStack.readEntity("device and addr == \"" + it["group"] + "\"")
             val profileType = ProfileType.DAB
 
@@ -599,8 +775,14 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                 model
             ).getActiveConfiguration()
 
-            equipBuilder.doCutOverMigration(it["id"].toString(), model,
-                equipDis, DabZoneProfileCutOverMapping.entries, profileConfiguration, equipHashMap = it)
+            equipBuilder.doCutOverMigration(
+                it["id"].toString(),
+                model,
+                equipDis,
+                DabZoneProfileCutOverMapping.entries,
+                profileConfiguration,
+                equipHashMap = it
+            )
 
             val dabEquip = DabEquip(it["id"].toString())
 
@@ -613,7 +795,8 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             dabEquip.damper2Size.writeDefaultVal(newDamper2Size)
 
             // temperature offset is now a literal (was multiplied by 10 before)
-            val newTempOffset = String.format("%.1f", dabEquip.temperatureOffset.readDefaultVal() * 0.1).toDouble()
+            val newTempOffset =
+                String.format("%.1f", dabEquip.temperatureOffset.readDefaultVal() * 0.1).toDouble()
             dabEquip.temperatureOffset.writeDefaultVal(newTempOffset)
 
             // At app startup, cutOver migrations currently run before upgrades.
@@ -631,7 +814,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         }
     }
 
-    private fun getDamperSizeEnum(size: Double) : Double {
+    private fun getDamperSizeEnum(size: Double): Double {
         return when (size) {
             6.0 -> 1.0
             8.0 -> 2.0
@@ -659,32 +842,57 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         }
         val equipBuilder = ProfileEquipBuilder(hayStack)
         val deviceModel = ModelLoader.getCMDeviceModel() as SeventyFiveFDeviceDirective
-        val deviceDis = hayStack.siteName +"-"+ deviceModel.name
+        val deviceDis = hayStack.siteName + "-" + deviceModel.name
         dabEquips.forEach {
             CcuLog.i(Domain.LOG_TAG, "Do DM system equip migration for $it")
             when {
                 (it["profile"].toString() == "SYSTEM_DAB_STAGED_RTU" ||
                         it["domainName"].toString() == "dabStagedRtu") -> {
-                    migrateDabStagedSystemProfile(it["id"].toString(), equipBuilder, site, deviceModel, deviceDis)
+                    migrateDabStagedSystemProfile(
+                        it["id"].toString(),
+                        equipBuilder,
+                        site,
+                        deviceModel,
+                        deviceDis,
+                        equipHashMap = it
+                    )
                 }
+
                 (it["profile"].toString() == "SYSTEM_DAB_STAGED_VFD_RTU" ||
                         it["domainName"].toString() == "dabStagedRtuVfdFan") -> {
-                    migrateDabStagedVfdSystemProfile(it["id"].toString(), equipBuilder, site, deviceModel, deviceDis)
+                    migrateDabStagedVfdSystemProfile(
+                        it["id"].toString(),
+                        equipBuilder,
+                        site,
+                        deviceModel,
+                        deviceDis,
+                        equipHashMap = it
+                    )
                 }
+
                 else -> {}
             }
 
         }
     }
 
-    private fun migrateDabStagedSystemProfile (equipId : String, equipBuilder: ProfileEquipBuilder, site: Site,
-                                               deviceModel : SeventyFiveFDeviceDirective, deviceDis : String) {
+    private fun migrateDabStagedSystemProfile(
+        equipId: String, equipBuilder: ProfileEquipBuilder, site: Site,
+        deviceModel: SeventyFiveFDeviceDirective, deviceDis: String, equipHashMap: HashMap<Any, Any>
+    ) {
 
         val model = ModelLoader.getDabStageRtuModelDef()
         val equipDis = "${site.displayName}-${model.name}"
         val profileConfig = StagedRtuProfileConfig(model as SeventyFiveFProfileDirective)
-        equipBuilder.doCutOverMigration(equipId, model,
-            equipDis, DabStagedRtuCutOverMapping.entries , profileConfig.getDefaultConfiguration(), isSystem = true)
+        equipBuilder.doCutOverMigration(
+            equipId,
+            model,
+            equipDis,
+            DabStagedRtuCutOverMapping.entries,
+            profileConfig.getDefaultConfiguration(),
+            isSystem = true,
+            equipHashMap = equipHashMap
+        )
 
         val entityMapper = EntityMapper(model)
         val deviceBuilder = DeviceBuilder(hayStack, entityMapper)
@@ -716,36 +924,69 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         }
         val equipBuilder = ProfileEquipBuilder(hayStack)
         val deviceModel = ModelLoader.getCMDeviceModel() as SeventyFiveFDeviceDirective
-        val deviceDis = hayStack.siteName +"-"+ deviceModel.name
+        val deviceDis = hayStack.siteName + "-" + deviceModel.name
         vavEquips.forEach {
             CcuLog.i(Domain.LOG_TAG, "Do DM system equip migration for $it")
             when {
                 (it["profile"].toString() == "SYSTEM_VAV_STAGED_RTU" ||
-                    it["domainName"].toString() == "vavStagedRtu") -> {
-                    migrateVavStagedSystemProfile(it["id"].toString(), equipBuilder, site, deviceModel, deviceDis)
+                        it["domainName"].toString() == "vavStagedRtu") -> {
+                    migrateVavStagedSystemProfile(
+                        it["id"].toString(),
+                        equipBuilder,
+                        site,
+                        deviceModel,
+                        deviceDis,
+                        equipHashMap = it
+                    )
                 }
+
                 (it["profile"].toString() == "SYSTEM_VAV_STAGED_VFD_RTU" ||
                         it["domainName"].toString() == "vavStagedRtuVfdFan") -> {
-                   migrateVavStagedVfdSystemProfile(it["id"].toString(), equipBuilder, site, deviceModel, deviceDis)
+                    migrateVavStagedVfdSystemProfile(
+                        it["id"].toString(),
+                        equipBuilder,
+                        site,
+                        deviceModel,
+                        deviceDis,
+                        equipHashMap = it
+                    )
                 }
+
                 (it["profile"].toString() == "SYSTEM_VAV_ANALOG_RTU" ||
                         it["domainName"].toString() == "vavFullyModulatingAhu") -> {
-                    migrateVavFullyModulatingSystemProfile(it["id"].toString(), equipBuilder, site, deviceModel, deviceDis)
+                    migrateVavFullyModulatingSystemProfile(
+                        it["id"].toString(),
+                        equipBuilder,
+                        site,
+                        deviceModel,
+                        deviceDis,
+                        equipHashMap = it
+                    )
                 }
+
                 else -> {}
             }
 
         }
     }
 
-    private fun migrateVavStagedSystemProfile (equipId : String, equipBuilder: ProfileEquipBuilder, site: Site,
-                                               deviceModel : SeventyFiveFDeviceDirective, deviceDis : String) {
+    private fun migrateVavStagedSystemProfile(
+        equipId: String, equipBuilder: ProfileEquipBuilder, site: Site,
+        deviceModel: SeventyFiveFDeviceDirective, deviceDis: String, equipHashMap: HashMap<Any, Any>
+    ) {
 
         val model = ModelLoader.getVavStageRtuModelDef()
         val equipDis = "${site.displayName}-${model.name}"
         val profileConfig = StagedRtuProfileConfig(model as SeventyFiveFProfileDirective)
-        equipBuilder.doCutOverMigration(equipId, model,
-            equipDis, VavStagedRtuCutOverMapping.entries , profileConfig.getDefaultConfiguration(), isSystem = true)
+        equipBuilder.doCutOverMigration(
+            equipId,
+            model,
+            equipDis,
+            VavStagedRtuCutOverMapping.entries,
+            profileConfig.getDefaultConfiguration(),
+            isSystem = true,
+            equipHashMap = equipHashMap
+        )
 
         val entityMapper = EntityMapper(model)
         val deviceBuilder = DeviceBuilder(hayStack, entityMapper)
@@ -765,15 +1006,23 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         )
     }
 
-    private fun migrateVavStagedVfdSystemProfile (equipId : String, equipBuilder: ProfileEquipBuilder, site: Site,
-                                               deviceModel : SeventyFiveFDeviceDirective, deviceDis : String) {
+    private fun migrateVavStagedVfdSystemProfile(
+        equipId: String, equipBuilder: ProfileEquipBuilder, site: Site,
+        deviceModel: SeventyFiveFDeviceDirective, deviceDis: String, equipHashMap: HashMap<Any, Any>
+    ) {
 
         val model = ModelLoader.getVavStagedVfdRtuModelDef()
         val equipDis = "${site.displayName}-${model.name}"
         val profileConfig = StagedVfdRtuProfileConfig(model as SeventyFiveFProfileDirective)
-        equipBuilder.doCutOverMigration(equipId, model,
-            equipDis, VavStagedVfdRtuCutOverMapping.entries , profileConfig.getDefaultConfiguration()
-            ,isSystem = true)
+        equipBuilder.doCutOverMigration(
+            equipId,
+            model,
+            equipDis,
+            VavStagedVfdRtuCutOverMapping.entries,
+            profileConfig.getDefaultConfiguration(),
+            isSystem = true,
+            equipHashMap = equipHashMap
+        )
 
         val entityMapper = EntityMapper(model)
         val deviceBuilder = DeviceBuilder(hayStack, entityMapper)
@@ -793,15 +1042,23 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         )
     }
 
-    private fun migrateDabStagedVfdSystemProfile (equipId : String, equipBuilder: ProfileEquipBuilder, site: Site,
-                                                  deviceModel : SeventyFiveFDeviceDirective, deviceDis : String) {
+    private fun migrateDabStagedVfdSystemProfile(
+        equipId: String, equipBuilder: ProfileEquipBuilder, site: Site,
+        deviceModel: SeventyFiveFDeviceDirective, deviceDis: String, equipHashMap: HashMap<Any, Any>
+    ) {
 
         val model = ModelLoader.getDabStagedVfdRtuModelDef()
         val equipDis = "${site.displayName}-${model.name}"
         val profileConfig = StagedVfdRtuProfileConfig(model as SeventyFiveFProfileDirective)
-        equipBuilder.doCutOverMigration(equipId, model,
-            equipDis, DabStagedVfdRtuCutOverMapping.entries , profileConfig.getDefaultConfiguration()
-            ,isSystem = true)
+        equipBuilder.doCutOverMigration(
+            equipId,
+            model,
+            equipDis,
+            DabStagedVfdRtuCutOverMapping.entries,
+            profileConfig.getDefaultConfiguration(),
+            isSystem = true,
+            equipHashMap
+        )
 
         val entityMapper = EntityMapper(model)
         val deviceBuilder = DeviceBuilder(hayStack, entityMapper)
@@ -821,15 +1078,23 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         )
     }
 
-    private fun migrateVavFullyModulatingSystemProfile (equipId : String, equipBuilder: ProfileEquipBuilder, site: Site,
-                                                  deviceModel : SeventyFiveFDeviceDirective, deviceDis : String) {
+    private fun migrateVavFullyModulatingSystemProfile(
+        equipId: String, equipBuilder: ProfileEquipBuilder, site: Site,
+        deviceModel: SeventyFiveFDeviceDirective, deviceDis: String, equipHashMap: HashMap<Any, Any>
+    ) {
         CcuLog.i(Domain.LOG_TAG, "VavFullyModulatingSystemProfile equipID: $equipId")
         val model = ModelLoader.getVavModulatingRtuModelDef()
         val equipDis = "${site.displayName}-${model.name}"
         val profileConfig = ModulatingRtuProfileConfig(model as SeventyFiveFProfileDirective)
-        equipBuilder.doCutOverMigration(equipId, model,
-            equipDis, VavFullyModulatingRtuCutOverMapping.entries , profileConfig.getDefaultConfiguration()
-            ,isSystem = true)
+        equipBuilder.doCutOverMigration(
+            equipId,
+            model,
+            equipDis,
+            VavFullyModulatingRtuCutOverMapping.entries,
+            profileConfig.getDefaultConfiguration(),
+            isSystem = true,
+            equipHashMap = equipHashMap
+        )
 
         val entityMapper = EntityMapper(model)
         val deviceBuilder = DeviceBuilder(hayStack, entityMapper)
@@ -864,9 +1129,11 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
 
             val model = ModelLoader.getHyperStatSplitCpuModel()
             val equipDis = "${site?.displayName}-cpuecon-${it["group"]}"
-            val deviceModel = ModelLoader.getHyperStatSplitDeviceModel() as SeventyFiveFDeviceDirective
+            val deviceModel =
+                ModelLoader.getHyperStatSplitDeviceModel() as SeventyFiveFDeviceDirective
             val deviceDis = "${site?.displayName}-HSS-${it["group"]}"
-            val deviceBuilder = DeviceBuilder(hayStack, EntityMapper(model as SeventyFiveFProfileDirective))
+            val deviceBuilder =
+                DeviceBuilder(hayStack, EntityMapper(model as SeventyFiveFProfileDirective))
             val device = hayStack.readEntity("device and addr == \"" + it["group"] + "\"")
 
             val profileConfiguration = HyperStatSplitCpuProfileConfiguration(
@@ -879,8 +1146,14 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                 model
             ).getActiveConfiguration()
 
-            equipBuilder.doCutOverMigration(it["id"].toString(), model,
-                equipDis, HyperStatSplitCpuCutOverMapping.entries, profileConfiguration, equipHashMap = it)
+            equipBuilder.doCutOverMigration(
+                it["id"].toString(),
+                model,
+                equipDis,
+                HyperStatSplitCpuCutOverMapping.entries,
+                profileConfiguration,
+                equipHashMap = it
+            )
 
             val hssEquip = HyperStatSplitEquip(it["id"].toString())
 
@@ -891,51 +1164,88 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             }
 
             if (hssEquip.universalIn1Association.pointExists()) {
-                hssEquip.universalIn1Association.writeDefaultVal(migrateUniversalInValue(hssEquip.universalIn1Association.readDefaultVal().toInt()))
+                hssEquip.universalIn1Association.writeDefaultVal(
+                    migrateUniversalInValue(
+                        hssEquip.universalIn1Association.readDefaultVal().toInt()
+                    )
+                )
             }
 
             if (hssEquip.universalIn2Association.pointExists()) {
-                hssEquip.universalIn2Association.writeDefaultVal(migrateUniversalInValue(hssEquip.universalIn2Association.readDefaultVal().toInt()))
+                hssEquip.universalIn2Association.writeDefaultVal(
+                    migrateUniversalInValue(
+                        hssEquip.universalIn2Association.readDefaultVal().toInt()
+                    )
+                )
             }
 
             if (hssEquip.universalIn3Association.pointExists()) {
-                hssEquip.universalIn3Association.writeDefaultVal(migrateUniversalInValue(hssEquip.universalIn3Association.readDefaultVal().toInt()))
+                hssEquip.universalIn3Association.writeDefaultVal(
+                    migrateUniversalInValue(
+                        hssEquip.universalIn3Association.readDefaultVal().toInt()
+                    )
+                )
             }
 
             if (hssEquip.universalIn4Association.pointExists()) {
-                hssEquip.universalIn4Association.writeDefaultVal(migrateUniversalInValue(hssEquip.universalIn4Association.readDefaultVal().toInt()))
+                hssEquip.universalIn4Association.writeDefaultVal(
+                    migrateUniversalInValue(
+                        hssEquip.universalIn4Association.readDefaultVal().toInt()
+                    )
+                )
             }
 
             if (hssEquip.universalIn5Association.pointExists()) {
-                hssEquip.universalIn5Association.writeDefaultVal(migrateUniversalInValue(hssEquip.universalIn5Association.readDefaultVal().toInt()))
+                hssEquip.universalIn5Association.writeDefaultVal(
+                    migrateUniversalInValue(
+                        hssEquip.universalIn5Association.readDefaultVal().toInt()
+                    )
+                )
             }
 
             if (hssEquip.universalIn6Association.pointExists()) {
-                hssEquip.universalIn6Association.writeDefaultVal(migrateUniversalInValue(hssEquip.universalIn6Association.readDefaultVal().toInt()))
+                hssEquip.universalIn6Association.writeDefaultVal(
+                    migrateUniversalInValue(
+                        hssEquip.universalIn6Association.readDefaultVal().toInt()
+                    )
+                )
             }
 
             if (hssEquip.universalIn7Association.pointExists()) {
-                hssEquip.universalIn7Association.writeDefaultVal(migrateUniversalInValue(hssEquip.universalIn7Association.readDefaultVal().toInt()))
+                hssEquip.universalIn7Association.writeDefaultVal(
+                    migrateUniversalInValue(
+                        hssEquip.universalIn7Association.readDefaultVal().toInt()
+                    )
+                )
             }
 
             if (hssEquip.universalIn8Association.pointExists()) {
-                hssEquip.universalIn8Association.writeDefaultVal(migrateUniversalInValue(hssEquip.universalIn8Association.readDefaultVal().toInt()))
+                hssEquip.universalIn8Association.writeDefaultVal(
+                    migrateUniversalInValue(
+                        hssEquip.universalIn8Association.readDefaultVal().toInt()
+                    )
+                )
             }
 
             if (hssEquip.standalonePrePurgeOccupiedTimeOffsetTuner.pointExists()) {
-                val prePurgeOffsetMap = hayStack.readMapById(hssEquip.standalonePrePurgeOccupiedTimeOffsetTuner.id)
-                val prePurgeOffsetPoint = Point.Builder().setHashMap(prePurgeOffsetMap).addMarker("tuner").build()
+                val prePurgeOffsetMap =
+                    hayStack.readMapById(hssEquip.standalonePrePurgeOccupiedTimeOffsetTuner.id)
+                val prePurgeOffsetPoint =
+                    Point.Builder().setHashMap(prePurgeOffsetMap).addMarker("tuner").build()
                 hayStack.updatePoint(prePurgeOffsetPoint, prePurgeOffsetPoint.id)
             }
 
             if (hssEquip.standalonePrePurgeFanSpeedTuner.pointExists()) {
-                val prePurgeFanSpeedMap = hayStack.readMapById(hssEquip.standalonePrePurgeFanSpeedTuner.id)
-                val prePurgeFanSpeedPoint = Point.Builder().setHashMap(prePurgeFanSpeedMap).addMarker("tuner").build()
+                val prePurgeFanSpeedMap =
+                    hayStack.readMapById(hssEquip.standalonePrePurgeFanSpeedTuner.id)
+                val prePurgeFanSpeedPoint =
+                    Point.Builder().setHashMap(prePurgeFanSpeedMap).addMarker("tuner").build()
                 hayStack.updatePoint(prePurgeFanSpeedPoint, prePurgeFanSpeedPoint.id)
             }
 
             if (hssEquip.prePurgeEnable.readPriorityVal() > 0.0 && !hssEquip.prePurgeStatus.pointExists()) {
-                val prePurgeStatus = model.points.find { it.domainName == DomainName.prePurgeStatus }
+                val prePurgeStatus =
+                    model.points.find { it.domainName == DomainName.prePurgeStatus }
                 prePurgeStatus.run {
                     equipBuilder.createPoint(
                         PointBuilderConfig(
@@ -951,7 +1261,8 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             }
 
             if (hssEquip.temperatureSensorBusAdd0.pointExists()) {
-                val humiditySensorBusAdd0Def = model.points.find { it.domainName == DomainName.humiditySensorBusAdd0 }
+                val humiditySensorBusAdd0Def =
+                    model.points.find { it.domainName == DomainName.humiditySensorBusAdd0 }
                 humiditySensorBusAdd0Def.run {
                     val humiditySensorBusAdd0Id = equipBuilder.createPoint(
                         PointBuilderConfig(
@@ -968,7 +1279,8 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             }
 
             if (hssEquip.temperatureSensorBusAdd1.pointExists()) {
-                val humiditySensorBusAdd1Def = model.points.find { it.domainName == DomainName.humiditySensorBusAdd1 }
+                val humiditySensorBusAdd1Def =
+                    model.points.find { it.domainName == DomainName.humiditySensorBusAdd1 }
                 humiditySensorBusAdd1Def.run {
                     val humiditySensorBusAdd1Id = equipBuilder.createPoint(
                         PointBuilderConfig(
@@ -985,7 +1297,8 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             }
 
             if (hssEquip.temperatureSensorBusAdd2.pointExists()) {
-                val humiditySensorBusAdd2Def = model.points.find { it.domainName == DomainName.humiditySensorBusAdd2 }
+                val humiditySensorBusAdd2Def =
+                    model.points.find { it.domainName == DomainName.humiditySensorBusAdd2 }
                 humiditySensorBusAdd2Def.run {
                     val humiditySensorBusAdd2Id = equipBuilder.createPoint(
                         PointBuilderConfig(
@@ -1042,49 +1355,215 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         }
     }
 
-    fun updateMigrationVersion(){
+    private fun doOAOProfileMigration() {
+        val oao = hayStack.readEntity("equip and oao")
+        if (oao.isEmpty() || (oao.isNotEmpty() && oao.containsKey("domainName"))) {
+            CcuLog.i(Domain.LOG_TAG, "OAO equip is not found or OAO equip is already migrated")
+            return
+        }
+
+        val CT_INDEX_START = 8
+        val equipBuilder = ProfileEquipBuilder(hayStack)
+        val site = hayStack.site
+        CcuLog.i(Domain.LOG_TAG, "Do OAO migration for oao")
+        val model = ModelLoader.getSmartNodeOAOModelDef()
+        val equipDis = "${site?.displayName}-OAO-${oao["group"]}"
+        val deviceModel = ModelLoader.getSmartNodeDevice() as SeventyFiveFDeviceDirective
+        val deviceBuilder =
+            DeviceBuilder(hayStack, EntityMapper(model as SeventyFiveFProfileDirective))
+        val device = hayStack.readEntity("device and addr == \"" + oao["group"] + "\"")
+        val deviceDis = "${site?.displayName}-SN-${oao["group"]}"
+        val profileType = ProfileType.OAO
+
+        val oaoConfiguration = OAOProfileConfiguration(
+            Integer.parseInt(oao["group"].toString()),
+            NodeType.SMART_NODE.name,
+            0,
+            oao["roomRef"].toString(),
+            oao["floorRef"].toString(),
+            profileType,
+            model
+        ).getActiveConfiguration()
+
+        CcuLog.d(
+            L.TAG_CCU_DOMAIN,
+            "oao migration configuration: $oaoConfiguration, deviceDis: $deviceDis, equipDis: $equipDis"
+        )
+        equipBuilder.doCutOverMigration(
+            oao["id"].toString(), model,
+            equipDis, OaoCutOverMapping.entries, oaoConfiguration, equipHashMap = oao
+        )
+
+        deviceBuilder.doCutOverMigration(
+            device["id"].toString(),
+            deviceModel,
+            deviceDis,
+            NodeDeviceCutOverMapping.entries,
+            oaoConfiguration
+        )
+
+        val oaoEquip = OAOEquip(oao["id"].toString())
+        oaoEquip.currentTransformerType.writeDefaultVal(oaoEquip.currentTransformerType.readDefaultVal() - CT_INDEX_START)
+
+        fun getSystemProfileType(): String {
+            val profileType = L.ccu().systemProfile.profileType
+            return when (profileType) {
+                ProfileType.SYSTEM_DAB_ANALOG_RTU, ProfileType.SYSTEM_DAB_HYBRID_RTU, ProfileType.SYSTEM_DAB_STAGED_RTU, ProfileType.SYSTEM_DAB_STAGED_VFD_RTU, ProfileType.dabExternalAHUController, ProfileType.SYSTEM_DAB_ADVANCED_AHU -> "dab"
+                ProfileType.SYSTEM_VAV_ANALOG_RTU, ProfileType.SYSTEM_VAV_HYBRID_RTU, ProfileType.SYSTEM_VAV_IE_RTU, ProfileType.SYSTEM_VAV_STAGED_RTU, ProfileType.SYSTEM_VAV_STAGED_VFD_RTU, ProfileType.SYSTEM_VAV_ADVANCED_AHU, ProfileType.vavExternalAHUController -> "vav"
+                else -> {
+                    "default"
+                }
+            }
+        }
+
+        val deviceEntityId =
+            hayStack.readEntity("device and addr == \"${oaoConfiguration.nodeAddress}\"")["id"].toString()
+        val device1 = Device.Builder().setHDict(hayStack.readHDictById(deviceEntityId)).build()
+
+        fun updateDevicePoint(domainName: String, port: String, analogType: Any) {
+            val pointDef = deviceModel.points.find { it.domainName == domainName }
+            pointDef?.let {
+                val pointDict = getDevicePointDict(domainName, deviceEntityId, hayStack).apply {
+                    this["port"] = port
+                    this["analogType"] = analogType
+                }
+                deviceBuilder.updatePoint(it, oaoConfiguration, device1, pointDict)
+            }
+        }
+
+        //Update analog input points
+        updateDevicePoint(DomainName.analog1In, Port.ANALOG_IN_ONE.name, 5)
+        updateDevicePoint(
+            DomainName.analog2In,
+            Port.ANALOG_IN_TWO.name,
+            8 + oaoEquip.currentTransformerType.readDefaultVal().toInt()
+        )
+
+        //Update analog output points
+        updateDevicePoint(
+            DomainName.analog1Out,
+            Port.ANALOG_OUT_ONE.name,
+            "${oaoEquip.outsideDamperMinDrive.readDefaultVal()} - ${oaoEquip.outsideDamperMaxDrive.readDefaultVal()}"
+        )
+        updateDevicePoint(
+            DomainName.analog2Out,
+            Port.ANALOG_OUT_TWO.name,
+            "${oaoEquip.returnDamperMinDrive.readDefaultVal()} - ${oaoEquip.returnDamperMaxDrive.readDefaultVal()}"
+        )
+
+        //Update TH input points
+        updateDevicePoint(DomainName.th1In, Port.TH1_IN.name, 0)
+        updateDevicePoint(DomainName.th2In, Port.TH2_IN.name, 0)
+
+        //Update relay points
+        updateDevicePoint(
+            DomainName.relay1,
+            Port.RELAY_ONE.name,
+            OutputRelayActuatorType.NormallyClose.displayName
+        )
+        updateDevicePoint(
+            DomainName.relay2,
+            Port.RELAY_TWO.name,
+            OutputRelayActuatorType.NormallyClose.displayName
+        )
+
+    }
+
+
+    fun updateMigrationVersion() {
         val pm = Globals.getInstance().applicationContext.packageManager
         val pi: PackageInfo
         try {
             pi = pm.getPackageInfo("a75f.io.renatus", 0)
             val currentAppVersion = pi.versionName.substring(pi.versionName.lastIndexOf('_') + 1)
-            val migrationVersion = hayStack.readDefaultStrVal("diag and migration and version")
-            CcuLog.d(TAG_CCU_DOMAIN, "currentAppVersion: $currentAppVersion, migrationVersion: $migrationVersion")
+            val migrationVersion = Domain.readStrPointValueByDomainName(DomainName.migrationVersion)
+            CcuLog.d(
+                TAG_CCU_DOMAIN,
+                "currentAppVersion: $currentAppVersion, migrationVersion: $migrationVersion"
+            )
             if (currentAppVersion != migrationVersion) {
-                CCUHsApi.getInstance().writeDefaultVal("point and diag and migration", currentAppVersion)
+                Domain.writeDefaultValByDomain(DomainName.migrationVersion, currentAppVersion)
             }
         } catch (e: PackageManager.NameNotFoundException) {
             e.printStackTrace()
         }
     }
 
-     fun temperatureModeMigration() {
+    fun temperatureModeMigration() {
         if (!PreferenceUtil.isTempModeMigrationRequired()) {
-            CcuLog.i(L.TAG_CCU_MIGRATION_UTIL,"Temperature mode migration Initiated")
-            writeValAtLevelByDomain(DomainName.temperatureMode, TunerConstants.SYSTEM_BUILDING_VAL_LEVEL,1.0)
+            CcuLog.i(L.TAG_CCU_MIGRATION_UTIL, "Temperature mode migration Initiated")
+            writeValAtLevelByDomain(
+                DomainName.temperatureMode,
+                TunerConstants.SYSTEM_BUILDING_VAL_LEVEL,
+                1.0
+            )
             PreferenceUtil.setTempModeMigrationNotRequired()
         }
     }
 
+    private fun migrateAnalogTypeForVavAnalog1In() {
+        CcuLog.i(L.TAG_CCU_MIGRATION_UTIL, "Migrate Analog Type for VAV Analog1In!!")
+        hayStack.readAllEntities("equip and zone and vav and domainName").forEach { equip ->
+            val device = hayStack.read("device and equipRef == \"${equip["id"]}\"")
+            val analog1In =
+                hayStack.read("domainName == \"${DomainName.analog1In}\" and deviceRef == \"${device["id"]}\"")
+            val damperType =
+                hayStack.readPointPriorityValByQuery("domainName == \"${DomainName.damperType}\" and equipRef == \"${equip["id"]}\"")
+            if (analog1In.isNotEmpty()) {
+                val analog1InPoint =
+                    RawPoint.Builder().setHDict(hayStack.readHDictById(analog1In["id"].toString()))
+                        .build()
+                analog1InPoint.type = getDamperTypeString(damperType.toInt())
+                hayStack.updatePoint(analog1InPoint, analog1In["id"].toString())
+                CcuLog.d(
+                    L.TAG_CCU_MIGRATION_UTIL,
+                    "Analog1In type updated for device ${device["dis"]}"
+                )
+            }
+        }
+    }
+
+    private fun getDamperTypeString(index: Int): String {
+        return when (index) {
+            0 -> "0-10v"
+            1 -> "2-10v"
+            2 -> "10-2v"
+            3 -> "10-0v"
+            4 -> "Smart Damper"
+            5 -> "0-5v"
+            else -> {
+                "0-10v"
+            }
+        }
+    }
+
     private fun migrateHisInterpolateForDevicePoints() {
-        CcuLog.i(L.TAG_CCU_MIGRATION_UTIL,"Migrate His Interpolate for Device Points!!")
-        val devices= hayStack.readAllEntities("device and domainName and not modbus and not ccu") // DM integrated devices
+        CcuLog.i(L.TAG_CCU_MIGRATION_UTIL, "Migrate His Interpolate for Device Points!!")
+        val devices =
+            hayStack.readAllEntities("device and domainName and not modbus and not ccu") // DM integrated devices
         devices.forEach { device ->
-            CcuLog.d(L.TAG_CCU_MIGRATION_UTIL,"device id ${device["id"]} device name ${device["dis"]}")
+            CcuLog.d(
+                L.TAG_CCU_MIGRATION_UTIL,
+                "device id ${device["id"]} device name ${device["dis"]}"
+            )
 
             val devicePointsList = hayStack.readAllEntities("deviceRef == \"${device["id"]}\"")
-            val haystackDevice = Device.Builder().setHDict(hayStack.readHDictById(device["id"].toString())).build()
-            val deviceModel =  if(device["sourceModel"] == null) { // If sourceModel is not found, fetch model by using domainName
-                try {
-                    ModelLoader.getModelForDomainName(device["domainName"].toString())
-                } catch (e: Exception) {
-                    CcuLog.e(L.TAG_CCU_DOMAIN, "Error while fetching sourceModel for device ${device["dis"]}. Skipping hisInterpolate migration.....")
-                    return@forEach
+            val haystackDevice =
+                Device.Builder().setHDict(hayStack.readHDictById(device["id"].toString())).build()
+            val deviceModel =
+                if (device["sourceModel"] == null) { // If sourceModel is not found, fetch model by using domainName
+                    try {
+                        ModelLoader.getModelForDomainName(device["domainName"].toString())
+                    } catch (e: Exception) {
+                        CcuLog.e(
+                            L.TAG_CCU_DOMAIN,
+                            "Error while fetching sourceModel for device ${device["dis"]}. Skipping hisInterpolate migration....."
+                        )
+                        return@forEach
+                    }
+                } else {
+                    ModelCache.getModelById(device["sourceModel"].toString())
                 }
-            }
-            else {
-                ModelCache.getModelById(device["sourceModel"].toString())
-            }
 
             val equip = hayStack.read("id == ${device["equipRef"]}")
             val profileType = equip["profile"].toString()
@@ -1096,20 +1575,31 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
 
             devicePointsList.forEach { point ->
                 if (!point.containsKey("hisInterpolate")) {
-                    CcuLog.d(L.TAG_CCU_DOMAIN,"hisInterpolate not found for device point ${point["dis"]}. Updating hisInterpolate tag.....")
-                    val modelPointDef = deviceModel.points.find { it.domainName == point["domainName"].toString() }
-                     deviceBuilder.updatePoint(modelPointDef as SeventyFiveFDevicePointDef ,profileConfiguration, haystackDevice,point)
+                    CcuLog.d(
+                        L.TAG_CCU_DOMAIN,
+                        "hisInterpolate not found for device point ${point["dis"]}. Updating hisInterpolate tag....."
+                    )
+                    val modelPointDef =
+                        deviceModel.points.find { it.domainName == point["domainName"].toString() }
+                    deviceBuilder.updatePoint(
+                        modelPointDef as SeventyFiveFDevicePointDef,
+                        profileConfiguration,
+                        haystackDevice,
+                        point
+                    )
                 }
             }
         }
     }
 
-    private fun getProfileConfig(profileType: String) : ProfileConfiguration {
-        return when(profileType) {
+    private fun getProfileConfig(profileType: String): ProfileConfiguration {
+        return when (profileType) {
             "dabExternalAHUController", "vavExternalAHUController" -> {
                 val profile = ExternalAhuConfiguration(profileType)
                 profile
-            }else -> {
+            }
+
+            else -> {
                 /*
                  This is not a robust solution, but it works for now.
                  Right now, existing configuration classes reside in the :logic package and aren't accessible here.
@@ -1117,6 +1607,536 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
              */
                 val profile = DefaultProfileConfiguration(1000, "", 0, "", "", profileType)
                 profile
+            }
+        }
+    }
+
+    private fun updateBacnetProperties(hayStack: CCUHsApi) {
+        // migration for system equip and points
+        val hsSystemEquip = hayStack.readEntity("equip and system and not modbus and domainName")
+        val site = hayStack.site
+        val profileEquipBuilder = ProfileEquipBuilder(hayStack)
+
+        if (hsSystemEquip.isNotEmpty() && site != null) {
+            val systemModel = ModelCache.getModelById(hsSystemEquip["sourceModel"].toString())
+            val profileType = hsSystemEquip["profile"].toString()
+            val profileConfig = DefaultProfileConfiguration(
+                hsSystemEquip["group"].toString().toInt(),
+                "",
+                0,
+                hsSystemEquip["roomRef"].toString(),
+                hsSystemEquip["floorRef"].toString(),
+                profileType
+            )
+            val equipDis = hsSystemEquip["dis"].toString()
+            val systemEquip = profileEquipBuilder.buildEquip(
+                EquipBuilderConfig(
+                    systemModel,
+                    profileConfig,
+                    site.id,
+                    hayStack.timeZone,
+                    equipDis
+                )
+            )
+            hayStack.updateEquip(systemEquip, hsSystemEquip["id"].toString())
+
+            val bacnetPoints = hayStack.readAllEntities(
+                "point and domainName and bacnetId and equipRef == \"${hsSystemEquip["id"]}\""
+            )
+            bacnetPoints.forEach { point ->
+                CcuLog.d(
+                    L.TAG_CCU_DOMAIN,
+                    "Updating bacnetId for the system point(${point["dis"]})."
+                )
+                systemModel.points.find { it.domainName == point["domainName"] }?.let { pointDef ->
+                    profileEquipBuilder.updatePoint(
+                        PointBuilderConfig(
+                            pointDef,
+                            profileConfig,
+                            hsSystemEquip["id"].toString(),
+                            site.id,
+                            site.tz,
+                            equipDis
+                        ), point
+                    )
+
+                }
+            }
+        } else {
+            CcuLog.i(Domain.LOG_TAG, "system profile is not migrated - $hsSystemEquip")
+        }
+
+        // migration for terminal equip and points
+        val equips =
+            hayStack.readAllEntities("equip and not system and not modbus and domainName and not building and not diag and not config")
+        equips.forEach { equip ->
+            val equipModel = ModelCache.getModelById(equip["sourceModel"].toString())
+            val equipDis = equip["dis"].toString()
+            val equipId = equip["id"].toString()
+            val profileType = equip["profile"].toString()
+            val profileConfiguration = DefaultProfileConfiguration(
+                equip["group"].toString().toInt(),
+                "",
+                0,
+                equip["roomRef"].toString(),
+                equip["floorRef"].toString(),
+                profileType
+            )
+            val bacnetPoints =
+                hayStack.readAllEntities("point and domainName and bacnetId and equipRef == \"$equipId\"")
+            bacnetPoints.forEach { point ->
+                CcuLog.d(
+                    L.TAG_CCU_DOMAIN,
+                    "Updating bacnetId for the point(${point["dis"]})."
+                )
+                equipModel.points.find { it.domainName == point["domainName"] }?.let { pointDef ->
+                    profileEquipBuilder.updatePoint(
+                        PointBuilderConfig(
+                            pointDef,
+                            profileConfiguration,
+                            equipId,
+                            site!!.id,
+                            site.tz,
+                            equipDis
+                        ), point
+                    )
+                }
+            }
+        }
+    }
+
+    private fun updateMinCfmPointMaxVal(minMaxCfmDomainNames: Pair<String, String>) {
+        CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "executing updateMinCfmPointMaxVal")
+        hayStack.readAllEntities(" point and zone and config and domainName == \"${minMaxCfmDomainNames.first}\" ")
+            .forEach { minCfmMap ->
+                val maxCfmVal = hayStack.readPointPriorityValByQuery(
+                    " domainName == \"${minMaxCfmDomainNames.second}\" and equipRef == \"${
+                        minCfmMap["equipRef"]
+                    }\" "
+                )
+                CcuLog.d(
+                    L.TAG_CCU_MIGRATION_UTIL,
+                    "Point value for ${minMaxCfmDomainNames.second}: $maxCfmVal"
+                )
+                if (maxCfmVal != minCfmMap["maxVal"].toString().toDouble()) {
+                    CcuLog.d(
+                        L.TAG_CCU_MIGRATION_UTIL,
+                        "Updating point for ${minMaxCfmDomainNames.first}"
+                    )
+                    hayStack.updatePoint(
+                        Point.Builder()
+                            .setHDict(hayStack.readHDictById(minCfmMap["id"].toString()))
+                            .setMaxVal(maxCfmVal.toString()).build(),
+                        minCfmMap["id"].toString()
+                    )
+                }
+            }
+    }
+
+    // This method is to be used in case of CCUs which have been replaced and post which, the bypassDamper data is not available in the new CCU.
+    private fun restoreMissingBypassDamperAfterReplace(): Boolean {
+        // Perform the operation only on a replaced CCU and if the bypassDamper does not exist in the new CCU.
+        if (validateBypassDamperRecoveryForReplacedCcu()) {
+            /** If the value return while fetching the bypassDamper equip for this CCU which is missing ahuRef is null, that means,
+             * there was error occurred while fetching the remote equip. To ensure retrial return false and not set the preference
+             */
+            CcuLog.i(
+                TAG_CCU_BYPASS_RECOVER,
+                "This is a replaced CCU. No bypassDamper found locally. Will be checking the cloud now."
+            )
+            val remoteBypassDamperEquip = hayStack.readRemoteEntitiesByQuery(
+                "equip and domainName == \"${DomainName.smartnodeBypassDamper}\" and not ahuRef and ccuRef==\"${
+                    hayStack.ccuId.replace(
+                        "@",
+                        ""
+                    )
+                }\" and siteRef == \"${hayStack.site?.id?.replace("@", "")}\""
+            )
+                ?.firstOrNull()
+                ?: return false
+            CcuLog.i(
+                TAG_CCU_BYPASS_RECOVER,
+                "bypassDamper equip with no ahuRef found in cloud for the current ccuID. Continuing with the recovery process."
+            )
+            /** If the value return while fetching the bypassDamper equip for this CCU which is missing ahuRef is empty, that means,
+             * the bypassDamper does not exist before the CCU was replaced. In this case, return true and set the preference
+             * since no migration is required.
+             */
+            if (remoteBypassDamperEquip.isEmpty) {
+                CcuLog.i(
+                    TAG_CCU_BYPASS_RECOVER,
+                    "bypassDamper does not exist before the CCU was replaced. No migration required. Setting preference."
+                )
+                return true
+            }
+            CcuLog.d(TAG_CCU_BYPASS_RECOVER, "remoteBypassDamper equip = $remoteBypassDamperEquip")
+            val equipRef = remoteBypassDamperEquip.id().toString()
+
+            /** The operation is considered to be a failure if the equipPoints or devicePoints or the device itself is null.
+             * In this case, return false and not set the preference.
+             */
+            val remoteBypassDamperEquipPoints =
+                hayStack.readRemoteEntitiesByQuery("point and equipRef == $equipRef")
+                    ?: return false
+            val remoteBypassDamperDevice =
+                hayStack.readRemoteEntitiesByQuery("device and equipRef == $equipRef")
+                    ?.firstOrNull()
+                    ?: return false
+            CcuLog.d(
+                TAG_CCU_BYPASS_RECOVER,
+                "remoteBypassDamper device = $remoteBypassDamperDevice"
+            )
+            val remoteBypassDamperDevicePoints =
+                hayStack.readRemoteEntitiesByQuery("point and deviceRef == ${remoteBypassDamperDevice.id()}")
+                    ?: return false
+
+            CcuLog.i(
+                TAG_CCU_BYPASS_RECOVER,
+                "No null response found for the fetching of the remote bypassDamper entities. Proceeding with their restoration."
+            )
+            /** The equips and points are fetched successfully. Now, we can proceed with the migration.
+             * First, we will build the equip, device and points in the CCU again using the model based building operations.
+             * Then we will update those entities with the existing id of fetched entities.
+             * Finally, we will import the priority array for the points.
+             */
+            val bypassDamperEquipModel =
+                ModelLoader.getSmartNodeBypassDamperModelDef() as SeventyFiveFProfileDirective
+
+            val profileConfiguration = BypassDamperProfileConfiguration(
+                Integer.parseInt(remoteBypassDamperEquip["group"].toString()),
+                NodeType.SMART_NODE.name,
+                0,
+                remoteBypassDamperEquip["roomRef"].toString(),
+                remoteBypassDamperEquip["floorRef"].toString(),
+                ProfileType.BYPASS_DAMPER,
+                bypassDamperEquipModel
+            ).getDefaultConfiguration()
+
+            restoreBypassDamperEquipAndPoints(
+                remoteBypassDamperEquip,
+                remoteBypassDamperEquipPoints,
+                profileConfiguration
+            )
+            restoreBypassDamperDeviceAndPoints(
+                remoteBypassDamperDevice,
+                remoteBypassDamperDevicePoints,
+                profileConfiguration
+            )
+        }
+        return true
+    }
+
+    private fun validateBypassDamperRecoveryForReplacedCcu(): Boolean {
+        return PreferenceUtil.getCcuInstallType().equals("REPLACECCU")
+                && hayStack.readId("equip and system and not modbus and not connect and profile == \"SYSTEM_DEFAULT\"") == null
+                && hayStack.readId("domainName == \"${DomainName.smartnodeBypassDamper}\"") == null
+    }
+
+    private fun restoreBypassDamperEquipAndPoints(
+        remoteBypassDamperEquip: HDict,
+        remoteBypassDamperEquipPoints: List<HDict>,
+        profileConfiguration: BypassDamperProfileConfiguration
+    ) {
+        CcuLog.i(
+            TAG_CCU_BYPASS_RECOVER,
+            "Restoring bypassDamper equip and points and writable arrays"
+        )
+        val pointIdList = mutableListOf<HDict>()
+        val equipBuilder = ProfileEquipBuilder(hayStack)
+
+        CcuLog.d(
+            TAG_CCU_BYPASS_RECOVER,
+            "total remoteBypassDamperEquipPoints = ${remoteBypassDamperEquipPoints.size}"
+        )
+        CcuLog.d(
+            TAG_CCU_BYPASS_RECOVER,
+            "remoteBypassDamperEquipPoints = $remoteBypassDamperEquipPoints"
+        )
+
+        CcuLog.i(
+            TAG_CCU_BYPASS_RECOVER,
+            "Restoring bypassDamper equip ${remoteBypassDamperEquip.getStr("dis")} with domainName ${
+                remoteBypassDamperEquip.getStr("domainName")
+            } and id ${remoteBypassDamperEquip.id()}"
+        )
+        val bypassEquip = equipBuilder.buildEquip(
+            EquipBuilderConfig(
+                profileConfiguration.model,
+                profileConfiguration,
+                hayStack.siteIdRef.toString(),
+                hayStack.timeZone,
+                remoteBypassDamperEquip.getStr("dis")
+            )
+        )
+
+        bypassEquip.id = remoteBypassDamperEquip.id().toString()
+        bypassEquip.ahuRef = hayStack.readId("equip and system and not modbus and not connect")
+
+        hayStack.addRemoteEquip(bypassEquip, bypassEquip.id.replace("@", ""))
+        hayStack.syncStatusService.addUpdatedEntity(bypassEquip.id.toString())
+
+        val remotePointMapWithDomainName =
+            remoteBypassDamperEquipPoints.associateBy { it.get("domainName").toString() }
+        val toBeUpdatePoints = mutableListOf<String>()
+
+        profileConfiguration.model.points.forEach { pointMetaData ->
+            val pointBuilderConfig = PointBuilderConfig(
+                pointMetaData,
+                profileConfiguration,
+                bypassEquip.id,
+                hayStack.siteIdRef.toString(),
+                hayStack.timeZone,
+                remoteBypassDamperEquip.dis()
+            )
+            CcuLog.d(TAG_CCU_BYPASS_RECOVER, "pointMetaData for equipPoint = $pointMetaData")
+            if (remotePointMapWithDomainName.containsKey(pointMetaData.domainName)) {
+                CcuLog.d(TAG_CCU_BYPASS_RECOVER, "point model id: ${pointMetaData.domainName}")
+                CcuLog.d(
+                    TAG_CCU_BYPASS_RECOVER,
+                    "remote point found in Model: ${remotePointMapWithDomainName[pointMetaData.domainName]}"
+                )
+                val equipPoint = equipBuilder.buildPoint(pointBuilderConfig)
+                equipPoint.id =
+                    remotePointMapWithDomainName[pointMetaData.domainName]!!.id().toString()
+                hayStack.addRemotePoint(equipPoint, equipPoint.id.toString().replace("@", ""))
+                hayStack.syncStatusService.addUpdatedEntity(equipPoint.id)
+                if (pointMetaData.tagNames.contains("writable")) {
+                    pointIdList.add(HDictBuilder().add("id", HRef.copy(equipPoint.id)).toDict())
+                }
+                toBeUpdatePoints.add(equipPoint.id)
+            } else {
+                CcuLog.d(
+                    TAG_CCU_BYPASS_RECOVER,
+                    "remote point not found in Model: ${pointMetaData.domainName}. Adding new point"
+                )
+                equipBuilder.createPoint(pointBuilderConfig)
+            }
+        }
+        deleteRemotePointsIfNotAvailableInModel(remoteBypassDamperEquipPoints, toBeUpdatePoints)
+        CcuLog.d(
+            TAG_CCU_BYPASS_RECOVER,
+            "Total equip points to have their priority array synced: ${pointIdList.size}"
+        )
+        CcuLog.d(TAG_CCU_BYPASS_RECOVER, "pointIdList for equipPoints = $pointIdList")
+        CcuLog.i(TAG_CCU_BYPASS_RECOVER, "Executing importPointArrays for equip points.")
+        hayStack.importPointArrays(pointIdList)
+    }
+
+    private fun restoreBypassDamperDeviceAndPoints(
+        remoteBypassDamperDevice: HDict,
+        remoteBypassDamperDevicePoints: List<HDict>,
+        profileConfiguration: BypassDamperProfileConfiguration
+    ) {
+        CcuLog.i(
+            TAG_CCU_BYPASS_RECOVER,
+            "Restoring bypassDamper device and points and writable arrays"
+        )
+        val pointIdList = mutableListOf<HDict>()
+        val deviceBuilder = DeviceBuilder(hayStack, EntityMapper(profileConfiguration.model))
+        val smartNodeDeviceModel = ModelLoader.getSmartNodeDevice() as SeventyFiveFDeviceDirective
+
+        CcuLog.i(
+            TAG_CCU_BYPASS_RECOVER,
+            "Restoring bypassDamper device ${remoteBypassDamperDevice.getStr("dis")} with domainName ${
+                remoteBypassDamperDevice.getStr("domainName")
+            } and id ${remoteBypassDamperDevice.id()}"
+        )
+        val deviceIterator = remoteBypassDamperDevice.iterator() as Iterator<Map.Entry<Any, Any>>
+        val deviceMap = HashMap<Any, Any>()
+        while (deviceIterator.hasNext()) {
+            val mapEntry = deviceIterator.next()
+            deviceMap[mapEntry.key] = mapEntry.value
+        }
+        val device = Device.Builder().setHashMap(deviceMap).build()
+        device.id = remoteBypassDamperDevice.id().toString()
+        hayStack.addRemoteDevice(device, device.id.replace("@", ""))
+
+        deviceBuilder.updateDevice(device.id, smartNodeDeviceModel, device.displayName)
+
+        val remotePointMapWithDomainName =
+            remoteBypassDamperDevicePoints.associateBy { it.getStr("domainName") }
+        val toBeUpdatePoints = mutableListOf<String>()
+
+        smartNodeDeviceModel.points.forEach { pointMetaData ->
+            CcuLog.d(TAG_CCU_BYPASS_RECOVER, "pointMetaData for devicePoint = $pointMetaData")
+            if (remotePointMapWithDomainName.containsKey(pointMetaData.domainName)) {
+                CcuLog.d(TAG_CCU_BYPASS_RECOVER, "point model id: ${pointMetaData.domainName}")
+                CcuLog.d(
+                    TAG_CCU_BYPASS_RECOVER,
+                    "remote point found in Model: ${remotePointMapWithDomainName[pointMetaData.domainName]}"
+                )
+                val devicePoint =
+                    deviceBuilder.buildRawPoint(pointMetaData, profileConfiguration, device)
+                devicePoint.id =
+                    remotePointMapWithDomainName[pointMetaData.domainName]?.id().toString()
+                hayStack.addRemotePoint(devicePoint, devicePoint.id.replace("@", ""))
+                hayStack.syncStatusService.addUpdatedEntity(devicePoint.id.toString())
+                if (pointMetaData.tagNames.contains("writable")) {
+                    pointIdList.add(HDictBuilder().add("id", HRef.copy(devicePoint.id)).toDict())
+                }
+                toBeUpdatePoints.add(devicePoint.id)
+            } else {
+                CcuLog.d(
+                    TAG_CCU_BYPASS_RECOVER,
+                    "remote point not found in Model: ${pointMetaData.domainName}. Adding new point"
+                )
+                deviceBuilder.createPoint(
+                    pointMetaData,
+                    profileConfiguration,
+                    device,
+                    device.displayName
+                )
+            }
+        }
+        deleteRemotePointsIfNotAvailableInModel(remoteBypassDamperDevicePoints, toBeUpdatePoints)
+        CcuLog.d(
+            TAG_CCU_BYPASS_RECOVER,
+            "Total device points to have their priority array synced: ${pointIdList.size}"
+        )
+        CcuLog.d(TAG_CCU_BYPASS_RECOVER, "pointIdList for devicePoints = $pointIdList")
+        CcuLog.i(TAG_CCU_BYPASS_RECOVER, "Executing importPointArrays for devicePoints.")
+        hayStack.importPointArrays(pointIdList)
+    }
+
+    private fun deleteRemotePointsIfNotAvailableInModel(
+        remotePoints: List<HDict>,
+        updatedPointIdList: List<String>
+    ) {
+        CcuLog.w(TAG_CCU_BYPASS_RECOVER, "Deleting remote points if not available in model")
+        remotePoints.forEach { remotePoint ->
+            if (!updatedPointIdList.contains(remotePoint.id().toString())) {
+                CcuLog.w(
+                    TAG_CCU_BYPASS_RECOVER,
+                    "Deleting remote point ${remotePoint.getStr("dis")} with id ${remotePoint.id()}"
+                )
+                hayStack.deleteRemoteEntity(remotePoint.id().toString())
+            }
+        }
+    }
+
+    private fun doSseStandaloneDomainModelMigration() {
+        CcuLog.i(L.TAG_CCU_DOMAIN, "SSE standalone equip migration is started")
+        val sseEquips = hayStack.readAllEntities("equip and zone and sse")
+            .filter { it["domainName"] == null }
+            .toList()
+        if (sseEquips.isEmpty()) {
+            CcuLog.i(Domain.LOG_TAG, "SSE DM standalone equip migration is complete")
+            return
+        }
+        val equipBuilder = ProfileEquipBuilder(hayStack)
+        val site = hayStack.site
+
+        sseEquips.forEach {
+            CcuLog.i(Domain.LOG_TAG, "Do DM SSE standalone equip migration for $it")
+            val model = when {
+                it.containsKey("sse") && it.containsKey("smartnode") -> ModelLoader.getSmartNodeSSEModel()
+                else -> ModelLoader.getHelioNodeSSEModel()
+            }
+            val equipDis = "${site?.displayName}-SSE-${it["group"]}"
+            val isHelioNode = it.containsKey("helionode")
+            val deviceModel =
+                if (isHelioNode) ModelLoader.getHelioNodeDevice() as SeventyFiveFDeviceDirective
+                else ModelLoader.getSmartNodeDevice() as SeventyFiveFDeviceDirective
+            val deviceDis =
+                if (isHelioNode) "${site?.displayName}-HN-${it["group"]}" else "${site?.displayName}-SN-${it["group"]}"
+            val deviceBuilder =
+                DeviceBuilder(hayStack, EntityMapper(model as SeventyFiveFProfileDirective))
+            val device = hayStack.readEntity("device and addr == \"" + it["group"] + "\"")
+            val profileType = ProfileType.SSE
+
+            val profileConfiguration = SseProfileConfiguration(
+                Integer.parseInt(it["group"].toString()),
+                if (isHelioNode) NodeType.HELIO_NODE.name else NodeType.SMART_NODE.name,
+                0,
+                it["roomRef"].toString(),
+                it["floorRef"].toString(),
+                profileType,
+                model
+            ).getActiveConfiguration()
+
+            equipBuilder.doCutOverMigration(
+                it["id"].toString(),
+                model,
+                equipDis,
+                SseZoneProfileCutOverMapping.entries,
+                profileConfiguration,
+                equipHashMap = it
+            )
+
+            val sseEquip = SseEquip(it["id"].toString())
+            // temperature offset is now a literal (was multiplied by 10 before)
+            val newTempOffset =
+                String.format("%.1f", sseEquip.temperatureOffset.readDefaultVal() * 0.1).toDouble()
+            sseEquip.temperatureOffset.writeDefaultVal(newTempOffset)
+            sseEquip.demandResponseSetback.writeVal(17, 2.0)
+
+            deviceBuilder.doCutOverMigration(
+                device["id"].toString(),
+                deviceModel,
+                deviceDis,
+                NodeDeviceCutOverMapping.entries,
+                profileConfiguration
+            )
+
+            val relay1OutputEnable = sseEquip.relay1OutputState.readDefaultVal()
+
+            if (relay1OutputEnable > 0) {
+                CcuLog.i(
+                    L.TAG_CCU_DOMAIN,
+                    "Relay1 is enabled, so creating relay1OutputAssociation point"
+                )
+                val relay1OutputAssociationDef =
+                    model.points.find { it.domainName == "relay1OutputAssociation" }
+                relay1OutputAssociationDef?.run {
+                    equipBuilder.createPoint(
+                        PointBuilderConfig(
+                            relay1OutputAssociationDef, profileConfiguration,
+                            it["id"].toString(), site?.id.toString(), site?.tz, equipDis
+                        )
+                    )
+                }
+                val coolingStage1 = hayStack
+                    .readEntity(
+                        "point and group == \"" + it["group"].toString() + "\" and " +
+                                "domainName == \"" + DomainName.coolingStage1 + "\""
+                    )
+                CcuLog.i(L.TAG_CCU_DOMAIN, "coolingStage1 point: $coolingStage1")
+                if (coolingStage1.isNotEmpty()) {
+                    sseEquip.relay1OutputAssociation.writeDefaultVal(1.0)
+                }
+                sseEquip.relay1OutputState.writeDefaultVal(1)
+            }
+
+            val relay2OutputEnable = sseEquip.relay2OutputState.readDefaultVal()
+
+            if (relay2OutputEnable > 0) {
+                CcuLog.i(
+                    L.TAG_CCU_DOMAIN,
+                    "Relay2 is enabled, so creating relay2OutputAssociation point"
+                )
+                val relay2OutputAssociationDef =
+                    model.points.find { it.domainName == "relay2OutputAssociation" }
+                relay2OutputAssociationDef?.run {
+                    equipBuilder.createPoint(
+                        PointBuilderConfig(
+                            relay2OutputAssociationDef, profileConfiguration,
+                            it["id"].toString(), site?.id.toString(), site?.tz, equipDis
+                        )
+                    )
+                }
+            }
+        }
+    }
+
+    fun checkBacnetIdMigrationRequired() {
+        if (!PreferenceUtil.isBacnetIdMigrationDone()) {
+            try {
+                updateBacnetProperties(CCUHsApi.getInstance());
+                PreferenceUtil.setBacnetIdMigrationDone();
+            } catch (e: Exception) {
+                //For now, we make sure it does not stop other migrations even if this fails.
+                e.printStackTrace();
+                CcuLog.e(L.TAG_CCU_MIGRATION_UTIL, "Error in migrateBacnetIdForVavDevices $e")
             }
         }
     }
@@ -1134,7 +2154,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         otnEquips.forEach {
             CcuLog.i(Domain.LOG_TAG, "Do DM zone equip migration for $it")
 
-            val model =  ModelLoader.getOtnTiModel() as SeventyFiveFProfileDirective
+            val model = ModelLoader.getOtnTiModel() as SeventyFiveFProfileDirective
             val equipDis = "${site?.displayName}-OTN-${it["group"]}"
             val profileType = ProfileType.OTN
 
@@ -1148,8 +2168,10 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                 model
             ).getActiveConfiguration()
 
-            equipBuilder.doCutOverMigration(it["id"].toString(), model,
-                equipDis, OtnEquipCutOverMapping.entries, profileConfiguration, equipHashMap = it)
+            equipBuilder.doCutOverMigration(
+                it["id"].toString(), model,
+                equipDis, OtnEquipCutOverMapping.entries, profileConfiguration, equipHashMap = it
+            )
 
             // At app startup, cutover migrations currently run before upgrades.
             // This is a problem because demandResponseSetback is supposed to get its value from a newly-added BuildingTuner point, which isn't available yet.
@@ -1172,5 +2194,4 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             otnEquip.temperatureOffset.writeDefaultVal(0.1 * otnEquip.temperatureOffset.readDefaultVal())
         }
     }
-
 }

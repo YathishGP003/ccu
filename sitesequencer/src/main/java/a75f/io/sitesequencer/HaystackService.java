@@ -47,6 +47,7 @@ public class HaystackService {
     private static final String MSG_CALCULATING = "calculating";
     static final String MSG_SUCCESS = "success";
     private static final String MSG_FAILED = "failed";
+    private static final String WHO = "CCU_SEQUENCER";
 
     private static final String MSG_ERROR_NO_ENTITIES = "Error in finding Entities, please check query";
     private static final String MSG_ERROR_NO_ENTITY = "Error in finding Entity, please check query";
@@ -54,11 +55,18 @@ public class HaystackService {
     private V8Function fetchFunction;
     private V8Array v8Array;
 
+    public static final int SYSTEM_DEFAULT_VAL_LEVEL = 17;
+    public static final int UI_DEFAULT_VAL_LEVEL = 8;
+    public static final int SYSTEM_BUILDING_VAL_LEVEL = 16;
+
 
     private SequencerLogsCallback sequenceLogsCallback;
 
-    HaystackService(SequencerLogsCallback sequenceLogsCallback){
+    private String reason;
+
+    HaystackService(SequencerLogsCallback sequenceLogsCallback, String lastRunId, String sequenceId){
         this.sequenceLogsCallback = sequenceLogsCallback;
+        reason = "Run Id : " + lastRunId+ " - " + "Sequence Id : " + sequenceId;
     }
 
     // return array of values
@@ -129,26 +137,17 @@ public class HaystackService {
     public void pointWrite(String id, int level, double value, boolean override, Object contextHelper) {
         String message = String.format("writing point with id = %s, level = %d, value = %s", id, level, value);
         sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("POINT_WRITE"), message, MSG_CALCULATING);
-        CcuLog.d(TAG, "---pointWrite##--id-"+id + "<--level-->"+level+"<--override-->"+override);
-        CCUHsApi.getInstance().pointWrite(HRef.copy(id), level, "Seq_Demo", HNum.make(value), HNum.make(0));
-    }
-
-    public void pointWriteMany(String[] ids, int level, double value, boolean override, Object contextHelper) {
-        CcuLog.d(TAG, "---pointWriteMany##--id-"+ids.length + "<--level-->"+level+"<--override-->"+override);
-        for(int i=0;i<ids.length; i++){
-            String message = String.format("writing point with, id = %s, level = %d, value = %s", HRef.copy(ids[i]), level, value);
-            sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("POINT_WRITE"), message, MSG_CALCULATING);
-            CCUHsApi.getInstance().pointWrite(HRef.copy(ids[i]), level, "Seq_Demo", HNum.make(value), HNum.make(0));
-        }
+        CcuLog.d(TAG, "---pointWrite##--id-"+id + "<--level-->"+level+"<--override-->"+override + "<-value->"+value);
+        CCUHsApi.getInstance().pointWrite(HRef.copy(id), level, WHO, HNum.make(value), HNum.make(0), reason);
     }
 
     public void pointWriteMany(V8Array ids, int level, double value, boolean override, Object contextHelper) {
-        CcuLog.d(TAG, "---pointWriteMany##--id-"+ids.length() + "<--level-->"+level+"<--override-->"+override);
+        CcuLog.d(TAG, "---pointWriteMany##--id-"+ids.length() + "<--level-->"+level+"<--override-->"+override + "<-value->"+value);
         for(int i=0;i<ids.length(); i++){
             String pointId = ids.getString(i);
             String message = String.format("writing point with, id = %s, level = %d, value = %s", HRef.copy(pointId), level, value);
             sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("POINT_WRITE"), message, MSG_CALCULATING);
-            CCUHsApi.getInstance().pointWrite(HRef.copy(pointId), level, "Seq_Demo", HNum.make(value), HNum.make(0));
+            CCUHsApi.getInstance().pointWrite(HRef.copy(pointId), level, WHO, HNum.make(value), HNum.make(0), reason);
         }
         ids.close();
     }
@@ -206,14 +205,14 @@ public class HaystackService {
         }
     }
 
-    public Integer findValueByFilter(String filter, Object contextHelper) {
+    public Double findValueByFilter(String filter, Object contextHelper) {
         CcuLog.d(TAG, "---findValueByFilter##--original filter-" + filter);
         sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("FETCH_VALUE_BY_ID"), filter, MSG_CALCULATING);
         List<HashMap> list = findByFilterCustom(filter, contextHelper);
 
         if(!list.isEmpty()){
             String entityId = list.get(0).get("id").toString();
-            int val = fetchValueByIdOnly(entityId, contextHelper);
+            double val = fetchValueByIdOnly(entityId, contextHelper);
             sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("FETCH_VALUE_BY_ID"), getCustomMessageValue(val), MSG_SUCCESS);
             return val;
         }else{
@@ -236,7 +235,7 @@ public class HaystackService {
         }
     }
 
-    public int fetchValueByHisReadMany(String id, Object contextHelper) {
+    public Double fetchValueByHisReadMany(String id, Object contextHelper) {
         sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("FETCH_VALUE_BY_HIS_READ_MANY"), "looking value for id-->"+id, MSG_CALCULATING);
         return fetchValueByIdOnly(id, contextHelper);
     }
@@ -261,6 +260,20 @@ public class HaystackService {
         }
     }
 
+    /**
+     * This method will remove unwanted characters and clean the filter, then it can be used by ccu
+     * there are some limitations why it is not generic
+     * for -> domainName ==@buildingLimitMax | we need to remove @ before querying in CCU
+     * same goes for port, dis and group
+     * But
+     * if filter contains id like shown below
+     * id == @80dfaab5-9252-4c14-9bf0-1a6af67fc7bd
+     * @ should not be removed from id or else query doesnt work
+     *
+     * @param filter
+     * @param contextHelper
+     * @return
+     */
     private List<HashMap> findByFilterCustom(String filter, Object contextHelper) {
         CcuLog.d(TAG, "---findByFilterCustom##--original filter-"+filter);
         filter = removeFirstAndLastParentheses(filter);
@@ -274,6 +287,9 @@ public class HaystackService {
         }
         if(filter.contains("group")){
             filter = filter.replaceAll("group==@", "group==");
+        }
+        if(filter.contains("domainName")){
+            filter = filter.replaceAll("domainName==@", "domainName==");
         }
         filter = fixInvertedCommas(filter);
         filter = removeQuotesFromIdValue(filter);
@@ -311,22 +327,27 @@ public class HaystackService {
 
     // if writable tag is there, return value of highest level
     // if writable tag is not there, check for his item and return latest value
-    public Integer fetchValueByIdOnly(String filter, Object contextHelper) {
+    public Double fetchValueByIdOnly(String filter, Object contextHelper) {
         sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("FETCH_VALUE_BY_ID"), "looking value for id-->"+filter, MSG_CALCULATING);
-        Integer output = null;
-        try {
-            if(CCUHsApi.getInstance().readMapById(filter).get("writable") != null) {
-                output = (int)(CCUHsApi.getInstance().readDefaultValById(filter).doubleValue());
-            }else{
-                output = (int)(CCUHsApi.getInstance().readHisValById(filter).doubleValue());
-            }
-            CcuLog.d(TAG, "---fetchValueById###--id-"+filter+"<---->"+output);
-        }catch (Exception e){
-            e.printStackTrace();
-        }
+        Double output = getValueByEntityId(filter);
         sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("FETCH_VALUE_BY_ID"), "value -->"+output, MSG_CALCULATING);
         if(contextHelper instanceof V8Object){
             ((V8Object) contextHelper).close();
+        }
+        return output;
+    }
+
+    private Double getValueByEntityId(String entityId){
+        Double output = null;
+        try {
+            if(CCUHsApi.getInstance().readMapById(entityId).get("writable") != null) {
+                output = CCUHsApi.getInstance().readPointPriorityVal(entityId);
+            }else{
+                output = CCUHsApi.getInstance().readHisValById(entityId);
+            }
+            CcuLog.d(TAG, "---getValueByEntityId###--id-"+entityId+"<---->"+output);
+        }catch (Exception e){
+            e.printStackTrace();
         }
         return output;
     }
@@ -437,18 +458,35 @@ public class HaystackService {
     }
 
     private Double fetchValueByGivenLevel(String pointId, String level) {
-        int levelInArray = 1;
-        if (level.equalsIgnoreCase("default")) {
-            levelInArray = HayStackConstants.DEFAULT_POINT_LEVEL - 1;
-        } else if (level.equalsIgnoreCase("highest")) {
-            levelInArray = 17;
+        CcuLog.d(TAG, "---fetchValueByGivenLevel###--pointId-"+pointId+"<--level-->"+level);
+        Double output;
+        if (level.equalsIgnoreCase("highest")) {
+            output = getValueByEntityId(pointId);
+        } else if (level.equalsIgnoreCase("default")) {
+            output = getValueByLevel(pointId, SYSTEM_DEFAULT_VAL_LEVEL-1);
+            if (output == -1) {
+                CcuLog.d(TAG, "---fetchValueByGivenLevel###--pointId-"+pointId+"<--level 17-->"+level + "<-output->"+output);
+                output = getValueByLevel(pointId, SYSTEM_BUILDING_VAL_LEVEL-1);
+                CcuLog.d(TAG, "---fetchValueByGivenLevel###--pointId-"+pointId+"<--level 16-->"+level + "<-output->"+output);
+            }
+            if (output == -1) {
+                output = 0.0;
+            }
         } else {
-            levelInArray = Integer.parseInt(level) - 1;
+            output = getValueByLevel(pointId, Integer.parseInt(level) - 1);
+            CcuLog.d(TAG, "---fetchValueByGivenLevel###--pointId-"+pointId+"<--level-->"+level + "<-output->"+output);
+            if (output == -1) {
+                output = 0.0;
+            }
         }
+        return output;
+    }
+
+    private Double getValueByLevel(String pointId, int levelInArray){
         ArrayList<HashMap> values = CCUHsApi.getInstance().readPoint(pointId);
         if (values != null && values.size() > 0) {
             HashMap valMap = values.get(levelInArray);
-            return valMap.get("val") == null ? 0 : Double.parseDouble(valMap.get("val").toString());
+            return valMap.get("val") == null ? -1 : Double.parseDouble(valMap.get("val").toString());
         } else {
             return 0.0;
         }
@@ -577,7 +615,7 @@ public class HaystackService {
         return "list size is " + size;
     }
 
-    private String getCustomMessageValue(int value){
+    private String getCustomMessageValue(Double value){
         return "value is " + value;
     }
 
@@ -599,5 +637,19 @@ public class HaystackService {
             v8Array.close(); // Release the V8Array
             v8Array = null; // Clear reference
         }
+    }
+
+    public void clearPointValueMany(V8Array ids, int level, Object contextHelper) {
+        CcuLog.d(TAG, "---clearPointValueMany##--id-"+ids.length() + "<--level-->"+level);
+        sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("CLEAR_POINT_VALUES"), "clearPointValueMany-->", MSG_CALCULATING);
+        for(int i=0;i<ids.length(); i++){
+            String pointId = ids.getString(i);
+            CcuLog.d(TAG, "---clearPointValueMany##--id-"+ids.length() + "<--level-->"+level + "<--pointId-->"+pointId);
+            String message = String.format("writing point with, id = %s, level = %d, value = %s", HRef.copy(pointId), level, 0);
+            sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("POINT_WRITE"), message, MSG_CALCULATING);
+            CCUHsApi.getInstance().pointWrite(HRef.copy(pointId), level, WHO, null, HNum.make(0), reason);
+        }
+        ids.close();
+        sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("CLEAR_POINT_VALUES"), "clearPointValueMany-->", MSG_SUCCESS);
     }
 }

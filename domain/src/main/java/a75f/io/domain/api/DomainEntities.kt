@@ -98,6 +98,12 @@ class Ccu(domainName : String, id : String) : Entity(domainName) {
         bypassEquips[id] = Equip(domainName, id)
     }
 
+    fun addOaoEquip(entityMap : HashMap<Any, Any>) {
+        val domainName = entityMap["domainName"].toString()
+        val id = entityMap["id"].toString()
+        equips[id] = Equip(domainName, id)
+    }
+
 }
 open class Point(domainName : String, val equipRef: String) : Entity(domainName) {
 
@@ -145,6 +151,10 @@ open class Point(domainName : String, val equipRef: String) : Entity(domainName)
         requireId()
         Domain.hayStack.writeHisValById(id, hisVal)
     }
+    fun writeHisValueByIdWithoutCOV(hisVal : Double) {
+        requireId()
+        Domain.hayStack.writeHisValueByIdWithoutCOV(id, hisVal)
+    }
     fun readPriorityVal() : Double {
         requireId()
         val priorityVal = Domain.hayStack.readPointPriorityVal(id)
@@ -156,10 +166,15 @@ open class Point(domainName : String, val equipRef: String) : Entity(domainName)
     }
     fun writeDefaultVal(defaultVal : Any) {
         requireId()
+        if (id == "null") {
+            return
+        }
         if (defaultVal is String) {
             Domain.hayStack.writeDefaultValById(id, defaultVal)
         } else if (defaultVal is Double) {
             Domain.hayStack.writeDefaultValById(id, defaultVal)
+        } else if (defaultVal is Int) {
+            Domain.hayStack.writeDefaultValById(id, defaultVal.toDouble())
         }
     }
 
@@ -188,10 +203,16 @@ open class Point(domainName : String, val equipRef: String) : Entity(domainName)
 
     fun writeVal(level: Int, value : Double) {
         requireId()
+        if(id == "null") {
+            return
+        }
         Domain.hayStack.writePointForCcuUser(id, level, value, 0, null)
     }
     fun writeVal(level: Int, who: String?, writableVal: Double?, duration: Int) {
         requireId()
+        if(id == "null") {
+            return
+        }
         Domain.hayStack.writePoint(id, level, who, writableVal, duration)
     }
 

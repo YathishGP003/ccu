@@ -17,14 +17,13 @@ import java.util.*
 val hayStack = CCUHsApi.getInstance();
 
 fun setDiagMigrationVal() {
-    val version =
-        hayStack.readDefaultStrVal("point and diag and app and version")
+    val version = hayStack.defaultStrValByDomainName("appVersion")
     if(validateMigration()){
-        hayStack.writeDefaultVal("point and diag and migration", version)
-        val pointmig = hayStack.readEntity("point and diag and migration")
-       CcuLog.i("CCU_SCHEDULABLE", "Diag Point Id is =  "+pointmig.get("id")+  " Value is set to " + version)
+        hayStack.writeDefaultStrValByDomainName("migrationVersion", version)
+        val pointmig = hayStack.readEntityByDomainName("migrationVersion")
+        CcuLog.i("CCU_SCHEDULABLE", "Diag Point Id is =  "+ pointmig["id"] +  " Value is set to " + version)
     }else{
-       CcuLog.i("CCU_SCHEDULABLE", "Diag Point is not Set")
+        CcuLog.i("CCU_SCHEDULABLE", "Diag Point is not Set")
     }
 }
 

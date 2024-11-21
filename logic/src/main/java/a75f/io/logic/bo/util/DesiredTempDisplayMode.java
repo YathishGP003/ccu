@@ -12,12 +12,16 @@ import static a75f.io.logic.bo.util.TemperatureMode.HEATING;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Tags;
 import a75f.io.domain.HyperStatSplitEquip;
+import a75f.io.domain.api.DomainName;
+import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode;
@@ -47,9 +51,11 @@ public class DesiredTempDisplayMode {
             if(!hasSystemEquip(zoneEquips, ccuHsApi)){
                 modeToset = getConditioningModeForZone(roomRef, ccuHsApi);
             }
+            CcuLog.d(L.TAG_CCU,"Temperature modeType : "+modeToset+" equip : "+ roomRef);
             ccuHsApi.writeHisValByQuery("hvacMode and roomRef == \""
                     + roomRef + "\"", (double) modeToset.ordinal());
         } else {
+            CcuLog.d(L.TAG_CCU,"Temperature modeType : "+modeType+" equip : "+ roomRef);
             ccuHsApi.writeHisValByQuery("hvacMode and roomRef == \""
                     + roomRef + "\"", (double) modeType.ordinal());
         }
@@ -166,13 +172,18 @@ public class DesiredTempDisplayMode {
     private static TemperatureMode getTemperatureModeForSSEProfile(Equip mEquip, CCUHsApi ccuHsApi) {
         boolean heating = false;
         boolean cooling = false;
-        int relayState = ccuHsApi.readDefaultVal("config and relay1 and equipRef" +
-                " == \"" + mEquip.getId() + "\"").intValue();
-        if (SSERelayAssociationUtil.isRelayAssociatedToHeating(relayState)) {
-            heating = true;
-        }
-        if (SSERelayAssociationUtil.isRelayAssociatedToCooling(relayState)) {
-            cooling = true;
+        int relay1OutputAssociationState = ccuHsApi.readDefaultVal("point and domainName == \""+ DomainName.relay1OutputAssociation +"\"" +
+                " and equipRef == \"" + mEquip.getId() + "\"").intValue();
+        int isRelay1Enabled = ccuHsApi.readDefaultVal("point and domainName == \""+ DomainName.relay1OutputEnable +"\"" +
+                " and equipRef == \"" + mEquip.getId() + "\"").intValue();
+        if(isRelay1Enabled == 1){
+            if (relay1OutputAssociationState == 0) {
+                heating = true;
+            } else if (relay1OutputAssociationState == 1) {
+                cooling = true;
+            }
+        }else{
+            return DUAL;
         }
         return getTemperatureMode(heating, cooling);
     }
@@ -419,6 +430,21 @@ public class DesiredTempDisplayMode {
             Equip actualEquip = new Equip.Builder().setHashMap(equip).build();
             setModeType(actualEquip.getRoomRef(), ccuHsApi);
         });
+    }
+
+    public static void setSystemModeForStandaloneProfile(CCUHsApi ccuHsApi) {
+        ArrayList<HashMap<Object,Object>> standaloneEquips = ccuHsApi.readAllEntities("equip and (hyperstat or smartstat or hyperstatsplit) and roomRef");
+        List<String> roomRefs = getRoomRefsForAllStandaloneProfiles(standaloneEquips);
+        for (String roomRef : roomRefs) {
+            setModeTypeOnUserIntentChange(roomRef, ccuHsApi);
+        }
+    }
+    private static List<String> getRoomRefsForAllStandaloneProfiles(ArrayList<HashMap<Object, Object>> standaloneEquips) {
+        Set<String> roomRefs = new HashSet<>(); // Using set to avoid duplicate
+        standaloneEquips.forEach(standaloneEquip -> {
+            roomRefs.add(standaloneEquip.get("roomRef").toString());
+        });
+        return new ArrayList<>(roomRefs);
     }
     public static String setPointStatusMessage(String status, TemperatureMode modeType) {
         boolean statusContainsChar = false;

@@ -302,7 +302,7 @@ public class ScheduleManager {
     }
 
     public void updateOccupancy(CCUHsApi hayStack, Set<ZoneProfile> zoneProfiles) {
-        boolean drActivated = DemandResponseMode.isDRModeActivated(hayStack);
+        boolean drActivated = DemandResponseMode.isDRModeActivated();
         CcuLog.i(TAG_CCU_SCHEDULER, "updateOccupancy : ScheduleManager");
         for (ZoneProfile profile : zoneProfiles) {
             if (profile instanceof ModbusProfile) {
@@ -861,7 +861,7 @@ public class ScheduleManager {
                 return PRECONDITIONING;
         }
         CcuLog.d(L.TAG_CCU_SCHEDULER, "getSystemPreconditioningStatus : "+UNOCCUPIED);
-        return DemandResponse.isDRModeActivated(hayStack) ? DEMAND_RESPONSE_UNOCCUPIED : UNOCCUPIED;
+        return DemandResponse.isDRModeActivated() ? DEMAND_RESPONSE_UNOCCUPIED : UNOCCUPIED;
     }
 
     //TODO-Schedules - Make sure the applySchedule has run before algo loops to ensure the cache is updated
@@ -1021,7 +1021,7 @@ public class ScheduleManager {
             return "No schedule configured";
         }
         if (curOccupancyMode == Occupancy.PRECONDITIONING) {
-            if(DemandResponse.isDRModeActivated(hayStack)){
+            if(DemandResponse.isDRModeActivated()){
                 return "In Demand Response | Preconditioning";
             }
             return "In Preconditioning";
@@ -1042,7 +1042,7 @@ public class ScheduleManager {
         }
 
         if(curOccupancyMode == AUTOAWAY){
-            if(DemandResponse.isDRModeActivated(hayStack)){
+            if(DemandResponse.isDRModeActivated()){
                 return "In Auto Away | Demand Response";
             }
             return "In Auto Away";
@@ -1082,7 +1082,7 @@ public class ScheduleManager {
             if (th > 0) {
                 DateTime et = new DateTime(th);
                 int min = et.getMinuteOfHour();
-                if(DemandResponse.isDRModeActivated(hayStack)){
+                if(DemandResponse.isDRModeActivated()){
                     return String.format(Locale.US, "In Temporary Hold | Demand Response |" +
                             " till %s", et.getHourOfDay() + ":" + (min < 10 ? "0" + min : min));
                 }
@@ -1253,7 +1253,7 @@ public class ScheduleManager {
                                      TimeUtil.getEndTimeMin(currentOccupiedInfo.getCurrentlyOccupiedSchedule().getEthh(),currentOccupiedInfo.getCurrentlyOccupiedSchedule().getEtmm()));
 
             case PRECONDITIONING:
-                if(DemandResponse.isDRModeActivated(ccuHsApi)){
+                if(DemandResponse.isDRModeActivated()){
                     return "In Demand Response | Preconditioning";
                 }
                 return "In Preconditioning";

@@ -29,7 +29,7 @@ class SequencerSchedulerUtil {
                 var isJobCreated = isAlarmScheduled(context, siteSequencerDefinition.seqId.hashCode()) //isJobExists(siteSequencerDefinition.seqId, context)
                 CcuLog.d(
                     TAG,
-                    "isJobCreated: $isJobCreated for seq id ->: ${siteSequencerDefinition.seqId}")
+                    "isJobCreated: $isJobCreated for seq id ->: ${siteSequencerDefinition.seqId} -isEnabled-${siteSequencerDefinition.enabled}")
                 //if (!isJobCreated) {
                     scheduleJob(context, siteSequencerDefinition)
                 //}
@@ -399,7 +399,8 @@ class SequencerSchedulerUtil {
             return null
         }
 
-        fun createAlertDefinition(sequenceAlert : SequenceAlert): AlertDefinition {
+        fun createAlertDefinition(
+            sequenceAlert: SequenceAlert, ): AlertDefinition {
             val alertDefinition = AlertDefinition()
             val testAlert = Alert()
             testAlert.mTitle = sequenceAlert.title

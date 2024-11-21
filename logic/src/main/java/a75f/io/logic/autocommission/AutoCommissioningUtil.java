@@ -2,7 +2,6 @@ package a75f.io.logic.autocommission;
 
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 import android.widget.Toast;
 
 import org.projecthaystack.HNum;
@@ -14,6 +13,7 @@ import java.util.TimerTask;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HayStackConstants;
+import a75f.io.domain.api.DomainName;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
@@ -23,14 +23,9 @@ public class AutoCommissioningUtil {
 
     private static final int NOT_STARTED_TIMER = 60000;
 
-    public static void setAutoCommissionState(AutoCommissioningState autoCommissioningState){
-        String autoCommissioningPointId =  CCUHsApi.getInstance().readId("point and diag and auto and commissioning");
-        CCUHsApi.getInstance().pointWriteForCcuUser(HRef.copy(autoCommissioningPointId), HayStackConstants.DEFAULT_POINT_LEVEL, HNum.make((double) autoCommissioningState.ordinal()), HNum.make(0));
-    }
-
     public static AutoCommissioningState getAutoCommissionState(){
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        Double autoCommissioningPoint = hayStack.readPointPriorityValByQuery("point and diag and auto and commissioning");
+        Double autoCommissioningPoint = hayStack.readPointPriorityValByQuery("domainName == \"" + DomainName.autoCommissioning + "\"");
         return autoCommissioningPoint == null ? AutoCommissioningState.NOT_STARTED : AutoCommissioningState.values()[autoCommissioningPoint.intValue()];
     }
 
@@ -63,7 +58,7 @@ public class AutoCommissioningUtil {
                                        "Auto-commissioning Test completed.",Toast.LENGTH_SHORT).show();
                            }
                        });
-                       String autoCommissioningPointId = CCUHsApi.getInstance().readId("point and diag and auto and commissioning");
+                       String autoCommissioningPointId = getAutoCommissioningPointId();
                        instance.pointWriteForCcuUser(HRef.copy(autoCommissioningPointId),
                                HayStackConstants.DEFAULT_POINT_LEVEL, HNum.make((double) AutoCommissioningState.COMPLETED.ordinal()), HNum.make(0));
                        instance.writeHisValById(autoCommissioningPointId, (double) AutoCommissioningState.COMPLETED.ordinal());
@@ -77,7 +72,7 @@ public class AutoCommissioningUtil {
             if (isAutoCommissioningStarted()) {
                 //This section deals with exceptional situations may be when the CCU is offline or not opened during the auto-commissioning process
                 CcuLog.d(L.TAG_CCU_AUTO_COMMISSIONING, "Setting auto-commissioning to COMPLETED state: " + new Date(System.currentTimeMillis()));
-                String autoCommissioningPointId = CCUHsApi.getInstance().readId("point and diag and auto and commissioning");
+                String autoCommissioningPointId = getAutoCommissioningPointId();
                 instance.pointWriteForCcuUser(HRef.copy(autoCommissioningPointId),
                         HayStackConstants.DEFAULT_POINT_LEVEL, HNum.make((double) AutoCommissioningState.COMPLETED.ordinal()), HNum.make(0));
                 instance.writeHisValById(autoCommissioningPointId, (double) AutoCommissioningState.COMPLETED.ordinal());
@@ -98,4 +93,7 @@ public class AutoCommissioningUtil {
         }, NOT_STARTED_TIMER);
     }
 
+    public static String getAutoCommissioningPointId() {
+        return CCUHsApi.getInstance().readId("domainName == \"" + DomainName.autoCommissioning + "\"");
+    }
 }

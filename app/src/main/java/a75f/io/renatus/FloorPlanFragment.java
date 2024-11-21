@@ -72,6 +72,7 @@ import a75f.io.renatus.profiles.acb.AcbProfileConfigFragment;
 import a75f.io.renatus.profiles.hss.cpu.HyperStatSplitCpuFragment;
 import a75f.io.renatus.profiles.dab.DabProfileConfigFragment;
 import a75f.io.renatus.profiles.otn.OtnProfileConfigFragment;
+import a75f.io.renatus.profiles.sse.SseProfileConfigFragment;
 import a75f.io.renatus.profiles.vav.VavProfileConfigFragment;
 import a75f.io.renatus.modbus.ModbusConfigView;
 import a75f.io.renatus.modbus.util.ModbusLevel;
@@ -1100,8 +1101,11 @@ public class FloorPlanFragment extends Fragment {
                             .newInstance(Short.parseShort(nodeAddress), zone.getId(), NodeType.CONTROL_MOTE, floor.getId()), FragmentTempInfConfiguration.ID);
                     break;
                 case SSE:
-                    showDialogFragment(FragmentSSEConfiguration
-                            .newInstance(Short.parseShort(nodeAddress), zone.getId(), NodeType.SMART_NODE, floor.getId(), profile.getProfileType()), FragmentSSEConfiguration.ID);
+                    Equip equipSse = profile.getEquip();
+                    CcuLog.i(L.TAG_CCU_UI, "equip domainName "+equipSse.getDomainName()+" "+profile.getProfileType());
+                    NodeType helioNode = equipSse.getDomainName().contains("helionode") ? NodeType.HELIO_NODE : NodeType.SMART_NODE;
+                    showDialogFragment(SseProfileConfigFragment.Companion
+                            .newInstance(Short.parseShort(nodeAddress), zone.getId(), floor.getId(), helioNode, profile.getProfileType()), SseProfileConfigFragment.Companion.getID());
                     break;
                 case HYPERSTAT_MONITORING:
                     showDialogFragment(HyperStatMonitoringFragment.newInstance(Short.parseShort(nodeAddress)

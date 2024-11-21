@@ -94,8 +94,7 @@ public class Pulse
 
 		if(mTimeSinceCMDead > 15){
 			mTimeSinceCMDead = 0;
-			HashMap ccu = CCUHsApi.getInstance().read("ccu");
-			String ccuName = ccu.get("dis").toString();
+			String ccuName = Domain.ccuDevice.getCcuDisName();
 			AlertGenerateHandler.handleMessage(CM_DEAD, ccuName +" has stopped reporting data properly and needs to " +
 					"be serviced. "+CCUUtils.getSupportMsgContent(Globals.getInstance().getApplicationContext()));
 		}
@@ -128,8 +127,7 @@ public class Pulse
 				mLowSignalCount = (int)mDeviceLowSignalCount.get(nodeAddr);
 				if (!(boolean)mDeviceLowSignalAlert.get(nodeAddr) && mLowSignalCount >= 50) {
 					mDeviceLowSignalAlert.put(nodeAddr,true);
-					HashMap ccu = CCUHsApi.getInstance().read("ccu");
-					String ccuName = ccu.get("dis").toString();
+					String ccuName = Domain.ccuDevice.getCcuDisName();
 					AlertGenerateHandler.handleDeviceMessage(DEVICE_LOW_SIGNAL,
 							"For"+" "+ccuName + " ," + deviceInfo.getDisplayName() + " is having an issue and has reported low signal for last 50 updates. If you continue to receive this alert, "+CCUUtils.getSupportMsgContent(Globals.getInstance().getApplicationContext()),
 							deviceInfo.getId());
@@ -229,7 +227,7 @@ public class Pulse
 						CcuLog.i(L.TAG_CCU_DEVICE, "regularSNUpdate: "+val);
 						boolean isPressureOnAI1 = hayStack.readDefaultVal("point and domainName == \"" + DomainName.pressureSensorType + "\" and equipRef == \"" + equip.getId() + "\"") > 0.0;
 						double oldDisAnalogVal = hayStack.readHisValById(logPoint.get("id").toString());
-						double curDisAnalogVal = (isBypassDamper && isPressureOnAI1) ? getPressureConversion(equip, val) : getAnalogConversion(phyPoint, logPoint, val);
+						double curDisAnalogVal = (isBypassDamper && isPressureOnAI1) ? getPressureConversion(equip, val) : Math.round(getAnalogConversion(phyPoint, logPoint, val));
 						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
 						CcuLog.i(L.TAG_CCU_DEVICE, " Feedback regularSNUpdate: id "+logPoint.get("id").toString());
 						if (oldDisAnalogVal != curDisAnalogVal) {
@@ -244,7 +242,7 @@ public class Pulse
 						val = smartNodeRegularUpdateMessage_t.update.externalAnalogVoltageInput2.get();
 						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
 						double oldDynamicVar = hayStack.readHisValById(logPoint.get("id").toString());
-						double dynamicVar = getAnalogConversion(phyPoint, logPoint, val);
+						double dynamicVar =  Math.round(getAnalogConversion(phyPoint, logPoint, val));
 						if (oldDynamicVar != dynamicVar) {
 							if (logPointInfo.getMarkers().contains("pid")) {
 								hayStack.writeHisValueByIdWithoutCOV(logPoint.get("id").toString(), dynamicVar + getPiOffsetValue(nodeAddr));
@@ -253,7 +251,7 @@ public class Pulse
 								}
 							} else if (isBypassDamper) {
 								// For Bypass Damper, AI2 maps to Damper Feedback
-								hayStack.writeHisValueByIdWithoutCOV(logPoint.get("id").toString(), getAnalogConversion(phyPoint, logPoint, val));
+								hayStack.writeHisValueByIdWithoutCOV(logPoint.get("id").toString(), (double) Math.round(getAnalogConversion(phyPoint, logPoint, val)));
 							} else
 								hayStack.writeHisValueByIdWithoutCOV(logPoint.get("id").toString(), dynamicVar);
 						}
@@ -396,10 +394,9 @@ public class Pulse
 			CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartNodeUpdate : "+t+" : "+val);
 			switch (t) {
 				case HUMIDITY:
-					double oldHumidityVal = CCUHsApi.getInstance().readHisValById(sp.getId());
 					double curHumidityVal = getHumidityConversion(val);
 					CCUHsApi.getInstance().writeHisValById(sp.getId(), val );
-					if(oldHumidityVal != curHumidityVal && sp.getPointRef() != null)
+					if(sp.getPointRef() != null)
 						CCUHsApi.getInstance().writeHisValById(sp.getPointRef(), curHumidityVal);
 					break;
 				case PRESSURE:
@@ -689,7 +686,7 @@ public class Pulse
 			ControlMoteMessageHandlerKt.handleAdvancedAhuCmUpdate(cmRegularUpdateMessage_t);
 			//handleAdvancedAhuCmUpdate(hayStack, cmRegularUpdateMessage_t); //TODO- TEMP to be cleaned up
 		}
-		String addr = String.valueOf(L.ccu().getSmartNodeAddressBand());
+		String addr = String.valueOf(L.ccu().getAddressBand());
 		addr = addr.substring(0, addr.length()-2).concat("99");
 		HashMap device = hayStack.read("device and addr == \""+Short.parseShort(addr)+"\"");
 		double curTempVal = 0.0;
@@ -1027,8 +1024,7 @@ public class Pulse
 				mLowSignalCount = (int)mDeviceLowSignalCount.get(nodeAddr);
 				if (!(boolean)mDeviceLowSignalAlert.get(nodeAddr) && mLowSignalCount >= 50){
 					mDeviceLowSignalAlert.put(nodeAddr,true);
-					HashMap ccu = CCUHsApi.getInstance().read("ccu");
-					String ccuName = ccu.get("dis").toString();
+					String ccuName = Domain.ccuDevice.getCcuDisName();
 					AlertGenerateHandler.handleDeviceMessage(DEVICE_LOW_SIGNAL,
 							"For"+" "+ccuName + " ," + deviceInfo.getDisplayName() + " is having an issue and has " +
 									"reported low signal for last 50 updates. If you continue to receive this alert, "+CCUUtils.getSupportMsgContent(Globals.getInstance().getApplicationContext()), deviceInfo.getId());
@@ -1151,7 +1147,7 @@ public class Pulse
 	public static void rebootMessageFromCM(WrmOrCmRebootIndicationMessage_t wrmOrCMReootMsgs){
 		CcuLog.d(L.TAG_CCU_DEVICE,"Reboot Messages from CM for = "+wrmOrCMReootMsgs.wrmAddress+","+wrmOrCMReootMsgs.rebootCause);
 		short address = (short)wrmOrCMReootMsgs.wrmAddress.get();
-		if(address == 0x00 || (address == 0x01) || (address == L.ccu().getSmartNodeAddressBand()+99)){
+		if(address == 0x00 || (address == 0x01) || (address == L.ccu().getAddressBand()+99)){
 			LSerial.getInstance().setResetSeedMessage(true);
 
 			String firmwareVersion = wrmOrCMReootMsgs.majorFirmwareVersion+"."+wrmOrCMReootMsgs.minorFirmwareVersion;
@@ -1575,8 +1571,7 @@ public class Pulse
 			 double zoneDeadTime = TunerUtil.readTunerValByQuery("zone and dead and time",d.getEquipRef());
 			 zoneDeadTime = zoneDeadTime > 0 ? zoneDeadTime : 15;
              if ((currentTime - lastUpdateTime) > ( zoneDeadTime *60 * 1000)){
-				 HashMap ccu = CCUHsApi.getInstance().read("ccu");
-				 String ccuName = ccu.get("dis").toString();
+				 String ccuName = Domain.ccuDevice.getCcuDisName();
 				 AlertGenerateHandler.handleDeviceMessage(DEVICE_DEAD, "For"+" "+ccuName + "," +d.getDisplayName() +" has " +
 						 "stopped reporting data. "+CCUUtils.getSupportMsgContent(Globals.getInstance().getApplicationContext()), d.getId());
 				 mDeviceUpdate.remove(address);

@@ -44,7 +44,7 @@ public class PreferenceUtil {
     public static final String CARRIER_POINT_MIGRATION_DAB_TO_VVT = "carrierPointDabToVvtMigration";
     private static final String IS_CCU_LAUNCHED = "isCcuLaunched";
     private static final String IS_NEW_EXTERNAL_AHU = "isNewExternalAhu";
-    public static final String UPDATE_HIS_ITEMS = "updateHisItems";
+    public static final String UPDATE_HIS_ITEMS = "WritingMissingHisWriteValues";
     private static final String IS_CCU_REBOOT_STARTED = "isCcuRebootedStarted";
 
     public static final String MODULATING_FANSPEED_MIGRATION = "modulatingFanSpeedMigration";
@@ -75,7 +75,12 @@ public class PreferenceUtil {
     public static final String ZONE_CO2_MIGRATION = "ZONE_CO2_MIGRATION";
     public static final String APP_VERSION_POINTS_MIGRATION = "appVersionPointsMigration";
     public static final String MIGRATE_HIS_INTERPOLATE_FOR_DEVICE_POINTS = "migrateHisInterpolateForDeviceEntities";
+    public static final String MIGRATE_ANALOG_INPUT_TYPE_FOR_VAV_DEVICE_POINT = "migrateAnalogInputTypeForVavDevicePoint";
     public static final String BACKFILL_DEFAULT_VALUE_MIGRATION = "backFillDefaultValueMigration";
+    public static final String DAB_DAMPER_SIZE_MIGRATION = "dabDamperSizeMigration";
+    public static final String BACNET_ID_MIGRATION = "bacnetIdUpdateMigration";
+    private static final String INSTALL_TYPE = "INSTALL_TYPE";
+    private static final String RESTORE_BYPASS_DAMPER_AFTER_REPLACE = "restoreBypassDamperAfterReplace";
 
 
 
@@ -581,11 +586,47 @@ public class PreferenceUtil {
     public static void setMigrateHisInterpolateForDevicePoints() {
         setBooleanPreference(MIGRATE_HIS_INTERPOLATE_FOR_DEVICE_POINTS, true);
     }
+
+    public static boolean getMigrateAnalogInputTypeForVavDevicePoint() {
+        return getBooleanPreference(MIGRATE_ANALOG_INPUT_TYPE_FOR_VAV_DEVICE_POINT);
+    }
+
+    public static void setMigrateAnalogInputTypeForVavDevicePoint() {
+        setBooleanPreference(MIGRATE_ANALOG_INPUT_TYPE_FOR_VAV_DEVICE_POINT, true);
+    }
     public static boolean isBackFillValueUpdateRequired() {
         return getBooleanPreference(BACKFILL_DEFAULT_VALUE_MIGRATION);
     }
 
     public static void setBackFillValueUpdateDone() {
         setBooleanPreference(BACKFILL_DEFAULT_VALUE_MIGRATION, true);
+    }
+
+    public static boolean getDamperSizeMigrationFlagStatus() {
+        return getBooleanPreference(DAB_DAMPER_SIZE_MIGRATION);
+    }
+
+    public static void setDamperSizeMigrationFlagStatus() {
+        setBooleanPreference(DAB_DAMPER_SIZE_MIGRATION, true);
+    }
+
+    public static boolean isBacnetIdMigrationDone() {
+        return getBooleanPreference(BACNET_ID_MIGRATION);
+    }
+
+    public static void setBacnetIdMigrationDone() {
+        setBooleanPreference(BACNET_ID_MIGRATION, true);
+    }
+
+    public static String getCcuInstallType() {
+        return getStringPreference(INSTALL_TYPE);
+    }
+
+    public static boolean getRestoreBypassDamperAfterReplace() {
+        return getBooleanPreference(RESTORE_BYPASS_DAMPER_AFTER_REPLACE);
+    }
+
+    public static void setRestoreBypassDamperAfterReplace() {
+        setBooleanPreference(RESTORE_BYPASS_DAMPER_AFTER_REPLACE, true);
     }
 }

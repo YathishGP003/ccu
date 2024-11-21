@@ -58,6 +58,7 @@ import a75f.io.api.haystack.util.DatabaseEvent;
 import a75f.io.device.DeviceUpdateJob;
 import a75f.io.device.EveryDaySchedulerService;
 import a75f.io.device.mesh.LSerial;
+import a75f.io.domain.api.Domain;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
@@ -466,7 +467,7 @@ public abstract class UtilityApplication extends Application {
         crashPreference.edit().putStringSet("crash", timeSet).commit();
 
         if (crashPreference.getStringSet("crash", null).size() >= 3 ) {
-            CCUHsApi.getInstance().writeHisValByQuery("point and safe and mode and diag and his", 1.0);
+            Domain.diagEquip.getSafeModeStatus().writeHisVal(1.0);
         } else if (OOMExceptionHandler.isOOMCausedByFragmentation(paramThrowable)) {
             RenatusApp.rebootTablet();
         }

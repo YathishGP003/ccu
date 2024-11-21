@@ -235,7 +235,7 @@ public class DualDuctProfile extends ZoneProfile {
         EpidemicState epidemicState = EpidemicState.values()[(int) epidemicMode];
     
         if((epidemicState != EpidemicState.OFF) && (L.ccu().oaoProfile != null)){
-            double smartPurgeDABDamperMinOpenMultiplier = TunerUtil.readTunerValByQuery("purge and system and dab and damper and pos and multiplier and min ", L.ccu().oaoProfile.getEquipRef());
+            double smartPurgeDABDamperMinOpenMultiplier = L.ccu().oaoProfile.getOAOEquip().getSystemPurgeDabDamperMinOpenMultiplier().readPriorityVal();
             damper.iaqCompensatedMinPos =(int) (damper.minPosition * smartPurgeDABDamperMinOpenMultiplier);
         } else {
             damper.iaqCompensatedMinPos = damper.minPosition;

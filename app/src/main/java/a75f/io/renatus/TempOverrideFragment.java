@@ -175,9 +175,13 @@ public class TempOverrideFragment extends Fragment {
     @Override
     public void onStop() {
         super.onStop();
+        reSettingTempModeValues();
+        snackbar.dismiss();
+    }
+    public void  reSettingTempModeValues()
+    {
         Globals.getInstance().setTemporaryOverrideMode(false);
         Globals.getInstance().resetTempOverCount();
-        //RenatusLandingActivity.snackbar.dismiss();
         stopCountdownTimer();
         tempOverRiddenValue = TempOverRiddenValue.getInstance();
         for (Map.Entry<String, String> overrideVal : tempOverRiddenValue.getAllItems()) {
@@ -193,7 +197,6 @@ public class TempOverrideFragment extends Fragment {
             }
         }
         tempOverRiddenValue.clear();
-        snackbar.dismiss();
     }
 
     public void setPointVal(String id, double val) {

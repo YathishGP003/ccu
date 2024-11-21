@@ -37,7 +37,7 @@ import a75f.io.logic.tuners.StandAloneTuners;
 import a75f.io.logic.util.RxTask;
 import a75f.io.util.ExecutorTask;
 
-public class SingleStageEquip {
+public class SingleStageEquiptobeDeleted {
 
     int nodeAddr;
     ProfileType profileType;
@@ -51,8 +51,7 @@ public class SingleStageEquip {
     String equipRef = null;
 
 
-    public SingleStageEquip(ProfileType T, int node) {
-
+    public SingleStageEquiptobeDeleted(ProfileType T, int node) {
         profileType = T;
         sseProfile = new SingleStageProfile();
         nodeAddr = node;

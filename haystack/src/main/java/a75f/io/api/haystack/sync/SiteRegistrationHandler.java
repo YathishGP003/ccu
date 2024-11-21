@@ -85,7 +85,7 @@ public class SiteRegistrationHandler {
             siteCreationRequestJson.put(SiteFieldConstants.GEOCOUNTRY, siteDict.get(SiteFieldConstants.GEOCOUNTRY));
             siteCreationRequestJson.put(SiteFieldConstants.GEOPOSTALCODE, siteDict.get(SiteFieldConstants.GEOPOSTALCODE));
             siteCreationRequestJson.put(SiteFieldConstants.GEOSTATE, siteDict.get(SiteFieldConstants.GEOSTATE));
-            siteCreationRequestJson.put(SiteFieldConstants.INSTALLER_EMAIL, siteDict.get(SiteFieldConstants.INSTALLER_EMAIL));
+            siteCreationRequestJson.put(SiteFieldConstants.INSTALLER_EMAIL, siteDict.get(CcuFieldConstants.INSTALLER_EMAIL));
             siteCreationRequestJson.put(SiteFieldConstants.ORGANIZATION, siteDict.get(SiteFieldConstants.ORGANIZATION));
             siteCreationRequestJson.put(SiteFieldConstants.TIMEZONE, siteDict.get(SiteFieldConstants.TIMEZONE));
             siteCreationRequestJson.put(SiteFieldConstants.WEATHERREF, siteDict.get(SiteFieldConstants.WEATHERREF, false));

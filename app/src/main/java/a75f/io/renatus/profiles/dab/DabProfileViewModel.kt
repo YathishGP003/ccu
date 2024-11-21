@@ -117,6 +117,8 @@ class DabProfileViewModel : ViewModel() {
                 zoneRef, floorRef, profileType, model
             ).getDefaultConfiguration()
             CcuLog.i(Domain.LOG_TAG, profileConfiguration.toString())
+            profileConfiguration.damper1Size.currentVal = 4.0
+            profileConfiguration.damper2Size.currentVal = 4.0
             viewState = DabConfigViewState.fromDabProfileConfig(profileConfiguration)
         }
         this.context = requireContext
@@ -288,16 +290,6 @@ class DabProfileViewModel : ViewModel() {
     private fun overrideForBypassDamper(config: DabProfileConfiguration) {
         val equip = hayStack.readEntity("equip and group == \"" + config.nodeAddress + "\"")
         val dabEquip = DabEquip(equip["id"].toString())
-
-        if (dabEquip.enableCFMControl.readDefaultVal() <= 0.0) {
-            dabEquip.minCoolingDamperPos.writeVal(7, hayStack.ccuUserName, dabEquip.minCoolingDamperPos.readDefaultVal(), 0)
-            dabEquip.minCoolingDamperPos.writeDefaultVal(40.0)
-            dabEquip.minCoolingDamperPos.writeHisVal(dabEquip.minCoolingDamperPos.readDefaultVal())
-
-            dabEquip.minHeatingDamperPos.writeVal(7, hayStack.ccuUserName, dabEquip.minHeatingDamperPos.readDefaultVal(), 0)
-            dabEquip.minHeatingDamperPos.writeDefaultVal(40.0)
-            dabEquip.minHeatingDamperPos.writeHisVal(dabEquip.minHeatingDamperPos.readDefaultVal())
-        }
 
         dabEquip.dabProportionalKFactor.writeVal(14, hayStack.ccuUserName, 0.7, 0)
         dabEquip.dabProportionalKFactor.writeHisVal(0.7)

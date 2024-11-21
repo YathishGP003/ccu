@@ -56,6 +56,7 @@ import a75f.io.device.serial.CcuToCmOverUsbCmResetMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSmartStatControlsMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSnControlsMessage_t;
 import a75f.io.device.serial.MessageType;
+import a75f.io.domain.api.Domain;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
@@ -79,10 +80,6 @@ public class RemoteCommandHandlerUtil {
     private static final String SET_HOME_APP_CMD = "cmd package set-home-activity --user 0 \"%s/.MainActivity\"";
     private static final String APPOPS_SET_ALLOW_CMD = "appops set %s %s allow";
     private static final String PM_GRANT_CMD = "pm grant %s %s";
-    private static final String BAC_APP_PACKAGE_NAME = "io.seventyfivef.bacapp";
-    private static final String REMOTE_ACCESS_PACKAGE_NAME = "io.seventyfivef.remoteaccess";
-    private static final String HOME_APP_PACKAGE_NAME_OBSOLETE = "io.seventyfivef.home";
-    private static final String HOME_APP_PACKAGE_NAME = "com.x75frenatus.home";
 
     private static long bacAppDownloadId = -1;
     private static String bacAppApkName = "";
@@ -134,7 +131,7 @@ public class RemoteCommandHandlerUtil {
                 break;
             case UPDATE_CCU:
                 OtaStatusDiagPoint.Companion.updateCCUOtaStatus(OtaStatus.OTA_REQUEST_RECEIVED);
-                String curVersion = CCUHsApi.getInstance().readDefaultStrVal("point and diag and app and version");
+                String curVersion = Domain.diagEquip.getAppVersion().readDefaultStrVal();
                 String[] versionPart = id.split("_");
                 String downloadApkVersion = versionPart[versionPart.length-1].replace(".apk","");
                 if(curVersion.equals(downloadApkVersion)) {
@@ -246,7 +243,7 @@ public class RemoteCommandHandlerUtil {
         }
         if(logLevelValue == -1)
             return;
-        CCUHsApi.getInstance().writeHisValByQuery(Queries.LOG_LEVEL_QUERY,logLevelValue);
+        Domain.ccuEquip.getLogLevel().writeHisVal(logLevelValue);
         CCUHsApi.getInstance().setCcuLogLevel(logLevelValue);
     }
 
@@ -355,12 +352,19 @@ public class RemoteCommandHandlerUtil {
                         } else if (downloadId == bacAppDownloadId) {
                             String fileName = resolveApkFilename(bacAppApkName);
                             if (fileName != null) {
+                                String uninstallPackage = L.BAC_APP_PACKAGE_NAME_OBSOLETE;
+                                String launchPackage = L.BAC_APP_PACKAGE_NAME;
+                                final String BAC_APP_VERSION_OLD_PACKAGE = "3.2.12";
+                                if(bacAppApkName.contains(BAC_APP_VERSION_OLD_PACKAGE)) {
+                                    uninstallPackage = L.BAC_APP_PACKAGE_NAME;
+                                    launchPackage = L.BAC_APP_PACKAGE_NAME_OBSOLETE;
+                                }
                                 String[] commands = new String[]{
                                         // uninstall the bacapp with older package name
-                                        String.format(UNINSTALL_CMD, "com.example.ccu_bacapp"),
+                                        String.format(UNINSTALL_CMD, uninstallPackage),
                                         String.format(INSTALL_CMD, fileName)
                                 };
-                                RenatusApp.executeAsRoot(commands, BAC_APP_PACKAGE_NAME, false, false);
+                                RenatusApp.executeAsRoot(commands, launchPackage, false, false);
                             }
                         } else if (downloadId == remoteAccessAppDownloadId) {
                             String fileName = resolveApkFilename(remoteAccessApkName);
@@ -371,11 +375,11 @@ public class RemoteCommandHandlerUtil {
                                 }
                                 String[] commands = new String[]{
                                         String.format(INSTALL_CMD, fileName),
-                                        String.format(APPOPS_SET_ALLOW_CMD, REMOTE_ACCESS_PACKAGE_NAME, "PROJECT_MEDIA"),                     // Screen Capture access
-                                        String.format(APPOPS_SET_ALLOW_CMD, REMOTE_ACCESS_PACKAGE_NAME, "SYSTEM_ALERT_WINDOW"),               // Overlay access
-                                        String.format(PM_GRANT_CMD, REMOTE_ACCESS_PACKAGE_NAME, "android.permission.WRITE_SECURE_SETTINGS")   // Accessibility access
+                                        String.format(APPOPS_SET_ALLOW_CMD, L.REMOTE_ACCESS_PACKAGE_NAME, "PROJECT_MEDIA"),                     // Screen Capture access
+                                        String.format(APPOPS_SET_ALLOW_CMD, L.REMOTE_ACCESS_PACKAGE_NAME, "SYSTEM_ALERT_WINDOW"),               // Overlay access
+                                        String.format(PM_GRANT_CMD, L.REMOTE_ACCESS_PACKAGE_NAME, "android.permission.WRITE_SECURE_SETTINGS")   // Accessibility access
                                 };
-                                RenatusApp.executeAsRoot(commands, REMOTE_ACCESS_PACKAGE_NAME, false, false);
+                                RenatusApp.executeAsRoot(commands, L.REMOTE_ACCESS_PACKAGE_NAME, false, false);
                             }
                         } else if (downloadId == homeAppDownloadId) {
                             String fileName = resolveApkFilename(homeAppApkName);
@@ -391,17 +395,17 @@ public class RemoteCommandHandlerUtil {
                                 String baseName = pieces[pieces.length - 1];
                                 String[] commands = new String[]{
                                         REMOUNT_RW,
-                                        String.format(UNINSTALL_CMD, HOME_APP_PACKAGE_NAME),            // Necessary because the signing key changed
+                                        String.format(UNINSTALL_CMD, L.HOME_APP_PACKAGE_NAME),            // Necessary because the signing key changed
                                         String.format(REMOVE_FILE, "/system/priv-app/75fHome*.apk"),
 
-                                        String.format(UNINSTALL_CMD, HOME_APP_PACKAGE_NAME_OBSOLETE),   // Necessary because a few have been installed in the field
+                                        String.format(UNINSTALL_CMD, L.HOME_APP_PACKAGE_NAME_OBSOLETE),   // Necessary because a few have been installed in the field
                                         String.format(REMOVE_FILE, "/system/priv-app/Home*.apk"),
 
                                         String.format(MOVE_FILE, fileName, "/system/priv-app"),
                                         String.format("chmod 644 /system/priv-app/%s", baseName),
                                         String.format("chown root.root /system/priv-app/%s", baseName),
                                         String.format(INSTALL_CMD, String.format("/system/priv-app/%s", baseName)),
-                                        String.format(SET_HOME_APP_CMD, HOME_APP_PACKAGE_NAME),
+                                        String.format(SET_HOME_APP_CMD, L.HOME_APP_PACKAGE_NAME),
                                 };
 
                                 RenatusApp.executeAsRoot(commands, null, false, true);

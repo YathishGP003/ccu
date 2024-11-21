@@ -15,7 +15,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.domain.api.Domain;
+import a75f.io.domain.equips.CCUDiagEquip;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
@@ -214,8 +215,11 @@ public class CCUUtils {
 		try {
 			PackageInfo info = manager.getPackageInfo(Globals.getInstance().getApplicationContext().getPackageName(), 0);
 			String appVersion = info.versionName;
-			String migrationVersion=appVersion.substring(appVersion.lastIndexOf('_') + 1);
-			CCUHsApi.getInstance().writeDefaultVal("point and diag and migration", migrationVersion);
+			String migrationVersion = appVersion.substring(appVersion.lastIndexOf('_') + 1);
+			CCUDiagEquip diagEquip = Domain.INSTANCE.checkCCUEquipInitialisedAndGet();
+			if (diagEquip != null){
+				diagEquip.getAppVersion().writeDefaultVal(migrationVersion);
+			}
 			CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "Update Migration Diag Point "+migrationVersion);
 		} catch (PackageManager.NameNotFoundException e) {
 			e.printStackTrace();

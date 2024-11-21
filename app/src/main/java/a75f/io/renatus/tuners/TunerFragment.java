@@ -60,6 +60,7 @@ import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Zone;
 import a75f.io.api.haystack.sync.PointWriteCache;
+import a75f.io.domain.api.Domain;
 import a75f.io.domain.cutover.BuildingEquipCutOverMapping;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
@@ -266,8 +267,8 @@ public class TunerFragment extends BaseDialogFragment implements TunerItemClickL
             AlertDialog.Builder dialog = new AlertDialog.Builder(getActivity());
             dialog.setView(dialogView);
 
-            HashMap ccu = CCUHsApi.getInstance().read("ccu");
-            ((TextView) dialogView.findViewById(R.id.textView_Building)).setText(ccu.get("dis").toString());
+            String ccuDisName = Domain.ccuDevice.getCcuDisName();
+            ((TextView) dialogView.findViewById(R.id.textView_Building)).setText(ccuDisName);
 
             AlertDialog valueDialog = dialog.show();
 

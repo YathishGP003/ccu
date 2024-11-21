@@ -3,7 +3,6 @@ package a75f.io.renatus.profiles.dab
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.domain.api.Domain
 import a75f.io.logger.CcuLog
-import a75f.io.logic.L
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.dab.DabEquipToBeDeleted.CARRIER_PROD
 import a75f.io.logic.bo.building.definitions.ProfileType
@@ -164,9 +163,9 @@ class DabProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                             previewWidth = 60,
                             expandedWidth = 80,
                             onSelected = { selectedIndex ->
-                                viewModel.viewState.damper1Size = selectedIndex.toDouble()
+                                viewModel.viewState.damper1Size = viewModel.damper1SizesList[selectedIndex].toDouble()
                             },
-                            defaultSelection = viewModel.viewState.damper1Size.toInt(),
+                            defaultSelection = viewModel.damper1SizesList.indexOf(viewModel.viewState.damper1Size.toInt().toString()),
                             spacerLimit = 20,
                             heightValue = 268
                         )
@@ -223,9 +222,9 @@ class DabProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                             previewWidth = 60,
                             expandedWidth = 80,
                             onSelected = { selectedIndex ->
-                                viewModel.viewState.damper2Size = selectedIndex.toDouble()
+                                viewModel.viewState.damper2Size = viewModel.damper2SizesList[selectedIndex].toDouble()
                             },
-                            defaultSelection = viewModel.viewState.damper2Size.toInt(),
+                            defaultSelection = viewModel.damper2SizesList.indexOf(viewModel.viewState.damper2Size.toInt().toString()),
                             spacerLimit = 20,
                             heightValue = 268
                         )
@@ -285,17 +284,8 @@ class DabProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start) {
                     Spacer(modifier = Modifier.width(78.dp))
                     Row {
-                        HeaderTextView(text = "Enable IAQ Control", padding = 10)
-                        Spacer(modifier = Modifier.width(248.dp))
-                        ToggleButtonStateful(
-                            defaultSelection = viewModel.viewState.enableIAQControl,
-                            onEnabled = { viewModel.viewState.enableIAQControl = it }
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(83.dp))
-                    Row {
                         HeaderTextView(text = "Enable CO2 Control", padding = 10)
-                        Spacer(modifier = Modifier.width(178.dp))
+                        Spacer(modifier = Modifier.width(240.dp))
                         ToggleButtonStateful(
                             defaultSelection = viewModel.viewState.enableCo2Control,
                             onEnabled = { viewModel.viewState.enableCo2Control = it }

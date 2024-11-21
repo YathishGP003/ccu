@@ -23,7 +23,9 @@ import a75f.io.messaging.handler.AutoCommissioningStateHandler
 import a75f.io.messaging.handler.CREATE_CUSTOM_ALERT_DEF_CMD
 import a75f.io.messaging.handler.DELETE_CUSTOM_ALERT_DEF_CMD
 import a75f.io.messaging.handler.DELETE_SITE_DEFS_CMD
+import a75f.io.messaging.handler.FixAlertHandler
 import a75f.io.messaging.handler.KEY_ALERT_DEF_IDS
+import a75f.io.messaging.handler.KEY_ALERT_ID
 import a75f.io.messaging.handler.KEY_ALERT_IDS
 import a75f.io.messaging.handler.REMOVE_ALERT_CMD
 import a75f.io.messaging.handler.RemoteCommandUpdateHandler
@@ -121,6 +123,7 @@ private fun parseId(messageContent : JsonObject , command : String) : String?{
         UPDATE_CUSTOM_ALERT_DEF_CMD,
         DELETE_CUSTOM_ALERT_DEF_CMD -> messageContent.asJsonObject.get("definitionId")?.asString
         REMOVE_ALERT_CMD -> messageContent.asJsonObject.get("alertId")?.asString
+        FixAlertHandler.CMD -> messageContent.asJsonObject.get("alertId")?.asString
         else -> messageContent.asJsonObject.get(MESSAGE_ATTRIBUTE_ID)?.asString
     }
 }

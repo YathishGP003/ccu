@@ -5,7 +5,6 @@ import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 import static a75f.io.logic.L.ccu;
 import static a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType.TwoToTenV;
-import static a75f.io.logic.bo.util.UnitUtils.celsiusToFahrenheit;
 
 import android.app.Dialog;
 import android.content.Intent;
@@ -15,12 +14,10 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import androidx.annotation.Nullable;
@@ -29,7 +26,6 @@ import java.util.ArrayList;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
-import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.device.mesh.LSerial;
 import a75f.io.logger.CcuLog;
@@ -40,10 +36,7 @@ import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.oao.OAOProfile;
-import a75f.io.logic.bo.building.oao.OAOProfileConfiguration;
-import a75f.io.logic.bo.building.system.dab.DabExternalAhu;
-import a75f.io.logic.bo.building.system.vav.VavExternalAhu;
-import a75f.io.logic.ccu.restore.CCU;
+import a75f.io.logic.bo.building.oao.OAOProfileConfigurationToBeDeleted;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.modbus.util.UtilSourceKt;
@@ -51,7 +44,6 @@ import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.util.RxjavaUtil;
 import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
-import a75f.io.util.ExecutorTask;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -60,14 +52,14 @@ import butterknife.ButterKnife;
  * Created by samjithsadasivan on 6/5/18.
  */
 
-public class DialogOAOProfile extends BaseDialogFragment
+public class DialogOAOProfileToBeDeleted extends BaseDialogFragment
 {
-    public static final String ID = DialogOAOProfile.class.getSimpleName();
+    public static final String ID = DialogOAOProfileToBeDeleted.class.getSimpleName();
     
     private short    mSmartNodeAddress;
     private NodeType mNodeType;
     private OAOProfile mProfile;
-    private OAOProfileConfiguration mProfileConfig;
+    private OAOProfileConfigurationToBeDeleted mProfileConfig;
     
     private Button setButton;
     private Button unpairButton;
@@ -98,13 +90,13 @@ public class DialogOAOProfile extends BaseDialogFragment
     @BindView(R.id.smartPurgeOutsideDamperMinOpen) Spinner smartPurgeOutsideDamperMinOpen;
     @BindView(R.id.enhancedVentiOutsideDamperMinOpen) Spinner enhancedVentilationOutsideDamperMinOpen;
 
-    public DialogOAOProfile()
+    public DialogOAOProfileToBeDeleted()
     {
     }
     
-    public static DialogOAOProfile newInstance(short smartNodeAddress, String roomRef, String floorRef)
+    public static DialogOAOProfileToBeDeleted newInstance(short smartNodeAddress, String roomRef, String floorRef)
     {
-        DialogOAOProfile f = new DialogOAOProfile();
+        DialogOAOProfileToBeDeleted f = new DialogOAOProfileToBeDeleted();
         Bundle bundle = new Bundle();
         bundle.putShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR, smartNodeAddress);
         bundle.putString(FragmentCommonBundleArgs.ARG_NAME, roomRef);
@@ -187,7 +179,7 @@ public class DialogOAOProfile extends BaseDialogFragment
             setOAOSavingInProgress(true);
             setButton.setEnabled(false);
 
-                    ExecutorTask.executeAsync( () ->
+                    RxjavaUtil.executeBackgroundTask( () ->
                                     ProgressDialogUtils.showProgressDialog(getActivity(), "Saving OAO Configuration"),
                             () -> {
                                 setUpOAOProfile();
@@ -196,7 +188,7 @@ public class DialogOAOProfile extends BaseDialogFragment
                             },
                             () -> {
                                 ProgressDialogUtils.hideProgressDialog();
-                                DialogOAOProfile.this.closeAllBaseDialogFragments();
+                                DialogOAOProfileToBeDeleted.this.closeAllBaseDialogFragments();
                                 SystemConfigFragment.SystemConfigFragmentHandler.sendEmptyMessage(6);
                                 getActivity().sendBroadcast(new Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED));
                                 UtilSourceKt.showToast("OAO Equip Created Successfully", requireContext());
@@ -208,24 +200,24 @@ public class DialogOAOProfile extends BaseDialogFragment
 
         unpairButton.setOnClickListener(v -> {
             unpairButton.setEnabled(false);
-            ExecutorTask.executeAsync(
-                    () -> ProgressDialogUtils.showProgressDialog(getActivity(), "Deleting OAO Equip"),
-                    () -> {
-                        deleteOAOEquip();
-                        L.saveCCUState();
-                        CCUHsApi.getInstance().syncEntityTree();
-                    },
-                    () -> {
-                        ProgressDialogUtils.hideProgressDialog();
-                        try {
-                            DialogOAOProfile.this.closeAllBaseDialogFragments();
-                        } catch (Exception e) {
-                            CcuLog.e(L.TAG_CCU_OAO, "Exception when closing Bypass Damper dialog: " + e);
-                        }
-                        SystemConfigFragment.SystemConfigFragmentHandler.sendEmptyMessage(1);
-                        UtilSourceKt.showToast("OAO Equip Deleted Successfully", requireContext());
-                    }
-            );
+            ProgressDialogUtils.showProgressDialog(getActivity(),"Deleting OAO Equip");
+
+            new Thread(() -> {
+                deleteOAOEquip();
+                L.saveCCUState();
+                CCUHsApi.getInstance().syncEntityTree();
+            }).start();
+
+            new Handler().postDelayed(() -> {
+                ProgressDialogUtils.hideProgressDialog();
+                try {
+                    DialogOAOProfileToBeDeleted.this.closeAllBaseDialogFragments();
+                } catch (Exception e) {
+                    CcuLog.e(L.TAG_CCU_OAO, "Exception when closing Bypass Damper dialog: " + e);
+                }
+                SystemConfigFragment.SystemConfigFragmentHandler.sendEmptyMessage(1);
+                UtilSourceKt.showToast("OAO Equip Deleted Successfully", requireContext());
+            }, 12000);
         });
     
         ArrayList<Integer> voltsArray = new ArrayList<>();
@@ -273,7 +265,7 @@ public class DialogOAOProfile extends BaseDialogFragment
         
         if (mProfile != null) {
             CcuLog.d(L.TAG_CCU_UI,  "Get OAOProfile: ");
-            mProfileConfig = (OAOProfileConfiguration) mProfile.getProfileConfiguration(mSmartNodeAddress);
+            //mProfileConfig = (OAOProfileConfigurationToBeDeleted) mProfile.getProfileConfiguration(mSmartNodeAddress);
         } else {
             CcuLog.d(L.TAG_CCU_UI, "Create OAOProfile: ");
             mProfile = new OAOProfile();
@@ -344,7 +336,7 @@ public class DialogOAOProfile extends BaseDialogFragment
 
     private void setUpOAOProfile() {
        
-        OAOProfileConfiguration oaoConfig = new OAOProfileConfiguration();
+        OAOProfileConfigurationToBeDeleted oaoConfig = new OAOProfileConfigurationToBeDeleted();
     
         Output analog1Op = new Output();
         analog1Op.setAddress(mSmartNodeAddress);
@@ -389,12 +381,12 @@ public class DialogOAOProfile extends BaseDialogFragment
         oaoConfig.outsideDamperMinOpenDuringFanHigh = Double.parseDouble(oaDamperMinOpenDuringFanHigh.getSelectedItem().toString());
         oaoConfig.returnDamperMinOpen = Double.parseDouble(returnDamperMinOpen.getSelectedItem().toString());
         if (mProfileConfig == null) {
-            mProfile.addOaoEquip(mSmartNodeAddress, oaoConfig, floorRef, zoneRef,  NodeType.SMART_NODE);
+            //mProfile.addOaoEquip(mSmartNodeAddress, oaoConfig, floorRef, zoneRef,  NodeType.SMART_NODE);
             if (L.ccu().systemProfile.getProfileType() != ProfileType.SYSTEM_DEFAULT) {
                 L.ccu().systemProfile.setOutsideTempCoolingLockoutEnabled(CCUHsApi.getInstance(), true);
             }
         } else {
-            mProfile.updateOaoEquip(oaoConfig);
+           // mProfile.updateOaoEquip(oaoConfig);
         }
         L.ccu().oaoProfile = mProfile;
         CcuLog.d(L.TAG_CCU_UI, "Set OAO Config");

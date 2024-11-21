@@ -100,17 +100,17 @@ public class DiagEquip
         if((plugged == BatteryManager.BATTERY_PLUGGED_AC) || (plugged == BatteryManager.BATTERY_PLUGGED_USB))
             isPowerConnected = true;
 
-        ccuDiagEquip.getAppRestart().writeHisVal(AlertManager.getInstance().getRepo().checkIfAppRestarted() ? 1.0 : 0.0);
+        ccuDiagEquip.getAppRestart().writeHisValueByIdWithoutCOV(AlertManager.getInstance().getRepo().checkIfAppRestarted() ? 1.0 : 0.0);
 
         // Are we charging / charged?
         int status = batteryStatus.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
         boolean charging = status == BatteryManager.BATTERY_STATUS_CHARGING ||
                 status == BatteryManager.BATTERY_STATUS_FULL;
-        ccuDiagEquip.getPowerConnected().writeHisVal(charging ? 1.0 : (isPowerConnected ? 1.0 : 0.0));
-        ccuDiagEquip.getChargingStatus().writeHisVal(charging ? 1.0 : 0.0);
+        ccuDiagEquip.getPowerConnected().writeHisValueByIdWithoutCOV(charging ? 1.0 : (isPowerConnected ? 1.0 : 0.0));
+        ccuDiagEquip.getChargingStatus().writeHisValueByIdWithoutCOV(charging ? 1.0 : 0.0);
         int level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
         int scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
-        ccuDiagEquip.getBatteryLevel().writeHisVal((level*100)/scale);
+        ccuDiagEquip.getBatteryLevel().writeHisValueByIdWithoutCOV((level*100)/scale);
 
         WifiManager wifi = (WifiManager) Globals.getInstance().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         if (wifi != null) {
@@ -155,10 +155,10 @@ public class DiagEquip
             e.printStackTrace();
         }
 
-        ccuDiagEquip.getSafeModeStatus().writeHisVal(Globals.getInstance().isSafeMode()? 1 : 0);
+        ccuDiagEquip.getSafeModeStatus().writeHisValueByIdWithoutCOV(Globals.getInstance().isSafeMode()? 1 : 0);
         updateFreeInternalStoragePoint();
         updateRemoteSessionStatusPoint();
-        ccuEquip.getLogLevel().writeHisVal(ccuEquip.getLogLevel().readHisVal());
+        ccuEquip.getLogLevel().writeHisValueByIdWithoutCOV(ccuEquip.getLogLevel().readHisVal());
 
         countOfBacnetAppVersionNotFound = 0;
         updateAppVersionPoint(L.HOME_APP_PACKAGE_NAME, ccuDiagEquip.getHomeAppVersion());
@@ -169,21 +169,21 @@ public class DiagEquip
     }
 
     private void updateMemoryStatus(ActivityManager.MemoryInfo mi) {
-        ccuDiagEquip.getAvailableMemory().writeHisVal(mi.availMem / 1048576L);
-        ccuDiagEquip.getTotalMemory().writeHisVal(mi.totalMem/1048576L);
-        ccuDiagEquip.isLowMemory().writeHisVal(mi.lowMemory? 1.0 :0);
+        ccuDiagEquip.getAvailableMemory().writeHisValueByIdWithoutCOV(mi.availMem / 1048576L);
+        ccuDiagEquip.getTotalMemory().writeHisValueByIdWithoutCOV(mi.totalMem/1048576L);
+        ccuDiagEquip.isLowMemory().writeHisValueByIdWithoutCOV(mi.lowMemory? 1.0 :0);
     }
 
     private void updateWifiStatus(int linkSpeed, int rssi, int signalStrength) {
-        ccuDiagEquip.getWifiLinkSpeed().writeHisVal(linkSpeed);
-        ccuDiagEquip.getWifiRssi().writeHisVal(rssi);
-        ccuDiagEquip.getWifiSignalStrength().writeHisVal(signalStrength);
+        ccuDiagEquip.getWifiLinkSpeed().writeHisValueByIdWithoutCOV(linkSpeed);
+        ccuDiagEquip.getWifiRssi().writeHisValueByIdWithoutCOV(rssi);
+        ccuDiagEquip.getWifiSignalStrength().writeHisValueByIdWithoutCOV(signalStrength);
     }
 
     private void updateRemoteSessionStatusPoint() {
         SharedPreferences sharedPreferences = Globals.getInstance().getApplicationContext().getSharedPreferences(SHARED_PREFERENCE_NAME, Context.MODE_PRIVATE);
         int screenSharingStatus = sharedPreferences.getInt(KEY_SCREEN_SHARING_STATUS, 0);
-        ccuDiagEquip.getRemoteSessionStatus().writeHisVal(screenSharingStatus);
+        ccuDiagEquip.getRemoteSessionStatus().writeHisValueByIdWithoutCOV(screenSharingStatus);
     }
 
     public void updateFreeInternalStoragePoint(){
@@ -193,7 +193,7 @@ public class DiagEquip
         long availableBlocks = stat.getAvailableBlocksLong();
         long freeInternalMemorySize = (((availableBlocks * blockSize)/1024)/1024);  // it returns size in MB
         CcuLog.d("CCUDiagEquip","freeInternalStorage "+freeInternalMemorySize);
-        ccuDiagEquip.getAvailableInternalDiskStorage().writeHisVal(freeInternalMemorySize);
+        ccuDiagEquip.getAvailableInternalDiskStorage().writeHisValueByIdWithoutCOV(freeInternalMemorySize);
     }
 
     private static boolean isDebuggable() {

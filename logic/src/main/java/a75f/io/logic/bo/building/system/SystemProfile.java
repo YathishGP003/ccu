@@ -831,8 +831,6 @@ public abstract class SystemProfile
             handleBypassCoolingLockoutNormal();
         }
 
-        hayStack.writeDefaultVal("point and domainName == \"" + DomainName.bypassHeatingLockout + "\"", isBypassHeatingLockoutActive ? 1.0 : 0.0);
-        hayStack.writeDefaultVal("point and domainName == \"" + DomainName.bypassCoolingLockout + "\"", isBypassCoolingLockoutActive ? 1.0 : 0.0);
         hayStack.writeHisValByQuery("point and domainName == \"" + DomainName.bypassHeatingLockout + "\"", isBypassHeatingLockoutActive ? 1.0 : 0.0);
         hayStack.writeHisValByQuery("point and domainName == \"" + DomainName.bypassCoolingLockout + "\"", isBypassCoolingLockoutActive ? 1.0 : 0.0);
     }

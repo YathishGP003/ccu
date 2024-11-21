@@ -1162,6 +1162,7 @@ object DomainName {
     const val relay1Cmd = "relay1Cmd"
     const val relay2Cmd = "relay2Cmd"
     const val controlVariable = "controlVariable"
+    const val processVariable = "processVariable"
     const val smartnodePID = "smartnodePID"
     const val helionodePID = "helionodePID"
 

@@ -256,7 +256,7 @@ class PlcProfileViewModel : ViewModel() {
                 saveUnUsedPortStatus(profileConfiguration, deviceAddress, hayStack)
             }
         }
-        updateProcessVariablePoint(profileConfiguration.nodeAddress)
+        //updateProcessVariablePoint(profileConfiguration.nodeAddress)
         plcProfile.init()
     }
 

@@ -480,10 +480,20 @@ public class ZoneViewData {
         if (piSensorValue > 0) {
             plcPoints.put("Pi Sensor Value",piSensorValue);
         }
-        Map<Object, Object> targetDetails = Collections.emptyMap();
+
+        HashMap<Object, Object> equip = CCUHsApi.getInstance().readMapById(equipID);
+        int group = Integer.parseInt(equip.get("group").toString());
+        PlcProfile profile = (PlcProfile) L.getProfile(group);
+        assert profile != null;
+        String processVariable = profile.getProcessVariableDomainName();
+        String dynamicTargetValue = profile.getDynamicTargetDomainName();
+        HashMap<Object, Object> inputDetails = CCUHsApi.getInstance().readEntity(
+                "point and domainName == \""+processVariable+"\" and equipRef == \""+equipID+"\"");
+        Map<Object, Object> targetDetails;
         if(analog2Config == 1) {
             plcPoints.put("Dynamic Setpoint",true);
-            plcEquip.getDynamicTargetValue().getPoint();
+            targetDetails = CCUHsApi.getInstance().readEntity(
+                    "point and domainName == \""+dynamicTargetValue+"\" and equipRef == \""+equipID+"\"");
             targetValue = plcEquip.getDynamicTargetValue().readDefaultVal();
         }else {
             targetDetails = plcEquip.getPidTargetValue().getPoint();
@@ -492,15 +502,6 @@ public class ZoneViewData {
         }
         
         plcPoints.put("Target Value",targetValue);
-
-        HashMap<Object, Object> equip = CCUHsApi.getInstance().readMapById(equipID);
-        int group = Integer.parseInt(equip.get("group").toString());
-        PlcProfile profile = (PlcProfile) L.getProfile(group);
-        assert profile != null;
-        String processVariable = profile.getProcessVariableDomainName();
-
-        HashMap<Object, Object> inputDetails = CCUHsApi.getInstance().readEntity(
-            "point and domainName == \""+processVariable+"\" and equipRef == \""+equipID+"\"");
 
         CcuLog.d(L.TAG_CCU_UI, "inputDetails = " + inputDetails+" targetDetails = "+targetDetails);
         plcPoints.put("Unit Type", StringUtils.substringAfterLast(inputDetails.get("dis").toString(), "-"));

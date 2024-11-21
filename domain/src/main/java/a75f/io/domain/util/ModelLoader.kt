@@ -1,5 +1,6 @@
 package a75f.io.domain.util
 
+import a75f.io.domain.util.ModelCache.context
 import io.seventyfivef.domainmodeler.client.ModelDirective
 
 /**
@@ -114,7 +115,8 @@ object ModelLoader {
     }
 
     fun getSmartNodePidModel() : ModelDirective {
-        return ModelCache.getModelById(MODEL_SMARTNODE_PID)
+        //return ModelCache.getModelById(MODEL_SMARTNODE_PID)
+        return ResourceHelper.loadModel("assets/75f/models/smartnodePID_v0.0.28_copy.json", context!!)
     }
     fun getHelioNodePidModel() : ModelDirective {
         return ModelCache.getModelById(MODEL_HELIONODE_PID)

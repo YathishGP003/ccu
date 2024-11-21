@@ -1,5 +1,10 @@
 package a75f.io.logic.bo.building.plc;
 
+import static a75f.io.logic.bo.building.plc.PlcProfileUtilKt.getDynamicTargetPoint;
+import static a75f.io.logic.bo.building.plc.PlcProfileUtilKt.getProcessVariableMappedPoint;
+
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -9,6 +14,8 @@ import a75.io.algos.GenericPIController;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Tags;
+import a75f.io.domain.util.ModelCache;
+import a75f.io.domain.util.ModelLoader;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.BaseProfileConfiguration;
@@ -16,6 +23,8 @@ import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.tuners.TunerUtil;
+import io.seventyfivef.domainmodeler.client.ModelDirective;
+import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective;
 
 /**
  * Created by samjithsadasivan on 2/25/19.
@@ -76,9 +85,8 @@ public class PlcProfile extends ZoneProfile {
         pendingTunerChange = true;
     }
 
-    // public void setPendingTunerChange() { plcEquip.setPendingTunerChange(); }
-
     private String processVariableDomainName;
+    private String dynamicTargetDomainName;
 
     @Override
     public ProfileType getProfileType() {
@@ -105,17 +113,18 @@ public class PlcProfile extends ZoneProfile {
 
     @Override
     public void updateZonePoints() {
-
-        double processVariable = CCUHsApi.getInstance().readHisValByQuery("point and equipRef == \"" + equipRef + "\" and domainName == \"" + processVariableDomainName + "\"");
+        updateSensorLinkedLogicalPoints();
+        double processVariable =plcEquip.getProcessVariable().readHisVal();
         double targetValue = plcEquip.getPidTargetValue().readPriorityVal();
         double controlVariable;
         if (hasPendingTunerChange()) refreshPITuners();
 
         if (isEnabledAnalog2InForSp) {
-            CcuLog.d(L.TAG_CCU_ZONE, "Use analog 2 offset ");
+            CcuLog.d(L.TAG_CCU_ZONE, "Use analog 2 offset , dynamicTargetDomainName: " + dynamicTargetDomainName);
             targetValue = plcEquip.getDynamicTargetValue().readDefaultVal();
         }
-        CcuLog.d(L.TAG_CCU_ZONE, "PlcProfile, processVariable: " + processVariable + ", targetValue: " + targetValue);
+        CcuLog.d(L.TAG_CCU_ZONE, "PlcProfile, processVariable: "+processVariableDomainName+" : "
+                + processVariable + ", targetValue: " + targetValue);
 
         if (plcEquip.getInvertControlLoopoutput().readDefaultVal() > 0) {
             plc.updateControlVariable(processVariable, targetValue);
@@ -137,7 +146,7 @@ public class PlcProfile extends ZoneProfile {
         int eStatus = (int) (Math.round(100 * controlVariable) / 100);
         plcEquip.getControlVariable().writePointValue(curCv);
 
-        String statusMessage = getStatusMessage(equipRef, eStatus, CCUHsApi.getInstance());
+        String statusMessage = getStatusMessage(eStatus);
         plcEquip.getEquipStatusMessage().writeDefaultVal(statusMessage);
         outputSignal = eStatus;
 
@@ -154,29 +163,16 @@ public class PlcProfile extends ZoneProfile {
      * Generate a PI Loop Status Message.
      * Defer to CCU-UI spec of PI Profile for the format of this message.
      *
-     * @param equipID
-     * @param outputSignal
-     * @param hayStack
-     * @return
      */
-    private String getStatusMessage(String equipID, int outputSignal, CCUHsApi hayStack) {
+    private String getStatusMessage(int outputSignal) {
 
-        double relay1Config = hayStack.readDefaultVal("point and relay1 and config and" +
-                " enabled and equipRef == \"" + equipID + "\"");
         StringBuilder statusBuilder = new StringBuilder();
-        statusBuilder.append("Loop output is " + (outputSignal > 0 ? "active" : "inactive"));
-        if (relay1Config > Math.abs(0.01)) {
-            double relay1Status = hayStack.readHisValByQuery("point and relay1 and cmd and equipRef" +
-                    " == \"" + equipID + "\"");
-            statusBuilder.append(", Relay1 " + (relay1Status > Math.abs(0.01) ? "ON" : "OFF"));
+        statusBuilder.append("Loop output is ").append(outputSignal > 0 ? "active" : "inactive");
+        if (plcEquip.getRelay1OutputEnable().readDefaultVal() > 0) {
+            statusBuilder.append(", Relay1 ").append(plcEquip.getRelay1Cmd().readHisVal() > 0 ? "ON" : "OFF");
         }
-        double relay2Config = hayStack.readDefaultVal("point and relay2 and config and" +
-                " enabled and equipRef == \"" + equipID + "\"");
-
-        if (relay2Config > Math.abs(0.01)) {
-            double relay2Status = hayStack.readHisValByQuery("point and relay2 and cmd and equipRef" +
-                    " == \"" + equipID + "\"");
-            statusBuilder.append(", Relay2 " + (relay2Status > Math.abs(0.01) ? "ON" : "OFF"));
+        if (plcEquip.getRelay2OutputEnable().readDefaultVal() > 0) {
+            statusBuilder.append(", Relay2 ").append(plcEquip.getRelay2Cmd().readHisVal() > 0 ? "ON" : "OFF");
         }
 
         return statusBuilder.toString();
@@ -225,7 +221,13 @@ public class PlcProfile extends ZoneProfile {
         spSensorOffset = plcEquip.getSetpointSensorOffset().readDefaultVal();
         isEnabledAnalog2InForSp = plcEquip.getUseAnalogIn2ForSetpoint().readDefaultVal() > 0;
         isEnabledZeroErrorMidpoint = plcEquip.getExpectZeroErrorAtMidpoint().readDefaultVal() > 0;
-        processVariableDomainName = updateProcessVariableDomainName();
+        boolean isSmartNode = CCUHsApi.getInstance().readMapById(equipRef).containsKey(Tags.SMART_NODE);
+        ModelDirective model = isSmartNode ? ModelLoader.INSTANCE.getSmartNodePidModel()
+                                    : ModelLoader.INSTANCE.getHelioNodePidModel();
+        processVariableDomainName = getProcessVariableMappedPoint(plcEquip, model);
+        if (isEnabledAnalog2InForSp) {
+            dynamicTargetDomainName = getDynamicTargetPoint(plcEquip, model);
+        }
     }
 
     public void refreshPITuners() {
@@ -242,17 +244,24 @@ public class PlcProfile extends ZoneProfile {
         plcEquip.getControlVariable().writePointValue(0);
     }
 
-    private String updateProcessVariableDomainName() {
-        ArrayList<HashMap<Object, Object>> points = CCUHsApi.getInstance().readAllEntities("point and equipRef == \"" + equipRef + "\"");
-        for (HashMap<Object, Object> point : points) {
-            if (point.get(Tags.DIS).toString().contains("processVariable")) {
-                return point.get(Tags.DOMAIN_NAME).toString();
-            }
-        }
-        return "";
-    }
-
     public String getProcessVariableDomainName() {
         return processVariableDomainName;
+    }
+
+    public String getDynamicTargetDomainName() {
+        return dynamicTargetDomainName;
+    }
+
+    private void updateSensorLinkedLogicalPoints() {
+        if (StringUtils.isNotEmpty(processVariableDomainName)) {
+            double processVariableSensorVal = CCUHsApi.getInstance().readHisValByQuery("point and equipRef == \"" + equipRef + "\" and domainName == \"" + processVariableDomainName + "\"");
+            plcEquip.getProcessVariable().writePointValue(processVariableSensorVal);
+        }
+
+        if (isEnabledAnalog2InForSp && StringUtils.isNotEmpty(dynamicTargetDomainName)) {
+            double dynamicTargetSensorVal = CCUHsApi.getInstance().readHisValByQuery("point and equipRef == \"" + equipRef + "\" and domainName == \"" + dynamicTargetDomainName + "\"");
+            plcEquip.getDynamicTargetValue().writePointValue(dynamicTargetSensorVal);
+        }
+
     }
 }

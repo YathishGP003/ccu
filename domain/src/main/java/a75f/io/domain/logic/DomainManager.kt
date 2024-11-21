@@ -174,6 +174,8 @@ object DomainManager {
         when {
             equip.markers.contains("vav") -> Domain.equips[equip.id] = VavEquip(equip.id)
             equip.markers.contains("dab") -> Domain.equips[equip.id] = DabEquip(equip.id)
+            equip.markers.contains("pid") -> Domain.equips[equip.id] = PlcEquip(equip.id)
+
         }
     }
 

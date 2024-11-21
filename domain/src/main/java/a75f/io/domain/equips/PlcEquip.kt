@@ -25,6 +25,7 @@ class PlcEquip (equipRef : String) : DomainEquip(equipRef) {
     val relay1OffThreshold = Point(DomainName.relay1OffThreshold, equipRef)
     val relay2OffThreshold = Point(DomainName.relay2OffThreshold, equipRef)
 
+    val processVariable = Point(DomainName.processVariable, equipRef)
     val proportionalKFactor = Point(DomainName.proportionalKFactor, equipRef)
     val integralKFactor = Point(DomainName.integralKFactor, equipRef)
     val pidIntegralTime = Point(DomainName.pidIntegralTime, equipRef)

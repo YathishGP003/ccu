@@ -3832,7 +3832,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         textViewStatus.setText(plcPoints.get("Status").toString());
         textViewUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
 
-        labelInputAir.setText("Input  " + plcPoints.get("Unit Type").toString() + " : ");
+        labelInputAir.setText("Input (" + plcPoints.get("Unit Type").toString() + ") : ");
 
         double processValue = (double) plcPoints.get("Input Value");
         textViewInputAir.setText(String.format("%.2f", processValue) + " " + plcPoints.get("Unit").toString());
@@ -3844,9 +3844,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         try {
             if ((boolean) plcPoints.get("Dynamic Setpoint") == true) {
 
-                labelTarget.setText(plcPoints.get("Dynamic Unit Type").toString() + " : ");
+                labelTarget.setText("Target ("+plcPoints.get("Dynamic Unit Type").toString() + ") : ");
                 textViewTargetAir.setText(plcPoints.get("Target Value").toString() + " " + plcPoints.get("Dynamic Unit").toString());
-                labelOffsetAir.setText("Offset " + plcPoints.get("Dynamic Unit Type").toString() + " : ");
+                labelOffsetAir.setText("Offset (" + plcPoints.get("Dynamic Unit Type").toString() + ") : ");
                 textViewOffsetAir.setText(plcPoints.get("Offset Value").toString() + " " + plcPoints.get("Dynamic Unit").toString());
                 viewPointRow2.setPadding(0, 0, 0, 40);
                 linearLayoutZonePoints.addView(viewTitle);

@@ -31,7 +31,7 @@ object OtnEquipCutOverMapping {
         "constantTempAlertTime" to "constantTempAlertTime",
         "temperatureIntegralTimes" to "tiTemperatureIntegralTime",
         "temperatureProportionalRanges" to "tiTemperatureIntegralTime",
-        //"occupancySensor" to "occupancySensor",
+        "occupancySensor" to "zoneOccupancy",
         "occupancy" to "occupancyMode",
         "scheduleType" to "scheduleType",
         "zoneDynamicPriority" to "zoneDynamicPriority",

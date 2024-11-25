@@ -9,13 +9,10 @@ import a75f.io.domain.api.DomainName
 import a75f.io.domain.api.EntityConfig
 import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.logic.DeviceBuilder
-import a75f.io.domain.logic.DomainManager
 import a75f.io.domain.logic.EntityMapper
-import a75f.io.domain.logic.PointBuilderConfig
 import a75f.io.domain.logic.ProfileEquipBuilder
 import a75f.io.domain.util.ModelLoader
 import a75f.io.domain.util.ModelLoader.getHelioNodePidModel
-import a75f.io.domain.util.ModelLoader.getSmartNodeDevice
 import a75f.io.domain.util.ModelLoader.getSmartNodePidModel
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
@@ -135,7 +132,7 @@ class PlcProfileViewModel : ViewModel() {
      *                      `targetVal` list without modification.
      * @return An `ArrayList<String>` containing the computed target values for the specified sensor.
      */
-    fun returnTargetValue(selectedIndex: Int): ArrayList<String> {
+    fun returnTargetValueAi1(selectedIndex: Int): ArrayList<String> {
         if (selectedIndex == 0) {
             return targetVal
         }
@@ -154,6 +151,69 @@ class PlcProfileViewModel : ViewModel() {
     }
 
     /**
+     * Generates a list of target values for a selected native sensor.
+     *
+     * This function creates a list of target values based on the engineering constraints of a
+     * specific native sensor selected by its index. The list is populated with values from the
+     * sensor's minimum to maximum engineering values, incremented by a predefined step size.
+     * If the selected index is 0, the function returns the existing `targetVal` list.
+     *
+     * @param selectedIndex The index of the native sensor in the sensor list.
+     *                      (1-based index: subtracting 1 aligns it to the list index.)
+     *                      If `selectedIndex` is 0, the existing `targetVal` is returned.
+     * @return An `ArrayList<String>` containing the calculated target values for the selected sensor.
+     */
+    fun returnTargetValueNativeSensor(selectedIndex: Int): ArrayList<String> {
+        if (selectedIndex == 0) {
+            return targetVal
+        }
+        val r = SensorManager.getInstance().getNativeSensorList()[selectedIndex - 1]
+        targetVal.clear()
+
+        val minVal = (100 * r.minEngineeringValue).toInt()
+        val maxVal = (100 * r.maxEngineeringValue).toInt()
+        val increment = (100 * r.incrementEngineeringValue).toInt()
+
+        for (pos in minVal..maxVal step increment) {
+            targetVal.add((pos / 100.0).toString())
+        }
+
+        return targetVal
+    }
+
+    /**
+     * Generates a list of target values for a selected thermistor 1 sensor.
+     *
+     * This function creates a list of target values based on the engineering constraints of a
+     * specific native sensor selected by its index. The list is populated with values from the
+     * sensor's minimum to maximum engineering values, incremented by a predefined step size.
+     * If the selected index is 0, the function returns the existing `targetVal` list.
+     *
+     * @param selectedIndex The index of the native sensor in the sensor list.
+     *                      (1-based index: subtracting 1 aligns it to the list index.)
+     *                      If `selectedIndex` is 0, the existing `targetVal` is returned.
+     * @return An `ArrayList<String>` containing the calculated target values for the selected sensor.
+     */
+    fun returnTargetValueTH1(selectedIndex: Int): ArrayList<String> {
+        if (selectedIndex == 0) {
+            return targetVal
+        }
+        val r = SensorManager.getInstance().getThermistorSensorList()[selectedIndex - 1]
+        targetVal.clear()
+
+        val minVal = (100 * r.minEngineeringValue).toInt()
+        val maxVal = (100 * r.maxEngineeringValue).toInt()
+        val increment = (100 * r.incrementEgineeringValue).toInt()
+
+        for (pos in minVal..maxVal step increment) {
+            targetVal.add((pos / 100.0).toString())
+        }
+
+        return targetVal
+    }
+
+
+    /**
      * Returns a list of error values based on the selected index.
      *
      * This function calculates error values using the sensor's engineering values and increments,
@@ -164,7 +224,7 @@ class PlcProfileViewModel : ViewModel() {
      * @param selectedIndex The index of the selected sensor. If 0, the existing list is returned.
      * @return A list of error values as strings, excluding the first element (0.0).
      */
-    fun returnErrorValue(selectedIndex: Int): ArrayList<String> {
+    fun returnErrorValueAi1(selectedIndex: Int): ArrayList<String> {
         if (selectedIndex == 0) {
             return errorVal
         }
@@ -181,18 +241,70 @@ class PlcProfileViewModel : ViewModel() {
 
         // Since the first element is 0, we cannot use it in the calculation of PI loop value
         // since it will cause division by zero
-        errorVal.removeAt(0)
+        errorVal.remove("0.0")
+
+        return errorVal
+    }
+
+    fun returnErrorValueNativeSensor(selectedIndex: Int): ArrayList<String> {
+        if (selectedIndex == 0) {
+            return errorVal
+        }
+        val r = SensorManager.getInstance().getNativeSensorList()[selectedIndex - 1]
+        errorVal.clear()
+
+        val minVal = (100 * r.minEngineeringValue).toInt()
+        val maxVal = (100 * r.maxEngineeringValue).toInt()
+        val increment = (100 * r.incrementEngineeringValue).toInt()
+
+        for (pos in minVal..maxVal step increment) {
+            errorVal.add((pos / 100.0).toString())
+        }
+
+        // Since the first element is 0, we cannot use it in the calculation of PI loop value
+        // since it will cause division by zero
+        errorVal.remove("0.0")
+
+        return errorVal
+    }
+
+    fun returnErrorValueTH1(selectedIndex: Int): ArrayList<String> {
+        if (selectedIndex == 0) {
+            return errorVal
+        }
+        val r = SensorManager.getInstance().getThermistorSensorList()[selectedIndex - 1]
+        errorVal.clear()
+
+        val minVal = (100 * r.minEngineeringValue).toInt()
+        val maxVal = (100 * r.maxEngineeringValue).toInt()
+        val increment = (100 * r.incrementEgineeringValue).toInt()
+
+        for (pos in minVal..maxVal step increment) {
+            errorVal.add((pos / 100.0).toString())
+        }
+
+        // Since the first element is 0, we cannot use it in the calculation of PI loop value
+        // since it will cause division by zero
+        errorVal.remove("0.0")
 
         return errorVal
     }
 
     private fun initializeLists() {
         analog1InputType = getListByDomainName(DomainName.analog1InputType, model)
+
         // Get the target list based on the selected sensor type
-        pidTargetValue = returnTargetValue(viewState.analog1InputType.toInt())
+        if(viewState.analog1InputType.toInt() != 0) pidTargetValue = returnTargetValueAi1(viewState.analog1InputType.toInt())
+        if(viewState.thermistor1InputType.toInt() != 0) pidTargetValue = returnTargetValueTH1(viewState.thermistor1InputType.toInt())
+        if(viewState.nativeSensorType.toInt() != 0) pidTargetValue = returnErrorValueNativeSensor(viewState.nativeSensorType.toInt())
+
         thermistor1InputType = getListByDomainName(DomainName.thermistor1InputType, model)
+
         // Get the error list based on the selected sensor type
-        pidProportionalRange = returnErrorValue(viewState.analog1InputType.toInt())
+        if(viewState.analog1InputType.toInt() != 0) pidProportionalRange = returnErrorValueAi1(viewState.analog1InputType.toInt())
+        if(viewState.thermistor1InputType.toInt() != 0) pidProportionalRange = returnErrorValueTH1(viewState.thermistor1InputType.toInt())
+        if(viewState.nativeSensorType.toInt() != 0) pidProportionalRange = returnErrorValueNativeSensor(viewState.nativeSensorType.toInt())
+
         nativeSensorType = getListByDomainName(DomainName.nativeSensorType, model)
 
         analog2InputType = getListByDomainName(DomainName.analog2InputType, model)

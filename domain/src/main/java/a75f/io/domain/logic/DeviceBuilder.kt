@@ -16,6 +16,7 @@ import a75f.io.domain.util.highPriorityDispatcher
 import a75f.io.logger.CcuLog
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDevicePointDef
+import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import io.seventyfivef.domainmodeler.common.point.Constraint
 import io.seventyfivef.domainmodeler.common.point.MultiStateConstraint
 import io.seventyfivef.domainmodeler.common.point.NumericConstraint
@@ -29,7 +30,8 @@ import org.projecthaystack.HStr
 import kotlin.system.measureTimeMillis
 
 class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: EntityMapper) {
-    fun buildDeviceAndPoints(configuration: ProfileConfiguration, modelDef: SeventyFiveFDeviceDirective, equipRef: String, siteRef : String, deviceDis: String) {
+    fun buildDeviceAndPoints(configuration: ProfileConfiguration, modelDef: SeventyFiveFDeviceDirective, equipRef: String, siteRef : String, deviceDis: String,
+                             profileModelDef: SeventyFiveFProfileDirective? = null) {
         CcuLog.i(Domain.LOG_TAG, "buildDeviceAndPoints $configuration")
         val hayStackDevice = buildDevice(modelDef, configuration, equipRef, siteRef, deviceDis)
         val deviceId = hayStack.addDevice(hayStackDevice)
@@ -38,10 +40,12 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
         val time = measureTimeMillis {
             createPoints(modelDef, configuration, hayStackDevice)
         }
+        profileModelDef?.let { updateBaseConfigPointRefs(configuration, it, hayStackDevice) }
         CcuLog.i(Domain.LOG_TAG, "Time taken to create device points ${time}ms")
     }
 
-    fun updateDeviceAndPoints(configuration: ProfileConfiguration, modelDef: SeventyFiveFDeviceDirective, equipRef: String, siteRef : String, deviceDis: String) {
+    fun updateDeviceAndPoints(configuration: ProfileConfiguration, modelDef: SeventyFiveFDeviceDirective, equipRef: String, siteRef : String, deviceDis: String,
+                              profileModelDef: SeventyFiveFProfileDirective? = null) {
         CcuLog.i(Domain.LOG_TAG, "updateDeviceAndPoints $configuration")
         val hayStackDevice = buildDevice(modelDef, configuration, equipRef, siteRef, deviceDis)
 
@@ -56,6 +60,7 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
         val time = measureTimeMillis {
             updatePoints(modelDef, configuration, hayStackDevice)
         }
+        profileModelDef?.let { updateBaseConfigPointRefs(configuration, it, hayStackDevice) }
         CcuLog.i(Domain.LOG_TAG, "Time taken to update device points ${time}ms")
     }
 
@@ -348,5 +353,21 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
             hayStackPoint.id = pointId
             DomainManager.addRawPoint(hayStackPoint)
             CcuLog.d(Domain.LOG_TAG,"point created ${hayStackPoint.domainName} id = ${hayStackPoint.id} for the device: $deviceDis " )
+    }
+
+    private fun updateBaseConfigPointRefs(configuration: ProfileConfiguration, profileModelDef: SeventyFiveFProfileDirective, device : Device) {
+        configuration.getBaseProfileConfigs().forEach { entityConfig ->
+            val pointDef = profileModelDef.points.find { it.domainName == entityConfig.domainName }
+            pointDef?.devicePointAssociation?.devicePointDomainName?.let {
+                val devicePoint = hayStack.readHDict("point and domainName == \"$it\" and deviceRef == \"${device.id}\"")
+                val pointEntity = RawPoint.Builder().setHDict(devicePoint).build()
+
+                val profilePoint = hayStack.readEntity("point and domainName == \"${entityConfig.domainName}\" and equipRef == \"${device.equipRef}\"")
+                val profilePointId = profilePoint["id"].toString()
+                pointEntity.pointRef = profilePointId
+                hayStack.updatePoint(pointEntity, pointEntity.id)
+                CcuLog.i(Domain.LOG_TAG, "updateBaseConfigPointRefs point ${entityConfig.domainName}-${pointEntity.domainName} with pointRef $profilePointId")
+            }
+        }
     }
 }

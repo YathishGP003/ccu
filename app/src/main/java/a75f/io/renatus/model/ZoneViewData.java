@@ -507,7 +507,7 @@ public class ZoneViewData {
         plcPoints.put("Unit Type", StringUtils.substringAfterLast(inputDetails.get("dis").toString(), "-"));
         plcPoints.put("Unit",  inputDetails.get("unit"));
         plcPoints.put("Dynamic Unit Type", StringUtils.substringAfterLast(targetDetails.get("dis").toString(), "-"));
-        plcPoints.put("Dynamic Unit",  targetDetails.get("unit"));
+        plcPoints.put("Dynamic Unit",  (analog2Config == 1) ? targetDetails.get("unit") : inputDetails.get("unit"));
         
         if (th1InputSensor == 1 || th1InputSensor == 2) {
             plcPoints.put("Unit Type", "Temperature");

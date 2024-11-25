@@ -228,6 +228,8 @@ public class PlcProfile extends ZoneProfile {
         if (isEnabledAnalog2InForSp) {
             dynamicTargetDomainName = getDynamicTargetPoint(plcEquip, model);
         }
+        CcuLog.i(L.TAG_CCU_ZONE, "PLC initialized : proportionalGain " + plc.getProportionalGain() + ", integralGain " + plc.getIntegralGain() +
+                ", proportionalSpread " + plc.getMaxAllowedError() + ", integralMaxTimeout " + plc.getIntegralMaxTimeout());
     }
 
     public void refreshPITuners() {
@@ -260,7 +262,7 @@ public class PlcProfile extends ZoneProfile {
 
         if (isEnabledAnalog2InForSp && StringUtils.isNotEmpty(dynamicTargetDomainName)) {
             double dynamicTargetSensorVal = CCUHsApi.getInstance().readHisValByQuery("point and equipRef == \"" + equipRef + "\" and domainName == \"" + dynamicTargetDomainName + "\"");
-            plcEquip.getDynamicTargetValue().writePointValue(dynamicTargetSensorVal);
+            plcEquip.getDynamicTargetValue().writePointValue(dynamicTargetSensorVal + spSensorOffset);
         }
 
     }

@@ -339,7 +339,7 @@ class PlcProfileViewModel : ViewModel() {
                     .sendSeedMessage(false, false, deviceAddress, zoneRef, floorRef)
                 DesiredTempDisplayMode.setModeType(zoneRef, CCUHsApi.getInstance())
                 CcuLog.i(Domain.LOG_TAG, "PlcProfile Pairing complete")
-
+                plcProfile.init()
                 // This check is needed because the dialog sometimes fails to close inside the coroutine.
                 // We don't know why this happens.
                 if (ProgressDialogUtils.isDialogShowing()) {
@@ -364,12 +364,12 @@ class PlcProfileViewModel : ViewModel() {
 
         } else {
             equipBuilder.updateEquipAndPoints(profileConfiguration, model, hayStack.site!!.id, equipDis, true)
+            updateDeviceAndPoints(deviceAddress, profileConfiguration, nodeType, hayStack, model, deviceModel)
             CoroutineScope(Dispatchers.IO).launch {
                 saveUnUsedPortStatus(profileConfiguration, deviceAddress, hayStack)
             }
         }
         //updateProcessVariablePoint(profileConfiguration.nodeAddress)
-        plcProfile.init()
     }
 
 
@@ -400,11 +400,38 @@ class PlcProfileViewModel : ViewModel() {
             deviceModel,
             equipId,
             hayStack.site!!.id,
-            deviceDis
+            deviceDis,
+            model
         )
         CcuLog.i(Domain.LOG_TAG, " add Profile")
         plcProfile = PlcProfile(deviceAddress, equipId)
 
+    }
+
+    private fun updateDeviceAndPoints(
+        deviceAddress: Short,
+        config: ProfileConfiguration,
+        nodeType: NodeType?,
+        hayStack: CCUHsApi,
+        equipModel: SeventyFiveFProfileDirective?,
+        deviceModel: SeventyFiveFDeviceDirective?
+    ) {
+        requireNotNull(equipModel)
+        requireNotNull(deviceModel)
+        val equipId = hayStack.readEntity("equip and group == \"$deviceAddress\"")["id"].toString()
+        val entityMapper = EntityMapper(equipModel)
+        val deviceBuilder = DeviceBuilder(hayStack, entityMapper)
+        val deviceName = when(nodeType) { NodeType.HELIO_NODE -> "-HN-" else -> "-SN-"}
+        val deviceDis = hayStack.siteName + deviceName + config.nodeAddress
+        CcuLog.i(Domain.LOG_TAG, " buildDeviceAndPoints")
+        deviceBuilder.updateDeviceAndPoints(
+            config,
+            deviceModel,
+            equipId,
+            hayStack.site!!.id,
+            deviceDis,
+            model
+        )
     }
 
     private fun getProfileDomainModel() : SeventyFiveFProfileDirective{
@@ -438,27 +465,6 @@ class PlcProfileViewModel : ViewModel() {
         )
     }
 
-    private fun updateProcessVariablePoint(nodeAddress: Int) {
-        val processVariablePoint = getProcessVariableMappedPoint()
-        processVariablePoint ?: return
-
-        val equip = hayStack.readHDict("equip and group == \"${nodeAddress}\"")
-        val equipId = equip["id"].toString()
-        val processVariableDbPoint = hayStack.readHDict(
-            "point and domainName == \"$processVariablePoint\" and equipRef == \"$equipId\"")
-        CcuLog.i(Domain.LOG_TAG, "processVariableBasePoint found $processVariableDbPoint")
-
-        if (processVariableDbPoint["dis"].toString().contains("processVariable")) {
-            CcuLog.i(Domain.LOG_TAG, "ProcessVariable name is updated")
-            return
-        }
-        val pointDis = equip["dis"].toString()+"-processVariable-"+processVariableDbPoint["dis"].toString().substringAfterLast("-")
-        val point = Point.Builder().setHDict(processVariableDbPoint).build()
-        point.displayName = pointDis
-        hayStack.updatePoint(point, point.id)
-        CcuLog.i(Domain.LOG_TAG, "ProcessVariable name is updated " + point.displayName)
-    }
-
     private fun getProcessVariableMappedPoint() : String? {
         if (viewState.analog1InputType > 0) {
             val analog1InputPoint = model.points.find { it.domainName == DomainName.analog1InputType }
@@ -476,7 +482,7 @@ class PlcProfileViewModel : ViewModel() {
     }
 
     private fun getAnalog2InputTypeMappedPoint() : String? {
-        if (viewState.analog2InputType > 0) {
+        if (viewState.useAnalogIn2ForSetpoint) {
             val analog2InputTypePoint = model.points.find { it.domainName == DomainName.analog2InputType }
             return (analog2InputTypePoint?.valueConstraint as MultiStateConstraint).allowedValues[viewState.analog2InputType.toInt()].value
         } else {

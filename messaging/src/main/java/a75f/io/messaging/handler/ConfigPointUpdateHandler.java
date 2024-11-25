@@ -142,7 +142,7 @@ class ConfigPointUpdateHandler {
             DeviceBuilder deviceBuilder = new DeviceBuilder(hayStack, entityMapper);
             HashMap<Object, Object> systemEquip = hayStack.readMapById(Domain.systemEquip.getEquipRef());
             equipBuilder.updateEquipAndPoints(config, model, hayStack.getSite().getId(),systemEquip.get("dis").toString() , true);
-            deviceBuilder.updateDeviceAndPoints(config, deviceModel, Domain.systemEquip.getEquipRef(), hayStack.getSite().getId(), hayStack.getSiteName() + "-" + deviceModel.getName());
+            deviceBuilder.updateDeviceAndPoints(config, deviceModel, Domain.systemEquip.getEquipRef(), hayStack.getSite().getId(), hayStack.getSiteName() + "-" + deviceModel.getName(), null);
             DomainManager.INSTANCE.addSystemDomainEquip(hayStack);
             removeWritableTagFromCMDevicePort(configPoint, hayStack, val);
 
@@ -273,7 +273,7 @@ class ConfigPointUpdateHandler {
             DeviceBuilder deviceBuilder = new DeviceBuilder(hayStack, entityMapper);
             HashMap<Object, Object> systemEquip = hayStack.readMapById(Domain.systemEquip.getEquipRef());
             equipBuilder.updateEquipAndPoints(config, equipModel, hayStack.getSite().getId(),systemEquip.get("dis").toString() , true);
-            deviceBuilder.updateDeviceAndPoints(config, deviceModel, Domain.systemEquip.getEquipRef(), hayStack.getSite().getId(), hayStack.getSiteName() + "-" + deviceModel.getName());
+            deviceBuilder.updateDeviceAndPoints(config, deviceModel, Domain.systemEquip.getEquipRef(), hayStack.getSite().getId(), hayStack.getSiteName() + "-" + deviceModel.getName(), null);
             DomainManager.INSTANCE.addSystemDomainEquip(hayStack);
         } else if (systemProfile instanceof VavFullyModulatingRtu) {
             SeventyFiveFProfileDirective model = (SeventyFiveFProfileDirective) ModelLoader.INSTANCE.getVavModulatingRtuModelDef();

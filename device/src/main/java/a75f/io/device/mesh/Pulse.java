@@ -382,6 +382,10 @@ public class Pulse
 			}
 			RawPoint sp = node.getRawPoint(p);
 			if (sp == null) {
+				if (isDomainEquip) {
+					CcuLog.d(L.TAG_CCU_DEVICE, " Sensor point not available in the model, hence not created. port:" + p);
+					continue;
+				}
 				sp = node.addSensor(p);
                 CcuLog.d(L.TAG_CCU_DEVICE, " Sensor Added , type "+t+" port "+p);
 			} else if (sp.getPointRef() == null) {

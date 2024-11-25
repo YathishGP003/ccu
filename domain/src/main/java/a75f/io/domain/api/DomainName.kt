@@ -417,6 +417,8 @@ object DomainName {
     const val zoneUvi = "zoneUvi"
     const val zoneCo2Equivalent = "zoneCo2e"
     const val zoneOccupancy = "zoneOccupancy"
+    const val sensorPm10 = "sensor_pm10"
+    const val sensorEnergyMeter = "sensor_energy_meter"
 
     const val dischargeAirTempSetpoint = "dischargeAirTempSetpoint"
     const val reheatCmd = "reheatCmd"

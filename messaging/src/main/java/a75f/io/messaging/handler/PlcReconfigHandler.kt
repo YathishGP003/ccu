@@ -30,62 +30,130 @@ fun updateConfigPoint(msgObject: JsonObject, configPoint: Point) {
     val hayStack = CCUHsApi.getInstance()
     val address = configPoint.group.toShort()
     val profile = L.getProfile(address) as PlcProfile
-
     val equip = profile.equip
     val config = profile.domainProfileConfiguration as PlcProfileConfig
     val model = getModelForDomainName(equip.domainName) as SeventyFiveFProfileDirective
-    when (configPoint.domainName) {
+    val value = msgObject[HayStackConstants.WRITABLE_ARRAY_VAL].asString.toInt()
+
+    when(configPoint.domainName) {
+        DomainName.analog1InputType -> config.analog1InputType.currentVal = value.toDouble()
+        DomainName.thermistor1InputType -> config.thermistor1InputType.currentVal = value.toDouble()
+        DomainName.nativeSensorType -> config.nativeSensorType.currentVal = value.toDouble()
+        DomainName.analog2InputType -> config.analog2InputType.currentVal = value.toDouble()
+        DomainName.useAnalogIn2ForSetpoint -> config.useAnalogIn2ForSetpoint.enabled = value > 0
+        DomainName.relay1OutputEnable -> config.relay1OutputEnable.enabled = value > 0
+        DomainName.relay2OutputEnable -> config.relay2OutputEnable.enabled = value > 0
+        else -> {CcuLog.e(L.TAG_CCU_PUBNUB, "Not a dependent/associate point : $configPoint")}
+    }
+    CcuLog.i(L.TAG_CCU_PUBNUB, "updatePIConfigPoint value : $value \n CurrentConfig : $config")
+    addBaseProfileConfig(DomainName.analog1InputType, config, model)
+    addBaseProfileConfig(DomainName.thermistor1InputType, config, model)
+    addBaseProfileConfig(DomainName.nativeSensorType, config, model)
+    //addBaseProfileConfig(DomainName.analog2InputType, config, model)
+    addBaseProfileConfig(DomainName.useAnalogIn2ForSetpoint, config, model)
+
+    config.baseConfigs.forEach {
+        CcuLog.i(L.TAG_CCU_PUBNUB, "BaseConfig added : ${it.domainName}")
+    }
+
+
+    if (profileReconfigurationRequired(configPoint)) {
+        val equipBuilder = ProfileEquipBuilder(hayStack)
+        equipBuilder.updateEquipAndPoints(
+            config,
+            model,
+            equip.siteRef,
+            equip.displayName, true
+        )
+
+
+        val device = hayStack.readEntity("device and addr == \"$address\"")
+        val deviceModel =
+            getModelForDomainName(device["domainName"].toString()) as SeventyFiveFDeviceDirective
+        val entityMapper = EntityMapper(model)
+        val deviceBuilder = DeviceBuilder(hayStack, entityMapper)
+        deviceBuilder.updateDeviceAndPoints(
+            config, deviceModel, equip.id, equip.siteRef,
+            device[Tags.DIS].toString(), model
+        )
+    }
+
+    writePointFromJson(configPoint, msgObject, CCUHsApi.getInstance())
+}
+
+private fun addBaseProfileConfig(domainName: String, config: PlcProfileConfig, model: SeventyFiveFProfileDirective) {
+    when (domainName) {
         DomainName.analog1InputType -> {
-            val analog1InputPoint = model.points.find { it.domainName == DomainName.analog1InputType }
-            return (analog1InputPoint?.valueConstraint as MultiStateConstraint).allowedValues[viewState.analog1InputType.toInt()].value
-            config.baseConfigs.add(EntityConfig(processVariablePoint))
+            val analog1Input = getInputSensorPoint(domainName, config.analog1InputType.currentVal.toInt(), model)
+            if (analog1Input.isNotEmpty()) {
+                config.baseConfigs.add(EntityConfig(analog1Input))
+            }
+        }
+        DomainName.thermistor1InputType -> {
+            val thermistor1Input = getInputSensorPoint(domainName, config.thermistor1InputType.currentVal.toInt(), model)
+            if (thermistor1Input.isNotEmpty()) {
+                config.baseConfigs.add(EntityConfig(thermistor1Input))
+            }
+        }
+        DomainName.nativeSensorType -> {
+            val nativeSensorType = getInputSensorPoint(domainName, config.nativeSensorType.currentVal.toInt(), model)
+            if (nativeSensorType.isNotEmpty()) {
+                config.baseConfigs.add(EntityConfig(nativeSensorType))
+            }
+        }
+        /*DomainName.analog2InputType -> {
+            val analog2Input = getInputSensorPoint(domainName, config.analog2InputType.currentVal.toInt(), model)
+            if (analog2Input.isNotEmpty()) {
+                config.baseConfigs.add(EntityConfig(analog2Input))
+            }
+        }*/
+        DomainName.useAnalogIn2ForSetpoint -> {
+            if (config.useAnalogIn2ForSetpoint.enabled) {
+                val analog2Input = getInputSensorPoint(DomainName.analog2InputType, config.analog2InputType.currentVal.toInt(), model)
+                if (analog2Input.isNotEmpty()) {
+                    config.baseConfigs.add(EntityConfig(analog2Input))
+                } else {
+                    CcuLog.e(L.TAG_CCU_PUBNUB, "Analog2Input not found for ${config.analog2InputType.currentVal}")
+                }
+            }
         }
     }
 
-    val equipBuilder = ProfileEquipBuilder(hayStack)
-    equipBuilder.updateEquipAndPoints(
-        config,
-        model,
-        equip.siteRef,
-        equip.displayName, true
-    )
+}
 
-
-    val deviceModel =
-        getModelForDomainName(Domain.systemEquip.equipRef) as SeventyFiveFDeviceDirective
-    val entityMapper = EntityMapper(model)
-    val deviceBuilder = DeviceBuilder(hayStack, entityMapper)
-    val device = hayStack.readEntity("device and addr == \"$address\"")
-    deviceBuilder.updateDeviceAndPoints(
-        config, deviceModel, equip.id, equip.siteRef,
-        device[Tags.DIS].toString(), model
-    )
-
-
-    /*if(configPoint.getMarkers().contains(INPUT_TAG)){
-            PlcRelayConfigHandler.updateInputSensor(msgObject,configPoint);
-        }else if(configPoint.getMarkers().contains(TARGET_TAG)){
-            PlcRelayConfigHandler.updateTargetValue(msgObject,configPoint);
-        }else if(configPoint.getMarkers().contains(RANGE_TAG)){
-            PlcRelayConfigHandler.updateRangeValue(msgObject,configPoint);
-        }else if(configPoint.getMarkers().contains(MIDPOINT_TAG)){
-            PlcRelayConfigHandler.updateMidpointValue(msgObject,configPoint);
-        }else if(configPoint.getMarkers().contains(INVERSION_TAG)){
-            PlcRelayConfigHandler.updateInversionValue(msgObject,configPoint);
-        }else if(configPoint.getMarkers().contains(ANALOG2_TAG) &&
-                configPoint.getMarkers().contains(ENABLED_TAG)) {
-            PlcRelayConfigHandler.updateEnableAn2Value(msgObject, configPoint);
-        }else if(configPoint.getMarkers().contains(SETPOINT_TAG) &&
-                configPoint.getMarkers().contains(SENSOR_TAG)) {
-            PlcRelayConfigHandler.updateAn2SetpointValue(msgObject, configPoint);
-        }else if(configPoint.getMarkers().contains(ANALOG1_TAG) &&
-                configPoint.getMarkers().contains(OUTPUT_TAG)) {
-            PlcRelayConfigHandler.updateAn1OutputValue(msgObject, configPoint);
-        }else if(configPoint.getMarkers().contains(RELAY1_TAG)
-        ||configPoint.getMarkers().contains(RELAY2_TAG)) {
-            PlcRelayConfigHandler.updateRelayValue(msgObject, configPoint);
-        }*/
-    writePointFromJson(configPoint, msgObject, CCUHsApi.getInstance())
+private fun getInputSensorPoint(domainName : String, index : Int, model: SeventyFiveFProfileDirective): String {
+    //Models have a dummy entry "not used" at index 0 which are not associated with any point.
+    if (index == 0) {
+        return ""
+    }
+    return when (domainName) {
+        DomainName.analog1InputType -> {
+            val analog1InputPoint = model.points.find { it.domainName == DomainName.analog1InputType }
+            (analog1InputPoint?.valueConstraint as MultiStateConstraint).allowedValues[index].value
+        }
+        DomainName.thermistor1InputType -> {
+            val thermistor1InputPoint = model.points.find { it.domainName == DomainName.thermistor1InputType }
+            (thermistor1InputPoint?.valueConstraint as MultiStateConstraint).allowedValues[index].value
+        }
+        DomainName.nativeSensorType -> {
+            val nativeSensorTypePoint = model.points.find { it.domainName == DomainName.nativeSensorType }
+            (nativeSensorTypePoint?.valueConstraint as MultiStateConstraint).allowedValues[index].value
+        }
+        DomainName.analog2InputType -> {
+            val analog2InputPoint = model.points.find { it.domainName == DomainName.analog2InputType }
+            (analog2InputPoint?.valueConstraint as MultiStateConstraint).allowedValues[index].value
+        }
+        else -> ""
+    }
+}
+private fun profileReconfigurationRequired(configPoint: Point): Boolean {
+    return configPoint.domainName == DomainName.analog1InputType ||
+            configPoint.domainName == DomainName.thermistor1InputType ||
+            configPoint.domainName == DomainName.nativeSensorType ||
+            configPoint.domainName == DomainName.analog2InputType ||
+            configPoint.domainName == DomainName.useAnalogIn2ForSetpoint ||
+            configPoint.domainName == DomainName.relay1OutputEnable ||
+            configPoint.domainName == DomainName.relay2OutputEnable
 }
 
 private fun writePointFromJson(configPoint: Point, msgObject: JsonObject, hayStack: CCUHsApi) {

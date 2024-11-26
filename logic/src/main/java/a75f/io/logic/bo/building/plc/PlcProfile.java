@@ -4,6 +4,7 @@ import static a75f.io.logic.bo.building.plc.PlcProfileUtilKt.getDynamicTargetPoi
 import static a75f.io.logic.bo.building.plc.PlcProfileUtilKt.getProcessVariableMappedPoint;
 
 import org.apache.commons.lang3.StringUtils;
+import org.projecthaystack.HDict;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,6 +15,7 @@ import a75.io.algos.GenericPIController;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Tags;
+import a75f.io.domain.config.ProfileConfiguration;
 import a75f.io.domain.util.ModelCache;
 import a75f.io.domain.util.ModelLoader;
 import a75f.io.logger.CcuLog;
@@ -22,6 +24,7 @@ import a75f.io.logic.bo.building.BaseProfileConfiguration;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.vav.VavProfileConfiguration;
 import a75f.io.logic.tuners.TunerUtil;
 import io.seventyfivef.domainmodeler.client.ModelDirective;
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective;
@@ -107,8 +110,8 @@ public class PlcProfile extends ZoneProfile {
 
     @Override
     public Equip getEquip() {
-        HashMap<Object, Object> equip = CCUHsApi.getInstance().readEntity("equip and group == \"" + nodeAddr + "\"");
-        return new Equip.Builder().setHashMap(equip).build();
+        HDict equip = CCUHsApi.getInstance().readHDict("equip and group == \"" + nodeAddr + "\"");
+        return new Equip.Builder().setHDict(equip).build();
     }
 
     @Override
@@ -244,6 +247,20 @@ public class PlcProfile extends ZoneProfile {
     @Override
     public void reset() {
         plcEquip.getControlVariable().writePointValue(0);
+    }
+
+    @Override
+    public ProfileConfiguration getDomainProfileConfiguration() {
+        Equip equip = getEquip();
+        NodeType nodeType = equip.getDomainName().contains("helionode") ? NodeType.HELIO_NODE : NodeType.SMART_NODE;
+        return new PlcProfileConfig(nodeAddr, nodeType.name(),
+                0,
+                equip.getRoomRef(),
+                equip.getFloorRef() ,
+                ProfileType.PLC,
+                (SeventyFiveFProfileDirective) ModelLoader.INSTANCE.getModelForDomainName(equip.getDomainName()))
+                .getActiveConfiguration();
+
     }
 
     public String getProcessVariableDomainName() {

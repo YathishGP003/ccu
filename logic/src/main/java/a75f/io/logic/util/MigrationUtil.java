@@ -116,7 +116,6 @@ public class MigrationUtil {
 
         if (!PreferenceUtil.isTitle24HssPointsMigrationDone()) {
             Title24Migration.Companion.doTitle24HsPointMigration(CCUHsApi.getInstance());
-            Title24Migration.Companion.doTitle24HssPointsMigration(CCUHsApi.getInstance());
             PreferenceUtil.setTitle24HssPointsMigrationDone();
         }
 
@@ -192,6 +191,17 @@ public class MigrationUtil {
             new MigrationHandler(ccuHsApi).doDabDamperSizeMigration();
             PreferenceUtil.setDamperSizeMigrationFlagStatus();
             CcuLog.d(TAG, "doDabDamperSizeMigration ended");
+        }
+        if(!PreferenceUtil.getTitle24RedundantPointMigrationStatus()) {
+            CcuLog.d(TAG, " Title24Migration removeDuplicateTitle24Points started");
+            try {
+                Title24Migration.Companion.removeDuplicateTitle24Points(CCUHsApi.getInstance());
+                PreferenceUtil.setTitle24ReduntPointMigrationStatus();
+            } catch (Exception e) {
+                CcuLog.e(TAG, "Title24Migration removeDuplicateTitle24Points failed");
+                e.printStackTrace();
+            }
+            CcuLog.d(TAG, "Title24Migration removeDuplicateTitle24Points completed");
         }
         ccuHsApi.scheduleSync();
     }

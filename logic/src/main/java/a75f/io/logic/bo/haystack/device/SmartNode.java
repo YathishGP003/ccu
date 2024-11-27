@@ -660,6 +660,8 @@ public class SmartNode
             case SENSOR_NO: return "noSensor";
             case SENSOR_CO2_EQUIVALENT: return "co2EquivalentSensor";
             case SENSOR_PM2P5: return "pm25Sensor";
+            case SENSOR_PM10: return "sensor_pm10";
+            case SENSOR_ENERGY_METER: return "sensor_energy_meter";
 
             case RSSI: return "rssi";
             default: return null;
@@ -679,6 +681,8 @@ public class SmartNode
             case SENSOR_UVI: return DomainName.zoneUvi;
             case SENSOR_CO2_EQUIVALENT: return DomainName.zoneCo2Equivalent;
             case SENSOR_OCCUPANCY: return DomainName.zoneOccupancy;
+            case SENSOR_ENERGY_METER: return DomainName.sensorEnergyMeter;
+            case SENSOR_PM10: return DomainName.sensorPm10;
 
             default: return null;
         }

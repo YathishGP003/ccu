@@ -81,6 +81,7 @@ public class PreferenceUtil {
     public static final String BACNET_ID_MIGRATION = "bacnetIdUpdateMigration";
     private static final String INSTALL_TYPE = "INSTALL_TYPE";
     private static final String RESTORE_BYPASS_DAMPER_AFTER_REPLACE = "restoreBypassDamperAfterReplace";
+    private static final String TITLE_24_REDUNDANT_POINT_MIGRATION = "title24ReduntPointMigration";
 
 
 
@@ -628,5 +629,13 @@ public class PreferenceUtil {
 
     public static void setRestoreBypassDamperAfterReplace() {
         setBooleanPreference(RESTORE_BYPASS_DAMPER_AFTER_REPLACE, true);
+    }
+
+    public static boolean getTitle24RedundantPointMigrationStatus() {
+        return getBooleanPreference(TITLE_24_REDUNDANT_POINT_MIGRATION);
+    }
+
+    public static void setTitle24ReduntPointMigrationStatus() {
+        setBooleanPreference(TITLE_24_REDUNDANT_POINT_MIGRATION, true);
     }
 }

@@ -4,6 +4,8 @@ import static a75f.io.api.haystack.util.TimeUtil.getEndHour;
 import static a75f.io.api.haystack.util.TimeUtil.getEndMinute;
 import static a75f.io.api.haystack.util.TimeUtil.getEndSec;
 
+import android.util.Log;
+
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
@@ -17,6 +19,7 @@ import org.projecthaystack.HDictBuilder;
 import org.projecthaystack.HList;
 import org.projecthaystack.HNum;
 import org.projecthaystack.HRef;
+import org.projecthaystack.HTimeZone;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -1950,12 +1953,23 @@ public class Schedule extends Entity
     public HDict getScheduleHDict()
     {
         if (isVacation()) {
-    
             //range,building,dis,vacation,id,heating,temp,siteRef,schedule,cooling
             //{stdt:2019-07-04T05:00:00Z Rel etdt:2019-07-14T04:59:59Z Rel},M,"vaca1",M,@5d0bd3a5f987526c76b06132 "vaca1",M,M,@5d0ba7e5d099b1630edee18e,M,M
+            HTimeZone tz =  HTimeZone.make(CCUHsApi.getInstance().getTimeZone());
             HDict hDict = new HDictBuilder()
-                                  .add("stdt", HDateTime.make(mStartDate.getMillis()))
-                                  .add("etdt", HDateTime.make(mEndDate.getMillis())).toDict();
+                                  .add("stdt", HDateTime.make(mStartDate.getMillis(), tz))
+                                  .add("etdt", HDateTime.make(mEndDate.getMillis(), tz)).toDict();
+
+            Log.i("manju","Vacation tz "+tz);
+            Log.i("manju","Vacation mStartDate"+mStartDate + "milises: "+mStartDate.getMillis());
+            Log.i("manju","Vacation mEndDate"+mEndDate+ "milises: "+mEndDate.getMillis());
+            Log.i("manju","Vacation Schedule HDict: "+hDict);
+            Log.i("manju","Vacation Schedule without tz: "+HDateTime.make(mStartDate.getMillis()));
+            Log.i("manju","Vacation Schedule without tz: "+HDateTime.make(mEndDate.getMillis()));
+
+
+            Log.i("manju","Vacation Schedule with tz: "+HDateTime.make(mStartDate.getMillis(), tz));
+            Log.i("manju","Vacation Schedule with tz: "+HDateTime.make(mEndDate.getMillis(), tz));
 
             HDictBuilder vacationSchedule = new HDictBuilder()
                                             .add("id", HRef.copy(getId()))
@@ -2062,10 +2076,20 @@ public class Schedule extends Entity
         if (isVacation()) {
             //range,building,dis,vacation,id,heating,temp,siteRef,schedule,cooling
             //{stdt:2019-07-04T05:00:00Z Rel etdt:2019-07-14T04:59:59Z Rel},M,"vaca1",M,@5d0bd3a5f987526c76b06132 "vaca1",M,M,@5d0ba7e5d099b1630edee18e,M,M
+            HTimeZone tz =  HTimeZone.make(CCUHsApi.getInstance().getTimeZone());
             HDict hDict = new HDictBuilder()
-                                  .add("stdt", HDateTime.make(mStartDate.getMillis()))
-                                  .add("etdt", HDateTime.make(mEndDate.getMillis())).toDict();
+                    .add("stdt", HDateTime.make(mStartDate.getMillis(), tz))
+                    .add("etdt", HDateTime.make(mEndDate.getMillis(), tz)).toDict();
+            Log.i("manju","Vacation tz "+tz);
+            Log.i("manju","Vacation mStartDate"+mStartDate + "milises: "+mStartDate.getMillis());
+            Log.i("manju","Vacation mEndDate"+mEndDate+ "milises: "+mEndDate.getMillis());
+            Log.i("manju","Vacation Schedule HDict: "+hDict);
+            Log.i("manju","Vacation Schedule without tz: "+HDateTime.make(mStartDate.getMillis()));
+            Log.i("manju","Vacation Schedule without tz: "+HDateTime.make(mEndDate.getMillis()));
 
+
+            Log.i("manju","Vacation Schedule with tz: "+HDateTime.make(mStartDate.getMillis(), tz));
+            Log.i("manju","Vacation Schedule with tz: "+HDateTime.make(mEndDate.getMillis(), tz));
             HDictBuilder vacationSchedule = new HDictBuilder()
                                              .add("id", HRef.copy(getId()))
                                              .add("temp")

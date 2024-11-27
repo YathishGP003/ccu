@@ -89,10 +89,12 @@ public class DemandResponseMode {
     }
 
     public static boolean isDREnrollmentPoint(HashMap<Object, Object> demandResponseEnrollment) {
-        return demandResponseEnrollment.get("domainName").toString().equals(DomainName.demandResponseEnrollment);
+        return   ((demandResponseEnrollment.containsKey("domainName")) &&
+                (demandResponseEnrollment.get("domainName").toString().equals(DomainName.demandResponseEnrollment)));
     }
     public static boolean isDRActivationPoint(HashMap<Object, Object> demandResponseEnrollment) {
-        return demandResponseEnrollment.get("domainName").toString().equals(DomainName.demandResponseActivation);
+        return ((demandResponseEnrollment.containsKey("domainName")) &&
+                (demandResponseEnrollment.get("domainName").toString().equals(DomainName.demandResponseActivation)));
     }
     public static boolean isDemandResponseConfigPoint(HashMap<Object, Object> pointEntity) {
         return isDREnrollmentPoint(pointEntity) || isDRActivationPoint(pointEntity);

@@ -58,6 +58,8 @@ class PointsUtil(private val hayStack : CCUHsApi) {
             DomainName.helionodeActiveChilledBeam -> ModelLoader.getHelioNodeVavAcbModelDef() as SeventyFiveFProfileDirective
             DomainName.smartnodeBypassDamper -> ModelLoader.getSmartNodeBypassDamperModelDef() as SeventyFiveFProfileDirective
             DomainName.hyperstatSplitCPU -> ModelLoader.getHyperStatSplitCpuModel() as SeventyFiveFProfileDirective
+            DomainName.smartnodePID -> ModelLoader.getSmartNodePidModel() as SeventyFiveFProfileDirective
+            DomainName.helionodePID -> ModelLoader.getHelioNodePidModel() as SeventyFiveFProfileDirective
             else -> null
         }
     }

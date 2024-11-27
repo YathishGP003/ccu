@@ -233,6 +233,12 @@ public class PlcProfile extends ZoneProfile {
         }
         CcuLog.i(L.TAG_CCU_ZONE, "PLC initialized : proportionalGain " + plc.getProportionalGain() + ", integralGain " + plc.getIntegralGain() +
                 ", proportionalSpread " + plc.getMaxAllowedError() + ", integralMaxTimeout " + plc.getIntegralMaxTimeout());
+
+        //TODO - TEMP code for debugging an issue where proportionalRange is set to 0
+        if (plc.getMaxAllowedError() == 0) {
+            CcuLog.e(L.TAG_CCU_ZONE, "PLC initialized with zero proportional spread. Please check the configuration. ");
+            CcuLog.e(L.TAG_CCU_ZONE, " Point "+plcEquip.getPidProportionalRange().getPoint()+" val "+plcEquip.getPidProportionalRange().readPriorityVal());
+        }
     }
 
     public void refreshPITuners() {

@@ -5,9 +5,7 @@ import a75f.io.api.haystack.HSUtil
 import a75f.io.api.haystack.HayStackConstants
 import a75f.io.api.haystack.Point
 import a75f.io.api.haystack.Tags
-import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
-import a75f.io.domain.api.EntityConfig
 import a75f.io.domain.logic.DeviceBuilder
 import a75f.io.domain.logic.EntityMapper
 import a75f.io.domain.logic.ProfileEquipBuilder
@@ -16,10 +14,10 @@ import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.plc.PlcProfile
 import a75f.io.logic.bo.building.plc.PlcProfileConfig
+import a75f.io.logic.bo.building.plc.addBaseProfileConfig
 import com.google.gson.JsonObject
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
-import io.seventyfivef.domainmodeler.common.point.MultiStateConstraint
 
 fun updateConfigPoint(msgObject: JsonObject, configPoint: Point) {
     CcuLog.i(
@@ -49,7 +47,6 @@ fun updateConfigPoint(msgObject: JsonObject, configPoint: Point) {
     addBaseProfileConfig(DomainName.analog1InputType, config, model)
     addBaseProfileConfig(DomainName.thermistor1InputType, config, model)
     addBaseProfileConfig(DomainName.nativeSensorType, config, model)
-    //addBaseProfileConfig(DomainName.analog2InputType, config, model)
     addBaseProfileConfig(DomainName.useAnalogIn2ForSetpoint, config, model)
 
     config.baseConfigs.forEach {
@@ -81,71 +78,6 @@ fun updateConfigPoint(msgObject: JsonObject, configPoint: Point) {
     writePointFromJson(configPoint, msgObject, CCUHsApi.getInstance())
 }
 
-private fun addBaseProfileConfig(domainName: String, config: PlcProfileConfig, model: SeventyFiveFProfileDirective) {
-    when (domainName) {
-        DomainName.analog1InputType -> {
-            val analog1Input = getInputSensorPoint(domainName, config.analog1InputType.currentVal.toInt(), model)
-            if (analog1Input.isNotEmpty()) {
-                config.baseConfigs.add(EntityConfig(analog1Input))
-            }
-        }
-        DomainName.thermistor1InputType -> {
-            val thermistor1Input = getInputSensorPoint(domainName, config.thermistor1InputType.currentVal.toInt(), model)
-            if (thermistor1Input.isNotEmpty()) {
-                config.baseConfigs.add(EntityConfig(thermistor1Input))
-            }
-        }
-        DomainName.nativeSensorType -> {
-            val nativeSensorType = getInputSensorPoint(domainName, config.nativeSensorType.currentVal.toInt(), model)
-            if (nativeSensorType.isNotEmpty()) {
-                config.baseConfigs.add(EntityConfig(nativeSensorType))
-            }
-        }
-        /*DomainName.analog2InputType -> {
-            val analog2Input = getInputSensorPoint(domainName, config.analog2InputType.currentVal.toInt(), model)
-            if (analog2Input.isNotEmpty()) {
-                config.baseConfigs.add(EntityConfig(analog2Input))
-            }
-        }*/
-        DomainName.useAnalogIn2ForSetpoint -> {
-            if (config.useAnalogIn2ForSetpoint.enabled) {
-                val analog2Input = getInputSensorPoint(DomainName.analog2InputType, config.analog2InputType.currentVal.toInt(), model)
-                if (analog2Input.isNotEmpty()) {
-                    config.baseConfigs.add(EntityConfig(analog2Input))
-                } else {
-                    CcuLog.e(L.TAG_CCU_PUBNUB, "Analog2Input not found for ${config.analog2InputType.currentVal}")
-                }
-            }
-        }
-    }
-
-}
-
-private fun getInputSensorPoint(domainName : String, index : Int, model: SeventyFiveFProfileDirective): String {
-    //Models have a dummy entry "not used" at index 0 which are not associated with any point.
-    if (index == 0) {
-        return ""
-    }
-    return when (domainName) {
-        DomainName.analog1InputType -> {
-            val analog1InputPoint = model.points.find { it.domainName == DomainName.analog1InputType }
-            (analog1InputPoint?.valueConstraint as MultiStateConstraint).allowedValues[index].value
-        }
-        DomainName.thermistor1InputType -> {
-            val thermistor1InputPoint = model.points.find { it.domainName == DomainName.thermistor1InputType }
-            (thermistor1InputPoint?.valueConstraint as MultiStateConstraint).allowedValues[index].value
-        }
-        DomainName.nativeSensorType -> {
-            val nativeSensorTypePoint = model.points.find { it.domainName == DomainName.nativeSensorType }
-            (nativeSensorTypePoint?.valueConstraint as MultiStateConstraint).allowedValues[index].value
-        }
-        DomainName.analog2InputType -> {
-            val analog2InputPoint = model.points.find { it.domainName == DomainName.analog2InputType }
-            (analog2InputPoint?.valueConstraint as MultiStateConstraint).allowedValues[index].value
-        }
-        else -> ""
-    }
-}
 private fun profileReconfigurationRequired(configPoint: Point): Boolean {
     return configPoint.domainName == DomainName.analog1InputType ||
             configPoint.domainName == DomainName.thermistor1InputType ||

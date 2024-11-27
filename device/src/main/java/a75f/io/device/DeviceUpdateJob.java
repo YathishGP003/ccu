@@ -20,8 +20,12 @@ import a75f.io.device.bacnet.BacnetUtilKt;
 import a75f.io.device.connect.ConnectModbusSerialComm;
 import a75f.io.device.mesh.LSerial;
 import a75f.io.device.mesh.MeshNetwork;
+import a75f.io.device.mesh.Pulse;
 import a75f.io.device.modbus.ModbusNetwork;
+import a75f.io.device.serial.CmToCcuOverUsbSnRegularUpdateMessage_t;
 import a75f.io.device.serial.MessageType;
+import a75f.io.device.serial.SensorReading_t;
+import a75f.io.device.serial.SmartNodeSensorReading_t;
 import a75f.io.domain.api.Domain;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
@@ -63,10 +67,10 @@ public class DeviceUpdateJob extends BaseJob implements WatchdogMonitor
                         .getInt("control_loop_frequency",60), 45, TimeUnit.SECONDS);
 
         //TODO - TEMP code for performance testing to simulate device load. Remove this code after performance issue resolved
-        //injectTestInputMessage();
+        injectTestInputMessage();
     }
     
-        public void doJob()
+    public void doJob()
     {
         watchdogMonitor = false;
         ConnectModbusSerialComm.testReadOp();
@@ -111,18 +115,29 @@ public class DeviceUpdateJob extends BaseJob implements WatchdogMonitor
     }
 
     private void injectTestInputMessage() {
-        try {
-            sleep(40000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+
         new Thread(() -> {
             while (true) {
+                try {
+                    sleep(30000);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
                 List<HashMap<Object, Object>> hsDevices = CCUHsApi.getInstance().readAllEntities("device and hyperstat");
                 hsDevices.forEach(device -> {
                     injectTestRegularUpdateMessage(Integer.parseInt(device.get("addr").toString()), CCUHsApi.getInstance());
                     try {
-                        sleep(1500);
+                        sleep(500);
+                    } catch (InterruptedException e) {
+                        CcuLog.e(L.TAG_CCU_DEVICE, "error ", e);
+                    }
+                });
+
+                List<HashMap<Object, Object>> snDevices = CCUHsApi.getInstance().readAllEntities("device and smartnode");
+                snDevices.forEach(device -> {
+                    injectTestRegularUpdateMessageSmartNode(Integer.parseInt(device.get("addr").toString()), CCUHsApi.getInstance());
+                    try {
+                        sleep(500);
                     } catch (InterruptedException e) {
                         CcuLog.e(L.TAG_CCU_DEVICE, "error ", e);
                     }
@@ -165,5 +180,36 @@ public class DeviceUpdateJob extends BaseJob implements WatchdogMonitor
     }
     private static byte[] getByteArrayFromInt(int integerVal) {
         return ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN).putInt(integerVal).array();
+    }
+
+    public static void injectTestRegularUpdateMessageSmartNode(int address, CCUHsApi hayStack) {
+        Random randomNumGenerator = new Random();
+        CmToCcuOverUsbSnRegularUpdateMessage_t msg = new CmToCcuOverUsbSnRegularUpdateMessage_t();
+        msg.update.smartNodeAddress.set(address);
+        msg.update.roomTemperature.set(65+randomNumGenerator.nextInt(10));
+        msg.update.externalAnalogVoltageInput1.set(randomNumGenerator.nextInt(10000));
+        msg.update.externalThermistorInput1.set(randomNumGenerator.nextInt(10000));
+        msg.update.externalAnalogVoltageInput2.set(randomNumGenerator.nextInt(10000));
+
+        SmartNodeSensorReading_t sensorReadingHumidity = new SmartNodeSensorReading_t();
+        sensorReadingHumidity.sensorType.set(1);//humidity
+        sensorReadingHumidity.sensorData.set(randomNumGenerator.nextInt(1000));
+        msg.update.sensorReadings[0] = sensorReadingHumidity;
+
+        SmartNodeSensorReading_t sensorReadingCO2 = new SmartNodeSensorReading_t();
+        sensorReadingCO2.sensorType.set(2);//CO2
+        sensorReadingCO2.sensorData.set(400+randomNumGenerator.nextInt(1000));
+        msg.update.sensorReadings[1] = sensorReadingCO2;
+
+        SmartNodeSensorReading_t sensorReadingCO = new SmartNodeSensorReading_t();
+        sensorReadingCO.sensorType.set(3);//CO
+        sensorReadingCO.sensorData.set(randomNumGenerator.nextInt(200));
+        msg.update.sensorReadings[2] = sensorReadingCO;
+
+        SmartNodeSensorReading_t sensorReadingNO = new SmartNodeSensorReading_t();
+        sensorReadingNO.sensorType.set(4);//NO
+        sensorReadingNO.sensorData.set(randomNumGenerator.nextInt(200));
+        msg.update.sensorReadings[3] = sensorReadingNO;
+        Pulse.regularSNUpdate(msg);
     }
 }

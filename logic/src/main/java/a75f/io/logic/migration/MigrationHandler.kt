@@ -45,6 +45,7 @@ import a75f.io.logic.bo.building.dab.DabProfileConfiguration
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.CpuUniInType
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuProfileConfiguration
+import a75f.io.logic.bo.building.plc.doPlcDomainModelCutOverMigration
 import a75f.io.logic.bo.building.schedules.Occupancy
 import a75f.io.logic.bo.building.schedules.occupancy.DemandResponse
 import a75f.io.logic.bo.building.system.vav.config.ModulatingRtuProfileConfig
@@ -126,6 +127,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         createMigrationVersionPoint(CCUHsApi.getInstance())
         addSystemDomainEquip(CCUHsApi.getInstance())
         addCmBoardDevice(hayStack)
+        doPlcDomainModelCutOverMigration(hayStack)
         if (!isMigrationRequired()) {
             CcuLog.i(L.TAG_CCU_MIGRATION_UTIL, "---- Migration Not Required ----")
             return

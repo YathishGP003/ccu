@@ -1113,7 +1113,7 @@ public class FloorPlanFragment extends Fragment {
                     break;
                 case OTN:
                     showDialogFragment(OtnProfileConfigFragment.Companion.newInstance(Short.parseShort(nodeAddress),
-                            zone.getId(), floor.getId(), NodeType.OTN, profile.getProfileType()), FragmentOTNTempInfConfiguration.ID);
+                            zone.getId(), floor.getId(), NodeType.OTN, profile.getProfileType()), OtnProfileConfigFragment.Companion.getID());
                     break;
                 case HYPERSTAT_VRV:
                     showDialogFragment(HyperStatVrvFragment.newInstance(Short.parseShort(nodeAddress)

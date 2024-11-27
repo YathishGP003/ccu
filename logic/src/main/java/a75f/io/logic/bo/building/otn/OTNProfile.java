@@ -7,44 +7,32 @@ import static a75f.io.logic.bo.building.ZoneState.TEMPDEAD;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
-import a75f.io.api.haystack.HSUtil;
-import a75f.io.api.haystack.Occupied;
 import a75f.io.domain.equips.OtnEquip;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.BaseProfileConfiguration;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.system.SystemMode;
-import a75f.io.logic.bo.building.system.dab.DabSystemController;
-import a75f.io.logic.bo.util.SystemTemperatureUtil;
 import a75f.io.logic.tuners.TunerUtil;
 
 /*
  * created by spoorthidev on 3-August-2021
  */
 public class OTNProfile extends ZoneProfile {
-    //OTNEquip mOTNEquip;
-    public HashMap<Integer, OTNEquip> mOTNDeviceMap;
 
     OtnEquip otnEquip;
     Short mNodeAddr;
     public OTNProfile(String equipRef, Short nodeAddr) {
-        mOTNDeviceMap = new HashMap<>();
         otnEquip = new OtnEquip(equipRef);
         mNodeAddr = nodeAddr;
 
-    }
-
-    //TODO - remove
-    public OTNProfile(){
-        mOTNDeviceMap = new HashMap<>();
     }
 
     @Override
@@ -122,7 +110,7 @@ public class OTNProfile extends ZoneProfile {
     }
 
     @Override
-    public OTNConfiguration getProfileConfiguration(short address) {
+    public BaseProfileConfiguration getProfileConfiguration(short address) {
         return null;
     }
 

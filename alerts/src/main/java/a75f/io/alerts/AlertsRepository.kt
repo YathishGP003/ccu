@@ -242,8 +242,8 @@ class AlertsRepository(
       val ccuId = haystack.ccuRef.toVal()
 
       if (alertDef.alert.ismEnabled() && !alertDef.isMuted(ccuId, null)) {
+         alertDef.alert.setmNotificationMsg(AlertFormatter.updatingNotificationMessage(msg,alertDef))
          alertDef.alert.setmMessage(msg)
-         alertDef.alert.setmNotificationMsg(alertDef.alert.mNotificationMsg)
          val alert = AlertBuilder.build(alertDef, AlertFormatter.getFormattedMessage(alertDef,this), haystack,equipRef,null)
          if (isOtaAlert(title)){
             alert.setFixed(true)
@@ -264,6 +264,7 @@ class AlertsRepository(
       val ccuId = haystack.ccuRef.toVal()
 
       if (alertDef.alert.ismEnabled() && !alertDef.isMuted(ccuId, null)) {
+         alertDef.alert.setmNotificationMsg(AlertFormatter.updatingNotificationMessage(msg,alertDef))
          alertDef.alert.setmMessage(msg)
          val alert = AlertBuilder.build(alertDef, AlertFormatter.getFormattedMessage(alertDef,this), haystack,equipRef,null)
          if (isOtaAlert(title)){

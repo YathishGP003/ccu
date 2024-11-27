@@ -49,9 +49,20 @@ public class AlertFormatter
     }
     
     public static String getFormattedMessage(AlertDefinition def, AlertsRepository repository) {
-        String message = def.alert.mMessage;
-        StringTokenizer t = new StringTokenizer(def.alert.mMessage);
-        while(t.hasMoreTokens()) {
+        String message = getMessage(def, def.alert.mMessage);
+        if(repository.isOtaAlert(def.alert.mTitle)) {
+            message = StringUtil.processMessageForNumberFormattingOnlyOtaUpdate(message);
+        }
+        else {
+            message = StringUtil.processMessageForNumberFormatting(message);
+        }
+        CcuLog.d(TAG_CCU_ALERTS,"  Alert Formatted Message "+message);
+        return message;
+    }
+
+    private static String getMessage(AlertDefinition def, String message) {
+        StringTokenizer t = new StringTokenizer(message);
+        while (t.hasMoreTokens()) {
             String token = t.nextToken();
             if (token.startsWith("#")) {
                 try {
@@ -63,14 +74,17 @@ public class AlertFormatter
                 }
             }
         }
-
+        return message;
+    }
+    public static String getFormattedNotificationMessage(AlertDefinition def, AlertsRepository repository) {
+        String message = getMessage(def, def.alert.mNotificationMsg);
         if(repository.isOtaAlert(def.alert.mTitle)) {
             message = StringUtil.processMessageForNumberFormattingOnlyOtaUpdate(message);
         }
         else {
             message = StringUtil.processMessageForNumberFormatting(message);
         }
-        CcuLog.d(TAG_CCU_ALERTS,"  Alert Formatted Message "+message);
+        CcuLog.d(TAG_CCU_ALERTS,"  Alert Formatted Message for notification "+message);
         return message;
     }
 
@@ -218,6 +232,22 @@ public class AlertFormatter
             }
         }
         return value;
+    }
+
+    public static String updatingNotificationMessage(String message, AlertDefinition alertDef) {
+        if (AlertFormatter.isNotificationMessageEqual(alertDef)) {
+            return message;
+        } else {
+            return AlertFormatter.getFormattedNotificationMessage(alertDef, AlertManager.getInstance().getRepo());
+        }
+    }
+
+
+    public static boolean isNotificationMessageEqual(AlertDefinition def) {
+        //To check - checking if there is any double space converting it into single space
+        String Message = def.alert.mMessage.replaceAll("\\s+", " ").trim();
+        String NotificationMsg = def.alert.mNotificationMsg.replaceAll("\\s+", " ").trim();
+        return Message.equalsIgnoreCase(NotificationMsg);
     }
 
 }

@@ -82,6 +82,7 @@ public class PreferenceUtil {
     private static final String INSTALL_TYPE = "INSTALL_TYPE";
     private static final String RESTORE_BYPASS_DAMPER_AFTER_REPLACE = "restoreBypassDamperAfterReplace";
     private static final String TITLE_24_REDUNDANT_POINT_MIGRATION = "title24ReduntPointMigration";
+    private static final String LOCK_OUT_HIS_UPDATE = "lockoutHisUpdate";
 
 
 
@@ -637,5 +638,13 @@ public class PreferenceUtil {
 
     public static void setTitle24ReduntPointMigrationStatus() {
         setBooleanPreference(TITLE_24_REDUNDANT_POINT_MIGRATION, true);
+    }
+
+    public static boolean getLockOutHisUpdate() {
+        return getBooleanPreference(LOCK_OUT_HIS_UPDATE);
+    }
+
+    public static void setLockOutHisUpdate() {
+        setBooleanPreference(LOCK_OUT_HIS_UPDATE, true);
     }
 }

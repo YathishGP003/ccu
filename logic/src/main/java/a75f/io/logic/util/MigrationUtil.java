@@ -37,6 +37,7 @@ import a75f.io.api.haystack.util.SchedulableMigrationKt;
 import a75f.io.domain.api.Domain;
 import a75f.io.domain.api.DomainName;
 import a75f.io.domain.equips.CCUDiagEquip;
+import a75f.io.domain.equips.SystemEquip;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.BuildConfig;
 import a75f.io.logic.DefaultSchedules;
@@ -186,6 +187,10 @@ public class MigrationUtil {
         deleteDuplicateLimitsifAny(ccuHsApi);
         cleanUpAndCreateZoneSchedules(ccuHsApi);
         syncZoneSchedulesFromLocal(ccuHsApi);
+        if(!PreferenceUtil.getLockOutHisUpdate()){
+            updateHisValueForLockOutPoints();
+            PreferenceUtil.setLockOutHisUpdate();
+        }
         if(!PreferenceUtil.getDamperSizeMigrationFlagStatus()) {
             CcuLog.d(TAG, "doDabDamperSizeMigration started");
             new MigrationHandler(ccuHsApi).doDabDamperSizeMigration();
@@ -1357,6 +1362,28 @@ public class MigrationUtil {
         return siteDis + "-" + floor.get("dis").toString() + "-" + roomMap.get("dis");
     }
 
-
+    public static void updateHisValueForLockOutPoints(){
+        try {
+            CcuLog.e(TAG_CCU_MIGRATION_UTIL, "lockout point update started");
+            String equipId = Domain.systemEquip.getId();
+            SystemEquip systemEquip = new SystemEquip(equipId);
+            HashMap<Object, Object> heatingLockout = CCUHsApi.getInstance()
+                    .readEntity("point and domainName == \"" + DomainName.useOutsideTempLockoutHeating + "\" and equipRef == \"" + equipId + "\"");
+            HashMap<Object, Object> coolingLockout = CCUHsApi.getInstance()
+                    .readEntity("point and domainName == \"" + DomainName.useOutsideTempLockoutCooling + "\" and equipRef == \"" + equipId + "\"");
+            CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(
+                    heatingLockout.get("id").toString(),
+                    systemEquip.getUseOutsideTempLockoutHeating().readPriorityVal()
+            );
+            CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(
+                    coolingLockout.get("id").toString(),
+                    systemEquip.getUseOutsideTempLockoutCooling().readPriorityVal()
+            );
+            CcuLog.e(TAG_CCU_MIGRATION_UTIL, "lockout point update completed");
+        }catch (Exception e){
+            CcuLog.e(TAG_CCU_MIGRATION_UTIL, "lockout point update failed "+e.getMessage());
+            e.printStackTrace();
+        }
+    }
 
 }

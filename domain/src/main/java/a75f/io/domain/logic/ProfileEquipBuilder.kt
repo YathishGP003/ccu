@@ -21,6 +21,7 @@ import io.seventyfivef.domainmodeler.client.type.SeventyFiveFEquipDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import io.seventyfivef.domainmodeler.common.point.MultiStateConstraint
 import io.seventyfivef.domainmodeler.common.point.PointConfiguration
+import io.seventyfivef.ph.core.PointType
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
@@ -318,8 +319,12 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
             } else {
                 initializeDefaultVal(hayStackPoint, pointConfig.modelDef.defaultValue as Number)
             }
+            if(pointConfig.modelDef.tagNames.contains("his")) {
+                CcuLog.d(Domain.LOG_TAG, "writing hisVal for ${pointConfig.modelDef.domainName}")
+                hayStack.writeHisValById(pointId, pointConfig.modelDef.defaultValue.toString().toDouble())
+            }
         } else if (pointConfig.modelDef.tagNames.contains("his") && !(pointConfig.modelDef.domainName.equals(
-                DomainName.heartBeat))) {
+                DomainName.heartBeat)) && pointConfig.modelDef.kind != PointType.STR) {
             // heartBeat is the one point where we don't want to initialize a hisVal to zero (since we want a gray dot on the zone screen, not green)
             hayStack.writeHisValById(pointId, 0.0)
         }

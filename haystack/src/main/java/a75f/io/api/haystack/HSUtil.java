@@ -431,6 +431,12 @@ public class HSUtil {
         }
     }
 
+    public static boolean isDamperSizeConfigPoint(String id, CCUHsApi hayStack) {
+        HashMap<Object, Object> pointEntity = hayStack.readMapById(id);
+            return pointEntity.containsKey("dab") && pointEntity.containsKey("size")
+                    && pointEntity.containsKey("domainName") && pointEntity.containsKey("damper");
+    }
+
     public static boolean isMaxCFMCoolingConfigPoint(String id, CCUHsApi hayStack) {
         HashMap<Object, Object> pointEntity = hayStack.readMapById(id);
         return pointEntity.containsKey(Tags.DOMAIN_NAME) && pointEntity.get(Tags.DOMAIN_NAME).equals("maxCFMCooling");

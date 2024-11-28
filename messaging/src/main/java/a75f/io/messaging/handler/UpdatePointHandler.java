@@ -208,6 +208,12 @@ public class UpdatePointHandler implements MessageHandler
             return;
         }
 
+        if(HSUtil.isDamperSizeConfigPoint(pointUid, CCUHsApi.getInstance())){
+            TrueCFMDABConfigHandler.updatePointVal(localPoint, msgObject);
+            updatePoints(localPoint);
+            return;
+        }
+
         if(HSUtil.isMaxCFMCoolingConfigPoint(pointUid, CCUHsApi.getInstance())){
             TrueCFMVAVConfigHandler.updateMinCoolingConfigPoint(msgObject, localPoint, hayStack);
             TrueCFMVAVConfigHandler.updateAirflowCFMProportionalRange(msgObject, localPoint, hayStack);

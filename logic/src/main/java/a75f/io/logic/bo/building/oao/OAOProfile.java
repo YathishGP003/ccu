@@ -156,16 +156,20 @@ public class OAOProfile
         double exhaustFanHysteresis = oaoEquip.getExhaustFanHysteresis().readDefaultVal();
         double exhaustFanStage1Threshold = oaoEquip.getExhaustFanStage1Threshold().readDefaultVal();
         double exhaustFanStage2Threshold = oaoEquip.getExhaustFanStage2Threshold().readDefaultVal();
+
+        CcuLog.d(L.TAG_CCU_OAO," exhaustFanHysteresis "+exhaustFanHysteresis+" exhaustFanStage1Threshold "+exhaustFanStage1Threshold
+                            +" exhaustFanStage2Threshold "+exhaustFanStage2Threshold+" outsideAirFinalLoopOutput "+outsideAirFinalLoopOutput);
+
         if (outsideAirFinalLoopOutput > exhaustFanStage1Threshold) {
-              oaoEquip.getExhaustFanStage1Threshold().writeHisVal(1);
+              oaoEquip.getExhaustFanStage1().writeHisVal(1);
         } else if (outsideAirFinalLoopOutput < (exhaustFanStage1Threshold - exhaustFanHysteresis)){
-            oaoEquip.getExhaustFanStage1Threshold().writeHisVal(0);
+            oaoEquip.getExhaustFanStage1().writeHisVal(0);
         }
     
         if (outsideAirFinalLoopOutput > exhaustFanStage2Threshold) {
-            oaoEquip.getExhaustFanStage2Threshold().writeHisVal(1);
+            oaoEquip.getExhaustFanStage2().writeHisVal(1);
         } else if (outsideAirFinalLoopOutput < (exhaustFanStage2Threshold - exhaustFanHysteresis)) {
-            oaoEquip.getExhaustFanStage2Threshold().writeHisVal(0);
+            oaoEquip.getExhaustFanStage2().writeHisVal(0);
         }
         oaoEquip.getMatThrottle().writeHisVal(isMatThrottle() ? 1 : 0);
     }

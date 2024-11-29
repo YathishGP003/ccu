@@ -249,11 +249,6 @@ public class SingleStageProfile extends ZoneProfile
                 state = DEADBAND;
             }
            setStatus(stageStatus, state.ordinal(), (state == HEATING ? buildingLimitMinBreached() : state == COOLING ? buildingLimitMaxBreached() : false));
-            if (occuStatus != null) {
-                sseEquip.getOccupancyMode().writeHisVal(occuStatus.isOccupied() ? Occupancy.OCCUPIED.ordinal() : (occuStatus.isPreconditioning() ? Occupancy.PRECONDITIONING.ordinal() : (occuStatus.isForcedOccupied() ? Occupancy.FORCEDOCCUPIED.ordinal() : 0)));
-            } else {
-                sseEquip.getOccupancyMode().writeHisVal( occupied ? 1 : 0);
-            }
     }
 
     private void handleRFDead() {
@@ -265,7 +260,6 @@ public class SingleStageProfile extends ZoneProfile
             sseEquip.getEquipStatusMessage().writeDefaultVal(RFDead);
             sseEquip.getOccupancyMode().writeHisVal(0);
         }
-        //sseEquip.setStatus(controlFanStage(), state.ordinal(), false);
     }
 
     @JsonIgnore

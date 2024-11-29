@@ -50,6 +50,7 @@ import butterknife.ButterKnife;
 
 import static a75f.io.logic.bo.building.dab.DabProfile.CARRIER_PROD;
 import static a75f.io.logic.bo.util.DesiredTempDisplayMode.setSystemModeForDab;
+import static a75f.io.renatus.profiles.oao.OaoUtilKt.updateOaoPoints;
 import static a75f.io.renatus.util.RxjavaUtil.executeBackground;
 
 /**
@@ -694,11 +695,16 @@ public class DABFullyAHUProfile extends Fragment implements AdapterView.OnItemSe
     }
     
     private void setConfigBackgroundWithProgress(String tags, double val) {
-    
-        RxjavaUtil.executeBackgroundTask( () -> ProgressDialogUtils.showProgressDialog(getActivity(),"Saving System " +
-                                                                                                     "Configuration"),
-                                          () -> systemProfile.setConfigVal(tags, val),
-                                          ()-> ProgressDialogUtils.hideProgressDialog());
+
+        RxjavaUtil.executeBackgroundTask(() -> ProgressDialogUtils.showProgressDialog(getActivity(), "Saving System " +
+                        "Configuration"),
+                () -> systemProfile.setConfigVal(tags, val),
+                () -> {
+                    ProgressDialogUtils.hideProgressDialog();
+                    updateOaoPoints();
+                }
+
+        );
         
     }
     

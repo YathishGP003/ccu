@@ -74,9 +74,6 @@ class OAOViewModel : ViewModel() {
     lateinit var exhaustFanHysteresisList: List<String>
     lateinit var systemPurgeOutsideDamperMinPosList: List<String>
     lateinit var enhancedVentilationOutsideDamperMinOpenList: List<String>
-
-    var openCancelDialog by mutableStateOf(false)
-    var nextDestination by mutableStateOf(-1)
     private lateinit var context: Context
     lateinit var hayStack: CCUHsApi
 
@@ -232,6 +229,7 @@ class OAOViewModel : ViewModel() {
                 ProfileType.getProfileTypeForName(profileConfiguration.profileType)
             )
         }
+        deleteUnusedSystemPoints()
         if (L.ccu().systemProfile.profileType != ProfileType.SYSTEM_DEFAULT) {
             L.ccu().systemProfile.setOutsideTempCoolingLockoutEnabled(CCUHsApi.getInstance(), true)
         }
@@ -408,17 +406,5 @@ class OAOViewModel : ViewModel() {
             OutputRelayActuatorType.NormallyClose.displayName
         )
 
-    }
-
-
-    private fun getSystemProfileType(): String {
-        val profileType = L.ccu().systemProfile.profileType
-        return when (profileType) {
-            ProfileType.SYSTEM_DAB_ANALOG_RTU, ProfileType.SYSTEM_DAB_HYBRID_RTU, ProfileType.SYSTEM_DAB_STAGED_RTU, ProfileType.SYSTEM_DAB_STAGED_VFD_RTU, ProfileType.dabExternalAHUController, ProfileType.SYSTEM_DAB_ADVANCED_AHU -> "dab"
-            ProfileType.SYSTEM_VAV_ANALOG_RTU, ProfileType.SYSTEM_VAV_HYBRID_RTU, ProfileType.SYSTEM_VAV_IE_RTU, ProfileType.SYSTEM_VAV_STAGED_RTU, ProfileType.SYSTEM_VAV_STAGED_VFD_RTU, ProfileType.SYSTEM_VAV_ADVANCED_AHU, ProfileType.vavExternalAHUController -> "vav"
-            else -> {
-                "default"
-            }
-        }
     }
 }

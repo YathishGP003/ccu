@@ -2,6 +2,7 @@ package a75f.io.domain.api
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.CCUTagsDb
+import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.devices.CCUDevice
 import a75f.io.domain.devices.CmBoardDevice
 import a75f.io.domain.devices.ConnectDevice
@@ -10,6 +11,8 @@ import a75f.io.domain.equips.CCUDiagEquip
 import a75f.io.domain.equips.CCUEquip
 import a75f.io.domain.equips.DomainEquip
 import a75f.io.domain.logic.DomainManager
+import a75f.io.domain.logic.PointBuilderConfig
+import a75f.io.domain.logic.ProfileEquipBuilder
 import a75f.io.logger.CcuLog
 import android.annotation.SuppressLint
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
@@ -381,5 +384,27 @@ object Domain {
 
     fun isDiagEquipInitialised() : Boolean {
         return Domain::diagEquip.isInitialized
+    }
+
+    fun createDomainPoint(
+        model: SeventyFiveFProfileDirective, profileConfiguration: ProfileConfiguration,
+        equipRef: String, siteRef: String, tz: String, equipDis: String, domainName: String
+    ) {
+        val equipBuilder = ProfileEquipBuilder(CCUHsApi.getInstance())
+        val modelPointDef = model.points.find { it.domainName == domainName }
+        modelPointDef?.run {
+            CcuLog.d(
+                LOG_TAG, "Creating point for domainName: $domainName ")
+            equipBuilder.createPoint(
+                PointBuilderConfig(
+                    modelPointDef,
+                    profileConfiguration,
+                    equipRef,
+                    siteRef,
+                    tz,
+                    equipDis
+                )
+            )
+        }
     }
 }

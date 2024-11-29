@@ -14,6 +14,7 @@ import a75f.io.logic.bo.building.system.vav.VavFullyModulatingRtu
 import a75f.io.logic.bo.building.system.vav.config.ModulatingRtuProfileConfig
 import a75f.io.logic.bo.haystack.device.ControlMote
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
+import a75f.io.renatus.profiles.oao.updateOaoPoints
 import a75f.io.renatus.profiles.profileUtils.UnusedPortsModel
 import a75f.io.renatus.util.ProgressDialogUtils
 import a75f.io.renatus.util.highPriorityDispatcher
@@ -80,6 +81,7 @@ open class VavModulatingRtuViewModel : ModulatingRtuViewModel() {
             DesiredTempDisplayMode.setSystemModeForVav(hayStack)
             updateSystemMode()
             systemEquipId?.let { L.ccu().systemProfile.updateAhuRef(it) }
+            updateOaoPoints()
             hayStack.syncEntityTree()
             hayStack.setCcuReady()
         }

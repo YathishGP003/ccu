@@ -174,6 +174,10 @@ public class Pulse
 				double val;
 				Port currentPort = getPhysicalPointPort(phyPoint);
 				CcuLog.i(L.TAG_CCU_DEVICE, "regularSNUpdate: PORT "+currentPort);
+				if (currentPort == null) {
+					CcuLog.d(L.TAG_CCU_DEVICE, "Port not found for "+phyPoint);
+					continue;
+				}
 				switch (currentPort){
 					case RSSI:
 						hayStack.writeHisValueByIdWithoutCOV(phyPoint.get("id").toString(), (double)rssi);

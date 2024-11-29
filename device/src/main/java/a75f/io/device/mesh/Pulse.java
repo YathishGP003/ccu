@@ -48,6 +48,7 @@ import a75f.io.device.serial.SnRebootIndicationMessage_t;
 import a75f.io.device.serial.WrmOrCmRebootIndicationMessage_t;
 import a75f.io.domain.api.Domain;
 import a75f.io.domain.api.DomainName;
+import a75f.io.domain.devices.CmBoardDevice;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
@@ -965,11 +966,16 @@ public class Pulse
 	}
 
 	private static void updateCMPhysicalPoints(CmToCcuOverUsbCmRegularUpdateMessage_t cmRegularUpdateMessage_t) {
-		
+
 		CCUHsApi hayStack = CCUHsApi.getInstance();
 		HashMap device = hayStack.read("device and cm");
 		if (!device.isEmpty()) {
 			String deviceId = device.get("id").toString();
+			if (device.containsKey("domainName")) {
+				updateDomainCmUpdates(deviceId, cmRegularUpdateMessage_t);
+				return;
+			}
+
 			HashMap analog1In = hayStack.read("point and analog1 and in and deviceRef == \""+deviceId+"\"");
 			if (!analog1In.isEmpty()) {
 				hayStack.writeHisValById(analog1In.get("id").toString(),
@@ -996,6 +1002,13 @@ public class Pulse
 		}
 	}
 
+	public static void updateDomainCmUpdates(String deviceId, CmToCcuOverUsbCmRegularUpdateMessage_t cmRegularUpdateMessage_t) {
+		CmBoardDevice cmBoardDevice = new CmBoardDevice(deviceId);
+		cmBoardDevice.getAnalog1In().writeHisVal(cmRegularUpdateMessage_t.analogSense1.get());
+		cmBoardDevice.getAnalog2In().writeHisVal(cmRegularUpdateMessage_t.analogSense2.get());
+		cmBoardDevice.getTh1In().writeHisVal(cmRegularUpdateMessage_t.thermistor1.get());
+		cmBoardDevice.getTh2In().writeHisVal(cmRegularUpdateMessage_t.thermistor2.get());
+	}
 
 	public static void regularSmartStatUpdate(CmToCcuOverUsbSmartStatRegularUpdateMessage_t smartStatRegularUpdateMessage_t)
 	{

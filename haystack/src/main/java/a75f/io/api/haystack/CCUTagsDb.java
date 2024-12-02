@@ -1316,6 +1316,10 @@ public class CCUTagsDb extends HServer {
         if(z.getLastModifiedBy() != null){
             b.add("lastModifiedBy", z.getLastModifiedBy());
         }
+        if(z.getBacnetId() != 0) {
+            b.add(Tags.BACNET_ID, z.getBacnetId());
+            b.add(Tags.BACNET_TYPE, Tags.DEVICE);
+        }
 
         for (String m : z.getMarkers()) {
             b.add(m);

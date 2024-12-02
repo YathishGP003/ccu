@@ -179,19 +179,22 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             PreferenceUtil.setModbusEnumCorrectionDone()
         }
         if(!PreferenceUtil.isBackFillValueUpdateRequired()) {
-            val backFillDurationDomainPoint = Domain.ccuEquip.backFillDuration
+            val backFillDurationDomainPoint  = hayStack.readEntity("domainName == \"backfillDuration\"")
             try {
-                updatingBackFillDefaultValues(hayStack, backFillDurationDomainPoint)
+                if(backFillDurationDomainPoint.isNotEmpty()) {
+                    updatingBackFillDefaultValues(
+                        hayStack,
+                        backFillDurationDomainPoint
+                    )
+                }
             } catch (e: Exception) {
                 e.printStackTrace()
                 //For now, we make sure it does not stop other migrations even if this fails.
                 CcuLog.e(L.TAG_CCU_MIGRATION_UTIL, "Error in updatingBackfillDefaultValues $e")
-                try {
-                    backFillDurationDomainPoint.writeDefaultVal(24.0)
-                } catch (e: Exception) {
-                    CcuLog.e(L.TAG_CCU_MIGRATION_UTIL, "Error in updatingBackfillDefaultValues in catch block $e")
+                if(backFillDurationDomainPoint.isNotEmpty()) {
+                    hayStack.writeDefaultValById(backFillDurationDomainPoint["id"].toString(), 24.0)
+                    CcuLog.i(L.TAG_CCU_MIGRATION_UTIL, "Updated backfill default value")
                 }
-
             }
 
             PreferenceUtil.setBackFillValueUpdateDone()
@@ -263,38 +266,29 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         }
     }
 
-    private fun updatingBackFillDefaultValues(hayStack: CCUHsApi, backFillPointDomain: a75f.io.domain.api.Point) {
-        if(backFillPointDomain.id == "") {
-            CcuLog.e(L.TAG_CCU_MIGRATION_UTIL, "backFillDuration point not exist")
-            return
-        }
-        val backFillPoint = hayStack.readEntity(backFillPointDomain.id)
+    private fun updatingBackFillDefaultValues(hayStack: CCUHsApi, backFillPoint: HashMap<Any, Any>) {
 
-        if(backFillPoint.isEmpty()) {
-            CcuLog.e(L.TAG_CCU_MIGRATION_UTIL, "backFillDuration point Map not exist")
-            return
-        }
-
-        val lastUpdatedTimeForBackFillPoint = hayStack.readPointPriorityLatestTime(backFillPointDomain.id)
+        val backFillDurationId = backFillPoint["id"].toString()
+        val lastUpdatedTimeForBackFillPoint = hayStack.readPointPriorityLatestTime(backFillDurationId)
 
         if(lastUpdatedTimeForBackFillPoint == null) {
             CcuLog.i(L.TAG_CCU_MIGRATION_UTIL, "lastUpdatedTimeForBackFillPoint not found" +
                     " so Updated the fallback default value for backfill point")
-            backFillPointDomain.writeDefaultVal(24.0)
+            hayStack.writeDefaultValById(backFillDurationId,24.0)
             return
         }
 
         val lastUpdatedTime = DateTime.parse(lastUpdatedTimeForBackFillPoint.substring(0, 19))
         if(backFillPoint["createdDateTime"] == null) {
             CcuLog.i(L.TAG_CCU_MIGRATION_UTIL, "Updated the fallback default value for backfill point")
-            backFillPointDomain.writeDefaultVal(24.0)
+            hayStack.writeDefaultValById(backFillDurationId,24.0)
             CcuLog.i(L.TAG_CCU_MIGRATION_UTIL, "Updated backfill default value")
             return
         }
         val createdTime =
             DateTime.parse(backFillPoint["createdDateTime"].toString().substring(0,19))
         if (createdTime.equals(lastUpdatedTime)) {
-            backFillPointDomain.writeDefaultVal(24.0)
+            hayStack.writeDefaultValById(backFillDurationId,24.0)
             CcuLog.i(L.TAG_CCU_MIGRATION_UTIL, "Updated backfill default value")
         } else {
             CcuLog.i(

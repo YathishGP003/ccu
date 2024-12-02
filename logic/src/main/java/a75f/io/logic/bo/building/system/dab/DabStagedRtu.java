@@ -573,6 +573,12 @@ public class DabStagedRtu extends DabSystemProfile
 //            }
         }
 
+        if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_HYBRID_RTU) {
+            return status.toString().isEmpty() ? "System OFF" + SystemProfileUtil.isDeHumidifierOn()
+                    + SystemProfileUtil.isHumidifierOn() : status + SystemProfileUtil.isDeHumidifierOn()
+                    + (SystemProfileUtil.isHumidifierOn());
+        }
+
         String humidifierStatus = getRelayMappingForStage(HUMIDIFIER).isEmpty() ? "" :
                 systemEquip.getHumidifierEnable().readHisVal() > 0 ? " | Humidifier ON " : " | Humidifier OFF ";
         String dehumidifierStatus = getRelayMappingForStage(DEHUMIDIFIER).isEmpty() ? "" :

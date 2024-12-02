@@ -74,7 +74,6 @@ import a75f.io.logic.migration.modbus.correctEnumsForCorruptModbusPoints
 import a75f.io.logic.migration.scheduler.SchedulerRevampMigration
 import a75f.io.logic.tuners.TunerConstants
 import a75f.io.logic.util.PreferenceUtil
-import a75f.io.logic.util.createOfflineModePoint
 import android.content.Context
 import android.content.SharedPreferences
 import android.content.pm.PackageInfo
@@ -135,7 +134,6 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         }
         isMigrationOngoing = true
         if (hayStack.readEntity(Tags.SITE).isNotEmpty()) {
-            createOfflineModePoint()
             // After DM integration skipping migration for DR mode
 //            migrationForDRMode()
             migrateEquipStatusEnums()

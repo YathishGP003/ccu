@@ -119,6 +119,7 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
         } else {
             updatePoints(modelDef, configuration, entityConfiguration, equipId, siteRef, equipDis)
         }
+        DomainManager.buildDomain(CCUHsApi.getInstance())
         deletePoints(entityConfiguration, equipId)
         return equipId
     }

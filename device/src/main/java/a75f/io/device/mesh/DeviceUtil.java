@@ -392,7 +392,6 @@ public class DeviceUtil {
             SystemScheduleUtil.handleManualDesiredTempUpdate(coolDtPoint, heatDtPoint, avgDtPoint, coolVal, heatVal,
                     avgVal, who);
         });
-
     }
 
     public static Port getPortFromDomainName(String domainName) {

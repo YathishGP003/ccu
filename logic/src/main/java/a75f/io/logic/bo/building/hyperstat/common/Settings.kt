@@ -17,8 +17,9 @@ enum class HSZoneStatus {
    CONDITIONING_MODE,
    FAN_MODE,
    FAN_LEVEL,
-   DISCHARGE_AIRFLOW
-
+   DISCHARGE_AIRFLOW,
+   CONFIG,
+   EQUIP
 }
 
 /**

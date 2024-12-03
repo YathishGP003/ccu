@@ -22,8 +22,10 @@ import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.cutover.DabStagedRtuCutOverMapping
 import a75f.io.domain.cutover.DabStagedVfdRtuCutOverMapping
 import a75f.io.domain.cutover.DabZoneProfileCutOverMapping
+import a75f.io.domain.cutover.HyperStatDeviceCutOverMapping
 import a75f.io.domain.cutover.HyperStatSplitCpuCutOverMapping
 import a75f.io.domain.cutover.HyperStatSplitDeviceCutoverMapping
+import a75f.io.domain.cutover.HyperStatV2EquipCutoverMapping
 import a75f.io.domain.cutover.NodeDeviceCutOverMapping
 import a75f.io.domain.cutover.OaoCutOverMapping
 import a75f.io.domain.cutover.SseZoneProfileCutOverMapping
@@ -31,11 +33,13 @@ import a75f.io.domain.cutover.VavFullyModulatingRtuCutOverMapping
 import a75f.io.domain.cutover.VavStagedRtuCutOverMapping
 import a75f.io.domain.cutover.VavStagedVfdRtuCutOverMapping
 import a75f.io.domain.cutover.VavZoneProfileCutOverMapping
+import a75f.io.domain.cutover.getDomainNameForMonitoringProfile
 import a75f.io.domain.equips.DabEquip
 import a75f.io.domain.equips.SseEquip
 import a75f.io.domain.equips.VavEquip
 import a75f.io.domain.logic.DeviceBuilder
 import a75f.io.domain.logic.DomainManager.addCmBoardDevice
+import a75f.io.domain.logic.DomainManager.addDomainEquips
 import a75f.io.domain.logic.DomainManager.addSystemDomainEquip
 import a75f.io.domain.logic.EntityMapper
 import a75f.io.domain.logic.EquipBuilderConfig
@@ -53,6 +57,8 @@ import a75f.io.logic.bo.building.dab.getDevicePointDict
 import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType
 import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.definitions.ProfileType
+import a75f.io.logic.bo.building.hyperstat.v2.configs.CpuConfiguration
+import a75f.io.logic.bo.building.hyperstat.v2.configs.MonitoringConfiguration
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.CpuUniInType
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuProfileConfiguration
 import a75f.io.logic.bo.building.oao.OAOProfileConfiguration
@@ -78,6 +84,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
+import io.seventyfivef.domainmodeler.client.ModelDirective
 import io.seventyfivef.domainmodeler.client.ModelPointDef
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDevicePointDef
@@ -128,6 +135,8 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         createMigrationVersionPoint(CCUHsApi.getInstance())
         addSystemDomainEquip(CCUHsApi.getInstance())
         addCmBoardDevice(hayStack)
+        doHSCPUDMMigration()
+        doHSMonitoringDMMigration()
         if (!isMigrationRequired()) {
             CcuLog.i(L.TAG_CCU_MIGRATION_UTIL, "---- Migration Not Required ----")
             return
@@ -258,7 +267,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
     private fun clearOtaCachePreferences() {
         CcuLog.d(L.TAG_CCU_MIGRATION_UTIL,"Clearing OtaCache Preferences")
         try {
-            var sharedPreferences: SharedPreferences = Globals.getInstance().applicationContext.getSharedPreferences("otaCache" , Context.MODE_PRIVATE)
+            val sharedPreferences: SharedPreferences = Globals.getInstance().applicationContext.getSharedPreferences("otaCache" , Context.MODE_PRIVATE)
             sharedPreferences.edit().clear().apply()
         }
         catch (e : Exception) {
@@ -437,32 +446,6 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                 hayStack.updatePoint(equipStatusPoint, equipStatusPoint.id)
             }
         }
-    }
-
-    private fun migrationForDRMode() {
-        val demandResponse = DemandResponseMode()
-        val systemProfile = hayStack.readEntity("equip and system and not modbus")
-        val displayName = systemProfile[Tags.DIS].toString()
-        val siteRef = systemProfile[Tags.SITEREF].toString()
-        val id = systemProfile[Tags.ID].toString()
-        val tz = systemProfile[Tags.TZ].toString()
-        val demandResponseMode = hayStack.readEntity(
-            "demand and" +
-                    " response and not activation and not enable and system and not tuner"
-        )
-        val demandResponseEnrollment = hayStack.readEntity(
-            "demand and" +
-                    " response and enable and system"
-        )
-        if (demandResponseMode.size > 0) {
-            hayStack.deleteEntityItem(demandResponseMode["id"].toString())
-        }
-        if (demandResponseEnrollment.isEmpty()) {
-            demandResponse.createDemandResponseEnrollmentPoint(displayName, siteRef, id, tz, hayStack
-            )
-        }
-        migrateDemandResponseSetbackTunerForAllTempZones(hayStack)
-        migrateDemandResponseForOccupancyEnum(hayStack)
     }
 
     private  fun migrateDemandResponseForOccupancyEnum(ccuHsApi: CCUHsApi) {
@@ -1344,6 +1327,55 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         }
     }
 
+
+    private fun doHSCPUDMMigration() {
+        val hyperStatCPUEquip = hayStack.readAllEntities("equip and hyperstat and cpu")
+            .filter { it["domainName"] == null }
+            .toList()
+        CcuLog.d(L.TAG_CCU_HSCPU, "HyperStat CPU Equip Migration list of equips $hyperStatCPUEquip")
+        if (hyperStatCPUEquip.isNotEmpty()) {
+            val model = ModelLoader.getHyperStatCpuModel()
+            val deviceModel =
+                    ModelLoader.getHyperStatDeviceModel() as SeventyFiveFDeviceDirective
+            val deviceBuilder =
+                    DeviceBuilder(hayStack, EntityMapper(model as SeventyFiveFProfileDirective))
+            val profileType = ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT
+            val equipBuilder = ProfileEquipBuilder(hayStack)
+            hyperStatCPUEquip.forEach {
+                CcuLog.i(Domain.LOG_TAG, "Do DM zone equip migration for $it")
+                val equipDis = "${hayStack.siteName}-${model.name}-${it["group"]}"
+                val deviceDis = "${hayStack.siteName}-${deviceModel.name}-${it["group"]}"
+                val device = hayStack.readEntity("device and addr == \"" + it["group"] + "\"")
+                val profileConfiguration = CpuConfiguration(
+                    Integer.parseInt(it["group"].toString()),
+                    NodeType.HYPER_STAT.name,
+                    0,
+                    it["roomRef"].toString(),
+                    it["floorRef"].toString(),
+                    profileType, model
+                ).getActiveConfiguration()
+                equipBuilder.doCutOverMigration(
+                    it["id"].toString(),
+                    model,
+                    equipDis,
+                    HyperStatV2EquipCutoverMapping.getCPUEntries(),
+                    profileConfiguration,
+                    equipHashMap = it
+                )
+
+                deviceBuilder.doCutOverMigration(
+                    device.get("id").toString(),
+                    deviceModel,
+                    deviceDis,
+                    HyperStatDeviceCutOverMapping.entries,
+                    profileConfiguration
+                )
+
+            }
+        }
+        addDomainEquips(hayStack)
+    }
+
     private fun updateBacnetProperties(hayStack: CCUHsApi) {
         // migration for system equip and points
         val hsSystemEquip = hayStack.readEntity("equip and system and not modbus and domainName")
@@ -1754,4 +1786,95 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             }
         }
     }
+
+    private fun doHSMonitoringDMMigration() {
+        val hyperStatMonitoringEquip =
+            hayStack.readAllEntities("equip and hyperstat and monitoring")
+                .filter { it["domainName"] == null }
+                .toList()
+
+        val model = ModelLoader.getHyperStatMonitoringModel()
+        val deviceModel =
+            ModelLoader.getHyperStatDeviceModel() as SeventyFiveFDeviceDirective
+        val deviceBuilder =
+            DeviceBuilder(hayStack, EntityMapper(model as SeventyFiveFProfileDirective))
+        val profileType = ProfileType.HYPERSTAT_MONITORING
+
+        if (hyperStatMonitoringEquip.isNotEmpty()) {
+            val equipBuilder = ProfileEquipBuilder(hayStack)
+            hyperStatMonitoringEquip.forEach {
+                CcuLog.i(Domain.LOG_TAG, "Do DM zone equip migration for $it")
+                val equipDis = "${hayStack.siteName}-${model.name}-${it["group"]}"
+                val deviceDis = "${hayStack.siteName}-${deviceModel.name}-${it["group"]}"
+                val device = hayStack.readEntity("device and addr == \"" + it["group"] + "\"")
+                val profileConfiguration = MonitoringConfiguration(
+                    Integer.parseInt(it["group"].toString()),
+                    NodeType.HYPER_STAT.name,
+                    0,
+                    it["roomRef"].toString(),
+                    it["floorRef"].toString(),
+                    profileType,
+                    model
+                ).getActiveConfiguration()
+                migrateLogicalPointsForHyperStatMonitoring(it["id"].toString(), profileConfiguration, model, equipBuilder)
+
+                equipBuilder.doCutOverMigration(
+                    it["id"].toString(),
+                    model,
+                    equipDis,
+                    HyperStatV2EquipCutoverMapping.getMonitoringEntries(),
+                    profileConfiguration,
+                    equipHashMap = it
+                )
+
+                deviceBuilder.doCutOverMigration(
+                    device["id"].toString(),
+                    deviceModel,
+                    deviceDis,
+                    HyperStatDeviceCutOverMapping.entries,
+                    profileConfiguration
+                )
+
+            }
+        }
+    }
+
+    private fun migrateLogicalPointsForHyperStatMonitoring(
+        equipRef: String,
+        profileConfiguration: MonitoringConfiguration,
+        modelDef: ModelDirective,
+        profileEquipBuilder: ProfileEquipBuilder
+    ) {
+
+        // Map of tags to search query
+        val logicalPoints = mapOf(
+            Tags.ANALOG1 to "point and analog1 and logical and equipRef == \"$equipRef\"",
+            Tags.ANALOG2 to "point and analog2 and logical and equipRef == \"$equipRef\"",
+            Tags.TH1 to "point and th1 and logical and equipRef == \"$equipRef\"",
+            Tags.TH2 to "point and th2 and logical and equipRef == \"$equipRef\""
+        )
+
+        logicalPoints.forEach { (_, query) ->
+            val logicalPoint = hayStack.readEntity(query)
+            if (logicalPoint.isNotEmpty()) {
+                val site = hayStack.site
+                val modelPointName = getDomainNameForMonitoringProfile(logicalPoint)
+                val modelPoint = modelDef.points.find { it.domainName.equals(modelPointName, true) }
+                if (modelPoint != null) {
+                    val equipDis = "${hayStack.siteName}-${modelDef.name}-${logicalPoint["group"]}"
+                    profileEquipBuilder.updatePoint(
+                        PointBuilderConfig(
+                            modelPoint,
+                            profileConfiguration,
+                            equipRef,
+                            site!!.id,
+                            site.tz,
+                            equipDis
+                        ), logicalPoint
+                    )
+                }
+            }
+        }
+    }
+
 }

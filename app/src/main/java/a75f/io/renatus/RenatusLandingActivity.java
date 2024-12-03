@@ -171,8 +171,12 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                 @Override
                 public void onTabSelected(TabLayout.Tab tab) {
                     btnTabs.setEnabled(false);
-                    mViewPager.removeAllViews();
-                    mViewPager.setAdapter(null);
+                    try {
+                        mViewPager.removeAllViews();
+                        mViewPager.setAdapter(null);
+                    } catch (IllegalStateException e) {
+                      CcuLog.e(TAG,"IllegalStateException",e);
+                    }
                     if (tab.getPosition() == 0){
                         if (isSetupPassWordRequired()) {
                             showRequestPasswordAlert("Setup Access Authentication",getString(R.string.USE_SETUP_PASSWORD_KEY), tab.getPosition());

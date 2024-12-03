@@ -121,7 +121,7 @@ public class LSerial
         {
             byte[] data = event.getBytes();
             MessageType messageType = MessageType.values()[(event.getBytes()[0] & 0xff)];
-
+            DLog.LogdSerial("Received Event Type: " + messageType.name());
             if (messageType == MessageType.CM_REGULAR_UPDATE)
             {
                 Pulse.regularCMUpdate(fromBytes(data, CmToCcuOverUsbCmRegularUpdateMessage_t.class));

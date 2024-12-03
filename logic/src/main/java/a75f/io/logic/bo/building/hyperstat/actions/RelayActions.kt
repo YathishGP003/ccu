@@ -4,7 +4,7 @@ import a75f.io.logic.bo.building.ZoneState
 import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
 import a75f.io.logic.bo.building.hyperstat.common.BasicSettings
-import a75f.io.logic.bo.building.hyperstat.profiles.pipe2.HyperStatPipe2Equip
+import a75f.io.logic.bo.building.hyperstat.profiles.pipe2.HyperStatPipe2EquipToBeDeleted
 
 
 /**
@@ -86,12 +86,12 @@ interface RelayActions {
                                  humidityHysteresis: Int,
                                  targetMaxInsideHumidity: Double)
     fun doRelayWaterValveOperation(
-        equip: HyperStatPipe2Equip,
-        port: Port,
-        basicSettings: BasicSettings,
-        loopOutput: Int,
-        relayActivationHysteresis: Int,
-        relayStages: HashMap<String, Int>
+            equip: HyperStatPipe2EquipToBeDeleted,
+            port: Port,
+            basicSettings: BasicSettings,
+            loopOutput: Int,
+            relayActivationHysteresis: Int,
+            relayStages: HashMap<String, Int>
     )
     fun doCompressorStage1( port: Port,
                             compressorLoopOutput: Int,

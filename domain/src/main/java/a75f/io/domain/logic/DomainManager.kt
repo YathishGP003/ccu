@@ -3,8 +3,6 @@ package a75f.io.domain.logic
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.domain.BypassDamperEquip
 import a75f.io.domain.OAOEquip
-import a75f.io.domain.equips.BuildingEquip
-import a75f.io.domain.equips.VavEquip
 import a75f.io.domain.api.Device
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
@@ -14,19 +12,27 @@ import a75f.io.domain.api.Site
 import a75f.io.domain.devices.CCUDevice
 import a75f.io.domain.devices.CmBoardDevice
 import a75f.io.domain.devices.ConnectDevice
+import a75f.io.domain.devices.HyperStatDevice
+import a75f.io.domain.equips.BuildingEquip
+import a75f.io.domain.equips.CCUDiagEquip
+import a75f.io.domain.equips.CCUEquip
+import a75f.io.domain.equips.DabAdvancedHybridSystemEquip
 import a75f.io.domain.equips.DabEquip
 import a75f.io.domain.equips.DabStagedSystemEquip
 import a75f.io.domain.equips.DabStagedVfdSystemEquip
-import a75f.io.domain.equips.DabAdvancedHybridSystemEquip
 import a75f.io.domain.equips.DefaultSystemEquip
-import a75f.io.domain.equips.CCUDiagEquip
-import a75f.io.domain.equips.CCUEquip
 import a75f.io.domain.equips.DomainEquip
 import a75f.io.domain.equips.SseEquip
 import a75f.io.domain.equips.VavAdvancedHybridSystemEquip
+import a75f.io.domain.equips.VavEquip
 import a75f.io.domain.equips.VavModulatingRtuSystemEquip
 import a75f.io.domain.equips.VavStagedSystemEquip
 import a75f.io.domain.equips.VavStagedVfdSystemEquip
+import a75f.io.domain.equips.hyperstat.CpuV2Equip
+import a75f.io.domain.equips.hyperstat.HpuV2Equip
+import a75f.io.domain.equips.hyperstat.HyperStatEquip
+import a75f.io.domain.equips.hyperstat.MonitoringEquip
+import a75f.io.domain.equips.hyperstat.Pipe2V2Equip
 import a75f.io.logger.CcuLog
 import io.seventyfivef.ph.core.Tags
 
@@ -76,6 +82,7 @@ object DomainManager {
         addDomainEquips(hayStack)
         addSystemDomainEquip(hayStack)
         addCmBoardDevice(hayStack)
+        addDomainDevices(hayStack)
         addCCUDevice(hayStack)
         addDiagEquip(hayStack)
         addCCUEquip(hayStack)
@@ -89,7 +96,7 @@ object DomainManager {
         }
     }
 
-    private fun addDomainEquips(hayStack: CCUHsApi) {
+    fun addDomainEquips(hayStack: CCUHsApi) {
         hayStack.readAllEntities("zone and equip")
             .forEach {
                 CcuLog.i(Domain.LOG_TAG, "Build domain $it")
@@ -97,7 +104,12 @@ object DomainManager {
                     it.contains("vav") -> Domain.equips[it["id"].toString()] = VavEquip(it["id"].toString())
                     it.contains("dab") -> Domain.equips[it["id"].toString()] = DabEquip(it["id"].toString())
                     it.contains("sse") -> Domain.equips[it["id"].toString()] = SseEquip(it["id"].toString())
-                           }
+                    (it.contains("hyperstat") && it.contains("cpu")) -> Domain.equips[it["id"].toString()] = CpuV2Equip(it["id"].toString())
+                    (it.contains("hyperstat") && it.contains("hpu")) -> Domain.equips[it["id"].toString()] = HpuV2Equip(it["id"].toString())
+                    (it.contains("hyperstat") && it.contains("pipe2")) -> Domain.equips[it["id"].toString()] = Pipe2V2Equip(it["id"].toString())
+                    (it.contains("domainName") && it["domainName"].toString() == DomainName.hyperstatMonitoring) -> Domain.equips[it["id"].toString()] = MonitoringEquip(it["id"].toString())
+
+                }
             }
 
         hayStack.readAllEntities("bypassDamper and equip")
@@ -193,6 +205,19 @@ object DomainManager {
 
     }
 
+    private fun addDomainDevices(hayStack: CCUHsApi) {
+        hayStack.readAllEntities("zone and equip").forEach { equip ->
+
+            val deviceMap = hayStack.readEntity("domainName and device and equipRef == \"${equip["id"]}\"")
+            if (deviceMap.isNotEmpty()) {
+                when {
+                    (equip.contains("hyperstat") && (equip.contains("cpu") || equip.contains("hpu") || equip.contains("pipe2") ||
+                            equip.contains(a75f.io.api.haystack.Tags.MONITORING))) -> Domain.devices[equip["id"].toString()] = HyperStatDevice(deviceMap["id"].toString())
+                }
+            }
+        }
+    }
+
     fun addDiagEquip(hayStack: CCUHsApi) {
         val diagEquip = hayStack.readEntity("diag and equip")
         if (diagEquip.isNotEmpty()) {
@@ -213,6 +238,15 @@ object DomainManager {
             equip.markers.contains("vav") -> Domain.equips[equip.id] = VavEquip(equip.id)
             equip.markers.contains("dab") -> Domain.equips[equip.id] = DabEquip(equip.id)
             equip.markers.contains("sse") -> Domain.equips[equip.id] = SseEquip(equip.id)
+            equip.markers.contains("hyperstat") -> {
+                when {
+                    equip.markers.contains("cpu") -> Domain.equips[equip.id] = CpuV2Equip(equip.id)
+                    equip.markers.contains("hpu") -> Domain.equips[equip.id] = HpuV2Equip(equip.id)
+                    equip.markers.contains("pipe2") -> Domain.equips[equip.id] = Pipe2V2Equip(equip.id)
+                    equip.markers.contains(a75f.io.api.haystack.Tags.MONITORING) ->
+                        Domain.equips[equip.id] = MonitoringEquip(equip.id)
+                }
+            }
         }
     }
 
@@ -378,6 +412,7 @@ object DomainManager {
         rooms?.get(hayStackDevice.roomRef)
         val device = Domain.site?.floors?.get(hayStackDevice.floorRef)?.
         rooms?.get(hayStackDevice.roomRef)?.equips?.get(hayStackDevice.equipRef)
+        addDomainDevices(Domain.hayStack)
     }
 
     fun addRawPoint(hayStackPoint : a75f.io.api.haystack.RawPoint) {

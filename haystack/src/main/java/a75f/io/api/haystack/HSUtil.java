@@ -358,7 +358,7 @@ public class HSUtil {
     public static boolean isMonitoringConfig(String id, CCUHsApi hayStack) {
         HashMap<Object, Object> pointEntity = hayStack.readMapById(id);
         return pointEntity.containsKey(Tags.MONITORING)
-                && pointEntity.containsKey(Tags.HYPERSTAT);
+                && pointEntity.containsKey(Tags.CONFIG);
     }
 
     public static boolean isHyperStatConfig(String id, CCUHsApi hayStack) {

@@ -103,7 +103,9 @@ import a75f.io.device.mesh.Pulse;
 import a75f.io.device.mesh.hypersplit.HyperSplitMsgReceiver;
 import a75f.io.device.mesh.hyperstat.HyperStatMsgReceiver;
 import a75f.io.domain.HyperStatSplitEquip;
+import a75f.io.domain.api.Domain;
 import a75f.io.domain.api.DomainName;
+import a75f.io.domain.equips.hyperstat.MonitoringEquip;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.L;
@@ -1492,7 +1494,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                             }
 
                             if (p.getProfile().startsWith(ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT.name())) {
-                                HashMap<String, Object> cpuEquipPoints = HyperStatZoneViewKt.getHyperStatCPUEquipPoints(p);
+                                HashMap<String, Object> cpuEquipPoints = HyperStatZoneViewKt.getHyperStatCpuDetails(p);
                                 HyperStatZoneViewKt.loadHyperStatCpuProfile(cpuEquipPoints, inflater, linearLayoutZonePoints, updatedEquipId,  p.getGroup(),requireActivity());
                             }
                             if (p.getProfile().startsWith(ProfileType.HYPERSTAT_HEAT_PUMP_UNIT.name())) {
@@ -1961,7 +1963,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
             }
             if (updatedEquip.getProfile().startsWith(ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT.name())) {
 
-                HashMap cpuEquipPoints = HyperStatZoneViewKt.getHyperStatCPUEquipPoints(updatedEquip);
+                HashMap cpuEquipPoints = HyperStatZoneViewKt.getHyperStatCpuDetails(updatedEquip);
                 HyperStatZoneViewKt.loadHyperStatCpuProfile(cpuEquipPoints, inflater, linearLayoutZonePoints, updatedEquip.getId(), updatedEquip.getGroup(),requireActivity());
 
             }
@@ -4232,8 +4234,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         double currentAverageTemp = 0;
         double curTemp= 0;
         for (int i = 0; i < zoneMap.size(); i++) {
-            Equip avgTempEquip = new Equip.Builder().setHashMap(zoneMap.get(i)).build();
-            double avgTemp = CCUHsApi.getInstance().readHisValByQuery("temp and sensor and (current or space) and equipRef == \"" + avgTempEquip.getId() + "\"");
+            MonitoringEquip monitoringEquip = (MonitoringEquip) Domain.INSTANCE.getDomainEquip(p.getId());
+            double avgTemp = monitoringEquip.getCurrentTemp().readHisVal();
             currentAverageTemp = (currentAverageTemp + avgTemp);
         }
 
@@ -4433,7 +4435,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 for (int k = 0; k < openZoneMap.size(); k++) {
                     Equip updatedEquip = new Equip.Builder().setHashMap(openZoneMap.get(k)).build();
                     if (updatedEquip.getProfile().contains("MONITORING")) {
-                        HashMap monitoringEquipPoints = ZoneViewData.getHyperStatMonitoringEquipPoints(updatedEquip.getGroup());
+                        HashMap monitoringEquipPoints = HyperStatZoneViewKt.getHyperStatMonitoringEquipPoints(updatedEquip, CCUHsApi.getInstance());
                         seekArc.setCurrentTemp(Float.parseFloat(monitoringEquipPoints.get("curtempwithoffset").toString()));
                         loadMonitoringPointsUI(monitoringEquipPoints, inflater, linearLayoutZonePoints, updatedEquip.getGroup());
                     }

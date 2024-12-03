@@ -3,9 +3,6 @@ package a75f.io.messaging.handler
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Point
 import a75f.io.api.haystack.Tags
-import a75f.io.domain.config.AssociationConfig
-import a75f.io.domain.config.EnableConfig
-import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.logic.DomainManager
 import a75f.io.domain.logic.ProfileEquipBuilder
 import a75f.io.logger.CcuLog
@@ -18,7 +15,6 @@ import a75f.io.logic.bo.building.system.util.getDabConnectEquip
 import a75f.io.logic.bo.building.system.util.getVavCmEquip
 import a75f.io.logic.bo.building.system.util.getVavConnectEquip
 import a75f.io.logic.bo.building.system.vav.VavAdvancedAhu
-import android.util.Log
 import com.google.gson.JsonObject
 
 /**
@@ -49,44 +45,10 @@ private fun updateAhuConfiguration(msgObject: JsonObject, receivedPoint: Point, 
     val pointNewValue = msgObject["val"].asDouble
 
     if (receivedPoint.markers.contains(Tags.CONNECTMODULE)) {
-        updatePortStatus(receivedPoint.domainName, pointNewValue, activeConfiguration.connectConfiguration)
+        updateConfiguration(receivedPoint.domainName, pointNewValue, activeConfiguration.connectConfiguration)
     } else {
-        updatePortStatus(receivedPoint.domainName, pointNewValue, activeConfiguration.cmConfiguration)
+        updateConfiguration(receivedPoint.domainName, pointNewValue, activeConfiguration.cmConfiguration)
     }
-}
-
-private fun updatePortStatus(domainName: String, pointValue: Double, config: ProfileConfiguration) {
-
-    config.getEnableConfigs().forEach {
-        if (it.domainName == domainName) {
-            setEnabledStatus(it, pointValue)
-            return
-        }
-    }
-
-    config.getAssociationConfigs().forEach {
-        if (it.domainName == domainName) {
-            setAssociation(it, pointValue)
-            return
-        }
-    }
-
-    config.getValueConfigs().forEach {
-        if (it.domainName == domainName) {
-            it.currentVal = pointValue
-            return
-        }
-    }
-
-}
-
-private fun setEnabledStatus(config: EnableConfig, pointValue: Double) {
-    config.enabled = pointValue == 1.0
-    Log.i("manju", "setEnabledStatus: received $pointValue ${config.domainName} ${config.enabled}")
-}
-
-private fun setAssociation(association: AssociationConfig, pointValue: Double) {
-    association.associationVal = pointValue.toInt()
 }
 
 private fun getAhuEquip(): Pair<HashMap<Any, Any>, HashMap<Any, Any>> {

@@ -33,7 +33,6 @@ import a75f.io.api.haystack.Tags.TH2
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.Port
-import a75f.io.logic.bo.building.hyperstat.profiles.cpu.CpuReconfiguration
 import a75f.io.logic.bo.building.hyperstat.profiles.hpu.HpuReconfiguration
 import a75f.io.logic.bo.building.hyperstat.profiles.pipe2.Pipe2Reconfiguration
 import a75f.io.logic.bo.haystack.device.DeviceUtil
@@ -148,11 +147,6 @@ class HyperStatReconfigureUtil {
                 equip: Equip,
                 portType: Port
         ) {
-            if (equip.markers.contains(CPU)) {
-                CpuReconfiguration.updateConfiguration(
-                    updatedConfigValue, equip, portType,
-                )
-            }
 
             if (equip.markers.contains(PIPE2)) {
                 Pipe2Reconfiguration.updateConfiguration(
@@ -171,11 +165,6 @@ class HyperStatReconfigureUtil {
                 updatedConfigValue: Double,
                 equip: Equip,
         ) {
-            if (equip.markers.contains(CPU)) {
-                CpuReconfiguration.configAssociationPoint(
-                    portType, updatedConfigValue, equip
-                )
-            }
             if (equip.markers.contains(PIPE2)) {
                 Pipe2Reconfiguration.configAssociationPoint(
                     portType, updatedConfigValue, equip

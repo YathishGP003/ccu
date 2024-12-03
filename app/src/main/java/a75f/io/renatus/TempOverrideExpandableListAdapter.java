@@ -53,8 +53,6 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.ReheatType;
 import a75f.io.logic.bo.building.dualduct.DualDuctProfile;
 import a75f.io.logic.bo.building.dualduct.DualDuctProfileConfiguration;
-import a75f.io.logic.bo.building.hyperstat.profiles.cpu.HyperStatCpuConfiguration;
-import a75f.io.logic.bo.building.hyperstat.profiles.cpu.HyperStatCpuProfile;
 import a75f.io.logic.bo.building.hyperstatmonitoring.HyperStatMonitoringConfiguration;
 import a75f.io.logic.bo.building.hyperstatmonitoring.HyperStatMonitoringProfile;
 import a75f.io.logic.bo.building.plc.PlcProfile;
@@ -1892,8 +1890,14 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                 }
                 break;
             case "HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT":
+                /*
+                TODO : Implement the mapping for the Conventional Package Unit
+
                 HyperStatCpuProfile mHSCpuProfile = (HyperStatCpuProfile) L.getProfile(Short.parseShort(parseGroup(listTitle)));
-                HyperStatCpuConfiguration mHSCpuConfig = (HyperStatCpuConfiguration) mHSCpuProfile.getProfileConfiguration(Short.parseShort(parseGroup(listTitle)));
+
+                CpuV2Equip equip1 = (CpuV2Equip) Domain.INSTANCE.getDomainEquip(mHSCpuProfile.getEquip().getId());
+                CpuConfiguration mHSCpuConfig = (CpuConfiguration) getConfiguration(equip1);
+
                 List<String> analogCpuArr = new ArrayList<>();
                 for (Sensor r : SensorManager.getInstance().getExternalSensorList()) {
                     analogCpuArr.add(r.sensorName + " " + r.engineeringUnit);
@@ -1964,7 +1968,7 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                     if (mHSCpuConfig.getThermistorIn2State().getEnabled())
                         return mHSCpuConfig.getThermistorIn2State().getAssociation().toString();
                     else return "Not Enabled";
-                }
+                }*/
                 break;
         }
         return "Not Used";

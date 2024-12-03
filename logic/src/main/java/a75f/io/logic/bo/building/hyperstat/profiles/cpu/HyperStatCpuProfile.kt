@@ -2,6 +2,9 @@ package a75f.io.logic.bo.building.hyperstat.profiles.cpu
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Equip
+import a75f.io.domain.api.Domain
+import a75f.io.domain.equips.hyperstat.CpuV2Equip
+import a75f.io.domain.equips.hyperstat.HyperStatEquip
 import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.logic.L
@@ -16,595 +19,197 @@ import a75f.io.logic.bo.building.hvac.StandaloneFanStage
 import a75f.io.logic.bo.building.hyperstat.common.BasicSettings
 import a75f.io.logic.bo.building.hyperstat.common.FanModeCacheStorage
 import a75f.io.logic.bo.building.hyperstat.common.HSHaystackUtil
-import a75f.io.logic.bo.building.hyperstat.common.HSHaystackUtil.Companion.getActualFanMode
-import a75f.io.logic.bo.building.hyperstat.common.HyperStatAssociationUtil
-import a75f.io.logic.bo.building.hyperstat.common.HyperStatEquip
+import a75f.io.logic.bo.building.hyperstat.common.HyperStatEquipToBeDeleted
+import a75f.io.logic.bo.building.hyperstat.common.HyperStatLoopController
 import a75f.io.logic.bo.building.hyperstat.common.HyperStatProfileTuners
-import a75f.io.logic.bo.building.hyperstat.common.HyperstatLoopController
 import a75f.io.logic.bo.building.hyperstat.common.UserIntents
 import a75f.io.logic.bo.building.hyperstat.profiles.HyperStatPackageUnitProfile
+import a75f.io.logic.bo.building.hyperstat.profiles.util.fetchBasicSettings
+import a75f.io.logic.bo.building.hyperstat.profiles.util.fetchHyperStatTuners
+import a75f.io.logic.bo.building.hyperstat.profiles.util.fetchUserIntents
+import a75f.io.logic.bo.building.hyperstat.profiles.util.getConfiguration
+import a75f.io.logic.bo.building.hyperstat.profiles.util.getLogicalPointList
+import a75f.io.logic.bo.building.hyperstat.profiles.util.getPercentFromVolt
+import a75f.io.logic.bo.building.hyperstat.profiles.util.updateAllLoopOutput
+import a75f.io.logic.bo.building.hyperstat.profiles.util.updateOccupancyDetection
+import a75f.io.logic.bo.building.hyperstat.profiles.util.updateOperatingMode
+import a75f.io.logic.bo.building.hyperstat.v2.configs.AnalogInputAssociation
+import a75f.io.logic.bo.building.hyperstat.v2.configs.AnalogOutConfigs
+import a75f.io.logic.bo.building.hyperstat.v2.configs.CpuConfiguration
+import a75f.io.logic.bo.building.hyperstat.v2.configs.HsCpuAnalogOutMapping
+import a75f.io.logic.bo.building.hyperstat.v2.configs.HsCpuRelayMapping
+import a75f.io.logic.bo.building.hyperstat.v2.configs.HyperStatConfiguration
+import a75f.io.logic.bo.building.hyperstat.v2.configs.Th2InputAssociation
 import a75f.io.logic.bo.building.schedules.Occupancy
 import a75f.io.logic.jobs.HyperStatUserIntentHandler
-import a75f.io.logic.jobs.HyperStatUserIntentHandler.Companion.hyperStatStatus
-import a75f.io.logic.tuners.TunerUtil
-import com.fasterxml.jackson.annotation.JsonIgnore
 import kotlin.math.roundToInt
 
 
 /**
- * @author tcase@75f.io
+ * @author Manjunath K
  * Created on 7/7/21.
  */
 class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
-
-    // One zone can have many hyperstat devices.  Each has its own address and equip representation
-    private val cpuDeviceMap: MutableMap<Short, HyperStatCpuEquip> = mutableMapOf()
 
     private var coolingLoopOutput = 0
     private var heatingLoopOutput = 0
     private var fanLoopOutput = 0
     private var doorWindowSensorOpenStatus = false
     private var runFanLowDuringDoorWindow = false
-    private val defaultFanLoopOutput = 0.0
 
-    override lateinit var occupancyStatus: Occupancy
 
     // Flags for keeping tab of occupancy during linear fan operation(Only to be used in doAnalogFanActionCpu())
     private var previousOccupancyStatus: Occupancy = Occupancy.NONE
     private var occupancyBeforeDoorWindow: Occupancy = Occupancy.UNOCCUPIED
     private var previousFanStageStatus: StandaloneFanStage = StandaloneFanStage.OFF
+    private val cpuDeviceMap: MutableMap<Int, CpuV2Equip> = mutableMapOf()
+
+    private val defaultFanLoopOutput = 0.0
     private var previousFanLoopVal = 0
     private var previousFanLoopValStaged = 0
     private var fanLoopCounter = 0
 
-    private val hyperstatCPUAlgorithm = HyperstatLoopController()
-
+    private val cpuAlgorithm = HyperStatLoopController()
+    override lateinit var occupancyStatus: Occupancy
     private lateinit var curState: ZoneState
 
     override fun getProfileType() = ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT
 
-    override fun <T : BaseProfileConfiguration?> getProfileConfiguration(address: Short): T {
-        val equip = cpuDeviceMap[address]
-        return equip?.getConfiguration() as T
-    }
-
     override fun updateZonePoints() {
-        cpuDeviceMap.forEach { (_, equip) ->
-            CcuLog.d(L.TAG_CCU_HSCPU,"Process Equip: equipRef =  ${equip.equipRef}")
+
+        cpuDeviceMap.forEach { (nodeAddress, equip) ->
+            cpuDeviceMap[nodeAddress] = Domain.getDomainEquip(equip.equipRef) as CpuV2Equip
+            CcuLog.d(L.TAG_CCU_HSCPU,"Process CPU Equip: node ${equip.nodeAddress} equipRef =  ${equip.equipRef}")
             processHyperStatCPUProfile(equip)
         }
     }
 
-    fun addEquip(node: Short): HyperStatEquip {
-        val equip = HyperStatCpuEquip(node)
-        CcuLog.d(L.TAG_CCU_HSSPLIT_CPUECON, "From addEquip(), calling initEquipReference()...")
-        equip.initEquipReference(node)
-        cpuDeviceMap[node] = equip
-        return equip
-    }
-
-    override fun addNewEquip(node: Short, room: String, floor: String, baseConfig: BaseProfileConfiguration) {
-        val equip = addEquip(node)
-        val configuration = equip.initializePoints(baseConfig as HyperStatCpuConfiguration, room, floor, node)
-        hsHaystackUtil = equip.hsHaystackUtil
-        CcuLog.d(L.TAG_CCU_HSSPLIT_CPUECON, "configuration returned by addNewEquip for Cpu: $configuration")
-        return configuration
-    }
-
-    override fun getHyperStatEquip(node: Short): HyperStatEquip {
-        return cpuDeviceMap[node] as HyperStatCpuEquip
-    }
-
-    // Run the profile logic and algorithm for an equip.
-    fun processHyperStatCPUProfile(equip: HyperStatCpuEquip) {
-
-        if (Globals.getInstance().isTestMode) {
-            CcuLog.i(L.TAG_CCU_HSCPU,"Test mode is on: ${equip.nodeAddress}")
-            return
-        }
-
-        if (mInterface != null) mInterface.refreshView()
-        val relayStages = HashMap<String, Int>()
-        val analogOutStages = HashMap<String, Int>()
-
-        logicalPointsList = equip.getLogicalPointList()
-        hsHaystackUtil = HSHaystackUtil(equip.equipRef!!, CCUHsApi.getInstance())
-        handleFanConditioningModes(equip.equipRef!!)
-        if(isRFDead){
-            handleRFDead(equip)
-            return
-        } else if (isZoneDead) {
-            handleDeadZone(equip)
-            return
-        }
-        curState = ZoneState.DEADBAND
-        occupancyStatus = equipOccupancyHandler.currentOccupiedMode
-
-        val config = equip.getConfiguration()
-        val hyperStatTuners = fetchHyperStatTuners(equip)
-        val userIntents = fetchUserIntents(equip)
-        val averageDesiredTemp = getAverageTemp(userIntents)
-
-        val fanModeSaved = FanModeCacheStorage().getFanModeFromCache(equip.equipRef!!)
-        val basicSettings = fetchBasicSettings(equip)
-        CcuLog.d(L.TAG_CCU_HSCPU,"Before fall back ${basicSettings.fanMode} ${basicSettings.conditioningMode}")
-        val updatedFanMode = fallBackFanMode(equip, equip.equipRef!!, fanModeSaved, basicSettings)
-        basicSettings.fanMode = updatedFanMode
-        CcuLog.d(L.TAG_CCU_HSCPU,"After fall back ${basicSettings.fanMode} ${basicSettings.conditioningMode}")
-        hyperstatCPUAlgorithm.initialise(tuners = hyperStatTuners)
-        hyperstatCPUAlgorithm.dumpLogs()
-        handleChangeOfDirection(userIntents)
-
-        coolingLoopOutput = 0
-        heatingLoopOutput = 0
-        fanLoopOutput = 0
-        evaluateLoopOutputs(userIntents, basicSettings, hyperStatTuners)
-
-        equip.hsHaystackUtil.updateOccupancyDetection()
-        doorWindowSensorOpenStatus = runForDoorWindowSensor(config, equip)
-        runFanLowDuringDoorWindow = checkFanOperationAllowedDoorWindow(equip)
-        // Updating the occupancy status happens one cycle later after update of doorWindowSensorOpenStatus.
-        // Once it is detected then reset the loop output values
-        if(occupancyStatus == Occupancy.WINDOW_OPEN) resetLoopOutputValues()
-        runForKeyCardSensor(config, equip)
-        equip.hsHaystackUtil.updateAllLoopOutput(coolingLoopOutput,heatingLoopOutput,fanLoopOutput,false,0)
-        val currentOperatingMode = equip.hsHaystackUtil.getOccupancyModePointValue().toInt()
-
-        updateTitle24LoopCounter(hyperStatTuners, basicSettings)
-
-        CcuLog.i(L.TAG_CCU_HSCPU,
-            "Analog Fan speed multiplier  ${hyperStatTuners.analogFanSpeedMultiplier} \n"+
-                 "Current Working mode : ${Occupancy.values()[currentOperatingMode]} \n"+
-                 "Current Temp : $currentTemp \n"+
-                 "Desired Heating: ${userIntents.zoneHeatingTargetTemperature} \n"+
-                 "Desired Cooling: ${userIntents.zoneCoolingTargetTemperature} \n"+
-                 "Heating Loop Output: $heatingLoopOutput \n"+
-                 "Cooling Loop Output:: $coolingLoopOutput \n"+
-                 "Fan Loop Output:: $fanLoopOutput \n"
-        )
-
-        if (basicSettings.fanMode != StandaloneFanStage.OFF) {
-            runRelayOperations(config, hyperStatTuners, userIntents, basicSettings, relayStages)
-            runAnalogOutOperations(equip, config, basicSettings, analogOutStages)
-        }else{
-            resetAllLogicalPointValues()
-        }
-        setOperatingMode(currentTemp,averageDesiredTemp,basicSettings,equip)
-
-        if (equip.hsHaystackUtil.getStatus() != curState.ordinal.toDouble())
-            equip.hsHaystackUtil.setStatus(curState.ordinal.toDouble())
-
-        var temperatureState = ZoneTempState.NONE
-        if (buildingLimitMinBreached() || buildingLimitMaxBreached()) temperatureState = ZoneTempState.EMERGENCY
-
-        CcuLog.i(L.TAG_CCU_HSCPU,"Equip Running : $curState")
-        HyperStatUserIntentHandler.updateHyperStatStatus(
-            equip.equipRef!!, relayStages, analogOutStages, temperatureState
-        )
-        updateTitle24Flags(basicSettings)
+    fun addEquip(equipRef: String) {
+        val equip = CpuV2Equip(equipRef)
+        cpuDeviceMap[equip.nodeAddress] = equip
     }
 
     /**
-     * Updates the Title 24 flags by storing the current occupancy status and fan-loop output.
-     * The previous occupancy status and fan-loop output are updated for use in the next loop iteration.
-     * If the fan loop counter is greater than 0, it decrements the counter.
+     * Returns the value of the lowest activated heating stage based on the fan loop points.
+     * If no heating stage is activated, returns the default fan loop output value.
      *
-     * @param basicSettings settings containing fan mode state.
+     * @return the value of the lowest activated heating stage or the default fan loop output value.
      */
-    private fun updateTitle24Flags(basicSettings: BasicSettings) {
-        // Store the fan-loop output/occupancy for usage in next loop
-        previousOccupancyStatus = occupancyStatus
-        if(occupancyStatus != Occupancy.WINDOW_OPEN) occupancyBeforeDoorWindow = occupancyStatus
-        // Store the fan status so that when the zone goes from user defined fan state to unoccupied state, the fan protection can be offered
-        previousFanStageStatus = basicSettings.fanMode
-        // Store the fanloop output when the zone was not in UNOCCUPIED state
-        if(fanLoopCounter == 0) previousFanLoopVal = fanLoopOutput
-        if (fanLoopCounter > 0) fanLoopCounter--
+    private fun getLowestHeatingStateActivated(equip: CpuV2Equip): Double {
+        return listOf(
+                equip.fanOutHeatingStage1.readPriorityVal(),
+                equip.fanOutHeatingStage2.readPriorityVal(),
+                equip.fanOutHeatingStage3.readPriorityVal()
+        ).firstOrNull { it > 0 } ?: defaultFanLoopOutput
+    }
+
+
+    /**
+     * Returns the value of the lowest activated cooling stage based on the fan loop points.
+     * If no cooling stage is activated, returns the default fan loop output value.
+     *
+     * @return the value of the lowest activated cooling stage or the default fan loop output value.
+     */
+    private fun getLowestCoolingStateActivated(equip: CpuV2Equip): Double {
+        return listOf(
+                equip.fanOutCoolingStage1.readPriorityVal(),
+                equip.fanOutCoolingStage2.readPriorityVal(),
+                equip.fanOutCoolingStage3.readPriorityVal()
+        ).firstOrNull { it > 0 } ?: defaultFanLoopOutput
     }
 
     /**
-     * Updates the Title 24 loop counter based on changes in occupancy and fan-loop output.
-     * If there is a change in occupancy and the fan-loop output is less than the previous value,
-     * the fan loop counter is set to the minimum fan runtime post conditioning specified by the tuners.
-     * If there is a change in occupancy and the fan-loop output is greater than the previous value,
-     * the fan loop counter is reset to zero.
-     *
-     * @param tuners The HyperStat profile tuners containing configuration parameters.
-     * @param basicSettings settings containing fan mode state.
+     * Returns the value of the non zero activated analog recirculate stage based on the fan loop points.
+     * If no recirculate stage is activated, returns the default fan loop output value.
+     * @return the value of the first non zero activated recirculate stage or the default fan loop output value.
      */
-    private fun updateTitle24LoopCounter(tuners: HyperStatProfileTuners, basicSettings: BasicSettings) {
-        // Check if there is change in occupancy and the fan-loop output is less than the previous value,
-        // then offer the fan protection
-        if((occupancyStatus != previousOccupancyStatus && fanLoopOutput < previousFanLoopVal) ||
-            (basicSettings.fanMode != previousFanStageStatus && fanLoopOutput < previousFanLoopVal)) {
-            fanLoopCounter = tuners.minFanRuntimePostConditioning
-        }
-        else if(occupancyStatus != previousOccupancyStatus && fanLoopOutput > previousFanLoopVal)
-            fanLoopCounter = 0 // Reset the counter if the fan-loop output is greater than the previous value
-    }
-
-    private fun handleChangeOfDirection(userIntents: UserIntents){
-        if (currentTemp > userIntents.zoneCoolingTargetTemperature && state != ZoneState.COOLING) {
-            hyperstatCPUAlgorithm.resetCoolingControl()
-            state = ZoneState.COOLING
-            CcuLog.d(L.TAG_CCU_HSCPU,"Resetting cooling")
-        } else if (currentTemp < userIntents.zoneHeatingTargetTemperature && state != ZoneState.HEATING) {
-            hyperstatCPUAlgorithm.resetHeatingControl()
-            state = ZoneState.HEATING
-            CcuLog.d(L.TAG_CCU_HSCPU,"Resetting heating")
+    private fun getAnalogRecirculateValueActivated(equip: CpuV2Equip): Double {
+        return when {
+            equip.analog1FanRecirculate.readHisVal() > 0 -> equip.analog1FanRecirculate.readPriorityVal()
+            equip.analog2FanRecirculate.readHisVal() > 0 -> equip.analog2FanRecirculate.readPriorityVal()
+            equip.analog3FanRecirculate.readHisVal() > 0 -> equip.analog3FanRecirculate.readPriorityVal()
+            else -> defaultFanLoopOutput
         }
     }
 
-    private fun evaluateLoopOutputs(userIntents: UserIntents, basicSettings: BasicSettings, hyperStatTuners: HyperStatProfileTuners){
-        when (state) {
-            //Update coolingLoop when the zone is in cooling or it was in cooling and no change over happened yet.
-            ZoneState.COOLING -> coolingLoopOutput = hyperstatCPUAlgorithm.calculateCoolingLoopOutput(
-                currentTemp, userIntents.zoneCoolingTargetTemperature
-            ).toInt().coerceAtLeast(0)
-
-            //Update heatingLoop when the zone is in heating or it was in heating and no change over happened yet.
-            ZoneState.HEATING -> heatingLoopOutput = hyperstatCPUAlgorithm.calculateHeatingLoopOutput(
-                userIntents.zoneHeatingTargetTemperature, currentTemp
-            ).toInt().coerceAtLeast(0)
-
-            else -> CcuLog.d(L.TAG_CCU_HSCPU," Zone is in deadband")
-        }
-
-        if (coolingLoopOutput > 0 && (basicSettings.conditioningMode == StandaloneConditioningMode.COOL_ONLY
-                    ||basicSettings.conditioningMode == StandaloneConditioningMode.AUTO) ) {
-            fanLoopOutput = ((coolingLoopOutput * hyperStatTuners.analogFanSpeedMultiplier).toInt()).coerceAtMost(100)
-        }
-        else if (heatingLoopOutput > 0  && (basicSettings.conditioningMode == StandaloneConditioningMode.HEAT_ONLY
-                    ||basicSettings.conditioningMode == StandaloneConditioningMode.AUTO)) {
-            fanLoopOutput = ((heatingLoopOutput * hyperStatTuners.analogFanSpeedMultiplier).toInt()).coerceAtMost(100)
-        }
-    }
-
-    private fun fetchBasicSettings(equip: HyperStatCpuEquip) = BasicSettings(
-            conditioningMode = StandaloneConditioningMode.values()[equip.hsHaystackUtil.getCurrentConditioningMode().toInt()],
-            fanMode = StandaloneFanStage.values()[equip.hsHaystackUtil.getCurrentFanMode().toInt()]
-        )
-
-    private fun fetchUserIntents(equip: HyperStatCpuEquip): UserIntents {
-        return UserIntents(
-            currentTemp = equip.getCurrentTemp(),
-            zoneCoolingTargetTemperature = equip.hsHaystackUtil.getDesiredTempCooling(),
-            zoneHeatingTargetTemperature = equip.hsHaystackUtil.getDesiredTempHeating(),
-            targetMinInsideHumidity = equip.hsHaystackUtil.getTargetMinInsideHumidity(),
-            targetMaxInsideHumidity = equip.hsHaystackUtil.getTargetMaxInsideHumidity(),
-        )
-    }
-
-    private fun fetchHyperStatTuners(equip: HyperStatCpuEquip): HyperStatProfileTuners {
-
-        /**
-         * Consider that
-         * proportionalGain = proportionalKFactor
-         * integralGain = integralKFactor
-         * proportionalSpread = temperatureProportionalRange
-         * integralMaxTimeout = temperatureIntegralTime
-         */
-
-        val hsTuners = HyperStatProfileTuners()
-        hsTuners.proportionalGain = TunerUtil.getProportionalGain(equip.equipRef!!)
-        hsTuners.integralGain = TunerUtil.getIntegralGain(equip.equipRef!!)
-        hsTuners.proportionalSpread = TunerUtil.getProportionalSpread(equip.equipRef!!)
-        hsTuners.integralMaxTimeout = TunerUtil.getIntegralTimeout(equip.equipRef!!).toInt()
-        hsTuners.relayActivationHysteresis = TunerUtil.getHysteresisPoint("relay and  activation", equip.equipRef!!).toInt()
-        hsTuners.analogFanSpeedMultiplier = TunerUtil.readTunerValByQuery("analog and fan and speed and multiplier", equip.equipRef!!)
-        hsTuners.humidityHysteresis = TunerUtil.getHysteresisPoint("humidity", equip.equipRef!!).toInt()
-        hsTuners.minFanRuntimePostConditioning = TunerUtil.readTunerValByQuery("fan and cur and runtime and postconditioning and min", equip.equipRef!!).toInt()
-        return hsTuners
-    }
-
-    private fun runRelayOperations(
-        config: HyperStatCpuConfiguration, tuner: HyperStatProfileTuners, userIntents: UserIntents,
-        basicSettings: BasicSettings,
-        relayStages: HashMap<String, Int>
+    private fun doAnalogStagedFanAction(
+            port: Port, fanLowPercent: Int, fanMediumPercent: Int, fanHighPercent: Int,
+            fanMode: StandaloneFanStage, fanEnabledMapped: Boolean,
+            conditioningMode: StandaloneConditioningMode, fanLoopOutput: Int,
+            analogOutStages: HashMap<String, Int>, fanProtectionCounter: Int, equip: CpuV2Equip
     ) {
-        if (config.relay1State.enabled) {
-            handleRelayState(
-                config.relay1State, config, Port.RELAY_ONE, 
-                tuner, userIntents, basicSettings, relayStages
-            )
-        }
-        if (config.relay2State.enabled) {
-            handleRelayState(
-                config.relay2State, config, Port.RELAY_TWO, 
-                tuner, userIntents, basicSettings, relayStages
-            )
-        }
-        if (config.relay3State.enabled) {
-            handleRelayState(
-                config.relay3State, config, Port.RELAY_THREE,
-                tuner, userIntents, basicSettings, relayStages
-            )
-        }
-        if (config.relay4State.enabled) {
-            handleRelayState(
-                config.relay4State, config, Port.RELAY_FOUR,
-                tuner, userIntents, basicSettings, relayStages
-            )
-        }
-        if (config.relay5State.enabled) {
-            handleRelayState(
-                config.relay5State, config, Port.RELAY_FIVE,
-                tuner, userIntents, basicSettings, relayStages
-            )
-        }
-        if (config.relay6State.enabled) {
-            handleRelayState(
-                config.relay6State, config, Port.RELAY_SIX,
-                tuner, userIntents, basicSettings, relayStages
-            )
-        }
-    }
+        if (fanMode == StandaloneFanStage.OFF) return
 
-    private fun runAnalogOutOperations(
-        equip: HyperStatCpuEquip, config: HyperStatCpuConfiguration,
-        basicSettings: BasicSettings, analogOutStages: HashMap<String, Int>
-    ) {
-        if (config.analogOut1State.enabled) {
-            handleAnalogOutState(
-                config.analogOut1State, equip, config, Port.ANALOG_OUT_ONE, basicSettings, analogOutStages
-            )
-        }
-        if (config.analogOut2State.enabled) {
-            handleAnalogOutState(
-                config.analogOut2State, equip, config, Port.ANALOG_OUT_TWO, basicSettings, analogOutStages
-            )
-        }
-        if (config.analogOut3State.enabled) {
-            handleAnalogOutState(
-                config.analogOut3State, equip, config, Port.ANALOG_OUT_THREE, basicSettings, analogOutStages
-            )
-        }
-    }
+        var fanLoopForAnalog: Int
+        var logMsg = "" // This will be overwritten based on priority
 
-    private fun handleRelayState(
-        relayState: RelayState, config: HyperStatCpuConfiguration, port: Port, tuner: HyperStatProfileTuners,
-        userIntents: UserIntents, basicSettings: BasicSettings, relayStages: HashMap<String, Int>
-    ) {
-        when {
-            (HyperStatAssociationUtil.isRelayAssociatedToCoolingStage(relayState)) -> {
+        if (fanMode == StandaloneFanStage.AUTO) {
 
-                if (basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.COOL_ONLY.ordinal ||
-                    basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.AUTO.ordinal
-                ) {
-                    runRelayForCooling(relayState, port, config, tuner, relayStages)
-                } else {
-                    resetPort(port)
+            if (conditioningMode == StandaloneConditioningMode.OFF) {
+                updateLogicalPoint(logicalPointsList[port]!!, 0.0)
+                return
+            }
+
+            fanLoopForAnalog = fanLoopOutput
+            val coolingVoltage = getCoolingActivatedAnalogVoltage(fanEnabledMapped, fanLoopOutput, equip)
+            val heatingVoltage = getHeatingActivatedAnalogVoltage(fanEnabledMapped, fanLoopOutput, equip)
+
+            if (conditioningMode == StandaloneConditioningMode.AUTO) {
+
+                val operatingMode = equip.operatingMode.readHisVal().toInt()
+                if (operatingMode == ZoneState.COOLING.ordinal) {
+                    fanLoopForAnalog = coolingVoltage
+                    logMsg = "Cooling"
+                } else if (operatingMode == ZoneState.HEATING.ordinal) {
+                    fanLoopForAnalog = heatingVoltage
+                    logMsg = "Heating"
                 }
+            } else if (conditioningMode == StandaloneConditioningMode.COOL_ONLY) {
+                fanLoopForAnalog = coolingVoltage
+                logMsg = "Cooling"
+            } else if (conditioningMode == StandaloneConditioningMode.HEAT_ONLY) {
+                fanLoopForAnalog = heatingVoltage
+                logMsg = "Heating"
             }
-            (HyperStatAssociationUtil.isRelayAssociatedToHeatingStage(relayState)) -> {
-
-                if (basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.HEAT_ONLY.ordinal ||
-                    basicSettings.conditioningMode.ordinal == StandaloneConditioningMode.AUTO.ordinal
-                ) {
-                    runRelayForHeating(relayState, port, config, tuner, relayStages)
-                } else {
-                    resetPort(port)
-                }
+            // Check if we need fan protection
+            if (fanProtectionCounter > 0 && fanLoopForAnalog < previousFanLoopValStaged) {
+                fanLoopForAnalog = previousFanLoopValStaged
+                logMsg = "Fan Protection"
+            } else {
+                // else indicates we are not in protection mode, so store the fanLoopForAnalog value for protection mdoe
+                previousFanLoopValStaged = fanLoopForAnalog
             }
-            (HyperStatAssociationUtil.isRelayAssociatedToFan(relayState)) -> {
-
-                if (basicSettings.fanMode != StandaloneFanStage.OFF) {
-                    runRelayForFanSpeed(relayState, port, config, tuner, relayStages, basicSettings,
-                        previousFanLoopVal, fanLoopCounter)
-                } else {
-                   resetPort(port)
-                }
+            // When in dead-band, set the fan-loopForAnalog to the recirculate analog value. Also ensure fan protection is not ON
+            if ((fanLoopOutput == 0 || runFanLowDuringDoorWindow) && fanProtectionCounter == 0 && isInSoftOccupiedMode()) {
+                fanLoopForAnalog = getPercentFromVolt(getAnalogRecirculateValueActivated(equip).roundToInt())
+                logMsg = "Deadband"
             }
-            (HyperStatAssociationUtil.isRelayAssociatedToFanEnabled(relayState)) -> {
-                doFanEnabled( curState,port, fanLoopOutput )
+        } else {
+            fanLoopForAnalog = when (fanMode) {
+                StandaloneFanStage.LOW_CUR_OCC, StandaloneFanStage.LOW_OCC, StandaloneFanStage.LOW_ALL_TIME -> fanLowPercent
+                StandaloneFanStage.MEDIUM_CUR_OCC, StandaloneFanStage.MEDIUM_OCC, StandaloneFanStage.MEDIUM_ALL_TIME -> fanMediumPercent
+                StandaloneFanStage.HIGH_CUR_OCC, StandaloneFanStage.HIGH_OCC, StandaloneFanStage.HIGH_ALL_TIME -> fanHighPercent
+                else -> 0
             }
-
-            (HyperStatAssociationUtil.isRelayAssociatedToOccupiedEnabled(relayState)) -> {
-                doOccupiedEnabled(port)
-            }
-            (HyperStatAssociationUtil.isRelayAssociatedToHumidifier(relayState)) -> {
-                doHumidifierOperation(port, tuner.humidityHysteresis, userIntents.targetMinInsideHumidity)
-            }
-            (HyperStatAssociationUtil.isRelayAssociatedToDeHumidifier(relayState)) -> {
-                doDeHumidifierOperation(port,tuner.humidityHysteresis,userIntents.targetMaxInsideHumidity)
-            }
-        }
-    }
-
-    private fun runRelayForCooling(
-        relayAssociation: RelayState,
-        whichPort: Port,
-        config: HyperStatCpuConfiguration,
-        tuner: HyperStatProfileTuners,
-        relayStages: HashMap<String, Int>
-    ) {
-        CcuLog.i(L.TAG_CCU_HSCPU," $whichPort: ${relayAssociation.association}")
-        when (relayAssociation.association) {
-            CpuRelayAssociation.COOLING_STAGE_1 -> {
-                doCoolingStage1(
-                    whichPort, coolingLoopOutput, tuner.relayActivationHysteresis, relayStages
-                )
-            }
-            CpuRelayAssociation.COOLING_STAGE_2 -> {
-                val highestStage = HyperStatAssociationUtil.getHighestCoolingStage(config).ordinal
-                val divider = if (highestStage == 1) 50 else 33
-               doCoolingStage2(
-                   whichPort, coolingLoopOutput, tuner.relayActivationHysteresis, divider,relayStages
-               )
-            }
-            CpuRelayAssociation.COOLING_STAGE_3 -> {
-                doCoolingStage3(
-                    whichPort, coolingLoopOutput, tuner.relayActivationHysteresis, relayStages
-                )
-            }
-            else -> {}
-        }
-        if(getCurrentPortStatus(whichPort) == 1.0)
-            curState = ZoneState.COOLING
-
-    }
-
-    private fun runRelayForHeating(
-        relayAssociation: RelayState, whichPort: Port, config: HyperStatCpuConfiguration,
-        tuner: HyperStatProfileTuners, relayStages: HashMap<String, Int>
-    ) {
-        CcuLog.i(L.TAG_CCU_HSCPU," $whichPort: ${relayAssociation.association}")
-        when (relayAssociation.association) {
-            CpuRelayAssociation.HEATING_STAGE_1 -> {
-                doHeatingStage1(
-                    whichPort,
-                    heatingLoopOutput,
-                    tuner.relayActivationHysteresis,
-                    relayStages
-                )
-            }
-            CpuRelayAssociation.HEATING_STAGE_2 -> {
-                val highestStage = HyperStatAssociationUtil.getHighestHeatingStage(config).ordinal
-                val divider = if (highestStage == 4) 50 else 33
-                doHeatingStage2(
-                    whichPort, heatingLoopOutput, tuner.relayActivationHysteresis,
-                    divider, relayStages)
-            }
-            CpuRelayAssociation.HEATING_STAGE_3 -> {
-                doHeatingStage3(
-                    whichPort, heatingLoopOutput, tuner.relayActivationHysteresis, relayStages)
-            }
-            else -> {}
-        }
-        if(getCurrentPortStatus(whichPort) == 1.0)
-            curState = ZoneState.HEATING
-    }
-
-    private fun runRelayForFanSpeed(
-        relayAssociation: RelayState, whichPort: Port, config: HyperStatCpuConfiguration,
-        tuner: HyperStatProfileTuners, relayStages: HashMap<String, Int>, basicSettings: BasicSettings,
-        previousFanLoopVal: Int, fanProtectionCounter: Int
-    ) {
-        var localFanLoopOutput = fanLoopOutput
-        CcuLog.i(L.TAG_CCU_HSCPU," $whichPort: ${relayAssociation.association} runRelayForFanSpeed: ${basicSettings.fanMode}")
-        if (basicSettings.fanMode == StandaloneFanStage.AUTO
-            && basicSettings.conditioningMode == StandaloneConditioningMode.OFF ) {
-            CcuLog.d(L.TAG_CCU_HSCPU,"Cond is Off , Fan is Auto  : ")
-            resetPort(whichPort)
-            return
-        }
-        val highestStage = HyperStatAssociationUtil.getHighestFanStage(config)
-        val divider = if (highestStage == CpuRelayAssociation.FAN_MEDIUM_SPEED) 50 else 33
-        val fanEnabledMapped = HyperStatAssociationUtil.isAnyRelayAssociatedToFanEnabled(config)
-        val lowestStage = HyperStatAssociationUtil.getLowestFanStage(config)
-
-        if (fanEnabledMapped) setFanEnabledStatus(true) else setFanEnabledStatus(false)
-
-        setFanLowestFanLowStatus(false)
-        setFanLowestFanMediumStatus(false)
-        setFanLowestFanHighStatus(false)
-        when(lowestStage) {
-            CpuRelayAssociation.FAN_LOW_SPEED -> setFanLowestFanLowStatus(true)
-            CpuRelayAssociation.FAN_MEDIUM_SPEED -> setFanLowestFanMediumStatus(true)
-            CpuRelayAssociation.FAN_HIGH_SPEED -> setFanLowestFanHighStatus(true)
-            else -> {
-                // Do nothing
-            }
+            // Store just in case when we switch from current occupied to unoccupied mode
+            previousFanLoopValStaged = fanLoopForAnalog
         }
 
-        // In order to protect the fan, persist the fan for few cycles when there is a sudden change in
-        // occupancy and decrease in fan loop output
-        if (fanProtectionCounter > 0) {
-            localFanLoopOutput = previousFanLoopVal
-        }
-
-        when (relayAssociation.association) {
-            CpuRelayAssociation.FAN_LOW_SPEED -> {
-                doFanLowSpeed(
-                    logicalPointsList[whichPort]!!,null,null, basicSettings.fanMode,
-                    localFanLoopOutput,tuner.relayActivationHysteresis,relayStages,divider,getDoorWindowFanOperationStatus())
-            }
-            CpuRelayAssociation.FAN_MEDIUM_SPEED -> {
-                doFanMediumSpeed(
-                    logicalPointsList[whichPort]!!,null,basicSettings.fanMode,
-                    localFanLoopOutput,tuner.relayActivationHysteresis,divider,relayStages,getDoorWindowFanOperationStatus())
-            }
-            CpuRelayAssociation.FAN_HIGH_SPEED -> {
-                doFanHighSpeed(
-                    logicalPointsList[whichPort]!!,basicSettings.fanMode,
-                    localFanLoopOutput,tuner.relayActivationHysteresis,relayStages,getDoorWindowFanOperationStatus())
-            }
-            else -> return
-        }
-    }
-
-    private fun handleAnalogOutState(
-        analogOutState: AnalogOutState, equip: HyperStatCpuEquip, config: HyperStatCpuConfiguration,
-        port: Port, basicSettings: BasicSettings, analogOutStages: HashMap<String, Int>
-    ) {
-        // If we are in Auto Away mode we no need to Any analog Operations
-        when {
-            (HyperStatAssociationUtil.isAnalogOutAssociatedToCooling(analogOutState)) -> {
-                doAnalogCooling(port,basicSettings.conditioningMode,analogOutStages,coolingLoopOutput)
-            }
-            (HyperStatAssociationUtil.isAnalogOutAssociatedToHeating(analogOutState)) -> {
-                doAnalogHeating(port,basicSettings.conditioningMode,analogOutStages,heatingLoopOutput)
-            }
-            (HyperStatAssociationUtil.isAnalogOutAssociatedToFanSpeed(analogOutState)) -> {
-                doAnalogFanActionCpu(
-                    port, analogOutState.perAtFanLow.toInt(), analogOutState.perAtFanMedium.toInt(),
-                    analogOutState.perAtFanHigh.toInt(), basicSettings.fanMode,
-                    basicSettings.conditioningMode, fanLoopOutput, analogOutStages, previousFanLoopVal, fanLoopCounter
-                )
-            }
-            (HyperStatAssociationUtil.isAnalogOutAssociatedToDcvDamper(analogOutState)) -> {
-                doAnalogDCVAction(
-                    port,analogOutStages,config.zoneCO2Threshold,config.zoneCO2DamperOpeningRate,isDoorOpenState(config,equip)
-                )
-            }
-            (HyperStatAssociationUtil.isAnalogOutAssociatedToStagedFanSpeed(analogOutState)) -> {
-                doAnalogStagedFanAction(
-                    port, analogOutState.perAtFanLow.toInt(), analogOutState.perAtFanMedium.toInt(),
-                    analogOutState.perAtFanHigh.toInt(), basicSettings.fanMode, HyperStatAssociationUtil.isAnyRelayAssociatedToFanEnabled(config),
-                    basicSettings.conditioningMode, fanLoopOutput, analogOutStages, fanLoopCounter
-                )
-            }
-        }
-    }
-
-    private fun getCoolingActivatedAnalogVoltage(fanEnabledMapped: Boolean, fanLoopOutput: Int): Int {
-        var voltage = getPercentageFromVoltageSelected(getCoolingStateActivated().roundToInt())
-        // For title 24 compliance, check if fanEnabled is mapped, then set the fanloopForAnalog to the lowest cooling state activated
-        // and check if staged fan is inactive(fanLoopForAnalog == 0)
-        if(fanEnabledMapped && voltage == 0 && fanLoopOutput > 0) {
-            voltage = getPercentageFromVoltageSelected(getLowestCoolingStateActivated().roundToInt())
-        }
-        return voltage
-    }
-
-
-    private fun getHeatingActivatedAnalogVoltage(fanEnabledMapped: Boolean, fanLoopOutput: Int): Int {
-        var voltage = getPercentageFromVoltageSelected(getHeatingStateActivated().roundToInt())
-        // For title 24 compliance, check if fanEnabled is mapped, then set the fanloopForAnalog to the lowest heating state activated
-        // and check if staged fan is inactive(fanLoopForAnalog == 0)
-        if (fanEnabledMapped && voltage == 0 && fanLoopOutput > 0) {
-            voltage = getPercentageFromVoltageSelected(getLowestHeatingStateActivated().roundToInt())
-        }
-        return voltage
+        if (fanLoopForAnalog > 0) analogOutStages[AnalogOutput.FAN_SPEED.name] = fanLoopForAnalog
+        updateLogicalPoint(logicalPointsList[port]!!, fanLoopForAnalog.toDouble())
+        CcuLog.i(L.TAG_CCU_HSHST, "$port = Staged Fan Speed($logMsg) $fanLoopForAnalog")
     }
 
     private fun doAnalogFanActionCpu(
-        port: Port,
-        fanLowPercent: Int,
-        fanMediumPercent: Int,
-        fanHighPercent: Int,
-        fanMode: StandaloneFanStage,
-        conditioningMode: StandaloneConditioningMode,
-        fanLoopOutput: Int,
-        analogOutStages: HashMap<String, Int>,
-        previousFanLoopVal: Int,
-        fanProtectionCounter: Int
+            port: Port, fanLowPercent: Int, fanMediumPercent: Int, fanHighPercent: Int,
+            fanMode: StandaloneFanStage, conditioningMode: StandaloneConditioningMode, fanLoopOutput: Int,
+            analogOutStages: HashMap<String, Int>, previousFanLoopVal: Int, fanProtectionCounter: Int
     ) {
         if (fanMode != StandaloneFanStage.OFF) {
             var fanLoopForAnalog = 0
             if (fanMode == StandaloneFanStage.AUTO) {
                 if (conditioningMode == StandaloneConditioningMode.OFF) {
-                    updateLogicalPointIdValue(logicalPointsList[port]!!, 0.0)
+                    updateLogicalPoint(logicalPointsList[port]!!, 0.0)
                     return
                 }
                 fanLoopForAnalog = fanLoopOutput
@@ -632,161 +237,412 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
                     }
                 }
             }
-            if (fanLoopForAnalog > 0) analogOutStages[AnalogOutput.FAN_SPEED.name] =
-                fanLoopForAnalog
-            updateLogicalPointIdValue(logicalPointsList[port]!!, fanLoopForAnalog.toDouble())
-            CcuLog.i(L.TAG_CCU_HSCPU, "$port = Linear Fan Speed  analogSignal   $fanLoopForAnalog")
+            if (fanLoopForAnalog > 0) analogOutStages[AnalogOutput.FAN_SPEED.name] = fanLoopForAnalog
+            updateLogicalPoint(logicalPointsList[port]!!, fanLoopForAnalog.toDouble())
         }
     }
 
-    /**
-     * Check if currently in any of the occupied mode
-     *
-     * @return true if in occupied,forced occupied etc, else false.
-     */
-    private fun checkIfInOccupiedMode(): Boolean {
-        return  occupancyStatus != Occupancy.UNOCCUPIED &&
-                occupancyStatus != Occupancy.DEMAND_RESPONSE_UNOCCUPIED &&
-                occupancyStatus != Occupancy.VACATION
+    private fun getCoolingStateActivated(equip: CpuV2Equip): Double {
+        return when {
+            equip.coolingStage3.readHisVal() > 0 -> equip.fanOutCoolingStage3.readPriorityVal()
+            equip.coolingStage2.readHisVal() > 0 -> equip.fanOutCoolingStage2.readPriorityVal()
+            equip.coolingStage1.readHisVal() > 0 -> equip.fanOutCoolingStage1.readPriorityVal()
+            else -> defaultFanLoopOutput
+        }
     }
 
-     private fun doAnalogStagedFanAction(
-        port: Port,
-        fanLowPercent: Int,
-        fanMediumPercent: Int,
-        fanHighPercent: Int,
-        fanMode: StandaloneFanStage,
-        fanEnabledMapped: Boolean,
-        conditioningMode: StandaloneConditioningMode,
-        fanLoopOutput: Int,
-        analogOutStages: HashMap<String, Int>,
-        fanProtectionCounter: Int
+    private fun getHeatingStateActivated(equip: CpuV2Equip): Double {
+        return when {
+            equip.heatingStage3.readHisVal() > 0 -> equip.fanOutHeatingStage3.readPriorityVal()
+            equip.heatingStage2.readHisVal() > 0 -> equip.fanOutHeatingStage2.readPriorityVal()
+            equip.heatingStage1.readHisVal() > 0 -> equip.fanOutHeatingStage1.readPriorityVal()
+            else -> defaultFanLoopOutput
+        }
+    }
+
+    private fun getHeatingActivatedAnalogVoltage(fanEnabledMapped: Boolean, fanLoopOutput: Int, equip: CpuV2Equip): Int {
+        // For title 24 compliance, check if fanEnabled is mapped, then set the fanloopForAnalog to the lowest heating state activated
+        // and check if staged fan is inactive(fanLoopForAnalog == 0)
+
+        var voltage = getPercentFromVolt(getHeatingStateActivated(equip).roundToInt())
+        if (fanEnabledMapped && voltage == 0 && fanLoopOutput > 0) {
+            voltage = getPercentFromVolt(getLowestHeatingStateActivated(equip).roundToInt())
+        }
+        return voltage
+    }
+
+    private fun getCoolingActivatedAnalogVoltage(fanEnabledMapped: Boolean, fanLoopOutput: Int, equip: CpuV2Equip): Int {
+        // For title 24 compliance, check if fanEnabled is mapped, then set the fan loop ForAnalog to the lowest cooling state activated
+        // and check if staged fan is inactive(fanLoopForAnalog == 0)
+
+        var voltage = getPercentFromVolt(getCoolingStateActivated(equip).roundToInt())
+        if (fanEnabledMapped && voltage == 0 && fanLoopOutput > 0) {
+            voltage = getPercentFromVolt(getLowestCoolingStateActivated(equip).roundToInt())
+        }
+        return voltage
+    }
+
+    /**
+     * Updates the Title 24 flags by storing the current occupancy status and fan-loop output.
+     * The previous occupancy status and fan-loop output are updated for use in the next loop iteration.
+     * If the fan loop counter is greater than 0, it decrements the counter.
+     * @param basicSettings settings containing fan mode state.
+     */
+    private fun updateTitle24Flags(basicSettings: BasicSettings) {
+        // Store the fan-loop output/occupancy for usage in next loop
+        previousOccupancyStatus = occupancyStatus
+        if (occupancyStatus != Occupancy.WINDOW_OPEN) occupancyBeforeDoorWindow = occupancyStatus
+        // Store the fan status so that when the zone goes from user defined fan state to unoccupied state, the fan protection can be offered
+        previousFanStageStatus = basicSettings.fanMode
+        // Store the fanloop output when the zone was not in UNOCCUPIED state
+        if (fanLoopCounter == 0) previousFanLoopVal = fanLoopOutput
+        if (fanLoopCounter > 0) fanLoopCounter--
+    }
+
+    fun processHyperStatCPUProfile(equip: CpuV2Equip) {
+
+        if (Globals.getInstance().isTestMode) {
+            CcuLog.d(L.TAG_CCU_HSCPU, "Test mode is on: ${equip.equipRef}")
+            return
+        }
+
+        if (mInterface != null) mInterface.refreshView()
+
+        val relayStages = HashMap<String, Int>()
+        val analogOutStages = HashMap<String, Int>()
+        val config = getConfiguration(equip.equipRef)
+
+        logicalPointsList = getLogicalPointList(equip, config!!)
+        hsHaystackUtil = HSHaystackUtil(equip.equipRef, CCUHsApi.getInstance())
+
+        if (isRFDead) {
+            handleRFDead(equip)
+            return
+        } else if (isZoneDead) {
+            handleDeadZone(equip)
+            return
+        }
+        curState = ZoneState.DEADBAND
+        occupancyStatus = equipOccupancyHandler.currentOccupiedMode
+
+
+        val hyperStatTuners = fetchHyperStatTuners(equip)
+        val userIntents = fetchUserIntents(equip)
+        val averageDesiredTemp = getAverageTemp(userIntents)
+
+        val fanModeSaved = FanModeCacheStorage().getFanModeFromCache(equip.equipRef)
+        val basicSettings = fetchBasicSettings(equip)
+
+        CcuLog.d(L.TAG_CCU_HSCPU, "Before fall back ${basicSettings.fanMode} ${basicSettings.conditioningMode}")
+        val updatedFanMode = fallBackFanMode(equip, equip.equipRef, fanModeSaved, basicSettings)
+        basicSettings.fanMode = updatedFanMode
+        CcuLog.d(L.TAG_CCU_HSCPU, "After fall back ${basicSettings.fanMode} ${basicSettings.conditioningMode}")
+
+        cpuAlgorithm.initialise(hyperStatTuners)
+        cpuAlgorithm.dumpLogs()
+        handleChangeOfDirection(userIntents)
+        updateOperatingMode(currentTemp, averageDesiredTemp, basicSettings, equip)
+
+        coolingLoopOutput = 0
+        heatingLoopOutput = 0
+        fanLoopOutput = 0
+
+        evaluateLoopOutputs(userIntents, basicSettings, hyperStatTuners)
+        updateOccupancyDetection(equip)
+
+        doorWindowSensorOpenStatus = runForDoorWindowSensor(config, equip)
+        runFanLowDuringDoorWindow = checkFanOperationAllowedDoorWindow(userIntents)
+        // Updating the occupancy status happens one cycle later after update of doorWindowSensorOpenStatus.
+        // Once it is detected then reset the loop output values
+        if (occupancyStatus == Occupancy.WINDOW_OPEN) resetLoopOutputValues()
+        runForKeyCardSensor(config, equip)
+        updateAllLoopOutput(equip, coolingLoopOutput, heatingLoopOutput, fanLoopOutput)
+        updateTitle24LoopCounter(hyperStatTuners, basicSettings)
+
+        CcuLog.d(
+                L.TAG_CCU_HSCPU,"Fan speed multiplier  ${hyperStatTuners.analogFanSpeedMultiplier} " +
+                        "Current Occupancy: ${Occupancy.values()[equip.occupancyMode.readHisVal().toInt()]} \n" +
+                        "Current Temp : $currentTemp Desired (Heating: ${userIntents.zoneHeatingTargetTemperature} Cooling: ${userIntents.zoneCoolingTargetTemperature})\n" +
+                        "Loop Outputs: (Heating: $heatingLoopOutput Cooling: $coolingLoopOutput Fan : $fanLoopOutput) \n"
+        )
+
+        if (basicSettings.fanMode != StandaloneFanStage.OFF) {
+            operateRelays(config as CpuConfiguration, hyperStatTuners, userIntents, basicSettings, relayStages)
+            operateAnalogOutputs(config, equip, basicSettings, analogOutStages)
+        } else {
+            resetLogicalPoints()
+        }
+
+        equip.equipStatus.writeHisVal(curState.ordinal.toDouble())
+
+        var temperatureState = ZoneTempState.NONE
+        if (buildingLimitMinBreached() || buildingLimitMaxBreached()) temperatureState = ZoneTempState.EMERGENCY
+
+        HyperStatUserIntentHandler.updateHyperStatStatus(equip.equipRef, relayStages, analogOutStages, temperatureState, equip)
+        updateTitle24Flags(basicSettings)
+        CcuLog.d(L.TAG_CCU_HSCPU,"-------------------------------------------------")
+    }
+
+    private fun operateAnalogOutputs(
+            config: CpuConfiguration, equip: CpuV2Equip,
+            basicSettings: BasicSettings, analogOutStages: HashMap<String, Int>
     ) {
-        var fanLoopForAnalog = 0
-        var logMsg = "" // This will be overwritten based on priority
-
-        if (fanMode != StandaloneFanStage.OFF) {
-            if (fanMode == StandaloneFanStage.AUTO) {
-                if (conditioningMode == StandaloneConditioningMode.OFF) {
-                    updateLogicalPointIdValue(logicalPointsList[port]!!, 0.0)
-                    return
+        config.apply {
+            listOf(
+                    Pair(AnalogOutConfigs(analogOut1Enabled.enabled, analogOut1Association.associationVal, analogOut1MinMaxConfig, analogOut1FanSpeedConfig, recirculateFanConfig.analogOut1.currentVal), Port.ANALOG_OUT_ONE),
+                    Pair(AnalogOutConfigs(analogOut2Enabled.enabled, analogOut2Association.associationVal, analogOut2MinMaxConfig, analogOut2FanSpeedConfig, recirculateFanConfig.analogOut2.currentVal), Port.ANALOG_OUT_TWO),
+                    Pair(AnalogOutConfigs(analogOut3Enabled.enabled, analogOut3Association.associationVal, analogOut3MinMaxConfig, analogOut3FanSpeedConfig, recirculateFanConfig.analogOut3.currentVal), Port.ANALOG_OUT_THREE),
+            ).forEach { (analogOutConfig, port) ->
+                if (analogOutConfig.enabled) {
+                    handleAnalogOutState(analogOutConfig, equip, config, port, basicSettings, analogOutStages)
                 }
-                fanLoopForAnalog = fanLoopOutput
-                if (conditioningMode == StandaloneConditioningMode.AUTO) {
-                    if (getOperatingMode() == 1.0) {
-                        fanLoopForAnalog = getCoolingActivatedAnalogVoltage(fanEnabledMapped, fanLoopOutput)
-                        logMsg = "Cooling"
-                    } else if (getOperatingMode() == 2.0) {
-                        fanLoopForAnalog = getHeatingActivatedAnalogVoltage(fanEnabledMapped, fanLoopOutput)
-                        logMsg = "Heating"
-                    }
-                } else if (conditioningMode == StandaloneConditioningMode.COOL_ONLY) {
-                    fanLoopForAnalog = getCoolingActivatedAnalogVoltage(fanEnabledMapped, fanLoopOutput)
-                    logMsg = "Cooling"
-                } else if (conditioningMode == StandaloneConditioningMode.HEAT_ONLY) {
-                    fanLoopForAnalog = getHeatingActivatedAnalogVoltage(fanEnabledMapped, fanLoopOutput)
-                    logMsg = "Heating"
-                }
-                // Check if we need fan protection
-                if(fanProtectionCounter > 0  && fanLoopForAnalog < previousFanLoopValStaged) {
-                    fanLoopForAnalog = previousFanLoopValStaged
-                    logMsg = "Fan Protection"
-                } else {
-                    // else indicates we are not in protection mode, so store the fanLoopForAnalog value for protection mdoe
-                    previousFanLoopValStaged = fanLoopForAnalog
-                }
-                // When in dead-band, set the fan-loopForAnalog to the recirculate analog value. Also ensure fan protection is not ON
-                if ((fanLoopOutput == 0 || getDoorWindowFanOperationStatus()) && fanProtectionCounter == 0 && checkIfInOccupiedMode()) {
-                    fanLoopForAnalog = getPercentageFromVoltageSelected(getAnalogRecirculateValueActivated().roundToInt())
-                    logMsg = "Deadband"
-                }
-            } else {
-                when {
-                    (fanMode == StandaloneFanStage.LOW_CUR_OCC
-                            || fanMode == StandaloneFanStage.LOW_OCC
-                            || fanMode == StandaloneFanStage.LOW_ALL_TIME) -> {
-                        fanLoopForAnalog = fanLowPercent
-                    }
-
-                    (fanMode == StandaloneFanStage.MEDIUM_CUR_OCC
-                            || fanMode == StandaloneFanStage.MEDIUM_OCC
-                            || fanMode == StandaloneFanStage.MEDIUM_ALL_TIME) -> {
-                        fanLoopForAnalog = fanMediumPercent
-                    }
-
-                    (fanMode == StandaloneFanStage.HIGH_CUR_OCC
-                            || fanMode == StandaloneFanStage.HIGH_OCC
-                            || fanMode == StandaloneFanStage.HIGH_ALL_TIME) -> {
-                        fanLoopForAnalog = fanHighPercent
-                    }
-                }
-                // Store just in case when we switch from current occupied to unoccupied mode
-                previousFanLoopValStaged = fanLoopForAnalog
             }
-            if (fanLoopForAnalog > 0) analogOutStages[AnalogOutput.FAN_SPEED.name] =
-                fanLoopForAnalog
-            updateLogicalPointIdValue(logicalPointsList[port]!!, fanLoopForAnalog.toDouble())
-            CcuLog.i(L.TAG_CCU_HSCPU, "$port = Staged Fan Speed($logMsg)  analogSignal  $fanLoopForAnalog")
         }
     }
 
-    private fun getOperatingMode(): Double {
+    private fun handleAnalogOutState(
+            analogOut: AnalogOutConfigs, equip: CpuV2Equip, config: CpuConfiguration,
+            port: Port, basicSettings: BasicSettings, analogOutStages: HashMap<String, Int>
+    ) {
+        val analogOutMapping = HsCpuAnalogOutMapping.values().find { it.ordinal == analogOut.association }
+        when (analogOutMapping) {
+            HsCpuAnalogOutMapping.COOLING -> {
+                doAnalogCooling(
+                        port, basicSettings.conditioningMode, analogOutStages, coolingLoopOutput
+                )
+            }
 
-        return hsHaystackUtil.readHisVal("point and operating and mode")
+            HsCpuAnalogOutMapping.HEATING -> {
+                doAnalogHeating(
+                        port, basicSettings.conditioningMode, analogOutStages, heatingLoopOutput
+                )
+            }
 
+            HsCpuAnalogOutMapping.LINEAR_FAN_SPEED -> {
+                doAnalogFanActionCpu(
+                        port, analogOut.fanSpeed.low.currentVal.toInt(), analogOut.fanSpeed.medium.currentVal.toInt(),
+                        analogOut.fanSpeed.high.currentVal.toInt(), basicSettings.fanMode, basicSettings.conditioningMode,
+                        fanLoopOutput, analogOutStages, previousFanLoopVal, fanLoopCounter
+                )
+            }
+
+            HsCpuAnalogOutMapping.STAGED_FAN_SPEED -> {
+                doAnalogStagedFanAction(
+                        port, analogOut.fanSpeed.low.currentVal.toInt(), analogOut.fanSpeed.medium.currentVal.toInt(),
+                        analogOut.fanSpeed.high.currentVal.toInt(), basicSettings.fanMode,
+                        config.isAnyRelayEnabledAssociated(association = HsCpuRelayMapping.FAN_ENABLED.ordinal),
+                        basicSettings.conditioningMode, fanLoopOutput, analogOutStages, fanLoopCounter, equip
+                )
+            }
+
+            HsCpuAnalogOutMapping.DCV_DAMPER -> {
+                doAnalogDCVAction(
+                        port, analogOutStages, config.zoneCO2Threshold.currentVal,
+                        config.zoneCO2DamperOpeningRate.currentVal, isDoorOpenState(config, equip),equip
+                )
+            }
+
+            else -> {}
+        }
+        CcuLog.d(L.TAG_CCU_HSCPU,"$port = $analogOutMapping : ${getCurrentLogicalPointStatus(logicalPointsList[port]!!)}")
     }
 
-    private fun handleDeadZone(equip: HyperStatCpuEquip) {
+    private fun operateRelays(
+            config: CpuConfiguration, tuner: HyperStatProfileTuners, userIntents: UserIntents,
+            basicSettings: BasicSettings,
+            relayStages: HashMap<String, Int>
+    ) {
+        listOf(
+                Triple(config.relay1Enabled.enabled, config.relay1Association.associationVal, Port.RELAY_ONE),
+                Triple(config.relay2Enabled.enabled, config.relay2Association.associationVal, Port.RELAY_TWO),
+                Triple(config.relay3Enabled.enabled, config.relay3Association.associationVal, Port.RELAY_THREE),
+                Triple(config.relay4Enabled.enabled, config.relay4Association.associationVal, Port.RELAY_FOUR),
+                Triple(config.relay5Enabled.enabled, config.relay5Association.associationVal, Port.RELAY_FIVE),
+                Triple(config.relay6Enabled.enabled, config.relay6Association.associationVal, Port.RELAY_SIX)
+        ).forEach { (enabled, association, port) ->
+            if (enabled) handleRelayState(association, config, port, tuner, userIntents, basicSettings, relayStages)
+        }
+    }
 
-       CcuLog.d(L.TAG_CCU_HSCPU,"Zone is Dead ${equip.node}")
-        state = ZoneState.TEMPDEAD
-        resetAllLogicalPointValues(equip)
-        equip.hsHaystackUtil.setProfilePoint("operating and mode", state.ordinal.toDouble())
-        if (equip.hsHaystackUtil.getEquipStatus() != state.ordinal.toDouble())
-            equip.hsHaystackUtil.setEquipStatus(state.ordinal.toDouble())
-        val curStatus = equip.hsHaystackUtil.getEquipLiveStatus()
-        if (curStatus != ZoneTempDead) {
-            equip.hsHaystackUtil.writeDefaultVal("status and message and writable", ZoneTempDead)
+    private fun handleRelayState(
+            association: Int, config: CpuConfiguration, port: Port, tuner: HyperStatProfileTuners,
+            userIntents: UserIntents, basicSettings: BasicSettings, relayStages: HashMap<String, Int>
+    ) {
+        val relayMapping = HsCpuRelayMapping.values().find { it.ordinal == association }
+        when (relayMapping) {
+            HsCpuRelayMapping.COOLING_STAGE_1, HsCpuRelayMapping.COOLING_STAGE_2, HsCpuRelayMapping.COOLING_STAGE_3 -> {
+                if (basicSettings.conditioningMode == StandaloneConditioningMode.COOL_ONLY
+                        || basicSettings.conditioningMode == StandaloneConditioningMode.AUTO) {
+                    runRelayForCooling(relayMapping, port, config, tuner, relayStages)
+                } else {
+                    resetPort(port)
+                }
+            }
+
+            HsCpuRelayMapping.HEATING_STAGE_1, HsCpuRelayMapping.HEATING_STAGE_2, HsCpuRelayMapping.HEATING_STAGE_3 -> {
+                if (basicSettings.conditioningMode == StandaloneConditioningMode.HEAT_ONLY
+                        || basicSettings.conditioningMode == StandaloneConditioningMode.AUTO) {
+                    runRelayForHeating(relayMapping, port, config, tuner, relayStages)
+                } else {
+                    resetPort(port)
+                }
+            }
+
+            HsCpuRelayMapping.FAN_LOW_SPEED, HsCpuRelayMapping.FAN_MEDIUM_SPEED, HsCpuRelayMapping.FAN_HIGH_SPEED -> {
+                if (basicSettings.fanMode != StandaloneFanStage.OFF) {
+                    runRelayForFanSpeed(relayMapping, port, config, tuner, relayStages, basicSettings,
+                            previousFanLoopVal, fanLoopCounter)
+                } else {
+                    resetPort(port)
+                }
+            }
+
+            HsCpuRelayMapping.FAN_ENABLED -> doFanEnabled(curState, port, fanLoopOutput)
+            HsCpuRelayMapping.OCCUPIED_ENABLED -> doOccupiedEnabled(port)
+            HsCpuRelayMapping.HUMIDIFIER -> doHumidifierOperation(port, tuner.humidityHysteresis, userIntents.targetMinInsideHumidity)
+            HsCpuRelayMapping.DEHUMIDIFIER -> doDeHumidifierOperation(port, tuner.humidityHysteresis, userIntents.targetMaxInsideHumidity)
+            else -> {}
         }
-        hyperStatStatus[equip.equipRef.toString()] = ZoneTempDead
-        equip.haystack.writeHisValByQuery(
-            "point and not ota and status and his and group == \"${equip.node}\"",
-            ZoneState.TEMPDEAD.ordinal.toDouble()
-        )
+        CcuLog.d(L.TAG_CCU_HSCPU,"$port = $relayMapping : ${getCurrentLogicalPointStatus(logicalPointsList[port]!!)}")
     }
-    private fun handleRFDead(equip: HyperStatCpuEquip) {
-        CcuLog.d(L.TAG_CCU_HSCPU,"RF Signal is Dead ${equip.node}")
-        state = ZoneState.RFDEAD
-        equip.hsHaystackUtil.setProfilePoint("operating and mode", state.ordinal.toDouble())
-        if (equip.hsHaystackUtil.getEquipStatus() != state.ordinal.toDouble()) {
-            equip.hsHaystackUtil.setEquipStatus(state.ordinal.toDouble())
+
+    private fun runRelayForCooling(
+            association: HsCpuRelayMapping, whichPort: Port, config: CpuConfiguration,
+            tuner: HyperStatProfileTuners, relayStages: HashMap<String, Int>
+    ) {
+        when (association) {
+            HsCpuRelayMapping.COOLING_STAGE_1 -> {
+                doCoolingStage1(
+                        whichPort, coolingLoopOutput, tuner.relayActivationHysteresis, relayStages
+                )
+            }
+
+            HsCpuRelayMapping.COOLING_STAGE_2 -> {
+                val divider = if (config.getHighestCoolingStage() == HsCpuRelayMapping.COOLING_STAGE_2) 50 else 33
+                doCoolingStage2(
+                        whichPort, coolingLoopOutput, tuner.relayActivationHysteresis, divider, relayStages
+                )
+            }
+
+            HsCpuRelayMapping.COOLING_STAGE_3 -> {
+                doCoolingStage3(
+                        whichPort, coolingLoopOutput, tuner.relayActivationHysteresis, relayStages
+                )
+            }
+
+            else -> {}
         }
-        val curStatus = equip.hsHaystackUtil.getEquipLiveStatus()
-        if (curStatus != RFDead) {
-            equip.hsHaystackUtil.writeDefaultVal("status and message and writable", RFDead)
-        }
-        hyperStatStatus[equip.equipRef.toString()] = RFDead
-        equip.haystack.writeHisValByQuery(
-            "point and not ota and status and his and group == \"${equip.node}\"",
-            ZoneState.RFDEAD.ordinal.toDouble()
-        )
+
+        if (getCurrentPortStatus(whichPort) == 1.0) curState = ZoneState.COOLING
     }
+
+    private fun runRelayForHeating(
+            association: HsCpuRelayMapping, whichPort: Port, config: CpuConfiguration,
+            tuner: HyperStatProfileTuners, relayStages: HashMap<String, Int>
+    ) {
+        when (association) {
+            HsCpuRelayMapping.HEATING_STAGE_1 -> {
+                doHeatingStage1(whichPort, heatingLoopOutput, tuner.relayActivationHysteresis, relayStages)
+            }
+
+            HsCpuRelayMapping.HEATING_STAGE_2 -> {
+                val divider = if (config.getHighestHeatingStage() == HsCpuRelayMapping.HEATING_STAGE_2) 50 else 33
+                doHeatingStage2(whichPort, heatingLoopOutput, tuner.relayActivationHysteresis, divider, relayStages)
+            }
+
+            HsCpuRelayMapping.HEATING_STAGE_3 -> {
+                doHeatingStage3(whichPort, heatingLoopOutput, tuner.relayActivationHysteresis, relayStages)
+            }
+
+            else -> {}
+        }
+        if (getCurrentPortStatus(whichPort) == 1.0) curState = ZoneState.HEATING
+    }
+
+    private fun runRelayForFanSpeed(
+            relayAssociation: HsCpuRelayMapping, whichPort: Port, config: CpuConfiguration,
+            tuner: HyperStatProfileTuners, relayStages: HashMap<String, Int>, basicSettings: BasicSettings,
+            previousFanLoopVal: Int, fanProtectionCounter: Int
+    ) {
+        if (basicSettings.fanMode == StandaloneFanStage.AUTO
+                && basicSettings.conditioningMode == StandaloneConditioningMode.OFF) {
+            resetPort(whichPort)
+            return
+        }
+        var localFanLoopOutput = fanLoopOutput
+        val highestStage = config.getHighestFanSelected()
+        val divider = if (highestStage == HsCpuRelayMapping.FAN_MEDIUM_SPEED) 50 else 33
+        val fanEnabledMapped = config.isAnyRelayEnabledAssociated(association = HsCpuRelayMapping.FAN_ENABLED.ordinal)
+        val lowestStage = config.getLowestFanSelected()
+
+        if (fanEnabledMapped) setFanEnabledStatus(true) else setFanEnabledStatus(false)
+
+        resetFanLowestFanStatus()
+
+        when (lowestStage) {
+            HsCpuRelayMapping.FAN_LOW_SPEED -> setFanLowestFanLowStatus(true)
+            HsCpuRelayMapping.FAN_MEDIUM_SPEED -> setFanLowestFanMediumStatus(true)
+            HsCpuRelayMapping.FAN_HIGH_SPEED -> setFanLowestFanHighStatus(true)
+            else -> {}
+        }
+
+        // In order to protect the fan, persist the fan for few cycles when there is a sudden change in
+        // occupancy and decrease in fan loop output
+        if (fanProtectionCounter > 0) {
+            localFanLoopOutput = previousFanLoopVal
+        }
+
+        when (relayAssociation) {
+            HsCpuRelayMapping.FAN_LOW_SPEED -> {
+                doFanLowSpeed(
+                        logicalPointsList[whichPort]!!, null, null, basicSettings.fanMode,
+                        localFanLoopOutput, tuner.relayActivationHysteresis, relayStages, divider, runFanLowDuringDoorWindow)
+            }
+
+            HsCpuRelayMapping.FAN_MEDIUM_SPEED -> {
+                doFanMediumSpeed(
+                        logicalPointsList[whichPort]!!, null, basicSettings.fanMode,
+                        localFanLoopOutput, tuner.relayActivationHysteresis, divider, relayStages, runFanLowDuringDoorWindow)
+            }
+
+            HsCpuRelayMapping.FAN_HIGH_SPEED -> {
+                doFanHighSpeed(
+                        logicalPointsList[whichPort]!!, basicSettings.fanMode,
+                        localFanLoopOutput, tuner.relayActivationHysteresis, relayStages, runFanLowDuringDoorWindow)
+            }
+
+            else -> return
+        }
+        CcuLog.d(L.TAG_CCU_HSCPU,"$whichPort = $relayAssociation : ${getCurrentLogicalPointStatus(logicalPointsList[whichPort]!!)}")
+    }
+
 
     /**
-     * Check for the flag which allows fan operation during door window
-     * @return true or false
+     * Updates the Title 24 loop counter based on changes in occupancy and fan-loop output.
+     * If there is a change in occupancy and the fan-loop output is less than the previous value,
+     * the fan loop counter is set to the minimum fan runtime post conditioning specified by the tuners.
+     * If there is a change in occupancy and the fan-loop output is greater than the previous value,
+     * the fan loop counter is reset to zero.
+     *
+     * @param tuners The HyperStat profile tuners containing configuration parameters.
+     * @param basicSettings settings containing fan mode state.
      */
-    private fun getDoorWindowFanOperationStatus(): Boolean {
-        return runFanLowDuringDoorWindow
+    private fun updateTitle24LoopCounter(tuners: HyperStatProfileTuners, basicSettings: BasicSettings) {
+        // Check if there is change in occupancy and the fan-loop output is less than the previous value,
+        // then offer the fan protection
+        if ((occupancyStatus != previousOccupancyStatus && fanLoopOutput < previousFanLoopVal) ||
+                (basicSettings.fanMode != previousFanStageStatus && fanLoopOutput < previousFanLoopVal)) {
+            fanLoopCounter = tuners.minFanRuntimePostConditioning
+        } else if (occupancyStatus != previousOccupancyStatus && fanLoopOutput > previousFanLoopVal)
+            fanLoopCounter = 0 // Reset the counter if the fan-loop output is greater than the previous value
     }
 
     /**
      * Check if we should allow fan operation even when the door window is open
-     * @param equip HyperStatCpuEquip
      * @return true if the door or window is open and the occupancy status is not UNOCCUPIED, otherwise false.
      */
-    private fun checkFanOperationAllowedDoorWindow(equip: HyperStatCpuEquip): Boolean {
-        return if(currentTemp < fetchUserIntents(equip).zoneCoolingTargetTemperature && currentTemp > fetchUserIntents(equip).zoneHeatingTargetTemperature) {
+    private fun checkFanOperationAllowedDoorWindow(userIntents: UserIntents): Boolean {
+        return if (currentTemp < userIntents.zoneCoolingTargetTemperature && currentTemp > userIntents.zoneHeatingTargetTemperature) {
             doorWindowSensorOpenStatus &&
                     occupancyBeforeDoorWindow != Occupancy.UNOCCUPIED &&
                     occupancyBeforeDoorWindow != Occupancy.DEMAND_RESPONSE_UNOCCUPIED &&
@@ -796,100 +652,118 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
         }
     }
 
-    private fun runForDoorWindowSensor(config: HyperStatCpuConfiguration, equip: HyperStatCpuEquip): Boolean {
-        val isDoorOpen = isDoorOpenState(config,equip)
-       CcuLog.i(L.TAG_CCU_HSCPU," is Door Open ? $isDoorOpen")
+    private fun runForKeyCardSensor(config: HyperStatConfiguration, equip: HyperStatEquip) {
+        val isKeyCardEnabled = (config.isEnabledAndAssociated(config.analogIn1Enabled, config.analogIn1Association, AnalogInputAssociation.KEY_CARD_SENSOR.ordinal)
+                || config.isEnabledAndAssociated(config.analogIn1Enabled, config.analogIn2Association, AnalogInputAssociation.KEY_CARD_SENSOR.ordinal))
+        keyCardIsInSlot((if (isKeyCardEnabled) 1.0 else 0.0), if (equip.keyCardSensor.readHisVal() > 0) 1.0 else 0.0, equip)
+    }
+
+    private fun runForDoorWindowSensor(config: HyperStatConfiguration, equip: HyperStatEquip): Boolean {
+        val isDoorOpen = isDoorOpenState(config, equip)
+        CcuLog.i(L.TAG_CCU_HSHST, " is Door Open ? $isDoorOpen")
         return isDoorOpen
     }
-    
-    private fun isDoorOpenState(config: HyperStatCpuConfiguration, equip: HyperStatCpuEquip): Boolean{
+
+    private fun isDoorOpenState(config: HyperStatConfiguration, equip: HyperStatEquip): Boolean {
+
+        fun isAnalogHasDoorWindowMapping(): Boolean {
+            return (config.isEnabledAndAssociated(config.analogOut1Enabled, config.analogIn1Association, AnalogInputAssociation.DOOR_WINDOW_SENSOR_TITLE_24.ordinal)
+                    || config.isEnabledAndAssociated(config.analogOut2Enabled, config.analogIn2Association, AnalogInputAssociation.DOOR_WINDOW_SENSOR_TITLE_24.ordinal))
+        }
 
         // If thermistor value less than 10000 ohms door is closed (0) else door is open (1)
         // If analog in value is less than 2v door is closed(0) else door is open (1)
         var isDoorOpen = false
-
         var th2SensorEnabled = false
-        var analog1SensorEnabled = false
-        var analog2SensorEnabled = false
+        var analogSensorEnabled = false
 
-        // Thermistor 2 is always mapped to door window sensor
-        if (isDoorWindowSensorOnTh2(config)) {
-            val sensorValue = equip.hsHaystackUtil.getSensorPointValue(
-                "door and window and logical and sensor"
-            )
-           CcuLog.d(L.TAG_CCU_HSCPU,"TH2 Door Window sensor value : Door is $sensorValue")
-            if (sensorValue.toInt() == 1) isDoorOpen = true
+        if (config.isEnabledAndAssociated(config.thermistor2Enabled, config.thermistor2Association,
+                        Th2InputAssociation.DOOR_WINDOW_SENSOR_NC_TITLE_24.ordinal)) {
+            val sensorValue = equip.doorWindowSensorNCTitle24.readHisVal().toInt()
+            if (sensorValue == 1) isDoorOpen = true
             th2SensorEnabled = true
+            CcuLog.d(L.TAG_CCU_HSHST, "TH1 Door Window sensor value : Door is $sensorValue")
         }
 
-        if (config.analogIn1State.enabled &&
-            HyperStatAssociationUtil.isAnalogInAssociatedToDoorWindowSensor(config.analogIn1State)
-        ) {
-            val sensorValue = equip.hsHaystackUtil.getSensorPointValue(
-                "door and window2 and logical and sensor"
-            )
-           CcuLog.d(L.TAG_CCU_HSCPU,"Analog In 1 Door Window sensor value : Door is $sensorValue")
-            if (sensorValue.toInt() == 1) isDoorOpen = true
-            analog1SensorEnabled = true
-        }
+        if (isAnalogHasDoorWindowMapping()) {
+            val sensorValue = equip.doorWindowSensorTitle24.readHisVal().toInt()
+            if (sensorValue == 1) isDoorOpen = true
+            analogSensorEnabled = true
+            CcuLog.d(L.TAG_CCU_HSHST, "Analog Input has mapping Door Window sensor value : Door is $sensorValue")
 
-        if (config.analogIn2State.enabled &&
-            HyperStatAssociationUtil.isAnalogInAssociatedToDoorWindowSensor(config.analogIn2State)
-        ) {
-            val sensorValue = equip.hsHaystackUtil.getSensorPointValue(
-                "door and window3 and logical and sensor"
-            )
-           CcuLog.d(L.TAG_CCU_HSCPU,"Analog In 2 Door Window sensor value : Door is $sensorValue")
-            if (sensorValue.toInt() == 1) isDoorOpen = true
-            analog2SensorEnabled = true
         }
         doorWindowIsOpen(
-            if (th2SensorEnabled || analog1SensorEnabled || analog2SensorEnabled) 1.0 else 0.0,
-            if (isDoorOpen) 1.0 else 0.0
+                if (th2SensorEnabled || analogSensorEnabled) 1.0 else 0.0,
+                if (isDoorOpen) 1.0 else 0.0, equip
         )
         return isDoorOpen
     }
 
-    private fun isDoorWindowSensorOnTh2(config: HyperStatCpuConfiguration): Boolean {
-        return config.thermistorIn2State.enabled && config.thermistorIn2State.association.equals(Th2InAssociation.DOOR_WINDOW_SENSOR)
-    }
-
     private fun resetLoopOutputValues() {
-       CcuLog.d(L.TAG_CCU_HSCPU,"Resetting all the loop output values: ")
+        CcuLog.d(L.TAG_CCU_HSHST, "Resetting all the loop output values: ")
         coolingLoopOutput = 0
         heatingLoopOutput = 0
         fanLoopOutput = 0
     }
 
-    private fun runForKeyCardSensor(config: HyperStatCpuConfiguration, equip: HyperStatCpuEquip) {
+    private fun evaluateLoopOutputs(userIntents: UserIntents, basicSettings: BasicSettings, hyperStatTuners: HyperStatProfileTuners) {
+        when (state) {
+            //Update coolingLoop when the zone is in cooling or it was in cooling and no change over happened yet.
+            ZoneState.COOLING -> coolingLoopOutput = cpuAlgorithm.calculateCoolingLoopOutput(
+                    currentTemp, userIntents.zoneCoolingTargetTemperature
+            ).toInt().coerceAtLeast(0)
 
-        var analog1KeycardEnabled = false
-        var analog2KeycardEnabled = false
+            //Update heatingLoop when the zone is in heating or it was in heating and no change over happened yet.
+            ZoneState.HEATING -> heatingLoopOutput = cpuAlgorithm.calculateHeatingLoopOutput(
+                    userIntents.zoneHeatingTargetTemperature, currentTemp
+            ).toInt().coerceAtLeast(0)
 
-        var analog1Sensor = 0.0
-        var analog2Sensor = 0.0
-
-        if (config.analogIn1State.enabled &&
-            HyperStatAssociationUtil.isAnalogInAssociatedToKeyCardSensor(config.analogIn1State)
-        ) {
-            analog1KeycardEnabled = true
-            analog1Sensor = equip.hsHaystackUtil.getSensorPointValue("keycard and sensor and logical")
+            else -> CcuLog.d(L.TAG_CCU_HSHST, " Zone is in deadband")
         }
 
-        if (config.analogIn2State.enabled &&
-            HyperStatAssociationUtil.isAnalogInAssociatedToKeyCardSensor(config.analogIn2State)
-        ) {
-            analog2KeycardEnabled = true
-            analog2Sensor = equip.hsHaystackUtil.getSensorPointValue("keycard2 and sensor and logical")
+        if (coolingLoopOutput > 0 && (basicSettings.conditioningMode == StandaloneConditioningMode.COOL_ONLY
+                        || basicSettings.conditioningMode == StandaloneConditioningMode.AUTO)) {
+            fanLoopOutput = ((coolingLoopOutput * hyperStatTuners.analogFanSpeedMultiplier).toInt()).coerceAtMost(100)
+        } else if (heatingLoopOutput > 0 && (basicSettings.conditioningMode == StandaloneConditioningMode.HEAT_ONLY
+                        || basicSettings.conditioningMode == StandaloneConditioningMode.AUTO)) {
+            fanLoopOutput = ((heatingLoopOutput * hyperStatTuners.analogFanSpeedMultiplier).toInt()).coerceAtMost(100)
         }
+    }
 
-        CcuLog.d(L.TAG_CCU_HSCPU,"Keycard Enable Value "+  if (analog1KeycardEnabled || analog2KeycardEnabled) 1.0 else 0.0)
-        CcuLog.d(L.TAG_CCU_HSCPU,"Keycard sensor Value "+ if (analog1Sensor > 0 || analog2Sensor > 0) 1.0 else 0.0)
+    private fun handleChangeOfDirection(userIntents: UserIntents) {
+        if (currentTemp > userIntents.zoneCoolingTargetTemperature && state != ZoneState.COOLING) {
+            cpuAlgorithm.resetCoolingControl()
+            state = ZoneState.COOLING
+            CcuLog.d(L.TAG_CCU_HSHST, "Resetting cooling")
+        } else if (currentTemp < userIntents.zoneHeatingTargetTemperature && state != ZoneState.HEATING) {
+            cpuAlgorithm.resetHeatingControl()
+            state = ZoneState.HEATING
+            CcuLog.d(L.TAG_CCU_HSHST, "Resetting heating")
+        }
+    }
 
-        keyCardIsInSlot(
-            if (analog1KeycardEnabled || analog2KeycardEnabled) 1.0 else 0.0,
-            if (analog1Sensor > 0 || analog2Sensor > 0) 1.0 else 0.0
-        )
+    override fun getDisplayCurrentTemp() = averageZoneTemp
+
+    override fun getAverageZoneTemp(): Double {
+        var tempTotal = 0.0
+        var nodeCount = 0
+        cpuDeviceMap.forEach { (_, cpuDevice) ->
+            if (cpuDevice.currentTemp.readHisVal() > 0) {
+                tempTotal += cpuDevice.currentTemp.readHisVal()
+                nodeCount++
+            }
+        }
+        return if (nodeCount == 0) 0.0 else tempTotal / nodeCount
+    }
+
+    /**
+     * Check if currently in any of the occupied mode
+     * @return true if in occupied,forced occupied etc, else false.
+     */
+    private fun isInSoftOccupiedMode(): Boolean {
+        return occupancyStatus != Occupancy.UNOCCUPIED &&
+                occupancyStatus != Occupancy.DEMAND_RESPONSE_UNOCCUPIED &&
+                occupancyStatus != Occupancy.VACATION
     }
 
     override fun getEquip(): Equip? {
@@ -900,137 +774,19 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
         return null
     }
 
-    @JsonIgnore
-    override fun getNodeAddresses(): Set<Short?> {
-        return cpuDeviceMap.keys
-    }
+    override fun getNodeAddresses(): Set<Short?> =  cpuDeviceMap.keys.map { it.toShort() }.toSet()
 
-    private fun resetAllLogicalPointValues(equip: HyperStatCpuEquip) {
-        equip.hsHaystackUtil.updateAllLoopOutput(0,0,0,false,0)
-        resetAllLogicalPointValues()
-        HyperStatUserIntentHandler.updateHyperStatStatus(
-            equipId = equip.equipRef!!,
-            portStages = HashMap(),
-            analogOutStages = HashMap(),
-            temperatureState = ZoneTempState.TEMP_DEAD
-        )
-    }
+    fun getProfileDomainEquip(node: Int): CpuV2Equip = cpuDeviceMap[node]!!
 
-    @JsonIgnore
     override fun getCurrentTemp(): Double {
         for (nodeAddress in cpuDeviceMap.keys) {
-            return cpuDeviceMap[nodeAddress]!!.getCurrentTemp()
+            return cpuDeviceMap[nodeAddress]!!.currentTemp.readHisVal()
         }
         return 0.0
     }
 
-    @JsonIgnore
-    override fun getDisplayCurrentTemp(): Double {
-        return averageZoneTemp
-    }
+    override fun addNewEquip(node: Short, room: String, floor: String, baseConfig: BaseProfileConfiguration) { TODO("Not using now") }
+    override fun getHyperStatEquip(node: Short): HyperStatEquipToBeDeleted { TODO("Not using now revisit once all are migrated") }
+    override fun <T : BaseProfileConfiguration?> getProfileConfiguration(address: Short): T { TODO("Not using now") }
 
-    @JsonIgnore
-    override fun getAverageZoneTemp(): Double {
-        var tempTotal = 0.0
-        var nodeCount = 0
-        for (nodeAddress in cpuDeviceMap.keys) {
-            if (cpuDeviceMap[nodeAddress] == null) {
-                continue
-            }
-            if (cpuDeviceMap[nodeAddress]!!.getCurrentTemp() > 0) {
-                tempTotal += cpuDeviceMap[nodeAddress]!!.getCurrentTemp()
-                nodeCount++
-            }
-        }
-        return if (nodeCount == 0) 0.0 else tempTotal / nodeCount
-    }
-
-    private fun getCoolingStateActivated (): Double {
-        return if (stageActive("cooling and runtime and stage3")) {
-            hsHaystackUtil.readPointValue("fan and cooling and stage3")
-        } else if (stageActive("cooling and runtime and stage2")) {
-            hsHaystackUtil.readPointValue("fan and cooling and stage2")
-        } else if (stageActive("cooling and runtime and stage1")) {
-            hsHaystackUtil.readPointValue("fan and cooling and stage1")
-        } else {
-            defaultFanLoopOutput
-        }
-    }
-
-
-    private fun getHeatingStateActivated (): Double {
-        return if (stageActive("heating and runtime and stage3")) {
-            hsHaystackUtil.readPointValue("fan and heating and stage3")
-        } else if (stageActive("heating and runtime and stage2")) {
-            hsHaystackUtil.readPointValue("fan and heating and stage2")
-        } else if (stageActive("heating and runtime and stage1")){
-            hsHaystackUtil.readPointValue("fan and heating and stage1")
-        } else {
-            defaultFanLoopOutput
-        }
-    }
-
-    /**
-     * Returns the value of the non zero activated analog recirculate stage based on the fan loop points.
-     * If no recirculate stage is activated, returns the default fan loop output value.
-     *
-     * @return the value of the first non zero activated recirculate stage or the default fan loop output value.
-     */
-    private fun getAnalogRecirculateValueActivated (): Double {
-        return if (hsHaystackUtil.readPointValue("recirculate and analog1") != 0.0) {
-            hsHaystackUtil.readPointValue("recirculate and analog1")
-        } else if (hsHaystackUtil.readPointValue("recirculate and analog2") != 0.0) {
-            hsHaystackUtil.readPointValue("recirculate and analog2")
-        } else if (hsHaystackUtil.readPointValue("recirculate and analog3") != 0.0) {
-            hsHaystackUtil.readPointValue("recirculate and analog3")
-        } else {
-            defaultFanLoopOutput
-        }
-    }
-
-    /**
-     * Returns the value of the lowest activated cooling stage based on the fan loop points.
-     * If no cooling stage is activated, returns the default fan loop output value.
-     *
-     * @return the value of the lowest activated cooling stage or the default fan loop output value.
-     */
-    private fun getLowestCoolingStateActivated (): Double {
-        return if (hsHaystackUtil.readPointValue("fan and cooling and stage1") != 0.0) {
-            hsHaystackUtil.readPointValue("fan and cooling and stage1")
-        } else if (hsHaystackUtil.readPointValue("fan and cooling and stage2") != 0.0) {
-            hsHaystackUtil.readPointValue("fan and cooling and stage2")
-        } else if (hsHaystackUtil.readPointValue("fan and cooling and stage3") != 0.0) {
-            hsHaystackUtil.readPointValue("fan and cooling and stage3")
-        } else {
-            defaultFanLoopOutput
-        }
-    }
-
-    /**
-     * Returns the value of the lowest activated heating stage based on the fan loop points.
-     * If no heating stage is activated, returns the default fan loop output value.
-     *
-     * @return the value of the lowest activated heating stage or the default fan loop output value.
-     */
-    private fun getLowestHeatingStateActivated (): Double {
-        return if (hsHaystackUtil.readPointValue("fan and heating and stage1") != 0.0) {
-            hsHaystackUtil.readPointValue("fan and heating and stage1")
-        } else if (hsHaystackUtil.readPointValue("fan and heating and stage2") != 0.0) {
-            hsHaystackUtil.readPointValue("fan and heating and stage2")
-        } else if (hsHaystackUtil.readPointValue("fan and heating and stage3") != 0.0) {
-            hsHaystackUtil.readPointValue("fan and heating and stage3")
-        } else {
-            defaultFanLoopOutput
-        }
-    }
-
-    private fun stageActive(fanStage: String): Boolean {
-        return hsHaystackUtil.readHisVal(fanStage) == 1.0
-    }
-
-    private fun getPercentageFromVoltageSelected(voltageSelected: Int): Int {
-        val minVoltage = 0
-        val maxVoltage = 10
-        return (((voltageSelected - minVoltage).toDouble() / (maxVoltage - minVoltage)) * 100).roundToInt()
-    }
 }

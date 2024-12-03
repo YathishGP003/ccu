@@ -24,6 +24,7 @@ object DomainName {
     const val integralKFactor = "integralKFactor"
     const val pidIntegralTime = "pidIntegralTime"
     const val demandResponseSetback = "demandResponseSetback"
+    const val firmwareVersion = "firmwareVersion"
 
     const val rebalanceHoldTime = "rebalanceHoldTime"
     const val constantTempAlertTime = "constantTempAlertTime"
@@ -56,9 +57,11 @@ object DomainName {
     const val vavReheatSeriesFan = "vavReheatSeriesFan"
     const val activeChilledBeam = "activeChilledBeam"
     const val hyperstatSplitCPU = "hyperstatSplitCPU"
+    const val hyperstatCPU = "hyperstatCPU"
 
     // Devices
     const val hyperstatSplitDevice = "hyperstatSplitDevice"
+    const val hyperstatDevice = "hyperstatDevice"
 
     //DAB
     const val smartnodeDAB = "smartnodeDAB"
@@ -280,6 +283,8 @@ object DomainName {
     const val standalonePrePurgeFanSpeedTuner = "standalonePrePurgeFanSpeedTuner"
     const val prePurgeOutsideDamperOpen = "prePurgeOutsideDamperOpen"
     const val co2DamperOpeningRate = "co2DamperOpeningRate"
+    const val doorWindowSensorNCTitle24 = "doorWindowSensorNCTitle24"
+    const val doorWindowSensorTitle24 = "doorWindowSensorTitle24"
     const val systemPostPurgeRuntimeTuner = "systemPostPurgeRuntimeTuner"
     const val economizingMinTemperature = "economizingMinTemperature"
     const val economizingMaxTemperature = "economizingMaxTemperature"
@@ -405,6 +410,7 @@ object DomainName {
     const val dischargeAirTemp = "dischargeAirTemp"
     const val enteringAirTemp = "enteringAirTemp"
     const val pressureSensor = "pressureSensor"
+    const val uviSensor = "uviSensor"
     const val zoneVoc = "zoneVoc"
     const val occupancyMode = "occupancyMode"
     const val occupancyDetection = "occupancyDetection"
@@ -414,9 +420,11 @@ object DomainName {
     const val zonePm25 = "zonePm25"
     const val zoneCo = "zoneCo"
     const val zoneNo = "zoneNo"
+    const val zoneNo2 = "zoneNo2"
     const val zoneUvi = "zoneUvi"
     const val zoneCo2Equivalent = "zoneCo2e"
     const val zoneOccupancy = "zoneOccupancy"
+    const val zonePm10 = "zonePm10"
     const val sensorPm10 = "sensor_pm10"
     const val sensorEnergyMeter = "sensor_energy_meter"
 
@@ -438,6 +446,7 @@ object DomainName {
     const val pressureRequestPercentage = "pressureRequestPercentage"
     const val pressureCurrentRequest = "pressureCurrentRequest"
     const val vavZoneVocThreshold = "vavZoneVocThreshold"
+    const val keyCardSensor = "keyCardSensor"
 
     const val seriesFanCmd = "seriesFanCmd"
     const val parallelFanCmd = "parallelFanCmd"
@@ -1051,7 +1060,18 @@ object DomainName {
     const val analog4FanMedium = "analog4FanMedium"
     const val analog4FanHigh = "analog4FanHigh"
 
+    const val analog1MinDCVDamper = "analog1MinDCVDamper"
+    const val analog1MaxDCVDamper = "analog1MaxDCVDamper"
+    const val analog2MinDCVDamper = "analog2MinDCVDamper"
+    const val analog2MaxDCVDamper = "analog2MaxDCVDamper"
+    const val analog3MinDCVDamper = "analog3MinDCVDamper"
+    const val analog3MaxDCVDamper = "analog3MaxDCVDamper"
+
+
     const val fanOutRecirculate = "fanOutRecirculate"
+    const val analog1FanRecirculate = "analog1FanRecirculate"
+    const val analog2FanRecirculate = "analog2FanRecirculate"
+    const val analog3FanRecirculate = "analog3FanRecirculate"
     const val fanOutEconomizer = "fanOutEconomizer"
     const val fanOutHeatingStage1 = "fanOutHeatingStage1"
     const val fanOutHeatingStage2 = "fanOutHeatingStage2"
@@ -1098,6 +1118,7 @@ object DomainName {
     const val pm25Sensor = "pm25Sensor"
     const val pm10Sensor = "pm10Sensor"
     const val soundSensor = "soundSensor"
+    const val co2Equivalent = "co2Equivalent"
     const val mixedAirTempSensor = "mixedAirTempSensor"
     const val dischargeAirTemperature = "dischargeAirTemperature"
     const val mixedAirHumiditySensor = "mixedAirHumiditySensor"
@@ -1151,6 +1172,12 @@ object DomainName {
     const val satBasedCoolingControlFeedback = "satBasedCoolingControlFeedback"
     const val satBasedHeatingControlFeedback = "satBasedHeatingControlFeedback"
 
+    const val keyCardSensingEnable = "keyCardSensingEnable"
+    const val keyCardSensorInput = "keyCardSensorInput"
+    const val doorWindowSensingEnable = "doorWindowSensingEnable"
+    const val doorWindowSensorInput = "doorWindowSensorInput"
+
+
     // Diag equip points
     const val diagEquip = "diagEquip"
     const val ccuConfiguration = "ccuConfiguration"
@@ -1189,5 +1216,47 @@ object DomainName {
 
     //SSE
     const val externalAirTempSensor = "externalAirTempSensor"
+    const val hyperstatMonitoring = "hyperstatMonitoring"
+    //Monitoring
+    const val differentialAirPressureSensor_025 = "differentialAirPressureSensor_025"
+    const val genericIonSensorPoint = "genericIonSensorPoint"
+
+    const val airTempSensor100kOhms_th1 = "airTempSensor100kOhms_th1"
+    const val externalAirTempSensor_th1 = "externalAirTempSensor_th1"
+    const val genericAlarmNO_th1 = "genericAlarmNO_th1"
+    const val genericAlarmNC_th1 = "genericAlarmNC_th1"
+
+    const val airTempSensor100kOhms_th2 = "airTempSensor100kOhms_th2"
+    const val externalAirTempSensor_th2 = "externalAirTempSensor_th2"
+    const val genericAlarmNO_th2 = "genericAlarmNO_th2"
+    const val genericAlarmNC_th2 = "genericAlarmNC_th2"
+
+    const val voltageInput_ai1 = "voltageInput_ai1"
+    const val ductStaticPressureSensor1_2_ai1 = "ductStaticPressureSensor1_2_ai1"
+    const val differentialAirPressureSensor_025_ai1 = "differentialAirPressureSensor_025_ai1"
+    const val airFlowSensor_ai1 = "airFlowSensor_ai1"
+    const val zoneHumidity_ai1 = "zoneHumidity_ai1"
+    const val zoneCo2_ai1 = "zoneCo2_ai1"
+    const val zoneCo_ai1 = "zoneCo_ai1"
+    const val zoneNo2_ai1 = "zoneNo2_ai1"
+    const val currentTx10_ai1 = "currentTx10_ai1"
+    const val currentTx20_ai1 = "currentTx20_ai1"
+    const val currentTx50_ai1 = "currentTx50_ai1"
+    const val genericIonSensorPoint_ai1 = "genericIonSensorPoint_ai1"
+
+    const val voltageInput_ai2 = "voltageInput_ai2"
+    const val ductStaticPressureSensor1_2_ai2 = "ductStaticPressureSensor1_2_ai2"
+    const val differentialAirPressureSensor_025_ai2 = "differentialAirPressureSensor_025_ai2"
+    const val airFlowSensor_ai2 = "airFlowSensor_ai2"
+    const val zoneHumidity_ai2 = "zoneHumidity_ai2"
+    const val zoneCo2_ai2 = "zoneCo2_ai2"
+    const val zoneCo_ai2 = "zoneCo_ai2"
+    const val zoneNo2_ai2 = "zoneNo2_ai2"
+    const val currentTx10_ai2 = "currentTx10_ai2"
+    const val currentTx20_ai2 = "currentTx20_ai2"
+    const val currentTx50_ai2 = "currentTx50_ai2"
+    const val genericIonSensorPoint_ai2 = "genericIonSensorPoint_ai2"
+
+
 }
 

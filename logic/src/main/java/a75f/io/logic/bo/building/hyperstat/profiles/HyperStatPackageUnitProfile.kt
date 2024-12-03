@@ -30,6 +30,12 @@ abstract class HyperStatPackageUnitProfile: HyperStatProfile(){
         fanEnabledStatus = status
     }
 
+    fun resetFanLowestFanStatus() {
+        lowestStageFanLow = false
+        lowestStageFanMedium = false
+        lowestStageFanHigh = false
+    }
+
     /**
      * Sets the status of the lowest fan low stage.
      *
@@ -87,7 +93,7 @@ abstract class HyperStatPackageUnitProfile: HyperStatProfile(){
             relayState = 1.0
         }
         if (relayState != -1.0) {
-            updateLogicalPointIdValue(logicalPointId, relayState)
+            updateLogicalPoint(logicalPointId, relayState)
         }
         if (getCurrentLogicalPointStatus(logicalPointId) == 1.0) {
             relayStages[Stage.FAN_1.displayName] = 1
@@ -130,8 +136,7 @@ abstract class HyperStatPackageUnitProfile: HyperStatProfile(){
             ) 1.0 else 0.0
         }
         if (relayState != -1.0) {
-            updateLogicalPointIdValue(logicalPointId, relayState)
-            CcuLog.i(L.TAG_CCU_HSPIPE2, "$logicalPointId = FanMediumSpeed:  $relayState")
+            updateLogicalPoint(logicalPointId, relayState)
         }
         if (getCurrentLogicalPointStatus(logicalPointId) == 1.0) {
             relayStages[Stage.FAN_2.displayName] = 1
@@ -167,8 +172,7 @@ abstract class HyperStatPackageUnitProfile: HyperStatProfile(){
             ) 1.0 else 0.0
         }
         if (relayState != -1.0) {
-            updateLogicalPointIdValue(logicalPointId, relayState)
-            CcuLog.i(L.TAG_CCU_HSPIPE2, "$logicalPointId = FanHighSpeed:  $relayState")
+            updateLogicalPoint(logicalPointId, relayState)
         }
         if (getCurrentLogicalPointStatus(logicalPointId) == 1.0) {
             relayStages[Stage.FAN_3.displayName] = 1
@@ -204,7 +208,7 @@ abstract class HyperStatPackageUnitProfile: HyperStatProfile(){
             var fanLoopForAnalog = 0
             if (fanMode == StandaloneFanStage.AUTO) {
                 if (conditioningMode == StandaloneConditioningMode.OFF) {
-                    updateLogicalPointIdValue(logicalPointsList[port]!!, 0.0)
+                    updateLogicalPoint(logicalPointsList[port]!!, 0.0)
                     return
                 }
                 fanLoopForAnalog = fanLoopOutput
@@ -231,8 +235,8 @@ abstract class HyperStatPackageUnitProfile: HyperStatProfile(){
             }
             if (fanLoopForAnalog > 0) analogOutStages[AnalogOutput.FAN_SPEED.name] =
                 fanLoopForAnalog
-            updateLogicalPointIdValue(logicalPointsList[port]!!, fanLoopForAnalog.toDouble())
-            CcuLog.i(L.TAG_CCU_HSCPU, "$port = Linear Fan Speed  analogSignal   $fanLoopForAnalog")
+            updateLogicalPoint(logicalPointsList[port]!!, fanLoopForAnalog.toDouble())
+            CcuLog.i(L.TAG_CCU_HSHST, "$port = Linear Fan Speed  analogSignal   $fanLoopForAnalog")
         }
     }
 

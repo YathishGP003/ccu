@@ -59,7 +59,7 @@ public class AutoAway implements OccupancyTrigger {
         double autoAwayTimeMinutes = occupancyUtil.getAutoAwayTime();
         double timeToAutoAway =
             (lastOccupancy.getTime() + autoAwayTimeMinutes * 60 * 1000) - System.currentTimeMillis();
-        CcuLog.i(L.TAG_CCU_SCHEDULER, "autoAwayTimeMinutes "+autoAwayTimeMinutes+" : millis Left "+ timeToAutoAway);
+        CcuLog.i(L.TAG_CCU_SCHEDULER, "autoAwayTimeMinutes "+autoAwayTimeMinutes+" : seconds Left "+ (timeToAutoAway /1000));
 
         return timeToAutoAway <= 0;
     }

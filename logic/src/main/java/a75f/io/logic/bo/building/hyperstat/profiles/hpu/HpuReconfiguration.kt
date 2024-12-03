@@ -17,13 +17,13 @@ class HpuReconfiguration {
             updatedConfigValue: Double,
             equipPoint: Equip, ) {
             
-            val equip = HyperStatHpuEquip.getHyperStatEquipRef(equipPoint.group.toShort())
+            val equip = HyperStatHpuEquipToBeDeleted.getHyperStatEquipRef(equipPoint.group.toShort())
             val updatedConfiguration = updateAssociation(equip.getConfiguration(), portType, updatedConfigValue.toInt())
             equip.updateConfiguration(updatedConfiguration)
         }
 
         fun updateConfiguration(updatedConfigValue: Double, equipPoint: Equip, portType: Port) {
-            val equip = HyperStatHpuEquip.getHyperStatEquipRef(equipPoint.group.toShort())
+            val equip = HyperStatHpuEquipToBeDeleted.getHyperStatEquipRef(equipPoint.group.toShort())
             val updatedConfiguration = updateConfig(equip.getConfiguration(), portType, updatedConfigValue)
             equip.updateConfiguration(updatedConfiguration)
         }

@@ -2,6 +2,12 @@ package a75f.io.device.mesh.hyperstat;
 
 import static a75f.io.api.haystack.Tags.HYPERSTAT;
 import static a75f.io.device.mesh.Pulse.getHumidityConversion;
+import static a75f.io.device.mesh.hyperstat.HyperStatMsgHandlerKt.runProfileAlgo;
+import static a75f.io.device.mesh.hyperstat.HyperStatMsgHandlerKt.sendAcknowledge;
+import static a75f.io.logic.bo.building.hyperstat.profiles.util.HyperStatUtilsKt.getConfiguration;
+import static a75f.io.logic.bo.building.hyperstat.profiles.util.HyperStatUtilsKt.getCpuFanLevel;
+import static a75f.io.logic.bo.building.hyperstat.profiles.util.HyperStatUtilsKt.getPossibleConditionMode;
+import static a75f.io.logic.bo.building.hyperstat.profiles.util.HyperStatUtilsKt.getPossibleFanModeSettings;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 
@@ -11,7 +17,6 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
@@ -26,16 +31,12 @@ import a75f.io.device.mesh.AnalogUtil;
 import a75f.io.device.mesh.DLog;
 import a75f.io.device.mesh.DeviceHSUtil;
 import a75f.io.device.mesh.DeviceUtil;
-import a75f.io.device.mesh.LSerial;
-import a75f.io.device.mesh.MeshUtil;
 import a75f.io.device.mesh.Pulse;
 import a75f.io.device.mesh.ThermistorUtil;
-import a75f.io.device.serial.CcuToCmOverUsbDeviceTempAckMessage_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
-import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode;
@@ -43,10 +44,8 @@ import a75f.io.logic.bo.building.hvac.StandaloneFanStage;
 import a75f.io.logic.bo.building.hyperstat.common.HSHaystackUtil;
 import a75f.io.logic.bo.building.hyperstat.common.PossibleConditioningMode;
 import a75f.io.logic.bo.building.hyperstat.common.PossibleFanMode;
-import a75f.io.logic.bo.building.hyperstat.profiles.cpu.HyperStatCpuEquip;
-import a75f.io.logic.bo.building.hyperstat.profiles.cpu.HyperStatCpuProfile;
-import a75f.io.logic.bo.building.hyperstat.profiles.pipe2.HyperStatPipe2Equip;
-import a75f.io.logic.bo.building.hyperstat.profiles.pipe2.HyperStatPipe2Profile;
+import a75f.io.logic.bo.building.hyperstat.v2.configs.CpuConfiguration;
+import a75f.io.logic.bo.building.hyperstat.v2.configs.HyperStatConfiguration;
 import a75f.io.logic.bo.building.sensors.SensorType;
 import a75f.io.logic.bo.haystack.device.HyperStatDevice;
 import a75f.io.logic.bo.util.CCUUtils;
@@ -55,16 +54,16 @@ import a75f.io.logic.interfaces.ZoneDataInterface;
 import a75f.io.logic.jobs.HyperStatUserIntentHandler;
 
 public class HyperStatMsgReceiver {
-    
+
     private static final int HYPERSTAT_MESSAGE_ADDR_START_INDEX = 1;
     private static final int HYPERSTAT_MESSAGE_ADDR_END_INDEX = 5;
     private static final int HYPERSTAT_MESSAGE_TYPE_INDEX = 13;
     private static final int HYPERSTAT_SERIALIZED_MESSAGE_START_INDEX = 17;
     private static ZoneDataInterface currentTempInterface = null;
-    
+
     public static void processMessage(byte[] data, CCUHsApi hayStack) {
         try {
-    
+
             /*
             * Message Type - 1 byte
             * Address - 4 bytes
@@ -75,15 +74,15 @@ public class HyperStatMsgReceiver {
             * Actual Serialized data starts at index 17.
             */
             CcuLog.e(L.TAG_CCU_DEVICE, "HyperStatMsgReceiver processMessage processMessage :"+ Arrays.toString(data));
-    
+
             byte[] addrArray = Arrays.copyOfRange(data, HYPERSTAT_MESSAGE_ADDR_START_INDEX,
                                                   HYPERSTAT_MESSAGE_ADDR_END_INDEX);
             int address = ByteBuffer.wrap(addrArray)
                                     .order(ByteOrder.LITTLE_ENDIAN)
                                     .getInt();
-    
+
             MessageType messageType = MessageType.values()[data[HYPERSTAT_MESSAGE_TYPE_INDEX]];
-    
+
             byte[] messageArray = Arrays.copyOfRange(data, HYPERSTAT_SERIALIZED_MESSAGE_START_INDEX, data.length);
 
             /*
@@ -94,12 +93,10 @@ public class HyperStatMsgReceiver {
 
                 So, skip evaluation here if the message contents are actually a HyperSplit message.
             */
-            if (messageType == MessageType.HYPERSPLIT_REGULAR_UPDATE_MESSAGE) {
-                return;
-            } else if (messageType == MessageType.HYPERSTAT_REGULAR_UPDATE_MESSAGE) {
+            if (messageType == MessageType.HYPERSTAT_REGULAR_UPDATE_MESSAGE) {
                 HyperStatRegularUpdateMessage_t regularUpdate =
                         HyperStatRegularUpdateMessage_t.parseFrom(messageArray);
-    
+
                 handleRegularUpdate(regularUpdate, address, hayStack);
             } else if (messageType == MessageType.HYPERSTAT_LOCAL_CONTROLS_OVERRIDE_MESSAGE) {
                 HyperStatLocalControlsOverrideMessage_t overrideMessage =
@@ -115,71 +112,72 @@ public class HyperStatMsgReceiver {
             CcuLog.e(L.TAG_CCU_DEVICE, "Cant parse protobuf data: "+e.getMessage());
         }
     }
-    
+
     private static void handleRegularUpdate(HyperStatRegularUpdateMessage_t regularUpdateMessage, int nodeAddress,
                                      CCUHsApi hayStack) {
         if (DLog.isLoggingEnabled()) {
             CcuLog.i(L.TAG_CCU_DEVICE, "handleRegularUpdate: "+regularUpdateMessage.toString());
         }
-        HashMap device = hayStack.read("device and addr == \"" + nodeAddress + "\"");
 
+        HashMap device = HyperStatControlUtilKt.getHyperStatDevice(nodeAddress);
         Pulse.mDeviceUpdate.put((short) nodeAddress, Calendar.getInstance().getTimeInMillis());
 
-        if(Globals.getInstance().isTemporaryOverrideMode()) {
-            Pulse.updateRssiPointIfAvailable(hayStack, device.get("id").toString(), regularUpdateMessage.getRssi(), 1, nodeAddress);
-            return;
-        }
-        DeviceHSUtil.getEnabledSensorPointsWithRefForDevice(device, hayStack)
-                .forEach( point -> writePortInputsToHaystackDatabase( point, regularUpdateMessage, hayStack));
-        if (!regularUpdateMessage.getSensorReadingsList().isEmpty()) {
-            writeSensorInputsToHaystackDatabase(regularUpdateMessage.getSensorReadingsList(), nodeAddress);
+        if (device == null || device.isEmpty()) {
+
+            // TODO  Remove bellow code once all the profiles are migrated to Domainas
+            device = hayStack.readEntity("device and addr == \"" + nodeAddress + "\"");
+            if(Globals.getInstance().isTemporaryOverrideMode()) {
+                Pulse.updateRssiPointIfAvailable(hayStack, device.get("id").toString(), regularUpdateMessage.getRssi(), 1, nodeAddress);
+                return;
+            }
+            DeviceHSUtil.getEnabledSensorPointsWithRefForDevice(device, hayStack)
+                    .forEach( point -> writePortInputsToHaystackDatabase( point, regularUpdateMessage, hayStack));
+            if (!regularUpdateMessage.getSensorReadingsList().isEmpty()) {
+                writeSensorInputsToHaystackDatabase(regularUpdateMessage.getSensorReadingsList(), nodeAddress);
+            }
+        } else {
+            // DM integrated devices are handled in HyperStatMsgHandlerKt
+            HyperStatMsgHandlerKt.handleRegularUpdate(regularUpdateMessage, device, nodeAddress, currentTempInterface);
         }
     }
-    
+
     private static void handleOverrideMessage(HyperStatLocalControlsOverrideMessage_t message, int nodeAddress,
                                               CCUHsApi hayStack) {
 
-        HashMap equipMap = CCUHsApi.getInstance().read("equip and group == \""+nodeAddress+"\"");
-        Equip hsEquip = new Equip.Builder().setHashMap(equipMap).build();
+        HashMap device = HyperStatControlUtilKt.getHyperStatDevice(nodeAddress);
+        if (!device.isEmpty()) {
+            Equip hsEquip = new Equip.Builder().setHashMap(device).build();
+            if (hsEquip.getMarkers().contains(HYPERSTAT)) {
+                HyperStatMsgHandlerKt.handleOverrideMsg(message, nodeAddress, hsEquip.getEquipRef());
+            }
+        } else {
+            HashMap equipMap = CCUHsApi.getInstance().read("equip and group == \"" + nodeAddress + "\"");
+            Equip hsEquip = new Equip.Builder().setHashMap(equipMap).build();
 
-        // HyperSplit and HyperStat local controls override messages share an index.
-        // So, handler method has to be called for both types.
-        // The HyperStat message processing is only done if the equip has a "hyperstat" tag.
-        if (hsEquip.getMarkers().contains(HYPERSTAT)) {
+            // HyperSplit and HyperStat local controls override messages share an index.
+            // So, handler method has to be called for both types.
+            // The HyperStat message processing is only done if the equip has a "hyperstat" tag.
+            if (hsEquip.getMarkers().contains(HYPERSTAT)) {
 
-            CcuLog.i(L.TAG_CCU_DEVICE, "OverrideMessage: "+message.toString());
+                CcuLog.i(L.TAG_CCU_DEVICE, "OverrideMessage: " + message.toString());
 
-            writeDesiredTemp(message, hsEquip, hayStack);
-            updateFanConditioningMode(hsEquip.getId(), message.getFanSpeed().ordinal(), message.getConditioningModeValue(), hsEquip, nodeAddress);
-            ZoneProfile profile = L.getProfile((short) nodeAddress);
-            runProfileAlgo(profile, (short) nodeAddress);
+                writeDesiredTemp(message, hsEquip, hayStack);
+                updateFanConditioningMode(hsEquip.getId(), message.getFanSpeed().ordinal(), message.getConditioningModeValue(), hsEquip, nodeAddress);
+                runProfileAlgo((short) nodeAddress);
 
-            /** send the updated control  message*/
-            HyperStatMessageSender.sendControlMessage(nodeAddress, hsEquip.getId());
-            sendAcknowledge(nodeAddress);
+                /** send the updated control  message*/
+                HyperStatMessageSender.sendControlMessage(nodeAddress, hsEquip.getId());
+                sendAcknowledge(nodeAddress);
 
+            }
         }
     }
-
-    private static void runProfileAlgo(ZoneProfile profile, short nodeAddress){
-
-        if (profile instanceof HyperStatCpuProfile) {
-            HyperStatCpuProfile hyperStatCpuProfile = (HyperStatCpuProfile) profile;
-            hyperStatCpuProfile.processHyperStatCPUProfile((HyperStatCpuEquip) Objects.requireNonNull(hyperStatCpuProfile.getHyperStatEquip(nodeAddress)));
-        }
-        if(profile instanceof HyperStatPipe2Profile){
-            HyperStatPipe2Profile hyperStatPipe2Profile = (HyperStatPipe2Profile) profile;
-            hyperStatPipe2Profile.processHyperStatPipeProfile((HyperStatPipe2Equip) Objects.requireNonNull(hyperStatPipe2Profile.getHyperStatEquip(nodeAddress)));
-
-        }
-    }
-
 
     private static void writePortInputsToHaystackDatabase(RawPoint rawPoint,
                                                      HyperStatRegularUpdateMessage_t regularUpdateMessage,
                                                      CCUHsApi hayStack) {
         Point point = DeviceHSUtil.getLogicalPointForRawPoint(rawPoint, hayStack);
-    
+
         if (DLog.isLoggingEnabled()) {
             CcuLog.i(L.TAG_CCU_DEVICE,
                      "writePortInputsToHaystackDatabase: logical point for " + rawPoint.getDisplayName() + " " + point);
@@ -222,9 +220,9 @@ public class HyperStatMsgReceiver {
 
     private static void writeRoomTemp(RawPoint rawPoint, Point point,
                                HyperStatRegularUpdateMessage_t regularUpdateMessage, CCUHsApi hayStack) {
-        
+
         hayStack.writeHisValById(rawPoint.getId(), (double) regularUpdateMessage.getRoomTemperature());
-        
+
         double receivedRoomTemp = Pulse.getRoomTempConversion((double) regularUpdateMessage.getRoomTemperature());
         double curRoomTemp = hayStack.readHisValById(point.getId());
         if (curRoomTemp != receivedRoomTemp) {
@@ -286,7 +284,7 @@ public class HyperStatMsgReceiver {
         CcuLog.d(L.TAG_CCU_DEVICE, "Sensor input : Thermistor type " + rawPoint.getType() + " val " + thInputVal);
 
     }
-    
+
     private static void writeAnalogInputVal(RawPoint rawPoint, Point point, CCUHsApi hayStack, double val) {
         CcuLog.i(L.TAG_CCU_DEVICE, "writeAnalogInputVal: "+rawPoint.getPort()+" " +rawPoint.getType());
         hayStack.writeHisValById(rawPoint.getId(), val);
@@ -306,7 +304,7 @@ public class HyperStatMsgReceiver {
         // Analog in is connected some other sensor
         hayStack.writeHisValById(point.getId(), AnalogUtil.getAnalogConversion(rawPoint, val));
     }
-    
+
     private static void writeHumidityVal(RawPoint rawPoint, Point point,
                                   HyperStatRegularUpdateMessage_t regularUpdateMessage, CCUHsApi hayStack) {
         hayStack.writeHisValById(rawPoint.getId(), (double)regularUpdateMessage.getHumidity());
@@ -326,10 +324,10 @@ public class HyperStatMsgReceiver {
     }
 
     private static void writeSensorInputsToHaystackDatabase(List<HyperStat.SensorReadingPb_t> sensorReadings, int addr) {
-        
+
         HyperStatDevice node = new HyperStatDevice(addr);
         int emVal = 0;
-       
+
         for (HyperStat.SensorReadingPb_t sensorReading : sensorReadings) {
             SensorType sensorType = SensorType.values()[sensorReading.getSensorType()];
             Port port = sensorType.getSensorPort();
@@ -378,7 +376,7 @@ public class HyperStatMsgReceiver {
                     break;
             }
         }
-        
+
         if (emVal > 0) {
             RawPoint sp = node.getRawPoint(Port.SENSOR_ENERGY_METER);
             if (sp == null) {
@@ -387,9 +385,9 @@ public class HyperStatMsgReceiver {
             CCUHsApi.getInstance().writeHisValById(sp.getId(), (double)emVal );
             CCUHsApi.getInstance().writeHisValById(sp.getPointRef(),(double)emVal);
         }
-        
+
     }
-    
+
     private static void writeDesiredTemp(HyperStatLocalControlsOverrideMessage_t message, Equip hsEquip,
                                          CCUHsApi hayStack) {
         int modeType = CCUHsApi.getInstance().readHisValByQuery("zone and hvacMode and roomRef" +
@@ -478,14 +476,14 @@ public class HyperStatMsgReceiver {
 
     }
 
-
     public static void updateFanConditioningMode(String equipId, int fanMode,int conditioningMode, Equip equip, int nodeAddress){
         PossibleConditioningMode possibleConditioningMode = PossibleConditioningMode.OFF;
         PossibleFanMode possibleFanMode = PossibleFanMode.OFF;
 
         if(equip.getProfile().equalsIgnoreCase(ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT.name())){
-            possibleConditioningMode = HSHaystackUtil.Companion.getPossibleConditioningModeSettings(nodeAddress);
-            possibleFanMode = HSHaystackUtil.Companion.getPossibleFanModeSettings(nodeAddress);
+            HyperStatConfiguration config = getConfiguration(equipId);
+            possibleConditioningMode = getPossibleConditionMode(config);
+            possibleFanMode = getPossibleFanModeSettings(getCpuFanLevel((CpuConfiguration)config));
         }
         if(equip.getProfile().equalsIgnoreCase(ProfileType.HYPERSTAT_TWO_PIPE_FCU.name())){
             possibleConditioningMode = PossibleConditioningMode.BOTH;
@@ -500,20 +498,6 @@ public class HyperStatMsgReceiver {
         updateFanMode(equipId,fanMode,possibleFanMode);
         updateConditioningMode(equipId,conditioningMode,possibleConditioningMode);
     }
-
-
-    private static void sendAcknowledge(int address){
-        CcuLog.i(L.TAG_CCU_DEVICE, "Sending Acknowledgement");
-        if (!LSerial.getInstance().isConnected()) {
-            CcuLog.d(L.TAG_CCU_DEVICE,"Device not connected !!");
-            return;
-        }
-        CcuToCmOverUsbDeviceTempAckMessage_t msg = new CcuToCmOverUsbDeviceTempAckMessage_t();
-        msg.messageType.set(MessageType.CCU_TO_CM_OVER_USB_SN_SET_TEMPERATURE_ACK);
-        msg.smartNodeAddress.set(address);
-        MeshUtil.sendStructToCM(msg);
-    }
-
 
     private static int getLogicalFanMode(PossibleFanMode mode,int selectedMode){
         CcuLog.i(L.TAG_CCU_DEVICE, "PossibleFanMode: "+mode + " selectedMode  "+selectedMode);

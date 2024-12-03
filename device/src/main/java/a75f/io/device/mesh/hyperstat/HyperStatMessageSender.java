@@ -1,7 +1,5 @@
 package a75f.io.device.mesh.hyperstat;
 
-import android.util.Log;
-
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
@@ -105,9 +103,6 @@ public class HyperStatMessageSender {
      * @param equipRef
      */
     public static void sendControlMessage(int address, String equipRef) {
-        Equip equip = HSUtil.getEquipInfo(equipRef);
-        int modeType = CCUHsApi.getInstance().readHisValByQuery("zone and hvacMode and roomRef" +
-                " == \"" + equip.getRoomRef() + "\"").intValue();
         HyperStatControlsMessage_t controls = HyperStatMessageGenerator.getControlMessage(address,
                 equipRef).build();
         
@@ -200,7 +195,7 @@ public class HyperStatMessageSender {
         writeSeedMessage(seedMessage, address, checkDuplicate);
     }
     private static void writeMessageBytesToUsb(int address, MessageType msgType, byte[] dataBytes) {
-        Log.d(L.TAG_CCU_SERIAL,"writeMessageBytesToUsb");
+        CcuLog.d(L.TAG_CCU_SERIAL,"writeMessageBytesToUsb");
         HyperStatSettingsUtil.Companion.setCcuControlMessageTimer(System.currentTimeMillis());
         byte[] msgBytes = new byte[dataBytes.length + FIXED_INT_BYTES_SIZE * 2 + 1];
         //CM currently supports both legacy byte array and protobuf encoding. Message type is kept as raw byte at the start to help CM determine which type
@@ -218,7 +213,7 @@ public class HyperStatMessageSender {
         System.arraycopy(dataBytes, 0, msgBytes,  2 * FIXED_INT_BYTES_SIZE + 1, dataBytes.length);
     
         LSerial.getInstance().sendSerialBytesToCM(msgBytes);
-        Log.d(L.TAG_CCU_SERIAL, Arrays.toString(msgBytes));
+        CcuLog.d(L.TAG_CCU_SERIAL, Arrays.toString(msgBytes));
         
     }
     

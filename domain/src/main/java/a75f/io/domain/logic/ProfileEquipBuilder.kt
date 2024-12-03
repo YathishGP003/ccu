@@ -70,7 +70,7 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
      * modelDef - Model instance for profile.
      */
     fun updateEquipAndPoints(configuration: ProfileConfiguration, modelDef: ModelDirective, siteRef: String, equipDis: String,
-                             isReconfiguration : Boolean = false) : String{
+                             isReconfiguration : Boolean = false) : String {
         CcuLog.i(Domain.LOG_TAG, "updateEquipAndPoints $configuration isReconfiguration $isReconfiguration")
         val entityMapper = EntityMapper(modelDef as SeventyFiveFProfileDirective)
 
@@ -105,8 +105,6 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
 
         hayStack.updateEquip(hayStackEquip, equipId)
 
-        //TODO - Fix crash
-        //DomainManager.addEquip(hayStackEquip)
         val time = measureTimeMillis {
             createPoints(modelDef, configuration, entityConfiguration, equipId, siteRef, equipDis)
         }
@@ -121,6 +119,7 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
         }
         DomainManager.buildDomain(CCUHsApi.getInstance())
         deletePoints(entityConfiguration, equipId)
+        DomainManager.buildDomain(CCUHsApi.getInstance())
         return equipId
     }
 
@@ -340,13 +339,15 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
         hayStackPoint.id = existingPoint["id"].toString()
         hayStackPoint.roomRef = existingPoint["roomRef"].toString()
         hayStackPoint.floorRef = existingPoint["floorRef"].toString()
-        hayStackPoint.group = existingPoint["group"].toString()
         existingPoint["createdDateTime"]?.let {
             hayStackPoint.createdDateTime =
                 HDateTime.make(existingPoint["createdDateTime"].toString())
         }
         existingPoint["ccuRef"]?.let { hayStackPoint.ccuRef = existingPoint["ccuRef"].toString() }
-        hayStackPoint.lastModifiedBy = hayStack.getCCUUserName();
+        hayStackPoint.lastModifiedBy = hayStack.getCCUUserName()
+        existingPoint["bacnetId"]?.let {
+            hayStackPoint.bacnetId = existingPoint["bacnetId"].toString().toInt()
+        }
         hayStack.updatePoint(hayStackPoint, existingPoint["id"].toString())
 
         //TODO- Not changing the value during migration as it might change user configurations
@@ -395,7 +396,7 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
                            mapping : Map<String, String>, profileConfiguration: ProfileConfiguration?,
     isSystem: Boolean = false, equipHashMap: HashMap<Any, Any>) {
         CcuLog.i(Domain.LOG_TAG, "doCutOverMigration for $equipDis")
-        var equipPoints =
+        val equipPoints =
             hayStack.readAllEntities("point and equipRef == \"$equipRef\"")
         val site = hayStack.site
         //TODO-To be removed after testing is complete.

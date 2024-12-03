@@ -6,6 +6,7 @@ import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.devices.CCUDevice
 import a75f.io.domain.devices.CmBoardDevice
 import a75f.io.domain.devices.ConnectDevice
+import a75f.io.domain.devices.DomainDevice
 import a75f.io.domain.equips.BuildingEquip
 import a75f.io.domain.equips.CCUDiagEquip
 import a75f.io.domain.equips.CCUEquip
@@ -13,6 +14,7 @@ import a75f.io.domain.equips.DomainEquip
 import a75f.io.domain.logic.DomainManager
 import a75f.io.domain.logic.PointBuilderConfig
 import a75f.io.domain.logic.ProfileEquipBuilder
+import a75f.io.domain.logic.DomainManager.addDomainEquips
 import a75f.io.logger.CcuLog
 import android.annotation.SuppressLint
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
@@ -40,6 +42,8 @@ object Domain {
     lateinit var diagEquip: CCUDiagEquip
     lateinit var ccuDevice : CCUDevice // This is physical entity, this will be deleted and added when ccu is registered and unregistered
     lateinit var ccuEquip: CCUEquip
+
+    val devices = mutableMapOf<String, DomainDevice>()
 
     /**
      * Retrieve the domain object of a point by it id and equipRef.
@@ -259,7 +263,7 @@ object Domain {
         return valuesList
     }
 
-    private fun getStringFormat(itVal: Double, incVal: Double): String {
+    fun getStringFormat(itVal: Double, incVal: Double): String {
         var decimalPlaces = 0
         var i : Double = incVal
         while (i < 1) {
@@ -271,6 +275,9 @@ object Domain {
     }
 
     fun getDomainEquip(equipId : String) : DomainEquip? {
+        if (equipId.isEmpty()) {
+            addDomainEquips(hayStack)
+        }
         return equips[equipId]
     }
 
@@ -340,10 +347,7 @@ object Domain {
             CcuLog.d(CCUTagsDb.TAG_CCU_HS, "Invalid point write attempt: $domainName")
         }
     }
-    @JvmStatic
-    fun reaPriorityValByDomainName(domainName: String, equipRef: String): Double {
-        return hayStack.readPointPriorityValByQuery("point and domainName == \"$domainName\" and equipRef == \"$equipRef\"")
-    }
+
     fun getListOfDisNameByDomainName(domainName: String, model: SeventyFiveFProfileDirective) : List<String> {
         val valuesList: MutableList<String> = mutableListOf()
         val point = model.points.find { it.domainName == domainName }
@@ -355,6 +359,11 @@ object Domain {
             }
         }
         return valuesList
+    }
+
+    @JvmStatic
+    fun getEquipDevices() : Map<String,DomainDevice> {
+        return devices
     }
 
     /*we should make sure domain equip's are initialised before accessing Domain equips

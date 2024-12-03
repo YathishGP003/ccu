@@ -10,7 +10,7 @@ import a75f.io.logic.bo.building.hvac.StandaloneFanStage
  * Created by Manjunath K on 01-08-2022.
  */
 
-abstract class HyperStatFanCoilUnit: HyperStatProfile(){
+abstract class  HyperStatFanCoilUnit: HyperStatProfile(){
     /* Flags for checking if the current stage is lowest
     *  Eg: If FAN MEDIUM and FAN HIGH is used, then FAN MEDIUM is the lowest stage */
     private var lowestStageFanLow = false
@@ -79,7 +79,7 @@ abstract class HyperStatFanCoilUnit: HyperStatProfile(){
             ) 1 else 0
         }
         if(relayState != -1){
-            updateLogicalPointIdValue(logicalPointId, relayState.toDouble())
+            updateLogicalPoint(logicalPointId, relayState.toDouble())
         }
         if (getCurrentLogicalPointStatus(logicalPointId) == 1.0) {
             relayStages[Stage.FAN_1.displayName] = 1
@@ -122,7 +122,7 @@ abstract class HyperStatFanCoilUnit: HyperStatProfile(){
         }
 
         if(relayState != -1){
-            updateLogicalPointIdValue(logicalPointId, relayState.toDouble())
+            updateLogicalPoint(logicalPointId, relayState.toDouble())
         }
         if (getCurrentLogicalPointStatus(logicalPointId) == 1.0) {
             relayStages[Stage.FAN_2.displayName] = 1
@@ -157,7 +157,7 @@ abstract class HyperStatFanCoilUnit: HyperStatProfile(){
         }
 
         if(relayState != -1){
-            updateLogicalPointIdValue(logicalPointId, relayState.toDouble())
+            updateLogicalPoint(logicalPointId, relayState.toDouble())
         }
         if (getCurrentLogicalPointStatus(logicalPointId) == 1.0) {
             relayStages[Stage.FAN_3.displayName] = 1
@@ -179,7 +179,7 @@ abstract class HyperStatFanCoilUnit: HyperStatProfile(){
             var fanLoopForAnalog = 0
             if (fanMode == StandaloneFanStage.AUTO) {
                 if (conditioningMode == StandaloneConditioningMode.OFF) {
-                    updateLogicalPointIdValue(logicalPointsList[port]!!, 0.0)
+                    updateLogicalPoint(logicalPointsList[port]!!, 0.0)
                     return
                 }
                 fanLoopForAnalog = fanLoopOutput
@@ -205,7 +205,7 @@ abstract class HyperStatFanCoilUnit: HyperStatProfile(){
                 }
             }
             if (fanLoopForAnalog > 0) analogOutStages[AnalogOutput.FAN_SPEED.name] = 1 else analogOutStages.remove(AnalogOutput.FAN_SPEED.name)
-            updateLogicalPointIdValue(logicalPointsList[port]!!, fanLoopForAnalog.toDouble())
+            updateLogicalPoint(logicalPointsList[port]!!, fanLoopForAnalog.toDouble())
         }
     }
 

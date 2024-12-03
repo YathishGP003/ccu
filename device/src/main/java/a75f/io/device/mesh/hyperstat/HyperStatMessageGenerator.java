@@ -1,5 +1,10 @@
 package a75f.io.device.mesh.hyperstat;
 
+import static a75f.io.device.mesh.hyperstat.HyperStatControlUtilKt.getHyperStatControlMessage;
+import static a75f.io.device.mesh.hyperstat.HyperStatControlUtilKt.getHyperStatDevice;
+import static a75f.io.device.mesh.hyperstat.HyperStatSettingsUtilKt.getHyperStatSettings2Message;
+import static a75f.io.device.mesh.hyperstat.HyperStatSettingsUtilKt.getHyperStatSettings3Message;
+import static a75f.io.device.mesh.hyperstat.HyperStatSettingsUtilKt.getHyperStatSettingsMessage;
 import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_ONE;
 import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_THREE;
 import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_TWO;
@@ -37,23 +42,7 @@ import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode;
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage;
 import a75f.io.logic.bo.building.hyperstat.common.BasicSettings;
 import a75f.io.logic.bo.building.schedules.Occupancy;
-import a75f.io.logic.bo.util.TemperatureMode;
 import a75f.io.logic.tuners.TunerConstants;
-
-import static a75f.io.logic.bo.building.schedules.Occupancy.AUTOAWAY;
-import static a75f.io.logic.bo.building.schedules.Occupancy.UNOCCUPIED;
-import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_ONE;
-import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_THREE;
-import static a75f.io.logic.bo.building.definitions.Port.ANALOG_OUT_TWO;
-import static a75f.io.logic.bo.building.definitions.Port.RELAY_FIVE;
-import static a75f.io.logic.bo.building.definitions.Port.RELAY_FOUR;
-import static a75f.io.logic.bo.building.definitions.Port.RELAY_ONE;
-import static a75f.io.logic.bo.building.definitions.Port.RELAY_SIX;
-import static a75f.io.logic.bo.building.definitions.Port.RELAY_THREE;
-import static a75f.io.logic.bo.building.definitions.Port.RELAY_TWO;
-
-import android.util.Log;
-
 
 public class HyperStatMessageGenerator {
     
@@ -96,6 +85,11 @@ public class HyperStatMessageGenerator {
      */
     public static HyperStatSettingsMessage_t getSettingsMessage(String zone, int address,
                                                                 String equipRef) {
+        HashMap hsDevice = getHyperStatDevice(address);
+        if (!hsDevice.isEmpty()) {
+            return getHyperStatSettingsMessage(equipRef, zone);
+        }
+
         int temperatureMode = (int) Domain.readValAtLevelByDomain(DomainName.temperatureMode,
                 TunerConstants.SYSTEM_BUILDING_VAL_LEVEL);
 
@@ -139,7 +133,7 @@ public class HyperStatMessageGenerator {
             .setDisplayPM25(isDisplayP2p5(equipRef))
             .setCo2AlertTarget((int)readCo2ThresholdValue(equipRef))
             .setPm25AlertTarget((int)readPm2p5ThresholdValue(equipRef))
-            .setVocAlertTarget((int)readVocThresholdValue(equipRef))
+            .setVocAlertTarget(4000)
             .setHyperstatLinearFanSpeeds(HyperStatSettingsUtil.Companion.getLinearFanSpeedDetails(equipRef))
             .setHyperstatStagedFanSpeeds(HyperStatSettingsUtil.Companion.getStagedFanSpeedDetails(equipRef))
                 .setTemperatureMode(temperatureMode == 0 ? HyperStat.HyperStatTemperatureMode_e.HYPERSTAT_TEMP_MODE_DUAL_FIXED_DB
@@ -154,7 +148,21 @@ public class HyperStatMessageGenerator {
 
 
     }
-    
+    public static HyperStat.HyperStatSettingsMessage2_t getSetting2Message(int address, String equipRef){
+        HashMap hsDevice = getHyperStatDevice(address);
+        if (!hsDevice.isEmpty()) {
+            return getHyperStatSettings2Message(equipRef);
+        }
+        return  HyperStatSettingsUtil.Companion.getSetting2Message(address,equipRef,CCUHsApi.getInstance());
+    }
+
+    public static HyperStat.HyperStatSettingsMessage3_t getSetting3Message(int address, String equipRef){
+        HashMap hsDevice = getHyperStatDevice(address);
+        if (!hsDevice.isEmpty()) {
+            return getHyperStatSettings3Message(equipRef);
+        }
+        return  HyperStatSettingsUtil.Companion.getSetting3Message(address,equipRef);
+    }
     /**
      * Generate control message for a node from haystack data.
      *
@@ -164,6 +172,11 @@ public class HyperStatMessageGenerator {
      */
     public static HyperStatControlsMessage_t.Builder getControlMessage(int address, String equipRef) {
 
+        HashMap hsDevice = getHyperStatDevice(address);
+        if (!hsDevice.isEmpty()) {
+           return getHyperStatControlMessage(hsDevice);
+        }
+        // Remove file code once dm is migrated
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap device = hayStack.read("device and addr == \"" + address + "\"");
         String temperatureMode = (int) Domain.readValAtLevelByDomain(DomainName.temperatureMode,
@@ -184,7 +197,7 @@ public class HyperStatMessageGenerator {
         controls.setUnoccupiedMode(isInUnOccupiedMode(equipRef));
         controls.setOperatingMode(getOperatingMode(equipRef));
 
-        Log.i(L.TAG_CCU_DEVICE,
+        CcuLog.i(L.TAG_CCU_DEVICE,
                 "Desired Heat temp "+((int)getDesiredTempHeating(equipRef) * 2)+
                  "\n Desired Cool temp "+((int)getDesiredTempCooling(equipRef) * 2)+
                  "\n DeviceFanMode "+getDeviceFanMode(settings).name()+
@@ -193,48 +206,45 @@ public class HyperStatMessageGenerator {
                 "\n operatingMode :"+controls.getOperatingMode()+
                  "\n occupancyMode :"+isInUnOccupiedMode(equipRef)+
                 "\n TemperatureMode :"+temperatureMode);
-        controls.setFanSpeed(getDeviceFanMode(settings));
-        controls.setConditioningMode(getConditioningMode(settings));
-        controls.setUnoccupiedMode(isInUnOccupiedMode(equipRef));
 
         if (!device.isEmpty()) {
             CcuLog.i(L.TAG_CCU_DEVICE, "===================Device Layer==================================");
             DeviceHSUtil.getEnabledCmdPointsWithRefForDevice(device, hayStack).forEach(rawPoint -> {
                 double logicalVal;
-                if(rawPoint.getMarkers().contains(Tags.WRITABLE)){
+                if (rawPoint.getMarkers().contains(Tags.WRITABLE)) {
                     logicalVal = hayStack.readPointPriorityVal(rawPoint.getId());
-                    CcuLog.d(L.TAG_CCU_DEVICE, "test-writable READ hyperstat ##getControlMessage: writable id->"+rawPoint.getId()+"<logicalVal:>"+logicalVal+"<-dis->"+rawPoint.getDisplayName());
-                }else{
+                    CcuLog.d(L.TAG_CCU_DEVICE, "test-writable READ hyperstat ##getControlMessage: writable id->" + rawPoint.getId() + "<logicalVal:>" + logicalVal + "<-dis->" + rawPoint.getDisplayName());
+                } else {
                     logicalVal = hayStack.readHisValById(rawPoint.getPointRef());
-                    CcuLog.d(L.TAG_CCU_DEVICE, "test-writable READ hyperstat ##getControlMessage: not writable id->"+rawPoint.getId()+"<logicalVal:>"+logicalVal+"<-dis->"+rawPoint.getDisplayName());
+                    CcuLog.d(L.TAG_CCU_DEVICE, "test-writable READ hyperstat ##getControlMessage: not writable id->" + rawPoint.getId() + "<logicalVal:>" + logicalVal + "<-dis->" + rawPoint.getDisplayName());
                 }
                 int mappedVal;
                 if (Globals.getInstance().isTemporaryOverrideMode()) { //Mapping not required during override.
-                    mappedVal =  hayStack.readHisValById(rawPoint.getId()).shortValue();
+                    mappedVal = hayStack.readHisValById(rawPoint.getId()).shortValue();
                 } else {
                     mappedVal = (DeviceUtil.isAnalog(rawPoint.getPort())
                             ? DeviceUtil.mapAnalogOut(rawPoint.getType(), (short) logicalVal)
                             : DeviceUtil.mapDigitalOut(rawPoint.getType(), logicalVal > 0));
                 }
-                if(rawPoint.getMarkers().contains(Tags.WRITABLE)){
+                if (rawPoint.getMarkers().contains(Tags.WRITABLE)) {
                     hayStack.writeDefaultVal(rawPoint.getId(), (double) mappedVal);
                     double value = hayStack.readPointPriorityVal(rawPoint.getId());
                     hayStack.writeHisValById(rawPoint.getId(), value);
-                }else{
+                } else {
                     hayStack.writeHisValById(rawPoint.getId(), (double) mappedVal);
                 }
 
-                CcuLog.d(L.TAG_CCU_DEVICE, "test-writable WRITE hyperstat ##getControlMessage: writeHisValById id->"+rawPoint.getId()+"<mappedVal:>"+mappedVal+"<-dis->"+rawPoint.getDisplayName());
+                CcuLog.d(L.TAG_CCU_DEVICE, "test-writable WRITE hyperstat ##getControlMessage: writeHisValById id->" + rawPoint.getId() + "<mappedVal:>" + mappedVal + "<-dis->" + rawPoint.getDisplayName());
 
                 CcuLog.i(L.TAG_CCU_DEVICE,
-                        rawPoint.getType()+" "+logicalVal+" Port "+rawPoint.getPort() +" =  "+mappedVal);
+                        rawPoint.getType() + " " + logicalVal + " Port " + rawPoint.getPort() + " =  " + mappedVal);
                 setHyperStatPort(controls, Port.valueOf(rawPoint.getPort()), mappedVal);
             });
             CcuLog.i(L.TAG_CCU_DEVICE, "=====================================================");
         }
         return controls;
     }
-    
+
     public static double getDesiredTempCooling(String equipRef) {
         HashMap<Object, Object> desiredTempCooling;
         desiredTempCooling = CCUHsApi.getInstance().readEntity("desired and temp and " +
@@ -413,13 +423,6 @@ public class HyperStatMessageGenerator {
     public static boolean isDisplayP2p5(String equipRef){
         return CCUHsApi.getInstance().readDefaultVal(
                 "point and config and enabled and pm2p5 and equipRef == \""+equipRef+ "\"") == 1;
-    }
-
-    public static HyperStat.HyperStatSettingsMessage2_t getSetting2Message(int address, String equipRef){
-        return  HyperStatSettingsUtil.Companion.getSetting2Message(address,equipRef,CCUHsApi.getInstance());
-    }
-    public static HyperStat.HyperStatSettingsMessage3_t getSetting3Message(int address, String equipRef){
-        return  HyperStatSettingsUtil.Companion.getSetting3Message(address,equipRef);
     }
 
     public static HyperStatControlsMessage_t getHyperstatRebootControl(int address){

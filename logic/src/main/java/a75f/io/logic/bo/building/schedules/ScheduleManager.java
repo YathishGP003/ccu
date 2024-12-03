@@ -53,7 +53,7 @@ import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.erm.EmrProfile;
-import a75f.io.logic.bo.building.hyperstatmonitoring.HyperStatMonitoringProfile;
+import a75f.io.logic.bo.building.hyperstatmonitoring.HyperStatV2MonitoringProfile;
 import a75f.io.logic.bo.building.modbus.ModbusProfile;
 import a75f.io.logic.bo.building.plc.PlcProfile;
 import a75f.io.logic.bo.building.schedules.occupancy.DemandResponse;
@@ -76,7 +76,6 @@ import a75f.io.logic.interfaces.BuildingScheduleListener;
 import a75f.io.logic.interfaces.ZoneDataInterface;
 import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.TunerUtil;
-import a75f.io.logic.util.RxjavaUtil;
 import a75f.io.util.ExecutorTask;
 
 public class ScheduleManager {
@@ -236,7 +235,7 @@ public class ScheduleManager {
         for (ZoneProfile profile : zoneProfiles) {
 
             if (profile instanceof ModbusProfile
-                    || profile instanceof HyperStatMonitoringProfile
+                    || profile instanceof HyperStatV2MonitoringProfile
                     || profile instanceof PlcProfile
                     || profile instanceof EmrProfile
             ) {
@@ -382,7 +381,7 @@ public class ScheduleManager {
 
         for (ZoneProfile profile : zoneProfiles) {
             try {
-                if (profile instanceof ModbusProfile || profile instanceof HyperStatMonitoringProfile) {
+                if (profile instanceof ModbusProfile || profile instanceof HyperStatV2MonitoringProfile) {
                     continue;
                 }
                 EquipOccupancyHandler occupancyHandler = profile.getEquipOccupancyHandler();
@@ -422,7 +421,7 @@ public class ScheduleManager {
                     String roomRef = equip.getRoomRef();
 
                     if (profile instanceof ModbusProfile
-                            || profile instanceof HyperStatMonitoringProfile
+                            || profile instanceof HyperStatV2MonitoringProfile
                             || profile instanceof PlcProfile
                             || profile instanceof EmrProfile
                     ) {

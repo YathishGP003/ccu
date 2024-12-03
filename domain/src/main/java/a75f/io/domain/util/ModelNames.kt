@@ -13,10 +13,6 @@ object ModelNames {
     const val VAV_STAGED_RTU = "vav_staged_RTU"
     const val VAV_STAGED_RTU_VFD = "vav_staged_RTU_VFD"
     const val DAB_STAGED_RTU_VFD = "dab_staged_RTU_VFD"
-    const val HYPERSTAT_CPU = "hyperstatcpu"
-    const val HYPERSTAT_HPU = "hyperstathpu"
-    const val HYPERSTAT_2PFCU = "hyperstat2pfcu"
-    const val HYPERSTAT_4PFCU = "hyperstat4pfcu"
     const val CM_DEVICE = "cmBoardDevice"
     const val SMARTSTAT_DEVICE = "smartstatDevice"
     const val HELIONODE_DEVICE = "helionodeDevice"
@@ -46,5 +42,5 @@ object ModelNames {
     const val dabAdvancedHybridAhuV2 = "dabAdvancedHybridAhuV2"
     const val vavAdvancedHybridAhuV2 = "vavAdvancedHybridAhuV2"
     const val connectModuleDevice = "connectModuleDevice"
-
+    const val hyperStatCpu = "hyperstatCPU"
 }

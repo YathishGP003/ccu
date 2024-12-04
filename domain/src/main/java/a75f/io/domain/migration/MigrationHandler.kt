@@ -395,6 +395,9 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
                         )
                         val point = CCUHsApi.getInstance()
                             .readEntity("point and domainName == \"${diffDomain.domainName}\" and equipRef == \"${equip.id}\"")
+                        if(point["id"]==null) {
+                            return@forEach
+                        }
                         Log.d(Domain.LOG_TAG, "updated haystack point: $hayStackPoint")
                         if (Domain.readEquip(newModel.id)["roomRef"].toString() == "SYSTEM") {
                             hayStackPoint.roomRef = "SYSTEM"

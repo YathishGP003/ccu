@@ -69,6 +69,7 @@ public class PreferenceUtil {
     public static final String ZONE_CO2_MIGRATION = "ZONE_CO2_MIGRATION";
     public static final String MIGRATE_HIS_INTERPOLATE_FOR_DEVICE_POINTS = "migrateHisInterpolateForDeviceEntities";
     public static final String MIGRATE_ANALOG_INPUT_TYPE_FOR_VAV_DEVICE_POINT = "migrateAnalogInputTypeForVavDevicePoint";
+    public static final String DELETE_REDUNDANT_SETBACK_POINTS_FROM_HN_ACB_EQUIPS  = "deleteRedundantSetbackPointsFromHnAcbEquips";
     public static final String BACKFILL_DEFAULT_VALUE_MIGRATION = "backFillDefaultValueMigration";
     public static final String DAB_DAMPER_SIZE_MIGRATION = "dabDamperSizeMigration";
     public static final String BACNET_ID_MIGRATION = "bacnetIdUpdateMigration";
@@ -451,6 +452,14 @@ public class PreferenceUtil {
 
     public static void setRecoverHelioNodeACBTunersMigration() {
         setBooleanPreference(RECOVER_HELIO_NODE_ACB_TUNERS_MIGRATION, true);
+    }
+
+    public static boolean getDeleteRedundantSetbackPointsFromHnAcbEquips() {
+        return getBooleanPreference(DELETE_REDUNDANT_SETBACK_POINTS_FROM_HN_ACB_EQUIPS);
+    }
+
+    public static void setDeleteRedundantSetbackPointsFromHnAcbEquips() {
+        setBooleanPreference(DELETE_REDUNDANT_SETBACK_POINTS_FROM_HN_ACB_EQUIPS, true);
     }
 
     public static boolean getACBCondensateSensorMigration() {

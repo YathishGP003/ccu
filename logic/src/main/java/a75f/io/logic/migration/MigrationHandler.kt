@@ -217,6 +217,16 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             migrateDeadBandPoints(hayStack)
             PreferenceUtil.setDeadBandMigrationNotRequired()
         }
+        try {
+            if (!PreferenceUtil.getDeleteRedundantSetbackPointsFromHnAcbEquips()) {
+                VavAndAcbProfileMigration.recoverHelioNodeACBTuners(hayStack)
+                deleteRedundantSetbackPointsFromHnAcbEquips()
+                PreferenceUtil.setDeleteRedundantSetbackPointsFromHnAcbEquips()
+            }
+        } catch (e: Exception) {
+            //For now, we make sure it does not stop other migrations even if this fails.
+            CcuLog.e(L.TAG_CCU_MIGRATION_UTIL, "Error in deleteRedundantSetbackPointsFromHnAcbEquips $e")
+        }
         if(!PreferenceUtil.isVavCfmOnEdgeMigrationDone()) {
             VavAndAcbProfileMigration.addMinHeatingDamperPositionMigration(hayStack)
             PreferenceUtil.setVavCfmOnEdgeMigrationDone()
@@ -339,6 +349,35 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             updateMinCfmPointMaxVal(Pair(DomainName.minCFMReheating, DomainName.maxCFMReheating))
         }
         isMigrationOngoing = false
+    }
+
+    private fun deleteRedundantSetbackPointsFromHnAcbEquips() {
+        CcuLog.d(L.TAG_CCU_MIGRATION_UTIL , "deleteRedundantSetbackPointsFromHnAcbEquips started")
+        hayStack.readAllEntities("equip and domainName == \"helionodeActiveChilledBeam\"").forEach { hnAcbEquip ->
+                val nonDmDemandResponse = hayStack.readEntity("demand and response and setback and tuner and not domainName and equipRef==\"${hnAcbEquip["id"].toString()}\"")
+                if (nonDmDemandResponse.isNotEmpty()) {
+                    CcuLog.d(L.TAG_CCU_MIGRATION_UTIL , "deleteRedundantSetbackPointsFromHnAcbEquips: ${nonDmDemandResponse["id"].toString()}")
+                    val dmDemandResponseSetback = hayStack.readHDict("domainName==\"demandResponseSetback\" and equipRef==\"${hnAcbEquip["id"].toString()}\"")
+                    if (dmDemandResponseSetback != null && !dmDemandResponseSetback.isEmpty) {
+                        hayStack.updatePoint(Point.Builder().setHDict(dmDemandResponseSetback).build() , nonDmDemandResponse["id"].toString())
+                        CcuLog.d(L.TAG_CCU_MIGRATION_UTIL , "deleteRedundantSetbackPointsFromHnAcbEquips: demandResponse ${nonDmDemandResponse["id"].toString()} updated")
+                        hayStack.deleteWritablePoint(dmDemandResponseSetback["id"].toString()) // delete the duplicate point
+                    }
+                } else {
+                    CcuLog.d(L.TAG_CCU_MIGRATION_UTIL , "deleteRedundantSetbackPointsFromHnAcbEquips: no demandResponse found")
+                }
+                val nonDmAutoAway = hayStack.readEntity("auto and away and setback and not domainName and equipRef==\"${hnAcbEquip["id"].toString()}\"")
+                if (nonDmAutoAway.isNotEmpty()) {
+                    val dmAutoAway = hayStack.readHDict("domainName==\"autoAway\" and equipRef==\"${hnAcbEquip["id"].toString()}\"")
+                    if (dmAutoAway != null && !dmAutoAway.isEmpty) {
+                        hayStack.updatePoint(Point.Builder().setHDict(dmAutoAway).build() , nonDmAutoAway["id"].toString())
+                        CcuLog.d(L.TAG_CCU_MIGRATION_UTIL , "deleteRedundantSetbackPointsFromHnAcbEquips: autoAway ${nonDmAutoAway["id"].toString()} updated")
+                        hayStack.deleteWritablePoint(dmAutoAway["id"].toString())
+                    }
+                } else {
+                    CcuLog.d("MigrationHandler" , "deleteRedundantSetbackPointsFromHnAcbEquips: no autoAway found")
+                }
+            }
     }
 
     private fun migrateDeadBandPoints(hayStack: CCUHsApi) {
@@ -484,16 +523,16 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             )
         }
         val equipsList: MutableList<ArrayList<HashMap<Any, Any>>> = ArrayList()
-        equipsList.add(ccuHsApi.readAllEntities("equip and vav and not system"))
-        equipsList.add(ccuHsApi.readAllEntities("equip and dab and not system"))
-        equipsList.add(ccuHsApi.readAllEntities("equip and dualDuct"))
-        equipsList.add(ccuHsApi.readAllEntities("equip and standalone and smartstat"))
-        equipsList.add(ccuHsApi.readAllEntities("equip and standalone and hyperstat"))
-        equipsList.add(ccuHsApi.readAllEntities("equip and standalone and hyperstatsplit"))
-        equipsList.add(ccuHsApi.readAllEntities("equip and sse"))
-        equipsList.add(ccuHsApi.readAllEntities("equip and sse"))
-        equipsList.add(ccuHsApi.readAllEntities("equip and ti"))
-        equipsList.add(ccuHsApi.readAllEntities("equip and otn"))
+        equipsList.add(ccuHsApi.readAllEntities("equip and vav and not system and not domainName"))
+        equipsList.add(ccuHsApi.readAllEntities("equip and dab and not system and not domainName"))
+        equipsList.add(ccuHsApi.readAllEntities("equip and dualDuct and not domainName"))
+        equipsList.add(ccuHsApi.readAllEntities("equip and standalone and smartstat and not domainName"))
+        equipsList.add(ccuHsApi.readAllEntities("equip and standalone and hyperstat and not domainName"))
+        equipsList.add(ccuHsApi.readAllEntities("equip and standalone and hyperstatsplit and not domainName"))
+        equipsList.add(ccuHsApi.readAllEntities("equip and sse and not domainName"))
+        equipsList.add(ccuHsApi.readAllEntities("equip and sse and not domainName"))
+        equipsList.add(ccuHsApi.readAllEntities("equip and ti and not domainName"))
+        equipsList.add(ccuHsApi.readAllEntities("equip and otn and not domainName"))
 
         for (equips in equipsList) {
             for (equipMap in equips) {

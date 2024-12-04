@@ -319,10 +319,10 @@ public class TunerUpgrades {
 
     public static void migrateAutoAwaySetbackTuner(CCUHsApi hayStack) {
             //Create the tuner point on all equips
-            ArrayList<HashMap<Object, Object>> vavEquips = hayStack.readAllEntities("equip and vav and zone");
-            ArrayList<HashMap<Object, Object>> dabEquips = hayStack.readAllEntities("equip and dab and zone");
-            ArrayList<HashMap<Object, Object>> dabDualDuctEquips = hayStack.readAllEntities("equip and dualDuct");
-            ArrayList<HashMap<Object, Object>> ssEquips = hayStack.readAllEntities("equip and standalone and smartstat");
+            ArrayList<HashMap<Object, Object>> vavEquips = hayStack.readAllEntities("equip and vav and zone and not domainName");
+            ArrayList<HashMap<Object, Object>> dabEquips = hayStack.readAllEntities("equip and dab and zone and not domainName");
+            ArrayList<HashMap<Object, Object>> dabDualDuctEquips = hayStack.readAllEntities("equip and dualDuct and not domainName");
+            ArrayList<HashMap<Object, Object>> ssEquips = hayStack.readAllEntities("equip and standalone and smartstat and not domainName");
             createPoint(hayStack,vavEquips);
             createPoint(hayStack,dabEquips);
             createPoint(hayStack,dabDualDuctEquips);

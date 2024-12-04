@@ -42,6 +42,7 @@ import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.properties.Delegates
@@ -71,6 +72,8 @@ open class SseProfileViewModel : ViewModel() {
     lateinit var temperatureOffsetsList: List<String>
 
     private lateinit var pairingCompleteListener: OnPairingCompleteListener
+    private var saveJob : Job? = null
+
 
     fun init(bundle: Bundle, context: Context, hayStack: CCUHsApi) {
         deviceAddress = bundle.getShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR)
@@ -177,30 +180,32 @@ open class SseProfileViewModel : ViewModel() {
     }
 
     fun saveConfiguration() {
-        ProgressDialogUtils.showProgressDialog(context, "Saving SSE Configuration")
-        viewModelScope.launch(highPriorityDispatcher) {
-            CCUHsApi.getInstance().resetCcuReady()
-            setUpSseProfile()
-            CcuLog.i(Domain.LOG_TAG, "SSE Profile Setup complete")
-            withContext(Dispatchers.Main) {
-                context.sendBroadcast(Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED))
-                showToast("SSE Configuration saved successfully", context)
-                CcuLog.i(Domain.LOG_TAG, "Close Pairing dialog")
-                ProgressDialogUtils.hideProgressDialog()
-                pairingCompleteListener.onPairingComplete()
-            }
+        if (saveJob == null) {
+            ProgressDialogUtils.showProgressDialog(context, "Saving SSE Configuration")
+            saveJob = viewModelScope.launch(highPriorityDispatcher) {
+                CCUHsApi.getInstance().resetCcuReady()
+                setUpSseProfile()
+                CcuLog.i(Domain.LOG_TAG, "SSE Profile Setup complete")
+                withContext(Dispatchers.Main) {
+                    context.sendBroadcast(Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED))
+                    showToast("SSE Configuration saved successfully", context)
+                    CcuLog.i(Domain.LOG_TAG, "Close Pairing dialog")
+                    ProgressDialogUtils.hideProgressDialog()
+                    pairingCompleteListener.onPairingComplete()
+                }
 
-            L.saveCCUState()
-            DesiredTempDisplayMode.setModeType(zoneRef, CCUHsApi.getInstance())
-            hayStack.syncEntityTree()
-            CCUHsApi.getInstance().setCcuReady()
-            CcuLog.i(Domain.LOG_TAG, "Send seed for $deviceAddress")
-            LSerial.getInstance()
-                .sendSeedMessage(false, false, deviceAddress, zoneRef, floorRef)
-            CcuLog.i(Domain.LOG_TAG, "SSE Profile Pairing complete")
-            if (ProgressDialogUtils.isDialogShowing()) {
-                ProgressDialogUtils.hideProgressDialog()
-                pairingCompleteListener.onPairingComplete()
+                L.saveCCUState()
+                DesiredTempDisplayMode.setModeType(zoneRef, CCUHsApi.getInstance())
+                hayStack.syncEntityTree()
+                CCUHsApi.getInstance().setCcuReady()
+                CcuLog.i(Domain.LOG_TAG, "Send seed for $deviceAddress")
+                LSerial.getInstance()
+                    .sendSeedMessage(false, false, deviceAddress, zoneRef, floorRef)
+                CcuLog.i(Domain.LOG_TAG, "SSE Profile Pairing complete")
+                if (ProgressDialogUtils.isDialogShowing()) {
+                    ProgressDialogUtils.hideProgressDialog()
+                    pairingCompleteListener.onPairingComplete()
+                }
             }
         }
     }

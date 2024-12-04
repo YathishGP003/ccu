@@ -8,6 +8,7 @@ import a75f.io.api.haystack.Tags;
 import a75f.io.device.mesh.DeviceUtil;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.bo.building.system.vav.VavSystemController;
+import a75f.io.renatus.profiles.oao.OaoUtilKt;
 import a75f.io.renatus.util.SystemProfileUtil;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -590,6 +591,7 @@ public class VavHybridRtuProfile extends Fragment implements AdapterView.OnItemS
                 () -> ProgressDialogUtils.showProgressDialog(getActivity(),"Saving VAV Configuration"),
                 () -> systemProfile.setConfigAssociation(config, val),
                 () -> {
+                    OaoUtilKt.updateOaoPoints();
                     systemProfile.updateStagesSelected();
                     ProgressDialogUtils.hideProgressDialog();
                     updateSystemMode();

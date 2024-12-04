@@ -73,6 +73,8 @@ import a75f.io.renatus.profiles.hss.cpu.HyperStatSplitCpuFragment;
 import a75f.io.renatus.profiles.dab.DabProfileConfigFragment;
 import a75f.io.renatus.profiles.otn.OtnProfileConfigFragment;
 import a75f.io.renatus.profiles.sse.SseProfileConfigFragment;
+import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatV2CpuFragment;
+import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatMonitoringFragment;
 import a75f.io.renatus.profiles.vav.VavProfileConfigFragment;
 import a75f.io.renatus.modbus.ModbusConfigView;
 import a75f.io.renatus.modbus.util.ModbusLevel;
@@ -1108,8 +1110,8 @@ public class FloorPlanFragment extends Fragment {
                             .newInstance(Short.parseShort(nodeAddress), zone.getId(), floor.getId(), helioNode, profile.getProfileType()), SseProfileConfigFragment.Companion.getID());
                     break;
                 case HYPERSTAT_MONITORING:
-                    showDialogFragment(HyperStatMonitoringFragment.newInstance(Short.parseShort(nodeAddress)
-                            , zone.getId(), floor.getId(), profile.getProfileType()), HyperStatMonitoringFragment.ID);
+                    showDialogFragment(HyperStatMonitoringFragment.Companion.newInstance(Short.parseShort(nodeAddress)
+                            , zone.getId(), floor.getId(),NodeType.HYPER_STAT, profile.getProfileType()), HyperStatMonitoringFragment.Companion.getID());
                     break;
                 case OTN:
                     showDialogFragment(OtnProfileConfigFragment.Companion.newInstance(Short.parseShort(nodeAddress),
@@ -1117,10 +1119,14 @@ public class FloorPlanFragment extends Fragment {
                     break;
                 case HYPERSTAT_VRV:
                     showDialogFragment(HyperStatVrvFragment.newInstance(Short.parseShort(nodeAddress)
-                        , zone.getId(), floor.getId()), HyperStatMonitoringFragment.ID);
+                        , zone.getId(), floor.getId()), HyperStatVrvFragment.ID);
                     break;
 
                 case HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT:
+                    showDialogFragment(HyperStatV2CpuFragment.newInstance(Short.parseShort(nodeAddress)
+                                    , zone.getId(), floor.getId(),NodeType.HYPER_STAT, profile.getProfileType()),
+                            HyperStatV2CpuFragment.ID);
+                    break;
                 case HYPERSTAT_TWO_PIPE_FCU:
                 case HYPERSTAT_HEAT_PUMP_UNIT:
                     showDialogFragment(HyperStatFragment.newInstance(Short.parseShort(nodeAddress)
@@ -1160,8 +1166,6 @@ public class FloorPlanFragment extends Fragment {
             }
         } else
             Toast.makeText(getActivity(), "Zone profile is empty, recheck your DB", Toast.LENGTH_LONG).show();
-
-
     }
 
     static class FloorComparator implements Comparator<Floor> {

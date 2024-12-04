@@ -1,7 +1,6 @@
 package a75f.io.domain.config
 
-import a75f.io.domain.api.Domain
-import a75f.io.logger.CcuLog
+import a75f.io.domain.api.Point
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfilePointDef
 import io.seventyfivef.domainmodeler.common.point.NumericConstraint
@@ -88,6 +87,12 @@ abstract class ProfileConfiguration (var nodeAddress : Int, var nodeType : Strin
 
     override fun toString(): String {
         return "nodeAddr $nodeAddress roomRef $roomRef floorRe $floorRef"
+    }
+
+    fun getActivePointValue(point: Point, fallback: ValueConfig): Double {
+        if (point.pointExists())
+            return point.readDefaultVal()
+        return fallback.currentVal
     }
 
 }

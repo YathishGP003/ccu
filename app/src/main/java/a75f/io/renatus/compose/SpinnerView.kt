@@ -163,7 +163,8 @@ fun SpinnerElementOption(
     unit: String,
     itemSelected: (Option) -> Unit,
     previewWidth : Int = 130,
-    viewModel: AdvancedHybridAhuViewModel? = null
+    viewModel: AdvancedHybridAhuViewModel? = null,
+    disabledIndices: List<Int> = emptyList()
 ) {
     val selectedItem = remember { mutableStateOf(defaultSelection) }
     val expanded = remember { mutableStateOf(false) }
@@ -239,7 +240,8 @@ fun SpinnerElementOption(
                             selectedIndex = index
                             expanded.value = false
                             itemSelected(item)
-                        })
+                        },
+                        enabled = !disabledIndices.contains(index))
                 }
             }
             LaunchedEffect(expanded) {
@@ -273,7 +275,8 @@ fun SearchSpinnerElement(
     unit: String,
     onSelect: (Option) -> Unit,
     width: Int,
-    isEnabled: Boolean = true
+    isEnabled: Boolean = true,
+    disabledIndices: List<Int> = emptyList()
 ) {
     val selectedItem = remember { mutableStateOf(default) }
     val expanded = remember { mutableStateOf(false) }
@@ -406,7 +409,7 @@ fun SearchSpinnerElement(
                                     selectedIndex = allItems.indexOf(it)
                                     searchedOption = ""
                                     onSelect(it)
-                                })
+                                }, enabled = !disabledIndices.contains(it.index))
                         }
                     }
                     LaunchedEffect(expanded) {

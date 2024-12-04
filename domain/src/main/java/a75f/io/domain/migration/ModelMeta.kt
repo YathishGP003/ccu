@@ -16,6 +16,9 @@ import a75f.io.domain.util.MODEL_HN_VAV_ACB
 import a75f.io.domain.util.MODEL_HN_VAV_NO_FAN
 import a75f.io.domain.util.MODEL_HN_VAV_PARALLEL_FAN
 import a75f.io.domain.util.MODEL_HN_VAV_SERIES_FAN
+import a75f.io.domain.util.MODEL_HYPERSTAT_CPU
+import a75f.io.domain.util.MODEL_HYPERSTAT_DEVICE
+import a75f.io.domain.util.MODEL_HYPERSTAT_MONITORING
 import a75f.io.domain.util.MODEL_HYPERSTAT_SPLIT_CPU
 import a75f.io.domain.util.MODEL_HYPERSTAT_SPLIT_DEVICE
 import a75f.io.domain.util.MODEL_SMART_NODE_DAB
@@ -78,10 +81,12 @@ fun getRequiredModels(): List<String> {
             MODEL_DAB_ADVANCED_AHU_V2_CONNECT,
             MODEL_CM_DEVICE,
             MODEL_CONNECT_DEVICE,
+            MODEL_HYPERSTAT_DEVICE,
+            MODEL_HYPERSTAT_CPU,
             MODEL_SN_OAO,
-
-
             MODEL_SMART_NODE_SSE,
-            MODEL_HELIO_NODE_SSE
+            MODEL_HELIO_NODE_SSE,
+            MODEL_HYPERSTAT_CPU,
+            MODEL_HYPERSTAT_MONITORING,
     )
 }

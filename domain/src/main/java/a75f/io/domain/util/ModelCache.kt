@@ -105,6 +105,9 @@ object ModelCache {
 
         modelContainer[MODEL_OTN_DEVICE] = getModelById(MODEL_OTN_DEVICE)
         CcuLog.i(Domain.LOG_TAG, "otnDevice loaded")
+
+        modelContainer[MODEL_HYPERSTAT_DEVICE] = getModelById(MODEL_HYPERSTAT_DEVICE)
+        CcuLog.i(Domain.LOG_TAG, "hyperstat device loaded")
     }
     
     private fun loadVavZoneEquipModels() {
@@ -134,6 +137,9 @@ object ModelCache {
 
         modelContainer[MODEL_SMART_NODE_DAB] = getModelById(MODEL_SMART_NODE_DAB)
         CcuLog.i(Domain.LOG_TAG, "smartnodeDAB equip model loaded")
+
+        modelContainer[MODEL_HELIO_NODE_DAB] = getModelById(MODEL_HELIO_NODE_DAB)
+        CcuLog.i(Domain.LOG_TAG, "helionodeDAB equip model loaded")
 
         modelContainer[MODEL_HELIO_NODE_DAB] = getModelById(MODEL_HELIO_NODE_DAB)
         CcuLog.i(Domain.LOG_TAG, "helionodeDAB equip model loaded")

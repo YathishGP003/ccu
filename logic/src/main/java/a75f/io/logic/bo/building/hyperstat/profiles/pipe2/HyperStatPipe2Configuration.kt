@@ -3,7 +3,6 @@ package a75f.io.logic.bo.building.hyperstat.profiles.pipe2
 import a75f.io.logic.bo.building.BaseProfileConfiguration
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.AnalogInAssociation
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.AnalogInState
-import a75f.io.logic.bo.building.hyperstat.profiles.cpu.HyperStatCpuConfiguration
 
 /**
  * Created by Manjunath K on 26-07-2022.
@@ -48,7 +47,7 @@ class HyperStatPipe2Configuration: BaseProfileConfiguration() {
     var displayCo2 = true
 
     companion object {
-        fun default(): HyperStatCpuConfiguration = HyperStatCpuConfiguration()
+        fun default(): HyperStatPipe2Configuration = HyperStatPipe2Configuration()
     }
 }
 

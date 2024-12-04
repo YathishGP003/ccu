@@ -38,6 +38,7 @@ import a75f.io.renatus.profiles.hss.cpu.HyperStatSplitCpuFragment;
 import a75f.io.renatus.profiles.dab.DabProfileConfigFragment;
 import a75f.io.renatus.profiles.oao.OAOProfileFragment;
 import a75f.io.renatus.profiles.sse.SseProfileConfigFragment;
+import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatV2CpuFragment;
 import a75f.io.renatus.profiles.vav.BypassConfigFragment;
 import a75f.io.renatus.profiles.vav.VavProfileConfigFragment;
 import a75f.io.renatus.util.CCUUiUtil;
@@ -378,8 +379,17 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
                 showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
             }
         }
-        else if (mProfileType == ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT
-                || mProfileType == ProfileType.HYPERSTAT_TWO_PIPE_FCU
+        else if (mProfileType == ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT) {
+            if (L.isSimulation()) {
+                showDialogFragment(HyperStatV2CpuFragment.newInstance(mNodeAddress, mRoomName, mFloorName,mNodeType, mProfileType),
+                        HyperStatV2CpuFragment.ID);
+            }
+            else {
+                FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan.getInstance(mNodeAddress, mRoomName, mFloorName, mNodeType, mProfileType);
+                showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
+            }
+        }
+        else if (mProfileType == ProfileType.HYPERSTAT_TWO_PIPE_FCU
                 || mProfileType == ProfileType.HYPERSTAT_HEAT_PUMP_UNIT){
             if (L.isSimulation()) {
                 showDialogFragment(

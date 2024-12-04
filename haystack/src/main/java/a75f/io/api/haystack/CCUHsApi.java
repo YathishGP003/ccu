@@ -1336,7 +1336,8 @@ public class CCUHsApi
                 hisSyncHandler.addSensorPendingSync(id);
             }
         }
-        CcuLog.i("CCU_HS","writeHisValById "+id+" timeMS: "+(System.currentTimeMillis()- time));
+        CcuLog.d(TAG_CCU_HS,"writeHisValById "+id+" timeMS: "+(System.currentTimeMillis()- time)+
+                " prevVal: "+prevVal+" currentVal: "+val+" item: "+item);
     }
 
     /**

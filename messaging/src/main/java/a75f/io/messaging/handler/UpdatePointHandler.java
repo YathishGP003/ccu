@@ -1,6 +1,7 @@
 package a75f.io.messaging.handler;
 
 import static a75f.io.logic.bo.building.BackfillUtilKt.updateBackfillDuration;
+import static a75f.io.messaging.handler.CPUReconfigHandlerKt.reconfigureHSCPUV2;
 import static a75f.io.messaging.handler.DataSyncHandler.isCloudEntityHasLatestValue;
 
 import android.content.Context;
@@ -125,6 +126,10 @@ public class UpdatePointHandler implements MessageHandler
             updateUI(localPoint);
             return;
         }
+
+        if (HSUtil.isCPUEquip(pointUid, CCUHsApi.getInstance())){
+            reconfigureHSCPUV2(msgObject, localPoint);
+        }
         
         if (HSUtil.isSystemConfigOutputPoint(pointUid, CCUHsApi.getInstance())
                 || HSUtil.isSystemConfigHumidifierType(pointUid, CCUHsApi.getInstance())
@@ -145,7 +150,7 @@ public class UpdatePointHandler implements MessageHandler
         }
 
         if (HSUtil.isMonitoringConfig(pointUid, CCUHsApi.getInstance())) {
-            HyperStatMonitoringConfigHandler.updateConfigPoint(msgObject, localPoint, CCUHsApi.getInstance());
+            HyperStatMonitoringConfigHandler.reconfigureMonitoring(msgObject, localPoint);
             updatePoints(localPoint);
             return;
         }
@@ -205,6 +210,12 @@ public class UpdatePointHandler implements MessageHandler
         if(HSUtil.isDABTrueCFMConfig(pointUid, CCUHsApi.getInstance())){
             TrueCFMDABConfigHandler.updateDABConfigPoint(msgObject, localPoint, hayStack);
             hayStack.scheduleSync();
+            return;
+        }
+
+        if(HSUtil.isDamperSizeConfigPoint(pointUid, CCUHsApi.getInstance())){
+            TrueCFMDABConfigHandler.updatePointVal(localPoint, msgObject);
+            updatePoints(localPoint);
             return;
         }
 

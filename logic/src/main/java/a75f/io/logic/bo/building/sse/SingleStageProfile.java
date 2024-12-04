@@ -14,6 +14,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Occupied;
+import a75f.io.domain.api.Domain;
 import a75f.io.domain.api.Point;
 import a75f.io.domain.config.ProfileConfiguration;
 import a75f.io.domain.equips.SseEquip;
@@ -105,6 +106,8 @@ public class SingleStageProfile extends ZoneProfile
     @Override
     public void updateZonePoints()
     {
+        Equip equip = new Equip.Builder().setHashMap(CCUHsApi.getInstance().read("equip and group == \"" + this.nodeAddr + "\"")).build();
+        sseEquip = (SseEquip) Domain.INSTANCE.getDomainEquip(equip.getId());
         if (isRFDead()) {
             handleRFDead();
             return;
@@ -120,140 +123,143 @@ public class SingleStageProfile extends ZoneProfile
             return;
         }
 
-            Equip equip = new Equip.Builder().setHashMap(CCUHsApi.getInstance().read("equip and group == \"" + this.nodeAddr + "\"")).build();
-            double setTempCooling = sseEquip.getDesiredTempCooling().readPriorityVal();
-            double setTempHeating = sseEquip.getDesiredTempHeating().readPriorityVal();
-            double avgSetTemp = getDesiredTemp();
-            double roomTemp = getCurrentTemp();
-            //For dual temp but for single mode we use tuners
-            double hysteresis = sseEquip.getStandaloneStage1Hysteresis().readPriorityVal();
-            double relay1config = sseEquip.getRelay1OutputState().readDefaultVal();
-            SSEStage sseStage = SSEStage.NOT_INSTALLED;
-            if(relay1config > 0)
-                sseStage = SSEStage.values()[(int) sseEquip.getRelay1OutputAssociation().readDefaultVal() + 1];
-            double relay2config = sseEquip.getRelay2OutputState().readDefaultVal();
-            double relay2Association = sseEquip.getRelay2OutputAssociation().readDefaultVal();
-            String zoneId = HSUtil.getZoneIdFromEquipId(equip.getId());
-            Occupied occuStatus = ScheduleManager.getInstance().getOccupiedModeCache(zoneId);
-            boolean occupied = ScheduleUtil.isZoneOccupied(CCUHsApi.getInstance(), zoneId, Occupancy.OCCUPIED);
-            boolean autoForceOccupied = ScheduleUtil.isZoneOccupied(CCUHsApi.getInstance(), zoneId, Occupancy.AUTOFORCEOCCUPIED);
-            boolean forceOccupied = ScheduleUtil.isZoneOccupied(CCUHsApi.getInstance(), zoneId, Occupancy.FORCEDOCCUPIED);
-            String stageStatus = "";
-            CcuLog.d(TAG_CCU_ZONE, "sse profile =" + roomTemp + "," + sseStage.name()+","+avgSetTemp);
-            if ((roomTemp > 0) && (sseStage == SSEStage.COOLING)) {
-                //Zone is in Cooling
-                state = COOLING;
-                if (roomTemp >= setTempCooling) {
+        double setTempCooling = sseEquip.getDesiredTempCooling().readPriorityVal();
+        double setTempHeating = sseEquip.getDesiredTempHeating().readPriorityVal();
+        double avgSetTemp = getDesiredTemp();
+        double roomTemp = getCurrentTemp();
+        //For dual temp but for single mode we use tuners
+        double hysteresis = sseEquip.getStandaloneStage1Hysteresis().readPriorityVal();
+        double relay1config = sseEquip.getRelay1OutputState().readDefaultVal();
+        SSEStage sseStage = SSEStage.NOT_INSTALLED;
+        if(relay1config > 0)
+            sseStage = SSEStage.values()[(int) sseEquip.getRelay1OutputAssociation().readDefaultVal() + 1];
+        double relay2config = sseEquip.getRelay2OutputState().readDefaultVal();
+        double relay2Association = sseEquip.getRelay2OutputAssociation().readDefaultVal();
+        String zoneId = HSUtil.getZoneIdFromEquipId(equip.getId());
+        Occupied occuStatus = ScheduleManager.getInstance().getOccupiedModeCache(zoneId);
+        boolean occupied = ScheduleUtil.isZoneOccupied(CCUHsApi.getInstance(), zoneId, Occupancy.OCCUPIED);
+        boolean autoForceOccupied = ScheduleUtil.isZoneOccupied(CCUHsApi.getInstance(), zoneId, Occupancy.AUTOFORCEOCCUPIED);
+        boolean forceOccupied = ScheduleUtil.isZoneOccupied(CCUHsApi.getInstance(), zoneId, Occupancy.FORCEDOCCUPIED);
+        String stageStatus = "";
+        CcuLog.d(TAG_CCU_ZONE, "hysteresis =" + hysteresis + ", relay1config = " + relay1config + "," +
+                " relay2config = " + relay2config + ", relay2Association = " + relay2Association
+                + ", occupied = " + occupied + ", autoForceOccupied = " + autoForceOccupied + ", forceOccupied = " + forceOccupied
+                + ", setTempCooling = " + setTempCooling + ", setTempHeating = " + setTempHeating + ", sseStage = " + sseStage.name()
+                + ", node = " + this.nodeAddr + ", occuStatus = " + occuStatus + ", avgSetTemp = " + avgSetTemp + "," +
+                " roomTemp = " + roomTemp + ", setTempCooling = " + setTempCooling + ", setTempHeating = " + setTempHeating);
+        if ((roomTemp > 0) && (sseStage == SSEStage.COOLING)) {
+            //Zone is in Cooling
+            state = COOLING;
+            if (roomTemp >= setTempCooling) {
+                stageStatus = " Stage 1 Cool ON";
+                setCmdSignal(sseEquip.getCoolingStage1(), 1.0);
+                if (relay2config > 0) {
+                    if(relay2Association == SSERelay2.FAN.ordinal()){
+                        stageStatus = stageStatus + ", Fan ON";
+                        setCmdSignal(sseEquip.getFanStage1(), 1.0);
+                    }else{
+                        if(occupied) {
+                            stageStatus = stageStatus + ", Equip ON";
+                            sseEquip.getOccupiedEnable().writeHisVal(1.0);
+                        }
+                        else {
+                            stageStatus = stageStatus + ", Equip OFF";
+                            sseEquip.getOccupiedEnable().writeHisVal(0.0);
+                        }
+                    }
+                }
+            } else if (roomTemp <= setTempCooling - hysteresis) {
+                setCmdSignal(sseEquip.getCoolingStage1(), 0);
+                if ((relay2config > 0) && isOccupied(occupied, forceOccupied, autoForceOccupied)) {
+                    if(relay2Association == SSERelay2.FAN.ordinal()){
+                        stageStatus = "Fan ON";
+                        setCmdSignal(sseEquip.getFanStage1(), 1.0);
+                    }else{
+                        stageStatus = "Equip ON";
+                        sseEquip.getOccupiedEnable().writeHisVal(1.0);
+                    }
+                } else {
+                    setCmdSignal(sseEquip.getFanStage1(), 0);
+                    sseEquip.getOccupiedEnable().writeHisVal(0.0);
+                }
+            } else {
+                if (sseEquip.getCoolingStage1().readHisVal() > 0)
                     stageStatus = " Stage 1 Cool ON";
-                    setCmdSignal(sseEquip.getCoolingStage1(), 1.0);
-                    if (relay2config > 0) {
-                        if(relay2Association == SSERelay2.FAN.ordinal()){
-                            stageStatus = stageStatus + ", Fan ON";
-                            setCmdSignal(sseEquip.getFanStage1(), 1.0);
-                        }else{
-                            if(occupied) {
-                                stageStatus = stageStatus + ", Equip ON";
-                                sseEquip.getOccupiedEnable().writeHisVal(1.0);
-                            }
-                            else {
-                                stageStatus = stageStatus + ", Equip OFF";
-                                sseEquip.getOccupiedEnable().writeHisVal(0.0);
-                            }
-                        }
-                    }
-                } else if (roomTemp <= setTempCooling - hysteresis) {
-                    setCmdSignal(sseEquip.getCoolingStage1(), 0);
-                    if ((relay2config > 0) && isOccupied(occupied, forceOccupied, autoForceOccupied)) {
-                        if(relay2Association == SSERelay2.FAN.ordinal()){
-                            stageStatus = "Fan ON";
-                            setCmdSignal(sseEquip.getFanStage1(), 1.0);
-                        }else{
-                            stageStatus = "Equip ON";
-                            sseEquip.getOccupiedEnable().writeHisVal(1.0);
-                        }
-                    } else {
-                        setCmdSignal(sseEquip.getFanStage1(), 0);
-                        sseEquip.getOccupiedEnable().writeHisVal(0.0);
+                if ((relay2config > 0) && occupied) {
+                    if(relay2Association == SSERelay2.FAN.ordinal()){
+                        stageStatus = stageStatus.isEmpty() ? "Fan ON" : stageStatus + ", Fan ON";
+                        setCmdSignal(sseEquip.getFanStage1(), 1.0);
+                    }else{
+                        stageStatus = stageStatus.isEmpty() ? "Equip ON" : stageStatus + ", Equip ON";
+                        sseEquip.getOccupiedEnable().writeHisVal(1.0);
                     }
                 } else {
-                    if (sseEquip.getCoolingStage1().readHisVal() > 0)
-                        stageStatus = " Stage 1 Cool ON";
-                    if ((relay2config > 0) && occupied) {
-                        if(relay2Association == SSERelay2.FAN.ordinal()){
-                            stageStatus = stageStatus.isEmpty() ? "Fan ON" : stageStatus + ", Fan ON";
-                            setCmdSignal(sseEquip.getFanStage1(), 1.0);
-                        }else{
-                            stageStatus = stageStatus.isEmpty() ? "Equip ON" : stageStatus + ", Equip ON";
+                    setCmdSignal(sseEquip.getFanStage1(), 0);
+                    sseEquip.getOccupiedEnable().writeHisVal(0.0);
+                }
+            }
+        } else if ((roomTemp > 0) && (sseStage == SSEStage.HEATING)) {
+            //Zone is in heating
+            state = HEATING;
+            if (roomTemp <= setTempHeating) {
+                stageStatus = " Stage 1 Heat ON";
+                setCmdSignal(sseEquip.getHeatingStage1(), 1.0);
+                if (relay2config > 0) {
+                    if(relay2Association == SSERelay2.FAN.ordinal()) {
+                        stageStatus = stageStatus + ", Fan ON";
+                        setCmdSignal(sseEquip.getFanStage1(), 1.0);
+                    }else {
+                        if(isOccupied(occupied, forceOccupied, autoForceOccupied)) {
+                            stageStatus = stageStatus + ", Equip ON";
                             sseEquip.getOccupiedEnable().writeHisVal(1.0);
+                        }else{
+                            stageStatus = stageStatus + ", Equip OFF";
+                            sseEquip.getOccupiedEnable().writeHisVal(0.0);
                         }
-                    } else {
-                        setCmdSignal(sseEquip.getFanStage1(), 0);
-                        sseEquip.getOccupiedEnable().writeHisVal(0.0);
                     }
                 }
-            } else if ((roomTemp > 0) && (sseStage == SSEStage.HEATING)) {
-                //Zone is in heating
-                state = HEATING;
-                if (roomTemp <= setTempHeating) {
+            } else if (roomTemp >= (setTempHeating + hysteresis)) {
+                setCmdSignal(sseEquip.getHeatingStage1(), 0);
+                if ((relay2config > 0) && isOccupied(occupied, forceOccupied, autoForceOccupied)) {
+                    if(relay2Association == SSERelay2.FAN.ordinal()){
+                        stageStatus = "Fan ON";
+                        setCmdSignal(sseEquip.getFanStage1(), 1.0);
+                    }else{
+                        stageStatus = "Equip ON";
+                        sseEquip.getOccupiedEnable().writeHisVal(1.0);
+                    }
+                } else {
+                    setCmdSignal(sseEquip.getFanStage1(), 0);
+                    sseEquip.getOccupiedEnable().writeHisVal(0.0);
+                }
+            } else {
+                if (sseEquip.getHeatingStage1().readHisVal() > 0)
                     stageStatus = " Stage 1 Heat ON";
-                    setCmdSignal(sseEquip.getHeatingStage1(), 1.0);
-                    if (relay2config > 0) {
-                        if(relay2Association == SSERelay2.FAN.ordinal()) {
-                            stageStatus = stageStatus + ", Fan ON";
-                            setCmdSignal(sseEquip.getFanStage1(), 1.0);
-                        }else {
-                            if(isOccupied(occupied, forceOccupied, autoForceOccupied)) {
-                                stageStatus = stageStatus + ", Equip ON";
-                                sseEquip.getOccupiedEnable().writeHisVal(1.0);
-                            }else{
-                                stageStatus = stageStatus + ", Equip OFF";
-                                sseEquip.getOccupiedEnable().writeHisVal(0.0);
-                            }
-                        }
-                    }
-                } else if (roomTemp >= (setTempHeating + hysteresis)) {
-                    setCmdSignal(sseEquip.getHeatingStage1(), 0);
-                    if ((relay2config > 0) && isOccupied(occupied, forceOccupied, autoForceOccupied)) {
-                        if(relay2Association == SSERelay2.FAN.ordinal()){
-                            stageStatus = "Fan ON";
-                            setCmdSignal(sseEquip.getFanStage1(), 1.0);
-                        }else{
-                            stageStatus = "Equip ON";
-                            sseEquip.getOccupiedEnable().writeHisVal(1.0);
-                        }
-                    } else {
-                        setCmdSignal(sseEquip.getFanStage1(), 0);
-                        sseEquip.getOccupiedEnable().writeHisVal(0.0);
+                if ((relay2config > 0) && occupied) {
+                    if(relay2Association == SSERelay2.FAN.ordinal()){
+                        stageStatus = stageStatus.isEmpty() ? "Fan ON" : stageStatus + ", Fan ON";
+                        setCmdSignal(sseEquip.getFanStage1(), 1.0);
+                    }else{
+                        stageStatus = stageStatus.isEmpty() ? "Equip ON" : stageStatus + ", Equip ON";
+                        sseEquip.getOccupiedEnable().writeHisVal(1.0);
                     }
                 } else {
-                    if (sseEquip.getHeatingStage1().readHisVal() > 0)
-                        stageStatus = " Stage 1 Heat ON";
-                    if ((relay2config > 0) && occupied) {
-                        if(relay2Association == SSERelay2.FAN.ordinal()){
-                            stageStatus = stageStatus.isEmpty() ? "Fan ON" : stageStatus + ", Fan ON";
-                            setCmdSignal(sseEquip.getFanStage1(), 1.0);
-                        }else{
-                            stageStatus = stageStatus.isEmpty() ? "Equip ON" : stageStatus + ", Equip ON";
-                            sseEquip.getOccupiedEnable().writeHisVal(1.0);
-                        }
-                    } else {
-                        setCmdSignal(sseEquip.getFanStage1(), 0);
-                        sseEquip.getOccupiedEnable().writeHisVal(0.0);
-                    }
+                    setCmdSignal(sseEquip.getFanStage1(), 0);
+                    sseEquip.getOccupiedEnable().writeHisVal(0.0);
                 }
-            } else {
-                // neither heating, cooling, nor zone dead
-               stageStatus = controlFanStage();
-                //Fan is already handled. Just update heating/cooling.
-                resetConditioning((short) this.nodeAddr);
-                state = DEADBAND;
             }
-           setStatus(stageStatus, state.ordinal(), (state == HEATING ? buildingLimitMinBreached() : state == COOLING ? buildingLimitMaxBreached() : false));
-            if (occuStatus != null) {
-                sseEquip.getOccupancyMode().writeHisVal(occuStatus.isOccupied() ? Occupancy.OCCUPIED.ordinal() : (occuStatus.isPreconditioning() ? Occupancy.PRECONDITIONING.ordinal() : (occuStatus.isForcedOccupied() ? Occupancy.FORCEDOCCUPIED.ordinal() : 0)));
-            } else {
-                sseEquip.getOccupancyMode().writeHisVal( occupied ? 1 : 0);
-            }
+        } else {
+            // neither heating, cooling, nor zone dead
+           stageStatus = controlFanStage();
+            //Fan is already handled. Just update heating/cooling.
+            resetConditioning((short) this.nodeAddr);
+            state = DEADBAND;
+        }
+        CcuLog.d(TAG_CCU_ZONE,
+                "cooling stage = " + sseEquip.getCoolingStage1().readHisVal() + "," +
+                        " heating stage = " + sseEquip.getHeatingStage1().readHisVal() + "," +
+                        " fan stage = " + sseEquip.getFanStage1().readHisVal());
+       setStatus(stageStatus, state.ordinal(), (state == HEATING ? buildingLimitMinBreached() : state == COOLING ? buildingLimitMaxBreached() : false));
     }
 
     private void handleRFDead() {
@@ -265,7 +271,6 @@ public class SingleStageProfile extends ZoneProfile
             sseEquip.getEquipStatusMessage().writeDefaultVal(RFDead);
             sseEquip.getOccupancyMode().writeHisVal(0);
         }
-        //sseEquip.setStatus(controlFanStage(), state.ordinal(), false);
     }
 
     @JsonIgnore

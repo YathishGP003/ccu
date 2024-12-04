@@ -3,6 +3,7 @@ package a75f.io.logic.bo.building.schedules.occupancy;
 import org.projecthaystack.UnknownRecException;
 
 import a75f.io.api.haystack.Occupied;
+import a75f.io.domain.api.DomainName;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.schedules.Occupancy;
@@ -18,7 +19,7 @@ public class KeyCard implements OccupancyTrigger {
     //TODO : Currently this is deep in the profile. Not exposed as a point
     public boolean isEnabled() {
         try {
-            return occupancyUtil.isConfigEnabled("keycard and sensing and enabled");
+            return occupancyUtil.isConfigEnabled("keycard and sensing and enabled") || occupancyUtil.isConfigEnabledByDomain(DomainName.keyCardSensingEnable);
         } catch (UnknownRecException e) {
             return false;
         }
@@ -38,13 +39,13 @@ public class KeyCard implements OccupancyTrigger {
                 (occupancyMode == Occupancy.OCCUPIED || occupancyMode == Occupancy.AUTOFORCEOCCUPIED
                         || occupancyMode == Occupancy.KEYCARD_AUTOAWAY || occupancyMode == Occupancy.DEMAND_RESPONSE_OCCUPIED
                         || occupancyMode == Occupancy.AUTOAWAY || occupancyMode == Occupancy.EMERGENCY_CONDITIONING)) {
-            return occupancyUtil.getSensorStatus("keycard and input");
+            return occupancyUtil.getSensorByDomain(DomainName.keyCardSensorInput) || occupancyUtil.getSensorStatus("keycard and input");
         }
         if(!occStatus.isOccupied() &&
                 (occupancyMode == Occupancy.UNOCCUPIED ||occupancyMode ==
                         Occupancy.DEMAND_RESPONSE_UNOCCUPIED || occupancyMode == Occupancy.AUTOFORCEOCCUPIED
                         || occupancyMode == Occupancy.EMERGENCY_CONDITIONING)) {
-            return (!occupancyUtil.getSensorStatus("keycard and input"));
+            return (!occupancyUtil.getSensorByDomain(DomainName.keyCardSensorInput)) || (!occupancyUtil.getSensorStatus("keycard and input"));
         }
         return false;
     }

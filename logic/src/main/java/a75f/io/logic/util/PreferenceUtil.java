@@ -38,21 +38,15 @@ public class PreferenceUtil {
       * In the future, we can remove the older key from the shared preference file if deemed necessary.
     **/
     public static final String ZONE_EQUIP_CONFIG_POINT_MIGRATION = "zoneEquipPointFloorRefRoomRefMigration_v2";
-    public static final String TITLE_24_OAO_POINTS_MIGRATION = "title24OaoPointsMigration";
-    public static final String TITLE_24_HSS_POINTS_MIGRATION = "title24HssPointsMigration";
-
     public static final String CARRIER_POINT_MIGRATION_DAB_TO_VVT = "carrierPointDabToVvtMigration";
     private static final String IS_CCU_LAUNCHED = "isCcuLaunched";
     private static final String IS_NEW_EXTERNAL_AHU = "isNewExternalAhu";
     public static final String UPDATE_HIS_ITEMS = "WritingMissingHisWriteValues";
     private static final String IS_CCU_REBOOT_STARTED = "isCcuRebootedStarted";
 
-    public static final String MODULATING_FANSPEED_MIGRATION = "modulatingFanSpeedMigration";
     public static final String SINGLE_DUAL_MIGRATION = "singleDualMigration";
 
     public static final String VAV_REHEAT_RELAY_ACTIVATION_HYSTERESIS_VALUE_MIGRATION = "vavReheatRelayActivationHysteresisValueMigration";
-    public static final String HS_USER_INTENT_AND_WRITABLE_MARKER_POINTS_MIGRATION = "hsUserIntentAndWritableMarkerPointMigration";
-    public static final String HS_TH_CONFIG_MIGRATION = "hsThConfigMigration";
     public static final String HS_MONITORING_GENERIC_FAULT_ENUM_MIGRATION = "hsMonitoringGenericFaultEnumMigration";
 
     public static final String LOCALLY_SYNC_SCHEDULE = "locallySyncedSchedules";
@@ -73,7 +67,6 @@ public class PreferenceUtil {
     public static final String VAV_CFM_ON_EDGE_MIGRATION = "vavCfmOnEdgeMigration";
     public static final String DEAD_BAND_MIGRATION = "deadBandMigration";
     public static final String ZONE_CO2_MIGRATION = "ZONE_CO2_MIGRATION";
-    public static final String APP_VERSION_POINTS_MIGRATION = "appVersionPointsMigration";
     public static final String MIGRATE_HIS_INTERPOLATE_FOR_DEVICE_POINTS = "migrateHisInterpolateForDeviceEntities";
     public static final String MIGRATE_ANALOG_INPUT_TYPE_FOR_VAV_DEVICE_POINT = "migrateAnalogInputTypeForVavDevicePoint";
     public static final String BACKFILL_DEFAULT_VALUE_MIGRATION = "backFillDefaultValueMigration";
@@ -82,6 +75,7 @@ public class PreferenceUtil {
     private static final String INSTALL_TYPE = "INSTALL_TYPE";
     private static final String RESTORE_BYPASS_DAMPER_AFTER_REPLACE = "restoreBypassDamperAfterReplace";
     private static final String TITLE_24_REDUNDANT_POINT_MIGRATION = "title24ReduntPointMigration";
+    private static final String LOCK_OUT_HIS_UPDATE = "lockoutHisUpdate";
 
 
 
@@ -387,22 +381,6 @@ public class PreferenceUtil {
         setBooleanPreference(ZONE_EQUIP_CONFIG_POINT_MIGRATION, true);
     }
 
-    public static boolean isTitle24OaoPointsMigrationDone() {
-        return getBooleanPreference(TITLE_24_OAO_POINTS_MIGRATION);
-    }
-
-    public static void setTitle24OaoPointsMigrationDone() {
-        setBooleanPreference(TITLE_24_OAO_POINTS_MIGRATION, true);
-    }
-
-    public static boolean isTitle24HssPointsMigrationDone() {
-        return getBooleanPreference(TITLE_24_HSS_POINTS_MIGRATION);
-    }
-
-    public static void setTitle24HssPointsMigrationDone() {
-        setBooleanPreference(TITLE_24_HSS_POINTS_MIGRATION, true);
-    }
-
     public static boolean getCarrierDabToVvtMigration() {
         return getBooleanPreference(CARRIER_POINT_MIGRATION_DAB_TO_VVT);
     }
@@ -435,10 +413,6 @@ public class PreferenceUtil {
          setBooleanPreference(UPDATE_HIS_ITEMS, true);
     }
 
-    public static boolean getModulatingFanSpeedMigrationStatus() {
-        return getBooleanPreference(MODULATING_FANSPEED_MIGRATION);
-    }
-
     public static boolean getSingleDualMigrationStatus() {
         return getBooleanPreference(SINGLE_DUAL_MIGRATION);
     }
@@ -455,29 +429,12 @@ public class PreferenceUtil {
         setBooleanPreference(VAV_REHEAT_RELAY_ACTIVATION_HYSTERESIS_VALUE_MIGRATION, true);
     }
 
-    public static boolean getHsUserIntentAndWritableMarkerPointsMigration() {
-        return getBooleanPreference(HS_USER_INTENT_AND_WRITABLE_MARKER_POINTS_MIGRATION);
-    }
-
-    public static void setHsUserIntentAndWritableMarkerPointsMigration() {
-        setBooleanPreference(HS_USER_INTENT_AND_WRITABLE_MARKER_POINTS_MIGRATION, true);
-    }
-
-
     public static boolean areZonesLocallySynced() {
         return getBooleanPreference(LOCALLY_SYNC_SCHEDULE);
     }
 
     public static void setZonesLocallySynced() {
         setBooleanPreference(LOCALLY_SYNC_SCHEDULE, true);
-    }
-
-    public static boolean getHyperStatThermistorConfigMigration() {
-        return getBooleanPreference(HS_TH_CONFIG_MIGRATION);
-    }
-
-    public static void setHyperStatThermistorConfigMigration() {
-        setBooleanPreference(HS_TH_CONFIG_MIGRATION, true);
     }
 
     public static boolean getACBRelayLogicalPointsMigration() {
@@ -572,14 +529,6 @@ public class PreferenceUtil {
         setBooleanPreference(ZONE_CO2_MIGRATION, true);
     }
 
-    public static boolean getAppVersionPointsMigration() {
-        return getBooleanPreference(APP_VERSION_POINTS_MIGRATION);
-    }
-
-    public static void setAppVersionPointsMigration() {
-        setBooleanPreference(APP_VERSION_POINTS_MIGRATION, true);
-    }
-
     public static boolean getMigrateHisInterpolateForDevicePoints() {
         return getBooleanPreference(MIGRATE_HIS_INTERPOLATE_FOR_DEVICE_POINTS);
     }
@@ -637,5 +586,13 @@ public class PreferenceUtil {
 
     public static void setTitle24ReduntPointMigrationStatus() {
         setBooleanPreference(TITLE_24_REDUNDANT_POINT_MIGRATION, true);
+    }
+
+    public static boolean getLockOutHisUpdate() {
+        return getBooleanPreference(LOCK_OUT_HIS_UPDATE);
+    }
+
+    public static void setLockOutHisUpdate() {
+        setBooleanPreference(LOCK_OUT_HIS_UPDATE, true);
     }
 }

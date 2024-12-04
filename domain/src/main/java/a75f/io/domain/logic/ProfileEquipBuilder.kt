@@ -21,6 +21,7 @@ import io.seventyfivef.domainmodeler.client.type.SeventyFiveFEquipDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import io.seventyfivef.domainmodeler.common.point.MultiStateConstraint
 import io.seventyfivef.domainmodeler.common.point.PointConfiguration
+import io.seventyfivef.ph.core.PointType
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
@@ -69,7 +70,7 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
      * modelDef - Model instance for profile.
      */
     fun updateEquipAndPoints(configuration: ProfileConfiguration, modelDef: ModelDirective, siteRef: String, equipDis: String,
-                             isReconfiguration : Boolean = false) : String{
+                             isReconfiguration : Boolean = false) : String {
         CcuLog.i(Domain.LOG_TAG, "updateEquipAndPoints $configuration isReconfiguration $isReconfiguration")
         val entityMapper = EntityMapper(modelDef as SeventyFiveFProfileDirective)
 
@@ -104,8 +105,6 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
 
         hayStack.updateEquip(hayStackEquip, equipId)
 
-        //TODO - Fix crash
-        //DomainManager.addEquip(hayStackEquip)
         val time = measureTimeMillis {
             createPoints(modelDef, configuration, entityConfiguration, equipId, siteRef, equipDis)
         }
@@ -118,7 +117,9 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
         } else {
             updatePoints(modelDef, configuration, entityConfiguration, equipId, siteRef, equipDis)
         }
+        DomainManager.buildDomain(CCUHsApi.getInstance())
         deletePoints(entityConfiguration, equipId)
+        DomainManager.buildDomain(CCUHsApi.getInstance())
         return equipId
     }
 
@@ -318,8 +319,12 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
             } else {
                 initializeDefaultVal(hayStackPoint, pointConfig.modelDef.defaultValue as Number)
             }
+            if(pointConfig.modelDef.tagNames.contains("his")) {
+                CcuLog.d(Domain.LOG_TAG, "writing hisVal for ${pointConfig.modelDef.domainName}")
+                hayStack.writeHisValById(pointId, pointConfig.modelDef.defaultValue.toString().toDouble())
+            }
         } else if (pointConfig.modelDef.tagNames.contains("his") && !(pointConfig.modelDef.domainName.equals(
-                DomainName.heartBeat))) {
+                DomainName.heartBeat)) && pointConfig.modelDef.kind != PointType.STR) {
             // heartBeat is the one point where we don't want to initialize a hisVal to zero (since we want a gray dot on the zone screen, not green)
             hayStack.writeHisValById(pointId, 0.0)
         }
@@ -334,13 +339,15 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
         hayStackPoint.id = existingPoint["id"].toString()
         hayStackPoint.roomRef = existingPoint["roomRef"].toString()
         hayStackPoint.floorRef = existingPoint["floorRef"].toString()
-        hayStackPoint.group = existingPoint["group"].toString()
         existingPoint["createdDateTime"]?.let {
             hayStackPoint.createdDateTime =
                 HDateTime.make(existingPoint["createdDateTime"].toString())
         }
         existingPoint["ccuRef"]?.let { hayStackPoint.ccuRef = existingPoint["ccuRef"].toString() }
-        hayStackPoint.lastModifiedBy = hayStack.getCCUUserName();
+        hayStackPoint.lastModifiedBy = hayStack.getCCUUserName()
+        existingPoint["bacnetId"]?.let {
+            hayStackPoint.bacnetId = existingPoint["bacnetId"].toString().toInt()
+        }
         hayStack.updatePoint(hayStackPoint, existingPoint["id"].toString())
 
         //TODO- Not changing the value during migration as it might change user configurations
@@ -389,7 +396,7 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
                            mapping : Map<String, String>, profileConfiguration: ProfileConfiguration?,
     isSystem: Boolean = false, equipHashMap: HashMap<Any, Any>) {
         CcuLog.i(Domain.LOG_TAG, "doCutOverMigration for $equipDis")
-        var equipPoints =
+        val equipPoints =
             hayStack.readAllEntities("point and equipRef == \"$equipRef\"")
         val site = hayStack.site
         //TODO-To be removed after testing is complete.

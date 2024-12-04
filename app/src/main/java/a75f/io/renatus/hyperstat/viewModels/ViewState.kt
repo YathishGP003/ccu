@@ -40,10 +40,7 @@ import a75f.io.renatus.R
         fun fromConfigTo(config: BaseProfileConfiguration, profileType: ProfileType): ViewState {
 
             when(profileType){
-                ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT -> {
-                    val configuration = config as HyperStatCpuConfiguration
-                    return fromConfigCPU(configuration)
-                }
+
                 ProfileType.HYPERSTAT_TWO_PIPE_FCU -> {
                     val configuration = config as HyperStatPipe2Configuration
                     return fromConfigPipe2(configuration)
@@ -57,80 +54,9 @@ import a75f.io.renatus.R
             }
 
             // Assume we don't have config
-            return fromConfigCPU(HyperStatCpuConfiguration())
+            return fromConfigHpu(HyperStatHpuConfiguration())
         }
 
-        private fun fromConfigCPU(config: HyperStatCpuConfiguration) = ViewState(
-            profileType = ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT,
-            tempOffsetPosition = (tempOffsetSpinnerValues().indexOf(config.temperatureOffset.toString())),
-            forceOccupiedEnabled = config.isEnableAutoForceOccupied,
-            autoAwayEnabled = config.isEnableAutoAway,
-            relays = listOf(
-                ConfigState(config.relay1State.enabled,config.relay1State.association.ordinal),
-                ConfigState(config.relay2State.enabled,config.relay2State.association.ordinal),
-                ConfigState(config.relay3State.enabled,config.relay3State.association.ordinal),
-                ConfigState(config.relay4State.enabled,config.relay4State.association.ordinal),
-                ConfigState(config.relay5State.enabled,config.relay5State.association.ordinal),
-                ConfigState(config.relay6State.enabled,config.relay6State.association.ordinal)
-            ),
-            analogOutUis = listOf(
-                AnalogConfigState(
-                    config.analogOut1State.enabled,
-                    config.analogOut1State.association.ordinal,
-                    config.analogOut1State.voltageAtMin,
-                    config.analogOut1State.voltageAtMax,
-                    config.analogOut1State.perAtFanLow,
-                    config.analogOut1State.perAtFanMedium,
-                    config.analogOut1State.perAtFanHigh,
-                    config.analogOut1State.voltageAtRecirculate
-                ),
-                AnalogConfigState(
-                    config.analogOut2State.enabled,
-                    config.analogOut2State.association.ordinal,
-                    config.analogOut2State.voltageAtMin,
-                    config.analogOut2State.voltageAtMax,
-                    config.analogOut2State.perAtFanLow,
-                    config.analogOut2State.perAtFanMedium,
-                    config.analogOut2State.perAtFanHigh,
-                    config.analogOut2State.voltageAtRecirculate
-                ),
-
-                AnalogConfigState(
-                    config.analogOut3State.enabled,
-                    config.analogOut3State.association.ordinal,
-                    config.analogOut3State.voltageAtMin,
-                    config.analogOut3State.voltageAtMax,
-                    config.analogOut3State.perAtFanLow,
-                    config.analogOut3State.perAtFanMedium,
-                    config.analogOut3State.perAtFanHigh,
-                    config.analogOut3State.voltageAtRecirculate
-                ),
-
-                ),
-            thermistorIns = listOf(
-                ConfigState(config.thermistorIn1State.enabled,config.thermistorIn1State.association.ordinal),
-                ConfigState(config.thermistorIn2State.enabled,config.thermistorIn2State.association.ordinal),
-            ),
-            analogIns = listOf(
-                ConfigState(config.analogIn1State.enabled,config.analogIn1State.association.ordinal),
-                ConfigState(config.analogIn2State.enabled,config.analogIn2State.association.ordinal),
-            ),
-            zoneCO2DamperOpeningRatePos = co2DCVOpeningDamperSetIndexFromValue(config.zoneCO2DamperOpeningRate),
-            zoneCO2ThresholdPos = co2DCVDamperSetIndexFromValue(config.zoneCO2Threshold),
-            zoneCO2TargetPos = co2DCVDamperSetIndexFromValue(config.zoneCO2Target),
-            zoneVocThresholdPos =  vocSetIndexFromValue(config.zoneVOCThreshold),
-            zoneVocTargetPos =  vocSetIndexFromValue(config.zoneVOCTarget),
-            zonePm2p5ThresholdPos =  pmSetIndexFromValue(config.zonePm2p5Threshold),
-            zonePm2p5TargetPos =  pmSetIndexFromValue(config.zonePm2p5Target),
-            isDisplayHumidityEnabled = config.displayHumidity,
-            isDisplayCo2Enabled = config.displayCo2,
-            isDisplayVOCEnabled = config.displayVOC,
-            isDisplayPp2p5Enabled = config.displayPp2p5,
-            stagedFanUis = listOf(
-                config.coolingStage1FanState, config.coolingStage2FanState, config.coolingStage3FanState,
-                config.heatingStage1FanState, config.heatingStage2FanState, config.heatingStage3FanState
-            )
-        )
 
         private fun fromConfigPipe2(config: HyperStatPipe2Configuration) = ViewState(
             profileType = ProfileType.HYPERSTAT_TWO_PIPE_FCU,
@@ -274,73 +200,11 @@ import a75f.io.renatus.R
 
     fun toConfig(): BaseProfileConfiguration{
         when(profileType){
-            ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT-> return toCpuConfig()
             ProfileType.HYPERSTAT_TWO_PIPE_FCU-> return to2PipeConfig()
             ProfileType.HYPERSTAT_HEAT_PUMP_UNIT-> return toHpuConfig()
             else -> {}
         }
-        return toCpuConfig()
-    }
-
-    private fun toCpuConfig(): HyperStatCpuConfiguration {
-        return HyperStatCpuConfiguration().apply {
-            temperatureOffset = tempOffsetSpinnerValues()[(tempOffsetPosition)]!!.toDouble()
-            isEnableAutoForceOccupied = forceOccupiedEnabled
-            isEnableAutoAway = autoAwayEnabled
-
-            thermistorIn1State = Th1InState(thermistorIns[0].enabled,Th1InAssociation.values()[thermistorIns[0].association])
-            thermistorIn2State = Th2InState(thermistorIns[1].enabled,Th2InAssociation.values()[thermistorIns[1].association])
-
-            relay1State = RelayState(relays[0].enabled,CpuRelayAssociation.values()[relays[0].association])
-            relay2State = RelayState(relays[1].enabled,CpuRelayAssociation.values()[relays[1].association])
-            relay3State = RelayState(relays[2].enabled,CpuRelayAssociation.values()[relays[2].association])
-            relay4State = RelayState(relays[3].enabled,CpuRelayAssociation.values()[relays[3].association])
-            relay5State = RelayState(relays[4].enabled,CpuRelayAssociation.values()[relays[4].association])
-            relay6State = RelayState(relays[5].enabled,CpuRelayAssociation.values()[relays[5].association])
-
-            analogOut1State = AnalogOutState(
-                analogOutUis[0].enabled,
-                CpuAnalogOutAssociation.values()[analogOutUis[0].association],
-                analogOutUis[0].voltageAtMin,analogOutUis[0].voltageAtMax,
-                analogOutUis[0].perAtFanLow,analogOutUis[0].perAtFanMedium,analogOutUis[0].perAtFanHigh,
-                analogOutUis[0].voltageAtRecirculate
-            )
-            analogOut2State = AnalogOutState(
-                analogOutUis[1].enabled,
-                CpuAnalogOutAssociation.values()[analogOutUis[1].association],
-                analogOutUis[1].voltageAtMin,analogOutUis[1].voltageAtMax,
-                analogOutUis[1].perAtFanLow,analogOutUis[1].perAtFanMedium,analogOutUis[1].perAtFanHigh,
-                analogOutUis[1].voltageAtRecirculate
-            )
-            analogOut3State = AnalogOutState(
-                analogOutUis[2].enabled,
-                CpuAnalogOutAssociation.values()[analogOutUis[2].association],
-                analogOutUis[2].voltageAtMin,analogOutUis[2].voltageAtMax,
-                analogOutUis[2].perAtFanLow,analogOutUis[2].perAtFanMedium,analogOutUis[2].perAtFanHigh,
-                analogOutUis[2].voltageAtRecirculate
-            )
-            analogIn1State = AnalogInState(analogIns[0].enabled,AnalogInAssociation.values()[analogIns[0].association])
-            analogIn2State = AnalogInState(analogIns[1].enabled,AnalogInAssociation.values()[analogIns[1].association])
-
-            coolingStage1FanState = stagedFanUis[0]
-            coolingStage2FanState = stagedFanUis[1]
-            coolingStage3FanState = stagedFanUis[2]
-            heatingStage1FanState = stagedFanUis[3]
-            heatingStage2FanState = stagedFanUis[4]
-            heatingStage3FanState = stagedFanUis[5]
-
-            zoneCO2DamperOpeningRate = co2DCVDamperValueFromIndex(zoneCO2DamperOpeningRatePos)
-            zoneCO2Threshold = openingDamperValueFromIndex(zoneCO2ThresholdPos)
-            zoneCO2Target = openingDamperValueFromIndex(zoneCO2TargetPos)
-            zoneVOCThreshold = vocValueFromIndex(zoneVocThresholdPos)
-            zoneVOCTarget = vocValueFromIndex(zoneVocTargetPos)
-            zonePm2p5Threshold = pm25ValueFromIndex(zonePm2p5ThresholdPos)
-            zonePm2p5Target = pm25ValueFromIndex(zonePm2p5TargetPos)
-            displayHumidity = isDisplayHumidityEnabled
-            displayCo2 = isDisplayCo2Enabled
-            displayVOC = isDisplayVOCEnabled
-            displayPp2p5 = isDisplayPp2p5Enabled
-        }
+        return toHpuConfig()
     }
 
 
@@ -455,35 +319,6 @@ import a75f.io.renatus.R
 
 // CPU Specific
 
-val CpuRelayAssociation.displayName: Int
-    get() {
-        return when (this) {
-            CpuRelayAssociation.COOLING_STAGE_1 -> R.string.cooling_stage_1
-            CpuRelayAssociation.COOLING_STAGE_2 -> R.string.cooling_stage_2
-            CpuRelayAssociation.COOLING_STAGE_3 -> R.string.cooling_stage_3
-            CpuRelayAssociation.HEATING_STAGE_1 -> R.string.heating_stage_1
-            CpuRelayAssociation.HEATING_STAGE_2 -> R.string.heating_stage_2
-            CpuRelayAssociation.HEATING_STAGE_3 -> R.string.heating_stage_3
-            CpuRelayAssociation.FAN_LOW_SPEED -> R.string.fan_low_speed
-            CpuRelayAssociation.FAN_MEDIUM_SPEED -> R.string.fan_medium_speed
-            CpuRelayAssociation.FAN_HIGH_SPEED -> R.string.fan_high_speed
-            CpuRelayAssociation.FAN_ENABLED -> R.string.fan_enabled
-            CpuRelayAssociation.OCCUPIED_ENABLED -> R.string.occupied_enabled
-            CpuRelayAssociation.HUMIDIFIER -> R.string.humidifier
-            CpuRelayAssociation.DEHUMIDIFIER -> R.string.dehumidifier
-        }
-    }
-
-val CpuAnalogOutAssociation.displayName: Int
-    get() {
-        return when (this) {
-            CpuAnalogOutAssociation.COOLING -> R.string.cooling
-            CpuAnalogOutAssociation.MODULATING_FAN_SPEED -> R.string.modulating_fan_speed
-            CpuAnalogOutAssociation.HEATING -> R.string.heating
-            CpuAnalogOutAssociation.DCV_DAMPER -> R.string.dcv_damper
-            CpuAnalogOutAssociation.PREDEFINED_FAN_SPEED -> R.string.predefined_fan_speed
-        }
-    }
 
 val AnalogInAssociation.displayName: Int
     get() {
@@ -521,15 +356,6 @@ fun <E> Iterable<E>.updated(index: Int, elem: E) = mapIndexed { i, existing -> i
 
 fun getAnalogOutDisplayName(profileType: ProfileType, enumValue: Int): Int{
     when(profileType){
-        ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT ->{
-            when (enumValue) {
-                CpuAnalogOutAssociation.COOLING.ordinal-> return R.string.cooling
-                CpuAnalogOutAssociation.MODULATING_FAN_SPEED.ordinal -> return R.string.modulating_fan_speed
-                CpuAnalogOutAssociation.HEATING.ordinal -> return R.string.heating
-                CpuAnalogOutAssociation.DCV_DAMPER.ordinal -> return R.string.dcv_damper
-                CpuAnalogOutAssociation.PREDEFINED_FAN_SPEED.ordinal -> return R.string.predefined_fan_speed
-            }
-        }
         ProfileType.HYPERSTAT_TWO_PIPE_FCU ->{
             when (enumValue) {
                 Pipe2AnalogOutAssociation.FAN_SPEED.ordinal -> return R.string.fan_speed

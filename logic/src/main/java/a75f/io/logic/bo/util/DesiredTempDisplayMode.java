@@ -6,6 +6,7 @@ import static a75f.io.logic.bo.building.hvac.StandaloneConditioningMode.AUTO;
 import static a75f.io.logic.bo.building.hvac.StandaloneConditioningMode.COOL_ONLY;
 import static a75f.io.logic.bo.building.hvac.StandaloneConditioningMode.HEAT_ONLY;
 import static a75f.io.logic.bo.building.hvac.StandaloneConditioningMode.OFF;
+import static a75f.io.logic.bo.building.hyperstat.profiles.util.HyperStatUtilsKt.getConfiguration;
 import static a75f.io.logic.bo.util.TemperatureMode.COOLING;
 import static a75f.io.logic.bo.util.TemperatureMode.DUAL;
 import static a75f.io.logic.bo.util.TemperatureMode.HEATING;
@@ -25,9 +26,7 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode;
-import a75f.io.logic.bo.building.hyperstat.common.HyperStatAssociationUtil;
-import a75f.io.logic.bo.building.hyperstat.profiles.cpu.HyperStatCpuConfiguration;
-import a75f.io.logic.bo.building.hyperstat.profiles.cpu.HyperStatCpuEquip;
+import a75f.io.logic.bo.building.hyperstat.v2.configs.CpuConfiguration;
 import a75f.io.logic.bo.building.hyperstatsplit.common.HyperStatSplitAssociationUtil;
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuEconProfile;
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuProfileConfiguration;
@@ -311,22 +310,8 @@ public class DesiredTempDisplayMode {
     }
 
     private static TemperatureMode getTemperatureModeForHSCPU(Equip mEquip) {
-        boolean heating = false;
-        boolean cooling = false;
-        HyperStatCpuEquip hyperStatCpuEquip = HyperStatCpuEquip.Companion.getHyperStatEquipRef(
-                Short.parseShort(mEquip.getGroup()));
-        HyperStatCpuConfiguration config = new HyperStatCpuConfiguration();
-        HyperStatCpuConfiguration relayConfigurations = hyperStatCpuEquip.getRelayConfigurations(config);
-        HyperStatCpuConfiguration analogConfigurations = hyperStatCpuEquip.getAnalogOutConfigurations(config);
-        if (HyperStatAssociationUtil.Companion.isAnyRelayEnabledAssociatedToCooling(relayConfigurations) ||
-                HyperStatAssociationUtil.Companion.isAnyAnalogOutEnabledAssociatedToCooling(analogConfigurations)) {
-            cooling = true;
-        }
-        if (HyperStatAssociationUtil.Companion.isAnyRelayEnabledAssociatedToHeating(relayConfigurations) ||
-                HyperStatAssociationUtil.Companion.isAnyAnalogOutEnabledAssociatedToHeating(analogConfigurations)) {
-            heating = true;
-        }
-       return getTemperatureForStandaloneBasedOnConditioningMode(getTemperatureMode(heating, cooling), mEquip);
+        CpuConfiguration cpuConfiguration = (CpuConfiguration)getConfiguration(mEquip.getId());
+       return getTemperatureForStandaloneBasedOnConditioningMode(getTemperatureMode(cpuConfiguration.isCoolingAvailable(), cpuConfiguration.isHeatingAvailable()), mEquip);
     }
 
     private static TemperatureMode getTemperatureForStandaloneBasedOnConditioningMode(TemperatureMode temperatureMode,Equip equip) {

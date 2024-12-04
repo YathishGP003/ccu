@@ -56,6 +56,7 @@ import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.logic.tuners.VavTRTuners;
+import a75f.io.logic.util.SystemProfileUtil;
 
 /**
  * Created by samjithsadasivan on 8/14/18.
@@ -650,6 +651,13 @@ public class VavStagedRtu extends VavSystemProfile
             VavStagedVfdSystemEquip vfdSystemEquip = (VavStagedVfdSystemEquip) Domain.systemEquip;
             status.append(vfdSystemEquip.getFanSignal().readHisVal() > 0 ? " Analog Fan ON " : "");
         }
+
+        if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_HYBRID_RTU) {
+            return status.toString().isEmpty() ? "System OFF" + SystemProfileUtil.isDeHumidifierOn()
+                    + SystemProfileUtil.isHumidifierOn() : status + SystemProfileUtil.isDeHumidifierOn()
+                    + (SystemProfileUtil.isHumidifierOn());
+        }
+
         String humidifierStatus = getRelayMappingForStage(HUMIDIFIER).isEmpty() ? "" :
                                         systemEquip.getHumidifierEnable().readHisVal() > 0 ? " | Humidifier ON " : " | Humidifier OFF ";
         String dehumidifierStatus = getRelayMappingForStage(DEHUMIDIFIER).isEmpty() ? "" :

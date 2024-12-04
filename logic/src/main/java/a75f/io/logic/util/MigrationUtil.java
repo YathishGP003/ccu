@@ -8,7 +8,6 @@ import static a75f.io.logic.migration.firmware.FirmwareVersionPointMigration.ini
 import static a75f.io.logic.util.PreferenceUtil.FIRMWARE_VERSION_POINT_MIGRATION;
 
 
-import org.projecthaystack.HDict;
 import org.projecthaystack.HDictBuilder;
 import org.projecthaystack.HGrid;
 import org.projecthaystack.HRow;
@@ -37,6 +36,7 @@ import a75f.io.api.haystack.util.SchedulableMigrationKt;
 import a75f.io.domain.api.Domain;
 import a75f.io.domain.api.DomainName;
 import a75f.io.domain.equips.CCUDiagEquip;
+import a75f.io.domain.equips.SystemEquip;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.BuildConfig;
 import a75f.io.logic.DefaultSchedules;
@@ -52,9 +52,6 @@ import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.migration.VavAndAcbProfileMigration;
 import a75f.io.logic.migration.MigrationHandler;
-import a75f.io.logic.migration.VavAndAcbProfileMigration;
-import a75f.io.logic.migration.hyperstat.CpuPointsMigration;
-import a75f.io.logic.migration.hyperstat.MigratePointsUtil;
 import a75f.io.logic.migration.title24.Title24Migration;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.util.ExecutorTask;
@@ -114,37 +111,20 @@ public class MigrationUtil {
             updateHisValue(CCUHsApi.getInstance());
         }
 
-        if (!PreferenceUtil.isTitle24HssPointsMigrationDone()) {
-            Title24Migration.Companion.doTitle24HsPointMigration(CCUHsApi.getInstance());
-            PreferenceUtil.setTitle24HssPointsMigrationDone();
-        }
-
         if(!PreferenceUtil.areZonesLocallySynced()) {
             updateAllZoneSchedulesLocally(ccuHsApi);
             PreferenceUtil.setZonesLocallySynced();
         }
 
-        if (!PreferenceUtil.getHsUserIntentAndWritableMarkerPointsMigration()) {
-            migrateUserIntentMarker();
-            PreferenceUtil.setHsUserIntentAndWritableMarkerPointsMigration();
-        }
 
         boolean firmwarePointMigrationState = initFirmwareVersionPointMigration();
         removeWritableTagForFloor();
         migrateTIProfileEnum(CCUHsApi.getInstance());
         migrateSenseToMonitoring(ccuHsApi);
-        if (!PreferenceUtil.getModulatingFanSpeedMigrationStatus()) {
-            migrateHyperStatFanStagedEnum(CCUHsApi.getInstance());
-        }
 
         if (!PreferenceUtil.getVavReheatRelayActivationHysteresisValueMigration()) {
             setVavReheatRelayActivationHysteresisDefaultValues(ccuHsApi);
             PreferenceUtil.setVavReheatRelayActivationHysteresisValueMigration();
-        }
-
-        if (!PreferenceUtil.getHyperStatThermistorConfigMigration()) {
-            migrateHyperStatThermistorConfig(ccuHsApi);
-            PreferenceUtil.setHyperStatThermistorConfigMigration();
         }
 
         if (!PreferenceUtil.getHSMonitoringGenericFaultEnumMigration()) {
@@ -186,6 +166,10 @@ public class MigrationUtil {
         deleteDuplicateLimitsifAny(ccuHsApi);
         cleanUpAndCreateZoneSchedules(ccuHsApi);
         syncZoneSchedulesFromLocal(ccuHsApi);
+        if(!PreferenceUtil.getLockOutHisUpdate()){
+            updateHisValueForLockOutPoints();
+            PreferenceUtil.setLockOutHisUpdate();
+        }
         if(!PreferenceUtil.getDamperSizeMigrationFlagStatus()) {
             CcuLog.d(TAG, "doDabDamperSizeMigration started");
             new MigrationHandler(ccuHsApi).doDabDamperSizeMigration();
@@ -562,18 +546,6 @@ public class MigrationUtil {
         }
     }
 
-    private static void migrateHyperStatFanStagedEnum(CCUHsApi ccuHsApi) {
-
-        ArrayList<HashMap<Object, Object>> hsCpuEquips = ccuHsApi.readAllEntities("equip and hyperstat and cpu");
-        if (!hsCpuEquips.isEmpty()) {
-            for (HashMap<Object, Object> equipMap : hsCpuEquips) {
-                Equip equip = new Equip.Builder().setHashMap(equipMap).build();
-                fanSpeedLogicalPointMigration(equip, ccuHsApi);
-                analogOutConfigPointsMigration(equip, ccuHsApi);
-            }
-        }
-    }
-
     private static void setVavReheatRelayActivationHysteresisDefaultValues(CCUHsApi ccuHsApi) {
         // In 2.4 --> 2.5 migration, vavReheatRelayActivationHysteresis point was added for BuildingTuner and VAV terminal equips.
         // But the terminal equip migration ran first, so this tuner did not get a default value (since there was no Level 17 tuner yet).
@@ -667,175 +639,7 @@ public class MigrationUtil {
         CCUHsApi.getInstance().updateFloor(markerRemovedFloor, markerRemovedFloor.getId());
     }
 
-    private static void migrateUserIntentMarker() {
 
-        ArrayList<HashMap<Object, Object>> equips = CCUHsApi.getInstance().readAllEntities("hyperstat and equip and (cpu or pipe2 or hpu)");
-        equips.forEach(objectObjectHashMap -> {
-
-            if (objectObjectHashMap != null && objectObjectHashMap.containsKey(Tags.ID)) {
-                HashMap<Object, Object> fanMode = CpuPointsMigration.Companion.readPoint(
-                        "fan and mode", Objects.requireNonNull(objectObjectHashMap.get(Tags.ID)).toString());
-                HashMap<Object, Object> conditioningMode = CpuPointsMigration.Companion.readPoint(
-                        "conditioning and mode", Objects.requireNonNull(objectObjectHashMap.get(Tags.ID)).toString());
-                HashMap<Object, Object> operatingMode = CCUHsApi.getInstance()
-                        .readEntity("operating and mode and writable and equipRef== \"" + objectObjectHashMap.get("id") + "\"");
-                HashMap<Object, Object> zoneOccupancy = CCUHsApi.getInstance()
-                        .readEntity("zone and occupancy and not auto and not sensor and writable and equipRef== \"" + objectObjectHashMap.get("id") + "\"");
-                HashMap<Object, Object> autoAwayOccupancyDetection = CCUHsApi.getInstance()
-                        .readEntity("auto and away and occupancy and writable and equipRef== \"" + objectObjectHashMap.get("id") + "\"");
-
-                if (!fanMode.isEmpty() && !fanMode.containsKey("userIntent")) {
-                    MigratePointsUtil.Companion.updateMarkers(
-                            fanMode,
-                            new String[]{"userIntent"},
-                            new String[]{},
-                            null);
-                }
-                if (!conditioningMode.isEmpty() && !conditioningMode.containsKey("userIntent")) {
-                    MigratePointsUtil.Companion.updateMarkers(
-                            conditioningMode,
-                            new String[]{"userIntent"},
-                            new String[]{},
-                            null);
-                }
-                if (!operatingMode.isEmpty()) {
-                    MigratePointsUtil.Companion.updateMarkers(
-                            operatingMode,
-                            new String[]{},
-                            new String[]{"writable"},
-                            null);
-                }
-                if (!zoneOccupancy.isEmpty()) {
-                    MigratePointsUtil.Companion.updateMarkers(
-                            zoneOccupancy,
-                            new String[]{},
-                            new String[]{"writable"},
-                            null);
-                }
-                if (!autoAwayOccupancyDetection.isEmpty()) {
-                    MigratePointsUtil.Companion.updateMarkers(
-                            autoAwayOccupancyDetection,
-                            new String[]{},
-                            new String[]{"writable"},
-                            null);
-                }
-            }
-        });
-    }
-
-    private static void migrateHyperStatThermistorConfig(CCUHsApi hayStack) {
-        ArrayList<HashMap<Object, Object>> hsEquips = hayStack.readAllEntities("equip and hyperstat and not monitoring");
-        hsEquips.forEach(equip -> {
-            if (equip.containsKey("id") && equip.get("id") != null) {
-
-                // TH1 is the same for CPU, HPU, and 2-Pipe Profiles.
-                // TH2 is different for the 2-Pipe Profile.
-
-                HashMap<Object, Object> airflowEnabledPoint = hayStack.readEntity("config and air and discharge and temp and enabled and equipRef == \"" + equip.get("id") + "\"");
-
-                boolean isTh1Enabled = false;
-                if (airflowEnabledPoint.containsKey("id") && airflowEnabledPoint.get("id") != null) {
-                    isTh1Enabled = hayStack.readDefaultValById(airflowEnabledPoint.get("id").toString()) > 0.0;
-                    hayStack.deleteEntity(airflowEnabledPoint.get("id").toString());
-                }
-
-                Point th1EnabledPoint = new Point.Builder()
-                        .setDisplayName(equip.get("dis").toString() + "-thIn1Enabled")
-                        .setSiteRef(equip.get("siteRef").toString())
-                        .setEquipRef(equip.get("id").toString())
-                        .setRoomRef(equip.get("roomRef").toString())
-                        .setFloorRef(equip.get("floorRef").toString())
-                        .setTz(equip.get("tz").toString())
-                        .setGroup(equip.get("group").toString())
-                        .setEnums("false,true")
-                        .addMarker("config")
-                        .addMarker("writable")
-                        .addMarker("zone")
-                        .addMarker("input")
-                        .addMarker("th1")
-                        .addMarker("enabled").build();
-                String th1EnabledPointId = hayStack.addPoint(th1EnabledPoint);
-                hayStack.writeDefaultValById(th1EnabledPointId, isTh1Enabled ? 1.0 : 0.0);
-
-                Point th1AssociationPoint = new Point.Builder()
-                        .setDisplayName(equip.get("dis").toString() + "-thIn1Association")
-                        .setSiteRef(equip.get("siteRef").toString())
-                        .setEquipRef(equip.get("id").toString())
-                        .setRoomRef(equip.get("roomRef").toString())
-                        .setFloorRef(equip.get("floorRef").toString())
-                        .setTz(equip.get("tz").toString())
-                        .setGroup(equip.get("group").toString())
-                        .setEnums("airflowTemperatureSensor,genericFaultNC,genericFaultNO")
-                        .addMarker("config")
-                        .addMarker("writable")
-                        .addMarker("zone")
-                        .addMarker("input")
-                        .addMarker("th1")
-                        .addMarker("association").build();
-                String th1AssociationPointId = hayStack.addPoint(th1AssociationPoint);
-                hayStack.writeDefaultValById(th1AssociationPointId, 0.0);
-
-                boolean isTh2Enabled = false;
-                String th2AssociationEnum;
-                if (equip.containsKey("pipe2")) {
-                    isTh2Enabled = true;
-
-                    HashMap<Object, Object> swtEnabledPoint = hayStack.readEntity("config and supply and water and temp and enabled and equipRef == \"" + equip.get("id") + "\"");
-                    if (swtEnabledPoint.containsKey("id") && swtEnabledPoint.get("id") != null) {
-                        hayStack.deleteEntity(swtEnabledPoint.get("id").toString());
-                    }
-
-                    th2AssociationEnum = "supplyWaterTempSensor";
-                } else {
-                    HashMap<Object, Object> doorWindowEnabledPoint = hayStack.readEntity("config and window and temp and enabled and equipRef == \"" + equip.get("id") + "\"");
-                    if (doorWindowEnabledPoint.containsKey("id") && doorWindowEnabledPoint.get("id") != null) {
-                        isTh2Enabled = hayStack.readDefaultValById(doorWindowEnabledPoint.get("id").toString()) > 0.0;
-                        hayStack.deleteEntity(doorWindowEnabledPoint.get("id").toString());
-                    }
-
-                    th2AssociationEnum = "doorWindowTempSensor,genericFaultNC,genericFaultNO";
-                }
-
-                Point th2EnabledPoint = new Point.Builder()
-                        .setDisplayName(equip.get("dis").toString() + "-thIn2Enabled")
-                        .setSiteRef(equip.get("siteRef").toString())
-                        .setEquipRef(equip.get("id").toString())
-                        .setRoomRef(equip.get("roomRef").toString())
-                        .setFloorRef(equip.get("floorRef").toString())
-                        .setTz(equip.get("tz").toString())
-                        .setGroup(equip.get("group").toString())
-                        .setEnums("false,true")
-                        .addMarker("config")
-                        .addMarker("writable")
-                        .addMarker("zone")
-                        .addMarker("input")
-                        .addMarker("th2")
-                        .addMarker("enabled").build();
-                String th2EnabledPointId = hayStack.addPoint(th2EnabledPoint);
-                hayStack.writeDefaultValById(th2EnabledPointId, isTh2Enabled ? 1.0 : 0.0);
-
-                Point th2AssociationPoint = new Point.Builder()
-                        .setDisplayName(equip.get("dis").toString() + "-thIn2Association")
-                        .setSiteRef(equip.get("siteRef").toString())
-                        .setEquipRef(equip.get("id").toString())
-                        .setRoomRef(equip.get("roomRef").toString())
-                        .setFloorRef(equip.get("floorRef").toString())
-                        .setTz(equip.get("tz").toString())
-                        .setGroup(equip.get("group").toString())
-                        .setEnums(th2AssociationEnum)
-                        .addMarker("config")
-                        .addMarker("writable")
-                        .addMarker("zone")
-                        .addMarker("input")
-                        .addMarker("th2")
-                        .addMarker("association").build();
-                String th2AssociationPointId = hayStack.addPoint(th2AssociationPoint);
-                hayStack.writeDefaultValById(th2AssociationPointId, 0.0);
-
-            }
-        });
-
-    }
 
     private static void migrateHyperStatMonitoringGenericFaultEnum(CCUHsApi hayStack) {
         ArrayList<HashMap<Object, Object>> hsEquips = hayStack.readAllEntities("equip and hyperstat and monitoring");
@@ -846,36 +650,6 @@ public class MigrationUtil {
                 hayStack.updatePoint(faultPoint, faultPointMap.get("id").toString());
             });
         });
-    }
-
-    private static void analogOutConfigPointsMigration(Equip equip, CCUHsApi ccuHsApi) {
-
-        ArrayList<HashMap<Object, Object>> analogOutPoints = ccuHsApi.readAllEntities("point and " +
-                "(analog1 or analog2 or analog3) and cpu and output and association and equipRef == \"" + equip.getId() + "\"");
-        for (HashMap<Object, Object> analogOutPoint : analogOutPoints) {
-            if (analogOutPoint.get("enum").toString().contains("fanspeed")) {
-                Point enumUpdatedAnalogOutPoint = new Point.Builder().setHashMap(analogOutPoint)
-                        .setEnums("cooling,modulatingFanSpeed,heating,dcvdamper,predefinedFanSpeed").build();
-                CCUHsApi.getInstance().updatePoint(enumUpdatedAnalogOutPoint, enumUpdatedAnalogOutPoint.getId());
-            }
-        }
-    }
-
-    private static void fanSpeedLogicalPointMigration(Equip equip, CCUHsApi ccuHsApi) {
-
-        HashMap<Object, Object> siteMap = CCUHsApi.getInstance().readEntity(Tags.SITE);
-        String siteDis = siteMap.get("dis").toString();
-        String equipDis = siteDis + "-hyperstatcpu-" + equip.getGroup();
-
-        HashMap<Object, Object> fanSpeedPointMap = ccuHsApi.readEntity("point and " +
-                "fan and run and speed and equipRef == \"" + equip.getId() + "\"");
-        if (fanSpeedPointMap != null && !fanSpeedPointMap.isEmpty()) {
-            Point fanSpeedPoint = new Point.Builder().setHashMap(fanSpeedPointMap).removeMarker("run")
-                    .removeMarker("analog").removeMarker("output").addMarker("modulating").setGroup(equip.getGroup())
-                    .addMarker("cpu").addMarker("cur").addMarker("standalone").setDisplayName(equipDis + "-modulatingFanSpeed")
-                    .build();
-            CCUHsApi.getInstance().updatePoint(fanSpeedPoint, fanSpeedPoint.getId());
-        }
     }
 
     private static void migrateSenseToMonitoring(CCUHsApi ccuHsApi) {
@@ -1276,7 +1050,7 @@ public class MigrationUtil {
 
         for(HashMap<Object, Object> room : rooms) {
             ArrayList<Schedule> roomSchedules = ccuHsApi.getZoneSchedule(room.get("id").toString(),false);
-            if (roomSchedules.size() > 0) {
+            if (!roomSchedules.isEmpty()) {
                 Schedule roomSchedule = roomSchedules.get(0);
                 if (!scheduleIdList.contains(roomSchedule.getId())) {
                     CcuLog.d(TAG_CCU_MIGRATION_UTIL, "re-sync roomSchedule id : " + roomSchedule.getId());
@@ -1357,6 +1131,28 @@ public class MigrationUtil {
         return siteDis + "-" + floor.get("dis").toString() + "-" + roomMap.get("dis");
     }
 
-
+    public static void updateHisValueForLockOutPoints(){
+        try {
+            CcuLog.e(TAG_CCU_MIGRATION_UTIL, "lockout point update started");
+            String equipId = Domain.systemEquip.getId();
+            SystemEquip systemEquip = new SystemEquip(equipId);
+            HashMap<Object, Object> heatingLockout = CCUHsApi.getInstance()
+                    .readEntity("point and domainName == \"" + DomainName.useOutsideTempLockoutHeating + "\" and equipRef == \"" + equipId + "\"");
+            HashMap<Object, Object> coolingLockout = CCUHsApi.getInstance()
+                    .readEntity("point and domainName == \"" + DomainName.useOutsideTempLockoutCooling + "\" and equipRef == \"" + equipId + "\"");
+            CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(
+                    heatingLockout.get("id").toString(),
+                    systemEquip.getUseOutsideTempLockoutHeating().readPriorityVal()
+            );
+            CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(
+                    coolingLockout.get("id").toString(),
+                    systemEquip.getUseOutsideTempLockoutCooling().readPriorityVal()
+            );
+            CcuLog.e(TAG_CCU_MIGRATION_UTIL, "lockout point update completed");
+        }catch (Exception e){
+            CcuLog.e(TAG_CCU_MIGRATION_UTIL, "lockout point update failed "+e.getMessage());
+            e.printStackTrace();
+        }
+    }
 
 }

@@ -52,6 +52,7 @@ import static a75f.io.logic.bo.building.system.SystemController.State.COOLING;
 import static a75f.io.logic.bo.building.system.SystemController.State.HEATING;
 import static a75f.io.logic.bo.util.DesiredTempDisplayMode.setSystemModeForDab;
 import static a75f.io.logic.bo.building.dab.DabProfile.CARRIER_PROD;
+import static a75f.io.renatus.profiles.oao.OaoUtilKt.updateOaoPoints;
 
 /**
  * Created by samjithsadasivan on 11/8/18.
@@ -623,6 +624,7 @@ public class DABHybridAhuProfile extends Fragment implements AdapterView.OnItemS
                 },
                 () -> systemProfile.setConfigAssociation(config, val),
                 () -> {
+                    updateOaoPoints();
                     systemProfile.updateStagesSelected();
                     updateSystemMode();
                     ProgressDialogUtils.hideProgressDialog();

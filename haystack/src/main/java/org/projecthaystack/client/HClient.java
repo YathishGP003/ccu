@@ -417,8 +417,8 @@ public class HClient extends HProj
     Double currentHighPriorityVal = getValue(r.get(idStr).toString());
     Boolean isHeartBeatPoint = isHeartBeatPoint("heartbeat", r.get(idStr).toString());
     if(isHeartBeatPoint) {
-      ArrayList<HisItem> hisItem = CCUHsApi.getInstance().hisRead(r.get(idStr).toString(), "current");
-      if (hisItem != null && hisItem.size() > 0) {
+      List<HisItem> hisItem = CCUHsApi.getInstance().getHisItems(r.get(idStr).toString(), 0,1); // this method will return empty list in case of failure to avoid null pointer exception
+      if (hisItem != null && !hisItem.isEmpty()) {
 
       long lastModifiedTimeInMillis = hisItem.get(0).getDateInMillis();
       long currentTimeInMillis = System.currentTimeMillis();

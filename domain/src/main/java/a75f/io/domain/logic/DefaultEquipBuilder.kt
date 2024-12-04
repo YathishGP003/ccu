@@ -125,7 +125,6 @@ open class DefaultEquipBuilder : EquipBuilder {
             .setEquipRef(pointConfig.equipRef)
             .setFloorRef(pointConfig.configuration?.floorRef)
             .setKind(Kind.parsePointType(pointConfig.modelDef.kind.name))
-            .setUnit(pointConfig.modelDef.defaultUnit)
             .setSiteRef(pointConfig.siteRef)
 
         if (pointConfig.configuration?.roomRef != null) {
@@ -135,6 +134,10 @@ open class DefaultEquipBuilder : EquipBuilder {
             if (it > 0) {
                 pointBuilder.setGroup(pointConfig.configuration?.nodeAddress.toString())
             }
+        }
+
+        pointConfig.modelDef.defaultUnit?.takeIf { it.isNotEmpty() }?.let {
+            pointBuilder.setUnit(it)
         }
 
         if (pointConfig.modelDef.valueConstraint.constraintType == Constraint.ConstraintType.NUMERIC) {

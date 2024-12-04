@@ -1,5 +1,7 @@
 package a75f.io.renatus;
 
+import static a75f.io.logic.bo.building.NodeType.HYPER_STAT;
+
 import android.app.Dialog;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -18,6 +20,7 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.BLE.FragmentDeviceScan;
+import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatMonitoringFragment;
 import a75f.io.renatus.util.CCUUiUtil;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -64,15 +67,16 @@ public class HyperStatMonitoringPairScreen extends BaseDialogFragment {
         if (mProfileName == ProfileType.HYPERSTAT_MONITORING) {
             if (L.isSimulation()) {
                 showDialogFragment(
-                        HyperStatMonitoringFragment.newInstance( mNodeAddress,
+                        HyperStatMonitoringFragment.Companion.newInstance( mNodeAddress,
                                 mRoomName,
                                 mFloorName,
+                                HYPER_STAT,
                                 ProfileType.HYPERSTAT_MONITORING),
-                        HyperStatMonitoringFragment.ID
+                        HyperStatMonitoringFragment.Companion.getID()
                 );
             } else {
                 FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan
-                        .getInstance(mNodeAddress, mRoomName, mFloorName, NodeType.HYPER_STAT, ProfileType.HYPERSTAT_MONITORING);
+                        .getInstance(mNodeAddress, mRoomName, mFloorName, HYPER_STAT, ProfileType.HYPERSTAT_MONITORING);
                 showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
             }
         }

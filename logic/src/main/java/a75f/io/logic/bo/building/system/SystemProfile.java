@@ -1,8 +1,6 @@
 package a75f.io.logic.bo.building.system;
 
 import static a75f.io.logic.L.ccu;
-import static a75f.io.logic.bo.building.BackfillUtilKt.addBackFillDurationPointIfNotExists;
-import static a75f.io.logic.util.OfflineModeUtilKt.createOfflineModePoint;
 
 import android.content.Context;
 
@@ -584,9 +582,6 @@ public abstract class SystemProfile
             hayStack.writePointForCcuUser(enhancedVentilationPointId, TunerConstants.UI_DEFAULT_VAL_LEVEL, 0.0, 0);
             hayStack.writeHisValById(enhancedVentilationPointId, 0.0);
         }
-
-        addBackFillDurationPointIfNotExists(hayStack);
-        createOfflineModePoint();
 
         createOutsideTempLockoutPoints(hayStack, siteRef, equipref, equipDis, tz);
     }

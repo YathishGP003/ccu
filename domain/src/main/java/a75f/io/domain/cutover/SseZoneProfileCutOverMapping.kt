@@ -54,6 +54,17 @@ object SseZoneProfileCutOverMapping {
         "currentDrawn_10" to "currentTx10",
         "currentDrawn_20" to "currentTx20",
         "currentDrawn_50" to "currentTx50",
-
+        // sensor points
+        "emr" to "sensor_energy_meter",
+        "illuminance" to "zoneIlluminance",
+        "occupancySensor" to "zoneOccupancy",
+        "sound" to "zoneSound",
+        "uvi" to "zoneUvi",
+        "no" to "zoneNo",
+        "co2Equivalent" to "zoneCo2e",
+        "co2" to "zoneCo2",
+        "pm2p5" to "zonePm25",
+        "pm10" to "sensor_pm10",
+        "co" to "zoneCo"
     )
 }

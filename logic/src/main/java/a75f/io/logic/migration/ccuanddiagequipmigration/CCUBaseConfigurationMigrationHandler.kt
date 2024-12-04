@@ -9,8 +9,6 @@ import a75f.io.domain.util.ModelLoader
 import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.logic.L
-import a75f.io.logic.bo.building.definitions.ProfileType
-import a75f.io.logic.bo.building.system.util.readEntity
 import io.seventyfivef.domainmodeler.client.ModelDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import io.seventyfivef.ph.core.Tags
@@ -64,15 +62,17 @@ class CCUBaseConfigurationMigrationHandler {
         deleteOldAddressBandPoint(hayStack)
         deleteNonDmDrActivationPoint(hayStack)
 
-        deleteCCURelatedPointsFromDefaultSystemProfile(hayStack)
+        deleteCCURelatedPointsFromNonDmSystemProfile(hayStack)
 
     }
 
-    private fun deleteCCURelatedPointsFromDefaultSystemProfile(hayStack: CCUHsApi) {
-        val systemEquip = hayStack.readEntity("system and equip and not modbus and not connectModule")
-        CcuLog.i(L.TAG_CCU_MIGRATION_UTIL, "systemEquip $systemEquip")
-        if (systemEquip.isNotEmpty() && (systemEquip.containsKey("profile") &&
-                    systemEquip["profile"].toString() == ProfileType.SYSTEM_DEFAULT.name)) {
+    private fun deleteCCURelatedPointsFromNonDmSystemProfile(hayStack: CCUHsApi) {
+
+        val systemEquip = hayStack.readEntity("system and equip and not" +
+                " modbus and not connectModule and not domainName")
+        CcuLog.i(L.TAG_CCU_MIGRATION_UTIL, "Deleting CCU points present in NON DM systemEquip $systemEquip")
+
+        if (systemEquip.isNotEmpty()) {
             val queries = mapOf(
                 "backfill and duration and not domainName" to "backfill duration point",
                 "offline and mode and not domainName" to "offline mode point",

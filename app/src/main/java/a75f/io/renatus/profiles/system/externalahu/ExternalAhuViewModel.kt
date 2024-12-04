@@ -40,8 +40,8 @@ import a75f.io.renatus.modbus.util.isAllRightParamsSelected
 import a75f.io.renatus.modbus.util.parseModbusDataFromString
 import a75f.io.renatus.modbus.util.showErrorDialog
 import a75f.io.renatus.modbus.util.showToast
+import a75f.io.renatus.profiles.oao.updateOaoPoints
 import a75f.io.renatus.util.ProgressDialogUtils
-import a75f.io.renatus.util.RxjavaUtil
 import a75f.io.renatus.util.highPriorityDispatcher
 import android.annotation.SuppressLint
 import android.app.Application
@@ -237,6 +237,7 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
                 equipModel.value.isDevicePaired = true
                 configModel.value.isStateChanged = false
                 showToast("Configuration saved successfully", context)
+                updateOaoPoints();
                 hayStack.syncEntityTree()
                 hayStack.setCcuReady()
             }

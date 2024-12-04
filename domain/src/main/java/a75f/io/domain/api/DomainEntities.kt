@@ -121,9 +121,6 @@ open class Point(domainName : String, val equipRef: String) : Entity(domainName)
             id = point["id"].toString()
             dis = point["dis"].toString()
         }
-        /*if (id.isEmpty()) {
-            throw IllegalStateException("Invalid point domain name")
-        }*/
     }
     fun pointExists() : Boolean {
         try {
@@ -169,12 +166,10 @@ open class Point(domainName : String, val equipRef: String) : Entity(domainName)
         if (id == "null") {
             return
         }
-        if (defaultVal is String) {
-            Domain.hayStack.writeDefaultValById(id, defaultVal)
-        } else if (defaultVal is Double) {
-            Domain.hayStack.writeDefaultValById(id, defaultVal)
-        } else if (defaultVal is Int) {
-            Domain.hayStack.writeDefaultValById(id, defaultVal.toDouble())
+        when (defaultVal) {
+            is String -> Domain.hayStack.writeDefaultValById(id, defaultVal)
+            is Int -> Domain.hayStack.writeDefaultValById(id, defaultVal.toDouble())
+            is Double ->Domain.hayStack.writeDefaultValById(id, defaultVal)
         }
     }
 
@@ -305,6 +300,11 @@ open class PhysicalPoint(domainName : String, val deviceRef: String) : Entity (d
         } catch (e: IllegalStateException) {
             false
         }
+    }
+
+    fun writeHisValueByIdWithoutCOV(hisVal: Double) {
+        requireId()
+        Domain.hayStack.writeHisValueByIdWithoutCOV(id, hisVal)
     }
 
     fun readPoint() : RawPoint {

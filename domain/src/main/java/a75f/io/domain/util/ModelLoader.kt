@@ -142,6 +142,23 @@ object ModelLoader {
 
 
 
+    fun getHyperStatDeviceModel() : ModelDirective {
+        return ModelCache.getModelById(MODEL_HYPERSTAT_DEVICE)
+    }
+    fun getHyperStatCpuModel() : ModelDirective {
+        return ModelCache.getModelById(MODEL_HYPERSTAT_CPU)
+    }
+
+
+
+    fun getHyperStatMonitoringModel() : ModelDirective {
+        return ModelCache.getModelById(MODEL_HYPERSTAT_MONITORING)
+    }
+
+    fun getHyperStatDevice() : ModelDirective {
+        return ModelCache.getModelById(MODEL_HYPERSTAT_DEVICE)
+    }
+
     fun getModelForDomainName( domainName : String) : ModelDirective {
         return when(domainName) {
             "smartnodeVAVReheatNoFan" -> getSmartNodeVavNoFanModelDef()
@@ -163,6 +180,7 @@ object ModelLoader {
             "cmDevice" -> getCMDeviceModel()
             "connectModuleDevice" -> getConnectModuleDeviceModel()
             "hyperstatSplitDevice" -> getHyperStatSplitDeviceModel()
+            "hyperstatCPU" -> getHyperStatCpuModel()
             DomainName.ccuConfiguration -> getCCUBaseConfigurationModel()
             "smartnodeOAO" -> getSmartNodeOAOModelDef()
             "smartnodeSSE" -> getSmartNodeSSEModel()

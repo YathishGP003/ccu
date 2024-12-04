@@ -792,7 +792,7 @@ public class VavAdvancedHybridRtu extends VavStagedRtu
         }
         
         if (!status.toString().equals("")) {
-            status.insert(0, super.getStatusMessage()+" ; Analog ");
+            status.insert(0, super.getStatusMessage()+" | Analog ");
         } else {
             status.append(super.getStatusMessage());
         }

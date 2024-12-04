@@ -1,55 +1,15 @@
 package a75f.io.logic.util
 
-import a75f.io.api.haystack.*
 import a75f.io.api.haystack.util.hayStack
+import a75f.io.domain.api.Domain
 import a75f.io.logic.L
 import a75f.io.logic.jobs.bearertoken.BearerTokenManager
-import a75f.io.logic.tuners.SystemTuners
-import a75f.io.logic.tuners.TunerConstants
-import java.util.*
+import java.util.Date
 
 const val TIMER_TO_BE_VALID = 900000
 
-fun createOfflineModePoint(){
-
-    val siteMap = hayStack.readEntity(Tags.SITE)
-    val equipMap = hayStack.readEntity("equip and system and not modbus and not connectModule")
-    val equip = Equip.Builder().setHashMap(equipMap).build()
-    val equipRef = equip.id
-    val siteRef = Objects.requireNonNull(siteMap[Tags.ID]).toString()
-    val tz = Objects.requireNonNull(siteMap["tz"]).toString()
-    val equipDis = Objects.requireNonNull(siteMap["dis"]).toString() + "-SystemEquip"
-    if(isPointNotAvailable(equipRef)) {
-        val offlineMode: Point =
-            Point.Builder()
-                .setDisplayName(SystemTuners.getDisplayNameFromVariation("$equipDis-offlineMode"))
-                .setSiteRef(siteRef).setEquipRef(equipRef)
-                .addMarker("sp").addMarker("system").setHisInterpolate("cov")
-                .addMarker("writable").addMarker("his")
-                .addMarker("offline")
-                .addMarker("config")
-                .addMarker("mode")
-                .addMarker("cur")
-                .setEnums("online,offline")
-                .setKind(Kind.NUMBER)
-                .setTz(tz).build()
-        val offlineModeId: String = CCUHsApi.getInstance().addPoint(offlineMode)
-        CCUHsApi.getInstance()
-            .writePointForCcuUser(offlineModeId, TunerConstants.UI_DEFAULT_VAL_LEVEL, 0.0, 0)
-        CCUHsApi.getInstance().writeHisValById(offlineModeId, 0.0)
-    }
-}
-
-fun isPointNotAvailable(equipRef: String?): Boolean {
-    val offlineModePoint = hayStack.readEntity(
-        "point and offline and mode and equipRef == \"$equipRef\""
-    )
-    return offlineModePoint.isEmpty()
-}
-
 fun isOfflineMode():Boolean{
-    return hayStack.readDefaultVal("offline and mode and point") > 0
-
+    return Domain.ccuEquip.offlineMode.readDefaultVal() > 0.0
 }
 
 fun fetchToken(){

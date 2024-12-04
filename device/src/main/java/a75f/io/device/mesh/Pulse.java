@@ -48,6 +48,7 @@ import a75f.io.device.serial.SnRebootIndicationMessage_t;
 import a75f.io.device.serial.WrmOrCmRebootIndicationMessage_t;
 import a75f.io.domain.api.Domain;
 import a75f.io.domain.api.DomainName;
+import a75f.io.domain.devices.CmBoardDevice;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
@@ -173,6 +174,10 @@ public class Pulse
 				double val;
 				Port currentPort = getPhysicalPointPort(phyPoint);
 				CcuLog.i(L.TAG_CCU_DEVICE, "regularSNUpdate: PORT "+currentPort);
+				if (currentPort == null) {
+					CcuLog.d(L.TAG_CCU_DEVICE, "Port not found for "+phyPoint);
+					continue;
+				}
 				switch (currentPort){
 					case RSSI:
 						hayStack.writeHisValueByIdWithoutCOV(phyPoint.get("id").toString(), (double)rssi);
@@ -202,19 +207,15 @@ public class Pulse
 								th2TempVal = CCUUtils.roundToOneDecimal(th2TempVal);
 								hayStack.writeHisValById(logPoint.get("id").toString(), th2TempVal);
 							} else if (isTh2Enabled && isAcb) {
-								double oldCondensateSensor = hayStack.readHisValById(logPoint.get("id").toString());
 								boolean curCondensateStatus = isCondensateNc ? ((val*10) >= 10000) : ((val*10) < 10000);
 								double curCondensateSensor = curCondensateStatus ? 1.0 : 0.0;
-								if (oldCondensateSensor != curCondensateSensor) {
-									hayStack.writeHisValueByIdWithoutCOV(logPoint.get("id").toString(), curCondensateSensor);
-								}
-
+								hayStack.writeHisValById(logPoint.get("id").toString(), curCondensateSensor);
 							} else {
-								double oldEntTempVal = hayStack.readHisValById(logPoint.get("id").toString());
 								double curEntTempVal = ThermistorUtil.getThermistorValueToTemp(val * 10);
 								curEntTempVal = CCUUtils.roundToOneDecimal(curEntTempVal);
-								if ((oldEntTempVal != curEntTempVal) && !isSse)
-									hayStack.writeHisValueByIdWithoutCOV(logPoint.get("id").toString(), curEntTempVal);
+								if (!isSse) {
+									hayStack.writeHisValById(logPoint.get("id").toString(), curEntTempVal);
+								}
 							}
 							hayStack.writeHisValById(phyPoint.get("id").toString(), val/100);
 							CcuLog.d(L.TAG_CCU_DEVICE,
@@ -230,8 +231,8 @@ public class Pulse
 						double curDisAnalogVal = (isBypassDamper && isPressureOnAI1) ? getPressureConversion(equip, val) : Math.round(getAnalogConversion(phyPoint, logPoint, val));
 						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
 						CcuLog.i(L.TAG_CCU_DEVICE, " Feedback regularSNUpdate: id "+logPoint.get("id").toString());
+						hayStack.writeHisValById(logPoint.get("id").toString(), curDisAnalogVal);
 						if (oldDisAnalogVal != curDisAnalogVal) {
-							hayStack.writeHisValueByIdWithoutCOV(logPoint.get("id").toString(), curDisAnalogVal);
 							if (currentTempInterface != null) {
 								currentTempInterface.updateSensorValue(nodeAddr);
 							}
@@ -243,18 +244,17 @@ public class Pulse
 						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
 						double oldDynamicVar = hayStack.readHisValById(logPoint.get("id").toString());
 						double dynamicVar =  Math.round(getAnalogConversion(phyPoint, logPoint, val));
+						double newDynamicVar = oldDynamicVar;
 						if (oldDynamicVar != dynamicVar) {
+							newDynamicVar = dynamicVar;
 							if (logPointInfo.getMarkers().contains("pid")) {
-								hayStack.writeHisValueByIdWithoutCOV(logPoint.get("id").toString(), dynamicVar + getPiOffsetValue(nodeAddr));
+								newDynamicVar = dynamicVar + getPiOffsetValue(nodeAddr);
 								if (currentTempInterface != null) {
 									currentTempInterface.updateSensorValue(nodeAddr);
 								}
-							} else if (isBypassDamper) {
-								// For Bypass Damper, AI2 maps to Damper Feedback
-								hayStack.writeHisValueByIdWithoutCOV(logPoint.get("id").toString(), (double) Math.round(getAnalogConversion(phyPoint, logPoint, val)));
-							} else
-								hayStack.writeHisValueByIdWithoutCOV(logPoint.get("id").toString(), dynamicVar);
+							}
 						}
+						hayStack.writeHisValById(logPoint.get("id").toString(), newDynamicVar);
 						break;
 					case TH1_IN:
 						if (isMATDamperConfigured(logPoint, nodeAddr, DomainName.damper1Type, hayStack)) {
@@ -267,8 +267,8 @@ public class Pulse
 							double curDisTempVal = ThermistorUtil.getThermistorValueToTemp(val * 10);
 							curDisTempVal = CCUUtils.roundToOneDecimal(curDisTempVal);
 							hayStack.writeHisValById(phyPoint.get("id").toString(), val/100);
+							hayStack.writeHisValById(logPoint.get("id").toString(), curDisTempVal);
 							if (oldDisTempVal != curDisTempVal) {
-								hayStack.writeHisValueByIdWithoutCOV(logPoint.get("id").toString(), curDisTempVal);
 								if (currentTempInterface != null && logPointInfo.getMarkers().contains("pid")) {
 									currentTempInterface.updateSensorValue(nodeAddr);
 								}
@@ -970,11 +970,16 @@ public class Pulse
 	}
 
 	private static void updateCMPhysicalPoints(CmToCcuOverUsbCmRegularUpdateMessage_t cmRegularUpdateMessage_t) {
-		
+
 		CCUHsApi hayStack = CCUHsApi.getInstance();
 		HashMap device = hayStack.read("device and cm");
 		if (!device.isEmpty()) {
 			String deviceId = device.get("id").toString();
+			if (device.containsKey("domainName")) {
+				updateDomainCmUpdates(deviceId, cmRegularUpdateMessage_t);
+				return;
+			}
+
 			HashMap analog1In = hayStack.read("point and analog1 and in and deviceRef == \""+deviceId+"\"");
 			if (!analog1In.isEmpty()) {
 				hayStack.writeHisValById(analog1In.get("id").toString(),
@@ -1001,6 +1006,13 @@ public class Pulse
 		}
 	}
 
+	public static void updateDomainCmUpdates(String deviceId, CmToCcuOverUsbCmRegularUpdateMessage_t cmRegularUpdateMessage_t) {
+		CmBoardDevice cmBoardDevice = new CmBoardDevice(deviceId);
+		cmBoardDevice.getAnalog1In().writeHisVal(cmRegularUpdateMessage_t.analogSense1.get());
+		cmBoardDevice.getAnalog2In().writeHisVal(cmRegularUpdateMessage_t.analogSense2.get());
+		cmBoardDevice.getTh1In().writeHisVal(cmRegularUpdateMessage_t.thermistor1.get());
+		cmBoardDevice.getTh2In().writeHisVal(cmRegularUpdateMessage_t.thermistor2.get());
+	}
 
 	public static void regularSmartStatUpdate(CmToCcuOverUsbSmartStatRegularUpdateMessage_t smartStatRegularUpdateMessage_t)
 	{

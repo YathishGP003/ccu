@@ -358,7 +358,7 @@ public class HSUtil {
     public static boolean isMonitoringConfig(String id, CCUHsApi hayStack) {
         HashMap<Object, Object> pointEntity = hayStack.readMapById(id);
         return pointEntity.containsKey(Tags.MONITORING)
-                && pointEntity.containsKey(Tags.HYPERSTAT);
+                && pointEntity.containsKey(Tags.CONFIG);
     }
 
     public static boolean isHyperStatConfig(String id, CCUHsApi hayStack) {
@@ -429,6 +429,12 @@ public class HSUtil {
         } else {
             return (pointEntity.containsKey(Tags.ENABLE) && (pointEntity.containsKey(Tags.CFM) || pointEntity.containsKey("trueCFM")) && pointEntity.containsKey(Tags.DAB));
         }
+    }
+
+    public static boolean isDamperSizeConfigPoint(String id, CCUHsApi hayStack) {
+        HashMap<Object, Object> pointEntity = hayStack.readMapById(id);
+            return pointEntity.containsKey("dab") && pointEntity.containsKey("size")
+                    && pointEntity.containsKey("domainName") && pointEntity.containsKey("damper");
     }
 
     public static boolean isMaxCFMCoolingConfigPoint(String id, CCUHsApi hayStack) {

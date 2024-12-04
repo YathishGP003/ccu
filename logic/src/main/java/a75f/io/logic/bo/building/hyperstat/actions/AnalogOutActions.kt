@@ -1,5 +1,6 @@
 package a75f.io.logic.bo.building.hyperstat.actions
 
+import a75f.io.domain.equips.hyperstat.HyperStatEquip
 import a75f.io.logic.bo.building.ZoneState
 import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
@@ -27,7 +28,8 @@ interface AnalogOutActions {
                            analogOutStages: HashMap<String, Int>,
                            zoneCO2Threshold: Double,
                            zoneCO2DamperOpeningRate: Double,
-                           isDoorOpen: Boolean)
+                           isDoorOpen: Boolean,
+                           equip: HyperStatEquip? = null)
 
     fun doAnalogFanAction(port: Port,
                           fanLowPercent: Int,

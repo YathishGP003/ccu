@@ -18,6 +18,8 @@ class OAOEquip(equipRef: String) : DomainEquip(equipRef) {
     val returnDamperMinOpen = Point(DomainName.returnDamperMinOpen, equipRef)
     val exhaustFanStage1Threshold = Point(DomainName.exhaustFanStage1Threshold, equipRef)
     val exhaustFanStage2Threshold = Point(DomainName.exhaustFanStage2Threshold, equipRef)
+    val exhaustFanStage1 = Point(DomainName.exhaustFanStage1, equipRef)
+    val exhaustFanStage2 = Point(DomainName.exhaustFanStage2, equipRef)
     val currentTransformerType = Point(DomainName.currentTransformerType, equipRef)
     val co2Threshold = Point(DomainName.co2Threshold, equipRef)
     val exhaustFanHysteresis = Point(DomainName.exhaustFanHysteresis, equipRef)

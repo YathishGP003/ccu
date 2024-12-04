@@ -48,7 +48,7 @@ import a75f.io.logic.bo.building.erm.EmrProfile;
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.HyperStatCpuProfile;
 import a75f.io.logic.bo.building.hyperstat.profiles.hpu.HyperStatHpuProfile;
 import a75f.io.logic.bo.building.hyperstat.profiles.pipe2.HyperStatPipe2Profile;
-import a75f.io.logic.bo.building.hyperstatmonitoring.HyperStatMonitoringProfile;
+import a75f.io.logic.bo.building.hyperstatmonitoring.HyperStatV2MonitoringProfile;
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuEconProfile;
 import a75f.io.logic.bo.building.modbus.ModbusProfile;
 import a75f.io.logic.bo.building.oao.OAOProfile;
@@ -534,7 +534,7 @@ public class Globals {
                             break;
                         case HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT:
                             HyperStatCpuProfile cpuProfile = new HyperStatCpuProfile();
-                            cpuProfile.addEquip(Short.parseShort(eq.getGroup()));
+                            cpuProfile.addEquip(eq.getId());
                             L.ccu().zoneProfiles.add(cpuProfile);
                             break;
                         case HYPERSTAT_HEAT_PUMP_UNIT:
@@ -550,8 +550,8 @@ public class Globals {
                             break;
 
                         case HYPERSTAT_MONITORING:
-                            HyperStatMonitoringProfile hyperStatMonitoringProfile = new HyperStatMonitoringProfile();
-                            hyperStatMonitoringProfile.addHyperStatMonitoringEquip(Short.parseShort(eq.getGroup()));
+                            HyperStatV2MonitoringProfile hyperStatMonitoringProfile = new HyperStatV2MonitoringProfile(eq.getId(), Short.parseShort(eq.getGroup()));
+                            hyperStatMonitoringProfile.addHyperStatMonitoringEquip();
                             L.ccu().zoneProfiles.add(hyperStatMonitoringProfile);
                             break;
                         case OTN:

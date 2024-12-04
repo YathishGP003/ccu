@@ -6,6 +6,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Occupied;
+import a75f.io.domain.api.DomainName;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
@@ -53,13 +54,24 @@ public class Preconditioning implements OccupancyTrigger {
         if (occupied != null && occupied.getVacation() != null) {
             return false;
         }
-        double currentTemp = CCUHsApi.getInstance().readHisValByQuery("(space or current) and air and temp and equipRef == \""+equipId+"\"");
-        double desiredTemp = CCUHsApi.getInstance().readHisValByQuery("desired and air and temp and average and equipRef == \""+equipId+"\"");
+
+        double currentTemp;
+        double desiredTemp;
+        if (HSUtil.isDomainEquip(equipId, CCUHsApi.getInstance())) {
+            currentTemp = CCUHsApi.getInstance().readHisValByQuery("point and domainName == \"" + DomainName.currentTemp + "\" and equipRef == \"" + equipId + "\"");
+            desiredTemp = CCUHsApi.getInstance().readHisValByQuery("point and domainName == \"" + DomainName.desiredTemp + "\" and equipRef == \"" + equipId + "\"");
+        } else {
+            currentTemp = CCUHsApi.getInstance().readHisValByQuery("(space or current) and air and temp and equipRef == \"" + equipId + "\"");
+            desiredTemp = CCUHsApi.getInstance().readHisValByQuery("desired and air and temp and (average or avg) and equipRef == \"" + equipId + "\"");
+        }
+
         double tempDiff = currentTemp - desiredTemp;
         double preconRate = TunerUtil.readTunerValByQuery("standalone and preconditioning and rate and " +
-                                                          (tempDiff >= 0 ? "cooling" : "heating"),
-                                                          equipId);
-    
+                        (tempDiff >= 0 ? "cooling" : "heating"),
+                equipId);
+
+        CcuLog.d(L.TAG_CCU_SCHEDULER, "Current temp: " + currentTemp +
+                ", Desired temp: " + desiredTemp + ", Temp diff: " + tempDiff + ", Precon rate: " + preconRate);
         /*
          *Initial tempDiff based on average temp is used to determine heating/cooling preconditioning required.
          *Then calculate the absolute tempDiff to determine the preconditioning time.

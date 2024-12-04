@@ -103,11 +103,9 @@ class ScheduleGroupModel (application: Application) : AndroidViewModel(applicati
     }
 
     fun deleteEntity(id: String) {
-        RxjavaUtil.executeBackground {
             ccuHsApi.deleteEntity(addAtSymbol(id))
             ScheduleManager.getInstance().updateSchedules()
             ccuHsApi.syncEntityTree()
-        }
     }
 
     fun bindData(

@@ -185,7 +185,7 @@ public class ScheduleUtil {
     public static void trimScheduleTowardCommonTimeSlot(Schedule zoneSchedule,
                                                         List<List<CommonTimeSlotFinder.TimeSlot>> commonTimeSlot,
                                                         CommonTimeSlotFinder commonTimeSlotFinder, CCUHsApi ccuHsApi) {
-        RxjavaUtil.executeBackground(() -> commonTimeSlotFinder.trimScheduleTowardCommonTimeSlotAndSync(zoneSchedule, commonTimeSlot, ccuHsApi));
+        commonTimeSlotFinder.trimScheduleTowardCommonTimeSlotAndSync(zoneSchedule, commonTimeSlot, ccuHsApi);
     }
 
     public static String getDayString(int day, int mScheduleGroup) {

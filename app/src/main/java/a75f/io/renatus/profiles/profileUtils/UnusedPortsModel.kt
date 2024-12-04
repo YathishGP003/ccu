@@ -60,9 +60,6 @@ open class UnusedPortsModel {
                     viewModel.profileConfiguration.unusedPorts[firstUnusedPort] = it
                     viewModel.setStateChanged()
                 }
-                is OAOViewModel -> {
-                    viewModel.profileConfiguration.unusedPorts[firstUnusedPort] = it
-                }
                 is SseProfileViewModel -> {
                     viewModel.profileConfiguration.unusedPorts[firstUnusedPort] = it
                 }

@@ -38,7 +38,6 @@ class OAOProfileConfiguration(
     lateinit var usePerRoomCO2Sensing: EnableConfig
     lateinit var systemPurgeOutsideDamperMinPos: ValueConfig
     lateinit var enhancedVentilationOutsideDamperMinOpen: ValueConfig
-    lateinit var unusedPorts: HashMap<String, Boolean>
 
     fun getDefaultConfiguration(): OAOProfileConfiguration {
         outsideDamperMinDrive = getDefaultValConfig(DomainName.outsideDamperMinDrive, model)
@@ -59,7 +58,6 @@ class OAOProfileConfiguration(
         usePerRoomCO2Sensing = getDefaultEnableConfig(DomainName.usePerRoomCO2Sensing, model)
         systemPurgeOutsideDamperMinPos = getDefaultValConfig(DomainName.systemPurgeOutsideDamperMinPos, model)
         enhancedVentilationOutsideDamperMinOpen = getDefaultValConfig(DomainName.enhancedVentilationOutsideDamperMinOpen, model)
-        unusedPorts = hashMapOf<String, Boolean>().apply { put("Relay1", false)}
         isDefault = true
         return this
     }
@@ -122,8 +120,7 @@ class OAOProfileConfiguration(
                 "exhaustFanHysteresis: ${exhaustFanHysteresis.currentVal},"+
                 "usePerRoomCO2Sensing: ${usePerRoomCO2Sensing.enabled},"+
                 "systemPurgeOutsideDamperMinPos: ${systemPurgeOutsideDamperMinPos.currentVal},"+
-                "enhancedVentilationOutsideDamperMinOpen: ${enhancedVentilationOutsideDamperMinOpen.currentVal},"+
-                "unusedPorts: $unusedPorts"
+                "enhancedVentilationOutsideDamperMinOpen: ${enhancedVentilationOutsideDamperMinOpen.currentVal},"
     }
 
     override fun getValueConfigs(): List<ValueConfig> {

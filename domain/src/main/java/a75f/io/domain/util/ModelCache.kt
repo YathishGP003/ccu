@@ -103,6 +103,9 @@ object ModelCache {
         modelContainer[MODEL_CONNECT_DEVICE] = getModelById(MODEL_CONNECT_DEVICE)
         CcuLog.i(Domain.LOG_TAG, "cmBoardDevice loaded")
 
+        modelContainer[MODEL_OTN_DEVICE] = getModelById(MODEL_OTN_DEVICE)
+        CcuLog.i(Domain.LOG_TAG, "otnDevice loaded")
+
         modelContainer[MODEL_HYPERSTAT_DEVICE] = getModelById(MODEL_HYPERSTAT_DEVICE)
         CcuLog.i(Domain.LOG_TAG, "hyperstat device loaded")
     }
@@ -179,9 +182,8 @@ object ModelCache {
 
     private fun loadStandAloneModels() {
         modelContainer[MODEL_HYPERSTAT_SPLIT_CPU] = getModelById(MODEL_HYPERSTAT_SPLIT_CPU)
-        modelContainer[MODEL_HYPERSTAT_CPU] = getModelById(MODEL_HYPERSTAT_CPU)
-        CcuLog.i(Domain.LOG_TAG, "HyperStat CPU equip model loaded")
-
+        modelContainer[MODEL_OTN_TI] = getModelById(MODEL_OTN_TI)
+        CcuLog.i(Domain.LOG_TAG, "Otn profile model loaded")
         modelContainer[MODEL_SMART_NODE_SSE] = getModelById(
             MODEL_SMART_NODE_SSE)
         CcuLog.i(Domain.LOG_TAG, "MODEL_SMART_NODE_SSE model loaded")
@@ -214,6 +216,14 @@ object ModelCache {
         CcuLog.i(Domain.LOG_TAG, "Model Loaded from FS ${model.name}  ${model.version?.major}.${model.version?.minor}.${model.version?.patch}")
         modelContainer[modelId] = model
         return model
+    }
+
+    fun getModelByFileName( fileName : String) : ModelDirective {
+        return if (context != null) {
+            ResourceHelper.loadModel(fileName, context!!)
+        } else {
+            ResourceHelper.loadModel(fileName)
+        }
     }
 
     private fun loadBuildingEquipModel() {

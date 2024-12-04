@@ -71,6 +71,7 @@ import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
 import a75f.io.renatus.profiles.acb.AcbProfileConfigFragment;
 import a75f.io.renatus.profiles.hss.cpu.HyperStatSplitCpuFragment;
 import a75f.io.renatus.profiles.dab.DabProfileConfigFragment;
+import a75f.io.renatus.profiles.otn.OtnProfileConfigFragment;
 import a75f.io.renatus.profiles.sse.SseProfileConfigFragment;
 import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatV2CpuFragment;
 import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatMonitoringFragment;
@@ -1113,8 +1114,8 @@ public class FloorPlanFragment extends Fragment {
                             , zone.getId(), floor.getId(),NodeType.HYPER_STAT, profile.getProfileType()), HyperStatMonitoringFragment.Companion.getID());
                     break;
                 case OTN:
-                    showDialogFragment(FragmentOTNTempInfConfiguration.newInstance(Short.parseShort(nodeAddress),
-                            zone.getId(), floor.getId(), profile.getProfileType()), FragmentOTNTempInfConfiguration.ID);
+                    showDialogFragment(OtnProfileConfigFragment.Companion.newInstance(Short.parseShort(nodeAddress),
+                            zone.getId(), floor.getId(), NodeType.OTN, profile.getProfileType()), OtnProfileConfigFragment.Companion.getID());
                     break;
                 case HYPERSTAT_VRV:
                     showDialogFragment(HyperStatVrvFragment.newInstance(Short.parseShort(nodeAddress)

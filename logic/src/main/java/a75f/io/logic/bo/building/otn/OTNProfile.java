@@ -7,76 +7,48 @@ import static a75f.io.logic.bo.building.ZoneState.TEMPDEAD;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
-import a75f.io.api.haystack.HSUtil;
-import a75f.io.api.haystack.Occupied;
+import a75f.io.domain.equips.OtnEquip;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.BaseProfileConfiguration;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
+import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.system.SystemMode;
-import a75f.io.logic.bo.building.system.dab.DabSystemController;
-import a75f.io.logic.bo.util.SystemTemperatureUtil;
 import a75f.io.logic.tuners.TunerUtil;
 
 /*
  * created by spoorthidev on 3-August-2021
  */
 public class OTNProfile extends ZoneProfile {
-    OTNEquip mOTNEquip;
-    public HashMap<Integer, OTNEquip> mOTNDeviceMap;
 
-    public OTNProfile(){
-        mOTNDeviceMap = new HashMap<>();
-    }
+    OtnEquip otnEquip;
+    Short mNodeAddr;
+    public OTNProfile(String equipRef, Short nodeAddr) {
+        otnEquip = new OtnEquip(equipRef);
+        mNodeAddr = nodeAddr;
 
-    public void addOTNEquip(ProfileType type, int node, OTNConfiguration config,
-                            String floorRef, String roomRef) {
-        mOTNEquip = new OTNEquip(type, node);
-        mOTNEquip.createEntities(config, floorRef, roomRef);
-        mOTNDeviceMap.put(node, mOTNEquip);
-        mOTNEquip.init();
-    }
-
-    public void addOTNEquip(int node) {
-        mOTNEquip = new OTNEquip(ProfileType.OTN, node);
-        mOTNDeviceMap.put(node, mOTNEquip);
-        mOTNEquip.init();
-    }
-
-    public void updateOTN(ProfileType type, int node, OTNConfiguration config, String floorRef,
-                          String roomRef) {
-        mOTNEquip.update(type, node, config, floorRef, roomRef);
-        mOTNEquip.init();
-        updateOccupancyDetPoint();
     }
 
     @Override
     public void updateZonePoints() {
+        CcuLog.d(L.TAG_CCU_ZONE, "updateZonePoints : " + mNodeAddr);
         if(isRFDead()){
-            handleRFDead(mOTNEquip);
+            handleRFDead();
             return;
         } else if (isZoneDead()) {
-            handleZoneDead(mOTNEquip);
+            handleZoneDead();
             return;
         }
 
-
-        double desiredTempCooling =
-                SystemTemperatureUtil.getDesiredTempCooling(mOTNEquip.mEquipRef);
-        double desiredTempHeating =
-                SystemTemperatureUtil.getDesiredTempHeating(mOTNEquip.mEquipRef);
-        double tempMidPoint = (desiredTempCooling + desiredTempHeating) / 2;
-        mOTNEquip.setDesiredTemp(tempMidPoint);
-
-        double setTempCooling = mOTNEquip.getDesiredTempCooling();
-        double setTempHeating = mOTNEquip.getDesiredTempHeating();
-        double roomTemp = mOTNEquip.getCurrentTemp();
+        double setTempCooling = otnEquip.getDesiredTempCooling().readPriorityVal();
+        double setTempHeating = otnEquip.getDesiredTempHeating().readPriorityVal();
+        double roomTemp = otnEquip.getCurrentTemp().readHisVal();
         double systemDefaultTemp = 72.0;
 
 
@@ -93,8 +65,6 @@ public class OTNProfile extends ZoneProfile {
         } else {
             SystemMode systemMode = SystemMode.values()[(int) TunerUtil.readSystemUserIntentVal(
                     "conditioning and mode")];
-            CcuLog.d(L.TAG_CCU_ZONE,
-                    " cazEquip : systemMode-" + systemMode + " roomTemp:" + roomTemp);
             if (systemMode == SystemMode.AUTO || systemMode == SystemMode.COOLONLY && roomTemp > systemDefaultTemp) {
                 state = COOLING;
             }
@@ -105,42 +75,33 @@ public class OTNProfile extends ZoneProfile {
                 state = COOLING;
             }
         }
-        if (mOTNEquip.getStatus() != state.ordinal()) {
-            mOTNEquip.setStatus(state.ordinal());
-        }
 
+        Boolean isEmergencyMode = L.ccu().systemProfile.getSystemController().isEmergencyMode();
+        CcuLog.d(L.TAG_CCU_ZONE,
+                " OtnEquip : state " + state + " roomTemp " + roomTemp+ " setTempCooling "
+                        +setTempCooling+ " setTempHeating "+setTempHeating+ " isEmergencyMode "+isEmergencyMode);
 
-        mOTNEquip.setStatus(state.ordinal(),
-                DabSystemController.getInstance().isEmergencyMode() && (state == HEATING ?
-                        buildingLimitMinBreached()
-                        : state == COOLING && buildingLimitMaxBreached()));
+        setStatus(state.ordinal(), isEmergencyMode && (state == HEATING ?
+                        buildingLimitMinBreached() : state == COOLING && buildingLimitMaxBreached()));
 
     }
 
-    private void handleZoneDead(OTNEquip mOTNEquip) {
+    private void handleZoneDead() {
         state = TEMPDEAD;
-        String curStatus = CCUHsApi.getInstance().readDefaultStrVal("point and status and " +
-                "message and writable and group == \"" + mOTNEquip.mNodeAddr + "\"");
+        String curStatus = otnEquip.getEquipStatusMessage().readDefaultStrVal();
         if (!curStatus.equals("Zone Temp Dead")) {
-            CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable" +
-                    " and" +
-                    " group == \"" + mOTNEquip.mNodeAddr + "\"", "Zone Temp Dead");
+            otnEquip.getEquipStatusMessage().writeDefaultVal("Zone Temp Dead");
         }
-        CCUHsApi.getInstance().writeHisValByQuery("point and not ota and status and his and group == \"" +
-                mOTNEquip.mNodeAddr + "\"", (double) TEMPDEAD.ordinal());
+        otnEquip.getEquipStatus().writeHisVal(TEMPDEAD.ordinal());
     }
 
-    private void handleRFDead(OTNEquip mOTNEquip) {
+    private void handleRFDead() {
         state = RFDEAD;
-        String curStatus = CCUHsApi.getInstance().readDefaultStrVal("point and status and " +
-                "message and writable and group == \"" + mOTNEquip.mNodeAddr + "\"");
+        String curStatus = otnEquip.getEquipStatusMessage().readDefaultStrVal();
         if (!curStatus.equals(RFDead)) {
-            CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable" +
-                    " and" +
-                    " group == \"" + mOTNEquip.mNodeAddr + "\"", RFDead);
+            otnEquip.getEquipStatusMessage().writeDefaultVal(RFDead);
         }
-        CCUHsApi.getInstance().writeHisValByQuery("point and not ota and status and his and group == \"" +
-                mOTNEquip.mNodeAddr + "\"", (double) RFDEAD.ordinal());
+        otnEquip.getEquipStatus().writeHisVal(RFDEAD.ordinal());
     }
 
     @Override
@@ -149,44 +110,47 @@ public class OTNProfile extends ZoneProfile {
     }
 
     @Override
-    public OTNConfiguration getProfileConfiguration(short address) {
-        return mOTNEquip.getOTNconfiguration();
+    public BaseProfileConfiguration getProfileConfiguration(short address) {
+        return null;
     }
 
     @Override
     public Set<Short> getNodeAddresses() {
         return new HashSet<Short>() {{
-            add((short) mOTNEquip.mNodeAddr);
+            add(mNodeAddr);
         }};
     }
 
+    @Override
+    public double getCurrentTemp() {
+        return otnEquip.getCurrentTemp().readHisVal();
+    }
 
     @Override
     public Equip getEquip()
     {
-        HashMap<Object,Object> equip = CCUHsApi.getInstance().readEntity("equip and group == \""+ mOTNEquip.mNodeAddr+"\"");
+        HashMap<Object,Object> equip = CCUHsApi.getInstance().readEntity("equip and group == \""+ mNodeAddr+"\"");
         return new Equip.Builder().setHashMap(equip).build();
     }
 
-
-    private void updateOccupancyDetPoint(){
-        boolean isAutoawayenabled = CCUHsApi.getInstance().readDefaultVal("point and " +
-                "auto and forced and away and config and equipRef == \"" + mOTNEquip.mEquipRef + "\"") > 0;
-        Occupied occuStatus =
-                ScheduleManager.getInstance().getOccupiedModeCache(HSUtil.getZoneIdFromEquipId(mOTNEquip.mEquipRef ));
-        if(isAutoawayenabled && occuStatus != null) {
-            if (occuStatus.isOccupied()) {
-                HashMap<Object,Object> ocupancyDetection = CCUHsApi.getInstance().readEntity(
-                        "point and  otn and occupancy and detection and his and equipRef  ==" +
-                                " \"" + mOTNEquip.mEquipRef + "\"");
-                if (ocupancyDetection.get("id") != null) {
-                    double val = CCUHsApi.getInstance().readHisValById(Objects.requireNonNull(ocupancyDetection.get(
-                            "id")).toString());
-                    CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(Objects.requireNonNull(ocupancyDetection.get(
-                            "id")).toString(),
-                            val);
-                }
+    private void setStatus(double status, boolean emergency) {
+        otnEquip.getEquipStatus().writeHisVal(status);
+        String message;
+        if (emergency) {
+            message = (status == 0 ? "Recirculating Air" : status == 1 ? "Emergency Cooling" :
+                    "Emergency Heating");
+        } else {
+            if (ScheduleManager.getInstance().getSystemOccupancy() == Occupancy.PRECONDITIONING) {
+                message = "In Preconditioning ";
+            } else {
+                message = (status == 0 ? "Recirculating Air" : status == 1 ? "Cooling Space" :
+                        "Warming Space");
             }
+        }
+
+        String curStatus = otnEquip.getEquipStatusMessage().readDefaultStrVal();
+        if (!curStatus.equals(message)) {
+            otnEquip.getEquipStatusMessage().writeDefaultVal(message);
         }
     }
 }

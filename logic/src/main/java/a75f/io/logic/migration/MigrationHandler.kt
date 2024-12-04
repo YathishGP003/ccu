@@ -28,6 +28,7 @@ import a75f.io.domain.cutover.HyperStatSplitDeviceCutoverMapping
 import a75f.io.domain.cutover.HyperStatV2EquipCutoverMapping
 import a75f.io.domain.cutover.NodeDeviceCutOverMapping
 import a75f.io.domain.cutover.OaoCutOverMapping
+import a75f.io.domain.cutover.OtnEquipCutOverMapping
 import a75f.io.domain.cutover.SseZoneProfileCutOverMapping
 import a75f.io.domain.cutover.VavFullyModulatingRtuCutOverMapping
 import a75f.io.domain.cutover.VavStagedRtuCutOverMapping
@@ -35,6 +36,7 @@ import a75f.io.domain.cutover.VavStagedVfdRtuCutOverMapping
 import a75f.io.domain.cutover.VavZoneProfileCutOverMapping
 import a75f.io.domain.cutover.getDomainNameForMonitoringProfile
 import a75f.io.domain.equips.DabEquip
+import a75f.io.domain.equips.OtnEquip
 import a75f.io.domain.equips.SseEquip
 import a75f.io.domain.equips.VavEquip
 import a75f.io.domain.logic.DeviceBuilder
@@ -62,6 +64,7 @@ import a75f.io.logic.bo.building.hyperstat.v2.configs.MonitoringConfiguration
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.CpuUniInType
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuProfileConfiguration
 import a75f.io.logic.bo.building.oao.OAOProfileConfiguration
+import a75f.io.logic.bo.building.otn.OtnProfileConfiguration
 import a75f.io.logic.bo.building.schedules.Occupancy
 import a75f.io.logic.bo.building.schedules.occupancy.DemandResponse
 import a75f.io.logic.bo.building.sse.SseProfileConfiguration
@@ -135,6 +138,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         createMigrationVersionPoint(CCUHsApi.getInstance())
         addSystemDomainEquip(CCUHsApi.getInstance())
         addCmBoardDevice(hayStack)
+        doOtnTerminalDomainModelMigration()
         doHSCPUDMMigration()
         doHSMonitoringDMMigration()
         if (!isMigrationRequired()) {
@@ -1915,5 +1919,60 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             }
         }
     }
+
+    private fun doOtnTerminalDomainModelMigration() {
+        val otnEquips = hayStack.readAllEntities("equip and zone and otn")
+            .filter { it["domainName"] == null }
+            .toList()
+        if (otnEquips.isEmpty()) {
+            CcuLog.i(Domain.LOG_TAG, "VAV DM zone equip migration is complete")
+            return
+        }
+        val equipBuilder = ProfileEquipBuilder(hayStack)
+        val site = hayStack.site
+        otnEquips.forEach {
+            CcuLog.i(Domain.LOG_TAG, "Do DM zone equip migration for $it")
+
+            val model = ModelLoader.getOtnTiModel() as SeventyFiveFProfileDirective
+            val equipDis = "${site?.displayName}-OTN-${it["group"]}"
+            val profileType = ProfileType.OTN
+
+            val profileConfiguration = OtnProfileConfiguration(
+                Integer.parseInt(it["group"].toString()),
+                NodeType.OTN.name,
+                0,
+                it["roomRef"].toString(),
+                it["floorRef"].toString(),
+                profileType,
+                model
+            ).getActiveConfiguration()
+
+            equipBuilder.doCutOverMigration(
+                it["id"].toString(), model,
+                equipDis, OtnEquipCutOverMapping.entries, profileConfiguration, equipHashMap = it
+            )
+
+            // At app startup, cutover migrations currently run before upgrades.
+            // This is a problem because demandResponseSetback is supposed to get its value from a newly-added BuildingTuner point, which isn't available yet.
+            // Setting the fallback value manually for now.
+            //vavEquip.demandResponseSetback.writeVal(17, 2.0)
+
+            val deviceModel = ModelLoader.getOtnDeviceModel() as SeventyFiveFDeviceDirective
+            val deviceDis = "${site?.displayName}-OTN-${it["group"]}"
+            val deviceBuilder = DeviceBuilder(hayStack, EntityMapper(model))
+            val device = hayStack.readEntity("device and addr == \"" + it["group"] + "\"")
+            deviceBuilder.doCutOverMigration(
+                device["id"].toString(),
+                deviceModel,
+                deviceDis,
+                NodeDeviceCutOverMapping.entries,
+                profileConfiguration
+            )
+
+            val otnEquip = OtnEquip(it["id"].toString())
+            otnEquip.temperatureOffset.writeDefaultVal(0.1 * otnEquip.temperatureOffset.readDefaultVal())
+        }
+    }
+
 
 }

@@ -6,6 +6,7 @@ buildscript {
     ext.objectboxVersion = '2.8.0'
     ext.domainModelLibVersion = '20241129.1-prod'
 
+
     repositories {
         mavenLocal()
         jcenter()

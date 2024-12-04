@@ -9,6 +9,7 @@ import a75f.io.domain.util.ModelLoader
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.hyperstat.profiles.util.getConfiguration
+import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import com.google.gson.JsonObject
 
 
@@ -27,9 +28,10 @@ fun reconfigureHSCPUV2(msgObject: JsonObject, configPoint: Point) {
         CcuLog.e(L.TAG_CCU_PUBNUB, "updateConfigPoint for CPU Reconfiguration $config")
     } else {
         updateConfiguration(configPoint.domainName, pointNewValue.asDouble, config!!)
+        equipBuilder.updateEquipAndPoints(config!!,model , hayStack.getSite()!!.id, hyperStatCPUEquip["dis"].toString(), true)
     }
     writePointFromJson(configPoint, msgObject, hayStack)
-    equipBuilder.updateEquipAndPoints(config!!,model , hayStack.getSite()!!.id, hyperStatCPUEquip["dis"].toString(), true)
+    DesiredTempDisplayMode.setModeType(configPoint.roomRef, CCUHsApi.getInstance())
 
     CcuLog.i(L.TAG_CCU_PUBNUB, "updateConfigPoint for CPU Reconfiguration $config")
 

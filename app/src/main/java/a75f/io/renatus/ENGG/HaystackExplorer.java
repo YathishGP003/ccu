@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Set;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Point;
@@ -358,11 +359,13 @@ public class HaystackExplorer extends Fragment
                 if (isCurrentTempPoint(p)) {
                     CcuLog.d(L.TAG_CCU_UI, "Set "+p.getDomainName()+" Equip "+p.getEquipRef());
                     Equip q = HSUtil.getEquipInfo(p.getEquipRef());
+                    Device device =  HSUtil.getDevice(Short.parseShort(q.getGroup()));
                     ExecutorTask.executeBackground( () -> {
-                        CmToCcuOverUsbSnRegularUpdateMessage_t msg = new CmToCcuOverUsbSnRegularUpdateMessage_t();
-                        msg.update.smartNodeAddress.set(Integer.parseInt(q.getGroup()));
-                        msg.update.roomTemperature.set((int)val);
-                        Pulse.regularSNUpdate(msg);
+                        if (device.getMarkers().contains("smartnode") || device.getMarkers().contains("helionode")) {
+                            mockSnRegularUpdate(val, Integer.parseInt(q.getGroup()));
+                        } else {
+                            hayStack.writeHisValueByIdWithoutCOV(id, val);
+                        }
                     });
                 } else {
                     hayStack.writeHisValueByIdWithoutCOV(id, val);
@@ -376,5 +379,12 @@ public class HaystackExplorer extends Fragment
             return point.getDomainName().equals("currentTemp");
         }
         return point.getMarkers().contains("current") && point.getMarkers().contains("temp");
+    }
+
+    public static void mockSnRegularUpdate(double val, int nodeAddress) {
+        CmToCcuOverUsbSnRegularUpdateMessage_t msg = new CmToCcuOverUsbSnRegularUpdateMessage_t();
+        msg.update.smartNodeAddress.set(nodeAddress);
+        msg.update.roomTemperature.set((int) val);
+        Pulse.regularSNUpdate(msg);
     }
 }

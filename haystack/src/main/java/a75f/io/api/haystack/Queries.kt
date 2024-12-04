@@ -29,9 +29,6 @@ class Queries {
         const val ZONE_HEATING_DEADBAND = "schedulable and zone and heating and deadband and roomRef == "
         const val ZONE_UNOCCUPIED_ZONE_SETBACK = "schedulable and zone and unoccupied and setback and roomRef == "
 
-        const val LOG_LEVEL_QUERY = "log and level and diag"
-
-
 
     }
 

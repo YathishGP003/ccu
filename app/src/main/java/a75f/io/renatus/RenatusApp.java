@@ -19,6 +19,7 @@ import java.io.InputStream;
 
 import a75f.io.alerts.AlertManager;
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.domain.api.Domain;
 import a75f.io.logger.CcuLog;
 import a75f.io.sitesequencer.log.SequenceLogs;
 import dagger.hilt.android.HiltAndroidApp;
@@ -181,7 +182,7 @@ public class RenatusApp extends UtilityApplication
 	public static void restartApp() {
 		AlertManager.getInstance().clearAlertsWhenAppClose();
 		AlertManager.getInstance().getRepo().setRestartAppToTrue();
-		CCUHsApi.getInstance().writeHisValByQuery("app and restart",1.0);
+		Domain.diagEquip.getAppRestart().writeHisVal(1.0);
 		closeApp();
 	}
 

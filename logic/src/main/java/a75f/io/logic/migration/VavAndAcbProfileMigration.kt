@@ -622,7 +622,36 @@ class VavAndAcbProfileMigration {
                     )
                 }
 
-                //
+                if (!acbEquip.demandResponseSetback.pointExists()) {
+                    CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "VavAndAcbProfileMigration.recoverHelioNodeACBTuners: demandResponseSetback does not exist")
+                    val modelPointDef = model.points.find { it.domainName.contentEquals(DomainName.demandResponseSetback) } as SeventyFiveFProfilePointDef
+                    equipBuilder.createPoint(
+                        PointBuilderConfig(
+                            modelPointDef,
+                            profileConfiguration,
+                            it["id"].toString(),
+                            site!!.id,
+                            hayStack.timeZone,
+                            equipDis
+                        )
+                    )
+                }
+
+                if(!acbEquip.autoAwaySetback.pointExists()) {
+                    CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "VavAndAcbProfileMigration.recoverHelioNodeACBTuners: autoAwaySetback does not exist")
+                    val modelPointDef = model.points.find { it.domainName.contentEquals(DomainName.autoAwaySetback) } as SeventyFiveFProfilePointDef
+                    equipBuilder.createPoint(
+                        PointBuilderConfig(
+                            modelPointDef,
+                            profileConfiguration,
+                            it["id"].toString(),
+                            site!!.id,
+                            hayStack.timeZone,
+                            equipDis
+                        )
+                    )
+                }
+
                 if (acbEquip.enableCFMControl.readDefaultVal() > 0) {
                     if (!acbEquip.vavAirflowCFMProportionalRange.pointExists()) {
                         val modelPointDef = model.points.find { it.domainName.contentEquals(DomainName.vavAirflowCFMProportionalRange) } as SeventyFiveFProfilePointDef

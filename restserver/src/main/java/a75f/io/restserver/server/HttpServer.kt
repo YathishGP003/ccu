@@ -171,6 +171,7 @@ class HttpServer {
                         if(query.contains("equipRef")){
                             try {
                                 equipRefId = getEquipRefId(query).replace("@","").trim()
+                                CcuLog.d(HTTP_SERVER, "read all query contains equipRef equipRefId is==> $equipRefId")
                                 if(CCUHsApi.getInstance().readMapById(equipRefId)["group"] != null){
                                     group = CCUHsApi.getInstance().readMapById(equipRefId)["group"] as String
                                 }

@@ -29,6 +29,8 @@ import a75f.io.api.haystack.Zone;
 import a75f.io.data.message.MessageDbUtilKt;
 import a75f.io.domain.api.Domain;
 import a75f.io.domain.api.DomainName;
+import a75f.io.domain.devices.CCUDevice;
+import a75f.io.domain.logic.CCUDeviceBuilder;
 import a75f.io.domain.logic.DomainManager;
 import a75f.io.domain.migration.DiffManger;
 import a75f.io.domain.util.ModelCache;
@@ -46,7 +48,7 @@ import a75f.io.logic.bo.building.erm.EmrProfile;
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.HyperStatCpuProfile;
 import a75f.io.logic.bo.building.hyperstat.profiles.hpu.HyperStatHpuProfile;
 import a75f.io.logic.bo.building.hyperstat.profiles.pipe2.HyperStatPipe2Profile;
-import a75f.io.logic.bo.building.hyperstatmonitoring.HyperStatMonitoringProfile;
+import a75f.io.logic.bo.building.hyperstatmonitoring.HyperStatV2MonitoringProfile;
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuEconProfile;
 import a75f.io.logic.bo.building.modbus.ModbusProfile;
 import a75f.io.logic.bo.building.oao.OAOProfile;
@@ -77,6 +79,7 @@ import a75f.io.logic.bo.building.vav.VavParallelFanProfile;
 import a75f.io.logic.bo.building.vav.VavReheatProfile;
 import a75f.io.logic.bo.building.vav.VavSeriesFanProfile;
 import a75f.io.logic.bo.building.vrv.VrvProfile;
+import a75f.io.logic.bo.util.DesiredTempDisplayMode;
 import a75f.io.logic.cloud.RenatusServicesEnvironment;
 import a75f.io.logic.cloud.RenatusServicesUrls;
 import a75f.io.logic.filesystem.FileSystemTools;
@@ -84,8 +87,6 @@ import a75f.io.logic.jobs.BuildingProcessJob;
 import a75f.io.logic.jobs.ScheduleProcessJob;
 import a75f.io.logic.jobs.bearertoken.BearerTokenManager;
 import a75f.io.logic.migration.MigrationHandler;
-import a75f.io.logic.migration.heartbeat.HeartbeatDiagMigration;
-import a75f.io.logic.migration.heartbeat.HeartbeatMigration;
 import a75f.io.logic.tuners.TunerEquip;
 import a75f.io.logic.util.CCUProxySettings;
 import a75f.io.logic.util.MigrationUtil;
@@ -257,10 +258,10 @@ public class Globals {
         //set SN address band
         try {
             String addrBand = getSmartNodeBand();
-            L.ccu().setSmartNodeAddressBand(addrBand == null ? 1000 : Short.parseShort(addrBand));
+            L.ccu().setAddressBand(addrBand == null ? 1000 : Short.parseShort(addrBand));
         } catch (NumberFormatException e) {
             CcuLog.i(L.TAG_CCU_INIT, "Failerd to read device address band ", e);
-            L.ccu().setSmartNodeAddressBand((short) 1000);
+            L.ccu().setAddressBand((short) 1000);
         }
         CCUHsApi.getInstance().trimObjectBoxHisStore();
         importTunersAndScheduleJobs();
@@ -298,9 +299,13 @@ public class Globals {
                 Watchdog.getInstance().addMonitor(mScheduleProcessJob);
                 Watchdog.getInstance().start();
                 modelMigration(migrationHandler);
-                MigrationHandler.Companion.doPostModelMigrationTasks();
-                /*temperatureMode migration should be handled after model migration*/
+                migrationHandler.doPostModelMigrationTasks();
+
+                /*Below migration scripts should be handled after model migration*/
                 migrationHandler.temperatureModeMigration();
+                /*checkBacnetIdMigrationRequired migration script will update source model version
+                 of system Equip, This will affect DM TO DM migration*/
+                migrationHandler.checkBacnetIdMigrationRequired();
             } catch (Exception e) {
                 //Catch ignoring any exception here to avoid app from not loading in case of an init failure.
                 //Init would retried during next app restart.
@@ -315,6 +320,7 @@ public class Globals {
                     CcuLog.i(L.TAG_CCU_INIT, "Failed to load profiles", e);
                 }
                 isInitCompleted = true;
+                updateTemperatureModeForEquips(); // Update temperature mode fo all equips while app restart
                 DEFAULT_HEARTBEAT_INTERVAL = Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
                         .getInt("control_loop_frequency", 60);
                 initCompletedListeners.forEach(OnCcuInitCompletedListener::onInitCompleted);
@@ -327,6 +333,13 @@ public class Globals {
         if (isTestMode()) {
             setTestMode(false);
         }
+    }
+
+    private void updateTemperatureModeForEquips() {
+        CcuLog.d(L.TAG_CCU, "UtilityApplication.updateTemperatureModeForEquips");
+        DesiredTempDisplayMode.setSystemModeForVav(CCUHsApi.getInstance());
+        DesiredTempDisplayMode.setSystemModeForDab(CCUHsApi.getInstance());
+        DesiredTempDisplayMode.setSystemModeForStandaloneProfile(CCUHsApi.getInstance());
     }
 
     private void modelMigration(MigrationHandler migrationHandler) {
@@ -521,7 +534,7 @@ public class Globals {
                             break;
                         case HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT:
                             HyperStatCpuProfile cpuProfile = new HyperStatCpuProfile();
-                            cpuProfile.addEquip(Short.parseShort(eq.getGroup()));
+                            cpuProfile.addEquip(eq.getId());
                             L.ccu().zoneProfiles.add(cpuProfile);
                             break;
                         case HYPERSTAT_HEAT_PUMP_UNIT:
@@ -537,13 +550,12 @@ public class Globals {
                             break;
 
                         case HYPERSTAT_MONITORING:
-                            HyperStatMonitoringProfile hyperStatMonitoringProfile = new HyperStatMonitoringProfile();
-                            hyperStatMonitoringProfile.addHyperStatMonitoringEquip(Short.parseShort(eq.getGroup()));
+                            HyperStatV2MonitoringProfile hyperStatMonitoringProfile = new HyperStatV2MonitoringProfile(eq.getId(), Short.parseShort(eq.getGroup()));
+                            hyperStatMonitoringProfile.addHyperStatMonitoringEquip();
                             L.ccu().zoneProfiles.add(hyperStatMonitoringProfile);
                             break;
                         case OTN:
-                            OTNProfile otnProfile = new OTNProfile();
-                            otnProfile.addOTNEquip(Short.parseShort(eq.getGroup()));
+                            OTNProfile otnProfile = new OTNProfile(eq.getId(), Short.parseShort(eq.getGroup()));
                             L.ccu().zoneProfiles.add(otnProfile);
                             break;
                         case HYPERSTAT_VRV:
@@ -597,7 +609,9 @@ public class Globals {
         if (oaoEquip != null && oaoEquip.size() > 0) {
             CcuLog.d(L.TAG_CCU, "Create Default OAO Profile");
             OAOProfile oao = new OAOProfile();
-            oao.addOaoEquip(Short.parseShort(oaoEquip.get("group").toString()));
+            oao.addOAOEquip(oaoEquip.get("id").toString()
+                    , Short.parseShort(oaoEquip.get("group").toString())
+                    , ProfileType.OAO);
             L.ccu().oaoProfile = oao;
         }
 
@@ -661,10 +675,10 @@ public class Globals {
             String nodeAdd = device.get("addr").toString();
             return nodeAdd.substring(0, nodeAdd.length() - 2).concat("00");
         } else {
-            HashMap<Object, Object> band = CCUHsApi.getInstance().readEntity("point and snband");
+            HashMap<Object, Object> addressBand = (HashMap<Object, Object>) Domain.readPoint(DomainName.addressBand);
             CcuLog.i(Domain.LOG_TAG, "Deviceband " + device);
-            if (band != null && band.size() > 0 && band.get("val") != null) {
-                return band.get("val").toString();
+            if (addressBand != null && addressBand.size() > 0 && addressBand.get("val") != null) {
+                return addressBand.get("val").toString();
             }
         }
         return null;
@@ -721,12 +735,16 @@ public class Globals {
         String systemProf = systemProfile.get("id").toString();
 
         if (!(systemProf.equals(ahuRef))) {
-            CCUHsApi.getInstance().updateCCUahuRef(systemProf);
+            CCUDeviceBuilder ccuDeviceBuilder = new CCUDeviceBuilder();
+            CCUDevice ccuDeviceObj = Domain.ccuDevice;
+            ccuDeviceBuilder.buildCCUDevice(ccuDeviceObj.getEquipRef(), ccuDeviceObj.getSiteRef(), ccuDeviceObj.getCcuDisName(),
+                    ccuDeviceObj.getInstallerEmail(), ccuDeviceObj.getManagerEmail(),
+                    ahuRef, true);
         }
     }
 
     private void handleAutoCommissioning() {
-        String autoCommissioningPointId = CCUHsApi.getInstance().readId("point and diag and auto and commissioning");
+        String autoCommissioningPointId = AutoCommissioningUtil.getAutoCommissioningPointId();
         if (autoCommissioningPointId != null && AutoCommissioningUtil.isAutoCommissioningStarted()) {
             long scheduledStopDatetimeInMillis = PreferenceUtil.getScheduledStopDatetime(AutoCommissioningUtil.SCHEDULEDSTOPDATETIME);
             AutoCommissioningUtil.handleAutoCommissioningState(scheduledStopDatetimeInMillis);

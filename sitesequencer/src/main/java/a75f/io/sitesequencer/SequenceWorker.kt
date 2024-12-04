@@ -19,13 +19,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
-import org.mozilla.javascript.RhinoException
-import org.mozilla.javascript.Scriptable
-import org.mozilla.javascript.ScriptableObject
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import java.util.UUID
 import java.util.function.Consumer
 
 class SequenceWorker(context: Context, params: WorkerParameters) :
@@ -214,8 +212,11 @@ class SequenceWorker(context: Context, params: WorkerParameters) :
             val sequenceAlert = SequencerSchedulerUtil.findAlertByBlockId(def, blockId)
             if (sequenceAlert != null) {
                 val alertDefinition = SequencerSchedulerUtil.createAlertDefinition(sequenceAlert)
+                alertDefinition.alert.mMessage = message
+                alertDefinition.alert.mNotificationMsg = notificationMsg
                 val tempId = entityId!!.replaceFirst("@".toRegex(), "")
-                mapOfPastAlerts["$blockId:$tempId"] = AlertData(sequenceAlert.title, sequenceAlert.message, entityId, "sequencer", blockId, alertDefinition)
+                mapOfPastAlerts["${alertDefinition.alert.alertDefId}:$blockId:$tempId"] = AlertData(sequenceAlert.title,
+                    message.toString(), entityId, "sequencer", blockId, alertDefinition)
             } else {
                 CcuLog.d(TAG, "sequenceAlert not found for blockId: $blockId")
             }
@@ -231,7 +232,7 @@ class SequenceWorker(context: Context, params: WorkerParameters) :
             AlertManager.getInstance()
                 .getActiveAlertsByCreatorAndBlockId("sequencer", sequenceAlert.alertBlockId)
                 .forEach(Consumer { alert: Alert ->
-                    val keyFromDb = alert.blockId + ":" + alert.equipId
+                    val keyFromDb = alert.alertDefId + ":"+ alert.blockId +":" + alert.equipId
                     if (!mapOfPastAlerts.containsKey(keyFromDb)) {
 
                         CcuLog.d(
@@ -259,7 +260,7 @@ class SequenceWorker(context: Context, params: WorkerParameters) :
         for (alert in alertData) {
             CcuLog.d(
                 TAG,
-                "##create alert title -> ${alert.title} <-blockId-> ${alert.blockId} <entityId> ${alert.entityId}"
+                "##create alert title -> ${alert.title} <-blockId-> ${alert.blockId} <entityId> ${alert.entityId} <message>${alert.message} <notificationMessage>${alert.alertDefinition.alert.mNotificationMsg}"
             )
             sequenceLogs.addLog(
                 SequenceMethodLog(
@@ -287,40 +288,6 @@ class SequenceWorker(context: Context, params: WorkerParameters) :
         val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
         return dateFormat.format(currentDateTime)
     }
-
-    private suspend fun evaluateJs(
-        def: SiteSequencerDefinition,
-        javascriptSnippet: String?,
-        mContext: Context?,
-        alertJsUtil: SequencerJsUtil?,
-        sequenceLogUtil: SequencerLogsCallback
-    ) {
-        val rhino = org.mozilla.javascript.Context.enter()
-        rhino.optimizationLevel = -1
-        val scope: Scriptable = rhino.initStandardObjects()
-        scope.put("print", scope, org.mozilla.javascript.Context.javaToJS(ConsolePrint(), scope))
-        val jsObject =
-            org.mozilla.javascript.Context.javaToJS(HaystackService(sequenceLogUtil), scope)
-        ScriptableObject.putProperty(scope, "haystack", jsObject)
-        val persistBlockService =
-            org.mozilla.javascript.Context.javaToJS(
-                PersistBlockService.getInstance(def.seqId),
-                scope
-            )
-        ScriptableObject.putProperty(scope, "persistBlock", persistBlockService)
-        val alertJsUtilJsObject = org.mozilla.javascript.Context.javaToJS(alertJsUtil, scope)
-        ScriptableObject.putProperty(scope, "alerts", alertJsUtilJsObject)
-        ScriptableObject.putProperty(scope, "ctx", mContext)
-        try {
-            rhino.evaluateString(scope, javascriptSnippet, "JavaScript", 1, null)
-        } catch (exception: RhinoException) {
-            exception.printStackTrace()
-            CcuLog.e(TAG, exception.message)
-        } finally {
-            org.mozilla.javascript.Context.exit()
-        }
-    }
-
     private suspend fun evaluateJsJ2v8(
         def: SiteSequencerDefinition,
         javascriptSnippet: String?,
@@ -330,7 +297,8 @@ class SequenceWorker(context: Context, params: WorkerParameters) :
     ) {
         V8.createV8Runtime(null, mContext.applicationInfo.dataDir).use { runtime ->
             runtime.use { runtime ->
-                val haystackService = HaystackService(sequenceLogUtil)
+                val lastRunId = UUID.randomUUID().toString()
+                val haystackService = HaystackService(sequenceLogUtil, lastRunId, def.seqId)
                 val haystackServiceObject = V8Object(runtime)
 
                 registerAllMethods(haystackService, haystackServiceObject)

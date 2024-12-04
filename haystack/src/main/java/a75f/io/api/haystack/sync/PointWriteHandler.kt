@@ -24,6 +24,7 @@ class PointWriteHandler {
 
     private fun processBatch(pointWriteBatch: List<Array<HDict>>, ccuHsApi: CCUHsApi) {
         val listOfPointArrayDict = mutableListOf<HDict>()
+        var retryIdList: List<String> = emptyList()
         for (array in pointWriteBatch) {
             // Iterate through each dictionary in the array and add it to the list
             for (dict in array) {
@@ -42,12 +43,15 @@ class PointWriteHandler {
         }
         if (pointWriteManyResponse.respCode == HttpUtil.HTTP_RESPONSE_OK) {
             CcuLog.i(PointWriteCache.POINT_WRITE_TAG, "PointWriteMany Success Response Code :"+pointWriteManyResponse.respCode )
-        } else if (pointWriteManyResponse.respCode >= HttpUtil.HTTP_RESPONSE_ERR_REQUEST) {
+        } else if (pointWriteManyResponse.respCode == HttpUtil.HTTP_RESPONSE_ERR_REQUEST) {
             CcuLog.i(PointWriteCache.POINT_WRITE_TAG, "PointWriteMany Failed Response Code :"+pointWriteManyResponse.respCode )
-            EntitySyncErrorHandler.handle400HttpError(
+            retryIdList = EntitySyncErrorHandler.handle400HttpError(
                 ccuHsApi,
                 pointWriteManyResponse.errRespString
             )
+        } else if (pointWriteManyResponse.respCode >= HttpUtil.HTTP_RESPONSE_UNAUTHORIZED) {
+            CcuLog.i(PointWriteCache.POINT_WRITE_TAG, "PointWriteMany Failed Response Code :"+pointWriteManyResponse.respCode )
+            return
         }
         val pointWriteIterator = pointWriteGrid.iterator()
         while (pointWriteIterator.hasNext()) {
@@ -55,7 +59,9 @@ class PointWriteHandler {
             val pointId = row["id"].toString()
             val pointLevel = row["level"].toString()
 
-            PointWriteCache.getInstance().clearPointWriteInCache(pointId, pointLevel)
+            if(!retryIdList.contains(pointId)) {
+                PointWriteCache.getInstance().clearPointWriteInCache(pointId, pointLevel)
+            }
         }
     }
 

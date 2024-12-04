@@ -23,7 +23,7 @@ object ModelCache {
     fun init(context: Context, haystack: CCUHsApi) {
         this.context = context
         val terminalDomainEquip =  haystack.readAllEntities("equip and zone and not standalone and sourceModel")
-        /*if(terminalDomainEquip.isNotEmpty()){
+        if(terminalDomainEquip.isNotEmpty()){
             loadModels(haystack)
         }else{
             loadStandAloneModelsAsync()
@@ -31,7 +31,7 @@ object ModelCache {
             loadTerminalModelsAsync()
             loadBuildingEquipModel()
             loadDeviceModels()
-        }*/
+        }
     }
 
     private fun loadModels(haystack: CCUHsApi) {
@@ -69,6 +69,7 @@ object ModelCache {
         CoroutineScope(Dispatchers.IO).launch {
             loadSystemProfileModels()
             loadBypassDamperModels()
+            loadOAOModelAsync()
         }
     }
 
@@ -76,6 +77,13 @@ object ModelCache {
         CcuLog.i(Domain.LOG_TAG, "Load loadTerminalModelsAsync")
         CoroutineScope(Dispatchers.IO).launch {
             loadVavZoneEquipModels()
+        }
+    }
+
+    private fun loadOAOModelAsync() {
+        CcuLog.i(Domain.LOG_TAG, "Load loadOAOModelAsync")
+        CoroutineScope(Dispatchers.IO).launch {
+            loadOAOModel()
         }
     }
 
@@ -94,6 +102,12 @@ object ModelCache {
 
         modelContainer[MODEL_CONNECT_DEVICE] = getModelById(MODEL_CONNECT_DEVICE)
         CcuLog.i(Domain.LOG_TAG, "cmBoardDevice loaded")
+
+        modelContainer[MODEL_OTN_DEVICE] = getModelById(MODEL_OTN_DEVICE)
+        CcuLog.i(Domain.LOG_TAG, "otnDevice loaded")
+
+        modelContainer[MODEL_HYPERSTAT_DEVICE] = getModelById(MODEL_HYPERSTAT_DEVICE)
+        CcuLog.i(Domain.LOG_TAG, "hyperstat device loaded")
     }
     
     private fun loadVavZoneEquipModels() {
@@ -127,6 +141,8 @@ object ModelCache {
         modelContainer[MODEL_HELIO_NODE_DAB] = getModelById(MODEL_HELIO_NODE_DAB)
         CcuLog.i(Domain.LOG_TAG, "helionodeDAB equip model loaded")
 
+        modelContainer[MODEL_HELIO_NODE_DAB] = getModelById(MODEL_HELIO_NODE_DAB)
+        CcuLog.i(Domain.LOG_TAG, "helionodeDAB equip model loaded")
     }
 
     private fun loadSystemProfileModels() {
@@ -166,6 +182,19 @@ object ModelCache {
 
     private fun loadStandAloneModels() {
         modelContainer[MODEL_HYPERSTAT_SPLIT_CPU] = getModelById(MODEL_HYPERSTAT_SPLIT_CPU)
+        modelContainer[MODEL_OTN_TI] = getModelById(MODEL_OTN_TI)
+        CcuLog.i(Domain.LOG_TAG, "Otn profile model loaded")
+        modelContainer[MODEL_SMART_NODE_SSE] = getModelById(
+            MODEL_SMART_NODE_SSE)
+        CcuLog.i(Domain.LOG_TAG, "MODEL_SMART_NODE_SSE model loaded")
+
+        modelContainer[MODEL_HELIO_NODE_SSE] = getModelById(
+            MODEL_HELIO_NODE_SSE)
+        CcuLog.i(Domain.LOG_TAG, "MODEL_HELIO_NODE_SSE model loaded")
+    }
+
+    private fun loadOAOModel() {
+        modelContainer[MODEL_SN_OAO] = getModelById(MODEL_SN_OAO)
     }
 
     /**

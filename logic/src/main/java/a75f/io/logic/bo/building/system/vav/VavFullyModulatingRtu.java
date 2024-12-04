@@ -46,7 +46,11 @@ public class VavFullyModulatingRtu extends VavSystemProfile
     private static final int CO2_MIN = 400;
     
     private static final int ANALOG_SCALE = 10;
+
     public VavModulatingRtuSystemEquip systemEquip;
+
+    private int lastSystemSATRequests = 0;
+
     public VavFullyModulatingRtu() {
     }
     
@@ -103,6 +107,9 @@ public class VavFullyModulatingRtu extends VavSystemProfile
         VavSystemController.getInstance().runVavSystemControlAlgo();
         updateSystemPoints();
         setTrTargetVals();
+        if (trSystem != null) {
+            trSystem.resetRequests();
+        }
     }
     
     @Override
@@ -136,10 +143,49 @@ public class VavFullyModulatingRtu extends VavSystemProfile
         } else if (VavSystemController.getInstance().getSystemState() == COOLING &&
              (systemMode == SystemMode.COOLONLY ||
               systemMode == SystemMode.AUTO)) {
+
             double satSpMax = systemEquip.getSatSPMax().readPriorityVal();
             double satSpMin = systemEquip.getSatSPMin().readPriorityVal();
             CcuLog.d(L.TAG_CCU_SYSTEM, "satSpMax :" + satSpMax + " satSpMin: " + satSpMin + " SAT: " + getSystemSAT());
-            systemCoolingLoopOp = (int) ((satSpMax - getSystemSAT())  * 100 / (satSpMax - satSpMin)) ;
+
+            /*
+                During Unoccupied Mode, AHU should only run if a sufficient # of zones are generating SAT requests. Once enabled,
+                AHU should run until all zones are satisfied.
+
+                This logic sets setupModeActive=true when systemSATRequests exceeds systemSATIgnores. It remains true until
+                systemSATRequests has dropped to zero or the system returns to Occupied.
+
+                In Unoccupied Mode, coolingLoopOutput is now set to 0 unless setupModeActive=true. This will prevent the AHU from
+                waiting to trim all loops down to minimum before shutting off after the schedule goes Unoccupied.
+             */
+            if (!isSystemOccupied()) {
+                int systemSATRequests = getSystemSATRequests();
+                double systemSATIgnores = systemEquip.getSatIgnoreRequest().readPriorityVal();
+                if ((!setupModeActive) && systemSATRequests > systemSATIgnores) {
+                    CcuLog.i(L.TAG_CCU_SYSTEM, "# of zone SAT Requests (" + systemSATRequests + ") is above threshold of " + systemSATIgnores + "; system entering setup mode for unoccupied conditioning");
+                    setupModeActive = true;
+                }
+
+                if (setupModeActive) {
+                    systemCoolingLoopOp = (int) ((satSpMax - getSystemSAT())  * 100 / (satSpMax - satSpMin)) ;
+
+                    // Once systemSATRequests has dropped to zero, exit setup mode
+                    if (systemSATRequests == 0 && lastSystemSATRequests == 0) {
+                        CcuLog.i(L.TAG_CCU_SYSTEM, "No more zone SAT requests and 0 coolingLoopOutput; system exiting unoccupied Setup Mode");
+                        setupModeActive = false;
+                    }
+
+                } else {
+                    systemCoolingLoopOp = 0;
+                }
+
+                lastSystemSATRequests = 0;
+
+            } else {
+                setupModeActive = false;
+                systemCoolingLoopOp = (int) ((satSpMax - getSystemSAT())  * 100 / (satSpMax - satSpMin)) ;
+            }
+
         } else {
             systemCoolingLoopOp = 0;
         }
@@ -210,7 +256,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
         if (isSingleZoneTIMode(CCUHsApi.getInstance())) {
             systemFanLoopOp = getSingleZoneFanLoopOp(analogFanSpeedMultiplier);
         } else if((epidemicState == EpidemicState.PREPURGE || epidemicState == EpidemicState.POSTPURGE) && (L.ccu().oaoProfile != null)){
-            double smartPurgeVAVFanLoopOp = TunerUtil.readTunerValByQuery("system and purge and vav and fan and loop and output", L.ccu().oaoProfile.getEquipRef());
+            double smartPurgeVAVFanLoopOp = L.ccu().oaoProfile.getOAOEquip().getSystemPurgeVavMinFanLoopOutput().readPriorityVal();
             double spSpMax = systemEquip.getStaticPressureSPMax().readPriorityVal();
             double spSpMin = systemEquip.getStaticPressureSPMin().readPriorityVal();
             double staticPressureLoopOutput = (int) ((getStaticPressure() - spSpMin) * 100 / (spSpMax - spSpMin)) ;
@@ -231,7 +277,13 @@ public class VavFullyModulatingRtu extends VavSystemProfile
             double spSpMin = systemEquip.getStaticPressureSPMin().readPriorityVal();
     
             CcuLog.d(L.TAG_CCU_SYSTEM,"spSpMax :"+spSpMax+" spSpMin: "+spSpMin+" SP: "+getStaticPressure());
-            systemFanLoopOp = (int) ((getStaticPressure() - spSpMin) * 100 / (spSpMax -spSpMin)) ;
+
+            // If schedule is Unoccupied, fan should only run if there is conditioning. In this case, that translates to CoolingLoopOp > 0.
+            if (isSystemOccupied() || systemCoolingLoopOp > 0) {
+                systemFanLoopOp = (int) ((getStaticPressure() - spSpMin) * 100 / (spSpMax - spSpMin));
+            } else {
+                systemFanLoopOp = 0;
+            }
         } else if (VavSystemController.getInstance().getSystemState() == HEATING){
             systemFanLoopOp = (int) (VavSystemController.getInstance().getHeatingSignal() * analogFanSpeedMultiplier);
         } else {
@@ -291,13 +343,13 @@ public class VavFullyModulatingRtu extends VavSystemProfile
 
         if (systemEquip.getRelay3OutputEnable().readPriorityVal() > 0)
         {
-            double systemStaticPressureOoutput = getStaticPressure() - SystemConstants.SP_CONFIG_MIN;
             signal = 0;
             if(systemMode != SystemMode.OFF  && (isSystemOccupied() || isReheatActive(CCUHsApi.getInstance())))
                 signal = 1;
-            else if((VavSystemController.getInstance().getSystemState() == COOLING) && (systemStaticPressureOoutput > 0) && (systemMode == SystemMode.COOLONLY || systemMode == SystemMode.AUTO))
+            // all the below cases are for what happens in Unoccupied Mode (run only if enabled by Epidemic Mode or an active heating/cooling loop)
+            else if((VavSystemController.getInstance().getSystemState() == COOLING) && (systemCoolingLoopOp > 0 || systemFanLoopOp > 0) && (systemMode == SystemMode.COOLONLY || systemMode == SystemMode.AUTO))
                 signal = 1;
-            else if((VavSystemController.getInstance().getSystemState() == HEATING) && (systemFanLoopOp > 0))
+            else if((VavSystemController.getInstance().getSystemState() == HEATING) && (systemHeatingLoopOp > 0 || systemFanLoopOp > 0))
                 signal = 1;
             else if((epidemicState == EpidemicState.PREPURGE || epidemicState == EpidemicState.POSTPURGE) && (L.ccu().oaoProfile != null) && (systemFanLoopOp > 0)){
                 signal = 1;

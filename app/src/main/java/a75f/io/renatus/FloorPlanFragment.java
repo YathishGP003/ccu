@@ -72,6 +72,10 @@ import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
 import a75f.io.renatus.profiles.acb.AcbProfileConfigFragment;
 import a75f.io.renatus.profiles.hss.cpu.HyperStatSplitCpuFragment;
 import a75f.io.renatus.profiles.dab.DabProfileConfigFragment;
+import a75f.io.renatus.profiles.otn.OtnProfileConfigFragment;
+import a75f.io.renatus.profiles.sse.SseProfileConfigFragment;
+import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatV2CpuFragment;
+import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatMonitoringFragment;
 import a75f.io.renatus.profiles.plc.PlcProfileConfigFragment;
 import a75f.io.renatus.profiles.vav.VavProfileConfigFragment;
 import a75f.io.renatus.modbus.ModbusConfigView;
@@ -1105,18 +1109,17 @@ public class FloorPlanFragment extends Fragment {
                             .newInstance(Short.parseShort(nodeAddress), zone.getId(), NodeType.SMART_NODE, floor.getId(), profile.getProfileType()), FragmentSSEConfiguration.ID);
                     break;
                 case HYPERSTAT_MONITORING:
-                    showDialogFragment(HyperStatMonitoringFragment.newInstance(Short.parseShort(nodeAddress)
-                            , zone.getId(), floor.getId(), profile.getProfileType()), HyperStatMonitoringFragment.ID);
+                    showDialogFragment(HyperStatMonitoringFragment.Companion.newInstance(Short.parseShort(nodeAddress)
+                            , zone.getId(), floor.getId(),NodeType.HYPER_STAT, profile.getProfileType()), HyperStatMonitoringFragment.Companion.getID());
                     break;
                 case OTN:
-                    showDialogFragment(FragmentOTNTempInfConfiguration.newInstance(Short.parseShort(nodeAddress),
-                            zone.getId(), floor.getId(), profile.getProfileType()), FragmentOTNTempInfConfiguration.ID);
+                    showDialogFragment(OtnProfileConfigFragment.Companion.newInstance(Short.parseShort(nodeAddress),
+                            zone.getId(), floor.getId(), NodeType.OTN, profile.getProfileType()), OtnProfileConfigFragment.Companion.getID());
                     break;
                 case HYPERSTAT_VRV:
                     showDialogFragment(HyperStatVrvFragment.newInstance(Short.parseShort(nodeAddress)
-                        , zone.getId(), floor.getId()), HyperStatMonitoringFragment.ID);
+                            , zone.getId(), floor.getId()), HyperStatVrvFragment.ID);
                     break;
-
                 case HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT:
                 case HYPERSTAT_TWO_PIPE_FCU:
                 case HYPERSTAT_HEAT_PUMP_UNIT:

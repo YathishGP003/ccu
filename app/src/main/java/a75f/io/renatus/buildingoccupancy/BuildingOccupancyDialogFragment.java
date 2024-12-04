@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.DAYS;
 import a75f.io.api.haystack.schedule.BuildingOccupancy;
+import a75f.io.domain.api.Domain;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.util.OfflineModeUtilKt;
@@ -293,7 +294,7 @@ public class BuildingOccupancyDialogFragment extends DialogFragment {
     }
     private void showDeleteAlert() {
 
-        boolean isCloudConnected = CCUHsApi.getInstance().readHisValByQuery("cloud and connected and diag and point") > 0;
+        boolean isCloudConnected = Domain.diagEquip.getCcuHeartbeat().readHisVal() > 0;
         if(BuildConfig.BUILD_TYPE.equals("qa")) {
             CcuLog.d(TAG,"isCloudConnected" + isCloudConnected);
         }

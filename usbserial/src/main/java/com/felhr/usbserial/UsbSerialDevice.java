@@ -302,6 +302,7 @@ public abstract class UsbSerialDevice implements UsbSerialInterface
 				}catch (NullPointerException e){
 					CcuLog.e(TAG_USB_SERIAL,"Exception on while invoking the requestWait() method.");
 					e.printStackTrace();
+					requestIN.queue(serialBuffer.getReadBuffer(), SerialBuffer.DEFAULT_READ_BUFFER_SIZE);
 				}
 			}
 		}

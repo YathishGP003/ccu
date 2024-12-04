@@ -12,6 +12,7 @@ import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Kind;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
+import a75f.io.domain.api.Domain;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.util.OfflineModeUtilKt;
@@ -383,19 +384,19 @@ public class TunerUtil
             instance.writePointForCcuUser(watchDogPoint.get("id").toString(), TunerConstants.TUNER_BUILDING_VAL_LEVEL,
                     0.0, 0, null);
             instance.writeHisValById(watchDogPoint.get("id").toString(), 0.0);
-            instance.writeHisValByQuery("backfill and ventilation and config", 0.0);
-            instance.writeDefaultVal("backfill and ventilation and config", 0.0);
-            instance.writeHisValByQuery("point and diag and cloud and connected", 0.0);
-            instance.writeDefaultVal("point and diag and cloud and connected", 0.0);
+            Domain.ccuEquip.getBackFillDuration().writeHisVal(0.0);
+            Domain.ccuEquip.getBackFillDuration().writeDefaultVal(0.0);
+            Domain.diagEquip.getCcuHeartbeat().writeHisVal(0.0);
+            Domain.diagEquip.getCcuHeartbeat().writeDefaultVal(0.0);
             OfflineModeUtilKt.updateMechanicalLockout();
         }else{
             instance.writePointForCcuUser(watchDogPoint.get("id").toString(), TunerConstants.TUNER_BUILDING_VAL_LEVEL,
                     45.0, 0, null);
             instance.writeHisValById(watchDogPoint.get("id").toString(), 45.0);
-            instance.writeHisValByQuery("backfill and ventilation and config", 24.0);
-            instance.writeDefaultVal("backfill and ventilation and config", 24.0);
-            instance.writeHisValByQuery("point and diag and cloud and connected", 1.0);
-            instance.writeDefaultVal("point and diag and cloud and connected", 1.0);
+            Domain.ccuEquip.getBackFillDuration().writeHisVal(24.0);
+            Domain.ccuEquip.getBackFillDuration().writeDefaultVal(24.0);
+            Domain.diagEquip.getCcuHeartbeat().writeHisVal(1.0);
+            Domain.diagEquip.getCcuHeartbeat().writeDefaultVal(1.0);
             OfflineModeUtilKt.fetchToken();
             CCUHsApi.getInstance().syncEntityWithPointWrite();
         }

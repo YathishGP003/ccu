@@ -122,7 +122,7 @@ fun sendBroadCast(context: Context, intentAction: String, message: String) {
     }
 
     fun getAddressBand(): Int {
-        return L.ccu().smartNodeAddressBand.toInt() + 99
+        return L.ccu().addressBand.toInt() + 99
     }
 
     fun getUtcOffset(): Int {

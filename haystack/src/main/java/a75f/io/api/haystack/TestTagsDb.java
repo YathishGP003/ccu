@@ -26,6 +26,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
+import a75f.io.constants.CcuFieldConstants;
 import a75f.io.logger.CcuLog;
 import io.objectbox.query.QueryBuilder;
 
@@ -51,8 +52,8 @@ public class TestTagsDb extends CCUTagsDb {
                 .add("geoAddr", "" + s.getGeoAddress())
                 .add("tz", s.getTz())
                 .add("organization", s.getOrganization())
-                .add("fmEmail", s.getFcManagerEmail())
-                .add("installerEmail", s.getInstallerEmail())
+                .add(CcuFieldConstants.FACILITY_MANAGER_EMAIL, s.getFcManagerEmail())
+                .add(CcuFieldConstants.INSTALLER_EMAIL, s.getInstallerEmail())
                 .add("area", HNum.make(s.getArea(), "ft\u00B2"));
         if(s.getCreatedDateTime() != null){
             site.add("createdDateTime", s.getCreatedDateTime());
@@ -85,8 +86,8 @@ public class TestTagsDb extends CCUTagsDb {
                 .add("geoAddr", "" + s.getGeoAddress())
                 .add("tz", s.getTz())
                 .add("organization", s.getOrganization())
-                .add("fmEmail", s.getFcManagerEmail())
-                .add("installerEmail", s.getInstallerEmail())
+                .add(CcuFieldConstants.FACILITY_MANAGER_EMAIL, s.getFcManagerEmail())
+                .add(CcuFieldConstants.INSTALLER_EMAIL, s.getInstallerEmail())
                 .add("area", HNum.make(s.getArea(), "ft\u00B2"));
 
         String weatherRef = s.getWeatherRef();

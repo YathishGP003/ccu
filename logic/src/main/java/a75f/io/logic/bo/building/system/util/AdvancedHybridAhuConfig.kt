@@ -15,7 +15,7 @@ import io.seventyfivef.ph.core.Tags
 
 open class AdvancedHybridAhuConfig(val cmModel: SeventyFiveFProfileDirective, connectModel: SeventyFiveFProfileDirective) {
     val cmConfiguration = CmConfiguration(cmModel)
-    val connectConfiguration = ConnectConfiguration(connectModel, L.ccu().smartNodeAddressBand + 98)
+    val connectConfiguration = ConnectConfiguration(connectModel, L.ccu().addressBand + 98)
     init {
         cmConfiguration.getDefaultConfiguration()
         connectConfiguration.getDefaultConfiguration()

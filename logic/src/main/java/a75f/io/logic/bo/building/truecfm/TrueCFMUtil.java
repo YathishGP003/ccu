@@ -50,7 +50,7 @@ public class TrueCFMUtil {
         }
     }
 
-    private static double getDamperSizeFromEnum(int index) {
+    public static double getDamperSizeFromEnum(int index) {
         switch (index) {
             case 1:
                 return 6.0;
@@ -68,6 +68,8 @@ public class TrueCFMUtil {
                 return 18.0;
             case 8:
                 return 20.0;
+            case 9:
+                return 22.0;
             default:
                 return 4.0;
         }

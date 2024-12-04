@@ -100,12 +100,6 @@ public class InstallTypeFragment extends Fragment {
 
 
         HashMap site = CCUHsApi.getInstance().read("site");
-        HashMap ccu = CCUHsApi.getInstance().read("ccu");
-           /* if(ccu.size() > 0)
-            {
-                String ccuId = ccu.get("id").toString();
-                CCUHsApi.getInstance().deleteEntityTree(ccuId);
-            }*/
         if(!site.isEmpty())
         {
             String siteId = site.get("id").toString();

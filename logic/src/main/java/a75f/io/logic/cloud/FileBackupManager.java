@@ -40,6 +40,11 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class FileBackupManager {
 
+    private static final String BACNET_FD_CONFIGURATION = "bacnetFdConfiguration";
+    private static final String BACNET_BBMD_CONFIGURATION = "bacnetBbmdConfiguration";
+    private static final String BACNET_DEVICE_TYPE = "bacnetDeviceType";
+    private static final String BACNET_FD_AUTO_STATE = "fdAutoState";
+
     private OkHttpClient getOkHttpClient(){
         HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
         loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.HEADERS);
@@ -117,6 +122,24 @@ public class FileBackupManager {
                             CcuLog.e(TAG_CCU_REPLACE, "String : name:" + name +"-"+ "value:" + value);
                             bacnet_pref.edit().putString(name, value).apply();
                         }
+
+                        if(name.equalsIgnoreCase(BACNET_BBMD_CONFIGURATION)){
+                            String value = element.getTextContent();
+                            CcuLog.e(TAG_CCU_REPLACE, "String : name:" + name +"-"+ "value:" + value);
+                            bacnet_pref.edit().putString(name, value).apply();
+                        }
+
+                        if(name.equalsIgnoreCase(BACNET_FD_CONFIGURATION)){
+                            String value = element.getTextContent();
+                            CcuLog.e(TAG_CCU_REPLACE, "String : name:" + name +"-"+ "value:" + value);
+                            bacnet_pref.edit().putString(name, value).apply();
+                        }
+
+                        if(name.equalsIgnoreCase(BACNET_DEVICE_TYPE)){
+                            String value = element.getTextContent();
+                            CcuLog.e(TAG_CCU_REPLACE, "String : name:" + name +"-"+ "value:" + value);
+                            bacnet_pref.edit().putString(name, value).apply();
+                        }
                     }
                 }
 
@@ -129,6 +152,12 @@ public class FileBackupManager {
                         if(name.equals("isBACnetinitialized") || name.equals("isBACnetConfigFileCreated")){
                             String value = element.getAttribute("value");
                             CcuLog.e(TAG_CCU_REPLACE, "Boolean : name" + name +"-"+ "value:" + value);
+                            bacnet_pref.edit().putBoolean(name, Boolean.parseBoolean(value)).apply();
+                        }
+
+                        if(name.equalsIgnoreCase(BACNET_FD_AUTO_STATE)){
+                            String value = element.getAttribute("value");
+                            CcuLog.e(TAG_CCU_REPLACE, "Boolean : name:" + name +"-"+ "value:" + value);
                             bacnet_pref.edit().putBoolean(name, Boolean.parseBoolean(value)).apply();
                         }
                     }

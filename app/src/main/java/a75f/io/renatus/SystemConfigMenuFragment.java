@@ -21,6 +21,7 @@ import androidx.fragment.app.FragmentManager;
 
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.system.DefaultSystem;
+import a75f.io.renatus.profiles.oao.OAOProfileFragment;
 import a75f.io.renatus.profiles.vav.BypassConfigFragment;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.ProgressDialogUtils;
@@ -121,28 +122,8 @@ public class SystemConfigMenuFragment extends Fragment {
 
         view.findViewById(R.id.lil_oao).setOnClickListener(view1 -> {
             if (SystemConfigFragment.SystemConfigFragmentHandler != null) {
-                if (L.ccu().oaoProfile != null) {
-
-                    FragmentManager fm = getActivity().getSupportFragmentManager();
-
-                    DialogOAOProfile oaoFragment = (DialogOAOProfile)fm.findFragmentByTag("OaoConfig");
-                    boolean oaoFragmentOpen = oaoFragment != null && oaoFragment.isVisible();
-                    if (fm.findFragmentByTag("BypassConfig") instanceof BypassConfigFragment) {
-                        BypassConfigFragment bypassFragment = (BypassConfigFragment)fm.findFragmentByTag("BypassConfig");
-                        boolean bypassFragmentOpen = bypassFragment != null && bypassFragment.isVisible();
-                        boolean bypassHasUnsavedChanges = bypassFragment != null && bypassFragment.hasUnsavedChanges();
-                        if (!(oaoFragmentOpen || (bypassFragmentOpen && bypassHasUnsavedChanges))) ProgressDialogUtils.showProgressDialog(getContext(), "Loading OAO Profile");
-                    } else {
-                        // If Bypass Damper has been unpaired, fragment will now be a BypassFragment instead. In this case, no need to check for unsaved changes.
-                        if (!oaoFragmentOpen) {
-                            ProgressDialogUtils.showProgressDialog(getContext(), "Loading OAO Profile");
-                        }
-                    }
-
-                }
                 SystemConfigFragment.SystemConfigFragmentHandler.sendEmptyMessage(1);
             }
-
         });
 
         view.findViewById(R.id.lil_bypass).setOnClickListener(view1 -> {

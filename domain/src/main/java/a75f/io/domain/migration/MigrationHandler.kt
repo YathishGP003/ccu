@@ -3,11 +3,15 @@ package a75f.io.domain.migration
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Point
 import a75f.io.api.haystack.RawPoint
-import a75f.io.domain.api.*
+import a75f.io.domain.api.Device
+import a75f.io.domain.api.Domain
 import a75f.io.domain.api.Domain.getBypassEquipByDomainName
 import a75f.io.domain.api.Domain.getDeviceEntityByDomain
 import a75f.io.domain.api.Domain.getEquipDetailsByDomain
 import a75f.io.domain.api.Domain.getSystemEquipByDomainName
+import a75f.io.domain.api.DomainName
+import a75f.io.domain.api.EntityConfig
+import a75f.io.domain.api.Equip
 import a75f.io.domain.config.DefaultProfileConfiguration
 import a75f.io.domain.config.EntityConfiguration
 import a75f.io.domain.config.ExternalAhuConfiguration
@@ -17,7 +21,6 @@ import a75f.io.domain.logic.DomainManager
 import a75f.io.domain.logic.EntityMapper
 import a75f.io.domain.logic.EquipBuilderConfig
 import a75f.io.domain.logic.PointBuilderConfig
-
 import a75f.io.domain.logic.ProfileEquipBuilder
 import a75f.io.domain.logic.TunerEquipBuilder
 import a75f.io.domain.util.ModelCache
@@ -260,23 +263,29 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
             val hayStackEquip = equipBuilder.buildEquip(EquipBuilderConfig(newModel, profileConfiguration, siteRef,
                 haystack.timeZone, equipMap["dis"].toString()))
             // TODO: once OAO is DM-migrated, a similar conditional should be created for it
-            if (Domain.readEquip(newModel.id)["profile"].toString() == DomainName.smartnodeBypassDamper) {
+            if (Domain.readEquip(newModel.id)["domainName"].toString() == DomainName.smartnodeBypassDamper) {
+                hayStackEquip.ahuRef = equipMap["ahuRef"]?.toString()?: haystack.readEntity("system and equip and not connectModule and not modbus")["id"].toString()
                 hayStackEquip.roomRef = "SYSTEM"
                 hayStackEquip.floorRef = "SYSTEM"
                 haystack.updateEquip(hayStackEquip, it.id)
                 hayStackEquip.id = it.id
                 DomainManager.addBypassEquip(Domain.hayStack, Domain.hayStack.ccuId)
+                CcuLog.d(Domain.LOG_TAG, "DM-DM Bypass Equip updated: ${hayStackEquip.domainName}")
             } else if (Domain.readEquip(newModel.id)["roomRef"].toString() == "SYSTEM") {
                 hayStackEquip.roomRef = "SYSTEM"
                 hayStackEquip.floorRef = "SYSTEM"
+                equipMap["ahuRef"]?.let { hayStackEquip.ahuRef = it.toString() }
                 haystack.updateEquip(hayStackEquip, it.id)
                 DomainManager.addSystemEquip(Domain.hayStack, Domain.hayStack.ccuId)
+                DomainManager.addOaoEquip(Domain.hayStack, Domain.hayStack.ccuId)
+                CcuLog.d(Domain.LOG_TAG, "DM-DM system Equip updated: ${hayStackEquip.domainName}")
             }else{
                 hayStackEquip.ahuRef = equipMap["ahuRef"]?.toString()
                 hayStackEquip.gatewayRef = equipMap["gatewayRef"]?.toString()
                 haystack.updateEquip(hayStackEquip, it.id)
                 hayStackEquip.id = it.id
                 DomainManager.addEquip(hayStackEquip)
+                CcuLog.d(Domain.LOG_TAG, "DM-DM Equip updated: ${hayStackEquip.domainName}")
             }
         }
     }
@@ -300,6 +309,7 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
                     hayStackEquip.id = it.id
                     if (Domain.readEquip(newModel.id)["roomRef"].toString() == "SYSTEM") {
                         DomainManager.addSystemEquip(Domain.hayStack, Domain.hayStack.ccuId)
+                        DomainManager.addOaoEquip(Domain.hayStack, Domain.hayStack.ccuId)
                     }else{
                         DomainManager.addEquip(hayStackEquip)
                     }
@@ -360,6 +370,7 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
                     hayStackEquip.id = it.id
                     if (Domain.readEquip(newModel.id)["roomRef"].toString() == "SYSTEM") {
                         DomainManager.addSystemEquip(Domain.hayStack, Domain.hayStack.ccuId)
+                        DomainManager.addOaoEquip(Domain.hayStack, Domain.hayStack.ccuId)
                     }else{
                         DomainManager.addEquip(hayStackEquip)
                     }
@@ -384,6 +395,9 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
                         )
                         val point = CCUHsApi.getInstance()
                             .readEntity("point and domainName == \"${diffDomain.domainName}\" and equipRef == \"${equip.id}\"")
+                        if(point["id"]==null) {
+                            return@forEach
+                        }
                         Log.d(Domain.LOG_TAG, "updated haystack point: $hayStackPoint")
                         if (Domain.readEquip(newModel.id)["roomRef"].toString() == "SYSTEM") {
                             hayStackPoint.roomRef = "SYSTEM"

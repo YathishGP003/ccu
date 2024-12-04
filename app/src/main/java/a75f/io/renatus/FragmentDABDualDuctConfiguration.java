@@ -602,21 +602,6 @@ public class FragmentDABDualDuctConfiguration extends BaseDialogFragment {
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap<Object, Object> equip = hayStack.read("equip and group == \"" + config.getNodeAddress() + "\"");
 
-        double minCoolingDamperPos = hayStack.readDefaultVal("point and config and min and damper and pos and cooling and not analog1 and not analog2 and equipRef == \"" + equip.get("id") + "\"");
-        double minHeatingDamperPos = hayStack.readDefaultVal("point and config and min and damper and pos and heating and not analog1 and not analog2 and equipRef == \"" + equip.get("id") + "\"");
-
-        HashMap<Object,Object> minCoolingDamperPosPoint = hayStack.readEntity("point and config and damper and cooling and min and not analog1 and not analog2 and equipRef == \"" + equip.get("id") + "\"");
-        String minCoolingDamperPosPointId = minCoolingDamperPosPoint.get("id").toString();
-        hayStack.writePointForCcuUser(minCoolingDamperPosPointId, 7, minCoolingDamperPos, 0, "Bypass Damper Added");
-        hayStack.writeHisValById(minCoolingDamperPosPointId, minCoolingDamperPos);
-        hayStack.writeDefaultValById(minCoolingDamperPosPointId, 20.0);
-
-        HashMap<Object,Object> minHeatingDamperPosPoint = hayStack.readEntity("point and config and damper and heating and min and not analog1 and not analog2 and equipRef == \"" + equip.get("id") + "\"");
-        String minHeatingDamperPosPointId = minHeatingDamperPosPoint.get("id").toString();
-        hayStack.writePointForCcuUser(minHeatingDamperPosPointId, 7, minHeatingDamperPos, 0, "Bypass Damper Added");
-        hayStack.writeHisValById(minHeatingDamperPosPointId, minHeatingDamperPos);
-        hayStack.writeDefaultValById(minHeatingDamperPosPointId, 20.0);
-
         // There is a bug with tuner copying currently (matching is based on presence of markers and can fail).
         // Tuner-copying framework (pre-DM) doesn't have a way of saying "and not reheat".
         // So, we have to set the values here to be sure that tuners are overridden correctly.

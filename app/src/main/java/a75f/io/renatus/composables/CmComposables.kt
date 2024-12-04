@@ -13,10 +13,7 @@ import a75f.io.renatus.compose.formatText
 import a75f.io.renatus.modbus.util.CANCEL
 import a75f.io.renatus.modbus.util.SAVE
 import a75f.io.renatus.profiles.system.advancedahu.AdvancedHybridAhuViewModel
-import a75f.io.renatus.modbus.util.SAVE
 import a75f.io.renatus.profiles.system.advancedahu.Option
-import a75f.io.renatus.profiles.system.advancedahu.vav.VavAdvancedHybridAhuViewModel
-import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -47,7 +44,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlin.system.measureTimeMillis
 
 /**
  * Created by Manjunath K on 27-03-2024.
@@ -153,12 +149,13 @@ fun AOTHConfig(
     items: List<Option>,
     unit: String = "",
     isEnabled: Boolean,
-    onSelect: (Option) -> Unit
+    onSelect: (Option) -> Unit,
+    padding: Int = 10
 ) {
     Row(
         modifier = Modifier
                 .wrapContentWidth()
-                .padding(10.dp)
+                .padding(padding.dp)
     ) {
         Box(modifier = Modifier.wrapContentWidth()) {
             ToggleButtonStateful(defaultSelection = default) { onEnabled(it) }
@@ -184,7 +181,9 @@ fun AOTHConfig(
     }
 }
 
-
+/*
+* If test signals has to to be shown then pass true to parameter isTestSignalVisible
+* */
 @Composable
 fun RelayConfiguration(
     relayName: String,
@@ -196,12 +195,14 @@ fun RelayConfiguration(
     isEnabled: Boolean,
     onAssociationChanged: (Option) -> Unit,
     testState: Boolean = false,
-    onTestActivated: (Boolean) -> Unit
+    onTestActivated: (Boolean) -> Unit,
+    padding: Int = 10,
+    isTestSignalVisible: Boolean = true
 ) {
     Row(
         modifier = Modifier
                 .wrapContentWidth()
-                .padding(10.dp)
+                .padding(padding.dp)
     ) {
         Box(modifier = Modifier.wrapContentWidth()) {
             ToggleButtonStateful(defaultSelection = enabled) { onEnabledChanged(it) }
@@ -223,49 +224,53 @@ fun RelayConfiguration(
                 isEnabled = isEnabled
             )
         }
-        Box(
-            modifier = Modifier
+        if(isTestSignalVisible) {
+            Box(
+                modifier = Modifier
                     .weight(1f)
                     .padding(start = 5.dp)
-        ) {
-            var buttonState by remember { mutableStateOf(testState) }
-            var text by remember { mutableStateOf("OFF") }
-            Button(
-                onClick = {
-                    buttonState = !buttonState
-                    text = when (buttonState) {
-                        true -> "ON"
-                        false -> "OFF"
-                    }
-                    onTestActivated(buttonState)
-                },
-                shape = RoundedCornerShape(5.dp),
-                colors = ButtonDefaults.buttonColors(
-                    contentColor = when (buttonState) {
-                        true -> ComposeUtil.primaryColor
-                        false -> ComposeUtil.greyColor
-                    }, containerColor = Color.Transparent
-                ),
-                border = BorderStroke(1.dp, color = when (buttonState) {
-                    true -> ComposeUtil.primaryColor
-                    false -> ComposeUtil.greyColor
-                }),
-                    modifier = Modifier
-                            .width(72.dp)
-                            .height(44.dp),
-                    contentPadding = PaddingValues(0.dp),
             ) {
-                Text(
-                    text = when (buttonState) {
-                        true -> "ON"
-                        false -> "OFF"
+                var buttonState by remember { mutableStateOf(testState) }
+                var text by remember { mutableStateOf("OFF") }
+                Button(
+                    onClick = {
+                        buttonState = !buttonState
+                        text = when (buttonState) {
+                            true -> "ON"
+                            false -> "OFF"
+                        }
+                        onTestActivated(buttonState)
                     },
+                    shape = RoundedCornerShape(5.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        contentColor = when (buttonState) {
+                            true -> ComposeUtil.primaryColor
+                            false -> ComposeUtil.greyColor
+                        }, containerColor = Color.Transparent
+                    ),
+                    border = BorderStroke(
+                        1.dp, color = when (buttonState) {
+                            true -> ComposeUtil.primaryColor
+                            false -> ComposeUtil.greyColor
+                        }
+                    ),
+                    modifier = Modifier
+                        .width(72.dp)
+                        .height(44.dp),
+                    contentPadding = PaddingValues(0.dp),
+                ) {
+                    Text(
+                        text = when (buttonState) {
+                            true -> "ON"
+                            false -> "OFF"
+                        },
                         fontSize = 20.sp,
                         fontFamily = ComposeUtil.myFontFamily,
                         fontWeight = FontWeight.Normal,
                         textAlign = TextAlign.Left,
                         modifier = Modifier.wrapContentSize(Alignment.Center)
-                )
+                    )
+                }
             }
         }
     }
@@ -284,12 +289,14 @@ fun AnalogOutConfig(
     isEnabled: Boolean,
     onAssociationChanged: (Option) -> Unit = {},
     testVal: Double,
-    onTestSignalSelected: (Double) -> Unit = {}
+    onTestSignalSelected: (Double) -> Unit = {},
+    padding: Int = 10,
+    disabledIndices: List<Int> = emptyList()
 ) {
     Row(
         modifier = Modifier
                 .wrapContentWidth()
-                .padding(10.dp)
+                .padding(padding.dp)
     ) {
         Box(modifier = Modifier
             .wrapContentWidth()) {
@@ -309,7 +316,8 @@ fun AnalogOutConfig(
                 unit = unit,
                 onSelect = { onAssociationChanged(it) },
                 width = 400,
-                isEnabled = isEnabled
+                isEnabled = isEnabled,
+                disabledIndices = disabledIndices
             )
         }
         Box(

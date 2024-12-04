@@ -291,16 +291,6 @@ class VavProfileViewModel : ViewModel() {
         val equip = hayStack.readEntity("equip and group == \"" + config.nodeAddress + "\"")
         val vavEquip = VavEquip(equip["id"].toString())
 
-        if (vavEquip.enableCFMControl.readDefaultVal() <= 0.0) {
-            vavEquip.minCoolingDamperPos.writeVal(7, hayStack.ccuUserName, vavEquip.minCoolingDamperPos.readDefaultVal(), 0)
-            vavEquip.minCoolingDamperPos.writeDefaultVal(20.0)
-            vavEquip.minCoolingDamperPos.writeHisVal(10.0)
-
-            vavEquip.minHeatingDamperPos.writeVal(7, hayStack.ccuUserName, vavEquip.minHeatingDamperPos.readDefaultVal(), 0)
-            vavEquip.minHeatingDamperPos.writeDefaultVal(20.0)
-            vavEquip.minHeatingDamperPos.writeHisVal(10.0)
-        }
-
         vavEquip.vavProportionalKFactor.writeVal(14, hayStack.ccuUserName, 0.7, 0)
         vavEquip.vavProportionalKFactor.writeHisVal(0.7)
 

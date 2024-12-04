@@ -35,6 +35,8 @@ public enum ProfileType
                 return SYSTEM_DAB_STAGED_VFD_RTU;
             case "SYSTEM_DAB_HYBRID_RTU":
                 return SYSTEM_DAB_HYBRID_RTU;
+            case "OAO":
+                return OAO;
         }
         return null;
     }

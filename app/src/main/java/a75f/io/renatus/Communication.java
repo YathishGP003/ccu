@@ -2,7 +2,14 @@ package a75f.io.renatus;
 
 import static a75f.io.device.bacnet.BacnetConfigConstants.APDU_SEGMENT_TIMEOUT;
 import static a75f.io.device.bacnet.BacnetConfigConstants.APDU_TIMEOUT;
+import static a75f.io.device.bacnet.BacnetConfigConstants.BACNET_BBMD_CONFIGURATION;
 import static a75f.io.device.bacnet.BacnetConfigConstants.BACNET_CONFIGURATION;
+import static a75f.io.device.bacnet.BacnetConfigConstants.BACNET_DEVICE_TYPE;
+import static a75f.io.device.bacnet.BacnetConfigConstants.BACNET_DEVICE_TYPE_BBMD;
+import static a75f.io.device.bacnet.BacnetConfigConstants.BACNET_DEVICE_TYPE_FD;
+import static a75f.io.device.bacnet.BacnetConfigConstants.BACNET_DEVICE_TYPE_NEITHER;
+import static a75f.io.device.bacnet.BacnetConfigConstants.BACNET_FD_AUTO_STATE;
+import static a75f.io.device.bacnet.BacnetConfigConstants.BACNET_FD_CONFIGURATION;
 import static a75f.io.device.bacnet.BacnetConfigConstants.BROADCAST_BACNET_APP_CONFIGURATION_TYPE;
 import static a75f.io.device.bacnet.BacnetConfigConstants.BROADCAST_BACNET_APP_START;
 import static a75f.io.device.bacnet.BacnetConfigConstants.BROADCAST_BACNET_APP_STOP;
@@ -31,6 +38,7 @@ import static a75f.io.renatus.UtilityApplication.context;
 import static a75f.io.renatus.UtilityApplication.startRestServer;
 import static a75f.io.renatus.UtilityApplication.stopRestServer;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -44,6 +52,8 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -75,8 +85,10 @@ import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
+import a75f.io.renatus.bacnet.BacnetConfigChange;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.DataBbmd;
 import a75f.io.renatus.util.DataBbmdObj;
@@ -190,6 +202,9 @@ public class Communication extends Fragment {
 
     @BindView(R.id.tvFdSubmit) View tvFdSubmit;
 
+    @BindView(R.id.checkBoxAuto)
+    CheckBox fdCheckBoxAuto;
+
     @BindView(R.id.fdInputViews) LinearLayout fdInputViews;
 
     @BindView(R.id.tvBbmdAdd) View tvBbmdAdd;
@@ -202,11 +217,15 @@ public class Communication extends Fragment {
     @BindView(R.id.iv_refresh_ip)
     ImageView ivRefreshView;
 
+    @BindView(R.id.tvBacAppVersion) TextView tvBacAppVersion;
+
     SharedPreferences sharedPreferences;
     JSONObject config;
     JSONObject networkObject;
     JSONObject deviceObject;
     JSONObject objectConf;
+
+    private View rootView;
 
     private ExecutorService executorService;
 
@@ -219,7 +238,9 @@ public class Communication extends Fragment {
     public static Communication newInstance() {
         return new Communication();
     }
-    
+
+    private BacnetConfigChange bacnetConfigChangeListener = null;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable
@@ -227,13 +248,17 @@ public class Communication extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_modbusconfig, container, false);
         ButterKnife.bind(this, rootView);
         executorService = Executors.newFixedThreadPool(1);
+        bacnetConfigChangeListener = (BacnetConfigChange) requireActivity();
         return rootView;
     }
     
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        this.rootView = view;
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+
+        String selectedDeviceType = sharedPreferences.getString(BACNET_DEVICE_TYPE, BACNET_DEVICE_TYPE_NEITHER);
 
         ArrayAdapter<String> spinnerBaudRateAdapter = getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray(R.array.mb_config_baudrate_array))));
         spinnerBaudRate.setAdapter(spinnerBaudRateAdapter);
@@ -310,11 +335,18 @@ public class Communication extends Fragment {
             String label = radioButton.getText().toString();
             CcuLog.d(TAG_CCU_BACNET, "radioButton selected-->"+label);
             handleConfigurationType(label);
+            performConfigFileBackup();
         });
 
         bbmdInputContainer.setVisibility(View.GONE);
 
         fdInputView.setVisibility(View.GONE);
+
+        String bacAppVersion = CCUHsApi.getInstance().readDefaultStrVal("point and diag and version and bacnet");
+        if (bacAppVersion.isEmpty()) {
+            bacAppVersion = "Not Installed";
+        }
+        tvBacAppVersion.setText(bacAppVersion);
 
         tvFdSubmit.setOnClickListener(view1 -> {
             if (validateFdData()) {
@@ -336,12 +368,12 @@ public class Communication extends Fragment {
                     String jsonString = new Gson().toJson(dataFdObj);
                     CcuLog.d(TAG_CCU_BACNET, "fd output-->" + jsonString);
 
+                    sharedPreferences.edit().putString(BACNET_DEVICE_TYPE, BACNET_DEVICE_TYPE_FD).apply();
+                    sharedPreferences.edit().putString(BACNET_FD_CONFIGURATION, jsonString).apply();
+
                     RadioButton radioButton = view.findViewById(R.id.rb_foreign_device);
-                    String label = radioButton.getText().toString();
-                    Intent intent = new Intent(BROADCAST_BACNET_APP_CONFIGURATION_TYPE);
-                    intent.putExtra("message", label);
-                    intent.putExtra("data", jsonString);
-                    context.sendBroadcast(intent);
+                    bacnetConfigChangeListener.submitConfiguration("fd", fdCheckBoxAuto.isChecked(), dataFdObj.getDataFd().getBbmdMask());
+                    performConfigFileBackup();
                 } catch (NumberFormatException e) {
                     e.printStackTrace();
                 }
@@ -358,9 +390,19 @@ public class Communication extends Fragment {
             fdInputViews.addView(fdView);
         });
 
+        boolean defaultCheckBoxState = sharedPreferences.getBoolean(BACNET_FD_AUTO_STATE, true);
+
+        fdCheckBoxAuto.setChecked(defaultCheckBoxState);
+
+        fdCheckBoxAuto.setOnCheckedChangeListener((compoundButton, state) -> {
+            CcuLog.d(TAG_CCU_BACNET, "fdCheckBoxAuto-state->"+state);
+            sharedPreferences.edit().putBoolean(BACNET_FD_AUTO_STATE, state).apply();
+        });
+
         tvBbmdAdd.setOnClickListener(view1 -> {
             CcuLog.d(TAG_CCU_BACNET, "add bbmd config");
             View bbmdView = LayoutInflater.from(getContext()).inflate(R.layout.lyt_bbmd_view, null);
+            bbmdView.findViewById(R.id.tvBbmdRemove).setVisibility(View.VISIBLE);
             bbmdView.findViewById(R.id.tvBbmdRemove).setOnClickListener(view2 -> {
                 View parent = bbmdView.findViewById(R.id.bbmdViewContainer);
                 bbmdInputViews.removeView(parent);
@@ -387,6 +429,9 @@ public class Communication extends Fragment {
 
                     String jsonString = new Gson().toJson(dataBbmdObj);
                     CcuLog.d(TAG_CCU_BACNET, "bbmd output-->" + jsonString);
+                    sharedPreferences.edit().putString(BACNET_DEVICE_TYPE, BACNET_DEVICE_TYPE_BBMD).apply();
+                    sharedPreferences.edit().putString(BACNET_BBMD_CONFIGURATION, jsonString).apply();
+
 
                     RadioButton radioButton = view.findViewById(R.id.rb_bbmd);
                     String label = radioButton.getText().toString();
@@ -394,6 +439,7 @@ public class Communication extends Fragment {
                     intent.putExtra("message", label);
                     intent.putExtra("data", jsonString);
                     context.sendBroadcast(intent);
+                    performConfigFileBackup();
                 } catch (NumberFormatException e) {
                     e.printStackTrace();
                 }
@@ -407,6 +453,34 @@ public class Communication extends Fragment {
                 Toast.makeText(requireContext(), "Disable bacnet to fetch ip", Toast.LENGTH_SHORT).show();
             }
         });
+
+        CcuLog.d(TAG_CCU_BACNET, "last selected bacnet device type==>"+selectedDeviceType);
+        if(selectedDeviceType.equalsIgnoreCase(BACNET_DEVICE_TYPE_BBMD)){
+            openDeviceConfigurationSettings(R.id.rb_bbmd);
+            ((RadioButton)rootView.findViewById(R.id.rb_bbmd)).setChecked(true);
+            String configuration = sharedPreferences.getString(BACNET_BBMD_CONFIGURATION, null);
+            if(configuration != null){
+                CcuLog.d(TAG_CCU_BACNET, "bbmd configuration found");
+                DataBbmdObj dataBbmdObj = new Gson().fromJson(configuration, DataBbmdObj.class);
+                ArrayList<DataBbmd> listOdDataBbmd = dataBbmdObj.getListOfDataBbmd();
+                CcuLog.d(TAG_CCU_BACNET, "bbmd lis size"+listOdDataBbmd.size());
+                createBbmdViewAndFillData(listOdDataBbmd);
+            }
+        }else if(selectedDeviceType.equalsIgnoreCase(BACNET_DEVICE_TYPE_FD)){
+            openDeviceConfigurationSettings(R.id.rb_foreign_device);
+            ((RadioButton)rootView.findViewById(R.id.rb_foreign_device)).setChecked(true);
+            String configuration = sharedPreferences.getString(BACNET_FD_CONFIGURATION, null);
+            if(configuration != null){
+                CcuLog.d(TAG_CCU_BACNET, "fd configuration found");
+                DataFdObj dataFdObj = new Gson().fromJson(configuration, DataFdObj.class);
+                if(dataFdObj != null) {
+                    fillFdView(dataFdObj.getDataFd(), 0);
+                }
+            }
+        }else{
+            openDeviceConfigurationSettings(R.id.rb_neither);
+            ((RadioButton)rootView.findViewById(R.id.rb_neither)).setChecked(true);
+        }
     }
 
     private boolean validateFdData() {
@@ -465,6 +539,7 @@ public class Communication extends Fragment {
             fdInputView.setVisibility(View.VISIBLE);
             bbmdInputContainer.setVisibility(View.GONE);
         }else{
+            sharedPreferences.edit().putString(BACNET_DEVICE_TYPE, BACNET_DEVICE_TYPE_NEITHER).apply();
             fdInputView.setVisibility(View.GONE);
             bbmdInputContainer.setVisibility(View.GONE);
             sendBroadCast(context, BROADCAST_BACNET_APP_CONFIGURATION_TYPE, label);
@@ -973,6 +1048,7 @@ public class Communication extends Fragment {
         String deviceIpAddress = "";
         try {
             Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+            boolean foundPreferredNetwork = false;
             while (interfaces.hasMoreElements()) {
                 NetworkInterface iface = interfaces.nextElement();
                 // filters out 127.0.0.1 and inactive interfaces
@@ -987,10 +1063,14 @@ public class Communication extends Fragment {
                             CcuLog.d(Tags.BACNET, "device interface and ip" + iface.getDisplayName() + "-" + addr.getHostAddress());
                             deviceIpAddress = addr.getHostAddress();
                             if(iface.getName().startsWith("eth")){
+                                foundPreferredNetwork = true;
                                 break;
                             }
                         }
                     }
+                }
+                if (foundPreferredNetwork) {
+                    break;
                 }
             }
         } catch (Exception e) {
@@ -1000,5 +1080,54 @@ public class Communication extends Fragment {
     }
     private CustomSpinnerDropDownAdapter getAdapterValue(ArrayList values) {
         return new CustomSpinnerDropDownAdapter(this.requireContext(), R.layout.spinner_dropdown_item, values);
+    }
+
+    private void openDeviceConfigurationSettings(int selectedViewId){
+        RadioButton radioButton = rootView.findViewById(selectedViewId);
+        String label = radioButton.getText().toString();
+        CcuLog.d(TAG_CCU_BACNET, "radioButton selected-->"+label);
+        handleConfigurationType(label);
+    }
+
+    private void addBbmdConfigurationRow(){
+        CcuLog.d(TAG_CCU_BACNET, "add bbmd config");
+        View bbmdView = LayoutInflater.from(getContext()).inflate(R.layout.lyt_bbmd_view, null);
+        bbmdView.findViewById(R.id.tvBbmdRemove).setVisibility(View.VISIBLE);
+        bbmdView.findViewById(R.id.tvBbmdRemove).setOnClickListener(view2 -> {
+            View parent = bbmdView.findViewById(R.id.bbmdViewContainer);
+            bbmdInputViews.removeView(parent);
+        });
+        bbmdInputViews.addView(bbmdView);
+    }
+
+    private void createBbmdViewAndFillData(ArrayList<DataBbmd> listOdDataBbmd) {
+        fillBbmdView(listOdDataBbmd.get(0), 0);
+        for (int i = 1; i < listOdDataBbmd.size(); i++) {
+            addBbmdConfigurationRow();
+            DataBbmd item = listOdDataBbmd.get(i);
+            fillBbmdView(item, i);
+        }
+    }
+
+    private void fillBbmdView(DataBbmd item, int childPosition) {
+        View childView = bbmdInputViews.getChildAt(childPosition);
+        EditText etBbmdIp = childView.findViewById(R.id.etBbmdIp);
+        EditText etBbmdPort = childView.findViewById(R.id.etBbmdPort);
+        EditText etBbmdMask = childView.findViewById(R.id.etBbmdTime);
+        CcuLog.d(TAG_CCU_BACNET, "getBbmdIp" + item.getBbmdIp() + "<--port-->" + item.getBbmdPort() + "<--mask-->" + item.getBbmdMask());
+        etBbmdIp.setText(item.getBbmdIp());
+        etBbmdPort.setText(String.valueOf(item.getBbmdPort()));
+        etBbmdMask.setText(String.valueOf(item.getBbmdMask()));
+    }
+
+    private void fillFdView(DataFd item, int childPosition) {
+        View childView = fdInputViews.getChildAt(childPosition);
+        EditText etFdIp = childView.findViewById(R.id.etFdIp);
+        EditText etFdPort = childView.findViewById(R.id.etFdPort);
+        EditText etFdTime = childView.findViewById(R.id.etFdTime);
+        CcuLog.d(TAG_CCU_BACNET, "fdIp" + item.getBbmdIp() + "<--fdPort-->" + item.getBbmdPort() + "<--mask-->" + item.getBbmdMask());
+        etFdIp.setText(item.getBbmdIp());
+        etFdPort.setText(String.valueOf(item.getBbmdPort()));
+        etFdTime.setText(String.valueOf(item.getBbmdMask()));
     }
 }

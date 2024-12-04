@@ -358,7 +358,7 @@ public class HSUtil {
     public static boolean isMonitoringConfig(String id, CCUHsApi hayStack) {
         HashMap<Object, Object> pointEntity = hayStack.readMapById(id);
         return pointEntity.containsKey(Tags.MONITORING)
-                && pointEntity.containsKey(Tags.HYPERSTAT);
+                && pointEntity.containsKey(Tags.CONFIG);
     }
 
     public static boolean isHyperStatConfig(String id, CCUHsApi hayStack) {
@@ -429,6 +429,12 @@ public class HSUtil {
         } else {
             return (pointEntity.containsKey(Tags.ENABLE) && (pointEntity.containsKey(Tags.CFM) || pointEntity.containsKey("trueCFM")) && pointEntity.containsKey(Tags.DAB));
         }
+    }
+
+    public static boolean isDamperSizeConfigPoint(String id, CCUHsApi hayStack) {
+        HashMap<Object, Object> pointEntity = hayStack.readMapById(id);
+            return pointEntity.containsKey("dab") && pointEntity.containsKey("size")
+                    && pointEntity.containsKey("domainName") && pointEntity.containsKey("damper");
     }
 
     public static boolean isMaxCFMCoolingConfigPoint(String id, CCUHsApi hayStack) {
@@ -701,9 +707,9 @@ public class HSUtil {
         return null;
     }
 
-    public static boolean isPointBackfillConfigPoint(String id, CCUHsApi ccuHsApi) {
-        HashMap<Object, Object> pointEntity = ccuHsApi.readMapById(id);
-        return ((pointEntity.containsKey(Tags.BACKFILL)) && (pointEntity.containsKey(Tags.DURATION)));
+    public static boolean isPointBackfillConfigPoint(HashMap pointEntity) {
+        return ((pointEntity.containsKey(Tags.DOMAIN_NAME)) &&
+                (pointEntity.get(Tags.DOMAIN_NAME).toString().equals("backfillDuration")));
     }
 
     public static boolean isBypassDamperPresentInSystem(CCUHsApi ccuHsApi) {
@@ -737,6 +743,19 @@ public class HSUtil {
 
         }
         return b.toDict();
+    }
+
+    public static HashMap<Object, Object> hDictToMap(HDict hDict) {
+        HashMap<Object, Object> hashMap = new HashMap<>();
+
+        if (hDict != null) {
+            Iterator iterator = hDict.iterator();
+            while (iterator != null && iterator.hasNext()) {
+                Map.Entry entry = (Map.Entry) iterator.next();
+                hashMap.put(entry.getKey(), entry.getValue());
+            }
+        }
+        return hashMap;
     }
 
     public static boolean isDomainEquip(String equipRef, CCUHsApi hayStack) {

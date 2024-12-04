@@ -3,6 +3,7 @@ package a75f.io.domain.logic
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Equip
 import a75f.io.api.haystack.Point
+import a75f.io.api.haystack.Site
 import a75f.io.api.haystack.Tags
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
@@ -16,12 +17,15 @@ import a75f.io.domain.util.TunerUtil
 import a75f.io.logger.CcuLog
 import io.seventyfivef.domainmodeler.client.ModelDirective
 import io.seventyfivef.domainmodeler.client.ModelPointDef
+import io.seventyfivef.domainmodeler.client.type.SeventyFiveFEquipDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import io.seventyfivef.domainmodeler.common.point.MultiStateConstraint
 import io.seventyfivef.domainmodeler.common.point.PointConfiguration
+import io.seventyfivef.ph.core.PointType
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
+import java.util.ArrayList
 import org.projecthaystack.HDateTime
 import kotlin.system.measureTimeMillis
 
@@ -41,7 +45,7 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
         val systemEquip = hayStack.readEntity("system and equip and not modbus and not connectModule")
         if (systemEquip.isEmpty()) {
             CcuLog.i(Domain.LOG_TAG, "addEquip - Invalid System equip , ahuRef cannot be applied")
-        } else if (isStandAloneEquip(hayStackEquip)) {
+        } else if (isStandAloneEquip(hayStackEquip) || isDiagEquip(hayStackEquip)) {
             hayStackEquip.gatewayRef = systemEquip[Tags.ID].toString()
             CcuLog.i(Domain.LOG_TAG, "Added gateway ref")
         } else {
@@ -66,13 +70,15 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
      * modelDef - Model instance for profile.
      */
     fun updateEquipAndPoints(configuration: ProfileConfiguration, modelDef: ModelDirective, siteRef: String, equipDis: String,
-                             isReconfiguration : Boolean = false) : String{
+                             isReconfiguration : Boolean = false) : String {
         CcuLog.i(Domain.LOG_TAG, "updateEquipAndPoints $configuration isReconfiguration $isReconfiguration")
         val entityMapper = EntityMapper(modelDef as SeventyFiveFProfileDirective)
 
         val equip = if(configuration.nodeAddress == 99){
             hayStack.readEntity("equip and system and not modbus and not connectModule")
-        }else{
+        } else if (configuration is CCUEquipConfiguration){
+            hayStack.readMapById(Domain.ccuEquip.getId())
+        } else{
             hayStack.readEntity("equip and group == \"${configuration.nodeAddress}\"")
         }
 
@@ -99,8 +105,6 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
 
         hayStack.updateEquip(hayStackEquip, equipId)
 
-        //TODO - Fix crash
-        //DomainManager.addEquip(hayStackEquip)
         val time = measureTimeMillis {
             createPoints(modelDef, configuration, entityConfiguration, equipId, siteRef, equipDis)
         }
@@ -113,7 +117,9 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
         } else {
             updatePoints(modelDef, configuration, entityConfiguration, equipId, siteRef, equipDis)
         }
+        DomainManager.buildDomain(CCUHsApi.getInstance())
         deletePoints(entityConfiguration, equipId)
+        DomainManager.buildDomain(CCUHsApi.getInstance())
         return equipId
     }
 
@@ -313,8 +319,12 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
             } else {
                 initializeDefaultVal(hayStackPoint, pointConfig.modelDef.defaultValue as Number)
             }
+            if(pointConfig.modelDef.tagNames.contains("his")) {
+                CcuLog.d(Domain.LOG_TAG, "writing hisVal for ${pointConfig.modelDef.domainName}")
+                hayStack.writeHisValById(pointId, pointConfig.modelDef.defaultValue.toString().toDouble())
+            }
         } else if (pointConfig.modelDef.tagNames.contains("his") && !(pointConfig.modelDef.domainName.equals(
-                DomainName.heartBeat))) {
+                DomainName.heartBeat)) && pointConfig.modelDef.kind != PointType.STR) {
             // heartBeat is the one point where we don't want to initialize a hisVal to zero (since we want a gray dot on the zone screen, not green)
             hayStack.writeHisValById(pointId, 0.0)
         }
@@ -328,9 +338,15 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
         hayStackPoint.id = existingPoint["id"].toString()
         hayStackPoint.roomRef = existingPoint["roomRef"].toString()
         hayStackPoint.floorRef = existingPoint["floorRef"].toString()
-        hayStackPoint.group = existingPoint["group"].toString()
-        hayStackPoint.createdDateTime = HDateTime.make(existingPoint["createdDateTime"].toString())
-        hayStackPoint.lastModifiedBy = hayStack.getCCUUserName();
+        existingPoint["createdDateTime"]?.let {
+            hayStackPoint.createdDateTime =
+                HDateTime.make(existingPoint["createdDateTime"].toString())
+        }
+        existingPoint["ccuRef"]?.let { hayStackPoint.ccuRef = existingPoint["ccuRef"].toString() }
+        hayStackPoint.lastModifiedBy = hayStack.getCCUUserName()
+        existingPoint["bacnetId"]?.let {
+            hayStackPoint.bacnetId = existingPoint["bacnetId"].toString().toInt()
+        }
         hayStack.updatePoint(hayStackPoint, existingPoint["id"].toString())
 
         //TODO- Not changing the value during migration as it might change user configurations
@@ -341,11 +357,11 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
 
     fun updateEquip(
         equipRef: String,
-        modelDef: SeventyFiveFProfileDirective,
+        modelDef: ModelDirective,
         equipDis: String,
         isSystem: Boolean,
         siteRef: String,
-        profileConfiguration: ProfileConfiguration,
+        profileConfiguration: ProfileConfiguration?,
         equipHashMap : HashMap<Any, Any>
     ) {
         val equip = buildEquip(
@@ -358,6 +374,8 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
         )
         if(equipHashMap.containsKey("ahuRef")){
             equip.ahuRef = equipHashMap["ahuRef"].toString()
+        }else{
+            CcuLog.d(Domain.LOG_TAG, "ahuRef not found in equipHashMap")
         }
         if(equipHashMap.containsKey("gatewayRef")){
             equip.gatewayRef = equipHashMap["gatewayRef"].toString()
@@ -366,23 +384,23 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
         if (isSystem) {
             equip.group = "99"
         }
-        equip.createdDateTime = HDateTime.make(equipHashMap["createdDateTime"].toString())
+        equipHashMap["createdDateTime"]?.let {
+            equip.createdDateTime = HDateTime.make(equipHashMap["createdDateTime"].toString())
+        }
         equip.lastModifiedBy = hayStack.getCCUUserName();
         hayStack.updateEquip(equip, equipRef)
         CcuLog.i(Domain.LOG_TAG, " Updated Equip ${equip.group}-${equip.domainName}")
     }
-    fun doCutOverMigration(equipRef: String, modelDef : SeventyFiveFProfileDirective, equipDis : String,
-                           mapping : Map<String, String>, profileConfiguration: ProfileConfiguration,
-    isSystem: Boolean = false, equipHashMap: HashMap<Any, Any> = HashMap()) {
+    fun doCutOverMigration(equipRef: String, modelDef : ModelDirective, equipDis : String,
+                           mapping : Map<String, String>, profileConfiguration: ProfileConfiguration?,
+    isSystem: Boolean = false, equipHashMap: HashMap<Any, Any>) {
         CcuLog.i(Domain.LOG_TAG, "doCutOverMigration for $equipDis")
-        var equipPoints =
+        val equipPoints =
             hayStack.readAllEntities("point and equipRef == \"$equipRef\"")
         val site = hayStack.site
         //TODO-To be removed after testing is complete.
         var update = 0
         var delete = 0
-        var add = 0
-        var pass = 0
         equipPoints.filter { it["domainName"] == null}
             .forEach { dbPoint ->
                 val modelPointName = getDomainNameFromDis(dbPoint, mapping)
@@ -398,7 +416,7 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
                     //println("Cut-Over migration Update $dbPoint")
                     val modelPoint = modelDef.points.find { it.domainName.equals(modelPointName, true)}
                     if (modelPoint != null) {
-                        updatePoint(PointBuilderConfig(modelPoint, null, equipRef, site!!.id, site!!.tz, equipDis), dbPoint)
+                        updatePoint(PointBuilderConfig(modelPoint, profileConfiguration, equipRef, site!!.id, site.tz, equipDis), dbPoint)
                     } else {
                         delete++
                         CcuLog.e(Domain.LOG_TAG, " Model point does not exist for domain name $modelPointName")
@@ -407,17 +425,107 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
                 }
             }
 
+        if (modelDef is SeventyFiveFProfileDirective) {
+            processCutOverMigrationBasedOnModelDef(modelDef, equipPoints, mapping, equipRef, equipDis, site, profileConfiguration)
+        } else if(modelDef is SeventyFiveFEquipDirective) {
+            processCutOverMigrationBasedOnModelDef(modelDef, equipPoints, mapping, equipRef, equipDis, site, profileConfiguration)
+        }
+
+        CcuLog.i(
+            Domain.LOG_TAG, "CutOver migration for ${modelDef.domainName} Total points DB: ${equipPoints.size} " +
+                    " Model: ${modelDef.points.size} Map: ${mapping.size} ")
+        CcuLog.i(Domain.LOG_TAG, " Deleted $delete Updated $update")
+        CcuLog.i(Domain.LOG_TAG, "equipHashMap: $equipHashMap")
+        updateEquip(equipRef, modelDef, equipDis, isSystem, site!!.id, profileConfiguration, equipHashMap)
+        CcuLog.i(Domain.LOG_TAG, " Cut-Over migration completed for Equip ${modelDef.domainName}")
+    }
+    private fun processCutOverMigrationBasedOnModelDef(
+        modelDef: SeventyFiveFProfileDirective,
+        equipPoints: ArrayList<HashMap<Any, Any>>,
+        mapping: Map<String, String>,
+        equipRef: String,
+        equipDis: String,
+        site: Site?,
+        profileConfiguration: ProfileConfiguration?,
+    ) {
+        var add = 0
+        var pass = 0
         modelDef.points.forEach { modelPointDef ->
 
-            val displayName = BuildingEquipCutOverMapping.findDisFromDomainName(modelPointDef.domainName)
+            val displayName =
+                BuildingEquipCutOverMapping.findDisFromDomainName(modelPointDef.domainName)
             if (displayName == null && modelPointDef.configuration.configType == PointConfiguration.ConfigType.BASE) {
                 add++
-                //Point exists in model but not in mapping table or local db. create it.
-                CcuLog.e(Domain.LOG_TAG, " Cut-Over migration Add ${modelPointDef.domainName} - $modelPointDef")
-                //println(" Cut-Over migration Add ${modelPointDef.domainName}- $modelPointDef")
+                CcuLog.e(
+                    Domain.LOG_TAG,
+                    "Cut-Over migration Add ${modelPointDef.domainName} - $modelPointDef"
+                )
                 if (!pointWithDomainNameExists(equipPoints, modelPointDef.domainName, mapping)) {
-                    CcuLog.e(Domain.LOG_TAG, " Cut-Over migration createPoint ${modelPointDef.domainName}")
-                    createPoint(PointBuilderConfig(modelPointDef, profileConfiguration, equipRef, site!!.id, site?.tz, equipDis))
+                    CcuLog.e(
+                        Domain.LOG_TAG,
+                        "Cut-Over migration createPoint ${modelPointDef.domainName}"
+                    )
+                    createPoint(
+                        PointBuilderConfig(
+                            modelPointDef,
+                            profileConfiguration,
+                            equipRef,
+                            site!!.id,
+                            site?.tz,
+                            equipDis
+                        )
+                    )
+                }
+            } else {
+                CcuLog.e(Domain.LOG_TAG, "Cut-Over migration PASS $modelPointDef")
+                pass++
+            }
+        }
+        CcuLog.i(Domain.LOG_TAG, "Added $add pass $pass")
+
+    }
+    private fun processCutOverMigrationBasedOnModelDef(
+        modelDef: SeventyFiveFEquipDirective,
+        equipPoints: ArrayList<HashMap<Any, Any>>,
+        mapping: Map<String, String>,
+        equipRef: String,
+        equipDis: String,
+        site: Site?,
+        profileConfiguration: ProfileConfiguration?,
+    ) {
+        var add = 0
+        var pass = 0
+        modelDef.points.forEach { modelPointDef ->
+            val displayName =
+                BuildingEquipCutOverMapping.findDisFromDomainName(modelPointDef.domainName)
+            if (displayName == null) {
+                add++
+                //Point exists in model but not in mapping table or local db. create it.
+                CcuLog.e(
+                    Domain.LOG_TAG,
+                    " Cut-Over migration Add ${modelPointDef.domainName} - $modelPointDef"
+                )
+                //println(" Cut-Over migration Add ${modelPointDef.domainName}- $modelPointDef")
+                if (!pointWithDomainNameExists(
+                        equipPoints,
+                        modelPointDef.domainName,
+                        mapping
+                    )
+                ) {
+                    CcuLog.e(
+                        Domain.LOG_TAG,
+                        " Cut-Over migration createPoint ${modelPointDef.domainName}"
+                    )
+                    createPoint(
+                        PointBuilderConfig(
+                            modelPointDef,
+                            profileConfiguration,
+                            equipRef,
+                            site!!.id,
+                            site?.tz,
+                            equipDis
+                        )
+                    )
                 }
             } else {
                 //TODO- Need to consider the case when point exists in map but not in DB.
@@ -427,15 +535,8 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
             }
         }
 
-        CcuLog.i(
-            Domain.LOG_TAG, "CutOver migration for ${modelDef.domainName} Total points DB: ${equipPoints.size} " +
-                    " Model: ${modelDef.points.size} Map: ${mapping.size} ")
-        CcuLog.i(Domain.LOG_TAG, " Deleted $delete Updated $update added $add pass $pass")
-        CcuLog.i(Domain.LOG_TAG, "equipHashMap: $equipHashMap")
-        updateEquip(equipRef, modelDef, equipDis, isSystem, site!!.id, profileConfiguration, equipHashMap)
-        CcuLog.i(Domain.LOG_TAG, " Cut-Over migration completed for Equip ${modelDef.domainName}")
+        CcuLog.i(Domain.LOG_TAG, "Added $add pass $pass")
     }
-
     private fun pointWithDomainNameExists(dbPoints : List<Map<Any, Any>>, domainName : String, mapping : Map <String, String>) : Boolean{
         return dbPoints.any { dbPoint ->
             mapping.get(dbPoint["dis"].toString()
@@ -446,5 +547,9 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
 
     private fun isStandAloneEquip(equip : Equip) : Boolean {
         return equip.markers.contains(Tags.STANDALONE)
+    }
+
+    private fun isDiagEquip(equip : Equip) : Boolean {
+        return equip.markers.contains(Tags.DIAG)
     }
 }

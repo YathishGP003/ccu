@@ -5,7 +5,6 @@ import a75f.io.api.haystack.Device
 import a75f.io.api.haystack.Equip
 import a75f.io.api.haystack.HSUtil
 import a75f.io.api.haystack.RawPoint
-import a75f.io.api.haystack.sync.HttpUtil
 import a75f.io.api.haystack.sync.PointWriteCache
 import a75f.io.device.mesh.LSerial
 import a75f.io.device.mesh.LSmartNode
@@ -49,13 +48,10 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.projecthaystack.HDateTime
-import org.projecthaystack.HDict
 import org.projecthaystack.HDictBuilder
-import org.projecthaystack.HGridBuilder
 import org.projecthaystack.HNum
 import org.projecthaystack.HRef
 import org.projecthaystack.HVal
-import org.projecthaystack.io.HZincWriter
 import kotlin.properties.Delegates
 
 class BypassConfigViewModel : ViewModel() {
@@ -103,7 +99,6 @@ class BypassConfigViewModel : ViewModel() {
         get() = _isDialogOpen
 
     fun init(bundle: Bundle, context: Context, hayStack : CCUHsApi) {
-        openCancelDialog = false
         deviceAddress = bundle.getShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR)
         zoneRef = bundle.getString(FragmentCommonBundleArgs.ARG_NAME)!!
         floorRef = bundle.getString(FragmentCommonBundleArgs.FLOOR_NAME)!!
@@ -336,37 +331,38 @@ class BypassConfigViewModel : ViewModel() {
         updateSystemTunerVal("vav and pspread and not airflow and not air", 1.5, "Bypass Damper Added", hayStack)
 
 
-        val sysEquipId = CCUHsApi.getInstance().readEntity("equip and system and not modbus and not connectModule").get("id").toString()
-        val childEquips = HSUtil.getEquipsWithAhuRefOnThisCcu(sysEquipId)
-        val childEquipsIterator = childEquips.iterator()
-        while(childEquipsIterator.hasNext()) {
-            val eq = childEquipsIterator.next()
+        CCUHsApi.getInstance().readEntity("equip and system and not modbus and not connectModule")["id"]?.let {sysEquipId ->
+            val childEquips = HSUtil.getEquipsWithAhuRefOnThisCcu(sysEquipId.toString())
+            val childEquipsIterator = childEquips.iterator()
+            while(childEquipsIterator.hasNext()) {
+                val eq = childEquipsIterator.next()
 
-            val minCoolingDamperPosPoint = hayStack.readEntity("point and config and damper and cooling and min and not analog1 and not analog2 and equipRef == \"" + eq.id + "\"")
-            val minCoolingDamperPosPointId = minCoolingDamperPosPoint.get("id").toString()
-            hayStack.writePointForCcuUser(minCoolingDamperPosPointId, 7, 10.0, 0, "Bypass Damper Added")
-            hayStack.writeHisValById(minCoolingDamperPosPointId, 10.0)
+                hayStack.readEntity("point and config and damper and cooling and min and not analog1 and not analog2 and equipRef == \"" + eq.id + "\"")["id"]?.let { minCoolingDamperPosPointId ->
+                    hayStack.writePointForCcuUser(minCoolingDamperPosPointId.toString(), 8, 10.0, 0, "Bypass Damper Added")
+                    hayStack.writeHisValById(minCoolingDamperPosPointId.toString(), 10.0)
+                }
 
-            val minHeatingDamperPosPoint = hayStack.readEntity("point and config and damper and heating and min and not analog1 and not analog2 and equipRef == \"" + eq.id + "\"")
-            val minHeatingDamperPosPointId = minHeatingDamperPosPoint.get("id").toString()
-            hayStack.writePointForCcuUser(minHeatingDamperPosPointId, 7, 10.0, 0, "Bypass Damper Added")
-            hayStack.writeHisValById(minHeatingDamperPosPointId, 10.0)
+                hayStack.readEntity("point and config and damper and heating and min and not analog1 and not analog2 and equipRef == \"" + eq.id + "\"")["id"]?.let { minHeatingDamperPosPointId ->
+                    hayStack.writePointForCcuUser(minHeatingDamperPosPointId.toString(), 8, 10.0, 0, "Bypass Damper Added")
+                    hayStack.writeHisValById(minHeatingDamperPosPointId.toString(), 10.0)
+                }
 
-            if (eq.markers.contains("dualDuct")) {
-                val systemPGain = TunerUtil.readTunerValByQuery("system and dab and pgain and not reheat and not default")
-                val pGainPoint = hayStack.readEntity("point and tuner and dualDuct and pgain and not reheat and equipRef == \"" + eq.id + "\"")
-                val pGainPointId = pGainPoint["id"].toString()
-                hayStack.writePointForCcuUser(pGainPointId, 14, systemPGain, 0, "Bypass Damper Added")
+                if (eq.markers.contains("dualDuct")) {
+                    val systemPGain = TunerUtil.readTunerValByQuery("system and dab and pgain and not reheat and not default")
+                    hayStack.readEntity("point and tuner and dualDuct and pgain and not reheat and equipRef == \"" + eq.id + "\"")["id"]?.let { pGainPointId ->
+                        hayStack.writePointForCcuUser(pGainPointId.toString(), 14, systemPGain, 0, "Bypass Damper Added")
+                    }
 
-                val systemIGain = TunerUtil.readTunerValByQuery("system and dab and igain and not reheat and not default")
-                val iGainPoint = hayStack.readEntity("point and tuner and dualDuct and igain and not reheat and equipRef == \"" + eq.id + "\"")
-                val iGainPointId = iGainPoint["id"].toString()
-                hayStack.writePointForCcuUser(iGainPointId, 14, systemIGain, 0, "Bypass Damper Added")
+                    val systemIGain = TunerUtil.readTunerValByQuery("system and dab and igain and not reheat and not default")
+                    val iGainPoint = hayStack.readEntity("point and tuner and dualDuct and igain and not reheat and equipRef == \"" + eq.id + "\"")
+                    val iGainPointId = iGainPoint["id"].toString()
+                    hayStack.writePointForCcuUser(iGainPointId, 14, systemIGain, 0, "Bypass Damper Added")
 
-                val systemPSpread = TunerUtil.readTunerValByQuery("system and dab and pspread and not reheat and not default")
-                val pSpreadPoint = hayStack.readEntity("point and tuner and dualDuct and pspread and not reheat and equipRef == \"" + eq.id + "\"")
-                val pSpreadPointId = pSpreadPoint["id"].toString()
-                hayStack.writePointForCcuUser(pSpreadPointId, 14, systemPSpread, 0, "Bypass Damper Added")
+                    val systemPSpread = TunerUtil.readTunerValByQuery("system and dab and pspread and not reheat and not default")
+                    hayStack.readEntity("point and tuner and dualDuct and pspread and not reheat and equipRef == \"" + eq.id + "\"")["id"]?.let { pSpreadPointId ->
+                        hayStack.writePointForCcuUser(pSpreadPointId.toString(), 14, systemPSpread, 0, "Bypass Damper Added")
+                    }
+                }
             }
         }
     }
@@ -382,49 +378,47 @@ class BypassConfigViewModel : ViewModel() {
         updateSystemTunerVal("vav and igain and not airflow and not air", null, "Bypass Damper Unpaired", hayStack)
         updateSystemTunerVal("vav and pspread and not airflow and not air", null, "Bypass Damper Unpaired", hayStack)
 
-        val sysEquipId = CCUHsApi.getInstance().readEntity("equip and system and not modbus and not connectModule").get("id").toString()
-        val childEquips = HSUtil.getEquipsWithAhuRefOnThisCcu(sysEquipId)
-        val childEquipsIterator = childEquips.iterator()
-        while(childEquipsIterator.hasNext()) {
-            val eq = childEquipsIterator.next()
+        hayStack.readEntity("equip and system and not modbus and not connectModule")["id"]?.let { sysEquipId ->
+            val childEquips = HSUtil.getEquipsWithAhuRefOnThisCcu(sysEquipId.toString())
+            val childEquipsIterator = childEquips.iterator()
+            while(childEquipsIterator.hasNext()) {
+                val eq = childEquipsIterator.next()
 
-            val minCoolingDamperPosPoint = hayStack.readEntity("point and config and damper and cooling and min and not analog1 and not analog2 and equipRef == \"" + eq.id + "\"")
-            if (minCoolingDamperPosPoint.size > 0) {
-                val minCoolingDamperPosPointId = minCoolingDamperPosPoint.get("id").toString()
+                if (eq.markers.contains("dualDuct")) {
+                    //val pGainPoint = hayStack.readEntity("point and tuner and dualDuct and pgain and not reheat and equipRef == \"" + eq.id + "\"")
+                    //val pGainPointId = pGainPoint["id"].toString()
+                    updateChildEquipsTunerVal(
+                        sysEquipId.toString(),
+                        "dualDuct and pgain and not reheat",
+                        null,
+                        "Bypass Damper Added",
+                        hayStack
+                    )
+                    //hayStack.writePointForCcuUser(pGainPointId, 14, null, 0, "Bypass Damper Added")
 
-                hayStack.getHSClient().pointWrite(HRef.copy(minCoolingDamperPosPointId), 7, hayStack.ccuUserName, null, HNum.make(1), HDateTime.make(System.currentTimeMillis()))
-                val b: HDictBuilder = HDictBuilder().add("id", HRef.copy(minCoolingDamperPosPointId)).add("level",7).add("who",CCUHsApi.getInstance().getCCUUserName()).add("duration", HNum.make(0, "ms")).add("val", null as? HVal).add("reason", "Bypass Damper Unpaired")
-                PointWriteCache.getInstance().writePoint(minCoolingDamperPosPointId, b.toDict())
-                hayStack.writeHisValById(minCoolingDamperPosPointId, HSUtil.getPriorityVal(minCoolingDamperPosPointId))
+                    //val iGainPoint = hayStack.readEntity("point and tuner and dualDuct and igain and not reheat and equipRef == \"" + eq.id + "\"")
+                    //val iGainPointId = iGainPoint["id"].toStrin
+                    updateChildEquipsTunerVal(
+                        sysEquipId.toString(),
+                        "dualDuct and igain and not reheat",
+                        null,
+                        "Bypass Damper Added",
+                        hayStack
+                    )
+                    //hayStack.writePointForCcuUser(iGainPointId, 14, null, 0, "Bypass Damper Added")
+
+                    //val pSpreadPoint = hayStack.readEntity("point and tuner and dualDuct and pspread and not reheat and equipRef == \"" + eq.id + "\"")
+                    //val pSpreadPointId = pSpreadPoint["id"].toString()
+                    updateChildEquipsTunerVal(
+                        sysEquipId.toString(),
+                        "dualDuct and pspread and not reheat",
+                        null,
+                        "Bypass Damper Added",
+                        hayStack
+                    )
+                    //hayStack.writePointForCcuUser(pSpreadPointId, 14, null, 0, "Bypass Damper Added")
+                }
             }
-
-            val minHeatingDamperPosPoint = hayStack.readEntity("point and config and damper and heating and min and not analog1 and not analog2 and equipRef == \"" + eq.id + "\"")
-            if (minHeatingDamperPosPoint.size > 0) {
-                val minHeatingDamperPosPointId = minHeatingDamperPosPoint.get("id").toString()
-
-                hayStack.getHSClient().pointWrite(HRef.copy(minHeatingDamperPosPointId), 7, hayStack.ccuUserName, null, HNum.make(1), HDateTime.make(System.currentTimeMillis()))
-                val b: HDictBuilder = HDictBuilder().add("id", HRef.copy(minHeatingDamperPosPointId)).add("level",7).add("who",CCUHsApi.getInstance().getCCUUserName()).add("duration", HNum.make(0, "ms")).add("val", null as? HVal).add("reason", "Bypass Damper Unpaired")
-                PointWriteCache.getInstance().writePoint(minHeatingDamperPosPointId, b.toDict())
-                hayStack.writeHisValById(minHeatingDamperPosPointId, HSUtil.getPriorityVal(minHeatingDamperPosPointId))
-            }
-
-            if (eq.markers.contains("dualDuct")) {
-                //val pGainPoint = hayStack.readEntity("point and tuner and dualDuct and pgain and not reheat and equipRef == \"" + eq.id + "\"")
-                //val pGainPointId = pGainPoint["id"].toString()
-                updateChildEquipsTunerVal(sysEquipId, "dualDuct and pgain and not reheat", null, "Bypass Damper Added", hayStack)
-                //hayStack.writePointForCcuUser(pGainPointId, 14, null, 0, "Bypass Damper Added")
-
-                //val iGainPoint = hayStack.readEntity("point and tuner and dualDuct and igain and not reheat and equipRef == \"" + eq.id + "\"")
-                //val iGainPointId = iGainPoint["id"].toStrin
-                updateChildEquipsTunerVal(sysEquipId, "dualDuct and igain and not reheat", null, "Bypass Damper Added", hayStack)
-                //hayStack.writePointForCcuUser(iGainPointId, 14, null, 0, "Bypass Damper Added")
-
-                //val pSpreadPoint = hayStack.readEntity("point and tuner and dualDuct and pspread and not reheat and equipRef == \"" + eq.id + "\"")
-                //val pSpreadPointId = pSpreadPoint["id"].toString()
-                updateChildEquipsTunerVal(sysEquipId, "dualDuct and pspread and not reheat", null, "Bypass Damper Added", hayStack)
-                //hayStack.writePointForCcuUser(pSpreadPointId, 14, null, 0, "Bypass Damper Added")
-            }
-
         }
     }
 

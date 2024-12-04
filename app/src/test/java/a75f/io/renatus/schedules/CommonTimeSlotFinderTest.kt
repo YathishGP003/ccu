@@ -89,27 +89,6 @@ class CommonTimeSlotFinderTest {
     }
 
 
-    @Test
-    fun testGetCommonIntervals() {
-        /*val schedule = mapOf(
-            "Monday" to listOf(
-                CommonTimeSlotFinder.TimeSlot(9, 0, 11, 0),
-                CommonTimeSlotFinder.TimeSlot(13, 0, 15, 0)
-            ),
-            "Tuesday" to listOf(
-                CommonTimeSlotFinder.TimeSlot(10, 0, 12, 0),
-                CommonTimeSlotFinder.TimeSlot(14, 0, 16, 0)
-            )
-        )
-
-        val expectedCommonIntervals = listOf(
-            CommonTimeSlotFinder.TimeSlot(10, 0, 11, 0),
-            CommonTimeSlotFinder.TimeSlot(14, 0, 15, 0)
-        )
-
-        val result = commonTimeSlotFinder.getCommonIntervals(schedule)*/
-        assertEquals(1, 1)
-    }
 
     @Test
     fun testGetUncommonIntervals() {
@@ -171,6 +150,360 @@ class CommonTimeSlotFinderTest {
 
         assertEquals(1, 1)
     }
+    @Test
+    fun testGetCommonIntervals() {
+        val testCases = listOf(
+            Pair(
+                mapOf(
+                    "Monday" to listOf("08:00 - 08:45", "09:30 - 14:30", "14:45 - 19:30", "20:00 - 24:00"),
+                    "Tuesday" to listOf("08:00 - 08:45", "09:30 - 14:30", "14:45 - 19:30", "20:00 - 24:00"),
+                    "Wednesday" to listOf("08:00 - 08:45", "09:30 - 14:30", "14:45 - 19:30", "20:00 - 24:00"),
+                    "Thursday" to listOf("08:00 - 08:45", "09:30 - 14:30", "14:45 - 19:30", "20:00 - 24:00"),
+                    "Friday" to listOf("08:00 - 08:45", "09:30 - 14:30", "14:45 - 19:30", "20:00 - 24:00"),
+                ),
+                listOf("08:00 - 08:45", "09:30 - 14:30", "14:45 - 19:30", "20:00 - 24:00"),
+            ),
+            // Test Case 1: Simple overlap between two days
+            Pair(
+                mapOf(
+                    "Monday" to listOf("08:00 - 12:00", "14:00 - 18:00"),
+                    "Tuesday" to listOf("10:00 - 16:00", "18:00 - 20:00")
+                ),
+                listOf("10:00 - 12:00", "14:00 - 16:00")
+            ),
 
-    // Add more tests for other methods and scenarios
+            // Test Case 2: No overlap across all days
+            Pair(
+                mapOf(
+                    "Monday" to listOf("08:00 - 10:00"),
+                    "Tuesday" to listOf("11:00 - 13:00"),
+                    "Wednesday" to listOf("14:00 - 16:00")
+                ),
+                listOf()
+            ),
+
+            // Test Case 3: Fully overlapping intervals across all days
+            Pair(
+                mapOf(
+                    "Monday" to listOf("08:00 - 10:00"),
+                    "Tuesday" to listOf("08:00 - 10:00"),
+                    "Wednesday" to listOf("08:00 - 10:00")
+                ),
+                listOf("08:00 - 10:00")
+            ),
+
+            // Test Case 4: Partial overlaps across multiple days
+            Pair(
+                mapOf(
+                    "Monday" to listOf("08:00 - 14:00"),
+                    "Tuesday" to listOf("10:00 - 16:00"),
+                    "Wednesday" to listOf("12:00 - 18:00")
+                ),
+                listOf("12:00 - 14:00")
+            ),
+
+            // Test Case 5: Single day in the schedule
+            Pair(
+                mapOf(
+                    "Monday" to listOf("08:00 - 12:00", "14:00 - 18:00")
+                ),
+                listOf("08:00 - 12:00", "14:00 - 18:00")
+            ),
+
+            // Test Case 6: Overlap with multiple intervals on some days
+            Pair(
+                mapOf(
+                    "Monday" to listOf("08:00 - 10:00", "12:00 - 14:00"),
+                    "Tuesday" to listOf("09:00 - 13:00", "15:00 - 16:00"),
+                    "Wednesday" to listOf("08:30 - 11:00", "13:00 - 15:30")
+                ),
+                listOf("09:00 - 10:00")
+            ),
+
+            // Test Case 7: Empty schedule
+            Pair(
+                emptyMap<String, List<String>>(),
+                listOf()
+            ),
+
+            // Test Case 8: All days with identical intervals
+            Pair(
+                mapOf(
+                    "Monday" to listOf("08:00 - 12:00"),
+                    "Tuesday" to listOf("08:00 - 12:00"),
+                    "Wednesday" to listOf("08:00 - 12:00")
+                ),
+                listOf("08:00 - 12:00")
+            ),
+
+            // Test Case 9: Different intervals with no intersection
+            Pair(
+                mapOf(
+                    "Monday" to listOf("08:00 - 10:00"),
+                    "Tuesday" to listOf("10:30 - 12:30"),
+                    "Wednesday" to listOf("13:00 - 15:00")
+                ),
+                listOf()
+            ),
+
+            // Test Case 10: Overlap across two days, no overlap on the third
+            Pair(
+                mapOf(
+                    "Monday" to listOf("08:00 - 12:00"),
+                    "Tuesday" to listOf("10:00 - 14:00"),
+                    "Wednesday" to listOf("15:00 - 18:00")
+                ),
+                listOf()
+            )
+        )
+
+        // Running the test cases
+        for ((scheduleInput, expected) in testCases) {
+            val schedule = scheduleInput.mapValues { (_, times) -> times.map { convertStringToTimeSlot(it) } }
+            val expectedResult = expected.map { convertStringToTimeSlot(it) }
+
+            val actualResult = commonTimeSlotFinder.getCommonIntervals(schedule)
+            assertEquals(expectedResult, actualResult)
+        }
+    }
+
+    @Test
+    fun testCreateDayScheduleWithBoundaries() {
+        // Pair format: (timeSlots, boundaries, expectedResult)
+        val testCases = listOf(
+
+            Triple(
+                     listOf("08:00 - 17:30"),
+                      listOf("08:00 - 08:45", "09:30 - 14:30", "14:45 - 19:30", "20:00 - 24:00"),
+                     listOf("08:00 - 08:45", "09:30 - 14:30", "14:45 - 17:30")
+                ),
+
+            // Test Case 1: Simple overlapping intervals
+            Triple(
+                listOf("08:00 - 10:00", "12:00 - 14:00"),
+                listOf("09:00 - 13:00"),
+                listOf("09:00 - 10:00", "12:00 - 13:00")
+            ),
+
+            // Test Case 2: No overlap
+            Triple(
+                listOf("14:00 - 16:00", "18:00 - 20:00"),
+                listOf("08:00 - 10:00", "12:00 - 13:00"),
+                listOf()
+            ),
+
+            // Test Case 3: Exact match with boundaries
+            Triple(
+                listOf("08:00 - 10:00", "12:00 - 14:00"),
+                listOf("08:00 - 10:00", "12:00 - 14:00"),
+                listOf("08:00 - 10:00", "12:00 - 14:00")
+            ),
+
+            // Test Case 4: Partial overlaps with boundaries
+            Triple(
+                listOf("07:00 - 09:00", "10:30 - 12:30"),
+                listOf("08:00 - 11:00"),
+                listOf("08:00 - 09:00", "10:30 - 11:00")
+            ),
+
+            // Test Case 5: Fully nested intervals within boundaries
+            Triple(
+                listOf("08:00 - 09:00", "10:00 - 11:00"),
+                listOf("07:00 - 12:00"),
+                listOf("08:00 - 09:00", "10:00 - 11:00")
+            ),
+
+            // Test Case 6: Multiple boundaries intersecting a single time slot
+            Triple(
+                listOf("08:00 - 12:00"),
+                listOf("07:00 - 09:00", "10:00 - 11:00"),
+                listOf("08:00 - 09:00", "10:00 - 11:00")
+            ),
+
+            // Test Case 7: Edge case with matching start and end times
+            Triple(
+                listOf("09:00 - 11:00"),
+                listOf("09:00 - 11:00"),
+                listOf("09:00 - 11:00")
+            ),
+
+            // Test Case 8: Non-overlapping time slots with partial overlaps at boundary edges
+            Triple(
+                listOf("06:00 - 07:30", "11:00 - 13:00", "15:00 - 17:00"),
+                listOf("07:00 - 12:00", "16:00 - 18:00"),
+                listOf("07:00 - 07:30", "11:00 - 12:00", "16:00 - 17:00")
+            ),
+
+            // Test Case 9: Empty time slots list
+            Triple(
+                listOf(),
+                listOf("08:00 - 10:00", "12:00 - 14:00"),
+                listOf()
+            ),
+
+            // Test Case 10: Empty boundaries list
+            Triple(
+                listOf("08:00 - 10:00", "12:00 - 14:00"),
+                listOf(),
+                listOf()
+            )
+        )
+
+        // Run all test cases
+        for ((timeSlots, boundaries, expected) in testCases) {
+            val timeSlotObjects = timeSlots.map { convertStringToTimeSlot(it) }
+            val boundaryObjects = boundaries.map { convertStringToTimeSlot(it) }
+            val expectedObjects = expected.map { convertStringToTimeSlot(it) }
+
+            val actualResult = commonTimeSlotFinder.createDayScheduleWithBoundaries(timeSlotObjects, boundaryObjects)
+            assertEquals(expectedObjects, actualResult)
+        }
+    }
+
+    @Test
+    fun testGetUncommonTimeSlot(){
+
+        // Triple format : (Building Intervals, Zone Intervals, Expected Result)
+        val testCases = listOf(
+
+            // Test Case 1
+            Triple(
+                listOf("00:00 - 03:45", "06:30 - 18:45", "19:45 - 24:00"),
+                listOf("03:15 - 17:30"),
+                listOf("03:45 - 06:30")
+            ),
+            // Test Case 2
+            Triple(
+                listOf("00:00 - 12:00", "14:00 - 18:00"),
+                listOf("10:00 - 15:00"),
+                listOf("12:00 - 14:00")
+            ),
+            // Test Case 3
+            Triple(
+                listOf("08:00 - 10:00", "12:00 - 14:00"),
+                listOf("07:30 - 14:30"),
+                listOf("07:30 - 08:00", "10:00 - 12:00", "14:00 - 14:30")
+            ),
+            // Test Case 4
+            Triple(
+                listOf("06:00 - 08:00", "10:00 - 12:00", "14:00 - 16:00"),
+                listOf("05:00 - 17:00"),
+                listOf("05:00 - 06:00", "08:00 - 10:00", "12:00 - 14:00", "16:00 - 17:00")
+            ),
+            // Test Case 5
+            Triple(
+                listOf("01:00 - 02:00", "04:00 - 05:00", "07:00 - 08:00"),
+                listOf("00:30 - 08:30"),
+                listOf("00:30 - 01:00", "02:00 - 04:00", "05:00 - 07:00", "08:00 - 08:30")
+            ),
+            // Test Case 6
+            Triple(
+                listOf("00:00 - 12:00"),
+                listOf("06:00 - 18:00"),
+                listOf("12:00 - 18:00")
+            ),
+            // Test Case 7
+            Triple(
+                listOf("09:00 - 11:00", "13:00 - 15:00"),
+                listOf("08:00 - 16:00"),
+                listOf("08:00 - 09:00", "11:00 - 13:00", "15:00 - 16:00")
+            ),
+            // Test Case 8
+            Triple(
+                listOf("23:00 - 24:00"),
+                listOf("22:30 - 23:30"),
+                listOf("22:30 - 23:00")
+            ),
+            // Test Case 9
+            Triple(
+                listOf("00:00 - 06:00"),
+                listOf("03:00 - 09:00"),
+                listOf("06:00 - 09:00")
+            ),
+            // Test Case 10
+            Triple(
+                listOf("10:00 - 11:00", "13:00 - 14:00", "16:00 - 17:00"),
+                listOf("09:00 - 18:00"),
+                listOf("09:00 - 10:00", "11:00 - 13:00", "14:00 - 16:00", "17:00 - 18:00")
+            ),
+            // Test Case 11
+            Triple(
+                listOf("10:00 - 11:00", "13:00 - 14:00", "16:00 - 17:00"),
+                listOf("09:00 - 12:00", "12:30 - 15:00"),
+                listOf("09:00 - 10:00", "11:00 - 12:00","12:30 - 13:00", "14:00 - 15:00")
+            ),
+
+        )
+
+        for ((building, zone, expected) in testCases) {
+            val buildingIntervals = building.map { convertStringToTimeSlot(it) }
+            val zoneIntervals = zone.map { convertStringToTimeSlot(it) }
+            val expectedResult = expected.map { convertStringToTimeSlot(it) }
+
+            val actualResult = commonTimeSlotFinder.getUncommonIntervals(buildingIntervals, zoneIntervals)
+
+            assertEquals(expectedResult, actualResult)
+        }
+    }
+    @Test
+    fun testCalculateStartMinute() {
+        val boundary = CommonTimeSlotFinder.TimeSlot(8, 0, 17, 30)
+
+        // Test cases in the format: (boundary, timeSlot, expectedStartMinute)
+        val testCases = listOf(
+            Triple(boundary, CommonTimeSlotFinder.TimeSlot(8, 0, 14, 30), 0),    // Case 1: Exact match
+            Triple(boundary, CommonTimeSlotFinder.TimeSlot(8, 30, 14, 30), 30),  // Case 2: Same hour, boundary starts earlier
+            Triple(boundary, CommonTimeSlotFinder.TimeSlot(9, 15, 14, 30), 15),  // Case 3: TimeSlot starts after boundary hour
+            Triple(boundary, CommonTimeSlotFinder.TimeSlot(7, 45, 14, 30), 0),   // Case 4: Boundary starts after TimeSlot hour
+            Triple(boundary, CommonTimeSlotFinder.TimeSlot(8, 15, 14, 30), 15)   // Case 5: Boundary minute is greater, same hour
+        )
+
+        for ((boundary, timeSlot, expectedStartMinute) in testCases) {
+            val actualResult = commonTimeSlotFinder.calculateStartMinute(boundary, timeSlot)
+            assertEquals(
+                "Failed for boundary: $boundary and timeSlot: $timeSlot",
+                expectedStartMinute,
+                actualResult
+            )
+        }
+    }
+
+    @Test
+    fun testCalculateEndMinute() {
+        val boundary = CommonTimeSlotFinder.TimeSlot(8, 0, 17, 30)
+
+        // Test cases in the format: (boundary, timeSlot, expectedEndMinute)
+        val testCases = listOf(
+            Triple(boundary, CommonTimeSlotFinder.TimeSlot(8, 0, 17, 30), 30),   // Case 1: Exact match
+            Triple(boundary, CommonTimeSlotFinder.TimeSlot(8, 0, 17, 15), 15),   // Case 2: Same hour, pick minimum minute
+            Triple(boundary, CommonTimeSlotFinder.TimeSlot(8, 0, 16, 0), 0),     // Case 3: TimeSlot ends earlier than boundary
+            Triple(boundary, CommonTimeSlotFinder.TimeSlot(8, 0, 18, 0), 30),    // Case 4: TimeSlot extends beyond boundary
+            Triple(boundary, CommonTimeSlotFinder.TimeSlot(8, 0, 15, 45), 45)    // Case 5: TimeSlot ends before boundary in a different hour
+        )
+
+        for ((boundary, timeSlot, expectedEndMinute) in testCases) {
+            val actualResult = commonTimeSlotFinder.calculateEndMinute(boundary, timeSlot)
+            assertEquals(
+                "Failed for boundary: $boundary and timeSlot: $timeSlot",
+                expectedEndMinute,
+                actualResult
+            )
+        }
+    }
+
+    @Test
+    fun convertStringToTimeslot() {
+        val timeSlot = CommonTimeSlotFinder.TimeSlot(9, 0, 11, 0)
+        val result = convertStringToTimeSlot("09:00 - 11:00")
+        assertEquals(result, timeSlot)
+    }
+
+    // Helper function to convert string to TimeSlot
+    private fun convertStringToTimeSlot(time: String): CommonTimeSlotFinder.TimeSlot {
+        val (start, end) = time.split(" - ")
+        val (startHour, startMinute) = start.split(":").map { it.toInt() }
+        val (endHour, endMinute) = end.split(":").map { it.toInt() }
+        return CommonTimeSlotFinder.TimeSlot(startHour, startMinute, endHour, endMinute)
+    }
+
 }

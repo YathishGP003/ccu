@@ -1,5 +1,17 @@
 package a75f.io.api.haystack;
 
+import static a75f.io.constants.SiteFieldConstants.AREA;
+import static a75f.io.constants.SiteFieldConstants.DESCRIPTION;
+import static a75f.io.constants.SiteFieldConstants.GEOADDRESS;
+import static a75f.io.constants.SiteFieldConstants.GEOCITY;
+import static a75f.io.constants.SiteFieldConstants.GEOCOUNTRY;
+import static a75f.io.constants.SiteFieldConstants.GEOPOSTALCODE;
+import static a75f.io.constants.SiteFieldConstants.GEOSTATE;
+import static a75f.io.constants.SiteFieldConstants.ID;
+import static a75f.io.constants.SiteFieldConstants.ORGANIZATION;
+import static a75f.io.constants.SiteFieldConstants.SITE;
+import static a75f.io.constants.SiteFieldConstants.TIMEZONE;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
@@ -66,6 +78,8 @@ import a75f.io.api.haystack.util.DatabaseAction;
 import a75f.io.api.haystack.util.DatabaseEvent;
 import a75f.io.api.haystack.util.DbStrings;
 import a75f.io.api.haystack.util.Migrations;
+import a75f.io.constants.CcuFieldConstants;
+import a75f.io.constants.SiteFieldConstants;
 import a75f.io.data.RenatusDatabaseBuilder;
 import a75f.io.data.entities.DatabaseHelper;
 import a75f.io.data.entities.EntityDBUtilKt;
@@ -524,19 +538,19 @@ public class CCUTagsDb extends HServer {
 
     public String addSiteWithId(Site s, String id) {
         HDictBuilder site = new HDictBuilder()
-                .add("id", HRef.make(id))
-                .add("dis", s.getDisplayName())
-                .add("site", HMarker.VAL)
-                .add("geoCity", s.getGeoCity())
-                .add("geoState", s.getGeoState())
-                .add("geoCountry", s.getGeoCountry())
-                .add("geoPostalCode", s.getGeoPostalCode())
-                .add("geoAddr", "" + s.getGeoAddress())
-                .add("tz", s.getTz())
-                .add("organization", s.getOrganization())
-                .add("fmEmail", s.getFcManagerEmail())
-                .add("installerEmail", s.getInstallerEmail())
-                .add("area", HNum.make(s.getArea(), "ft\u00B2"));
+                .add(ID, HRef.make(id))
+                .add(DESCRIPTION, s.getDisplayName())
+                .add(SITE, HMarker.VAL)
+                .add(GEOCITY, s.getGeoCity())
+                .add(GEOSTATE, s.getGeoState())
+                .add(GEOCOUNTRY, s.getGeoCountry())
+                .add(GEOPOSTALCODE, s.getGeoPostalCode())
+                .add(GEOADDRESS, "" + s.getGeoAddress())
+                .add(TIMEZONE, s.getTz())
+                .add(ORGANIZATION, s.getOrganization())
+                .add(SiteFieldConstants.FACILITY_MANAGER_EMAIL, s.getFcManagerEmail())
+                .add(SiteFieldConstants.INSTALLER_EMAIL, s.getInstallerEmail())
+                .add(AREA, HNum.make(s.getArea(), "ft\u00B2"));
         if(s.getCreatedDateTime() != null){
             site.add("createdDateTime", s.getCreatedDateTime());
         }
@@ -572,8 +586,8 @@ public class CCUTagsDb extends HServer {
                 .add("geoAddr", "" + s.getGeoAddress())
                 .add("tz", s.getTz())
                 .add("organization", s.getOrganization())
-                .add("fmEmail", s.getFcManagerEmail())
-                .add("installerEmail", s.getInstallerEmail())
+                .add(CcuFieldConstants.FACILITY_MANAGER_EMAIL, s.getFcManagerEmail())
+                .add(CcuFieldConstants.INSTALLER_EMAIL, s.getInstallerEmail())
                 .add("area", HNum.make(s.getArea(), "ft\u00B2"));
 
         String weatherRef = s.getWeatherRef();
@@ -714,9 +728,12 @@ public class CCUTagsDb extends HServer {
                                      .add("floorRef", q.getFloorRef() != null ? q.getFloorRef() : "SYSTEM")
                                      .add("profile", q.getProfile())
                                      .add("priorityLevel", q.getPriority())
-                                     .add("tz",q.getTz())
-                                     .add("group",q.getGroup());
-    
+                                     .add("tz",q.getTz());
+
+        // Diag equip wont have group
+        if(q.getGroup() != null){
+            equip.add("group",q.getGroup());
+        }
         if (q.getAhuRef() != null) {
             equip.add("ahuRef",q.getAhuRef());
         }
@@ -1079,9 +1096,8 @@ public class CCUTagsDb extends HServer {
                 .add("dis", p.getDisplayName())
                 .add("point", HMarker.VAL)
                 .add("setting", HMarker.VAL)
-                .add("deviceRef", p.getDeviceRef())
                 .add("siteRef", p.getSiteRef())
-                .add("val", p.getVal())
+                .add("val", Integer.parseInt(p.getVal()))
                 .add("kind", p.getKind() == null ? "Str" : p.getKind());
 
         if (p.getUnit() != null) b.add("unit", p.getUnit());
@@ -1099,6 +1115,21 @@ public class CCUTagsDb extends HServer {
         }
         if (p.getDomainName() != null) {
             b.add("domainName", p.getDomainName());
+        }
+        if(p.getIncrementVal() != null){
+            b.add("incrementVal", Integer.parseInt(p.getIncrementVal()));
+        }
+        if(p.getMinVal() != null){
+            b.add("minVal", Integer.parseInt(p.getMinVal()));
+        }
+        if(p.getMaxVal() != null){
+            b.add("maxVal", Integer.parseInt(p.getMaxVal()));
+        }
+        if(p.getEquipRef() != null){
+            b.add("equipRef", p.getEquipRef());
+        }
+        if(p.getDeviceRef() != null){
+            b.add("deviceRef", p.getDeviceRef());
         }
         for (String m : p.getMarkers()) {
             b.add(m);
@@ -1284,6 +1315,10 @@ public class CCUTagsDb extends HServer {
         }
         if(z.getLastModifiedBy() != null){
             b.add("lastModifiedBy", z.getLastModifiedBy());
+        }
+        if(z.getBacnetId() != 0) {
+            b.add(Tags.BACNET_ID, z.getBacnetId());
+            b.add(Tags.BACNET_TYPE, Tags.DEVICE);
         }
 
         for (String m : z.getMarkers()) {

@@ -10,7 +10,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import a75f.io.logic.bo.building.bypassdamper.BypassDamperProfile;
 import a75f.io.logic.bo.building.oao.OAOProfile;
 import a75f.io.logic.bo.building.system.SystemProfile;
-import a75f.io.logic.bo.haystack.device.ControlMote;
 
 /**
  * Created by Yinten isOn 8/15/2017.
@@ -26,7 +25,7 @@ public class CCUApplication
 
     private String           mTitle        = "";
     private ArrayList<Floor> mfloors       = new ArrayList<Floor>();
-    private short           mSmartNodeAddressBand;
+    private short mAddressBand;
     private String mCCUName;
     
 
@@ -37,14 +36,14 @@ public class CCUApplication
         mCCUName = name;
     }
     
-    public short getSmartNodeAddressBand()
+    public short getAddressBand()
     {
-        return mSmartNodeAddressBand;
+        return mAddressBand;
     }
 
-    public void setSmartNodeAddressBand(short smartNodeAddressBand)
+    public void setAddressBand(short addressBand)
     {
-        this.mSmartNodeAddressBand = smartNodeAddressBand;
+        this.mAddressBand = addressBand;
     }
 
     public ArrayList<Floor> getFloors()

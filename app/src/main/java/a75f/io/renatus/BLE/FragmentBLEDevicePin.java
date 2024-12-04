@@ -39,7 +39,6 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.util.ByteArrayUtils;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
-import a75f.io.renatus.DialogOAOProfile;
 import a75f.io.renatus.Fragment2PipeFanCoilUnitConfig;
 import a75f.io.renatus.Fragment4PipeFanCoilUnitConfig;
 import a75f.io.renatus.FragmentCPUConfiguration;
@@ -47,9 +46,9 @@ import a75f.io.renatus.FragmentDABDualDuctConfiguration;
 import a75f.io.renatus.FragmentEMRConfiguration;
 import a75f.io.renatus.FragmentHMPConfiguration;
 import a75f.io.renatus.FragmentHeatPumpConfiguration;
+import a75f.io.renatus.FragmentPLCConfiguration;
 import a75f.io.renatus.FragmentSSEConfiguration;
 import a75f.io.renatus.FragmentTempInfConfiguration;
-import a75f.io.renatus.HyperStatMonitoringFragment;
 import a75f.io.renatus.R;
 import a75f.io.renatus.bluetooth.BLEAction;
 import a75f.io.renatus.bluetooth.BLEProvisionService;
@@ -57,6 +56,10 @@ import a75f.io.renatus.hyperstat.ui.HyperStatFragment;
 import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
 import a75f.io.renatus.profiles.dab.DabProfileConfigFragment;
 import a75f.io.renatus.profiles.hss.cpu.HyperStatSplitCpuFragment;
+import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatMonitoringFragment;
+import a75f.io.renatus.profiles.oao.OAOProfileFragment;
+import a75f.io.renatus.profiles.sse.SseProfileConfigFragment;
+import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatV2CpuFragment;
 import a75f.io.renatus.profiles.plc.PlcProfileConfigFragment;
 import a75f.io.renatus.profiles.vav.BypassConfigFragment;
 import a75f.io.renatus.profiles.vav.VavProfileConfigFragment;
@@ -420,7 +423,9 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
                                                             mProfileType), FragmentDABDualDuctConfiguration.ID);
                         break;
                     case OAO:
-                        showDialogFragment(DialogOAOProfile.newInstance(mPairingAddress,mName,mFloorName),DialogOAOProfile.ID);
+                        showDialogFragment(
+                                OAOProfileFragment.Companion.newInstance(mPairingAddress, mName, mFloorName,mNodeType, mProfileType),
+                                OAOProfileFragment.Companion.getID());
                         break;
                     case BYPASS_DAMPER:
                         showDialogFragment(
@@ -452,11 +457,11 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
                         showDialogFragment(Fragment4PipeFanCoilUnitConfig.newInstance(mPairingAddress, mName, mNodeType, mFloorName, mProfileType), Fragment4PipeFanCoilUnitConfig.ID);
                         break;
                     case HYPERSTAT_MONITORING:
-                        showDialogFragment(HyperStatMonitoringFragment.newInstance(mPairingAddress,mName,mFloorName,ProfileType.HYPERSTAT_MONITORING),
-                                HyperStatMonitoringFragment.ID);
+                        showDialogFragment(HyperStatMonitoringFragment.Companion.newInstance(mPairingAddress,mName,mFloorName,mNodeType,ProfileType.HYPERSTAT_MONITORING),
+                                HyperStatMonitoringFragment.Companion.getID());
                         break;
                     case HYPERSTAT_VRV:
-                        showDialogFragment(HyperStatVrvFragment.newInstance(mPairingAddress, mName, mFloorName), HyperStatMonitoringFragment.ID);
+                        showDialogFragment(HyperStatVrvFragment.newInstance(mPairingAddress, mName, mFloorName), HyperStatVrvFragment.ID);
                         break;
                     case HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT:
                         showDialogFragment(HyperStatFragment.newInstance(mPairingAddress,mName,mFloorName,

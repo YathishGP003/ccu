@@ -20,7 +20,7 @@
             android:layout_weight="0.5"
             android:paddingTop="11.8dp"
             android:paddingBottom="5.2dp"
-            android:text="@string/txt_IPAddress"
+            android:text="@string/txt_FD_IPAddress"
             android:textAppearance="@style/title_normal_22" />
 
         <EditText

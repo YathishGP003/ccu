@@ -8,6 +8,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Point;
+import a75f.io.domain.VavAcbEquip;
 import a75f.io.domain.api.DomainName;
 import a75f.io.domain.equips.VavEquip;
 import a75f.io.domain.logic.ProfileEquipBuilder;
@@ -72,14 +73,28 @@ public class TrueCFMVAVConfigHandler {
         Point updatedPoint = new Point.Builder().setHashMap(entity).setMaxVal(maxValForMinCFM).build();
         CCUHsApi.getInstance().updatePointWithoutUpdatingLastModifiedTime(updatedPoint, updatedPoint.getId());
         if (minCfmValue > maxCfmValue) {
-            CCUHsApi.getInstance().writeDefaultVal("point and domainName == \"" + DomainName.minCFMCooling + "\" and equipRef == \""+equip.getId()+"\"", maxCfmValue);
+            if (equip.getDomainName().contains("VAV")) {
+                VavEquip vavEquip = new VavEquip(equip.getId());
+                vavEquip.getMinCFMCooling().writePointValue(maxCfmValue);
+            } else {
+                VavAcbEquip AcbEquip = new VavAcbEquip(equip.getId());
+                AcbEquip.getMinCFMCooling().writePointValue(maxCfmValue);
+            }
         }
         writePointFromJson(configPoint, msgObject, hayStack);
     }
 
+    public static void writeHisValue(String id, CCUHsApi hayStack) {
+        HashMap<Object, Object> entity = hayStack.readMapById(id);
+        if(entity.containsKey("his")) {
+            Double val = hayStack.readPointPriorityVal(id);
+            hayStack.writeHisValById(id, val);
+        }
+    }
+
     public static void updateAirflowCFMProportionalRange(JsonObject msgObject, Point configPoint, CCUHsApi hayStack) {
         VavEquip vavEquip = new VavEquip(configPoint.getEquipRef());
-        vavEquip.getVavAirflowCFMProportionalRange().writeVal(8, 1.5 * msgObject.get("val").getAsDouble());
+        vavEquip.getVavAirflowCFMProportionalRange().writePointValue(1.5 * msgObject.get("val").getAsDouble());
     }
 
     public static void updateMinReheatingConfigPoint(JsonObject msgObject, Point configPoint, CCUHsApi hayStack) {
@@ -92,7 +107,13 @@ public class TrueCFMVAVConfigHandler {
         Point updatedPoint = new Point.Builder().setHashMap(entity).setMaxVal(minHeatingCFMValue).build();
         CCUHsApi.getInstance().updatePointWithoutUpdatingLastModifiedTime(updatedPoint, updatedPoint.getId());
         if (minHeatingCfmValue > maxHeatingCfmValue) {
-            CCUHsApi.getInstance().writeDefaultVal("point and domainName == \"" + DomainName.minCFMReheating + "\" and equipRef == \""+equip.getId()+"\"", maxHeatingCfmValue);
+            if (equip.getDomainName().contains("VAV")) {
+                VavEquip vavEquip = new VavEquip(equip.getId());
+                vavEquip.getMinCFMReheating().writePointValue(maxHeatingCfmValue);
+            } else {
+                VavAcbEquip AcbEquip = new VavAcbEquip(equip.getId());
+                AcbEquip.getMinCFMReheating().writePointValue(maxHeatingCfmValue);
+            }
         }
         writePointFromJson(configPoint, msgObject, hayStack);
     }
@@ -104,6 +125,7 @@ public class TrueCFMVAVConfigHandler {
         int duration = msgObject.get(HayStackConstants.WRITABLE_ARRAY_DURATION) != null ? msgObject.get(
                 HayStackConstants.WRITABLE_ARRAY_DURATION).getAsInt() : 0;
         hayStack.writePointLocal(configPoint.getId(), level, who, val, duration);
+        writeHisValue(configPoint.getId(), hayStack);
     }
 }
 

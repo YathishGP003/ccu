@@ -159,6 +159,7 @@ public class Tags
     public static final String MAX = "max";
     public static final String IAQ = "iaq";
     public static final String MIN ="min" ;
+    public static final String INCREMENTAL ="incrementVal" ;
     public static final String COV = "cov" ;
     public static final String RANGE = "range";
     public static final String SPECIAL = "special";

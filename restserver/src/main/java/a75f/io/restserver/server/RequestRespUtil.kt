@@ -25,6 +25,7 @@ fun repackagePoints(tempGrid: HGrid, isVirtualZoneEnabled: Boolean, group: Strin
         var isEquip = false
         var extractedEquipRef = ""
         var isSystem = false
+        var isConnect = false
         while (rowIterator.hasNext()) {
             val e: HDict.MapEntry = (rowIterator.next() as HDict.MapEntry)
             when (e.value!!) {
@@ -34,6 +35,9 @@ fun repackagePoints(tempGrid: HGrid, isVirtualZoneEnabled: Boolean, group: Strin
                 is Boolean -> hDictBuilder.add(e.key.toString(), e.value as Boolean)
                 is HVal -> hDictBuilder.add(e.key.toString(), e.value as HVal)
                 else -> hDictBuilder.add(e.key.toString(), e.value.toString())
+            }
+            if (e.key.toString() == "connectModule") {
+                isConnect = true
             }
             if (e.key.toString() == "system") {
                 isSystem = true
@@ -57,51 +61,58 @@ fun repackagePoints(tempGrid: HGrid, isVirtualZoneEnabled: Boolean, group: Strin
                 extractedEquipRef = e.value.toString()
             }
         }
-        val zoneName = CCUHsApi.getInstance()
-            .readMapById(extractedZoneRef.replace("@", ""))["dis"].toString().trim()
-        val pointDisName = extractedDis.split("-")
-        val lastLiteralFromDis = pointDisName[pointDisName.size - 1]
-        var profileName = ""
-        if (pointDisName.size > 1) {
-            profileName = pointDisName[1]
-        }
+            val zoneName = CCUHsApi.getInstance()
+                .readMapById(extractedZoneRef.replace("@" , ""))["dis"].toString().trim()
+            val pointDisName = extractedDis.split("-")
+            val lastLiteralFromDis = pointDisName[pointDisName.size - 1]
+            var profileName = ""
+            if (pointDisName.size > 1) {
+                profileName = pointDisName[1]
+            }
 
-        if (!isSystem) {
-            if (isVirtualZoneEnabled) {
-                if (isEquip) {
-                    hDictBuilder.add("dis", "${zoneName}_${extractedGroup}")
-                } else {
-                    hDictBuilder.add("dis", lastLiteralFromDis)
-                }
-
-
-                try {
-                    if (bacnetId != "0.0") {
-                        if (!isEquip) {
-                            val bacnetIdAfterModification = removeFirstFourChars(bacnetId)
-                            hDictBuilder.add("bacnetId", bacnetIdAfterModification.toLong())
-                        }
+            if (!isSystem) {
+                if (isVirtualZoneEnabled) {
+                    if (isEquip) {
+                        hDictBuilder.add("dis" , "${zoneName}_${extractedGroup}")
+                    } else {
+                        hDictBuilder.add("dis" , lastLiteralFromDis)
                     }
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
 
-            } else {
-                if(extractedGroup.isEmpty()){
-                    extractedGroup = getGroupFromEquipRef(extractedEquipRef)
-                }
-                if (zoneName.isEmpty() || zoneName == "null" || zoneName == "") {
-                    hDictBuilder.add("dis", "${profileName}_${extractedGroup}_$lastLiteralFromDis")
+
+                    try {
+                        if (bacnetId != "0.0") {
+                            if (!isEquip) {
+                                val bacnetIdAfterModification = removeFirstFourChars(bacnetId)
+                                hDictBuilder.add("bacnetId" , bacnetIdAfterModification.toLong())
+                            }
+                        }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+
                 } else {
-                    hDictBuilder.add(
-                        "dis",
-                        "${zoneName}_${profileName}_${extractedGroup}_$lastLiteralFromDis"
-                    )
+                    if (extractedGroup.isEmpty()) {
+                        extractedGroup = getGroupFromEquipRef(extractedEquipRef)
+                    }
+                    if (zoneName.isEmpty() || zoneName == "null" || zoneName == "") {
+                        hDictBuilder.add(
+                            "dis" ,
+                            "${profileName}_${extractedGroup}_$lastLiteralFromDis"
+                        )
+                    } else {
+                        hDictBuilder.add(
+                            "dis" ,
+                            "${zoneName}_${profileName}_${extractedGroup}_$lastLiteralFromDis"
+                        )
+                    }
+                }
+            } else {
+                if (isConnect) {
+                    hDictBuilder.add("dis" , "connect-$lastLiteralFromDis")
+                } else {
+                    hDictBuilder.add("dis" , lastLiteralFromDis)
                 }
             }
-        }else{
-            hDictBuilder.add("dis", lastLiteralFromDis)
-        }
         mutableDictList.add(hDictBuilder.toDict())
     }
     return mutableDictList

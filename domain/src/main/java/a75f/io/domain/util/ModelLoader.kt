@@ -1,5 +1,6 @@
 package a75f.io.domain.util
 
+import a75f.io.domain.api.DomainName
 import a75f.io.domain.util.ModelCache.context
 import io.seventyfivef.domainmodeler.client.ModelDirective
 
@@ -113,6 +114,51 @@ object ModelLoader {
     fun getHelioNodeDabModel() : ModelDirective {
         return ModelCache.getModelById(MODEL_HELIO_NODE_DAB)
     }
+    fun getCCUBaseConfigurationModel() : ModelDirective {
+        return ModelCache.getModelById(MODEL_CCU_BASE_CONFIGURATION)
+    }
+    fun getDiagEquipModel() : ModelDirective {
+        return ModelCache.getModelById(MODEL_CCU_DIAG_EQUIP)
+    }
+
+    fun getSmartNodeOAOModelDef() : ModelDirective {
+        return ModelCache.getModelById(MODEL_SN_OAO)
+    }
+
+    fun getSmartNodeSSEModel() : ModelDirective {
+        return ModelCache.getModelById(MODEL_SMART_NODE_SSE)
+    }
+
+    fun getHelioNodeSSEModel() : ModelDirective {
+        return ModelCache.getModelById(MODEL_HELIO_NODE_SSE)
+    }
+
+    fun getOtnTiModel() : ModelDirective {
+        return ModelCache.getModelById(MODEL_OTN_TI)
+    }
+
+    fun getOtnDeviceModel() : ModelDirective {
+        return ModelCache.getModelById(MODEL_OTN_DEVICE)
+    }
+
+
+
+    fun getHyperStatDeviceModel() : ModelDirective {
+        return ModelCache.getModelById(MODEL_HYPERSTAT_DEVICE)
+    }
+    fun getHyperStatCpuModel() : ModelDirective {
+        return ModelCache.getModelById(MODEL_HYPERSTAT_CPU)
+    }
+
+
+
+    fun getHyperStatMonitoringModel() : ModelDirective {
+        return ModelCache.getModelById(MODEL_HYPERSTAT_MONITORING)
+    }
+
+    fun getHyperStatDevice() : ModelDirective {
+        return ModelCache.getModelById(MODEL_HYPERSTAT_DEVICE)
+    }
 
     fun getSmartNodePidModel() : ModelDirective {
         return ModelCache.getModelById(MODEL_SMARTNODE_PID)
@@ -143,6 +189,11 @@ object ModelLoader {
             "cmDevice" -> getCMDeviceModel()
             "connectModuleDevice" -> getConnectModuleDeviceModel()
             "hyperstatSplitDevice" -> getHyperStatSplitDeviceModel()
+            "hyperstatCPU" -> getHyperStatCpuModel()
+            DomainName.ccuConfiguration -> getCCUBaseConfigurationModel()
+            "smartnodeOAO" -> getSmartNodeOAOModelDef()
+            "smartnodeSSE" -> getSmartNodeSSEModel()
+            "helionodeSSE" -> getHelioNodeSSEModel()
             "vavStagedRtu" -> getVavStageRtuModelDef()
             "smartnodePID" -> getSmartNodePidModel()
             "helionodePID" -> getHelioNodePidModel()

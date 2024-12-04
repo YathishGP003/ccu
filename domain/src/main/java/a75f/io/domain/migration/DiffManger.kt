@@ -108,7 +108,7 @@ class DiffManger(var context: Context?) {
                     val currentEquipMap = Domain.readEquip(assetsModelMeta.modelId)
 
                     // Retrieve the current device map by using modelID
-                    val currentDeviceMap = Domain.readDevice(assetsModelMeta.modelId)
+                    val currentDeviceMap = Domain.readNonDmDevice(assetsModelMeta.modelId,assetsModelMeta.version.toString())
 
                     Log.d(Domain.LOG_TAG, "OLD Model Data ${oldModel!!.name} ${oldModel.version}")
                     Log.d(Domain.LOG_TAG, "Current Model Data $currentEquipMap")

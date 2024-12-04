@@ -17,7 +17,6 @@ import java.util.Set;
 import a75.io.algos.CO2Loop;
 import a75.io.algos.ControlLoop;
 import a75.io.algos.GenericPIController;
-import a75.io.algos.VOCLoop;
 import a75.io.algos.tr.TrimResetListener;
 import a75.io.algos.tr.TrimResponseRequest;
 import a75.io.algos.vav.VavTRSystem;
@@ -36,6 +35,7 @@ import a75f.io.logic.bo.building.BaseProfileConfiguration;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.ZonePriority;
 import a75f.io.logic.bo.building.ZoneProfile;
+import a75f.io.logic.bo.building.ZoneState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Damper;
 import a75f.io.logic.bo.building.hvac.ParallelFanVavUnit;
@@ -111,6 +111,8 @@ public abstract class VavProfile extends ZoneProfile {
     double co2Threshold = TunerConstants.ZONE_CO2_THRESHOLD;
     CCUHsApi hayStack= CCUHsApi.getInstance();
     String equipRef = null;
+
+    protected ZoneState deadbandTransitionState    = COOLING;
         
     public VavProfile(String equipRef, Short addr, ProfileType profileType) {
         CcuLog.i(L.TAG_CCU_ZONE, "VavProfile ");
@@ -636,18 +638,19 @@ public abstract class VavProfile extends ZoneProfile {
 
         } else {
             if (!TrueCFMUtil.cfmControlNotRequired(hayStack, equipId)) {
-                double minCfmHeating = TrueCFMUtil.getMinCFMReheating(hayStack, equipId);
+                double minCfmDeadband = deadbandTransitionState == HEATING ? TrueCFMUtil.getMinCFMReheating(hayStack, equipId)
+                                            : TrueCFMUtil.getMinCFMCooling(hayStack, equipId);
 
                 //CO2 loop output from 0-50% modulates min cfm (up to max cooling cfm)
                 if (enabledCO2Control && occupied && co2Loop.getLoopOutput(co2) > 0) {
-                    co2CompensatedMinCfm = minCfmHeating + (maxCfmCooling - minCfmHeating) * Math.min(50, co2Loop.getLoopOutput()) / 50;
+                    co2CompensatedMinCfm = minCfmDeadband + (maxCfmCooling - minCfmDeadband) * Math.min(50, co2Loop.getLoopOutput()) / 50;
                     CcuLog.i(L.TAG_CCU_ZONE, "state: DEADBAND, co2: " + co2 + ", co2LoopOp: " + co2Loop.getLoopOutput(co2) + ", co2CompensatedMinCfm " + co2CompensatedMinCfm);
                 }
 
-                cfmSp = Math.max(minCfmHeating, co2CompensatedMinCfm);
+                cfmSp = Math.max(minCfmDeadband, co2CompensatedMinCfm);
 
                 CcuLog.i(L.TAG_CCU_ZONE, " updateDamperWhenSystemCooling Deadband co2LoopOp: " + co2Loop.getLoopOutput(co2) + "cfmSp (Occupied): "+cfmSp
-                        + ", Min Heating CFM Sp: " + minCfmHeating
+                        + ", minCfmDeadband Sp: " + minCfmDeadband
                         +", CO2 DCV CFM Sp: " + co2CompensatedMinCfm);
 
             } else {

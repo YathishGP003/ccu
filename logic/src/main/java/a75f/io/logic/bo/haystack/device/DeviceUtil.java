@@ -99,6 +99,17 @@ public class DeviceUtil {
         return null;
     }
 
+    public static List<RawPoint> getEnabledCmdPointsWithRefForDevice(HashMap device, CCUHsApi hayStack) {
+        ArrayList<HashMap> rawPoints = hayStack.readAll("point and physical and cmd and deviceRef == \"" +
+                device.get("id") + "\"");
+
+        return rawPoints.stream()
+                .filter( p -> p.get("pointRef") != null)
+                .filter(p -> p.get("portEnabled").toString().equals("true"))
+                .map(p -> new RawPoint.Builder().setHashMap(p).build())
+                .collect(Collectors.toList());
+
+    }
     /*Not version tag is used to ignore firmware version point in the collection*/
     public static List<RawPoint> getPortsForDevice(Short deviceAddress, CCUHsApi hayStack) {
         HashMap<Object, Object> device = hayStack.readEntity("device and addr == \""+deviceAddress+"\"");

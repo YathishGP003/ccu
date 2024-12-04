@@ -27,7 +27,6 @@ class DabProfileConfiguration (nodeAddress: Int, nodeType: String, priority: Int
 
 
     lateinit var enableCo2Control: EnableConfig
-    lateinit var enableIAQControl: EnableConfig
     lateinit var autoForceOccupied: EnableConfig
     lateinit var autoAway: EnableConfig
 
@@ -54,7 +53,6 @@ class DabProfileConfiguration (nodeAddress: Int, nodeType: String, priority: Int
         zonePriority = getDefaultValConfig(DomainName.zonePriority, model)
 
         enableCo2Control = getDefaultEnableConfig(DomainName.enableCo2Control, model)
-        enableIAQControl = getDefaultEnableConfig(DomainName.enableIAQControl, model)
 
         autoForceOccupied = getDefaultEnableConfig(DomainName.autoForceOccupied, model)
         autoAway = getDefaultEnableConfig(DomainName.autoAway, model)
@@ -96,7 +94,6 @@ class DabProfileConfiguration (nodeAddress: Int, nodeType: String, priority: Int
         reheatType.currentVal = dabEquip.reheatType.readDefaultVal()
         zonePriority.currentVal = dabEquip.zonePriority.readPriorityVal()
         enableCo2Control.enabled = dabEquip.enableCo2Control.readDefaultVal() > 0
-        enableIAQControl.enabled = dabEquip.enableIAQControl.readDefaultVal() > 0
         autoAway.enabled = dabEquip.autoAway.readDefaultVal() > 0
         autoForceOccupied.enabled = dabEquip.autoForceOccupied.readDefaultVal() > 0
         enableCFMControl.enabled = dabEquip.enableCFMControl.readDefaultVal() > 0
@@ -142,7 +139,6 @@ class DabProfileConfiguration (nodeAddress: Int, nodeType: String, priority: Int
             add(autoAway)
             add(autoForceOccupied)
             add(enableCo2Control)
-            add(enableIAQControl)
             add(enableCFMControl)
         }
     }
@@ -172,7 +168,7 @@ class DabProfileConfiguration (nodeAddress: Int, nodeType: String, priority: Int
         return " temperatureOffset: ${temperatureOffset.currentVal} damper1Type: ${damper1Type.currentVal}  damper1Size: ${damper1Size.currentVal}" +
                 " damper1Shape: ${damper1Shape.currentVal} damper2Type: ${damper2Type.currentVal} damper2Size: " +
                 "${damper2Size.currentVal} damper2Shape: ${damper2Shape.currentVal} reheatType: ${reheatType.currentVal} zonePriority: ${zonePriority.currentVal}" +
-                "enableCo2Control: ${enableCo2Control.enabled} enableIAQControl: ${enableIAQControl.enabled}" +
+                "enableCo2Control: ${enableCo2Control.enabled}" +
                 " autoForceOccupied: ${autoForceOccupied.enabled} autoAway: ${autoAway.enabled} enableCFMControl: " +
                 " ${enableCFMControl.enabled} minReheatDamperPos: ${minReheatDamperPos.currentVal} minCFMForIAQ: ${minCFMForIAQ.currentVal} maxCoolingDamperPos " +
                 "${maxCoolingDamperPos.currentVal} minCoolingDamperPos: ${minCoolingDamperPos.currentVal} maxHeatingDamperPos: " +

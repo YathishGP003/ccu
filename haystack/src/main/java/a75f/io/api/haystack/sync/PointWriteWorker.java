@@ -48,19 +48,29 @@ public class PointWriteWorker extends Worker {
     
     private boolean sendPointArrays() {
         HGrid writablePointsGrid = CCUHsApi.getInstance().readGrid("point and writable");
-        
+        if(writablePointsGrid != null) {
+            CcuLog.d(TAG, "Writable Points Count = " + writablePointsGrid.numRows());
+        }
         HGridIterator writablePointsIterator = new HGridIterator(writablePointsGrid);
-        
+
+        boolean overallPointWriteStatus = true;
+        int batchCount = 0;
         while (writablePointsIterator.hasNext()) {
-            
+
+            CcuLog.d(TAG, "sendPointArrays.batch = " + ++batchCount);
             HGrid pointGrid = writablePointsIterator.next(WRITABLE_POINT_BATCH_SIZE);
+            if(pointGrid != null) {
+                CcuLog.d(TAG, "PointWrite Batch size = " + pointGrid.numRows());
+            }
             boolean status = sendPointArrayBatch(pointGrid);
             
             if (!status) {
-                return false;
+                CcuLog.d(TAG, "PointWrite failed for batch = " + batchCount);
+                overallPointWriteStatus = false;
             }
         }
-        return true;
+        CcuLog.d(TAG, "PointWrite status = " + overallPointWriteStatus);
+        return overallPointWriteStatus;
     }
     
     private boolean sendPointArrayBatch(HGrid pointGrid) {
@@ -86,8 +96,11 @@ public class PointWriteWorker extends Worker {
                         HZincWriter.gridToString(gridData), CCUHsApi.getInstance().getJwt());
                 if (response.getRespCode() == HttpUtil.HTTP_RESPONSE_OK) {
                     return true;
-                } else if (response.getRespCode() >= HttpUtil.HTTP_RESPONSE_ERR_REQUEST) {
-                    EntitySyncErrorHandler.handle400HttpError(CCUHsApi.getInstance(), response.getErrRespString());
+                } else if (response.getRespCode() == HttpUtil.HTTP_RESPONSE_ERR_REQUEST) {
+                    if(EntitySyncErrorHandler.handle400HttpError(CCUHsApi.getInstance(), response.getErrRespString()).isEmpty()) {
+                        CcuLog.d(TAG, "Since no ids are mentioned in the error response or present in CCU, assuming the batch write was successful.");
+                        return true;
+                    }
                 }
                 return false;
             }

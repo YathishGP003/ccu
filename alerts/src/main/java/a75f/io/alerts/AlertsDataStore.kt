@@ -111,7 +111,7 @@ class AlertsDataStore @JvmOverloads constructor(
 
    fun cancelAppRestarted() {
       alertsSharedPrefs.edit().putBoolean(PREFS_ALERTS_APP_RESTART, false).apply()
-      CCUHsApi.getInstance().writeHisValByQuery("app and restart",0.0)
+      CCUHsApi.getInstance().writeHisValByQuery("domainName == \"appRestart\"", 0.0)
    }
 
    fun isAppRestarted() =
@@ -200,7 +200,14 @@ class AlertsDataStore @JvmOverloads constructor(
          // We do not allow adding alerts if there is already an active alert of the same type (title) and same equip (same test/requirement as on server)
          // CCU Crash alert can be added if there is an existing crash alert.
 
-         if(a.blockId != null && a.blockId == alert.blockId && a.equipId == alert.equipId && alert.mTitle != "CCU CRASH"){
+         if (a.creator == "blockly" && a.alertDefId != null && a.alertDefId == alert.alertDefId && a.equipId == alert.equipId && alert.mTitle != "CCU CRASH") {
+            return
+         }
+
+         if (a.creator == "sequencer" && a.alertDefId != null && a.alertDefId == alert.alertDefId
+            && a.blockId != null && a.blockId == alert.blockId
+            && a.equipId == alert.equipId && alert.mTitle != "CCU CRASH"
+         ) {
             return
          }
 

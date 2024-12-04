@@ -19,9 +19,11 @@ import static a75f.io.logic.bo.building.definitions.Port.RSSI;
 import static a75f.io.logic.bo.building.definitions.Port.SENSOR_CO;
 import static a75f.io.logic.bo.building.definitions.Port.SENSOR_CO2;
 import static a75f.io.logic.bo.building.definitions.Port.SENSOR_CO2_EQUIVALENT;
+import static a75f.io.logic.bo.building.definitions.Port.SENSOR_ENERGY_METER;
 import static a75f.io.logic.bo.building.definitions.Port.SENSOR_ILLUMINANCE;
 import static a75f.io.logic.bo.building.definitions.Port.SENSOR_NO;
 import static a75f.io.logic.bo.building.definitions.Port.SENSOR_OCCUPANCY;
+import static a75f.io.logic.bo.building.definitions.Port.SENSOR_PM10;
 import static a75f.io.logic.bo.building.definitions.Port.SENSOR_PM2P5;
 import static a75f.io.logic.bo.building.definitions.Port.SENSOR_PRESSURE;
 import static a75f.io.logic.bo.building.definitions.Port.SENSOR_RH;
@@ -390,7 +392,6 @@ public class DeviceUtil {
             SystemScheduleUtil.handleManualDesiredTempUpdate(coolDtPoint, heatDtPoint, avgDtPoint, coolVal, heatVal,
                     avgVal, who);
         });
-
     }
 
     public static Port getPortFromDomainName(String domainName) {
@@ -430,6 +431,8 @@ public class DeviceUtil {
             case "noSensor": return SENSOR_NO;
             case "co2EquivalentSensor": return SENSOR_CO2_EQUIVALENT;
             case "pm25Sensor": return SENSOR_PM2P5;
+            case "sensor_pm10": return SENSOR_PM10;
+            case "sensor_energy_meter": return SENSOR_ENERGY_METER;
 
             case "rssi": return RSSI;
             default: return null;

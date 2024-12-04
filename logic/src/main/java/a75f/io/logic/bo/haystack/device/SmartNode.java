@@ -24,6 +24,7 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.firmware.FirmwareVersion;
 import a75f.io.logic.bo.building.heartbeat.HeartBeat;
 import a75f.io.logic.bo.building.plc.PlcProfileConfig;
+import a75f.io.logic.bo.building.sse.SseProfileConfiguration;
 import a75f.io.logic.bo.building.vav.AcbProfileConfiguration;
 import a75f.io.logic.bo.building.vav.VavProfileConfiguration;
 
@@ -440,6 +441,10 @@ public class SmartNode
             return new AcbProfileConfiguration(Integer.parseInt(equip.getGroup()), NodeType.HELIO_NODE.name(), 0, equip.getRoomRef(), equip.getFloorRef(), ProfileType.VAV_ACB, pointsUtil.getModelFromEquip(equip)).getActiveConfiguration();
         } else if (equip.getDomainName().equals(DomainName.smartnodeBypassDamper)) {
             return new BypassDamperProfileConfiguration(Integer.parseInt(equip.getGroup()), NodeType.SMART_NODE.name(), 0, equip.getRoomRef(), equip.getFloorRef(), ProfileType.BYPASS_DAMPER, pointsUtil.getModelFromEquip(equip)).getActiveConfiguration();
+        }else if (equip.getDomainName().equals(DomainName.smartnodeSSE)) {
+            return new SseProfileConfiguration(Integer.parseInt(equip.getGroup()), NodeType.SMART_NODE.name(), 0, equip.getRoomRef(), equip.getFloorRef(), ProfileType.SSE, pointsUtil.getModelFromEquip(equip)).getActiveConfiguration();
+        }else if (equip.getDomainName().equals(DomainName.helionodeSSE)) {
+            return new SseProfileConfiguration(Integer.parseInt(equip.getGroup()), NodeType.HELIO_NODE.name(), 0, equip.getRoomRef(), equip.getFloorRef(), ProfileType.SSE, pointsUtil.getModelFromEquip(equip)).getActiveConfiguration();
         } else if (equip.getDomainName().equals(DomainName.smartnodePID)) {
             return new PlcProfileConfig(Integer.parseInt(equip.getGroup()), NodeType.SMART_NODE.name(), 0, equip.getRoomRef(), equip.getFloorRef(), ProfileType.PLC, pointsUtil.getModelFromEquip(equip)).getActiveConfiguration();
         } else if (equip.getDomainName().equals(DomainName.helionodePID)) {
@@ -660,6 +665,8 @@ public class SmartNode
             case SENSOR_NO: return "noSensor";
             case SENSOR_CO2_EQUIVALENT: return "co2EquivalentSensor";
             case SENSOR_PM2P5: return "pm25Sensor";
+            case SENSOR_PM10: return "sensor_pm10";
+            case SENSOR_ENERGY_METER: return "sensor_energy_meter";
 
             case RSSI: return "rssi";
             default: return null;
@@ -679,6 +686,8 @@ public class SmartNode
             case SENSOR_UVI: return DomainName.zoneUvi;
             case SENSOR_CO2_EQUIVALENT: return DomainName.zoneCo2Equivalent;
             case SENSOR_OCCUPANCY: return DomainName.zoneOccupancy;
+            case SENSOR_ENERGY_METER: return DomainName.sensorEnergyMeter;
+            case SENSOR_PM10: return DomainName.sensorPm10;
 
             default: return null;
         }

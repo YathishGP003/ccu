@@ -19,6 +19,7 @@ import java.util.TimerTask;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.util.TimeUtil;
+import a75f.io.domain.api.Domain;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
@@ -99,9 +100,10 @@ public class AutoCommissioningStateHandler  implements MessageHandler {
             return;
         }
 
-        String ccuID = CCUHsApi.getInstance().readId("ccu and device");
+
+        String ccuID = Domain.ccuDevice.getId();
         String msgCCUid = msgObject.get(CCU_ID).getAsString();
-        autoCommissioningPointId = CCUHsApi.getInstance().readId("point and diag and auto and commissioning");
+        autoCommissioningPointId = AutoCommissioningUtil.getAutoCommissioningPointId();
         if(msgCCUid != null && msgCCUid.equals(ccuID)) {
 
             switch (msgObject.get(STATE).getAsInt()) {

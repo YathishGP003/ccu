@@ -473,9 +473,7 @@ private fun calculatePurseBaseLoop(
     analogFanMultiplier: Double
 ): Double {
     val profile = L.ccu().systemProfile
-    val smartPurgeDabFanLoopOp = TunerUtil.readTunerValByQuery(
-        "system and purge and vav and fan and loop and output", L.ccu().oaoProfile.equipRef
-    )
+    val smartPurgeDabFanLoopOp = L.ccu().oaoProfile.oaoEquip.systemPurgeVavMinFanLoopOutput.readPriorityVal();
     val sPLoopOutput: Double =
         ((profile.staticPressure - spSpMin) * 100 / (spSpMax - spSpMin)).toInt().toDouble()
     return if ((isSystemAtCoolingSide(conditioningMode, controller))) {
@@ -509,9 +507,7 @@ fun isFanLoopUpdateRequired(tempDirection: TempDirection, conditioningMode: Syst
 }
 
 fun checkOaoLoop(systemCoolingLoopOp: Double): Double {
-    val economizingToMainCoolingLoopMap = TunerUtil.readTunerValByQuery(
-        "oao and economizing and main and cooling and loop and map", L.ccu().oaoProfile.equipRef
-    )
+    val economizingToMainCoolingLoopMap = L.ccu().oaoProfile.oaoEquip.economizingToMainCoolingLoopMap.readPriorityVal();
     logIt("OAO profile is available isEconomizingAvailable ? = ${L.ccu().oaoProfile.isEconomizingAvailable}")
     val updatedFanLoop =
         (systemCoolingLoopOp * 100 / economizingToMainCoolingLoopMap).coerceIn(0.0, 100.0)

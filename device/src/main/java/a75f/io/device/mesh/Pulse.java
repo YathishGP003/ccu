@@ -48,6 +48,7 @@ import a75f.io.device.serial.SnRebootIndicationMessage_t;
 import a75f.io.device.serial.WrmOrCmRebootIndicationMessage_t;
 import a75f.io.domain.api.Domain;
 import a75f.io.domain.api.DomainName;
+import a75f.io.domain.devices.CmBoardDevice;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
@@ -94,8 +95,7 @@ public class Pulse
 
 		if(mTimeSinceCMDead > 15){
 			mTimeSinceCMDead = 0;
-			HashMap ccu = CCUHsApi.getInstance().read("ccu");
-			String ccuName = ccu.get("dis").toString();
+			String ccuName = Domain.ccuDevice.getCcuDisName();
 			AlertGenerateHandler.handleMessage(CM_DEAD, ccuName +" has stopped reporting data properly and needs to " +
 					"be serviced. "+CCUUtils.getSupportMsgContent(Globals.getInstance().getApplicationContext()));
 		}
@@ -128,8 +128,7 @@ public class Pulse
 				mLowSignalCount = (int)mDeviceLowSignalCount.get(nodeAddr);
 				if (!(boolean)mDeviceLowSignalAlert.get(nodeAddr) && mLowSignalCount >= 50) {
 					mDeviceLowSignalAlert.put(nodeAddr,true);
-					HashMap ccu = CCUHsApi.getInstance().read("ccu");
-					String ccuName = ccu.get("dis").toString();
+					String ccuName = Domain.ccuDevice.getCcuDisName();
 					AlertGenerateHandler.handleDeviceMessage(DEVICE_LOW_SIGNAL,
 							"For"+" "+ccuName + " ," + deviceInfo.getDisplayName() + " is having an issue and has reported low signal for last 50 updates. If you continue to receive this alert, "+CCUUtils.getSupportMsgContent(Globals.getInstance().getApplicationContext()),
 							deviceInfo.getId());
@@ -175,6 +174,10 @@ public class Pulse
 				double val;
 				Port currentPort = getPhysicalPointPort(phyPoint);
 				CcuLog.i(L.TAG_CCU_DEVICE, "regularSNUpdate: PORT "+currentPort);
+				if (currentPort == null) {
+					CcuLog.d(L.TAG_CCU_DEVICE, "Port not found for "+phyPoint);
+					continue;
+				}
 				switch (currentPort){
 					case RSSI:
 						hayStack.writeHisValueByIdWithoutCOV(phyPoint.get("id").toString(), (double)rssi);
@@ -204,19 +207,15 @@ public class Pulse
 								th2TempVal = CCUUtils.roundToOneDecimal(th2TempVal);
 								hayStack.writeHisValById(logPoint.get("id").toString(), th2TempVal);
 							} else if (isTh2Enabled && isAcb) {
-								double oldCondensateSensor = hayStack.readHisValById(logPoint.get("id").toString());
 								boolean curCondensateStatus = isCondensateNc ? ((val*10) >= 10000) : ((val*10) < 10000);
 								double curCondensateSensor = curCondensateStatus ? 1.0 : 0.0;
-								if (oldCondensateSensor != curCondensateSensor) {
-									hayStack.writeHisValueByIdWithoutCOV(logPoint.get("id").toString(), curCondensateSensor);
-								}
-
+								hayStack.writeHisValById(logPoint.get("id").toString(), curCondensateSensor);
 							} else {
-								double oldEntTempVal = hayStack.readHisValById(logPoint.get("id").toString());
 								double curEntTempVal = ThermistorUtil.getThermistorValueToTemp(val * 10);
 								curEntTempVal = CCUUtils.roundToOneDecimal(curEntTempVal);
-								if ((oldEntTempVal != curEntTempVal) && !isSse)
-									hayStack.writeHisValueByIdWithoutCOV(logPoint.get("id").toString(), curEntTempVal);
+								if (!isSse) {
+									hayStack.writeHisValById(logPoint.get("id").toString(), curEntTempVal);
+								}
 							}
 							hayStack.writeHisValById(phyPoint.get("id").toString(), val/100);
 							CcuLog.d(L.TAG_CCU_DEVICE,
@@ -229,11 +228,11 @@ public class Pulse
 						CcuLog.i(L.TAG_CCU_DEVICE, "regularSNUpdate: "+val);
 						boolean isPressureOnAI1 = hayStack.readDefaultVal("point and domainName == \"" + DomainName.pressureSensorType + "\" and equipRef == \"" + equip.getId() + "\"") > 0.0;
 						double oldDisAnalogVal = hayStack.readHisValById(logPoint.get("id").toString());
-						double curDisAnalogVal = (isBypassDamper && isPressureOnAI1) ? getPressureConversion(equip, val) : getAnalogConversion(phyPoint, logPoint, val);
+						double curDisAnalogVal = (isBypassDamper && isPressureOnAI1) ? getPressureConversion(equip, val) : Math.round(getAnalogConversion(phyPoint, logPoint, val));
 						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
 						CcuLog.i(L.TAG_CCU_DEVICE, " Feedback regularSNUpdate: id "+logPoint.get("id").toString());
+						hayStack.writeHisValById(logPoint.get("id").toString(), curDisAnalogVal);
 						if (oldDisAnalogVal != curDisAnalogVal) {
-							hayStack.writeHisValueByIdWithoutCOV(logPoint.get("id").toString(), curDisAnalogVal);
 							if (currentTempInterface != null) {
 								currentTempInterface.updateSensorValue(nodeAddr);
 							}
@@ -244,19 +243,18 @@ public class Pulse
 						val = smartNodeRegularUpdateMessage_t.update.externalAnalogVoltageInput2.get();
 						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
 						double oldDynamicVar = hayStack.readHisValById(logPoint.get("id").toString());
-						double dynamicVar = getAnalogConversion(phyPoint, logPoint, val);
+						double dynamicVar =  Math.round(getAnalogConversion(phyPoint, logPoint, val));
+						double newDynamicVar = oldDynamicVar;
 						if (oldDynamicVar != dynamicVar) {
+							newDynamicVar = dynamicVar;
 							if (logPointInfo.getMarkers().contains("pid")) {
-								hayStack.writeHisValueByIdWithoutCOV(logPoint.get("id").toString(), dynamicVar + getPiOffsetValue(nodeAddr));
+								newDynamicVar = dynamicVar + getPiOffsetValue(nodeAddr);
 								if (currentTempInterface != null) {
 									currentTempInterface.updateSensorValue(nodeAddr);
 								}
-							} else if (isBypassDamper) {
-								// For Bypass Damper, AI2 maps to Damper Feedback
-								hayStack.writeHisValueByIdWithoutCOV(logPoint.get("id").toString(), getAnalogConversion(phyPoint, logPoint, val));
-							} else
-								hayStack.writeHisValueByIdWithoutCOV(logPoint.get("id").toString(), dynamicVar);
+							}
 						}
+						hayStack.writeHisValById(logPoint.get("id").toString(), newDynamicVar);
 						break;
 					case TH1_IN:
 						if (isMATDamperConfigured(logPoint, nodeAddr, DomainName.damper1Type, hayStack)) {
@@ -269,8 +267,8 @@ public class Pulse
 							double curDisTempVal = ThermistorUtil.getThermistorValueToTemp(val * 10);
 							curDisTempVal = CCUUtils.roundToOneDecimal(curDisTempVal);
 							hayStack.writeHisValById(phyPoint.get("id").toString(), val/100);
+							hayStack.writeHisValById(logPoint.get("id").toString(), curDisTempVal);
 							if (oldDisTempVal != curDisTempVal) {
-								hayStack.writeHisValueByIdWithoutCOV(logPoint.get("id").toString(), curDisTempVal);
 								if (currentTempInterface != null && logPointInfo.getMarkers().contains("pid")) {
 									currentTempInterface.updateSensorValue(nodeAddr);
 								}
@@ -384,6 +382,10 @@ public class Pulse
 			}
 			RawPoint sp = node.getRawPoint(p);
 			if (sp == null) {
+				if (isDomainEquip) {
+					CcuLog.d(L.TAG_CCU_DEVICE, " Sensor point not available in the model, hence not created. port:" + p);
+					continue;
+				}
 				sp = node.addSensor(p);
                 CcuLog.d(L.TAG_CCU_DEVICE, " Sensor Added , type "+t+" port "+p);
 			} else if (sp.getPointRef() == null) {
@@ -396,10 +398,9 @@ public class Pulse
 			CcuLog.d(L.TAG_CCU_DEVICE,"regularSmartNodeUpdate : "+t+" : "+val);
 			switch (t) {
 				case HUMIDITY:
-					double oldHumidityVal = CCUHsApi.getInstance().readHisValById(sp.getId());
 					double curHumidityVal = getHumidityConversion(val);
 					CCUHsApi.getInstance().writeHisValById(sp.getId(), val );
-					if(oldHumidityVal != curHumidityVal && sp.getPointRef() != null)
+					if(sp.getPointRef() != null)
 						CCUHsApi.getInstance().writeHisValById(sp.getPointRef(), curHumidityVal);
 					break;
 				case PRESSURE:
@@ -689,7 +690,7 @@ public class Pulse
 			ControlMoteMessageHandlerKt.handleAdvancedAhuCmUpdate(cmRegularUpdateMessage_t);
 			//handleAdvancedAhuCmUpdate(hayStack, cmRegularUpdateMessage_t); //TODO- TEMP to be cleaned up
 		}
-		String addr = String.valueOf(L.ccu().getSmartNodeAddressBand());
+		String addr = String.valueOf(L.ccu().getAddressBand());
 		addr = addr.substring(0, addr.length()-2).concat("99");
 		HashMap device = hayStack.read("device and addr == \""+Short.parseShort(addr)+"\"");
 		double curTempVal = 0.0;
@@ -969,11 +970,16 @@ public class Pulse
 	}
 
 	private static void updateCMPhysicalPoints(CmToCcuOverUsbCmRegularUpdateMessage_t cmRegularUpdateMessage_t) {
-		
+
 		CCUHsApi hayStack = CCUHsApi.getInstance();
 		HashMap device = hayStack.read("device and cm");
 		if (!device.isEmpty()) {
 			String deviceId = device.get("id").toString();
+			if (device.containsKey("domainName")) {
+				updateDomainCmUpdates(deviceId, cmRegularUpdateMessage_t);
+				return;
+			}
+
 			HashMap analog1In = hayStack.read("point and analog1 and in and deviceRef == \""+deviceId+"\"");
 			if (!analog1In.isEmpty()) {
 				hayStack.writeHisValById(analog1In.get("id").toString(),
@@ -1000,6 +1006,13 @@ public class Pulse
 		}
 	}
 
+	public static void updateDomainCmUpdates(String deviceId, CmToCcuOverUsbCmRegularUpdateMessage_t cmRegularUpdateMessage_t) {
+		CmBoardDevice cmBoardDevice = new CmBoardDevice(deviceId);
+		cmBoardDevice.getAnalog1In().writeHisVal(cmRegularUpdateMessage_t.analogSense1.get());
+		cmBoardDevice.getAnalog2In().writeHisVal(cmRegularUpdateMessage_t.analogSense2.get());
+		cmBoardDevice.getTh1In().writeHisVal(cmRegularUpdateMessage_t.thermistor1.get());
+		cmBoardDevice.getTh2In().writeHisVal(cmRegularUpdateMessage_t.thermistor2.get());
+	}
 
 	public static void regularSmartStatUpdate(CmToCcuOverUsbSmartStatRegularUpdateMessage_t smartStatRegularUpdateMessage_t)
 	{
@@ -1027,8 +1040,7 @@ public class Pulse
 				mLowSignalCount = (int)mDeviceLowSignalCount.get(nodeAddr);
 				if (!(boolean)mDeviceLowSignalAlert.get(nodeAddr) && mLowSignalCount >= 50){
 					mDeviceLowSignalAlert.put(nodeAddr,true);
-					HashMap ccu = CCUHsApi.getInstance().read("ccu");
-					String ccuName = ccu.get("dis").toString();
+					String ccuName = Domain.ccuDevice.getCcuDisName();
 					AlertGenerateHandler.handleDeviceMessage(DEVICE_LOW_SIGNAL,
 							"For"+" "+ccuName + " ," + deviceInfo.getDisplayName() + " is having an issue and has " +
 									"reported low signal for last 50 updates. If you continue to receive this alert, "+CCUUtils.getSupportMsgContent(Globals.getInstance().getApplicationContext()), deviceInfo.getId());
@@ -1151,7 +1163,7 @@ public class Pulse
 	public static void rebootMessageFromCM(WrmOrCmRebootIndicationMessage_t wrmOrCMReootMsgs){
 		CcuLog.d(L.TAG_CCU_DEVICE,"Reboot Messages from CM for = "+wrmOrCMReootMsgs.wrmAddress+","+wrmOrCMReootMsgs.rebootCause);
 		short address = (short)wrmOrCMReootMsgs.wrmAddress.get();
-		if(address == 0x00 || (address == 0x01) || (address == L.ccu().getSmartNodeAddressBand()+99)){
+		if(address == 0x00 || (address == 0x01) || (address == L.ccu().getAddressBand()+99)){
 			LSerial.getInstance().setResetSeedMessage(true);
 
 			String firmwareVersion = wrmOrCMReootMsgs.majorFirmwareVersion+"."+wrmOrCMReootMsgs.minorFirmwareVersion;
@@ -1575,8 +1587,7 @@ public class Pulse
 			 double zoneDeadTime = TunerUtil.readTunerValByQuery("zone and dead and time",d.getEquipRef());
 			 zoneDeadTime = zoneDeadTime > 0 ? zoneDeadTime : 15;
              if ((currentTime - lastUpdateTime) > ( zoneDeadTime *60 * 1000)){
-				 HashMap ccu = CCUHsApi.getInstance().read("ccu");
-				 String ccuName = ccu.get("dis").toString();
+				 String ccuName = Domain.ccuDevice.getCcuDisName();
 				 AlertGenerateHandler.handleDeviceMessage(DEVICE_DEAD, "For"+" "+ccuName + "," +d.getDisplayName() +" has " +
 						 "stopped reporting data. "+CCUUtils.getSupportMsgContent(Globals.getInstance().getApplicationContext()), d.getId());
 				 mDeviceUpdate.remove(address);

@@ -146,8 +146,9 @@ public class LSmartNode
                 || equip.getProfile().equals(ProfileType.VAV_REHEAT.name());
 
         boolean isDab = equip.getProfile().equals(ProfileType.DAB.name());
-
-        if (isVav || isDab) {
+        boolean isOtn = equip.getProfile().equals(ProfileType.OTN.name());
+        boolean isSse = equip.getProfile().equals(ProfileType.SSE.name());
+        if (isVav || isDab || isOtn || isSse) {
             settings.temperatureOffset.set((short)(10*getTempOffset(address)));
         } else {
             settings.temperatureOffset.set((short)(getTempOffset(address)));

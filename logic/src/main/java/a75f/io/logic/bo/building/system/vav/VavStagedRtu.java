@@ -56,6 +56,7 @@ import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.logic.tuners.VavTRTuners;
+import a75f.io.logic.util.SystemProfileUtil;
 
 /**
  * Created by samjithsadasivan on 8/14/18.
@@ -76,8 +77,11 @@ public class VavStagedRtu extends VavSystemProfile
     SystemController.State currentConditioning = OFF;
     
     int[] stageStatus = new int[17];
-    
+
     public VavStagedSystemEquip systemEquip;
+
+    private int lastSystemSATRequests = 0;
+
     public void initTRSystem() {
         trSystem =  new VavTRSystem();
     }
@@ -119,6 +123,9 @@ public class VavStagedRtu extends VavSystemProfile
         VavSystemController.getInstance().runVavSystemControlAlgo();
         updateSystemPoints();
         setTrTargetVals();
+        if (trSystem != null) {
+            trSystem.resetRequests();
+        }
     }
     
     @Override
@@ -177,7 +184,46 @@ public class VavStagedRtu extends VavSystemProfile
             double satSpMin = systemEquip.getSatSPMin().readPriorityVal();
     
             CcuLog.d(L.TAG_CCU_SYSTEM,"satSpMax :"+satSpMax+" satSpMin: "+satSpMin+" SAT: "+getSystemSAT());
-            systemCoolingLoopOp = (int) ((satSpMax - getSystemSAT())  * 100 / (satSpMax - satSpMin)) ;
+
+            /*
+                During Unoccupied Mode, AHU should only run if a sufficient # of zones are generating SAT requests. Once enabled,
+                AHU should run until all zones are satisfied.
+
+                This logic sets setupModeActive=true when systemSATRequests exceeds systemSATIgnores. It remains true until
+                systemSATRequests has dropped to zero or the system returns to Occupied.
+
+                In Unoccupied Mode, coolingLoopOutput is now set to 0 unless setupModeActive=true. This will prevent the AHU from
+                waiting to trim all loops down to minimum before shutting off after the schedule goes Unoccupied.
+             */
+            if (!isSystemOccupied()) {
+                int systemSATRequests = getSystemSATRequests();
+
+                double systemSATIgnores = TunerUtil.readTunerValByQuery("sat and ignoreRequest", getSystemEquipRef());
+
+                if ((!setupModeActive) && (systemSATRequests > systemSATIgnores)) {
+                    CcuLog.i(L.TAG_CCU_SYSTEM, "# of zone SAT Requests (" + systemSATRequests + ") is above threshold of " + systemSATIgnores + "; system entering setup mode for unoccupied conditioning");
+                    setupModeActive = true;
+                }
+
+                if (setupModeActive) {
+                    systemCoolingLoopOp = (int) ((satSpMax - getSystemSAT())  * 100 / (satSpMax - satSpMin)) ;
+
+                    // Once systemSATRequests has dropped to zero, exit setup mode
+                    if (systemSATRequests == 0 && lastSystemSATRequests == 0) {
+                        CcuLog.i(L.TAG_CCU_SYSTEM, "No more zone SAT requests; system exiting unoccupied Setup Mode");
+                        setupModeActive = false;
+                    }
+
+                } else {
+                    systemCoolingLoopOp = 0;
+                }
+
+                lastSystemSATRequests = systemSATRequests;
+
+            } else {
+                setupModeActive = false;
+                systemCoolingLoopOp = (int) ((satSpMax - getSystemSAT())  * 100 / (satSpMax - satSpMin)) ;
+            }
         } else {
             systemCoolingLoopOp = 0;
         }
@@ -197,7 +243,7 @@ public class VavStagedRtu extends VavSystemProfile
             systemFanLoopOp = getSingleZoneFanLoopOp(analogFanSpeedMultiplier);
         } else if((epidemicState == EpidemicState.PREPURGE || epidemicState == EpidemicState.POSTPURGE ) && (L.ccu().oaoProfile != null)) {
             //TODO- Part OAO. Will be replaced with domanName later.
-            double smartPurgeDabFanLoopOp = TunerUtil.readTunerValByQuery("system and purge and vav and fan and loop and output", L.ccu().oaoProfile.getEquipRef());
+            double smartPurgeDabFanLoopOp = L.ccu().oaoProfile.getOAOEquip().getSystemPurgeVavMinFanLoopOutput().readPriorityVal();
             double spSpMax = systemEquip.getStaticPressureSPMax().readPriorityVal();
             double spSpMin = systemEquip.getStaticPressureSPMin().readPriorityVal();
 
@@ -223,7 +269,13 @@ public class VavStagedRtu extends VavSystemProfile
             double spSpMin = systemEquip.getStaticPressureSPMin().readPriorityVal();
     
             CcuLog.d(L.TAG_CCU_SYSTEM,"spSpMax :"+spSpMax+" spSpMin: "+spSpMin+" SP: "+getStaticPressure());
-            systemFanLoopOp = (int) ((getStaticPressure() - spSpMin) * 100 / (spSpMax -spSpMin)) ;
+
+            // If schedule is Unoccupied, fan should only run if there is conditioning. In this case, that translates to CoolingLoopOp > 0.
+            if (isSystemOccupied() || systemCoolingLoopOp > 0) {
+                systemFanLoopOp = (int) ((getStaticPressure() - spSpMin) * 100 / (spSpMax - spSpMin));
+            } else {
+                systemFanLoopOp = 0;
+            }
             
         } else if (VavSystemController.getInstance().getSystemState() == HEATING) {
             systemFanLoopOp = (int) (VavSystemController.getInstance().getHeatingSignal() * analogFanSpeedMultiplier);
@@ -268,7 +320,7 @@ public class VavStagedRtu extends VavSystemProfile
         if (!systemEquip.getEquipScheduleStatus().readDefaultStrVal().equals(scheduleStatus)) {
             systemEquip.getEquipScheduleStatus().writeDefaultVal(scheduleStatus);
         }
-    
+
     }
 
     /**
@@ -599,6 +651,13 @@ public class VavStagedRtu extends VavSystemProfile
             VavStagedVfdSystemEquip vfdSystemEquip = (VavStagedVfdSystemEquip) Domain.systemEquip;
             status.append(vfdSystemEquip.getFanSignal().readHisVal() > 0 ? " Analog Fan ON " : "");
         }
+
+        if (L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_HYBRID_RTU) {
+            return status.toString().isEmpty() ? "System OFF" + SystemProfileUtil.isDeHumidifierOn()
+                    + SystemProfileUtil.isHumidifierOn() : status + SystemProfileUtil.isDeHumidifierOn()
+                    + (SystemProfileUtil.isHumidifierOn());
+        }
+
         String humidifierStatus = getRelayMappingForStage(HUMIDIFIER).isEmpty() ? "" :
                                         systemEquip.getHumidifierEnable().readHisVal() > 0 ? " | Humidifier ON " : " | Humidifier OFF ";
         String dehumidifierStatus = getRelayMappingForStage(DEHUMIDIFIER).isEmpty() ? "" :

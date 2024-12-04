@@ -57,12 +57,13 @@ public class SpecialScheduleCalendarFragment extends DialogFragment{
         calendarView.setOnDateChangedListener((widget, date, selected) -> {
             if(selected) {
                 LocalDate localDate = LocalDate.of(date.getYear(), date.getMonth(), date.getDay());
-                calendarView.state().edit().setMinimumDate(localDate).commit();
                 if(localDate.plusDays(SPECIAL_SCHEDULE_DAYS_LIMIT - 1L).isAfter(LocalDate.now().plusDays(DAYS_IN_YEAR- 1L))){
                     calendarView.state().edit().setMaximumDate(LocalDate.now().plusDays(DAYS_IN_YEAR- 1L)).commit();
+                    calendarView.setCurrentDate(date, true);
                 }
                 else {
                     calendarView.state().edit().setMaximumDate(localDate.plusDays(SPECIAL_SCHEDULE_DAYS_LIMIT - 1L)).commit();
+                    calendarView.setCurrentDate(date, true);
                 }
             }else {
                 calendarView.state().edit().setMinimumDate(CalendarDay.today()).commit();
@@ -103,8 +104,7 @@ public class SpecialScheduleCalendarFragment extends DialogFragment{
             return;
         }
 
-        calendarView.state().edit().setMinimumDate(CalendarDay.from(startDate.getYear(),
-                    startDate.getMonthOfYear(), startDate.getDayOfMonth())).commit();
+
         CalendarDay startDay = CalendarDay.from(startDate.getYear(), startDate.getMonthOfYear(), startDate.getDayOfMonth());
         CalendarDay endDay = CalendarDay.from(endDate.getYear(), endDate.getMonthOfYear(), endDate.getDayOfMonth());
         calendarView.selectRange(startDay, endDay);

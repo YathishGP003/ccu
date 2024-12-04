@@ -102,10 +102,10 @@ public class DabStagedRtuWithVfd extends DabStagedRtu
                 signal = vfdSystemEquip.getAnalog2Default().readDefaultVal();
             }
             if((epidemicState == EpidemicState.PREPURGE) && L.ccu().oaoProfile != null){
-                double smartPrePurgeFanSpeed = TunerUtil.readTunerValByQuery("system and prePurge and fan and speed", L.ccu().oaoProfile.getEquipRef());
+                double smartPrePurgeFanSpeed = L.ccu().oaoProfile.getOAOEquip().getSystemPrePurgeFanSpeedTuner().readPriorityVal();
                 signal = Math.max(signal,smartPrePurgeFanSpeed / ANALOG_SCALE);
             }else if((epidemicState == EpidemicState.POSTPURGE) && L.ccu().oaoProfile != null){
-                double smartPurgeFanLoopOp = TunerUtil.readTunerValByQuery("system and postPurge and fan and speed", L.ccu().oaoProfile.getEquipRef());
+                double smartPurgeFanLoopOp = L.ccu().oaoProfile.getOAOEquip().getSystemPostPurgeFanSpeedTuner().readPriorityVal();
                 signal = Math.max(signal,smartPurgeFanLoopOp / ANALOG_SCALE);
             }
     

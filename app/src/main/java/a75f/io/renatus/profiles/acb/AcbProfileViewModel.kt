@@ -17,11 +17,17 @@ import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.vav.AcbProfileConfiguration
 import a75f.io.logic.bo.building.vav.VavAcbProfile
+import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.logic.getSchedule
+import a75f.io.messaging.handler.ACBConfigHandler
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.FloorPlanFragment
 import a75f.io.renatus.modbus.util.showToast
+import a75f.io.renatus.profiles.OnPairingCompleteListener
+import a75f.io.renatus.profiles.profileUtils.UnusedPortsModel
+import a75f.io.renatus.profiles.profileUtils.UnusedPortsModel.Companion.saveUnUsedPortStatus
 import a75f.io.renatus.util.ProgressDialogUtils
+import a75f.io.renatus.util.highPriorityDispatcher
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -35,14 +41,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.properties.Delegates
-import a75f.io.renatus.profiles.OnPairingCompleteListener
-import a75f.io.renatus.profiles.profileUtils.UnusedPortsModel
-import a75f.io.renatus.profiles.profileUtils.UnusedPortsModel.Companion.saveUnUsedPortStatus
-import a75f.io.messaging.handler.ACBConfigHandler
-import a75f.io.api.haystack.HSUtil
-import a75f.io.api.haystack.Tags
-import a75f.io.domain.equips.VavEquip
-import a75f.io.renatus.util.highPriorityDispatcher
 
 
 class AcbProfileViewModel : ViewModel() {
@@ -180,6 +178,7 @@ class AcbProfileViewModel : ViewModel() {
                 CcuLog.i(Domain.LOG_TAG, "Send seed for $deviceAddress")
                 LSerial.getInstance()
                     .sendSeedMessage(false, false, deviceAddress, zoneRef, floorRef)
+                DesiredTempDisplayMode.setModeType(zoneRef, CCUHsApi.getInstance())
                 CcuLog.i(Domain.LOG_TAG, "AcbProfile Pairing complete")
 
                 // This check is needed because the dialog sometimes fails to close inside the coroutine.
@@ -309,30 +308,19 @@ class AcbProfileViewModel : ViewModel() {
     }
 
     private fun setScheduleType(config: AcbProfileConfiguration) {
-        val scheduleTypePoint = hayStack.readEntity("point and domainName == \"" + DomainName.scheduleType + "\" and group == \"" + config.nodeAddress + "\"")
-        val scheduleTypeId = scheduleTypePoint.get("id").toString()
-
-        val roomSchedule = getSchedule(zoneRef, floorRef)
-        if(roomSchedule.isZoneSchedule) {
-            hayStack.writeDefaultValById(scheduleTypeId, 1.0)
-        } else {
-            hayStack.writeDefaultValById(scheduleTypeId, 2.0)
+        hayStack.readEntity("point and domainName == \"" + DomainName.scheduleType + "\" and group == \"" + config.nodeAddress + "\"")["id"]?.let { scheduleTypeId ->
+            val roomSchedule = getSchedule(zoneRef, floorRef)
+            if(roomSchedule.isZoneSchedule) {
+                hayStack.writeDefaultValById(scheduleTypeId.toString(), 1.0)
+            } else {
+                hayStack.writeDefaultValById(scheduleTypeId.toString(), 2.0)
+            }
         }
     }
 
     private fun overrideForBypassDamper(config: AcbProfileConfiguration) {
         val equip = hayStack.read("equip and group == \"" + config.nodeAddress + "\"")
         val acbEquip = VavAcbEquip(equip.get("id").toString())
-
-        if (!(acbEquip.enableCFMControl.readDefaultVal() > 0.0)) {
-            acbEquip.minCoolingDamperPos.writeVal(7, hayStack.ccuUserName, acbEquip.minCoolingDamperPos.readDefaultVal(), 0)
-            acbEquip.minCoolingDamperPos.writeDefaultVal(20.0)
-            acbEquip.minCoolingDamperPos.writeHisVal(10.0)
-
-            acbEquip.minHeatingDamperPos.writeVal(7, hayStack.ccuUserName, acbEquip.minHeatingDamperPos.readDefaultVal(), 0)
-            acbEquip.minHeatingDamperPos.writeDefaultVal(20.0)
-            acbEquip.minHeatingDamperPos.writeHisVal(10.0)
-        }
 
         // Right now, framework is not copying from System Tuner correctly. Duct-tape fix for this case.
         acbEquip.vavProportionalKFactor.writeVal(14, hayStack.ccuUserName, 0.7, 0)

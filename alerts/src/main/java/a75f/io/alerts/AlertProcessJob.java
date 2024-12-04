@@ -39,7 +39,7 @@ public class AlertProcessJob
         CcuLog.d(TAG_CCU_ALERTS, "AlertProcessJob -> ");
 
 
-        double isSafeMode = CCUHsApi.getInstance().readHisValByQuery("point and safe and mode and diag and his");
+        double isSafeMode = CCUHsApi.getInstance().readHisValByQuery("domainName == \"safeModeStatus\"");
         boolean isSafeModeAlertActive = false;
 
         if(isSafeMode == 1){

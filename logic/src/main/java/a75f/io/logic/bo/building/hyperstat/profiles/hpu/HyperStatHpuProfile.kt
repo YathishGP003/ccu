@@ -19,12 +19,11 @@ import a75f.io.logic.bo.building.hyperstat.common.BasicSettings
 import a75f.io.logic.bo.building.hyperstat.common.FanModeCacheStorage
 import a75f.io.logic.bo.building.hyperstat.common.HSHaystackUtil
 import a75f.io.logic.bo.building.hyperstat.common.HyperStatAssociationUtil
-import a75f.io.logic.bo.building.hyperstat.common.HyperStatEquip
+import a75f.io.logic.bo.building.hyperstat.common.HyperStatEquipToBeDeleted
 import a75f.io.logic.bo.building.hyperstat.common.HyperStatProfileTuners
-import a75f.io.logic.bo.building.hyperstat.common.HyperstatLoopController
+import a75f.io.logic.bo.building.hyperstat.common.HyperStatLoopController
 import a75f.io.logic.bo.building.hyperstat.common.UserIntents
 import a75f.io.logic.bo.building.hyperstat.profiles.HyperStatPackageUnitProfile
-import a75f.io.logic.bo.building.hyperstat.profiles.cpu.HyperStatCpuConfiguration
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.Th2InAssociation
 import a75f.io.logic.bo.building.hyperstat.profiles.pipe2.Pipe2RelayAssociation
 import a75f.io.logic.bo.building.schedules.Occupancy
@@ -38,7 +37,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore
  */
 
 class HyperStatHpuProfile : HyperStatPackageUnitProfile(){
-    private val hpuDeviceMap: MutableMap<Short, HyperStatHpuEquip> = mutableMapOf()
+    private val hpuDeviceMap: MutableMap<Short, HyperStatHpuEquipToBeDeleted> = mutableMapOf()
     private var coolingLoopOutput = 0
     private var heatingLoopOutput = 0
     private var fanLoopOutput = 0
@@ -47,7 +46,7 @@ class HyperStatHpuProfile : HyperStatPackageUnitProfile(){
     private var compressorLoopOutput = 0
     override lateinit var occupancyStatus: Occupancy
     private var occupancyBeforeDoorWindow = Occupancy.UNOCCUPIED
-    private val hyperStatHpuAlgorithm = HyperstatLoopController()
+    private val hyperStatHpuAlgorithm = HyperStatLoopController()
     private lateinit var curState: ZoneState
 
     private var analogOutputPoints: HashMap<Int, String> = HashMap()
@@ -61,7 +60,7 @@ class HyperStatHpuProfile : HyperStatPackageUnitProfile(){
     }
 
     // Run the profile logic and algorithm for an equip.
-    private fun processHyperStatHpuProfile(equip: HyperStatHpuEquip) {
+    fun processHyperStatHpuProfile(equip: HyperStatHpuEquipToBeDeleted) {
 
         if (Globals.getInstance().isTestMode) {
             CcuLog.i(L.TAG_CCU_HSHPU, "Test mode is on: ${equip.nodeAddress}")
@@ -141,7 +140,7 @@ class HyperStatHpuProfile : HyperStatPackageUnitProfile(){
                 runFanOperationBasedOnAuxStages(relayStages,analogOutStages,config)
             }
         }else{
-            resetAllLogicalPointValues()
+            resetLogicalPoints()
         }
         
         setOperatingMode(currentTemp, averageDesiredTemp, basicSettings, equip)
@@ -300,16 +299,16 @@ class HyperStatHpuProfile : HyperStatPackageUnitProfile(){
                             basicSettings.conditioningMode == StandaloneConditioningMode.HEAT_ONLY)) {
                     
                     if (currentTemp < (userIntents.zoneHeatingTargetTemperature - tuner.auxHeating1Activate)) {
-                        updateLogicalPointIdValue(logicalPointsList[port]!!, 1.0)
+                        updateLogicalPoint(logicalPointsList[port]!!, 1.0)
                         relayStages[ Pipe2RelayAssociation.AUX_HEATING_STAGE1.name] = 1
                     } else if (currentTemp >= (userIntents.zoneHeatingTargetTemperature - (tuner.auxHeating1Activate - 1))) {
-                        updateLogicalPointIdValue(logicalPointsList[port]!!, 0.0)
+                        updateLogicalPoint(logicalPointsList[port]!!, 0.0)
                         relayStages.remove(Pipe2RelayAssociation.AUX_HEATING_STAGE1.name)
                     } else if(hayStack.readHisValById(logicalPointsList[port]!!) == 1.0) {
                         relayStages[ Pipe2RelayAssociation.AUX_HEATING_STAGE1.name] = 1
                     }
                 }else{
-                    updateLogicalPointIdValue(logicalPointsList[port]!!, 0.0)
+                    updateLogicalPoint(logicalPointsList[port]!!, 0.0)
                     relayStages.remove(Pipe2RelayAssociation.AUX_HEATING_STAGE1.name)
                 }
             }
@@ -319,16 +318,16 @@ class HyperStatHpuProfile : HyperStatPackageUnitProfile(){
                     || basicSettings.conditioningMode == StandaloneConditioningMode.HEAT_ONLY)) {
 
                     if (currentTemp < (userIntents.zoneHeatingTargetTemperature - tuner.auxHeating2Activate)) {
-                        updateLogicalPointIdValue(logicalPointsList[port]!!, 1.0)
+                        updateLogicalPoint(logicalPointsList[port]!!, 1.0)
                         relayStages[Pipe2RelayAssociation.AUX_HEATING_STAGE2.name] = 1
                     } else if (currentTemp >= (userIntents.zoneHeatingTargetTemperature - (tuner.auxHeating2Activate - 1))) {
-                        updateLogicalPointIdValue(logicalPointsList[port]!!, 0.0)
+                        updateLogicalPoint(logicalPointsList[port]!!, 0.0)
                         relayStages.remove(Pipe2RelayAssociation.AUX_HEATING_STAGE2.name)
                     } else if(hayStack.readHisValById(logicalPointsList[port]!!) == 1.0) {
                         relayStages[ Pipe2RelayAssociation.AUX_HEATING_STAGE2.name] = 1
                     }
                 }else{
-                    updateLogicalPointIdValue(logicalPointsList[port]!!, 0.0)
+                    updateLogicalPoint(logicalPointsList[port]!!, 0.0)
                     relayStages.remove(Pipe2RelayAssociation.AUX_HEATING_STAGE2.name)
                 }
             }
@@ -339,7 +338,7 @@ class HyperStatHpuProfile : HyperStatPackageUnitProfile(){
                 if(basicSettings.conditioningMode == StandaloneConditioningMode.AUTO
                     || basicSettings.conditioningMode == StandaloneConditioningMode.COOL_ONLY) {
                     val status = if (coolingLoopOutput > 0) 1.0 else 0.0
-                    updateLogicalPointIdValue(
+                    updateLogicalPoint(
                         logicalPointsList[port]!!,
                         status
                     )
@@ -350,7 +349,7 @@ class HyperStatHpuProfile : HyperStatPackageUnitProfile(){
                 if( basicSettings.conditioningMode == StandaloneConditioningMode.AUTO
                     || basicSettings.conditioningMode == StandaloneConditioningMode.HEAT_ONLY) {
                     val status = if (heatingLoopOutput > 0) 1.0 else 0.0
-                    updateLogicalPointIdValue(
+                    updateLogicalPoint(
                         logicalPointsList[port]!!,
                         status
                     )
@@ -456,37 +455,37 @@ class HyperStatHpuProfile : HyperStatPackageUnitProfile(){
             resetAux(relayStages)
         }else{
             if(stage == HpuRelayAssociation.FAN_LOW_SPEED){
-                updateLogicalPointIdValue(relayOutputPoints[HpuRelayAssociation.FAN_LOW_SPEED.ordinal]!!, 1.0)
+                updateLogicalPoint(relayOutputPoints[HpuRelayAssociation.FAN_LOW_SPEED.ordinal]!!, 1.0)
                 relayStages[fanStatusMessage!!.displayName] = 1
                 return
             }
             if(stage == HpuRelayAssociation.FAN_MEDIUM_SPEED){
-                updateLogicalPointIdValue(relayOutputPoints[HpuRelayAssociation.FAN_MEDIUM_SPEED.ordinal]!!, 1.0)
+                updateLogicalPoint(relayOutputPoints[HpuRelayAssociation.FAN_MEDIUM_SPEED.ordinal]!!, 1.0)
                 relayStages[fanStatusMessage!!.displayName] = 1
 
                 if(relayOutputPoints.containsKey(HpuRelayAssociation.FAN_LOW_SPEED.ordinal)) {
-                    updateLogicalPointIdValue(relayOutputPoints[HpuRelayAssociation.FAN_LOW_SPEED.ordinal]!!, 1.0)
+                    updateLogicalPoint(relayOutputPoints[HpuRelayAssociation.FAN_LOW_SPEED.ordinal]!!, 1.0)
                     relayStages[Stage.FAN_2.displayName] = 1
                 }
                 if(relayOutputPoints.containsKey(HpuRelayAssociation.FAN_HIGH_SPEED.ordinal)
                     && (!relayOutputPoints.containsKey(HpuRelayAssociation.AUX_HEATING_STAGE2.ordinal)
                             || getCurrentLogicalPointStatus(relayOutputPoints[HpuRelayAssociation.AUX_HEATING_STAGE2.ordinal]!!) == 0.0)
                 ) {
-                    updateLogicalPointIdValue(relayOutputPoints[HpuRelayAssociation.FAN_HIGH_SPEED.ordinal]!!, 0.0)
+                    updateLogicalPoint(relayOutputPoints[HpuRelayAssociation.FAN_HIGH_SPEED.ordinal]!!, 0.0)
                     relayStages.remove(Stage.FAN_3.displayName)
                 }
             }
             if(stage == HpuRelayAssociation.FAN_HIGH_SPEED){
-                updateLogicalPointIdValue(relayOutputPoints[HpuRelayAssociation.FAN_HIGH_SPEED.ordinal]!!, 1.0)
+                updateLogicalPoint(relayOutputPoints[HpuRelayAssociation.FAN_HIGH_SPEED.ordinal]!!, 1.0)
                 relayStages[fanStatusMessage!!.displayName] = 1
 
                 if(relayOutputPoints.containsKey(HpuRelayAssociation.FAN_MEDIUM_SPEED.ordinal)) {
-                    updateLogicalPointIdValue(relayOutputPoints[HpuRelayAssociation.FAN_MEDIUM_SPEED.ordinal]!!, 1.0)
+                    updateLogicalPoint(relayOutputPoints[HpuRelayAssociation.FAN_MEDIUM_SPEED.ordinal]!!, 1.0)
                     relayStages[Stage.FAN_2.displayName] = 1
                 }
 
                 if(relayOutputPoints.containsKey(HpuRelayAssociation.FAN_LOW_SPEED.ordinal)) {
-                    updateLogicalPointIdValue(relayOutputPoints[HpuRelayAssociation.FAN_LOW_SPEED.ordinal]!!, 1.0)
+                    updateLogicalPoint(relayOutputPoints[HpuRelayAssociation.FAN_LOW_SPEED.ordinal]!!, 1.0)
                     relayStages[Stage.FAN_1.displayName] = 1
                 }
             }
@@ -518,17 +517,17 @@ class HyperStatHpuProfile : HyperStatPackageUnitProfile(){
             var doWeHaveAnalog = false
             if (config.analogOut1State.enabled
                 && HyperStatAssociationUtil.isHpuAnalogOutMappedToFanSpeed(config.analogOut1State)) {
-                updateLogicalPointIdValue(analogOutputPoints[HpuAnalogOutAssociation.FAN_SPEED.ordinal]!!, fanSpeed)
+                updateLogicalPoint(analogOutputPoints[HpuAnalogOutAssociation.FAN_SPEED.ordinal]!!, fanSpeed)
                 doWeHaveAnalog = true
             }
             if (config.analogOut2State.enabled
                 && HyperStatAssociationUtil.isHpuAnalogOutMappedToFanSpeed(config.analogOut2State)) {
-                updateLogicalPointIdValue(analogOutputPoints[HpuAnalogOutAssociation.FAN_SPEED.ordinal]!!, fanSpeed)
+                updateLogicalPoint(analogOutputPoints[HpuAnalogOutAssociation.FAN_SPEED.ordinal]!!, fanSpeed)
                 doWeHaveAnalog = true
             }
             if (config.analogOut3State.enabled
                 && HyperStatAssociationUtil.isHpuAnalogOutMappedToFanSpeed(config.analogOut3State)) {
-                updateLogicalPointIdValue(analogOutputPoints[HpuAnalogOutAssociation.FAN_SPEED.ordinal]!!, fanSpeed)
+                updateLogicalPoint(analogOutputPoints[HpuAnalogOutAssociation.FAN_SPEED.ordinal]!!, fanSpeed)
                 doWeHaveAnalog = true
             }
 
@@ -587,7 +586,7 @@ class HyperStatHpuProfile : HyperStatPackageUnitProfile(){
     ) {
         if (basicSettings.fanMode == StandaloneFanStage.AUTO
             && basicSettings.conditioningMode == StandaloneConditioningMode.OFF ) {
-            CcuLog.i( L.TAG_CCU_HSHPU,"Cond is Off , Fan is Auto  : ")
+            CcuLog.i( L.TAG_CCU_HSHPU,"Cond is Off , Fan is Auto   ")
             resetPort(whichPort)
             return
         }
@@ -644,10 +643,10 @@ class HyperStatHpuProfile : HyperStatPackageUnitProfile(){
     }
 
     private fun runAnalogOutOperations(
-        equip: HyperStatHpuEquip,
-        config: HyperStatHpuConfiguration,
-        basicSettings: BasicSettings,
-        analogOutStages: HashMap<String, Int>
+            equip: HyperStatHpuEquipToBeDeleted,
+            config: HyperStatHpuConfiguration,
+            basicSettings: BasicSettings,
+            analogOutStages: HashMap<String, Int>
     ) {
 
         if (config.analogOut1State.enabled) {
@@ -674,12 +673,12 @@ class HyperStatHpuProfile : HyperStatPackageUnitProfile(){
         return ZoneState.TEMPDEAD
     }
     private fun handleAnalogOutState(
-        analogOutState: HpuAnalogOutState,
-        equip: HyperStatHpuEquip,
-        config: HyperStatHpuConfiguration,
-        port: Port,
-        basicSettings: BasicSettings,
-        analogOutStages: HashMap<String, Int>
+            analogOutState: HpuAnalogOutState,
+            equip: HyperStatHpuEquipToBeDeleted,
+            config: HyperStatHpuConfiguration,
+            port: Port,
+            basicSettings: BasicSettings,
+            analogOutStages: HashMap<String, Int>
     ) {
         // If we are in Auto Away mode we no need to Any analog Operations
         when {
@@ -727,7 +726,7 @@ class HyperStatHpuProfile : HyperStatPackageUnitProfile(){
      * @param equip HyperStatCpuEquip
      * @return true if the door or window is open and the occupancy status is not UNOCCUPIED, otherwise false.
      */
-    private fun checkFanOperationAllowedDoorWindow(equip: HyperStatHpuEquip): Boolean {
+    private fun checkFanOperationAllowedDoorWindow(equip: HyperStatHpuEquipToBeDeleted): Boolean {
         return if(currentTemp < fetchUserIntents(equip).zoneCoolingTargetTemperature && currentTemp > fetchUserIntents(equip).zoneHeatingTargetTemperature) {
             doorWindowSensorOpenStatus &&
                     occupancyBeforeDoorWindow != Occupancy.UNOCCUPIED &&
@@ -738,14 +737,14 @@ class HyperStatHpuProfile : HyperStatPackageUnitProfile(){
         }
     }
 
-    private fun runForDoorWindowSensor(config: HyperStatHpuConfiguration, equip: HyperStatHpuEquip): Boolean {
+    private fun runForDoorWindowSensor(config: HyperStatHpuConfiguration, equip: HyperStatHpuEquipToBeDeleted): Boolean {
         val isDoorOpen = isDoorOpenState(config,equip)
         CcuLog.i(L.TAG_CCU_HSHPU, " is Door Open ? $isDoorOpen")
         if (isDoorOpen) resetLoopOutputValues()
         return isDoorOpen
     }
 
-    private fun isDoorOpenState(config: HyperStatHpuConfiguration, equip: HyperStatHpuEquip): Boolean{
+    private fun isDoorOpenState(config: HyperStatHpuConfiguration, equip: HyperStatHpuEquipToBeDeleted): Boolean{
 
         // If thermistor value less than 10000 ohms door is closed (0) else door is open (1)
         // If analog in value is less than 2v door is closed(0) else door is open (1)
@@ -789,7 +788,7 @@ class HyperStatHpuProfile : HyperStatPackageUnitProfile(){
 
         doorWindowIsOpen(
             if (th2SensorEnabled || analog1SensorEnabled || analog2SensorEnabled) 1.0 else 0.0,
-            if (isDoorOpen) 1.0 else 0.0
+            if (isDoorOpen) 1.0 else 0.0, null
         )
 
         return isDoorOpen
@@ -800,7 +799,7 @@ class HyperStatHpuProfile : HyperStatPackageUnitProfile(){
             Th2InAssociation.DOOR_WINDOW_SENSOR)
     }
 
-    private fun runForKeyCardSensor(config: HyperStatHpuConfiguration, equip: HyperStatHpuEquip) {
+    private fun runForKeyCardSensor(config: HyperStatHpuConfiguration, equip: HyperStatHpuEquipToBeDeleted) {
 
         var analog1KeycardEnabled = false
         var analog2KeycardEnabled = false
@@ -831,7 +830,7 @@ class HyperStatHpuProfile : HyperStatPackageUnitProfile(){
 
         keyCardIsInSlot(
             if (analog1KeycardEnabled || analog2KeycardEnabled) 1.0 else 0.0,
-            if (analog1Sensor > 0 || analog2Sensor > 0) 1.0 else 0.0
+            if (analog1Sensor > 0 || analog2Sensor > 0) 1.0 else 0.0, null
         )
     }
 
@@ -843,11 +842,11 @@ class HyperStatHpuProfile : HyperStatPackageUnitProfile(){
         compressorLoopOutput = 0
     }
 
-    private fun resetAllLogicalPointValues(equip: HyperStatHpuEquip) {
+    private fun resetAllLogicalPointValues(equip: HyperStatHpuEquipToBeDeleted) {
 
         equip.hsHaystackUtil.updateAllLoopOutput(0,0,0,true,0)
 
-        resetAllLogicalPointValues()
+        resetLogicalPoints()
 
         HyperStatUserIntentHandler.updateHyperStatStatus(
             equipId = equip.equipRef!!,
@@ -859,14 +858,14 @@ class HyperStatHpuProfile : HyperStatPackageUnitProfile(){
     }
 
 
-    private fun fetchBasicSettings(equip: HyperStatHpuEquip) =
+    private fun fetchBasicSettings(equip: HyperStatHpuEquipToBeDeleted) =
 
         BasicSettings(
             conditioningMode = StandaloneConditioningMode.values()[equip.hsHaystackUtil.getCurrentConditioningMode().toInt()],
             fanMode = StandaloneFanStage.values()[equip.hsHaystackUtil.getCurrentFanMode().toInt()]
         )
 
-    private fun fetchUserIntents(equip: HyperStatHpuEquip): UserIntents {
+    private fun fetchUserIntents(equip: HyperStatHpuEquipToBeDeleted): UserIntents {
 
         return UserIntents(
             currentTemp = equip.getCurrentTemp(),
@@ -877,7 +876,7 @@ class HyperStatHpuProfile : HyperStatPackageUnitProfile(){
         )
     }
 
-    private fun fetchHyperStatTuners(equip: HyperStatHpuEquip): HyperStatProfileTuners {
+    private fun fetchHyperStatTuners(equip: HyperStatHpuEquipToBeDeleted): HyperStatProfileTuners {
 
         /**
          * Consider that
@@ -934,7 +933,7 @@ class HyperStatHpuProfile : HyperStatPackageUnitProfile(){
         return if (nodeCount == 0) 0.0 else tempTotal / nodeCount
     }
 
-    private fun handleDeadZone(equip: HyperStatHpuEquip) {
+    private fun handleDeadZone(equip: HyperStatHpuEquipToBeDeleted) {
 
         CcuLog.d(L.TAG_CCU_HSHPU, "updatePointsForEquip: Dead Zone ")
         state = ZoneState.TEMPDEAD
@@ -953,7 +952,7 @@ class HyperStatHpuProfile : HyperStatPackageUnitProfile(){
             ZoneState.TEMPDEAD.ordinal.toDouble()
         )
     }
-    private fun handleRFDead(equip: HyperStatHpuEquip) {
+    private fun handleRFDead(equip: HyperStatHpuEquipToBeDeleted) {
         CcuLog.d(L.TAG_CCU_HSHPU,"RF Signal is Dead ${equip.node}")
         state = ZoneState.RFDEAD
         equip.hsHaystackUtil.setProfilePoint("operating and mode", state.ordinal.toDouble())
@@ -970,8 +969,8 @@ class HyperStatHpuProfile : HyperStatPackageUnitProfile(){
             ZoneState.RFDEAD.ordinal.toDouble()
         )
     }
-    override fun getHyperStatEquip(node: Short): HyperStatEquip {
-        return hpuDeviceMap[node] as HyperStatHpuEquip
+    override fun getHyperStatEquip(node: Short): HyperStatEquipToBeDeleted {
+        return hpuDeviceMap[node] as HyperStatHpuEquipToBeDeleted
     }
 
     override fun addNewEquip(
@@ -986,8 +985,8 @@ class HyperStatHpuProfile : HyperStatPackageUnitProfile(){
         return configuration
     }
 
-    fun addEquip(node: Short): HyperStatEquip {
-        val equip = HyperStatHpuEquip(node)
+    fun addEquip(node: Short): HyperStatEquipToBeDeleted {
+        val equip = HyperStatHpuEquipToBeDeleted(node)
         equip.initEquipReference(node)
         hpuDeviceMap[node] = equip
         return equip

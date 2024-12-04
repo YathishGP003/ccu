@@ -37,7 +37,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
-import java.util.HashMap
 
 class HyperStatSplitCpuViewModel : HyperStatSplitViewModel() {
 
@@ -201,11 +200,6 @@ class HyperStatSplitCpuViewModel : HyperStatSplitViewModel() {
                     L.saveCCUState()
                     hayStack.syncEntityTree()
                     CCUHsApi.getInstance().setCcuReady()
-                    CcuLog.i(Domain.LOG_TAG, "Send seed for $deviceAddress")
-                    LSerial.getInstance()
-                        .sendHyperSplitSeedMessage(deviceAddress, zoneRef, floorRef)
-
-                    DesiredTempDisplayMode.setModeType(zoneRef, CCUHsApi.getInstance())
                     CcuLog.i(Domain.LOG_TAG, "HSS Profile Pairing complete")
                     //delete deadband points in equip level
                     deletingDeadBandPointsInEquipLevel()
@@ -216,7 +210,10 @@ class HyperStatSplitCpuViewModel : HyperStatSplitViewModel() {
                         ProgressDialogUtils.hideProgressDialog()
                         pairingCompleteListener.onPairingComplete()
                     }
-
+                    CcuLog.i(Domain.LOG_TAG, "Send seed for $deviceAddress")
+                    LSerial.getInstance()
+                        .sendHyperSplitSeedMessage(deviceAddress, zoneRef, floorRef)
+                    DesiredTempDisplayMode.setModeType(zoneRef, CCUHsApi.getInstance())
                     // This check is needed because the dialog sometimes fails to close inside the coroutine.
                     // We don't know why this happens.
                     if (ProgressDialogUtils.isDialogShowing()) {
@@ -539,14 +536,13 @@ class HyperStatSplitCpuViewModel : HyperStatSplitViewModel() {
     }
 
     private fun setScheduleType(config: HyperStatSplitProfileConfiguration) {
-        val scheduleTypePoint = hayStack.readEntity("point and domainName == \"" + DomainName.scheduleType + "\" and group == \"" + config.nodeAddress + "\"")
-        val scheduleTypeId = scheduleTypePoint.get("id").toString()
-
-        val roomSchedule = getSchedule(zoneRef, floorRef)
-        if(roomSchedule.isZoneSchedule) {
-            hayStack.writeDefaultValById(scheduleTypeId, 1.0)
-        } else {
-            hayStack.writeDefaultValById(scheduleTypeId, 2.0)
+        hayStack.readEntity("point and domainName == \"" + DomainName.scheduleType + "\" and group == \"" + config.nodeAddress + "\"")["id"]?.let { scheduleTypeId ->
+            val roomSchedule = getSchedule(zoneRef, floorRef)
+            if(roomSchedule.isZoneSchedule) {
+                hayStack.writeDefaultValById(scheduleTypeId.toString(), 1.0)
+            } else {
+                hayStack.writeDefaultValById(scheduleTypeId.toString(), 2.0)
+            }
         }
     }
 

@@ -17,7 +17,6 @@ import a75f.io.logic.bo.building.Zone;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.logic.bo.building.bacnet.BacnetProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
-import a75f.io.logic.util.RxTask;
 import a75f.io.util.ExecutorTask;
 
 /**
@@ -85,6 +84,13 @@ public class L
     public static final String TAG_CCU_FILES = "CCU_FILES";
     public static final String TAG_ZONE_SCHEDULE_SPILL = "ZONE_SCHEDULE_SPILL";
 
+    // External App package names
+    public static final String BAC_APP_PACKAGE_NAME = "io.seventyfivef.bacapp";
+    public static final String BAC_APP_PACKAGE_NAME_OBSOLETE = "com.example.ccu_bacapp";
+    public static final String REMOTE_ACCESS_PACKAGE_NAME = "io.seventyfivef.remoteaccess";
+    public static final String HOME_APP_PACKAGE_NAME = "com.x75frenatus.home";
+    public static final String HOME_APP_PACKAGE_NAME_OBSOLETE = "io.seventyfivef.home";
+
     public static Context app()
     {
         return Globals.getInstance().getApplicationContext();
@@ -127,7 +133,7 @@ public class L
     
     public static short generateSmartNodeAddress()
     {
-        short currentBand = L.ccu().getSmartNodeAddressBand();
+        short currentBand = L.ccu().getAddressBand();
         ArrayList<HashMap<Object,Object>> nodes = CCUHsApi.getInstance().readAllEntities("device and node");
         if (nodes.size() == 0) {
             return currentBand;

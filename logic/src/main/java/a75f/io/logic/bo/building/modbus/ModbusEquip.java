@@ -356,21 +356,33 @@ public class ModbusEquip {
                 if (!Objects.nonNull(marker.getTagValue())) {
                     tags.append(" and ").append(marker.getTagName());
                 }
+                else {
+                    if (isValidTagForQuery(marker.getTagName())) {
+                        tags.append(" and ").append(marker.getTagName()).append(" == \"").append(marker.getTagValue()).append("\"");
+                        if(isInt(marker.getTagValue()) || isLong(marker.getTagValue()) || isDouble(marker.getTagValue())) {
+                            tags.append(" or ").append(marker.getTagName()).append(" == ").append(marker.getTagValue());
+                        }
+                    }
+                }
             }
 
             if (tags.length() > 0) {
                 HashMap pointRead = CCUHsApi.getInstance().read("point and logical and modbus " + tags + " and equipRef == \"" + equipRef + "\"");
                 Point logicalPoint = new Point.Builder().setHashMap(pointRead).build();
+                CcuLog.d("Modbus", "UpdateHaystackPoints: Tags -> " +tags);
+                CcuLog.d("Modbus", "UpdateHaystackPoints: Logical Point -> " + pointRead +" name "+configParams.getName() +" display in UI "+configParams.isDisplayInUI() );
 
                 if (configParams.isDisplayInUI()) {
                     if (!logicalPoint.getMarkers().contains("displayInUi")) {
                         logicalPoint.getMarkers().add("displayInUi");
+                        CcuLog.d("Modbus", "UpdateHaystackPoints: Add displayUI tag " + logicalPoint.getDisplayName());
                         if (logicalPoint.getId() != null) {
                             CCUHsApi.getInstance().updatePoint(logicalPoint, logicalPoint.getId());
                         }
                     }
                 } else if (logicalPoint.getMarkers().contains("displayInUi")) {
                     logicalPoint.getMarkers().remove("displayInUi");
+                    CcuLog.d("Modbus", "UpdateHaystackPoints: Remove displayUI tag " + logicalPoint.getDisplayName());
                     if (logicalPoint.getId() != null) {
                         CCUHsApi.getInstance().updatePoint(logicalPoint, logicalPoint.getId());
                     }
@@ -378,6 +390,13 @@ public class ModbusEquip {
             }
         }
         CCUHsApi.getInstance().syncEntityTree();
+    }
+
+    private boolean isValidTagForQuery(String tagName) {
+        if (tagName.equals("unit") || tagName.equals("hisInterpolate") || tagName.equals("minVal") || tagName.equals("maxVal") || tagName.equals("incrementVal")) {
+            return false;
+        }
+        return true;
     }
 
     public boolean hasEquipType(ModbusEquipTypes modbusEquipTyp, List<String> modbusEquipTypes) {

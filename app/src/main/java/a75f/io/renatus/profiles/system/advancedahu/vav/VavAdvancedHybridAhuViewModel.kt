@@ -13,6 +13,7 @@ import a75f.io.logic.bo.building.system.util.getVavConnectEquip
 import a75f.io.logic.bo.building.system.vav.VavAdvancedAhu
 import a75f.io.logic.bo.building.system.vav.config.VavAdvancedHybridAhuConfig
 import a75f.io.renatus.modbus.util.showToast
+import a75f.io.renatus.profiles.oao.updateOaoPoints
 import a75f.io.renatus.profiles.system.advancedahu.AdvancedHybridAhuViewModel
 import a75f.io.renatus.profiles.system.advancedahu.isValidateConfiguration
 import a75f.io.renatus.util.ProgressDialogUtils
@@ -84,6 +85,7 @@ class VavAdvancedHybridAhuViewModel : AdvancedHybridAhuViewModel() {
                 viewState.value.isStateChanged = false
                 saveJob = null
                 showToast("Configuration saved successfully", context)
+                updateOaoPoints()
                 hayStack.setCcuReady()
                 hayStack.syncEntityTree()
             }

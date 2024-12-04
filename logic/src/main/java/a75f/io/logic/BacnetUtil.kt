@@ -1,6 +1,10 @@
 package a75f.io.logic
 
+import a75f.io.api.haystack.CCUHsApi
+import a75f.io.api.haystack.HSUtil
 import a75f.io.api.haystack.Point
+import a75f.io.api.haystack.Tags
+import a75f.io.api.haystack.Tags.BACNET_ID
 import a75f.io.logger.CcuLog
 import a75f.io.logic.bo.building.hvac.Stage
 
@@ -22,7 +26,7 @@ import a75f.io.logic.bo.building.hvac.Stage
         objectType: String,
         nodeAddress: Int
     ) {
-        val nodeAdd = nodeAddress - L.ccu().smartNodeAddressBand + 1000
+        val nodeAdd = nodeAddress - L.ccu().addressBand + 1000
         val bacnetId = "$nodeAdd$objectId"
         point.bacnetId = bacnetId.toInt()
         point.bacnetType = objectType
@@ -47,5 +51,55 @@ fun getBacnetId(ordinal: Double): Int {
         Stage.FAN_4.ordinal -> FANSTAGE4ID
         Stage.FAN_5.ordinal -> FANSTAGE5ID
         else -> 0
+    }
+}
+
+fun generateBacnetIdForRoom(zoneID: String): Int {
+    var bacnetID = 1
+    var isBacnetIDUsed = true
+    try {
+        val currentRoom = CCUHsApi.getInstance().readMapById(zoneID)
+        if (currentRoom.containsKey(BACNET_ID) && currentRoom[BACNET_ID] != 0) {
+            val bacnetID2 = (currentRoom[BACNET_ID].toString() + "").toDouble()
+            CcuLog.d(L.TAG_CCU_BACNET, "Already have bacnetID $bacnetID2")
+            return bacnetID2.toInt()
+        }
+        val rooms = CCUHsApi.getInstance().readAllEntities("room")
+        if (rooms.size == 0) {
+            CcuLog.d(L.TAG_CCU_BACNET, "rooms size : 0 ")
+            return bacnetID
+        }
+        while (isBacnetIDUsed) {
+            for (room in rooms) {
+                if (room.containsKey(BACNET_ID)
+                    && room[BACNET_ID] != 0
+                    && (room[Tags.BACNET_ID].toString() + "").toDouble() == bacnetID.toDouble()
+                ) {
+                    CcuLog.d(L.TAG_CCU_BACNET,"In looping over - {bacnetID: ${room[BACNET_ID]} ,tempBacnetID: $bacnetID} - room object: $room")
+                    bacnetID += 1
+                    isBacnetIDUsed = true
+                    break
+                } else {
+                    isBacnetIDUsed = false
+                }
+            }
+        }
+        CcuLog.d(L.TAG_CCU_BACNET, "Generated bacnetID: $bacnetID")
+    } catch (e: NumberFormatException) {
+        e.printStackTrace()
+    }
+    return bacnetID
+}
+
+fun updateRoom(roomRef: String, floorRef: String){
+    try {
+        val bacnetId = generateBacnetIdForRoom(roomRef)
+        val zone = HSUtil.getZone(roomRef, floorRef)
+        zone.bacnetId = bacnetId
+        zone.bacnetType = Tags.DEVICE
+        CCUHsApi.getInstance().updateZone(zone, zone.id)
+    } catch (e: NullPointerException) {
+        CcuLog.d(L.TAG_CCU_BACNET, "Unable to update zone:  " + e.message)
+        e.printStackTrace()
     }
 }

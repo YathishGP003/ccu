@@ -45,7 +45,7 @@ public class DeviceUpdateJob extends BaseJob implements WatchdogMonitor
     boolean watchdogMonitor = false;
     
     private Lock jobLock = new ReentrantLock();
-    private DeviceStatusUpdateJob deviceStatusUpdateJob;
+    private DiagUpdateJob diagUpdateJob;
     @Override
     public void bark() {
         watchdogMonitor = true;
@@ -62,8 +62,8 @@ public class DeviceUpdateJob extends BaseJob implements WatchdogMonitor
         deviceNw = new MeshNetwork();
         modbusNetwork = new ModbusNetwork();
     
-        deviceStatusUpdateJob = new DeviceStatusUpdateJob();
-        deviceStatusUpdateJob.scheduleJob("deviceStatusUpdateJob", Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
+        diagUpdateJob = new DiagUpdateJob();
+        diagUpdateJob.scheduleJob("diagUpdateJob", Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
                         .getInt("control_loop_frequency",60), 45, TimeUnit.SECONDS);
 
         //TODO - TEMP code for performance testing to simulate device load. Remove this code after performance issue resolved

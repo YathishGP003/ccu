@@ -44,10 +44,6 @@ public class RestoreEntity implements Runnable{
     public void run() {
         try{
             switch (equipId){
-                case RestoreCCU.SYNC_SITE:
-                    restoreCCU.syncExistingSite(ccu.getSiteCode(), deviceCount, equipResponseCallback,
-                        replaceCCUTracker, retryCountCallback);
-                    break;
                 case RestoreCCU.CCU_DEVICE:
                 //restoreCCU.restoreCCUDevice(ccu, deviceCount, equipResponseCallback, replaceCCUTracker);
                     break;

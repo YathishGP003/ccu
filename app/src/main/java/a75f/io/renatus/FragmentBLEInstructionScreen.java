@@ -36,6 +36,9 @@ import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
 import a75f.io.renatus.profiles.acb.AcbProfileConfigFragment;
 import a75f.io.renatus.profiles.hss.cpu.HyperStatSplitCpuFragment;
 import a75f.io.renatus.profiles.dab.DabProfileConfigFragment;
+import a75f.io.renatus.profiles.oao.OAOProfileFragment;
+import a75f.io.renatus.profiles.sse.SseProfileConfigFragment;
+import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatV2CpuFragment;
 import a75f.io.renatus.profiles.plc.PlcProfileConfigFragment;
 import a75f.io.renatus.profiles.vav.BypassConfigFragment;
 import a75f.io.renatus.profiles.vav.VavProfileConfigFragment;
@@ -101,13 +104,10 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
     {
         if (mProfileType == ProfileType.SSE)
         {
-            if (L.isSimulation())
-            {
-                showDialogFragment(FragmentSSEConfiguration
-                                           .newInstance(mNodeAddress, mRoomName, mNodeType, mFloorName,ProfileType.SSE), FragmentSSEConfiguration.ID);
-            }
-            else
-            {
+            if (L.isSimulation()) {
+                showDialogFragment(SseProfileConfigFragment.Companion
+                        .newInstance(mNodeAddress, mRoomName, mFloorName, mNodeType, mProfileType), SseProfileConfigFragment.Companion.getID());
+            } else {
                 FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan
                                                                 .getInstance(mNodeAddress, mRoomName, mFloorName, mNodeType, ProfileType.SSE);
                 showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
@@ -280,8 +280,9 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
         {
             if (L.isSimulation())
             {
-                showDialogFragment(DialogOAOProfile
-                                           .newInstance(mNodeAddress, "SYSTEM", "SYSTEM"), DialogOAOProfile.ID);
+                showDialogFragment(
+                        OAOProfileFragment.Companion.newInstance(mNodeAddress, mRoomName, mFloorName,mNodeType, mProfileType),
+                        OAOProfileFragment.Companion.getID());
             }
             else
             {

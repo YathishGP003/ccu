@@ -14,6 +14,7 @@ import a75f.io.domain.api.Domain;
 import a75f.io.domain.api.DomainName;
 import a75f.io.domain.equips.DabEquip;
 import a75f.io.domain.equips.PlcEquip;
+import a75f.io.domain.equips.SseEquip;
 import a75f.io.domain.equips.VavEquip;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
@@ -91,13 +92,13 @@ public class ZoneViewData {
     }
 
     public static HashMap getSSEEquipPoints(String equipID) {
-        
+        SseEquip sseEquip = (SseEquip) Domain.INSTANCE.getDomainEquip(equipID);
         HashMap ssePoints = new HashMap();
         ssePoints.put("Profile","SSE");
         boolean isThermister1On = (CCUHsApi.getInstance().readDefaultVal(THERMISTER_QUERY_POINT + equipID + "\"") > 0);
         
-        String equipStatusPoint = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and equipRef == \""+equipID+"\"");
-        double dischargePoint = CCUHsApi.getInstance().readHisValByQuery("point and zone and sensor and discharge and air and temp and equipRef == \""+equipID+"\"");
+        String equipStatusPoint = sseEquip.getEquipStatusMessage().readDefaultStrVal();
+        double dischargePoint = sseEquip.getDischargeAirTemperature().readHisVal();
         ssePoints.put(AIRFLOW_SENSOR,isThermister1On);
         if (equipStatusPoint.length() > 0)
         {

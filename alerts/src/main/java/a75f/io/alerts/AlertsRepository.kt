@@ -242,8 +242,8 @@ class AlertsRepository(
       val ccuId = haystack.ccuRef.toVal()
 
       if (alertDef.alert.ismEnabled() && !alertDef.isMuted(ccuId, null)) {
+         alertDef.alert.setmNotificationMsg(AlertFormatter.updatingNotificationMessage(msg,alertDef))
          alertDef.alert.setmMessage(msg)
-         alertDef.alert.setmNotificationMsg(alertDef.alert.mNotificationMsg)
          val alert = AlertBuilder.build(alertDef, AlertFormatter.getFormattedMessage(alertDef,this), haystack,equipRef,null)
          if (isOtaAlert(title)){
             alert.setFixed(true)
@@ -264,6 +264,7 @@ class AlertsRepository(
       val ccuId = haystack.ccuRef.toVal()
 
       if (alertDef.alert.ismEnabled() && !alertDef.isMuted(ccuId, null)) {
+         alertDef.alert.setmNotificationMsg(AlertFormatter.updatingNotificationMessage(msg,alertDef))
          alertDef.alert.setmMessage(msg)
          val alert = AlertBuilder.build(alertDef, AlertFormatter.getFormattedMessage(alertDef,this), haystack,equipRef,null)
          if (isOtaAlert(title)){
@@ -288,7 +289,7 @@ class AlertsRepository(
       //val ccuId = haystack.ccuRef.toVal()
       val alert = AlertBuilder.build(
          alertDef,
-         AlertFormatter.getFormattedMessage(alertDef, this),
+         msg,
          haystack,
          equipRef,
          null
@@ -576,6 +577,23 @@ class AlertsRepository(
          }
       }
       return true
+   }
+
+
+   // "Resolve" an alert
+   fun fixAlertLocally(alert: Alert) {
+
+      alert.setEndTime(DateTime().millis)
+      alert.setFixed(true)
+      alert.setSyncStatus(true)
+      dataStore.updateAlert(alert)
+      alertDefsState.remove(alert)
+
+      // special handling in preferences for "CCU RESTART" alert.  Is that restart alert, or that it was restarted?
+      if (alert.mTitle.equals("CCU RESTART", ignoreCase = true)) {
+         dataStore.cancelAppRestarted()
+      }
+      setAlertListChanged()
    }
 
    fun fixAlertByDef(alertDef : AlertDefinition ) {

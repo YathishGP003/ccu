@@ -102,7 +102,7 @@ public class NotificationHandler {
     }
 
     public static void setCloudConnectionStatus(boolean bIsConnected) {
-        CCUHsApi.getInstance().writeHisValByQuery("point and diag and cloud and connected", bIsConnected ? 1.0 : 0.0);
+        CCUHsApi.getInstance().writeHisValByQuery("domainName == \"ccuHeartbeat\"", bIsConnected ? 1.0 : 0.0);
         if (bIsConnected) {
             CcuLog.i(L.TAG_CCU_READ_CHANGES, "CCU IS CONNECTED TO WIFI " + new Date(System.currentTimeMillis()));
             long lastCCUUpdateTime = PreferenceUtil.getLastCCUUpdatedTime();

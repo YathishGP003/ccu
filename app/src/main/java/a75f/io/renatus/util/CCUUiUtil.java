@@ -28,7 +28,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import a75f.io.alerts.AlertManager;
-import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.domain.api.Domain;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.renatus.BuildConfig;
@@ -75,7 +75,7 @@ public class CCUUiUtil {
     public static void triggerRestart(Context context) {
         AlertManager.getInstance().clearAlertsWhenAppClose();
         AlertManager.getInstance().getRepo().setRestartAppToTrue();
-        CCUHsApi.getInstance().writeHisValByQuery("app and restart",1.0);
+        Domain.diagEquip.getAppRestart().writeHisVal(1.0);
         PackageManager packageManager = context.getPackageManager();
         Intent intent = packageManager.getLaunchIntentForPackage(context.getPackageName());
         ComponentName componentName = intent.getComponent();

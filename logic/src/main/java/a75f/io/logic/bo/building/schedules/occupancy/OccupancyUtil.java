@@ -68,5 +68,11 @@ public class OccupancyUtil {
         return hayStack.readHisValByQuery(sensor+" and sensor and equipRef  == \"" + equipRef + "\"") > 0;
     }
 
+    public boolean getSensorByDomain(String domainName) {
+        return hayStack.readHisValByQuery("domainName == \""+ domainName +"\" and equipRef == \"" + equipRef + "\"") > 0;
+    }
 
+    public boolean isConfigEnabledByDomain(String domainName) {
+        return hayStack.readHisValByQuery("domainName == \""+ domainName +"\" and equipRef == \"" + equipRef + "\"") > 0;
+    }
 }

@@ -2,6 +2,7 @@ package a75f.io.messaging.handler
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Equip
+import a75f.io.api.haystack.HayStackConstants
 import a75f.io.api.haystack.Point
 import a75f.io.logic.bo.building.ccu.CazEquipUtil
 import a75f.io.logic.bo.building.ccu.RoomTempSensor
@@ -65,6 +66,19 @@ class TIConfigHandler {
                 updateSensorPoints(supplyTempSensorConfig, roomTempSensorConfig, currentTempPoint, nodeAddress, configPoint.equipRef)
             }
             CCUHsApi.getInstance().scheduleSync()
+            writePointFromJson(configPoint, msgobject, haystack)
+        }
+
+        private fun writePointFromJson(
+            configPoint: Point,
+            msgObject: JsonObject,
+            hayStack: CCUHsApi
+        ) {
+            val who = msgObject[HayStackConstants.WRITABLE_ARRAY_WHO].asString
+            val level = msgObject[HayStackConstants.WRITABLE_ARRAY_LEVEL].asInt
+            val value = msgObject[HayStackConstants.WRITABLE_ARRAY_VAL].asDouble
+            val duration = if (msgObject[HayStackConstants.WRITABLE_ARRAY_DURATION] != null) msgObject[HayStackConstants.WRITABLE_ARRAY_DURATION].asInt else 0
+            hayStack.writePointLocal(configPoint.id, level, who, value, duration)
         }
 
         private fun updateSensorPoints(

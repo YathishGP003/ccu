@@ -22,6 +22,10 @@ import a75f.io.renatus.profiles.dab.DabProfileConfigFragment;
 import a75f.io.renatus.profiles.hss.cpu.HyperStatSplitCpuFragment;
 import a75f.io.renatus.profiles.plc.PlcProfileConfigFragment;
 import a75f.io.renatus.profiles.vav.BypassConfigFragment;
+import a75f.io.renatus.profiles.oao.OAOProfileFragment;
+import a75f.io.renatus.profiles.sse.SseProfileConfigFragment;
+import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatV2CpuFragment;
+import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatMonitoringFragment;
 import a75f.io.renatus.profiles.vav.VavProfileConfigFragment;
 import a75f.io.renatus.util.CCUUiUtil;
 import butterknife.BindView;
@@ -141,9 +145,9 @@ public class AlternatePairingFragment extends BaseDialogFragment {
     private void openBLEPairing() {
         switch (mProfileType) {
             case SSE:
-                showDialogFragment(FragmentSSEConfiguration
-                        .newInstance(mPairingAddress, mRoomName, mNodeType,
-                                mFloorName,mProfileType), FragmentSSEConfiguration.ID);
+                showDialogFragment(SseProfileConfigFragment.Companion
+                        .newInstance(mPairingAddress, mRoomName, mFloorName, mNodeType,
+                                mProfileType), SseProfileConfigFragment.Companion.getID());
                 break;
             case VAV_REHEAT:
             case VAV_SERIES_FAN:
@@ -168,9 +172,9 @@ public class AlternatePairingFragment extends BaseDialogFragment {
                                 mProfileType), FragmentDABDualDuctConfiguration.ID);
                 break;
             case OAO:
-                    showDialogFragment(DialogOAOProfile
-                            .newInstance(mPairingAddress, "SYSTEM", "SYSTEM"),
-                            DialogOAOProfile.ID);
+                showDialogFragment(OAOProfileFragment.Companion
+                        .newInstance(mPairingAddress, mRoomName, mFloorName, mNodeType,
+                                mProfileType), OAOProfileFragment.Companion.getID());
                     break;
             case EMR:
                     showDialogFragment(FragmentEMRConfiguration
@@ -183,17 +187,17 @@ public class AlternatePairingFragment extends BaseDialogFragment {
                         PlcProfileConfigFragment.Companion.getID());
                 break;
             case HYPERSTAT_MONITORING:
-                showDialogFragment(HyperStatMonitoringFragment.newInstance(mPairingAddress,
-                                mRoomName, mFloorName, ProfileType.HYPERSTAT_MONITORING),
-                        HyperStatMonitoringFragment.ID);
+                showDialogFragment(HyperStatMonitoringFragment.Companion.newInstance(mPairingAddress,
+                                mRoomName, mFloorName,mNodeType, ProfileType.HYPERSTAT_MONITORING),
+                        HyperStatMonitoringFragment.Companion.getID());
                 break;
             case HYPERSTAT_VRV:
                 showDialogFragment(HyperStatVrvFragment.newInstance(mPairingAddress, mRoomName,
-                        mFloorName), HyperStatMonitoringFragment.ID);
+                        mFloorName), HyperStatVrvFragment.ID);
                 break;
             case HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT:
-                showDialogFragment(HyperStatFragment.newInstance(mPairingAddress, mRoomName, mFloorName,
-                        mNodeType, ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT), HyperStatFragment.ID);
+                showDialogFragment(HyperStatV2CpuFragment.newInstance(mPairingAddress, mRoomName, mFloorName,
+                        mNodeType, ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT), HyperStatV2CpuFragment.ID);
                 break;
             case HYPERSTAT_HEAT_PUMP_UNIT:
                 showDialogFragment(HyperStatFragment.newInstance(mPairingAddress,mRoomName,mFloorName,

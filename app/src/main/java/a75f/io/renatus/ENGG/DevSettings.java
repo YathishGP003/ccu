@@ -49,6 +49,8 @@ import a75f.io.api.haystack.Queries;
 import a75f.io.api.haystack.Site;
 import a75f.io.device.mesh.LSerial;
 import a75f.io.domain.logic.TunerEquipBuilder;
+import a75f.io.domain.api.Domain;
+import a75f.io.domain.api.DomainName;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
@@ -467,7 +469,7 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
         logLevelSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                CCUHsApi.getInstance().writeHisValByQuery(Queries.LOG_LEVEL_QUERY, (double) position);
+                Domain.ccuEquip.getLogLevel().writeHisVal(position);
                 CCUHsApi.getInstance().setCcuLogLevel(position);
             }
             @Override

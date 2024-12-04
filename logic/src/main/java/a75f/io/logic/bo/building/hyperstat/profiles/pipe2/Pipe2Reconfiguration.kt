@@ -15,13 +15,13 @@ class Pipe2Reconfiguration {
             updatedConfigValue: Double,
             equipPoint: Equip, ) {
             
-            val equip = HyperStatPipe2Equip.getHyperStatEquipRef(equipPoint.group.toShort())
+            val equip = HyperStatPipe2EquipToBeDeleted.getHyperStatEquipRef(equipPoint.group.toShort())
             val updatedConfiguration = updateAssociation(equip.getConfiguration(), portType, updatedConfigValue.toInt())
             equip.updateConfiguration(updatedConfiguration)
         }
 
         fun updateConfiguration(updatedConfigValue: Double, equipPoint: Equip, portType: Port) {
-            val equip = HyperStatPipe2Equip.getHyperStatEquipRef(equipPoint.group.toShort())
+            val equip = HyperStatPipe2EquipToBeDeleted.getHyperStatEquipRef(equipPoint.group.toShort())
             val updatedConfiguration = updateConfig(equip.getConfiguration(), portType, updatedConfigValue)
             equip.updateConfiguration(updatedConfiguration)
         }

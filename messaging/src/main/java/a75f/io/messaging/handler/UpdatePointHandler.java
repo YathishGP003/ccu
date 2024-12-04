@@ -1,6 +1,7 @@
 package a75f.io.messaging.handler;
 
 import static a75f.io.logic.bo.building.BackfillUtilKt.updateBackfillDuration;
+import static a75f.io.messaging.handler.CPUReconfigHandlerKt.reconfigureHSCPUV2;
 import static a75f.io.messaging.handler.DataSyncHandler.isCloudEntityHasLatestValue;
 
 import android.content.Context;
@@ -31,6 +32,7 @@ import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.sync.PointWriteCache;
+import a75f.io.domain.api.Domain;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.vrv.VrvControlMessageCache;
@@ -124,6 +126,10 @@ public class UpdatePointHandler implements MessageHandler
             updateUI(localPoint);
             return;
         }
+
+        if (HSUtil.isCPUEquip(pointUid, CCUHsApi.getInstance())){
+            reconfigureHSCPUV2(msgObject, localPoint);
+        }
         
         if (HSUtil.isSystemConfigOutputPoint(pointUid, CCUHsApi.getInstance())
                 || HSUtil.isSystemConfigHumidifierType(pointUid, CCUHsApi.getInstance())
@@ -144,7 +150,7 @@ public class UpdatePointHandler implements MessageHandler
         }
 
         if (HSUtil.isMonitoringConfig(pointUid, CCUHsApi.getInstance())) {
-            HyperStatMonitoringConfigHandler.updateConfigPoint(msgObject, localPoint, CCUHsApi.getInstance());
+            HyperStatMonitoringConfigHandler.reconfigureMonitoring(msgObject, localPoint);
             updatePoints(localPoint);
             return;
         }
@@ -207,6 +213,12 @@ public class UpdatePointHandler implements MessageHandler
             return;
         }
 
+        if(HSUtil.isDamperSizeConfigPoint(pointUid, CCUHsApi.getInstance())){
+            TrueCFMDABConfigHandler.updatePointVal(localPoint, msgObject);
+            updatePoints(localPoint);
+            return;
+        }
+
         if(HSUtil.isMaxCFMCoolingConfigPoint(pointUid, CCUHsApi.getInstance())){
             TrueCFMVAVConfigHandler.updateMinCoolingConfigPoint(msgObject, localPoint, hayStack);
             TrueCFMVAVConfigHandler.updateAirflowCFMProportionalRange(msgObject, localPoint, hayStack);
@@ -244,7 +256,7 @@ public class UpdatePointHandler implements MessageHandler
             DemandResponseMode.handleDRMessageUpdate(pointEntity, hayStack, msgObject, zoneDataInterface);
             return;
         }
-        if (HSUtil.isPointBackfillConfigPoint(pointUid, CCUHsApi.getInstance())) {
+        if (HSUtil.isPointBackfillConfigPoint(pointEntity)) {
             JsonElement backFillVal = msgObject.get("val");
             if (!backFillVal.isJsonNull()){
                 updateBackfillDuration(backFillVal.getAsDouble());
@@ -421,8 +433,7 @@ public class UpdatePointHandler implements MessageHandler
     public static void setModbusWritableDataInterface(ModbusWritableDataInterface in) { modbusWritableDataInterface = in; }
     public static void setMasterControlLimitListener(MasterControlLimitListener listener) {masterControlLimitListener = listener; }
     private static boolean canIgnorePointUpdate(String pbSource, String pointUid, CCUHsApi hayStack) {
-        HashMap ccu = hayStack.read("ccu");
-        String ccuName = ccu.get("dis").toString();
+        String ccuName = hayStack.getCcuName();
     
         //Notification for update from the same CCU by using ccu_deviceId format..
         if (pbSource.equals(hayStack.getCCUUserName())) {

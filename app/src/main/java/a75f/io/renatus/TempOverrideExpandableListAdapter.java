@@ -39,6 +39,7 @@ import a75f.io.api.haystack.Zone;
 import a75f.io.device.mesh.ThermistorUtil;
 import a75f.io.domain.VavAcbEquip;
 import a75f.io.domain.equips.DabEquip;
+import a75f.io.domain.equips.SseEquip;
 import a75f.io.domain.equips.VavEquip;
 import a75f.io.domain.api.Domain;
 import a75f.io.logger.CcuLog;
@@ -52,8 +53,6 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.definitions.ReheatType;
 import a75f.io.logic.bo.building.dualduct.DualDuctProfile;
 import a75f.io.logic.bo.building.dualduct.DualDuctProfileConfiguration;
-import a75f.io.logic.bo.building.hyperstat.profiles.cpu.HyperStatCpuConfiguration;
-import a75f.io.logic.bo.building.hyperstat.profiles.cpu.HyperStatCpuProfile;
 import a75f.io.logic.bo.building.hyperstatmonitoring.HyperStatMonitoringConfiguration;
 import a75f.io.logic.bo.building.hyperstatmonitoring.HyperStatMonitoringProfile;
 import a75f.io.logic.bo.building.plc.PlcProfile;
@@ -67,7 +66,6 @@ import a75f.io.logic.bo.building.ss4pfcu.FourPipeFanCoilUnitConfiguration;
 import a75f.io.logic.bo.building.ss4pfcu.FourPipeFanCoilUnitProfile;
 import a75f.io.logic.bo.building.sscpu.ConventionalUnitConfiguration;
 import a75f.io.logic.bo.building.sscpu.ConventionalUnitProfile;
-import a75f.io.logic.bo.building.sse.SingleStageConfig;
 import a75f.io.logic.bo.building.sse.SingleStageProfile;
 import a75f.io.logic.bo.building.sshpu.HeatPumpUnitConfiguration;
 import a75f.io.logic.bo.building.sshpu.HeatPumpUnitProfile;
@@ -1534,43 +1532,18 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
         String profile = getProfileName(listTitle);
         switch (profile){
             case "SSE":
-                SingleStageProfile mSSEProfile = (SingleStageProfile) L.getProfile(Short.parseShort(parseGroup(listTitle)));
-                SingleStageConfig sseProfileConfig = (SingleStageConfig) mSSEProfile.getProfileConfiguration(Short.parseShort(parseGroup(listTitle)));
-                int relaypos = (int)getConfigNumVal("enable and "+pointname, Integer.parseInt(parseGroup(listTitle)));
-                if (pointname.equals("relay1")){
-                    if (sseProfileConfig.isOpConfigured(Port.RELAY_ONE)) {
-                        if (relaypos == 1)
-                            return "Heating";
-                        else if (relaypos == 2)
-                            return "Cooling";
-                        //else return "Not enabled";
-                    }
-                    else {
-                        return "Not Enabled";
-                    }
-                }
-                else if (pointname.equals("relay2")){
-                    if (sseProfileConfig.isOpConfigured(Port.RELAY_TWO)) {
-                        List<String> sse_relay2_mode = Arrays.asList(convertView.getResources().getStringArray(R.array.sse_relay2_mode));
-                        return sse_relay2_mode.get(relaypos);
-                    }
-                    else {
-                        return "Not Enabled";
-                    }
-                }
-                else if (pointname.equals("Thermistor1")){
-                    if (sseProfileConfig.enableThermistor1)
-                        return "Airflow Sensor";
-                    else
-                        return "Not Enabled";
-                }else if (pointname.equals("Thermistor2")){
-                    if (sseProfileConfig.enableThermistor2)
-                        return "External Sensor";
-                    else
-                        return "Not Enabled";
-                }
-                else if (pointname.startsWith("Analog"))
-                    return "Not Used";
+                if (pointname.equals("Analog-out1"))
+                    return "Not Enabled";
+                else if (pointname.equals("Analog-out2"))
+                    return "Not Enabled";
+                else if (pointname.equals("relay1")) {
+                    return getSseRelayMapping(pointname, listTitle);
+                } else if (pointname.equals("relay2"))
+                    return getSseRelayMapping(pointname, listTitle);
+                else if (pointname.equals("Thermistor1"))
+                    return getSseRelayMapping(pointname, listTitle);
+                else if (pointname.equals("Thermistor2"))
+                    return getSseRelayMapping(pointname, listTitle);
                 break;
             case "VAV_SERIES_FAN":
                 if (pointname.equals("Analog-out2"))
@@ -1918,8 +1891,14 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                 }
                 break;
             case "HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT":
+                /*
+                TODO : Implement the mapping for the Conventional Package Unit
+
                 HyperStatCpuProfile mHSCpuProfile = (HyperStatCpuProfile) L.getProfile(Short.parseShort(parseGroup(listTitle)));
-                HyperStatCpuConfiguration mHSCpuConfig = (HyperStatCpuConfiguration) mHSCpuProfile.getProfileConfiguration(Short.parseShort(parseGroup(listTitle)));
+
+                CpuV2Equip equip1 = (CpuV2Equip) Domain.INSTANCE.getDomainEquip(mHSCpuProfile.getEquip().getId());
+                CpuConfiguration mHSCpuConfig = (CpuConfiguration) getConfiguration(equip1);
+
                 List<String> analogCpuArr = new ArrayList<>();
                 for (Sensor r : SensorManager.getInstance().getExternalSensorList()) {
                     analogCpuArr.add(r.sensorName + " " + r.engineeringUnit);
@@ -1990,7 +1969,7 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                     if (mHSCpuConfig.getThermistorIn2State().getEnabled())
                         return mHSCpuConfig.getThermistorIn2State().getAssociation().toString();
                     else return "Not Enabled";
-                }
+                }*/
                 break;
         }
         return "Not Used";
@@ -2034,6 +2013,39 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
             return "Modulating Reheat";
         }
         return "Not Used";
+    }
+
+    private String getSseRelayMapping(String pointname, String listTitle) {
+        SingleStageProfile sseProfile = (SingleStageProfile) L.getProfile(Short.parseShort(parseGroup(listTitle)));
+        SseEquip equip = (SseEquip) Domain.INSTANCE.getDomainEquip(sseProfile.getEquip().getId());
+        if(pointname.equals("relay1")){
+            if(equip.getRelay1OutputState().readDefaultVal() > 0){
+                if(equip.getRelay1OutputAssociation().readDefaultVal() == 0) return "Heating";
+                else if(equip.getRelay1OutputAssociation().readDefaultVal() == 1) return "Cooling";
+            }else{
+                return "Not Enabled";
+            }
+        }
+        if(pointname.equals("relay2")){
+            if(equip.getRelay2OutputState().readDefaultVal() > 0){
+                if(equip.getRelay2OutputAssociation().readDefaultVal() == 0) return "Fan";
+                else if(equip.getRelay1OutputAssociation().readDefaultVal() == 1) return "Occupancy Enabled";
+            }else{
+                return "Not Enabled";
+            }
+        }
+
+        if (pointname.equals("Thermistor1")) {
+            if(equip.getThermistor1InputEnable().readDefaultVal() > 0)
+                return "Airflow Sensor";
+            else return "Not Enabled";
+        }
+        if (pointname.equals("Thermistor2")) {
+            if(equip.getThermistor2InputEnable().readDefaultVal() > 0)
+                return "External Sensor";
+            else return "Not Enabled";
+        }
+        return "Not Enabled";
     }
     
     private String getProfileName(String listTitle) {
@@ -2086,7 +2098,7 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
         HashMap device = hayStack.read("device and addr == \""+nodeAddr+"\"");
         boolean is2pfcu = device.containsKey("pipe2");
         if (device.containsKey("smartstat") && !is2pfcu || profile.equals("SSE")) {
-            HashMap curTempPoint = hayStack.read("point and current and temp " +
+            HashMap curTempPoint = hayStack.read("point and (current or space) and temp " +
                     "and group == \""+nodeAddr+"\"");
             if (!curTempPoint.isEmpty()){
                 hayStack.writeHisValById(curTempPoint.get("id").toString(),

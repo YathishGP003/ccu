@@ -3,8 +3,6 @@ package a75f.io.domain.logic
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.domain.BypassDamperEquip
 import a75f.io.domain.OAOEquip
-import a75f.io.domain.equips.BuildingEquip
-import a75f.io.domain.equips.VavEquip
 import a75f.io.domain.api.Device
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
@@ -33,7 +31,6 @@ import a75f.io.domain.equips.VavStagedSystemEquip
 import a75f.io.domain.equips.VavStagedVfdSystemEquip
 import a75f.io.domain.equips.hyperstat.CpuV2Equip
 import a75f.io.domain.equips.hyperstat.HpuV2Equip
-import a75f.io.domain.equips.hyperstat.HyperStatEquip
 import a75f.io.domain.equips.hyperstat.MonitoringEquip
 import a75f.io.domain.equips.hyperstat.Pipe2V2Equip
 import a75f.io.logger.CcuLog
@@ -214,6 +211,19 @@ object DomainManager {
         }
 
 
+    }
+
+    private fun addDomainDevices(hayStack: CCUHsApi) {
+        hayStack.readAllEntities("zone and equip").forEach { equip ->
+
+            val deviceMap = hayStack.readEntity("domainName and device and equipRef == \"${equip["id"]}\"")
+            if (deviceMap.isNotEmpty()) {
+                when {
+                    (equip.contains("hyperstat") && (equip.contains("cpu") || equip.contains("hpu") || equip.contains("pipe2") ||
+                            equip.contains(a75f.io.api.haystack.Tags.MONITORING))) -> Domain.devices[equip["id"].toString()] = HyperStatDevice(deviceMap["id"].toString())
+                }
+            }
+        }
     }
 
     fun addDiagEquip(hayStack: CCUHsApi) {

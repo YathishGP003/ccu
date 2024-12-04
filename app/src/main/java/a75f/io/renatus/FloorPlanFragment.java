@@ -894,10 +894,9 @@ public class FloorPlanFragment extends Fragment {
                     hsZone.setScheduleRef(defaultNamedSchedule.get("id").toString());
 
                 }
-
-                CCUHsApi.getInstance().updateZone(hsZone, zoneId);
+                BacnetUtilKt.addBacnetTags(getActivity().getApplicationContext(), hsZone.getFloorRef(), hsZone.getId());
+                hsZone = HSUtil.getZone(hsZone.getId(), hsZone.getFloorRef());
                 L.saveCCUStateAsync();
-                CCUHsApi.getInstance().syncEntityTree();
                 roomList.add(hsZone);
                 roomList.sort(new ZoneComparator());
                 updateRooms(roomList);
@@ -905,7 +904,6 @@ public class FloorPlanFragment extends Fragment {
 
                 hideKeyboard();
                 siteRoomList.add(addRoomEdit.getText().toString().trim());
-                BacnetUtilKt.addBacnetTags(getActivity().getApplicationContext(), hsZone.getFloorRef(), hsZone.getId());
                 return true;
             } else {
                 Toast.makeText(getActivity().getApplicationContext(), "Room cannot be empty", Toast.LENGTH_SHORT).show();

@@ -31,6 +31,7 @@ public class PreferenceUtil {
     private static final String CLEAN_OTHER_CCU_ZONE_SCHEDULES = "removeOtherCcuZoneSchedules";
     private static final String DATA_MIGRATION_POP_UP = "dataMigrationPopUp";
     private static final String SR_MIGRATION_POINT = "srMigrationPoint";
+    private static final String UPDATE_BACNET_ID_FOR_ROOM = "updateBacnetIdForRoom";
 
     /**
       * Below preference key is being changed from "zoneEquipPointFloorRefRoomRefMigration" to "zoneEquipPointFloorRefRoomRefMigration_v2"
@@ -72,7 +73,7 @@ public class PreferenceUtil {
     public static final String DELETE_REDUNDANT_SETBACK_POINTS_FROM_HN_ACB_EQUIPS  = "deleteRedundantSetbackPointsFromHnAcbEquips";
     public static final String BACKFILL_DEFAULT_VALUE_MIGRATION = "backFillDefaultValueMigration";
     public static final String DAB_DAMPER_SIZE_MIGRATION = "dabDamperSizeMigration";
-    public static final String BACNET_ID_MIGRATION = "bacnetIdUpdateMigration";
+    public static final String BACNET_ID_MIGRATION = "bacnetIdAndTypeUpdateMigration";
     private static final String INSTALL_TYPE = "INSTALL_TYPE";
     private static final String RESTORE_BYPASS_DAMPER_AFTER_REPLACE = "restoreBypassDamperAfterReplace";
     private static final String TITLE_24_REDUNDANT_POINT_MIGRATION = "title24ReduntPointMigration";
@@ -587,6 +588,14 @@ public class PreferenceUtil {
 
     public static void setRestoreBypassDamperAfterReplace() {
         setBooleanPreference(RESTORE_BYPASS_DAMPER_AFTER_REPLACE, true);
+    }
+
+    public static void setUpdateBacnetIdForRoom() {
+        setBooleanPreference(UPDATE_BACNET_ID_FOR_ROOM, true);
+    }
+
+    public static boolean getUpdateBacnetIdForRoom() {
+        return getBooleanPreference(UPDATE_BACNET_ID_FOR_ROOM);
     }
 
     public static boolean getTitle24RedundantPointMigrationStatus() {

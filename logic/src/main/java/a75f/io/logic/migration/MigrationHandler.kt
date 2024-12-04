@@ -1456,7 +1456,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                     L.TAG_CCU_DOMAIN,
                     "Updating bacnetId for the system point(${point["dis"]})."
                 )
-                systemModel.points.find { it.domainName == point["domainName"] }?.let { pointDef ->
+                systemModel.points.find { it.domainName == point["domainName"].toString() }?.let { pointDef ->
                     profileEquipBuilder.updatePoint(
                         PointBuilderConfig(
                             pointDef,
@@ -1495,7 +1495,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                     L.TAG_CCU_DOMAIN,
                     "Updating bacnetId for the point(${point["dis"]})."
                 )
-                equipModel.points.find { it.domainName == point["domainName"] }?.let { pointDef ->
+                equipModel.points.find { it.domainName == point["domainName"].toString() }?.let { pointDef ->
                     profileEquipBuilder.updatePoint(
                         PointBuilderConfig(
                             pointDef,

@@ -38,6 +38,7 @@ import a75f.io.domain.api.DomainName;
 import a75f.io.domain.equips.CCUDiagEquip;
 import a75f.io.domain.equips.SystemEquip;
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.BacnetUtilKt;
 import a75f.io.logic.BuildConfig;
 import a75f.io.logic.DefaultSchedules;
 
@@ -65,7 +66,10 @@ public class MigrationUtil {
      */
     public static void doMigrationTasksIfRequired() {
         CCUHsApi ccuHsApi = CCUHsApi.getInstance();
-
+        if(!PreferenceUtil.getUpdateBacnetIdForRoom()) {
+            updateBacnetPropertiesForRoom();
+            PreferenceUtil.setUpdateBacnetIdForRoom();
+        }
 
         if(!PreferenceUtil.getTrueCfmPressureUnitTagMigration()) {
             doTrueCfmPressureUnitTagMigration(CCUHsApi.getInstance());
@@ -1153,6 +1157,15 @@ public class MigrationUtil {
             CcuLog.e(TAG_CCU_MIGRATION_UTIL, "lockout point update failed "+e.getMessage());
             e.printStackTrace();
         }
+    }
+    private static void updateBacnetPropertiesForRoom() {
+        ArrayList<HashMap<Object, Object>> rooms = CCUHsApi.getInstance().readAllEntities("room");
+        CcuLog.d(TAG_CCU_MIGRATION_UTIL, "updateBacnetPropertiesForRoom start");
+        rooms.forEach(room -> {
+                CcuLog.d(TAG_CCU_MIGRATION_UTIL, "updateBacnetPropertiesForRoom room id : " + room.get("id"));
+                BacnetUtilKt.updateRoom(room.get("id").toString(), room.get("floorRef").toString());
+        });
+        CcuLog.d(TAG_CCU_MIGRATION_UTIL, "updateBacnetPropertiesForRoom completed");
     }
 
 }

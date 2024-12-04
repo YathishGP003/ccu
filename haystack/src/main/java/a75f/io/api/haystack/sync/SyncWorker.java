@@ -197,9 +197,7 @@ public class SyncWorker extends Worker {
     }
     
     private void updateDeleteStatus(List<String> entityList) {
-        for (String s : entityList) {
-            syncStatusService.setDeletedEntitySynced(s);
-        }
+        syncStatusService.setDeletedEntitySynced(entityList);
         syncStatusService.saveSyncStatus();
     }
     

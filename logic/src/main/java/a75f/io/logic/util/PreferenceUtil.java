@@ -79,6 +79,7 @@ public class PreferenceUtil {
     private static final String TITLE_24_REDUNDANT_POINT_MIGRATION = "title24ReduntPointMigration";
     private static final String LOCK_OUT_HIS_UPDATE = "lockoutHisUpdate";
 
+    private static final String BACNET_SETTING_POINT_DELETED = "bacnetSettingPointDeleted";
 
 
     public static void setContext(Context c) {
@@ -612,5 +613,13 @@ public class PreferenceUtil {
 
     public static void setLockOutHisUpdate() {
         setBooleanPreference(LOCK_OUT_HIS_UPDATE, true);
+    }
+
+    public static boolean getBacnetSettingPointDeleted() {
+        return getBooleanPreference(BACNET_SETTING_POINT_DELETED);
+    }
+
+    public static void setBacnetSettingPointDeleted() {
+        setBooleanPreference(BACNET_SETTING_POINT_DELETED, true);
     }
 }

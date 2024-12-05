@@ -245,6 +245,10 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                 CcuLog.e(L.TAG_CCU_MIGRATION_UTIL, "Error in migrateAnalogTypeForVAVanalog1In $e")
            }
         }
+        if(!PreferenceUtil.getBacnetSettingPointDeleted()) {
+            removeRedundantBacnetSettingPoints()
+            PreferenceUtil.setBacnetSettingPointDeleted()
+        }
         hayStack.scheduleSync()
     }
 
@@ -1975,4 +1979,11 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
     }
 
 
+
+    fun removeRedundantBacnetSettingPoints() {
+        hayStack.readAllEntities("point and setting and point").forEach {
+            CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "bacnet setting points found: ${it["dis"]}. Deleting the redundant point")
+            hayStack.deleteEntity(it["id"].toString())
+        }
+    }
 }

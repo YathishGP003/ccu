@@ -201,8 +201,6 @@ class HyperStatSplitCpuViewModel : HyperStatSplitViewModel() {
                     hayStack.syncEntityTree()
                     CCUHsApi.getInstance().setCcuReady()
                     CcuLog.i(Domain.LOG_TAG, "HSS Profile Pairing complete")
-                    //delete deadband points in equip level
-                    deletingDeadBandPointsInEquipLevel()
                     withContext(Dispatchers.Main) {
                         context.sendBroadcast(Intent(FloorPlanFragment.ACTION_BLE_PAIRING_COMPLETED))
                         showToast("HSS Configuration saved successfully", context)
@@ -224,24 +222,6 @@ class HyperStatSplitCpuViewModel : HyperStatSplitViewModel() {
             }
         }
 
-    }
-
-    // this function is added to delete the deadband points because in  model we have deaband points
-    // If we remove in the model this method will be removed as well
-    private fun deletingDeadBandPointsInEquipLevel() {
-
-        val equipRef = hssProfile.hsSplitHaystackUtil.equipRef
-        val coolingDeadBand: HashMap<Any, Any>? = CCUHsApi.getInstance()
-            .readEntity("cooling and deadband and not multiplier  and equipRef == \"$equipRef\"")
-        val heatingDeadBand: HashMap<Any, Any>? = CCUHsApi.getInstance()
-            .readEntity("heating and deadband and not multiplier  and equipRef == \"$equipRef\"")
-        if (!coolingDeadBand.isNullOrEmpty()) {
-            CCUHsApi.getInstance().deleteEntity(coolingDeadBand["id"].toString())
-        }
-        if (!heatingDeadBand.isNullOrEmpty()) {
-            CCUHsApi.getInstance().deleteEntity(heatingDeadBand["id"].toString())
-        }
-        CcuLog.i(Domain.LOG_TAG, "Deleted Equip level Deadband points")
     }
 
     /*

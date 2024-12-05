@@ -397,7 +397,7 @@ public class HSUtil {
 
     public static boolean isCPUEquip(String id, CCUHsApi hayStack) {
         HashMap<Object, Object> equipMap = hayStack.readMapById(id);
-        return equipMap.containsKey(Tags.CPU);
+        return equipMap.containsKey(Tags.HYPERSTAT) && equipMap.containsKey(Tags.CPU);
     }
 
     public static boolean isHPUEquip(String id, CCUHsApi hayStack) {

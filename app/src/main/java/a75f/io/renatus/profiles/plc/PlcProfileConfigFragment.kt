@@ -19,6 +19,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -439,7 +440,19 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                     contentAlignment = Alignment.CenterEnd
                 ) {
                     SaveTextView(SET) {
-                        viewModel.saveConfiguration()
+                        if (viewModel.viewState.analog1InputType > 0.0 ||
+                            viewModel.viewState.thermistor1InputType > 0.0 ||
+                            viewModel.viewState.nativeSensorType > 0.0) {
+                            
+                            viewModel.saveConfiguration()
+                        } else {
+                            Toast.makeText(
+                                requireContext(),
+                                "Please select an input sensor",
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
+
                     }
                 }
 

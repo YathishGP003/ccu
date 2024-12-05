@@ -129,6 +129,9 @@ public class UpdatePointHandler implements MessageHandler
 
         if (HSUtil.isCPUEquip(pointUid, CCUHsApi.getInstance())){
             reconfigureHSCPUV2(msgObject, localPoint);
+            updatePoints(localPoint);
+            hayStack.scheduleSync();
+            return;
         }
         
         if (HSUtil.isSystemConfigOutputPoint(pointUid, CCUHsApi.getInstance())

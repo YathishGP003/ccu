@@ -1,5 +1,7 @@
 package a75f.io.renatus;
 
+import static a75f.io.device.bacnet.BacnetUtilKt.generateBacnetIdForRoom;
+
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
@@ -892,11 +894,13 @@ public class FloorPlanFragment extends Fragment {
                                 "Zone following zone-schedule as default named schedule is not available", Toast.LENGTH_SHORT).show();
                 }else {
                     hsZone.setScheduleRef(defaultNamedSchedule.get("id").toString());
-
                 }
-                BacnetUtilKt.addBacnetTags(getActivity().getApplicationContext(), hsZone.getFloorRef(), hsZone.getId());
-                hsZone = HSUtil.getZone(hsZone.getId(), hsZone.getFloorRef());
+                int bacnetId = generateBacnetIdForRoom(zoneId);
+                hsZone.setBacnetId(bacnetId);
+                hsZone.setBacnetType(Tags.DEVICE);
+                CCUHsApi.getInstance().updateZone(hsZone, zoneId);
                 L.saveCCUStateAsync();
+                CCUHsApi.getInstance().syncEntityTree();
                 roomList.add(hsZone);
                 roomList.sort(new ZoneComparator());
                 updateRooms(roomList);

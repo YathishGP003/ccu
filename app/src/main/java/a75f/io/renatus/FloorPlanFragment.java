@@ -1,5 +1,7 @@
 package a75f.io.renatus;
 
+import static a75f.io.device.bacnet.BacnetUtilKt.generateBacnetIdForRoom;
+
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
@@ -71,6 +73,7 @@ import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
 import a75f.io.renatus.profiles.acb.AcbProfileConfigFragment;
 import a75f.io.renatus.profiles.hss.cpu.HyperStatSplitCpuFragment;
 import a75f.io.renatus.profiles.dab.DabProfileConfigFragment;
+import a75f.io.renatus.profiles.otn.OtnProfileConfigFragment;
 import a75f.io.renatus.profiles.sse.SseProfileConfigFragment;
 import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatV2CpuFragment;
 import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatMonitoringFragment;
@@ -891,9 +894,10 @@ public class FloorPlanFragment extends Fragment {
                                 "Zone following zone-schedule as default named schedule is not available", Toast.LENGTH_SHORT).show();
                 }else {
                     hsZone.setScheduleRef(defaultNamedSchedule.get("id").toString());
-
                 }
-
+                int bacnetId = generateBacnetIdForRoom(zoneId);
+                hsZone.setBacnetId(bacnetId);
+                hsZone.setBacnetType(Tags.DEVICE);
                 CCUHsApi.getInstance().updateZone(hsZone, zoneId);
                 L.saveCCUStateAsync();
                 CCUHsApi.getInstance().syncEntityTree();
@@ -904,7 +908,6 @@ public class FloorPlanFragment extends Fragment {
 
                 hideKeyboard();
                 siteRoomList.add(addRoomEdit.getText().toString().trim());
-                BacnetUtilKt.addBacnetTags(getActivity().getApplicationContext(), hsZone.getFloorRef(), hsZone.getId());
                 return true;
             } else {
                 Toast.makeText(getActivity().getApplicationContext(), "Room cannot be empty", Toast.LENGTH_SHORT).show();
@@ -1113,8 +1116,8 @@ public class FloorPlanFragment extends Fragment {
                             , zone.getId(), floor.getId(),NodeType.HYPER_STAT, profile.getProfileType()), HyperStatMonitoringFragment.Companion.getID());
                     break;
                 case OTN:
-                    showDialogFragment(FragmentOTNTempInfConfiguration.newInstance(Short.parseShort(nodeAddress),
-                            zone.getId(), floor.getId(), profile.getProfileType()), FragmentOTNTempInfConfiguration.ID);
+                    showDialogFragment(OtnProfileConfigFragment.Companion.newInstance(Short.parseShort(nodeAddress),
+                            zone.getId(), floor.getId(), NodeType.OTN, profile.getProfileType()), OtnProfileConfigFragment.Companion.getID());
                     break;
                 case HYPERSTAT_VRV:
                     showDialogFragment(HyperStatVrvFragment.newInstance(Short.parseShort(nodeAddress)

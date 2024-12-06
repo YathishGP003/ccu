@@ -22,6 +22,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.*
 import java.lang.reflect.Type
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 
 /**
@@ -139,6 +140,7 @@ data class AlertSyncDto(
 //@Singleton
 class ServiceGenerator {
 
+   private val HTTP_REQUEST_TIMEOUT: Long = 30 // seconds
    companion object {
       @JvmStatic
       val instance: ServiceGenerator by lazy {
@@ -165,6 +167,9 @@ class ServiceGenerator {
 
       val okHttpClient = OkHttpClient.Builder().apply {
          addInterceptor(okhttpLogging)
+         readTimeout(HTTP_REQUEST_TIMEOUT, TimeUnit.SECONDS)
+         writeTimeout(HTTP_REQUEST_TIMEOUT, TimeUnit.SECONDS)
+         connectTimeout(HTTP_REQUEST_TIMEOUT, TimeUnit.SECONDS)
          addInterceptor(
             Interceptor { chain ->
                val bearerToken = CCUHsApi.getInstance().jwt

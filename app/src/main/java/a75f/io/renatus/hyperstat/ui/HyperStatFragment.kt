@@ -10,6 +10,8 @@ import a75f.io.logic.Globals
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
+import a75f.io.logic.bo.building.hyperstat.profiles.hpu.HpuAnalogOutAssociation
+import a75f.io.logic.bo.building.hyperstat.profiles.pipe2.Pipe2AnalogOutAssociation
 import a75f.io.renatus.BASE.BaseDialogFragment
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.FloorPlanFragment
@@ -19,23 +21,47 @@ import a75f.io.renatus.hyperstat.AnalogOutWidgets
 import a75f.io.renatus.hyperstat.RelayWidgets
 import a75f.io.renatus.hyperstat.StagedFanWidgets
 import a75f.io.renatus.hyperstat.ThermistorInWidgets
-import a75f.io.renatus.hyperstat.viewModels.*
+import a75f.io.renatus.hyperstat.viewModels.HpuViewModel
+import a75f.io.renatus.hyperstat.viewModels.HyperStatModel
+import a75f.io.renatus.hyperstat.viewModels.Pipe2ViewModel
+import a75f.io.renatus.hyperstat.viewModels.ViewState
+import a75f.io.renatus.hyperstat.viewModels.analogFanLevelSpeedValue
+import a75f.io.renatus.hyperstat.viewModels.analogFanSpeedIndexFromValue
+import a75f.io.renatus.hyperstat.viewModels.analogVoltageAtSpinnerValues
+import a75f.io.renatus.hyperstat.viewModels.analogVoltageIndexFromValue
+import a75f.io.renatus.hyperstat.viewModels.co2DCVDamperValue
+import a75f.io.renatus.hyperstat.viewModels.co2DCVOpeningDamperValue
+import a75f.io.renatus.hyperstat.viewModels.getAnalogOutDisplayName
+import a75f.io.renatus.hyperstat.viewModels.pmValues
+import a75f.io.renatus.hyperstat.viewModels.setOnItemSelected
+import a75f.io.renatus.hyperstat.viewModels.tempOffsetSpinnerValues
+import a75f.io.renatus.hyperstat.viewModels.vocValues
 import a75f.io.renatus.util.CCUUiUtil
 import a75f.io.renatus.util.ProgressDialogUtils
 import a75f.io.renatus.util.RxjavaUtil
 import a75f.io.renatus.util.extension.showErrorDialog
+import a75f.io.renatus.views.CustomCCUSwitch
+import a75f.io.renatus.views.CustomSpinnerDropDownAdapter
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import android.widget.Button
+import android.widget.LinearLayout
+import android.widget.NumberPicker
+import android.widget.Spinner
+import android.widget.TextView
+import android.widget.Toast
+import android.widget.ToggleButton
 import androidx.fragment.app.viewModels
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.CompositeDisposable
-import a75f.io.renatus.views.CustomCCUSwitch
-import a75f.io.renatus.views.CustomSpinnerDropDownAdapter
+
 /**
  * Created by Manjunath K on 15-07-2022.
  */
@@ -716,13 +742,20 @@ class HyperStatFragment : BaseDialogFragment() {
                 analogOutAtFanRecirculateLabel.visibility = View.GONE
                 analogOutAtFanRecirculateSelector.visibility = View.GONE
 
+                if (viewModel is HpuViewModel) {
+                    analogOutFanConfig.visibility = if (analogOutState.enabled && (analogOutState.association == HpuAnalogOutAssociation.FAN_SPEED.ordinal )) View.VISIBLE else View.GONE
+
+                }
+                if (viewModel is Pipe2ViewModel) {
+                    analogOutFanConfig.visibility = if (analogOutState.enabled && (analogOutState.association == Pipe2AnalogOutAssociation.FAN_SPEED.ordinal)) View.VISIBLE else View.GONE
+
+                }
+
                 analogOutAtFanLow.setSelection(analogFanSpeedIndexFromValue(analogOutState.perAtFanLow))
                 analogOutAtFanMedium.setSelection(analogFanSpeedIndexFromValue(analogOutState.perAtFanMedium))
                 analogOutAtFanHigh.setSelection(analogFanSpeedIndexFromValue(analogOutState.perAtFanHigh))
                 // Set the recirculate fan speed only if it is visible
-                if(analogOutAtFanRecirculateLabel.visibility == View.VISIBLE) {
-                    analogOutAtFanRecirculateSelector.setSelection(analogFanSpeedIndexFromValue(analogOutState.voltageAtRecirculate))
-                }
+
 
                 if (!isDampSelected && analogOutState.enabled)
                     isDampSelected = viewModel.isDamperSelected(analogOutState.association)

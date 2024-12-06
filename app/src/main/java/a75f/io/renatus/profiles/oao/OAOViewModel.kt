@@ -30,9 +30,6 @@ import a75f.io.renatus.util.ProgressDialogUtils
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.seventyfivef.domainmodeler.client.ModelDirective
@@ -97,7 +94,6 @@ class OAOViewModel : ViewModel() {
                 deviceAddress.toInt(), nodeType.name, 0,
                 zoneRef, floorRef, profileType, model
             ).getActiveConfiguration()
-            profileConfiguration.unusedPorts["Relay1"] = getUnUsedPort(deviceAddress.toInt())
         } else {
             profileConfiguration = OAOProfileConfiguration(
                 deviceAddress.toInt(), nodeType.name, 0,
@@ -171,10 +167,6 @@ class OAOViewModel : ViewModel() {
                 setUpOAOProfile()
                 CcuLog.i(Domain.LOG_TAG, "OAO Profile Setup complete")
                 L.saveCCUState()
-                saveUnMappedPort(
-                    configuration = profileConfiguration,
-                    profileConfiguration.unusedPorts["Relay1"]!!
-                )
                 hayStack.syncEntityTree()
                 CCUHsApi.getInstance().setCcuReady()
                 CcuLog.i(Domain.LOG_TAG, "Send seed for $deviceAddress")
@@ -323,28 +315,7 @@ class OAOViewModel : ViewModel() {
         ).containsKey("unused")
     }
 
-    private fun saveUnMappedPort(configuration: OAOProfileConfiguration, enabled: Boolean) {
-        val deviceId =
-            hayStack.readEntity("device and addr == \"${configuration.nodeAddress}\"")["id"].toString()
-        val relay1Dict =
-            hayStack.readHDict("point and domainName == \"relay1\" and deviceRef == \"$deviceId\"")
-
-        if (enabled != relay1Dict.has(Tags.UNUSED)) {
-            val relay1 = RawPoint.Builder().setHDict(relay1Dict).build()
-            if (enabled) {
-                relay1.markers.add(Tags.WRITABLE)
-                relay1.markers.add(Tags.UNUSED)
-                relay1.enabled = false
-            } else {
-                relay1.markers.remove(Tags.WRITABLE)
-                relay1.markers.remove(Tags.UNUSED)
-            }
-            hayStack.updatePoint(relay1, relay1Dict["id"].toString())
-        }
-    }
-
-
-    fun updateDevicePoints(
+    private fun updateDevicePoints(
         hayStack: CCUHsApi,
         config: OAOProfileConfiguration,
         deviceBuilder: DeviceBuilder,

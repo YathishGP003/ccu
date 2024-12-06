@@ -49,7 +49,7 @@ class CommonTimeSlotFinder {
         return getUncommonIntervals(buildingScheduleDays, zoneScheduleDays)
     }
 
-    private fun getUncommonIntervals(buildingIntervals: List<TimeSlot>, zoneIntervals: List<TimeSlot>): List<TimeSlot> {
+    fun getUncommonIntervals(buildingIntervals: List<TimeSlot>, zoneIntervals: List<TimeSlot>): List<TimeSlot> {
         val uncommonIntervals = mutableListOf<TimeSlot>()
         val sortedBuildingIntervals = buildingIntervals.sortedWith(compareBy({ it.startHour }, { it.startMinute }))
         val sortedZoneIntervals = zoneIntervals.sortedWith(compareBy({ it.startHour }, { it.startMinute }))
@@ -59,31 +59,51 @@ class CommonTimeSlotFinder {
             var currentStartMinutes = zoneStartMinutes
             var hasOverlap = false
 
-            for (building in sortedBuildingIntervals) {
+            for (currentBuildingIntervalPosition in sortedBuildingIntervals.indices) {
+                val building = sortedBuildingIntervals[currentBuildingIntervalPosition]
                 val (buildingStartMinutes, buildingEndMinutes) = building.toMinutes()
 
-                if (currentStartMinutes < buildingEndMinutes) {
-                    if (zoneEndMinutes <= buildingStartMinutes) {
-                        // No overlap at all
-                        uncommonIntervals.add(TimeSlot(
-                            currentStartMinutes / 60, currentStartMinutes % 60,
-                            zoneEndMinutes / 60, zoneEndMinutes % 60
-                        ))
-                        hasOverlap = true
-                        break
-                    } else {
-                        // Overlap found
-                        if (currentStartMinutes < buildingStartMinutes) {
-                            uncommonIntervals.add(TimeSlot(
-                                currentStartMinutes / 60, currentStartMinutes % 60,
-                                buildingStartMinutes / 60, buildingStartMinutes % 60
-                            ))
-                        }
-                        currentStartMinutes = maxOf(currentStartMinutes, buildingEndMinutes)
-                    }
+                // Skip building intervals that end before the current zone start
+                if (buildingEndMinutes <= currentStartMinutes) {
+                    continue
                 }
+
+                // Fully contained interval
+                if (currentStartMinutes >= buildingStartMinutes && zoneEndMinutes <= buildingEndMinutes) {
+                    currentStartMinutes = zoneEndMinutes
+                    hasOverlap = true
+                    break
+                }
+
+                // No overlap
+                if (zoneEndMinutes <= buildingStartMinutes) {
+                    break
+                }
+
+                // Partial overlap if zone start is before building start
+                if (currentStartMinutes < buildingStartMinutes) {
+                    uncommonIntervals.add(TimeSlot(
+                        currentStartMinutes / 60, currentStartMinutes % 60,
+                        buildingStartMinutes / 60, buildingStartMinutes % 60
+                    ))
+                }
+
+                // Update current start time to the max of the current start time and the building end time
+                currentStartMinutes = maxOf(currentStartMinutes, buildingEndMinutes)
+
+                // Partial overlap if zone end is after building end
+                if(currentStartMinutes < zoneEndMinutes &&
+                    isCurrentBuildingIntervalIsLastOrNextBuildingIntervalsStartTimeIsGreaterThanCurrentZoneEndMinutes(currentBuildingIntervalPosition, sortedBuildingIntervals, zoneEndMinutes)) {
+                    uncommonIntervals.add(TimeSlot(
+                        currentStartMinutes / 60, currentStartMinutes % 60,
+                        zoneEndMinutes / 60, zoneEndMinutes % 60
+                    ))
+                }
+
+                hasOverlap = true
             }
 
+            // Add remaining interval if no overlap
             if (!hasOverlap && currentStartMinutes < zoneEndMinutes) {
                 uncommonIntervals.add(TimeSlot(
                     currentStartMinutes / 60, currentStartMinutes % 60,
@@ -92,9 +112,16 @@ class CommonTimeSlotFinder {
             }
         }
 
-        return uncommonIntervals.filter { (it.startHour * 60 + it.startMinute) != (it.endHour * 60 + it.endMinute) }.distinct()
+        return uncommonIntervals
     }
-    private fun getCommonIntervals(schedule: Map<String, List<TimeSlot>>): List<TimeSlot> {
+
+    private fun isCurrentBuildingIntervalIsLastOrNextBuildingIntervalsStartTimeIsGreaterThanCurrentZoneEndMinutes(
+        currentBuildingIntervalPosition: Int, buildingIntervals: List<TimeSlot>, currentMaxMin : Int): Boolean {
+        return currentBuildingIntervalPosition == buildingIntervals.size - 1 || buildingIntervals[currentBuildingIntervalPosition + 1].toMinutes().first > currentMaxMin
+    }
+
+
+    fun getCommonIntervals(schedule: Map<String, List<TimeSlot>>): List<TimeSlot> {
         if (schedule.isEmpty()) return emptyList()
 
         var commonIntervals = schedule.values.first().toMutableList()
@@ -224,35 +251,7 @@ class CommonTimeSlotFinder {
         addDaysToAppropriateLists(zoneDays, dayMapping.map { it.second })
         addDaysToAppropriateLists(buildingDays, dayMapping.map { it.first })
 
-        fun createDayScheduleWithBoundaries(timeSlots: List<TimeSlot>,
-                                            boundaries: List<TimeSlot>
-        ): List<TimeSlot> {
-            val result = mutableListOf<TimeSlot>()
 
-            for (boundary in boundaries) {
-                for (timeSlot in timeSlots) {
-                    // Check if the time slot overlaps with the boundary
-                    if ((timeSlot.startHour < boundary.endHour || (timeSlot.startHour == boundary.endHour && timeSlot.startMinute < boundary.endMinute)) &&
-                        (timeSlot.endHour > boundary.startHour || (timeSlot.endHour == boundary.startHour && timeSlot.endMinute > boundary.startMinute))) {
-
-                        val startHour = maxOf(boundary.startHour, timeSlot.startHour)
-                        val startMinute = if (startHour == boundary.startHour) maxOf(boundary.startMinute, timeSlot.startMinute) else timeSlot.startMinute
-
-                        val endHour = minOf(boundary.endHour, timeSlot.endHour)
-                        val endMinute = if(endHour < timeSlots.maxByOrNull { it.endHour}!!.endHour) boundary.endMinute
-                        else if (endHour == boundary.endHour) minOf(boundary.endMinute, timeSlot.endMinute)
-                        else timeSlot.endMinute
-
-                        if(endHour < timeSlots.maxByOrNull { it.endHour}!!.endHour) maxOf(boundary.endMinute, timeSlot.endMinute)
-                        // Only add valid time slots within the boundary limits
-                        if (startHour < endHour || (startHour == endHour && startMinute <= endMinute)) {
-                            result.add(TimeSlot(startHour, startMinute, endHour, endMinute))
-                        }
-                    }
-                }
-            }
-            return result
-        }
         fun generateWeekendSchedule1(boundaryDays: MutableList<Schedule.Days>): Map<String, List<TimeSlot>> {
             return mapOf(
                 DAYS.SATURDAY.name to createDayScheduleWithBoundaries(
@@ -470,6 +469,59 @@ class CommonTimeSlotFinder {
                     thursdayCommonIntervalsFinal, fridayCommonIntervalsFinal, saturdayCommonIntervalsFinal,
                     sundayCommonIntervalsFinal)
             }
+        }
+    }
+    fun createDayScheduleWithBoundaries(timeSlots: List<TimeSlot>,
+                                        boundaries: List<TimeSlot>
+    ): List<TimeSlot> {
+        val result = mutableListOf<TimeSlot>()
+
+        for (boundary in boundaries) {
+            for (timeSlot in timeSlots) {
+                // Check if the time slot overlaps with the boundary
+                if ((timeSlot.startHour < boundary.endHour || (timeSlot.startHour == boundary.endHour && timeSlot.startMinute < boundary.endMinute)) &&
+                    (timeSlot.endHour > boundary.startHour || (timeSlot.endHour == boundary.startHour && timeSlot.endMinute > boundary.startMinute))) {
+
+                    val startHour = maxOf(boundary.startHour, timeSlot.startHour)
+                    val startMinute = calculateStartMinute(boundary, timeSlot)
+                    val endHour = minOf(boundary.endHour, timeSlot.endHour)
+                    val endMinute = calculateEndMinute(boundary, timeSlot)
+
+                    if(endHour < timeSlots.maxByOrNull { it.endHour}!!.endHour) maxOf(boundary.endMinute, timeSlot.endMinute)
+                    // Only add valid time slots within the boundary limits
+                    if (startHour < endHour || (startHour == endHour && startMinute <= endMinute)) {
+                        result.add(TimeSlot(startHour, startMinute, endHour, endMinute))
+                    }
+                }
+            }
+        }
+        return result
+    }
+    fun calculateStartMinute(boundary: TimeSlot, timeSlot: TimeSlot): Int {
+        return when {
+            boundary.startHour == timeSlot.startHour && boundary.startMinute == timeSlot.startMinute -> boundary.startMinute
+            boundary.startHour == timeSlot.startHour -> maxOf(boundary.startMinute, timeSlot.startMinute)
+            timeSlot.startHour > boundary.startHour -> timeSlot.startMinute
+            else -> boundary.startMinute
+        }
+    }
+
+    fun calculateEndMinute(boundary: TimeSlot, timeSlot: TimeSlot): Int {
+        return when {
+            // Case 1: Exact match between boundary and timeSlot
+            boundary.endHour == timeSlot.endHour && boundary.endMinute == timeSlot.endMinute -> boundary.endMinute
+
+            // Case 2: Same hour, pick the minimum minute
+            boundary.endHour == timeSlot.endHour -> minOf(boundary.endMinute, timeSlot.endMinute)
+
+            // Case 3: timeSlot ends earlier than boundary
+            timeSlot.endHour < boundary.endHour -> timeSlot.endMinute
+
+            // Case 4: timeSlot extends beyond boundary but in a different hour
+            boundary.endHour < timeSlot.endHour -> boundary.endMinute
+
+            // Case 5: timeSlot ends within the same hour but earlier or equal
+            else -> minOf(boundary.endMinute, timeSlot.endMinute)
         }
     }
     fun getUnCommonTimeSlot(
@@ -1109,19 +1161,15 @@ class CommonTimeSlotFinder {
             TimeSlot(it.sthh, it.stmm, it.ethh, it.etmm)
         }
 
-        val everydayFinal = uncommonIntervals.getOrNull(0)?.getOrNull(0)?.let {
-            complainedTimeslots(everydayListOfTimeSlot, it)
-        } ?: emptyList()
-
         val itemsToRemove = mutableListOf<Int>()
         val itemsToAdd = mutableListOf<Schedule.Days>()
 
         for (i in mSchedule.days) {
             if (daysToBeAdded.contains(DAYS.values()[i.day])) {
-                if (everydayFinal.isNotEmpty()) {
+                if (everydayListOfTimeSlot.isNotEmpty()) {
                     val d: Schedule.Days = i
                     val matchingTimeSlot =
-                        everydayFinal.find { it.startHour == d.sthh && it.startMinute == d.stmm }
+                        everydayListOfTimeSlot.find { it.startHour == d.sthh && it.startMinute == d.stmm }
                     if(matchingTimeSlot == null) {
                         continue
                     }

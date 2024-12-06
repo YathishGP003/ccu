@@ -24,7 +24,6 @@ class OAOViewState {
     var usePerRoomCO2SensingState by mutableStateOf (false)
     var systemPurgeOutsideDamperMinPos by mutableStateOf (0.0)
     var enhancedVentilationOutsideDamperMinOpenPos by mutableStateOf (0.0)
-    var unusedPortState by mutableStateOf(hashMapOf<String, Boolean>())
 
 
     companion object {
@@ -48,7 +47,6 @@ class OAOViewState {
                 exhaustFanHysteresisPos = config.exhaustFanHysteresis.currentVal
                 systemPurgeOutsideDamperMinPos = config.systemPurgeOutsideDamperMinPos.currentVal
                 enhancedVentilationOutsideDamperMinOpenPos = config.enhancedVentilationOutsideDamperMinOpen.currentVal
-                unusedPortState = config.unusedPorts
             }
         }
     }
@@ -72,7 +70,6 @@ class OAOViewState {
         profileConfiguration.exhaustFanHysteresis.currentVal = this.exhaustFanHysteresisPos
         profileConfiguration.systemPurgeOutsideDamperMinPos.currentVal = this.systemPurgeOutsideDamperMinPos
         profileConfiguration.enhancedVentilationOutsideDamperMinOpen.currentVal = this.enhancedVentilationOutsideDamperMinOpenPos
-        profileConfiguration.unusedPorts = this.unusedPortState
     }
 
     override fun toString(): String {
@@ -93,7 +90,6 @@ class OAOViewState {
                 "exhaustFanHysteresis: $exhaustFanHysteresisPos,"+
                 "usePerRoomCO2Sensing: $usePerRoomCO2SensingState,"+
                 "systemPurgeOutsideDamperMinPos: $systemPurgeOutsideDamperMinPos,"+
-                "enhancedVentilationOutsideDamperMinOpen: $enhancedVentilationOutsideDamperMinOpenPos,"+
-                "unusedPorts: $unusedPortState"
+                "enhancedVentilationOutsideDamperMinOpen: $enhancedVentilationOutsideDamperMinOpenPos,"
     }
 }

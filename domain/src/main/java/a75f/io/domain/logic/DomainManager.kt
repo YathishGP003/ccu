@@ -22,6 +22,7 @@ import a75f.io.domain.equips.DabStagedSystemEquip
 import a75f.io.domain.equips.DabStagedVfdSystemEquip
 import a75f.io.domain.equips.DefaultSystemEquip
 import a75f.io.domain.equips.DomainEquip
+import a75f.io.domain.equips.OtnEquip
 import a75f.io.domain.equips.SseEquip
 import a75f.io.domain.equips.VavAdvancedHybridSystemEquip
 import a75f.io.domain.equips.VavEquip
@@ -30,7 +31,6 @@ import a75f.io.domain.equips.VavStagedSystemEquip
 import a75f.io.domain.equips.VavStagedVfdSystemEquip
 import a75f.io.domain.equips.hyperstat.CpuV2Equip
 import a75f.io.domain.equips.hyperstat.HpuV2Equip
-import a75f.io.domain.equips.hyperstat.HyperStatEquip
 import a75f.io.domain.equips.hyperstat.MonitoringEquip
 import a75f.io.domain.equips.hyperstat.Pipe2V2Equip
 import a75f.io.logger.CcuLog
@@ -108,6 +108,8 @@ object DomainManager {
                     (it.contains("hyperstat") && it.contains("hpu")) -> Domain.equips[it["id"].toString()] = HpuV2Equip(it["id"].toString())
                     (it.contains("hyperstat") && it.contains("pipe2")) -> Domain.equips[it["id"].toString()] = Pipe2V2Equip(it["id"].toString())
                     (it.contains("domainName") && it["domainName"].toString() == DomainName.hyperstatMonitoring) -> Domain.equips[it["id"].toString()] = MonitoringEquip(it["id"].toString())
+                    it.contains("otn") -> Domain.equips[it["id"].toString()] =
+                        OtnEquip(it["id"].toString())
 
                 }
             }
@@ -116,6 +118,12 @@ object DomainManager {
             .forEach {
                 CcuLog.i(Domain.LOG_TAG, "Build domain $it")
                 Domain.equips[it["id"].toString()] = BypassDamperEquip(it["id"].toString())
+            }
+
+        hayStack.readAllEntities("otn and equip")
+            .forEach {
+                CcuLog.i(Domain.LOG_TAG, "Build domain $it")
+                Domain.equips[it["id"].toString()] = OtnEquip(it["id"].toString())
             }
 
         hayStack.readAllEntities("oao and equip")
@@ -238,6 +246,7 @@ object DomainManager {
             equip.markers.contains("vav") -> Domain.equips[equip.id] = VavEquip(equip.id)
             equip.markers.contains("dab") -> Domain.equips[equip.id] = DabEquip(equip.id)
             equip.markers.contains("sse") -> Domain.equips[equip.id] = SseEquip(equip.id)
+            equip.markers.contains("otn") -> Domain.equips[equip.id] = OtnEquip(equip.id)
             equip.markers.contains("hyperstat") -> {
                 when {
                     equip.markers.contains("cpu") -> Domain.equips[equip.id] = CpuV2Equip(equip.id)
@@ -412,7 +421,6 @@ object DomainManager {
         rooms?.get(hayStackDevice.roomRef)
         val device = Domain.site?.floors?.get(hayStackDevice.floorRef)?.
         rooms?.get(hayStackDevice.roomRef)?.equips?.get(hayStackDevice.equipRef)
-        addDomainDevices(Domain.hayStack)
     }
 
     fun addRawPoint(hayStackPoint : a75f.io.api.haystack.RawPoint) {

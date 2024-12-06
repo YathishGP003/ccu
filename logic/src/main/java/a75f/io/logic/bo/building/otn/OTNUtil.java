@@ -15,12 +15,12 @@ public class OTNUtil {
     public static HashMap getOTNPoints(String equipID) {
         HashMap points = new HashMap();
         points.put("Profile", "Temperature Influencing");
-        String equipStatusPoint = CCUHsApi.getInstance().readDefaultStrVal("point and status and " +
+        String equipStatusPoint = CCUHsApi.getInstance().readDefaultStrVal("point and " +
                 "message and equipRef == \"" + equipID + "\"");
         double humidity = CCUHsApi.getInstance().readHisValByQuery("point and air and humidity " +
                 "and sensor " +
                 "and equipRef == \"" + equipID + "\"");
-        double forceoccupied = CCUHsApi.getInstance().readHisValByQuery("point and occupancy and" +
+        double forceoccupied = CCUHsApi.getInstance().readHisValByQuery("point and (occupancy or occupied) and" +
                 " mode and equipRef == \"" + equipID + "\"");
 
         CcuLog.d(LOG_TAG, "equipStatusPoint =" + equipStatusPoint +

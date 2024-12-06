@@ -26,7 +26,6 @@ fun repackagePoints(tempGrid: HGrid, isVirtualZoneEnabled: Boolean, group: Strin
         var extractedEquipRef = ""
         var isSystem = false
         var isConnect = false
-        var isRoom = false
         while (rowIterator.hasNext()) {
             val e: HDict.MapEntry = (rowIterator.next() as HDict.MapEntry)
             when (e.value!!) {
@@ -61,11 +60,7 @@ fun repackagePoints(tempGrid: HGrid, isVirtualZoneEnabled: Boolean, group: Strin
             if (e.key.toString() == "equipRef") {
                 extractedEquipRef = e.value.toString()
             }
-            if (e.key.toString() == "room") {
-                isRoom = true
-            }
         }
-        if(!isRoom) {
             val zoneName = CCUHsApi.getInstance()
                 .readMapById(extractedZoneRef.replace("@" , ""))["dis"].toString().trim()
             val pointDisName = extractedDis.split("-")
@@ -118,9 +113,6 @@ fun repackagePoints(tempGrid: HGrid, isVirtualZoneEnabled: Boolean, group: Strin
                     hDictBuilder.add("dis" , lastLiteralFromDis)
                 }
             }
-        } else {
-            hDictBuilder.add("dis" , extractedDis)
-        }
         mutableDictList.add(hDictBuilder.toDict())
     }
     return mutableDictList

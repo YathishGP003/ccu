@@ -295,4 +295,17 @@ public class SyncStatusService {
             builder.add("lastModifiedDateTime", HDateTime.make(System.currentTimeMillis()));
         }
     }
+
+    public void setDeletedEntitySynced(List<String> removedSyncIdList) {
+        CcuLog.i(HayStackConstants.LOG_TAG,"setDeletedEntitySynced for ids:"+removedSyncIdList);
+        deletedIdList.removeAll(removedSyncIdList);
+        putListString(PREFS_ID_LIST_DELETED, deletedIdList);
+
+        if(updatedIdList.removeAll(removedSyncIdList)) {
+            putListString(PREFS_ID_LIST_UPDATED, updatedIdList);
+        }
+        if(unsyncedIdList.removeAll(removedSyncIdList)) {
+            putListString(PREFS_ID_LIST_UNSYNCED, unsyncedIdList);
+        }
+    }
 }

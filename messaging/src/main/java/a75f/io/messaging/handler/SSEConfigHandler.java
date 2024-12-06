@@ -98,7 +98,7 @@ class SSEConfigHandler {
     }
 
     public static void updateTemperatureMode(Point configPoint, CCUHsApi ccuHsApi) {
-        if (configPoint.getDomainName().equals(DomainName.relay1OutputEnable)) {
+        if (configPoint.getDomainName().equals(DomainName.relay1OutputAssociation)) {
             DesiredTempDisplayMode.setModeType(configPoint.getRoomRef(), ccuHsApi);
         }
     }

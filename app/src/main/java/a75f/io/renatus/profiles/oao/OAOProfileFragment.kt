@@ -16,7 +16,6 @@ import a75f.io.renatus.compose.SaveTextViewNew
 import a75f.io.renatus.compose.TitleTextView
 import a75f.io.renatus.compose.ToggleButtonStateful
 import a75f.io.renatus.profiles.OnPairingCompleteListener
-import a75f.io.renatus.profiles.profileUtils.UnusedPortsFragment
 import a75f.io.renatus.util.highPriorityDispatcher
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -498,15 +497,6 @@ class OAOProfileFragment : BaseDialogFragment(), OnPairingCompleteListener {
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))
-
-                val mapOfUnUsedPorts = viewModel.viewState.unusedPortState
-                if (mapOfUnUsedPorts.isNotEmpty()) {
-                    UnusedPortsFragment.DividerRow()
-                    UnusedPortsFragment.LabelUnusedPorts()
-                    UnusedPortsFragment.UnUsedPortsListView(viewModel)
-                }
-
-                Spacer(modifier = Modifier.height(25.dp))
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -524,7 +514,7 @@ class OAOProfileFragment : BaseDialogFragment(), OnPairingCompleteListener {
                             }
                         }
                         Column(horizontalAlignment = Alignment.End) {
-                            Row() {
+                            Row {
                                 SaveTextViewNew("SET") {
                                     viewModel.saveConfiguration()
                                 }

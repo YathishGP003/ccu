@@ -31,6 +31,7 @@ public class PreferenceUtil {
     private static final String CLEAN_OTHER_CCU_ZONE_SCHEDULES = "removeOtherCcuZoneSchedules";
     private static final String DATA_MIGRATION_POP_UP = "dataMigrationPopUp";
     private static final String SR_MIGRATION_POINT = "srMigrationPoint";
+    private static final String UPDATE_BACNET_ID_FOR_ROOM = "updateBacnetIdForRoom";
 
     /**
       * Below preference key is being changed from "zoneEquipPointFloorRefRoomRefMigration" to "zoneEquipPointFloorRefRoomRefMigration_v2"
@@ -69,14 +70,16 @@ public class PreferenceUtil {
     public static final String ZONE_CO2_MIGRATION = "ZONE_CO2_MIGRATION";
     public static final String MIGRATE_HIS_INTERPOLATE_FOR_DEVICE_POINTS = "migrateHisInterpolateForDeviceEntities";
     public static final String MIGRATE_ANALOG_INPUT_TYPE_FOR_VAV_DEVICE_POINT = "migrateAnalogInputTypeForVavDevicePoint";
+    public static final String DELETE_REDUNDANT_SETBACK_POINTS_FROM_HN_ACB_EQUIPS  = "deleteRedundantSetbackPointsFromHnAcbEquips";
     public static final String BACKFILL_DEFAULT_VALUE_MIGRATION = "backFillDefaultValueMigration";
     public static final String DAB_DAMPER_SIZE_MIGRATION = "dabDamperSizeMigration";
-    public static final String BACNET_ID_MIGRATION = "bacnetIdUpdateMigration";
+    public static final String BACNET_ID_MIGRATION = "bacnetIdAndTypeUpdateMigration";
     private static final String INSTALL_TYPE = "INSTALL_TYPE";
     private static final String RESTORE_BYPASS_DAMPER_AFTER_REPLACE = "restoreBypassDamperAfterReplace";
     private static final String TITLE_24_REDUNDANT_POINT_MIGRATION = "title24ReduntPointMigration";
     private static final String LOCK_OUT_HIS_UPDATE = "lockoutHisUpdate";
 
+    private static final String BACNET_SETTING_POINT_DELETED = "bacnetSettingPointDeleted";
 
 
     public static void setContext(Context c) {
@@ -453,6 +456,14 @@ public class PreferenceUtil {
         setBooleanPreference(RECOVER_HELIO_NODE_ACB_TUNERS_MIGRATION, true);
     }
 
+    public static boolean getDeleteRedundantSetbackPointsFromHnAcbEquips() {
+        return getBooleanPreference(DELETE_REDUNDANT_SETBACK_POINTS_FROM_HN_ACB_EQUIPS);
+    }
+
+    public static void setDeleteRedundantSetbackPointsFromHnAcbEquips() {
+        setBooleanPreference(DELETE_REDUNDANT_SETBACK_POINTS_FROM_HN_ACB_EQUIPS, true);
+    }
+
     public static boolean getACBCondensateSensorMigration() {
         return getBooleanPreference(ACB_COND_SENSOR_MIGRATION);
     }
@@ -580,6 +591,14 @@ public class PreferenceUtil {
         setBooleanPreference(RESTORE_BYPASS_DAMPER_AFTER_REPLACE, true);
     }
 
+    public static void setUpdateBacnetIdForRoom() {
+        setBooleanPreference(UPDATE_BACNET_ID_FOR_ROOM, true);
+    }
+
+    public static boolean getUpdateBacnetIdForRoom() {
+        return getBooleanPreference(UPDATE_BACNET_ID_FOR_ROOM);
+    }
+
     public static boolean getTitle24RedundantPointMigrationStatus() {
         return getBooleanPreference(TITLE_24_REDUNDANT_POINT_MIGRATION);
     }
@@ -594,5 +613,13 @@ public class PreferenceUtil {
 
     public static void setLockOutHisUpdate() {
         setBooleanPreference(LOCK_OUT_HIS_UPDATE, true);
+    }
+
+    public static boolean getBacnetSettingPointDeleted() {
+        return getBooleanPreference(BACNET_SETTING_POINT_DELETED);
+    }
+
+    public static void setBacnetSettingPointDeleted() {
+        setBooleanPreference(BACNET_SETTING_POINT_DELETED, true);
     }
 }

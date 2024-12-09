@@ -6,13 +6,6 @@
 trigger:
 - none
 
-schedules:
-  - cron: '00 23 * * *' # This cron expression represents 04:30 AM IST
-    displayName: CCU Scheduled Nightly Build
-    branches:
-      include:
-        - master
-
 jobs:
 - job: Job_1
   displayName: Build APK QA
@@ -118,6 +111,3 @@ jobs:
     inputs:
       PathtoPublish: '$(System.DefaultWorkingDirectory)/app/build/outputs/apk/airoverse_prod/'
       ArtifactName: Airoverse_prodApk
-
-
-

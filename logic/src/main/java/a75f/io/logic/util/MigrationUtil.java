@@ -191,7 +191,36 @@ public class MigrationUtil {
             }
             CcuLog.d(TAG, "Title24Migration removeDuplicateTitle24Points completed");
         }
+
+        if (!PreferenceUtil.getLocalBuildingTunersUpdate()) {
+            updateLocalTunersEquipRef(ccuHsApi);
+            PreferenceUtil.setLocalBuildingTunersUpdate();
+        }
+
         ccuHsApi.scheduleSync();
+    }
+    private static void updateLocalTunersEquipRef(CCUHsApi hayStack) {
+        ArrayList<HashMap<Object, Object>> localBuildingPoints = hayStack.readAllEntities("point and default and (tuner or schedulable) and not ccuRef");
+
+        if (!localBuildingPoints.isEmpty()) {
+            HashMap<Object, Object> buildingEquip = CCUHsApi.getInstance().readEntity("building and equip");
+            if (buildingEquip.isEmpty()) {
+                CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Building Equip not found");
+            } else {
+                String localBuildingEquipRef = buildingEquip.get("id").toString();
+                CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Local Building Equip id "+localBuildingEquipRef);
+                localBuildingPoints.forEach(pointMap -> {
+                    String localTunerEquipRef = pointMap.get("equipRef").toString();
+                    CcuLog.d(TAG_CCU_MIGRATION_UTIL, pointMap.get("domainName").toString() + " : Local localTunerEquipRef id " + localTunerEquipRef);
+                    if (!localBuildingEquipRef.equalsIgnoreCase(localTunerEquipRef)) {
+                        Point updatedPoint = new Point.Builder().setHDict(CCUHsApi.getInstance().readHDictById(pointMap.get(Tags.ID).toString())).setEquipRef(localBuildingEquipRef).build();
+                        hayStack.updatePoint(updatedPoint, updatedPoint.getId());
+                    }
+                });
+            }
+        } else {
+            CcuLog.d(TAG_CCU_MIGRATION_UTIL, "tuners are not found");
+        }
     }
 
     private static void migrateHyperStatSplitGatewayRef(CCUHsApi hayStack) {

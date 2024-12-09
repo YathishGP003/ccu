@@ -125,21 +125,47 @@ public class UpdateEntityHandler implements MessageHandler {
                 return;
             }
 
-
-
-
             if (row.has("physical") && row.get("physical") != null) {
                 RawPoint point = new RawPoint.Builder().setHDict((HDict) row).build();
                 CCUHsApi.getInstance().tagsDb.updatePoint(point, entityId);
             }else {
                 Point point = new Point.Builder().setHDict((HDict) row).build();
+                updateEquipRefIfRequired(point);
                 CCUHsApi.getInstance().tagsDb.updatePoint(point, entityId);
             }
 
             CcuLog.i(L.TAG_CCU_MESSAGING,"<< Entities Imported");
         }
+    }
 
+    /**
+     * Local building tuner equip and cloud building tuner equip are different for every CCU
+     * So when CCU receives Update entity Check if the point is a building tuner then
+     * update equip ref of the tuner with local building tuner equip id
+     * @param point
+     * @return
+     */
+    private static void updateEquipRefIfRequired(Point point) {
+        if (isBuildingTuner(point)) {
+            Equip equip = new Equip.Builder().setHashMap(CCUHsApi.getInstance().readEntity("building and equip")).build();
+            if (equip != null) {
+                point.setEquipRef(equip.getEquipRef());
+                CcuLog.d(L.TAG_CCU_MESSAGING, "domainName "+ point.getDomainName() + "updated with local building tuner equip id");
+            } else {
+                CcuLog.d(L.TAG_CCU_MESSAGING, "Local Building Tuner Equip not found");
+            }
+        }
+    }
 
+    /**
+     * It will check the point is building tuner point or not (Not ccu ref is added because some of
+     * the non dm hyperstat tuner points has default tags)
+     *
+     * @param point
+     * @return
+     */
+    private static boolean isBuildingTuner(Point point) {
+        return (point.getMarkers().contains(Tags.POINT) && point.getMarkers().contains(Tags.DEFAULT) && (!point.getTags().containsKey(Tags.CCUREF)) && (point.getMarkers().contains(Tags.TUNER) || point.getMarkers().contains(Tags.SCHEDULABLE)));
     }
 
     private static boolean isModbusInputOrDiscreteInput(HRow row) {

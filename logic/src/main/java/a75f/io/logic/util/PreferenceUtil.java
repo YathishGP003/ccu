@@ -78,6 +78,7 @@ public class PreferenceUtil {
     private static final String RESTORE_BYPASS_DAMPER_AFTER_REPLACE = "restoreBypassDamperAfterReplace";
     private static final String TITLE_24_REDUNDANT_POINT_MIGRATION = "title24ReduntPointMigration";
     private static final String LOCK_OUT_HIS_UPDATE = "lockoutHisUpdate";
+    private static final String UPDTAE_LOCAL_BUILDING_TUNERS = "UPDTAE_LOCAL_BUILDING_TUNERS";
 
     private static final String BACNET_SETTING_POINT_DELETED = "bacnetSettingPointDeleted";
 
@@ -621,5 +622,13 @@ public class PreferenceUtil {
 
     public static void setBacnetSettingPointDeleted() {
         setBooleanPreference(BACNET_SETTING_POINT_DELETED, true);
+    }
+
+    public static boolean getLocalBuildingTunersUpdate() {
+        return getBooleanPreference(UPDTAE_LOCAL_BUILDING_TUNERS);
+    }
+
+    public static void setLocalBuildingTunersUpdate() {
+        setBooleanPreference(UPDTAE_LOCAL_BUILDING_TUNERS, true);
     }
 }

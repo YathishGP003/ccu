@@ -39,6 +39,7 @@ import a75f.io.domain.equips.DabEquip
 import a75f.io.domain.equips.OtnEquip
 import a75f.io.domain.equips.SseEquip
 import a75f.io.domain.equips.VavEquip
+import a75f.io.domain.equips.hyperstat.HyperStatEquip
 import a75f.io.domain.logic.DeviceBuilder
 import a75f.io.domain.logic.DomainManager.addCmBoardDevice
 import a75f.io.domain.logic.DomainManager.addDomainEquips
@@ -1417,7 +1418,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                     HyperStatDeviceCutOverMapping.entries,
                     profileConfiguration
                 )
-
+                updateTempOffsetValue(it["id"].toString())
             }
         }
         addDomainEquips(hayStack)
@@ -1881,7 +1882,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                     HyperStatDeviceCutOverMapping.entries,
                     profileConfiguration
                 )
-
+                updateTempOffsetValue(it["id"].toString())
             }
         }
     }
@@ -1978,6 +1979,10 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         }
     }
 
+    private fun updateTempOffsetValue(equipRef: String) {
+        val hsEquip = HyperStatEquip(equipRef)
+        hsEquip.temperatureOffset.writeDefaultVal(hsEquip.temperatureOffset.readDefaultVal() / 10)
+    }
 
 
     fun removeRedundantBacnetSettingPoints() {

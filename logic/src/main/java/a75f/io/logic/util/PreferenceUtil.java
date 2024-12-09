@@ -79,7 +79,7 @@ public class PreferenceUtil {
     private static final String TITLE_24_REDUNDANT_POINT_MIGRATION = "title24ReduntPointMigration";
     private static final String LOCK_OUT_HIS_UPDATE = "lockoutHisUpdate";
     private static final String UPDTAE_LOCAL_BUILDING_TUNERS = "UPDTAE_LOCAL_BUILDING_TUNERS";
-
+    private static final String MIGRATE_HYPERSTATSPLIT_FAN_MODE_CACHE = "migrateHyperStatSplitFanModeCache";
     private static final String BACNET_SETTING_POINT_DELETED = "bacnetSettingPointDeleted";
 
 
@@ -630,5 +630,11 @@ public class PreferenceUtil {
 
     public static void setLocalBuildingTunersUpdate() {
         setBooleanPreference(UPDTAE_LOCAL_BUILDING_TUNERS, true);
+    }
+    public static boolean getMigrateHyperStatSplitFanModeCache() {
+        return getBooleanPreference(MIGRATE_HYPERSTATSPLIT_FAN_MODE_CACHE);
+    }
+    public static void setMigrateHyperStatSplitFanModeCache() {
+        setBooleanPreference(MIGRATE_HYPERSTATSPLIT_FAN_MODE_CACHE, true);
     }
 }

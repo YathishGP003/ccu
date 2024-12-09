@@ -304,7 +304,7 @@ private fun handleFanMode(hssEquip: HyperStatSplitEquip, selectedPosition: Int, 
                 hssEquip.getId(), "domainName == \"" + DomainName.fanOpMode + "\"",
                 actualFanMode.toDouble(), CCUHsApi.getInstance().ccuUserName)
             if (selectedPosition != 0 && selectedPosition % 3 == 0)
-                cacheStorage.saveFanModeInCache(hssEquip.getId(), selectedPosition)
+                cacheStorage.saveFanModeInCache(hssEquip.getId(), actualFanMode)
             else
                 cacheStorage.removeFanModeFromCache(hssEquip.getId())
         }

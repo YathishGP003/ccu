@@ -250,7 +250,26 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             removeRedundantBacnetSettingPoints()
             PreferenceUtil.setBacnetSettingPointDeleted()
         }
+        if (!PreferenceUtil.getMigrateHyperStatSplitFanModeCache()) {
+            migrateHyperStatSplitFanModeCache() // Migrate HyperStat Fan Mode Cache to HyperStatSplit Fan Mode Cache if split fan mode is present
+            PreferenceUtil.setMigrateHyperStatSplitFanModeCache()
+        }
         hayStack.scheduleSync()
+    }
+
+    private fun migrateHyperStatSplitFanModeCache() {
+        CcuLog.i(L.TAG_CCU_MIGRATION_UTIL, "Migrating HyperStat Fan Mode Cache to HyperStatSplit Fan Mode Cache")
+        CCUHsApi.getInstance().readAllEntities("equip and hyperstatsplit").forEach { equipMap ->
+
+            val hypertStatFanModeCache = a75f.io.logic.bo.building.hyperstat.common.FanModeCacheStorage()
+            val fanMode = hypertStatFanModeCache.getFanModeFromCache(equipMap["id"].toString())
+            if (fanMode != 0) {
+                val splitFanModeCache = a75f.io.logic.bo.building.hyperstatsplit.common.FanModeCacheStorage()
+                splitFanModeCache.saveFanModeInCache(equipMap["id"].toString(), fanMode) // Save the fan mode in the HyperStatSplit cache
+
+                hypertStatFanModeCache.removeFanModeFromCache(equipMap["id"].toString()) // Remove the fan mode from the HyperStat cache
+            }
+        }
     }
 
     fun doDabDamperSizeMigration() {

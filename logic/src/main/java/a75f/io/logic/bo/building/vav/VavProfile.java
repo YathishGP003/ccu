@@ -144,6 +144,10 @@ public abstract class VavProfile extends ZoneProfile {
         //initTRSystem();
         this.equipRef = equipRef;
 
+        coolingLoop.useNegativeCumulativeError(false);
+        coolingLoop.setDisabled();
+        heatingLoop.useNegativeCumulativeError(false);
+        heatingLoop.setDisabled();
         init();
         CcuLog.i(L.TAG_CCU_ZONE, "VavProfile Done");
     }
@@ -816,5 +820,14 @@ public abstract class VavProfile extends ZoneProfile {
                 (SeventyFiveFProfileDirective) ModelLoader.INSTANCE.getModelForDomainName(equip.getDomainName()))
                 .getActiveConfiguration();
 
+    }
+
+    protected void handleDeadband() {
+        if (state != DEADBAND) {
+            deadbandTransitionState = state;
+            state = DEADBAND;
+        }
+        valveController.reset();
+        valve.currentPosition = 0;
     }
 }

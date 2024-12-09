@@ -129,7 +129,7 @@ public class VavSeriesFanProfile extends VavProfile
                 vavEquip.getCoolingLoopOutput().writePointValue(loopOp);
                 loopOp = (int) vavEquip.getCoolingLoopOutput().readHisVal();
             }
-        } else if (roomTemp < setTempHeating && systemMode != SystemMode.OFF) {
+        } else if (roomTemp < setTempHeating && systemMode != SystemMode.OFF && vavEquip.getReheatType().readDefaultVal() > 0) {
             //Zone is in heating
             if (state != HEATING) {
                 handleHeatingChangeOver();
@@ -145,8 +145,11 @@ public class VavSeriesFanProfile extends VavProfile
             loopOp = (int) vavEquip.getHeatingLoopOutput().readHisVal();
         } else {
             //Zone is in deadband
-            if (state != DEADBAND) {
-                handleDeadband();
+            handleDeadband();
+            if (heatingLoop.getEnabled()) {
+                loopOp = (int) heatingLoop.getLoopOutput(setTempHeating, roomTemp);
+            } else if (coolingLoop.getEnabled()) {
+                loopOp = (int) coolingLoop.getLoopOutput(roomTemp, setTempCooling);
             }
         }
         return loopOp;
@@ -193,14 +196,6 @@ public class VavSeriesFanProfile extends VavProfile
     
         state = HEATING;
         heatingLoop.setEnabled();
-        coolingLoop.setDisabled();
-    }
-    
-    private void handleDeadband() {
-        deadbandTransitionState = state;
-        state = DEADBAND;
-        valve.currentPosition = 0;
-        heatingLoop.setDisabled();
         coolingLoop.setDisabled();
     }
     

@@ -36,11 +36,6 @@ public class VavReheatProfile extends VavProfile
         super(equipRef, nodeAddress, ProfileType.VAV_REHEAT);
     }
 
-
-    //TODO - Only for backward compatibility during development. Should be removed.
-    public VavReheatProfile() {
-        super(null, null, ProfileType.VAV_REHEAT);
-    }
     @Override
     public ProfileType getProfileType()
     {
@@ -95,7 +90,7 @@ public class VavReheatProfile extends VavProfile
                 vavEquip.getCoolingLoopOutput().writePointValue(loopOp);
                 loopOp = (int) vavEquip.getCoolingLoopOutput().readHisVal();
             }
-        } else if (roomTemp < setTempHeating && systemMode != SystemMode.OFF) {
+        } else if (roomTemp < setTempHeating && systemMode != SystemMode.OFF && vavEquip.getReheatType().readDefaultVal() > 0) {
             //Zone is in heating
             if (state != HEATING) {
                 handleHeatingChangeOver();
@@ -111,8 +106,11 @@ public class VavReheatProfile extends VavProfile
             loopOp = (int) vavEquip.getHeatingLoopOutput().readHisVal();
         } else {
             //Zone is in deadband
-            if (state != DEADBAND) {
-                handleDeadband();
+            handleDeadband();
+            if (heatingLoop.getEnabled()) {
+                loopOp = (int) heatingLoop.getLoopOutput(setTempHeating, roomTemp);
+            } else if (coolingLoop.getEnabled()) {
+                loopOp = (int) coolingLoop.getLoopOutput(roomTemp, setTempCooling);
             }
         }
         try {
@@ -217,15 +215,6 @@ public class VavReheatProfile extends VavProfile
         
         state = HEATING;
         heatingLoop.setEnabled();
-        coolingLoop.setDisabled();
-    }
-    
-    private void handleDeadband() {
-        deadbandTransitionState = state;
-        state = DEADBAND;
-        valveController.reset();
-        valve.currentPosition = 0;
-        heatingLoop.setDisabled();
         coolingLoop.setDisabled();
     }
     

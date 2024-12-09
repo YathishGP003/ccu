@@ -83,18 +83,19 @@ public class GenericPIController
     // Calculate the integral Error without negative Cumulative error
     public void calculateIEWithoutNegativeCE() {
 
-    integralError = limitedError * integralGain;
-        if(cumulativeError > 0)
-            cumulativeError = cumulativeError + integralError/integralMaxTimeout;
-        else
-            cumulativeError = integralError/integralMaxTimeout;
+        integralError = limitedError * integralGain;
+        if (cumulativeError > 0) {
+            cumulativeError = cumulativeError + integralError / integralMaxTimeout;
+        } else {
+            cumulativeError = integralError / integralMaxTimeout;
+        }
 
-    //apply integral limits
-    double integralLimit = maxAllowedError * integralGain;
-    double negativeIntLimit = -1 * integralLimit;
+        //apply integral limits
+        double integralLimit = maxAllowedError * integralGain;
+        double negativeIntLimit = -1 * integralLimit;
 
-    cumulativeError = Math.min(cumulativeError, integralLimit);
-    cumulativeError = Math.max(cumulativeError, negativeIntLimit);
+        cumulativeError = Math.min(cumulativeError, integralLimit);
+        cumulativeError = Math.max(cumulativeError, negativeIntLimit);
 
 }
 

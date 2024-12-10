@@ -2005,7 +2005,8 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
 
 
     fun removeRedundantBacnetSettingPoints() {
-        hayStack.readAllEntities("point and setting and point").forEach {
+        CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "Removing redundant bacnet setting points")
+        hayStack.readAllEntities("bacnet and setting and point").forEach {
             CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "bacnet setting points found: ${it["dis"]}. Deleting the redundant point")
             hayStack.deleteEntity(it["id"].toString())
         }

@@ -65,7 +65,7 @@ public class VavSeriesFanProfile extends VavProfile
         SystemController.State conditioning = L.ccu().systemProfile.getSystemController().getSystemState();
 
         CcuLog.e(L.TAG_CCU_ZONE, "Run Zone algorithm for "+nodeAddr+" setTempCooling "+setTempCooling+
-                "setTempHeating "+setTempHeating+" systemMode "+conditioning);
+                "setTempHeating "+setTempHeating+" systemMode "+conditioning+" roomTemp "+roomTemp);
 
         CcuLog.i(L.TAG_CCU_ZONE, "PI Tuners: proportionalGain " + proportionalGain + ", integralGain " + integralGain +
                 ", proportionalSpread " + proportionalSpread + ", integralMaxTimeout " + integralMaxTimeout);
@@ -104,6 +104,7 @@ public class VavSeriesFanProfile extends VavProfile
 
         logLoopParams((short) nodeAddr, roomTemp, loopOp);
         updateLoopParams((short) nodeAddr);
+        CcuLog.e(L.TAG_CCU_ZONE, "LoopStatus HeatingLoop "+heatingLoop.getEnabled()+" CoolingLoop "+coolingLoop.getEnabled());
     }
 
     private void initLoopVariables(short node) {
@@ -118,8 +119,8 @@ public class VavSeriesFanProfile extends VavProfile
     
     private int getLoopOp(SystemController.State conditioning, double roomTemp, Equip equip) {
         int loopOp = 0;
-        SystemMode systemMode = SystemMode.values()[(int)(int) TunerUtil.readSystemUserIntentVal("conditioning and mode")];
-        if (roomTemp > setTempCooling && systemMode != SystemMode.OFF) {
+        SystemMode systemMode = SystemMode.values()[(int) TunerUtil.readSystemUserIntentVal("conditioning and mode")];
+        if (roomTemp > setTempCooling && isCoolingAvailable(systemMode)) {
             //Zone is in Cooling
             if (state != COOLING) {
                 handleCoolingChangeOver();
@@ -129,7 +130,7 @@ public class VavSeriesFanProfile extends VavProfile
                 vavEquip.getCoolingLoopOutput().writePointValue(loopOp);
                 loopOp = (int) vavEquip.getCoolingLoopOutput().readHisVal();
             }
-        } else if (roomTemp < setTempHeating && systemMode != SystemMode.OFF && vavEquip.getReheatType().readDefaultVal() > 0) {
+        } else if (roomTemp < setTempHeating && isHeatingAvailable( systemMode, vavEquip.getReheatType().readDefaultVal() > 0)) {
             //Zone is in heating
             if (state != HEATING) {
                 handleHeatingChangeOver();

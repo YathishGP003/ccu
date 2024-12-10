@@ -70,7 +70,7 @@ public class VavReheatProfile extends VavProfile
         Equip equip = new Equip.Builder()
                 .setHashMap(CCUHsApi.getInstance().readEntity("equip and group == \"" + nodeAddr + "\"")).build();
         CcuLog.e(L.TAG_CCU_ZONE, "Run Zone algorithm for "+nodeAddr+" setTempCooling "+setTempCooling+
-                                    "setTempHeating "+setTempHeating+" systemMode "+systemMode);
+                                    "setTempHeating "+setTempHeating+" systemMode "+systemMode+" roomTemp "+roomTemp);
 
         CcuLog.i(L.TAG_CCU_ZONE, "PI Tuners: proportionalGain " + proportionalGain + ", integralGain " + integralGain +
                 ", proportionalSpread " + proportionalSpread + ", integralMaxTimeout " + integralMaxTimeout);
@@ -79,7 +79,7 @@ public class VavReheatProfile extends VavProfile
                     ", cfmProportionalSpread " + cfmController.getProportionalSpread() + ", cfmIntegralMaxTimeout " + cfmController.getIntegralMaxTimeout());
         }
 
-        if (roomTemp > setTempCooling && systemMode != SystemMode.OFF ) {
+        if (roomTemp > setTempCooling && isCoolingAvailable(systemMode) ) {
             //Zone is in Cooling
             if (state != COOLING) {
                 handleCoolingChangeOver();
@@ -90,7 +90,7 @@ public class VavReheatProfile extends VavProfile
                 vavEquip.getCoolingLoopOutput().writePointValue(loopOp);
                 loopOp = (int) vavEquip.getCoolingLoopOutput().readHisVal();
             }
-        } else if (roomTemp < setTempHeating && systemMode != SystemMode.OFF && vavEquip.getReheatType().readDefaultVal() > 0) {
+        } else if (roomTemp < setTempHeating && isHeatingAvailable(systemMode, vavEquip.getReheatType().readDefaultVal() > 0)) {
             //Zone is in heating
             if (state != HEATING) {
                 handleHeatingChangeOver();
@@ -152,6 +152,7 @@ public class VavReheatProfile extends VavProfile
         setStatus(state.ordinal(), VavSystemController.getInstance().isEmergencyMode() && (state == HEATING ? buildingLimitMinBreached()
                 : state == COOLING ? buildingLimitMaxBreached() : false));
         updateLoopParams();
+        CcuLog.e(L.TAG_CCU_ZONE, "LoopStatus HeatingLoop "+heatingLoop.getEnabled()+" CoolingLoop "+coolingLoop.getEnabled());
     }
 
 

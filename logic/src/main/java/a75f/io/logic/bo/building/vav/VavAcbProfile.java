@@ -80,7 +80,6 @@ public class VavAcbProfile extends VavProfile
         initLoopVariables();
         double roomTemp = getCurrentTemp();
         boolean condensate = getCondensate();
-        CcuLog.d(L.TAG_CCU_ZONE, "Condensate detected? " + condensate);
 
         int loopOp = 0;
         //If supply air temperature from air handler is greater than room temperature, Cooling shall be
@@ -90,7 +89,7 @@ public class VavAcbProfile extends VavProfile
         Equip equip = new Equip.Builder()
                 .setHashMap(CCUHsApi.getInstance().readEntity("equip and group == \"" + nodeAddr + "\"")).build();
         CcuLog.d(L.TAG_CCU_ZONE, "Run Zone algorithm for "+nodeAddr+" setTempCooling "+setTempCooling+
-                "setTempHeating "+setTempHeating+" systemMode "+systemMode+" roomTemp "+roomTemp);
+                "setTempHeating "+setTempHeating+" systemMode "+systemMode+" roomTemp "+roomTemp +"Condensate " + condensate);
 
         CcuLog.d(L.TAG_CCU_ZONE, "PI Tuners: proportionalGain " + proportionalGain + ", integralGain " + integralGain +
                 ", proportionalSpread " + proportionalSpread + ", integralMaxTimeout " + integralMaxTimeout);
@@ -99,7 +98,7 @@ public class VavAcbProfile extends VavProfile
                     ", cfmProportionalSpread " + cfmController.getProportionalSpread() + ", cfmIntegralMaxTimeout " + cfmController.getIntegralMaxTimeout());
         }
 
-        if (roomTemp > setTempCooling && systemMode != SystemMode.OFF ) {
+        if (roomTemp > setTempCooling && isCoolingAvailable(systemMode) ) {
             //Zone is in Cooling
             if (state != COOLING) {
                 handleCoolingChangeOver();
@@ -113,7 +112,7 @@ public class VavAcbProfile extends VavProfile
                 // Damper and CHW Valve go to minimum if system is in heating
                 chwValve.currentPosition = 0;
             }
-        } else if (roomTemp < setTempHeating && systemMode != SystemMode.OFF && ((VavAcbEquip)vavEquip).getValveType().readDefaultVal() > 0) {
+        } else if (roomTemp < setTempHeating && isHeatingAvailable( systemMode, ((VavAcbEquip)vavEquip).getValveType().readDefaultVal() > 0)) {
             //Zone is in heating
             if (state != HEATING) {
                 handleHeatingChangeOver();
@@ -164,6 +163,7 @@ public class VavAcbProfile extends VavProfile
         setStatus(state.ordinal(), VavSystemController.getInstance().isEmergencyMode() && (state == HEATING ? buildingLimitMinBreached()
                 : state == COOLING ? buildingLimitMaxBreached() : false));
         updateLoopParams();
+        CcuLog.e(L.TAG_CCU_ZONE, "LoopStatus HeatingLoop "+heatingLoop.getEnabled()+" CoolingLoop "+coolingLoop.getEnabled());
     }
 
     private void handleRFDead() {

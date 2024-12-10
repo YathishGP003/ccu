@@ -85,7 +85,7 @@ public class SeekArc extends View
     private static final float   INNER_GREY_STROKE_WIDTH        = 40.0f;
     public static final  int     SPACE_BETWEEN_TWO_WORD_STRINGS = 10;
     private static       int     INVALID_PROGRESS_VALUE         = -1;
-    private static       int     PADDING_BETWEEN_TEXT           = 20;
+    private static       int     PADDING_BETWEEN_TEXT           = 34;
     private final        int     mAngleOffset                   = -90;
     private              Handler handler                        = new Handler();
     float   currentAnimationTime        = 0;

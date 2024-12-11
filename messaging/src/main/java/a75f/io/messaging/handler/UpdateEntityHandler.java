@@ -149,8 +149,8 @@ public class UpdateEntityHandler implements MessageHandler {
         if (isBuildingTuner(point)) {
             Equip equip = new Equip.Builder().setHashMap(CCUHsApi.getInstance().readEntity("building and equip")).build();
             if (equip != null) {
-                point.setEquipRef(equip.getEquipRef());
-                CcuLog.d(L.TAG_CCU_MESSAGING, "domainName "+ point.getDomainName() + "updated with local building tuner equip id");
+                point.setEquipRef(equip.getId());
+                CcuLog.d(L.TAG_CCU_MESSAGING, "domainName "+ point.getDomainName() + " updated with local building tuner equip id: "+equip.getId());
             } else {
                 CcuLog.d(L.TAG_CCU_MESSAGING, "Local Building Tuner Equip not found");
             }

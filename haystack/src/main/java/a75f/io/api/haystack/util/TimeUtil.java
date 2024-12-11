@@ -3,6 +3,9 @@ package a75f.io.api.haystack.util;
 import org.projecthaystack.HDateTime;
 import org.projecthaystack.ParseException;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import a75f.io.api.haystack.DAYS;
 import a75f.io.logger.CcuLog;
 
@@ -109,4 +112,16 @@ public class TimeUtil {
         return day == DAYS.SUNDAY.ordinal();
     }
 
+    public static String convertTo12HourFormat(String inputTime) {
+        try {
+            SimpleDateFormat inputFormat = new SimpleDateFormat("HH:mm");
+            Date date = inputFormat.parse(inputTime);
+
+            SimpleDateFormat outputFormat = new SimpleDateFormat("hh:mm a");
+            return outputFormat.format(date);
+        } catch (java.text.ParseException e) {
+            e.printStackTrace();
+            return inputTime;
+        }
+    }
 }

@@ -39,6 +39,7 @@ public class SmartNodeSettings2_t extends Struct {
     public final Signed16 maxEngVal = new Signed16();
     public final RelayBitmap_t relayBitmap = inner(new RelayBitmap_t()); // This is used to set the type of relay used ex : NO or NC.
     public final Unsigned8 maxDischargeAirTemperature = new Unsigned8(); // 70-120 default of 90
+    public final Unsigned8 singleStageEquipmentOccupiedEnabled = new Unsigned8();
 
     public class RelayBitmap_t extends Struct
     {

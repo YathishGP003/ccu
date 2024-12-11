@@ -37,7 +37,9 @@ import a75f.io.device.serial.SmartNodeSettings_t;
 import a75f.io.device.util.DeviceConfigurationUtil;
 import a75f.io.domain.BypassDamperEquip;
 import a75f.io.domain.VavAcbEquip;
+import a75f.io.domain.api.Domain;
 import a75f.io.domain.api.DomainName;
+import a75f.io.domain.equips.SseEquip;
 import a75f.io.domain.equips.VavEquip;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
@@ -158,6 +160,7 @@ public class LSmartNode
         if(profile == null)
             profile = "dab";
 
+        if(equip.getMarkers().contains("sse")) profile = "sse";
         switch (profile){
             case "dab":
                 settings.profileBitmap.dynamicAirflowBalancing.set((short)1);
@@ -171,6 +174,7 @@ public class LSmartNode
                 break;
             case "sse":
                 settings.profileBitmap.singleStageEquipment.set((short)1);
+                setSSESettings(address, settings);
                 break;
             case "iftt":
                 settings.profileBitmap.customControl.set((short)1);
@@ -344,6 +348,9 @@ public class LSmartNode
             settings2.runPILoopOnNode.set(TrueCFMUtil.isCfmOnEdgeActive(hsApi, equipRef) ? (short)1 : (short)0);
         }
 
+        if (isEquipType("sse", address)) {
+           setSSESettings2(address, settings2);
+        }
     }
 
     private static ProfileMap_t getProfileMap2(String profString) {
@@ -1107,5 +1114,68 @@ public class LSmartNode
         }
         return controlsMessage;
     }
-    
+
+    public static void setSSESettings(short address, SmartNodeSettings_t settings) {
+        byte reserved = 0;
+        CCUHsApi hsApi = CCUHsApi.getInstance();
+        Equip equip = new Equip.Builder().setHashMap(hsApi.readEntity("equip and sse and group == \"" + address + "\"")).build();
+        SseEquip sseEquip = (SseEquip) Domain.INSTANCE.getDomainEquip(equip.getId());
+        if (sseEquip == null) {
+            CcuLog.d(TAG_CCU_DEVICE, "Settings1: SSE Equip not found for address " + address);
+            return;
+        }
+        double relay1config = sseEquip.getRelay1OutputState().readDefaultVal();
+        double relay2config = sseEquip.getRelay2OutputState().readDefaultVal();
+        double enableExternal10kTemperatureSensorToggle = sseEquip.getThermistor2InputEnable().readDefaultVal();
+        // fourth last bit is for relay 1
+        if (relay1config > 0) {
+            double relay1Association = sseEquip.getRelay1OutputAssociation().readDefaultVal();
+            if (relay1Association == 1) {
+                reserved |= (1 << 3);
+            }
+        }
+        // third last bit is for relay 2
+        if (relay2config > 0) {
+            double relay2Association = sseEquip.getRelay2OutputAssociation().readDefaultVal();
+            if (relay2Association == 0) {
+                reserved |= (1 << 2);
+            }
+        }
+
+        // second last bit is for external 10k temperature sensor
+        if (enableExternal10kTemperatureSensorToggle > 0) {
+            reserved |= (1 << 1);
+        }
+
+        reserved |= (0); // least significant bit is always 0 - beacon is not enabled.
+
+        settings.reserved.set(reserved);
+    }
+
+    public static void setSSESettings2(short address, SmartNodeSettings2_t settings) {
+        CCUHsApi hsApi = CCUHsApi.getInstance();
+        Equip equip = new Equip.Builder().setHashMap(hsApi.readEntity("equip and sse and group == \"" + address + "\"")).build();
+        SseEquip sseEquip = (SseEquip) Domain.INSTANCE.getDomainEquip(equip.getId());
+        if (sseEquip == null) {
+            CcuLog.d(TAG_CCU_DEVICE, "Settings2: SSE Equip not found for address " + address);
+            return;
+        }
+        double relay1config = sseEquip.getRelay1OutputState().readDefaultVal();
+        double relay2config = sseEquip.getRelay2OutputState().readDefaultVal();
+
+        if (relay1config > 0) {
+            settings.relay1Enable.set((short) 1);
+        } else {
+            settings.relay1Enable.set((short) 0);
+        }
+        if (relay2config > 0) {
+            settings.relay2Enable.set((short) 1);
+            double relay2Association = sseEquip.getRelay2OutputAssociation().readDefaultVal();
+            if (relay2Association == 1) {
+                settings.singleStageEquipmentOccupiedEnabled.set((short) 1);
+            }
+        } else {
+            settings.relay2Enable.set((short) 0);
+        }
+    }
 }

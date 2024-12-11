@@ -2,6 +2,7 @@ package a75f.io.renatus.profiles.plc
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Point
+import a75f.io.api.haystack.RawPoint
 import a75f.io.device.mesh.LSerial
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.Domain.getListByDomainName
@@ -340,6 +341,10 @@ class PlcProfileViewModel : ViewModel() {
                 DesiredTempDisplayMode.setModeType(zoneRef, CCUHsApi.getInstance())
                 CcuLog.i(Domain.LOG_TAG, "PlcProfile Pairing complete")
                 plcProfile.init()
+
+                CoroutineScope(Dispatchers.IO).launch {
+                    updateTypeForAnalog1Out(profileConfiguration)
+                }
                 // This check is needed because the dialog sometimes fails to close inside the coroutine.
                 // We don't know why this happens.
                 if (ProgressDialogUtils.isDialogShowing()) {
@@ -369,7 +374,6 @@ class PlcProfileViewModel : ViewModel() {
                 saveUnUsedPortStatus(profileConfiguration, deviceAddress, hayStack)
             }
         }
-        //updateProcessVariablePoint(profileConfiguration.nodeAddress)
     }
 
 
@@ -496,6 +500,21 @@ class PlcProfileViewModel : ViewModel() {
             ModelLoader.getSmartNodeDevice()
         } else {
             ModelLoader.getHelioNodeDevice()
+        }
+    }
+
+    private fun updateTypeForAnalog1Out(config : PlcProfileConfig) {
+        val type = "${viewState.analog1MinOutput.toInt()}-${viewState.analog1MaxOutput.toInt()}v"
+
+        val device = hayStack.readEntity("device and addr == \"${config.nodeAddress}\"")
+        val analog1OutDict = hayStack.readHDict("point and deviceRef == \"${device["id"]}\" and domainName == \"analog1Out\"")
+        val analog1OutPoint = RawPoint.Builder().setHDict(analog1OutDict).build()
+        CcuLog.i(Domain.LOG_TAG, "device $device update type $type current type ${analog1OutPoint.type}")
+        if (analog1OutPoint.type != type) {
+            analog1OutPoint.type = type
+            hayStack.updatePoint(analog1OutPoint, analog1OutPoint.id)
+        } else {
+            CcuLog.i(Domain.LOG_TAG, "Analog1Out type is already set to $type")
         }
     }
 }

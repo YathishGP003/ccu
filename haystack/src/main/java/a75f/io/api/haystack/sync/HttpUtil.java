@@ -35,6 +35,7 @@ public class HttpUtil {
     public static final int HTTP_RESPONSE_UNAUTHORIZED = 401;
 
     private static final int HTTP_REQUEST_TIMEOUT_MS = 30 * 1000;
+    private static final int HTTP_REQUEST_TIMEOUT_MS_LONG = 60 * 1000;
 
     private static OkHttpClient okHttpClient = null;
 
@@ -95,8 +96,14 @@ public class HttpUtil {
                 connection.setUseCaches(false);
                 connection.setDoInput(true);
                 connection.setDoOutput(true);
-                connection.setConnectTimeout(HTTP_REQUEST_TIMEOUT_MS);
-                connection.setReadTimeout(HTTP_REQUEST_TIMEOUT_MS);
+
+                if(targetURL.contains("removeCCU")) {
+                    connection.setConnectTimeout(HTTP_REQUEST_TIMEOUT_MS_LONG);
+                    connection.setReadTimeout(HTTP_REQUEST_TIMEOUT_MS_LONG);
+                } else {
+                    connection.setConnectTimeout(HTTP_REQUEST_TIMEOUT_MS);
+                    connection.setReadTimeout(HTTP_REQUEST_TIMEOUT_MS);
+                }
 
 
                 CcuLog.d("CCU_HTTP_REQUEST", "HttpUtil:executePost: [POST] " + url + " - Token: " + bearerToken);

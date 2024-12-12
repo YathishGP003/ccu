@@ -311,7 +311,7 @@ public class DesiredTempDisplayMode {
 
     private static TemperatureMode getTemperatureModeForHSCPU(Equip mEquip) {
         CpuConfiguration cpuConfiguration = (CpuConfiguration)getConfiguration(mEquip.getId());
-       return getTemperatureForStandaloneBasedOnConditioningMode(getTemperatureMode(cpuConfiguration.isCoolingAvailable(), cpuConfiguration.isHeatingAvailable()), mEquip);
+       return getTemperatureForStandaloneBasedOnConditioningMode(getTemperatureMode(cpuConfiguration.isHeatingAvailable(),cpuConfiguration.isCoolingAvailable()), mEquip);
     }
 
     private static TemperatureMode getTemperatureForStandaloneBasedOnConditioningMode(TemperatureMode temperatureMode,Equip equip) {

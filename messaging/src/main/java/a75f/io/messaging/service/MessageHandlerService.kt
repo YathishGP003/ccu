@@ -170,18 +170,18 @@ class MessageHandlerService @Inject constructor(private val appContext: Context,
         if (msg.command.equals("updateEntity")) {
             if (msg.target_scope.equals("CCU") &&
                ! (msg.target_id.equals(CCUHsApi.getInstance().ccuId.replace("@", "")))) {
-                return true;
+                return true
             }
             else if (msg.target_scope.equals("SITE") &&
                ! (msg.target_id.equals(CCUHsApi.getInstance().site?.id?.replace("@", "")))) {
-                return true;
+                return true
             }
             else if (msg.target_scope.equals("ORGANIZATION") &&
                ! (msg.target_id.equals(CCUHsApi.getInstance().site?.organization))) {
-                return true;
+                return true
             }
         }
 
-        return false;
+        return false
     }
 }

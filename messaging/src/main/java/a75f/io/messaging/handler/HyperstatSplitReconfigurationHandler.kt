@@ -51,6 +51,11 @@ class HyperstatSplitReconfigurationHandler {
                     //Handle it here.
                     hayStack.clearPointArrayLevel(configPoint.id, level, true)
                     hayStack.writeHisValById(configPoint.id, HSUtil.getPriorityVal(configPoint.id))
+                    if (configPoint.domainName.equals(DomainName.conditioningMode) ||
+                            configPoint.domainName.equals(DomainName.fanOpMode)) {
+                        DesiredTempDisplayMode.setModeTypeOnUserIntentChange(configPoint.roomRef, CCUHsApi.getInstance())
+                        return
+                    }
                     return
                 }
 

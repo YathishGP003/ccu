@@ -250,6 +250,16 @@ object DomainManager {
             equip.markers.contains("pid") -> Domain.equips[equip.id] = PlcEquip(equip.id)
 
             equip.markers.contains("sse") -> Domain.equips[equip.id] = SseEquip(equip.id)
+            equip.markers.contains("otn") -> Domain.equips[equip.id] = OtnEquip(equip.id)
+            equip.markers.contains("hyperstat") -> {
+                when {
+                    equip.markers.contains("cpu") -> Domain.equips[equip.id] = CpuV2Equip(equip.id)
+                    equip.markers.contains("hpu") -> Domain.equips[equip.id] = HpuV2Equip(equip.id)
+                    equip.markers.contains("pipe2") -> Domain.equips[equip.id] = Pipe2V2Equip(equip.id)
+                    equip.markers.contains(a75f.io.api.haystack.Tags.MONITORING) ->
+                        Domain.equips[equip.id] = MonitoringEquip(equip.id)
+                }
+            }
         }
     }
 

@@ -276,7 +276,7 @@ public class VavSeriesFanProfile extends VavProfile
     private void handleRFDead() {
         CcuLog.d(L.TAG_CCU_ZONE,"RF Signal Dead : equipRef: "+vavEquip.getEquipRef());
         vavEquip.getEquipStatus().writeHisVal((double) RFDEAD.ordinal());
-        vavEquip.getEquipStatusMessage().writeDefaultVal(RFDead+": "+getFanStatusMessage());
+        vavEquip.getEquipStatusMessage().writeDefaultVal(RFDead);
     }
     private void updateFanStatus (boolean occupied, String equipId, SystemMode mode) {
         if ((occupied || valve.currentPosition > 0) && mode != SystemMode.OFF) {

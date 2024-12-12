@@ -39,6 +39,7 @@ import a75f.io.domain.equips.DabEquip
 import a75f.io.domain.equips.OtnEquip
 import a75f.io.domain.equips.SseEquip
 import a75f.io.domain.equips.VavEquip
+import a75f.io.domain.equips.hyperstat.HyperStatEquip
 import a75f.io.domain.logic.DeviceBuilder
 import a75f.io.domain.logic.DomainManager.addCmBoardDevice
 import a75f.io.domain.logic.DomainManager.addDomainEquips
@@ -247,7 +248,30 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                 CcuLog.e(L.TAG_CCU_MIGRATION_UTIL, "Error in migrateAnalogTypeForVAVanalog1In $e")
            }
         }
+        if(!PreferenceUtil.getBacnetSettingPointDeleted()) {
+            removeRedundantBacnetSettingPoints()
+            PreferenceUtil.setBacnetSettingPointDeleted()
+        }
+        if (!PreferenceUtil.getMigrateHyperStatSplitFanModeCache()) {
+            migrateHyperStatSplitFanModeCache() // Migrate HyperStat Fan Mode Cache to HyperStatSplit Fan Mode Cache if split fan mode is present
+            PreferenceUtil.setMigrateHyperStatSplitFanModeCache()
+        }
         hayStack.scheduleSync()
+    }
+
+    private fun migrateHyperStatSplitFanModeCache() {
+        CcuLog.i(L.TAG_CCU_MIGRATION_UTIL, "Migrating HyperStat Fan Mode Cache to HyperStatSplit Fan Mode Cache")
+        CCUHsApi.getInstance().readAllEntities("equip and hyperstatsplit").forEach { equipMap ->
+
+            val hypertStatFanModeCache = a75f.io.logic.bo.building.hyperstat.common.FanModeCacheStorage()
+            val fanMode = hypertStatFanModeCache.getFanModeFromCache(equipMap["id"].toString())
+            if (fanMode != 0) {
+                val splitFanModeCache = a75f.io.logic.bo.building.hyperstatsplit.common.FanModeCacheStorage()
+                splitFanModeCache.saveFanModeInCache(equipMap["id"].toString(), fanMode) // Save the fan mode in the HyperStatSplit cache
+
+                hypertStatFanModeCache.removeFanModeFromCache(equipMap["id"].toString()) // Remove the fan mode from the HyperStat cache
+            }
+        }
     }
 
     fun doDabDamperSizeMigration() {
@@ -1415,7 +1439,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                     HyperStatDeviceCutOverMapping.entries,
                     profileConfiguration
                 )
-
+                updateTempOffsetValue(it["id"].toString())
             }
         }
         addDomainEquips(hayStack)
@@ -1879,7 +1903,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                     HyperStatDeviceCutOverMapping.entries,
                     profileConfiguration
                 )
-
+                updateTempOffsetValue(it["id"].toString())
             }
         }
     }
@@ -1976,5 +2000,17 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         }
     }
 
+    private fun updateTempOffsetValue(equipRef: String) {
+        val hsEquip = HyperStatEquip(equipRef)
+        hsEquip.temperatureOffset.writeDefaultVal(hsEquip.temperatureOffset.readDefaultVal() / 10)
+    }
 
+
+    fun removeRedundantBacnetSettingPoints() {
+        CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "Removing redundant bacnet setting points")
+        hayStack.readAllEntities("bacnet and setting and point").forEach {
+            CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "bacnet setting points found: ${it["dis"]}. Deleting the redundant point")
+            hayStack.deleteEntity(it["id"].toString())
+        }
+    }
 }

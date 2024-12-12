@@ -227,9 +227,7 @@ public class HDateTime extends HVal
     date.encode(s);
     s.append('T');
     time.encode(s);
-    if (tzOffset == 0) s.append('Z');
-    else
-    {
+
       int offset = this.tzOffset;
       if (offset < 0) { s.append('-'); offset = -offset; }
       else { s.append('+'); }
@@ -237,7 +235,7 @@ public class HDateTime extends HVal
       int zm = (offset % 3600) / 60;
       if (zh < 10) s.append('0'); s.append(zh).append(':');
       if (zm < 10) s.append('0'); s.append(zm);
-    }
+
     s.append(' ').append(tz);
   }
 

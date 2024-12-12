@@ -1,5 +1,6 @@
 package a75f.io.renatus.buildingoccupancy.viewmodels;
 
+import static a75f.io.api.haystack.util.TimeUtil.convertTo12HourFormat;
 import static a75f.io.api.haystack.util.TimeUtil.getEndTimeHr;
 import static a75f.io.api.haystack.util.TimeUtil.getEndTimeMin;
 
@@ -386,10 +387,9 @@ public class BuildingOccupancyViewModel  {
                     if (!MasterControlUtil.isNonTempModule(zoneProfile)) {
                         StringBuilder scheduleImpactConstructor = new StringBuilder();
                         scheduleImpactConstructor.append(ScheduleUtil.getDayString(i.getStart().getDayOfWeek(), schedule.getScheduleGroup()))
-                                .append(" (").append(i.getStart().hourOfDay().get()).append(":")
-                                .append(i.getStart().minuteOfHour().get() == 0 ? "00" : i.getStart().minuteOfHour().get())
-                                .append(" - ").append(getEndTimeHr(i.getEnd().hourOfDay().get(), i.getEnd().minuteOfHour().get()))
-                                .append(":").append(getEndTimeMin(i.getEnd().hourOfDay().get(), i.getEnd().minuteOfHour().get()) == 0 ? "00" : i.getEnd().minuteOfHour().get()).append(") \n");
+                                .append(" (").append( convertTo12HourFormat(i.getStart().hourOfDay().get()+":"+i.getStart().minuteOfHour().get()) )
+                                .append(" - ").append( convertTo12HourFormat(i.getEnd().hourOfDay().get()+":"+i.getEnd().minuteOfHour().get()) )
+                                .append(") \n");
 
                         if (schedule.isNamedSchedule()) {
                             schedules = schedules.concat("named");
@@ -401,11 +401,9 @@ public class BuildingOccupancyViewModel  {
                                     scheduleImpactConstructor.toString(), getScheduleGroup(schedule.getScheduleGroup(), true)));
                             spillNamedZones.append("\t\t\tZone ").append(zoneDis).append(" ")
                                     .append(ScheduleUtil.getDayString(i.getStart().getDayOfWeek(), schedule.getScheduleGroup()))
-                                    .append(" (").append(i.getStart().hourOfDay().get()).append(":")
-                                    .append(i.getStart().minuteOfHour().get() == 0 ? "00" : i.getStart().minuteOfHour().get())
-                                    .append(" - ").append(getEndTimeHr(i.getEnd().hourOfDay().get(), i.getEnd().minuteOfHour().get()))
-                                    .append(":").append(getEndTimeMin(i.getEnd().hourOfDay().get(),
-                                            i.getEnd().minuteOfHour().get()) == 0 ? "00" : i.getEnd().minuteOfHour().get()).append(")");
+                                    .append(" (").append( convertTo12HourFormat(i.getStart().hourOfDay().get()+":"+i.getStart().minuteOfHour().get()) )
+                                    .append(" - ").append( convertTo12HourFormat(i.getEnd().hourOfDay().get()+":"+i.getEnd().minuteOfHour().get()) )
+                                    .append(")");
                         } else {
                             schedules = schedules.concat(Tags.ZONE);
                             if (!zoneHeaders.contains(floorDis)) {
@@ -416,11 +414,9 @@ public class BuildingOccupancyViewModel  {
                                     scheduleImpactConstructor.toString(), getScheduleGroup(schedule.getScheduleGroup(), false)));
                             spillZones.append("\t\t\tZone ").append(zoneDis).append(" ")
                                     .append(ScheduleUtil.getDayString(i.getStart().getDayOfWeek(), schedule.getScheduleGroup()))
-                                    .append(" (").append(i.getStart().hourOfDay().get()).append(":")
-                                    .append(i.getStart().minuteOfHour().get() == 0 ? "00" : i.getStart().minuteOfHour().get())
-                                    .append(" - ").append(getEndTimeHr(i.getEnd().hourOfDay().get(), i.getEnd().minuteOfHour().get()))
-                                    .append(":").append(getEndTimeMin(i.getEnd().hourOfDay().get(),
-                                            i.getEnd().minuteOfHour().get()) == 0 ? "00" : i.getEnd().minuteOfHour().get()).append(") \n");
+                                    .append(" (").append( convertTo12HourFormat(i.getStart().hourOfDay().get()+":"+i.getStart().minuteOfHour().get()) )
+                                    .append(" - ").append( convertTo12HourFormat(i.getEnd().hourOfDay().get()+":"+i.getEnd().minuteOfHour().get()) )
+                                    .append(") \n");
                         }
                     }
                 }

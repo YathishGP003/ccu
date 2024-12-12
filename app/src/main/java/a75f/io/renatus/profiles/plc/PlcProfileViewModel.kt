@@ -509,9 +509,12 @@ class PlcProfileViewModel : ViewModel() {
         val device = hayStack.readEntity("device and addr == \"${config.nodeAddress}\"")
         val analog1OutDict = hayStack.readHDict("point and deviceRef == \"${device["id"]}\" and domainName == \"analog1Out\"")
         val analog1OutPoint = RawPoint.Builder().setHDict(analog1OutDict).build()
-        CcuLog.i(Domain.LOG_TAG, "device $device update type $type current type ${analog1OutPoint.type}")
+        CcuLog.i(Domain.LOG_TAG, "analog1OutDict $analog1OutDict update type $type current type ${analog1OutPoint.type}")
+
+        val controlVariable = hayStack.readEntity("point and domainName == \"controlVariable\" and group == \"${config.nodeAddress}\"")
         if (analog1OutPoint.type != type) {
             analog1OutPoint.type = type
+            analog1OutPoint.pointRef = controlVariable["id"].toString()
             hayStack.updatePoint(analog1OutPoint, analog1OutPoint.id)
         } else {
             CcuLog.i(Domain.LOG_TAG, "Analog1Out type is already set to $type")

@@ -825,10 +825,16 @@ public abstract class VavProfile extends ZoneProfile {
 
     }
 
-    protected void handleDeadband() {
+    protected void handleDeadband(SystemMode conditioningMode, boolean reheatAvailable) {
         if (state != DEADBAND) {
             deadbandTransitionState = state;
             state = DEADBAND;
+        }
+        if (!isCoolingAvailable(conditioningMode)) {
+            coolingLoop.setDisabled();
+        }
+        if (!isHeatingAvailable(conditioningMode, reheatAvailable)) {
+            heatingLoop.setDisabled();
         }
         valveController.reset();
         valve.currentPosition = 0;

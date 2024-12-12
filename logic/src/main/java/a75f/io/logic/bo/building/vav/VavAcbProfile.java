@@ -120,7 +120,7 @@ public class VavAcbProfile extends VavProfile
             chwValve.currentPosition = 0;
         } else {
             //Zone is in deadband
-            handleDeadband();
+            handleDeadband(systemMode);
             if (coolingLoop.getEnabled()) {
                 loopOp = (int) coolingLoop.getLoopOutput(roomTemp, setTempCooling);
             }
@@ -327,11 +327,13 @@ public class VavAcbProfile extends VavProfile
 
     }
 
-    @Override
-    public void handleDeadband() {
+    public void handleDeadband(SystemMode systemMode) {
         if (state != DEADBAND) {
             deadbandTransitionState = state;
             state = DEADBAND;
+        }
+        if (!isCoolingAvailable(systemMode)) {
+            coolingLoop.setDisabled();
         }
         chwValve.currentPosition = 0;
     }

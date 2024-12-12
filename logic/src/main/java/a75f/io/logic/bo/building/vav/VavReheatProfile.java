@@ -69,8 +69,12 @@ public class VavReheatProfile extends VavProfile
         SystemMode systemMode = SystemMode.values()[(int) TunerUtil.readSystemUserIntentVal("conditioning and mode")];
         Equip equip = new Equip.Builder()
                 .setHashMap(CCUHsApi.getInstance().readEntity("equip and group == \"" + nodeAddr + "\"")).build();
+
+        boolean reheatEnabled = vavEquip.getReheatType().readDefaultVal() > 0;
+
         CcuLog.e(L.TAG_CCU_ZONE, "Run Zone algorithm for "+nodeAddr+" setTempCooling "+setTempCooling+
-                                    "setTempHeating "+setTempHeating+" systemMode "+systemMode+" roomTemp "+roomTemp);
+                                    " setTempHeating "+setTempHeating+" systemMode "+systemMode+" roomTemp "+roomTemp
+                                    +"reheatEnabled "+reheatEnabled);
 
         CcuLog.i(L.TAG_CCU_ZONE, "PI Tuners: proportionalGain " + proportionalGain + ", integralGain " + integralGain +
                 ", proportionalSpread " + proportionalSpread + ", integralMaxTimeout " + integralMaxTimeout);
@@ -90,7 +94,7 @@ public class VavReheatProfile extends VavProfile
                 vavEquip.getCoolingLoopOutput().writePointValue(loopOp);
                 loopOp = (int) vavEquip.getCoolingLoopOutput().readHisVal();
             }
-        } else if (roomTemp < setTempHeating && isHeatingAvailable(systemMode, vavEquip.getReheatType().readDefaultVal() > 0)) {
+        } else if (roomTemp < setTempHeating && isHeatingAvailable(systemMode, reheatEnabled)) {
             //Zone is in heating
             if (state != HEATING) {
                 handleHeatingChangeOver();
@@ -106,7 +110,7 @@ public class VavReheatProfile extends VavProfile
             loopOp = (int) vavEquip.getHeatingLoopOutput().readHisVal();
         } else {
             //Zone is in deadband
-            handleDeadband();
+            handleDeadband(systemMode, reheatEnabled);
             if (heatingLoop.getEnabled()) {
                 loopOp = (int) heatingLoop.getLoopOutput(setTempHeating, roomTemp);
             } else if (coolingLoop.getEnabled()) {

@@ -120,6 +120,7 @@ public class VavSeriesFanProfile extends VavProfile
     private int getLoopOp(SystemController.State conditioning, double roomTemp, Equip equip) {
         int loopOp = 0;
         SystemMode systemMode = SystemMode.values()[(int) TunerUtil.readSystemUserIntentVal("conditioning and mode")];
+        boolean reheatEnabled = vavEquip.getReheatType().readDefaultVal() > 0;
         if (roomTemp > setTempCooling && isCoolingAvailable(systemMode)) {
             //Zone is in Cooling
             if (state != COOLING) {
@@ -130,7 +131,7 @@ public class VavSeriesFanProfile extends VavProfile
                 vavEquip.getCoolingLoopOutput().writePointValue(loopOp);
                 loopOp = (int) vavEquip.getCoolingLoopOutput().readHisVal();
             }
-        } else if (roomTemp < setTempHeating && isHeatingAvailable( systemMode, vavEquip.getReheatType().readDefaultVal() > 0)) {
+        } else if (roomTemp < setTempHeating && isHeatingAvailable( systemMode, reheatEnabled)) {
             //Zone is in heating
             if (state != HEATING) {
                 handleHeatingChangeOver();
@@ -146,7 +147,7 @@ public class VavSeriesFanProfile extends VavProfile
             loopOp = (int) vavEquip.getHeatingLoopOutput().readHisVal();
         } else {
             //Zone is in deadband
-            handleDeadband();
+            handleDeadband(systemMode, reheatEnabled);
             if (heatingLoop.getEnabled()) {
                 loopOp = (int) heatingLoop.getLoopOutput(setTempHeating, roomTemp);
             } else if (coolingLoop.getEnabled()) {

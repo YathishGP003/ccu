@@ -506,9 +506,12 @@ public class ZoneViewData {
 
         CcuLog.d(L.TAG_CCU_UI, "inputDetails = " + inputDetails+" targetDetails = "+targetDetails);
         plcPoints.put("Unit Type", StringUtils.substringAfterLast(inputDetails.get("dis").toString(), "-"));
-        plcPoints.put("Unit",  inputDetails.get("unit"));
+        String inputUnit = inputDetails.get("unit") == null ? "" : inputDetails.get("unit").toString();
+        plcPoints.put("Unit",  inputUnit);
         plcPoints.put("Dynamic Unit Type", StringUtils.substringAfterLast(targetDetails.get("dis").toString(), "-"));
-        plcPoints.put("Dynamic Unit",  (analog2Config == 1) ? targetDetails.get("unit") : inputDetails.get("unit"));
+        String targetUnit = (analog2Config == 1) ? targetDetails.get("unit") == null ? "" : targetDetails.get("unit").toString()
+                                : inputUnit;
+        plcPoints.put("Dynamic Unit",  targetUnit);
         
         if (th1InputSensor == 1 || th1InputSensor == 2) {
             plcPoints.put("Unit Type", "Temperature");

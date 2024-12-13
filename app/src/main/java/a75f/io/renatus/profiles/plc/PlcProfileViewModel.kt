@@ -1,11 +1,11 @@
 package a75f.io.renatus.profiles.plc
 
 import a75f.io.api.haystack.CCUHsApi
-import a75f.io.api.haystack.Point
 import a75f.io.api.haystack.RawPoint
 import a75f.io.device.mesh.LSerial
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.Domain.getListByDomainName
+import a75f.io.domain.api.Domain.getMinMaxIncValuesByDomainName
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.api.EntityConfig
 import a75f.io.domain.config.ProfileConfiguration
@@ -137,12 +137,15 @@ class PlcProfileViewModel : ViewModel() {
         if (selectedIndex == 0) {
             return targetVal
         }
-        val r = SensorManager.getInstance().externalSensorList[selectedIndex - 1]
+        var minMaxInc: Triple<Double, Double, Double> = Triple(0.0, 0.0, 0.0)
+        var pointString = getProcessVariableMappedPoint()
+        minMaxInc = getMinMaxIncValuesByDomainName(pointString.toString(), model)
+
         targetVal.clear()
 
-        val minVal = (100 * r.minEngineeringValue).toInt()
-        val maxVal = (100 * r.maxEngineeringValue).toInt()
-        val increment = (100 * r.incrementEgineeringValue).toInt()
+        val minVal = (100 * minMaxInc.first).toInt()
+        val maxVal = (100 * minMaxInc.second).toInt()
+        val increment = (100 * minMaxInc.third).toInt()
 
         for (pos in minVal..maxVal step increment) {
             targetVal.add((pos / 100.0).toString())
@@ -168,12 +171,15 @@ class PlcProfileViewModel : ViewModel() {
         if (selectedIndex == 0) {
             return targetVal
         }
-        val r = SensorManager.getInstance().getNativeSensorList()[selectedIndex - 1]
+        var minMaxInc: Triple<Double, Double, Double> = Triple(0.0, 0.0, 0.0)
+        var pointString = getProcessVariableMappedPoint()
+        minMaxInc = getMinMaxIncValuesByDomainName(pointString.toString(), model)
+
         targetVal.clear()
 
-        val minVal = (100 * r.minEngineeringValue).toInt()
-        val maxVal = (100 * r.maxEngineeringValue).toInt()
-        val increment = (100 * r.incrementEngineeringValue).toInt()
+        val minVal = (100 * minMaxInc.first).toInt()
+        val maxVal = (100 * minMaxInc.second).toInt()
+        val increment = (100 * minMaxInc.third).toInt()
 
         for (pos in minVal..maxVal step increment) {
             targetVal.add((pos / 100.0).toString())
@@ -199,12 +205,15 @@ class PlcProfileViewModel : ViewModel() {
         if (selectedIndex == 0) {
             return targetVal
         }
-        val r = SensorManager.getInstance().getThermistorSensorList()[selectedIndex - 1]
+        var minMaxInc: Triple<Double, Double, Double> = Triple(0.0, 0.0, 0.0)
+        var pointString = getProcessVariableMappedPoint()
+        minMaxInc = getMinMaxIncValuesByDomainName(pointString.toString(), model)
+
         targetVal.clear()
 
-        val minVal = (100 * r.minEngineeringValue).toInt()
-        val maxVal = (100 * r.maxEngineeringValue).toInt()
-        val increment = (100 * r.incrementEgineeringValue).toInt()
+        val minVal = (100 * minMaxInc.first).toInt()
+        val maxVal = (100 * minMaxInc.second).toInt()
+        val increment = (100 * minMaxInc.third).toInt()
 
         for (pos in minVal..maxVal step increment) {
             targetVal.add((pos / 100.0).toString())
@@ -212,7 +221,6 @@ class PlcProfileViewModel : ViewModel() {
 
         return targetVal
     }
-
 
     /**
      * Returns a list of error values based on the selected index.
@@ -229,20 +237,22 @@ class PlcProfileViewModel : ViewModel() {
         if (selectedIndex == 0) {
             return errorVal
         }
-        val r = SensorManager.getInstance().externalSensorList[selectedIndex - 1]
+        var minMaxInc: Triple<Double, Double, Double> = Triple(0.0, 0.0, 0.0)
+        var pointString = getProcessVariableMappedPoint()
+        minMaxInc = getMinMaxIncValuesByDomainName(pointString.toString(), model)
+
         errorVal.clear()
 
-        val minVal = (100 * r.minEngineeringValue).toInt()
-        val maxVal = (100 * r.maxEngineeringValue).toInt()
-        val increment = (100 * r.incrementEgineeringValue).toInt()
+        val minVal = (100 * minMaxInc.first).toInt()
+        val maxVal = (100 * minMaxInc.second).toInt()
+        val increment = (100 * minMaxInc.third).toInt()
 
         for (pos in minVal..maxVal step increment) {
             errorVal.add((pos / 100.0).toString())
         }
 
-        // Since the first element is 0, we cannot use it in the calculation of PI loop value
-        // since it will cause division by zero
-        errorVal.remove("0.0")
+        // Remove the negative and zero values from the list
+        errorVal.removeIf { it.toDoubleOrNull() == null || it.toDouble() <= 0 }
 
         return errorVal
     }
@@ -251,20 +261,22 @@ class PlcProfileViewModel : ViewModel() {
         if (selectedIndex == 0) {
             return errorVal
         }
-        val r = SensorManager.getInstance().getNativeSensorList()[selectedIndex - 1]
+        var minMaxInc: Triple<Double, Double, Double> = Triple(0.0, 0.0, 0.0)
+        var pointString = getProcessVariableMappedPoint()
+        minMaxInc = getMinMaxIncValuesByDomainName(pointString.toString(), model)
+
         errorVal.clear()
 
-        val minVal = (100 * r.minEngineeringValue).toInt()
-        val maxVal = (100 * r.maxEngineeringValue).toInt()
-        val increment = (100 * r.incrementEngineeringValue).toInt()
+        val minVal = (100 * minMaxInc.first).toInt()
+        val maxVal = (100 * minMaxInc.second).toInt()
+        val increment = (100 * minMaxInc.third).toInt()
 
         for (pos in minVal..maxVal step increment) {
             errorVal.add((pos / 100.0).toString())
         }
 
-        // Since the first element is 0, we cannot use it in the calculation of PI loop value
-        // since it will cause division by zero
-        errorVal.remove("0.0")
+        // Remove the negative and zero values from the list
+        errorVal.removeIf { it.toDoubleOrNull() == null || it.toDouble() <= 0 }
 
         return errorVal
     }
@@ -273,20 +285,22 @@ class PlcProfileViewModel : ViewModel() {
         if (selectedIndex == 0) {
             return errorVal
         }
-        val r = SensorManager.getInstance().getThermistorSensorList()[selectedIndex - 1]
+        var minMaxInc: Triple<Double, Double, Double> = Triple(0.0, 0.0, 0.0)
+        var pointString = getProcessVariableMappedPoint()
+        minMaxInc = getMinMaxIncValuesByDomainName(pointString.toString(), model)
+
         errorVal.clear()
 
-        val minVal = (100 * r.minEngineeringValue).toInt()
-        val maxVal = (100 * r.maxEngineeringValue).toInt()
-        val increment = (100 * r.incrementEgineeringValue).toInt()
+        val minVal = (100 * minMaxInc.first).toInt()
+        val maxVal = (100 * minMaxInc.second).toInt()
+        val increment = (100 * minMaxInc.third).toInt()
 
         for (pos in minVal..maxVal step increment) {
             errorVal.add((pos / 100.0).toString())
         }
 
-        // Since the first element is 0, we cannot use it in the calculation of PI loop value
-        // since it will cause division by zero
-        errorVal.remove("0.0")
+        // Remove the negative and zero values from the list
+        errorVal.removeIf { it.toDoubleOrNull() == null || it.toDouble() <= 0 }
 
         return errorVal
     }

@@ -638,15 +638,15 @@ private fun getRelayConfigs(equip: HyperStatEquip): HyperStat.HyperstatRelay_t {
         if (relayConfigs.relay1Enable)
             relayConfigs.relay1Mapping = 1 + relay1OutputAssociation.readDefaultVal().toInt()
         if (relayConfigs.relay2Enable)
-            relayConfigs.relay2Mapping = 1 + relay1OutputAssociation.readDefaultVal().toInt()
+            relayConfigs.relay2Mapping = 1 + relay2OutputAssociation.readDefaultVal().toInt()
         if (relayConfigs.relay3Enable)
-            relayConfigs.relay3Mapping = 1 + relay1OutputAssociation.readDefaultVal().toInt()
+            relayConfigs.relay3Mapping = 1 + relay3OutputAssociation.readDefaultVal().toInt()
         if (relayConfigs.relay4Enable)
-            relayConfigs.relay4Mapping = 1 + relay1OutputAssociation.readDefaultVal().toInt()
+            relayConfigs.relay4Mapping = 1 + relay4OutputAssociation.readDefaultVal().toInt()
         if (relayConfigs.relay5Enable)
-            relayConfigs.relay5Mapping = 1 + relay1OutputAssociation.readDefaultVal().toInt()
+            relayConfigs.relay5Mapping = 1 + relay5OutputAssociation.readDefaultVal().toInt()
         if (relayConfigs.relay6Enable)
-            relayConfigs.relay6Mapping = 1 + relay1OutputAssociation.readDefaultVal().toInt()
+            relayConfigs.relay6Mapping = 1 + relay6OutputAssociation.readDefaultVal().toInt()
     }
     return relayConfigs.build()
 }
@@ -660,19 +660,19 @@ private fun getAnalogOutConfigs(equip: HyperStatEquip): HyperStat.HyperstatAnalo
         analogOutConfigs.analogOut3Enable =  analog3OutputEnable.readDefaultVal() == 1.0
 
         if (analogOutConfigs.analogOut1Enable) {
-            analogOutConfigs.analogOut1Mapping = analog2OutputAssociation.readDefaultVal().toInt()
+            analogOutConfigs.analogOut1Mapping = analog1OutputAssociation.readDefaultVal().toInt()
             analogOutConfigs.analogOut1AtMinSetting = hsApi.readDefaultVal("min and analog == 1 and equipRef == \"$equipRef\"").toInt()
             analogOutConfigs.analogOut1AtMaxSetting = hsApi.readDefaultVal("max and analog == 1 and equipRef == \"$equipRef\"").toInt()
         }
         if (analogOutConfigs.analogOut2Enable) {
-            analogOutConfigs.analogOut2Mapping = analog3OutputAssociation.readDefaultVal().toInt()
-            analogOutConfigs.analogOut1AtMinSetting = hsApi.readDefaultVal("min and analog == 2 and equipRef == \"$equipRef\"").toInt()
-            analogOutConfigs.analogOut1AtMaxSetting = hsApi.readDefaultVal("max and analog == 2 and equipRef == \"$equipRef\"").toInt()
+            analogOutConfigs.analogOut2Mapping = analog2OutputAssociation.readDefaultVal().toInt()
+            analogOutConfigs.analogOut2AtMinSetting = hsApi.readDefaultVal("min and analog == 2 and equipRef == \"$equipRef\"").toInt()
+            analogOutConfigs.analogOut2AtMaxSetting = hsApi.readDefaultVal("max and analog == 2 and equipRef == \"$equipRef\"").toInt()
         }
         if (analogOutConfigs.analogOut3Enable) {
             analogOutConfigs.analogOut3Mapping = analog3OutputAssociation.readDefaultVal().toInt()
-            analogOutConfigs.analogOut1AtMinSetting = hsApi.readDefaultVal("min and analog == 3 and equipRef == \"$equipRef\"").toInt()
-            analogOutConfigs.analogOut1AtMaxSetting = hsApi.readDefaultVal("max and analog == 3 and equipRef == \"$equipRef\"").toInt()
+            analogOutConfigs.analogOut3AtMinSetting = hsApi.readDefaultVal("min and analog == 3 and equipRef == \"$equipRef\"").toInt()
+            analogOutConfigs.analogOut3AtMaxSetting = hsApi.readDefaultVal("max and analog == 3 and equipRef == \"$equipRef\"").toInt()
         }
     }
     return analogOutConfigs.build()
@@ -700,7 +700,7 @@ fun getHyperStatSettingsMessage(equipRef: String, zone: String): HyperStatSettin
     return HyperStatSettingsMessage_t.newBuilder()
             .setRoomName(zone)
             .setHeatingDeadBand((getHeatingDeadBand(zoneId) * 10).toInt())
-            .setCoolingDeadBand((getHeatingDeadBand(zoneId) * 10).toInt())
+            .setCoolingDeadBand((getCoolingDeadBand(zoneId) * 10).toInt())
             .setMinCoolingUserTemp(getCoolingUserLimit("min", zoneId))
             .setMaxCoolingUserTemp(getCoolingUserLimit("max", zoneId))
             .setMinHeatingUserTemp(getHeatingUserLimit("min", zoneId))

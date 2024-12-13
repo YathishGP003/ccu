@@ -131,7 +131,6 @@ class HyperStatSplitCpuEconProfile(equipRef: String, nodeAddress: Short) : Hyper
         val outsideDamperMinOpen = getEffectiveOutsideDamperMinOpen()
 
         val fanModeSaved = FanModeCacheStorage().getFanModeFromCache(equipRef)
-        val actualFanMode = getActualFanMode(nodeAddress.toString(), fanModeSaved)
 
         val isCondensateTripped : Boolean = hssEquip.condensateStatusNC.readHisVal() > 0.0 || hssEquip.condensateStatusNO.readHisVal() > 0.0
         if (isCondensateTripped) CcuLog.d(L.TAG_CCU_HSSPLIT_CPUECON, "Condensate overflow detected")
@@ -140,7 +139,7 @@ class HyperStatSplitCpuEconProfile(equipRef: String, nodeAddress: Short) : Hyper
         // It will revert to previous value when Condensate returns to normal
         val basicSettings = fetchBasicSettings(wasCondensateTripped, isCondensateTripped)
 
-        val updatedFanMode = fallBackFanMode(equipRef, fanModeSaved, actualFanMode, basicSettings)
+        val updatedFanMode = fallBackFanMode(equipRef, fanModeSaved, basicSettings)
         basicSettings.fanMode = updatedFanMode
 
         hyperstatSplitCPUEconAlgorithm.initialise(tuners = hyperStatSplitTuners)

@@ -266,7 +266,7 @@ public class VavParallelFanProfile extends VavProfile
         }
     }
     private void handleRFDead() {
-        vavEquip.getEquipStatusMessage().writeDefaultVal(RFDead+" : "+getFanStatusMessage());
+        vavEquip.getEquipStatusMessage().writeDefaultVal(RFDead);
         vavEquip.getEquipStatus().writeHisVal(RFDEAD.ordinal());
     }
     private void updateFanStatus () {

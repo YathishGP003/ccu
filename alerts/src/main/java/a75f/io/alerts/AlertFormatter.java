@@ -137,7 +137,7 @@ public class AlertFormatter
                     return token.contains("name") ? p.getDisplayName() : hs.readHisValById(p.getId()).toString();
                 } else
                 {
-                    return token.contains("name") ? p.getDisplayName() : ((c.grpOperation.contains("min") || c.grpOperation.contains("max") || c.grpOperation.contains("average")) ? String.valueOf(c.resVal) : hs.readHisValById(p.getId()).toString());
+                    return token.contains("name") ? p.getDisplayName() : ((c.grpOperation.contains("min") || c.grpOperation.contains("max") || c.grpOperation.contains("average") || c.grpOperation.contains("oao")) ? String.valueOf(c.resVal) : hs.readHisValById(p.getId()).toString());
                 }
             case "present":
                 for (Conditional d : def.conditionals) {

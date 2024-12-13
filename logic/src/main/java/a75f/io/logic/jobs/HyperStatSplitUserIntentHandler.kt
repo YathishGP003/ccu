@@ -14,6 +14,7 @@ import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
 import a75f.io.logic.bo.building.hyperstat.profiles.pipe2.Pipe2RelayAssociation
 import a75f.io.logic.bo.building.hyperstatsplit.common.BasicSettings
+import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.logic.tuners.TunerConstants
 import a75f.io.logic.util.RxjavaUtil
 import a75f.io.util.ExecutorTask
@@ -307,6 +308,7 @@ class HyperStatSplitUserIntentHandler {
                             CcuLog.d(L.TAG_CCU_HSSPLIT_CPUECON, " updated his write $id")
                             haystack.writeHisValById(id, value)
                         }
+                        DesiredTempDisplayMode.setModeType(pointDetails.roomRef, CCUHsApi.getInstance())
                     }
                     CcuLog.i(L.TAG_CCU_HSSPLIT_CPUECON, " update HyperStat Split UI Points work done")
 

@@ -34,7 +34,7 @@ fun update(entitytable: HayStackEntity, context : Context) {
         if (entityDbHelper == null) {
             entityDbHelper = EntityDatabaseHelper(RenatusDatabaseBuilder.getInstance(context))
         }
-        Log.i(TAG, " DbUtil:Update entitytable : ${entitytable.Id}")
+        Log.i(TAG, " DbUtil:Update entitytable : $entitytable")
         entityDbHelper?.update(entitytable)
     }
 }

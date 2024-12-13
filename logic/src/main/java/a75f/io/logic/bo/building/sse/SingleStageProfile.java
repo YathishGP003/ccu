@@ -269,7 +269,6 @@ public class SingleStageProfile extends ZoneProfile
         if (!curStatus.equals(RFDead))
         {
             sseEquip.getEquipStatusMessage().writeDefaultVal(RFDead);
-            sseEquip.getOccupancyMode().writeHisVal(0);
         }
     }
 

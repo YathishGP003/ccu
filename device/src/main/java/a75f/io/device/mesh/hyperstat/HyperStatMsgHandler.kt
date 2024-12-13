@@ -304,7 +304,8 @@ private fun updateDynamicSensors(device: HyperStatDevice, sensorReadings: List<S
     sensorReadings.forEach { readings ->
         try {
             val sensorType = SensorType.values()[readings.sensorType]
-            var sensorValue = readings.sensorData.toDouble()
+            var physicalValue = readings.sensorData.toDouble()
+            var logicalValue = readings.sensorData.toDouble()
             val port = sensorType.sensorPort
 
             if (sensorType == SensorType.NONE )
@@ -317,12 +318,16 @@ private fun updateDynamicSensors(device: HyperStatDevice, sensorReadings: List<S
             }
 
             when(sensorType) {
-                SensorType.HUMIDITY -> sensorValue = readings.sensorData.toDouble() / 10
+                SensorType.HUMIDITY -> {
+                    physicalValue /= 10
+                    logicalValue /= 10
+                }
+                SensorType.PRESSURE -> logicalValue = Pulse.convertPressureFromPaToInH2O(physicalValue)
                 else -> { }
             }
 
-            updateSensorValue(sensorPoint, sensorType, sensorValue, equipRef)
-            CcuLog.d(L.TAG_CCU_DEVICE, "sensorType: $sensorType, sensorPoint: ${sensorPoint.domainName} sensorValue: $sensorValue, port: $port")
+            updateSensorValue(sensorPoint, sensorType, physicalValue, logicalValue, equipRef)
+            CcuLog.d(L.TAG_CCU_DEVICE, "sensorType: $sensorType, sensorPoint: ${sensorPoint.domainName} physicalValue: $physicalValue, logicalValue: $logicalValue, port: $port")
         } catch (e: Exception) {
             CcuLog.e(L.TAG_CCU_DEVICE, "Error in updateDynamicSensors $readings", e)
         }
@@ -348,7 +353,7 @@ private fun getSensorPoint(device: HyperStatDevice, sensorType: SensorType): Phy
 
 fun updateSensorValue(
         physicalPoint: PhysicalPoint?, sensorType: SensorType,
-        sensorValue: Double, equipRef: String) {
+        physicalValue: Double, logicalValue: Double, equipRef: String) {
 
     fun getLogicalSensorForPhysicalPoint(physicalDomainName: String): String? {
         return when (physicalDomainName) {
@@ -402,8 +407,8 @@ fun updateSensorValue(
             CcuLog.e(L.TAG_CCU_DEVICE, "Logical sensor point is not available for ${physicalPoint.domainName}")
         }
     }
-    physicalPoint.writeHisVal(sensorValue)
-    updateLogicalPoint(physicalPoint, sensorValue)
+    physicalPoint.writeHisVal(physicalValue)
+    updateLogicalPoint(physicalPoint , logicalValue)
 
 }
 

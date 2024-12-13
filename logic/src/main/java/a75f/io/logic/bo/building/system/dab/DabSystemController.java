@@ -12,6 +12,7 @@ import static a75f.io.logic.bo.building.system.SystemController.State.OFF;
 import static a75f.io.logic.bo.building.system.SystemMode.AUTO;
 import static a75f.io.logic.bo.building.system.SystemMode.COOLONLY;
 import static a75f.io.logic.bo.building.system.SystemMode.HEATONLY;
+import static a75f.io.logic.bo.building.truecfm.TrueCFMUtil.getDamperSizeFromEnum;
 
 import com.google.common.collect.EvictingQueue;
 
@@ -977,8 +978,8 @@ public class DabSystemController extends SystemController
             double damperPosVal = normalizedDamperPosMap.get(damperPosPrimary.get("id").toString());
             double damperSizeVal = hayStack.readDefaultValById(damperSizePrimary.get("id").toString());
             
-            weightedDamperOpeningSum += (damperPosVal * damperSizeVal);
-            damperSizeSum += damperSizeVal;
+            weightedDamperOpeningSum += (damperPosVal *  getDamperSizeFromEnum((int)damperSizeVal));
+            damperSizeSum += getDamperSizeFromEnum((int)damperSizeVal);
             
             HashMap<Object, Object> damperPosSecondary = hayStack.readEntity("point and domainName == \"" + DomainName.normalizedDamper2Cmd + "\"" +
                     " and equipRef == \""+dabEquip.get("id").toString()+"\"");
@@ -988,8 +989,8 @@ public class DabSystemController extends SystemController
             damperPosVal = normalizedDamperPosMap.get(damperPosSecondary.get("id").toString());
             damperSizeVal = hayStack.readDefaultValById(damperSizeSecondary.get("id").toString());
             
-            weightedDamperOpeningSum += (damperPosVal * damperSizeVal);
-            damperSizeSum += damperSizeVal;
+            weightedDamperOpeningSum += (damperPosVal *  getDamperSizeFromEnum((int)damperSizeVal));
+            damperSizeSum += getDamperSizeFromEnum((int)damperSizeVal);
             
         }
         return damperSizeSum == 0 ? 0 : CCUUtils.roundToTwoDecimal((double) weightedDamperOpeningSum / damperSizeSum);

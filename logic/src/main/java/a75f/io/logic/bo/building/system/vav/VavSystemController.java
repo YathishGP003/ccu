@@ -20,7 +20,6 @@ import a75f.io.logic.bo.building.system.SystemConstants;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.SystemPILoopController;
-import a75f.io.logic.bo.building.system.dab.DabExternalAhu;
 import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.bo.util.SystemScheduleUtil;
 import a75f.io.logic.bo.util.SystemTemperatureUtil;
@@ -35,6 +34,7 @@ import static a75f.io.logic.bo.building.system.SystemController.State.OFF;
 import static a75f.io.logic.bo.building.system.SystemMode.AUTO;
 import static a75f.io.logic.bo.building.system.SystemMode.COOLONLY;
 import static a75f.io.logic.bo.building.system.SystemMode.HEATONLY;
+import static a75f.io.logic.bo.building.truecfm.TrueCFMUtil.getDamperSizeFromEnum;
 
 /**
  * VavSystemController applies Weighted average and Moving average filters on temperature diffs.
@@ -892,8 +892,8 @@ public class VavSystemController extends SystemController
         
             double damperPosVal = normalizedDamperPosMap.get(damperPos.get("id").toString());
             double damperSizeVal = hayStack.readDefaultValById(damperSize.get("id").toString());
-            weightedDamperOpeningSum += damperPosVal * damperSizeVal;
-            damperSizeSum += damperSizeVal;
+            weightedDamperOpeningSum += damperPosVal * getDamperSizeFromEnum((int)damperSizeVal);
+            damperSizeSum += getDamperSizeFromEnum((int)damperSizeVal);
         }
         return damperSizeSum == 0 ? 0 : (double) weightedDamperOpeningSum / damperSizeSum;
     }

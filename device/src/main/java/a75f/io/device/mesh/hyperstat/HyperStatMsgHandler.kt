@@ -306,6 +306,10 @@ private fun updateDynamicSensors(device: HyperStatDevice, sensorReadings: List<S
             val sensorType = SensorType.values()[readings.sensorType]
             var sensorValue = readings.sensorData.toDouble()
             val port = sensorType.sensorPort
+
+            if (sensorType == SensorType.NONE )
+                return@forEach
+
             val sensorPoint = getSensorPoint(device, sensorType)
             if (sensorPoint == null) {
                 CcuLog.e(L.TAG_CCU_DEVICE, "Sensor type not found for $sensorType")
@@ -317,7 +321,7 @@ private fun updateDynamicSensors(device: HyperStatDevice, sensorReadings: List<S
                 else -> { }
             }
 
-            updateSensorValue(sensorPoint, sensorType, sensorValue, equipRef, nodeAddress)
+            updateSensorValue(sensorPoint, sensorType, sensorValue, equipRef)
             CcuLog.d(L.TAG_CCU_DEVICE, "sensorType: $sensorType, sensorPoint: ${sensorPoint.domainName} sensorValue: $sensorValue, port: $port")
         } catch (e: Exception) {
             CcuLog.e(L.TAG_CCU_DEVICE, "Error in updateDynamicSensors $readings", e)
@@ -337,27 +341,47 @@ private fun getSensorPoint(device: HyperStatDevice, sensorType: SensorType): Phy
         SensorType.PM10 -> device.pm10Sensor
         SensorType.PRESSURE -> device.pressureSensor
         SensorType.UVI -> device.uviSensor
-        else -> {
-            CcuLog.e(L.TAG_CCU_DEVICE, "Sensor type not found for $sensorType")
-            null
-        }
+        else -> { null }
     }
 }
 
 
 fun updateSensorValue(
         physicalPoint: PhysicalPoint?, sensorType: SensorType,
-        sensorValue: Double, equipRef: String, nodeAddress: Int) {
+        sensorValue: Double, equipRef: String) {
+
+    fun getLogicalSensorForPhysicalPoint(physicalDomainName: String): String? {
+        return when (physicalDomainName) {
+            DomainName.co2Sensor -> DomainName.zoneCo2
+            DomainName.humiditySensor -> DomainName.zoneHumidity
+            DomainName.occupancySensor -> DomainName.zoneOccupancy
+            DomainName.soundSensor -> DomainName.zoneSound
+            DomainName.co2EquivalentSensor -> DomainName.zoneCo2Equivalent
+            DomainName.illuminanceSensor -> DomainName.zoneIlluminance
+            DomainName.pm25Sensor -> DomainName.zonePm25
+            DomainName.pm10Sensor -> DomainName.zonePm10
+            DomainName.uviSensor -> DomainName.zoneUvi
+            DomainName.pressureSensor -> DomainName.zonePressureSensor
+            else -> null
+        }
+    }
 
     fun createSensorPoint(domainName: String, physicalPoint: PhysicalPoint) {
         val pointsUtil = PointsUtil(CCUHsApi.getInstance())
         val equip = HSUtil.getEquipInfo(equipRef)
-        val pointRef = pointsUtil.createDynamicSensorEquipPoint(equip, domainName, getConfiguration(equipRef)!!)
-        if (pointRef == null) {
-            CcuLog.e(L.TAG_CCU_DEVICE, "Unable to create sensor point for $domainName")
-            return
+        val pointRef: String?
+        val isSensorExist = isSensorExist(domainName, equipRef)
+        if (isSensorExist != null) {
+            CcuLog.e(L.TAG_CCU_DEVICE, "Sensor point already exist for $domainName")
+            pointRef = isSensorExist
+        } else {
+            pointRef = pointsUtil.createDynamicSensorEquipPoint(equip, domainName, getConfiguration(equipRef)!!)
+            if (pointRef == null) {
+                CcuLog.e(L.TAG_CCU_DEVICE, "Unable to create sensor point for $domainName")
+                return
+            }
         }
-        CcuLog.e(L.TAG_CCU_DEVICE, "Dynamic sensor created for $domainName")
+        CcuLog.e(L.TAG_CCU_DEVICE, "Dynamic sensor created for $domainName : id : $pointRef")
         val rowPoint = (RawPoint.Builder().setHashMap(physicalPoint.domainName.readPhysicalPoint(physicalPoint.deviceRef) as HashMap)).setPointRef(pointRef).build()
         CCUHsApi.getInstance().updatePoint(rowPoint, rowPoint.id)
         CCUHsApi.getInstance().scheduleSync()
@@ -371,7 +395,12 @@ fun updateSensorValue(
 
     if (physicalPoint.readPoint().pointRef == null) {
         CcuLog.e(L.TAG_CCU_DEVICE, "Logical sensor point is not found creating new point ${physicalPoint.domainName}")
-        createSensorPoint(physicalPoint.domainName, physicalPoint)
+        val logicalSensorName = getLogicalSensorForPhysicalPoint(physicalPoint.domainName)
+        if (logicalSensorName != null) {
+            createSensorPoint(logicalSensorName, physicalPoint)
+        } else {
+            CcuLog.e(L.TAG_CCU_DEVICE, "Logical sensor point is not available for ${physicalPoint.domainName}")
+        }
     }
     physicalPoint.writeHisVal(sensorValue)
     updateLogicalPoint(physicalPoint, sensorValue)
@@ -405,4 +434,11 @@ fun runProfileAlgo(nodeAddress: Short) {
             profile.processHyperStatPipeProfile(profile.getHyperStatEquip(nodeAddress) as HyperStatPipe2EquipToBeDeleted)
         }
     }
+}
+
+fun isSensorExist(domainName:String, equipRef: String): String?{
+    val sensorPoint = hayStack.readEntity("point and domainName == \"$domainName\" and equipRef == \"$equipRef\"")
+    if (sensorPoint.isNotEmpty())
+        return sensorPoint[Tags.ID].toString()
+    return null
 }

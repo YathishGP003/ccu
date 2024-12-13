@@ -34,7 +34,7 @@ class HyperStatDevice (deviceRef : String) : DomainDevice (deviceRef) {
     val illuminanceSensor = PhysicalPoint(DomainName.illuminanceSensor ,deviceRef)
     val humiditySensor = PhysicalPoint(DomainName.humiditySensor ,deviceRef)
     val soundSensor = PhysicalPoint(DomainName.soundSensor ,deviceRef)
-    val co2Equivalent = PhysicalPoint(DomainName.co2Equivalent ,deviceRef)
+    val co2Equivalent = PhysicalPoint(DomainName.co2EquivalentSensor ,deviceRef)
     val co2Sensor = PhysicalPoint(DomainName.co2Sensor ,deviceRef)
     val pm25Sensor = PhysicalPoint(DomainName.pm25Sensor ,deviceRef)
     val pm10Sensor = PhysicalPoint(DomainName.pm10Sensor ,deviceRef)

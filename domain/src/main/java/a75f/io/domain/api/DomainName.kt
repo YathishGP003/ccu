@@ -410,6 +410,7 @@ object DomainName {
     const val dischargeAirTemp = "dischargeAirTemp"
     const val enteringAirTemp = "enteringAirTemp"
     const val pressureSensor = "pressureSensor"
+    const val zonePressureSensor = "zonePressureSensor" // hyperstat contains zone as prefix
     const val uviSensor = "uviSensor"
     const val zoneVoc = "zoneVoc"
     const val occupancyMode = "occupancyMode"
@@ -1118,7 +1119,7 @@ object DomainName {
     const val pm25Sensor = "pm25Sensor"
     const val pm10Sensor = "pm10Sensor"
     const val soundSensor = "soundSensor"
-    const val co2Equivalent = "co2Equivalent"
+    const val co2EquivalentSensor = "co2EquivalentSensor"
     const val mixedAirTempSensor = "mixedAirTempSensor"
     const val dischargeAirTemperature = "dischargeAirTemperature"
     const val mixedAirHumiditySensor = "mixedAirHumiditySensor"

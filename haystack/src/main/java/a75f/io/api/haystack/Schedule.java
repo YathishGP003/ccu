@@ -830,6 +830,7 @@ public class Schedule extends Entity
 
                 if (currentlyOccupied)
                 {
+                    CcuLog.d("CCU_SCHEDULER","Currently Occupied "+daysSorted.get(i)+" Current Time "+getTime());
                     occupied.setCurrentlyOccupiedSchedule(daysSorted.get(i));
                 } else
                 {

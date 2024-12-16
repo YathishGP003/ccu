@@ -1116,7 +1116,7 @@ public class LSmartNode
     }
 
     public static void setSSESettings(short address, SmartNodeSettings_t settings) {
-        byte reserved = 0;
+        byte sseConfigBitmap = 0;
         CCUHsApi hsApi = CCUHsApi.getInstance();
         Equip equip = new Equip.Builder().setHashMap(hsApi.readEntity("equip and sse and group == \"" + address + "\"")).build();
         SseEquip sseEquip = (SseEquip) Domain.INSTANCE.getDomainEquip(equip.getId());
@@ -1131,25 +1131,25 @@ public class LSmartNode
         if (relay1config > 0) {
             double relay1Association = sseEquip.getRelay1OutputAssociation().readDefaultVal();
             if (relay1Association == 1) {
-                reserved |= (1 << 3);
+                sseConfigBitmap |= (1 << 0);
             }
         }
-        // third last bit is for relay 2
+        // fifth last bit is for relay 2
         if (relay2config > 0) {
             double relay2Association = sseEquip.getRelay2OutputAssociation().readDefaultVal();
             if (relay2Association == 0) {
-                reserved |= (1 << 2);
+                sseConfigBitmap |= (1 << 1);
             }
         }
 
-        // second last bit is for external 10k temperature sensor
+        // sixth bit is for external 10k temperature sensor
         if (enableExternal10kTemperatureSensorToggle > 0) {
-            reserved |= (1 << 1);
+            sseConfigBitmap |= (1 << 2);
         }
 
-        reserved |= (0); // least significant bit is always 0 - beacon is not enabled.
+        sseConfigBitmap |= (0 << 3); //this bit is always 0 - beacon is not enabled. - 7th bit
 
-        settings.reserved.set(reserved);
+        settings.settingsBitmap.set(sseConfigBitmap);
     }
 
     public static void setSSESettings2(short address, SmartNodeSettings2_t settings) {

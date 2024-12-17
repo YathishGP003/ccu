@@ -585,7 +585,7 @@ public class HaystackService {
 
     private static String fixInvertedCommas(String input) {
         // Define the pattern
-        Pattern pattern = Pattern.compile("==([^\\s]+)");
+        Pattern pattern = Pattern.compile("==\\s*([@\\w-]+)");
 
         // Match the pattern against the input
         Matcher matcher = pattern.matcher(input);

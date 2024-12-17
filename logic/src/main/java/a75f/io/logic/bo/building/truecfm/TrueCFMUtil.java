@@ -15,7 +15,10 @@ import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.DamperShape;
 import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
+import a75f.io.logic.bo.building.system.SystemController;
+import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.vav.VavSystemProfile;
+import a75f.io.logic.tuners.TunerUtil;
 
 public class TrueCFMUtil {
     
@@ -68,8 +71,6 @@ public class TrueCFMUtil {
                 return 18.0;
             case 8:
                 return 20.0;
-            case 9:
-                return 22.0;
             default:
                 return 4.0;
         }
@@ -85,7 +86,11 @@ public class TrueCFMUtil {
     public static boolean isCfmOnEdgeActive(CCUHsApi hayStack, String terminalEquipRef) {
         if (L.ccu().systemProfile instanceof VavSystemProfile) {
             int systemOpMode = hayStack.readHisValByQuery("point and operating and mode and equipRef == \"" + L.ccu().systemProfile.getSystemEquipRef() + "\"").intValue();
-            return isTrueCfmEnabled(hayStack, terminalEquipRef) && systemOpMode == 1; // I can't believe there isn't an enum for this, but I couldn't find one
+            SystemMode conditioningMode = SystemMode.values()[(int) TunerUtil.readSystemUserIntentVal("conditioning and mode")];
+
+            return isTrueCfmEnabled(hayStack, terminalEquipRef)
+                    && conditioningMode != SystemMode.OFF
+                    && systemOpMode == SystemController.State.COOLING.ordinal();
         }
         return false;
     }

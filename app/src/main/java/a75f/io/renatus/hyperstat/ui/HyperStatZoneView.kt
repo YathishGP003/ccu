@@ -559,7 +559,7 @@ private fun handleHumidityMode(
         selectedPosition: Int, equipId: String,
         equip: HyperStatEquip? = null) {
     if (equip != null) {
-        equip.targetHumidifier.writePointValue(selectedPosition.toDouble())
+        equip.targetHumidifier.writePointValue((selectedPosition + 1).toDouble())
     } else {
         updateHyperStatUIPoints(
                 equipId, "target and humidifier", (selectedPosition + 1).toDouble(), CCUHsApi.getInstance().ccuUserName
@@ -569,7 +569,7 @@ private fun handleHumidityMode(
 
 private fun handleDeHumidityMode(selectedPosition: Int, equipId: String, equip: HyperStatEquip? = null) {
     if (equip != null) {
-        equip.targetDehumidifier.writePointValue(selectedPosition.toDouble())
+        equip.targetDehumidifier.writePointValue((selectedPosition + 1).toDouble())
     } else {
         updateHyperStatUIPoints(
                 equipId, "target and dehumidifier", (selectedPosition + 1).toDouble(), CCUHsApi.getInstance().ccuUserName

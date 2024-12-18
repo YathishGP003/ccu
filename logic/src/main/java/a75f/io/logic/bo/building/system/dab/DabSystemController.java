@@ -786,7 +786,7 @@ public class DabSystemController extends SystemController
     public boolean hasTemp(Equip q) {
         try
         {
-            return CCUHsApi.getInstance().readHisValByQuery("point and  (current or space) and temp and equipRef == \"" + q.getId()
+            return CCUHsApi.getInstance().readHisValByQuery("point and (current or space) and temp and sensor and equipRef == \"" + q.getId()
                                                             + "\"") > 0;
         } catch (Exception e) {
             return false;

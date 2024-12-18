@@ -1261,9 +1261,6 @@ public class ScheduleManager {
                 return "In AutoAway";
 
             case UNOCCUPIED:
-                if (ScheduleUtil.isAnyZoneAutoAway(equipOccupancy)) {
-                    return "In AutoAway";
-                }
                 if (nextOccupiedInfo == null || nextOccupiedInfo.getNextOccupiedSchedule() == null ){
                     CcuLog.i(TAG_CCU_SCHEDULER, " Unoccupied and info does not exist");
                     return "In Unoccupied Mode";

@@ -28,7 +28,7 @@ fun getProcessVariableMappedPoint(plcEquip: PlcEquip, model : ModelDirective) : 
 }
 
 fun getDynamicTargetPoint(plcEquip: PlcEquip, model : ModelDirective) : String{
-    if (plcEquip.analog2InputType.readDefaultVal() > 0) {
+    if (plcEquip.useAnalogIn2ForSetpoint.readDefaultVal() > 0) {
         val analog2InputPoint = model.points.find { it.domainName == DomainName.analog2InputType }
         return (analog2InputPoint?.valueConstraint as MultiStateConstraint)
             .allowedValues[plcEquip.analog2InputType.readDefaultVal().toInt()].value

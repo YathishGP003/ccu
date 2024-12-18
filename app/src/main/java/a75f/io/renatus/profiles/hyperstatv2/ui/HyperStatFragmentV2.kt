@@ -417,7 +417,7 @@ abstract class HyperStatFragmentV2 : BaseDialogFragment(), OnPairingCompleteList
                 .fillMaxWidth()
                 .padding(top = 10.dp, bottom = 10.dp)) {
             val rowModifier = Modifier
-                    .width(200.dp)
+                    .width(185.dp)
                     .padding(top = 10.dp)
             Box(modifier = rowModifier) {
                 StyledTextView(firstLabel, fontSize = 20, textAlignment = TextAlign.Left)

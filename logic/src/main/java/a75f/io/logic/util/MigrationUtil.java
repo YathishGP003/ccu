@@ -207,6 +207,10 @@ public class MigrationUtil {
                 e.printStackTrace();
             }
         }
+        if(!PreferenceUtil.getNonDmOtaPointDeletionStatus()) {
+            deleteNonDMSystemOTAStatusPoint(ccuHsApi);
+            PreferenceUtil.setNonDmOtaPointDeletionStatus();
+        }
         ccuHsApi.scheduleSync();
     }
     private static void updateLocalTunersEquipRef(CCUHsApi hayStack) {
@@ -1262,4 +1266,16 @@ public class MigrationUtil {
         CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "doDabDamperSizeMigration2 ended");
     }
 
+    private static void deleteNonDMSystemOTAStatusPoint(CCUHsApi ccuHsApi) {
+        HashMap<Object, Object> systemEquip = ccuHsApi.readEntity("system and equip and not" +
+                " modbus and not connectModule and not domainName");
+        if (systemEquip.size() > 0) {
+            HashMap<Object, Object> otaStatusPoint =  ccuHsApi.readEntity("ota and status" +
+                    " and equipRef == \"" + systemEquip.get(Tags.ID) + "\"");
+            if(otaStatusPoint.size() > 0) {
+                ccuHsApi.deleteEntity(otaStatusPoint.get(Tags.ID).toString());
+                CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Deleted OTA status point");
+            }
+        }
+    }
 }

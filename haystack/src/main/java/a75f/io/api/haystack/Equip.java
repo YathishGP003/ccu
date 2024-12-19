@@ -143,6 +143,11 @@ public class Equip extends Entity
     {
         this.floorRef = floorRef;
     }
+    public void setProfile(String profile)
+    {
+        this.profile = profile;
+    }
+
     public String getId()
     {
         return id;

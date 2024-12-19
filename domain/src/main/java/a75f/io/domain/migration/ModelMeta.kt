@@ -1,6 +1,8 @@
 package a75f.io.domain.migration
 
 import a75f.io.domain.util.MODEL_BUILDING_EQUIP
+import a75f.io.domain.util.MODEL_CCU_BASE_CONFIGURATION
+import a75f.io.domain.util.MODEL_CCU_DIAG_EQUIP
 import a75f.io.domain.util.MODEL_CM_DEVICE
 import a75f.io.domain.util.MODEL_CONNECT_DEVICE
 import a75f.io.domain.util.MODEL_DAB_ADVANCED_AHU_V2_CM
@@ -88,5 +90,7 @@ fun getRequiredModels(): List<String> {
             MODEL_HELIO_NODE_SSE,
             MODEL_HYPERSTAT_CPU,
             MODEL_HYPERSTAT_MONITORING,
+            MODEL_CCU_DIAG_EQUIP,
+            MODEL_CCU_BASE_CONFIGURATION
     )
 }

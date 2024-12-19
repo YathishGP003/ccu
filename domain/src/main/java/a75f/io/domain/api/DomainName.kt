@@ -1204,6 +1204,8 @@ object DomainName {
     const val bacnetAppVersion = "bacnetAppVersion"
     const val remoteAccessAppVersion = "remoteAccessAppVersion"
     const val homeAppVersion = "homeAppVersion"
+    const val otaStatusCCU = "otaStatusCCU"
+    const val otaStatusCM = "otaStatusCM"
 
 
     // CCU Specific points

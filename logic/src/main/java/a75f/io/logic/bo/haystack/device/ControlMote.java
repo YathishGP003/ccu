@@ -62,13 +62,6 @@ public class ControlMote
         deviceRef = CCUHsApi.getInstance().addDevice(d);
         createPoints();
         addFirmwareVersionPoint();
-        OtaStatusDiagPoint.Companion.addOTAStatusPoint(
-                site.getDisplayName()+"-"+Tags.CM,
-                systemEquipRef,
-                site.getId(),
-                site.getTz(),
-                CCUHsApi.getInstance()
-        );
     }
 	//For CCU as a zone part
     public ControlMote(int address, String site, String floor, String room, String equipRef) {

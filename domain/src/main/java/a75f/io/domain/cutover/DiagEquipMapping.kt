@@ -17,7 +17,7 @@ object DiagEquipMapping {
         "serialConnection" to DomainName.serialConnection,
         "appRestart" to DomainName.appRestart,
         "appVersion" to DomainName.appVersion,
-        "otaStatus" to DomainName.otaStatus,
+        "otaStatus" to DomainName.otaStatusCCU,
         "safeModeStatus" to DomainName.safeModeStatus,
         "availableInternalDiskStorage" to DomainName.availableInternalDiskStorage,
         "autoCommissioning" to DomainName.autoCommissioning,

@@ -75,7 +75,7 @@ object HyperStatV2EquipCutoverMapping {
             "fanMediumSpeed" to DomainName.fanMediumSpeed,
             "fanHighSpeed" to DomainName.fanHighSpeed,
 
-            "dcvDamper" to DomainName.dcvDamper,
+            "dcvDamper" to DomainName.dcvDamperModulating,
             "analog1Mindcvdamper" to DomainName.analog1MinDCVDamper,
             "analog1Maxdcvdamper" to DomainName.analog1MaxDCVDamper,
             "analog2Mindcvdamper" to DomainName.analog2MinDCVDamper,

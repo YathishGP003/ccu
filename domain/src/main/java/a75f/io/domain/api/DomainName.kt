@@ -1086,7 +1086,8 @@ object DomainName {
     const val fanHighSpeed = "fanHighSpeed"
     const val exhaustFanStage1 = "exhaustFanStage1"
     const val exhaustFanStage2 = "exhaustFanStage2"
-    const val dcvDamper = "dcvDamper"
+    const val dcvDamper = "dcvDamper" // for relay
+    const val dcvDamperModulating = "dcvDamperModulating" // for analog dcv
 
     const val oaoDamper = "oaoDamper"
     const val outsideDamperSensor = "outsideDamperSensor"

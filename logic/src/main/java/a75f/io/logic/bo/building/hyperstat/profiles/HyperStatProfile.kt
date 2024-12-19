@@ -417,6 +417,7 @@ abstract class HyperStatProfile : ZoneProfile(),RelayActions, AnalogOutActions, 
             && !isDoorOpen && (currentOccupancyMode == Occupancy.OCCUPIED.ordinal ||
                     currentOccupancyMode == Occupancy.AUTOFORCEOCCUPIED.ordinal ||
                     currentOccupancyMode == Occupancy.PRECONDITIONING.ordinal ||
+                    currentOccupancyMode == Occupancy.DEMAND_RESPONSE_OCCUPIED.ordinal ||
                     currentOccupancyMode == Occupancy.FORCEDOCCUPIED.ordinal)
         ) {
             var damperOperationPercent = (co2Value - zoneCO2Threshold) / zoneCO2DamperOpeningRate
@@ -427,6 +428,7 @@ abstract class HyperStatProfile : ZoneProfile(),RelayActions, AnalogOutActions, 
 
         } else if (co2Value < zoneCO2Threshold || currentOccupancyMode == Occupancy.AUTOAWAY.ordinal ||
             currentOccupancyMode == Occupancy.VACATION.ordinal ||
+            currentOccupancyMode == Occupancy.DEMAND_RESPONSE_UNOCCUPIED.ordinal ||
             currentOccupancyMode == Occupancy.UNOCCUPIED.ordinal || isDoorOpen
         ) {
             updateLogicalPoint(logicalPointsList[port]!!, 0.0)

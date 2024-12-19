@@ -94,7 +94,7 @@ open class HyperStatEquip(equipRef : String) : DomainEquip(equipRef) {
     val occupiedEnable = Point(DomainName.occupiedEnable, equipRef)
     val humidifierEnable = Point(DomainName.humidifierEnable, equipRef)
     val dehumidifierEnable = Point(DomainName.dehumidifierEnable, equipRef)
-    val dcvDamper = Point(DomainName.dcvDamper, equipRef)
+    val dcvDamperModulating = Point(DomainName.dcvDamperModulating, equipRef)
     val targetHumidifier = Point(DomainName.targetHumidifier, equipRef)
     val targetDehumidifier = Point(DomainName.targetDehumidifier, equipRef)
     val co2Threshold = Point(DomainName.co2Threshold, equipRef)

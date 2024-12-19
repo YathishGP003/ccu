@@ -1055,4 +1055,41 @@ class DabAdvancedAhu : DabSystemProfile() {
     private fun isAllowToActiveStage1Fan(): Boolean {
         return (systemCoolingLoopOp > 0 || systemSatCoolingLoopOp > 0 || systemFanLoopOp > 0 || systemHeatingLoopOp > 0 || systemSatHeatingLoopOp > 0 || staticPressureFanLoopOp > 0)
     }
+
+    fun isStageEnabled(stage: String, cmRelayMappings: Map<Point, Point>): Boolean {
+        cmRelayMappings.forEach { (relay, association) ->
+            if (relay.readDefaultVal() > 0) {
+                val domainName = relayAssociationToDomainName(association.readDefaultVal().toInt())
+                if(domainName == stage) {
+                    return true
+                }
+            }
+        }
+        return false
+    }
+    fun isHighFanStagesEnabled() : Boolean{
+        return systemEquip.cmEquip.loadFanStage5.readHisVal() > 0 ||
+                systemEquip.cmEquip.loadFanStage4.readHisVal() > 0 ||
+                systemEquip.cmEquip.loadFanStage3.readHisVal() > 0 ||
+
+                systemEquip.cmEquip.fanPressureStage5Feedback.readHisVal() > 0 ||
+                systemEquip.cmEquip.fanPressureStage4Feedback.readHisVal() > 0 ||
+                systemEquip.cmEquip.fanPressureStage3Feedback.readHisVal() > 0 ||
+
+                systemEquip.connectEquip1.loadFanStage5.readHisVal() > 0 ||
+                systemEquip.connectEquip1.loadFanStage4.readHisVal() > 0 ||
+                systemEquip.connectEquip1.loadFanStage3.readHisVal() > 0
+    }
+
+    fun isMediumFanStageEnabled() : Boolean{
+        return systemEquip.cmEquip.loadFanStage2.readHisVal() > 0 ||
+                systemEquip.cmEquip.fanPressureStage2Feedback.readHisVal() > 0 ||
+                systemEquip.connectEquip1.loadFanStage2.readHisVal() > 0
+    }
+
+    fun isLowFanStageEnabled() : Boolean{
+        return systemEquip.cmEquip.loadFanStage1.readHisVal() > 0 ||
+                systemEquip.cmEquip.fanPressureStage1Feedback.readHisVal() > 0 ||
+                systemEquip.connectEquip1.loadFanStage1.readHisVal() > 0
+    }
 }

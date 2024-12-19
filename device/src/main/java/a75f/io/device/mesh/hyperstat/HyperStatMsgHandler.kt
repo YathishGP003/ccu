@@ -223,6 +223,10 @@ private fun updateThermistor(logicalPointId: String, value: Double, equipRef: St
         DomainName.genericAlarmNO, DomainName.genericAlarmNO_th1, DomainName.genericAlarmNO_th2 -> {
             if ((value * 10) <= 10000) 1.0 else 0.0
         }
+        /*For Generic(1-100)kohms, CCU just need to convertto kOhms*/
+        DomainName.airTempSensor100kOhms_th1, DomainName.airTempSensor100kOhms_th2 -> {
+            value/100
+        }
 
         else -> {
             CCUUtils.roundToOneDecimal(ThermistorUtil.getThermistorValueToTemp(value * 10))

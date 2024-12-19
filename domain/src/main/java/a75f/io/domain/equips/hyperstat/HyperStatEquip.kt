@@ -101,6 +101,7 @@ open class HyperStatEquip(equipRef : String) : DomainEquip(equipRef) {
     val pm25Threshold = Point(DomainName.pm25Threshold, equipRef)
     val co2Target = Point(DomainName.co2Target, equipRef)
     val pm25Target = Point(DomainName.pm25Target, equipRef)
+    val pm10Target = Point(DomainName.pm10Target, equipRef)
     val enableHumidityDisplay = Point(DomainName.enableHumidityDisplay, equipRef)
     val enableCo2Display = Point(DomainName.enableCO2Display, equipRef)
     val enablePm25Display = Point(DomainName.enablePm25Display, equipRef)

@@ -1259,7 +1259,7 @@ object DomainName {
     const val currentTx20_ai2 = "currentTx20_ai2"
     const val currentTx50_ai2 = "currentTx50_ai2"
     const val genericIonSensorPoint_ai2 = "genericIonSensorPoint_ai2"
-
+    const val pm10Target = "pm10Target"
 
 }
 

@@ -1902,8 +1902,32 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                     profileConfiguration
                 )
                 updateTempOffsetValue(it["id"].toString())
+                migaratePm25AndPm10ToDefaultValue(model, hayStack, profileConfiguration, it["id"].toString())
             }
         }
+    }
+
+    private fun migaratePm25AndPm10ToDefaultValue(
+        model: SeventyFiveFProfileDirective,
+        hayStack: CCUHsApi,
+        profileConfiguration: MonitoringConfiguration,
+        equipRef: String
+    ) {
+        val pm10DefaultVal = profileConfiguration.getDefaultValConfig(DomainName.pm10Target, model)
+        val pm25Target = profileConfiguration.getDefaultValConfig(DomainName.pm25Target, model)
+        val co2Target = profileConfiguration.getDefaultValConfig(DomainName.co2Target, model)
+        hayStack.writeDefaultVal("point and domainName == \"${DomainName.pm10Target}\" " +
+                "and equipRef == \"$equipRef\"", pm10DefaultVal.currentVal)
+
+        hayStack.writeDefaultVal("point and domainName == \"${DomainName.pm25Target}\" " +
+                "and equipRef == \"$equipRef\"", pm25Target.currentVal)
+
+        hayStack.writeDefaultVal("point and domainName == \"${DomainName.co2Target}\" " +
+                "and equipRef == \"$equipRef\"", co2Target.currentVal)
+
+        CcuLog.i(Domain.LOG_TAG, "PM10 and PM25 points are migrated to default values "+
+                "PM10: ${pm10DefaultVal.currentVal} and PM25: ${pm25Target.currentVal}")
+
     }
 
     private fun migrateLogicalPointsForHyperStatMonitoring(

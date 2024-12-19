@@ -20,6 +20,9 @@ class MonitoringViewState : HyperStatV2ViewState() {
                     configuration.thermistor2Association.associationVal
                 this.analogIn1Config.association = configuration.analogIn1Association.associationVal
                 this.analogIn2Config.association = configuration.analogIn2Association.associationVal
+                this.co2Config.target = configuration.zoneCO2Target.currentVal
+                this.pm2p5Config.target = configuration.zonePM2p5Target.currentVal
+                this.pm10Config.target = configuration.zonePM10Target.currentVal
             }
         }
 
@@ -39,6 +42,9 @@ class MonitoringViewState : HyperStatV2ViewState() {
                 this.thermistor2Association.associationVal = state.thermistor2Config.association
                 this.analogIn1Association.associationVal = state.analogIn1Config.association
                 this.analogIn2Association.associationVal = state.analogIn2Config.association
+                this.zoneCO2Target.currentVal = state.co2Config.target
+                this.zonePM2p5Target.currentVal = state.pm2p5Config.target
+                this.zonePM10Target.currentVal = state.pm10Config.target
             }
         }
     }

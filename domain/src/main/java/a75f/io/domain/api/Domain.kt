@@ -237,6 +237,29 @@ object Domain {
         return valuesList
     }
 
+    /**
+     * Retrieves the minimum, maximum, and increment values for a given domain name from a model's configuration.
+     *
+     * This function searches the specified domain name in the given model's points and retrieves the
+     * `minValue`, `maxValue`, and `tagValueIncrement` associated with the domain if it has a `NumericConstraint`.
+     *
+     * @param domainName The domain name to search for in the model's points.
+     * @param model The `SeventyFiveFProfileDirective` model containing the points and their constraints.
+     * @return A `Triple` containing: (minVal maxVal incVal)
+     *         If no `NumericConstraint` is found for the specified domain, returns a `Triple` with all values set to `0.0`.
+     */
+    fun getMinMaxIncValuesByDomainName(domainName: String, model: SeventyFiveFProfileDirective) : Triple<Double, Double, Double> {
+        val point = model.points.find { it.domainName == domainName }
+
+        if (point?.valueConstraint is NumericConstraint) {
+            val minVal = (point.valueConstraint as NumericConstraint).minValue
+            val maxVal = (point.valueConstraint as NumericConstraint).maxValue
+            val incVal = point.presentationData?.get("tagValueIncrement").toString().toDouble()
+            return Triple(minVal, maxVal, incVal)
+        }
+        return Triple(0.0, 0.0, 0.0)
+    }
+
     fun getListByDomainNameWithCustomMaxVal(domainName: String, model: SeventyFiveFProfileDirective, maxVal: Double) : List<String> {
         val valuesList : MutableList<String> = mutableListOf()
         val point = model.points.find { it.domainName == domainName }

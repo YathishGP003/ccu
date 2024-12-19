@@ -75,7 +75,7 @@ public class VavSeriesFanProfile extends VavProfile
         }
 
         int loopOp = getLoopOp(conditioning, roomTemp,vavEquip);
-
+        loopOp = Math.max(0, loopOp);
         SystemMode systemMode = SystemMode.values()[(int) TunerUtil.readSystemUserIntentVal("conditioning and mode")];
         if (systemMode == SystemMode.OFF|| valveController.getControlVariable() == 0) {
             valve.currentPosition = 0;

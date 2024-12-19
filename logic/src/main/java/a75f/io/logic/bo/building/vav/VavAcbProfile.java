@@ -125,7 +125,7 @@ public class VavAcbProfile extends VavProfile
                 loopOp = (int) coolingLoop.getLoopOutput(roomTemp, setTempCooling);
             }
         }
-
+        loopOp = Math.max(0, loopOp);
         try {
             updateIaqCompensatedMinDamperPos(nodeAddr, equip);
         } catch (UnknownRecException e) {

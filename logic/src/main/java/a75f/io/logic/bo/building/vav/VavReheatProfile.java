@@ -122,6 +122,7 @@ public class VavReheatProfile extends VavProfile
         } catch (UnknownRecException e) {
             CcuLog.e(L.TAG_CCU_ZONE, "IaqCompensation cannot be performed ", e);
         }
+        loopOp = Math.max(0, loopOp);
         damper.currentPosition = damper.iaqCompensatedMinPos + (damper.maxPosition - damper.iaqCompensatedMinPos) * loopOp / 100;
 
         CcuLog.d(L.TAG_CCU_ZONE,"VAVLoopOp :"+loopOp+", adjusted minposition "+damper.iaqCompensatedMinPos+","+damper.currentPosition);

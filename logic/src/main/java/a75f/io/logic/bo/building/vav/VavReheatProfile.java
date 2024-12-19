@@ -36,11 +36,6 @@ public class VavReheatProfile extends VavProfile
         super(equipRef, nodeAddress, ProfileType.VAV_REHEAT);
     }
 
-
-    //TODO - Only for backward compatibility during development. Should be removed.
-    public VavReheatProfile() {
-        super(null, null, ProfileType.VAV_REHEAT);
-    }
     @Override
     public ProfileType getProfileType()
     {
@@ -74,8 +69,12 @@ public class VavReheatProfile extends VavProfile
         SystemMode systemMode = SystemMode.values()[(int) TunerUtil.readSystemUserIntentVal("conditioning and mode")];
         Equip equip = new Equip.Builder()
                 .setHashMap(CCUHsApi.getInstance().readEntity("equip and group == \"" + nodeAddr + "\"")).build();
+
+        boolean reheatEnabled = vavEquip.getReheatType().readDefaultVal() > 0;
+
         CcuLog.e(L.TAG_CCU_ZONE, "Run Zone algorithm for "+nodeAddr+" setTempCooling "+setTempCooling+
-                                    "setTempHeating "+setTempHeating+" systemMode "+systemMode);
+                                    " setTempHeating "+setTempHeating+" systemMode "+systemMode+" roomTemp "+roomTemp
+                                    +"reheatEnabled "+reheatEnabled);
 
         CcuLog.i(L.TAG_CCU_ZONE, "PI Tuners: proportionalGain " + proportionalGain + ", integralGain " + integralGain +
                 ", proportionalSpread " + proportionalSpread + ", integralMaxTimeout " + integralMaxTimeout);
@@ -84,7 +83,7 @@ public class VavReheatProfile extends VavProfile
                     ", cfmProportionalSpread " + cfmController.getProportionalSpread() + ", cfmIntegralMaxTimeout " + cfmController.getIntegralMaxTimeout());
         }
 
-        if (roomTemp > setTempCooling && systemMode != SystemMode.OFF ) {
+        if (roomTemp > setTempCooling && isCoolingAvailable(systemMode) ) {
             //Zone is in Cooling
             if (state != COOLING) {
                 handleCoolingChangeOver();
@@ -95,7 +94,7 @@ public class VavReheatProfile extends VavProfile
                 vavEquip.getCoolingLoopOutput().writePointValue(loopOp);
                 loopOp = (int) vavEquip.getCoolingLoopOutput().readHisVal();
             }
-        } else if (roomTemp < setTempHeating && systemMode != SystemMode.OFF) {
+        } else if (roomTemp < setTempHeating && isHeatingAvailable(systemMode, reheatEnabled)) {
             //Zone is in heating
             if (state != HEATING) {
                 handleHeatingChangeOver();
@@ -111,8 +110,11 @@ public class VavReheatProfile extends VavProfile
             loopOp = (int) vavEquip.getHeatingLoopOutput().readHisVal();
         } else {
             //Zone is in deadband
-            if (state != DEADBAND) {
-                handleDeadband();
+            handleDeadband(systemMode, reheatEnabled);
+            if (heatingLoop.getEnabled()) {
+                loopOp = (int) heatingLoop.getLoopOutput(setTempHeating, roomTemp);
+            } else if (coolingLoop.getEnabled()) {
+                loopOp = (int) coolingLoop.getLoopOutput(roomTemp, setTempCooling);
             }
         }
         try {
@@ -120,6 +122,7 @@ public class VavReheatProfile extends VavProfile
         } catch (UnknownRecException e) {
             CcuLog.e(L.TAG_CCU_ZONE, "IaqCompensation cannot be performed ", e);
         }
+        loopOp = Math.max(0, loopOp);
         damper.currentPosition = damper.iaqCompensatedMinPos + (damper.maxPosition - damper.iaqCompensatedMinPos) * loopOp / 100;
 
         CcuLog.d(L.TAG_CCU_ZONE,"VAVLoopOp :"+loopOp+", adjusted minposition "+damper.iaqCompensatedMinPos+","+damper.currentPosition);
@@ -154,6 +157,7 @@ public class VavReheatProfile extends VavProfile
         setStatus(state.ordinal(), VavSystemController.getInstance().isEmergencyMode() && (state == HEATING ? buildingLimitMinBreached()
                 : state == COOLING ? buildingLimitMaxBreached() : false));
         updateLoopParams();
+        CcuLog.e(L.TAG_CCU_ZONE, "LoopStatus HeatingLoop "+heatingLoop.getEnabled()+" CoolingLoop "+coolingLoop.getEnabled());
     }
 
 
@@ -217,15 +221,6 @@ public class VavReheatProfile extends VavProfile
         
         state = HEATING;
         heatingLoop.setEnabled();
-        coolingLoop.setDisabled();
-    }
-    
-    private void handleDeadband() {
-        deadbandTransitionState = state;
-        state = DEADBAND;
-        valveController.reset();
-        valve.currentPosition = 0;
-        heatingLoop.setDisabled();
         coolingLoop.setDisabled();
     }
     

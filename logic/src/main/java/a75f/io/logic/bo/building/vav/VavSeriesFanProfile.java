@@ -65,7 +65,7 @@ public class VavSeriesFanProfile extends VavProfile
         SystemController.State conditioning = L.ccu().systemProfile.getSystemController().getSystemState();
 
         CcuLog.e(L.TAG_CCU_ZONE, "Run Zone algorithm for "+nodeAddr+" setTempCooling "+setTempCooling+
-                "setTempHeating "+setTempHeating+" systemMode "+conditioning);
+                "setTempHeating "+setTempHeating+" systemMode "+conditioning+" roomTemp "+roomTemp);
 
         CcuLog.i(L.TAG_CCU_ZONE, "PI Tuners: proportionalGain " + proportionalGain + ", integralGain " + integralGain +
                 ", proportionalSpread " + proportionalSpread + ", integralMaxTimeout " + integralMaxTimeout);
@@ -75,7 +75,7 @@ public class VavSeriesFanProfile extends VavProfile
         }
 
         int loopOp = getLoopOp(conditioning, roomTemp,vavEquip);
-
+        loopOp = Math.max(0, loopOp);
         SystemMode systemMode = SystemMode.values()[(int) TunerUtil.readSystemUserIntentVal("conditioning and mode")];
         if (systemMode == SystemMode.OFF|| valveController.getControlVariable() == 0) {
             valve.currentPosition = 0;
@@ -104,6 +104,7 @@ public class VavSeriesFanProfile extends VavProfile
 
         logLoopParams((short) nodeAddr, roomTemp, loopOp);
         updateLoopParams((short) nodeAddr);
+        CcuLog.e(L.TAG_CCU_ZONE, "LoopStatus HeatingLoop "+heatingLoop.getEnabled()+" CoolingLoop "+coolingLoop.getEnabled());
     }
 
     private void initLoopVariables(short node) {
@@ -118,8 +119,9 @@ public class VavSeriesFanProfile extends VavProfile
     
     private int getLoopOp(SystemController.State conditioning, double roomTemp, Equip equip) {
         int loopOp = 0;
-        SystemMode systemMode = SystemMode.values()[(int)(int) TunerUtil.readSystemUserIntentVal("conditioning and mode")];
-        if (roomTemp > setTempCooling && systemMode != SystemMode.OFF) {
+        SystemMode systemMode = SystemMode.values()[(int) TunerUtil.readSystemUserIntentVal("conditioning and mode")];
+        boolean reheatEnabled = vavEquip.getReheatType().readDefaultVal() > 0;
+        if (roomTemp > setTempCooling && isCoolingAvailable(systemMode)) {
             //Zone is in Cooling
             if (state != COOLING) {
                 handleCoolingChangeOver();
@@ -129,7 +131,7 @@ public class VavSeriesFanProfile extends VavProfile
                 vavEquip.getCoolingLoopOutput().writePointValue(loopOp);
                 loopOp = (int) vavEquip.getCoolingLoopOutput().readHisVal();
             }
-        } else if (roomTemp < setTempHeating && systemMode != SystemMode.OFF) {
+        } else if (roomTemp < setTempHeating && isHeatingAvailable( systemMode, reheatEnabled)) {
             //Zone is in heating
             if (state != HEATING) {
                 handleHeatingChangeOver();
@@ -145,8 +147,11 @@ public class VavSeriesFanProfile extends VavProfile
             loopOp = (int) vavEquip.getHeatingLoopOutput().readHisVal();
         } else {
             //Zone is in deadband
-            if (state != DEADBAND) {
-                handleDeadband();
+            handleDeadband(systemMode, reheatEnabled);
+            if (heatingLoop.getEnabled()) {
+                loopOp = (int) heatingLoop.getLoopOutput(setTempHeating, roomTemp);
+            } else if (coolingLoop.getEnabled()) {
+                loopOp = (int) coolingLoop.getLoopOutput(roomTemp, setTempCooling);
             }
         }
         return loopOp;
@@ -193,14 +198,6 @@ public class VavSeriesFanProfile extends VavProfile
     
         state = HEATING;
         heatingLoop.setEnabled();
-        coolingLoop.setDisabled();
-    }
-    
-    private void handleDeadband() {
-        deadbandTransitionState = state;
-        state = DEADBAND;
-        valve.currentPosition = 0;
-        heatingLoop.setDisabled();
         coolingLoop.setDisabled();
     }
     

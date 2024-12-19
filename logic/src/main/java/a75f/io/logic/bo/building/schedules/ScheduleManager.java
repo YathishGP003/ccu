@@ -273,6 +273,7 @@ public class ScheduleManager {
         Set<Schedule.Days> combinedSpecialSchedules =  Schedule.combineSpecialSchedules(equip.getRoomRef().
                                                                                                               replace("@", ""));
         if(ScheduleUtil.isCurrentMinuteUnderSpecialSchedule(combinedSpecialSchedules)){
+            CcuLog.d(L.TAG_CCU_SCHEDULER," CurrentMinuteUnderSpecialSchedule "+combinedSpecialSchedules);
             updateOccupiedSchedule(equip, equipSchedule, null);
         } else if (activeSystemVacation == null ) {
             ArrayList<Schedule> activeZoneVacationSchedules = CCUHsApi.getInstance().getZoneSchedule(equip.getRoomRef(),true);

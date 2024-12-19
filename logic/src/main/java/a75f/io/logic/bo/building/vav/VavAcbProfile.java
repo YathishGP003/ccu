@@ -80,7 +80,6 @@ public class VavAcbProfile extends VavProfile
         initLoopVariables();
         double roomTemp = getCurrentTemp();
         boolean condensate = getCondensate();
-        CcuLog.d(L.TAG_CCU_ZONE, "Condensate detected? " + condensate);
 
         int loopOp = 0;
         //If supply air temperature from air handler is greater than room temperature, Cooling shall be
@@ -90,7 +89,7 @@ public class VavAcbProfile extends VavProfile
         Equip equip = new Equip.Builder()
                 .setHashMap(CCUHsApi.getInstance().readEntity("equip and group == \"" + nodeAddr + "\"")).build();
         CcuLog.d(L.TAG_CCU_ZONE, "Run Zone algorithm for "+nodeAddr+" setTempCooling "+setTempCooling+
-                "setTempHeating "+setTempHeating+" systemMode "+systemMode+" roomTemp "+roomTemp);
+                "setTempHeating "+setTempHeating+" systemMode "+systemMode+" roomTemp "+roomTemp +"Condensate " + condensate);
 
         CcuLog.d(L.TAG_CCU_ZONE, "PI Tuners: proportionalGain " + proportionalGain + ", integralGain " + integralGain +
                 ", proportionalSpread " + proportionalSpread + ", integralMaxTimeout " + integralMaxTimeout);
@@ -99,7 +98,7 @@ public class VavAcbProfile extends VavProfile
                     ", cfmProportionalSpread " + cfmController.getProportionalSpread() + ", cfmIntegralMaxTimeout " + cfmController.getIntegralMaxTimeout());
         }
 
-        if (roomTemp > setTempCooling && systemMode != SystemMode.OFF ) {
+        if (roomTemp > setTempCooling && isCoolingAvailable(systemMode) ) {
             //Zone is in Cooling
             if (state != COOLING) {
                 handleCoolingChangeOver();
@@ -113,7 +112,7 @@ public class VavAcbProfile extends VavProfile
                 // Damper and CHW Valve go to minimum if system is in heating
                 chwValve.currentPosition = 0;
             }
-        } else if (roomTemp < setTempHeating && systemMode != SystemMode.OFF) {
+        } else if (roomTemp < setTempHeating && isHeatingAvailable( systemMode, ((VavAcbEquip)vavEquip).getValveType().readDefaultVal() > 0)) {
             //Zone is in heating
             if (state != HEATING) {
                 handleHeatingChangeOver();
@@ -121,11 +120,12 @@ public class VavAcbProfile extends VavProfile
             chwValve.currentPosition = 0;
         } else {
             //Zone is in deadband
-            if (state != DEADBAND) {
-                handleDeadband();
+            handleDeadband(systemMode);
+            if (coolingLoop.getEnabled()) {
+                loopOp = (int) coolingLoop.getLoopOutput(roomTemp, setTempCooling);
             }
         }
-
+        loopOp = Math.max(0, loopOp);
         try {
             updateIaqCompensatedMinDamperPos(nodeAddr, equip);
         } catch (UnknownRecException e) {
@@ -134,7 +134,7 @@ public class VavAcbProfile extends VavProfile
         damper.currentPosition = damper.iaqCompensatedMinPos + (damper.maxPosition - damper.iaqCompensatedMinPos) * loopOp / 100;
         damper.currentPosition = Math.max(damper.currentPosition, damper.minPosition);
         damper.currentPosition = Math.min(damper.currentPosition, damper.maxPosition);
-        CcuLog.d(L.TAG_CCU_ZONE,"VAVLoopOp :"+loopOp+", adjusted minposition "+damper.iaqCompensatedMinPos+","+damper.currentPosition);
+        CcuLog.d(L.TAG_CCU_ZONE,"AcbLoopOp :"+loopOp+", adjusted minposition "+damper.iaqCompensatedMinPos+","+damper.currentPosition);
 
         if (systemMode == SystemMode.OFF || coolingLoop.getLoopOutput() == 0) {
             chwValve.currentPosition = 0;
@@ -163,6 +163,7 @@ public class VavAcbProfile extends VavProfile
         setStatus(state.ordinal(), VavSystemController.getInstance().isEmergencyMode() && (state == HEATING ? buildingLimitMinBreached()
                 : state == COOLING ? buildingLimitMaxBreached() : false));
         updateLoopParams();
+        CcuLog.e(L.TAG_CCU_ZONE, "LoopStatus HeatingLoop "+heatingLoop.getEnabled()+" CoolingLoop "+coolingLoop.getEnabled());
     }
 
     private void handleRFDead() {
@@ -262,14 +263,6 @@ public class VavAcbProfile extends VavProfile
         coolingLoop.setDisabled();
     }
     
-    private void handleDeadband() {
-        deadbandTransitionState = state;
-        state = DEADBAND;
-        chwValve.currentPosition = 0;
-        heatingLoop.setDisabled();
-        coolingLoop.setDisabled();
-    }
-    
     /**
      * Thermistor measurements interpret junk reading when they are actually not connected.
      * Avoid running the loop when the air temps are outside a reasonable range to make sure they are not picked by the
@@ -332,5 +325,16 @@ public class VavAcbProfile extends VavProfile
                 (SeventyFiveFProfileDirective) ModelLoader.INSTANCE.getModelForDomainName(equip.getDomainName()))
                 .getActiveConfiguration();
 
+    }
+
+    public void handleDeadband(SystemMode systemMode) {
+        if (state != DEADBAND) {
+            deadbandTransitionState = state;
+            state = DEADBAND;
+        }
+        if (!isCoolingAvailable(systemMode)) {
+            coolingLoop.setDisabled();
+        }
+        chwValve.currentPosition = 0;
     }
 }

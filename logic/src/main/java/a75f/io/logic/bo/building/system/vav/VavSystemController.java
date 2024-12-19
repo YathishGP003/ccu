@@ -932,19 +932,18 @@ public class VavSystemController extends SystemController
             double normalizedDamperPos = normalizedDamperMap.get(damperPos.get("id").toString());
             double minLimit = 0, maxLimit = 0;
             if (systemState == COOLING) {
-                if (getStatus(equip.get("group").toString()) == ZoneState.COOLING.ordinal()) {
-                    minLimit = hayStack.readDefaultVal("point and zone and config and min and damper " +
-                            "and cooling and equipRef == \"" + equip.get("id").toString() + "\"");
-                    maxLimit = hayStack.readDefaultVal("point and zone and config and max and damper" +
-                            " and cooling and equipRef == \"" + equip.get("id").toString() + "\"");
-                } else if (getStatus(equip.get("group").toString()) == ZoneState.HEATING.ordinal()
-                        || getStatus(equip.get("group").toString()) == ZoneState.DEADBAND.ordinal()
-                        || getStatus(equip.get("group").toString()) == ZoneState.TEMPDEAD.ordinal()) {
+                if (getStatus(equip.get("group").toString()) == ZoneState.HEATING.ordinal()) {
                     minLimit = hayStack.readDefaultVal("point and zone and config and min and damper" +
                             " and heating and equipRef == \"" + equip.get("id").toString() + "\"");
                     maxLimit = hayStack.readDefaultVal("point and zone and config and max and damper " +
                             "and heating and equipRef == \"" + equip.get("id").toString() + "\"");
+                } else {
+                    minLimit = hayStack.readDefaultVal("point and zone and config and min and damper " +
+                            "and cooling and equipRef == \"" + equip.get("id").toString() + "\"");
+                    maxLimit = hayStack.readDefaultVal("point and zone and config and max and damper" +
+                            " and cooling and equipRef == \"" + equip.get("id").toString() + "\"");
                 }
+
             } else {
                 minLimit = hayStack.readDefaultVal("point and zone and config and min and damper" +
                         " and heating and equipRef == \"" + equip.get("id").toString() + "\"");

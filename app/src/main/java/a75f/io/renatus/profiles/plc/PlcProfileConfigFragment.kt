@@ -128,8 +128,8 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                                     viewModel.pidTargetValue = viewModel.returnTargetValueAi1(selectedIndex)
                                     viewModel.pidProportionalRange = viewModel.returnErrorValueAi1(selectedIndex)
                                     // Reset the target and proportional range values
-                                    viewModel.viewState.pidTargetValue = 0.0
-                                    viewModel.viewState.pidProportionalRange = 0.0
+                                    viewModel.viewState.pidTargetValue = viewModel.pidTargetValue[0].toDouble()
+                                    viewModel.viewState.pidProportionalRange = viewModel.pidProportionalRange[0].toDouble()
                                     viewModel.viewState.thermistor1InputType = 0.0
                                     viewModel.viewState.nativeSensorType = 0.0
                                 }
@@ -181,8 +181,8 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                                     viewModel.pidTargetValue = viewModel.returnTargetValueTH1(selectedIndex)
                                     viewModel.pidProportionalRange = viewModel.returnErrorValueTH1(selectedIndex)
                                     // Reset the target and proportional range values
-                                    viewModel.viewState.pidTargetValue = 0.0
-                                    viewModel.viewState.pidProportionalRange = 0.0
+                                    viewModel.viewState.pidTargetValue = viewModel.pidTargetValue[0].toDouble()
+                                    viewModel.viewState.pidProportionalRange = viewModel.pidProportionalRange[0].toDouble()
                                     viewModel.viewState.analog1InputType = 0.0
                                     viewModel.viewState.nativeSensorType = 0.0
                                 }
@@ -234,8 +234,8 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                                     viewModel.pidTargetValue = viewModel.returnTargetValueNativeSensor(selectedIndex)
                                     viewModel.pidProportionalRange = viewModel.returnErrorValueNativeSensor(selectedIndex)
                                     // Reset the target and proportional range values
-                                    viewModel.viewState.pidTargetValue = 0.0
-                                    viewModel.viewState.pidProportionalRange = 0.0
+                                    viewModel.viewState.pidTargetValue = viewModel.pidTargetValue[0].toDouble()
+                                    viewModel.viewState.pidProportionalRange = viewModel.pidProportionalRange[0].toDouble()
                                     viewModel.viewState.analog1InputType = 0.0
                                     viewModel.viewState.thermistor1InputType = 0.0
                                 }

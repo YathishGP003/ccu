@@ -273,6 +273,7 @@ public class ScheduleManager {
         Set<Schedule.Days> combinedSpecialSchedules =  Schedule.combineSpecialSchedules(equip.getRoomRef().
                                                                                                               replace("@", ""));
         if(ScheduleUtil.isCurrentMinuteUnderSpecialSchedule(combinedSpecialSchedules)){
+            CcuLog.d(L.TAG_CCU_SCHEDULER," CurrentMinuteUnderSpecialSchedule "+combinedSpecialSchedules);
             updateOccupiedSchedule(equip, equipSchedule, null);
         } else if (activeSystemVacation == null ) {
             ArrayList<Schedule> activeZoneVacationSchedules = CCUHsApi.getInstance().getZoneSchedule(equip.getRoomRef(),true);
@@ -1261,9 +1262,6 @@ public class ScheduleManager {
                 return "In AutoAway";
 
             case UNOCCUPIED:
-                if (ScheduleUtil.isAnyZoneAutoAway(equipOccupancy)) {
-                    return "In AutoAway";
-                }
                 if (nextOccupiedInfo == null || nextOccupiedInfo.getNextOccupiedSchedule() == null ){
                     CcuLog.i(TAG_CCU_SCHEDULER, " Unoccupied and info does not exist");
                     return "In Unoccupied Mode";

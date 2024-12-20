@@ -471,7 +471,7 @@ public class Pulse
 		}
 	}
 
-	private static double convertPressureFromPaToInH2O(double Pa) {
+	public static double convertPressureFromPaToInH2O(double Pa) {
 		double inH2O = Pa / 248.84;
 		return CCUUtils.roundToTwoDecimal(inH2O);
 	}

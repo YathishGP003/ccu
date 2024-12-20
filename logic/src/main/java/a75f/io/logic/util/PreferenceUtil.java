@@ -78,9 +78,12 @@ public class PreferenceUtil {
     private static final String RESTORE_BYPASS_DAMPER_AFTER_REPLACE = "restoreBypassDamperAfterReplace";
     private static final String TITLE_24_REDUNDANT_POINT_MIGRATION = "title24ReduntPointMigration";
     private static final String LOCK_OUT_HIS_UPDATE = "lockoutHisUpdate";
+    public static final String DAB_DAMPER_SIZE_MIGRATION2 = "dabDamperSizeMigration2";
+
     private static final String UPDTAE_LOCAL_BUILDING_TUNERS = "UPDTAE_LOCAL_BUILDING_TUNERS";
     private static final String MIGRATE_HYPERSTATSPLIT_FAN_MODE_CACHE = "migrateHyperStatSplitFanModeCache";
     private static final String BACNET_SETTING_POINT_DELETED = "bacnetSettingPointDeleted";
+    private static final String OTA_STATUS_POINT_REMOVAL = "otaStatusPointRemoval";
 
 
     public static void setContext(Context c) {
@@ -636,5 +639,21 @@ public class PreferenceUtil {
     }
     public static void setMigrateHyperStatSplitFanModeCache() {
         setBooleanPreference(MIGRATE_HYPERSTATSPLIT_FAN_MODE_CACHE, true);
+    }
+
+    public static boolean getDamperSizeMigration2FlagStatus() {
+        return getBooleanPreference(DAB_DAMPER_SIZE_MIGRATION2);
+    }
+
+    public static void setDamperSizeMigration2FlagStatus() {
+        setBooleanPreference(DAB_DAMPER_SIZE_MIGRATION2, true);
+    }
+
+    public static boolean getNonDmOtaPointDeletionStatus() {
+        return getBooleanPreference(OTA_STATUS_POINT_REMOVAL);
+    }
+
+    public static void setNonDmOtaPointDeletionStatus() {
+        setBooleanPreference(OTA_STATUS_POINT_REMOVAL, true);
     }
 }

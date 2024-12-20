@@ -62,6 +62,8 @@ abstract class HyperStatConfiguration(
     lateinit var zonePM2p5Threshold: ValueConfig
     lateinit var zonePM2p5Target: ValueConfig
 
+    lateinit var zonePM10Target: ValueConfig
+
     lateinit var displayHumidity: EnableConfig
     lateinit var displayCO2: EnableConfig
     lateinit var displayPM2p5: EnableConfig
@@ -127,6 +129,7 @@ abstract class HyperStatConfiguration(
             add(zoneCO2Target)
             add(zonePM2p5Threshold)
             add(zonePM2p5Target)
+            add(zonePM10Target)
         }
     }
 
@@ -239,6 +242,8 @@ abstract class HyperStatConfiguration(
 
         zonePM2p5Threshold = getDefaultValConfig(DomainName.pm25Threshold, model)
         zonePM2p5Target = getDefaultValConfig(DomainName.pm25Target, model)
+
+        zonePM10Target = getDefaultValConfig(DomainName.pm10Target, model)
 
         displayHumidity = getDefaultEnableConfig(DomainName.enableHumidityDisplay, model)
         displayCO2 = getDefaultEnableConfig(DomainName.enableCO2Display, model)

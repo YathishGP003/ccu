@@ -58,6 +58,8 @@ import a75f.io.api.haystack.util.DatabaseEvent;
 import a75f.io.device.DeviceUpdateJob;
 import a75f.io.device.EveryDaySchedulerService;
 import a75f.io.device.mesh.LSerial;
+import a75f.io.device.mesh.RootCommandExecuter;
+import a75f.io.domain.api.Ccu;
 import a75f.io.domain.api.Domain;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
@@ -186,6 +188,7 @@ public abstract class UtilityApplication extends Application {
         OtaCache cache = new OtaCache();
         cache.restoreOtaRequests(context);
         CCUUtils.setCCUReadyProperty("false");
+        initNetworkConfig();
         CcuLog.i("UI_PROFILING", "UtilityApplication.onCreate Done");
         CcuLog.i("CCU_DB", "postProcessingInit - end");
     }
@@ -606,5 +609,35 @@ public abstract class UtilityApplication extends Application {
         HttpServer.Companion.getInstance(context).startServer();
     }
 
+    private void initNetworkConfig() {
+        SharedPreferences sharedPreferences = Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE);
+        String networkTypePref = sharedPreferences.getString("networkType", "eth0");
+        String ipAddressPref = sharedPreferences.getString("ipAddress", "");
+        String subnetMaskPref = sharedPreferences.getString("subnetMask", "");
+        String broadcastAddressPref = sharedPreferences.getString("broadcastAddress", "");
+        String dnsAddressPref = sharedPreferences.getString("dnsAddress", "");
+        if (!networkTypePref.isEmpty() && !ipAddressPref.isEmpty()) {
+            setNetwork(ipAddressPref, broadcastAddressPref, subnetMaskPref, networkTypePref, dnsAddressPref);
+        }
 
+    }
+
+    public static void setNetwork(String ipAddress, String broadcast, String subNet, String networkType, String dnsAddress) {
+        try {
+            CcuLog.i("NetworkConfig", "Setting network: " + ipAddress + " " + broadcast + " " + subNet + " " + networkType);
+            String ipAddrAddCmd = "ip addr add " + ipAddress + " broadcast " + broadcast + " dev " + networkType;
+            String ifconfigCmd = "ifconfig " + networkType + " " + ipAddress + " netmask " + subNet + " up ";
+            CcuLog.i("NetworkConfig", "Setting network: " + ipAddrAddCmd + " ; " + ifconfigCmd);
+            RootCommandExecuter.runRootCommand(ipAddrAddCmd);
+            //Weirdly often this needs to be called multiple times to take effect.
+            RootCommandExecuter.runRootCommand(ifconfigCmd);
+            RootCommandExecuter.runRootCommand(ifconfigCmd);
+            RootCommandExecuter.runRootCommand(ifconfigCmd);
+            if (!dnsAddress.isEmpty()) {
+                RootCommandExecuter.runRootCommand("setprop net.dns1" + dnsAddress);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

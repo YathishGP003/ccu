@@ -75,7 +75,7 @@ object HyperStatV2EquipCutoverMapping {
             "fanMediumSpeed" to DomainName.fanMediumSpeed,
             "fanHighSpeed" to DomainName.fanHighSpeed,
 
-            "dcvDamper" to DomainName.dcvDamper,
+            "dcvDamper" to DomainName.dcvDamperModulating,
             "analog1Mindcvdamper" to DomainName.analog1MinDCVDamper,
             "analog1Maxdcvdamper" to DomainName.analog1MaxDCVDamper,
             "analog2Mindcvdamper" to DomainName.analog2MinDCVDamper,
@@ -137,11 +137,11 @@ object HyperStatV2EquipCutoverMapping {
             "zoneilluminance" to DomainName.zoneIlluminance,
             "zonehumidity" to DomainName.zoneHumidity,
             "pm2p5" to DomainName.zonePm25,
-            "zoneSound" to DomainName.zoneSound,
+            "sound" to DomainName.zoneSound,
             "co2Equivalent" to DomainName.zoneCo2Equivalent,
             "uvi" to DomainName.zoneUvi,
             "pm10" to DomainName.zonePm10,
-            "pressure" to DomainName.pressureSensor,
+            "pressure" to DomainName.zonePressureSensor,
 
             "zoneOccupancy" to DomainName.occupancyMode,
             "occupancyDetection" to DomainName.occupancyDetection,
@@ -218,11 +218,11 @@ object HyperStatV2EquipCutoverMapping {
 
                 // For Equip Associated Points we are handling separately
                 "pm2p5" to DomainName.zonePm25,
-                "zoneSound" to DomainName.zoneSound,
+                "sound" to DomainName.zoneSound,
                 "co2Equivalent" to DomainName.zoneCo2Equivalent,
                 "uvi" to DomainName.zoneUvi,
                 "pm10" to DomainName.zonePm10,
-                "pressure" to DomainName.pressureSensor,
+                "pressure" to DomainName.zonePressureSensor,
                 )
         fun getCPUEntries(): Map<String, String> {
                 return commonEntries + cpuEntries

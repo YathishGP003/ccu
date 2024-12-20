@@ -33,6 +33,9 @@ class MonitoringConfiguration(
         analogIn2Association =
             getDefaultAssociationConfig(DomainName.analog2InputAssociation, model)
 
+        zoneCO2Target = getDefaultValConfig(DomainName.co2Target, model)
+        zonePM2p5Target = getDefaultValConfig(DomainName.pm25Target, model)
+        zonePM10Target = getDefaultValConfig(DomainName.pm10Target, model)
         isDefault = true
         return this
     }
@@ -64,6 +67,9 @@ class MonitoringConfiguration(
         analogIn2Association.associationVal =
             monitoringEquip.analogIn2Association.readDefaultVal().toInt()
 
+        zoneCO2Target.currentVal = monitoringEquip.co2Target.readDefaultVal()
+        zonePM2p5Target.currentVal = monitoringEquip.pm25Target.readDefaultVal()
+        zonePM10Target.currentVal = monitoringEquip.pm10Target.readDefaultVal()
         isDefault = false
         return this
     }
@@ -88,6 +94,9 @@ class MonitoringConfiguration(
     override fun getValueConfigs(): List<ValueConfig> {
         return mutableListOf<ValueConfig>().apply {
             add(temperatureOffset)
+            add(zoneCO2Target)
+            add(zonePM2p5Target)
+            add(zonePM10Target)
         }
     }
 }

@@ -4,7 +4,6 @@ import a75f.io.api.haystack.Tags
 
 
 import a75f.io.api.haystack.util.hayStack
-import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.api.Point
 
@@ -23,7 +22,8 @@ class CCUDiagEquip (equipRef : String) : DomainEquip(equipRef) {
     val serialConnection = Point(DomainName.serialConnection, equipRef)
     val appRestart = Point(DomainName.appRestart, equipRef)
     val appVersion = Point(DomainName.appVersion, equipRef)
-    val otaStatus = Point(DomainName.otaStatus, equipRef)
+    val otaStatusCCU = Point(DomainName.otaStatusCCU, equipRef)
+    val otaStatusCM = Point(DomainName.otaStatusCM, equipRef)
     val safeModeStatus = Point(DomainName.safeModeStatus, equipRef)
     val availableInternalDiskStorage = Point(DomainName.availableInternalDiskStorage, equipRef)
     val autoCommissioning = Point(DomainName.autoCommissioning, equipRef)

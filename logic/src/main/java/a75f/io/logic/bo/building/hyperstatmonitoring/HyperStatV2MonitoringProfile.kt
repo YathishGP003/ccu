@@ -1,5 +1,7 @@
 package a75f.io.logic.bo.building.hyperstatmonitoring
 
+import a75f.io.api.haystack.CCUHsApi
+import a75f.io.api.haystack.Equip
 import a75f.io.domain.equips.hyperstat.MonitoringEquip
 import a75f.io.domain.util.ModelLoader.getModelForDomainName
 import a75f.io.domain.util.ModelLoader
@@ -45,5 +47,9 @@ class HyperStatV2MonitoringProfile(val equipRef: String, val nodeAddress: Short)
             equip.id, equip.floorRef , profileType,
             (getModelForDomainName(equip.domainName) as SeventyFiveFProfileDirective)
         ).getDefaultConfiguration()
+    }
+
+    override fun getEquip(): Equip {
+            return Equip.Builder().setHashMap(CCUHsApi.getInstance().readEntity("equip and group == \"$nodeAddress\"")).build()
     }
 }

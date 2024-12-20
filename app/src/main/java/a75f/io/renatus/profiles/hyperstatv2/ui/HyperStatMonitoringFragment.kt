@@ -32,6 +32,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
@@ -42,6 +43,7 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.viewModels
@@ -167,10 +169,73 @@ class HyperStatMonitoringFragment : BaseDialogFragment(), OnPairingCompleteListe
                         }
                     }
                 }
+                Row(modifier = Modifier
+                    .padding(start = 50.dp, end = 20.dp)) {
+                    val co2ThresholdOptions = viewModel.getOptionByDomainName(DomainName.co2Target, viewModel.equipModel, true)
+                    val co2Unit = viewModel.getUnit(DomainName.co2Target, viewModel.equipModel)
+                    val pm25Unit = viewModel.getUnit(DomainName.pm25Target, viewModel.equipModel)
+                    val pm25ThresholdOptions = viewModel.getOptionByDomainName(DomainName.pm25Target, viewModel.equipModel, true)
+
+                    Box(modifier = Modifier
+                        .weight(1f)
+                        .padding(top = 10.dp)) {
+                        StyledTextView("CO2 Target", fontSize = 20, textAlignment = TextAlign.Left)
+                    }
+                    Box(modifier = Modifier
+                        .weight(.9f)
+                        .padding(top = 5.dp)) {
+                        SpinnerElementOption(viewModel.viewState.value.co2Config.target.toInt().toString(), co2ThresholdOptions, co2Unit,
+                            itemSelected = { viewModel.viewState.value.co2Config.target = it.value.toDouble() }, viewModel = null)
+                    }
+
+                    Box(modifier = Modifier
+                        .weight(1.1f)
+                        .padding(top = 10.dp)) {
+                        StyledTextView("PM 2.5 Target", fontSize = 20, textAlignment = TextAlign.Left)
+                    }
+                    Box(modifier = Modifier
+                        .weight(1f)
+                        .padding(top = 5.dp)) {
+                        SpinnerElementOption(viewModel.viewState.value.pm2p5Config.target.toInt().toString(), pm25ThresholdOptions, pm25Unit,
+                            itemSelected = { viewModel.viewState.value.pm2p5Config.target = it.value.toDouble() }, viewModel = null)
+                    }
+                }
+                Row(modifier = Modifier.width(620.dp)
+                    .padding(top = 10.dp,start = 50.dp, end = 20.dp)) {
+                    val pm10TargetOptions = viewModel.getOptionByDomainName(
+                        DomainName.pm10Target,
+                        viewModel.equipModel,
+                        true
+                    )
+                    val pm10Unit = viewModel.getUnit(DomainName.pm10Target, viewModel.equipModel)
+
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(top = 10.dp)
+                    ) {
+                        StyledTextView("Pm 10 Target", fontSize = 20, textAlignment = TextAlign.Left)
+                    }
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(top = 5.dp)
+                    ) {
+                        SpinnerElementOption(viewModel.viewState.value.pm10Config.target.toInt()
+                            .toString(),
+                            pm10TargetOptions,
+                            pm10Unit,
+                            itemSelected = {
+                                viewModel.viewState.value.pm10Config.target = it.value.toDouble()
+                            },
+                            viewModel = null
+                        )
+                    }
+                }
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(PaddingValues(bottom = 10.dp, end = 10.dp)),
+                        .padding(PaddingValues(top = 10.dp, bottom = 10.dp, end = 10.dp)),
                     contentAlignment = Alignment.CenterEnd
                 ) {
                     SaveTextView(SET) {

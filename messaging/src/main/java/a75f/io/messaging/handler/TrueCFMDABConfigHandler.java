@@ -39,11 +39,6 @@ public class TrueCFMDABConfigHandler {
 
     public static void updatePointVal(Point localPoint, JsonObject msgObject){
         CcuLog.d(L.TAG_CCU_MESSAGING, "updatePointVal DAB: " + msgObject);
-        String val = msgObject.get("val").getAsString();
-        if(!val.isEmpty()) {
-            int value = (int) TrueCFMUtil.getDamperSizeFromEnum((Integer.parseInt(val)));
-            msgObject.addProperty("val", value);
-        }
         writePointFromJson(localPoint, msgObject, CCUHsApi.getInstance());
     }
 

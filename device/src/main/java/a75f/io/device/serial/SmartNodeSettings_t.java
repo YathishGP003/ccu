@@ -52,11 +52,11 @@ public class  SmartNodeSettings_t extends Struct
 	
 	public final UTF8String roomName = new UTF8String(SerialConsts.ROOM_NAME_MAX_LENGTH);
 	
-	public final Unsigned8 showCentigrade            = new Unsigned8(1);
-	public final Unsigned8 displayHold               = new Unsigned8(1);
-	public final Unsigned8 militaryTime              = new Unsigned8(1);
-	public final Unsigned8 enableOccupationDetection = new Unsigned8(1);
-	public final Unsigned8 reserved                  = new Unsigned8(4);
+	public final Unsigned8 showCentigrade            = new Unsigned8(1); //0th bit
+	public final Unsigned8 displayHold               = new Unsigned8(1); //1st bit
+	public final Unsigned8 militaryTime              = new Unsigned8(1); //2nd bit
+	public final Unsigned8 enableOccupationDetection = new Unsigned8(1); //3rd bit
+	public final Unsigned8 settingsBitmap = new Unsigned8(4); //4th to 7th bits
 	
 	public class SmartNodeProfileBitmap_t extends Struct
 	{

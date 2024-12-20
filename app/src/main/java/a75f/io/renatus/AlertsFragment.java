@@ -15,10 +15,10 @@ import android.widget.ListView;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 
@@ -189,9 +189,25 @@ public class AlertsFragment extends Fragment implements AlertManager.AlertListLi
 		{
 			return "";
 		}
-		DateFormat sdf = new SimpleDateFormat("dd MMM yyyy HH:mm");
+		SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, yyyy | hh:mm a");
 		Date date = new Date(millis);
-		return sdf.format(date);
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(date);
+		int day = calendar.get(Calendar.DAY_OF_MONTH);
+
+		// Add the correct suffix for the day
+		String suffix;
+		if (day >= 11 && day <= 13) {
+			suffix = "th";
+		} else {
+			switch (day % 10) {
+				case 1: suffix = "st"; break;
+				case 2: suffix = "nd"; break;
+				case 3: suffix = "rd"; break;
+				default: suffix = "th"; break;
+			}
+		}
+		return sdf.format(date).replace(",", suffix + ',');
 	}
 
 	@Override

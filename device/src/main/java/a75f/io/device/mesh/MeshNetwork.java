@@ -380,11 +380,10 @@ public class MeshNetwork extends DeviceNetwork
     }
 
     private boolean isAnyEquipAlive(CCUHsApi hayStack) {
-        List<HashMap<Object, Object>> allStatusPoints = hayStack.readAllEntities("point and status and not ota and his");
-
+        List<HashMap<Object, Object>> allStatusPoints = hayStack.readAllEntities("point and status and not ota and his and zone");
         for (HashMap point : allStatusPoints) {
             int statusVal = hayStack.readHisValById(point.get("id").toString()).intValue();
-            if (statusVal != ZoneState.TEMPDEAD.ordinal()) {
+            if (statusVal < ZoneState.TEMPDEAD.ordinal()) {
                 return true;
             }
         }

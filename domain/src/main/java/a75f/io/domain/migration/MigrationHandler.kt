@@ -256,7 +256,7 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
 
     private fun updateEquipVersion(newModel: ModelDirective, equips: List<Equip>, siteRef: String) {
         val equipBuilder = ProfileEquipBuilder (haystack)
-        equips.forEach {
+        equips.forEach { it ->
             val equipMap = haystack.readMapById(it.id)
             val profileConfiguration = getProfileConfig(equipMap["profile"].toString())
             updateRef(equipMap, profileConfiguration)
@@ -274,10 +274,17 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
             } else if (Domain.readEquip(newModel.id)["roomRef"].toString() == "SYSTEM") {
                 hayStackEquip.roomRef = "SYSTEM"
                 hayStackEquip.floorRef = "SYSTEM"
+                /*For diag equip we should not have profileType*/
+                if(equipMap.containsKey("domainName") && equipMap["domainName"] == DomainName.diagEquip) {
+                    equipMap["gatewayRef"]?.let { hayStackEquip.gatewayRef = it.toString() }
+                    hayStackEquip.profile = null
+                }
                 equipMap["ahuRef"]?.let { hayStackEquip.ahuRef = it.toString() }
                 haystack.updateEquip(hayStackEquip, it.id)
                 DomainManager.addSystemEquip(Domain.hayStack, Domain.hayStack.ccuId)
                 DomainManager.addOaoEquip(Domain.hayStack, Domain.hayStack.ccuId)
+                DomainManager.addEquipToDomain(Domain.hayStack, Domain.hayStack.ccuId, DomainName.ccuConfiguration)
+                DomainManager.addEquipToDomain(Domain.hayStack, Domain.hayStack.ccuId, DomainName.diagEquip)
                 CcuLog.d(Domain.LOG_TAG, "DM-DM system Equip updated: ${hayStackEquip.domainName}")
             }else{
                 hayStackEquip.ahuRef = equipMap["ahuRef"]?.toString()
@@ -466,8 +473,14 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
     private fun updateRef(equipMap: HashMap<Any, Any>, profileConfiguration: ProfileConfiguration) {
         if (equipMap.containsKey("roomRef") && equipMap["roomRef"] != null) profileConfiguration.roomRef = equipMap["roomRef"].toString()
         if (equipMap.containsKey("floorRef") && equipMap["floorRef"] != null) profileConfiguration.floorRef = equipMap["floorRef"].toString()
-        if (equipMap.containsKey("group") && equipMap["group"] != null) profileConfiguration.nodeAddress = Integer.parseInt(
+        if (equipMap.containsKey("group") && equipMap["group"] != null) {
+            profileConfiguration.nodeAddress = Integer.parseInt(
             equipMap["group"].toString())
+        }
+        if(equipMap.containsKey("domainName") && equipMap["domainName"] == DomainName.diagEquip
+            || equipMap["domainName"] == DomainName.ccuConfiguration) {
+            profileConfiguration.nodeAddress = 0
+        }
         if (equipMap.containsKey("profile") && equipMap["profile"] != null) profileConfiguration.profileType = equipMap["profile"].toString()
     }
 

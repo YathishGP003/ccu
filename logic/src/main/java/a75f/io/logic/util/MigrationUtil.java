@@ -36,6 +36,7 @@ import a75f.io.api.haystack.util.SchedulableMigrationKt;
 import a75f.io.domain.api.Domain;
 import a75f.io.domain.api.DomainName;
 import a75f.io.domain.equips.CCUDiagEquip;
+import a75f.io.domain.equips.DabEquip;
 import a75f.io.domain.equips.SystemEquip;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.BacnetUtilKt;
@@ -197,6 +198,19 @@ public class MigrationUtil {
             PreferenceUtil.setLocalBuildingTunersUpdate();
         }
 
+        if(!PreferenceUtil.getDamperSizeMigration2FlagStatus()) {
+            try {
+                doDabDamperSizeMigration2();
+                PreferenceUtil.setDamperSizeMigration2FlagStatus();
+            } catch (Exception e) {
+                CcuLog.e(TAG, "getDamperSizeMigration2FlagStatus failed");
+                e.printStackTrace();
+            }
+        }
+        if(!PreferenceUtil.getNonDmOtaPointDeletionStatus()) {
+            deleteNonDMSystemOTAStatusPoint(ccuHsApi);
+            PreferenceUtil.setNonDmOtaPointDeletionStatus();
+        }
         ccuHsApi.scheduleSync();
     }
     private static void updateLocalTunersEquipRef(CCUHsApi hayStack) {
@@ -1197,4 +1211,71 @@ public class MigrationUtil {
         CcuLog.d(TAG_CCU_MIGRATION_UTIL, "updateBacnetPropertiesForRoom completed");
     }
 
+
+    private static void doDabDamperSizeMigration2() {
+        CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "doDabDamperSizeMigration2 started");
+
+        // Map of damper sizes
+        Map<Double, Double> damperSizeMap = new HashMap<>();
+        damperSizeMap.put(4.0, 0.0);
+        damperSizeMap.put(6.0, 1.0);
+        damperSizeMap.put(8.0, 2.0);
+        damperSizeMap.put(10.0, 3.0);
+        damperSizeMap.put(12.0, 4.0);
+        damperSizeMap.put(14.0, 5.0);
+        damperSizeMap.put(16.0, 6.0);
+        damperSizeMap.put(18.0, 7.0);
+        damperSizeMap.put(20.0, 8.0);
+        damperSizeMap.put(22.0, 9.0);
+
+        List<HashMap<Object, Object>> dabEquips = CCUHsApi.getInstance().readAllEntities("equip and zone and dab and not dualDuct")
+                .stream()
+                .filter(entity -> entity.get("domainName") != null)
+                .collect(Collectors.toList());
+        for (HashMap<Object, Object> entity : dabEquips) {
+            DabEquip dabEquip = new DabEquip(entity.get("id").toString());
+            double damper1Val = dabEquip.getDamper1Size().readPriorityVal();
+            double damper2Val = dabEquip.getDamper2Size().readPriorityVal();
+
+            if (damper1Val != 1.0 && damper1Val != 3.0 &&
+                    damper1Val != 5.0 && damper1Val != 7.0 &&
+                    damper1Val != 9.0) {
+
+                dabEquip.getDamper1Size().writeDefaultVal(
+                        damperSizeMap.getOrDefault(damper1Val, 4.0)
+                );
+                CcuLog.d(
+                        L.TAG_CCU_MIGRATION_UTIL,
+                        "Damper1 Size -mig-2: " + dabEquip.getDamper1Size().readPriorityVal()
+                );
+
+                if (damper2Val != 1.0 && damper2Val != 3.0 &&
+                        damper2Val != 5.0 && damper2Val != 7.0 &&
+                        damper2Val != 9.0) {
+
+                    dabEquip.getDamper2Size().writeDefaultVal(
+                            damperSizeMap.getOrDefault(damper2Val, 4.0)
+                    );
+                    CcuLog.d(
+                            L.TAG_CCU_MIGRATION_UTIL,
+                            "Damper2 Size -mig-2: " + dabEquip.getDamper2Size().readPriorityVal()
+                    );
+                }
+            }
+        }
+        CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "doDabDamperSizeMigration2 ended");
+    }
+
+    private static void deleteNonDMSystemOTAStatusPoint(CCUHsApi ccuHsApi) {
+        HashMap<Object, Object> systemEquip = ccuHsApi.readEntity("system and equip and not" +
+                " modbus and not connectModule and not domainName");
+        if (systemEquip.size() > 0) {
+            HashMap<Object, Object> otaStatusPoint =  ccuHsApi.readEntity("ota and status" +
+                    " and equipRef == \"" + systemEquip.get(Tags.ID) + "\"");
+            if(otaStatusPoint.size() > 0) {
+                ccuHsApi.deleteEntity(otaStatusPoint.get(Tags.ID).toString());
+                CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Deleted OTA status point");
+            }
+        }
+    }
 }

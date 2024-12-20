@@ -207,7 +207,7 @@ class HyperStatV2CpuFragment : HyperStatFragmentV2() {
                     .fillMaxWidth()
                     .padding(top = 10.dp, bottom = 10.dp)) {
                 val rowModifier = Modifier
-                        .width(200.dp)
+                        .width(185.dp)
                         .padding(top = 10.dp)
                 if (viewModel.isAnyRelayMappedToStage(HsCpuRelayMapping.COOLING_STAGE_1)) {
                     Box(modifier = rowModifier) {
@@ -252,7 +252,7 @@ class HyperStatV2CpuFragment : HyperStatFragmentV2() {
                     .fillMaxWidth()
                     .padding(top = 10.dp, bottom = 10.dp)) {
                 val rowModifier = Modifier
-                        .width(200.dp)
+                        .width(185.dp)
                         .padding(top = 10.dp)
                 if (viewModel.isAnyRelayMappedToStage(HsCpuRelayMapping.HEATING_STAGE_1)) {
                     Box(modifier = rowModifier) {

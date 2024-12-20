@@ -98,7 +98,7 @@ class Ccu(domainName : String, id : String) : Entity(domainName) {
         bypassEquips[id] = Equip(domainName, id)
     }
 
-    fun addOaoEquip(entityMap : HashMap<Any, Any>) {
+    fun addDomainEquip(entityMap : HashMap<Any, Any>) {
         val domainName = entityMap["domainName"].toString()
         val id = entityMap["id"].toString()
         equips[id] = Equip(domainName, id)
@@ -175,12 +175,20 @@ open class Point(domainName : String, val equipRef: String) : Entity(domainName)
 
     fun writePointValue(value: Double) {
         requireId()
-        CcuLog.d("CCU_DEVICE", "test-writable writePointValue:=======value====> $value <--id--> $id <--iswritable-->${isWritable()} <--default value-->${readDefaultVal()}<--dis-->$dis")
+        CcuLog.d(
+            "CCU_DEVICE",
+            "test-writable writePointValue:=======value====> $value <--id--> $id <--iswritable-->${isWritable()} <--default value-->${readDefaultVal()}<--dis-->$dis"
+        )
         if (isWritable()) {
-            if (value != readDefaultVal()) {
+            if (value == 0.0) {
+                writeDefaultVal(value)
+            } else if (value != readDefaultVal()) {
                 writeDefaultVal(value)
             }
-            CcuLog.d("CCU_DEVICE", "test-writable writePointValue:=======readPriorityVal()====> ${readPriorityVal()} for <--id-->$id<--dis-->$dis")
+            CcuLog.d(
+                "CCU_DEVICE",
+                "test-writable writePointValue:=======readPriorityVal()====> ${readPriorityVal()} for <--id-->$id<--dis-->$dis"
+            )
             writeHisVal(readPriorityVal())
         } else {
             writeHisVal(value)

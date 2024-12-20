@@ -411,6 +411,7 @@ object DomainName {
     const val dischargeAirTemp = "dischargeAirTemp"
     const val enteringAirTemp = "enteringAirTemp"
     const val pressureSensor = "pressureSensor"
+    const val zonePressureSensor = "zonePressureSensor" // hyperstat contains zone as prefix
     const val uviSensor = "uviSensor"
     const val zoneVoc = "zoneVoc"
     const val occupancyMode = "occupancyMode"
@@ -1086,7 +1087,8 @@ object DomainName {
     const val fanHighSpeed = "fanHighSpeed"
     const val exhaustFanStage1 = "exhaustFanStage1"
     const val exhaustFanStage2 = "exhaustFanStage2"
-    const val dcvDamper = "dcvDamper"
+    const val dcvDamper = "dcvDamper" // for relay
+    const val dcvDamperModulating = "dcvDamperModulating" // for analog dcv
 
     const val oaoDamper = "oaoDamper"
     const val outsideDamperSensor = "outsideDamperSensor"
@@ -1119,7 +1121,7 @@ object DomainName {
     const val pm25Sensor = "pm25Sensor"
     const val pm10Sensor = "pm10Sensor"
     const val soundSensor = "soundSensor"
-    const val co2Equivalent = "co2Equivalent"
+    const val co2EquivalentSensor = "co2EquivalentSensor"
     const val mixedAirTempSensor = "mixedAirTempSensor"
     const val dischargeAirTemperature = "dischargeAirTemperature"
     const val mixedAirHumiditySensor = "mixedAirHumiditySensor"
@@ -1204,6 +1206,8 @@ object DomainName {
     const val bacnetAppVersion = "bacnetAppVersion"
     const val remoteAccessAppVersion = "remoteAccessAppVersion"
     const val homeAppVersion = "homeAppVersion"
+    const val otaStatusCCU = "otaStatusCCU"
+    const val otaStatusCM = "otaStatusCM"
 
 
     // CCU Specific points
@@ -1257,7 +1261,7 @@ object DomainName {
     const val currentTx20_ai2 = "currentTx20_ai2"
     const val currentTx50_ai2 = "currentTx50_ai2"
     const val genericIonSensorPoint_ai2 = "genericIonSensorPoint_ai2"
-
+    const val pm10Target = "pm10Target"
 
 
     //PLC

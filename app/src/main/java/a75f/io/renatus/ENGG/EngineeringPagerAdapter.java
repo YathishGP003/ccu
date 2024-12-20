@@ -32,8 +32,11 @@ public class EngineeringPagerAdapter extends FragmentStatePagerAdapter
 			case 1:
 				fragment = HaystackExplorer.newInstance();
 				break;
-			case 2:
+			/*case 2:
 				fragment = LogFragment.newInstance();
+				break;*/
+			case 2:
+				fragment = NetworkConfigFragment.newInstance();
 				break;
 			case 3:
 				fragment = new AlertDefsFragment();
@@ -72,7 +75,8 @@ public class EngineeringPagerAdapter extends FragmentStatePagerAdapter
 			case 1:
 				return "Haystack Explorer";
 			case 2:
-				return "CcuLog";
+				//return "CcuLog";
+				return "Network Config";
 			case 3:
 				return "Alert Defs";
 			case 4:

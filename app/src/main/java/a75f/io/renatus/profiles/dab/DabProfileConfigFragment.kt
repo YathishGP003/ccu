@@ -4,7 +4,6 @@ import a75f.io.api.haystack.CCUHsApi
 import a75f.io.domain.api.Domain
 import a75f.io.logger.CcuLog
 import a75f.io.logic.bo.building.NodeType
-import a75f.io.logic.bo.building.dab.DabEquipToBeDeleted.CARRIER_PROD
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.renatus.BASE.BaseDialogFragment
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
@@ -57,7 +56,7 @@ import kotlinx.coroutines.withContext
 class DabProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener {
 
     private val viewModel: DabProfileViewModel by viewModels()
-
+    val CARRIER_PROD: String = "carrier_prod"
     companion object {
         val ID: String = DabProfileConfigFragment::class.java.simpleName
         fun newInstance(
@@ -163,9 +162,9 @@ class DabProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                             previewWidth = 60,
                             expandedWidth = 80,
                             onSelected = { selectedIndex ->
-                                viewModel.viewState.damper1Size = viewModel.damper1SizesList[selectedIndex].toDouble()
+                                viewModel.viewState.damper1Size = selectedIndex.toDouble()
                             },
-                            defaultSelection = viewModel.damper1SizesList.indexOf(viewModel.viewState.damper1Size.toInt().toString()),
+                            defaultSelection = viewModel.viewState.damper1Size.toInt(),
                             spacerLimit = 20,
                             heightValue = 268
                         )
@@ -222,9 +221,9 @@ class DabProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                             previewWidth = 60,
                             expandedWidth = 80,
                             onSelected = { selectedIndex ->
-                                viewModel.viewState.damper2Size = viewModel.damper2SizesList[selectedIndex].toDouble()
+                                viewModel.viewState.damper2Size =  selectedIndex.toDouble()
                             },
-                            defaultSelection = viewModel.damper2SizesList.indexOf(viewModel.viewState.damper2Size.toInt().toString()),
+                            defaultSelection = viewModel.viewState.damper2Size.toInt(),
                             spacerLimit = 20,
                             heightValue = 268
                         )

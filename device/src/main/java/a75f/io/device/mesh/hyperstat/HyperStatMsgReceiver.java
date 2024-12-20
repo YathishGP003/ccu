@@ -352,7 +352,6 @@ public class HyperStatMsgReceiver {
                 case CO:
                 case NO:
                 case VOC:
-                case PRESSURE:
                 case SOUND:
                 case CO2_EQUIVALENT:
                 case ILLUMINANCE:
@@ -361,6 +360,10 @@ public class HyperStatMsgReceiver {
                 case PM10:
                     CCUHsApi.getInstance().writeHisValById(sp.getId(), val );
                     CCUHsApi.getInstance().writeHisValById(sp.getPointRef(),val);
+                    break;
+                case PRESSURE:
+                    CCUHsApi.getInstance().writeHisValById(sp.getId(), val );
+                    CCUHsApi.getInstance().writeHisValById(sp.getPointRef(),Pulse.convertPressureFromPaToInH2O(val));
                     break;
                 case OCCUPANCY:
                     if(val == 0 || val == 1) {

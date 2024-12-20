@@ -1685,7 +1685,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         specialScheduleImageButton.setTag(mSchedule.getId());
         vacationImageButton.setOnClickListener(v ->
         {
-            ScheduleGroupFragment schedulerFragment = new ScheduleGroupFragment().showVacationsLayout(mSchedule.getRoomRef(), mSchedule);
+            ScheduleGroupFragment schedulerFragment = new ScheduleGroupFragment().showVacationsLayout(zoneId, mSchedule);
 
             FragmentManager childFragmentManager = getFragmentManager();
             childFragmentManager.beginTransaction();

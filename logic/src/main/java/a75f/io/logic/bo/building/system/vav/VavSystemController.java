@@ -20,7 +20,6 @@ import a75f.io.logic.bo.building.system.SystemConstants;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.SystemPILoopController;
-import a75f.io.logic.bo.building.system.dab.DabExternalAhu;
 import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.bo.util.SystemScheduleUtil;
 import a75f.io.logic.bo.util.SystemTemperatureUtil;
@@ -35,6 +34,7 @@ import static a75f.io.logic.bo.building.system.SystemController.State.OFF;
 import static a75f.io.logic.bo.building.system.SystemMode.AUTO;
 import static a75f.io.logic.bo.building.system.SystemMode.COOLONLY;
 import static a75f.io.logic.bo.building.system.SystemMode.HEATONLY;
+import static a75f.io.logic.bo.building.truecfm.TrueCFMUtil.getDamperSizeFromEnum;
 
 /**
  * VavSystemController applies Weighted average and Moving average filters on temperature diffs.
@@ -892,8 +892,8 @@ public class VavSystemController extends SystemController
         
             double damperPosVal = normalizedDamperPosMap.get(damperPos.get("id").toString());
             double damperSizeVal = hayStack.readDefaultValById(damperSize.get("id").toString());
-            weightedDamperOpeningSum += damperPosVal * damperSizeVal;
-            damperSizeSum += damperSizeVal;
+            weightedDamperOpeningSum += damperPosVal * getDamperSizeFromEnum((int)damperSizeVal);
+            damperSizeSum += getDamperSizeFromEnum((int)damperSizeVal);
         }
         return damperSizeSum == 0 ? 0 : (double) weightedDamperOpeningSum / damperSizeSum;
     }
@@ -932,19 +932,18 @@ public class VavSystemController extends SystemController
             double normalizedDamperPos = normalizedDamperMap.get(damperPos.get("id").toString());
             double minLimit = 0, maxLimit = 0;
             if (systemState == COOLING) {
-                if (getStatus(equip.get("group").toString()) == ZoneState.COOLING.ordinal()) {
-                    minLimit = hayStack.readDefaultVal("point and zone and config and min and damper " +
-                            "and cooling and equipRef == \"" + equip.get("id").toString() + "\"");
-                    maxLimit = hayStack.readDefaultVal("point and zone and config and max and damper" +
-                            " and cooling and equipRef == \"" + equip.get("id").toString() + "\"");
-                } else if (getStatus(equip.get("group").toString()) == ZoneState.HEATING.ordinal()
-                        || getStatus(equip.get("group").toString()) == ZoneState.DEADBAND.ordinal()
-                        || getStatus(equip.get("group").toString()) == ZoneState.TEMPDEAD.ordinal()) {
+                if (getStatus(equip.get("group").toString()) == ZoneState.HEATING.ordinal()) {
                     minLimit = hayStack.readDefaultVal("point and zone and config and min and damper" +
                             " and heating and equipRef == \"" + equip.get("id").toString() + "\"");
                     maxLimit = hayStack.readDefaultVal("point and zone and config and max and damper " +
                             "and heating and equipRef == \"" + equip.get("id").toString() + "\"");
+                } else {
+                    minLimit = hayStack.readDefaultVal("point and zone and config and min and damper " +
+                            "and cooling and equipRef == \"" + equip.get("id").toString() + "\"");
+                    maxLimit = hayStack.readDefaultVal("point and zone and config and max and damper" +
+                            " and cooling and equipRef == \"" + equip.get("id").toString() + "\"");
                 }
+
             } else {
                 minLimit = hayStack.readDefaultVal("point and zone and config and min and damper" +
                         " and heating and equipRef == \"" + equip.get("id").toString() + "\"");

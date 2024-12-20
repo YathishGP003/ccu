@@ -46,6 +46,7 @@ import a75f.io.logic.bo.building.hvac.VavUnit;
 import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
 import a75f.io.logic.bo.building.system.SystemController;
+import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.vav.VavSystemProfile;
 import a75f.io.logic.bo.building.truecfm.TrueCFMUtil;
 import a75f.io.logic.tuners.TunerConstants;
@@ -144,6 +145,10 @@ public abstract class VavProfile extends ZoneProfile {
         //initTRSystem();
         this.equipRef = equipRef;
 
+        coolingLoop.useNegativeCumulativeError(false);
+        coolingLoop.setDisabled();
+        heatingLoop.useNegativeCumulativeError(false);
+        heatingLoop.setDisabled();
         init();
         CcuLog.i(L.TAG_CCU_ZONE, "VavProfile Done");
     }
@@ -220,6 +225,8 @@ public abstract class VavProfile extends ZoneProfile {
         vavUnit.vavDamper.maxPosition = 100;
         damper = vavUnit.vavDamper; //This is not necessary. Keeping to maintain legacy code.
         valve = vavUnit.reheatValve;
+
+        state = DEADBAND;
         CcuLog.i(L.TAG_CCU_ZONE, "VavProfile Init Done");
     }
 
@@ -816,5 +823,28 @@ public abstract class VavProfile extends ZoneProfile {
                 (SeventyFiveFProfileDirective) ModelLoader.INSTANCE.getModelForDomainName(equip.getDomainName()))
                 .getActiveConfiguration();
 
+    }
+
+    protected void handleDeadband(SystemMode conditioningMode, boolean reheatAvailable) {
+        if (state != DEADBAND) {
+            deadbandTransitionState = state;
+            state = DEADBAND;
+        }
+        if (!isCoolingAvailable(conditioningMode)) {
+            coolingLoop.setDisabled();
+        }
+        if (!isHeatingAvailable(conditioningMode, reheatAvailable)) {
+            heatingLoop.setDisabled();
+        }
+        valveController.reset();
+        valve.currentPosition = 0;
+    }
+
+    protected boolean isCoolingAvailable (SystemMode conditioningMode) {
+        return (conditioningMode == SystemMode.COOLONLY || conditioningMode == SystemMode.AUTO);
+    }
+
+    protected boolean isHeatingAvailable (SystemMode conditioningMode, boolean reheatAvailable) {
+        return (conditioningMode == SystemMode.HEATONLY || conditioningMode == SystemMode.AUTO || reheatAvailable);
     }
 }

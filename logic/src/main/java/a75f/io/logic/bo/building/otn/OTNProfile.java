@@ -1,6 +1,7 @@
 package a75f.io.logic.bo.building.otn;
 
 import static a75f.io.logic.bo.building.ZoneState.COOLING;
+import static a75f.io.logic.bo.building.ZoneState.DEADBAND;
 import static a75f.io.logic.bo.building.ZoneState.HEATING;
 import static a75f.io.logic.bo.building.ZoneState.RFDEAD;
 import static a75f.io.logic.bo.building.ZoneState.TEMPDEAD;
@@ -74,6 +75,9 @@ public class OTNProfile extends ZoneProfile {
             if (systemMode == SystemMode.HEATONLY && roomTemp > systemDefaultTemp) {
                 state = COOLING;
             }
+        }
+        if (roomTemp <= setTempCooling && roomTemp >= setTempHeating) {
+            state = DEADBAND;
         }
 
         Boolean isEmergencyMode = L.ccu().systemProfile.getSystemController().isEmergencyMode();

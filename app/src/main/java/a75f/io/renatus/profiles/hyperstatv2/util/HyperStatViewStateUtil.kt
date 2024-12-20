@@ -79,6 +79,7 @@ class HyperStatViewStateUtil {
 
                 co2Config = ThresholdTargetConfig(configuration.zoneCO2Threshold.currentVal, configuration.zoneCO2Target.currentVal)
                 pm2p5Config = ThresholdTargetConfig(configuration.zonePM2p5Threshold.currentVal, configuration.zonePM2p5Target.currentVal)
+                pm10Config = ThresholdTargetConfig(0.0, configuration.zonePM10Target.currentVal)
                 damperOpeningRate = configuration.zoneCO2DamperOpeningRate.currentVal.toInt()
 
                 humidityDisplay = configuration.displayHumidity.enabled
@@ -127,11 +128,13 @@ class HyperStatViewStateUtil {
                 thermistor1Association.associationVal = state.thermistor1Config.association
                 thermistor2Association.associationVal = state.thermistor2Config.association
 
-                zonePM2p5Threshold.currentVal = state.pm2p5Config.threshold.toDouble()
-                zonePM2p5Target.currentVal = state.pm2p5Config.target.toDouble()
+                zonePM2p5Threshold.currentVal = state.pm2p5Config.threshold
+                zonePM2p5Target.currentVal = state.pm2p5Config.target
 
-                zoneCO2Threshold.currentVal = state.co2Config.threshold.toDouble()
-                zoneCO2Target.currentVal = state.co2Config.target.toDouble()
+                zonePM10Target.currentVal = state.pm10Config.target
+
+                zoneCO2Threshold.currentVal = state.co2Config.threshold
+                zoneCO2Target.currentVal = state.co2Config.target
                 zoneCO2DamperOpeningRate.currentVal = state.damperOpeningRate.toDouble()
 
                 displayHumidity.enabled = state.humidityDisplay

@@ -466,23 +466,7 @@ abstract class HyperStatSplitProfile(equipRef: String, nodeAddress: Short) : Zon
         var actualFanModeSaved = fanModeSaved
         logIt("FanModeSaved in Shared Preference $actualFanModeSaved")
         val currentOperatingMode = hssEquip.occupancyMode.readHisVal().toInt()
-        /*
-       * If the current fan mode is AUTO and the occupancy status is OCCUPIED or AUTO_FORCE_OCCUPIED or FORCED_OCCUPIED or PRECONDITIONING
-       * then we need to check the second priority fan mode and check it is FAN OCCUPIED PERIOD or not
-       * if yes then we need to set the fan mode to that value and save it in the Shared preference
-       * */
-        if (actualFanModeSaved == 0 && basicSettings.fanMode == StandaloneFanStage.AUTO &&
-            (occupancyStatus == Occupancy.OCCUPIED
-                    || occupancyStatus == Occupancy.AUTOFORCEOCCUPIED
-                    || occupancyStatus == Occupancy.FORCEDOCCUPIED
-                    || Occupancy.values()[currentOperatingMode] == Occupancy.PRECONDITIONING)) {
 
-            val fanMode = getSecondPriorityFanMode(equipRef)
-            if (fanMode != 0 && fanMode % 3 == 0) {
-                FanModeCacheStorage().saveFanModeInCache(equipRef, fanMode)
-                actualFanModeSaved = fanMode
-            }
-        }
         logIt("Fall back fan mode " + basicSettings.fanMode + " conditioning mode " + basicSettings.conditioningMode)
         logIt("Fan Details :$occupancyStatus  ${basicSettings.fanMode}  $actualFanModeSaved")
         if (isEligibleToAuto(basicSettings,currentOperatingMode)) {
@@ -512,28 +496,7 @@ abstract class HyperStatSplitProfile(equipRef: String, nodeAddress: Short) : Zon
         }
         return  StandaloneFanStage.values()[hssEquip.fanOpMode.readHisVal().toInt()]
     }
-    // This method will return the second priority fan mode
-    private fun getSecondPriorityFanMode(equipRef: String) : Int {
-        val fanModePoint = haystack.readId("point and fan and mode and equipRef == \"$equipRef\"")
-        var highPriorityFanMode = 0
-        if (fanModePoint != null) {
-            val values = haystack.readPoint(fanModePoint)
-            if (values != null && values.size > 0) {
-                var count = 0
-                for (l in 1..values.size) {
-                    val valMap = values[l - 1] as java.util.HashMap<*, *>
-                    if(valMap["val"] != null ){
-                        count++
-                        highPriorityFanMode = valMap["val"].toString().toInt()
-                        if (count == 2) {
-                            return highPriorityFanMode
-                        }
-                    }
-                }
-            }
-        }
-        return highPriorityFanMode
-    }
+
 
     private fun isEligibleToAuto(basicSettings: BasicSettings, currentOperatingMode: Int ): Boolean{
         return (occupancyStatus != Occupancy.OCCUPIED

@@ -40,6 +40,7 @@ open class HyperStatV2ViewState {
     var co2Config by mutableStateOf(ThresholdTargetConfig(0.0, 0.0))
     var damperOpeningRate by mutableStateOf(0)
     var pm2p5Config by mutableStateOf(ThresholdTargetConfig(0.0, 0.0))
+    var pm10Config by mutableStateOf(ThresholdTargetConfig(0.0, 0.0))
 
     var humidityDisplay by mutableStateOf(false)
     var co2Display by mutableStateOf(false)

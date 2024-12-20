@@ -256,7 +256,7 @@ class HyperStatSettingsUtil {
                         hsApi, equipRef, "analog1 and output and config and max "
                     ) * 10).toInt()
                 } else {
-                    analogOutConfiguration.analogOut1AtMinSetting = defaultAnalogOutMinSetting
+                    analogOutConfiguration.analogOut1AtMinSetting = defaultAnalogOutMinSetting * 10
                     analogOutConfiguration.analogOut1AtMaxSetting = defaultAnalogOutMaxSetting * 10
                 }
             }
@@ -274,7 +274,7 @@ class HyperStatSettingsUtil {
                         hsApi, equipRef, "analog2 and output and config and max "
                     ) * 10).toInt()
                 } else {
-                    analogOutConfiguration.analogOut2AtMinSetting = defaultAnalogOutMinSetting
+                    analogOutConfiguration.analogOut2AtMinSetting = defaultAnalogOutMinSetting * 10
                     analogOutConfiguration.analogOut2AtMaxSetting = defaultAnalogOutMaxSetting * 10
                 }
             }
@@ -292,7 +292,7 @@ class HyperStatSettingsUtil {
                         hsApi, equipRef, "analog3 and output and config and max "
                     ) * 10).toInt()
                 } else {
-                    analogOutConfiguration.analogOut3AtMinSetting = defaultAnalogOutMinSetting
+                    analogOutConfiguration.analogOut3AtMinSetting = defaultAnalogOutMinSetting * 10
                     analogOutConfiguration.analogOut3AtMaxSetting = defaultAnalogOutMaxSetting * 10
                 }
             }
@@ -600,17 +600,17 @@ private fun setStagedFanSpeedDetails(equip: HyperStatEquip): HyperStat.Hyperstat
     val stagedFanSpeedBuilder = HyperStat.HyperstatStagedFanSpeeds_t.newBuilder()
     equip.apply {
         if (this is CpuV2Equip) {
-            if (isAnalogOutEnabledAndIsMapped(analog1OutputEnable, analog1OutputAssociation, HsCpuAnalogOutMapping.LINEAR_FAN_SPEED.ordinal)) {
+            if (isAnalogOutEnabledAndIsMapped(analog1OutputEnable, analog1OutputAssociation, HsCpuAnalogOutMapping.STAGED_FAN_SPEED.ordinal)) {
                 stagedFanSpeedBuilder.stagedFanLowSpeedLevel = analog1FanLow.readPriorityVal().toInt()
                 stagedFanSpeedBuilder.stagedFanMediumSpeedLevel = analog1FanMedium.readPriorityVal().toInt()
                 stagedFanSpeedBuilder.stagedFanHighSpeedLevel = analog1FanHigh.readPriorityVal().toInt()
             }
-            if (isAnalogOutEnabledAndIsMapped(analog2OutputEnable, analog2OutputAssociation, HsCpuAnalogOutMapping.LINEAR_FAN_SPEED.ordinal)) {
+            if (isAnalogOutEnabledAndIsMapped(analog2OutputEnable, analog2OutputAssociation, HsCpuAnalogOutMapping.STAGED_FAN_SPEED.ordinal)) {
                 stagedFanSpeedBuilder.stagedFanLowSpeedLevel = analog2FanLow.readPriorityVal().toInt()
                 stagedFanSpeedBuilder.stagedFanMediumSpeedLevel = analog2FanMedium.readPriorityVal().toInt()
                 stagedFanSpeedBuilder.stagedFanHighSpeedLevel = analog2FanHigh.readPriorityVal().toInt()
             }
-            if (isAnalogOutEnabledAndIsMapped(analog3OutputEnable, analog3OutputAssociation, HsCpuAnalogOutMapping.LINEAR_FAN_SPEED.ordinal)) {
+            if (isAnalogOutEnabledAndIsMapped(analog3OutputEnable, analog3OutputAssociation, HsCpuAnalogOutMapping.STAGED_FAN_SPEED.ordinal)) {
                 stagedFanSpeedBuilder.stagedFanLowSpeedLevel = analog3FanLow.readPriorityVal().toInt()
                 stagedFanSpeedBuilder.stagedFanMediumSpeedLevel = analog3FanMedium.readPriorityVal().toInt()
                 stagedFanSpeedBuilder.stagedFanHighSpeedLevel = analog3FanHigh.readPriorityVal().toInt()
@@ -661,18 +661,18 @@ private fun getAnalogOutConfigs(equip: HyperStatEquip): HyperStat.HyperstatAnalo
 
         if (analogOutConfigs.analogOut1Enable) {
             analogOutConfigs.analogOut1Mapping = analog1OutputAssociation.readDefaultVal().toInt()
-            analogOutConfigs.analogOut1AtMinSetting = hsApi.readDefaultVal("min and analog == 1 and equipRef == \"$equipRef\"").toInt()
-            analogOutConfigs.analogOut1AtMaxSetting = hsApi.readDefaultVal("max and analog == 1 and equipRef == \"$equipRef\"").toInt()
+            analogOutConfigs.analogOut1AtMinSetting = hsApi.readDefaultVal("min and analog == 1 and equipRef == \"$equipRef\"").toInt() * 10
+            analogOutConfigs.analogOut1AtMaxSetting = hsApi.readDefaultVal("max and analog == 1 and equipRef == \"$equipRef\"").toInt() * 10
         }
         if (analogOutConfigs.analogOut2Enable) {
             analogOutConfigs.analogOut2Mapping = analog2OutputAssociation.readDefaultVal().toInt()
-            analogOutConfigs.analogOut2AtMinSetting = hsApi.readDefaultVal("min and analog == 2 and equipRef == \"$equipRef\"").toInt()
-            analogOutConfigs.analogOut2AtMaxSetting = hsApi.readDefaultVal("max and analog == 2 and equipRef == \"$equipRef\"").toInt()
+            analogOutConfigs.analogOut2AtMinSetting = hsApi.readDefaultVal("min and analog == 2 and equipRef == \"$equipRef\"").toInt() * 10
+            analogOutConfigs.analogOut2AtMaxSetting = hsApi.readDefaultVal("max and analog == 2 and equipRef == \"$equipRef\"").toInt() * 10
         }
         if (analogOutConfigs.analogOut3Enable) {
             analogOutConfigs.analogOut3Mapping = analog3OutputAssociation.readDefaultVal().toInt()
-            analogOutConfigs.analogOut3AtMinSetting = hsApi.readDefaultVal("min and analog == 3 and equipRef == \"$equipRef\"").toInt()
-            analogOutConfigs.analogOut3AtMaxSetting = hsApi.readDefaultVal("max and analog == 3 and equipRef == \"$equipRef\"").toInt()
+            analogOutConfigs.analogOut3AtMinSetting = hsApi.readDefaultVal("min and analog == 3 and equipRef == \"$equipRef\"").toInt() * 10
+            analogOutConfigs.analogOut3AtMaxSetting = hsApi.readDefaultVal("max and analog == 3 and equipRef == \"$equipRef\"").toInt() * 10
         }
     }
     return analogOutConfigs.build()
@@ -719,7 +719,8 @@ fun getHyperStatSettingsMessage(equipRef: String, zone: String): HyperStatSettin
             .setHyperstatLinearFanSpeeds(setLinearFanSpeedDetails(hyperStatEquip))
             .setHyperstatStagedFanSpeeds(setStagedFanSpeedDetails(hyperStatEquip))
             .setTemperatureMode(getTempMode())
-            .build()
+            .setMiscSettings1(4)
+        .build()
 }
 
 fun getHyperStatSettings2Message(equipRef: String): HyperStatSettingsMessage2_t {
@@ -764,7 +765,7 @@ private fun getCommonTuners(equipRef: String): HyperStat.HyperStatTunersGeneric_
     return HyperStat.HyperStatTunersGeneric_t.newBuilder().apply {
         unoccupiedSetback = (CCUHsApi.getInstance().readPointPriorityValByQuery("schedulable and zone and unoccupied and setback and roomRef == \"" + equip.get("roomRef").toString() + "\"") * 10).toInt()
         minFanRuntimePostconditioning = TunerUtil.readTunerValByQuery("min and fan and runtime and postconditioning", equipRef).toInt()
-        relayActivationHysteresis = TunerUtil.getHysteresisPoint("relay and activation", equipRef).toInt()
+        relayActivationHysteresis = TunerUtil.getHysteresisPoint("hysteresis and activation", equipRef).toInt()
         analogFanSpeedMultiplier = (TunerUtil.readTunerValByQuery("analog and fan and speed and multiplier", equipRef) * 10 ).toInt()
         humidityHysteresis = TunerUtil.getHysteresisPoint("humidity", equipRef).toInt()
         autoAwayZoneSetbackTemp = (TunerUtil.readTunerValByQuery("auto and away and setback") * 10).toInt()
@@ -781,6 +782,9 @@ private fun getStagedFanDetails(equip: CpuV2Equip): HyperStat.HyperStatConfigsCp
         heatingStage1FanAnalogVoltage = (equip.fanOutHeatingStage1.readPriorityVal() * 10).toInt()
         heatingStage2FanAnalogVoltage = (equip.fanOutHeatingStage2.readPriorityVal() * 10).toInt()
         heatingStage3FanAnalogVoltage = (equip.fanOutHeatingStage3.readPriorityVal() * 10).toInt()
+        analogoutAtRecFanAnalogVoltage = ((CCUHsApi.getInstance()
+            .readPointPriorityValByQuery("config and recirculate and equipRef == \"${equip.equipRef}\"") * 10)
+            .toInt()) // this needs to be checked again.
     }.build()
 }
 

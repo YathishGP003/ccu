@@ -258,6 +258,19 @@ public class AppInstaller
                 if (!sFilePath.isEmpty())
                 {
                     OtaStatusDiagPoint.Companion.updateCCUOtaStatus(OtaStatus.OTA_UPDATE_STARTED);
+                    try {
+                        int syncResult = Runtime.getRuntime().exec("sync").waitFor();
+                        if (syncResult != 0) {
+                            CcuLog.e(L.TAG_CCU_DOWNLOAD, "sync failed");
+                        } else {
+                            CcuLog.d(L.TAG_CCU_DOWNLOAD, "sync success");
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        CcuLog.e(L.TAG_CCU_DOWNLOAD, "sync failed: " + e.getMessage());
+                    }
+                    CcuLog.i(L.TAG_CCU_DOWNLOAD,"sleeping the thread for  second to complete the sync process ");
+                    Thread.sleep(3000);
                     File file = new File(RenatusApp.getAppContext().getExternalFilesDir(null), CCU_APK_FILE_NAME);
                     final String[] commands = {"pm install -r -d -g "+file.getAbsolutePath()};
 

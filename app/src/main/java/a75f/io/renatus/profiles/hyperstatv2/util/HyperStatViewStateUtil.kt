@@ -5,9 +5,17 @@ import a75f.io.logic.bo.building.hyperstat.v2.configs.CpuMinMaxConfig
 import a75f.io.logic.bo.building.hyperstat.v2.configs.CpuStagedConfig
 import a75f.io.logic.bo.building.hyperstat.v2.configs.FanConfig
 import a75f.io.logic.bo.building.hyperstat.v2.configs.HyperStatConfiguration
+import a75f.io.logic.bo.building.hyperstat.v2.configs.HpuConfiguration
+import a75f.io.logic.bo.building.hyperstat.v2.configs.HpuMinMaxConfig
+import a75f.io.logic.bo.building.hyperstat.v2.configs.Pipe2Configuration
+import a75f.io.logic.bo.building.hyperstat.v2.configs.Pipe2MinMaxConfig
 import a75f.io.renatus.profiles.hyperstatv2.viewstates.CpuAnalogOutMinMaxConfig
 import a75f.io.renatus.profiles.hyperstatv2.viewstates.CpuViewState
+import a75f.io.renatus.profiles.hyperstatv2.viewstates.HpuAnalogOutMinMaxConfig
+import a75f.io.renatus.profiles.hyperstatv2.viewstates.HpuViewState
 import a75f.io.renatus.profiles.hyperstatv2.viewstates.HyperStatV2ViewState
+import a75f.io.renatus.profiles.hyperstatv2.viewstates.Pipe2AnalogOutMinMaxConfig
+import a75f.io.renatus.profiles.hyperstatv2.viewstates.Pipe2ViewState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -253,6 +261,110 @@ class HyperStatViewStateUtil {
                 stage1 = stagedConfig.stage1.currentVal.toInt()
                 stage2 = stagedConfig.stage2.currentVal.toInt()
                 stage3 = stagedConfig.stage3.currentVal.toInt()
+            }
+        }
+
+
+        fun hpuConfigToState(configuration: HpuConfiguration): HpuViewState {
+            val hpuState = hyperStatConfigToState(configuration, HpuViewState()) as HpuViewState
+            hpuState.apply {
+                configMinMaxToStateHPU(analogOut1MinMax, configuration.analogOut1MinMaxConfig)
+                configMinMaxToStateHPU(analogOut2MinMax, configuration.analogOut2MinMaxConfig)
+                configMinMaxToStateHPU(analogOut3MinMax, configuration.analogOut3MinMaxConfig)
+
+                configFanState(analogOut1FanConfig, configuration.analogOut1FanSpeedConfig)
+                configFanState(analogOut2FanConfig, configuration.analogOut2FanSpeedConfig)
+                configFanState(analogOut3FanConfig, configuration.analogOut3FanSpeedConfig)
+            }
+            return hpuState
+        }
+
+        private fun configMinMaxToStateHPU(minMaxState: HpuAnalogOutMinMaxConfig, minMaxConfig: HpuMinMaxConfig) {
+            minMaxState.apply {
+                compressorConfig.min = minMaxConfig.compressorConfig.min.currentVal.toInt()
+                compressorConfig.max = minMaxConfig.compressorConfig.max.currentVal.toInt()
+                dcvDamperConfig.min = minMaxConfig.dcvDamperConfig.min.currentVal.toInt()
+                dcvDamperConfig.max = minMaxConfig.dcvDamperConfig.max.currentVal.toInt()
+                fanSpeedConfig.min = minMaxConfig.fanSpeedConfig.min.currentVal.toInt()
+                fanSpeedConfig.max = minMaxConfig.fanSpeedConfig.max.currentVal.toInt()
+            }
+
+        }
+
+        fun hpuStateToConfig(state: HpuViewState, configuration: HpuConfiguration) {
+            hyperStatStateToConfig(state, configuration)
+            configuration.apply {
+                minMaxConfigFromStateHPU(analogOut1MinMaxConfig, state.analogOut1MinMax)
+                minMaxConfigFromStateHPU(analogOut2MinMaxConfig, state.analogOut2MinMax)
+                minMaxConfigFromStateHPU(analogOut3MinMaxConfig, state.analogOut3MinMax)
+
+                fanConfigFromState(analogOut1FanSpeedConfig, state.analogOut1FanConfig)
+                fanConfigFromState(analogOut2FanSpeedConfig, state.analogOut2FanConfig)
+                fanConfigFromState(analogOut3FanSpeedConfig, state.analogOut3FanConfig)
+
+
+            }
+        }
+
+        private fun minMaxConfigFromStateHPU(minMaxConfig: HpuMinMaxConfig, minMaxState: HpuAnalogOutMinMaxConfig) {
+            minMaxConfig.apply {
+                compressorConfig.min.currentVal = minMaxState.compressorConfig.min.toDouble()
+                compressorConfig.max.currentVal = minMaxState.compressorConfig.max.toDouble()
+                fanSpeedConfig.min.currentVal = minMaxState.fanSpeedConfig.min.toDouble()
+                fanSpeedConfig.max.currentVal = minMaxState.fanSpeedConfig.max.toDouble()
+                dcvDamperConfig.min.currentVal = minMaxState.dcvDamperConfig.min.toDouble()
+                dcvDamperConfig.max.currentVal = minMaxState.dcvDamperConfig.max.toDouble()
+            }
+        }
+
+        fun pipe2ConfigToState(configuration: Pipe2Configuration): Pipe2ViewState {
+            val pipe2ViewState = hyperStatConfigToState(configuration, Pipe2ViewState()) as Pipe2ViewState
+            pipe2ViewState.apply {
+                configMinMaxToStatePipe2(analogOut1MinMax, configuration.analogOut1MinMaxConfig)
+                configMinMaxToStatePipe2(analogOut2MinMax, configuration.analogOut2MinMaxConfig)
+                configMinMaxToStatePipe2(analogOut3MinMax, configuration.analogOut3MinMaxConfig)
+
+                configFanState(analogOut1FanConfig, configuration.analogOut1FanSpeedConfig)
+                configFanState(analogOut2FanConfig, configuration.analogOut2FanSpeedConfig)
+                configFanState(analogOut3FanConfig, configuration.analogOut3FanSpeedConfig)
+
+                thermistor2EnableConfig.enabled = configuration.thermistor2EnableConfig.enabled
+            }
+            return pipe2ViewState
+        }
+
+        private fun configMinMaxToStatePipe2(minMaxState: Pipe2AnalogOutMinMaxConfig, minMaxConfig: Pipe2MinMaxConfig) {
+            minMaxState.apply {
+                waterModulatingValue.min = minMaxConfig.waterModulatingValue.min.currentVal.toInt()
+                waterModulatingValue.max = minMaxConfig.waterModulatingValue.max.currentVal.toInt()
+                dcvDamperConfig.min = minMaxConfig.dcvDamperConfig.min.currentVal.toInt()
+                dcvDamperConfig.max = minMaxConfig.dcvDamperConfig.max.currentVal.toInt()
+                fanSpeedConfig.min = minMaxConfig.fanSpeedConfig.min.currentVal.toInt()
+                fanSpeedConfig.max = minMaxConfig.fanSpeedConfig.max.currentVal.toInt()
+            }
+        }
+        fun pipe2StateToConfig(state: Pipe2ViewState, configuration: Pipe2Configuration) {
+            hyperStatStateToConfig(state, configuration)
+            configuration.apply {
+                minMaxConfigFromStatePipe2(analogOut1MinMaxConfig, state.analogOut1MinMax)
+                minMaxConfigFromStatePipe2(analogOut2MinMaxConfig, state.analogOut2MinMax)
+                minMaxConfigFromStatePipe2(analogOut3MinMaxConfig, state.analogOut3MinMax)
+
+                fanConfigFromState(analogOut1FanSpeedConfig, state.analogOut1FanConfig)
+                fanConfigFromState(analogOut2FanSpeedConfig, state.analogOut2FanConfig)
+                fanConfigFromState(analogOut3FanSpeedConfig, state.analogOut3FanConfig)
+                thermistor2EnableConfig.enabled = state.thermistor2EnableConfig.enabled
+
+            }
+        }
+        private fun minMaxConfigFromStatePipe2(minMaxConfig: Pipe2MinMaxConfig, minMaxState: Pipe2AnalogOutMinMaxConfig) {
+            minMaxConfig.apply {
+                waterModulatingValue.min.currentVal = minMaxState.waterModulatingValue.min.toDouble()
+                waterModulatingValue.max.currentVal = minMaxState.waterModulatingValue.max.toDouble()
+                fanSpeedConfig.min.currentVal = minMaxState.fanSpeedConfig.min.toDouble()
+                fanSpeedConfig.max.currentVal = minMaxState.fanSpeedConfig.max.toDouble()
+                dcvDamperConfig.min.currentVal = minMaxState.dcvDamperConfig.min.toDouble()
+                dcvDamperConfig.max.currentVal = minMaxState.dcvDamperConfig.max.toDouble()
             }
         }
 

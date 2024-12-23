@@ -7,6 +7,6 @@ import a75f.io.domain.equips.hyperstat.HyperStatEquip
  */
 
 interface DoorWindowKeycardActions {
-    fun doorWindowIsOpen(doorWindowEnabled: Double, doorWindowSensor: Double, equip: HyperStatEquip?)
-    fun keyCardIsInSlot(keycardEnabled: Double, keycardSensor: Double, equip: HyperStatEquip?)
+    fun doorWindowIsOpen(doorWindowEnabled: Double, doorWindowSensor: Double, equip: HyperStatEquip)
+    fun keyCardIsInSlot(keycardEnabled: Double, keycardSensor: Double, equip: HyperStatEquip)
 }

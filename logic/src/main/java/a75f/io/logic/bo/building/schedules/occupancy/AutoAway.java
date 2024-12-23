@@ -5,6 +5,7 @@ import org.projecthaystack.UnknownRecException;
 import java.util.Date;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.domain.api.DomainName;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.schedules.Occupancy;
@@ -19,7 +20,8 @@ public class AutoAway implements OccupancyTrigger {
     
     public boolean isEnabled() {
         try {
-            return occupancyUtil.isConfigEnabled("auto and away");
+            boolean isEnabled = occupancyUtil.isConfigEnabledByDomain(DomainName.autoAway);
+            return isEnabled || occupancyUtil.isConfigEnabled("auto and away");
         } catch (UnknownRecException e) {
             return false;
         }
@@ -65,6 +67,7 @@ public class AutoAway implements OccupancyTrigger {
     }
 
     private static boolean isAutoAwayEnabled(OccupancyUtil occupancyUtil) {
-        return occupancyUtil.isConfigEnabled("auto and away");
+        boolean isEnabled = occupancyUtil.isConfigEnabledByDomain(DomainName.autoAway);
+        return isEnabled || occupancyUtil.isConfigEnabled("auto and away");
     }
 }

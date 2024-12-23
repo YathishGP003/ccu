@@ -5,8 +5,6 @@ import java.nio.ByteOrder;
 import java.util.Arrays;
 
 import a75f.io.api.haystack.CCUHsApi;
-import a75f.io.api.haystack.Equip;
-import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Zone;
 import a75f.io.device.BuildConfig;
 import a75f.io.device.HyperStat;
@@ -71,7 +69,7 @@ public class HyperStatMessageSender {
      */
     public static void sendSettingsMessage(Zone zone, int address, String equipRef) {
         HyperStatSettingsMessage_t settings = HyperStatMessageGenerator.getSettingsMessage(
-                zone.getDisplayName(), address, equipRef);
+                zone.getDisplayName(), equipRef);
         if (DLog.isLoggingEnabled()) {
             CcuLog.i(L.TAG_CCU_SERIAL, settings.toString());
         }
@@ -103,8 +101,8 @@ public class HyperStatMessageSender {
      * @param equipRef
      */
     public static void sendControlMessage(int address, String equipRef) {
-        HyperStatControlsMessage_t controls = HyperStatMessageGenerator.getControlMessage(address,
-                equipRef).build();
+        HyperStatControlsMessage_t controls = HyperStatMessageGenerator.getControlMessage(address
+        ).build();
         
         if (DLog.isLoggingEnabled()) {
             CcuLog.i(L.TAG_CCU_SERIAL, controls.toString());
@@ -224,8 +222,8 @@ public class HyperStatMessageSender {
 
 
     public static void sendAdditionalSettingMessages(int address, String equipRef){
-        HyperStat.HyperStatSettingsMessage2_t settingsMessage2 = HyperStatMessageGenerator.getSetting2Message(address, equipRef);
-        HyperStat.HyperStatSettingsMessage3_t settingsMessage3 = HyperStatMessageGenerator.getSetting3Message(address, equipRef);
+        HyperStat.HyperStatSettingsMessage2_t settingsMessage2 = HyperStatMessageGenerator.getSetting2Message(equipRef);
+        HyperStat.HyperStatSettingsMessage3_t settingsMessage3 = HyperStatMessageGenerator.getSetting3Message(equipRef);
 
         if (DLog.isLoggingEnabled()) {
             CcuLog.d(L.TAG_CCU_DEVICE,"Debugger Enabled");

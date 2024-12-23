@@ -2,7 +2,6 @@ package a75f.io.messaging.handler;
 
 import static a75f.io.messaging.handler.AdvanceAhuReconfigHandlerKt.isAdvanceAhuV2Profile;
 import static a75f.io.messaging.handler.AdvanceAhuReconfigHandlerKt.reconfigureAdvanceAhuV2;
-import static a75f.io.messaging.handler.CPUReconfigHandlerKt.reconfigureHSCPUV2;
 
 import com.google.gson.JsonObject;
 

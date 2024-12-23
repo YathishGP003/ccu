@@ -50,6 +50,13 @@ class HyperStatConfigurationTest {
         val config = getCpuConfig()
         config.relay1Association.associationVal = HsCpuRelayMapping.HEATING_STAGE_1.ordinal
         assert(config.getHighestHeatingStage() == HsCpuRelayMapping.HEATING_STAGE_1)
+
+        config.relay2Association.associationVal = HsCpuRelayMapping.HEATING_STAGE_2.ordinal
+        assert(config.getHighestHeatingStage() == HsCpuRelayMapping.HEATING_STAGE_2)
+
+        config.relay3Association.associationVal = HsCpuRelayMapping.HEATING_STAGE_3.ordinal
+        assert(config.getHighestHeatingStage() == HsCpuRelayMapping.HEATING_STAGE_3)
+
     }
 
     @Test

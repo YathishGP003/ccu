@@ -20,7 +20,6 @@ import a75f.io.logic.L
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
 import a75f.io.logic.bo.building.schedules.Occupancy
-import android.util.Log
 
 /**
  * Created by Manjunath K on 22-10-2024.

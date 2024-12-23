@@ -61,19 +61,19 @@ import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType
 import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.hyperstat.v2.configs.CpuConfiguration
+import a75f.io.logic.bo.building.hyperstat.v2.configs.HpuConfiguration
 import a75f.io.logic.bo.building.hyperstat.v2.configs.MonitoringConfiguration
+import a75f.io.logic.bo.building.hyperstat.v2.configs.Pipe2Configuration
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.CpuUniInType
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuProfileConfiguration
 import a75f.io.logic.bo.building.oao.OAOProfileConfiguration
 import a75f.io.logic.bo.building.otn.OtnProfileConfiguration
-import a75f.io.logic.bo.building.schedules.Occupancy
 import a75f.io.logic.bo.building.schedules.occupancy.DemandResponse
 import a75f.io.logic.bo.building.sse.SseProfileConfiguration
 import a75f.io.logic.bo.building.system.vav.config.ModulatingRtuProfileConfig
 import a75f.io.logic.bo.building.system.vav.config.StagedRtuProfileConfig
 import a75f.io.logic.bo.building.system.vav.config.StagedVfdRtuProfileConfig
 import a75f.io.logic.bo.building.vav.VavProfileConfiguration
-import a75f.io.logic.bo.util.DemandResponseMode
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.logic.diag.DiagEquip.createMigrationVersionPoint
 import a75f.io.logic.migration.VavAndAcbProfileMigration.Companion.cleanACBDuplicatePoints
@@ -108,7 +108,6 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
 
     val TAG_CCU_BYPASS_RECOVER = "CCU_BYPASS_RECOVER"
 
-
     override val hayStack = hsApi
 
     private val schedulerRevamp = SchedulerRevampMigration(hayStack)
@@ -141,7 +140,9 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         addCmBoardDevice(hayStack)
         doOtnTerminalDomainModelMigration()
         doHSCPUDMMigration()
+        doHSHPUDMMigration()
         doHSMonitoringDMMigration()
+        doHSPipe2DMMigration()
         if (!isMigrationRequired()) {
             CcuLog.i(L.TAG_CCU_MIGRATION_UTIL, "---- Migration Not Required ----")
             return
@@ -511,72 +512,6 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             if (!equipStatusPoint.enums.toString().contains("rfdead")) {
                 equipStatusPoint.enums = "deadband,cooling,heating,tempdead,rfdead"
                 hayStack.updatePoint(equipStatusPoint, equipStatusPoint.id)
-            }
-        }
-    }
-
-    private  fun migrateDemandResponseForOccupancyEnum(ccuHsApi: CCUHsApi) {
-        val occModePoints = ccuHsApi.readAllEntities("occupancy and mode and enum and not modbus")
-        occModePoints.forEach { occMode ->
-            val occModePoint = Point.Builder().setHashMap(occMode).build()
-            if (!occModePoint.enums.toString().contains("demandresponseoccupied")) {
-                occModePoint.enums = Occupancy.getEnumStringDefinition()
-                hayStack.updatePoint(occModePoint, occModePoint.id)
-            }
-        }
-
-        val occStatePoints = ccuHsApi.readAllEntities("occupancy and state and enum and not modbus")
-        occStatePoints.forEach { occState ->
-            val occStatePoint = Point.Builder().setHashMap(occState).build()
-            if (!occStatePoint.enums.toString().contains("demandresponseoccupied")) {
-                occStatePoint.enums = Occupancy.getEnumStringDefinition()
-                hayStack.updatePoint(occStatePoint, occStatePoint.id)
-            }
-        }
-    }
-
-    private fun migrateDemandResponseSetbackTunerForAllTempZones(ccuHsApi: CCUHsApi) {
-        val demandResponseSetBackTuner = ccuHsApi.readEntity(
-            "demand and" +
-                    " response and system and tuner"
-        )
-        if (demandResponseSetBackTuner.isEmpty()) {
-            val systemEquip = ccuHsApi.readEntity("equip and system and not modbus")
-            val equipRef = systemEquip["id"].toString()
-            val equipDis = systemEquip["dis"].toString()
-            CcuLog.i(L.TAG_CCU_DR_MODE, "System level tuner is created for: $equipDis")
-            DemandResponseMode.createDemandResponseSetBackTuner(
-                ccuHsApi,
-                equipRef, equipDis, true, null, null
-            )
-        }
-        val equipsList: MutableList<ArrayList<HashMap<Any, Any>>> = ArrayList()
-        equipsList.add(ccuHsApi.readAllEntities("equip and vav and not system and not domainName"))
-        equipsList.add(ccuHsApi.readAllEntities("equip and dab and not system and not domainName"))
-        equipsList.add(ccuHsApi.readAllEntities("equip and dualDuct and not domainName"))
-        equipsList.add(ccuHsApi.readAllEntities("equip and standalone and smartstat and not domainName"))
-        equipsList.add(ccuHsApi.readAllEntities("equip and standalone and hyperstat and not domainName"))
-        equipsList.add(ccuHsApi.readAllEntities("equip and standalone and hyperstatsplit and not domainName"))
-        equipsList.add(ccuHsApi.readAllEntities("equip and sse and not domainName"))
-        equipsList.add(ccuHsApi.readAllEntities("equip and sse and not domainName"))
-        equipsList.add(ccuHsApi.readAllEntities("equip and ti and not domainName"))
-        equipsList.add(ccuHsApi.readAllEntities("equip and otn and not domainName"))
-
-        for (equips in equipsList) {
-            for (equipMap in equips) {
-                val demandResponseSetBackTunerPoint =
-                    ccuHsApi.readEntity("demand and response and setback and equipRef == \"" + equipMap["id"].toString() + "\"")
-                if (demandResponseSetBackTunerPoint.isEmpty()) {
-                    DemandResponseMode.createDemandResponseSetBackTuner(
-                        ccuHsApi,
-                        equipMap["id"].toString(), equipMap["dis"].toString(), false,
-                        equipMap["roomRef"].toString(), equipMap["floorRef"].toString()
-                    )
-                    CcuLog.i(
-                        L.TAG_CCU_DR_MODE,
-                        "Equip level tuner is created for: " + equipMap["dis"].toString()
-                    )
-                }
             }
         }
     }
@@ -1146,7 +1081,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             }
 
             deviceBuilder.doCutOverMigration(
-                device.get("id").toString(),
+                device["id"].toString(),
                 deviceModel,
                 deviceDis,
                 HyperStatSplitDeviceCutoverMapping.entries,
@@ -1431,7 +1366,57 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                 )
 
                 deviceBuilder.doCutOverMigration(
-                    device.get("id").toString(),
+                    device["id"].toString(),
+                    deviceModel,
+                    deviceDis,
+                    HyperStatDeviceCutOverMapping.entries,
+                    profileConfiguration
+                )
+                updateTempOffsetValue(it["id"].toString())
+            }
+        }
+        addDomainEquips(hayStack)
+    }
+
+    private fun doHSHPUDMMigration() {
+
+        val hyperStatHPUEquip = hayStack.readAllEntities("equip and hyperstat and hpu")
+            .filter { it["domainName"] == null }
+            .toList()
+        CcuLog.d(L.TAG_CCU_HSHPU, "HyperStat HPU Equip Migration list of equips $hyperStatHPUEquip")
+        if (hyperStatHPUEquip.isNotEmpty()) {
+            val model = ModelLoader.getHyperStatHpuModel()
+            val deviceModel =
+                ModelLoader.getHyperStatDeviceModel() as SeventyFiveFDeviceDirective
+            val deviceBuilder =
+                DeviceBuilder(hayStack, EntityMapper(model as SeventyFiveFProfileDirective))
+            val profileType = ProfileType.HYPERSTAT_HEAT_PUMP_UNIT
+            val equipBuilder = ProfileEquipBuilder(hayStack)
+            hyperStatHPUEquip.forEach {
+                CcuLog.i(Domain.LOG_TAG, "Do DM zone equip migration for $it")
+                val equipDis = "${hayStack.siteName}-${model.name}-${it["group"]}"
+                val deviceDis = "${hayStack.siteName}-${deviceModel.name}-${it["group"]}"
+                val device = hayStack.readEntity("device and addr == \"" + it["group"] + "\"")
+                val profileConfiguration = HpuConfiguration(
+                    Integer.parseInt(it["group"].toString()),
+                    NodeType.HYPER_STAT.name,
+                    0,
+                    it["roomRef"].toString(),
+                    it["floorRef"].toString(),
+                    profileType, model
+                ).getActiveConfiguration()
+
+                equipBuilder.doCutOverMigration(
+                    it["id"].toString(),
+                    model,
+                    equipDis,
+                    HyperStatV2EquipCutoverMapping.getHPUEntries(),
+                    profileConfiguration,
+                    equipHashMap = it
+                )
+
+                deviceBuilder.doCutOverMigration(
+                    device["id"].toString(),
                     deviceModel,
                     deviceDis,
                     HyperStatDeviceCutOverMapping.entries,
@@ -1844,11 +1829,11 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
     fun checkBacnetIdMigrationRequired() {
         if(!PreferenceUtil.isBacnetIdMigrationDone()) {
             try {
-                updateBacnetProperties(CCUHsApi.getInstance());
-                PreferenceUtil.setBacnetIdMigrationDone();
+                updateBacnetProperties(CCUHsApi.getInstance())
+                PreferenceUtil.setBacnetIdMigrationDone()
             } catch (e : Exception) {
                 //For now, we make sure it does not stop other migrations even if this fails.
-                e.printStackTrace();
+                e.printStackTrace()
                 CcuLog.e(L.TAG_CCU_MIGRATION_UTIL, "Error in migrateBacnetIdForVavDevices $e")
             }
         }
@@ -1928,6 +1913,56 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         CcuLog.i(Domain.LOG_TAG, "PM10 and PM25 points are migrated to default values "+
                 "PM10: ${pm10DefaultVal.currentVal} and PM25: ${pm25Target.currentVal}")
 
+    }
+
+    private fun doHSPipe2DMMigration() {
+        val hyperStatPipe2Equip =
+            hayStack.readAllEntities("equip and hyperstat and pipe2")
+                .filter { it["domainName"] == null }
+                .toList()
+
+        val model = ModelLoader.getHyperStatPipe2Model()
+        val deviceModel =
+            ModelLoader.getHyperStatDeviceModel() as SeventyFiveFDeviceDirective
+        val deviceBuilder =
+            DeviceBuilder(hayStack, EntityMapper(model as SeventyFiveFProfileDirective))
+        val profileType = ProfileType.HYPERSTAT_TWO_PIPE_FCU
+
+        if (hyperStatPipe2Equip.isNotEmpty()) {
+            val equipBuilder = ProfileEquipBuilder(hayStack)
+            hyperStatPipe2Equip.forEach {
+                CcuLog.i(Domain.LOG_TAG, "Do DM zone equip migration for $it")
+                val equipDis = "${hayStack.siteName}-${model.name}-${it["group"]}"
+                val deviceDis = "${hayStack.siteName}-${deviceModel.name}-${it["group"]}"
+                val device = hayStack.readEntity("device and addr == \"" + it["group"] + "\"")
+                val profileConfiguration = Pipe2Configuration(
+                    Integer.parseInt(it["group"].toString()),
+                    NodeType.HYPER_STAT.name,
+                    0,
+                    it["roomRef"].toString(),
+                    it["floorRef"].toString(),
+                    profileType,
+                    model
+                ).getActiveConfiguration()
+
+                equipBuilder.doCutOverMigration(
+                    it["id"].toString(),
+                    model,
+                    equipDis,
+                    HyperStatV2EquipCutoverMapping.getPipe2Entries(),
+                    profileConfiguration,
+                    equipHashMap = it
+                )
+
+                deviceBuilder.doCutOverMigration(
+                    device["id"].toString(),
+                    deviceModel,
+                    deviceDis,
+                    HyperStatDeviceCutOverMapping.entries,
+                    profileConfiguration
+                )
+            }
+        }
     }
 
     private fun migrateLogicalPointsForHyperStatMonitoring(

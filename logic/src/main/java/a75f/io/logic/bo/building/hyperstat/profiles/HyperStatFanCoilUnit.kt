@@ -44,6 +44,12 @@ abstract class  HyperStatFanCoilUnit: HyperStatProfile(){
         lowestStageFanHigh = status
     }
 
+    fun resetFanStatus(){
+        lowestStageFanLow = false
+        lowestStageFanMedium = false
+        lowestStageFanHigh = false
+    }
+
     override fun doFanLowSpeed(
         logicalPointId: String,
         mediumLogicalPoint : String?,

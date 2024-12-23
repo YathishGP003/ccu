@@ -539,13 +539,13 @@ public class Globals {
                             break;
                         case HYPERSTAT_HEAT_PUMP_UNIT:
                             HyperStatHpuProfile hpuProfile = new HyperStatHpuProfile();
-                            hpuProfile.addEquip(Short.parseShort(eq.getGroup()));
+                            hpuProfile.addEquip(eq.getId());
                             L.ccu().zoneProfiles.add(hpuProfile);
                             break;
 
                         case HYPERSTAT_TWO_PIPE_FCU:
                             HyperStatPipe2Profile pipe2Profile = new HyperStatPipe2Profile();
-                            pipe2Profile.addEquip(Short.parseShort(eq.getGroup()));
+                            pipe2Profile.addEquip(eq.getId());
                             L.ccu().zoneProfiles.add(pipe2Profile);
                             break;
 

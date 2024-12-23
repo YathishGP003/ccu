@@ -15,11 +15,12 @@ import androidx.annotation.Nullable;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.renatus.BASE.BaseDialogFragment;
-import a75f.io.renatus.hyperstat.ui.HyperStatFragment;
 import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
 import a75f.io.renatus.profiles.acb.AcbProfileConfigFragment;
 import a75f.io.renatus.profiles.dab.DabProfileConfigFragment;
 import a75f.io.renatus.profiles.hss.cpu.HyperStatSplitCpuFragment;
+import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatV2HpuFragment;
+import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatV2Pipe2Fragment;
 import a75f.io.renatus.profiles.vav.BypassConfigFragment;
 import a75f.io.renatus.profiles.oao.OAOProfileFragment;
 import a75f.io.renatus.profiles.sse.SseProfileConfigFragment;
@@ -199,13 +200,13 @@ public class AlternatePairingFragment extends BaseDialogFragment {
                         mNodeType, ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT), HyperStatV2CpuFragment.ID);
                 break;
             case HYPERSTAT_HEAT_PUMP_UNIT:
-                showDialogFragment(HyperStatFragment.newInstance(mPairingAddress,mRoomName,mFloorName,
+                showDialogFragment(HyperStatV2HpuFragment.newInstance(mPairingAddress,mRoomName,mFloorName,
                                 mNodeType,ProfileType.HYPERSTAT_HEAT_PUMP_UNIT),
-                        HyperStatFragment.ID);
+                        HyperStatV2HpuFragment.ID);
                 break;
             case HYPERSTAT_TWO_PIPE_FCU:
-                showDialogFragment(HyperStatFragment.newInstance(mPairingAddress,mRoomName,mFloorName,
-                                mNodeType,ProfileType.HYPERSTAT_TWO_PIPE_FCU), HyperStatFragment.ID);
+                showDialogFragment(HyperStatV2Pipe2Fragment.newInstance(mPairingAddress,mRoomName,mFloorName,
+                                mNodeType,ProfileType.HYPERSTAT_TWO_PIPE_FCU), HyperStatV2Pipe2Fragment.ID);
                 break;
             case HYPERSTATSPLIT_CPU:
                 showDialogFragment(HyperStatSplitCpuFragment.Companion.newInstance(mPairingAddress,mRoomName,mFloorName,

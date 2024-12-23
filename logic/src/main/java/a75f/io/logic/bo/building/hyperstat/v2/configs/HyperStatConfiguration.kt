@@ -6,6 +6,7 @@ import a75f.io.domain.config.EnableConfig
 import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.config.ValueConfig
 import a75f.io.domain.equips.hyperstat.HyperStatEquip
+import a75f.io.domain.equips.hyperstat.Pipe2V2Equip
 import a75f.io.logic.bo.building.definitions.ProfileType
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 
@@ -184,7 +185,9 @@ abstract class HyperStatConfiguration(
         thermistor2Enabled.enabled = equip.thermistor2InputEnable.readDefaultVal() == 1.0
 
         if (thermistor1Enabled.enabled) thermistor1Association.associationVal = equip.thermistor1InputAssociation.readDefaultVal().toInt()
-        if (thermistor2Enabled.enabled) thermistor2Association.associationVal = equip.thermistor2InputAssociation.readDefaultVal().toInt()
+        if (equip !is Pipe2V2Equip) {
+            if (thermistor2Enabled.enabled) thermistor2Association.associationVal = equip.thermistor2InputAssociation.readDefaultVal().toInt()
+        }
     }
 
     fun getActiveConfiguration(equip: HyperStatEquip): HyperStatConfiguration {

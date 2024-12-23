@@ -58,6 +58,7 @@ object DomainName {
     const val activeChilledBeam = "activeChilledBeam"
     const val hyperstatSplitCPU = "hyperstatSplitCPU"
     const val hyperstatCPU = "hyperstatCPU"
+    const val hyperstatHPU = "hyperstatHPU"
 
     // Devices
     const val hyperstatSplitDevice = "hyperstatSplitDevice"
@@ -635,6 +636,8 @@ object DomainName {
     const val fanSignal = "fanSignal"
     const val linearFanSpeed = "linearFanSpeed"
     const val stagedFanSpeed = "stagedFanSpeed"
+    const val modulatingWaterValve = "modulatingWaterValve"
+    const val leavingWaterTemperature = "leavingWaterTemperature"
 
     const val systemtargetMaxInsideHumidity = "systemtargetMaxInsideHumidity"
     const val systemtargetMinInsideHumidity = "systemtargetMinInsideHumidity"
@@ -1098,6 +1101,7 @@ object DomainName {
     const val ductStaticPressureSensor0_1 = "ductStaticPressureSensor0_1"
     const val ductStaticPressureSensor0_2 = "ductStaticPressureSensor0_2"
     const val ductStaticPressureSensor0_10 = "ductStaticPressureSensor0_10"
+    const val compressorLoopOutput = "compressorLoopOutput"
 
     const val dcvAvailable = "dcvAvailable"
     const val weatherOutsideTemp = "weatherOutsideTemp"
@@ -1173,6 +1177,37 @@ object DomainName {
     const val pressureBasedFanControlFeedback = "pressureBasedFanControlFeedback"
     const val satBasedCoolingControlFeedback = "satBasedCoolingControlFeedback"
     const val satBasedHeatingControlFeedback = "satBasedHeatingControlFeedback"
+
+    const val analog1MinWaterValve = "analog1MinWaterValve"
+    const val analog2MinWaterValve = "analog2MinWaterValve"
+    const val analog3MinWaterValve = "analog3MinWaterValve"
+    const val analog1MinFanSpeed = "analog1MinFanSpeed"
+    const val analog2MinFanSpeed = "analog2MinFanSpeed"
+    const val analog3MinFanSpeed = "analog3MinFanSpeed"
+
+    const val analog1MaxWaterValve = "analog1MaxWaterValve"
+    const val analog2MaxWaterValve = "analog2MaxWaterValve"
+    const val analog3MaxWaterValve = "analog3MaxWaterValve"
+    const val analog1MaxFanSpeed = "analog1MaxFanSpeed"
+    const val analog2MaxFanSpeed = "analog2MaxFanSpeed"
+    const val analog3MaxFanSpeed = "analog3MaxFanSpeed"
+
+    const val compressorSpeed = "compressorSpeed"
+    const val compressorStage1 = "compressorStage1"
+    const val compressorStage2 = "compressorStage2"
+    const val compressorStage3 = "compressorStage3"
+    const val auxHeatingStage1 = "auxHeatingStage1"
+    const val auxHeatingStage2 = "auxHeatingStage2"
+    const val occupiedEnabled = "occupiedEnabled1"
+    const val changeOverCooling = "changeOverCooling"
+    const val changeOverHeating = "changeOverHeating"
+
+    const val analog1MinCompressorSpeed = "analog1MinCompressorSpeed"
+    const val analog1MaxCompressorSpeed = "analog1MaxCompressorSpeed"
+    const val analog2MinCompressorSpeed = "analog2MinCompressorSpeed"
+    const val analog2MaxCompressorSpeed = "analog2MaxCompressorSpeed"
+    const val analog3MinCompressorSpeed = "analog3MinCompressorSpeed"
+    const val analog3MaxCompressorSpeed = "analog3MaxCompressorSpeed"
 
     const val keyCardSensingEnable = "keyCardSensingEnable"
     const val keyCardSensorInput = "keyCardSensorInput"
@@ -1261,6 +1296,9 @@ object DomainName {
     const val currentTx50_ai2 = "currentTx50_ai2"
     const val genericIonSensorPoint_ai2 = "genericIonSensorPoint_ai2"
     const val pm10Target = "pm10Target"
+    const val waterValve = "waterValve"
+
+
 
 }
 

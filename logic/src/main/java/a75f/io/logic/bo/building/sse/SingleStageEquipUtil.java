@@ -13,7 +13,6 @@ import a75f.io.logic.BacnetUtilKt;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.hvac.SSEStage;
-import a75f.io.logic.bo.building.hyperstat.common.LogicalPointsUtil;
 import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.logic.bo.haystack.device.SmartStat;
 
@@ -221,24 +220,7 @@ public class SingleStageEquipUtil {
 
     public static Point createAnalogInLogicalPoints(String equipDis, String siteRef, String equipRef, String roomRef, String floorRef, String tz, int nodeAddr, int analogInAssociation) {
 
-
         Point point = null;
-        
-        if (analogInAssociation == 0) {
-            point = LogicalPointsUtil.Companion.createPointForCurrentTx(equipDis,siteRef,equipRef,roomRef,floorRef,tz
-            ,"0","10","0.1","amps", LogicalPointsUtil.TransformerSensorType.TRANSFORMER);
-        } else if (analogInAssociation == 1) {
-            point = LogicalPointsUtil.Companion.createPointForCurrentTx(equipDis,siteRef,equipRef,roomRef,floorRef,tz
-                    ,"0","20","0.1","amps", LogicalPointsUtil.TransformerSensorType.TRANSFORMER_20);
-        } else if (analogInAssociation == 2) {
-            point = LogicalPointsUtil.Companion.createPointForCurrentTx(equipDis,siteRef,equipRef,roomRef,floorRef,tz
-                    ,"0","50","0.1","amps", LogicalPointsUtil.TransformerSensorType.TRANSFORMER_50);
-        }
-
-        String id = point.getId();
-        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(id,0.0);
-
-
         return point;
     }
 

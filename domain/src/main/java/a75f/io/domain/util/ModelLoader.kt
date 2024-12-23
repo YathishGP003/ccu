@@ -149,7 +149,13 @@ object ModelLoader {
         return ModelCache.getModelById(MODEL_HYPERSTAT_CPU)
     }
 
+    fun getHyperStatHpuModel() : ModelDirective {
+        return ModelCache.getModelById(MODEL_HYPERSTAT_HPU)
+    }
 
+    fun getHyperStatPipe2Model() : ModelDirective {
+        return ModelCache.getModelById(MODEL_HYPERSTAT_Pip2)
+    }
 
     fun getHyperStatMonitoringModel() : ModelDirective {
         return ModelCache.getModelById(MODEL_HYPERSTAT_MONITORING)
@@ -185,6 +191,8 @@ object ModelLoader {
             "smartnodeOAO" -> getSmartNodeOAOModelDef()
             "smartnodeSSE" -> getSmartNodeSSEModel()
             "helionodeSSE" -> getHelioNodeSSEModel()
+            "hyperstatHPU" -> getHyperStatHpuModel()
+            "hyperstat2pfcu" -> getHyperStatPipe2Model()
             else -> throw IllegalStateException("Invalid Model Name")
         }
     }

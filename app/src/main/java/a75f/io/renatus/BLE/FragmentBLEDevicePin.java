@@ -51,7 +51,6 @@ import a75f.io.renatus.FragmentTempInfConfiguration;
 import a75f.io.renatus.R;
 import a75f.io.renatus.bluetooth.BLEAction;
 import a75f.io.renatus.bluetooth.BLEProvisionService;
-import a75f.io.renatus.hyperstat.ui.HyperStatFragment;
 import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
 import a75f.io.renatus.profiles.dab.DabProfileConfigFragment;
 import a75f.io.renatus.profiles.hss.cpu.HyperStatSplitCpuFragment;
@@ -59,6 +58,8 @@ import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatMonitoringFragment;
 import a75f.io.renatus.profiles.oao.OAOProfileFragment;
 import a75f.io.renatus.profiles.sse.SseProfileConfigFragment;
 import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatV2CpuFragment;
+import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatV2HpuFragment;
+import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatV2Pipe2Fragment;
 import a75f.io.renatus.profiles.vav.BypassConfigFragment;
 import a75f.io.renatus.profiles.vav.VavProfileConfigFragment;
 import a75f.io.renatus.profiles.acb.AcbProfileConfigFragment;
@@ -466,14 +467,13 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
                                 HyperStatV2CpuFragment.ID);
                         break;
                     case HYPERSTAT_HEAT_PUMP_UNIT:
-                        showDialogFragment(HyperStatFragment.newInstance(mPairingAddress,mName,mFloorName,
+                        showDialogFragment(HyperStatV2HpuFragment.newInstance(mPairingAddress,mName,mFloorName,
                                         mNodeType,ProfileType.HYPERSTAT_HEAT_PUMP_UNIT),
-                                HyperStatFragment.ID);
+                                HyperStatV2HpuFragment.ID);
                         break;
                     case HYPERSTAT_TWO_PIPE_FCU:
-                        showDialogFragment(HyperStatFragment.newInstance(mPairingAddress,mName,mFloorName,
-                                        mNodeType,ProfileType.HYPERSTAT_TWO_PIPE_FCU),
-                                HyperStatFragment.ID);
+                        showDialogFragment(HyperStatV2Pipe2Fragment.newInstance(mPairingAddress, mName, mFloorName, mNodeType,mProfileType), HyperStatV2Pipe2Fragment.ID);
+
                         break;
                     case HYPERSTATSPLIT_CPU:
                         showDialogFragment(HyperStatSplitCpuFragment.Companion.newInstance(mPairingAddress,mName,mFloorName,

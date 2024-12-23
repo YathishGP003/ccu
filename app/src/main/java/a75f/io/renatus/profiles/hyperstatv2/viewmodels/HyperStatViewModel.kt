@@ -244,7 +244,7 @@ open class HyperStatViewModel(application: Application) : AndroidViewModel(appli
         if (!Globals.getInstance().isTestMode)
             Globals.getInstance().isTestMode = true
 
-        val testMessage = HyperStatMessageGenerator.getControlMessage(deviceAddress.toInt(), equipRef!!)
+        val testMessage = HyperStatMessageGenerator.getControlMessage(deviceAddress.toInt())
 
         fun getAnalogOut(value: Int) = HyperStatAnalogOutputControl_t.newBuilder().setPercent(value).build()
 

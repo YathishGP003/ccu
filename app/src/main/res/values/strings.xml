@@ -1685,7 +1685,7 @@
     <string name="label_configure_as">Configure as</string>
     <string name="label_bbmd">BBMD</string>
     <string name="label_foreign_device">Foreign Device</string>
-    <string name="label_neither">Neither</string>
+    <string name="label_normal">Normal</string>
     <string name="label_configure_service">Configure Service</string>
     <string name="label_destination_ip_address">Destination IP Address <font color="#e5561a">*</font></string>
     <string name="label_destination_mac_address">Destination Mac Address</string>

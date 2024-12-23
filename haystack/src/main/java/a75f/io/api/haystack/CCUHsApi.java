@@ -95,6 +95,7 @@ public class CCUHsApi
     private static CCUHsApi instance;
     private static final String PREFS_HAS_MIGRATED_TO_SILO = "hasMigratedToSilo";
     private static final String INTENT_POINT_DELETED = "a75f.io.renatus.POINT_DELETED";
+    private static final String INTENT_ZONE_DELETED = "a75f.io.renatus.ZONE_DELETED";
     public AndroidHSClient hsClient;
     public CCUTagsDb       tagsDb;
 
@@ -1399,12 +1400,21 @@ public class CCUHsApi
     }
 
     public void deleteEntity(String id) {
-        CcuLog.d(TAG_CCU_HS, "deleteEntity " + CCUHsApi.getInstance().readMapById(id).toString());
+        HashMap<Object,Object> entity = CCUHsApi.getInstance().readMapById(id);
+        CcuLog.d(TAG_CCU_HS, "deleteEntity " + entity.toString());
         tagsDb.tagsMap.remove(id.replace("@", ""));
         EntityDBUtilKt.deleteEntitywithId(id,this.context);
         syncStatusService.addDeletedEntity(id, true);
         tagsDb.clearHistory(HRef.copy(id));
         HisItemCache.getInstance().delete(id);
+
+        if(isBacNetEnabled() && id != null && !id.replace("@","").equals("null")) {
+            if (entity.get("equip") != null) {
+                sendBroadCastToBacApp(INTENT_ZONE_DELETED,id);
+            } else {
+                sendBroadCastToBacApp(INTENT_POINT_DELETED,id);
+            }
+        }
     }
 
     /**
@@ -1413,18 +1423,27 @@ public class CCUHsApi
      * @param id
      */
     public void deleteEntityItem(String id) {
-        CcuLog.d(TAG_CCU_HS, "deleteEntity " + CCUHsApi.getInstance().readMapById(id).toString());
+        HashMap<Object,Object> entity = CCUHsApi.getInstance().readMapById(id);
+        CcuLog.d(TAG_CCU_HS, "deleteEntity " + entity.toString());
         tagsDb.tagsMap.remove(id.replace("@", ""));
         EntityDBUtilKt.deleteEntitywithId(id.replace("@", ""),this.context);
         syncStatusService.addDeletedEntity(id, false);
         tagsDb.clearHistory(HRef.copy(id));
         HisItemCache.getInstance().delete(id);
 
-        if(isBacNetEnabled()) {
-            Intent intent = new Intent(INTENT_POINT_DELETED);
-            intent.putExtra("message", id);
-            context.sendBroadcast(intent);
+        if(isBacNetEnabled() && id != null && !id.replace("@","").equals("null"))  {
+            if (entity.get("equip") != null) {
+                sendBroadCastToBacApp(INTENT_ZONE_DELETED, id);
+            } else {
+                sendBroadCastToBacApp(INTENT_POINT_DELETED, id);
+            }
         }
+    }
+    private void sendBroadCastToBacApp(String action, String id) {
+        Intent intent = new Intent();
+        intent.setAction(action);
+        intent.putExtra("message", id);
+        context.sendBroadcast(intent);
     }
 
     public void deleteEntityLocally(String id) {

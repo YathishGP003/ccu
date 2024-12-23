@@ -99,6 +99,7 @@ android {
         }
         prod {
             minifyEnabled false
+//            shrinkResources true
             signingConfig signingConfigs.release
             ext.betaDistributionGroupAliases = "nightly-1"
             ext.betaDistributionReleaseNotesFilePath="${projectDir}/../CHANGES"
@@ -107,13 +108,15 @@ android {
         }
         qa {
             minifyEnabled false
+//            shrinkResources true
             signingConfig signingConfigs.debug
             versionNameSuffix "_" + 'qa' + "_" + versionSuffix
-            debuggable true
+            debuggable false
             manifestPlaceholders = [ applicationLabel:"@string/app_75f",appicon:"@drawable/ic_logo_svg",roundicon:"@drawable/ic_logo_svg"]
         }
         carrier_prod {
             minifyEnabled false
+//            shrinkResources true
             signingConfig signingConfigs.debug
             versionNameSuffix "_" + 'carrier_prod' + "_" + versionSuffix
             debuggable false
@@ -121,12 +124,14 @@ android {
         }
         staging {
             minifyEnabled false
+//            shrinkResources true
             signingConfig signingConfigs.debug
             versionNameSuffix "_" + 'staging' + "_" + versionSuffix
             manifestPlaceholders = [ applicationLabel:"@string/app_75f",appicon:"@drawable/ic_logo_svg",roundicon:"@drawable/ic_logo_svg"]
         }
         daikin_prod {
             minifyEnabled false
+//            shrinkResources true
             signingConfig signingConfigs.release
             ext.betaDistributionGroupAliases = "nightly-1"
             ext.betaDistributionReleaseNotesFilePath="${projectDir}/../CHANGES"
@@ -135,6 +140,7 @@ android {
         }
         airoverse_prod {
             minifyEnabled false
+//            shrinkResources true
             signingConfig signingConfigs.debug
             versionNameSuffix "_" + 'airoverse_prod' + "_" + versionSuffix
             debuggable false

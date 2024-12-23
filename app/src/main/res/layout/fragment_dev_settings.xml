@@ -430,7 +430,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_margin="10dp"
+                    android:layout_margin="1dp"
                     android:text="Use BTU Meter Proxy"
                     android:textSize="20sp"
                     android:textStyle="bold" />
@@ -440,7 +440,7 @@
                     android:id="@+id/btuProxyBtn"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_margin="10dp" />
+                    android:layout_margin="1dp" />
 
                 <LinearLayout
                     android:id="@+id/btuProxyLayout"
@@ -451,8 +451,8 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_margin="10dp"
-                        android:text="Inlet Water Temp (F)"
+                        android:layout_margin="1dp"
+                        android:text="Inlet Water Temp (C)"
                         android:textSize="20sp"
                         android:textStyle="bold" />
 
@@ -465,8 +465,8 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_margin="10dp"
-                        android:text="Outlet Water Temp (F)"
+                        android:layout_margin="1dp"
+                        android:text="Outlet Water Temp (C)"
                         android:textSize="20sp"
                         android:textStyle="bold" />
 
@@ -479,7 +479,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_margin="10dp"
+                        android:layout_margin="1dp"
                         android:text="CW Max FLow rate"
                         android:textSize="20sp"
                         android:textStyle="bold" />

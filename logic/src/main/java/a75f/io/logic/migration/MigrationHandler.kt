@@ -16,6 +16,7 @@ import a75f.io.domain.OAOEquip
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.Domain.writeValAtLevelByDomain
 import a75f.io.domain.api.DomainName
+import a75f.io.domain.cutover.DabFullyModulatingRtuCutOverMapping
 import a75f.io.domain.config.DefaultProfileConfiguration
 import a75f.io.domain.config.ExternalAhuConfiguration
 import a75f.io.domain.config.ProfileConfiguration
@@ -744,6 +745,10 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                         it["domainName"].toString() == "dabStagedRtuVfdFan") -> {
                     migrateDabStagedVfdSystemProfile(it["id"].toString(), equipBuilder, site, deviceModel, deviceDis, equipHashMap = it)
                 }
+                (it["profile"].toString() == "SYSTEM_DAB_ANALOG_RTU" ||
+                        it["domainName"].toString() == "dabFullyModulatingAhu") -> {
+                    migrateDabFullyModulatingSystemProfile(it["id"].toString(), equipBuilder, site, deviceModel, deviceDis, equipHashMap = it)
+                }
                 else -> {}
             }
 
@@ -847,6 +852,34 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         equipBuilder.doCutOverMigration(equipId, model,
             equipDis, VavStagedVfdRtuCutOverMapping.entries , profileConfig.getDefaultConfiguration()
             ,isSystem = true,equipHashMap = equipHashMap)
+
+        val entityMapper = EntityMapper(model)
+        val deviceBuilder = DeviceBuilder(hayStack, entityMapper)
+
+        val cmDevice = hayStack.readEntity("cm and device")
+        if (cmDevice.isNotEmpty()) {
+            hayStack.deleteEntityTree(cmDevice["id"].toString())
+        }
+
+        CcuLog.i(Domain.LOG_TAG, " buildDeviceAndPoints")
+        deviceBuilder.buildDeviceAndPoints(
+            profileConfig.getActiveConfiguration(),
+            deviceModel,
+            equipId,
+            hayStack.site!!.id,
+            deviceDis
+        )
+    }
+
+    private fun migrateDabFullyModulatingSystemProfile (equipId : String, equipBuilder: ProfileEquipBuilder, site: Site,
+                                                  deviceModel : SeventyFiveFDeviceDirective, deviceDis : String, equipHashMap: HashMap<Any, Any>) {
+        CcuLog.i(Domain.LOG_TAG, "DabFullyModulatingSystemProfile equipID: $equipId")
+        val model = ModelLoader.getDabModulatingRtuModelDef()
+        val equipDis = "${site.displayName}-${model.name}"
+        val profileConfig = ModulatingRtuProfileConfig(model as SeventyFiveFProfileDirective)
+        equipBuilder.doCutOverMigration(equipId, model,
+            equipDis, DabFullyModulatingRtuCutOverMapping.entries , profileConfig.getDefaultConfiguration()
+            ,isSystem = true, equipHashMap)
 
         val entityMapper = EntityMapper(model)
         val deviceBuilder = DeviceBuilder(hayStack, entityMapper)

@@ -34,6 +34,7 @@ import a75f.io.logic.bo.building.system.vav.VavFullyModulatingRtu;
 import a75f.io.logic.bo.building.system.vav.VavIERtu;
 import a75f.io.logic.bo.building.system.vav.VavStagedRtu;
 import a75f.io.logic.bo.building.system.vav.VavStagedRtuWithVfd;
+import a75f.io.logic.bo.building.system.vav.config.DabModulatingRtuProfileConfig;
 import a75f.io.logic.bo.building.system.vav.config.ModulatingRtuProfileConfig;
 import a75f.io.logic.bo.building.system.vav.config.StagedRtuProfileConfig;
 import a75f.io.logic.bo.building.system.vav.config.StagedVfdRtuProfileConfig;
@@ -58,6 +59,8 @@ class ConfigPointUpdateHandler {
         } else if ((configPoint.getMarkers().contains(Tags.ASSOCIATION) )
             || configPoint.getMarkers().contains(Tags.HUMIDIFIER)) {
             updateConfigAssociation(msgObject, configPoint, hayStack);
+        } else if(configPoint.getMarkers().contains(Tags.DCWB)) {
+            updateDabDcwbPoints(msgObject, configPoint, hayStack);
         } else if (isAdvanceAhuV2Profile()) {
             reconfigureAdvanceAhuV2(msgObject, configPoint);
         }
@@ -103,7 +106,34 @@ class ConfigPointUpdateHandler {
 
 
         if (systemProfile instanceof DabFullyModulatingRtu) {
-            ((DabFullyModulatingRtu) systemProfile).setConfigEnabled(configType, val);
+            SeventyFiveFProfileDirective model = (SeventyFiveFProfileDirective) ModelLoader.INSTANCE.getDabModulatingRtuModelDef();
+            DabModulatingRtuProfileConfig config = new DabModulatingRtuProfileConfig(model).getActiveConfiguration();
+            if (configPoint.getDomainName().contains(DomainName.analog1OutputEnable)) {
+                config.analog1OutputEnable.setEnabled(val > 0);
+            } else if (configPoint.getDomainName().contains(DomainName.analog2OutputEnable)) {
+                config.analog2OutputEnable.setEnabled(val > 0);
+            } else if (configPoint.getDomainName().contains(DomainName.analog3OutputEnable)) {
+                config.analog3OutputEnable.setEnabled(val > 0);
+            } else if (configPoint.getDomainName().contains(DomainName.analog4OutputEnable)) {
+                config.analog4OutputEnable.setEnabled(val > 0);
+            } else if (configPoint.getDomainName().contains(DomainName.relay3OutputEnable)) {
+                config.relay3OutputEnable.setEnabled(val > 0);
+            } else if (configPoint.getDomainName().contains(DomainName.relay7OutputEnable)) {
+                config.relay7OutputEnable.setEnabled(val > 0);
+            } else if (configPoint.getDomainName().contains(DomainName.dcwbEnable)) {
+                config.dcwbEnable.setEnabled(val > 0);
+            } else if(configPoint.getDomainName().contains(DomainName.adaptiveDeltaEnable)){
+                config.adaptiveDeltaEnable.setEnabled(val > 0);
+            } else if(configPoint.getDomainName().contains(DomainName.maximizedExitWaterTempEnable)){
+                config.maximizedExitWaterTempEnable.setEnabled(val > 0);
+            }
+            CcuLog.i(L.TAG_CCU_PUBNUB, "updateConfigPoint for DabFullyModulatingAhu" + config);
+            ProfileEquipBuilder equipBuilder = new ProfileEquipBuilder(hayStack);
+            HashMap<Object, Object> systemEquip = hayStack.readMapById(Domain.systemEquip.getEquipRef());
+            equipBuilder.updateEquipAndPoints(config, model, hayStack.getSite().getId(), systemEquip.get("dis").toString(), true);
+            DomainManager.INSTANCE.addSystemDomainEquip(hayStack);
+            removeWritableTagFromCMDevicePort(configPoint, hayStack, val);
+
         } else if (systemProfile instanceof DabStagedRtu) {
             if (systemProfile instanceof DabAdvancedHybridRtu) {
                 ((DabStagedRtu) systemProfile).setConfigEnabled(configType, val);
@@ -242,6 +272,50 @@ class ConfigPointUpdateHandler {
         }
     }
 
+    /**
+     * Updates the configuration points for a DabFullyModulatingRtu system profile based on the provided JSON object.
+     * This method adjusts various system parameters with dcwb tag in it. It also writes updated values to the Haystack API and
+     * updates the equipment and points mapping.
+     *
+     * @param msgObject  The JSON object containing the new value for the configuration point.
+     * @param configPoint The configuration point being updated.
+     * @param hayStack   The Haystack API instance used for interacting with the system.
+     */
+    private static void updateDabDcwbPoints(JsonObject msgObject, Point configPoint, CCUHsApi hayStack) {
+        SystemProfile systemProfile = L.ccu().systemProfile;
+        double val = msgObject.get("val").getAsDouble();
+
+        if (systemProfile instanceof DabFullyModulatingRtu) {
+            SeventyFiveFProfileDirective model = (SeventyFiveFProfileDirective) ModelLoader.INSTANCE.getDabModulatingRtuModelDef();
+            DabModulatingRtuProfileConfig config = new DabModulatingRtuProfileConfig(model).getActiveConfiguration();
+            if (configPoint.getDomainName().contains(DomainName.chilledWaterExitTemperatureMargin)) {
+                config.chilledWaterExitTemperatureMargin.setCurrentVal(val);
+            } else if (configPoint.getDomainName().contains(DomainName.chilledWaterExitTemperatureTarget)) {
+                config.chilledWaterExitTemperatureTarget.setCurrentVal(val);
+            } else if (configPoint.getDomainName().contains(DomainName.chilledWaterMaxFlowRate)) {
+                config.chilledWaterMaxFlowRate.setCurrentVal(val);
+            } else if (configPoint.getDomainName().contains(DomainName.analog1ValveClosedPosition)) {
+                config.analog1ValveClosedPosition.setCurrentVal(val);
+            } else if (configPoint.getDomainName().contains(DomainName.analog1ValveFullPosition)) {
+                config.analog1ValveFullPosition.setCurrentVal(val);
+            } else if (configPoint.getDomainName().contains(DomainName.analogOut4MinCoolingLoop)) {
+                config.analogOut4MinCoolingLoop.setCurrentVal(val);
+            } else if (configPoint.getDomainName().contains(DomainName.analogOut4MaxCoolingLoop)) {
+                config.analogOut4MaxCoolingLoop.setCurrentVal(val);
+            } else if (configPoint.getDomainName().contains(DomainName.analog4MinOutsideDamper)) {
+                config.analogOut4FreshAirMin.setCurrentVal(val);
+            } else if (configPoint.getDomainName().contains(DomainName.analog4MaxOutsideDamper)) {
+                config.analogOut4FreshAirMax.setCurrentVal(val);
+            }
+            ProfileEquipBuilder equipBuilder = new ProfileEquipBuilder(hayStack);
+            HashMap<Object, Object> systemEquip = hayStack.readMapById(Domain.systemEquip.getEquipRef());
+            equipBuilder.updateEquipAndPoints(config, model, hayStack.getSite().getId(), systemEquip.get("dis").toString(), true);
+            DomainManager.INSTANCE.addSystemDomainEquip(hayStack);
+        }
+        writePointFromJson(configPoint.getId(), msgObject, hayStack);
+        updateConditioningMode();
+    }
+
     private static void updateConfigAssociation(JsonObject msgObject, Point configPoint, CCUHsApi hayStack) {
         CcuLog.i(L.TAG_CCU_PUBNUB, "updateConfigAssociation "+configPoint.getDisplayName());
         
@@ -254,7 +328,17 @@ class ConfigPointUpdateHandler {
         double val = msgObject.get("val").getAsDouble();
         
         if (systemProfile instanceof DabFullyModulatingRtu) {
-            ((DabFullyModulatingRtu) systemProfile).setHumidifierConfigVal(relayType+" and humidifier and type", val);
+            SeventyFiveFProfileDirective model = (SeventyFiveFProfileDirective) ModelLoader.INSTANCE.getDabModulatingRtuModelDef();
+            DabModulatingRtuProfileConfig config = new DabModulatingRtuProfileConfig(model).getActiveConfiguration();
+            if (configPoint.getDomainName().contains(DomainName.relay7OutputAssociation)) {
+                config.relay7Association.setAssociationVal((int) val);
+            } else if(configPoint.getDomainName().contains(DomainName.analog4OutputAssociation)) {
+                config.analog4Association.setAssociationVal((int) val);
+            }
+            ProfileEquipBuilder equipBuilder = new ProfileEquipBuilder(hayStack);
+            HashMap<Object, Object> systemEquip = hayStack.readMapById(Domain.systemEquip.getEquipRef());
+            equipBuilder.updateEquipAndPoints(config, model, hayStack.getSite().getId(),systemEquip.get("dis").toString() , true);
+            DomainManager.INSTANCE.addSystemDomainEquip(hayStack);
         } else if (systemProfile instanceof DabStagedRtu) {
             if(systemProfile instanceof DabAdvancedHybridRtu){
                 ((DabStagedRtu) systemProfile).setConfigAssociation(relayType, val);

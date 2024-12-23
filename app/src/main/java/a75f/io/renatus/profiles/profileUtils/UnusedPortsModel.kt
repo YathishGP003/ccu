@@ -7,6 +7,7 @@ import a75f.io.domain.api.Domain
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.dab.DabProfileConfiguration
+import a75f.io.logic.bo.building.system.vav.config.DabModulatingRtuProfileConfig
 import a75f.io.logic.bo.building.sse.SseProfileConfiguration
 import a75f.io.logic.bo.building.system.vav.config.ModulatingRtuProfileConfig
 import a75f.io.logic.bo.building.system.vav.config.StagedRtuProfileConfig
@@ -17,6 +18,7 @@ import a75f.io.logic.bo.haystack.device.ControlMote
 import a75f.io.logic.bo.haystack.device.DeviceUtil
 import a75f.io.renatus.profiles.acb.AcbProfileViewModel
 import a75f.io.renatus.profiles.dab.DabProfileViewModel
+import a75f.io.renatus.profiles.system.DabModulatingRtuViewModel
 import a75f.io.renatus.profiles.system.DabStagedRtuViewModel
 import a75f.io.renatus.profiles.system.DabStagedVfdRtuViewModel
 import a75f.io.renatus.profiles.sse.SseProfileViewModel
@@ -60,6 +62,10 @@ open class UnusedPortsModel {
                     viewModel.profileConfiguration.unusedPorts[firstUnusedPort] = it
                     viewModel.setStateChanged()
                 }
+                is DabModulatingRtuViewModel -> {
+                    viewModel.viewState.value.unusedPortState[firstUnusedPort] = it
+                    viewModel.setStateChanged()
+                }
                 is SseProfileViewModel -> {
                     viewModel.profileConfiguration.unusedPorts[firstUnusedPort] = it
                 }
@@ -69,6 +75,7 @@ open class UnusedPortsModel {
         fun saveUnUsedPortStatusOfSystemProfile(profileConfiguration: Any, hayStack: CCUHsApi) {
             CcuLog.i(L.TAG_CCU_DOMAIN, "Saving unused ports")
             val unusedPorts = when (profileConfiguration) {
+                is DabModulatingRtuProfileConfig -> profileConfiguration.unusedPorts
                 is ModulatingRtuProfileConfig -> profileConfiguration.unusedPorts
                 is StagedVfdRtuProfileConfig -> profileConfiguration.unusedPorts
                 is StagedRtuProfileConfig -> profileConfiguration.unusedPorts
@@ -181,6 +188,7 @@ open class UnusedPortsModel {
 
         fun setPortState(portName: String, state: Boolean, profileConfiguration: Any) : HashMap<String, Boolean>{
             val unusedPorts = when (profileConfiguration) {
+                is DabModulatingRtuProfileConfig -> profileConfiguration.unusedPorts
                 is ModulatingRtuProfileConfig -> profileConfiguration.unusedPorts
                 is StagedVfdRtuProfileConfig -> profileConfiguration.unusedPorts
                 is StagedRtuProfileConfig -> profileConfiguration.unusedPorts

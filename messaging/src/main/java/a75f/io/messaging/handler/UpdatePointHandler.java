@@ -122,7 +122,7 @@ public class UpdatePointHandler implements MessageHandler
 
         //Handle DCWB specific system config here.
         if (HSUtil.isDcwbConfig(pointUid, CCUHsApi.getInstance())) {
-            DcwbConfigHandler.updateConfigPoint(msgObject, localPoint, CCUHsApi.getInstance());
+            ConfigPointUpdateHandler.updateConfigPoint(msgObject, localPoint, CCUHsApi.getInstance());
             updateUI(localPoint);
             return;
         }

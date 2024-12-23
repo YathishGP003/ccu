@@ -1,6 +1,8 @@
 package a75f.io.renatus.composables
 
 import a75f.io.renatus.compose.ComposeUtil
+import a75f.io.renatus.compose.ComposeUtil.Companion.greyColor
+import a75f.io.renatus.compose.ComposeUtil.Companion.primaryColor
 import a75f.io.renatus.compose.ToggleButtonStateful
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
@@ -11,11 +13,18 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults.buttonColors
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -220,6 +229,119 @@ fun SystemAnalogOutMappingViewButtonComposable(
                 textAlign = TextAlign.Left,
                 modifier = Modifier.wrapContentSize(Alignment.Center))
         }
+    }
+}
+
+@Composable
+fun TogglePointView(
+    pointText: String, pointState: Boolean = false, onPointEnabled: (Boolean) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 25.dp, end = 0.dp),
+        horizontalArrangement = Arrangement.Start
+    ) {
+        Row {
+            ToggleButtonStateful(defaultSelection = pointState, onEnabled = onPointEnabled)
+            Spacer(modifier = Modifier.width(30.dp))
+            Column {
+                Spacer(modifier=Modifier.height(6.dp))
+                Text(text = pointText, fontSize = 20.sp)
+            }
+        }
+    }
+}
+
+
+@Composable
+fun SwitchWithLabel(label: String, isChecked: Boolean, onCheckedChange: (Boolean) -> Unit) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(text = label, fontSize = 20.sp, modifier = Modifier.padding(end = 8.dp))
+        Spacer(modifier = Modifier.padding(16.dp))
+        Switch(
+            checked = isChecked,
+            onCheckedChange = onCheckedChange,
+            thumbContent = {
+                Icon(
+                    imageVector = if (isChecked) Icons.Filled.Check else Icons.Filled.Close,
+                    contentDescription = null,
+                    modifier = Modifier.size(SwitchDefaults.IconSize).padding(0.dp)
+                )
+            },
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = Color.White,
+                uncheckedThumbColor = Color.White,
+                uncheckedIconColor = greyColor,
+                uncheckedTrackColor = greyColor,
+                checkedIconColor = primaryColor,
+                checkedTrackColor = primaryColor,
+                uncheckedBorderColor = greyColor,
+                checkedBorderColor = primaryColor
+            )
+        )
+    }
+}
+
+@Composable
+fun SimpleSwitch(isChecked: Boolean, onCheckedChange: (Boolean) -> Unit) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Switch(
+            checked = isChecked,
+            onCheckedChange = onCheckedChange,
+            thumbContent = {
+                Icon(
+                    imageVector = if (isChecked) Icons.Filled.Check else Icons.Filled.Close,
+                    contentDescription = null,
+                    modifier = Modifier.size(SwitchDefaults.IconSize).padding(0.dp)
+                )
+            },
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = Color.White,
+                uncheckedThumbColor = Color.White,
+                uncheckedIconColor = greyColor,
+                uncheckedTrackColor = greyColor,
+                checkedIconColor = primaryColor,
+                checkedTrackColor = primaryColor,
+                uncheckedBorderColor = greyColor,
+                checkedBorderColor = primaryColor
+            )
+        )
+    }
+}
+
+@Composable
+fun SwitchWithLabelOnRight(label: String, isChecked: Boolean, onCheckedChange: (Boolean) -> Unit) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Switch(
+            checked = isChecked,
+            onCheckedChange = onCheckedChange,
+            thumbContent = {
+                Icon(
+                    imageVector = if (isChecked) Icons.Filled.Check else Icons.Filled.Close,
+                    contentDescription = null,
+                    modifier = Modifier.size(SwitchDefaults.IconSize).padding(0.dp)
+                )
+            },
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = Color.White,
+                uncheckedThumbColor = Color.White,
+                uncheckedIconColor = greyColor,
+                uncheckedTrackColor = greyColor,
+                checkedIconColor = primaryColor,
+                checkedTrackColor = primaryColor,
+                uncheckedBorderColor = greyColor,
+                checkedBorderColor = primaryColor
+            )
+        )
+        Spacer(modifier = Modifier.padding(16.dp))
+        Text(text = label, fontSize = 20.sp, modifier = Modifier.padding(end = 8.dp))
     }
 }
 

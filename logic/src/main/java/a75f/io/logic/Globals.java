@@ -409,6 +409,8 @@ public class Globals {
                 L.ccu().systemProfile = new DabStagedRtu();
             } else if (eq.getProfile().equals("dabStagedRtuVfdFan")) {
                 L.ccu().systemProfile = new DabStagedRtuWithVfd();
+            } else if (eq.getProfile().equals("dabFullyModulatingAhu")) {
+                L.ccu().systemProfile = new DabFullyModulatingRtu();
             } else {
 
                 switch (ProfileType.valueOf(getDomainSafeProfile(eq.getProfile()))) {

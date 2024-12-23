@@ -257,7 +257,8 @@ public class DabSystemController extends SystemController
         if (L.ccu().systemProfile instanceof  DabExternalAhu ||
                 (L.ccu().systemProfile instanceof DabStagedRtu && !(L.ccu().systemProfile instanceof DabAdvancedHybridRtu)) ||
                 L.ccu().systemProfile instanceof DabStagedRtuWithVfd ||
-                L.ccu().systemProfile instanceof DabAdvancedAhu) {
+                L.ccu().systemProfile instanceof DabAdvancedAhu ||
+                L.ccu().systemProfile instanceof DabFullyModulatingRtu) {
             CCUHsApi.getInstance().writeHisValByQuery("domainName == \""+averageHumidity+"\"", averageSystemHumidity);
             CCUHsApi.getInstance().writeHisValByQuery("domainName == \""+averageTemperature+"\"", averageSystemTemperature);
         } else {
@@ -488,7 +489,7 @@ public class DabSystemController extends SystemController
 
         if (L.ccu().systemProfile instanceof DabExternalAhu ||
                 (L.ccu().systemProfile instanceof DabStagedRtu && !(L.ccu().systemProfile instanceof DabAdvancedHybridRtu)) ||
-                L.ccu().systemProfile instanceof DabStagedRtuWithVfd
+                L.ccu().systemProfile instanceof DabStagedRtuWithVfd || L.ccu().systemProfile instanceof DabFullyModulatingRtu
         ) {
             Domain.writeHisValByDomain(systemCI, comfortIndex);
             Domain.writeHisValByDomain(DomainName.weightedAverageLoadMA, weightedAverageChangeOverLoadMA);

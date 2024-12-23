@@ -372,7 +372,16 @@ object DomainName {
     const val chilledWaterIntegralKFactor = "chilledWaterIntegralKFactor"
     const val dcwbChilledWaterTemperatureProportionalRange = "dcwbChilledWaterTemperatureProportionalRange"
     const val adaptiveComfortThresholdMargin = "adaptiveComfortThresholdMargin"
+    const val adaptiveDeltaEnable = "adaptiveDeltaEnable"
     const val chilledWaterProportionalKFactor = "chilledWaterProportionalKFactor"
+    const val systemDCWBValveLoopOutput = "systemDCWBValveLoopOutput"
+    const val chilledWaterExitTemperatureMargin = "chilledWaterExitTemperatureMargin"
+    const val chilledWaterExitTemperatureTarget = "chilledWaterExitTemperatureTarget"
+    const val chilledWaterValveSignal = "chilledWaterValveSignal"
+    const val dcwbEnable = "dcwbEnable"
+    const val maximizedExitWaterTempEnable = "maximizedExitWaterTempEnable"
+    const val chilledWaterTargetDelta = "chilledWaterTargetDelta"
+    const val chilledWaterMaxFlowRate = "chilledWaterMaxFlowRate"
 
     const val pipe2FancoilHeatingThreshold = "pipe2FancoilHeatingThreshold"
     const val pipe2FancoilCoolingThreshold = "pipe2FancoilCoolingThreshold"
@@ -427,6 +436,7 @@ object DomainName {
     const val zoneCo2Equivalent = "zoneCo2e"
     const val zoneOccupancy = "zoneOccupancy"
     const val zonePm10 = "zonePm10"
+    const val occupancySignal = "occupancySignal"
     const val sensorPm10 = "sensor_pm10"
     const val sensorEnergyMeter = "sensor_energy_meter"
 
@@ -964,6 +974,8 @@ object DomainName {
 
     const val coolingSignal = "coolingSignal"
     const val heatingSignal = "heatingSignal"
+    const val analogOut4MinCoolingLoop = "analogOut4MinCoolingLoop"
+    const val analogOut4MaxCoolingLoop = "analogOut4MaxCoolingLoop"
     const val analog4MinOutsideDamper = "analog4MinOutsideDamper"
     const val analog4MaxOutsideDamper = "analog4MaxOutsideDamper"
     const val outsideAirDamper = "outsideAirDamper"
@@ -973,6 +985,7 @@ object DomainName {
     const val co2TRSp = "co2TRSp"
     const val staticPressureTRSp = "staticPressureTRSp"
     const val vavFullyModulatingAhu = "vavFullyModulatingAhu"
+    const val dabFullyModulatingAhu = "dabFullyModulatingAhu"
     const val humidifier = "humidifier"
     const val dehumidifier = "dehumidifier"
 
@@ -1021,6 +1034,8 @@ object DomainName {
     const val analog1FanLow = "analog1FanLow"
     const val analog1FanMedium = "analog1FanMedium"
     const val analog1FanHigh = "analog1FanHigh"
+    const val analog1ValveClosedPosition = "analog1ValveClosedPosition"
+    const val analog1ValveFullPosition = "analog1ValveFullPosition"
 
     const val analog2MinCooling = "analog2MinCooling"
     const val analog2MaxCooling = "analog2MaxCooling"

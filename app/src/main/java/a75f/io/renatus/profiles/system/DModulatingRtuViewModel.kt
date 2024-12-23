@@ -19,6 +19,7 @@ import a75f.io.renatus.profiles.profileUtils.UnusedPortsModel.Companion.saveUnUs
 import a75f.io.logic.bo.building.system.SystemMode
 import a75f.io.logic.bo.building.system.dab.DabFullyModulatingRtu
 import a75f.io.logic.bo.building.system.vav.VavFullyModulatingRtu
+import a75f.io.logic.bo.building.system.vav.config.DabModulatingRtuProfileConfig
 import a75f.io.logic.bo.building.system.vav.config.ModulatingRtuProfileConfig
 import a75f.io.renatus.util.SystemProfileUtil
 import android.app.Activity
@@ -37,23 +38,22 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.system.measureTimeMillis
 
-open class ModulatingRtuViewModel : ViewModel() {
+open class DModulatingRtuViewModel : ViewModel() {
 
     lateinit var model: SeventyFiveFProfileDirective
     private lateinit var deviceModel: SeventyFiveFDeviceDirective
-    var viewState: MutableState<ModulatingRtuViewState> = mutableStateOf(ModulatingRtuViewState())
-    lateinit var profileConfiguration: ModulatingRtuProfileConfig
+    var viewState: MutableState<DabModulatingRtuViewState> = mutableStateOf(DabModulatingRtuViewState())
+    lateinit var profileConfiguration: DabModulatingRtuProfileConfig
 
     lateinit var context: Context
     lateinit var hayStack: CCUHsApi
     lateinit var relay7AssociationList: List<String>
+    lateinit var analog4AssociationList: List<String>
 
     var modelLoadedState =  MutableLiveData(false)
     val modelLoaded: LiveData<Boolean> get() = modelLoadedState
     private lateinit var equipBuilder: ProfileEquipBuilder
     private lateinit var deviceBuilder: DeviceBuilder
-
-    val ProfileName : String = "VAV Fully Modulating AHU"
    
     fun init(context: Context, profileModel: ModelDirective, hayStack: CCUHsApi) {
         this.hayStack = hayStack
@@ -74,6 +74,8 @@ open class ModulatingRtuViewModel : ViewModel() {
     private fun initializeLists() {
         relay7AssociationList =
             Domain.getListByDomainName(DomainName.relay7OutputAssociation, model)
+        analog4AssociationList =
+            Domain.getListByDomainName(DomainName.analog4OutputAssociation, model)
     }
 
     fun createNewEquip(id: String): String {
@@ -167,27 +169,22 @@ open class ModulatingRtuViewModel : ViewModel() {
     }
 
     fun getRelayState(relayName: String) : Boolean {
-        if(L.ccu().systemProfile.profileName == ProfileName) {
-            val physicalPoint = L.ccu().systemProfile.logicalPhysicalMap.values.find { it.domainName == relayName }
-            return physicalPoint?.readHisVal() == 1.0
-        }
-        return false
+        val physicalPoint = L.ccu().systemProfile.logicalPhysicalMap.values.find { it.domainName == relayName }
+        return physicalPoint?.readHisVal() == 1.0
     }
 
     fun sendTestCommand(relayName: String, testCommand: Boolean) {
         Globals.getInstance().isTestMode = true
-        if (L.ccu().systemProfile.profileName == ProfileName) {
-            viewModelScope.launch {
-                withContext(Dispatchers.IO) {
-                    val physicalPoint =
-                        L.ccu().systemProfile.logicalPhysicalMap.values.find { it.domainName == relayName }
-                    physicalPoint?.writeHisVal(testCommand.toDouble())
-                    CcuLog.i(
-                        Domain.LOG_TAG,
-                        "Send Test Command $relayName $testCommand ${physicalPoint?.readHisVal()}"
-                    )
-                    MeshUtil.sendStructToCM(DeviceUtil.getCMControlsMessage())
-                }
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                val physicalPoint =
+                    L.ccu().systemProfile.logicalPhysicalMap.values.find { it.domainName == relayName }
+                physicalPoint?.writeHisVal(testCommand.toDouble())
+                CcuLog.i(
+                    Domain.LOG_TAG,
+                    "Send Test Command $relayName $testCommand ${physicalPoint?.readHisVal()}"
+                )
+                MeshUtil.sendStructToCM(DeviceUtil.getCMControlsMessage())
             }
         }
     }

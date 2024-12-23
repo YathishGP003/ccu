@@ -58,6 +58,7 @@ import a75f.io.api.haystack.util.DatabaseEvent;
 import a75f.io.device.DeviceUpdateJob;
 import a75f.io.device.EveryDaySchedulerService;
 import a75f.io.device.mesh.LSerial;
+import a75f.io.domain.api.Ccu;
 import a75f.io.device.mesh.RootCommandExecuter;
 import a75f.io.domain.api.Ccu;
 import a75f.io.domain.api.Domain;

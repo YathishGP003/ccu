@@ -1,21 +1,17 @@
 package a75f.io.renatus.profiles.hyperstatv2.viewmodels
 
 import a75f.io.api.haystack.CCUHsApi
-import a75f.io.api.haystack.RawPoint
-import a75f.io.api.haystack.Tags
 import a75f.io.device.HyperStat.HyperStatAnalogOutputControl_t
 import a75f.io.device.mesh.hyperstat.HyperStatMessageGenerator
 import a75f.io.device.mesh.hyperstat.HyperStatMessageSender
 import a75f.io.device.serial.MessageType
 import a75f.io.domain.api.Domain.getStringFormat
-import a75f.io.domain.api.DomainName
 import a75f.io.domain.equips.hyperstat.HyperStatEquip
 import a75f.io.domain.util.ModelLoader
 import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.NodeType
-import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.hyperstat.common.PossibleFanMode
@@ -162,51 +158,6 @@ open class HyperStatViewModel(application: Application) : AndroidViewModel(appli
 
     fun setOnPairingCompleteListener(completeListener: OnPairingCompleteListener) {
         this.pairingCompleteListener = completeListener
-    }
-
-
-    fun setPortConfiguration(configuration: HyperStatConfiguration, relays: Map<String, Boolean>, analogOuts: Map<String, Pair<Boolean, String>>) {
-
-        val device = getHyperStatDevice(configuration.nodeAddress)
-        val deviceRef = device[Tags.ID].toString()
-
-
-        fun getPort(portName: String): RawPoint.Builder? {
-            val port = hayStack.readHDict("point and deviceRef == \"$deviceRef\" and domainName == \"$portName\"")
-            if (port.isEmpty) return null
-            return RawPoint.Builder().setHDict(port)
-        }
-
-        fun updatePort(port: RawPoint.Builder, type: String, isWritable: Boolean) {
-            port.setType(type)
-            if (isWritable) {
-                port.addMarker(Tags.WRITABLE)
-                port.addMarker(Tags.UNUSED)
-            } else {
-                port.removeMarkerIfExists(Tags.WRITABLE)
-                port.removeMarkerIfExists(Tags.UNUSED)
-                hayStack.clearAllAvailableLevelsInPoint(port.build().id)
-            }
-            val buildPoint = port.build()
-            hayStack.updatePoint(buildPoint, buildPoint.id)
-        }
-
-        relays.forEach { (relayName, externallyMapped) ->
-            val port = getPort(relayName)
-            if (port != null) updatePort(port, OutputRelayActuatorType.NormallyOpen.displayName, externallyMapped)
-        }
-
-        analogOuts.forEach { (analogName, config) ->
-            val port = getPort(analogName)
-            if (port != null) {
-                updatePort(port, config.second, config.first)
-            }
-        }
-
-    }
-
-    private fun getHyperStatDevice(nodeAddress: Int): HashMap<Any, Any> {
-        return hayStack.readEntity("domainName == \"${DomainName.hyperstatDevice}\" and addr == \"$nodeAddress\"")
     }
 
     fun updateTestRelay(relay: ConfigState, status: Boolean) {

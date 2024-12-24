@@ -59,13 +59,19 @@ open class HyperStatV2ViewState {
 
     open fun isDcvMapped() = false
 
-    fun isAnyRelayEnabledMapped(mapping: Int): Boolean {
-        if (relay1Config.enabled && relay1Config.association == mapping) return true
-        if (relay2Config.enabled && relay2Config.association == mapping) return true
-        if (relay3Config.enabled && relay3Config.association == mapping) return true
-        if (relay4Config.enabled && relay4Config.association == mapping) return true
-        if (relay5Config.enabled && relay5Config.association == mapping) return true
-        if (relay6Config.enabled && relay6Config.association == mapping) return true
+    fun isAnyRelayMapped(mapping: Int, ignoreSelection: ConfigState): Boolean {
+
+        fun checkSelection(config: ConfigState): Boolean {
+            config.apply { return (ignoreSelection != this && association == mapping) }
+        }
+
+        if (checkSelection(relay1Config)) return true
+        if (checkSelection(relay2Config)) return true
+        if (checkSelection(relay3Config)) return true
+        if (checkSelection(relay4Config)) return true
+        if (checkSelection(relay5Config)) return true
+        if (checkSelection(relay6Config)) return true
+
         return false
     }
 }

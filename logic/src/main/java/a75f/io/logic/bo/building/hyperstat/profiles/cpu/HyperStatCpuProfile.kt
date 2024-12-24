@@ -95,9 +95,9 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
      */
     private fun getLowestHeatingStateActivated(equip: CpuV2Equip): Double {
         return listOf(
-                equip.fanOutHeatingStage1.readPriorityVal(),
-                equip.fanOutHeatingStage2.readPriorityVal(),
-                equip.fanOutHeatingStage3.readPriorityVal()
+                equip.fanOutHeatingStage1.readDefaultVal(),
+                equip.fanOutHeatingStage2.readDefaultVal(),
+                equip.fanOutHeatingStage3.readDefaultVal()
         ).firstOrNull { it > 0 } ?: defaultFanLoopOutput
     }
 
@@ -110,9 +110,9 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
      */
     private fun getLowestCoolingStateActivated(equip: CpuV2Equip): Double {
         return listOf(
-                equip.fanOutCoolingStage1.readPriorityVal(),
-                equip.fanOutCoolingStage2.readPriorityVal(),
-                equip.fanOutCoolingStage3.readPriorityVal()
+                equip.fanOutCoolingStage1.readDefaultVal(),
+                equip.fanOutCoolingStage2.readDefaultVal(),
+                equip.fanOutCoolingStage3.readDefaultVal()
         ).firstOrNull { it > 0 } ?: defaultFanLoopOutput
     }
 
@@ -123,9 +123,9 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
      */
     private fun getAnalogRecirculateValueActivated(equip: CpuV2Equip): Double {
         return when {
-            equip.analog1FanRecirculate.readHisVal() > 0 -> equip.analog1FanRecirculate.readPriorityVal()
-            equip.analog2FanRecirculate.readHisVal() > 0 -> equip.analog2FanRecirculate.readPriorityVal()
-            equip.analog3FanRecirculate.readHisVal() > 0 -> equip.analog3FanRecirculate.readPriorityVal()
+            equip.analog1FanRecirculate.readDefaultVal() > 0 -> equip.analog1FanRecirculate.readDefaultVal()
+            equip.analog2FanRecirculate.readDefaultVal() > 0 -> equip.analog2FanRecirculate.readDefaultVal()
+            equip.analog3FanRecirculate.readDefaultVal() > 0 -> equip.analog3FanRecirculate.readDefaultVal()
             else -> defaultFanLoopOutput
         }
     }

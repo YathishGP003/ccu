@@ -3,6 +3,7 @@ package a75f.io.logic.bo.building.hyperstat.profiles.hpu
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Equip
 import a75f.io.api.haystack.util.hayStack
+import a75f.io.domain.api.Domain
 import a75f.io.domain.equips.hyperstat.HpuV2Equip
 import a75f.io.domain.equips.hyperstat.HyperStatEquip
 import a75f.io.logger.CcuLog
@@ -66,7 +67,8 @@ class HyperStatHpuProfile : HyperStatPackageUnitProfile(){
     override fun getProfileType() = ProfileType.HYPERSTAT_HEAT_PUMP_UNIT
 
     override fun updateZonePoints() {
-        hpuDeviceMap.forEach { (_, equip) ->
+        hpuDeviceMap.forEach { (nodeAddress, equip) ->
+            hpuDeviceMap[nodeAddress] = Domain.getDomainEquip(equip.equipRef) as HpuV2Equip
             CcuLog.i(L.TAG_CCU_HSHPU,"Process HPU Equip: node ${equip.nodeAddress} equipRef =  ${equip.equipRef}")
             processHyperStatHpuProfile(equip)
         }

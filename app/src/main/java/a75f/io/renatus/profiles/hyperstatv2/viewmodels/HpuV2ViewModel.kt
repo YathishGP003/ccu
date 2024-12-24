@@ -162,68 +162,8 @@ class HpuV2ViewModel(application: Application) : HyperStatViewModel(application)
             val equip = HpuV2Equip(equipId)
             updateFanMode(true,equip, getHpuFanLevel(profileConfiguration as HpuConfiguration))
         }
-        setPortConfiguration(profileConfiguration, getRelayMap(), getAnalogMap())
+        profileConfiguration.apply { setPortConfiguration(nodeAddress, getRelayMap(), getAnalogMap()) }
     }
-
-
-    private fun getAnalogMap(): Map<String, Pair<Boolean, String>> {
-        val analogOuts = mutableMapOf<String, Pair<Boolean, String>>()
-        analogOuts[DomainName.analog1Out] = Pair(isAnalogExternalMapped(profileConfiguration.analogOut1Enabled, profileConfiguration.analogOut1Association), analogType(profileConfiguration.analogOut1Enabled))
-        analogOuts[DomainName.analog2Out] = Pair(isAnalogExternalMapped(profileConfiguration.analogOut2Enabled, profileConfiguration.analogOut2Association), analogType(profileConfiguration.analogOut2Enabled))
-        analogOuts[DomainName.analog3Out] = Pair(isAnalogExternalMapped(profileConfiguration.analogOut3Enabled, profileConfiguration.analogOut3Association), analogType(profileConfiguration.analogOut3Enabled))
-        return analogOuts
-    }
-
-    private fun getRelayMap(): Map<String, Boolean> {
-        val relays = mutableMapOf<String, Boolean>()
-        relays[DomainName.relay1] = isRelayExternalMapped(profileConfiguration.relay1Enabled, profileConfiguration.relay1Association)
-        relays[DomainName.relay2] = isRelayExternalMapped(profileConfiguration.relay2Enabled, profileConfiguration.relay2Association)
-        relays[DomainName.relay3] = isRelayExternalMapped(profileConfiguration.relay3Enabled, profileConfiguration.relay3Association)
-        relays[DomainName.relay4] = isRelayExternalMapped(profileConfiguration.relay4Enabled, profileConfiguration.relay4Association)
-        relays[DomainName.relay5] = isRelayExternalMapped(profileConfiguration.relay5Enabled, profileConfiguration.relay5Association)
-        relays[DomainName.relay6] = isRelayExternalMapped(profileConfiguration.relay6Enabled, profileConfiguration.relay6Association)
-        return relays
-    }
-
-    private fun analogType(analogOutPort: EnableConfig): String {
-        (profileConfiguration as HpuConfiguration).apply {
-            return when (analogOutPort) {
-                analogOut1Enabled -> getPortType(analogOut1Association, analogOut1MinMaxConfig)
-                analogOut2Enabled -> getPortType(analogOut2Association, analogOut2MinMaxConfig)
-                analogOut3Enabled -> getPortType(analogOut3Association, analogOut3MinMaxConfig)
-                else -> "0-10v"
-            }
-        }
-
-    }
-
-    private fun getPortType(association: AssociationConfig, minMaxConfig: HpuMinMaxConfig): String {
-        val portType: String
-        when (association.associationVal) {
-            HsHpuAnalogOutMapping.COMPRESSOR_SPEED.ordinal -> {
-                portType = "${minMaxConfig.compressorConfig.min.currentVal.toInt()}-${minMaxConfig.compressorConfig.max.currentVal.toInt()}v"
-            }
-
-            HsHpuAnalogOutMapping.FAN_SPEED.ordinal -> {
-                portType = "${minMaxConfig.fanSpeedConfig.min.currentVal.toInt()}-${minMaxConfig.fanSpeedConfig.max.currentVal.toInt()}v"
-            }
-
-
-            HsHpuAnalogOutMapping.DCV_DAMPER.ordinal -> {
-                portType = "${minMaxConfig.dcvDamperConfig.min.currentVal.toInt()}-${minMaxConfig.dcvDamperConfig.max.currentVal.toInt()}v"
-            }
-
-            else -> {
-                portType = "0-10v"
-            }
-        }
-        return portType
-    }
-
-
-    private fun isRelayExternalMapped(enabled: EnableConfig, association: AssociationConfig) = (enabled.enabled && association.associationVal == HsHpuRelayMapping.EXTERNALLY_MAPPED.ordinal)
-
-    private fun isAnalogExternalMapped(enabled: EnableConfig, association: AssociationConfig) = (enabled.enabled && association.associationVal == HsHpuAnalogOutMapping.EXTERNALLY_MAPPED.ordinal)
 
     private fun addEquipment(config: HpuConfiguration, equipModel: SeventyFiveFProfileDirective, deviceModel: SeventyFiveFDeviceDirective): String {
         val equipBuilder = ProfileEquipBuilder(hayStack)

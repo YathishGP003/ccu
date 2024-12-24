@@ -71,7 +71,7 @@ private fun fillHyperStatControls(buildr: HyperStatControlsMessage_t.Builder, eq
             logicalVal
         }
         if (isWritable) {
-            port.writeDefaultVal(mappedVal)
+            // port.writeDefaultVal(mappedVal) // Need to check why it was added. This statement is overriding the algo calculated value at 8th level.
             port.writeHisVal(port.readPriorityVal())
         }
         return mappedVal

@@ -13,6 +13,7 @@ import a75f.io.renatus.R
 import a75f.io.renatus.composables.MinMaxConfiguration
 import a75f.io.renatus.composables.RelayConfiguration
 import a75f.io.renatus.compose.Title
+import a75f.io.renatus.profiles.hyperstatv2.util.ConfigState
 import a75f.io.renatus.profiles.hyperstatv2.util.FanSpeedConfig
 import a75f.io.renatus.profiles.hyperstatv2.util.MinMaxConfig
 import a75f.io.renatus.profiles.hyperstatv2.viewmodels.HpuV2ViewModel
@@ -96,7 +97,7 @@ class HyperStatV2HpuFragment : HyperStatFragmentV2(){
                     .fillMaxSize()
                     .padding(horizontal = 50.dp, vertical = 25.dp),
             ) {
-                item { Title("Heat Pump Unit") }
+                item { Title("HEAT PUMP UNIT") }
                 item { TempOffset() }
                 item { AutoForcedOccupiedAutoAwayConfig() }
                 item { Label() }
@@ -134,17 +135,27 @@ class HyperStatV2HpuFragment : HyperStatFragmentV2(){
 
     @Composable
     override fun DrawRelays() {
-        val relayEnums =
-            viewModel.getAllowedValues(DomainName.relay1OutputAssociation, viewModel.equipModel)
 
-        val disabledIndices =
-            if (viewModel.viewState.value.isAnyRelayEnabledMapped(HsHpuRelayMapping.CHANGE_OVER_B_HEATING.ordinal)) {
+        fun getDisabledIndices(config: ConfigState): List<Int> {
+            return if (viewModel.viewState.value.isAnyRelayMapped(
+                    HsHpuRelayMapping.CHANGE_OVER_B_HEATING.ordinal,
+                    config
+                )
+            ) {
                 listOf(HsHpuRelayMapping.CHANGE_OVER_O_COOLING.ordinal)
-            } else if (viewModel.viewState.value.isAnyRelayEnabledMapped(HsHpuRelayMapping.CHANGE_OVER_O_COOLING.ordinal)) {
+            } else if (viewModel.viewState.value.isAnyRelayMapped(
+                    HsHpuRelayMapping.CHANGE_OVER_O_COOLING.ordinal,
+                    config
+                )
+            ) {
                 listOf(HsHpuRelayMapping.CHANGE_OVER_B_HEATING.ordinal)
             } else {
                 emptyList()
             }
+        }
+
+        val relayEnums =
+            viewModel.getAllowedValues(DomainName.relay1OutputAssociation, viewModel.equipModel)
 
         viewModel.viewState.value.apply {
             repeat(6) { index ->
@@ -158,13 +169,24 @@ class HyperStatV2HpuFragment : HyperStatFragmentV2(){
                     else -> throw IllegalArgumentException("Invalid relay index: $index")
                 }
 
-                RelayConfiguration(relayName = "Relay ${index + 1}", enabled = relayConfig.enabled, onEnabledChanged = {
-                    relayConfig.enabled = it
+                RelayConfiguration(relayName = "Relay ${index + 1}",
+                    enabled = relayConfig.enabled,
+                    onEnabledChanged = {
+                        relayConfig.enabled = it
 
-                }, association = relayEnums[relayConfig.association], unit = "", relayEnums = relayEnums, onAssociationChanged = { associationIndex ->
-                    relayConfig.association = associationIndex.index
-                }, isEnabled = relayConfig.enabled, testState = false,
-                    onTestActivated = { viewModel.updateTestRelay(relayConfig, it) }, padding = 7 , disabledIndices = disabledIndices)
+                    },
+                    association = relayEnums[relayConfig.association],
+                    unit = "",
+                    relayEnums = relayEnums,
+                    onAssociationChanged = { associationIndex ->
+                        relayConfig.association = associationIndex.index
+                    },
+                    isEnabled = relayConfig.enabled,
+                    testState = false,
+                    onTestActivated = { viewModel.updateTestRelay(relayConfig, it) },
+                    padding = 7,
+                    disabledIndices = getDisabledIndices(relayConfig)
+                )
             }
         }
     }

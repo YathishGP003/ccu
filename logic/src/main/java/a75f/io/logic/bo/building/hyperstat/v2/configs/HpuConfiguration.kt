@@ -2,6 +2,8 @@ package a75f.io.logic.bo.building.hyperstat.v2.configs
 
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
+import a75f.io.domain.config.AssociationConfig
+import a75f.io.domain.config.EnableConfig
 import a75f.io.domain.config.ValueConfig
 import a75f.io.domain.equips.hyperstat.HpuV2Equip
 import a75f.io.domain.util.ModelNames
@@ -180,6 +182,63 @@ class HpuConfiguration(
         }
         return configuration
     }
+
+    override fun getAnalogMap(): Map<String, Pair<Boolean, String>> {
+        val analogOuts = mutableMapOf<String, Pair<Boolean, String>>()
+        analogOuts[DomainName.analog1Out] = Pair(isAnalogExternalMapped(analogOut1Enabled, analogOut1Association), analogType(analogOut1Enabled))
+        analogOuts[DomainName.analog2Out] = Pair(isAnalogExternalMapped(analogOut2Enabled, analogOut2Association), analogType(analogOut2Enabled))
+        analogOuts[DomainName.analog3Out] = Pair(isAnalogExternalMapped(analogOut3Enabled, analogOut3Association), analogType(analogOut3Enabled))
+        return analogOuts
+    }
+
+    override fun getRelayMap(): Map<String, Boolean> {
+        val relays = mutableMapOf<String, Boolean>()
+        relays[DomainName.relay1] = isRelayExternalMapped(relay1Enabled, relay1Association)
+        relays[DomainName.relay2] = isRelayExternalMapped(relay2Enabled, relay2Association)
+        relays[DomainName.relay3] = isRelayExternalMapped(relay3Enabled, relay3Association)
+        relays[DomainName.relay4] = isRelayExternalMapped(relay4Enabled, relay4Association)
+        relays[DomainName.relay5] = isRelayExternalMapped(relay5Enabled, relay5Association)
+        relays[DomainName.relay6] = isRelayExternalMapped(relay6Enabled, relay6Association)
+        return relays
+    }
+
+    private fun analogType(analogOutPort: EnableConfig): String {
+        return when (analogOutPort) {
+            analogOut1Enabled -> getPortType(analogOut1Association, analogOut1MinMaxConfig)
+            analogOut2Enabled -> getPortType(analogOut2Association, analogOut2MinMaxConfig)
+            analogOut3Enabled -> getPortType(analogOut3Association, analogOut3MinMaxConfig)
+            else -> "0-10v"
+        }
+    }
+
+    private fun getPortType(association: AssociationConfig, minMaxConfig: HpuMinMaxConfig): String {
+        val portType: String
+        when (association.associationVal) {
+            HsHpuAnalogOutMapping.COMPRESSOR_SPEED.ordinal -> {
+                portType = "${minMaxConfig.compressorConfig.min.currentVal.toInt()}-${minMaxConfig.compressorConfig.max.currentVal.toInt()}v"
+            }
+
+            HsHpuAnalogOutMapping.FAN_SPEED.ordinal -> {
+                portType = "${minMaxConfig.fanSpeedConfig.min.currentVal.toInt()}-${minMaxConfig.fanSpeedConfig.max.currentVal.toInt()}v"
+            }
+
+
+            HsHpuAnalogOutMapping.DCV_DAMPER.ordinal -> {
+                portType = "${minMaxConfig.dcvDamperConfig.min.currentVal.toInt()}-${minMaxConfig.dcvDamperConfig.max.currentVal.toInt()}v"
+            }
+
+            else -> {
+                portType = "0-10v"
+            }
+        }
+        return portType
+    }
+
+
+    private fun isRelayExternalMapped(enabled: EnableConfig, association: AssociationConfig) = (enabled.enabled && association.associationVal == HsHpuRelayMapping.EXTERNALLY_MAPPED.ordinal)
+
+    private fun isAnalogExternalMapped(enabled: EnableConfig, association: AssociationConfig) = (enabled.enabled && association.associationVal == HsHpuAnalogOutMapping.EXTERNALLY_MAPPED.ordinal)
+
 
     private fun getMinMax(minDomainName: String, maxDomainName: String): MinMaxConfig {
         return MinMaxConfig(getDefaultValConfig(minDomainName, model), getDefaultValConfig(maxDomainName, model))

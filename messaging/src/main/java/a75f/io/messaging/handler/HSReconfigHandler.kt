@@ -36,7 +36,9 @@ fun reconfigureHSV2(msgObject: JsonObject, configPoint: Point) {
         equipBuilder.updateEquipAndPoints(config, model , hayStack.getSite()!!.id, hyperStatEquip["dis"].toString(), true)
     }
     writePointFromJson(configPoint, msgObject, hayStack)
+    config!!.apply { setPortConfiguration( nodeAddress, getRelayMap(), getAnalogMap()) }
     DesiredTempDisplayMode.setModeType(configPoint.roomRef, CCUHsApi.getInstance())
+
     CcuLog.i(L.TAG_CCU_PUBNUB, "updateConfigPoint for CPU Reconfiguration $config")
 
 }

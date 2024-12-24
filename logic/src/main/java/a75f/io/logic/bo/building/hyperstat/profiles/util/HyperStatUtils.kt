@@ -1,5 +1,6 @@
 package a75f.io.logic.bo.building.hyperstat.profiles.util
 
+import a75f.io.api.haystack.CCUHsApi
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.devices.HyperStatDevice
@@ -332,6 +333,9 @@ fun getHpuFanLevel(config: HpuConfiguration): Int {
     return fanLevel
 }
 
+fun getHyperStatDevice(nodeAddress: Int): HashMap<Any, Any> {
+    return CCUHsApi.getInstance().readEntity("domainName == \"${DomainName.hyperstatDevice}\" and addr == \"$nodeAddress\"")
+}
 
 fun getPipe2FanLevel(config: Pipe2Configuration): Int {
     var fanLevel = 0

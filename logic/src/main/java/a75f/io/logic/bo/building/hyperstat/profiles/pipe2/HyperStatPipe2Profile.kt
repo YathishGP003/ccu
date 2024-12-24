@@ -2,6 +2,7 @@ package a75f.io.logic.bo.building.hyperstat.profiles.pipe2
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Equip
+import a75f.io.domain.api.Domain
 import a75f.io.domain.equips.hyperstat.HyperStatEquip
 import a75f.io.domain.equips.hyperstat.Pipe2V2Equip
 import a75f.io.logger.CcuLog
@@ -16,7 +17,11 @@ import a75f.io.logic.bo.building.hvac.AnalogOutput
 import a75f.io.logic.bo.building.hvac.Stage
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
-import a75f.io.logic.bo.building.hyperstat.common.*
+import a75f.io.logic.bo.building.hyperstat.common.BasicSettings
+import a75f.io.logic.bo.building.hyperstat.common.FanModeCacheStorage
+import a75f.io.logic.bo.building.hyperstat.common.HyperStatLoopController
+import a75f.io.logic.bo.building.hyperstat.common.HyperStatProfileTuners
+import a75f.io.logic.bo.building.hyperstat.common.UserIntents
 import a75f.io.logic.bo.building.hyperstat.profiles.HyperStatFanCoilUnit
 import a75f.io.logic.bo.building.hyperstat.profiles.util.fetchBasicSettings
 import a75f.io.logic.bo.building.hyperstat.profiles.util.fetchHyperStatTuners
@@ -69,7 +74,8 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
 
 
     override fun updateZonePoints() {
-        pipe2DeviceMap.forEach { (_, equip) ->
+        pipe2DeviceMap.forEach { (nodeAddress, equip) ->
+            pipe2DeviceMap[nodeAddress] = Domain.getDomainEquip(equip.equipRef) as Pipe2V2Equip
             CcuLog.d( L.TAG_CCU_HSPIPE2,"Process Pipe2: equipRef =  ${equip.nodeAddress}")
             processHyperStatPipeProfile(equip)
         }

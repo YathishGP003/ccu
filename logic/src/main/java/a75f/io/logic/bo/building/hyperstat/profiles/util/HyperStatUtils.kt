@@ -278,7 +278,7 @@ fun getCpuFanLevel(config: CpuConfiguration): Int {
     )
 
     if (config.isAnyAnalogOutEnabledAssociated(association = HsCpuAnalogOutMapping.LINEAR_FAN_SPEED.ordinal)
-            || config.isAnyAnalogOutEnabledAssociated(association = HsCpuAnalogOutMapping.LINEAR_FAN_SPEED.ordinal)) {
+            || config.isAnyAnalogOutEnabledAssociated(association = HsCpuAnalogOutMapping.STAGED_FAN_SPEED.ordinal)) {
         return 21 // All options are enabled due to analog fan speed
     }
 
@@ -309,8 +309,7 @@ fun getHpuFanLevel(config: HpuConfiguration): Int {
             third = false   //  Fan High
     )
 
-    if (config.isAnyAnalogOutEnabledAssociated(association = HsHpuAnalogOutMapping.FAN_SPEED.ordinal)
-            || config.isAnyAnalogOutEnabledAssociated(association = HsHpuAnalogOutMapping.FAN_SPEED.ordinal)) {
+    if (config.isAnyAnalogOutEnabledAssociated(association = HsHpuAnalogOutMapping.FAN_SPEED.ordinal)) {
         return 21 // All options are enabled due to analog fan speed
     }
 

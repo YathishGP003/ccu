@@ -74,7 +74,7 @@ public class FourPipeFanCoilUnitProfile extends ZoneProfile {
             double roomTemp = fourPfcuDevice.getCurrentTemp();
             Equip fourPfcuEquip = new Equip.Builder().setHashMap(CCUHsApi.getInstance().read("equip and group == \"" + node + "\"")).build();
             if (isRFDead()) {
-                handleRFDead(fourPfcuDevice, node);
+                handleRFDead(fourPfcuDevice, node,fourPfcuEquip);
                 continue;
             } else if (isZoneDead()) {
                 resetRelays(fourPfcuEquip.getId(), node, ZoneTempState.TEMP_DEAD);
@@ -146,8 +146,9 @@ public class FourPipeFanCoilUnitProfile extends ZoneProfile {
         }
     }
 
-    private void handleRFDead(FourPipeFanCoilUnitEquip fourPfcuDevice, short node) {
+    private void handleRFDead(FourPipeFanCoilUnitEquip fourPfcuDevice, short node, Equip equip) {
         fourPfcuDevice.setStatus(RFDEAD.ordinal());
+        StandaloneScheduler.updateSmartStatStatus(equip.getId(), RFDEAD, new HashMap<>(), ZoneTempState.RF_DEAD);
         String curStatus = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and writable and group == \"" + node + "\"");
         if (!curStatus.equals(RFDead)) {
             CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \"" + node + "\"", RFDead);

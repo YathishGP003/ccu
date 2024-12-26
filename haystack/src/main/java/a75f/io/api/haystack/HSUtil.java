@@ -1,6 +1,7 @@
 package a75f.io.api.haystack;
 
 import static a75f.io.api.haystack.Tags.BACNET_ID;
+import static a75f.io.api.haystack.Tags.EQUIPREF;
 
 import com.google.gson.internal.LinkedTreeMap;
 
@@ -395,14 +396,29 @@ public class HSUtil {
         return pointEntity.containsKey(Tags.STANDALONE);
     }
 
-    public static boolean isCPUEquip(String id, CCUHsApi hayStack) {
+    public static boolean isHsCPUEquip(String id, CCUHsApi hayStack) {
         HashMap<Object, Object> equipMap = hayStack.readMapById(id);
-        return equipMap.containsKey(Tags.HYPERSTAT) && equipMap.containsKey(Tags.CPU);
+        return isHsEquip(equipMap.get(EQUIPREF).toString(), hayStack) && equipMap.containsKey(Tags.CPU);
     }
+    public static boolean isHSHpuEquip(String id, CCUHsApi hayStack) {
+        HashMap<Object, Object> equipMap = hayStack.readMapById(id);
+        return isHsEquip(equipMap.get(EQUIPREF).toString(), hayStack) && equipMap.containsKey(Tags.HPU);
+    }
+
+    public static boolean isHSPipe2Equip(String id, CCUHsApi hayStack) {
+        HashMap<Object, Object> equipMap = hayStack.readMapById(id);
+        return isHsEquip(equipMap.get(EQUIPREF).toString(), hayStack) && equipMap.containsKey(Tags.PIPE2);
+    }
+
 
     public static boolean isHPUEquip(String id, CCUHsApi hayStack) {
         HashMap<Object, Object> equipMap = hayStack.readMapById(id);
         return equipMap.containsKey(Tags.HPU);
+    }
+
+    private static boolean isHsEquip(String equipRef, CCUHsApi hayStack) {
+        HashMap<Object, Object> equipMap = hayStack.readMapById(equipRef);
+        return equipMap.containsKey(Tags.HYPERSTAT);
     }
 
     public static boolean isVAVTrueCFMConfig(String id, CCUHsApi hayStack) {

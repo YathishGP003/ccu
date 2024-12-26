@@ -47,13 +47,12 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
+import a75f.io.logic.bo.building.system.dab.DabStagedRtu;
 import a75f.io.logic.ccu.restore.RestoreCCU;
 import a75f.io.logic.util.onLoadingCompleteListener;
 import a75f.io.messaging.client.MessagingClient;
-import a75f.io.renatus.DABFullyAHUProfile;
 import a75f.io.renatus.DABHybridAhuProfile;
 import a75f.io.renatus.DABStagedProfile;
-//import a75f.io.renatus.DABStagedRtuWithVfdProfile;
 import a75f.io.renatus.DefaultSystemProfile;
 import a75f.io.renatus.FloorPlanFragment;
 import a75f.io.renatus.R;
@@ -62,6 +61,9 @@ import a75f.io.renatus.SystemFragment;
 import a75f.io.renatus.UtilityApplication;
 import a75f.io.renatus.VavHybridRtuProfile;
 import a75f.io.renatus.VavIERtuProfile;
+//import a75f.io.renatus.VavStagedRtuProfile;
+import a75f.io.renatus.profiles.system.DabModulatingRtuFragment;
+import a75f.io.renatus.profiles.system.DabStagedRtuFragment;
 import a75f.io.renatus.profiles.system.DabStagedVfdRtuFragment;
 import a75f.io.renatus.profiles.system.VavModulatingRtuFragment;
 import a75f.io.renatus.profiles.system.VavStagedRtuFragment;
@@ -194,10 +196,10 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
             if (currentFragment instanceof VavHybridRtuProfile) {
                 selectItem(5);
             }
-            if (currentFragment instanceof DABStagedProfile) {
+            if (currentFragment instanceof DabStagedRtuFragment) {
                 selectItem(5);
             }
-            if (currentFragment instanceof DABFullyAHUProfile) {
+            if (currentFragment instanceof DabModulatingRtuFragment) {
                 selectItem(5);
             }
             if (currentFragment instanceof DabStagedVfdRtuFragment) {
@@ -902,7 +904,7 @@ public class FreshRegistration extends AppCompatActivity implements VerticalTabA
         }
         if (position == 15) {
 
-            fragment = new DABFullyAHUProfile();
+            fragment = new DabModulatingRtuFragment();
 
             Bundle data = new Bundle();
             data.putBoolean("REGISTRATION_WIZARD", true);

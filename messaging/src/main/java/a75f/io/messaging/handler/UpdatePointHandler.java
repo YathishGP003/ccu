@@ -1,7 +1,7 @@
 package a75f.io.messaging.handler;
 
 import static a75f.io.logic.bo.building.BackfillUtilKt.updateBackfillDuration;
-import static a75f.io.messaging.handler.CPUReconfigHandlerKt.reconfigureHSCPUV2;
+import static a75f.io.messaging.handler.HSReconfigHandlerKt.reconfigureHSV2;
 import static a75f.io.messaging.handler.DataSyncHandler.isCloudEntityHasLatestValue;
 
 import android.content.Context;
@@ -32,7 +32,6 @@ import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.sync.PointWriteCache;
-import a75f.io.domain.api.Domain;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.vrv.VrvControlMessageCache;
@@ -51,6 +50,7 @@ import static a75f.io.api.haystack.HayStackConstants.WRITABLE_ARRAY_DURATION;
 import static a75f.io.api.haystack.HayStackConstants.WRITABLE_ARRAY_LEVEL;
 import static a75f.io.api.haystack.HayStackConstants.WRITABLE_ARRAY_VAL;
 import static a75f.io.api.haystack.HayStackConstants.WRITABLE_ARRAY_WHO;
+
 public class UpdatePointHandler implements MessageHandler
 {
     public static final String CMD = "updatePoint";
@@ -122,18 +122,19 @@ public class UpdatePointHandler implements MessageHandler
 
         //Handle DCWB specific system config here.
         if (HSUtil.isDcwbConfig(pointUid, CCUHsApi.getInstance())) {
-            DcwbConfigHandler.updateConfigPoint(msgObject, localPoint, CCUHsApi.getInstance());
+            ConfigPointUpdateHandler.updateConfigPoint(msgObject, localPoint, CCUHsApi.getInstance());
             updateUI(localPoint);
             return;
         }
 
-        if (HSUtil.isCPUEquip(pointUid, CCUHsApi.getInstance())){
-            reconfigureHSCPUV2(msgObject, localPoint);
+        if (HSUtil.isHsCPUEquip(pointUid, CCUHsApi.getInstance())
+        || HSUtil.isHSPipe2Equip(pointUid, CCUHsApi.getInstance())
+        || HSUtil.isHSHpuEquip(pointUid, CCUHsApi.getInstance())){
+            reconfigureHSV2(msgObject, localPoint);
             updatePoints(localPoint);
-            hayStack.scheduleSync();
             return;
         }
-        
+
         if (HSUtil.isSystemConfigOutputPoint(pointUid, CCUHsApi.getInstance())
                 || HSUtil.isSystemConfigHumidifierType(pointUid, CCUHsApi.getInstance())
                 || HSUtil.isSystemConfigIE(pointUid, CCUHsApi.getInstance())
@@ -162,7 +163,6 @@ public class UpdatePointHandler implements MessageHandler
                 && !localPoint.getMarkers().contains(Tags.DESIRED)
                 && !localPoint.getMarkers().contains(Tags.SCHEDULE_TYPE)
                 && !localPoint.getMarkers().contains(Tags.TUNER)) {
-            HyperstatReconfigurationHandler.Companion.handleHyperStatConfigChange(msgObject, localPoint, CCUHsApi.getInstance());
             updatePoints(localPoint);
             if (localPoint.getMarkers().contains(Tags.USERINTENT) && localPoint.getMarkers().contains(Tags.CONDITIONING)) {
                 DesiredTempDisplayMode.setModeTypeOnUserIntentChange(localPoint.getRoomRef(), CCUHsApi.getInstance());

@@ -40,6 +40,10 @@ class MonitoringConfiguration(
         return this
     }
 
+    override fun getRelayMap(): Map<String, Boolean> =  mutableMapOf()
+
+    override fun getAnalogMap(): Map<String, Pair<Boolean, String>> = mutableMapOf()
+
     override fun getDependencies(): List<ValueConfig> {
         return mutableListOf()
     }

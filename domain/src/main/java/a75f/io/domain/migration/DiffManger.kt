@@ -130,10 +130,10 @@ class DiffManger(var context: Context?) {
                             val entityConfiguration =
                                 getDiffEntityConfiguration(oldModel, newModel)
                             handler.migrateModel(
-                                entityConfiguration,
-                                oldModel,
-                                newModel,
-                                siteRef
+                                    entityConfiguration,
+                                    oldModel,
+                                    newModel,
+                                    siteRef
                             )
                         } else {
                             CcuLog.i(

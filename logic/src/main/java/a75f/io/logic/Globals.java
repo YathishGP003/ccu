@@ -409,6 +409,8 @@ public class Globals {
                 L.ccu().systemProfile = new DabStagedRtu();
             } else if (eq.getProfile().equals("dabStagedRtuVfdFan")) {
                 L.ccu().systemProfile = new DabStagedRtuWithVfd();
+            } else if (eq.getProfile().equals("dabFullyModulatingAhu")) {
+                L.ccu().systemProfile = new DabFullyModulatingRtu();
             } else {
 
                 switch (ProfileType.valueOf(getDomainSafeProfile(eq.getProfile()))) {
@@ -539,13 +541,13 @@ public class Globals {
                             break;
                         case HYPERSTAT_HEAT_PUMP_UNIT:
                             HyperStatHpuProfile hpuProfile = new HyperStatHpuProfile();
-                            hpuProfile.addEquip(Short.parseShort(eq.getGroup()));
+                            hpuProfile.addEquip(eq.getId());
                             L.ccu().zoneProfiles.add(hpuProfile);
                             break;
 
                         case HYPERSTAT_TWO_PIPE_FCU:
                             HyperStatPipe2Profile pipe2Profile = new HyperStatPipe2Profile();
-                            pipe2Profile.addEquip(Short.parseShort(eq.getGroup()));
+                            pipe2Profile.addEquip(eq.getId());
                             L.ccu().zoneProfiles.add(pipe2Profile);
                             break;
 

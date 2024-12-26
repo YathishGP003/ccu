@@ -1,4 +1,4 @@
-package a75f.io.messaging.handler;
+package a75f.io.messaging.handler
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Point
@@ -93,7 +93,7 @@ class VavConfigHandler {
         // tag on these points after they are created.
         fun setMinCfmSetpointMaxVals(hayStack: CCUHsApi, config: VavProfileConfiguration) {
             val equip = hayStack.readEntity("equip and group == \"" + config.nodeAddress + "\"")
-            val vavEquip = VavEquip(equip.get("id").toString())
+            val vavEquip = VavEquip(equip["id"].toString())
 
             if (vavEquip.enableCFMControl.readDefaultVal() > 0.0) {
                 val maxCoolingCfm = vavEquip.maxCFMCooling.readDefaultVal()
@@ -101,11 +101,11 @@ class VavConfigHandler {
 
                 val minCoolingCfmMap = hayStack.readEntity("point and domainName == \"" + DomainName.minCFMCooling + "\"" + " and equipRef == \"" + vavEquip.equipRef + "\"")
                 val minCoolingCfmPoint = Point.Builder().setHashMap(minCoolingCfmMap).setMaxVal(maxCoolingCfm.toString()).build()
-                hayStack.updatePoint(minCoolingCfmPoint, minCoolingCfmMap.get("id").toString())
+                hayStack.updatePoint(minCoolingCfmPoint, minCoolingCfmMap["id"].toString())
 
                 val minReheatingCfmMap = hayStack.readEntity("point and domainName == \"" + DomainName.minCFMReheating + "\"" + " and equipRef == \"" + vavEquip.equipRef + "\"")
                 val minReheatingCfmPoint = Point.Builder().setHashMap(minReheatingCfmMap).setMaxVal(maxReheatingCfm.toString()).build()
-                hayStack.updatePoint(minReheatingCfmPoint, minReheatingCfmMap.get("id").toString())
+                hayStack.updatePoint(minReheatingCfmPoint, minReheatingCfmMap["id"].toString())
             }
 
         }
@@ -114,10 +114,10 @@ class VavConfigHandler {
         // We set this value to 1.5x the Max Cooling CFM, which is the ballpark value used by U.S. Support during commissioning.
         fun setAirflowCfmProportionalRange(hayStack: CCUHsApi, config: VavProfileConfiguration) {
             val equip = hayStack.readEntity("equip and group == \"" + config.nodeAddress + "\"")
-            val vavEquip = VavEquip(equip.get("id").toString())
+            val vavEquip = VavEquip(equip["id"].toString())
 
             if (vavEquip.enableCFMControl.readDefaultVal() > 0.0) {
-                vavEquip.vavAirflowCFMProportionalRange.writePointValue(1.5 * vavEquip.maxCFMCooling.readPriorityVal())
+                vavEquip.vavAirflowCFMProportionalRange.writeVal(10, 1.5 * vavEquip.maxCFMCooling.readPriorityVal())
             }
         }
 

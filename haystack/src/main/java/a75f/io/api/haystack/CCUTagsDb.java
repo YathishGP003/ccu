@@ -703,6 +703,9 @@ public class CCUTagsDb extends HServer {
                 equip.add(Tags.BACNET_ID, HSUtil.generateBacnetId(q.getGroup()));
                 equip.add(Tags.BACNET_TYPE, DEVICE);
             }
+            Intent intent = new Intent(BROADCAST_BACNET_ZONE_ADDED);
+            intent.putExtra("message", equip.get("id").toString());
+            appContext.sendBroadcast(intent);
         }
 
        /* Log.i("CDT_LMDT_LMB"," id>>> "+equip.get("id") + " dis>>> "+equip.get("dis") + " createdDateTime>>> "+
@@ -857,7 +860,7 @@ public class CCUTagsDb extends HServer {
         p.getTags().entrySet().forEach( entry -> b.add(entry.getKey(), entry.getValue()));
 
         HRef ref = (HRef) b.get("id");
-        if(p.getBacnetType() != null)
+        if(p.getBacnetType() != null && id != null && !id.replace("@","").equals("null"))
         {
             b.add(Tags.BACNET_ID, p.getBacnetId());
             b.add(Tags.BACNET_TYPE, p.getBacnetType());
@@ -1365,10 +1368,6 @@ public class CCUTagsDb extends HServer {
             b.add(Tags.BACNET_ID, z.getBacnetId());
             b.add(Tags.BACNET_TYPE, Tags.DEVICE);
             CcuLog.d(TAG_CCU_BACNET,"updateZone: "+z+" bacnetId: "+z.getBacnetId()+", bacnetType: device");
-            CcuLog.d(TAG_CCU_BACNET, "intent:"+BROADCAST_BACNET_ZONE_ADDED+", zoneID: "+id.val);
-            Intent intent = new Intent(BROADCAST_BACNET_ZONE_ADDED);
-            intent.putExtra("message", "@"+id.val);
-            appContext.sendBroadcast(intent);
         }
 		 HDict hDict = b.toDict();
 

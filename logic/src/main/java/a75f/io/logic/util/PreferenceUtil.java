@@ -79,11 +79,11 @@ public class PreferenceUtil {
     private static final String TITLE_24_REDUNDANT_POINT_MIGRATION = "title24ReduntPointMigration";
     private static final String LOCK_OUT_HIS_UPDATE = "lockoutHisUpdate";
     public static final String DAB_DAMPER_SIZE_MIGRATION2 = "dabDamperSizeMigration2";
-
     private static final String UPDTAE_LOCAL_BUILDING_TUNERS = "UPDTAE_LOCAL_BUILDING_TUNERS";
     private static final String MIGRATE_HYPERSTATSPLIT_FAN_MODE_CACHE = "migrateHyperStatSplitFanModeCache";
     private static final String BACNET_SETTING_POINT_DELETED = "bacnetSettingPointDeleted";
     private static final String OTA_STATUS_POINT_REMOVAL = "otaStatusPointRemoval";
+    private static final String PRANGE_POINT_MIGRATION_FLAG = "prangePointMigrationFlag";
 
 
     public static void setContext(Context c) {
@@ -639,6 +639,14 @@ public class PreferenceUtil {
     }
     public static void setMigrateHyperStatSplitFanModeCache() {
         setBooleanPreference(MIGRATE_HYPERSTATSPLIT_FAN_MODE_CACHE, true);
+    }
+
+    public static boolean getPrangePointMigrationFlag() {
+        return getBooleanPreference(PRANGE_POINT_MIGRATION_FLAG);
+    }
+
+    public static void setPrangePointMigrationFlag() {
+        setBooleanPreference(PRANGE_POINT_MIGRATION_FLAG, true);
     }
 
     public static boolean getDamperSizeMigration2FlagStatus() {

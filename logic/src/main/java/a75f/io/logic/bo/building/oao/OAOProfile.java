@@ -27,6 +27,8 @@ import a75f.io.logic.bo.building.system.SystemProfile;
 import a75f.io.logic.bo.building.system.dab.DabAdvancedAhu;
 import a75f.io.logic.bo.building.system.dab.DabAdvancedHybridRtu;
 import a75f.io.logic.bo.building.system.dab.DabExternalAhu;
+import a75f.io.logic.bo.building.system.dab.DabFullyModulatingRtu;
+import a75f.io.logic.bo.building.system.dab.DabFullyModulatingRtu;
 import a75f.io.logic.bo.building.system.dab.DabStagedRtu;
 import a75f.io.logic.bo.building.system.dab.DabStagedRtuWithVfd;
 import a75f.io.logic.bo.building.system.vav.VavAdvancedAhu;
@@ -189,6 +191,7 @@ public class OAOProfile
         return (systemProfile instanceof DabExternalAhu
                 || (systemProfile instanceof DabStagedRtu && !(systemProfile instanceof DabAdvancedHybridRtu))
                 || systemProfile instanceof DabStagedRtuWithVfd
+                || systemProfile instanceof DabFullyModulatingRtu
                 || systemProfile instanceof VavExternalAhu
                 || (systemProfile instanceof VavStagedRtu && !(systemProfile instanceof VavAdvancedHybridRtu))
                 || systemProfile instanceof VavFullyModulatingRtu

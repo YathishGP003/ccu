@@ -76,6 +76,9 @@ object ModelLoader {
     fun getDabStagedVfdRtuModelDef() : ModelDirective {
         return ModelCache.getModelById(MODEL_DAB_STAGED_VFD_RTU)
     }
+    fun getDabModulatingRtuModelDef() : ModelDirective {
+        return ModelCache.getModelById(MODEL_DAB_MODULATING_AHU)
+    }
     fun getDabExternalAhuModel() : ModelDirective {
         return ModelCache.getModelById(MODEL_EXTERNAL_AHU_DAB)
     }
@@ -150,7 +153,13 @@ object ModelLoader {
         return ModelCache.getModelById(MODEL_HYPERSTAT_CPU)
     }
 
+    fun getHyperStatHpuModel() : ModelDirective {
+        return ModelCache.getModelById(MODEL_HYPERSTAT_HPU)
+    }
 
+    fun getHyperStatPipe2Model() : ModelDirective {
+        return ModelCache.getModelById(MODEL_HYPERSTAT_Pip2)
+    }
 
     fun getHyperStatMonitoringModel() : ModelDirective {
         return ModelCache.getModelById(MODEL_HYPERSTAT_MONITORING)
@@ -194,6 +203,8 @@ object ModelLoader {
             "smartnodeOAO" -> getSmartNodeOAOModelDef()
             "smartnodeSSE" -> getSmartNodeSSEModel()
             "helionodeSSE" -> getHelioNodeSSEModel()
+            "hyperstatHPU" -> getHyperStatHpuModel()
+            "hyperstat2pfcu" -> getHyperStatPipe2Model()
             "vavStagedRtu" -> getVavStageRtuModelDef()
             "smartnodePID" -> getSmartNodePidModel()
             "helionodePID" -> getHelioNodePidModel()

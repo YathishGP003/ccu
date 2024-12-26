@@ -18,8 +18,6 @@ import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
 import a75f.io.logic.bo.building.hyperstat.common.BasicSettings
 import a75f.io.logic.bo.building.hyperstat.common.FanModeCacheStorage
-import a75f.io.logic.bo.building.hyperstat.common.HSHaystackUtil
-import a75f.io.logic.bo.building.hyperstat.common.HyperStatEquipToBeDeleted
 import a75f.io.logic.bo.building.hyperstat.common.HyperStatLoopController
 import a75f.io.logic.bo.building.hyperstat.common.HyperStatProfileTuners
 import a75f.io.logic.bo.building.hyperstat.common.UserIntents
@@ -97,9 +95,9 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
      */
     private fun getLowestHeatingStateActivated(equip: CpuV2Equip): Double {
         return listOf(
-                equip.fanOutHeatingStage1.readPriorityVal(),
-                equip.fanOutHeatingStage2.readPriorityVal(),
-                equip.fanOutHeatingStage3.readPriorityVal()
+                equip.fanOutHeatingStage1.readDefaultVal(),
+                equip.fanOutHeatingStage2.readDefaultVal(),
+                equip.fanOutHeatingStage3.readDefaultVal()
         ).firstOrNull { it > 0 } ?: defaultFanLoopOutput
     }
 
@@ -112,9 +110,9 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
      */
     private fun getLowestCoolingStateActivated(equip: CpuV2Equip): Double {
         return listOf(
-                equip.fanOutCoolingStage1.readPriorityVal(),
-                equip.fanOutCoolingStage2.readPriorityVal(),
-                equip.fanOutCoolingStage3.readPriorityVal()
+                equip.fanOutCoolingStage1.readDefaultVal(),
+                equip.fanOutCoolingStage2.readDefaultVal(),
+                equip.fanOutCoolingStage3.readDefaultVal()
         ).firstOrNull { it > 0 } ?: defaultFanLoopOutput
     }
 
@@ -125,9 +123,9 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
      */
     private fun getAnalogRecirculateValueActivated(equip: CpuV2Equip): Double {
         return when {
-            equip.analog1FanRecirculate.readHisVal() > 0 -> equip.analog1FanRecirculate.readPriorityVal()
-            equip.analog2FanRecirculate.readHisVal() > 0 -> equip.analog2FanRecirculate.readPriorityVal()
-            equip.analog3FanRecirculate.readHisVal() > 0 -> equip.analog3FanRecirculate.readPriorityVal()
+            equip.analog1FanRecirculate.readDefaultVal() > 0 -> equip.analog1FanRecirculate.readDefaultVal()
+            equip.analog2FanRecirculate.readDefaultVal() > 0 -> equip.analog2FanRecirculate.readDefaultVal()
+            equip.analog3FanRecirculate.readDefaultVal() > 0 -> equip.analog3FanRecirculate.readDefaultVal()
             else -> defaultFanLoopOutput
         }
     }
@@ -313,7 +311,6 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
         val config = getConfiguration(equip.equipRef)
 
         logicalPointsList = getLogicalPointList(equip, config!!)
-        hsHaystackUtil = HSHaystackUtil(equip.equipRef, CCUHsApi.getInstance())
 
         if (isRFDead) {
             handleRFDead(equip)
@@ -367,7 +364,7 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
         )
 
         if (basicSettings.fanMode != StandaloneFanStage.OFF) {
-            operateRelays(config as CpuConfiguration, hyperStatTuners, userIntents, basicSettings, relayStages)
+            operateRelays(config as CpuConfiguration, hyperStatTuners, userIntents, basicSettings, relayStages, equip)
             operateAnalogOutputs(config, equip, basicSettings, analogOutStages)
         } else {
             resetLogicalPoints()
@@ -449,8 +446,7 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
 
     private fun operateRelays(
             config: CpuConfiguration, tuner: HyperStatProfileTuners, userIntents: UserIntents,
-            basicSettings: BasicSettings,
-            relayStages: HashMap<String, Int>
+            basicSettings: BasicSettings, relayStages: HashMap<String, Int>, equip: CpuV2Equip
     ) {
         listOf(
                 Triple(config.relay1Enabled.enabled, config.relay1Association.associationVal, Port.RELAY_ONE),
@@ -460,13 +456,13 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
                 Triple(config.relay5Enabled.enabled, config.relay5Association.associationVal, Port.RELAY_FIVE),
                 Triple(config.relay6Enabled.enabled, config.relay6Association.associationVal, Port.RELAY_SIX)
         ).forEach { (enabled, association, port) ->
-            if (enabled) handleRelayState(association, config, port, tuner, userIntents, basicSettings, relayStages)
+            if (enabled) handleRelayState(association, config, port, tuner, userIntents, basicSettings, relayStages, equip)
         }
     }
 
     private fun handleRelayState(
             association: Int, config: CpuConfiguration, port: Port, tuner: HyperStatProfileTuners,
-            userIntents: UserIntents, basicSettings: BasicSettings, relayStages: HashMap<String, Int>
+            userIntents: UserIntents, basicSettings: BasicSettings, relayStages: HashMap<String, Int>, equip: CpuV2Equip
     ) {
         val relayMapping = HsCpuRelayMapping.values().find { it.ordinal == association }
         when (relayMapping) {
@@ -499,8 +495,8 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
 
             HsCpuRelayMapping.FAN_ENABLED -> doFanEnabled(curState, port, fanLoopOutput)
             HsCpuRelayMapping.OCCUPIED_ENABLED -> doOccupiedEnabled(port)
-            HsCpuRelayMapping.HUMIDIFIER -> doHumidifierOperation(port, tuner.humidityHysteresis, userIntents.targetMinInsideHumidity)
-            HsCpuRelayMapping.DEHUMIDIFIER -> doDeHumidifierOperation(port, tuner.humidityHysteresis, userIntents.targetMaxInsideHumidity)
+            HsCpuRelayMapping.HUMIDIFIER -> doHumidifierOperation(port, tuner.humidityHysteresis, userIntents.targetMinInsideHumidity, equip.zoneHumidity.readHisVal())
+            HsCpuRelayMapping.DEHUMIDIFIER -> doDeHumidifierOperation(port, tuner.humidityHysteresis, userIntents.targetMaxInsideHumidity, equip.zoneHumidity.readHisVal())
             else -> {}
         }
         CcuLog.d(L.TAG_CCU_HSCPU,"$port = $relayMapping : ${getCurrentLogicalPointStatus(logicalPointsList[port]!!)}")
@@ -689,7 +685,7 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
             val sensorValue = equip.doorWindowSensorTitle24.readHisVal().toInt()
             if (sensorValue == 1) isDoorOpen = true
             analogSensorEnabled = true
-            CcuLog.d(L.TAG_CCU_HSHST, "Analog Input has mapping Door Window sensor value : Door is $sensorValue")
+            CcuLog.d(L.TAG_CCU_HSCPU, "Analog Input has mapping Door Window sensor value : Door is $sensorValue")
 
         }
         doorWindowIsOpen(
@@ -785,8 +781,6 @@ class HyperStatCpuProfile : HyperStatPackageUnitProfile() {
         return 0.0
     }
 
-    override fun addNewEquip(node: Short, room: String, floor: String, baseConfig: BaseProfileConfiguration) { TODO("Not using now") }
-    override fun getHyperStatEquip(node: Short): HyperStatEquipToBeDeleted { TODO("Not using now revisit once all are migrated") }
     override fun <T : BaseProfileConfiguration?> getProfileConfiguration(address: Short): T { TODO("Not using now") }
 
 }

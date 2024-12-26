@@ -8,6 +8,8 @@ import a75f.io.algos.dcwb.AdaptiveDeltaTInput;
 import a75f.io.algos.dcwb.MaximizedDeltaTControl;
 import a75f.io.algos.dcwb.MaximizedDeltaTInput;
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.domain.api.Domain;
+import a75f.io.domain.equips.DabModulatingRtuSystemEquip;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.util.SystemTemperatureUtil;
@@ -23,7 +25,7 @@ class DcwbAlgoHandler {
     
     private static final int MAX_PI_LOOP_OUTPUT = 100;
     private static final int MIN_PI_LOOP_OUTPUT = 0;
-    
+
     public DcwbAlgoHandler(boolean isAdaptiveDelta, String equipRef, CCUHsApi hsApi) {
         hayStack = hsApi;
         adaptiveDelta = isAdaptiveDelta;
@@ -44,24 +46,29 @@ class DcwbAlgoHandler {
     private double chilledWaterValveLoopOutput;
     
     private double adaptiveComfortThresholdMargin = TunerConstants.ADAPTIVE_COMFORT_THRESHOLD_MARGIN;
-    
+
+    public void setAdaptiveDelta(boolean adaptiveDelta) {
+        this.adaptiveDelta = adaptiveDelta;
+    }
+    public DabModulatingRtuSystemEquip systemEquip;
+
     /**
      * Initialize tuners.
      * This needs to need to be called every time before the loop , otherwise a tuner update that was
      * received via pubnub wont be picked till next app-restart.
      */
     private void initializeTuners() {
+        systemEquip = (DabModulatingRtuSystemEquip) Domain.systemEquip;
         dcwbControlLoop.useNegativeProportionalError(false);
         dcwbControlLoop.setProportionalGain(TunerUtil.readTunerValByQuery("dcwb and pgain", systemEquipRef));
         dcwbControlLoop.setIntegralGain(TunerUtil.readTunerValByQuery("dcwb and igain", systemEquipRef));
         dcwbControlLoop.setProportionalSpread((int)TunerUtil.readTunerValByQuery("dcwb and pspread", systemEquipRef));
         dcwbControlLoop.setIntegralMaxTimeout((int)TunerUtil.readTunerValByQuery("dcwb and itimeout", systemEquipRef));
         
-        adaptiveComfortThresholdMargin = TunerUtil.readTunerValByQuery("dcwb and adaptive and comfort and threshold",
-                                                                               systemEquipRef);
-        chilledWaterTargetDelta = getChilledWaterConfig("target and delta", hayStack);
-        chilledWaterExitTemperatureMargin = getChilledWaterConfig("exit and temp and margin", hayStack);
-        chilledWaterMaxFlowRate = getChilledWaterConfig("max and flow and rate", hayStack);
+        adaptiveComfortThresholdMargin = systemEquip.getAdaptiveComfortThresholdMargin().readPriorityVal();
+        chilledWaterTargetDelta = systemEquip.getChilledWaterTargetDelta().readPriorityVal();
+        chilledWaterExitTemperatureMargin = systemEquip.getChilledWaterExitTemperatureMargin().readPriorityVal();
+        chilledWaterMaxFlowRate = systemEquip.getChilledWaterMaxFlowRate().readPriorityVal();
     }
     
     /**

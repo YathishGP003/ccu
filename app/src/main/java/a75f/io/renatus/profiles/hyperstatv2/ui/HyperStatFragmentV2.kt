@@ -159,7 +159,7 @@ abstract class HyperStatFragmentV2 : BaseDialogFragment(), OnPairingCompleteList
 
 
     @Composable
-    fun DrawRelays() {
+    open fun DrawRelays() {
         val relayEnums =
             viewModel.getAllowedValues(DomainName.relay1OutputAssociation, viewModel.equipModel)
         viewModel.viewState.value.apply {
@@ -221,7 +221,7 @@ abstract class HyperStatFragmentV2 : BaseDialogFragment(), OnPairingCompleteList
     }
 
     @Composable
-    fun DrawThermistors() {
+    open fun DrawThermistors() {
         // this is specific because CPU has 2 different list for profiles
         val thermistor1Enums = viewModel.getAllowedValues(DomainName.thermistor1InputAssociation, viewModel.equipModel)
         val thermistor2Enums = viewModel.getAllowedValues(DomainName.thermistor2InputAssociation, viewModel.equipModel)

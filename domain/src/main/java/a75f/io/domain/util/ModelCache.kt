@@ -182,6 +182,12 @@ object ModelCache {
 
     private fun loadStandAloneModels() {
         modelContainer[MODEL_HYPERSTAT_SPLIT_CPU] = getModelById(MODEL_HYPERSTAT_SPLIT_CPU)
+        modelContainer[MODEL_HYPERSTAT_CPU] = getModelById(MODEL_HYPERSTAT_CPU)
+        modelContainer[MODEL_HYPERSTAT_Pip2] = getModelById(MODEL_HYPERSTAT_Pip2)
+        modelContainer[MODEL_HYPERSTAT_HPU] = getModelById(MODEL_HYPERSTAT_HPU)
+
+        CcuLog.i(Domain.LOG_TAG, "HyperStat CPU equip model loaded")
+
         modelContainer[MODEL_OTN_TI] = getModelById(MODEL_OTN_TI)
         CcuLog.i(Domain.LOG_TAG, "Otn profile model loaded")
         modelContainer[MODEL_SMART_NODE_SSE] = getModelById(
@@ -216,14 +222,6 @@ object ModelCache {
         CcuLog.i(Domain.LOG_TAG, "Model Loaded from FS ${model.name}  ${model.version?.major}.${model.version?.minor}.${model.version?.patch}")
         modelContainer[modelId] = model
         return model
-    }
-
-    fun getModelByFileName( fileName : String) : ModelDirective {
-        return if (context != null) {
-            ResourceHelper.loadModel(fileName, context!!)
-        } else {
-            ResourceHelper.loadModel(fileName)
-        }
     }
 
     private fun loadBuildingEquipModel() {

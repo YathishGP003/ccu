@@ -29,7 +29,7 @@ interface AnalogOutActions {
                            zoneCO2Threshold: Double,
                            zoneCO2DamperOpeningRate: Double,
                            isDoorOpen: Boolean,
-                           equip: HyperStatEquip? = null)
+                           equip: HyperStatEquip)
 
     fun doAnalogFanAction(port: Port,
                           fanLowPercent: Int,

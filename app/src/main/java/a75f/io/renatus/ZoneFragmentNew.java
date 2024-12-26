@@ -140,13 +140,13 @@ import a75f.io.renatus.ENGG.bacnet.services.BacNetConstants;
 import a75f.io.renatus.bacnet.GridSpacingItemDecoration;
 import a75f.io.renatus.bacnet.RemotePointUpdateInterface;
 import a75f.io.renatus.bacnet.ZoneRecyclerBacnetParamAdapter;
-import a75f.io.renatus.hyperstat.ui.HyperStatZoneViewKt;
 import a75f.io.renatus.hyperstat.vrv.HyperStatVrvZoneViewKt;
 import a75f.io.renatus.hyperstatsplit.ui.HyperStatSplitZoneViewKt;
 import a75f.io.renatus.modbus.ZoneRecyclerModbusParamAdapter;
 import a75f.io.renatus.modbus.util.UtilSourceKt;
 import a75f.io.renatus.model.ZoneViewData;
 import a75f.io.logic.util.CommonTimeSlotFinder;
+import a75f.io.renatus.profiles.hyperstatv2.util.HyperStatZoneViewKt;
 import a75f.io.renatus.schedules.NamedSchedule;
 import a75f.io.renatus.schedules.ScheduleGroupFragment;
 import a75f.io.renatus.schedules.ScheduleUtil;
@@ -1498,7 +1498,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                 HyperStatZoneViewKt.loadHyperStatCpuProfile(cpuEquipPoints, inflater, linearLayoutZonePoints, updatedEquipId,  p.getGroup(),requireActivity());
                             }
                             if (p.getProfile().startsWith(ProfileType.HYPERSTAT_HEAT_PUMP_UNIT.name())) {
-                                HashMap<String, Object> cpuEquipPoints = HyperStatZoneViewKt.getHyperStatHpuEquipPoints(p);
+                                HashMap<String, Object> cpuEquipPoints = HyperStatZoneViewKt.getHyperStatHpuDetails(p);
                                 HyperStatZoneViewKt.loadHyperStatHpuProfile(cpuEquipPoints, inflater, linearLayoutZonePoints, updatedEquipId,  p.getGroup(),requireActivity());
                             }
                             if (p.getProfile().startsWith(ProfileType.HYPERSTAT_TWO_PIPE_FCU.name())) {
@@ -1973,7 +1973,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                                 p.getGroup());
             }
             if (updatedEquip.getProfile().startsWith(ProfileType.HYPERSTAT_HEAT_PUMP_UNIT.name())) {
-                HashMap<String, Object> cpuEquipPoints = HyperStatZoneViewKt.getHyperStatHpuEquipPoints(updatedEquip);
+                HashMap<String, Object> cpuEquipPoints = HyperStatZoneViewKt.getHyperStatHpuDetails(updatedEquip);
                 HyperStatZoneViewKt.loadHyperStatHpuProfile(cpuEquipPoints, inflater, linearLayoutZonePoints, updatedEquip.getId(), updatedEquip.getGroup(),requireActivity());
             }
             if (updatedEquip.getProfile().startsWith(ProfileType.HYPERSTAT_TWO_PIPE_FCU.name())) {

@@ -24,6 +24,7 @@ import java.util.HashMap;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logic.L;
+import a75f.io.renatus.profiles.system.DabModulatingRtuFragment;
 import a75f.io.renatus.profiles.system.DabStagedRtuFragment;
 import a75f.io.renatus.profiles.system.DabStagedVfdRtuFragment;
 import a75f.io.logic.util.onLoadingCompleteListener;
@@ -220,7 +221,7 @@ public class SystemProfileFragment extends Fragment implements onLoadingComplete
                     case 8:
                         if (canAddDABProfile()) {
                             getActivity().getSupportFragmentManager().beginTransaction()
-                                    .replace(R.id.profileContainer, new DABFullyAHUProfile()).commit();
+                                    .replace(R.id.profileContainer, new DabModulatingRtuFragment()).commit();
                             if (SystemConfigMenuFragment.SystemConfigMenuFragmentHandler != null) {
                                 SystemConfigMenuFragment.SystemConfigMenuFragmentHandler.sendEmptyMessage(1);
                             }

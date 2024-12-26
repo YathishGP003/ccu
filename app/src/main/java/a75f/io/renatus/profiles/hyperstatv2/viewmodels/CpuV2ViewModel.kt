@@ -3,9 +3,6 @@ package a75f.io.renatus.profiles.hyperstatv2.viewmodels
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.device.mesh.LSerial
 import a75f.io.domain.api.Domain
-import a75f.io.domain.api.DomainName
-import a75f.io.domain.config.AssociationConfig
-import a75f.io.domain.config.EnableConfig
 import a75f.io.domain.equips.hyperstat.CpuV2Equip
 import a75f.io.domain.logic.DeviceBuilder
 import a75f.io.domain.logic.EntityMapper
@@ -21,7 +18,6 @@ import a75f.io.logic.bo.building.hyperstat.profiles.util.getConfiguration
 import a75f.io.logic.bo.building.hyperstat.profiles.util.getCpuFanLevel
 import a75f.io.logic.bo.building.hyperstat.profiles.util.getPossibleConditionMode
 import a75f.io.logic.bo.building.hyperstat.v2.configs.CpuConfiguration
-import a75f.io.logic.bo.building.hyperstat.v2.configs.CpuMinMaxConfig
 import a75f.io.logic.bo.building.hyperstat.v2.configs.HsCpuAnalogOutMapping
 import a75f.io.logic.bo.building.hyperstat.v2.configs.HsCpuRelayMapping
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
@@ -132,7 +128,7 @@ class CpuV2ViewModel(application: Application) : HyperStatViewModel(application)
             updateFanMode(true,equip, getCpuFanLevel(profileConfiguration as CpuConfiguration))
             CcuLog.i(Domain.LOG_TAG, "Cpu profile reconfigured")
         }
-        setPortConfiguration(profileConfiguration, getRelayMap(), getAnalogMap())
+        profileConfiguration.apply { setPortConfiguration(nodeAddress, getRelayMap(), getAnalogMap()) }
     }
 
     private fun setConditioningMode(equip: CpuV2Equip) {
@@ -170,70 +166,6 @@ class CpuV2ViewModel(application: Application) : HyperStatViewModel(application)
             return
         }
     }
-
-    private fun getAnalogMap(): Map<String, Pair<Boolean, String>> {
-        val analogOuts = mutableMapOf<String, Pair<Boolean, String>>()
-        analogOuts[DomainName.analog1Out] = Pair(isAnalogExternalMapped(profileConfiguration.analogOut1Enabled, profileConfiguration.analogOut1Association), analogType(profileConfiguration.analogOut1Enabled))
-        analogOuts[DomainName.analog2Out] = Pair(isAnalogExternalMapped(profileConfiguration.analogOut2Enabled, profileConfiguration.analogOut2Association), analogType(profileConfiguration.analogOut2Enabled))
-        analogOuts[DomainName.analog3Out] = Pair(isAnalogExternalMapped(profileConfiguration.analogOut3Enabled, profileConfiguration.analogOut3Association), analogType(profileConfiguration.analogOut3Enabled))
-        return analogOuts
-    }
-
-    private fun getRelayMap(): Map<String, Boolean> {
-        val relays = mutableMapOf<String, Boolean>()
-        relays[DomainName.relay1] = isRelayExternalMapped(profileConfiguration.relay1Enabled, profileConfiguration.relay1Association)
-        relays[DomainName.relay2] = isRelayExternalMapped(profileConfiguration.relay2Enabled, profileConfiguration.relay2Association)
-        relays[DomainName.relay3] = isRelayExternalMapped(profileConfiguration.relay3Enabled, profileConfiguration.relay3Association)
-        relays[DomainName.relay4] = isRelayExternalMapped(profileConfiguration.relay4Enabled, profileConfiguration.relay4Association)
-        relays[DomainName.relay5] = isRelayExternalMapped(profileConfiguration.relay5Enabled, profileConfiguration.relay5Association)
-        relays[DomainName.relay6] = isRelayExternalMapped(profileConfiguration.relay6Enabled, profileConfiguration.relay6Association)
-        return relays
-    }
-
-    private fun analogType(analogOutPort: EnableConfig): String {
-        (profileConfiguration as CpuConfiguration).apply {
-            return when (analogOutPort) {
-                analogOut1Enabled -> getPortType(analogOut1Association, analogOut1MinMaxConfig)
-                analogOut2Enabled -> getPortType(analogOut2Association, analogOut2MinMaxConfig)
-                analogOut3Enabled -> getPortType(analogOut3Association, analogOut3MinMaxConfig)
-                else -> "0-10v"
-            }
-        }
-
-    }
-
-    private fun getPortType(association: AssociationConfig, minMaxConfig: CpuMinMaxConfig): String {
-        val portType: String
-        when (association.associationVal) {
-            HsCpuAnalogOutMapping.COOLING.ordinal -> {
-                portType = "${minMaxConfig.coolingConfig.min.currentVal.toInt()}-${minMaxConfig.coolingConfig.max.currentVal.toInt()}v"
-            }
-
-            HsCpuAnalogOutMapping.LINEAR_FAN_SPEED.ordinal -> {
-                portType = "${minMaxConfig.linearFanSpeedConfig.min.currentVal.toInt()}-${minMaxConfig.linearFanSpeedConfig.max.currentVal.toInt()}v"
-            }
-
-            HsCpuAnalogOutMapping.HEATING.ordinal -> {
-                portType = "${minMaxConfig.heatingConfig.min.currentVal.toInt()}-${minMaxConfig.heatingConfig.max.currentVal.toInt()}v"
-            }
-
-            HsCpuAnalogOutMapping.DCV_DAMPER.ordinal -> {
-                portType = "${minMaxConfig.dcvDamperConfig.min.currentVal.toInt()}-${minMaxConfig.dcvDamperConfig.max.currentVal.toInt()}v"
-            }
-
-            HsCpuAnalogOutMapping.STAGED_FAN_SPEED.ordinal -> { portType = "0-10v" } // Because staged will be based on the actual voltage in the configuration. Like during stage1 stage2 ...etc
-
-            else -> {
-                portType = "0-10v"
-            }
-        }
-        return portType
-    }
-
-
-    private fun isRelayExternalMapped(enabled: EnableConfig, association: AssociationConfig) = (enabled.enabled && association.associationVal == HsCpuRelayMapping.EXTERNALLY_MAPPED.ordinal)
-
-    private fun isAnalogExternalMapped(enabled: EnableConfig, association: AssociationConfig) = (enabled.enabled && association.associationVal == HsCpuAnalogOutMapping.EXTERNALLY_MAPPED.ordinal)
 
     private fun addEquipment(config: CpuConfiguration, equipModel: SeventyFiveFProfileDirective, deviceModel: SeventyFiveFDeviceDirective): String {
         val equipBuilder = ProfileEquipBuilder(hayStack)

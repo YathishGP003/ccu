@@ -2,6 +2,8 @@ package a75f.io.logic.bo.building.hyperstat.v2.configs
 
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
+import a75f.io.domain.config.AssociationConfig
+import a75f.io.domain.config.EnableConfig
 import a75f.io.domain.config.ValueConfig
 import a75f.io.domain.equips.hyperstat.CpuV2Equip
 import a75f.io.domain.util.ModelNames
@@ -249,6 +251,74 @@ class CpuConfiguration(
         }
 
         return configuration
+    }
+
+    private fun getPortType(association: AssociationConfig, minMaxConfig: Any): String {
+
+        val portType: String
+        val minMaxDetails = minMaxConfig as CpuMinMaxConfig
+        when (association.associationVal) {
+            HsCpuAnalogOutMapping.COOLING.ordinal -> {
+                portType =
+                    "${minMaxDetails.coolingConfig.min.currentVal.toInt()}-${minMaxDetails.coolingConfig.max.currentVal.toInt()}v"
+            }
+
+            HsCpuAnalogOutMapping.LINEAR_FAN_SPEED.ordinal -> {
+                portType =
+                    "${minMaxDetails.linearFanSpeedConfig.min.currentVal.toInt()}-${minMaxDetails.linearFanSpeedConfig.max.currentVal.toInt()}v"
+            }
+
+            HsCpuAnalogOutMapping.HEATING.ordinal -> {
+                portType =
+                    "${minMaxDetails.heatingConfig.min.currentVal.toInt()}-${minMaxDetails.heatingConfig.max.currentVal.toInt()}v"
+            }
+
+            HsCpuAnalogOutMapping.DCV_DAMPER.ordinal -> {
+                portType =
+                    "${minMaxDetails.dcvDamperConfig.min.currentVal.toInt()}-${minMaxDetails.dcvDamperConfig.max.currentVal.toInt()}v"
+            }
+
+            HsCpuAnalogOutMapping.STAGED_FAN_SPEED.ordinal -> {
+                portType = "0-10v"
+            } // Because staged will be based on the actual voltage in the configuration. Like during stage1 stage2 ...etc
+
+            else -> {
+                portType = "0-10v"
+            }
+        }
+        return portType
+    }
+
+    override fun getAnalogMap(): Map<String, Pair<Boolean, String>> {
+        val analogOuts = mutableMapOf<String, Pair<Boolean, String>>()
+        analogOuts[DomainName.analog1Out] = Pair(isAnalogExternalMapped(analogOut1Enabled, analogOut1Association), analogType(analogOut1Enabled))
+        analogOuts[DomainName.analog2Out] = Pair(isAnalogExternalMapped(analogOut2Enabled, analogOut2Association), analogType(analogOut2Enabled))
+        analogOuts[DomainName.analog3Out] = Pair(isAnalogExternalMapped(analogOut3Enabled, analogOut3Association), analogType(analogOut3Enabled))
+        return analogOuts
+    }
+
+    override fun getRelayMap(): Map<String, Boolean> {
+        val relays = mutableMapOf<String, Boolean>()
+        relays[DomainName.relay1] = isRelayExternalMapped(relay1Enabled, relay1Association)
+        relays[DomainName.relay2] = isRelayExternalMapped(relay2Enabled, relay2Association)
+        relays[DomainName.relay3] = isRelayExternalMapped(relay3Enabled, relay3Association)
+        relays[DomainName.relay4] = isRelayExternalMapped(relay4Enabled, relay4Association)
+        relays[DomainName.relay5] = isRelayExternalMapped(relay5Enabled, relay5Association)
+        relays[DomainName.relay6] = isRelayExternalMapped(relay6Enabled, relay6Association)
+        return relays
+    }
+
+    private fun isRelayExternalMapped(enabled: EnableConfig, association: AssociationConfig) = (enabled.enabled && association.associationVal == HsCpuRelayMapping.EXTERNALLY_MAPPED.ordinal)
+
+    private fun isAnalogExternalMapped(enabled: EnableConfig, association: AssociationConfig) = (enabled.enabled && association.associationVal == HsCpuAnalogOutMapping.EXTERNALLY_MAPPED.ordinal)
+
+    private fun analogType(analogOutPort: EnableConfig): String {
+        return when (analogOutPort) {
+            analogOut1Enabled -> getPortType(analogOut1Association, analogOut1MinMaxConfig)
+            analogOut2Enabled -> getPortType(analogOut2Association, analogOut2MinMaxConfig)
+            analogOut3Enabled -> getPortType(analogOut3Association, analogOut3MinMaxConfig)
+            else -> "0-10v"
+        }
     }
 
     private fun getMinMax(minDomainName: String, maxDomainName: String): MinMaxConfig {

@@ -18,8 +18,10 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -197,7 +199,8 @@ fun RelayConfiguration(
     testState: Boolean = false,
     onTestActivated: (Boolean) -> Unit,
     padding: Int = 10,
-    isTestSignalVisible: Boolean = true
+    isTestSignalVisible: Boolean = true,
+    disabledIndices: List<Int> = emptyList()
 ) {
     Row(
         modifier = Modifier
@@ -221,7 +224,8 @@ fun RelayConfiguration(
                 unit = unit,
                 onSelect = { onAssociationChanged(it) },
                 width = 400,
-                isEnabled = isEnabled
+                isEnabled = isEnabled,
+                disabledIndices = disabledIndices
             )
         }
         if(isTestSignalVisible) {
@@ -423,6 +427,30 @@ fun MinMaxConfiguration(
                 items = itemList,
                 unit = unit,
                 itemSelected = { onMaxSelected(it) }, viewModel = viewModel)
+        }
+    }
+}
+
+
+//This compose is used for the dependent point mapping view
+@Composable
+fun DependentPointMappingView(toggleName : String, toggleState :Boolean = false,
+                              toggleEnabled: (Boolean) -> Unit, mappingText : String, isEnabled: Boolean) {
+    Row (modifier = Modifier
+        .fillMaxWidth()
+        .padding(start = 8.dp, top = 10.dp), horizontalArrangement = Arrangement.Start){
+        Row {
+            ToggleButtonStateful(defaultSelection = toggleState, onEnabled = toggleEnabled, isDisabled = isEnabled)
+            Spacer(modifier = Modifier.width(10.dp))
+            Column {
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(text = toggleName, fontSize = 20.sp)
+            }
+        }
+        Column {
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(text = mappingText, fontSize = 20.sp, modifier = Modifier
+                .padding(start = 50.dp))
         }
     }
 }

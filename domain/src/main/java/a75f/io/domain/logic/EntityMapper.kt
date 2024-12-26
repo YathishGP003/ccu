@@ -1,6 +1,5 @@
 package a75f.io.domain.logic
 
-import a75f.io.api.haystack.Tags
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.EntityConfig
 import a75f.io.domain.config.AssociationConfig
@@ -10,15 +9,12 @@ import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.config.ValueConfig
 import a75f.io.domain.config.getConfig
 import a75f.io.logger.CcuLog
-import android.util.Log
-import io.seventyfivef.domainmodeler.client.ModelPointDef
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfilePointDef
 import io.seventyfivef.domainmodeler.common.point.AssociationConfiguration
 import io.seventyfivef.domainmodeler.common.point.ComparisonType
 import io.seventyfivef.domainmodeler.common.point.Constraint
 import io.seventyfivef.domainmodeler.common.point.DependentConfiguration
-import io.seventyfivef.domainmodeler.common.point.DynamicSensorConfiguration
 import io.seventyfivef.domainmodeler.common.point.MultiStateConstraint
 import io.seventyfivef.domainmodeler.common.point.PointConfiguration
 
@@ -88,13 +84,6 @@ class EntityMapper (private val modelDef: SeventyFiveFProfileDirective) {
                 it.configuration.configType == PointConfiguration.ConfigType.DYNAMIC_SENSOR
         }
     }
-    private fun toPoint(pointDef : ModelPointDef) : Map <Any, Any> {
-        val point = mutableMapOf<Any, Any>()
-        point[Tags.DIS] = pointDef.domainName
-        //pointDef.rootTagNames.
-
-        return point
-    }
 
     private fun getPointByDomainName(name : String) : SeventyFiveFProfilePointDef? {
         return modelDef.points.find { it.domainName == name }
@@ -145,15 +134,12 @@ class EntityMapper (private val modelDef: SeventyFiveFProfileDirective) {
         val baseConfig = profileConfiguration.getEnableConfigs()
             .find { point -> point.domainName == associationPointName }
 
-        if (baseConfig != null && evaluateConfiguration(
+        //TODO -index starts at 1 ?
+        return baseConfig != null && evaluateConfiguration(
                 pointConfiguration.comparisonType,
                 pointConfiguration.value as Int, //TODO -index starts at 1 ?
                 baseConfig.enabled.toInt()
-            )
-        ) {
-            return true
-        }
-        return false
+        )
     }
 
     /**
@@ -314,28 +300,6 @@ class EntityMapper (private val modelDef: SeventyFiveFProfileDirective) {
             )
         }
         return false
-    }
-
-    /**
-     * Returns a point definition if dynamic sensor point exists for sensor type and
-     * current value of the sensor is matching constraint set in point configuration.
-     */
-    fun getEnabledDynamicSensorPoint(sensorType : Int, currentVal : Double) : ModelPointDef?{
-        val sensorPoint = getDynamicSensorPoints().find {
-            isDynamicSensorTypeMatching(sensorType, it)
-        }
-        val sensorConfig = sensorPoint?.configuration as DynamicSensorConfiguration
-        if (evaluateConfiguration(sensorConfig.comparisonType,
-                sensorConfig.value as Int,
-                currentVal.toInt())) {
-            return sensorPoint
-        }
-        return null
-    }
-
-    private fun isDynamicSensorTypeMatching(sensorType: Int, pointDef: SeventyFiveFProfilePointDef) : Boolean{
-        val sensorConfig = pointDef.configuration as DynamicSensorConfiguration
-        return sensorType == sensorConfig.sensorType.toInt()
     }
 
     fun getPhysicalProfilePointRef(profileConfiguration: ProfileConfiguration, rawPointName : String) : String?{

@@ -20,7 +20,6 @@ import a75f.io.logic.L
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
 import a75f.io.logic.bo.building.schedules.Occupancy
-import android.util.Log
 
 /**
  * Created by Manjunath K on 22-10-2024.
@@ -72,7 +71,7 @@ private fun fillHyperStatControls(buildr: HyperStatControlsMessage_t.Builder, eq
             logicalVal
         }
         if (isWritable) {
-            port.writeDefaultVal(mappedVal)
+            // port.writeDefaultVal(mappedVal) // Need to check why it was added. This statement is overriding the algo calculated value at 8th level.
             port.writeHisVal(port.readPriorityVal())
         }
         return mappedVal

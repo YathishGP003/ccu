@@ -105,7 +105,6 @@ class PlcProfileViewModel : ViewModel() {
             profileConfiguration = PlcProfileConfig(deviceAddress.toInt(), nodeType.name, 0,
                 zoneRef, floorRef , profileType, model ).getActiveConfiguration()
             viewState = PlcProfileViewState.fromPlcProfileConfig(profileConfiguration)
-            unusedPorts = UnusedPortsModel.initializeUnUsedPorts(deviceAddress, hayStack)
         } else {
             profileConfiguration = PlcProfileConfig(deviceAddress.toInt(), nodeType.name, 0,
                 zoneRef, floorRef , profileType, model ).getDefaultConfiguration()

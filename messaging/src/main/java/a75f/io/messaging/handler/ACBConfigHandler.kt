@@ -17,19 +17,19 @@ class ACBConfigHandler {
             val device = hayStack.readEntity("device and addr == \"" + config.nodeAddress + "\"")
 
             // Set
-            val relay1 = hayStack.readHDict("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.relay1 + "\"");
-            var relay1Point = RawPoint.Builder().setHDict(relay1).setEnabled(true)
+            val relay1 = hayStack.readHDict("point and deviceRef == \""+ device["id"] +"\" and domainName == \"" + DomainName.relay1 + "\"")
+            val relay1Point = RawPoint.Builder().setHDict(relay1).setEnabled(true)
             hayStack.updatePoint(relay1Point.setType("Relay N/C").build(), relay1.get("id").toString())
 
-            var relay2 = hayStack.readHDict("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.relay2 + "\"");
-            var relay2Point = RawPoint.Builder().setHDict(relay2)
+            val relay2 = hayStack.readHDict("point and deviceRef == \""+ device["id"] +"\" and domainName == \"" + DomainName.relay2 + "\"")
+            val relay2Point = RawPoint.Builder().setHDict(relay2)
             hayStack.updatePoint(relay2Point.setType("Relay N/C").build(), relay2.get("id").toString())
 
-            var analogOut1 = hayStack.readHDict("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.analog1Out + "\"");
-            var analog1Point = RawPoint.Builder().setHDict(analogOut1)
+            val analogOut1 = hayStack.readHDict("point and deviceRef == \""+ device["id"] +"\" and domainName == \"" + DomainName.analog1Out + "\"")
+            val analog1Point = RawPoint.Builder().setHDict(analogOut1)
             hayStack.updatePoint(analog1Point.setType(getDamperTypeString(config)).build(), analogOut1.get("id").toString())
 
-            val analogOut2 = hayStack.readHDict("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.analog2Out + "\"");
+            val analogOut2 = hayStack.readHDict("point and deviceRef == \""+ device["id"] +"\" and domainName == \"" + DomainName.analog2Out + "\"")
 
             val valueType = config.valveType.currentVal.toInt() - 1
             val analog2OpEnabled = valueType == ReheatType.ZeroToTenV.ordinal ||
@@ -76,20 +76,20 @@ class ACBConfigHandler {
 
         fun updateCondensateSensor(hayStack: CCUHsApi, config: AcbProfileConfiguration) {
             val device = hayStack.readEntity("device and addr == \"" + config.nodeAddress + "\"")
-            var th2In = hayStack.readEntity("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.th2In + "\"")
-            var th2InPoint = RawPoint.Builder().setHashMap(th2In)
+            val th2In = hayStack.readEntity("point and deviceRef == \""+ device["id"] +"\" and domainName == \"" + DomainName.th2In + "\"")
+            val th2InPoint = RawPoint.Builder().setHashMap(th2In)
 
             if (config.condensateSensorType.enabled) {
                 // N/C Condensation Sensor
                 val condensateNcPoint = hayStack.readEntity("point and domainName == \"" + DomainName.condensateNC + "\" and group == \"" + config.nodeAddress + "\"")
                 if (condensateNcPoint.containsKey("id")) {
-                    hayStack.updatePoint(th2InPoint.setPointRef(condensateNcPoint.get("id").toString()).build(), th2In.get("id").toString())
+                    hayStack.updatePoint(th2InPoint.setPointRef(condensateNcPoint["id"].toString()).build(), th2In["id"].toString())
                 }
             } else {
                 // N/O Condensation Sensor
                 val condensateNoPoint = hayStack.readEntity("point and domainName == \"" + DomainName.condensateNO + "\" and group == \"" + config.nodeAddress + "\"")
                 if (condensateNoPoint.containsKey("id")) {
-                    hayStack.updatePoint(th2InPoint.setPointRef(condensateNoPoint.get("id").toString()).build(), th2In.get("id").toString())
+                    hayStack.updatePoint(th2InPoint.setPointRef(condensateNoPoint["id"].toString()).build(), th2In["id"].toString())
                 }
             }
 
@@ -97,20 +97,20 @@ class ACBConfigHandler {
 
         fun updateRelayAssociation(hayStack: CCUHsApi, config: AcbProfileConfiguration) {
             val device = hayStack.readEntity("device and addr == \"" + config.nodeAddress + "\"")
-            var relay1Map = hayStack.readEntity("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.relay1 + "\"")
-            var relay1 = RawPoint.Builder().setHashMap(relay1Map)
+            val relay1Map = hayStack.readEntity("point and deviceRef == \""+ device["id"] +"\" and domainName == \"" + DomainName.relay1 + "\"")
+            val relay1 = RawPoint.Builder().setHashMap(relay1Map)
 
             if (config.relay1Association.associationVal > 0) {
                 // N/O Valve
                 val valveNoPoint = hayStack.read("point and domainName == \"" + DomainName.chilledWaterValveIsolationCmdPointNO + "\" and group == \"" + config.nodeAddress + "\"")
                 if (valveNoPoint.containsKey("id")) {
-                    hayStack.updatePoint(relay1.setPointRef(valveNoPoint.get("id").toString()).build(), relay1Map.get("id").toString())
+                    hayStack.updatePoint(relay1.setPointRef(valveNoPoint["id"].toString()).build(), relay1Map["id"].toString())
                 }
             } else {
                 // N/C Valve
                 val valveNcPoint = hayStack.read("point and domainName == \"" + DomainName.chilledWaterValveIsolationCmdPointNC + "\" and group == \"" + config.nodeAddress + "\"")
                 if (valveNcPoint.containsKey("id")) {
-                    hayStack.updatePoint(relay1.setPointRef(valveNcPoint.get("id").toString()).build(), relay1Map.get("id").toString())
+                    hayStack.updatePoint(relay1.setPointRef(valveNcPoint["id"].toString()).build(), relay1Map["id"].toString())
                 }
             }
 
@@ -121,7 +121,7 @@ class ACBConfigHandler {
         // tag on these points after they are created.
         fun setMinCfmSetpointMaxVals(hayStack: CCUHsApi, config: AcbProfileConfiguration) {
             val equip = hayStack.readEntity("equip and group == \"" + config.nodeAddress + "\"")
-            val vavEquip = VavAcbEquip(equip.get("id").toString())
+            val vavEquip = VavAcbEquip(equip["id"].toString())
 
             if (vavEquip.enableCFMControl.readDefaultVal() > 0.0) {
                 val maxCoolingCfm = vavEquip.maxCFMCooling.readDefaultVal()
@@ -129,11 +129,11 @@ class ACBConfigHandler {
 
                 val minCoolingCfmMap = hayStack.readEntity("point and domainName == \"" + DomainName.minCFMCooling + "\"" + " and equipRef == \"" + vavEquip.equipRef + "\"")
                 val minCoolingCfmPoint = Point.Builder().setHashMap(minCoolingCfmMap).setMaxVal(maxCoolingCfm.toString()).build()
-                hayStack.updatePoint(minCoolingCfmPoint, minCoolingCfmMap.get("id").toString())
+                hayStack.updatePoint(minCoolingCfmPoint, minCoolingCfmMap["id"].toString())
 
                 val minReheatingCfmMap = hayStack.readEntity("point and domainName == \"" + DomainName.minCFMReheating + "\"" + " and equipRef == \"" + vavEquip.equipRef + "\"")
                 val minReheatingCfmPoint = Point.Builder().setHashMap(minReheatingCfmMap).setMaxVal(maxReheatingCfm.toString()).build()
-                hayStack.updatePoint(minReheatingCfmPoint, minReheatingCfmMap.get("id").toString())
+                hayStack.updatePoint(minReheatingCfmPoint, minReheatingCfmMap["id"].toString())
             }
 
         }
@@ -142,10 +142,10 @@ class ACBConfigHandler {
         // We set this value to 1.5x the Max Cooling CFM, which is the ballpark value used by U.S. Support during commissioning.
         fun setAirflowCfmProportionalRange(hayStack: CCUHsApi, config: AcbProfileConfiguration) {
             val equip = hayStack.readEntity("equip and group == \"" + config.nodeAddress + "\"")
-            val AcbEquip = VavEquip(equip.get("id").toString())
+            val acbEquip = VavEquip(equip["id"].toString())
 
-            if (AcbEquip.enableCFMControl.readDefaultVal() > 0.0) {
-                AcbEquip.vavAirflowCFMProportionalRange.writePointValue(1.5*AcbEquip.maxCFMCooling.readPriorityVal())
+            if (acbEquip.enableCFMControl.readDefaultVal() > 0.0) {
+                acbEquip.vavAirflowCFMProportionalRange.writeVal(10, 1.5*acbEquip.maxCFMCooling.readPriorityVal())
             }
         }
 

@@ -256,6 +256,15 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             migrateHyperStatSplitFanModeCache() // Migrate HyperStat Fan Mode Cache to HyperStatSplit Fan Mode Cache if split fan mode is present
             PreferenceUtil.setMigrateHyperStatSplitFanModeCache()
         }
+        if(!PreferenceUtil.getPrangePointMigrationFlag()) {
+            try {
+                prangePointMigration()
+                PreferenceUtil.setPrangePointMigrationFlag()
+            }catch (e: Exception) {
+                // For now, we make sure it does not stop other migrations even if this fails.
+                CcuLog.e(L.TAG_CCU_MIGRATION_UTIL, "Error in prangePointMigration $e")
+            }
+        }
         hayStack.scheduleSync()
     }
 
@@ -2102,5 +2111,38 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "bacnet setting points found: ${it["dis"]}. Deleting the redundant point")
             hayStack.deleteEntity(it["id"].toString())
         }
+    }
+
+    private fun prangePointMigration() {
+        CcuLog.i(L.TAG_CCU_MIGRATION_UTIL, "vavAirflowCFMProportionalRange migration is started")
+        CCUHsApi.getInstance().readAllEntities("equip and (vav or acb) and zone")
+            .forEach { equipMap ->
+                val vavAirflowCFMProportionalRange = Domain.readPointForEquip(
+                    DomainName.vavAirflowCFMProportionalRange,
+                    equipMap["id"].toString()
+                )
+                if (vavAirflowCFMProportionalRange.isNotEmpty()) {
+                    // read level 8 val
+                    val value = CCUHsApi.getInstance()
+                        .readDefaultVal("point and domainName == \"${DomainName.vavAirflowCFMProportionalRange}\" and equipRef == \"${equipMap["id"].toString()}\"")
+                    // write to level 10
+                    CCUHsApi.getInstance().writeTunerPointForCcuUser(
+                        vavAirflowCFMProportionalRange["id"].toString(),
+                        10,
+                        value,
+                        0,
+                        "updating vavAirflowCFMProportionalRange value from level 8 to 10"
+                    )
+                    // clear level 8 val
+                    hayStack.clearPointArrayLevel(
+                        vavAirflowCFMProportionalRange["id"].toString(), 8, false
+                    )
+                    CcuLog.i(
+                        L.TAG_CCU_MIGRATION_UTIL,
+                        "updated value for point ${vavAirflowCFMProportionalRange["id"]} to 10"
+                    )
+                }
+            }
+        CcuLog.i(L.TAG_CCU_MIGRATION_UTIL, "vavAirflowCFMProportionalRange migration is complete")
     }
 }

@@ -208,7 +208,7 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                             defaultSelection = viewModel.pidProportionalRange.indexOf(
                                 viewModel.viewState.pidProportionalRange.toDouble().toString()
                             ).let { index ->
-                                if (index >= 0) index else 0 // Fallback to 0 when 0 is present instead of 0.0
+                                if (index >= 0) index else 1 // Fallback to value 2 when 0 is present instead of 0.0
                             },
                             spacerLimit = 80,
                             heightValue = 211

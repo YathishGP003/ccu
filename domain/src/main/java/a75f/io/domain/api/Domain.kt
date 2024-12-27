@@ -264,7 +264,7 @@ object Domain {
             return Triple(minVal, maxVal, incVal)
         } else if (point?.valueConstraint is MultiStateConstraint) {
             val minVal = 0.0 // Consider enum first value as zero
-            val maxVal = (point.valueConstraint as MultiStateConstraint).allowedValues.size.toDouble()
+            val maxVal = (point.valueConstraint as MultiStateConstraint).allowedValues.size.toDouble() - 1 //  // Maximum valid index - (allowedValues list size - 1)
             val incVal = 1.0
             return Triple(minVal, maxVal, incVal)
         }

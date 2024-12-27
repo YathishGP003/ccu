@@ -170,7 +170,7 @@ class PlcProfileViewModel : ViewModel() {
         if (selectedIndex == 0) {
             return targetVal
         }
-        var minMaxInc: Triple<Double, Double, Double> = Triple(0.0, 0.0, 0.0)
+        var minMaxInc: Triple<Double, Double, Double>
         var pointString = getProcessVariableMappedPoint()
         minMaxInc = getMinMaxIncValuesByDomainName(pointString.toString(), model)
 
@@ -236,23 +236,10 @@ class PlcProfileViewModel : ViewModel() {
         if (selectedIndex == 0) {
             return errorVal
         }
-        var minMaxInc: Triple<Double, Double, Double> = Triple(0.0, 0.0, 0.0)
-        var pointString = getProcessVariableMappedPoint()
-        minMaxInc = getMinMaxIncValuesByDomainName(pointString.toString(), model)
-
         errorVal.clear()
-
-        val minVal = (100 * minMaxInc.first).toInt()
-        val maxVal = (100 * minMaxInc.second).toInt()
-        val increment = (100 * minMaxInc.third).toInt()
-
-        for (pos in minVal..maxVal step increment) {
-            errorVal.add((pos / 100.0).toString())
+        for (pos in 1..10 step 1) {
+            errorVal.add((pos.toDouble()).toString())
         }
-
-        // Remove the negative and zero values from the list
-        errorVal.removeIf { it.toDoubleOrNull() == null || it.toDouble() <= 0 }
-
         return errorVal
     }
 
@@ -260,23 +247,10 @@ class PlcProfileViewModel : ViewModel() {
         if (selectedIndex == 0) {
             return errorVal
         }
-        var minMaxInc: Triple<Double, Double, Double> = Triple(0.0, 0.0, 0.0)
-        var pointString = getProcessVariableMappedPoint()
-        minMaxInc = getMinMaxIncValuesByDomainName(pointString.toString(), model)
-
         errorVal.clear()
-
-        val minVal = (100 * minMaxInc.first).toInt()
-        val maxVal = (100 * minMaxInc.second).toInt()
-        val increment = (100 * minMaxInc.third).toInt()
-
-        for (pos in minVal..maxVal step increment) {
-            errorVal.add((pos / 100.0).toString())
+        for (pos in 1..10 step 1) {
+            errorVal.add((pos.toDouble()).toString())
         }
-
-        // Remove the negative and zero values from the list
-        errorVal.removeIf { it.toDoubleOrNull() == null || it.toDouble() <= 0 }
-
         return errorVal
     }
 
@@ -284,23 +258,10 @@ class PlcProfileViewModel : ViewModel() {
         if (selectedIndex == 0) {
             return errorVal
         }
-        var minMaxInc: Triple<Double, Double, Double> = Triple(0.0, 0.0, 0.0)
-        var pointString = getProcessVariableMappedPoint()
-        minMaxInc = getMinMaxIncValuesByDomainName(pointString.toString(), model)
-
         errorVal.clear()
-
-        val minVal = (100 * minMaxInc.first).toInt()
-        val maxVal = (100 * minMaxInc.second).toInt()
-        val increment = (100 * minMaxInc.third).toInt()
-
-        for (pos in minVal..maxVal step increment) {
-            errorVal.add((pos / 100.0).toString())
+        for (pos in 1..10 step 1) {
+            errorVal.add((pos.toDouble()).toString())
         }
-
-        // Remove the negative and zero values from the list
-        errorVal.removeIf { it.toDoubleOrNull() == null || it.toDouble() <= 0 }
-
         return errorVal
     }
 
@@ -310,7 +271,7 @@ class PlcProfileViewModel : ViewModel() {
         // Get the target list based on the selected sensor type
         if(viewState.analog1InputType.toInt() != 0) pidTargetValue = returnTargetValueAi1(viewState.analog1InputType.toInt())
         if(viewState.thermistor1InputType.toInt() != 0) pidTargetValue = returnTargetValueTH1(viewState.thermistor1InputType.toInt())
-        if(viewState.nativeSensorType.toInt() != 0) pidTargetValue = returnErrorValueNativeSensor(viewState.nativeSensorType.toInt())
+        if(viewState.nativeSensorType.toInt() != 0) pidTargetValue = returnTargetValueNativeSensor(viewState.nativeSensorType.toInt())
 
         thermistor1InputType = getListByDomainName(DomainName.thermistor1InputType, model)
 

@@ -85,7 +85,7 @@ class PlcProfileViewModel : ViewModel() {
     private var saveJob : Job? = null
     private var targetVal = ArrayList<String>()
     private var errorVal = ArrayList<String>()
-
+    var isDefault = false
     fun init(bundle: Bundle, context: Context, hayStack : CCUHsApi) {
         deviceAddress = bundle.getShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR)
         zoneRef = bundle.getString(FragmentCommonBundleArgs.ARG_NAME)!!
@@ -109,6 +109,7 @@ class PlcProfileViewModel : ViewModel() {
             profileConfiguration = PlcProfileConfig(deviceAddress.toInt(), nodeType.name, 0,
                 zoneRef, floorRef , profileType, model ).getDefaultConfiguration()
             viewState = PlcProfileViewState.fromPlcProfileConfig(profileConfiguration)
+            isDefault = true
         }
         CcuLog.i(Domain.LOG_TAG, profileConfiguration.toString())
         this.context = context

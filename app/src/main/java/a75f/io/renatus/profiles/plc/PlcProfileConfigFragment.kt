@@ -122,6 +122,8 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                             previewWidth = 195,
                             expandedWidth = 195,
                             onSelected = { selectedIndex ->
+                                viewModel.viewState.thermistor1InputType = 0.0
+                                viewModel.viewState.nativeSensorType = 0.0
                                 viewModel.viewState.analog1InputType = selectedIndex.toDouble()
                                 if (selectedIndex > 0) {
                                     // Update the target value and error range based on the selected input type
@@ -195,6 +197,8 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                             previewWidth = 195,
                             expandedWidth = 195,
                             onSelected = { selectedIndex ->
+                                viewModel.viewState.analog1InputType = 0.0
+                                viewModel.viewState.nativeSensorType = 0.0
                                 viewModel.viewState.thermistor1InputType = selectedIndex.toDouble()
                                 if (selectedIndex > 0) {
                                     // Update the target value and error range based on the selected input type
@@ -252,6 +256,8 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                             previewWidth = 195,
                             expandedWidth = 195,
                             onSelected = { selectedIndex ->
+                                viewModel.viewState.analog1InputType = 0.0
+                                viewModel.viewState.thermistor1InputType = 0.0
                                 viewModel.viewState.nativeSensorType = selectedIndex.toDouble()
                                 if (selectedIndex > 0) {
                                     // Update the target value and error range based on the selected input type

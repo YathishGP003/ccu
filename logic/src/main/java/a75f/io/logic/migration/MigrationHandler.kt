@@ -265,6 +265,10 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                 CcuLog.e(L.TAG_CCU_MIGRATION_UTIL, "Error in prangePointMigration $e")
             }
         }
+        if(!PreferenceUtil.getCorrectRelay2PointRefSeriesParallel()) {
+            correctPointRefForRelay2SeriesFan()
+            PreferenceUtil.setCorrectRelay2PointRefSeriesParallel()
+        }
         hayStack.scheduleSync()
     }
 
@@ -2105,7 +2109,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
     }
 
 
-    fun removeRedundantBacnetSettingPoints() {
+    private fun removeRedundantBacnetSettingPoints() {
         CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "Removing redundant bacnet setting points")
         hayStack.readAllEntities("bacnet and setting and point").forEach {
             CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "bacnet setting points found: ${it["dis"]}. Deleting the redundant point")
@@ -2144,5 +2148,26 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                 }
             }
         CcuLog.i(L.TAG_CCU_MIGRATION_UTIL, "vavAirflowCFMProportionalRange migration is complete")
+    }
+
+    private fun correctPointRefForRelay2SeriesFan() {
+        CcuLog.d(L.TAG_CCU_MIGRATION_UTIL,"correctPointRefForRelay2SeriesFan execution started")
+        hayStack.readAllEntities("equip and ( profile == \"${ ProfileType.VAV_SERIES_FAN }\" or profile == \"${ ProfileType.VAV_PARALLEL_FAN }\" )  ").forEach { vavSeriesEquipMap ->
+            CcuLog.d(L.TAG_CCU_MIGRATION_UTIL,"equipName: ${vavSeriesEquipMap["dis"]} and id: ${vavSeriesEquipMap["id"]} and domainName: ${vavSeriesEquipMap["domainName"]} ")
+            hayStack.readId("device and equipRef == \"${ vavSeriesEquipMap["id"] }\" ")?.let { deviceId ->
+                val logicalPointId = hayStack.readId("(domainName == \"${ DomainName.seriesFanCmd }\" or domainName == \"${ DomainName.parallelFanCmd }\") and equipRef == \"${ vavSeriesEquipMap["id"] }\"")
+                val relay2PhyPointDict = hayStack.readHDict("portEnabled and domainName==\"${DomainName.relay2}\" and deviceRef== \"${deviceId}\" ")
+                CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "\tlogicalPointId: $logicalPointId and current pointRef: ${relay2PhyPointDict.get("pointRef", false)}")
+                if (relay2PhyPointDict.get("pointRef", false) != null && relay2PhyPointDict.get("pointRef").toString()
+                    .replace("@", "") != logicalPointId?.replace("@", "")
+                ) {
+                    CcuLog.d(L.TAG_CCU_MIGRATION_UTIL,"\tIncorrect mapping to logical point.")
+                    val relay2PhyPoint = RawPoint.Builder().setHDict(relay2PhyPointDict).build()
+                    relay2PhyPoint.pointRef = logicalPointId
+                    hayStack.updatePoint(relay2PhyPoint, relay2PhyPoint.id)
+                }
+            }
+        }
+        CcuLog.d(L.TAG_CCU_MIGRATION_UTIL,"correctPointRefForRelay2SeriesFan execution completed")
     }
 }

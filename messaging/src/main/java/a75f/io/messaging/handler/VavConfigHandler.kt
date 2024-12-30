@@ -35,10 +35,8 @@ class VavConfigHandler {
             val relay2OpEnabled = ((config.profileType != ProfileType.VAV_REHEAT.name) || reheatType == ReheatType.TwoStage.ordinal)
             val relay2 = hayStack.readHDict("point and deviceRef == \""+ device["id"] +"\" and domainName == \"" + DomainName.relay2 + "\"")
             val relay2Point = RawPoint.Builder().setHDict(relay2).setType(if (relay2OpEnabled) "Relay N/C" else "Relay N/O").setEnabled(relay2OpEnabled)
-            if (relay2OpEnabled){
+            if ((config.profileType == ProfileType.VAV_REHEAT.name) && relay2OpEnabled){
                 relay2Point.setPointRef(reheatCmdPoint["id"].toString())
-            } else {
-                relay2Point.setPointRef(null)
             }
             hayStack.updatePoint(relay2Point.build(), relay2["id"].toString())
 

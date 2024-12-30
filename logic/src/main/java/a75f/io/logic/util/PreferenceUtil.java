@@ -84,7 +84,7 @@ public class PreferenceUtil {
     private static final String BACNET_SETTING_POINT_DELETED = "bacnetSettingPointDeleted";
     private static final String OTA_STATUS_POINT_REMOVAL = "otaStatusPointRemoval";
     private static final String PRANGE_POINT_MIGRATION_FLAG = "prangePointMigrationFlag";
-
+    private static final String CORRECT_RELAY2_POINTREF_SERIES_PARALLEL = "correctRelay2PointRefSeriesParallel";
 
     public static void setContext(Context c) {
         context= c;
@@ -663,5 +663,13 @@ public class PreferenceUtil {
 
     public static void setNonDmOtaPointDeletionStatus() {
         setBooleanPreference(OTA_STATUS_POINT_REMOVAL, true);
+    }
+
+    public static boolean getCorrectRelay2PointRefSeriesParallel() {
+        return getBooleanPreference(CORRECT_RELAY2_POINTREF_SERIES_PARALLEL);
+    }
+
+    public static void setCorrectRelay2PointRefSeriesParallel() {
+        setBooleanPreference(CORRECT_RELAY2_POINTREF_SERIES_PARALLEL, true);
     }
 }

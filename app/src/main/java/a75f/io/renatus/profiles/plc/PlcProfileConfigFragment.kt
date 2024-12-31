@@ -338,9 +338,10 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                         previewWidth = 130,
                         expandedWidth = 150,
                         onSelected = { selectedIndex ->
-                            viewModel.viewState.setpointSensorOffset = selectedIndex.toDouble()
+                            viewModel.viewState.setpointSensorOffset =
+                                viewModel.setpointSensorOffset[selectedIndex].toDouble()
                         },
-                        defaultSelection = viewModel.viewState.setpointSensorOffset.toInt(),
+                        defaultSelection = viewModel.setpointSensorOffset.indexOf(viewModel.viewState.setpointSensorOffset.toString()),
                         spacerLimit = 50,
                         heightValue = 211
                     )

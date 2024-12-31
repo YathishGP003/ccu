@@ -1,6 +1,7 @@
 package a75f.io.renatus.profiles.plc
 
 import a75f.io.api.haystack.CCUHsApi
+import a75f.io.api.haystack.Device
 import a75f.io.api.haystack.RawPoint
 import a75f.io.device.mesh.LSerial
 import a75f.io.domain.api.Domain
@@ -18,16 +19,16 @@ import a75f.io.domain.util.ModelLoader.getSmartNodePidModel
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.NodeType
+import a75f.io.logic.bo.building.dab.getDevicePointDict
+import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.plc.PlcProfile
 import a75f.io.logic.bo.building.plc.PlcProfileConfig
-import a75f.io.logic.bo.building.sensors.SensorManager
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.FloorPlanFragment
 import a75f.io.renatus.modbus.util.showToast
 import a75f.io.renatus.profiles.OnPairingCompleteListener
-import a75f.io.renatus.profiles.profileUtils.UnusedPortsModel
 import a75f.io.renatus.profiles.profileUtils.UnusedPortsModel.Companion.saveUnUsedPortStatus
 import a75f.io.renatus.util.ProgressDialogUtils
 import a75f.io.renatus.util.highPriorityDispatcher
@@ -319,6 +320,12 @@ class PlcProfileViewModel : ViewModel() {
 
                 CoroutineScope(Dispatchers.IO).launch {
                     updateTypeForAnalog1Out(profileConfiguration)
+                    updatePortConfiguration(
+                        hayStack,
+                        profileConfiguration,
+                        DeviceBuilder(hayStack, EntityMapper(model)),
+                        deviceModel
+                    )
                 }
                 // This check is needed because the dialog sometimes fails to close inside the coroutine.
                 // We don't know why this happens.
@@ -494,5 +501,83 @@ class PlcProfileViewModel : ViewModel() {
         } else {
             CcuLog.i(Domain.LOG_TAG, "Analog1Out type is already set to $type")
         }
+    }
+
+    private fun updatePortConfiguration(
+        hayStack: CCUHsApi,
+        config: PlcProfileConfig,
+        deviceBuilder: DeviceBuilder,
+        deviceModel: SeventyFiveFDeviceDirective
+    ) {
+        val deviceEntityId =
+            hayStack.readEntity("device and addr == \"${config.nodeAddress}\"")["id"].toString()
+        val device = Device.Builder().setHDict(hayStack.readHDictById(deviceEntityId)).build()
+
+        fun updateDevicePoint(
+            domainName: String, port: String, analogType: Any,
+            isPortEnabled: Boolean = false
+        ) {
+            val pointDef = deviceModel.points.find { it.domainName == domainName }
+            pointDef?.let {
+                val pointDict = getDevicePointDict(domainName, deviceEntityId, hayStack).apply {
+                    this["port"] = port
+                    this["analogType"] = analogType
+                    this["portEnabled"] = isPortEnabled
+                }
+                deviceBuilder.updatePoint(it, config, device, pointDict)
+            }
+        }
+
+        // Analog In 1
+        if (config.analog1InputType.currentVal > 0) {
+            updateDevicePoint(
+                DomainName.analog1In,
+                Port.ANALOG_IN_ONE.name,
+                (config.analog1InputType.currentVal - 1).toInt(),
+                true
+            )
+        } else {
+            updateDevicePoint(
+                DomainName.analog1In, Port.ANALOG_IN_ONE.name, 0, false
+            )
+        }
+
+        // Analog In 2
+        if (config.analog2InputType.currentVal > 0) {
+            updateDevicePoint(
+                DomainName.analog2In,
+                Port.ANALOG_IN_TWO.name,
+                (config.analog2InputType.currentVal).toInt(),
+                true
+            )
+        } else {
+            updateDevicePoint(
+                DomainName.analog2In, Port.ANALOG_IN_TWO.name, 0, false
+            )
+        }
+
+        // Th1 In
+        if (config.thermistor1InputType.currentVal > 0) {
+            updateDevicePoint(
+                DomainName.th1In,
+                Port.TH1_IN.name,
+                (config.thermistor1InputType.currentVal - 1).toInt(),
+                true
+            )
+        } else {
+            updateDevicePoint(DomainName.th1In, Port.TH1_IN.name, 0, false)
+        }
+
+        // Relay 1
+        if (config.relay1OutputEnable.enabled)
+            updateDevicePoint(DomainName.relay1, Port.RELAY_ONE.name, "Relay N/O", true)
+        else
+            updateDevicePoint(DomainName.relay1, Port.RELAY_ONE.name, "Relay N/C", false)
+
+        // Relay 2
+        if (config.relay2OutputEnable.enabled)
+            updateDevicePoint(DomainName.relay2, Port.RELAY_TWO.name, "Relay N/O", true)
+        else
+            updateDevicePoint(DomainName.relay2, Port.RELAY_TWO.name, "Relay N/C", false)
     }
 }

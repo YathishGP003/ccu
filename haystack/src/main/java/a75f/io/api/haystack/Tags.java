@@ -235,5 +235,6 @@ public class Tags
     public static final String CONNECTMODULE = "connectModule";
     public static final String UNUSED = "unused";
     public static final String CCUREF = "ccuRef";
+    public static final String POINTREF = "pointRef";
 
 }

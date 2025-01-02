@@ -45,4 +45,6 @@ object ModelNames {
     const val hyperStatCpu = "hyperstatCPU"
     const val hyperStatPipe2 = "hyperstat2PFCU"
     const val hyperStatHpu = "hyperstatHPU"
+    const val ti = "ccuTemperatureInfluence"
+
 }

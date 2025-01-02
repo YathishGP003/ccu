@@ -47,7 +47,6 @@ import a75f.io.renatus.FragmentEMRConfiguration;
 import a75f.io.renatus.FragmentHMPConfiguration;
 import a75f.io.renatus.FragmentHeatPumpConfiguration;
 import a75f.io.renatus.FragmentPLCConfiguration;
-import a75f.io.renatus.FragmentTempInfConfiguration;
 import a75f.io.renatus.R;
 import a75f.io.renatus.bluetooth.BLEAction;
 import a75f.io.renatus.bluetooth.BLEProvisionService;
@@ -55,6 +54,7 @@ import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
 import a75f.io.renatus.profiles.dab.DabProfileConfigFragment;
 import a75f.io.renatus.profiles.hss.cpu.HyperStatSplitCpuFragment;
 import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatMonitoringFragment;
+import a75f.io.renatus.profiles.ti.TIFragment;
 import a75f.io.renatus.profiles.oao.OAOProfileFragment;
 import a75f.io.renatus.profiles.sse.SseProfileConfigFragment;
 import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatV2CpuFragment;
@@ -440,8 +440,7 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
                                 .newInstance(mPairingAddress, mName, mNodeType, mFloorName), FragmentEMRConfiguration.ID);
                         break;
                     case TEMP_INFLUENCE:
-                        showDialogFragment(FragmentTempInfConfiguration
-                                .newInstance(mPairingAddress, mName, mNodeType, mFloorName), FragmentTempInfConfiguration.ID);
+                        showDialogFragment(TIFragment.newInstance(mPairingAddress, mName, mFloorName,mNodeType, ProfileType.TEMP_INFLUENCE), TIFragment.ID);
                     case SMARTSTAT_CONVENTIONAL_PACK_UNIT:
                         showDialogFragment(FragmentCPUConfiguration.newInstance(mPairingAddress, mName, mNodeType, mFloorName, mProfileType), FragmentCPUConfiguration.ID);
                         break;

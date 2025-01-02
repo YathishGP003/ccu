@@ -143,8 +143,6 @@ object ModelLoader {
         return ModelCache.getModelById(MODEL_OTN_DEVICE)
     }
 
-
-
     fun getHyperStatDeviceModel() : ModelDirective {
         return ModelCache.getModelById(MODEL_HYPERSTAT_DEVICE)
     }
@@ -166,6 +164,15 @@ object ModelLoader {
 
     fun getHyperStatDevice() : ModelDirective {
         return ModelCache.getModelById(MODEL_HYPERSTAT_DEVICE)
+    }
+
+
+    fun getTIModel(): ModelDirective {
+        return ModelCache.getModelById(MODEL_TI)
+    }
+
+    fun getTIDeviceModel(): ModelDirective {
+        return ModelCache.getModelById(MODEL_TI_DEVICE)
     }
 
     fun getModelForDomainName( domainName : String) : ModelDirective {
@@ -190,6 +197,8 @@ object ModelLoader {
             "connectModuleDevice" -> getConnectModuleDeviceModel()
             "hyperstatSplitDevice" -> getHyperStatSplitDeviceModel()
             "hyperstatCPU" -> getHyperStatCpuModel()
+            "temperatureInfluence" -> getTIModel()
+            "temperatureInfluenceDevice" -> getTIDeviceModel()
             DomainName.ccuConfiguration -> getCCUBaseConfigurationModel()
             "smartnodeOAO" -> getSmartNodeOAOModelDef()
             "smartnodeSSE" -> getSmartNodeSSEModel()

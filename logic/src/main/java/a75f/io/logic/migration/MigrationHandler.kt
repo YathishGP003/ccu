@@ -31,6 +31,7 @@ import a75f.io.domain.cutover.NodeDeviceCutOverMapping
 import a75f.io.domain.cutover.OaoCutOverMapping
 import a75f.io.domain.cutover.OtnEquipCutOverMapping
 import a75f.io.domain.cutover.SseZoneProfileCutOverMapping
+import a75f.io.domain.cutover.TiCutOverMapping
 import a75f.io.domain.cutover.VavFullyModulatingRtuCutOverMapping
 import a75f.io.domain.cutover.VavStagedRtuCutOverMapping
 import a75f.io.domain.cutover.VavStagedVfdRtuCutOverMapping
@@ -56,6 +57,7 @@ import a75f.io.logic.Globals
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.bypassdamper.BypassDamperProfileConfiguration
+import a75f.io.logic.bo.building.caz.configs.TIConfiguration
 import a75f.io.logic.bo.building.dab.DabProfileConfiguration
 import a75f.io.logic.bo.building.dab.getDevicePointDict
 import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType
@@ -144,6 +146,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         doHSHPUDMMigration()
         doHSMonitoringDMMigration()
         doHSPipe2DMMigration()
+        doTiCutOverMigration()
         if (!isMigrationRequired()) {
             CcuLog.i(L.TAG_CCU_MIGRATION_UTIL, "---- Migration Not Required ----")
             return
@@ -1351,6 +1354,52 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                 val profile = DefaultProfileConfiguration(1000, "", 0, "", "", profileType)
                 profile
             }
+        }
+    }
+
+
+    private fun doTiCutOverMigration() {
+        val haystack = CCUHsApi.getInstance()
+
+        val tiEquip = haystack.readEntity("equip and ti")
+        if (tiEquip.isEmpty() || (tiEquip.isNotEmpty() && tiEquip.containsKey("domainName"))) {
+            CcuLog.i(Domain.LOG_TAG, "TI equip is not found or TI equip is already DM migrated")
+            return
+        }
+
+        if (tiEquip.isNotEmpty()) {
+            val model = ModelLoader.getTIModel() as SeventyFiveFProfileDirective
+            val deviceModel = ModelLoader.getTIDeviceModel() as SeventyFiveFDeviceDirective
+            val deviceBuilder = DeviceBuilder(haystack, EntityMapper(model))
+            val profileType = ProfileType.TEMP_INFLUENCE
+            val equipBuilder = ProfileEquipBuilder(hayStack)
+
+            val nodeAddress = tiEquip["group"].toString()
+            val equipDis = "${hayStack.siteName}-${model.name}-$nodeAddress"
+            val deviceDis = "${hayStack.siteName}-${deviceModel.name}-$nodeAddress"
+            val device = hayStack.readEntity("device and addr == \"$nodeAddress\"")
+            val configuration = TIConfiguration(
+                nodeAddress.toInt(), NodeType.CONTROL_MOTE.name, 0,
+                tiEquip["roomRef"].toString(), tiEquip["floorRef"].toString(),
+                profileType, model
+            ).getActiveConfiguration()
+            equipBuilder.doCutOverMigration(
+                tiEquip["id"].toString(),
+                model,
+                equipDis,
+                TiCutOverMapping.entries,
+                configuration,
+                equipHashMap = tiEquip
+            )
+
+            deviceBuilder.doCutOverMigration(
+                device["id"].toString(),
+                deviceModel,
+                deviceDis,
+                TiCutOverMapping.tiDeviceMapping,
+                configuration
+            )
+            addDomainEquips(hayStack)
         }
     }
 

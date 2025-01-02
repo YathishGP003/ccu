@@ -1,7 +1,5 @@
 package a75f.io.logic.jobs;
 
-import org.joda.time.DateTime;
-
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -97,26 +95,12 @@ public class BuildingProcessJob extends BaseJob implements WatchdogMonitor
             CcuLog.d(L.TAG_CCU_JOB,"<- BuildingProcessJob : Previous Instance of job still running");
         }
     }
-    
-    
-    //This could go away once messaging is stabilized.
-    /*private void handleMessagingRegistration() {
-        boolean useMessagingApi = Globals.getInstance().isAckdMessagingEnabled();
-        if (!useMessagingApi && !PbSubscriptionHandler.getInstance().isPubnubSubscribed()) {
-            CCUHsApi.getInstance().syncEntityTree();
-            if (CCUHsApi.getInstance().siteSynced()) {
-                String siteUID = CCUHsApi.getInstance().getSiteIdRef().toString();
-                PbSubscriptionHandler.getInstance().registerSite(Globals.getInstance().getApplicationContext(),
-                                                                 siteUID);
-            }
-        }
-    }*/
-    
+
     private void runZoneProfilesAlgorithm() {
         for (ZoneProfile profile : L.ccu().zoneProfiles) {
             try {
-                            profile.updateZonePoints();
-            } catch (Exception e){
+                profile.updateZonePoints();
+            } catch (Exception e) {
                 CcuLog.e(L.TAG_CCU_JOB, "runZoneProfilesAlgorithm Failed ! ", e);
                 e.printStackTrace();
             }

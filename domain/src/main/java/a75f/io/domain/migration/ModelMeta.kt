@@ -35,6 +35,8 @@ import a75f.io.domain.util.MODEL_SN_VAV_ACB
 import a75f.io.domain.util.MODEL_SN_VAV_NO_FAN
 import a75f.io.domain.util.MODEL_SN_VAV_PARALLEL_FAN
 import a75f.io.domain.util.MODEL_SN_VAV_SERIES_FAN
+import a75f.io.domain.util.MODEL_TI
+import a75f.io.domain.util.MODEL_TI_DEVICE
 import a75f.io.domain.util.MODEL_VAV_ADVANCED_AHU_V2_CM
 import a75f.io.domain.util.MODEL_VAV_ADVANCED_AHU_V2_CONNECT
 import a75f.io.domain.util.MODEL_VAV_MODULATING_AHU
@@ -95,6 +97,8 @@ fun getRequiredModels(): List<String> {
             MODEL_HYPERSTAT_HPU,
             MODEL_HYPERSTAT_MONITORING,
             MODEL_CCU_DIAG_EQUIP,
-            MODEL_CCU_BASE_CONFIGURATION
+            MODEL_CCU_BASE_CONFIGURATION,
+            MODEL_TI_DEVICE,
+            MODEL_TI
     )
 }

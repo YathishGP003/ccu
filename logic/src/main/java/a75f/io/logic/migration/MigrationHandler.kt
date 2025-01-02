@@ -194,27 +194,6 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             correctEnumsForCorruptModbusPoints(hayStack)
             PreferenceUtil.setModbusEnumCorrectionDone()
         }
-        if(!PreferenceUtil.isBackFillValueUpdateRequired()) {
-            val backFillDurationDomainPoint  = hayStack.readEntity("domainName == \"backfillDuration\"")
-            try {
-                if(backFillDurationDomainPoint.isNotEmpty()) {
-                    updatingBackFillDefaultValues(
-                        hayStack,
-                        backFillDurationDomainPoint
-                    )
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-                //For now, we make sure it does not stop other migrations even if this fails.
-                CcuLog.e(L.TAG_CCU_MIGRATION_UTIL, "Error in updatingBackfillDefaultValues $e")
-                if(backFillDurationDomainPoint.isNotEmpty()) {
-                    hayStack.writeDefaultValById(backFillDurationDomainPoint["id"].toString(), 24.0)
-                    CcuLog.i(L.TAG_CCU_MIGRATION_UTIL, "Updated backfill default value")
-                }
-            }
-
-            PreferenceUtil.setBackFillValueUpdateDone()
-        }
         if(!PreferenceUtil.isHisTagRemovalFromNonDmDevicesDone()) {
             removeHisTagsFromNonDMDevices()
             PreferenceUtil.setHisTagRemovalFromNonDmDevicesDone()

@@ -2037,6 +2037,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                     HyperStatDeviceCutOverMapping.entries,
                     profileConfiguration
                 )
+                updateTempOffsetValue(it["id"].toString())
             }
         }
     }

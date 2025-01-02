@@ -126,7 +126,7 @@ class HyperStatV2HpuFragment : HyperStatFragmentV2(){
 
             Column(modifier = Modifier.weight(4f)) {
                 DrawRelays()
-                DrawAnalogOutput() // only Analog Out function is using overriden function
+                DrawAnalogOutput()
                 DrawThermistors()
                 DrawAnalogIn()
             }

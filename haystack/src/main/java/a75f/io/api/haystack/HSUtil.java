@@ -566,9 +566,7 @@ public class HSUtil {
     public static boolean isTIProfile(String pointUid, CCUHsApi instance) {
         HashMap<Object, Object> pointEntity = instance.readMapById(pointUid);
         return ((pointEntity.containsKey("ti")
-                && pointEntity.containsKey("config"))
-                && (pointEntity.containsKey("space")
-                || pointEntity.containsKey("supply")));
+                && pointEntity.containsKey("config")));
     }
 
     /**

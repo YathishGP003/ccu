@@ -1,6 +1,7 @@
 package a75f.io.renatus.composables
 
 import a75f.io.renatus.compose.ComposeUtil.Companion.primaryColor
+import a75f.io.renatus.compose.LabelTextView
 import a75f.io.renatus.compose.StyledTextView
 import a75f.io.renatus.compose.SubTitle
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -188,7 +189,7 @@ fun TempOffsetPicker(
 
     Box(modifier = modifier) {
         Box( modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            SubTitle(text = header)
+            LabelTextView(text = header)
         }
         LazyColumn(
             state = listState,

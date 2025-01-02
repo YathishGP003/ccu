@@ -378,7 +378,7 @@ public class InstallerOptions extends Fragment implements MasterControlLimitList
         else mNext.setVisibility(View.GONE);
 
         if (!isFreshRegister) {
-            ArrayList<HashMap> equips = ccuHsApi.readAll("equip and zone");
+            ArrayList<HashMap> equips = ccuHsApi.readAll("equip and (zone or bypassDamper or oao)");
             mAddressBandSpinner.setEnabled(equips == null || equips.isEmpty());
         }
 
@@ -1008,7 +1008,7 @@ public class InstallerOptions extends Fragment implements MasterControlLimitList
 
             if (intent.getAction().equals(ACTION_SETTING_SCREEN)) {
                 if (mAddressBandSpinner != null) {
-                    ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and zone");
+                    ArrayList<HashMap> equips = CCUHsApi.getInstance().readAll("equip and (zone or bypassDamper or oao)");
                     mAddressBandSpinner.setEnabled(equips == null || equips.isEmpty());
                 }
             }

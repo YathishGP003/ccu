@@ -60,10 +60,10 @@ object DomainName {
     const val hyperstatCPU = "hyperstatCPU"
     const val hyperstatHPU = "hyperstatHPU"
 
-
     // Devices
     const val hyperstatSplitDevice = "hyperstatSplitDevice"
     const val hyperstatDevice = "hyperstatDevice"
+    const val ccuTiDevice = "ccuTiDevice"
 
     //DAB
     const val smartnodeDAB = "smartnodeDAB"
@@ -1316,6 +1316,10 @@ object DomainName {
 
 
 
+
+    const val roomTemperature = "roomTemperature"
+    const val roomTemperatureType = "roomTemperatureType"
+    const val supplyAirTempType = "dischargeAirTemperatureType"
 
     //PLC
     const val analog1InputType = "analog1InputType"

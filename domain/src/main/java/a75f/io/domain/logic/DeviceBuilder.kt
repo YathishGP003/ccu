@@ -21,7 +21,6 @@ import io.seventyfivef.domainmodeler.common.point.Constraint
 import io.seventyfivef.domainmodeler.common.point.MultiStateConstraint
 import io.seventyfivef.domainmodeler.common.point.NumericConstraint
 import io.seventyfivef.ph.core.TagType
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
@@ -31,7 +30,7 @@ import kotlin.system.measureTimeMillis
 
 class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: EntityMapper) {
     fun buildDeviceAndPoints(configuration: ProfileConfiguration, modelDef: SeventyFiveFDeviceDirective, equipRef: String, siteRef : String, deviceDis: String,
-                             profileModelDef: SeventyFiveFProfileDirective? = null) {
+                             profileModelDef: SeventyFiveFProfileDirective? = null) : String{
         CcuLog.i(Domain.LOG_TAG, "buildDeviceAndPoints $configuration")
         val hayStackDevice = buildDevice(modelDef, configuration, equipRef, siteRef, deviceDis)
         val deviceId = hayStack.addDevice(hayStackDevice)
@@ -42,10 +41,11 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
         }
         profileModelDef?.let { updateBaseConfigPointRefs(configuration, it, hayStackDevice) }
         CcuLog.i(Domain.LOG_TAG, "Time taken to create device points ${time}ms")
+        return deviceId
     }
 
     fun updateDeviceAndPoints(configuration: ProfileConfiguration, modelDef: SeventyFiveFDeviceDirective, equipRef: String, siteRef : String, deviceDis: String,
-                              profileModelDef: SeventyFiveFProfileDirective? = null) {
+                              profileModelDef: SeventyFiveFProfileDirective? = null) : String {
         CcuLog.i(Domain.LOG_TAG, "updateDeviceAndPoints $configuration")
         val hayStackDevice = buildDevice(modelDef, configuration, equipRef, siteRef, deviceDis)
 
@@ -62,6 +62,7 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
         }
         profileModelDef?.let { updateBaseConfigPointRefs(configuration, it, hayStackDevice) }
         CcuLog.i(Domain.LOG_TAG, "Time taken to update device points ${time}ms")
+        return deviceId
     }
 
     private fun createPoints(modelDef: SeventyFiveFDeviceDirective, profileConfiguration: ProfileConfiguration, device: Device) {

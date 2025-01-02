@@ -158,7 +158,7 @@ object ModelLoader {
     }
 
     fun getHyperStatPipe2Model() : ModelDirective {
-        return ModelCache.getModelById(MODEL_HYPERSTAT_Pip2)
+        return ModelCache.getModelById(MODEL_HYPERSTAT_PIPE2)
     }
 
     fun getHyperStatMonitoringModel() : ModelDirective {
@@ -167,6 +167,15 @@ object ModelLoader {
 
     fun getHyperStatDevice() : ModelDirective {
         return ModelCache.getModelById(MODEL_HYPERSTAT_DEVICE)
+    }
+
+
+    fun getTIModel(): ModelDirective {
+        return ModelCache.getModelById(MODEL_TI)
+    }
+
+    fun getTIDeviceModel(): ModelDirective {
+        return ModelCache.getModelById(MODEL_TI_DEVICE)
     }
 
     fun getSmartNodePidModel() : ModelDirective {
@@ -199,6 +208,8 @@ object ModelLoader {
             "connectModuleDevice" -> getConnectModuleDeviceModel()
             "hyperstatSplitDevice" -> getHyperStatSplitDeviceModel()
             "hyperstatCPU" -> getHyperStatCpuModel()
+            "temperatureInfluence" -> getTIModel()
+            "temperatureInfluenceDevice" -> getTIDeviceModel()
             DomainName.ccuConfiguration -> getCCUBaseConfigurationModel()
             "smartnodeOAO" -> getSmartNodeOAOModelDef()
             "smartnodeSSE" -> getSmartNodeSSEModel()

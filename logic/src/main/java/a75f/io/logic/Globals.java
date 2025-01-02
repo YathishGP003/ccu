@@ -40,7 +40,7 @@ import a75f.io.logic.autocommission.AutoCommissioningUtil;
 import a75f.io.logic.bo.building.CCUApplication;
 import a75f.io.logic.bo.building.bacnet.BacnetProfile;
 import a75f.io.logic.bo.building.bypassdamper.BypassDamperProfile;
-import a75f.io.logic.bo.building.ccu.CazProfile;
+import a75f.io.logic.bo.building.ccu.TIProfile;
 import a75f.io.logic.bo.building.dab.DabProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.dualduct.DualDuctProfile;
@@ -93,7 +93,6 @@ import a75f.io.logic.util.MigrationUtil;
 import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.logic.watchdog.Watchdog;
 import a75f.io.sitesequencer.SequenceManager;
-import a75f.io.sitesequencer.SequencerSchedulerUtil;
 import a75f.io.util.ExecutorTask;
 
 /*
@@ -505,8 +504,7 @@ public class Globals {
                             L.ccu().zoneProfiles.add(emr);
                             break;
                         case TEMP_INFLUENCE:
-                            CazProfile caz = new CazProfile();
-                            caz.addCcuAsZoneEquip(Short.parseShort(eq.getGroup()));
+                            TIProfile caz = new TIProfile(eq.getId(),Short.parseShort(eq.getGroup()));
                             L.ccu().zoneProfiles.add(caz);
                             break;
                         case SSE:

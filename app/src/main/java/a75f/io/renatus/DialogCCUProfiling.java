@@ -19,6 +19,7 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.lights.LightProfile;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
+import a75f.io.renatus.profiles.ti.TIFragment;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -83,7 +84,7 @@ public class DialogCCUProfiling extends BaseDialogFragment
     @OnClick(R.id.rl_tempinf)
     void onTempInfluenceOnClick()
     {
-        showDialogFragment(FragmentTempInfConfiguration.newInstance(mNodeAddress, mRoomName, NodeType.CONTROL_MOTE, mFloorName), FragmentTempInfConfiguration.ID);
+        showDialogFragment(TIFragment.newInstance(mNodeAddress, mRoomName, mFloorName,NodeType.CONTROL_MOTE, ProfileType.TEMP_INFLUENCE), TIFragment.ID);
     }
 
     @Override

@@ -73,6 +73,7 @@ import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
 import a75f.io.renatus.profiles.acb.AcbProfileConfigFragment;
 import a75f.io.renatus.profiles.hss.cpu.HyperStatSplitCpuFragment;
 import a75f.io.renatus.profiles.dab.DabProfileConfigFragment;
+import a75f.io.renatus.profiles.ti.TIFragment;
 import a75f.io.renatus.profiles.otn.OtnProfileConfigFragment;
 import a75f.io.renatus.profiles.sse.SseProfileConfigFragment;
 import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatV2CpuFragment;
@@ -1106,8 +1107,8 @@ public class FloorPlanFragment extends Fragment {
                             .newInstance(Short.parseShort(nodeAddress), zone.getId(), NodeType.SMART_STAT, floor.getId(), profile.getProfileType()), Fragment4PipeFanCoilUnitConfig.ID);
                     break;
                 case TEMP_INFLUENCE:
-                    showDialogFragment(FragmentTempInfConfiguration
-                            .newInstance(Short.parseShort(nodeAddress), zone.getId(), NodeType.CONTROL_MOTE, floor.getId()), FragmentTempInfConfiguration.ID);
+                    showDialogFragment(TIFragment
+                            .newInstance(Short.parseShort(nodeAddress), zone.getId(),floor.getId(),NodeType.CONTROL_MOTE, ProfileType.TEMP_INFLUENCE), TIFragment.ID);
                     break;
                 case SSE:
                     showDialogFragment(FragmentSSEConfiguration

@@ -77,7 +77,7 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
             double roomTemp = twoPfcuDevice.getCurrentTemp();
             Equip twoPfcuEquip = new Equip.Builder().setHashMap(CCUHsApi.getInstance().read("equip and group == \"" + node + "\"")).build();
             if (isRFDead()) {
-                handleRFDead(node, twoPfcuDevice);
+                handleRFDead(node, twoPfcuDevice, twoPfcuEquip);
                 return;
             } else if (isZoneDead()) {
                 resetRelays(twoPfcuEquip.getId(), node,ZoneTempState.TEMP_DEAD);
@@ -166,8 +166,10 @@ public class TwoPipeFanCoilUnitProfile extends ZoneProfile {
 
     }
 
-    private void handleRFDead(short node, TwoPipeFanCoilUnitEquip twoPfcuDevice) {
+    private void handleRFDead(short node, TwoPipeFanCoilUnitEquip twoPfcuDevice,Equip equip) {
         twoPfcuDevice.setStatus(RFDEAD.ordinal());
+        StandaloneScheduler.updateSmartStatStatus(equip.getId(), RFDEAD, new HashMap<>(), ZoneTempState.RF_DEAD);
+
         String curStatus = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and writable and group == \"" + node + "\"");
         if (!curStatus.equals(RFDead)) {
             CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \"" + node + "\"", RFDead);

@@ -474,7 +474,7 @@ public class ConventionalUnitProfile extends ZoneProfile {
     }
 
     private void handleRFDead(ConventionalUnitLogicalMap cpuDevice, short node, Equip cpuEquip) {
-        StandaloneScheduler.updateSmartStatStatus(cpuEquip.getId(),DEADBAND, new HashMap<>(),ZoneTempState.RF_DEAD);
+        StandaloneScheduler.updateSmartStatStatus(cpuEquip.getId(),RFDEAD, new HashMap<>(),ZoneTempState.RF_DEAD);
         if(cpuDevice.getStatus() != RFDEAD.ordinal()) {
             cpuDevice.setStatus(RFDEAD.ordinal());
         }

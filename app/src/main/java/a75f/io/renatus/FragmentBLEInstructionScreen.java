@@ -35,6 +35,7 @@ import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
 import a75f.io.renatus.profiles.acb.AcbProfileConfigFragment;
 import a75f.io.renatus.profiles.hss.cpu.HyperStatSplitCpuFragment;
 import a75f.io.renatus.profiles.dab.DabProfileConfigFragment;
+import a75f.io.renatus.profiles.ti.TIFragment;
 import a75f.io.renatus.profiles.oao.OAOProfileFragment;
 import a75f.io.renatus.profiles.sse.SseProfileConfigFragment;
 import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatV2CpuFragment;
@@ -335,7 +336,8 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
         {
             //CCU As a Zone -- Temp influence profile - No pairing needed
            // if (L.isSimulation()) {
-                showDialogFragment(FragmentTempInfConfiguration.newInstance(mNodeAddress, mRoomName, mNodeType, mFloorName), FragmentTempInfConfiguration.ID);
+            showDialogFragment(TIFragment
+                    .newInstance(mNodeAddress, mRoomName,mFloorName,mNodeType, ProfileType.TEMP_INFLUENCE), TIFragment.ID);
             /*}
             else
             {

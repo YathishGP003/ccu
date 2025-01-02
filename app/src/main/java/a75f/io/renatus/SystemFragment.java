@@ -961,6 +961,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		});
 		getActivity().registerReceiver(occupancyReceiver, new IntentFilter(ACTION_STATUS_CHANGE));
 		configWatermark();
+		refreshData();
 		CcuLog.i("UI_PROFILING", "SystemFragment.onViewCreated Done");
 	}
 

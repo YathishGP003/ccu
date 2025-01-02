@@ -50,6 +50,7 @@ import static a75f.io.api.haystack.HayStackConstants.WRITABLE_ARRAY_DURATION;
 import static a75f.io.api.haystack.HayStackConstants.WRITABLE_ARRAY_LEVEL;
 import static a75f.io.api.haystack.HayStackConstants.WRITABLE_ARRAY_VAL;
 import static a75f.io.api.haystack.HayStackConstants.WRITABLE_ARRAY_WHO;
+import static a75f.io.messaging.handler.TiReconfigKt.tiReconfiguration;
 
 public class UpdatePointHandler implements MessageHandler
 {
@@ -253,7 +254,10 @@ public class UpdatePointHandler implements MessageHandler
         }
 
         if(HSUtil.isTIProfile(pointUid, CCUHsApi.getInstance())){
-            TIConfigHandler.Companion.updateTIConfig(msgObject,localPoint,hayStack);
+            //TIConfigHandlerToBeDelete.Companion.updateTIConfig(msgObject,localPoint,hayStack);
+            tiReconfiguration(msgObject, localPoint);
+            updatePoints(localPoint);
+            return;
         }
         if(DemandResponseMode.isDemandResponseConfigPoint(pointEntity)){
             DemandResponseMode.handleDRMessageUpdate(pointEntity, hayStack, msgObject, zoneDataInterface);

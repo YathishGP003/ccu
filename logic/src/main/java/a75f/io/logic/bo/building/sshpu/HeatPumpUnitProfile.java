@@ -77,7 +77,7 @@ public class HeatPumpUnitProfile extends ZoneProfile {
 
             CcuLog.d("CPUC_Config", "updateZonePoints: "+isZoneDead());
             if (isRFDead()) {
-                handleRFDead(hpuDevice, node);
+                handleRFDead(hpuDevice, node,hpuEquip);
                 continue;
             } else if (isZoneDead()){
                 resetRelays(hpuEquip.getId(),node,curHumidity, ZoneTempState.TEMP_DEAD);
@@ -178,12 +178,14 @@ public class HeatPumpUnitProfile extends ZoneProfile {
                 //No condition happens
                 //state = DEADBAND;
                 resetRelays(hpuEquip.getId(),node,curHumidity,ZoneTempState.FAN_OP_MODE_OFF);
+                hpuDevice.setStatus(DEADBAND.ordinal());
             }
         }
     }
 
-    private void handleRFDead(HeatPumpUnitEquip hpuDevice, short node) {
+    private void handleRFDead(HeatPumpUnitEquip hpuDevice, short node, Equip equip) {
         hpuDevice.setStatus(RFDEAD.ordinal());
+        StandaloneScheduler.updateSmartStatStatus(equip.getId(), RFDEAD, new HashMap<>(), ZoneTempState.RF_DEAD);
         String curStatus = CCUHsApi.getInstance().readDefaultStrVal("point and status and message" +
                 " and writable and group == \"" + node + "\"");
         if (!curStatus.equals(RFDead)) {

@@ -28,6 +28,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import a75f.io.alerts.AlertManager;
+import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.domain.api.Domain;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
@@ -267,4 +268,31 @@ public class CCUUiUtil {
         return ContextCompat.getColor(context, R.color.tuner_group);
     }
 
+    public static boolean isDomainEquip(String val, String filter) {
+        if (filter.equals("node")) {
+            return CCUHsApi.getInstance().readEntity("equip and group == \"" + val + "\"").containsKey("domainName");
+        } else {
+            return CCUHsApi.getInstance().readMapById(val).containsKey("domainName");
+        }
+    }
+
+    public static Double readPriorityValByEquipRef(String domainName, String equipRef) {
+        return CCUHsApi.getInstance().readPointPriorityValByQuery("point and domainName == \"" + domainName + "\" " +
+                " and equipRef == \"" + equipRef + "\"");
+    }
+
+    public static Double readPriorityValByGroupId(String domainName, String groupId) {
+        return CCUHsApi.getInstance().readPointPriorityValByQuery("point and domainName == \"" + domainName + "\" " +
+                " and group == \"" + groupId + "\"");
+    }
+
+    public static Double readPriorityValByRoomRef(String domainName, String roomRef) {
+        return CCUHsApi.getInstance().readPointPriorityValByQuery("point and domainName == \"" + domainName + "\" " +
+                " and roomRef == \"" + roomRef + "\"");
+    }
+
+    public static Double readHisValByEquipRef(String domainName, String equipRef) {
+        return CCUHsApi.getInstance().readHisValByQuery("point and domainName == \"" + domainName + "\" " +
+                " and equipRef ==\"" + equipRef + "\"");
+    }
 }

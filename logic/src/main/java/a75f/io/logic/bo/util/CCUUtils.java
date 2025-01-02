@@ -52,6 +52,12 @@ public class CCUUtils
     }
 
     public static Date getLastReceivedTimeForRssi(String nodeAddr){
+        if(isDomainEquip(nodeAddr, "node")){
+            HashMap<Object, Object> point = CCUHsApi.getInstance()
+                    .readEntity("domainName == \"" + DomainName.heartBeat + "\" and group == \"" + nodeAddr + "\"");
+            HisItem hisItem = CCUHsApi.getInstance().curRead(point.get("id").toString());
+            return (hisItem == null) ? null : hisItem.getDate();
+        }
         CCUHsApi hayStack = CCUHsApi.getInstance();
         HashMap point = CCUHsApi.getInstance().read("point and (heartBeat or heartbeat) and group == \""+nodeAddr+"\"");
         if(point.size() == 0){
@@ -361,5 +367,13 @@ public class CCUUtils
             }
         }
         CcuLog.d(TAG_CCU_REF,"Executed updateZoneSchedulablePointsWithUpdatedCcuRef");
+    }
+
+    public static boolean isDomainEquip(String val, String filter) {
+        if (filter.equals("node")) {
+            return CCUHsApi.getInstance().readEntity("equip and group == \"" + val + "\"").containsKey("domainName");
+        } else {
+            return CCUHsApi.getInstance().readMapById(val).containsKey("domainName");
+        }
     }
 }

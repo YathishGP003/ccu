@@ -231,13 +231,13 @@ object HyperStatV2EquipCutoverMapping {
             "auxHeatingstage2" to DomainName.auxHeatingStage2,
 
             //min max
-            "analog1MinmodulatingWaterValve" to DomainName.analog1MinWaterValve,
-            "analog2MinmodulatingWaterValve" to DomainName.analog2MinWaterValve,
-            "analog2MinmodulatingWaterValve" to DomainName.analog3MinWaterValve,
+            "analog1Minwater" to DomainName.analog1MinWaterValve,
+            "analog2Minwater" to DomainName.analog2MinWaterValve,
+            "analog3Minwater" to DomainName.analog3MinWaterValve,
 
-            "analog1MaxmodulatingWaterValve" to DomainName.analog1MaxWaterValve,
-            "analog2MaxmodulatingWaterValve" to DomainName.analog2MaxWaterValve,
-            "analog3MaxmodulatingWaterValve" to DomainName.analog3MaxWaterValve,
+            "analog1Maxwater" to DomainName.analog1MaxWaterValve,
+            "analog2Maxwater" to DomainName.analog2MaxWaterValve,
+            "analog3Maxwater" to DomainName.analog3MaxWaterValve,
 
             "analog1Minfanspeed" to DomainName.analog1MinFanSpeed,
             "analog2Minfanspeed" to DomainName.analog2MinFanSpeed,

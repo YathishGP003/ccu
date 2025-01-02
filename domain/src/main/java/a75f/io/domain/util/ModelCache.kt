@@ -183,7 +183,7 @@ object ModelCache {
     private fun loadStandAloneModels() {
         modelContainer[MODEL_HYPERSTAT_SPLIT_CPU] = getModelById(MODEL_HYPERSTAT_SPLIT_CPU)
         modelContainer[MODEL_HYPERSTAT_CPU] = getModelById(MODEL_HYPERSTAT_CPU)
-        modelContainer[MODEL_HYPERSTAT_Pip2] = getModelById(MODEL_HYPERSTAT_Pip2)
+        modelContainer[MODEL_HYPERSTAT_PIPE2] = getModelById(MODEL_HYPERSTAT_PIPE2)
         modelContainer[MODEL_HYPERSTAT_HPU] = getModelById(MODEL_HYPERSTAT_HPU)
 
         CcuLog.i(Domain.LOG_TAG, "HyperStat CPU equip model loaded")

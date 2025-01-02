@@ -274,7 +274,7 @@ data class Pipe2MinMaxConfig (
 )
 
 enum class HsPipe2AnalogOutMapping(val displayName: String) {
-    WATER_MODULATING_VALUE("Water modulating Value"),
+    WATER_MODULATING_VALUE("Water modulating valve"),
     FAN_SPEED("Fan Speed"),
     DCV_DAMPER("DCV Damper"),
     EXTERNALLY_MAPPED("Externally Mapped")

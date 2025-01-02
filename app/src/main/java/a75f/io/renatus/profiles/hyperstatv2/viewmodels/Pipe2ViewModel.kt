@@ -3,9 +3,6 @@ package a75f.io.renatus.profiles.hyperstatv2.viewmodels
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.device.mesh.LSerial
 import a75f.io.domain.api.Domain
-import a75f.io.domain.api.DomainName
-import a75f.io.domain.config.AssociationConfig
-import a75f.io.domain.config.EnableConfig
 import a75f.io.domain.equips.hyperstat.Pipe2V2Equip
 import a75f.io.domain.logic.DeviceBuilder
 import a75f.io.domain.logic.EntityMapper
@@ -16,11 +13,9 @@ import a75f.io.logic.L
 import a75f.io.logic.bo.building.ZonePriority
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.hyperstat.profiles.pipe2.HyperStatPipe2Profile
+import a75f.io.logic.bo.building.hyperstat.profiles.util.getConfiguration
 import a75f.io.logic.bo.building.hyperstat.profiles.util.getPipe2FanLevel
-import a75f.io.logic.bo.building.hyperstat.v2.configs.HsPipe2AnalogOutMapping
-import a75f.io.logic.bo.building.hyperstat.v2.configs.HsPipe2RelayMapping
 import a75f.io.logic.bo.building.hyperstat.v2.configs.Pipe2Configuration
-import a75f.io.logic.bo.building.hyperstat.v2.configs.Pipe2MinMaxConfig
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.renatus.FloorPlanFragment
 import a75f.io.renatus.modbus.util.showToast
@@ -54,11 +49,16 @@ class Pipe2ViewModel(application: Application) : HyperStatViewModel(application)
 
         equipModel = ModelLoader.getHyperStatPipe2Model() as SeventyFiveFProfileDirective
 
-        profileConfiguration = if (L.getProfile(deviceAddress) != null && L.getProfile(deviceAddress) is HyperStatPipe2Profile) {
-
-            Pipe2Configuration(deviceAddress.toInt(), nodeType.name, 0, zoneRef, floorRef, profileType, equipModel).getActiveConfiguration()
+        if (L.getProfile(deviceAddress) != null && L.getProfile(deviceAddress) is HyperStatPipe2Profile) {
+            hyperStatProfile = (L.getProfile(deviceAddress) as HyperStatPipe2Profile)
+            val equip = (hyperStatProfile as HyperStatPipe2Profile).getProfileDomainEquip(deviceAddress.toInt())
+            profileConfiguration = getConfiguration(equip.equipRef)!!.getActiveConfiguration()
+            equipRef = equip.equipRef
         } else {
-            Pipe2Configuration(deviceAddress.toInt(), nodeType.name, 0, zoneRef, floorRef, profileType, equipModel).getDefaultConfiguration()
+            profileConfiguration = Pipe2Configuration(
+                nodeAddress = deviceAddress.toInt(), nodeType = nodeType.name, priority = 0,
+                roomRef = zoneRef, floorRef = floorRef, profileType = profileType, model = equipModel
+            ).getDefaultConfiguration()
         }
 
         viewState.value = HyperStatViewStateUtil.pipe2ConfigToState(profileConfiguration as Pipe2Configuration)

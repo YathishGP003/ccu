@@ -369,11 +369,11 @@ public class CCUUtils
         CcuLog.d(TAG_CCU_REF,"Executed updateZoneSchedulablePointsWithUpdatedCcuRef");
     }
 
-    public static boolean isDomainEquip(String val, String filter) {
+    public static boolean isDomainEquip(String groupOrEquipId, String filter) {
         if (filter.equals("node")) {
-            return CCUHsApi.getInstance().readEntity("equip and group == \"" + val + "\"").containsKey("domainName");
+            return CCUHsApi.getInstance().readEntity("equip and group == \"" + groupOrEquipId + "\"").containsKey("domainName");
         } else {
-            return CCUHsApi.getInstance().readMapById(val).containsKey("domainName");
+            return CCUHsApi.getInstance().readMapById(groupOrEquipId).containsKey("domainName");
         }
     }
 }

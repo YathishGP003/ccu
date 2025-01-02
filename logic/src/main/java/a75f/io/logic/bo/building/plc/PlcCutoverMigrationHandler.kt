@@ -118,7 +118,7 @@ private fun doPlcMigration(equipRef: String, modelDef : SeventyFiveFProfileDirec
                 //println("Cut-Over migration Update $dbPoint")
                 val modelPoint = modelDef.points.find { it.domainName.equals(modelPointName, true)}
                 if (modelPoint != null) {
-                    equipBuilder.updatePoint(PointBuilderConfig(modelPoint, null, equipRef, site!!.id, site!!.tz, equipDis), dbPoint)
+                    equipBuilder.updatePoint(PointBuilderConfig(modelPoint, profileConfiguration, equipRef, site!!.id, site!!.tz, equipDis), dbPoint)
                 } else {
                     delete++
                     CcuLog.e(Domain.LOG_TAG, " Model point does not exist for domain name $modelPointName")

@@ -39,6 +39,7 @@ import a75f.io.domain.BypassDamperEquip;
 import a75f.io.domain.VavAcbEquip;
 import a75f.io.domain.api.Domain;
 import a75f.io.domain.api.DomainName;
+import a75f.io.domain.equips.PlcEquip;
 import a75f.io.domain.equips.SseEquip;
 import a75f.io.domain.equips.VavEquip;
 import a75f.io.logger.CcuLog;
@@ -297,23 +298,28 @@ public class LSmartNode
 
         } else if (equip.getProfile().equals("PLC")) {
             CCUHsApi hsApi = CCUHsApi.getInstance();
+            PlcEquip plcEquip = (PlcEquip) Domain.INSTANCE.getDomainEquip(equip.getId());
+            if (plcEquip == null) {
+                CcuLog.e(TAG_CCU_DEVICE, "PLC Equip not found for equipRef: " + equip.getId());
+                return;
+            }
             settings2.inputSensor1.set(getInputSensor1(hsApi, address));
-            InputSensorType_t inputSensor2 = getInputSensor2(hsApi.readDefaultVal("point and config and analog2 and sensor and group == \""+address+"\"").intValue());
+            InputSensorType_t inputSensor2 = getInputSensor2((int)plcEquip.getAnalog2InputType().readDefaultVal());
             settings2.inputSensor2.set(inputSensor2);
 
-            double rawSpSensorOffset = hsApi.readDefaultVal("point and config and setpoint and sensor and offset and group == \""+address+"\"");
+            double rawSpSensorOffset = plcEquip.getSetpointSensorOffset().readDefaultVal()/10;
             settings2.setpointSensorOffset.set(getInputSensor1Multiplier(inputSensor2, rawSpSensorOffset));
 
-            settings2.genericPiProportionalRange.set(hsApi.readDefaultVal("point and config and pid and prange and group == \""+address+"\"").shortValue());
-            settings2.turnOnRelay1.set(hsApi.readDefaultVal("point and config and relay1 and on and threshold and group == \""+address+"\"").shortValue());
-            settings2.turnOnRelay2.set(hsApi.readDefaultVal("point and config and relay2 and on and threshold and group == \""+address+"\"").shortValue());
-            settings2.turnOffRelay1.set(hsApi.readDefaultVal("point and config and relay1 and off and threshold and group == \""+address+"\"").shortValue());
-            settings2.turnOffRelay2.set(hsApi.readDefaultVal("point and config and relay2 and off and threshold and group == \""+address+"\"").shortValue());
-            settings2.expectedZeroErrorAtMidpoint.set(hsApi.readDefaultVal("point and config and zero and error and midpoint and group == \""+address+"\"").shortValue());
-            settings2.invertControlLoopOutput.set(hsApi.readDefaultVal("point and config and control and loop and inversion and group == \""+address+"\"").shortValue());
-            settings2.useAnalogIn2ForDynamicSetpoint.set(hsApi.readDefaultVal("point and config and analog2 and setpoint and enabled and group == \""+address+"\"").shortValue());
-            settings2.relay1Enable.set(hsApi.readDefaultVal("point and config and relay1 and enabled and group == \""+address+"\"").shortValue());
-            settings2.relay2Enable.set(hsApi.readDefaultVal("point and config and relay2 and enabled and group == \""+address+"\"").shortValue());
+            settings2.genericPiProportionalRange.set((short)plcEquip.getPidProportionalRange().readDefaultVal());
+            settings2.turnOnRelay1.set((short)plcEquip.getRelay1OnThreshold().readDefaultVal());
+            settings2.turnOnRelay2.set((short)plcEquip.getRelay2OnThreshold().readDefaultVal());
+            settings2.turnOffRelay1.set((short)plcEquip.getRelay1OffThreshold().readDefaultVal());
+            settings2.turnOffRelay2.set((short)plcEquip.getRelay2OffThreshold().readDefaultVal());
+            settings2.expectedZeroErrorAtMidpoint.set((short)plcEquip.getExpectZeroErrorAtMidpoint().readDefaultVal());
+            settings2.invertControlLoopOutput.set((short)plcEquip.getInvertControlLoopoutput().readDefaultVal());
+            settings2.useAnalogIn2ForDynamicSetpoint.set((short)plcEquip.getUseAnalogIn2ForSetpoint().readDefaultVal());
+            settings2.relay1Enable.set((short)plcEquip.getRelay1OutputEnable().readDefaultVal());
+            settings2.relay2Enable.set((short)plcEquip.getRelay2OutputEnable().readDefaultVal());
             // For now PI Loop enabled to run on edge device all the time
             settings2.runPILoopOnNode.set((short)1);
         } else if (equip.getProfile().equals("BYPASS_DAMPER")) {
@@ -375,7 +381,8 @@ public class LSmartNode
 
     private static InputSensorType_t getInputSensor1(CCUHsApi hsApi, short address) {
 
-        int ai1Input = hsApi.readDefaultVal("point and config and analog1 and sensor and group == \""+address+"\"").intValue();
+        int ai1Input = hsApi.readDefaultVal("point and domainName == \""+DomainName.analog1InputType+"\" and group == \""+address+"\"").intValue();
+        CcuLog.d(TAG_CCU_DEVICE, "AI1 Input: " + ai1Input);
         switch (ai1Input) {
             case 1: return InputSensorType_t.INPUT_SENSOR_GENERIC_0_10V;
             case 2: return InputSensorType_t.INPUT_SENSOR_PRESSURE_SENSOR_0_2;
@@ -391,13 +398,13 @@ public class LSmartNode
             case 12: return InputSensorType_t.INPUT_SENSOR_ION_METER_1_1M;
         }
 
-        int th1Input = hsApi.readDefaultVal("point and config and th1 and sensor and group == \""+address+"\"").intValue();
+        int th1Input = hsApi.readDefaultVal("point and domainName == \""+DomainName.thermistor1InputType+"\" and group == \""+address+"\"").intValue();
         switch (th1Input) {
             case 1: return InputSensorType_t.INPUT_SENSOR_10K_TYPE2_PROBE;
             case 2: return InputSensorType_t.INPUT_SENSOR_GENERIC_1K_100K;
         }
 
-        int nativeSensorInput = hsApi.readDefaultVal("point and config and native and sensor and group == \""+address+"\"").intValue();
+        int nativeSensorInput = hsApi.readDefaultVal("point and domainName == \""+DomainName.nativeSensorType+"\" and group == \""+address+"\"").intValue();
         switch (nativeSensorInput) {
             case 1: return InputSensorType_t.INPUT_SENSOR_NATIVE_TEMP;
             case 2: return InputSensorType_t.INPUT_SENSOR_NATIVE_HUMIDITY;
@@ -915,7 +922,7 @@ public class LSmartNode
                 double target = CCUHsApi.getInstance().readPointPriorityValByQuery("point and domainName == \"" + DomainName.ductStaticPressureSetpoint + "\" and equipRef == \"" + equipRef + "\"");
                 return Short.parseShort(String.valueOf((int)(10*target)));
             } else if  (equip.getProfile().equals(ProfileType.PLC.name())) {
-                double target = CCUHsApi.getInstance().readPointPriorityValByQuery("point and config and pid and target and value and equipRef == \"" + equipRef + "\"");
+                double target = CCUHsApi.getInstance().readPointPriorityValByQuery("point and domainName == \""+DomainName.pidTargetValue+"\" and equipRef == \"" + equipRef + "\"");
                 InputSensorType_t sensorType = getInputSensor1(CCUHsApi.getInstance(), Short.parseShort(equip.getGroup()));
                 return getInputSensor1Multiplier(sensorType, target);
             }

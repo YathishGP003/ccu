@@ -1,6 +1,7 @@
 package a75f.io.domain.util
 
 import a75f.io.domain.api.DomainName
+import a75f.io.domain.util.ModelCache.context
 import io.seventyfivef.domainmodeler.client.ModelDirective
 
 /**
@@ -143,6 +144,8 @@ object ModelLoader {
         return ModelCache.getModelById(MODEL_OTN_DEVICE)
     }
 
+
+
     fun getHyperStatDeviceModel() : ModelDirective {
         return ModelCache.getModelById(MODEL_HYPERSTAT_DEVICE)
     }
@@ -175,6 +178,14 @@ object ModelLoader {
         return ModelCache.getModelById(MODEL_TI_DEVICE)
     }
 
+    fun getSmartNodePidModel() : ModelDirective {
+        return ModelCache.getModelById(MODEL_SMARTNODE_PID)
+        //return ResourceHelper.loadModel("assets/75f/models/smartnodePID_v0.0.28_copy.json", context!!)
+    }
+    fun getHelioNodePidModel() : ModelDirective {
+        return ModelCache.getModelById(MODEL_HELIONODE_PID)
+    }
+
     fun getModelForDomainName( domainName : String) : ModelDirective {
         return when(domainName) {
             "smartnodeVAVReheatNoFan" -> getSmartNodeVavNoFanModelDef()
@@ -205,6 +216,9 @@ object ModelLoader {
             "helionodeSSE" -> getHelioNodeSSEModel()
             "hyperstatHPU" -> getHyperStatHpuModel()
             "hyperstat2pfcu" -> getHyperStatPipe2Model()
+            "vavStagedRtu" -> getVavStageRtuModelDef()
+            "smartnodePID" -> getSmartNodePidModel()
+            "helionodePID" -> getHelioNodePidModel()
             else -> throw IllegalStateException("Invalid Model Name")
         }
     }

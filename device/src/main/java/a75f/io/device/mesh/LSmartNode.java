@@ -314,8 +314,8 @@ public class LSmartNode
             settings2.useAnalogIn2ForDynamicSetpoint.set(hsApi.readDefaultVal("point and config and analog2 and setpoint and enabled and group == \""+address+"\"").shortValue());
             settings2.relay1Enable.set(hsApi.readDefaultVal("point and config and relay1 and enabled and group == \""+address+"\"").shortValue());
             settings2.relay2Enable.set(hsApi.readDefaultVal("point and config and relay2 and enabled and group == \""+address+"\"").shortValue());
-            // PI Loop runs all the time for PI Profile
-            settings2.runPILoopOnNode.set((short)0);
+            // For now PI Loop enabled to run on edge device all the time
+            settings2.runPILoopOnNode.set((short)1);
         } else if (equip.getProfile().equals("BYPASS_DAMPER")) {
             BypassDamperEquip bdEquip = new BypassDamperEquip(equipRef);
             settings2.inputSensor1.set(bdEquip.getPressureSensorType().readDefaultVal() > 0 ? InputSensorType_t.INPUT_SENSOR_GENERIC_0_10V : InputSensorType_t.INPUT_SENSOR_NATIVE_PRESSURE);

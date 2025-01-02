@@ -333,7 +333,6 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
         CcuLog.i(Domain.LOG_TAG," Created Equip point ${pointConfig.modelDef.domainName}")
         return pointId
     }
-
     fun updatePoint(pointConfig: PointBuilderConfig, existingPoint : HashMap<Any, Any>) {
         val hayStackPoint = buildPoint(pointConfig)
         hayStackPoint.id = existingPoint["id"].toString()
@@ -356,7 +355,7 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
         CcuLog.i(Domain.LOG_TAG," Updated Equip point ${pointConfig.modelDef.domainName}")
     }
 
-    private fun updateEquip(
+    fun updateEquip(
         equipRef: String,
         modelDef: ModelDirective,
         equipDis: String,

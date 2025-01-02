@@ -164,7 +164,7 @@ public class Pulse
 			for(HashMap phyPoint : phyPoints) {
 				CcuLog.d(L.TAG_CCU_DEVICE, "Physical point "+phyPoint);
 				if (phyPoint.get("pointRef") == null || phyPoint.get("pointRef") == "") {
-					CcuLog.d(L.TAG_CCU_DEVICE, "No logical point for "+phyPoint);
+					CcuLog.d(L.TAG_CCU_DEVICE, "No logical point for "+phyPoint.get("dis"));
 					continue;
 				}
 				HashMap logPoint = hayStack.read("point and id=="+phyPoint.get("pointRef"));

@@ -80,6 +80,7 @@ import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatV2CpuFragment;
 import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatV2Pipe2Fragment;
 import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatV2HpuFragment;
 import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatMonitoringFragment;
+import a75f.io.renatus.profiles.plc.PlcProfileConfigFragment;
 import a75f.io.renatus.profiles.vav.VavProfileConfigFragment;
 import a75f.io.renatus.modbus.ModbusConfigView;
 import a75f.io.renatus.modbus.util.ModbusLevel;
@@ -898,6 +899,7 @@ public class FloorPlanFragment extends Fragment {
                 }else {
                     hsZone.setScheduleRef(defaultNamedSchedule.get("id").toString());
                 }
+
                 int bacnetId = generateBacnetIdForRoom(zoneId);
                 hsZone.setBacnetId(bacnetId);
                 hsZone.setBacnetType(Tags.DEVICE);
@@ -911,6 +913,7 @@ public class FloorPlanFragment extends Fragment {
 
                 hideKeyboard();
                 siteRoomList.add(addRoomEdit.getText().toString().trim());
+                BacnetUtilKt.addBacnetTags(getActivity().getApplicationContext(), hsZone.getFloorRef(), hsZone.getId());
                 return true;
             } else {
                 Toast.makeText(getActivity().getApplicationContext(), "Room cannot be empty", Toast.LENGTH_SHORT).show();
@@ -1067,8 +1070,8 @@ public class FloorPlanFragment extends Fragment {
                             .newInstance(Short.parseShort(nodeAddress), zone.getId(), floor.getId(), nodeTypeHN, profile.getProfileType()), AcbProfileConfigFragment.Companion.getID());
                     break;
                 case PLC:
-                    showDialogFragment(FragmentPLCConfiguration
-                            .newInstance(Short.parseShort(nodeAddress), zone.getId(), NodeType.SMART_NODE, floor.getId()), FragmentPLCConfiguration.ID);
+                    showDialogFragment(PlcProfileConfigFragment.Companion
+                            .newInstance(Short.parseShort(nodeAddress), zone.getId(), floor.getId(), NodeType.SMART_NODE, ProfileType.PLC), FragmentPLCConfiguration.ID);
                     break;
                 case DAB:
                     Equip equipDab = profile.getEquip();
@@ -1108,11 +1111,8 @@ public class FloorPlanFragment extends Fragment {
                             .newInstance(Short.parseShort(nodeAddress), zone.getId(),floor.getId(),NodeType.CONTROL_MOTE, ProfileType.TEMP_INFLUENCE), TIFragment.ID);
                     break;
                 case SSE:
-                    Equip equipSse = profile.getEquip();
-                    CcuLog.i(L.TAG_CCU_UI, "equip domainName "+equipSse.getDomainName()+" "+profile.getProfileType());
-                    NodeType helioNode = equipSse.getDomainName().contains("helionode") ? NodeType.HELIO_NODE : NodeType.SMART_NODE;
-                    showDialogFragment(SseProfileConfigFragment.Companion
-                            .newInstance(Short.parseShort(nodeAddress), zone.getId(), floor.getId(), helioNode, profile.getProfileType()), SseProfileConfigFragment.Companion.getID());
+                    showDialogFragment(FragmentSSEConfiguration
+                            .newInstance(Short.parseShort(nodeAddress), zone.getId(), NodeType.SMART_NODE, floor.getId(), profile.getProfileType()), FragmentSSEConfiguration.ID);
                     break;
                 case HYPERSTAT_MONITORING:
                     showDialogFragment(HyperStatMonitoringFragment.Companion.newInstance(Short.parseShort(nodeAddress)
@@ -1124,14 +1124,9 @@ public class FloorPlanFragment extends Fragment {
                     break;
                 case HYPERSTAT_VRV:
                     showDialogFragment(HyperStatVrvFragment.newInstance(Short.parseShort(nodeAddress)
-                        , zone.getId(), floor.getId()), HyperStatVrvFragment.ID);
+                            , zone.getId(), floor.getId()), HyperStatVrvFragment.ID);
                     break;
-
                 case HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT:
-                    showDialogFragment(HyperStatV2CpuFragment.newInstance(Short.parseShort(nodeAddress)
-                                    , zone.getId(), floor.getId(),NodeType.HYPER_STAT, profile.getProfileType()),
-                            HyperStatV2CpuFragment.ID);
-                    break;
                 case HYPERSTAT_TWO_PIPE_FCU:
                     showDialogFragment(HyperStatV2Pipe2Fragment.Companion.newInstance(Short.parseShort(nodeAddress),
                                     zone.getId(), floor.getId(), NodeType.HYPER_STAT, ProfileType.HYPERSTAT_TWO_PIPE_FCU),
@@ -1175,6 +1170,8 @@ public class FloorPlanFragment extends Fragment {
             }
         } else
             Toast.makeText(getActivity(), "Zone profile is empty, recheck your DB", Toast.LENGTH_LONG).show();
+
+
     }
 
     static class FloorComparator implements Comparator<Floor> {

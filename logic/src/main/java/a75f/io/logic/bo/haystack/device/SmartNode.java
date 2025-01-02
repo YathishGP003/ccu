@@ -23,6 +23,7 @@ import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.firmware.FirmwareVersion;
 import a75f.io.logic.bo.building.heartbeat.HeartBeat;
+import a75f.io.logic.bo.building.plc.PlcProfileConfig;
 import a75f.io.logic.bo.building.sse.SseProfileConfiguration;
 import a75f.io.logic.bo.building.vav.AcbProfileConfiguration;
 import a75f.io.logic.bo.building.vav.VavProfileConfiguration;
@@ -444,7 +445,11 @@ public class SmartNode
             return new SseProfileConfiguration(Integer.parseInt(equip.getGroup()), NodeType.SMART_NODE.name(), 0, equip.getRoomRef(), equip.getFloorRef(), ProfileType.SSE, pointsUtil.getModelFromEquip(equip)).getActiveConfiguration();
         }else if (equip.getDomainName().equals(DomainName.helionodeSSE)) {
             return new SseProfileConfiguration(Integer.parseInt(equip.getGroup()), NodeType.HELIO_NODE.name(), 0, equip.getRoomRef(), equip.getFloorRef(), ProfileType.SSE, pointsUtil.getModelFromEquip(equip)).getActiveConfiguration();
-        } else {
+        } else if (equip.getDomainName().equals(DomainName.smartnodePID)) {
+            return new PlcProfileConfig(Integer.parseInt(equip.getGroup()), NodeType.SMART_NODE.name(), 0, equip.getRoomRef(), equip.getFloorRef(), ProfileType.PLC, pointsUtil.getModelFromEquip(equip)).getActiveConfiguration();
+        } else if (equip.getDomainName().equals(DomainName.helionodePID)) {
+            return new PlcProfileConfig(Integer.parseInt(equip.getGroup()), NodeType.HELIO_NODE.name(), 0, equip.getRoomRef(), equip.getFloorRef(), ProfileType.PLC, pointsUtil.getModelFromEquip(equip)).getActiveConfiguration();
+        }else {
             return null;
         }
     }

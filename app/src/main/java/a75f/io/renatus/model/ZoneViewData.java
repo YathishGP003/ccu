@@ -1,16 +1,25 @@
 package a75f.io.renatus.model;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HisItem;
+import a75f.io.domain.api.Ccu;
 import a75f.io.domain.api.Domain;
 import a75f.io.domain.api.DomainName;
 import a75f.io.domain.equips.DabEquip;
+import a75f.io.domain.equips.PlcEquip;
 import a75f.io.domain.equips.SseEquip;
 import a75f.io.domain.equips.VavEquip;
+import a75f.io.logger.CcuLog;
+import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Thermistor;
+import a75f.io.logic.bo.building.plc.PlcProfile;
 import a75f.io.logic.bo.building.sensors.NativeSensor;
 import a75f.io.logic.bo.building.sensors.Sensor;
 import a75f.io.logic.bo.building.sensors.SensorManager;
@@ -436,28 +445,27 @@ public class ZoneViewData {
     }
 
     public static HashMap getPiEquipPoints(String equipID) {
-        HashMap plcPoints = new HashMap();
-        
+
+        PlcEquip plcEquip = (PlcEquip) Domain.INSTANCE.getDomainEquip(equipID);
+        HashMap<String, Object> plcPoints = new HashMap<>();
         plcPoints.put("Profile","Pi Loop Controller");
-        ArrayList equipStatusPoint = CCUHsApi.getInstance().readAll("point and status and message and equipRef == \""+equipID+"\"");
+        if (plcEquip == null) {
+            CcuLog.d(L.TAG_CCU_UI, "getPiEquipPoints: plcEquip is null");
+            return plcPoints;
+        }
         ArrayList inputValue = CCUHsApi.getInstance().readAll("point and process and logical and variable and equipRef == \""+equipID+"\"");
-        ArrayList piSensorValue = CCUHsApi.getInstance().readAll("point and analog1 and config and input and sensor and equipRef == \""+equipID+"\"");
-        double dynamicSetpoint = CCUHsApi.getInstance().readDefaultVal("point and analog2 and config and enabled and equipRef == \""+equipID+"\"");
-        int th1InputSensor =  CCUHsApi.getInstance().readDefaultVal("point and config and th1 and input and sensor and equipRef == \"" + equipID + "\"").intValue();
-        double targetValue = dynamicSetpoint > 0 ? 0: CCUHsApi.getInstance().readPointPriorityValByQuery("point and zone and pid and target and config and equipRef == \""+equipID+"\"");
-        double analog1sensorType = CCUHsApi.getInstance().readPointPriorityValByQuery("point and analog1 and config and input and sensor and equipRef == \""+equipID+"\"");
-        double analog2sensorType = CCUHsApi.getInstance().readPointPriorityValByQuery("point and analog2 and config and input and sensor and equipRef == \""+equipID+"\"");
-        double offsetValue = CCUHsApi.getInstance().readDefaultVal("point and config and setpoint and sensor and offset and equipRef == \""+equipID+"\"");
-        double loopOutput =
-            CCUHsApi.getInstance().readHisValByQuery("point and control and variable and equipRef == \""+equipID+"\"");
-        
-        if (equipStatusPoint != null && equipStatusPoint.size() > 0)
-        {
-            String id = ((HashMap) equipStatusPoint.get(0)).get("id").toString();
-            String status = CCUHsApi.getInstance().readDefaultStrValById(id);
-            plcPoints.put("Status",status);
-        }else{
-            plcPoints.put("Status","OFF");
+        double piSensorValue =plcEquip.getAnalog1InputType().readDefaultVal();
+        double analog2Config = plcEquip.getUseAnalogIn2ForSetpoint().readDefaultVal();
+        int th1InputSensor =  (int)plcEquip.getThermistor1InputType().readDefaultVal();
+        double targetValue = analog2Config > 0 ? 0: plcEquip.getPidTargetValue().readDefaultVal();
+        double offsetValue = plcEquip.getSetpointSensorOffset().readDefaultVal();
+        double loopOutput = plcEquip.getControlVariable().readHisVal();
+
+        String status = plcEquip.getEquipStatusMessage().readDefaultStrVal();
+        if (!status.isEmpty()) {
+            plcPoints.put("Status", status);
+        } else {
+            plcPoints.put("Status", "OFF");
         }
         if (inputValue != null && inputValue.size() > 0)
         {
@@ -470,39 +478,47 @@ public class ZoneViewData {
         
         plcPoints.put("Offset Value",offsetValue);
         
-        if (piSensorValue != null && piSensorValue.size() > 0)
-        {
-            String id = ((HashMap) piSensorValue.get(0)).get("id").toString();
-            double piSensorVal = CCUHsApi.getInstance().readHisValById(id);
-            plcPoints.put("Pi Sensor Value",piSensorVal);
+        if (piSensorValue > 0) {
+            plcPoints.put("Pi Sensor Value",piSensorValue);
         }
-        if(dynamicSetpoint == 1) {
+
+        HashMap<Object, Object> equip = CCUHsApi.getInstance().readMapById(equipID);
+        int group = Integer.parseInt(equip.get("group").toString());
+        PlcProfile profile = (PlcProfile) L.getProfile(group);
+        assert profile != null;
+        String processVariable = profile.getProcessVariableDomainName();
+        String dynamicTargetValue = profile.getDynamicTargetDomainName();
+        HashMap<Object, Object> inputDetails = CCUHsApi.getInstance().readEntity(
+                "point and domainName == \""+processVariable+"\" and equipRef == \""+equipID+"\"");
+        Map<Object, Object> targetDetails;
+        if(analog2Config == 1) {
             plcPoints.put("Dynamic Setpoint",true);
-            targetValue = CCUHsApi.getInstance().readHisValByQuery("point and dynamic and target and value and equipRef == \""+equipID+"\"");
+            targetDetails = CCUHsApi.getInstance().readEntity(
+                    "point and domainName == \""+dynamicTargetValue+"\" and equipRef == \""+equipID+"\"");
+            targetValue = plcEquip.getDynamicTargetValue().readDefaultVal();
         }else {
-            if(dynamicSetpoint == 0)
+            targetDetails = plcEquip.getPidTargetValue().getPoint();
+            if(analog2Config == 0)
                 plcPoints.put("Dynamic Setpoint",false);
         }
         
         plcPoints.put("Target Value",targetValue);
-        
-        HashMap inputDetails = CCUHsApi.getInstance().read(
-            "point and process and logical and variable and equipRef == \""+equipID+"\"");
-        HashMap targetDetails =
-            CCUHsApi.getInstance().read("point and target and pid and equipRef == \""+equipID+"\"");
-        
-        plcPoints.put("Unit Type", inputDetails.get("shortDis"));
-        plcPoints.put("Unit",  inputDetails.get("unit"));
-        plcPoints.put("Dynamic Unit Type", targetDetails.get("shortDis"));
-        plcPoints.put("Dynamic Unit",  targetDetails.get("unit"));
+
+        CcuLog.d(L.TAG_CCU_UI, "inputDetails = " + inputDetails+" targetDetails = "+targetDetails);
+        plcPoints.put("Unit Type", StringUtils.substringAfterLast(inputDetails.get("dis").toString(), "-"));
+        String inputUnit = inputDetails.get("unit") == null ? "" : inputDetails.get("unit").toString();
+        plcPoints.put("Unit",  inputUnit);
+        plcPoints.put("Dynamic Unit Type", StringUtils.substringAfterLast(targetDetails.get("dis").toString(), "-"));
+        String targetUnit = (analog2Config == 1) ? targetDetails.get("unit") == null ? "" : targetDetails.get("unit").toString()
+                                : inputUnit;
+        plcPoints.put("Dynamic Unit",  targetUnit);
         
         if (th1InputSensor == 1 || th1InputSensor == 2) {
             plcPoints.put("Unit Type", "Temperature");
             plcPoints.put("Unit", "\u00B0F");
         }
         
-        int nativeInputSensor =  CCUHsApi.getInstance().readDefaultVal("point and config and native and input and " +
-                                                                       "sensor and equipRef == \"" + equipID + "\"").intValue();
+        int nativeInputSensor =  (int) plcEquip.getNativeSensorType().readDefaultVal();
         if (nativeInputSensor > 0) {
             NativeSensor selectedSensor = SensorManager.getInstance().getNativeSensorList().get(nativeInputSensor - 1);
             plcPoints.put("Unit Type", selectedSensor.sensorName);

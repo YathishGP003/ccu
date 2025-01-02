@@ -237,6 +237,40 @@ object Domain {
         return valuesList
     }
 
+    /**
+     * Retrieves the minimum value, maximum value, and increment value for a given domain name
+     * from the specified model.
+     *
+     * This function searches for the point in the model that matches the provided domain name.
+     * It determines whether the point's value constraint is numeric or multi-state and extracts
+     * the appropriate minimum, maximum, and increment values accordingly.
+     *
+     * - For numeric constraints: Uses `minValue`, `maxValue`, and `tagValueIncrement` from the point.
+     * - For multi-state constraints: Sets the minimum value to 0, the maximum value to the size of
+     *   the allowed values, and the increment value to 1.
+     * - If no matching point or constraint type is found, it returns default values of 0.0, 0.0, and 0.0.
+     *
+     * @param domainName The domain name used to find the point in the model.
+     * @param model The profile directive model containing the points to search.
+     * @return A Triple containing the minimum value, maximum value, and increment value.
+     */
+    fun getMinMaxIncValuesByDomainName(domainName: String, model: SeventyFiveFProfileDirective) : Triple<Double, Double, Double> {
+        val point = model.points.find { it.domainName == domainName }
+
+        if (point?.valueConstraint is NumericConstraint) {
+            val minVal = (point.valueConstraint as NumericConstraint).minValue
+            val maxVal = (point.valueConstraint as NumericConstraint).maxValue
+            val incVal = point.presentationData?.get("tagValueIncrement").toString().toDouble()
+            return Triple(minVal, maxVal, incVal)
+        } else if (point?.valueConstraint is MultiStateConstraint) {
+            val minVal = 0.0 // Consider enum first value as zero
+            val maxVal = (point.valueConstraint as MultiStateConstraint).allowedValues.size.toDouble() - 1 //  // Maximum valid index - (allowedValues list size - 1)
+            val incVal = 1.0
+            return Triple(minVal, maxVal, incVal)
+        }
+        return Triple(0.0, 0.0, 0.0)
+    }
+
     fun getListByDomainNameWithCustomMaxVal(domainName: String, model: SeventyFiveFProfileDirective, maxVal: Double) : List<String> {
         val valuesList : MutableList<String> = mutableListOf()
         val point = model.points.find { it.domainName == domainName }

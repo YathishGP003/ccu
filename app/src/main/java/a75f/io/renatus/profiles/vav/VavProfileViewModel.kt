@@ -35,6 +35,7 @@ import a75f.io.renatus.profiles.profileUtils.UnusedPortsModel
 import a75f.io.renatus.profiles.profileUtils.UnusedPortsModel.Companion.saveUnUsedPortStatus
 import a75f.io.renatus.util.ProgressDialogUtils
 import a75f.io.renatus.util.highPriorityDispatcher
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -65,6 +66,7 @@ class VavProfileViewModel : ViewModel() {
     private lateinit var deviceModel : SeventyFiveFDeviceDirective
     lateinit var viewState: VavConfigViewState
 
+    @SuppressLint("StaticFieldLeak")
     private lateinit var context : Context
     lateinit var hayStack : CCUHsApi
 

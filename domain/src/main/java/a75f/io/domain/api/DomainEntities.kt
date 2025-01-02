@@ -221,6 +221,10 @@ open class Point(domainName : String, val equipRef: String) : Entity(domainName)
         Domain.hayStack.writeHisValueByIdWithoutCOV(id, hisVal)
     }
 
+    fun getPoint() : Map <Any, Any>{
+        return domainName.readPoint(equipRef)
+    }
+
     override fun equals(other: Any?)
             = (other is Point) && this.domainName == other.domainName
     override fun hashCode() = Objects.hash(domainName)

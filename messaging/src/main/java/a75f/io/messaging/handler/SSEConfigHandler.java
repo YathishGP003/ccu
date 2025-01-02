@@ -85,7 +85,8 @@ class SSEConfigHandler {
         deviceBuilder.updateDeviceAndPoints(sseConfig,
             deviceModel, equip.getId(),
                 equip.getSiteRef(),
-            hayStack.getSiteName() + deviceName + sseConfig.getNodeAddress()
+            hayStack.getSiteName() + deviceName + sseConfig.getNodeAddress(),
+                null
         );
         SseEquipUtil.Companion.updatePortConfiguration(
                 hayStack,

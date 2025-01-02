@@ -1,5 +1,6 @@
 package a75f.io.domain.config
 
+import a75f.io.domain.api.EntityConfig
 import a75f.io.domain.api.Point
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfilePointDef
@@ -16,6 +17,7 @@ import io.seventyfivef.domainmodeler.common.point.NumericConstraint
 abstract class ProfileConfiguration (var nodeAddress : Int, var nodeType : String, var priority : Int, var roomRef : String, var floorRef : String, var profileType : String) {
 
     var isDefault = false
+
     /**
      * Get a list of domainNames of all base-configs
      * This need not have all base points.
@@ -34,17 +36,17 @@ abstract class ProfileConfiguration (var nodeAddress : Int, var nodeType : Strin
         return emptyList()
     }
 
+    /**
+     * List of points which frameworks is asked to added every time without running any logic.
+     */
+    open fun getBaseProfileConfigs() : List<EntityConfig> {
+        return emptyList()
+    }
+
     open fun getConfigByDomainName(domainName: String): Any? {
         return ValueConfig(domainName, 0.0)
     }
 
-    /**
-     * Override the function when you have custom points to be created
-     *
-     */
-    open fun getCustomPoints() : List<Pair <SeventyFiveFProfilePointDef, Any>> {
-        return emptyList()
-    }
 
     /**
      * Get a list of domainNames of all dependencies
@@ -55,6 +57,7 @@ abstract class ProfileConfiguration (var nodeAddress : Int, var nodeType : Strin
     open fun getValueConfigs() : List<ValueConfig> {
         return emptyList()
     }
+
     fun getDefaultValConfig(domainName : String, model : SeventyFiveFProfileDirective) :ValueConfig {
         val point = model.points.find { it.domainName == domainName }
         val config = ValueConfig(domainName, point?.defaultValue?.toString()?.toDouble() ?: 0.0)
@@ -66,6 +69,16 @@ abstract class ProfileConfiguration (var nodeAddress : Int, var nodeType : Strin
         point?.presentationData?.get("tagValueIncrement")?.let { config.incVal = it.toString().toDouble() }
         return config
     }
+
+
+    /**
+     * Override the function when you have custom points to be created
+     *
+     */
+    open fun getCustomPoints() : List<Pair <SeventyFiveFProfilePointDef, Any>> {
+        return emptyList()
+    }
+
 
     fun getDefaultAssociationConfig(
         domainName: String,

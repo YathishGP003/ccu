@@ -25,6 +25,7 @@ import a75f.io.domain.equips.DefaultSystemEquip
 import a75f.io.domain.equips.DomainEquip
 import a75f.io.domain.equips.OtnEquip
 import a75f.io.domain.equips.SseEquip
+import a75f.io.domain.equips.PlcEquip
 import a75f.io.domain.equips.VavAdvancedHybridSystemEquip
 import a75f.io.domain.equips.VavEquip
 import a75f.io.domain.equips.VavModulatingRtuSystemEquip
@@ -114,6 +115,7 @@ object DomainManager {
                     it.contains("otn") -> Domain.equips[it["id"].toString()] =
                         OtnEquip(it["id"].toString())
 
+                    it.contains("pid") -> Domain.equips[it["id"].toString()] = PlcEquip(it["id"].toString())
                 }
             }
 
@@ -253,6 +255,8 @@ object DomainManager {
         when {
             equip.markers.contains("vav") -> Domain.equips[equip.id] = VavEquip(equip.id)
             equip.markers.contains("dab") -> Domain.equips[equip.id] = DabEquip(equip.id)
+            equip.markers.contains("pid") -> Domain.equips[equip.id] = PlcEquip(equip.id)
+
             equip.markers.contains("sse") -> Domain.equips[equip.id] = SseEquip(equip.id)
             equip.markers.contains("otn") -> Domain.equips[equip.id] = OtnEquip(equip.id)
             equip.markers.contains("hyperstat") -> {

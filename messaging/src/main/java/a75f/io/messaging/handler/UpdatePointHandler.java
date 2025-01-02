@@ -115,7 +115,7 @@ public class UpdatePointHandler implements MessageHandler
         Reconfiguration handled for PI profile
          */
         if (HSUtil.isPIConfig(pointUid, CCUHsApi.getInstance())) {
-            PIReConfigHandler.updateConfigPoint(msgObject, localPoint);
+            PlcReconfigHandlerKt.updateConfigPoint(msgObject, localPoint);
             updatePoints(localPoint);
             return;
         }

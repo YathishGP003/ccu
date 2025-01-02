@@ -6,6 +6,7 @@ import a75f.io.renatus.compose.LabelTextView
 import a75f.io.renatus.compose.ToggleButtonStateful
 import a75f.io.renatus.profiles.acb.AcbProfileViewModel
 import a75f.io.renatus.profiles.dab.DabProfileViewModel
+import a75f.io.renatus.profiles.plc.PlcProfileViewModel
 import a75f.io.renatus.profiles.profileUtils.UnusedPortsModel.Companion.saveConfiguration
 import a75f.io.renatus.profiles.system.DabModulatingRtuViewModel
 import a75f.io.renatus.profiles.system.DabStagedRtuViewModel
@@ -48,6 +49,7 @@ open class UnusedPortsFragment : Fragment() {
                 is DabStagedVfdRtuViewModel -> TreeMap(viewModel.viewState.value.unusedPortState)
                 is SseProfileViewModel -> TreeMap(viewModel.viewState.unusedPortState)
                 is DabModulatingRtuViewModel -> TreeMap(viewModel.viewState.value.unusedPortState)
+                is PlcProfileViewModel -> TreeMap(viewModel.viewState.unusedPortState)
                 else -> null
             }
 

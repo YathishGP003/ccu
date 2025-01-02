@@ -60,6 +60,7 @@ import a75f.io.renatus.profiles.sse.SseProfileConfigFragment;
 import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatV2CpuFragment;
 import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatV2HpuFragment;
 import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatV2Pipe2Fragment;
+import a75f.io.renatus.profiles.plc.PlcProfileConfigFragment;
 import a75f.io.renatus.profiles.vav.BypassConfigFragment;
 import a75f.io.renatus.profiles.vav.VavProfileConfigFragment;
 import a75f.io.renatus.profiles.acb.AcbProfileConfigFragment;
@@ -141,7 +142,7 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
         b.putParcelable(BUNDLE_KEY_BLUETOOTH_DEVICE, device);
         b.putShort(ARG_PAIRING_ADDR, pairingAddress);
         b.putString(ARG_NAME, name);
-        b.putString(FLOOR_NAME, mFloorName);
+        b.putString(FragmentCommonBundleArgs.FLOOR_NAME, mFloorName);
         b.putString(FragmentCommonBundleArgs.NODE_TYPE, nodeType.toString());
         b.putString(FragmentCommonBundleArgs.PROFILE_TYPE, profileType.toString());
         bleProvisionDialogFragment.setArguments(b);
@@ -432,8 +433,9 @@ public class FragmentBLEDevicePin extends BaseDialogFragment
                                 BypassConfigFragment.Companion.getID());
                         break;
                     case PLC:
-                        showDialogFragment(FragmentPLCConfiguration
-                                .newInstance(mPairingAddress, mName, mNodeType, mFloorName), FragmentPLCConfiguration.ID);
+                        showDialogFragment(PlcProfileConfigFragment.Companion
+                                .newInstance(mPairingAddress, mName, mFloorName, mNodeType, ProfileType.PLC),
+                                PlcProfileConfigFragment.Companion.getID());
                         break;
                     case EMR:
                         showDialogFragment(FragmentEMRConfiguration

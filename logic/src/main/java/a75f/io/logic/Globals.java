@@ -494,8 +494,8 @@ public class Globals {
                             L.ccu().zoneProfiles.add(dualDuct);
                             break;
                         case PLC:
-                            PlcProfile plc = new PlcProfile();
-                            plc.addPlcEquip(Short.parseShort(eq.getGroup()));
+                            PlcProfile plc = new PlcProfile(Short.parseShort(eq.getGroup()), eq.getId());
+                            plc.init();
                             L.ccu().zoneProfiles.add(plc);
                             break;
                         case EMR:
@@ -660,6 +660,9 @@ public class Globals {
                 return ProfileType.VAV_ACB.name();
             case DomainName.hyperstatSplitCPU:
                 return ProfileType.HYPERSTATSPLIT_CPU.name();
+            case DomainName.smartnodePID:
+            case DomainName.helionodePID:
+                return ProfileType.PLC.name();
             default:
                 return profile;
         }

@@ -135,7 +135,6 @@ public class SensorManager {
         nativeSensors.add(new NativeSensor("Native-CO2", "ppm", 0, 2000, 100, SensorType.CO2));
         nativeSensors.add(new NativeSensor("Native-CO", "ppm", 0, 100, 1, SensorType.CO));
         nativeSensors.add(new NativeSensor("Native-NO", "ppm", 0, 5, 0.1, SensorType.NO));
-        nativeSensors.add(new NativeSensor("Native-VOC", "ppb", 0, 60000, 1000, SensorType.VOC));
         nativeSensors.add(new NativeSensor("Native-Pressure", Consts.PRESSURE_UNIT, 0, 2, 0.1, SensorType.PRESSURE));
         nativeSensors.add(new NativeSensor("Native-Sound", "dB", 0, 140, 1, SensorType.SOUND));
         nativeSensors.add(new NativeSensor("Native-Occupancy", "", 0, 1, 1, SensorType.OCCUPANCY));
@@ -166,6 +165,25 @@ public class SensorManager {
         externalSensors.add(new Sensor("Key Card Sensor","",0,10,0,1,1));
         externalSensors.add(new Sensor("Door Window Sensor","ohms",0,10,0,10000,100));
         return externalSensors;
+    }
+
+    /**
+     * Retrieves a predefined list of thermistor sensors.
+     *
+     * This method returns a list of `Sensor` objects representing commonly used thermistor
+     * sensors. Each sensor is instantiated with specific properties such as its name,
+     * unit of measurement, range, resolution, and other parameters. The list includes
+     * both temperature probes and generic fault sensors.
+     *
+     * @return A `List<Sensor>` containing predefined thermistor sensor configurations.
+     */
+    public List<Sensor> getThermistorSensorList() {
+        List<Sensor> thermistorSensors = new ArrayList<>();
+        thermistorSensors.add(new Sensor("10k type 2 probe","F",0,10,-40,302,0.5));
+        thermistorSensors.add(new Sensor("Generic(1-100)kohms","F",0,10,-40,302,0.5));
+        thermistorSensors.add(new Sensor("Generic Fault NC","C",0,1,0,1,1));
+        thermistorSensors.add(new Sensor("Generic Fault NO","C",0,1,0,1,1));
+        return thermistorSensors;
     }
 
     public List<Sensor> getExternalSensorList() {

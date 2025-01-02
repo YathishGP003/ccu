@@ -130,14 +130,19 @@ public class DeviceUtil {
         if (rawPoints != null && !rawPoints.isEmpty()) {
             return rawPoints.stream()
                     .filter(rawPoint -> rawPoint.getDomainName() != null
-                            && !rawPoint.getMarkers().contains("sensor")
-                            && !(rawPoint.getDomainName().equals(DomainName.analog1In)
-                            || rawPoint.getDomainName().equals(DomainName.analog2In)
-                            || rawPoint.getDomainName().equals(DomainName.th1In)
-                            || rawPoint.getDomainName().equals(DomainName.th2In)) && !rawPoint.getEnabled())
+                            && !isInputPort(rawPoint) && !rawPoint.getEnabled())
                     .collect(Collectors.toList());
         } else {
             return null;
         }
+    }
+    private static boolean isInputPort(RawPoint rawPoint) {
+        return rawPoint.getDomainName().equals(DomainName.analog1In)
+                || rawPoint.getDomainName().equals(DomainName.analog2In)
+                || rawPoint.getDomainName().equals(DomainName.th1In)
+                || rawPoint.getDomainName().equals(DomainName.th2In)
+                || rawPoint.getDomainName().equals(DomainName.currentTemp)
+                || rawPoint.getDomainName().equals(DomainName.desiredTemp)
+                || rawPoint.getDomainName().toLowerCase().contains("sensor");
     }
 }

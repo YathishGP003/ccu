@@ -55,6 +55,8 @@ class PointsUtil(private val hayStack : CCUHsApi) {
             DomainName.helionodeSSE -> ModelLoader.getHelioNodeSSEModel() as SeventyFiveFProfileDirective
             DomainName.smartnodeSSE -> ModelLoader.getSmartNodeSSEModel() as SeventyFiveFProfileDirective
             DomainName.hyperstatHPU -> ModelLoader.getHyperStatHpuModel() as SeventyFiveFProfileDirective
+            DomainName.smartnodePID -> ModelLoader.getSmartNodePidModel() as SeventyFiveFProfileDirective
+            DomainName.helionodePID -> ModelLoader.getHelioNodePidModel() as SeventyFiveFProfileDirective
             DomainName.hyperstatMonitoring -> ModelLoader.getHyperStatMonitoringModel() as SeventyFiveFProfileDirective
             else -> null
         }

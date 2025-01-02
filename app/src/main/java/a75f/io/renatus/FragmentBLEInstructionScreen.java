@@ -41,6 +41,7 @@ import a75f.io.renatus.profiles.sse.SseProfileConfigFragment;
 import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatV2CpuFragment;
 import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatV2HpuFragment;
 import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatV2Pipe2Fragment;
+import a75f.io.renatus.profiles.plc.PlcProfileConfigFragment;
 import a75f.io.renatus.profiles.vav.BypassConfigFragment;
 import a75f.io.renatus.profiles.vav.VavProfileConfigFragment;
 import a75f.io.renatus.util.CCUUiUtil;
@@ -132,8 +133,9 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
         {
             if (L.isSimulation())
             {
-                showDialogFragment(FragmentPLCConfiguration
-                                           .newInstance(mNodeAddress, mRoomName, mNodeType, mFloorName), FragmentPLCConfiguration.ID);
+                showDialogFragment(PlcProfileConfigFragment.Companion
+                                           .newInstance(mNodeAddress, mRoomName, mFloorName, mNodeType, ProfileType.PLC),
+                        PlcProfileConfigFragment.Companion.getID());
             }
             else
             {

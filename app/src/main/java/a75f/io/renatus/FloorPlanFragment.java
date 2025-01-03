@@ -1127,10 +1127,6 @@ public class FloorPlanFragment extends Fragment {
                             , zone.getId(), floor.getId()), HyperStatVrvFragment.ID);
                     break;
                 case HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT:
-                    showDialogFragment(HyperStatV2CpuFragment.newInstance(Short.parseShort(nodeAddress)
-                                    , zone.getId(), floor.getId(),NodeType.HYPER_STAT, profile.getProfileType()),
-                            HyperStatV2CpuFragment.ID);
-                    break;
                 case HYPERSTAT_TWO_PIPE_FCU:
                     showDialogFragment(HyperStatV2Pipe2Fragment.Companion.newInstance(Short.parseShort(nodeAddress),
                                     zone.getId(), floor.getId(), NodeType.HYPER_STAT, ProfileType.HYPERSTAT_TWO_PIPE_FCU),

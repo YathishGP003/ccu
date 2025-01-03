@@ -285,7 +285,7 @@ public class PlcProfile extends ZoneProfile {
 
         if (isEnabledAnalog2InForSp && StringUtils.isNotEmpty(dynamicTargetDomainName)) {
             double dynamicTargetSensorVal = CCUHsApi.getInstance().readHisValByQuery("point and equipRef == \"" + equipRef + "\" and domainName == \"" + dynamicTargetDomainName + "\"");
-            plcEquip.getDynamicTargetValue().writePointValue(dynamicTargetSensorVal + spSensorOffset);
+            plcEquip.getDynamicTargetValue().writePointValue(dynamicTargetSensorVal + spSensorOffset/10);
         }
 
     }

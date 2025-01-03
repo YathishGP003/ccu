@@ -1111,8 +1111,11 @@ public class FloorPlanFragment extends Fragment {
                             .newInstance(Short.parseShort(nodeAddress), zone.getId(),floor.getId(),NodeType.CONTROL_MOTE, ProfileType.TEMP_INFLUENCE), TIFragment.ID);
                     break;
                 case SSE:
-                    showDialogFragment(FragmentSSEConfiguration
-                            .newInstance(Short.parseShort(nodeAddress), zone.getId(), NodeType.SMART_NODE, floor.getId(), profile.getProfileType()), FragmentSSEConfiguration.ID);
+                    Equip equipSse = profile.getEquip();
+                    CcuLog.i(L.TAG_CCU_UI, "equip domainName "+equipSse.getDomainName()+" "+profile.getProfileType());
+                    NodeType helioNode = equipSse.getDomainName().contains("helionode") ? NodeType.HELIO_NODE : NodeType.SMART_NODE;
+                    showDialogFragment(SseProfileConfigFragment.Companion
+                            .newInstance(Short.parseShort(nodeAddress), zone.getId(), floor.getId(), helioNode, profile.getProfileType()), SseProfileConfigFragment.Companion.getID());
                     break;
                 case HYPERSTAT_MONITORING:
                     showDialogFragment(HyperStatMonitoringFragment.Companion.newInstance(Short.parseShort(nodeAddress)

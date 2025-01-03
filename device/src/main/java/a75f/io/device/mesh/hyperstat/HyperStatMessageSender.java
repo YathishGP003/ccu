@@ -98,9 +98,8 @@ public class HyperStatMessageSender {
      * Send control message based on the node's state in database.
      * Message will be sent only the current message is different from last sent state
      * @param address
-     * @param equipRef
      */
-    public static void sendControlMessage(int address, String equipRef) {
+    public static void sendControlMessage(int address) {
         HyperStatControlsMessage_t controls = HyperStatMessageGenerator.getControlMessage(address
         ).build();
         

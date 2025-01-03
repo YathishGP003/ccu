@@ -89,6 +89,7 @@ import a75f.io.api.haystack.modbus.EquipmentDevice;
 import a75f.io.api.haystack.modbus.Parameter;
 import a75f.io.domain.api.Domain;
 import a75f.io.domain.OAOEquip;
+import a75f.io.domain.api.DomainName;
 import a75f.io.domain.util.ModelNames;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
@@ -1060,7 +1061,14 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		if(getActivity() != null && L.ccu().systemProfile != null) {
 			getActivity().runOnUiThread(() -> {
 				String colorHex = CCUUiUtil.getColorCode(getContext());
-				String status = CCUHsApi.getInstance().readDefaultStrVal("system and status and message");
+				String status;
+				if (isDMSupportProfile()) {
+					status = CCUHsApi.getInstance()
+							.readDefaultStrVal("system and domainName == \"" + DomainName.equipStatusMessage + "\"");
+				} else {
+					status = CCUHsApi.getInstance().readDefaultStrVal("system and status and message");
+				}
+
 				//If the system status is not updated yet (within a minute of registering the device), generate a
 				//default message.
 				if (StringUtils.isEmpty(status)) {
@@ -1084,8 +1092,11 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 					setPointConfig.setVisibility(View.GONE);
 
 				} else {
-					systemModePicker.setValue((int) TunerUtil.readSystemUserIntentVal("conditioning and mode"));
-
+					if (isDMSupportProfile()) {
+						systemModePicker.setValue((int) TunerUtil.readSystemUserIntentVal("domainName == \"" + DomainName.conditioningMode + "\""));
+					} else {
+						systemModePicker.setValue((int) TunerUtil.readSystemUserIntentVal("conditioning and mode"));
+					}
 					equipmentStatus.setText(StringUtil.isBlank(status)? Html.fromHtml("<font color='"+colorHex+"'>OFF</font>") : Html.fromHtml(status.replace("ON","<font color='"+colorHex+"'>ON</font>").replace("OFF","<font color='"+colorHex+"'>OFF</font>")));
 					if (isCelsiusTunerAvailableStatus()) {
 						occupancyStatus.setText(StatusCelsiusVal(ScheduleManager.getInstance()
@@ -1107,10 +1118,17 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 					sbComfortValue.setProgress(5 - (int) TunerUtil.readSystemUserIntentVal("desired and ci"));
 					sbComfortValue.setContentDescription(String.valueOf(5 - (int) TunerUtil.readSystemUserIntentVal("desired and ci")));
 
-					targetMaxInsideHumidity.setSelection(humidityAdapter
-							.getPosition(TunerUtil.readSystemUserIntentVal("target and max and inside and humidity")), false);
-					targetMinInsideHumidity.setSelection(humidityAdapter
-							.getPosition(TunerUtil.readSystemUserIntentVal("target and min and inside and humidity")), false);
+					if (isDMSupportProfile()) {
+						targetMaxInsideHumidity.setSelection(humidityAdapter
+								.getPosition(TunerUtil.readSystemUserIntentVal("domainName == \"" + DomainName.systemtargetMaxInsideHumidity + "\"")), false);
+						targetMinInsideHumidity.setSelection(humidityAdapter
+								.getPosition(TunerUtil.readSystemUserIntentVal("domainName == \"" + DomainName.systemtargetMinInsideHumidity + "\"")), false);
+					} else {
+						targetMaxInsideHumidity.setSelection(humidityAdapter
+								.getPosition(TunerUtil.readSystemUserIntentVal("target and max and inside and humidity")), false);
+						targetMinInsideHumidity.setSelection(humidityAdapter
+								.getPosition(TunerUtil.readSystemUserIntentVal("target and min and inside and humidity")), false);
+					}
 
 					if(L.ccu().systemProfile instanceof VavIERtu) {
 						IEGatewayDetail.setVisibility(View.VISIBLE);
@@ -1295,14 +1313,21 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 				if (maxHumiditySpinnerReady)
 				{
 					maxHumiditySpinnerReady = false;
-					SystemProfileUtil.setUserIntentBackground("target and max and inside and humidity", val);
+					if (isDMSupportProfile()) {
+						SystemProfileUtil.setUserIntentBackground("domainName == \"" + DomainName.systemtargetMaxInsideHumidity + "\"", val);
+					} else {
+						SystemProfileUtil.setUserIntentBackground("target and max and inside and humidity", val);
+					}
 				}
 				break;
 			case R.id.targetMinInsideHumidity:
-				if (minHumiditySpinnerReady)
-				{
+				if (minHumiditySpinnerReady) {
 					minHumiditySpinnerReady = false;
-					SystemProfileUtil.setUserIntentBackground("target and min and inside and humidity", val);
+					if (isDMSupportProfile()) {
+						SystemProfileUtil.setUserIntentBackground("domainName == \"" + DomainName.systemtargetMinInsideHumidity + "\"", val);
+					} else {
+						SystemProfileUtil.setUserIntentBackground("target and min and inside and humidity", val);
+					}
 				}
 				break;
 		}

@@ -212,6 +212,7 @@ open class HyperStatViewModel(application: Application) : AndroidViewModel(appli
             testMessage.setAnalogOut3(getAnalogOut(testAnalogOut3))
         }
 
+        CcuLog.i(L.TAG_CCU_HSHST, "Test signal == > $testMessage")
         HyperStatMessageSender.writeControlMessage(
                 testMessage!!.build(), deviceAddress.toInt(),
                 MessageType.HYPERSTAT_CONTROLS_MESSAGE, false

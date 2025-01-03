@@ -1062,7 +1062,8 @@ public class Schedule extends Entity
     public ArrayList<Interval> getScheduledIntervalsForDays(ArrayList<Days> daysSorted) {
         ArrayList<Interval> daysIntervals = new ArrayList<Interval>();
         ArrayList<Interval> allIntervals = getScheduledIntervals(getDaysSorted());
-        if(!daysSorted.isEmpty() && daysSorted.get(0).getSthh() > daysSorted.get(0).getEthh()) {
+        if(!daysSorted.isEmpty() && ( daysSorted.get(0).getSthh() > daysSorted.get(0).getEthh()
+                || (daysSorted.get(0).getSthh() == daysSorted.get(0).getEthh() && daysSorted.get(0).getStmm() > daysSorted.get(0).getEtmm()) ) ) {
             if(daysSorted.get(daysSorted.size()-1).getDay()==6) {
 
                 //overnight scenario
@@ -1268,7 +1269,7 @@ public class Schedule extends Entity
         ArrayList<Days> days = new ArrayList<>();
 
         for (Days day : getDaysSorted()){
-            if (day.getSthh() >= day.getEthh() && (day.getDay() == DAYS.SUNDAY.ordinal())){
+            if ((day.getSthh() > day.getEthh() || (day.getSthh() == day.getEthh() && day.getStmm() > day.getEtmm()) ) && (day.getDay() == DAYS.SUNDAY.ordinal())){
                 Days d = new Days();
                 d.setSthh(day.mSthh);
                 d.setStmm(day.mStmm);

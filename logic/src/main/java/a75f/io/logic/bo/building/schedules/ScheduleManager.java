@@ -70,6 +70,7 @@ import a75f.io.logic.bo.building.system.vav.VavExternalAhu;
 import a75f.io.logic.bo.building.system.vav.VavFullyModulatingRtu;
 import a75f.io.logic.bo.building.system.vav.VavStagedRtu;
 import a75f.io.logic.bo.building.system.vav.VavStagedRtuWithVfd;
+import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.bo.util.DemandResponseMode;
 import a75f.io.logic.bo.util.DesiredTempDisplayMode;
 import a75f.io.logic.bo.util.TemperatureMode;
@@ -1238,7 +1239,13 @@ public class ScheduleManager {
             return "In Energy saving Vacation";
         }
 
-        double epidemicMode = CCUHsApi.getInstance().readHisValByQuery("point and sp and system and epidemic and mode and state and equipRef ==\""+L.ccu().systemProfile.getSystemEquipRef()+"\"");
+        double epidemicMode;
+        if (CCUUtils.isDomainEquip(L.ccu().systemProfile.getSystemEquipRef(), "equip")) {
+            epidemicMode = CCUHsApi.getInstance().readHisValByQuery("equipRef == \"" + L.ccu().systemProfile.getSystemEquipRef() + "\" and domainName == \"" + DomainName.epidemicModeSystemState + "\"");
+        } else {
+            epidemicMode = CCUHsApi.getInstance().readHisValByQuery("sp and system and epidemic and mode and state and equipRef ==\"" + L.ccu().systemProfile.getSystemEquipRef() + "\"");
+        }
+
         EpidemicState epidemicState = EpidemicState.values()[(int) epidemicMode];
         String epidemicString = (epidemicState != EpidemicState.OFF) ? "["+epidemicState.name()+"] " : "";
 

@@ -309,7 +309,6 @@ public class LSmartNode
 
             double rawSpSensorOffset = plcEquip.getSetpointSensorOffset().readDefaultVal()/10;
             settings2.setpointSensorOffset.set(getInputSensor1Multiplier(inputSensor2, rawSpSensorOffset));
-
             settings2.genericPiProportionalRange.set((short)plcEquip.getPidProportionalRange().readDefaultVal());
             settings2.turnOnRelay1.set((short)plcEquip.getRelay1OnThreshold().readDefaultVal());
             settings2.turnOnRelay2.set((short)plcEquip.getRelay2OnThreshold().readDefaultVal());

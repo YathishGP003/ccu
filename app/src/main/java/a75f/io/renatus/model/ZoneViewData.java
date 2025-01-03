@@ -81,7 +81,7 @@ public class ZoneViewData {
         
         HashMap tiPoints = new HashMap();
         tiPoints.put("Profile","TEMP_INFLUENCE");
-        String equipStatusPoint = CCUHsApi.getInstance().readDefaultStrVal("point and status and message and equipRef == \""+equipID+"\"");
+        String equipStatusPoint = CCUHsApi.getInstance().readDefaultStrVal("point and domainName == \"" + DomainName.equipStatusMessage + "\" and equipRef == \""+equipID+"\"");
         if (equipStatusPoint.length() > 0)
         {
             tiPoints.put("Status",equipStatusPoint);

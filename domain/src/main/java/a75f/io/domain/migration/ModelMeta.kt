@@ -26,6 +26,8 @@ import a75f.io.domain.util.MODEL_HYPERSTAT_HPU
 import a75f.io.domain.util.MODEL_HYPERSTAT_PIPE2
 import a75f.io.domain.util.MODEL_HYPERSTAT_SPLIT_CPU
 import a75f.io.domain.util.MODEL_HYPERSTAT_SPLIT_DEVICE
+import a75f.io.domain.util.MODEL_OTN_DEVICE
+import a75f.io.domain.util.MODEL_OTN_TI
 import a75f.io.domain.util.MODEL_SMART_NODE_DAB
 import a75f.io.domain.util.MODEL_SMART_NODE_DEVICE
 import a75f.io.domain.util.MODEL_SMART_NODE_SSE
@@ -99,6 +101,8 @@ fun getRequiredModels(): List<String> {
             MODEL_CCU_DIAG_EQUIP,
             MODEL_CCU_BASE_CONFIGURATION,
             MODEL_TI_DEVICE,
-            MODEL_TI
+            MODEL_TI,
+            MODEL_OTN_TI,
+            MODEL_OTN_DEVICE
     )
 }

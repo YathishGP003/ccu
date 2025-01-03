@@ -165,7 +165,7 @@ public class UpdateEntityHandler implements MessageHandler {
      * @return
      */
     private static boolean isBuildingTuner(Point point) {
-        return (point.getMarkers().contains(Tags.POINT) && point.getMarkers().contains(Tags.DEFAULT) && (!point.getTags().containsKey(Tags.CCUREF)) && (point.getMarkers().contains(Tags.TUNER) || point.getMarkers().contains(Tags.SCHEDULABLE)));
+        return (point.getMarkers().contains(Tags.POINT) && point.getMarkers().contains(Tags.DEFAULT) && (point.getCcuRef() == null) && (point.getMarkers().contains(Tags.TUNER) || point.getMarkers().contains(Tags.SCHEDULABLE)));
     }
 
     private static boolean isModbusInputOrDiscreteInput(HRow row) {

@@ -2,6 +2,7 @@ package a75f.io.logic.bo.building.otn;
 
 import java.util.HashMap;
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.domain.api.DomainName;
 import a75f.io.logger.CcuLog;
 
 /*
@@ -15,14 +16,15 @@ public class OTNUtil {
     public static HashMap getOTNPoints(String equipID) {
         HashMap points = new HashMap();
         points.put("Profile", "Temperature Influencing");
-        String equipStatusPoint = CCUHsApi.getInstance().readDefaultStrVal("point and " +
-                "message and equipRef == \"" + equipID + "\"");
-        double humidity = CCUHsApi.getInstance().readHisValByQuery("point and air and humidity " +
-                "and sensor " +
-                "and equipRef == \"" + equipID + "\"");
-        double forceoccupied = CCUHsApi.getInstance().readHisValByQuery("point and (occupancy or occupied) and" +
-                " mode and equipRef == \"" + equipID + "\"");
-
+        String equipStatusPoint = CCUHsApi.getInstance()
+                .readDefaultStrVal("domainName == \"" + DomainName.equipStatusMessage + "\"" +
+                        " and equipRef == \"" + equipID + "\"");
+        double humidity = CCUHsApi.getInstance()
+                .readHisValByQuery("domainName == \"" + DomainName.zoneHumidity + "\" and " +
+                        "equipRef == \"" + equipID + "\"");
+        double forceoccupied = CCUHsApi.getInstance()
+                .readHisValByQuery("domainName == \"" + DomainName.occupancyMode + "\" and " +
+                        "equipRef == \"" + equipID + "\"");
         CcuLog.d(LOG_TAG, "equipStatusPoint =" + equipStatusPoint +
                 "humidity =" + humidity + "forceoccupied" + forceoccupied);
 

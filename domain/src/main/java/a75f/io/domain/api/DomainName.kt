@@ -59,6 +59,7 @@ object DomainName {
     const val hyperstatSplitCPU = "hyperstatSplitCPU"
     const val hyperstatCPU = "hyperstatCPU"
     const val hyperstatHPU = "hyperstatHPU"
+    const val hyperstat2PFCU = "hyperstat2PFCU"
 
     // Devices
     const val hyperstatSplitDevice = "hyperstatSplitDevice"

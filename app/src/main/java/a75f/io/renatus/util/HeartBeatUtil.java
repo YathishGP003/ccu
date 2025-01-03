@@ -13,6 +13,7 @@ import java.util.concurrent.TimeUnit;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Tags;
+import a75f.io.domain.api.DomainName;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.util.CCUUtils;
@@ -48,7 +49,12 @@ public class HeartBeatUtil {
             updatedTime = CCUUtils.getLastReceivedTimeForRssi(nodeAddress);
             HashMap<Object, Object> equip = CCUHsApi.getInstance().readEntity("equip and group ==\""+nodeAddress+"\"");
             if (!equip.isEmpty()) {
-                zoneDeadTime = TunerUtil.readTunerValByQuery("zone and dead and time", equip.get(Tags.ID).toString());
+                if(CCUUtils.isDomainEquip(equip.get(Tags.ID).toString(), "equip")){
+                    zoneDeadTime = TunerUtil
+                            .readTunerValByQuery("domainName == \"" + DomainName.zoneDeadTime + "\"", equip.get(Tags.ID).toString());
+                }else{
+                    zoneDeadTime = TunerUtil.readTunerValByQuery("zone and dead and time", equip.get(Tags.ID).toString());
+                }
             }
         }
         if(updatedTime == null){

@@ -1083,7 +1083,10 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
             config: Pipe2Configuration, analogOutStages: HashMap<String, Int>, fanSpeed: FanSpeed,
             basicSettings: BasicSettings
     ) {
-        if (!isEligibleForHeating(basicSettings.conditioningMode)) return
+        if (!isEligibleForHeating(basicSettings.conditioningMode)) {
+            resetAux(relayStages)
+            return
+        }
 
         if (currentTemp < userIntents.zoneHeatingTargetTemperature - auxHeatingActivate) {
             updateLogicalPoint(relayOutputPoints[auxMapping.ordinal], 1.0)

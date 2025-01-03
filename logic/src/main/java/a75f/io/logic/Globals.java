@@ -40,7 +40,7 @@ import a75f.io.logic.autocommission.AutoCommissioningUtil;
 import a75f.io.logic.bo.building.CCUApplication;
 import a75f.io.logic.bo.building.bacnet.BacnetProfile;
 import a75f.io.logic.bo.building.bypassdamper.BypassDamperProfile;
-import a75f.io.logic.bo.building.ccu.CazProfile;
+import a75f.io.logic.bo.building.ccu.TIProfile;
 import a75f.io.logic.bo.building.dab.DabProfile;
 import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.dualduct.DualDuctProfile;
@@ -93,7 +93,6 @@ import a75f.io.logic.util.MigrationUtil;
 import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.logic.watchdog.Watchdog;
 import a75f.io.sitesequencer.SequenceManager;
-import a75f.io.sitesequencer.SequencerSchedulerUtil;
 import a75f.io.util.ExecutorTask;
 
 /*
@@ -409,6 +408,8 @@ public class Globals {
                 L.ccu().systemProfile = new DabStagedRtu();
             } else if (eq.getProfile().equals("dabStagedRtuVfdFan")) {
                 L.ccu().systemProfile = new DabStagedRtuWithVfd();
+            } else if (eq.getProfile().equals("dabFullyModulatingAhu")) {
+                L.ccu().systemProfile = new DabFullyModulatingRtu();
             } else {
 
                 switch (ProfileType.valueOf(getDomainSafeProfile(eq.getProfile()))) {
@@ -503,8 +504,7 @@ public class Globals {
                             L.ccu().zoneProfiles.add(emr);
                             break;
                         case TEMP_INFLUENCE:
-                            CazProfile caz = new CazProfile();
-                            caz.addCcuAsZoneEquip(Short.parseShort(eq.getGroup()));
+                            TIProfile caz = new TIProfile(eq.getId(),Short.parseShort(eq.getGroup()));
                             L.ccu().zoneProfiles.add(caz);
                             break;
                         case SSE:
@@ -539,13 +539,13 @@ public class Globals {
                             break;
                         case HYPERSTAT_HEAT_PUMP_UNIT:
                             HyperStatHpuProfile hpuProfile = new HyperStatHpuProfile();
-                            hpuProfile.addEquip(Short.parseShort(eq.getGroup()));
+                            hpuProfile.addEquip(eq.getId());
                             L.ccu().zoneProfiles.add(hpuProfile);
                             break;
 
                         case HYPERSTAT_TWO_PIPE_FCU:
                             HyperStatPipe2Profile pipe2Profile = new HyperStatPipe2Profile();
-                            pipe2Profile.addEquip(Short.parseShort(eq.getGroup()));
+                            pipe2Profile.addEquip(eq.getId());
                             L.ccu().zoneProfiles.add(pipe2Profile);
                             break;
 

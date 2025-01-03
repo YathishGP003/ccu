@@ -3,24 +3,20 @@ package a75f.io.logic.jobs
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.HSUtil
 import a75f.io.api.haystack.Point
-import a75f.io.domain.api.DomainName
 import a75f.io.domain.equips.hyperstat.HyperStatEquip
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
-import a75f.io.logic.interfaces.ZoneDataInterface
 import a75f.io.logic.bo.building.ZoneTempState
 import a75f.io.logic.bo.building.hvac.AnalogOutput
 import a75f.io.logic.bo.building.hvac.Stage
-import a75f.io.logic.bo.building.hyperstat.profiles.pipe2.Pipe2RelayAssociation
+import a75f.io.logic.bo.building.hyperstat.v2.configs.HsPipe2RelayMapping
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
+import a75f.io.logic.interfaces.ZoneDataInterface
 import a75f.io.logic.tuners.TunerConstants
-import a75f.io.logic.util.RxjavaUtil
 import a75f.io.util.ExecutorTask
-import android.util.Log
 import org.projecthaystack.HNum
 import org.projecthaystack.HRef
 import kotlin.collections.set
-import kotlin.math.log
 
 
 /**
@@ -43,7 +39,7 @@ class HyperStatUserIntentHandler {
                 portStages: HashMap<String, Int>,
                 analogOutStages: HashMap<String, Int>,
                 temperatureState: ZoneTempState,
-                equip: HyperStatEquip? = null
+                equip: HyperStatEquip
         ) {
             var status: String
             status = when (temperatureState) {
@@ -103,21 +99,21 @@ class HyperStatUserIntentHandler {
                 status += "Heating 3 ON"
             }
 
-            if ((portStages.containsKey(Pipe2RelayAssociation.AUX_HEATING_STAGE1.name)
-                            || portStages.containsKey(Pipe2RelayAssociation.AUX_HEATING_STAGE2.name))
+            if ((portStages.containsKey(HsPipe2RelayMapping.AUX_HEATING_STAGE1.name)
+                            || portStages.containsKey(HsPipe2RelayMapping.AUX_HEATING_STAGE2.name))
                     && status.isNotBlank()) {
                 status += ", "
             }
-            if (portStages.containsKey(Pipe2RelayAssociation.AUX_HEATING_STAGE1.name)
-                    && portStages.containsKey(Pipe2RelayAssociation.AUX_HEATING_STAGE2.name)
+            if (portStages.containsKey(HsPipe2RelayMapping.AUX_HEATING_STAGE1.name)
+                    && portStages.containsKey(HsPipe2RelayMapping.AUX_HEATING_STAGE2.name)
             ) {
                 status += "Aux Heating 1&2 ON"
-            } else if (portStages.containsKey(Pipe2RelayAssociation.AUX_HEATING_STAGE1.name)) {
+            } else if (portStages.containsKey(HsPipe2RelayMapping.AUX_HEATING_STAGE1.name)) {
                 status += "Aux Heating1 ON"
-            } else if (portStages.containsKey(Pipe2RelayAssociation.AUX_HEATING_STAGE2.name)) {
+            } else if (portStages.containsKey(HsPipe2RelayMapping.AUX_HEATING_STAGE2.name)) {
                 status += "Aux Heating2 ON"
             }
-            if (portStages.containsKey(Pipe2RelayAssociation.WATER_VALVE.name)) {
+            if (portStages.containsKey(HsPipe2RelayMapping.WATER_VALVE.name)) {
                 status += if (status.isNotBlank())
                     ", Water Valve ON"
                 else
@@ -198,13 +194,7 @@ class HyperStatUserIntentHandler {
                 hyperStatStatus[equipId] = status
                 if (status.isEmpty()) status = " OFF "
 
-                if (equip != null) {
-                    equip.equipStatusMessage.writeDefaultVal(status)
-                } else {
-                    CCUHsApi.getInstance().writeDefaultVal(
-                            "point and status and message and writable and equipRef == \"$equipId\"", status
-                    )
-                }
+                equip.equipStatusMessage.writeDefaultVal(status)
                 zoneDataInterface?.refreshScreen("", false)
             }
             CcuLog.i(L.TAG_CCU_HSHST, "Equip status message : $status")

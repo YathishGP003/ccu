@@ -2,6 +2,9 @@ package a75f.io.logic.bo.building.hyperstat.profiles.pipe2
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Equip
+import a75f.io.domain.api.Domain
+import a75f.io.domain.equips.hyperstat.HyperStatEquip
+import a75f.io.domain.equips.hyperstat.Pipe2V2Equip
 import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.logic.L
@@ -14,13 +17,29 @@ import a75f.io.logic.bo.building.hvac.AnalogOutput
 import a75f.io.logic.bo.building.hvac.Stage
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.hvac.StandaloneFanStage
-import a75f.io.logic.bo.building.hyperstat.common.*
+import a75f.io.logic.bo.building.hyperstat.common.BasicSettings
+import a75f.io.logic.bo.building.hyperstat.common.FanModeCacheStorage
+import a75f.io.logic.bo.building.hyperstat.common.HyperStatLoopController
+import a75f.io.logic.bo.building.hyperstat.common.HyperStatProfileTuners
+import a75f.io.logic.bo.building.hyperstat.common.UserIntents
 import a75f.io.logic.bo.building.hyperstat.profiles.HyperStatFanCoilUnit
+import a75f.io.logic.bo.building.hyperstat.profiles.util.fetchBasicSettings
+import a75f.io.logic.bo.building.hyperstat.profiles.util.fetchHyperStatTuners
+import a75f.io.logic.bo.building.hyperstat.profiles.util.fetchUserIntents
+import a75f.io.logic.bo.building.hyperstat.profiles.util.getConfiguration
+import a75f.io.logic.bo.building.hyperstat.profiles.util.getLogicalPointList
+import a75f.io.logic.bo.building.hyperstat.profiles.util.updateAllLoopOutput
+import a75f.io.logic.bo.building.hyperstat.profiles.util.updateOccupancyDetection
+import a75f.io.logic.bo.building.hyperstat.profiles.util.updateOperatingMode
+import a75f.io.logic.bo.building.hyperstat.v2.configs.AnalogInputAssociation
+import a75f.io.logic.bo.building.hyperstat.v2.configs.FanConfig
+import a75f.io.logic.bo.building.hyperstat.v2.configs.HsPipe2AnalogOutMapping
+import a75f.io.logic.bo.building.hyperstat.v2.configs.HsPipe2RelayMapping
+import a75f.io.logic.bo.building.hyperstat.v2.configs.HyperStatConfiguration
+import a75f.io.logic.bo.building.hyperstat.v2.configs.Pipe2AnalogOutConfigs
+import a75f.io.logic.bo.building.hyperstat.v2.configs.Pipe2Configuration
 import a75f.io.logic.bo.building.schedules.Occupancy
 import a75f.io.logic.jobs.HyperStatUserIntentHandler
-import a75f.io.logic.jobs.HyperStatUserIntentHandler.Companion.hyperStatStatus
-import a75f.io.logic.tuners.TunerUtil
-import com.fasterxml.jackson.annotation.JsonIgnore
 
 
 /**
@@ -30,61 +49,43 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 
 class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
 
-    private val pipe2DeviceMap: MutableMap<Short, HyperStatPipe2EquipToBeDeleted> = mutableMapOf()
-    private val hyperStatLoopController = HyperStatLoopController()
-    private var supplyWaterTempTh2 = 0.0
-    private var heatingThreshold = 85.0
-    private var coolingThreshold = 65.0
-
     private var coolingLoopOutput = 0
     private var heatingLoopOutput = 0
     private var fanLoopOutput = 0
+    private var supplyWaterTempTh2 = 0.0
+    private var heatingThreshold = 85.0
+    private var coolingThreshold = 65.0
+    
+    
     private var doorWindowSensorOpenStatus = false
     private var runFanLowDuringDoorWindow = false
-    private lateinit var curState: ZoneState
-
-    private var analogOutputPoints: HashMap<Int, String> = HashMap()
-    private var relayOutputPoints: HashMap<Int, String> = HashMap()
+    
+    private val pipe2DeviceMap: MutableMap<Int, Pipe2V2Equip> = mutableMapOf()
     private var occupancyBeforeDoorWindow = Occupancy.UNOCCUPIED
+    
+    private val hyperStatLoopController = HyperStatLoopController()
+    override lateinit var occupancyStatus: Occupancy
+    private lateinit var curState: ZoneState
+    
+    private var analogLogicalPoints: HashMap<Int, String> = HashMap()
+    private var relayLogicalPoints: HashMap<Int, String> = HashMap()
 
-    override fun getHyperStatEquip(node: Short): HyperStatEquipToBeDeleted {
-        return pipe2DeviceMap[node] as HyperStatPipe2EquipToBeDeleted
-    }
+    override fun getProfileType() = ProfileType.HYPERSTAT_TWO_PIPE_FCU    
 
-    override fun addNewEquip(
-        node: Short,
-        room: String,
-        floor: String,
-        baseConfig: BaseProfileConfiguration
-    ) {
-        val equip = addEquip(node)
-        val configuration =
-            equip.initializePoints(baseConfig as HyperStatPipe2Configuration, room, floor, node)
-        hsHaystackUtil = equip.hsHaystackUtil
-        return configuration
-    }
 
     override fun updateZonePoints() {
-        pipe2DeviceMap.forEach { (_, equip) ->
-            logIt( "Process Pipe2: equipRef =  ${equip.nodeAddress}")
+        pipe2DeviceMap.forEach { (nodeAddress, equip) ->
+            pipe2DeviceMap[nodeAddress] = Domain.getDomainEquip(equip.equipRef) as Pipe2V2Equip
+            CcuLog.d( L.TAG_CCU_HSPIPE2,"Process Pipe2: equipRef =  ${equip.nodeAddress}")
             processHyperStatPipeProfile(equip)
         }
     }
-
-    override fun getProfileType() = ProfileType.HYPERSTAT_TWO_PIPE_FCU
-
-    override fun <T : BaseProfileConfiguration?> getProfileConfiguration(address: Short): T {
-        val equip = pipe2DeviceMap[address]
-        return equip?.getConfiguration() as T
+    
+    fun addEquip(equipRef: String) {
+        val equip = Pipe2V2Equip(equipRef)
+        pipe2DeviceMap[equip.nodeAddress] = equip
     }
-
-    fun addEquip(node: Short): HyperStatEquipToBeDeleted {
-        val equip = HyperStatPipe2EquipToBeDeleted(node)
-        equip.initEquipReference(node)
-        pipe2DeviceMap[node] = equip
-        return equip
-    }
-
+    
     override fun getEquip(): Equip? {
         for (nodeAddress in pipe2DeviceMap.keys) {
             val equip = CCUHsApi.getInstance().readEntity("equip and group == \"$nodeAddress\"")
@@ -93,27 +94,15 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
         return null
     }
 
-    override fun getNodeAddresses(): MutableSet<Short> {
-        return pipe2DeviceMap.keys
-    }
-
-    fun processHyperStatPipeProfile(equip: HyperStatPipe2EquipToBeDeleted) {
+    fun processHyperStatPipeProfile(equip: Pipe2V2Equip) {
 
         if (Globals.getInstance().isTestMode) {
-            logIt( "Test mode is on: ${equip.equipRef}")
-                return
+            CcuLog.d(L.TAG_CCU_HSPIPE2, "Test mode is on: ${equip.equipRef}")
+            return
         }
-
         if (mInterface != null) mInterface.refreshView()
 
-        val relayStages = HashMap<String, Int>()
-        val analogOutStages = HashMap<String, Int>()
-
-        logicalPointsList = equip.getLogicalPointList()
-        relayOutputPoints = equip.getRelayOutputPoints()
-        analogOutputPoints = equip.getAnalogOutputPoints()
-        hsHaystackUtil = HSHaystackUtil(equip.equipRef!!, CCUHsApi.getInstance())
-        if(isRFDead){
+        if (isRFDead) {
             handleRFDead(equip)
             return
         } else if (isZoneDead) {
@@ -121,20 +110,30 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
             return
         }
 
+        val relayOutputStatus = HashMap<String, Int>()
+        val analogOutputStatus = HashMap<String, Int>()
+
+        val config = getConfiguration(equip.equipRef)
+
+        logicalPointsList = getLogicalPointList(equip, config!!)
+
+        relayLogicalPoints = getRelayOutputPoints(equip)
+        analogLogicalPoints = getAnalogOutputPoints(equip)
+
         curState = ZoneState.DEADBAND
         occupancyStatus = equipOccupancyHandler.currentOccupiedMode
 
-        val config = equip.getConfiguration()
         val hyperStatTuners = fetchHyperStatTuners(equip)
         val userIntents = fetchUserIntents(equip)
         val averageDesiredTemp = getAverageTemp(userIntents)
-
-        val fanModeSaved = FanModeCacheStorage().getFanModeFromCache(equip.equipRef!!)
+        val fanModeSaved = FanModeCacheStorage().getFanModeFromCache(equip.equipRef)
         val basicSettings = fetchBasicSettings(equip)
-        logIt("Before fall back ${basicSettings.fanMode} ${basicSettings.conditioningMode}")
-        val updatedFanMode = fallBackFanMode(equip, equip.equipRef!!, fanModeSaved, basicSettings)
+
+        CcuLog.d(L.TAG_CCU_HSPIPE2, "Before fall back ${basicSettings.fanMode} ${basicSettings.conditioningMode}")
+        val updatedFanMode = fallBackFanMode(equip, equip.equipRef, fanModeSaved, basicSettings)
         basicSettings.fanMode = updatedFanMode
-        logIt("After fall back ${basicSettings.fanMode} ${basicSettings.conditioningMode}")
+        CcuLog.d(L.TAG_CCU_HSPIPE2, "After fall back ${basicSettings.fanMode} ${basicSettings.conditioningMode}")
+
         heatingThreshold = hyperStatTuners.heatingThreshold
         coolingThreshold = hyperStatTuners.coolingThreshold
 
@@ -145,212 +144,93 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
         coolingLoopOutput = 0
         heatingLoopOutput = 0
         fanLoopOutput = 0
+
+        val currentOperatingMode = equip.occupancyMode.readHisVal().toInt()
         evaluateLoopOutputs(userIntents, basicSettings, hyperStatTuners)
+        updateOccupancyDetection(equip)
 
-        supplyWaterTempTh2 = getSupplyWaterTemp(equip.equipRef!!)
-        equip.hsHaystackUtil.updateOccupancyDetection()
+        doorWindowSensorOpenStatus = runForDoorWindowSensor(config, equip, analogOutputStatus, relayOutputStatus)
+        runFanLowDuringDoorWindow = checkFanOperationAllowedDoorWindow(userIntents)
+        supplyWaterTempTh2 = equip.leavingWaterTemperature.readHisVal()
+        if (occupancyStatus == Occupancy.WINDOW_OPEN) resetLoopOutputValues()
 
-        equip.hsHaystackUtil.updateAllLoopOutput (
-            coolingLoopOutput, heatingLoopOutput,
-            fanLoopOutput,false ,0
+        runForKeyCardSensor(config, equip)
+        updateAllLoopOutput(equip, coolingLoopOutput, heatingLoopOutput, fanLoopOutput, false)
+
+        CcuLog.i(L.TAG_CCU_HSPIPE2,
+                "Fan speed multiplier:  ${hyperStatTuners.analogFanSpeedMultiplier} " +
+                        "AuxHeating1Activate: ${hyperStatTuners.auxHeating1Activate} " +
+                        "AuxHeating2Activate: ${hyperStatTuners.auxHeating2Activate} " +
+                        "waterValveSamplingOnTime: ${hyperStatTuners.waterValveSamplingOnTime}  waterValveSamplingWaitTime : ${hyperStatTuners.waterValveSamplingWaitTime} \n" +
+                        "waterValveSamplingDuringLoopDeadbandOnTime: ${hyperStatTuners.waterValveSamplingDuringLoopDeadbandOnTime}  waterValveSamplingDuringLoopDeadbandWaitTime : ${hyperStatTuners.waterValveSamplingDuringLoopDeadbandWaitTime} \n" +
+                        "Current Occupancy: ${Occupancy.values()[currentOperatingMode]} \n" +
+                        "supplyWaterTempTh2 : $supplyWaterTempTh2 \n" +
+                        "Fan Mode : ${basicSettings.fanMode} Conditioning Mode ${basicSettings.conditioningMode} \n" +
+                        "heatingThreshold: $heatingThreshold  coolingThreshold : $coolingThreshold \n" +
+                        "Current Temp : $currentTemp Desired (Heating: ${userIntents.zoneHeatingTargetTemperature}" +
+                        " Cooling: ${userIntents.zoneCoolingTargetTemperature})\n" +
+                        "Loop Outputs: (Heating: $heatingLoopOutput Cooling: $coolingLoopOutput Fan : $fanLoopOutput ) \n"
         )
-        val currentOperatingMode = equip.hsHaystackUtil.getOccupancyModePointValue().toInt()
 
-        logIt(
-            "Analog Fan speed multiplier  ${hyperStatTuners.analogFanSpeedMultiplier} \n" +
-            "Current Working mode : ${Occupancy.values()[currentOperatingMode]} \n" +
-            "Current Temp : $currentTemp \n" +
-            "Desired Heating: ${userIntents.zoneHeatingTargetTemperature} \n" +
-            "Desired Cooling: ${userIntents.zoneCoolingTargetTemperature} \n" +
-            "Heating Loop Output: $heatingLoopOutput \n" +
-            "Cooling Loop Output:: $coolingLoopOutput \n" +
-            "Fan Loop Output:: $fanLoopOutput \n" +
-            "supplyWaterTempTh2 : $supplyWaterTempTh2 \n" +
-            "Fan Mode : ${basicSettings.fanMode} Conditioning Mode ${basicSettings.conditioningMode} \n" +
-            "heatingThreshold: $heatingThreshold  coolingThreshold : $coolingThreshold \n"+
-            "waterValveSamplingOnTime: ${hyperStatTuners.waterValveSamplingOnTime}  waterValveSamplingWaitTime : ${hyperStatTuners.waterValveSamplingWaitTime} \n"+
-            "waterValveSamplingDuringLoopDeadbandOnTime: ${hyperStatTuners.waterValveSamplingDuringLoopDeadbandOnTime}  waterValveSamplingDuringLoopDeadbandWaitTime : ${hyperStatTuners.waterValveSamplingDuringLoopDeadbandWaitTime} \n",
-        )
+        operateRelays(config as Pipe2Configuration, hyperStatTuners, userIntents, basicSettings, relayOutputStatus, relayLogicalPoints, equip, analogOutputStatus)
+        operateAnalogOutputs(config, equip, basicSettings, analogOutputStatus, userIntents)
+        runAlgorithm(equip, basicSettings, hyperStatTuners, relayOutputStatus, analogOutputStatus, config, userIntents)
 
-        runRelayOperations(equip, config, hyperStatTuners, userIntents, basicSettings, relayStages,analogOutStages)
-        runAnalogOutOperations(equip, config, basicSettings, analogOutStages,userIntents)
-        runAlgorithm(equip, basicSettings, hyperStatTuners, relayStages,analogOutStages, config,userIntents)
-        doorWindowSensorOpenStatus = runForDoorWindowSensor(config, equip,analogOutStages,relayStages)
-        runFanLowDuringDoorWindow = checkFanOperationAllowedDoorWindow(equip)
         // Run the title 24 fan operation after the reset of all PI output is done
-        doFanOperationTitle24(hyperStatTuners, basicSettings, relayStages, userIntents, analogOutStages, config)
-        runForKeycardSensor(config, equip)
+        doFanOperationTitle24(hyperStatTuners, basicSettings, relayOutputStatus, userIntents, analogOutputStatus, config)
+        runForKeyCardSensor(config, equip)
 
-        setOperatingMode(currentTemp,averageDesiredTemp,basicSettings,equip)
-
-        if (equip.hsHaystackUtil.getStatus() != curState.ordinal.toDouble()){
-                equip.hsHaystackUtil.setStatus(curState.ordinal.toDouble())
-        }
+        updateOperatingMode(currentTemp, averageDesiredTemp, basicSettings, equip)
+        equip.equipStatus.writeHisVal(curState.ordinal.toDouble())
+        showOutputStatus()
         var temperatureState = ZoneTempState.NONE
         if (buildingLimitMinBreached() || buildingLimitMaxBreached()) temperatureState = ZoneTempState.EMERGENCY
-
-        HyperStatUserIntentHandler.updateHyperStatStatus(
-                equip.equipRef!!, relayStages, analogOutStages, temperatureState
-        )
-        if(occupancyStatus != Occupancy.WINDOW_OPEN) occupancyBeforeDoorWindow = occupancyStatus
-
-        dumpOutput()
+        HyperStatUserIntentHandler.updateHyperStatStatus(equip.equipRef, relayOutputStatus, analogOutputStatus, temperatureState, equip)
+        if (occupancyStatus != Occupancy.WINDOW_OPEN) occupancyBeforeDoorWindow = occupancyStatus
+        CcuLog.i(L.TAG_CCU_HSPIPE2, "----------------------------------------------------------")
     }
 
-    private fun evaluateLoopOutputs(userIntents: UserIntents, basicSettings: BasicSettings, hyperStatTuners: HyperStatProfileTuners){
+    private fun evaluateLoopOutputs(userIntents: UserIntents, basicSettings: BasicSettings, hyperStatTuners: HyperStatProfileTuners) {
         when (state) {
             //Update coolingLoop when the zone is in cooling or it was in cooling and no change over happened yet.
             ZoneState.COOLING -> coolingLoopOutput =
-                hyperStatLoopController.calculateCoolingLoopOutput(
-                    currentTemp, userIntents.zoneCoolingTargetTemperature
-                ).toInt().coerceAtLeast(0)
+                    hyperStatLoopController.calculateCoolingLoopOutput(
+                            currentTemp, userIntents.zoneCoolingTargetTemperature).toInt().coerceAtLeast(0)
 
             //Update heatingLoop when the zone is in heating or it was in heating and no change over happened yet.
             ZoneState.HEATING -> heatingLoopOutput =
-                hyperStatLoopController.calculateHeatingLoopOutput(
-                    userIntents.zoneHeatingTargetTemperature, currentTemp
-                ).toInt().coerceAtLeast(0)
+                    hyperStatLoopController.calculateHeatingLoopOutput(
+                            userIntents.zoneHeatingTargetTemperature, currentTemp
+                    ).toInt().coerceAtLeast(0)
 
-            else -> logIt( " Zone is in deadband")
+            else -> CcuLog.d(L.TAG_CCU_HSPIPE2, " Zone is in deadband")
         }
 
         if (coolingLoopOutput > 0 && (basicSettings.conditioningMode == StandaloneConditioningMode.COOL_ONLY
-                    || basicSettings.conditioningMode == StandaloneConditioningMode.AUTO)) {
+                        || basicSettings.conditioningMode == StandaloneConditioningMode.AUTO)) {
             fanLoopOutput = ((coolingLoopOutput * hyperStatTuners.analogFanSpeedMultiplier).coerceAtMost(100.0).toInt())
-        }
-        else if (heatingLoopOutput > 0 && ((basicSettings.conditioningMode == StandaloneConditioningMode.HEAT_ONLY && supplyWaterTempTh2 > coolingThreshold )
-                    || (basicSettings.conditioningMode == StandaloneConditioningMode.AUTO && supplyWaterTempTh2 > coolingThreshold))
+        } else if (heatingLoopOutput > 0 && ((basicSettings.conditioningMode == StandaloneConditioningMode.HEAT_ONLY && supplyWaterTempTh2 > coolingThreshold)
+                        || (basicSettings.conditioningMode == StandaloneConditioningMode.AUTO && supplyWaterTempTh2 > coolingThreshold))
         ) {
             fanLoopOutput = (heatingLoopOutput * hyperStatTuners.analogFanSpeedMultiplier).coerceAtMost(100.0).toInt()
         }
     }
 
-    private fun handleChangeOfDirection(userIntents: UserIntents){
+    private fun handleChangeOfDirection(userIntents: UserIntents) {
         if (currentTemp > userIntents.zoneCoolingTargetTemperature && state != ZoneState.COOLING) {
             hyperStatLoopController.resetCoolingControl()
             state = ZoneState.COOLING
-            logIt( "Resetting cooling")
+            CcuLog.d(L.TAG_CCU_HSPIPE2, "Resetting cooling")
         } else if (currentTemp < userIntents.zoneHeatingTargetTemperature && state != ZoneState.HEATING) {
             hyperStatLoopController.resetHeatingControl()
             state = ZoneState.HEATING
-            logIt( "Resetting heating")
+            CcuLog.d(L.TAG_CCU_HSPIPE2, "Resetting heating")
         }
     }
-
-    private fun fetchBasicSettings(equip: HyperStatPipe2EquipToBeDeleted) =
-
-        BasicSettings(
-            conditioningMode = StandaloneConditioningMode.values()[equip.hsHaystackUtil.getCurrentConditioningMode()
-                .toInt()],
-            fanMode = StandaloneFanStage.values()[equip.hsHaystackUtil.getCurrentFanMode().toInt()]
-        )
-
-
-    private fun fetchHyperStatTuners(equip: HyperStatPipe2EquipToBeDeleted): HyperStatProfileTuners {
-
-        /**
-         * Consider that
-         * proportionalGain = proportionalKFactor
-         * integralGain = integralKFactor
-         * proportionalSpread = temperatureProportionalRange
-         * integralMaxTimeout = temperatureIntegralTime
-         */
-
-        val hsTuners = HyperStatProfileTuners()
-        hsTuners.proportionalGain = TunerUtil.getProportionalGain(equip.equipRef!!)
-        hsTuners.integralGain = TunerUtil.getIntegralGain(equip.equipRef!!)
-        hsTuners.proportionalSpread = TunerUtil.getProportionalSpread(equip.equipRef!!)
-        hsTuners.integralMaxTimeout = TunerUtil.getIntegralTimeout(equip.equipRef!!).toInt()
-        hsTuners.relayActivationHysteresis = TunerUtil.getHysteresisPoint(
-            "relay and activation", equip.equipRef!!
-        ).toInt()
-        hsTuners.analogFanSpeedMultiplier = TunerUtil.readTunerValByQuery(
-            "analog and fan and speed and multiplier", equip.equipRef!!
-        )
-        hsTuners.humidityHysteresis =
-            TunerUtil.getHysteresisPoint("humidity", equip.equipRef!!).toInt()
-
-        hsTuners.heatingThreshold = TunerUtil.readTunerValByQuery("tuner and heating and threshold and equipRef == \"${equip.equipRef}\"")
-
-        hsTuners.coolingThreshold = TunerUtil.readTunerValByQuery("tuner and cooling and threshold and equipRef == \"${equip.equipRef}\"")
-
-        hsTuners.auxHeating1Activate = TunerUtil.readTunerValByQuery("tuner and heating and aux and stage1 and equipRef == \"${equip.equipRef}\"")
-
-        hsTuners.auxHeating2Activate = TunerUtil.readTunerValByQuery("tuner and heating and aux and stage2 and equipRef == \"${equip.equipRef}\"")
-
-        hsTuners.waterValveSamplingOnTime = TunerUtil.readTunerValByQuery("tuner and samplingrate and water and on and time and not loop and equipRef == \"${equip.equipRef}\"")
-            .toInt()
-
-        hsTuners.waterValveSamplingWaitTime = TunerUtil.readTunerValByQuery("tuner and samplingrate and water and wait and time and not loop and equipRef == \"${equip.equipRef}\"")
-            .toInt()
-
-        hsTuners.waterValveSamplingDuringLoopDeadbandOnTime = TunerUtil.readTunerValByQuery("tuner and samplingrate and loop and on and time and equipRef == \"${equip.equipRef}\"")
-            .toInt()
-
-        hsTuners.waterValveSamplingDuringLoopDeadbandWaitTime =  TunerUtil.readTunerValByQuery("tuner and samplingrate and loop and wait and time and equipRef == \"${equip.equipRef}\"")
-            .toInt()
-
-        return hsTuners
-    }
-
-    private fun handleDeadZone(equip: HyperStatPipe2EquipToBeDeleted) {
-        logIt( "Zone is Dead ${equip.equipRef}")
-        state = ZoneState.TEMPDEAD
-        resetLogicalPoints()
-        equip.hsHaystackUtil.setProfilePoint("operating and mode", state.ordinal.toDouble())
-        if (equip.hsHaystackUtil.getEquipStatus() != state.ordinal.toDouble())
-            equip.hsHaystackUtil.setEquipStatus(state.ordinal.toDouble())
-
-        val curStatus = equip.hsHaystackUtil.getEquipLiveStatus()
-        if (curStatus != ZoneTempDead) {
-            equip.hsHaystackUtil.writeDefaultVal(
-                "status and message and writable",
-                ZoneTempDead
-            )
-        }
-        hyperStatStatus[equip.equipRef.toString()] = ZoneTempDead
-        equip.haystack.writeHisValByQuery(
-            "point and not ota and status and his and group == \"${equip.node}\"",
-            ZoneState.TEMPDEAD.ordinal.toDouble()
-        )
-    }
-    private fun handleRFDead(equip: HyperStatPipe2EquipToBeDeleted) {
-        logIt("RF Signal is Dead ${equip.node}")
-        state = ZoneState.RFDEAD
-        equip.hsHaystackUtil.setProfilePoint("operating and mode", state.ordinal.toDouble())
-        if (equip.hsHaystackUtil.getEquipStatus() != state.ordinal.toDouble()) {
-            equip.hsHaystackUtil.setEquipStatus(state.ordinal.toDouble())
-        }
-        val curStatus = equip.hsHaystackUtil.getEquipLiveStatus()
-        if (curStatus != RFDead) {
-            equip.hsHaystackUtil.writeDefaultVal("status and message and writable", RFDead)
-        }
-        hyperStatStatus[equip.equipRef.toString()] = RFDead
-        equip.haystack.writeHisValByQuery(
-            "point and not ota and status and his and group == \"${equip.node}\"",
-            ZoneState.RFDEAD.ordinal.toDouble()
-        )
-    }
-    private fun fetchUserIntents(equip: HyperStatPipe2EquipToBeDeleted): UserIntents {
-
-        return UserIntents(
-            currentTemp = equip.getCurrentTemp(),
-            zoneCoolingTargetTemperature = equip.hsHaystackUtil.getDesiredTempCooling(),
-            zoneHeatingTargetTemperature = equip.hsHaystackUtil.getDesiredTempHeating(),
-            targetMinInsideHumidity = equip.hsHaystackUtil.getTargetMinInsideHumidity(),
-            targetMaxInsideHumidity = equip.hsHaystackUtil.getTargetMaxInsideHumidity(),
-        )
-    }
-
 
     private fun runAlgorithm(
-            equip: HyperStatPipe2EquipToBeDeleted,
-            basicSettings: BasicSettings,
-            tuner: HyperStatProfileTuners,
-            relayStages: HashMap<String, Int>,
-            analogOutStages: HashMap<String, Int>,
-            configuration: HyperStatPipe2Configuration,
-            userIntents: UserIntents
+            equip: Pipe2V2Equip, basicSettings: BasicSettings, tuner: HyperStatProfileTuners, relayStages: HashMap<String, Int>,
+            analogOutStages: HashMap<String, Int>, configuration: Pipe2Configuration, userIntents: UserIntents
     ) {
         // Run water sampling
          processForWaterSampling(equip, tuner, configuration, relayStages)
@@ -384,38 +264,38 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
     }
 
     private fun doCoolOnly(
-        tuner: HyperStatProfileTuners,
-        basicSettings: BasicSettings,
-        relayStages: HashMap<String, Int>,
-        configuration: HyperStatPipe2Configuration,
-        userIntents: UserIntents,
-        analogOutStages: HashMap<String, Int>,
-        equip: HyperStatPipe2EquipToBeDeleted
+            tuner: HyperStatProfileTuners,
+            basicSettings: BasicSettings,
+            relayStages: HashMap<String, Int>,
+            configuration: Pipe2Configuration,
+            userIntents: UserIntents,
+            analogOutStages: HashMap<String, Int>,
+            equip: Pipe2V2Equip
     ) {
-        logIt( "doCoolOnly: mode ")
+        CcuLog.d(L.TAG_CCU_HSPIPE2, "doCoolOnly: mode ")
 
         if (basicSettings.fanMode == StandaloneFanStage.OFF || supplyWaterTempTh2 > heatingThreshold) {
-            logIt( "Resetting WATER_VALVE to OFF")
+            CcuLog.d(L.TAG_CCU_HSPIPE2, "Resetting WATER_VALVE to OFF")
             resetWaterValue(relayStages,equip)
         }
 
         if (basicSettings.fanMode != StandaloneFanStage.OFF) {
-            if (relayOutputPoints.containsKey(Pipe2RelayAssociation.AUX_HEATING_STAGE1.ordinal)
-                && relayOutputPoints.containsKey(Pipe2RelayAssociation.AUX_HEATING_STAGE2.ordinal)
+            if (relayLogicalPoints.containsKey(HsPipe2RelayMapping.AUX_HEATING_STAGE1.ordinal)
+                && relayLogicalPoints.containsKey(HsPipe2RelayMapping.AUX_HEATING_STAGE2.ordinal)
             ) {
 
                 if (basicSettings.fanMode == StandaloneFanStage.AUTO) {
-                    if (getCurrentLogicalPointStatus(relayOutputPoints[Pipe2RelayAssociation.AUX_HEATING_STAGE1.ordinal]!!) == 1.0
-                        && getCurrentLogicalPointStatus(relayOutputPoints[Pipe2RelayAssociation.AUX_HEATING_STAGE2.ordinal]!!) == 0.0
+                    if (getCurrentLogicalPointStatus(relayLogicalPoints[HsPipe2RelayMapping.AUX_HEATING_STAGE1.ordinal]!!) == 1.0
+                        && getCurrentLogicalPointStatus(relayLogicalPoints[HsPipe2RelayMapping.AUX_HEATING_STAGE2.ordinal]!!) == 0.0
                     ) {
                         resetFan(relayStages,analogOutStages,basicSettings)
-                        operateAuxBasedOnFan(Pipe2RelayAssociation.AUX_HEATING_STAGE1,relayStages)
+                        operateAuxBasedOnFan(HsPipe2RelayMapping.AUX_HEATING_STAGE1,relayStages)
                         runSpecificAnalogFanSpeed(configuration,FanSpeed.MEDIUM,analogOutStages)
                         return
                     }
-                    if (getCurrentLogicalPointStatus(relayOutputPoints[Pipe2RelayAssociation.AUX_HEATING_STAGE2.ordinal]!!) == 1.0) {
+                    if (getCurrentLogicalPointStatus(relayLogicalPoints[HsPipe2RelayMapping.AUX_HEATING_STAGE2.ordinal]!!) == 1.0) {
                         resetFan(relayStages,analogOutStages,basicSettings)
-                        operateAuxBasedOnFan(Pipe2RelayAssociation.AUX_HEATING_STAGE2,relayStages)
+                        operateAuxBasedOnFan(HsPipe2RelayMapping.AUX_HEATING_STAGE2,relayStages)
                         runSpecificAnalogFanSpeed(configuration,FanSpeed.HIGH,analogOutStages)
                     } else {
                         if(coolingLoopOutput > 0) {
@@ -435,16 +315,16 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
                     doFanOperation(tuner, basicSettings, relayStages, configuration, userIntents, analogOutStages, equip)
                 }
             }
-            else if (relayOutputPoints.containsKey(Pipe2RelayAssociation.AUX_HEATING_STAGE1.ordinal)
-                && (getCurrentLogicalPointStatus(relayOutputPoints[Pipe2RelayAssociation.AUX_HEATING_STAGE1.ordinal]!!) == 1.0)){
+            else if (relayLogicalPoints.containsKey(HsPipe2RelayMapping.AUX_HEATING_STAGE1.ordinal)
+                && (getCurrentLogicalPointStatus(relayLogicalPoints[HsPipe2RelayMapping.AUX_HEATING_STAGE1.ordinal]!!) == 1.0)){
                 resetFan(relayStages,analogOutStages,basicSettings)
-                operateAuxBasedOnFan(Pipe2RelayAssociation.AUX_HEATING_STAGE1,relayStages)
+                operateAuxBasedOnFan(HsPipe2RelayMapping.AUX_HEATING_STAGE1,relayStages)
                 runSpecificAnalogFanSpeed(configuration,FanSpeed.MEDIUM,analogOutStages)
             }
-            else if (relayOutputPoints.containsKey(Pipe2RelayAssociation.AUX_HEATING_STAGE2.ordinal)
-                && (getCurrentLogicalPointStatus(relayOutputPoints[Pipe2RelayAssociation.AUX_HEATING_STAGE2.ordinal]!!) == 1.0)){
+            else if (relayLogicalPoints.containsKey(HsPipe2RelayMapping.AUX_HEATING_STAGE2.ordinal)
+                && (getCurrentLogicalPointStatus(relayLogicalPoints[HsPipe2RelayMapping.AUX_HEATING_STAGE2.ordinal]!!) == 1.0)){
                 resetFan(relayStages,analogOutStages,basicSettings)
-                operateAuxBasedOnFan(Pipe2RelayAssociation.AUX_HEATING_STAGE2,relayStages)
+                operateAuxBasedOnFan(HsPipe2RelayMapping.AUX_HEATING_STAGE2,relayStages)
                 runSpecificAnalogFanSpeed(configuration,FanSpeed.HIGH,analogOutStages)
             }
             else {
@@ -457,15 +337,15 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
     }
 
     private fun doHeatOnly(
-        tuner: HyperStatProfileTuners,
-        basicSettings: BasicSettings,
-        relayStages: HashMap<String, Int>,
-        configuration: HyperStatPipe2Configuration,
-        userIntents: UserIntents,
-        analogOutStages: HashMap<String, Int>,
-        equip: HyperStatPipe2EquipToBeDeleted
+            tuner: HyperStatProfileTuners,
+            basicSettings: BasicSettings,
+            relayStages: HashMap<String, Int>,
+            configuration: Pipe2Configuration,
+            userIntents: UserIntents,
+            analogOutStages: HashMap<String, Int>,
+            equip: Pipe2V2Equip
     ) {
-        logIt( "doHeatOnly: mode ")
+        CcuLog.d(L.TAG_CCU_HSPIPE2, "doHeatOnly: mode ")
 
         // b. Deactivate Water Valve associated relay, if it is enabled and the fan speed is off.
         if (basicSettings.fanMode == StandaloneFanStage.OFF || supplyWaterTempTh2 < coolingThreshold) {
@@ -473,25 +353,25 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
         }
 
         if (basicSettings.fanMode != StandaloneFanStage.OFF) {
-            if (relayOutputPoints.containsKey(Pipe2RelayAssociation.AUX_HEATING_STAGE1.ordinal)
-                && relayOutputPoints.containsKey(Pipe2RelayAssociation.AUX_HEATING_STAGE2.ordinal)
+            if (relayLogicalPoints.containsKey(HsPipe2RelayMapping.AUX_HEATING_STAGE1.ordinal)
+                && relayLogicalPoints.containsKey(HsPipe2RelayMapping.AUX_HEATING_STAGE2.ordinal)
             ) {
                 if (basicSettings.fanMode == StandaloneFanStage.AUTO) {
-                    if (getCurrentLogicalPointStatus(relayOutputPoints[Pipe2RelayAssociation.AUX_HEATING_STAGE1.ordinal]!!) == 1.0
-                        && getCurrentLogicalPointStatus(relayOutputPoints[Pipe2RelayAssociation.AUX_HEATING_STAGE2.ordinal]!!) == 0.0
+                    if (getCurrentLogicalPointStatus(relayLogicalPoints[HsPipe2RelayMapping.AUX_HEATING_STAGE1.ordinal]!!) == 1.0
+                        && getCurrentLogicalPointStatus(relayLogicalPoints[HsPipe2RelayMapping.AUX_HEATING_STAGE2.ordinal]!!) == 0.0
                     ) {
                         resetFan(relayStages,analogOutStages,basicSettings)
-                        operateAuxBasedOnFan(Pipe2RelayAssociation.AUX_HEATING_STAGE1,relayStages)
+                        operateAuxBasedOnFan(HsPipe2RelayMapping.AUX_HEATING_STAGE1,relayStages)
                         runSpecificAnalogFanSpeed(configuration,FanSpeed.MEDIUM,analogOutStages)
                         return
                     }
-                    if (getCurrentLogicalPointStatus(relayOutputPoints[Pipe2RelayAssociation.AUX_HEATING_STAGE2.ordinal]!!) == 1.0) {
+                    if (getCurrentLogicalPointStatus(relayLogicalPoints[HsPipe2RelayMapping.AUX_HEATING_STAGE2.ordinal]!!) == 1.0) {
                         resetFan(relayStages,analogOutStages,basicSettings)
-                        operateAuxBasedOnFan(Pipe2RelayAssociation.AUX_HEATING_STAGE2,relayStages)
+                        operateAuxBasedOnFan(HsPipe2RelayMapping.AUX_HEATING_STAGE2,relayStages)
                         runSpecificAnalogFanSpeed(configuration,FanSpeed.HIGH,analogOutStages)
                     } else {
                         // For title 24 compliance when doorwindow is open, run the lowest fan speed
-                        if((heatingLoopOutput > 0) || getDoorWindowFanOperationStatus()) {
+                        if((heatingLoopOutput > 0) || runFanLowDuringDoorWindow) {
                             doFanOperation(tuner, basicSettings, relayStages, configuration, userIntents, analogOutStages, equip)
                         } else {
                             resetFan(relayStages,analogOutStages,basicSettings)
@@ -502,16 +382,16 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
                     doFanOperation(tuner, basicSettings, relayStages, configuration, userIntents, analogOutStages, equip)
                 }
             }
-            else if (relayOutputPoints.containsKey(Pipe2RelayAssociation.AUX_HEATING_STAGE1.ordinal)
-                && (getCurrentLogicalPointStatus(relayOutputPoints[Pipe2RelayAssociation.AUX_HEATING_STAGE1.ordinal]!!) == 1.0)){
+            else if (relayLogicalPoints.containsKey(HsPipe2RelayMapping.AUX_HEATING_STAGE1.ordinal)
+                && (getCurrentLogicalPointStatus(relayLogicalPoints[HsPipe2RelayMapping.AUX_HEATING_STAGE1.ordinal]!!) == 1.0)){
                 resetFan(relayStages,analogOutStages,basicSettings)
-                operateAuxBasedOnFan(Pipe2RelayAssociation.AUX_HEATING_STAGE1,relayStages)
+                operateAuxBasedOnFan(HsPipe2RelayMapping.AUX_HEATING_STAGE1,relayStages)
                 runSpecificAnalogFanSpeed(configuration,FanSpeed.MEDIUM,analogOutStages)
             }
-            else if (relayOutputPoints.containsKey(Pipe2RelayAssociation.AUX_HEATING_STAGE2.ordinal)
-                && (getCurrentLogicalPointStatus(relayOutputPoints[Pipe2RelayAssociation.AUX_HEATING_STAGE2.ordinal]!!) == 1.0)){
+            else if (relayLogicalPoints.containsKey(HsPipe2RelayMapping.AUX_HEATING_STAGE2.ordinal)
+                && (getCurrentLogicalPointStatus(relayLogicalPoints[HsPipe2RelayMapping.AUX_HEATING_STAGE2.ordinal]!!) == 1.0)){
                 resetFan(relayStages,analogOutStages,basicSettings)
-                operateAuxBasedOnFan(Pipe2RelayAssociation.AUX_HEATING_STAGE2,relayStages)
+                operateAuxBasedOnFan(HsPipe2RelayMapping.AUX_HEATING_STAGE2,relayStages)
                 runSpecificAnalogFanSpeed(configuration,FanSpeed.HIGH,analogOutStages)
             }
             else {
@@ -527,105 +407,110 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
 
     // New requirement for aux and fan operations If we do not have fan then no aux
     private fun operateAuxBasedOnFan(
-        association: Pipe2RelayAssociation,
-        relayStages: HashMap<String, Int>
-    ){
-        var stage = Pipe2RelayAssociation.AUX_HEATING_STAGE1
+            association: HsPipe2RelayMapping,
+            relayStages: HashMap<String, Int>
+    ) {
+        var stage = HsPipe2RelayMapping.AUX_HEATING_STAGE1
         var state = 0
-        var fanStatusMessage : Stage? = null
-        if(association == Pipe2RelayAssociation.AUX_HEATING_STAGE1){
-            if (relayOutputPoints.containsKey(Pipe2RelayAssociation.FAN_MEDIUM_SPEED.ordinal)){
-                stage = Pipe2RelayAssociation.FAN_MEDIUM_SPEED
+        var fanStatusMessage: Stage? = null
+        if (association == HsPipe2RelayMapping.AUX_HEATING_STAGE1) {
+            if (relayLogicalPoints.containsKey(HsPipe2RelayMapping.FAN_MEDIUM_SPEED.ordinal)) {
+                stage = HsPipe2RelayMapping.FAN_MEDIUM_SPEED
                 state = 1
                 fanStatusMessage = Stage.FAN_2
-            }else if (relayOutputPoints.containsKey(Pipe2RelayAssociation.FAN_HIGH_SPEED.ordinal)){
-                stage = Pipe2RelayAssociation.FAN_HIGH_SPEED
+            } else if (relayLogicalPoints.containsKey(HsPipe2RelayMapping.FAN_HIGH_SPEED.ordinal)) {
+                stage = HsPipe2RelayMapping.FAN_HIGH_SPEED
                 state = 1
                 fanStatusMessage = Stage.FAN_3
-            }else if (relayOutputPoints.containsKey(Pipe2RelayAssociation.FAN_LOW_SPEED.ordinal)){
-                stage = Pipe2RelayAssociation.FAN_LOW_SPEED
+            } else if (relayLogicalPoints.containsKey(HsPipe2RelayMapping.FAN_LOW_SPEED.ordinal)) {
+                stage = HsPipe2RelayMapping.FAN_LOW_SPEED
                 state = 1
                 fanStatusMessage = Stage.FAN_1
-            }else if (analogOutputPoints.containsKey(Pipe2AnalogOutAssociation.FAN_SPEED.ordinal)) {
-                stage = Pipe2RelayAssociation.FAN_ENABLED
+            } else if (analogLogicalPoints.containsKey(HsPipe2AnalogOutMapping.FAN_SPEED.ordinal)) {
+                stage = HsPipe2RelayMapping.FAN_ENABLED
                 state = 1
             }
         }
-        if(association == Pipe2RelayAssociation.AUX_HEATING_STAGE2){
-            if (relayOutputPoints.containsKey(Pipe2RelayAssociation.FAN_HIGH_SPEED.ordinal)){
-                stage = Pipe2RelayAssociation.FAN_HIGH_SPEED
+        if (association == HsPipe2RelayMapping.AUX_HEATING_STAGE2) {
+            if (relayLogicalPoints.containsKey(HsPipe2RelayMapping.FAN_HIGH_SPEED.ordinal)) {
+                stage = HsPipe2RelayMapping.FAN_HIGH_SPEED
                 state = 1
                 fanStatusMessage = Stage.FAN_3
-            }else if (relayOutputPoints.containsKey(Pipe2RelayAssociation.FAN_MEDIUM_SPEED.ordinal)){
-                stage = Pipe2RelayAssociation.FAN_MEDIUM_SPEED
+            } else if (relayLogicalPoints.containsKey(HsPipe2RelayMapping.FAN_MEDIUM_SPEED.ordinal)) {
+                stage = HsPipe2RelayMapping.FAN_MEDIUM_SPEED
                 state = 1
                 fanStatusMessage = Stage.FAN_2
-            }else if (relayOutputPoints.containsKey(Pipe2RelayAssociation.FAN_LOW_SPEED.ordinal)){
-                stage = Pipe2RelayAssociation.FAN_LOW_SPEED
+            } else if (relayLogicalPoints.containsKey(HsPipe2RelayMapping.FAN_LOW_SPEED.ordinal)) {
+                stage = HsPipe2RelayMapping.FAN_LOW_SPEED
                 state = 1
                 fanStatusMessage = Stage.FAN_1
-            }else if (analogOutputPoints.containsKey(Pipe2AnalogOutAssociation.FAN_SPEED.ordinal)) {
-                stage = Pipe2RelayAssociation.FAN_ENABLED
+            } else if (analogLogicalPoints.containsKey(HsPipe2AnalogOutMapping.FAN_SPEED.ordinal)) {
+                stage = HsPipe2RelayMapping.FAN_ENABLED
                 state = 1
             }
         }
-        if(state == 0){
+        if (state == 0) {
             resetAux(relayStages)
-        }else{
-            if(stage != Pipe2RelayAssociation.FAN_ENABLED){
-                updateLogicalPoint(relayOutputPoints[stage.ordinal]!!, 1.0)
+        } else {
+            if (stage != HsPipe2RelayMapping.FAN_ENABLED) {
+                updateLogicalPoint(relayLogicalPoints[stage.ordinal]!!, 1.0)
                 relayStages[fanStatusMessage!!.displayName] = 1
             }
-
         }
 
     }
 
 
-    private fun resetWaterValue(relayStages: HashMap<String, Int>, equip: HyperStatPipe2EquipToBeDeleted){
-        if(equip.waterSamplingStartTime == 0L) {
-            if (relayOutputPoints.containsKey(Pipe2RelayAssociation.WATER_VALVE.ordinal)) {
-                resetLogicalPoint(relayOutputPoints[Pipe2RelayAssociation.WATER_VALVE.ordinal]!!)
+    private fun resetWaterValue(relayStages: HashMap<String, Int>, equip: Pipe2V2Equip) {
+        if (equip.waterSamplingStartTime == 0L) {
+            if (relayLogicalPoints.containsKey(HsPipe2RelayMapping.WATER_VALVE.ordinal)) {
+                resetLogicalPoint(relayLogicalPoints[HsPipe2RelayMapping.WATER_VALVE.ordinal]!!)
             }
-            if (analogOutputPoints.containsKey(Pipe2AnalogOutAssociation.WATER_VALVE.ordinal)) {
-                resetLogicalPoint(analogOutputPoints[Pipe2AnalogOutAssociation.WATER_VALVE.ordinal]!!)
+            if (analogLogicalPoints.containsKey(HsPipe2AnalogOutMapping.WATER_MODULATING_VALUE.ordinal)) {
+                resetLogicalPoint(analogLogicalPoints[HsPipe2AnalogOutMapping.WATER_MODULATING_VALUE.ordinal]!!)
             }
             relayStages.remove(AnalogOutput.WATER_VALVE.name)
-            logIt( "Resetting WATER_VALVE to OFF")
+            CcuLog.d(L.TAG_CCU_HSPIPE2, "Resetting WATER_VALVE to OFF")
         }
     }
-    private fun resetAux(relayStages: HashMap<String, Int>){
-        if(relayOutputPoints.containsKey(Pipe2RelayAssociation.AUX_HEATING_STAGE1.ordinal)) {
-            resetLogicalPoint(relayOutputPoints[Pipe2RelayAssociation.AUX_HEATING_STAGE1.ordinal]!!)
+    private fun resetAux(relayStages: HashMap<String, Int>) {
+        if (relayLogicalPoints.containsKey(HsPipe2RelayMapping.AUX_HEATING_STAGE1.ordinal)) {
+            resetLogicalPoint(relayLogicalPoints[HsPipe2RelayMapping.AUX_HEATING_STAGE1.ordinal]!!)
         }
-        if(relayOutputPoints.containsKey(Pipe2RelayAssociation.AUX_HEATING_STAGE2.ordinal)) {
-            resetLogicalPoint(relayOutputPoints[Pipe2RelayAssociation.AUX_HEATING_STAGE2.ordinal]!!)
+        if (relayLogicalPoints.containsKey(HsPipe2RelayMapping.AUX_HEATING_STAGE2.ordinal)) {
+            resetLogicalPoint(relayLogicalPoints[HsPipe2RelayMapping.AUX_HEATING_STAGE2.ordinal]!!)
         }
-        relayStages.remove(Pipe2RelayAssociation.AUX_HEATING_STAGE1.name)
-        relayStages.remove(Pipe2RelayAssociation.AUX_HEATING_STAGE2.name)
+        relayStages.remove(HsPipe2RelayMapping.AUX_HEATING_STAGE1.name)
+        relayStages.remove(HsPipe2RelayMapping.AUX_HEATING_STAGE2.name)
 
     }
 
     private fun processForWaterSampling(
-            equip: HyperStatPipe2EquipToBeDeleted,
-            tuner: HyperStatProfileTuners,
-            config: HyperStatPipe2Configuration,
-            relayStages: HashMap<String, Int>,
+            equip: Pipe2V2Equip, tuner: HyperStatProfileTuners,
+            config: Pipe2Configuration, relayStages: HashMap<String, Int>,
     ) {
-        if(!HyperStatAssociationUtil.isAnyRelayAssociatedToWaterValve(config)
-            && !HyperStatAssociationUtil.isAnyPipe2AnalogAssociatedToWaterValve(config))
-        {
-            logIt( "No mapping for water value")
+
+        if (!config.isAnyRelayEnabledAssociated(association = HsPipe2RelayMapping.WATER_VALVE.ordinal) ||
+                !config.isAnyAnalogOutEnabledAssociated(association = HsPipe2AnalogOutMapping.WATER_MODULATING_VALUE.ordinal)) {
+            CcuLog.d(L.TAG_CCU_HSPIPE2, "No mapping for water value")
             return
         }
-        logIt( "waterSamplingStarted Time "+ equip.waterSamplingStartTime)
+
+        fun resetIsRequired(): Boolean {
+            return ((relayLogicalPoints.containsKey(HsPipe2RelayMapping.WATER_VALVE.ordinal) &&
+                    (getCurrentLogicalPointStatus(relayLogicalPoints[HsPipe2RelayMapping.WATER_VALVE.ordinal]!!).toInt() != 0))
+                    || (analogLogicalPoints.containsKey(HsPipe2AnalogOutMapping.WATER_MODULATING_VALUE.ordinal)
+                    && (getCurrentLogicalPointStatus(analogLogicalPoints[HsPipe2AnalogOutMapping.WATER_MODULATING_VALUE.ordinal]!!).toInt() != 0)))
+        }
+
+        CcuLog.d(L.TAG_CCU_HSPIPE2, "waterSamplingStarted Time "+ equip.waterSamplingStartTime)
 
         val waitTimeToDoSampling: Int
         val onTimeToDoSampling: Int
         if (supplyWaterTempTh2 in coolingThreshold..heatingThreshold) {
-            waitTimeToDoSampling =  tuner.waterValveSamplingDuringLoopDeadbandWaitTime
+            waitTimeToDoSampling = tuner.waterValveSamplingDuringLoopDeadbandWaitTime
             onTimeToDoSampling = tuner.waterValveSamplingDuringLoopDeadbandOnTime
-        } else{
+        } else {
             waitTimeToDoSampling = tuner.waterValveSamplingWaitTime
             onTimeToDoSampling = tuner.waterValveSamplingOnTime
         }
@@ -633,56 +518,46 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
         // added on 05-12-2022 If either one of the tuner value is 0 then we will not do water sampling
         if (waitTimeToDoSampling == 0 || onTimeToDoSampling == 0) {
             //resetting the water valve value value only when the tuner value is zero
-            if ((relayOutputPoints.containsKey(Pipe2RelayAssociation.WATER_VALVE.ordinal) && (getCurrentLogicalPointStatus(relayOutputPoints[Pipe2RelayAssociation.WATER_VALVE.ordinal]!!).toInt() != 0)) ||(analogOutputPoints.containsKey(Pipe2AnalogOutAssociation.WATER_VALVE.ordinal)  && (getCurrentLogicalPointStatus(analogOutputPoints[Pipe2AnalogOutAssociation.WATER_VALVE.ordinal]!!).toInt() != 0))) {
+            if (resetIsRequired()) {
                 equip.waterSamplingStartTime = 0
                 equip.lastWaterValveTurnedOnTime = System.currentTimeMillis()
                 resetWaterValue(relayStages, equip)
             }
-            logIt("No water sampling, because tuner value is zero!")
+            CcuLog.d(L.TAG_CCU_HSPIPE2, "No water sampling, because tuner value is zero!")
             return
         }
-        logIt( "waitTimeToDoSampling:  $waitTimeToDoSampling onTimeToDoSampling: $onTimeToDoSampling")
-        logIt( ":: ${System.currentTimeMillis()}: ${equip.lastWaterValveTurnedOnTime}")
+        CcuLog.d(L.TAG_CCU_HSPIPE2, "waitTimeToDoSampling:  $waitTimeToDoSampling onTimeToDoSampling: $onTimeToDoSampling")
+        CcuLog.d(L.TAG_CCU_HSPIPE2, "Current : ${System.currentTimeMillis()}: Last On: ${equip.lastWaterValveTurnedOnTime}")
+
         if (equip.waterSamplingStartTime == 0L) {
             val minutes = milliToMin(System.currentTimeMillis() - equip.lastWaterValveTurnedOnTime)
-            logIt( "sampling will start in : ${waitTimeToDoSampling-minutes} current : $minutes")
-            if(minutes >= waitTimeToDoSampling){
+            CcuLog.d(L.TAG_CCU_HSPIPE2, "sampling will start in : ${waitTimeToDoSampling - minutes} current : $minutes")
+            if (minutes >= waitTimeToDoSampling) {
                 doWaterSampling(equip, relayStages)
             }
-        }else{
-            val samplingSinceFrom =   milliToMin(System.currentTimeMillis() - equip.waterSamplingStartTime )
-            logIt( "Water sampling is running since from $samplingSinceFrom minutes")
-            if(samplingSinceFrom >= onTimeToDoSampling){
+        } else {
+            val samplingSinceFrom = milliToMin(System.currentTimeMillis() - equip.waterSamplingStartTime)
+            CcuLog.d(L.TAG_CCU_HSPIPE2, "Water sampling is running since from $samplingSinceFrom minutes")
+            if (samplingSinceFrom >= onTimeToDoSampling) {
                 equip.waterSamplingStartTime = 0
                 equip.lastWaterValveTurnedOnTime = System.currentTimeMillis()
-                resetWaterValue(relayStages,equip)
-                logIt( "Resetting WATER_VALVE to OFF")
-            }else{
+                resetWaterValue(relayStages, equip)
+                CcuLog.d(L.TAG_CCU_HSPIPE2, "Resetting WATER_VALVE to OFF")
+            } else {
                 relayStages[AnalogOutput.WATER_VALVE.name] = 1
             }
         }
-
     }
 
     private fun doWaterSampling(
-            equip: HyperStatPipe2EquipToBeDeleted,
+            equip: Pipe2V2Equip,
             relayStages: HashMap<String, Int>,
     ) {
         equip.waterSamplingStartTime = System.currentTimeMillis()
-        updateLogicalPoint(relayOutputPoints[Pipe2RelayAssociation.WATER_VALVE.ordinal],1.0)
-        updateLogicalPoint(analogOutputPoints[Pipe2AnalogOutAssociation.WATER_VALVE.ordinal],100.0)
+        updateLogicalPoint(relayLogicalPoints[HsPipe2RelayMapping.WATER_VALVE.ordinal],1.0)
+        updateLogicalPoint(analogLogicalPoints[HsPipe2AnalogOutMapping.WATER_MODULATING_VALUE.ordinal],100.0)
         relayStages[AnalogOutput.WATER_VALVE.name] = 1
-        logIt( "Turned ON water valve ")
-    }
-
-
-    private fun dumpOutput() {
-        relayOutputPoints.forEach { (i, s) ->
-            logIt(" ${Pipe2RelayAssociation.values()[i].name} : ${getCurrentLogicalPointStatus(s)}   : $s")
-        }
-        analogOutputPoints.forEach { (i, s) ->
-            logIt(" ${Pipe2AnalogOutAssociation.values()[i].name} : ${getCurrentLogicalPointStatus(s)}   : $s")
-        }
+        CcuLog.d(L.TAG_CCU_HSPIPE2, "Turned ON water valve ")
     }
 
     /**
@@ -703,18 +578,16 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
                                       relayStages: HashMap<String, Int>,
                                       userIntents: UserIntents,
                                       analogOutStages: HashMap<String, Int>,
-                                      configuration: HyperStatPipe2Configuration) {
-        if(basicSettings.fanMode == StandaloneFanStage.AUTO && getDoorWindowFanOperationStatus()) {
-            val lowestStage = HyperStatAssociationUtil.getPipe2LowestFanStage(configuration)
+                                      configuration: Pipe2Configuration) {
+        if (basicSettings.fanMode == StandaloneFanStage.AUTO && runFanLowDuringDoorWindow) {
+            val lowestStage = configuration.getLowestFanSelected()
 
             // Check which fan speed is the lowest and set the status(Eg: If FAN_MEDIUM and FAN_HIGH are used, then FAN_MEDIUM is the lowest)
-            setFanLowestFanLowStatus(false)
-            setFanLowestFanMediumStatus(false)
-            setFanLowestFanHighStatus(false)
+            resetFanStatus()
             when (lowestStage) {
-                Pipe2RelayAssociation.FAN_LOW_SPEED -> setFanLowestFanLowStatus(true)
-                Pipe2RelayAssociation.FAN_MEDIUM_SPEED -> setFanLowestFanMediumStatus(true)
-                Pipe2RelayAssociation.FAN_HIGH_SPEED -> setFanLowestFanHighStatus(true)
+                HsPipe2RelayMapping.FAN_LOW_SPEED -> setFanLowestFanLowStatus(true)
+                HsPipe2RelayMapping.FAN_MEDIUM_SPEED -> setFanLowestFanMediumStatus(true)
+                HsPipe2RelayMapping.FAN_HIGH_SPEED -> setFanLowestFanHighStatus(true)
                 else -> {
                     // Do nothing
                 }
@@ -730,95 +603,74 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
     }
 
     private fun doFanOperation(
-        tuner: HyperStatProfileTuners,
-        basicSettings: BasicSettings,
-        relayStages: HashMap<String, Int>,
-        configuration: HyperStatPipe2Configuration,
-        userIntents: UserIntents,
-        analogOutStages: HashMap<String, Int>,
-        equip: HyperStatPipe2EquipToBeDeleted
+            tuner: HyperStatProfileTuners, basicSettings: BasicSettings, relayStages: HashMap<String, Int>,
+            configuration: Pipe2Configuration, userIntents: UserIntents, analogOutStages: HashMap<String, Int>, equip: Pipe2V2Equip
     ) {
-      logIt(" Fan operation is running")
-        val lowestStage = HyperStatAssociationUtil.getPipe2LowestFanStage(configuration)
+        val lowestStage = configuration.getLowestFanSelected()
 
         // Check which fan speed is the lowest and set the status(Eg: If FAN_MEDIUM and FAN_HIGH are used, then FAN_MEDIUM is the lowest)
-        setFanLowestFanLowStatus(false)
-        setFanLowestFanMediumStatus(false)
-        setFanLowestFanHighStatus(false)
-        when(lowestStage) {
-            Pipe2RelayAssociation.FAN_LOW_SPEED -> setFanLowestFanLowStatus(true)
-            Pipe2RelayAssociation.FAN_MEDIUM_SPEED -> setFanLowestFanMediumStatus(true)
-            Pipe2RelayAssociation.FAN_HIGH_SPEED -> setFanLowestFanHighStatus(true)
+        resetFanStatus()
+
+        when (lowestStage) {
+            HsPipe2RelayMapping.FAN_LOW_SPEED -> setFanLowestFanLowStatus(true)
+            HsPipe2RelayMapping.FAN_MEDIUM_SPEED -> setFanLowestFanMediumStatus(true)
+            HsPipe2RelayMapping.FAN_HIGH_SPEED -> setFanLowestFanHighStatus(true)
             else -> {
                 // Do nothing
             }
         }
 
-        if( basicSettings.conditioningMode == StandaloneConditioningMode.OFF) {
+        if (basicSettings.conditioningMode == StandaloneConditioningMode.OFF) {
             if (basicSettings.fanMode != StandaloneFanStage.AUTO) {
                 runFanHigh(tuner, basicSettings, relayStages, fanLoopOutput)
                 runFanMedium(tuner, basicSettings, relayStages, configuration, fanLoopOutput)
                 runFanLow(tuner, basicSettings, relayStages, configuration, fanLoopOutput)
-                runAnalogFanSpeed(configuration,userIntents,analogOutStages,basicSettings)
+                runAnalogFanSpeed(configuration, userIntents, analogOutStages, basicSettings)
             } else {
-                resetFan(relayStages,analogOutStages,basicSettings)
+                resetFan(relayStages, analogOutStages, basicSettings)
             }
         } else {
 
-            if ( basicSettings.fanMode == StandaloneFanStage.AUTO
-                && supplyWaterTempTh2  > heatingThreshold
-                && supplyWaterTempTh2 in coolingThreshold .. heatingThreshold
-                && currentTemp > userIntents.zoneCoolingTargetTemperature) {
-                resetFan(relayStages,analogOutStages,basicSettings)
-            }
-            else {
-                if ( basicSettings.fanMode != StandaloneFanStage.AUTO && basicSettings.fanMode != StandaloneFanStage.OFF ) {
+            if (basicSettings.fanMode == StandaloneFanStage.AUTO
+                    && supplyWaterTempTh2 > heatingThreshold
+                    && supplyWaterTempTh2 in coolingThreshold..heatingThreshold
+                    && currentTemp > userIntents.zoneCoolingTargetTemperature) {
+                resetFan(relayStages, analogOutStages, basicSettings)
+            } else {
+                if (basicSettings.fanMode != StandaloneFanStage.AUTO && basicSettings.fanMode != StandaloneFanStage.OFF) {
                     runFanHigh(tuner, basicSettings, relayStages, fanLoopOutput)
                     runFanMedium(tuner, basicSettings, relayStages, configuration, fanLoopOutput)
                     runFanLow(tuner, basicSettings, relayStages, configuration, fanLoopOutput)
                     runAnalogFanSpeed(configuration, userIntents, analogOutStages, basicSettings)
                     return
                 }
-                if (equip.waterSamplingStartTime == 0L && (relayOutputPoints.containsKey(Pipe2RelayAssociation.WATER_VALVE.ordinal) &&
-                            getCurrentLogicalPointStatus(relayOutputPoints[Pipe2RelayAssociation.WATER_VALVE.ordinal]!!) == 1.0)) {
+                if (equip.waterSamplingStartTime == 0L && (relayLogicalPoints.containsKey(HsPipe2RelayMapping.WATER_VALVE.ordinal) &&
+                                getCurrentLogicalPointStatus(relayLogicalPoints[HsPipe2RelayMapping.WATER_VALVE.ordinal]!!) == 1.0)) {
 
                     runFanHigh(tuner, basicSettings, relayStages, fanLoopOutput)
                     runFanMedium(tuner, basicSettings, relayStages, configuration, fanLoopOutput)
                     runFanLow(tuner, basicSettings, relayStages, configuration, fanLoopOutput)
                     runAnalogFanSpeed(configuration, userIntents, analogOutStages, basicSettings)
-                }
-                else if(equip.waterSamplingStartTime == 0L &&  analogOutputPoints.containsKey(Pipe2AnalogOutAssociation.WATER_VALVE.ordinal) &&
-                    getCurrentLogicalPointStatus(analogOutputPoints[Pipe2AnalogOutAssociation.WATER_VALVE.ordinal]!!) > 1.0){
+                } else if (equip.waterSamplingStartTime == 0L && analogLogicalPoints.containsKey(HsPipe2AnalogOutMapping.WATER_MODULATING_VALUE.ordinal) &&
+                        getCurrentLogicalPointStatus(analogLogicalPoints[HsPipe2AnalogOutMapping.WATER_MODULATING_VALUE.ordinal]!!) > 1.0) {
                     runFanHigh(tuner, basicSettings, relayStages, fanLoopOutput)
                     runFanMedium(tuner, basicSettings, relayStages, configuration, fanLoopOutput)
                     runFanLow(tuner, basicSettings, relayStages, configuration, fanLoopOutput)
                     runAnalogFanSpeed(configuration, userIntents, analogOutStages, basicSettings)
-                }
-                else if (relayOutputPoints.containsKey(Pipe2RelayAssociation.AUX_HEATING_STAGE1.ordinal)
-                    && getCurrentLogicalPointStatus(relayOutputPoints[Pipe2RelayAssociation.AUX_HEATING_STAGE1.ordinal]!!) == 1.0){
+                } else if (relayLogicalPoints.containsKey(HsPipe2RelayMapping.AUX_HEATING_STAGE1.ordinal)
+                        && getCurrentLogicalPointStatus(relayLogicalPoints[HsPipe2RelayMapping.AUX_HEATING_STAGE1.ordinal]!!) == 1.0) {
                     runFanHigh(tuner, basicSettings, relayStages, fanLoopOutput)
                     runFanMedium(tuner, basicSettings, relayStages, configuration, fanLoopOutput)
                     runFanLow(tuner, basicSettings, relayStages, configuration, fanLoopOutput)
-                    runAnalogFanSpeed(
-                        configuration,
-                        userIntents,
-                        analogOutStages,
-                        basicSettings
-                    )
-                }
-                else if (relayOutputPoints.containsKey(Pipe2RelayAssociation.AUX_HEATING_STAGE2.ordinal)
-                    && getCurrentLogicalPointStatus(relayOutputPoints[Pipe2RelayAssociation.AUX_HEATING_STAGE2.ordinal]!!) == 1.0) {
+                    runAnalogFanSpeed(configuration, userIntents, analogOutStages, basicSettings)
+                } else if (relayLogicalPoints.containsKey(HsPipe2RelayMapping.AUX_HEATING_STAGE2.ordinal)
+                        && getCurrentLogicalPointStatus(relayLogicalPoints[HsPipe2RelayMapping.AUX_HEATING_STAGE2.ordinal]!!) == 1.0) {
                     runFanHigh(tuner, basicSettings, relayStages, fanLoopOutput)
                     runFanMedium(tuner, basicSettings, relayStages, configuration, fanLoopOutput)
                     runFanLow(tuner, basicSettings, relayStages, configuration, fanLoopOutput)
-                    runAnalogFanSpeed(
-                        configuration,
-                        userIntents,
-                        analogOutStages,
-                        basicSettings
-                    )
+                    runAnalogFanSpeed(configuration, userIntents, analogOutStages, basicSettings)
                 } else {
-                    resetFan(relayStages,analogOutStages,basicSettings)
+                    resetFan(relayStages, analogOutStages, basicSettings)
                 }
             }
         }
@@ -826,129 +678,92 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
 
     // Do fan low speed
     private fun runFanLow(
-        tuner: HyperStatProfileTuners,
-        basicSettings: BasicSettings,
-        relayStages: HashMap<String, Int>,
-        configuration: HyperStatPipe2Configuration,
-        fanLoop: Int
+            tuner: HyperStatProfileTuners, basicSettings: BasicSettings,
+            relayStages: HashMap<String, Int>, configuration: Pipe2Configuration, fanLoop: Int
     ) {
-        if (relayOutputPoints.containsKey(Pipe2RelayAssociation.FAN_LOW_SPEED.ordinal)) {
-            val highestStage =
-                HyperStatAssociationUtil.getPipe2HighestFanStage(configuration)
-            val divider = if (highestStage == Pipe2RelayAssociation.FAN_MEDIUM_SPEED) 50 else 33
+        if (relayLogicalPoints.containsKey(HsPipe2RelayMapping.FAN_LOW_SPEED.ordinal)) {
+            val highestStage = configuration.getHighestFanSelected()
+            val divider = if (highestStage == HsPipe2RelayMapping.FAN_MEDIUM_SPEED) 50 else 33
 
             doFanLowSpeed(
-                relayOutputPoints[Pipe2RelayAssociation.FAN_LOW_SPEED.ordinal]!!,
-                getSuperLogicalPointIfExist(Pipe2RelayAssociation.FAN_MEDIUM_SPEED),
-                getSuperLogicalPointIfExist(Pipe2RelayAssociation.FAN_HIGH_SPEED),
-                basicSettings.fanMode,
-                fanLoop,
-                tuner.relayActivationHysteresis,
-                relayStages,
-                divider,
-                getDoorWindowFanOperationStatus()
+                    relayLogicalPoints[HsPipe2RelayMapping.FAN_LOW_SPEED.ordinal]!!,
+                    getSuperLogicalPointIfExist(HsPipe2RelayMapping.FAN_MEDIUM_SPEED),
+                    getSuperLogicalPointIfExist(HsPipe2RelayMapping.FAN_HIGH_SPEED),
+                    basicSettings.fanMode, fanLoop, tuner.relayActivationHysteresis,
+                    relayStages, divider, runFanLowDuringDoorWindow
             )
         }
     }
 
     private fun runFanMedium(
-        tuner: HyperStatProfileTuners,
-        basicSettings: BasicSettings,
-        relayStages: HashMap<String, Int>,
-        configuration: HyperStatPipe2Configuration,
-        fanLoop: Int
+            tuner: HyperStatProfileTuners, basicSettings: BasicSettings,
+            relayStages: HashMap<String, Int>, configuration: Pipe2Configuration, fanLoop: Int
     ) {
-        if (relayOutputPoints.containsKey(Pipe2RelayAssociation.FAN_MEDIUM_SPEED.ordinal)) {
+        if (relayLogicalPoints.containsKey(HsPipe2RelayMapping.FAN_MEDIUM_SPEED.ordinal)) {
 
-            val highestStage =
-                HyperStatAssociationUtil.getPipe2HighestFanStage(configuration).ordinal
-            val divider = if (highestStage == 7) 50 else 33
+            val highestStage = configuration.getHighestFanSelected()
+            val divider = if (highestStage == HsPipe2RelayMapping.FAN_MEDIUM_SPEED) 50 else 33
 
             doFanMediumSpeed(
-                relayOutputPoints[Pipe2RelayAssociation.FAN_MEDIUM_SPEED.ordinal]!!,
-                getSuperLogicalPointIfExist(Pipe2RelayAssociation.FAN_HIGH_SPEED),
-                basicSettings.fanMode,
-                fanLoop,
-                tuner.relayActivationHysteresis,
-                divider,
-                relayStages,
-                getDoorWindowFanOperationStatus()
+                    relayLogicalPoints[HsPipe2RelayMapping.FAN_MEDIUM_SPEED.ordinal]!!,
+                    getSuperLogicalPointIfExist(HsPipe2RelayMapping.FAN_HIGH_SPEED),
+                    basicSettings.fanMode, fanLoop, tuner.relayActivationHysteresis,
+                    divider, relayStages, runFanLowDuringDoorWindow
             )
         }
     }
 
     private fun runFanHigh(
-        tuner: HyperStatProfileTuners,
-        basicSettings: BasicSettings,
-        relayStages: HashMap<String, Int>,
-        fanLoop: Int,
+            tuner: HyperStatProfileTuners,
+            basicSettings: BasicSettings,
+            relayStages: HashMap<String, Int>,
+            fanLoop: Int,
     ) {
-        if (relayOutputPoints.containsKey(Pipe2RelayAssociation.FAN_HIGH_SPEED.ordinal)) {
+        if (relayLogicalPoints.containsKey(HsPipe2RelayMapping.FAN_HIGH_SPEED.ordinal)) {
             doFanHighSpeed(
-                relayOutputPoints[Pipe2RelayAssociation.FAN_HIGH_SPEED.ordinal]!!,
-                basicSettings.fanMode,
-                fanLoop,
-                tuner.relayActivationHysteresis,
-                relayStages,
-                getDoorWindowFanOperationStatus()
+                    relayLogicalPoints[HsPipe2RelayMapping.FAN_HIGH_SPEED.ordinal]!!,
+                    basicSettings.fanMode, fanLoop, tuner.relayActivationHysteresis,
+                    relayStages, runFanLowDuringDoorWindow
             )
         }
     }
 
 
     private fun runAnalogFanSpeed(
-        config: HyperStatPipe2Configuration,
-        userIntents: UserIntents,
-        analogOutStages: HashMap<String, Int>,
-        basicSettings: BasicSettings
+            config: Pipe2Configuration,
+            userIntents: UserIntents,
+            analogOutStages: HashMap<String, Int>,
+            basicSettings: BasicSettings
     ){
         var output = fanLoopOutput
-        if( supplyWaterTempTh2  > heatingThreshold
-            && currentTemp > userIntents.zoneCoolingTargetTemperature){
+        if (supplyWaterTempTh2 > heatingThreshold && currentTemp > userIntents.zoneCoolingTargetTemperature) {
             output = 0
         }
-        if(config.analogOut1State.enabled && HyperStatAssociationUtil.isAnalogOutMappedToFanSpeed(config.analogOut1State)) {
-            doAnalogFanAction(
-                Port.ANALOG_OUT_ONE,
-                config.analogOut1State.perAtFanLow.toInt(),
-                config.analogOut1State.perAtFanMedium.toInt(),
-                config.analogOut1State.perAtFanHigh.toInt(),
-                basicSettings.fanMode,
-                basicSettings.conditioningMode,
-                output,
-                analogOutStages
-            )
-        }
-        if(config.analogOut2State.enabled && HyperStatAssociationUtil.isAnalogOutMappedToFanSpeed(config.analogOut2State)) {
-            doAnalogFanAction(
-                Port.ANALOG_OUT_TWO,
-                config.analogOut2State.perAtFanLow.toInt(),
-                config.analogOut2State.perAtFanMedium.toInt(),
-                config.analogOut2State.perAtFanHigh.toInt(),
-                basicSettings.fanMode,
-                basicSettings.conditioningMode,
-                output,
-                analogOutStages
-            )
-        }
-        if(config.analogOut3State.enabled && HyperStatAssociationUtil.isAnalogOutMappedToFanSpeed(config.analogOut3State)) {
-            doAnalogFanAction(
-                Port.ANALOG_OUT_THREE,
-                config.analogOut3State.perAtFanLow.toInt(),
-                config.analogOut3State.perAtFanMedium.toInt(),
-                config.analogOut3State.perAtFanHigh.toInt(),
-                basicSettings.fanMode,
-                basicSettings.conditioningMode,
-                output,
-                analogOutStages
-            )
+
+        config.apply {
+            listOf(
+                    Pair(Pipe2AnalogOutConfigs(analogOut1Enabled.enabled, analogOut1Association.associationVal, analogOut1MinMaxConfig, analogOut1FanSpeedConfig), Port.ANALOG_OUT_ONE),
+                    Pair(Pipe2AnalogOutConfigs(analogOut2Enabled.enabled, analogOut2Association.associationVal, analogOut2MinMaxConfig, analogOut2FanSpeedConfig), Port.ANALOG_OUT_TWO),
+                    Pair(Pipe2AnalogOutConfigs(analogOut3Enabled.enabled, analogOut3Association.associationVal, analogOut3MinMaxConfig, analogOut3FanSpeedConfig), Port.ANALOG_OUT_THREE),
+            ).forEach { (analogOutConfig, port) ->
+                if (analogOutConfig.enabled && analogOutConfig.association == HsPipe2AnalogOutMapping.FAN_SPEED.ordinal) {
+                    doAnalogFanAction(
+                            port, analogOutConfig.fanSpeed.low.currentVal.toInt(),
+                            analogOutConfig.fanSpeed.medium.currentVal.toInt(),
+                            analogOutConfig.fanSpeed.high.currentVal.toInt(),
+                            basicSettings.fanMode, basicSettings.conditioningMode,
+                            output, analogOutStages
+                    )
+
+                }
+            }
         }
     }
 
 
-    private fun getSuperLogicalPointIfExist(association: Pipe2RelayAssociation ): String? {
-        if(relayOutputPoints.containsKey(association.ordinal)){
-            return relayOutputPoints[association.ordinal]
+    private fun getSuperLogicalPointIfExist(association: HsPipe2RelayMapping ): String? {
+        if(relayLogicalPoints.containsKey(association.ordinal)){
+            return relayLogicalPoints[association.ordinal]
         }
         return null
     }
@@ -964,7 +779,7 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
         relayStages: HashMap<String, Int> ,
         analogOutStages: HashMap<String, Int>,
         basicSettings: BasicSettings,
-        equip: HyperStatPipe2EquipToBeDeleted
+        equip: Pipe2V2Equip
 
     ) {
         // Reset Relay
@@ -972,15 +787,15 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
             resetWaterValue(relayStages,equip)
             resetAux(relayStages)
 
-            if (relayOutputPoints.containsKey(Pipe2RelayAssociation.FAN_ENABLED.ordinal)) resetLogicalPoint(
-                relayOutputPoints[Pipe2RelayAssociation.FAN_ENABLED.ordinal]!!
+            if (relayLogicalPoints.containsKey(HsPipe2RelayMapping.FAN_ENABLED.ordinal)) resetLogicalPoint(
+                relayLogicalPoints[HsPipe2RelayMapping.FAN_ENABLED.ordinal]!!
             )
-            if (relayOutputPoints.containsKey(Pipe2RelayAssociation.OCCUPIED_ENABLED.ordinal)) resetLogicalPoint(
-                relayOutputPoints[Pipe2RelayAssociation.OCCUPIED_ENABLED.ordinal]!!
+            if (relayLogicalPoints.containsKey(HsPipe2RelayMapping.OCCUPIED_ENABLED.ordinal)) resetLogicalPoint(
+                relayLogicalPoints[HsPipe2RelayMapping.OCCUPIED_ENABLED.ordinal]!!
             )
 
-            if (analogOutputPoints.containsKey(Pipe2AnalogOutAssociation.DCV_DAMPER.ordinal)) resetLogicalPoint(
-                analogOutputPoints[Pipe2AnalogOutAssociation.DCV_DAMPER.ordinal]!!
+            if (analogLogicalPoints.containsKey(HsPipe2AnalogOutMapping.DCV_DAMPER.ordinal)) resetLogicalPoint(
+                analogLogicalPoints[HsPipe2AnalogOutMapping.DCV_DAMPER.ordinal]!!
             )
     }
 
@@ -990,233 +805,73 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
         basicSettings: BasicSettings
     ){
         if(basicSettings.fanMode == StandaloneFanStage.AUTO||basicSettings.fanMode == StandaloneFanStage.OFF) {
-            if (relayOutputPoints.containsKey(Pipe2RelayAssociation.FAN_LOW_SPEED.ordinal)) {
-                resetLogicalPoint(relayOutputPoints[Pipe2RelayAssociation.FAN_LOW_SPEED.ordinal]!!)
+            if (relayLogicalPoints.containsKey(HsPipe2RelayMapping.FAN_LOW_SPEED.ordinal)) {
+                resetLogicalPoint(relayLogicalPoints[HsPipe2RelayMapping.FAN_LOW_SPEED.ordinal]!!)
                 relayStages.remove(Stage.FAN_1.displayName)
             }
-            if (relayOutputPoints.containsKey(Pipe2RelayAssociation.FAN_MEDIUM_SPEED.ordinal)) {
-                resetLogicalPoint(relayOutputPoints[Pipe2RelayAssociation.FAN_MEDIUM_SPEED.ordinal]!!)
+            if (relayLogicalPoints.containsKey(HsPipe2RelayMapping.FAN_MEDIUM_SPEED.ordinal)) {
+                resetLogicalPoint(relayLogicalPoints[HsPipe2RelayMapping.FAN_MEDIUM_SPEED.ordinal]!!)
                 relayStages.remove(Stage.FAN_2.displayName)
             }
-            if (relayOutputPoints.containsKey(Pipe2RelayAssociation.FAN_HIGH_SPEED.ordinal)) {
-                resetLogicalPoint(relayOutputPoints[Pipe2RelayAssociation.FAN_HIGH_SPEED.ordinal]!!)
+            if (relayLogicalPoints.containsKey(HsPipe2RelayMapping.FAN_HIGH_SPEED.ordinal)) {
+                resetLogicalPoint(relayLogicalPoints[HsPipe2RelayMapping.FAN_HIGH_SPEED.ordinal]!!)
                 relayStages.remove(Stage.FAN_3.displayName)
             }
-            if (analogOutputPoints.containsKey(Pipe2AnalogOutAssociation.FAN_SPEED.ordinal)) {
-                resetLogicalPoint(analogOutputPoints[Pipe2AnalogOutAssociation.FAN_SPEED.ordinal]!!)
+            if (analogLogicalPoints.containsKey(HsPipe2AnalogOutMapping.FAN_SPEED.ordinal)) {
+                resetLogicalPoint(analogLogicalPoints[HsPipe2AnalogOutMapping.FAN_SPEED.ordinal]!!)
                 analogOutStages.remove(AnalogOutput.FAN_SPEED.name)
             }
         }
     }
 
-    private fun runRelayOperations(
-            equip: HyperStatPipe2EquipToBeDeleted,
-            config: HyperStatPipe2Configuration,
-            tuner: HyperStatProfileTuners,
-            userIntents: UserIntents,
-            basicSettings: BasicSettings,
-            relayStages: HashMap<String, Int>,
-            analogOutStages: HashMap<String, Int>
-    ) {
-
-        if (config.relay1State.enabled) {
-            handleRelayState(
-                config.relay1State, equip, Port.RELAY_ONE, tuner,
-                userIntents, basicSettings, relayStages, config, analogOutStages
-            )
-        }
-        if (config.relay2State.enabled) {
-            handleRelayState(
-                config.relay2State, equip, Port.RELAY_TWO, tuner,
-                userIntents, basicSettings, relayStages, config, analogOutStages
-            )
-        }
-        if (config.relay3State.enabled) {
-            handleRelayState(
-                config.relay3State, equip, Port.RELAY_THREE, tuner,
-                userIntents, basicSettings, relayStages, config, analogOutStages
-            )
-        }
-        if (config.relay4State.enabled) {
-            handleRelayState(
-                config.relay4State, equip, Port.RELAY_FOUR, tuner,
-                userIntents, basicSettings, relayStages, config, analogOutStages
-            )
-        }
-        if (config.relay5State.enabled) {
-            handleRelayState(
-                config.relay5State, equip, Port.RELAY_FIVE, tuner,
-                userIntents, basicSettings, relayStages, config, analogOutStages
-            )
-        }
-        if (config.relay6State.enabled) {
-            handleRelayState(
-                config.relay6State, equip, Port.RELAY_SIX, tuner,
-                userIntents, basicSettings, relayStages, config, analogOutStages
-            )
-        }
-    }
-
-
-    private fun runAnalogOutOperations(
-            equip: HyperStatPipe2EquipToBeDeleted,
-            config: HyperStatPipe2Configuration,
-            basicSettings: BasicSettings,
-            analogOutStages: HashMap<String, Int>,
-            userIntents: UserIntents
-    ) {
-
-        if (config.analogOut1State.enabled) {
-            handleAnalogOutState(
-                equip, config, config.analogOut1State,
-                Port.ANALOG_OUT_ONE, basicSettings, analogOutStages, userIntents
-            )
-        }
-        if (config.analogOut2State.enabled) {
-            handleAnalogOutState(
-                equip, config, config.analogOut2State,
-                Port.ANALOG_OUT_TWO, basicSettings, analogOutStages, userIntents
-            )
-        }
-        if (config.analogOut3State.enabled) {
-            handleAnalogOutState(
-                equip, config, config.analogOut3State,
-                Port.ANALOG_OUT_THREE, basicSettings, analogOutStages, userIntents
-            )
-        }
-    }
-
-
-    private fun handleRelayState(
-            relayState: Pipe2RelayState,
-            equip: HyperStatPipe2EquipToBeDeleted,
-            port: Port,
-            tuner: HyperStatProfileTuners,
-            userIntents: UserIntents,
-            basicSettings: BasicSettings,
-            relayStages: HashMap<String, Int>,
-            configuration: HyperStatPipe2Configuration,
-            analogOutStages: HashMap<String, Int>
-    ) {
-        when {
-
-            (HyperStatAssociationUtil.isRelayAuxHeatingStage1(relayState)) -> {
-                // Reheat is only used when the module is in cooling mode.
-
-                if( basicSettings.conditioningMode == StandaloneConditioningMode.AUTO
-                    || basicSettings.conditioningMode == StandaloneConditioningMode.HEAT_ONLY) {
-                        if (currentTemp < (userIntents.zoneHeatingTargetTemperature - tuner.auxHeating1Activate)) {
-                            updateLogicalPoint( relayOutputPoints[Pipe2RelayAssociation.AUX_HEATING_STAGE1.ordinal], 1.0)
-                            relayStages[Pipe2RelayAssociation.AUX_HEATING_STAGE1.name] = 1
-                            runSpecificAnalogFanSpeed(configuration,FanSpeed.MEDIUM,analogOutStages)
-
-                        } else if (currentTemp >= (userIntents.zoneHeatingTargetTemperature - (tuner.auxHeating1Activate - 1))) {
-                            updateLogicalPoint(
-                                relayOutputPoints[Pipe2RelayAssociation.AUX_HEATING_STAGE1.ordinal],
-                                0.0
-                            )
-                            runSpecificAnalogFanSpeed(configuration,FanSpeed.OFF,analogOutStages)
-
-                        } else {
-                            if(getCurrentLogicalPointStatus(relayOutputPoints[Pipe2RelayAssociation.AUX_HEATING_STAGE1.ordinal]!!) == 1.0)
-                                relayStages[Pipe2RelayAssociation.AUX_HEATING_STAGE1.name] = 1
-                        }
-
-                }else{
-                    resetAux(relayStages)
-                }
-            }
-            // Reheat is only used when the module is in cooling mode.
-            (HyperStatAssociationUtil.isRelayAuxHeatingStage2(relayState)) -> {
-                if(basicSettings.conditioningMode == StandaloneConditioningMode.AUTO
-                    || basicSettings.conditioningMode == StandaloneConditioningMode.HEAT_ONLY) {
-                        if (currentTemp < (userIntents.zoneHeatingTargetTemperature - tuner.auxHeating2Activate)) {
-                            updateLogicalPoint(
-                                relayOutputPoints[Pipe2RelayAssociation.AUX_HEATING_STAGE2.ordinal],
-                                1.0
-                            )
-                            relayStages[Pipe2RelayAssociation.AUX_HEATING_STAGE2.name] = 1
-                            runSpecificAnalogFanSpeed(configuration,FanSpeed.HIGH,analogOutStages)
-                        } else if (currentTemp >= (userIntents.zoneHeatingTargetTemperature - (tuner.auxHeating2Activate - 1))) {
-                            updateLogicalPoint(
-                                relayOutputPoints[Pipe2RelayAssociation.AUX_HEATING_STAGE2.ordinal],
-                                0.0
-                            )
-                        }else {
-                            if(getCurrentLogicalPointStatus(relayOutputPoints[Pipe2RelayAssociation.AUX_HEATING_STAGE2.ordinal]!!) == 1.0)
-                                relayStages[Pipe2RelayAssociation.AUX_HEATING_STAGE2.name] = 1
-                        }
-                }
-            }
-            (HyperStatAssociationUtil.isRelayWaterValveStage(relayState)) -> {
-
-                if(equip.waterSamplingStartTime == 0L && basicSettings.conditioningMode != StandaloneConditioningMode.OFF) {
-                    doRelayWaterValveOperation(
-                        equip, port, basicSettings, waterValveLoop(userIntents),
-                        tuner.relayActivationHysteresis, relayStages
-                    )
-                }
-            }
-            (HyperStatAssociationUtil.isRelayFanEnabledStage(relayState)) -> {
-                doFanEnabled(curState, port, fanLoopOutput)
-            }
-            (HyperStatAssociationUtil.isRelayOccupiedEnabledStage(relayState)) -> {
-                doOccupiedEnabled(port)
-            }
-            (HyperStatAssociationUtil.isRelayHumidifierEnabledStage(relayState)) -> {
-                doHumidifierOperation(
-                    port, tuner.humidityHysteresis, userIntents.targetMinInsideHumidity
-                )
-            }
-            (HyperStatAssociationUtil.isRelayDeHumidifierEnabledStage(relayState)) -> {
-                doDeHumidifierOperation(
-                    port, tuner.humidityHysteresis, userIntents.targetMaxInsideHumidity
-                )
-            }
-        }
-    }
-
     private fun handleAnalogOutState(
-            equip: HyperStatPipe2EquipToBeDeleted,
-            config: HyperStatPipe2Configuration,
-            analogOutState: Pipe2AnalogOutState,
-            port: Port,
-            basicSettings: BasicSettings,
-            analogOutStages: HashMap<String, Int>,
-            userIntents: UserIntents
+            analogOutState: Pipe2AnalogOutConfigs, equip: Pipe2V2Equip, config: Pipe2Configuration,
+            port: Port, basicSettings: BasicSettings, analogOutStages: HashMap<String, Int>, userIntents: UserIntents
     ) {
-        // If we are in Auto Away mode we no need to Any analog Operations
-        when {
-            (HyperStatAssociationUtil.isAnalogOutMappedToWaterValve(analogOutState)) -> {
-                // If it not in water sampling state the no need to take action
-                if(equip.waterSamplingStartTime == 0L && basicSettings.conditioningMode != StandaloneConditioningMode.OFF) {
+        val analogMapping = HsPipe2AnalogOutMapping.values().find { it.ordinal == analogOutState.association }
+        when (analogMapping) {
+            HsPipe2AnalogOutMapping.WATER_MODULATING_VALUE -> {
+                if (equip.waterSamplingStartTime == 0L && basicSettings.conditioningMode != StandaloneConditioningMode.OFF) {
                     doAnalogWaterValveAction(
-                        port, basicSettings.fanMode, basicSettings,
-                        waterValveLoop(userIntents), analogOutStages
+                            port, basicSettings.fanMode, basicSettings,
+                            waterValveLoop(userIntents), analogOutStages
                     )
                 }
             }
 
-            (HyperStatAssociationUtil.isAnalogOutMappedToDcvDamper(analogOutState)) -> {
+            HsPipe2AnalogOutMapping.DCV_DAMPER -> {
                 doAnalogDCVAction(
-                    port, analogOutStages, config.zoneCO2Threshold,
-                    config.zoneCO2DamperOpeningRate, isDoorOpenState(config, equip)
+                        port, analogOutStages, config.zoneCO2Threshold.currentVal,
+                        config.zoneCO2DamperOpeningRate.currentVal,
+                        isDoorOpenState(config, equip), equip
                 )
             }
+
+            else -> {}
         }
     }
 
-    private fun runSpecificAnalogFanSpeed(config: HyperStatPipe2Configuration, fanSpeed: FanSpeed, analogOutStages: HashMap<String, Int>) {
+
+    private fun runSpecificAnalogFanSpeed(config: Pipe2Configuration, fanSpeed: FanSpeed, analogOutStages: HashMap<String, Int>) {
         var analogOutputsUpdated = 0
-        val analogOutputStates = listOf(
-            Pair(Port.ANALOG_OUT_ONE, config.analogOut1State),
-            Pair(Port.ANALOG_OUT_TWO, config.analogOut2State),
-            Pair(Port.ANALOG_OUT_THREE, config.analogOut3State)
-        )
-        if (analogOutputStates.any { it.second.enabled && HyperStatAssociationUtil.isAnalogOutMappedToFanSpeed(it.second) }) {
-            for ((port, analogOutState) in analogOutputStates) {
-                if (analogOutState.enabled && HyperStatAssociationUtil.isAnalogOutMappedToFanSpeed(analogOutState)) {
-                    updateLogicalPoint(logicalPointsList[port]!!, getPercent(analogOutState, fanSpeed))
+
+        fun getPercent(fanConfig: FanConfig, fanSpeed: FanSpeed): Double {
+            return when (fanSpeed) {
+                FanSpeed.HIGH -> fanConfig.high.currentVal
+                FanSpeed.MEDIUM -> fanConfig.medium.currentVal
+                FanSpeed.LOW -> fanConfig.low.currentVal
+                else -> 0.0
+            }
+        }
+
+        config.apply {
+            listOf(
+                    Pair(Pipe2AnalogOutConfigs(analogOut1Enabled.enabled, analogOut1Association.associationVal, analogOut1MinMaxConfig, analogOut1FanSpeedConfig), Port.ANALOG_OUT_ONE),
+                    Pair(Pipe2AnalogOutConfigs(analogOut2Enabled.enabled, analogOut2Association.associationVal, analogOut2MinMaxConfig, analogOut2FanSpeedConfig), Port.ANALOG_OUT_TWO),
+                    Pair(Pipe2AnalogOutConfigs(analogOut3Enabled.enabled, analogOut3Association.associationVal, analogOut3MinMaxConfig, analogOut3FanSpeedConfig), Port.ANALOG_OUT_THREE),
+            ).forEach { (analogOutConfig, port) ->
+                if (analogOutConfig.enabled && analogOutConfig.association == HsPipe2AnalogOutMapping.FAN_SPEED.ordinal) {
+                    updateLogicalPoint(logicalPointsList[port]!!, getPercent(analogOutConfig.fanSpeed, fanSpeed))
                     analogOutputsUpdated++
                 }
             }
@@ -1226,14 +881,7 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
         }
     }
 
-    private fun getPercent(analogOutState: Pipe2AnalogOutState, fanSpeed: FanSpeed):Double{
-        return when(fanSpeed){
-            FanSpeed.HIGH -> analogOutState.perAtFanHigh
-            FanSpeed.MEDIUM -> analogOutState.perAtFanMedium
-            FanSpeed.LOW -> analogOutState.perAtFanLow
-            else -> 0.0
-        }
-    }
+
 
     private fun waterValveLoop(userIntents: UserIntents): Int {
         val supplyWaterTempTh2AboveHeating = supplyWaterTempTh2 > heatingThreshold
@@ -1259,99 +907,43 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
         return 0
     }
 
+    
+    private fun isDoorOpenState(config: HyperStatConfiguration, equip: HyperStatEquip): Boolean {
 
+        fun isAnalogHasDoorWindowMapping(): Boolean {
+            return (config.isEnabledAndAssociated(config.analogOut1Enabled, config.analogIn1Association, AnalogInputAssociation.DOOR_WINDOW_SENSOR_TITLE_24.ordinal)
+                    || config.isEnabledAndAssociated(config.analogOut2Enabled, config.analogIn2Association, AnalogInputAssociation.DOOR_WINDOW_SENSOR_TITLE_24.ordinal))
+        }
 
-    private fun isDoorOpenState(
-        config: HyperStatPipe2Configuration,
-        equip: HyperStatPipe2EquipToBeDeleted
-    ): Boolean {
-
-        // If analog in value is less than 2v door is closed(0) else door is open (1)
         var isDoorOpen = false
+        var analogSensorEnabled = false
 
-        var analog1SensorEnabled = false
-        var analog2SensorEnabled = false
+        if (isAnalogHasDoorWindowMapping()) {
+            val sensorValue = equip.doorWindowSensorTitle24.readHisVal().toInt()
+            if (sensorValue == 1) isDoorOpen = true
+            analogSensorEnabled = true
+            CcuLog.i(L.TAG_CCU_HSPIPE2, "Analog Input has mapping Door Window sensor value : Door is $sensorValue")
 
-        if (config.analogIn1State.enabled &&
-            HyperStatAssociationUtil.isAnalogInAssociatedToDoorWindowSensor(config.analogIn1State)
-        ) {
-            val sensorValue = equip.hsHaystackUtil.getSensorPointValue(
-                "door and window2 and sensor"
-            )
-            logIt( "Analog In 1 Door Window sensor value : Door is $sensorValue")
-            if (sensorValue.toInt() == 1) isDoorOpen = true
-            analog1SensorEnabled = true
         }
-
-        if (config.analogIn2State.enabled &&
-            HyperStatAssociationUtil.isAnalogInAssociatedToDoorWindowSensor(config.analogIn2State)
-        ) {
-            val sensorValue = equip.hsHaystackUtil.getSensorPointValue(
-                "door and window3 and sensor"
-            )
-            logIt( "Analog In 2 Door Window sensor value : Door is $sensorValue")
-            if (sensorValue.toInt() == 1) isDoorOpen = true
-            analog2SensorEnabled = true
-        }
-
         doorWindowIsOpen(
-            if (analog1SensorEnabled || analog2SensorEnabled) 1.0 else 0.0,
-            if (isDoorOpen) 1.0 else 0.0, null
+                if (analogSensorEnabled) 1.0 else 0.0,
+                if (isDoorOpen) 1.0 else 0.0, equip
         )
-
         return isDoorOpen
     }
 
-    private fun runForKeycardSensor(config: HyperStatPipe2Configuration, equip: HyperStatPipe2EquipToBeDeleted) {
-
-        var analog1KeycardEnabled = false
-        var analog2KeycardEnabled = false
-
-        var analog1Sensor = 0.0
-        var analog2Sensor = 0.0
-
-        if (config.analogIn1State.enabled &&
-            HyperStatAssociationUtil.isAnalogInAssociatedToKeyCardSensor(config.analogIn1State)
-        ) {
-            analog1KeycardEnabled = true
-            analog1Sensor = equip.hsHaystackUtil.getSensorPointValue(
-                "logical and keycard and sensor"
-            )
-        }
-
-        if (config.analogIn2State.enabled &&
-            HyperStatAssociationUtil.isAnalogInAssociatedToKeyCardSensor(config.analogIn2State)
-        ) {
-            analog2KeycardEnabled = true
-            analog2Sensor = equip.hsHaystackUtil.getSensorPointValue(
-                "logical and keycard2 and sensor"
-            )
-        }
-
-        logIt( "Keycard Enable Value "+  if (analog1KeycardEnabled || analog2KeycardEnabled) 1.0 else 0.0)
-        logIt( "Keycard sensor Value "+ if (analog1Sensor > 0 || analog2Sensor > 0) 1.0 else 0.0)
-
-        keyCardIsInSlot(
-            if (analog1KeycardEnabled || analog2KeycardEnabled) 1.0 else 0.0,
-            if (analog1Sensor > 0 || analog2Sensor > 0) 1.0 else 0.0, null
-        )
-    }
-
-    /**
-     * Check for the flag which allows fan operation during door window
-     * @return true or false
-     */
-    private fun getDoorWindowFanOperationStatus(): Boolean {
-        return runFanLowDuringDoorWindow
+    private fun runForKeyCardSensor(config: HyperStatConfiguration, equip: HyperStatEquip) {
+        val isKeyCardEnabled = (config.isEnabledAndAssociated(config.analogIn1Enabled, config.analogIn1Association, AnalogInputAssociation.KEY_CARD_SENSOR.ordinal)
+                || config.isEnabledAndAssociated(config.analogIn1Enabled, config.analogIn2Association, AnalogInputAssociation.KEY_CARD_SENSOR.ordinal))
+        keyCardIsInSlot((if (isKeyCardEnabled) 1.0 else 0.0), if (equip.keyCardSensor.readHisVal() > 0) 1.0 else 0.0, equip)
     }
 
     /**
      * Check if we should allow fan operation even when the door window is open
-     * @param equip HyperStatCpuEquip
      * @return true if the door or window is open and the occupancy status is not UNOCCUPIED, otherwise false.
      */
-    private fun checkFanOperationAllowedDoorWindow(equip: HyperStatPipe2EquipToBeDeleted): Boolean {
-        return if(currentTemp < fetchUserIntents(equip).zoneCoolingTargetTemperature && currentTemp > fetchUserIntents(equip).zoneHeatingTargetTemperature) {
+    private fun checkFanOperationAllowedDoorWindow(userIntents: UserIntents): Boolean {
+        return if (currentTemp < userIntents.zoneCoolingTargetTemperature && currentTemp > userIntents.zoneHeatingTargetTemperature) {
             doorWindowSensorOpenStatus &&
                     occupancyBeforeDoorWindow != Occupancy.UNOCCUPIED &&
                     occupancyBeforeDoorWindow != Occupancy.DEMAND_RESPONSE_UNOCCUPIED &&
@@ -1362,15 +954,13 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
     }
 
     private fun runForDoorWindowSensor(
-            config: HyperStatPipe2Configuration,
-            equip: HyperStatPipe2EquipToBeDeleted,
-            analogOutStages: HashMap<String, Int>,
-            relayStages: HashMap<String, Int>
+            config: HyperStatConfiguration, equip: HyperStatEquip,
+            analogOutStages: HashMap<String, Int>, relayStages: HashMap<String, Int>
     ): Boolean {
 
-        val isDoorOpen = isDoorOpenState(config,equip)
-        logIt( " is Door Open ? $isDoorOpen")
-        if (isDoorOpen){
+        val isDoorOpen = isDoorOpenState(config, equip)
+        CcuLog.d(L.TAG_CCU_HSPIPE2, " is Door Open ? $isDoorOpen")
+        if (isDoorOpen) {
             resetLoopOutputValues()
             resetLogicalPoints()
             analogOutStages.clear()
@@ -1380,54 +970,160 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
     }
 
     private fun resetLoopOutputValues() {
-        logIt( "Resetting all the loop output values: ")
+        CcuLog.d(L.TAG_CCU_HSPIPE2, "Resetting all the loop output values: ")
         coolingLoopOutput = 0
         heatingLoopOutput = 0
         fanLoopOutput = 0
     }
 
-    private fun getSupplyWaterTemp(equipRef: String): Double {
-        return CCUHsApi.getInstance()
-            .readHisValByQuery("supply and water and temp and sensor and equipRef == \"$equipRef\"")
-    }
 
-    @JsonIgnore
     override fun getCurrentTemp(): Double {
         for (nodeAddress in pipe2DeviceMap.keys) {
-            return pipe2DeviceMap[nodeAddress]!!.getCurrentTemp()
+            return pipe2DeviceMap[nodeAddress]!!.currentTemp.readHisVal()
         }
         return 0.0
     }
+    
+    override fun getDisplayCurrentTemp() = averageZoneTemp
 
-    @JsonIgnore
-    override fun getDisplayCurrentTemp(): Double {
-        return averageZoneTemp
-    }
-
-    @JsonIgnore
     override fun getAverageZoneTemp(): Double {
         var tempTotal = 0.0
         var nodeCount = 0
-        for (nodeAddress in pipe2DeviceMap.keys) {
-            if (pipe2DeviceMap[nodeAddress] == null) {
-                continue
-            }
-            if (pipe2DeviceMap[nodeAddress]!!.getCurrentTemp() > 0) {
-                tempTotal += pipe2DeviceMap[nodeAddress]!!.getCurrentTemp()
+        pipe2DeviceMap.forEach { (_, device) ->
+            if (device.currentTemp.readHisVal() > 0) {
+                tempTotal += device.currentTemp.readHisVal()
                 nodeCount++
             }
         }
         return if (nodeCount == 0) 0.0 else tempTotal / nodeCount
     }
 
-    private fun milliToMin(milliseconds: Long): Long {
-        return (milliseconds / (1000 * 60) % 60)
+    private fun milliToMin(milliseconds: Long) = (milliseconds / (1000 * 60) % 60)
+
+    private fun operateAnalogOutputs(
+            config: Pipe2Configuration, equip: Pipe2V2Equip, basicSettings: BasicSettings,
+            analogOutStages: HashMap<String, Int>, userIntents: UserIntents
+    ) {
+        config.apply {
+            listOf(
+                    Pair(Pipe2AnalogOutConfigs(analogOut1Enabled.enabled, analogOut1Association.associationVal, analogOut1MinMaxConfig, analogOut1FanSpeedConfig), Port.ANALOG_OUT_ONE),
+                    Pair(Pipe2AnalogOutConfigs(analogOut2Enabled.enabled, analogOut2Association.associationVal, analogOut2MinMaxConfig, analogOut2FanSpeedConfig), Port.ANALOG_OUT_TWO),
+                    Pair(Pipe2AnalogOutConfigs(analogOut3Enabled.enabled, analogOut3Association.associationVal, analogOut3MinMaxConfig, analogOut3FanSpeedConfig), Port.ANALOG_OUT_THREE),
+            ).forEach { (analogOutConfig, port) ->
+                if (analogOutConfig.enabled) handleAnalogOutState(analogOutConfig, equip, config, port, basicSettings, analogOutStages, userIntents)
+            }
+        }
     }
 
-    /**
-     * Function just to print logs
-     */
-    private fun logIt(msg: String){
-        CcuLog.d(L.TAG_CCU_HSPIPE2, msg)
+    private fun operateRelays(
+            config: Pipe2Configuration, tuner: HyperStatProfileTuners, userIntents: UserIntents, basicSettings: BasicSettings,
+            relayStages: HashMap<String, Int>, relayOutputPoints: HashMap<Int, String>, equip: Pipe2V2Equip, analogOutStages: HashMap<String, Int>
+    ) {
+        listOf(
+                Triple(config.relay1Enabled.enabled, config.relay1Association.associationVal, Port.RELAY_ONE),
+                Triple(config.relay2Enabled.enabled, config.relay2Association.associationVal, Port.RELAY_TWO),
+                Triple(config.relay3Enabled.enabled, config.relay3Association.associationVal, Port.RELAY_THREE),
+                Triple(config.relay4Enabled.enabled, config.relay4Association.associationVal, Port.RELAY_FOUR),
+                Triple(config.relay5Enabled.enabled, config.relay5Association.associationVal, Port.RELAY_FIVE),
+                Triple(config.relay6Enabled.enabled, config.relay6Association.associationVal, Port.RELAY_SIX)
+        ).forEach { (enabled, association, port) ->
+            if (enabled) handleRelayState(association, config, port, tuner, userIntents, basicSettings, relayStages, relayOutputPoints, equip, analogOutStages)
+        }
+    }
+
+
+    private fun isEligibleForHeating(conditioningMode: StandaloneConditioningMode): Boolean {
+        return  conditioningMode == StandaloneConditioningMode.AUTO || conditioningMode == StandaloneConditioningMode.HEAT_ONLY
+    }
+
+    private fun handleRelayState(
+            association: Int, config: Pipe2Configuration, port: Port, tuner: HyperStatProfileTuners,
+            userIntents: UserIntents, basicSettings: BasicSettings, relayStages: HashMap<String, Int>,
+            relayOutputPoints: HashMap<Int, String>, equip: Pipe2V2Equip, analogOutStages: HashMap<String, Int>
+    ) {
+
+        val relayMapping = HsPipe2RelayMapping.values().find { it.ordinal == association }
+        when (relayMapping) {
+
+            HsPipe2RelayMapping.AUX_HEATING_STAGE1 -> {
+                operateAuxStageHeating(
+                        relayMapping, relayOutputPoints, relayStages, tuner.auxHeating1Activate,
+                        userIntents, config, analogOutStages, FanSpeed.MEDIUM, basicSettings
+                )
+            }
+
+            HsPipe2RelayMapping.AUX_HEATING_STAGE2 -> {
+                operateAuxStageHeating(
+                        relayMapping, relayOutputPoints, relayStages, tuner.auxHeating2Activate,
+                        userIntents, config, analogOutStages, FanSpeed.HIGH, basicSettings
+                )
+            }
+
+            HsPipe2RelayMapping.WATER_VALVE -> {
+                if (equip.waterSamplingStartTime == 0L && basicSettings.conditioningMode != StandaloneConditioningMode.OFF) {
+                    doRelayWaterValveOperation(
+                            equip, port, basicSettings, waterValveLoop(userIntents),
+                            tuner.relayActivationHysteresis, relayStages
+                    )
+                }
+            }
+
+            HsPipe2RelayMapping.FAN_ENABLED -> doFanEnabled(curState, port, fanLoopOutput)
+            HsPipe2RelayMapping.OCCUPIED_ENABLED -> doOccupiedEnabled(port)
+            HsPipe2RelayMapping.HUMIDIFIER -> doHumidifierOperation(port, tuner.humidityHysteresis, userIntents.targetMinInsideHumidity, equip.zoneHumidity.readHisVal())
+            HsPipe2RelayMapping.DEHUMIDIFIER -> doDeHumidifierOperation(port, tuner.humidityHysteresis, userIntents.targetMaxInsideHumidity, equip.zoneHumidity.readHisVal())
+            else -> {}
+        }
+    }
+
+
+    private fun operateAuxStageHeating(
+            auxMapping: HsPipe2RelayMapping, relayOutputPoints: HashMap<Int, String>,
+            relayStages: HashMap<String, Int>, auxHeatingActivate: Double, userIntents: UserIntents,
+            config: Pipe2Configuration, analogOutStages: HashMap<String, Int>, fanSpeed: FanSpeed,
+            basicSettings: BasicSettings
+    ) {
+        if (!isEligibleForHeating(basicSettings.conditioningMode)) return
+
+        if (currentTemp < userIntents.zoneHeatingTargetTemperature - auxHeatingActivate) {
+            updateLogicalPoint(relayOutputPoints[auxMapping.ordinal], 1.0)
+            relayStages[auxMapping.name] = 1
+            runSpecificAnalogFanSpeed(config, fanSpeed, analogOutStages)
+
+        } else if (currentTemp >= userIntents.zoneHeatingTargetTemperature - (auxHeatingActivate - 1)) {
+            updateLogicalPoint(relayOutputPoints[auxMapping.ordinal], 0.0)
+            runSpecificAnalogFanSpeed(config, FanSpeed.OFF, analogOutStages)
+        } else {
+            if (getCurrentLogicalPointStatus(relayOutputPoints[auxMapping.ordinal]!!) == 1.0) relayStages[auxMapping.name] = 1
+        }
+    }
+
+    private fun showOutputStatus() {
+        logicalPointsList.toSortedMap().forEach { (port, logicalPointId) ->
+            var mapping: String? = null
+            when (port) {
+                Port.RELAY_ONE, Port.RELAY_TWO, Port.RELAY_THREE, Port.RELAY_FOUR, Port.RELAY_FIVE, Port.RELAY_SIX -> {
+                    val enumPos = relayLogicalPoints.entries.find { it.value.contentEquals(logicalPointId) }?.key
+                    mapping = HsPipe2RelayMapping.values().find { it.ordinal == enumPos }?.name
+                }
+
+                Port.ANALOG_OUT_ONE, Port.ANALOG_OUT_TWO, Port.ANALOG_OUT_THREE -> {
+                    val enumPos = analogLogicalPoints.entries.find { it.value.contentEquals(logicalPointId) }?.key
+                    mapping = HsPipe2AnalogOutMapping.values().find { it.ordinal == enumPos }?.name
+                }
+                else -> {}
+            }
+
+            CcuLog.i(L.TAG_CCU_HSPIPE2, "$port = $mapping : ${getCurrentLogicalPointStatus(logicalPointsList[port]!!)}")
+        }
+    }
+
+
+    fun getProfileDomainEquip(node: Int): Pipe2V2Equip = pipe2DeviceMap[node]!!
+
+    override fun getNodeAddresses(): Set<Short?> = pipe2DeviceMap.keys.map { it.toShort() }.toSet()
+
+    override fun <T : BaseProfileConfiguration?> getProfileConfiguration(address: Short): T {
+        TODO("Not using now")
     }
 }

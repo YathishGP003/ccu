@@ -58,4 +58,20 @@ open class HyperStatV2ViewState {
     var testAnalogOut3 by mutableStateOf(0)
 
     open fun isDcvMapped() = false
+
+    fun isAnyRelayMapped(mapping: Int, ignoreSelection: ConfigState): Boolean {
+
+        fun checkSelection(config: ConfigState): Boolean {
+            config.apply { return (ignoreSelection != this && association == mapping) }
+        }
+
+        if (checkSelection(relay1Config)) return true
+        if (checkSelection(relay2Config)) return true
+        if (checkSelection(relay3Config)) return true
+        if (checkSelection(relay4Config)) return true
+        if (checkSelection(relay5Config)) return true
+        if (checkSelection(relay6Config)) return true
+
+        return false
+    }
 }

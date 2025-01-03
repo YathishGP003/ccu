@@ -62,6 +62,7 @@ import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.dab.DabAdvancedHybridRtu;
 import a75f.io.logic.bo.building.system.dab.DabExternalAhu;
+import a75f.io.logic.bo.building.system.dab.DabFullyModulatingRtu;
 import a75f.io.logic.bo.building.system.dab.DabStagedRtu;
 import a75f.io.logic.bo.building.system.dab.DabStagedRtuWithVfd;
 import a75f.io.logic.bo.building.system.vav.VavAdvancedHybridRtu;
@@ -1448,6 +1449,7 @@ public class ScheduleManager {
         return L.ccu().systemProfile instanceof DabExternalAhu
                 || (L.ccu().systemProfile instanceof DabStagedRtu && !(L.ccu().systemProfile instanceof DabAdvancedHybridRtu))
                 || L.ccu().systemProfile instanceof DabStagedRtuWithVfd
+                || L.ccu().systemProfile instanceof DabFullyModulatingRtu
                 || L.ccu().systemProfile instanceof VavExternalAhu
                 || (L.ccu().systemProfile instanceof VavStagedRtu && !(L.ccu().systemProfile instanceof VavAdvancedHybridRtu))
                 || L.ccu().systemProfile instanceof VavStagedRtuWithVfd

@@ -99,6 +99,7 @@ import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.dab.DabAdvancedAhu;
 import a75f.io.logic.bo.building.system.dab.DabAdvancedHybridRtu;
 import a75f.io.logic.bo.building.system.dab.DabExternalAhu;
+import a75f.io.logic.bo.building.system.dab.DabFullyModulatingRtu;
 import a75f.io.logic.bo.building.system.dab.DabStagedRtu;
 import a75f.io.logic.bo.building.system.dab.DabStagedRtuWithVfd;
 import a75f.io.logic.bo.building.system.util.UserIntentConfig;
@@ -960,6 +961,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		});
 		getActivity().registerReceiver(occupancyReceiver, new IntentFilter(ACTION_STATUS_CHANGE));
 		configWatermark();
+		refreshData();
 		CcuLog.i("UI_PROFILING", "SystemFragment.onViewCreated Done");
 	}
 
@@ -967,6 +969,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		return (L.ccu().systemProfile instanceof DabExternalAhu
 				|| (L.ccu().systemProfile instanceof DabStagedRtu && !(L.ccu().systemProfile instanceof DabAdvancedHybridRtu))
 				|| L.ccu().systemProfile instanceof DabStagedRtuWithVfd
+				|| L.ccu().systemProfile instanceof DabFullyModulatingRtu
 				|| L.ccu().systemProfile instanceof VavExternalAhu
 				|| (L.ccu().systemProfile instanceof VavStagedRtu && !(L.ccu().systemProfile instanceof VavAdvancedHybridRtu))
 				|| L.ccu().systemProfile instanceof VavAdvancedAhu

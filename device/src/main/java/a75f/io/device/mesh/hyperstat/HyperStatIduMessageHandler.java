@@ -226,7 +226,7 @@ class HyperStatIduMessageHandler {
     }
 
     public static HyperStat.HyperStatCcuDatabaseSeedMessage_t getIduSeedMessage(String zone, int address, String equipRef) {
-        HyperStat.HyperStatSettingsMessage_t hyperStatSettingsMessage_t = getSettingsMessage(zone, address, equipRef);
+        HyperStat.HyperStatSettingsMessage_t hyperStatSettingsMessage_t = getSettingsMessage(zone, equipRef);
         HyperStat.HyperStatIduControlsMessage_t hyperStatControlsMessage_t = HyperStatIduMessageHandler.getIduControlMessage(address, CCUHsApi.getInstance());
 
         CcuLog.i(L.TAG_CCU_SERIAL, "Seed Message t"+hyperStatSettingsMessage_t.toByteString().toString());

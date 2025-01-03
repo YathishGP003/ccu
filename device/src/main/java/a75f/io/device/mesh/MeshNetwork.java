@@ -201,7 +201,7 @@ public class MeshNetwork extends DeviceNetwork
                                         if (sendControlMessage) {
                                             HyperStat.HyperStatControlsMessage_t.Builder controls =
                                                     HyperStatMessageGenerator.getControlMessage(
-                                                            Integer.parseInt(d.getAddr()), d.getEquipRef());
+                                                            Integer.parseInt(d.getAddr()));
                                             HyperStatMessageSender.writeControlMessage(controls.build(), Integer.parseInt(d.getAddr()),
                                                     MessageType.HYPERSTAT_CONTROLS_MESSAGE, false);
                                         }

@@ -69,14 +69,16 @@ import a75f.io.logic.cloud.CloudConnectionManager;
 import a75f.io.logic.cloud.CloudConnectionResponseCallback;
 import a75f.io.logic.limits.SchedulabeLimits;
 import a75f.io.renatus.bacnet.BacNetSelectModelView;
-import a75f.io.renatus.hyperstat.ui.HyperStatFragment;
 import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
 import a75f.io.renatus.profiles.acb.AcbProfileConfigFragment;
 import a75f.io.renatus.profiles.hss.cpu.HyperStatSplitCpuFragment;
 import a75f.io.renatus.profiles.dab.DabProfileConfigFragment;
+import a75f.io.renatus.profiles.ti.TIFragment;
 import a75f.io.renatus.profiles.otn.OtnProfileConfigFragment;
 import a75f.io.renatus.profiles.sse.SseProfileConfigFragment;
 import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatV2CpuFragment;
+import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatV2Pipe2Fragment;
+import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatV2HpuFragment;
 import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatMonitoringFragment;
 import a75f.io.renatus.profiles.plc.PlcProfileConfigFragment;
 import a75f.io.renatus.profiles.vav.VavProfileConfigFragment;
@@ -1105,8 +1107,8 @@ public class FloorPlanFragment extends Fragment {
                             .newInstance(Short.parseShort(nodeAddress), zone.getId(), NodeType.SMART_STAT, floor.getId(), profile.getProfileType()), Fragment4PipeFanCoilUnitConfig.ID);
                     break;
                 case TEMP_INFLUENCE:
-                    showDialogFragment(FragmentTempInfConfiguration
-                            .newInstance(Short.parseShort(nodeAddress), zone.getId(), NodeType.CONTROL_MOTE, floor.getId()), FragmentTempInfConfiguration.ID);
+                    showDialogFragment(TIFragment
+                            .newInstance(Short.parseShort(nodeAddress), zone.getId(),floor.getId(),NodeType.CONTROL_MOTE, ProfileType.TEMP_INFLUENCE), TIFragment.ID);
                     break;
                 case SSE:
                     showDialogFragment(FragmentSSEConfiguration
@@ -1126,10 +1128,14 @@ public class FloorPlanFragment extends Fragment {
                     break;
                 case HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT:
                 case HYPERSTAT_TWO_PIPE_FCU:
+                    showDialogFragment(HyperStatV2Pipe2Fragment.Companion.newInstance(Short.parseShort(nodeAddress),
+                                    zone.getId(), floor.getId(), NodeType.HYPER_STAT, ProfileType.HYPERSTAT_TWO_PIPE_FCU),
+                            HyperStatV2Pipe2Fragment.ID);
+                    break;
                 case HYPERSTAT_HEAT_PUMP_UNIT:
-                    showDialogFragment(HyperStatFragment.newInstance(Short.parseShort(nodeAddress)
+                    showDialogFragment(HyperStatV2HpuFragment.newInstance(Short.parseShort(nodeAddress)
                             , zone.getId(), floor.getId(),NodeType.HYPER_STAT, profile.getProfileType()),
-                            HyperStatFragment.ID);
+                            HyperStatV2HpuFragment.ID);
                     break;
                 case HYPERSTATSPLIT_CPU:
                     showDialogFragment(HyperStatSplitCpuFragment.Companion.newInstance(Short.parseShort(nodeAddress)

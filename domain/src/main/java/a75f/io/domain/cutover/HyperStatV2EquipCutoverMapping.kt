@@ -130,8 +130,8 @@ object HyperStatV2EquipCutoverMapping {
             "zoneDeadTime" to DomainName.zoneDeadTime,
             "coolingDeadband" to DomainName.coolingDeadband,
             "standaloneIntegralKFactor" to DomainName.standaloneIntegralKFactor,
-            "demandResponseSetback" to DomainName.demandResponseSetback,
-
+            "DemandResponseSetback" to DomainName.demandResponseSetback,
+            "otaStatus" to DomainName.otaStatus,
             "co2" to DomainName.zoneCo2,
             "occupancysensor" to DomainName.zoneOccupancy,
             "zoneilluminance" to DomainName.zoneIlluminance,
@@ -192,29 +192,101 @@ object HyperStatV2EquipCutoverMapping {
             "fanOutRecirculateAnalog2" to DomainName.analog2FanRecirculate,
             "fanOutRecirculateAnalog3" to DomainName.analog3FanRecirculate,
     )
-        private val monitoringEntries = linkedMapOf(
-                // Equip - base Points
-                "temperatureOffset" to DomainName.temperatureOffset,
 
-                "isThermister1enabled" to DomainName.thermistor1InputEnable,
-                "isThermister2enabled" to DomainName.thermistor2InputEnable,
+    private val hpuEntries = linkedMapOf(
+            "compressorStage1" to DomainName.compressorStage1,
+            "compressorStage2" to DomainName.compressorStage2,
+            "compressorStage3" to DomainName.compressorStage3,
 
-                //
-                "isAnalog1enaled" to DomainName.analog1InputEnable,
-                "isAnalog2enabled" to DomainName.analog2InputEnable,
+            "auxHeatingstage1" to DomainName.auxHeatingStage1,
+            "auxHeatingstage2" to DomainName.auxHeatingStage2,
 
-                "th1InputSensor" to DomainName.thermistor1InputAssociation,
-                "th2InputSensor" to DomainName.thermistor2InputAssociation,
+            "compressorSpeed" to DomainName.compressorSpeed,
+            "fanSpeed" to DomainName.fanSignal,
+            "analog1Maxfanspeed" to DomainName.analog1MaxFanSpeed,
+            "analog1Minfanspeed" to DomainName.analog1MinFanSpeed,
+            "analog2Maxfanspeed" to DomainName.analog2MaxFanSpeed,
+            "analog2Minfanspeed" to DomainName.analog2MinFanSpeed,
+            "analog3Maxfanspeed" to DomainName.analog3MaxFanSpeed,
+            "analog3Minfanspeed" to DomainName.analog3MinFanSpeed,
 
-                "analog1InputSensor" to DomainName.analog1InputAssociation,
-                "analog2InputSensor" to DomainName.analog2InputAssociation,
+            "analog1Mincompressorspeed" to DomainName.analog1MinCompressorSpeed,
+            "analog1Maxcompressorspeed" to DomainName.analog1MaxCompressorSpeed,
+            "analog2Mincompressorspeed" to DomainName.analog2MinCompressorSpeed,
+            "analog2Maxcompressorspeed" to DomainName.analog2MaxCompressorSpeed,
+            "analog3Mincompressorspeed" to DomainName.analog3MinCompressorSpeed,
+            "analog3Maxcompressorspeed" to DomainName.analog3MaxCompressorSpeed,
+            "compressorLoopOutput" to DomainName.compressorLoopOutput,
+            "auxHeating1Activate" to DomainName.auxHeating1Activate,
+            "auxHeating2Activate" to DomainName.auxHeating2Activate,
+            "coolingAirflowTemp" to DomainName.coolingAirflowTemp,
+            "changeOverCooling" to DomainName.changeOverCooling,
+            "heatingAirflowTemp" to DomainName.heatingAirflowTemp,
+    )
 
-                "currentTemp" to DomainName.currentTemp,
-                "occupancy" to DomainName.zoneOccupancy,
-                "illuminance" to DomainName.zoneIlluminance,
-                "heartBeat" to DomainName.heartBeat,
-                "otaStatus" to DomainName.otaStatus,
-                "scheduleType" to DomainName.scheduleType,
+    private val pipe2Entries = linkedMapOf(
+            // Relay mapping
+            "waterValve" to DomainName.waterValve,
+            "auxHeatingstage1" to DomainName.auxHeatingStage1,
+            "auxHeatingstage2" to DomainName.auxHeatingStage2,
+
+            //min max
+            "analog1Minwater" to DomainName.analog1MinWaterValve,
+            "analog2Minwater" to DomainName.analog2MinWaterValve,
+            "analog3Minwater" to DomainName.analog3MinWaterValve,
+
+            "analog1Maxwater" to DomainName.analog1MaxWaterValve,
+            "analog2Maxwater" to DomainName.analog2MaxWaterValve,
+            "analog3Maxwater" to DomainName.analog3MaxWaterValve,
+
+            "analog1Minfanspeed" to DomainName.analog1MinFanSpeed,
+            "analog2Minfanspeed" to DomainName.analog2MinFanSpeed,
+            "analog3Minfanspeed" to DomainName.analog3MinFanSpeed,
+
+            "analog1Maxfanspeed" to DomainName.analog1MaxFanSpeed,
+            "analog2Maxfanspeed" to DomainName.analog2MaxFanSpeed,
+            "analog3Maxfanspeed" to DomainName.analog3MaxFanSpeed,
+
+            // 2pipe specific points tuners
+            "auxHeating1Activate" to DomainName.auxHeating1Activate,
+            "auxHeating2Activate" to DomainName.auxHeating2Activate,
+            "fanSpeed" to DomainName.fanSignal,
+
+            "coolingAirflowTemp" to DomainName.coolingAirflowTemp,
+            "heatingAirflowTemp" to DomainName.heatingAirflowTemp,
+            "modulatingWaterValve" to DomainName.modulatingWaterValve,
+            "supplyWaterTemp" to DomainName.leavingWaterTemperature,
+            "2PipeFancoilHeatingThreshold" to DomainName.pipe2FancoilHeatingThreshold,
+            "2PipeFancoilCoolingThreshold" to DomainName.pipe2FancoilCoolingThreshold,
+            "waterValveSamplingOnTime" to DomainName.waterValveSamplingOnTime,
+            "waterValveSamplingWaitTime" to DomainName.waterValveSamplingWaitTime,
+            "waterValveSamplingDuringLoopDeadbandOnTime" to DomainName.waterValveSamplingLoopDeadbandOnTime,
+            "waterValveSamplingDuringLoopDeadbandWaitTime" to DomainName.waterValveSamplingLoopDeadbandWaitTime,
+
+            )
+    private val monitoringEntries = linkedMapOf(
+            // Equip - base Points
+            "temperatureOffset" to DomainName.temperatureOffset,
+
+            "isThermister1enabled" to DomainName.thermistor1InputEnable,
+            "isThermister2enabled" to DomainName.thermistor2InputEnable,
+
+            //
+            "isAnalog1enaled" to DomainName.analog1InputEnable,
+            "isAnalog2enabled" to DomainName.analog2InputEnable,
+
+            "th1InputSensor" to DomainName.thermistor1InputAssociation,
+            "th2InputSensor" to DomainName.thermistor2InputAssociation,
+
+            "analog1InputSensor" to DomainName.analog1InputAssociation,
+            "analog2InputSensor" to DomainName.analog2InputAssociation,
+
+            "currentTemp" to DomainName.currentTemp,
+            "occupancy" to DomainName.zoneOccupancy,
+            "illuminance" to DomainName.zoneIlluminance,
+            "heartBeat" to DomainName.heartBeat,
+            "otaStatus" to DomainName.otaStatus,
+            "scheduleType" to DomainName.scheduleType,
 
                 // For Equip Associated Points we are handling separately
                 "pm2p5" to DomainName.zonePm25,
@@ -281,8 +353,16 @@ object HyperStatV2EquipCutoverMapping {
                         "IONMeter(0:1Million)ions/cc" to DomainName.genericIonSensorPoint_ai2,)
                 return analog
         }
-        fun getMonitoringEntries(): Map<String, String> {
-                return monitoringEntries
-        }
+    fun getMonitoringEntries(): Map<String, String> {
+        return monitoringEntries
+    }
+
+    fun getHPUEntries(): Map<String, String> {
+        return commonEntries + hpuEntries
+    }
+
+    fun getPipe2Entries(): Map<String, String> {
+        return commonEntries + pipe2Entries
+    }
 }
 

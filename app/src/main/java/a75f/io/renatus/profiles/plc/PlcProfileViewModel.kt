@@ -1,6 +1,7 @@
 package a75f.io.renatus.profiles.plc
 
 import a75f.io.api.haystack.CCUHsApi
+import a75f.io.api.haystack.Device
 import a75f.io.api.haystack.RawPoint
 import a75f.io.device.mesh.LSerial
 import a75f.io.domain.api.Domain
@@ -18,16 +19,16 @@ import a75f.io.domain.util.ModelLoader.getSmartNodePidModel
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.NodeType
+import a75f.io.logic.bo.building.dab.getDevicePointDict
+import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.plc.PlcProfile
 import a75f.io.logic.bo.building.plc.PlcProfileConfig
-import a75f.io.logic.bo.building.sensors.SensorManager
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.FloorPlanFragment
 import a75f.io.renatus.modbus.util.showToast
 import a75f.io.renatus.profiles.OnPairingCompleteListener
-import a75f.io.renatus.profiles.profileUtils.UnusedPortsModel
 import a75f.io.renatus.profiles.profileUtils.UnusedPortsModel.Companion.saveUnUsedPortStatus
 import a75f.io.renatus.util.ProgressDialogUtils
 import a75f.io.renatus.util.highPriorityDispatcher
@@ -85,7 +86,7 @@ class PlcProfileViewModel : ViewModel() {
     private var saveJob : Job? = null
     private var targetVal = ArrayList<String>()
     private var errorVal = ArrayList<String>()
-
+    var isDefault = false
     fun init(bundle: Bundle, context: Context, hayStack : CCUHsApi) {
         deviceAddress = bundle.getShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR)
         zoneRef = bundle.getString(FragmentCommonBundleArgs.ARG_NAME)!!
@@ -105,11 +106,11 @@ class PlcProfileViewModel : ViewModel() {
             profileConfiguration = PlcProfileConfig(deviceAddress.toInt(), nodeType.name, 0,
                 zoneRef, floorRef , profileType, model ).getActiveConfiguration()
             viewState = PlcProfileViewState.fromPlcProfileConfig(profileConfiguration)
-            unusedPorts = UnusedPortsModel.initializeUnUsedPorts(deviceAddress, hayStack)
         } else {
             profileConfiguration = PlcProfileConfig(deviceAddress.toInt(), nodeType.name, 0,
                 zoneRef, floorRef , profileType, model ).getDefaultConfiguration()
             viewState = PlcProfileViewState.fromPlcProfileConfig(profileConfiguration)
+            isDefault = true
         }
         CcuLog.i(Domain.LOG_TAG, profileConfiguration.toString())
         this.context = context
@@ -171,7 +172,7 @@ class PlcProfileViewModel : ViewModel() {
         if (selectedIndex == 0) {
             return targetVal
         }
-        var minMaxInc: Triple<Double, Double, Double> = Triple(0.0, 0.0, 0.0)
+        var minMaxInc: Triple<Double, Double, Double>
         var pointString = getProcessVariableMappedPoint()
         minMaxInc = getMinMaxIncValuesByDomainName(pointString.toString(), model)
 
@@ -237,23 +238,10 @@ class PlcProfileViewModel : ViewModel() {
         if (selectedIndex == 0) {
             return errorVal
         }
-        var minMaxInc: Triple<Double, Double, Double> = Triple(0.0, 0.0, 0.0)
-        var pointString = getProcessVariableMappedPoint()
-        minMaxInc = getMinMaxIncValuesByDomainName(pointString.toString(), model)
-
         errorVal.clear()
-
-        val minVal = (100 * minMaxInc.first).toInt()
-        val maxVal = (100 * minMaxInc.second).toInt()
-        val increment = (100 * minMaxInc.third).toInt()
-
-        for (pos in minVal..maxVal step increment) {
-            errorVal.add((pos / 100.0).toString())
+        for (pos in 1..10 step 1) {
+            errorVal.add((pos.toDouble()).toString())
         }
-
-        // Remove the negative and zero values from the list
-        errorVal.removeIf { it.toDoubleOrNull() == null || it.toDouble() <= 0 }
-
         return errorVal
     }
 
@@ -261,23 +249,10 @@ class PlcProfileViewModel : ViewModel() {
         if (selectedIndex == 0) {
             return errorVal
         }
-        var minMaxInc: Triple<Double, Double, Double> = Triple(0.0, 0.0, 0.0)
-        var pointString = getProcessVariableMappedPoint()
-        minMaxInc = getMinMaxIncValuesByDomainName(pointString.toString(), model)
-
         errorVal.clear()
-
-        val minVal = (100 * minMaxInc.first).toInt()
-        val maxVal = (100 * minMaxInc.second).toInt()
-        val increment = (100 * minMaxInc.third).toInt()
-
-        for (pos in minVal..maxVal step increment) {
-            errorVal.add((pos / 100.0).toString())
+        for (pos in 1..10 step 1) {
+            errorVal.add((pos.toDouble()).toString())
         }
-
-        // Remove the negative and zero values from the list
-        errorVal.removeIf { it.toDoubleOrNull() == null || it.toDouble() <= 0 }
-
         return errorVal
     }
 
@@ -285,23 +260,10 @@ class PlcProfileViewModel : ViewModel() {
         if (selectedIndex == 0) {
             return errorVal
         }
-        var minMaxInc: Triple<Double, Double, Double> = Triple(0.0, 0.0, 0.0)
-        var pointString = getProcessVariableMappedPoint()
-        minMaxInc = getMinMaxIncValuesByDomainName(pointString.toString(), model)
-
         errorVal.clear()
-
-        val minVal = (100 * minMaxInc.first).toInt()
-        val maxVal = (100 * minMaxInc.second).toInt()
-        val increment = (100 * minMaxInc.third).toInt()
-
-        for (pos in minVal..maxVal step increment) {
-            errorVal.add((pos / 100.0).toString())
+        for (pos in 1..10 step 1) {
+            errorVal.add((pos.toDouble()).toString())
         }
-
-        // Remove the negative and zero values from the list
-        errorVal.removeIf { it.toDoubleOrNull() == null || it.toDouble() <= 0 }
-
         return errorVal
     }
 
@@ -311,7 +273,7 @@ class PlcProfileViewModel : ViewModel() {
         // Get the target list based on the selected sensor type
         if(viewState.analog1InputType.toInt() != 0) pidTargetValue = returnTargetValueAi1(viewState.analog1InputType.toInt())
         if(viewState.thermistor1InputType.toInt() != 0) pidTargetValue = returnTargetValueTH1(viewState.thermistor1InputType.toInt())
-        if(viewState.nativeSensorType.toInt() != 0) pidTargetValue = returnErrorValueNativeSensor(viewState.nativeSensorType.toInt())
+        if(viewState.nativeSensorType.toInt() != 0) pidTargetValue = returnTargetValueNativeSensor(viewState.nativeSensorType.toInt())
 
         thermistor1InputType = getListByDomainName(DomainName.thermistor1InputType, model)
 
@@ -358,6 +320,12 @@ class PlcProfileViewModel : ViewModel() {
 
                 CoroutineScope(Dispatchers.IO).launch {
                     updateTypeForAnalog1Out(profileConfiguration)
+                    updatePortConfiguration(
+                        hayStack,
+                        profileConfiguration,
+                        DeviceBuilder(hayStack, EntityMapper(model)),
+                        deviceModel
+                    )
                 }
                 // This check is needed because the dialog sometimes fails to close inside the coroutine.
                 // We don't know why this happens.
@@ -533,5 +501,83 @@ class PlcProfileViewModel : ViewModel() {
         } else {
             CcuLog.i(Domain.LOG_TAG, "Analog1Out type is already set to $type")
         }
+    }
+
+    private fun updatePortConfiguration(
+        hayStack: CCUHsApi,
+        config: PlcProfileConfig,
+        deviceBuilder: DeviceBuilder,
+        deviceModel: SeventyFiveFDeviceDirective
+    ) {
+        val deviceEntityId =
+            hayStack.readEntity("device and addr == \"${config.nodeAddress}\"")["id"].toString()
+        val device = Device.Builder().setHDict(hayStack.readHDictById(deviceEntityId)).build()
+
+        fun updateDevicePoint(
+            domainName: String, port: String, analogType: Any,
+            isPortEnabled: Boolean = false
+        ) {
+            val pointDef = deviceModel.points.find { it.domainName == domainName }
+            pointDef?.let {
+                val pointDict = getDevicePointDict(domainName, deviceEntityId, hayStack).apply {
+                    this["port"] = port
+                    this["analogType"] = analogType
+                    this["portEnabled"] = isPortEnabled
+                }
+                deviceBuilder.updatePoint(it, config, device, pointDict)
+            }
+        }
+
+        // Analog In 1
+        if (config.analog1InputType.currentVal > 0) {
+            updateDevicePoint(
+                DomainName.analog1In,
+                Port.ANALOG_IN_ONE.name,
+                (config.analog1InputType.currentVal - 1).toInt(),
+                true
+            )
+        } else {
+            updateDevicePoint(
+                DomainName.analog1In, Port.ANALOG_IN_ONE.name, 0, false
+            )
+        }
+
+        // Analog In 2
+        if (config.analog2InputType.currentVal > 0) {
+            updateDevicePoint(
+                DomainName.analog2In,
+                Port.ANALOG_IN_TWO.name,
+                (config.analog2InputType.currentVal).toInt(),
+                true
+            )
+        } else {
+            updateDevicePoint(
+                DomainName.analog2In, Port.ANALOG_IN_TWO.name, 0, false
+            )
+        }
+
+        // Th1 In
+        if (config.thermistor1InputType.currentVal > 0) {
+            updateDevicePoint(
+                DomainName.th1In,
+                Port.TH1_IN.name,
+                (config.thermistor1InputType.currentVal - 1).toInt(),
+                true
+            )
+        } else {
+            updateDevicePoint(DomainName.th1In, Port.TH1_IN.name, 0, false)
+        }
+
+        // Relay 1
+        if (config.relay1OutputEnable.enabled)
+            updateDevicePoint(DomainName.relay1, Port.RELAY_ONE.name, "Relay N/O", true)
+        else
+            updateDevicePoint(DomainName.relay1, Port.RELAY_ONE.name, "Relay N/C", false)
+
+        // Relay 2
+        if (config.relay2OutputEnable.enabled)
+            updateDevicePoint(DomainName.relay2, Port.RELAY_TWO.name, "Relay N/O", true)
+        else
+            updateDevicePoint(DomainName.relay2, Port.RELAY_TWO.name, "Relay N/C", false)
     }
 }

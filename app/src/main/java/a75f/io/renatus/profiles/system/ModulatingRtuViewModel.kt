@@ -17,6 +17,7 @@ import a75f.io.logic.L
 import a75f.io.logic.bo.haystack.device.ControlMote
 import a75f.io.renatus.profiles.profileUtils.UnusedPortsModel.Companion.saveUnUsedPortStatusOfSystemProfile
 import a75f.io.logic.bo.building.system.SystemMode
+import a75f.io.logic.bo.building.system.dab.DabFullyModulatingRtu
 import a75f.io.logic.bo.building.system.vav.VavFullyModulatingRtu
 import a75f.io.logic.bo.building.system.vav.config.ModulatingRtuProfileConfig
 import a75f.io.renatus.util.SystemProfileUtil
@@ -133,6 +134,21 @@ open class ModulatingRtuViewModel : ViewModel() {
 
     fun updateSystemMode() {
         val systemProfile = L.ccu().systemProfile as VavFullyModulatingRtu
+        val mode = SystemMode.values()[systemProfile.systemEquip.conditioningMode.readPriorityVal()
+            .toInt()]
+        if (mode == SystemMode.OFF) {
+            return
+        }
+        if (mode == SystemMode.AUTO && (!systemProfile.isCoolingAvailable || !systemProfile.isHeatingAvailable)
+            || mode == SystemMode.COOLONLY && !systemProfile.isCoolingAvailable
+            || mode == SystemMode.HEATONLY && !systemProfile.isHeatingAvailable
+        ) {
+            SystemProfileUtil.showConditioningDisabledDialog(context as Activity, mode)
+        }
+    }
+
+    fun updateDabSystemMode() {
+        val systemProfile = L.ccu().systemProfile as DabFullyModulatingRtu
         val mode = SystemMode.values()[systemProfile.systemEquip.conditioningMode.readPriorityVal()
             .toInt()]
         if (mode == SystemMode.OFF) {

@@ -10,7 +10,6 @@ import a75f.io.device.bacnet.BacnetConfigConstants.BACNET_CONFIGURATION
 import a75f.io.device.bacnet.BacnetConfigConstants.BACNET_HEART_BEAT
 import a75f.io.device.bacnet.BacnetConfigConstants.BACNET_ID
 import a75f.io.device.bacnet.BacnetConfigConstants.BROADCAST_BACNET_APP_START
-import a75f.io.device.bacnet.BacnetConfigConstants.BROADCAST_BACNET_ZONE_ADDED
 import a75f.io.device.bacnet.BacnetConfigConstants.DAYLIGHT_SAVING_STATUS
 import a75f.io.device.bacnet.BacnetConfigConstants.DESCRIPTION
 import a75f.io.device.bacnet.BacnetConfigConstants.FIRMWARE_REVISION
@@ -266,13 +265,6 @@ fun sendBroadCast(context: Context, intentAction: String, message: String) {
         try {
             val bacnetId = generateBacnetIdForRoom(roomRef)
             val zone = HSUtil.getZone(roomRef, floorRef)
-            if(zone.bacnetId == 0){
-                sendBroadCast(
-                    context,
-                    BROADCAST_BACNET_ZONE_ADDED,
-                    zone.id
-                )
-            }
             zone.bacnetId = bacnetId
             zone.bacnetType = Tags.DEVICE
             CCUHsApi.getInstance().updateZone(zone, zone.id)

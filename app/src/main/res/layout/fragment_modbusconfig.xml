@@ -1320,7 +1320,7 @@
                         android:layout_marginStart="30dp"
                         android:checked="true"
                         android:fontFamily="@font/lato_regular"
-                        android:text="@string/label_neither"
+                        android:text="@string/label_normal"
                         android:textSize="20sp" />
                 </RadioGroup>
 

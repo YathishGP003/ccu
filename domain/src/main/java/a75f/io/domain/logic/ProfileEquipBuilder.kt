@@ -387,7 +387,7 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
         equipHashMap["createdDateTime"]?.let {
             equip.createdDateTime = HDateTime.make(equipHashMap["createdDateTime"].toString())
         }
-        equip.lastModifiedBy = hayStack.getCCUUserName();
+        equip.lastModifiedBy = hayStack.getCCUUserName()
         hayStack.updateEquip(equip, equipRef)
         CcuLog.i(Domain.LOG_TAG, " Updated Equip ${equip.group}-${equip.domainName}")
     }

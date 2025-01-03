@@ -76,6 +76,9 @@ object ModelLoader {
     fun getDabStagedVfdRtuModelDef() : ModelDirective {
         return ModelCache.getModelById(MODEL_DAB_STAGED_VFD_RTU)
     }
+    fun getDabModulatingRtuModelDef() : ModelDirective {
+        return ModelCache.getModelById(MODEL_DAB_MODULATING_AHU)
+    }
     fun getDabExternalAhuModel() : ModelDirective {
         return ModelCache.getModelById(MODEL_EXTERNAL_AHU_DAB)
     }
@@ -150,7 +153,13 @@ object ModelLoader {
         return ModelCache.getModelById(MODEL_HYPERSTAT_CPU)
     }
 
+    fun getHyperStatHpuModel() : ModelDirective {
+        return ModelCache.getModelById(MODEL_HYPERSTAT_HPU)
+    }
 
+    fun getHyperStatPipe2Model() : ModelDirective {
+        return ModelCache.getModelById(MODEL_HYPERSTAT_PIPE2)
+    }
 
     fun getHyperStatMonitoringModel() : ModelDirective {
         return ModelCache.getModelById(MODEL_HYPERSTAT_MONITORING)
@@ -158,6 +167,15 @@ object ModelLoader {
 
     fun getHyperStatDevice() : ModelDirective {
         return ModelCache.getModelById(MODEL_HYPERSTAT_DEVICE)
+    }
+
+
+    fun getTIModel(): ModelDirective {
+        return ModelCache.getModelById(MODEL_TI)
+    }
+
+    fun getTIDeviceModel(): ModelDirective {
+        return ModelCache.getModelById(MODEL_TI_DEVICE)
     }
 
     fun getSmartNodePidModel() : ModelDirective {
@@ -190,10 +208,14 @@ object ModelLoader {
             "connectModuleDevice" -> getConnectModuleDeviceModel()
             "hyperstatSplitDevice" -> getHyperStatSplitDeviceModel()
             "hyperstatCPU" -> getHyperStatCpuModel()
+            "temperatureInfluence" -> getTIModel()
+            "temperatureInfluenceDevice" -> getTIDeviceModel()
             DomainName.ccuConfiguration -> getCCUBaseConfigurationModel()
             "smartnodeOAO" -> getSmartNodeOAOModelDef()
             "smartnodeSSE" -> getSmartNodeSSEModel()
             "helionodeSSE" -> getHelioNodeSSEModel()
+            "hyperstatHPU" -> getHyperStatHpuModel()
+            "hyperstat2pfcu" -> getHyperStatPipe2Model()
             "vavStagedRtu" -> getVavStageRtuModelDef()
             "smartnodePID" -> getSmartNodePidModel()
             "helionodePID" -> getHelioNodePidModel()

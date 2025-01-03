@@ -122,6 +122,8 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                             previewWidth = 195,
                             expandedWidth = 195,
                             onSelected = { selectedIndex ->
+                                viewModel.viewState.thermistor1InputType = 0.0
+                                viewModel.viewState.nativeSensorType = 0.0
                                 viewModel.viewState.analog1InputType = selectedIndex.toDouble()
                                 if (selectedIndex > 0) {
                                     // Update the target value and error range based on the selected input type
@@ -129,9 +131,16 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                                     viewModel.pidProportionalRange = viewModel.returnErrorValueAi1(selectedIndex)
                                     // Reset the target and proportional range values
                                     viewModel.viewState.pidTargetValue = viewModel.pidTargetValue[0].toDouble()
-                                    viewModel.viewState.pidProportionalRange = viewModel.pidProportionalRange[0].toDouble()
+                                    viewModel.viewState.pidProportionalRange = viewModel.pidProportionalRange[1].toDouble()
                                     viewModel.viewState.thermistor1InputType = 0.0
                                     viewModel.viewState.nativeSensorType = 0.0
+                                }
+                                // We are maintaining this default selection to keep it consistent with how it was in non-DM.
+                                if (selectedIndex == 1 || selectedIndex == 5 || selectedIndex == 7
+                                    || selectedIndex == 8 || selectedIndex == 9
+                                    || selectedIndex == 10 || selectedIndex == 11
+                                ) {
+                                    viewModel.viewState.pidTargetValue = 5.0
                                 }
                             },
                             defaultSelection = viewModel.viewState.analog1InputType.toInt(),
@@ -155,7 +164,20 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                             defaultSelection = viewModel.pidTargetValue.indexOf(
                                 viewModel.viewState.pidTargetValue.toDouble().toString()
                             ).let { index ->
-                                if (index >= 0) index else 0 // Fallback to 0 when 0 is present instead of 0.0
+                                when {
+                                    viewModel.isDefault -> {
+                                        try {
+                                            val targetIndex = viewModel.pidTargetValue.indexOf("5.0")
+                                            viewModel.isDefault = false
+                                            targetIndex
+                                        } catch (e: Exception) {
+                                            0
+                                        }
+                                    }
+                                    index >= 0 -> index
+                                    else -> 0 // Fallback to 0 when 0 is present instead of 0.0
+                                }
+
                             },
                             spacerLimit = 180,
                             heightValue = 211
@@ -175,6 +197,8 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                             previewWidth = 195,
                             expandedWidth = 195,
                             onSelected = { selectedIndex ->
+                                viewModel.viewState.analog1InputType = 0.0
+                                viewModel.viewState.nativeSensorType = 0.0
                                 viewModel.viewState.thermistor1InputType = selectedIndex.toDouble()
                                 if (selectedIndex > 0) {
                                     // Update the target value and error range based on the selected input type
@@ -182,9 +206,13 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                                     viewModel.pidProportionalRange = viewModel.returnErrorValueTH1(selectedIndex)
                                     // Reset the target and proportional range values
                                     viewModel.viewState.pidTargetValue = viewModel.pidTargetValue[0].toDouble()
-                                    viewModel.viewState.pidProportionalRange = viewModel.pidProportionalRange[0].toDouble()
+                                    viewModel.viewState.pidProportionalRange = viewModel.pidProportionalRange[1].toDouble()
                                     viewModel.viewState.analog1InputType = 0.0
                                     viewModel.viewState.nativeSensorType = 0.0
+                                }
+                                // We are maintaining this default selection to keep it consistent with how it was in non-DM.
+                                if (selectedIndex == 1 || selectedIndex == 2) {
+                                    viewModel.viewState.pidTargetValue = 5.0
                                 }
                             },
                             defaultSelection = viewModel.viewState.thermistor1InputType.toInt(),
@@ -208,7 +236,7 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                             defaultSelection = viewModel.pidProportionalRange.indexOf(
                                 viewModel.viewState.pidProportionalRange.toDouble().toString()
                             ).let { index ->
-                                if (index >= 0) index else 0 // Fallback to 0 when 0 is present instead of 0.0
+                                if (index >= 0) index else 1 // Fallback to value 2 when 0 is present instead of 0.0
                             },
                             spacerLimit = 80,
                             heightValue = 211
@@ -228,6 +256,8 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                             previewWidth = 195,
                             expandedWidth = 195,
                             onSelected = { selectedIndex ->
+                                viewModel.viewState.analog1InputType = 0.0
+                                viewModel.viewState.thermistor1InputType = 0.0
                                 viewModel.viewState.nativeSensorType = selectedIndex.toDouble()
                                 if (selectedIndex > 0) {
                                     // Update the target value and error range based on the selected input type
@@ -235,9 +265,15 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                                     viewModel.pidProportionalRange = viewModel.returnErrorValueNativeSensor(selectedIndex)
                                     // Reset the target and proportional range values
                                     viewModel.viewState.pidTargetValue = viewModel.pidTargetValue[0].toDouble()
-                                    viewModel.viewState.pidProportionalRange = viewModel.pidProportionalRange[0].toDouble()
+                                    viewModel.viewState.pidProportionalRange = viewModel.pidProportionalRange[1].toDouble()
                                     viewModel.viewState.analog1InputType = 0.0
                                     viewModel.viewState.thermistor1InputType = 0.0
+                                }
+                                // We are maintaining this default selection to keep it consistent with how it was in non-DM.
+                                if (selectedIndex != 0) {
+                                    viewModel.viewState.pidTargetValue =
+                                        viewModel.pidTargetValue.get(viewModel.pidTargetValue.size / 2)
+                                            .toDouble()
                                 }
                             },
                             defaultSelection = viewModel.viewState.nativeSensorType.toInt(),
@@ -302,9 +338,10 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                         previewWidth = 130,
                         expandedWidth = 150,
                         onSelected = { selectedIndex ->
-                            viewModel.viewState.setpointSensorOffset = selectedIndex.toDouble()
+                            viewModel.viewState.setpointSensorOffset =
+                                viewModel.setpointSensorOffset[selectedIndex].toDouble()
                         },
-                        defaultSelection = viewModel.viewState.setpointSensorOffset.toInt(),
+                        defaultSelection = viewModel.setpointSensorOffset.indexOf(viewModel.viewState.setpointSensorOffset.toString()),
                         spacerLimit = 50,
                         heightValue = 211
                     )

@@ -33,15 +33,32 @@ fun updateConfigPoint(msgObject: JsonObject, configPoint: Point) {
     val model = getModelForDomainName(equip.domainName) as SeventyFiveFProfileDirective
     val value = msgObject[HayStackConstants.WRITABLE_ARRAY_VAL].asString.toInt()
 
-    when(configPoint.domainName) {
-        DomainName.analog1InputType -> config.analog1InputType.currentVal = value.toDouble()
-        DomainName.thermistor1InputType -> config.thermistor1InputType.currentVal = value.toDouble()
-        DomainName.nativeSensorType -> config.nativeSensorType.currentVal = value.toDouble()
+    when (configPoint.domainName) {
+        DomainName.analog1InputType -> {
+            config.analog1InputType.currentVal = value.toDouble()
+            config.thermistor1InputType.currentVal = 0.0
+            config.nativeSensorType.currentVal = 0.0
+        }
+
+        DomainName.thermistor1InputType -> {
+            config.analog1InputType.currentVal = 0.0
+            config.thermistor1InputType.currentVal = value.toDouble()
+            config.nativeSensorType.currentVal = 0.0
+        }
+
+        DomainName.nativeSensorType -> {
+            config.analog1InputType.currentVal = 0.0
+            config.thermistor1InputType.currentVal = 0.0
+            config.nativeSensorType.currentVal = value.toDouble()
+        }
+
         DomainName.analog2InputType -> config.analog2InputType.currentVal = value.toDouble()
         DomainName.useAnalogIn2ForSetpoint -> config.useAnalogIn2ForSetpoint.enabled = value > 0
         DomainName.relay1OutputEnable -> config.relay1OutputEnable.enabled = value > 0
         DomainName.relay2OutputEnable -> config.relay2OutputEnable.enabled = value > 0
-        else -> {CcuLog.e(L.TAG_CCU_PUBNUB, "Not a dependent/associate point : $configPoint")}
+        else -> {
+            CcuLog.e(L.TAG_CCU_PUBNUB, "Not a dependent/associate point : $configPoint")
+        }
     }
     CcuLog.i(L.TAG_CCU_PUBNUB, "updatePIConfigPoint value : $value \n CurrentConfig : $config")
     addBaseProfileConfig(DomainName.analog1InputType, config, model)

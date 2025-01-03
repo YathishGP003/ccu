@@ -31,14 +31,16 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.BLE.FragmentDeviceScan;
-import a75f.io.renatus.hyperstat.ui.HyperStatFragment;
 import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
 import a75f.io.renatus.profiles.acb.AcbProfileConfigFragment;
 import a75f.io.renatus.profiles.hss.cpu.HyperStatSplitCpuFragment;
 import a75f.io.renatus.profiles.dab.DabProfileConfigFragment;
+import a75f.io.renatus.profiles.ti.TIFragment;
 import a75f.io.renatus.profiles.oao.OAOProfileFragment;
 import a75f.io.renatus.profiles.sse.SseProfileConfigFragment;
 import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatV2CpuFragment;
+import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatV2HpuFragment;
+import a75f.io.renatus.profiles.hyperstatv2.ui.HyperStatV2Pipe2Fragment;
 import a75f.io.renatus.profiles.plc.PlcProfileConfigFragment;
 import a75f.io.renatus.profiles.vav.BypassConfigFragment;
 import a75f.io.renatus.profiles.vav.VavProfileConfigFragment;
@@ -334,7 +336,8 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
         {
             //CCU As a Zone -- Temp influence profile - No pairing needed
            // if (L.isSimulation()) {
-                showDialogFragment(FragmentTempInfConfiguration.newInstance(mNodeAddress, mRoomName, mNodeType, mFloorName), FragmentTempInfConfiguration.ID);
+            showDialogFragment(TIFragment
+                    .newInstance(mNodeAddress, mRoomName,mFloorName,mNodeType, ProfileType.TEMP_INFLUENCE), TIFragment.ID);
             /*}
             else
             {
@@ -381,13 +384,31 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
                 showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
             }
         }
-        else if (mProfileType == ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT
-                || mProfileType == ProfileType.HYPERSTAT_TWO_PIPE_FCU
-                || mProfileType == ProfileType.HYPERSTAT_HEAT_PUMP_UNIT){
+        else if (mProfileType == ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT) {
+            if (L.isSimulation()) {
+                showDialogFragment(HyperStatV2CpuFragment.newInstance(mNodeAddress, mRoomName, mFloorName,mNodeType, mProfileType),
+                        HyperStatV2CpuFragment.ID);
+            }
+            else {
+                FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan.getInstance(mNodeAddress, mRoomName, mFloorName, mNodeType, mProfileType);
+                showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
+            }
+        }
+        else if (mProfileType == ProfileType.HYPERSTAT_HEAT_PUMP_UNIT){
             if (L.isSimulation()) {
                 showDialogFragment(
-                        HyperStatFragment.Companion.newInstance(mNodeAddress, mRoomName, mFloorName,mNodeType, mProfileType),
-                        HyperStatFragment.ID);
+                        HyperStatV2HpuFragment.Companion.newInstance(mNodeAddress, mRoomName, mFloorName,mNodeType, mProfileType),
+                        HyperStatV2HpuFragment.ID);
+
+
+            } else {
+                FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan.getInstance(mNodeAddress, mRoomName, mFloorName, mNodeType, mProfileType);
+                showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);
+            }
+        }
+        else if (mProfileType == ProfileType.HYPERSTAT_TWO_PIPE_FCU){
+            if (L.isSimulation()) {
+                showDialogFragment(HyperStatV2Pipe2Fragment.newInstance(mNodeAddress, mRoomName, mFloorName, mNodeType,mProfileType), HyperStatV2Pipe2Fragment.ID);
             } else {
                 FragmentDeviceScan fragmentDeviceScan = FragmentDeviceScan.getInstance(mNodeAddress, mRoomName, mFloorName, mNodeType, mProfileType);
                 showDialogFragment(fragmentDeviceScan, FragmentDeviceScan.ID);

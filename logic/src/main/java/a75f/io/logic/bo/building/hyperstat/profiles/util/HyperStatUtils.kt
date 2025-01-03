@@ -1,5 +1,6 @@
 package a75f.io.logic.bo.building.hyperstat.profiles.util
 
+import a75f.io.api.haystack.CCUHsApi
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.devices.HyperStatDevice
@@ -7,6 +8,7 @@ import a75f.io.domain.equips.hyperstat.CpuV2Equip
 import a75f.io.domain.equips.hyperstat.HpuV2Equip
 import a75f.io.domain.equips.hyperstat.HyperStatEquip
 import a75f.io.domain.equips.hyperstat.MonitoringEquip
+import a75f.io.domain.equips.hyperstat.Pipe2V2Equip
 import a75f.io.domain.util.ModelLoader
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
@@ -25,11 +27,15 @@ import a75f.io.logic.bo.building.hyperstat.v2.configs.CpuConfiguration
 import a75f.io.logic.bo.building.hyperstat.v2.configs.HpuConfiguration
 import a75f.io.logic.bo.building.hyperstat.v2.configs.HsCpuAnalogOutMapping
 import a75f.io.logic.bo.building.hyperstat.v2.configs.HsCpuRelayMapping
+import a75f.io.logic.bo.building.hyperstat.v2.configs.HsHpuAnalogOutMapping
+import a75f.io.logic.bo.building.hyperstat.v2.configs.HsHpuRelayMapping
+import a75f.io.logic.bo.building.hyperstat.v2.configs.HsPipe2AnalogOutMapping
+import a75f.io.logic.bo.building.hyperstat.v2.configs.HsPipe2RelayMapping
 import a75f.io.logic.bo.building.hyperstat.v2.configs.HyperStatConfiguration
 import a75f.io.logic.bo.building.hyperstat.v2.configs.MonitoringConfiguration
 import a75f.io.logic.bo.building.hyperstat.v2.configs.Pipe2Configuration
-import a75f.io.logic.bo.building.system.logIt
 import a75f.io.logic.tuners.TunerUtil
+import io.seventyfivef.domainmodeler.client.ModelDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import kotlin.math.roundToInt
 
@@ -37,7 +43,6 @@ import kotlin.math.roundToInt
  * Created by Manjunath K on 25-10-2024.
  */
 
-// TODO check bellow function is required or not
 fun getPercentFromVolt(voltage: Int, min: Int = 0, max: Int = 10) = (((voltage - min).toDouble() / (max - min)) * 100).roundToInt()
 
 fun fetchUserIntents(equip: HyperStatEquip): UserIntents {
@@ -70,16 +75,32 @@ fun fetchHyperStatTuners(equip: HyperStatEquip): HyperStatProfileTuners {
         is CpuV2Equip -> {
             hsTuners.minFanRuntimePostConditioning = TunerUtil.readTunerValByQuery("domainName ==\"${DomainName.minFanRuntimePostConditioning}\"", equip.equipRef).toInt()
         }
-    }
 
+        is HpuV2Equip -> {
+            hsTuners.auxHeating1Activate = TunerUtil.readTunerValByQuery("domainName ==\"${DomainName.auxHeating1Activate}\"", equip.equipRef)
+            hsTuners.auxHeating2Activate = TunerUtil.readTunerValByQuery("domainName ==\"${DomainName.auxHeating2Activate}\"", equip.equipRef)
+        }
+
+        is Pipe2V2Equip -> {
+            hsTuners.auxHeating1Activate = TunerUtil.readTunerValByQuery("domainName ==\"${DomainName.auxHeating1Activate}\"", equip.equipRef)
+            hsTuners.auxHeating2Activate = TunerUtil.readTunerValByQuery("domainName ==\"${DomainName.auxHeating2Activate}\"", equip.equipRef)
+            hsTuners.heatingThreshold = TunerUtil.readTunerValByQuery("domainName ==\"${DomainName.pipe2FancoilHeatingThreshold}\"", equip.equipRef)
+            hsTuners.coolingThreshold = TunerUtil.readTunerValByQuery("domainName ==\"${DomainName.pipe2FancoilCoolingThreshold}\"", equip.equipRef)
+            hsTuners.waterValveSamplingOnTime = TunerUtil.readTunerValByQuery("domainName ==\"${DomainName.waterValveSamplingOnTime}\"", equip.equipRef).toInt()
+            hsTuners.waterValveSamplingWaitTime = TunerUtil.readTunerValByQuery("domainName ==\"${DomainName.waterValveSamplingWaitTime}\"", equip.equipRef).toInt()
+            hsTuners.waterValveSamplingDuringLoopDeadbandOnTime = TunerUtil.readTunerValByQuery("domainName ==\"${DomainName.waterValveSamplingLoopDeadbandOnTime}\"", equip.equipRef).toInt()
+            hsTuners.waterValveSamplingDuringLoopDeadbandWaitTime =  TunerUtil.readTunerValByQuery("domainName ==\"${DomainName.waterValveSamplingLoopDeadbandWaitTime}\"", equip.equipRef).toInt()
+        }
+
+    }
 
     return hsTuners
 }
 
-fun getLogicalPointList(equip: HyperStatEquip, config: HyperStatConfiguration): HashMap<Any, String> {
+fun getLogicalPointList(equip: HyperStatEquip, config: HyperStatConfiguration): HashMap<Port, String> {
 
     val device = Domain.getEquipDevices()[equip.equipRef] as HyperStatDevice
-    val logicalPoints: HashMap<Any, String> = HashMap()
+    val logicalPoints = HashMap<Port, String>()
 
     if (device.relay1.readPoint().pointRef != null && device.relay1.readPoint().pointRef.isNotEmpty()) {
         if (config.relay1Enabled.enabled) logicalPoints[Port.RELAY_ONE] = device.relay1.readPoint().pointRef
@@ -109,7 +130,7 @@ fun getLogicalPointList(equip: HyperStatEquip, config: HyperStatConfiguration): 
         if (config.analogOut3Enabled.enabled) logicalPoints[Port.ANALOG_OUT_THREE] = device.analog3Out.readPoint().pointRef
     }
 
-    CcuLog.d(L.TAG_CCU_HS, "Logical Points: for ${equip.equipRef} $logicalPoints")
+    CcuLog.d(L.TAG_CCU_HSHST, "Logical Points: for ${equip.equipRef} $logicalPoints")
     return logicalPoints
 }
 
@@ -134,14 +155,28 @@ fun getConfiguration(equipRef: String): HyperStatConfiguration? {
                 profileType = ProfileType.HYPERSTAT_MONITORING, model = monitoringModel
             ).getActiveConfiguration()
         }
+        is Pipe2V2Equip -> {
+            val pipe2Model = ModelLoader.getHyperStatPipe2Model() as SeventyFiveFProfileDirective
+            return Pipe2Configuration(
+                    nodeAddress = equip.nodeAddress, nodeType = NodeType.HYPER_STAT.name,
+                    priority = 0,  roomRef = equip.roomRef!!, floorRef = equip.floorRef!!,
+                    profileType = ProfileType.HYPERSTAT_TWO_PIPE_FCU, model = pipe2Model
+            ).getActiveConfiguration()
+        }
+        is HpuV2Equip -> {
+            val hpuModel = ModelLoader.getHyperStatHpuModel() as SeventyFiveFProfileDirective
+            return HpuConfiguration(
+                    nodeAddress = equip.nodeAddress, nodeType = NodeType.HYPER_STAT.name,
+                    priority = 0,  roomRef = equip.roomRef!!, floorRef = equip.floorRef!!,
+                    profileType = ProfileType.HYPERSTAT_HEAT_PUMP_UNIT, model= hpuModel
+            ).getActiveConfiguration()
+        }
+
         else -> {
             return null
         }
     }
 }
-
-
-
 
 fun updateAllLoopOutput(equip: HyperStatEquip, coolingLoop: Int, heatingLoop: Int, fanLoop: Int, isHpuProfile: Boolean = false, compressorLoop: Int = 0) {
     equip.apply {
@@ -165,7 +200,6 @@ fun updateOperatingMode(currentTemp: Double, averageDesiredTemp: Double, basicSe
         else -> ZoneState.DEADBAND.ordinal
     }
     equip.operatingMode.writeHisVal(zoneOperatingMode.toDouble())
-    logIt("averageDesiredTemp $averageDesiredTemp zoneOperatingMode ${ZoneState.values()[zoneOperatingMode]}")
 }
 
 fun getActualConditioningMode(config: HyperStatConfiguration, selectedConditioningMode: Int): Int {
@@ -196,8 +230,14 @@ fun getPossibleConditionMode(config: HyperStatConfiguration): PossibleConditioni
             cooling = config.isCoolingAvailable()
             heating = config.isHeatingAvailable()
         }
-        is Pipe2Configuration -> { }
-        is HpuConfiguration -> { }
+
+        is Pipe2Configuration -> {
+            return PossibleConditioningMode.BOTH
+        }
+
+        is HpuConfiguration -> {
+            return PossibleConditioningMode.BOTH
+        }
     }
 
     return if (cooling && heating) {
@@ -212,7 +252,11 @@ fun getPossibleConditionMode(config: HyperStatConfiguration): PossibleConditioni
 }
 
 fun getPossibleFanModeSettings(fanLevel: Int): PossibleFanMode {
-    // TODO check if we can update with enums or add proper information
+    /*
+     When fan level is calculated by based on the fan stages selected
+
+    */
+
     return when (fanLevel) {
         6 -> PossibleFanMode.LOW
         7 -> PossibleFanMode.MED
@@ -234,7 +278,7 @@ fun getCpuFanLevel(config: CpuConfiguration): Int {
     )
 
     if (config.isAnyAnalogOutEnabledAssociated(association = HsCpuAnalogOutMapping.LINEAR_FAN_SPEED.ordinal)
-            || config.isAnyAnalogOutEnabledAssociated(association = HsCpuAnalogOutMapping.LINEAR_FAN_SPEED.ordinal)) {
+            || config.isAnyAnalogOutEnabledAssociated(association = HsCpuAnalogOutMapping.STAGED_FAN_SPEED.ordinal)) {
         return 21 // All options are enabled due to analog fan speed
     }
 
@@ -257,6 +301,71 @@ fun getCpuFanLevel(config: CpuConfiguration): Int {
     return fanLevel
 }
 
+fun getHpuFanLevel(config: HpuConfiguration): Int {
+    var fanLevel = 0
+    var fanEnabledStages: Triple<Boolean, Boolean, Boolean> = Triple(
+            first = false,  //  Fan low
+            second = false, //  Fan Medium
+            third = false   //  Fan High
+    )
+
+    if (config.isAnyAnalogOutEnabledAssociated(association = HsHpuAnalogOutMapping.FAN_SPEED.ordinal)) {
+        return 21 // All options are enabled due to analog fan speed
+    }
+
+    val relays = config.getRelayEnabledAssociations()
+    for ((enabled, association) in relays) {
+        if (enabled && association == HsHpuRelayMapping.FAN_LOW_SPEED.ordinal) {
+            fanEnabledStages = fanEnabledStages.copy(first = true)
+        }
+        if (enabled && association == HsHpuRelayMapping.FAN_MEDIUM_SPEED.ordinal) {
+            fanEnabledStages = fanEnabledStages.copy(second = true)
+        }
+        if (enabled && association == HsHpuRelayMapping.FAN_HIGH_SPEED.ordinal) {
+            fanEnabledStages = fanEnabledStages.copy(third = true)
+        }
+    }
+
+    if (fanEnabledStages.first) fanLevel += 6
+    if (fanEnabledStages.second) fanLevel += 7
+    if (fanEnabledStages.third) fanLevel += 8
+    return fanLevel
+}
+
+fun getHyperStatDevice(nodeAddress: Int): HashMap<Any, Any> {
+    return CCUHsApi.getInstance().readEntity("domainName == \"${DomainName.hyperstatDevice}\" and addr == \"$nodeAddress\"")
+}
+
+fun getPipe2FanLevel(config: Pipe2Configuration): Int {
+    var fanLevel = 0
+    var fanEnabledStages: Triple<Boolean, Boolean, Boolean> = Triple(
+            first = false,  //  Fan low
+            second = false, //  Fan Medium
+            third = false   //  Fan High
+    )
+
+    if (config.isAnyAnalogOutEnabledAssociated(association = HsPipe2AnalogOutMapping.FAN_SPEED.ordinal)) {
+        return 21 // All options are enabled due to analog fan speed
+    }
+
+    val relays = config.getRelayEnabledAssociations()
+    for ((enabled, association) in relays) {
+        if (enabled && association == HsPipe2RelayMapping.FAN_LOW_SPEED.ordinal) {
+            fanEnabledStages = fanEnabledStages.copy(first = true)
+        }
+        if (enabled && association == HsPipe2RelayMapping.FAN_MEDIUM_SPEED.ordinal) {
+            fanEnabledStages = fanEnabledStages.copy(second = true)
+        }
+        if (enabled && association == HsPipe2RelayMapping.FAN_HIGH_SPEED.ordinal) {
+            fanEnabledStages = fanEnabledStages.copy(third = true)
+        }
+    }
+
+    if (fanEnabledStages.first) fanLevel += 6
+    if (fanEnabledStages.second) fanLevel += 7
+    if (fanEnabledStages.third) fanLevel += 8
+    return fanLevel
+}
 
 /**
  * Test cases are added to this function
@@ -282,4 +391,13 @@ fun getSelectedFanMode(fanLevel: Int, selectedFan: Int): Int {
         CcuLog.e(L.TAG_CCU_HSHST, "Error getSelectedFan function ${e.localizedMessage}", e)
     }
     return StandaloneFanStage.OFF.ordinal
+}
+
+fun getModelByEquipRef(equipRef: String): ModelDirective? {
+    return when (Domain.getDomainEquip(equipRef) as HyperStatEquip) {
+        is CpuV2Equip -> ModelLoader.getHyperStatCpuModel()
+        is HpuV2Equip -> ModelLoader.getHyperStatHpuModel()
+        is Pipe2V2Equip -> ModelLoader.getHyperStatPipe2Model()
+        else -> null
+    }
 }

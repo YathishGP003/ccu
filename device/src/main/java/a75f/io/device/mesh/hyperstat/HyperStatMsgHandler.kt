@@ -32,15 +32,17 @@ import a75f.io.logic.bo.building.hvac.StandaloneFanStage
 import a75f.io.logic.bo.building.hyperstat.common.PossibleConditioningMode
 import a75f.io.logic.bo.building.hyperstat.common.PossibleFanMode
 import a75f.io.logic.bo.building.hyperstat.profiles.cpu.HyperStatCpuProfile
-import a75f.io.logic.bo.building.hyperstat.profiles.hpu.HyperStatHpuEquipToBeDeleted
 import a75f.io.logic.bo.building.hyperstat.profiles.hpu.HyperStatHpuProfile
-import a75f.io.logic.bo.building.hyperstat.profiles.pipe2.HyperStatPipe2EquipToBeDeleted
 import a75f.io.logic.bo.building.hyperstat.profiles.pipe2.HyperStatPipe2Profile
 import a75f.io.logic.bo.building.hyperstat.profiles.util.getConfiguration
 import a75f.io.logic.bo.building.hyperstat.profiles.util.getCpuFanLevel
+import a75f.io.logic.bo.building.hyperstat.profiles.util.getHpuFanLevel
+import a75f.io.logic.bo.building.hyperstat.profiles.util.getPipe2FanLevel
 import a75f.io.logic.bo.building.hyperstat.profiles.util.getPossibleConditionMode
 import a75f.io.logic.bo.building.hyperstat.profiles.util.getPossibleFanModeSettings
 import a75f.io.logic.bo.building.hyperstat.v2.configs.CpuConfiguration
+import a75f.io.logic.bo.building.hyperstat.v2.configs.HpuConfiguration
+import a75f.io.logic.bo.building.hyperstat.v2.configs.Pipe2Configuration
 import a75f.io.logic.bo.building.sensors.SensorType
 import a75f.io.logic.bo.util.CCUUtils
 import a75f.io.logic.interfaces.ZoneDataInterface
@@ -72,7 +74,7 @@ fun handleRegularUpdate(regularUpdateMessage: HyperStatRegularUpdateMessage_t, d
     updateIlluminance(hsDevice, regularUpdateMessage.illuminance.toDouble())
     updateHumidity(hsDevice, regularUpdateMessage.humidity.toDouble())
     updateSound(hsDevice, regularUpdateMessage.illuminance.toDouble())
-    updateDynamicSensors(hsDevice, regularUpdateMessage.sensorReadingsList, equipRef, nodeAddress)
+    updateDynamicSensors(hsDevice, regularUpdateMessage.sensorReadingsList, equipRef)
 
     CcuLog.d(L.TAG_CCU_DEVICE, "HyperStat Regular Update completed")
 
@@ -116,8 +118,16 @@ private fun updateModes(equip: HyperStatEquip, message: HyperStatLocalControlsOv
             possibleFanMode = getPossibleFanModeSettings(getCpuFanLevel(configs))
             possibleMode = getPossibleConditionMode(configs)
         }
-
-        is HyperStatPipe2Profile, is HyperStatHpuProfile -> {}
+        is HyperStatHpuProfile -> {
+            val configs = getConfiguration(equip.equipRef) as HpuConfiguration
+            possibleFanMode = getPossibleFanModeSettings(getHpuFanLevel(configs))
+            possibleMode = getPossibleConditionMode(configs)
+        }
+        is HyperStatPipe2Profile-> {
+            val configs = getConfiguration(equip.equipRef) as Pipe2Configuration
+            possibleFanMode = getPossibleFanModeSettings(getPipe2FanLevel(configs))
+            possibleMode = getPossibleConditionMode(configs)
+        }
     }
     updateFanMode(possibleFanMode, message.fanSpeed, equip.equipRef)
     updateConditioningMode(possibleMode, message.conditioningMode, equip)
@@ -304,7 +314,7 @@ private fun getSensorMappedValue(point: HashMap<Any, Any>, rawValue: Double): Do
     return 0.0
 }
 
-private fun updateDynamicSensors(device: HyperStatDevice, sensorReadings: List<SensorReadingPb_t>, equipRef: String, nodeAddress: Int) {
+private fun updateDynamicSensors(device: HyperStatDevice, sensorReadings: List<SensorReadingPb_t>, equipRef: String) {
     sensorReadings.forEach { readings ->
         try {
             val sensorType = SensorType.values()[readings.sensorType]
@@ -436,11 +446,11 @@ fun runProfileAlgo(nodeAddress: Short) {
         }
 
         is HyperStatHpuProfile -> {
-            profile.processHyperStatHpuProfile(profile.getHyperStatEquip(nodeAddress) as HyperStatHpuEquipToBeDeleted)
+            profile.processHyperStatHpuProfile(profile.getProfileDomainEquip(nodeAddress.toInt()))
         }
 
         is HyperStatPipe2Profile -> {
-            profile.processHyperStatPipeProfile(profile.getHyperStatEquip(nodeAddress) as HyperStatPipe2EquipToBeDeleted)
+            profile.processHyperStatPipeProfile(profile.getProfileDomainEquip(nodeAddress.toInt()))
         }
     }
 }

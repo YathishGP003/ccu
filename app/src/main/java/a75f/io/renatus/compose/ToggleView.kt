@@ -29,11 +29,10 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun ToggleButton(
     defaultSelection : Boolean,
-    modifier: Modifier = Modifier.wrapContentSize().padding(end = 30.dp),
     onEnabled: (Boolean) -> Unit,
 ) {
     Box(
-        modifier = modifier,
+        modifier = Modifier.wrapContentSize().padding(end = 30.dp),
         contentAlignment = Alignment.Center
     ) {
         Switch(
@@ -57,7 +56,7 @@ fun ToggleButton(
                 checkedTrackColor = primaryColor,
                 uncheckedBorderColor = greyColor,
                 checkedBorderColor = primaryColor
-            )
+            ),
         )
     }
 }
@@ -98,6 +97,46 @@ fun ToggleButtonStateful(
                 uncheckedBorderColor = greyColor,
                 checkedBorderColor = primaryColor
             )
+        )
+    }
+}
+
+
+@Composable
+fun ToggleButtonStateful(
+        defaultSelection : Boolean,
+        onEnabled: (Boolean) -> Unit,
+        isDisabled :Boolean = false,
+) {
+    Box(
+            modifier = Modifier.wrapContentSize(),
+            contentAlignment = Alignment.Center
+    ) {
+        var checked by remember { mutableStateOf(defaultSelection) }
+        Switch(
+                checked = checked,
+                onCheckedChange = {
+                    checked = it
+                    onEnabled(it)
+                },
+                thumbContent = {
+                    Icon(
+                            imageVector = if (checked) Icons.Filled.Check else Icons.Filled.Close,
+                            contentDescription = null,
+                            modifier = Modifier.size(SwitchDefaults.IconSize).padding(0.dp)
+                    )
+                },
+                colors = SwitchDefaults.colors(
+                        checkedThumbColor = Color.White,
+                        uncheckedThumbColor = Color.White,
+                        uncheckedIconColor = greyColor,
+                        uncheckedTrackColor = greyColor,
+                        checkedIconColor = primaryColor,
+                        checkedTrackColor = primaryColor,
+                        uncheckedBorderColor = greyColor,
+                        checkedBorderColor = primaryColor
+                ),
+                enabled = isDisabled
         )
     }
 }

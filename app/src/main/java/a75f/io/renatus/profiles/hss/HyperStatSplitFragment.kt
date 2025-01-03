@@ -653,7 +653,6 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                 .wrapContentWidth()) {
                 ToggleButton(
                     defaultSelection = enabled,
-                    modifier = Modifier.wrapContentSize()
                 ) {
                     if (!it || viewModel.viewState.value.enableOutsideAirOptimization || !(
                             (analogOutName.contains("1") && viewModel.viewState.value.analogOut1Association == HyperstatSplitReconfigurationHandler.Companion.CpuControlType.OAO_DAMPER.ordinal) ||

@@ -1,12 +1,18 @@
 package a75f.io.logic.bo.building.hyperstat.v2.configs
 
+import a75f.io.api.haystack.CCUHsApi
+import a75f.io.api.haystack.RawPoint
+import a75f.io.api.haystack.Tags
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.config.AssociationConfig
 import a75f.io.domain.config.EnableConfig
 import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.config.ValueConfig
 import a75f.io.domain.equips.hyperstat.HyperStatEquip
+import a75f.io.domain.equips.hyperstat.Pipe2V2Equip
 import a75f.io.logic.bo.building.definitions.ProfileType
+import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType
+import a75f.io.logic.bo.building.hyperstat.profiles.util.getHyperStatDevice
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 
 /**
@@ -184,7 +190,9 @@ abstract class HyperStatConfiguration(
         thermistor2Enabled.enabled = equip.thermistor2InputEnable.readDefaultVal() == 1.0
 
         if (thermistor1Enabled.enabled) thermistor1Association.associationVal = equip.thermistor1InputAssociation.readDefaultVal().toInt()
-        if (thermistor2Enabled.enabled) thermistor2Association.associationVal = equip.thermistor2InputAssociation.readDefaultVal().toInt()
+        if (equip !is Pipe2V2Equip) {
+            if (thermistor2Enabled.enabled) thermistor2Association.associationVal = equip.thermistor2InputAssociation.readDefaultVal().toInt()
+        }
     }
 
     fun getActiveConfiguration(equip: HyperStatEquip): HyperStatConfiguration {
@@ -320,6 +328,48 @@ abstract class HyperStatConfiguration(
 
     private fun isEnabledAndAssociated(enabled: Boolean, association: Int, mapping: Int) = enabled && association == mapping
 
+    abstract fun getRelayMap(): Map<String, Boolean>
+
+    abstract fun getAnalogMap(): Map<String, Pair<Boolean, String>>
+
+    fun setPortConfiguration(nodeAddress: Int, relays: Map<String, Boolean>, analogOuts: Map<String, Pair<Boolean, String>>) {
+
+        val hayStack = CCUHsApi.getInstance()
+        val device = getHyperStatDevice(nodeAddress)
+        val deviceRef = device[Tags.ID].toString()
+
+        fun getPort(portName: String): RawPoint.Builder? {
+            val port = hayStack.readHDict("point and deviceRef == \"$deviceRef\" and domainName == \"$portName\"")
+            if (port.isEmpty) return null
+            return RawPoint.Builder().setHDict(port)
+        }
+
+        fun updatePort(port: RawPoint.Builder, type: String, isWritable: Boolean) {
+            port.setType(type)
+            if (isWritable) {
+                port.addMarker(Tags.WRITABLE)
+                port.addMarker(Tags.UNUSED)
+            } else {
+                port.removeMarkerIfExists(Tags.WRITABLE)
+                port.removeMarkerIfExists(Tags.UNUSED)
+                hayStack.clearAllAvailableLevelsInPoint(port.build().id)
+            }
+            val buildPoint = port.build()
+            hayStack.updatePoint(buildPoint, buildPoint.id)
+        }
+
+        relays.forEach { (relayName, externallyMapped) ->
+            val port = getPort(relayName)
+            if (port != null) updatePort(port, OutputRelayActuatorType.NormallyOpen.displayName, externallyMapped)
+        }
+
+        analogOuts.forEach { (analogName, config) ->
+            val port = getPort(analogName)
+            if (port != null) {
+                updatePort(port, config.second, config.first)
+            }
+        }
+    }
 }
 
 data class MinMaxConfig(val min: ValueConfig, val max: ValueConfig)

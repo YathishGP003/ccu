@@ -5,6 +5,8 @@ import org.projecthaystack.UnknownRecException;
 import java.util.Date;
 
 import a75f.io.api.haystack.Occupied;
+import a75f.io.domain.api.Domain;
+import a75f.io.domain.api.DomainName;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.schedules.Occupancy;
@@ -42,7 +44,10 @@ public class AutoForcedOccupied implements OccupancyTrigger {
     }
 
     public static boolean isAutoForceEnabled(OccupancyUtil occupancyUtil) {
-        return occupancyUtil.isConfigEnabled("auto and forced and occupied") ||
+
+        boolean isEnabled = occupancyUtil.isConfigEnabledByDomain(DomainName.autoForceOccupied);
+
+        return isEnabled || occupancyUtil.isConfigEnabled("auto and forced and occupied") ||
                 occupancyUtil.isConfigEnabled("auto and forced and occupancy");
     }
 

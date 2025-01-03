@@ -36,7 +36,8 @@ public class ZoneScheduleViewModel {
             ArrayList<Interval> zoneIntervals = schedule.getScheduledIntervals(daysArrayList);
 
             int size = zoneIntervals.size();
-            if(!daysArrayList.isEmpty() && daysArrayList.get(0).getSthh() > daysArrayList.get(0).getEthh()) {
+            if(!daysArrayList.isEmpty() && ( daysArrayList.get(0).getSthh() > daysArrayList.get(0).getEthh() ||
+                    ( daysArrayList.get(0).getSthh() == daysArrayList.get(0).getEthh() && daysArrayList.get(0).getStmm() > daysArrayList.get(0).getEtmm() ))) {
                for(int i =0; i<size; i++){
                     Interval it = zoneIntervals.get(i);
                     DateTime initialEnding = it.getStart().withTime(23,59,59, 0);

@@ -6,6 +6,7 @@ import java.util.HashMap;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Point;
+import a75f.io.domain.api.DomainName;
 
 public class CazEquipUtil {
 
@@ -33,8 +34,9 @@ public class CazEquipUtil {
     }
 
     public static boolean isPortMappedToSupplyAirTemprature(String pointRef){
-        HashMap<Object, Object> logicalPoint = CCUHsApi.getInstance().readEntity("point and id == " + pointRef);
-        return logicalPoint.containsKey("supply");
+        HashMap<Object, Object> logicalPoint = CCUHsApi.getInstance().readEntity("point " +
+                "and domainName == \"" + DomainName.dischargeAirTemperature + "\" and id == " + pointRef);
+        return logicalPoint.containsKey("discharge");
     }
 
 }

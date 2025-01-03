@@ -9,6 +9,7 @@ import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.config.ValueConfig
 import a75f.io.domain.equips.TIEquip
 import a75f.io.domain.util.ModelNames
+import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.definitions.ProfileType
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import io.seventyfivef.ph.core.Tags
@@ -88,7 +89,7 @@ open class TIConfiguration(
     // reverse configuration like physical point mapping is dynamic and logical point mapping is static.
     // So, we need to update the physical point ref manually.
     fun updatePhysicalPointRef( equipRef: String, deviceRef: String) {
-        fun updatePhysicalPointRef(logicalDomainName: String, physicalPointDomain: String) {
+        fun updatePhysicalPointRef(logicalDomainName: String, physicalPointDomain: String, portEnabled: Boolean, port: String) {
             val logicalPoint = Point(logicalDomainName, equipRef)
             if (logicalPoint.pointExists()) {
                 val physicalPoint =
@@ -96,40 +97,97 @@ open class TIConfiguration(
                 if (physicalPoint.isNotEmpty()) {
                     val rowPoint = RawPoint.Builder().setHashMap(physicalPoint as HashMap)
                     rowPoint.setPointRef(logicalPoint.id)
-                    rowPoint.setEnabled(true)
+                    rowPoint.setEnabled(portEnabled)
+                    rowPoint.setPort(port)
                     CCUHsApi.getInstance().updatePoint(rowPoint.build(), rowPoint.build().id)
                 }
             }
         }
 
         when (roomTemperatureType.currentVal.toInt()) {
-            RoomTempType.SENSOR_BUS_TEMPERATURE.ordinal -> updatePhysicalPointRef(
-                DomainName.roomTemperature,
-                DomainName.currentTemp
-            )
+            RoomTempType.SENSOR_BUS_TEMPERATURE.ordinal -> {
+                updatePhysicalPointRef(
+                    DomainName.currentTemp,
+                    DomainName.currentTemp,
+                    true,
+                    Port.SENSOR_RT.toString()
+                )
+                 updatePhysicalPointRef(
+                    DomainName.roomTemperature,
+                    DomainName.th1In,
+                     false,
+                    Port.TH1_IN.toString()
+                )
 
-            RoomTempType.TH1.ordinal -> updatePhysicalPointRef(
-                DomainName.roomTemperature,
-                DomainName.th1In
-            )
+                updatePhysicalPointRef(
+                    DomainName.roomTemperature,
+                    DomainName.th2In,
+                    false,
+                    Port.TH2_IN.toString()
+                )
+            }
 
-            RoomTempType.TH2.ordinal -> updatePhysicalPointRef(
-                DomainName.roomTemperature,
-                DomainName.th2In
-            )
+            RoomTempType.TH1.ordinal -> {
+                updatePhysicalPointRef(
+                    DomainName.currentTemp,
+                    DomainName.currentTemp,
+                    false,
+                    Port.SENSOR_RT.toString()
+                )
+                updatePhysicalPointRef(
+                    DomainName.roomTemperature,
+                    DomainName.th1In,
+                    true,
+                    Port.TH2_IN.toString()
+                )
+                updatePhysicalPointRef(
+                    DomainName.roomTemperature,
+                    DomainName.th2In,
+                    false,
+                    Port.TH2_IN.toString()
+                )
+            }
 
+            RoomTempType.TH2.ordinal -> {
+                updatePhysicalPointRef(
+                    DomainName.currentTemp,
+                    DomainName.currentTemp,
+                    false,
+                    Port.SENSOR_RT.toString()
+                )
+                updatePhysicalPointRef(
+                    DomainName.roomTemperature,
+                    DomainName.th1In,
+                    false,
+                    Port.TH1_IN.toString()
+                )
+                updatePhysicalPointRef(
+                    DomainName.roomTemperature,
+                    DomainName.th2In,
+                    true,
+                    Port.TH2_IN.toString()
+                )
+            }
             else -> {}
         }
         when (supplyAirTemperatureType.currentVal.toInt()) {
-            SupplyTempType.TH1.ordinal -> updatePhysicalPointRef(
-                DomainName.supplyAirTempType,
-                DomainName.th1In
-            )
+            SupplyTempType.TH1.ordinal -> {
+                updatePhysicalPointRef(
+                    DomainName.dischargeAirTemperature,
+                    DomainName.th1In,
+                    true,
+                    Port.TH1_IN.toString()
+                )
+            }
 
-            SupplyTempType.TH2.ordinal -> updatePhysicalPointRef(
-                DomainName.supplyAirTempType,
-                DomainName.th2In
-            )
+            SupplyTempType.TH2.ordinal -> {
+                updatePhysicalPointRef(
+                    DomainName.dischargeAirTemperature,
+                    DomainName.th2In,
+                    true,
+                    Port.TH2_IN.toString()
+                )
+            }
 
             else -> {}
         }

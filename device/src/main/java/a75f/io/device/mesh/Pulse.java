@@ -702,7 +702,7 @@ public class Pulse
 			TIEquip tiEquip = new TIEquip(device.get(Tags.EQUIPREF).toString());
 			ArrayList<HashMap<Object, Object>> phyPoints = hayStack.readAllEntities("point and physical and sensor and deviceRef == \"" + deviceRef + "\"");
 
-			double tempOffset = tiEquip.getTemperatureOffset().readPriorityVal();
+			double tempOffset = tiEquip.getTemperatureOffset().readPriorityVal() * 10;
 
 			String logicalCurTempPoint = "";
 			double th2TempVal = 0.0;

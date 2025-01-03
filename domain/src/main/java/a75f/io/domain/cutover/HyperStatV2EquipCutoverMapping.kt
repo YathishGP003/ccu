@@ -221,6 +221,7 @@ object HyperStatV2EquipCutoverMapping {
             "auxHeating2Activate" to DomainName.auxHeating2Activate,
             "coolingAirflowTemp" to DomainName.coolingAirflowTemp,
             "changeOverCooling" to DomainName.changeOverCooling,
+            "changeOverHeating" to DomainName.changeOverHeating,
             "heatingAirflowTemp" to DomainName.heatingAirflowTemp,
     )
 

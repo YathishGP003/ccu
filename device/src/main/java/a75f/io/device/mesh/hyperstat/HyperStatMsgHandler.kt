@@ -88,7 +88,7 @@ fun handleOverrideMsg(message: HyperStatLocalControlsOverrideMessage_t, nodeAddr
     updateDesiredTemp(equip, message)
     updateModes(equip, message, nodeAddress)
     runProfileAlgo(nodeAddress.toShort())
-    HyperStatMessageSender.sendControlMessage(nodeAddress, equipRef)
+    HyperStatMessageSender.sendControlMessage(nodeAddress)
     sendAcknowledge(nodeAddress)
 }
 

@@ -12,6 +12,7 @@ import a75f.io.domain.util.MODEL_DAB_STAGED_RTU
 import a75f.io.domain.util.MODEL_DAB_STAGED_VFD_RTU
 import a75f.io.domain.util.MODEL_EXTERNAL_AHU_DAB
 import a75f.io.domain.util.MODEL_EXTERNAL_AHU_VAV
+import a75f.io.domain.util.MODEL_HELIONODE_PID
 import a75f.io.domain.util.MODEL_HELIO_NODE_DAB
 import a75f.io.domain.util.MODEL_HELIO_NODE_DEVICE
 import a75f.io.domain.util.MODEL_HELIO_NODE_SSE
@@ -28,6 +29,7 @@ import a75f.io.domain.util.MODEL_HYPERSTAT_SPLIT_CPU
 import a75f.io.domain.util.MODEL_HYPERSTAT_SPLIT_DEVICE
 import a75f.io.domain.util.MODEL_OTN_DEVICE
 import a75f.io.domain.util.MODEL_OTN_TI
+import a75f.io.domain.util.MODEL_SMARTNODE_PID
 import a75f.io.domain.util.MODEL_SMART_NODE_DAB
 import a75f.io.domain.util.MODEL_SMART_NODE_DEVICE
 import a75f.io.domain.util.MODEL_SMART_NODE_SSE
@@ -103,6 +105,8 @@ fun getRequiredModels(): List<String> {
             MODEL_TI_DEVICE,
             MODEL_TI,
             MODEL_OTN_TI,
-            MODEL_OTN_DEVICE
+            MODEL_OTN_DEVICE,
+            MODEL_HELIONODE_PID,
+            MODEL_SMARTNODE_PID
     )
 }

@@ -94,6 +94,8 @@ public class DabFullyModulatingRtu extends DabSystemProfile
     DcwbAlgoHandler dcwbAlgoHandler = null;
     
     private synchronized void updateSystemPoints() {
+
+        systemEquip = (DabModulatingRtuSystemEquip) Domain.systemEquip;
         updateOutsideWeatherParams();
         updateMechanicalConditioning(CCUHsApi.getInstance());
         

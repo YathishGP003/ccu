@@ -133,6 +133,8 @@ public class VavFullyModulatingRtu extends VavSystemProfile
     }
     
     private synchronized void updateSystemPoints() {
+
+        systemEquip = (VavModulatingRtuSystemEquip) Domain.systemEquip;
         updateOutsideWeatherParams();
         updateMechanicalConditioning(CCUHsApi.getInstance());
         

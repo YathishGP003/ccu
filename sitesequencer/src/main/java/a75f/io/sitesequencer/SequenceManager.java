@@ -106,6 +106,12 @@ public class SequenceManager
         repo.fetchSequencerDefssIfEmpty();
     }
 
+    public void fetchPredefinedSequencesForCleanUp() {
+        CcuLog.d(SequencerParser.TAG_CCU_SITE_SEQUENCER, "fetchPredefinedSequencesForCleanUp repoCheck()-->" + repoCheck());
+        if (! repoCheck()) return;
+        repo.fetchSequencerDefinitionsForCleanup();
+    }
+
     public void addSequencerDefinition(SiteSequencerDefinition def) {
         if (! repoCheck()) return;
         repo.addSequencerDefinition(def);

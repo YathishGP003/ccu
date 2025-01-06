@@ -78,6 +78,36 @@ class SiteSequencerRepository(
         }
     }
 
+    public fun fetchSequencerDefinitionsForCleanup() {
+        CcuLog.d(
+            SequencerParser.TAG_CCU_SITE_SEQUENCER,
+            "fetchSequencerDefinitionsForCleanup !haystack.siteSynced()-->" + !haystack.siteSynced() + " !haystack.authorised-->" + !haystack.authorised
+        )
+        if (!haystack.siteSynced() || !haystack.authorised) {
+            return
+        }
+        val siteId = haystack.siteIdRef.toVal()
+        CcuLog.d(
+            SequencerParser.TAG_CCU_SITE_SEQUENCER,
+            "fetchSequencerDefinitionsForCleanup siteId-->$siteId"
+        )
+
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                // Switch to the IO context for the network call
+                val response = siteSequencerService.getSiteDefinitions(siteId)
+                handleRetrievedDefsSequencesForCleanup(haystack.context, response)
+            } catch (e: Exception) {
+                // Log and handle any errors that occur during the network request
+                CcuLog.e(
+                    SequencerParser.TAG_CCU_SITE_SEQUENCER,
+                    "##Error fetching site definitions can not do cleanup, check network connection and try again later",
+                    e
+                )
+            }
+        }
+    }
+
     fun fetchSequencerDefssIfEmpty() {
         CcuLog.d(
             SequencerParser.TAG_CCU_SITE_SEQUENCER,
@@ -120,6 +150,32 @@ class SiteSequencerRepository(
             _sequencerDefsMap.putAll(retrievedSeqDefs.associateBy { it.seqId })
 
             //log
+            CcuLog.d(
+                SequencerParser.TAG_CCU_SITE_SEQUENCER,
+                "Fetched ${_sequencerDefsMap.size} Predefined seq defs"
+            )
+            scheduleSequencerJobs("network fetched definitions")
+            saveDefs()
+        }
+    }
+
+    private fun handleRetrievedDefsSequencesForCleanup(
+        context: Context,
+        retrievedSeqDefs: List<SiteSequencerDefinition>
+    ) {
+        dailyCleanUp(retrievedSeqDefs)
+        CcuLog.d(
+            SequencerParser.TAG_CCU_SITE_SEQUENCER,
+            "handleRetrievedDefsSequencesForCleanup ## retrievedSeqDefs.size-->" + retrievedSeqDefs.size
+        )
+        synchronized(_sequencerDefsMap) {
+            CcuLog.d(
+                SequencerParser.TAG_CCU_SITE_SEQUENCER,
+                "handleRetrievedDefsSequencesForCleanup ## 1 _sequencerDefsMap.size-->" + _sequencerDefsMap.size
+            )
+            _sequencerDefsMap.clear()
+            _sequencerDefsMap.putAll(retrievedSeqDefs.associateBy { it.seqId })
+
             CcuLog.d(
                 SequencerParser.TAG_CCU_SITE_SEQUENCER,
                 "Fetched ${_sequencerDefsMap.size} Predefined seq defs"
@@ -186,6 +242,46 @@ class SiteSequencerRepository(
                     "seq_" + CCUHsApi.getInstance().ccuId + "_" + oldSiteSequencerDefinition.seqId + ".json"
                 SequencerLogUtil.deleteJsonFile(CCUHsApi.getInstance().context, fileName)
             }
+        }
+    }
+
+    private fun dailyCleanUp(retrievedSequencerDefs: List<SiteSequencerDefinition>) {
+        CcuLog.d(
+            SequencerParser.TAG_CCU_SITE_SEQUENCER,
+            "doing daily cleanUp"
+        )
+
+        // Convert the data store list to a mutable map with seqId as the key
+        val siteSequencerMap =
+            dataStore.getSiteSequencerDefinitions().associateBy { it.seqId }.toMutableMap()
+
+        siteSequencerMap.values.forEach { oldSiteSequencerDefinition ->
+            val matchingNewDefinition = retrievedSequencerDefs.find { newSiteSequencerDefinition ->
+                newSiteSequencerDefinition.seqId == oldSiteSequencerDefinition.seqId
+            }
+
+            if (matchingNewDefinition != null) {
+                if (matchingNewDefinition.modifiedBy.dateTime != oldSiteSequencerDefinition.modifiedBy.dateTime) {
+                    // seq got updated
+                    CcuLog.d(
+                        SequencerParser.TAG_CCU_SITE_SEQUENCER,
+                        "doing daily cleanUp modified time is different remove alerts"
+                    )
+                    fixAlerts(oldSiteSequencerDefinition)
+                }
+            } else {
+                // seq got deleted
+                // remove log file
+                CcuLog.d(
+                    SequencerParser.TAG_CCU_SITE_SEQUENCER,
+                    "doing daily cleanUp seq got removed remove alerts"
+                )
+                fixAlerts(oldSiteSequencerDefinition)
+                val fileName =
+                    "seq_" + CCUHsApi.getInstance().ccuId + "_" + oldSiteSequencerDefinition.seqId + ".json"
+                SequencerLogUtil.deleteJsonFile(CCUHsApi.getInstance().context, fileName)
+            }
+            SequencerSchedulerUtil.cancelIntentsForSeqId(haystack.context, oldSiteSequencerDefinition.seqId)
         }
     }
 

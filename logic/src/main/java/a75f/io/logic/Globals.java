@@ -253,6 +253,7 @@ public class Globals {
         AlertManager.getInstance(mApplicationContext, renatusServicesUrls.getAlertsUrl()).initiateAlertOperations(getScheduledThreadPool());
         SequenceManager.getInstance(mApplicationContext, renatusServicesUrls.getSequencerUrl())
                 .fetchPredefinedSequencesIfEmpty();
+        SequencerSchedulerUtil.Companion.scheduleDailyCleanupTask(mApplicationContext);
 
         //set SN address band
         try {

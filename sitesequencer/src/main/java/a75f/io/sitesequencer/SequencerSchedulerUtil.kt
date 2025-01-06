@@ -9,6 +9,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.SystemClock
 import androidx.work.PeriodicWorkRequest
+import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import java.util.Calendar
@@ -23,7 +24,12 @@ class SequencerSchedulerUtil {
         private val TAG = SequencerParser.TAG_CCU_SITE_SEQUENCER
         private const val PREFS_NAME = "ccu_sequences"
         private const val KEY_HASHMAP = "job_ids_hashmap"
+        fun scheduleDailyCleanupTask(context: Context) {
+            val dailyWorkRequest = PeriodicWorkRequestBuilder<SequencerDailyCleanupWorker>(24, TimeUnit.HOURS)
+                .build()
 
+            WorkManager.getInstance(context).enqueue(dailyWorkRequest)
+        }
         fun createJob(context: Context, siteSequencerDefinition: SiteSequencerDefinition) {
             if (context != null) {
                 var isJobCreated = isAlarmScheduled(context, siteSequencerDefinition.seqId.hashCode()) //isJobExists(siteSequencerDefinition.seqId, context)

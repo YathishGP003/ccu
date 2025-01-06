@@ -40,7 +40,10 @@ fun doPlcDomainModelCutOverMigration(hayStack: CCUHsApi) {
         val deviceDis = if (isHelioNode) "${site?.displayName}-HN-${it["group"]}" else "${site?.displayName}-SN-${it["group"]}"
         val deviceBuilder = DeviceBuilder(hayStack, EntityMapper(model as SeventyFiveFProfileDirective))
         val device = hayStack.readEntity("device and addr == \"" + it["group"] + "\"")
-
+        val nativeSensorTypePoint =
+            hayStack.readEntity("native and sensor and point and config and equipRef == \"" + it["id"] + "\"");
+        val nativeSensorTypeValue =
+            hayStack.readDefaultValById(nativeSensorTypePoint["id"].toString())
         val profileConfiguration = PlcProfileConfig(
             Integer.parseInt(it["group"].toString()),
             if (isHelioNode) NodeType.HELIO_NODE.name else NodeType.SMART_NODE.name,
@@ -83,6 +86,18 @@ fun doPlcDomainModelCutOverMigration(hayStack: CCUHsApi) {
             it["siteRef"].toString(),
             it["dis"].toString(), true
         )
+
+        CcuLog.i(
+            Domain.LOG_TAG,
+            "Node: ${it["group"]}, id : ${nativeSensorTypePoint["id"].toString()}, nativeSensorTypeValue  $nativeSensorTypeValue"
+        )
+
+        // If user is selected native sensor type as VOC, then we are updating the enum value to index - 1
+        if (nativeSensorTypeValue >= 7)
+            hayStack.writeDefaultValById(
+                nativeSensorTypePoint["id"].toString(),
+                nativeSensorTypeValue - 1
+            )
 
         deviceBuilder.updateDeviceAndPoints(
             migratedConfiguration, deviceModel, it["id"].toString(), it["siteRef"].toString(),

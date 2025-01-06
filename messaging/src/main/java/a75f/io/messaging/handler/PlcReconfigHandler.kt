@@ -31,22 +31,28 @@ fun updateConfigPoint(msgObject: JsonObject, configPoint: Point) {
     val equip = profile.equip
     val config = profile.domainProfileConfiguration as PlcProfileConfig
     val model = getModelForDomainName(equip.domainName) as SeventyFiveFProfileDirective
-    val value = msgObject[HayStackConstants.WRITABLE_ARRAY_VAL].asString.toInt()
+    val value = msgObject[HayStackConstants.WRITABLE_ARRAY_VAL].asString.toDouble().toInt()
 
     when (configPoint.domainName) {
         DomainName.analog1InputType -> {
+            if(value.toDouble() == 0.0)
+                return  // ignoring this message
             config.analog1InputType.currentVal = value.toDouble()
             config.thermistor1InputType.currentVal = 0.0
             config.nativeSensorType.currentVal = 0.0
         }
 
         DomainName.thermistor1InputType -> {
+            if(value.toDouble() == 0.0)
+                return  // ignoring this message
             config.analog1InputType.currentVal = 0.0
             config.thermistor1InputType.currentVal = value.toDouble()
             config.nativeSensorType.currentVal = 0.0
         }
 
         DomainName.nativeSensorType -> {
+            if(value.toDouble() == 0.0)
+                return  // ignoring this message
             config.analog1InputType.currentVal = 0.0
             config.thermistor1InputType.currentVal = 0.0
             config.nativeSensorType.currentVal = value.toDouble()
@@ -90,9 +96,11 @@ fun updateConfigPoint(msgObject: JsonObject, configPoint: Point) {
             config, deviceModel, equip.id, equip.siteRef,
             device[Tags.DIS].toString(), model
         )
+        config.updatePortConfiguration(hayStack, config, deviceBuilder, deviceModel)
     }
 
     writePointFromJson(configPoint, msgObject, CCUHsApi.getInstance())
+    profile.init()
 }
 
 private fun profileReconfigurationRequired(configPoint: Point): Boolean {

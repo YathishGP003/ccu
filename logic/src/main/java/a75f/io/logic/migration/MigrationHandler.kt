@@ -40,6 +40,7 @@ import a75f.io.domain.cutover.getDomainNameForMonitoringProfile
 import a75f.io.domain.equips.DabEquip
 import a75f.io.domain.equips.OtnEquip
 import a75f.io.domain.equips.SseEquip
+import a75f.io.domain.equips.TIEquip
 import a75f.io.domain.equips.VavEquip
 import a75f.io.domain.equips.hyperstat.HyperStatEquip
 import a75f.io.domain.logic.DeviceBuilder
@@ -1402,6 +1403,8 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                 configuration
             )
             addDomainEquips(hayStack)
+            val tiDomainEquip = TIEquip(tiEquip["id"].toString())
+            tiDomainEquip.temperatureOffset.writeDefaultVal(tiDomainEquip.temperatureOffset.readDefaultVal() / 10)
         }
     }
 

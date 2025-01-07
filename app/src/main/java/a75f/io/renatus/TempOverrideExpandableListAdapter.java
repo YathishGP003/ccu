@@ -39,6 +39,7 @@ import a75f.io.api.haystack.Zone;
 import a75f.io.device.mesh.ThermistorUtil;
 import a75f.io.domain.VavAcbEquip;
 import a75f.io.domain.equips.DabEquip;
+import a75f.io.domain.equips.PlcEquip;
 import a75f.io.domain.equips.SseEquip;
 import a75f.io.domain.equips.VavEquip;
 import a75f.io.domain.api.Domain;
@@ -56,8 +57,6 @@ import a75f.io.logic.bo.building.dualduct.DualDuctProfileConfiguration;
 import a75f.io.logic.bo.building.hyperstatmonitoring.HyperStatMonitoringConfiguration;
 import a75f.io.logic.bo.building.hyperstatmonitoring.HyperStatMonitoringProfile;
 import a75f.io.logic.bo.building.plc.PlcProfile;
-import a75f.io.logic.bo.building.plc.PlcProfileConfig;
-import a75f.io.logic.bo.building.plc.PlcProfileConfiguration;
 import a75f.io.logic.bo.building.sensors.Sensor;
 import a75f.io.logic.bo.building.sensors.SensorManager;
 import a75f.io.logic.bo.building.ss2pfcu.TwoPipeFanCoilUnitConfiguration;
@@ -1653,7 +1652,7 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                 break;
             case "PLC":
                 PlcProfile mPlcProfile = (PlcProfile) L.getProfile(Short.parseShort(parseGroup(listTitle)));
-                PlcProfileConfiguration plcProfileConfig = (PlcProfileConfiguration) mPlcProfile.getProfileConfiguration(Short.parseShort(parseGroup(listTitle)));
+                a75f.io.domain.equips.PlcEquip plcEquip = (PlcEquip) Domain.INSTANCE.getDomainEquip(mPlcProfile.getEquip().getId());
                 HashMap equip = CCUHsApi.getInstance().read("equip and pid and group == \"" + parseGroup(listTitle) + "\"");
                 String equipRef = equip.get("id").toString();
                 if (pointname.equals("Analog1In")){
@@ -1666,7 +1665,8 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                     return analog1InArr.get(analogInSelection);
                 }
                 else if (pointname.equals("Analog2In")){
-                    if (plcProfileConfig.useAnalogIn2ForSetpoint) {
+                    assert plcEquip != null;
+                    if (plcEquip.getUseAnalogIn2ForSetpoint().readDefaultVal() > 0) {
                         ArrayList<String> analog2InArr = new ArrayList<>();
                         for (Sensor r : SensorManager.getInstance().getExternalSensorList()) {
                             if (!r.sensorName.contains("ION Meter")) {
@@ -1688,11 +1688,13 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                     return th1InArr.get(thSelection);
                 }
                 else if (pointname.equals("relay1")){
-                    if(plcProfileConfig.relay1ConfigEnabled)
+                    assert plcEquip != null;
+                    if(plcEquip.getRelay1OutputEnable().readDefaultVal() > 0)
                         return "";
                     else return "Not Enabled";
                 }else if (pointname.equals("relay2")){
-                    if(plcProfileConfig.relay2ConfigEnabled)
+                    assert plcEquip != null;
+                    if(plcEquip.getRelay2OutputEnable().readDefaultVal() > 0)
                         return "";
                     else return "Not Enabled";
                 }

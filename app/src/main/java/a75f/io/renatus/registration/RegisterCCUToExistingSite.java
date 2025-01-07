@@ -143,7 +143,7 @@ public class RegisterCCUToExistingSite extends DialogFragment {
         });
 
         mAddCCU.setOnClickListener(v -> {
-            String ccuName = mCCUNameET.getText().toString();
+            String ccuName = mCCUNameET.getText().toString().trim();
             String installerEmail = mInstallerEmailET.getText().toString();
             String managerEmail = mManagerEmailET.getText().toString();
             if (ccuName.trim().isEmpty()) {

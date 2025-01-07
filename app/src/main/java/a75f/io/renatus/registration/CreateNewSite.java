@@ -339,18 +339,18 @@ public class CreateNewSite extends Fragment {
             ) {
                 CcuLog.i("UI_PROFILING","Add Site Begin");
                 ProgressDialogUtils.showProgressDialog(getActivity(),"Adding New Site...");
-                String siteName = mSiteName.getText().toString();
-                String siteCity = mSiteCity.getText().toString();
+                String siteName = mSiteName.getText().toString().trim();
+                String siteCity = mSiteCity.getText().toString().trim();
 
-                String siteZip = mSiteZip.getText().toString();
-                String siteAddress = mStreetAdd.getText().toString();
-                String siteState = mSiteState.getText().toString();
-                String siteCountry = mSiteCountry.getText().toString();
+                String siteZip = mSiteZip.getText().toString().trim();
+                String siteAddress = mStreetAdd.getText().toString().trim();
+                String siteState = mSiteState.getText().toString().trim();
+                String siteCountry = mSiteCountry.getText().toString().trim();
 
-                String managerEmail = mSiteEmailId.getText().toString();
-                String installerEmail = mSiteInstallerEmailId.getText().toString();
-                String installerOrg = mSiteOrg.getText().toString();
-                String ccuName = mSiteCCU.getText().toString();
+                String managerEmail = mSiteEmailId.getText().toString().trim();
+                String installerEmail = mSiteInstallerEmailId.getText().toString().trim();
+                String installerOrg = mSiteOrg.getText().toString().trim();
+                String ccuName = mSiteCCU.getText().toString().trim();
                 ExecutorTask.executeAsync(
                         () -> {},
                         () -> {
@@ -412,17 +412,17 @@ public class CreateNewSite extends Fragment {
                         && !CCUUiUtil.isInvalidName(mSiteName.getText().toString()) && !CCUUiUtil.isInvalidName(mSiteCCU.getText().toString())
                 ) {
 
-                    String siteName = mSiteName.getText().toString();
-                    String siteCity = mSiteCity.getText().toString();
-                    String siteZip = mSiteZip.getText().toString();
-                    String siteAddress = mStreetAdd.getText().toString();
-                    String siteState = mSiteState.getText().toString();
-                    String siteCountry = mSiteCountry.getText().toString();
+                    String siteName = mSiteName.getText().toString().trim();
+                    String siteCity = mSiteCity.getText().toString().trim();
+                    String siteZip = mSiteZip.getText().toString().trim();
+                    String siteAddress = mStreetAdd.getText().toString().trim();
+                    String siteState = mSiteState.getText().toString().trim();
+                    String siteCountry = mSiteCountry.getText().toString().trim();
 
-                    String installerEmail = mSiteInstallerEmailId.getText().toString();
-                    String facilityManagerEmail = mSiteEmailId.getText().toString();
-                    String installerOrg = mSiteOrg.getText().toString();
-                    String ccuName = mSiteCCU.getText().toString();
+                    String installerEmail = mSiteInstallerEmailId.getText().toString().trim();
+                    String facilityManagerEmail = mSiteEmailId.getText().toString().trim();
+                    String installerOrg = mSiteOrg.getText().toString().trim();
+                    String ccuName = mSiteCCU.getText().toString().trim();
 
                     if (!site.isEmpty()) {
                         String siteId = site.get("id").toString();
@@ -523,9 +523,9 @@ public class CreateNewSite extends Fragment {
                 //We just need to delete it locally before creating a new CCU device.
                 CCUHsApi.getInstance().deleteEntityLocally(CCUHsApi.getInstance().getCcuRef().toString());
 
-                String facilityManagerEmail = mSiteEmailId.getText().toString();
-                String installerEmail = mSiteInstallerEmailId.getText().toString();
-                String ccuName = mSiteCCU.getText().toString();
+                String facilityManagerEmail = mSiteEmailId.getText().toString().trim();
+                String installerEmail = mSiteInstallerEmailId.getText().toString().trim();
+                String ccuName = mSiteCCU.getText().toString().trim();
 
                 CCUDeviceBuilder ccuDeviceBuilder = new CCUDeviceBuilder();
                 String deviceId = ccuDeviceBuilder.buildCCUDevice(
@@ -671,9 +671,9 @@ public class CreateNewSite extends Fragment {
             String ahuRef = Domain.ccuDevice.getAhuRef();
             String equipRef = Domain.ccuDevice.getEquipRef();
             String siteRef = Domain.ccuDevice.getSiteRef();
-            String managerEmail = mSiteEmailId.getText().toString();
-            String installerEmail = mSiteInstallerEmailId.getText().toString();
-            String ccuName = mSiteCCU.getText().toString();
+            String managerEmail = mSiteEmailId.getText().toString().trim();
+            String installerEmail = mSiteInstallerEmailId.getText().toString().trim();
+            String ccuName = mSiteCCU.getText().toString().trim();
             CCUDeviceBuilder ccuDeviceBuilder = new CCUDeviceBuilder();
             ccuDeviceBuilder.buildCCUDevice(equipRef, siteRef, ccuName,
                     installerEmail, managerEmail,

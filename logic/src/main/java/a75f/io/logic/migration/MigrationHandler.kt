@@ -254,6 +254,10 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             correctPointRefForRelay2SeriesFan()
             PreferenceUtil.setCorrectRelay2PointRefSeriesParallel()
         }
+        if(!PreferenceUtil.getRemoveRedundantSseDevicePoints()) {
+            removeRedundantSmartnodeHelionodePointsForSse()
+            PreferenceUtil.setRemoveRedundantSseDevicePoints()
+        }
         hayStack.scheduleSync()
     }
 
@@ -2203,5 +2207,27 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             }
         }
         CcuLog.d(L.TAG_CCU_MIGRATION_UTIL,"correctPointRefForRelay2SeriesFan execution completed")
+    }
+
+    private fun removeRedundantSmartnodeHelionodePointsForSse() {
+        CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "removeRedundantSmartnodeHelionodePointsForSse started")
+        hayStack.readAllEntities("equip and (domainName == \"${ DomainName.smartnodeSSE }\" or domainName == \"${ DomainName.helionodeSSE }\")").forEach { sseEquip ->
+            CcuLog.d(L.TAG_CCU_MIGRATION_UTIL,"sseEquip name: ${sseEquip["domainName"]}, id: ${sseEquip["id"]}, dis: ${sseEquip["dis"]}")
+            hayStack.readId("device and equipRef == \"${ sseEquip["id"]?.toString() }\"")?.let { sseDeviceId ->
+                listOf(DomainName.sensorEnergyMeter, DomainName.sensorNo2, DomainName.sensorPm10).forEach { redundantDomainName ->
+                    val redundantList = hayStack.readAllEntities("point and domainName == \"${ redundantDomainName }\" and deviceRef == \"${ sseDeviceId }\"")
+                    CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "redundantDomainName= ${redundantDomainName}, redundantList size: ${redundantList.size}")
+                    if(redundantList.size == 2) {
+                        CcuLog.d(L.TAG_CCU_MIGRATION_UTIL,"removing a random redundant point: ${redundantList[0]}")
+                        hayStack.deleteEntity(redundantList[0]["id"].toString())
+                    }
+                }
+                hayStack.readId("point and port == \"SENSOR_VOC\" and not domainName and deviceRef == \"${ sseDeviceId }\"")?.let { vocSensorId ->
+                    CcuLog.d(L.TAG_CCU_MIGRATION_UTIL,"Found non dm sensorVOC point id: ${vocSensorId}")
+                    hayStack.deleteEntity(vocSensorId)
+                }
+            }
+        }
+        CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "removeRedundantSmartnodeHelionodePointsForSse completed")
     }
 }

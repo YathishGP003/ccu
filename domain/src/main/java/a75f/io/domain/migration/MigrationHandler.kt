@@ -104,7 +104,7 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
                 /*val equip = getSystemEquipByDomainName(newModel.domainName)
                 if (equip != null) listOf(equip) else*/ emptyList()
             } else {
-                getDeviceEntityByDomain(newModel.domainName)
+                getDeviceEntityByDomain(newModel.domainName, newModel.version.toString())
             }
         CcuLog.d(Domain.LOG_TAG, "Device points to be Added: size:${entityData.tobeAdded.size}")
         entityData.tobeAdded.forEach { item ->

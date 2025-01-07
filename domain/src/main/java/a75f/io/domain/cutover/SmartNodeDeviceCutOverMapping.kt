@@ -14,7 +14,6 @@ object NodeDeviceCutOverMapping {
         "currentTemp" to "currentTemp",
         "rssi" to "rssi",
         "SENSOR_CO2" to "co2Sensor",
-        "SENSOR_VOC" to "vocSensor",
         "desiredTemp" to "desiredTemp",
         "firmwareVersion" to "firmwareVersion",
         "SENSOR_PRESSURE" to "pressureSensor",

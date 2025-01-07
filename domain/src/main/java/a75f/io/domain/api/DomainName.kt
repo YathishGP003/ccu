@@ -441,6 +441,7 @@ object DomainName {
     const val occupancySignal = "occupancySignal"
     const val sensorPm10 = "sensor_pm10"
     const val sensorEnergyMeter = "sensor_energy_meter"
+    const val sensorNo2 = "sensor_no2"
 
     const val dischargeAirTempSetpoint = "dischargeAirTempSetpoint"
     const val reheatCmd = "reheatCmd"

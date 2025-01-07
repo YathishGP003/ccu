@@ -105,8 +105,8 @@ object Domain {
         return equips
     }
 
-    fun getDeviceEntityByDomain(domainName: String) : List<Device> {
-        val deviceEntities = hayStack.readAllEntities("device and domainName == \"$domainName\"")
+    fun getDeviceEntityByDomain(domainName: String, newModelVersion: String) : List<Device> {
+        val deviceEntities = hayStack.readAllEntities("device and domainName == \"$domainName\"  and sourceModelVersion!=\"$newModelVersion\"")
         val deviceEntityList = mutableListOf<Device>()
         deviceEntities.forEach { device ->
             domainName.let {

@@ -54,6 +54,22 @@ class HyperstatSplitReconfigurationHandler {
                     if (configPoint.domainName.equals(DomainName.conditioningMode) ||
                             configPoint.domainName.equals(DomainName.fanOpMode)) {
                         DesiredTempDisplayMode.setModeTypeOnUserIntentChange(configPoint.roomRef, CCUHsApi.getInstance())
+
+                        /*
+                        - If we do reconfiguration from portal for fanMode, level 10 updated as ( val = 9)
+                        - Now if user change the fanMode from CCU, it will update the level 8 as 1
+                        - Now if we do reconfiguration from portal for fanMode, message will receive for only removing level 8 not for level 10
+                        - Because level 10 does not have change of value, so silo will never send update entity for level 10
+                        - Due to this fanMode will not update in CCU's shared preference
+                         */
+                        if (configPoint.domainName.equals(DomainName.fanOpMode)) {
+                            val configVal = HSUtil.getPriorityVal(configPoint.id).toInt() // After clearing the level, update the preference with priority value
+                            val cache = FanModeCacheStorage()
+                            if (configVal != 0 && configVal % 3 == 0) //Save only Fan occupied period mode alone, else no need.
+                                cache.saveFanModeInCache(configPoint.equipRef, configVal)
+                            else cache.removeFanModeFromCache(configPoint.equipRef)
+                        }
+
                         return
                     }
                     return

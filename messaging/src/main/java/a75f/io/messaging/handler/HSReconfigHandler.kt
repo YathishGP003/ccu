@@ -4,9 +4,11 @@ import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.HSUtil
 import a75f.io.api.haystack.HayStackConstants
 import a75f.io.api.haystack.Point
+import a75f.io.domain.api.DomainName
 import a75f.io.domain.logic.ProfileEquipBuilder
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
+import a75f.io.logic.bo.building.hyperstat.common.FanModeCacheStorage
 import a75f.io.logic.bo.building.hyperstat.profiles.util.getConfiguration
 import a75f.io.logic.bo.building.hyperstat.profiles.util.getModelByEquipRef
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
@@ -34,13 +36,38 @@ fun reconfigureHSV2(msgObject: JsonObject, configPoint: Point) {
     } else {
         updateConfiguration(configPoint.domainName, pointNewValue.asDouble, config!!)
         equipBuilder.updateEquipAndPoints(config, model , hayStack.getSite()!!.id, hyperStatEquip["dis"].toString(), true)
+        if (configPoint.domainName == DomainName.fanOpMode) {
+            updateFanMode(configPoint.equipRef, pointNewValue.asInt)
+        }
     }
     writePointFromJson(configPoint, msgObject, hayStack)
     config!!.apply { setPortConfiguration( nodeAddress, getRelayMap(), getAnalogMap()) }
     DesiredTempDisplayMode.setModeType(configPoint.roomRef, CCUHsApi.getInstance())
 
+    /*
+    - If we do reconfiguration from portal for fanMode, level 10 updated as ( val = 9)
+    - Now if user change the fanMode from CCU, it will update the level 8 as 1
+    - Now if we do reconfiguration from portal for fanMode, message will receive for only removing level 8 not for level 10
+    - Because level 10 does not have change of value, so silo will never send update entity for level 10
+    - Due to this fanMode will not update in CCU's shared preference
+     */
+    if ((pointNewValue == null || pointNewValue.asString.isEmpty()) && configPoint.domainName == DomainName.fanOpMode) {
+        updateFanMode(configPoint.equipRef, HSUtil.getPriorityVal(configPoint.id).toInt())
+    }
+
     CcuLog.i(L.TAG_CCU_PUBNUB, "updateConfigPoint for CPU Reconfiguration $config")
 
+}
+
+fun updateFanMode(equipRef: String, fanMode: Int) {
+    CcuLog.i(L.TAG_CCU_PUBNUB, "updateFanMode $fanMode")
+    val cache = FanModeCacheStorage()
+    if (fanMode != 0  && fanMode % 3 == 0) {
+        cache.saveFanModeInCache(equipRef, fanMode)
+    }
+    else {
+        cache.removeFanModeFromCache(equipRef)
+    }
 }
 
 private fun writePointFromJson(configPoint: Point, msgObject: JsonObject, hayStack: CCUHsApi) {

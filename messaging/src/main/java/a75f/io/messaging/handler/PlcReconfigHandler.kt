@@ -12,6 +12,15 @@ import a75f.io.domain.logic.ProfileEquipBuilder
 import a75f.io.domain.util.ModelLoader.getModelForDomainName
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
+import a75f.io.logic.bo.building.plc.PLCConstants.AIR_TEMP_SENSOR_100K_OHMS
+import a75f.io.logic.bo.building.plc.PLCConstants.CURRENT_TX10_AI1
+import a75f.io.logic.bo.building.plc.PLCConstants.CURRENT_TX20_AI1
+import a75f.io.logic.bo.building.plc.PLCConstants.CURRENT_TX50_AI1
+import a75f.io.logic.bo.building.plc.PLCConstants.EXTERNAL_AIR_TEMP_SENSOR
+import a75f.io.logic.bo.building.plc.PLCConstants.VOLTAGE_INPUT_AI1
+import a75f.io.logic.bo.building.plc.PLCConstants.ZONE_CO_AI1
+import a75f.io.logic.bo.building.plc.PLCConstants.ZONE_HUMIDITY_AI1
+import a75f.io.logic.bo.building.plc.PLCConstants.ZONE_NO2_AI1
 import a75f.io.logic.bo.building.plc.PlcProfile
 import a75f.io.logic.bo.building.plc.PlcProfileConfig
 import a75f.io.logic.bo.building.plc.addBaseProfileConfig
@@ -31,42 +40,68 @@ fun updateConfigPoint(msgObject: JsonObject, configPoint: Point) {
     val equip = profile.equip
     val config = profile.domainProfileConfiguration as PlcProfileConfig
     val model = getModelForDomainName(equip.domainName) as SeventyFiveFProfileDirective
-    val value = msgObject[HayStackConstants.WRITABLE_ARRAY_VAL].asString.toDouble().toInt()
-
+    val sensorTypeValue =
+        msgObject[HayStackConstants.WRITABLE_ARRAY_VAL].asString.toDouble().toInt()
     when (configPoint.domainName) {
         DomainName.analog1InputType -> {
-            if(value.toDouble() == 0.0)
+            if (sensorTypeValue.toDouble() == 0.0)
                 return  // ignoring this message
-            config.analog1InputType.currentVal = value.toDouble()
+            config.analog1InputType.currentVal = sensorTypeValue.toDouble()
             config.thermistor1InputType.currentVal = 0.0
             config.nativeSensorType.currentVal = 0.0
+            if (sensorTypeValue == VOLTAGE_INPUT_AI1 || sensorTypeValue == ZONE_HUMIDITY_AI1 || sensorTypeValue == ZONE_CO_AI1
+                || sensorTypeValue == ZONE_NO2_AI1 || sensorTypeValue == CURRENT_TX10_AI1
+                || sensorTypeValue == CURRENT_TX20_AI1 || sensorTypeValue == CURRENT_TX50_AI1
+            ) {
+                config.pidTargetValue.currentVal = 5.0
+            } else {
+                config.pidTargetValue.currentVal = 0.0
+            }
         }
 
         DomainName.thermistor1InputType -> {
-            if(value.toDouble() == 0.0)
+            if (sensorTypeValue.toDouble() == 0.0)
                 return  // ignoring this message
             config.analog1InputType.currentVal = 0.0
-            config.thermistor1InputType.currentVal = value.toDouble()
+            config.thermistor1InputType.currentVal = sensorTypeValue.toDouble()
             config.nativeSensorType.currentVal = 0.0
+            if (sensorTypeValue == EXTERNAL_AIR_TEMP_SENSOR || sensorTypeValue == AIR_TEMP_SENSOR_100K_OHMS) {
+                config.pidTargetValue.currentVal = 5.0
+            } else {
+                config.pidTargetValue.currentVal = 0.0
+            }
         }
 
         DomainName.nativeSensorType -> {
-            if(value.toDouble() == 0.0)
+            if (sensorTypeValue.toDouble() == 0.0)
                 return  // ignoring this message
             config.analog1InputType.currentVal = 0.0
             config.thermistor1InputType.currentVal = 0.0
-            config.nativeSensorType.currentVal = value.toDouble()
+            config.nativeSensorType.currentVal = sensorTypeValue.toDouble()
+
+            if (sensorTypeValue != 0) {
+                val values = config.returnTargetValueNativeSensor()
+                config.pidTargetValue.currentVal = values[values.size / 2].toDouble()
+
+            }
         }
 
-        DomainName.analog2InputType -> config.analog2InputType.currentVal = value.toDouble()
-        DomainName.useAnalogIn2ForSetpoint -> config.useAnalogIn2ForSetpoint.enabled = value > 0
-        DomainName.relay1OutputEnable -> config.relay1OutputEnable.enabled = value > 0
-        DomainName.relay2OutputEnable -> config.relay2OutputEnable.enabled = value > 0
+        DomainName.analog2InputType -> config.analog2InputType.currentVal =
+            sensorTypeValue.toDouble()
+
+        DomainName.useAnalogIn2ForSetpoint -> config.useAnalogIn2ForSetpoint.enabled =
+            sensorTypeValue > 0
+
+        DomainName.relay1OutputEnable -> config.relay1OutputEnable.enabled = sensorTypeValue > 0
+        DomainName.relay2OutputEnable -> config.relay2OutputEnable.enabled = sensorTypeValue > 0
         else -> {
             CcuLog.e(L.TAG_CCU_PUBNUB, "Not a dependent/associate point : $configPoint")
         }
     }
-    CcuLog.i(L.TAG_CCU_PUBNUB, "updatePIConfigPoint value : $value \n CurrentConfig : $config")
+    CcuLog.i(
+        L.TAG_CCU_PUBNUB,
+        "updatePIConfigPoint value : $sensorTypeValue \n CurrentConfig : $config"
+    )
     addBaseProfileConfig(DomainName.analog1InputType, config, model)
     addBaseProfileConfig(DomainName.thermistor1InputType, config, model)
     addBaseProfileConfig(DomainName.nativeSensorType, config, model)

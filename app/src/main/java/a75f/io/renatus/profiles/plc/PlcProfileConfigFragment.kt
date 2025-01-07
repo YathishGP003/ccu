@@ -180,7 +180,8 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
 
                             },
                             spacerLimit = 180,
-                            heightValue = 211
+                            heightValue = 211,
+                            isEnabled = !viewModel.viewState.useAnalogIn2ForSetpoint
                         )
                     }
                 }
@@ -329,7 +330,8 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                         },
                         defaultSelection = viewModel.viewState.analog2InputType.toInt(),
                         spacerLimit = 82,
-                        heightValue = 268
+                        heightValue = 268,
+                        isEnabled = viewModel.viewState.useAnalogIn2ForSetpoint
                     )
                     Spacer(modifier = Modifier.width(95.dp))
                     DropDownWithLabel(
@@ -343,7 +345,8 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                         },
                         defaultSelection = viewModel.setpointSensorOffset.indexOf(viewModel.viewState.setpointSensorOffset.toString()),
                         spacerLimit = 50,
-                        heightValue = 211
+                        heightValue = 211,
+                        isEnabled = viewModel.viewState.useAnalogIn2ForSetpoint
                     )
                 }
 
@@ -414,7 +417,8 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                         },
                         defaultSelection = viewModel.relay1OnThreshold.indexOf(viewModel.viewState.relay1OnThreshold.toInt().toString()),
                         spacerLimit = 200,
-                        heightValue = 268
+                        heightValue = 268,
+                        isEnabled = viewModel.viewState.relay1OutputEnable
                     )
                     Spacer(modifier = Modifier.width(85.dp))
                     DropDownWithLabel(
@@ -427,7 +431,8 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                         },
                         defaultSelection = viewModel.relay2OnThreshold.indexOf(viewModel.viewState.relay2OnThreshold.toInt().toString()),
                         spacerLimit = 120,
-                        heightValue = 211
+                        heightValue = 211,
+                        isEnabled = viewModel.viewState.relay2OutputEnable
                     )
                 }
 
@@ -445,7 +450,8 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                         },
                         defaultSelection = viewModel.relay1OffThreshold.indexOf(viewModel.viewState.relay1OffThreshold.toInt().toString()),
                         spacerLimit = 190,
-                        heightValue = 268
+                        heightValue = 268,
+                        isEnabled = viewModel.viewState.relay1OutputEnable
                     )
                     Spacer(modifier = Modifier.width(85.dp))
                     DropDownWithLabel(
@@ -458,7 +464,8 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                         },
                         defaultSelection = viewModel.relay2OffThreshold.indexOf(viewModel.viewState.relay2OffThreshold.toInt().toString()),
                         spacerLimit = 110,
-                        heightValue = 211
+                        heightValue = 211,
+                        isEnabled = viewModel.viewState.relay2OutputEnable
                     )
                 }
                 Spacer(modifier = Modifier.height(30.dp))

@@ -17,6 +17,7 @@ import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.haystack.device.DeviceUtil
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
+import io.seventyfivef.domainmodeler.common.point.MultiStateConstraint
 import io.seventyfivef.ph.core.Tags
 
 class PlcProfileConfig (nodeAddress: Int, nodeType: String, priority: Int, roomRef : String, floorRef : String, profileType : ProfileType, val model : SeventyFiveFProfileDirective)
@@ -227,4 +228,30 @@ class PlcProfileConfig (nodeAddress: Int, nodeType: String, priority: Int, roomR
         updateDevicePoint(DomainName.relay1, Port.RELAY_ONE.name, "Relay N/C", config.relay1OutputEnable.enabled)
         updateDevicePoint(DomainName.relay2, Port.RELAY_TWO.name, "Relay N/C", config.relay2OutputEnable.enabled)
     }
+
+    fun returnTargetValueNativeSensor(): ArrayList<String> {
+        val targetVal = ArrayList<String>()
+        val minMaxInc: Triple<Double, Double, Double>
+        val pointString = getDomainPoint()
+        minMaxInc = Domain.getMinMaxIncValuesByDomainName(pointString, model)
+
+        targetVal.clear()
+
+        val minVal = (100 * minMaxInc.first).toInt()
+        val maxVal = (100 * minMaxInc.second).toInt()
+        val increment = (100 * minMaxInc.third).toInt()
+
+        for (pos in minVal..maxVal step increment) {
+            targetVal.add((pos / 100.0).toString())
+        }
+
+        CcuLog.i("kumar_debug", "reconfig domainName: $pointString Target Values: $targetVal")
+        return targetVal
+    }
+
+    private fun getDomainPoint() : String{
+        return (model.points.find { it.domainName == DomainName.nativeSensorType }?.valueConstraint as MultiStateConstraint)
+            .allowedValues[nativeSensorType.currentVal.toInt()].value
+    }
+
 }

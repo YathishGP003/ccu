@@ -188,26 +188,15 @@ public class PlcProfile extends ZoneProfile {
      */
     private void handleRelayOp(double loopOp) {
 
-        if (plcEquip.getRelay1OutputEnable().readDefaultVal() > 0) {
-            if (loopOp > plcEquip.getRelay1OnThreshold().readDefaultVal()) {
-                plcEquip.getRelay1Cmd().writePointValue(1);
-            } else if (plcEquip.getRelay1Cmd().readHisVal() > 0 && loopOp < plcEquip.getRelay1OffThreshold().readDefaultVal()) {
-                plcEquip.getRelay1Cmd().writePointValue(0);
-            }
-        } else {
-            plcEquip.getRelay1Cmd().writePointValue(0);
-        }
+        boolean relay1OnStatus = plcEquip.getRelay1OutputEnable().readDefaultVal() > 0 &&
+                            loopOp > plcEquip.getRelay1OnThreshold().readDefaultVal() &&
+                            loopOp < plcEquip.getRelay1OffThreshold().readDefaultVal();
+        plcEquip.getRelay1Cmd().writePointValue(relay1OnStatus ? 1 : 0);
 
-        if (plcEquip.getRelay2OutputEnable().readDefaultVal() > 0) {
-            if (loopOp > plcEquip.getRelay2OnThreshold().readDefaultVal()) {
-                plcEquip.getRelay2Cmd().writePointValue(1);
-            } else if (plcEquip.getRelay2Cmd().readHisVal() > 0 && loopOp < plcEquip.getRelay2OffThreshold().readDefaultVal()) {
-                plcEquip.getRelay2Cmd().writePointValue(0);
-            }
-        } else {
-            plcEquip.getRelay2Cmd().writePointValue(0);
-        }
-
+        boolean relay2OnStatus = plcEquip.getRelay2OutputEnable().readDefaultVal() > 0 &&
+                            loopOp > plcEquip.getRelay2OnThreshold().readDefaultVal() &&
+                            loopOp < plcEquip.getRelay2OffThreshold().readDefaultVal();
+        plcEquip.getRelay2Cmd().writePointValue(relay2OnStatus ? 1 : 0);
     }
 
 
@@ -285,7 +274,7 @@ public class PlcProfile extends ZoneProfile {
 
         if (isEnabledAnalog2InForSp && StringUtils.isNotEmpty(dynamicTargetDomainName)) {
             double dynamicTargetSensorVal = CCUHsApi.getInstance().readHisValByQuery("point and equipRef == \"" + equipRef + "\" and domainName == \"" + dynamicTargetDomainName + "\"");
-            plcEquip.getDynamicTargetValue().writePointValue(dynamicTargetSensorVal + spSensorOffset/10);
+            plcEquip.getDynamicTargetValue().writePointValue(dynamicTargetSensorVal + spSensorOffset);
         }
 
     }

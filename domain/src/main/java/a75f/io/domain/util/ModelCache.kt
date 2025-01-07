@@ -197,6 +197,9 @@ object ModelCache {
         modelContainer[MODEL_HELIO_NODE_SSE] = getModelById(
             MODEL_HELIO_NODE_SSE)
         CcuLog.i(Domain.LOG_TAG, "MODEL_HELIO_NODE_SSE model loaded")
+
+        modelContainer[MODEL_SMARTNODE_PID] = getModelById(MODEL_SMARTNODE_PID)
+        modelContainer[MODEL_HELIONODE_PID] = getModelById(MODEL_HELIONODE_PID)
     }
 
     private fun loadOAOModel() {

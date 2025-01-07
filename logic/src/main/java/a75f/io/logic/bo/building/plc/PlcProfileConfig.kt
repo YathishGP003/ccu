@@ -224,15 +224,7 @@ class PlcProfileConfig (nodeAddress: Int, nodeType: String, priority: Int, roomR
         }
 
         // Relay 1
-        if (config.relay1OutputEnable.enabled)
-            updateDevicePoint(DomainName.relay1, Port.RELAY_ONE.name, "Relay N/O", true)
-        else
-            updateDevicePoint(DomainName.relay1, Port.RELAY_ONE.name, "Relay N/C", false)
-
-        // Relay 2
-        if (config.relay2OutputEnable.enabled)
-            updateDevicePoint(DomainName.relay2, Port.RELAY_TWO.name, "Relay N/O", true)
-        else
-            updateDevicePoint(DomainName.relay2, Port.RELAY_TWO.name, "Relay N/C", false)
+        updateDevicePoint(DomainName.relay1, Port.RELAY_ONE.name, "Relay N/C", config.relay1OutputEnable.enabled)
+        updateDevicePoint(DomainName.relay2, Port.RELAY_TWO.name, "Relay N/C", config.relay2OutputEnable.enabled)
     }
 }

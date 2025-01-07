@@ -329,7 +329,7 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
                 updateRef(equipMap, profileConfiguration)
                 val modelPointDef = newModel.points.find { it.domainName == diffDomain.domainName }
                 modelPointDef?.run {
-                    if (toBeAddedForEquip(modelPointDef, equip.id)) {
+                    if (toBeAddedForEquip(modelPointDef, equip.id, false)) {
                         equipBuilder.createPoint(
                             PointBuilderConfig(modelPointDef, profileConfiguration, equip.id, siteRef, haystack.timeZone, equipMap["dis"].toString())
                         )
@@ -389,7 +389,7 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
                 val profileConfiguration = getProfileConfig(equipMap["profile"].toString())
                 updateRef(equipMap, profileConfiguration)
                 modelPointDef?.run {
-                    if (toBeAddedForEquip(modelPointDef, equip.id)) {
+                    if (toBeAddedForEquip(modelPointDef, equip.id, true)) {
                         val hayStackPoint = equipBuilder.buildPoint(
                             PointBuilderConfig(
                                 modelPointDef,
@@ -484,14 +484,15 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
         if (equipMap.containsKey("profile") && equipMap["profile"] != null) profileConfiguration.profileType = equipMap["profile"].toString()
     }
 
-
-    private fun toBeAddedForEquip(pointDef : ModelPointDef, equipRef : String) : Boolean {
+   /* isDynamicSensorRequired is required to decide whether to add/update a dynamic sensor point or not
+       While Adding we never add DYNAMIC_SENSOR points; they are created from the device layer, but updating the point we can allow to update the dynamic sensor points*/
+    private fun toBeAddedForEquip(pointDef : ModelPointDef, equipRef : String, isDynamicSensorRequired : Boolean) : Boolean {
 
         if (pointDef is SeventyFiveFProfilePointDef) {
             return when (pointDef.configuration.configType) {
                 PointConfiguration.ConfigType.BASE -> true // always add BASE points
                 PointConfiguration.ConfigType.DEPENDENT -> isDependentPointEnabled(pointDef, equipRef)
-                PointConfiguration.ConfigType.DYNAMIC_SENSOR -> false // never add DYNAMIC_SENSOR points; they are created from the device layer
+                PointConfiguration.ConfigType.DYNAMIC_SENSOR -> isDynamicSensorRequired // never add DYNAMIC_SENSOR points; they are created from the device layer
                 PointConfiguration.ConfigType.ASSOCIATED -> isAssociatedPointEnabled(pointDef)
                 PointConfiguration.ConfigType.ASSOCIATION -> isAssociationPointEnabled(pointDef, equipRef)
             }

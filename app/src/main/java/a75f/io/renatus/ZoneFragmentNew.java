@@ -830,7 +830,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                     }
                     if (profileType.contains(profileEM) || profileType.contains(profilePLC)
                             || profileType.contains(profileTempMonitor)
-                            || profileType.contains(profileTempInfluence)
                             || profileType.contains(profileModBus)
                             || profileType.contains(profileBacnet)) {
                         nontempModule = true;

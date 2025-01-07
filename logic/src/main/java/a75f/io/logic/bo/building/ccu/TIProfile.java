@@ -70,26 +70,26 @@ public class TIProfile extends ZoneProfile {
                 /*CCUHsApi.getInstance().writeDefaultVal("point and status and message and" +
                         " writable and group == \"" + mNodeAddr + "\"", RFDead);*/
             }
-            tiEquip.getOtaStatus().writeHisVal(RFDEAD.ordinal());
+            tiEquip.getEquipStatus().writeHisVal(RFDEAD.ordinal());
             /*CCUHsApi.getInstance().writeHisValByQuery("point and not ota and status and" +
                     " his and group == \"" + mNodeAddr + "\"", (double) RFDEAD.ordinal());*/
             return;
         } else if (isZoneDead()) {
             state = TEMPDEAD;
-            String curStatus = tiEquip.getEquipStatus().readDefaultStrVal();
+            String curStatus = tiEquip.getEquipStatusMessage().readDefaultStrVal();
                    // CCUHsApi.getInstance().readDefaultStrVal("point and status and message and writable and group == \"" + mNodeAddr + "\"");
             if (!curStatus.equals("Zone Temp Dead")) {
-                tiEquip.getEquipStatus().writeDefaultVal("Zone Temp Dead");
+                tiEquip.getEquipStatusMessage().writeDefaultVal("Zone Temp Dead");
                // CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \"" + mNodeAddr + "\"", "Zone Temp Dead");
             }
-            tiEquip.getOtaStatus().writeHisVal( TEMPDEAD.ordinal());
+            tiEquip.getEquipStatus().writeHisVal(TEMPDEAD.ordinal());
             //CCUHsApi.getInstance().writeHisValByQuery("point and not ota and status and his and group == \"" + mNodeAddr+ "\"", (double) TEMPDEAD.ordinal());
             return;
         }
 
         double setTempCooling = tiEquip.getDesiredTempCooling().readPriorityVal();
         double setTempHeating = tiEquip.getDesiredTempHeating().readPriorityVal();
-        double roomTemp = tiEquip.getCurrentTemp().readPriorityVal();
+        double roomTemp = tiEquip.getCurrentTemp().readHisVal();
         double systemDefaultTemp = 72.0;
 
 
@@ -122,7 +122,7 @@ public class TIProfile extends ZoneProfile {
     }
 
     private void setStatus(double status, boolean emergency) {
-        tiEquip.getEquipStatus().writeDefaultVal(status);
+        tiEquip.getEquipStatus().writeHisVal(status);
         String message;
         if (emergency) {
             message = (status == 0 ? "Recirculating Air" : status == 1 ? "Emergency Cooling" :

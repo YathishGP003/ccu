@@ -10,6 +10,7 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.domain.api.Domain;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.autocommission.remoteSession.RemoteSessionStatus;
+import a75f.io.util.ExecutorTask;
 
 public class RemoteAccessSessionBroadCastReceiver extends BroadcastReceiver {
 
@@ -29,19 +30,22 @@ public class RemoteAccessSessionBroadCastReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
 
-        if (intent == null || intent.getAction() == null) {
-            return;
-        }
-
-        String action = intent.getAction();
-
-        if (action.equals(CUSTOM_BROADCAST_ACTION)) {
-
-            String remoteSessionStatus = intent.getStringExtra(REMOTE_SESSION_STATUS);
-            if (remoteSessionStatus != null) {
-                updateRemoteSessionStatus(context, remoteSessionStatus);
+        ExecutorTask.executeBackground(() -> {
+            if (intent == null || intent.getAction() == null) {
+                return;
             }
-        }
+
+            String action = intent.getAction();
+
+            if (action.equals(CUSTOM_BROADCAST_ACTION)) {
+
+                String remoteSessionStatus = intent.getStringExtra(REMOTE_SESSION_STATUS);
+                if (remoteSessionStatus != null) {
+                    updateRemoteSessionStatus(context, remoteSessionStatus);
+                }
+            }
+        });
+
     }
 
     private void updateRemoteSessionStatus(Context context, String remoteSessionStatus) {
@@ -83,6 +87,6 @@ public class RemoteAccessSessionBroadCastReceiver extends BroadcastReceiver {
         editor.putInt(KEY_SCREEN_SHARING_STATUS, (int) val);
         editor.apply();
 
-        Domain.diagEquip.getRemoteSessionStatus().writeHisVal(val);
+        CCUHsApi.getInstance().writeHisValByQuery("domainName == \"remoteSessionStatus\" or point and diag and remote and status", val);
     }
 }

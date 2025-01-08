@@ -188,7 +188,7 @@ public class PlcProfile extends ZoneProfile {
      */
     private void handleRelayOp(double loopOp) {
         if (plcEquip.getRelay1OutputEnable().readDefaultVal() > 0) {
-            if (loopOp > plcEquip.getRelay1OnThreshold().readDefaultVal()) {
+            if (loopOp >= plcEquip.getRelay1OnThreshold().readDefaultVal()) {
                 plcEquip.getRelay1Cmd().writePointValue(1);
             } else if (plcEquip.getRelay1Cmd().readHisVal() > 0 && loopOp <= plcEquip.getRelay1OffThreshold().readDefaultVal()) {
                 plcEquip.getRelay1Cmd().writePointValue(0);
@@ -198,7 +198,7 @@ public class PlcProfile extends ZoneProfile {
         }
 
         if (plcEquip.getRelay2OutputEnable().readDefaultVal() > 0) {
-            if (loopOp > plcEquip.getRelay2OnThreshold().readDefaultVal()) {
+            if (loopOp >= plcEquip.getRelay2OnThreshold().readDefaultVal()) {
                 plcEquip.getRelay2Cmd().writePointValue(1);
             } else if (plcEquip.getRelay2Cmd().readHisVal() > 0 && loopOp <= plcEquip.getRelay2OffThreshold().readDefaultVal()) {
                 plcEquip.getRelay2Cmd().writePointValue(0);

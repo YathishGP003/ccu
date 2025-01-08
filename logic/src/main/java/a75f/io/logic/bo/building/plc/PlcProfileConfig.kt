@@ -2,7 +2,9 @@ package a75f.io.logic.bo.building.plc
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Device
+import a75f.io.api.haystack.RawPoint
 import a75f.io.domain.api.Domain
+import a75f.io.domain.api.Domain.hayStack
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.api.EntityConfig
 import a75f.io.domain.config.EnableConfig
@@ -252,6 +254,28 @@ class PlcProfileConfig (nodeAddress: Int, nodeType: String, priority: Int, roomR
     private fun getDomainPoint() : String{
         return (model.points.find { it.domainName == DomainName.nativeSensorType }?.valueConstraint as MultiStateConstraint)
             .allowedValues[nativeSensorType.currentVal.toInt()].value
+    }
+
+    fun updateTypeForAnalog1Out(config: PlcProfileConfig) {
+        val type = "${config.analog1MinOutput.currentVal.toInt()}-${config.analog1MaxOutput.currentVal.toInt()}v"
+        val device = hayStack.readEntity("device and addr == \"${config.nodeAddress}\"")
+        val analog1OutDict =
+            hayStack.readHDict("point and deviceRef == \"${device["id"]}\" and domainName == \"analog1Out\"")
+        val analog1OutPoint = RawPoint.Builder().setHDict(analog1OutDict).build()
+        CcuLog.i(
+            Domain.LOG_TAG,
+            "analog1OutDict $analog1OutDict update type $type current type ${analog1OutPoint.type}"
+        )
+
+        val controlVariable =
+            hayStack.readEntity("point and domainName == \"controlVariable\" and group == \"${config.nodeAddress}\"")
+        if (analog1OutPoint.type != type) {
+            analog1OutPoint.type = type
+            analog1OutPoint.pointRef = controlVariable["id"].toString()
+            hayStack.updatePoint(analog1OutPoint, analog1OutPoint.id)
+        } else {
+            CcuLog.i(Domain.LOG_TAG, "Analog1Out type is already set to $type")
+        }
     }
 
 }

@@ -131,6 +131,7 @@ fun updateConfigPoint(msgObject: JsonObject, configPoint: Point) {
             config, deviceModel, equip.id, equip.siteRef,
             device[Tags.DIS].toString(), model
         )
+        config.updateTypeForAnalog1Out(config)
         config.updatePortConfiguration(hayStack, config, deviceBuilder, deviceModel)
     }
 

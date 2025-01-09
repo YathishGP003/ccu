@@ -171,6 +171,10 @@ open class TIConfiguration(
             else -> {}
         }
         when (supplyAirTemperatureType.currentVal.toInt()) {
+
+            SupplyTempType.NONE.ordinal -> {
+                Domain.writeHisValByDomain(DomainName.dischargeAirTemperature, 0.0)
+            }
             SupplyTempType.TH1.ordinal -> {
                 updatePhysicalPointRef(
                     DomainName.dischargeAirTemperature,

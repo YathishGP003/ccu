@@ -1661,7 +1661,7 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                     for (Sensor r : SensorManager.getInstance().getExternalSensorList()) {
                         analog1InArr.add(r.sensorName+" "+r.engineeringUnit);
                     }
-                    int analogInSelection = CCUHsApi.getInstance().readDefaultVal("point and config and analog1 and input and sensor and equipRef == \"" + equipRef + "\"").intValue();
+                    int analogInSelection = (int) plcEquip.getAnalog1InputType().readDefaultVal();
                     return analog1InArr.get(analogInSelection);
                 }
                 else if (pointname.equals("Analog2In")){
@@ -1673,7 +1673,7 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                                 analog2InArr.add(r.sensorName + " " + r.engineeringUnit);
                             }
                         }
-                        int analogInSelection = CCUHsApi.getInstance().readDefaultVal("point and config and analog2 and input and sensor and equipRef == \"" + equipRef + "\"").intValue();
+                        int analogInSelection = (int) plcEquip.getAnalog2InputType().readDefaultVal();
                         return analog2InArr.get(analogInSelection);
                     }else
                         return "Not Enabled";
@@ -1684,7 +1684,7 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                     for (Thermistor m : Thermistor.getThermistorList()) {
                         th1InArr.add(m.sensorName+" "+m.engineeringUnit);
                     }
-                    int thSelection = CCUHsApi.getInstance().readDefaultVal("point and config and th1 and input and sensor and equipRef == \"" + equipRef + "\"").intValue();
+                    int thSelection = (int) plcEquip.getThermistor1InputType().readDefaultVal();
                     return th1InArr.get(thSelection);
                 }
                 else if (pointname.equals("relay1")){
@@ -1697,6 +1697,8 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                     if(plcEquip.getRelay2OutputEnable().readDefaultVal() > 0)
                         return "";
                     else return "Not Enabled";
+                }else if (pointname.equals("Analog-out1")) {
+                       return "Used";
                 }
                 break;
             case "SMARTSTAT_HEAT_PUMP_UNIT":

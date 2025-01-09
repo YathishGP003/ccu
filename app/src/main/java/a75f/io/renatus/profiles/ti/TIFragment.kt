@@ -119,7 +119,7 @@ class TIFragment : BaseDialogFragment(), OnPairingCompleteListener {
             ) {
                 item {
                     Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                        TitleTextView("TEMPERATURE INFLUENCE")
+                        TitleTextView("TEMPERATURE INFLUENCING")
                     }
                     Spacer(modifier = Modifier.height(50.dp))
 
@@ -133,7 +133,7 @@ class TIFragment : BaseDialogFragment(), OnPairingCompleteListener {
 
                     val valuesPickerState = rememberPickerState()
                     Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                        TempOffsetPicker(header = "Room Temp Offset", state = valuesPickerState, items = viewModel.temperatureOffsetsList, onChanged = { it: String ->
+                        TempOffsetPicker(header = "ROOM TEMP OFFSET", state = valuesPickerState, items = viewModel.temperatureOffsetsList, onChanged = { it: String ->
                             viewModel.viewState.temperatureOffset = it.toDouble()
                         }, startIndex = viewModel.temperatureOffsetsList.indexOf(viewModel.viewState.temperatureOffset.toString()), visibleItemsCount = 3, textModifier = Modifier.padding(8.dp), textStyle = TextStyle(fontSize = 15.sp, fontWeight = FontWeight.Normal))
                     }
@@ -147,7 +147,7 @@ class TIFragment : BaseDialogFragment(), OnPairingCompleteListener {
                         key(viewModel.viewState.roomTemperatureType) {
                             DropDownWithLabel(label = "Room Temperature", list = viewModel.roomTempList, previewWidth = 300, expandedWidth = 300, onSelected = { selectedIndex ->
                                 viewModel.viewState.roomTemperatureType = selectedIndex.toDouble()
-                            }, defaultSelection = viewModel.viewState.roomTemperatureType.toInt(), isHeader = false, spacerLimit = 200, heightValue = 211, disabledIndices = roomHideIndices)
+                            }, defaultSelection = viewModel.viewState.roomTemperatureType.toInt(), isHeader = false, spacerLimit = 200, heightValue = 211, disabledIndices = roomHideIndices, labelWidth = 240)
                         }
 
                         Spacer(modifier = Modifier.height(30.dp))
@@ -155,7 +155,7 @@ class TIFragment : BaseDialogFragment(), OnPairingCompleteListener {
                         key(viewModel.viewState.supplyAirTemperatureType) {
                             DropDownWithLabel(label = "Supply Air Temperature", list = viewModel.supplyAirTempList, previewWidth = 300, expandedWidth = 300, onSelected = { selectedIndex ->
                                 viewModel.viewState.supplyAirTemperatureType = selectedIndex.toDouble()
-                            }, defaultSelection = viewModel.viewState.supplyAirTemperatureType.toInt(), isHeader = false, paddingLimit = -40, spacerLimit = 200, heightValue = 211, disabledIndices = supplyHideIndices)
+                            }, defaultSelection = viewModel.viewState.supplyAirTemperatureType.toInt(), isHeader = false, paddingLimit = -40, spacerLimit = 200, heightValue = 211, disabledIndices = supplyHideIndices, labelWidth = 240)
                         }
                     }
 

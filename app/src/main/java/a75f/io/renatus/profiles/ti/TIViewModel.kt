@@ -47,6 +47,9 @@ import androidx.lifecycle.viewModelScope
 
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
+import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfilePointDef
+import io.seventyfivef.domainmodeler.common.point.Constraint
+import io.seventyfivef.domainmodeler.common.point.MultiStateConstraint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -120,9 +123,24 @@ class TIViewModel: ViewModel() {
     private fun initializeLists() {
         zonePrioritiesList = getListByDomainName(DomainName.zonePriority, equipModel)
         temperatureOffsetsList = getListByDomainName(DomainName.temperatureOffset, equipModel)
-        roomTempList = getListByDomainName(DomainName.roomTemperatureType, equipModel)
-        supplyAirTempList = getListByDomainName(DomainName.supplyAirTempType, equipModel)
+        roomTempList =getAllowedValues(DomainName.roomTemperatureType, equipModel)
+        supplyAirTempList = getAllowedValues(DomainName.supplyAirTempType, equipModel)
 
+    }
+    fun getAllowedValues(domainName: String, model: SeventyFiveFProfileDirective): List<String> {
+        val pointDef = getPointByDomainName(model, domainName) ?: return emptyList()
+        return if (pointDef.valueConstraint.constraintType == Constraint.ConstraintType.MULTI_STATE) {
+            val constraint = pointDef.valueConstraint as MultiStateConstraint
+            constraint.allowedValues.map { "${it.dis}" }
+        } else {
+            emptyList()
+        }
+    }
+
+    private fun getPointByDomainName(
+        modelDefinition: SeventyFiveFProfileDirective, domainName: String
+    ): SeventyFiveFProfilePointDef? {
+        return modelDefinition.points.find { (it.domainName.contentEquals(domainName)) }
     }
     fun showErrorDialog(context: Context, message: String) {
         val builder = AlertDialog.Builder(context)
@@ -196,8 +214,8 @@ class TIViewModel: ViewModel() {
         CcuLog.i(Domain.LOG_TAG, "init DM")
         val equipBuilder = ProfileEquipBuilder(hayStack)
 
-        val equipDis = hayStack.siteName + "-TI-" + profileConfiguration.nodeAddress
-        val deviceDis = hayStack.siteName + "-TI-" + profileConfiguration.nodeAddress
+        val equipDis = hayStack.siteName + "-" + equipModel.name + "-" + profileConfiguration.nodeAddress
+        val deviceDis = hayStack.siteName + "-" + deviceModel.name + "-" + profileConfiguration.nodeAddress
 
         if (profileConfiguration.isDefault) {
             addEquipAndPoints(deviceAddress, profileConfiguration, hayStack, equipModel, deviceModel)
@@ -221,7 +239,7 @@ class TIViewModel: ViewModel() {
     ) {
 
         val equipBuilder = ProfileEquipBuilder(hayStack)
-        val equipDis = hayStack.siteName + "-TI-" + config.nodeAddress
+        val equipDis = hayStack.siteName + "-" + equipModel.name + "-" + config.nodeAddress
         CcuLog.i(Domain.LOG_TAG, " buildEquipAndPoints ${equipModel.domainName} profileType ${config.profileType}" )
         val equipId = equipBuilder.buildEquipAndPoints(
             config, equipModel, hayStack.site!!
@@ -229,7 +247,7 @@ class TIViewModel: ViewModel() {
         )
         val entityMapper = EntityMapper(equipModel)
         val deviceBuilder = DeviceBuilder(hayStack, entityMapper)
-        val deviceDis = hayStack.siteName + "-TI-" + config.nodeAddress
+        val deviceDis = hayStack.siteName + "-" + deviceModel.name + "-" + config.nodeAddress
         CcuLog.i(Domain.LOG_TAG, " buildDeviceAndPoints")
         val deviceId = deviceBuilder.buildDeviceAndPoints(
             config,

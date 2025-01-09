@@ -211,6 +211,10 @@ public class MigrationUtil {
             deleteNonDMSystemOTAStatusPoint(ccuHsApi);
             PreferenceUtil.setNonDmOtaPointDeletionStatus();
         }
+        if(!PreferenceUtil.getNullIdRemovalStatus()) {
+            removeNullIdPoint(ccuHsApi);
+            PreferenceUtil.setNullIdRemovalStatus();
+        }
         ccuHsApi.scheduleSync();
     }
     private static void updateLocalTunersEquipRef(CCUHsApi hayStack) {
@@ -1277,5 +1281,9 @@ public class MigrationUtil {
                 CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Deleted OTA status point");
             }
         }
+    }
+    private static void removeNullIdPoint(CCUHsApi ccuHsApi) {
+        ccuHsApi.removeEntity("null");
+        CcuLog.d(TAG, "removeNullIdPoint completed");
     }
 }

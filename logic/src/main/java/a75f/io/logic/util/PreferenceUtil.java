@@ -86,6 +86,7 @@ public class PreferenceUtil {
     private static final String PRANGE_POINT_MIGRATION_FLAG = "prangePointMigrationFlag";
     private static final String CORRECT_RELAY2_POINTREF_SERIES_PARALLEL = "correctRelay2PointRefSeriesParallel";
     private static final String REMOVE_REDUNDANT_SSE_DEVICE_POINTS = "removeRedundantSseDevicePoints";
+    private static final String NULL_ID_REMOVAL_STATUS = "nullIdRemovalStatus";
 
     public static void setContext(Context c) {
         context= c;
@@ -680,5 +681,13 @@ public class PreferenceUtil {
 
     public static void setRemoveRedundantSseDevicePoints() {
         setBooleanPreference(REMOVE_REDUNDANT_SSE_DEVICE_POINTS, true);
+    }
+
+    public static boolean getNullIdRemovalStatus() {
+        return getBooleanPreference(NULL_ID_REMOVAL_STATUS);
+    }
+
+    public static void setNullIdRemovalStatus() {
+        setBooleanPreference(NULL_ID_REMOVAL_STATUS, true);
     }
 }

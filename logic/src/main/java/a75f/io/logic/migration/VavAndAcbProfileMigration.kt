@@ -720,7 +720,7 @@ class VavAndAcbProfileMigration {
             val hnAcbEquips = hayStack.readAllEntities("equip and domainName == \"" + DomainName.helionodeActiveChilledBeam + "\"")
             hnAcbEquips.forEach {
                 val acbEquip = VavAcbEquip(it["id"].toString())
-                val device = hayStack.readEntity("device and equipRef == \"" + it["group"].toString() + "\"")
+                val device = hayStack.readEntity("device and equipRef == \"" + it["id"].toString() + "\"")
                 val th2In = hayStack.readEntity("point and deviceRef == \"" + device["id"].toString() + "\" and domainName == \"" + DomainName.th2In + "\"")
                 val th2InPoint = RawPoint.Builder().setHashMap(th2In)
                 if (acbEquip.thermistor2Type.readPriorityVal() > 0) {
@@ -736,7 +736,7 @@ class VavAndAcbProfileMigration {
             val snAcbEquips = hayStack.readAllEntities("equip and domainName == \"" + DomainName.smartnodeActiveChilledBeam + "\"")
             snAcbEquips.forEach {
                 val acbEquip = VavAcbEquip(it["id"].toString())
-                val device = hayStack.readEntity("device and equipRef == \"" + it["group"].toString() + "\"")
+                val device = hayStack.readEntity("device and equipRef == \"" + it["id"].toString() + "\"")
                 val th2In = hayStack.readEntity("point and deviceRef == \"" + device["id"].toString() + "\" and domainName == \"" + DomainName.th2In + "\"")
                 val th2InPoint = RawPoint.Builder().setHashMap(th2In)
                 if (acbEquip.thermistor2Type.readPriorityVal() > 0) {

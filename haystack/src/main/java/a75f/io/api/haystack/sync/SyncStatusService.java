@@ -244,7 +244,7 @@ public class SyncStatusService {
         while(updatedItr.hasNext()) {
             String id = updatedItr.next();
             HDict entity = CCUHsApi.getInstance().readHDictById(id);
-            if (entity == null) {
+            if (entity == null || id.equals("null")) {
                 CcuLog.e("CCU_HS_SyncHandler","Invalid updated entity for sync "+id);
                 //Entity might have been deleted.
                 updatedItr.remove();

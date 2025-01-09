@@ -154,6 +154,7 @@ fun TempOffsetPicker(
     textModifier: Modifier = Modifier,
     textStyle: TextStyle = LocalTextStyle.current,
     dividerColor: Color = primaryColor,
+    labelWidth : Int = 210
 ) {
 
     val visibleItemsMiddle = visibleItemsCount / 2
@@ -189,7 +190,7 @@ fun TempOffsetPicker(
 
     Box(modifier = modifier) {
         Box( modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            LabelTextView(text = header)
+            LabelTextView(text = header,labelWidth)
         }
         LazyColumn(
             state = listState,

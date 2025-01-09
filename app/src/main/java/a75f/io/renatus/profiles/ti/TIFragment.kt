@@ -135,7 +135,7 @@ class TIFragment : BaseDialogFragment(), OnPairingCompleteListener {
                     Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                         TempOffsetPicker(header = "ROOM TEMP OFFSET", state = valuesPickerState, items = viewModel.temperatureOffsetsList, onChanged = { it: String ->
                             viewModel.viewState.temperatureOffset = it.toDouble()
-                        }, startIndex = viewModel.temperatureOffsetsList.indexOf(viewModel.viewState.temperatureOffset.toString()), visibleItemsCount = 3, textModifier = Modifier.padding(8.dp), textStyle = TextStyle(fontSize = 15.sp, fontWeight = FontWeight.Normal))
+                        }, startIndex = viewModel.temperatureOffsetsList.indexOf(viewModel.viewState.temperatureOffset.toString()), visibleItemsCount = 3, textModifier = Modifier.padding(8.dp), textStyle = TextStyle(fontSize = 15.sp, fontWeight = FontWeight.Normal), labelWidth = 240)
                     }
 
                     Spacer(modifier = Modifier.height(50.dp))

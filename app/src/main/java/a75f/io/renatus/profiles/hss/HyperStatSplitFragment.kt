@@ -115,7 +115,8 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                 startIndex = viewModel.temperatureOffsetsList.indexOf(viewModel.viewState.value.temperatureOffset.toString()),
                 visibleItemsCount = 3,
                 textModifier = Modifier.padding(8.dp),
-                textStyle = TextStyle(fontSize = 18.sp)
+                textStyle = TextStyle(fontSize = 18.sp),
+                labelWidth = 280
             )
         }
     }

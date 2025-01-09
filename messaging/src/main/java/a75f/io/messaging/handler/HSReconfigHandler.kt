@@ -5,7 +5,10 @@ import a75f.io.api.haystack.HSUtil
 import a75f.io.api.haystack.HayStackConstants
 import a75f.io.api.haystack.Point
 import a75f.io.domain.api.DomainName
+import a75f.io.domain.logic.DeviceBuilder
+import a75f.io.domain.logic.EntityMapper
 import a75f.io.domain.logic.ProfileEquipBuilder
+import a75f.io.domain.util.ModelLoader
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.hyperstat.common.FanModeCacheStorage
@@ -13,6 +16,8 @@ import a75f.io.logic.bo.building.hyperstat.profiles.util.getConfiguration
 import a75f.io.logic.bo.building.hyperstat.profiles.util.getModelByEquipRef
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import com.google.gson.JsonObject
+import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
+import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 
 
 fun reconfigureHSV2(msgObject: JsonObject, configPoint: Point) {
@@ -29,6 +34,11 @@ fun reconfigureHSV2(msgObject: JsonObject, configPoint: Point) {
 
     val config = getConfiguration(configPoint.equipRef)?.getActiveConfiguration()
     val equipBuilder = ProfileEquipBuilder(hayStack)
+    val deviceModel = ModelLoader.getHyperStatDevice() as SeventyFiveFDeviceDirective
+    val entityMapper = EntityMapper(model as SeventyFiveFProfileDirective)
+    val deviceBuilder = DeviceBuilder(hayStack, entityMapper)
+    val deviceDis = "${hayStack.siteName}-${deviceModel.name}-${config!!.nodeAddress}"
+
 
     val pointNewValue = msgObject["val"]
     if(pointNewValue == null || pointNewValue.asString.isEmpty()){
@@ -39,6 +49,8 @@ fun reconfigureHSV2(msgObject: JsonObject, configPoint: Point) {
         if (configPoint.domainName == DomainName.fanOpMode) {
             updateFanMode(configPoint.equipRef, pointNewValue.asInt)
         }
+        deviceBuilder.updateDeviceAndPoints(config, deviceModel, hyperStatEquip["id"].toString(), hayStack.site!!.id, deviceDis)
+
     }
     writePointFromJson(configPoint, msgObject, hayStack)
     config!!.apply { setPortConfiguration( nodeAddress, getRelayMap(), getAnalogMap()) }

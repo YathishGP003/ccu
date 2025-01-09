@@ -7,7 +7,7 @@ object OtnEquipCutOverMapping {
         "humidity" to "zoneHumidity",
         "occupancyDetection" to "occupancyDetection",
         "zonePriority" to "zonePriority",
-        "Demand Response Setback" to "demandResponseSetback",
+        "DemandResponseSetback" to "demandResponseSetback",
         "heartBeat" to "heartBeat",
         "autoawayEnabled" to "autoAway",
         "desiredTemp" to "desiredTemp",

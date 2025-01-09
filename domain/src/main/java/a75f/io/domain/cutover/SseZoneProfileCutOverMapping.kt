@@ -44,7 +44,7 @@ object SseZoneProfileCutOverMapping {
         "standaloneCO2Target" to "standaloneCo2Target",
         "standaloneCO2Threshold" to "standaloneCo2Threshold",
         "autoAwaySetback" to "autoAwaySetback",
-        "Demand Response Setback" to "demandResponseSetback",
+        "DemandResponseSetback" to "demandResponseSetback",
         "coolingAirflowTemp" to "coolingAirflowTemp",
         "heatingAirflowTemp" to "heatingAirflowTemp",
         "standaloneCoolingAirflowTempUpperOffset" to "standaloneStage1CoolingUpperOffset",

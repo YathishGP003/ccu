@@ -273,6 +273,7 @@ object HyperStatSplitCpuCutOverMapping {
         "otaStatus" to "otaStatusHyperlite",
         "scheduleType" to "scheduleType",
         "heartBeat" to "heartBeat",
+        "DemandResponseSetback"  to "demandResponseSetback",
 
-    )
+        )
 }

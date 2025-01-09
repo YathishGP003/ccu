@@ -115,7 +115,7 @@ object DabZoneProfileCutOverMapping {
         "reheatIntegralKFactor" to "dabReheatIntegralKFactor",
         "reheatRelayActivationHysteresis" to "dabReheatRelayActivationHysteresis",
         "autoAwaySetback" to "autoAwaySetback",
-        "Demand Response Setback"  to "demandResponseSetback",
+        "DemandResponseSetback"  to "demandResponseSetback",
         "reheatProportionalKFactor" to "dabReheatProportionalKFactor",
     )
 }

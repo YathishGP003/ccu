@@ -1200,4 +1200,36 @@
         <item name="android:fontFamily">@font/lato_regular</item>
         <item name="android:gravity">center_vertical</item>
     </style>
+
+    <style name="text_header_log" parent="@android:style/TextAppearance">
+        <item name="android:textSize">20sp</item>
+        <item name="android:textColor">@color/grey_select</item>
+        <item name="android:fontFamily">@font/lato_regular</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="fontWeight">400</item>
+    </style>
+
+    <style name="text_log_header_title" parent="@android:style/TextAppearance">
+        <item name="android:textSize">20sp</item>
+        <item name="android:textColor">@color/grey_select</item>
+        <item name="android:fontFamily">@font/lato_regular</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="fontWeight">700</item>
+    </style>
+
+    <style name="text_log_item" parent="@android:style/TextAppearance">
+        <item name="android:textSize">20sp</item>
+        <item name="android:textColor">@color/secondary</item>
+        <item name="android:fontFamily">@font/lato_regular</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="fontWeight">400</item>
+    </style>
+
+    <style name="text_header_alert_defs" parent="@android:style/TextAppearance">
+        <item name="android:textSize">24sp</item>
+        <item name="android:textColor">@color/black</item>
+        <item name="android:fontFamily">@font/lato_regular</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="fontWeight">700</item>
+    </style>
 </resources>

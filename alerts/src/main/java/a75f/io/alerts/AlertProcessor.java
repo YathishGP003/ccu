@@ -61,7 +61,6 @@ public class AlertProcessor
 
     private SequenceLogs sequenceLogs;
     private FullLogs fullLogs;
-
     private Context mContext;
 
     AlertProcessor(Context c) {
@@ -82,6 +81,7 @@ public class AlertProcessor
 
         //AlertManager.getInstance().fixAlert("CCU IN SAFE MODE", "CCU is in safe mode", false);
         fullLogs = new FullLogs();
+        //AlertManager.getInstance().sequenceLogsMap;
         mapOfPastAlerts.clear();
         List<AlertDefOccurrence> occurrences = new ArrayList<>();
 
@@ -114,13 +114,21 @@ public class AlertProcessor
                     alertJsUtil.def = def;
                     CcuLog.d(TAG_CCU_ALERTS, "---------starting evaluation using j2v8------"+def.alert.mTitle);
                     sequenceLogs.addLog(new SequenceMethodLog(LogLevel.INFO, LogOperation.GENERIC_INFO,
-                            "Starting sequence evaluation using j2v8", "pending", new Date().toString(), new Date().toString()));
+                            "Starting sequence evaluation using j2v8", "pending", new Date().toString(), new Date().toString(), null));
                     def.evaluateJsJ2v8(def, jsForTesting, mContext, alertJsUtil, new SequencerLogsCallbackImpl(sequenceLogs));
 
                     sequenceLogs.addLog(new SequenceMethodLog(LogLevel.INFO, LogOperation.GENERIC_INFO,
-                            "Ending sequence evaluation using j2v8", "success", new Date().toString(), new Date().toString()));
+                            "Ending sequence evaluation using j2v8", "success", new Date().toString(), new Date().toString(), null));
                     CcuLog.d(TAG_CCU_ALERTS, "---------ending evaluation------"+def.alert.mTitle);
                     fullLogs.addLog(sequenceLogs);
+                    CcuLog.d(TAG_CCU_ALERTS, "---------add seq log to id------"+def.alert.alertDefId + "<--sequenceLogs-->"+sequenceLogs.getLogs().size() + "<-->"+def._id);
+                    AlertManager.getInstance().sequenceLogsMap.put(def._id, sequenceLogs);
+
+                    AlertDefinition alertBlocklyDefinition = AlertManager.getInstance().getRepo().getBloclyAlertDefUsingId(def.alert.mTitle);
+                    alertBlocklyDefinition.alert.alertDefId = def._id;
+                    alertBlocklyDefinition.alert.setCreator("blockly");
+                    occurrences.add(processBlocklyAlert(alertBlocklyDefinition));
+
                 }else {
                     def.evaluate(defaultSharedPrefs);
 
@@ -132,8 +140,8 @@ public class AlertProcessor
                     }
                 }
             }catch (Exception e) {
-                CcuLog.e(TAG_CCU_ALERTS, "Error in evaluating alert definition-->" + def.alert.mTitle);
                 e.printStackTrace();
+                CcuLog.e(TAG_CCU_ALERTS, "Error in evaluating alert definition-->" + def.alert.mTitle + "---message--"+e.getMessage());
             }
         }
         CcuLog.d(TAG_CCU_ALERTS, "evaluateAlertDefinitions - end");
@@ -150,11 +158,19 @@ public class AlertProcessor
 
         mapOfPastAlerts.forEach((k, v) -> {
             Alert tempAlert = (Alert) v;
+            CcuLog.d(TAG_CCU_ALERTS, "generateAlertBlockly-->title-->"+tempAlert.mTitle+"<--equipId-->"+tempAlert.equipId+"<--blockId-->"+tempAlert.blockId);
             AlertManager.getInstance().generateAlertBlockly(tempAlert.mTitle, tempAlert.mMessage, tempAlert.equipId, "blockly", tempAlert.blockId);
+
+            SequenceLogs seqLogs = AlertManager.getInstance().sequenceLogsMap.get(tempAlert.alertDefId);
+            if(seqLogs != null){
+                seqLogs.addLog(new SequenceMethodLog(LogLevel.INFO, LogOperation.GENERIC_INFO,
+                        "create alert -- "+tempAlert.mTitle, "success", new Date().toString(), new Date().toString(), null));
+                AlertManager.getInstance().sequenceLogsMap.put(tempAlert.alertDefId, seqLogs);
+            }
         });
         // generate log file once all blockly alerts are done
         if(sequenceLogs != null){
-            String fileName = "blocklyAlert_" + CCUHsApi.getInstance().getCcuId() + "_" + CCUHsApi.getInstance().getSite().getId() + ".json";
+            String fileName = "blocklyAlert_" + CCUHsApi.getInstance().getCcuId() + ".json";
             File logDir = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + CustomLogUtil.LOGS_DIR_ALERTS);
             CustomLogUtil.Companion.dumpLogs(mContext, fileName, new Gson().toJson(fullLogs), logDir, TAG_CCU_ALERTS);
         }
@@ -257,6 +273,11 @@ public class AlertProcessor
                 result = calculateResult(result, operator, conditional.status);
             }
         }
+        return buildOccurrence(def, result, false, null, null);
+    }
+
+    private AlertDefOccurrence processBlocklyAlert(AlertDefinition def) {
+        boolean result = true;
         return buildOccurrence(def, result, false, null, null);
     }
 

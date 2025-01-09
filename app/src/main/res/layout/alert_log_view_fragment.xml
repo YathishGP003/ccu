@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingStart="41dp"
+    android:paddingEnd="40dp"
+    android:paddingBottom="43dp"
+    android:background="@color/white"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:id="@+id/search_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="33dp">
+
+        <ImageView
+            android:id="@+id/img_close"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:src="@drawable/img_close" />
+
+        <TextView
+            android:id="@+id/tv_error"
+            style="@style/text_header_log"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="29dp"
+            android:layout_toStartOf="@+id/img_close"
+            android:drawableStart="@drawable/img_error"
+            android:text="ERROR" />
+
+        <TextView
+            android:id="@+id/tv_trace"
+            style="@style/text_header_log"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="12dp"
+            android:layout_toStartOf="@+id/tv_error"
+            android:drawableStart="@drawable/img_trace"
+            android:text="TRACE" />
+
+        <TextView
+            android:id="@+id/tv_warn"
+            style="@style/text_header_log"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="12dp"
+            android:layout_toStartOf="@+id/tv_trace"
+            android:drawableStart="@drawable/img_warn"
+            android:text="WARN" />
+
+        <TextView
+            style="@style/text_header_log"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="12dp"
+            android:layout_toStartOf="@+id/tv_warn"
+            android:drawableStart="@drawable/img_info"
+            android:text="INFO" />
+
+        <SearchView
+            android:id="@+id/search_view"
+            android:layout_width="290dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:elevation="2dp"
+            android:iconifiedByDefault="false"
+            android:queryHint="Search" />
+
+    </RelativeLayout>
+
+    <include layout="@layout/alert_log_view_fragment_header" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewLogSequences"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="19dp" />
+</LinearLayout>

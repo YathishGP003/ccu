@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="40dp"
+    android:layout_marginTop="18dp"
+    android:layout_marginEnd="40dp"
+    android:paddingTop="16dp"
+    android:paddingBottom="16dp"
+    android:background="@color/listview_divider_color">
+
+    <TextView
+        android:gravity="center|center_vertical"
+        android:id="@+id/titleText"
+        style="@style/text_log_header_title"
+        android:layout_width="300sp"
+        android:layout_height="match_parent"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:text="@string/title_alert_name"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Alert Name" />
+
+    <TextView
+        style="@style/text_log_header_title"
+        android:gravity="center|center_vertical"
+        android:text="@string/title_alert_severity"
+        android:id="@+id/severityText"
+        android:layout_width="100sp"
+        android:layout_height="match_parent"
+        android:layout_marginStart="28sp"
+        android:ellipsize="end"
+        android:singleLine="true"
+        app:layout_constraintBottom_toBottomOf="@+id/titleText"
+        app:layout_constraintStart_toEndOf="@+id/titleText"
+        app:layout_constraintTop_toTopOf="@+id/titleText"
+        tools:text="Severity" />
+
+    <TextView
+        style="@style/text_log_header_title"
+        android:text="@string/title_alert_status"
+        android:id="@+id/stateText"
+        android:layout_width="180sp"
+        android:layout_height="match_parent"
+        android:ellipsize="end"
+        android:gravity="center|center_vertical"
+        android:singleLine="true"
+        app:layout_constraintBottom_toBottomOf="@+id/titleText"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/titleText"
+        tools:text="Message" />
+
+    <!--   The placement of this view is a bit hack, using its margins against the parents to position it
+           correctly between the other columns.  Overall this view won't scale well.  Redo using %'s for column widths. -->
+    <TextView
+        android:gravity="center|center_vertical"
+        style="@style/text_log_header_title"
+        android:text="@string/title_alert_message"
+        android:id="@+id/conditionalText"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginStart="422sp"
+        android:layout_marginEnd="184sp"
+        android:clickable="true"
+        android:ellipsize="end"
+        android:focusable="true"
+        android:maxLines="1"
+        android:singleLine="false"
+        app:layout_constraintBottom_toBottomOf="@+id/titleText"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/titleText"
+        tools:text="Status" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

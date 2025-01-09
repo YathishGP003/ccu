@@ -3,6 +3,7 @@ package a75f.io.renatus.ENGG.alertdefs
 import a75f.io.alerts.AlertManager
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
+import a75f.io.renatus.ENGG.alertdefs.BundleConstants.TAG
 import a75f.io.renatus.R
 import a75f.io.renatus.util.extension.showErrorDialog
 import android.os.Bundle
@@ -23,7 +24,7 @@ import kotlinx.android.synthetic.main.alert_defs_fragment.*
  * @author tcase@75f.io
  * Created on 3/2/21.
  */
-class AlertDefsFragment: Fragment() {
+class AlertDefsFragment: Fragment(), AdapterCallback {
 
    private val viewModel: AlertDefsViewModel by viewModels()
    private lateinit var listAdapter: AlertDefsListAdapter
@@ -50,7 +51,7 @@ class AlertDefsFragment: Fragment() {
    }
 
    private fun setupListView() {
-      listAdapter = AlertDefsListAdapter()
+      listAdapter = AlertDefsListAdapter(this)
       val listLayoutMgr = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
 
       alertDefsListView.apply {
@@ -86,5 +87,34 @@ class AlertDefsFragment: Fragment() {
 
       listAdapter.setAlertDefs(viewState.alertDefRows)
    }
+
+   private fun launchFragment(alertDefId: String?) {
+      var fragment: Fragment = AlertLogViewFragment()
+
+      val args = Bundle()
+      args.putString(BundleConstants.ALERT_DEF_ID, alertDefId)
+      fragment.arguments = args
+
+      val fragmentManager = requireActivity().supportFragmentManager
+      val transaction = fragmentManager.beginTransaction()
+      transaction.add(R.id.container_property_fragment, fragment)
+      transaction.addToBackStack(null)
+      transaction.commit()
+   }
+
+   override fun onItemClicked(alertDefId: String?) {
+      CcuLog.d(TAG, "this is the alertDefId-->$alertDefId")
+      val logs = viewModel.getLogsByDefId(alertDefId)
+      if(logs != null){
+         CcuLog.d(TAG, "logs not null ccu name->${logs.ccuName} -- size ${logs.logs.size}")
+      }else{
+         CcuLog.d(TAG, "logs are null")
+      }
+      launchFragment(alertDefId)
+   }
+}
+
+interface AdapterCallback {
+   fun onItemClicked(alertDefId: String?)
 }
 

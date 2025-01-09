@@ -7,6 +7,7 @@ public interface SequencerLogsCallback {
     void logWarn(LogLevel logLevel, LogOperation operationName,  String message, String result);
 
     void logInfo(LogLevel logLevel, LogOperation operationName,  String message, String result);
+    void logInfo(LogLevel logLevel, LogOperation operationName,  String message, String result, String resultJson);
 
     void logError(LogLevel logLevel, LogOperation operationName,  String message, String result);
 

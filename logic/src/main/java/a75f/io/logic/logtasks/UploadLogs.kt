@@ -142,4 +142,44 @@ class UploadLogs(
 
       CcuLog.i(TAG_CCU_SITE_SEQUENCER, "sequencer log files uploaded")
    }
+
+   fun saveCcuAlertsLogs(id: String) {
+      CcuLog.i("CCU_ALERTS", "saveCcuAlertsLogs id -> $id")
+      val fileName = "blocklyAlert_@$id.json"
+      val dateStr = fileSystemTools.timeStamp()
+      val ccuGuid = haystackApi.ccuId ?: "ccu-id-missing"
+      val ccuGuidTrimmed = if (id.startsWith("@")) id.drop(1) else id
+      val logDir = "ccu/alerts"
+      val seqFile = fileSystemTools.getBacAppLogs( logDir, fileName)
+      val listOfFiles: List<File> = mutableListOf<File>().apply {
+         seqFile?.let { add(it) }
+      }
+      if(listOfFiles.isEmpty()){
+         CcuLog.i("CCU_ALERTS", "No alerts logs found")
+         return
+      }
+      // This specific file id format is a requirement (Earth(CCU)-4726)
+      val fileId = ccuGuidTrimmed + "_" + dateStr + ".zip"
+      val zipFile = fileSystemTools.zipFiles(listOfFiles, fileId)
+      val siteRef = haystackApi.siteIdRef.toString()
+
+      if (siteRef == null) {
+         // not the exact way I intended to use reportNull, but it works to report a bug
+         siteRef.reportNull("null", "siteId missing while trying to save log")
+         CcuLog.i("CCU_ALERTS", "saveCcuAlertsLogs site ref is null")
+         return
+      }
+
+      // drop the "@"
+      val siteId = if (siteRef.startsWith("@")) siteRef.drop(1) else siteRef
+
+      fileStorageManager.uploadFile(
+         zipFile!!,
+         mimeType =  "application/zip",
+         container = "alertlogs",
+         siteId = siteId,
+         fileId = fileId)
+
+      CcuLog.i("CCU_ALERTS", "alerts log files uploaded")
+   }
 }

@@ -2,8 +2,8 @@ package a75f.io.sitesequencer;
 
 import static a75f.io.sitesequencer.HaystackService.MSG_SUCCESS;
 
-import a75f.io.sitesequencer.log.LogLevel;
-import a75f.io.sitesequencer.log.LogOperation;
+import a75f.io.alerts.log.LogLevel;
+import a75f.io.alerts.log.LogOperation;
 import a75f.io.sitesequencer.log.SequencerLogsCallback;
 
 public class SequencerJsUtil {

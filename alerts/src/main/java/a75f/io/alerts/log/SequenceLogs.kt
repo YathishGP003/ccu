@@ -24,6 +24,7 @@ data class SequenceMethodLog(
     val result: String,
     val timestamp: String,
     val expiresAt: String,
+    val resultJson:String? = null
 )
 
 enum class LogLevel {

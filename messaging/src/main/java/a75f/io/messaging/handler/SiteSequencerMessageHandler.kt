@@ -2,6 +2,7 @@
 
 package a75f.io.messaging.handler
 
+import a75f.io.alerts.AlertManager
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.logger.CcuLog
 import a75f.io.messaging.MessageHandler
@@ -139,6 +140,7 @@ class SiteSequencerMessageHandler(
             instanceOf().sequenceManager.getSequenceById(deletedSeqId)?.let {
                 instanceOf().sequenceManager.fixAlertsBySequenceId(it)
             }
+            AlertManager.getInstance().removeAlertDefUsingAlertDefId(deletedSeqId)
             instanceOf().sequenceManager.deleteDefinition(deletedSeqId)
             val fileName = "seq_" + CCUHsApi.getInstance().ccuId + "_" + deletedSeqId + ".json"
             SequencerLogUtil.deleteJsonFile(context, fileName)

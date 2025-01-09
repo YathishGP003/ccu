@@ -14,6 +14,7 @@ import java.util.concurrent.TimeUnit;
 
 import a75f.io.alerts.cloud.AlertsService;
 import a75f.io.alerts.cloud.ServiceGenerator;
+import a75f.io.alerts.log.SequenceLogs;
 import a75f.io.alerts.model.AlertDefOccurrence;
 import a75f.io.api.haystack.Alert;
 import a75f.io.api.haystack.CCUHsApi;
@@ -49,6 +50,8 @@ public class AlertManager implements CCUHsApi.EntityDeletedListener
     private final Context appContext;
 
     private final HashMap<String, Object> persistentBlockMap= new HashMap<>();
+
+    HashMap<String, SequenceLogs> sequenceLogsMap = new HashMap<>();
 
     /**
      * Call this when apiBase changes.  Token should not be null, so please include current token.
@@ -373,5 +376,21 @@ public class AlertManager implements CCUHsApi.EntityDeletedListener
     public void fixAlertLocally(Alert a) {
         if (! repoCheck()) return;
         repo.fixAlertLocally(a);
+    }
+
+    public HashMap<String, SequenceLogs> getSequenceLogsMap() {
+        return sequenceLogsMap;
+    }
+
+    public void addAlertDef(String key, AlertDefinition alertDefinition){
+        repo.addSequencerOccurrence(key, alertDefinition);
+    }
+
+    public void removeAlertDef(String key){
+        repo.removeSequencerOccurrence(key);
+    }
+
+    public void removeAlertDefUsingAlertDefId(String defId){
+        repo.removeSequencerOccurrenceByDefId(defId);
     }
 }

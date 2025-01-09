@@ -60,7 +60,9 @@ class AlertsRepository(
    // Rx disposable for clearing
    private var fetchDisposable: Disposable? = null
    // results of AlertProcessor evaluation saved to report state for debugging screen.
-   private var alertDefOccurrences: List<AlertDefOccurrence> = emptyList()
+   //private var alertDefOccurrences: List<AlertDefOccurrence> = emptyList()
+   private var alertDefOccurrences = mutableListOf<AlertDefOccurrence>()
+   private var alertDefOccurrencesSequencer : MutableMap<String, AlertDefOccurrence> = mutableMapOf()//mutableListOf<AlertDefOccurrence>()
 
    private val boxStore = haystack.tagsDb.boxStore
    private val alertBox = boxStore.boxFor(Alert::class.java)
@@ -143,6 +145,10 @@ class AlertsRepository(
    }
 
    private fun AlertDefsMap.findTitleById(id: String) = values.find { it._id == id }?.alert?.mTitle
+
+   fun getBloclyAlertDefUsingId(title: String) : AlertDefinition? {
+      return alertDefsMap[title]
+   }
 
 
    /////  Alerts   /////
@@ -340,6 +346,9 @@ class AlertsRepository(
 
       // commit changes
       alertsStateChange.newAlerts
+         .filter {
+               occurrence -> occurrence.alertDef.alert.creator != "blockly" && occurrence.alertDef.alert.creator != "sequencer"
+         }
          .map { occurrence ->  occurrence.toAlert(haystack,this) }
          .forEach { alert -> addAlert(alert)
       }
@@ -352,6 +361,10 @@ class AlertsRepository(
 
       // sync
       syncAlerts()
+
+      alertDefOccurrencesSequencer.forEach { (_, value) ->
+         alertDefOccurrences.add(value)
+      }
    }
 
    // data structure used by AlertDefs dev settings fragment0
@@ -599,6 +612,26 @@ class AlertsRepository(
    fun fixAlertByDef(alertDef : AlertDefinition ) {
       dataStore.findAlerts(alertDef).forEach {
          fixAlert(it)
+      }
+   }
+
+   fun addSequencerOccurrence(key: String, alertDef: AlertDefinition) {
+      alertDefOccurrencesSequencer[key] = AlertDefOccurrence(alertDef, false, false, "")
+   }
+
+   fun removeSequencerOccurrence(key: String) {
+      alertDefOccurrences.remove(alertDefOccurrencesSequencer[key])
+      alertDefOccurrencesSequencer.remove(key)
+   }
+
+   fun removeSequencerOccurrenceByDefId(alertDefId: String) {
+      val iterator = alertDefOccurrencesSequencer.iterator()
+      while (iterator.hasNext()) {
+         val entry = iterator.next()
+         if (entry.key.contains(alertDefId)) {
+            alertDefOccurrences.remove(alertDefOccurrencesSequencer[entry.key])
+            iterator.remove()
+         }
       }
    }
 }

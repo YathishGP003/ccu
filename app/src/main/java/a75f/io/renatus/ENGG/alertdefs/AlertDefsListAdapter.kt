@@ -1,5 +1,6 @@
 package a75f.io.renatus.ENGG.alertdefs
 
+import a75f.io.logger.CcuLog
 import a75f.io.renatus.R
 import android.graphics.Color
 import android.graphics.Typeface
@@ -9,6 +10,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
 
 /**
@@ -17,9 +19,10 @@ import androidx.recyclerview.widget.RecyclerView
  * @author tcase@75f.io
  * Created on 3/2/21.
  */
-class AlertDefsListAdapter: RecyclerView.Adapter<AlertDefViewHolder>() {
+class AlertDefsListAdapter(private val callback: AdapterCallback): RecyclerView.Adapter<AlertDefViewHolder>() {
 
    private val alertDefList: MutableList<AlertDefRow> = mutableListOf()
+   private val TAG = "CCU_ALERTS"
 
    /**
     * Simple setting of all alerts.
@@ -37,7 +40,7 @@ class AlertDefsListAdapter: RecyclerView.Adapter<AlertDefViewHolder>() {
 
    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AlertDefViewHolder {
       val view = LayoutInflater.from(parent.context).inflate(R.layout.alert_def_list_item, parent, false)
-      return AlertDefViewHolder(view)
+      return AlertDefViewHolder(view, callback)
    }
 
    override fun onBindViewHolder(holder: AlertDefViewHolder, position: Int) {
@@ -48,7 +51,7 @@ class AlertDefsListAdapter: RecyclerView.Adapter<AlertDefViewHolder>() {
    override fun getItemCount() = alertDefList.size
 }
 
-class AlertDefViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
+class AlertDefViewHolder(itemView: View, val callback: AdapterCallback): RecyclerView.ViewHolder(itemView) {
 
    private val titleView: TextView = itemView.findViewById(R.id.titleText)
    private val severityView: TextView = itemView.findViewById(R.id.severityText)
@@ -71,7 +74,7 @@ class AlertDefViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
             severityView.setTypeface(null, Typeface.BOLD)
             if (isCustom) {
                titleView.setTextColor(Color.DKGRAY)
-               titleView.setTypeface(null, Typeface.BOLD_ITALIC )
+               titleView.setTypeface(null, Typeface.BOLD )
             } else {
                titleView.setTypeface(null, Typeface.BOLD)
                titleView.setTextColor(Color.BLACK)
@@ -81,7 +84,7 @@ class AlertDefViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
             statusView.setTypeface(null, Typeface.NORMAL)
             if (isCustom) {
                titleView.setTextColor(Color.DKGRAY)
-               titleView.setTypeface(null, Typeface.ITALIC )
+               titleView.setTypeface(null, Typeface.NORMAL)
             } else {
                titleView.setTypeface(null, Typeface.NORMAL)
                titleView.setTextColor(Color.BLACK)
@@ -97,11 +100,20 @@ class AlertDefViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
          }
 
          itemView.setOnClickListener {
-            AlertDialog.Builder(itemView.context)
-               .setTitle(title)
-               .setMessage(notificationMsg)
-               .show()
+
+            if (creator != null && (creator == "blockly" || creator == "sequencer")) {
+               CcuLog.d("CCU_ALERTS", "this is blockly alert")
+               //kamal launch new fragment from here
+               callback.onItemClicked(alertDefId)
+            } else {
+               CcuLog.d("CCU_ALERTS", "this is not a blockly alert")
+               AlertDialog.Builder(itemView.context)
+                  .setTitle(title)
+                  .setMessage(notificationMsg)
+                  .show()
+            }
          }
+
 
          if (alertPopup == null) {
             statusView.setOnClickListener(null)

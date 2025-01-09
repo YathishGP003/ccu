@@ -15,9 +15,10 @@ import android.text.style.StyleSpan
 /** creates a nicely formatted string out of this alert defs' evaluated conditionals */
 fun AlertDefinition.conditionEvaluationText(): SpannableStringBuilder {
    val sb = SpannableStringBuilder()
-
-   for (cond in conditionals) {
-      sb.append(cond.evaluationText())
+   if(conditionals != null) {
+      for (cond in conditionals) {
+         sb.append(cond.evaluationText())
+      }
    }
    return sb
 }

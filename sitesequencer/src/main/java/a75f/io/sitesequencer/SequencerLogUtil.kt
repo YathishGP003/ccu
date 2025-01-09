@@ -1,7 +1,7 @@
 package a75f.io.sitesequencer
 
+import a75f.io.alerts.log.SequenceLogs
 import a75f.io.logger.CcuLog
-import a75f.io.sitesequencer.log.SequenceLogs
 import android.content.Context
 import android.os.Environment
 import com.google.gson.Gson

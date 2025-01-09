@@ -42,6 +42,7 @@ public class RemoteCommandUpdateHandler implements MessageHandler
     public static final String OTA_UPDATE_REMOTE_ACCESS_APP = "ota_update_remoteAccess";
     public static final String OTA_UPDATE_HOME_APP = "ota_update_homeApp";
     public static final String UPDATE_CCU_LOG_LEVEL = "update_ccu_log_level";
+    public static final String SAVE_ALERT_LOGS = "save_alert_logs";
     /**
      * Maintain Queue request for all the OTA request and process one by one
      */
@@ -119,6 +120,15 @@ public class RemoteCommandUpdateHandler implements MessageHandler
                                     remoteCommandInterface.updateRemoteCommands(cmdType, cmdLevel, ccuId+"_"+sequenceId);
                                 else if (safeModeInterface != null)
                                     safeModeInterface.updateRemoteCommands(cmdType, cmdLevel, ccuId+"_"+sequenceId);
+                            }
+                                break;
+                            case SAVE_ALERT_LOGS: {
+                                String ccuId = msgObject.get("id").getAsString();
+                                CcuLog.d("RemoteCommand", " handle save alert logs");
+                                if (remoteCommandInterface != null)
+                                    remoteCommandInterface.updateRemoteCommands(cmdType, cmdLevel, ccuId);
+                                else if (safeModeInterface != null)
+                                    safeModeInterface.updateRemoteCommands(cmdType, cmdLevel, ccuId);
                             }
                                 break;
                             case RESET_PASSWORD:

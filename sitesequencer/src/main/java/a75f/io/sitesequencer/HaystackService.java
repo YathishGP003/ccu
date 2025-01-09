@@ -28,12 +28,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import a75f.io.alerts.log.LogLevel;
+import a75f.io.alerts.log.LogOperation;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.HisItem;
 import a75f.io.logger.CcuLog;
-import a75f.io.sitesequencer.log.LogLevel;
-import a75f.io.sitesequencer.log.LogOperation;
 import a75f.io.sitesequencer.log.SequencerLogsCallback;
 
 public class HaystackService {
@@ -69,6 +69,13 @@ public class HaystackService {
         reason = "Run Id : " + lastRunId+ " - " + "Sequence Id : " + sequenceId;
     }
 
+    private String getResultJson(HashMap hashMap){
+        List<HashMap> list = new ArrayList<>();
+        list.add(hashMap);
+        String resultJson = new Gson().toJson(list);
+        return resultJson;
+    }
+
     // return array of values
     public String hisReadManyInterpolateWithDateRange(Object hisPointIdObj, String startDate, String endDate, Object  contextHelper) {
         String hisPointId = hisPointIdObj.toString();
@@ -87,8 +94,12 @@ public class HaystackService {
         Double[] values = hisItems.stream()
                 .map(HisItem::getVal)
                 .toArray(Double[]::new);
+
+        HashMap resultMap = new HashMap();
+        resultMap.put("values", Arrays.toString(values));
+
         String finalMessage = String.format(Locale.ENGLISH, "found values %s", Arrays.toString(values));
-        sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("HIS_READMANY_INTERPOLATE"), finalMessage, MSG_SUCCESS);
+        sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("HIS_READMANY_INTERPOLATE"), finalMessage, MSG_SUCCESS, getResultJson(resultMap));
         return new Gson().toJson(values);
     }
 
@@ -129,8 +140,12 @@ public class HaystackService {
         Double[] values = hisItems.stream()
                 .map(HisItem::getVal)
                 .toArray(Double[]::new);
+
+        HashMap resultMap = new HashMap();
+        resultMap.put("values", Arrays.toString(values));
+
         String finalMessage = String.format(Locale.ENGLISH, "found values %s", Arrays.toString(values));
-        sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("HIS_READMANY_INTERPOLATE"), finalMessage, MSG_SUCCESS);
+        sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("HIS_READMANY_INTERPOLATE"), finalMessage, MSG_SUCCESS, getResultJson(resultMap));
         return new Gson().toJson(values);
     }
 
@@ -197,7 +212,7 @@ public class HaystackService {
         List<HashMap> list = findByFilterCustom(filter, contextHelper);
         if(!list.isEmpty()){
             String result = new Gson().toJson(list.get(0));
-            sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("FIND_ENTITY_BY_FILTER"), getCustomMessageEntityId(result), MSG_SUCCESS);
+            sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("FIND_ENTITY_BY_FILTER"), getCustomMessageEntityId(result), MSG_SUCCESS, getResultJson(list.get(0)));
             return result;
         }else{
             sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("FIND_ENTITY_BY_FILTER"), MSG_ERROR_NO_ENTITY, MSG_FAILED);
@@ -213,7 +228,9 @@ public class HaystackService {
         if(!list.isEmpty()){
             String entityId = list.get(0).get("id").toString();
             double val = fetchValueByIdOnly(entityId, contextHelper);
-            sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("FETCH_VALUE_BY_ID"), getCustomMessageValue(val), MSG_SUCCESS);
+            HashMap resultMap = new HashMap();
+            resultMap.put("value", val);
+            sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("FETCH_VALUE_BY_ID"), getCustomMessageValue(val), MSG_SUCCESS, getResultJson(resultMap));
             return val;
         }else{
             sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("FIND_BY_FILTER"), MSG_NO_VALUE, MSG_FAILED);
@@ -227,7 +244,7 @@ public class HaystackService {
         HashMap result = CCUHsApi.getInstance().read(id);
         if(result != null){
             String entityResult = new Gson().toJson(result);
-            sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("FETCH_VALUE_BY_ID"), getCustomMessageEntityId(entityResult), MSG_SUCCESS);
+            sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("FETCH_VALUE_BY_ID"), getCustomMessageEntityId(entityResult), MSG_SUCCESS, getResultJson(result));
             return entityResult;
         }else{
             sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("FIND_BY_ID"), MSG_NO_ENTITY_FOR_ID, MSG_FAILED);
@@ -243,7 +260,10 @@ public class HaystackService {
     public int fetchValueByPointWriteMany(String id, Double level, Object contextHelper) {
         sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("FETCH_VALUE_BY_POINT_WRITE_MANY"), "looking value for id-->"+id, MSG_CALCULATING);
         int returnedValue = (int) (CCUHsApi.getInstance().readDefaultValByLevel(id, (int) (level.doubleValue()))).doubleValue();
-        sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("FETCH_VALUE_BY_POINT_WRITE_MANY"), "value is "+returnedValue, MSG_SUCCESS);
+
+        HashMap resultMap = new HashMap();
+        resultMap.put("value", returnedValue);
+        sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("FETCH_VALUE_BY_POINT_WRITE_MANY"), "value is "+returnedValue, MSG_SUCCESS, getResultJson(resultMap));
         return returnedValue;
     }
 
@@ -330,7 +350,11 @@ public class HaystackService {
     public Double fetchValueByIdOnly(String filter, Object contextHelper) {
         sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("FETCH_VALUE_BY_ID"), "looking value for id-->"+filter, MSG_CALCULATING);
         Double output = getValueByEntityId(filter);
-        sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("FETCH_VALUE_BY_ID"), "value -->"+output, MSG_CALCULATING);
+
+        HashMap resultMap = new HashMap();
+        resultMap.put("value", output);
+
+        sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("FETCH_VALUE_BY_ID"), "value -->"+output, MSG_SUCCESS, getResultJson(resultMap));
         if(contextHelper instanceof V8Object){
             ((V8Object) contextHelper).close();
         }

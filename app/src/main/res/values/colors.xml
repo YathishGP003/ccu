@@ -118,4 +118,7 @@
     <color name="airoverse_hover_03">#1A6FC498</color>
     <color name="airoverse_banners">#3C3C3C</color>
 
+    <color name="log_key_blue">#021693</color>
+    <color name="log_value_red">#FF3A42</color>
+
 </resources>

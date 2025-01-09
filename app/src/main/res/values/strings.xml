@@ -1775,4 +1775,8 @@
     <string name="edit_schedule">EDIT SCHEDULE</string>
     <string name="zone_vacations">Zone Vacations</string>
     <string name="vacations">Vacations</string>
+    <string name="title_alert_name">Alert Name</string>
+    <string name="title_alert_severity">Severity</string>
+    <string name="title_alert_status">Status</string>
+    <string name="title_alert_message">Message</string>
 </resources>

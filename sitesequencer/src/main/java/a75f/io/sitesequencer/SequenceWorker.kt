@@ -2,13 +2,13 @@ package a75f.io.sitesequencer
 
 import a75f.io.alerts.AlertDefinition
 import a75f.io.alerts.AlertManager
+import a75f.io.alerts.log.LogLevel
+import a75f.io.alerts.log.LogOperation
+import a75f.io.alerts.log.SequenceLogs
+import a75f.io.alerts.log.SequenceMethodLog
 import a75f.io.api.haystack.Alert
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.logger.CcuLog
-import a75f.io.sitesequencer.log.LogLevel
-import a75f.io.sitesequencer.log.LogOperation
-import a75f.io.sitesequencer.log.SequenceLogs
-import a75f.io.sitesequencer.log.SequenceMethodLog
 import a75f.io.sitesequencer.log.SequencerLogsCallback
 import android.content.Context
 import androidx.work.CoroutineWorker
@@ -109,6 +109,14 @@ class SequenceWorker(context: Context, params: WorkerParameters) :
                     "##ending evaluation for seqId: $seqId <--name--> ${siteSequencerDefinition.seqName}"
                 )
 
+
+                /*val sequenceAlert = SequencerSchedulerUtil.findAlertByBlockId(siteSequencerDefinition, siteSequencerDefinition.seqId)
+                if (sequenceAlert != null) {
+                    val alertDefinition =
+                        SequencerSchedulerUtil.createAlertDefinitionEmpty()
+                    AlertManager.getInstance().test(siteSequencerDefinition.seqName, siteSequencerDefinition.seqId)
+                }*/
+
                 val fileName =
                     "seq_" + CCUHsApi.getInstance().ccuId + "_" + siteSequencerDefinition.seqId + ".json"
                 SequencerLogUtil.dumpLogs(applicationContext, fileName, sequenceLogs)
@@ -166,6 +174,21 @@ class SequenceWorker(context: Context, params: WorkerParameters) :
             )
         }
 
+        override fun logInfo(
+            logLevel: LogLevel,
+            operationName: LogOperation,
+            message: String,
+            result: String,
+            resultJson: String?
+        ) {
+            sequenceLogs.addLog(
+                SequenceMethodLog(
+                    logLevel, operationName,
+                    message, result, Date().toString(), Date().toString(), resultJson
+                )
+            )
+        }
+
         override fun logError(
             logLevel: LogLevel,
             operationName: LogOperation,
@@ -217,6 +240,16 @@ class SequenceWorker(context: Context, params: WorkerParameters) :
                 val tempId = entityId!!.replaceFirst("@".toRegex(), "")
                 mapOfPastAlerts["${alertDefinition.alert.alertDefId}:$blockId:$tempId"] = AlertData(sequenceAlert.title,
                     message.toString(), entityId, "sequencer", blockId, alertDefinition)
+                if (def != null) {
+                    CcuLog.d(TAG, "add this sequencer to alert def ui-->${def.seqId}")
+                    alertDefinition.alert.alertDefId = def.seqId
+                    alertDefinition.alert.setCreator("blockly")
+                    val key = "${alertDefinition.alert.alertDefId}:$blockId:$tempId"
+                    AlertManager.getInstance().addAlertDef(key, alertDefinition)
+                    AlertManager.getInstance().sequenceLogsMap[def.seqId] = sequenceLogs
+                }else{
+                    CcuLog.d(TAG, "add this sequencer to alert def ui failed as def is not there")
+                }
             } else {
                 CcuLog.d(TAG, "sequenceAlert not found for blockId: $blockId")
             }
@@ -250,6 +283,7 @@ class SequenceWorker(context: Context, params: WorkerParameters) :
                             )
                         )
                         AlertManager.getInstance().fixAlert(alert)
+                        AlertManager.getInstance().removeAlertDef(keyFromDb)
                     }
                 })
         }

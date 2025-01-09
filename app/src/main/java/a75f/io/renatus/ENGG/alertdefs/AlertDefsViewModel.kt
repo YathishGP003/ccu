@@ -1,9 +1,12 @@
 package a75f.io.renatus.ENGG.alertdefs
 
 import a75f.io.alerts.*
+import a75f.io.alerts.log.SequenceLogs
 import a75f.io.alerts.model.AlertDefOccurrence
 import a75f.io.api.haystack.Alert
 import a75f.io.api.haystack.Alert.AlertSeverity.*
+import a75f.io.logger.CcuLog
+import a75f.io.renatus.ENGG.alertdefs.BundleConstants.TAG
 import a75f.io.renatus.R
 import android.text.SpannableStringBuilder
 import androidx.annotation.ColorRes
@@ -37,6 +40,7 @@ class AlertDefsViewModel: ViewModel() {
 
       // Initialize empty map of AlertDefs to all their Alerts & Offset Status
       val occurrences = alertManager.alertDefOccurrences
+
       val alertDefsMap = occurrences
          .associateWithTo(mutableMapOf<AlertDefOccurrence, AlertDefStatus>(), { AlertDefStatus() })
 
@@ -91,7 +95,6 @@ class AlertDefsViewModel: ViewModel() {
       } else {
          alertDef.alert.mTitle
       }
-
       var statusString = status.statusString()
       if (statusString.isBlank() || statusString == "Resolved") {
          if (occurrence.isMuted) statusString = "MUTED"
@@ -109,7 +112,9 @@ class AlertDefsViewModel: ViewModel() {
          conditional = alertDef.conditionEvaluationText(),
          colorRes = severity.color(),
          status = statusString,
-         evalString = occurrence.evaluationString
+         evalString = occurrence.evaluationString,
+         creator = alertDef.alert.creator,
+         alertDefId = alertDef.alert.alertDefId
       )
    }
 
@@ -125,6 +130,11 @@ class AlertDefsViewModel: ViewModel() {
       val sdf: DateFormat = SimpleDateFormat("dd MMM yyyy HH:mm")
       val date = Date(millis)
       return sdf.format(date)
+   }
+
+   fun getLogsByDefId(alertDefId: String?) : SequenceLogs? {
+      CcuLog.d(TAG, "log map size--${alertManager.sequenceLogsMap.size}")
+      return alertManager.sequenceLogsMap[alertDefId]
    }
 }
 
@@ -187,5 +197,7 @@ data class AlertDefRow(
    val conditional: SpannableStringBuilder,
    @ColorRes val colorRes: Int,
    val status: String,
-   val evalString: String
+   val evalString: String,
+   val creator: String? = "",
+   val alertDefId: String? = "",
 )

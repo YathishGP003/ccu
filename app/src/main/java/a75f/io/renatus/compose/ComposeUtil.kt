@@ -63,7 +63,8 @@ class ComposeUtil {
                     }
                 }
                 if (!modifiedStringBuilder.first().isDigit() && modifiedStringBuilder.last().isDigit()) {
-                    modifiedStringBuilder.insert(modifiedStringBuilder.length - 1, ' ')
+                    if(!(modifiedStringBuilder.length > 1 && modifiedStringBuilder[modifiedStringBuilder.length - 2].isDigit()))
+                        modifiedStringBuilder.insert(modifiedStringBuilder.length - 1, ' ')
                 }
                 if (modifiedStringBuilder.last().isLetter() && modifiedStringBuilder.last().isLowerCase() && modifiedStringBuilder.length > 1 && modifiedStringBuilder[modifiedStringBuilder.length - 2].isDigit()) {
                     modifiedStringBuilder.insert(modifiedStringBuilder.length - 1, ' ')

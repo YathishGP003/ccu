@@ -413,9 +413,9 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                         previewWidth = 165,
                         expandedWidth = 185,
                         onSelected = { selectedIndex ->
-                            viewModel.viewState.relay1OnThreshold = viewModel.relay1OnThreshold[selectedIndex].toDouble()
+                            viewModel.viewState.relay1OnThreshold = selectedIndex.toDouble()
                         },
-                        defaultSelection = viewModel.relay1OnThreshold.indexOf(viewModel.viewState.relay1OnThreshold.toInt().toString()),
+                        defaultSelection = viewModel.viewState.relay1OnThreshold.toInt(),
                         spacerLimit = 200,
                         heightValue = 268,
                         isEnabled = viewModel.viewState.relay1OutputEnable
@@ -427,9 +427,9 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                         previewWidth = 130,
                         expandedWidth = 150,
                         onSelected = { selectedIndex ->
-                            viewModel.viewState.relay2OnThreshold = viewModel.relay2OnThreshold[selectedIndex].toDouble()
+                            viewModel.viewState.relay2OnThreshold = selectedIndex.toDouble()
                         },
-                        defaultSelection = viewModel.relay2OnThreshold.indexOf(viewModel.viewState.relay2OnThreshold.toInt().toString()),
+                        defaultSelection = viewModel.viewState.relay2OnThreshold.toInt(),
                         spacerLimit = 120,
                         heightValue = 211,
                         isEnabled = viewModel.viewState.relay2OutputEnable
@@ -446,9 +446,9 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                         previewWidth = 165,
                         expandedWidth = 185,
                         onSelected = { selectedIndex ->
-                            viewModel.viewState.relay1OffThreshold = viewModel.relay1OffThreshold[selectedIndex].toDouble()
+                            viewModel.viewState.relay1OffThreshold = selectedIndex.toDouble()
                         },
-                        defaultSelection = viewModel.relay1OffThreshold.indexOf(viewModel.viewState.relay1OffThreshold.toInt().toString()),
+                        defaultSelection = viewModel.viewState.relay1OffThreshold.toInt(),
                         spacerLimit = 190,
                         heightValue = 268,
                         isEnabled = viewModel.viewState.relay1OutputEnable
@@ -460,9 +460,9 @@ class PlcProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                         previewWidth = 130,
                         expandedWidth = 150,
                         onSelected = { selectedIndex ->
-                            viewModel.viewState.relay2OffThreshold = viewModel.relay2OffThreshold[selectedIndex].toDouble()
+                            viewModel.viewState.relay2OffThreshold = selectedIndex.toDouble()
                         },
-                        defaultSelection = viewModel.relay2OffThreshold.indexOf(viewModel.viewState.relay2OffThreshold.toInt().toString()),
+                        defaultSelection = viewModel.viewState.relay2OffThreshold.toInt(),
                         spacerLimit = 110,
                         heightValue = 211,
                         isEnabled = viewModel.viewState.relay2OutputEnable

@@ -1,7 +1,6 @@
 package a75f.io.renatus.profiles.plc
 
 import a75f.io.api.haystack.CCUHsApi
-import a75f.io.api.haystack.Device
 import a75f.io.api.haystack.RawPoint
 import a75f.io.device.mesh.LSerial
 import a75f.io.domain.api.Domain
@@ -19,8 +18,6 @@ import a75f.io.domain.util.ModelLoader.getSmartNodePidModel
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.NodeType
-import a75f.io.logic.bo.building.dab.getDevicePointDict
-import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.plc.PlcProfile
 import a75f.io.logic.bo.building.plc.PlcProfileConfig
@@ -110,6 +107,7 @@ class PlcProfileViewModel : ViewModel() {
             profileConfiguration = PlcProfileConfig(deviceAddress.toInt(), nodeType.name, 0,
                 zoneRef, floorRef , profileType, model ).getDefaultConfiguration()
             viewState = PlcProfileViewState.fromPlcProfileConfig(profileConfiguration)
+            viewState.pidTargetValue = 5.0  // by default set to 5.0
             isDefault = true
         }
         CcuLog.i(Domain.LOG_TAG, profileConfiguration.toString())
@@ -288,10 +286,10 @@ class PlcProfileViewModel : ViewModel() {
         setpointSensorOffset = getListByDomainName(DomainName.setpointSensorOffset, model)
         analog1MinOutput = getListByDomainName(DomainName.analog1MinOutput, model)
         analog1MaxOutput = getListByDomainName(DomainName.analog1MaxOutput, model)
-        relay1OnThreshold = getListByDomainName(DomainName.relay1OnThreshold, model)
-        relay1OffThreshold = getListByDomainName(DomainName.relay1OffThreshold, model)
-        relay2OnThreshold = getListByDomainName(DomainName.relay2OnThreshold, model)
-        relay2OffThreshold = getListByDomainName(DomainName.relay2OffThreshold, model)
+        relay1OnThreshold = getListByDomainName(DomainName.relay1OnThreshold, model).map { "$it%" }
+        relay1OffThreshold = getListByDomainName(DomainName.relay1OffThreshold, model).map { "$it%" }
+        relay2OnThreshold = getListByDomainName(DomainName.relay2OnThreshold, model).map { "$it%" }
+        relay2OffThreshold = getListByDomainName(DomainName.relay2OffThreshold, model).map { "$it%" }
     }
 
     fun saveConfiguration() {

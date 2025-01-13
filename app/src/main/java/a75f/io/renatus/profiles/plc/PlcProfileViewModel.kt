@@ -314,7 +314,8 @@ class PlcProfileViewModel : ViewModel() {
                     .sendSeedMessage(false, false, deviceAddress, zoneRef, floorRef)
                 DesiredTempDisplayMode.setModeType(zoneRef, CCUHsApi.getInstance())
                 CcuLog.i(Domain.LOG_TAG, "PlcProfile Pairing complete")
-                plcProfile.init()
+                if(profileConfiguration.isDefault) plcProfile.init()
+                plcProfile.updateProcessVariable()
 
                 CoroutineScope(Dispatchers.IO).launch {
                     updateTypeForAnalog1Out(profileConfiguration)

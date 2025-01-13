@@ -498,6 +498,7 @@ public class Globals {
                         case PLC:
                             PlcProfile plc = new PlcProfile(Short.parseShort(eq.getGroup()), eq.getId());
                             plc.init();
+                            plc.updateProcessVariable();
                             L.ccu().zoneProfiles.add(plc);
                             break;
                         case EMR:

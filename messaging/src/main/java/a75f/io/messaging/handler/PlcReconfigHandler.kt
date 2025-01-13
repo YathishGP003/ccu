@@ -136,7 +136,7 @@ fun updateConfigPoint(msgObject: JsonObject, configPoint: Point) {
     }
 
     writePointFromJson(configPoint, msgObject, CCUHsApi.getInstance())
-    profile.init()
+    profile.updateProcessVariable()
 }
 
 private fun profileReconfigurationRequired(configPoint: Point): Boolean {

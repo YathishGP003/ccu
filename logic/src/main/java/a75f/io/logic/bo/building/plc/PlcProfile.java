@@ -5,9 +5,6 @@ import static a75f.io.logic.bo.building.plc.PlcProfileUtilKt.getProcessVariableM
 
 import org.apache.commons.lang3.StringUtils;
 import org.projecthaystack.HDict;
-
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -222,13 +219,7 @@ public class PlcProfile extends ZoneProfile {
         spSensorOffset = plcEquip.getSetpointSensorOffset().readDefaultVal();
         isEnabledAnalog2InForSp = plcEquip.getUseAnalogIn2ForSetpoint().readDefaultVal() > 0;
         isEnabledZeroErrorMidpoint = plcEquip.getExpectZeroErrorAtMidpoint().readDefaultVal() > 0;
-        boolean isSmartNode = CCUHsApi.getInstance().readMapById(equipRef).containsKey(Tags.SMART_NODE);
-        ModelDirective model = isSmartNode ? ModelLoader.INSTANCE.getSmartNodePidModel()
-                                    : ModelLoader.INSTANCE.getHelioNodePidModel();
-        processVariableDomainName = getProcessVariableMappedPoint(plcEquip, model);
-        if (isEnabledAnalog2InForSp) {
-            dynamicTargetDomainName = getDynamicTargetPoint(plcEquip, model);
-        }
+
         CcuLog.i(L.TAG_CCU_ZONE, "PLC initialized : proportionalGain " + plc.getProportionalGain() + ", integralGain " + plc.getIntegralGain() +
                 ", proportionalSpread " + plc.getMaxAllowedError() + ", integralMaxTimeout " + plc.getIntegralMaxTimeout());
 
@@ -286,5 +277,17 @@ public class PlcProfile extends ZoneProfile {
             plcEquip.getDynamicTargetValue().writePointValue(dynamicTargetSensorVal + spSensorOffset);
         }
 
+    }
+
+    public void updateProcessVariable() {
+        boolean isSmartNode = CCUHsApi.getInstance().readMapById(equipRef).containsKey(Tags.SMART_NODE);
+        ModelDirective model = isSmartNode ? ModelLoader.INSTANCE.getSmartNodePidModel()
+                : ModelLoader.INSTANCE.getHelioNodePidModel();
+        processVariableDomainName = getProcessVariableMappedPoint(plcEquip, model);
+        if (isEnabledAnalog2InForSp) {
+            dynamicTargetDomainName = getDynamicTargetPoint(plcEquip, model);
+        }
+        CcuLog.i(L.TAG_CCU_ZONE, "updateProcessVariable>>>> updateProcessVariable:"
+                + processVariableDomainName + ", dynamicTargetDomainName:" + dynamicTargetDomainName);
     }
 }

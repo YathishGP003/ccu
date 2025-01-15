@@ -87,6 +87,7 @@ public class PreferenceUtil {
     private static final String CORRECT_RELAY2_POINTREF_SERIES_PARALLEL = "correctRelay2PointRefSeriesParallel";
     private static final String REMOVE_REDUNDANT_SSE_DEVICE_POINTS = "removeRedundantSseDevicePoints";
     private static final String NULL_ID_REMOVAL_STATUS = "nullIdRemovalStatus";
+    private static final String UPDATE_HISINTERPOLATE_COV = "hisinterpolatecov";
 
     public static void setContext(Context c) {
         context= c;
@@ -689,5 +690,13 @@ public class PreferenceUtil {
 
     public static void setNullIdRemovalStatus() {
         setBooleanPreference(NULL_ID_REMOVAL_STATUS, true);
+    }
+
+    public static boolean getHisInterpolateCOV() {
+        return getBooleanPreference(UPDATE_HISINTERPOLATE_COV);
+    }
+
+    public static void setHisInterpolateCOV() {
+        setBooleanPreference(UPDATE_HISINTERPOLATE_COV, true);
     }
 }

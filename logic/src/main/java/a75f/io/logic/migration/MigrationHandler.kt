@@ -258,6 +258,10 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             removeRedundantSmartnodeHelionodePointsForSse()
             PreferenceUtil.setRemoveRedundantSseDevicePoints()
         }
+        if(!PreferenceUtil.getHisInterpolateCOV()) {
+            updateHisInterpolate()
+            PreferenceUtil.setHisInterpolateCOV()
+        }
         hayStack.scheduleSync()
     }
 
@@ -2229,5 +2233,16 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             }
         }
         CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "removeRedundantSmartnodeHelionodePointsForSse completed")
+    }
+
+    private fun updateHisInterpolate() {
+        hayStack.readAllHDictByQuery("ota and status and hisInterpolate == \""+"linear"+"\"")
+            .forEach { point ->
+                hayStack.updatePoint(
+                    Point.Builder().setHDict(point).setHisInterpolate("cov").build(),
+                    point["id"].toString()
+                )
+                CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "Updated ${point["dis"]} hisInterpolate for point ${point["id"]}  to cov")
+            }
     }
 }

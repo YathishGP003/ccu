@@ -106,7 +106,7 @@ public class Conditional
                                 // these values are for debugging, not part of the algorithm
                                 error = null;
                                 sb = new StringBuilder();
-
+        String key = "(" + this.key + ")";
         if (grpOperation!=null && !grpOperation.isEmpty() && grpOperation.contains("Clear Password")){
             clearPassword(value, spDefaultPrefs);
             return;

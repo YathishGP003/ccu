@@ -318,16 +318,7 @@ class PlcProfileViewModel : ViewModel() {
                 plcProfile.updateProcessVariable()
 
                 CoroutineScope(Dispatchers.IO).launch {
-                    updateTypeForAnalog1Out(profileConfiguration)
-                    profileConfiguration.updatePortConfiguration(
-                        hayStack,
-                        profileConfiguration,
-                        DeviceBuilder(hayStack, EntityMapper(model)),
-                        deviceModel
-                    )
-                    CoroutineScope(Dispatchers.IO).launch {
-                        saveUnUsedPortStatus(profileConfiguration, deviceAddress, hayStack)
-                    }
+                    saveUnUsedPortStatus(profileConfiguration, deviceAddress, hayStack)
                 }
                 // This check is needed because the dialog sometimes fails to close inside the coroutine.
                 // We don't know why this happens.
@@ -355,6 +346,13 @@ class PlcProfileViewModel : ViewModel() {
             equipBuilder.updateEquipAndPoints(profileConfiguration, model, hayStack.site!!.id, equipDis, true)
             updateDeviceAndPoints(deviceAddress, profileConfiguration, nodeType, hayStack, model, deviceModel)
         }
+        updateTypeForAnalog1Out(profileConfiguration)
+        profileConfiguration.updatePortConfiguration(
+            hayStack,
+            profileConfiguration,
+            DeviceBuilder(hayStack, EntityMapper(model)),
+            deviceModel
+        )
     }
 
 

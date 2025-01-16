@@ -218,7 +218,7 @@ public class CCUUtils {
 			String migrationVersion = appVersion.substring(appVersion.lastIndexOf('_') + 1);
 			CCUDiagEquip diagEquip = Domain.INSTANCE.checkCCUEquipInitialisedAndGet();
 			if (diagEquip != null){
-				diagEquip.getAppVersion().writeDefaultVal(migrationVersion);
+				diagEquip.getMigrationVersion().writeDefaultVal(migrationVersion);
 			}
 			CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "Update Migration Diag Point "+migrationVersion);
 		} catch (PackageManager.NameNotFoundException e) {

@@ -376,6 +376,7 @@ public class CreateNewSite extends Fragment {
                             }
                             L.ccu().systemProfile = new DefaultSystem();
                             DomainManager.INSTANCE.addSystemDomainEquip(CCUHsApi.getInstance());
+                            updateMigrationDiagWithAppVersion();
                         },
                         () -> {
                             mNext.setEnabled(true);
@@ -968,7 +969,6 @@ public class CreateNewSite extends Fragment {
         TunerEquip.INSTANCE.initialize(CCUHsApi.getInstance(), false);
 
         CCUHsApi.getInstance().syncEntityTree();
-        updateMigrationDiagWithAppVersion();
         CcuLog.i(TAG, "LocalSiteID: " + localSiteId);
         ccuHsApi.log();
         prefs.setString("SITE_ID", localSiteId);

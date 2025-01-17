@@ -1,6 +1,8 @@
 
 package a75f.io.renatus.profiles.system.advancedahu
 
+import a75f.io.api.haystack.CCUHsApi
+import a75f.io.api.haystack.Tags
 import a75f.io.device.cm.getAdvancedAhuAnalogInputMappings
 import a75f.io.device.cm.getAdvancedAhuThermistorMappings
 import a75f.io.device.cm.getCo2DomainName
@@ -11,6 +13,7 @@ import a75f.io.device.cm.getUniversalInputSensorMapping
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.config.AssociationConfig
 import a75f.io.domain.config.EnableConfig
+import a75f.io.domain.equips.TIEquip
 import a75f.io.logic.bo.building.system.AdvancedAhuAnalogOutAssociationType
 import a75f.io.logic.bo.building.system.AdvancedAhuRelayAssociationType
 import a75f.io.logic.bo.building.system.getDomainPressure
@@ -381,6 +384,54 @@ fun validateSatSequence(sensors: Sensors): Pair<Boolean, Spanned> {
     return Pair(true, Html.fromHtml("success", Html.FROM_HTML_MODE_LEGACY))
 }
 
+fun checkTIValidation(profileConfiguration: AdvancedHybridAhuConfig): Pair<Boolean, Spanned> {
+    val tiEquip = CCUHsApi.getInstance().readEntity("equip and ti")
+    if (tiEquip.isNullOrEmpty())
+        return Pair(true, Html.fromHtml("success", Html.FROM_HTML_MODE_LEGACY))
+    val tiDomainEquip = TIEquip(tiEquip[Tags.ID].toString())
+
+    val th1isUsedInTI = (tiDomainEquip.roomTemperatureType.readDefaultVal()
+        .toInt() == 1 || tiDomainEquip.supplyAirTemperatureType.readDefaultVal().toInt() == 1)
+    val th2isUsedInTI = (tiDomainEquip.roomTemperatureType.readDefaultVal()
+        .toInt() == 2 || tiDomainEquip.supplyAirTemperatureType.readDefaultVal().toInt() == 2)
+    val addressBusIsUsedInTI = (tiDomainEquip.roomTemperatureType.readDefaultVal().toInt() == 0)
+
+    if (profileConfiguration.cmConfiguration.thermistor1Enabled.enabled && th1isUsedInTI) {
+        return Pair(
+            false,
+            Html.fromHtml(
+                "Th1 is used in TI zone please desable to use it here",
+                Html.FROM_HTML_MODE_LEGACY
+            )
+        )
+    }
+    if (profileConfiguration.cmConfiguration.thermistor2Enabled.enabled && th2isUsedInTI) {
+        return Pair(
+            false,
+            Html.fromHtml(
+                "Th1 is used in TI zone please desable to use it here",
+                Html.FROM_HTML_MODE_LEGACY
+            )
+        )
+    }
+    if ((profileConfiguration.cmConfiguration.address0SensorAssociation.temperatureAssociation.associationVal > 0 ||
+                profileConfiguration.cmConfiguration.address1SensorAssociation.temperatureAssociation.associationVal > 0 ||
+                profileConfiguration.cmConfiguration.address2SensorAssociation.temperatureAssociation.associationVal > 0 ||
+                profileConfiguration.cmConfiguration.address3SensorAssociation.temperatureAssociation.associationVal > 0
+                ) && addressBusIsUsedInTI
+    ) {
+        return Pair(
+            false,
+            Html.fromHtml(
+                "Address bus is used in TI zone please desable to use it here",
+                Html.FROM_HTML_MODE_LEGACY
+            )
+        )
+    }
+    return Pair(true, Html.fromHtml("success", Html.FROM_HTML_MODE_LEGACY))
+}
+
+
 fun isValidateConfiguration(profileConfiguration: AdvancedHybridAhuConfig): Pair<Boolean, Spanned> {
 
     var isPressureAvailable = false
@@ -434,6 +485,11 @@ fun isValidateConfiguration(profileConfiguration: AdvancedHybridAhuConfig): Pair
     if (!connectModuleStatus.first) {
         return connectModuleStatus
     }
+
+    /*if (!checkTIValidation(profileConfiguration).first) {
+        return checkTIValidation(profileConfiguration)
+    }*/
+
     return Pair(true, Html.fromHtml("Success", Html.FROM_HTML_MODE_LEGACY))
 }
 

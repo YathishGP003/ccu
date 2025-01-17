@@ -2,16 +2,11 @@ package a75f.io.renatus.profiles.ti
 
 
 import a75f.io.api.haystack.CCUHsApi
-import a75f.io.api.haystack.RawPoint
-import a75f.io.device.mesh.LSerial
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.Domain.getListByDomainName
 import a75f.io.domain.api.DomainName
-import a75f.io.domain.api.PhysicalPoint
-import a75f.io.domain.api.Point
-import a75f.io.domain.api.readPhysicalPoint
-import a75f.io.domain.config.ProfileConfiguration
-import a75f.io.domain.equips.TIEquip
+import a75f.io.domain.logic.DeviceBuilder
+import a75f.io.domain.logic.EntityMapper
 import a75f.io.domain.logic.ProfileEquipBuilder
 import a75f.io.domain.util.ModelLoader
 import a75f.io.logger.CcuLog
@@ -20,31 +15,25 @@ import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.caz.configs.TIConfiguration
 import a75f.io.logic.bo.building.ccu.TIProfile
 import a75f.io.logic.bo.building.definitions.ProfileType
-import a75f.io.renatus.BASE.FragmentCommonBundleArgs
-import a75f.io.renatus.profiles.OnPairingCompleteListener
-
-import android.content.Context
-import android.os.Bundle
-import a75f.io.domain.logic.EntityMapper
-import a75f.io.domain.logic.DeviceBuilder
 import a75f.io.logic.bo.building.system.dab.DabAdvancedAhu
 import a75f.io.logic.bo.building.system.util.getAdvancedAhuSystemEquip
 import a75f.io.logic.bo.building.system.vav.VavAdvancedAhu
+import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.FloorPlanFragment
 import a75f.io.renatus.R
 import a75f.io.renatus.modbus.util.ALERT
 import a75f.io.renatus.modbus.util.OK
 import a75f.io.renatus.modbus.util.showToast
-import a75f.io.renatus.profiles.system.advancedahu.SAT_1_MUST_ERROR
+import a75f.io.renatus.profiles.OnPairingCompleteListener
 import a75f.io.renatus.util.ProgressDialogUtils
 import a75f.io.renatus.util.highPriorityDispatcher
+import android.content.Context
 import android.content.Intent
+import android.os.Bundle
 import android.text.Html
-import android.text.Spanned
 import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfilePointDef
@@ -157,23 +146,35 @@ class TIViewModel: ViewModel() {
     private fun isValidConfig(): Boolean {
         var isTh1Used = false
         var isTh2Used = false
+        var isSensorBusIsUsed = false
 
         if (L.ccu().systemProfile is DabAdvancedAhu || L.ccu().systemProfile is VavAdvancedAhu) {
             val ahuConfig = getAdvancedAhuSystemEquip()
             isTh1Used = ahuConfig.thermistor1InputEnable.readDefaultVal() > 0
             isTh2Used = ahuConfig.thermistor2InputEnable.readDefaultVal() > 0
+            isSensorBusIsUsed = (ahuConfig.temperatureSensorBusAdd0.readDefaultVal() > 0 ||
+                    ahuConfig.temperatureSensorBusAdd1.readDefaultVal() > 0 ||
+                    ahuConfig.temperatureSensorBusAdd2.readDefaultVal() > 0 ||
+                    ahuConfig.temperatureSensorBusAdd3.readDefaultVal() > 0)
         }
 
-        if (isTh1Used && isTh2Used) {
+        fun isTiMapped(mapping: Int) = (viewState.roomTemperatureType.toInt() == mapping ||  viewState.supplyAirTemperatureType.toInt() == mapping)
+
+        if (isSensorBusIsUsed && viewState.roomTemperatureType.toInt() == 0) {
+            showErrorDialog(context, "Sensor bus is already used in system profile")
+            return false
+        }
+
+        if (isTh1Used && isTh2Used && (isTiMapped(1) || isTiMapped(2))) {
             showErrorDialog(context, "Both thermistors are used in system profile")
             return false
         }
-        if (isTh1Used && (viewState.roomTemperatureType.toInt() == 1 ||  viewState.supplyAirTemperatureType.toInt() == 1)) {
+        if (isTh1Used && isTiMapped(1)) {
             showErrorDialog(context, "Thermistor 1 is already used in system profile")
             return false
         }
 
-        if (isTh2Used && (viewState.roomTemperatureType.toInt() == 2 ||  viewState.supplyAirTemperatureType.toInt() == 2)) {
+        if (isTh2Used && isTiMapped(2)) {
             showErrorDialog(context, "Thermistor 2 is already used in system profile")
             return false
         }

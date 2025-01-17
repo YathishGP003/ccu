@@ -107,9 +107,9 @@ fun sendBroadCast(context: Context, intentAction: String, message: String) {
 
         // "objectConf" object
         val objectConf = JSONObject()
-        objectConf.put(NUMBER_OF_NOTIFICATION_CLASS_OBJECTS, 1)
-        objectConf.put(NUMBER_OF_TREND_LOG_OBJECTS, 1)
-        objectConf.put(NUMBER_OF_SCHEDULE_OBJECTS, 1)
+        objectConf.put(NUMBER_OF_NOTIFICATION_CLASS_OBJECTS, 0) //These objects are not required as of now
+        objectConf.put(NUMBER_OF_TREND_LOG_OBJECTS, 0)
+        objectConf.put(NUMBER_OF_SCHEDULE_OBJECTS, 0)
         objectConf.put(NUMBER_OF_OFFSET_VALUES, 1)
 
 

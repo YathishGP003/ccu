@@ -4,7 +4,7 @@ import static a75f.io.device.bacnet.BacnetConfigConstants.BACNET_CONFIGURATION;
 import static a75f.io.device.bacnet.BacnetConfigConstants.BACNET_DEVICE_TYPE;
 import static a75f.io.device.bacnet.BacnetConfigConstants.BACNET_DEVICE_TYPE_BBMD;
 import static a75f.io.device.bacnet.BacnetConfigConstants.BACNET_DEVICE_TYPE_FD;
-import static a75f.io.device.bacnet.BacnetConfigConstants.BACNET_DEVICE_TYPE_NEITHER;
+import static a75f.io.device.bacnet.BacnetConfigConstants.BACNET_DEVICE_TYPE_NORMAL;
 import static a75f.io.device.bacnet.BacnetConfigConstants.BACNET_FD_AUTO_STATE;
 import static a75f.io.device.bacnet.BacnetConfigConstants.BACNET_FD_CONFIGURATION;
 import static a75f.io.device.bacnet.BacnetConfigConstants.IS_BACNET_CONFIG_FILE_CREATED;
@@ -781,7 +781,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
             }else if(bacnetDeviceType.equalsIgnoreCase(BACNET_DEVICE_TYPE_BBMD)){
                 CcuLog.d(TAG, "---bacnet configuration is ---"+BACNET_DEVICE_TYPE_BBMD);
             }else{
-                CcuLog.d(TAG, "---bacnet configuration is ---"+BACNET_DEVICE_TYPE_NEITHER);
+                CcuLog.d(TAG, "---bacnet configuration is ---"+ BACNET_DEVICE_TYPE_NORMAL);
             }
         }
     }

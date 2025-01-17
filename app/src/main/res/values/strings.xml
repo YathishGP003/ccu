@@ -1264,9 +1264,9 @@
     <string name="txt_BBMD_IPAddress">BBMD IP Address <font color="#e5561a">*</font></string>
     <string name="txt_FD_IPAddress">BBMD IP Address <font color="#e5561a">*</font></string>
     <string name="txt_LocalNetworkAddress">Local Network Number <font color="#e5561a">*</font></string>
-    <string name="txt_localNetworkAddressHint">In between 1 to 65535</string>
+    <string name="txt_localNetworkAddressHint">In between 1 to 65534</string>
     <string name="txt_virtualNetworkAddress">Virtual Network Number <font color="#e5561a">*</font></string>
-    <string name="txt_virtualNetworkAddressHint">In between 1 to 65535</string>
+    <string name="txt_virtualNetworkAddressHint">In between 1 to 65534</string>
     <string name="txt_port">Port <font color="#e5561a">*</font></string>
     <string name="txt_port_hint">Recommended: 47808 to 47823</string>
     <string name="txt_auto_hint">Auto will work if time is greater than 0 </string>

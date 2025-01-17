@@ -7,7 +7,7 @@ import static a75f.io.device.bacnet.BacnetConfigConstants.BACNET_CONFIGURATION;
 import static a75f.io.device.bacnet.BacnetConfigConstants.BACNET_DEVICE_TYPE;
 import static a75f.io.device.bacnet.BacnetConfigConstants.BACNET_DEVICE_TYPE_BBMD;
 import static a75f.io.device.bacnet.BacnetConfigConstants.BACNET_DEVICE_TYPE_FD;
-import static a75f.io.device.bacnet.BacnetConfigConstants.BACNET_DEVICE_TYPE_NEITHER;
+import static a75f.io.device.bacnet.BacnetConfigConstants.BACNET_DEVICE_TYPE_NORMAL;
 import static a75f.io.device.bacnet.BacnetConfigConstants.BACNET_FD_AUTO_STATE;
 import static a75f.io.device.bacnet.BacnetConfigConstants.BACNET_FD_CONFIGURATION;
 import static a75f.io.device.bacnet.BacnetConfigConstants.BROADCAST_BACNET_APP_CONFIGURATION_TYPE;
@@ -38,7 +38,6 @@ import static a75f.io.renatus.UtilityApplication.context;
 import static a75f.io.renatus.UtilityApplication.startRestServer;
 import static a75f.io.renatus.UtilityApplication.stopRestServer;
 
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -53,12 +52,12 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -81,7 +80,6 @@ import java.net.ServerSocket;
 import java.util.Enumeration;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -198,10 +196,12 @@ public class Communication extends Fragment {
 
     @BindView(R.id.bbmdInputContainer) View bbmdInputContainer;
 
+    @BindView(R.id.normalView) View normalView;
     @BindView(R.id.tvFdAdd) View tvfDAdd;
 
     @BindView(R.id.tvFdSubmit) View tvFdSubmit;
 
+    @BindView(R.id.tvNormalSubmit) View tvNormalSubmit;
     @BindView(R.id.checkBoxAuto)
     CheckBox fdCheckBoxAuto;
 
@@ -230,7 +230,6 @@ public class Communication extends Fragment {
     private ExecutorService executorService;
 
     boolean isZoneToVirtualDeviceErrorShowing = false;
-
     public Communication() {
     
     }
@@ -258,7 +257,7 @@ public class Communication extends Fragment {
         this.rootView = view;
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 
-        String selectedDeviceType = sharedPreferences.getString(BACNET_DEVICE_TYPE, BACNET_DEVICE_TYPE_NEITHER);
+        String selectedDeviceType = sharedPreferences.getString(BACNET_DEVICE_TYPE, BACNET_DEVICE_TYPE_NORMAL);
 
         ArrayAdapter<String> spinnerBaudRateAdapter = getAdapterValue(new ArrayList(Arrays.asList(getResources().getStringArray(R.array.mb_config_baudrate_array))));
         spinnerBaudRate.setAdapter(spinnerBaudRateAdapter);
@@ -322,6 +321,14 @@ public class Communication extends Fragment {
             networkObject = config.getJSONObject("network");
             deviceObject = config.getJSONObject("device");
             objectConf = config.getJSONObject("objectConf");
+
+            // Following objects were not required, So we have initialized the value with 0
+            objectConf.put("noOfScheduleObjects",0);
+            objectConf.put("noOfTrendLogObjects",0);
+            objectConf.put("noOfNotificationClassObjects",0);
+            config.put("objectConf", objectConf);
+            sharedPreferences.edit().putString(BACNET_CONFIGURATION,config.toString()).apply();
+
             setBACnetConfigurationValues();
             doBACnetConfigurationValidation();
             initializeBACnet();
@@ -342,6 +349,11 @@ public class Communication extends Fragment {
 
         fdInputView.setVisibility(View.GONE);
 
+        normalView.setVisibility(View.VISIBLE);
+
+        // Below mentioned functionality was not required. Because it was handled in the BACapp
+        sharedPreferences.edit().putBoolean(BACNET_FD_AUTO_STATE, false).apply();
+
         String bacAppVersion = CCUHsApi.getInstance().readDefaultStrVal("point and diag and version and bacnet");
         if (bacAppVersion.isEmpty()) {
             bacAppVersion = "Not Installed";
@@ -350,7 +362,7 @@ public class Communication extends Fragment {
 
         tvFdSubmit.setOnClickListener(view1 -> {
             if (validateFdData()) {
-                Toast.makeText(context, "device configured as fd", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, "Device configured as FD", Toast.LENGTH_SHORT).show();
                 try {
                     DataFdObj dataFdObj = new DataFdObj();
                     for (int i = 0; i < fdInputViews.getChildCount(); i++) {
@@ -380,6 +392,12 @@ public class Communication extends Fragment {
             }
         });
 
+        tvNormalSubmit.setOnClickListener(view1 -> { // Updating submit button for Normal
+            sharedPreferences.edit().putString(BACNET_DEVICE_TYPE, BACNET_DEVICE_TYPE_NORMAL).apply();
+            sendBroadCast(context, BROADCAST_BACNET_APP_CONFIGURATION_TYPE, "Normal");
+            Toast.makeText(context, "Device configured as Normal", Toast.LENGTH_SHORT).show();
+                });
+
         tvfDAdd.setOnClickListener(view1 -> {
             CcuLog.d(TAG_CCU_BACNET, "add fd config");
             View fdView = LayoutInflater.from(getContext()).inflate(R.layout.lyt_fd_view, null);
@@ -390,7 +408,7 @@ public class Communication extends Fragment {
             fdInputViews.addView(fdView);
         });
 
-        boolean defaultCheckBoxState = sharedPreferences.getBoolean(BACNET_FD_AUTO_STATE, true);
+        boolean defaultCheckBoxState = sharedPreferences.getBoolean(BACNET_FD_AUTO_STATE, false);
 
         fdCheckBoxAuto.setChecked(defaultCheckBoxState);
 
@@ -412,7 +430,7 @@ public class Communication extends Fragment {
 
         tvBbmdSubmit.setOnClickListener(view1 -> {
             if (validateBbmdData()) {
-                Toast.makeText(context, "device configured as bbmd", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, "Device configured as BBMD", Toast.LENGTH_SHORT).show();
                 try {
                     DataBbmdObj dataBbmdObj = new DataBbmdObj();
                     for (int i = 0; i < bbmdInputViews.getChildCount(); i++) {
@@ -531,18 +549,19 @@ public class Communication extends Fragment {
         return true;
     }
 
-    private void handleConfigurationType(String label){
+    private void handleConfigurationType(String label) {
         if(label.equalsIgnoreCase(getString(R.string.label_bbmd))){
             bbmdInputContainer.setVisibility(View.VISIBLE);
             fdInputView.setVisibility(View.GONE);
+            normalView.setVisibility(View.GONE);
         }else if(label.equalsIgnoreCase(getString(R.string.label_foreign_device))){
             fdInputView.setVisibility(View.VISIBLE);
             bbmdInputContainer.setVisibility(View.GONE);
+            normalView.setVisibility(View.GONE);
         }else{
-            sharedPreferences.edit().putString(BACNET_DEVICE_TYPE, BACNET_DEVICE_TYPE_NEITHER).apply();
             fdInputView.setVisibility(View.GONE);
             bbmdInputContainer.setVisibility(View.GONE);
-            sendBroadCast(context, BROADCAST_BACNET_APP_CONFIGURATION_TYPE, label);
+            normalView.setVisibility(View.VISIBLE);
         }
     }
 
@@ -706,9 +725,9 @@ public class Communication extends Fragment {
 
         if(ipAddress.getText().toString().equals(EMPTY_STRING) || (!CCUUiUtil.isValidIPAddress(ipAddress.getText().toString().trim()))) return false;
 
-        if(localNetworkNumber.getText().toString().equals(EMPTY_STRING) || (!CCUUiUtil.isValidNumber(Integer.parseInt(localNetworkNumber.getText().toString()), 1, 65535, 1)))  return false;
+        if(localNetworkNumber.getText().toString().equals(EMPTY_STRING) || (!CCUUiUtil.isValidNumber(Integer.parseInt(localNetworkNumber.getText().toString()), 1, 65534, 1)))  return false;
 
-        if(virtualNetworkNumber.getText().toString().equals(EMPTY_STRING) || (!CCUUiUtil.isValidNumber(Integer.parseInt(virtualNetworkNumber.getText().toString()), 1, 65535, 1)))  return false;
+        if(virtualNetworkNumber.getText().toString().equals(EMPTY_STRING) || (!CCUUiUtil.isValidNumber(Integer.parseInt(virtualNetworkNumber.getText().toString()), 1, 65534, 1)))  return false;
 
         if(Integer.parseInt(virtualNetworkNumber.getText().toString()) == Integer.parseInt(localNetworkNumber.getText().toString())) {
             virtualNetworkNumber.setError(context.getResources().getString(R.string.error_vnn_and_lnn_not_same));

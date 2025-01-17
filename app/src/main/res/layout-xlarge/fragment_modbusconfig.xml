@@ -1008,6 +1008,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
+                    android:visibility="gone"
                     android:orientation="horizontal">
                     <LinearLayout
                         android:layout_width="0dp"
@@ -1070,6 +1071,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
+                    android:visibility="gone"
                     android:orientation="horizontal">
                     <LinearLayout
                         android:layout_width="0dp"
@@ -1133,6 +1135,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
+                    android:visibility="gone"
                     android:orientation="horizontal">
                     <LinearLayout
                         android:layout_width="0dp"
@@ -1444,12 +1447,13 @@
                             android:textSize="22sp" />
 
                         <CheckBox
-                            android:checked="true"
+                            android:checked="false"
                             android:id="@+id/checkBoxAuto"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:gravity="center"
                             android:minWidth="36dp"
+                            android:visibility="gone"
                             android:minHeight="36dp"
                             android:padding="5dp"
                             android:text="AUTO"
@@ -1460,10 +1464,30 @@
                             android:layout_marginStart="10dp"
                             android:gravity="center"
                             android:layout_width="match_parent"
+                            android:visibility="gone"
                             android:layout_height="match_parent"
                             android:text="@string/txt_auto_hint"
                             android:textAppearance="@style/font_style_hint" />
                     </LinearLayout>
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_below="@id/rg_configuration_type"
+                    android:id="@+id/normalView">
+                    <TextView
+                        android:id="@+id/tvNormalSubmit"
+                        android:layout_width="wrap_content"
+                        android:layout_marginTop="15dp"
+                        android:layout_height="48dp"
+                        android:layout_marginEnd="50dp"
+                        android:fontFamily="@font/lato_regular"
+                        android:gravity="center_vertical"
+                        android:text="@string/txt_submit"
+                        android:textAllCaps="true"
+                        android:textColor="?orange_75f"
+                        android:textSize="22sp" />
                 </LinearLayout>
             </RelativeLayout>
         </LinearLayout>

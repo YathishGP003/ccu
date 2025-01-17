@@ -13,7 +13,7 @@ object  BacnetConfigConstants {
     const val BACNET_DEVICE_TYPE = "bacnetDeviceType"
     const val BACNET_DEVICE_TYPE_BBMD = "bbmd"
     const val BACNET_DEVICE_TYPE_FD = "fd"
-    const val BACNET_DEVICE_TYPE_NEITHER = "neither"
+    const val BACNET_DEVICE_TYPE_NORMAL = "normal"
     const val BACNET_BBMD_CONFIGURATION = "bacnetBbmdConfiguration"
     const val BACNET_FD_CONFIGURATION = "bacnetFdConfiguration"
     const val HTTP_SERVER_STATUS = "httpServerStatus"

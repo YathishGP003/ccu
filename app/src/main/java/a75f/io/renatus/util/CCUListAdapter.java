@@ -2,6 +2,7 @@ package a75f.io.renatus.util;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,17 +19,30 @@ import com.google.gson.JsonObject;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.projecthaystack.HGrid;
+import org.projecthaystack.HRow;
+import org.projecthaystack.io.HZincReader;
 
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
+import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.sync.HttpUtil;
 import a75f.io.constants.HttpConstants;
+import a75f.io.domain.api.DomainName;
+import a75f.io.logger.CcuLog;
+import a75f.io.logic.L;
 import a75f.io.logic.ccu.restore.CCU;
 import a75f.io.logic.cloud.RenatusServicesEnvironment;
 import a75f.io.renatus.BuildConfig;
 import a75f.io.renatus.R;
 import a75f.io.renatus.registration.CCUSelect;
 import a75f.io.renatus.registration.UpdateCCUFragment;
+import a75f.io.renatus.util.remotecommand.bundle.BundleInstallManager;
+import a75f.io.renatus.util.remotecommand.bundle.models.ArtifactDTO;
+import a75f.io.renatus.util.remotecommand.bundle.models.UpgradeBundle;
 import a75f.io.util.ExecutorTask;
 
 public class CCUListAdapter extends RecyclerView.Adapter<CCUListAdapter.CCUView> {
@@ -36,6 +50,7 @@ public class CCUListAdapter extends RecyclerView.Adapter<CCUListAdapter.CCUView>
     private List<CCU> ccuList;
     private Context context;
     private CCUSelect callBack;
+    private boolean isCCUUpgradeRequired = false;
     private androidx.fragment.app.FragmentManager fragmentManager;
     public CCUListAdapter(List<CCU> ccuList, Context context, CCUSelect callBack, androidx.fragment.app.FragmentManager parentFragmentManager){
         this.ccuList = ccuList;
@@ -90,39 +105,106 @@ public class CCUListAdapter extends RecyclerView.Adapter<CCUListAdapter.CCUView>
        }
 
         holder.itemView.setOnClickListener(view ->{
-            if (!isCCUVersionMatchingWithReplacingCCU(position)) {
-                checkIsCCUHasRecommendedVersion(ccuList.get(position));
-            } else {
-                callBack.onCCUSelect(ccuList.get(position));
-            }
+            checkBundleVersionPointPresent(ccuList, position);
         } );
     }
 
-    public void checkIsCCUHasRecommendedVersion(CCU ccu){
+    private void checkBundleVersionPointPresent(List<CCU> ccuList, int position) {
         ExecutorTask.executeAsync(
-                ()-> ProgressDialogUtils.showProgressDialog(context, "Checking for File size"),
+                ()-> ProgressDialogUtils.showProgressDialog(context, "Checking for Bundle Version"),
                 ()-> {
-                    try {
-                        String fileSize = getFileSize(ccu.getVersion());
-                        updateCCUFragment(fragmentManager, ccu, fileSize);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
+                    isCCUUpgradeRequired = false;
+                    String bundleVersion = getBundleVersionPoint(ccuList, position);
+                    UpgradeBundle bundle = BundleInstallManager.Companion.getInstance().getUpgradeBundleByName(bundleVersion, true);
+                    CcuLog.d(L.TAG_CCU_BUNDLE, "Bundle Version Point"+bundle);
+
+                    if(bundleVersion != null && bundle != null && bundle.getUpgradeOkay() && bundle.getComponentsToUpgrade().size() > 0){
+                        isCCUUpgradeRequired = true;
+                        double size = 0;
+                        for (ArtifactDTO artifactDTO : bundle.getComponentsToUpgrade()) {
+                            size += Double.parseDouble(artifactDTO.getFileSize());
+                            CcuLog.d(L.TAG_CCU_BUNDLE, "Upgradable ArtifactDTO name "+artifactDTO.getFileName() + " version "+artifactDTO.getVersion() + " size "+artifactDTO.getFileSize());
+
+                        }
+                        CcuLog.d(L.TAG_CCU_BUNDLE, "Update UI with Bundle Version Point"+bundleVersion);
+                        try {
+                            updateCCUFragment(fragmentManager, null, String.valueOf(size), true, bundle.getBundle().getBundleName(), bundle);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
+                    } else if (!isCCUVersionMatchingWithReplacingCCU(position)) {
+                        isCCUUpgradeRequired = true;
+                        CCU ccu = ccuList.get(position);
+                        try {
+                            String fileSize = getFileSize(ccu.getVersion());
+                            updateCCUFragment(fragmentManager, ccu, fileSize, false, null, bundle);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
                     }
                 },
-                ProgressDialogUtils::hideProgressDialog);
+                ()->{
+                    ProgressDialogUtils.hideProgressDialog();
+                    if(!isCCUUpgradeRequired) {
+                        callBack.onCCUSelect(ccuList.get(position));
+                    }
+                });
     }
 
+    private String getBundleVersionPoint(List<CCU> ccuList, int position) {
 
-    private void updateCCUFragment(FragmentManager parentFragmentManager, CCU ccu, String fileSize) throws JSONException {
-        String currentAppVersionWithPatch = getCurrentAppVersionWithPatch();
-            FragmentTransaction ft = parentFragmentManager.beginTransaction();
-            Fragment previousFragment = parentFragmentManager.findFragmentByTag("popup");
-            if (previousFragment != null) {
-                ft.remove(previousFragment);
+            String ccuId = ccuList.get(position).getCcuId().replace("@", "");
+            String query = ("domainName == \"" + DomainName.bundleVersion + "\" and ccuRef == \"" + ccuId + "\"");
+
+            String response = CCUHsApi.getInstance().fetchRemoteEntityByQuery(query);
+
+            if (response == null || response.isEmpty()) {
+                CcuLog.d(L.TAG_CCU_BUNDLE, "Bundle Version Point response is empty");
+                return null;
             }
-            UpdateCCUFragment newFragment = new UpdateCCUFragment(currentAppVersionWithPatch,
+            List<HashMap> bundleVersionPointMapList =
+                    CCUHsApi.getInstance().HGridToList(new HZincReader(response).readGrid());
+            HashMap<Object, Object> bundleVersionMap = bundleVersionPointMapList.get(0);
+            if(bundleVersionMap.isEmpty()){
+                CcuLog.d(L.TAG_CCU_BUNDLE, "Bundle Version Point map not found");
+                return null;
+            }
+            String bundleVersionId = bundleVersionMap.get(Tags.ID).toString();
+            HGrid pointGrid = CCUHsApi.getInstance().readPointArrRemote(bundleVersionId);
+            if (pointGrid == null) {
+                CcuLog.d(L.TAG_CCU_BUNDLE, "Bundle Version Point grid is empty");
+                return null;
+            }
+            Iterator it = pointGrid.iterator();
+            while (it.hasNext()) {
+                HRow r = (HRow) it.next();
+                if (Integer.parseInt(r.get("level").toString()) == 8) {
+                    CcuLog.d(L.TAG_CCU_BUNDLE, "Bundle Version Point found value is "+r.get("val").toString());
+                    return r.get("val").toString();
+                }
+            }
+            return null;
+    }
+
+    private void updateCCUFragment(FragmentManager parentFragmentManager, CCU ccu, String fileSize,
+                                   boolean isBundleUpdate, String bundleName, UpgradeBundle bundle) throws JSONException {
+        String currentAppVersionWithPatch = getCurrentAppVersionWithPatch();
+        FragmentTransaction ft = parentFragmentManager.beginTransaction();
+        Fragment previousFragment = parentFragmentManager.findFragmentByTag("popup");
+        UpdateCCUFragment newFragment;
+        if (previousFragment != null) {
+            ft.remove(previousFragment);
+        }
+        if (isBundleUpdate) {
+            newFragment = new UpdateCCUFragment().showBundleUpdateScreenFromReplaceCCU(true,
+                    true, bundleName, fileSize, currentAppVersionWithPatch, bundle);
+        } else {
+            newFragment = new UpdateCCUFragment().showUiForReplaceCCU(currentAppVersionWithPatch,
                     ccu, fileSize, true);
-            newFragment.show(ft, "popup");
+        }
+        newFragment.show(ft, "popup");
     }
 
     private static String getFileSize(String currentCCUVersion) throws JSONException {

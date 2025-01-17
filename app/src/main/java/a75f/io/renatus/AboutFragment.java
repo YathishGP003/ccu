@@ -1,9 +1,5 @@
 package a75f.io.renatus;
 
-import static a75f.io.renatus.util.CCUUiUtil.getCurrentCCUVersion;
-import static a75f.io.renatus.util.CCUUiUtil.getGreyColor;
-import static a75f.io.renatus.util.CCUUiUtil.getPrimaryColor;
-import static a75f.io.renatus.util.CCUUiUtil.isCCUNeedsToBeUpdated;
 import static a75f.io.renatus.util.CCUUiUtil.isCurrentVersionHigherOrEqualToRequired;
 
 import android.annotation.SuppressLint;
@@ -15,24 +11,24 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.Editable;
-import android.text.Html;
 import android.text.TextWatcher;
 import android.util.Patterns;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.PopupWindow;
 import android.widget.ProgressBar;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -43,20 +39,17 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 
 import com.google.android.material.progressindicator.LinearProgressIndicator;
-import com.google.common.reflect.TypeToken;
-import com.google.gson.Gson;
 
 import org.jetbrains.annotations.NotNull;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.lang.reflect.Type;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -65,21 +58,20 @@ import java.util.Map;
 import java.util.TimeZone;
 
 import a75f.io.api.haystack.CCUHsApi;
-import a75f.io.api.haystack.sync.HttpUtil;
-import a75f.io.constants.HttpConstants;
+import a75f.io.domain.api.Domain;
+import a75f.io.domain.equips.CCUDiagEquip;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.cloud.OtpManager;
-import a75f.io.logic.cloud.RenatusServicesEnvironment;
 import a75f.io.logic.cloud.ResponseCallback;
 import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.renatus.ENGG.AppInstaller;
-import a75f.io.renatus.util.CCUUiUtil;
-import a75f.io.renatus.util.CustomSelectionAdapter;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.util.RxjavaUtil;
-import a75f.io.renatus.util.remotecommand.RemoteCommandHandlerUtil;
+import a75f.io.renatus.util.remotecommand.bundle.BundleInstallListener;
+import a75f.io.renatus.util.remotecommand.bundle.BundleInstallManager;
+import a75f.io.renatus.util.remotecommand.bundle.models.UpgradeBundle;
 import a75f.io.util.ExecutorTask;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -88,11 +80,10 @@ import butterknife.OnClick;
 /**
  * Created by Mahesh on 17-07-2019.
  */
-public class AboutFragment extends Fragment {
+public class AboutFragment extends Fragment implements BundleInstallListener {
 
 
     private boolean mCCUAppDownloaded = false;
-    private boolean mHomeAppDownloaded = false;
     private CountDownTimer otpCountDownTimer;
     @BindView(R.id.tvSerialNumber)
     TextView tvSerialNumber;
@@ -116,15 +107,17 @@ public class AboutFragment extends Fragment {
     LinearLayout linearLayout;
     @BindView(R.id.progress_bar)
     LinearProgressIndicator progressBar;
-    @BindView(R.id.downloaded_size)
-    TextView totalDownloadedSize;
-    @BindView(R.id.file_size)
-    TextView totalFileSize;
+    @BindView(R.id.progress_bar_layout)
+    LinearLayout progress_bar_layout;
+    @BindView(R.id.error_message_layout)
+    LinearLayout error_message_layout;
+    @BindView(R.id.error_image_layout)
+    LinearLayout error_image_layout;
+
     @BindView(R.id.downloading_text)
     TextView downloadingText;
-    String versionLabelString;
+    String bundleLabelString;
     String fileSize;
-    Long downloadTd;
     @BindView(R.id.update_status)
     TextView updateStatus;
     @BindView(R.id.version_text)
@@ -137,16 +130,12 @@ public class AboutFragment extends Fragment {
     LinearLayout connectionUpLayout;
     @BindView(R.id.connection_down_layout)
     LinearLayout connectionDownLayout;
-    boolean isNotFirstInvocation ;
-    @BindView(R.id.selectVersionSpinner)
-    Spinner selectVersionSpinner;
-    @BindView(R.id.selectedVersionSize)
-    TextView selectedVersionSize;
-    @BindView(R.id.cancel_update)
-    TextView cancelUpdate;
-    @BindView(R.id.selectVesrionLayout)
-    LinearLayout selectVersionLayout;
 
+    @BindView(R.id.download_perc)
+    TextView downloadPerc;
+
+    @BindView(R.id.imBundleHint)
+    ImageView imBundleHint;
 
     EditText code1;
     EditText code2;
@@ -161,11 +150,8 @@ public class AboutFragment extends Fragment {
     private AlertDialog.Builder builder;
     private AlertDialog alertDialog;
     TextView tvmessage;
-    private String selectedVersion;
-    private String SelectedVersionSize;
-    CustomSelectionAdapter<String> selectVersionValues;
-    private String nextUpdateVersionGlobal;
-    private String nextFinalUpdateVersionGlobal;
+    private boolean isPopupVisible = false;
+    private PopupWindow popupWindow;
 
     public AboutFragment() {
 
@@ -183,7 +169,6 @@ public class AboutFragment extends Fragment {
 
                 if (mCCUAppDownloaded) {
                     mCCUAppDownloaded = false;
-                    mHomeAppDownloaded = false;
                     final boolean bNewHomeAppAvailable =false;
                     final boolean bNewCCUAppAvailable = AppInstaller.getHandle().isNewCCUAppAvailable();
 
@@ -230,10 +215,15 @@ public class AboutFragment extends Fragment {
         PackageManager pm = getActivity().getPackageManager();
         PackageInfo pi;
         try {
-            pi = pm.getPackageInfo("a75f.io.renatus", 0);
-            String versionName = pi.versionName.toString().replace("RENATUS_CCU","CCU");
-            String str =  versionName + "." + pi.versionCode;
-            tvCcuVersion.setText(str);
+            String softwareVersion;
+            String bundleVersion = Domain.diagEquip.getBundleVersion().readDefaultStrVal();
+            if (bundleVersion != "") {
+                softwareVersion = bundleVersion;
+            } else {
+                pi = pm.getPackageInfo("a75f.io.renatus", 0);
+                softwareVersion = pi.versionName.toString().replace("RENATUS_CCU", "CCU");
+            }
+            tvCcuVersion.setText(softwareVersion);
         } catch (PackageManager.NameNotFoundException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -253,404 +243,223 @@ public class AboutFragment extends Fragment {
         } else {
             checkIsCCUHasRecommendedVersion(getActivity());
         }
-        cancelUpdate.setOnClickListener(cancelOnClickListener);
-        updateCCU.setOnClickListener(updateOnClickListener);
+        imBundleHint.setOnClickListener(imBundleHintListener);
        return rootView;
     }
 
     private void getRecommendedCCUDataFromPreference() {
-        versionLabelString = PreferenceUtil.getStringPreference("versionLabel");
-        fileSize = PreferenceUtil.getStringPreference("fileSize");
-        latestVersion.setText(getCurrentCCUVersion());
-        totalFileSize.setText(PreferenceUtil.getStringPreference("downloadSize"));
-        selectedVersion = PreferenceUtil.getStringPreference("selectedVersion");
-        SelectedVersionSize = PreferenceUtil.getStringPreference("SelectedVersionSize");
-        nextFinalUpdateVersionGlobal = PreferenceUtil.getStringPreference("finalNextFinalUpdateVersion");
-        nextUpdateVersionGlobal = PreferenceUtil.getStringPreference("nextUpdateVersion");
-        restoreListOfVersion();
+        bundleLabelString = PreferenceUtil.getStringPreference("versionLabel");
     }
 
-    private HashMap<String, String > reStoreRecommendedVersionsWithRequiredVersion() {
-        String recommendedVersionsWithRequiredVersion = PreferenceUtil.getStringPreference("recommendedVersionsWithRequiredVersion");
-        Gson gson = new Gson();
-        return gson.fromJson(recommendedVersionsWithRequiredVersion, HashMap.class);
-    }
-    private HashMap<String, String > restoreVersionWithVersionLabel() {
-        String recommendedVersionsWithRequiredVersion = PreferenceUtil.getStringPreference("versionWithVersionLabel");
-        Gson gson = new Gson();
-        return gson.fromJson(recommendedVersionsWithRequiredVersion, HashMap.class);
-    }
-    private HashMap<String, String > reStoreVersionWithSize() {
-        String recommendedVersionsWithRequiredVersion = PreferenceUtil.getStringPreference("versionWithSize");
-        Gson gson = new Gson();
-        return gson.fromJson(recommendedVersionsWithRequiredVersion, HashMap.class);
-    }
-
-    private void restoreListOfVersion() {
-        String sortedListOfVersion = PreferenceUtil.getStringPreference("sortedListOfVersion");
-        Gson gson = new Gson();
-        Type type = new TypeToken<List<String>>() {}.getType();
-        List<String> restoredList = gson.fromJson(sortedListOfVersion, type);
-        selectVersionValues = new CustomSelectionAdapter<>(getContext(), R.layout.custom_textview, restoredList);
-        selectVersionValues.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        HashMap<String, String> recommendedVersionsWithRequiredVersion =
-                reStoreRecommendedVersionsWithRequiredVersion();
-        HashMap<String, String> versionWithVersionLabel = restoreVersionWithVersionLabel();
-        HashMap<String, String> versionWithSize = reStoreVersionWithSize();
-        new Handler(Looper.getMainLooper()).post(() -> {
-            selectVersionSpinner.setAdapter(selectVersionValues);
-            CCUUiUtil.setSpinnerDropDownColor(selectVersionSpinner, getContext());
-            if(selectedVersion.equals(PreferenceUtil.getStringPreference("recommendedVersion"))){
-                selectVersionSpinner.setSelection(selectVersionValues.getPosition(selectedVersion+" Recommended"));
-            }else {
-                selectVersionSpinner.setSelection(selectVersionValues.getPosition(selectedVersion + " "));
-            }            selectedVersionSize.setText(SelectedVersionSize);
-            selectVersionSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                @Override
-                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                    onSpinnerSelection(parent, position, CCUUiUtil.getCurrentCCUVersion(),
-                            recommendedVersionsWithRequiredVersion, versionWithVersionLabel, versionWithSize);
-                }
-
-                @Override
-                public void onNothingSelected(AdapterView<?> parent) {
-
-                }
-            });
-        });
-    }
-
-    private void onSpinnerSelection(AdapterView<?> parent, int position, String currentAppVersion,
-                                    HashMap<String, String> recommendedVersionsWithRequiredVersion,
-                                    HashMap<String, String> versionWithVersionLabel, HashMap<String,
-            String> versionWithSize) {
-        String selectedItem = (String) parent.getItemAtPosition(position);
-        String version = selectedItem.split("\\s+")[0];
-        if(position > 0) {
-            if (isCurrentVersionHigherOrEqualToRequired(currentAppVersion, recommendedVersionsWithRequiredVersion.get(version))) {
-                totalFileSize.setVisibility(View.VISIBLE);
-                selectedVersionSize.setVisibility(View.VISIBLE);
-                versionLabelString = versionWithVersionLabel.get(version);
-                cancelUpdate.setEnabled(true);
-                cancelUpdate.setTextColor(CCUUiUtil.getPrimaryColor());
-                if(progressBar.getVisibility() == View.VISIBLE){
-                    updateCCU.setTextColor(CCUUiUtil.getGreyColor());
-                    updateCCU.setEnabled(false);
-                }
-                else {
-                    updateCCU.setTextColor(CCUUiUtil.getPrimaryColor());
-                    updateCCU.setEnabled(true);
-                }
-                String totalFileSize1 = versionWithSize.get(version)+" MB";
-                totalFileSize.setText(totalFileSize1);
-                String size = versionWithSize.get(version)+" MB";
-                fileSize = versionWithSize.get(version);
-                selectedVersionSize.setText(size);
-                selectedVersion = version;
-                SelectedVersionSize = versionWithSize.get(version)+" MB";
-                PreferenceUtil.setStringPreference("selectedVersion", selectedVersion);
-                PreferenceUtil.setStringPreference("SelectedVersionSize", SelectedVersionSize);
-            } else {
-                updateCCU.setEnabled(false);
-                cancelUpdate.setEnabled(false);
-                updateCCU.setTextColor(getGreyColor());
-                cancelUpdate.setTextColor(getGreyColor());
-                generateUpgradeCCUError(version, nextFinalUpdateVersionGlobal
-                        == null ? nextUpdateVersionGlobal : nextFinalUpdateVersionGlobal);
-            }
-        } else {
-            selectedVersionSize.setVisibility(View.GONE);
-            updateCCU.setTextColor(getGreyColor());
-            updateCCU.setEnabled(false);
-            cancelUpdate.setTextColor(getGreyColor());
-            cancelUpdate.setEnabled(false);
-        }
-    }
 
     private void installNewApk() {
         PreferenceUtil.installCCU();
-        selectVersionLayout.setVisibility(View.GONE);
-        //latestVersion.setText(PreferenceUtil.getStringPreference("recommendedVersion"));
         linearLayout.setVisibility(View.VISIBLE);
         updateAppText.setVisibility(View.GONE);
         updateCCU.setVisibility(View.GONE);
-        totalDownloadedSize.setVisibility(View.INVISIBLE);
-        totalFileSize.setVisibility(View.INVISIBLE);
-        downloadingText.setText("Installing..");
-        progressBar.setVisibility(View.GONE);
-
     }
 
     public void checkIsCCUHasRecommendedVersion(FragmentActivity activity) {
-        ExecutorTask.executeAsync(()->{
-                    ProgressDialogUtils.showProgressDialog(activity,"Checking for recommended version");
+        ExecutorTask.executeAsync(
+                () -> ProgressDialogUtils.showProgressDialog(activity, "Checking for recommended version"),
+                () -> {
+                    // Retrieve the recommended upgrade bundle
+                    BundleInstallManager bundleInstallManager = BundleInstallManager.Companion.getInstance();
+                    UpgradeBundle upgradeBundle = bundleInstallManager.getRecommendedUpgradeBundle(false);
+
+                    // Handle the case where CCU is offline
+                    if (upgradeBundle == null) {
+                        connectionDownLayout.setVisibility(View.VISIBLE);
+                        connectionUpLayout.setVisibility(View.GONE);
+                        return;
+                    } else if(upgradeBundle.getUpgradeOkay() && upgradeBundle.getComponentsToUpgrade().size() == 0){
+                        postToMainThread(this::softwareIsUpToDate);
+                        return;
+                    }
+                    postToMainThread(() -> {
+                        latestVersion.setText(upgradeBundle.component1().getBundleName());
+                        bundleLabelString = upgradeBundle.component1().getBundleName();
+                        downloadingText.setVisibility(View.GONE);
+                    });
+
+                    // Handle error messages in the upgrade bundle
+                    if (!upgradeBundle.getErrorMessages().isEmpty()) {
+                        postToMainThread(() -> handleUpgradeBundleErrors(upgradeBundle.getErrorMessages()));
+                    } else {
+                        postToMainThread(() -> setupUpdateCCUButton(upgradeBundle, bundleInstallManager));
+                    }
                 },
-                ()->{String response = getRecommendedCCUVersion();
-                    updateAboutFragmentUI(response);
-                },
-                ProgressDialogUtils::hideProgressDialog);
+                ProgressDialogUtils::hideProgressDialog
+        );
     }
+
+    private void handleUpgradeBundleErrors(List<String> upgradeBundleErrorMessages) {
+        downloadingText.setVisibility(View.GONE);
+        progress_bar_layout.setVisibility(View.GONE);
+        updateCCU.setVisibility(View.GONE);
+        error_message_layout.setVisibility(View.VISIBLE);
+        error_image_layout.setVisibility(View.VISIBLE);
+        linearLayout.setVisibility(View.VISIBLE);
+
+        // Build and display error messages
+        StringBuilder errorMessages = new StringBuilder();
+        error_message_layout.removeAllViews(); // Clear any previous messages
+
+        if (!upgradeBundleErrorMessages.isEmpty()) {
+            for (int i = 0; i < upgradeBundleErrorMessages.size(); i++) {
+                // Create a horizontal LinearLayout for each message with a number and message text
+                LinearLayout messageRow = new LinearLayout(requireContext());
+                messageRow.setOrientation(LinearLayout.HORIZONTAL);
+
+                TextView numberView = new TextView(requireContext());
+                numberView.setText((i + 1) + ". ");
+                messageRow.addView(numberView);
+                numberView.setTextAppearance(requireContext(), R.style.title_normal);
+                numberView.setTextSize(20);
+
+
+                // Create and set the error message TextView
+                TextView messageView = new TextView(requireContext(), null);
+                messageView.setText(upgradeBundleErrorMessages.get(i));
+                messageView.setTextAppearance(requireContext(), R.style.title_normal); // Apply your style
+                messageView.setTextSize(20);
+                messageView.setPadding(0, 8, 0, 0);
+                messageRow.addView(messageView);
+
+                // Add the constructed row to the parent layout
+                error_message_layout.addView(messageRow);
+            }
+        }
+
+        CcuLog.d(L.TAG_CCU_UI, errorMessages.toString());
+    }
+
+    private void setupUpdateCCUButton(UpgradeBundle upgradeBundle, BundleInstallManager bundleInstallManager) {
+        updateCCU.setEnabled(true);
+        if(upgradeBundle.getErrorMessages().isEmpty()) {
+            error_message_layout.setVisibility(View.GONE);
+            error_image_layout.setVisibility(View.GONE);
+        }
+        updateCCU.setOnClickListener(v -> {
+            if ("UPDATE NOW".equalsIgnoreCase(updateCCU.getText().toString())) {
+                startUpdateProcess(upgradeBundle, bundleInstallManager);
+            } else {
+                cancelUpdateProcess(bundleInstallManager);
+            }
+        });
+    }
+
+    private void startUpdateProcess(UpgradeBundle upgradeBundle, BundleInstallManager bundleInstallManager) {
+        startDownloadingApk();
+        PreferenceUtil.startUpdateCCU();
+        PreferenceUtil.setStringPreference("versionLabel", upgradeBundle.component1().getBundleName());
+        RxjavaUtil.executeBackgroundWithDisposable(() -> {
+            bundleInstallManager.initiateBundleUpgrade(upgradeBundle, this);
+        });
+    }
+
+    private void cancelUpdateProcess(BundleInstallManager bundleInstallManager) {
+        updateCCU.setVisibility(View.VISIBLE);
+        updateCCU.setEnabled(true);
+        updateCCU.setText("UPDATE NOW");
+
+        connectivityIssues.setVisibility(View.GONE);
+        updateAppText.setVisibility(View.VISIBLE);
+        linearLayout.setVisibility(View.GONE);
+        progress_bar_layout.setVisibility(View.GONE);
+        PreferenceUtil.stopUpdateCCU();
+        PreferenceUtil.installationCompleted();
+        bundleInstallManager.cancelBundleInstallation();
+    }
+
+    private void postToMainThread(Runnable action) {
+        new Handler(Looper.getMainLooper()).post(action);
+    }
+
 
     private void startDownloadingApk(){
-        progressBar.setVisibility(View.VISIBLE);
-        //selectVersionSpinner.setSelection(selectVersionValues.getPosition(selectedVersion+" "));
-        selectVersionSpinner.setEnabled(false);
-        updateCCU.setEnabled(false);
-        cancelUpdate.setEnabled(true);
-        updateCCU.setTextColor(getGreyColor());
-        cancelUpdate.setTextColor(getPrimaryColor());
+        progress_bar_layout.setVisibility(View.VISIBLE);
         linearLayout.setVisibility(View.VISIBLE);
-        progressBar.setVisibility(View.VISIBLE);
         connectivityIssues.setVisibility(View.GONE);
+        updateScreenLayout.setVisibility(View.VISIBLE);
+        downloadingText.setVisibility(View.VISIBLE);
+        updateCCU.setText("CANCEL");
+        latestVersion.setText(bundleLabelString);
     }
 
-    View.OnClickListener updateOnClickListener = view -> {
-        if(selectVersionSpinner.getSelectedItemPosition() > 0) {
-            selectVersionSpinner.setEnabled(false);
-            updateCCU.setEnabled(false);
-            updateCCU.setTextColor(getGreyColor());
-            cancelUpdate.setTextColor(getPrimaryColor());
-            selectedVersionSize.setVisibility(View.VISIBLE);
-            startDownloadingApk();
-            PreferenceUtil.startUpdateCCU();
-            RemoteCommandHandlerUtil.updateCCU(versionLabelString, AboutFragment.this, getActivity());
-        }
-    };
+    View.OnClickListener imBundleHintListener = view -> {
 
-    public void cancelUpdateCCU(){
-        PreferenceUtil.stopUpdateCCU();
-        if(getActivity() != null) {
-            getActivity().runOnUiThread(() -> {
-                connectivityIssues.setVisibility(View.GONE);
-                updateCCU.setEnabled(true);
-                updateAppText.setVisibility(View.VISIBLE);
-                linearLayout.setVisibility(View.GONE);
-                progressBar.setVisibility(View.GONE);
-                updateCCU.setTextColor(getGreyColor());
-                cancelUpdate.setTextColor(getGreyColor());
-                selectVersionSpinner.setEnabled(true);
-                selectVersionSpinner.setSelection(0);
-                selectedVersionSize.setVisibility(View.GONE);
+        if (isPopupVisible) {
+            imBundleHint.setAlpha(0.5f);
+            isPopupVisible = false;
+        } else {
+            imBundleHint.setAlpha(1f);
+            isPopupVisible = true;
 
+            imBundleHint.setAlpha(1f);
+            LayoutInflater inflater = getLayoutInflater();
+            View tooltipView = inflater.inflate(R.layout.tooltip_layout, null);
+            TextView ccuToolTip = tooltipView.findViewById(R.id.tvTooltipCCU);
+            TextView homeAppToolTip = tooltipView.findViewById(R.id.tvTooltipHomeApp);
+            TextView remoteAppToolTip = tooltipView.findViewById(R.id.tvTooltipRemoteApp);
+            TextView bacAppToolTip = tooltipView.findViewById(R.id.tvTooltipBACApp);
+
+            CCUDiagEquip ccuDiagEquip = Domain.diagEquip;
+
+            ccuToolTip.setText("CCU:v" + ccuDiagEquip.getAppVersion().readDefaultStrVal());
+
+            if(ccuDiagEquip.getHomeAppVersion().readDefaultStrVal() != ""){
+                homeAppToolTip.setText("HomeApp:v" + ccuDiagEquip.getHomeAppVersion().readDefaultStrVal());
+            } else {
+                homeAppToolTip.setText("HomeApp: Not Installed");
+            }
+
+            if(ccuDiagEquip.getRemoteAccessAppVersion().readDefaultStrVal() != ""){
+                remoteAppToolTip.setText("RemoteApp:v" + ccuDiagEquip.getRemoteAccessAppVersion().readDefaultStrVal());
+            } else {
+                remoteAppToolTip.setText("RemoteApp: Not Installed");
+            }
+
+            if(ccuDiagEquip.getBacnetAppVersion().readDefaultStrVal() != ""){
+                bacAppToolTip.setText("BAC App:v" + ccuDiagEquip.getBacnetAppVersion().readDefaultStrVal());
+            } else {
+                bacAppToolTip.setText("BAC App: Not Installed");
+            }
+
+            popupWindow = new PopupWindow(tooltipView,
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    true); // Focusable set to true
+
+            popupWindow.setOnDismissListener(() -> {
+                imBundleHint.setAlpha(0.5f);
+                isPopupVisible = false;
             });
-        }
-        Globals.getInstance().setCcuUpdateTriggerTimeToken(0);
-        isNotFirstInvocation = false;
-    }
-    View.OnClickListener cancelOnClickListener = view -> {
-        selectVersionSpinner.setSelection(0);
-        selectVersionSpinner.setEnabled(true);
-        updateCCU.setEnabled(true);
-        updateCCU.setTextColor(getGreyColor());
-        cancelUpdate.setTextColor(getGreyColor());
-        selectedVersionSize.setVisibility(View.GONE);
-        connectivityIssues.setVisibility(View.GONE);
-        DownloadManager manager =
-                (DownloadManager) RenatusApp.getAppContext().getSystemService(Context.DOWNLOAD_SERVICE);
-        if(downloadTd != null) {
-            manager.remove(downloadTd);
-            updateCCU.setEnabled(true);
-            updateAppText.setVisibility(View.VISIBLE);
-            linearLayout.setVisibility(View.GONE);
-            progressBar.setVisibility(View.GONE);
 
-            Globals.getInstance().setCcuUpdateTriggerTimeToken(0);
-            isNotFirstInvocation = false;
+            popupWindow.setBackgroundDrawable(new ColorDrawable());
+            popupWindow.setOutsideTouchable(true);
+            int[] location = new int[2];
+            tvCcuVersion.getLocationOnScreen(location);
+
+            int xOffset = tvCcuVersion.getWidth() - popupWindow.getWidth(); // Align to the end of TextView
+            int yOffset = tvCcuVersion.getHeight(); // Position below the TextView
+
+            popupWindow.showAtLocation(tvCcuVersion, Gravity.NO_GRAVITY, location[0] + xOffset, location[1] + yOffset);
         }
     };
-    private void updateAboutFragmentUI(String response) {
-        if(!isAdded() || getActivity()==null || getContext()==null) {
-            CcuLog.w(L.TAG_CCU_UI, "AboutFragment is not attached to the activity or context is null. Cancelling the ui update operation.");
-            return;
-        }
-        if (response != null) {
-            try {
-                JSONArray array = new JSONArray(response);
-                String recommendedVersion = null;
-                HashMap<String, String> versionWithState = new HashMap<>();
-                HashMap<String, String> versionWithSize = new HashMap<>();
-                HashMap<String, String> recommendedVersionsWithRequiredVersion = new HashMap<>();
-                HashMap<String, String> versionWithVersionLabel = new HashMap<>();
-                for (int i = 0; i < array.length(); i++) {
-                    JSONObject jsonObject = array.getJSONObject(i);
-                    String majorVersion = jsonObject.getString("majorVersion");
-                    String minorVersion = jsonObject.getString("minorVersion");
-                    String patchVersion = jsonObject.getString("patchVersion");
-                    String size = jsonObject.getString("size");
-                    String ccuVersion = majorVersion + "." + minorVersion + "." + patchVersion;
-                    if (!jsonObject.isNull("requiredVersion")) {
-                        JSONObject requiredVersionJson = (JSONObject) jsonObject.get("requiredVersion");
-                        String requiredMajorVersion = requiredVersionJson.getString("majorVersion");
-                        String requiredMinorVersion = requiredVersionJson.getString("minorVersion");
-                        String requiredPatchVersion = requiredVersionJson.getString("patchVersion");
-                        String recommendedRequiredVersion = requiredMajorVersion
-                                + "." + requiredMinorVersion + "." + requiredPatchVersion;
-                        recommendedVersionsWithRequiredVersion.put(ccuVersion, recommendedRequiredVersion);
-                    }
-                    if (jsonObject.getBoolean("recommended")) {
-                        versionWithState.put(ccuVersion, "Recommended");
-                        recommendedVersion = ccuVersion;
-                    } else if (jsonObject.getBoolean("deprecated")) {
-                        versionWithState.put(ccuVersion, "Deprecated");
-                    } else if (!jsonObject.getBoolean("deprecated")) {
-                        versionWithState.put(ccuVersion, "");
-                    }
-                    String versionLabelString = jsonObject.getString("versionLabel");
-                    versionWithSize.put(ccuVersion, size);
-                    versionWithVersionLabel.put(ccuVersion, versionLabelString);
-                }
 
-                String currentAppVersion =  CCUUiUtil.getCurrentCCUVersion();
-                String nextUpdateVersion = getNextUpdateVersion(currentAppVersion, recommendedVersion,
-                        recommendedVersionsWithRequiredVersion);
-                String nextFinalUpdateVersion = null;
-                if(isCurrentVersionHigherOrEqualToRequired(currentAppVersion, nextUpdateVersion)) {
-                    for (Map.Entry<String, String> entry : recommendedVersionsWithRequiredVersion.entrySet()) {
-                        if (entry.getValue().equals(nextUpdateVersion)) {
-                            nextFinalUpdateVersion = entry.getKey();
-                            break;
-                        }
-                    }
-                }
-                PreferenceUtil.setStringPreference("nextUpdateVersion", nextUpdateVersion);
-                PreferenceUtil.setStringPreference("recommendedVersion", recommendedVersion);
-                PreferenceUtil.setStringPreference("finalNextFinalUpdateVersion", nextFinalUpdateVersion);
-                nextUpdateVersionGlobal = nextUpdateVersion;
-                nextFinalUpdateVersionGlobal = nextFinalUpdateVersion;
-
-                List<String> sortedListOfVersion = getSortedList(versionWithState, currentAppVersion);
-                sortedListOfVersion.add(0,"Select version");
-                storeSortedListOfVersion(sortedListOfVersion);
-                storeRecommendedVersionsWithRequiredVersion(recommendedVersionsWithRequiredVersion);
-                storeVersionWithVersionLabel(versionWithVersionLabel);
-                storeVersionWithSize(versionWithSize);
-                selectVersionValues = new CustomSelectionAdapter<>(getContext(), R.layout.custom_textview, sortedListOfVersion);
-                selectVersionValues.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
-                if (getActivity() != null) {
-                    nextUpdateVersionGlobal = nextUpdateVersion;
-                    nextFinalUpdateVersionGlobal = nextFinalUpdateVersion;
-                    String finalRecommendedVersion = recommendedVersion;
-                    new Handler(Looper.getMainLooper()).post(() -> {
-                        CCUUiUtil.setSpinnerDropDownColor(selectVersionSpinner, getContext());
-                        updateCCU.setTextColor(getGreyColor());
-                        cancelUpdate.setTextColor(getGreyColor());
-                        selectVersionSpinner.setAdapter(selectVersionValues);
-                        selectVersionSpinner.setSelection(0);
-                        selectVersionSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                            @Override
-                            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                                onSpinnerSelection(parent, position, currentAppVersion,
-                                        recommendedVersionsWithRequiredVersion, versionWithVersionLabel,
-                                        versionWithSize);
-                            }
-                            @Override
-                            public void onNothingSelected(AdapterView<?> parent) {
-
-                            }
-                        });
-                        if (isCCUNeedsToBeUpdated(currentAppVersion, finalRecommendedVersion)) {
-                            updateScreenLayout.setVisibility(View.VISIBLE);
-                            latestVersion.setText(currentAppVersion);
-                        } else {
-                            selectVersionLayout.setVisibility(View.GONE);
-                            updateStatus.setText("CCU is up to date");
-                            updateAppText.setVisibility(View.GONE);
-                            updateCCU.setVisibility(View.GONE);
-                            verSionText.setVisibility(View.VISIBLE);
-                            latest_version_text.setVisibility(View.GONE);
-                            latestVersion.setText(currentAppVersion);
-                        }
-                    });
-                }
-            } catch (Exception e) {
-                CcuLog.i("Version management","Version management Exception ");
-                e.printStackTrace();
-            }
-        } else {
-            if (getActivity() != null) {
-                new Handler(Looper.getMainLooper()).post(() -> {
-                    connectionUpLayout.setVisibility(View.GONE);
-                    connectionDownLayout.setVisibility(View.VISIBLE);
-                });
-            }
-        }
+    private void softwareIsUpToDate() {
+        updateStatus.setText("Software is upto date");
+        updateAppText.setVisibility(View.GONE);
+        updateCCU.setVisibility(View.GONE);
+        verSionText.setVisibility(View.GONE);
+        latest_version_text.setVisibility(View.GONE);
+        latestVersion.setVisibility(View.GONE);
+        downloadingText.setVisibility(View.GONE);
+        progress_bar_layout.setVisibility(View.GONE);
+        PreferenceUtil.installationCompleted();
     }
 
-    private void storeRecommendedVersionsWithRequiredVersion(HashMap<String, String>
-                                                                     recommendedVersionsWithRequiredVersion) {
-        Gson gson = new Gson();
-        String json = gson.toJson(recommendedVersionsWithRequiredVersion);
-        PreferenceUtil.setStringPreference("recommendedVersionsWithRequiredVersion", json);
-    }
-
-    private void storeSortedListOfVersion(List<String> sortedListOfVersion) {
-        Gson gson = new Gson();
-        String json = gson.toJson(sortedListOfVersion);
-        PreferenceUtil.setStringPreference("sortedListOfVersion", json);
-    }
-    private void storeVersionWithVersionLabel(HashMap<String, String>
-                                                                     recommendedVersionsWithRequiredVersion) {
-        Gson gson = new Gson();
-        String json = gson.toJson(recommendedVersionsWithRequiredVersion);
-        PreferenceUtil.setStringPreference("versionWithVersionLabel", json);
-    }
-
-    private void storeVersionWithSize(HashMap<String, String> sortedListOfVersion) {
-        Gson gson = new Gson();
-        String json = gson.toJson(sortedListOfVersion);
-        PreferenceUtil.setStringPreference("versionWithSize", json);
-    }
-    private String getNextUpdateVersion(String currentVersion, String recommendedVersion,
-                                        HashMap<String, String> recommendedWithRequiredVersion) {
-        String minRequiredVersion = recommendedWithRequiredVersion.get(recommendedVersion);
-        if(recommendedWithRequiredVersion.get(
-                recommendedVersion) == null){
-            return recommendedVersion;
-        }
-        if(isCurrentVersionHigherOrEqualToRequired(currentVersion, recommendedWithRequiredVersion.get(
-                recommendedVersion))) {
-            return recommendedWithRequiredVersion.get(recommendedVersion);
-        } else {
-            return getNextUpdateVersion(currentVersion,
-                    minRequiredVersion, recommendedWithRequiredVersion);
-        }
-    }
-    public void generateUpgradeCCUError(String version, String finalRecommendedVersion){
-        AlertDialog alertDialog = new AlertDialog.Builder(getContext()).create();
-        View dialogView= LayoutInflater.from(getContext()).inflate(R.layout.upgrade_ccu_error,null);
-        TextView toAchieveText = dialogView.findViewById(R.id.toAchieveUpgrade);
-        TextView pleaseUpgradeToText = dialogView.findViewById(R.id.pleaseUpgradeTo);
-        TextView gotIt = dialogView.findViewById(R.id.gotIt);
-        String text = "To achieve the upgrade to CCU version <b>" + version + "</b>" +
-                "\n you must ensure your CCU version is at least <b>" + finalRecommendedVersion + "</b>.";
-
-        toAchieveText.setText(Html.fromHtml(text));
-
-        String pleaseUpgradeText = "Please upgrade to <b>" + finalRecommendedVersion + "</b> first, and then proceed to \n" +
-                "upgrade to <b>" + version + "</b>.";
-
-        pleaseUpgradeToText.setText(Html.fromHtml(pleaseUpgradeText));
-
-        alertDialog.setView(dialogView);
-        gotIt.setOnClickListener(v -> {
-            alertDialog.dismiss();
-            selectVersionSpinner.setSelection(0);
-        });
-        alertDialog.setCancelable(false);
-        alertDialog.show();
-    }
-    private String getRecommendedCCUVersion(){
-        String response = HttpUtil.executeJson(
-                RenatusServicesEnvironment.getInstance().getUrls().getRecommendedCCUVersion(),
-                null,
-                a75f.io.api.haystack.BuildConfig.HAYSTACK_API_KEY,
-                true,
-                HttpConstants.HTTP_METHOD_GET
-        );
-        CcuLog.i(L.TAG_CCU_UPDATE,"Response of recommended CCU version API "+response);
-        return response;
-    }
     private void setOTPOnAboutPage(){
         ResponseCallback responseCallBack = new ResponseCallback() {
             @Override
@@ -867,8 +676,7 @@ public class AboutFragment extends Fragment {
         alertDialog.show();
 
         mCCUAppDownloaded = false;
-        mHomeAppDownloaded = false;
-        AppInstaller.getHandle().downloadInstalls();
+         AppInstaller.getHandle().downloadInstalls();
     }
 
     @Override
@@ -879,6 +687,13 @@ public class AboutFragment extends Fragment {
         super.onDestroyView();
     }
 
+    @Override
+    public void onPause() {
+        if (isPopupVisible && popupWindow != null) {
+            popupWindow.dismiss();
+        }
+        super.onPause();
+    }
     private String otpWithDoubleSpaceBetween(String otp){
         StringBuilder otpwithSpace = new StringBuilder();
         String doubleSpace = "  ";
@@ -1066,34 +881,6 @@ public class AboutFragment extends Fragment {
         });
     }
 
-    public void setProgress(int value, long downloadId, int columnIndex) {
-        String downloadSizeProgress = null;
-        this.downloadTd = downloadId;
-        DecimalFormat df = new DecimalFormat("#.##");
-        if(fileSize != null && !fileSize.isEmpty()) {
-            double downloadSize = Double.parseDouble(df.format(value * .01 * Double.parseDouble(
-                    fileSize)));
-            downloadSizeProgress = downloadSize + " MB/";
-        }
-
-        if (getActivity() != null) {
-            String finalDownloadSizeProgress = downloadSizeProgress;
-            new Handler(Looper.getMainLooper()).post(() -> {
-                totalDownloadedSize.setText((finalDownloadSizeProgress));
-                progressBar.setProgressCompat(value, true);
-                connectivityIssues.setVisibility(View.GONE);
-                if (columnIndex == 4 || columnIndex == 1 && isNotFirstInvocation) {
-                    connectivityIssues.setVisibility(View.VISIBLE);
-                }
-                isNotFirstInvocation = true;
-                if (value == 100) {
-                    PreferenceUtil.stopUpdateCCU();
-                    PreferenceUtil.installCCU();
-                    installNewApk();
-                }
-            });
-        }
-    }
     private List<String> getSortedList(Map<String, String> hashmaps, String currentAppVersion) {
         List<String> stringList = new ArrayList<>();
         for (Map.Entry<String, String> entry : hashmaps.entrySet()) {
@@ -1111,6 +898,35 @@ public class AboutFragment extends Fragment {
             }
         }
         return tempHash;
+    }
+
+    @Override
+    public void onBundleInstallMessage(@NonNull BundleInstallManager.BundleInstallState installState,
+                                       int percentComplete, @NonNull String message) {
+        CcuLog.d("CCU_BUNDLE", "Message: "+message + " percComp " + percentComplete +
+                " installState " + installState);
+        if(percentComplete == 0 && installState == installState.DOWNLOAD_PAUSED){
+            return;
+        }
+        new Handler(Looper.getMainLooper()).post(() -> {
+            progressBar.setProgressCompat(percentComplete, true);
+            String perc = percentComplete + "%";
+            downloadingText.setText(message);
+            downloadPerc.setText(perc);
+            connectivityIssues.setVisibility(View.GONE);
+            if (installState == installState.INSTALLING) {
+                PreferenceUtil.stopUpdateCCU();
+                installNewApk();
+            } else if(installState == installState.COMPLETED){
+                softwareIsUpToDate();
+            } else if(installState == installState.DOWNLOAD_PAUSED){
+                connectivityIssues.setVisibility(View.VISIBLE);
+            } else if(installState == installState.DOWNLOAD_FAILED || installState == installState.FAILED){
+                handleUpgradeBundleErrors(Arrays.asList(message));
+                PreferenceUtil.stopUpdateCCU();
+                PreferenceUtil.installationCompleted();
+            }
+        });
     }
 
     static class VersionComparator implements Comparator<String> {
@@ -1131,6 +947,24 @@ public class AboutFragment extends Fragment {
             }
             return 0;
         }
+    }
+
+    @Override
+    public void onResume() {
+        BundleInstallManager.Companion.getInstance().addBundleInstallListener(this);
+        RxjavaUtil.executeBackground(() -> {
+            BundleInstallManager bundleInstallManager = BundleInstallManager.Companion.getInstance();
+            UpgradeBundle upgradeBundle = bundleInstallManager.getRecommendedUpgradeBundle(false);
+            if(upgradeBundle != null) {
+                updateToUi(upgradeBundle, bundleInstallManager);
+            }
+        });
+        CcuLog.i("AboutFragment", "onResume");
+        super.onResume();
+    }
+
+    private void updateToUi(UpgradeBundle upgradeBundle, BundleInstallManager bundleInstallManager) {
+        postToMainThread(() -> setupUpdateCCUButton(upgradeBundle, bundleInstallManager));
     }
 }
 

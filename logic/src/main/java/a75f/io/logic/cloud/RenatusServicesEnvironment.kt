@@ -80,7 +80,8 @@ class RenatusServicesEnvironment(
             BuildConfig.GATEWAY_API_BASE,
             BuildConfig.CCU_VERSION_API_BASE,
             BuildConfig.CCU_FILE_SIZE_API_BASE,
-            BuildConfig.SEQUENCER_API_BASE
+            BuildConfig.SEQUENCER_API_BASE,
+            BuildConfig.VERSION_MANAGEMENT_API_BASE
          )
       }
 
@@ -97,7 +98,8 @@ class RenatusServicesEnvironment(
             HTTP + baseIp ,
             HTTP + baseIp + CCU_VERSION_EXT,
             HTTP + baseIp +CCU_VERSION_EXT,
-            HTTP + baseIp +CCU_VERSION_EXT
+            HTTP + baseIp +CCU_VERSION_EXT,
+            HTTP + baseIp                    // version-management
          )
       }
 
@@ -160,7 +162,8 @@ data class RenatusServicesUrls(
    val gatewayUrl : String,
    val recommendedCCUVersion : String,
    val getCCUFileSize : String,
-   val sequencerUrl: String
+   val sequencerUrl: String,
+   val versionManagementUrl: String
 ) {
    // useful for local environment
    val base: String

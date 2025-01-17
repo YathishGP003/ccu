@@ -51,4 +51,8 @@ data class Message(@PrimaryKey val messageId: String,
 
     @ColumnInfo(name = MESSAGE_ATTRIBUTE_TARGET_SCOPE)
     var target_scope: String? = null,
+
+   @ColumnInfo(name = MESSAGE_ATTRIBUTE_BUNDLE_ID)
+   var bundle_id: String? = null,
+
 )

@@ -181,12 +181,7 @@ public class AppInstaller
                             UpdateCCUFragment updateCCUFragment = (UpdateCCUFragment) currentFragment;
                             updateCCUFragment.setProgress(100, downloadId, cursor.getInt(columnIndex));
                         }
-                        if (currentFragment instanceof AboutFragment) {
-                            AboutFragment fragment = (AboutFragment) activity.getSupportFragmentManager().findFragmentByTag("ABOUT_FRAGMENT_TAG");
-                            if (fragment != null) {
-                                fragment.setProgress(100, downloadId, cursor.getInt(columnIndex));
-                            }
-                        }
+
                         timer.cancel();
                     } else {
                         int bytesDownloaded = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR));
@@ -195,13 +190,6 @@ public class AppInstaller
                         if (currentFragment instanceof UpdateCCUFragment) {
                             UpdateCCUFragment updateCCUFragment = (UpdateCCUFragment) currentFragment;
                             updateCCUFragment.setProgress(progress, downloadId, cursor.getInt(columnIndex));
-                        }
-                        if (currentFragment instanceof AboutFragment) {
-                            AboutFragment fragment = (AboutFragment) activity.getSupportFragmentManager().findFragmentByTag("ABOUT_FRAGMENT_TAG");
-                            if (fragment != null) {
-                                fragment.setProgress(progress, downloadId, cursor.getInt(columnIndex));
-                            }
-
                         }
                         CcuLog.i(L.TAG_CCU_DOWNLOAD, "Downloaded: " + progress + "%");
                     }
@@ -212,12 +200,6 @@ public class AppInstaller
                     if (currentFragment instanceof UpdateCCUFragment) {
                         UpdateCCUFragment updateCCUFragment = (UpdateCCUFragment) currentFragment;
                         updateCCUFragment.downloadCanceled();
-                    }
-                    if (currentFragment instanceof AboutFragment) {
-                        AboutFragment fragment = (AboutFragment) activity.getSupportFragmentManager().findFragmentByTag("ABOUT_FRAGMENT_TAG");
-                        if (fragment != null) {
-                            fragment.cancelUpdateCCU();
-                        }
                     }
                 }
             }

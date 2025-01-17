@@ -173,7 +173,7 @@ public class CreateNewSite extends Fragment {
                     ft.remove(fragmentByTag);
                 }
                 try {
-                    UpdateCCUFragment updateCCUFragment = new UpdateCCUFragment(
+                    UpdateCCUFragment updateCCUFragment = new UpdateCCUFragment().resumeDownloadProcess(
                             PreferenceUtil.getUpdateCCUStatus(), PreferenceUtil.isCCUInstalling(), false);
                     updateCCUFragment.show(ft,"popup");
                 } catch (JSONException e) {
@@ -574,7 +574,7 @@ public class CreateNewSite extends Fragment {
                     if (fragmentByTag != null) {
                         ft.remove(fragmentByTag);
                     }
-                    UpdateCCUFragment updateCCUFragment = new UpdateCCUFragment(
+                    UpdateCCUFragment updateCCUFragment = new UpdateCCUFragment().resumeDownloadProcess(
                             PreferenceUtil.getUpdateCCUStatus(), PreferenceUtil.isCCUInstalling(), false);
                     updateCCUFragment.show(ft, "popup");
                 } catch (JSONException e) {
@@ -944,6 +944,7 @@ public class CreateNewSite extends Fragment {
 
     public String saveSite(String siteName, String siteCity, String siteZip, String geoAddress, String siteState, String siteCountry, String org, String installer, String fcManager) {
         String tzID = mTimeZoneSelector.getSelectedItem().toString();
+
         AlarmManager am = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
         am.setTimeZone(tzID);
 

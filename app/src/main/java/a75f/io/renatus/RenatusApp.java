@@ -49,9 +49,10 @@ public class RenatusApp extends UtilityApplication
 		super.attachBaseContext(base);
 		MultiDex.install(this);
 	}
-	private static boolean isRooted() {
+	public static boolean isRooted() {
 		return findBinary("su");
 	}
+
 	public static boolean findBinary(String binaryName) {
 		boolean found = false;
 		if (!found) {

@@ -143,7 +143,8 @@ class MessageHandlerService @Inject constructor(private val appContext: Context,
             (message.remoteCmdType == RemoteCommandUpdateHandler.RESTART_CCU
                     || message.remoteCmdType == RemoteCommandUpdateHandler.RESTART_TABLET
                     || message.command == AutoCommissioningStateHandler.CMD
-                    || message.command == RemoteCommandUpdateHandler.OTA_UPDATE_HOME_APP)
+                    || message.remoteCmdType == RemoteCommandUpdateHandler.OTA_UPDATE_HOME_APP
+                    || message.remoteCmdType == RemoteCommandUpdateHandler.OTA_UPDATE_BUNDLE)
     }
 
     private fun isUpdateCcuCommand(message: Message) : Boolean {

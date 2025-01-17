@@ -1,6 +1,8 @@
 package a75f.io.renatus.util.remotecommand;
 
 import static a75f.io.logic.L.TAG_CCU_DOWNLOAD;
+import static a75f.io.messaging.handler.RemoteCommandUpdateHandler.CMD_TYPE;
+import static a75f.io.messaging.handler.RemoteCommandUpdateHandler.OTA_UPDATE_BUNDLE;
 import static a75f.io.messaging.handler.RemoteCommandUpdateHandler.OTA_UPDATE_HOME_APP;
 import static a75f.io.messaging.handler.RemoteCommandUpdateHandler.OTA_UPDATE_BAC_APP;
 import static a75f.io.messaging.handler.RemoteCommandUpdateHandler.OTA_UPDATE_REMOTE_ACCESS_APP;
@@ -28,9 +30,12 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.preference.PreferenceManager;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 
+
+import com.google.gson.JsonObject;
 
 import java.io.File;
 
@@ -43,7 +48,6 @@ import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.HisItem;
-import a75f.io.api.haystack.Queries;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
 import a75f.io.data.message.MessageDbUtilKt;
@@ -64,12 +68,12 @@ import a75f.io.logic.L;
 import a75f.io.logic.diag.otastatus.OtaStatus;
 import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint;
 import a75f.io.logic.logtasks.UploadLogs;
-import a75f.io.logic.util.RxTask;
 import a75f.io.renatus.ENGG.AppInstaller;
 import a75f.io.renatus.RenatusApp;
 import a75f.io.renatus.UtilityApplication;
 import a75f.io.renatus.ota.OTAUpdateService;
 import a75f.io.renatus.util.CCUUtils;
+import a75f.io.renatus.util.remotecommand.bundle.BundleInstallManager;
 import a75f.io.util.ExecutorTask;
 
 public class RemoteCommandHandlerUtil {
@@ -93,8 +97,24 @@ public class RemoteCommandHandlerUtil {
 
     private static BroadcastReceiver otaBroadcastReceiver = null;
 
+    public static void handleRemoteCommand(@NonNull JsonObject msgObject) {
+        String cmdType = msgObject.get(CMD_TYPE).getAsString();
+        CcuLog.i(L.TAG_CCU_REMOTE_COMMAND, "RemoteCommandHandlerUtil(" + cmdType + ") obj=" + msgObject.toString());
+        switch(msgObject.get(CMD_TYPE).getAsString()) {
+            case OTA_UPDATE_BUNDLE:
+                CcuLog.i(L.TAG_CCU_REMOTE_COMMAND, "RemoteCommandHandlerUtil: Bundle OTA Upgrade initiated");
+                String bundleId = msgObject.get("bundle_id").getAsString();
+                CcuLog.i(L.TAG_CCU_REMOTE_COMMAND, "RemoteCommandHandlerUtil: Bundle id " + bundleId);
+                BundleInstallManager bim = BundleInstallManager.Companion.getInstance();
+                bim.processOTARemoteCommand(bundleId);
+                break;
+
+        }
+    }
+
     public static void handleRemoteCommand(String commands, String cmdLevel, String id) {
-        CcuLog.i(L.TAG_CCU_REMOTE_COMMAND, "RemoteCommandHandlerUtil=" + commands + "," + cmdLevel);
+        CcuLog.i(L.TAG_CCU_REMOTE_COMMAND, "RemoteCommandHandlerUtil(" + commands + ") level=" + cmdLevel);
+
         switch (commands) {
             case RESTART_CCU:
                 RenatusApp.restartApp();

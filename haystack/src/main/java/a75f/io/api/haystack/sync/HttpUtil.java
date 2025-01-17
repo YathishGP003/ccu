@@ -2,6 +2,7 @@ package a75f.io.api.haystack.sync;
 
 import static a75f.io.api.haystack.CCUTagsDb.TAG_CCU_HS;
 
+import a75f.io.api.haystack.BuildConfig;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.constants.HttpConstants;
 
@@ -72,7 +73,7 @@ public class HttpUtil {
 
     public static String executePost(String targetURL, String urlParameters, String bearerToken) {
         targetURL = StringUtils.appendIfMissing(targetURL, "/");
-        if (StringUtils.isNotBlank(bearerToken)) {
+        if (StringUtils.isNotBlank(bearerToken) || StringUtils.isNotBlank(BuildConfig.HAYSTACK_API_KEY)) {
             URL url;
             HttpURLConnection connection = null;
             try {
@@ -92,12 +93,17 @@ public class HttpUtil {
                 connection.setRequestProperty(HttpConstants.APP_NAME_HEADER_NAME, HttpConstants.APP_NAME_HEADER_VALUE);
                 connection.setRequestProperty("Content-Length", "" + urlParameters.getBytes(StandardCharsets.UTF_8).length);
                 connection.setRequestProperty("Content-Language", "en-US");
-                connection.setRequestProperty("Authorization", " Bearer " + bearerToken);
+                if (StringUtils.isNotBlank(bearerToken)) {
+                    connection.setRequestProperty("Authorization", " Bearer " + bearerToken);
+                } else {
+                    connection.setRequestProperty("api-key", BuildConfig.HAYSTACK_API_KEY);
+                }
+
                 connection.setUseCaches(false);
                 connection.setDoInput(true);
                 connection.setDoOutput(true);
 
-                if(targetURL.contains("removeCCU")) {
+                if (targetURL.contains("removeCCU")) {
                     connection.setConnectTimeout(HTTP_REQUEST_TIMEOUT_MS_LONG);
                     connection.setReadTimeout(HTTP_REQUEST_TIMEOUT_MS_LONG);
                 } else {

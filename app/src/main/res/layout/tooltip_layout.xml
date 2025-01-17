@@ -1,0 +1,40 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/tooltip_background"
+    android:padding="10dp">
+
+    <TextView
+        android:id="@+id/tvTooltipCCU"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="CCU: v2.22.0"
+        android:textColor="@android:color/white"
+        android:textSize="14sp"/>
+
+    <TextView
+        android:id="@+id/tvTooltipHomeApp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Home App: v4.1.28"
+        android:textColor="@android:color/white"
+        android:textSize="14sp"/>
+
+    <TextView
+        android:id="@+id/tvTooltipRemoteApp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Remote App: v0.1.37"
+        android:textColor="@android:color/white"
+        android:textSize="14sp"/>
+
+    <TextView
+        android:id="@+id/tvTooltipBACApp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="BAC App: v3.1.11"
+        android:textColor="@android:color/white"
+        android:textSize="14sp"/>
+</LinearLayout>

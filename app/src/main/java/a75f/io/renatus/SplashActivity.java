@@ -172,7 +172,7 @@ public class SplashActivity extends AppCompatActivity implements Globals.OnCcuIn
                 ft.remove(previousFragment);
             }
             try {
-                UpdateCCUFragment updateCCUFragment = new UpdateCCUFragment(
+                UpdateCCUFragment updateCCUFragment = new UpdateCCUFragment().resumeDownloadProcess(
                         PreferenceUtil.getUpdateCCUStatus(), PreferenceUtil.isCCUInstalling(), true);
                 updateCCUFragment.show(ft, "popup");
             } catch (JSONException e) {

@@ -141,6 +141,7 @@ class OtaStatusDiagPoint {
             ccuHsApi.writeHisValByQuery("ota and status and equipRef == \"$equipRef\"",status.ordinal.toDouble())
             CcuLog.d(L.TAG_CCU_OTA_PROCESS, "apk update updated $equipRef : $status ${status.ordinal.toDouble()}")
         }
+
         fun updateOtaStatusPoint(status: OtaStatus,nodes: ArrayList<Int>) {
             val hsApi = CCUHsApi.getInstance()
             nodes.forEach { i ->
@@ -284,5 +285,28 @@ class OtaStatusDiagPoint {
             Domain.diagEquip.otaStatusCCU.writeHisVal(status.ordinal.toDouble())
         }
 
+        /**
+         * Function to update the ota status of a bundle
+         */
+        fun updateBundleOtaStatus(status: BundleOtaStatus) {
+            if(Domain.isDiagEquipInitialised()) {
+                val point = Domain.diagEquip.otaStatusBundle
+                point.writeHisVal(status.ordinal.toDouble())
+            } else {
+                CcuLog.e(L.TAG_CCU_BUNDLE, "updateBundleOtaStatus: DiagEquip not initialised")
+            }
+        }
+
+        /**
+         * Function to update the bundle version point
+         */
+        fun updateBundleVersion(version: String) {
+            if(Domain.isDiagEquipInitialised()) {
+                val point = Domain.diagEquip.bundleVersion
+                point.writeDefaultVal(version)
+            } else {
+                CcuLog.e(L.TAG_CCU_BUNDLE, "updateBundleVersion: DiagEquip not initialised")
+            }
+        }
     }
 }

@@ -88,6 +88,7 @@ public class PreferenceUtil {
     private static final String REMOVE_REDUNDANT_SSE_DEVICE_POINTS = "removeRedundantSseDevicePoints";
     private static final String NULL_ID_REMOVAL_STATUS = "nullIdRemovalStatus";
     private static final String UPDATE_HISINTERPOLATE_COV = "hisinterpolatecov";
+    private static final String SIDE_APPS_UPDATE_STATUS ="sideAppsUpdateStatus";
 
     public static void setContext(Context c) {
         context= c;
@@ -698,5 +699,13 @@ public class PreferenceUtil {
 
     public static void setHisInterpolateCOV() {
         setBooleanPreference(UPDATE_HISINTERPOLATE_COV, true);
+    }
+
+    public static boolean isSideAppsUpdateFinished() {
+        return getBooleanPreference(SIDE_APPS_UPDATE_STATUS);
+    }
+
+    public static void setSideAppsUpdateFinished() {
+        setBooleanPreference(SIDE_APPS_UPDATE_STATUS, true);
     }
 }

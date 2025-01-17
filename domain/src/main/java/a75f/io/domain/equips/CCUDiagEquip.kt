@@ -32,7 +32,8 @@ class CCUDiagEquip (equipRef : String) : DomainEquip(equipRef) {
     val bacnetAppVersion = Point(DomainName.bacnetAppVersion, equipRef)
     val remoteAccessAppVersion = Point(DomainName.remoteAccessAppVersion, equipRef)
     val homeAppVersion = Point(DomainName.homeAppVersion, equipRef)
-
+    val bundleVersion = Point(DomainName.bundleVersion, equipRef)
+    val otaStatusBundle = Point(DomainName.otaStatusBundle, equipRef)
 
     private val diagEquipMap = hayStack.readMapById(equipRef)
     val displayName = diagEquipMap[Tags.DIS].toString()

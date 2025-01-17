@@ -1351,7 +1351,8 @@ object DomainName {
     const val smartnodePID = "smartnodePID"
     const val helionodePID = "helionodePID"
 
-
+    const val bundleVersion = "bundleVersion"
+    const val otaStatusBundle = "otaStatusBundle"
 
 }
 

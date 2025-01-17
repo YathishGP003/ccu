@@ -2,6 +2,8 @@ package a75f.io.messaging
 
 import a75f.io.data.message.MESSAGE_ATTRIBUTE_AUTO_CX_STATE
 import a75f.io.data.message.MESSAGE_ATTRIBUTE_AUTO_CX_STOP_TIME
+import a75f.io.data.message.MESSAGE_ATTRIBUTE_BUNDLE
+import a75f.io.data.message.MESSAGE_ATTRIBUTE_BUNDLE_ID
 import a75f.io.data.message.MESSAGE_ATTRIBUTE_COMMAND
 import a75f.io.data.message.MESSAGE_ATTRIBUTE_ID
 import a75f.io.data.message.MESSAGE_ATTRIBUTE_IDS
@@ -110,6 +112,12 @@ fun jsonToMessage(msgJson : JsonObject) : Message {
 
     if(messagePojo.remoteCmdType.equals(RemoteCommandUpdateHandler.SAVE_SEQUENCER_LOGS)){
         messagePojo.sequenceId = messageContent.asJsonObject.get(MESSAGE_ATTRIBUTE_SEQUENCE_ID)?.asString
+    }
+
+    if (messagePojo.remoteCmdType.equals(RemoteCommandUpdateHandler.OTA_UPDATE_BUNDLE)) {
+        val bundle = messageContent.asJsonObject.get(MESSAGE_ATTRIBUTE_BUNDLE)
+        val id = bundle.asJsonObject.get(MESSAGE_ATTRIBUTE_ID)?.asString
+        messagePojo.bundle_id = id
     }
 
     return messagePojo

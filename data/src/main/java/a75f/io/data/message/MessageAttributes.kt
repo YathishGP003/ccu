@@ -1,5 +1,7 @@
 package a75f.io.data.message
 
+const val MESSAGE_ATTRIBUTE_BUNDLE = "bundle"
+const val MESSAGE_ATTRIBUTE_BUNDLE_ID = "bundle_id"
 const val MESSAGE_ATTRIBUTE_COMMAND = "command"
 const val MESSAGE_ATTRIBUTE_MESSAGE_ID = "messageId"
 const val MESSAGE_ATTRIBUTE_ID = "id"

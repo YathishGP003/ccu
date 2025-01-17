@@ -116,7 +116,7 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
         if(PreferenceUtil.getUpdateCCUStatus() || PreferenceUtil.isCCUInstalling()) {
             try {
                 FragmentTransaction ft = getParentFragmentManager().beginTransaction();
-                UpdateCCUFragment updateCCUFragment = new UpdateCCUFragment(
+                UpdateCCUFragment updateCCUFragment = new UpdateCCUFragment().resumeDownloadProcess(
                         PreferenceUtil.getUpdateCCUStatus(), PreferenceUtil.isCCUInstalling(), true);
                 updateCCUFragment.show(ft, "popup");
             } catch (JSONException e) {

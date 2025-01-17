@@ -12,6 +12,8 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
+import com.google.gson.JsonObject;
+
 import a75f.io.alerts.AlertManager;
 import a75f.io.domain.api.Domain;
 import a75f.io.logger.CcuLog;
@@ -82,6 +84,12 @@ public class SafeModeActivity extends AppCompatActivity implements SafeModeInter
     @Override
     public void updateRemoteCommands(String commands,String cmdLevel,String id) {
         RemoteCommandHandlerUtil.handleRemoteCommand(commands,cmdLevel,id);
+    }
+
+    @Override
+    public void updateRemoteCommands(JsonObject msgObject) {
+        CcuLog.d("RemoteCommand","SafeModeActivity.UpdateRemoteCommands="+msgObject.toString());
+        RemoteCommandHandlerUtil.handleRemoteCommand(msgObject);
     }
 
     public static synchronized void CloudConnectionAlive() {

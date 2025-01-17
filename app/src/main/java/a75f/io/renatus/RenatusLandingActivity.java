@@ -9,6 +9,7 @@ import static a75f.io.device.bacnet.BacnetConfigConstants.BACNET_FD_AUTO_STATE;
 import static a75f.io.device.bacnet.BacnetConfigConstants.BACNET_FD_CONFIGURATION;
 import static a75f.io.device.bacnet.BacnetConfigConstants.IS_BACNET_CONFIG_FILE_CREATED;
 import static a75f.io.device.bacnet.BacnetUtilKt.populateBacnetConfigurationObject;
+import static a75f.io.logic.bo.util.CCUUtils.isRecommendedVersionCheckIsNotFalse;
 import static a75f.io.renatus.CcuRefReceiver.REQUEST_CCU_REF_ACTION;
 import static a75f.io.renatus.Communication.isPortAvailable;
 import static a75f.io.renatus.UtilityApplication.context;
@@ -27,8 +28,6 @@ import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.CountDownTimer;
-import android.os.Handler;
-import android.os.Looper;
 import android.os.Message;
 import android.preference.PreferenceManager;
 import android.text.Editable;
@@ -48,11 +47,11 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.fragment.app.FragmentStatePagerAdapter;
 import androidx.viewpager.widget.PagerAdapter;
@@ -61,7 +60,10 @@ import androidx.viewpager.widget.ViewPager;
 import com.google.android.material.tabs.TabItem;
 import com.google.android.material.tabs.TabLayout;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -86,6 +88,7 @@ import a75f.io.renatus.util.DataFdObj;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.Receiver.ConnectionChangeReceiver;
 import a75f.io.renatus.util.remotecommand.RemoteCommandHandlerUtil;
+import a75f.io.renatus.util.remotecommand.bundle.BundleInstallManager;
 import a75f.io.usbserial.UsbServiceActions;
 
 public class RenatusLandingActivity extends AppCompatActivity implements RemoteCommandHandleInterface, BacnetConfigChange {
@@ -277,6 +280,18 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
         populateBACnetConfiguration();
         intializeBACnet();
         ccuLaunched();
+
+        // If we just restarted after a bundled install, we need to perform
+        // a few housekeeping tasks.  This will clear the existing bundle install
+        // status and reboot the tablet if necessary.
+        BundleInstallManager.Companion.completeBundleInstallIfNecessary();
+
+        // For Golden Release we need to update all side apps to recommended version
+        if (!PreferenceUtil.isSideAppsUpdateFinished() && isRecommendedVersionCheckIsNotFalse()) {
+            BundleInstallManager.Companion.initUpdatingSideAppsToRecommended();
+            PreferenceUtil.setSideAppsUpdateFinished();
+        }
+
         checkBacnetDeviceType();
     }
 
@@ -324,21 +339,32 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
         }
         btnTabs.getTabAt(1).select();
         mTabLayout.post(() -> mTabLayout.setupWithViewPager(mViewPager, true));
-        /*FragmentManager fm = getSupportFragmentManager();
+        // Better to add tag instead of class name, coz class name will be something like
+        // class a75f.io.renatus.ZoneFragmentNew
+        List<String> listOfFragmentTagToRemove = new ArrayList<>();
+        listOfFragmentTagToRemove.add("ABOUT_FRAGMENT_TAG");
+        removeFragment(listOfFragmentTagToRemove);
+    }
+
+    private void removeFragment(List<String> fragmentTagToRemove) {
+        FragmentManager fm = getSupportFragmentManager();
+        CcuLog.i(TAG,"Fragments To Remove: "+fragmentTagToRemove);
         try {
             if (!isFinishing() && !fm.isDestroyed()) {
                 for (int i = 0; i < fm.getBackStackEntryCount(); ++i) {
                     fm.popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
                 }
                 for (Fragment fragment : fm.getFragments()) {
-                    if (!fragment.getClass().toString().contains("ZoneFragmentNew")) {
-                            fm.beginTransaction().remove(fragment).commit();
+                    if (fragmentTagToRemove.contains(fragment.getTag())) {
+                        fm.beginTransaction().remove(fragment).commit();
+                        CcuLog.i(TAG,"Fragment Removed: "+ fragment.getClass());
                     }
                 }
             }
         } catch (IllegalStateException e){
+            CcuLog.e(TAG,"IllegalStateException",e);
             e.printStackTrace();
-        }*/
+        }
     }
 
 
@@ -661,8 +687,14 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
 
     @Override
     public void updateRemoteCommands(String commands,String cmdLevel,String id) {
-        CcuLog.d("RemoteCommand","LandingActivity="+commands+","+cmdLevel);
+        CcuLog.d("RemoteCommand","LandingActivity.UpdateRemoteCommands="+commands+","+cmdLevel);
         RemoteCommandHandlerUtil.handleRemoteCommand(commands,cmdLevel,id);
+    }
+
+    @Override
+    public void updateRemoteCommands(JsonObject msgObject) {
+        CcuLog.d("RemoteCommand","LandingActivity.UpdateRemoteCommands="+msgObject.toString());
+        RemoteCommandHandlerUtil.handleRemoteCommand(msgObject);
     }
 
     private void configLogo(){

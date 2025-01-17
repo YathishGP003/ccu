@@ -30,6 +30,7 @@ import java.util.regex.Pattern;
 import a75f.io.alerts.AlertManager;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.domain.api.Domain;
+import a75f.io.domain.api.DomainName;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.renatus.BuildConfig;
@@ -129,6 +130,10 @@ public class CCUUiUtil {
     public static String getCurrentCCUVersion(){
         String currentCCUVersion = BuildConfig.VERSION_NAME.replaceAll("[a-zA-Z]", "");
         return currentCCUVersion.replaceAll("_","");
+    }
+
+    public static String getCurrentCCUBundleName(){
+        return CCUHsApi.getInstance().readDefaultStrVal("domainName == \"" + DomainName.bundleVersion + "\"");
     }
 
     public static ArrayAdapter<Double> getArrayAdapter(double start, double end, double increment, Context c) {

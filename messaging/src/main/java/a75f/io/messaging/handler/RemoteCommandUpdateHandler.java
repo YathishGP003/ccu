@@ -38,6 +38,7 @@ public class RemoteCommandUpdateHandler implements MessageHandler
     public static final String EXIT_SAFE_MODE = "exit_safe_mode";
     private static RemoteCommandHandleInterface remoteCommandInterface = null;
     private static SafeModeInterface safeModeInterface = null;
+    public static final String OTA_UPDATE_BUNDLE = "ota_update_bundle";
     public static final String OTA_UPDATE_BAC_APP = "update_bacapp";//"backappInstallOrUpgrade";
     public static final String OTA_UPDATE_REMOTE_ACCESS_APP = "ota_update_remoteAccess";
     public static final String OTA_UPDATE_HOME_APP = "ota_update_homeApp";
@@ -51,6 +52,8 @@ public class RemoteCommandUpdateHandler implements MessageHandler
     @Override
     public void handleMessage(@NonNull JsonObject msgObject, @NonNull Context context) {
         try {
+            CcuLog.d("RemoteCommand","handleMessage="+msgObject.toString());
+
             String cmdType = msgObject.get(CMD_TYPE).getAsString();
             String cmdLevel = msgObject.get("remoteCmdLevel").getAsString();
             String systemId = cmdLevel.equals("system")? (msgObject.get("id").isJsonNull() ? "":msgObject.get("id").getAsString()) : "";
@@ -74,6 +77,13 @@ public class RemoteCommandUpdateHandler implements MessageHandler
                                     safeModeInterface.updateRemoteCommands(cmdType, cmdLevel, "");
                                 break;
                             case UPDATE_CCU:
+                            case OTA_UPDATE_BUNDLE:
+                                CcuLog.d("RemoteCommand", " handle ota bundle update; type=" + cmdType);
+                                if (remoteCommandInterface != null)
+                                    remoteCommandInterface.updateRemoteCommands(msgObject);
+                                else if(safeModeInterface != null)
+                                    safeModeInterface.updateRemoteCommands(msgObject);
+                                break;
                             case OTA_UPDATE_BAC_APP:
                             case OTA_UPDATE_REMOTE_ACCESS_APP:
                             case OTA_UPDATE_HOME_APP:

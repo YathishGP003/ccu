@@ -136,7 +136,7 @@ public class AddtoExisting extends Fragment {
                         ft.remove(fragmentByTag);
                     }
                     try {
-                        UpdateCCUFragment updateCCUFragment = new UpdateCCUFragment(
+                        UpdateCCUFragment updateCCUFragment = new UpdateCCUFragment().resumeDownloadProcess(
                                 PreferenceUtil.getUpdateCCUStatus(), PreferenceUtil.isCCUInstalling(), false);
                         updateCCUFragment.show(ft, "popup");
                     } catch (JSONException e) {
@@ -489,7 +489,7 @@ public class AddtoExisting extends Fragment {
                     if (fragmentByTag != null) {
                         ft.remove(fragmentByTag);
                     }
-                    UpdateCCUFragment updateCCUFragment = new UpdateCCUFragment(
+                    UpdateCCUFragment updateCCUFragment = new UpdateCCUFragment().resumeDownloadProcess(
                             PreferenceUtil.getUpdateCCUStatus(), PreferenceUtil.isCCUInstalling(), false);
                     updateCCUFragment.show(ft, "popup");
                 } catch (JSONException e) {

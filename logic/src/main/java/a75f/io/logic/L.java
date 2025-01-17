@@ -90,6 +90,7 @@ public class L
     public static final String REMOTE_ACCESS_PACKAGE_NAME = "io.seventyfivef.remoteaccess";
     public static final String HOME_APP_PACKAGE_NAME = "com.x75frenatus.home";
     public static final String HOME_APP_PACKAGE_NAME_OBSOLETE = "io.seventyfivef.home";
+    public static final String TAG_CCU_BUNDLE = "CCU_BUNDLE";
 
     public static Context app()
     {

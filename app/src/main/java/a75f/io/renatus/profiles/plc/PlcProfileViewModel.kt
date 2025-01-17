@@ -314,8 +314,7 @@ class PlcProfileViewModel : ViewModel() {
                     .sendSeedMessage(false, false, deviceAddress, zoneRef, floorRef)
                 DesiredTempDisplayMode.setModeType(zoneRef, CCUHsApi.getInstance())
                 CcuLog.i(Domain.LOG_TAG, "PlcProfile Pairing complete")
-                if(profileConfiguration.isDefault) plcProfile.init()
-                plcProfile.updateProcessVariable()
+                plcProfile.init()
 
                 CoroutineScope(Dispatchers.IO).launch {
                     saveUnUsedPortStatus(profileConfiguration, deviceAddress, hayStack)
@@ -343,8 +342,9 @@ class PlcProfileViewModel : ViewModel() {
             L.ccu().zoneProfiles.add(plcProfile)
 
         } else {
-            equipBuilder.updateEquipAndPoints(profileConfiguration, model, hayStack.site!!.id, equipDis, true)
+            val equipRef = equipBuilder.updateEquipAndPoints(profileConfiguration, model, hayStack.site!!.id, equipDis, true)
             updateDeviceAndPoints(deviceAddress, profileConfiguration, nodeType, hayStack, model, deviceModel)
+            resetRelays(equipRef)
         }
         updateTypeForAnalog1Out(profileConfiguration)
         profileConfiguration.updatePortConfiguration(
@@ -353,6 +353,12 @@ class PlcProfileViewModel : ViewModel() {
             DeviceBuilder(hayStack, EntityMapper(model)),
             deviceModel
         )
+    }
+
+    private fun resetRelays(equipRef: String) {
+        val plcEquip = a75f.io.domain.equips.PlcEquip(equipRef)
+        plcEquip.relay1Cmd.writeHisVal(0.0)
+        plcEquip.relay2Cmd.writeHisVal(0.0)
     }
 
 

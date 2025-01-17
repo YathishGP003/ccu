@@ -388,6 +388,9 @@ object DomainName {
     const val pipe2FancoilHeatingThreshold = "pipe2FancoilHeatingThreshold"
     const val pipe2FancoilCoolingThreshold = "pipe2FancoilCoolingThreshold"
 
+    const val hyperstatPipe2FancoilCoolingThreshold = "hyperstatPipe2FancoilCoolingThreshold"
+    const val hyperstatPipe2FancoilHeatingThreshold = "hyperstatPipe2FancoilHeatingThreshold"
+
     const val vrvHeatingDeadbandMultiplier = "vrvHeatingDeadbandMultiplier"
     const val vrvHeatingDeadband = "vrvHeatingDeadband"
     const val vrvCoolingDeadbandMultiplier = "vrvCoolingDeadbandMultiplier"

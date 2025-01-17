@@ -84,8 +84,8 @@ fun fetchHyperStatTuners(equip: HyperStatEquip): HyperStatProfileTuners {
         is Pipe2V2Equip -> {
             hsTuners.auxHeating1Activate = TunerUtil.readTunerValByQuery("domainName ==\"${DomainName.auxHeating1Activate}\"", equip.equipRef)
             hsTuners.auxHeating2Activate = TunerUtil.readTunerValByQuery("domainName ==\"${DomainName.auxHeating2Activate}\"", equip.equipRef)
-            hsTuners.heatingThreshold = TunerUtil.readTunerValByQuery("domainName ==\"${DomainName.pipe2FancoilHeatingThreshold}\"", equip.equipRef)
-            hsTuners.coolingThreshold = TunerUtil.readTunerValByQuery("domainName ==\"${DomainName.pipe2FancoilCoolingThreshold}\"", equip.equipRef)
+            hsTuners.heatingThreshold = TunerUtil.readTunerValByQuery("domainName ==\"${DomainName.hyperstatPipe2FancoilHeatingThreshold}\"", equip.equipRef)
+            hsTuners.coolingThreshold = TunerUtil.readTunerValByQuery("domainName ==\"${DomainName.hyperstatPipe2FancoilCoolingThreshold}\"", equip.equipRef)
             hsTuners.waterValveSamplingOnTime = TunerUtil.readTunerValByQuery("domainName ==\"${DomainName.waterValveSamplingOnTime}\"", equip.equipRef).toInt()
             hsTuners.waterValveSamplingWaitTime = TunerUtil.readTunerValByQuery("domainName ==\"${DomainName.waterValveSamplingWaitTime}\"", equip.equipRef).toInt()
             hsTuners.waterValveSamplingDuringLoopDeadbandOnTime = TunerUtil.readTunerValByQuery("domainName ==\"${DomainName.waterValveSamplingLoopDeadbandOnTime}\"", equip.equipRef).toInt()

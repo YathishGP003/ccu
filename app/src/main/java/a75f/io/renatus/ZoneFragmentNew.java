@@ -3889,7 +3889,16 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         labelInputAir.setText("Input (" + plcPoints.get("Unit Type").toString() + ") : ");
 
         double processValue = (double) plcPoints.get("Input Value");
-        textViewInputAir.setText(String.format("%.2f", processValue) + " " + plcPoints.get("Unit").toString());
+        if (plcPoints.get("Unit Type").equals("Generic Alarm NO")
+                || plcPoints.get("Unit Type").equals("Generic Alarm NC")) {
+            if (processValue == 0) {
+                textViewInputAir.setText("Normal" + plcPoints.get("Unit").toString());
+            } else {
+                textViewInputAir.setText("Alarm" + plcPoints.get("Unit").toString());
+            }
+        } else {
+            textViewInputAir.setText(String.format("%.2f", processValue) + " " + plcPoints.get("Unit").toString());
+        }
         if (plcPoints.get("Unit").equals("\u00B0F")) {
             if (isCelsiusTunerAvailableStatus()) {
                 textViewInputAir.setText(String.format("%.2f", fahrenheitToCelsius(processValue)) + " " + " \u00B0C");

@@ -9,13 +9,11 @@ import static a75f.io.device.mesh.MeshUtil.checkDuplicateStruct;
 import static a75f.io.device.mesh.MeshUtil.sendStructToNodes;
 import static a75f.io.device.serial.SmartStatFanSpeed_t.FAN_SPEED_HIGH;
 import static a75f.io.device.serial.SmartStatFanSpeed_t.FAN_SPEED_HIGH2;
-
-import org.projecthaystack.UnknownRecException;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -231,7 +229,7 @@ public class Pulse
 						CcuLog.i(L.TAG_CCU_DEVICE, "regularSNUpdate: "+val);
 						boolean isPressureOnAI1 = hayStack.readDefaultVal("point and domainName == \"" + DomainName.pressureSensorType + "\" and equipRef == \"" + equip.getId() + "\"") > 0.0;
 						double oldDisAnalogVal = hayStack.readHisValById(logPoint.get("id").toString());
-						double curDisAnalogVal = (isBypassDamper && isPressureOnAI1) ? getPressureConversion(equip, val) : Math.round(getAnalogConversion(phyPoint, logPoint, val));
+						double curDisAnalogVal = (isBypassDamper && isPressureOnAI1) ? getPressureConversion(equip, val) : getAnalogConversion(phyPoint, logPoint, val);
 						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
 						CcuLog.i(L.TAG_CCU_DEVICE, " Feedback regularSNUpdate: id "+logPoint.get("id").toString());
 						hayStack.writeHisValById(logPoint.get("id").toString(), curDisAnalogVal);
@@ -246,7 +244,7 @@ public class Pulse
 						val = smartNodeRegularUpdateMessage_t.update.externalAnalogVoltageInput2.get();
 						hayStack.writeHisValById(phyPoint.get("id").toString(), val);
 						double oldDynamicVar = hayStack.readHisValById(logPoint.get("id").toString());
-						double dynamicVar =  Math.round(getAnalogConversion(phyPoint, logPoint, val));
+						double dynamicVar =  getAnalogConversion(phyPoint, logPoint, val);
 						double newDynamicVar = oldDynamicVar;
 						if (oldDynamicVar != dynamicVar) {
 							newDynamicVar = dynamicVar;
@@ -267,7 +265,20 @@ public class Pulse
 						} else {
 							val = smartNodeRegularUpdateMessage_t.update.externalThermistorInput1.get();
 							double oldDisTempVal = hayStack.readHisValById(logPoint.get("id").toString());
-							double curDisTempVal = ThermistorUtil.getThermistorValueToTemp(val * 10);
+							double curDisTempVal;
+							if (logPoint.containsKey("domainName")) {
+								String domainName = logPoint.get("domainName").toString();
+								if ("genericAlarmNO".equalsIgnoreCase(domainName)) {
+									curDisTempVal = (val >= 1000) ? 0.0 : 1.0;
+								} else if ("genericAlarmNC".equalsIgnoreCase(domainName)) {
+									curDisTempVal = (val >= 1000) ? 1.0 : 0.0;
+								} else {
+									curDisTempVal = ThermistorUtil.getThermistorValueToTemp(val * 10);
+								}
+							} else {
+								curDisTempVal = ThermistorUtil.getThermistorValueToTemp(val * 10);
+							}
+
 							curDisTempVal = CCUUtils.roundToOneDecimal(curDisTempVal);
 							hayStack.writeHisValById(phyPoint.get("id").toString(), val/100);
 							hayStack.writeHisValById(logPoint.get("id").toString(), curDisTempVal);
@@ -508,7 +519,7 @@ public class Pulse
 			double damperPercent= DeviceUtil.getPercentageFromVoltage(analogVal,
 					Objects.requireNonNull(pp.get("analogType")).toString());
 			CcuLog.i(L.TAG_CCU_DEVICE, "Feedback Reversed damper percent  : "+damperPercent);
-			return damperPercent;
+			return (double) Math.round(damperPercent);
 		}
 		Sensor analogSensor;
 		//If the analogType of physical point is set to one of the sensor types (Sensor.getSensorList) , corresponding sensor's
@@ -517,6 +528,11 @@ public class Pulse
 		{
 			int index = (int)Double.parseDouble(pp.get("analogType").toString());
 			analogSensor = SensorManager.getInstance().getExternalSensorList().get(index);
+			if (lp.containsKey("pid")) {
+				Double pressureValue = convertToPressureValue(val, analogSensor);
+				if (pressureValue != null) return pressureValue;
+			}
+
 		}catch (NumberFormatException e) {
 			CcuLog.e(L.TAG_CCU_DEVICE, "error ", e);
 			return analogVal;
@@ -527,7 +543,35 @@ public class Pulse
 		return CCUUtils.roundToTwoDecimal(analogConversion);
 		
 	}
-	
+
+	private static Double convertToPressureValue(Double val, Sensor analogSensor) {
+		if (externalSensors().contains(analogSensor.sensorName)) {
+			double i = ((0.001 * val) - analogSensor.minVoltage) /
+					(analogSensor.maxVoltage - analogSensor.minVoltage);
+
+			if (i < 0) {
+				i = 0;
+			}
+			if (i > 1) {
+				i = 1;
+			}
+
+			double pressureValue = i * (analogSensor.maxEngineeringValue - analogSensor.minEngineeringValue) +
+					analogSensor.minEngineeringValue;
+			CcuLog.i(L.TAG_CCU_DEVICE, "AI1 Pressure Sensor : "+pressureValue);
+			return CCUUtils.roundToTwoDecimal(pressureValue);
+		}
+		CcuLog.i(L.TAG_CCU_DEVICE, "analogType is not pressure sensor");
+		return null;
+	}
+
+	public static List<String> externalSensors() {
+		return Arrays.asList(
+				"Pressure Sensor (0-2)",
+				"Differential Pressure Sensor (0-0.25)"
+		);
+	}
+
 	private static void updateDesiredTemp(int node, Double dt) {
 		HashMap equipMap = CCUHsApi.getInstance().read("equip and group == \""+node+"\"");
 		Equip equip = new Equip.Builder().setHashMap(equipMap).build();

@@ -315,401 +315,462 @@ class VavAndAcbProfileMigration {
                 val equipDis = "${site?.displayName}-ACB-${it["group"]}"
 
                 if (!acbEquip.zoneDeadTime.pointExists()) {
-                    val modelPointDef = model.points.find { it.domainName.contentEquals(DomainName.zoneDeadTime) } as SeventyFiveFProfilePointDef
-                    equipBuilder.createPoint(
-                            PointBuilderConfig(
+                    model.points.find { pointDef -> pointDef.domainName.contentEquals(DomainName.zoneDeadTime) }
+                        ?.let { modelPointDef ->
+                            equipBuilder.createPoint(
+                                PointBuilderConfig(
                                     modelPointDef,
                                     profileConfiguration,
                                     it["id"].toString(),
                                     site!!.id,
                                     hayStack.timeZone,
                                     equipDis
+                                )
                             )
-                    )
+                        }
                 }
 
                 if (!acbEquip.autoAwayTime.pointExists()) {
-                    val modelPointDef = model.points.find { it.domainName.contentEquals(DomainName.autoAwayTime) } as SeventyFiveFProfilePointDef
-                    equipBuilder.createPoint(
-                            PointBuilderConfig(
+                    model.points.find { pointDef -> pointDef.domainName.contentEquals(DomainName.autoAwayTime) }
+                        ?.let { modelPointDef ->
+                            equipBuilder.createPoint(
+                                PointBuilderConfig(
                                     modelPointDef,
                                     profileConfiguration,
                                     it["id"].toString(),
                                     site!!.id,
                                     hayStack.timeZone,
                                     equipDis
+                                )
                             )
-                    )
+                        }
                 }
 
                 if (!acbEquip.abnormalCurTempRiseTrigger.pointExists()) {
-                    val modelPointDef = model.points.find { it.domainName.contentEquals(DomainName.abnormalCurTempRiseTrigger) } as SeventyFiveFProfilePointDef
-                    equipBuilder.createPoint(
-                            PointBuilderConfig(
+                    model.points.find { pointDef -> pointDef.domainName.contentEquals(DomainName.abnormalCurTempRiseTrigger) }
+                        ?.let { modelPointDef ->
+                            equipBuilder.createPoint(
+                                PointBuilderConfig(
                                     modelPointDef,
                                     profileConfiguration,
                                     it["id"].toString(),
                                     site!!.id,
                                     hayStack.timeZone,
                                     equipDis
+                                )
                             )
-                    )
+                        }
                 }
 
                 if (!acbEquip.vavCoolingDeadbandMultiplier.pointExists()) {
-                    val modelPointDef = model.points.find { it.domainName.contentEquals(DomainName.vavCoolingDeadbandMultiplier) } as SeventyFiveFProfilePointDef
-                    equipBuilder.createPoint(
-                            PointBuilderConfig(
+                    model.points.find { pointDef -> pointDef.domainName.contentEquals(DomainName.vavCoolingDeadbandMultiplier) }
+                        ?.let { modelPointDef ->
+                            equipBuilder.createPoint(
+                                PointBuilderConfig(
                                     modelPointDef,
                                     profileConfiguration,
                                     it["id"].toString(),
                                     site!!.id,
                                     hayStack.timeZone,
                                     equipDis
+                                )
                             )
-                    )
+                        }
                 }
 
                 if (!acbEquip.vavZonePriorityMultiplier.pointExists()) {
-                    val modelPointDef = model.points.find { it.domainName.contentEquals(DomainName.vavZonePriorityMultiplier) } as SeventyFiveFProfilePointDef
-                    equipBuilder.createPoint(
-                            PointBuilderConfig(
+                    model.points.find { pointDef -> pointDef.domainName.contentEquals(DomainName.vavZonePriorityMultiplier) }
+                        ?.let { modelPointDef ->
+                            equipBuilder.createPoint(
+                                PointBuilderConfig(
                                     modelPointDef,
                                     profileConfiguration,
                                     it["id"].toString(),
                                     site!!.id,
                                     hayStack.timeZone,
                                     equipDis
+                                )
                             )
-                    )
+                        }
                 }
 
                 if (!acbEquip.vavZoneCo2Target.pointExists()) {
-                    val modelPointDef = model.points.find { it.domainName.contentEquals(DomainName.vavZoneCo2Target) } as SeventyFiveFProfilePointDef
-                    equipBuilder.createPoint(
-                            PointBuilderConfig(
+                    model.points.find { pointDef -> pointDef.domainName.contentEquals(DomainName.vavZoneCo2Target) }
+                        ?.let { modelPointDef ->
+                            equipBuilder.createPoint(
+                                PointBuilderConfig(
                                     modelPointDef,
                                     profileConfiguration,
                                     it["id"].toString(),
                                     site!!.id,
                                     hayStack.timeZone,
                                     equipDis
+                                )
                             )
-                    )
+                        }
                 }
 
                 if (!acbEquip.reheatZoneMaxDischargeTemp.pointExists()) {
-                    val modelPointDef = model.points.find { it.domainName.contentEquals(DomainName.reheatZoneMaxDischargeTemp) } as SeventyFiveFProfilePointDef
-                    equipBuilder.createPoint(
-                            PointBuilderConfig(
+                    model.points.find { pointDef -> pointDef.domainName.contentEquals(DomainName.reheatZoneMaxDischargeTemp) }
+                        ?.let { modelPointDef ->
+                            equipBuilder.createPoint(
+                                PointBuilderConfig(
                                     modelPointDef,
                                     profileConfiguration,
                                     it["id"].toString(),
                                     site!!.id,
                                     hayStack.timeZone,
                                     equipDis
+                                )
                             )
-                    )
+                        }
                 }
 
                 if (!acbEquip.vavTemperatureProportionalRange.pointExists()) {
-                    val modelPointDef = model.points.find { it.domainName.contentEquals(DomainName.vavTemperatureProportionalRange) } as SeventyFiveFProfilePointDef
-                    equipBuilder.createPoint(
-                            PointBuilderConfig(
+                    model.points.find { pointDef -> pointDef.domainName.contentEquals(DomainName.vavTemperatureProportionalRange) }
+                        ?.let { modelPointDef ->
+                            equipBuilder.createPoint(
+                                PointBuilderConfig(
                                     modelPointDef,
                                     profileConfiguration,
                                     it["id"].toString(),
                                     site!!.id,
                                     hayStack.timeZone,
                                     equipDis
+                                )
                             )
-                    )
+                        }
                 }
 
                 if (!acbEquip.vavHeatingDeadbandMultiplier.pointExists()) {
-                    val modelPointDef = model.points.find { it.domainName.contentEquals(DomainName.vavHeatingDeadbandMultiplier) } as SeventyFiveFProfilePointDef
-                    equipBuilder.createPoint(
-                            PointBuilderConfig(
+                    model.points.find { pointDef -> pointDef.domainName.contentEquals(DomainName.vavHeatingDeadbandMultiplier) }
+                        ?.let { modelPointDef ->
+                            equipBuilder.createPoint(
+                                PointBuilderConfig(
                                     modelPointDef,
                                     profileConfiguration,
                                     it["id"].toString(),
                                     site!!.id,
                                     hayStack.timeZone,
                                     equipDis
+                                )
                             )
-                    )
+                        }
                 }
 
                 if (!acbEquip.constantTempAlertTime.pointExists()) {
-                    val modelPointDef = model.points.find { it.domainName.contentEquals(DomainName.constantTempAlertTime) } as SeventyFiveFProfilePointDef
-                    equipBuilder.createPoint(
-                            PointBuilderConfig(
+                    model.points.find { pointDef -> pointDef.domainName.contentEquals(DomainName.constantTempAlertTime) }
+                        ?.let { modelPointDef ->
+                            equipBuilder.createPoint(
+                                PointBuilderConfig(
                                     modelPointDef,
                                     profileConfiguration,
                                     it["id"].toString(),
                                     site!!.id,
                                     hayStack.timeZone,
                                     equipDis
+                                )
                             )
-                    )
+                        }
                 }
 
                 if (!acbEquip.forcedOccupiedTime.pointExists()) {
-                    val modelPointDef = model.points.find { it.domainName.contentEquals(DomainName.forcedOccupiedTime) } as SeventyFiveFProfilePointDef
-                    equipBuilder.createPoint(
-                            PointBuilderConfig(
+                    model.points.find { pointDef -> pointDef.domainName.contentEquals(DomainName.forcedOccupiedTime) }
+                        ?.let { modelPointDef ->
+                            equipBuilder.createPoint(
+                                PointBuilderConfig(
                                     modelPointDef,
                                     profileConfiguration,
                                     it["id"].toString(),
                                     site!!.id,
                                     hayStack.timeZone,
                                     equipDis
+                                )
                             )
-                    )
+                        }
                 }
 
                 if (!acbEquip.valveActuationStartDamperPosDuringSysHeating.pointExists()) {
-                    val modelPointDef = model.points.find { it.domainName.contentEquals(DomainName.valveActuationStartDamperPosDuringSysHeating) } as SeventyFiveFProfilePointDef
-                    equipBuilder.createPoint(
-                            PointBuilderConfig(
+                    model.points.find { pointDef -> pointDef.domainName.contentEquals(DomainName.valveActuationStartDamperPosDuringSysHeating) }
+                        ?.let { modelPointDef ->
+                            equipBuilder.createPoint(
+                                PointBuilderConfig(
                                     modelPointDef,
                                     profileConfiguration,
                                     it["id"].toString(),
                                     site!!.id,
                                     hayStack.timeZone,
                                     equipDis
+                                )
                             )
-                    )
+                        }
                 }
 
                 if (!acbEquip.vavZoneCo2Threshold.pointExists()) {
-                    val modelPointDef = model.points.find { it.domainName.contentEquals(DomainName.vavZoneCo2Threshold) } as SeventyFiveFProfilePointDef
-                    equipBuilder.createPoint(
-                            PointBuilderConfig(
+                    model.points.find { pointDef -> pointDef.domainName.contentEquals(DomainName.vavZoneCo2Threshold) }
+                        ?.let { modelPointDef ->
+                            equipBuilder.createPoint(
+                                PointBuilderConfig(
                                     modelPointDef,
                                     profileConfiguration,
                                     it["id"].toString(),
                                     site!!.id,
                                     hayStack.timeZone,
                                     equipDis
+                                )
                             )
-                    )
+                        }
                 }
 
                 if (!acbEquip.vavProportionalKFactor.pointExists()) {
-                    val modelPointDef = model.points.find { it.domainName.contentEquals(DomainName.vavProportionalKFactor) } as SeventyFiveFProfilePointDef
-                    equipBuilder.createPoint(
-                            PointBuilderConfig(
+                    model.points.find { pointDef -> pointDef.domainName.contentEquals(DomainName.vavProportionalKFactor) }
+                        ?.let { modelPointDef ->
+                            equipBuilder.createPoint(
+                                PointBuilderConfig(
                                     modelPointDef,
                                     profileConfiguration,
                                     it["id"].toString(),
                                     site!!.id,
                                     hayStack.timeZone,
                                     equipDis
+                                )
                             )
-                    )
+                        }
                 }
 
                 if (!acbEquip.vavIntegralKfactor.pointExists()) {
-                    val modelPointDef = model.points.find { it.domainName.contentEquals(DomainName.vavIntegralKfactor) } as SeventyFiveFProfilePointDef
-                    equipBuilder.createPoint(
-                            PointBuilderConfig(
+                    model.points.find { pointDef -> pointDef.domainName.contentEquals(DomainName.vavIntegralKfactor) }
+                        ?.let { modelPointDef ->
+                            equipBuilder.createPoint(
+                                PointBuilderConfig(
                                     modelPointDef,
                                     profileConfiguration,
                                     it["id"].toString(),
                                     site!!.id,
                                     hayStack.timeZone,
                                     equipDis
+                                )
                             )
-                    )
+                        }
                 }
 
                 if (!acbEquip.reheatZoneToDATMinDifferential.pointExists()) {
-                    val modelPointDef = model.points.find { it.domainName.contentEquals(DomainName.reheatZoneToDATMinDifferential) } as SeventyFiveFProfilePointDef
-                    equipBuilder.createPoint(
-                            PointBuilderConfig(
+                    model.points.find { pointDef -> pointDef.domainName.contentEquals(DomainName.reheatZoneToDATMinDifferential) }
+                        ?.let { modelPointDef ->
+                            equipBuilder.createPoint(
+                                PointBuilderConfig(
                                     modelPointDef,
                                     profileConfiguration,
                                     it["id"].toString(),
                                     site!!.id,
                                     hayStack.timeZone,
                                     equipDis
+                                )
                             )
-                    )
+                        }
                 }
 
                 if (!acbEquip.vavZonePrioritySpread.pointExists()) {
-                    val modelPointDef = model.points.find { it.domainName.contentEquals(DomainName.vavZonePrioritySpread) } as SeventyFiveFProfilePointDef
-                    equipBuilder.createPoint(
-                            PointBuilderConfig(
+                    model.points.find { pointDef -> pointDef.domainName.contentEquals(DomainName.vavZonePrioritySpread) }
+                        ?.let { modelPointDef ->
+                            equipBuilder.createPoint(
+                                PointBuilderConfig(
                                     modelPointDef,
                                     profileConfiguration,
                                     it["id"].toString(),
                                     site!!.id,
                                     hayStack.timeZone,
                                     equipDis
+                                )
                             )
-                    )
+                        }
                 }
 
                 if (!acbEquip.vavZoneVocTarget.pointExists()) {
-                    val modelPointDef = model.points.find { it.domainName.contentEquals(DomainName.vavZoneVocTarget) } as SeventyFiveFProfilePointDef
-                    equipBuilder.createPoint(
-                            PointBuilderConfig(
+                    model.points.find { pointDef -> pointDef.domainName.contentEquals(DomainName.vavZoneVocTarget) }
+                        ?.let { modelPointDef ->
+                            equipBuilder.createPoint(
+                                PointBuilderConfig(
                                     modelPointDef,
                                     profileConfiguration,
                                     it["id"].toString(),
                                     site!!.id,
                                     hayStack.timeZone,
                                     equipDis
+                                )
                             )
-                    )
+                        }
                 }
 
                 if (!acbEquip.vavTemperatureIntegralTime.pointExists()) {
-                    val modelPointDef = model.points.find { it.domainName.contentEquals(DomainName.vavTemperatureIntegralTime) } as SeventyFiveFProfilePointDef
-                    equipBuilder.createPoint(
-                            PointBuilderConfig(
+                    model.points.find { pointDef -> pointDef.domainName.contentEquals(DomainName.vavTemperatureIntegralTime) }
+                        ?.let { modelPointDef ->
+                            equipBuilder.createPoint(
+                                PointBuilderConfig(
                                     modelPointDef,
                                     profileConfiguration,
                                     it["id"].toString(),
                                     site!!.id,
                                     hayStack.timeZone,
                                     equipDis
+                                )
                             )
-                    )
+                        }
                 }
 
                 if (!acbEquip.relayActivationHysteresis.pointExists()) {
-                    val modelPointDef = model.points.find { it.domainName.contentEquals(DomainName.relayActivationHysteresis) } as SeventyFiveFProfilePointDef
-                    equipBuilder.createPoint(
-                            PointBuilderConfig(
+                    model.points.find { pointDef -> pointDef.domainName.contentEquals(DomainName.relayActivationHysteresis) }
+                        ?.let { modelPointDef ->
+                            equipBuilder.createPoint(
+                                PointBuilderConfig(
                                     modelPointDef,
                                     profileConfiguration,
                                     it["id"].toString(),
                                     site!!.id,
                                     hayStack.timeZone,
                                     equipDis
+                                )
                             )
-                    )
+                        }
                 }
 
                 if (!acbEquip.vavZoneVocThreshold.pointExists()) {
-                    val modelPointDef = model.points.find { it.domainName.contentEquals(DomainName.vavZoneVocThreshold) } as SeventyFiveFProfilePointDef
-                    equipBuilder.createPoint(
-                            PointBuilderConfig(
+                    model.points.find { pointDef -> pointDef.domainName.contentEquals(DomainName.vavZoneVocThreshold) }
+                        ?.let { modelPointDef ->
+                            equipBuilder.createPoint(
+                                PointBuilderConfig(
                                     modelPointDef,
                                     profileConfiguration,
                                     it["id"].toString(),
                                     site!!.id,
                                     hayStack.timeZone,
                                     equipDis
+                                )
                             )
-                    )
+                        }
                 }
 
                 if (!acbEquip.reheatZoneDischargeTempOffset.pointExists()) {
-                    val modelPointDef = model.points.find { it.domainName.contentEquals(DomainName.reheatZoneDischargeTempOffset) } as SeventyFiveFProfilePointDef
-                    equipBuilder.createPoint(
-                            PointBuilderConfig(
+                    model.points.find { pointDef -> pointDef.domainName.contentEquals(DomainName.reheatZoneDischargeTempOffset) }
+                        ?.let { modelPointDef ->
+                            equipBuilder.createPoint(
+                                PointBuilderConfig(
                                     modelPointDef,
                                     profileConfiguration,
                                     it["id"].toString(),
                                     site!!.id,
                                     hayStack.timeZone,
                                     equipDis
+                                )
                             )
-                    )
+                        }
                 }
 
                 if (!acbEquip.demandResponseSetback.pointExists()) {
-                    CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "VavAndAcbProfileMigration.recoverHelioNodeACBTuners: demandResponseSetback does not exist")
-                    val modelPointDef = model.points.find { it.domainName.contentEquals(DomainName.demandResponseSetback) } as SeventyFiveFProfilePointDef
-                    equipBuilder.createPoint(
-                        PointBuilderConfig(
-                            modelPointDef,
-                            profileConfiguration,
-                            it["id"].toString(),
-                            site!!.id,
-                            hayStack.timeZone,
-                            equipDis
-                        )
+                    CcuLog.d(
+                        L.TAG_CCU_MIGRATION_UTIL,
+                        "VavAndAcbProfileMigration.recoverHelioNodeACBTuners: demandResponseSetback does not exist"
                     )
+                    model.points.find { pointDef -> pointDef.domainName.contentEquals(DomainName.demandResponseSetback) }
+                        ?.let { modelPointDef ->
+                            equipBuilder.createPoint(
+                                PointBuilderConfig(
+                                    modelPointDef,
+                                    profileConfiguration,
+                                    it["id"].toString(),
+                                    site!!.id,
+                                    hayStack.timeZone,
+                                    equipDis
+                                )
+                            )
+                        }
                 }
 
-                if(!acbEquip.autoAwaySetback.pointExists()) {
-                    CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "VavAndAcbProfileMigration.recoverHelioNodeACBTuners: autoAwaySetback does not exist")
-                    val modelPointDef = model.points.find { it.domainName.contentEquals(DomainName.autoAwaySetback) } as SeventyFiveFProfilePointDef
-                    equipBuilder.createPoint(
-                        PointBuilderConfig(
-                            modelPointDef,
-                            profileConfiguration,
-                            it["id"].toString(),
-                            site!!.id,
-                            hayStack.timeZone,
-                            equipDis
-                        )
+                if (!acbEquip.autoAwaySetback.pointExists()) {
+                    CcuLog.d(
+                        L.TAG_CCU_MIGRATION_UTIL,
+                        "VavAndAcbProfileMigration.recoverHelioNodeACBTuners: autoAwaySetback does not exist"
                     )
+                    model.points.find { pointDef -> pointDef.domainName.contentEquals(DomainName.autoAwaySetback) }
+                        ?.let { modelPointDef ->
+                            equipBuilder.createPoint(
+                                PointBuilderConfig(
+                                    modelPointDef,
+                                    profileConfiguration,
+                                    it["id"].toString(),
+                                    site!!.id,
+                                    hayStack.timeZone,
+                                    equipDis
+                                )
+                            )
+                        }
                 }
 
                 if (acbEquip.enableCFMControl.readDefaultVal() > 0) {
                     if (!acbEquip.vavAirflowCFMProportionalRange.pointExists()) {
-                        val modelPointDef = model.points.find { it.domainName.contentEquals(DomainName.vavAirflowCFMProportionalRange) } as SeventyFiveFProfilePointDef
-                        equipBuilder.createPoint(
-                                PointBuilderConfig(
+                        model.points.find { pointDef -> pointDef.domainName.contentEquals(DomainName.vavAirflowCFMProportionalRange) }
+                            ?.let { modelPointDef ->
+                                equipBuilder.createPoint(
+                                    PointBuilderConfig(
                                         modelPointDef,
                                         profileConfiguration,
                                         it["id"].toString(),
                                         site!!.id,
                                         hayStack.timeZone,
                                         equipDis
+                                    )
                                 )
-                        )
+                            }
                     }
 
                     if (!acbEquip.vavAirflowCFMIntegralKFactor.pointExists()) {
-                        val modelPointDef = model.points.find { it.domainName.contentEquals(DomainName.vavAirflowCFMIntegralKFactor) } as SeventyFiveFProfilePointDef
-                        equipBuilder.createPoint(
-                                PointBuilderConfig(
+                        model.points.find { pointDef -> pointDef.domainName.contentEquals(DomainName.vavAirflowCFMIntegralKFactor) }
+                            ?.let { modelPointDef ->
+                                equipBuilder.createPoint(
+                                    PointBuilderConfig(
                                         modelPointDef,
                                         profileConfiguration,
                                         it["id"].toString(),
                                         site!!.id,
                                         hayStack.timeZone,
                                         equipDis
+                                    )
                                 )
-                        )
+                            }
                     }
 
                     if (!acbEquip.vavAirflowCFMIntegralTime.pointExists()) {
-                        val modelPointDef = model.points.find { it.domainName.contentEquals(DomainName.vavAirflowCFMIntegralTime) } as SeventyFiveFProfilePointDef
-                        equipBuilder.createPoint(
-                                PointBuilderConfig(
+                        model.points.find { pointDef -> pointDef.domainName.contentEquals(DomainName.vavAirflowCFMIntegralTime) }
+                            ?.let { modelPointDef ->
+                                equipBuilder.createPoint(
+                                    PointBuilderConfig(
                                         modelPointDef,
                                         profileConfiguration,
                                         it["id"].toString(),
                                         site!!.id,
                                         hayStack.timeZone,
                                         equipDis
+                                    )
                                 )
-                        )
+                            }
                     }
 
                     if (!acbEquip.vavAirflowCFMProportionalKFactor.pointExists()) {
-                        val modelPointDef = model.points.find { it.domainName.contentEquals(DomainName.vavAirflowCFMProportionalKFactor) } as SeventyFiveFProfilePointDef
-                        equipBuilder.createPoint(
-                                PointBuilderConfig(
+                        model.points.find { pointDef -> pointDef.domainName.contentEquals(DomainName.vavAirflowCFMProportionalKFactor) }
+                            ?.let { modelPointDef ->
+                                equipBuilder.createPoint(
+                                    PointBuilderConfig(
                                         modelPointDef,
                                         profileConfiguration,
                                         it["id"].toString(),
                                         site!!.id,
                                         hayStack.timeZone,
                                         equipDis
+                                    )
                                 )
-                        )
+                            }
                     }
                 }
-
             }
 
             PreferenceUtil.setRecoverHelioNodeACBTunersMigration()

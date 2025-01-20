@@ -3,19 +3,19 @@ package a75f.io.renatus.model;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HisItem;
-import a75f.io.domain.api.Ccu;
 import a75f.io.domain.api.Domain;
 import a75f.io.domain.api.DomainName;
 import a75f.io.domain.equips.DabEquip;
 import a75f.io.domain.equips.PlcEquip;
 import a75f.io.domain.equips.SseEquip;
 import a75f.io.domain.equips.VavEquip;
+import a75f.io.domain.util.ModelLoader;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.Thermistor;
@@ -25,6 +25,8 @@ import a75f.io.logic.bo.building.sensors.Sensor;
 import a75f.io.logic.bo.building.sensors.SensorManager;
 import a75f.io.logic.bo.building.truecfm.TrueCFMUtil;
 import a75f.io.logic.jobs.StringConstants;
+import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective;
+import io.seventyfivef.domainmodeler.common.point.MultiStateConstraint;
 
 /**
 *
@@ -445,7 +447,7 @@ public class ZoneViewData {
     }
 
     public static HashMap getPiEquipPoints(String equipID) {
-
+        HashMap<Object, Object> hsEquip = CCUHsApi.getInstance().readEntity("equip and id == "+equipID);
         PlcEquip plcEquip = (PlcEquip) Domain.INSTANCE.getDomainEquip(equipID);
         HashMap<String, Object> plcPoints = new HashMap<>();
         plcPoints.put("Profile","Pi Loop Controller");
@@ -455,6 +457,7 @@ public class ZoneViewData {
         }
         ArrayList inputValue = CCUHsApi.getInstance().readAll("point and process and logical and variable and equipRef == \""+equipID+"\"");
         double piSensorValue =plcEquip.getAnalog1InputType().readDefaultVal();
+        double piA2SensorValue =plcEquip.getAnalog2InputType().readDefaultVal();
         double analog2Config = plcEquip.getUseAnalogIn2ForSetpoint().readDefaultVal();
         int th1InputSensor =  (int)plcEquip.getThermistor1InputType().readDefaultVal();
         double targetValue = analog2Config > 0 ? 0: plcEquip.getPidTargetValue().readDefaultVal();
@@ -481,6 +484,26 @@ public class ZoneViewData {
         if (piSensorValue > 0) {
             plcPoints.put("Pi Sensor Value",piSensorValue);
         }
+
+        if (analog2Config > 0) {
+            SeventyFiveFProfileDirective model =
+                    (SeventyFiveFProfileDirective) ModelLoader.INSTANCE.getModelForDomainName(hsEquip.get("domainName").toString());
+
+            String domainName = model.getPoints().stream()
+                    .filter(point -> point.getDomainName().equals("analog2InputType"))
+                    .map(point -> (MultiStateConstraint) point.getValueConstraint())
+                    .findFirst()
+                    .map(constraint -> constraint.getAllowedValues().get((int) piA2SensorValue).getValue())
+                    .orElse(null);
+
+            HashMap<Object, Object> sensorPoint = CCUHsApi.getInstance().readEntity("domainName == \""+domainName+"\"");
+            double a2SensorValue = CCUHsApi.getInstance().readHisValById(sensorPoint.get("id").toString());
+            String unit = Objects.requireNonNull(sensorPoint.get("unit")).toString();
+
+            plcPoints.put("ai2Sensor", a2SensorValue);
+            plcPoints.put("ai2SensorUnit", unit);
+        }
+
 
         HashMap<Object, Object> equip = CCUHsApi.getInstance().readMapById(equipID);
         int group = Integer.parseInt(equip.get("group").toString());

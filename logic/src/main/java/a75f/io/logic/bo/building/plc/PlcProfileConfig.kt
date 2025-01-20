@@ -231,31 +231,6 @@ class PlcProfileConfig (nodeAddress: Int, nodeType: String, priority: Int, roomR
         updateDevicePoint(DomainName.relay2, Port.RELAY_TWO.name, "Relay N/C", config.relay2OutputEnable.enabled)
     }
 
-    fun returnTargetValueNativeSensor(): ArrayList<String> {
-        val targetVal = ArrayList<String>()
-        val minMaxInc: Triple<Double, Double, Double>
-        val pointString = getDomainPoint()
-        minMaxInc = Domain.getMinMaxIncValuesByDomainName(pointString, model)
-
-        targetVal.clear()
-
-        val minVal = (100 * minMaxInc.first).toInt()
-        val maxVal = (100 * minMaxInc.second).toInt()
-        val increment = (100 * minMaxInc.third).toInt()
-
-        for (pos in minVal..maxVal step increment) {
-            targetVal.add((pos / 100.0).toString())
-        }
-
-        CcuLog.i("kumar_debug", "reconfig domainName: $pointString Target Values: $targetVal")
-        return targetVal
-    }
-
-    private fun getDomainPoint() : String{
-        return (model.points.find { it.domainName == DomainName.nativeSensorType }?.valueConstraint as MultiStateConstraint)
-            .allowedValues[nativeSensorType.currentVal.toInt()].value
-    }
-
     fun updateTypeForAnalog1Out(config: PlcProfileConfig) {
         val type = "${config.analog1MinOutput.currentVal.toInt()}-${config.analog1MaxOutput.currentVal.toInt()}v"
         val device = hayStack.readEntity("device and addr == \"${config.nodeAddress}\"")
@@ -278,4 +253,28 @@ class PlcProfileConfig (nodeAddress: Int, nodeType: String, priority: Int, roomR
         }
     }
 
+    fun getMinVal(selectedIndex : Int, model: SeventyFiveFProfileDirective, domainName: String): ArrayList<String> {
+        val targetVal = ArrayList<String>()
+        val minMaxInc: Triple<Double, Double, Double>
+        val pointString =
+            (model.points.find { it.domainName == domainName }?.valueConstraint as MultiStateConstraint)
+                .allowedValues[selectedIndex].value
+        minMaxInc = Domain.getMinMaxIncValuesByDomainName(pointString, model)
+
+        targetVal.clear()
+
+        val minVal = (100 * minMaxInc.first).toInt()
+        val maxVal = (100 * minMaxInc.second).toInt()
+        val increment = (100 * minMaxInc.third).toInt()
+
+        for (pos in minVal..maxVal step increment) {
+            targetVal.add((pos / 100.0).toString())
+        }
+
+        if (targetVal.isEmpty()) {
+            targetVal.add("0.0")
+        }
+
+        return targetVal
+    }
 }

@@ -5,6 +5,7 @@ import a75f.io.api.haystack.RawPoint
 import a75f.io.device.mesh.LSerial
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.Domain.getListByDomainName
+import a75f.io.domain.api.Domain.getListOfDisNameByDomainName
 import a75f.io.domain.api.Domain.getMinMaxIncValuesByDomainName
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.api.EntityConfig
@@ -32,6 +33,7 @@ import a75f.io.renatus.util.highPriorityDispatcher
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.seventyfivef.domainmodeler.client.ModelDirective
@@ -107,7 +109,7 @@ class PlcProfileViewModel : ViewModel() {
             profileConfiguration = PlcProfileConfig(deviceAddress.toInt(), nodeType.name, 0,
                 zoneRef, floorRef , profileType, model ).getDefaultConfiguration()
             viewState = PlcProfileViewState.fromPlcProfileConfig(profileConfiguration)
-            viewState.pidTargetValue = 5.0  // by default set to 5.0
+            viewState.pidProportionalRange = 0.0 // by default set to 0
             isDefault = true
         }
         CcuLog.i(Domain.LOG_TAG, profileConfiguration.toString())
@@ -236,10 +238,20 @@ class PlcProfileViewModel : ViewModel() {
         if (selectedIndex == 0) {
             return errorVal
         }
+        var minMaxInc: Triple<Double, Double, Double>
+        var pointString = getProcessVariableMappedPoint()
+        minMaxInc = getMinMaxIncValuesByDomainName(pointString.toString(), model)
+
         errorVal.clear()
-        for (pos in 1..10 step 1) {
-            errorVal.add((pos.toDouble()).toString())
+
+        val minVal = (100 * minMaxInc.first).toInt()
+        val maxVal = (100 * minMaxInc.second).toInt()
+        val increment = (100 * minMaxInc.third).toInt()
+
+        for (pos in minVal..maxVal step increment) {
+            errorVal.add((pos / 100.0).toString())
         }
+
         return errorVal
     }
 
@@ -247,10 +259,20 @@ class PlcProfileViewModel : ViewModel() {
         if (selectedIndex == 0) {
             return errorVal
         }
+        var minMaxInc: Triple<Double, Double, Double>
+        var pointString = getProcessVariableMappedPoint()
+        minMaxInc = getMinMaxIncValuesByDomainName(pointString.toString(), model)
+
         errorVal.clear()
-        for (pos in 1..10 step 1) {
-            errorVal.add((pos.toDouble()).toString())
+
+        val minVal = (100 * minMaxInc.first).toInt()
+        val maxVal = (100 * minMaxInc.second).toInt()
+        val increment = (100 * minMaxInc.third).toInt()
+
+        for (pos in minVal..maxVal step increment) {
+            errorVal.add((pos / 100.0).toString())
         }
+
         return errorVal
     }
 
@@ -258,31 +280,41 @@ class PlcProfileViewModel : ViewModel() {
         if (selectedIndex == 0) {
             return errorVal
         }
+        var minMaxInc: Triple<Double, Double, Double>
+        var pointString = getProcessVariableMappedPoint()
+        minMaxInc = getMinMaxIncValuesByDomainName(pointString.toString(), model)
+
         errorVal.clear()
-        for (pos in 1..10 step 1) {
-            errorVal.add((pos.toDouble()).toString())
+
+        val minVal = (100 * minMaxInc.first).toInt()
+        val maxVal = (100 * minMaxInc.second).toInt()
+        val increment = (100 * minMaxInc.third).toInt()
+
+        for (pos in minVal..maxVal step increment) {
+            errorVal.add((pos / 100.0).toString())
         }
+
         return errorVal
     }
 
     private fun initializeLists() {
-        analog1InputType = getListByDomainName(DomainName.analog1InputType, model)
+        analog1InputType = getListOfDisNameByDomainName(DomainName.analog1InputType, model)
 
         // Get the target list based on the selected sensor type
         if(viewState.analog1InputType.toInt() != 0) pidTargetValue = returnTargetValueAi1(viewState.analog1InputType.toInt())
         if(viewState.thermistor1InputType.toInt() != 0) pidTargetValue = returnTargetValueTH1(viewState.thermistor1InputType.toInt())
         if(viewState.nativeSensorType.toInt() != 0) pidTargetValue = returnTargetValueNativeSensor(viewState.nativeSensorType.toInt())
 
-        thermistor1InputType = getListByDomainName(DomainName.thermistor1InputType, model)
+        thermistor1InputType = getListOfDisNameByDomainName(DomainName.thermistor1InputType, model)
 
         // Get the error list based on the selected sensor type
         if(viewState.analog1InputType.toInt() != 0) pidProportionalRange = returnErrorValueAi1(viewState.analog1InputType.toInt())
         if(viewState.thermistor1InputType.toInt() != 0) pidProportionalRange = returnErrorValueTH1(viewState.thermistor1InputType.toInt())
         if(viewState.nativeSensorType.toInt() != 0) pidProportionalRange = returnErrorValueNativeSensor(viewState.nativeSensorType.toInt())
 
-        nativeSensorType = getListByDomainName(DomainName.nativeSensorType, model)
+        nativeSensorType = getListOfDisNameByDomainName(DomainName.nativeSensorType, model)
 
-        analog2InputType = getListByDomainName(DomainName.analog2InputType, model)
+        analog2InputType = getListOfDisNameByDomainName(DomainName.analog2InputType, model)
         setpointSensorOffset = getListByDomainName(DomainName.setpointSensorOffset, model)
         analog1MinOutput = getListByDomainName(DomainName.analog1MinOutput, model)
         analog1MaxOutput = getListByDomainName(DomainName.analog1MaxOutput, model)
@@ -294,6 +326,10 @@ class PlcProfileViewModel : ViewModel() {
 
     fun saveConfiguration() {
         if (saveJob == null) {
+            if(viewState.pidProportionalRange <= 0.0) {
+                Toast.makeText(context, "Proportional Range cannot be 0", Toast.LENGTH_SHORT).show()
+                return
+            }
             ProgressDialogUtils.showProgressDialog(context, "Saving Plc Configuration")
             saveJob = viewModelScope.launch(highPriorityDispatcher) {
                 CCUHsApi.getInstance().resetCcuReady()

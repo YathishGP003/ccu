@@ -49,14 +49,10 @@ fun updateConfigPoint(msgObject: JsonObject, configPoint: Point) {
             config.analog1InputType.currentVal = sensorTypeValue.toDouble()
             config.thermistor1InputType.currentVal = 0.0
             config.nativeSensorType.currentVal = 0.0
-            if (sensorTypeValue == VOLTAGE_INPUT_AI1 || sensorTypeValue == ZONE_HUMIDITY_AI1 || sensorTypeValue == ZONE_CO_AI1
-                || sensorTypeValue == ZONE_NO2_AI1 || sensorTypeValue == CURRENT_TX10_AI1
-                || sensorTypeValue == CURRENT_TX20_AI1 || sensorTypeValue == CURRENT_TX50_AI1
-            ) {
-                config.pidTargetValue.currentVal = 5.0
-            } else {
-                config.pidTargetValue.currentVal = 0.0
-            }
+
+            val sensorMinVal = config.getMinVal(sensorTypeValue, model, "analog1InputType")
+            config.pidTargetValue.currentVal = sensorMinVal[0].toDouble()
+            config.pidProportionalRange.currentVal = sensorMinVal[0].toDouble()
         }
 
         DomainName.thermistor1InputType -> {
@@ -65,11 +61,10 @@ fun updateConfigPoint(msgObject: JsonObject, configPoint: Point) {
             config.analog1InputType.currentVal = 0.0
             config.thermistor1InputType.currentVal = sensorTypeValue.toDouble()
             config.nativeSensorType.currentVal = 0.0
-            if (sensorTypeValue == EXTERNAL_AIR_TEMP_SENSOR || sensorTypeValue == AIR_TEMP_SENSOR_100K_OHMS) {
-                config.pidTargetValue.currentVal = 5.0
-            } else {
-                config.pidTargetValue.currentVal = 0.0
-            }
+
+            val sensorMinVal = config.getMinVal(sensorTypeValue, model, "thermistor1InputType")
+            config.pidTargetValue.currentVal = sensorMinVal[0].toDouble()
+            config.pidProportionalRange.currentVal = sensorMinVal[0].toDouble()
         }
 
         DomainName.nativeSensorType -> {
@@ -79,11 +74,9 @@ fun updateConfigPoint(msgObject: JsonObject, configPoint: Point) {
             config.thermistor1InputType.currentVal = 0.0
             config.nativeSensorType.currentVal = sensorTypeValue.toDouble()
 
-            if (sensorTypeValue != 0) {
-                val values = config.returnTargetValueNativeSensor()
-                config.pidTargetValue.currentVal = values[values.size / 2].toDouble()
-
-            }
+            val sensorMinVal = config.getMinVal(sensorTypeValue, model, "nativeSensorType")
+            config.pidTargetValue.currentVal = sensorMinVal[0].toDouble()
+            config.pidProportionalRange.currentVal = sensorMinVal[0].toDouble()
         }
 
         DomainName.analog2InputType -> config.analog2InputType.currentVal =

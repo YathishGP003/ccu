@@ -3868,19 +3868,25 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         TextView textViewUpdatedTime = viewStatus.findViewById(R.id.last_updated_status);
 
         TextView labelInputAir = viewPointRow1.findViewById(R.id.text_point1label);
+        TextView a2SensorLabel = viewPointRow1.findViewById(R.id.text_pointA2SensorLabel);
         TextView labelTarget = viewPointRow1.findViewById(R.id.text_point2label);
         TextView labelOffsetAir = viewPointRow2.findViewById(R.id.text_point1label);
         LinearLayout lt_column2 = loopOpRow.findViewById(R.id.lt_column2);
         TextView label2 = viewPointRow2.findViewById(R.id.text_point2label);
 
         TextView textViewInputAir = viewPointRow1.findViewById(R.id.text_point1value);
+        TextView a2SensorValue = viewPointRow1.findViewById(R.id.text_pointA2SensorValue);
         TextView textViewTargetAir = viewPointRow1.findViewById(R.id.text_point2value);
         TextView textViewOffsetAir = viewPointRow2.findViewById(R.id.text_point1value);
         TextView value2 = viewPointRow2.findViewById(R.id.text_point2value);
+        LinearLayout lt_column_a2Sensor = loopOpRow.findViewById(R.id.lt_column_a2Sensor);
 
         label2.setVisibility(View.GONE);
         value2.setVisibility(View.GONE);
         lt_column2.setVisibility(View.GONE);
+        a2SensorLabel.setVisibility(View.GONE);
+        a2SensorValue.setVisibility(View.GONE);
+        lt_column_a2Sensor.setVisibility(View.GONE);
 
         textViewTitle.setText(plcPoints.get("Profile").toString() + " (" + nodeAddress + ")");
         textViewStatus.setText(plcPoints.get("Status").toString());
@@ -3906,12 +3912,14 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         }
         try {
             if ((boolean) plcPoints.get("Dynamic Setpoint") == true) {
-
-                labelTarget.setText("Target ("+plcPoints.get("Dynamic Unit Type").toString() + ") : ");
+                a2SensorLabel.setText("Target (" + plcPoints.get("Dynamic Unit Type").toString() + ") : ");
+                a2SensorValue.setText(plcPoints.get("ai2Sensor").toString()+" "+plcPoints.get("ai2SensorUnit").toString());
+                a2SensorLabel.setVisibility(View.VISIBLE);
+                a2SensorValue.setVisibility(View.VISIBLE);
+                labelTarget.setText("Dynamic Target ("+plcPoints.get("Dynamic Unit Type").toString() + ") : ");
                 textViewTargetAir.setText(plcPoints.get("Target Value").toString() + " " + plcPoints.get("Dynamic Unit").toString());
                 labelOffsetAir.setText("Offset (" + plcPoints.get("Dynamic Unit Type").toString() + ") : ");
                 textViewOffsetAir.setText(plcPoints.get("Offset Value").toString() + " " + plcPoints.get("Dynamic Unit").toString());
-                viewPointRow2.setPadding(0, 0, 0, 40);
                 linearLayoutZonePoints.addView(viewTitle);
                 linearLayoutZonePoints.addView(viewStatus);
                 linearLayoutZonePoints.addView(loopOpRow);

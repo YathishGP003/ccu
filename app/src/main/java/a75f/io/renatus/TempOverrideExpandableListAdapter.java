@@ -1863,7 +1863,7 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                 }
                 break;
             case "HYPERSTAT_MONITORING":
-                HyperStatMonitoringProfile monitoringProfile = (HyperStatMonitoringProfile) L.getProfile(Short.parseShort(parseGroup(listTitle)));
+                /*HyperStatMonitoringProfile monitoringProfile = (HyperStatMonitoringProfile) L.getProfile(Short.parseShort(parseGroup(listTitle)));
                 HyperStatMonitoringConfiguration monitoringConfiguration = (HyperStatMonitoringConfiguration) monitoringProfile.getProfileConfiguration(Short.parseShort(parseGroup(listTitle)));
                 ArrayList<String> analogArr = new ArrayList<>();
                 for (Sensor r : SensorManager.getInstance().getExternalSensorList()) {
@@ -1892,7 +1892,7 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
                     if (monitoringConfiguration.isTh2Enable)
                         return thArr.get(monitoringConfiguration.th2Sensor);
                     else return "Not Enabled";
-                }
+                }*/
                 break;
             case "HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT":
                 /*

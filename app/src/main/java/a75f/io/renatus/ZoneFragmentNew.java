@@ -3879,7 +3879,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         TextView textViewTargetAir = viewPointRow1.findViewById(R.id.text_point2value);
         TextView textViewOffsetAir = viewPointRow2.findViewById(R.id.text_point1value);
         TextView value2 = viewPointRow2.findViewById(R.id.text_point2value);
-        LinearLayout lt_column_a2Sensor = loopOpRow.findViewById(R.id.lt_column_a2Sensor);
+        LinearLayout lt_column_a2Sensor = viewPointRow1.findViewById(R.id.lt_column_a2Sensor);
 
         label2.setVisibility(View.GONE);
         value2.setVisibility(View.GONE);
@@ -3916,6 +3916,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 a2SensorValue.setText(plcPoints.get("ai2Sensor").toString()+" "+plcPoints.get("ai2SensorUnit").toString());
                 a2SensorLabel.setVisibility(View.VISIBLE);
                 a2SensorValue.setVisibility(View.VISIBLE);
+                lt_column_a2Sensor.setVisibility(View.VISIBLE);
                 labelTarget.setText("Dynamic Target ("+plcPoints.get("Dynamic Unit Type").toString() + ") : ");
                 textViewTargetAir.setText(plcPoints.get("Target Value").toString() + " " + plcPoints.get("Dynamic Unit").toString());
                 labelOffsetAir.setText("Offset (" + plcPoints.get("Dynamic Unit Type").toString() + ") : ");

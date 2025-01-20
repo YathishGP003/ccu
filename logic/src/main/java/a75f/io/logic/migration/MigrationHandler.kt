@@ -16,10 +16,10 @@ import a75f.io.domain.OAOEquip
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.Domain.writeValAtLevelByDomain
 import a75f.io.domain.api.DomainName
-import a75f.io.domain.cutover.DabFullyModulatingRtuCutOverMapping
 import a75f.io.domain.config.DefaultProfileConfiguration
 import a75f.io.domain.config.ExternalAhuConfiguration
 import a75f.io.domain.config.ProfileConfiguration
+import a75f.io.domain.cutover.DabFullyModulatingRtuCutOverMapping
 import a75f.io.domain.cutover.DabStagedRtuCutOverMapping
 import a75f.io.domain.cutover.DabStagedVfdRtuCutOverMapping
 import a75f.io.domain.cutover.DabZoneProfileCutOverMapping
@@ -51,6 +51,8 @@ import a75f.io.domain.logic.EntityMapper
 import a75f.io.domain.logic.EquipBuilderConfig
 import a75f.io.domain.logic.PointBuilderConfig
 import a75f.io.domain.logic.ProfileEquipBuilder
+import a75f.io.domain.migration.DiffManger
+import a75f.io.domain.util.MODEL_SN_OAO
 import a75f.io.domain.util.ModelCache
 import a75f.io.domain.util.ModelLoader
 import a75f.io.logger.CcuLog
@@ -70,9 +72,9 @@ import a75f.io.logic.bo.building.hyperstat.v2.configs.MonitoringConfiguration
 import a75f.io.logic.bo.building.hyperstat.v2.configs.Pipe2Configuration
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.CpuUniInType
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuProfileConfiguration
-import a75f.io.logic.bo.building.plc.doPlcDomainModelCutOverMigration
 import a75f.io.logic.bo.building.oao.OAOProfileConfiguration
 import a75f.io.logic.bo.building.otn.OtnProfileConfiguration
+import a75f.io.logic.bo.building.plc.doPlcDomainModelCutOverMigration
 import a75f.io.logic.bo.building.schedules.occupancy.DemandResponse
 import a75f.io.logic.bo.building.sse.SseProfileConfiguration
 import a75f.io.logic.bo.building.system.vav.config.ModulatingRtuProfileConfig
@@ -105,8 +107,11 @@ import org.projecthaystack.HGrid
 import org.projecthaystack.HGridBuilder
 import org.projecthaystack.HRef
 import org.projecthaystack.HRow
+import org.projecthaystack.HStr
+import org.projecthaystack.HVal
 import org.projecthaystack.io.HZincReader
 import org.projecthaystack.io.HZincWriter
+import java.io.File
 
 
 class MigrationHandler (hsApi : CCUHsApi) : Migration {
@@ -261,6 +266,11 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         if(!PreferenceUtil.getHisInterpolateCOV()) {
             updateHisInterpolate()
             PreferenceUtil.setHisInterpolateCOV()
+        }
+        if(!PreferenceUtil.getRestoreSourceModelTagsForOao()) {
+            recoverSourceModelTagsForOao()
+            correctAhuRefForBypassDamperAndCcuConfig()
+            PreferenceUtil.setRestoreSourceModelTagsForOao()
         }
         hayStack.scheduleSync()
     }
@@ -2244,5 +2254,83 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                 )
                 CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "Updated ${point["dis"]} hisInterpolate for point ${point["id"]}  to cov")
             }
+    }
+
+    private fun recoverSourceModelTagsForOao() {
+        CcuLog.d(
+            L.TAG_CCU_MIGRATION_UTIL,
+            "MigrationHandler.logic recoverSourceModelTagsForOao started"
+        )
+        hayStack.readAllHDictByQuery("equip and domainName and not sourceModel")
+            .forEach { incompleteEquipDict ->
+                CcuLog.d(
+                    L.TAG_CCU_MIGRATION_UTIL,
+                    "\tEquip found without source model: ${incompleteEquipDict.id()} for point" +
+                            "with displayName: ${incompleteEquipDict.dis()}"
+                )
+                val oaoEquipBuilder = Equip.Builder().setHDict(incompleteEquipDict)
+                oaoEquipBuilder.addTag("sourceModel", HStr.make(MODEL_SN_OAO))
+                DiffManger(hayStack.context).getOldModelMetaList(
+                    hayStack.context.filesDir.absolutePath + "/models",
+                    hayStack.context.getSharedPreferences(
+                        Globals.DOMAIN_MODEL_SF,
+                        Context.MODE_PRIVATE
+                    )
+                )
+                    .find { it.modelId == MODEL_SN_OAO }?.let { oaoModelMeta ->
+                        oaoEquipBuilder.addTag(
+                            "sourceModelVersion",
+                            HStr.make(oaoModelMeta.version.toString())
+                        )
+                    }
+                hayStack.updateEquip(oaoEquipBuilder.build(), incompleteEquipDict["id"].toString())
+            }
+        CcuLog.d(
+            L.TAG_CCU_MIGRATION_UTIL,
+            "MigrationHandler.logic recoverSourceModelTagsForOao ended"
+        )
+    }
+
+    private fun correctAhuRefForBypassDamperAndCcuConfig() {
+        CcuLog.d(
+            L.TAG_CCU_MIGRATION_UTIL,
+            "MigrationHandler.logic correctAhuRefForBypassDamper started"
+        )
+        hayStack.readId("system and equip and not modbus and not connect")
+            ?.let { systemProfileEquipId ->
+                hayStack.readAllHDictByQuery(
+                    "equip and (domainName == \"${DomainName.smartnodeBypassDamper}\" or " +
+                            "domainName == \"${DomainName.ccuConfiguration}\")"
+                ).forEach { equipDict ->
+                    CcuLog.d(
+                        L.TAG_CCU_MIGRATION_UTIL,
+                        "MigrationHandler.correctAhuRef iterating for entity with" +
+                                " dis: ${equipDict.dis()} systemEquipId: $systemProfileEquipId and ahuRef: ${
+                                    equipDict.get(
+                                        "ahuRef",
+                                        false
+                                    )
+                                } and equipId: ${equipDict.id()}"
+                    )
+                    if (!equipDict.get("ahuRef", false)?.toString().equals(systemProfileEquipId)) {
+                        CcuLog.d(
+                            L.TAG_CCU_MIGRATION_UTIL,
+                            "MigrationHandler.correctAhuRef ahuRef discrepancy found"
+                        )
+                        val equipBuilder = Equip.Builder().setHDict(equipDict)
+                        equipBuilder.setAhuRef(systemProfileEquipId)
+                        if (equipDict.get("domainName", false)
+                                ?.toString() == (DomainName.ccuConfiguration)
+                        ) {
+                            equipBuilder.setGatewayRef(systemProfileEquipId)
+                        }
+                        hayStack.updateEquip(equipBuilder.build(), equipDict.id().toString())
+                    }
+                }
+            }
+        CcuLog.d(
+            L.TAG_CCU_MIGRATION_UTIL,
+            "MigrationHandler.logic correctAhuRefForBypassDamper ended"
+        )
     }
 }

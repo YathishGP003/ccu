@@ -22,6 +22,7 @@ class DiagEquipConfigurationBuilder(private val hayStack : CCUHsApi): DefaultEqu
         val hayStackEquip = getDiagEquip(ccuName)
         val diagEquipId = Domain.diagEquip.getId()
         hayStackEquip.gatewayRef = systemEquipId
+        hayStackEquip.ahuRef = systemEquipId
         hayStackEquip.lastModifiedDateTime = HDateTime.make(System.currentTimeMillis())
         hayStackEquip.id = diagEquipId
         hayStack.updateEquip(hayStackEquip, diagEquipId)

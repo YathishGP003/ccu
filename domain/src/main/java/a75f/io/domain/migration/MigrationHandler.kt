@@ -63,7 +63,7 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
             if (Domain.readEquip(newModel.id)["domainName"].toString() == DomainName.smartnodeBypassDamper) {
                 val equip = getBypassEquipByDomainName(newModel.domainName)
                 equips = if (equip != null) listOf(equip) else emptyList()
-            } else if (Domain.readEquip(newModel.id)["roomRef"].toString() == "SYSTEM") {
+            } else if (Domain.readEquip(newModel.id)["roomRef"].toString().replace("@","") == "SYSTEM") {
                 val equip = getSystemEquipByDomainName(newModel.domainName)
                 equips = if (equip != null) listOf(equip) else emptyList()
             } else {
@@ -100,7 +100,7 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
         siteRef: String
     ) {
         val devices: List<Device> =
-            if (Domain.readEquip(newModel.id)["roomRef"].toString() == "SYSTEM") {
+            if (Domain.readEquip(newModel.id)["roomRef"].toString().replace("@","") == "SYSTEM") {
                 /*val equip = getSystemEquipByDomainName(newModel.domainName)
                 if (equip != null) listOf(equip) else*/ emptyList()
             } else {
@@ -271,7 +271,7 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
                 hayStackEquip.id = it.id
                 DomainManager.addBypassEquip(Domain.hayStack, Domain.hayStack.ccuId)
                 CcuLog.d(Domain.LOG_TAG, "DM-DM Bypass Equip updated: ${hayStackEquip.domainName}")
-            } else if (Domain.readEquip(newModel.id)["roomRef"].toString() == "SYSTEM") {
+            } else if (Domain.readEquip(newModel.id)["roomRef"].toString().replace("@","") == "SYSTEM") {
                 hayStackEquip.roomRef = "SYSTEM"
                 hayStackEquip.floorRef = "SYSTEM"
                 /*For diag equip we should not have profileType*/
@@ -314,7 +314,7 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
                     hayStackEquip.gatewayRef = equipMap["gatewayRef"]?.toString()
                     haystack.updateEquip(hayStackEquip, it.id)
                     hayStackEquip.id = it.id
-                    if (Domain.readEquip(newModel.id)["roomRef"].toString() == "SYSTEM") {
+                    if (Domain.readEquip(newModel.id)["roomRef"].toString().replace("@","") == "SYSTEM") {
                         DomainManager.addSystemEquip(Domain.hayStack, Domain.hayStack.ccuId)
                         DomainManager.addOaoEquip(Domain.hayStack, Domain.hayStack.ccuId)
                     }else{
@@ -375,7 +375,7 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
                     hayStackEquip.gatewayRef = equipMap["gatewayRef"]?.toString()
                     haystack.updateEquip(hayStackEquip, it.id)
                     hayStackEquip.id = it.id
-                    if (Domain.readEquip(newModel.id)["roomRef"].toString() == "SYSTEM") {
+                    if (Domain.readEquip(newModel.id)["roomRef"].toString().replace("@","") == "SYSTEM") {
                         DomainManager.addSystemEquip(Domain.hayStack, Domain.hayStack.ccuId)
                         DomainManager.addOaoEquip(Domain.hayStack, Domain.hayStack.ccuId)
                     }else{
@@ -406,7 +406,7 @@ class MigrationHandler(var haystack: CCUHsApi, var listener: DiffManger.OnMigrat
                             return@forEach
                         }
                         Log.d(Domain.LOG_TAG, "updated haystack point: $hayStackPoint")
-                        if (Domain.readEquip(newModel.id)["roomRef"].toString() == "SYSTEM") {
+                        if (Domain.readEquip(newModel.id)["roomRef"].toString().replace("@","") == "SYSTEM") {
                             hayStackPoint.roomRef = "SYSTEM"
                             hayStackPoint.floorRef = "SYSTEM"
                             haystack.updatePoint(hayStackPoint, point["id"].toString())

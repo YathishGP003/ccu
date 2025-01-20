@@ -2,10 +2,13 @@ package a75f.io.domain.logic
 
 import a75f.io.api.haystack.BuildConfig
 import a75f.io.api.haystack.CCUHsApi
+import a75f.io.api.haystack.Equip
 import a75f.io.domain.api.Domain
+import a75f.io.domain.util.ModelLoader
 import a75f.io.logger.CcuLog
 import io.seventyfivef.domainmodeler.client.ModelDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
+import org.projecthaystack.HDateTime
 
 class CCUBaseConfigurationBuilder(private val hayStack : CCUHsApi): DefaultEquipBuilder() {
     fun createCCUBaseConfiguration(ccuName : String,
@@ -61,4 +64,24 @@ class CCUBaseConfigurationBuilder(private val hayStack : CCUHsApi): DefaultEquip
          return BuildConfig.BUILD_TYPE == "dev" || BuildConfig.BUILD_TYPE == "qa" ||
                  BuildConfig.BUILD_TYPE == "dev_qa" || BuildConfig.BUILD_TYPE == "staging"
      }
+
+    fun updateCcuConfigAhuRef(systemEquipId: String) {
+        val ccuName = Domain.ccuDevice.ccuDisName
+        val hayStackEquip = getCcuEquip(ccuName)
+        val ccuEquipId = Domain.ccuEquip.getId()
+        hayStackEquip.gatewayRef = systemEquipId
+        hayStackEquip.ahuRef = systemEquipId
+        hayStackEquip.lastModifiedDateTime = HDateTime.make(System.currentTimeMillis())
+        hayStackEquip.id = ccuEquipId
+        hayStack.updateEquip(hayStackEquip, ccuEquipId)
+    }
+
+    private fun getCcuEquip(ccuName: String): Equip {
+        val siteRef = hayStack.siteIdRef.toString()
+        val tz = hayStack.timeZone
+        val ccuConfigModelDef = ModelLoader.getCCUBaseConfigurationModel()
+        return buildEquip(EquipBuilderConfig(ccuConfigModelDef, null, siteRef,tz,
+            "$ccuName-${ccuConfigModelDef.name}")
+        )
+    }
 }

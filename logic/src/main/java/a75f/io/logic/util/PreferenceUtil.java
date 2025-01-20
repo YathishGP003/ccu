@@ -89,6 +89,7 @@ public class PreferenceUtil {
     private static final String NULL_ID_REMOVAL_STATUS = "nullIdRemovalStatus";
     private static final String UPDATE_HISINTERPOLATE_COV = "hisinterpolatecov";
     private static final String SIDE_APPS_UPDATE_STATUS ="sideAppsUpdateStatus";
+    private static final String RESTORE_SOURCE_MODEL_TAGS_FOR_OAO = "restoreSourceModelTagsForOao";
 
     public static void setContext(Context c) {
         context= c;
@@ -707,5 +708,13 @@ public class PreferenceUtil {
 
     public static void setSideAppsUpdateFinished() {
         setBooleanPreference(SIDE_APPS_UPDATE_STATUS, true);
+    }
+
+    public static boolean getRestoreSourceModelTagsForOao() {
+        return getBooleanPreference(RESTORE_SOURCE_MODEL_TAGS_FOR_OAO);
+    }
+
+    public static void setRestoreSourceModelTagsForOao() {
+        setBooleanPreference(RESTORE_SOURCE_MODEL_TAGS_FOR_OAO, true);
     }
 }

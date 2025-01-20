@@ -102,7 +102,7 @@ import a75f.io.util.ExecutorTask;
 public class Globals {
     private static final String RESTART_CCU = "restart_ccu";
     private static final String RESTART_TABLET = "restart_tablet";
-    private static final String DOMAIN_MODEL_SF = "domain_model_sf";
+    public static final String DOMAIN_MODEL_SF = "domain_model_sf";
     public int selectedTab;
 
     public static final class IntentActions {

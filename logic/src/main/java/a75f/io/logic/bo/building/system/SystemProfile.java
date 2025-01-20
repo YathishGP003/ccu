@@ -4,8 +4,11 @@ import static a75f.io.logic.L.ccu;
 
 import android.content.Context;
 
+import org.projecthaystack.HDict;
+
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Timer;
@@ -24,10 +27,9 @@ import a75f.io.domain.api.Domain;
 import a75f.io.domain.api.DomainName;
 import a75f.io.domain.api.PhysicalPoint;
 import a75f.io.domain.devices.CCUDevice;
-import a75f.io.domain.equips.DomainEquip;
+import a75f.io.domain.logic.CCUBaseConfigurationBuilder;
 import a75f.io.domain.logic.CCUDeviceBuilder;
 import a75f.io.domain.logic.DiagEquipConfigurationBuilder;
-import a75f.io.domain.util.ModelLoader;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.BacnetIdKt;
 import a75f.io.logic.BacnetUtilKt;
@@ -190,17 +192,20 @@ public abstract class SystemProfile
 
     public void updateAhuRef(String systemEquipId) {
         CCUHsApi ccuHsApi = CCUHsApi.getInstance();
-        ArrayList<HashMap<Object, Object>> equips = ccuHsApi.readAllEntities("equip and zone");
-        if (L.ccu().oaoProfile != null) {
-            equips.add(ccuHsApi.read("equip and oao and not hyperstatsplit"));
+        List<HDict> equips = ccuHsApi.readAllHDictByQuery("equip and zone");
+        if (L.ccu().oaoProfile != null || L.ccu().bypassDamperProfile != null) {
+            equips.addAll(ccuHsApi.readAllHDictByQuery("equip and " +
+                    "(domainName == \"" + DomainName.smartnodeOAO + "\" " +
+                    "or domainName == \"" + DomainName.smartnodeBypassDamper +"\" " +
+                    ") and not hyperstatsplit"));
         }
 
         equips.forEach( m -> {
-            Equip q = new Equip.Builder().setHashMap(m).build();
+            Equip q = new Equip.Builder().setHDict(m).build();
             //All the zone equips served by AHU/RTU will have an ahuRef.
             if (q.getMarkers().contains("dab") || q.getMarkers().contains("dualDuct") || q.getMarkers().contains("vav")
                 || q.getMarkers().contains("ti") || q.getMarkers().contains("oao") || q.getMarkers().contains("sse")
-                || q.getMarkers().contains("vrv") || q.getMarkers().contains("otn")) {
+                || q.getMarkers().contains("vrv") || q.getMarkers().contains("otn") || q.getMarkers().contains("bypassDamper")) {
                 q.setAhuRef(systemEquipId);
             } else if (q.getMarkers().contains("smartstat") || q.getMarkers().contains("emr") || q.getMarkers().contains("pid") ||
                        q.getMarkers().contains("modbus") || q.getMarkers().contains("monitoring") || q.getMarkers().contains("hyperstat") ||q.getMarkers().contains("hyperstatsplit")) {
@@ -214,15 +219,18 @@ public abstract class SystemProfile
             ccuHsApi.updateEquip(q, q.getId());
         });
         
-        ArrayList<HashMap<Object, Object>> modbusEquips = ccuHsApi.readAllEntities("equip and modbus");
+        List<HDict> modbusEquips = ccuHsApi.readAllHDictByQuery("equip and modbus");
         modbusEquips.forEach( equipMap -> {
-            Equip equip = new Equip.Builder().setHashMap(equipMap).build();
+            Equip equip = new Equip.Builder().setHDict(equipMap).build();
             equip.setGatewayRef(systemEquipId);
             ccuHsApi.updateEquip(equip, equip.getId());
         });
 
         DiagEquipConfigurationBuilder diagEquipConfigurationBuilder = new DiagEquipConfigurationBuilder(ccuHsApi);
         diagEquipConfigurationBuilder.updateDiagGatewayRef(systemEquipId);
+
+        CCUBaseConfigurationBuilder ccuBaseConfigurationBuilder = new CCUBaseConfigurationBuilder(ccuHsApi);
+        ccuBaseConfigurationBuilder.updateCcuConfigAhuRef(systemEquipId);
 
         CCUDeviceBuilder ccuDeviceBuilder = new CCUDeviceBuilder();
         CCUDevice ccuDeviceObj = Domain.ccuDevice;

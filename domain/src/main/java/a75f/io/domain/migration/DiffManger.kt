@@ -61,17 +61,7 @@ class DiffManger(var context: Context?) {
         }
         val migrationHandler = MigrationHandler(CCUHsApi.getInstance(), migrationCompletedListener)
 
-        val oldModelMetaList =
-            if (isModelsFolderExists(modelsPath)) {
-                CcuLog.e(Domain.LOG_TAG, "fetching modelMeta from the models from external")
-                getModelMeta(modelsPath + File.separator + VERSION)
-            } else if (isModelsSharedPrefAvailable(sharedPref)) {
-                CcuLog.e(Domain.LOG_TAG, "fetching modelMeta from the shared preference")
-                getModelsFromSharedPref(sharedPref)
-            } else {
-                CcuLog.e(Domain.LOG_TAG, "fetching modelMeta from the assets/models folder")
-                getModelFileVersionDetails("$BACKUP_FIle_PATH$VERSION")
-            }
+        val oldModelMetaList = getOldModelMetaList(modelsPath, sharedPref)
         CcuLog.i(
             Domain.LOG_TAG,
             "old models count: ${oldModelMetaList.size}, currently used models count: ${newModelMetaList.size}"
@@ -296,6 +286,19 @@ class DiffManger(var context: Context?) {
             return null
         val modelDirectiveFactory = ModelDirectiveFactory(ResourceHelper.getObjectMapper())
         return modelDirectiveFactory.fromJson(modelData)
+    }
+
+    fun getOldModelMetaList(modelsPath: String, sharedPref: SharedPreferences?): MutableList<ModelMeta> {
+        if (isModelsFolderExists(modelsPath)) {
+            CcuLog.e(Domain.LOG_TAG, "fetching modelMeta from the models from external")
+            return getModelMeta(modelsPath + File.separator + VERSION)
+        } else if (isModelsSharedPrefAvailable(sharedPref)) {
+            CcuLog.e(Domain.LOG_TAG, "fetching modelMeta from the shared preference")
+            return getModelsFromSharedPref(sharedPref)
+        } else {
+            CcuLog.e(Domain.LOG_TAG, "fetching modelMeta from the assets/models folder")
+            return getModelFileVersionDetails("$BACKUP_FIle_PATH$VERSION")
+        }
     }
 
 }

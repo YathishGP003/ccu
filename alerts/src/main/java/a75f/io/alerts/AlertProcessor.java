@@ -42,8 +42,7 @@ import a75f.io.logger.CcuLog;
  * Core processing module that iterates through all the alert definitions , evaluates the conditional
  * and returns all the positive conditionals
  */
-public class AlertProcessor
-{
+public class AlertProcessor {
     // Parses a String into a list of AlertDefinitions
     AlertParser parser;
 
@@ -64,7 +63,7 @@ public class AlertProcessor
     private Context mContext;
 
     AlertProcessor(Context c) {
-        mContext  = c;
+        mContext = c;
         this.defaultSharedPrefs = PreferenceManager.getDefaultSharedPreferences(c);
 
         // great candidate for DI when we have it:
@@ -91,37 +90,37 @@ public class AlertProcessor
         }
 
         for (AlertDefinition def : alertDefs) {
-            try{
+            try {
                 boolean doProcess = inspectAlertDef(def, occurrences);
                 if (!doProcess) {
                     continue;
                 }
 
-                if(isInAutoCommissioningMode() && suppressAlert(def)) {
+                if (isInAutoCommissioningMode() && suppressAlert(def)) {
                     CcuLog.d(TAG_CCU_ALERTS, "In AutoCommissioning mode ");
                     continue;
                 }
                 Conditional.GrpOperator alertDefType = Conditional.GrpOperator.fromValue(def.conditionals.get(0).grpOperation); // See the note in ::inspectAlertDef regarding unique grpOperations
-                if(def.alertBuilder != null){
+                if (def.alertBuilder != null) {
                     sequenceLogs = new SequenceLogs(def._id, def._id, Objects.requireNonNull(CCUHsApi.getInstance().getSite()).getId(),
                             CCUHsApi.getInstance().getCcuId(), CCUHsApi.getInstance().getCcuName());
                     // new alert definition found use rhino processor to generate alert
-                    CcuLog.d(TAG_CCU_ALERTS, "new alert definition found evaluating alert-->"+def.alert.mTitle);
+                    CcuLog.d(TAG_CCU_ALERTS, "new alert definition found evaluating alert-->" + def.alert.mTitle);
                     //String jsForTesting = loadLocalJs(mContext, "test1.js");
                     //String jsForTesting = loadLocalJs(mContext, def.alertBuilder.getSnippet());
                     String jsForTesting = def.alertBuilder.getSnippet();
                     //evaluateJs(def.alertBuilder);
                     alertJsUtil.def = def;
-                    CcuLog.d(TAG_CCU_ALERTS, "---------starting evaluation using j2v8------"+def.alert.mTitle);
+                    CcuLog.d(TAG_CCU_ALERTS, "---------starting evaluation using j2v8------" + def.alert.mTitle);
                     sequenceLogs.addLog(new SequenceMethodLog(LogLevel.INFO, LogOperation.GENERIC_INFO,
                             "Starting sequence evaluation using j2v8", "pending", new Date().toString(), new Date().toString(), null));
                     def.evaluateJsJ2v8(def, jsForTesting, mContext, alertJsUtil, new SequencerLogsCallbackImpl(sequenceLogs));
 
                     sequenceLogs.addLog(new SequenceMethodLog(LogLevel.INFO, LogOperation.GENERIC_INFO,
                             "Ending sequence evaluation using j2v8", "success", new Date().toString(), new Date().toString(), null));
-                    CcuLog.d(TAG_CCU_ALERTS, "---------ending evaluation------"+def.alert.mTitle);
+                    CcuLog.d(TAG_CCU_ALERTS, "---------ending evaluation------" + def.alert.mTitle);
                     fullLogs.addLog(sequenceLogs);
-                    CcuLog.d(TAG_CCU_ALERTS, "---------add seq log to id------"+def.alert.alertDefId + "<--sequenceLogs-->"+sequenceLogs.getLogs().size() + "<-->"+def._id);
+                    CcuLog.d(TAG_CCU_ALERTS, "---------add seq log to id------" + def.alert.alertDefId + "<--sequenceLogs-->" + sequenceLogs.getLogs().size() + "<-->" + def._id);
                     AlertManager.getInstance().sequenceLogsMap.put(def._id, sequenceLogs);
 
                     AlertDefinition alertBlocklyDefinition = AlertManager.getInstance().getRepo().getBloclyAlertDefUsingId(def.alert.mTitle);
@@ -129,7 +128,7 @@ public class AlertProcessor
                     alertBlocklyDefinition.alert.setCreator("blockly");
                     occurrences.add(processBlocklyAlert(alertBlocklyDefinition));
 
-                }else {
+                } else {
                     def.evaluate(defaultSharedPrefs);
 
                     if (alertDefType.equals(Conditional.GrpOperator.EQUIP) || alertDefType.equals(Conditional.GrpOperator.DELTA)) {
@@ -139,9 +138,9 @@ public class AlertProcessor
                         occurrences.add(process(def));
                     }
                 }
-            }catch (Exception e) {
+            } catch (Exception e) {
                 e.printStackTrace();
-                CcuLog.e(TAG_CCU_ALERTS, "Error in evaluating alert definition-->" + def.alert.mTitle + "---message--"+e.getMessage());
+                CcuLog.e(TAG_CCU_ALERTS, "Error in evaluating alert definition-->" + def.alert.mTitle + "---message--" + e.getMessage());
             }
         }
         CcuLog.d(TAG_CCU_ALERTS, "evaluateAlertDefinitions - end");
@@ -149,7 +148,7 @@ public class AlertProcessor
         // this change is there if next time alert is not there then it will be fixed,
         // suppose alerts A, B, C are there in db and now only A, C are triggered then B will be fixed
         AlertManager.getInstance().getActiveAlertsByCreator("blockly").forEach(alert -> {
-            String keyFromDb = alert.blockId+":"+alert.equipId;
+            String keyFromDb = alert.blockId + ":" + alert.equipId;
             if (!mapOfPastAlerts.containsKey(keyFromDb)) {
                 //AlertManager.getInstance().deleteAlert(alert);
                 AlertManager.getInstance().fixAlert(alert);
@@ -158,18 +157,23 @@ public class AlertProcessor
 
         mapOfPastAlerts.forEach((k, v) -> {
             Alert tempAlert = (Alert) v;
-            CcuLog.d(TAG_CCU_ALERTS, "generateAlertBlockly-->title-->"+tempAlert.mTitle+"<--equipId-->"+tempAlert.equipId+"<--blockId-->"+tempAlert.blockId);
+            if (AlertManager.getInstance().getRepo().getBloclyAlertDefUsingId(tempAlert.mTitle)
+                    .isMuted(refToId(sequenceLogs.getCcuId()), tempAlert.equipId)) {
+                CcuLog.d(TAG_CCU_ALERTS, "Alert is muted-->" + tempAlert.mTitle + " for equipId-->" + tempAlert.equipId);
+                return;
+            }
+            CcuLog.d(TAG_CCU_ALERTS, "generateAlertBlockly-->title-->" + tempAlert.mTitle + "<--equipId-->" + tempAlert.equipId + "<--blockId-->" + tempAlert.blockId);
             AlertManager.getInstance().generateAlertBlockly(tempAlert.mTitle, tempAlert.mMessage, tempAlert.equipId, "blockly", tempAlert.blockId);
 
             SequenceLogs seqLogs = AlertManager.getInstance().sequenceLogsMap.get(tempAlert.alertDefId);
-            if(seqLogs != null){
+            if (seqLogs != null) {
                 seqLogs.addLog(new SequenceMethodLog(LogLevel.INFO, LogOperation.GENERIC_INFO,
-                        "create alert -- "+tempAlert.mTitle, "success", new Date().toString(), new Date().toString(), null));
+                        "create alert -- " + tempAlert.mTitle, "success", new Date().toString(), new Date().toString(), null));
                 AlertManager.getInstance().sequenceLogsMap.put(tempAlert.alertDefId, seqLogs);
             }
         });
         // generate log file once all blockly alerts are done
-        if(sequenceLogs != null){
+        if (sequenceLogs != null) {
             String fileName = "blocklyAlert_" + CCUHsApi.getInstance().getCcuId() + ".json";
             File logDir = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + CustomLogUtil.LOGS_DIR_ALERTS);
             CustomLogUtil.Companion.dumpLogs(mContext, fileName, new Gson().toJson(fullLogs), logDir, TAG_CCU_ALERTS);
@@ -182,26 +186,26 @@ public class AlertProcessor
     AlertJsUtil alertJsUtil = new AlertJsUtil(new AlertJsCallback() {
         @Override
         public boolean triggerAlert(String blockId, String notificationMsg, String message, String entityId, Object contextHelper, AlertDefinition def) {
-            if(entityId.contains("@@")) {
+            if (entityId.contains("@@")) {
                 entityId = entityId.replaceAll("@@", "@");
             }
             HashMap<Object, Object> map = CCUHsApi.getInstance().readMapById(entityId);
-            if(map == null || map.isEmpty()){
-                CcuLog.d(TAG_CCU_ALERTS, "---triggerAlert-DefId5005@@ invalid id->"+entityId);
+            if (map == null || map.isEmpty()) {
+                CcuLog.d(TAG_CCU_ALERTS, "---triggerAlert-DefId5005@@ invalid id->" + entityId);
                 return false;
-            }else{
-                CcuLog.d(TAG_CCU_ALERTS, "---triggerAlert-DefId5006@@-"+def._id + " notificationMsg: " + notificationMsg + " message: " + message + " entityId: " + entityId + "-current thread->"+Thread.currentThread().getName());
+            } else {
+                CcuLog.d(TAG_CCU_ALERTS, "---triggerAlert-DefId5006@@-" + def._id + " notificationMsg: " + notificationMsg + " message: " + message + " entityId: " + entityId + "-current thread->" + Thread.currentThread().getName());
                 def.alert.setmNotificationMsg(notificationMsg);
-                Alert alert = AlertBuilder.build(def, message, CCUHsApi.getInstance(),entityId,"");
+                Alert alert = AlertBuilder.build(def, message, CCUHsApi.getInstance(), entityId, "");
                 alert.blockId = def._id;
-                String tempId = entityId.replaceFirst("@","");
-                mapOfPastAlerts.put(def._id+":"+tempId, alert);
+                String tempId = entityId.replaceFirst("@", "");
+                mapOfPastAlerts.put(def._id + ":" + tempId, alert);
                 return true;
             }
         }
     });
 
-    private String loadLocalJs(Context context, String fileName){
+    private String loadLocalJs(Context context, String fileName) {
         return readTextFileFromAssets(context, fileName);
     }
 
@@ -237,11 +241,11 @@ public class AlertProcessor
         if (def.conditionals.size() > 0) {
             boolean isAlertMatches = false;
             for (Conditional conditional : def.conditionals) {
-                if(conditional.value != null && (conditional.value.equalsIgnoreCase("system and building and limit and min") ||
+                if (conditional.value != null && (conditional.value.equalsIgnoreCase("system and building and limit and min") ||
                         conditional.value.equalsIgnoreCase("system and building and limit and max")) &&
                         (!def.alert.getmSeverity().toString().equalsIgnoreCase("SEVERE"))) {
                     isAlertMatches = true;
-                    CcuLog.d(TAG_CCU_ALERTS, def.alert.getmTitle()+ " alert suppressed - conditional.value is -  "+conditional.value);
+                    CcuLog.d(TAG_CCU_ALERTS, def.alert.getmTitle() + " alert suppressed - conditional.value is -  " + conditional.value);
                 }
             }
             return isAlertMatches;
@@ -284,7 +288,7 @@ public class AlertProcessor
     private AlertDefOccurrence processJsDef(AlertDefinition def) {
         return buildOccurrence(def, true, false, null, null);
     }
-    
+
     /**
      * NOTE: This assumes the alert def has already been evaluated (AlertDefinition::evaluate)
      * <p>
@@ -334,7 +338,7 @@ public class AlertProcessor
                     "The conditional(s) were not evaluated against any equips.",
                     null,
                     null));
-        } else  {
+        } else {
             String ccuId = CCUHsApi.getInstance().getCcuRef().toVal();
 
             equipToResult.entrySet().forEach(e -> {
@@ -357,10 +361,10 @@ public class AlertProcessor
     }
 
     private AlertDefOccurrence buildOccurrence(AlertDefinition def,
-                               boolean result,
-                               boolean isMuted,
-                               String equipRef,
-                               String pointRef) {
+                                               boolean result,
+                                               boolean isMuted,
+                                               String equipRef,
+                                               String pointRef) {
         StringBuilder sb = new StringBuilder(def.evaluationString() + "Evaluates to: " + result);
         if (def.alertScope != null) {
             sb.append("\nAlertScope (muting): ").append(def.alertScope);
@@ -372,11 +376,11 @@ public class AlertProcessor
             sb.append(" MUTED");
         }
         return new AlertDefOccurrence(def,
-                                   isMuted,
-                                   result,
-                                   sb.toString(),
-                                   pointRef,
-                                   equipRef);
+                isMuted,
+                result,
+                sb.toString(),
+                pointRef,
+                equipRef);
     }
 
     /**
@@ -396,7 +400,7 @@ public class AlertProcessor
                 .map(conditional -> conditional.grpOperation)
                 .distinct()
                 .collect(Collectors.toList());
-        if(!def.emitter.equalsIgnoreCase("ALERT_BUILDER_CCU") && !def.emitter.equalsIgnoreCase("CCU")){
+        if (!def.emitter.equalsIgnoreCase("ALERT_BUILDER_CCU") && !def.emitter.equalsIgnoreCase("CCU")) {
             return false;
         }
 
@@ -412,17 +416,17 @@ public class AlertProcessor
             // Perhaps enforce this when an alert def is created? Or store the grpOperation at the alert def level, not the conditional level?
             evaluationString = "Not evaluated. A multi-conditional alert def has more than one grpOperation. Only one is allowed.";
         } else if (Conditional.GrpOperator.ALERT.equals(Conditional.GrpOperator.fromValue(uniqueGrpOperations.get(0)))) {
-                // JJG - I am unsure why the "alert" grp operator was even evaluated by this class.
-                //  These alert defs are evaluated elsewhere in the CCU.
-                //  Per the PM docs: "Special hard-coded logic on the CCU defines these alerts".
-                //  Presumably these are evaluated in the "AlertGenerateHandler" class?
-                //  Either way, a new positive occurrence was created by this class ONLY IF there is an active alert of the alert def.
-                //  Therefore, the AlertsRepository::processAlertsDef will not consider this positive occurrence as a "new alert",
-                //  and hence it will do nothing with the positive occurrence created in this method.
-                //  To my knowledge, creating a positive occurrence in this manner does nothing.
-                //  Plus, the Conditional::evaluate does not even evaluate this grpOperation.
-                //  This is long way of saying: This class will no longer process these alert defs.
-                evaluationString = "Not evaluated. Alert Def's with 'grpOperator' = 'alert' is processed elsewhere on the CCU.";
+            // JJG - I am unsure why the "alert" grp operator was even evaluated by this class.
+            //  These alert defs are evaluated elsewhere in the CCU.
+            //  Per the PM docs: "Special hard-coded logic on the CCU defines these alerts".
+            //  Presumably these are evaluated in the "AlertGenerateHandler" class?
+            //  Either way, a new positive occurrence was created by this class ONLY IF there is an active alert of the alert def.
+            //  Therefore, the AlertsRepository::processAlertsDef will not consider this positive occurrence as a "new alert",
+            //  and hence it will do nothing with the positive occurrence created in this method.
+            //  To my knowledge, creating a positive occurrence in this manner does nothing.
+            //  Plus, the Conditional::evaluate does not even evaluate this grpOperation.
+            //  This is long way of saying: This class will no longer process these alert defs.
+            evaluationString = "Not evaluated. Alert Def's with 'grpOperator' = 'alert' is processed elsewhere on the CCU.";
         }
 
         if (!evaluationString.isEmpty()) {
@@ -433,7 +437,7 @@ public class AlertProcessor
             occurrences.add(new AlertDefOccurrence(def, isMuted, false, evaluationString, null, null));
             return false;
         } else {
-            return  true;
+            return true;
         }
     }
 }

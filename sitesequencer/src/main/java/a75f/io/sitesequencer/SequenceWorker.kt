@@ -8,6 +8,7 @@ import a75f.io.alerts.log.SequenceLogs
 import a75f.io.alerts.log.SequenceMethodLog
 import a75f.io.api.haystack.Alert
 import a75f.io.api.haystack.CCUHsApi
+import a75f.io.api.haystack.util.hayStack
 import a75f.io.logger.CcuLog
 import a75f.io.sitesequencer.log.SequencerLogsCallback
 import android.content.Context
@@ -292,6 +293,17 @@ class SequenceWorker(context: Context, params: WorkerParameters) :
     private fun createAlert() {
         val alertData = mapOfPastAlerts.values
         for (alert in alertData) {
+            if (alert.alertDefinition.isMuted(
+                    hayStack.ccuRef.`val`,
+                    alert.entityId.replaceFirst("@", "")
+                )
+            ) {
+                CcuLog.d(
+                    TAG,
+                    "Alert is muted for this definition entityId: ${alert.entityId} <--blockId--> ${alert.blockId}"
+                )
+                continue
+            }
             CcuLog.d(
                 TAG,
                 "##create alert title -> ${alert.title} <-blockId-> ${alert.blockId} <entityId> ${alert.entityId} <message>${alert.message} <notificationMessage>${alert.alertDefinition.alert.mNotificationMsg}"

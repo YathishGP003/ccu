@@ -1,6 +1,9 @@
 package a75f.io.sitesequencer
 
 import a75f.io.alerts.AlertDefinition
+import a75f.io.alerts.model.AlertScope
+import a75f.io.alerts.model.AlertScopeDevice
+import a75f.io.alerts.model.AlertScopeEquip
 import a75f.io.api.haystack.Alert
 import a75f.io.logger.CcuLog
 import android.app.AlarmManager
@@ -12,6 +15,8 @@ import androidx.work.PeriodicWorkRequest
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
+import com.google.gson.internal.LinkedTreeMap
+import org.joda.time.DateTime
 import java.util.Calendar
 import java.util.Date
 import java.util.UUID
@@ -418,7 +423,50 @@ class SequencerSchedulerUtil {
             testAlert.alertDefId = sequenceAlert.alertDefinitionId
             alertDefinition.alert = testAlert
             alertDefinition._id = sequenceAlert.alertDefinitionId
+            sequenceAlert.alertScope?.let {
+                alertDefinition.alertScope = generateAlertScope(sequenceAlert.alertScope as LinkedTreeMap<*, *>)
+            }
             return alertDefinition
+        }
+
+        private fun generateAlertScope(seqAlertScope: LinkedTreeMap<*, *>): AlertScope {
+            val alertScopeDeviceList = mutableListOf<AlertScopeDevice>()
+            (seqAlertScope["devices"] as? List<LinkedTreeMap<*, *>>)?.forEach { deviceScope ->
+                val alertScopeEquipList = generateEquipScopeForAlerts(
+                    deviceScope["equips"] as? List<LinkedTreeMap<*, *>> ?: emptyList()
+                )
+                alertScopeDeviceList.add(
+                    AlertScopeDevice(
+                        deviceScope["deviceId"] as String,
+                        parseDateTimeOrNull(deviceScope["disableDateTimeFrom"]),
+                        parseDateTimeOrNull(deviceScope["disableDateTimeThru"]),
+                        alertScopeEquipList
+                    )
+                )
+            }
+            return AlertScope(
+                disableDateTimeFrom = seqAlertScope["disableDateTimeFrom"] as DateTime?,
+                disableDateTimeThru = seqAlertScope["disableDateTimeThru"] as DateTime?,
+                devices = alertScopeDeviceList
+            )
+        }
+
+        private fun generateEquipScopeForAlerts(equipScopeList: List<LinkedTreeMap<*, *>>): List<AlertScopeEquip> {
+            val alertScopeEquipList = mutableListOf<AlertScopeEquip>()
+            equipScopeList.forEach { equipScope ->
+                alertScopeEquipList.add(
+                    AlertScopeEquip(
+                        equipScope["equipId"] as String,
+                        DateTime.parse(equipScope["disableDateTimeFrom"].toString()),
+                        DateTime.parse(equipScope["disableDateTimeThru"].toString())
+                    )
+                )
+            }
+            return alertScopeEquipList
+        }
+
+        private fun parseDateTimeOrNull(dateTimeString: Any?): DateTime? {
+            return dateTimeString?.toString()?.let { DateTime.parse(it) }
         }
     }
 }

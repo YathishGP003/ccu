@@ -194,12 +194,12 @@ public class HaystackService {
         sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("FIND_BY_FILTER"), filter, MSG_CALCULATING);
         CcuLog.d(TAG, "---findByFilter##--original filter-" + filter);
         List<HashMap> list = findByFilterCustom(filter, contextHelper);
+        String result = new Gson().toJson(list);
         if (list.size() > 0) {
-            sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("FIND_BY_FILTER"), getCustomMessage(list.size()), MSG_SUCCESS);
+            sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("FIND_BY_FILTER"), getCustomMessage(list.size()), MSG_SUCCESS, result);
         } else {
             sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("FIND_BY_FILTER"), MSG_ERROR_NO_ENTITIES, MSG_FAILED);
         }
-        String result = new Gson().toJson(list);
         CcuLog.d(TAG, "---findByFilter##--original filter result->" + result);
         return result;
     }

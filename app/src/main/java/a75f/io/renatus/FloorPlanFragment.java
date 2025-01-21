@@ -1070,8 +1070,11 @@ public class FloorPlanFragment extends Fragment {
                             .newInstance(Short.parseShort(nodeAddress), zone.getId(), floor.getId(), nodeTypeHN, profile.getProfileType()), AcbProfileConfigFragment.Companion.getID());
                     break;
                 case PLC:
+                    Equip plcEquip = profile.getEquip();
+                    CcuLog.i(L.TAG_CCU_UI, "equip domainName "+plcEquip.getDomainName()+" "+profile.getProfileType());
+                    NodeType nodeTypePlc = plcEquip.getDomainName().contains("helionode") ? NodeType.HELIO_NODE : NodeType.SMART_NODE;
                     showDialogFragment(PlcProfileConfigFragment.Companion
-                            .newInstance(Short.parseShort(nodeAddress), zone.getId(), floor.getId(), NodeType.SMART_NODE, ProfileType.PLC), FragmentPLCConfiguration.ID);
+                            .newInstance(Short.parseShort(nodeAddress), zone.getId(), floor.getId(), nodeTypePlc, ProfileType.PLC), FragmentPLCConfiguration.ID);
                     break;
                 case DAB:
                     Equip equipDab = profile.getEquip();

@@ -8,7 +8,12 @@ class CCUApp(fileName: String): BaseBundleApp(fileName) {
     init {
         this.instructions = listOf(
             Instruction("mount -o rw,remount /system"),
-            Instruction("pm install -r -d -g $fullDownloadPath"),
+            Instruction("rm -f /system/priv-app/CCU*.apk", false),
+            Instruction("rm -f /system/priv-app/RENATUS*.apk", false),
+            Instruction("cp $fullDownloadPath /system/priv-app/$fileName"),
+            Instruction("chmod 644 /system/priv-app/$fileName"),
+            Instruction("chown root.root /system/priv-app/$fileName"),
+            Instruction("pm install -r -d -g --user 0 /system/priv-app/$fileName", false),
         )
     }
 }

@@ -289,7 +289,6 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
         // For Golden Release we need to update all side apps to recommended version
         if (!PreferenceUtil.isSideAppsUpdateFinished() && isRecommendedVersionCheckIsNotFalse()) {
             BundleInstallManager.Companion.initUpdatingSideAppsToRecommended();
-            PreferenceUtil.setSideAppsUpdateFinished();
         }
 
         checkBacnetDeviceType();

@@ -7,6 +7,7 @@ import a75f.io.logic.L
 import a75f.io.logic.diag.otastatus.BundleOtaStatus
 import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint.Companion.updateBundleOtaStatus
 import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint.Companion.updateBundleVersion
+import a75f.io.logic.util.PreferenceUtil
 import a75f.io.renatus.BuildConfig
 import a75f.io.renatus.ENGG.AppInstaller.DOWNLOAD_BASE_URL
 import a75f.io.renatus.RenatusApp
@@ -168,6 +169,7 @@ class BundleInstallManager: BundleInstallListener {
             try {
                 Timer().schedule(object : TimerTask() {
                     override fun run() {
+                        PreferenceUtil.setSideAppsUpdateFinished()
                         val bundleInstallManager = getInstance()
                         val upgradeBundle = bundleInstallManager.getRecommendedUpgradeBundle(false)
 

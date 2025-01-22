@@ -12,6 +12,7 @@ import a75f.io.renatus.modbus.util.CANCEL
 import a75f.io.renatus.modbus.util.SAVE
 import a75f.io.renatus.profiles.profileUtils.UnusedPortsFragment
 import a75f.io.renatus.util.AddProgressGif
+import a75f.io.renatus.util.TestSignalManager
 import a75f.io.renatus.util.highPriorityDispatcher
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -82,6 +83,7 @@ class VavStagedRtuFragment(loadingListener: onLoadingCompleteListener) : StagedR
             override fun onViewDetachedFromWindow(v: View) {
                 if (Globals.getInstance().isTestMode) {
                     Globals.getInstance().isTestMode = false
+                    TestSignalManager.restoreAllPoints()
                 }
             }
         })

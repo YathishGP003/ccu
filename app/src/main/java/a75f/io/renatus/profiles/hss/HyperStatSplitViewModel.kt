@@ -13,6 +13,7 @@ import a75f.io.logic.bo.building.hyperstatsplit.profiles.HyperStatSplitProfile
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.HyperStatSplitProfileConfiguration
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.profiles.OnPairingCompleteListener
+import a75f.io.renatus.util.TestSignalManager
 import android.content.Context
 import android.os.Bundle
 import androidx.compose.runtime.getValue
@@ -190,6 +191,7 @@ open class HyperStatSplitViewModel : ViewModel() {
         } else {
             if (Globals.getInstance().isTestMode) {
                 Globals.getInstance().isTestMode = false
+                TestSignalManager.restoreAllPoints()
             }
         }
     }

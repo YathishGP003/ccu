@@ -5,6 +5,7 @@ import a75f.io.device.mesh.DeviceUtil
 import a75f.io.device.mesh.MeshUtil
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
+import a75f.io.domain.api.PhysicalPoint
 import a75f.io.domain.logic.DeviceBuilder
 import a75f.io.domain.logic.DomainManager
 import a75f.io.domain.logic.EntityMapper
@@ -31,6 +32,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import a75f.io.logic.bo.haystack.device.ControlMote
 import a75f.io.renatus.profiles.profileUtils.UnusedPortsModel.Companion.saveUnUsedPortStatusOfSystemProfile
+import a75f.io.renatus.util.TestSignalManager
 import androidx.compose.runtime.MutableState
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -159,8 +161,13 @@ open class DabStagedRtuBaseViewModel : ViewModel() {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 val physicalPoint = L.ccu().systemProfile.logicalPhysicalMap.values.find { it.domainName == relayName }
+                if(physicalPoint != null){
+                    CcuLog.i(Domain.LOG_TAG, "Send Test Command## $relayName $testCommand ${physicalPoint?.readHisVal()} -- ${testCommand.toDouble()}")
+                    TestSignalManager.backUpRestorePoint(physicalPoint, testCommand)
+                }
+                physicalPoint?.writePointValue(testCommand.toDouble())
                 physicalPoint?.writeHisVal(testCommand.toDouble())
-                CcuLog.i(Domain.LOG_TAG, "Send Test Command $relayName $testCommand ${physicalPoint?.readHisVal()}")
+                CcuLog.i(Domain.LOG_TAG, "Send Test Command $relayName $testCommand ${physicalPoint?.readHisVal()}  -- ${testCommand.toDouble()} ")
                 MeshUtil.sendStructToCM(DeviceUtil.getCMControlsMessage())
             }
         }
@@ -168,7 +175,8 @@ open class DabStagedRtuBaseViewModel : ViewModel() {
 
     fun sendAnalogTestSignal(value: Double) {
         Globals.getInstance().isTestMode = true
-        Domain.cmBoardDevice.analog2Out.writeHisVal(10 * value)
+        TestSignalManager.backUpPoint(Domain.cmBoardDevice.analog2Out)
+        Domain.cmBoardDevice.analog2Out.writePointValue(10 * value)
         MeshUtil.sendStructToCM(DeviceUtil.getCMControlsMessage())
     }
 

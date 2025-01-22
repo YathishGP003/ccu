@@ -15,7 +15,6 @@ import a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
 import a75f.io.logic.bo.building.firmware.FirmwareVersion;
 import a75f.io.logic.bo.building.heartbeat.HeartBeat;
-import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint;
 
 /**
  * Created by samjithsadasivan on 12/6/18.
@@ -282,6 +281,14 @@ public class ControlMote
     public static void setAnalogOut(String analog, double val)
     {
         CCUHsApi.getInstance().writeHisValByQuery("point and his and system and out and "+analog, val);
+    }
+
+    public static HashMap<Object, Object> getTestPoint(String analog) {
+        return CCUHsApi.getInstance().readEntity("point and his and system and out and " + analog);
+    }
+
+    public static HashMap getRelayTestPoint(String relay) {
+        return CCUHsApi.getInstance().read("point and his and system and state and "+relay);
     }
     
     public static void setAnalogThInVal(String analog, double val)

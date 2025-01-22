@@ -31,6 +31,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import a75f.io.logic.bo.haystack.device.ControlMote
 import a75f.io.renatus.profiles.profileUtils.UnusedPortsModel.Companion.saveUnUsedPortStatusOfSystemProfile
+import a75f.io.renatus.util.TestSignalManager
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.LiveData
@@ -154,6 +155,10 @@ open class StagedRtuProfileViewModel : ViewModel() {
                 withContext(Dispatchers.IO) {
                     val physicalPoint =
                         L.ccu().systemProfile.logicalPhysicalMap.values.find { it.domainName == relayName }
+                    if(physicalPoint != null){
+                        TestSignalManager.backUpRestorePoint(physicalPoint, testCommand)
+                    }
+                    physicalPoint?.writePointValue(testCommand.toDouble())
                     physicalPoint?.writeHisVal(testCommand.toDouble())
                     CcuLog.i(
                         Domain.LOG_TAG,
@@ -168,6 +173,7 @@ open class StagedRtuProfileViewModel : ViewModel() {
     fun sendAnalogTestSignal(value: Double) {
         if(L.ccu().systemProfile.profileName == ProfileNameVFD) {
             Globals.getInstance().isTestMode = true
+            TestSignalManager.backUpPoint(Domain.cmBoardDevice.analog2Out)
             Domain.cmBoardDevice.analog2Out.writePointValue(10 * value)
             MeshUtil.sendStructToCM(DeviceUtil.getCMControlsMessage())
         }

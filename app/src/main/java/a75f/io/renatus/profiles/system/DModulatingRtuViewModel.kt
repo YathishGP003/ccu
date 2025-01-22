@@ -22,6 +22,7 @@ import a75f.io.logic.bo.building.system.vav.VavFullyModulatingRtu
 import a75f.io.logic.bo.building.system.vav.config.DabModulatingRtuProfileConfig
 import a75f.io.logic.bo.building.system.vav.config.ModulatingRtuProfileConfig
 import a75f.io.renatus.util.SystemProfileUtil
+import a75f.io.renatus.util.TestSignalManager
 import android.app.Activity
 import android.content.Context
 import androidx.compose.runtime.MutableState
@@ -179,6 +180,11 @@ open class DModulatingRtuViewModel : ViewModel() {
             withContext(Dispatchers.IO) {
                 val physicalPoint =
                     L.ccu().systemProfile.logicalPhysicalMap.values.find { it.domainName == relayName }
+
+                if(physicalPoint != null){
+                    TestSignalManager.backUpRestorePoint(physicalPoint, testCommand)
+                }
+                physicalPoint?.writePointValue(testCommand.toDouble())
                 physicalPoint?.writeHisVal(testCommand.toDouble())
                 CcuLog.i(
                     Domain.LOG_TAG,

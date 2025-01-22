@@ -48,6 +48,7 @@ import a75f.io.logic.bo.util.DesiredTempDisplayMode;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.util.ProgressDialogUtils;
+import a75f.io.renatus.util.TestSignalManager;
 import a75f.io.renatus.views.CustomCCUSwitch;
 import a75f.io.util.ExecutorTask;
 import butterknife.BindView;
@@ -310,6 +311,7 @@ public class FragmentHeatPumpConfiguration extends BaseDialogFragment implements
             public void onViewDetachedFromWindow(View view) {
                 if (Globals.getInstance().isTestMode()) {
                     Globals.getInstance().setTestMode(false);
+                    TestSignalManager.INSTANCE.restoreAllPoints();
                 }
             }
         });
@@ -500,6 +502,7 @@ public class FragmentHeatPumpConfiguration extends BaseDialogFragment implements
         } else {
             if (Globals.getInstance().isTestMode()) {
                 Globals.getInstance().setTestMode(false);
+                TestSignalManager.INSTANCE.restoreAllPoints();
             }
         }
     }

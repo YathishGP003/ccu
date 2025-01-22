@@ -42,6 +42,7 @@ import a75f.io.renatus.registration.FreshRegistration;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
+import a75f.io.renatus.util.TestSignalManager;
 import a75f.io.renatus.views.CustomCCUSwitch;
 import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
 import a75f.io.util.ExecutorTask;
@@ -254,6 +255,7 @@ public class DABHybridAhuProfile extends Fragment implements AdapterView.OnItemS
             public void onViewDetachedFromWindow(View view) {
                 if (Globals.getInstance().isTestMode()) {
                     Globals.getInstance().setTestMode(false);
+                    TestSignalManager.INSTANCE.restoreAllPoints();
                 }
             }
         });

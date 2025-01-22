@@ -49,6 +49,7 @@ import a75f.io.renatus.modbus.util.SAVE
 import a75f.io.renatus.modbus.util.showToast
 import a75f.io.renatus.profiles.hss.cpu.HyperStatSplitCpuState
 import a75f.io.renatus.profiles.hss.cpu.HyperStatSplitCpuViewModel
+import a75f.io.renatus.util.TestSignalManager
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -88,6 +89,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
         super.onDestroy()
         if (Globals.getInstance().isTestMode) {
             Globals.getInstance().isTestMode = false
+            TestSignalManager.restoreAllPoints()
         }
     }
 

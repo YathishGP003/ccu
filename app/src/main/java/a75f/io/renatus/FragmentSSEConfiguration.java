@@ -46,6 +46,7 @@ import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.ProgressDialogUtils;
+import a75f.io.renatus.util.TestSignalManager;
 import a75f.io.renatus.views.CustomCCUSwitch;
 import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
 import a75f.io.util.ExecutorTask;
@@ -374,6 +375,7 @@ public class FragmentSSEConfiguration  extends BaseDialogFragment implements Com
         } else {
             if (Globals.getInstance().isTestMode()) {
                 Globals.getInstance().setTestMode(false);
+                TestSignalManager.INSTANCE.restoreAllPoints();
             }
         }
     }

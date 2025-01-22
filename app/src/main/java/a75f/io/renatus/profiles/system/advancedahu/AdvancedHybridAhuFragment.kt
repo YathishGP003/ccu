@@ -68,6 +68,7 @@ import a75f.io.renatus.profiles.system.UNIVERSAL_IN5
 import a75f.io.renatus.profiles.system.UNIVERSAL_IN6
 import a75f.io.renatus.profiles.system.UNIVERSAL_IN7
 import a75f.io.renatus.profiles.system.UNIVERSAL_IN8
+import a75f.io.renatus.util.TestSignalManager
 import android.os.Bundle
 import android.view.View
 import android.view.View.OnAttachStateChangeListener
@@ -104,6 +105,7 @@ open class AdvancedHybridAhuFragment : Fragment() {
                 if (Globals.getInstance().isTestMode) {
                     Globals.getInstance().isTestMode = false
                     viewModel.updateTestCacheConfig(0, true)
+                    TestSignalManager.restoreAllPoints()
                 }
             }
         })

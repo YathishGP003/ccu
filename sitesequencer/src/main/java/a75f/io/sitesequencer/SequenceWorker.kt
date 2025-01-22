@@ -10,6 +10,7 @@ import a75f.io.api.haystack.Alert
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.util.hayStack
 import a75f.io.logger.CcuLog
+import a75f.io.logic.Globals
 import a75f.io.sitesequencer.log.SequencerLogsCallback
 import android.content.Context
 import androidx.work.CoroutineWorker
@@ -36,9 +37,14 @@ class SequenceWorker(context: Context, params: WorkerParameters) :
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
 
         try {
-            withTimeout(coroutineTimeOut) {
-                processSequenceLogs()
-                Result.success()
+            if(Globals.getInstance().isTestMode || Globals.getInstance().isTemporaryOverrideMode){
+                CcuLog.d(TAG, "---test mode or temp override is on interrupt this sequence---")
+                Result.failure()
+            }else{
+                withTimeout(coroutineTimeOut) {
+                    processSequenceLogs()
+                    Result.success()
+                }
             }
         } catch (e: TimeoutCancellationException) {
             // If the task takes longer than 3 minutes, it will be cancelled and return failure
@@ -109,14 +115,6 @@ class SequenceWorker(context: Context, params: WorkerParameters) :
                     TAG,
                     "##ending evaluation for seqId: $seqId <--name--> ${siteSequencerDefinition.seqName}"
                 )
-
-
-                /*val sequenceAlert = SequencerSchedulerUtil.findAlertByBlockId(siteSequencerDefinition, siteSequencerDefinition.seqId)
-                if (sequenceAlert != null) {
-                    val alertDefinition =
-                        SequencerSchedulerUtil.createAlertDefinitionEmpty()
-                    AlertManager.getInstance().test(siteSequencerDefinition.seqName, siteSequencerDefinition.seqId)
-                }*/
 
                 val fileName =
                     "seq_" + CCUHsApi.getInstance().ccuId + "_" + siteSequencerDefinition.seqId + ".json"

@@ -8,7 +8,6 @@ import a75f.io.logic.cloud.RemoteFileStorageManager
 import a75f.io.logic.cloudservice.ServiceGenerator
 import a75f.io.logic.filesystem.FileSystemTools
 import a75f.io.logic.reportNull
-import a75f.io.sitesequencer.TAG_CCU_SITE_SEQUENCER
 import android.os.Environment
 import java.io.File
 
@@ -24,6 +23,7 @@ class UploadLogs(
    private val fileStorageManager: RemoteFileStorageManager,
    private val haystackApi: CCUHsApi
 ) {
+   val TAG_CCU_SITE_SEQUENCER = "CCU_SITE_SEQUENCER"
 
    // companion object can be thought of as the static side of this class.
    companion object {

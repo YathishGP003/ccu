@@ -30,6 +30,8 @@ import android.widget.ToggleButton;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Objects;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.device.mesh.MeshUtil;
@@ -44,6 +46,7 @@ import a75f.io.renatus.registration.FreshRegistration;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
+import a75f.io.renatus.util.TestSignalManager;
 import a75f.io.renatus.views.CustomCCUSwitch;
 import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
 import a75f.io.util.ExecutorTask;
@@ -230,6 +233,7 @@ public class VavHybridRtuProfile extends Fragment implements AdapterView.OnItemS
             public void onViewDetachedFromWindow(View view) {
                 if (Globals.getInstance().isTestMode()) {
                     Globals.getInstance().setTestMode(false);
+                    TestSignalManager.INSTANCE.restoreAllPoints();
                 }
             }
         });
@@ -626,12 +630,28 @@ public class VavHybridRtuProfile extends Fragment implements AdapterView.OnItemS
                 modulatedVal = (int) (10 * (coolingMin + heatingMin) /2);
             }
             CcuLog.i("CCU_SERIAL"," State "+VavSystemController.getInstance().getSystemState()+" "+modulatedVal);
+            HashMap<Object, Object> pointMap = ControlMote.getTestPoint(tag);
+            if(pointMap != null) {
+                TestSignalManager.INSTANCE.backUpPoint(Objects.requireNonNull(pointMap.get("id")).toString());
+            }
             ControlMote.setAnalogOut(tag, modulatedVal);
         }else if (tag.contains("analog")) {
+            HashMap<Object, Object> pointMap = ControlMote.getTestPoint(tag);
+            if(pointMap != null) {
+                TestSignalManager.INSTANCE.backUpPoint(Objects.requireNonNull(pointMap.get("id")).toString());
+            }
             ControlMote.setAnalogOut(tag, DeviceUtil.getModulatedAnalogVal(systemProfile.getConfigVal(tag + " and min"),
                                                                            systemProfile.getConfigVal(tag+" and max"),
                                                                            val));
         } else if (tag.contains("relay")) {
+            HashMap pointMap = ControlMote.getRelayTestPoint(tag);
+            if(pointMap != null) {
+                if(val == 0){
+                    TestSignalManager.INSTANCE.restoreWritableArray(Objects.requireNonNull(pointMap.get("id")).toString());
+                }else{
+                    TestSignalManager.INSTANCE.backUpPoint(Objects.requireNonNull(pointMap.get("id")).toString());
+                }
+            }
             ControlMote.setRelayState(tag, val);
         }
         

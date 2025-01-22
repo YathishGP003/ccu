@@ -37,6 +37,7 @@ import a75f.io.logic.bo.util.UnitUtils
 import a75f.io.renatus.R
 import a75f.io.renatus.modbus.util.ALERT
 import a75f.io.renatus.modbus.util.OK
+import a75f.io.renatus.util.TestSignalManager
 import android.annotation.SuppressLint
 import android.content.Context
 import android.text.Spanned
@@ -347,7 +348,11 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
                 Globals.getInstance().isTestMode = true
                 updateTestCacheConfig(relayIndex)
                 val physicalPoint = getPhysicalPointForRelayIndex(relayIndex)
+                if(physicalPoint != null){
+                    TestSignalManager.backUpRestorePoint(physicalPoint, testCommand)
+                }
                 physicalPoint?.let {
+                    it.writePointValue(testCommand.toDouble())
                     it.writeHisVal(testCommand.toDouble())
                     sendTestModeMessage()
                 }
@@ -365,8 +370,11 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
                 Globals.getInstance().isTestMode = true
                 updateTestCacheConfig(analogIndex + 8)
                 val physicalPoint = getPhysicalPointForAnalogIndex(analogIndex)
+                if (physicalPoint != null) {
+                    TestSignalManager.backUpPoint(physicalPoint)
+                }
                 physicalPoint?.let {
-                    it.writeHisVal(testVal)
+                    it.writePointValue(testVal)
                     sendTestModeMessage()
                 }
             }
@@ -403,6 +411,8 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
                 Globals.getInstance().isTestMode = true
                 val physicalPoint = getConnectPhysicalPointForRelayIndex(relayIndex)
                 physicalPoint?.let {
+                    TestSignalManager.backUpRestorePoint(physicalPoint, testCommand)
+                    it.writePointValue(testCommand.toDouble())
                     it.writeHisVal(testCommand.toDouble())
                     CcuLog.i(Domain.LOG_TAG, "Send Test Command relayIndex $relayIndex $testCommand ${physicalPoint.domainName} ${physicalPoint.readHisVal()}")
                     ConnectModbusSerialComm.sendControlsMessage(Domain.connect1Device)
@@ -421,7 +431,8 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
                 Globals.getInstance().isTestMode = true
                 val physicalPoint = getConnectPhysicalPointForAnalogIndex(analogIndex)
                 physicalPoint?.let {
-                    it.writeHisVal(testVal)
+                    TestSignalManager.backUpPoint(it)
+                    it.writePointValue(testVal)
                     CcuLog.i(Domain.LOG_TAG, "Send Test Command analogIndex $analogIndex $testVal ${physicalPoint.readHisVal()}")
                     ConnectModbusSerialComm.sendControlsMessage(Domain.connect1Device)
                 }

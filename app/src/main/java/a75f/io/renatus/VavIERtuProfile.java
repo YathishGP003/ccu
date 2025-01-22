@@ -39,6 +39,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
+import a75f.io.renatus.util.TestSignalManager;
 import a75f.io.util.ExecutorTask;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -165,6 +166,7 @@ public class VavIERtuProfile extends Fragment implements AdapterView.OnItemSelec
             public void onViewDetachedFromWindow(View view) {
                 if (Globals.getInstance().isTestMode()) {
                     Globals.getInstance().setTestMode(false);
+                    TestSignalManager.INSTANCE.restoreAllPoints();
                 }
             }
         });

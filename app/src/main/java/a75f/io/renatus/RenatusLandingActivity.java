@@ -87,6 +87,7 @@ import a75f.io.renatus.util.CloudConnetionStatusThread;
 import a75f.io.renatus.util.DataFdObj;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.Receiver.ConnectionChangeReceiver;
+import a75f.io.renatus.util.TestSignalManager;
 import a75f.io.renatus.util.remotecommand.RemoteCommandHandlerUtil;
 import a75f.io.renatus.util.remotecommand.bundle.BundleInstallManager;
 import a75f.io.usbserial.UsbServiceActions;
@@ -332,6 +333,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
     private void launchZoneFragment() {
         CcuLog.i(TAG,"launch ZoneFragment");
         Globals.getInstance().setTestMode(false);
+        TestSignalManager.INSTANCE.restoreAllPoints();
         Globals.getInstance().setTemporaryOverrideMode(false);
         if( btnTabs.getSelectedTabPosition() != 0) {
             updateStatusViewPagerAdapter();

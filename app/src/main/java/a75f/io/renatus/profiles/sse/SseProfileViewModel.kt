@@ -8,6 +8,7 @@ import a75f.io.device.serial.CcuToCmOverUsbSnControlsMessage_t
 import a75f.io.device.serial.MessageType
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
+import a75f.io.domain.api.Point
 import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.logic.DeviceBuilder
 import a75f.io.domain.logic.EntityMapper
@@ -30,6 +31,7 @@ import a75f.io.renatus.modbus.util.showToast
 import a75f.io.renatus.profiles.OnPairingCompleteListener
 import a75f.io.renatus.profiles.profileUtils.UnusedPortsModel
 import a75f.io.renatus.util.ProgressDialogUtils
+import a75f.io.renatus.util.TestSignalManager
 import a75f.io.renatus.util.highPriorityDispatcher
 import android.annotation.SuppressLint
 import android.content.Context
@@ -149,6 +151,7 @@ open class SseProfileViewModel : ViewModel() {
         } else {
             if (Globals.getInstance().isTestMode) {
                 Globals.getInstance().isTestMode = false
+                TestSignalManager.restoreAllPoints()
             }
         }
     }
@@ -386,10 +389,18 @@ open class SseProfileViewModel : ViewModel() {
         if (getDeviceRef() == null) {
             CcuLog.i(Domain.LOG_TAG, "Device not found")
         }
-        CCUHsApi.getInstance()
-            .writeHisValByQuery(
-                "domainName == \"" + relayName + "\" and deviceRef == \""
-                        + getDeviceRef() + "\"", value
+        val query =   "domainName == \"" + relayName + "\" and deviceRef == \"" + getDeviceRef() + "\""
+        val deviceRef  = getDeviceRef()
+        if(deviceRef != null) {
+            val point = Point(relayName, deviceRef)
+            point.writePointValue(value)
+        } else{
+            CcuLog.d(
+                "CCU_DEVICE",
+                "test-writable sse relayHisWrite writeHisValById:=======value====>$value<--query-->$query<--iswritable-->false"
             )
+            CCUHsApi.getInstance()
+                .writeHisValByQuery(query, value)
+        }
     }
 }

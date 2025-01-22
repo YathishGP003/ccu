@@ -76,6 +76,7 @@ import a75f.io.logic.bo.building.vav.VavAcbProfile;
 import a75f.io.logic.bo.building.vav.VavProfile;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.CCUUtils;
+import a75f.io.renatus.util.TestSignalManager;
 import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
 
 import static a75f.io.device.mesh.LSmartNode.PULSE;
@@ -2063,30 +2064,104 @@ public class TempOverrideExpandableListAdapter extends BaseExpandableListAdapter
     }
 
     public void setPointVal(String id, double val) {
-        //Log.e("InsideTempOverrideExpandableListAdapter","id- "+id);
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        hayStack.writeHisValById(id, val);
-        Object logicalPoint = hayStack.readMapById(id).get("pointRef");
-        if (Objects.nonNull(logicalPoint)) {
-            hayStack.writeHisValById(logicalPoint.toString(), val);
+        HashMap<Object, Object> physicalPoint = hayStack.readMapById(id);
+        if(physicalPoint != null){
+            if(physicalPoint.containsKey("writable")){
+                TestSignalManager.INSTANCE.backUpPoint(id);
+                CcuLog.d("CCU_DEVICE", "test-writable setPointVal physical writePointValue:=======value====>"+ val + "<--id-->" +  id + "<--iswritable-->true");
+                hayStack.writeDefaultValById(id, val);
+                Double valueAtHighestLevel = hayStack.readPointPriorityVal(id);
+                CcuLog.d("CCU_DEVICE", "test-writable setPointVal physical writeHisValById:=======valueAtHighestLevel====>"+ valueAtHighestLevel + "<--id-->" +  id + "<--iswritable-->true");
+                hayStack.writeHisValById(id, valueAtHighestLevel);
+            }else{
+                CcuLog.d("CCU_DEVICE", "test-writable setPointVal physical writeHisValById:=======value====>"+ val + "<--id-->" +  id + "<--iswritable-->false");
+                hayStack.writeHisValById(id, val);
+            }
+        }
+
+        Object logicalPointRef = hayStack.readMapById(id).get("pointRef");
+        if(logicalPointRef != null){
+            HashMap<Object, Object> logicalPoint = hayStack.readMapById(logicalPointRef.toString());
+            if(logicalPoint.containsKey("writable")){
+                TestSignalManager.INSTANCE.backUpPoint(id);
+                CcuLog.d("CCU_DEVICE", "test-writable setPointVal logical writePointValue:=======value====>"+ val + "<--id-->" +  logicalPointRef + "<--iswritable-->true");
+                hayStack.writeDefaultValById(logicalPointRef.toString(), val);
+                Double valueAtHighestLevel = hayStack.readPointPriorityVal(logicalPointRef.toString());
+                CcuLog.d("CCU_DEVICE", "test-writable setPointVal logical writeHisValById:=======valueAtHighestLevel====>"+ valueAtHighestLevel + "<--id-->" +  logicalPointRef + "<--iswritable-->true");
+                hayStack.writeHisValById(logicalPointRef.toString(), valueAtHighestLevel);
+            }else{
+                CcuLog.d("CCU_DEVICE", "test-writable setPointVal logical writeHisValById:=======value====>"+ val + "<--id-->" +  logicalPointRef + "<--iswritable-->false");
+                hayStack.writeHisValById(logicalPointRef.toString(), val);
+            }
         }
     }
 
     public void setPointValForRelay(String id, double val, String pointname) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        hayStack.writeHisValById(id, val-1);
-        Object logicalPoint = hayStack.readMapById(id).get("pointRef");
-        if (Objects.nonNull(logicalPoint)) {
-            hayStack.writeHisValById(logicalPoint.toString(), val-1);
+        HashMap<Object, Object> physicalPoint = hayStack.readMapById(id);
+        if(physicalPoint != null){
+            if(physicalPoint.containsKey("writable")){
+                TestSignalManager.INSTANCE.backUpPoint(id);
+                CcuLog.d("CCU_DEVICE", "test-writable setPointValForRelay physical writePointValue:=======value====>"+ (val-1) + "<--id-->" +  id + "<--iswritable-->true");
+                hayStack.writeDefaultValById(id, val-1);
+                Double valueAtHighestLevel = hayStack.readPointPriorityVal(id);
+                CcuLog.d("CCU_DEVICE", "test-writable setPointValForRelay physical writeHisValById:=======valueAtHighestLevel====>"+ valueAtHighestLevel + "<--id-->" +  id + "<--iswritable-->true");
+                hayStack.writeHisValById(id, val-1);
+            }else{
+                CcuLog.d("CCU_DEVICE", "test-writable setPointVal physical writeHisValById:=======value====>"+ (val-1) + "<--id-->" +  id + "<--iswritable-->false");
+                hayStack.writeHisValById(id, val-1);
+            }
+        }
+
+        Object logicalPointRef = hayStack.readMapById(id).get("pointRef");
+        if(logicalPointRef != null){
+            HashMap<Object, Object> logicalPoint = hayStack.readMapById(logicalPointRef.toString());
+            if(logicalPoint.containsKey("writable")){
+                TestSignalManager.INSTANCE.backUpPoint(id);
+                CcuLog.d("CCU_DEVICE", "test-writable setPointValForRelay logical writePointValue:=======value====>"+ val + "<--id-->" +  logicalPointRef + "<--iswritable-->true");
+                hayStack.writeDefaultValById(logicalPointRef.toString(), val-1);
+                Double valueAtHighestLevel = hayStack.readPointPriorityVal(logicalPointRef.toString());
+                CcuLog.d("CCU_DEVICE", "test-writable setPointValForRelay logical writeHisValById:=======valueAtHighestLevel====>"+ valueAtHighestLevel + "<--id-->" +  logicalPointRef + "<--iswritable-->true");
+                hayStack.writeHisValById(logicalPointRef.toString(), val-1);
+            }else{
+                CcuLog.d("CCU_DEVICE", "test-writable setPointValForRelay logical writeHisValById:=======value====>"+ val + "<--id-->" +  logicalPointRef + "<--iswritable-->false");
+                hayStack.writeHisValById(logicalPointRef.toString(), val-1);
+            }
         }
     }
 
     public void setPointValForAnalog(String id, double val, short logicalValue) {
         CCUHsApi hayStack = CCUHsApi.getInstance();
-        hayStack.writeHisValById(id, val);
-        Object logicalPoint = hayStack.readMapById(id).get("pointRef");
-        if (Objects.nonNull(logicalPoint)) {
-            hayStack.writeHisValById(logicalPoint.toString(), Double.valueOf(logicalValue));
+        HashMap<Object, Object> physicalPoint = hayStack.readMapById(id);
+        if(physicalPoint != null){
+            if(physicalPoint.containsKey("writable")){
+                TestSignalManager.INSTANCE.backUpPoint(id);
+                CcuLog.d("CCU_DEVICE", "test-writable setPointValForAnalog physical writePointValue:=======value====>"+ val + "<--id-->" +  id + "<--iswritable-->true");
+                hayStack.writeDefaultValById(id, val);
+                Double valueAtHighestLevel = hayStack.readPointPriorityVal(id);
+                CcuLog.d("CCU_DEVICE", "test-writable setPointValForAnalog physical writeHisValById:=======valueAtHighestLevel====>"+ valueAtHighestLevel + "<--id-->" +  id + "<--iswritable-->true");
+                hayStack.writeHisValById(id, valueAtHighestLevel);
+            }else{
+                CcuLog.d("CCU_DEVICE", "test-writable setPointValForAnalog physical writeHisValById:=======value====>"+ val + "<--id-->" +  id + "<--iswritable-->false");
+                hayStack.writeHisValById(id, val);
+            }
+        }
+
+        Object logicalPointRef = hayStack.readMapById(id).get("pointRef");
+        if(logicalPointRef != null){
+            HashMap<Object, Object> logicalPoint = hayStack.readMapById(logicalPointRef.toString());
+            if(logicalPoint.containsKey("writable")){
+                TestSignalManager.INSTANCE.backUpPoint(id);
+                CcuLog.d("CCU_DEVICE", "test-writable setPointValForAnalog logical writePointValue:=======value====>"+ logicalValue + "<--id-->" +  logicalPointRef + "<--iswritable-->true");
+                hayStack.writeDefaultValById(logicalPointRef.toString(), Double.valueOf(logicalValue));
+                Double valueAtHighestLevel = hayStack.readPointPriorityVal(logicalPointRef.toString());
+                CcuLog.d("CCU_DEVICE", "test-writable setPointValForAnalog logical writeHisValById:=======valueAtHighestLevel====>"+ valueAtHighestLevel + "<--id-->" +  logicalPointRef + "<--iswritable-->true");
+                hayStack.writeHisValById(logicalPointRef.toString(), valueAtHighestLevel);
+            }else{
+                CcuLog.d("CCU_DEVICE", "test-writable setPointValForAnalog logical writeHisValById:=======value====>"+ logicalValue + "<--id-->" +  logicalPointRef + "<--iswritable-->false");
+                hayStack.writeHisValById(logicalPointRef.toString(), Double.valueOf(logicalValue));
+            }
         }
     }
 

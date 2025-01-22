@@ -43,6 +43,7 @@ import a75f.io.renatus.registration.FreshRegistration;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
+import a75f.io.renatus.util.TestSignalManager;
 import a75f.io.renatus.views.CustomCCUSwitch;
 import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
 import butterknife.BindView;
@@ -203,6 +204,7 @@ public class DABStagedProfile extends Fragment implements AdapterView.OnItemSele
             public void onViewDetachedFromWindow(View view) {
                 if (Globals.getInstance().isTestMode()) {
                     Globals.getInstance().setTestMode(false);
+                    TestSignalManager.INSTANCE.restoreAllPoints();
                 }
             }
         });

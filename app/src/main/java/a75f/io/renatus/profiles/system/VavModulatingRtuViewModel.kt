@@ -17,6 +17,7 @@ import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.renatus.profiles.oao.updateOaoPoints
 import a75f.io.renatus.profiles.profileUtils.UnusedPortsModel
 import a75f.io.renatus.util.ProgressDialogUtils
+import a75f.io.renatus.util.TestSignalManager
 import a75f.io.renatus.util.highPriorityDispatcher
 import android.content.Context
 import androidx.lifecycle.viewModelScope
@@ -90,40 +91,49 @@ open class VavModulatingRtuViewModel : ModulatingRtuViewModel() {
     override fun sendAnalogRelayTestSignal(tag: String, value: Double) {
         if(L.ccu().systemProfile.profileName == ProfileName) {
             val systemProfile = L.ccu().systemProfile as VavFullyModulatingRtu
-            Globals.getInstance().setTestMode(true)
+            Globals.getInstance().isTestMode = true
             if (tag.contains("analog")) {
                 when (tag) {
-                    DomainName.analog1Out ->
-                        Domain.cmBoardDevice.analog1Out.writeHisVal(
+                    DomainName.analog1Out ->{
+                        TestSignalManager.backUpPoint(Domain.cmBoardDevice.analog1Out)
+                        Domain.cmBoardDevice.analog1Out.writePointValue(
                             DeviceUtil.getModulatedAnalogVal(
                                 systemProfile.systemEquip.analog1MinCooling.readPriorityVal(),
                                 systemProfile.systemEquip.analog1MaxCooling.readPriorityVal(),
                                 value
                             ).toDouble())
-
-                    DomainName.analog2Out ->
-                        Domain.cmBoardDevice.analog2Out.writeHisVal(
+                    }
+                    DomainName.analog2Out -> {
+                        TestSignalManager.backUpPoint(Domain.cmBoardDevice.analog2Out)
+                        Domain.cmBoardDevice.analog2Out.writePointValue(
                             DeviceUtil.getModulatedAnalogVal(
                                 systemProfile.systemEquip.analog2MinStaticPressure.readPriorityVal(),
                                 systemProfile.systemEquip.analog2MaxStaticPressure.readPriorityVal(),
                                 value
-                            ).toDouble())
-
-                    DomainName.analog3Out ->
-                        Domain.cmBoardDevice.analog3Out.writeHisVal(
+                            ).toDouble()
+                        )
+                    }
+                    DomainName.analog3Out -> {
+                        TestSignalManager.backUpPoint(Domain.cmBoardDevice.analog2Out)
+                        Domain.cmBoardDevice.analog3Out.writePointValue(
                             DeviceUtil.getModulatedAnalogVal(
                                 systemProfile.systemEquip.analog3MinHeating.readPriorityVal(),
                                 systemProfile.systemEquip.analog3MaxHeating.readPriorityVal(),
                                 value
-                            ).toDouble())
+                            ).toDouble()
+                        )
+                    }
 
-                    DomainName.analog4Out ->
-                        Domain.cmBoardDevice.analog4Out.writeHisVal(
+                    DomainName.analog4Out -> {
+                        TestSignalManager.backUpPoint(Domain.cmBoardDevice.analog2Out)
+                        Domain.cmBoardDevice.analog4Out.writePointValue(
                             DeviceUtil.getModulatedAnalogVal(
                                 systemProfile.systemEquip.analog4MinOutsideDamper.readPriorityVal(),
                                 systemProfile.systemEquip.analog4MaxOutsideDamper.readPriorityVal(),
                                 value
-                            ).toDouble())
+                            ).toDouble()
+                        )
+                    }
                 }
             } else if (tag.contains("relay")) {
                 ControlMote.setRelayState(tag, value)

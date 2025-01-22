@@ -227,7 +227,6 @@ dependencies {
     implementation project(':usbserial')
     api 'com.google.guava:guava:26.0-android'
     implementation project(':alerts')
-    implementation project(':sitesequencer')
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     implementation 'io.github.microutils:kotlin-logging-jvm:2.0.6'
 

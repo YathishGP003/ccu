@@ -67,6 +67,7 @@ import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.cloud.RenatusServicesEnvironment;
+import a75f.io.logic.cloud.RenatusServicesUrls;
 import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.logic.watchdog.Watchdog;
 import a75f.io.messaging.MessageHandlerSubscriber;
@@ -82,6 +83,7 @@ import a75f.io.renatus.schedules.FileBackupService;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.views.RebootDataCache;
 import a75f.io.restserver.server.HttpServer;
+import a75f.io.sitesequencer.SequenceManager;
 import a75f.io.usbserial.SerialEvent;
 import a75f.io.usbserial.UsbConnectService;
 import a75f.io.usbserial.UsbModbusService;
@@ -160,6 +162,9 @@ public abstract class UtilityApplication extends Application {
         }*/
 
         Globals.getInstance().startTimerTask();
+        RenatusServicesUrls renatusServicesUrls = RenatusServicesEnvironment.getInstance().getUrls();
+        SequenceManager.getInstance(context, renatusServicesUrls.getSequencerUrl())
+                .fetchPredefinedSequencesIfEmpty();
         isDataSyncRestartRequired();
         UpdateCCUFragment.abortCCUDownloadProcess();
 

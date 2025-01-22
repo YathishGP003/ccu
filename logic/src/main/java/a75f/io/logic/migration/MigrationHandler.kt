@@ -1423,6 +1423,13 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             addDomainEquips(hayStack)
             val tiDomainEquip = TIEquip(tiEquip["id"].toString())
             tiDomainEquip.temperatureOffset.writeDefaultVal(tiDomainEquip.temperatureOffset.readDefaultVal() / 10)
+
+            TIConfiguration(
+                nodeAddress.toInt(), NodeType.CONTROL_MOTE.name, 0,
+                tiEquip["roomRef"].toString(), tiEquip["floorRef"].toString(),
+                profileType, model
+            ).getActiveConfiguration()
+                .updatePhysicalPointRef(tiEquip["id"].toString(), device["id"].toString())
         }
     }
 

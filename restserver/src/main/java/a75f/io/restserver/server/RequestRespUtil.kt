@@ -25,6 +25,8 @@ fun repackagePoints(tempGrid: HGrid, isVirtualZoneEnabled: Boolean, group: Strin
         var isEquip = false
         var extractedEquipRef = ""
         var isSystem = false
+        var isOaoProfile = false
+        var isByPassDamper = false
         var isConnect = false
         while (rowIterator.hasNext()) {
             val e: HDict.MapEntry = (rowIterator.next() as HDict.MapEntry)
@@ -35,6 +37,12 @@ fun repackagePoints(tempGrid: HGrid, isVirtualZoneEnabled: Boolean, group: Strin
                 is Boolean -> hDictBuilder.add(e.key.toString(), e.value as Boolean)
                 is HVal -> hDictBuilder.add(e.key.toString(), e.value as HVal)
                 else -> hDictBuilder.add(e.key.toString(), e.value.toString())
+            }
+            if(e.key.toString() == "bypassDamper"){
+                isByPassDamper = true
+            }
+	        if (e.key.toString() == "oao") {
+                isOaoProfile = true
             }
             if (e.key.toString() == "connectModule") {
                 isConnect = true
@@ -70,52 +78,67 @@ fun repackagePoints(tempGrid: HGrid, isVirtualZoneEnabled: Boolean, group: Strin
                 profileName = pointDisName[1]
             }
 
-            if (!isSystem) {
-                if (isVirtualZoneEnabled) {
-                    if (isEquip) {
-                        hDictBuilder.add("dis" , "${zoneName}_${extractedGroup}")
-                    } else {
-                        hDictBuilder.add("dis" , lastLiteralFromDis)
-                    }
-
-
-                    try {
-                        if (bacnetId != "0.0") {
-                            if (!isEquip) {
-                                val bacnetIdAfterModification = removeFirstFourChars(bacnetId)
-                                hDictBuilder.add("bacnetId" , bacnetIdAfterModification.toLong())
-                            }
-                        }
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                    }
-
-                } else {
-                    if (extractedGroup.isEmpty()) {
-                        extractedGroup = getGroupFromEquipRef(extractedEquipRef)
-                    }
-                    if (zoneName.isEmpty() || zoneName == "null" || zoneName == "") {
-                        hDictBuilder.add(
-                            "dis" ,
-                            "${profileName}_${extractedGroup}_$lastLiteralFromDis"
-                        )
-                    } else {
-                        hDictBuilder.add(
-                            "dis" ,
-                            "${zoneName}_${profileName}_${extractedGroup}_$lastLiteralFromDis"
-                        )
-                    }
-                }
+        if (!isSystem || isOaoProfile || isByPassDamper) {
+            createFormattedDisName(isVirtualZoneEnabled, isEquip, hDictBuilder, zoneName, extractedGroup,
+                lastLiteralFromDis, bacnetId, extractedEquipRef, profileName)
+        } else {
+            if (isConnect) {
+                hDictBuilder.add("dis" , "connect-$lastLiteralFromDis")
             } else {
-                if (isConnect) {
-                    hDictBuilder.add("dis" , "connect-$lastLiteralFromDis")
-                } else {
-                    hDictBuilder.add("dis" , lastLiteralFromDis)
-                }
+                hDictBuilder.add("dis" , lastLiteralFromDis)
             }
+        }
+        if (isOaoProfile && isVirtualZoneEnabled && isEquip) {
+            hDictBuilder.add("roomRef", "oao-fake-room-ref")
+            hDictBuilder.add("dis", "${profileName}_${extractedGroup}")
+        } else if (isByPassDamper && isVirtualZoneEnabled && isEquip) {
+            hDictBuilder.add("roomRef", "by-pass-damper-fake-room-ref")
+            hDictBuilder.add("dis", "${profileName}_${extractedGroup}")
+        }
         mutableDictList.add(hDictBuilder.toDict())
     }
     return mutableDictList
+}
+
+private fun createFormattedDisName(isVirtualZoneEnabled: Boolean, isEquip : Boolean, hDictBuilder : HDictBuilder,
+                                   zoneName: String, groupName : String, lastLiteralFromDis : String, bacnetId: String,
+                                   extractedEquipRef: String, profileName : String){
+    var extractedGroup = groupName
+    if (isVirtualZoneEnabled) {
+        if (isEquip) {
+            hDictBuilder.add("dis" , "${zoneName}_${extractedGroup}")
+        } else {
+            hDictBuilder.add("dis" , lastLiteralFromDis)
+        }
+
+
+        try {
+            if (bacnetId != "0.0") {
+                if (!isEquip) {
+                    val bacnetIdAfterModification = removeFirstFourChars(bacnetId)
+                    hDictBuilder.add("bacnetId" , bacnetIdAfterModification.toLong())
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+    } else {
+        if (extractedGroup.isEmpty()) {
+            extractedGroup = getGroupFromEquipRef(extractedEquipRef)
+        }
+        if (zoneName.isEmpty() || zoneName == "null" || zoneName == "") {
+            hDictBuilder.add(
+                "dis" ,
+                "${profileName}_${extractedGroup}_$lastLiteralFromDis"
+            )
+        } else {
+            hDictBuilder.add(
+                "dis" ,
+                "${zoneName}_${profileName}_${extractedGroup}_$lastLiteralFromDis"
+            )
+        }
+    }
 }
 
 fun removeFirstFourChars(input: String): String {

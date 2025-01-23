@@ -39,14 +39,14 @@ public class EmergencyConditioning implements OccupancyTrigger {
             // Check if the system is in heating or cooling range for emergency conditioning to enter
             // Check if the equip is in heating range
             boolean isWithinHeatingRange = currentTemp < buildingLimitMin
-                    && currentTemp > buildingLimitMin - tempDeadLeeway
+                    && currentTemp >= buildingLimitMin - tempDeadLeeway
                     && (conditioningMode == StandaloneConditioningMode.AUTO.ordinal()
                     || conditioningMode == StandaloneConditioningMode.HEAT_ONLY.ordinal())
                     && L.ccu().systemProfile.isHeatingActive();
 
             // Check if the equip is in cooling range
             boolean isWithinCoolingRange = currentTemp > buildingLimitMax
-                    && currentTemp < buildingLimitMax + tempDeadLeeway
+                    && currentTemp <= buildingLimitMax + tempDeadLeeway
                     && (conditioningMode == StandaloneConditioningMode.AUTO.ordinal()
                     || conditioningMode == StandaloneConditioningMode.COOL_ONLY.ordinal())
                     && L.ccu().systemProfile.isCoolingActive();
@@ -56,8 +56,8 @@ public class EmergencyConditioning implements OccupancyTrigger {
         CcuLog.i(L.TAG_CCU_SCHEDULER,
                 "EmergencyConditioning - " + currentTemp + " " + buildingLimitMin + "-" + buildingLimitMax + "(" + tempDeadLeeway +
                         ")");
-        return currentTemp < buildingLimitMin && currentTemp > buildingLimitMin - tempDeadLeeway ||
-                currentTemp > buildingLimitMax && currentTemp < buildingLimitMax + tempDeadLeeway;
+        return currentTemp < buildingLimitMin && currentTemp >= buildingLimitMin - tempDeadLeeway ||
+                currentTemp > buildingLimitMax && currentTemp <= buildingLimitMax + tempDeadLeeway;
     }
 
 

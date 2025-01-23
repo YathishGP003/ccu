@@ -753,6 +753,12 @@ public class ScheduleManager {
             postSystemOccupancy(CCUHsApi.getInstance());
             return;
         }
+        else if (ScheduleUtil.isAnyZoneEmergencyConditioning(ahuServedEquipsOccupancy)
+                && !L.ccu().systemProfile.getSystemController().isEmergencyMode() && isCurrentlyOccupied(ahuServedEquipsOccupancy)) {
+            systemOccupancy = OCCUPIED;
+            postSystemOccupancy(CCUHsApi.getInstance());
+            return;
+        }
 
         if (ScheduleUtil.areAllZonesInVacation(ahuServedEquipsOccupancy)) {
             if (ScheduleUtil.isAnyZoneForcedOccupied(ahuServedEquipsOccupancy)) {
@@ -814,6 +820,10 @@ public class ScheduleManager {
         });
         return ahuServedEquipsOccupancy;
     }
+    private boolean isCurrentlyOccupied(Map<String, OccupancyData> ahuServedEquipsOccupancy) {
+        return ahuServedEquipsOccupancy.values().stream().anyMatch(value -> value.isOccupied);
+    }
+
 
     private void postSystemOccupancy(CCUHsApi hayStack) {
         double systemOccupancyValue = CCUHsApi.getInstance().readHisValByQuery("point and domainName == \"" + DomainName.systemOccupancyMode+"\" or point and system and his and (occupancy or occupied) and mode");
@@ -1251,7 +1261,20 @@ public class ScheduleManager {
 
         switch (systemOccupancy) {
             case OCCUPIED:
-                if (currentOccupiedInfo == null || currentOccupiedInfo.getCurrentlyOccupiedSchedule() == null){
+                if (currentOccupiedInfo == null || currentOccupiedInfo.getCurrentlyOccupiedSchedule() == null) {
+                    Map<String, OccupancyData> ahuServedEquipsOccupancy = getAhuServedEquipsOccupancy(
+                            equipOccupancy, CCUHsApi.getInstance());
+                    // when any zone is in emergency conditioning in cooling side
+                    //but system is in heating side (conditioning mode is in heat only) and not in emergency mode - just for displaying the occupancy status has OCCUPIED
+                    if (ScheduleUtil.isAnyZoneEmergencyConditioning(ahuServedEquipsOccupancy) && !L.ccu().systemProfile.getSystemController().isEmergencyMode()
+                            && isCurrentlyOccupied(ahuServedEquipsOccupancy)) {
+                        // just for displaying the starting and ending time of the occupancy
+                        Occupied OccupiedInfo = ScheduleUtil.getCurrentOccupied(occupiedHashMap);
+                        return String.format(Locale.US, "%sIn %s | Changes to Energy saving Unoccupied mode at %02d:%02d",
+                                epidemicString,"Occupied mode",
+                                TimeUtil.getEndTimeHr(OccupiedInfo.getCurrentlyOccupiedSchedule().getEthh(),OccupiedInfo.getCurrentlyOccupiedSchedule().getEtmm()),
+                                TimeUtil.getEndTimeMin(OccupiedInfo.getCurrentlyOccupiedSchedule().getEthh(),OccupiedInfo.getCurrentlyOccupiedSchedule().getEtmm()));
+                    }
                     CcuLog.i(TAG_CCU_SCHEDULER, " Occupied , but info does not exist");
                     return "No schedule configured";
                 }

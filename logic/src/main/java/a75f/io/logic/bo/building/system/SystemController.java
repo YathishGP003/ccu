@@ -2,8 +2,6 @@ package a75f.io.logic.bo.building.system;
 
 import static a75f.io.logic.bo.building.system.SystemController.State.OFF;
 
-import org.projecthaystack.UnknownRecException;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -17,8 +15,6 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.TunerUtil;
-
-import static a75f.io.logic.bo.building.system.SystemController.State.OFF;
 
 /**
  * Created by samjithsadasivan on 3/20/19.
@@ -50,7 +46,7 @@ public abstract class SystemController
             double currentTemp = CCUHsApi.getInstance().readHisValByQuery("point and temp and sensor and (current or space) and equipRef == \""+q.getId()+"\"");
             double zonePriority = CCUHsApi.getInstance().readPointPriorityValByQuery
                     ("zone and priority and config and equipRef ==  \"" + q.getId() + "\"");
-            if (currentTemp < buildingLimitMin && currentTemp > (buildingLimitMin-tempDeadLeeway) && zonePriority!= 0) {
+            if (currentTemp < buildingLimitMin && currentTemp >= (buildingLimitMin-tempDeadLeeway) && zonePriority!= 0) {
                 return true;
             }
         }
@@ -70,7 +66,7 @@ public abstract class SystemController
             double currentTemp = CCUHsApi.getInstance().readHisValByQuery("point and temp and sensor and (current or space) and equipRef == \""+q.getId()+"\"");
             double zonePriority = CCUHsApi.getInstance().readPointPriorityValByQuery
                     ("zone and priority and config and equipRef ==  \"" + q.getId() + "\"");
-            if (currentTemp > buildingLimitMax && currentTemp < (buildingLimitMax+tempDeadLeeway) && zonePriority!=0) {
+            if (currentTemp > buildingLimitMax && currentTemp <= (buildingLimitMax+tempDeadLeeway) && zonePriority!=0) {
                 return true;
             }
         }

@@ -15,6 +15,7 @@ object HyperStatDeviceCutOverMapping {
             "SENSOR_CO2" to "co2Sensor",
             "SENSOR_NO" to "noSensor",
             "SENSOR_CO2_EQUIVALENT" to "co2EquivalentSensor",
+            "SENSOR_VOC" to "vocSensor",
 
             "relay1" to "relay1",
             "relay2" to "relay2",

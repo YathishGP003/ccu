@@ -361,6 +361,7 @@ private fun getSensorPoint(device: HyperStatDevice, sensorType: SensorType): Phy
         SensorType.PM10 -> device.pm10Sensor
         SensorType.PRESSURE -> device.pressureSensor
         SensorType.UVI -> device.uviSensor
+        SensorType.VOC -> device.vocSensor
         else -> { null }
     }
 }
@@ -382,6 +383,7 @@ fun updateSensorValue(
             DomainName.pm10Sensor -> DomainName.zonePm10
             DomainName.uviSensor -> DomainName.zoneUvi
             DomainName.pressureSensor -> DomainName.zonePressureSensor
+            DomainName.vocSensor -> DomainName.zoneVoc
             else -> null
         }
     }

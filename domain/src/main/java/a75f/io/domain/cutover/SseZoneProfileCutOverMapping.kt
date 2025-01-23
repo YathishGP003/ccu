@@ -65,6 +65,7 @@ object SseZoneProfileCutOverMapping {
         "co2" to "zoneCo2",
         "pm2p5" to "zonePm25",
         "pm10" to "sensor_pm10",
-        "co" to "zoneCo"
+        "co" to "zoneCo",
+        "voc" to "zoneVoc"
     )
 }

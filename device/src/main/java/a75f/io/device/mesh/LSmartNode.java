@@ -125,8 +125,11 @@ public class LSmartNode
             settings.minDamperOpen.set(Short.parseShort(String.valueOf(CCUHsApi.getInstance().readDefaultVal("point and domainName == \"" + DomainName.damperMinPosition + "\" and equipRef == \"" + equip.getId() + "\"").intValue())));
             settings.maxDamperOpen.set(Short.parseShort(String.valueOf(CCUHsApi.getInstance().readDefaultVal("point and domainName == \"" + DomainName.damperMaxPosition + "\" and equipRef == \"" + equip.getId() + "\"").intValue())));
         } else if (equip.getProfile().equals("PLC")) {
-            settings.minDamperOpen.set(Short.parseShort(String.valueOf(10*CCUHsApi.getInstance().readDefaultVal("point and config and analog1 and min and output and group == \"" + address + "\"").intValue())));
-            settings.maxDamperOpen.set(Short.parseShort(String.valueOf(10*CCUHsApi.getInstance().readDefaultVal("point and config and analog1 and max and output and group == \"" + address + "\"").intValue())));
+            //PC Analog min/max are send over damper min/max
+            settings.minDamperOpen.set( (short) (10 * CCUHsApi.getInstance().readDefaultVal("point and domainName == \""
+                                                    + DomainName.analog1MinOutput + "\" and equipRef == \"" + equip.getId() + "\"")));
+            settings.maxDamperOpen.set( (short) (10 * CCUHsApi.getInstance().readDefaultVal("point and domainName == \""
+                    + DomainName.analog1MaxOutput + "\" and equipRef == \"" + equip.getId() + "\"")));
         } else if (isEquipType("vav", address) && TrueCFMUtil.isTrueCfmEnabled(CCUHsApi.getInstance(), equipRef)) {
             // VAVs with TrueCFM enabled only have heating min/max damper positions
             // These will only apply when System is Heating. When System is Cooling, CFM loop runs on edge with no damper limits.
@@ -303,13 +306,16 @@ public class LSmartNode
                 CcuLog.e(TAG_CCU_DEVICE, "PLC Equip not found for equipRef: " + equip.getId());
                 return;
             }
-            settings2.inputSensor1.set(getInputSensor1(hsApi, address));
+            InputSensorType_t inputSensor1 = getInputSensor1(hsApi, address);
+            settings2.inputSensor1.set(inputSensor1);
             InputSensorType_t inputSensor2 = getInputSensor2((int)plcEquip.getAnalog2InputType().readDefaultVal());
             settings2.inputSensor2.set(inputSensor2);
 
             double rawSpSensorOffset = plcEquip.getSetpointSensorOffset().readDefaultVal();
             settings2.setpointSensorOffset.set(getInputSensor1Multiplier(inputSensor2, rawSpSensorOffset));
-            settings2.genericPiProportionalRange.set((short)plcEquip.getPidProportionalRange().readDefaultVal());
+            double proportionalRange = plcEquip.getPidProportionalRange().readDefaultVal();
+            CcuLog.d(TAG_CCU_DEVICE, "PLC Proportional Range: " + proportionalRange+ " "+inputSensor1+" "+inputSensor2);
+            settings2.genericPiProportionalRange.set(getInputSensor1Multiplier(inputSensor1, proportionalRange));
             settings2.turnOnRelay1.set((short)plcEquip.getRelay1OnThreshold().readDefaultVal());
             settings2.turnOnRelay2.set((short)plcEquip.getRelay2OnThreshold().readDefaultVal());
             settings2.turnOffRelay1.set((short)plcEquip.getRelay1OffThreshold().readDefaultVal());
@@ -404,6 +410,14 @@ public class LSmartNode
         }
 
         int nativeSensorInput = hsApi.readDefaultVal("point and domainName == \""+DomainName.nativeSensorType+"\" and group == \""+address+"\"").intValue();
+        /*
+         * VOC sensor has been removed from PI input selector drop down.
+         * Increment the index by 1 if the current selection is beyond VOC.
+         * Hard coding the index since the enum itself does not match the index.
+         */
+        if (nativeSensorInput > 5) {
+            nativeSensorInput++;
+        }
         switch (nativeSensorInput) {
             case 1: return InputSensorType_t.INPUT_SENSOR_NATIVE_TEMP;
             case 2: return InputSensorType_t.INPUT_SENSOR_NATIVE_HUMIDITY;
@@ -960,14 +974,14 @@ public class LSmartNode
             case INPUT_SENSOR_NATIVE_ILLUMINANCE:
             case INPUT_SENSOR_NATIVE_PM2P5:
             case INPUT_SENSOR_NATIVE_PM10:
-                Short.parseShort(String.valueOf((int)(val)));
+                return Short.parseShort(String.valueOf((int)(val)));
             case INPUT_SENSOR_NATIVE_CO2_EQUIVALENT:
                 return Short.parseShort(String.valueOf((int)(val/10)));
             case INPUT_SENSOR_ION_METER_1_1M:
             case INPUT_SENSOR_NATIVE_VOC:
                 return Short.parseShort(String.valueOf((int)(val/1000)));
             default:
-                return 0;
+                return Short.parseShort(String.valueOf((int)(10*val)));
         }
     }
 

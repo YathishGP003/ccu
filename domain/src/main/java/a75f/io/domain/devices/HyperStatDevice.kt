@@ -40,6 +40,7 @@ class HyperStatDevice (deviceRef : String) : DomainDevice (deviceRef) {
     val pm10Sensor = PhysicalPoint(DomainName.pm10Sensor ,deviceRef)
     val pressureSensor = PhysicalPoint(DomainName.pressureSensor ,deviceRef)
     val uviSensor = PhysicalPoint(DomainName.uviSensor ,deviceRef)
+    val vocSensor = PhysicalPoint(DomainName.vocSensor ,deviceRef)
 
     fun getRelays() : List<PhysicalPoint> {
         return listOf(relay1, relay2, relay3, relay4, relay5, relay6)

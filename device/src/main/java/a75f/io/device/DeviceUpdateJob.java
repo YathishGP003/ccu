@@ -148,7 +148,7 @@ public class DeviceUpdateJob extends BaseJob implements WatchdogMonitor
     public static void injectTestRegularUpdateMessage(int address, CCUHsApi hayStack) {
 
         Random randomNumGenerator = new Random();
-        a75f.io.device.HyperStat.HyperStatRegularUpdateMessage_t regularUpdateMessage = a75f.io.device.HyperStat.HyperStatRegularUpdateMessage_t.newBuilder()
+        a75f.io.device.HyperStat.HyperStatRegularUpdateMessage_t regularUpdateMessage = HyperStat.HyperStatRegularUpdateMessage_t.newBuilder()
                 .setRoomTemperature(650 + randomNumGenerator.nextInt(150))
                 .setHumidity(200 + randomNumGenerator.nextInt(400))
                 .setExternalThermistorInput1(randomNumGenerator.nextInt(20000))
@@ -157,6 +157,7 @@ public class DeviceUpdateJob extends BaseJob implements WatchdogMonitor
                 .setExternalAnalogVoltageInput2(randomNumGenerator.nextInt(10000))
                 .setOccupantDetected(randomNumGenerator.nextBoolean())
                 .setIlluminance(randomNumGenerator.nextInt(500))
+                .addSensorReadings(HyperStat.SensorReadingPb_t.newBuilder().setSensorType(5).setSensorData(randomNumGenerator.nextInt(1000)))
                 .build();
         //handleRegularUpdate(regularUpdateMessage, nodeAddress, hayStack);
         int FIXED_INT_BYTES_SIZE = 4;
@@ -207,7 +208,7 @@ public class DeviceUpdateJob extends BaseJob implements WatchdogMonitor
         msg.update.sensorReadings[2] = sensorReadingCO;
 
         SmartNodeSensorReading_t sensorReadingNO = new SmartNodeSensorReading_t();
-        sensorReadingNO.sensorType.set(4);//NO
+        sensorReadingNO.sensorType.set(5);//VOC
         sensorReadingNO.sensorData.set(randomNumGenerator.nextInt(200));
         msg.update.sensorReadings[3] = sensorReadingNO;
         Pulse.regularSNUpdate(msg);

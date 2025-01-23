@@ -142,7 +142,7 @@ object HyperStatV2EquipCutoverMapping {
             "uvi" to DomainName.zoneUvi,
             "pm10" to DomainName.zonePm10,
             "pressure" to DomainName.zonePressureSensor,
-
+            "voc" to DomainName.zoneVoc,
             "zoneOccupancy" to DomainName.occupancyMode,
             "occupancyDetection" to DomainName.occupancyDetection,
     )
@@ -296,6 +296,7 @@ object HyperStatV2EquipCutoverMapping {
                 "uvi" to DomainName.zoneUvi,
                 "pm10" to DomainName.zonePm10,
                 "pressure" to DomainName.zonePressureSensor,
+                "voc" to DomainName.zoneVoc
                 )
         fun getCPUEntries(): Map<String, String> {
                 return commonEntries + cpuEntries

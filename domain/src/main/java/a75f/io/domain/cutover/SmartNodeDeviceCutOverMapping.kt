@@ -25,5 +25,6 @@ object NodeDeviceCutOverMapping {
         "SENSOR_NO" to "noSensor",
         "SENSOR_UVI" to "uviSensor",
         "SENSOR_CO2_EQUIVALENT" to "co2EquivalentSensor",
+        "SENSOR_VOC" to "vocSensor"
     )
 }

@@ -38,7 +38,7 @@ object PlcCutOverMapping {
         "dynamicTargetValue" to "dynamicTargetValue",
 
         "otaStatus" to "otaStatus",
-
+        "voc" to "zoneVoc"
     )
 
 }

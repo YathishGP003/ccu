@@ -282,11 +282,9 @@ public class Pulse
 							curDisTempVal = CCUUtils.roundToOneDecimal(curDisTempVal);
 							hayStack.writeHisValById(phyPoint.get("id").toString(), val/100);
 							hayStack.writeHisValById(logPoint.get("id").toString(), curDisTempVal);
-							if (oldDisTempVal != curDisTempVal) {
 								if (currentTempInterface != null && logPointInfo.getMarkers().contains("pid")) {
 									currentTempInterface.updateSensorValue(nodeAddr);
 								}
-							}
 							CcuLog.d(L.TAG_CCU_DEVICE,
 							         "regularSmartNodeUpdate : Thermistor1 " + curDisTempVal + "," + oldDisTempVal +
 							         "," + logPointInfo.getMarkers().toString() + "," + logPoint.get("id").toString());
@@ -301,17 +299,15 @@ public class Pulse
 
 			//Write Current temp point based on th2 enabled or not
 			if(isTh2Enabled && !logicalCurTempPoint.isEmpty() && isSse) {
-				double oldCurTempVal = hayStack.readHisValById(logicalCurTempPoint);
 				hayStack.writeHisValById(logicalCurTempPoint, th2TempVal);
-				if ((currentTempInterface != null) && (oldCurTempVal != th2TempVal)) {
+				if ((currentTempInterface != null)) {
 					CcuLog.i(L.TAG_CCU_DEVICE,
 					    "Current Temp Refresh Logical:" + logicalCurTempPoint + " Node Address:" + nodeAddr + " currentTempVal:" + curTempVal);
 					currentTempInterface.updateTemperature(th2TempVal, nodeAddr);
 				}
 			} else if(!logicalCurTempPoint.isEmpty()){
-				double oldCurTempVal = hayStack.readHisValById(logicalCurTempPoint);
 				hayStack.writeHisValById(logicalCurTempPoint, curTempVal);
-				if ((currentTempInterface != null) && (oldCurTempVal != curTempVal)) {
+				if ((currentTempInterface != null)) {
 					CcuLog.i(L.TAG_CCU_DEVICE,
 					    "Current Temp Refresh Logical:" + logicalCurTempPoint + " Node Address:" + nodeAddr + " currentTempVal:" + curTempVal);
 					currentTempInterface.updateTemperature(curTempVal, nodeAddr);

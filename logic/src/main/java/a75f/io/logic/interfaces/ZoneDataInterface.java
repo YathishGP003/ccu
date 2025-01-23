@@ -8,6 +8,6 @@ public interface ZoneDataInterface {
     void refreshDesiredTemp(String nodeAddress, String coolDesiredTemp, String heatDesiredTemp,
                             String zoneId);
     void updateSensorValue(short nodeAddress);
-    void refreshHeartBeatStatus(String id);
+    void refreshHeartBeatStatus(String nodeAddress);
 }
 

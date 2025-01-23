@@ -432,9 +432,9 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
     HashMap<String, View> zoneStatus = new HashMap<>();
 
-    public void refreshHeartBeatStatus(String id) {
+    public void refreshHeartBeatStatus(String nodeAddress) {
         CcuLog.i("UI_PROFILING","ZoneFragmentNew.refreshHeartBeatStatus zoneOpen "+zoneOpen);
-        HashMap<Object, Object> equip = CCUHsApi.getInstance().readEntity("equip and group ==\""+id+"\"");
+        HashMap<Object, Object> equip = CCUHsApi.getInstance().readEntity("equip and group ==\""+ nodeAddress +"\"");
         if (!equip.isEmpty()) {
             HashMap<Object, Object> zone = CCUHsApi.getInstance().readMapById(equip.get("roomRef").toString());
             ArrayList<HashMap> equipsInZone = CCUHsApi.getInstance().readAll("equip and zone and roomRef ==\""

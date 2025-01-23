@@ -446,21 +446,20 @@ public class HyperSplitMsgReceiver {
                                        HyperSplit.HyperSplitRegularUpdateMessage_t regularUpdateMessage, CCUHsApi hayStack){
         hayStack.writeHisValueByIdWithoutCOV(rawPoint.getId(), (double)regularUpdateMessage.getRegularUpdateCommon().getRssi());
         hayStack.writeHisValueByIdWithoutCOV(point.getId(), 1.0);
+        if (currentTempInterface != null) {
+            currentTempInterface.refreshHeartBeatStatus(String.valueOf((point.getGroup())));
+        }
     }
 
     private static void writeRoomTemp(RawPoint rawPoint, Point point,
                                       HyperSplit.HyperSplitRegularUpdateMessage_t regularUpdateMessage, CCUHsApi hayStack) {
 
         hayStack.writeHisValById(rawPoint.getId(), (double) regularUpdateMessage.getRegularUpdateCommon().getRoomTemperature());
-
-        double receivedRoomTemp = Pulse.getRoomTempConversion((double) regularUpdateMessage.getRegularUpdateCommon().getRoomTemperature());
         double curRoomTemp = hayStack.readHisValById(point.getId());
-        if (curRoomTemp != receivedRoomTemp) {
             hayStack.writeHisValById(point.getId(), Pulse.getRoomTempConversion((double) regularUpdateMessage.getRegularUpdateCommon().getRoomTemperature()));
             if (currentTempInterface != null) {
                 currentTempInterface.updateTemperature(curRoomTemp, Short.parseShort(point.getGroup()));
             }
-        }
     }
 
     private static void writeUniversalInVal(RawPoint rawPoint, Point point, CCUHsApi hayStack, int val) {

@@ -63,7 +63,7 @@ fun handleRegularUpdate(regularUpdateMessage: HyperStatRegularUpdateMessage_t, d
         return
     }
     updateHsRssi(hsDevice, regularUpdateMessage.rssi)
-    updateTemp(hsDevice, regularUpdateMessage.roomTemperature.toDouble())
+    updateTemp(hsDevice, regularUpdateMessage.roomTemperature.toDouble(),nodeAddress,refresh)
 
     updatePhysicalInputs(hsDevice.analog1In, regularUpdateMessage.externalAnalogVoltageInput1.toDouble(), equipRef)
     updatePhysicalInputs(hsDevice.analog2In, regularUpdateMessage.externalAnalogVoltageInput2.toDouble(), equipRef)
@@ -256,10 +256,11 @@ private fun updateHsRssi(device: HyperStatDevice, rssi: Int) {
     }
 }
 
-private fun updateTemp(device: HyperStatDevice, temp: Double) {
+private fun updateTemp(device: HyperStatDevice, temp: Double, address: Int, refresh: ZoneDataInterface?) {
     val currentTemp = device.currentTemp
     currentTemp.writeHisVal(temp)
     updateLogicalPoint(currentTemp, Pulse.getRoomTempConversion(temp))
+    refresh?.updateTemperature(temp, address.toShort())
 }
 
 private fun updateOccupancy(device: HyperStatDevice, occupancyDetected: Boolean) {

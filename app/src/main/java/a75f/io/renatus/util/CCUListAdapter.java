@@ -2,7 +2,6 @@ package a75f.io.renatus.util;
 
 import android.content.Context;
 import android.graphics.Color;
-import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -120,6 +119,7 @@ public class CCUListAdapter extends RecyclerView.Adapter<CCUListAdapter.CCUView>
 
                     CcuLog.d(L.TAG_CCU_BUNDLE, "Bundle Version Point"+bundle);
 
+                    //Check if replace bundle required
                     if(bundleVersion != null && bundle != null && bundle.getUpgradeOkay() && bundle.getComponentsToUpgrade().size() > 0){
                         isCCUUpgradeRequired = true;
                         double size = 0;
@@ -130,12 +130,16 @@ public class CCUListAdapter extends RecyclerView.Adapter<CCUListAdapter.CCUView>
                         }
                         CcuLog.d(L.TAG_CCU_BUNDLE, "Update UI with Bundle Version Point"+bundleVersion);
                         try {
-                            updateCCUFragment(fragmentManager, null, String.valueOf(size), true, bundle.getBundle().getBundleName(), bundle);
+                            updateCCUFragment(fragmentManager, null, String.valueOf(size),
+                                    true, bundle.getBundle().getBundleName(), bundle);
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
 
-                    } else if (!isCCUVersionMatchingWithReplacingCCU(position)) {
+                    }
+                    // If replace bundle is not allowed due to bundleVersion point not present or point is empty
+                    // so replace CCU only
+                    else if (!isCCUVersionMatchingWithReplacingCCU(position)) {
                         isCCUUpgradeRequired = true;
                         CCU ccu = ccuList.get(position);
                         try {
@@ -149,6 +153,7 @@ public class CCUListAdapter extends RecyclerView.Adapter<CCUListAdapter.CCUView>
                 },
                 ()->{
                     ProgressDialogUtils.hideProgressDialog();
+                    // Everything is fine, proceed with CCU selection
                     if(!isCCUUpgradeRequired) {
                         callBack.onCCUSelect(ccuList.get(position));
                     }

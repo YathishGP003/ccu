@@ -292,7 +292,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
         // For Golden Release we need to update all side apps to recommended version
         // But we don't want to do this if CCU is replaced.
         // This function runs in timer thread, it will run after 1min
-        if (!PreferenceUtil.isSideAppsUpdateFinished() && isRecommendedVersionCheckIsNotFalse() && !PreferenceUtil.getCcuInstallType().equals("REPLACECCU")) {
+        if (!PreferenceUtil.isSideAppsUpdateFinished() && isRecommendedVersionCheckIsNotFalse()) {
             BundleInstallManager.Companion.initUpdatingSideAppsToRecommended();
         }
 

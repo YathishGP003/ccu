@@ -97,6 +97,8 @@ public class UpdateCCUFragment extends DialogFragment implements BundleInstallLi
     TextView downloadSizeText;
     LinearLayout error_message_layout;
     LinearLayout error_image_layout;
+    private View toastLayout;
+
     public UpdateCCUFragment showServerDownLayout(Boolean isServerDown) {
         this.isServerDown = isServerDown;
         return this;
@@ -169,7 +171,8 @@ public class UpdateCCUFragment extends DialogFragment implements BundleInstallLi
     }
 
     public UpdateCCUFragment showBundleUpdateScreenFromReplaceCCU(boolean isReplace, boolean isBundleUpdate, String bundleName,
-                             String fileSize, String currentAppVersionWithPatch, UpgradeBundle bundle) throws JSONException {
+                             String fileSize, String currentAppVersionWithPatch, UpgradeBundle bundle
+                                                                  ) throws JSONException {
         this.currentVersionOfCCUString = currentAppVersionWithPatch;
         this.recommendedVersionOfCCUString = bundleName;
         this.replacingCCUName = bundleName;
@@ -224,6 +227,8 @@ public class UpdateCCUFragment extends DialogFragment implements BundleInstallLi
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         LayoutInflater inflater = getLayoutInflater();
         View view = inflater.inflate(R.layout.fragment_update_c_c_u, null);
+        toastLayout = inflater.inflate(R.layout.custom_layout_ccu_successful_update, view.findViewById(R.id.custom_toast_layout_update_ccu));
+
         if (isServerDown) {
             fragment_layout = view.findViewById(R.id.update_ccu_fragment_layout);
             server_down_layout = view.findViewById(R.id.server_down_layout);
@@ -417,8 +422,8 @@ public class UpdateCCUFragment extends DialogFragment implements BundleInstallLi
         cancel_update.setVisibility(View.GONE);
     }
 
-    public void showCCUUpdateToast(UpgradeBundle response, View toastLayout, Context context, FragmentActivity fragmentActivity) {
-        if (response != null) {
+    public void showCCUUpdateToast(View toastLayout, Context context) {
+        if(context != null && toastLayout != null) {
             new Handler(Looper.getMainLooper()).post(() -> {
                 Toast toast = new Toast(context);
                 toast.setGravity(Gravity.BOTTOM, 50, 50);
@@ -478,8 +483,8 @@ public class UpdateCCUFragment extends DialogFragment implements BundleInstallLi
                     BundleInstallManager bundleInstallManager = BundleInstallManager.Companion.getInstance();
                     UpgradeBundle upgradeBundle = bundleInstallManager.getRecommendedUpgradeBundle(true);
                     boolean isCCCUHasRecommendedVersion = isCCUHasRecommendedVersion(parentFragmentManager, upgradeBundle);
-                    if(isCCCUHasRecommendedVersion){
-                        showCCUUpdateToast(upgradeBundle, toastLayout, context, fragmentActivity);
+                    if(isCCCUHasRecommendedVersion && upgradeBundle != null){
+                        showCCUUpdateToast(toastLayout, context);
                     }
                 },
                 ProgressDialogUtils::hideProgressDialog);
@@ -529,6 +534,8 @@ public class UpdateCCUFragment extends DialogFragment implements BundleInstallLi
                 installNewApk();
             } else if(installState == installState.COMPLETED){
                 cancelUpdateProcess(BundleInstallManager.Companion.getInstance());
+                dismiss();
+                showCCUUpdateToast(toastLayout, getContext());
             } else if(installState == installState.DOWNLOAD_PAUSED){
                 connectivityIssues.setVisibility(View.VISIBLE);
             } else if(installState == installState.DOWNLOAD_FAILED | installState == installState.FAILED){

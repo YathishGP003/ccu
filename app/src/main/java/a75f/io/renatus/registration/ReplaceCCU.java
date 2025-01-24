@@ -518,6 +518,8 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
                 ReplaceCCU.this.displayToastMessageOnRestoreSuccess(ccu);
                 ReplaceCCU.this.loadRenatusLandingIntent();
                 ReplaceCCU.this.updatePreference();
+                // Set the flag to indicate that After CCU replace is done, side Apps installation not required.
+                PreferenceUtil.setSideAppsUpdateFinished();
                 MessagingClient.getInstance().init();
                 UtilityApplication.scheduleMessagingAckJob();
                 CCUHsApi.getInstance().updateLocalTimeZone();

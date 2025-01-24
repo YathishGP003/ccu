@@ -357,44 +357,19 @@ public class PreferenceUtil {
     public static boolean getUpdateCCUStatus() {
         return getBooleanPreference(UPDATE_CCU_IN_PROGRESS);
     }
-    // TODO: AMAR Remove this stack trace once golden release is approved for prod
     public static void  startUpdateCCU() {
-        try{
-            throw new NullPointerException();
-        } catch (Exception e) {
-            CcuLog.e(L.TAG_CCU_BUNDLE, "updated started", e);
-            e.printStackTrace();
-        }
         setBooleanPreferenceByCommitting(UPDATE_CCU_IN_PROGRESS, true);
     }
     public static void stopUpdateCCU() {
-        try{
-            throw new NullPointerException();
-        } catch (Exception e) {
-            CcuLog.e(L.TAG_CCU_BUNDLE, "updated stopped", e);
-            e.printStackTrace();
-        }
         setBooleanPreferenceByCommitting(UPDATE_CCU_IN_PROGRESS, false);
     }
     public static boolean isCCUInstalling() {
         return getBooleanPreference(INSTALL_CCU_IN_PROGRESS);
     }
     public static void installCCU() {
-        try{
-            throw new NullPointerException();
-        } catch (Exception e) {
-            CcuLog.e(L.TAG_CCU_BUNDLE, "Install started", e);
-            e.printStackTrace();
-        }
         setBooleanPreferenceByCommitting(INSTALL_CCU_IN_PROGRESS, true);
     }
     public static void installationCompleted() {
-        try{
-            throw new NullPointerException();
-        } catch (Exception e) {
-            CcuLog.e(L.TAG_CCU_BUNDLE, "Install stopped", e);
-            e.printStackTrace();
-        }
         setBooleanPreferenceByCommitting(INSTALL_CCU_IN_PROGRESS, false);
     }
 
@@ -403,42 +378,18 @@ public class PreferenceUtil {
         return getBooleanPreference(UPDATE_CCU_IN_PROGRESS_IN_ABOUT_SCREEN);
     }
     public static void  startUpdateCCUInAboutScreen() {
-        try{
-            throw new NullPointerException();
-        } catch (Exception e) {
-            CcuLog.e(L.TAG_CCU_BUNDLE, "updated started InAboutScreen", e);
-            e.printStackTrace();
-        }
         setBooleanPreferenceByCommitting(UPDATE_CCU_IN_PROGRESS_IN_ABOUT_SCREEN, true);
     }
     public static void stopUpdateCCUInAboutScreen() {
-        try{
-            throw new NullPointerException();
-        } catch (Exception e) {
-            CcuLog.e(L.TAG_CCU_BUNDLE, "updated stopped InAboutScreen", e);
-            e.printStackTrace();
-        }
         setBooleanPreferenceByCommitting(UPDATE_CCU_IN_PROGRESS_IN_ABOUT_SCREEN, false);
     }
     public static boolean isCCUInstallingInAboutScreen() {
         return getBooleanPreference(INSTALL_CCU_IN_PROGRESS_IN_ABOUT_SCREEN);
     }
     public static void installCCUInAboutScreen() {
-        try{
-            throw new NullPointerException();
-        } catch (Exception e) {
-            CcuLog.e(L.TAG_CCU_BUNDLE, "Install started InAboutScreen", e);
-            e.printStackTrace();
-        }
         setBooleanPreferenceByCommitting(INSTALL_CCU_IN_PROGRESS_IN_ABOUT_SCREEN, true);
     }
     public static void installationCompletedInAboutScreen() {
-        try{
-            throw new NullPointerException();
-        } catch (Exception e) {
-            CcuLog.e(L.TAG_CCU_BUNDLE, "Install stopped InAboutScreen", e);
-            e.printStackTrace();
-        }
         setBooleanPreferenceByCommitting(INSTALL_CCU_IN_PROGRESS_IN_ABOUT_SCREEN, false);
     }
 

@@ -3,7 +3,6 @@ package a75f.io.messaging
 import a75f.io.data.message.MESSAGE_ATTRIBUTE_AUTO_CX_STATE
 import a75f.io.data.message.MESSAGE_ATTRIBUTE_AUTO_CX_STOP_TIME
 import a75f.io.data.message.MESSAGE_ATTRIBUTE_BUNDLE
-import a75f.io.data.message.MESSAGE_ATTRIBUTE_BUNDLE_ID
 import a75f.io.data.message.MESSAGE_ATTRIBUTE_COMMAND
 import a75f.io.data.message.MESSAGE_ATTRIBUTE_ID
 import a75f.io.data.message.MESSAGE_ATTRIBUTE_IDS
@@ -20,6 +19,7 @@ import a75f.io.data.message.MESSAGE_ATTRIBUTE_VERSION
 import a75f.io.data.message.MESSAGE_ATTRIBUTE_WHO
 import a75f.io.data.message.Message
 import a75f.io.logger.CcuLog
+import a75f.io.logic.L
 import a75f.io.messaging.exceptions.InvalidMessageFormatException
 import a75f.io.messaging.handler.AutoCommissioningStateHandler
 import a75f.io.messaging.handler.CREATE_CUSTOM_ALERT_DEF_CMD
@@ -27,7 +27,6 @@ import a75f.io.messaging.handler.DELETE_CUSTOM_ALERT_DEF_CMD
 import a75f.io.messaging.handler.DELETE_SITE_DEFS_CMD
 import a75f.io.messaging.handler.FixAlertHandler
 import a75f.io.messaging.handler.KEY_ALERT_DEF_IDS
-import a75f.io.messaging.handler.KEY_ALERT_ID
 import a75f.io.messaging.handler.KEY_ALERT_IDS
 import a75f.io.messaging.handler.REMOVE_ALERT_CMD
 import a75f.io.messaging.handler.RemoteCommandUpdateHandler
@@ -35,7 +34,6 @@ import a75f.io.messaging.handler.RemoveEntityHandler
 import a75f.io.messaging.handler.SchedulerRevampMigrationHandler
 import a75f.io.messaging.handler.SiteSyncHandler
 import a75f.io.messaging.handler.UPDATE_CUSTOM_ALERT_DEF_CMD
-import a75f.io.messaging.handler.UpdatePointHandler
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonObject
@@ -47,80 +45,84 @@ fun messageToJson(message : Message) : JsonObject {
     return gson.toJsonTree(message, messageType).asJsonObject
 }
 
-fun jsonToMessage(msgJson : JsonObject) : Message {
-    val messageId = msgJson.get(MESSAGE_ATTRIBUTE_MESSAGE_ID).asString
-    if (messageId.isNullOrEmpty()) {
-        throw InvalidMessageFormatException("Invalid messageId")
-    }
-    val messageContent = msgJson.asJsonObject.get("message")
-    if (messageContent.isJsonNull) {
-        throw InvalidMessageFormatException("Invalid message")
-    }
+fun jsonToMessage(msgJson : JsonObject) : Message? {
+    try {
+        val messageId = msgJson.get(MESSAGE_ATTRIBUTE_MESSAGE_ID).asString
+        if (messageId.isNullOrEmpty()) {
+            throw InvalidMessageFormatException("Invalid messageId")
+        }
+        val messageContent = msgJson.asJsonObject.get("message")
+        if (messageContent.isJsonNull) {
+            throw InvalidMessageFormatException("Invalid message")
+        }
 
-    val messagePojo = Message(messageId)
-    messagePojo.command = messageContent.asJsonObject.get(MESSAGE_ATTRIBUTE_COMMAND)?.asString
+        val messagePojo = Message(messageId)
+        messagePojo.command = messageContent.asJsonObject.get(MESSAGE_ATTRIBUTE_COMMAND)?.asString
 
 
 
-    if (messagePojo.command == null) {
-        throw InvalidMessageFormatException("Invalid Command")
-    }
+        if (messagePojo.command == null) {
+            throw InvalidMessageFormatException("Invalid Command")
+        }
 
-    if(messagePojo.command == SchedulerRevampMigrationHandler.CMD)
+        if(messagePojo.command == SchedulerRevampMigrationHandler.CMD)
+            return messagePojo
+
+        messagePojo.id = messagePojo.command?.let { parseId(messageContent as JsonObject, it) }
+        messagePojo.ids = messagePojo.command?.let { parseIds(messageContent as JsonObject, it) }
+
+        messagePojo.value = messageContent.asJsonObject.get("val")?.asString
+        messagePojo.who = messageContent.asJsonObject.get(MESSAGE_ATTRIBUTE_WHO)?.asString
+        messagePojo.remoteCmdType = messageContent.asJsonObject.get(MESSAGE_ATTRIBUTE_REMOTE_CMD_TYPE)?.asString
+        if (messagePojo.remoteCmdType != null) {
+            messagePojo.remoteCmdLevel = messageContent.asJsonObject.get(MESSAGE_ATTRIBUTE_LEVEL)?.asString
+        } else {
+            messagePojo.level = messageContent.asJsonObject.get(MESSAGE_ATTRIBUTE_LEVEL)?.asInt
+        }
+        messagePojo.version = messageContent.asJsonObject.get(MESSAGE_ATTRIBUTE_VERSION)?.asString
+        messagePojo.timeToken = msgJson.get("timetoken").asLong
+
+        if(messagePojo.command.equals(AutoCommissioningStateHandler.CMD)){
+            messagePojo.autoCXStopTime = messageContent.asJsonObject.get(MESSAGE_ATTRIBUTE_AUTO_CX_STOP_TIME)?.asString
+            messagePojo.autoCXState = messageContent.asJsonObject.get(MESSAGE_ATTRIBUTE_AUTO_CX_STATE)?.asInt?: 0
+        }
+
+        if(messagePojo.remoteCmdType.equals(RemoteCommandUpdateHandler.UPDATE_CCU_LOG_LEVEL)){
+            messagePojo.loglevel = messageContent.asJsonObject.get(MESSAGE_ATTRIBUTE_LOG_LEVEL)?.asString
+        }
+
+        if(messageContent.asJsonObject.has(MESSAGE_ATTRIBUTE_ROUTING_DETAILS)) {
+
+            messagePojo.target_id =
+                messageContent.asJsonObject.get(MESSAGE_ATTRIBUTE_ROUTING_DETAILS)?.asJsonObject?.get(
+                    MESSAGE_ATTRIBUTE_TARGET
+                )?.asJsonObject?.get(MESSAGE_ATTRIBUTE_ID)?.asString
+
+            CcuLog.d("MessageBuilder", "target id : ${messagePojo.target_id}")
+
+            messagePojo.target_scope =
+                messageContent.asJsonObject.get(MESSAGE_ATTRIBUTE_ROUTING_DETAILS)?.asJsonObject?.get(
+                    MESSAGE_ATTRIBUTE_TARGET
+                )?.asJsonObject?.get(MESSAGE_ATTRIBUTE_TARGET_SCOPE)?.asString
+
+            CcuLog.d("MessageBuilder", "target scope : ${messagePojo.target_scope}")
+        }
+
+
+        if(messagePojo.remoteCmdType.equals(RemoteCommandUpdateHandler.SAVE_SEQUENCER_LOGS)){
+            messagePojo.sequenceId = messageContent.asJsonObject.get(MESSAGE_ATTRIBUTE_SEQUENCE_ID)?.asString
+        }
+
+        if (messagePojo.remoteCmdType.equals(RemoteCommandUpdateHandler.OTA_UPDATE_BUNDLE)) {
+            val bundle = messageContent.asJsonObject.get(MESSAGE_ATTRIBUTE_BUNDLE)
+            val id = bundle.asJsonObject.get(MESSAGE_ATTRIBUTE_ID)?.asString
+            messagePojo.bundle_id = id
+        }
         return messagePojo
-
-    messagePojo.id = messagePojo.command?.let { parseId(messageContent as JsonObject, it) }
-    messagePojo.ids = messagePojo.command?.let { parseIds(messageContent as JsonObject, it) }
-
-    messagePojo.value = messageContent.asJsonObject.get("val")?.asString
-    messagePojo.who = messageContent.asJsonObject.get(MESSAGE_ATTRIBUTE_WHO)?.asString
-    messagePojo.remoteCmdType = messageContent.asJsonObject.get(MESSAGE_ATTRIBUTE_REMOTE_CMD_TYPE)?.asString
-    if (messagePojo.remoteCmdType != null) {
-        messagePojo.remoteCmdLevel = messageContent.asJsonObject.get(MESSAGE_ATTRIBUTE_LEVEL)?.asString
-    } else {
-        messagePojo.level = messageContent.asJsonObject.get(MESSAGE_ATTRIBUTE_LEVEL)?.asInt
+    } catch (e : Exception) {
+       CcuLog.e(L.TAG_CCU_MESSAGING, "Error while parsing message", e)
+       return null
     }
-    messagePojo.version = messageContent.asJsonObject.get(MESSAGE_ATTRIBUTE_VERSION)?.asString
-    messagePojo.timeToken = msgJson.get("timetoken").asLong
-
-    if(messagePojo.command.equals(AutoCommissioningStateHandler.CMD)){
-        messagePojo.autoCXStopTime = messageContent.asJsonObject.get(MESSAGE_ATTRIBUTE_AUTO_CX_STOP_TIME)?.asString
-        messagePojo.autoCXState = messageContent.asJsonObject.get(MESSAGE_ATTRIBUTE_AUTO_CX_STATE)?.asInt?: 0
-    }
-
-    if(messagePojo.remoteCmdType.equals(RemoteCommandUpdateHandler.UPDATE_CCU_LOG_LEVEL)){
-        messagePojo.loglevel = messageContent.asJsonObject.get(MESSAGE_ATTRIBUTE_LOG_LEVEL)?.asString
-    }
-
-    if(messageContent.asJsonObject.has(MESSAGE_ATTRIBUTE_ROUTING_DETAILS)) {
-
-        messagePojo.target_id =
-            messageContent.asJsonObject.get(MESSAGE_ATTRIBUTE_ROUTING_DETAILS)?.asJsonObject?.get(
-                MESSAGE_ATTRIBUTE_TARGET
-            )?.asJsonObject?.get(MESSAGE_ATTRIBUTE_ID)?.asString
-
-        CcuLog.d("MessageBuilder", "target id : ${messagePojo.target_id}")
-
-        messagePojo.target_scope =
-            messageContent.asJsonObject.get(MESSAGE_ATTRIBUTE_ROUTING_DETAILS)?.asJsonObject?.get(
-                MESSAGE_ATTRIBUTE_TARGET
-            )?.asJsonObject?.get(MESSAGE_ATTRIBUTE_TARGET_SCOPE)?.asString
-
-        CcuLog.d("MessageBuilder", "target scope : ${messagePojo.target_scope}")
-    }
-
-
-    if(messagePojo.remoteCmdType.equals(RemoteCommandUpdateHandler.SAVE_SEQUENCER_LOGS)){
-        messagePojo.sequenceId = messageContent.asJsonObject.get(MESSAGE_ATTRIBUTE_SEQUENCE_ID)?.asString
-    }
-
-    if (messagePojo.remoteCmdType.equals(RemoteCommandUpdateHandler.OTA_UPDATE_BUNDLE)) {
-        val bundle = messageContent.asJsonObject.get(MESSAGE_ATTRIBUTE_BUNDLE)
-        val id = bundle.asJsonObject.get(MESSAGE_ATTRIBUTE_ID)?.asString
-        messagePojo.bundle_id = id
-    }
-
-    return messagePojo
 }
 
 private fun parseId(messageContent : JsonObject , command : String) : String?{

@@ -43,7 +43,7 @@ class MessageBuilderTest {
                 autoCXStopTime = "")
         )
 
-        val messageJson = messageToJson(message);
+        val messageJson = messageToJson(message!!)
         println(messageJson)
     }
 

@@ -208,6 +208,11 @@ public class MessagingListener implements ServerSentEvent.Listener {
         Message msg;
         try {
             msg = MessageBuilderKt.jsonToMessage(payload);
+            if (msg == null) {
+                CcuLog.e(L.TAG_CCU_MESSAGING, "Failed to Parse message ");
+                return;
+            }
+
             if (messageHandlerService.ignoreUpdateSchedule(payload) || messageHandlerService.canIgnoreTheMessage(msg)
             || messageHandlerService.ignoreUpdateEntity(msg)) {
                 CcuLog.e(L.TAG_CCU_MESSAGING, "Ignore Message !"+payload);
@@ -216,7 +221,6 @@ public class MessagingListener implements ServerSentEvent.Listener {
 
         } catch (InvalidMessageFormatException e) {
             CcuLog.e(L.TAG_CCU_MESSAGING, "Failed to Parse message ", e);
-            e.printStackTrace();
             return;
         }
 

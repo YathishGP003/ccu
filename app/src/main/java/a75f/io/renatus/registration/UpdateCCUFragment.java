@@ -186,9 +186,12 @@ public class UpdateCCUFragment extends DialogFragment implements BundleInstallLi
         return this;
     }
     public static void abortCCUDownloadProcess() {
+        CcuLog.i(L.TAG_CCU_BUNDLE, "Aborting CCU download and installation process in Utility class");
         UpdateCCUFragment.stopAllDownloads();
         PreferenceUtil.stopUpdateCCU();
         PreferenceUtil.installationCompleted();
+        PreferenceUtil.stopUpdateCCUInAboutScreen();
+        PreferenceUtil.installationCompletedInAboutScreen();
     }
     private static void stopAllDownloads(){
         List<Long> downloadIds = getAllDownloadIds();

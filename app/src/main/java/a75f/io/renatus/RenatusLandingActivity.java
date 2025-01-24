@@ -64,6 +64,7 @@ import com.google.gson.JsonObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -285,10 +286,13 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
         // If we just restarted after a bundled install, we need to perform
         // a few housekeeping tasks.  This will clear the existing bundle install
         // status and reboot the tablet if necessary.
+        // This function runs in timer thread, it will run after 5mins
         BundleInstallManager.Companion.completeBundleInstallIfNecessary();
 
         // For Golden Release we need to update all side apps to recommended version
-        if (!PreferenceUtil.isSideAppsUpdateFinished() && isRecommendedVersionCheckIsNotFalse()) {
+        // But we don't want to do this if CCU is replaced.
+        // This function runs in timer thread, it will run after 1min
+        if (!PreferenceUtil.isSideAppsUpdateFinished() && isRecommendedVersionCheckIsNotFalse() && !PreferenceUtil.getCcuInstallType().equals("REPLACECCU")) {
             BundleInstallManager.Companion.initUpdatingSideAppsToRecommended();
         }
 

@@ -1284,8 +1284,8 @@
     <string name="error_zoneToVirtualDeviceMapping">every point at CCU level and zone level will be created with IP device created for CCU</string>
     <string name="error_ip_address">Invalid IP address</string>
     <string name="error_password">Invalid Password</string>
-    <string name="error_local_network_number">Local Network Number should be within 1 to 65535</string>
-    <string name="error_virtual_network_number">Virtual Network Number should be within 1 to 65535</string>
+    <string name="error_local_network_number">Local Network Number should be within 1 to 65534</string>
+    <string name="error_virtual_network_number">Virtual Network Number should be within 1 to 65534</string>
     <string name="error_ip_device_instance_number">IP device instance Number should be within 0 to 4194302</string>
     <string name="error_apdu_timeout">APDU Timeout should be within 6000 to 65535 in multiples of 1000</string>
     <string name="error_apdu_retries">No. of APDU Retries should be within 0 to 255</string>

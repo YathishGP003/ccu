@@ -117,6 +117,7 @@ public class AboutFragment extends Fragment implements BundleInstallListener {
     @BindView(R.id.downloading_text)
     TextView downloadingText;
     String bundleLabelString;
+    int percComplete;
     String fileSize;
     @BindView(R.id.update_status)
     TextView updateStatus;
@@ -235,10 +236,10 @@ public class AboutFragment extends Fragment implements BundleInstallListener {
         String ccuUID = CCUHsApi.getInstance().getCcuRef().toString();
         tvSerialNumber.setText(ccuUID == null ? CCUHsApi.getInstance().getCcuRef().toString() :ccuUID);
         setOTPOnAboutPage();
-        if(PreferenceUtil.getUpdateCCUStatus()){
+        if(PreferenceUtil.getUpdateCCUStatusInAboutScreen()){
             getRecommendedCCUDataFromPreference();
             startDownloadingApk();
-        } else if(PreferenceUtil.isCCUInstalling()){
+        } else if(PreferenceUtil.isCCUInstallingInAboutScreen()){
             installNewApk();
         } else {
             checkIsCCUHasRecommendedVersion(getActivity());
@@ -249,14 +250,24 @@ public class AboutFragment extends Fragment implements BundleInstallListener {
 
     private void getRecommendedCCUDataFromPreference() {
         bundleLabelString = PreferenceUtil.getStringPreference("versionLabel");
+        percComplete = PreferenceUtil.getIntPreference("percComplete");
     }
 
 
     private void installNewApk() {
-        PreferenceUtil.installCCU();
+        PreferenceUtil.installCCUInAboutScreen();
         linearLayout.setVisibility(View.VISIBLE);
         updateAppText.setVisibility(View.GONE);
         updateCCU.setVisibility(View.GONE);
+
+        // Set visibility again as it calls from onResume too
+        progress_bar_layout.setVisibility(View.VISIBLE);
+        linearLayout.setVisibility(View.VISIBLE);
+        connectivityIssues.setVisibility(View.GONE);
+        updateScreenLayout.setVisibility(View.VISIBLE);
+        downloadingText.setVisibility(View.VISIBLE);
+        latestVersion.setText(bundleLabelString);
+        downloadPerc.setVisibility(View.VISIBLE);
     }
 
     public void checkIsCCUHasRecommendedVersion(FragmentActivity activity) {
@@ -347,11 +358,21 @@ public class AboutFragment extends Fragment implements BundleInstallListener {
                 cancelUpdateProcess(bundleInstallManager);
             }
         });
+
+        // when onResume is called, the progress bar is set to 0, so we need to set it to the last known value
+        if(PreferenceUtil.isCCUInstallingInAboutScreen()){
+            progressBar.setProgressCompat(percComplete, true);
+            downloadingText.setText("Installing Bundle");
+            String perc = percComplete + "%";
+            downloadPerc.setText(perc);
+            installNewApk();
+        }
     }
 
     private void startUpdateProcess(UpgradeBundle upgradeBundle, BundleInstallManager bundleInstallManager) {
+        CcuLog.d(L.TAG_CCU_BUNDLE, "Bundle upgrade initiated from About screen");
         startDownloadingApk();
-        PreferenceUtil.startUpdateCCU();
+        PreferenceUtil.startUpdateCCUInAboutScreen();
         PreferenceUtil.setStringPreference("versionLabel", upgradeBundle.component1().getBundleName());
         RxjavaUtil.executeBackgroundWithDisposable(() -> {
             bundleInstallManager.initiateBundleUpgrade(upgradeBundle, this);
@@ -367,8 +388,8 @@ public class AboutFragment extends Fragment implements BundleInstallListener {
         updateAppText.setVisibility(View.VISIBLE);
         linearLayout.setVisibility(View.GONE);
         progress_bar_layout.setVisibility(View.GONE);
-        PreferenceUtil.stopUpdateCCU();
-        PreferenceUtil.installationCompleted();
+        PreferenceUtil.stopUpdateCCUInAboutScreen();
+        PreferenceUtil.installationCompletedInAboutScreen();
         bundleInstallManager.cancelBundleInstallation();
     }
 
@@ -457,7 +478,7 @@ public class AboutFragment extends Fragment implements BundleInstallListener {
         latestVersion.setVisibility(View.GONE);
         downloadingText.setVisibility(View.GONE);
         progress_bar_layout.setVisibility(View.GONE);
-        PreferenceUtil.installationCompleted();
+        PreferenceUtil.installationCompletedInAboutScreen();
     }
 
     private void setOTPOnAboutPage(){
@@ -915,7 +936,8 @@ public class AboutFragment extends Fragment implements BundleInstallListener {
             downloadPerc.setText(perc);
             connectivityIssues.setVisibility(View.GONE);
             if (installState == installState.INSTALLING) {
-                PreferenceUtil.stopUpdateCCU();
+                PreferenceUtil.stopUpdateCCUInAboutScreen();
+                PreferenceUtil.setIntPreference("percComplete", percentComplete);
                 installNewApk();
             } else if(installState == installState.COMPLETED){
                 softwareIsUpToDate();
@@ -923,8 +945,8 @@ public class AboutFragment extends Fragment implements BundleInstallListener {
                 connectivityIssues.setVisibility(View.VISIBLE);
             } else if(installState == installState.DOWNLOAD_FAILED || installState == installState.FAILED){
                 handleUpgradeBundleErrors(Arrays.asList(message));
-                PreferenceUtil.stopUpdateCCU();
-                PreferenceUtil.installationCompleted();
+                PreferenceUtil.stopUpdateCCUInAboutScreen();
+                PreferenceUtil.installationCompletedInAboutScreen();
             }
         });
     }
@@ -951,6 +973,7 @@ public class AboutFragment extends Fragment implements BundleInstallListener {
 
     @Override
     public void onResume() {
+        getRecommendedCCUDataFromPreference();
         BundleInstallManager.Companion.getInstance().addBundleInstallListener(this);
         RxjavaUtil.executeBackground(() -> {
             BundleInstallManager bundleInstallManager = BundleInstallManager.Companion.getInstance();

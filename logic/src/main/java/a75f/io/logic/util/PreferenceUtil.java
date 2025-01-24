@@ -8,6 +8,7 @@ import android.preference.PreferenceManager;
 import java.util.Date;
 
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.L;
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode;
 
 public class PreferenceUtil {
@@ -24,6 +25,8 @@ public class PreferenceUtil {
     private static final String DATA_SYNC_PROCESSING = "dataSyncProcessing";
     private static final String UPDATE_CCU_IN_PROGRESS = "updateCCUInProcessing";
     private static final String INSTALL_CCU_IN_PROGRESS = "installCCUInProcessing";
+    private static final String UPDATE_CCU_IN_PROGRESS_IN_ABOUT_SCREEN = "updateCCUInProcessingInAboutScreen";
+    private static final String INSTALL_CCU_IN_PROGRESS_IN_ABOUT_SCREEN = "installCCUInProcessingInAboutScreen";
     private static final String ENABLE_TEMPERATURE_TI_PORT= "enableTemperatureTIPort";
     private static final String HSS_OUTSIDE_DAMPER_MIN_OPEN = "hssOutsideDamperMinOpenMigration";
     private static final String LAST_USERINTENT_CONDITIONING_MODE = "lastUserIntentConditioningMode";
@@ -190,6 +193,11 @@ public class PreferenceUtil {
         editor.putBoolean(key, value);
         editor.apply();
     }
+    private static void setBooleanPreferenceByCommitting(String key, boolean value) {
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
+        editor.putBoolean(key, value);
+        editor.commit();
+    }
 
     public static String getStringPreference(String key) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
@@ -199,6 +207,16 @@ public class PreferenceUtil {
     public static void setStringPreference(String key, String value) {
         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
         editor.putString(key, value);
+        editor.apply();
+    }
+
+    public static int getIntPreference(String key) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        return prefs.getInt(key, 0);
+    }
+    public static void setIntPreference(String key, int value) {
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
+        editor.putInt(key, value);
         editor.apply();
     }
 
@@ -339,20 +357,89 @@ public class PreferenceUtil {
     public static boolean getUpdateCCUStatus() {
         return getBooleanPreference(UPDATE_CCU_IN_PROGRESS);
     }
+    // TODO: AMAR Remove this stack trace once golden release is approved for prod
     public static void  startUpdateCCU() {
-        setBooleanPreference(UPDATE_CCU_IN_PROGRESS, true);
+        try{
+            throw new NullPointerException();
+        } catch (Exception e) {
+            CcuLog.e(L.TAG_CCU_BUNDLE, "updated started", e);
+            e.printStackTrace();
+        }
+        setBooleanPreferenceByCommitting(UPDATE_CCU_IN_PROGRESS, true);
     }
     public static void stopUpdateCCU() {
-        setBooleanPreference(UPDATE_CCU_IN_PROGRESS, false);
+        try{
+            throw new NullPointerException();
+        } catch (Exception e) {
+            CcuLog.e(L.TAG_CCU_BUNDLE, "updated stopped", e);
+            e.printStackTrace();
+        }
+        setBooleanPreferenceByCommitting(UPDATE_CCU_IN_PROGRESS, false);
     }
     public static boolean isCCUInstalling() {
         return getBooleanPreference(INSTALL_CCU_IN_PROGRESS);
     }
     public static void installCCU() {
-        setBooleanPreference(INSTALL_CCU_IN_PROGRESS, true);
+        try{
+            throw new NullPointerException();
+        } catch (Exception e) {
+            CcuLog.e(L.TAG_CCU_BUNDLE, "Install started", e);
+            e.printStackTrace();
+        }
+        setBooleanPreferenceByCommitting(INSTALL_CCU_IN_PROGRESS, true);
     }
     public static void installationCompleted() {
-        setBooleanPreference(INSTALL_CCU_IN_PROGRESS, false);
+        try{
+            throw new NullPointerException();
+        } catch (Exception e) {
+            CcuLog.e(L.TAG_CCU_BUNDLE, "Install stopped", e);
+            e.printStackTrace();
+        }
+        setBooleanPreferenceByCommitting(INSTALL_CCU_IN_PROGRESS, false);
+    }
+
+    // Preference management for about screen
+    public static boolean getUpdateCCUStatusInAboutScreen() {
+        return getBooleanPreference(UPDATE_CCU_IN_PROGRESS_IN_ABOUT_SCREEN);
+    }
+    public static void  startUpdateCCUInAboutScreen() {
+        try{
+            throw new NullPointerException();
+        } catch (Exception e) {
+            CcuLog.e(L.TAG_CCU_BUNDLE, "updated started InAboutScreen", e);
+            e.printStackTrace();
+        }
+        setBooleanPreferenceByCommitting(UPDATE_CCU_IN_PROGRESS_IN_ABOUT_SCREEN, true);
+    }
+    public static void stopUpdateCCUInAboutScreen() {
+        try{
+            throw new NullPointerException();
+        } catch (Exception e) {
+            CcuLog.e(L.TAG_CCU_BUNDLE, "updated stopped InAboutScreen", e);
+            e.printStackTrace();
+        }
+        setBooleanPreferenceByCommitting(UPDATE_CCU_IN_PROGRESS_IN_ABOUT_SCREEN, false);
+    }
+    public static boolean isCCUInstallingInAboutScreen() {
+        return getBooleanPreference(INSTALL_CCU_IN_PROGRESS_IN_ABOUT_SCREEN);
+    }
+    public static void installCCUInAboutScreen() {
+        try{
+            throw new NullPointerException();
+        } catch (Exception e) {
+            CcuLog.e(L.TAG_CCU_BUNDLE, "Install started InAboutScreen", e);
+            e.printStackTrace();
+        }
+        setBooleanPreferenceByCommitting(INSTALL_CCU_IN_PROGRESS_IN_ABOUT_SCREEN, true);
+    }
+    public static void installationCompletedInAboutScreen() {
+        try{
+            throw new NullPointerException();
+        } catch (Exception e) {
+            CcuLog.e(L.TAG_CCU_BUNDLE, "Install stopped InAboutScreen", e);
+            e.printStackTrace();
+        }
+        setBooleanPreferenceByCommitting(INSTALL_CCU_IN_PROGRESS_IN_ABOUT_SCREEN, false);
     }
 
     public static boolean getCleanUpOtherCcuZoneSchedules() {

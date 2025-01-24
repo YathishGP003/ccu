@@ -114,8 +114,10 @@ public class CCUListAdapter extends RecyclerView.Adapter<CCUListAdapter.CCUView>
                 ()-> ProgressDialogUtils.showProgressDialog(context, "Checking for Bundle Version"),
                 ()-> {
                     isCCUUpgradeRequired = false;
+
                     String bundleVersion = getBundleVersionPoint(ccuList, position);
-                    UpgradeBundle bundle = BundleInstallManager.Companion.getInstance().getUpgradeBundleByName(bundleVersion, true);
+                    UpgradeBundle bundle = new BundleInstallManager().getUpgradeBundleByName(bundleVersion, true);
+
                     CcuLog.d(L.TAG_CCU_BUNDLE, "Bundle Version Point"+bundle);
 
                     if(bundleVersion != null && bundle != null && bundle.getUpgradeOkay() && bundle.getComponentsToUpgrade().size() > 0){

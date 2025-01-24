@@ -885,11 +885,11 @@ public class Communication extends Fragment {
                     break;
 
                 case R.id.etlocalNetworkAddress:
-                    validateAndSetValue(localNetworkNumber, LOCAL_NETWORK_NUMBER, localNetworkNumber.getText().toString(), networkObject, 1,65535, 1, getString(R.string.error_local_network_number));
+                    validateAndSetValue(localNetworkNumber, LOCAL_NETWORK_NUMBER, localNetworkNumber.getText().toString(), networkObject, 1,65534, 1, getString(R.string.error_local_network_number));
                     break;
 
                 case R.id.etVirtualNetworkAddress:
-                    validateAndSetValue(virtualNetworkNumber, VIRTUAL_NETWORK_NUMBER, virtualNetworkNumber.getText().toString(), networkObject, 1,65535, 1, getString(R.string.error_virtual_network_number));
+                    validateAndSetValue(virtualNetworkNumber, VIRTUAL_NETWORK_NUMBER, virtualNetworkNumber.getText().toString(), networkObject, 1,65534, 1, getString(R.string.error_virtual_network_number));
                     break;
 
                 case R.id.etPort:

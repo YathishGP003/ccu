@@ -76,7 +76,6 @@ public class RemoteCommandUpdateHandler implements MessageHandler
                                 else if(safeModeInterface != null)
                                     safeModeInterface.updateRemoteCommands(cmdType, cmdLevel, "");
                                 break;
-                            case UPDATE_CCU:
                             case OTA_UPDATE_BUNDLE:
                                 CcuLog.d("RemoteCommand", " handle ota bundle update; type=" + cmdType);
                                 if (remoteCommandInterface != null)
@@ -84,6 +83,7 @@ public class RemoteCommandUpdateHandler implements MessageHandler
                                 else if(safeModeInterface != null)
                                     safeModeInterface.updateRemoteCommands(msgObject);
                                 break;
+                            case UPDATE_CCU:
                             case OTA_UPDATE_BAC_APP:
                             case OTA_UPDATE_REMOTE_ACCESS_APP:
                             case OTA_UPDATE_HOME_APP:

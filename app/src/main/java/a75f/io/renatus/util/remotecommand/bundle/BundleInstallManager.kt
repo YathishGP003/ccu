@@ -134,42 +134,63 @@ class BundleInstallManager: BundleInstallListener {
 
         fun completeBundleInstallIfNecessary() {
             // Attempt to retrieve any stored bundle install state
-            Log.d(TAG, "Checking any pending bundle installation tasks")
+
             val bundleInstallState = getBundleInstallState()
             if (bundleInstallState != null) {
-                Log.d(TAG, "completeBundleInstallIfNecessary: Completing bundle installation for ${bundleInstallState.bundleName}")
-
-                // Reset our bundle state so that we can't get into a loop
-                clearBundleInstallState()
-
                 // Update the CCU OTA status
                 Log.d(TAG, "completeBundleInstallIfNecessary: Writing bundle ota point")
                 updateBundleOtaStatus(BundleOtaStatus.OTA_UPDATE_SUCCEEDED)
                 updateBundleVersion(bundleInstallState.bundleName)
-
-                // Clean up deleted files
-                for (fileName in bundleInstallState.downloadedFiles) {
-                    val file = File(RenatusApp.getAppContext().getExternalFilesDir(null), fileName)
-                    if (file.exists()) {
-                        Log.d(TAG, "completeBundleInstallIfNecessary: Deleting ${file.absolutePath}")
-                        file.delete()
+                try {
+                    val syncResult = Runtime.getRuntime().exec("sync").waitFor()
+                    if (syncResult != 0) {
+                        CcuLog.e(TAG, "sync failed")
+                    } else {
+                        CcuLog.d(TAG, "sync success")
                     }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    CcuLog.e(TAG, "sync failed: " + e.message)
                 }
+                CcuLog.i(
+                    L.TAG_CCU_BUNDLE,
+                    "waiting for 5 minutes before checking for bundle install completion"
+                )
+                Timer().schedule(object : TimerTask() {
+                    override fun run() {
+                        CcuLog.i(
+                            TAG,
+                            "Five minutes have passed, checking for bundle install completion"
+                        )
+                        // Reset our bundle state so that we can't get into a loop
+                        clearBundleInstallState()
 
-                // Finally, reboot if the bundle requires it (Home app was installed)
-                if (bundleInstallState.rebootRequired) {
-                    // Reboot the tablet
-                    Log.d(TAG, "completeBundleInstallIfNecessary: Restarting tablet")
-                    RenatusApp.rebootTablet()
-                }
+                        // Clean up deleted files
+                        /*for (fileName in bundleInstallState.downloadedFiles) {
+                            val file = File(RenatusApp.getAppContext().getExternalFilesDir(null), fileName)
+                            if (file.exists()) {
+                                Log.d(TAG, "completeBundleInstallIfNecessary: Deleting ${file.absolutePath}")
+                                file.delete()
+                            }
+                        }*/
+
+                        // Finally, reboot if the bundle requires it (Home app was installed)
+                        if (bundleInstallState.rebootRequired) {
+                            // Reboot the tablet
+                            Log.d(TAG, "completeBundleInstallIfNecessary: Restarting tablet")
+                            RenatusApp.rebootTablet()
+                        }
+                    }
+                }, 300000)
+            } else {
+                CcuLog.d(TAG, "No bundle install state found, Bundle install might have been completed")
             }
         }
         fun initUpdatingSideAppsToRecommended() {
-            CcuLog.i(L.TAG_CCU, "Scheduled migrating side apps to recommended bundle after 1 minute")
+            CcuLog.i(L.TAG_CCU_BUNDLE, "Scheduled migrating side apps to recommended bundle after 1 minute")
             try {
                 Timer().schedule(object : TimerTask() {
                     override fun run() {
-                        PreferenceUtil.setSideAppsUpdateFinished()
                         val bundleInstallManager = getInstance()
                         val upgradeBundle = bundleInstallManager.getRecommendedUpgradeBundle(false)
 
@@ -177,7 +198,7 @@ class BundleInstallManager: BundleInstallListener {
                             CcuLog.i(L.TAG_CCU_BUNDLE, "Expected a recommended bundle, but none were returned")
                             return
                         }
-
+                        PreferenceUtil.setSideAppsUpdateFinished()
                         // Remove CCU from the upgrade bundle
                         upgradeBundle.componentsToUpgrade.removeIf { it.fileName.contains("CCU") }
                         CcuLog.i(L.TAG_CCU_BUNDLE, "CCU removed from upgrade bundle")
@@ -414,9 +435,9 @@ class BundleInstallManager: BundleInstallListener {
      * @param bundleName - The bundleName to retrieve
      * @return - The UpgradeBundle object containing the bundle to upgrade to
      */
-    fun getUpgradeBundleByName(bundleName: String, isReplace : Boolean = false): UpgradeBundle? {
+    fun getUpgradeBundleByName(bundleName: String?, isReplace : Boolean = false): UpgradeBundle? {
         // For local builds, no bundled upgrades
-        if (BuildConfig.BUILD_TYPE == "local") {
+        if (BuildConfig.BUILD_TYPE == "local" || bundleName.isNullOrEmpty()) {
             return null
         }
 

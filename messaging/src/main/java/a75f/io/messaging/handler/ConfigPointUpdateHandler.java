@@ -122,10 +122,17 @@ class ConfigPointUpdateHandler {
                 config.relay7OutputEnable.setEnabled(val > 0);
             } else if (configPoint.getDomainName().contains(DomainName.dcwbEnable)) {
                 config.dcwbEnable.setEnabled(val > 0);
+                // When we enable the dcwb then set the adaptiva delta enabled by default
+                if(val > 0) {
+                    config.adaptiveDeltaEnable.setEnabled(true);
+                    config.maximizedExitWaterTempEnable.setEnabled(false);
+                }
             } else if(configPoint.getDomainName().contains(DomainName.adaptiveDeltaEnable)){
                 config.adaptiveDeltaEnable.setEnabled(val > 0);
+                config.maximizedExitWaterTempEnable.setEnabled(val <= 0);
             } else if(configPoint.getDomainName().contains(DomainName.maximizedExitWaterTempEnable)){
                 config.maximizedExitWaterTempEnable.setEnabled(val > 0);
+                config.adaptiveDeltaEnable.setEnabled(val <= 0);
             }
             CcuLog.i(L.TAG_CCU_PUBNUB, "updateConfigPoint for DabFullyModulatingAhu" + config);
             ProfileEquipBuilder equipBuilder = new ProfileEquipBuilder(hayStack);

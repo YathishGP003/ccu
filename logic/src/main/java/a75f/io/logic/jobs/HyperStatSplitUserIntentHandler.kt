@@ -31,7 +31,7 @@ class HyperStatSplitUserIntentHandler {
     companion object {
 
         var zoneDataInterface: ZoneDataInterface? = null
-        private var hyperStatSplitStatus: HashMap<String, String> = HashMap()
+        var hyperStatSplitStatus: HashMap<String, String> = HashMap()
 
         private fun getHyperStatSplitStatusString(equipRef: String?): String? {
             return if (hyperStatSplitStatus.size > 0 && hyperStatSplitStatus.containsKey(equipRef))
@@ -251,6 +251,8 @@ class HyperStatSplitUserIntentHandler {
                 )
                 zoneDataInterface?.refreshScreen("", false)
             }
+
+            CcuLog.i(L.TAG_CCU_ZONE, "HSS equip status $status")
         }
 
         fun isFanModeChangeUnnecessary(equipRef: String, userIntentFanMode: Int): Boolean {

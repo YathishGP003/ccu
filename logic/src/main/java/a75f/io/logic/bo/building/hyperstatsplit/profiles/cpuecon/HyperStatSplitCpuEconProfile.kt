@@ -33,6 +33,7 @@ import a75f.io.logic.bo.building.schedules.Occupancy
 import a75f.io.logic.bo.building.schedules.ScheduleManager
 import a75f.io.logic.bo.util.CCUUtils
 import a75f.io.logic.jobs.HyperStatSplitUserIntentHandler
+import a75f.io.logic.jobs.HyperStatSplitUserIntentHandler.Companion.hyperStatSplitStatus
 import a75f.io.logic.util.PreferenceUtil
 import com.fasterxml.jackson.annotation.JsonIgnore
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
@@ -1538,9 +1539,10 @@ class HyperStatSplitCpuEconProfile(equipRef: String, nodeAddress: Short) : Hyper
         if (hssEquip.equipStatus.readHisVal() != state.ordinal.toDouble())
             hssEquip.equipStatus.writeHisVal(state.ordinal.toDouble())
         val curStatus = hssEquip.equipStatusMessage.readDefaultStrVal()
-        if (curStatus != "Zone Temp Dead") {
-            hssEquip.equipStatusMessage.writeDefaultVal("Zone Temp Dead")
+        if (curStatus != ZoneTempDead) {
+            hssEquip.equipStatusMessage.writeDefaultVal(ZoneTempDead)
         }
+        hyperStatSplitStatus[hssEquip.getId()] = ZoneTempDead
         hssEquip.equipStatus.writeHisVal(ZoneState.TEMPDEAD.ordinal.toDouble())
     }
     private fun handleRFDead() {
@@ -1553,6 +1555,7 @@ class HyperStatSplitCpuEconProfile(equipRef: String, nodeAddress: Short) : Hyper
         if (curStatus != RFDead) {
             hssEquip.equipStatusMessage.writeDefaultVal(RFDead)
         }
+        hyperStatSplitStatus[hssEquip.getId()] = RFDead
         hssEquip.equipStatus.writeHisVal(ZoneState.RFDEAD.ordinal.toDouble())
     }
 

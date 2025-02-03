@@ -1,10 +1,10 @@
 package a75f.io.renatus.ENGG.bacnet.services
 
-import a75f.io.device.bacnet.BacnetConfigConstants.BACNET_CONFIGURATION
-import a75f.io.device.bacnet.BacnetConfigConstants.EMPTY_STRING
-import a75f.io.device.bacnet.BacnetConfigConstants.IP_ADDRESS
-import a75f.io.device.bacnet.BacnetConfigConstants.IP_DEVICE_INSTANCE_NUMBER
-import a75f.io.device.bacnet.BacnetConfigConstants.PORT
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_CONFIGURATION
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.EMPTY_STRING
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.IP_ADDRESS
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.IP_DEVICE_INSTANCE_NUMBER
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.PORT
 import a75f.io.logger.CcuLog
 import a75f.io.renatus.ENGG.bacnet.services.client.BaseResponse
 import a75f.io.renatus.ENGG.bacnet.services.client.CcuService

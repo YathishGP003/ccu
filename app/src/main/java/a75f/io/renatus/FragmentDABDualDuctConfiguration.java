@@ -1,6 +1,6 @@
 package a75f.io.renatus;
 
-import static a75f.io.device.bacnet.BacnetUtilKt.addBacnetTags;
+import static a75f.io.logic.util.bacnet.BacnetUtilKt.addBacnetTags;
 import static a75f.io.logic.bo.building.dab.DabProfile.CARRIER_PROD;
 
 import android.app.Dialog;

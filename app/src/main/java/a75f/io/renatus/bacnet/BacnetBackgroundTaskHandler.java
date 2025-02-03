@@ -1,9 +1,9 @@
 package a75f.io.renatus.bacnet;
 
-import static a75f.io.device.bacnet.BacnetConfigConstants.BACNET_DEVICE_TYPE;
-import static a75f.io.device.bacnet.BacnetConfigConstants.BACNET_DEVICE_TYPE_FD;
-import static a75f.io.device.bacnet.BacnetConfigConstants.BACNET_FD_CONFIGURATION;
-import static a75f.io.device.bacnet.BacnetConfigConstants.BROADCAST_BACNET_APP_CONFIGURATION_TYPE;
+import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_DEVICE_TYPE;
+import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_DEVICE_TYPE_FD;
+import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_FD_CONFIGURATION;
+import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BROADCAST_BACNET_APP_CONFIGURATION_TYPE;
 import static a75f.io.renatus.UtilityApplication.context;
 
 import android.content.Context;

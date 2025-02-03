@@ -2,7 +2,7 @@ package a75f.io.renatus.bacnet
 
 import a75f.io.api.haystack.bacnet.parser.BacnetProperty
 import a75f.io.api.haystack.bacnet.parser.BacnetSelectedValue
-import a75f.io.device.bacnet.BacnetConfigConstants
+import a75f.io.logic.util.bacnet.BacnetConfigConstants
 import a75f.io.logger.CcuLog
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.renatus.BASE.BaseDialogFragment

@@ -1,45 +1,45 @@
-package a75f.io.device.bacnet
+package a75f.io.logic.util.bacnet
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.HSUtil
 import a75f.io.api.haystack.Tags
-import a75f.io.device.bacnet.BacnetConfigConstants.APDU_SEGMENT_TIMEOUT
-import a75f.io.device.bacnet.BacnetConfigConstants.APDU_TIMEOUT
-import a75f.io.device.bacnet.BacnetConfigConstants.APPLICATION_SOFTWARE_VERSION
-import a75f.io.device.bacnet.BacnetConfigConstants.BACNET_CONFIGURATION
-import a75f.io.device.bacnet.BacnetConfigConstants.BACNET_HEART_BEAT
-import a75f.io.device.bacnet.BacnetConfigConstants.BACNET_ID
-import a75f.io.device.bacnet.BacnetConfigConstants.BROADCAST_BACNET_APP_START
-import a75f.io.device.bacnet.BacnetConfigConstants.DAYLIGHT_SAVING_STATUS
-import a75f.io.device.bacnet.BacnetConfigConstants.DESCRIPTION
-import a75f.io.device.bacnet.BacnetConfigConstants.FIRMWARE_REVISION
-import a75f.io.device.bacnet.BacnetConfigConstants.IP_ADDRESS
-import a75f.io.device.bacnet.BacnetConfigConstants.IP_ADDRESS_VAL
-import a75f.io.device.bacnet.BacnetConfigConstants.IP_DEVICE_INSTANCE_NUMBER
-import a75f.io.device.bacnet.BacnetConfigConstants.IP_DEVICE_OBJECT_NAME
-import a75f.io.device.bacnet.BacnetConfigConstants.IS_BACNET_INITIALIZED
-import a75f.io.device.bacnet.BacnetConfigConstants.LOCAL_NETWORK_NUMBER
-import a75f.io.device.bacnet.BacnetConfigConstants.LOCATION
-import a75f.io.device.bacnet.BacnetConfigConstants.MODEL_NAME
-import a75f.io.device.bacnet.BacnetConfigConstants.NUMBER_OF_APDU_RETRIES
-import a75f.io.device.bacnet.BacnetConfigConstants.NUMBER_OF_NOTIFICATION_CLASS_OBJECTS
-import a75f.io.device.bacnet.BacnetConfigConstants.NUMBER_OF_OFFSET_VALUES
-import a75f.io.device.bacnet.BacnetConfigConstants.NUMBER_OF_SCHEDULE_OBJECTS
-import a75f.io.device.bacnet.BacnetConfigConstants.NUMBER_OF_TREND_LOG_OBJECTS
-import a75f.io.device.bacnet.BacnetConfigConstants.PASSWORD
-import a75f.io.device.bacnet.BacnetConfigConstants.PORT
-import a75f.io.device.bacnet.BacnetConfigConstants.PORT_VAL
-import a75f.io.device.bacnet.BacnetConfigConstants.SERIAL_NUMBER
-import a75f.io.device.bacnet.BacnetConfigConstants.UTC_OFFSET
-import a75f.io.device.bacnet.BacnetConfigConstants.VENDOR_ID
-import a75f.io.device.bacnet.BacnetConfigConstants.VENDOR_ID_VALUE
-import a75f.io.device.bacnet.BacnetConfigConstants.VENDOR_NAME
-import a75f.io.device.bacnet.BacnetConfigConstants.VENDOR_NAME_VALUE
-import a75f.io.device.bacnet.BacnetConfigConstants.VIRTUAL_NETWORK_NUMBER
-import a75f.io.device.bacnet.BacnetConfigConstants.ZONE_TO_VIRTUAL_DEVICE_MAPPING
 import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.logic.L
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.APDU_SEGMENT_TIMEOUT
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.APDU_TIMEOUT
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.APPLICATION_SOFTWARE_VERSION
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_CONFIGURATION
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_HEART_BEAT
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_ID
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.BROADCAST_BACNET_APP_START
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.DAYLIGHT_SAVING_STATUS
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.DESCRIPTION
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.FIRMWARE_REVISION
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.IP_ADDRESS
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.IP_ADDRESS_VAL
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.IP_DEVICE_INSTANCE_NUMBER
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.IP_DEVICE_OBJECT_NAME
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.IS_BACNET_INITIALIZED
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.LOCAL_NETWORK_NUMBER
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.LOCATION
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.MODEL_NAME
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.NUMBER_OF_APDU_RETRIES
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.NUMBER_OF_NOTIFICATION_CLASS_OBJECTS
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.NUMBER_OF_OFFSET_VALUES
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.NUMBER_OF_SCHEDULE_OBJECTS
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.NUMBER_OF_TREND_LOG_OBJECTS
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.PASSWORD
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.PORT
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.PORT_VAL
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.SERIAL_NUMBER
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.UTC_OFFSET
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.VENDOR_ID
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.VENDOR_ID_VALUE
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.VENDOR_NAME
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.VENDOR_NAME_VALUE
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.VIRTUAL_NETWORK_NUMBER
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.ZONE_TO_VIRTUAL_DEVICE_MAPPING
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -49,10 +49,14 @@ import android.net.wifi.WifiManager
 import android.os.Build
 import android.preference.PreferenceManager
 import android.text.format.Formatter
+import org.json.JSONException
 import org.json.JSONObject
 import java.net.InetAddress
 import java.net.NetworkInterface
-import java.util.*
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
+import java.util.TimeZone
 import kotlin.math.abs
 
 
@@ -272,4 +276,41 @@ fun sendBroadCast(context: Context, intentAction: String, message: String) {
             CcuLog.d(L.TAG_CCU_BACNET, "Unable to update zone:  " + e.message)
             e.printStackTrace()
         }
+    }
+
+    fun getUpdatedExistingBacnetConfigDeviceData(configString: String): Pair<String, Boolean> {
+        var updatedConfigString = configString
+        var isConfigChanged = false
+
+        try {
+            val bacnetConfig = JSONObject(configString)
+            val deviceData = bacnetConfig.getJSONObject(Tags.DEVICE)
+
+            val applicationSoftwareVersion = getCcuVersion().toString()
+            val utcOffset = getUtcOffset()
+            val tabletModel = Build.MODEL
+            val firmwareRevision = getCmBoardVersion().toString()
+
+            if (deviceData.getString(APPLICATION_SOFTWARE_VERSION) != applicationSoftwareVersion) {
+                deviceData.put(APPLICATION_SOFTWARE_VERSION, getCcuVersion())
+                isConfigChanged = true
+            }
+            if (deviceData.getInt(UTC_OFFSET) != utcOffset) {
+                deviceData.put(UTC_OFFSET, utcOffset)
+                deviceData.put(DAYLIGHT_SAVING_STATUS, getDayLightSavingStatus())
+                isConfigChanged = true
+            }
+            if (deviceData.getString(MODEL_NAME) != tabletModel) {
+                deviceData.put(MODEL_NAME, tabletModel)
+                isConfigChanged = true
+            }
+            if (deviceData.getString(FIRMWARE_REVISION) != firmwareRevision) {
+                deviceData.put(FIRMWARE_REVISION, firmwareRevision)
+                isConfigChanged = true
+            }
+            updatedConfigString = bacnetConfig.toString()
+        } catch (e: JSONException) {
+            e.printStackTrace()
+        }
+        return Pair(updatedConfigString, isConfigChanged)
     }

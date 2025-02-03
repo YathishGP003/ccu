@@ -1,9 +1,9 @@
 package a75f.io.renatus.registration;
 
 import static a75f.io.api.haystack.util.SchedulableMigrationKt.validateMigration;
-import static a75f.io.device.bacnet.BacnetConfigConstants.BACNET_CONFIGURATION;
-import static a75f.io.device.bacnet.BacnetConfigConstants.IP_DEVICE_INSTANCE_NUMBER;
-import static a75f.io.device.bacnet.BacnetUtilKt.sendBroadCast;
+import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_CONFIGURATION;
+import static a75f.io.logic.util.bacnet.BacnetConfigConstants.IP_DEVICE_INSTANCE_NUMBER;
+import static a75f.io.logic.util.bacnet.BacnetUtilKt.sendBroadCast;
 import static a75f.io.logic.L.ccu;
 import static a75f.io.logic.bo.util.UnitUtils.celsiusToFahrenheit;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsius;
@@ -89,7 +89,6 @@ import a75f.io.logic.bo.building.system.dab.DabAdvancedAhu;
 import a75f.io.logic.bo.building.system.vav.VavAdvancedAhu;
 import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.bo.util.DemandResponseMode;
-import a75f.io.logic.diag.otastatus.OtaStatusDiagPoint;
 import a75f.io.logic.interfaces.MasterControlLimitListener;
 import a75f.io.logic.tuners.TunerConstants;
 import a75f.io.logic.tuners.TunerEquip;

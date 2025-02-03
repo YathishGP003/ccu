@@ -16,9 +16,12 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.Site;
 import a75f.io.logic.bo.util.RenatusLogicIntentActions;
-import a75f.io.logic.util.RxTask;
+import a75f.io.logic.util.PreferenceUtil;
+import a75f.io.logic.util.bacnet.BacnetConfigConstants;
+import a75f.io.logic.util.bacnet.BacnetUtilKt;
 import a75f.io.messaging.MessageHandler;
 import a75f.io.util.ExecutorTask;
+import kotlin.Pair;
 
 public class SiteSyncHandler implements MessageHandler
 {
@@ -41,8 +44,15 @@ public class SiteSyncHandler implements MessageHandler
             //"sync" pubnubs are generated for other entities in a Site too.
             //SiteSyncHandler should take care of only the Site entity updates.
             if (remoteSite != null && !remoteSite.equals(hayStack.getSite())) {
-                if(!remoteSite.getTz().equals(hayStack.getSite().getTz()))
-                    ExecutorTask.executeBackground(() -> hayStack.updateTimeZoneInBackground(remoteSite.getTz()) );
+                if(!remoteSite.getTz().equals(hayStack.getSite().getTz())){
+                    ExecutorTask.executeBackground(() -> {
+                        hayStack.updateTimeZoneInBackground(remoteSite.getTz());
+                        Pair<String, Boolean> updatedConfigData = BacnetUtilKt.getUpdatedExistingBacnetConfigDeviceData(PreferenceUtil.getStringPreference(BacnetConfigConstants.BACNET_CONFIGURATION));
+                        if(updatedConfigData.getSecond()){
+                            PreferenceUtil.setStringPreference(BacnetConfigConstants.BACNET_CONFIGURATION, updatedConfigData.getFirst());
+                        }
+                    });
+                }
 
                 hayStack.updateSiteLocal(remoteSite, hayStack.getSiteIdRef().toString());
                 Intent locationUpdateIntent = new Intent(RenatusLogicIntentActions.ACTION_SITE_LOCATION_UPDATED);

@@ -1,4 +1,4 @@
-package a75f.io.device.bacnet
+package a75f.io.logic.util.bacnet
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Equip

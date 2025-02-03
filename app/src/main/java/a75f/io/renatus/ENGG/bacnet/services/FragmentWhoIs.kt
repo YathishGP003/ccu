@@ -1,6 +1,6 @@
 package a75f.io.renatus.ENGG.bacnet.services
 
-import a75f.io.device.bacnet.BacnetConfigConstants
+import a75f.io.logic.util.bacnet.BacnetConfigConstants
 import a75f.io.logger.CcuLog
 import a75f.io.renatus.ENGG.bacnet.services.client.BaseResponse
 import a75f.io.renatus.ENGG.bacnet.services.client.CcuService

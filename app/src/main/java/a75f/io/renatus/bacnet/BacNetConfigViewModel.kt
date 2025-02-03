@@ -4,7 +4,7 @@ import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.bacnet.parser.BacnetModelDetailResponse
 import a75f.io.api.haystack.bacnet.parser.BacnetPoint
 import a75f.io.api.haystack.bacnet.parser.BacnetProperty
-import a75f.io.device.bacnet.buildBacnetModel
+import a75f.io.logic.util.bacnet.buildBacnetModel
 import a75f.io.domain.service.DomainService
 import a75f.io.domain.service.ResponseCallback
 import a75f.io.logger.CcuLog
@@ -67,7 +67,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.internal.toImmutableList
-import java.io.IOException
 import java.net.ConnectException
 import java.net.SocketTimeoutException
 import java.util.Objects

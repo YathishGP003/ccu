@@ -1,8 +1,7 @@
 package a75f.io.restserver.server
 
 import a75f.io.api.haystack.CCUHsApi
-import a75f.io.device.bacnet.BacnetConfigConstants
-import a75f.io.logger.CcuLog
+import a75f.io.logic.util.bacnet.BacnetConfigConstants
 import org.json.JSONException
 import org.json.JSONObject
 import org.projecthaystack.HDict

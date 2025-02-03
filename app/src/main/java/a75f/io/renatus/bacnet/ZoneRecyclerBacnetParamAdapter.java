@@ -12,7 +12,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -31,7 +30,7 @@ import java.util.Objects;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.bacnet.parser.BacnetZoneViewItem;
-import a75f.io.device.bacnet.BacnetConfigConstants;
+import a75f.io.logic.util.bacnet.BacnetConfigConstants;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.interfaces.ModbusDataInterface;
 import a75f.io.messaging.handler.UpdatePointHandler;

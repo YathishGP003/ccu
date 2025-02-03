@@ -3,7 +3,7 @@ package a75f.io.renatus;
 import static a75f.io.api.haystack.CCUTagsDb.TAG_CCU_HS;
 import static a75f.io.api.haystack.Tags.BACNET;
 import static a75f.io.api.haystack.util.SchedulableMigrationKt.validateMigration;
-import static a75f.io.device.bacnet.BacnetModelBuilderKt.buildBacnetModel;
+import static a75f.io.logic.util.bacnet.BacnetModelBuilderKt.buildBacnetModel;
 import static a75f.io.device.modbus.ModbusModelBuilderKt.buildModbusModel;
 import static a75f.io.logic.bo.building.schedules.ScheduleManager.getScheduleStateString;
 import static a75f.io.logic.bo.building.schedules.ScheduleUtil.disconnectedIntervals;

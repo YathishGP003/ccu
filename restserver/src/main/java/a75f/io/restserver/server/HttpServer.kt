@@ -5,12 +5,12 @@ import a75f.io.api.haystack.HisItem
 import a75f.io.api.haystack.util.LevelData
 import a75f.io.api.haystack.util.ReadAllResponse
 import a75f.io.api.haystack.util.retrieveLevelValues
-import a75f.io.device.bacnet.BacnetConfigConstants.HTTP_SERVER_STATUS
-import a75f.io.device.bacnet.readExternalBacnetJsonFile
-import a75f.io.device.bacnet.updateBacnetHeartBeat
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.interfaces.ModbusDataInterface
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.HTTP_SERVER_STATUS
+import a75f.io.logic.util.bacnet.readExternalBacnetJsonFile
+import a75f.io.logic.util.bacnet.updateBacnetHeartBeat
 import android.content.Context
 import android.content.SharedPreferences
 import android.preference.PreferenceManager
@@ -206,7 +206,7 @@ class HttpServer {
 
                 get("/bacnet/heartbeat") {
                     CcuLog.i(HTTP_SERVER,"called API: /bacnet/heartbeat ")
-                    updateBacnetHeartBeat();
+                    updateBacnetHeartBeat()
                 }
 
                 post("/watchSub") {
@@ -265,7 +265,7 @@ class HttpServer {
                 get("/pointWrite/{id}") {
                     CcuLog.i(HTTP_SERVER, "called API: /pointWrite/{id} ")
                     val id = call.parameters["id"]
-                    val response = CCUHsApi.getInstance().readPointArr("@"+id);
+                    val response = CCUHsApi.getInstance().readPointArr("@"+id)
                     CcuLog.i(HTTP_SERVER, " response: $response")
                     call.respond(HttpStatusCode.OK, BaseResponse(response))
                 }
@@ -299,7 +299,7 @@ class HttpServer {
                                 updateHeartBeatPoint(id)
                             }
                             else
-                                call.respond(HttpStatusCode.OK, BaseResponse(HttpStatusCode.NoContent));
+                                call.respond(HttpStatusCode.OK, BaseResponse(HttpStatusCode.NoContent))
                         }else{
                             call.respond(HttpStatusCode.OK, BaseResponse(HttpStatusCode.NoContent))
                         }

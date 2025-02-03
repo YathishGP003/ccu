@@ -1,16 +1,11 @@
 package a75f.io.renatus;
 
-import static a75f.io.device.bacnet.BacnetConfigConstants.IS_BACNET_INITIALIZED;
+import static a75f.io.logic.util.bacnet.BacnetConfigConstants.IS_BACNET_INITIALIZED;
 import static a75f.io.logic.util.PreferenceUtil.getDataSyncProcessing;
 import static a75f.io.logic.util.PreferenceUtil.getSyncStartTime;
-import static a75f.io.usbserial.UsbServiceActions.ACTION_USB_PRIV_APP_PERMISSION_DENIED;
 
 import android.app.Application;
-import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -19,8 +14,6 @@ import android.net.ConnectivityManager;
 import android.net.DhcpInfo;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
-import android.os.IBinder;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatDelegate;
 
@@ -58,9 +51,7 @@ import a75f.io.api.haystack.util.DatabaseEvent;
 import a75f.io.device.DeviceUpdateJob;
 import a75f.io.device.EveryDaySchedulerService;
 import a75f.io.device.mesh.LSerial;
-import a75f.io.domain.api.Ccu;
 import a75f.io.device.mesh.RootCommandExecuter;
-import a75f.io.domain.api.Ccu;
 import a75f.io.domain.api.Domain;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
@@ -85,9 +76,6 @@ import a75f.io.renatus.views.RebootDataCache;
 import a75f.io.restserver.server.HttpServer;
 import a75f.io.sitesequencer.SequenceManager;
 import a75f.io.usbserial.SerialEvent;
-import a75f.io.usbserial.UsbConnectService;
-import a75f.io.usbserial.UsbModbusService;
-import a75f.io.usbserial.UsbService;
 
 /**
  * Created by rmatt isOn 7/19/2017.
@@ -160,7 +148,6 @@ public abstract class UtilityApplication extends Application {
         if (!ccu.isEmpty()) {
             Instabug.setUserAttribute("CCU",ccu.get(Tags.ID).toString()+":"+ccu.get(Tags.DIS));
         }*/
-
         Globals.getInstance().startTimerTask();
         RenatusServicesUrls renatusServicesUrls = RenatusServicesEnvironment.getInstance().getUrls();
         SequenceManager.getInstance(context, renatusServicesUrls.getSequencerUrl())

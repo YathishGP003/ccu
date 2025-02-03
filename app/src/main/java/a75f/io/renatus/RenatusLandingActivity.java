@@ -1,14 +1,15 @@
 package a75f.io.renatus;
 
-import static a75f.io.device.bacnet.BacnetConfigConstants.BACNET_CONFIGURATION;
-import static a75f.io.device.bacnet.BacnetConfigConstants.BACNET_DEVICE_TYPE;
-import static a75f.io.device.bacnet.BacnetConfigConstants.BACNET_DEVICE_TYPE_BBMD;
-import static a75f.io.device.bacnet.BacnetConfigConstants.BACNET_DEVICE_TYPE_FD;
-import static a75f.io.device.bacnet.BacnetConfigConstants.BACNET_DEVICE_TYPE_NORMAL;
-import static a75f.io.device.bacnet.BacnetConfigConstants.BACNET_FD_AUTO_STATE;
-import static a75f.io.device.bacnet.BacnetConfigConstants.BACNET_FD_CONFIGURATION;
-import static a75f.io.device.bacnet.BacnetConfigConstants.IS_BACNET_CONFIG_FILE_CREATED;
-import static a75f.io.device.bacnet.BacnetUtilKt.populateBacnetConfigurationObject;
+import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_CONFIGURATION;
+import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_DEVICE_TYPE;
+import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_DEVICE_TYPE_BBMD;
+import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_DEVICE_TYPE_FD;
+import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_DEVICE_TYPE_NORMAL;
+import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_FD_AUTO_STATE;
+import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_FD_CONFIGURATION;
+import static a75f.io.logic.util.bacnet.BacnetConfigConstants.IS_BACNET_CONFIG_FILE_CREATED;
+import static a75f.io.logic.util.bacnet.BacnetUtilKt.getUpdatedExistingBacnetConfigDeviceData;
+import static a75f.io.logic.util.bacnet.BacnetUtilKt.populateBacnetConfigurationObject;
 import static a75f.io.logic.bo.util.CCUUtils.isRecommendedVersionCheckIsNotFalse;
 import static a75f.io.renatus.CcuRefReceiver.REQUEST_CCU_REF_ACTION;
 import static a75f.io.renatus.Communication.isPortAvailable;
@@ -64,7 +65,6 @@ import com.google.gson.JsonObject;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Timer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -92,6 +92,7 @@ import a75f.io.renatus.util.TestSignalManager;
 import a75f.io.renatus.util.remotecommand.RemoteCommandHandlerUtil;
 import a75f.io.renatus.util.remotecommand.bundle.BundleInstallManager;
 import a75f.io.usbserial.UsbServiceActions;
+import kotlin.Pair;
 
 public class RenatusLandingActivity extends AppCompatActivity implements RemoteCommandHandleInterface, BacnetConfigChange {
 
@@ -735,11 +736,16 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
     };
 
     private void populateBACnetConfiguration() {
-        boolean isBacnetConfigFileCreated =  prefs.getBoolean(IS_BACNET_CONFIG_FILE_CREATED);
-        if(!isBacnetConfigFileCreated){
-            String confString= populateBacnetConfigurationObject().toString();
-            prefs.setString(BACNET_CONFIGURATION,confString);
-            prefs.setBoolean(IS_BACNET_CONFIG_FILE_CREATED,true);
+        String confString;
+        if (!prefs.getBoolean(IS_BACNET_CONFIG_FILE_CREATED)) {
+            confString = populateBacnetConfigurationObject().toString();
+            prefs.setBoolean(IS_BACNET_CONFIG_FILE_CREATED, true);
+            prefs.setString(BACNET_CONFIGURATION, confString);
+        } else {
+            Pair<String, Boolean> updatedConfig = getUpdatedExistingBacnetConfigDeviceData(prefs.getString(BACNET_CONFIGURATION));
+            if(updatedConfig.component2().equals(true)) {
+                prefs.setString(BACNET_CONFIGURATION, updatedConfig.component1().toString());
+            }
         }
     }
 

@@ -1,6 +1,6 @@
 package a75f.io.renatus;
 
-import static a75f.io.device.bacnet.BacnetUtilKt.addBacnetTags;
+import static a75f.io.logic.util.bacnet.BacnetUtilKt.addBacnetTags;
 
 import android.app.Dialog;
 import android.content.Intent;
@@ -43,7 +43,6 @@ import a75f.io.logic.bo.util.DesiredTempDisplayMode;
 import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.util.ProgressDialogUtils;
-import a75f.io.renatus.util.RxjavaUtil;
 import a75f.io.renatus.util.TestSignalManager;
 import a75f.io.renatus.views.CustomCCUSwitch;
 import a75f.io.util.ExecutorTask;

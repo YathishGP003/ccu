@@ -1,6 +1,6 @@
 package a75f.io.renatus;
 
-import static a75f.io.device.bacnet.BacnetUtilKt.generateBacnetIdForRoom;
+import static a75f.io.logic.util.bacnet.BacnetUtilKt.generateBacnetIdForRoom;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
@@ -56,7 +56,6 @@ import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.Site;
 import a75f.io.api.haystack.Tags;
 import a75f.io.api.haystack.Zone;
-import a75f.io.device.bacnet.BacnetUtilKt;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.DefaultSchedules;
 import a75f.io.logic.Globals;
@@ -68,6 +67,7 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.cloud.CloudConnectionManager;
 import a75f.io.logic.cloud.CloudConnectionResponseCallback;
 import a75f.io.logic.limits.SchedulabeLimits;
+import a75f.io.logic.util.bacnet.BacnetUtilKt;
 import a75f.io.renatus.bacnet.BacNetSelectModelView;
 import a75f.io.renatus.hyperstat.vrv.HyperStatVrvFragment;
 import a75f.io.renatus.profiles.acb.AcbProfileConfigFragment;

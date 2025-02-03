@@ -7,9 +7,13 @@ import static a75f.io.constants.SiteFieldConstants.GEOCOUNTRY;
 import static a75f.io.constants.SiteFieldConstants.GEOPOSTALCODE;
 import static a75f.io.constants.SiteFieldConstants.GEOSTATE;
 import static a75f.io.constants.SiteFieldConstants.ORGANIZATION;
-import static a75f.io.device.bacnet.BacnetConfigConstants.BACNET_CONFIGURATION;
-import static a75f.io.device.bacnet.BacnetConfigConstants.IP_DEVICE_OBJECT_NAME;
-import static a75f.io.device.bacnet.BacnetUtilKt.sendBroadCast;
+import static a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_CONFIGURATION;
+import static a75f.io.logic.util.bacnet.BacnetConfigConstants.DAYLIGHT_SAVING_STATUS;
+import static a75f.io.logic.util.bacnet.BacnetConfigConstants.IP_DEVICE_OBJECT_NAME;
+import static a75f.io.logic.util.bacnet.BacnetConfigConstants.UTC_OFFSET;
+import static a75f.io.logic.util.bacnet.BacnetUtilKt.getDayLightSavingStatus;
+import static a75f.io.logic.util.bacnet.BacnetUtilKt.getUtcOffset;
+import static a75f.io.logic.util.bacnet.BacnetUtilKt.sendBroadCast;
 import static a75f.io.logic.bo.util.CCUUtils.isRecommendedVersionCheckIsNotFalse;
 import static a75f.io.logic.service.FileBackupJobReceiver.performConfigFileBackup;
 import static a75f.io.renatus.util.CCUUtils.updateMigrationDiagWithAppVersion;
@@ -1071,10 +1075,22 @@ public class CreateNewSite extends Fragment {
             String confString = prefs.getString(BACNET_CONFIGURATION);
             JSONObject config = new JSONObject(confString);
             JSONObject deviceObject = config.getJSONObject("device");
+            boolean changesFound = false;
             if(!deviceObject.get(IP_DEVICE_OBJECT_NAME).toString().equals(siteName+"_"+ccuName))
             {
                 CcuLog.d(L.TAG_CCU_BACNET, "siteName or ccuName changed "+siteName+"_"+ccuName);
                 deviceObject.put(IP_DEVICE_OBJECT_NAME,siteName+"_"+ccuName);
+                deviceObject.put(UTC_OFFSET, getUtcOffset());
+                deviceObject.put(DAYLIGHT_SAVING_STATUS, getDayLightSavingStatus());
+                changesFound = true;
+            }
+            if(deviceObject.getInt(UTC_OFFSET) != getUtcOffset()) {
+                CcuLog.d(L.TAG_CCU_BACNET, "UTC Offset changed " + getUtcOffset());
+                deviceObject.put(UTC_OFFSET, getUtcOffset());
+                deviceObject.put(DAYLIGHT_SAVING_STATUS, getDayLightSavingStatus());
+                changesFound = true;
+            }
+            if(changesFound) {
                 prefs.setString(BACNET_CONFIGURATION, config.toString());
                 sendBroadCast(mContext, "a75f.io.renatus.BACNET_CONFIG_CHANGE", "BACnet configurations are changed");
                 performConfigFileBackup();

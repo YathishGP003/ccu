@@ -272,6 +272,12 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             correctAhuRefForBypassDamperAndCcuConfig()
             PreferenceUtil.setRestoreSourceModelTagsForOao()
         }
+
+        if(!PreferenceUtil.getUpdatePointsFlagStatus()) {
+            updateDataType()
+            PreferenceUtil.setUpdatePointsFlagStatus()
+        }
+
         hayStack.scheduleSync()
     }
 
@@ -2339,5 +2345,158 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             L.TAG_CCU_MIGRATION_UTIL,
             "MigrationHandler.logic correctAhuRefForBypassDamper ended"
         )
+    }
+
+    fun updateDataType() {
+        val dabPoints = listOf(
+            "damper1Shape",
+            "damper1Cmd",
+            "dischargeAirTemp2",
+            "damper1Type",
+            "damper2Size",
+            "damper2Type",
+            "damper2Shape",
+            "damper2Cmd",
+            "damper1Size",
+            "dischargeAirTemp1",
+            "normalizedDamper1Cmd",
+            "normalizedDamper2Cmd"
+        )
+        CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "Updating corrupted dab points Started")
+        val dabEquips = hayStack.readAllEntities("equip and dab and zone")
+        dabEquips.forEach {
+            updatePoints(CCUHsApi.getInstance(), dabPoints, it)
+        }
+        CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "Updating corrupted dab points ends")
+
+
+        val hyperstatPoints = listOf(
+            "fanOutCoolingStage1",
+            "heatingStage2",
+            "analog2InputEnable",
+            "analog3MinHeating",
+            "analog2OutputAssociation",
+            "analog3OutputEnable",
+            "heatingStage1",
+            "analog1FanMedium",
+            "analog1MinCooling",
+            "analog1MaxCooling",
+            "coolingStage2",
+            "analog2FanLow",
+            "analog1InputEnable",
+            "analog3FanHigh",
+            "analog2OutputEnable",
+            "analog2FanMedium",
+            "analog3OutputAssociation",
+            "analog2InputAssociation",
+            "coolingStage1",
+            "analog3FanLow",
+            "analog1InputAssociation",
+            "analog3MaxHeating",
+            "analog1FanHigh",
+            "analog2MinLinearFanSpeed",
+            "fanOutHeatingStage1",
+            "analog1OutputAssociation",
+            "analog2FanHigh",
+            "fanOutHeatingStage2",
+            "fanOutCoolingStage2",
+            "analog2MaxLinearFanSpeed",
+            "analog1OutputEnable",
+            "analog1FanLow",
+            "analog3FanMedium",
+            "compressorStage1",
+            "compressorStage2",
+            "compressorStage3",
+            "auxHeatingStage1",
+            "auxHeatingStage2",
+            "auxHeating1Activate",
+            "auxHeating2Activate",
+            "auxHeatingStage1",
+            "auxHeatingStage2",
+            "auxHeating1Activate",
+            "auxHeating2Activate",
+            "coolingStage3",
+            "fanOutCoolingStage3",
+            "heatingStage3",
+            "fanOutHeatingStage3"
+        )
+
+        CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "Updating corrupted hs points Started")
+        val cupOrHpuOr2Pipe = hayStack.readAllEntities("equip and (cpu or hpu or pipe2) and zone")
+        cupOrHpuOr2Pipe.forEach {
+            updatePoints(CCUHsApi.getInstance(), hyperstatPoints, it)
+        }
+        CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "Updating corrupted hs points ended")
+
+        val ssePoints = listOf(
+            "standaloneStage1Hysteresis",
+            "heatingStage1",
+            "coolingStage1",
+            "analog1InputEnable",
+            "standaloneStage1CoolingUpperOffset",
+            "standaloneStage1HeatingUpperOffset",
+            "standaloneStage1CoolingLowerOffset",
+            "fanStage1",
+            "standaloneStage1HeatingLowerOffset"
+        )
+
+        CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "Updating corrupted sse points Started")
+        val sseEquips = hayStack.readAllEntities("equip and sse and zone")
+        sseEquips.forEach {
+            updatePoints(CCUHsApi.getInstance(), ssePoints, it)
+        }
+        CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "Updating corrupted sse points ends")
+    }
+
+    private fun updatePoints(
+        hayStack: CCUHsApi,
+        corruptedPoints: List<String>,
+        equip: java.util.HashMap<Any, Any>
+    ) {
+        if(equip.size == 0) return
+        val site = hayStack.site
+        val profileEquipBuilder = ProfileEquipBuilder(hayStack)
+        val equipModel = ModelCache.getModelById(equip["sourceModel"].toString())
+        val equipDis = equip["dis"].toString()
+        val equipId = equip["id"].toString()
+        val profileType = equip["profile"].toString()
+        val profileConfiguration = DefaultProfileConfiguration(
+            equip["group"].toString().toInt(),
+            "",
+            0,
+            equip["roomRef"].toString(),
+            equip["floorRef"].toString(),
+            profileType
+        )
+
+        val points = hayStack.readAllEntities("point and equipRef == \"$equipId\"")
+
+        points.forEach { point ->
+
+            if (!corruptedPoints.contains(point["domainName"].toString())) {
+                return@forEach
+            }
+
+            CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "prev point: $point")
+
+            equipModel.points.find { it.domainName == point["domainName"].toString() }
+                ?.let { pointDef ->
+                    profileEquipBuilder.updatePoint(
+                        PointBuilderConfig(
+                            pointDef,
+                            profileConfiguration,
+                            equipId,
+                            site!!.id,
+                            site.tz,
+                            equipDis
+                        ), point
+                    )
+                }
+
+            CcuLog.d(
+                L.TAG_CCU_MIGRATION_UTIL,
+                "updated point: ${hayStack.readEntity("point and id == ${point["id"]} ")}"
+            )
+        }
     }
 }

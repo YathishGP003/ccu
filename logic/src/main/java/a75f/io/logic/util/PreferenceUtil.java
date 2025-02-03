@@ -93,6 +93,7 @@ public class PreferenceUtil {
     private static final String UPDATE_HISINTERPOLATE_COV = "hisinterpolatecov";
     private static final String SIDE_APPS_UPDATE_STATUS ="sideAppsUpdateStatus";
     private static final String RESTORE_SOURCE_MODEL_TAGS_FOR_OAO = "restoreSourceModelTagsForOao";
+    private static final String UPDATE_CORRUPTED_DATATYPE_POINTS = "updateCorruptedPoints";
 
     public static void setContext(Context c) {
         context= c;
@@ -754,5 +755,13 @@ public class PreferenceUtil {
 
     public static void setRestoreSourceModelTagsForOao() {
         setBooleanPreference(RESTORE_SOURCE_MODEL_TAGS_FOR_OAO, true);
+    }
+
+    public static boolean getUpdatePointsFlagStatus() {
+        return getBooleanPreference(UPDATE_CORRUPTED_DATATYPE_POINTS);
+    }
+
+    public static void setUpdatePointsFlagStatus() {
+        setBooleanPreference(UPDATE_CORRUPTED_DATATYPE_POINTS, true);
     }
 }

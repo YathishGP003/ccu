@@ -582,7 +582,7 @@ public class FloorPlanFragment extends Fragment {
                                 for (Equip equipDetails : HSUtil.getEquips(zone.getId())) {
                                     equipDetails.setFloorRef(floor.getId());
                                     CCUHsApi.getInstance().updateEquip(equipDetails, equipDetails.getId());
-                                    ArrayList<HashMap> ponitsList = CCUHsApi.getInstance().readAll("point and equipRef == \"" + equipDetails.getId() + "\"");
+                                    List<HDict> ponitsList = CCUHsApi.getInstance().readAllHDictByQuery("point and equipRef == \"" + equipDetails.getId() + "\"");
                                     HashMap device = CCUHsApi.getInstance().read("device and equipRef == \"" + equipDetails.getId() + "\"");
                                     if (device != null) {
                                         Device deviceDetails = new Device.Builder().setHashMap(device).build();
@@ -590,8 +590,8 @@ public class FloorPlanFragment extends Fragment {
                                         CCUHsApi.getInstance().updateDevice(deviceDetails, deviceDetails.getId());
                                     }
 
-                                    for (HashMap pointDetailsMap : ponitsList) {
-                                        Point pointDetails = new Point.Builder().setHashMap(pointDetailsMap).build();
+                                    for (HDict pointDetailsMap : ponitsList) {
+                                        Point pointDetails = new Point.Builder().setHDict(pointDetailsMap).build();
                                         pointDetails.setFloorRef(floor.getId());
                                         CCUHsApi.getInstance().updatePoint(pointDetails, pointDetails.getId());
                                     }

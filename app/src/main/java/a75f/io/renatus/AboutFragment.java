@@ -280,27 +280,31 @@ public class AboutFragment extends Fragment implements BundleInstallListener {
 
                     // Handle the case where CCU is offline
                     if (upgradeBundle == null) {
-                        connectionDownLayout.setVisibility(View.VISIBLE);
-                        connectionUpLayout.setVisibility(View.GONE);
-                        return;
+                        postToMainThread(() -> {
+                            connectionDownLayout.setVisibility(View.VISIBLE);
+                            connectionUpLayout.setVisibility(View.GONE);
+                        });
                     } else if(upgradeBundle.getUpgradeOkay() && upgradeBundle.getComponentsToUpgrade().size() == 0){
                         postToMainThread(this::softwareIsUpToDate);
-                        return;
-                    }
-                    postToMainThread(() -> {
-                        latestVersion.setText(upgradeBundle.component1().getBundleName());
-                        bundleLabelString = upgradeBundle.component1().getBundleName();
-                        downloadingText.setVisibility(View.GONE);
-                    });
-
-                    // Handle error messages in the upgrade bundle
-                    if (!upgradeBundle.getErrorMessages().isEmpty()) {
-                        postToMainThread(() -> handleUpgradeBundleErrors(upgradeBundle.getErrorMessages()));
                     } else {
-                        postToMainThread(() -> setupUpdateCCUButton(upgradeBundle, bundleInstallManager));
+                        postToMainThread(() -> {
+                            latestVersion.setText(upgradeBundle.component1().getBundleName());
+                            bundleLabelString = upgradeBundle.component1().getBundleName();
+                            downloadingText.setVisibility(View.GONE);
+                        });
+
+                        // Handle error messages in the upgrade bundle
+                        if (!upgradeBundle.getErrorMessages().isEmpty()) {
+                            postToMainThread(() -> handleUpgradeBundleErrors(upgradeBundle.getErrorMessages()));
+                        } else {
+                            postToMainThread(() -> setupUpdateCCUButton(upgradeBundle, bundleInstallManager));
+                        }
                     }
                 },
-                ProgressDialogUtils::hideProgressDialog
+                ()->{
+                    ProgressDialogUtils.hideProgressDialog();
+                    CcuLog.d(L.TAG_CCU_UI, "Checking for recommended version completed, Hiding progress dialog");
+                }
         );
     }
 

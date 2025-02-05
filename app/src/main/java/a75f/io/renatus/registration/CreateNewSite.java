@@ -359,6 +359,7 @@ public class CreateNewSite extends Fragment {
                         () -> {},
                         () -> {
                             CcuLog.i("UI_PROFILING","Add Save Site to DB ");
+                            prefs.setString("temp_ccu_name", ccuName);
                             if (!site.isEmpty()) {
                                 String siteId = site.get("id").toString();
                                 updateSite(siteName, siteCity, siteZip, siteAddress, siteState, siteCountry, siteId,installerOrg, installerEmail, managerEmail);
@@ -367,20 +368,8 @@ public class CreateNewSite extends Fragment {
                             }
 
                             CcuLog.i("UI_PROFILING","Create CCU & Diag Equip ");
-                            if (isCCUDeviceExists) {
-                                CCUDeviceBuilder ccuDeviceBuilder = new CCUDeviceBuilder();
-                                ccuDeviceBuilder.buildCCUDevice(Domain.diagEquip.getEquipRef(),
-                                        site.get("id").toString(),ccuName, installerEmail, managerEmail,
-                                        Domain.INSTANCE.checkSystemEquipInitialisedAndGetId(), true);
-                                L.ccu().setCCUName(ccuName);
-                            } else {
-                                String ccuRef = getCcuRef(ccuName, installerEmail, managerEmail);
-                                L.ccu().setCCUName(ccuName);
-                                CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.make(ccuRef));
-                            }
-                            L.ccu().systemProfile = new DefaultSystem();
-                            DomainManager.INSTANCE.addSystemDomainEquip(CCUHsApi.getInstance());
-                            updateMigrationDiagWithAppVersion();
+                            postSiteCreationSetup(isCCUDeviceExists, site, ccuName, installerEmail, managerEmail);
+                            prefs.remove("temp_ccu_name");
                         },
                         () -> {
                             mNext.setEnabled(true);
@@ -1101,5 +1090,25 @@ public class CreateNewSite extends Fragment {
     }
     private CustomSpinnerDropDownAdapter getAdapterValue(ArrayList values) {
         return new CustomSpinnerDropDownAdapter(requireContext(), R.layout.spinner_dropdown_item, values);
+    }
+
+    public static void postSiteCreationSetup(boolean isCCUDeviceExists, HashMap<Object, Object> site,
+                                       String ccuName, String installerEmail, String managerEmail) {
+        CcuLog.d(TAG, "RegisterCcuToExistingSite postSiteCreationSetup()");
+        if (isCCUDeviceExists) {
+            CCUDeviceBuilder ccuDeviceBuilder = new CCUDeviceBuilder();
+            ccuDeviceBuilder.buildCCUDevice(Domain.diagEquip.getEquipRef(),
+                    site.get("id").toString(),ccuName, installerEmail, managerEmail,
+                    Domain.INSTANCE.checkSystemEquipInitialisedAndGetId(), true);
+            L.ccu().setCCUName(ccuName);
+        } else {
+            String ccuRef = getCcuRef(ccuName, installerEmail, managerEmail);
+            L.ccu().setCCUName(ccuName);
+            CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.make(ccuRef));
+        }
+        L.ccu().systemProfile = new DefaultSystem();
+        DomainManager.INSTANCE.addSystemDomainEquip(CCUHsApi.getInstance());
+        updateMigrationDiagWithAppVersion();
+        CcuLog.d(TAG, "RegisterCcuToExistingSite postSiteCreationSetup() complete");
     }
 }

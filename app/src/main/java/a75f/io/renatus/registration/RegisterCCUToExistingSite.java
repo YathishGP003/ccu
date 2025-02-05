@@ -57,9 +57,8 @@ import a75f.io.renatus.R;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
-import a75f.io.renatus.util.RxjavaUtil;
-import io.seventyfivef.domainmodeler.client.ModelDirective;
 import a75f.io.util.ExecutorTask;
+import io.seventyfivef.domainmodeler.client.ModelDirective;
 
 public class RegisterCCUToExistingSite extends DialogFragment {
 
@@ -157,6 +156,7 @@ public class RegisterCCUToExistingSite extends DialogFragment {
                 return;
             }
             if (!CCUUiUtil.isInvalidName(ccuName)) {
+                mAddCCU.setEnabled(false);
                 next(ccuName, installerEmail, managerEmail);
             }else{
                 Toast.makeText(getApplicationContext(), "Please provide proper details",
@@ -199,7 +199,6 @@ public class RegisterCCUToExistingSite extends DialogFragment {
         ExecutorTask.executeAsync(
                 ()-> ProgressDialogUtils.showProgressDialog(getActivity(),"Adding CCU"),
                 ()->{
-                    mAddCCU.setClickable(false);
                     ArrayList<HashMap<Object, Object> >ccus = CCUHsApi.getInstance().readAllEntities("device and ccu");
                     for(HashMap<Object, Object> ccu :ccus){
                         CCUHsApi.getInstance().deleteEntityLocally(ccu.get("id").toString());

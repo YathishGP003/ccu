@@ -26,6 +26,7 @@ import a75f.io.logic.ccu.restore.RestoreCCU;
 import a75f.io.logic.logtasks.UploadLogs;
 import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.renatus.ENGG.RenatusEngineeringActivity;
+import a75f.io.renatus.registration.CreateNewSite;
 import a75f.io.renatus.registration.FreshRegistration;
 import a75f.io.renatus.registration.UpdateCCUFragment;
 import a75f.io.renatus.safemode.SafeModeActivity;
@@ -33,6 +34,7 @@ import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.PreferenceConstants;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.util.ExecutorTask;
+import io.seventyfivef.haystack.tag.Tags;
 
 public class SplashActivity extends AppCompatActivity implements Globals.OnCcuInitCompletedListener{
 
@@ -76,6 +78,28 @@ public class SplashActivity extends AppCompatActivity implements Globals.OnCcuIn
             finish();
         }  else if(!site.isEmpty() && !prefs.getBoolean(PreferenceConstants.CCU_SETUP) &&
             prefs.getString("INSTALL_TYPE").equals("CREATENEW")) {
+            if(!CCUHsApi.getInstance().isCCURegistered()) {
+                CcuLog.d(TAG, "Site was successfully created but ccu device is not registered/created. " +
+                        "Creating and Registering CCU now.");
+                ExecutorTask.executeAsync(
+                        () -> CcuLog.i(TAG,"Create CCU & Diag Equip "),
+                        () -> {
+                            if (!CCUHsApi.getInstance().isCCURegistered()) {
+                                CreateNewSite.postSiteCreationSetup(
+                                        false, site, prefs.getString("temp_ccu_name"),
+                                        site.get(Tags.INSTALLER_EMAIL).toString(),
+                                        site.get(Tags.FM_EMAIL).toString());
+                            }
+                        },
+                        () -> {
+                            prefs.remove("temp_ccu_name");
+                            prefs.setBoolean(PreferenceConstants.CCU_SETUP, true);
+                            PreferenceUtil.setTempModeMigrationNotRequired();
+                            L.saveCCUState();
+                            CcuLog.i(TAG,"CCU Setup Complete ");
+                        }
+                );
+            }
             CcuLog.i(TAG,"CCU Setup is not completed");
             Intent i = new Intent(SplashActivity.this, FreshRegistration.class);
             i.putExtra("viewpager_position", 21);
@@ -122,7 +146,7 @@ public class SplashActivity extends AppCompatActivity implements Globals.OnCcuIn
             CcuLog.i(TAG,"ADD CCU is not completed");
             Intent i = new Intent(SplashActivity.this,
                     FreshRegistration.class);
-            i.putExtra("viewpager_position", 21);
+            i.putExtra("viewpager_position", CCUHsApi.getInstance().isCCURegistered() ? 21 : 23);
             i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(i);
         }else if(prefs.getString("INSTALL_TYPE").equals("ADDCCU") && !prefs.getBoolean("ADD_CCU")){

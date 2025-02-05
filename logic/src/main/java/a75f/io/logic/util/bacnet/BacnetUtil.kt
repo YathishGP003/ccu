@@ -215,10 +215,44 @@ fun sendBroadCast(context: Context, intentAction: String, message: String) {
         val isBACnetIntialized = preferences.getBoolean(IS_BACNET_INITIALIZED, false)
         if((isBACnetIntialized && (System.currentTimeMillis() - bacnetLastHeartBeatTime) > 300000)) {
             preferences.edit().putLong(BACNET_HEART_BEAT, System.currentTimeMillis()).apply()  // resetting the timer again
-            sendBroadCast(Globals.getInstance().applicationContext, BROADCAST_BACNET_APP_START, "Start BACnet App")
+            launchBacApp(Globals.getInstance().applicationContext, BROADCAST_BACNET_APP_START, "Start BACnet App","")
         }
     }
 
+   fun launchBacApp(context: Context, intentAction: String, message: String, deviceId: String) {
+    CcuLog.d(L.TAG_CCU_BACNET, "launchBacApp started")
+
+    try {
+        var packageName = L.BAC_APP_PACKAGE_NAME
+        var bacAppLaunchIntent = context.packageManager.getLaunchIntentForPackage(L.BAC_APP_PACKAGE_NAME)
+
+        // Fallback to the obsolete package if the current package is unavailable
+        if (bacAppLaunchIntent == null) {
+            CcuLog.d(L.TAG_CCU_BACNET, "Unable to acquire BacApp launch intent for " + L.BAC_APP_PACKAGE_NAME + ". Trying " + L.BAC_APP_PACKAGE_NAME_OBSOLETE)
+            packageName = L.BAC_APP_PACKAGE_NAME_OBSOLETE
+            bacAppLaunchIntent =
+                context.packageManager.getLaunchIntentForPackage(L.BAC_APP_PACKAGE_NAME_OBSOLETE)
+        }
+
+        if (bacAppLaunchIntent == null) {
+            CcuLog.d(L.TAG_CCU_BACNET, "Unable to acquire BacApp launch intent for " + L.BAC_APP_PACKAGE_NAME_OBSOLETE)
+            return
+        }
+
+        // Set the intent action and extras
+        bacAppLaunchIntent.setAction(intentAction)
+        bacAppLaunchIntent.putExtra("message", message)
+        if (deviceId.isNotEmpty()) {
+            bacAppLaunchIntent.putExtra("deviceId", deviceId)
+        }
+
+        context.startActivity(bacAppLaunchIntent)
+        CcuLog.d(L.TAG_CCU_BACNET, "BacApp ($packageName) will open now.")
+
+    } catch (e: Exception) {
+        CcuLog.d(L.TAG_CCU_BACNET, "launchBacApp exception: $e")
+    }
+}
     fun generateBacnetIdForRoom(zoneID: String): Int {
         var bacnetID = 1
         var isBacnetIDUsed = true

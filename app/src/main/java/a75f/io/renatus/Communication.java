@@ -84,7 +84,9 @@ import java.util.concurrent.Executors;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Tags;
+import a75f.io.logic.util.bacnet.BacnetUtilKt;
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.L;
 import a75f.io.renatus.bacnet.BacnetConfigChange;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.DataBbmd;
@@ -1020,7 +1022,7 @@ public class Communication extends Fragment {
             hideView(etOffsetValues, tvOffsetValue);
             startRestServer();
             sharedPreferences.edit().putBoolean(IS_BACNET_INITIALIZED, true).apply();
-            sendBroadCast(context, BROADCAST_BACNET_APP_START, "Start BACnet App", ipDeviceInstanceNumber.getText().toString());
+            BacnetUtilKt.launchBacApp(context, BROADCAST_BACNET_APP_START, "Start BACnet App", ipDeviceInstanceNumber.getText().toString());
             performConfigFileBackup();
         }
     }

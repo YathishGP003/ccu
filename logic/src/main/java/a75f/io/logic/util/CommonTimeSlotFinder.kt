@@ -309,62 +309,26 @@ class CommonTimeSlotFinder {
             )
         }
 
-        fun generateMonDaySchedule1(boundaryDays: MutableList<Schedule.Days>): Map<String, List<TimeSlot>> {
+        fun generateDaySchedule(
+            day: DAYS,
+            zoneScheduleDays: MutableList<Schedule.Days>,
+            scheduleDays: MutableList<Schedule.Days>,
+            previousDaySlot: MutableList<Schedule.Days> = mutableListOf()
+        ): Map<String, List<TimeSlot>> {
+
             return mapOf(
-                DAYS.MONDAY.name to createDayScheduleWithBoundaries(
-                    boundaryDays.map { TimeSlot(it.sthh, it.stmm, it.ethh, it.etmm) }, mondayDays.map { TimeSlot(it.sthh, it.stmm, it.ethh, it.etmm) }
+                day.name to createDayScheduleWithBoundaries(
+                    if (isScheduleGroupChanged) {
+                        zoneScheduleDays
+                    } else {
+                        scheduleDays
+                    }.map { TimeSlot(it.sthh, it.stmm, it.ethh, it.etmm) },
+                    scheduleDays.map { TimeSlot(it.sthh, it.stmm, it.ethh, it.etmm) },
+                    previousDaySlot,
+                    isScheduleGroupChanged
                 )
             )
         }
-
-        fun generateTueDaySchedule1(boundaryDays: MutableList<Schedule.Days>): Map<String, List<TimeSlot>> {
-            return mapOf(
-                DAYS.TUESDAY.name to createDayScheduleWithBoundaries(
-                    boundaryDays.map { TimeSlot(it.sthh, it.stmm, it.ethh, it.etmm) }, tuesdayDays.map { TimeSlot(it.sthh, it.stmm, it.ethh, it.etmm) }
-                )
-            )
-        }
-
-        fun generateWedDaySchedule1(boundaryDays: MutableList<Schedule.Days>): Map<String, List<TimeSlot>> {
-            return mapOf(
-                DAYS.WEDNESDAY.name to createDayScheduleWithBoundaries(
-                    boundaryDays.map { TimeSlot(it.sthh, it.stmm, it.ethh, it.etmm) }, wednesdayDays.map { TimeSlot(it.sthh, it.stmm, it.ethh, it.etmm) }
-                )
-            )
-        }
-
-        fun generateThuDaySchedule1(boundaryDays: MutableList<Schedule.Days>): Map<String, List<TimeSlot>> {
-            return mapOf(
-                DAYS.THURSDAY.name to createDayScheduleWithBoundaries(
-                    boundaryDays.map { TimeSlot(it.sthh, it.stmm, it.ethh, it.etmm) }, thursdayDays.map { TimeSlot(it.sthh, it.stmm, it.ethh, it.etmm) }
-                )
-            )
-        }
-
-        fun generateFriDaySchedule1(boundaryDays: MutableList<Schedule.Days>): Map<String, List<TimeSlot>> {
-            return mapOf(
-                DAYS.FRIDAY.name to createDayScheduleWithBoundaries(
-                    boundaryDays.map { TimeSlot(it.sthh, it.stmm, it.ethh, it.etmm) }, fridayDays.map { TimeSlot(it.sthh, it.stmm, it.ethh, it.etmm) }
-                )
-            )
-        }
-
-        fun generateSunDaySchedule1(boundaryDays: MutableList<Schedule.Days>): Map<String, List<TimeSlot>> {
-            return mapOf(
-                DAYS.SUNDAY.name to createDayScheduleWithBoundaries(
-                    boundaryDays.map { TimeSlot(it.sthh, it.stmm, it.ethh, it.etmm) }, sundayDays.map { TimeSlot(it.sthh, it.stmm, it.ethh, it.etmm) }
-                )
-            )
-        }
-
-        fun generateSaturdaySchedule1(boundaryDays: MutableList<Schedule.Days>): Map<String, List<TimeSlot>> {
-            return mapOf(
-                DAYS.SATURDAY.name to createDayScheduleWithBoundaries(
-                    boundaryDays.map { TimeSlot(it.sthh, it.stmm, it.ethh, it.etmm) }, saturdayDays.map { TimeSlot(it.sthh, it.stmm, it.ethh, it.etmm) }
-                )
-            )
-        }
-
 
         when (scheduleGroup) {
             ScheduleGroup.EVERYDAY.ordinal -> {
@@ -399,12 +363,15 @@ class CommonTimeSlotFinder {
                 val weekdayCommonIntervals = getCommonIntervals(generateWeekdaySchedule1(if(isScheduleGroupChanged) zoneMondayDays else {mondayDays})).toMutableList()
                 weekdayIntervalsFinal.addAll(weekdayCommonIntervals)
 
+                val saturdaySchedule = generateDaySchedule(DAYS.SATURDAY, zoneSaturdayDays, saturdayDays, fridayDays)
+                val sundaySchedule = generateDaySchedule(DAYS.SUNDAY, zoneSundayDays, sundayDays, saturdayDays)
+
                 val saturdayFinalIntervals = mutableListOf<TimeSlot>()
-                val saturdayCommonIntervals = getCommonIntervals(generateSaturdaySchedule1(if(isScheduleGroupChanged) zoneSaturdayDays else {saturdayDays})).toMutableList()
+                val saturdayCommonIntervals = getCommonIntervals(saturdaySchedule).toMutableList()
                 saturdayFinalIntervals.addAll(saturdayCommonIntervals)
 
                 val sundayFinalIntervals = mutableListOf<TimeSlot>()
-                val sundayCommonIntervals = getCommonIntervals(generateSunDaySchedule1(if(isScheduleGroupChanged) zoneSundayDays else {sundayDays})).toMutableList()
+                val sundayCommonIntervals = getCommonIntervals(sundaySchedule).toMutableList()
                 sundayFinalIntervals.addAll(sundayCommonIntervals)
 
                 return listOf(
@@ -416,51 +383,53 @@ class CommonTimeSlotFinder {
 
             else -> {
                 val mondayCommonIntervalsFinal = mutableListOf<TimeSlot>()
+
+                val mondaySchedule = generateDaySchedule(DAYS.MONDAY, zoneMondayDays, mondayDays, sundayDays)
+                val tuesdaySchedule = generateDaySchedule(DAYS.TUESDAY, zoneTuesdayDays, tuesdayDays, mondayDays)
+                val wednesdaySchedule = generateDaySchedule(DAYS.WEDNESDAY, zoneWednesdayDays, wednesdayDays, tuesdayDays)
+                val thursdaySchedule = generateDaySchedule(DAYS.THURSDAY, zoneThursdayDays, thursdayDays, wednesdayDays)
+                val fridaySchedule = generateDaySchedule(DAYS.FRIDAY, zoneFridayDays, fridayDays, thursdayDays)
+                val saturdaySchedule = generateDaySchedule(DAYS.SATURDAY, zoneSaturdayDays, saturdayDays, fridayDays)
+                val sundaySchedule = generateDaySchedule(DAYS.SUNDAY, zoneSundayDays, sundayDays, saturdayDays)
+
                 val mondayCommonIntervals = getCommonIntervals(
-                    generateMonDaySchedule1(
-                        if(isScheduleGroupChanged) zoneMondayDays else {mondayDays})
+                    mondaySchedule
                 ).toMutableList()
                 mondayCommonIntervalsFinal.addAll(mondayCommonIntervals)
 
                 val tuesdayCommonIntervalsFinal = mutableListOf<TimeSlot>()
                 val tuesdayCommonIntervals = getCommonIntervals(
-                    generateTueDaySchedule1(
-                        if(isScheduleGroupChanged) zoneTuesdayDays else {tuesdayDays})
+                    tuesdaySchedule
                 ).toMutableList()
                 tuesdayCommonIntervalsFinal.addAll(tuesdayCommonIntervals)
 
                 val wednesdayCommonIntervalsFinal = mutableListOf<TimeSlot>()
                 val wednesdayCommonIntervals = getCommonIntervals(
-                    generateWedDaySchedule1(
-                        if(isScheduleGroupChanged) zoneWednesdayDays else {wednesdayDays})
+                    wednesdaySchedule
                 ).toMutableList()
                 wednesdayCommonIntervalsFinal.addAll(wednesdayCommonIntervals)
 
                 val thursdayCommonIntervalsFinal = mutableListOf<TimeSlot>()
                 val thursdayCommonIntervals = getCommonIntervals(
-                    generateThuDaySchedule1(
-                        if(isScheduleGroupChanged) zoneThursdayDays else {thursdayDays})
+                    thursdaySchedule
                 ).toMutableList()
                 thursdayCommonIntervalsFinal.addAll(thursdayCommonIntervals)
 
                 val fridayCommonIntervalsFinal = mutableListOf<TimeSlot>()
                 val fridayCommonIntervals = getCommonIntervals(
-                    generateFriDaySchedule1(
-                        if(isScheduleGroupChanged) zoneFridayDays else {fridayDays})
+                    fridaySchedule
                 ).toMutableList()
                 fridayCommonIntervalsFinal.addAll(fridayCommonIntervals)
 
                 val saturdayCommonIntervalsFinal = mutableListOf<TimeSlot>()
                 val saturdayCommonIntervals = getCommonIntervals(
-                    generateSaturdaySchedule1(
-                        if(isScheduleGroupChanged) zoneSaturdayDays else {saturdayDays})
+                    saturdaySchedule
                 ).toMutableList()
                 saturdayCommonIntervalsFinal.addAll(saturdayCommonIntervals)
 
                 val sundayCommonIntervalsFinal = mutableListOf<TimeSlot>()
                 val sundayCommonIntervals = getCommonIntervals(
-                    generateSunDaySchedule1(
-                        if(isScheduleGroupChanged) zoneSundayDays else {sundayDays})
+                    sundaySchedule
                 ).toMutableList()
                 sundayCommonIntervalsFinal.addAll(sundayCommonIntervals)
 
@@ -472,7 +441,9 @@ class CommonTimeSlotFinder {
         }
     }
     fun createDayScheduleWithBoundaries(timeSlots: List<TimeSlot>,
-                                        boundaries: List<TimeSlot>
+                                        boundaries: List<TimeSlot>,
+                                        previousDaySlot: MutableList<Schedule.Days> = mutableListOf(),
+                                        isScheduleGroupChanged: Boolean = false
     ): List<TimeSlot> {
         val result = mutableListOf<TimeSlot>()
 
@@ -481,7 +452,6 @@ class CommonTimeSlotFinder {
                 // Check if the time slot overlaps with the boundary
                 if ((timeSlot.startHour < boundary.endHour || (timeSlot.startHour == boundary.endHour && timeSlot.startMinute < boundary.endMinute)) &&
                     (timeSlot.endHour > boundary.startHour || (timeSlot.endHour == boundary.startHour && timeSlot.endMinute > boundary.startMinute))) {
-
                     val startHour = maxOf(boundary.startHour, timeSlot.startHour)
                     val startMinute = calculateStartMinute(boundary, timeSlot)
                     val endHour = minOf(boundary.endHour, timeSlot.endHour)
@@ -492,11 +462,47 @@ class CommonTimeSlotFinder {
                     if (startHour < endHour || (startHour == endHour && startMinute <= endMinute)) {
                         result.add(TimeSlot(startHour, startMinute, endHour, endMinute))
                     }
+                    // Check if the time slot is overnight and add the overnight slot
+                } else if(timeSlot.startHour == boundary.startHour &&
+                    timeSlot.startMinute == boundary.startMinute &&
+                    timeSlot.endHour == boundary.endHour &&
+                    timeSlot.endMinute == boundary.endMinute && (timeSlot.startHour > timeSlot.endHour
+                            || (timeSlot.startHour == timeSlot.endHour && timeSlot.startMinute > timeSlot.endMinute))) {
+                    result.add(TimeSlot(
+                        boundary.startHour,
+                        boundary.startMinute,
+                        24,
+                        0,
+                    ))
+                }
+
+            }
+        }
+        // Check if the previous day has an overnight slot
+        if (previousDaySlot.isNotEmpty() && !isScheduleGroupChanged) {
+            val previousDayOvernightSlot = getPreviousDayOvernightSlot(previousDaySlot)
+            if (previousDayOvernightSlot != null) {
+                val startHour = previousDayOvernightSlot.startHour
+                val startMinute = previousDayOvernightSlot.startMinute
+                val endHour = previousDayOvernightSlot.endHour
+                val endMinute = previousDayOvernightSlot.endMinute
+                if (startHour < endHour || (startHour == endHour && startMinute <= endMinute)) {
+                    result.add(TimeSlot(startHour, startMinute, endHour, endMinute))
                 }
             }
         }
         return result
     }
+
+    private fun getPreviousDayOvernightSlot(previousDaySlot: MutableList<Schedule.Days>): TimeSlot? {
+        previousDaySlot.forEach {
+            if(it.sthh > it.ethh || (it.sthh == it.ethh && it.stmm > it.etmm)){
+                return TimeSlot(0, 0, it.ethh, it.etmm)
+            }
+        }
+        return null
+    }
+
     fun calculateStartMinute(boundary: TimeSlot, timeSlot: TimeSlot): Int {
         return when {
             boundary.startHour == timeSlot.startHour && boundary.startMinute == timeSlot.startMinute -> boundary.startMinute

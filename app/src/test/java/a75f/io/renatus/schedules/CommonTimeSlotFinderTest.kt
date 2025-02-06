@@ -272,6 +272,13 @@ class CommonTimeSlotFinderTest {
         // Pair format: (timeSlots, boundaries, expectedResult)
         val testCases = listOf(
 
+            //Overnight time slots
+            Triple(
+                listOf("08:30 - 08:00"),
+                listOf("08:30 - 08:00"),
+                listOf("08:30 - 24:00")),
+
+
             Triple(
                      listOf("08:00 - 17:30"),
                       listOf("08:00 - 08:45", "09:30 - 14:30", "14:45 - 19:30", "20:00 - 24:00"),

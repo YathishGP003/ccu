@@ -94,6 +94,7 @@ public class PreferenceUtil {
     private static final String SIDE_APPS_UPDATE_STATUS ="sideAppsUpdateStatus";
     private static final String RESTORE_SOURCE_MODEL_TAGS_FOR_OAO = "restoreSourceModelTagsForOao";
     private static final String UPDATE_CORRUPTED_DATATYPE_POINTS = "updateCorruptedPoints";
+    private static final String UNOCCUPIED_SETBACK_MAX_MIGRATION = "UNOCCUPIED_SETBACK_MAX_MIGRATION";
 
     public static void setContext(Context c) {
         context= c;
@@ -755,6 +756,14 @@ public class PreferenceUtil {
 
     public static void setRestoreSourceModelTagsForOao() {
         setBooleanPreference(RESTORE_SOURCE_MODEL_TAGS_FOR_OAO, true);
+    }
+
+    public static boolean unoccupiedSetbackMaxUpdate() {
+        return getBooleanPreference(UNOCCUPIED_SETBACK_MAX_MIGRATION);
+    }
+
+    public static void setUnoccupiedSetbackMaxUpdate() {
+        setBooleanPreference(UNOCCUPIED_SETBACK_MAX_MIGRATION, true);
     }
 
     public static boolean getUpdatePointsFlagStatus() {

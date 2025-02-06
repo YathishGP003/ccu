@@ -108,10 +108,8 @@ import org.projecthaystack.HGridBuilder
 import org.projecthaystack.HRef
 import org.projecthaystack.HRow
 import org.projecthaystack.HStr
-import org.projecthaystack.HVal
 import org.projecthaystack.io.HZincReader
 import org.projecthaystack.io.HZincWriter
-import java.io.File
 
 
 class MigrationHandler (hsApi : CCUHsApi) : Migration {
@@ -155,6 +153,12 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         doHSPipe2DMMigration()
         doTiCutOverMigration()
         doPlcDomainModelCutOverMigration(hayStack)
+
+        if(!PreferenceUtil.unoccupiedSetbackMaxUpdate()) {
+            updateUnoccupiedSetbackMax()
+            PreferenceUtil.setUnoccupiedSetbackMaxUpdate()
+        }
+
         if (!isMigrationRequired()) {
             CcuLog.i(L.TAG_CCU_MIGRATION_UTIL, "---- Migration Not Required ----")
             return
@@ -279,6 +283,20 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         }
 
         hayStack.scheduleSync()
+    }
+
+    private fun updateUnoccupiedSetbackMax() {
+        try {
+            val listOfUnoccupiedPoints = hayStack.readAllEntities("unoccupied and setback and not domainName")
+            CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "Total points found ${listOfUnoccupiedPoints.size}")
+            listOfUnoccupiedPoints.forEach {
+                val unoccupiedPoint = Point.Builder().setHashMap(it).setMaxVal("60").build()
+                hayStack.updatePoint(unoccupiedPoint, unoccupiedPoint.id)
+                CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "${unoccupiedPoint.id} Updated unoccupied setback max value")
+            }
+        } catch (e: Exception) {
+            CcuLog.e(L.TAG_CCU_MIGRATION_UTIL, "Error at updateUnoccupiedSetbackMax ${e.message}", e)
+        }
     }
 
     private fun migrateHyperStatSplitFanModeCache() {

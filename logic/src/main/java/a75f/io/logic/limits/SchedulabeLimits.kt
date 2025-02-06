@@ -244,7 +244,7 @@ class SchedulabeLimits {
                     .setHisInterpolate("cov")
                     .addMarker("schedulable").addMarker("writable").addMarker("his").addMarker("cur")
                     .addMarker("unoccupied").addMarker("setback").addMarker("sp")
-                    .setMinVal("0").setMaxVal("20").setIncrementVal("1")
+                    .setMinVal("0").setMaxVal("60").setIncrementVal("1")
                     .setUnit("\u00B0F")
                     .setTz(tz)
             addTagsBasedOnCondition(isBuilding, unoccupiedZoneSetback, ref, floorRef)

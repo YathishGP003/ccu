@@ -15,6 +15,7 @@ import android.graphics.Typeface;
 import android.os.Build;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Toast;
@@ -101,7 +102,7 @@ public class RangeBar extends View {
 
         hitBoxes[stateReflected.ordinal()].set(0, 0, bitmaps[stateReflected.ordinal()].getWidth() * 1.5f, bitmaps[stateReflected.ordinal()].getHeight());
 
-        int xPos = getPXForTemp(temps[stateReflected.ordinal()]);
+        int xPos = getXPosition(temps[stateReflected.ordinal()], stateReflected.ordinal()); // getPXForTemp(temps[stateReflected.ordinal()]);
         int yPos = getTempLineYLocation() - yDisplacemnet;
 
         matrix.postTranslate(xPos, yPos);
@@ -123,15 +124,6 @@ public class RangeBar extends View {
         } else {
             mTempIconPaint.setColor(getResources().getColor(R.color.min_temp));
         }
-        //force push the text if overlap
-        int dbWidth;
-        CcuLog.d(L.TAG_CCU_RANGE_CONTROL, "drawSliderIcon: coolband " + cdb);
-            dbWidth = (int)(temps[RangeBarState.LOWER_COOLING_LIMIT.ordinal()] - temps[RangeBarState.LOWER_HEATING_LIMIT.ordinal()]) + 30;
-        if (stateReflected == RangeBarState.LOWER_HEATING_LIMIT){
-            xPos = (int)( xPos + bitmaps[stateReflected.ordinal()].getWidth() / 2f) - dbWidth;
-        } else {
-            xPos = (int)( xPos + bitmaps[stateReflected.ordinal()].getWidth() / 2f) + dbWidth;
-        }
 
         if(isCelsiusTunerAvailableStatus()) {
             if(isUnoccupiedSetBackFragment){
@@ -148,10 +140,27 @@ public class RangeBar extends View {
             }
 
         } else {
-            canvas.drawText((roundToHalf(temps[stateReflected.ordinal()]))+"\u00B0F",
-                    xPos, (yPos - 10f), mTempIconPaint);
+            canvas.drawText((roundToHalf(temps[stateReflected.ordinal()]))+"°F", xPos, (yPos - 10f), mTempIconPaint);
         }
     }
+
+    public int getXPosition(float temp, int stateReflected) {
+
+        // When unoccupied setback is more than 35, then the temp slider and temp marker is going beyond the screen.
+        // So we are modifying the temp value to fit the slider and temp marker within the screen.
+
+        float modifiedTemp = temp;
+        if (unOccupiedSetBack > 35) {
+            int diff = 35 - unOccupiedSetBack;
+            if (stateReflected == RangeBarState.LOWER_HEATING_LIMIT.ordinal()) {
+                modifiedTemp = (int) (temp - diff);
+            } else {
+                modifiedTemp = (int) (temp + diff);
+            }
+        }
+        return getPXForTemp(modifiedTemp);
+    }
+
 
     private RangeBarState isHitBoxTouched(float x, float y) {
         for (int i = 0; i < hitBoxes.length; i++) {
@@ -331,7 +340,7 @@ public class RangeBar extends View {
         mHeatingBarDisplacement = (int) (20 * displayMetrics.density);
         mCoolingBarDisplacement = (int) (20 * displayMetrics.density);
 
-        mHitBoxPadding = (int) (25 * displayMetrics.density);
+        mHitBoxPadding = (int) (10 * displayMetrics.density);
         mPaddingBetweenCoolingBarAndSliderIcon = (int) (10 * displayMetrics.density);
         setMeasuredDimension(Math.round(mViewWidth), mViewHeight);
     }
@@ -468,7 +477,7 @@ public class RangeBar extends View {
     }
 
     private int getPXForTemp(float temp) {
-        return Math.round(mPaddingPX + mDegreeIncremntPX * (temp - mLowerBound));
+        return Math.round(((mPaddingPX) + mDegreeIncremntPX * (temp - mLowerBound)) * 1.3f); // To show the temp slide at center
     }
 
     private float getTempForPX(float px) {

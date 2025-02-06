@@ -126,15 +126,14 @@ public class UnOccupiedZoneSetBackDialogFragment extends DialogFragment {
         });
 
         ArrayList<Double> zoneSetBack = new ArrayList<>();
-        if(isCelsiusTunerAvailableStatus()) {
-         double  minValue = convertingRelativeValueFtoC(0);
-         double  maxValue = convertingRelativeValueFtoC(20);
-
-                for (double val = minValue;  val <= maxValue; val += 1) {
-                    zoneSetBack.add(val);
-                }
-        }else {
-            for (double val = 0; val <= 20; val += 1) {
+        if (isCelsiusTunerAvailableStatus()) {
+            double minValue = convertingRelativeValueFtoC(0);
+            double maxValue = convertingRelativeValueFtoC(60);
+            for (double val = minValue; val <= maxValue; val += 1) {
+                zoneSetBack.add(val);
+            }
+        } else {
+            for (double val = 0; val <= 60; val += 1) {
                 zoneSetBack.add(val);
             }
         }
@@ -194,7 +193,7 @@ public class UnOccupiedZoneSetBackDialogFragment extends DialogFragment {
         super.onStart();
         Dialog dialog = getDialog();
         if (dialog != null) {
-            dialog.getWindow().setLayout(1165, 500);
+            dialog.getWindow().setLayout(1265, 500);
         }
     }
 
@@ -209,6 +208,7 @@ public class UnOccupiedZoneSetBackDialogFragment extends DialogFragment {
             rangeSeekBarView.setUnOccupiedSetBack((int) Double.parseDouble(unOccupiedZoneSetBack.getSelectedItem().toString()));
         }
         rangeSeekBarView.setUnOccupiedFragment(true);
+        rangeSeekBarView.setUnOccupiedSetBack((int) Double.parseDouble(unOccupiedZoneSetBack.getSelectedItem().toString()));
     }
 
     @Override

@@ -709,7 +709,7 @@ public class InstallerOptions extends Fragment implements MasterControlLimitList
                 for (int val = 32;  val <= 140; val += 1) {
                     list.add(val+"\u00B0F  (" + fahrenheitToCelsius(val) + "\u00B0C)");
                 }
-                for (double val = 0;  val <= 20; val += 1) {
+                for (double val = 0;  val <= 60; val += 1) {
                     zoneSetBack.add(val+"\u00B0F  (" + CCUUtils.roundToOneDecimal(fahrenheitToCelsiusRelative(val)) + "\u00B0C)");
                 }
                 for (int val = 50;  val <= 100; val += 1) {
@@ -730,7 +730,7 @@ public class InstallerOptions extends Fragment implements MasterControlLimitList
                 for (int val = 32;  val <= 140; val += 1) {
                     list.add(val+"\u00B0F");
                 }
-                for (double val = 0;  val <= 20; val += 1) {
+                for (double val = 0;  val <= 60; val += 1) {
                     zoneSetBack.add(val+"\u00B0F");
                 }
                 for (int val = 50;  val <= 100; val += 1) {

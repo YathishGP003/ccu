@@ -45,8 +45,10 @@ public class TrimResponseProcessor
         CcuLog.d("CCU_SYSTEM", "processResetResponse");
         boolean isSystemCooling = isSystemCooling();
         if (++minuteCounter < trSetting.getTd() || !isSystemCooling) {
-            CcuLog.d("CCU_SYSTEM", "isSystemCooling "+isSystemCooling);
             trSetting.resetRequest();
+            setPoint += trSetting.getSPtrim();
+            applySetPointLimits();
+            CcuLog.d("CCU_SYSTEM", "isSystemCooling "+isSystemCooling+" TR SetPoint "+setPoint);
             return;
         }
     
@@ -68,17 +70,15 @@ public class TrimResponseProcessor
         } else {
             sp += trSetting.getSPtrim();
         }
-        
-        if (sp < trSetting.getSPmin()) {
-            sp = trSetting.getSPmin();
-        } else if (sp > trSetting.getSPmax()) {
-            sp = trSetting.getSPmax();
-        }
-        
         setPoint = sp;
-        CcuLog.d("CCU_SYSTEM", "setpoint "+setPoint);
+        applySetPointLimits();
+        CcuLog.d("CCU_SYSTEM", "TR SetPoint "+setPoint);
     }
 
+    private void applySetPointLimits() {
+        setPoint = Math.min(trSetting.getSPmax(), Math.max(trSetting.getSPmin(), setPoint));
+    }
+    
     public void resetRequests() {
         trSetting.resetRequest();
     }

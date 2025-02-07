@@ -19,8 +19,8 @@ import a75f.io.logic.bo.building.definitions.ProfileType
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 
-fun doPlcDomainModelCutOverMigration(hayStack: CCUHsApi) {
-    val plcEquips = hayStack.readAllEntities("equip and zone and pid")
+fun doPlcDomainModelCutOverMigration(hayStack: CCUHsApi, excludeExternalModbusQuery: String) {
+    val plcEquips = hayStack.readAllEntities("equip and zone and pid and $excludeExternalModbusQuery")
         .filter { it["domainName"] == null }
         .toList()
     if (plcEquips.isEmpty()) {

@@ -11,8 +11,8 @@ import a75f.io.logger.CcuLog
 import io.seventyfivef.ph.core.Tags
 
 class DiagEquipMigrationHandler {
-    fun doDiagEquipMigration(hayStack: CCUHsApi) {
-        val diagEquip = hayStack.readEntity("diag and equip")
+    fun doDiagEquipMigration(hayStack: CCUHsApi, excludeExternalModbusQuery: String) {
+        val diagEquip = hayStack.readEntity("diag and equip and $excludeExternalModbusQuery")
         if (diagEquip.isEmpty()) {
             CcuLog.i(Domain.LOG_TAG, "No Diag and equip found so creating now")
             val ccu = hayStack.ccuName

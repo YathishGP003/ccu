@@ -13,6 +13,7 @@ public class BearerTokenManagerService extends Service {
     
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        CcuLog.i(L.TAG_CCU_INIT, "BearerTokenManagerService onStartCommand executed");
         try {
             CCUHsApi hayStack = CCUHsApi.getInstance();
             if (!hayStack.getJwt().isEmpty() && !OfflineModeUtilKt.isOfflineMode()) {
@@ -21,7 +22,11 @@ public class BearerTokenManagerService extends Service {
         } catch (IllegalStateException e) {
             CcuLog.e(L.TAG_CCU_INIT, "Haystack not initialized: Skip Bearer token refresh", e);
             e.printStackTrace();
+        } catch (kotlin.UninitializedPropertyAccessException e) {
+            CcuLog.e(L.TAG_CCU_INIT, "Domain.ccuEquip is not initialized properly", e);
+            e.printStackTrace();
         }
+        CcuLog.i(L.TAG_CCU_INIT, "BearerTokenManagerService onStartCommand completed");
         return Service.START_NOT_STICKY;
     }
     

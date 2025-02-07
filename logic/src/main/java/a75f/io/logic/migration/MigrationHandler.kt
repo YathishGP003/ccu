@@ -121,6 +121,8 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
     private val schedulerRevamp = SchedulerRevampMigration(hayStack)
     private var isMigrationOngoing = false
 
+    val not_external_model_query = "(not ${Tags.MODBUS} and not ${Tags.BACNET_DEVICE_ID})"
+
     override fun isMigrationRequired(): Boolean {
         val appVersion = getAppVersion()
         val migrationVersion = hayStack.readDefaultStrVal("diag and migration and version")
@@ -139,7 +141,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         doVavSystemDomainModelMigration()
         doHyperStatSplitCpuDomainModelMigration()
         CCUBaseConfigurationMigrationHandler().doCCUBaseConfigurationMigration(hayStack)
-        DiagEquipMigrationHandler().doDiagEquipMigration(hayStack)
+        DiagEquipMigrationHandler().doDiagEquipMigration(hayStack, not_external_model_query)
         doDabSystemDomainModelMigration()
         doOAOProfileMigration()
         doSseStandaloneDomainModelMigration()
@@ -152,7 +154,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         doHSMonitoringDMMigration()
         doHSPipe2DMMigration()
         doTiCutOverMigration()
-        doPlcDomainModelCutOverMigration(hayStack)
+        doPlcDomainModelCutOverMigration(hayStack, not_external_model_query)
 
         if(!PreferenceUtil.unoccupiedSetbackMaxUpdate()) {
             updateUnoccupiedSetbackMax()
@@ -596,7 +598,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
     }
 
     private fun doVavTerminalDomainModelMigration() {
-        val vavEquips = hayStack.readAllEntities("equip and zone and vav")
+        val vavEquips = hayStack.readAllEntities("equip and zone and vav and $not_external_model_query")
                                 .filter { it["domainName"] == null }
                                 .toList()
         if (vavEquips.isEmpty()) {
@@ -673,7 +675,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
     }
 
     private fun doDabTerminalDomainModelMigration() {
-        val dabEquips = hayStack.readAllEntities("equip and zone and dab and not dualDuct")
+        val dabEquips = hayStack.readAllEntities("equip and zone and dab and not dualDuct and $not_external_model_query")
             .filter { it["domainName"] == null }
             .toList()
         if (dabEquips.isEmpty()) {
@@ -762,7 +764,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
     }
 
     private fun doDabSystemDomainModelMigration() {
-        val dabEquips = hayStack.readAllEntities("equip and system and dab and not modbus")
+        val dabEquips = hayStack.readAllEntities("equip and system and dab and $not_external_model_query")
             .filter { it["domainName"] == null }
             .toList()
 
@@ -823,7 +825,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
     }
 
     private fun doVavSystemDomainModelMigration() {
-        val vavEquips = hayStack.readAllEntities("equip and system and vav and not modbus")
+        val vavEquips = hayStack.readAllEntities("equip and system and vav and $not_external_model_query")
             .filter { it["domainName"] == null }
             .toList()
 
@@ -996,7 +998,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
     }
 
     private fun doHyperStatSplitCpuDomainModelMigration() {
-        val hssEquips = hayStack.readAllEntities("equip and hyperstatsplit and cpu")
+        val hssEquips = hayStack.readAllEntities("equip and hyperstatsplit and cpu and $not_external_model_query")
             .filter { it["domainName"] == null }
             .toList()
         if (hssEquips.isEmpty()) {
@@ -1189,7 +1191,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
     }
 
     private fun doOAOProfileMigration() {
-        val oao = hayStack.readEntity("equip and oao")
+        val oao = hayStack.readEntity("equip and oao and $not_external_model_query")
         if (oao.isEmpty() || (oao.isNotEmpty() && oao.containsKey("domainName"))) {
             CcuLog.i(Domain.LOG_TAG, "OAO equip is not found or OAO equip is already migrated")
             return
@@ -1406,7 +1408,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
     private fun doTiCutOverMigration() {
         val haystack = CCUHsApi.getInstance()
 
-        val tiEquip = haystack.readEntity("equip and ti")
+        val tiEquip = haystack.readEntity("equip and ti and $not_external_model_query")
         if (tiEquip.isEmpty() || (tiEquip.isNotEmpty() && tiEquip.containsKey("domainName"))) {
             CcuLog.i(Domain.LOG_TAG, "TI equip is not found or TI equip is already DM migrated")
             return
@@ -1459,7 +1461,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
 
 
     private fun doHSCPUDMMigration() {
-        val hyperStatCPUEquip = hayStack.readAllEntities("equip and hyperstat and cpu")
+        val hyperStatCPUEquip = hayStack.readAllEntities("equip and hyperstat and cpu and $not_external_model_query")
             .filter { it["domainName"] == null }
             .toList()
         CcuLog.d(L.TAG_CCU_HSCPU, "HyperStat CPU Equip Migration list of equips $hyperStatCPUEquip")
@@ -1508,7 +1510,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
 
     private fun doHSHPUDMMigration() {
 
-        val hyperStatHPUEquip = hayStack.readAllEntities("equip and hyperstat and hpu")
+        val hyperStatHPUEquip = hayStack.readAllEntities("equip and hyperstat and hpu and $not_external_model_query")
             .filter { it["domainName"] == null }
             .toList()
         CcuLog.d(L.TAG_CCU_HSHPU, "HyperStat HPU Equip Migration list of equips $hyperStatHPUEquip")
@@ -1852,7 +1854,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
 
     private fun doSseStandaloneDomainModelMigration() {
         CcuLog.i(L.TAG_CCU_DOMAIN, "SSE standalone equip migration is started")
-        val sseEquips = hayStack.readAllEntities("equip and zone and sse")
+        val sseEquips = hayStack.readAllEntities("equip and zone and sse and $not_external_model_query")
             .filter { it["domainName"] == null }
             .toList()
         if (sseEquips.isEmpty()) {
@@ -1969,7 +1971,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
 
     private fun doHSMonitoringDMMigration() {
         val hyperStatMonitoringEquip =
-            hayStack.readAllEntities("equip and hyperstat and monitoring")
+            hayStack.readAllEntities("equip and hyperstat and monitoring and $not_external_model_query")
                 .filter { it["domainName"] == null }
                 .toList()
 
@@ -2045,7 +2047,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
 
     private fun doHSPipe2DMMigration() {
         val hyperStatPipe2Equip =
-            hayStack.readAllEntities("equip and hyperstat and pipe2")
+            hayStack.readAllEntities("equip and hyperstat and pipe2 and $not_external_model_query")
                 .filter { it["domainName"] == null }
                 .toList()
 
@@ -2133,7 +2135,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
     }
 
     private fun doOtnTerminalDomainModelMigration() {
-        val otnEquips = hayStack.readAllEntities("equip and zone and otn")
+        val otnEquips = hayStack.readAllEntities("equip and zone and otn and $not_external_model_query")
             .filter { it["domainName"] == null }
             .toList()
         if (otnEquips.isEmpty()) {

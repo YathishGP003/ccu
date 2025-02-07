@@ -51,6 +51,7 @@ public class DabStagedRtuWithVfd extends DabStagedRtu
     @Override
     public void addSystemEquip() {
         systemEquip = (DabStagedVfdSystemEquip) Domain.systemEquip;
+        updateStagesSelected();
     }
     
     public synchronized void updateSystemPoints()

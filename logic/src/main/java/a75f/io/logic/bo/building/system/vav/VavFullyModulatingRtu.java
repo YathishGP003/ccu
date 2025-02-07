@@ -459,6 +459,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
     public void addSystemEquip() {
         systemEquip = (VavModulatingRtuSystemEquip) Domain.systemEquip;
         initTRSystem();
+        updateSystemPoints();
     }
     
     @Override

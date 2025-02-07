@@ -214,6 +214,7 @@ public class DabFullyModulatingRtu extends DabSystemProfile
     
     public void addSystemEquip() {
         systemEquip = (DabModulatingRtuSystemEquip) Domain.systemEquip;
+        updateSystemPoints();
     }
     
     @Override

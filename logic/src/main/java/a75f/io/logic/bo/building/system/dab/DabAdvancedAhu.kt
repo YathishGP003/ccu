@@ -103,6 +103,7 @@ class DabAdvancedAhu : DabSystemProfile() {
         advancedAhuImpl = AdvancedAhuAlgoHandler(systemEquip)
         initializePILoop()
         analogControlsEnabled = advancedAhuImpl.getEnabledAnalogControls(systemEquip.cmEquip, systemEquip.connectEquip1)
+        updateStagesSelected()
     }
 
     fun updateDomainEquip(equip: DabAdvancedHybridSystemEquip) {

@@ -97,6 +97,7 @@ public class DabStagedRtu extends DabSystemProfile
     @Override
     public void addSystemEquip() {
         systemEquip = (DabStagedSystemEquip) Domain.systemEquip;
+        updateStagesSelected();
     }
     
     protected synchronized void updateSystemPoints() {

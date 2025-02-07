@@ -47,7 +47,6 @@ import a75f.io.logic.bo.building.system.updateTemperatureSensorDerivedPoints
 import a75f.io.logic.bo.building.system.util.AhuSettings
 import a75f.io.logic.bo.building.system.util.AhuTuners
 import a75f.io.logic.bo.building.system.util.UserIntentConfig
-import a75f.io.logic.bo.building.system.util.getConnectDevice
 import a75f.io.logic.bo.building.system.util.getModulatedOutput
 import a75f.io.logic.bo.building.system.util.needToUpdateConditioningMode
 import a75f.io.logic.bo.building.system.util.roundOff
@@ -107,6 +106,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
         initTRSystem()
         initializePILoop()
         analogControlsEnabled = advancedAhuImpl.getEnabledAnalogControls(systemEquip.cmEquip, systemEquip.connectEquip1)
+        updateStagesSelected()
     }
 
     fun updateDomainEquip(equip: VavAdvancedHybridSystemEquip) {

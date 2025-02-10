@@ -11,6 +11,7 @@ import a75f.io.domain.logic.ProfileEquipBuilder
 import a75f.io.domain.util.ModelLoader
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
+import a75f.io.logic.bo.building.hvac.StandaloneFanStage
 import a75f.io.logic.bo.building.hyperstat.common.FanModeCacheStorage
 import a75f.io.logic.bo.building.hyperstat.profiles.util.getConfiguration
 import a75f.io.logic.bo.building.hyperstat.profiles.util.getModelByEquipRef
@@ -74,12 +75,17 @@ fun reconfigureHSV2(msgObject: JsonObject, configPoint: Point) {
 fun updateFanMode(equipRef: String, fanMode: Int) {
     CcuLog.i(L.TAG_CCU_PUBNUB, "updateFanMode $fanMode")
     val cache = FanModeCacheStorage()
-    if (fanMode != 0  && fanMode % 3 == 0) {
+    if (fanMode != 0  && (fanMode % 3 == 0 || isFanModeCurrentOccupied(fanMode)) ) {
         cache.saveFanModeInCache(equipRef, fanMode)
     }
     else {
         cache.removeFanModeFromCache(equipRef)
     }
+}
+
+private fun isFanModeCurrentOccupied(value : Int): Boolean {
+    val basicSettings = StandaloneFanStage.values()[value]
+    return (basicSettings == StandaloneFanStage.LOW_CUR_OCC || basicSettings == StandaloneFanStage.MEDIUM_CUR_OCC || basicSettings == StandaloneFanStage.HIGH_CUR_OCC)
 }
 
 private fun writePointFromJson(configPoint: Point, msgObject: JsonObject, hayStack: CCUHsApi) {

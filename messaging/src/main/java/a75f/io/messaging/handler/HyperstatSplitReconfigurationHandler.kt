@@ -19,6 +19,7 @@ import a75f.io.logic.L
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
+import a75f.io.logic.bo.building.hvac.StandaloneFanStage
 import a75f.io.logic.bo.building.hyperstatsplit.common.FanModeCacheStorage
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.HyperStatSplitProfileConfiguration
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.CpuEconSensorBusTempAssociation
@@ -65,7 +66,7 @@ class HyperstatSplitReconfigurationHandler {
                         if (configPoint.domainName.equals(DomainName.fanOpMode)) {
                             val configVal = HSUtil.getPriorityVal(configPoint.id).toInt() // After clearing the level, update the preference with priority value
                             val cache = FanModeCacheStorage()
-                            if (configVal != 0 && configVal % 3 == 0) //Save only Fan occupied period mode alone, else no need.
+                            if (configVal != 0 && (configVal % 3 == 0 || isFanModeCurrentOccupied(configVal) ) ) //Save only Fan occupied period or current Occupied mode alone, else no need.
                                 cache.saveFanModeInCache(configPoint.equipRef, configVal)
                             else cache.removeFanModeFromCache(configPoint.equipRef)
                         }
@@ -78,7 +79,7 @@ class HyperstatSplitReconfigurationHandler {
                 if (configPoint.domainName.equals(DomainName.fanOpMode)) {
                     val configVal = msgObject["val"].asInt
                     val cache = FanModeCacheStorage()
-                    if (configVal != 0 && configVal % 3 == 0) //Save only Fan occupied period mode alone, else no need.
+                    if (configVal != 0 && (configVal % 3 == 0 || isFanModeCurrentOccupied(configVal) )) //Save only Fan occupied period or current Occupied mode alone, else no need.
                         cache.saveFanModeInCache(
                             configPoint.equipRef,
                             configVal
@@ -100,6 +101,11 @@ class HyperstatSplitReconfigurationHandler {
             (L.getProfile(configPoint.group.toShort()) as HyperStatSplitCpuEconProfile).refreshEquip()
             hayStack.scheduleSync()
 
+        }
+
+        private fun isFanModeCurrentOccupied(value : Int): Boolean {
+            val basicSettings = StandaloneFanStage.values()[value]
+            return (basicSettings == StandaloneFanStage.LOW_CUR_OCC || basicSettings == StandaloneFanStage.MEDIUM_CUR_OCC || basicSettings == StandaloneFanStage.HIGH_CUR_OCC)
         }
 
         private fun isDynamicConfigPoint(configPoint: Point): Boolean {

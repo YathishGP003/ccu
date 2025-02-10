@@ -20,6 +20,7 @@ import a75f.io.logic.L
 import a75f.io.logic.bo.building.Thermistor
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
+import a75f.io.logic.bo.building.hvac.StandaloneFanStage
 import a75f.io.logic.bo.building.hyperstat.common.FanModeCacheStorage
 import a75f.io.logic.bo.building.hyperstat.common.HSZoneStatus
 import a75f.io.logic.bo.building.hyperstat.common.HyperstatProfileNames
@@ -459,9 +460,13 @@ private fun handleConditionMode(
 private fun handleFanMode(equipId: String, selectedPosition: Int, nodeAddress: String, profileType: ProfileType, userClickCheck: Boolean,
                           equip: HyperStatEquip? = null, configuration: HyperStatConfiguration?) {
 
+    fun isFanModeCurrentOccupied(basicSettings: StandaloneFanStage): Boolean {
+        return (basicSettings == StandaloneFanStage.LOW_CUR_OCC || basicSettings == StandaloneFanStage.MEDIUM_CUR_OCC || basicSettings == StandaloneFanStage.HIGH_CUR_OCC)
+    }
+
     fun updateFanModeCache(actualFanMode: Int) {
         val cacheStorage = FanModeCacheStorage()
-        if (selectedPosition != 0 && selectedPosition % 3 == 0)
+        if (selectedPosition != 0 && (selectedPosition % 3 == 0 || isFanModeCurrentOccupied(StandaloneFanStage.values()[actualFanMode])) )
             cacheStorage.saveFanModeInCache(equipId, actualFanMode) // while saving the fan mode, we need to save the actual fan mode instead of selected position
         else
             cacheStorage.removeFanModeFromCache(equipId)

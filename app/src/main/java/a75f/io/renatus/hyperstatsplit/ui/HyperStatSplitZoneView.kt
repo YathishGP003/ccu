@@ -35,6 +35,7 @@ import android.widget.AdapterView.OnItemSelectedListener
 import java.util.*
 import a75f.io.domain.HyperStatSplitEquip
 import a75f.io.domain.api.DomainName
+import a75f.io.logic.bo.building.hvac.StandaloneFanStage
 import android.view.MotionEvent
 
 fun loadHyperStatSplitCpuEconProfile(
@@ -303,14 +304,16 @@ private fun handleFanMode(hssEquip: HyperStatSplitEquip, selectedPosition: Int, 
             updateHyperStatSplitUIPoints(
                 hssEquip.getId(), "domainName == \"" + DomainName.fanOpMode + "\"",
                 actualFanMode.toDouble(), CCUHsApi.getInstance().ccuUserName)
-            if (selectedPosition != 0 && selectedPosition % 3 == 0)
+            if (selectedPosition != 0 && (selectedPosition % 3 == 0 || isFanModeCurrentOccupied(StandaloneFanStage.values()[actualFanMode])) )
                 cacheStorage.saveFanModeInCache(hssEquip.getId(), actualFanMode)
             else
                 cacheStorage.removeFanModeFromCache(hssEquip.getId())
         }
     }
 }
-
+private fun isFanModeCurrentOccupied(basicSettings: StandaloneFanStage): Boolean {
+    return (basicSettings == StandaloneFanStage.LOW_CUR_OCC || basicSettings == StandaloneFanStage.MEDIUM_CUR_OCC || basicSettings == StandaloneFanStage.HIGH_CUR_OCC)
+}
 private fun handleHumidityMode(selectedPosition: Int, equipId: String) {
     updateHyperStatSplitUIPoints(
         equipId, "domainName == \"" + DomainName.targetHumidifier + "\"", (selectedPosition + 1).toDouble(), CCUHsApi.getInstance().ccuUserName

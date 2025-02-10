@@ -463,12 +463,15 @@ abstract class HyperStatSplitProfile(equipRef: String, nodeAddress: Short) : Zon
         equipRef: String , fanModeSaved: Int , basicSettings: BasicSettings
     ): StandaloneFanStage {
 
-        var actualFanModeSaved = fanModeSaved
-        logIt("FanModeSaved in Shared Preference $actualFanModeSaved")
+        logIt("FanModeSaved in Shared Preference $fanModeSaved")
         val currentOperatingMode = hssEquip.occupancyMode.readHisVal().toInt()
 
+        // If occupancy is unoccupied or demand response unoccupied and the fan mode is current occupied then remove the fan mode from cache
+        if ((occupancyStatus == Occupancy.UNOCCUPIED || occupancyStatus == Occupancy.DEMAND_RESPONSE_UNOCCUPIED ) && isFanModeCurrentOccupied(fanModeSaved)) {
+            FanModeCacheStorage().removeFanModeFromCache(equipRef)
+        }
         logIt("Fall back fan mode " + basicSettings.fanMode + " conditioning mode " + basicSettings.conditioningMode)
-        logIt("Fan Details :$occupancyStatus  ${basicSettings.fanMode}  $actualFanModeSaved")
+        logIt("Fan Details :$occupancyStatus  ${basicSettings.fanMode}  $fanModeSaved")
         if (isEligibleToAuto(basicSettings,currentOperatingMode)) {
             logIt("Resetting the Fan status back to  AUTO: ")
             HyperStatSplitUserIntentHandler.updateHyperStatSplitUIPoints(
@@ -483,25 +486,31 @@ abstract class HyperStatSplitProfile(equipRef: String, nodeAddress: Short) : Zon
         if ((occupancyStatus == Occupancy.OCCUPIED
                     || occupancyStatus == Occupancy.AUTOFORCEOCCUPIED
                     || occupancyStatus == Occupancy.FORCEDOCCUPIED
-                    || Occupancy.values()[currentOperatingMode] == Occupancy.PRECONDITIONING)
+                    || Occupancy.values()[currentOperatingMode] == Occupancy.PRECONDITIONING
+                    || occupancyStatus == Occupancy.DEMAND_RESPONSE_OCCUPIED)
             && basicSettings.fanMode == StandaloneFanStage.AUTO && fanModeSaved != 0) {
             logIt("Resetting the Fan status back to ${StandaloneFanStage.values()[fanModeSaved]}")
             HyperStatSplitUserIntentHandler.updateHyperStatSplitUIPoints(
                 equipRef = equipRef,
                 command = "domainName == \"" + DomainName.fanOpMode + "\"",
-                value = actualFanModeSaved.toDouble(),
+                value = fanModeSaved.toDouble(),
                 CCUHsApi.getInstance().ccuUserName
             )
-            return StandaloneFanStage.values()[actualFanModeSaved]
+            return StandaloneFanStage.values()[fanModeSaved]
         }
         return  StandaloneFanStage.values()[hssEquip.fanOpMode.readHisVal().toInt()]
     }
 
+    private fun isFanModeCurrentOccupied(value : Int): Boolean {
+        val basicSettings = StandaloneFanStage.values()[value]
+        return (basicSettings == StandaloneFanStage.LOW_CUR_OCC || basicSettings == StandaloneFanStage.MEDIUM_CUR_OCC || basicSettings == StandaloneFanStage.HIGH_CUR_OCC)
+    }
 
     private fun isEligibleToAuto(basicSettings: BasicSettings, currentOperatingMode: Int ): Boolean{
         return (occupancyStatus != Occupancy.OCCUPIED
             && occupancyStatus != Occupancy.AUTOFORCEOCCUPIED
             && occupancyStatus != Occupancy.FORCEDOCCUPIED
+            && occupancyStatus != Occupancy.DEMAND_RESPONSE_OCCUPIED
             && Occupancy.values()[currentOperatingMode] != Occupancy.PRECONDITIONING
             && basicSettings.fanMode != StandaloneFanStage.OFF
             && basicSettings.fanMode != StandaloneFanStage.AUTO

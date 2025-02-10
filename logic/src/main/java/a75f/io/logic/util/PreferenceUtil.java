@@ -95,6 +95,7 @@ public class PreferenceUtil {
     private static final String RESTORE_SOURCE_MODEL_TAGS_FOR_OAO = "restoreSourceModelTagsForOao";
     private static final String UPDATE_CORRUPTED_DATATYPE_POINTS = "updateCorruptedPoints";
     private static final String UNOCCUPIED_SETBACK_MAX_MIGRATION = "UNOCCUPIED_SETBACK_MAX_MIGRATION";
+    private static final String PLC_POINTS_UPDATE_STATUS = "plcPointsUpdateStatus";
 
     public static void setContext(Context c) {
         context= c;
@@ -772,5 +773,13 @@ public class PreferenceUtil {
 
     public static void setUpdatePointsFlagStatus() {
         setBooleanPreference(UPDATE_CORRUPTED_DATATYPE_POINTS, true);
+    }
+
+    public static boolean getPlcUpdatePointStatus() {
+        return getBooleanPreference(PLC_POINTS_UPDATE_STATUS);
+    }
+
+    public static void setPlcUpdatePointStatus() {
+        setBooleanPreference(PLC_POINTS_UPDATE_STATUS, true);
     }
 }

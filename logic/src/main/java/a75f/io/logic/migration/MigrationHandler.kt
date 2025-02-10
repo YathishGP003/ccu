@@ -55,6 +55,7 @@ import a75f.io.domain.migration.DiffManger
 import a75f.io.domain.util.MODEL_SN_OAO
 import a75f.io.domain.util.ModelCache
 import a75f.io.domain.util.ModelLoader
+import a75f.io.domain.util.ModelLoader.getModelForDomainName
 import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.logic.L
@@ -74,6 +75,8 @@ import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.CpuUniInType
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuProfileConfiguration
 import a75f.io.logic.bo.building.oao.OAOProfileConfiguration
 import a75f.io.logic.bo.building.otn.OtnProfileConfiguration
+import a75f.io.logic.bo.building.plc.PlcProfileConfig
+import a75f.io.logic.bo.building.plc.addBaseProfileConfig
 import a75f.io.logic.bo.building.plc.doPlcDomainModelCutOverMigration
 import a75f.io.logic.bo.building.schedules.occupancy.DemandResponse
 import a75f.io.logic.bo.building.sse.SseProfileConfiguration
@@ -282,6 +285,11 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         if(!PreferenceUtil.getUpdatePointsFlagStatus()) {
             updateDataType()
             PreferenceUtil.setUpdatePointsFlagStatus()
+        }
+
+        if(!PreferenceUtil.getPlcUpdatePointStatus()) {
+            updatePLCPhysicalPoints()
+            PreferenceUtil.setPlcUpdatePointStatus()
         }
 
         hayStack.scheduleSync()
@@ -2518,5 +2526,56 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                 "updated point: ${hayStack.readEntity("point and id == ${point["id"]} ")}"
             )
         }
+    }
+
+    private fun updatePLCPhysicalPoints() {
+        val hayStack = CCUHsApi.getInstance()
+        val plcEquips = hayStack.readAllEntities("pid and equip and domainName")
+        CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "Updating PLC physical points. count: "+plcEquips.size)
+        plcEquips.forEach { plcEquip ->
+            val address = plcEquip["group"].toString()
+            val isHelioNode = plcEquip.containsKey("helionode")
+            val model =
+                if (isHelioNode) ModelLoader.getHelioNodePidModel() as SeventyFiveFProfileDirective
+                else ModelLoader.getSmartNodePidModel() as SeventyFiveFProfileDirective
+            val config = PlcProfileConfig(
+                Integer.parseInt(plcEquip["group"].toString()),
+                if (isHelioNode) NodeType.HELIO_NODE.name else NodeType.SMART_NODE.name,
+                0,
+                plcEquip["roomRef"].toString(),
+                plcEquip["floorRef"].toString(),
+                ProfileType.PLC,
+                model
+            ).getActiveConfiguration()
+            val entityMapper = EntityMapper(model)
+            val deviceBuilder = DeviceBuilder(hayStack, entityMapper)
+            val device = hayStack.readEntity("device and addr == \"$address\"")
+            val deviceModel =
+                getModelForDomainName(device["domainName"].toString()) as SeventyFiveFDeviceDirective
+
+            val nativeSensorTypePoint =
+                hayStack.readEntity("native and point and config and equipRef == \"" + plcEquip["id"] + "\"");
+            val nativeSensorTypeValue =
+                hayStack.readDefaultValById(nativeSensorTypePoint["id"].toString())
+
+            // If user is selected native sensor type as VOC, then we are updating the enum value to index - 1
+            if (nativeSensorTypeValue >= 7) {
+                config.nativeSensorType.currentVal = nativeSensorTypeValue - 1
+                //Update custom configurations which are done outside of the model
+                addBaseProfileConfig(DomainName.nativeSensorType, config, model)
+
+                val equipBuilder = ProfileEquipBuilder(hayStack)
+                equipBuilder.updateEquipAndPoints(
+                    config,
+                    model,
+                    plcEquip["siteRef"].toString(),
+                    plcEquip["dis"].toString(), true
+                )
+            }
+
+            config.updateTypeForAnalog1Out(config)
+            config.updatePortConfiguration(hayStack, config, deviceBuilder, deviceModel)
+        }
+        CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "Updating PLC physical points completed")
     }
 }

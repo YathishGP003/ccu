@@ -41,7 +41,7 @@ fun doPlcDomainModelCutOverMigration(hayStack: CCUHsApi, excludeExternalModbusQu
         val deviceBuilder = DeviceBuilder(hayStack, EntityMapper(model as SeventyFiveFProfileDirective))
         val device = hayStack.readEntity("device and addr == \"" + it["group"] + "\"")
         val nativeSensorTypePoint =
-            hayStack.readEntity("native and sensor and point and config and equipRef == \"" + it["id"] + "\"");
+            hayStack.readEntity("native and point and config and equipRef == \"" + it["id"] + "\"");
         val nativeSensorTypeValue =
             hayStack.readDefaultValById(nativeSensorTypePoint["id"].toString())
         val profileConfiguration = PlcProfileConfig(
@@ -74,6 +74,10 @@ fun doPlcDomainModelCutOverMigration(hayStack: CCUHsApi, excludeExternalModbusQu
             model
         ).getActiveConfiguration()
 
+        // If user is selected native sensor type as VOC, then we are updating the enum value to index - 1
+        if (nativeSensorTypeValue >= 7)
+            migratedConfiguration.nativeSensorType.currentVal = nativeSensorTypeValue - 1
+
         //Update custom configurations which are done outside of the model
         addBaseProfileConfig(DomainName.analog1InputType, migratedConfiguration, model)
         addBaseProfileConfig(DomainName.thermistor1InputType, migratedConfiguration, model)
@@ -91,13 +95,6 @@ fun doPlcDomainModelCutOverMigration(hayStack: CCUHsApi, excludeExternalModbusQu
             Domain.LOG_TAG,
             "Node: ${it["group"]}, id : ${nativeSensorTypePoint["id"].toString()}, nativeSensorTypeValue  $nativeSensorTypeValue"
         )
-
-        // If user is selected native sensor type as VOC, then we are updating the enum value to index - 1
-        if (nativeSensorTypeValue >= 7)
-            hayStack.writeDefaultValById(
-                nativeSensorTypePoint["id"].toString(),
-                nativeSensorTypeValue - 1
-            )
 
         deviceBuilder.updateDeviceAndPoints(
             migratedConfiguration, deviceModel, it["id"].toString(), it["siteRef"].toString(),

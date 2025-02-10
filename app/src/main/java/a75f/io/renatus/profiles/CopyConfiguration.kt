@@ -1,7 +1,6 @@
 package a75f.io.renatus.profiles
 
 import a75f.io.api.haystack.CCUHsApi
-import a75f.io.device.bacnet.buildBacnetModel
 import a75f.io.device.modbus.buildModbusModel
 import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.util.ModelLoader
@@ -28,6 +27,7 @@ import a75f.io.logic.bo.building.sse.SseProfileConfiguration
 import a75f.io.logic.bo.building.vav.AcbProfileConfiguration
 import a75f.io.logic.bo.building.vav.VavProfileConfiguration
 import a75f.io.logic.bo.util.CCUUtils
+import a75f.io.logic.util.bacnet.buildBacnetModel
 import a75f.io.renatus.FloorPlanFragment
 import a75f.io.renatus.bacnet.models.BacnetModel
 import a75f.io.renatus.modbus.models.EquipModel

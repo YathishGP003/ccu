@@ -47,7 +47,7 @@ class CopyConfiguration {
         private lateinit var config: ProfileConfiguration
         private val ccuHsApiInstance = CCUHsApi.getInstance()
 
-        private var profileType: ProfileType? = null;
+        private var profileType: ProfileType? = null
         private var moduleName: String? = null
         private var nodeType: NodeType? = null
         lateinit var equipModel: SeventyFiveFProfileDirective

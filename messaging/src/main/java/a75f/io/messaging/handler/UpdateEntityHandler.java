@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import a75f.io.api.haystack.CCUHsApi;
+import a75f.io.api.haystack.Device;
 import a75f.io.api.haystack.Equip;
 import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HayStackConstants;
@@ -50,7 +51,7 @@ public class UpdateEntityHandler implements MessageHandler {
 
     public static void updateEntity(JsonObject msgObject, long timeToken){
         CCUHsApi ccuHsApi = CCUHsApi.getInstance();
-        List<HRef> pointIds = new ArrayList<>();
+        List<HRef> entityIds = new ArrayList<>();
         msgObject.get("ids").getAsJsonArray().forEach( msgJson -> {
             CcuLog.i(L.TAG_CCU_MESSAGING, " UpdateEntityHandler "+msgJson.toString());
             String uid = msgJson.toString().replaceAll("\"", "");
@@ -91,27 +92,28 @@ public class UpdateEntityHandler implements MessageHandler {
                 }
             } else if (entity.containsKey(Tags.BUILDING) && entity.containsKey(Tags.OCCUPANCY)) {
                 updateBuildingOccupancy(uid,ccuHsApi);
-            } else if (entity.containsKey(Tags.POINT)) {
-                //check for points and store them
-                pointIds.add(HRef.copy(StringUtils.prependIfMissing(uid, "@")));
+            } else if (entity.containsKey(Tags.POINT) || entity.containsKey(Tags.EQUIP) ||
+                    entity.containsKey(Tags.DEVICE)) {
+                //check for points or equips and store them
+                entityIds.add(HRef.copy(StringUtils.prependIfMissing(uid, "@")));
             }
         });
 
-        if (!pointIds.isEmpty()){
-            remoteFetchPoints(pointIds);
+        if (!entityIds.isEmpty()){
+            remoteFetchEntities(entityIds);
         }
 
     }
 
-    private static void remoteFetchPoints(List<HRef> entityIds) {
+    private static void remoteFetchEntities(List<HRef> entityIds) {
 
-        CcuLog.i(L.TAG_CCU_MESSAGING, "remoteFetchPoints >> ");
+        CcuLog.i(L.TAG_CCU_MESSAGING, "remoteFetchEntities >> ");
 
         HRef[] ids = entityIds.toArray(new HRef[0]);
         HClient hClient = new HClient(CCUHsApi.getInstance().getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
         HGrid entitiesGrid = hClient.readByIds(ids, true);
         if (entitiesGrid == null) {
-            CcuLog.e(L.TAG_CCU_MESSAGING, "remoteFetchPoints: null ");
+            CcuLog.e(L.TAG_CCU_MESSAGING, "remoteFetchEntities: null ");
             return;
         }
 
@@ -125,10 +127,16 @@ public class UpdateEntityHandler implements MessageHandler {
                 return;
             }
 
-            if (row.has("physical") && row.get("physical") != null) {
+            if (row.has("equip")) {
+                Equip equip = new Equip.Builder().setHDict(row).build();
+                CCUHsApi.getInstance().tagsDb.updateEquip(equip, entityId);
+            } else if(row.has("device")) {
+                Device device = new Device.Builder().setHDict(row).build();
+                CCUHsApi.getInstance().tagsDb.updateDevice(device, entityId);
+            } else if (row.has("physical") && row.get("physical") != null) {
                 RawPoint point = new RawPoint.Builder().setHDict((HDict) row).build();
                 CCUHsApi.getInstance().tagsDb.updatePoint(point, entityId);
-            }else {
+            } else {
                 Point point = new Point.Builder().setHDict((HDict) row).build();
                 updateEquipRefIfRequired(point);
                 CCUHsApi.getInstance().tagsDb.updatePoint(point, entityId);

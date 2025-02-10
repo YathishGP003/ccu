@@ -53,7 +53,9 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
             "device and addr == \"${configuration.nodeAddress}\"")
 
         val deviceId =  device["id"].toString()
-        hayStack.updateDevice(hayStackDevice, deviceId)
+        if(!device.containsKey("domainName")) {
+            hayStack.updateDevice(hayStackDevice, deviceId)
+        }
 
         hayStackDevice.id = deviceId
         DomainManager.addDevice(hayStackDevice)

@@ -93,17 +93,19 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
             getEntityUpdateConfiguration(equipId, hayStack,entityMapper.getEntityConfiguration(configuration))
         }
 
-        val hayStackEquip = buildEquip(EquipBuilderConfig(modelDef, configuration, siteRef, hayStack.timeZone, equipDis))
-        val systemEquip = hayStack.readEntity("system and equip and not modbus and not connectModule")
-        if (systemEquip.isEmpty()) {
-            CcuLog.i(Domain.LOG_TAG, "addEquip - Invalid System equip , ahuRef cannot be applied")
-        } else if (isStandAloneEquip(hayStackEquip)) {
-            hayStackEquip.gatewayRef = systemEquip[Tags.ID].toString()
-        } else {
-            hayStackEquip.ahuRef = systemEquip[Tags.ID].toString()
-        }
+        if(!isReconfiguration || !equip.containsKey("domainName")) {
+            val hayStackEquip = buildEquip(EquipBuilderConfig(modelDef, configuration, siteRef, hayStack.timeZone, equipDis))
+            val systemEquip = hayStack.readEntity("system and equip and not modbus and not connectModule")
+            if (systemEquip.isEmpty()) {
+                CcuLog.i(Domain.LOG_TAG, "addEquip - Invalid System equip , ahuRef cannot be applied")
+            } else if (isStandAloneEquip(hayStackEquip)) {
+                hayStackEquip.gatewayRef = systemEquip[Tags.ID].toString()
+            } else {
+                hayStackEquip.ahuRef = systemEquip[Tags.ID].toString()
+            }
 
-        hayStack.updateEquip(hayStackEquip, equipId)
+            hayStack.updateEquip(hayStackEquip, equipId)
+        }
 
         val time = measureTimeMillis {
             createPoints(modelDef, configuration, entityConfiguration, equipId, siteRef, equipDis)

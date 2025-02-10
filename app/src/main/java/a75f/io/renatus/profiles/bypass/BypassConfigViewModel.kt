@@ -268,7 +268,7 @@ class BypassConfigViewModel : ViewModel() {
             setDamperFeedback(profileConfiguration)
 
         } else {
-            val equipRef = equipBuilder.updateEquipAndPoints(profileConfiguration, model, hayStack.site!!.id, equipDis)
+            val equipRef = equipBuilder.updateEquipAndPoints(profileConfiguration, model, hayStack.site!!.id, equipDis, isReconfiguration = true)
             bypassDamperProfile = BypassDamperProfile(equipRef, deviceAddress)
             setPressureSensorRef(profileConfiguration)
             setOutputTypes(profileConfiguration)

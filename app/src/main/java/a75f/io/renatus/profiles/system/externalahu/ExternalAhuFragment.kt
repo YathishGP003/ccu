@@ -89,6 +89,10 @@ import io.seventyfivef.domainmodeler.common.point.NumericConstraint
 class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
     private lateinit var viewModel: ExternalAhuViewModel
 
+    fun hasUnsavedChanged(): Boolean{
+        return viewModel.hasUnsavedChanges()
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {

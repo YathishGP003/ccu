@@ -53,6 +53,11 @@ class VavStagedRtuFragment(loadingListener: onLoadingCompleteListener) : StagedR
     private val viewModel: VavStagedRtuViewModel by viewModels()
     private val listener : onLoadingCompleteListener = loadingListener
 
+
+    fun hasUnsavedChanged(): Boolean{
+        return viewModel.hasUnsavedChanges()
+    }
+
     companion object {
         val ID: String = VavStagedRtuFragment::class.java.simpleName
         fun newInstance(): VavStagedRtuFragment {

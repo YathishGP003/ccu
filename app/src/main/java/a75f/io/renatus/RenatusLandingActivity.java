@@ -81,6 +81,15 @@ import a75f.io.messaging.handler.RemoteCommandUpdateHandler;
 import a75f.io.renatus.ENGG.RenatusEngineeringActivity;
 import a75f.io.renatus.bacnet.BacnetBackgroundTaskHandler;
 import a75f.io.renatus.bacnet.BacnetConfigChange;
+import a75f.io.renatus.profiles.system.DabModulatingRtuFragment;
+import a75f.io.renatus.profiles.system.DabStagedRtuFragment;
+import a75f.io.renatus.profiles.system.DabStagedVfdRtuFragment;
+import a75f.io.renatus.profiles.system.VavModulatingRtuFragment;
+import a75f.io.renatus.profiles.system.VavStagedRtuFragment;
+import a75f.io.renatus.profiles.system.VavStagedVfdRtuFragment;
+import a75f.io.renatus.profiles.system.advancedahu.dab.DabAdvancedHybridAhuFragment;
+import a75f.io.renatus.profiles.system.advancedahu.vav.VavAdvancedHybridAhuFragment;
+import a75f.io.renatus.profiles.system.externalahu.ExternalAhuFragment;
 import a75f.io.renatus.registration.CustomViewPager;
 import a75f.io.renatus.schedules.ScheduleGroupFragment;
 import a75f.io.renatus.util.CCUUiUtil;
@@ -394,6 +403,8 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
         btnTabs.getTabAt(1).select();
         mTabLayout.post(() -> mTabLayout.setupWithViewPager(mViewPager, true));
 
+
+        Context context = this;
         mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int i, float v, int i1) {
@@ -402,6 +413,64 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
 
             @Override
             public void onPageSelected(int i) {
+                if(i != 1){
+                    FragmentManager fragmentManager = getSupportFragmentManager();
+                    for (Fragment fragment : fragmentManager.getFragments()) {
+                        if (fragment instanceof VavStagedRtuFragment) {
+                            if(((VavStagedRtuFragment) fragment).hasUnsavedChanged()){
+                                showConfirmationDialog(i, context);
+                            }
+                        }
+                        if (fragment instanceof VavStagedVfdRtuFragment) {
+                            if (((VavStagedVfdRtuFragment) fragment).hasUnsavedChanged()) {
+                                showConfirmationDialog(i, context);
+                            }
+                        }
+                        if (fragment instanceof VavModulatingRtuFragment){
+                            if (((VavModulatingRtuFragment) fragment).hasUnsavedChanged()) {
+                                showConfirmationDialog(i, context);
+                            }
+                        }
+
+                        if (fragment instanceof DabStagedRtuFragment){
+                            if (((DabStagedRtuFragment) fragment).hasUnsavedChanged()) {
+                                showConfirmationDialog(i, context);
+                            }
+                        }
+
+                        if (fragment instanceof DabStagedVfdRtuFragment){
+                            if (((DabStagedVfdRtuFragment) fragment).hasUnsavedChanged()) {
+                                showConfirmationDialog(i, context);
+                            }
+                        }
+
+                        if(fragment instanceof DabModulatingRtuFragment){
+                            if (((DabModulatingRtuFragment) fragment).hasUnsavedChanged()) {
+                                showConfirmationDialog(i, context);
+                            }
+                        }
+
+                        if(fragment instanceof VavAdvancedHybridAhuFragment){
+                            if (((VavAdvancedHybridAhuFragment) fragment).hasUnsavedChanged()) {
+                                showConfirmationDialog(i, context);
+                                return;
+                            }
+                        }
+
+                        if(fragment instanceof DabAdvancedHybridAhuFragment){
+                            if (((DabAdvancedHybridAhuFragment) fragment).hasUnsavedChanged()) {
+                                showConfirmationDialog(i, context);
+                            }
+                        }
+
+                        if(fragment instanceof ExternalAhuFragment){
+                            if (((ExternalAhuFragment) fragment).hasUnsavedChanged()) {
+                                showConfirmationDialog(i, context);
+                            }
+                        }
+                    }
+                    return;
+                }
                 if (i == 1 && mViewPager.getAdapter().instantiateItem(mViewPager, i)  instanceof SystemConfigFragment ) {
                     menuToggle.setVisibility(View.VISIBLE);
                     floorMenu.setVisibility(View.GONE);
@@ -437,6 +506,20 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                     startCountDownTimer(INTERVAL);
                 }
                 Globals.getInstance().selectedTab = i;
+            }
+
+            private void showConfirmationDialog(int newPage, Context context) {
+                new AlertDialog.Builder(context)
+                        .setTitle("Unsaved Changes")
+                        .setMessage("You have unsaved changes. Do you want to discard them and proceed?")
+                        .setPositiveButton("Proceed", (dialog, which) -> {
+                            mViewPager.setCurrentItem(newPage, false);
+                        })
+                        .setNegativeButton("Go Back", (dialog, which) -> {
+                            mViewPager.setCurrentItem(1, false);
+                        })
+                        .setCancelable(false)
+                        .show();
             }
 
             @Override

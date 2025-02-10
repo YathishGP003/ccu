@@ -3,6 +3,7 @@ package a75f.io.renatus.profiles.system.advancedahu.dab
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.domain.api.Domain
 import a75f.io.domain.equips.DabAdvancedHybridSystemEquip
+import a75f.io.domain.logic.hasChanges
 import a75f.io.domain.util.ModelLoader
 import a75f.io.domain.util.ModelNames
 import a75f.io.logic.L
@@ -121,5 +122,21 @@ class DabAdvancedHybridAhuViewModel : AdvancedHybridAhuViewModel() {
         }
         viewState.value = DabAdvancedAhuState.fromProfileConfigToState(profileConfiguration as DabAdvancedHybridAhuConfig)
         viewState.value.isSaveRequired = !systemEquip["profile"].toString().contentEquals("dabAdvancedHybridAhuV2")
+    }
+
+    fun hasUnsavedChanges(): Boolean {
+        return try {
+            val newConfiguration = DabAdvancedHybridAhuConfig(cmModel, connectModel)
+            ((viewState.value) as DabAdvancedAhuState).fromStateToProfileConfig(newConfiguration)
+            return hasChanges(
+                profileConfiguration.cmConfiguration,
+                newConfiguration.cmConfiguration
+            ) || hasChanges(
+                profileConfiguration.connectConfiguration,
+                newConfiguration.connectConfiguration
+            )
+        } catch (e: Exception) {
+            false
+        }
     }
 }

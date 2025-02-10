@@ -30,6 +30,10 @@ class VavAdvancedHybridAhuFragment(loadingListener: onLoadingCompleteListener) :
     private val listener : onLoadingCompleteListener = loadingListener
     override val viewModel: VavAdvancedHybridAhuViewModel by viewModels()
 
+    fun hasUnsavedChanged(): Boolean{
+        return viewModel.hasUnsavedChanges()
+    }
+
     companion object {
         lateinit var instance: VavAdvancedHybridAhuFragment
     }

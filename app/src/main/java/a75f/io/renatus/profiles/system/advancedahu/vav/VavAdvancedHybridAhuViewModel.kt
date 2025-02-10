@@ -3,6 +3,7 @@ package a75f.io.renatus.profiles.system.advancedahu.vav
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.domain.api.Domain
 import a75f.io.domain.equips.VavAdvancedHybridSystemEquip
+import a75f.io.domain.logic.hasChanges
 import a75f.io.domain.util.ModelLoader
 import a75f.io.domain.util.ModelNames
 import a75f.io.logic.L
@@ -125,6 +126,21 @@ class VavAdvancedHybridAhuViewModel : AdvancedHybridAhuViewModel() {
         viewState.value.isSaveRequired = !systemEquip["profile"].toString().contentEquals("vavAdvancedHybridAhuV2")
     }
 
+    fun hasUnsavedChanges(): Boolean {
+        return try {
+            val newConfiguration = VavAdvancedHybridAhuConfig(cmModel, connectModel)
+            ((viewState.value) as VavAdvancedAhuState).fromStateToProfileConfig(newConfiguration)
+            return hasChanges(
+                profileConfiguration.cmConfiguration,
+                newConfiguration.cmConfiguration
+            ) || hasChanges(
+                profileConfiguration.connectConfiguration,
+                newConfiguration.connectConfiguration
+            )
+        } catch (e: Exception) {
+            false
+        }
+    }
 }
 
 

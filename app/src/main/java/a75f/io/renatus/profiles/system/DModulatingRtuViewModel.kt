@@ -55,7 +55,7 @@ open class DModulatingRtuViewModel : ViewModel() {
     val modelLoaded: LiveData<Boolean> get() = modelLoadedState
     private lateinit var equipBuilder: ProfileEquipBuilder
     private lateinit var deviceBuilder: DeviceBuilder
-   
+    lateinit var initialPortValues: HashMap<String, Boolean>
     fun init(context: Context, profileModel: ModelDirective, hayStack: CCUHsApi) {
         this.hayStack = hayStack
         equipBuilder = ProfileEquipBuilder(hayStack)

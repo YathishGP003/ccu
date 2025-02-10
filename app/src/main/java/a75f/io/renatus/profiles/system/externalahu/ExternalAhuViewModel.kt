@@ -556,4 +556,44 @@ class ExternalAhuViewModel(application: Application) : AndroidViewModel(applicat
         L.saveCCUState()
     }
 
+    fun hasUnsavedChanges(): Boolean {
+        try {
+            val configuration: ExternalAhuConfiguration
+            if (isDABExternal()) {
+                systemProfile = L.ccu().systemProfile as DabExternalAhu
+                configuration = getConfiguration(DAB_EXTERNAL_AHU_CONTROLLER, profileType)
+            } else {
+                systemProfile = L.ccu().systemProfile as VavExternalAhu
+                configuration = getConfiguration(VAV_EXTERNAL_AHU_CONTROLLER, profileType)
+            }
+            return verifyChanges(configuration, configModel.value.getConfiguration(profileType))
+        } catch (e: Exception) {
+            return false
+        }
+    }
+
+    private fun verifyChanges(
+        initialConfig: ExternalAhuConfiguration,
+        config: ExternalAhuConfiguration
+    ): Boolean {
+        return initialConfig.setPointControl.enabled != config.setPointControl.enabled ||
+                initialConfig.dualSetPointControl.enabled != config.dualSetPointControl.enabled ||
+                initialConfig.fanStaticSetPointControl.enabled != config.fanStaticSetPointControl.enabled ||
+                initialConfig.dcvControl.enabled != config.dcvControl.enabled ||
+                initialConfig.occupancyMode.enabled != config.occupancyMode.enabled ||
+                initialConfig.humidifierControl.enabled != config.humidifierControl.enabled ||
+                initialConfig.dehumidifierControl.enabled != config.dehumidifierControl.enabled ||
+                initialConfig.heatingMinSp.currentVal != config.heatingMinSp.currentVal ||
+                initialConfig.heatingMaxSp.currentVal != config.heatingMaxSp.currentVal ||
+                initialConfig.coolingMinSp.currentVal != config.coolingMinSp.currentVal ||
+                initialConfig.coolingMaxSp.currentVal != config.coolingMaxSp.currentVal ||
+                initialConfig.fanMinSp.currentVal != config.fanMinSp.currentVal ||
+                initialConfig.fanMaxSp.currentVal != config.fanMaxSp.currentVal ||
+                initialConfig.dcvMin.currentVal != config.dcvMin.currentVal ||
+                initialConfig.dcvMax.currentVal != config.dcvMax.currentVal ||
+                initialConfig.co2Threshold.currentVal != config.co2Threshold.currentVal ||
+                initialConfig.co2Target.currentVal != config.co2Target.currentVal ||
+                initialConfig.damperOpeningRate.currentVal != config.damperOpeningRate.currentVal
+    }
+
 }

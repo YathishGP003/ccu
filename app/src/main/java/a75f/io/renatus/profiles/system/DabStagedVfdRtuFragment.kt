@@ -75,6 +75,10 @@ class DabStagedVfdRtuFragment : DStagedRtuFragment() {
     private val viewModel : DabStagedVfdRtuViewModel by viewModels()
     var viewState: MutableState<StagedRtuVfdViewState> = mutableStateOf(StagedRtuVfdViewState())
 
+    fun hasUnsavedChanged(): Boolean{
+        return viewModel.hasUnsavedChanges()
+    }
+
     companion object {
         val ID: String = DabStagedVfdRtuFragment::class.java.simpleName
         fun newInstance() : DabStagedVfdRtuFragment {

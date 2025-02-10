@@ -1,6 +1,8 @@
 package a75f.io.renatus;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -28,6 +30,15 @@ import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.modbus.ModbusConfigView;
 import a75f.io.renatus.modbus.util.ModbusLevel;
 import a75f.io.renatus.profiles.oao.OAOProfileFragment;
+import a75f.io.renatus.profiles.system.DabModulatingRtuFragment;
+import a75f.io.renatus.profiles.system.DabStagedRtuFragment;
+import a75f.io.renatus.profiles.system.DabStagedVfdRtuFragment;
+import a75f.io.renatus.profiles.system.VavModulatingRtuFragment;
+import a75f.io.renatus.profiles.system.VavStagedRtuFragment;
+import a75f.io.renatus.profiles.system.VavStagedVfdRtuFragment;
+import a75f.io.renatus.profiles.system.advancedahu.dab.DabAdvancedHybridAhuFragment;
+import a75f.io.renatus.profiles.system.advancedahu.vav.VavAdvancedHybridAhuFragment;
+import a75f.io.renatus.profiles.system.externalahu.ExternalAhuFragment;
 import a75f.io.renatus.profiles.vav.BypassConfigFragment;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import butterknife.BindView;
@@ -85,12 +96,7 @@ public class SystemConfigFragment extends Fragment {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right);
-        transaction.replace(R.id.sysConfigFlContent, fragment);
-        transaction.commit();
-
+        replaceFragment("");
         navigationHandler();
     }
 
@@ -105,205 +111,34 @@ public class SystemConfigFragment extends Fragment {
                 super.handleMessage(msg);
                 switch (msg.what) {
                     case 0: {
-                        if (!(fragment instanceof BypassConfigFragment)) {
-                            if (SystemConfigMenuFragment.SystemConfigNavigationHandler != null) {
-                                SystemConfigMenuFragment.SystemConfigNavigationHandler.sendEmptyMessage(0);
-                            }
-                            if (isTransactionSafe && !(fragment instanceof SystemProfileFragment)) {
-                                fragmentClass = SystemProfileFragment.class;
-                                try {
-                                    fragment = (Fragment) fragmentClass.newInstance();
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }
-                                FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-                                FragmentTransaction transaction = fragmentManager.beginTransaction();
-                                transaction.setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right);
-                                transaction.replace(R.id.sysConfigFlContent, fragment, "SysProfileConfig");
-                                transaction.commit();
-                            } else {
-                                isTransactionPending = true;
-                            }
-                        } else {
-                            ((BypassConfigFragment) fragment).tryNavigateAway(5);
-                        }
-
+                        systemConfigPage();
                         break;
                     }
                     case 1: {
-                        if (!(fragment instanceof BypassConfigFragment)) {
-                            if (SystemConfigMenuFragment.SystemConfigNavigationHandler != null) {
-                                SystemConfigMenuFragment.SystemConfigNavigationHandler.sendEmptyMessage(1);
-                            }
-                            if (L.ccu().oaoProfile != null) {
-                                if (isTransactionSafe && !(fragment instanceof OAOProfileFragment)) {
-                                    fragmentClass = OAOProfileFragment.class;
-
-                                    try {
-                                        short meshAddress = Short.parseShort(L.ccu().oaoProfile.getNodeAddress()+"");
-                                        fragment = OAOProfileFragment.Companion.newInstance(meshAddress, "SYSTEM", "SYSTEM", NodeType.SMART_NODE, ProfileType.OAO);
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
-                                    }
-                                    FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-                                    FragmentTransaction transaction = fragmentManager.beginTransaction();
-                                    transaction.setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right);
-                                    transaction.replace(R.id.sysConfigFlContent, fragment, "OaoConfig");
-                                    transaction.commit();
-                                } else {
-                                    isTransactionPending = true;
-                                }
-                            } else {
-                                if (isTransactionSafe && !(fragment instanceof OaoFragment)) {
-                                    fragmentClass = OaoFragment.class;
-                                    try {
-                                        fragment = (Fragment) fragmentClass.newInstance();
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
-                                    }
-                                    FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-                                    FragmentTransaction transaction = fragmentManager.beginTransaction();
-                                    transaction.setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right);
-                                    transaction.replace(R.id.sysConfigFlContent, fragment, "OaoConfig");
-                                    transaction.commit();
-                                } else {
-                                    isTransactionPending = true;
-                                }
-                                ProgressDialogUtils.hideProgressDialog();
-                            }
-                        } else {
-                            ((BypassConfigFragment) fragment).tryNavigateAway(6);
+                        if (fragment instanceof SystemProfileFragment) {
+                            verifyChanges(getContext(), 1); break;
                         }
+                        oaoPage();
                         break;
+
                     }
                     case 2: {
-                        if (!(fragment instanceof BypassConfigFragment)) {
-                            if (SystemConfigMenuFragment.SystemConfigNavigationHandler != null) {
-                                SystemConfigMenuFragment.SystemConfigNavigationHandler.sendEmptyMessage(2);
-                            }
-                            if (L.ccu().bypassDamperProfile != null) {
-                                Equip bypassDamperEquip = L.ccu().bypassDamperProfile.getEquip();
-                                if (isTransactionSafe && !(fragment instanceof BypassConfigFragment)) {
-                                    fragmentClass = BypassConfigFragment.class;
-                                    try {
-                                        short meshAddress = Short.parseShort(bypassDamperEquip.getGroup());
-                                        fragment = BypassConfigFragment.Companion.newInstance(meshAddress, "SYSTEM", "SYSTEM", NodeType.SMART_NODE, ProfileType.BYPASS_DAMPER);
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
-                                    }
-                                    FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-                                    FragmentTransaction transaction = fragmentManager.beginTransaction();
-                                    transaction.setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right);
-                                    transaction.replace(R.id.sysConfigFlContent, fragment, "BypassConfig");
-                                    transaction.commit();
-                                } else {
-                                    isTransactionPending = true;
-                                }
-                            } else {
-                                if (isTransactionSafe && !(fragment instanceof BypassFragment)) {
-                                    fragmentClass = BypassFragment.class;
-                                    try {
-                                        fragment = (Fragment) fragmentClass.newInstance();
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
-                                    }
-                                    FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-                                    FragmentTransaction transaction = fragmentManager.beginTransaction();
-                                    transaction.setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right);
-                                    transaction.replace(R.id.sysConfigFlContent, fragment, "BypassConfig");
-                                    transaction.commit();
-                                } else {
-                                    isTransactionPending = true;
-                                }
-                            }
+                        if (fragment instanceof SystemProfileFragment) {
+                            verifyChanges(getContext(), 2); break;
                         }
-                        break;
+                        bypassDamperPage(); break;
                     }
                     case 3: {
-                        if (!(fragment instanceof BypassConfigFragment)) {
-                            if (SystemConfigMenuFragment.SystemConfigNavigationHandler != null) {
-                                SystemConfigMenuFragment.SystemConfigNavigationHandler.sendEmptyMessage(3);
-                            }
-                            if (isModbusEMRPaired()) {
-                                if (isTransactionSafe && !(fragment instanceof ModbusConfigView && fragment.getArguments().get(FragmentCommonBundleArgs.PROFILE_TYPE).equals(ProfileType.MODBUS_EMR))) {
-                                    fragmentClass = ModbusConfigView.class;
-                                    try {
-                                        fragment = ModbusConfigView.Companion.newInstance(getModbusEMRAddress(), "SYSTEM", "SYSTEM", ProfileType.MODBUS_EMR, ModbusLevel.SYSTEM,"emr");
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
-                                    }
-                                    FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-                                    FragmentTransaction transaction = fragmentManager.beginTransaction();
-                                    transaction.setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right);
-                                    transaction.replace(R.id.sysConfigFlContent, fragment, "EmrConfig");
-                                    transaction.commit();
-                                } else {
-                                    isTransactionPending = true;
-                                }
-                            } else {
-                                if (isTransactionSafe && !(fragment instanceof EnergyMeterFragment)) {
-                                    fragmentClass = EnergyMeterFragment.class;
-                                    try {
-                                        fragment = (Fragment) fragmentClass.newInstance();
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
-                                    }
-                                    FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-                                    FragmentTransaction transaction = fragmentManager.beginTransaction();
-                                    transaction.setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right);
-                                    transaction.replace(R.id.sysConfigFlContent, fragment, "EmrConfig");
-                                    transaction.commit();
-                                } else {
-                                    isTransactionPending = true;
-                                }
-                            }
-                        } else {
-                            ((BypassConfigFragment) fragment).tryNavigateAway(8);
+                        if (fragment instanceof SystemProfileFragment) {
+                            verifyChanges(getContext(), 3); break;
                         }
-                        break;
+                        modbusEnergyMeterPage(); break;
                     }
                     case 4: {
-                        if (!(fragment instanceof BypassConfigFragment)) {
-                            if (SystemConfigMenuFragment.SystemConfigNavigationHandler != null) {
-                                SystemConfigMenuFragment.SystemConfigNavigationHandler.sendEmptyMessage(4);
-                            }
-                            if (isModbusBTUPaired()) {
-                                if (isTransactionSafe && !(fragment instanceof ModbusConfigView && fragment.getArguments().get(FragmentCommonBundleArgs.PROFILE_TYPE).equals(ProfileType.MODBUS_BTU))) {
-                                    fragmentClass = ModbusConfigView.class;
-                                    try {
-                                        fragment = ModbusConfigView.Companion.newInstance(getModbusBTUAddress(), "SYSTEM", "SYSTEM", ProfileType.MODBUS_BTU, ModbusLevel.SYSTEM,"btu");
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
-                                    }
-                                    FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-                                    FragmentTransaction transaction = fragmentManager.beginTransaction();
-                                    transaction.setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right);
-                                    transaction.replace(R.id.sysConfigFlContent, fragment, "BtuConfig");
-                                    transaction.commit();
-                                } else {
-                                    isTransactionPending = true;
-                                }
-                            } else {
-                                if (isTransactionSafe && !(fragment instanceof BtuMeterFragment)) {
-                                    fragmentClass = BtuMeterFragment.class;
-                                    try {
-                                        fragment = (Fragment) fragmentClass.newInstance();
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
-                                    }
-                                    FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-                                    FragmentTransaction transaction = fragmentManager.beginTransaction();
-                                    transaction.setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right);
-                                    transaction.replace(R.id.sysConfigFlContent, fragment, "BtuConfig");
-                                    transaction.commit();
-                                } else {
-                                    isTransactionPending = true;
-                                }
-                            }
-                        } else {
-                            ((BypassConfigFragment) fragment).tryNavigateAway(9);
+                        if (fragment instanceof SystemProfileFragment) {
+                            verifyChanges(getContext(), 4); break;
                         }
-                        break;
+                        btuMeterPage(); break;
                     }
                     case 5: {
                         if (SystemConfigMenuFragment.SystemConfigNavigationHandler != null) {
@@ -316,11 +151,7 @@ public class SystemConfigFragment extends Fragment {
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
-                            FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-                            FragmentTransaction transaction = fragmentManager.beginTransaction();
-                            transaction.setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right);
-                            transaction.replace(R.id.sysConfigFlContent, fragment, "SysProfileConfig");
-                            transaction.commit();
+                            replaceFragment("SysProfileConfig");
                         } else {
                             isTransactionPending = true;
                         }
@@ -341,11 +172,7 @@ public class SystemConfigFragment extends Fragment {
                                 } catch (Exception e) {
                                     e.printStackTrace();
                                 }
-                                FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-                                FragmentTransaction transaction = fragmentManager.beginTransaction();
-                                transaction.setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right);
-                                transaction.replace(R.id.sysConfigFlContent, fragment, "OaoConfig");
-                                transaction.commit();
+                                replaceFragment("OaoConfig");
                             } else {
                                 isTransactionPending = true;
                             }
@@ -357,11 +184,7 @@ public class SystemConfigFragment extends Fragment {
                                 } catch (Exception e) {
                                     e.printStackTrace();
                                 }
-                                FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-                                FragmentTransaction transaction = fragmentManager.beginTransaction();
-                                transaction.setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right);
-                                transaction.replace(R.id.sysConfigFlContent, fragment, "OaoConfig");
-                                transaction.commit();
+                                replaceFragment("OaoConfig");
                             } else {
                                 isTransactionPending = true;
                             }
@@ -382,11 +205,7 @@ public class SystemConfigFragment extends Fragment {
                                 } catch (Exception e) {
                                     e.printStackTrace();
                                 }
-                                FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-                                FragmentTransaction transaction = fragmentManager.beginTransaction();
-                                transaction.setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right);
-                                transaction.replace(R.id.sysConfigFlContent, fragment, "BypassConfig");
-                                transaction.commit();
+                                replaceFragment("BypassConfig");
                             } else {
                                 isTransactionPending = true;
                             }
@@ -398,11 +217,7 @@ public class SystemConfigFragment extends Fragment {
                                 } catch (Exception e) {
                                     e.printStackTrace();
                                 }
-                                FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-                                FragmentTransaction transaction = fragmentManager.beginTransaction();
-                                transaction.setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right);
-                                transaction.replace(R.id.sysConfigFlContent, fragment, "BypassConfig");
-                                transaction.commit();
+                                replaceFragment("BypassConfig");
                             } else {
                                 isTransactionPending = true;
                             }
@@ -421,11 +236,7 @@ public class SystemConfigFragment extends Fragment {
                                 } catch (Exception e) {
                                     e.printStackTrace();
                                 }
-                                FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-                                FragmentTransaction transaction = fragmentManager.beginTransaction();
-                                transaction.setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right);
-                                transaction.replace(R.id.sysConfigFlContent, fragment, "EmrConfig");
-                                transaction.commit();
+                                replaceFragment("EmrConfig");
                             } else {
                                 isTransactionPending = true;
                             }
@@ -437,11 +248,7 @@ public class SystemConfigFragment extends Fragment {
                                 } catch (Exception e) {
                                     e.printStackTrace();
                                 }
-                                FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-                                FragmentTransaction transaction = fragmentManager.beginTransaction();
-                                transaction.setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right);
-                                transaction.replace(R.id.sysConfigFlContent, fragment, "EmrConfig");
-                                transaction.commit();
+                                replaceFragment("EmrConfig");
                             } else {
                                 isTransactionPending = true;
                             }
@@ -460,11 +267,7 @@ public class SystemConfigFragment extends Fragment {
                                 } catch (Exception e) {
                                     e.printStackTrace();
                                 }
-                                FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-                                FragmentTransaction transaction = fragmentManager.beginTransaction();
-                                transaction.setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right);
-                                transaction.replace(R.id.sysConfigFlContent, fragment, "BtuConfig");
-                                transaction.commit();
+                                replaceFragment("BtuConfig");
                             } else {
                                 isTransactionPending = true;
                             }
@@ -476,11 +279,7 @@ public class SystemConfigFragment extends Fragment {
                                 } catch (Exception e) {
                                     e.printStackTrace();
                                 }
-                                FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-                                FragmentTransaction transaction = fragmentManager.beginTransaction();
-                                transaction.setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right);
-                                transaction.replace(R.id.sysConfigFlContent, fragment, "BtuConfig");
-                                transaction.commit();
+                                replaceFragment("BtuConfig");
                             } else {
                                 isTransactionPending = true;
                             }
@@ -492,6 +291,281 @@ public class SystemConfigFragment extends Fragment {
                 }
             }
         };
+    }
+
+    private void replaceFragment(String tag) {
+        FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        transaction.setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right);
+        transaction.replace(R.id.sysConfigFlContent, fragment, tag);
+        transaction.commit();
+    }
+
+    private void btuMeterPage() {
+        if (!(fragment instanceof BypassConfigFragment)) {
+            if (SystemConfigMenuFragment.SystemConfigNavigationHandler != null) {
+                SystemConfigMenuFragment.SystemConfigNavigationHandler.sendEmptyMessage(4);
+            }
+            if (isModbusBTUPaired()) {
+                if (isTransactionSafe && !(fragment instanceof ModbusConfigView && fragment.getArguments().get(FragmentCommonBundleArgs.PROFILE_TYPE).equals(ProfileType.MODBUS_BTU))) {
+                    fragmentClass = ModbusConfigView.class;
+                    try {
+                        fragment = ModbusConfigView.Companion.newInstance(getModbusBTUAddress(), "SYSTEM", "SYSTEM", ProfileType.MODBUS_BTU, ModbusLevel.SYSTEM, "btu");
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    replaceFragment("BtuConfig");
+                } else {
+                    isTransactionPending = true;
+                }
+            } else {
+                if (isTransactionSafe && !(fragment instanceof BtuMeterFragment)) {
+                    fragmentClass = BtuMeterFragment.class;
+                    try {
+                        fragment = (Fragment) fragmentClass.newInstance();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    replaceFragment("BtuConfig");
+                } else {
+                    isTransactionPending = true;
+                }
+            }
+        } else {
+            ((BypassConfigFragment) fragment).tryNavigateAway(9);
+        }
+    }
+
+    private void modbusEnergyMeterPage() {
+        if (!(fragment instanceof BypassConfigFragment)) {
+            if (SystemConfigMenuFragment.SystemConfigNavigationHandler != null) {
+                SystemConfigMenuFragment.SystemConfigNavigationHandler.sendEmptyMessage(3);
+            }
+            if (isModbusEMRPaired()) {
+                if (isTransactionSafe && !(fragment instanceof ModbusConfigView && fragment.getArguments().get(FragmentCommonBundleArgs.PROFILE_TYPE).equals(ProfileType.MODBUS_EMR))) {
+                    fragmentClass = ModbusConfigView.class;
+                    try {
+                        fragment = ModbusConfigView.Companion.newInstance(getModbusEMRAddress(), "SYSTEM", "SYSTEM", ProfileType.MODBUS_EMR, ModbusLevel.SYSTEM, "emr");
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    replaceFragment("EmrConfig");
+                } else {
+                    isTransactionPending = true;
+                }
+            } else {
+                if (isTransactionSafe && !(fragment instanceof EnergyMeterFragment)) {
+                    fragmentClass = EnergyMeterFragment.class;
+                    try {
+                        fragment = (Fragment) fragmentClass.newInstance();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    replaceFragment("EmrConfig");
+                } else {
+                    isTransactionPending = true;
+                }
+            }
+        } else {
+            ((BypassConfigFragment) fragment).tryNavigateAway(8);
+        }
+    }
+
+    private void bypassDamperPage() {
+        if (!(fragment instanceof BypassConfigFragment)) {
+            if (SystemConfigMenuFragment.SystemConfigNavigationHandler != null) {
+                SystemConfigMenuFragment.SystemConfigNavigationHandler.sendEmptyMessage(2);
+            }
+            if (L.ccu().bypassDamperProfile != null) {
+                Equip bypassDamperEquip = L.ccu().bypassDamperProfile.getEquip();
+                if (isTransactionSafe && !(fragment instanceof BypassConfigFragment)) {
+                    fragmentClass = BypassConfigFragment.class;
+                    try {
+                        short meshAddress = Short.parseShort(bypassDamperEquip.getGroup());
+                        fragment = BypassConfigFragment.Companion.newInstance(meshAddress, "SYSTEM", "SYSTEM", NodeType.SMART_NODE, ProfileType.BYPASS_DAMPER);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    replaceFragment("BypassConfig");
+                } else {
+                    isTransactionPending = true;
+                }
+            } else {
+                if (isTransactionSafe && !(fragment instanceof BypassFragment)) {
+                    fragmentClass = BypassFragment.class;
+                    try {
+                        fragment = (Fragment) fragmentClass.newInstance();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    replaceFragment("BypassConfig");
+                } else {
+                    isTransactionPending = true;
+                }
+            }
+        }
+    }
+
+    private void oaoPage() {
+        if (!(fragment instanceof BypassConfigFragment)) {
+            if (SystemConfigMenuFragment.SystemConfigNavigationHandler != null) {
+                SystemConfigMenuFragment.SystemConfigNavigationHandler.sendEmptyMessage(1);
+            }
+            if (L.ccu().oaoProfile != null) {
+                if (isTransactionSafe && !(fragment instanceof OAOProfileFragment)) {
+                    fragmentClass = OAOProfileFragment.class;
+
+                    try {
+                        short meshAddress = Short.parseShort(L.ccu().oaoProfile.getNodeAddress() + "");
+                        fragment = OAOProfileFragment.Companion.newInstance(meshAddress, "SYSTEM", "SYSTEM", NodeType.SMART_NODE, ProfileType.OAO);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    replaceFragment("OaoConfig");
+                } else {
+                    isTransactionPending = true;
+                }
+            } else {
+                if (isTransactionSafe && !(fragment instanceof OaoFragment)) {
+                    fragmentClass = OaoFragment.class;
+                    try {
+                        fragment = (Fragment) fragmentClass.newInstance();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    replaceFragment("OaoConfig");
+                } else {
+                    isTransactionPending = true;
+                }
+                ProgressDialogUtils.hideProgressDialog();
+            }
+        } else {
+            ((BypassConfigFragment) fragment).tryNavigateAway(6);
+        }
+    }
+
+    private void systemConfigPage() {
+        if (!(fragment instanceof BypassConfigFragment)) {
+            if (SystemConfigMenuFragment.SystemConfigNavigationHandler != null) {
+                SystemConfigMenuFragment.SystemConfigNavigationHandler.sendEmptyMessage(0);
+            }
+            if (isTransactionSafe && !(fragment instanceof SystemProfileFragment)) {
+                fragmentClass = SystemProfileFragment.class;
+                try {
+                    fragment = (Fragment) fragmentClass.newInstance();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                replaceFragment("SysProfileConfig");
+            } else {
+                isTransactionPending = true;
+            }
+        } else {
+            ((BypassConfigFragment) fragment).tryNavigateAway(5);
+        }
+    }
+
+    private boolean verifyChanges(Context context, int page) {
+        for (Fragment fragment : getActivity().getSupportFragmentManager().getFragments()) {
+            if (fragment instanceof VavStagedRtuFragment) {
+                if (((VavStagedRtuFragment) fragment).hasUnsavedChanged()) {
+                    return showConfirmationDialog(context, page);
+                } else {
+                    goTo(page);
+                }
+            }
+            if (fragment instanceof VavStagedVfdRtuFragment) {
+                if (((VavStagedVfdRtuFragment) fragment).hasUnsavedChanged()) {
+                    return showConfirmationDialog(context, page);
+                } else {
+                    goTo(page);
+                }
+            }
+            if (fragment instanceof VavModulatingRtuFragment) {
+                if (((VavModulatingRtuFragment) fragment).hasUnsavedChanged()) {
+                    return showConfirmationDialog(context, page);
+                } else {
+                    goTo(page);
+                }
+            }
+
+            if (fragment instanceof DabStagedRtuFragment) {
+                if (((DabStagedRtuFragment) fragment).hasUnsavedChanged()) {
+                    return showConfirmationDialog(context, page);
+                } else {
+                    goTo(page);
+                }
+            }
+
+            if (fragment instanceof DabStagedVfdRtuFragment) {
+                if (((DabStagedVfdRtuFragment) fragment).hasUnsavedChanged()) {
+                    return showConfirmationDialog(context, page);
+                } else {
+                    goTo(page);
+                }
+            }
+
+            if (fragment instanceof DabModulatingRtuFragment) {
+                if (((DabModulatingRtuFragment) fragment).hasUnsavedChanged()) {
+                    return showConfirmationDialog(context, page);
+                } else {
+                    goTo(page);
+                }
+            }
+
+            if (fragment instanceof VavAdvancedHybridAhuFragment) {
+                if (((VavAdvancedHybridAhuFragment) fragment).hasUnsavedChanged()) {
+                    return showConfirmationDialog(context, page);
+                } else {
+                    goTo(page);
+                }
+            }
+
+            if (fragment instanceof DabAdvancedHybridAhuFragment) {
+                if (((DabAdvancedHybridAhuFragment) fragment).hasUnsavedChanged()) {
+                    return showConfirmationDialog(context, page);
+                } else {
+                    goTo(page);
+                }
+            }
+
+            if (fragment instanceof ExternalAhuFragment) {
+                if (((ExternalAhuFragment) fragment).hasUnsavedChanged()) {
+                    return showConfirmationDialog(context, page);
+                } else {
+                    goTo(page);
+                }
+            }
+        }
+        return true;
+    }
+
+    private void goTo(int page) {
+        if (page == 1) oaoPage();
+        else if (page == 2) bypassDamperPage();
+        else if (page == 3) modbusEnergyMeterPage();
+        else if (page == 4) btuMeterPage();
+    }
+
+
+    boolean state = false;
+
+    private boolean showConfirmationDialog(Context context, int page) {
+        new AlertDialog.Builder(context)
+                .setTitle("Unsaved Changes")
+                .setMessage("You have unsaved changes. Do you want to discard them and proceed?")
+                .setPositiveButton("Proceed", (dialog, which) -> {
+                    if (page == 1) oaoPage();
+                    else if (page == 2) bypassDamperPage();
+                    else if (page == 3) modbusEnergyMeterPage();
+                    else if (page == 4) btuMeterPage();
+                })
+                .setNegativeButton("Stay", (dialog, which) -> {
+                    state = false;
+                })
+                .setCancelable(false)
+                .show();
+        return state;
     }
 
     private boolean isModbusEMRPaired(){

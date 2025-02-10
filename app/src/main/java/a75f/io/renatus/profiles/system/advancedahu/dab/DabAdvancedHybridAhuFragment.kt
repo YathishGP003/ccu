@@ -28,6 +28,10 @@ import kotlinx.coroutines.withContext
 class DabAdvancedHybridAhuFragment : AdvancedHybridAhuFragment() {
     override val viewModel: DabAdvancedHybridAhuViewModel by viewModels()
 
+    fun hasUnsavedChanged(): Boolean{
+        return viewModel.hasUnsavedChanges()
+    }
+
     companion object {
         lateinit var instance: DabAdvancedHybridAhuFragment
     }

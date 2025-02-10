@@ -5,6 +5,7 @@ import a75f.io.device.mesh.DeviceUtil
 import a75f.io.device.mesh.MeshUtil
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
+import a75f.io.domain.logic.hasChanges
 import a75f.io.domain.util.ModelLoader
 import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
@@ -44,6 +45,7 @@ open class VavModulatingRtuViewModel : ModulatingRtuViewModel() {
             viewState.value = ModulatingRtuViewState.fromProfileConfig(profileConfiguration)
             CcuLog.i(Domain.LOG_TAG, "Default vavFullyModulatingAhu profile config Loaded")
         }
+        initialPortValues = HashMap(profileConfiguration.unusedPorts)
         modelLoadedState.postValue(true)
         viewState.value.isSaveRequired = !systemEquip["profile"].toString().contentEquals("vavFullyModulatingAhu")
     }
@@ -85,6 +87,7 @@ open class VavModulatingRtuViewModel : ModulatingRtuViewModel() {
             updateOaoPoints()
             hayStack.syncEntityTree()
             hayStack.setCcuReady()
+            initialPortValues = HashMap(profileConfiguration.unusedPorts)
         }
     }
 
@@ -154,5 +157,18 @@ open class VavModulatingRtuViewModel : ModulatingRtuViewModel() {
         }
         viewState.value = ModulatingRtuViewState.fromProfileConfig(profileConfiguration)
         viewState.value.isSaveRequired = !systemEquip["profile"].toString().contentEquals("vavFullyModulatingAhu")
+    }
+
+    fun hasUnsavedChanges(): Boolean {
+        return try {
+            val newConfiguration = ModulatingRtuProfileConfig(model).getDefaultConfiguration()
+            viewState.value.updateConfigFromViewState(newConfiguration)
+            return hasChanges(
+                profileConfiguration,
+                newConfiguration
+            ) || (initialPortValues.toMap() != viewState.value.unusedPortState.toMap())
+        } catch (e: Exception) {
+            false
+        }
     }
 }

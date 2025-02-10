@@ -53,7 +53,7 @@ open class ModulatingRtuViewModel : ViewModel() {
     val modelLoaded: LiveData<Boolean> get() = modelLoadedState
     private lateinit var equipBuilder: ProfileEquipBuilder
     private lateinit var deviceBuilder: DeviceBuilder
-
+    lateinit var initialPortValues: HashMap<String, Boolean>
     val ProfileName : String = "VAV Fully Modulating AHU"
    
     fun init(context: Context, profileModel: ModelDirective, hayStack: CCUHsApi) {

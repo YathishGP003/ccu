@@ -57,6 +57,10 @@ class VavModulatingRtuFragment(loadingListener: onLoadingCompleteListener) : Mod
     private val vavModulatingViewModel: VavModulatingRtuViewModel by viewModels()
     private val listener : onLoadingCompleteListener = loadingListener
 
+    fun hasUnsavedChanged(): Boolean{
+        return vavModulatingViewModel.hasUnsavedChanges()
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {

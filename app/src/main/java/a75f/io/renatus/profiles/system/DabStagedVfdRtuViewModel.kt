@@ -3,14 +3,13 @@ package a75f.io.renatus.profiles.system
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.domain.api.Domain
 import a75f.io.domain.logic.DomainManager
+import a75f.io.domain.logic.hasChanges
 import a75f.io.domain.util.ModelLoader
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.dab.DabProfile.CARRIER_PROD
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.system.dab.DabStagedRtuWithVfd
-import a75f.io.logic.bo.building.system.vav.VavStagedRtu
-import a75f.io.logic.bo.building.system.vav.VavStagedRtuWithVfd
 import a75f.io.logic.bo.building.system.vav.config.StagedVfdRtuProfileConfig
 import a75f.io.logic.bo.haystack.device.ControlMote
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
@@ -48,6 +47,7 @@ class DabStagedVfdRtuViewModel : DabStagedRtuBaseViewModel() {
             viewState.value = StagedRtuVfdViewState.fromProfileConfig(vfdProfileConfig)
             CcuLog.i(Domain.LOG_TAG, "Default profile config loaded")
         }
+        initialPortValues = HashMap(profileConfiguration.unusedPorts)
         modelLoadedState.postValue(true)
         viewState.value.isSaveRequired = !systemEquip["profile"].toString().contentEquals("dabStagedRtuVfdFan")
 
@@ -108,6 +108,7 @@ class DabStagedVfdRtuViewModel : DabStagedRtuBaseViewModel() {
             systemEquipId?.let { L.ccu().systemProfile.updateAhuRef(it) }
             hayStack.syncEntityTree()
             hayStack.setCcuReady()
+            initialPortValues = HashMap(profileConfiguration.unusedPorts)
         }
     }
 
@@ -128,5 +129,18 @@ class DabStagedVfdRtuViewModel : DabStagedRtuBaseViewModel() {
             CcuLog.i(Domain.LOG_TAG, "Default profile config Loaded")
         }
         viewState.value.isSaveRequired = !systemEquip["profile"].toString().contentEquals("dabStagedRtuVfdFan")
+    }
+
+    fun hasUnsavedChanges(): Boolean {
+        return try {
+            val newConfiguration = StagedVfdRtuProfileConfig(model).getDefaultConfiguration()
+            viewState.value.updateConfigFromViewState(newConfiguration)
+            return hasChanges(
+                profileConfiguration,
+                newConfiguration
+            ) || (initialPortValues.toMap() != viewState.value.unusedPortState.toMap())
+        } catch (e: Exception) {
+            false
+        }
     }
 }

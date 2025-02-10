@@ -2,6 +2,7 @@ package a75f.io.renatus.profiles.system
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.domain.api.Domain
+import a75f.io.domain.logic.hasChanges
 import a75f.io.domain.util.ModelLoader
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
@@ -42,6 +43,7 @@ class VavStagedRtuViewModel : StagedRtuProfileViewModel() {
             viewState.value = StagedRtuViewState.fromProfileConfig(profileConfiguration)
             CcuLog.i(Domain.LOG_TAG, "Default profile config Loaded")
         }
+        initialPortValues = HashMap(profileConfiguration.unusedPorts)
         modelLoadedState.postValue(true)
         viewState.value.isSaveRequired = !systemEquip["profile"].toString().contentEquals("vavStagedRtu")
     }
@@ -82,6 +84,7 @@ class VavStagedRtuViewModel : StagedRtuProfileViewModel() {
             updateOaoPoints()
             hayStack.syncEntityTree()
             hayStack.setCcuReady()
+            initialPortValues = HashMap(profileConfiguration.unusedPorts)
         }
     }
 
@@ -99,5 +102,19 @@ class VavStagedRtuViewModel : StagedRtuProfileViewModel() {
         }
         viewState.value = StagedRtuViewState.fromProfileConfig(profileConfiguration)
         viewState.value.isSaveRequired = !systemEquip["profile"].toString().contentEquals("vavStagedRtu")
+    }
+
+    fun hasUnsavedChanges(): Boolean {
+        return try {
+            val newConfiguration = StagedRtuProfileConfig(model).getDefaultConfiguration()
+            viewState.value.updateConfigFromViewState(newConfiguration)
+            return hasChanges(
+                profileConfiguration,
+                newConfiguration
+            ) || (initialPortValues.toMap() != viewState.value.unusedPortState.toMap())
+
+        } catch (e: Exception) {
+            false
+        }
     }
 }

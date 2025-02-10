@@ -59,6 +59,7 @@ open class DabStagedRtuBaseViewModel : ViewModel() {
     val modelLoaded: LiveData<Boolean> get() = modelLoadedState
     lateinit var equipBuilder : ProfileEquipBuilder
     lateinit var deviceBuilder: DeviceBuilder
+    lateinit var initialPortValues: HashMap<String, Boolean>
     fun init(context: Context, profileModel : ModelDirective, hayStack : CCUHsApi) {
 
         CcuLog.i(

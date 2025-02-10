@@ -61,7 +61,7 @@ open class StagedRtuProfileViewModel : ViewModel() {
     lateinit var deviceBuilder: DeviceBuilder
     val ProfileNameRTU : String = "VAV Staged RTU"
     val ProfileNameVFD : String = "VAV Staged RTU with VFD Fan"
-
+    lateinit var initialPortValues: HashMap<String, Boolean>
     fun init(context: Context, profileModel : ModelDirective, hayStack : CCUHsApi) {
 
         CcuLog.i(

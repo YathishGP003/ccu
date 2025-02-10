@@ -52,6 +52,10 @@ import kotlinx.coroutines.withContext
 class DabStagedRtuFragment : DStagedRtuFragment() {
     private val viewModel: DabStagedRtuViewModel by viewModels()
 
+    fun hasUnsavedChanged(): Boolean{
+        return viewModel.hasUnsavedChanges()
+    }
+
     companion object {
         val ID: String = DabStagedRtuFragment::class.java.simpleName
         fun newInstance(): DabStagedRtuFragment {

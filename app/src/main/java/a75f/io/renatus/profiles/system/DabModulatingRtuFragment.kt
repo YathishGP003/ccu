@@ -67,6 +67,9 @@ class DabModulatingRtuFragment : DModulatingRtuFragment() {
 
     private val dabModulatingViewModel: DabModulatingRtuViewModel by viewModels()
 
+    fun hasUnsavedChanged(): Boolean{
+        return dabModulatingViewModel.hasUnsavedChanges()
+    }
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {

@@ -61,7 +61,9 @@ class VavStagedVfdRtuFragment(loadingListener: onLoadingCompleteListener) : Stag
     var viewState: MutableState<StagedRtuVfdViewState> = mutableStateOf(StagedRtuVfdViewState())
     private val listener : onLoadingCompleteListener = loadingListener
 
-
+    fun hasUnsavedChanged(): Boolean{
+        return viewModel.hasUnsavedChanges()
+    }
 
     companion object {
         val ID: String = VavStagedVfdRtuFragment::class.java.simpleName

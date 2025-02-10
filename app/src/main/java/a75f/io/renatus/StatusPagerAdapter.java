@@ -20,6 +20,7 @@ public class StatusPagerAdapter extends FragmentStatePagerAdapter
 	{
 		super(fm);
 		fragments = new ArrayList<>();
+		fragments.add(DashboardFragment.newInstance());
 		fragments.add(ZoneFragmentNew.newInstance());
 		fragments.add(SystemFragment.newInstance());
 		fragments.add(new ScheduleGroupFragment());
@@ -35,7 +36,7 @@ public class StatusPagerAdapter extends FragmentStatePagerAdapter
 	@Override
 	public int getCount()
 	{
-		return 4;
+		return 5;
 	}
 	
 	
@@ -52,12 +53,14 @@ public class StatusPagerAdapter extends FragmentStatePagerAdapter
 		switch (position)
 		{
 			case 0:
-				return "Zones";
+				return "Dashboard";
 			case 1:
-				return "System";
+				return "Zones";
 			case 2:
-				return "SCHEDULING";
+				return "System";
 			case 3:
+				return "SCHEDULING";
+			case 4:
 				return "Alerts";
 		}
 		return null;

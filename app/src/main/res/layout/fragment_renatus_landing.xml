@@ -1,16 +1,24 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    tools:context="a75f.io.renatus.RenatusLandingActivity$PlaceholderFragment">
+    android:layout_height="match_parent">
+
+    <WebView
+        android:visibility="gone"
+        android:id="@+id/dashboard_webview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
 
     <TextView
-        android:id="@+id/section_label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:id="@+id/empty_dashboard"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:textSize="@dimen/sp_20"
+        android:fontFamily="@font/lato_bold"
+        android:text="Dashboard not configured."
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
 
-</RelativeLayout>
+</LinearLayout>

@@ -28,38 +28,47 @@ android {
     buildTypes {
         local {
             minifyEnabled false
+            buildConfigField "String", 'TABLE_MAKER_API_BASE', '\"https://table-maker-api.qa.service.75f.io/\"'
         }
         dev {
             minifyEnabled false
+            buildConfigField "String", 'TABLE_MAKER_API_BASE', '\"https://table-maker-api.qa.service.75f.io/\"'
         }
         dev_qa {
             minifyEnabled false
+            buildConfigField "String", 'TABLE_MAKER_API_BASE', '\"https://table-maker-api.qa.service.75f.io/\"'
         }
         prod {
             minifyEnabled false
             ext.betaDistributionGroupAliases = "nightly-1"
             ext.betaDistributionReleaseNotesFilePath="${projectDir}/../CHANGES"
+            buildConfigField "String", 'TABLE_MAKER_API_BASE', '\"https://table-maker-api.prod.service.75f.io/\"'
         }
         qa {
             minifyEnabled false
+            buildConfigField "String", 'TABLE_MAKER_API_BASE', '\"https://table-maker-api.qa.service.75f.io/\"'
         }
         carrier_prod {
             minifyEnabled false
             ext.betaDistributionGroupAliases = "nightly-1"
             ext.betaDistributionReleaseNotesFilePath="${projectDir}/../CHANGES"
+            buildConfigField "String", 'TABLE_MAKER_API_BASE', '\"https://table-maker-api.carrier.service.75f.io/\"'
         }
         staging {
             minifyEnabled false
+            buildConfigField "String", 'TABLE_MAKER_API_BASE', '\"https://table-maker-api.staging.service.75f.io/\"'
         }
         daikin_prod {
             minifyEnabled false
             ext.betaDistributionGroupAliases = "nightly-1"
             ext.betaDistributionReleaseNotesFilePath="${projectDir}/../CHANGES"
+            buildConfigField "String", 'TABLE_MAKER_API_BASE', '\"https://table-maker-api.daikin.service.75f.io/\"'
         }
         airoverse_prod {
             minifyEnabled false
             ext.betaDistributionGroupAliases = "nightly-1"
             ext.betaDistributionReleaseNotesFilePath="${projectDir}/../CHANGES"
+            buildConfigField "String", 'TABLE_MAKER_API_BASE', '\"https://table-maker-api.airoverse.service.75f.io/\"'
         }
     }
 

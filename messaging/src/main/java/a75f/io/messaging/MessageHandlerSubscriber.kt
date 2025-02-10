@@ -95,5 +95,10 @@ class MessageHandlerSubscriber @Inject constructor(){
                 MessageHandlerFactory.Command.sequenceDeleted
             )
         )
+        handlerService.registerMessageHandler(
+            MessageHandlerFactory.createInstance(
+                MessageHandlerFactory.Command.updateDashboard
+            )
+        )
     }
 }

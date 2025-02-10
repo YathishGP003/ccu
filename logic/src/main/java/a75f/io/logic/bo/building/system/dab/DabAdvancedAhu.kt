@@ -732,7 +732,7 @@ class DabAdvancedAhu : DabSystemProfile() {
     }
 
 
-    private fun updatePointsDbVal(isConnectEquip: Boolean,) {
+    private fun updatePointsDbVal(isConnectEquip: Boolean) {
         val stageStatus = if (isConnectEquip) connectStageStatus else cmStageStatus
         stageStatus.forEachIndexed { index, status ->
             val domainName = if (isConnectEquip) connectRelayAssociationToDomainName(index) else relayAssociationToDomainName(index)

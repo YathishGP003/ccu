@@ -103,6 +103,7 @@ import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
+import a75f.io.util.DashboardUtilKt;
 import io.seventyfivef.domainmodeler.client.ModelDirective;
 import a75f.io.util.ExecutorTask;
 
@@ -679,7 +680,8 @@ public class CreateNewSite extends Fragment {
             //Not sure why we have the 10 seconds delay here.
             //Probably protects against running into issues if register/unregister are done too quickly.
             new Handler().postDelayed(() -> removeCCU(ccuUID, CCUHsApi.getInstance()), 10000);
-
+            DashboardUtilKt.setDashboardConfig(false, getActivity());
+            DashboardUtilKt.saveConfigs("No dashboard configured", getActivity());
             dialog.dismiss();
         });
 

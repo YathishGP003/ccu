@@ -1,0 +1,819 @@
+@import "./theme.scss";
+$max-col: 12;
+$max-width: 100;
+$ut: "px";
+:root {
+  --mid-gray: #848484;
+  --white-color: #ffffff;
+  --success: #8dc63f;
+  --warning: #F44D57;
+  --danger: #F44D57;
+  --caution: #fbb03b;
+  --gray: #444;
+  --text: rgba(0, 0, 0, 0.87);
+  --dark-gray: #3339;
+  --line: rgba(0, 0, 0, 0.12);
+  --menu: #3c3c3c;
+  --light-grey: #999999;
+  --hover-grey: #ebeced;
+  --lighter-grey: #ccc;
+  --menubar-text: #919191;
+  --disabled-state: #B6B6B6; 
+  --active-color:#02C18D;
+  --font-family: "lato", Arial, sans-serif;
+  --mid-light-grey: #666666;
+  --text-lato: #333333;
+  --table-even: #f8f9fa;
+  --header-text: #333333;
+  --recommended-version: #18A762;
+  --strong-text: #000000;
+  --disabled-state: #B6B6B6;
+  --border-line-color: #D9D9D9;
+  --table-even-state : #f9f9f9;
+  --light-text:#666666;
+  --silver-grey: #cbcbcb;
+  --warning-text: #FF3A42;
+  --selected-row: rgba(229, 86, 26, 0.1);
+  --error-state : #FF3A42;
+  --done-state: #81C911;
+  --info: #3891DB;
+  --warn: #F4B244;
+  --trace: #DD8D66;
+  --error: #D94B15;
+  --green: #01B30C;
+  --tooltip-background : #000000;
+  --chipColor: #00AC26;
+  --alert-green:#21C073;
+  --mid-grey: #CCCCCC;
+  --alert-severe: #ED1C24;
+  --mild-orange: #E5561A1A;
+  --card-background: #fff;
+}
+.fs-global-topbar__toolbar__listitem--img {
+  display: none;
+}
+$breakpoints: (
+  xs: 0,
+  sm: 576px,
+  md: 768px,
+  lg: 992px,
+  xl: 1200px,
+);
+* {
+  box-sizing: border-box;
+}
+// creating grid  and flex css
+
+/* .row class for creating row */
+.row {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+  > [class^="col-"] {
+      position: relative;
+      width: 100%;
+      min-height: 1px;
+      padding-right: 15px;
+      padding-left: 15px;
+  }
+  .row > [class^="col-"] {
+      padding-right: 0px;
+      padding-left: 0px;
+  }
+}
+@for $col from 1 through $max-col {
+  $equation: calc(100% / $max-col) * $col;
+  /* .col-{breakpoint}-{column}  for creat a column */
+  .col-#{$col} {
+      -webkit-box-flex: 0;
+      -ms-flex: 0 0 $equation;
+      flex: 0 0 $equation;
+      max-width: $equation;
+  }
+}
+@each $breakpoint, $screen in $breakpoints {
+  @media screen and (min-width: $screen) {
+      /* .flex-{breakpoint}-row  for to set a horizontal direction */
+
+      .flex-#{$breakpoint}-row {
+          flex-direction: row !important;
+      }
+      /* .flex-{breakpoint}-column  for to set a vertical direction */
+      .flex-#{$breakpoint}-column {
+          flex-direction: column !important;
+      }
+      /* .flex-{breakpoint}-row-reverse  for to set a horizontal direction from opposite side */
+      .flex-#{$breakpoint}-row-reverse {
+          flex-direction: row-reverse !important;
+      }
+      /* .flex-{breakpoint}-column-reverse  for to set a vertical direction from opposite side */
+      .flex-#{$breakpoint}-column-reverse {
+          flex-direction: column-reverse !important;
+      }
+      /* .flex-{breakpoint}-wrap for to set a wrap in flex container */
+      .flex-#{$breakpoint}-wrap {
+          flex-wrap: wrap !important;
+      }
+      /* .flex-{breakpoint}-nowrap for to remove wrap in flex container */
+      .flex-#{$breakpoint}-nowrap {
+          flex-wrap: nowrap !important;
+      }
+      /* .flex-{breakpoint}-wrap-reverse for to set a wrap in flex container from opposite direction */
+      .flex-#{$breakpoint}-wrap-reverse {
+          flex-wrap: wrap-reverse !important;
+      }
+      /* .justify-content-{breakpoint}-start for to align flex items on the main axis from start */
+      .justify-content-#{$breakpoint}-start {
+          justify-content: flex-start !important;
+      }
+      /* .justify-content-{breakpoint}-end for to align flex items on the main axis from end */
+      .justify-content-#{$breakpoint}-end {
+          justify-content: flex-end !important;
+      }
+      /* .justify-content-{breakpoint}-center for to align flex items on the main axis from center */
+      .justify-content-#{$breakpoint}-center {
+          justify-content: center !important;
+      }
+      /* .justify-content-{breakpoint}-between for to align flex items on the main axis between */
+      .justify-content-#{$breakpoint}-between {
+          justify-content: space-between !important;
+      }
+      /* .justify-content-{breakpoint}-around for to align flex items on the main axis around */
+      .justify-content-#{$breakpoint}-around {
+          justify-content: space-around !important;
+      }
+      /* .align-items-{breakpoint}-start for to align flex items on the cross axis from start */
+      .align-items-#{$breakpoint}-start {
+          align-items: flex-start !important;
+      }
+      /* .align-items-{breakpoint}-end for to align flex items on the cross axis from end */
+      .align-items-#{$breakpoint}-end {
+          align-items: flex-end !important;
+      }
+      /* .align-items-{breakpoint}-center for to align flex items on the cross axis from center */
+      .align-items-#{$breakpoint}-center {
+          align-items: center !important;
+      }
+      /* .align-items-{breakpoint}-center for to align flex items on the cross axis from baseline */
+      .align-items-#{$breakpoint}-baseline {
+          align-items: baseline !important;
+      }
+      /* .align-items-{breakpoint}-center for to align flex items on the cross axis from stretch */
+      .align-items-#{$breakpoint}-stretch {
+          align-items: stretch !important;
+      }
+      /* .align-content-{breakpoint}-start for to align flex items together on the cross axis from start */
+      .align-content-#{$breakpoint}-start {
+          align-content: flex-start !important;
+      }
+      /* .align-content-{breakpoint}-end for to align flex items together on the cross axis from end */
+      .align-content-#{$breakpoint}-end {
+          align-content: flex-end !important;
+      }
+      /* .align-content-{breakpoint}-center for to align flex items together on the cross axis from center */
+      .align-content-#{$breakpoint}-center {
+          align-content: center !important;
+      }
+      /* .align-content-{breakpoint}-between for to align flex items together on the cross axis between */
+      .align-content-#{$breakpoint}-between {
+          align-content: space-between !important;
+      }
+      /* .align-content-{breakpoint}-around for to align flex items together on the cross axis around */
+      .align-content-#{$breakpoint}-around {
+          align-content: space-around !important;
+      }
+      /* .align-content-{breakpoint}-stretch for to align flex items together on the cross axis stretch */
+      .align-content-#{$breakpoint}-stretch {
+          align-content: stretch !important;
+      }
+      /* .align-self-{breakpoint}-auto for to align flex items  individually change their
+   alignment on the cross axis auto */
+      .align-self-#{$breakpoint}-auto {
+          align-self: auto !important;
+      }
+      /* .align-self-{breakpoint}-start for to align flex items  individually change their
+   alignment on the cross axis start */
+      .align-self-#{$breakpoint}-start {
+          align-self: flex-start !important;
+      }
+      /* .align-self-{breakpoint}-end for to align flex items  individually change their
+   alignment on the cross axis end */
+      .align-self-#{$breakpoint}-end {
+          align-self: flex-end !important;
+      }
+      /* .align-self-{breakpoint}-center for to align flex items  individually change their
+   alignment on the cross axis center */
+      .align-self-#{$breakpoint}-center {
+          align-self: center !important;
+      }
+      /* .align-self-{breakpoint}-baseline for to align flex items  individually change their
+   alignment on the cross axis baseline */
+      .align-self-#{$breakpoint}-baseline {
+          align-self: baseline !important;
+      }
+      /* .align-self-{breakpoint}-stretch for to align flex items  individually change their
+   alignment on the cross axis stretch */
+      .align-self-#{$breakpoint}-stretch {
+          align-self: stretch !important;
+      }
+      @for $col from 1 through $max-col {
+          $equation: calc(100% / $max-col) * $col;
+          /* .col-{breakpoint}-{col} to create a column  */
+          .col-#{$breakpoint}-#{$col} {
+              -webkit-box-flex: 0;
+              -ms-flex: 0 0 $equation;
+              flex: 0 0 $equation;
+              max-width: $equation;
+          }
+      }
+  }
+}
+
+.flex-row {
+  flex-direction: row !important;
+}
+.flex-column {
+  flex-direction: column !important;
+}
+.flex-row-reverse {
+  flex-direction: row-reverse !important;
+}
+.flex-column-reverse {
+  flex-direction: column-reverse !important;
+}
+
+.flex-wrap {
+  flex-wrap: wrap !important;
+}
+.flex-nowrap {
+  flex-wrap: nowrap !important;
+}
+.flex-wrap-reverse {
+  flex-wrap: wrap-reverse !important;
+}
+
+.justify-content-start {
+  justify-content: flex-start !important;
+}
+.justify-content-end {
+  justify-content: flex-end !important;
+}
+.justify-content-center {
+  justify-content: center !important;
+}
+.justify-content-between {
+  justify-content: space-between !important;
+}
+.justify-content-around {
+  justify-content: space-around !important;
+}
+
+.align-items-start {
+  align-items: flex-start !important;
+}
+.align-items-end {
+  align-items: flex-end !important;
+}
+.align-items-center {
+  align-items: center !important;
+}
+.align-items-baseline {
+  align-items: baseline !important;
+}
+.align-items-stretch {
+  align-items: stretch !important;
+}
+
+.align-content-start {
+  align-content: flex-start !important;
+}
+.align-content-end {
+  align-content: flex-end !important;
+}
+.align-content-center {
+  align-content: center !important;
+}
+.align-content-between {
+  align-content: space-between !important;
+}
+.align-content-around {
+  align-content: space-around !important;
+}
+.align-content-stretch {
+  align-content: stretch !important;
+}
+
+.align-self-auto {
+  align-self: auto !important;
+}
+.align-self-start {
+  align-self: flex-start !important;
+}
+.align-self-end {
+  align-self: flex-end !important;
+}
+.align-self-center {
+  align-self: center !important;
+}
+.align-self-baseline {
+  align-self: baseline !important;
+}
+.align-self-stretch {
+  align-self: stretch !important;
+}
+// ends
+// creating margin and padding css
+
+@for $width from 0 through $max-width {
+  /* .m-{width}-a to provide margin from top and bottom in px  */
+  .m-#{$width}-a {
+      margin: #{$width}#{$ut} auto !important;
+  }
+  /* .m-a-{width} to provide margin from left and right in px  */
+  .m-a-#{$width} {
+      margin: auto #{$width}#{$ut} !important;
+  }
+  /* .p-t-{width} to provide padding from top in px  */
+  .p-t-#{$width} {
+      padding-top: #{$width}#{$ut} !important;
+  }
+  /* .p-{width}-0 to provide padding from top and bottom in px  */
+  .p-#{$width}-0 {
+      padding: #{$width}#{$ut} 0 !important;
+  }
+  /* .p-r-{width} to provide padding from right in px  */
+  .p-r-#{$width} {
+      padding-right: #{$width}#{$ut} !important;
+  }
+  /* .p-b-{width} to provide padding from bottom in px  */
+  .p-b-#{$width} {
+      padding-bottom: #{$width}#{$ut} !important;
+  }
+  /* .p-l-{width} to provide padding from left in px  */
+  .p-l-#{$width} {
+      padding-left: #{$width}#{$ut} !important;
+  }
+  /* .m-l-{width} to provide margin from left in px  */
+  .m-l-#{$width} {
+      margin-left: #{$width}#{$ut} !important;
+  }
+  /* .m-t-{width} to provide margin from top in px  */
+  .m-t-#{$width} {
+      margin-top: #{$width}#{$ut} !important;
+  }
+  /* .m-r-{width} to provide margin from right in px  */
+  .m-r-#{$width} {
+      margin-right: #{$width}#{$ut} !important;
+  }
+  /* .m-b-{width} to provide margin from bottom in px  */
+  .m-b-#{$width} {
+      margin-bottom: #{$width}#{$ut} !important;
+  }
+}
+// ends
+
+//flex css
+/* .d-flex to provide flex funtionality */
+.d-flex {
+  display: flex;
+  width: 100%;
+  display: flex;
+  display: -webkit-box;
+  display: -moz-box;
+  display: -ms-flexbox;
+  display: -webkit-flex;
+}
+.flex-column {
+  -webkit-box-orient: vertical !important;
+  -webkit-box-direction: normal !important;
+  -ms-flex-direction: column !important;
+  flex-direction: column !important;
+}
+.justify-content-end {
+  justify-content: flex-end !important;
+  -ms-flex-pack: end !important;
+}
+.justify-content-start {
+  -webkit-box-pack: start !important;
+  -ms-flex-pack: start !important;
+  justify-content: flex-start !important;
+}
+.justify-content-center {
+  -webkit-box-pack: center !important;
+  -ms-flex-pack: center !important;
+  justify-content: center !important;
+}
+.d-flex-wrap {
+flex-wrap: wrap !important;
+}
+
+.mr-auto {
+  margin-right: auto !important;
+}
+
+.ml-auto {
+  margin-left: auto !important;
+}
+
+.display-inline-flex {
+  display: inline-flex;
+}
+
+// ends
+
+// btn css
+// common btn css
+[type="button"]:not(:disabled),
+[type="reset"]:not(:disabled),
+[type="submit"]:not(:disabled),
+button:not(:disabled) {
+  cursor: pointer;
+  outline: none;
+}
+/* .btn for inherit common button styling */
+.btn {
+  display: inline-block;
+  font-weight: 400;
+  color: var(--text);
+  text-align: center;
+  vertical-align: middle;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  background-color: transparent;
+  border: 1px solid transparent;
+  padding: 0.375rem 0.75rem;
+  font-size: 0.85em;
+  line-height: 1.5;
+  border-radius: 0.25rem;
+  min-width: 100px;
+  font-family: var(--font-family);
+  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out,
+      box-shadow 0.15s ease-in-out;
+      &:hover:not(:disabled):not(.disabled){
+        background-color: rgba(var(--primary-rgb), 0.09) !important;
+      }
+}
+/* .btn-outline-primary create outline border button styling */
+.btn-outline-primary {
+  color: var(--primary);
+  border-color: var(--primary);
+  &:disabled {
+      cursor: default;
+      color: var(--light-grey);
+      border-color: var(--light-grey);
+  }
+}
+/* .btn + .btn provide margin between two buttons */
+.btn + .btn {
+  margin-left: 10px;
+}
+.btn-text {
+  color: var(--primary) !important;
+  &:disabled,
+  &.disabled {
+      color: var(--light-grey);
+      cursor: default;
+  }
+  &:hover:not(:disabled):not(.disabled) {
+    background-color: rgba(var(--primary-rgb), 0.09);
+  }
+}
+// ends
+
+// utilities
+/*  .text-uppercase for text uppercase */
+.text-uppercase {
+  text-transform: uppercase;
+}
+/* .relative for position relative */
+.relative {
+  position: relative;
+}
+/* .text-light for ligtht color text */
+.text-light {
+  color: rgba(51, 51, 51, 0.6);
+}
+/* .hide to hide the element */
+.hide {
+  display: none;
+}
+/* .color-primary for get primary color  */
+.color-primary {
+  color: var(--primary);
+}
+/* .text-center for align text in center */
+.text-center {
+  text-align: center;
+}
+
+.text-right {
+text-align: right;
+}
+/* .list-none to reset default ul properties */
+.list-none {
+  list-style: none;
+  padding-left: 0px;
+  margin: 0px;
+}
+/* .pull-right to pull items to right side */
+.pull-right {
+  float: right;
+}
+/* .text-capitalize for capitalizing the text*/
+.text-capitalize {
+  text-transform: capitalize;
+}
+/* .text-truncate for truncate the text */
+.text-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* .w-100 for make width 100% */
+.w-100 {
+  width: 100%;
+}
+/* .h-100 for make height 100% */
+.h-100 {
+  height: 100%;
+}
+/* .border-none to remove border */
+.border-none {
+  border: none !important;
+}
+.text-primary {
+  color: var(--text);
+}
+.text-secondary {
+  color: var(--text)
+}
+.text-xs {
+  font-size: 0.75em;
+}
+.v-middle {
+  vertical-align: middle;
+}
+
+
+.warningDiv {
+display: flex;
+justify-content: center;
+
+margin-top: 12px !important;
+padding: 24px;
+background-color: var(--white-color);
+font-size: 14px;
+
+opacity: 0.8;
+color: var(--gray);
+
+.warningIcon {
+  color: var(--primary);
+  opacity: 0.6;
+}
+}
+
+.mat-form-field.mat-form-field-invalid .mat-form-field-ripple,
+.mat-form-field.mat-form-field-invalid .mat-form-field-ripple.mat-accent {
+  background-color: var(--primary) !important;
+}
+
+.mat-form-field.mat-form-field-invalid .mat-form-field-label {
+  color:var(--primary) !important;
+}
+
+// .mat-slide-toggle-thumb::after {
+//   content: url(../images/toggle-off.svg);
+//   position: absolute;
+//   left: 5px;
+//   top: 5px;
+//   font-size: 16px;
+//   color: var(--light-grey);
+//   width: 7.5px;
+//   height: 7.5px;
+//   transform: scale(1.2);
+//   line-height: 6px;
+// }
+
+.mat-slide-toggle.mat-checked:not(.mat-disabled) .mat-slide-toggle-bar {
+  background-color: var(--primary);
+}
+
+.mat-slide-toggle {
+  .mat-slide-toggle-label {
+    .mat-slide-toggle-bar {
+      width: 38px;
+      height: 20px;
+      border-radius: 80px;
+      .mat-slide-toggle-thumb-container {
+        top: 0px;
+        padding: 1px;
+        .mat-slide-toggle-thumb {
+          width: 17.06px;
+          height: 17.14px;
+          border-width: 1px 1px 0px;
+          border-style: solid;
+          border-color: var(--light-grey);
+        }
+      }
+    }
+  }
+}
+
+.mat-slide-toggle-bar {
+  width: 38px;
+  height: 20px;
+  border-radius: 80px;
+}
+
+.mat-slide-toggle.mat-checked .mat-slide-toggle-thumb {
+  background-color: #fff;
+  border-color: var(--primary) !important;
+  right: -1px;
+  position: absolute;
+}
+
+// .mat-slide-toggle.mat-checked:not(.mat-disabled) .mat-slide-toggle-thumb::after {
+//   content: url(../images/toggle-on.svg);
+//   left: 4px;
+//   top: 4px;
+//   font-size: 13px;
+//   color: var(--primary);
+//   line-height: 6px;
+// }
+
+.color-white {
+  color: var(--white-color);
+}
+
+.dropdown-menu-ul{
+  .list-menu-summary{
+    .accStyle{
+        color: var(--header-text)!important;
+    }
+  }
+}
+
+.mat-checkbox-frame {
+  border-color: var(--primary) !important;
+  border-width: 1px !important;
+}
+
+g.axis.axis--y, g.axis.axis--y-left, g.axis.axis--y-right {
+  text {
+    fill: var(--strong-text) !important;
+    line-height: 14px;
+    font-family: 'Lato';
+    font-weight: 400;
+  }
+}
+
+.grey-grid-lines line{
+  stroke: var(--lighter-grey) !important;
+  stroke-width: 1px !important;
+  stroke-opacity: 1 !important;
+  shape-rendering: unset !important;
+}
+
+.display-none {
+  display: none;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.read-only-cursor {
+  cursor: not-allowed;
+}
+
+.nowrap {
+  flex-wrap: nowrap !important;
+}
+
+.width200 {
+  width: 200px;
+}
+
+.width400 {
+  width: 400px !important;
+}
+
+.no-pointer-events {
+  pointer-events: none;
+}
+
+.all-pointer-events {
+  pointer-events: all !important;
+}
+
+ngx-daterangepicker-material {
+  .md-drppicker {
+      min-width: 620px !important;
+      margin-top: 10px;
+      display: flex !important;
+      flex-flow: row;
+      flex-wrap: wrap;
+      padding: 6px 8px 8px 10px !important;
+
+      .ranges {
+          order: 3;
+          float: none;
+          flex: 1 0 100%;
+          display: flex !important;
+
+          ul {
+              margin: 7px 0px 7px 8px;
+              li {
+                  margin: 0px 5px;
+                  display: inline-block;
+
+                  &:hover {
+                      background: transparent;
+                      border-radius: 16px;
+                  }
+
+                  button {
+                      padding: 6px 10px;
+                      background: #f2f2f2;
+                      border-radius: 16px;
+                      color: var(--header-text);
+                      font-size: 12px;
+                      font-weight: 400;
+                      font-family: 'Lato';
+
+                      &.active {
+                          background-color: var(--primary);
+                          color: var(--white-color);
+                      }
+                  }
+
+                  &:first-child {
+                      padding-left: 75px;
+                      vertical-align: middle;
+                      position: relative;
+
+                      &::before {
+                          content: "Quick Select";
+                          display: block;
+                          position: absolute;
+                          left: 0;
+                          top: 50%;
+                          transform: translateY(-50%);
+                      }
+                  }
+              }
+          }
+      }
+
+      .calendar.left,
+      .calendar.right {
+          order: 1;
+      }
+
+      .buttons {
+          order: 4;
+          flex: 1 0 100%;
+      }
+
+      .btn {
+          font-size: 13px;
+          line-height: 24px !important;
+
+          &.clear svg {
+              width: 16px;
+              height: 16px;
+          }
+      }
+
+      &.double {
+          .calendar {
+              td {
+                  &.active {
+                      background-color: var(--primary) !important;
+                      border-radius: 0px !important;
+                      color: var(--white-color) !important;
+
+                      &.off {
+                          background-color: var(--white-color) !important;
+                          border-color: transparent !important;
+                          color: var(--light-grey) !important;
+                      }
+                  }
+              }
+          }
+      }
+  }
+}
+
+.d-block {
+  display: block;
+}
+
+.visibility-hidden {
+  visibility: hidden;
+}

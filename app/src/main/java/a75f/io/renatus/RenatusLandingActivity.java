@@ -18,6 +18,7 @@ import static a75f.io.renatus.bacnet.BacnetBackgroundTaskHandler.BACNET_FD_INTER
 import static a75f.io.renatus.bacnet.BacnetBackgroundTaskHandler.BACNET_FD_IS_AUTO_ENABLED;
 import static a75f.io.renatus.registration.UpdateCCUFragment.abortCCUDownloadProcess;
 import static a75f.io.usbserial.UsbServiceActions.ACTION_USB_REQUIRES_TABLET_REBOOT;
+import static a75f.io.util.DashboardUtilKt.isDashboardConfig;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
@@ -58,7 +59,6 @@ import androidx.fragment.app.FragmentStatePagerAdapter;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
-import com.google.android.material.tabs.TabItem;
 import com.google.android.material.tabs.TabLayout;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -100,12 +100,8 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
     private static CountDownTimer countDownTimer;
     private static final long DISCONNECT_TIMEOUT = 3000;
     private static final long INTERVAL = 1000;
-    private long mStopTimeInFuture;
-    private static final long SCREEN_SWITCH_TIMEOUT_MILLIS = 3600000;
-    //TODO - refactor
-    public boolean settingView = false;
-    private TabItem pageSettingButton;
-    private TabItem pageDashBoardButton;
+    static final long SCREEN_SWITCH_TIMEOUT_MILLIS = 3600000;
+
     private ImageView logo_75f;
     private ImageView powerbylogo;
     private ImageView menuToggle;
@@ -113,7 +109,6 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
     static CloudConnetionStatusThread mCloudConnectionStatus = null;
     private BroadcastReceiver mConnectionChangeReceiver;
     private CcuRefReceiver mCcuRefReceiver = null;
-    private ImageView powerByLogoForCarrier;
 
     private BacnetBackgroundTaskHandler bacnetBackgroundTaskHandler;
 
@@ -169,8 +164,6 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
             btnTabs.setTabMode(TabLayout.MODE_SCROLLABLE);
             logo_75f = findViewById(R.id.logo_75f);
             powerbylogo = findViewById(R.id.powerbylogo);
-            pageSettingButton = findViewById(R.id.pageSettingButton);
-            pageDashBoardButton = findViewById(R.id.pageDashBoardButton);
             configLogo();
 
             btnTabs.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
@@ -199,6 +192,9 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                         tab.setIcon(R.drawable.ic_dashboard_orange);
                         mStatusPagerAdapter = new StatusPagerAdapter(getSupportFragmentManager());
                         mViewPager.setAdapter(mStatusPagerAdapter);
+                        if(!isDashboardConfig(Globals.getInstance().getApplicationContext())) {
+                            mViewPager.setCurrentItem(1);
+                        }
                         mTabLayout.post(() -> mTabLayout.setupWithViewPager(mViewPager, true));
                         if (isZonePassWordRequired()) {
                             showRequestPasswordAlert("Zone Settings Authentication", getString(R.string.ZONE_SETTINGS_PASSWORD_KEY), 0);
@@ -316,8 +312,6 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
     @SuppressLint("LogNotTimber")
     private void startCountDownTimer(long interval) {
         CcuLog.i(TAG,"startCountDownTimer ");
-        mStopTimeInFuture = System.currentTimeMillis() + SCREEN_SWITCH_TIMEOUT_MILLIS;
-
         if (countDownTimer != null)
             countDownTimer.cancel();
 
@@ -393,12 +387,12 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
         menuToggle.setVisibility(View.GONE);
         floorMenu.setVisibility(View.GONE);
         mViewPager.setOffscreenPageLimit(1);
-
         mViewPager.setAdapter(mStatusPagerAdapter);
+        if(!isDashboardConfig(getApplicationContext())) {
+            mViewPager.setCurrentItem(1);
+        }
         btnTabs.getTabAt(1).select();
-
         mTabLayout.post(() -> mTabLayout.setupWithViewPager(mViewPager, true));
-
 
         mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
@@ -608,11 +602,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
 
                 @Override
                 public void onTextChanged(CharSequence charSequence, int i, int i1, int count) {
-                    if (count>0){
-                        posButton.setEnabled(true);
-                    } else {
-                        posButton.setEnabled(false);
-                    }
+                    posButton.setEnabled(count > 0);
                 }
 
                 @Override
@@ -725,12 +715,10 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
 
     private final BroadcastReceiver mUsbEventReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
-            switch (intent.getAction()) {
-                case ACTION_USB_REQUIRES_TABLET_REBOOT:
-                    CcuLog.i("CCU_SERIAL"," SHOW REBOOT DIALOG");
-                    CCUUiUtil.showRebootDialog(RenatusLandingActivity.this);
-                    Toast.makeText(context, "USB device not connected", Toast.LENGTH_LONG).show();
-                    break;
+            if (intent.getAction().equals(ACTION_USB_REQUIRES_TABLET_REBOOT)) {
+                CcuLog.i("CCU_SERIAL", " SHOW REBOOT DIALOG");
+                CCUUiUtil.showRebootDialog(RenatusLandingActivity.this);
+                Toast.makeText(context, "USB device not connected", Toast.LENGTH_LONG).show();
             }
         }
     };
@@ -759,9 +747,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
     private void executeTask() {
         executorService.submit(() -> {
             boolean isPortAvailable = isPortAvailable(5001);
-            this.runOnUiThread(() -> {
-                handleClick(isPortAvailable);
-            });
+            this.runOnUiThread(() -> handleClick(isPortAvailable));
         });
     }
 
@@ -776,7 +762,11 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
         mViewPager.removeAllViews();
         mViewPager.setAdapter(null);
         mStatusPagerAdapter = new StatusPagerAdapter(getSupportFragmentManager());
+        if(!isDashboardConfig(getApplicationContext())) {
+            mViewPager.setCurrentItem(1);
+        }
         mViewPager.setAdapter(mStatusPagerAdapter);
+
     }
 
     @Override

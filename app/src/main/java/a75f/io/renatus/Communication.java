@@ -95,6 +95,7 @@ import a75f.io.renatus.util.DataFd;
 import a75f.io.renatus.util.DataFdObj;
 import a75f.io.renatus.views.CustomCCUSwitch;
 import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
+import a75f.io.util.DashboardUtilKt;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -681,7 +682,9 @@ public class Communication extends Fragment {
             tvScheduleObjects.setVisibility(View.GONE);
             etOffsetValues.setVisibility(View.VISIBLE);
             tvOffsetValue.setVisibility(View.GONE);
-            stopRestServer();
+            if (!DashboardUtilKt.isDashboardConfig(context)) {
+                stopRestServer();
+            }
             sharedPreferences.edit().putBoolean(IS_BACNET_INITIALIZED, false).apply();
             sendBroadCast(context, BROADCAST_BACNET_APP_STOP, "Stop BACnet App");
             performConfigFileBackup();

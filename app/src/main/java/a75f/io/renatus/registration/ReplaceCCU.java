@@ -69,6 +69,7 @@ import a75f.io.logic.cloud.RenatusServicesUrls;
 import a75f.io.logic.cloud.ResponseCallback;
 import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.messaging.client.MessagingClient;
+import a75f.io.messaging.handler.DashboardHandlerKt;
 import a75f.io.renatus.R;
 import a75f.io.renatus.UtilityApplication;
 import a75f.io.renatus.util.CCUListAdapter;
@@ -76,6 +77,7 @@ import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.util.ProgressDialogUtils;
 import a75f.io.sitesequencer.SequenceManager;
+import a75f.io.util.DashboardUtilKt;
 import a75f.io.util.ExecutorTask;
 
 public class ReplaceCCU extends Fragment implements CCUSelect {
@@ -629,6 +631,7 @@ public class ReplaceCCU extends Fragment implements CCUSelect {
         prefs.setString(BacnetConfigConstants.BACNET_BBMD_CONFIGURATION, bacnet_pref.getString(BacnetConfigConstants.BACNET_BBMD_CONFIGURATION,null));
         prefs.setString(BacnetConfigConstants.BACNET_FD_CONFIGURATION, bacnet_pref.getString(BacnetConfigConstants.BACNET_FD_CONFIGURATION,null));
         prefs.setString(BacnetConfigConstants.BACNET_DEVICE_TYPE, bacnet_pref.getString(BacnetConfigConstants.BACNET_DEVICE_TYPE,null));
+        DashboardHandlerKt.getDashboardConfiguration();
     }
 
     private void performSiteSyncIfNotCompleted(ConcurrentHashMap<String, ?> currentReplacementProgress,

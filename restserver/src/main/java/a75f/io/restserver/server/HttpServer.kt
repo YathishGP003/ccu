@@ -2,10 +2,12 @@ package a75f.io.restserver.server
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.HisItem
+import a75f.io.api.haystack.Tags
 import a75f.io.api.haystack.util.LevelData
 import a75f.io.api.haystack.util.ReadAllResponse
 import a75f.io.api.haystack.util.retrieveLevelValues
 import a75f.io.logger.CcuLog
+import a75f.io.logic.Globals
 import a75f.io.logic.L
 import a75f.io.logic.interfaces.ModbusDataInterface
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.HTTP_SERVER_STATUS
@@ -37,13 +39,17 @@ import io.ktor.websocket.WebSockets
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.json.JSONArray
+import org.json.JSONObject
 import org.projecthaystack.HGrid
 import org.projecthaystack.HGridBuilder
+import org.projecthaystack.HRef
 import org.projecthaystack.HRow
 import org.projecthaystack.UnknownRecException
 import org.projecthaystack.io.HZincReader
 import org.projecthaystack.io.HZincWriter
 import java.util.concurrent.TimeUnit
+import java.util.regex.Pattern
 
 class HttpServer {
 
@@ -61,6 +67,10 @@ class HttpServer {
             }
             return instance
         }
+    }
+
+    fun isServerRunning(): Boolean {
+        return sharedPreferences!!.getBoolean(HTTP_SERVER_STATUS, false)
     }
 
     fun startServer() {
@@ -99,6 +109,8 @@ class HttpServer {
                 method(HttpMethod.Post)
                 method(HttpMethod.Delete)
                 anyHost()
+                allowNonSimpleContentTypes = true
+                host("*")
             }
             // Greatly reduces the amount of data that's needed to be sent to the client by
             // gzipping outgoing content when applicable.
@@ -265,7 +277,7 @@ class HttpServer {
                 get("/pointWrite/{id}") {
                     CcuLog.i(HTTP_SERVER, "called API: /pointWrite/{id} ")
                     val id = call.parameters["id"]
-                    val response = CCUHsApi.getInstance().readPointArr("@"+id)
+                    val response = CCUHsApi.getInstance().readPointArr("@$id")
                     CcuLog.i(HTTP_SERVER, " response: $response")
                     call.respond(HttpStatusCode.OK, BaseResponse(response))
                 }
@@ -304,6 +316,181 @@ class HttpServer {
                             call.respond(HttpStatusCode.OK, BaseResponse(HttpStatusCode.NoContent))
                         }
                     }
+                }
+
+
+                // Dashboard API's with JSON format response
+
+                /*
+                URL     : 192.168.1.5:5001/hisReadMany
+	            Body    :
+		            cd0dba2c-032a-41d4-a1db-0e1fc246720d,cd0dba2c-032a-41d4-a1db-0e1fc246720d,cd0dba2c-032a-41d4-a1db-0e1fc246720d
+                Response :
+                    [{"id":"cd0dba2c-032a-41d4-a1db-0e1fc246720d","value":0,"unit":"kVAR"},
+                     {"id":"cd0dba2c-032a-41d4-a1db-0e1fc246720d","value":0,"unit":"kVAR"},
+                     {"id":"cd0dba2c-032a-41d4-a1db-0e1fc246720d","value":0,"unit":"kVAR"}]
+                 */
+
+                post("/hisReadMany") {
+                    val ids = call.receive<String>()
+                    CcuLog.i(HTTP_SERVER," hisReadMany: $ids")
+                    val responseData = JSONArray()
+                    val haystack = CCUHsApi.getInstance()
+                    if (ids.isNotBlank()) {
+                        val items: Iterator<*> = getHGridData(ids).iterator()
+                        while (items.hasNext()) {
+                            val entity = items.next() as HRow
+                            val id = entity["id"].toString()
+                            val item = JSONObject()
+                            item.put("id", entity["id"])
+                            item.put("value", haystack.readHisValById(id))
+                            if (entity.has("unit")) {
+                                item.put("unit", entity["unit"])
+                            }
+                            responseData.put(item)
+                            CcuLog.i(HTTP_SERVER, "item : $item")
+                        }
+                        call.respond(HttpStatusCode.OK, responseData.toString())
+                    } else {
+                        call.respond(HttpStatusCode.BadRequest, "Invalid request")
+                    }
+                }
+
+                /*
+               URL     : 192.168.1.5:5001/pointWriteMany
+               Body    :
+                   cd0dba2c-032a-41d4-a1db-0e1fc246720d,cd0dba2c-032a-41d4-a1db-0e1fc246720d,cd0dba2c-032a-41d4-a1db-0e1fc246720d
+               Response :
+                   [{"id":"cd0dba2c-032a-41d4-a1db-0e1fc246720d","value":0,"unit":"kVAR"},
+                    {"id":"cd0dba2c-032a-41d4-a1db-0e1fc246720d","value":0,"unit":"kVAR"},
+                    {"id":"cd0dba2c-032a-41d4-a1db-0e1fc246720d","value":0,"unit":"kVAR"}]
+                */
+
+                post("/pointWriteMany") {
+                    val ids = call.receive<String>()
+                    CcuLog.i(HTTP_SERVER," pointWriteMany: $ids")
+                    val responseData = JSONArray()
+                    if (ids.isNotBlank()) {
+                        val items: Iterator<*> = getHGridData(ids).iterator()
+                        while (items.hasNext()) {
+                            val entity = items.next() as HRow
+                            if (entity.has("writable")) {
+                                val id = entity["id"].toString()
+                                val item = JSONObject()
+                                item.put("id", entity["id"])
+                                item.put("value", readWritablePointValue(id))
+                                if (entity.has("unit")) {
+                                    item.put("unit", entity["unit"])
+                                }
+                                responseData.put(item)
+                                CcuLog.i(HTTP_SERVER, "item : $item")
+                            }
+                        }
+                        call.respond(HttpStatusCode.OK, responseData.toString())
+                    } else {
+                        call.respond(HttpStatusCode.BadRequest, "Invalid request")
+                    }
+                }
+
+                /*
+               URL     : 192.168.1.5:5001/query
+               Body    :
+                   tuner and point
+               Response :
+                     [
+                     {"dab":"marker","tz":"Kolkata","roomRef":"SYSTEM","createdDateTime":"2025-01-03T12:08:06.232+00:00 UTC","point":"marker"},
+                     {"dab":"marker","tz":"Kolkata","roomRef":"SYSTEM","createdDateTime":"2025-01-03T12:08:06.232+00:00 UTC","point":"marker"},
+                     {"dab":"marker","tz":"Kolkata","roomRef":"SYSTEM","createdDateTime":"2025-01-03T12:08:06.232+00:00 UTC","point":"marker"}]
+                */
+
+                post("/query") {
+                    val query = call.receive<String>()
+                    CcuLog.i(HTTP_SERVER, " /query  : $query")
+
+                    if (query != null) {
+                        val entities = CCUHsApi.getInstance().readAllEntities(getModifiedQuery(query))
+                        if (entities.isNullOrEmpty()) {
+                            call.respond(HttpStatusCode.BadRequest, "No points found for the query")
+                        } else {
+                            val response = JSONArray()
+                            entities.forEach { entity ->
+                                val responseEntity = JSONObject()
+                                entity.forEach { (key, value) ->
+                                    responseEntity.put(key as String, value)
+                                }
+                                response.put(responseEntity)
+                            }
+                            call.respond(HttpStatusCode.OK, response.toString())
+                        }
+                    } else {
+                        call.respond(HttpStatusCode.BadRequest)
+                    }
+                }
+
+                /*
+                URL     : 192.168.1.5:5001/writeManyDefaultValues
+                Body    :
+                   2fe44a56-919f-46b7-8741-1ea0467aeb78 = 2,
+                 */
+
+                post("/writeManyDefaultValues") {
+                    val body = call.receive<String>()
+                    CcuLog.i(HTTP_SERVER, " /writeManyDefaultValues  : $body")
+                    if (body.isNotEmpty()) {
+                        try {
+                            val dataItems = JSONObject(body)
+                            val idsStatus = JSONArray()
+                            val haystack = CCUHsApi.getInstance()
+                            if (dataItems.length() > 0) {
+                                dataItems.keys().forEach { key ->
+                                    if (key.isEmpty()) {
+                                        return@forEach
+                                    }
+                                    val id = key.trim()
+                                    val value = dataItems.get(id)
+                                    val entity = haystack.readMapById(id)
+                                    if (entity.isEmpty()) {
+                                        idsStatus.put(JSONObject().put(id, "Id not found"))
+                                    } else if (entity.containsKey(Tags.WRITABLE)) {
+                                        when (value) {
+                                            is Number -> {
+                                                haystack.writeDefaultValById(id, value.toDouble())
+                                                haystack.writeHisValById(id, haystack.readPointPriorityVal(id))
+                                                idsStatus.put(JSONObject().put(id, "Updated successfully"))
+                                            }
+                                            is String -> {
+                                                haystack.writeDefaultValById(id, value)
+                                                idsStatus.put(JSONObject().put(id, "Updated successfully"))
+                                            }
+                                            else -> {}
+                                        }
+                                    } else {
+                                        idsStatus.put(JSONObject().put(id, "ID does not have writable tag"))
+                                    }
+                                }
+                            } else {
+                                call.respond(
+                                    HttpStatusCode.NotFound,
+                                    BaseResponse("Invalid request")
+                                )
+                            }
+                            call.respond(HttpStatusCode.OK, idsStatus.toString())
+
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                            call.respond(
+                                HttpStatusCode.InternalServerError,
+                                BaseResponse("Exception ${e.message} ${e.stackTrace}")
+                            )
+                        }
+                    } else {
+                        call.respond(HttpStatusCode.NotFound, BaseResponse("Invalid request"))
+                    }
+                }
+
+                get("/getDashboardConfiguration") {
+                    CcuLog.i(HTTP_SERVER," getDashboardConfiguration")
+                    call.respond(HttpStatusCode.OK, getDashboardConfiguration())
                 }
             }
         }
@@ -351,10 +538,7 @@ class HttpServer {
 
     private fun isHeartBeatPoint(filterKey : String, pointId : String): Boolean {
         val pointMap = CCUHsApi.getInstance().readMapById(pointId)
-        if(pointMap != null && pointMap[filterKey] != null){
-            return true
-        }
-        return false
+        return pointMap != null && pointMap[filterKey] != null
     }
 
     private fun getHisItemByIdAndRange(pointId: String, range: String): HisItem? {
@@ -371,5 +555,66 @@ class HttpServer {
         }
 
         return hisItem
+    }
+
+    private fun getDashboardConfiguration(): String {
+        val sharedPreferences: SharedPreferences =
+            Globals.getInstance().applicationContext.getSharedPreferences(
+                "dashboard",
+                Context.MODE_PRIVATE
+            )
+        return sharedPreferences.getString("config", "") ?: ""
+    }
+
+    private fun getModifiedQuery(query: String) : String {
+        var modifiedQuery = query.replace("\\", "")
+        modifiedQuery = fixInvertedCommas(modifiedQuery)
+        CcuLog.i(HTTP_SERVER, " /modifiedQuery  : $modifiedQuery")
+        return modifiedQuery
+    }
+
+    private fun fixInvertedCommas(input: String): String {
+        // Define the pattern
+        val pattern = Pattern.compile("==\\s*([@\\w-]+)")
+
+        // Match the pattern against the input
+        val matcher = pattern.matcher(input)
+
+        // StringBuffer to build the modified string
+        val result = StringBuffer()
+
+        // Find and replace the pattern
+        while (matcher.find()) {
+            // Extract the value after "=="
+            val extractedValue = matcher.group(1)
+
+            // Add inverted commas around the extracted value
+            val replacement = "==\"$extractedValue\""
+
+            // Replace the matched part with the modified value
+            matcher.appendReplacement(result, replacement)
+        }
+
+        // Append the remaining part of the input
+        matcher.appendTail(result)
+        val finalResult = result.toString()
+        // Print the modified string
+        return finalResult
+    }
+
+    private fun readWritablePointValue(id: String): String {
+        return try {
+            CCUHsApi.getInstance().readPointPriorityVal(id).toString()
+        } catch (exception: NumberFormatException){
+            CCUHsApi.getInstance().readDefaultStrValById(id).toString()
+        }
+    }
+
+    private fun getHGridData(ids: String): HGrid {
+        val idList = ids.split(",")
+        val refined = mutableListOf<HRef>()
+        idList.forEach { refined.add(HRef.copy(it)) }
+        val finalRes = refined.toTypedArray<HRef>()
+        return CCUHsApi.getInstance().readHDictByIds(finalRes)
     }
 }

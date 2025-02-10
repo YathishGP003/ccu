@@ -11,7 +11,6 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.net.ConnectivityManager;
-import android.net.DhcpInfo;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 
@@ -63,6 +62,8 @@ import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.logic.watchdog.Watchdog;
 import a75f.io.messaging.MessageHandlerSubscriber;
 import a75f.io.messaging.client.MessagingClient;
+import a75f.io.messaging.handler.DashboardHandler;
+import a75f.io.messaging.handler.DashboardHandlerKt;
 import a75f.io.messaging.handler.DataSyncHandler;
 import a75f.io.messaging.service.MessageCleanUpWork;
 import a75f.io.messaging.service.MessageRetryHandlerWork;
@@ -76,15 +77,15 @@ import a75f.io.renatus.views.RebootDataCache;
 import a75f.io.restserver.server.HttpServer;
 import a75f.io.sitesequencer.SequenceManager;
 import a75f.io.usbserial.SerialEvent;
+import a75f.io.util.DashboardListener;
+import a75f.io.util.DashboardUtilKt;
 
 /**
  * Created by rmatt isOn 7/19/2017.
  */
 
 public abstract class UtilityApplication extends Application {
-    private static final String TAG = "UtilityApplication";
 
-    public static DhcpInfo dhcpInfo;
     public static WifiManager wifiManager;
     public static Context context = null;
 
@@ -100,6 +101,18 @@ public abstract class UtilityApplication extends Application {
     private static final String MOUNT_COMMAND = "mount -o %s,remount /system";
     private static final String INIT_BIN_DIR = "/system/bin/";
     private static final String INIT_RC_DIR = "/system/etc/init/";
+    private final DashboardListener dashboardListener = isDashboardConfigured -> {
+        CcuLog.i("DASHBOARD", "dashboardListener : "+isDashboardConfigured);
+        if (isDashboardConfigured) {
+            if (!HttpServer.Companion.getInstance(context).isServerRunning()) {
+                startRestServer();
+            }
+        } else {
+            if (!isBACnetIntialized()) {
+                stopRestServer();
+            }
+        }
+    };
 
     public static boolean isRoomDbReady = false;
     @Inject
@@ -138,16 +151,6 @@ public abstract class UtilityApplication extends Application {
 
         //Remove this Equip Manager once all modbus models are migrated from Domain modeler
         EquipsManager.getInstance(this).setApplicationContext(this);
-
-        /*CCUHsApi hayStack = CCUHsApi.getInstance();
-        HashMap<Object, Object> site = hayStack.readEntity("site");
-        if (!site.isEmpty()) {
-            Instabug.setUserAttribute("Site",site.get(Tags.DIS).toString());
-        }
-        HashMap<Object, Object> ccu = hayStack.readEntity("device and ccu");
-        if (!ccu.isEmpty()) {
-            Instabug.setUserAttribute("CCU",ccu.get(Tags.ID).toString()+":"+ccu.get(Tags.DIS));
-        }*/
         Globals.getInstance().startTimerTask();
         RenatusServicesUrls renatusServicesUrls = RenatusServicesEnvironment.getInstance().getUrls();
         SequenceManager.getInstance(context, renatusServicesUrls.getSequencerUrl())
@@ -182,6 +185,8 @@ public abstract class UtilityApplication extends Application {
         cache.restoreOtaRequests(context);
         CCUUtils.setCCUReadyProperty("false");
         initNetworkConfig();
+        checkAndServerStatus();
+        DashboardHandler.Companion.setDashboardListener(dashboardListener);
         CcuLog.i("UI_PROFILING", "UtilityApplication.onCreate Done");
         CcuLog.i("CCU_DB", "postProcessingInit - end");
     }
@@ -230,7 +235,6 @@ public abstract class UtilityApplication extends Application {
         Process process = Runtime.getRuntime().exec("su");
         StringBuilder output = new StringBuilder();
 
-        String line = null;
         InputStream stdout = process.getInputStream();
         InputStream es = process.getErrorStream();
         DataOutputStream commandInput = new DataOutputStream(process.getOutputStream());
@@ -291,7 +295,7 @@ public abstract class UtilityApplication extends Application {
                     installationCorrect = false;
                     break;
                 default: // Some other error
-                    CcuLog.e(L.TAG_CCU_INIT, "Error checking " + INIT_SCRIPT_FILE + " installation, return code " + String.valueOf(status));
+                    CcuLog.e(L.TAG_CCU_INIT, "Error checking " + INIT_SCRIPT_FILE + " installation, return code " + status);
                     installationCorrect = false;
                     break;
             }
@@ -318,7 +322,7 @@ public abstract class UtilityApplication extends Application {
                     installationCorrect = false;
                     break;
                 default: // Some other error
-                    CcuLog.e(L.TAG_CCU_INIT, "Error checking " + INIT_RC_FILE + " installation, return code " + String.valueOf(status));
+                    CcuLog.e(L.TAG_CCU_INIT, "Error checking " + INIT_RC_FILE + " installation, return code " + status);
                     installationCorrect = false;
                     break;
             }
@@ -631,6 +635,13 @@ public abstract class UtilityApplication extends Application {
             }
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    private static void checkAndServerStatus() {
+        DashboardHandlerKt.getDashboardConfiguration();
+        if (DashboardUtilKt.isDashboardConfig(Globals.getInstance().getApplicationContext()) || isBACnetIntialized()) {
+            startRestServer();
         }
     }
 }

@@ -1,13 +1,14 @@
 package a75f.io.renatus;
 
+import static a75f.io.renatus.RenatusLandingActivity.SCREEN_SWITCH_TIMEOUT_MILLIS;
 import static a75f.io.renatus.RenatusLandingActivity.btnTabs;
 import static a75f.io.renatus.RenatusLandingActivity.mTabLayout;
 import static a75f.io.renatus.RenatusLandingActivity.mViewPager;
+import static a75f.io.util.DashboardUtilKt.isDashboardConfig;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.os.CountDownTimer;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -40,11 +41,11 @@ import a75f.io.api.haystack.Floor;
 import a75f.io.api.haystack.HSUtil;
 import a75f.io.api.haystack.Zone;
 import a75f.io.device.mesh.ThermistorUtil;
-import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.ZoneProfile;
 import a75f.io.renatus.util.ZoneSorter;
+import a75f.io.util.DashboardUtilKt;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -126,7 +127,7 @@ public class TempOverrideFragment extends Fragment {
     }
 
     private void startCountDownTimer() {
-        countDownTimer = new CountDownTimer(3601000, 1000) {
+        countDownTimer = new CountDownTimer(SCREEN_SWITCH_TIMEOUT_MILLIS, 1000) {
             @Override
             public void onTick(long l) {
                 long millis = l;
@@ -140,6 +141,9 @@ public class TempOverrideFragment extends Fragment {
                 if (getActivity() != null) {
                     StatusPagerAdapter mStatusPagerAdapter = new StatusPagerAdapter(getActivity().getSupportFragmentManager());
                     mViewPager.setAdapter(mStatusPagerAdapter);
+                    if(!isDashboardConfig(Globals.getInstance().getApplicationContext())) {
+                        mViewPager.setCurrentItem(1);
+                    }
                     if (btnTabs.getSelectedTabPosition() != 0) {
                         btnTabs.getTabAt(1).select();
                         mTabLayout.post(() -> mTabLayout.setupWithViewPager(mViewPager, true));

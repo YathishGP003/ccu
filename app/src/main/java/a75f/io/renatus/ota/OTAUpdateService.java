@@ -363,54 +363,58 @@ public class OTAUpdateService extends IntentService {
     }
 
     private void handleNodeReboot(byte[] eventBytes) {
+        try {
+            SnRebootIndicationMessage_t msg = new SnRebootIndicationMessage_t();
+            msg.setByteBuffer(ByteBuffer.wrap(eventBytes).order(ByteOrder.LITTLE_ENDIAN), 0);
 
-        SnRebootIndicationMessage_t msg = new SnRebootIndicationMessage_t();
-        msg.setByteBuffer(ByteBuffer.wrap(eventBytes).order(ByteOrder.LITTLE_ENDIAN), 0);
-
-        if(msg.smartNodeDeviceType == null){
-            CcuLog.d(TAG, " SmartNode device type is null" );
-            return;
-        }
-        CcuLog.d(TAG, "Node: "+msg.smartNodeAddress.get() + " Device :"+msg.smartNodeDeviceType.get() + " Device Rebooted");
-        if (msg.smartNodeDeviceType.get() != FirmwareDeviceType_t.FIRMWARE_DEVICE_CONTROL_MOTE
-                && mCurrentLwMeshAddress != msg.smartNodeAddress.get()) {
-            CcuLog.d(TAG, mCurrentLwMeshAddress+ " != "+msg.smartNodeAddress.get());
-            return;
-        }
-        CcuLog.d(TAG, "mUpdateInProgress : "+mUpdateInProgress);
-       if (( msg.smartNodeDeviceType.get() == FirmwareDeviceType_t.FIRMWARE_DEVICE_CONTROL_MOTE ||
-                (msg.smartNodeAddress.get() == mCurrentLwMeshAddress)) && mUpdateInProgress) {
-            sendBroadcast(new Intent(Globals.IntentActions.OTA_UPDATE_NODE_REBOOT));
-
-            short versionMajor = msg.smartNodeMajorFirmwareVersion.get();
-            short versionMinor = msg.smartNodeMinorFirmwareVersion.get();
-            String ccuName = Domain.ccuDevice.getCcuDisName();
-           AlertGenerateHandler.handleDeviceMessage(FIRMWARE_OTA_UPDATE_ENDED, "Firmware OTA update for"+" "+ccuName+" "+
-                    "ended for "+mFirmwareDeviceType.getUpdateFileName()+" "+ mCurrentLwMeshAddress+" "+"with version"+" "+versionMajor +
-                    // changed Smart node to Smart Device as it is indicating the general name (US:9387)
-                    "." + versionMinor, getDeviceId(String.valueOf(mFirmwareDeviceType), mCurrentLwMeshAddress));
-           CcuLog.d(TAG, mUpdateWaitingToComplete + " - "+versionMajor+" - "+versionMinor);
-            if (mUpdateWaitingToComplete && versionMatches(versionMajor, versionMinor)) {
-                CcuLog.d(TAG, "[UPDATE] [SUCCESSFUL]"
-                        + " [Node Address:" + mCurrentLwMeshAddress + "]"   // updated to Node address from SN as
-                        // Node address is more generic and mCurrentLwMeshAddress contains generic node address (US:9387)
-                        + " [PACKETS:" + mLastSentPacket
-                        + "] Updated to target: " + versionMajor + "." + versionMinor);
-                OtaStatusDiagPoint.Companion.updateOtaStatusPoint(OtaStatus.OTA_SUCCEEDED, mCurrentLwMeshAddress);
-            } else {
-                CcuLog.d(TAG, "[UPDATE] [FAILED]"
-                        + " [Node Address:" + mCurrentLwMeshAddress + "]"
-                        + " [PACKETS:" + mLastSentPacket + "]"
-                        + " [TARGET: " + mVersionMajor
-                        + "." + mVersionMinor
-                        + "] [ACTUAL: " + versionMajor + "." + versionMinor + "]");
-                OtaStatusDiagPoint.Companion.updateOtaStatusPoint(OtaStatus.OTA_CM_TO_DEVICE_FAILED, mCurrentLwMeshAddress);
+            if (msg.smartNodeDeviceType == null) {
+                CcuLog.d(TAG, " SmartNode device type is null");
+                return;
             }
-            OtaStatus nodeStatus = DeviceUtil.getNodeStatus(msg.nodeStatus.get());
-            if (nodeStatus != OtaStatus.NO_INFO)
-                OtaStatusDiagPoint.Companion.updateOtaStatusPoint(nodeStatus, mCurrentLwMeshAddress);
+            CcuLog.d(TAG, "Node: " + msg.smartNodeAddress.get() + " Device :" + msg.smartNodeDeviceType.get() + " Device Rebooted");
+            if (msg.smartNodeDeviceType.get() != FirmwareDeviceType_t.FIRMWARE_DEVICE_CONTROL_MOTE
+                    && mCurrentLwMeshAddress != msg.smartNodeAddress.get()) {
+                CcuLog.d(TAG, mCurrentLwMeshAddress + " != " + msg.smartNodeAddress.get());
+                return;
+            }
+            CcuLog.d(TAG, "mUpdateInProgress : " + mUpdateInProgress);
+            if ((msg.smartNodeDeviceType.get() == FirmwareDeviceType_t.FIRMWARE_DEVICE_CONTROL_MOTE ||
+                    (msg.smartNodeAddress.get() == mCurrentLwMeshAddress)) && mUpdateInProgress) {
+                sendBroadcast(new Intent(Globals.IntentActions.OTA_UPDATE_NODE_REBOOT));
 
-            moveUpdateToNextNode();
+                short versionMajor = msg.smartNodeMajorFirmwareVersion.get();
+                short versionMinor = msg.smartNodeMinorFirmwareVersion.get();
+                String ccuName = Domain.ccuDevice.getCcuDisName();
+                AlertGenerateHandler.handleDeviceMessage(FIRMWARE_OTA_UPDATE_ENDED, "Firmware OTA update for" + " " + ccuName + " " +
+                        "ended for " + mFirmwareDeviceType.getUpdateFileName() + " " + mCurrentLwMeshAddress + " " + "with version" + " " + versionMajor +
+                        // changed Smart node to Smart Device as it is indicating the general name (US:9387)
+                        "." + versionMinor, getDeviceId(String.valueOf(mFirmwareDeviceType), mCurrentLwMeshAddress));
+                CcuLog.d(TAG, mUpdateWaitingToComplete + " - " + versionMajor + " - " + versionMinor);
+                if (mUpdateWaitingToComplete && versionMatches(versionMajor, versionMinor)) {
+                    CcuLog.d(TAG, "[UPDATE] [SUCCESSFUL]"
+                            + " [Node Address:" + mCurrentLwMeshAddress + "]"   // updated to Node address from SN as
+                            // Node address is more generic and mCurrentLwMeshAddress contains generic node address (US:9387)
+                            + " [PACKETS:" + mLastSentPacket
+                            + "] Updated to target: " + versionMajor + "." + versionMinor);
+                    OtaStatusDiagPoint.Companion.updateOtaStatusPoint(OtaStatus.OTA_SUCCEEDED, mCurrentLwMeshAddress);
+                } else {
+                    CcuLog.d(TAG, "[UPDATE] [FAILED]"
+                            + " [Node Address:" + mCurrentLwMeshAddress + "]"
+                            + " [PACKETS:" + mLastSentPacket + "]"
+                            + " [TARGET: " + mVersionMajor
+                            + "." + mVersionMinor
+                            + "] [ACTUAL: " + versionMajor + "." + versionMinor + "]");
+                    OtaStatusDiagPoint.Companion.updateOtaStatusPoint(OtaStatus.OTA_CM_TO_DEVICE_FAILED, mCurrentLwMeshAddress);
+                }
+                OtaStatus nodeStatus = DeviceUtil.getNodeStatus(msg.nodeStatus.get());
+                if (nodeStatus != OtaStatus.NO_INFO)
+                    OtaStatusDiagPoint.Companion.updateOtaStatusPoint(nodeStatus, mCurrentLwMeshAddress);
+
+                moveUpdateToNextNode();
+            }
+        } catch (Exception e) {
+            //CCU should not crash if an older CM sends incorrectly formatted message.
+            CcuLog.e(TAG, "Error parsing node reboot message: " + e.getMessage());
         }
     }
 

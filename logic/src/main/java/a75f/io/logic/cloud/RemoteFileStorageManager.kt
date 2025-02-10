@@ -1,8 +1,10 @@
 package a75f.io.logic.cloud
 
 import a75f.io.logger.CcuLog
+import a75f.io.logic.L
 import a75f.io.logic.L.TAG_CCU
 import a75f.io.logic.cloudservice.FileStorageService
+import a75f.io.logic.logtasks.UploadLogs
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.asRequestBody
@@ -40,6 +42,7 @@ class RemoteFileStorageManager(
       container: String,
       siteId: String,
       fileId: String,
+      logType : String
    ) {
       // create RequestBody instance from file
       val requestBody: RequestBody = file.asRequestBody(mimeType.toMediaTypeOrNull())
@@ -60,7 +63,14 @@ class RemoteFileStorageManager(
          }
 
          override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
-            CcuLog.i(TAG_CCU, "Upload success")
+            CcuLog.i(TAG_CCU, "Upload file response : ${response}")
+            if(response.code() == 500 || response.code() == 403) return
+
+            when (logType) {
+               L.TAG_CCU_LOGS ->   UploadLogs.instanceOf().updateFileData(null, null, L.TAG_CCU_LOGS)
+               L.TAG_SEQUENCER_LOGS -> UploadLogs.instanceOf().updateFileData(null,null, L.TAG_SEQUENCER_LOGS)
+               L.TAG_ALERT_LOGS -> UploadLogs.instanceOf().updateFileData(null,null, L.TAG_ALERT_LOGS)
+            }
          }
       })
    }

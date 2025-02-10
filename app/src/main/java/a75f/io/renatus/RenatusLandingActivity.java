@@ -589,7 +589,6 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
     @Override
     public void onPause() {
         super.onPause();
-        RemoteCommandUpdateHandler.setRemoteCommandInterface(null);
     }
 
     @Override

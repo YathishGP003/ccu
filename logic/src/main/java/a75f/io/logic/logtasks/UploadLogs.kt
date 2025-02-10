@@ -8,7 +8,7 @@ import a75f.io.logic.cloud.RemoteFileStorageManager
 import a75f.io.logic.cloudservice.ServiceGenerator
 import a75f.io.logic.filesystem.FileSystemTools
 import a75f.io.logic.reportNull
-import android.os.Environment
+import android.preference.PreferenceManager
 import java.io.File
 
 /**
@@ -89,12 +89,15 @@ class UploadLogs(
       // drop the "@"
       val siteId = if (siteRef.startsWith("@")) siteRef.drop(1) else siteRef
 
+      updateFileData(fileSystemTools.getFilePath(listOfFiles, fileId), fileId, L.TAG_CCU_LOGS)
+
       fileStorageManager.uploadFile(
          zipFile,
          mimeType =  "application/zip",
          container = "cculogs",
          siteId = siteId,
-         fileId = fileId)
+         fileId = fileId,
+         logType = L.TAG_CCU_LOGS)
 
       CcuLog.i(L.TAG_CCU, "file uploaded")
    }
@@ -133,12 +136,15 @@ class UploadLogs(
       // drop the "@"
       val siteId = if (siteRef.startsWith("@")) siteRef.drop(1) else siteRef
 
+      updateFileData(fileSystemTools.getFilePath(listOfFiles, fileId), fileId, L.TAG_SEQUENCER_LOGS)
+
       fileStorageManager.uploadFile(
          zipFile!!,
          mimeType =  "application/zip",
          container = "seqlogs",
          siteId = siteId,
-         fileId = fileId)
+         fileId = fileId,
+         logType = L.TAG_SEQUENCER_LOGS)
 
       CcuLog.i(TAG_CCU_SITE_SEQUENCER, "sequencer log files uploaded")
    }
@@ -173,13 +179,98 @@ class UploadLogs(
       // drop the "@"
       val siteId = if (siteRef.startsWith("@")) siteRef.drop(1) else siteRef
 
+      updateFileData(fileSystemTools.getFilePath(listOfFiles, fileId), fileId, L.TAG_ALERT_LOGS)
+
       fileStorageManager.uploadFile(
          zipFile!!,
          mimeType =  "application/zip",
          container = "alertlogs",
          siteId = siteId,
-         fileId = fileId)
+         fileId = fileId,
+         logType = L.TAG_ALERT_LOGS)
 
       CcuLog.i("CCU_ALERTS", "alerts log files uploaded")
+   }
+
+   fun syncUnSyncedLogFiles() {
+      val defaultSharedPref =
+         PreferenceManager.getDefaultSharedPreferences(Globals.getInstance().applicationContext)
+      val ccuLogFilePath = defaultSharedPref.getString(L.TAG_CCU_LOGS_FILE_PATH, null)
+      val ccuLogFileId = defaultSharedPref.getString(L.TAG_CCU_LOGS_FILE_ID, null)
+      val sequencerLogFilePath = defaultSharedPref.getString(L.TAG_SEQUENCER_LOGS_FILE_PATH, null)
+      val sequencerLogFileId = defaultSharedPref.getString(L.TAG_SEQUENCER_LOGS_FILE_ID, null)
+      val alertLogFilePath = defaultSharedPref.getString(L.TAG_ALERT_LOGS_FILE_PATH, null)
+      val alertLogFileId = defaultSharedPref.getString(L.TAG_ALERT_LOGS_FILE_ID, null)
+
+      try {
+         if (ccuLogFilePath != null && ccuLogFileId != null) {
+            CcuLog.i(
+               L.TAG_CCU,
+               "syncUnSyncedLogFiles ccuLogFilePath -> $ccuLogFilePath, ccuLogFileId -> $ccuLogFileId"
+            )
+            fileStorageManager.uploadFile(
+               File(ccuLogFilePath),
+               mimeType = "application/zip",
+               container = "cculogs",
+               siteId = haystackApi.siteIdRef.toString().replace("@", ""),
+               fileId = ccuLogFileId,
+               logType = L.TAG_CCU_LOGS
+            )
+         }
+
+         if (sequencerLogFilePath != null && sequencerLogFileId != null) {
+            CcuLog.i(
+               L.TAG_CCU,
+               "syncUnSyncedLogFiles sequencerLogFilePath -> $sequencerLogFilePath, sequencerLogFileId -> $sequencerLogFileId"
+            )
+            fileStorageManager.uploadFile(
+               File(sequencerLogFilePath),
+               mimeType = "application/zip",
+               container = "seqlogs",
+               siteId = haystackApi.siteIdRef.toString().replace("@", ""),
+               fileId = sequencerLogFileId,
+               logType = L.TAG_SEQUENCER_LOGS
+            )
+         }
+
+         if (alertLogFilePath != null && alertLogFileId != null) {
+            CcuLog.i(
+               L.TAG_CCU,
+               "syncUnSyncedLogFiles alertLogFilePath -> $alertLogFilePath, alertLogFileId -> $alertLogFileId"
+            )
+            fileStorageManager.uploadFile(
+               File(alertLogFilePath),
+               mimeType = "application/zip",
+               container = "alertlogs",
+               siteId = haystackApi.siteIdRef.toString().replace("@", ""),
+               fileId = alertLogFileId,
+               logType = L.TAG_ALERT_LOGS
+            )
+         }
+      } catch (exception: Exception) {
+         CcuLog.e(L.TAG_CCU, "syncUnSyncedLogFiles Exception -> $exception")
+      }
+   }
+
+   fun updateFileData(filePath: String?, fileId: String?, logType: String) {
+      CcuLog.i(L.TAG_CCU, "updateFIleData filePath -> $filePath, fileId -> $fileId, logType -> $logType")
+      val defaultPrefs =
+         PreferenceManager.getDefaultSharedPreferences(Globals.getInstance().applicationContext)
+      when (logType) {
+         L.TAG_CCU_LOGS -> {
+            defaultPrefs.edit().putString(L.TAG_CCU_LOGS_FILE_PATH, filePath).apply()
+            defaultPrefs.edit().putString(L.TAG_CCU_LOGS_FILE_ID, fileId).apply()
+         }
+
+         L.TAG_SEQUENCER_LOGS -> {
+            defaultPrefs.edit().putString(L.TAG_SEQUENCER_LOGS_FILE_PATH, filePath).apply()
+            defaultPrefs.edit().putString(L.TAG_SEQUENCER_LOGS_FILE_ID, fileId).apply()
+         }
+
+         L.TAG_ALERT_LOGS -> {
+            defaultPrefs.edit().putString(L.TAG_ALERT_LOGS_FILE_PATH, filePath).apply()
+            defaultPrefs.edit().putString(L.TAG_ALERT_LOGS_FILE_ID, fileId).apply()
+         }
+      }
    }
 }

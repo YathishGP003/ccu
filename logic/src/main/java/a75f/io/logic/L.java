@@ -93,6 +93,18 @@ public class L
     public static final String HOME_APP_PACKAGE_NAME_OBSOLETE = "io.seventyfivef.home";
     public static final String TAG_CCU_BUNDLE = "CCU_BUNDLE";
 
+    public static final String TAG_CCU_LOGS_FILE_PATH = "TAG_CCU_LOGS_FILE_PATH";
+    public static final String TAG_CCU_LOGS_FILE_ID = "TAG_CCU_LOGS_FILE_ID";
+    public static final String TAG_SEQUENCER_LOGS_FILE_PATH = "TAG_SEQUENCER_LOGS_FILE_PATH";
+    public static final String TAG_SEQUENCER_LOGS_FILE_ID = "TAG_SEQUENCER_LOGS_FILE_ID";
+    public static final String TAG_ALERT_LOGS_FILE_PATH = "TAG_ALERT_LOGS_FILE_PATH";
+    public static final String TAG_ALERT_LOGS_FILE_ID = "TAG_ALERT_LOGS_FILE_ID";
+
+    public static final String TAG_CCU_LOGS = "CCU_LOGS";
+    public static final String TAG_SEQUENCER_LOGS = "SEQUENCER_LOGS";
+    public static final String TAG_ALERT_LOGS = "ALERT_LOGS";
+
+
     public static Context app()
     {
         return Globals.getInstance().getApplicationContext();

@@ -69,6 +69,10 @@ class FileSystemTools(private val appContext: Context) {
       return File(destZipPath)
    }
 
+    fun getFilePath(files: List<File>, fileId: String): String {
+        return files[0].parentFile.absolutePath + File.separator + fileId
+    }
+
    /** Collect all SharedPreferences and write them to the given file name */
    fun writePreferences(fileName: String): File {
 

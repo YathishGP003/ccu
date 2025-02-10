@@ -19,6 +19,7 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.cloudconnectivity.CloudConnectivityListener;
+import a75f.io.logic.logtasks.UploadLogs;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.messaging.handler.DataSyncHandler;
@@ -120,6 +121,7 @@ public class NotificationHandler {
                 PreferenceUtil.setLastCCUUpdatedTime(System.currentTimeMillis());
             }
             prefs.setString(INTERNET_DISCONNECTED_TIMESTAMP, "");
+            UploadLogs.instanceOf().syncUnSyncedLogFiles();
         } else {
             rebootDeviceByCCUNetworkWatchdogTimeoutTuner();
         }

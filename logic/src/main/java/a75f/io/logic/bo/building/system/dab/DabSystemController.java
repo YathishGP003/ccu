@@ -286,7 +286,7 @@ public class DabSystemController extends SystemController
         for (HashMap<Object, Object> equipMap : allEquips) {
 
             Equip equip = new Equip.Builder().setHashMap(equipMap).build();
-            hasTi = hasTi || equip.getMarkers().contains("ti") || equip.getMarkers().contains("otn");
+            hasTi = hasTi || equip.getMarkers().contains("ti");
 
             if (deadZones.contains(equip.getId())) {
                 zoneDeadCount++;
@@ -751,7 +751,7 @@ public class DabSystemController extends SystemController
                 double tempVal = CCUHsApi.getInstance().readHisValByQuery(
                         "point and air and temp and sensor and (current or space) and equipRef == \"" + equipMap.get("id") + "\""
                 );
-                hasTi = hasTi || equip.getMarkers().contains("ti") || equip.getMarkers().contains("otn");
+                hasTi = hasTi || equip.getMarkers().contains("ti");
                 if (!deadZones.contains(equip.getId()) && (tempVal > 0)) {
                     tempSum += tempVal;
                     tempZones++;

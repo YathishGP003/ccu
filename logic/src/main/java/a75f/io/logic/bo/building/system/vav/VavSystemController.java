@@ -291,7 +291,7 @@ public class VavSystemController extends SystemController
         for (HashMap<Object, Object> equipMap : allEquips) {
 
             Equip equip = new Equip.Builder().setHashMap(equipMap).build();
-            hasTi = hasTi || equip.getMarkers().contains("ti") || equip.getMarkers().contains("otn");
+            hasTi = hasTi || equip.getMarkers().contains("ti");
 
             if (isZoneDead(equip.getId()) || isRFDead(equip.getId())) {
                 zoneDeadCount++;
@@ -721,7 +721,7 @@ public class VavSystemController extends SystemController
                 double tempVal = CCUHsApi.getInstance().readHisValByQuery(
                     "temp and sensor and (current or space) and equipRef == \"" + equipMap.get("id") + "\""
                 );
-                hasTi = hasTi || equip.getMarkers().contains("ti") || equip.getMarkers().contains("otn");
+                hasTi = hasTi || equip.getMarkers().contains("ti");
                 if (!isZoneDead(equip.getId()) && (tempVal > 0) && !isRFDead(equip.getId())) {
                     tempSum += tempVal;
                     tempZones++;
@@ -747,6 +747,8 @@ public class VavSystemController extends SystemController
         }
         averageSystemTemperature = tempZones == 0 ? 0 : tempSum/tempZones;
         averageSystemTemperature = CCUUtils.roundToOneDecimal(averageSystemTemperature);
+        CcuLog.d(L.TAG_CCU_SYSTEM, "averageSystemTemperature "+averageSystemTemperature+" tempZone "+tempZones
+                +" tempSum "+tempSum);
     }
     
     @Override

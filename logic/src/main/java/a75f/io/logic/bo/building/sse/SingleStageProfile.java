@@ -312,6 +312,9 @@ public class SingleStageProfile extends ZoneProfile
             if ((relay2Association == SSERelay2.FAN.ordinal()) && occupied) {
                 stageStatus = "Fan ON";
                 sseEquip.getFanStage1().writeHisVal(1.0);
+            } else if (relay2Association == SSERelay2.FAN.ordinal() && !occupied) {
+                stageStatus = "Fan OFF";
+                sseEquip.getFanStage1().writeHisVal(0);
             }else if ((relay2Association == SSERelay2.OCCUPIED_ENABLE.ordinal()) && occupied) {
                 stageStatus = "Equip ON";
                 sseEquip.getOccupiedEnable().writeHisVal(1.0);

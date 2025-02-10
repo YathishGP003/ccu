@@ -3354,4 +3354,22 @@ public class CCUHsApi
         }
         return dictList;
     }
+
+    /**
+     * Supports dynamic detection of writable points and updating both writable and his vals.
+     * @param pointMap
+     */
+    public void writePointValue(Map<Object, Object> pointMap, double value) {
+        if (pointMap == null || pointMap.isEmpty()) {
+            CcuLog.e(TAG, "writePointValue : pointMap is empty , value : " + value);
+            return;
+        }
+        String pointId = pointMap.get("id").toString();
+        if (pointMap.containsKey(Tags.WRITABLE)) {
+            writeDefaultValById(pointId, value);
+            writeHisValById(pointId, readPointPriorityVal(pointId));
+        } else {
+            writeHisValById(pointId, value);
+        }
+    }
 }

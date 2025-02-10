@@ -960,11 +960,8 @@ public class VavSystemController extends SystemController
             limitedNormalizedDamperPos = Math.max(limitedNormalizedDamperPos, minLimit);
             
             limitedNormalizedDamperPos = CCUUtils.roundToTwoDecimal(limitedNormalizedDamperPos);
-            
-            double curNormalisedDamper = hayStack.readHisValById(damperPos.get("id").toString());
-            if (curNormalisedDamper != limitedNormalizedDamperPos) {
-                hayStack.writeHisValById(damperPos.get("id").toString() , limitedNormalizedDamperPos);
-            }
+
+            hayStack.writePointValue(damperPos , limitedNormalizedDamperPos);
     
             CcuLog.d(L.TAG_CCU_SYSTEM,"setDamperLimits : Equip "+equip.get("dis")+" minLimit "
                                       +minLimit+" maxLimit "+maxLimit+" normalizedDamperPos "+normalizedDamperPos

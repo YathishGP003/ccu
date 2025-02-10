@@ -1093,17 +1093,17 @@ public class DabSystemController extends SystemController
             
             limitedPrimaryDamperPos = Math.min(limitedPrimaryDamperPos, maxLimit);
             limitedPrimaryDamperPos = Math.max(limitedPrimaryDamperPos, minLimit);
-            hayStack.writeHisValById(primaryDamperPosPoint.get("id").toString(), limitedPrimaryDamperPos);
+            hayStack.writePointValue(primaryDamperPosPoint, limitedPrimaryDamperPos);
 
             limitedSecondaryDamperPos = Math.min(limitedSecondaryDamperPos, maxLimit);
             limitedSecondaryDamperPos = Math.max(limitedSecondaryDamperPos, minLimit);
-            hayStack.writeHisValById(secondoryDamperPosPoint.get("id").toString(), limitedSecondaryDamperPos);
+            hayStack.writePointValue(secondoryDamperPosPoint, limitedSecondaryDamperPos);
 
             CcuLog.d(L.TAG_CCU_SYSTEM,
                      " limitedPrimaryDamperPos : " + limitedPrimaryDamperPos + ",  " +
                      "limitedSecondaryDamperPos : " + limitedSecondaryDamperPos
             );
-            
+
             if (TrueCFMUtil.isTrueCfmEnabled(hayStack, equipRef)) {
                 CcuLog.d(L.TAG_CCU_SYSTEM, "UpdateTrueCfm moving average queue "+dabEquip.get("dis"));
                 DabTrueCfmHandler.getInstance().updateDamperPosQueueMap(primaryDamperPosPoint.get("id").toString(),

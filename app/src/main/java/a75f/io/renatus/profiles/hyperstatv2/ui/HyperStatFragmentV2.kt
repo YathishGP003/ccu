@@ -21,6 +21,7 @@ import a75f.io.renatus.compose.StyledTextView
 import a75f.io.renatus.compose.SubTitle
 import a75f.io.renatus.compose.ToggleButtonStateful
 import a75f.io.renatus.modbus.util.SAVE
+import a75f.io.renatus.profiles.CopyConfiguration
 import a75f.io.renatus.profiles.OnPairingCompleteListener
 import a75f.io.renatus.profiles.hyperstatv2.viewmodels.HyperStatViewModel
 import a75f.io.renatus.profiles.system.ANALOG_IN1
@@ -33,6 +34,7 @@ import a75f.io.renatus.profiles.system.THERMISTOR_2
 import a75f.io.renatus.profiles.system.advancedahu.Option
 import android.widget.Toast
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -49,6 +51,8 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Switch
@@ -56,15 +60,20 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -86,18 +95,18 @@ abstract class HyperStatFragmentV2 : BaseDialogFragment(), OnPairingCompleteList
     }
 
     @Composable
-    fun TempOffset() {
+    fun TempOffset(modifier: Modifier = Modifier) {
         val valuesPickerState = rememberPickerState()
-        Column(modifier = Modifier.padding(start = 400.dp, end = 400.dp)) {
+        Column(modifier = modifier.padding(start = 400.dp, end = 400.dp)) {
             val temperatureOffsetsList = viewModel.getListByDomainName(DomainName.temperatureOffset, viewModel.equipModel)
             TempOffsetPicker(header = "TEMP OFFSET", state = valuesPickerState, items = temperatureOffsetsList, onChanged = { it: String -> viewModel.viewState.value.temperatureOffset = it.toDouble() }, startIndex = temperatureOffsetsList.indexOf(viewModel.viewState.value.temperatureOffset.toString()), visibleItemsCount = 3, textModifier = Modifier.padding(8.dp), textStyle = TextStyle(fontSize = 18.sp))
         }
     }
 
     @Composable
-    fun AutoForcedOccupiedAutoAwayConfig() {
+    fun AutoForcedOccupiedAutoAwayConfig(modifier: Modifier = Modifier) {
 
-        Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+        Box(contentAlignment = Alignment.Center, modifier = modifier.fillMaxSize()) {
             Row(modifier = Modifier.padding(20.dp)) {
                 Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(top = 10.dp, end = 40.dp)) {
                     StyledTextView(text = "Auto Force Occupied", fontSize = 20, textAlignment = TextAlign.Start)
@@ -116,8 +125,8 @@ abstract class HyperStatFragmentV2 : BaseDialogFragment(), OnPairingCompleteList
     }
 
     @Composable
-    fun Label() {
-        Row(modifier = Modifier
+    fun Label(modifier: Modifier = Modifier) {
+        Row(modifier = modifier
                 .fillMaxWidth()
                 .padding(top = 5.dp, bottom = 10.dp)) {
             Box(modifier = Modifier.weight(1f))
@@ -141,8 +150,8 @@ abstract class HyperStatFragmentV2 : BaseDialogFragment(), OnPairingCompleteList
      * if any profile specific changes required.
      */
     @Composable
-    open fun Configurations() {
-        Row(modifier = Modifier.fillMaxWidth()) {
+    open fun Configurations(modifier: Modifier = Modifier) {
+        Row(modifier = modifier.fillMaxWidth()) {
             Image(painter = painterResource(id = R.drawable.input_hyperstat_cpu), contentDescription = "Relays", modifier = Modifier
                     .weight(1.5f)
                     .padding(top = 25.dp)
@@ -243,12 +252,12 @@ abstract class HyperStatFragmentV2 : BaseDialogFragment(), OnPairingCompleteList
     }
 
     @Composable
-    fun ThresholdTargetConfig(viewModel: HyperStatViewModel) {
+    fun ThresholdTargetConfig(viewModel: HyperStatViewModel,modifier: Modifier = Modifier) {
         val co2ThresholdOptions = viewModel.getOptionByDomainName(DomainName.co2Threshold, viewModel.equipModel, true)
         val co2Unit = viewModel.getUnit(DomainName.co2Threshold, viewModel.equipModel)
         val pm25Unit = viewModel.getUnit(DomainName.pm25Target, viewModel.equipModel)
         val pm25ThresholdOptions = viewModel.getOptionByDomainName(DomainName.pm25Target, viewModel.equipModel, true)
-        Column(modifier = Modifier.padding(start = 25.dp, top = 25.dp)) {
+        Column(modifier = modifier.padding(start = 25.dp, top = 25.dp)) {
             MinMaxConfiguration("CO2 Threshold", "CO2 Target", itemList = co2ThresholdOptions, co2Unit, minDefault = viewModel.viewState.value.co2Config.threshold.toInt().toString(), maxDefault = viewModel.viewState.value.co2Config.target.toInt().toString(), onMinSelected = { viewModel.viewState.value.co2Config.threshold = it.value.toDouble() }, onMaxSelected = { viewModel.viewState.value.co2Config.target = it.value.toDouble() })
 
             Row {
@@ -292,7 +301,7 @@ abstract class HyperStatFragmentV2 : BaseDialogFragment(), OnPairingCompleteList
     }
 
     @Composable
-    fun DisplayInDeviceConfig(viewModel: HyperStatViewModel) {
+    fun DisplayInDeviceConfig(viewModel: HyperStatViewModel,modifier: Modifier = Modifier) {
 
         val context = LocalContext.current
         var humidityDisplay by remember { mutableStateOf(viewModel.viewState.value.humidityDisplay) }
@@ -309,7 +318,7 @@ abstract class HyperStatFragmentV2 : BaseDialogFragment(), OnPairingCompleteList
         }
 
         val colors = SwitchDefaults.colors(checkedThumbColor = Color.White, uncheckedThumbColor = Color.White, uncheckedIconColor = greyColor, uncheckedTrackColor = greyColor, checkedIconColor = primaryColor, checkedTrackColor = primaryColor, uncheckedBorderColor = greyColor, checkedBorderColor = primaryColor)
-        Column(modifier = Modifier.padding(start = 25.dp, top = 25.dp)) {
+        Column(modifier = modifier.padding(start = 25.dp, top = 25.dp)) {
             BoldStyledTextView("DISPLAY IN DEVICE HOME SCREEN", fontSize = 20)
             Spacer(modifier = Modifier.height(10.dp))
 
@@ -386,8 +395,8 @@ abstract class HyperStatFragmentV2 : BaseDialogFragment(), OnPairingCompleteList
 
 
     @Composable
-    fun SaveConfig(viewModel: HyperStatViewModel) {
-        Row(modifier = Modifier
+    fun SaveConfig(viewModel: HyperStatViewModel,modifier: Modifier = Modifier) {
+        Row(modifier = modifier
                 .fillMaxWidth()
                 .padding(PaddingValues(top = 20.dp)), horizontalArrangement = Arrangement.End, verticalAlignment = Alignment.CenterVertically) {
             Box(modifier = Modifier
@@ -447,6 +456,64 @@ abstract class HyperStatFragmentV2 : BaseDialogFragment(), OnPairingCompleteList
             CircularProgressIndicator(color = primaryColor)
             Spacer(modifier = Modifier.height(10.dp))
             Text(text = "Loading Profile Configuration")
+        }
+    }
+
+    @Composable
+    fun PasteCopiedConfiguration(viewModel : HyperStatViewModel) {
+        val isDisabled by viewModel.isDisabled.observeAsState(false)
+        if (isDisabled) {
+            Box(
+                modifier = Modifier
+                    .background(color = Color(0xFFEBECED))
+                    .fillMaxWidth()
+            ) {
+                Row(
+                    modifier = Modifier
+                        .padding(start = 20.dp, end = 24.dp, top = 20.dp, bottom = 20.dp)
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = buildAnnotatedString {
+                            append("Configuration from ")
+                            pushStyle(SpanStyle(fontWeight = FontWeight.Bold))
+                            append(CopyConfiguration.getModuleName())
+                            pop()
+                            append(" is copied to the clipboard.")
+                        },
+                        fontSize = 20.sp,
+                    )
+                    Button(
+                        onClick = { viewModel.applyCopiedConfiguration() },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.Transparent,
+                            contentColor = primaryColor
+                        ),
+                    ) {
+                        Text(text = "PASTE", fontSize = 20.sp, fontWeight = FontWeight.Medium)
+                    }
+
+                    Spacer(modifier = Modifier.weight(1f))
+
+                    Button(
+                        onClick = { viewModel.disablePasteConfiguration() },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.Transparent,
+                            contentColor = primaryColor
+                        ),
+                        contentPadding = PaddingValues(0.dp)
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.close),
+                            contentDescription = "Close",
+                            colorFilter = ColorFilter.tint(primaryColor),
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+
+                }
+            }
         }
     }
 

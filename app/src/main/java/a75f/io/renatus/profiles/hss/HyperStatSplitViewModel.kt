@@ -4,28 +4,36 @@ import a75f.io.api.haystack.CCUHsApi
 import a75f.io.device.HyperSplit
 import a75f.io.device.mesh.hypersplit.HyperSplitMessageSender
 import a75f.io.device.serial.MessageType
-import a75f.io.domain.api.Domain.getListByDomainName
-import a75f.io.domain.api.DomainName
 import a75f.io.logic.Globals
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.HyperStatSplitProfile
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.HyperStatSplitProfileConfiguration
+import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuProfileConfiguration
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
+import a75f.io.renatus.R
+import a75f.io.renatus.modbus.util.formattedToastMessage
+import a75f.io.renatus.profiles.CopyConfiguration
 import a75f.io.renatus.profiles.OnPairingCompleteListener
 import a75f.io.renatus.util.TestSignalManager
+import a75f.io.renatus.profiles.hss.cpu.HyperStatSplitCpuState
 import android.content.Context
 import android.os.Bundle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfilePointDef
 import io.seventyfivef.domainmodeler.common.point.Constraint
 import io.seventyfivef.domainmodeler.common.point.MultiStateConstraint
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import kotlin.properties.Delegates
 
 open class HyperStatSplitViewModel : ViewModel() {
@@ -67,7 +75,10 @@ open class HyperStatSplitViewModel : ViewModel() {
 
     var minMaxVoltage = List(11) { Option(it, it.toString()) }
     var testVoltage = List(101) { Option(it, it.toString()) }
-
+    private val _isDisabled = MutableLiveData(false)
+    val isDisabled: LiveData<Boolean> = _isDisabled
+    private val _isReloadRequired = MutableLiveData(false)
+    val isReloadRequired: LiveData<Boolean> = _isReloadRequired
     open fun init(bundle: Bundle, context: Context, hayStack: CCUHsApi) {
         openDuplicateDialog = false
         openMissingDialog = false
@@ -201,6 +212,29 @@ open class HyperStatSplitViewModel : ViewModel() {
 
     fun setOnPairingCompleteListener(completeListener: OnPairingCompleteListener) {
         this.pairingCompleteListener = completeListener
+    }
+
+    fun applyCopiedConfiguration() {
+        viewState.value = HyperStatSplitCpuState.fromProfileConfigToState(CopyConfiguration.getCopiedConfiguration() as HyperStatSplitCpuProfileConfiguration)
+        reloadUiRequired()
+        disablePasteConfiguration()
+        formattedToastMessage(context.getString(R.string.Toast_Success_Message_paste_Configuration), context)
+    }
+    private  fun reloadUiRequired(){
+        _isReloadRequired.value = !_isReloadRequired.value!!
+    }
+
+      fun isCopiedConfigurationAvailable() {
+        val selectedProfileType = CopyConfiguration.getSelectedProfileType()
+        if (selectedProfileType != null && selectedProfileType == profileType) {
+            disablePasteConfiguration()
+        }
+    }
+
+    fun disablePasteConfiguration() {
+        viewModelScope.launch(Dispatchers.Main) {
+            _isDisabled.value = !_isDisabled.value!!
+        }
     }
 
 }

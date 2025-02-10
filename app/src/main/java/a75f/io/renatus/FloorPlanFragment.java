@@ -8,9 +8,14 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.style.StyleSpan;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,6 +24,7 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -102,7 +108,7 @@ public class FloorPlanFragment extends Fragment {
     public DataArrayAdapter<Floor> mFloorListAdapter;
     public DataArrayAdapter<Zone> mRoomListAdapter;
     public DataArrayAdapter<String> mModuleListAdapter;
-
+    View toastWarning;
 
     private enum FloorHandledCondition { ALLOW_NEW_FLOOR, ALLOW_RENAMING_FLOOR, ADD_NEW_FLOOR, ADD_RENAMED_FLOOR }
 
@@ -228,6 +234,7 @@ public class FloorPlanFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.floorplan, container, false);
+        toastWarning = getLayoutInflater().inflate(R.layout.custom_toast_layout_warning, rootView.findViewById(R.id.custom_toast_layout_warning));
         ButterKnife.bind(this, rootView);
         instance = this;
         return rootView;
@@ -240,6 +247,19 @@ public class FloorPlanFragment extends Fragment {
         disableRoomModule();
         Globals.getInstance().selectedTab = 0;
         TaskManager.INSTANCE.disposeCurrentTask();
+        ImageView toastImage = toastWarning.findViewById(R.id.custom_toast_image);
+        TextView SuccessToast = toastWarning.findViewById(R.id.custom_toast_Title);
+        TextView CopiedText = toastWarning.findViewById(R.id.custom_toast_message_detail);
+
+        ViewGroup.MarginLayoutParams layoutParams;
+        layoutParams = (ViewGroup.MarginLayoutParams) CopiedText.getLayoutParams();
+        layoutParams.leftMargin = 0;
+        CopiedText.setLayoutParams(layoutParams);
+
+        SuccessToast.setText(R.string.Toast_Success_Title);
+        SuccessToast.setTextColor(getResources().getColor(R.color.success_status));
+        toastImage.setImageResource(R.drawable.font_awesome_custom_check_mark);
+        toastImage.setColorFilter(getResources().getColor(R.color.success_status));
     }
 
 
@@ -1225,5 +1245,27 @@ public class FloorPlanFragment extends Fragment {
     private void hideKeyboard(){
         ((InputMethodManager) requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE))
                 .hideSoftInputFromWindow(requireView().getWindowToken(), 0);
+    }
+    public void enhancedToastMessage(String message) {
+        TextView detailToast = toastWarning.findViewById(R.id.custom_toast_message_detail);
+        detailToast.setVisibility(View.VISIBLE);
+        toastWarning.setPadding(20,20,20,20);
+
+        String toastMessage = message + getString(R.string.Toast_Success_Message_copied_Configuration);
+        SpannableString spannable = new SpannableString(toastMessage);
+        spannable.setSpan(
+                new StyleSpan(Typeface.BOLD),
+                0,
+                message.length(),
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+        )
+        ;
+        detailToast.setText(spannable);
+        detailToast.setTextColor(getResources().getColor(R.color.white));
+        Toast toast = new Toast(Globals.getInstance().getApplicationContext());
+        toast.setGravity(Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0, 50);
+        toast.setView(toastWarning);
+        toast.setDuration(Toast.LENGTH_LONG);
+        toast.show();
     }
 }

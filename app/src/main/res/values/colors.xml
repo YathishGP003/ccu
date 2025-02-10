@@ -42,6 +42,7 @@
     <color name="floor_plan_rect">#8080ff80</color>
     <color name="safe_status">#00A000</color>
     <color name="danger_status">#C00000</color>
+    <color name="success_status">#21C073</color>
 
     <color name="severity_severe">#D00000</color>
     <color name="severity_moderate">#D87800</color>

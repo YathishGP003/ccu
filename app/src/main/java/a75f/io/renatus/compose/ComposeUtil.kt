@@ -132,8 +132,8 @@ class ComposeUtil {
 }
 
 @Composable
-fun Title(title: String) {
-    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+fun Title(title: String,modifier: Modifier = Modifier) {
+    Box(modifier = modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
         TitleTextView(title)
     }
 }

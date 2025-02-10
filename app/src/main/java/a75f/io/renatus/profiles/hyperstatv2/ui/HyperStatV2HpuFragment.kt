@@ -18,6 +18,7 @@ import a75f.io.renatus.profiles.hyperstatv2.util.FanSpeedConfig
 import a75f.io.renatus.profiles.hyperstatv2.util.MinMaxConfig
 import a75f.io.renatus.profiles.hyperstatv2.viewmodels.HpuV2ViewModel
 import a75f.io.renatus.profiles.hyperstatv2.viewstates.HpuViewState
+import a75f.io.renatus.profiles.profileUtils.PasteBannerFragment
 import a75f.io.renatus.util.highPriorityDispatcher
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -32,6 +33,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.painterResource
@@ -76,7 +79,18 @@ class HyperStatV2HpuFragment : HyperStatFragmentV2(){
             ShowProgressBar()
             CcuLog.i(Domain.LOG_TAG, "Show Progress")
         }
-
+        //reloading the UI once's paste button is clicked
+        viewModel.isReloadRequired.observe(viewLifecycleOwner) { isDialogOpen ->
+            if (isDialogOpen) {
+                viewLifecycleOwner.lifecycleScope.launch(highPriorityDispatcher) {
+                    withContext(Dispatchers.Main) {
+                        rootView.setContent {
+                            RootView()
+                        }
+                    }
+                }
+            }
+        }
         viewLifecycleOwner.lifecycleScope.launch(highPriorityDispatcher) {
             viewModel.init(requireArguments(), requireContext(), CCUHsApi.getInstance())
             viewModel.setOnPairingCompleteListener(this@HyperStatV2HpuFragment)
@@ -95,17 +109,26 @@ class HyperStatV2HpuFragment : HyperStatFragmentV2(){
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 50.dp, vertical = 25.dp),
             ) {
-                item { Title("HEAT PUMP UNIT") }
-                item { TempOffset() }
-                item { AutoForcedOccupiedAutoAwayConfig() }
-                item { Label() }
-                item { Configurations() }
-                item { AnalogMinMaxConfigurations() }
-                item { ThresholdTargetConfig(viewModel) }
-                item { DisplayInDeviceConfig(viewModel) }
-                item { SaveConfig(viewModel) }
+
+                item {
+                    val isDisabled by viewModel.isDisabled.observeAsState(false)
+                    if (isDisabled) {
+                        PasteBannerFragment.PasteCopiedConfiguration(
+                            onPaste = { viewModel.applyCopiedConfiguration() },
+                            onClose = { viewModel.disablePasteConfiguration() }
+                        )
+                    }
+                }
+                item { Title("HEAT PUMP UNIT",Modifier.padding(50.dp,25.dp)) }
+                item { TempOffset(Modifier.padding(50.dp,0.dp)) }
+                item { AutoForcedOccupiedAutoAwayConfig(Modifier.padding(50.dp,0.dp)) }
+                item { Label(Modifier.padding(50.dp,0.dp)) }
+                item { Configurations(Modifier.padding(50.dp,0.dp)) }
+                item { AnalogMinMaxConfigurations(Modifier.padding(50.dp,0.dp)) }
+                item { ThresholdTargetConfig(viewModel,Modifier.padding(50.dp,0.dp)) }
+                item { DisplayInDeviceConfig(viewModel,Modifier.padding(50.dp,0.dp)) }
+                item { SaveConfig(viewModel,Modifier.padding(50.dp,25.dp)) }
             }
         }
     }
@@ -116,9 +139,9 @@ class HyperStatV2HpuFragment : HyperStatFragmentV2(){
      * overriden because analog out has some staged configuration specific to HPU profile
      */
     @Composable
-    override fun Configurations() {
+    override fun Configurations(modifier:Modifier) {
 
-        Row(modifier = Modifier.fillMaxWidth()) {
+        Row(modifier = modifier.fillMaxWidth()) {
             Image(painter = painterResource(id = R.drawable.input_hyperstat_cpu), contentDescription = "Relays", modifier = Modifier
                 .weight(1.5f)
                 .padding(top = 25.dp)
@@ -192,8 +215,8 @@ class HyperStatV2HpuFragment : HyperStatFragmentV2(){
     }
 
     @Composable
-    fun AnalogMinMaxConfigurations() {
-        Column(modifier = Modifier.padding(start = 25.dp, top = 25.dp)) {
+    fun AnalogMinMaxConfigurations(modifier: Modifier = Modifier) {
+        Column(modifier = modifier.padding(start = 25.dp, top = 25.dp)) {
             CompressorMinMax()
             DcvDamperMinMax()
             FanSpeedMinMax()

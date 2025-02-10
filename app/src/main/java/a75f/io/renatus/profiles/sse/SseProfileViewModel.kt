@@ -27,7 +27,10 @@ import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.logic.getSchedule
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.FloorPlanFragment
+import a75f.io.renatus.R
+import a75f.io.renatus.modbus.util.formattedToastMessage
 import a75f.io.renatus.modbus.util.showToast
+import a75f.io.renatus.profiles.CopyConfiguration
 import a75f.io.renatus.profiles.OnPairingCompleteListener
 import a75f.io.renatus.profiles.profileUtils.UnusedPortsModel
 import a75f.io.renatus.util.ProgressDialogUtils
@@ -37,6 +40,8 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.seventyfivef.domainmodeler.client.ModelDirective
@@ -75,6 +80,10 @@ open class SseProfileViewModel : ViewModel() {
 
     private lateinit var pairingCompleteListener: OnPairingCompleteListener
     private var saveJob : Job? = null
+    private val _isDisabled = MutableLiveData(false)
+    val isDisabled: LiveData<Boolean> = _isDisabled
+    private val _isReloadRequired = MutableLiveData(false)
+    val isReloadRequired: LiveData<Boolean> = _isReloadRequired
 
 
     fun init(bundle: Bundle, context: Context, hayStack: CCUHsApi) {
@@ -105,6 +114,7 @@ open class SseProfileViewModel : ViewModel() {
             viewState = SseConfigViewState.fromSseProfileConfig(profileConfiguration)
         }
         initializeLists()
+        isCopiedConfigurationAvailable()
         CcuLog.i(Domain.LOG_TAG, profileConfiguration.toString())
         this.context = context
         this.hayStack = hayStack
@@ -401,6 +411,30 @@ open class SseProfileViewModel : ViewModel() {
             )
             CCUHsApi.getInstance()
                 .writeHisValByQuery(query, value)
+        }
+    }
+    fun applyCopiedConfiguration() {
+        val copiedConfiguration = CopyConfiguration.getCopiedConfiguration() as SseProfileConfiguration
+        viewState = SseConfigViewState.fromSseProfileConfig(copiedConfiguration)
+        viewState.unusedPortState = copiedConfiguration.unusedPorts
+        reloadUiRequired()
+        disablePasteConfiguration()
+        formattedToastMessage(context.getString(R.string.Toast_Success_Message_paste_Configuration), context)
+    }
+
+    private fun isCopiedConfigurationAvailable() {
+        val selectedProfileType = CopyConfiguration.getSelectedProfileType()
+        if (selectedProfileType != null && selectedProfileType == profileType
+            && nodeType == CopyConfiguration.getSelectedNodeType()) {
+            disablePasteConfiguration()
+        }
+    }
+    private  fun reloadUiRequired(){
+        _isReloadRequired.value = !_isReloadRequired.value!!
+    }
+     fun disablePasteConfiguration() {
+        viewModelScope.launch(Dispatchers.Main) {
+            _isDisabled.value = !_isDisabled.value!!
         }
     }
 }

@@ -61,7 +61,7 @@ class MonitoringModel(application: Application) : HyperStatViewModel(application
 
         viewState.value = MonitoringViewState.fromMonitoringConfigToState(profileConfiguration as MonitoringConfiguration)
         initializeLists()
-
+        isCopiedConfigurationAvailable()
         CcuLog.i(Domain.LOG_TAG, "Monitoring profile cofig Loaded")
     }
 

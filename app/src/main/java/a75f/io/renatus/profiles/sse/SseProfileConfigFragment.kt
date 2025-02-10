@@ -8,6 +8,7 @@ import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.renatus.BASE.BaseDialogFragment
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
+import a75f.io.renatus.R
 import a75f.io.renatus.composables.DropDownWithLabel
 import a75f.io.renatus.composables.Picker
 import a75f.io.renatus.composables.SystemRelayMappingView
@@ -19,6 +20,7 @@ import a75f.io.renatus.compose.TitleTextView
 import a75f.io.renatus.compose.ToggleButtonStateful
 import a75f.io.renatus.modbus.util.SET
 import a75f.io.renatus.profiles.OnPairingCompleteListener
+import a75f.io.renatus.profiles.profileUtils.PasteBannerFragment
 import a75f.io.renatus.profiles.profileUtils.UnusedPortsFragment
 import a75f.io.renatus.util.highPriorityDispatcher
 import android.os.Bundle
@@ -40,6 +42,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
@@ -87,6 +91,18 @@ class SseProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
                 CcuLog.i(Domain.LOG_TAG, "Show Progress")
             }
         }
+        //reloading the UI once's paste button is clicked
+        viewModel.isReloadRequired.observe(viewLifecycleOwner) { isDialogOpen ->
+            if (isDialogOpen) {
+                viewLifecycleOwner.lifecycleScope.launch(highPriorityDispatcher) {
+                    withContext(Dispatchers.Main) {
+                        rootView.setContent {
+                            RootView()
+                        }
+                    }
+                }
+            }
+        }
         viewLifecycleOwner.lifecycleScope.launch(highPriorityDispatcher) {
             viewModel.init(requireArguments(), requireContext(), CCUHsApi.getInstance())
             viewModel.setOnPairingCompleteListener(this@SseProfileConfigFragment)
@@ -103,178 +119,190 @@ class SseProfileConfigFragment : BaseDialogFragment(), OnPairingCompleteListener
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(20.dp),
         ) {
             item {
-                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                    TitleTextView("SSE")
+                val isDisabled by viewModel.isDisabled.observeAsState(false)
+                if (isDisabled) {
+                    PasteBannerFragment.PasteCopiedConfiguration(
+                        onPaste = { viewModel.applyCopiedConfiguration() },
+                        onClose = { viewModel.disablePasteConfiguration() }
+                    )
                 }
-                Spacer(modifier = Modifier.height(20.dp))
+            }
+            item {
+                Column(modifier = Modifier.padding(20.dp)) {
 
-                Row(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(10.dp)
-                )
-                {
+                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                        TitleTextView("SSE")
+                    }
+                    Spacer(modifier = Modifier.height(20.dp))
 
-                    Column(
+                    Row(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(10.dp),
-                    ) {
-                        Row(
+                            .padding(10.dp)
+                    )
+                    {
+
+                        Column(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .padding(10.dp)
-                        )
-                        {
-                            Spacer(modifier = Modifier.padding(start = 30.dp))
-                            Text(
-                                text = "ENABLE",
-                                fontSize = 20.sp,
-                                color = ComposeUtil.greyColor
+                                .padding(10.dp),
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(10.dp)
                             )
-                            Spacer(modifier = Modifier.width(270.dp))
-                            Spacer(modifier = Modifier.padding(start = 40.dp))
-                            Text(
-                                text = "ACTUATOR TYPE",
-                                fontSize = 20.sp,
-                                color = ComposeUtil.greyColor
-                            )
-                            Spacer(modifier = Modifier.width(230.dp))
-                            Spacer(modifier = Modifier.padding(start = 80.dp))
-                            Text(
-                                text = "TEST SIGNAL",
-                                fontSize = 20.sp,
-                                color = ComposeUtil.greyColor
-                            )
-                        }
+                            {
+                                Spacer(modifier = Modifier.padding(start = 30.dp))
+                                Text(
+                                    text = "ENABLE",
+                                    fontSize = 20.sp,
+                                    color = ComposeUtil.greyColor
+                                )
+                                Spacer(modifier = Modifier.width(270.dp))
+                                Spacer(modifier = Modifier.padding(start = 40.dp))
+                                Text(
+                                    text = "ACTUATOR TYPE",
+                                    fontSize = 20.sp,
+                                    color = ComposeUtil.greyColor
+                                )
+                                Spacer(modifier = Modifier.width(230.dp))
+                                Spacer(modifier = Modifier.padding(start = 80.dp))
+                                Text(
+                                    text = "TEST SIGNAL",
+                                    fontSize = 20.sp,
+                                    color = ComposeUtil.greyColor
+                                )
+                            }
 
-                        Spacer(modifier = Modifier.height(10.dp))
-                        RelayConfiguration()
-                        Spacer(modifier = Modifier.height(10.dp))
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.Start
-                        ) {
-                            Spacer(modifier = Modifier.width(20.dp))
-                            Row {
-                                HeaderTextView(
-                                    text = "TH1 - Airflow Temperature Sensor",
-                                    padding = 10
-                                )
-                                Spacer(modifier = Modifier.width(10.dp))
-                                ToggleButtonStateful(
-                                    defaultSelection = viewModel.viewState.th1State.value,
-                                    onEnabled = {
-                                        viewModel.viewState.th1State.value = it
-                                    }
-                                )
-                            }
-                            Spacer(modifier = Modifier.width(60.dp))
-                            Row {
-                                HeaderTextView(
-                                    text = "TH2 - Use external 10k Temperature Sensor",
-                                    padding = 10
-                                )
-                                Spacer(modifier = Modifier.width(10.dp))
-                                ToggleButtonStateful(
-                                    defaultSelection = viewModel.viewState.th2State.value,
-                                    onEnabled = { viewModel.viewState.th2State.value = it }
-                                )
-                            }
-                        }
-                        Spacer(modifier = Modifier.height(10.dp))
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.Start
-                        ) {
-                            Spacer(modifier = Modifier.width(20.dp))
-                            Row {
-                                HeaderTextView(text = "Auto Force Occupied", padding = 10)
-                                Spacer(modifier = Modifier.width(30.dp))
-                                ToggleButtonStateful(
-                                    defaultSelection = viewModel.viewState.autoForcedOccupiedState.value,
-                                    onEnabled = {
-                                        viewModel.viewState.autoForcedOccupiedState.value = it
-                                    }
-                                )
-                            }
-                            Spacer(modifier = Modifier.width(190.dp))
-                            Row {
-                                HeaderTextView(text = "Auto Away", padding = 10)
-                                Spacer(modifier = Modifier.width(30.dp))
-                                ToggleButtonStateful(
-                                    defaultSelection = viewModel.viewState.autoAwayState.value,
-                                    onEnabled = { viewModel.viewState.autoAwayState.value = it }
-                                )
-                            }
-                        }
-                        Spacer(modifier = Modifier.height(15.dp))
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.Start
-                        ) {
-                            Spacer(modifier = Modifier.width(20.dp))
-                            AnalogIn1(
-                                relayText = "Analog-in1",
-                                relayState = viewModel.viewState.analog1InState.value,
-                                onRelayEnabled = {
-                                    viewModel.viewState.analog1InState.value = it
-                                },
-                                mappingSelection = viewModel.viewState.analog1InAssociationIndex.value,
-                                mapping = viewModel.analogIn1AssociationList,
-                                onMappingChanged = {
-                                    viewModel.viewState.analog1InAssociationIndex.value = it
-                                }
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.height(30.dp))
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.Start
-                        ) {
-                            val valuesPickerState = rememberPickerState()
-                            Box(
+                            Spacer(modifier = Modifier.height(10.dp))
+                            RelayConfiguration()
+                            Spacer(modifier = Modifier.height(10.dp))
+                            Row(
                                 modifier = Modifier.fillMaxWidth(),
-                                contentAlignment = Alignment.Center
+                                horizontalArrangement = Arrangement.Start
                             ) {
-                                Picker(
-                                    modifier = Modifier.width(120.dp),
-                                    header = "Temperature\n    Offset",
-                                    state = valuesPickerState,
-                                    items = viewModel.temperatureOffsetsList,
-                                    onChanged = { it: String ->
-                                        viewModel.viewState.temperatureOffset.value = it.toDouble()
-                                    },
-                                    startIndex = viewModel.temperatureOffsetsList
-                                        .indexOf(viewModel.viewState.temperatureOffset.value.toString()),
-                                    visibleItemsCount = 3,
-                                    textModifier = Modifier.padding(8.dp),
-                                    textStyle = TextStyle(
-                                        fontSize = 15.sp,
-                                        fontWeight = FontWeight.Bold
+                                Spacer(modifier = Modifier.width(20.dp))
+                                Row {
+                                    HeaderTextView(
+                                        text = "TH1 - Airflow Temperature Sensor",
+                                        padding = 10
                                     )
+                                    Spacer(modifier = Modifier.width(10.dp))
+                                    ToggleButtonStateful(
+                                        defaultSelection = viewModel.viewState.th1State.value,
+                                        onEnabled = {
+                                            viewModel.viewState.th1State.value = it
+                                        }
+                                    )
+                                }
+                                Spacer(modifier = Modifier.width(60.dp))
+                                Row {
+                                    HeaderTextView(
+                                        text = "TH2 - Use external 10k Temperature Sensor",
+                                        padding = 10
+                                    )
+                                    Spacer(modifier = Modifier.width(10.dp))
+                                    ToggleButtonStateful(
+                                        defaultSelection = viewModel.viewState.th2State.value,
+                                        onEnabled = { viewModel.viewState.th2State.value = it }
+                                    )
+                                }
+                            }
+                            Spacer(modifier = Modifier.height(10.dp))
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.Start
+                            ) {
+                                Spacer(modifier = Modifier.width(20.dp))
+                                Row {
+                                    HeaderTextView(text = "Auto Force Occupied", padding = 10)
+                                    Spacer(modifier = Modifier.width(30.dp))
+                                    ToggleButtonStateful(
+                                        defaultSelection = viewModel.viewState.autoForcedOccupiedState.value,
+                                        onEnabled = {
+                                            viewModel.viewState.autoForcedOccupiedState.value = it
+                                        }
+                                    )
+                                }
+                                Spacer(modifier = Modifier.width(190.dp))
+                                Row {
+                                    HeaderTextView(text = "Auto Away", padding = 10)
+                                    Spacer(modifier = Modifier.width(30.dp))
+                                    ToggleButtonStateful(
+                                        defaultSelection = viewModel.viewState.autoAwayState.value,
+                                        onEnabled = { viewModel.viewState.autoAwayState.value = it }
+                                    )
+                                }
+                            }
+                            Spacer(modifier = Modifier.height(15.dp))
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.Start
+                            ) {
+                                Spacer(modifier = Modifier.width(20.dp))
+                                AnalogIn1(
+                                    relayText = "Analog-in1",
+                                    relayState = viewModel.viewState.analog1InState.value,
+                                    onRelayEnabled = {
+                                        viewModel.viewState.analog1InState.value = it
+                                    },
+                                    mappingSelection = viewModel.viewState.analog1InAssociationIndex.value,
+                                    mapping = viewModel.analogIn1AssociationList,
+                                    onMappingChanged = {
+                                        viewModel.viewState.analog1InAssociationIndex.value = it
+                                    }
                                 )
                             }
-                        }
 
-                        val mapOfUnUsedPorts = viewModel.viewState.unusedPortState
-                        if (mapOfUnUsedPorts.isNotEmpty()) {
-                            UnusedPortsFragment.DividerRow()
-                            UnusedPortsFragment.LabelUnusedPorts()
-                            UnusedPortsFragment.UnUsedPortsListView(viewModel)
-                        }
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(PaddingValues(bottom = 10.dp, end = 10.dp)),
-                            contentAlignment = Alignment.CenterEnd
-                        ) {
-                            SaveTextView(SET) {
-                                viewModel.saveConfiguration()
+                            Spacer(modifier = Modifier.height(30.dp))
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.Start
+                            ) {
+                                val valuesPickerState = rememberPickerState()
+                                Box(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Picker(
+                                        modifier = Modifier.width(120.dp),
+                                        header = "Temperature\n    Offset",
+                                        state = valuesPickerState,
+                                        items = viewModel.temperatureOffsetsList,
+                                        onChanged = { it: String ->
+                                            viewModel.viewState.temperatureOffset.value =
+                                                it.toDouble()
+                                        },
+                                        startIndex = viewModel.temperatureOffsetsList
+                                            .indexOf(viewModel.viewState.temperatureOffset.value.toString()),
+                                        visibleItemsCount = 3,
+                                        textModifier = Modifier.padding(8.dp),
+                                        textStyle = TextStyle(
+                                            fontSize = 15.sp,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    )
+                                }
+                            }
+
+                            val mapOfUnUsedPorts = viewModel.viewState.unusedPortState
+                            if (mapOfUnUsedPorts.isNotEmpty()) {
+                                UnusedPortsFragment.DividerRow()
+                                UnusedPortsFragment.LabelUnusedPorts()
+                                UnusedPortsFragment.UnUsedPortsListView(viewModel)
+                            }
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(PaddingValues(bottom = 10.dp, end = 10.dp)),
+                                contentAlignment = Alignment.CenterEnd
+                            ) {
+                                SaveTextView(SET) {
+                                    viewModel.saveConfiguration()
+                                }
                             }
                         }
                     }

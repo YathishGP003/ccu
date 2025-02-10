@@ -1,7 +1,7 @@
 package a75f.io.renatus.profiles.hyperstatv2.viewmodels
 
 import a75f.io.api.haystack.CCUHsApi
-import a75f.io.device.HyperStat.HyperStatAnalogOutputControl_t
+import a75f.io.device.HyperStat
 import a75f.io.device.mesh.hyperstat.HyperStatMessageGenerator
 import a75f.io.device.mesh.hyperstat.HyperStatMessageSender
 import a75f.io.device.serial.MessageType
@@ -17,11 +17,21 @@ import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
 import a75f.io.logic.bo.building.hyperstat.common.PossibleFanMode
 import a75f.io.logic.bo.building.hyperstat.profiles.HyperStatProfile
 import a75f.io.logic.bo.building.hyperstat.profiles.util.getPossibleFanModeSettings
+import a75f.io.logic.bo.building.hyperstat.v2.configs.CpuConfiguration
+import a75f.io.logic.bo.building.hyperstat.v2.configs.HpuConfiguration
 import a75f.io.logic.bo.building.hyperstat.v2.configs.HyperStatConfiguration
+import a75f.io.logic.bo.building.hyperstat.v2.configs.MonitoringConfiguration
+import a75f.io.logic.bo.building.hyperstat.v2.configs.Pipe2Configuration
+import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuProfileConfiguration
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
+import a75f.io.renatus.R
+import a75f.io.renatus.modbus.util.formattedToastMessage
+import a75f.io.renatus.profiles.CopyConfiguration
 import a75f.io.renatus.profiles.OnPairingCompleteListener
 import a75f.io.renatus.profiles.hyperstatv2.util.ConfigState
+import a75f.io.renatus.profiles.hyperstatv2.util.HyperStatViewStateUtil
 import a75f.io.renatus.profiles.hyperstatv2.viewstates.HyperStatV2ViewState
+import a75f.io.renatus.profiles.hyperstatv2.viewstates.MonitoringViewState
 import a75f.io.renatus.profiles.system.advancedahu.Option
 import android.app.Application
 import android.content.Context
@@ -29,13 +39,18 @@ import android.os.Bundle
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.viewModelScope
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfilePointDef
 import io.seventyfivef.domainmodeler.common.point.Constraint
 import io.seventyfivef.domainmodeler.common.point.MultiStateConstraint
 import io.seventyfivef.domainmodeler.common.point.NumericConstraint
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import kotlin.properties.Delegates
 
 /**
@@ -67,6 +82,10 @@ open class HyperStatViewModel(application: Application) : AndroidViewModel(appli
     var minMaxVoltage = List(11) { Option(it, it.toString()) }
     var testVoltage = List(101) { Option(it, it.toString()) }
     var damperOpeningRate = (10..100 step 10).toList().map { Option(it, it.toString()) }
+    private val _isDisabled = MutableLiveData(false)
+    val isDisabled: LiveData<Boolean> = _isDisabled
+    private val _isReloadRequired = MutableLiveData(false)
+    val isReloadRequired: LiveData<Boolean> = _isReloadRequired
 
     open fun init(bundle: Bundle, context: Context, hayStack: CCUHsApi) {
         this.context = context
@@ -197,7 +216,7 @@ open class HyperStatViewModel(application: Application) : AndroidViewModel(appli
 
         val testMessage = HyperStatMessageGenerator.getControlMessage(deviceAddress.toInt())
 
-        fun getAnalogOut(value: Int) = HyperStatAnalogOutputControl_t.newBuilder().setPercent(value).build()
+        fun getAnalogOut(value: Int) = HyperStat.HyperStatAnalogOutputControl_t.newBuilder().setPercent(value).build()
 
         viewState.value.apply {
             testMessage.setRelay1(testRelay1)
@@ -218,6 +237,43 @@ open class HyperStatViewModel(application: Application) : AndroidViewModel(appli
                 MessageType.HYPERSTAT_CONTROLS_MESSAGE, false
         )
         CcuLog.i(L.TAG_CCU_HSHST, "---HyperStat test signal sent---\n ${testMessage.build()}")
+    }
+
+    fun applyCopiedConfiguration() {
+
+        if(CopyConfiguration.getSelectedProfileType() == ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT) {
+            viewState.value = HyperStatViewStateUtil.cpuConfigToState(CopyConfiguration.getCopiedConfiguration() as CpuConfiguration)
+        }
+        else if (CopyConfiguration.getSelectedProfileType() == ProfileType.HYPERSTAT_HEAT_PUMP_UNIT){
+            viewState.value = HyperStatViewStateUtil.hpuConfigToState(CopyConfiguration.getCopiedConfiguration() as HpuConfiguration)
+        }
+        else if (CopyConfiguration.getSelectedProfileType() == ProfileType.HYPERSTAT_TWO_PIPE_FCU){
+            viewState.value = HyperStatViewStateUtil.pipe2ConfigToState(CopyConfiguration.getCopiedConfiguration() as Pipe2Configuration)
+        }
+        else if (CopyConfiguration.getSelectedProfileType() == ProfileType.HYPERSTAT_MONITORING){
+            viewState.value = MonitoringViewState.fromMonitoringConfigToState(CopyConfiguration.getCopiedConfiguration() as MonitoringConfiguration)
+        }
+
+        reloadUiRequired()
+        disablePasteConfiguration()
+        formattedToastMessage(context.getString(R.string.Toast_Success_Message_paste_Configuration), context)
+
+    }
+
+     fun isCopiedConfigurationAvailable() {
+        val selectedProfileType = CopyConfiguration.getSelectedProfileType()
+        if (selectedProfileType != null && selectedProfileType == profileType) {
+            disablePasteConfiguration()
+        }
+    }
+
+    fun disablePasteConfiguration() {
+        viewModelScope.launch(Dispatchers.Main) {
+            _isDisabled.value = !_isDisabled.value!!
+        }
+    }
+    private  fun reloadUiRequired(){
+        _isReloadRequired.value = !_isReloadRequired.value!!
     }
 }
 

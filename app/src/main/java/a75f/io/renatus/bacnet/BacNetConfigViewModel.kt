@@ -45,7 +45,12 @@ import a75f.io.renatus.modbus.util.OnItemSelectBacnetDevice
 import a75f.io.renatus.modbus.util.SAVED
 import a75f.io.renatus.modbus.util.SAVING_BACNET
 import a75f.io.renatus.modbus.util.WARNING
+import a75f.io.renatus.modbus.util.formattedToastMessage
+import a75f.io.renatus.modbus.util.getBacnetPoints
+import a75f.io.renatus.modbus.util.isAllParamsSelectedBacNet
 import a75f.io.renatus.modbus.util.showToast
+import a75f.io.renatus.profiles.CopyConfiguration
+import a75f.io.renatus.profiles.CopyConfiguration.Companion.getSelectedBacNetModel
 import a75f.io.renatus.util.ProgressDialogUtils
 import android.annotation.SuppressLint
 import android.app.Application
@@ -69,7 +74,6 @@ import kotlinx.coroutines.withContext
 import okhttp3.internal.toImmutableList
 import java.net.ConnectException
 import java.net.SocketTimeoutException
-import java.util.Objects
 import kotlin.properties.Delegates
 
 
@@ -119,6 +123,8 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
     private val _isDialogOpen = MutableLiveData<Boolean>()
     val isDialogOpen: LiveData<Boolean>
         get() = _isDialogOpen
+    private val _isDisabled = MutableLiveData(false)
+    val isDisabled: LiveData<Boolean> = _isDisabled
 
     val bacNetItemsMap = hashMapOf<String, RpResponseMultiReadItem>()
     private lateinit var service : CcuService
@@ -128,6 +134,7 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
             modelName.value = item
             ProgressDialogUtils.showProgressDialog( context, "Fetching $item details")
             fetchModelDetails(item)
+            isCopiedConfigurationAvailable()
         }
     }
 
@@ -170,7 +177,7 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
                 val equipmentDevice = buildBacnetModel(bacnetProfile.equip.roomRef)
                 val model = BacnetModel()
                 model.equipDevice.value = equipmentDevice[0]
-                model.selectAllParameters.value = isAllParamsSelected(equipmentDevice[0])
+                model.selectAllParameters.value = isAllParamsSelectedBacNet(equipmentDevice[0])
                 model.points = getBacnetPoints(equipmentDevice[0].points.toImmutableList()) //equipmentDevice[0].points
                 bacnetModel.value = model
                 bacnetModel.value.isDevicePaired = true
@@ -197,6 +204,7 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
                     }
                 }
             }
+            isCopiedConfigurationAvailable()
             isUpdateMode.value = true
         } else {
             isUpdateMode.value = false
@@ -209,16 +217,6 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
         }
     }
 
-    private fun isAllParamsSelected(equipDevice: BacnetModelDetailResponse) : Boolean {
-        var isAllSelected = true
-        if (equipDevice.points.isNotEmpty()) {
-            equipDevice.points.forEach {
-                if (!it.protocolData?.bacnet?.displayInUIDefault!!)
-                    isAllSelected = false
-            }
-        }
-        return isAllSelected
-    }
 
     fun holdBundleValues(bundle: Bundle) {
         selectedSlaveId = bundle.getString(FragmentCommonBundleArgs.ARG_PAIRING_ADDR)?.toLong() ?: 0
@@ -339,34 +337,6 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
             dialog.dismiss()
         }
         builder.create().show()
-    }
-
-    private fun getBacnetPoints(points: List<BacnetPoint>): MutableList<BacnetPointState> {
-        val parameterList = mutableListOf<BacnetPointState>()
-        if (Objects.nonNull(points)) {
-            for (bacnetPoint in points) {
-                val bacnetPointState = BacnetPointState(
-                    bacnetPoint.id,
-                    bacnetPoint.name,
-                    bacnetPoint.domainName,
-                    bacnetPoint.kind,
-                    bacnetPoint.valueConstraint,
-                    bacnetPoint.hisInterpolate,
-                    bacnetPoint.protocolData,
-                    bacnetPoint.defaultUnit,
-                    bacnetPoint.defaultValue,
-                    bacnetPoint.equipTagNames,
-                    bacnetPoint.rootTagNames,
-                    bacnetPoint.descriptiveTags,
-                    bacnetPoint.equipTagsList,
-                    bacnetPoint.bacnetProperties,
-                    displayInUi = mutableStateOf(bacnetPoint.protocolData?.bacnet!!.displayInUIDefault),
-                    disName = bacnetPoint.disName
-                )
-                parameterList.add(bacnetPointState)
-            }
-        }
-        return parameterList
     }
 
     fun updateData(){
@@ -758,6 +728,7 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
             }
         }
         return true
+
     }
 
     private fun isEquipExists(equipId: String): Boolean {
@@ -839,5 +810,50 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
         }
         bacnetModel.value.points = updatedPoints.toMutableList()
         CcuLog.d(TAG, "Updated point is $pointId and property is ${bacnetProperty.value.id} value is $i")
+    }
+    fun applyCopiedConfiguration() {
+        val copiedModbusConfiguration = CopyConfiguration.getCopiedBacnetConfiguration()
+
+        if(bacnetModel.value.isDevicePaired){
+            bacnetModel.value.points.forEach { bacNetPoint ->
+                copiedModbusConfiguration.value.points.forEach {
+                    if (bacNetPoint.disName.equals(it.disName,true)) {
+                        bacNetPoint.displayInUi.value = it.displayInUi.value
+                        bacNetPoint.protocolData?.bacnet?.displayInUIDefault = it.displayInUi.value
+                    }
+                }
+            }
+        } else {
+            bacnetModel.value.points.forEach { bacNetPoint ->
+                copiedModbusConfiguration.value.points.forEach {
+                    if (bacNetPoint.domainName.equals(it.disName.replace(" ", "").toLowerCase(), true) || bacNetPoint.name.equals(it.disName, true)) {
+                        bacNetPoint.displayInUi.value = it.displayInUi.value
+                        bacNetPoint.protocolData?.bacnet?.displayInUIDefault = it.displayInUi.value
+                    }
+                }
+            }
+        }
+        disablePasteConfiguration()
+        formattedToastMessage(context.getString(R.string.Toast_Success_Message_paste_Configuration), context)
+    }
+
+    fun isCopiedConfigurationAvailable() {
+        if(getSelectedBacNetModel() != null && (bacnetModel.value.isDevicePaired == false || bacnetModel.value.isDevicePaired == true) && modelName.value.equals(getSelectedBacNetModel(),true)){
+            enablePasteConfiguration()
+        }
+      else{
+            disablePasteConfiguration()
+        }
+    }
+
+    fun disablePasteConfiguration() {
+        viewModelScope.launch(Dispatchers.Main) {
+            _isDisabled.value = false
+        }
+    }
+    private fun enablePasteConfiguration() {
+        viewModelScope.launch(Dispatchers.Main) {
+            _isDisabled.value = true
+        }
     }
 }

@@ -20,6 +20,7 @@ import a75f.io.renatus.profiles.hyperstatv2.util.MinMaxConfig
 import a75f.io.renatus.profiles.hyperstatv2.util.StagedConfig
 import a75f.io.renatus.profiles.hyperstatv2.viewmodels.CpuV2ViewModel
 import a75f.io.renatus.profiles.hyperstatv2.viewstates.CpuViewState
+import a75f.io.renatus.profiles.profileUtils.PasteBannerFragment
 import a75f.io.renatus.util.highPriorityDispatcher
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -29,13 +30,14 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.painterResource
@@ -52,7 +54,7 @@ import kotlinx.coroutines.withContext
  */
 
 class HyperStatV2CpuFragment : HyperStatFragmentV2() {
-
+    var list = listOf<Unit>()
 
     companion object {
         const val ID = "HyperStatFragmentCpu"
@@ -84,7 +86,18 @@ class HyperStatV2CpuFragment : HyperStatFragmentV2() {
             ShowProgressBar()
             CcuLog.i(Domain.LOG_TAG, "Show Progress")
         }
-
+        //reloading the UI once's paste button is clicked
+        viewModel.isReloadRequired.observe(viewLifecycleOwner) { isDialogOpen ->
+            if (isDialogOpen) {
+                viewLifecycleOwner.lifecycleScope.launch(highPriorityDispatcher) {
+                    withContext(Dispatchers.Main) {
+                        rootView.setContent {
+                            RootView()
+                        }
+                    }
+                }
+            }
+        }
         viewLifecycleOwner.lifecycleScope.launch(highPriorityDispatcher) {
             viewModel.init(requireArguments(), requireContext(), CCUHsApi.getInstance())
             viewModel.setOnPairingCompleteListener(this@HyperStatV2CpuFragment)
@@ -100,22 +113,34 @@ class HyperStatV2CpuFragment : HyperStatFragmentV2() {
     @Composable
     fun RootView() {
         Column {
-            LazyColumn(
-                    modifier = Modifier
-                            .fillMaxSize()
-                            .padding(horizontal = 50.dp, vertical = 25.dp),
-            ) {
-                item { Title("CONVENTIONAL PACKAGE UNIT") }
-                item { TempOffset() }
-                item { AutoForcedOccupiedAutoAwayConfig() }
-                item { Label() }
-                item { Configurations() }
-                item { AnalogMinMaxConfigurations() }
-                item { ThresholdTargetConfig(viewModel) }
-                item { DisplayInDeviceConfig(viewModel) }
-                item { SaveConfig(viewModel) }
+            LazyColumn {
+                item {
+                    val isDisabled by viewModel.isDisabled.observeAsState(false)
+                    if (isDisabled) {
+                        PasteBannerFragment.PasteCopiedConfiguration(
+                            onPaste = { viewModel.applyCopiedConfiguration() },
+                            onClose = { viewModel.disablePasteConfiguration() }
+                        )
+                    }
+                }
+                item { List() }
             }
         }
+    }
+
+    @Composable
+    fun List() {
+        list = listOf(
+            Title(title = "CONVENTIONAL PACKAGE UNIT",Modifier.padding(50.dp,25.dp)),
+            TempOffset(Modifier.padding(50.dp,0.dp)),
+            AutoForcedOccupiedAutoAwayConfig(Modifier.padding(50.dp,0.dp)),
+            Label(Modifier.padding(50.dp,0.dp)),
+            Configurations(Modifier.padding(50.dp,0.dp)),
+            AnalogMinMaxConfigurations(Modifier.padding(50.dp,0.dp)),
+            ThresholdTargetConfig(viewModel,Modifier.padding(50.dp,0.dp)),
+            DisplayInDeviceConfig(viewModel,Modifier.padding(50.dp,0.dp)),
+            SaveConfig(viewModel,Modifier.padding(50.dp,25.dp))
+        )
     }
 
     /**
@@ -123,13 +148,13 @@ class HyperStatV2CpuFragment : HyperStatFragmentV2() {
      * overriden because analog out has some staged configuration specific to CPU profile
      */
     @Composable
-    override fun Configurations() {
+    override fun Configurations(modifier: Modifier) {
 
-        Row(modifier = Modifier.fillMaxWidth()) {
+        Row(modifier = modifier.fillMaxWidth()) {
             Image(painter = painterResource(id = R.drawable.input_hyperstat_cpu), contentDescription = "Relays", modifier = Modifier
-                    .weight(1.5f)
-                    .padding(top = 25.dp)
-                    .height(805.dp))
+                .weight(1.5f)
+                .padding(top = 25.dp)
+                .height(805.dp))
 
             Column(modifier = Modifier.weight(4f)) {
                 DrawRelays()
@@ -185,8 +210,8 @@ class HyperStatV2CpuFragment : HyperStatFragmentV2() {
     }
 
     @Composable
-    fun AnalogMinMaxConfigurations() {
-        Column(modifier = Modifier.padding(start = 25.dp, top = 25.dp)) {
+    fun AnalogMinMaxConfigurations(modifier: Modifier = Modifier) {
+        Column(modifier = modifier.padding(start = 25.dp, top = 25.dp)) {
             CoolingMinMax()
             HeatingMinMax()
             LinearFanSpeedMinMax()
@@ -204,11 +229,11 @@ class HyperStatV2CpuFragment : HyperStatFragmentV2() {
         fun StagedCooling(stagedConfig: StagedConfig) {
 
             Row(modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 10.dp, bottom = 10.dp)) {
+                .fillMaxWidth()
+                .padding(top = 10.dp, bottom = 10.dp)) {
                 val rowModifier = Modifier
-                        .width(185.dp)
-                        .padding(top = 10.dp)
+                    .width(185.dp)
+                    .padding(top = 10.dp)
                 if (viewModel.isAnyRelayMappedToStage(HsCpuRelayMapping.COOLING_STAGE_1)) {
                     Box(modifier = rowModifier) {
                         StyledTextView("Fan-Out during\nCooling Stage1", fontSize = 20, textAlignment = TextAlign.Left)
@@ -249,11 +274,11 @@ class HyperStatV2CpuFragment : HyperStatFragmentV2() {
         fun StagedHeating(stagedConfig: StagedConfig) {
 
             Row(modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 10.dp, bottom = 10.dp)) {
+                .fillMaxWidth()
+                .padding(top = 10.dp, bottom = 10.dp)) {
                 val rowModifier = Modifier
-                        .width(185.dp)
-                        .padding(top = 10.dp)
+                    .width(185.dp)
+                    .padding(top = 10.dp)
                 if (viewModel.isAnyRelayMappedToStage(HsCpuRelayMapping.HEATING_STAGE_1)) {
                     Box(modifier = rowModifier) {
                         StyledTextView("Fan-Out during\nHeating Stage1", fontSize = 20, textAlignment = TextAlign.Left)
@@ -302,11 +327,11 @@ class HyperStatV2CpuFragment : HyperStatFragmentV2() {
 
         (viewModel.viewState.value as CpuViewState).apply {
             Row(modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 10.dp, bottom = 10.dp)) {
+                .fillMaxWidth()
+                .padding(top = 10.dp, bottom = 10.dp)) {
                 val rowModifier = Modifier
-                        .width(200.dp)
-                        .padding(top = 10.dp)
+                    .width(200.dp)
+                    .padding(top = 10.dp)
                 if (analogOut1Enabled && analogOut1Association == HsCpuAnalogOutMapping.STAGED_FAN_SPEED.ordinal) {
                     Box(modifier = rowModifier) {
                         StyledTextView("Analog-Out1 at\nFan Recirculate", fontSize = 20, textAlignment = TextAlign.Left)

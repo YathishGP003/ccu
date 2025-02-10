@@ -31,6 +31,8 @@ import a75f.io.domain.api.DomainName;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.BuildConfig;
 import a75f.io.logic.R;
+import a75f.io.logic.bo.building.NodeType;
+import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.schedule.SpecialSchedule;
 import a75f.io.logic.util.PreferenceUtil;
 
@@ -376,4 +378,36 @@ public class CCUUtils
             return CCUHsApi.getInstance().readMapById(groupOrEquipId).containsKey("domainName");
         }
     }
+    public static ProfileType getProfileType(String profileType) {
+        for (ProfileType type : ProfileType.values()) {
+            if (type.name().equals(profileType)) {
+                return type;
+            }
+        }
+        return null;
+    }
+    public static NodeType getNodeType(HashMap<Object, Object> device) {
+        if (device == null || !device.containsKey("domainName")) {
+            return null;
+        }
+
+        String domainName = device.get("domainName").toString().toLowerCase();
+
+        if (domainName.contains("helionode")) {
+            return NodeType.HELIO_NODE;
+        } else if (domainName.contains("smartnode")) {
+            return NodeType.SMART_NODE;
+        } else if (domainName.contains("hyperstatsplit")) {
+            return NodeType.HYPERSTATSPLIT;
+        } else if (domainName.contains("hyperstat")) {
+            return NodeType.HYPER_STAT;
+        } else if (domainName.contains("otn")) {
+            return NodeType.OTN;
+        } else {
+            return null;
+        }
+    }
+
+
+
 }

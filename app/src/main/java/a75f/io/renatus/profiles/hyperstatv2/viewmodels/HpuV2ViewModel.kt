@@ -70,6 +70,7 @@ class HpuV2ViewModel(application: Application) : HyperStatViewModel(application)
         }
 
         viewState.value = HyperStatViewStateUtil.hpuConfigToState(profileConfiguration as HpuConfiguration)
+        isCopiedConfigurationAvailable()
     }
 
     override fun saveConfiguration() {

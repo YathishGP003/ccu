@@ -17,12 +17,16 @@ import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.vav.AcbProfileConfiguration
 import a75f.io.logic.bo.building.vav.VavAcbProfile
+import a75f.io.logic.bo.building.vav.VavProfileConfiguration
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.logic.getSchedule
 import a75f.io.messaging.handler.ACBConfigHandler
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.FloorPlanFragment
+import a75f.io.renatus.R
+import a75f.io.renatus.modbus.util.formattedToastMessage
 import a75f.io.renatus.modbus.util.showToast
+import a75f.io.renatus.profiles.CopyConfiguration
 import a75f.io.renatus.profiles.OnPairingCompleteListener
 import a75f.io.renatus.profiles.profileUtils.UnusedPortsModel
 import a75f.io.renatus.profiles.profileUtils.UnusedPortsModel.Companion.saveUnUsedPortStatus
@@ -31,6 +35,8 @@ import a75f.io.renatus.util.highPriorityDispatcher
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.seventyfivef.domainmodeler.client.ModelDirective
@@ -88,6 +94,11 @@ class AcbProfileViewModel : ViewModel() {
     private lateinit var pairingCompleteListener: OnPairingCompleteListener
     private var saveJob : Job? = null
 
+    private val _isDisabled = MutableLiveData(false)
+    val isDisabled: LiveData<Boolean> = _isDisabled
+    private val _isReloadRequired = MutableLiveData(false)
+    val isReloadRequired: LiveData<Boolean> = _isReloadRequired
+
     fun init(bundle: Bundle, context: Context, hayStack : CCUHsApi) {
         deviceAddress = bundle.getShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR)
         zoneRef = bundle.getString(FragmentCommonBundleArgs.ARG_NAME)!!
@@ -118,6 +129,7 @@ class AcbProfileViewModel : ViewModel() {
         this.context = context
         this.hayStack = hayStack
         initializeLists()
+        isCopiedConfigurationAvailable()
         CcuLog.i(Domain.LOG_TAG, "ACB Config Loaded")
     }
 
@@ -207,6 +219,7 @@ class AcbProfileViewModel : ViewModel() {
             setScheduleType(profileConfiguration)
             ACBConfigHandler.setMinCfmSetpointMaxVals(hayStack, profileConfiguration)
             ACBConfigHandler.setAirflowCfmProportionalRange(hayStack, profileConfiguration)
+            saveUnUsedPortStatus(profileConfiguration, deviceAddress, hayStack)
             // Have to reload the profile here because we just changed the CFM proportional range
             acbProfile.init()
             L.ccu().zoneProfiles.add(acbProfile)
@@ -336,6 +349,31 @@ class AcbProfileViewModel : ViewModel() {
 
     fun setOnPairingCompleteListener(completeListener: OnPairingCompleteListener) {
         this.pairingCompleteListener = completeListener
+    }
+    fun applyCopiedConfiguration() {
+        val copiedConfiguration = CopyConfiguration.getCopiedConfiguration() as AcbProfileConfiguration
+        viewState = AcbConfigViewState.fromAcbProfileConfig(copiedConfiguration)
+        viewState.unusedPortState =  copiedConfiguration.unusedPorts
+        reloadUiRequired()
+        disablePasteConfiguration()
+        formattedToastMessage(context.getString(R.string.Toast_Success_Message_paste_Configuration), context)
+    }
+
+    private fun isCopiedConfigurationAvailable() {
+        val selectedProfileType = CopyConfiguration.getSelectedProfileType()
+        if (selectedProfileType != null && selectedProfileType == profileType
+            && nodeType == CopyConfiguration.getSelectedNodeType()) {
+            disablePasteConfiguration()
+        }
+    }
+
+    fun disablePasteConfiguration() {
+        viewModelScope.launch(Dispatchers.Main) {
+            _isDisabled.value = !_isDisabled.value!!
+        }
+    }
+    private  fun reloadUiRequired(){
+        _isReloadRequired.value = !_isReloadRequired.value!!
     }
 
 }

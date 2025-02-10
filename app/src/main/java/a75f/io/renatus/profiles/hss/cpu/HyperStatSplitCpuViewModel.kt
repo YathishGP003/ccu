@@ -64,6 +64,7 @@ class HyperStatSplitCpuViewModel : HyperStatSplitViewModel() {
         this.hayStack = hayStack
 
         initializeLists()
+        isCopiedConfigurationAvailable()
         CcuLog.i(Domain.LOG_TAG, "HSS initialized")
     }
 

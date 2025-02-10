@@ -47,6 +47,7 @@ import a75f.io.renatus.compose.noOfItemsDisplayInDropDown
 import a75f.io.renatus.compose.simpleVerticalScrollbar
 import a75f.io.renatus.modbus.util.SAVE
 import a75f.io.renatus.modbus.util.showToast
+import a75f.io.renatus.profiles.CopyConfiguration
 import a75f.io.renatus.profiles.hss.cpu.HyperStatSplitCpuState
 import a75f.io.renatus.profiles.hss.cpu.HyperStatSplitCpuViewModel
 import a75f.io.renatus.util.TestSignalManager
@@ -94,8 +95,8 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
     }
 
     @Composable
-    fun Title(viewModel: HyperStatSplitCpuViewModel) {
-        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+    fun Title(viewModel: HyperStatSplitCpuViewModel,modifier: Modifier = Modifier) {
+        Box(modifier = modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
             when (viewModel.profileType) {
                 ProfileType.HYPERSTATSPLIT_CPU -> TitleTextView("CPU & ECONOMIZER")
                 else -> TitleTextView("CPU & ECONOMIZER")
@@ -106,9 +107,9 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
     override fun getIdString() : String { return "" }
 
     @Composable
-    fun TempOffset(viewModel: HyperStatSplitCpuViewModel) {
+    fun TempOffset(viewModel: HyperStatSplitCpuViewModel,modifier: Modifier = Modifier) {
         val valuesPickerState = rememberPickerState()
-        Column(modifier = Modifier.padding(start = 400.dp, end = 400.dp)) {
+        Column(modifier = modifier.padding(start = 400.dp, end = 400.dp)) {
             TempOffsetPicker(
                 header = "TEMPERATURE OFFSET",
                 state = valuesPickerState,
@@ -124,8 +125,8 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
     }
 
     @Composable
-    fun AutoAwayConfig(viewModel: HyperStatSplitCpuViewModel) {
-        Column(modifier = Modifier.padding(start = 25.dp, top = 25.dp, bottom = 25.dp)) {
+    fun AutoAwayConfig(viewModel: HyperStatSplitCpuViewModel,modifier: Modifier = Modifier) {
+        Column(modifier = modifier.padding(start = 25.dp, top = 25.dp, bottom = 25.dp)) {
             Row(modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 10.dp)) {
@@ -201,9 +202,9 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
     }
 
     @Composable
-    fun TitleLabel() {
+    fun TitleLabel(modifier: Modifier = Modifier) {
         Row(
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxWidth()
         ) {
             Spacer(modifier=Modifier.width(300.dp))
@@ -229,13 +230,13 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
     }
 
     @Composable
-    fun SensorConfig(viewModel: HyperStatSplitCpuViewModel) {
+    fun SensorConfig(viewModel: HyperStatSplitCpuViewModel,modifier: Modifier = Modifier) {
         val temperatureEnums = viewModel.getAllowedValues(DomainName.temperatureSensorBusAdd0, viewModel.equipModel)
         val humidityEnums = viewModel.getAllowedValues(DomainName.humiditySensorBusAdd0, viewModel.equipModel)
         val pressureEnum = viewModel.getAllowedValues(DomainName.pressureSensorBusAdd0, viewModel.equipModel)
 
-        SubTitle("SENSOR BUS")
-        Row(modifier = Modifier.padding(vertical = 10.dp)) {
+        SubTitle("SENSOR BUS",modifier)
+        Row(modifier = modifier.padding(vertical = 10.dp)) {
             Column {
                 EnableCompose("Address 0", viewModel.viewState.value.sensorAddress0.enabled) {
                     viewModel.viewState.value.sensorAddress0.enabled = it
@@ -272,7 +273,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
             }
         }
 
-        Row(modifier = Modifier.padding(vertical = 25.dp)) {
+        Row(modifier = modifier.padding(vertical = 25.dp)) {
             EnableCompose("Address 1", viewModel.viewState.value.sensorAddress1.enabled) {
                 viewModel.viewState.value.sensorAddress1.enabled = it
             }
@@ -292,7 +293,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                 )
             }
         }
-        Row(modifier = Modifier.padding(vertical = 10.dp)) {
+        Row(modifier = modifier.padding(vertical = 10.dp)) {
             EnableCompose("Address 2", viewModel.viewState.value.sensorAddress2.enabled) {
                 viewModel.viewState.value.sensorAddress2.enabled = it
             }
@@ -415,12 +416,12 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
     }
 
     @Composable
-    fun RelayConfig(viewModel: HyperStatSplitCpuViewModel) {
+    fun RelayConfig(viewModel: HyperStatSplitCpuViewModel,modifier: Modifier = Modifier) {
         val relayEnums = viewModel.getAllowedValues(DomainName.relay1OutputAssociation, viewModel.equipModel)
 
-        SubTitle("HS CONNECT")
+        SubTitle("HS CONNECT",modifier)
         Row(
-            modifier = Modifier.fillMaxWidth()
+            modifier = modifier.fillMaxWidth()
         ) {
             // Display relay image
             Image(
@@ -546,7 +547,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
     }
 
     @Composable
-    fun AnalogOutConfig(viewModel: HyperStatSplitCpuViewModel) {
+    fun AnalogOutConfig(viewModel: HyperStatSplitCpuViewModel,modifier: Modifier = Modifier) {
         val analogOutEnums = viewModel.getAllowedValues(DomainName.analog1OutputAssociation, viewModel.equipModel)
         val enabledEnums = if (viewModel.viewState.value.enableOutsideAirOptimization) {
             analogOutEnums
@@ -554,7 +555,7 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
             analogOutEnums.filter { it.value != DomainName.oaoDamper }
         }
 
-        Row(modifier = Modifier.fillMaxWidth()) {
+        Row(modifier = modifier.fillMaxWidth()) {
             // Display analog out image
             Column(
                 modifier = Modifier
@@ -909,10 +910,10 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
     }
 
     @Composable
-    fun UniversalInConfig(viewModel: HyperStatSplitCpuViewModel) {
+    fun UniversalInConfig(viewModel: HyperStatSplitCpuViewModel,modifier: Modifier = Modifier) {
         val universalEnum = viewModel.getAllowedValues(DomainName.universalIn1Association, viewModel.equipModel)
 
-        Row(modifier = Modifier.fillMaxWidth()) {
+        Row(modifier = modifier.fillMaxWidth()) {
             Image(
                 painter = painterResource(id = R.drawable.connect_ui),
                 contentDescription = "Universal Inputs",
@@ -1207,8 +1208,8 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
     }
 
     @Composable
-    fun CoolingControl(viewModel: HyperStatSplitCpuViewModel) {
-        Column() {
+    fun CoolingControl(viewModel: HyperStatSplitCpuViewModel,modifier: Modifier = Modifier) {
+        Column(modifier = modifier) {
             if (viewModel.isCoolingAOEnabled()) {
                 EnableCoolingVoltage(viewModel, HyperstatSplitReconfigurationHandler.Companion.CpuControlType.COOLING)
             }
@@ -1299,8 +1300,8 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
     }
 
     @Composable
-    fun HeatingControl(viewModel: HyperStatSplitCpuViewModel) {
-        Column() {
+    fun HeatingControl(viewModel: HyperStatSplitCpuViewModel,modifier: Modifier = Modifier) {
+        Column(modifier = modifier) {
             if (viewModel.isHeatingAOEnabled()) {
                 EnableHeatingVoltage(viewModel, HyperstatSplitReconfigurationHandler.Companion.CpuControlType.HEATING)
             }
@@ -1392,8 +1393,8 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
     }
 
     @Composable
-    fun LinearFanControl(viewModel: HyperStatSplitCpuViewModel) {
-        Column() {
+    fun LinearFanControl(viewModel: HyperStatSplitCpuViewModel,modifier: Modifier = Modifier) {
+        Column(modifier =  modifier) {
             if (viewModel.isLinearFanAOEnabled()) {
                 EnableLinearFanVoltage(viewModel, HyperstatSplitReconfigurationHandler.Companion.CpuControlType.LINEAR_FAN)
             }
@@ -1485,8 +1486,8 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
     }
 
     @Composable
-    fun StagedFanControl(viewModel: HyperStatSplitCpuViewModel) {
-        Column() {
+    fun StagedFanControl(viewModel: HyperStatSplitCpuViewModel,modifier: Modifier = Modifier) {
+        Column(modifier = modifier) {
             if (viewModel.isStagedFanAOEnabled()) {
                 EnableStagedFanVoltage(viewModel, HyperstatSplitReconfigurationHandler.Companion.CpuControlType.STAGED_FAN)
             }
@@ -1544,8 +1545,8 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
     }
 
     @Composable
-    fun OAODamperControl(viewModel: HyperStatSplitCpuViewModel) {
-        Column() {
+    fun OAODamperControl(viewModel: HyperStatSplitCpuViewModel,modifier: Modifier = Modifier) {
+        Column(modifier = modifier) {
             if (viewModel.isOAODamperAOEnabled()) {
                 EnableOAODamperVoltage(viewModel, HyperstatSplitReconfigurationHandler.Companion.CpuControlType.OAO_DAMPER)
             }
@@ -1645,8 +1646,8 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
     }
 
     @Composable
-    fun ReturnDamperControl(viewModel: HyperStatSplitCpuViewModel) {
-        Column() {
+    fun ReturnDamperControl(viewModel: HyperStatSplitCpuViewModel,modifier: Modifier = Modifier) {
+        Column(modifier = modifier) {
             if (viewModel.isReturnDamperAOEnabled()) {
                 EnableReturnDamperVoltage(viewModel, HyperstatSplitReconfigurationHandler.Companion.CpuControlType.RETURN_DAMPER)
             }
@@ -1963,9 +1964,9 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
 
     @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
     @Composable
-    fun ZoneOAOConfig(viewModel: HyperStatSplitCpuViewModel) {
+    fun ZoneOAOConfig(viewModel: HyperStatSplitCpuViewModel,modifier: Modifier = Modifier) {
         FlowRow(
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxWidth()
                 .padding(start = 25.dp, bottom = 10.dp),
             maxItemsInEachRow = 4
@@ -2366,8 +2367,8 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
     }
 
     @Composable
-    fun DisplayInDeviceConfig(viewModel: HyperStatSplitCpuViewModel) {
-        Column(modifier = Modifier.padding(start = 25.dp, top = 25.dp)) {
+    fun DisplayInDeviceConfig(viewModel: HyperStatSplitCpuViewModel,modifier: Modifier = Modifier) {
+        Column(modifier = modifier.padding(start = 25.dp, top = 25.dp)) {
             BoldStyledTextView("Display in Device Home Screen", fontSize = 20)
             Spacer(modifier = Modifier.height(10.dp))
 
@@ -2443,9 +2444,9 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
     }
 
     @Composable
-    fun SaveConfig(viewModel: HyperStatSplitCpuViewModel) {
+    fun SaveConfig(viewModel: HyperStatSplitCpuViewModel,modifier: Modifier = Modifier) {
         Row(
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxWidth()
                 .padding(PaddingValues(top = 20.dp)),
             horizontalArrangement = Arrangement.End,
@@ -2502,5 +2503,6 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
             dialog.window!!.setLayout(width, height)
         }
     }
+
 
 }

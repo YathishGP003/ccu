@@ -1745,6 +1745,12 @@
     <string name="Toast_Warning_Title">Warning!</string>
 
 
+    <string name="Toast_Success_Title"> Success! </string>
+    <string name="Toast_Success_Message_copied_Configuration">configuration copied to clipboard</string>
+    <string name="Toast_Success_Message_paste_Configuration"> Configuration pasted successfully</string>
+    <string name="Toast_copied_clipboard"> is copied to the clipboard.</string>
+    <string name="Toast_configuration">Configuration from </string>
+
     <string name="offline_description">Not connected to Cloud</string>
     <string name="system_profile">System Profile</string>
     <string name="taost_for_fallback">The zone schedule of the zone is deleted and is therefore following default named schedule, which is not editable. Please restart the CCU app to reinstate the zone schedule</string>

@@ -41,6 +41,7 @@ import a75f.io.renatus.modbus.util.RE_FETCH
 import a75f.io.renatus.modbus.util.SAVE
 import a75f.io.renatus.modbus.util.SEARCH_DEVICE
 import a75f.io.renatus.modbus.util.SEARCH_MODEL
+import a75f.io.renatus.profiles.profileUtils.PasteBannerFragment
 import a75f.io.renatus.util.ProgressDialogUtils
 import android.content.Context
 import android.os.Bundle
@@ -69,6 +70,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -187,26 +189,36 @@ class BacNetSelectModelView : BaseDialogFragment() {
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(50.dp),
         ) {
             viewModel.configModelDefinition(requireContext())
+
             if(viewModel.isUpdateMode.value){
                 // show update UI only
                 item{
-                    Box(
-                        modifier = Modifier.fillMaxWidth(),
-                        contentAlignment = Alignment.Center
-                    ) { TitleTextViewCustom(BACNET, Color.Black) }
+                    val isDisabled by viewModel.isDisabled.observeAsState(false)
+                    if (isDisabled) {
+                        PasteBannerFragment.PasteCopiedConfiguration(
+                            onPaste = { viewModel.applyCopiedConfiguration() },
+                            onClose = { viewModel.disablePasteConfiguration() }
+                        )
+                    }
 
-                    ModelSelected()
-                    DeviceDetailsReadOnly()
-                    PortDetailsReadOnlyUpdate()
+                  Column(modifier = Modifier.padding(start = 20.dp)) {
+                      Box(
+                          modifier = Modifier.fillMaxWidth(),
+                          contentAlignment = Alignment.Center
+                      ) { TitleTextViewCustom(BACNET, Color.Black) }
+                      ModelSelected()
+                      DeviceDetailsReadOnly()
+                      PortDetailsReadOnlyUpdate()
+                  }
 
                 }
                 item {
                     Row(
                         modifier = Modifier
                             .fillMaxSize()
+                            .padding(start = 20.dp)
                             .padding(PaddingValues(bottom = 20.dp, top = 20.dp)),
                         horizontalArrangement = Arrangement.Start,
                         verticalAlignment = Alignment.CenterVertically
@@ -214,11 +226,11 @@ class BacNetSelectModelView : BaseDialogFragment() {
                         HeaderLeftAlignedTextViewNew(
                             if (viewModel.bacnetModel.value.equipDevice.value!!.name.isNullOrEmpty()) "" else getName(
                                 viewModel.bacnetModel.value.equipDevice.value!!.name
-                            ), 22
+                            ), 22,Modifier.padding(start = 20.dp)
                         )
 
                     }
-                    Row(modifier = Modifier.padding(start = 10.dp)) { ParameterLabelUpdateConfig() }
+                    Row(modifier = Modifier.padding(start = 20.dp)) { ParameterLabelUpdateConfig() }
 
                     ParametersListViewUpdate(viewModel.bacnetModel)
                 }
@@ -226,6 +238,7 @@ class BacNetSelectModelView : BaseDialogFragment() {
                     Row(
                         modifier = Modifier
                             .fillMaxSize()
+                            .padding(50.dp)
                             .padding(PaddingValues(bottom = 5.dp)),
                         horizontalArrangement = Arrangement.End,
                         verticalAlignment = Alignment.CenterVertically
@@ -243,6 +256,14 @@ class BacNetSelectModelView : BaseDialogFragment() {
             }else{
                 // show create UI only
                 item {
+                    val isDisabled by viewModel.isDisabled.observeAsState(false)
+                    if (isDisabled) {
+                        PasteBannerFragment.PasteCopiedConfiguration(
+                            onPaste = { viewModel.applyCopiedConfiguration() },
+                            onClose = { viewModel.disablePasteConfiguration() }
+                        )
+                    }
+                    Column(modifier = Modifier.padding(start = 20.dp)) {
                     Box(
                         modifier = Modifier.fillMaxWidth(),
                         contentAlignment = Alignment.Center
@@ -269,11 +290,12 @@ class BacNetSelectModelView : BaseDialogFragment() {
                         HeaderLeftAlignedTextViewNew(
                             if (viewModel.bacnetModel.value.equipDevice.value!!.name.isNullOrEmpty()) "" else getName(
                                 viewModel.bacnetModel.value.equipDevice.value!!.name
-                            ), 22
+                            ), 22, Modifier.padding(start = 20.dp)
                         )
 
                     }
                     Row(modifier = Modifier.padding(start = 10.dp)) { ParameterLabel() }
+                }
                 }
                 item { ParametersListView(data = viewModel.bacnetModel) }
 
@@ -281,6 +303,7 @@ class BacNetSelectModelView : BaseDialogFragment() {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
+                            .padding(50.dp)
                             .padding(PaddingValues(bottom = 10.dp, end = 10.dp)),
                         contentAlignment = Alignment.CenterEnd
                     ) {
@@ -290,6 +313,7 @@ class BacNetSelectModelView : BaseDialogFragment() {
                     Row(
                         modifier = Modifier
                             .fillMaxSize()
+                            .padding(50.dp)
                             .padding(PaddingValues(bottom = 5.dp)),
                         horizontalArrangement = Arrangement.End,
                         verticalAlignment = Alignment.CenterVertically
@@ -359,6 +383,7 @@ class BacNetSelectModelView : BaseDialogFragment() {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .padding(start = 30.dp)
                         .wrapContentHeight()
                 ) {
                     for (rowIndex in 0 until 1) {
@@ -424,13 +449,14 @@ class BacNetSelectModelView : BaseDialogFragment() {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .padding(start = 30.dp)
                         .wrapContentHeight()
                 ) {
                     //Row {
                     for (rowIndex in 0 until 1) {
                         if (index < data.value.points.size) {
                             val item = data.value.points[index]
-                            if(item.disName.toLowerCase() != "heartbeat"){
+                            if(!item.disName.equals("heartbeat", ignoreCase = true) && !item.disName.contains("heartbeat", ignoreCase = true)){
                                 Row {
                                     Box(modifier = Modifier
                                         .weight(5f)
@@ -1112,7 +1138,7 @@ class BacNetSelectModelView : BaseDialogFragment() {
 
     @Composable
     fun ParameterLabel() {
-        Row(modifier = Modifier.fillMaxWidth()) {
+        Row(modifier = Modifier.padding(start = 10.dp).fillMaxWidth()) {
             Box(modifier = Modifier.weight(4f)) { SubTitle("PARAMETER") }
             Box(modifier = Modifier.weight(3f)) {
 
@@ -1145,7 +1171,8 @@ class BacNetSelectModelView : BaseDialogFragment() {
 
     @Composable
     fun ParameterLabelUpdateConfig() {
-        Row(modifier = Modifier.fillMaxWidth()) {
+        Row(modifier = Modifier.fillMaxWidth().padding(start = 20.dp)
+        ) {
             Box(modifier = Modifier.weight(5f)) { SubTitle("PARAMETER") }
             Box(modifier = Modifier.weight(5f)) {
 

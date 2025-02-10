@@ -30,13 +30,14 @@ import a75f.io.renatus.modbus.util.SAME_AS_PARENT
 import a75f.io.renatus.modbus.util.SAVED
 import a75f.io.renatus.modbus.util.SAVING
 import a75f.io.renatus.modbus.util.WARNING
+import a75f.io.renatus.modbus.util.formattedToastMessage
 import a75f.io.renatus.modbus.util.getParameters
 import a75f.io.renatus.modbus.util.getParametersList
 import a75f.io.renatus.modbus.util.isAllParamsSelected
 import a75f.io.renatus.modbus.util.parseModbusDataFromString
 import a75f.io.renatus.modbus.util.showToast
+import a75f.io.renatus.profiles.CopyConfiguration
 import a75f.io.renatus.util.ProgressDialogUtils
-import a75f.io.renatus.util.RxjavaUtil
 import a75f.io.util.ExecutorTask
 import android.annotation.SuppressLint
 import android.app.Application
@@ -85,6 +86,10 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
     private var selectedSlaveId by Delegates.notNull<Short>()
     private var domainService = DomainService()
     private val _isDialogOpen = MutableLiveData<Boolean>()
+    private val _isDisabled = MutableLiveData(false)
+    val isDisabled: LiveData<Boolean> = _isDisabled
+    private var selectedModelForCopyConfig :String? = null
+
     val isDialogOpen: LiveData<Boolean>
         get() = _isDialogOpen
 
@@ -92,6 +97,7 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
         override fun onItemSelected(index: Int, item: String) {
             selectedModbusType.value = index
             modelName.value = item
+            isCopiedConfigurationAvailable()
             ProgressDialogUtils.showProgressDialog( context, "Fetching $item details")
             fetchModelDetails(item)
         }
@@ -121,10 +127,13 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
                             subDeviceList.add(mutableStateOf(subEquip))
                         }
                     }
-                    if (subDeviceList.isNotEmpty())
+                    if (subDeviceList.isNotEmpty()) {
                         equipModel.value.subEquips = subDeviceList
-                    else
+                    }
+                    else {
                         equipModel.value.subEquips = mutableListOf()
+                    }
+                    isCopiedConfigurationAvailable()
                 }
             } else if(modelName.value.contentEquals("Select Model")) {
                 ProgressDialogUtils.showProgressDialog(context, LOADING)
@@ -134,6 +143,7 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
         slaveIdList.value = getSlaveIds(true)
         if (!equipModel.value.isDevicePaired)
             equipModel.value.slaveId.value = 1
+
     }
 
     fun holdBundleValues(bundle: Bundle) {
@@ -496,5 +506,76 @@ class ModbusConfigViewModel(application: Application) : AndroidViewModel(applica
     }
 
 
+    fun applyCopiedConfiguration() {
 
+       val copiedModbusConfiguration = CopyConfiguration.getCopiedModbusConfiguration()
+        equipModel.value.parameters.forEach { param ->
+            copiedModbusConfiguration.value.parameters.forEach { copiedParam ->
+                if (copiedParam.param.value.name == param.param.value.name) {
+                    param.displayInUi.value = copiedParam.displayInUi.value
+                }
+            }
+        }
+
+        equipModel.value.subEquips.forEach { subEquip ->
+            subEquip.value.parameters.forEach { param ->
+                copiedModbusConfiguration.value.subEquips.forEach { copiedSubEquip ->
+                    copiedSubEquip.value.parameters.forEach { copiedParam ->
+                        if (copiedParam.param.value.name == param.param.value.name) {
+                            param.displayInUi.value = copiedParam.displayInUi.value
+                        }
+                    }
+                }
+            }
+        }
+        if(!equipModel.value.isDevicePaired){
+            equipModel.value.equipDevice.value = CopyConfiguration.getCopiedModbusConfiguration().value.equipDevice.value
+        }
+        disablePasteConfiguration()
+        updateSelectAll()
+        formattedToastMessage(context.getString(R.string.Toast_Success_Message_paste_Configuration), context)
+    }
+
+    fun isCopiedConfigurationAvailable() {
+        selectedModelForCopyConfig = CopyConfiguration.getSelectedModbusModel()
+        val configuration = CopyConfiguration.getCopiedModbusConfiguration()
+
+        // Check if moduleLevel is "zone" and modelName is valid
+        val isZoneValid = moduleLevel == "zone" && modelName.value != "Select Model" || !equipModel.value.equipDevice.value.name.isNullOrEmpty()
+
+        // Check if a model is selected and configurations are valid
+        val isModelSelected = !selectedModelForCopyConfig.isNullOrEmpty()
+        val isSameModel = modelName.value.equals(selectedModelForCopyConfig, true)
+        val isSameVendorAndName = configuration.value.equipDevice.value.vendor.equals(equipModel.value.equipDevice.value.vendor, true) &&
+                configuration.value.equipDevice.value.name.equals(equipModel.value.equipDevice.value.name, true)
+
+        if (isZoneValid && isModelSelected) {
+            when {
+                // Case 1: Model is selected, equip is not paired, and model is different
+                !equipModel.value.isDevicePaired && !isSameModel -> disablePasteConfiguration()
+
+                // Case 2: Model is selected, equip is not paired, and model is the same as selected model
+                !equipModel.value.isDevicePaired && isSameModel -> enablePasteConfiguration()
+
+                // Case 3: Equip is paired, vendor and name are the same as selected configuration
+                isSameVendorAndName -> enablePasteConfiguration()
+
+                else -> disablePasteConfiguration()
+            }
+        }
+        else {
+            disablePasteConfiguration()
+        }
+    }
+
+    fun disablePasteConfiguration() {
+        viewModelScope.launch(Dispatchers.Main) {
+            _isDisabled.value = false
+        }
+    }
+    private fun enablePasteConfiguration() {
+        viewModelScope.launch(Dispatchers.Main) {
+            _isDisabled.value = true
+        }
+    }
 }

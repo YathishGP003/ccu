@@ -1,18 +1,27 @@
 package a75f.io.renatus.modbus.util
 
+import a75f.io.api.haystack.bacnet.parser.BacnetModelDetailResponse
+import a75f.io.api.haystack.bacnet.parser.BacnetPoint
 import a75f.io.api.haystack.modbus.EquipmentDevice
 import a75f.io.api.haystack.modbus.Parameter
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
+import a75f.io.logic.bo.building.NodeType
 import a75f.io.renatus.R
+import a75f.io.renatus.bacnet.models.BacnetPointState
 import a75f.io.renatus.modbus.models.EquipModel
 import a75f.io.renatus.modbus.models.RegisterItem
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
+import android.view.Gravity
+import android.view.LayoutInflater
+import android.widget.ImageView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.compose.runtime.mutableStateOf
+import androidx.core.content.ContextCompat
 import com.google.gson.Gson
 import java.util.Objects
 
@@ -65,6 +74,43 @@ fun getParametersList(equipment: EquipmentDevice): List<Parameter> {
         param.multiplier = it.getMultiplier()
         param.wordOrder = it.getWordOrder()
         parameterList.add(param)
+    }
+    return parameterList
+}
+ fun isAllParamsSelectedBacNet(equipDevice: BacnetModelDetailResponse) : Boolean {
+    var isAllSelected = true
+    if (equipDevice.points.isNotEmpty()) {
+        equipDevice.points.forEach {
+            if (!it.protocolData?.bacnet?.displayInUIDefault!!)
+                isAllSelected = false
+        }
+    }
+    return isAllSelected
+}
+ fun getBacnetPoints(points: List<BacnetPoint>): MutableList<BacnetPointState> {
+    val parameterList = mutableListOf<BacnetPointState>()
+    if (Objects.nonNull(points)) {
+        for (bacnetPoint in points) {
+            val bacnetPointState = BacnetPointState(
+                bacnetPoint.id,
+                bacnetPoint.name,
+                bacnetPoint.domainName,
+                bacnetPoint.kind,
+                bacnetPoint.valueConstraint,
+                bacnetPoint.hisInterpolate,
+                bacnetPoint.protocolData,
+                bacnetPoint.defaultUnit,
+                bacnetPoint.defaultValue,
+                bacnetPoint.equipTagNames,
+                bacnetPoint.rootTagNames,
+                bacnetPoint.descriptiveTags,
+                bacnetPoint.equipTagsList,
+                bacnetPoint.bacnetProperties,
+                displayInUi = mutableStateOf(bacnetPoint.protocolData?.bacnet!!.displayInUIDefault),
+                disName = bacnetPoint.disName
+            )
+            parameterList.add(bacnetPointState)
+        }
     }
     return parameterList
 }
@@ -200,3 +246,38 @@ fun showErrorDialog(context: Context, message: String) {
     }
     builder.create().show()
 }
+fun formattedToastMessage(message: String, context: Context) {
+    val layoutInflater = LayoutInflater.from(context)
+    val toastWarning = layoutInflater.inflate(
+        R.layout.custom_toast_layout_warning,
+        null
+    )
+    val toastImage = toastWarning.findViewById<ImageView>(R.id.custom_toast_image)
+    val successToast = toastWarning.findViewById<TextView>(R.id.custom_toast_Title)
+    val pasteText = toastWarning.findViewById<TextView>(R.id.custom_toast_message_detail)
+    successToast.setText(R.string.Toast_Success_Title)
+    successToast.setTextColor(ContextCompat.getColor(context,R.color.success_status))
+    toastImage.setImageResource(R.drawable.font_awesome_custom_check_mark)
+    toastImage.setColorFilter(ContextCompat.getColor(context,R.color.success_status))
+    toastWarning.setPadding(20, 20, 20, 20)
+
+    pasteText.text = message
+    val toast = Toast(context)
+    toast.setGravity(Gravity.BOTTOM, 50, 50)
+    toast.view = toastWarning
+    toast.duration = Toast.LENGTH_LONG
+    toast.show()
+}
+fun getNodeType(device: HashMap<Any, Any>): NodeType? {
+    val domainName = device["domainName"]?.toString() ?: return null
+
+    return when {
+        domainName.contains("helionode",true) -> NodeType.HELIO_NODE
+        domainName.contains("smartnode",true) -> NodeType.SMART_NODE
+        domainName.contains("hyperstatsplit",true) -> NodeType.HYPERSTATSPLIT
+        domainName.contains("hyperstat",true) -> NodeType.HYPER_STAT
+        domainName.contains("otn",true) -> NodeType.OTN
+        else -> null
+    }
+}
+

@@ -12,6 +12,7 @@ import a75f.io.renatus.composables.MissingPointDialog
 import a75f.io.renatus.compose.ComposeUtil
 import a75f.io.renatus.profiles.OnPairingCompleteListener
 import a75f.io.renatus.profiles.hss.HyperStatSplitFragment
+import a75f.io.renatus.profiles.profileUtils.PasteBannerFragment
 import a75f.io.renatus.util.highPriorityDispatcher
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -27,6 +28,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
@@ -67,6 +70,20 @@ class HyperStatSplitCpuFragment : HyperStatSplitFragment(), OnPairingCompleteLis
             ShowProgressBar()
             CcuLog.i(Domain.LOG_TAG, "Show Progress")
         }
+
+        //reloading the UI once's paste button is clicked
+        viewModel.isReloadRequired.observe(viewLifecycleOwner) { isDialogOpen ->
+            if (isDialogOpen) {
+                viewLifecycleOwner.lifecycleScope.launch(highPriorityDispatcher) {
+                    withContext(Dispatchers.Main) {
+                        rootView.setContent {
+                            RootView()
+                        }
+                    }
+                }
+            }
+        }
+
         viewLifecycleOwner.lifecycleScope.launch(highPriorityDispatcher) {
             viewModel.init(requireArguments(), requireContext(), CCUHsApi.getInstance())
             viewModel.setOnPairingCompleteListener(this@HyperStatSplitCpuFragment)
@@ -106,25 +123,33 @@ class HyperStatSplitCpuFragment : HyperStatSplitFragment(), OnPairingCompleteLis
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 50.dp, vertical = 25.dp),
             ) {
-                item { Title(viewModel) }
-                item { TempOffset(viewModel) }
-                item { AutoAwayConfig(viewModel) }
+                item {
+                    val isDisabled by viewModel.isDisabled.observeAsState(false)
+                    if (isDisabled) {
+                        PasteBannerFragment.PasteCopiedConfiguration(
+                            onPaste = { viewModel.applyCopiedConfiguration() },
+                            onClose = { viewModel.disablePasteConfiguration() }
+                        )
+                    }
+                }
+                item { Title(viewModel,Modifier.padding(50.dp,25.dp)) }
+                item { TempOffset(viewModel,Modifier.padding(50.dp,0.dp)) }
+                item { AutoAwayConfig(viewModel,Modifier.padding(50.dp,0.dp)) }
 
-                item { TitleLabel() }
-                item { SensorConfig(viewModel) }
-                item { RelayConfig(viewModel) }
-                item { AnalogOutConfig(viewModel) }
-                item { UniversalInConfig(viewModel) }
+                item { TitleLabel(Modifier.padding(50.dp,0.dp)) }
+                item { SensorConfig(viewModel,Modifier.padding(50.dp,0.dp)) }
+                item { RelayConfig(viewModel,Modifier.padding(50.dp,0.dp)) }
+                item { AnalogOutConfig(viewModel,Modifier.padding(50.dp,0.dp)) }
+                item { UniversalInConfig(viewModel,Modifier.padding(50.dp,0.dp)) }
 
-                item { AnalogOutDynamicConfig(viewModel) }
+                item { AnalogOutDynamicConfig(viewModel,Modifier.padding(50.dp,0.dp)) }
 
-                item { ZoneOAOConfig(viewModel) }
+                item { ZoneOAOConfig(viewModel,Modifier.padding(50.dp,0.dp)) }
 
-                item { DisplayInDeviceConfig(viewModel) }
+                item { DisplayInDeviceConfig(viewModel,Modifier.padding(50.dp,0.dp)) }
 
-                item { SaveConfig(viewModel) }
+                item { SaveConfig(viewModel,Modifier.padding(50.dp,25.dp)) }
             }
         }
     }
@@ -143,13 +168,13 @@ class HyperStatSplitCpuFragment : HyperStatSplitFragment(), OnPairingCompleteLis
     }
 
     @Composable
-    fun AnalogOutDynamicConfig(viewModel: HyperStatSplitCpuViewModel) {
-        CoolingControl(viewModel)
-        HeatingControl(viewModel)
-        LinearFanControl(viewModel)
-        StagedFanControl(viewModel)
-        OAODamperControl(viewModel)
-        ReturnDamperControl(viewModel)
+    fun AnalogOutDynamicConfig(viewModel: HyperStatSplitCpuViewModel,modifier: Modifier = Modifier) {
+        CoolingControl(viewModel,modifier)
+        HeatingControl(viewModel,modifier)
+        LinearFanControl(viewModel,modifier)
+        StagedFanControl(viewModel,modifier)
+        OAODamperControl(viewModel,modifier)
+        ReturnDamperControl(viewModel,modifier)
     }
 
     override fun onPairingComplete() {

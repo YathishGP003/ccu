@@ -42,4 +42,41 @@ public enum ProfileType
         }
         return null;
     }
+
+    public static String getProfileDescription(ProfileType profileType) {
+        if (profileType == null) {
+            return "UnknownProfile";
+        }
+
+        switch (profileType) {
+            case DAB:
+                return "DAB";
+            case VAV_REHEAT:
+                return "VAVReheatNoFan";
+            case VAV_ACB:
+                return "ActiveChilledBeams + DOAS";
+            case VAV_SERIES_FAN:
+                return "VAVReheatSeries";
+            case VAV_PARALLEL_FAN:
+                return "VAVReheatParallel";
+            case SSE:
+                return "SingleStageEquipment";
+            case PLC:
+                return "PILoopController";
+            case HYPERSTATSPLIT_CPU:
+                return "ConventionalPackageUnit & Economizer";
+            case HYPERSTAT_MONITORING:
+                return "Monitoring";
+            case HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT:
+                return "ConventionalPackageUnit";
+            case HYPERSTAT_HEAT_PUMP_UNIT:
+                return "HeatPumpUnit";
+            case HYPERSTAT_TWO_PIPE_FCU:
+                return "2PipeFCU";
+            case OTN:
+                return "TemperatureInfluencing";
+            default:
+                return "UnknownProfile";
+        }
+    }
 }

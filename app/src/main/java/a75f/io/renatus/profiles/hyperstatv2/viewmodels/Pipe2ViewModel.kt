@@ -62,6 +62,7 @@ class Pipe2ViewModel(application: Application) : HyperStatViewModel(application)
         }
 
         viewState.value = HyperStatViewStateUtil.pipe2ConfigToState(profileConfiguration as Pipe2Configuration)
+        isCopiedConfigurationAvailable()
     }
 
     override fun saveConfiguration() {

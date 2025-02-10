@@ -47,6 +47,8 @@ public class FloorListActionMenuListener implements MultiChoiceModeListener
 
 		MenuInflater inflater = mode.getMenuInflater();
 		inflater.inflate(R.menu.action_menu, menu);
+		menu.findItem(R.id.copyConfiguration).setVisible(false);
+		menu.findItem(R.id.divider).setVisible(false);
 		mMenu = menu;
 		selectedFloor.clear();
 		aMode = mode;

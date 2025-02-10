@@ -7,6 +7,15 @@
         android:visible="true"
         myapp:showAsAction="always|withText" />
     <item
+        android:id="@+id/copyConfiguration"
+        android:title="COPY CONFIGURATION"
+        android:visible="true"
+        myapp:showAsAction="always|withText" />
+    <item
+        android:id="@+id/divider"
+        android:visible="true"
+        android:icon="@drawable/ic_divider" />
+    <item
         android:id="@+id/deleteSelection"
         android:title="Delete"
         android:visible="true"

@@ -15,6 +15,7 @@ import a75f.io.renatus.modbus.util.SET
 import a75f.io.renatus.profiles.OnPairingCompleteListener
 import a75f.io.renatus.profiles.hyperstatv2.util.ConfigState
 import a75f.io.renatus.profiles.hyperstatv2.viewmodels.MonitoringModel
+import a75f.io.renatus.profiles.profileUtils.PasteBannerFragment
 import a75f.io.renatus.profiles.system.advancedahu.Option
 import a75f.io.renatus.util.highPriorityDispatcher
 import android.os.Bundle
@@ -37,6 +38,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
@@ -80,6 +83,18 @@ class HyperStatMonitoringFragment : BaseDialogFragment(), OnPairingCompleteListe
         rootView.setContent {
             ShowProgressBar()
         }
+        //reloading the UI once's paste button is clicked
+        viewModel.isReloadRequired.observe(viewLifecycleOwner) { isDialogOpen ->
+            if(isDialogOpen) {
+                viewLifecycleOwner.lifecycleScope.launch(highPriorityDispatcher) {
+                    withContext(Dispatchers.Main) {
+                        rootView.setContent {
+                            RootView()
+                        }
+                    }
+                }
+            }
+        }
         viewLifecycleOwner.lifecycleScope.launch(highPriorityDispatcher) {
             viewModel.init(requireArguments(), requireContext(), CCUHsApi.getInstance())
             viewModel.setOnPairingCompleteListener(this@HyperStatMonitoringFragment)
@@ -110,136 +125,212 @@ class HyperStatMonitoringFragment : BaseDialogFragment(), OnPairingCompleteListe
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(20.dp),
         ) {
             item {
-
-                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                    TitleTextView("MONITORING")
+                val isDisabled by viewModel.isDisabled.observeAsState(false)
+                if (isDisabled) {
+                    PasteBannerFragment.PasteCopiedConfiguration(
+                        onPaste = { viewModel.applyCopiedConfiguration() },
+                        onClose = { viewModel.disablePasteConfiguration() }
+                    )
                 }
-                Spacer(modifier = Modifier.height(20.dp))
-                val valuesPickerState = rememberPickerState()
+            }
+            item {
+                Column(modifier = Modifier.padding(20.dp)) {
 
-                Picker(
-                    header = "Temperature Offset",
-                    state = valuesPickerState,
-                    items = viewModel.temperatureOffset,
-                    onChanged = { it: String ->
-                        viewModel.viewState.value.temperatureOffset = it.toDouble()
-                    },
-                    startIndex = viewModel.temperatureOffset.indexOf(viewModel.viewState.value.temperatureOffset.toString()),
-                    visibleItemsCount = 3,
-                    textModifier = Modifier.padding(8.dp),
-                    textStyle = TextStyle(fontSize = 15.sp, fontWeight = FontWeight.Bold)
-                )
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    Image(painter = painterResource(id = R.drawable.hyperstatsenseinput),
-                        contentDescription = "Relays", modifier = Modifier
-                            .padding(start = 50.dp, end = 20.dp)
-                            .height(475.dp))
+                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                        TitleTextView("MONITORING")
+                    }
+                    Spacer(modifier = Modifier.height(20.dp))
+                    val valuesPickerState = rememberPickerState()
 
-                    Column(modifier = Modifier.fillMaxSize().padding(top = 80.dp)) {
+                    Picker(
+                        header = "Temperature Offset",
+                        state = valuesPickerState,
+                        items = viewModel.temperatureOffset,
+                        onChanged = { it: String ->
+                            viewModel.viewState.value.temperatureOffset = it.toDouble()
+                        },
+                        startIndex = viewModel.temperatureOffset.indexOf(viewModel.viewState.value.temperatureOffset.toString()),
+                        visibleItemsCount = 3,
+                        textModifier = Modifier.padding(8.dp),
+                        textStyle = TextStyle(fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                    )
+                    Row(modifier = Modifier.fillMaxWidth()) {
+                        Image(
+                            painter = painterResource(id = R.drawable.hyperstatsenseinput),
+                            contentDescription = "Relays", modifier = Modifier
+                                .padding(start = 50.dp, end = 20.dp)
+                                .height(475.dp)
+                        )
 
-                        repeat(4) { index ->
-                            val relayConfig = when (index) {
-                                0 -> viewModel.viewState.value.thermistor1Config
-                                1 -> viewModel.viewState.value.thermistor2Config
-                                2 -> viewModel.viewState.value.analogIn1Config
-                                3 -> viewModel.viewState.value.analogIn2Config
-                                else -> throw IllegalArgumentException("Invalid relay index: $index")
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(top = 80.dp)
+                        ) {
+
+                            repeat(4) { index ->
+                                val relayConfig = when (index) {
+                                    0 -> viewModel.viewState.value.thermistor1Config
+                                    1 -> viewModel.viewState.value.thermistor2Config
+                                    2 -> viewModel.viewState.value.analogIn1Config
+                                    3 -> viewModel.viewState.value.analogIn2Config
+                                    else -> throw IllegalArgumentException("Invalid relay index: $index")
+                                }
+                                val relayEnums = if (index < 2) {
+                                    viewModel.getAllowedValues(
+                                        DomainName.thermistor1InputAssociation,
+                                        viewModel.equipModel
+                                    )
+                                } else {
+                                    viewModel.getAllowedValues(
+                                        DomainName.analog1InputAssociation,
+                                        viewModel.equipModel
+                                    )
+                                }
+
+                                if (index == 2) {
+                                    Spacer(modifier = Modifier.height(30.dp))
+                                }
+
+                                val disName = when (index) {
+                                    0 -> "Thermistor 1"
+                                    1 -> "Thermistor 2"
+                                    2 -> "Analog In 1"
+                                    3 -> "Analog In 2"
+                                    else -> {
+                                        ""
+                                    }
+                                }
+                                DrawRelayConfig(relayConfig, relayEnums, disName)
                             }
-                            val relayEnums = if(index < 2){
-                                viewModel.getAllowedValues(DomainName.thermistor1InputAssociation, viewModel.equipModel)
-                            } else {
-                                viewModel.getAllowedValues(DomainName.analog1InputAssociation, viewModel.equipModel)
-                            }
-
-                            if(index == 2){
-                                Spacer(modifier = Modifier.height(30.dp))
-                            }
-
-                            val disName = when (index) {
-                                0 -> "Thermistor 1"
-                                1 -> "Thermistor 2"
-                                2 -> "Analog In 1"
-                                3 -> "Analog In 2"
-                                else -> {""}
-                            }
-                            DrawRelayConfig(relayConfig, relayEnums, disName)
                         }
                     }
-                }
-                Row(modifier = Modifier
-                    .padding(start = 50.dp, end = 20.dp)) {
-                    val co2ThresholdOptions = viewModel.getOptionByDomainName(DomainName.co2Target, viewModel.equipModel, true)
-                    val co2Unit = viewModel.getUnit(DomainName.co2Target, viewModel.equipModel)
-                    val pm25Unit = viewModel.getUnit(DomainName.pm25Target, viewModel.equipModel)
-                    val pm25ThresholdOptions = viewModel.getOptionByDomainName(DomainName.pm25Target, viewModel.equipModel, true)
-
-                    Box(modifier = Modifier
-                        .weight(1f)
-                        .padding(top = 10.dp)) {
-                        StyledTextView("CO2 Target", fontSize = 20, textAlignment = TextAlign.Left)
-                    }
-                    Box(modifier = Modifier
-                        .weight(.9f)
-                        .padding(top = 5.dp)) {
-                        SpinnerElementOption(viewModel.viewState.value.co2Config.target.toInt().toString(), co2ThresholdOptions, co2Unit,
-                            itemSelected = { viewModel.viewState.value.co2Config.target = it.value.toDouble() }, viewModel = null)
-                    }
-
-                    Box(modifier = Modifier
-                        .weight(1.1f)
-                        .padding(top = 10.dp)) {
-                        StyledTextView("PM 2.5 Target", fontSize = 20, textAlignment = TextAlign.Left)
-                    }
-                    Box(modifier = Modifier
-                        .weight(1f)
-                        .padding(top = 5.dp)) {
-                        SpinnerElementOption(viewModel.viewState.value.pm2p5Config.target.toInt().toString(), pm25ThresholdOptions, pm25Unit,
-                            itemSelected = { viewModel.viewState.value.pm2p5Config.target = it.value.toDouble() }, viewModel = null)
-                    }
-                }
-                Row(modifier = Modifier.width(620.dp)
-                    .padding(top = 10.dp,start = 50.dp, end = 20.dp)) {
-                    val pm10TargetOptions = viewModel.getOptionByDomainName(
-                        DomainName.pm10Target,
-                        viewModel.equipModel,
-                        true
-                    )
-                    val pm10Unit = viewModel.getUnit(DomainName.pm10Target, viewModel.equipModel)
-
-                    Box(
+                    Row(
                         modifier = Modifier
-                            .weight(1f)
-                            .padding(top = 10.dp)
+                            .padding(start = 50.dp, end = 20.dp)
                     ) {
-                        StyledTextView("Pm 10 Target", fontSize = 20, textAlignment = TextAlign.Left)
-                    }
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(top = 5.dp)
-                    ) {
-                        SpinnerElementOption(viewModel.viewState.value.pm10Config.target.toInt()
-                            .toString(),
-                            pm10TargetOptions,
-                            pm10Unit,
-                            itemSelected = {
-                                viewModel.viewState.value.pm10Config.target = it.value.toDouble()
-                            },
-                            viewModel = null
+                        val co2ThresholdOptions = viewModel.getOptionByDomainName(
+                            DomainName.co2Target,
+                            viewModel.equipModel,
+                            true
                         )
+                        val co2Unit = viewModel.getUnit(DomainName.co2Target, viewModel.equipModel)
+                        val pm25Unit =
+                            viewModel.getUnit(DomainName.pm25Target, viewModel.equipModel)
+                        val pm25ThresholdOptions = viewModel.getOptionByDomainName(
+                            DomainName.pm25Target,
+                            viewModel.equipModel,
+                            true
+                        )
+
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(top = 10.dp)
+                        ) {
+                            StyledTextView(
+                                "CO2 Target",
+                                fontSize = 20,
+                                textAlignment = TextAlign.Left
+                            )
+                        }
+                        Box(
+                            modifier = Modifier
+                                .weight(.9f)
+                                .padding(top = 5.dp)
+                        ) {
+                            SpinnerElementOption(viewModel.viewState.value.co2Config.target.toInt()
+                                .toString(),
+                                co2ThresholdOptions,
+                                co2Unit,
+                                itemSelected = {
+                                    viewModel.viewState.value.co2Config.target = it.value.toDouble()
+                                },
+                                viewModel = null
+                            )
+                        }
+
+                        Box(
+                            modifier = Modifier
+                                .weight(1.1f)
+                                .padding(top = 10.dp)
+                        ) {
+                            StyledTextView(
+                                "PM 2.5 Target",
+                                fontSize = 20,
+                                textAlignment = TextAlign.Left
+                            )
+                        }
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(top = 5.dp)
+                        ) {
+                            SpinnerElementOption(viewModel.viewState.value.pm2p5Config.target.toInt()
+                                .toString(),
+                                pm25ThresholdOptions,
+                                pm25Unit,
+                                itemSelected = {
+                                    viewModel.viewState.value.pm2p5Config.target =
+                                        it.value.toDouble()
+                                },
+                                viewModel = null
+                            )
+                        }
                     }
-                }
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(PaddingValues(top = 10.dp, bottom = 10.dp, end = 10.dp)),
-                    contentAlignment = Alignment.CenterEnd
-                ) {
-                    SaveTextView(SET) {
-                        viewModel.saveConfiguration()
+                    Row(
+                        modifier = Modifier
+                            .width(620.dp)
+                            .padding(top = 10.dp, start = 50.dp, end = 20.dp)
+                    ) {
+                        val pm10TargetOptions = viewModel.getOptionByDomainName(
+                            DomainName.pm10Target,
+                            viewModel.equipModel,
+                            true
+                        )
+                        val pm10Unit =
+                            viewModel.getUnit(DomainName.pm10Target, viewModel.equipModel)
+
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(top = 10.dp)
+                        ) {
+                            StyledTextView(
+                                "Pm 10 Target",
+                                fontSize = 20,
+                                textAlignment = TextAlign.Left
+                            )
+                        }
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(top = 5.dp)
+                        ) {
+                            SpinnerElementOption(
+                                viewModel.viewState.value.pm10Config.target.toInt()
+                                    .toString(),
+                                pm10TargetOptions,
+                                pm10Unit,
+                                itemSelected = {
+                                    viewModel.viewState.value.pm10Config.target =
+                                        it.value.toDouble()
+                                },
+                                viewModel = null
+                            )
+                        }
+                    }
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(PaddingValues(top = 10.dp, bottom = 10.dp, end = 10.dp)),
+                        contentAlignment = Alignment.CenterEnd
+                    ) {
+                        SaveTextView(SET) {
+                            viewModel.saveConfiguration()
+                        }
                     }
                 }
             }

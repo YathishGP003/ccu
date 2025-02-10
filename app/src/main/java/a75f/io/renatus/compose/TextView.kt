@@ -136,9 +136,9 @@ fun HeaderLeftAlignedTextViewNew(text: String) {
 }
 
 @Composable
-fun HeaderLeftAlignedTextViewNew(text: String, fontSize : Int = 22) {
+fun HeaderLeftAlignedTextViewNew(text: String, fontSize : Int = 22, modifier: Modifier= Modifier) {
     Text(
-        modifier = Modifier
+        modifier = modifier
             .wrapContentSize(),
         style = TextStyle(
             fontFamily = myFontFamily,
@@ -346,10 +346,10 @@ fun SubTitle(text: String, fontSizeCustom : Double = 19.5, topPaddingValue: Int 
 }
 
 @Composable
-fun SubTitle(text: String) {
+fun SubTitle(text: String,modifier: Modifier = Modifier) {
 
     Text(
-        modifier = Modifier
+        modifier = modifier
             .height(50.dp)
             .padding(start = 5.dp, top = 10.dp),
         style = TextStyle(

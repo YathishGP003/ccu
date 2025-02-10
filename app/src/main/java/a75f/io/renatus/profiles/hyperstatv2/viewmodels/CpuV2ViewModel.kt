@@ -66,6 +66,7 @@ class CpuV2ViewModel(application: Application) : HyperStatViewModel(application)
         }
 
         viewState.value = HyperStatViewStateUtil.cpuConfigToState(profileConfiguration as CpuConfiguration)
+        isCopiedConfigurationAvailable()
     }
 
     override fun saveConfiguration() {

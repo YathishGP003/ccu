@@ -25,7 +25,7 @@
             android:src="@drawable/warning_toast" />
 
         <TextView
-            android:id="@+id/custom_toast_message_warning"
+            android:id="@+id/custom_toast_Title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
@@ -34,6 +34,20 @@
             android:gravity="center_vertical"
             android:text="@string/Toast_Warning_Title"
             android:textColor="@color/warning_toast_red"
+            android:textSize="@dimen/margin_20"
+            android:textStyle="bold" />
+        <TextView
+            android:id="@+id/custom_toast_module_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginStart="4dp"
+            android:contentDescription="@string/success"
+            android:fontFamily="@font/lato"
+            android:gravity="center_vertical"
+            android:text="@string/Toast_Warning_Title"
+            android:textColor="@color/warning_toast_red"
+            android:visibility="gone"
             android:textSize="@dimen/margin_20"
             android:textStyle="bold" />
     </LinearLayout>

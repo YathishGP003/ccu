@@ -22,6 +22,7 @@ import java.io.File;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
 import a75f.io.logic.L;
@@ -257,6 +258,7 @@ public class AppInstaller
                     final String[] commands = {"pm install -r -d -g "+file.getAbsolutePath()};
 
                     CcuLog.d(L.TAG_CCU_DOWNLOAD, "Install AppInstall silent invokeInstallerIntent===>>>"+sFilePath+","+file.getAbsolutePath());
+                    CCUHsApi.getInstance().resetCcuReady();
                     RenatusApp.executeAsRoot(commands, null, true, false);
                     OtaStatusDiagPoint.Companion.updateCCUOtaStatus(OtaStatus.OTA_SUCCEEDED);
                     Globals.getInstance().setCcuUpdateTriggerTimeToken(0);

@@ -230,8 +230,6 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
     boolean isCPUloaded = false;
     boolean isHPUloaded = false;
     ArrayList<HashMap> openZoneMap;
-    double currentTempSensor = 0;
-    int noTempSensor = 0;
     HashMap<String, Integer> mScheduleTypeMap = new HashMap<>();
     Prefs prefs;
 
@@ -551,8 +549,8 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                     if (zoneNodes != null && !zoneNodes.isEmpty() && zoneNodes.contains(nodeAddress)) {
                         SeekArc tempSeekArc = seekArcArrayList.get(i);
                         ExecutorTask.executeBackground(() -> {
-                            currentTempSensor = 0;
-                            noTempSensor = 0;
+                            double currentTempSensor = 0;
+                            double noTempSensor = 0;
                             ArrayList<HashMap> zoneEquips = gridItem.getZoneEquips();
                             for (int j = 0; j < zoneEquips.size(); j++) {
                                 Equip tempEquip = new Equip.Builder().setHashMap(zoneEquips.get(j)).build();
@@ -576,7 +574,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                 currentTempSensor = Double.parseDouble(decimalFormat.format(Math.round(currentTempSensor * 10.0) / 10.0));
                             }
                             if (currentTempSensor > 0) {
-                                getActivity().runOnUiThread(() -> tempSeekArc.setCurrentTemp((float) (currentTempSensor)));
+                                tempSeekArc.setCurrentTemp((float) (currentTempSensor));
                             }
                         });
                         break;

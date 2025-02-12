@@ -427,14 +427,15 @@ public abstract class UtilityApplication extends Application {
             Thread.setDefaultUncaughtExceptionHandler((paramThread, paramThrowable) -> {
                 try {
                     CcuLog.e(L.TAG_CCU, "LifeCycleEvent App Crash");
+                    paramThrowable.printStackTrace();
                     handleSafeMode(paramThrowable);
                     RaygunClient.send(paramThrowable);
-                    paramThrowable.printStackTrace();
                     RenatusApp.closeApp();
                 } catch (Exception e) {
                     //An exception here could lead to ANR, so catch it and let the app get relaunched.
                     e.printStackTrace();
                     CcuLog.e(L.TAG_CCU, "Exception while handling safe mode");
+                    RenatusApp.triggerRebirth(RenatusApp.getAppContext());
                 }
             });
         }

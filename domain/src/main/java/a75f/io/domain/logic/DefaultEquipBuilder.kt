@@ -301,4 +301,21 @@ open class DefaultEquipBuilder : EquipBuilder {
             }
         }
     }
+
+    /**
+     * Please do not use this method for any other things.
+     * This method is strictly used for closing the highPriorityDispatcher thread pool.
+     * The Finalize() method is called by the garbage collector on an object when garbage collection
+     * determines that there are no more references to the object.
+     * This method is called before the object is actually destroyed.
+     * This method is called only once during the life cycle of an object.
+     * It is not recommended to use this method for any operation or initialization.
+     *
+     * This method is deemed deprecated in newer Java version and if any issues are found in future,
+     * we should remove this method and provide a better solution.
+     */
+    protected fun finalize() {
+        CcuLog.d(Domain.LOG_TAG, "DefaultEquipBuilder finalize called")
+        highPriorityDispatcher.close()
+    }
 }

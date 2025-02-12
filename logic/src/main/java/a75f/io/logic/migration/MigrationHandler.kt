@@ -2391,7 +2391,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             "normalizedDamper2Cmd"
         )
         CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "Updating corrupted dab points Started")
-        val dabEquips = hayStack.readAllEntities("equip and dab and zone")
+        val dabEquips = hayStack.readAllEntities("equip and dab and zone and domainName")
         dabEquips.forEach {
             updatePoints(CCUHsApi.getInstance(), dabPoints, it)
         }
@@ -2450,7 +2450,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         )
 
         CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "Updating corrupted hs points Started")
-        val cupOrHpuOr2Pipe = hayStack.readAllEntities("equip and (cpu or hpu or pipe2) and zone")
+        val cupOrHpuOr2Pipe = hayStack.readAllEntities("equip and (cpu or hpu or pipe2) and hyperstat and zone and domainName")
         cupOrHpuOr2Pipe.forEach {
             updatePoints(CCUHsApi.getInstance(), hyperstatPoints, it)
         }
@@ -2469,7 +2469,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         )
 
         CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "Updating corrupted sse points Started")
-        val sseEquips = hayStack.readAllEntities("equip and sse and zone")
+        val sseEquips = hayStack.readAllEntities("equip and sse and zone and domainName")
         sseEquips.forEach {
             updatePoints(CCUHsApi.getInstance(), ssePoints, it)
         }

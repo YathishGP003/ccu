@@ -536,6 +536,14 @@ public class SystemConfigFragment extends Fragment {
                     goTo(page);
                 }
             }
+
+            if (fragment instanceof VavHybridRtuProfile) {
+                goTo(page);
+            }
+
+            if (fragment instanceof DABHybridAhuProfile) {
+                goTo(page);
+            }
         }
         return true;
     }

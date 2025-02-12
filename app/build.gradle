@@ -326,7 +326,8 @@ def getVersionCodeTimestamp() {
     Since 2022, the date format cannot be converted to int as it exceeds the int limit.
     With the below fix, version code can be used for many years as we are changing only the last four digits
      */
-    def code = 2112240002 +  (1000 * LocalDate.now().getYear()) + LocalDate.now().getDayOfYear() + 10 * (Integer.parseInt(VERSION_CODE_MAJOR) + Integer.parseInt(VERSION_CODE_MINOR) + Integer.parseInt(VERSION_CODE_PATCH))
+    def code = 2112240002 +  (1000 * LocalDate.now().getYear()) + LocalDate.now().getDayOfYear() +
+            (Integer.parseInt(VERSION_CODE_MAJOR) * 100) + (Integer.parseInt(VERSION_CODE_MINOR) * 10) + Integer.parseInt(VERSION_CODE_PATCH)
     return code
 }
 

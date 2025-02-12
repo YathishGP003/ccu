@@ -162,37 +162,41 @@ public class CCUListAdapter extends RecyclerView.Adapter<CCUListAdapter.CCUView>
 
     private String getBundleVersionPoint(List<CCU> ccuList, int position) {
 
-            String ccuId = ccuList.get(position).getCcuId().replace("@", "");
-            String query = ("domainName == \"" + DomainName.bundleVersion + "\" and ccuRef == \"" + ccuId + "\"");
+        String ccuId = ccuList.get(position).getCcuId().replace("@", "");
+        String query = ("domainName == \"" + DomainName.bundleVersion + "\" and ccuRef == \"" + ccuId + "\"");
 
-            String response = CCUHsApi.getInstance().fetchRemoteEntityByQuery(query);
+        String response = CCUHsApi.getInstance().fetchRemoteEntityByQuery(query);
 
-            if (response == null || response.isEmpty()) {
-                CcuLog.d(L.TAG_CCU_BUNDLE, "Bundle Version Point response is empty");
-                return null;
-            }
-            List<HashMap> bundleVersionPointMapList =
-                    CCUHsApi.getInstance().HGridToList(new HZincReader(response).readGrid());
-            HashMap<Object, Object> bundleVersionMap = bundleVersionPointMapList.get(0);
-            if(bundleVersionMap.isEmpty()){
-                CcuLog.d(L.TAG_CCU_BUNDLE, "Bundle Version Point map not found");
-                return null;
-            }
-            String bundleVersionId = bundleVersionMap.get(Tags.ID).toString();
-            HGrid pointGrid = CCUHsApi.getInstance().readPointArrRemote(bundleVersionId);
-            if (pointGrid == null) {
-                CcuLog.d(L.TAG_CCU_BUNDLE, "Bundle Version Point grid is empty");
-                return null;
-            }
-            Iterator it = pointGrid.iterator();
-            while (it.hasNext()) {
-                HRow r = (HRow) it.next();
-                if (Integer.parseInt(r.get("level").toString()) == 8) {
-                    CcuLog.d(L.TAG_CCU_BUNDLE, "Bundle Version Point found value is "+r.get("val").toString());
-                    return r.get("val").toString();
-                }
-            }
+        if (response == null || response.isEmpty()) {
+            CcuLog.d(L.TAG_CCU_BUNDLE, "Bundle Version Point response is empty");
             return null;
+        }
+        List<HashMap> bundleVersionPointMapList =
+                CCUHsApi.getInstance().HGridToList(new HZincReader(response).readGrid());
+        if(bundleVersionPointMapList.isEmpty()){
+            CcuLog.d(L.TAG_CCU_BUNDLE, "Bundle Version Point list is empty");
+            return null;
+        }
+        HashMap<Object, Object> bundleVersionMap = bundleVersionPointMapList.get(0);
+        if(bundleVersionMap.isEmpty()){
+            CcuLog.d(L.TAG_CCU_BUNDLE, "Bundle Version Point map not found");
+            return null;
+        }
+        String bundleVersionId = bundleVersionMap.get(Tags.ID).toString();
+        HGrid pointGrid = CCUHsApi.getInstance().readPointArrRemote(bundleVersionId);
+        if (pointGrid == null) {
+            CcuLog.d(L.TAG_CCU_BUNDLE, "Bundle Version Point grid is empty");
+            return null;
+        }
+        Iterator it = pointGrid.iterator();
+        while (it.hasNext()) {
+            HRow r = (HRow) it.next();
+            if (Integer.parseInt(r.get("level").toString()) == 8) {
+                CcuLog.d(L.TAG_CCU_BUNDLE, "Bundle Version Point found value is "+r.get("val").toString());
+                return r.get("val").toString();
+            }
+        }
+        return null;
     }
 
     private void updateCCUFragment(FragmentManager parentFragmentManager, CCU ccu, String fileSize,

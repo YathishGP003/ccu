@@ -49,9 +49,13 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             app:tabGravity="fill"
+            app:tabPaddingStart="5dp"
+            app:tabPaddingEnd="5dp"
             app:tabIndicator="?orange_75f"
             app:tabIndicatorHeight="6dp"
-            app:tabMode="fixed" />
+            app:tabMaxWidth="200dp"
+            app:tabMinWidth="140dp"
+            app:tabMode="scrollable"/>
 
         <Space
             android:layout_width="0dp"

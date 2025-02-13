@@ -149,10 +149,10 @@ public class RenatusApp extends UtilityApplication
 					// Two semicolons in case one of the commands is actually multiple commands separated by a semicolon
 					CcuLog.e(TAG_CCU_DOWNLOAD, "Tablet is NOT rooted, unable to execute remote commands:" + String.join(";; ", commands));
 				}
-			} catch (IOException e) {
+			} catch (IOException | InterruptedException e) {
 				CcuLog.e(TAG_CCU_DOWNLOAD, e.getMessage());
-			} catch (InterruptedException e) {
-				CcuLog.e(TAG_CCU_DOWNLOAD, e.getMessage());
+				//An installation may have failed here. Keeping CCU app active to continue normal operation.
+				CCUHsApi.getInstance().setCcuReady();
 			}
 		});
 		thread.start();

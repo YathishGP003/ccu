@@ -208,9 +208,8 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                         if (isZonePassWordRequired()) {
                             showRequestPasswordAlert("Zone Settings Authentication", getString(R.string.ZONE_SETTINGS_PASSWORD_KEY), 0);
                         }
-                        floorMenu.setVisibility(View.VISIBLE);
-                        menuToggle.setVisibility(View.GONE);
                     }
+                    showFloorIcon();
                     btnTabs.setEnabled(true);
                 }
 
@@ -255,28 +254,25 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
 
             WeatherDataDownloadService.getWeatherData();
 
-            floorMenu.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
+            floorMenu.setOnClickListener(v -> {
 
-                    Fragment currentFragment = mStatusPagerAdapter.getItem(mViewPager.getCurrentItem());
-                    if (currentFragment != null && currentFragment instanceof ZoneFragmentNew) {
-                        DrawerLayout mDrawerLayout = findViewById(R.id.drawer_layout);
-                        LinearLayout drawer_screen = findViewById(R.id.drawer_screen);
-                        try {
+                Fragment currentFragment = mStatusPagerAdapter.getItem(mViewPager.getCurrentItem());
+                if (currentFragment != null && currentFragment instanceof ZoneFragmentNew) {
+                    DrawerLayout mDrawerLayout = findViewById(R.id.drawer_layout);
+                    LinearLayout drawer_screen = findViewById(R.id.drawer_screen);
+                    try {
+                        mDrawerLayout.openDrawer(drawer_screen);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        if (mDrawerLayout != null && !mDrawerLayout.isShown()) {
                             mDrawerLayout.openDrawer(drawer_screen);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            if (mDrawerLayout != null && !mDrawerLayout.isShown()) {
-                                mDrawerLayout.openDrawer(drawer_screen);
-                            }
                         }
-                    } else{
-                        startCountDownTimer(INTERVAL);
                     }
-
-
+                } else{
+                    startCountDownTimer(INTERVAL);
                 }
+
+
             });
         }
         CcuLog.i("UI_PROFILING","LandingActivity.onCreate Completed");
@@ -304,6 +300,28 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
         }
 
         checkBacnetDeviceType();
+    }
+
+    public void showFloorIcon() {
+         int tabPosition = btnTabs.getSelectedTabPosition();
+         if (tabPosition == 1) {
+             Fragment fragment = mStatusPagerAdapter.getItem(mViewPager.getCurrentItem());
+             menuToggle.setVisibility(View.GONE);
+             if (fragment instanceof ZoneFragmentNew) {
+                 floorMenu.setVisibility(View.VISIBLE);
+             } else {
+                 floorMenu.setVisibility(View.GONE);
+             }
+
+         } else {
+             Fragment fragment = mSettingPagerAdapter.getItem(mViewPager.getCurrentItem());
+             floorMenu.setVisibility(View.GONE);
+             if (fragment instanceof SettingsFragment || fragment instanceof SystemConfigFragment) {
+                 menuToggle.setVisibility(View.VISIBLE);
+             } else {
+                 menuToggle.setVisibility(View.GONE);
+             }
+         }
     }
 
     @Override
@@ -533,6 +551,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
             @SuppressLint("ResourceType")
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
+                showFloorIcon();
                 LinearLayout tabLayout = (LinearLayout)((ViewGroup) mTabLayout.getChildAt(0)).getChildAt(tab.getPosition());
                 TextView tabTextView = (TextView) tabLayout.getChildAt(1);
 

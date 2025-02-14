@@ -864,11 +864,10 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
         mViewPager.removeAllViews();
         mViewPager.setAdapter(null);
         mStatusPagerAdapter = new StatusPagerAdapter(getSupportFragmentManager());
+        mViewPager.setAdapter(mStatusPagerAdapter);
         if(!isDashboardConfig(getApplicationContext())) {
             mViewPager.setCurrentItem(1);
         }
-        mViewPager.setAdapter(mStatusPagerAdapter);
-
     }
 
     @Override

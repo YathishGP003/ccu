@@ -49,12 +49,12 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             app:tabGravity="fill"
-            app:tabPaddingStart="5dp"
-            app:tabPaddingEnd="5dp"
+            app:tabPaddingStart="15dp"
+            app:tabPaddingEnd="15dp"
             app:tabIndicator="?orange_75f"
             app:tabIndicatorHeight="6dp"
             app:tabMaxWidth="200dp"
-            app:tabMinWidth="140dp"
+            app:tabMinWidth="0dp"
             app:tabMode="scrollable"/>
 
         <Space

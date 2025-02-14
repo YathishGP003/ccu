@@ -45,10 +45,13 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             app:tabGravity="fill"
-            android:layout_marginStart="12dp"
+            app:tabPaddingStart="15dp"
+            app:tabPaddingEnd="15dp"
             app:tabIndicator="?orange_75f"
             app:tabIndicatorHeight="6dp"
-            app:tabMode="fixed" />
+            app:tabMaxWidth="200dp"
+            app:tabMinWidth="0dp"
+            app:tabMode="scrollable"/>
 
         <Space
             android:layout_width="0dp"

@@ -35,6 +35,7 @@ public class PreferenceUtil {
     private static final String DATA_MIGRATION_POP_UP = "dataMigrationPopUp";
     private static final String SR_MIGRATION_POINT = "srMigrationPoint";
     private static final String UPDATE_BACNET_ID_FOR_ROOM = "updateBacnetIdForRoom";
+    private static final String CONNECTION_CHANGE_TIMESTAMP = "connectionChangeTimestamp";
 
     /**
       * Below preference key is being changed from "zoneEquipPointFloorRefRoomRefMigration" to "zoneEquipPointFloorRefRoomRefMigration_v2"
@@ -781,5 +782,9 @@ public class PreferenceUtil {
 
     public static void setPlcUpdatePointStatus() {
         setBooleanPreference(PLC_POINTS_UPDATE_STATUS, true);
+    }
+
+    public static void setConnectionChangeTime(long lastTimeToken) {
+        setLongPreference(CONNECTION_CHANGE_TIMESTAMP, lastTimeToken);
     }
 }

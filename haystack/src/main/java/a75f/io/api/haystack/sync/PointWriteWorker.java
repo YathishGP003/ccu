@@ -31,8 +31,17 @@ public class PointWriteWorker extends Worker {
     
     @NonNull @Override
     public Result doWork() {
-        
-        CcuLog.i(TAG, "doWork : PointWriteWorker");
+
+        CcuLog.d(TAG, "PointWriteWorker doWork | isDataSyncProcessRunning: " + CCUHsApi.getInstance().isDataSyncProcessRunning() +
+                " | Time since connection change: " + (System.currentTimeMillis() - CCUHsApi.getInstance().getConnectionChangeTime()));
+
+        // Abort PointWrite if its less than 5 minutes since the network reconnected
+        // or if a data sync process is currently running.
+        if ((System.currentTimeMillis() - CCUHsApi.getInstance().getConnectionChangeTime()) < 300000
+                || CCUHsApi.getInstance().isDataSyncProcessRunning()) {
+            CcuLog.d(TAG, "Either data sync process is running or last connection change was less than 5 minutes ago. So aborting PointWrite.");
+            return Result.retry();
+        }
     
         if (!CCUHsApi.getInstance().isCCURegistered()) {
             CcuLog.e(TAG, "Abort PointWrite : CCU Not registered");

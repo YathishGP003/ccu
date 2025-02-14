@@ -1003,7 +1003,8 @@ public class CCUHsApi
             return hGrid;
         }
 
-        if (CCUHsApi.getInstance().isCCURegistered() && hasEntitySynced(id.toString())) {
+        if (CCUHsApi.getInstance().isNetworkConnected()
+                && CCUHsApi.getInstance().isCCURegistered() && hasEntitySynced(id.toString())) {
             String uid = id.toString();
             if (dur.unit == null) {
                 dur = HNum.make(dur.val ,"ms");
@@ -1032,7 +1033,7 @@ public class CCUHsApi
             return;
         }
 
-        if (CCUHsApi.getInstance().isCCURegistered()) {
+        if (CCUHsApi.getInstance().isNetworkConnected() && CCUHsApi.getInstance().isCCURegistered()) {
             String uid = id.toString();
             if (dur.unit == null) {
                 dur = HNum.make(dur.val ,"ms");
@@ -3371,5 +3372,15 @@ public class CCUHsApi
         } else {
             writeHisValById(pointId, value);
         }
+    }
+
+    public boolean isDataSyncProcessRunning() {
+        SharedPreferences spDefaultPrefs = PreferenceManager.getDefaultSharedPreferences(context);
+        return spDefaultPrefs.getBoolean("dataSyncProcessing", false);
+    }
+
+    public long getConnectionChangeTime() {
+        SharedPreferences spDefaultPrefs = PreferenceManager.getDefaultSharedPreferences(context);
+        return spDefaultPrefs.getLong("connectionChangeTimestamp", 0);
     }
 }

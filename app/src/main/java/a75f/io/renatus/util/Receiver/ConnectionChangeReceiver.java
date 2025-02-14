@@ -31,7 +31,10 @@ public class ConnectionChangeReceiver extends BroadcastReceiver {
         NetworkInfo info = cm.getActiveNetworkInfo();
         if (info != null) {
             if (info.isConnected()) {
-                CcuLog.i(L.TAG_CCU_READ_CHANGES, " CONNECTION CHANGE RECEIVER");
+                CcuLog.i(L.TAG_CCU_READ_CHANGES, "CONNECTION CHANGE RECEIVER | DataSyncHandler.isMessageTimeExpired: "
+                        + DataSyncHandler.isMessageTimeExpired(PreferenceUtil.getLastCCUUpdatedTime())
+                        + " | getDataSyncProcessing(): " + getDataSyncProcessing());
+                PreferenceUtil.setConnectionChangeTime(System.currentTimeMillis());
                 if (!DataSyncHandler.isMessageTimeExpired(PreferenceUtil.getLastCCUUpdatedTime()) &&
                         !getDataSyncProcessing()) {
                     CcuLog.i(L.TAG_CCU_READ_CHANGES, " DATA SYNC NOT IN PROGRESS");

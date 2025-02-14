@@ -98,8 +98,8 @@ public class AppInstaller
                 (DownloadManager) RenatusApp.getAppContext().getSystemService(Context.DOWNLOAD_SERVICE);
         removeAllQueuedDownloads(manager);
         DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
-        request.setDescription("Downloading software update");
-        request.setTitle("Downloading Update");
+        request.setDescription("Downloading "+apkFile+" software");
+        request.setTitle("Downloading "+apkFile+" app");
         request.allowScanningByMediaScanner();
         request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE);
         request.setAllowedOverRoaming(true)
@@ -142,19 +142,21 @@ public class AppInstaller
         }
     }
 
-    private boolean isFIleDownloaded(long downloadId) {
+    public boolean isFIleDownloaded(long downloadId) {
         if(downloadId!=-1) {
             DownloadManager dm = (DownloadManager) RenatusApp.getAppContext().getSystemService(Context.DOWNLOAD_SERVICE);
             DownloadManager.Query query = new DownloadManager.Query();
-            query.setFilterById(getCCUAppDownloadId());
+            query.setFilterById(downloadId);
             Cursor cursor = dm.query(query);
             if (cursor.moveToFirst()) {
-                @SuppressLint("Range") int columnStatusIndex = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS));
-                if (columnStatusIndex == STATUS_RUNNING) {
+                @SuppressLint("Range") int downloadStatus = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS));
+                @SuppressLint("Range") long id = cursor.getLong(cursor.getColumnIndex(DownloadManager.COLUMN_ID));
+                CcuLog.d(L.TAG_CCU_DOWNLOAD, "File download status : "+downloadStatus+", downloadID: "+id+" downloadId arg: "+downloadId);
+                if (downloadStatus == STATUS_RUNNING) {
                     CcuLog.d(L.TAG_CCU_DOWNLOAD, "File is still downloading, downloadID: "+downloadId);
                     return false;
                 } else {
-                    CcuLog.d(L.TAG_CCU_DOWNLOAD, "File download status : "+columnStatusIndex+", downloadID: "+downloadId);
+                    CcuLog.d(L.TAG_CCU_DOWNLOAD, "File download status : "+downloadStatus+", downloadID: "+downloadId);
                     dm.remove(downloadId);
                 }
             }

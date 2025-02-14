@@ -227,20 +227,26 @@ public class RemoteCommandHandlerUtil {
             case OTA_UPDATE_BAC_APP:
                 CcuLog.i(L.TAG_CCU_REMOTE_COMMAND,"Downloading BAC App for OTA Update; ApkName=" + id);
                 bacAppApkName = id;
-                updateCCU(id, null, null);
-                setDownloadIdBacApp(downloadFile(DOWNLOAD_BASE_URL + bacAppApkName, bacAppApkName));
+                if(AppInstaller.getHandle().isFIleDownloaded(bacAppDownloadId)){
+                    updateCCU(id, null, null);
+                    setDownloadIdBacApp(downloadFile(DOWNLOAD_BASE_URL + bacAppApkName, bacAppApkName));
+                }
                 break;
             case OTA_UPDATE_REMOTE_ACCESS_APP:
                 CcuLog.i(L.TAG_CCU_REMOTE_COMMAND,"Downloading Remote Access Agent for OTA Update; ApkName=" + id);
                 remoteAccessApkName = id;
-                updateCCU(id, null, null);
-                setRemoteAccessAppDownloadId(downloadFile(DOWNLOAD_BASE_URL + remoteAccessApkName, remoteAccessApkName));
+                if(AppInstaller.getHandle().isFIleDownloaded(remoteAccessAppDownloadId)){
+                    updateCCU(id, null, null);
+                    setRemoteAccessAppDownloadId(downloadFile(DOWNLOAD_BASE_URL + remoteAccessApkName, remoteAccessApkName));
+                }
                 break;
             case OTA_UPDATE_HOME_APP:
                 CcuLog.i(L.TAG_CCU_REMOTE_COMMAND,"Downloading Home App for OTA Update; ApkName=" + id);
                 homeAppApkName = id;
-                updateCCU(id, null, null);
-                setHomeAppDownloadId(downloadFile(DOWNLOAD_BASE_URL + homeAppApkName, homeAppApkName));
+                if(AppInstaller.getHandle().isFIleDownloaded(homeAppDownloadId)){
+                    updateCCU(id, null, null);
+                    setHomeAppDownloadId(downloadFile(DOWNLOAD_BASE_URL + homeAppApkName, homeAppApkName));
+                }
                 break;
             case UPDATE_CCU_LOG_LEVEL:
                 handleCCULogLevelChange(id);

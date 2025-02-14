@@ -126,6 +126,17 @@ fun updateConfigPoint(msgObject: JsonObject, configPoint: Point) {
         )
         config.updateTypeForAnalog1Out(config)
         config.updatePortConfiguration(hayStack, config, deviceBuilder, deviceModel)
+    } else if (configPoint.domainName == DomainName.analog1MinOutput || configPoint.domainName == DomainName.analog1MaxOutput) {
+        CcuLog.d(L.TAG_CCU_PUBNUB, "Update analog Out val")
+        when (configPoint.domainName) {
+            DomainName.analog1MinOutput -> {
+                config.analog1MinOutput.currentVal = sensorTypeValue.toDouble()
+            }
+            DomainName.analog1MaxOutput -> {
+                config.analog1MaxOutput.currentVal = sensorTypeValue.toDouble()
+            }
+        }
+        config.updateTypeForAnalog1Out(config)
     }
 
     writePointFromJson(configPoint, msgObject, CCUHsApi.getInstance())

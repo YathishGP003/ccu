@@ -49,7 +49,7 @@
             app:tabPaddingEnd="15dp"
             app:tabIndicator="?orange_75f"
             app:tabIndicatorHeight="6dp"
-            app:tabMaxWidth="200dp"
+            app:tabMaxWidth="250dp"
             app:tabMinWidth="0dp"
             app:tabMode="scrollable"/>
 

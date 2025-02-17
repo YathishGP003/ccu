@@ -84,6 +84,9 @@ class VavAndAcbProfileMigration {
                         profileConfiguration,
                         port.domainName
                     )
+                    CcuLog.i(L.TAG_CCU_MIGRATION_UTIL, "port domainName: ${port.domainName}" +
+                            " pointRef: ${port.pointRef} enabled: ${port.enabled} profile: ${equip.profile}")
+
                     if (logicalPointRefName == null && port.enabled && !isRelay1PortIsNotEnabled(
                             port)) {
                         port.enabled = false

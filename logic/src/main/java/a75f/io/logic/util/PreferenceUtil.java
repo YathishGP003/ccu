@@ -97,6 +97,8 @@ public class PreferenceUtil {
     private static final String UPDATE_CORRUPTED_DATATYPE_POINTS = "updateCorruptedPoints";
     private static final String UNOCCUPIED_SETBACK_MAX_MIGRATION = "UNOCCUPIED_SETBACK_MAX_MIGRATION";
     private static final String PLC_POINTS_UPDATE_STATUS = "plcPointsUpdateStatus";
+    private static final String OLD_PORT_ENABLED_MIGRATION_STATUS = "oldPortEnabledMigrationStatus";
+    private static final String RELAY2_port_ENABLED_STATUS = "relay2PortEnabledStatus";
 
     public static void setContext(Context c) {
         context= c;
@@ -787,4 +789,21 @@ public class PreferenceUtil {
     public static void setConnectionChangeTime(long lastTimeToken) {
         setLongPreference(CONNECTION_CHANGE_TIMESTAMP, lastTimeToken);
     }
+
+    public static boolean getOldPortEnabledMigrationStatus() {
+        return getBooleanPreference(OLD_PORT_ENABLED_MIGRATION_STATUS);
+    }
+
+    public static void setOldPortEnabledMigrationStatus() {
+        setBooleanPreference(OLD_PORT_ENABLED_MIGRATION_STATUS, true);
+    }
+
+    public static boolean getRelay2PortEnabledStatus() {
+        return getBooleanPreference(RELAY2_port_ENABLED_STATUS);
+    }
+
+    public static void setRelay2PortEnabledStatus() {
+        setBooleanPreference(RELAY2_port_ENABLED_STATUS, true);
+    }
+
 }

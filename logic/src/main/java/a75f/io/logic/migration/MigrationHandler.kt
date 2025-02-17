@@ -67,6 +67,7 @@ import a75f.io.logic.bo.building.dab.getDevicePointDict
 import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType
 import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.definitions.ProfileType
+import a75f.io.logic.bo.building.definitions.ReheatType
 import a75f.io.logic.bo.building.hyperstat.v2.configs.CpuConfiguration
 import a75f.io.logic.bo.building.hyperstat.v2.configs.HpuConfiguration
 import a75f.io.logic.bo.building.hyperstat.v2.configs.MonitoringConfiguration
@@ -84,6 +85,7 @@ import a75f.io.logic.bo.building.system.vav.config.ModulatingRtuProfileConfig
 import a75f.io.logic.bo.building.system.vav.config.StagedRtuProfileConfig
 import a75f.io.logic.bo.building.system.vav.config.StagedVfdRtuProfileConfig
 import a75f.io.logic.bo.building.vav.VavProfileConfiguration
+import a75f.io.logic.bo.haystack.device.DeviceUtil
 import a75f.io.logic.bo.util.DesiredTempDisplayMode
 import a75f.io.logic.diag.DiagEquip.createMigrationVersionPoint
 import a75f.io.logic.migration.VavAndAcbProfileMigration.Companion.cleanACBDuplicatePoints
@@ -189,12 +191,15 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             CcuLog.e(L.TAG_CCU_MIGRATION_UTIL, "Error in migrateHisInterpolate $e")
         }
 
-        try {
-            VavAndAcbProfileMigration.migrateVavAndAcbProfilesToCorrectPortEnabledStatus(hayStack)
-        } catch (e: Exception) {
-            //TODO - This is temporary fix till vav model issue is resolved in the next releases.
-            //For now, we make sure it does not stop other migrations even if this fails.
-            CcuLog.e(L.TAG_CCU_MIGRATION_UTIL, "Error in migrateVavAndAcbProfilesToCorrectPortEnabledStatus: ${e.message}")
+        if (!PreferenceUtil.getOldPortEnabledMigrationStatus()) {
+            try {
+                VavAndAcbProfileMigration.migrateVavAndAcbProfilesToCorrectPortEnabledStatus(hayStack)
+            } catch (e: Exception) {
+                //TODO - This is temporary fix till vav model issue is resolved in the next releases.
+                //For now, we make sure it does not stop other migrations even if this fails.
+                CcuLog.e(L.TAG_CCU_MIGRATION_UTIL, "Error in migrateVavAndAcbProfilesToCorrectPortEnabledStatus: ${e.message}")
+            }
+            PreferenceUtil.setOldPortEnabledMigrationStatus()
         }
         updateAhuRefForTIEquip()
         clearLevel4ValuesOfDesiredTempIfDurationIs0()
@@ -290,6 +295,11 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         if(!PreferenceUtil.getPlcUpdatePointStatus()) {
             updatePLCPhysicalPoints()
             PreferenceUtil.setPlcUpdatePointStatus()
+        }
+
+        if(!PreferenceUtil.getRelay2PortEnabledStatus()) {
+            updateRelay2Port(CCUHsApi.getInstance())
+            PreferenceUtil.setRelay2PortEnabledStatus()
         }
 
         hayStack.scheduleSync()
@@ -2577,5 +2587,43 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             config.updatePortConfiguration(hayStack, config, deviceBuilder, deviceModel)
         }
         CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "Updating PLC physical points completed")
+    }
+
+    private fun updateRelay2Port(ccuHsApi: CCUHsApi) {
+        CcuLog.i(L.TAG_CCU_MIGRATION_UTIL, "updateRelay2Port portEnabled status")
+
+        val vavEquips = ccuHsApi.readAllEntities("equip and vav and not system and not acb")
+
+        vavEquips.forEach { equipMap ->
+            CcuLog.i(L.TAG_CCU_MIGRATION_UTIL, "Migrate -> " + equipMap["dis"].toString())
+            val equip = Equip.Builder().setHashMap(equipMap).build()
+            val domainEquip = VavEquip(equip.id)
+            val address: Short = equip.group.toShort()
+            val devicePorts = DeviceUtil.getPortsForDevice(address, ccuHsApi)
+            devicePorts?.forEach { port ->
+                val reheatType = domainEquip.reheatType.readPriorityVal().toInt()
+                CcuLog.i(
+                    L.TAG_CCU_MIGRATION_UTIL, "id: ${port.id}  port domainName: ${port.domainName}" +
+                            " pointRef: ${port.pointRef} enabled: ${port.enabled} profile: ${equip.profile}: reheatType: $reheatType"
+                )
+
+                if (port.domainName == DomainName.relay2
+                    && equip.profile != null && equip.profile.equals(ProfileType.VAV_REHEAT.name)
+                    && port.pointRef != null && !port.enabled && !port.markers.contains("unused")
+                ) {
+                    port.enabled = true
+                    if (reheatType != ReheatType.TwoStage.ordinal + 1) { // if reheat is not using stage2 then disable relay2
+                        port.enabled = false
+                        port.pointRef = null
+                    }
+                    CcuLog.i(
+                        L.TAG_CCU_MIGRATION_UTIL,
+                        "id: ${port.id} Port: ${port.displayName} is updated with reheatType is $reheatType and is enabled? ${port.enabled}"
+                    )
+                    ccuHsApi.updatePoint(port, port.id)
+                }
+
+            }
+        }
     }
 }

@@ -117,7 +117,7 @@ public class TimeUtil {
             SimpleDateFormat inputFormat = new SimpleDateFormat("HH:mm");
             Date date = inputFormat.parse(inputTime);
 
-            SimpleDateFormat outputFormat = new SimpleDateFormat("hh:mm a");
+            SimpleDateFormat outputFormat = new SimpleDateFormat("h:mm a");
             return outputFormat.format(date);
         } catch (java.text.ParseException e) {
             e.printStackTrace();

@@ -53,6 +53,8 @@ public class AlertManager implements CCUHsApi.EntityDeletedListener
 
     HashMap<String, SequenceLogs> sequenceLogsMap = new HashMap<>();
 
+    private boolean isPostProcessingDone = false;
+
     /**
      * Call this when apiBase changes.  Token should not be null, so please include current token.
      */
@@ -366,11 +368,18 @@ public class AlertManager implements CCUHsApi.EntityDeletedListener
             public void run() {
                 CcuLog.d(TAG_CCU_ALERTS, "Alert Operations Init started: ");
                 fetchPredefinedAlertsIfEmpty();
-                repo.processAlertsOnAppOpen();
+                doPostProcessingAfterOneTimeFetch();
                 taskExecutor.scheduleAtFixedRate(new AlertProcessJob(appContext).getJobRunnable(), 60, 60, TimeUnit.SECONDS);
                 CcuLog.d(TAG_CCU_ALERTS, "Alert Operations Init completed: ");
             }
         }.start();
+    }
+
+    public void doPostProcessingAfterOneTimeFetch() {
+        if (!isPostProcessingDone) {
+            repo.processAlertsOnAppOpen();
+            isPostProcessingDone = true;
+        }
     }
 
     public void fixAlertLocally(Alert a) {

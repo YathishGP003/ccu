@@ -460,6 +460,7 @@ class AlertsRepository(
          }
 
          saveDefs()
+         AlertManager.getInstance().doPostProcessingAfterOneTimeFetch()
       }
    }
 
@@ -552,17 +553,20 @@ class AlertsRepository(
          // otherwise for all the active alerts with groupType != 'alert', fetch them in the runtime variable alertDefsState in Raised State
          else {
             if (alertDefsMap.values.map { it._id }.toSet().contains(alert.alertDefId) && !alertDefsState.getActiveAlerts().contains(alert) && isGroupTypeNotAlert(alert)) {
-               alertDefsState[AlertsDefStateKey(alert.mTitle, alert.equipId?.let {"@$it"})] = AlertDefOccurrenceState(
-                  AlertDefOccurrence(alertDefsMap[alert.mTitle]!!,
-                     isMuted = false,
-                     testPositive = true,
-                     evaluationString = alert.mMessage,
-                     pointId = alert.ref,
-                     equipRef = alert.equipId?.let {"@$it"}
-                  )
-                  , AlertDefProgress.Raised(
-                     timeRaised = DateTime(alert.startTime),
-                     timeFixed = null))
+               if(alertDefsMap[alert.mTitle] != null){
+                  alertDefsState[AlertsDefStateKey(alert.mTitle, alert.equipId?.let {"@$it"})] = AlertDefOccurrenceState(
+                     AlertDefOccurrence(
+                        alertDefsMap[alert.mTitle]!!,
+                        isMuted = false,
+                        testPositive = true,
+                        evaluationString = alert.mMessage ?: "",
+                        pointId = alert.ref,
+                        equipRef = alert.equipId?.let {"@$it"}
+                     )
+                     , AlertDefProgress.Raised(
+                        timeRaised = DateTime(alert.startTime),
+                        timeFixed = null))
+               }
             }
          }
       }

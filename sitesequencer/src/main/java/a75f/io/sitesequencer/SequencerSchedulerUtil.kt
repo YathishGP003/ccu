@@ -30,6 +30,7 @@ class SequencerSchedulerUtil {
         private const val PREFS_NAME = "ccu_sequences"
         private const val KEY_HASHMAP = "job_ids_hashmap"
         fun scheduleDailyCleanupTask(context: Context) {
+            CcuLog.i(TAG_CCU_SITE_SEQUENCER, "alerts cleanup job scheduled");
             val dailyWorkRequest = PeriodicWorkRequestBuilder<SequencerDailyCleanupWorker>(24, TimeUnit.HOURS)
                 .build()
 

@@ -402,4 +402,10 @@ public class AlertManager implements CCUHsApi.EntityDeletedListener
     public void removeAlertDefUsingAlertDefId(String defId){
         repo.removeSequencerOccurrenceByDefId(defId);
     }
+
+    public void fetchBlocklyAlertsForCleanUp() {
+        CcuLog.d(TAG_CCU_ALERTS, "clean up blockly alerts" + repoCheck());
+        if (! repoCheck()) return;
+        repo.getBlocklyAlerts();
+    }
 }

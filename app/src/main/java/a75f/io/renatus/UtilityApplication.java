@@ -76,6 +76,7 @@ import a75f.io.renatus.util.Prefs;
 import a75f.io.renatus.views.RebootDataCache;
 import a75f.io.restserver.server.HttpServer;
 import a75f.io.sitesequencer.SequenceManager;
+import a75f.io.sitesequencer.SequencerSchedulerUtil;
 import a75f.io.usbserial.SerialEvent;
 import a75f.io.util.DashboardListener;
 import a75f.io.util.DashboardUtilKt;
@@ -189,6 +190,14 @@ public abstract class UtilityApplication extends Application {
         DashboardHandler.Companion.setDashboardListener(dashboardListener);
         CcuLog.i("UI_PROFILING", "UtilityApplication.onCreate Done");
         CcuLog.i("CCU_DB", "postProcessingInit - end");
+        scheduleAlertCleanUpJob();
+    }
+
+    private void scheduleAlertCleanUpJob() {
+        RenatusServicesUrls renatusServicesUrls = RenatusServicesEnvironment.getInstance().getUrls();
+        SequenceManager.getInstance(this, renatusServicesUrls.getSequencerUrl())
+                .fetchPredefinedSequencesIfEmpty();
+        SequencerSchedulerUtil.Companion.scheduleDailyCleanupTask(this);
     }
 
     @Subscribe(threadMode = ThreadMode.ASYNC, sticky = true)

@@ -78,7 +78,7 @@ class SiteSequencerRepository(
         }
     }
 
-    public fun fetchSequencerDefinitionsForCleanup() {
+    fun fetchSequencerDefinitionsForCleanup() {
         CcuLog.d(
             SequencerParser.TAG_CCU_SITE_SEQUENCER,
             "fetchSequencerDefinitionsForCleanup !haystack.siteSynced()-->" + !haystack.siteSynced() + " !haystack.authorised-->" + !haystack.authorised

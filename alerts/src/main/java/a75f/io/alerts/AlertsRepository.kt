@@ -638,4 +638,66 @@ class AlertsRepository(
          }
       }
    }
+
+   fun getBlocklyAlerts() {
+      if (!haystack.siteSynced() || !haystack.authorised) {
+         return
+      }
+      val siteId = haystack.siteIdRef.toVal()
+
+      alertsService.getSiteDefinitions(siteId)
+         .subscribeOn(Schedulers.io())
+         .map { it.data }
+         .subscribe(
+            { alertDefs -> cleanBlocklyAlerts(alertDefs)
+
+               CcuLog.i(TAG_CCU_ALERTS,  "res: $alertDefs")
+            },
+            { error -> CcuLog.e(TAG_CCU_ALERTS, "Unexpected error fetching or parsing site definitions.", error) }
+         )
+   }
+
+   private fun cleanBlocklyAlerts(alertDefs: ArrayList<AlertDefinition>?) {
+      dailyCleanUp(alertDefs!!)
+   }
+
+   private fun dailyCleanUp(cloudAlertDefs: ArrayList<AlertDefinition>) {
+      CcuLog.d(
+         TAG_CCU_ALERTS,
+         "doing blockly alerts daily cleanUp"
+      )
+
+      val localAlertDefs = dataStore.getAlertDefinitions();
+      CcuLog.d(
+         TAG_CCU_ALERTS,
+         "localAlertDefs: $localAlertDefs"
+      )
+      CcuLog.d(
+         TAG_CCU_ALERTS,
+         "cloudAlertDefs: $cloudAlertDefs"
+      )
+      val alertsTitleMap = localAlertDefs.associateBy { it.alert.mTitle }
+
+      alertsTitleMap.values.forEach() { localAlertDef ->
+         val matchedAlertDef = cloudAlertDefs.find { cloudAlertDef ->
+            cloudAlertDef.alert.mTitle == localAlertDef.alert.mTitle
+         }
+         CcuLog.d(
+            TAG_CCU_ALERTS,
+            "matchedAlertDef: $matchedAlertDef"
+         )
+         if (matchedAlertDef == null){
+            // only blockly alerts
+            if(localAlertDef.alertBuilder != null) {
+               CcuLog.d(
+                  TAG_CCU_ALERTS,
+                  "removing local blockly alert ${localAlertDef.alert}"
+               )
+               fixAlert(localAlertDef.alert)
+               alertDefsMap.remove(localAlertDef.alert.mTitle)
+            }
+            saveDefs()
+         }
+      }
+   }
 }

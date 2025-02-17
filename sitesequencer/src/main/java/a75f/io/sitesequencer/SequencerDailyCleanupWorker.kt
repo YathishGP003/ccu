@@ -1,6 +1,7 @@
 package a75f.io.sitesequencer
 
 
+import a75f.io.alerts.AlertManager
 import a75f.io.logger.CcuLog
 import android.content.Context
 import androidx.work.Worker
@@ -14,7 +15,8 @@ class SequencerDailyCleanupWorker(context: Context, workerParams: WorkerParamete
     }
 
     private fun performDailyTask() {
-        CcuLog.d(SequencerParser.TAG_CCU_SITE_SEQUENCER, "--sequencer performing daily cleanup--")
+        CcuLog.d(SequencerParser.TAG_CCU_SITE_SEQUENCER, "--sequencer/blockly alert daily cleanup--")
         SequenceManager.getInstance().fetchPredefinedSequencesForCleanUp()
+        AlertManager.getInstance().fetchBlocklyAlertsForCleanUp()
     }
 }

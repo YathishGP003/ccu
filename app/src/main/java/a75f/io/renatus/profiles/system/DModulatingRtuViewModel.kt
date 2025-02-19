@@ -51,8 +51,6 @@ open class DModulatingRtuViewModel : ViewModel() {
     lateinit var relay7AssociationList: List<String>
     lateinit var analog4AssociationList: List<String>
 
-    var modelLoadedState =  MutableLiveData(false)
-    val modelLoaded: LiveData<Boolean> get() = modelLoadedState
     private lateinit var equipBuilder: ProfileEquipBuilder
     private lateinit var deviceBuilder: DeviceBuilder
     lateinit var initialPortValues: HashMap<String, Boolean>

@@ -12,6 +12,7 @@ import a75f.io.renatus.modbus.util.SAVE
 import a75f.io.renatus.profiles.profileUtils.UnusedPortsFragment
 import a75f.io.renatus.util.AddProgressGif
 import a75f.io.renatus.util.TestSignalManager
+import a75f.io.renatus.util.highPriorityDispatcher
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -66,18 +67,22 @@ class DabStagedRtuFragment : DStagedRtuFragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
-        viewLifecycleOwner.lifecycleScope.launch {
-            withContext(Dispatchers.IO) {
-                viewModel.init(requireContext(), CCUHsApi.getInstance())
-            }
-        }
-        val rootView = ComposeView(requireContext())
-        rootView.apply {
+        val rootView = ComposeView(requireContext()).apply {
             setContent {
-                RootView()
+                AddProgressGif()
+                CcuLog.i(Domain.LOG_TAG, "Show Progress")
             }
-            return rootView
         }
+        viewLifecycleOwner.lifecycleScope.launch(highPriorityDispatcher){
+            viewModel.init(requireContext(), CCUHsApi.getInstance())
+            withContext(Dispatchers.Main) {
+                rootView.setContent {
+                    CcuLog.i(Domain.LOG_TAG, "Hide Progress")
+                    RootView()
+                }
+            }
+        }
+        return rootView
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -98,12 +103,6 @@ class DabStagedRtuFragment : DStagedRtuFragment() {
     @Preview
     @Composable
     fun RootView() {
-        val modelLoaded by viewModel.modelLoaded.observeAsState(initial = false)
-        if (!modelLoaded) {
-            AddProgressGif()
-            CcuLog.i(Domain.LOG_TAG, "Show Progress")
-            return
-        }
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()

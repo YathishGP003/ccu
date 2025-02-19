@@ -61,7 +61,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class DabModulatingRtuFragment : DModulatingRtuFragment() {
 
@@ -73,18 +75,27 @@ class DabModulatingRtuFragment : DModulatingRtuFragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
+        val rootView = ComposeView(requireContext()).apply {
+            setContent {
+                AddProgressGif()
+                CcuLog.i(Domain.LOG_TAG, "Show Progress")
+            }
+        }
+
         viewLifecycleOwner.lifecycleScope.launch (highPriorityDispatcher) {
             dabModulatingViewModel.init(
                     requireContext(),
                     CCUHsApi.getInstance()
-                )
+            )
+            withContext(Dispatchers.Main) {
+                rootView.setContent {
+                    CcuLog.i(Domain.LOG_TAG, "Hide Progress")
+                    RootView()
+                }
+            }
 
         }
-        val rootView = ComposeView(requireContext())
-        rootView.apply {
-            setContent { RootView() }
-            return rootView
-        }
+        return rootView
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -105,16 +116,6 @@ class DabModulatingRtuFragment : DModulatingRtuFragment() {
     @Preview
     @Composable
     fun RootView() {
-        val modelLoaded by dabModulatingViewModel.modelLoaded.observeAsState(initial = false)
-        if (!modelLoaded) {
-            AddProgressGif()
-            CcuLog.i(Domain.LOG_TAG, "Show Progress")
-            return
-
-        }
-
-
-        CcuLog.i(Domain.LOG_TAG, "Hide Progress")
         val viewState = dabModulatingViewModel.viewState
         LazyColumn(
             modifier = Modifier

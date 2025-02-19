@@ -55,8 +55,7 @@ open class DabStagedRtuBaseViewModel : ViewModel() {
     lateinit var relay5AssociationList : List<String>
     lateinit var relay6AssociationList : List<String>
     lateinit var relay7AssociationList : List<String>
-    var modelLoadedState =  MutableLiveData(false)
-    val modelLoaded: LiveData<Boolean> get() = modelLoadedState
+
     lateinit var equipBuilder : ProfileEquipBuilder
     lateinit var deviceBuilder: DeviceBuilder
     lateinit var initialPortValues: HashMap<String, Boolean>

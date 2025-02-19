@@ -47,7 +47,6 @@ class DabStagedRtuViewModel : DabStagedRtuBaseViewModel()  {
             CcuLog.i(Domain.LOG_TAG, "Default profile config Loaded")
         }
         initialPortValues = HashMap(profileConfiguration.unusedPorts)
-        modelLoadedState.postValue(true)
         viewState.value.isSaveRequired = !systemEquip["profile"].toString().contentEquals("dabStagedRtu")
     }
 

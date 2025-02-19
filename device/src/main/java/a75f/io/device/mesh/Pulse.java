@@ -900,7 +900,8 @@ public class Pulse
 			hayStack.writeHisValById(cmCurrentTemp.get("id").toString(), curTempVal);
 			CcuLog.d(L.TAG_CCU_DEVICE, "regularCMUpdate : CM currentTemp " + curTempVal+","+val);
 		}
-		HashMap cmHumidity = hayStack.read("point and system and cm and humidity");
+		HashMap cmHumidity = hayStack.read("(point and system and domainName == \""+DomainName.cmHumidity+"\") " +
+					"or (point and system and cm and humidity and not compensation and not target and not avg and not outside)");
 		if (cmHumidity != null && !cmHumidity.isEmpty()) {
 			double val = CCUUtils.roundToOneDecimal(cmRegularUpdateMessage_t.humidity.get());
 			if (val > 0) {
@@ -969,6 +970,8 @@ public class Pulse
 		cmBoardDevice.getAnalog2In().writeHisVal(cmRegularUpdateMessage_t.analogSense2.get());
 		cmBoardDevice.getTh1In().writeHisVal(cmRegularUpdateMessage_t.thermistor1.get());
 		cmBoardDevice.getTh2In().writeHisVal(cmRegularUpdateMessage_t.thermistor2.get());
+		cmBoardDevice.getCurrentTemp().writeHisVal(cmRegularUpdateMessage_t.roomTemperature.get());
+		cmBoardDevice.getHumiditySensor().writeHisVal(cmRegularUpdateMessage_t.humidity.get());
 	}
 
 	public static void regularSmartStatUpdate(CmToCcuOverUsbSmartStatRegularUpdateMessage_t smartStatRegularUpdateMessage_t)

@@ -12,7 +12,7 @@ fun retrieveLevelValues(id: String): ArrayList<String?> {
     listOfMap.forEachIndexed { index, hashMap ->
         run {
             if (hashMap["val"] != null) {
-                arrayList.add("$index : ${hashMap["val"].toString()}")
+                arrayList.add("${index + 1}: ${hashMap["val"].toString()}")
             }
         }
     }

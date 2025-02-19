@@ -1616,7 +1616,7 @@ public class CCUTagsDb extends HServer {
         WritableArrayDBUtilKt.update(writableArray, this.appContext);
 
         if (isBacNetEnabled()) {
-            //shareUpdatedPointWithBacApp(rec.id().toVal(), level, val.toString());
+            shareUpdatedPointWithBacApp(id.toString(), level, "null");
         }
     }
     

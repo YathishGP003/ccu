@@ -462,6 +462,17 @@ class CommonTimeSlotFinder {
                     if (startHour < endHour || (startHour == endHour && startMinute <= endMinute)) {
                         result.add(TimeSlot(startHour, startMinute, endHour, endMinute))
                     }
+                    // if there is overnight slot at boundary
+                    else if (boundary.startHour > boundary.endHour ||
+                        (boundary.startHour == boundary.endHour && boundary.startMinute > boundary.endMinute)) {
+                        val startHour = maxOf(boundary.startHour, timeSlot.startHour)
+                        val startMinute = calculateStartMinute(boundary, timeSlot)
+                        val endHour = 24
+                        val endMinute = 0
+                        if (startHour < endHour || (startHour == endHour && startMinute <= endMinute)) {
+                            result.add(TimeSlot(startHour, startMinute, endHour, endMinute))
+                        }
+                    }
                     // Check if the time slot is overnight and add the overnight slot
                 } else if(timeSlot.startHour == boundary.startHour &&
                     timeSlot.startMinute == boundary.startMinute &&
@@ -479,7 +490,7 @@ class CommonTimeSlotFinder {
             }
         }
         // Check if the previous day has an overnight slot
-        if (previousDaySlot.isNotEmpty() && !isScheduleGroupChanged) {
+        if (previousDaySlot.isNotEmpty()) {
             val previousDayOvernightSlot = getPreviousDayOvernightSlot(previousDaySlot)
             if (previousDayOvernightSlot != null) {
                 val startHour = previousDayOvernightSlot.startHour

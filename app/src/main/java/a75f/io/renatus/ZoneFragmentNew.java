@@ -1568,7 +1568,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         Schedule schedule = CCUHsApi.getInstance().getScheduleById((String)v.getTag());
 
         if(OfflineModeUtilKt.isOfflineMode() && schedule.isNamedSchedule() && !isSpecial) {
-            TabLayout.Tab selectedTab = RenatusLandingActivity.mTabLayout.getTabAt(2);
+            TabLayout.Tab selectedTab = RenatusLandingActivity.mTabLayout.getTabAt(3);
             selectedTab.select();
         }else {
             ScheduleGroupFragment scheduleGroupFragment;

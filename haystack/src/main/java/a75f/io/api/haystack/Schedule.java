@@ -1077,11 +1077,15 @@ public class Schedule extends Entity
     }
     //Get existing intervals for selected days
     public ArrayList<Interval> getScheduledIntervalsForDays(ArrayList<Days> daysSorted) {
-        ArrayList<Interval> daysIntervals = new ArrayList<Interval>();
+        ArrayList<Interval> daysIntervals = new ArrayList<>();
         ArrayList<Interval> allIntervals = getScheduledIntervals(getDaysSorted());
+
         if(!daysSorted.isEmpty() && ( daysSorted.get(0).getSthh() > daysSorted.get(0).getEthh()
                 || (daysSorted.get(0).getSthh() == daysSorted.get(0).getEthh() && daysSorted.get(0).getStmm() > daysSorted.get(0).getEtmm()) ) ) {
-            if(daysSorted.get(daysSorted.size()-1).getDay()==6) {
+
+            Days lastDay = daysSorted.get(daysSorted.size()-1);
+            if(lastDay.getDay() == 6 && (lastDay.getSthh() > lastDay.getEthh() ||
+                    (lastDay.getSthh() == lastDay.getEthh() && lastDay.getStmm() > lastDay.getEtmm()))) {
 
                 //overnight scenario
                 Interval iv = allIntervals.get(allIntervals.size() - 1);

@@ -346,7 +346,7 @@ public class AboutFragment extends Fragment implements BundleInstallListener {
             }
         }
 
-        CcuLog.d(L.TAG_CCU_UI, errorMessages.toString());
+        CcuLog.d(L.TAG_CCU_BUNDLE, errorMessages.toString());
     }
 
     private void setupUpdateCCUButton(UpgradeBundle upgradeBundle, BundleInstallManager bundleInstallManager) {

@@ -907,7 +907,7 @@ class BundleInstallManager: BundleInstallListener {
             if (!upgradeBundle.upgradeOkay) {
                 updateBundleOtaStatus(BundleOtaStatus.OTA_REQUEST_VALIDATION_FAILED)
                 state = BundleInstallState.FAILED
-                val msg = "Bundle marked as not upgradeable"
+                val msg = upgradeBundle.errorMessages.joinToString("\n\n")
                 sendBundleInstallMessage(state, 0, msg)
                 return msg
             }

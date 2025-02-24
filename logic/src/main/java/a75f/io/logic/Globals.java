@@ -146,7 +146,7 @@ public class Globals {
 
 
     private final List<OnCcuInitCompletedListener> initCompletedListeners = new ArrayList<>();
-
+    public LandingActivityListener landingActivityListener = null;
     private Globals() {
     }
 
@@ -773,5 +773,21 @@ public class Globals {
 
     public int getSelectedTab(){
         return selectedTab;
+    }
+
+    public interface LandingActivityListener {
+        void onLandingActivityLoaded();
+    }
+
+    public void registerLandingActivityListener(LandingActivityListener listener) {
+        if (listener != null) {
+            landingActivityListener = listener;
+        }
+    }
+
+    public void unRegisterLandingActivityListener() {
+        if (landingActivityListener != null) {
+            landingActivityListener = null;
+        }
     }
 }

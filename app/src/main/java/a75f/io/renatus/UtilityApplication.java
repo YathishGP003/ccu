@@ -85,7 +85,7 @@ import a75f.io.util.DashboardUtilKt;
  * Created by rmatt isOn 7/19/2017.
  */
 
-public abstract class UtilityApplication extends Application {
+public abstract class UtilityApplication extends Application implements Globals.LandingActivityListener {
 
     public static WifiManager wifiManager;
     public static Context context = null;
@@ -180,7 +180,6 @@ public abstract class UtilityApplication extends Application {
         } else {
             CcuLog.i(L.TAG_CCU, "Reboot service not started for build type: " + BuildConfig.BUILD_TYPE);
         }
-        initMessaging();
         verifyAndroidInitScripts();
         OtaCache cache = new OtaCache();
         cache.restoreOtaRequests(context);
@@ -191,6 +190,7 @@ public abstract class UtilityApplication extends Application {
         CcuLog.i("UI_PROFILING", "UtilityApplication.onCreate Done");
         CcuLog.i("CCU_DB", "postProcessingInit - end");
         scheduleAlertCleanUpJob();
+        Globals.getInstance().registerLandingActivityListener(this);
     }
 
     private void scheduleAlertCleanUpJob() {
@@ -653,5 +653,12 @@ public abstract class UtilityApplication extends Application {
         if (DashboardUtilKt.isDashboardConfig(Globals.getInstance().getApplicationContext()) || isBACnetIntialized()) {
             startRestServer();
         }
+    }
+
+    @Override
+    public void onLandingActivityLoaded() {
+        CcuLog.i(L.TAG_CCU, "landing activity loaded - init messaging");
+        initMessaging();
+        Globals.getInstance().unRegisterLandingActivityListener();
     }
 }

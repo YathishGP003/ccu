@@ -69,6 +69,7 @@ public class FragmentDeviceScan extends BaseDialogFragment
     ProfileType         mProfileType;
     LeDeviceListAdapter mLeDeviceListAdapter;
     BluetoothAdapter    mBluetoothAdapter;
+    private boolean isBluetoothListenerRegistered = false;
     private BluetoothLeScanner mBluetoothLeScanner;
     boolean mScanning;
     BluetoothStateReceiver bluetoothStateReceiver;
@@ -225,6 +226,7 @@ public class FragmentDeviceScan extends BaseDialogFragment
                     //Skip BLE because we can't emulate it.
                     CcuLog.d(L.TAG_CCU_BLE, "enabling bluetooth...");
                     mBluetoothAdapter.enable();
+                    isBluetoothListenerRegistered = true;
                     requireContext().registerReceiver(bluetoothStateReceiver, new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED));
 
                 } else {
@@ -234,6 +236,7 @@ public class FragmentDeviceScan extends BaseDialogFragment
                         if (mBLEDeviceListListView.getCount() == 0 && getActivity() != null) {
                             CcuLog.d(L.TAG_CCU_BLE, "disabling bluetooth...");
                             mBluetoothAdapter.disable();
+                            isBluetoothListenerRegistered = true;
                             requireContext().registerReceiver(bluetoothStateReceiver, new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED));
                         }
                     }, 10000);
@@ -388,6 +391,17 @@ public class FragmentDeviceScan extends BaseDialogFragment
 
     
     @Override
+    public void onStop() {
+        super.onStop();
+        if (bluetoothStateReceiver != null && isBluetoothListenerRegistered) {
+            requireContext().unregisterReceiver(bluetoothStateReceiver);
+            isBluetoothListenerRegistered = false;
+        } else {
+            CcuLog.d(L.TAG_CCU_BLE, "onStop: blue tooth state listener is not registered");
+        }
+    }
+
+    @Override
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
@@ -519,12 +533,22 @@ public class FragmentDeviceScan extends BaseDialogFragment
 
                     if (state == BluetoothAdapter.STATE_ON) {
                         CcuLog.d(L.TAG_CCU_BLE, "bluetooth is enabled");
-                        requireContext().unregisterReceiver(bluetoothStateReceiver);
+                        if (bluetoothStateReceiver != null && isBluetoothListenerRegistered) {
+                            requireContext().unregisterReceiver(bluetoothStateReceiver);
+                            isBluetoothListenerRegistered = false;
+                        } else {
+                            CcuLog.d(L.TAG_CCU_BLE, "State on: blue tooth state listener is not registered");
+                        }
                         searchDevices();
                     }
                     if (state == BluetoothAdapter.STATE_OFF) {
                         CcuLog.d(L.TAG_CCU_BLE, "bluetooth is disabled");
-                        requireContext().unregisterReceiver(bluetoothStateReceiver);
+                        if (bluetoothStateReceiver != null && isBluetoothListenerRegistered) {
+                            requireContext().unregisterReceiver(bluetoothStateReceiver);
+                            isBluetoothListenerRegistered = false;
+                        } else {
+                            CcuLog.d(L.TAG_CCU_BLE, "State off: blue tooth state listener is not registered");
+                        }
                         searchDevices();
                     }
                 } else {

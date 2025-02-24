@@ -838,7 +838,7 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
     }
 
     fun isCopiedConfigurationAvailable() {
-        if(getSelectedBacNetModel() != null && (bacnetModel.value.isDevicePaired == false || bacnetModel.value.isDevicePaired == true) && modelName.value.equals(getSelectedBacNetModel(),true)){
+        if(getSelectedBacNetModel() != null && moduleLevel!="system" && (bacnetModel.value.isDevicePaired == false || bacnetModel.value.isDevicePaired == true) && modelName.value.equals(getSelectedBacNetModel(),true)){
             enablePasteConfiguration()
         }
       else{

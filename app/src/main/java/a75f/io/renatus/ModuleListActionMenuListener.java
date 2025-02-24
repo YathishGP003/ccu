@@ -236,13 +236,13 @@ class ModuleListActionMenuListener implements MultiChoiceModeListener
 		// single module - - visibility true
 		if (seletedModules.size() == 1) {
 			//Non DM profiles - visibility false
-			if ((equip.containsKey("smartstat") || equip.containsKey("ti"))) {
+			if (equip.containsKey("smartstat") || equip.containsKey("ti") ||equip.containsKey("dualDuct") || (equip.containsKey("emr") && (equip.containsKey("smartnode") || equip.containsKey("helionode")))) {
 				return false;
 			}
 			return true;
 		}
 		// Non DM profiles -- visibility false
-		else if ((equip.containsKey("smartstat") || equip.containsKey("ti"))) {
+		else if (equip.containsKey("smartstat") || equip.containsKey("ti") || equip.containsKey("dualDuct") || (equip.containsKey("emr") && (equip.containsKey("smartnode") || equip.containsKey("helionode")))) {
 			return false;
 		}
 		// For ModbusSubEquips - visibility true

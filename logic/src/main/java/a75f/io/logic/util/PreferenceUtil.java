@@ -99,6 +99,7 @@ public class PreferenceUtil {
     private static final String PLC_POINTS_UPDATE_STATUS = "plcPointsUpdateStatus";
     private static final String OLD_PORT_ENABLED_MIGRATION_STATUS = "oldPortEnabledMigrationStatus";
     private static final String RELAY2_port_ENABLED_STATUS = "relay2PortEnabledStatus";
+    private static final String DAB_FULLY_MODULATING_POINTS_UPDATE = "dabFullyModulatingPointsUpdate";
 
     public static void setContext(Context c) {
         context= c;
@@ -804,6 +805,14 @@ public class PreferenceUtil {
 
     public static void setRelay2PortEnabledStatus() {
         setBooleanPreference(RELAY2_port_ENABLED_STATUS, true);
+    }
+
+    public static boolean getDabFullyModulatingPointsUpdate() {
+        return getBooleanPreference(DAB_FULLY_MODULATING_POINTS_UPDATE);
+    }
+
+    public static void setDabFullyModulatingPointsUpdate() {
+        setBooleanPreference(DAB_FULLY_MODULATING_POINTS_UPDATE, true);
     }
 
 }

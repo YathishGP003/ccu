@@ -83,8 +83,8 @@ object DabFullyModulatingRtuCutOverMapping {
 
         "targetMinInsideHumidty" to "systemtargetMinInsideHumidity",
         "outsideTempHeatingLockout" to "dabOutsideTempHeatingLockout",
-        "Humidifier" to "humidifierEnable",
-        "DeHumidifier" to "dehumidifierEnable",
+        "humidifier" to "humidifierEnable",
+        "dehumidifier" to "dehumidifierEnable",
         "weightedAverageHeatingLoadMA" to "weightedAverageHeatingLoadMA",
 
 
@@ -127,7 +127,7 @@ object DabFullyModulatingRtuCutOverMapping {
         "analog2AtMinFan" to "analog2MinFan",
         "analog1AtMaxCooling" to "analog1MaxCooling",
         "rebalanceHoldTime" to "rebalanceHoldTime",
-        "chilledWaterIntegralKFactor" to "dabIntegralKFactor",
+        "chilledWaterIntegralKFactor" to "chilledWaterIntegralKFactor",
         "humidifier" to "humidifierEnable",
         "analog1AtValveFullPosition" to "analog1ValveFullPosition",
         "maximizedExitWaterTempEnabled" to "maximizedExitWaterTempEnable",
@@ -198,6 +198,7 @@ object DabFullyModulatingRtuCutOverMapping {
         "ccuAlarmVolumeLevel" to "ccuAlarmVolumeLevel",
         "cmHeartBeatInterval" to "cmHeartBeatInterval",
         "targetCumulativeDamper" to "dabTargetCumulativeDamper",
+        "dabReheatRelayActivationHysteresis" to "dabReheatRelayActivationHysteresis",
         "relayDeactivationHysteresis" to "dabRelayDeactivationHysteresis",
         "humidityHysteresis" to "dabHumidityHysteresis",
         "stageUpTimerCounter" to "dabStageUpTimerCounter",

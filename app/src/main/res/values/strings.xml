@@ -1787,4 +1787,5 @@
     <string name="title_alert_severity">Severity</string>
     <string name="title_alert_status">Status</string>
     <string name="title_alert_message">Message</string>
+    <string name="txt_global">Global</string>
 </resources>

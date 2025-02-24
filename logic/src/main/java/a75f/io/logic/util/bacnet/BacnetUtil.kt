@@ -21,6 +21,7 @@ import a75f.io.logic.util.bacnet.BacnetConfigConstants.IP_ADDRESS_VAL
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.IP_DEVICE_INSTANCE_NUMBER
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.IP_DEVICE_OBJECT_NAME
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.IS_BACNET_INITIALIZED
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.IS_GLOBAL
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.LOCAL_NETWORK_NUMBER
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.LOCATION
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.MODEL_NAME
@@ -239,9 +240,14 @@ fun sendBroadCast(context: Context, intentAction: String, message: String) {
             return
         }
 
+        val sharedPreferences =
+            PreferenceManager.getDefaultSharedPreferences(Globals.getInstance().applicationContext)
+        val isGlobal = sharedPreferences.getBoolean(IS_GLOBAL, false)
+
         // Set the intent action and extras
         bacAppLaunchIntent.setAction(intentAction)
         bacAppLaunchIntent.putExtra("message", message)
+        bacAppLaunchIntent.putExtra(IS_GLOBAL, isGlobal)
         if (deviceId.isNotEmpty()) {
             bacAppLaunchIntent.putExtra("deviceId", deviceId)
         }

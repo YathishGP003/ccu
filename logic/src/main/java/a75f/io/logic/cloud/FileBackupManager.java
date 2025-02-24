@@ -10,6 +10,7 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.cloudservice.FileBackupService;
 import static a75f.io.logic.L.TAG_CCU_BACKUP;
 import static a75f.io.logic.L.TAG_CCU_REPLACE;
+import static a75f.io.logic.util.bacnet.BacnetConfigConstants.IS_GLOBAL;
 
 import android.content.SharedPreferences;
 import com.google.gson.Gson;
@@ -156,6 +157,12 @@ public class FileBackupManager {
                         }
 
                         if(name.equalsIgnoreCase(BACNET_FD_AUTO_STATE)){
+                            String value = element.getAttribute("value");
+                            CcuLog.e(TAG_CCU_REPLACE, "Boolean : name:" + name +"-"+ "value:" + value);
+                            bacnet_pref.edit().putBoolean(name, Boolean.parseBoolean(value)).apply();
+                        }
+
+                        if(name.equalsIgnoreCase(IS_GLOBAL)){
                             String value = element.getAttribute("value");
                             CcuLog.e(TAG_CCU_REPLACE, "Boolean : name:" + name +"-"+ "value:" + value);
                             bacnet_pref.edit().putBoolean(name, Boolean.parseBoolean(value)).apply();

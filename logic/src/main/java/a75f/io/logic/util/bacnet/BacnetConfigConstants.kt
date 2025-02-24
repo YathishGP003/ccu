@@ -21,6 +21,7 @@ object  BacnetConfigConstants {
     const val BACNET_ID = "bacnetId"
     const val BACNET_TYPE = "bacnetType"
     const val BACNET_FD_AUTO_STATE = "fdAutoState"
+    const val IS_GLOBAL = "isGlobal"
 
 
 
@@ -62,6 +63,8 @@ object  BacnetConfigConstants {
     const val PORT_VAL = "47808"
     const val VENDOR_ID_VALUE = 1181
     const val VENDOR_NAME_VALUE = "75F"
+
+    const val BROADCAST_BACNET_APP_GLOBAL_PARAM = "a75f.io.renatus.BROADCAST_BACNET_APP_GLOBAL_PARAM"
 
 
 }

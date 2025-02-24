@@ -95,6 +95,7 @@ import a75f.io.renatus.util.DataFd;
 import a75f.io.renatus.util.DataFdObj;
 import a75f.io.renatus.views.CustomCCUSwitch;
 import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
+import a75f.io.restserver.server.HttpServer;
 import a75f.io.util.DashboardUtilKt;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -993,8 +994,19 @@ public class Communication extends Fragment {
     }
 
     private void handleClick(boolean isPortAvailable){
-        if(!isPortAvailable){
+
+        if (!isPortAvailable && HttpServer.Companion.getInstance(context).isServerRunning()) {
+            if(!DashboardUtilKt.isDashboardConfig(context)){
+                CcuLog.d(TAG_CCU_BACNET,"5001 port is busy-->");
+                Toast.makeText(context, "Port is busy try after some time", Toast.LENGTH_SHORT).show();
+                HttpServer.Companion.getInstance(context).stopServer();
+                return;
+            }
+        }
+       else if(!isPortAvailable){
+            CcuLog.d(TAG_CCU_BACNET,"5001 port is busy-->");
             Toast.makeText(context, "Port is busy try after some time", Toast.LENGTH_SHORT).show();
+            HttpServer.Companion.getInstance(context).stopServer();
             return;
         }
         CcuLog.d(TAG_CCU_BACNET,"5001 port is free-->");
@@ -1023,7 +1035,9 @@ public class Communication extends Fragment {
             hideView(etTrendLogObjects, tvTrendLogObjects);
             hideView(etScheduleObjects, tvScheduleObjects);
             hideView(etOffsetValues, tvOffsetValue);
-            startRestServer();
+            if (!HttpServer.Companion.getInstance(context).isServerRunning()) {
+                startRestServer();
+            }
             sharedPreferences.edit().putBoolean(IS_BACNET_INITIALIZED, true).apply();
             BacnetUtilKt.launchBacApp(context, BROADCAST_BACNET_APP_START, "Start BACnet App", ipDeviceInstanceNumber.getText().toString());
             performConfigFileBackup();
@@ -1031,6 +1045,7 @@ public class Communication extends Fragment {
     }
 
     public static boolean isPortAvailable(int port) {
+        CcuLog.d(TAG_CCU_BACNET, "Checking port availability " + port);
         ServerSocket serverSocket = null;
         try {
             // Attempt to bind a server socket to the specified port.
@@ -1039,6 +1054,8 @@ public class Communication extends Fragment {
             return true;
         } catch (IOException e) {
             // If an exception occurs during the binding attempt, it means the port is not available.
+            CcuLog.d(TAG_CCU_BACNET, "Exception while checking port availability " + e);
+            e.printStackTrace();
             return false;
         } finally {
             // Close the server socket to release the port.

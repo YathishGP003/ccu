@@ -1,6 +1,7 @@
 package a75f.io.renatus.profiles.system.advancedahu
 
 import a75f.io.api.haystack.CCUHsApi
+import a75f.io.api.haystack.Equip
 import a75f.io.device.cm.sendTestModeMessage
 import a75f.io.device.connect.ConnectModbusSerialComm
 import a75f.io.domain.api.Domain
@@ -162,6 +163,20 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
         DomainManager.addSystemDomainEquip(hayStack)
         DomainManager.addCmBoardDevice(hayStack)
         return ahuEquipId
+    }
+
+    fun updateAhuRefForConnectModule() {
+        val connectModule = CCUHsApi.getInstance()
+            .readEntity("domainName == \"${DomainName.dabAdvancedHybridAhuV2_connectModule}\" or domainName == \"${DomainName.vavAdvancedHybridAhuV2_connectModule}\" and equip")
+        val systemEquip = getAdvancedAhuSystemEquip()
+        if (connectModule["ahuRef"] == null) {
+            val connectModuleEquip = Equip.Builder().setHashMap(connectModule).setAhuRef(systemEquip.getId()).build()
+            CCUHsApi.getInstance().updateEquip(connectModuleEquip, connectModule["id"].toString())
+            CcuLog.i(Domain.LOG_TAG, "update AhuRef for connect Module Equip ")
+        }
+        else{
+            CcuLog.i(Domain.LOG_TAG, "AhuRef is already updated for connect Module Equip ")
+        }
     }
 
     fun addConnectModule() {

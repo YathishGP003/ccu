@@ -87,6 +87,9 @@ class VavAdvancedHybridAhuViewModel : AdvancedHybridAhuViewModel() {
                 saveJob = null
                 showToast("Configuration saved successfully", context)
                 updateOaoPoints()
+                if (profileConfiguration.connectConfiguration.connectEnabled) {
+                    updateAhuRefForConnectModule()
+                }
                 hayStack.setCcuReady()
                 hayStack.syncEntityTree()
             }

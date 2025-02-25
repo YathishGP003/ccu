@@ -49,6 +49,7 @@ object DomainName {
     const val temperatureMode = "temperatureMode"
 
     const val dabAdvancedHybridAhuV2_connectModule = "dabAdvancedHybridAhuV2_connectModule"
+    const val vavAdvancedHybridAhuV2_connectModule = "vavAdvancedHybridAhuV2_connectModule"
     const val connectModuleDevice = "connectModuleDevice"
 
     // Profiles

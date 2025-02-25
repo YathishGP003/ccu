@@ -8,7 +8,6 @@ import a75f.io.renatus.compose.HeaderTextView
 import a75f.io.renatus.compose.LabelTextView
 import a75f.io.renatus.compose.ParameterLabel
 import a75f.io.renatus.compose.SaveTextView
-import a75f.io.renatus.compose.TextViewCompose
 import a75f.io.renatus.compose.TextViewWithClick
 import a75f.io.renatus.compose.TextViewWithClickOption
 import a75f.io.renatus.compose.TitleTextView
@@ -36,6 +35,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -243,6 +243,8 @@ class ModbusConfigView : BaseDialogFragment() {
                                 )
                             ) {
                                 SaveTextView("UNPAIR") { viewModel.unpair() }
+                            } else {
+                                Spacer(modifier = Modifier.weight(1f))
                             }
                             SaveTextView(SET) { viewModel.saveConfiguration() }
                         }
@@ -381,6 +383,9 @@ class ModbusConfigView : BaseDialogFragment() {
                             ) {
                                 SaveTextView("UNPAIR") { viewModel.unpair() }
                             }
+                            else {
+                                Spacer(modifier = Modifier.weight(1f))
+                            }
                             SaveTextView(SET) { viewModel.saveConfiguration() }
                         }
 
@@ -431,7 +436,7 @@ class ModbusConfigView : BaseDialogFragment() {
     @Composable
     fun SubEquipments(data: MutableState<EquipModel>) {
 
-        Column(modifier = Modifier.padding(start = 5.dp)) {
+        Column(modifier = Modifier.padding(8.dp)) {
             data.value.subEquips.forEach { subEquip ->
                 Row(
                     horizontalArrangement = Arrangement.Center,
@@ -448,21 +453,25 @@ class ModbusConfigView : BaseDialogFragment() {
                         )
                     }
                     Box(modifier = Modifier.weight(1f)) { HeaderTextView(SLAVE_ID) }
-                    Box(modifier = Modifier.weight(2f)) {
-                        if (viewModel.equipModel.value.isDevicePaired) {
-                            TextViewCompose(subEquip.value.slaveId.value.toString())
-                        } else {
-                            val onItemSelect = object : OnItemSelect {
-                                override fun onItemSelected(index: Int, item: String) {
-                                    if (index == 0) {
-                                        subEquip.value.slaveId.value = 0
-                                        subEquip.value.childSlaveId.value = SAME_AS_PARENT
-                                    } else {
-                                        subEquip.value.slaveId.value = item.toInt()
-                                        subEquip.value.childSlaveId.value = item
-                                    }
+                    var boxWeight = 1f
+                    if (subEquip.value.childSlaveId.value == SAME_AS_PARENT
+                        && !viewModel.equipModel.value.isDevicePaired) {
+                        boxWeight = 2f
+                    }
+                    Box(modifier = Modifier.weight(boxWeight)) {
+                        val onItemSelect = object : OnItemSelect {
+                            override fun onItemSelected(index: Int, item: String) {
+                                if (index == 0) {
+                                    subEquip.value.slaveId.value = 0
+                                    subEquip.value.childSlaveId.value = SAME_AS_PARENT
+                                } else {
+                                    subEquip.value.slaveId.value = item.toInt()
+                                    subEquip.value.childSlaveId.value = item
                                 }
                             }
+                        }
+                        if((subEquip.value.childSlaveId.value == SAME_AS_PARENT)
+                            && !viewModel.equipModel.value.isDevicePaired) {
                             TextViewWithClick(
                                 text = subEquip.value.childSlaveId,
                                 onClick = {
@@ -476,6 +485,20 @@ class ModbusConfigView : BaseDialogFragment() {
                                 },
                                 enableClick = !viewModel.equipModel.value.isDevicePaired,
                                 isCompress = false
+                            )
+                        } else {
+                            TextViewWithClickOption(
+                                text = subEquip.value.slaveId,
+                                onClick = {
+                                    ProgressDialogUtils.showProgressDialog(context, LOADING)
+                                    showDialogFragment(
+                                        ModelSelectionFragment.newInstance(
+                                            viewModel.childSlaveIdList,
+                                            onItemSelect, SEARCH_SLAVE_ID
+                                        ), ModelSelectionFragment.ID
+                                    )
+                                },
+                                enableClick = !viewModel.equipModel.value.isDevicePaired,
                             )
                         }
                     }

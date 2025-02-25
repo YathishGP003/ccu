@@ -6,7 +6,18 @@ import a75f.io.renatus.compose.ComposeUtil.Companion.myFontFamily
 import a75f.io.renatus.compose.ComposeUtil.Companion.primaryColor
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
@@ -377,7 +388,7 @@ fun SaveTextView(text: String,isChanged: Boolean = true,onClick: () -> Unit) {
     ) {
         Spacer(modifier = Modifier.width(width = 8.dp))
         Text(text = text, style =  TextStyle( fontFamily = myFontFamily,fontSize = 20.sp,  fontWeight = FontWeight.Normal))
-        Spacer(modifier = Modifier.width(width = 4.dp))
+        Spacer(modifier = Modifier.width(width = 8.dp))
     }
 }
 
@@ -528,7 +539,7 @@ fun TextViewWithClickOption(text: MutableState<Int>, onClick: () -> Unit, enable
             enabled = false,
             readOnly = !enableClick,
             modifier = Modifier
-                .width(100.dp)
+                .width(105.dp)
                 .clickable(onClick = {
                     if (enableClick)
                         onClick()
@@ -558,6 +569,7 @@ fun TextViewWithClickOption(text: MutableState<Int>, onClick: () -> Unit, enable
                     modifier = Modifier.size(20.dp)
                 )
             },
+            singleLine = true
         )
         Divider(
             Modifier.width(85.dp).padding(top = 0.dp, start = 5.dp).offset(x = 5.dp, y = (-10).dp))

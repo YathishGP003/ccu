@@ -812,10 +812,12 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
                         )
                     }
                     Box(modifier = Modifier.weight(1f)) { HeaderTextView(SLAVE_ID) }
-                    Box(modifier = Modifier.weight(2f)) {
-                        if (viewModel.equipModel.value.isDevicePaired) {
-                            TextViewCompose(subEquip.value.slaveId.value.toString())
-                        } else {
+                    var boxWeight = 1f
+                    if (subEquip.value.childSlaveId.value == SAME_AS_PARENT
+                        && !viewModel.equipModel.value.isDevicePaired) {
+                        boxWeight = 2f
+                    }
+                    Box(modifier = Modifier.weight(boxWeight)) {
                             val onItemSelect = object : OnItemSelect {
                                 override fun onItemSelected(index: Int, item: String) {
                                     if (index == 0) {
@@ -827,6 +829,8 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
                                     }
                                 }
                             }
+                        if((subEquip.value.childSlaveId.value == SAME_AS_PARENT)
+                            && !viewModel.equipModel.value.isDevicePaired) {
                             TextViewWithClick(
                                 text = subEquip.value.childSlaveId,
                                 onClick = {
@@ -841,6 +845,20 @@ class ExternalAhuFragment(var profileType: ProfileType) : Fragment() {
                                 },
                                 enableClick = !viewModel.equipModel.value.isDevicePaired,
                                 isCompress = false
+                            )
+                        } else {
+                            TextViewWithClickOption(
+                                text = subEquip.value.slaveId,
+                                onClick = {
+                                    ProgressDialogUtils.showProgressDialog(context, LOADING)
+                                    showDialogFragment(
+                                        ModelSelectionFragment.newInstance(
+                                            viewModel.childSlaveIdList,
+                                            onItemSelect, SEARCH_SLAVE_ID
+                                        ), ModelSelectionFragment.ID
+                                    )
+                                },
+                                enableClick = !viewModel.equipModel.value.isDevicePaired,
                             )
                         }
                     }

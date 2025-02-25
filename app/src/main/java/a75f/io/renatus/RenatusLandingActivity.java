@@ -606,7 +606,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
         CcuLog.i(TAG, "LandingActivity onResume");
         isCloudConnectionAlive();
         RemoteCommandUpdateHandler.setRemoteCommandInterface(this);
-        Globals.getInstance().landingActivityListener.onLandingActivityLoaded();
+        if (Globals.getInstance().landingActivityListener != null) Globals.getInstance().landingActivityListener.onLandingActivityLoaded();
     }
     @Override
     public void onPause() {

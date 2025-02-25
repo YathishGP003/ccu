@@ -15,7 +15,6 @@ import android.graphics.Typeface;
 import android.os.Build;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Toast;
@@ -481,7 +480,7 @@ public class RangeBar extends View {
     }
 
     private float getTempForPX(float px) {
-        return ((px - mPaddingPX) / mDegreeIncremntPX) + mLowerBound;
+        return ((px - mPaddingPX) / (mDegreeIncremntPX * 1.3f)) + mLowerBound;
     }
 
 

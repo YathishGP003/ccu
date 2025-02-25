@@ -21,6 +21,7 @@ import org.projecthaystack.UnknownRecException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -48,6 +49,7 @@ import a75f.io.logic.bo.util.SystemScheduleUtil;
 import a75f.io.logic.bo.util.SystemTemperatureUtil;
 import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.TunerUtil;
+import kotlin.Pair;
 
 /**
  * Created by samjithsadasivan on 1/9/19.
@@ -345,8 +347,9 @@ public class DabSystemController extends SystemController
             if(sysEquip != null) {
                 double cmCurrentTemp = getCMCurrentTemp(sysEquip);
                 if(isCMTempDead(cmCurrentTemp)) {
-                    double desiredTempCooling = ScheduleManager.getInstance().getSystemCoolingDesiredTemp();
-                    double desiredTempHeating = ScheduleManager.getInstance().getSystemHeatingDesiredTemp();
+                    Pair<Double, Double> systemDesiredTemp = ScheduleManager.getInstance().getSystemDesiredTemp();
+                    double desiredTempCooling = systemDesiredTemp.component1();
+                    double desiredTempHeating = systemDesiredTemp.component2();
                     double tempMidPoint = (desiredTempCooling + desiredTempHeating)/2;
                     
                     double cmCoolingLoad = cmCurrentTemp > tempMidPoint ? cmCurrentTemp - desiredTempCooling :
@@ -712,9 +715,9 @@ public class DabSystemController extends SystemController
 
     public void updateSystemDesiredTemp(){
         try {
-
-            double desiredTempCooling = ScheduleManager.getInstance().getSystemCoolingDesiredTemp();
-            double desiredTempHeating = ScheduleManager.getInstance().getSystemHeatingDesiredTemp();
+            Pair<Double, Double> systemDesiredTemp = ScheduleManager.getInstance().getSystemDesiredTemp();
+            double desiredTempCooling = systemDesiredTemp.component1();
+            double desiredTempHeating = systemDesiredTemp.component2();
 
             String coolingPointId = CCUHsApi.getInstance().readId("point and system and cm and cooling" +
                     " and desired and temp and equipRef == \"" +

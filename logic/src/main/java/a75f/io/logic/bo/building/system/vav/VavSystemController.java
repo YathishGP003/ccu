@@ -25,6 +25,7 @@ import a75f.io.logic.bo.util.SystemScheduleUtil;
 import a75f.io.logic.bo.util.SystemTemperatureUtil;
 import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.TunerUtil;
+import kotlin.Pair;
 
 import static a75f.io.domain.api.DomainName.averageHumidity;
 import static a75f.io.domain.api.DomainName.averageTemperature;
@@ -346,8 +347,9 @@ public class VavSystemController extends SystemController
 
                 double cmCurrentTemp = getCMCurrentTemp(sysEquip);
                 if(isCMTempDead(cmCurrentTemp)) {
-                    double desiredTempCooling = ScheduleManager.getInstance().getSystemCoolingDesiredTemp();
-                    double desiredTempHeating = ScheduleManager.getInstance().getSystemHeatingDesiredTemp();
+                    Pair<Double, Double> systemDesiredTemp = ScheduleManager.getInstance().getSystemDesiredTemp();
+                    double desiredTempCooling = systemDesiredTemp.component1();
+                    double desiredTempHeating = systemDesiredTemp.component2();
 
                     double zoneCoolingLoad = cmCurrentTemp > desiredTempCooling ? cmCurrentTemp - desiredTempCooling : 0;
                     double zoneHeatingLoad = cmCurrentTemp < desiredTempHeating ? desiredTempHeating - cmCurrentTemp : 0;
@@ -685,8 +687,9 @@ public class VavSystemController extends SystemController
     public void updateSystemDesiredTemp(){
         try {
 
-            double desiredTempCooling = ScheduleManager.getInstance().getSystemCoolingDesiredTemp();
-            double desiredTempHeating = ScheduleManager.getInstance().getSystemHeatingDesiredTemp();
+            Pair<Double, Double> systemDesiredTemp = ScheduleManager.getInstance().getSystemDesiredTemp();
+            double desiredTempCooling = systemDesiredTemp.component1();
+            double desiredTempHeating = systemDesiredTemp.component2();
             HashMap<Object, Object> coolTempPoint = CCUHsApi.getInstance()
                                                             .readEntity("point and system and cooling and " +
                                                                         "desired and temp and equipRef == " + "\"" +

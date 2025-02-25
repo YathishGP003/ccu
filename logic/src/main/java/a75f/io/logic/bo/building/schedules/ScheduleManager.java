@@ -18,6 +18,7 @@ import static a75f.io.logic.bo.building.schedules.Occupancy.UNOCCUPIED;
 import static a75f.io.logic.bo.building.schedules.Occupancy.VACATION;
 import static a75f.io.logic.bo.building.schedules.Occupancy.WINDOW_OPEN;
 import static a75f.io.logic.bo.building.schedules.ScheduleUtil.ACTION_STATUS_CHANGE;
+import static a75f.io.logic.bo.building.schedules.ScheduleUtil.isAHUServedZone;
 import static a75f.io.logic.bo.building.schedules.ScheduleUtil.isCurrentMinuteUnderSpecialSchedule;
 
 import android.content.Intent;
@@ -34,6 +35,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
@@ -79,6 +82,7 @@ import a75f.io.logic.interfaces.ZoneDataInterface;
 import a75f.io.logic.tuners.BuildingTunerCache;
 import a75f.io.logic.tuners.TunerUtil;
 import a75f.io.util.ExecutorTask;
+import kotlin.Pair;
 
 public class ScheduleManager {
 
@@ -1366,36 +1370,36 @@ public class ScheduleManager {
         }
     }
 
-    public double getSystemCoolingDesiredTemp(){
-        double unOccupiedSetback = CCUHsApi.getInstance().readPointPriorityValByQuery("default and unocc and setback");
-        double demandResponseSetback = DemandResponseMode.getSystemLevelDemandResponseSetBackIfActive(CCUHsApi.getInstance());
+    public Pair<Double, Double> getSystemDesiredTemp() {
+        double totalCoolingDesiredTemp = 0.0;
+        double totalHeatingDesiredTemp = 0.0;
 
-        if(currentOccupiedInfo != null)
-            return (systemOccupancy == DEMAND_RESPONSE_UNOCCUPIED ||
-                    systemOccupancy == UNOCCUPIED || systemOccupancy == VACATION) ?
-                        currentOccupiedInfo.getCoolingVal() + unOccupiedSetback + demandResponseSetback : currentOccupiedInfo.getCoolingVal() + demandResponseSetback;
-        else if(nextOccupiedInfo != null)
-            return (systemOccupancy == DEMAND_RESPONSE_UNOCCUPIED ||
-                    systemOccupancy == UNOCCUPIED || systemOccupancy == VACATION)?
-                        nextOccupiedInfo.getCoolingVal() + unOccupiedSetback + demandResponseSetback: nextOccupiedInfo.getCoolingVal() + demandResponseSetback;
-        else return 0;
-    }
+        String orQuery = " or ";
+        List<HashMap<Object, Object>> ahuServedEquipMapList = CCUHsApi.getInstance().readAllEntities(
+                "equip and zone and not modbus and not bacnetDeviceId and " +
+                        "(" + Tags.DAB + orQuery + Tags.VAV + orQuery + Tags.DUALDUCT + orQuery +
+                        Tags.TI + orQuery + Tags.OTN + ")"
+        );
 
-    public double getSystemHeatingDesiredTemp(){
-        double unOccupiedSetback = CCUHsApi.getInstance().readPointPriorityValByQuery("default and unocc and setback");
-        double demandResponseSetback = DemandResponseMode.getSystemLevelDemandResponseSetBackIfActive(CCUHsApi.getInstance());
+        if(ahuServedEquipMapList.isEmpty()) {
+            return new Pair(0.0, 0.0);
+        }
 
-        if(currentOccupiedInfo != null)
-            return (systemOccupancy == DEMAND_RESPONSE_UNOCCUPIED ||
-                    systemOccupancy == UNOCCUPIED || systemOccupancy == VACATION) ?
-                        currentOccupiedInfo.getHeatingVal() - unOccupiedSetback -
-                                demandResponseSetback : currentOccupiedInfo.getHeatingVal() - demandResponseSetback;
-        else if (nextOccupiedInfo != null)
-            return (systemOccupancy == DEMAND_RESPONSE_UNOCCUPIED ||
-                    systemOccupancy == UNOCCUPIED || systemOccupancy == VACATION) ?
-                        nextOccupiedInfo.getHeatingVal() - unOccupiedSetback -
-                                demandResponseSetback: nextOccupiedInfo.getHeatingVal() -demandResponseSetback;
-        else return 0;
+        for(HashMap<Object, Object> ahuServedEquip : ahuServedEquipMapList) {
+            totalCoolingDesiredTemp += CCUHsApi.getInstance().readPointPriorityValByQuery(
+                    "((domainName == \"" + DomainName.desiredTempCooling + "\") " +
+                            "or (desired and cooling and temp)) " +
+                            "and equipRef == \"" + ahuServedEquip.get("id") + "\"");
+
+            totalHeatingDesiredTemp += CCUHsApi.getInstance().readPointPriorityValByQuery(
+                    "((domainName == \"" + DomainName.desiredTempHeating + "\") " +
+                            "or (desired and heating and temp)) " +
+                            "and equipRef == \"" + ahuServedEquip.get("id") + "\"");
+        }
+
+        CcuLog.d("USER_TEST", "totalCoolingDesiredTemp: " + totalCoolingDesiredTemp + ", totalHeatingDesiredTemp: " + totalHeatingDesiredTemp);
+        CcuLog.d("USER_TEST", "ahuServedEquipMapList.size(): " + ahuServedEquipMapList.size());
+        return new Pair(totalCoolingDesiredTemp/ahuServedEquipMapList.size(), totalHeatingDesiredTemp/ahuServedEquipMapList.size());
     }
 
     /**

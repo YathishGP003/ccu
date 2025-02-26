@@ -43,6 +43,7 @@ import a75f.io.domain.equips.SseEquip
 import a75f.io.domain.equips.TIEquip
 import a75f.io.domain.equips.VavEquip
 import a75f.io.domain.equips.hyperstat.HyperStatEquip
+import a75f.io.domain.logic.CCUBaseConfigurationBuilder
 import a75f.io.domain.logic.DeviceBuilder
 import a75f.io.domain.logic.DomainManager.addCmBoardDevice
 import a75f.io.domain.logic.DomainManager.addDomainEquips
@@ -107,6 +108,7 @@ import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDevicePointDef
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import org.joda.time.DateTime
+import org.projecthaystack.HDateTime
 import org.projecthaystack.HDict
 import org.projecthaystack.HDictBuilder
 import org.projecthaystack.HGrid
@@ -301,6 +303,10 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         if(!PreferenceUtil.getRelay2PortEnabledStatus()) {
             updateRelay2Port(CCUHsApi.getInstance())
             PreferenceUtil.setRelay2PortEnabledStatus()
+        }
+        if (PreferenceUtil.isProfileTypeCorrectedInCCUConfigEquip()) {
+            updateCCUConfigEquipProfileType()
+            PreferenceUtil.setProfileTypeCorrectedInCCUConfigEquip()
         }
 
         if (!PreferenceUtil.getDabFullyModulatingPointsUpdate()) {
@@ -2722,5 +2728,37 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                 )
             }
         }
+    }
+    private fun updateCCUConfigEquipProfileType() {
+        val ccuName = CCUHsApi.getInstance().ccuName
+        val ccuEquip = hayStack.readEntityByDomainName(DomainName.ccuConfiguration)
+
+        if (ccuEquip.size == 0) {
+            CcuLog.e(L.TAG_CCU_MIGRATION_UTIL, "CCU Configuration Equip not found")
+            return
+        }
+        if (ccuName == null) {
+            CcuLog.e(L.TAG_CCU_MIGRATION_UTIL, "CCU name is null")
+            return
+        }
+        if (ccuEquip.containsKey(Tags.PROFILE)) {
+            CcuLog.i(L.TAG_CCU_MIGRATION_UTIL, "CCU Configuration Equip already has profile")
+            return
+        }
+        val systemEquip = hayStack.readEntity("equip and system and not modbus and not connectModule")
+        val ccuEquipId = ccuEquip["id"].toString()
+
+        val ccuConfigEquip = CCUBaseConfigurationBuilder(hayStack).getCcuEquip(ccuName)
+
+        systemEquip[Tags.ID]?.toString()?.let { systemEquipId ->
+            ccuConfigEquip.gatewayRef = systemEquipId
+            ccuConfigEquip.ahuRef = systemEquipId
+        }
+
+        ccuConfigEquip.lastModifiedDateTime = HDateTime.make(System.currentTimeMillis())
+        ccuConfigEquip.id = ccuEquipId
+
+        hayStack.updateEquip(ccuConfigEquip, ccuConfigEquip.id)
+        CcuLog.i(L.TAG_CCU_MIGRATION_UTIL, "CCU Configuration Equip updated with profile")
     }
 }

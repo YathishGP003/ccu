@@ -4,7 +4,7 @@ import a75f.io.api.haystack.BuildConfig
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Equip
 import a75f.io.domain.api.Domain
-import a75f.io.domain.util.ModelLoader
+import a75f.io.domain.util.ModelLoader.getCCUBaseConfigurationModel
 import a75f.io.logger.CcuLog
 import io.seventyfivef.domainmodeler.client.ModelDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
@@ -76,11 +76,12 @@ class CCUBaseConfigurationBuilder(private val hayStack : CCUHsApi): DefaultEquip
         hayStack.updateEquip(hayStackEquip, ccuEquipId)
     }
 
-    private fun getCcuEquip(ccuName: String): Equip {
+    fun getCcuEquip(ccuName: String): Equip {
         val siteRef = hayStack.siteIdRef.toString()
         val tz = hayStack.timeZone
-        val ccuConfigModelDef = ModelLoader.getCCUBaseConfigurationModel()
-        return buildEquip(EquipBuilderConfig(ccuConfigModelDef, null, siteRef,tz,
+        val ccuConfigModelDef = getCCUBaseConfigurationModel()
+        val profileConfiguration = CCUEquipConfiguration(ccuConfigModelDef as SeventyFiveFProfileDirective, hayStack).getDefaultConfiguration()
+        return buildEquip(EquipBuilderConfig(ccuConfigModelDef, profileConfiguration, siteRef,tz,
             "$ccuName-${ccuConfigModelDef.name}")
         )
     }

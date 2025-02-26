@@ -64,26 +64,19 @@ public class TIProfile extends ZoneProfile {
     public void updateZonePoints() {
         if(isRFDead()){
             state = RFDEAD;
-            String curStatus = tiEquip.getEquipStatus().readDefaultStrVal();
+            String curStatus = tiEquip.getEquipStatusMessage().readDefaultStrVal();
             if (!curStatus.equals(RFDead)) {
-                tiEquip.getEquipStatus().writeDefaultVal(RFDead);
-                /*CCUHsApi.getInstance().writeDefaultVal("point and status and message and" +
-                        " writable and group == \"" + mNodeAddr + "\"", RFDead);*/
+                tiEquip.getEquipStatusMessage().writeDefaultVal(RFDead);
             }
             tiEquip.getEquipStatus().writeHisVal(RFDEAD.ordinal());
-            /*CCUHsApi.getInstance().writeHisValByQuery("point and not ota and status and" +
-                    " his and group == \"" + mNodeAddr + "\"", (double) RFDEAD.ordinal());*/
             return;
         } else if (isZoneDead()) {
             state = TEMPDEAD;
             String curStatus = tiEquip.getEquipStatusMessage().readDefaultStrVal();
-                   // CCUHsApi.getInstance().readDefaultStrVal("point and status and message and writable and group == \"" + mNodeAddr + "\"");
             if (!curStatus.equals("Zone Temp Dead")) {
                 tiEquip.getEquipStatusMessage().writeDefaultVal("Zone Temp Dead");
-               // CCUHsApi.getInstance().writeDefaultVal("point and status and message and writable and group == \"" + mNodeAddr + "\"", "Zone Temp Dead");
             }
             tiEquip.getEquipStatus().writeHisVal(TEMPDEAD.ordinal());
-            //CCUHsApi.getInstance().writeHisValByQuery("point and not ota and status and his and group == \"" + mNodeAddr+ "\"", (double) TEMPDEAD.ordinal());
             return;
         }
 

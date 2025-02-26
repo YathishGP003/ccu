@@ -396,7 +396,6 @@ public class TunerUtil
             Domain.ccuEquip.getBackFillDuration().writeHisVal(24.0);
             Domain.ccuEquip.getBackFillDuration().writeDefaultVal(24.0);
             Domain.diagEquip.getCcuHeartbeat().writeHisVal(1.0);
-            Domain.diagEquip.getCcuHeartbeat().writeDefaultVal(1.0);
             OfflineModeUtilKt.fetchToken();
             CCUHsApi.getInstance().syncEntityWithPointWrite();
         }

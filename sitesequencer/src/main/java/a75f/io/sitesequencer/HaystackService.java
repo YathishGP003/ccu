@@ -1,6 +1,8 @@
 package a75f.io.sitesequencer;
 
 
+import android.webkit.HttpAuthHandler;
+
 import com.eclipsesource.v8.V8;
 import com.eclipsesource.v8.V8Array;
 import com.eclipsesource.v8.V8Function;
@@ -33,7 +35,10 @@ import a75f.io.alerts.log.LogOperation;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HayStackConstants;
 import a75f.io.api.haystack.HisItem;
+import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.bo.building.definitions.Port;
+import a75f.io.logic.bo.haystack.device.SmartNode;
 import a75f.io.sitesequencer.log.SequencerLogsCallback;
 
 public class HaystackService {
@@ -154,15 +159,30 @@ public class HaystackService {
         sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("POINT_WRITE"), message, MSG_CALCULATING);
         CcuLog.d(TAG, "---pointWrite##--id-"+id + "<--level-->"+level+"<--override-->"+override + "<-value->"+value);
         CCUHsApi.getInstance().pointWrite(HRef.copy(id), level, WHO, HNum.make(value), HNum.make(0), reason);
+
+        //This is not the best place to do it. But PI config change from sequencer requires dependent points to be updated.
+        //There is no clean way to it for now.
+        HashMap<Object, Object> point = CCUHsApi.getInstance().readMapById(id);
+        if (point.containsKey(Tags.PID) && point.containsKey("analog") && point.containsKey("output")) {
+            int address = Integer.parseInt(point.get(Tags.GROUP).toString());
+            String type = "";
+            if (point.containsKey(Tags.MIN)) {
+                int maxVal = CCUHsApi.getInstance().readDefaultVal("domainName == \"analog1MaxOutput\" and group == \""+address+"\"").intValue();
+                type = (int)value+"-"+maxVal+"v";
+            } else {
+                int minVal = CCUHsApi.getInstance().readDefaultVal("domainName == \"analog1MinOutput\" and group == \""+address+"\"").intValue();
+                type = minVal+"-"+(int)value+"v";
+            }
+            CcuLog.d(TAG, "Update Type for PID "+type);
+            SmartNode.updateDomainPhysicalPointType(address, "analog1Out", type);
+        }
     }
 
     public void pointWriteMany(V8Array ids, int level, double value, boolean override, Object contextHelper) {
         CcuLog.d(TAG, "---pointWriteMany##--id-"+ids.length() + "<--level-->"+level+"<--override-->"+override + "<-value->"+value);
         for(int i=0;i<ids.length(); i++){
             String pointId = ids.getString(i);
-            String message = String.format("writing point with, id = %s, level = %d, value = %s", HRef.copy(pointId), level, value);
-            sequenceLogsCallback.logInfo(LogLevel.INFO, LogOperation.valueOf("POINT_WRITE"), message, MSG_CALCULATING);
-            CCUHsApi.getInstance().pointWrite(HRef.copy(pointId), level, WHO, HNum.make(value), HNum.make(0), reason);
+            pointWrite(pointId, level, value, override, contextHelper);
         }
         ids.close();
     }

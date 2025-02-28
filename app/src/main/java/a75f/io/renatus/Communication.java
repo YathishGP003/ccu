@@ -21,6 +21,7 @@ import static a75f.io.logic.util.bacnet.BacnetConfigConstants.IP_DEVICE_OBJECT_N
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.IS_BACNET_INITIALIZED;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.LOCAL_NETWORK_NUMBER;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.LOCATION;
+import static a75f.io.logic.util.bacnet.BacnetConfigConstants.NETWORK_INTERFACE;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.NULL;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.NUMBER_OF_APDU_RETRIES;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.NUMBER_OF_NOTIFICATION_CLASS_OBJECTS;
@@ -38,25 +39,28 @@ import static a75f.io.renatus.UtilityApplication.context;
 import static a75f.io.renatus.UtilityApplication.startRestServer;
 import static a75f.io.renatus.UtilityApplication.stopRestServer;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.text.Editable;
+import android.text.Html;
 import android.text.TextWatcher;
 import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -74,6 +78,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
 import java.net.ServerSocket;
 import java.util.Enumeration;
@@ -86,9 +91,10 @@ import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Tags;
 import a75f.io.logic.util.bacnet.BacnetUtilKt;
 import a75f.io.logger.CcuLog;
-import a75f.io.logic.L;
+import a75f.io.logic.Globals;
 import a75f.io.renatus.bacnet.BacnetConfigChange;
 import a75f.io.renatus.util.CCUUiUtil;
+import a75f.io.renatus.util.CustomSelectionAdapter;
 import a75f.io.renatus.util.DataBbmd;
 import a75f.io.renatus.util.DataBbmdObj;
 import a75f.io.renatus.util.DataFd;
@@ -106,7 +112,12 @@ public class Communication extends Fragment {
     private final String PREF_MB_PARITY = "mb_parity";
     private final String PREF_MB_DATA_BITS = "mb_databits";
     private final String PREF_MB_STOP_BITS = "mb_stopbits";
-    
+
+    private String deviceIpAddress = "";
+    private int portNumber = 47808;
+    private int subnetMask = 1;
+    private int bacnetConfigSelectedPosition = 2; // Default value mapped to Normal
+
     @BindView(R.id.spinnerBaudRate) Spinner spinnerBaudRate;
     
     @BindView(R.id.spinnerParity) Spinner spinnerParity;
@@ -136,9 +147,8 @@ public class Communication extends Fragment {
 
     @BindView(R.id.tvPassword1) TextView tvPassword;
 
-    @BindView(R.id.etIP) EditText ipAddress;
 
-    @BindView(R.id.tvIP1) TextView tvIPAddress;
+    @BindView(R.id.ipSpinner) Spinner ipAddressSpinner;
 
     @BindView(R.id.etlocalNetworkAddress) EditText localNetworkNumber;
 
@@ -188,8 +198,6 @@ public class Communication extends Fragment {
 
     @BindView(R.id.tvZvdmHint) TextView tvzvdmHint;
 
-    @BindView(R.id.rg_configuration_type)
-    RadioGroup rgConfigurationType;
 
     @BindView(R.id.etOffsetValues) EditText etOffsetValues;
 
@@ -200,19 +208,19 @@ public class Communication extends Fragment {
     @BindView(R.id.bbmdInputContainer) View bbmdInputContainer;
 
     @BindView(R.id.normalView) View normalView;
-    @BindView(R.id.tvFdAdd) View tvfDAdd;
+    @BindView(R.id.etFdIp) EditText etFDIP;
+    @BindView(R.id.etFdPort) EditText etFDPort;
+    @BindView(R.id.etFdTime) EditText etFDTime;
 
-    @BindView(R.id.tvFdSubmit) View tvFdSubmit;
+    @BindView(R.id.tvFdSubmit) TextView tvFdSubmit;
 
     @BindView(R.id.tvNormalSubmit) View tvNormalSubmit;
-    @BindView(R.id.checkBoxAuto)
-    CheckBox fdCheckBoxAuto;
 
-    @BindView(R.id.fdInputViews) LinearLayout fdInputViews;
+    @BindView(R.id.bacnetConfigureLayout) RelativeLayout bacnetConfigureLayout;
 
     @BindView(R.id.tvBbmdAdd) View tvBbmdAdd;
 
-    @BindView(R.id.tvBbmdSubmit) View tvBbmdSubmit;
+    @BindView(R.id.tvBbmdSubmit) TextView tvBbmdSubmit;
 
     @BindView(R.id.bbmdInputViews)
     LinearLayout bbmdInputViews;
@@ -221,6 +229,8 @@ public class Communication extends Fragment {
     ImageView ivRefreshView;
 
     @BindView(R.id.tvBacAppVersion) TextView tvBacAppVersion;
+
+    @BindView(R.id.bacnetConfigSpinner) Spinner bacnetConfigSpinner;
 
     SharedPreferences sharedPreferences;
     JSONObject config;
@@ -233,6 +243,9 @@ public class Communication extends Fragment {
     private ExecutorService executorService;
 
     boolean isZoneToVirtualDeviceErrorShowing = false;
+
+    private CustomSelectionAdapter<String> spinnerBacnetConfigAdapter;
+
     public Communication() {
     
     }
@@ -332,6 +345,7 @@ public class Communication extends Fragment {
             config.put("objectConf", objectConf);
             sharedPreferences.edit().putString(BACNET_CONFIGURATION,config.toString()).apply();
 
+            getIpAddress();
             setBACnetConfigurationValues();
             doBACnetConfigurationValidation();
             initializeBACnet();
@@ -340,12 +354,20 @@ public class Communication extends Fragment {
             e.printStackTrace();
         }
 
-        rgConfigurationType.setOnCheckedChangeListener((radioGroup, checkedId) -> {
-            RadioButton radioButton = view.findViewById(checkedId);
-            String label = radioButton.getText().toString();
-            CcuLog.d(TAG_CCU_BACNET, "radioButton selected-->"+label);
-            handleConfigurationType(label);
-            performConfigFileBackup();
+        spinnerBacnetConfigAdapter =  new CustomSelectionAdapter<>(getContext(), R.layout.custom_textview, Arrays.asList(getResources().getStringArray(R.array.bacnet_config_array)),false);
+        bacnetConfigSpinner.setAdapter(spinnerBacnetConfigAdapter);
+        bacnetConfigSelectedPosition = getBacnetConfiguration(selectedDeviceType);
+        bacnetConfigSpinner.setSelection(bacnetConfigSelectedPosition);
+        spinnerBacnetConfigAdapter.setConfiguredIndex(bacnetConfigSelectedPosition);
+
+        bacnetConfigSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                bacnetConfigSelectedPosition = position;
+                String selectedItem = bacnetConfigSpinner.getSelectedItem().toString();
+                handleConfigurationType(selectedItem);
+            }
+            @Override public void onNothingSelected(AdapterView<?> parent) {
+            }
         });
 
         bbmdInputContainer.setVisibility(View.GONE);
@@ -364,106 +386,40 @@ public class Communication extends Fragment {
         tvBacAppVersion.setText(bacAppVersion);
 
         tvFdSubmit.setOnClickListener(view1 -> {
-            if (validateFdData()) {
-                Toast.makeText(context, "Device configured as FD", Toast.LENGTH_SHORT).show();
-                try {
-                    DataFdObj dataFdObj = new DataFdObj();
-                    for (int i = 0; i < fdInputViews.getChildCount(); i++) {
-                        View childView = fdInputViews.getChildAt(i);
-                        EditText etBbmdIp = childView.findViewById(R.id.etFdIp);
-                        EditText etBbmdPort = childView.findViewById(R.id.etFdPort);
-                        EditText etBbmdMask = childView.findViewById(R.id.etFdTime);
-
-                        CcuLog.d(TAG_CCU_BACNET, "fd entry at->" + i + "<--ip-->" + etBbmdIp.getText().toString() + "<--port-->" +
-                                etBbmdPort.getText().toString() + "<--time-->" + etBbmdMask.getText().toString());
-                        dataFdObj.setDataFd(new DataFd(etBbmdIp.getText().toString(), Integer.parseInt(etBbmdPort.getText().toString()),
-                                Integer.parseInt(etBbmdMask.getText().toString())));
-                    }
-
-                    String jsonString = new Gson().toJson(dataFdObj);
-                    CcuLog.d(TAG_CCU_BACNET, "fd output-->" + jsonString);
-
-                    sharedPreferences.edit().putString(BACNET_DEVICE_TYPE, BACNET_DEVICE_TYPE_FD).apply();
-                    sharedPreferences.edit().putString(BACNET_FD_CONFIGURATION, jsonString).apply();
-
-                    RadioButton radioButton = view.findViewById(R.id.rb_foreign_device);
-                    bacnetConfigChangeListener.submitConfiguration("fd", fdCheckBoxAuto.isChecked(), dataFdObj.getDataFd().getBbmdMask());
-                    performConfigFileBackup();
-                } catch (NumberFormatException e) {
-                    e.printStackTrace();
-                }
+            if (BACnetConfigurationType.FD.ordinal() == spinnerBacnetConfigAdapter.getConfiguredIndex() || BACnetConfigurationType.NORMAL.ordinal() == spinnerBacnetConfigAdapter.getConfiguredIndex()) {
+                saveBacnetConfiguration(BACnetConfigurationType.FD.ordinal());
+            } else {
+                showConfirmationForBacnetConfiguration(false, bacnetConfigSelectedPosition);
             }
         });
 
         tvNormalSubmit.setOnClickListener(view1 -> { // Updating submit button for Normal
-            sharedPreferences.edit().putString(BACNET_DEVICE_TYPE, BACNET_DEVICE_TYPE_NORMAL).apply();
-            sendBroadCast(context, BROADCAST_BACNET_APP_CONFIGURATION_TYPE, "Normal");
-            Toast.makeText(context, "Device configured as Normal", Toast.LENGTH_SHORT).show();
-                });
-
-        tvfDAdd.setOnClickListener(view1 -> {
-            CcuLog.d(TAG_CCU_BACNET, "add fd config");
-            View fdView = LayoutInflater.from(getContext()).inflate(R.layout.lyt_fd_view, null);
-            fdView.findViewById(R.id.tvfDRemove).setOnClickListener(view2 -> {
-                View parent = fdView.findViewById(R.id.fdViewContainer);
-                fdInputViews.removeView(parent);
-            });
-            fdInputViews.addView(fdView);
-        });
-
-        boolean defaultCheckBoxState = sharedPreferences.getBoolean(BACNET_FD_AUTO_STATE, false);
-
-        fdCheckBoxAuto.setChecked(defaultCheckBoxState);
-
-        fdCheckBoxAuto.setOnCheckedChangeListener((compoundButton, state) -> {
-            CcuLog.d(TAG_CCU_BACNET, "fdCheckBoxAuto-state->"+state);
-            sharedPreferences.edit().putBoolean(BACNET_FD_AUTO_STATE, state).apply();
+            if (BACnetConfigurationType.NORMAL.ordinal() == spinnerBacnetConfigAdapter.getConfiguredIndex()) {
+                saveBacnetConfiguration(BACnetConfigurationType.NORMAL.ordinal());
+            } else {
+                showConfirmationForBacnetConfiguration(false, bacnetConfigSelectedPosition);
+            }
         });
 
         tvBbmdAdd.setOnClickListener(view1 -> {
             CcuLog.d(TAG_CCU_BACNET, "add bbmd config");
             View bbmdView = LayoutInflater.from(getContext()).inflate(R.layout.lyt_bbmd_view, null);
-            bbmdView.findViewById(R.id.tvBbmdRemove).setVisibility(View.VISIBLE);
+            showBBMDDialogView(bbmdView, false);
             bbmdView.findViewById(R.id.tvBbmdRemove).setOnClickListener(view2 -> {
                 View parent = bbmdView.findViewById(R.id.bbmdViewContainer);
-                bbmdInputViews.removeView(parent);
+                showAlertForRemoveBBMD(parent);
             });
-            bbmdInputViews.addView(bbmdView);
+            bbmdView.findViewById(R.id.tvBbmdEdit).setOnClickListener(view2 -> {
+                showBBMDDialogView(bbmdView, true);
+            });
+
         });
 
         tvBbmdSubmit.setOnClickListener(view1 -> {
-            if (validateBbmdData()) {
-                Toast.makeText(context, "Device configured as BBMD", Toast.LENGTH_SHORT).show();
-                try {
-                    DataBbmdObj dataBbmdObj = new DataBbmdObj();
-                    for (int i = 0; i < bbmdInputViews.getChildCount(); i++) {
-                        View childView = bbmdInputViews.getChildAt(i);
-                        EditText etBbmdIp = childView.findViewById(R.id.etBbmdIp);
-                        EditText etBbmdPort = childView.findViewById(R.id.etBbmdPort);
-                        EditText etBbmdMask = childView.findViewById(R.id.etBbmdTime);
-
-                        CcuLog.d(TAG_CCU_BACNET, "bbmd entry at->" + i + "<--ip-->" + etBbmdIp.getText().toString() + "<--port-->" +
-                                etBbmdPort.getText().toString() + "<--mask-->" + etBbmdMask.getText().toString());
-                        dataBbmdObj.addItem(new DataBbmd(etBbmdIp.getText().toString(), Integer.parseInt(etBbmdPort.getText().toString()),
-                                Integer.parseInt(etBbmdMask.getText().toString())));
-                    }
-
-                    String jsonString = new Gson().toJson(dataBbmdObj);
-                    CcuLog.d(TAG_CCU_BACNET, "bbmd output-->" + jsonString);
-                    sharedPreferences.edit().putString(BACNET_DEVICE_TYPE, BACNET_DEVICE_TYPE_BBMD).apply();
-                    sharedPreferences.edit().putString(BACNET_BBMD_CONFIGURATION, jsonString).apply();
-
-
-                    RadioButton radioButton = view.findViewById(R.id.rb_bbmd);
-                    String label = radioButton.getText().toString();
-                    Intent intent = new Intent(BROADCAST_BACNET_APP_CONFIGURATION_TYPE);
-                    intent.putExtra("message", label);
-                    intent.putExtra("data", jsonString);
-                    context.sendBroadcast(intent);
-                    performConfigFileBackup();
-                } catch (NumberFormatException e) {
-                    e.printStackTrace();
-                }
+            if (BACnetConfigurationType.BBMD.ordinal() == spinnerBacnetConfigAdapter.getConfiguredIndex() || BACnetConfigurationType.NORMAL.ordinal() == spinnerBacnetConfigAdapter.getConfiguredIndex()) {
+                saveBacnetConfiguration(BACnetConfigurationType.BBMD.ordinal());
+            } else {
+                showConfirmationForBacnetConfiguration(false, bacnetConfigSelectedPosition);
             }
         });
 
@@ -477,71 +433,166 @@ public class Communication extends Fragment {
 
         CcuLog.d(TAG_CCU_BACNET, "last selected bacnet device type==>"+selectedDeviceType);
         if(selectedDeviceType.equalsIgnoreCase(BACNET_DEVICE_TYPE_BBMD)){
-            openDeviceConfigurationSettings(R.id.rb_bbmd);
-            ((RadioButton)rootView.findViewById(R.id.rb_bbmd)).setChecked(true);
-            String configuration = sharedPreferences.getString(BACNET_BBMD_CONFIGURATION, null);
-            if(configuration != null){
-                CcuLog.d(TAG_CCU_BACNET, "bbmd configuration found");
-                DataBbmdObj dataBbmdObj = new Gson().fromJson(configuration, DataBbmdObj.class);
-                ArrayList<DataBbmd> listOdDataBbmd = dataBbmdObj.getListOfDataBbmd();
-                CcuLog.d(TAG_CCU_BACNET, "bbmd lis size"+listOdDataBbmd.size());
-                createBbmdViewAndFillData(listOdDataBbmd);
-            }
+            bacnetConfigSpinner.setSelection(BACnetConfigurationType.BBMD.ordinal());
+            updateBbmdListItems();
+            updateBacnetConfigStateChanged(false);
         }else if(selectedDeviceType.equalsIgnoreCase(BACNET_DEVICE_TYPE_FD)){
-            openDeviceConfigurationSettings(R.id.rb_foreign_device);
-            ((RadioButton)rootView.findViewById(R.id.rb_foreign_device)).setChecked(true);
-            String configuration = sharedPreferences.getString(BACNET_FD_CONFIGURATION, null);
-            if(configuration != null){
-                CcuLog.d(TAG_CCU_BACNET, "fd configuration found");
-                DataFdObj dataFdObj = new Gson().fromJson(configuration, DataFdObj.class);
-                if(dataFdObj != null) {
-                    fillFdView(dataFdObj.getDataFd(), 0);
-                }
-            }
+            bacnetConfigSpinner.setSelection(BACnetConfigurationType.FD.ordinal());
+            updateFdView();
+            updateBacnetConfigStateChanged(false);
         }else{
-            openDeviceConfigurationSettings(R.id.rb_neither);
-            ((RadioButton)rootView.findViewById(R.id.rb_neither)).setChecked(true);
+            bacnetConfigSpinner.setSelection(BACnetConfigurationType.NORMAL.ordinal());
         }
+
+        RenatusLandingActivity.isBacnetConfigStateChanged = false;
+    }
+
+    private void saveBacnetConfiguration(int selectedOrdinal) {
+        switch (selectedOrdinal) {
+            case 0:
+                if (validateBbmdData("")) {
+                    displayCustomToastMessageOnSuccess(false, false);
+                    try {
+                        DataBbmdObj dataBbmdObj = new DataBbmdObj();
+                        for (int i = 0; i < bbmdInputViews.getChildCount(); i++) {
+                            View childView = bbmdInputViews.getChildAt(i);
+                            TextView etBbmdIp = childView.findViewById(R.id.etBbmdIp);
+                            TextView etBbmdPort = childView.findViewById(R.id.etBbmdPort);
+                            TextView etBbmdMask = childView.findViewById(R.id.etBbmdTime);
+
+                            CcuLog.d(TAG_CCU_BACNET, "bbmd entry at->" + i + "<--ip-->" + etBbmdIp.getText().toString() + "<--port-->" +
+                                    etBbmdPort.getText().toString() + "<--mask-->" + etBbmdMask.getText().toString());
+                            dataBbmdObj.addItem(new DataBbmd(etBbmdIp.getText().toString(), Integer.parseInt(etBbmdPort.getText().toString()),
+                                    Integer.parseInt(etBbmdMask.getText().toString())));
+                        }
+
+                        String jsonString = new Gson().toJson(dataBbmdObj);
+                        CcuLog.d(TAG_CCU_BACNET, "bbmd output-->" + jsonString);
+                        sharedPreferences.edit().putString(BACNET_DEVICE_TYPE, BACNET_DEVICE_TYPE_BBMD).apply();
+                        sharedPreferences.edit().putString(BACNET_BBMD_CONFIGURATION, jsonString).apply();
+
+                        sharedPreferences.edit().remove(BACNET_FD_CONFIGURATION).apply(); // Clearing FD configuration if any
+
+                        Intent intent = new Intent(BROADCAST_BACNET_APP_CONFIGURATION_TYPE);
+                        intent.putExtra("message", "BBMD");
+                        intent.putExtra("data", jsonString);
+                        context.sendBroadcast(intent);
+                        spinnerBacnetConfigAdapter.setConfiguredIndex(BACnetConfigurationType.BBMD.ordinal());
+                        updateBacnetConfigStateChanged(false);
+                        performConfigFileBackup();
+                    } catch (NumberFormatException e) {
+                        e.printStackTrace();
+                    }
+                }
+                break;
+            case 1:
+                if (validateFdData()) {
+                    displayCustomToastMessageOnSuccess(false, false);
+                    try {
+                        DataFdObj dataFdObj = new DataFdObj();
+
+                        CcuLog.d(TAG_CCU_BACNET, "fd entry at->" + "<--ip-->" + etFDIP.getText().toString() + "<--port-->" +
+                                etFDPort.getText().toString() + "<--time-->" + etFDPort.getText().toString());
+                        dataFdObj.setDataFd(new DataFd(etFDIP.getText().toString(), Integer.parseInt(etFDPort.getText().toString()),
+                                Integer.parseInt(etFDTime.getText().toString())));
+
+                        String jsonString = new Gson().toJson(dataFdObj);
+                        CcuLog.d(TAG_CCU_BACNET, "fd output-->" + jsonString);
+
+                        sharedPreferences.edit().putString(BACNET_DEVICE_TYPE, BACNET_DEVICE_TYPE_FD).apply();
+                        sharedPreferences.edit().putString(BACNET_FD_CONFIGURATION, jsonString).apply();
+
+                        sharedPreferences.edit().remove(BACNET_BBMD_CONFIGURATION).apply(); // Clearing BBMD configuration if any
+
+                        Intent intent = new Intent(BROADCAST_BACNET_APP_CONFIGURATION_TYPE);
+                        intent.putExtra("message", "Foreign Device");
+                        intent.putExtra("data", jsonString);
+                        context.sendBroadcast(intent);
+
+                        spinnerBacnetConfigAdapter.setConfiguredIndex(BACnetConfigurationType.FD.ordinal());
+                        updateBacnetConfigStateChanged(false);
+                        performConfigFileBackup();
+                    } catch (NumberFormatException e) {
+                        e.printStackTrace();
+                    }
+                }
+                break;
+            case 2:
+                sharedPreferences.edit().putString(BACNET_DEVICE_TYPE, BACNET_DEVICE_TYPE_NORMAL).apply();
+                sharedPreferences.edit().remove(BACNET_FD_CONFIGURATION).apply(); // Clearing FD configuration if any
+                sharedPreferences.edit().remove(BACNET_BBMD_CONFIGURATION).apply(); // Clearing BBMD configuration if any
+                sendBroadCast(context, BROADCAST_BACNET_APP_CONFIGURATION_TYPE, "Normal");
+                spinnerBacnetConfigAdapter.setConfiguredIndex(BACnetConfigurationType.NORMAL.ordinal());
+                displayCustomToastMessageOnSuccess(false,false);
+                break;
+        }
+    }
+
+    private void updateBbmdListItems() {
+        if (bbmdInputViews.getChildCount() > 0) {
+            bbmdInputViews.removeViews(1, bbmdInputViews.getChildCount() - 1);
+        }
+        String configuration = sharedPreferences.getString(BACNET_BBMD_CONFIGURATION, null);
+        if(configuration != null){
+            CcuLog.d(TAG_CCU_BACNET, "bbmd configuration found");
+            DataBbmdObj dataBbmdObj = new Gson().fromJson(configuration, DataBbmdObj.class);
+            ArrayList<DataBbmd> listOdDataBbmd = dataBbmdObj.getListOfDataBbmd();
+            CcuLog.d(TAG_CCU_BACNET, "bbmd lis size "+listOdDataBbmd.size());
+            createBbmdViewAndFillData(listOdDataBbmd);
+        }
+        getIpAddress();
+    }
+
+    private void updateFdView() {
+        String configuration = sharedPreferences.getString(BACNET_FD_CONFIGURATION, null);
+        if(configuration != null){
+            DataFdObj dataFdObj = new Gson().fromJson(configuration, DataFdObj.class);
+            if(dataFdObj != null) {
+                fillFdView(dataFdObj.getDataFd());
+            }
+        } else {
+            etFDIP.setText("192.168.1.1"); //If FD configuration is not available, set default values
+            etFDPort.setText("47808");
+            etFDTime.setText("0");
+        }
+        updateBacnetConfigStateChanged(false);
     }
 
     private boolean validateFdData() {
-        for (int i = 0; i < fdInputViews.getChildCount(); i++) {
-            View childView = fdInputViews.getChildAt(i);
-            EditText etBbmdIp = childView.findViewById(R.id.etFdIp);
-            EditText etBbmdPort = childView.findViewById(R.id.etFdPort);
-            EditText etBbmdMask = childView.findViewById(R.id.etFdTime);
 
-            if (etBbmdIp.getText().toString().equals(EMPTY_STRING) || (!CCUUiUtil.isValidIPAddress(etBbmdIp.getText().toString().trim()))) {
-                etBbmdIp.setError(getString(R.string.error_ip_address));
+            if (etFDIP.getText().toString().equals(EMPTY_STRING) || (!CCUUiUtil.isValidIPAddress(etFDIP.getText().toString().trim()))) {
+                etFDIP.setError(getString(R.string.error_ip_address));
                 return false;
             }
-            if (etBbmdPort.getText().toString().equals(EMPTY_STRING) || (!CCUUiUtil.isValidNumber(Integer.parseInt(etBbmdPort.getText().toString()), 0, Integer.MAX_VALUE, 1))) {
-                etBbmdPort.setError(getString(R.string.txt_valid_number));
+            if (etFDPort.getText().toString().equals(EMPTY_STRING) || (!CCUUiUtil.isValidNumber(Integer.parseInt(etFDPort.getText().toString()), 47808, 47823, 1))) {
+                etFDPort.setError(getString(R.string.txt_error_port));
                 return false;
             }
-            if (etBbmdMask.getText().toString().equals(EMPTY_STRING) || (!CCUUiUtil.isValidNumber(Integer.parseInt(etBbmdMask.getText().toString()), 0, Integer.MAX_VALUE, 1))) {
-                etBbmdMask.setError(getString(R.string.txt_valid_number));
+            if (etFDTime.getText().toString().equals(EMPTY_STRING) || (!CCUUiUtil.isValidNumber(Integer.parseInt(etFDTime.getText().toString()), 0, 65536, 1))) {
+                etFDTime.setError(getString(R.string.txt_valid_number));
                 return false;
             }
-            etBbmdIp.setError(null);
-            etBbmdPort.setError(null);
-            etBbmdMask.setError(null);
-        }
+            etFDIP.setError(null);
+            etFDPort.setError(null);
+            etFDTime.setError(null);
         return true;
     }
 
-    private boolean validateBbmdData() {
+    private boolean validateBbmdData(String ipAddressWhileAddingNew) {
         for (int i = 0; i < bbmdInputViews.getChildCount(); i++) {
             View childView = bbmdInputViews.getChildAt(i);
-            EditText etBbmdIp = childView.findViewById(R.id.etBbmdIp);
-            EditText etBbmdPort = childView.findViewById(R.id.etBbmdPort);
-            EditText etBbmdMask = childView.findViewById(R.id.etBbmdTime);
+            TextView etBbmdIp = childView.findViewById(R.id.etBbmdIp);
+            TextView etBbmdPort = childView.findViewById(R.id.etBbmdPort);
+            TextView etBbmdMask = childView.findViewById(R.id.etBbmdTime);
 
             if (etBbmdIp.getText().toString().equals(EMPTY_STRING) || (!CCUUiUtil.isValidIPAddress(etBbmdIp.getText().toString().trim()))) {
                 etBbmdIp.setError(getString(R.string.error_ip_address));
                 return false;
             }
-            if (etBbmdMask.getText().toString().equals(EMPTY_STRING) || (!CCUUiUtil.isValidNumber(Integer.parseInt(etBbmdMask.getText().toString()), 0, Integer.MAX_VALUE, 1))) {
+            if (!ipAddressWhileAddingNew.isEmpty() && etBbmdIp.getText().toString().equals(ipAddressWhileAddingNew)) {
+                return false; // Same IP address is not allowed
+            }
+            if (etBbmdMask.getText().toString().equals(EMPTY_STRING) || (!CCUUiUtil.isValidNumber(Integer.parseInt(etBbmdMask.getText().toString()), 1, Integer.MAX_VALUE, 1))) {
                 etBbmdMask.setError(getString(R.string.txt_valid_number));
                 return false;
             }
@@ -557,10 +608,13 @@ public class Communication extends Fragment {
             bbmdInputContainer.setVisibility(View.VISIBLE);
             fdInputView.setVisibility(View.GONE);
             normalView.setVisibility(View.GONE);
+            updateBbmdListItems();
+            updateBbmdListView();
         }else if(label.equalsIgnoreCase(getString(R.string.label_foreign_device))){
             fdInputView.setVisibility(View.VISIBLE);
             bbmdInputContainer.setVisibility(View.GONE);
             normalView.setVisibility(View.GONE);
+            updateFdView();
         }else{
             fdInputView.setVisibility(View.GONE);
             bbmdInputContainer.setVisibility(View.GONE);
@@ -575,7 +629,6 @@ public class Communication extends Fragment {
             description.setText(deviceObject.getString(DESCRIPTION).equals(NULL) || deviceObject.getString(DESCRIPTION).equals(EMPTY_STRING)  ? EMPTY_STRING : deviceObject.getString(DESCRIPTION).trim());
             location.setText((deviceObject.getString(LOCATION).equals(NULL)) || (deviceObject.getString(LOCATION).equals(EMPTY_STRING)) ? EMPTY_STRING : deviceObject.getString(LOCATION).trim());
             password.setText((deviceObject.getString(PASSWORD).equals(NULL)) || (deviceObject.getString(PASSWORD).equals(EMPTY_STRING)) ? EMPTY_STRING : deviceObject.getString(PASSWORD).trim());
-            ipAddress.setText(networkObject.getString(IP_ADDRESS));
             localNetworkNumber.setText(String.valueOf((networkObject.getString(LOCAL_NETWORK_NUMBER).equals(NULL)) || (networkObject.getString(LOCAL_NETWORK_NUMBER).equals(EMPTY_STRING)) ? EMPTY_STRING : networkObject.getInt(LOCAL_NETWORK_NUMBER)));
             virtualNetworkNumber.setText(String.valueOf((networkObject.getString(VIRTUAL_NETWORK_NUMBER).equals(NULL)) || (networkObject.getString(VIRTUAL_NETWORK_NUMBER).equals(EMPTY_STRING)) ? EMPTY_STRING : networkObject.getInt(VIRTUAL_NETWORK_NUMBER)));
             port.setText(String.valueOf(networkObject.getInt(PORT)));
@@ -597,7 +650,6 @@ public class Communication extends Fragment {
         description.addTextChangedListener(new EditTextWatcher(description));
         location.addTextChangedListener(new EditTextWatcher(location));
         password.addTextChangedListener(new EditTextWatcher(password));
-        ipAddress.addTextChangedListener(new EditTextWatcher(ipAddress));
         localNetworkNumber.addTextChangedListener(new EditTextWatcher(localNetworkNumber));
         virtualNetworkNumber.addTextChangedListener(new EditTextWatcher(virtualNetworkNumber));
         port.addTextChangedListener(new EditTextWatcher(port));
@@ -609,6 +661,9 @@ public class Communication extends Fragment {
         etTrendLogObjects.addTextChangedListener(new EditTextWatcher(etTrendLogObjects));
         etScheduleObjects.addTextChangedListener(new EditTextWatcher(etScheduleObjects));
         etOffsetValues.addTextChangedListener(new EditTextWatcher(etOffsetValues));
+        etFDIP.addTextChangedListener(new EditTextWatcher(etFDIP));
+        etFDPort.addTextChangedListener(new EditTextWatcher(etFDPort));
+        etFDTime.addTextChangedListener(new EditTextWatcher(etFDTime));
     }
 
     private void initializeBACnet() {
@@ -616,6 +671,8 @@ public class Communication extends Fragment {
         if(UtilityApplication.isBACnetIntialized()){
             initializeBACnet.setVisibility(View.GONE);
             disableBACnet.setVisibility(View.VISIBLE);
+            ipAddressSpinner.setEnabled(false);
+            bacnetConfigureLayout.setVisibility(View.VISIBLE);
             toggleZoneToVirtualDeviceMapping.setEnabled(false);
             hideView(description, tvDescription);
             hideView(location, tvLocation);
@@ -626,7 +683,6 @@ public class Communication extends Fragment {
                 tvPassword.setVisibility(View.VISIBLE);
                 tvPassword.setText("******");
             }
-            hideView(ipAddress, tvIPAddress);
             hideView(localNetworkNumber, tvLocalNetworkNumber);
             hideView(virtualNetworkNumber, tvVirtualNetworkAddress);
             hideView(port, tvPort);
@@ -640,6 +696,7 @@ public class Communication extends Fragment {
             hideView(etOffsetValues, tvOffsetValue);
         }else{
             disableBACnet.setVisibility(View.GONE);
+            bacnetConfigureLayout.setVisibility(View.GONE);
             initializeBACnet.setVisibility(View.VISIBLE);
             toggleZoneToVirtualDeviceMapping.setEnabled(true);
             setBACnetConfigurationValues();
@@ -652,6 +709,7 @@ public class Communication extends Fragment {
             toggleZoneToVirtualDeviceMapping.setEnabled(true);
             initializeBACnet.setVisibility(View.VISIBLE);
             disableBACnet.setVisibility(View.GONE);
+            bacnetConfigureLayout.setVisibility(View.GONE);
             description.setVisibility(View.VISIBLE);
             tvDescription.setVisibility(View.GONE);
             location.setVisibility(View.VISIBLE);
@@ -659,8 +717,7 @@ public class Communication extends Fragment {
             textInputLayout.setVisibility(View.VISIBLE);
             password.setVisibility(View.VISIBLE);
             tvPassword.setVisibility(View.GONE);
-            ipAddress.setVisibility(View.VISIBLE);
-            tvIPAddress.setVisibility(View.GONE);
+            ipAddressSpinner.setEnabled(true);
             localNetworkNumber.setVisibility(View.VISIBLE);
             tvLocalNetworkNumber.setVisibility(View.GONE);
             virtualNetworkNumber.setVisibility(View.VISIBLE);
@@ -683,6 +740,7 @@ public class Communication extends Fragment {
             tvScheduleObjects.setVisibility(View.GONE);
             etOffsetValues.setVisibility(View.VISIBLE);
             tvOffsetValue.setVisibility(View.GONE);
+            ipAddressSpinner.setEnabled(true);
             if (!DashboardUtilKt.isDashboardConfig(context)) {
                 stopRestServer();
             }
@@ -728,7 +786,7 @@ public class Communication extends Fragment {
 
     private boolean validateEntries() {
 
-        if(ipAddress.getText().toString().equals(EMPTY_STRING) || (!CCUUiUtil.isValidIPAddress(ipAddress.getText().toString().trim()))) return false;
+        if(deviceIpAddress.equals(EMPTY_STRING) || (!CCUUiUtil.isValidIPAddress(deviceIpAddress.toString().trim()))) return false;
 
         if(localNetworkNumber.getText().toString().equals(EMPTY_STRING) || (!CCUUiUtil.isValidNumber(Integer.parseInt(localNetworkNumber.getText().toString()), 1, 65534, 1)))  return false;
 
@@ -782,6 +840,20 @@ public class Communication extends Fragment {
         CCUUiUtil.setSpinnerDropDownColor(spinnerStopbits,getContext());
     }
 
+    public void setIsBacConfigStateChangedAndUpdateView(boolean stateChanged) {
+        RenatusLandingActivity.isBacnetConfigStateChanged = stateChanged;
+
+        if (spinnerBacnetConfigAdapter.getConfiguredIndex() == BACnetConfigurationType.BBMD.ordinal()) {
+            bacnetConfigSpinner.setSelection(BACnetConfigurationType.BBMD.ordinal());
+            updateBbmdListItems();
+        } else if (spinnerBacnetConfigAdapter.getConfiguredIndex() == BACnetConfigurationType.FD.ordinal()) {
+            bacnetConfigSpinner.setSelection(BACnetConfigurationType.FD.ordinal());
+            updateFdView();
+        } else {
+            bacnetConfigSpinner.setSelection(BACnetConfigurationType.NORMAL.ordinal());
+        }
+    }
+
     private class EditTextWatcher implements TextWatcher {
 
         private final View view;
@@ -828,9 +900,9 @@ public class Communication extends Fragment {
                     try {
                         CcuLog.i(TAG_CCU_BACNET, "Key: location, Value: "+password.getText().toString());
                         if (!CCUUiUtil.isAlphaNumeric(password.getText().toString())) {
-                            ipAddress.setError(getString(R.string.error_password));
+                            password.setError(getString(R.string.error_password));
                         } else {
-                            ipAddress.setError(null);
+                            password.setError(null);
                             deviceObject.put(PASSWORD, password.getText().toString().trim());
                             sharedPreferences.edit().putString(BACNET_CONFIGURATION, config.toString()).apply();
                         }
@@ -839,55 +911,6 @@ public class Communication extends Fragment {
                     }
                     break;
 
-                case R.id.etIP:
-                    try {
-                        if (!ipAddress.getText().toString().trim().isEmpty()) {
-                            CcuLog.i(TAG_CCU_BACNET, "Key: ipAddress, Value: "+ipAddress.getText().toString()+", isValid: "+CCUUiUtil.isValidIPAddress(ipAddress.getText().toString()));
-                            if (!CCUUiUtil.isValidIPAddress(ipAddress.getText().toString())) {
-                                ipAddress.setError(getString(R.string.error_ip_address));
-                                initializeBACnet.setEnabled(false);
-                                initializeBACnet.setClickable(false);
-                                initializeBACnet.setTextColor(ContextCompat.getColor(context, R.color.tuner_group));
-                            } else {
-                                ipAddress.setError(null);
-                                networkObject.put(IP_ADDRESS, ipAddress.getText().toString().trim());
-                                sharedPreferences.edit().putString(BACNET_CONFIGURATION, config.toString()).apply();
-                                if(validateEntries()){
-                                    initializeBACnet.setEnabled(true);
-                                    initializeBACnet.setClickable(true);
-
-                                    TypedValue typedValue = new TypedValue();
-                                    requireActivity().getTheme().resolveAttribute(R.attr.orange_75f, typedValue, true);
-                                    int color = typedValue.data;
-                                    initializeBACnet.setTextColor(color);
-                                }else{
-                                    initializeBACnet.setEnabled(false);
-                                    initializeBACnet.setClickable(false);
-                                    initializeBACnet.setTextColor(ContextCompat.getColor(context, R.color.tuner_group));
-                                }
-                            }
-                        }else{
-                            ipAddress.setError(null);
-                            networkObject.put(IP_ADDRESS,"");
-                            sharedPreferences.edit().putString(BACNET_CONFIGURATION, config.toString()).apply();
-                            if(validateEntries()){
-                                initializeBACnet.setEnabled(true);
-                                initializeBACnet.setClickable(true);
-
-                                TypedValue typedValue = new TypedValue();
-                                requireActivity().getTheme().resolveAttribute(R.attr.orange_75f, typedValue, true);
-                                int color = typedValue.data;
-                                initializeBACnet.setTextColor(color);
-                            }else{
-                                initializeBACnet.setEnabled(false);
-                                initializeBACnet.setClickable(false);
-                                initializeBACnet.setTextColor(ContextCompat.getColor(context, R.color.tuner_group));
-                            }
-                        }
-                    } catch (JSONException e) {
-                        throw new RuntimeException(e);
-                    }
-                    break;
 
                 case R.id.etlocalNetworkAddress:
                     validateAndSetValue(localNetworkNumber, LOCAL_NETWORK_NUMBER, localNetworkNumber.getText().toString(), networkObject, 1,65534, 1, getString(R.string.error_local_network_number));
@@ -898,7 +921,7 @@ public class Communication extends Fragment {
                     break;
 
                 case R.id.etPort:
-                    validateAndSetValue(port, PORT, port.getText().toString(), networkObject, 4096,65535, 1, getString(R.string.txt_error_port));
+                    validateAndSetValue(port, PORT, port.getText().toString(), networkObject, 47808,47823, 1, getString(R.string.txt_error_port));
                     break;
 
                 case R.id.etIPDeviceInstanceNumber:
@@ -930,6 +953,33 @@ public class Communication extends Fragment {
                     break;
                 case R.id.etOffsetValues:
                     validateAndSetValue(etOffsetValues, NUMBER_OF_OFFSET_VALUES, etOffsetValues.getText().toString(), objectConf, 1, 100, 1, getString(R.string.error_offset_values));
+                    break;
+                case R.id.etFdIp:
+                    if (etFDIP.getText().toString().equals(EMPTY_STRING) || (!CCUUiUtil.isValidIPAddress(etFDIP.getText().toString().trim()))) {
+                        etFDIP.setError(getString(R.string.error_ip_address));
+                    }
+                    else {
+                        etFDIP.setError(null);
+                    }
+                    updateBacnetConfigStateChanged(true);
+                    break;
+                case R.id.etFdPort:
+                    if (etFDPort.getText().toString().equals(EMPTY_STRING) || (!CCUUiUtil.isValidNumber(Integer.parseInt(etFDPort.getText().toString()), 47808, 47823, 1))) {
+                        etFDPort.setError(getString(R.string.txt_error_port));
+                    }
+                    else {
+                        etFDPort.setError(null);
+                    }
+                    updateBacnetConfigStateChanged(true);
+                    break;
+                case R.id.etFdTime:
+                    if (etFDTime.getText().toString().equals(EMPTY_STRING) || (!CCUUiUtil.isValidNumber(Integer.parseInt(etFDTime.getText().toString()), 0, 65536, 1))) {
+                        etFDTime.setError(getString(R.string.txt_valid_number));
+                    }
+                    else {
+                        etFDTime.setError(null);
+                    }
+                    updateBacnetConfigStateChanged(true);
                     break;
             }
         }
@@ -1014,6 +1064,7 @@ public class Communication extends Fragment {
             toggleZoneToVirtualDeviceMapping.setEnabled(false);
             initializeBACnet.setVisibility(View.GONE);
             disableBACnet.setVisibility(View.VISIBLE);
+            bacnetConfigureLayout.setVisibility(View.VISIBLE);
             hideView(description, tvDescription);
             hideView(location, tvLocation);
             if(password.getText().toString().trim().isEmpty()){
@@ -1023,7 +1074,7 @@ public class Communication extends Fragment {
                 tvPassword.setVisibility(View.VISIBLE);
                 tvPassword.setText("******");
             }
-            hideView(ipAddress, tvIPAddress);
+            ipAddressSpinner.setEnabled(false);
             hideView(localNetworkNumber, tvLocalNetworkNumber);
             hideView(virtualNetworkNumber, tvVirtualNetworkAddress);
             hideView(port, tvPort);
@@ -1085,10 +1136,9 @@ public class Communication extends Fragment {
         }
     }
     private void getIpAddress() {
-        String deviceIpAddress = "";
+        ArrayList<String> ipAddresses = new ArrayList<>();
         try {
             Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
-            boolean foundPreferredNetwork = false;
             while (interfaces.hasMoreElements()) {
                 NetworkInterface iface = interfaces.nextElement();
                 // filters out 127.0.0.1 and inactive interfaces
@@ -1100,34 +1150,108 @@ public class Communication extends Fragment {
                     while (addresses.hasMoreElements()) {
                         InetAddress addr = addresses.nextElement();
                         if (!addr.isLoopbackAddress() && addr.getHostAddress().indexOf(':') == -1) {
-                            CcuLog.d(Tags.BACNET, "device interface and ip" + iface.getDisplayName() + "-" + addr.getHostAddress());
-                            deviceIpAddress = addr.getHostAddress();
-                            if(iface.getName().startsWith("eth")){
-                                foundPreferredNetwork = true;
-                                break;
+                            CcuLog.d(Tags.BACNET, "device interface and ip " + iface.getDisplayName() + " - " + addr.getHostAddress());
+                            String networkType = iface.getName().startsWith("eth") ? "Ethernet" : "Wi-Fi";
+                            String item = addr.getHostAddress() + " (" + networkType + ")";
+                            if (!ipAddresses.contains(item)) { // Avoid duplicate items
+                                ipAddresses.add(item);
+                            }
+
+                            for (InterfaceAddress interfaceAddress : iface.getInterfaceAddresses()) {
+                                CcuLog.d(Tags.BACNET, "Address : " + interfaceAddress);
+                                if (interfaceAddress.getAddress().equals(addr)) {
+                                    subnetMask = interfaceAddress.getNetworkPrefixLength();
+                                    CcuLog.d(Tags.BACNET, "Subnet Mask: " + subnetMask);
+                                    break;
+                                }
                             }
                         }
                     }
-                }
-                if (foundPreferredNetwork) {
-                    break;
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        ipAddress.setText(deviceIpAddress);
+
+        // If no addresses are found, add a default message
+        if (ipAddresses.isEmpty()) {
+            ipAddresses.add("No Network interfaces");
+        }
+
+        // Update the spinner with the dynamically fetched IP addresses
+        ArrayAdapter<String> adapter = new CustomSelectionAdapter<>(this.requireContext(),R.layout.custom_spinner_view,ipAddresses,true);
+        ipAddressSpinner.setAdapter(adapter);
+
+        try {
+            if (ipAddresses.size() > 1 ) { // We needs to Maintain the selection if we have 2 items
+                String networkInterface = networkObject.get(NETWORK_INTERFACE).toString();
+                if(!networkInterface.isEmpty()) {
+                    for(String item : ipAddresses) {
+                        if(item.contains(networkInterface) || (networkInterface.equals("Wifi") && item.contains("Wi-Fi"))) {
+                            ipAddressSpinner.setSelection(ipAddresses.indexOf(item));
+                            break;
+                        }
+                    }
+                } else {
+                    for(String item : ipAddresses) {
+                        if(item.contains("Ethernet")) {
+                            ipAddressSpinner.setSelection(ipAddresses.indexOf(item));
+                            break;
+                        }
+                    }
+                }
+            }
+        } catch (JSONException e) {
+            CcuLog.e(TAG_CCU_BACNET, "Exception while fetching network object "+ e);
+        }
+
+        ipAddressSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String selectedIp = ipAddresses.get(position);
+                if(selectedIp.contains(" (")) {
+                    deviceIpAddress = selectedIp.substring(0, selectedIp.indexOf(" ("));
+                } else {
+                    deviceIpAddress = "";
+                }
+                CcuLog.d(TAG_CCU_BACNET," item selected -- > "+deviceIpAddress);
+
+                try {
+                    if (selectedIp.contains("Wi-Fi")) {
+                        networkObject.put(NETWORK_INTERFACE, "Wifi");
+                    } else if (selectedIp.contains("Ethernet")) {
+                        networkObject.put(NETWORK_INTERFACE, "Ethernet");
+                    } else {
+                        networkObject.put(NETWORK_INTERFACE, "");
+                    }
+                } catch (Exception e) {
+                   CcuLog.e(TAG_CCU_BACNET,"Exception while updating network object "+e);
+                }
+                updateBbmdIPAddress();
+                updateSelectedIpAddress();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+            }
+        });
+        updateBbmdIPAddress();
     }
+
+    private void updateBbmdIPAddress() {
+        if ( !port.getText().toString().isBlank() && !port.getText().toString().isEmpty() ) {
+            portNumber = Integer.parseInt(port.getText().toString());
+        }
+        String selectedDeviceType = sharedPreferences.getString(BACNET_DEVICE_TYPE, BACNET_DEVICE_TYPE_NORMAL);
+        if (selectedDeviceType.equalsIgnoreCase(BACNET_DEVICE_TYPE_BBMD) || bacnetConfigSelectedPosition == BACnetConfigurationType.BBMD.ordinal()) {
+            fillBbmdView(new DataBbmd(deviceIpAddress, portNumber, subnetMask),0);
+        }
+    }
+
     private CustomSpinnerDropDownAdapter getAdapterValue(ArrayList values) {
         return new CustomSpinnerDropDownAdapter(this.requireContext(), R.layout.spinner_dropdown_item, values);
     }
 
-    private void openDeviceConfigurationSettings(int selectedViewId){
-        RadioButton radioButton = rootView.findViewById(selectedViewId);
-        String label = radioButton.getText().toString();
-        CcuLog.d(TAG_CCU_BACNET, "radioButton selected-->"+label);
-        handleConfigurationType(label);
-    }
 
     private void addBbmdConfigurationRow(){
         CcuLog.d(TAG_CCU_BACNET, "add bbmd config");
@@ -1135,7 +1259,10 @@ public class Communication extends Fragment {
         bbmdView.findViewById(R.id.tvBbmdRemove).setVisibility(View.VISIBLE);
         bbmdView.findViewById(R.id.tvBbmdRemove).setOnClickListener(view2 -> {
             View parent = bbmdView.findViewById(R.id.bbmdViewContainer);
-            bbmdInputViews.removeView(parent);
+            showAlertForRemoveBBMD(parent);
+        });
+        bbmdView.findViewById(R.id.tvBbmdEdit).setOnClickListener(view1 -> {
+            showBBMDDialogView(bbmdView, true);
         });
         bbmdInputViews.addView(bbmdView);
     }
@@ -1151,23 +1278,345 @@ public class Communication extends Fragment {
 
     private void fillBbmdView(DataBbmd item, int childPosition) {
         View childView = bbmdInputViews.getChildAt(childPosition);
-        EditText etBbmdIp = childView.findViewById(R.id.etBbmdIp);
-        EditText etBbmdPort = childView.findViewById(R.id.etBbmdPort);
-        EditText etBbmdMask = childView.findViewById(R.id.etBbmdTime);
+        TextView etBbmdIp = childView.findViewById(R.id.etBbmdIp);
+        TextView tvBbmdSelfIp = childView.findViewById(R.id.etBbmdIpSelf);
+        TextView etBbmdPort = childView.findViewById(R.id.etBbmdPort);
+        TextView etBbmdMask = childView.findViewById(R.id.etBbmdTime);
+        ImageView ivBbmdRemove = childView.findViewById(R.id.tvBbmdRemove);
+        ImageView ivBbmdEdit = childView.findViewById(R.id.tvBbmdEdit);
         CcuLog.d(TAG_CCU_BACNET, "getBbmdIp" + item.getBbmdIp() + "<--port-->" + item.getBbmdPort() + "<--mask-->" + item.getBbmdMask());
         etBbmdIp.setText(item.getBbmdIp());
         etBbmdPort.setText(String.valueOf(item.getBbmdPort()));
         etBbmdMask.setText(String.valueOf(item.getBbmdMask()));
+        if(childPosition % 2 != 0){
+            childView.setBackgroundColor(getResources().getColor(R.color.tuner_bg_grey));
+        }
+
+        if(childPosition == 0) { // Info for Own device IP address in BBMD table
+            ivBbmdRemove.setEnabled(false);
+            ivBbmdRemove.setColorFilter(ContextCompat.getColor(context, R.color.disable_element_color));
+            ivBbmdEdit.setEnabled(false);
+            ivBbmdEdit.setColorFilter(ContextCompat.getColor(context, R.color.disable_element_color));
+            tvBbmdSelfIp.setVisibility(View.VISIBLE);
+        }
     }
 
-    private void fillFdView(DataFd item, int childPosition) {
-        View childView = fdInputViews.getChildAt(childPosition);
-        EditText etFdIp = childView.findViewById(R.id.etFdIp);
-        EditText etFdPort = childView.findViewById(R.id.etFdPort);
-        EditText etFdTime = childView.findViewById(R.id.etFdTime);
+    private void fillFdView(DataFd item) {
         CcuLog.d(TAG_CCU_BACNET, "fdIp" + item.getBbmdIp() + "<--fdPort-->" + item.getBbmdPort() + "<--mask-->" + item.getBbmdMask());
-        etFdIp.setText(item.getBbmdIp());
-        etFdPort.setText(String.valueOf(item.getBbmdPort()));
-        etFdTime.setText(String.valueOf(item.getBbmdMask()));
+        etFDIP.setText(item.getBbmdIp());
+        etFDPort.setText(String.valueOf(item.getBbmdPort()));
+        etFDTime.setText(String.valueOf(item.getBbmdMask()));
+    }
+
+    enum BACnetConfigurationType {
+        BBMD, FD, NORMAL
+    }
+
+    private int getBacnetConfiguration (String selectedMode) {
+        switch (selectedMode) {
+            case BACNET_DEVICE_TYPE_BBMD:
+                return BACnetConfigurationType.BBMD.ordinal();
+            case BACNET_DEVICE_TYPE_FD:
+                return BACnetConfigurationType.FD.ordinal();
+            case BACNET_DEVICE_TYPE_NORMAL:
+                return BACnetConfigurationType.NORMAL.ordinal();
+            default:
+        }
+        return 0;
+    }
+
+    private void showBBMDDialogView(View bbmdView, boolean isUpdateBBMD) {
+        // Create the dialog
+        CcuLog.d(TAG_CCU_BACNET, "showBBMDDialogView called: isUpdateBBMD "+isUpdateBBMD);
+        Dialog dialog = new Dialog(this.requireContext());
+        dialog.setCancelable(true);
+
+        // Inflate the custom layout
+        LayoutInflater inflater = LayoutInflater.from(this.requireContext());
+        View dialogView = inflater.inflate(R.layout.dialog_add_bbmd_view, null);
+        dialog.setContentView(dialogView);
+
+        // Initialize the input fields and buttons
+        TextView title = dialogView.findViewById(R.id.title_text_bbmd_view);
+        EditText ipAddressEditText = dialogView.findViewById(R.id.ip_address_edit_text);
+        EditText portEditText = dialogView.findViewById(R.id.port_edit_text);
+        EditText maskEditText = dialogView.findViewById(R.id.mask_edit_text);
+        TextView cancelButton = dialogView.findViewById(R.id.cancel_button);
+        TextView saveButton = dialogView.findViewById(R.id.save_button);
+
+        TextView tvBbmdIp = bbmdView.findViewById(R.id.etBbmdIp);
+        TextView tvBbmdPort = bbmdView.findViewById(R.id.etBbmdPort);
+        TextView tvBbmdMask = bbmdView.findViewById(R.id.etBbmdTime);
+
+        if(isUpdateBBMD){
+            title.setText("Edit BBMD");
+            ipAddressEditText.setText(tvBbmdIp.getText().toString());
+            portEditText.setText(tvBbmdPort.getText().toString());
+            maskEditText.setText(tvBbmdMask.getText().toString());
+        }
+
+        // Handle the Cancel button click
+        cancelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss(); // Close the dialog
+            }
+        });
+
+        // Handle the Save button click
+        saveButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Retrieve values from the inputs
+                String ipAddress = ipAddressEditText.getText().toString();
+                String port = portEditText.getText().toString();
+                String mask = maskEditText.getText().toString();
+
+                // Validate input
+
+                if (ipAddress.equals(EMPTY_STRING) || (!CCUUiUtil.isValidIPAddress(ipAddress.trim()))) {
+                    ipAddressEditText.setError(getString(R.string.error_ip_address));
+                    return;
+                }
+
+                if (port.equals(EMPTY_STRING) || (!CCUUiUtil.isValidNumber(Integer.parseInt(port), 47808, 47823, 1))) {
+                    portEditText.setError("Port should be within 47808 and 47823");
+                    return;
+                }
+                if (mask.equals(EMPTY_STRING) || (!CCUUiUtil.isValidNumber(Integer.parseInt(mask), 1, 32, 1))) {
+                    maskEditText.setError("Mask should be within 1 and 32");
+                    return ;
+                }
+
+                if (isUpdateBBMD) {
+                    if(!validateBbmdData(ipAddress) && !ipAddress.equals(tvBbmdIp.getText().toString())) {
+                        ipAddressEditText.setError("IP Address already exists");
+                        return;
+                    }
+                } else {
+                    if(!validateBbmdData(ipAddress)) {
+                        ipAddressEditText.setError("IP Address already exists");
+                        return;
+                    }
+                }
+
+                ipAddressEditText.setError(null);
+                portEditText.setError(null);
+                maskEditText.setError(null);
+
+
+                // Update the BBMD view with the new values
+                if(isUpdateBBMD) {
+                    DataBbmd dataBbmd = new DataBbmd(ipAddress, Integer.parseInt(port), Integer.parseInt(mask));
+                    fillBbmdView(dataBbmd, bbmdInputViews.indexOfChild(bbmdView));
+                    displayCustomToastMessageOnSuccess(true,true);
+                }
+                else {
+                    tvBbmdIp.setText(ipAddress);
+                    tvBbmdPort.setText(port);
+                    tvBbmdMask.setText(mask);
+                    bbmdInputViews.addView(bbmdView);
+                    updateBbmdListView();
+                    displayCustomToastMessageOnSuccess(true,false);
+                }
+                updateBacnetConfigStateChanged(true);
+                // Close the dialog after processing the input
+                dialog.dismiss();
+            }
+        });
+
+        // Show the dialog
+        dialog.show();
+    }
+
+    private void updateBbmdListView() {
+        for (int i = 0; i < bbmdInputViews.getChildCount(); i++) {
+            View bbmdView = bbmdInputViews.getChildAt(i);
+            if(i == 0) { // Info for Own device IP address in BBMD table
+                ImageView ivBbmdRemove = bbmdView.findViewById(R.id.tvBbmdRemove);
+                ImageView ivBbmdEdit = bbmdView.findViewById(R.id.tvBbmdEdit);
+                TextView tvBbmdSelfIp = bbmdView.findViewById(R.id.etBbmdIpSelf);
+
+                ivBbmdRemove.setEnabled(false);
+                ivBbmdRemove.setColorFilter(ContextCompat.getColor(context, R.color.disable_element_color));
+                ivBbmdEdit.setEnabled(false);
+                ivBbmdEdit.setColorFilter(ContextCompat.getColor(context, R.color.disable_element_color));
+                tvBbmdSelfIp.setVisibility(View.VISIBLE);
+            }
+            if(i % 2 != 0){
+                bbmdView.setBackgroundColor(getResources().getColor(R.color.tuner_bg_grey));
+            }
+            else {
+                bbmdView.setBackgroundColor(getResources().getColor(R.color.white));
+            }
+        }
+    }
+    private void displayCustomToastMessageOnSuccess(boolean isBBMD, boolean isUpdate) {
+        Toast toast = new Toast(Globals.getInstance().getApplicationContext());
+        toast.setGravity(Gravity.BOTTOM, 50, 50);
+        View toastSuccess = getLayoutInflater().inflate(R.layout.custom_toast_bacnet_configuration,
+                rootView.findViewById(R.id.custom_toast_layout));
+        toast.setView(toastSuccess);
+
+        TextView textView = toast.getView().findViewById(R.id.custom_toast_message_detail);
+        if (isBBMD) {
+            if (isUpdate) {
+                textView.setText("BBMD updated successfully.");
+            }
+            else {
+                textView.setText("BBMD added successfully.");
+            }
+        }
+        else {
+            textView.setText("Configuration updated successfully.");
+        }
+        textView.setTextSize(21);
+
+        TextView textViewTitle = toast.getView().findViewById(R.id.custom_toast_message_success);
+        textViewTitle.setTypeface(textViewTitle.getTypeface(), Typeface.BOLD);
+        textViewTitle.setTextSize(21);
+
+        LinearLayout linearLayout = toast.getView().findViewById(R.id.custom_toast_layout);
+        linearLayout.setPadding(20, 20, 20, 20);
+        toast.setDuration(Toast.LENGTH_SHORT);
+        toast.show();
+    }
+
+    private void showAlertForRemoveBBMD(View parent) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_delete_schedule, null);
+        TextView msg = dialogView.findViewById(R.id.tvMessage);
+        TextView cancel = dialogView.findViewById(R.id.btnCancel);
+        cancel.setText(getText(R.string.button_cancel));
+        TextView proceed = dialogView.findViewById(R.id.btnProceed);
+        proceed.setText(getText(R.string.button_delete));
+
+        String ipAddress = ((TextView) parent.findViewById(R.id.etBbmdIp)).getText().toString();
+        String message = "Are you sure you want to delete BBMD with <br>IP Address: <b>" + ipAddress + "?</b>";
+
+        // Use Html to style the text
+        msg.setText(Html.fromHtml(message, Html.FROM_HTML_MODE_LEGACY));
+        msg.setTextSize(20);
+        builder.setCancelable(false)
+                .setView(dialogView);
+        AlertDialog alert = builder.create();
+        alert.show();
+
+        cancel.setOnClickListener(view -> {alert.dismiss();});
+        proceed.setOnClickListener(view -> {
+            bbmdInputViews.removeView(parent);
+            updateBbmdListView();
+            updateBacnetConfigStateChanged(true);
+            alert.dismiss();
+        });
+    }
+
+    private void updateBacnetConfigStateChanged(boolean state) {
+        RenatusLandingActivity.isBacnetConfigStateChanged = state;
+    }
+
+    private void showConfirmationForBacnetConfiguration(boolean isTabChanged, int position) {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        View dialogView = getLayoutInflater().inflate(R.layout.bacnet_config_confirmation_alert, null);
+        TextView msg = dialogView.findViewById(R.id.tvMessage);
+        TextView lftBtn = dialogView.findViewById(R.id.btn_discard);
+        TextView rgtBtn = dialogView.findViewById(R.id.btn_stay);
+
+        String message = "You have unsaved <b>BACnet Config</b> changes. Are you sure you want to change the tab?";
+        if (!isTabChanged) {
+            message = "Are you sure you want to change configuration from <b>"+BACnetConfigurationType.values()[spinnerBacnetConfigAdapter.getConfiguredIndex()]+"</b> to <b>"+BACnetConfigurationType.values()[position]+"</b>? Any configuration saved as <b>"+BACnetConfigurationType.values()[spinnerBacnetConfigAdapter.getConfiguredIndex()]+"</b> would be lost.";
+            lftBtn.setText(getText(R.string.button_cancel));
+            rgtBtn.setText(getText(R.string.button_delete));
+        }
+
+        if(message.contains("FD")) {
+            message = message.replace("FD", "Foreign Device");
+        }
+        if (message.contains("NORMAL")) {
+            message = message.replace("NORMAL", "Normal");
+        }
+
+        msg.setText(Html.fromHtml(message, Html.FROM_HTML_MODE_LEGACY));
+        builder.setView(dialogView)
+                .setCancelable(false);
+
+        AlertDialog alert = builder.create();
+        alert.show();
+
+        lftBtn.setOnClickListener(view -> {
+            if (!isTabChanged) {
+                bacnetConfigSpinner.setSelection(bacnetConfigSelectedPosition);// Stay on the same tab
+            }
+            else {
+                RenatusLandingActivity.isBacnetConfigStateChanged = false;
+                SettingsFragment.SettingFragmentHandler.sendEmptyMessage(position);
+            }
+
+            alert.dismiss();
+        });
+        rgtBtn.setOnClickListener(view -> {
+            if (!isTabChanged) {
+                saveBacnetConfiguration(bacnetConfigSelectedPosition);
+            }
+            alert.dismiss();
+        });
+    }
+
+    public void tryToNavigateTab(int intent) {
+        CcuLog.d(TAG_CCU_BACNET, "IsStateChanged: "+RenatusLandingActivity.isBacnetConfigStateChanged+" tryToNavigateTab: "+intent);
+        if (RenatusLandingActivity.isBacnetConfigStateChanged) {
+            showConfirmationForBacnetConfiguration(true, intent);
+        }
+        else {
+            SettingsFragment.SettingFragmentHandler.sendEmptyMessage(intent);
+        }
+    }
+
+    private void updateSelectedIpAddress() {
+        try {
+            if (!deviceIpAddress.trim().isEmpty()) {
+                CcuLog.i(TAG_CCU_BACNET, "Key: ipAddress, Value: " + ipAddressSpinner.getSelectedItem().toString() + ", isValid: " + CCUUiUtil.isValidIPAddress(deviceIpAddress));
+                if (!CCUUiUtil.isValidIPAddress(deviceIpAddress)) {
+                    initializeBACnet.setEnabled(false);
+                    initializeBACnet.setClickable(false);
+                    initializeBACnet.setTextColor(ContextCompat.getColor(context, R.color.tuner_group));
+                } else {
+                    networkObject.put(IP_ADDRESS, deviceIpAddress.trim());
+                    sharedPreferences.edit().putString(BACNET_CONFIGURATION, config.toString()).apply();
+                    if (validateEntries()) {
+                        initializeBACnet.setEnabled(true);
+                        initializeBACnet.setClickable(true);
+
+                        TypedValue typedValue = new TypedValue();
+                        requireActivity().getTheme().resolveAttribute(R.attr.orange_75f, typedValue, true);
+                        int color = typedValue.data;
+                        initializeBACnet.setTextColor(color);
+                    } else {
+                        initializeBACnet.setEnabled(false);
+                        initializeBACnet.setClickable(false);
+                        initializeBACnet.setTextColor(ContextCompat.getColor(context, R.color.tuner_group));
+                    }
+                }
+            } else {
+                networkObject.put(IP_ADDRESS, "");
+                sharedPreferences.edit().putString(BACNET_CONFIGURATION, config.toString()).apply();
+                if (validateEntries()) {
+                    initializeBACnet.setEnabled(true);
+                    initializeBACnet.setClickable(true);
+
+                    TypedValue typedValue = new TypedValue();
+                    requireActivity().getTheme().resolveAttribute(R.attr.orange_75f, typedValue, true);
+                    int color = typedValue.data;
+                    initializeBACnet.setTextColor(color);
+                } else {
+                    initializeBACnet.setEnabled(false);
+                    initializeBACnet.setClickable(false);
+                    initializeBACnet.setTextColor(ContextCompat.getColor(context, R.color.tuner_group));
+                }
+            }
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="25dp"
+    android:background="@drawable/custom_spinner_softedge"
+    android:gravity="center">
+
+    <TextView
+        android:id="@+id/tv_confirmation"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Confirmation"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:layout_gravity="start"
+        android:textColor="@android:color/black"
+        android:layout_marginBottom="16dp" />
+
+    <TextView
+        android:id="@+id/tvMessage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="You have unsaved BACnet Config changes. Are you sure you want to change the tab?"
+        android:textSize="20sp"
+        android:textColor="@android:color/black"
+        android:layout_marginBottom="24dp" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_gravity="end">
+
+        <TextView
+            android:id="@+id/btn_discard"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="DISCARD AND LEAVE"
+            android:textSize="18sp"
+            android:textAllCaps="true"
+            android:textColor="?orange_75f"
+            android:background="@android:color/transparent"
+            android:padding="8dp" />
+        <View
+            android:layout_width="0.01dp"
+            android:layout_height="20dp"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:background="#CCCCCC" />
+
+        <TextView
+            android:id="@+id/btn_stay"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="STAY ON THIS PAGE"
+            android:textAllCaps="true"
+            android:textSize="18sp"
+            android:textColor="?orange_75f"
+            android:background="@android:color/transparent"
+            android:padding="8dp" />
+
+    </LinearLayout>
+</LinearLayout>

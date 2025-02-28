@@ -4,8 +4,25 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
     <TextView
         xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/spinnerTextView"
-        android:layout_width="match_parent"
+        android:id="@+id/spinnerFirstTextView"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:gravity="center_vertical"
+        android:text="192.168.137.101"
+        android:textColor="@color/black"
         android:singleLine="true"
-        android:textSize="18sp" /></LinearLayout>
+        android:textSize="21sp" />
+    <TextView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/spinnerSecondTextView"
+        android:layout_width="wrap_content"
+        android:padding="5dp"
+        android:gravity="center_vertical"
+        android:layout_height="wrap_content"
+        android:text="(Wifi)"
+        android:textColor="#666666"
+        android:singleLine="true"
+        android:textSize="21sp" />
+
+</LinearLayout>

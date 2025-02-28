@@ -1,10 +1,14 @@
 package a75f.io.renatus;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.core.content.ContextCompat;
+
+import android.os.Handler;
+import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -71,6 +75,8 @@ public class MenuFragment extends Fragment {
     @BindView(R.id.lil_about)
     LinearLayout lilAbout;
 
+    public static Handler SettingsNavigationHandler;
+
     int listSelectorBackground;
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_menu, container, false);
@@ -78,7 +84,7 @@ public class MenuFragment extends Fragment {
 
         if (getActivity() != null) {
             if (SettingsFragment.SettingFragmentHandler != null) {
-                SettingsFragment.SettingFragmentHandler.sendEmptyMessage(0);
+                SettingsFragment.SettingFragmentHandler.sendEmptyMessage(-1);
             }
             listSelectorBackground = CCUUiUtil.getListSelectorBackground(getContext());
 
@@ -132,41 +138,6 @@ public class MenuFragment extends Fragment {
                 if (SettingsFragment.SettingFragmentHandler != null) {
                         SettingsFragment.SettingFragmentHandler.sendEmptyMessage(0);
                 }
-
-                iconAccount.setColorFilter(ContextCompat.getColor(getActivity(),
-                        R.color.white));
-                iconSecurity.setColorFilter(ContextCompat.getColor(getActivity(),
-                        R.color.black));
-                iconWifi.setColorFilter(ContextCompat.getColor(getActivity(),
-                        R.color.black));
-                iconInstaller.setColorFilter(ContextCompat.getColor(getActivity(),
-                        R.color.black));
-                //iconSystemProfile.setColorFilter(ContextCompat.getColor(getActivity(),
-                //        R.color.black));
-                iconModbusConfig.setColorFilter(ContextCompat.getColor(getActivity(),
-                        R.color.black));
-                iconTemporaryOverride.setColorFilter(ContextCompat.getColor(getActivity(),
-                        R.color.black));
-                iconAbout.setColorFilter(ContextCompat.getColor(getActivity(),
-                        R.color.black));
-
-                textAccount.setTextColor(getResources().getColor(R.color.white));
-                textSecurity.setTextColor(getResources().getColor(R.color.black));
-                textWifi.setTextColor(getResources().getColor(R.color.black));
-                textInstaller.setTextColor(getResources().getColor(R.color.black));
-                //textSystemProfile.setTextColor(getResources().getColor(R.color.black));
-                textModbusConfig.setTextColor(getResources().getColor(R.color.black));
-                textTemporaryOverride.setTextColor(getResources().getColor(R.color.black));
-                textAbout.setTextColor(getResources().getColor(R.color.black));
-
-                lilAccount.setBackgroundResource(listSelectorBackground);
-                lilSecurity.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-                liltWifi.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-                lilInstaller.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-                //lilSystemProfile.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-                lilModbusConfig.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-                lilTemporaryOverride.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-                lilAbout.setBackgroundColor(getResources().getColor(android.R.color.transparent));
             }
         });
 
@@ -177,41 +148,6 @@ public class MenuFragment extends Fragment {
                 if (SettingsFragment.SettingFragmentHandler != null) {
                     SettingsFragment.SettingFragmentHandler.sendEmptyMessage(1);
                 }
-
-                iconAccount.setColorFilter(ContextCompat.getColor(getActivity(),
-                        R.color.black));
-                iconSecurity.setColorFilter(ContextCompat.getColor(getActivity(),
-                        R.color.white));
-                iconWifi.setColorFilter(ContextCompat.getColor(getActivity(),
-                        R.color.black));
-                iconInstaller.setColorFilter(ContextCompat.getColor(getActivity(),
-                        R.color.black));
-                //iconSystemProfile.setColorFilter(ContextCompat.getColor(getActivity(),
-                //        R.color.black));
-                iconModbusConfig.setColorFilter(ContextCompat.getColor(getActivity(),
-                        R.color.black));
-                iconTemporaryOverride.setColorFilter(ContextCompat.getColor(getActivity(),
-                        R.color.black));
-                iconAbout.setColorFilter(ContextCompat.getColor(getActivity(),
-                        R.color.black));
-
-                textAccount.setTextColor(getResources().getColor(R.color.black));
-                textSecurity.setTextColor(getResources().getColor(R.color.white));
-                textWifi.setTextColor(getResources().getColor(R.color.black));
-                textInstaller.setTextColor(getResources().getColor(R.color.black));
-                //textSystemProfile.setTextColor(getResources().getColor(R.color.black));
-                textModbusConfig.setTextColor(getResources().getColor(R.color.black));
-                textTemporaryOverride.setTextColor(getResources().getColor(R.color.black));
-                textAbout.setTextColor(getResources().getColor(R.color.black));
-
-                lilAccount.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-                lilSecurity.setBackgroundResource(listSelectorBackground);
-                liltWifi.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-                lilInstaller.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-                //lilSystemProfile.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-                lilModbusConfig.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-                lilTemporaryOverride.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-                lilAbout.setBackgroundColor(getResources().getColor(android.R.color.transparent));
             }
         });
 
@@ -222,41 +158,6 @@ public class MenuFragment extends Fragment {
                 if (SettingsFragment.SettingFragmentHandler != null) {
                     SettingsFragment.SettingFragmentHandler.sendEmptyMessage(2);
                 }
-
-                iconAccount.setColorFilter(ContextCompat.getColor(getActivity(),
-                        R.color.black));
-                iconSecurity.setColorFilter(ContextCompat.getColor(getActivity(),
-                        R.color.black));
-                iconWifi.setColorFilter(ContextCompat.getColor(getActivity(),
-                        R.color.white));
-                iconInstaller.setColorFilter(ContextCompat.getColor(getActivity(),
-                        R.color.black));
-                //iconSystemProfile.setColorFilter(ContextCompat.getColor(getActivity(),
-                //        R.color.black));
-                iconModbusConfig.setColorFilter(ContextCompat.getColor(getActivity(),
-                        R.color.black));
-                iconTemporaryOverride.setColorFilter(ContextCompat.getColor(getActivity(),
-                        R.color.black));
-                iconAbout.setColorFilter(ContextCompat.getColor(getActivity(),
-                        R.color.black));
-
-                textAccount.setTextColor(getResources().getColor(R.color.black));
-                textSecurity.setTextColor(getResources().getColor(R.color.black));
-                textWifi.setTextColor(getResources().getColor(R.color.white));
-                textInstaller.setTextColor(getResources().getColor(R.color.black));
-                //textSystemProfile.setTextColor(getResources().getColor(R.color.black));
-                textModbusConfig.setTextColor(getResources().getColor(R.color.black));
-                textTemporaryOverride.setTextColor(getResources().getColor(R.color.black));
-                textAbout.setTextColor(getResources().getColor(R.color.black));
-
-                lilAccount.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-                liltWifi.setBackgroundResource(listSelectorBackground);
-                lilSecurity.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-                lilInstaller.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-                //lilSystemProfile.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-                lilModbusConfig.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-                lilTemporaryOverride.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-                lilAbout.setBackgroundColor(getResources().getColor(android.R.color.transparent));
             }
         });
 
@@ -267,87 +168,9 @@ public class MenuFragment extends Fragment {
                 if (SettingsFragment.SettingFragmentHandler != null) {
                     SettingsFragment.SettingFragmentHandler.sendEmptyMessage(3);
                 }
-
-                iconAccount.setColorFilter(ContextCompat.getColor(getActivity(),
-                        R.color.black));
-                iconSecurity.setColorFilter(ContextCompat.getColor(getActivity(),
-                        R.color.black));
-                iconWifi.setColorFilter(ContextCompat.getColor(getActivity(),
-                        R.color.black));
-                iconInstaller.setColorFilter(ContextCompat.getColor(getActivity(),
-                        R.color.white));
-                //iconSystemProfile.setColorFilter(ContextCompat.getColor(getActivity(),
-                //        R.color.black));
-                iconModbusConfig.setColorFilter(ContextCompat.getColor(getActivity(),
-                        R.color.black));
-                iconTemporaryOverride.setColorFilter(ContextCompat.getColor(getActivity(),
-                        R.color.black));
-                iconAbout.setColorFilter(ContextCompat.getColor(getActivity(),
-                        R.color.black));
-
-                textAccount.setTextColor(getResources().getColor(R.color.black));
-                textSecurity.setTextColor(getResources().getColor(R.color.black));
-                textWifi.setTextColor(getResources().getColor(R.color.black));
-                textInstaller.setTextColor(getResources().getColor(R.color.white));
-                //textSystemProfile.setTextColor(getResources().getColor(R.color.black));
-                textModbusConfig.setTextColor(getResources().getColor(R.color.black));
-                textTemporaryOverride.setTextColor(getResources().getColor(R.color.black));
-                textAbout.setTextColor(getResources().getColor(R.color.black));
-
-                lilAccount.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-                lilInstaller.setBackgroundResource(listSelectorBackground);
-                lilSecurity.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-                liltWifi.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-                //lilSystemProfile.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-                lilModbusConfig.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-                lilTemporaryOverride.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-                lilAbout.setBackgroundColor(getResources().getColor(android.R.color.transparent));
             }
         });
 
-        /*
-        view.findViewById(R.id.lil_system_profile).setOnClickListener(view1 -> {
-            if (SettingsFragment.SettingFragmentHandler != null) {
-                SettingsFragment.SettingFragmentHandler.sendEmptyMessage(4);
-            }
-
-            iconAccount.setColorFilter(ContextCompat.getColor(getActivity(),
-                    R.color.black));
-            iconSecurity.setColorFilter(ContextCompat.getColor(getActivity(),
-                    R.color.black));
-            iconWifi.setColorFilter(ContextCompat.getColor(getActivity(),
-                    R.color.black));
-            iconInstaller.setColorFilter(ContextCompat.getColor(getActivity(),
-                    R.color.black));
-            //iconSystemProfile.setColorFilter(ContextCompat.getColor(getActivity(),
-            //        R.color.white));
-            iconModbusConfig.setColorFilter(ContextCompat.getColor(getActivity(),
-                    R.color.black));
-            iconTemporaryOverride.setColorFilter(ContextCompat.getColor(getActivity(),
-                    R.color.black));
-            iconAbout.setColorFilter(ContextCompat.getColor(getActivity(),
-                    R.color.black));
-
-            textAccount.setTextColor(getResources().getColor(R.color.black));
-            textSecurity.setTextColor(getResources().getColor(R.color.black));
-            textWifi.setTextColor(getResources().getColor(R.color.black));
-            textInstaller.setTextColor(getResources().getColor(R.color.black));
-            //textSystemProfile.setTextColor(getResources().getColor(R.color.white));
-            textModbusConfig.setTextColor(getResources().getColor(R.color.black));
-            textTemporaryOverride.setTextColor(getResources().getColor(R.color.black));
-            textAbout.setTextColor(getResources().getColor(R.color.black));
-
-            lilAccount.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-            //lilSystemProfile.setBackgroundResource(listSelectorBackground);
-            lilSecurity.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-            liltWifi.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-            lilInstaller.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-            lilModbusConfig.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-            lilTemporaryOverride.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-            lilAbout.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-
-        });
-        */
 
         view.findViewById(R.id.lil_modbus_config).setOnClickListener(view1 -> {
             // If Activity is null, we don't have enough info to do the complete animation.
@@ -356,42 +179,6 @@ public class MenuFragment extends Fragment {
                 if (SettingsFragment.SettingFragmentHandler != null) {
                     SettingsFragment.SettingFragmentHandler.sendEmptyMessage(4);
                 }
-
-                iconAccount.setColorFilter(ContextCompat.getColor(getActivity(),
-                        R.color.black));
-                iconSecurity.setColorFilter(ContextCompat.getColor(getActivity(),
-                        R.color.black));
-                iconWifi.setColorFilter(ContextCompat.getColor(getActivity(),
-                        R.color.black));
-                iconInstaller.setColorFilter(ContextCompat.getColor(getActivity(),
-                        R.color.black));
-                //iconSystemProfile.setColorFilter(ContextCompat.getColor(getActivity(),
-                //        R.color.black));
-                iconModbusConfig.setColorFilter(ContextCompat.getColor(getActivity(),
-                        R.color.white));
-                iconTemporaryOverride.setColorFilter(ContextCompat.getColor(getActivity(),
-                        R.color.black));
-                iconAbout.setColorFilter(ContextCompat.getColor(getActivity(),
-                        R.color.black));
-
-                textAccount.setTextColor(getResources().getColor(R.color.black));
-                textSecurity.setTextColor(getResources().getColor(R.color.black));
-                textWifi.setTextColor(getResources().getColor(R.color.black));
-                textInstaller.setTextColor(getResources().getColor(R.color.black));
-                //textSystemProfile.setTextColor(getResources().getColor(R.color.black));
-                textModbusConfig.setTextColor(getResources().getColor(R.color.white));
-                textTemporaryOverride.setTextColor(getResources().getColor(R.color.black));
-                textAbout.setTextColor(getResources().getColor(R.color.black));
-
-
-                lilAccount.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-                lilAbout.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-                lilSecurity.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-                liltWifi.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-                lilInstaller.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-                //lilSystemProfile.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-                lilModbusConfig.setBackgroundResource(listSelectorBackground);
-                lilTemporaryOverride.setBackgroundColor(getResources().getColor(android.R.color.transparent));
             }
         });
 
@@ -402,41 +189,6 @@ public class MenuFragment extends Fragment {
                 if (SettingsFragment.SettingFragmentHandler != null) {
                     SettingsFragment.SettingFragmentHandler.sendEmptyMessage(5);
                 }
-
-                iconAccount.setColorFilter(ContextCompat.getColor(getActivity(),
-                        R.color.black));
-                iconSecurity.setColorFilter(ContextCompat.getColor(getActivity(),
-                        R.color.black));
-                iconWifi.setColorFilter(ContextCompat.getColor(getActivity(),
-                        R.color.black));
-                iconInstaller.setColorFilter(ContextCompat.getColor(getActivity(),
-                        R.color.black));
-                //iconSystemProfile.setColorFilter(ContextCompat.getColor(getActivity(),
-                //        R.color.black));
-                iconModbusConfig.setColorFilter(ContextCompat.getColor(getActivity(),
-                        R.color.black));
-                iconTemporaryOverride.setColorFilter(ContextCompat.getColor(getActivity(),
-                        R.color.white));
-                iconAbout.setColorFilter(ContextCompat.getColor(getActivity(),
-                        R.color.black));
-
-                textAccount.setTextColor(getResources().getColor(R.color.black));
-                textSecurity.setTextColor(getResources().getColor(R.color.black));
-                textWifi.setTextColor(getResources().getColor(R.color.black));
-                textInstaller.setTextColor(getResources().getColor(R.color.black));
-                //textSystemProfile.setTextColor(getResources().getColor(R.color.black));
-                textModbusConfig.setTextColor(getResources().getColor(R.color.black));
-                textTemporaryOverride.setTextColor(getResources().getColor(R.color.white));
-                textAbout.setTextColor(getResources().getColor(R.color.black));
-
-                lilAccount.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-                lilTemporaryOverride.setBackgroundResource(listSelectorBackground);
-                lilSecurity.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-                liltWifi.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-                lilInstaller.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-                //lilSystemProfile.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-                lilModbusConfig.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-                lilAbout.setBackgroundColor(getResources().getColor(android.R.color.transparent));
             }
         });
 
@@ -447,45 +199,285 @@ public class MenuFragment extends Fragment {
                 if (SettingsFragment.SettingFragmentHandler != null) {
                     SettingsFragment.SettingFragmentHandler.sendEmptyMessage(6);
                 }
-
-                iconAccount.setColorFilter(ContextCompat.getColor(getActivity(),
-                        R.color.black));
-                iconSecurity.setColorFilter(ContextCompat.getColor(getActivity(),
-                        R.color.black));
-                iconWifi.setColorFilter(ContextCompat.getColor(getActivity(),
-                        R.color.black));
-                iconInstaller.setColorFilter(ContextCompat.getColor(getActivity(),
-                        R.color.black));
-                //iconSystemProfile.setColorFilter(ContextCompat.getColor(getActivity(),
-                //        R.color.black));
-                iconModbusConfig.setColorFilter(ContextCompat.getColor(getActivity(),
-                        R.color.black));
-                iconTemporaryOverride.setColorFilter(ContextCompat.getColor(getActivity(),
-                        R.color.black));
-                iconAbout.setColorFilter(ContextCompat.getColor(getActivity(),
-                        R.color.white));
-
-                textAccount.setTextColor(getResources().getColor(R.color.black));
-                textSecurity.setTextColor(getResources().getColor(R.color.black));
-                textWifi.setTextColor(getResources().getColor(R.color.black));
-                textInstaller.setTextColor(getResources().getColor(R.color.black));
-                //textSystemProfile.setTextColor(getResources().getColor(R.color.black));
-                textModbusConfig.setTextColor(getResources().getColor(R.color.black));
-                textTemporaryOverride.setTextColor(getResources().getColor(R.color.black));
-                textAbout.setTextColor(getResources().getColor(R.color.white));
-
-
-                lilAccount.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-                lilAbout.setBackgroundResource(listSelectorBackground);
-                lilSecurity.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-                liltWifi.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-                lilInstaller.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-                //lilSystemProfile.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-                lilModbusConfig.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-                lilTemporaryOverride.setBackgroundColor(getResources().getColor(android.R.color.transparent));
             }
         });
 
+        navigationHandler();
 
+
+    }
+    @SuppressLint("HandlerLeak")
+    private void navigationHandler() {
+        SettingsNavigationHandler = new Handler() {
+            public void handleMessage(Message msg) {
+                super.handleMessage(msg);
+                switch (msg.what) {
+                    case 0: {
+                        if (getActivity() != null) {
+                            iconAccount.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.white));
+                            iconSecurity.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.black));
+                            iconWifi.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.black));
+                            iconInstaller.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.black));
+                            iconModbusConfig.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.black));
+                            iconTemporaryOverride.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.black));
+                            iconAbout.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.black));
+
+                            textAccount.setTextColor(getResources().getColor(R.color.white));
+                            textSecurity.setTextColor(getResources().getColor(R.color.black));
+                            textWifi.setTextColor(getResources().getColor(R.color.black));
+                            textInstaller.setTextColor(getResources().getColor(R.color.black));
+                            //textSystemProfile.setTextColor(getResources().getColor(R.color.black));
+                            textModbusConfig.setTextColor(getResources().getColor(R.color.black));
+                            textTemporaryOverride.setTextColor(getResources().getColor(R.color.black));
+                            textAbout.setTextColor(getResources().getColor(R.color.black));
+
+                            lilAccount.setBackgroundResource(listSelectorBackground);
+                            lilSecurity.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+                            liltWifi.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+                            lilInstaller.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+                            //lilSystemProfile.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+                            lilModbusConfig.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+                            lilTemporaryOverride.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+                            lilAbout.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+                        }
+                        break;
+                    }
+
+                    case 1: {
+                        if (getActivity() != null) {
+
+                            iconAccount.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.black));
+                            iconSecurity.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.white));
+                            iconWifi.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.black));
+                            iconInstaller.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.black));
+                            iconModbusConfig.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.black));
+                            iconTemporaryOverride.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.black));
+                            iconAbout.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.black));
+
+                            textAccount.setTextColor(getResources().getColor(R.color.black));
+                            textSecurity.setTextColor(getResources().getColor(R.color.white));
+                            textWifi.setTextColor(getResources().getColor(R.color.black));
+                            textInstaller.setTextColor(getResources().getColor(R.color.black));
+                            textModbusConfig.setTextColor(getResources().getColor(R.color.black));
+                            textTemporaryOverride.setTextColor(getResources().getColor(R.color.black));
+                            textAbout.setTextColor(getResources().getColor(R.color.black));
+
+                            lilAccount.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+                            lilSecurity.setBackgroundResource(listSelectorBackground);
+                            liltWifi.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+                            lilInstaller.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+                            lilModbusConfig.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+                            lilTemporaryOverride.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+                            lilAbout.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+                        }
+                        break;
+                    }
+
+                    case 2: {
+                        if (getActivity() != null) {
+                            iconAccount.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.black));
+                            iconSecurity.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.black));
+                            iconWifi.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.white));
+                            iconInstaller.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.black));
+                            iconModbusConfig.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.black));
+                            iconTemporaryOverride.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.black));
+                            iconAbout.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.black));
+
+                            textAccount.setTextColor(getResources().getColor(R.color.black));
+                            textSecurity.setTextColor(getResources().getColor(R.color.black));
+                            textWifi.setTextColor(getResources().getColor(R.color.white));
+                            textInstaller.setTextColor(getResources().getColor(R.color.black));
+                            textModbusConfig.setTextColor(getResources().getColor(R.color.black));
+                            textTemporaryOverride.setTextColor(getResources().getColor(R.color.black));
+                            textAbout.setTextColor(getResources().getColor(R.color.black));
+
+                            lilAccount.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+                            liltWifi.setBackgroundResource(listSelectorBackground);
+                            lilSecurity.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+                            lilInstaller.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+                            lilModbusConfig.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+                            lilTemporaryOverride.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+                            lilAbout.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+                        }
+                        break;
+                    }
+
+                    case 3: {
+                        if (getActivity() != null) {
+
+                            iconAccount.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.black));
+                            iconSecurity.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.black));
+                            iconWifi.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.black));
+                            iconInstaller.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.white));
+                            //iconSystemProfile.setColorFilter(ContextCompat.getColor(getActivity(),
+                            //        R.color.black));
+                            iconModbusConfig.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.black));
+                            iconTemporaryOverride.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.black));
+                            iconAbout.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.black));
+
+                            textAccount.setTextColor(getResources().getColor(R.color.black));
+                            textSecurity.setTextColor(getResources().getColor(R.color.black));
+                            textWifi.setTextColor(getResources().getColor(R.color.black));
+                            textInstaller.setTextColor(getResources().getColor(R.color.white));
+                            //textSystemProfile.setTextColor(getResources().getColor(R.color.black));
+                            textModbusConfig.setTextColor(getResources().getColor(R.color.black));
+                            textTemporaryOverride.setTextColor(getResources().getColor(R.color.black));
+                            textAbout.setTextColor(getResources().getColor(R.color.black));
+
+                            lilAccount.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+                            lilInstaller.setBackgroundResource(listSelectorBackground);
+                            lilSecurity.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+                            liltWifi.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+                            //lilSystemProfile.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+                            lilModbusConfig.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+                            lilTemporaryOverride.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+                            lilAbout.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+                        }
+                        break;
+                    }
+
+                    case 4: {
+                        if (getActivity() != null) {
+
+                            iconAccount.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.black));
+                            iconSecurity.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.black));
+                            iconWifi.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.black));
+                            iconInstaller.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.black));
+                            iconModbusConfig.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.white));
+                            iconTemporaryOverride.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.black));
+                            iconAbout.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.black));
+
+                            textAccount.setTextColor(getResources().getColor(R.color.black));
+                            textSecurity.setTextColor(getResources().getColor(R.color.black));
+                            textWifi.setTextColor(getResources().getColor(R.color.black));
+                            textInstaller.setTextColor(getResources().getColor(R.color.black));
+                            textModbusConfig.setTextColor(getResources().getColor(R.color.white));
+                            textTemporaryOverride.setTextColor(getResources().getColor(R.color.black));
+                            textAbout.setTextColor(getResources().getColor(R.color.black));
+
+
+                            lilAccount.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+                            lilAbout.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+                            lilSecurity.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+                            liltWifi.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+                            lilInstaller.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+                            lilModbusConfig.setBackgroundResource(listSelectorBackground);
+                            lilTemporaryOverride.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+                        }
+                        break;
+                    }
+
+                    case 5: {
+                        if (getActivity() != null) {
+                            iconAccount.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.black));
+                            iconSecurity.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.black));
+                            iconWifi.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.black));
+                            iconInstaller.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.black));
+                            iconModbusConfig.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.black));
+                            iconTemporaryOverride.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.white));
+                            iconAbout.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.black));
+
+                            textAccount.setTextColor(getResources().getColor(R.color.black));
+                            textSecurity.setTextColor(getResources().getColor(R.color.black));
+                            textWifi.setTextColor(getResources().getColor(R.color.black));
+                            textInstaller.setTextColor(getResources().getColor(R.color.black));
+                            textModbusConfig.setTextColor(getResources().getColor(R.color.black));
+                            textTemporaryOverride.setTextColor(getResources().getColor(R.color.white));
+                            textAbout.setTextColor(getResources().getColor(R.color.black));
+
+                            lilAccount.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+                            lilTemporaryOverride.setBackgroundResource(listSelectorBackground);
+                            lilSecurity.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+                            liltWifi.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+                            lilInstaller.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+                            lilModbusConfig.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+                            lilAbout.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+                        }
+                        break;
+                    }
+
+                    case 6: {
+                        if (getActivity() != null) {
+
+                            iconAccount.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.black));
+                            iconSecurity.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.black));
+                            iconWifi.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.black));
+                            iconInstaller.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.black));
+                            iconModbusConfig.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.black));
+                            iconTemporaryOverride.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.black));
+                            iconAbout.setColorFilter(ContextCompat.getColor(getActivity(),
+                                    R.color.white));
+
+                            textAccount.setTextColor(getResources().getColor(R.color.black));
+                            textSecurity.setTextColor(getResources().getColor(R.color.black));
+                            textWifi.setTextColor(getResources().getColor(R.color.black));
+                            textInstaller.setTextColor(getResources().getColor(R.color.black));
+                            textModbusConfig.setTextColor(getResources().getColor(R.color.black));
+                            textTemporaryOverride.setTextColor(getResources().getColor(R.color.black));
+                            textAbout.setTextColor(getResources().getColor(R.color.white));
+
+
+                            lilAccount.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+                            lilAbout.setBackgroundResource(listSelectorBackground);
+                            lilSecurity.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+                            liltWifi.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+                            lilInstaller.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+                            lilModbusConfig.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+                            lilTemporaryOverride.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+                        }
+                        break;
+                    }
+
+                }
+            }
+        };
     }
 }

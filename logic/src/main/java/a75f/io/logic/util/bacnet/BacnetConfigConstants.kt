@@ -31,6 +31,7 @@ object  BacnetConfigConstants {
     const val LOCAL_NETWORK_NUMBER = "localNetNum"
     const val VIRTUAL_NETWORK_NUMBER = "virtualNetNum"
     const val PORT = "port"
+    const val NETWORK_INTERFACE = "networkInterface"
 
     // "device" constants
     const val IP_DEVICE_INSTANCE_NUMBER = "ipDeviceInstanceNum"

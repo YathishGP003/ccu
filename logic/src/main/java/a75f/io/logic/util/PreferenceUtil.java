@@ -101,6 +101,7 @@ public class PreferenceUtil {
     private static final String RELAY2_port_ENABLED_STATUS = "relay2PortEnabledStatus";
     private static final String PROFILE_TYPE_IN_CCU_CONFIG_STATUS = "profileTypeInCcuConfigStatus";
     private static final String DAB_FULLY_MODULATING_POINTS_UPDATE = "dabFullyModulatingPointsUpdate";
+    private static final String MIGRATE_BACNET_NETWORK_INTERFACE = "migrateBacnetNetworkInterface";
 
     public static void setContext(Context c) {
         context= c;
@@ -823,4 +824,12 @@ public class PreferenceUtil {
         setBooleanPreference(DAB_FULLY_MODULATING_POINTS_UPDATE, true);
     }
 
+
+    public static boolean getUpdateBacnetNetworkInterface() {
+        return getBooleanPreference(MIGRATE_BACNET_NETWORK_INTERFACE);
+    }
+
+    public static void setUpdateBacnetNetworkInterface() {
+        setBooleanPreference(MIGRATE_BACNET_NETWORK_INTERFACE, true);
+    }
 }

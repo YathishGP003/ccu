@@ -16,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
+import a75f.io.logger.CcuLog;
 import a75f.io.renatus.registration.CreateNewSite;
 import a75f.io.renatus.registration.InstallerOptions;
 import a75f.io.renatus.registration.Security;
@@ -93,77 +94,105 @@ public class SettingsFragment extends Fragment {
             public void handleMessage(Message msg) {
                 super.handleMessage(msg);
                 switch (msg.what) {
-                    case 0: {
-
-                        if (isTransactionSafe && !(fragment instanceof CreateNewSite)) {
-                            fragmentClass = CreateNewSite.class;
-                            try {
-                                fragment = (Fragment) fragmentClass.newInstance();
-                            } catch (Exception e) {
-                                e.printStackTrace();
+                    case -1: //initialize the fragment as launching page
+                    case 0 : {
+                        if (!(fragment instanceof Communication) || !RenatusLandingActivity.isBacnetConfigStateChanged) {
+                            if (MenuFragment.SettingsNavigationHandler != null) {
+                                MenuFragment.SettingsNavigationHandler.sendEmptyMessage(0);
                             }
-                            FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-                            FragmentTransaction transaction = fragmentManager.beginTransaction();
-                            transaction.setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right);
-                            transaction.replace(R.id.flContent, fragment);
-                            transaction.commit();
+                            if (isTransactionSafe && !(fragment instanceof CreateNewSite)) {
+                                fragmentClass = CreateNewSite.class;
+                                try {
+                                    fragment = (Fragment) fragmentClass.newInstance();
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                                FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+                                FragmentTransaction transaction = fragmentManager.beginTransaction();
+                                transaction.setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right);
+                                transaction.replace(R.id.flContent, fragment);
+                                transaction.commit();
+                            } else {
+                                isTransactionPending = true;
+                            }
                         } else {
-                            isTransactionPending = true;
+                            ((Communication) fragment).tryToNavigateTab(0);
                         }
                         break;
                     }
                     case 1: {
-
-                        if (isTransactionSafe && !(fragment instanceof Security)) {
-                            fragmentClass = Security.class;
-                            try {
-                                fragment = (Fragment) fragmentClass.newInstance();
-                            } catch (Exception e) {
-                                e.printStackTrace();
+                        if (!(fragment instanceof Communication) || !RenatusLandingActivity.isBacnetConfigStateChanged) {
+                            if (MenuFragment.SettingsNavigationHandler != null) {
+                                MenuFragment.SettingsNavigationHandler.sendEmptyMessage(1);
                             }
-                            FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-                            FragmentTransaction transaction = fragmentManager.beginTransaction();
-                            transaction.setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right);
-                            transaction.replace(R.id.flContent, fragment);
-                            transaction.commit();
+
+                            if (isTransactionSafe && !(fragment instanceof Security)) {
+                                fragmentClass = Security.class;
+                                try {
+                                    fragment = (Fragment) fragmentClass.newInstance();
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                                FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+                                FragmentTransaction transaction = fragmentManager.beginTransaction();
+                                transaction.setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right);
+                                transaction.replace(R.id.flContent, fragment);
+                                transaction.commit();
+                            } else {
+                                isTransactionPending = true;
+                            }
                         } else {
-                            isTransactionPending = true;
+                            ((Communication) fragment).tryToNavigateTab(1);
                         }
                         break;
                     }
                     case 2: {
-                        if (isTransactionSafe && !(fragment instanceof WifiFragment)) {
-                            fragmentClass = WifiFragment.class;
-                            try {
-                                fragment = (Fragment) fragmentClass.newInstance();
-                            } catch (Exception e) {
-                                e.printStackTrace();
+                        if (!(fragment instanceof Communication) || !RenatusLandingActivity.isBacnetConfigStateChanged) {
+                            if (MenuFragment.SettingsNavigationHandler != null) {
+                                MenuFragment.SettingsNavigationHandler.sendEmptyMessage(2);
                             }
-                            FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-                            FragmentTransaction transaction = fragmentManager.beginTransaction();
-                            transaction.setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right);
-                            transaction.replace(R.id.flContent, fragment);
-                            transaction.commit();
+                            if (isTransactionSafe && !(fragment instanceof WifiFragment)) {
+                                fragmentClass = WifiFragment.class;
+                                try {
+                                    fragment = (Fragment) fragmentClass.newInstance();
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                                FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+                                FragmentTransaction transaction = fragmentManager.beginTransaction();
+                                transaction.setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right);
+                                transaction.replace(R.id.flContent, fragment);
+                                transaction.commit();
+                            } else {
+                                isTransactionPending = true;
+                            }
                         } else {
-                            isTransactionPending = true;
+                            ((Communication) fragment).tryToNavigateTab(2);
                         }
                         break;
                     }
                     case 3: {
-                        if (isTransactionSafe && !(fragment instanceof InstallerOptions)) {
-                            fragmentClass = InstallerOptions.class;
-                            try {
-                                fragment = (Fragment) fragmentClass.newInstance();
-                            } catch (Exception e) {
-                                e.printStackTrace();
+                        if (!(fragment instanceof Communication) || !RenatusLandingActivity.isBacnetConfigStateChanged) {
+                            if (MenuFragment.SettingsNavigationHandler != null) {
+                                MenuFragment.SettingsNavigationHandler.sendEmptyMessage(3);
                             }
-                            FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-                            FragmentTransaction transaction = fragmentManager.beginTransaction();
-                            transaction.setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right);
-                            transaction.replace(R.id.flContent, fragment);
-                            transaction.commit();
+                            if (isTransactionSafe && !(fragment instanceof InstallerOptions)) {
+                                fragmentClass = InstallerOptions.class;
+                                try {
+                                    fragment = (Fragment) fragmentClass.newInstance();
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                                FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+                                FragmentTransaction transaction = fragmentManager.beginTransaction();
+                                transaction.setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right);
+                                transaction.replace(R.id.flContent, fragment);
+                                transaction.commit();
+                            } else {
+                                isTransactionPending = true;
+                            }
                         } else {
-                            isTransactionPending = true;
+                            ((Communication) fragment).tryToNavigateTab(3);
                         }
                         break;
                     }
@@ -188,57 +217,79 @@ public class SettingsFragment extends Fragment {
                     }
                     */
                     case 4: {
-                        if (isTransactionSafe && !(fragment instanceof Communication)) {
-                            fragmentClass = Communication.class;
-                            try {
-                                fragment = (Fragment) fragmentClass.newInstance();
-                            } catch (Exception e) {
-                                e.printStackTrace();
+                        if (!(fragment instanceof Communication) || !RenatusLandingActivity.isBacnetConfigStateChanged) {
+                            if (MenuFragment.SettingsNavigationHandler != null) {
+                                MenuFragment.SettingsNavigationHandler.sendEmptyMessage(4);
                             }
-                            FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-                            FragmentTransaction transaction = fragmentManager.beginTransaction();
-                            transaction.setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right);
-                            transaction.replace(R.id.flContent, fragment);
-                            transaction.commit();
-                        } else {
-                            isTransactionPending = true;
+                            if (isTransactionSafe && !(fragment instanceof Communication)) {
+                                fragmentClass = Communication.class;
+                                try {
+                                    fragment = (Fragment) fragmentClass.newInstance();
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                                FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+                                FragmentTransaction transaction = fragmentManager.beginTransaction();
+                                transaction.setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right);
+                                transaction.replace(R.id.flContent, fragment);
+                                transaction.commit();
+                            } else {
+                                isTransactionPending = true;
+                            }
+                        }
+                        else  {
+                            ((Communication) fragment).tryToNavigateTab(4);
                         }
                         break;
                     }
                     case 5: {
-                        if (isTransactionSafe && !(fragment instanceof TempOverrideFragment)) {
-                            //TODO:
-                            fragmentClass = TempOverrideFragment.class;
-                            try {
-                                fragment = (Fragment) fragmentClass.newInstance();
-                            } catch (Exception e) {
-                                e.printStackTrace();
+                        if (!(fragment instanceof Communication) || !RenatusLandingActivity.isBacnetConfigStateChanged) {
+                            if (MenuFragment.SettingsNavigationHandler != null) {
+                                MenuFragment.SettingsNavigationHandler.sendEmptyMessage(5);
                             }
-                            FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-                            FragmentTransaction transaction = fragmentManager.beginTransaction();
-                            transaction.setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right);
-                            transaction.replace(R.id.flContent, fragment);
-                            transaction.commit();
-                        } else {
-                            isTransactionPending = true;
+                            if (isTransactionSafe && !(fragment instanceof TempOverrideFragment)) {
+                                fragmentClass = TempOverrideFragment.class;
+                                try {
+                                    fragment = (Fragment) fragmentClass.newInstance();
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                                FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+                                FragmentTransaction transaction = fragmentManager.beginTransaction();
+                                transaction.setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right);
+                                transaction.replace(R.id.flContent, fragment);
+                                transaction.commit();
+                            } else {
+                                isTransactionPending = true;
+                            }
+                        }
+                        else {
+                            ((Communication) fragment).tryToNavigateTab(5);
                         }
                         break;
                     }
                     case 6:
-                        if (isTransactionSafe && !(fragment instanceof AboutFragment)) {
-                            fragmentClass = AboutFragment.class;
-                            try {
-                                fragment = (Fragment) fragmentClass.newInstance();
-                            } catch (Exception e) {
-                                e.printStackTrace();
+                        if (!(fragment instanceof Communication) || !RenatusLandingActivity.isBacnetConfigStateChanged) {
+                            if (MenuFragment.SettingsNavigationHandler != null) {
+                                MenuFragment.SettingsNavigationHandler.sendEmptyMessage(6);
                             }
-                            FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-                            FragmentTransaction transaction = fragmentManager.beginTransaction();
-                            transaction.setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right);
-                            transaction.replace(R.id.flContent, fragment, "ABOUT_FRAGMENT_TAG");
-                            transaction.commit();
+                            if (isTransactionSafe && !(fragment instanceof AboutFragment)) {
+                                fragmentClass = AboutFragment.class;
+                                try {
+                                    fragment = (Fragment) fragmentClass.newInstance();
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                                FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+                                FragmentTransaction transaction = fragmentManager.beginTransaction();
+                                transaction.setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right);
+                                transaction.replace(R.id.flContent, fragment, "ABOUT_FRAGMENT_TAG");
+                                transaction.commit();
+                            } else {
+                                isTransactionPending = true;
+                            }
                         } else {
-                            isTransactionPending = true;
+                            ((Communication) fragment).tryToNavigateTab(6);
                         }
                         break;
                     default:

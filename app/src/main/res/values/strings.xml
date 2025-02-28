@@ -819,6 +819,7 @@
     <string name="label_extsensor">Use External 10k Temp Sensor</string>
     <string name="button_set">SET</string>
     <string name="button_cancel">CANCEL</string>
+    <string name="button_delete">DELETE</string>
     <string name="button_save">SAVE</string>
     <string name="button_unpair">UNPAIR</string>
     <string name="label_cpucoolstage1">Cooling Stage 1</string>
@@ -1270,7 +1271,7 @@
     <string name="txt_port">Port <font color="#e5561a">*</font></string>
     <string name="txt_port_hint">Recommended: 47808 to 47823</string>
     <string name="txt_auto_hint">Auto will work if time is greater than 0 </string>
-    <string name="txt_error_port">Port should be within 4096 to 65535</string>
+    <string name="txt_error_port">Port should be within 47808 to 47823</string>
     <string name="txt_valid_number">Please input valid number</string>
     <string name="txt_ip_device_instance_number">IP Device Instance Number  <font color="#e5561a">*</font></string>
     <string name="txt_ip_device_instance_number_hint">In between 0 to 4194302</string>
@@ -1332,6 +1333,12 @@
     <string-array name="mb_config_stopbits_array">
         <item>  1 </item>
         <item>  2 </item>
+    </string-array>
+
+    <string-array name="bacnet_config_array">
+        <item>  BBMD </item>
+        <item>  Foreign device </item>
+        <item>  Normal </item>
     </string-array>
     <!--<string-array name="energy_distribution_values">
         <item> 0% </item>
@@ -1684,7 +1691,7 @@
     <string name="latest_version">Latest Version: </string>
     <string name="download_size">  | Download Size: </string>
     <string name="bacnet_admin">admin@75f</string>
-    <string name="label_configure_as">Configure as</string>
+    <string name="label_configure_as">Configure As</string>
     <string name="label_bbmd">BBMD</string>
     <string name="label_foreign_device">Foreign Device</string>
     <string name="label_normal">Normal</string>
@@ -1721,8 +1728,10 @@
     <string name="menutoggle">menutoggle</string>
     <string name="display_toast_message">display toast message</string>
     <string name="txt_add">ADD</string>
+    <string name="txt_add_bbmd">ADD BBMD</string>
     <string name="txt_remove">REMOVE</string>
     <string name="txt_mask">Mask <font color="#e5561a">*</font></string>
+    <string name="txt_action">Actions </string>
     <string name="txt_mask_hint">Recommended 1 to 32</string>
     <string name="supply_airflow_temp">Supply Airflow Temperature:</string>
     <string name="duct_static_pressure">Duct Static pressure:</string>

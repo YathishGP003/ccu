@@ -524,48 +524,31 @@
                             android:layout_height="wrap_content"
                             android:paddingTop="11.8dp"
                             android:paddingBottom="5.2dp"
-                            android:layout_weight="1.2"
+                            android:layout_weight="1.35"
                             android:text="@string/txt_IPAddress"
                             android:textAppearance="@style/title_normal_22"
                             />
-                        <EditText
-                            android:id="@+id/etIP"
+                        <Spinner
                             android:layout_width="0dp"
-                            android:layout_height="wrap_content"
+                            android:id="@+id/ipSpinner"
+                            android:layout_weight="0.9"
                             android:paddingTop="12dp"
                             android:paddingBottom="5dp"
-                            android:layout_weight="0.8"
-                            android:inputType="number"
-                            android:digits="0123456789."
-                            android:maxLength="15"
-                            android:text="192.168.1.1"
-                            android:textColor="@color/grey_select"
-                            android:textAppearance="@style/title_normal_22_grey"/>
-                        <TextView
-                            android:id="@+id/tvIP1"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:paddingTop="12dp"
-                            android:paddingBottom="5dp"
-                            android:layout_weight="0.8"
-                            android:visibility="gone"
-                            android:textColor="@color/grey_select"
-                            android:textAppearance="@style/title_normal_22_grey"/>
+                            style="@style/customSpinnerDownArrow"
+                            android:textColor="@color/grey_select"/>
+                        <ImageView
+                            android:id="@+id/iv_refresh_ip"
+                            android:layout_marginStart="@dimen/dp_10"
+                            android:layout_gravity="center_vertical"
+                            android:src="@drawable/ip_refresh_icon"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"/>
                         <View
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"/>
 
                     </LinearLayout>
-
-                    <ImageView
-                        android:layout_marginEnd="@dimen/dp_100"
-                        android:id="@+id/iv_refresh_ip"
-                        android:layout_marginStart="@dimen/dp_10"
-                        android:layout_gravity="end|center_vertical"
-                        android:src="@drawable/ic_refresh"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"/>
                 </FrameLayout>
 
                 <LinearLayout
@@ -1303,192 +1286,380 @@
 
             </RelativeLayout>
             <RelativeLayout
+                android:id="@+id/bacnetConfigureLayout"
                 android:layout_marginStart="70dp"
                 android:layout_marginTop="22dp"
                 android:layout_marginEnd="50dp"
                 android:layout_marginBottom="30dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/label_configure_as_layout"
+                    android:orientation="horizontal">
                 <TextView
                     android:textStyle="bold"
                     android:textColor="#212121"
-                    android:textSize="24sp"
+                    android:textSize="22sp"
+                    android:padding ="5dp"
+                    android:paddingEnd="10dp"
                     android:fontFamily="@font/lato_bold"
                     android:id="@+id/label_configure_as"
                     android:text="@string/label_configure_as"
                     android:layout_width="wrap_content"
+                    android:layout_gravity="bottom"
                     android:layout_height="wrap_content"/>
+                <Spinner
+                    android:layout_width="wrap_content"
+                    android:id="@+id/bacnetConfigSpinner"
+                    android:layout_height="42dp"
+                    android:layout_marginStart="5dp"
+                    style="@style/customSpinnerDownArrow"
+                    android:entries="@array/bacnet_config_array"
+                    tools:listitem="@layout/spinner_dropdown_item"
+                    android:fontFamily="@font/lato_regular"/>
+                </LinearLayout>
 
-                <RadioGroup
-                    android:id="@+id/rg_configuration_type"
-                    android:layout_marginTop="22dp"
-                    android:orientation="horizontal"
-                    android:layout_below="@+id/label_configure_as"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
-                    <RadioButton
-                        android:id="@+id/rb_bbmd"
-                        android:fontFamily="@font/lato_regular"
-                        android:textSize="20sp"
-                        android:checked="false"
-                        android:text="@string/label_bbmd"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"/>
-                    <RadioButton
-                        android:id="@+id/rb_foreign_device"
-                        android:fontFamily="@font/lato_regular"
-                        android:layout_marginStart="30dp"
-                        android:textSize="20sp"
-                        android:checked="false"
-                        android:text="@string/label_foreign_device"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"/>
-                    <RadioButton
-                        android:id="@+id/rb_neither"
-                        android:fontFamily="@font/lato_regular"
-                        android:layout_marginStart="30dp"
-                        android:textSize="20sp"
-                        android:checked="true"
-                        android:text="@string/label_normal"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"/>
-                </RadioGroup>
                 <LinearLayout
                     android:visibility="gone"
                     android:id="@+id/bbmdInputContainer"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_below="@+id/rg_configuration_type"
+                    android:layout_marginStart="10dp"
+                    android:layout_below="@+id/label_configure_as_layout"
                     android:layout_marginTop="@dimen/dp_10"
                     android:orientation="vertical">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="50dp"
+                        android:layout_marginTop="5dp"
+                        android:orientation="horizontal"
+                        android:weightSum="1">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="48dp"
+                            android:layout_weight="0.425"
+                            android:padding="5dp"
+                            android:gravity="center"
+                            android:textColor="#666666"
+                            android:background="#EBECED"
+                            android:text="IP Address"
+                            android:textStyle="bold"
+                            android:textAppearance="@style/title_normal_22" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:text="|"
+                            android:gravity="center"
+                            android:textColor="#CCCCCC"
+                            android:background="#EBECED"
+                            android:textStyle="bold"
+                            android:textSize="22sp"/>
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="48dp"
+                            android:layout_weight="0.25"
+                            android:padding="5dp"
+                            android:gravity="center"
+                            android:background="#EBECED"
+                            android:textColor="#666666"
+                            android:textStyle="bold"
+                            android:text="Port"
+                            android:textAppearance="@style/title_normal_22" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:text="|"
+                            android:gravity="center"
+                            android:textColor="#CCCCCC"
+                            android:background="#EBECED"
+                            android:textStyle="bold"
+                            android:textSize="22sp"/>
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="48dp"
+                            android:padding="5dp"
+                            android:gravity="center"
+                            android:layout_weight="0.175"
+                            android:background="#EBECED"
+                            android:textColor="#666666"
+                            android:textStyle="bold"
+                            android:text="Mask"
+                            android:textAppearance="@style/title_normal_22" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:text="|"
+                            android:gravity="center"
+                            android:textColor="#CCCCCC"
+                            android:textStyle="bold"
+                            android:background="#EBECED"
+                            android:textSize="22sp"/>
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="48dp"
+                            android:padding="5dp"
+                            android:gravity="center"
+                            android:layout_weight="0.15"
+                            android:background="#EBECED"
+                            android:text="@string/txt_action"
+                            android:textStyle="bold"
+                            android:textColor="#666666"
+                            android:textAppearance="@style/title_normal_22" />
+                    </LinearLayout>
+
                     <LinearLayout
                         android:id="@+id/bbmdInputViews"
                         android:orientation="vertical"
                         android:layout_width="match_parent"
+                        android:layout_marginEnd="50dp"
                         android:layout_height="wrap_content">
                         <include layout="@layout/lyt_bbmd_view"/>
                     </LinearLayout>
+                    
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="5dp"
+                        android:layout_marginTop="20dp"
+                        android:layout_marginEnd="50dp"
+                        android:weightSum="1"
+                        android:orientation="horizontal">
 
                     <TextView
                         android:id="@+id/tvBbmdAdd"
-                        android:layout_width="wrap_content"
+                        android:layout_width="0dp"
+                        android:layout_weight="0.5"
                         android:layout_height="48dp"
-                        android:layout_marginEnd="50dp"
                         android:fontFamily="@font/lato_regular"
-                        android:gravity="center_vertical"
+                        android:gravity="start|center_vertical"
                         android:paddingTop="10dp"
                         android:paddingBottom="10dp"
-                        android:text="@string/txt_add"
+                        android:text="@string/txt_add_bbmd"
                         android:textAllCaps="true"
                         android:textColor="?orange_75f"
                         android:textSize="22sp" />
                     <TextView
                         android:id="@+id/tvBbmdSubmit"
-                        android:layout_width="wrap_content"
+                        android:layout_width="0dp"
+                        android:layout_weight="0.5"
                         android:layout_height="48dp"
-                        android:layout_marginEnd="50dp"
                         android:fontFamily="@font/lato_regular"
-                        android:gravity="center_vertical"
+                        android:gravity="center_vertical|end"
                         android:paddingTop="10dp"
                         android:paddingBottom="10dp"
-                        android:text="@string/txt_submit"
+                        android:text="@string/button_save"
                         android:textAllCaps="true"
                         android:textColor="?orange_75f"
                         android:textSize="22sp" />
+                    </LinearLayout>
                 </LinearLayout>
                 <LinearLayout
                     android:visibility="visible"
                     android:id="@+id/fdInputView"
                     android:layout_width="match_parent"
+                    android:layout_marginStart="10dp"
                     android:layout_height="wrap_content"
-                    android:layout_below="@+id/rg_configuration_type"
+                    android:layout_below="@+id/label_configure_as_layout"
                     android:layout_marginTop="@dimen/dp_10"
                     android:orientation="vertical">
 
                     <LinearLayout
-                        android:id="@+id/fdInputViews"
-                        android:orientation="vertical"
+                        android:id="@+id/fdViewContainer"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content">
-                        <include layout="@layout/lyt_fd_view"/>
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:weightSum="1">
+
+
+                            <TextView
+                                android:id="@+id/tvBbmdIp"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="0.5"
+                                android:paddingTop="11.8dp"
+                                android:paddingBottom="5.2dp"
+                                android:text="@string/txt_FD_IPAddress"
+                                android:textAppearance="@style/title_normal_22" />
+
+                            <EditText
+                                android:id="@+id/etFdIp"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="0.5"
+                                android:digits="0123456789."
+                                android:inputType="number"
+                                android:maxLength="15"
+                                android:paddingTop="12dp"
+                                android:paddingBottom="5dp"
+                                android:text="192.168.1.1"
+                                android:textAppearance="@style/title_normal_22_grey"
+                                android:textColor="@color/grey_select" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            android:orientation="horizontal"
+                            android:weightSum="1">
+
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="0.5"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:id="@+id/tvBbmdPort"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:paddingTop="11.5dp"
+                                    android:paddingBottom="4dp"
+                                    android:text="@string/txt_port"
+                                    android:textAppearance="@style/title_normal_22" />
+
+                                <TextView
+                                    android:id="@+id/tvBbmdPortHint"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:text="@string/txt_port_hint"
+                                    android:textAppearance="@style/font_style_hint" />
+                            </LinearLayout>
+
+                            <EditText
+                                android:id="@+id/etFdPort"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="0.5"
+                                android:inputType="number"
+                                android:maxLength="5"
+                                android:maxLines="1"
+                                android:paddingTop="12dp"
+                                android:paddingBottom="5dp"
+                                android:text="47808"
+                                android:textAppearance="@style/title_normal_22_grey"
+                                android:textColor="@color/grey_select" />
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            android:orientation="horizontal"
+                            android:weightSum="1">
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="0.5"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:id="@+id/tvBbmdTime"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:paddingTop="11.8dp"
+                                    android:paddingBottom="5.2dp"
+                                    android:text="@string/txt_time"
+                                    android:textAppearance="@style/title_normal_22" />
+                                <TextView
+                                    android:id="@+id/tvFdTimeToLiveHint"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:text="@string/txt_time_to_live_hint"
+                                    android:textAppearance="@style/font_style_hint" />
+
+                            </LinearLayout>
+
+
+                            <EditText
+                                android:text="0"
+                                android:id="@+id/etFdTime"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="0.5"
+                                android:digits="0123456789."
+                                android:inputType="number"
+                                android:maxLength="15"
+                                android:paddingTop="12dp"
+                                android:paddingBottom="5dp"
+                                android:textAppearance="@style/title_normal_22_grey"
+                                android:textColor="@color/grey_select" />
+                        </LinearLayout>
+
+                        <TextView
+                            android:visibility="gone"
+                            android:id="@+id/tvfDRemove"
+                            android:layout_width="wrap_content"
+                            android:layout_height="48dp"
+                            android:layout_marginTop="12dp"
+                            android:layout_marginEnd="50dp"
+                            android:fontFamily="@font/lato_regular"
+                            android:gravity="center_vertical"
+                            android:paddingTop="10dp"
+                            android:paddingBottom="10dp"
+                            android:text="@string/txt_remove"
+                            android:textAllCaps="true"
+                            android:textColor="?orange_75f"
+                            android:textSize="22sp" />
                     </LinearLayout>
 
-                    <TextView
-		        android:visibility="gone"
-                        android:id="@+id/tvFdAdd"
-                        android:layout_width="wrap_content"
-                        android:layout_height="48dp"
-                        android:layout_marginEnd="50dp"
-                        android:fontFamily="@font/lato_regular"
-                        android:gravity="center_vertical"
-                        android:paddingTop="10dp"
-                        android:paddingBottom="10dp"
-                        android:text="@string/txt_add"
-                        android:textAllCaps="true"
-                        android:textColor="?orange_75f"
-                        android:textSize="22sp" />
-                    <LinearLayout
+                    <RelativeLayout
                         android:layout_marginTop="12dp"
                         android:paddingTop="10dp"
                         android:paddingBottom="10dp"
-                        android:orientation="horizontal"
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
+                        android:layout_marginEnd="50dp"
                         android:layout_height="wrap_content">
                         <TextView
                             android:id="@+id/tvFdSubmit"
                             android:layout_width="wrap_content"
                             android:layout_height="48dp"
-                            android:layout_marginEnd="50dp"
+                            android:layout_alignParentEnd="true"
+                            android:layout_gravity="end|center_vertical"
                             android:fontFamily="@font/lato_regular"
-                            android:gravity="center_vertical"
-                            android:text="@string/txt_submit"
+                            android:text="@string/button_save"
                             android:textAllCaps="true"
                             android:textColor="?orange_75f"
                             android:textSize="22sp" />
 
-                        <CheckBox
-                            android:checked="false"
-                            android:id="@+id/checkBoxAuto"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:gravity="center"
-                            android:minWidth="36dp"
-                            android:visibility="gone"
-                            android:minHeight="36dp"
-                            android:padding="5dp"
-                            android:text="AUTO"
-                            android:fontFamily="@font/lato_regular"
-                            android:textSize="20sp"
-                            />
-                        <TextView
-                            android:layout_marginStart="10dp"
-                            android:gravity="center"
-                            android:layout_width="match_parent"
-                            android:visibility="gone"
-                            android:layout_height="match_parent"
-                            android:text="@string/txt_auto_hint"
-                            android:textAppearance="@style/font_style_hint" />
-                    </LinearLayout>
+                    </RelativeLayout>
                 </LinearLayout>
-                <LinearLayout
+                <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:layout_below="@id/rg_configuration_type"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginEnd="50dp"
+                    android:layout_below="@id/label_configure_as_layout"
                     android:id="@+id/normalView">
                     <TextView
                         android:id="@+id/tvNormalSubmit"
                         android:layout_width="wrap_content"
-                        android:layout_marginTop="15dp"
                         android:layout_height="48dp"
-                        android:layout_marginEnd="50dp"
+                        android:layout_alignParentEnd="true"
+                        android:paddingEnd="20dp"
                         android:fontFamily="@font/lato_regular"
                         android:gravity="center_vertical"
-                        android:text="@string/txt_submit"
+                        android:text="@string/button_save"
                         android:textAllCaps="true"
                         android:textColor="?orange_75f"
                         android:textSize="22sp" />
-                </LinearLayout>
+                </RelativeLayout>
             </RelativeLayout>
         </LinearLayout>
     </LinearLayout>

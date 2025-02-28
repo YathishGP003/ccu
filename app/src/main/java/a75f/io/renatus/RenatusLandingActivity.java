@@ -33,6 +33,7 @@ import android.os.CountDownTimer;
 import android.os.Message;
 import android.preference.PreferenceManager;
 import android.text.Editable;
+import android.text.Html;
 import android.text.InputType;
 import android.text.SpannableString;
 import android.text.TextWatcher;
@@ -109,6 +110,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
     private static CountDownTimer countDownTimer;
     private static final long DISCONNECT_TIMEOUT = 3000;
     private static final long INTERVAL = 1000;
+    public static boolean isBacnetConfigStateChanged = false;
     static final long SCREEN_SWITCH_TIMEOUT_MILLIS = 3600000;
 
     private ImageView logo_75f;
@@ -137,6 +139,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
     public static CustomViewPager mViewPager;
     public static TabLayout mTabLayout, btnTabs;
     private Prefs prefs;
+    private boolean allowReselectTab = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -178,39 +181,59 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
             btnTabs.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
                 @Override
                 public void onTabSelected(TabLayout.Tab tab) {
-                    btnTabs.setEnabled(false);
-                    try {
-                        mViewPager.removeAllViews();
-                        mViewPager.setAdapter(null);
-                    } catch (IllegalStateException e) {
-                      CcuLog.e(TAG,"IllegalStateException",e);
-                    }
-                    if (tab.getPosition() == 0){
-                        if (isSetupPassWordRequired()) {
-                            showRequestPasswordAlert("Setup Access Authentication",getString(R.string.USE_SETUP_PASSWORD_KEY), tab.getPosition());
-                        }
-                        tab.setIcon(R.drawable.ic_settings_orange);
-                        mSettingPagerAdapter = new SettingsPagerAdapter(getSupportFragmentManager());
-                        mViewPager.setAdapter(mSettingPagerAdapter);
-                        mTabLayout.post(() -> mTabLayout.setupWithViewPager(mViewPager, true));
-                        startCountDownTimer(INTERVAL);
-                        setMarginStart(mTabLayout);
-                        floorMenu.setVisibility(View.GONE);
+                    if (isBacnetConfigStateChanged && tab.getPosition() != 0) {
+                        showBacnetTabChangeConfirmationDialog(1, null, shouldChangeTab -> {
+                            if (shouldChangeTab) {
+                                isBacnetConfigStateChanged = false;
+                                allowReselectTab = true;
+                                btnTabs.selectTab(tab);
+                            } else {
+                                btnTabs.getTabAt(0).select();
+                            }
+                        });
+                    } else {
+                        if (!isBacnetConfigStateChanged) {
+                            btnTabs.setEnabled(false);
+                            try {
+                                mViewPager.removeAllViews();
+                                mViewPager.setAdapter(null);
+                            } catch (IllegalStateException e) {
+                                CcuLog.e(TAG, "IllegalStateException", e);
+                            }
+                            if (tab.getPosition() == 0) {
+                                if (isSetupPassWordRequired()) {
+                                    showRequestPasswordAlert("Setup Access Authentication", getString(R.string.USE_SETUP_PASSWORD_KEY), tab.getPosition());
+                                }
+                                tab.setIcon(R.drawable.ic_settings_orange);
+                                mSettingPagerAdapter = new SettingsPagerAdapter(getSupportFragmentManager());
+                                mViewPager.setAdapter(mSettingPagerAdapter);
+                                mTabLayout.post(() -> mTabLayout.setupWithViewPager(mViewPager, true));
+                                startCountDownTimer(INTERVAL);
+                                setMarginStart(mTabLayout);
+                                floorMenu.setVisibility(View.GONE);
 
-                    } else if (tab.getPosition() == 1){
-                        tab.setIcon(R.drawable.ic_dashboard_orange);
-                        mStatusPagerAdapter = new StatusPagerAdapter(getSupportFragmentManager());
-                        mViewPager.setAdapter(mStatusPagerAdapter);
-                        if(!isDashboardConfig(Globals.getInstance().getApplicationContext())) {
-                            mViewPager.setCurrentItem(1);
-                        }
-                        mTabLayout.post(() -> mTabLayout.setupWithViewPager(mViewPager, true));
-                        if (isZonePassWordRequired()) {
-                            showRequestPasswordAlert("Zone Settings Authentication", getString(R.string.ZONE_SETTINGS_PASSWORD_KEY), 0);
+                            } else if (tab.getPosition() == 1) {
+                                tab.setIcon(R.drawable.ic_dashboard_orange);
+                                mStatusPagerAdapter = new StatusPagerAdapter(getSupportFragmentManager());
+                                mViewPager.setAdapter(mStatusPagerAdapter);
+                                if (!isDashboardConfig(Globals.getInstance().getApplicationContext())) {
+                                    mViewPager.setCurrentItem(1);
+                                }
+                                mTabLayout.post(() -> mTabLayout.setupWithViewPager(mViewPager, true));
+                                if (isZonePassWordRequired()) {
+                                    showRequestPasswordAlert("Zone Settings Authentication", getString(R.string.ZONE_SETTINGS_PASSWORD_KEY), 0);
+                                }
+                            }
+                            showFloorIcon();
+                            btnTabs.setEnabled(true);
+                        } else {
+                            if (tab.getPosition() == 0) {
+                                tab.setIcon(R.drawable.ic_settings_orange);
+                            } else {
+                                tab.setIcon(R.drawable.ic_dashboard_orange);
+                            }
                         }
                     }
-                    showFloorIcon();
-                    btnTabs.setEnabled(true);
                 }
 
                 private void setMarginStart(TabLayout mTabLayout) {
@@ -232,7 +255,42 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
 
                 @Override
                 public void onTabReselected(TabLayout.Tab tab) {
-
+                    if (allowReselectTab) { // Tab will reselect when we allow the permission
+                        allowReselectTab = false;
+                        btnTabs.setEnabled(false);
+                        try {
+                            mViewPager.removeAllViews();
+                            mViewPager.setAdapter(null);
+                        } catch (IllegalStateException e) {
+                            CcuLog.e(TAG, "IllegalStateException", e);
+                        }
+                        if (tab.getPosition() == 0) {
+                            if (isSetupPassWordRequired()) {
+                                showRequestPasswordAlert("Setup Access Authentication", getString(R.string.USE_SETUP_PASSWORD_KEY), tab.getPosition());
+                            }
+                            tab.setIcon(R.drawable.ic_settings_orange);
+                            mSettingPagerAdapter = new SettingsPagerAdapter(getSupportFragmentManager());
+                            mViewPager.setAdapter(mSettingPagerAdapter);
+                            mTabLayout.post(() -> mTabLayout.setupWithViewPager(mViewPager, true));
+                            startCountDownTimer(INTERVAL);
+                            setMarginStart(mTabLayout);
+                            floorMenu.setVisibility(View.GONE);
+                        } else if (tab.getPosition() == 1) {
+                            tab.setIcon(R.drawable.ic_dashboard_orange);
+                            mStatusPagerAdapter = new StatusPagerAdapter(getSupportFragmentManager());
+                            mViewPager.setAdapter(mStatusPagerAdapter);
+                            if (!isDashboardConfig(Globals.getInstance().getApplicationContext())) {
+                                mViewPager.setCurrentItem(1);
+                            }
+                            mTabLayout.post(() -> mTabLayout.setupWithViewPager(mViewPager, true));
+                            if (isZonePassWordRequired()) {
+                                showRequestPasswordAlert("Zone Settings Authentication", getString(R.string.ZONE_SETTINGS_PASSWORD_KEY), 0);
+                            }
+                            floorMenu.setVisibility(View.VISIBLE);
+                            menuToggle.setVisibility(View.GONE);
+                        }
+                        btnTabs.setEnabled(true);
+                    }
                 }
             });
 
@@ -432,7 +490,7 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
 
             @Override
             public void onPageSelected(int i) {
-                if(i != 1){
+                if(i != 1 && !isBacnetConfigStateChanged){
                     FragmentManager fragmentManager = getSupportFragmentManager();
                     for (Fragment fragment : fragmentManager.getFragments()) {
                         if (fragment instanceof VavStagedRtuFragment) {
@@ -490,6 +548,20 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
                     }
                     return;
                 }
+                if (i!=2) {
+                    Fragment communicationFragment = checkCurrentFragmentIsCommunication();
+                    if (communicationFragment != null) {
+                        showBacnetTabChangeConfirmationDialog(1, communicationFragment, shouldChangeTab -> {
+                            if (shouldChangeTab) {
+                                mViewPager.setCurrentItem(i);
+                            } else {
+                                mViewPager.setCurrentItem(2);
+                            }
+                        });
+                    }
+                    return;
+                }
+
                 if (i == 1 && mViewPager.getAdapter().instantiateItem(mViewPager, i)  instanceof SystemConfigFragment ) {
                     menuToggle.setVisibility(View.VISIBLE);
                     floorMenu.setVisibility(View.GONE);
@@ -575,6 +647,53 @@ public class RenatusLandingActivity extends AppCompatActivity implements RemoteC
             public void onTabReselected(TabLayout.Tab tab) {
 
             }
+        });
+    }
+
+    private Fragment checkCurrentFragmentIsCommunication() {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        for (Fragment fragment : fragmentManager.getFragments()) {
+            if (fragment instanceof Communication) {
+                if (isBacnetConfigStateChanged) {
+                    return fragment;
+                }
+            }
+        }
+        return null;
+    }
+    public interface TabChangeListener {
+        void onTabChangeConfirmed(boolean shouldChangeTab);
+    }
+
+    private void showBacnetTabChangeConfirmationDialog(int i, Fragment fragment, TabChangeListener tabChangeListener) {
+        CcuLog.d(TAG,"showBacnetTabChangeConfirmationDialog i = "+i);
+        AlertDialog.Builder builder = new AlertDialog.Builder(RenatusLandingActivity.this);
+        View dialogView = getLayoutInflater().inflate(R.layout.bacnet_config_confirmation_alert, null);
+        TextView msg = dialogView.findViewById(R.id.tvMessage);
+        TextView lftBtn = dialogView.findViewById(R.id.btn_discard);
+        TextView rgtBtn = dialogView.findViewById(R.id.btn_stay);
+
+        String message = "You have unsaved <b>BACnet Config</b> changes. Are you sure you want to change the tab?";
+
+        msg.setText(Html.fromHtml(message, Html.FROM_HTML_MODE_LEGACY));
+        builder.setView(dialogView)
+                .setCancelable(false);
+
+        AlertDialog alert = builder.create();
+        alert.show();
+
+        lftBtn.setOnClickListener(view -> {
+            if (fragment != null) {
+                ((Communication) fragment).setIsBacConfigStateChangedAndUpdateView(false);
+            } else {
+                isBacnetConfigStateChanged = false;
+            }
+            tabChangeListener.onTabChangeConfirmed(true);
+            alert.dismiss();
+        });
+        rgtBtn.setOnClickListener(view -> {
+            tabChangeListener.onTabChangeConfirmed(false);
+            alert.dismiss();
         });
     }
 

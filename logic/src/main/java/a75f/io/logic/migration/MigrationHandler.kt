@@ -98,10 +98,15 @@ import a75f.io.logic.migration.modbus.correctEnumsForCorruptModbusPoints
 import a75f.io.logic.migration.scheduler.SchedulerRevampMigration
 import a75f.io.logic.tuners.TunerConstants
 import a75f.io.logic.util.PreferenceUtil
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.BACNET_CONFIGURATION
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.NETWORK_INTERFACE
 import android.content.Context
 import android.content.SharedPreferences
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import android.preference.PreferenceManager
 import io.seventyfivef.domainmodeler.client.ModelDirective
 import io.seventyfivef.domainmodeler.client.ModelPointDef
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
@@ -109,6 +114,7 @@ import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDevicePointDef
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import org.joda.time.DateTime
 import org.projecthaystack.HDateTime
+import org.json.JSONObject
 import org.projecthaystack.HDict
 import org.projecthaystack.HDictBuilder
 import org.projecthaystack.HGrid
@@ -314,8 +320,74 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             PreferenceUtil.setDabFullyModulatingPointsUpdate()
         }
 
+        if(!PreferenceUtil.getUpdateBacnetNetworkInterface()) {
+            updateBacnetNetworkInterface()
+            PreferenceUtil.setUpdateBacnetNetworkInterface()
+        }
+
         hayStack.scheduleSync()
     }
+
+    private fun updateBacnetNetworkInterface() {
+        CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "Updating Bacnet network interface")
+        try {
+            val connectivityManager = Globals.getInstance().applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+            val allNetworks = connectivityManager.allNetworks // Get all available networks
+
+            var ethernetAvailable = false
+            var wifiAvailable = false
+
+            for (network in allNetworks) {
+                val networkCapabilities = connectivityManager.getNetworkCapabilities(network)
+                if (networkCapabilities != null) {
+                    if (networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)) {
+                        ethernetAvailable = true
+                    }
+                    if (networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
+                        wifiAvailable = true
+                    }
+                }
+            }
+
+            val sharedPreferences: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(Globals.getInstance().applicationContext)
+            val confString: String = sharedPreferences.getString(BACNET_CONFIGURATION, "").toString()
+
+            if (confString.isEmpty()) {
+                CcuLog.e(L.TAG_CCU_MIGRATION_UTIL, "BACnet configuration not found")
+                return
+            }
+
+            val config = JSONObject(confString)
+            val networkObject = config.getJSONObject("network")
+
+            CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "Ethernet available: $ethernetAvailable, Wi-Fi available: $wifiAvailable")
+
+            when {
+                ethernetAvailable && wifiAvailable -> {
+                    // If both Ethernet and Wi-Fi are available, prefer Ethernet
+                    networkObject.put(NETWORK_INTERFACE, "Ethernet")
+                }
+                ethernetAvailable -> {
+                    networkObject.put(NETWORK_INTERFACE, "Ethernet")
+                }
+                wifiAvailable -> {
+                    networkObject.put(NETWORK_INTERFACE, "Wifi")
+                }
+                else -> {
+                    CcuLog.e(L.TAG_CCU_MIGRATION_UTIL, "No network interfaces available")
+                }
+            }
+
+            sharedPreferences.edit().putString(BACNET_CONFIGURATION, config.toString()).apply()
+
+            CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "Updated Bacnet network interface: ${sharedPreferences.getString(BACNET_CONFIGURATION, "")}")
+
+        } catch (e: Exception) {
+            CcuLog.e(L.TAG_CCU_MIGRATION_UTIL, "Error in updateBacnetNetworkInterface $e")
+        }
+    }
+
+
 
     private fun updateUnoccupiedSetbackMax() {
         try {

@@ -138,6 +138,7 @@ public class ModbusEquip {
                 heartBeatPoint.setBacnetId(Integer.valueOf(uniqueId));
                 CCUHsApi.getInstance().addPoint(heartBeatPoint);
             }catch (Exception e){
+                CcuLog.e(TAG,"Error in creating heartbeat point for "+equipDis);
                 e.printStackTrace();
             }
         }
@@ -377,7 +378,6 @@ public class ModbusEquip {
     public static String formatNumber(int number) {
         return String.format("%03d", number);
     }
-
 
     public void updateHaystackPoints(String equipRef, List<Parameter> configuredParams) {
         for (Parameter configParams : configuredParams) {

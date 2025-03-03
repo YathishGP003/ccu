@@ -28,6 +28,8 @@ fun repackagePoints(tempGrid: HGrid, isVirtualZoneEnabled: Boolean, group: Strin
         var isOaoProfile = false
         var isByPassDamper = false
         var isModbus = false
+        var isEmr = false
+        var isBtu = false
         var isConnect = false
         while (rowIterator.hasNext()) {
             val e: HDict.MapEntry = (rowIterator.next() as HDict.MapEntry)
@@ -47,6 +49,12 @@ fun repackagePoints(tempGrid: HGrid, isVirtualZoneEnabled: Boolean, group: Strin
             }
 	        if (e.key.toString() == "oao") {
                 isOaoProfile = true
+            }
+            if (e.key.toString() == "emr") {
+                isEmr = true
+            }
+            if (e.key.toString() == "btu") {
+                isBtu = true
             }
             if (e.key.toString() == "connectModule") {
                 isConnect = true
@@ -103,6 +111,12 @@ fun repackagePoints(tempGrid: HGrid, isVirtualZoneEnabled: Boolean, group: Strin
             hDictBuilder.add("dis", "${profileName}_${extractedGroup}")
         } else if (isByPassDamper && isVirtualZoneEnabled && isEquip) {
             hDictBuilder.add("roomRef", "by-pass-damper-fake-room-ref")
+            hDictBuilder.add("dis", "${profileName}_${extractedGroup}")
+        } else if (isEmr && isSystem && isVirtualZoneEnabled && isEquip) {
+            hDictBuilder.add("roomRef", "emr-fake-room-ref")
+            hDictBuilder.add("dis", "${profileName}_${extractedGroup}")
+        } else if (isBtu && isSystem && isVirtualZoneEnabled && isEquip) {
+            hDictBuilder.add("roomRef", "btu-fake-room-ref")
             hDictBuilder.add("dis", "${profileName}_${extractedGroup}")
         }
         mutableDictList.add(hDictBuilder.toDict())

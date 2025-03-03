@@ -102,6 +102,7 @@ public class CCUTagsDb extends HServer {
 
     static final String DEVICE = "device";
     static final String SYSTEM = "system";
+    static final String MODBUS = "modbus";
     private static final String PREFS_TAGS_DB = "ccu_tags";
     private static final String PREFS_TAGS_MAP = "tagsMap";
     private static final String PREFS_TAGS_WA = "writeArrayMap";
@@ -696,7 +697,7 @@ public class CCUTagsDb extends HServer {
         q.getTags().entrySet().forEach( entry -> equip.add(entry.getKey(), entry.getValue()));
 
         if (q.getBacnetType() != null) {
-            if(q.getMarkers() != null && q.getMarkers().contains(SYSTEM)){
+            if(q.getMarkers() != null && q.getMarkers().contains(SYSTEM) && !q.getMarkers().contains(MODBUS)){
                 equip.add(Tags.BACNET_ID, 0);
                 equip.add(Tags.BACNET_TYPE, DEVICE);
             }else if(q.getRoomRef() != null){

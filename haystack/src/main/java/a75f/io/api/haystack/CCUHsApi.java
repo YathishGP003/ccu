@@ -6,6 +6,7 @@ import static a75f.io.api.haystack.CCUTagsDb.TAG_CCU_HS;
 import static a75f.io.api.haystack.CCUTagsDb.TAG_CCU_OAO;
 import static a75f.io.api.haystack.CCUTagsDb.TAG_CCU_ROOM_DB;
 import static a75f.io.api.haystack.Tags.DEVICE;
+import static a75f.io.api.haystack.Tags.MODBUS;
 import static a75f.io.api.haystack.Tags.SYSTEM;
 
 import android.annotation.SuppressLint;
@@ -407,8 +408,13 @@ public class CCUHsApi
         }
         if(!isBuildingTunerEquip(q)) {
             if (q.getMarkers() != null && q.getMarkers().contains(SYSTEM)) {
-                q.setBacnetId(0);
-                q.setBacnetType(DEVICE);
+                if (q.getMarkers().contains(MODBUS)) {
+                    q.setBacnetId(HSUtil.generateBacnetId(q.getGroup()));
+                    q.setBacnetType(DEVICE);
+                } else {
+                    q.setBacnetId(0);
+                    q.setBacnetType(DEVICE);
+                }
             } else if (q.getRoomRef() != null && q.getRoomRef() != "SYSTEM") {
                 q.setBacnetId(HSUtil.generateBacnetId(q.getGroup()));
                 q.setBacnetType(DEVICE);

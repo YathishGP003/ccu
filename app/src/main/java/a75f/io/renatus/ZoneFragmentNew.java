@@ -85,6 +85,7 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.stream.Collectors;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
@@ -2456,7 +2457,16 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                     if (parameter.isDisplayInUI())
                                         parameterList.add(parameter);
                                 });
-
+                                List<Parameter> sortedparamterList = parameterList.stream()
+                                        .sorted(Comparator.comparing(param -> {
+                                            Integer pointNum = param.getLogicalPointTags().stream()
+                                                    .filter(tag -> "pointNum".equals(tag.getTagName()))
+                                                    .map(tag -> (Integer.parseInt(tag.getTagValue())))
+                                                    .findFirst()
+                                                    .orElse(Integer.MAX_VALUE);
+                                            return pointNum;
+                                        }))
+                                        .collect(Collectors.toList());
                                 View zoneDetails = inflater.inflate(R.layout.item_modbus_detail_view, null);
                                 RecyclerView modbusParams = zoneDetails.findViewById(R.id.recyclerParams);
                                 TextView tvEquipmentType = zoneDetails.findViewById(R.id.tvEquipmentType);
@@ -2499,7 +2509,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                 ZoneRecyclerModbusParamAdapter zoneRecyclerModbusParamAdapter =
                                         new ZoneRecyclerModbusParamAdapter(getContext(),
                                                                            modbusDevices.get(i).getDeviceEquipRef(),
-                                                                           parameterList);
+                                                                           sortedparamterList);
                                 modbusParams.setAdapter(zoneRecyclerModbusParamAdapter);
                                 modbusParams.invalidate();
                                 linearLayoutZonePoints.addView(zoneDetails);

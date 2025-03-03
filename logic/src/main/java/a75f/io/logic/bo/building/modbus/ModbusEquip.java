@@ -1,5 +1,6 @@
 package a75f.io.logic.bo.building.modbus;
 
+import org.projecthaystack.HDict;
 import org.projecthaystack.HNum;
 import org.projecthaystack.HStr;
 
@@ -364,8 +365,13 @@ public class ModbusEquip {
                 }
                 else {
                     if (isValidTagForQuery(marker.getTagName())) {
-                        tags.append(" and ").append(marker.getTagName()).append(" == \"").append(marker.getTagValue()).append("\"");
-                        if(isInt(marker.getTagValue()) || isLong(marker.getTagValue()) || isDouble(marker.getTagValue())) {
+                        //if the pointNum tag is there adding the pointNum tag in this format (and pointNum == 4)
+                        if (!marker.getTagName().equalsIgnoreCase("pointNum")) {
+                            tags.append(" and ").append(marker.getTagName()).append(" == \"").append(marker.getTagValue()).append("\"");
+                        } else {
+                            tags.append(" and ").append((marker.getTagName())).append(" == ").append(marker.getTagValue());
+                        }
+                        if (!marker.getTagName().equalsIgnoreCase("pointNum") && (isInt(marker.getTagValue()) || isLong(marker.getTagValue()) || isDouble(marker.getTagValue()))) {
                             tags.append(" or ").append(marker.getTagName()).append(" == ").append(marker.getTagValue());
                         }
                     }
@@ -373,8 +379,8 @@ public class ModbusEquip {
             }
 
             if (tags.length() > 0) {
-                HashMap pointRead = CCUHsApi.getInstance().read("point and logical and modbus " + tags + " and equipRef == \"" + equipRef + "\"");
-                Point logicalPoint = new Point.Builder().setHashMap(pointRead).build();
+                HDict pointRead = CCUHsApi.getInstance().readHDict("point and logical and modbus " + tags + " and equipRef == \"" + equipRef + "\"");
+                Point logicalPoint = new Point.Builder().setHDict(pointRead).build();
                 CcuLog.d("Modbus", "UpdateHaystackPoints: Tags -> " +tags);
                 CcuLog.d("Modbus", "UpdateHaystackPoints: Logical Point -> " + pointRead +" name "+configParams.getName() +" display in UI "+configParams.isDisplayInUI() );
 

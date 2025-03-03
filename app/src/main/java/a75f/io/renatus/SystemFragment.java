@@ -75,10 +75,12 @@ import java.lang.ref.WeakReference;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.DAYS;
@@ -1387,6 +1389,16 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 				if (parameter.isDisplayInUI())
 					parameterList.add(parameter);
 			});
+			List<Parameter> sortedparamterList = parameterList.stream()
+					.sorted(Comparator.comparing(param -> {
+						Integer pointNum = param.getLogicalPointTags().stream()
+								.filter(tag -> "pointNum".equals(tag.getTagName()))
+								.map(tag -> (Integer.parseInt(tag.getTagValue())))
+								.findFirst()
+								.orElse(Integer.MAX_VALUE);
+						return pointNum;
+					}))
+					.collect(Collectors.toList());
 			String nodeAddress = String.valueOf(emDevice.getSlaveId());
 			int displayIndex = emDevice.getName().lastIndexOf('-') + 1;
 			String displayName = emDevice.getName().substring(displayIndex);
@@ -1397,7 +1409,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), 2);
 			energyMeterParams.setLayoutManager(gridLayoutManager);
 			ZoneRecyclerModbusParamAdapter zoneRecyclerModbusParamAdapter =
-					new ZoneRecyclerModbusParamAdapter(getContext(), emDevice.getDeviceEquipRef(), parameterList);
+					new ZoneRecyclerModbusParamAdapter(getContext(), emDevice.getDeviceEquipRef(), sortedparamterList);
 			energyMeterParams.setAdapter(zoneRecyclerModbusParamAdapter);
 			TextView emrUpdatedTime = view.findViewById(R.id.last_updated_statusEM);
 			emrUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
@@ -1428,7 +1440,16 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 				if (parameter.isDisplayInUI())
 					parameterList.add(parameter);
 			});
-
+			List<Parameter> sortedparamterList = parameterList.stream()
+					.sorted(Comparator.comparing(param -> {
+						Integer pointNum = param.getLogicalPointTags().stream()
+								.filter(tag -> "pointNum".equals(tag.getTagName()))
+								.map(tag -> (Integer.parseInt(tag.getTagValue())))
+								.findFirst()
+								.orElse(Integer.MAX_VALUE);
+						return pointNum;
+					}))
+					.collect(Collectors.toList());
 			String nodeAddress = String.valueOf(btuDevice.getSlaveId());
 			int displayIndex = btuDevice.getName().lastIndexOf('-') + 1;
 			String displayName = btuDevice.getName().substring(displayIndex);
@@ -1439,7 +1460,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), 2);
 			btuMeterParams.setLayoutManager(gridLayoutManager);
 			ZoneRecyclerModbusParamAdapter zoneRecyclerModbusParamAdapter =
-					new ZoneRecyclerModbusParamAdapter(getContext(), btuDevice.getDeviceEquipRef(), parameterList);
+					new ZoneRecyclerModbusParamAdapter(getContext(), btuDevice.getDeviceEquipRef(), sortedparamterList);
 			btuMeterParams.setAdapter(zoneRecyclerModbusParamAdapter);
 			TextView btuUpdatedTime = view.findViewById(R.id.last_updated_statusBTU);
 			btuUpdatedTime.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
@@ -1495,7 +1516,16 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 					if (parameter.isDisplayInUI())
 						parameterList.add(parameter);
 				});
-
+				List<Parameter> sortedparamterList = parameterList.stream()
+						.sorted(Comparator.comparing(param -> {
+							Integer pointNum = param.getLogicalPointTags().stream()
+									.filter(tag -> "pointNum".equals(tag.getTagName()))
+									.map(tag -> (Integer.parseInt(tag.getTagValue())))
+									.findFirst()
+									.orElse(Integer.MAX_VALUE);
+							return pointNum;
+						}))
+						.collect(Collectors.toList());
 				String nodeAddress = String.valueOf(externalModbusEquip.getSlaveId());
 				int displayIndex = externalModbusEquip.getName().lastIndexOf('-') + 1;
 				String displayName = externalModbusEquip.getName().substring(displayIndex);
@@ -1506,7 +1536,7 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 				GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), 2);
 				externalModbusParams.setLayoutManager(gridLayoutManager);
 				ZoneRecyclerModbusParamAdapter zoneRecyclerModbusParamAdapter =
-						new ZoneRecyclerModbusParamAdapter(getContext(), externalModbusEquip.getDeviceEquipRef(), parameterList);
+						new ZoneRecyclerModbusParamAdapter(getContext(), externalModbusEquip.getDeviceEquipRef(), sortedparamterList);
 				externalModbusParams.setAdapter(zoneRecyclerModbusParamAdapter);
 				externalModbusLastUpdated.setText(HeartBeatUtil.getLastUpdatedTime(nodeAddress));
 				HeartBeatUtil.moduleStatus(externalModbusStatus, nodeAddress);

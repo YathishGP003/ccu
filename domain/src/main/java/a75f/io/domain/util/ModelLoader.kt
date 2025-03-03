@@ -219,6 +219,10 @@ object ModelLoader {
             "vavStagedRtu" -> getVavStageRtuModelDef()
             "smartnodePID" -> getSmartNodePidModel()
             "helionodePID" -> getHelioNodePidModel()
+            "cmBoardDevice" -> getCMDeviceModel()
+            "otnDevice" -> getOtnDeviceModel()
+            "hyperstatDevice" -> getHyperStatDeviceModel()
+            "ccuTiDevice" -> getTIDeviceModel()
             else -> throw IllegalStateException("Invalid Model Name")
         }
     }

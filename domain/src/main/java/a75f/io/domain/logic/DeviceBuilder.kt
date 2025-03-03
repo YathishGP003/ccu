@@ -12,6 +12,7 @@ import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.cutover.BuildingEquipCutOverMapping
 import a75f.io.domain.cutover.devicePointWithDomainNameExists
 import a75f.io.domain.cutover.getDeviceDomainNameFromDis
+import a75f.io.domain.util.TagsUtil
 import a75f.io.domain.util.highPriorityDispatcher
 import a75f.io.logger.CcuLog
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
@@ -24,6 +25,7 @@ import io.seventyfivef.ph.core.TagType
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
+import org.projecthaystack.HBool
 import org.projecthaystack.HDateTime
 import org.projecthaystack.HStr
 import kotlin.system.measureTimeMillis
@@ -141,20 +143,26 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
 
         modelDef.tags.filter { it.kind == TagType.MARKER && it.name.lowercase() != "addr"}.forEach{ pointBuilder.addMarker(it.name)}
 
-        /*modelDef.tags.filter { it.kind == TagType.NUMBER }.forEach{ tag ->
-            TagsUtil.getTagDefHVal(tag)?.let { pointBuilder.addTag(tag.name, it) }
+        modelDef.tags.filter { it.kind == TagType.NUMBER }.forEach { tag ->
+            TagsUtil.getTagDefHVal(tag)?.let {
+                pointBuilder.addTag(tag.name, it)
+            }
         }
 
-        modelDef.tags.filter { it.kind == TagType.STR && it.name.lowercase() != "bacnetid" }.forEach{ tag ->
-            tag.defaultValue?.let {
-                pointBuilder.addTag(tag.name, HStr.make(tag.defaultValue.toString()))
+        modelDef.tags.filter { it.kind == TagType.STR && (it.name.lowercase() != "bacnetid" || it.name.lowercase() != "analogtype") }
+            .forEach { tag ->
+                tag.defaultValue?.let {
+                    pointBuilder.addTag(tag.name, HStr.make(tag.defaultValue.toString()))
+                }
             }
-        }
-        modelDef.tags.filter { it.kind == TagType.BOOL && it.name != "portEnabled"}.forEach{ tag ->
-            tag.defaultValue?.let {
-                pointBuilder.addTag(tag.name, HBool.make(tag.defaultValue as Boolean))
+
+        modelDef.tags.filter { it.kind == TagType.BOOL && it.name != "portEnabled" }
+            .forEach { tag ->
+                tag.defaultValue?.let {
+                    pointBuilder.addTag(tag.name, HBool.make(tag.defaultValue as Boolean))
+                }
             }
-        }*/
+
         pointBuilder.addTag(Tags.TZ, HStr.make(hayStack.site?.tz))
         pointBuilder.addTag("sourcePoint", HStr.make(modelDef.id))
 

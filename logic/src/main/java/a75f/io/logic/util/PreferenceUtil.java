@@ -102,6 +102,7 @@ public class PreferenceUtil {
     private static final String PROFILE_TYPE_IN_CCU_CONFIG_STATUS = "profileTypeInCcuConfigStatus";
     private static final String DAB_FULLY_MODULATING_POINTS_UPDATE = "dabFullyModulatingPointsUpdate";
     private static final String MIGRATE_BACNET_NETWORK_INTERFACE = "migrateBacnetNetworkInterface";
+    private static final String DEVICE_POINTS_MIGRATION_STATUS = "devicePointsMigrationStatus";
 
     public static void setContext(Context c) {
         context= c;
@@ -832,4 +833,12 @@ public class PreferenceUtil {
     public static void setUpdateBacnetNetworkInterface() {
         setBooleanPreference(MIGRATE_BACNET_NETWORK_INTERFACE, true);
     }
+    public static boolean getDevicePointsMigrationStatus() {
+        return getBooleanPreference(DEVICE_POINTS_MIGRATION_STATUS);
+    }
+
+    public static void setDevicePointsMigrationStatus() {
+        setBooleanPreference(DEVICE_POINTS_MIGRATION_STATUS, true);
+    }
+
 }

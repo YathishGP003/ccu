@@ -455,8 +455,8 @@ class BypassConfigViewModel : ViewModel() {
     private fun setOutputTypes(config: BypassDamperProfileConfiguration) {
         val device = hayStack.read("device and addr == \"" + config.nodeAddress + "\"")
 
-        var analogOut1 = hayStack.read("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.analog1Out + "\"")
-        var analog1Point = RawPoint.Builder().setHashMap(analogOut1)
+        var analogOut1 = hayStack.readHDict("point and deviceRef == \""+device.get("id")+"\" and domainName == \"" + DomainName.analog1Out + "\"")
+        var analog1Point = RawPoint.Builder().setHDict(analogOut1)
         hayStack.updatePoint(analog1Point.setType(getDamperTypeString(config)).build(), analogOut1.get("id").toString())
 
     }

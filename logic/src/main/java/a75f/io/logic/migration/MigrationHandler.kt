@@ -112,6 +112,7 @@ import io.seventyfivef.domainmodeler.client.ModelPointDef
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDevicePointDef
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
+import io.seventyfivef.ph.core.TagType
 import org.joda.time.DateTime
 import org.projecthaystack.HDateTime
 import org.json.JSONObject
@@ -323,6 +324,27 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         if(!PreferenceUtil.getUpdateBacnetNetworkInterface()) {
             updateBacnetNetworkInterface()
             PreferenceUtil.setUpdateBacnetNetworkInterface()
+        }
+
+        if (!PreferenceUtil.getDevicePointsMigrationStatus()){
+            try {
+                CcuLog.d(
+                    L.TAG_CCU_MIGRATION_UTIL,
+                    "DEVICE_POINTS_MIGRATION_STATUS started"
+                )
+                migrateDevicePoints(CCUHsApi.getInstance())
+                PreferenceUtil.setDevicePointsMigrationStatus()
+                CcuLog.d(
+                    L.TAG_CCU_MIGRATION_UTIL,
+                    "DEVICE_POINTS_MIGRATION_STATUS ended"
+                )
+            }catch (e: Exception){
+                CcuLog.e(
+                    L.TAG_CCU_MIGRATION_UTIL,
+                    "DEVICE_POINTS_MIGRATION_STATUS failed"
+                )
+                e.printStackTrace()
+            }
         }
 
         hayStack.scheduleSync()
@@ -2801,6 +2823,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             }
         }
     }
+
     private fun updateCCUConfigEquipProfileType() {
         val ccuName = CCUHsApi.getInstance().ccuName
         val ccuEquip = hayStack.readEntityByDomainName(DomainName.ccuConfiguration)
@@ -2832,5 +2855,80 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
 
         hayStack.updateEquip(ccuConfigEquip, ccuConfigEquip.id)
         CcuLog.i(L.TAG_CCU_MIGRATION_UTIL, "CCU Configuration Equip updated with profile")
+    }
+
+    private fun migrateDevicePoints(ccuHsApi: CCUHsApi) {
+        val devices = ccuHsApi.readAllEntities("device and not ccu and domainName")
+
+        devices.forEach deviceLoop@{ device ->
+            CcuLog.d(
+                L.TAG_CCU_MIGRATION_UTIL,
+                "====================== Device: $device ======================"
+            )
+            val deviceModel: SeventyFiveFDeviceDirective
+            try {
+                deviceModel =
+                    getModelForDomainName(device["domainName"].toString()) as SeventyFiveFDeviceDirective
+            } catch (e: IllegalStateException) {
+                e.printStackTrace()
+                CcuLog.e(L.TAG_CCU_MIGRATION_UTIL, "deviceModel ${device["domainName"].toString()} not found")
+                return@deviceLoop
+            }
+
+            val deviceId = device["id"].toString()
+
+            CcuLog.d(
+                L.TAG_CCU_MIGRATION_UTIL,
+                "====================== Device Address: ${device["addr"]} ======================"
+            )
+
+            hayStack.readAllHDictByQuery("point and deviceRef == \"$deviceId\"")
+                .forEach pointLoop@{ point ->
+                    CcuLog.d(
+                        L.TAG_CCU_MIGRATION_UTIL,
+                        ">>>>>>>>>> device point: $point"
+                    )
+                    val rawPointBuilder = RawPoint.Builder().setHDict(point)
+                    if (!point.has("domainName")) {
+                        CcuLog.d(
+                            L.TAG_CCU_MIGRATION_UTIL,
+                            "domainName not exists for point: $point"
+                        )
+                        return@pointLoop
+                    }
+                    val domainPointDef = deviceModel.points.find { it.domainName == point["domainName"].toString() }
+                    if(domainPointDef == null) {
+                        CcuLog.d(
+                            L.TAG_CCU_MIGRATION_UTIL,
+                            "Point '${point["domainName"]}' not found in model '${deviceModel.name}'"
+                        )
+                        return@pointLoop
+                    }
+                    domainPointDef.tags
+                        .filter { tag ->
+                            tag.kind == TagType.STR &&
+                                    (tag.name.equals("outputtype", ignoreCase = true) ||
+                                            tag.name.equals("port", ignoreCase = true) ||
+                                            tag.name.equals("inputtype", ignoreCase = true))
+                        }
+                        .forEach { tag ->
+                            val defaultVal = tag.defaultValue ?: ""
+                            CcuLog.i(
+                                L.TAG_CCU_MIGRATION_UTIL,
+                                "Adding tag '${tag.name}' with value: '$defaultVal' to point '${point["domainName"]}'"
+                            )
+
+                            rawPointBuilder.addTag(tag.name, HStr.make(defaultVal.toString()))
+                        }
+
+                    val rawPoint = rawPointBuilder.build()
+                    rawPoint.lastModifiedBy = hayStack.ccuUserName
+                    CcuLog.d(
+                        L.TAG_CCU_MIGRATION_UTIL,
+                        "Updated point '${rawPoint.domainName}' with Markers: ${rawPoint.markers}, Tags: ${rawPoint.tags}"
+                    )
+                    hayStack.updatePoint(rawPoint, rawPoint.id)
+                }
+        }
     }
 }

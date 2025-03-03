@@ -9,6 +9,7 @@ import org.projecthaystack.HDictBuilder
 import org.projecthaystack.HGrid
 import org.projecthaystack.HRow
 import org.projecthaystack.HVal
+import kotlin.math.abs
 
 fun repackagePoints(tempGrid: HGrid, isVirtualZoneEnabled: Boolean, group: String): MutableList<HDict> {
     val mutableDictList = mutableListOf<HDict>()
@@ -26,6 +27,7 @@ fun repackagePoints(tempGrid: HGrid, isVirtualZoneEnabled: Boolean, group: Strin
         var isSystem = false
         var isOaoProfile = false
         var isByPassDamper = false
+        var isModbus = false
         var isConnect = false
         while (rowIterator.hasNext()) {
             val e: HDict.MapEntry = (rowIterator.next() as HDict.MapEntry)
@@ -36,6 +38,9 @@ fun repackagePoints(tempGrid: HGrid, isVirtualZoneEnabled: Boolean, group: Strin
                 is Boolean -> hDictBuilder.add(e.key.toString(), e.value as Boolean)
                 is HVal -> hDictBuilder.add(e.key.toString(), e.value as HVal)
                 else -> hDictBuilder.add(e.key.toString(), e.value.toString())
+            }
+            if(e.key.toString() == "modbus"){
+                isModbus = true
             }
             if(e.key.toString() == "bypassDamper"){
                 isByPassDamper = true
@@ -87,6 +92,12 @@ fun repackagePoints(tempGrid: HGrid, isVirtualZoneEnabled: Boolean, group: Strin
                 hDictBuilder.add("dis" , lastLiteralFromDis)
             }
         }
+
+        if(isModbus && !isEquip && isVirtualZoneEnabled){
+            val bacnetIdAfterModification = removeLeadingZeros(removeFirstFourChars(bacnetId)) //removeGroup(extractedGroup, bacnetId)
+            hDictBuilder.add("bacnetId" , bacnetIdAfterModification.toLong())
+        }
+
         if (isOaoProfile && isVirtualZoneEnabled && isEquip) {
             hDictBuilder.add("roomRef", "oao-fake-room-ref")
             hDictBuilder.add("dis", "${profileName}_${extractedGroup}")
@@ -97,6 +108,10 @@ fun repackagePoints(tempGrid: HGrid, isVirtualZoneEnabled: Boolean, group: Strin
         mutableDictList.add(hDictBuilder.toDict())
     }
     return mutableDictList
+}
+
+private fun removeLeadingZeros(formatted: String): String {
+    return formatted.toInt().toString()
 }
 
 private fun createFormattedDisName(isVirtualZoneEnabled: Boolean, isEquip : Boolean, hDictBuilder : HDictBuilder,
@@ -146,6 +161,24 @@ fun removeFirstFourChars(input: String): String {
     }
     return input.substring(4)
 }
+
+fun removeGroup(group: String, bacnetId: String): String {
+    try {
+        val bacnetIdInt = abs(bacnetId.toInt())
+        if(bacnetIdInt > 2000000){
+            val band = 2000000 - bacnetIdInt
+            val result = abs(band.toString().replaceFirst(group, "").toInt())
+            return result.toString()
+        }else{
+            return abs(bacnetId.toInt()).toString()
+        }
+    } catch (e: Exception) {
+        e.printStackTrace()
+    }
+    return abs(bacnetId.toInt()).toString()
+}
+
+
 
 fun getBacNetId(
     bacnetId: String,

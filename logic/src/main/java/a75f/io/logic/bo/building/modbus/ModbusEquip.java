@@ -34,6 +34,7 @@ public class ModbusEquip {
     String equipRef = null;
     public List<Parameter> configuredParams= new ArrayList<>();
     CCUHsApi hayStack = CCUHsApi.getInstance();
+    private static final String TAG = "Modbus";
 
     public ModbusEquip(ProfileType type, short node) {
         profileType = type;
@@ -129,8 +130,16 @@ public class ModbusEquip {
         String equipmentRef = hayStack.addEquip(mbEquip.build());
 
         if(!isSlaveIdSameAsParent) {
-            CCUHsApi.getInstance().addPoint(HeartBeat.getHeartBeatPoint(equipDis, equipmentRef,
-                    siteRef, roomRef, floorRef, equipmentInfo.getSlaveId(), "modbus", profileType, tz));
+            try {
+                Point heartBeatPoint = HeartBeat.getHeartBeatPoint(equipDis, equipmentRef,
+                        siteRef, roomRef, floorRef, equipmentInfo.getSlaveId(), "modbus", profileType, tz);
+                int uniqueBacnetId = 2000 + equipmentInfo.getSlaveId();
+                String uniqueId = uniqueBacnetId + "029";
+                heartBeatPoint.setBacnetId(Integer.valueOf(uniqueId));
+                CCUHsApi.getInstance().addPoint(heartBeatPoint);
+            }catch (Exception e){
+                e.printStackTrace();
+            }
         }
         Point equipScheduleType = new Point.Builder()
                     .setDisplayName(siteDis+"-"+modbusEquipType+"-"+equipmentInfo.getSlaveId()+"-scheduleType")
@@ -195,6 +204,16 @@ public class ModbusEquip {
             }
             for(LogicalPointTags marker : configParam.getLogicalPointTags()) {
                 if(Objects.nonNull(marker.getTagValue())){
+                    if(marker.getTagName().contains("bacnetId")) {
+                        int band = 2000 + equipmentInfo.getSlaveId();
+                        String uniqueId = band + formatNumber(Integer.parseInt(marker.getTagValue()));
+                        CcuLog.d(TAG, "assign bacnet id to modbus point-->"+uniqueId);
+                        logicalParamPoint.setBacnetId(Integer.parseInt(uniqueId));
+                    }
+                    if(marker.getTagName().contains("bacnetType")) {
+                        CcuLog.d(TAG, "assign bacnet type to modbus point-->"+marker.getTagValue());
+                        logicalParamPoint.setBacnetType(marker.getTagValue());
+                    }
                     if(marker.getTagName().contains("unit")) {
                         logicalParamPoint.setUnit(marker.getTagValue());
                         physicalParamPoint.setUnit(marker.getTagValue());
@@ -354,6 +373,11 @@ public class ModbusEquip {
         CCUHsApi.getInstance().syncEntityTree();
         return equipmentRef;
     }
+
+    public static String formatNumber(int number) {
+        return String.format("%03d", number);
+    }
+
 
     public void updateHaystackPoints(String equipRef, List<Parameter> configuredParams) {
         for (Parameter configParams : configuredParams) {

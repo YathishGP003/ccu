@@ -314,7 +314,7 @@ public class RestoreCCU {
         replaceCCUTracker.updateReplaceStatus(RestoreCCU.PAIRING_ADDRESS, ReplaceStatus.RUNNING.toString());
         HashMap pointMaps = (HashMap) Domain.readPoint(DomainName.addressBand);
         int pairingAddress = 1000;
-        if(!pointMaps.containsKey("val")){
+        if(pointMaps.isEmpty()){
             ArrayList<HashMap<Object, Object>> devices = CCUHsApi.getInstance().readAllEntities("device and addr");
             for(HashMap device : devices){
                 int devicePairingAddress  = Integer.parseInt(device.get("addr").toString());
@@ -324,9 +324,8 @@ public class RestoreCCU {
                 }
             }
             pairingAddress = (pairingAddress/100) * 100;
-        }
-        else {
-            pairingAddress = Integer.parseInt(pointMaps.get("val").toString());
+        } else {
+            pairingAddress = CCUHsApi.getInstance().readDefaultValById(pointMaps.get("id").toString()).intValue();
         }
         L.ccu().setAddressBand((short) pairingAddress);
         L.saveCCUState();
@@ -445,12 +444,6 @@ public class RestoreCCU {
         replaceCCUTracker.updateReplaceStatus(RestoreCCU.SYNC_SITE, ReplaceStatus.COMPLETED.toString());
         equipResponseCallback.onEquipRestoreComplete(deviceCount.decrementAndGet());
         CcuLog.i(TAG, "Saving site details completed");
-    }
-
-    public void getSettingPointsOfCCUDevice(String ccuDeviceID, RetryCountCallback retryCountCallback){
-        CcuLog.i(TAG, "Saving Setting points started");
-        restoreCCUHsApi.restoreSettingPointsOfCCUDevice(ccuDeviceID, retryCountCallback);
-        CcuLog.i(TAG, "Saving Setting points completed");
     }
 
     public static boolean isReplaceCCUUnderProcess(){

@@ -302,6 +302,7 @@ public class Globals {
                 /*checkBacnetIdMigrationRequired migration script will update source model version
                  of system Equip, This will affect DM TO DM migration*/
                 migrationHandler.checkBacnetIdMigrationRequired();
+                migrationHandler.initAddressBand();
             } catch (Exception e) {
                 //Catch ignoring any exception here to avoid app from not loading in case of an init failure.
                 //Init would retried during next app restart.
@@ -673,9 +674,9 @@ public class Globals {
             return nodeAdd.substring(0, nodeAdd.length() - 2).concat("00");
         } else {
             HashMap<Object, Object> addressBand = (HashMap<Object, Object>) Domain.readPoint(DomainName.addressBand);
-            CcuLog.i(Domain.LOG_TAG, "Deviceband " + device);
-            if (addressBand != null && addressBand.size() > 0 && addressBand.get("val") != null) {
-                return addressBand.get("val").toString();
+            CcuLog.i(Domain.LOG_TAG, "AddressBand fetching from point" + addressBand);
+            if (addressBand != null && addressBand.size() > 0) {
+                return CCUHsApi.getInstance().readDefaultStrVal(addressBand.get("id").toString());
             }
         }
         return null;

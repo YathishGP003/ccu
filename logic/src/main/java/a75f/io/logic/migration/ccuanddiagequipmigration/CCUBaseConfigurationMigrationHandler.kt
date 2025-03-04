@@ -42,7 +42,7 @@ class CCUBaseConfigurationMigrationHandler {
         fun updateCCUEquipPoints(ccuModel: ModelDirective, hayStack: CCUHsApi) {
             val ccuEquip = Domain.ccuEquip
 
-            ccuEquip.updateAddressBand(addressBandSelected)
+            ccuEquip.addressBand.writeDefaultVal(addressBandSelected)
 
             CCUEquipConfiguration(ccuModel as SeventyFiveFProfileDirective, hayStack)
                 .saveDemandResponseEnrollmentStatus(drEnrollmentStatus > 0)
@@ -101,11 +101,11 @@ class CCUBaseConfigurationMigrationHandler {
 
     }
 
-    private fun deleteOldAddressBandPoint(hayStack: CCUHsApi) {
-        val snBandPoint = hayStack.readEntity("snband")
-        if (snBandPoint.isNotEmpty()) {
-            hayStack.deleteEntity(snBandPoint[Tags.ID].toString())
-            CcuLog.i(L.TAG_CCU_MIGRATION_UTIL, "Deleted old snband point")
+    fun deleteOldAddressBandPoint(hayStack: CCUHsApi) {
+        val snBandPoints = hayStack.readAllEntities("snband")
+        snBandPoints.forEach {
+            hayStack.deleteEntity(it[Tags.ID].toString())
+            CcuLog.i(L.TAG_CCU_MIGRATION_UTIL, "Deleting old snband point")
         }
     }
 }

@@ -410,40 +410,17 @@ public class RestoreCCUHsApi {
             throw new NullHGridException("Null occurred while fetching points for the equip Id: "+ equipRow.get("id").toString());
         }
 
-        List<HashMap> pointMaps = ccuHsApi.HGridToList(pointsGrid);
         List<Point> points = new ArrayList<>();
-        List<SettingPoint> settingPoints = new ArrayList<>();
-
         Iterator pointsGridIterator = pointsGrid.iterator();
 
         while(pointsGridIterator!=null && pointsGridIterator.hasNext()) {
             HRow pointRow = (HRow) pointsGridIterator.next();
-            if(!pointRow.has(Tags.SETTING)){
             points.add(new Point.Builder().setHDict(pointRow).build());
-            }
         }
-        pointMaps.forEach(map ->{
-            if(map.containsKey(Tags.SETTING)){
-                settingPoints.add(new SettingPoint.Builder().setHashMap(map).build());
-            }
-        });
+
         addEquipAndPoints(equips, points);
-        addSettingPoints(settingPoints);
         writeValueToEquipPoints(equips, hClient, retryCountCallback);
         CcuLog.i(TAG, "Import Equip completed for "+equipRow.get("dis").toString());
-    }
-
-    private void addSettingPoints(List<SettingPoint> settingPoints) {
-        settingPoints.forEach(settingPoint -> {
-            String pointId = StringUtils.prependIfMissing(settingPoint.getId(), "@");
-            HashMap<Object, Object> point = ccuHsApi.readMapById(pointId);
-            if (point.isEmpty()) {
-                String pointLuid = ccuHsApi.addRemotePoint(settingPoint, settingPoint.getId().replace("@", ""));
-                ccuHsApi.setSynced(pointLuid);
-            } else {
-                CcuLog.i(TAG, "Point already imported " + settingPoint.getId());
-            }
-        });
     }
 
     public void importDevice(HRow deviceRow, RetryCountCallback retryCountCallback){
@@ -885,28 +862,6 @@ public class RestoreCCUHsApi {
             }
         }
         CcuLog.i(TAG, "Import Named schedule completed");
-    }
-    public void restoreSettingPointsOfCCUDevice(String ccuDeviceID, RetryCountCallback retryCountCallback){
-
-        HClient hClient = new HClient(CCUHsApi.getInstance().getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
-        HDict settingPoints = new HDictBuilder().add("filter",
-                "setting and point and deviceRef == " + StringUtils.prependIfMissing(ccuDeviceID, "@")).toDict();
-        HGrid settingPointsGrid =  invokeWithRetry("read", hClient, HGridBuilder.dictToGrid(settingPoints),
-                retryCountCallback);
-
-        List<HashMap> pointMaps = ccuHsApi.HGridToList(settingPointsGrid);
-
-        pointMaps.forEach(pointMap -> {
-            SettingPoint pointDetails = new SettingPoint.Builder().setHashMap(pointMap).build();
-            String pointId = StringUtils.prependIfMissing(pointDetails.getId(), "@");
-            HashMap<Object, Object> point = ccuHsApi.readMapById(pointId);
-            if (point.isEmpty()) {
-                String pointLuid = ccuHsApi.addRemotePoint(pointDetails, pointDetails.getId().replace("@", ""));
-                ccuHsApi.setSynced(pointLuid);
-            } else {
-                CcuLog.i(TAG, "Point already imported "+pointDetails.getId());
-            }
-        });
     }
 
     public HGrid getDiagEquipByEquipId(String equipId, RetryCountCallback retryCountCallback){

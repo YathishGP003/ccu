@@ -265,7 +265,7 @@ open class DefaultEquipBuilder : EquipBuilder {
             val band = Domain.readPoint(DomainName.addressBand)
             CcuLog.i(Domain.LOG_TAG, "Deviceband $device")
             if (band != null && band.isNotEmpty() && band["val"] != null) {
-                return band["val"].toString()
+                return hayStack.readDefaultStrVal(band["id"].toString())
             }
         }
         return null
@@ -276,11 +276,11 @@ open class DefaultEquipBuilder : EquipBuilder {
         val tz = hayStack.timeZone
         val equipDis = hayStack.readMapById(equipRef)["dis"].toString()
         modelDef.points.forEach {
-            createPoint(PointBuilderConfig(it, null, equipRef, siteRef, tz, equipDis))
+            createPointFromDef(PointBuilderConfig(it, null, equipRef, siteRef, tz, equipDis))
             CcuLog.i(Domain.LOG_TAG," Created "+if(isDiagEquip){"CCUDiagEquip"} else {"CCU_Configuration"}+" point ${it.domainName}")
         }
     }
-    private fun createPoint(pointConfig: PointBuilderConfig) {
+    fun createPointFromDef(pointConfig: PointBuilderConfig) {
         val hayStackPoint = buildPoint(pointConfig)
         val pointId = hayStack.addPoint(hayStackPoint)
         hayStackPoint.id = pointId

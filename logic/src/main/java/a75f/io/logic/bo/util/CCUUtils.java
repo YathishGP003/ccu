@@ -25,7 +25,6 @@ import a75f.io.api.haystack.HisItem;
 import a75f.io.api.haystack.Point;
 import a75f.io.api.haystack.RawPoint;
 import a75f.io.api.haystack.Schedule;
-import a75f.io.api.haystack.SettingPoint;
 import a75f.io.api.haystack.Zone;
 import a75f.io.domain.api.DomainName;
 import a75f.io.logger.CcuLog;
@@ -155,7 +154,6 @@ public class CCUUtils
         executeTask(executorService, latch, () -> updateZoneOccupancyPointWithUpdatedCcuRef(ccuHsApi, isCcuReregistration));
         executeTask(executorService, latch, () -> updateNonTunerEquipAndPointsWithUpdatedCcuRef(ccuHsApi, isCcuReregistration));
         executeTask(executorService, latch, () -> updateDeviceAndPointsWithUpdatedCcuRef(ccuHsApi, isCcuReregistration));
-        executeTask(executorService, latch, () -> updateSettingPointsWithUpdatedCcuRef(ccuHsApi, isCcuReregistration, ccuId));
         executeTask(executorService, latch, () -> updateZoneSchedulesWithUpdatedCcuRef(ccuHsApi, isCcuReregistration));
         executeTask(executorService, latch, () -> updateSpecialSchedulesWithUpdatedCcuRef(ccuHsApi));
         executeTask(executorService, latch, () -> updateZoneSchedulablePointsWithUpdatedCcuRef(ccuHsApi, isCcuReregistration, ccuId));
@@ -285,19 +283,6 @@ public class CCUUtils
         }
         String ccuId = ccuHsApi.getCcuId();
         CcuLog.d(TAG_CCU_REF,"Executed updateDeviceAndPointsWithUpdatedCcuRef");
-    }
-
-    public static void updateSettingPointsWithUpdatedCcuRef(CCUHsApi ccuHsApi, boolean isCcuReregistration, String ccuId) {
-        CcuLog.d(TAG_CCU_REF,"Executing updateSettingPointsWithUpdatedCcuRef");
-        ArrayList<HashMap<Object, Object>> settingPoints = ccuHsApi.readAllEntities("point and deviceRef == \"" + ccuId +
-                "\"");
-        for(HashMap<Object, Object> settingPoint : settingPoints){
-            SettingPoint point = new SettingPoint.Builder().setHashMap(settingPoint).build();
-            if(point != null && (isCcuReregistration || point.getCcuRef() == null)) {
-                ccuHsApi.updateSettingPoint(point, point.getId());
-            }
-        }
-        CcuLog.d(TAG_CCU_REF,"Executed updateSettingPointsWithUpdatedCcuRef");
     }
 
     public static void updateZoneSchedulesWithUpdatedCcuRef(CCUHsApi ccuHsApi, boolean isCcuReregistration) {

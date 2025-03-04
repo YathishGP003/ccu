@@ -31,6 +31,7 @@ import org.projecthaystack.HDict;
 import org.projecthaystack.HDictBuilder;
 import org.projecthaystack.HGrid;
 import org.projecthaystack.HGridBuilder;
+import org.projecthaystack.HList;
 import org.projecthaystack.HRef;
 import org.projecthaystack.HRow;
 import org.projecthaystack.client.HClient;
@@ -38,9 +39,11 @@ import org.projecthaystack.client.HClient;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HayStackConstants;
+import a75f.io.api.haystack.Tags;
 import a75f.io.constants.CcuFieldConstants;
 import a75f.io.domain.api.Domain;
 import a75f.io.domain.api.DomainName;
@@ -211,7 +214,7 @@ public class RegisterCCUToExistingSite extends DialogFragment {
                     CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.make(ccuId));
                     CCUHsApi.getInstance().registerCcu(installerEmail);
                     prefs.setString(CcuFieldConstants.INSTALLER_EMAIL, installerEmail);
-                    Domain.ccuEquip.updateAddressBand(addressBandSelected);
+                    Domain.ccuEquip.getAddressBand().writeDefaultVal(addressBandSelected);
                     L.ccu().setAddressBand(Short.parseShort(addressBandSelected));
                     updateMigrationDiagWithAppVersion();
                     if(!Globals.getInstance().siteAlreadyCreated()) {
@@ -248,24 +251,7 @@ public class RegisterCCUToExistingSite extends DialogFragment {
     private void getRegisteredAddressBand() {
         ExecutorTask.executeAsync(
                 ()-> regAddressBands.clear(),
-                ()->{
-                    HClient hClient = new HClient(CCUHsApi.getInstance().getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
-                    String siteUID = CCUHsApi.getInstance().getSiteIdRef().toString();
-                    HDict tDict = new HDictBuilder().add("filter", "domainName == \"" + DomainName.addressBand + "\" and siteRef == " + siteUID).toDict();
-                    HGrid addressPoint = hClient.call("read", HGridBuilder.dictToGrid(tDict));
-                    if(addressPoint == null) {
-                        CcuLog.w(L.TAG_CCU_REGISTER_GATHER_DETAILS,"HGrid(schedulePoint) is null.");
-                        new Handler(Looper.getMainLooper()).post(() -> Toast.makeText(getActivity(),"Couldn't find the node address, Please choose the node address which is not used already.", Toast.LENGTH_LONG).show());
-                    }
-                    Iterator it = addressPoint.iterator();
-                    while (it.hasNext())
-                    {
-                        HRow r = (HRow) it.next();
-                        if (r.has("val")) {
-                            regAddressBands.add(r.get("val").toString());
-                        }
-                    }
-                },
+                ()-> fetchUsedAddressBandsFromOtherCCU(),
                 ()->{
                     regAddressBands.sort((s, t1) -> Integer.compare(Integer.parseInt(s), Integer.parseInt(t1)));
                     int selectedIndex = 0;
@@ -284,6 +270,58 @@ public class RegisterCCUToExistingSite extends DialogFragment {
                     addressBandSpinner.setSelection(selectedIndex);
                 }
         );
+    }
+
+    private void fetchUsedAddressBandsFromOtherCCU() {
+        List<String> addressBandIdList = new ArrayList<>();
+        HClient hClient = new HClient(CCUHsApi.getInstance().getHSUrl(), HayStackConstants.USER, HayStackConstants.PASS);
+        String siteUID = CCUHsApi.getInstance().getSiteIdRef().toString();
+        HDict tDict = new HDictBuilder().add("filter", "domainName == \"" + DomainName.addressBand + "\" and siteRef == " + siteUID).toDict();
+        HGrid addressPoint = hClient.call("read", HGridBuilder.dictToGrid(tDict));
+
+        if(addressPoint == null || addressPoint.isEmpty()) {
+            CcuLog.w(L.TAG_CCU_REGISTER_GATHER_DETAILS,"HGrid(schedulePoint) is null.");
+            new Handler(Looper.getMainLooper()).post(() -> Toast.makeText(getActivity(),"Couldn't find the node address, Please choose the node address which is not used already.", Toast.LENGTH_LONG).show());
+        }
+        Iterator it = addressPoint.iterator();
+        while (it.hasNext())
+        {
+            HRow r = (HRow) it.next();
+            if (r.has("val")) {
+                regAddressBands.add(r.get("val").toString());
+            }
+            if(r.has(Tags.ID)){
+                addressBandIdList.add(r.get(Tags.ID).toString());
+            }
+        }
+        HDict[] dictArr = new HDict[addressBandIdList.size()];
+        for(int index = 0; index < dictArr.length; index++){
+            HDictBuilder hDictBuilder =new HDictBuilder()
+                    .add("id", HRef.copy(addressBandIdList.get(index)));
+            dictArr[index] = hDictBuilder.toDict();
+        }
+        HGrid addressPointGrid = hClient.call("pointWriteMany", HGridBuilder.dictsToGrid(dictArr));
+
+        if (addressPointGrid == null) {
+            CcuLog.d(L.TAG_CCU_BUNDLE, "Address band Point grid is empty");
+            return;
+        }
+
+        Iterator addressBandGridIterator = addressPointGrid.iterator();
+        while (addressBandGridIterator.hasNext()) {
+            HRow r = (HRow) addressBandGridIterator.next();
+            if (r.has("data") && r.get("data") instanceof HList && ((HList) r.get("data")).size() > 0) {
+                HList dataList = (HList) r.get("data");
+                for (int i = 0; i < dataList.size(); i++) {
+                    HDict dataElement = (HDict) dataList.get(i);
+                    if (Integer.parseInt(dataElement.get("level").toString()) == 8) {
+                        CcuLog.d(L.TAG_CCU_BUNDLE, "Address band value value is " + dataElement.get("val").toString());
+                        regAddressBands.add(dataElement.get("val").toString());
+                    }
+                }
+
+            }
+        }
     }
 }
 

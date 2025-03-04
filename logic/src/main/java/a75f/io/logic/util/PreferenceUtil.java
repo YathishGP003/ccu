@@ -103,6 +103,7 @@ public class PreferenceUtil {
     private static final String DAB_FULLY_MODULATING_POINTS_UPDATE = "dabFullyModulatingPointsUpdate";
     private static final String MIGRATE_BACNET_NETWORK_INTERFACE = "migrateBacnetNetworkInterface";
     private static final String DEVICE_POINTS_MIGRATION_STATUS = "devicePointsMigrationStatus";
+    private static final String ADDRESS_BAND_INIT_COMPLETED = "addressBandInitCompleted";
 
     public static void setContext(Context c) {
         context= c;
@@ -810,6 +811,14 @@ public class PreferenceUtil {
         setBooleanPreference(RELAY2_port_ENABLED_STATUS, true);
     }
 
+
+    public static void setAddressBandInitCompleted() {
+        setBooleanPreference(ADDRESS_BAND_INIT_COMPLETED, true);
+    }
+
+    public static boolean isAddressBandInitCompleted() {
+        return getBooleanPreference(ADDRESS_BAND_INIT_COMPLETED);
+    }
     public static boolean isProfileTypeCorrectedInCCUConfigEquip() {
         return getBooleanPreference(PROFILE_TYPE_IN_CCU_CONFIG_STATUS);
     }

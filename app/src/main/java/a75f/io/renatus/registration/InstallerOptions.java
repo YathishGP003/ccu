@@ -338,7 +338,7 @@ public class InstallerOptions extends Fragment implements MasterControlLimitList
                     addressBandSelected = mAddressBandSpinner.getSelectedItem().toString();
                     L.ccu().setAddressBand(Short.parseShort(addressBandSelected));
                     if (!isFreshRegister){
-                        String addressBand = Domain.ccuEquip.getAddressBandValue();
+                        String addressBand = String.valueOf(Domain.ccuEquip.getAddressBand().readDefaultVal());
                         if(addressBand != null && !addressBandSelected.equals(addressBand) && regAddressBands.contains(addressBandSelected)) {
                             Toast toast = new Toast(Globals.getInstance().getApplicationContext());
                             toast.setGravity(Gravity.BOTTOM, 50, 50);
@@ -346,7 +346,7 @@ public class InstallerOptions extends Fragment implements MasterControlLimitList
                             toast.setDuration(Toast.LENGTH_LONG);
                             toast.show();
                         }
-                        Domain.ccuEquip.updateAddressBand(addressBandSelected);
+                        Domain.ccuEquip.getAddressBand().writeDefaultVal(addressBandSelected);
                         regAddressBands.remove(addressBand);
                         regAddressBands.add(addressBandSelected);
                         try {

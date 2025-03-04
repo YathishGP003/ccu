@@ -5,9 +5,11 @@ import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Equip
 import a75f.io.domain.api.Domain
 import a75f.io.domain.util.ModelLoader.getCCUBaseConfigurationModel
+import a75f.io.domain.api.DomainName
 import a75f.io.logger.CcuLog
 import io.seventyfivef.domainmodeler.client.ModelDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
+import io.seventyfivef.ph.core.Tags
 import org.projecthaystack.HDateTime
 
 class CCUBaseConfigurationBuilder(private val hayStack : CCUHsApi): DefaultEquipBuilder() {
@@ -84,5 +86,20 @@ class CCUBaseConfigurationBuilder(private val hayStack : CCUHsApi): DefaultEquip
         return buildEquip(EquipBuilderConfig(ccuConfigModelDef, profileConfiguration, siteRef,tz,
             "$ccuName-${ccuConfigModelDef.name}")
         )
+    }
+
+    /*
+    * IN few CCU's addressBand point is not present , so creating it here
+    * This is one time operating in CCU's life*/
+    fun createAddressBandPoint(ccuEquip: HashMap<Any, Any>) {
+        val ccuBaseConfigurationModel = getCCUBaseConfigurationModel()
+
+        val modelPointDef = ccuBaseConfigurationModel.points.find { it.domainName == DomainName.addressBand }
+
+        val profileConfiguration = CCUEquipConfiguration(ccuBaseConfigurationModel as SeventyFiveFProfileDirective,
+            hayStack).getDefaultConfiguration()
+
+        createPointFromDef(PointBuilderConfig(modelPointDef!!, profileConfiguration, ccuEquip[Tags.ID].toString(),
+            hayStack.siteIdRef.toString(), hayStack.timeZone, "${hayStack.ccuName}-${ccuBaseConfigurationModel.name}"))
     }
 }

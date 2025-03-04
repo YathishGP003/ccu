@@ -2695,6 +2695,60 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "Updating PLC physical points completed")
     }
 
+    /*
+    * At this point, migration of addressBand point is happening from SettingPoint to Point from version 3.1.x
+    * so if any CCU comes from above 2.18.x there will be DM-DM migration happening for addressBand point
+    * so initialising addressBand point at level 8 once is necessary.
+    * Below function handle that part
+    */
+    fun initAddressBand() {
+        if(!PreferenceUtil.isAddressBandInitCompleted()) {
+            CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "Initialising addressBand point")
+            val addressBandVal = Globals.getInstance().smartNodeBand
+            val ccuEquip = hayStack.readEntityByDomainName(DomainName.ccuConfiguration)
+            if(ccuEquip.isEmpty()) {
+                CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "CCU Equip not found")
+                return
+            }
+            val addressBandQuery = "point and domainName == \"${DomainName.addressBand}\" and equipRef == \"${ccuEquip["id"]}\""
+
+            val addressBandQueryForDuplicatePointWithSameDomainName = "point and domainName == \"${DomainName.addressBand}\""
+            val duplicateAddressBandPoints = hayStack.readAllEntities(addressBandQueryForDuplicatePointWithSameDomainName)
+
+            if(duplicateAddressBandPoints.size > 1) {
+                CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "Duplicate addressBand points found")
+                duplicateAddressBandPoints.forEach {
+                    if(!it.containsKey("equipRef") ||  it["equipRef"].toString() != ccuEquip["id"].toString()) {
+                        CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "Deleting duplicate addressBand point with id: ${it["id"]}")
+                        hayStack.deleteEntity(it["id"].toString())
+                    }
+                }
+            }
+
+            val duplicateAddressBandPointsPostDeletion = hayStack.readAllEntities(addressBandQueryForDuplicatePointWithSameDomainName)
+
+            if(duplicateAddressBandPointsPostDeletion.size > 1) {
+                CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "Duplicate addressBand points found")
+                duplicateAddressBandPointsPostDeletion.drop(1).forEach {
+                    CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "Deleting duplicate addressBand point except one ," +
+                            " Deleted point id: ${it["id"]}")
+                    hayStack.deleteEntity(it["id"].toString())
+                }
+            }
+
+            CCUBaseConfigurationMigrationHandler().deleteOldAddressBandPoint(hayStack)
+
+            val addressBandPoint = hayStack.readEntity(addressBandQuery)
+            if(addressBandPoint.isEmpty()) {
+                CCUBaseConfigurationBuilder(hayStack).createAddressBandPoint(ccuEquip)
+            }
+
+            hayStack.writeDefaultVal(addressBandQuery, addressBandVal)
+            PreferenceUtil.setAddressBandInitCompleted()
+            CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "Initialising addressBand point completed")
+        }
+    }
+
     private fun updateRelay2Port(ccuHsApi: CCUHsApi) {
         CcuLog.i(L.TAG_CCU_MIGRATION_UTIL, "updateRelay2Port portEnabled status")
 

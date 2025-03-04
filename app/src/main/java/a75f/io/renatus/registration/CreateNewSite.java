@@ -551,7 +551,7 @@ public class CreateNewSite extends Fragment {
 
         String ccuRef = ccuBaseConfigurationBuilder.createCCUBaseConfiguration(ccuName,
                 installerEmail, facilityManagerEmail, diagEquipId, ccuBaseConfigurationModel);
-        Domain.ccuEquip.updateAddressBand("1000");   // Default value`for address band
+        Domain.ccuEquip.getAddressBand().writeDefaultVal("1000");   // Default value`for address band
         L.ccu().setAddressBand(Short.parseShort("1000"));
 
 

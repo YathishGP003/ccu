@@ -174,7 +174,7 @@ public class RegisterGatherCCUDetails extends Activity {
                 CCUHsApi.getInstance().addOrUpdateConfigProperty(HayStackConstants.CUR_CCU, HRef.make(ccuId));
                 CCUHsApi.getInstance().registerCcu(installerEmail);
                 prefs.setString(CcuFieldConstants.INSTALLER_EMAIL, installerEmail);
-                Domain.ccuEquip.updateAddressBand(addressBandSelected);
+                Domain.ccuEquip.getAddressBand().writeDefaultVal(addressBandSelected);
                 L.ccu().setAddressBand(Short.parseShort(addressBandSelected));
                 next();
             }else{

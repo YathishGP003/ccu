@@ -177,7 +177,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         }
 
         if (!isMigrationRequired()) {
-            CcuLog.i(L.TAG_CCU_MIGRATION_UTIL, "---- Migration Not Required ----")
+            CcuLog.i(TAG_CCU_MIGRATION_UTIL, "---- Migration Not Required ----")
             return
         }
         isMigrationOngoing = true
@@ -198,7 +198,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             }
         } catch (e: Exception) {
             //For now, we make sure it does not stop other migrations even if this fails.
-            CcuLog.e(L.TAG_CCU_MIGRATION_UTIL, "Error in migrateHisInterpolate $e")
+            CcuLog.e(TAG_CCU_MIGRATION_UTIL, "Error in migrateHisInterpolate $e")
         }
 
         if (!PreferenceUtil.getOldPortEnabledMigrationStatus()) {
@@ -207,7 +207,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             } catch (e: Exception) {
                 //TODO - This is temporary fix till vav model issue is resolved in the next releases.
                 //For now, we make sure it does not stop other migrations even if this fails.
-                CcuLog.e(L.TAG_CCU_MIGRATION_UTIL, "Error in migrateVavAndAcbProfilesToCorrectPortEnabledStatus: ${e.message}")
+                CcuLog.e(TAG_CCU_MIGRATION_UTIL, "Error in migrateVavAndAcbProfilesToCorrectPortEnabledStatus: ${e.message}")
             }
             PreferenceUtil.setOldPortEnabledMigrationStatus()
         }
@@ -246,7 +246,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             }
         } catch (e: Exception) {
             //For now, we make sure it does not stop other migrations even if this fails.
-            CcuLog.e(L.TAG_CCU_MIGRATION_UTIL, "Error in deleteRedundantSetbackPointsFromHnAcbEquips $e")
+            CcuLog.e(TAG_CCU_MIGRATION_UTIL, "Error in deleteRedundantSetbackPointsFromHnAcbEquips $e")
         }
         if(!PreferenceUtil.isVavCfmOnEdgeMigrationDone()) {
             VavAndAcbProfileMigration.addMinHeatingDamperPositionMigration(hayStack)
@@ -259,7 +259,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                 PreferenceUtil.setMigrateAnalogInputTypeForVavDevicePoint()
               } catch (e: Exception) {
                 //For now, we make sure it does not stop other migrations even if this fails.
-                CcuLog.e(L.TAG_CCU_MIGRATION_UTIL, "Error in migrateAnalogTypeForVAVanalog1In $e")
+                CcuLog.e(TAG_CCU_MIGRATION_UTIL, "Error in migrateAnalogTypeForVAVanalog1In $e")
            }
         }
         if(!PreferenceUtil.getBacnetSettingPointDeleted()) {
@@ -276,7 +276,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                 PreferenceUtil.setPrangePointMigrationFlag()
             }catch (e: Exception) {
                 // For now, we make sure it does not stop other migrations even if this fails.
-                CcuLog.e(L.TAG_CCU_MIGRATION_UTIL, "Error in prangePointMigration $e")
+                CcuLog.e(TAG_CCU_MIGRATION_UTIL, "Error in prangePointMigration $e")
             }
         }
         if(!PreferenceUtil.getCorrectRelay2PointRefSeriesParallel()) {
@@ -351,7 +351,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
     }
 
     private fun updateBacnetNetworkInterface() {
-        CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "Updating Bacnet network interface")
+        CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Updating Bacnet network interface")
         try {
             val connectivityManager = Globals.getInstance().applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
             val allNetworks = connectivityManager.allNetworks // Get all available networks
@@ -375,14 +375,14 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             val confString: String = sharedPreferences.getString(BACNET_CONFIGURATION, "").toString()
 
             if (confString.isEmpty()) {
-                CcuLog.e(L.TAG_CCU_MIGRATION_UTIL, "BACnet configuration not found")
+                CcuLog.e(TAG_CCU_MIGRATION_UTIL, "BACnet configuration not found")
                 return
             }
 
             val config = JSONObject(confString)
             val networkObject = config.getJSONObject("network")
 
-            CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "Ethernet available: $ethernetAvailable, Wi-Fi available: $wifiAvailable")
+            CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Ethernet available: $ethernetAvailable, Wi-Fi available: $wifiAvailable")
 
             when {
                 ethernetAvailable && wifiAvailable -> {
@@ -396,16 +396,16 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                     networkObject.put(NETWORK_INTERFACE, "Wifi")
                 }
                 else -> {
-                    CcuLog.e(L.TAG_CCU_MIGRATION_UTIL, "No network interfaces available")
+                    CcuLog.e(TAG_CCU_MIGRATION_UTIL, "No network interfaces available")
                 }
             }
 
             sharedPreferences.edit().putString(BACNET_CONFIGURATION, config.toString()).apply()
 
-            CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "Updated Bacnet network interface: ${sharedPreferences.getString(BACNET_CONFIGURATION, "")}")
+            CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Updated Bacnet network interface: ${sharedPreferences.getString(BACNET_CONFIGURATION, "")}")
 
         } catch (e: Exception) {
-            CcuLog.e(L.TAG_CCU_MIGRATION_UTIL, "Error in updateBacnetNetworkInterface $e")
+            CcuLog.e(TAG_CCU_MIGRATION_UTIL, "Error in updateBacnetNetworkInterface $e")
         }
     }
 
@@ -414,19 +414,19 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
     private fun updateUnoccupiedSetbackMax() {
         try {
             val listOfUnoccupiedPoints = hayStack.readAllEntities("unoccupied and setback and not domainName")
-            CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "Total points found ${listOfUnoccupiedPoints.size}")
+            CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Total points found ${listOfUnoccupiedPoints.size}")
             listOfUnoccupiedPoints.forEach {
                 val unoccupiedPoint = Point.Builder().setHashMap(it).setMaxVal("60").build()
                 hayStack.updatePoint(unoccupiedPoint, unoccupiedPoint.id)
-                CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "${unoccupiedPoint.id} Updated unoccupied setback max value")
+                CcuLog.d(TAG_CCU_MIGRATION_UTIL, "${unoccupiedPoint.id} Updated unoccupied setback max value")
             }
         } catch (e: Exception) {
-            CcuLog.e(L.TAG_CCU_MIGRATION_UTIL, "Error at updateUnoccupiedSetbackMax ${e.message}", e)
+            CcuLog.e(TAG_CCU_MIGRATION_UTIL, "Error at updateUnoccupiedSetbackMax ${e.message}", e)
         }
     }
 
     private fun migrateHyperStatSplitFanModeCache() {
-        CcuLog.i(L.TAG_CCU_MIGRATION_UTIL, "Migrating HyperStat Fan Mode Cache to HyperStatSplit Fan Mode Cache")
+        CcuLog.i(TAG_CCU_MIGRATION_UTIL, "Migrating HyperStat Fan Mode Cache to HyperStatSplit Fan Mode Cache")
         CCUHsApi.getInstance().readAllEntities("equip and hyperstatsplit").forEach { equipMap ->
 
             val hypertStatFanModeCache = a75f.io.logic.bo.building.hyperstat.common.FanModeCacheStorage()
@@ -471,13 +471,13 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
 
 
     private fun clearOtaCachePreferences() {
-        CcuLog.d(L.TAG_CCU_MIGRATION_UTIL,"Clearing OtaCache Preferences")
+        CcuLog.d(TAG_CCU_MIGRATION_UTIL,"Clearing OtaCache Preferences")
         try {
             val sharedPreferences: SharedPreferences = Globals.getInstance().applicationContext.getSharedPreferences("otaCache" , Context.MODE_PRIVATE)
             sharedPreferences.edit().clear().apply()
         }
         catch (e : Exception) {
-            CcuLog.e(L.TAG_CCU_MIGRATION_UTIL,"Failed to clear OtaCache ${e.printStackTrace()}")
+            CcuLog.e(TAG_CCU_MIGRATION_UTIL,"Failed to clear OtaCache ${e.printStackTrace()}")
         }
     }
 
@@ -487,7 +487,8 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         val lastUpdatedTimeForBackFillPoint = hayStack.readPointPriorityLatestTime(backFillDurationId)
 
         if(lastUpdatedTimeForBackFillPoint == null) {
-            CcuLog.i(L.TAG_CCU_MIGRATION_UTIL, "lastUpdatedTimeForBackFillPoint not found" +
+            CcuLog.i(
+                TAG_CCU_MIGRATION_UTIL, "lastUpdatedTimeForBackFillPoint not found" +
                     " so Updated the fallback default value for backfill point")
             hayStack.writeDefaultValById(backFillDurationId,24.0)
             return
@@ -495,19 +496,19 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
 
         val lastUpdatedTime = DateTime.parse(lastUpdatedTimeForBackFillPoint.substring(0, 19))
         if(backFillPoint["createdDateTime"] == null) {
-            CcuLog.i(L.TAG_CCU_MIGRATION_UTIL, "Updated the fallback default value for backfill point")
+            CcuLog.i(TAG_CCU_MIGRATION_UTIL, "Updated the fallback default value for backfill point")
             hayStack.writeDefaultValById(backFillDurationId,24.0)
-            CcuLog.i(L.TAG_CCU_MIGRATION_UTIL, "Updated backfill default value")
+            CcuLog.i(TAG_CCU_MIGRATION_UTIL, "Updated backfill default value")
             return
         }
         val createdTime =
             DateTime.parse(backFillPoint["createdDateTime"].toString().substring(0,19))
         if (createdTime.equals(lastUpdatedTime)) {
             hayStack.writeDefaultValById(backFillDurationId,24.0)
-            CcuLog.i(L.TAG_CCU_MIGRATION_UTIL, "Updated backfill default value")
+            CcuLog.i(TAG_CCU_MIGRATION_UTIL, "Updated backfill default value")
         } else {
             CcuLog.i(
-                L.TAG_CCU_MIGRATION_UTIL,
+                TAG_CCU_MIGRATION_UTIL,
                 "backfill default value is already updated by user so no need to update"
             )
         }
@@ -538,9 +539,9 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                 CcuLog.d(TAG_CCU_BYPASS_RECOVER, "Some exception occurred. CCU Bypass Recovery operation stopped abruptly.")
             }
         }
-        CcuLog.d(L.TAG_CCU_MIGRATION_UTIL,"doPostModelMigrationTasks: check isMigrationOngoing $isMigrationOngoing")
+        CcuLog.d(TAG_CCU_MIGRATION_UTIL,"doPostModelMigrationTasks: check isMigrationOngoing $isMigrationOngoing")
         if(isMigrationOngoing) {
-            CcuLog.d(L.TAG_CCU_MIGRATION_UTIL,"Version update detected, performing minCFMPoints' maxVal update")
+            CcuLog.d(TAG_CCU_MIGRATION_UTIL,"Version update detected, performing minCFMPoints' maxVal update")
             updateMinCfmPointMaxVal(Pair(DomainName.minCFMCooling, DomainName.maxCFMCooling))
             updateMinCfmPointMaxVal(Pair(DomainName.minCFMReheating, DomainName.maxCFMReheating))
         }
@@ -548,26 +549,26 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
     }
 
     private fun deleteRedundantSetbackPointsFromHnAcbEquips() {
-        CcuLog.d(L.TAG_CCU_MIGRATION_UTIL , "deleteRedundantSetbackPointsFromHnAcbEquips started")
+        CcuLog.d(TAG_CCU_MIGRATION_UTIL , "deleteRedundantSetbackPointsFromHnAcbEquips started")
         hayStack.readAllEntities("equip and domainName == \"helionodeActiveChilledBeam\"").forEach { hnAcbEquip ->
                 val nonDmDemandResponse = hayStack.readEntity("demand and response and setback and tuner and not domainName and equipRef==\"${hnAcbEquip["id"].toString()}\"")
                 if (nonDmDemandResponse.isNotEmpty()) {
-                    CcuLog.d(L.TAG_CCU_MIGRATION_UTIL , "deleteRedundantSetbackPointsFromHnAcbEquips: ${nonDmDemandResponse["id"].toString()}")
+                    CcuLog.d(TAG_CCU_MIGRATION_UTIL , "deleteRedundantSetbackPointsFromHnAcbEquips: ${nonDmDemandResponse["id"].toString()}")
                     val dmDemandResponseSetback = hayStack.readHDict("domainName==\"demandResponseSetback\" and equipRef==\"${hnAcbEquip["id"].toString()}\"")
                     if (dmDemandResponseSetback != null && !dmDemandResponseSetback.isEmpty) {
                         hayStack.updatePoint(Point.Builder().setHDict(dmDemandResponseSetback).build() , nonDmDemandResponse["id"].toString())
-                        CcuLog.d(L.TAG_CCU_MIGRATION_UTIL , "deleteRedundantSetbackPointsFromHnAcbEquips: demandResponse ${nonDmDemandResponse["id"].toString()} updated")
+                        CcuLog.d(TAG_CCU_MIGRATION_UTIL , "deleteRedundantSetbackPointsFromHnAcbEquips: demandResponse ${nonDmDemandResponse["id"].toString()} updated")
                         hayStack.deleteWritablePoint(dmDemandResponseSetback["id"].toString()) // delete the duplicate point
                     }
                 } else {
-                    CcuLog.d(L.TAG_CCU_MIGRATION_UTIL , "deleteRedundantSetbackPointsFromHnAcbEquips: no demandResponse found")
+                    CcuLog.d(TAG_CCU_MIGRATION_UTIL , "deleteRedundantSetbackPointsFromHnAcbEquips: no demandResponse found")
                 }
                 val nonDmAutoAway = hayStack.readEntity("auto and away and setback and not domainName and equipRef==\"${hnAcbEquip["id"].toString()}\"")
                 if (nonDmAutoAway.isNotEmpty()) {
                     val dmAutoAway = hayStack.readHDict("domainName==\"autoAway\" and equipRef==\"${hnAcbEquip["id"].toString()}\"")
                     if (dmAutoAway != null && !dmAutoAway.isEmpty) {
                         hayStack.updatePoint(Point.Builder().setHDict(dmAutoAway).build() , nonDmAutoAway["id"].toString())
-                        CcuLog.d(L.TAG_CCU_MIGRATION_UTIL , "deleteRedundantSetbackPointsFromHnAcbEquips: autoAway ${nonDmAutoAway["id"].toString()} updated")
+                        CcuLog.d(TAG_CCU_MIGRATION_UTIL , "deleteRedundantSetbackPointsFromHnAcbEquips: autoAway ${nonDmAutoAway["id"].toString()} updated")
                         hayStack.deleteWritablePoint(dmAutoAway["id"].toString())
                     }
                 } else {
@@ -1441,14 +1442,14 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
 
      fun temperatureModeMigration() {
         if (!PreferenceUtil.isTempModeMigrationRequired()) {
-            CcuLog.i(L.TAG_CCU_MIGRATION_UTIL,"Temperature mode migration Initiated")
+            CcuLog.i(TAG_CCU_MIGRATION_UTIL,"Temperature mode migration Initiated")
             writeValAtLevelByDomain(DomainName.temperatureMode, TunerConstants.SYSTEM_BUILDING_VAL_LEVEL,1.0)
             PreferenceUtil.setTempModeMigrationNotRequired()
         }
     }
 
     private fun migrateAnalogTypeForVavAnalog1In() {
-        CcuLog.i(L.TAG_CCU_MIGRATION_UTIL,"Migrate Analog Type for VAV Analog1In!!")
+        CcuLog.i(TAG_CCU_MIGRATION_UTIL,"Migrate Analog Type for VAV Analog1In!!")
         hayStack.readAllEntities("equip and zone and vav and domainName").forEach { equip ->
             val device = hayStack.read("device and equipRef == \"${equip["id"]}\"")
             val analog1In = hayStack.read("domainName == \"${DomainName.analog1In}\" and deviceRef == \"${device["id"]}\"")
@@ -1457,7 +1458,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                 val analog1InPoint = RawPoint.Builder().setHDict(hayStack.readHDictById(analog1In["id"].toString())).build()
                 analog1InPoint.type = getDamperTypeString(damperType.toInt())
                 hayStack.updatePoint(analog1InPoint , analog1In["id"].toString())
-                CcuLog.d(L.TAG_CCU_MIGRATION_UTIL,"Analog1In type updated for device ${device["dis"]}")
+                CcuLog.d(TAG_CCU_MIGRATION_UTIL,"Analog1In type updated for device ${device["dis"]}")
             }
         }
     }
@@ -1474,10 +1475,10 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
     }
 
     private fun migrateHisInterpolateForDevicePoints() {
-        CcuLog.i(L.TAG_CCU_MIGRATION_UTIL,"Migrate His Interpolate for Device Points!!")
+        CcuLog.i(TAG_CCU_MIGRATION_UTIL,"Migrate His Interpolate for Device Points!!")
         val devices= hayStack.readAllEntities("device and domainName and not modbus and not ccu") // DM integrated devices
         devices.forEach { device ->
-            CcuLog.d(L.TAG_CCU_MIGRATION_UTIL,"device id ${device["id"]} device name ${device["dis"]}")
+            CcuLog.d(TAG_CCU_MIGRATION_UTIL,"device id ${device["id"]} device name ${device["dis"]}")
 
             val devicePointsList = hayStack.readAllEntities("deviceRef == \"${device["id"]}\"")
             val haystackDevice = Device.Builder().setHDict(hayStack.readHDictById(device["id"].toString())).build()
@@ -1775,16 +1776,16 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
     }
 
     private fun updateMinCfmPointMaxVal(minMaxCfmDomainNames: Pair<String, String>) {
-        CcuLog.d(L.TAG_CCU_MIGRATION_UTIL,"executing updateMinCfmPointMaxVal")
+        CcuLog.d(TAG_CCU_MIGRATION_UTIL,"executing updateMinCfmPointMaxVal")
         hayStack.readAllEntities(" point and zone and config and domainName == \"${minMaxCfmDomainNames.first}\" ").forEach { minCfmMap ->
             val maxCfmVal = hayStack.readPointPriorityValByQuery(
                 " domainName == \"${minMaxCfmDomainNames.second}\" and equipRef == \"${
                     minCfmMap["equipRef"]
                 }\" "
             )
-            CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "Point value for ${minMaxCfmDomainNames.second}: $maxCfmVal")
+            CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Point value for ${minMaxCfmDomainNames.second}: $maxCfmVal")
             if (maxCfmVal != minCfmMap["maxVal"].toString().toDouble()) {
-                CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "Updating point for ${minMaxCfmDomainNames.first}")
+                CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Updating point for ${minMaxCfmDomainNames.first}")
                 hayStack.updatePoint(
                     Point.Builder()
                         .setHDict(hayStack.readHDictById(minCfmMap["id"].toString()))
@@ -2088,7 +2089,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             } catch (e : Exception) {
                 //For now, we make sure it does not stop other migrations even if this fails.
                 e.printStackTrace()
-                CcuLog.e(L.TAG_CCU_MIGRATION_UTIL, "Error in migrateBacnetIdForVavDevices $e")
+                CcuLog.e(TAG_CCU_MIGRATION_UTIL, "Error in migrateBacnetIdForVavDevices $e")
             }
         }
     }
@@ -2319,15 +2320,15 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
 
 
     private fun removeRedundantBacnetSettingPoints() {
-        CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "Removing redundant bacnet setting points")
+        CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Removing redundant bacnet setting points")
         hayStack.readAllEntities("bacnet and setting and point").forEach {
-            CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "bacnet setting points found: ${it["dis"]}. Deleting the redundant point")
+            CcuLog.d(TAG_CCU_MIGRATION_UTIL, "bacnet setting points found: ${it["dis"]}. Deleting the redundant point")
             hayStack.deleteEntity(it["id"].toString())
         }
     }
 
     private fun prangePointMigration() {
-        CcuLog.i(L.TAG_CCU_MIGRATION_UTIL, "vavAirflowCFMProportionalRange migration is started")
+        CcuLog.i(TAG_CCU_MIGRATION_UTIL, "vavAirflowCFMProportionalRange migration is started")
         CCUHsApi.getInstance().readAllEntities("equip and (vav or acb) and zone")
             .forEach { equipMap ->
                 val vavAirflowCFMProportionalRange = Domain.readPointForEquip(
@@ -2351,55 +2352,55 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                         vavAirflowCFMProportionalRange["id"].toString(), 8, false
                     )
                     CcuLog.i(
-                        L.TAG_CCU_MIGRATION_UTIL,
+                        TAG_CCU_MIGRATION_UTIL,
                         "updated value for point ${vavAirflowCFMProportionalRange["id"]} to 10"
                     )
                 }
             }
-        CcuLog.i(L.TAG_CCU_MIGRATION_UTIL, "vavAirflowCFMProportionalRange migration is complete")
+        CcuLog.i(TAG_CCU_MIGRATION_UTIL, "vavAirflowCFMProportionalRange migration is complete")
     }
 
     private fun correctPointRefForRelay2SeriesFan() {
-        CcuLog.d(L.TAG_CCU_MIGRATION_UTIL,"correctPointRefForRelay2SeriesFan execution started")
+        CcuLog.d(TAG_CCU_MIGRATION_UTIL,"correctPointRefForRelay2SeriesFan execution started")
         hayStack.readAllEntities("equip and ( profile == \"${ ProfileType.VAV_SERIES_FAN }\" or profile == \"${ ProfileType.VAV_PARALLEL_FAN }\" )  ").forEach { vavSeriesEquipMap ->
-            CcuLog.d(L.TAG_CCU_MIGRATION_UTIL,"equipName: ${vavSeriesEquipMap["dis"]} and id: ${vavSeriesEquipMap["id"]} and domainName: ${vavSeriesEquipMap["domainName"]} ")
+            CcuLog.d(TAG_CCU_MIGRATION_UTIL,"equipName: ${vavSeriesEquipMap["dis"]} and id: ${vavSeriesEquipMap["id"]} and domainName: ${vavSeriesEquipMap["domainName"]} ")
             hayStack.readId("device and equipRef == \"${ vavSeriesEquipMap["id"] }\" ")?.let { deviceId ->
                 val logicalPointId = hayStack.readId("(domainName == \"${ DomainName.seriesFanCmd }\" or domainName == \"${ DomainName.parallelFanCmd }\") and equipRef == \"${ vavSeriesEquipMap["id"] }\"")
                 val relay2PhyPointDict = hayStack.readHDict("portEnabled and domainName==\"${DomainName.relay2}\" and deviceRef== \"${deviceId}\" ")
-                CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "\tlogicalPointId: $logicalPointId and current pointRef: ${relay2PhyPointDict.get("pointRef", false)}")
+                CcuLog.d(TAG_CCU_MIGRATION_UTIL, "\tlogicalPointId: $logicalPointId and current pointRef: ${relay2PhyPointDict.get("pointRef", false)}")
                 if (relay2PhyPointDict.get("pointRef", false) != null && relay2PhyPointDict.get("pointRef").toString()
                     .replace("@", "") != logicalPointId?.replace("@", "")
                 ) {
-                    CcuLog.d(L.TAG_CCU_MIGRATION_UTIL,"\tIncorrect mapping to logical point.")
+                    CcuLog.d(TAG_CCU_MIGRATION_UTIL,"\tIncorrect mapping to logical point.")
                     val relay2PhyPoint = RawPoint.Builder().setHDict(relay2PhyPointDict).build()
                     relay2PhyPoint.pointRef = logicalPointId
                     hayStack.updatePoint(relay2PhyPoint, relay2PhyPoint.id)
                 }
             }
         }
-        CcuLog.d(L.TAG_CCU_MIGRATION_UTIL,"correctPointRefForRelay2SeriesFan execution completed")
+        CcuLog.d(TAG_CCU_MIGRATION_UTIL,"correctPointRefForRelay2SeriesFan execution completed")
     }
 
     private fun removeRedundantSmartnodeHelionodePointsForSse() {
-        CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "removeRedundantSmartnodeHelionodePointsForSse started")
+        CcuLog.d(TAG_CCU_MIGRATION_UTIL, "removeRedundantSmartnodeHelionodePointsForSse started")
         hayStack.readAllEntities("equip and (domainName == \"${ DomainName.smartnodeSSE }\" or domainName == \"${ DomainName.helionodeSSE }\")").forEach { sseEquip ->
-            CcuLog.d(L.TAG_CCU_MIGRATION_UTIL,"sseEquip name: ${sseEquip["domainName"]}, id: ${sseEquip["id"]}, dis: ${sseEquip["dis"]}")
+            CcuLog.d(TAG_CCU_MIGRATION_UTIL,"sseEquip name: ${sseEquip["domainName"]}, id: ${sseEquip["id"]}, dis: ${sseEquip["dis"]}")
             hayStack.readId("device and equipRef == \"${ sseEquip["id"]?.toString() }\"")?.let { sseDeviceId ->
                 listOf(DomainName.sensorEnergyMeter, DomainName.sensorNo2, DomainName.sensorPm10).forEach { redundantDomainName ->
                     val redundantList = hayStack.readAllEntities("point and domainName == \"${ redundantDomainName }\" and deviceRef == \"${ sseDeviceId }\"")
-                    CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "redundantDomainName= ${redundantDomainName}, redundantList size: ${redundantList.size}")
+                    CcuLog.d(TAG_CCU_MIGRATION_UTIL, "redundantDomainName= ${redundantDomainName}, redundantList size: ${redundantList.size}")
                     if(redundantList.size == 2) {
-                        CcuLog.d(L.TAG_CCU_MIGRATION_UTIL,"removing a random redundant point: ${redundantList[0]}")
+                        CcuLog.d(TAG_CCU_MIGRATION_UTIL,"removing a random redundant point: ${redundantList[0]}")
                         hayStack.deleteEntity(redundantList[0]["id"].toString())
                     }
                 }
                 hayStack.readId("point and port == \"SENSOR_VOC\" and not domainName and deviceRef == \"${ sseDeviceId }\"")?.let { vocSensorId ->
-                    CcuLog.d(L.TAG_CCU_MIGRATION_UTIL,"Found non dm sensorVOC point id: ${vocSensorId}")
+                    CcuLog.d(TAG_CCU_MIGRATION_UTIL,"Found non dm sensorVOC point id: ${vocSensorId}")
                     hayStack.deleteEntity(vocSensorId)
                 }
             }
         }
-        CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "removeRedundantSmartnodeHelionodePointsForSse completed")
+        CcuLog.d(TAG_CCU_MIGRATION_UTIL, "removeRedundantSmartnodeHelionodePointsForSse completed")
     }
 
     private fun updateHisInterpolate() {
@@ -2409,19 +2410,19 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                     Point.Builder().setHDict(point).setHisInterpolate("cov").build(),
                     point["id"].toString()
                 )
-                CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "Updated ${point["dis"]} hisInterpolate for point ${point["id"]}  to cov")
+                CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Updated ${point["dis"]} hisInterpolate for point ${point["id"]}  to cov")
             }
     }
 
     private fun recoverSourceModelTagsForOao() {
         CcuLog.d(
-            L.TAG_CCU_MIGRATION_UTIL,
+            TAG_CCU_MIGRATION_UTIL,
             "MigrationHandler.logic recoverSourceModelTagsForOao started"
         )
         hayStack.readAllHDictByQuery("equip and domainName and not sourceModel")
             .forEach { incompleteEquipDict ->
                 CcuLog.d(
-                    L.TAG_CCU_MIGRATION_UTIL,
+                    TAG_CCU_MIGRATION_UTIL,
                     "\tEquip found without source model: ${incompleteEquipDict.id()} for point" +
                             "with displayName: ${incompleteEquipDict.dis()}"
                 )
@@ -2443,14 +2444,14 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                 hayStack.updateEquip(oaoEquipBuilder.build(), incompleteEquipDict["id"].toString())
             }
         CcuLog.d(
-            L.TAG_CCU_MIGRATION_UTIL,
+            TAG_CCU_MIGRATION_UTIL,
             "MigrationHandler.logic recoverSourceModelTagsForOao ended"
         )
     }
 
     private fun correctAhuRefForBypassDamperAndCcuConfig() {
         CcuLog.d(
-            L.TAG_CCU_MIGRATION_UTIL,
+            TAG_CCU_MIGRATION_UTIL,
             "MigrationHandler.logic correctAhuRefForBypassDamper started"
         )
         hayStack.readId("system and equip and not modbus and not connect")
@@ -2460,7 +2461,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                             "domainName == \"${DomainName.ccuConfiguration}\")"
                 ).forEach { equipDict ->
                     CcuLog.d(
-                        L.TAG_CCU_MIGRATION_UTIL,
+                        TAG_CCU_MIGRATION_UTIL,
                         "MigrationHandler.correctAhuRef iterating for entity with" +
                                 " dis: ${equipDict.dis()} systemEquipId: $systemProfileEquipId and ahuRef: ${
                                     equipDict.get(
@@ -2471,7 +2472,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                     )
                     if (!equipDict.get("ahuRef", false)?.toString().equals(systemProfileEquipId)) {
                         CcuLog.d(
-                            L.TAG_CCU_MIGRATION_UTIL,
+                            TAG_CCU_MIGRATION_UTIL,
                             "MigrationHandler.correctAhuRef ahuRef discrepancy found"
                         )
                         val equipBuilder = Equip.Builder().setHDict(equipDict)
@@ -2486,7 +2487,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                 }
             }
         CcuLog.d(
-            L.TAG_CCU_MIGRATION_UTIL,
+            TAG_CCU_MIGRATION_UTIL,
             "MigrationHandler.logic correctAhuRefForBypassDamper ended"
         )
     }
@@ -2506,12 +2507,12 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             "normalizedDamper1Cmd",
             "normalizedDamper2Cmd"
         )
-        CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "Updating corrupted dab points Started")
+        CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Updating corrupted dab points Started")
         val dabEquips = hayStack.readAllEntities("equip and dab and zone and domainName")
         dabEquips.forEach {
             updatePoints(CCUHsApi.getInstance(), dabPoints, it)
         }
-        CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "Updating corrupted dab points ends")
+        CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Updating corrupted dab points ends")
 
 
         val hyperstatPoints = listOf(
@@ -2565,12 +2566,12 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             "fanOutHeatingStage3"
         )
 
-        CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "Updating corrupted hs points Started")
+        CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Updating corrupted hs points Started")
         val cupOrHpuOr2Pipe = hayStack.readAllEntities("equip and (cpu or hpu or pipe2) and hyperstat and zone and domainName")
         cupOrHpuOr2Pipe.forEach {
             updatePoints(CCUHsApi.getInstance(), hyperstatPoints, it)
         }
-        CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "Updating corrupted hs points ended")
+        CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Updating corrupted hs points ended")
 
         val ssePoints = listOf(
             "standaloneStage1Hysteresis",
@@ -2584,12 +2585,12 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             "standaloneStage1HeatingLowerOffset"
         )
 
-        CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "Updating corrupted sse points Started")
+        CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Updating corrupted sse points Started")
         val sseEquips = hayStack.readAllEntities("equip and sse and zone and domainName")
         sseEquips.forEach {
             updatePoints(CCUHsApi.getInstance(), ssePoints, it)
         }
-        CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "Updating corrupted sse points ends")
+        CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Updating corrupted sse points ends")
     }
 
     private fun updatePoints(
@@ -2621,7 +2622,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                 return@forEach
             }
 
-            CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "prev point: $point")
+            CcuLog.d(TAG_CCU_MIGRATION_UTIL, "prev point: $point")
 
             equipModel.points.find { it.domainName == point["domainName"].toString() }
                 ?.let { pointDef ->
@@ -2638,7 +2639,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                 }
 
             CcuLog.d(
-                L.TAG_CCU_MIGRATION_UTIL,
+                TAG_CCU_MIGRATION_UTIL,
                 "updated point: ${hayStack.readEntity("point and id == ${point["id"]} ")}"
             )
         }
@@ -2647,7 +2648,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
     private fun updatePLCPhysicalPoints() {
         val hayStack = CCUHsApi.getInstance()
         val plcEquips = hayStack.readAllEntities("pid and equip and domainName")
-        CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "Updating PLC physical points. count: "+plcEquips.size)
+        CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Updating PLC physical points. count: "+plcEquips.size)
         plcEquips.forEach { plcEquip ->
             val address = plcEquip["group"].toString()
             val isHelioNode = plcEquip.containsKey("helionode")
@@ -2692,7 +2693,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             config.updateTypeForAnalog1Out(config)
             config.updatePortConfiguration(hayStack, config, deviceBuilder, deviceModel)
         }
-        CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "Updating PLC physical points completed")
+        CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Updating PLC physical points completed")
     }
 
     /*
@@ -2750,12 +2751,12 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
     }
 
     private fun updateRelay2Port(ccuHsApi: CCUHsApi) {
-        CcuLog.i(L.TAG_CCU_MIGRATION_UTIL, "updateRelay2Port portEnabled status")
+        CcuLog.i(TAG_CCU_MIGRATION_UTIL, "updateRelay2Port portEnabled status")
 
         val vavEquips = ccuHsApi.readAllEntities("equip and vav and not system and not acb")
 
         vavEquips.forEach { equipMap ->
-            CcuLog.i(L.TAG_CCU_MIGRATION_UTIL, "Migrate -> " + equipMap["dis"].toString())
+            CcuLog.i(TAG_CCU_MIGRATION_UTIL, "Migrate -> " + equipMap["dis"].toString())
             val equip = Equip.Builder().setHashMap(equipMap).build()
             val domainEquip = VavEquip(equip.id)
             val address: Short = equip.group.toShort()
@@ -2763,7 +2764,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             devicePorts?.forEach { port ->
                 val reheatType = domainEquip.reheatType.readPriorityVal().toInt()
                 CcuLog.i(
-                    L.TAG_CCU_MIGRATION_UTIL, "id: ${port.id}  port domainName: ${port.domainName}" +
+                    TAG_CCU_MIGRATION_UTIL, "id: ${port.id}  port domainName: ${port.domainName}" +
                             " pointRef: ${port.pointRef} enabled: ${port.enabled} profile: ${equip.profile}: reheatType: $reheatType"
                 )
 
@@ -2777,7 +2778,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                         port.pointRef = null
                     }
                     CcuLog.i(
-                        L.TAG_CCU_MIGRATION_UTIL,
+                        TAG_CCU_MIGRATION_UTIL,
                         "id: ${port.id} Port: ${port.displayName} is updated with reheatType is $reheatType and is enabled? ${port.enabled}"
                     )
                     ccuHsApi.updatePoint(port, port.id)
@@ -2883,15 +2884,15 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         val ccuEquip = hayStack.readEntityByDomainName(DomainName.ccuConfiguration)
 
         if (ccuEquip.size == 0) {
-            CcuLog.e(L.TAG_CCU_MIGRATION_UTIL, "CCU Configuration Equip not found")
+            CcuLog.e(TAG_CCU_MIGRATION_UTIL, "CCU Configuration Equip not found")
             return
         }
         if (ccuName == null) {
-            CcuLog.e(L.TAG_CCU_MIGRATION_UTIL, "CCU name is null")
+            CcuLog.e(TAG_CCU_MIGRATION_UTIL, "CCU name is null")
             return
         }
         if (ccuEquip.containsKey(Tags.PROFILE)) {
-            CcuLog.i(L.TAG_CCU_MIGRATION_UTIL, "CCU Configuration Equip already has profile")
+            CcuLog.i(TAG_CCU_MIGRATION_UTIL, "CCU Configuration Equip already has profile")
             return
         }
         val systemEquip = hayStack.readEntity("equip and system and not modbus and not connectModule")
@@ -2908,7 +2909,26 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         ccuConfigEquip.id = ccuEquipId
 
         hayStack.updateEquip(ccuConfigEquip, ccuConfigEquip.id)
-        CcuLog.i(L.TAG_CCU_MIGRATION_UTIL, "CCU Configuration Equip updated with profile")
+        CcuLog.i(TAG_CCU_MIGRATION_UTIL, "CCU Configuration Equip updated with profile")
+    }
+
+    /*In v2.17.3 CCU has created non-DM sensor points, this script handles removing of those*/
+    fun removeRedundantDevicePoints() {
+        val devices = hayStack.readAllEntities("device and node and (smartnode or helionode or hyperstat)")
+        devices.forEach { device ->
+            val deviceRef = device["id"].toString()
+
+            val points = hayStack.readAllEntities(
+                "point and not domainName and " +
+                        "(port == \"" + Port.SENSOR_PM10 + "\" or port == \""+Port.SENSOR_ENERGY_METER +
+                        "\" or" + " port == \""+Port.SENSOR_NO +"\") and deviceRef == \"$deviceRef\"")
+
+            points.forEach { point ->
+                hayStack.deleteEntity(point["id"].toString())
+                CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Deleted redundant point:" +
+                        " ${point["dis"]} id :${point["dis"]}  for device: ${device["dis"]}")
+            }
+        }
     }
 
     private fun migrateDevicePoints(ccuHsApi: CCUHsApi) {

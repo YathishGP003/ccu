@@ -13,7 +13,6 @@ object HyperStatDeviceCutOverMapping {
             "SENSOR_SOUND" to "soundSensor",
             "SENSOR_PRESSURE" to "pressureSensor",
             "SENSOR_CO2" to "co2Sensor",
-            "SENSOR_NO" to "noSensor",
             "SENSOR_CO2_EQUIVALENT" to "co2EquivalentSensor",
             "SENSOR_VOC" to "vocSensor",
 

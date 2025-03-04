@@ -302,6 +302,7 @@ public class Globals {
                 /*checkBacnetIdMigrationRequired migration script will update source model version
                  of system Equip, This will affect DM TO DM migration*/
                 migrationHandler.checkBacnetIdMigrationRequired();
+                migrationHandler.removeRedundantDevicePoints();
                 migrationHandler.initAddressBand();
             } catch (Exception e) {
                 //Catch ignoring any exception here to avoid app from not loading in case of an init failure.

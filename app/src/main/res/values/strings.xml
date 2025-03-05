@@ -1162,6 +1162,7 @@
     <string name="txt_system_profile">System Profile</string>
     <string name="txt_occupancy_status">Occupancy Status:</string>
     <string name="txt_equipment_status">Equipment Status:</string>
+    <string name="txt_equipment_status_CN1">CN 1 Status:</string>
     <string name="txt_schedule">Schedule:</string>
     <string name="txt_intrinsic_schedule">Intrinsic Schedule</string>
     <string name="txt_building_occupancy">Building Occupancy</string>

@@ -580,7 +580,7 @@ enum class ControlType {
  * This enum list is picked from the model & Need to update when any changes in the model for this enum
  */
 enum class ConnectControlType {
-    LOAD_BASED_COOLING_CONTROL, LOAD_BASED_HEATING_CONTROL, LOAD_BASED_FAN_CONTROL, COMPOSITE, CO2_BASED_DAMPER_CONTROL
+    LOAD_BASED_COOLING_CONTROL, LOAD_BASED_HEATING_CONTROL, LOAD_BASED_FAN_CONTROL, COMPOSITE, CO2_BASED_DAMPER_CONTROL, OAO_DAMPER, RETURN_DAMPER
 }
 
 data class Option(val index: Int, val value: String, val dis: String? = null)

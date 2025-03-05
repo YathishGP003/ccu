@@ -18,9 +18,13 @@ import static a75f.io.logic.bo.building.system.ExternalAhuUtilKt.getConfigValue;
 import static a75f.io.logic.bo.building.system.ExternalAhuUtilKt.getModbusPointValue;
 import static a75f.io.logic.bo.building.system.ExternalAhuUtilKt.getOperatingMode;
 import static a75f.io.logic.bo.building.system.ExternalAhuUtilKt.getSetPoint;
+import static a75f.io.logic.bo.building.system.util.AdvancedAhuUtilKt.getAdvancedAhuSystemEquip;
+import static a75f.io.logic.bo.building.system.util.AdvancedAhuUtilKt.getConnectEquip;
+import static a75f.io.logic.bo.building.system.util.AdvancedAhuUtilKt.isConnectModuleExist;
 import static a75f.io.logic.bo.util.UnitUtils.StatusCelsiusVal;
 import static a75f.io.logic.bo.util.UnitUtils.fahrenheitToCelsiusTwoDecimal;
 import static a75f.io.logic.bo.util.UnitUtils.isCelsiusTunerAvailableStatus;
+import static a75f.io.messaging.handler.AdvanceAhuReconfigHandlerKt.isAdvanceAhuV2Profile;
 
 import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
@@ -128,13 +132,11 @@ import a75f.io.renatus.modbus.util.UtilSourceKt;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.HeartBeatUtil;
 import a75f.io.renatus.util.Prefs;
-import a75f.io.renatus.util.RxjavaUtil;
 import a75f.io.renatus.util.SystemProfileUtil;
 import a75f.io.renatus.views.CustomCCUSwitch;
 import a75f.io.renatus.views.CustomSpinnerDropDownAdapter;
 import a75f.io.renatus.views.OaoArc;
 import a75f.io.util.ExecutorTask;
-import io.reactivex.rxjava3.disposables.Disposable;
 
 /**
  * Created by samjithsadasivan isOn 8/7/17.
@@ -261,6 +263,11 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 	TextView satCurrent;
 	TextView dualSatCurrent;
 	TextView dspSetPoint;
+	TextView EquipStatusForCn1;
+	TextView textViewCn1;
+	TextView textViewCM;
+
+	LinearLayout linearLayoutCn;
 	TextView dspCurrent;
 	TextView opMode;
 	TextView coolingSp;
@@ -735,6 +742,10 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 		mainLayout = view.findViewById(R.id.main_layout);
 		lastUpdated = view.findViewById(R.id.lastUpdated);
 		scheduleType = view.findViewById(R.id.scheduleType);
+		EquipStatusForCn1 = view.findViewById(R.id.equipmentStatusCN);
+		textViewCn1 =  view.findViewById(R.id.textview_CN);
+		textViewCM = view.findViewById(R.id.textviewCM);
+		linearLayoutCn = view.findViewById(R.id.linear_layout_cn);
 		if(prefs.getBoolean("REGISTRATION")){
 			lastUpdated.setVisibility(View.VISIBLE);
 			scheduleType.setVisibility(View.VISIBLE);
@@ -1064,9 +1075,19 @@ public class SystemFragment extends Fragment implements AdapterView.OnItemSelect
 			getActivity().runOnUiThread(() -> {
 				String colorHex = CCUUiUtil.getColorCode(getContext());
 				String status;
+				String cnStatus;
 				if (isDMSupportProfile()) {
-					status = CCUHsApi.getInstance()
-							.readDefaultStrVal("system and domainName == \"" + DomainName.equipStatusMessage + "\"");
+					if (isAdvanceAhuV2Profile() && isConnectModuleExist()) {
+						textViewCM.setText("CM Status:");
+						status = getAdvancedAhuSystemEquip().getEquipStatusMessage().readDefaultStrVal();
+						cnStatus = getConnectEquip().getEquipStatusMessage().readDefaultStrVal();
+						EquipStatusForCn1.setText(StringUtil.isBlank(cnStatus)? Html.fromHtml("<font color='"+colorHex+"'> System OFF</font>") : Html.fromHtml(cnStatus.replace("ON","<font color='"+colorHex+"'>ON</font>").replace("OFF","<font color='"+colorHex+"'>OFF</font>")));
+					} else {
+						textViewCn1.setVisibility(View.GONE);
+						linearLayoutCn.setVisibility(View.GONE);
+						status = CCUHsApi.getInstance().readDefaultStrVal("system  and domainName == \"" + DomainName.equipStatusMessage + "\"");
+					}
+
 				} else {
 					status = CCUHsApi.getInstance().readDefaultStrVal("system and status and message");
 				}

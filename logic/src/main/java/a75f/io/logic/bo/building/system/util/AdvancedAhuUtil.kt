@@ -13,6 +13,8 @@ import a75f.io.domain.util.ModelLoader.getVavAdvancedAhuConnectModelV2
 import a75f.io.domain.util.ModelNames
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
+import a75f.io.logic.bo.building.system.AdvancedAhuAlgoHandler
+import a75f.io.logic.bo.building.system.AdvancedAhuAnalogOutAssociationType
 import a75f.io.logic.bo.building.system.SystemMode
 import a75f.io.logic.bo.building.system.dab.DabAdvancedAhu
 import a75f.io.logic.bo.building.system.vav.VavAdvancedAhu
@@ -178,5 +180,126 @@ fun isConnectModuleExist(): Boolean {
     if(L.ccu().systemProfile is DabAdvancedAhu)
         return getDabConnectEquip().isNotEmpty()
     return false
+}
+
+ fun getConnectModuleSystemStatus(connectEquip: ConnectModuleEquip, advancedAhuImpl: AdvancedAhuAlgoHandler, coolingLoopOutput :Double, analogControlsEnabled : Set<AdvancedAhuAnalogOutAssociationType>): String {
+    val systemEquip = getAdvancedAhuSystemEquip()
+    if (advancedAhuImpl.isEmergencyShutOffEnabledAndActive(
+            connectEquip1 = connectEquip,
+        )
+    )
+        return "Emergency Shut Off mode is active"
+    val connectModuleSystemStatus = StringBuilder().apply {
+        append(if (connectEquip.loadFanStage1.readHisVal() > 0) "1" else "")
+        append(if (connectEquip.loadFanStage2.readHisVal() > 0) ",2" else "")
+        append(if (connectEquip.loadFanStage3.readHisVal() > 0) ",3" else "")
+        append(if (connectEquip.loadFanStage4.readHisVal() > 0) ",4" else "")
+        append(if (connectEquip.loadFanStage5.readHisVal() > 0) ",5" else "")
+    }
+    if (connectModuleSystemStatus.isNotEmpty()) {
+        if (connectModuleSystemStatus[0] == ',') {
+            connectModuleSystemStatus.deleteCharAt(0)
+        }
+        connectModuleSystemStatus.insert(0, "Fan Stage ")
+        connectModuleSystemStatus.append(" ON ")
+    }
+    val coolingStatus = StringBuilder().apply {
+        append(if (connectEquip.loadCoolingStage1.readHisVal() > 0) "1" else "")
+        append(if (connectEquip.loadCoolingStage2.readHisVal() > 0) ",2" else "")
+        append(if (connectEquip.loadCoolingStage3.readHisVal() > 0) ",3" else "")
+        append(if (connectEquip.loadCoolingStage4.readHisVal() > 0) ",4" else "")
+        append(if (connectEquip.loadCoolingStage5.readHisVal() > 0) ",5" else "")
+    }
+    if (coolingStatus.isNotEmpty()) {
+        if (coolingStatus[0] == ',') {
+            coolingStatus.deleteCharAt(0)
+        }
+        coolingStatus.insert(0, "Cooling Stage ")
+        coolingStatus.append(" ON ")
+    }
+
+    val heatingStatus = StringBuilder().apply {
+        append(if (connectEquip.loadHeatingStage1.readHisVal() > 0) "1" else "")
+        append(if (connectEquip.loadHeatingStage2.readHisVal() > 0) ",2" else "")
+        append(if (connectEquip.loadHeatingStage3.readHisVal() > 0) ",3" else "")
+        append(if (connectEquip.loadHeatingStage4.readHisVal() > 0) ",4" else "")
+        append(if (connectEquip.loadHeatingStage5.readHisVal() > 0) ",5" else "")
+    }
+    if (heatingStatus.isNotEmpty()) {
+        if (heatingStatus[0] == ',') {
+            heatingStatus.deleteCharAt(0)
+        }
+        heatingStatus.insert(0, "Heating Stage ")
+        heatingStatus.append(" ON ")
+    }
+
+    if (coolingLoopOutput > 0 && L.ccu().oaoProfile != null && L.ccu().oaoProfile.isEconomizingAvailable) {
+        connectModuleSystemStatus.insert(0, "Free Cooling Used | ")
+    }
+
+    val humidifierStatus = getHumidifierStatus(connectEquip1 = connectEquip)
+    val dehumidifierStatus = getDehumidifierStatus(connectEquip1 = connectEquip)
+
+    val analogStatus = StringBuilder()
+    if ((analogControlsEnabled.contains(AdvancedAhuAnalogOutAssociationType.LOAD_FAN)) && connectEquip.fanLoopOutput.readHisVal() > 0) {
+        analogStatus.append("| Fan ON ")
+    }
+    if ((systemEquip.mechanicalCoolingAvailable.readHisVal() > 0) && ((analogControlsEnabled.contains(
+            AdvancedAhuAnalogOutAssociationType.LOAD_COOLING
+        ))) && connectEquip.coolingLoopOutput.readHisVal() > 0
+    ) {
+        analogStatus.append("| Cooling ON ")
+    }
+    if ((systemEquip.mechanicalCoolingAvailable.readHisVal() > 0) && ((analogControlsEnabled.contains(
+            AdvancedAhuAnalogOutAssociationType.LOAD_HEATING
+        )) && connectEquip.heatingLoopOutput.readHisVal() > 0)
+    ) {
+        analogStatus.append("| Heating ON ")
+    }
+    if (analogStatus.isNotEmpty()) {
+        analogStatus.insert(0, " | Analog ")
+    }
+    connectModuleSystemStatus.append(coolingStatus)
+        .append(heatingStatus)
+        .append(analogStatus)
+
+    return if (connectModuleSystemStatus.toString() == "") "System OFF$humidifierStatus$dehumidifierStatus" else connectModuleSystemStatus.toString() + humidifierStatus + dehumidifierStatus
+}
+
+ fun getHumidifierStatus(
+    systemEquip: AdvancedHybridSystemEquip? = null,
+    connectEquip1: ConnectModuleEquip? = null
+): String {
+    if (systemEquip != null && systemEquip.humidifierEnable.pointExists()) {
+        return if (systemEquip.humidifierEnable.readHisVal() > 0) {
+            " | Humidifier ON "
+
+        } else " | Humidifier OFF "
+    }
+    if (connectEquip1 != null && connectEquip1.humidifierEnable.pointExists()) {
+        return if (connectEquip1.humidifierEnable.readHisVal() > 0) {
+            " | Humidifier ON "
+        } else " | Humidifier OFF "
+    }
+    // just for the case when dehumidifierEnable point is not available
+    return ""
+}
+ fun getDehumidifierStatus(
+    systemEquip: AdvancedHybridSystemEquip? = null,
+    connectEquip1: ConnectModuleEquip? = null
+): String {
+    if (systemEquip != null && systemEquip.dehumidifierEnable.pointExists()) {
+        return if (systemEquip.dehumidifierEnable.readHisVal() > 0) {
+            " | DeHumidifier ON "
+
+        } else " | DeHumidifier OFF "
+    }
+    if (connectEquip1 != null && connectEquip1.dehumidifierEnable.pointExists()) {
+        return if (connectEquip1.dehumidifierEnable.readHisVal() > 0) {
+            " | DeHumidifier ON "
+        } else " | DeHumidifier OFF "
+    }
+    // just for the case when humidifierEnable point is not available
+    return ""
 }
 

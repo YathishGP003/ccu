@@ -264,12 +264,13 @@ class AdvancedAhuAlgoHandler (val equip: SystemEquip) {
     }
 
     fun isEmergencyShutOffEnabledAndActive(
-            systemEquip: AdvancedHybridSystemEquip, connectEquip1: ConnectModuleEquip
+            systemEquip: AdvancedHybridSystemEquip ?= null, connectEquip1: ConnectModuleEquip? = null
     ): Boolean {
-        if (isEmergencyShutOffEnabledAndActivated(systemEquip)) {
+
+        if ((systemEquip != null) && isEmergencyShutOffEnabledAndActivated(systemEquip)) {
             return true
         }
-        if (isConnectEmergencyShutOffEnabledAndActivated(connectEquip1)) {
+        if ((connectEquip1 != null) && isConnectEmergencyShutOffEnabledAndActivated(connectEquip1)) {
             return true
         }
         return false

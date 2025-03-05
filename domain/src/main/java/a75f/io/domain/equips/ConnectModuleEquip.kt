@@ -278,6 +278,7 @@ class ConnectModuleEquip (equipRef : String) : DomainEquip(equipRef) {
     val analog3MaxHeatingComposite = Point(DomainName.analog3MaxHeatingComposite, equipRef)
     val analog4MinHeatingComposite = Point(DomainName.analog4MinHeatingComposite, equipRef)
     val analog4MaxHeatingComposite = Point(DomainName.analog4MaxHeatingComposite, equipRef)
+    val equipStatusMessage = Point(DomainName.equipStatusMessage,equipRef)
 
     var stageUpTimer = 0.0
     var stageDownTimer = 0.0

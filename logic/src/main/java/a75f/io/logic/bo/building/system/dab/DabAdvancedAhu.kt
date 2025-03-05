@@ -46,7 +46,11 @@ import a75f.io.logic.bo.building.system.updateTemperatureSensorDerivedPoints
 import a75f.io.logic.bo.building.system.util.AhuSettings
 import a75f.io.logic.bo.building.system.util.AhuTuners
 import a75f.io.logic.bo.building.system.util.UserIntentConfig
+import a75f.io.logic.bo.building.system.util.getConnectModuleSystemStatus
+import a75f.io.logic.bo.building.system.util.getDehumidifierStatus
+import a75f.io.logic.bo.building.system.util.getHumidifierStatus
 import a75f.io.logic.bo.building.system.util.getModulatedOutput
+import a75f.io.logic.bo.building.system.util.isConnectModuleExist
 import a75f.io.logic.bo.building.system.util.needToUpdateConditioningMode
 import a75f.io.logic.bo.building.system.util.roundOff
 import a75f.io.logic.tuners.TunerUtil
@@ -484,8 +488,15 @@ class DabAdvancedAhu : DabSystemProfile() {
 
     private fun updateSystemStatus() {
         val systemStatus = statusMessage
+        val connectModuleStatus = getConnectModuleSystemStatus(
+            systemEquip.connectEquip1,
+            advancedAhuImpl,
+            systemCoolingLoopOp,
+            analogControlsEnabled
+        )
         val scheduleStatus = ScheduleManager.getInstance().systemStatusString
         CcuLog.d(L.TAG_CCU_SYSTEM, "StatusMessage: $systemStatus")
+        CcuLog.d(L.TAG_CCU_SYSTEM, "connect module StatusMessage: $connectModuleStatus")
         CcuLog.d(L.TAG_CCU_SYSTEM, "ScheduleStatus: $scheduleStatus")
         if (systemEquip.equipStatusMessage.readDefaultStrVal() != systemStatus) {
             systemEquip.equipStatusMessage.writeDefaultVal(systemStatus)
@@ -494,17 +505,22 @@ class DabAdvancedAhu : DabSystemProfile() {
         if (systemEquip.equipScheduleStatus.readDefaultStrVal() != scheduleStatus) {
             systemEquip.equipScheduleStatus.writeDefaultVal(scheduleStatus)
         }
+        if (isConnectModuleExist()) {
+            if (systemEquip.connectEquip1.equipStatusMessage.readDefaultStrVal() != connectModuleStatus) {
+                systemEquip.connectEquip1.equipStatusMessage.writeDefaultVal(connectModuleStatus)
+            }
+        }
     }
 
 
     override fun getStatusMessage(): String {
         if (advancedAhuImpl.isEmergencyShutOffEnabledAndActive(systemEquip.cmEquip, systemEquip.connectEquip1)) return "Emergency Shut Off mode is active"
         val systemStatus = StringBuilder().apply {
-            append(if (systemEquip.cmEquip.loadFanStage1.readHisVal() > 0 || systemEquip.cmEquip.fanPressureStage1Feedback.readHisVal() > 0 || systemEquip.connectEquip1.loadFanStage1.readHisVal() > 0) "1" else "")
-            append(if (systemEquip.cmEquip.loadFanStage2.readHisVal() > 0 || systemEquip.cmEquip.fanPressureStage2Feedback.readHisVal() > 0 || systemEquip.connectEquip1.loadFanStage2.readHisVal() > 0) ",2" else "")
-            append(if (systemEquip.cmEquip.loadFanStage3.readHisVal() > 0 || systemEquip.cmEquip.fanPressureStage3Feedback.readHisVal() > 0 || systemEquip.connectEquip1.loadFanStage3.readHisVal() > 0) ",3" else "")
-            append(if (systemEquip.cmEquip.loadFanStage4.readHisVal() > 0 || systemEquip.cmEquip.fanPressureStage4Feedback.readHisVal() > 0 || systemEquip.connectEquip1.loadFanStage4.readHisVal() > 0) ",4" else "")
-            append(if (systemEquip.cmEquip.loadFanStage5.readHisVal() > 0 || systemEquip.cmEquip.fanPressureStage5Feedback.readHisVal() > 0 || systemEquip.connectEquip1.loadFanStage5.readHisVal() > 0) ",5" else "")
+            append(if (systemEquip.cmEquip.loadFanStage1.readHisVal() > 0 || systemEquip.cmEquip.fanPressureStage1Feedback.readHisVal() > 0) "1" else "")
+            append(if (systemEquip.cmEquip.loadFanStage2.readHisVal() > 0 || systemEquip.cmEquip.fanPressureStage2Feedback.readHisVal() > 0) ",2" else "")
+            append(if (systemEquip.cmEquip.loadFanStage3.readHisVal() > 0 || systemEquip.cmEquip.fanPressureStage3Feedback.readHisVal() > 0) ",3" else "")
+            append(if (systemEquip.cmEquip.loadFanStage4.readHisVal() > 0 || systemEquip.cmEquip.fanPressureStage4Feedback.readHisVal() > 0) ",4" else "")
+            append(if (systemEquip.cmEquip.loadFanStage5.readHisVal() > 0 || systemEquip.cmEquip.fanPressureStage5Feedback.readHisVal() > 0) ",5" else "")
         }
         if (systemStatus.isNotEmpty()) {
             if (systemStatus[0] == ',') {
@@ -514,11 +530,11 @@ class DabAdvancedAhu : DabSystemProfile() {
             systemStatus.append(" ON ")
         }
         val coolingStatus = StringBuilder().apply {
-            append(if (systemEquip.cmEquip.loadCoolingStage1.readHisVal() > 0 || systemEquip.cmEquip.satCoolingStage1Feedback.readHisVal() > 0 || systemEquip.connectEquip1.loadCoolingStage1.readHisVal() > 0) "1" else "")
-            append(if (systemEquip.cmEquip.loadCoolingStage2.readHisVal() > 0 || systemEquip.cmEquip.satCoolingStage2Feedback.readHisVal() > 0 || systemEquip.connectEquip1.loadCoolingStage2.readHisVal() > 0) ",2" else "")
-            append(if (systemEquip.cmEquip.loadCoolingStage3.readHisVal() > 0 || systemEquip.cmEquip.satCoolingStage3Feedback.readHisVal() > 0 || systemEquip.connectEquip1.loadCoolingStage3.readHisVal() > 0) ",3" else "")
-            append(if (systemEquip.cmEquip.loadCoolingStage4.readHisVal() > 0 || systemEquip.cmEquip.satCoolingStage4Feedback.readHisVal() > 0 || systemEquip.connectEquip1.loadCoolingStage4.readHisVal() > 0) ",4" else "")
-            append(if (systemEquip.cmEquip.loadCoolingStage5.readHisVal() > 0 || systemEquip.cmEquip.satCoolingStage5Feedback.readHisVal() > 0 || systemEquip.connectEquip1.loadCoolingStage5.readHisVal() > 0) ",5" else "")
+            append(if (systemEquip.cmEquip.loadCoolingStage1.readHisVal() > 0 || systemEquip.cmEquip.satCoolingStage1Feedback.readHisVal() > 0) "1" else "")
+            append(if (systemEquip.cmEquip.loadCoolingStage2.readHisVal() > 0 || systemEquip.cmEquip.satCoolingStage2Feedback.readHisVal() > 0) ",2" else "")
+            append(if (systemEquip.cmEquip.loadCoolingStage3.readHisVal() > 0 || systemEquip.cmEquip.satCoolingStage3Feedback.readHisVal() > 0) ",3" else "")
+            append(if (systemEquip.cmEquip.loadCoolingStage4.readHisVal() > 0 || systemEquip.cmEquip.satCoolingStage4Feedback.readHisVal() > 0) ",4" else "")
+            append(if (systemEquip.cmEquip.loadCoolingStage5.readHisVal() > 0 || systemEquip.cmEquip.satCoolingStage5Feedback.readHisVal() > 0) ",5" else "")
         }
         if (coolingStatus.isNotEmpty()) {
             if (coolingStatus[0] == ',') {
@@ -529,11 +545,11 @@ class DabAdvancedAhu : DabSystemProfile() {
         }
 
         val heatingStatus = StringBuilder().apply {
-            append(if (systemEquip.cmEquip.loadHeatingStage1.readHisVal() > 0 || systemEquip.cmEquip.satHeatingStage1Feedback.readHisVal() > 0 || systemEquip.connectEquip1.loadHeatingStage1.readHisVal() > 0) "1" else "")
-            append(if (systemEquip.cmEquip.loadHeatingStage2.readHisVal() > 0 || systemEquip.cmEquip.satHeatingStage2Feedback.readHisVal() > 0 || systemEquip.connectEquip1.loadHeatingStage2.readHisVal() > 0) ",2" else "")
-            append(if (systemEquip.cmEquip.loadHeatingStage3.readHisVal() > 0 || systemEquip.cmEquip.satHeatingStage3Feedback.readHisVal() > 0 || systemEquip.connectEquip1.loadHeatingStage3.readHisVal() > 0) ",3" else "")
-            append(if (systemEquip.cmEquip.loadHeatingStage4.readHisVal() > 0 || systemEquip.cmEquip.satHeatingStage4Feedback.readHisVal() > 0 || systemEquip.connectEquip1.loadHeatingStage4.readHisVal() > 0) ",4" else "")
-            append(if (systemEquip.cmEquip.loadHeatingStage5.readHisVal() > 0 || systemEquip.cmEquip.satHeatingStage5Feedback.readHisVal() > 0 || systemEquip.connectEquip1.loadHeatingStage5.readHisVal() > 0) ",5" else "")
+            append(if (systemEquip.cmEquip.loadHeatingStage1.readHisVal() > 0 || systemEquip.cmEquip.satHeatingStage1Feedback.readHisVal() > 0) "1" else "")
+            append(if (systemEquip.cmEquip.loadHeatingStage2.readHisVal() > 0 || systemEquip.cmEquip.satHeatingStage2Feedback.readHisVal() > 0) ",2" else "")
+            append(if (systemEquip.cmEquip.loadHeatingStage3.readHisVal() > 0 || systemEquip.cmEquip.satHeatingStage3Feedback.readHisVal() > 0) ",3" else "")
+            append(if (systemEquip.cmEquip.loadHeatingStage4.readHisVal() > 0 || systemEquip.cmEquip.satHeatingStage4Feedback.readHisVal() > 0) ",4" else "")
+            append(if (systemEquip.cmEquip.loadHeatingStage5.readHisVal() > 0 || systemEquip.cmEquip.satHeatingStage5Feedback.readHisVal() > 0) ",5" else "")
         }
         if (heatingStatus.isNotEmpty()) {
             if (heatingStatus[0] == ',') {
@@ -547,8 +563,8 @@ class DabAdvancedAhu : DabSystemProfile() {
             systemStatus.insert(0, "Free Cooling Used | ")
         }
 
-        val humidifierStatus = getHumidifierStatus()
-        val dehumidifierStatus = getDehumidifierStatus()
+        val humidifierStatus = getHumidifierStatus(systemEquip = systemEquip.cmEquip)
+        val dehumidifierStatus = getDehumidifierStatus(systemEquip = systemEquip.cmEquip)
 
         val analogStatus = StringBuilder()
         if ((analogControlsEnabled.contains(AdvancedAhuAnalogOutAssociationType.LOAD_FAN) && systemFanLoopOp > 0)
@@ -572,26 +588,6 @@ class DabAdvancedAhu : DabSystemProfile() {
         systemStatus.append(coolingStatus).append(heatingStatus).append(analogStatus)
 
         return if (systemStatus.toString() == "") "System OFF$humidifierStatus$dehumidifierStatus" else systemStatus.toString() + humidifierStatus + dehumidifierStatus
-    }
-
-    private fun getHumidifierStatus(): String {
-        return if (systemEquip.cmEquip.humidifierEnable.pointExists()) {
-            if (systemEquip.cmEquip.humidifierEnable.readHisVal() > 0) {
-                " | Humidifier ON "
-            } else " | Humidifier OFF "
-        } else {
-            ""
-        }
-    }
-
-    private fun getDehumidifierStatus(): String {
-        return if (systemEquip.cmEquip.dehumidifierEnable.pointExists()) {
-            if (systemEquip.cmEquip.dehumidifierEnable.readHisVal() > 0) {
-                " | Dehumidifier ON "
-            } else " | Dehumidifier OFF "
-        } else {
-            ""
-        }
     }
 
     fun updateStagesSelected() {

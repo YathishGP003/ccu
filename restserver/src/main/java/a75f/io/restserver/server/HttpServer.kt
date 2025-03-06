@@ -571,9 +571,16 @@ class HttpServer {
 
     private fun getModifiedQuery(query: String) : String {
         var modifiedQuery = query.replace("\\", "")
-        modifiedQuery = fixInvertedCommas(modifiedQuery)
+        modifiedQuery = fixInvertedCommas(addDomainNameSupport(modifiedQuery))
         CcuLog.i(HTTP_SERVER, " /modifiedQuery  : $modifiedQuery")
         return modifiedQuery
+    }
+
+
+    // remove @ for domain name checks
+    private fun addDomainNameSupport(input: String): String {
+        val output = input.replace(Regex("(domainName\\s*=+\\s*)@"), "$1")
+        return output
     }
 
     private fun fixInvertedCommas(input: String): String {

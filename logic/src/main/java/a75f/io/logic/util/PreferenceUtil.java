@@ -104,6 +104,7 @@ public class PreferenceUtil {
     private static final String MIGRATE_BACNET_NETWORK_INTERFACE = "migrateBacnetNetworkInterface";
     private static final String DEVICE_POINTS_MIGRATION_STATUS = "devicePointsMigrationStatus";
     private static final String ADDRESS_BAND_INIT_COMPLETED = "addressBandInitCompleted";
+    private static final String MIGRATE_UPDATE_HSS_POINTS = "migrateUpdateHssPoints";
 
     public static void setContext(Context c) {
         context= c;
@@ -850,4 +851,12 @@ public class PreferenceUtil {
         setBooleanPreference(DEVICE_POINTS_MIGRATION_STATUS, true);
     }
 
+
+    public static boolean getMigrateHssPoints() {
+        return getBooleanPreference(MIGRATE_UPDATE_HSS_POINTS);
+    }
+
+    public static void setMigrateHssPoints() {
+        setBooleanPreference(MIGRATE_UPDATE_HSS_POINTS, true);
+    }
 }

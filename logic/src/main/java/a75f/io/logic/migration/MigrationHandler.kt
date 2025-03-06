@@ -347,6 +347,11 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             }
         }
 
+        if(!PreferenceUtil.getMigrateHssPoints()) {
+            updateHSSPoints()
+            PreferenceUtil.setMigrateHssPoints()
+        }
+
         hayStack.scheduleSync()
     }
 
@@ -3004,5 +3009,34 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                     hayStack.updatePoint(rawPoint, rawPoint.id)
                 }
         }
+    }
+
+    private fun updateHSSPoints(){
+        val hssPoints = listOf(
+            "exhaustFanStage1",
+            "exhaustFanStage2",
+            "coolingStage1",
+            "coolingStage2",
+            "coolingStage3",
+            "heatingStage1",
+            "heatingStage2",
+            "heatingStage3",
+            "fanOutCoolingStage1",
+            "fanOutCoolingStage2",
+            "fanOutCoolingStage3",
+            "fanOutHeatingStage1",
+            "fanOutHeatingStage2",
+            "fanOutHeatingStage3",
+            "exhaustFanStage1Threshold",
+            "exhaustFanStage2Threshold"
+        )
+
+
+        CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "Updating corrupted HSS points Started")
+        val hssEquips = hayStack.readAllEntities("equip and zone and domainName == \"hyperstatSplitCPU\"")
+        hssEquips.forEach {
+            updatePoints(CCUHsApi.getInstance(), hssPoints, it)
+        }
+        CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "Updating corrupted HSS points ends")
     }
 }

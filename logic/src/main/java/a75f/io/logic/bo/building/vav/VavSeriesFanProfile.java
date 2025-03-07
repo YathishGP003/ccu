@@ -150,6 +150,11 @@ public class VavSeriesFanProfile extends VavProfile
             handleDeadband(systemMode, reheatEnabled);
             if (heatingLoop.getEnabled()) {
                 loopOp = (int) heatingLoop.getLoopOutput(setTempHeating, roomTemp);
+                loopOp = Math.max(0, loopOp);
+                if (conditioning == SystemController.State.COOLING && isHeatingAvailable(systemMode, reheatEnabled)) {
+                    updateReheatDuringSystemCooling(loopOp, vavEquip.getId());
+                    loopOp =  getGPC36AdjustedHeatingLoopOp(loopOp, roomTemp, vavEquip.getDischargeAirTemp().readHisVal(), equip);
+                }
             } else if (coolingLoop.getEnabled()) {
                 loopOp = (int) coolingLoop.getLoopOutput(roomTemp, setTempCooling);
             }

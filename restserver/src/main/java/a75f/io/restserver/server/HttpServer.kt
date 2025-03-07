@@ -44,8 +44,10 @@ import org.json.JSONArray
 import org.json.JSONObject
 import org.projecthaystack.HGrid
 import org.projecthaystack.HGridBuilder
+import org.projecthaystack.HNum
 import org.projecthaystack.HRef
 import org.projecthaystack.HRow
+import org.projecthaystack.HStr
 import org.projecthaystack.UnknownRecException
 import org.projecthaystack.io.HZincReader
 import org.projecthaystack.io.HZincWriter
@@ -433,7 +435,11 @@ class HttpServer {
                 /*
                 URL     : 192.168.1.5:5001/writeManyDefaultValues
                 Body    :
-                   2fe44a56-919f-46b7-8741-1ea0467aeb78 = 2,
+                   [
+                    { "id": "95100eed-a06e-45c7-97e6-5a599cf434a6", "value": "","level": 8},
+                    { "id": "95100eed-a06e-45c7-97e6-5a599cf434a6", "value": "","level": 8},
+                    { "id": "95100eed-a06e-45c7-97e6-5a599cf434a6", "value": "","level": 8},
+                ]
                  */
 
                 post("/writeManyDefaultValues") {
@@ -441,28 +447,27 @@ class HttpServer {
                     CcuLog.i(HTTP_SERVER, " /writeManyDefaultValues  : $body")
                     if (body.isNotEmpty()) {
                         try {
-                            val dataItems = JSONObject(body)
+                            val dataItems = JSONArray(body)
                             val idsStatus = JSONArray()
                             val haystack = CCUHsApi.getInstance()
                             if (dataItems.length() > 0) {
-                                dataItems.keys().forEach { key ->
-                                    if (key.isEmpty()) {
-                                        return@forEach
-                                    }
-                                    val id = key.trim()
-                                    val value = dataItems.get(id)
+                                for (i in 0 until dataItems.length()) {
+                                    val dataItem = dataItems.getJSONObject(i)
+                                    val id = dataItem.getString("id")
+                                    val value = dataItem.get("value")
+                                    val level = dataItem.getInt("level")
                                     val entity = haystack.readMapById(id)
                                     if (entity.isEmpty()) {
                                         idsStatus.put(JSONObject().put(id, "Id not found"))
                                     } else if (entity.containsKey(Tags.WRITABLE)) {
                                         when (value) {
                                             is Number -> {
-                                                haystack.writeDefaultValById(id, value.toDouble())
+                                                haystack.pointWrite(HRef.copy(id), level , "CCU_DASHBOARD", HNum.make(value as Double), HNum.make(0))
                                                 haystack.writeHisValById(id, haystack.readPointPriorityVal(id))
                                                 idsStatus.put(JSONObject().put(id, "Updated successfully"))
                                             }
                                             is String -> {
-                                                haystack.writeDefaultValById(id, value)
+                                                haystack.pointWrite(HRef.copy(id), level , "CCU_DASHBOARD", HStr.make(value), HNum.make(0))
                                                 idsStatus.put(JSONObject().put(id, "Updated successfully"))
                                             }
                                             else -> {}

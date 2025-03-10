@@ -677,7 +677,8 @@ public class Globals {
             HashMap<Object, Object> addressBand = (HashMap<Object, Object>) Domain.readPoint(DomainName.addressBand);
             CcuLog.i(Domain.LOG_TAG, "AddressBand fetching from point" + addressBand);
             if (addressBand != null && addressBand.size() > 0) {
-                return CCUHsApi.getInstance().readDefaultStrVal(addressBand.get("id").toString());
+                return String.valueOf((int) CCUHsApi.getInstance().
+                        readDefaultValById(addressBand.get("id").toString()).doubleValue());
             }
         }
         return null;

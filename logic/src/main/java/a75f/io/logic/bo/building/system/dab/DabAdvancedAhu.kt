@@ -11,10 +11,12 @@ import a75f.io.domain.api.Point
 import a75f.io.domain.api.readPoint
 import a75f.io.domain.equips.DabAdvancedHybridSystemEquip
 import a75f.io.logger.CcuLog
+import a75f.io.logic.BuildConfig
 import a75f.io.logic.Globals
 import a75f.io.logic.L
 import a75f.io.logic.autocommission.AutoCommissioningUtil
 import a75f.io.logic.bo.building.EpidemicState
+import a75f.io.logic.bo.building.dab.DabProfile
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.hvac.Stage
 import a75f.io.logic.bo.building.schedules.ScheduleManager
@@ -98,7 +100,14 @@ class DabAdvancedAhu : DabSystemProfile() {
     val cmRelayStatus = BitSet()
     val analogStatus = arrayOf(0.0, 0.0, 0.0, 0.0, 0.0)
 
-    override fun getProfileName(): String = "DAB Advanced Hybrid AHU v2"
+    override fun getProfileName(): String {
+        return if (BuildConfig.BUILD_TYPE.equals(DabProfile.CARRIER_PROD, ignoreCase = true)) {
+            "VVT-C Advanced Hybrid AHU v2"
+        } else {
+            "DAB Advanced Hybrid AHU v2"
+        }
+    }
+
 
     override fun getProfileType(): ProfileType = ProfileType.SYSTEM_DAB_ADVANCED_AHU
 

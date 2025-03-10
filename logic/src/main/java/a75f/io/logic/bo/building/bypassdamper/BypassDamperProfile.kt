@@ -5,6 +5,7 @@ import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Equip
 import a75f.io.api.haystack.util.hayStack
 import a75f.io.domain.BypassDamperEquip
+import a75f.io.domain.api.DomainName
 import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.util.ModelLoader
 import a75f.io.logger.CcuLog
@@ -79,7 +80,7 @@ class BypassDamperProfile(equipRef: String, addr: Short): ZoneProfile() {
 
             val staticPressureSensor = bdEquip.ductStaticPressureSensor.readHisVal()
             val staticPressureSp = bdEquip.ductStaticPressureSetpoint.readPriorityVal()
-            if (systemFanLoopOp > 0.0) {
+            if (systemFanLoopOp > 0.0 || isSystemFanOn()) {
                 if (!bypassLoop.enabled) bypassLoop.setEnabled()
 
                 bypassLoopOp = bypassLoop.getLoopOutput(staticPressureSensor, staticPressureSp)
@@ -102,6 +103,15 @@ class BypassDamperProfile(equipRef: String, addr: Short): ZoneProfile() {
         bdEquip.bypassDamperPos.writeHisVal(bypassDamper.currentPosition.toDouble())
 
     }
+
+    /**
+     * FanStage1 might be ON during occupancy even when fanLoopOp is zero.
+     */
+    private fun isSystemFanOn() : Boolean {
+        return hayStack.readHisValByQuery("point and system and domainName == \"" + DomainName.fanStage1 + "\"") > 0.0 ||
+                hayStack.readHisValByQuery("point and system and domainName == \"" + DomainName.fanEnable + "\"") > 0.0
+    }
+
 
     override fun isZoneDead(): Boolean {
         val equip = equip

@@ -5,8 +5,8 @@ import a75f.io.api.haystack.Equip
 import a75f.io.api.haystack.HSUtil
 import a75f.io.device.HyperSplit
 import a75f.io.device.HyperSplit.HyperSplitSettingsMessage4_t
+import a75f.io.domain.HyperStatSplitEquip
 import a75f.io.domain.api.DomainName
-import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.CpuControlType
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.CpuEconAnalogOutAssociation
@@ -841,6 +841,13 @@ class HyperSplitSettingsUtil {
                 }
             }
             return stagedFanSpeedBuilder.build()
+        }
+
+        fun getMisSettings(equipRef: String): Int {
+            val equip = HyperStatSplitEquip(equipRef)
+            val disableTouch = equip.disableTouch.readDefaultVal().toInt()
+            val enableBrightness = equip.enableBrightness.readDefaultVal().toInt()
+            return (disableTouch shl 1) or (enableBrightness shl 2)  // bit 0: enableExternal10kTemperatureSensor sending always 0
         }
 
         private fun getAnalogOutMapping(

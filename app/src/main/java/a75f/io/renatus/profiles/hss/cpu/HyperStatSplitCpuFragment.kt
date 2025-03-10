@@ -146,9 +146,10 @@ class HyperStatSplitCpuFragment : HyperStatSplitFragment(), OnPairingCompleteLis
                 item { AnalogOutDynamicConfig(viewModel,Modifier.padding(50.dp,0.dp)) }
 
                 item { ZoneOAOConfig(viewModel,Modifier.padding(50.dp,0.dp)) }
-
+                item { DividerRow() }
                 item { DisplayInDeviceConfig(viewModel,Modifier.padding(50.dp,0.dp)) }
-
+                item { DividerRow() }
+                item { MiscSettingConfig(viewModel) }
                 item { SaveConfig(viewModel,Modifier.padding(50.dp,25.dp)) }
             }
         }

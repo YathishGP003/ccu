@@ -138,7 +138,10 @@ class HyperStatV2CpuFragment : HyperStatFragmentV2() {
             Configurations(Modifier.padding(50.dp,0.dp)),
             AnalogMinMaxConfigurations(Modifier.padding(50.dp,0.dp)),
             ThresholdTargetConfig(viewModel,Modifier.padding(50.dp,0.dp)),
+            DividerRow(),
             DisplayInDeviceConfig(viewModel,Modifier.padding(50.dp,0.dp)),
+            DividerRow(),
+            MisSettingConfig(viewModel),
             SaveConfig(viewModel,Modifier.padding(50.dp,25.dp))
         )
     }

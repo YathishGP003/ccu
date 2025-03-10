@@ -23,6 +23,13 @@ class MonitoringViewState : HyperStatV2ViewState() {
                 this.co2Config.target = configuration.zoneCO2Target.currentVal
                 this.pm2p5Config.target = configuration.zonePM2p5Target.currentVal
                 this.pm10Config.target = configuration.zonePM10Target.currentVal
+
+                this.humidityDisplay = configuration.displayHumidity.enabled
+                this.co2Display = configuration.displayCO2.enabled
+                this.pm25Display = configuration.displayPM2p5.enabled
+
+                this.disableTouch = configuration.disableTouch.enabled
+                this.enableBrightness = configuration.enableBrightness.enabled
             }
         }
 
@@ -45,6 +52,13 @@ class MonitoringViewState : HyperStatV2ViewState() {
                 this.zoneCO2Target.currentVal = state.co2Config.target
                 this.zonePM2p5Target.currentVal = state.pm2p5Config.target
                 this.zonePM10Target.currentVal = state.pm10Config.target
+
+                this.displayHumidity.enabled = state.humidityDisplay
+                this.displayCO2.enabled = state.co2Display
+                this.displayPM2p5.enabled = state.pm25Display
+
+                this.disableTouch.enabled = state.disableTouch
+                this.enableBrightness.enabled = state.enableBrightness
             }
         }
     }

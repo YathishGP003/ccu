@@ -74,6 +74,9 @@ abstract class HyperStatConfiguration(
     lateinit var displayCO2: EnableConfig
     lateinit var displayPM2p5: EnableConfig
 
+    lateinit var disableTouch : EnableConfig
+    lateinit var enableBrightness : EnableConfig
+
     abstract fun getActiveConfiguration(): HyperStatConfiguration
 
     override fun getEnableConfigs(): List<EnableConfig> {
@@ -101,6 +104,9 @@ abstract class HyperStatConfiguration(
             add(displayHumidity)
             add(displayCO2)
             add(displayPM2p5)
+
+            add(disableTouch)
+            add(enableBrightness)
 
         }
     }
@@ -150,6 +156,8 @@ abstract class HyperStatConfiguration(
         zoneCO2Threshold.currentVal = equip.co2Threshold.readDefaultVal()
         zoneCO2Target.currentVal = equip.co2Target.readDefaultVal()
         zonePM2p5Target.currentVal = equip.pm25Target.readDefaultVal()
+        disableTouch.enabled = equip.disableTouch.readDefaultVal() == 1.0
+        enableBrightness.enabled = equip.enableBrightness.readDefaultVal() == 1.0
     }
 
     private fun relayConfiguration(equip: HyperStatEquip) {
@@ -256,6 +264,10 @@ abstract class HyperStatConfiguration(
         displayHumidity = getDefaultEnableConfig(DomainName.enableHumidityDisplay, model)
         displayCO2 = getDefaultEnableConfig(DomainName.enableCO2Display, model)
         displayPM2p5 = getDefaultEnableConfig(DomainName.enablePm25Display, model)
+
+        disableTouch = getDefaultEnableConfig(DomainName.disableTouch, model)
+        enableBrightness = getDefaultEnableConfig(DomainName.enableBrightness, model)
+
         isDefault = true
         return this
     }

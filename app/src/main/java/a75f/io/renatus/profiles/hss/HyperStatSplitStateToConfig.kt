@@ -92,6 +92,9 @@ fun updateHyperStatSplitConfigFromState(config: HyperStatSplitProfileConfigurati
     config.displayHumidity.enabled = state.displayHumidity
     config.displayCO2.enabled = state.displayCO2
     config.displayPM2p5.enabled = state.displayPM2p5
+
+    config.disableTouch.enabled = state.disableTouch
+    config.enableBrightness.enabled = state.enableBrightness
 }
 
 fun updateDynamicPoints(config: HyperStatSplitCpuProfileConfiguration, state: HyperStatSplitCpuState) {

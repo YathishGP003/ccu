@@ -105,6 +105,8 @@ open class HyperStatEquip(equipRef : String) : DomainEquip(equipRef) {
     val enableHumidityDisplay = Point(DomainName.enableHumidityDisplay, equipRef)
     val enableCo2Display = Point(DomainName.enableCO2Display, equipRef)
     val enablePm25Display = Point(DomainName.enablePm25Display, equipRef)
+    val disableTouch = Point(DomainName.disableTouch, equipRef)
+    val enableBrightness = Point(DomainName.enableBrightness, equipRef)
 
     val standaloneTemperatureProportionalRange = Point(DomainName.standaloneTemperatureProportionalRange, equipRef)
     val standaloneTemperatureIntegralTime = Point(DomainName.standaloneTemperatureIntegralTime, equipRef)

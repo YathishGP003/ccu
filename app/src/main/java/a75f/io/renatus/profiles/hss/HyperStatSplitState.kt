@@ -68,6 +68,9 @@ open class HyperStatSplitState {
     var displayCO2 by mutableStateOf(false)
     var displayPM2p5 by mutableStateOf(false)
 
+    var disableTouch by mutableStateOf(false)
+    var enableBrightness by mutableStateOf(false)
+
     var testStateRelay1 by mutableStateOf(false)
     var testStateRelay2 by mutableStateOf(false)
     var testStateRelay3 by mutableStateOf(false)

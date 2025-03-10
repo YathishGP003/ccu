@@ -21,6 +21,7 @@ import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.oao.OAOProfile
 import a75f.io.logic.bo.building.oao.OAOProfileConfiguration
+import a75f.io.logic.bo.building.system.SystemProfile
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.FloorPlanFragment
 import a75f.io.renatus.SystemConfigFragment
@@ -73,6 +74,7 @@ class OAOViewModel : ViewModel() {
     lateinit var enhancedVentilationOutsideDamperMinOpenList: List<String>
     private lateinit var context: Context
     lateinit var hayStack: CCUHsApi
+    val systemProfile: SystemProfile = L.ccu().systemProfile
 
     fun init(bundle: Bundle, context: Context, hayStack: CCUHsApi) {
         deviceAddress = bundle.getShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR)
@@ -222,8 +224,10 @@ class OAOViewModel : ViewModel() {
             )
         }
         deleteUnusedSystemPoints()
-        if (L.ccu().systemProfile.profileType != ProfileType.SYSTEM_DEFAULT) {
-            L.ccu().systemProfile.setOutsideTempCoolingLockoutEnabled(CCUHsApi.getInstance(), true)
+        if (systemProfile.profileType != ProfileType.SYSTEM_DEFAULT && L.ccu().oaoProfile == null) {
+            if (!systemProfile.isOutsideTempCoolingLockoutEnabled(hayStack)) {
+                systemProfile.setOutsideTempCoolingLockoutEnabled(hayStack, true)
+            }
         }
         L.ccu().oaoProfile = oaoProfile
     }
@@ -274,6 +278,10 @@ class OAOViewModel : ViewModel() {
                 CCUHsApi.getInstance().resetCcuReady()
 
                 try {
+                    //disable the cooling lockout when oao is unpaired
+                    if (systemProfile.isOutsideTempCoolingLockoutEnabled(hayStack)) {
+                        systemProfile.setOutsideTempCoolingLockoutEnabled(hayStack, false)
+                    }
                     val oao = CCUHsApi.getInstance().readEntity("equip and oao")
                     hayStack.deleteEntityTree(oao["id"].toString())
                     val sysDevices = HSUtil.getDevices("SYSTEM") + HSUtil.getDevices("@SYSTEM")

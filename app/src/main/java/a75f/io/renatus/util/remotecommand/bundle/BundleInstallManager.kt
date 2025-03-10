@@ -21,6 +21,7 @@ import android.app.DownloadManager
 import android.content.Context
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
+import android.database.Cursor
 import android.net.Uri
 import android.os.Build
 import android.util.Log
@@ -30,6 +31,7 @@ import java.io.File
 import java.lang.Thread.sleep
 import java.util.Timer
 import java.util.TimerTask
+import kotlin.time.Duration.Companion.hours
 
 interface BundleInstallListener {
     fun onBundleInstallMessage(installState: BundleInstallManager.BundleInstallState,
@@ -81,6 +83,8 @@ class BundleInstallManager: BundleInstallListener {
     // Singleton management
     companion object {
         const val TAG = "CCU_BUNDLE"
+        val connectionTimeOut = 1.hours.inWholeSeconds
+        var downloadPausedTime = 0L
 
         @Volatile
         private var instance: BundleInstallManager? = null
@@ -579,21 +583,60 @@ class BundleInstallManager: BundleInstallListener {
                 val status: Int = cursor.getInt(statusColumn)
                 when (status) {
                     DownloadManager.STATUS_FAILED -> {
+                        downloadPausedTime = 0
                         throw DownloadFailedException("Download failed")
                     }
 
                     DownloadManager.STATUS_PAUSED, DownloadManager.STATUS_PENDING -> {
-                        sendBundleInstallMessage(BundleInstallState.DOWNLOAD_PAUSED, progress, "(App $appNbr/$totalApps) Downloading $appName App...")
+                        downloadPausedTime ++
+                        CcuLog.i(TAG, "Download paused from ${downloadPausedTime / 60} minutes")
+
+                        if (downloadPausedTime >= connectionTimeOut) {
+                            CcuLog.i(
+                                TAG, "Download paused from connection time out limit" +
+                                        " ${connectionTimeOut / 60} minutes, so cancelling and  re-trying download"
+                            )
+
+                            downloadPausedTime = 0
+                            manager.remove(downloadId)
+
+                            downloadFile(
+                                appName,
+                                appNbr,
+                                totalApps,
+                                apkFile
+                            )
+                            finishDownload = true
+
+                            val sizeIndex = cursor.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES)
+                            val total: Long = cursor.getLong(sizeIndex)
+                            if (total >= 0) {
+                                val updatedProgress = getUpdatedProgress(cursor, appNbr, totalApps, total)
+                                if (updatedProgress != progress) {
+                                    progress = updatedProgress
+                                    sendBundleInstallMessage(
+                                        BundleInstallState.DOWNLOADING,
+                                        progress,
+                                        "(App $appNbr/$totalApps) Downloading $appName App..."
+                                    )
+                                }
+                            }
+                        } else {
+                            sendBundleInstallMessage(
+                                BundleInstallState.DOWNLOAD_PAUSED,
+                                progress,
+                                "(App $appNbr/$totalApps) Downloading $appName App..."
+                            )
+                        }
+
                     }
 
                     DownloadManager.STATUS_RUNNING -> {
+                        downloadPausedTime = 0
                         val sizeIndex = cursor.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES)
                         val total: Long = cursor.getLong(sizeIndex)
                         if (total >= 0) {
-                            val bytesSoFar = cursor.getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR)
-                            val downloaded: Long = cursor.getLong(bytesSoFar)
-
-                            val updatedProgress = (((appNbr.toDouble()-1F) / totalApps * 100F) + ((downloaded * 100F / total).toInt() / totalApps)).toInt()
+                            val updatedProgress = getUpdatedProgress(cursor, appNbr, totalApps, total)
                             if (updatedProgress != progress) {
                                 progress = updatedProgress
                                 sendBundleInstallMessage(BundleInstallState.DOWNLOADING, progress, "(App $appNbr/$totalApps) Downloading $appName App...")
@@ -602,17 +645,31 @@ class BundleInstallManager: BundleInstallListener {
                     }
 
                     DownloadManager.STATUS_SUCCESSFUL -> {
+                        downloadPausedTime = 0
                         progress = 100
                         finishDownload = true
                     }
                 }
+            } else {
+                CcuLog.i(TAG, "Download cursor not found")
+                return
             }
 
-            // Sleep a bit so that we aren't just hammering the download manager
-            sleep(2)
+            // Sleep a second so that we aren't just hammering the download manager
+            // And sleeping for second also helps to increment the downloadPausedTime
+            sleep(1000)
         }
 
         return
+    }
+
+    private fun getUpdatedProgress(cursor: Cursor, appNbr: Int, totalApps: Int, total: Long): Int {
+        val bytesSoFar =
+            cursor.getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR)
+        val downloaded: Long = cursor.getLong(bytesSoFar)
+        val updatedProgress =
+            (((appNbr.toDouble() - 1F) / totalApps * 100F) + ((downloaded * 100F / total).toInt() / totalApps)).toInt()
+        return updatedProgress
     }
 
     /***

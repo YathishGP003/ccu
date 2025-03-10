@@ -1,12 +1,19 @@
 package a75f.io.logic.bo.building.oao
 
+import a75f.io.api.haystack.CCUHsApi
+import a75f.io.api.haystack.Device
 import a75f.io.domain.OAOEquip
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.config.EnableConfig
 import a75f.io.domain.config.ProfileConfiguration
 import a75f.io.domain.config.ValueConfig
+import a75f.io.domain.logic.DeviceBuilder
+import a75f.io.logic.bo.building.dab.getDevicePointDict
+import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType
+import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.definitions.ProfileType
+import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import io.seventyfivef.ph.core.Tags
 
@@ -149,5 +156,69 @@ class OAOProfileConfiguration(
         return mutableListOf<EnableConfig>().apply {
             add(usePerRoomCO2Sensing)
         }
+    }
+
+    fun updateDevicePoints(
+        hayStack: CCUHsApi,
+        config: OAOProfileConfiguration,
+        deviceBuilder: DeviceBuilder,
+        deviceModel: SeventyFiveFDeviceDirective,
+        isReconfig : Boolean = false
+    ) {
+        val deviceEntityId =
+            hayStack.readEntity("device and addr == \"${config.nodeAddress}\"")["id"].toString()
+        val device = Device.Builder().setHDict(hayStack.readHDictById(deviceEntityId)).build()
+
+        fun updateDevicePoint(domainName: String, port: String, analogType: Any) {
+            val pointDef = deviceModel.points.find { it.domainName == domainName }
+            pointDef?.let {
+                val pointDict = getDevicePointDict(domainName, deviceEntityId, hayStack).apply {
+                    this["port"] = port
+                    this["analogType"] = analogType
+                }
+                deviceBuilder.updatePoint(it, config, device, pointDict)
+            }
+        }
+
+        //Update analog input points
+        updateDevicePoint(DomainName.analog1In, Port.ANALOG_IN_ONE.name, 5)
+        updateDevicePoint(
+            DomainName.analog2In,
+            Port.ANALOG_IN_TWO.name,
+            8 + config.currentTransformerType.currentVal
+        )
+
+        //Update analog output points
+        updateDevicePoint(
+            DomainName.analog1Out,
+            Port.ANALOG_OUT_ONE.name,
+            "${config.outsideDamperMinDrive.currentVal} - ${config.outsideDamperMaxDrive.currentVal}"
+        )
+        updateDevicePoint(
+            DomainName.analog2Out,
+            Port.ANALOG_OUT_TWO.name,
+            "${config.returnDamperMinDrive.currentVal} - ${config.returnDamperMaxDrive.currentVal}"
+        )
+
+        // not updating below points if reconfiguring
+        if(isReconfig)
+            return
+
+        //Update TH input points
+        updateDevicePoint(DomainName.th1In, Port.TH1_IN.name, 0)
+        updateDevicePoint(DomainName.th2In, Port.TH2_IN.name, 0)
+
+        //Update relay points
+        updateDevicePoint(
+            DomainName.relay1,
+            Port.RELAY_ONE.name,
+            OutputRelayActuatorType.NormallyClose.displayName
+        )
+        updateDevicePoint(
+            DomainName.relay2,
+            Port.RELAY_TWO.name,
+            OutputRelayActuatorType.NormallyClose.displayName
+        )
+
     }
 }

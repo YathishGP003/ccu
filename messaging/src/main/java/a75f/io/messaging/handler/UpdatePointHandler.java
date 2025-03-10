@@ -305,6 +305,11 @@ public class UpdatePointHandler implements MessageHandler
         if (localPoint.getMarkers().contains(Tags.VRV)) {
             VrvControlMessageCache.getInstance().setControlsPending(Integer.parseInt(localPoint.getGroup()));
         }
+
+        if (localPoint.getMarkers().contains(Tags.OAO)) {
+            OaoReconfigHandlerKt.updateOaoDevicePoints(msgObject, localPoint);
+            hayStack.scheduleSync();
+        }
     }
     
     /**

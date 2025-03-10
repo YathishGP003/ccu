@@ -70,6 +70,7 @@ import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType
 import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.definitions.ReheatType
+import a75f.io.logic.bo.building.hyperstat.profiles.util.getConfiguration
 import a75f.io.logic.bo.building.hyperstat.v2.configs.CpuConfiguration
 import a75f.io.logic.bo.building.hyperstat.v2.configs.HpuConfiguration
 import a75f.io.logic.bo.building.hyperstat.v2.configs.MonitoringConfiguration
@@ -114,8 +115,8 @@ import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDevicePointDef
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import io.seventyfivef.ph.core.TagType
 import org.joda.time.DateTime
-import org.projecthaystack.HDateTime
 import org.json.JSONObject
+import org.projecthaystack.HDateTime
 import org.projecthaystack.HDict
 import org.projecthaystack.HDictBuilder
 import org.projecthaystack.HGrid
@@ -350,6 +351,11 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         if(!PreferenceUtil.getMigrateHssPoints()) {
             updateHSSPoints()
             PreferenceUtil.setMigrateHssPoints()
+        }
+
+        if (!PreferenceUtil.getRecoverCpuFromCorrecption()) {
+            remigrateCpuPoint()
+            PreferenceUtil.setRecoverCpuFromCorrecption()
         }
 
         hayStack.scheduleSync()
@@ -1590,7 +1596,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
     }
 
 
-    private fun doHSCPUDMMigration() {
+    fun doHSCPUDMMigration() {
         val hyperStatCPUEquip = hayStack.readAllEntities("equip and hyperstat and cpu and $not_external_model_query")
             .filter { it["domainName"] == null }
             .toList()
@@ -2933,6 +2939,47 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                 CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Deleted redundant point:" +
                         " ${point["dis"]} id :${point["dis"]}  for device: ${device["dis"]}")
             }
+        }
+    }
+
+    private fun remigrateCpuPoint() {
+        val hayStack = CCUHsApi.getInstance()
+        val nonMigratedPoints: List<java.util.HashMap<Any, Any>> =
+            hayStack.readAllEntities("point and not domainName and hyperstat")
+        if (nonMigratedPoints.isNotEmpty()) {
+            val migrationHandler = MigrationHandler(CCUHsApi.getInstance())
+            migrationHandler.doHSCPUDMMigration()
+        } else {
+            CcuLog.d(TAG_CCU_MIGRATION_UTIL, "No non migrated points found for equip ")
+        }
+
+        val hyperStatCPUEquip =
+            hayStack.readAllEntities("equip and hyperstat and cpu and $not_external_model_query")
+        val equipBuilder = ProfileEquipBuilder(hayStack)
+        val deviceModel = ModelLoader.getHyperStatDevice() as SeventyFiveFDeviceDirective
+        val model = ModelLoader.getHyperStatCpuModel()
+        val entityMapper = EntityMapper(model as SeventyFiveFProfileDirective)
+        val deviceBuilder = DeviceBuilder(hayStack, entityMapper)
+
+        hyperStatCPUEquip.forEach { equip ->
+            val equipId = equip["id"].toString()
+            val config = getConfiguration(equipId)?.getActiveConfiguration()
+            val deviceDis = "${hayStack.siteName}-${deviceModel.name}-${config!!.nodeAddress}"
+            equipBuilder.updateEquipAndPoints(
+                config,
+                model,
+                hayStack.getSite()!!.id,
+                equip["dis"].toString(),
+                true
+            )
+            deviceBuilder.updateDeviceAndPoints(
+                config,
+                deviceModel,
+                equip["id"].toString(),
+                hayStack.site!!.id,
+                deviceDis
+            )
+            config.apply { setPortConfiguration(nodeAddress, getRelayMap(), getAnalogMap()) }
         }
     }
 

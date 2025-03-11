@@ -2,9 +2,9 @@ package a75f.io.renatus.bacnet
 
 import a75f.io.api.haystack.bacnet.parser.BacnetProperty
 import a75f.io.api.haystack.bacnet.parser.BacnetSelectedValue
-import a75f.io.logic.util.bacnet.BacnetConfigConstants
 import a75f.io.logger.CcuLog
 import a75f.io.logic.bo.building.definitions.ProfileType
+import a75f.io.logic.util.bacnet.BacnetConfigConstants
 import a75f.io.renatus.BASE.BaseDialogFragment
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.R
@@ -211,6 +211,7 @@ class BacNetSelectModelView : BaseDialogFragment() {
                       ModelSelected()
                       DeviceDetailsReadOnly()
                       PortDetailsReadOnlyUpdate()
+                      DeviceNetworkDetailsReadOnlyUpdate()
                   }
 
                 }
@@ -275,9 +276,11 @@ class BacNetSelectModelView : BaseDialogFragment() {
                         // manual mode
                         DeviceDetails()
                         PortDetails()
+                        DeviceNetworkDetails()
                     }else{
                         DeviceDetailsReadOnly()
                         PortDetailsReadOnly()
+                        DeviceNetworkDetailsReadOnly()
                     }
 
                     Row(
@@ -901,6 +904,52 @@ class BacNetSelectModelView : BaseDialogFragment() {
     }
 
     @Composable
+    fun DeviceNetworkDetails() {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(PaddingValues(bottom = 5.dp)),
+            horizontalArrangement = Arrangement.Start,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(0.5f) // Ensures the Box takes 50% of the Row's width
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(PaddingValues(bottom = 0.dp)),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                    ) {
+                        LabelTextView("Device Network", fontSize = 22)
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                    ) {
+                        EditableTextFieldWhiteBgUnderline(
+                            "Enter Device Network Number",
+                            "Invalid DNET Number",
+                            false,
+                            onTextChanged = {
+                                CcuLog.d("BacNetSelectModelView", "device network val-->$it")
+                                viewModel.dnet.value = it
+                            })
+                    }
+                }
+            }
+        }
+    }
+
+
+
+    @Composable
     fun PortDetailsReadOnly() {
 
         Row(
@@ -966,6 +1015,44 @@ class BacNetSelectModelView : BaseDialogFragment() {
     }
 
     @Composable
+    fun DeviceNetworkDetailsReadOnly() {
+
+        Row(
+            modifier = Modifier
+                .padding(PaddingValues(bottom = 5.dp)),
+            horizontalArrangement = Arrangement.Start,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(0.5f)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(PaddingValues(bottom = 0.dp)),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                    ) {
+                        LabelTextView("Device Network", fontSize = 22)
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                    ) {
+                        LabelTextView(viewModel.dnet.value, fontSize = 22)
+                    }
+                }
+            }
+        }
+    }
+
+    @Composable
     fun PortDetailsReadOnlyUpdate() {
 
         Row(
@@ -1024,6 +1111,44 @@ class BacNetSelectModelView : BaseDialogFragment() {
                             .fillMaxWidth()
                     ) {
                         LabelTextView(viewModel.destinationMacAddress.value, fontSize = 22)
+                    }
+                }
+            }
+        }
+    }
+
+    @Composable
+    fun DeviceNetworkDetailsReadOnlyUpdate() {
+
+        Row(
+            modifier = Modifier
+                .padding(PaddingValues(bottom = 5.dp)),
+            horizontalArrangement = Arrangement.Start,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(0.5f)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(PaddingValues(bottom = 0.dp)),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                    ) {
+                        LabelTextView("Device Network", fontSize = 22)
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth()
+                    ) {
+                        LabelTextView(viewModel.dnet.value, fontSize = 22)
                     }
                 }
             }

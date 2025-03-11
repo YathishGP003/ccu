@@ -3343,6 +3343,9 @@ public class CCUHsApi
     public void writeDefaultStrValByDomainName(String domainName, String val) {
         writeDefaultVal("point and domainName == \""+domainName+"\"", val);
     }
+    public Double readDefaultValByDomainName(String domainName) {
+        return readDefaultVal("point and domainName == \""+domainName+"\"");
+    }
 
     public HashMap<Object, Object> readEntityByDomainName (String domainName) {
         return readEntity("domainName == \""+domainName+"\"");

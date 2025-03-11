@@ -216,7 +216,7 @@ public class CCUUtils {
 			PackageInfo info = manager.getPackageInfo(Globals.getInstance().getApplicationContext().getPackageName(), 0);
 			String appVersion = info.versionName;
 			String migrationVersion = appVersion.substring(appVersion.lastIndexOf('_') + 1);
-			CCUDiagEquip diagEquip = Domain.INSTANCE.checkCCUEquipInitialisedAndGet();
+			CCUDiagEquip diagEquip = Domain.INSTANCE.getDomainDiagEquip();
 			if (diagEquip != null){
 				diagEquip.getMigrationVersion().writeDefaultVal(migrationVersion);
 			}

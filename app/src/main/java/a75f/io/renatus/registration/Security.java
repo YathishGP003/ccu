@@ -393,10 +393,10 @@ public class Security extends Fragment {
             {
                 textViewTap.setText(getString(R.string.taptochange));
             }else {
+                togglePassword.setChecked(false);
+                prefs.setBoolean(setKey, false);
                 textViewTap.setText(getString(R.string.taptoset));
             }
-            togglePassword.setChecked(false);
-            prefs.setBoolean(setKey, false);
             alertDialog.dismiss();
         });
 

@@ -132,7 +132,10 @@ class HyperStatV2Pipe2Fragment : HyperStatFragmentV2() {
                 item { Configurations(Modifier.padding(50.dp,0.dp)) }
                 item { AnalogMinMaxConfigurations(Modifier.padding(50.dp,0.dp)) }
                 item { ThresholdTargetConfig(viewModel,Modifier.padding(50.dp,0.dp)) }
+                item { DividerRow() }
                 item { DisplayInDeviceConfig(viewModel,Modifier.padding(50.dp,0.dp)) }
+                item { DividerRow() }
+                item { MisSettingConfig(viewModel) }
                 item { SaveConfig(viewModel,Modifier.padding(50.dp,25.dp)) }
             }
         }

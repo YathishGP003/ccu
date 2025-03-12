@@ -13,6 +13,7 @@ import a75f.io.renatus.composables.RelayConfiguration
 import a75f.io.renatus.composables.TempOffsetPicker
 import a75f.io.renatus.composables.rememberPickerState
 import a75f.io.renatus.compose.BoldStyledTextView
+import a75f.io.renatus.compose.ComposeUtil
 import a75f.io.renatus.compose.ComposeUtil.Companion.greyColor
 import a75f.io.renatus.compose.ComposeUtil.Companion.primaryColor
 import a75f.io.renatus.compose.SaveTextView
@@ -319,7 +320,7 @@ abstract class HyperStatFragmentV2 : BaseDialogFragment(), OnPairingCompleteList
 
         val colors = SwitchDefaults.colors(checkedThumbColor = Color.White, uncheckedThumbColor = Color.White, uncheckedIconColor = greyColor, uncheckedTrackColor = greyColor, checkedIconColor = primaryColor, checkedTrackColor = primaryColor, uncheckedBorderColor = greyColor, checkedBorderColor = primaryColor)
         Column(modifier = modifier.padding(start = 25.dp, top = 25.dp)) {
-            BoldStyledTextView("DISPLAY IN DEVICE HOME SCREEN", fontSize = 20)
+            BoldStyledTextView("Display in device home screen", fontSize = 20)
             Spacer(modifier = Modifier.height(10.dp))
 
             Row(modifier = Modifier
@@ -393,6 +394,90 @@ abstract class HyperStatFragmentV2 : BaseDialogFragment(), OnPairingCompleteList
         }
     }
 
+    @Composable
+    fun MisSettingConfig(viewModel: HyperStatViewModel) {
+        var disableTouch by remember { mutableStateOf(viewModel.viewState.value.disableTouch) }
+        var enableBrightness by remember { mutableStateOf(viewModel.viewState.value.enableBrightness) }
+        val colors = SwitchDefaults.colors(
+            checkedThumbColor = Color.White,
+            uncheckedThumbColor = Color.White,
+            uncheckedIconColor = greyColor,
+            uncheckedTrackColor = greyColor,
+            checkedIconColor = primaryColor,
+            checkedTrackColor = primaryColor,
+            uncheckedBorderColor = greyColor,
+            checkedBorderColor = primaryColor
+        )
+
+        Column(modifier = Modifier.padding(start = 25.dp, top = 25.dp)) {
+            BoldStyledTextView("Misc Settings", fontSize = 20)
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 10.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .weight(4f)
+                        .padding(top = 10.dp)
+                ) {
+                    StyledTextView(text = "Disable Touch", fontSize = 20)
+                }
+                Box(modifier = Modifier.weight(1f)) {
+                    Switch(checked = disableTouch, colors = colors, onCheckedChange = {
+                        disableTouch = it
+                        viewModel.viewState.value.disableTouch = it
+
+                    }, thumbContent = {
+                        Icon(
+                            imageVector = if (disableTouch) Icons.Filled.Check else Icons.Filled.Close,
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(SwitchDefaults.IconSize)
+                                .padding(0.dp)
+                        )
+                    })
+                }
+
+                Box(
+                    modifier = Modifier
+                        .weight(4f)
+                        .padding(top = 10.dp)
+                ) {
+                    StyledTextView(text = "Enable Brightness", fontSize = 20)
+                }
+                Box(modifier = Modifier.weight(1f)) {
+                    Switch(checked = enableBrightness, colors = colors, onCheckedChange = {
+                        enableBrightness = it
+                        viewModel.viewState.value.enableBrightness = it
+                    }, thumbContent = {
+                        Icon(
+                            imageVector = if (enableBrightness) Icons.Filled.Check else Icons.Filled.Close,
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(SwitchDefaults.IconSize)
+                                .padding(0.dp)
+                        )
+                    })
+                }
+            }
+        }
+    }
+
+    @Composable
+    fun DividerRow(modifier: Modifier = Modifier) {
+        Spacer(modifier = Modifier.height(20.dp))
+        Row(
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(end = 20.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            ComposeUtil.DashDivider(height = 20.dp)
+        }
+    }
 
     @Composable
     fun SaveConfig(viewModel: HyperStatViewModel,modifier: Modifier = Modifier) {

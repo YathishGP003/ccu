@@ -183,6 +183,9 @@ class HyperStatSplitCpuProfileConfiguration (nodeAddress: Int, nodeType: String,
             displayCO2.enabled = hssEquip.enableCO2Display.readDefaultVal() > 0.0
             displayPM2p5.enabled = hssEquip.enablePm25Display.readDefaultVal() > 0.0
 
+            disableTouch.enabled = hssEquip.disableTouch.readDefaultVal() > 0.0
+            enableBrightness.enabled = hssEquip.enableBrightness.readDefaultVal() > 0.0
+
             enableOutsideAirOptimization.enabled = hssEquip.enableOutsideAirOptimization.readDefaultVal() > 0.0
         }
     }

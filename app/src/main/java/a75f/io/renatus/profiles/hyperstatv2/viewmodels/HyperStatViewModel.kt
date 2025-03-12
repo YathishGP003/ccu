@@ -13,7 +13,7 @@ import a75f.io.logic.Globals
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
-import a75f.io.logic.bo.building.hvac.StandaloneConditioningMode
+import a75f.io.logic.bo.building.hvac.StandaloneFanStage
 import a75f.io.logic.bo.building.hyperstat.common.PossibleFanMode
 import a75f.io.logic.bo.building.hyperstat.profiles.HyperStatProfile
 import a75f.io.logic.bo.building.hyperstat.profiles.util.getPossibleFanModeSettings
@@ -22,7 +22,6 @@ import a75f.io.logic.bo.building.hyperstat.v2.configs.HpuConfiguration
 import a75f.io.logic.bo.building.hyperstat.v2.configs.HyperStatConfiguration
 import a75f.io.logic.bo.building.hyperstat.v2.configs.MonitoringConfiguration
 import a75f.io.logic.bo.building.hyperstat.v2.configs.Pipe2Configuration
-import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuProfileConfiguration
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.R
 import a75f.io.renatus.modbus.util.formattedToastMessage
@@ -278,13 +277,75 @@ open class HyperStatViewModel(application: Application) : AndroidViewModel(appli
 }
 
 fun updateFanMode(isReconfigure: Boolean, equip: HyperStatEquip, fanLevel: Int) {
+    fun resetFanToOff() = equip.fanOpMode.writePointValue(StandaloneFanStage.OFF.ordinal.toDouble())
     val possibleFanMode = getPossibleFanModeSettings(fanLevel)
     if (possibleFanMode == PossibleFanMode.OFF) {
-        equip.fanOpMode.writePointValue(StandaloneConditioningMode.OFF.ordinal.toDouble())
+        resetFanToOff()
         return
     }
-    if (!isReconfigure) {
-        equip.fanOpMode.writePointValue(StandaloneConditioningMode.AUTO.ordinal.toDouble())
+
+    if (isReconfigure) {
+        val currentFanMode = StandaloneFanStage.values()[equip.fanOpMode.readPriorityVal().toInt()]
+        fun isWithinLow(): Boolean {
+            return (currentFanMode.ordinal in listOf(
+                StandaloneFanStage.LOW_ALL_TIME.ordinal,
+                StandaloneFanStage.LOW_OCC.ordinal,
+                StandaloneFanStage.LOW_CUR_OCC.ordinal))
+        }
+        fun isWithinMedium(): Boolean {
+            return (currentFanMode.ordinal in listOf(
+                StandaloneFanStage.MEDIUM_ALL_TIME.ordinal,
+                StandaloneFanStage.MEDIUM_OCC.ordinal,
+                StandaloneFanStage.MEDIUM_CUR_OCC.ordinal))
+        }
+        fun isWithinHigh(): Boolean {
+            return (currentFanMode.ordinal in listOf(
+                StandaloneFanStage.HIGH_ALL_TIME.ordinal,
+                StandaloneFanStage.HIGH_OCC.ordinal,
+                StandaloneFanStage.HIGH_CUR_OCC.ordinal))
+        }
+
+        when (possibleFanMode) {
+            PossibleFanMode.LOW -> {
+                if (!isWithinLow()) {
+                    resetFanToOff()
+                }
+            }
+
+            PossibleFanMode.MED -> {
+                if (!isWithinMedium()) {
+                    resetFanToOff()
+                }
+            }
+
+            PossibleFanMode.HIGH -> {
+                if (!isWithinHigh()) {
+                    resetFanToOff()
+                }
+            }
+
+            PossibleFanMode.LOW_MED -> {
+                if (isWithinHigh()) {
+                    resetFanToOff()
+                }
+            }
+
+            PossibleFanMode.LOW_HIGH -> {
+                if (isWithinMedium()) {
+                    resetFanToOff()
+                }
+            }
+
+            PossibleFanMode.MED_HIGH -> {
+                if (!isWithinLow()) {
+                    resetFanToOff()
+                }
+            }
+
+            else -> {}
+        }
+    } else {
+        equip.fanOpMode.writePointValue(StandaloneFanStage.AUTO.ordinal.toDouble())
     }
 }
 

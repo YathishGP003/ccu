@@ -43,6 +43,16 @@ import kotlin.math.roundToInt
  * Created by Manjunath K on 25-10-2024.
  */
 
+const val OFF = 0
+const val AUTO = 1
+const val LOW = 6
+const val MED = 7
+const val HIGH = 8
+const val LOW_MED = 13
+const val LOW_HIGH = 14
+const val MED_HIGH = 15
+const val LOW_MED_HIGH = 21
+
 fun getPercentFromVolt(voltage: Int, min: Int = 0, max: Int = 10) = (((voltage - min).toDouble() / (max - min)) * 100).roundToInt()
 
 fun fetchUserIntents(equip: HyperStatEquip): UserIntents {
@@ -252,19 +262,14 @@ fun getPossibleConditionMode(config: HyperStatConfiguration): PossibleConditioni
 }
 
 fun getPossibleFanModeSettings(fanLevel: Int): PossibleFanMode {
-    /*
-     When fan level is calculated by based on the fan stages selected
-
-    */
-
     return when (fanLevel) {
-        6 -> PossibleFanMode.LOW
-        7 -> PossibleFanMode.MED
-        8 -> PossibleFanMode.HIGH
-        13 -> PossibleFanMode.LOW_MED
-        14 -> PossibleFanMode.LOW_HIGH
-        15 -> PossibleFanMode.MED_HIGH
-        21 -> PossibleFanMode.LOW_MED_HIGH
+        LOW -> PossibleFanMode.LOW
+        MED -> PossibleFanMode.MED
+        HIGH -> PossibleFanMode.HIGH
+        LOW_MED -> PossibleFanMode.LOW_MED
+        LOW_HIGH -> PossibleFanMode.LOW_HIGH
+        MED_HIGH -> PossibleFanMode.MED_HIGH
+        LOW_MED_HIGH -> PossibleFanMode.LOW_MED_HIGH
         else -> PossibleFanMode.OFF
     }
 }
@@ -279,7 +284,7 @@ fun getCpuFanLevel(config: CpuConfiguration): Int {
 
     if (config.isAnyAnalogOutEnabledAssociated(association = HsCpuAnalogOutMapping.LINEAR_FAN_SPEED.ordinal)
             || config.isAnyAnalogOutEnabledAssociated(association = HsCpuAnalogOutMapping.STAGED_FAN_SPEED.ordinal)) {
-        return 21 // All options are enabled due to analog fan speed
+        return LOW_MED_HIGH // All options are enabled due to analog fan speed
     }
 
     val relays = config.getRelayEnabledAssociations()
@@ -295,9 +300,9 @@ fun getCpuFanLevel(config: CpuConfiguration): Int {
         }
     }
 
-    if (fanEnabledStages.first) fanLevel += 6
-    if (fanEnabledStages.second) fanLevel += 7
-    if (fanEnabledStages.third) fanLevel += 8
+    if (fanEnabledStages.first) fanLevel += LOW
+    if (fanEnabledStages.second) fanLevel += MED
+    if (fanEnabledStages.third) fanLevel += HIGH
     return fanLevel
 }
 
@@ -310,7 +315,7 @@ fun getHpuFanLevel(config: HpuConfiguration): Int {
     )
 
     if (config.isAnyAnalogOutEnabledAssociated(association = HsHpuAnalogOutMapping.FAN_SPEED.ordinal)) {
-        return 21 // All options are enabled due to analog fan speed
+        return LOW_MED_HIGH // All options are enabled due to analog fan speed
     }
 
     val relays = config.getRelayEnabledAssociations()
@@ -326,14 +331,24 @@ fun getHpuFanLevel(config: HpuConfiguration): Int {
         }
     }
 
-    if (fanEnabledStages.first) fanLevel += 6
-    if (fanEnabledStages.second) fanLevel += 7
-    if (fanEnabledStages.third) fanLevel += 8
+    if (fanEnabledStages.first) fanLevel += LOW
+    if (fanEnabledStages.second) fanLevel += MED
+    if (fanEnabledStages.third) fanLevel += HIGH
     return fanLevel
 }
 
 fun getHyperStatDevice(nodeAddress: Int): HashMap<Any, Any> {
     return CCUHsApi.getInstance().readEntity("domainName == \"${DomainName.hyperstatDevice}\" and addr == \"$nodeAddress\"")
+}
+
+
+fun getHsFanLevel(config: HyperStatConfiguration): Int {
+    return when (config) {
+        is CpuConfiguration -> getCpuFanLevel(config)
+        is HpuConfiguration -> getHpuFanLevel(config)
+        is Pipe2Configuration -> getPipe2FanLevel(config)
+        else -> 0
+    }
 }
 
 fun getPipe2FanLevel(config: Pipe2Configuration): Int {
@@ -345,7 +360,7 @@ fun getPipe2FanLevel(config: Pipe2Configuration): Int {
     )
 
     if (config.isAnyAnalogOutEnabledAssociated(association = HsPipe2AnalogOutMapping.FAN_SPEED.ordinal)) {
-        return 21 // All options are enabled due to analog fan speed
+        return LOW_MED_HIGH // All options are enabled due to analog fan speed
     }
 
     val relays = config.getRelayEnabledAssociations()
@@ -361,11 +376,14 @@ fun getPipe2FanLevel(config: Pipe2Configuration): Int {
         }
     }
 
-    if (fanEnabledStages.first) fanLevel += 6
-    if (fanEnabledStages.second) fanLevel += 7
-    if (fanEnabledStages.third) fanLevel += 8
+    if (fanEnabledStages.first) fanLevel += LOW
+    if (fanEnabledStages.second) fanLevel += MED
+    if (fanEnabledStages.third) fanLevel += HIGH
     return fanLevel
 }
+
+
+
 
 /**
  * Test cases are added to this function
@@ -373,18 +391,63 @@ fun getPipe2FanLevel(config: Pipe2Configuration): Int {
  */
 fun getSelectedFanMode(fanLevel: Int, selectedFan: Int): Int {
     try {
-        if (selectedFan == 0) return StandaloneFanStage.OFF.ordinal // No fan stages are selected so only off can present here
-        if (selectedFan == 1) return StandaloneFanStage.AUTO.ordinal // No fan stages are selected so only off can present here
+        if (selectedFan == OFF) return StandaloneFanStage.OFF.ordinal // No fan stages are selected so only off can present here
+        if (selectedFan == AUTO) return StandaloneFanStage.AUTO.ordinal // No fan stages are selected so only off can present here
 
         return (when (fanLevel) {
-            21 -> StandaloneFanStage.values()[selectedFan] // All options are available so selected from the list
-            6 -> if (selectedFan in 1..4) StandaloneFanStage.values()[selectedFan] else StandaloneFanStage.OFF // Only fan low are selected
-            7 -> if (selectedFan in listOf(4, 8)) StandaloneFanStage.OFF else StandaloneFanStage.values()[selectedFan - 3] // Only fan medium are selected
-            8 -> if (selectedFan in listOf(7, 11)) StandaloneFanStage.OFF else StandaloneFanStage.values()[selectedFan - 6] // Only fan high are selected
-            13 -> StandaloneFanStage.values()[selectedFan] // Fan low & mediums are selected
-            15 -> StandaloneFanStage.values()[selectedFan - 3] // Medium & high fan speeds are selected
-            14 -> (if (selectedFan < 5) StandaloneFanStage.values()[selectedFan] else StandaloneFanStage.values()[selectedFan - 3]) //low high selected
+            LOW -> {
+                if (selectedFan <= StandaloneFanStage.LOW_ALL_TIME.ordinal) {
+                    StandaloneFanStage.values()[selectedFan]
+                } else {
+                    StandaloneFanStage.OFF
+                }
+            }
+
+            LOW_MED -> {
+                if (selectedFan <= StandaloneFanStage.MEDIUM_ALL_TIME.ordinal) {
+                    StandaloneFanStage.values()[selectedFan]
+                } else {
+                    StandaloneFanStage.OFF
+                }
+            }
+
+            LOW_MED_HIGH -> StandaloneFanStage.values()[selectedFan]
+            MED -> {
+                when (selectedFan) {
+                    in listOf(2, 3, 4) -> StandaloneFanStage.values()[selectedFan + 3]
+                    in listOf(
+                        StandaloneFanStage.MEDIUM_CUR_OCC.ordinal,
+                        StandaloneFanStage.MEDIUM_OCC.ordinal,
+                        StandaloneFanStage.MEDIUM_ALL_TIME.ordinal
+                    ) -> StandaloneFanStage.values()[selectedFan - 3]
+                    else -> StandaloneFanStage.OFF
+                }
+            }
+            HIGH -> {
+                when (selectedFan) {
+                    in listOf(2, 3, 4) -> StandaloneFanStage.values()[selectedFan + 6]
+                    in listOf(
+                        StandaloneFanStage.HIGH_CUR_OCC.ordinal,
+                        StandaloneFanStage.HIGH_OCC.ordinal,
+                        StandaloneFanStage.HIGH_ALL_TIME.ordinal
+                    ) -> StandaloneFanStage.values()[selectedFan - 6]
+                    else -> StandaloneFanStage.OFF
+                }
+            }
+            LOW_HIGH -> {
+                when (selectedFan) {
+                    in listOf(2, 3, 4) -> StandaloneFanStage.values()[selectedFan]
+                    in listOf(5, 6, 7) -> StandaloneFanStage.values()[selectedFan + 3]
+                    in listOf(
+                        StandaloneFanStage.HIGH_CUR_OCC.ordinal,
+                        StandaloneFanStage.HIGH_OCC.ordinal,
+                        StandaloneFanStage.HIGH_ALL_TIME.ordinal
+                    ) -> StandaloneFanStage.values()[selectedFan - 3]
+                    else -> StandaloneFanStage.OFF
+                }
+            }
             else -> StandaloneFanStage.OFF
+
 
         }).ordinal
     } catch (e: ArrayIndexOutOfBoundsException) {

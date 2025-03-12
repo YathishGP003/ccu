@@ -57,6 +57,9 @@ open class HyperStatV2ViewState {
     var testAnalogOut2 by mutableStateOf(0)
     var testAnalogOut3 by mutableStateOf(0)
 
+    var disableTouch by mutableStateOf(false)
+    var enableBrightness by mutableStateOf(false)
+
     open fun isDcvMapped() = false
 
     fun isAnyRelayMapped(mapping: Int, ignoreSelection: ConfigState): Boolean {

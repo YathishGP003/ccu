@@ -1099,7 +1099,8 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
 
             DropdownMenu(
                 modifier = Modifier
-                    .background(Color.White).width((expandedWidth).dp),
+                    .background(Color.White)
+                    .width((expandedWidth).dp),
                 expanded = expanded.value,
                 onDismissRequest = { expanded.value = false }) {
                 Column(
@@ -2440,6 +2441,71 @@ open class HyperStatSplitFragment : BaseDialogFragment() {
                 Box(modifier = Modifier.weight(1f)) {
                 }
             }
+        }
+    }
+
+    @Composable
+    fun MiscSettingConfig(viewModel: HyperStatSplitCpuViewModel) {
+        Column(modifier = Modifier.padding(start = 25.dp, top = 25.dp)) {
+            BoldStyledTextView("Misc Settings", fontSize = 20)
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 10.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .weight(4f)
+                        .padding(top = 10.dp)
+                ) {
+                    StyledTextView(
+                        text = viewModel.profileConfiguration.disableTouch.disName,
+                        fontSize = 20
+                    )
+                }
+                Box(modifier = Modifier.weight(1f)) {
+                    ToggleButton(
+                        defaultSelection = viewModel.viewState.value.disableTouch,
+                        onEnabled = {
+                            viewModel.viewState.value.disableTouch = it
+                        }
+                    )
+                }
+
+                Box(
+                    modifier = Modifier
+                        .weight(4f)
+                        .padding(top = 10.dp)
+                ) {
+                    StyledTextView(
+                        text = viewModel.profileConfiguration.enableBrightness.disName,
+                        fontSize = 20
+                    )
+                }
+                Box(modifier = Modifier.weight(1f)) {
+                    ToggleButton(
+                        defaultSelection = viewModel.viewState.value.enableBrightness,
+                        onEnabled = {
+                            viewModel.viewState.value.enableBrightness = it
+                        }
+                    )
+                }
+            }
+        }
+    }
+
+    @Composable
+    fun DividerRow(modifier: Modifier = Modifier) {
+        Spacer(modifier = Modifier.height(5.dp))
+        Row(
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(end = 20.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            ComposeUtil.DashDivider(height = 20.dp)
         }
     }
 

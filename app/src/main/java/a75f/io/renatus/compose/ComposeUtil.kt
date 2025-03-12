@@ -88,11 +88,11 @@ class ComposeUtil {
 
 
         @Composable
-        fun DashDivider() {
-            LazyColumn(modifier = Modifier.width(1200.dp).height(50.dp)) {
+        fun DashDivider(height: Dp = 50.dp) {
+            LazyColumn(modifier = Modifier.width(1200.dp).height(height)) {
                 items(1) {
                     Column(
-                        modifier = Modifier.width(1200.dp).height(50.dp)
+                        modifier = Modifier.width(1200.dp).height(height)
                     ) {
                         DashDivider(
                             color = greyDropDownUnderlineColor,

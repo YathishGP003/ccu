@@ -206,6 +206,7 @@ public class VavSeriesFanProfile extends VavProfile
         valve.currentPosition = 0;
         coolingLoop.setEnabled();
         heatingLoop.setDisabled();
+        vavEquip.getHeatingLoopOutput().writePointValue(0);
     }
     
     private void handleHeatingChangeOver() {
@@ -213,6 +214,7 @@ public class VavSeriesFanProfile extends VavProfile
         state = HEATING;
         heatingLoop.setEnabled();
         coolingLoop.setDisabled();
+        vavEquip.getCoolingLoopOutput().writePointValue(0);
     }
     
     private void updateReheatDuringSystemCooling(int loopOp, String equipId) {

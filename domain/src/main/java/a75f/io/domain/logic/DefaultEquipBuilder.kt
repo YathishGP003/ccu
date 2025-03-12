@@ -265,7 +265,7 @@ open class DefaultEquipBuilder : EquipBuilder {
             val band = Domain.readPoint(DomainName.addressBand)
             CcuLog.i(Domain.LOG_TAG, "Deviceband $device")
             if (band.isNotEmpty()) {
-                return hayStack.readDefaultStrVal(band["id"].toString())
+                return hayStack.readDefaultValById(band["id"].toString()).toInt().toString()
             }
         }
         return null

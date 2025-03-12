@@ -35,6 +35,7 @@ import a75f.io.alerts.log.LogOperation;
 import a75f.io.alerts.log.SequencerLogsCallback;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.HisItem;
+import a75f.io.api.haystack.Tags;
 import a75f.io.logger.CcuLog;
 
 public class HaystackService {
@@ -297,20 +298,6 @@ public class HaystackService {
     private List<HashMap> findByFilterCustom(String filter, Object contextHelper) {
         CcuLog.d(TAG, "---findByFilterCustom##--original filter-"+filter);
         filter = removeFirstAndLastParentheses(filter);
-
-        // below code need to be fixed
-        if(filter.contains("port")){
-            filter = filter.replaceAll("port==@", "port==");
-        }
-        if(filter.contains("dis")){
-            filter = filter.replaceAll("dis==@", "dis==");
-        }
-        if(filter.contains("group")){
-            filter = filter.replaceAll("group==@", "group==");
-        }
-        if(filter.contains("domainName")){
-            filter = filter.replaceAll("domainName==@", "domainName==");
-        }
         filter = fixInvertedCommas(filter);
         filter = removeQuotesFromIdValue(filter);
 
@@ -608,7 +595,7 @@ public class HaystackService {
 
     private static String fixInvertedCommas(String input) {
         // Define the pattern
-        Pattern pattern = Pattern.compile("==\\s*([@\\w-]+)");
+        Pattern pattern = Pattern.compile("(\\w+)\\s*==\\s*(\\\"?[\\w\\s-]+\\\"?|[@\\w-]+)");
 
         // Match the pattern against the input
         Matcher matcher = pattern.matcher(input);
@@ -618,11 +605,19 @@ public class HaystackService {
 
         // Find and replace the pattern
         while (matcher.find()) {
+            String extractedKey = matcher.group(1);
             // Extract the value after "=="
-            String extractedValue = matcher.group(1);
-
-            // Add inverted commas around the extracted value
-            String replacement = "==\"" + extractedValue + "\"";
+            String extractedValue = matcher.group(2);
+            String replacement = matcher.group();
+            if(extractedValue.contains("@")) {
+                List<String> nonRefKeys = new ArrayList<>(Arrays.asList("port", Tags.DIS, Tags.GROUP, Tags.DOMAIN_NAME));
+                // below code need to be fixed
+                if(nonRefKeys.contains(extractedKey)) {
+                    extractedValue = extractedValue.replaceAll("@", "");
+                }
+                // Add inverted commas around the extracted value
+                replacement = extractedKey + "==\"" + extractedValue + "\"";
+            }
 
             // Replace the matched part with the modified value
             matcher.appendReplacement(result, replacement);

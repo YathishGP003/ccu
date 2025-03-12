@@ -417,9 +417,17 @@ object Domain {
         }
     }
 
-    fun checkCCUEquipInitialisedAndGet() : CCUDiagEquip?{
-        return if(Domain::ccuEquip.isInitialized) {
+    fun getDomainDiagEquip() : CCUDiagEquip?{
+        return if (Domain::diagEquip.isInitialized) {
             diagEquip
+        } else {
+            null
+        }
+    }
+
+    fun getDomainCCUEquip() : CCUEquip? {
+        return if (Domain::ccuEquip.isInitialized) {
+            ccuEquip
         } else {
             null
         }

@@ -72,6 +72,8 @@ public class RawPoint extends Entity
 
     private String hisInterpolate;
     private String sourcePoint;
+    private String inputType;
+    private String outputType;
 
     /**
      * Support for arbitrary KVP. This is only intended for new tags/profiles at this time.
@@ -210,6 +212,14 @@ public class RawPoint extends Entity
 
     public String getSourcePoint(){return sourcePoint;}
 
+    public String getInputType() {
+        return inputType;
+    }
+
+    public String getOutputType() {
+        return outputType;
+    }
+
     public static class Builder{
         private String            displayName;
         private ArrayList<String> markers = new ArrayList<>();
@@ -243,6 +253,9 @@ public class RawPoint extends Entity
 
         private String hisInterpolate;
         private String sourcePoint;
+        private String inputType;
+        private String outputType;
+
 
         private Map<String, HVal> tags = new HashMap<>();
         public Builder setEnabled(boolean enabled)
@@ -421,6 +434,17 @@ public class RawPoint extends Entity
             return this;
         }
 
+        public Builder setInputType(String inputType) {
+            this.inputType = inputType;
+            return this;
+        }
+
+        public Builder setOutputType(String outputType) {
+            this.outputType = outputType;
+            return this;
+        }
+
+
         public RawPoint build(){
             RawPoint p = new RawPoint();
             p.displayName = this.displayName;
@@ -456,6 +480,8 @@ public class RawPoint extends Entity
             p.parameterId = this.parameterId;
             p.domainName = this.domainName;
             p.tags = this.tags;
+            p.inputType = this.inputType;
+            p.outputType = this.outputType;
             return p;
         }
 
@@ -602,6 +628,14 @@ public class RawPoint extends Entity
                 else if (pair.getKey().equals("sourcePoint"))
                 {
                     this.sourcePoint = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("inputType"))
+                {
+                    this.inputType = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("outputType"))
+                {
+                    this.outputType = pair.getValue().toString();
                 }
                 else {
                     this.tags.put(pair.getKey().toString(), (HVal) pair.getValue());
@@ -752,6 +786,14 @@ public class RawPoint extends Entity
                 else if (pair.getKey().equals("domainName"))
                 {
                     this.domainName = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("inputType"))
+                {
+                    this.inputType = pair.getValue().toString();
+                }
+                else if (pair.getKey().equals("outputType"))
+                {
+                    this.outputType = pair.getValue().toString();
                 }
                 else {
                     this.tags.put(pair.getKey().toString(), (HVal) pair.getValue());

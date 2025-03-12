@@ -50,6 +50,7 @@ public class ZoneRecyclerBacnetParamAdapter extends RecyclerView.Adapter<ZoneRec
     private static final String DESTINATION_IP = "destinationIp";
     private static final String DESTINATION_PORT = "destinationPort";
     private static final String MAC_ADDRESS = "macAddress";
+    private static final String DEVICE_NETWORK = "deviceNetwork";
 
     private static final String TAG = ZoneRecyclerBacnetParamAdapter.class.getSimpleName();
     Context context;
@@ -172,7 +173,7 @@ public class ZoneRecyclerBacnetParamAdapter extends RecyclerView.Adapter<ZoneRec
         //OBJECT_MULTI_STATE_VALUE
         DestinationMultiRead destinationMultiRead = new DestinationMultiRead(Objects.requireNonNull(configMap.get(DESTINATION_IP)),
                 Objects.requireNonNull(configMap.get(DESTINATION_PORT)), Objects.requireNonNull(configMap.get(DEVICE_ID)),
-                "2", macAddress);
+                Objects.requireNonNull(configMap.get(DEVICE_NETWORK)), macAddress);
 
         int dataType;
         String selectedValueAsPerType;

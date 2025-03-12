@@ -3,8 +3,6 @@ package a75f.io.renatus.profiles.oao
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Device
 import a75f.io.api.haystack.HSUtil
-import a75f.io.api.haystack.RawPoint
-import a75f.io.api.haystack.Tags
 import a75f.io.device.mesh.LSerial
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
@@ -15,12 +13,10 @@ import a75f.io.domain.util.ModelLoader
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.NodeType
-import a75f.io.logic.bo.building.dab.getDevicePointDict
-import a75f.io.logic.bo.building.definitions.OutputRelayActuatorType
-import a75f.io.logic.bo.building.definitions.Port
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.oao.OAOProfile
 import a75f.io.logic.bo.building.oao.OAOProfileConfiguration
+import a75f.io.logic.bo.building.system.SystemProfile
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.FloorPlanFragment
 import a75f.io.renatus.SystemConfigFragment
@@ -73,6 +69,7 @@ class OAOViewModel : ViewModel() {
     lateinit var enhancedVentilationOutsideDamperMinOpenList: List<String>
     private lateinit var context: Context
     lateinit var hayStack: CCUHsApi
+    val systemProfile: SystemProfile = L.ccu().systemProfile
 
     fun init(bundle: Bundle, context: Context, hayStack: CCUHsApi) {
         deviceAddress = bundle.getShort(FragmentCommonBundleArgs.ARG_PAIRING_ADDR)
@@ -194,7 +191,7 @@ class OAOViewModel : ViewModel() {
         val equipDis = hayStack.siteName + "-OAO-" + profileConfiguration.nodeAddress
         if (profileConfiguration.isDefault) {
             addEquipAndPoints(profileConfiguration, nodeType, hayStack, model, deviceModel)
-            updateDevicePoints(
+            profileConfiguration.updateDevicePoints(
                 hayStack,
                 profileConfiguration,
                 DeviceBuilder(hayStack, EntityMapper(model)),
@@ -208,7 +205,7 @@ class OAOViewModel : ViewModel() {
                 equipDis,
                 true
             )
-            updateDevicePoints(
+            profileConfiguration.updateDevicePoints(
                 hayStack,
                 profileConfiguration,
                 DeviceBuilder(hayStack, EntityMapper(model)),
@@ -222,8 +219,10 @@ class OAOViewModel : ViewModel() {
             )
         }
         deleteUnusedSystemPoints()
-        if (L.ccu().systemProfile.profileType != ProfileType.SYSTEM_DEFAULT) {
-            L.ccu().systemProfile.setOutsideTempCoolingLockoutEnabled(CCUHsApi.getInstance(), true)
+        if (systemProfile.profileType != ProfileType.SYSTEM_DEFAULT && L.ccu().oaoProfile == null) {
+            if (!systemProfile.isOutsideTempCoolingLockoutEnabled(hayStack)) {
+                systemProfile.setOutsideTempCoolingLockoutEnabled(hayStack, true)
+            }
         }
         L.ccu().oaoProfile = oaoProfile
     }
@@ -274,6 +273,10 @@ class OAOViewModel : ViewModel() {
                 CCUHsApi.getInstance().resetCcuReady()
 
                 try {
+                    //disable the cooling lockout when oao is unpaired
+                    if (systemProfile.isOutsideTempCoolingLockoutEnabled(hayStack)) {
+                        systemProfile.setOutsideTempCoolingLockoutEnabled(hayStack, false)
+                    }
                     val oao = CCUHsApi.getInstance().readEntity("equip and oao")
                     hayStack.deleteEntityTree(oao["id"].toString())
                     val sysDevices = HSUtil.getDevices("SYSTEM") + HSUtil.getDevices("@SYSTEM")
@@ -307,75 +310,4 @@ class OAOViewModel : ViewModel() {
         }
     }
 
-    private fun getUnUsedPort(nodeAddress: Int): Boolean {
-        val device = hayStack.readEntity("device and addr == \"$nodeAddress\"")
-        return hayStack.readEntity(
-            "point and domainName == \"relay1\" and" +
-                    " deviceRef == \"" + device["id"].toString() + "\""
-        ).containsKey("unused")
-    }
-
-    private fun updateDevicePoints(
-        hayStack: CCUHsApi,
-        config: OAOProfileConfiguration,
-        deviceBuilder: DeviceBuilder,
-        deviceModel: SeventyFiveFDeviceDirective,
-        isReconfig : Boolean = false
-    ) {
-        val deviceEntityId =
-            hayStack.readEntity("device and addr == \"${config.nodeAddress}\"")["id"].toString()
-        val device = Device.Builder().setHDict(hayStack.readHDictById(deviceEntityId)).build()
-
-        fun updateDevicePoint(domainName: String, port: String, analogType: Any) {
-            val pointDef = deviceModel.points.find { it.domainName == domainName }
-            pointDef?.let {
-                val pointDict = getDevicePointDict(domainName, deviceEntityId, hayStack).apply {
-                    this["port"] = port
-                    this["analogType"] = analogType
-                }
-                deviceBuilder.updatePoint(it, config, device, pointDict)
-            }
-        }
-
-        //Update analog input points
-        updateDevicePoint(DomainName.analog1In, Port.ANALOG_IN_ONE.name, 5)
-        updateDevicePoint(
-            DomainName.analog2In,
-            Port.ANALOG_IN_TWO.name,
-            8 + config.currentTransformerType.currentVal
-        )
-
-        //Update analog output points
-        updateDevicePoint(
-            DomainName.analog1Out,
-            Port.ANALOG_OUT_ONE.name,
-            "${config.outsideDamperMinDrive.currentVal} - ${config.outsideDamperMaxDrive.currentVal}"
-        )
-        updateDevicePoint(
-            DomainName.analog2Out,
-            Port.ANALOG_OUT_TWO.name,
-            "${config.returnDamperMinDrive.currentVal} - ${config.returnDamperMaxDrive.currentVal}"
-        )
-
-        // not updating below points if reconfiguring
-        if(isReconfig)
-            return
-
-        //Update TH input points
-        updateDevicePoint(DomainName.th1In, Port.TH1_IN.name, 0)
-        updateDevicePoint(DomainName.th2In, Port.TH2_IN.name, 0)
-
-        //Update relay points
-        updateDevicePoint(
-            DomainName.relay1,
-            Port.RELAY_ONE.name,
-            OutputRelayActuatorType.NormallyClose.displayName
-        )
-        updateDevicePoint(
-            DomainName.relay2,
-            Port.RELAY_TWO.name,
-            OutputRelayActuatorType.NormallyClose.displayName
-        )
-
-    }
 }

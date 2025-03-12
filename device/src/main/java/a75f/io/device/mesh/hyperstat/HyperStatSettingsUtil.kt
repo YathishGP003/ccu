@@ -76,6 +76,12 @@ private fun getTempMode(): HyperStat.HyperStatTemperatureMode_e {
         HyperStat.HyperStatTemperatureMode_e.HYPERSTAT_TEMP_MODE_DUAL_VARIABLE_DB
 }
 
+private fun getMiscSettings(equip: HyperStatEquip): Int {
+    val disableTouch = equip.disableTouch.readDefaultVal().toInt()
+    val enableBrightness = equip.enableBrightness.readDefaultVal().toInt()
+    return (disableTouch shl 1) or (enableBrightness shl 2)  // bit 0: enableExternal10kTemperatureSensor sending always 0
+}
+
 private fun isAnalogOutEnabledAndIsMapped(enablePoint: Point, association: Point, mapping: Int): Boolean {
     return (enablePoint.readDefaultVal() == 1.0 && association.readDefaultVal().toInt() == mapping )
 }
@@ -227,11 +233,7 @@ fun getHyperStatSettingsMessage(equipRef: String, zone: String): HyperStatSettin
             .setHyperstatLinearFanSpeeds(setLinearFanSpeedDetails(hyperStatEquip))
             .setHyperstatStagedFanSpeeds(setStagedFanSpeedDetails(hyperStatEquip))
             .setTemperatureMode(getTempMode())
-            .setMiscSettings1(4) //  Sending value 4 because firmware expects it to be 4
-            //sending MiscSettings1 always 001
-            // bit 0: enableExternal10kTemperatureSensor
-            // bit 1: disableTouch
-            // bit 2: brightnessVariationEnable
+            .setMiscSettings1(getMiscSettings(hyperStatEquip))
 
             .build()
 }

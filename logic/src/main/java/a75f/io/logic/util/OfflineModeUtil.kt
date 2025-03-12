@@ -2,6 +2,7 @@ package a75f.io.logic.util
 
 import a75f.io.api.haystack.util.hayStack
 import a75f.io.domain.api.Domain
+import a75f.io.domain.api.DomainName
 import a75f.io.logic.L
 import a75f.io.logic.jobs.bearertoken.BearerTokenManager
 import java.util.Date
@@ -9,7 +10,11 @@ import java.util.Date
 const val TIMER_TO_BE_VALID = 900000
 
 fun isOfflineMode():Boolean{
-    return Domain.ccuEquip.offlineMode.readDefaultVal() > 0.0
+    Domain.getDomainCCUEquip()?.let {
+        return it.offlineMode.readDefaultVal() > 0.0
+    }
+
+    return hayStack.readDefaultValByDomainName(DomainName.offlineMode) > 0.0
 }
 
 fun fetchToken(){

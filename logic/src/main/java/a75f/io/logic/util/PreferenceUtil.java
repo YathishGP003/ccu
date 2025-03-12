@@ -105,6 +105,7 @@ public class PreferenceUtil {
     private static final String DEVICE_POINTS_MIGRATION_STATUS = "devicePointsMigrationStatus";
     private static final String ADDRESS_BAND_INIT_COMPLETED = "addressBandInitCompleted";
     private static final String MIGRATE_UPDATE_HSS_POINTS = "migrateUpdateHssPoints";
+    private static final String MIGRATE_HSCPU_DATA_CORREPTION = "MIGRATE_HSCPU_DATA_CORREPTION";
 
     public static void setContext(Context c) {
         context= c;
@@ -842,6 +843,13 @@ public class PreferenceUtil {
 
     public static void setUpdateBacnetNetworkInterface() {
         setBooleanPreference(MIGRATE_BACNET_NETWORK_INTERFACE, true);
+    }
+    public static boolean getRecoverCpuFromCorrecption() {
+        return getBooleanPreference(MIGRATE_HSCPU_DATA_CORREPTION);
+    }
+
+    public static void setRecoverCpuFromCorrecption() {
+        setBooleanPreference(MIGRATE_HSCPU_DATA_CORREPTION, true);
     }
     public static boolean getDevicePointsMigrationStatus() {
         return getBooleanPreference(DEVICE_POINTS_MIGRATION_STATUS);

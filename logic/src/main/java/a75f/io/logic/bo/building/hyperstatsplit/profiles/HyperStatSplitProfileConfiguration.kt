@@ -99,6 +99,9 @@ open class HyperStatSplitProfileConfiguration (nodeAddress: Int, nodeType: Strin
     lateinit var displayCO2: EnableConfig
     lateinit var displayPM2p5: EnableConfig
 
+    lateinit var disableTouch: EnableConfig
+    lateinit var enableBrightness: EnableConfig
+
     // This point did not exist in old HSS CPU profile. In DM framework, dependencies work a lot better if there
     // is a boolean config "Enable" point.
     lateinit var enableOutsideAirOptimization: EnableConfig
@@ -146,6 +149,9 @@ open class HyperStatSplitProfileConfiguration (nodeAddress: Int, nodeType: Strin
             add(displayHumidity)
             add(displayCO2)
             add(displayPM2p5)
+
+            add(disableTouch)
+            add(enableBrightness)
 
             add(enableOutsideAirOptimization)
         }
@@ -398,6 +404,9 @@ open class HyperStatSplitProfileConfiguration (nodeAddress: Int, nodeType: Strin
         displayCO2 = getDefaultEnableConfig(DomainName.enableCO2Display, model)
         displayPM2p5 = getDefaultEnableConfig(DomainName.enablePm25Display, model)
 
+        disableTouch = getDefaultEnableConfig(DomainName.disableTouch, model)
+        enableBrightness = getDefaultEnableConfig(DomainName.enableBrightness, model)
+
         enableOutsideAirOptimization = getDefaultEnableConfig(DomainName.enableOutsideAirOptimization, model)
     }
 
@@ -437,7 +446,8 @@ open class HyperStatSplitProfileConfiguration (nodeAddress: Int, nodeType: Strin
                 "\n" + "\nzoneVOCTarget=${zoneVOCTarget.currentVal}," +
                 "\nzonePM2p5Target=${zonePM2p5Target.currentVal}," +
                 "\ndisplayHumidity=${displayHumidity.enabled}," + "\ndisplayCO2=${displayCO2.enabled}," +
-                "\n" + "\ndisplayPM2p5=${displayPM2p5.enabled})"
+                "\n" + "\ndisplayPM2p5=${displayPM2p5.enabled}), " +
+                "\ndisableTouch=${disableTouch.enabled}, " + "\nenableBrightness=${enableBrightness.enabled},"
     }
 
     open fun analogOut1TypeToString(): String { return "0-10v" }

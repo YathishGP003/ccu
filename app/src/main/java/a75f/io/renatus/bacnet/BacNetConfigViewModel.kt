@@ -2,15 +2,14 @@ package a75f.io.renatus.bacnet
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.bacnet.parser.BacnetModelDetailResponse
-import a75f.io.api.haystack.bacnet.parser.BacnetPoint
 import a75f.io.api.haystack.bacnet.parser.BacnetProperty
-import a75f.io.logic.util.bacnet.buildBacnetModel
 import a75f.io.domain.service.DomainService
 import a75f.io.domain.service.ResponseCallback
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.bacnet.BacnetProfile
 import a75f.io.logic.bo.building.definitions.ProfileType
+import a75f.io.logic.util.bacnet.buildBacnetModel
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs
 import a75f.io.renatus.ENGG.bacnet.services.BacNetConstants
 import a75f.io.renatus.ENGG.bacnet.services.BacnetReadRequestMultiple
@@ -93,6 +92,7 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
     var isDestinationIpValid = mutableStateOf(true)
     var destinationPort  = mutableStateOf("")
     var destinationMacAddress  = mutableStateOf("")
+    var dnet = mutableStateOf("0")
 
     val isUpdateMode = mutableStateOf(false)
     val displayInUi = mutableStateOf(true)
@@ -144,27 +144,19 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
             destinationIp.value = item.deviceIp
             deviceId.value = item.deviceId
             destinationPort.value = item.devicePort
-            destinationMacAddress.value = item.deviceMacAddress?.let { convertMacAddress(it) } ?: ""
+            destinationMacAddress.value = item.deviceMacAddress?.let { macAddressToByteArray(it) } ?: ""
+            dnet.value = item.deviceNetwork
         }
     }
 
-    fun convertMacAddress(macAddress: String): String {
-        val hexArray = macAddress.split(":")
-        val sb = StringBuilder()
+    private fun macAddressToByteArray(mac: String): String {
+        var byteArray = mac.split(":")
+            .map { it.toInt(16).toByte() }
+            .toByteArray()
+        return byteArray.joinToString(".") { (it.toInt() and 0xFF).toString() }
 
-        for (i in hexArray.indices.reversed()) {
-            // Convert each hex value to an integer
-            val decimalValue = hexArray[i].toInt(16)
-            sb.append(decimalValue)
-
-            if (i > 0) {
-                sb.append(".")
-            }
-        }
-
-        return sb.toString()
     }
-
+    
     fun configModelDefinition(context: Context) {
         this.context = context
 
@@ -191,10 +183,11 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
                             "destinationIp" -> destinationIp.value = configParam[1]
                             "destinationPort" -> destinationPort.value = configParam[1]
                             "macAddress" -> destinationMacAddress.value = configParam[1]
+                            "deviceNetwork" -> dnet.value = configParam[1]
                         }
                     }
                 }
-                CcuLog.d(TAG, "--> deviceId ${deviceId.value} destinationIp ${destinationIp.value} destinationPort ${destinationPort.value} macAddress ${destinationMacAddress.value}")
+                CcuLog.d(TAG, "--> deviceId ${deviceId.value} destinationIp ${destinationIp.value} destinationPort ${destinationPort.value} macAddress ${destinationMacAddress.value} dnet ${dnet.value}")
                 model.equipDevice.value.modelConfig?.let { config ->
                     config.split(",").forEach {
                         val configParam = it.split(":")
@@ -405,7 +398,7 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
         if (parentMap.isNullOrEmpty()) {
 
             bacnetProfile = BacnetProfile()
-            val configParam = "deviceId:${deviceId.value},destinationIp:${destinationIp.value},destinationPort:${destinationPort.value},macAddress:${destinationMacAddress.value}"
+            val configParam = "deviceId:${deviceId.value},destinationIp:${destinationIp.value},destinationPort:${destinationPort.value},macAddress:${destinationMacAddress.value},deviceNetwork:${dnet.value}"
             val modelConfig = "modelName:${modelName.value},modelId:${getModelIdByName(modelName.value)}"
             bacnetProfile.addBacAppEquip(configParam, modelConfig, deviceId.value, deviceId.value, floorRef, zoneRef,
                 bacnetModel.value.equipDevice.value,
@@ -453,7 +446,7 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
         CcuLog.d(TAG, "--------------fetchData--isDestinationIpInvalidValid-----$deviceIp--------")
         service = ServiceManager.makeCcuService(ipAddress = deviceIp)
         val destination =
-            DestinationMultiRead(destinationIp.value, destinationPort.value, deviceId.value, "2", destinationMacAddress.value)
+            DestinationMultiRead(destinationIp.value, destinationPort.value, deviceId.value, dnet.value, destinationMacAddress.value)
         val readAccessSpecification = mutableListOf<ReadRequestMultiple>()
 
         bacnetModel.value.points.forEach {
@@ -564,7 +557,7 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
 
     private fun fetchConnectedDeviceGlobally() {
         service = ServiceManager.makeCcuService(deviceIp)
-        CcuLog.d(TAG, "fetchConnectedDevice for ${deviceId.value} -- ${destinationIp.value} -- ${destinationPort.value} -- ${destinationMacAddress.value}")
+        CcuLog.d(TAG, "fetchConnectedDevice for ${deviceId.value} -- ${destinationIp.value} -- ${destinationPort.value} -- ${destinationMacAddress.value} -- ${dnet.value}")
         try {
             val broadCastValue = "global"
 
@@ -681,8 +674,17 @@ class BacNetConfigViewModel(application: Application) : AndroidViewModel(applica
             point.displayInEditor.value = false
             val writableLevelKey = "${point.protocolData?.bacnet?.objectId}-87"
             if(bacNetItemsMap[writableLevelKey] != null){
-                bacNetItemsMap[writableLevelKey]?.results?.get(0)?.propertyArrayIndex?.let {
-                    point.defaultWriteLevel = it
+                val results = bacNetItemsMap[writableLevelKey]?.results
+                if (results != null) {
+                    for (item in results) {
+                        if(item.propertyValue.type == "34"){
+                            if(item.propertyArrayIndex != null){
+                                point.defaultWriteLevel = item.propertyArrayIndex
+                                CcuLog.d(TAG,"default write level is -->${item.propertyArrayIndex}")
+                                break
+                            }
+                        }
+                    }
                 }
             }
             point.bacnetProperties?.forEach { bacnetProperty ->

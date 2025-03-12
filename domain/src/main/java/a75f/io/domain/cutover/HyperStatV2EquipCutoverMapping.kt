@@ -8,7 +8,9 @@ object HyperStatV2EquipCutoverMapping {
     private val commonEntries = linkedMapOf(
             "temperatureOffset" to DomainName.temperatureOffset,
             "autoawayEnabled" to DomainName.autoAway,
+            "AutoAway" to DomainName.autoAway,
             "autoForceOccupiedEnabled" to DomainName.autoForceOccupied,
+            "AutoForceOccupied" to DomainName.autoForceOccupied,
 
             "relay1OutputEnabled" to DomainName.relay1OutputEnable,
             "relay2OutputEnabled" to DomainName.relay2OutputEnable,
@@ -37,7 +39,12 @@ object HyperStatV2EquipCutoverMapping {
             "analogOut3Association" to DomainName.analog3OutputAssociation,
 
             "thIn1Enabled" to DomainName.thermistor1InputEnable,
+            "enableAirflowTempSensorTh1" to DomainName.thermistor1InputEnable,
+            "enableAirflowTempSensor" to DomainName.thermistor1InputEnable,
+
             "thIn2Enabled" to DomainName.thermistor2InputEnable,
+            "enableDoorWindowSensorTh2" to DomainName.thermistor2InputEnable,
+            "enableDoorWindowSensor" to DomainName.thermistor2InputEnable,
 
             "thIn1Association" to DomainName.thermistor1InputAssociation,
             "thIn2Association" to DomainName.thermistor2InputAssociation,
@@ -66,14 +73,19 @@ object HyperStatV2EquipCutoverMapping {
             "desiredTemp" to DomainName.desiredTemp,
             "desiredTempCooling" to DomainName.desiredTempCooling,
             "desiredTempHeating" to DomainName.desiredTempHeating,
-
             "fanEnabled" to DomainName.fanEnable,
+            "fanEnable" to DomainName.fanEnable,
             "occupiedEnabled" to DomainName.occupiedEnable,
             "humidifierEnableCmd" to DomainName.humidifierEnable,
+            "humidifierEnabled" to DomainName.humidifierEnable,
             "dehumidifierEnableCmd" to DomainName.dehumidifierEnable,
+            "dehumidifierEnabled" to DomainName.dehumidifierEnable,
             "fanlowspeed" to DomainName.fanLowSpeed,
+            "fanStage1" to DomainName.fanLowSpeed,
             "fanMediumSpeed" to DomainName.fanMediumSpeed,
+            "fanStage2" to DomainName.fanMediumSpeed,
             "fanHighSpeed" to DomainName.fanHighSpeed,
+            "fanStage3" to DomainName.fanHighSpeed,
 
             "dcvDamper" to DomainName.dcvDamperModulating,
             "analog1Mindcvdamper" to DomainName.analog1MinDCVDamper,
@@ -82,6 +94,14 @@ object HyperStatV2EquipCutoverMapping {
             "analog2Maxdcvdamper" to DomainName.analog2MaxDCVDamper,
             "analog3Mindcvdamper" to DomainName.analog3MinDCVDamper,
             "analog3Maxdcvdamper" to DomainName.analog3MaxDCVDamper,
+
+            "DcvDamper" to DomainName.dcvDamperModulating,
+            "analog1atMindcvdamper" to DomainName.analog1MinDCVDamper,
+            "analog1atMaxdcvdamper" to DomainName.analog1MaxDCVDamper,
+            "analog2atMindcvdamper" to DomainName.analog2MinDCVDamper,
+            "analog2atMaxdcvdamper" to DomainName.analog2MaxDCVDamper,
+            "analog3atMindcvdamper" to DomainName.analog3MinDCVDamper,
+            "analog3atMaxdcvdamper" to DomainName.analog3MaxDCVDamper,
 
             "analog1FanLow" to DomainName.analog1FanLow,
             "analog2FanLow" to DomainName.analog2FanLow,
@@ -92,8 +112,20 @@ object HyperStatV2EquipCutoverMapping {
             "analog1FanHigh" to DomainName.analog1FanHigh,
             "analog2FanHigh" to DomainName.analog2FanHigh,
             "analog3FanHigh" to DomainName.analog3FanHigh,
+
+            "analog1atFanLow" to DomainName.analog1FanLow,
+            "analog2atFanLow" to DomainName.analog2FanLow,
+            "analog3atFanLow" to DomainName.analog3FanLow,
+            "analog1atFanMedium" to DomainName.analog1FanMedium,
+            "analog2atFanMedium" to DomainName.analog2FanMedium,
+            "analog3atFanMedium" to DomainName.analog3FanMedium,
+            "analog1atFanHigh" to DomainName.analog1FanHigh,
+            "analog2atFanHigh" to DomainName.analog2FanHigh,
+            "analog3atFanHigh" to DomainName.analog3FanHigh,
+
             "currentTemp" to DomainName.currentTemp,
             "airflowTempSensor" to DomainName.dischargeAirTemperature,
+            "th1AirflowTempSensor" to DomainName.dischargeAirTemperature, // 631 has this point
             "genericFaultNC" to DomainName.genericAlarmNC,
             "genericFaultNO" to DomainName.genericAlarmNO,
 
@@ -104,6 +136,7 @@ object HyperStatV2EquipCutoverMapping {
             "keyCardSensor_2" to DomainName.keyCardSensor,
 
             "doorWindowSensor" to DomainName.doorWindowSensorNCTitle24, // thermistor
+            "th2doorWindowSensor" to DomainName.doorWindowSensorNCTitle24, // thermistor  631 has this point
             "doorWindowSensor_2" to DomainName.doorWindowSensorTitle24, // analogin1
             "doorWindowSensor_3" to DomainName.doorWindowSensorTitle24, // analogi22
 
@@ -134,8 +167,11 @@ object HyperStatV2EquipCutoverMapping {
             "otaStatus" to DomainName.otaStatus,
             "co2" to DomainName.zoneCo2,
             "occupancysensor" to DomainName.zoneOccupancy,
+            "occupancySensor" to DomainName.zoneOccupancy,
             "zoneilluminance" to DomainName.zoneIlluminance,
+            "illuminance" to DomainName.zoneIlluminance,
             "zonehumidity" to DomainName.zoneHumidity,
+            "humidity" to DomainName.zoneHumidity,
             "pm2p5" to DomainName.zonePm25,
             "sound" to DomainName.zoneSound,
             "co2Equivalent" to DomainName.zoneCo2Equivalent,
@@ -144,6 +180,7 @@ object HyperStatV2EquipCutoverMapping {
             "pressure" to DomainName.zonePressureSensor,
             "voc" to DomainName.zoneVoc,
             "zoneOccupancy" to DomainName.occupancyMode,
+            "occupancy" to DomainName.occupancyMode,
             "occupancyDetection" to DomainName.occupancyDetection,
     )
 
@@ -165,6 +202,14 @@ object HyperStatV2EquipCutoverMapping {
             "analog3Mincooling" to DomainName.analog3MinCooling,
             "analog3Maxcooling" to DomainName.analog3MaxCooling,
 
+            "Cooling" to DomainName.coolingSignal,
+            "analog1atMincooling" to DomainName.analog1MinCooling,
+            "analog1atMaxcooling" to DomainName.analog1MaxCooling,
+            "analog2atMincooling" to DomainName.analog2MinCooling,
+            "analog2atMaxcooling" to DomainName.analog2MaxCooling,
+            "analog3atMincooling" to DomainName.analog3MinCooling,
+            "analog3atMaxcooling" to DomainName.analog3MaxCooling,
+
             "modulatingHeating" to DomainName.heatingSignal,
             "analog1Minheating" to DomainName.analog1MinHeating,
             "analog1Maxheating" to DomainName.analog1MaxHeating,
@@ -173,6 +218,14 @@ object HyperStatV2EquipCutoverMapping {
             "analog3Minheating" to DomainName.analog3MinHeating,
             "analog3Maxheating" to DomainName.analog3MaxHeating,
 
+            "Heating" to DomainName.heatingSignal,
+            "analog1atMinheating" to DomainName.analog1MinHeating,
+            "analog1atMaxheating" to DomainName.analog1MaxHeating,
+            "analog2atMinheating" to DomainName.analog2MinHeating,
+            "analog2atMaxheating" to DomainName.analog2MaxHeating,
+            "analog3atMinheating" to DomainName.analog3MinHeating,
+            "analog3atMaxheating" to DomainName.analog3MaxHeating,
+
             "modulatingFanSpeed" to DomainName.linearFanSpeed,
             "analog1Minfanspeed" to DomainName.analog1MinLinearFanSpeed,
             "analog1Maxfanspeed" to DomainName.analog1MaxLinearFanSpeed,
@@ -180,6 +233,14 @@ object HyperStatV2EquipCutoverMapping {
             "analog2Maxfanspeed" to DomainName.analog2MaxLinearFanSpeed,
             "analog3Minfanspeed" to DomainName.analog3MinLinearFanSpeed,
             "analog3Maxfanspeed" to DomainName.analog3MaxLinearFanSpeed,
+
+            "FanSpeed" to DomainName.linearFanSpeed,
+            "analog1atMinfanspeed" to DomainName.analog1MinLinearFanSpeed,
+            "analog1atMaxfanspeed" to DomainName.analog1MaxLinearFanSpeed,
+            "analog2atMinfanspeed" to DomainName.analog2MinLinearFanSpeed,
+            "analog2atMaxfanspeed" to DomainName.analog2MaxLinearFanSpeed,
+            "analog3atMinfanspeed" to DomainName.analog3MinLinearFanSpeed,
+            "analog3atMaxfanspeed" to DomainName.analog3MaxLinearFanSpeed,
 
             "predefinedFanSpeed" to DomainName.stagedFanSpeed,
             "fanOutCoolingStage1" to DomainName.fanOutCoolingStage1,

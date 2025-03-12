@@ -36,6 +36,14 @@ class MonitoringConfiguration(
         zoneCO2Target = getDefaultValConfig(DomainName.co2Target, model)
         zonePM2p5Target = getDefaultValConfig(DomainName.pm25Target, model)
         zonePM10Target = getDefaultValConfig(DomainName.pm10Target, model)
+
+        displayHumidity = getDefaultEnableConfig(DomainName.enableHumidityDisplay, model)
+        displayCO2 = getDefaultEnableConfig(DomainName.enableCO2Display, model)
+        displayPM2p5 = getDefaultEnableConfig(DomainName.enablePm25Display, model)
+
+        disableTouch = getDefaultEnableConfig(DomainName.disableTouch, model)
+        enableBrightness = getDefaultEnableConfig(DomainName.enableBrightness, model)
+
         isDefault = true
         return this
     }
@@ -74,6 +82,14 @@ class MonitoringConfiguration(
         zoneCO2Target.currentVal = monitoringEquip.co2Target.readDefaultVal()
         zonePM2p5Target.currentVal = monitoringEquip.pm25Target.readDefaultVal()
         zonePM10Target.currentVal = monitoringEquip.pm10Target.readDefaultVal()
+
+        displayHumidity.enabled = monitoringEquip.enableHumidityDisplay.readDefaultVal() == 1.0
+        displayCO2.enabled = monitoringEquip.enableCo2Display.readDefaultVal() == 1.0
+        displayPM2p5.enabled = monitoringEquip.enablePm25Display.readDefaultVal() == 1.0
+
+        disableTouch.enabled = monitoringEquip.disableTouch.readDefaultVal() == 1.0
+        enableBrightness.enabled = monitoringEquip.enableBrightness.readDefaultVal() == 1.0
+
         isDefault = false
         return this
     }
@@ -92,6 +108,11 @@ class MonitoringConfiguration(
             add(analogIn2Enabled)
             add(thermistor1Enabled)
             add(thermistor2Enabled)
+            add(displayCO2)
+            add(displayHumidity)
+            add(displayPM2p5)
+            add(disableTouch)
+            add(enableBrightness)
         }
     }
 

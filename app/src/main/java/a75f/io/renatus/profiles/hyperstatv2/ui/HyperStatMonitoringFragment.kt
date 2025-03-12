@@ -11,9 +11,12 @@ import a75f.io.renatus.composables.Picker
 import a75f.io.renatus.composables.RelayConfiguration
 import a75f.io.renatus.composables.rememberPickerState
 import a75f.io.renatus.compose.*
+import a75f.io.renatus.compose.ComposeUtil.Companion.greyColor
+import a75f.io.renatus.compose.ComposeUtil.Companion.primaryColor
 import a75f.io.renatus.modbus.util.SET
 import a75f.io.renatus.profiles.OnPairingCompleteListener
 import a75f.io.renatus.profiles.hyperstatv2.util.ConfigState
+import a75f.io.renatus.profiles.hyperstatv2.viewmodels.HyperStatViewModel
 import a75f.io.renatus.profiles.hyperstatv2.viewmodels.MonitoringModel
 import a75f.io.renatus.profiles.profileUtils.PasteBannerFragment
 import a75f.io.renatus.profiles.system.advancedahu.Option
@@ -22,6 +25,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -33,16 +37,29 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -322,6 +339,10 @@ class HyperStatMonitoringFragment : BaseDialogFragment(), OnPairingCompleteListe
                             )
                         }
                     }
+                    DividerRow()
+                    DisplayInDeviceConfig(viewModel)
+                    DividerRow()
+                    MisSettingConfig(viewModel)
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -358,6 +379,184 @@ class HyperStatMonitoringFragment : BaseDialogFragment(), OnPairingCompleteListe
             },
             isTestSignalVisible = false
         )
+    }
+
+    @Composable
+    fun DisplayInDeviceConfig(viewModel: HyperStatViewModel) {
+
+        val context = LocalContext.current
+        var humidityDisplay by remember { mutableStateOf(viewModel.viewState.value.humidityDisplay) }
+        var co2Display by remember { mutableStateOf(viewModel.viewState.value.co2Display) }
+        var pm25Display by remember { mutableStateOf(viewModel.viewState.value.pm25Display) }
+
+        fun canSelectMore(currentSelections: List<Boolean>): Boolean {
+            val selectedCount = currentSelections.count { it }
+            if (selectedCount >= 2) {
+                Toast.makeText(context, "Only two items can be displayed on the home screen", Toast.LENGTH_SHORT).show()
+                return false
+            }
+            return true
+        }
+
+        val colors = SwitchDefaults.colors(checkedThumbColor = Color.White, uncheckedThumbColor = Color.White, uncheckedIconColor = greyColor, uncheckedTrackColor = greyColor, checkedIconColor = primaryColor, checkedTrackColor = primaryColor, uncheckedBorderColor = greyColor, checkedBorderColor = primaryColor)
+        Column(modifier = Modifier.padding(start = 25.dp, top = 25.dp)) {
+            BoldStyledTextView("Display in device home screen", fontSize = 20)
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Row(modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 10.dp)) {
+                Box(modifier = Modifier
+                    .weight(4f)
+                    .padding(top = 10.dp)) {
+                    StyledTextView(text = "Humidity", fontSize = 20)
+                }
+                Box(modifier = Modifier.weight(1f)) {
+                    Switch(checked = humidityDisplay, colors = colors, onCheckedChange = {
+                        if (!it || canSelectMore(listOf(co2Display, pm25Display))) {
+                            humidityDisplay = it
+                            viewModel.viewState.value.humidityDisplay = it
+                        }
+                    }, thumbContent = {
+                        Icon(imageVector = if (humidityDisplay) Icons.Filled.Check else Icons.Filled.Close, contentDescription = null, modifier = Modifier
+                            .size(SwitchDefaults.IconSize)
+                            .padding(0.dp))
+                    })
+                }
+
+                Box(modifier = Modifier
+                    .weight(4f)
+                    .padding(top = 10.dp)) {
+                    StyledTextView(text = "CO2", fontSize = 20)
+                }
+                Box(modifier = Modifier.weight(1f)) {
+                    Switch(checked = co2Display, colors = colors, onCheckedChange = {
+                        if (!it || canSelectMore(listOf(humidityDisplay, pm25Display))) {
+                            co2Display = it
+                            viewModel.viewState.value.co2Display = it
+                        }
+                    }, thumbContent = {
+                        Icon(imageVector = if (co2Display) Icons.Filled.Check else Icons.Filled.Close, contentDescription = null, modifier = Modifier
+                            .size(SwitchDefaults.IconSize)
+                            .padding(0.dp))
+                    })
+                }
+            }
+
+            Row(modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 10.dp)) {
+                Box(modifier = Modifier
+                    .weight(4f)
+                    .padding(top = 10.dp)) {
+                    StyledTextView(text = "PM 2.5", fontSize = 20)
+                }
+                Box(modifier = Modifier.weight(1f)) {
+                    Switch(checked = pm25Display, colors = colors, onCheckedChange = {
+                        if (!it || canSelectMore(listOf(humidityDisplay, co2Display))) {
+                            pm25Display = it
+                            viewModel.viewState.value.pm25Display = it
+                        }
+                    }, thumbContent = {
+                        Icon(imageVector = if (pm25Display) Icons.Filled.Check else Icons.Filled.Close, contentDescription = null, modifier = Modifier
+                            .size(SwitchDefaults.IconSize)
+                            .padding(0.dp))
+                    })
+                }
+
+                Box(modifier = Modifier
+                    .weight(4f)
+                    .padding(top = 10.dp)) {
+                }
+                Box(modifier = Modifier.weight(1f)) {
+                }
+            }
+        }
+    }
+
+    @Composable
+    fun MisSettingConfig(viewModel: HyperStatViewModel) {
+        var disableTouch by remember { mutableStateOf(viewModel.viewState.value.disableTouch) }
+        var enableBrightness by remember { mutableStateOf(viewModel.viewState.value.enableBrightness) }
+        val colors = SwitchDefaults.colors(
+            checkedThumbColor = Color.White,
+            uncheckedThumbColor = Color.White,
+            uncheckedIconColor = greyColor,
+            uncheckedTrackColor = greyColor,
+            checkedIconColor = primaryColor,
+            checkedTrackColor = primaryColor,
+            uncheckedBorderColor = greyColor,
+            checkedBorderColor = primaryColor
+        )
+
+        Column(modifier = Modifier.padding(start = 25.dp, top = 25.dp)) {
+            BoldStyledTextView("Misc Settings", fontSize = 20)
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 10.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .weight(4f)
+                        .padding(top = 10.dp)
+                ) {
+                    StyledTextView(text = "Disable Touch", fontSize = 20)
+                }
+                Box(modifier = Modifier.weight(1f)) {
+                    Switch(checked = disableTouch, colors = colors, onCheckedChange = {
+                        disableTouch = it
+                        viewModel.viewState.value.disableTouch = it
+
+                    }, thumbContent = {
+                        Icon(
+                            imageVector = if (disableTouch) Icons.Filled.Check else Icons.Filled.Close,
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(SwitchDefaults.IconSize)
+                                .padding(0.dp)
+                        )
+                    })
+                }
+
+                Box(
+                    modifier = Modifier
+                        .weight(4f)
+                        .padding(top = 10.dp)
+                ) {
+                    StyledTextView(text = "Enable Brightness", fontSize = 20)
+                }
+                Box(modifier = Modifier.weight(1f)) {
+                    Switch(checked = enableBrightness, colors = colors, onCheckedChange = {
+                        enableBrightness = it
+                        viewModel.viewState.value.enableBrightness = it
+                    }, thumbContent = {
+                        Icon(
+                            imageVector = if (enableBrightness) Icons.Filled.Check else Icons.Filled.Close,
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(SwitchDefaults.IconSize)
+                                .padding(0.dp)
+                        )
+                    })
+                }
+            }
+        }
+    }
+
+    @Composable
+    fun DividerRow(modifier: Modifier = Modifier) {
+        Spacer(modifier = Modifier.height(20.dp))
+        Row(
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(end = 20.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            ComposeUtil.DashDivider(height = 20.dp)
+        }
     }
 
     override fun getIdString(): String {

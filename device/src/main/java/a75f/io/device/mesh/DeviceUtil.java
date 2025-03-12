@@ -98,13 +98,19 @@ public class DeviceUtil {
                 if (arrOfStr[1].contains("v")) {
                     arrOfStr[1] = arrOfStr[1].replace("v", "");
                 }
-                int min = (int)Double.parseDouble(arrOfStr[0]);
-                int max = (int)Double.parseDouble(arrOfStr[1]);
+
+                int min = (int) Double.parseDouble(arrOfStr[0]);
+                int max = (int) Double.parseDouble(arrOfStr[1]);
+
+                return (short) ((((max - min) * (val / 100.0)) + min) * 10);
+
+                /*
+                This logic will not work when max is 0
                 if (max > min) {
                     return (short) (min * 10 + (max - min ) * 10 * val/100);
                 } else {
                     return (short) (min * 10 - (min - max ) * 10 * val/100);
-                }
+                }*/
             }
         }
         return (short) 0;

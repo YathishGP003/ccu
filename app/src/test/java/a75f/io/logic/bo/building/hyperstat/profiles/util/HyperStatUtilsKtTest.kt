@@ -34,29 +34,6 @@ class HyperStatUtilsKtTest {
     }
 
     @Test
-    fun testGetActualConditioningMode() {
-
-    }
-
-    @Test
-    fun getSelectedConditioningMode() {
-    }
-
-    @Test
-    fun getPossibleConditionMode() {
-        val config = getCpuConfig()
-    }
-
-    @Test
-    fun getPossibleFanModeSettings() {
-    }
-
-    @Test
-    fun getCpuFanLevel() {
-    }
-
-
-    @Test
     fun testFanOffAuto() {
         // these will work with any fan level as they are 0 and 1
         assert(getSelectedFanMode(1, 0) == StandaloneFanStage.OFF.ordinal)
@@ -95,15 +72,13 @@ class HyperStatUtilsKtTest {
         // when only medium fan options are available
         assert(getSelectedFanMode(7, 0) == StandaloneFanStage.OFF.ordinal)
         assert(getSelectedFanMode(7, 1) == StandaloneFanStage.AUTO.ordinal)
+        assert(getSelectedFanMode(7, 2) == 5)
+        assert(getSelectedFanMode(7, 3) == 6)
+        assert(getSelectedFanMode(7, 4) == 7)
         assert(getSelectedFanMode(7, 5) == 2)
         assert(getSelectedFanMode(7, 6) == 3)
         assert(getSelectedFanMode(7, 7) == 4)
 
-        // Negative test cases
-        assertEquals(StandaloneFanStage.OFF.ordinal, getSelectedFanMode(7, 2))
-        assertEquals(StandaloneFanStage.OFF.ordinal, getSelectedFanMode(7, 3))
-        assertEquals(StandaloneFanStage.OFF.ordinal, getSelectedFanMode(7, 4))
-        assertEquals(StandaloneFanStage.OFF.ordinal, getSelectedFanMode(7, 8))
 
     }
 
@@ -115,15 +90,41 @@ class HyperStatUtilsKtTest {
         assert(getSelectedFanMode(8, 8) == 2)
         assert(getSelectedFanMode(8, 9) == 3)
         assert(getSelectedFanMode(8, 10) == 4)
-        // Negative test cases
-        assert(getSelectedFanMode(8, 2) == StandaloneFanStage.OFF.ordinal)
-        assert(getSelectedFanMode(8, 3) == StandaloneFanStage.OFF.ordinal)
-        assert(getSelectedFanMode(8, 4) == StandaloneFanStage.OFF.ordinal)
+        assert(getSelectedFanMode(8, 2) == 8)
+        assert(getSelectedFanMode(8, 3) == 9)
+        assert(getSelectedFanMode(8, 4) == 10)
+
         assert(getSelectedFanMode(8, 5) == StandaloneFanStage.OFF.ordinal)
-        assert(getSelectedFanMode(8, 6) == StandaloneFanStage.OFF.ordinal)
-        assert(getSelectedFanMode(8, 7) == StandaloneFanStage.OFF.ordinal)
-        assert(getSelectedFanMode(8, 11) == StandaloneFanStage.OFF.ordinal)
     }
 
+    @Test
+    fun testLowHighSelectedFanMode() {
+        // when only high fan options are available
+        assert(getSelectedFanMode(LOW_HIGH, 0) == StandaloneFanStage.OFF.ordinal)
+        assert(getSelectedFanMode(LOW_HIGH, 1) == StandaloneFanStage.AUTO.ordinal)
+        assert(getSelectedFanMode(LOW_HIGH, 2) == 2)
+        assert(getSelectedFanMode(LOW_HIGH, 3) == 3)
+        assert(getSelectedFanMode(LOW_HIGH, 4) == 4)
+        assert(getSelectedFanMode(LOW_HIGH, 8) == 5)
+        assert(getSelectedFanMode(LOW_HIGH, 9) == 6)
+        assert(getSelectedFanMode(LOW_HIGH, 10) == 7)
+        assert(getSelectedFanMode(LOW_HIGH, 5) == 8)
+        assert(getSelectedFanMode(LOW_HIGH, 6) == 9)
+        assert(getSelectedFanMode(LOW_HIGH, 7) == 10)
+    }
 
+    @Test
+    fun testLowMediumSelectedFanMode() {
+        // when only high fan options are available
+        assert(getSelectedFanMode(LOW_MED, 0) == StandaloneFanStage.OFF.ordinal)
+        assert(getSelectedFanMode(LOW_MED, 1) == StandaloneFanStage.AUTO.ordinal)
+
+        assert(getSelectedFanMode(LOW_MED, 2) == 2)
+        assert(getSelectedFanMode(LOW_MED, 3) == 3)
+        assert(getSelectedFanMode(LOW_MED, 4) == 4)
+        assert(getSelectedFanMode(LOW_MED, 5) == 5)
+        assert(getSelectedFanMode(LOW_MED, 6) == 6)
+        assert(getSelectedFanMode(LOW_MED, 7) == 7)
+
+    }
 }

@@ -508,12 +508,11 @@ public class SmartNode
             return ;
         }
 
-        HashMap point = CCUHsApi.getInstance().read("point and physical and deviceRef == \"" + device.get("id").toString() + "\""+" and domainName == \""+domainName+"\"");
-        if (point.get("analogType" ) == null || !point.get("analogType" ).equals(type))
-        {
-            RawPoint p = new RawPoint.Builder().setHashMap(point).build();
+        HDict point = CCUHsApi.getInstance().readHDict("point and physical and deviceRef == \"" + device.get("id").toString() + "\"" + " and domainName == \"" + domainName + "\"");
+        if (point.get("analogType") == null || !point.get("analogType").equals(type)) {
+            RawPoint p = new RawPoint.Builder().setHDict(point).build();
             p.setType(type);
-            CCUHsApi.getInstance().updatePoint(p,p.getId());
+            CCUHsApi.getInstance().updatePoint(p, p.getId());
         }
     }
     

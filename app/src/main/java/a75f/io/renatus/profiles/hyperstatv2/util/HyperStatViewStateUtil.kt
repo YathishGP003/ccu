@@ -93,6 +93,9 @@ class HyperStatViewStateUtil {
                 humidityDisplay = configuration.displayHumidity.enabled
                 co2Display = configuration.displayCO2.enabled
                 pm25Display = configuration.displayPM2p5.enabled
+
+                disableTouch = configuration.disableTouch.enabled
+                enableBrightness = configuration.enableBrightness.enabled
             }
         }
 
@@ -148,6 +151,9 @@ class HyperStatViewStateUtil {
                 displayHumidity.enabled = state.humidityDisplay
                 displayCO2.enabled = state.co2Display
                 displayPM2p5.enabled = state.pm25Display
+
+                disableTouch.enabled = state.disableTouch
+                enableBrightness.enabled = state.enableBrightness
             }
         }
 

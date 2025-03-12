@@ -230,6 +230,7 @@ public class VavReheatProfile extends VavProfile
         valve.currentPosition = 0;
         coolingLoop.setEnabled();
         heatingLoop.setDisabled();
+        vavEquip.getHeatingLoopOutput().writePointValue(0);
     }
     
     private void handleHeatingChangeOver() {
@@ -237,6 +238,7 @@ public class VavReheatProfile extends VavProfile
         state = HEATING;
         heatingLoop.setEnabled();
         coolingLoop.setDisabled();
+        vavEquip.getCoolingLoopOutput().writePointValue(0);
     }
     
     private void updateReheatDuringSystemCooling(int heatingLoopOp, double roomTemp, String vavEquipId) {

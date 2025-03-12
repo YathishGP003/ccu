@@ -8,6 +8,7 @@ import a75f.io.device.HyperStat.HyperStatControlsMessage_t
 import a75f.io.device.HyperStat.HyperStatFanSpeed_e
 import a75f.io.device.HyperStat.HyperStatOperatingMode_e
 import a75f.io.device.mesh.DeviceUtil.mapAnalogOut
+import a75f.io.device.mesh.DeviceUtil.mapDigitalOut
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.Domain.getEquipDevices
 import a75f.io.domain.api.DomainName
@@ -51,13 +52,20 @@ private fun fillHyperStatControls(buildr: HyperStatControlsMessage_t.Builder, eq
         return HyperStatAnalogOutputControl_t.newBuilder().setPercent(value.toInt()).build()
     }
 
-    fun getPortValue(port: PhysicalPoint): Double {
+    fun getPortValue(port: PhysicalPoint, isRelay: Boolean): Double {
         val logicalPointRef = port.readPoint().pointRef
         if (logicalPointRef == null) {
             CcuLog.e(L.TAG_CCU_DEVICE, "Logical point ref is missing for ${port.domainName}")
             port.writeHisVal(0.0)
         } else {
-            port.writeHisVal(CCUHsApi.getInstance().readHisValById(logicalPointRef))
+            val actualPhysicalValue: Double = if (isRelay) {
+                mapDigitalOut(port.readPoint().type, CCUHsApi.getInstance().readHisValById(logicalPointRef) > 0.0).toDouble()
+            } else {
+                mapAnalogOut(port.readPoint().type,
+                    CCUHsApi.getInstance().readHisValById(logicalPointRef).toInt().toShort()
+                ).toDouble()
+            }
+            port.writeHisVal(actualPhysicalValue)
         }
         val isWritable = port.isWritable()
         val logicalVal = if (isWritable) {
@@ -71,14 +79,13 @@ private fun fillHyperStatControls(buildr: HyperStatControlsMessage_t.Builder, eq
             logicalVal
         }
         if (isWritable) {
-            // port.writeDefaultVal(mappedVal) // Need to check why it was added. This statement is overriding the algo calculated value at 8th level.
             port.writeHisVal(port.readPriorityVal())
         }
         return mappedVal
     }
     try {
         device.getRelays().forEachIndexed { index, relay ->
-            val mappedVal = getPortValue(relay) > 0
+            val mappedVal = getPortValue(relay, true) > 0
             when (index) {
                 0 -> buildr.setRelay1(mappedVal)
                 1 -> buildr.setRelay2(mappedVal)
@@ -89,12 +96,11 @@ private fun fillHyperStatControls(buildr: HyperStatControlsMessage_t.Builder, eq
             }
         }
         device.getAnalogOuts().forEachIndexed { index, analogOut ->
-            val mappedVal = getPortValue(analogOut).toInt().toShort()
-            val voltage = mapAnalogOut(analogOut.readPoint().type, mappedVal)
+            val mappedVal = getPortValue(analogOut, false).toInt().toShort()
             when (index) {
-                0 -> buildr.setAnalogOut1(getAnalogOutValue(voltage.toDouble()))
-                1 -> buildr.setAnalogOut2(getAnalogOutValue(voltage.toDouble()))
-                2 -> buildr.setAnalogOut3(getAnalogOutValue(voltage.toDouble()))
+                0 -> buildr.setAnalogOut1(getAnalogOutValue(mappedVal.toDouble()))
+                1 -> buildr.setAnalogOut2(getAnalogOutValue(mappedVal.toDouble()))
+                2 -> buildr.setAnalogOut3(getAnalogOutValue(mappedVal.toDouble()))
             }
         }
     } catch (e: NullPointerException) {

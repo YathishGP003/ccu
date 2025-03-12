@@ -29,6 +29,7 @@ import a75f.io.api.haystack.Zone;
 import a75f.io.domain.api.DomainName;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.BuildConfig;
+import a75f.io.logic.L;
 import a75f.io.logic.R;
 import a75f.io.logic.bo.building.NodeType;
 import a75f.io.logic.bo.building.definitions.ProfileType;
@@ -391,6 +392,10 @@ public class CCUUtils
         } else {
             return null;
         }
+    }
+    public static Boolean isAdvanceHybridProfile() {
+        return L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_HYBRID_RTU ||
+                L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_HYBRID_RTU;
     }
 
 

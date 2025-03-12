@@ -81,6 +81,8 @@ fun configMisc(config:HyperStatSplitProfileConfiguration, state: HyperStatSplitS
     state.displayCO2 = config.displayCO2.enabled
     state.displayPM2p5 = config.displayPM2p5.enabled
 
+    state.disableTouch = config.disableTouch.enabled
+    state.enableBrightness = config.enableBrightness.enabled
 }
 
 fun updateAnalogOutDynamicConfig(config: HyperStatSplitCpuProfileConfiguration, state: HyperStatSplitCpuState) {

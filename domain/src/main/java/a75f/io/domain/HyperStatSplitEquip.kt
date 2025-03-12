@@ -162,6 +162,9 @@ open class HyperStatSplitEquip (equipRef : String) : DomainEquip(equipRef) {
     val enableCO2Display = Point(DomainName.enableCO2Display, equipRef)
     val enablePm25Display = Point(DomainName.enablePm25Display, equipRef)
 
+    val disableTouch = Point(DomainName.disableTouch, equipRef)
+    val enableBrightness = Point(DomainName.enableBrightness, equipRef)
+
     val occupancyMode = Point(DomainName.occupancyMode, equipRef)
     val fanOpMode = Point(DomainName.fanOpMode, equipRef)
     val operatingMode = Point(DomainName.operatingMode, equipRef)

@@ -134,13 +134,7 @@ public class HyperSplitMessageGenerator {
                         : HyperSplit.HyperSplitTemperatureMode_e.HYPERSPLIT_TEMP_MODE_DUAL_VARIABLE_DB)
                 .setHyperstatLinearFanSpeeds(HyperSplitSettingsUtil.Companion.getLinearFanSpeedDetails(equipRef))
                 .setHyperstatStagedFanSpeeds(HyperSplitSettingsUtil.Companion.getStagedFanSpeedDetails(equipRef))
-                .setMiscSettings1(4); // Sending value 4 because firmware expects it to be 4
-        //sending MiscSettings1 always 001
-        // bit 0: enableExternal10kTemperatureSensor
-        // bit 1: disableTouch
-        // bit 2: brightnessVariationEnable
-
-
+                .setMiscSettings1(HyperSplitSettingsUtil.Companion.getMisSettings(equipRef));
         return msg.build();
 
     }

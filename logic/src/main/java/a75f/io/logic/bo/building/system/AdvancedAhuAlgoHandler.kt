@@ -233,15 +233,21 @@ class AdvancedAhuAlgoHandler (val equip: SystemEquip) {
 
 
 
-    fun getEnabledAnalogControls(systemEquip: AdvancedHybridSystemEquip, connectEquip1: ConnectModuleEquip) : Set<AdvancedAhuAnalogOutAssociationType> {
+    fun getEnabledAnalogControls(systemEquip: AdvancedHybridSystemEquip? = null, connectEquip1: ConnectModuleEquip? = null) : Set<AdvancedAhuAnalogOutAssociationType> {
         val enabledControls = mutableSetOf<AdvancedAhuAnalogOutAssociationType>()
-        getCMAnalogAssociationMap(systemEquip).forEach { (analogOut: Point, association: Point) ->
-            if (analogOut.readDefaultVal() > 0) { // is config enabled
-                val analogOutAssociationType = AdvancedAhuAnalogOutAssociationType.values()[association.readDefaultVal().toInt()]
-                enabledControls.add(analogOutAssociationType)
+        if (systemEquip != null) {
+            getCMAnalogAssociationMap(systemEquip).forEach { (analogOut: Point, association: Point) ->
+                if (analogOut.readDefaultVal() > 0) { // is config enabled
+                    val analogOutAssociationType =
+                        AdvancedAhuAnalogOutAssociationType.values()[association.readDefaultVal()
+                            .toInt()]
+                    enabledControls.add(analogOutAssociationType)
+                }
             }
         }
-        getAnalogAssociation(enabledControls, connectEquip1)
+        if (connectEquip1 != null) {
+            getAnalogAssociation(enabledControls, connectEquip1)
+        }
         return enabledControls
     }
 

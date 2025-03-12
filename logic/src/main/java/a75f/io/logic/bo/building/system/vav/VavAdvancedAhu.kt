@@ -89,6 +89,10 @@ open class VavAdvancedAhu : VavSystemProfile() {
     private val loadFanIndexRange = 27..31
     private lateinit var analogControlsEnabled : Set<AdvancedAhuAnalogOutAssociationType>
 
+    // just for checking analogControlsEnabled to  showing the cm status and Cn status
+    private lateinit var cmAnalogControlsEnabled: Set<AdvancedAhuAnalogOutAssociationType>
+    private lateinit var cnAnalogControlsEnabled: Set<AdvancedAhuAnalogOutAssociationType>
+
     private var satStageUpTimer = 0.0
     private var satStageDownTimer = 0.0
 
@@ -536,11 +540,12 @@ open class VavAdvancedAhu : VavSystemProfile() {
     }
     private fun updateSystemStatus() {
         val systemStatus = statusMessage
+        cnAnalogControlsEnabled = advancedAhuImpl.getEnabledAnalogControls(connectEquip1 = systemEquip.connectEquip1)
         val connectModuleStatus = getConnectModuleSystemStatus(
             systemEquip.connectEquip1,
             advancedAhuImpl,
             systemCoolingLoopOp,
-            analogControlsEnabled
+            cnAnalogControlsEnabled
         )
         val scheduleStatus = ScheduleManager.getInstance().systemStatusString
         CcuLog.d(L.TAG_CCU_SYSTEM, "StatusMessage: $systemStatus")
@@ -561,6 +566,7 @@ open class VavAdvancedAhu : VavSystemProfile() {
     }
 
     override fun getStatusMessage(): String {
+        cmAnalogControlsEnabled = advancedAhuImpl.getEnabledAnalogControls(systemEquip = systemEquip.cmEquip)
         if (advancedAhuImpl.isEmergencyShutOffEnabledAndActive(systemEquip = systemEquip.cmEquip))
             return "Emergency Shut Off mode is active"
         val systemStatus = StringBuilder().apply {
@@ -615,19 +621,19 @@ open class VavAdvancedAhu : VavSystemProfile() {
         val dehumidifierStatus = getDehumidifierStatus(systemEquip = systemEquip.cmEquip)
 
         val analogStatus = StringBuilder()
-        if ((analogControlsEnabled.contains(AdvancedAhuAnalogOutAssociationType.LOAD_FAN) && systemFanLoopOp > 0)
+        if ((cmAnalogControlsEnabled.contains(AdvancedAhuAnalogOutAssociationType.LOAD_FAN) && systemFanLoopOp > 0)
                 || (analogControlsEnabled.contains(AdvancedAhuAnalogOutAssociationType.PRESSURE_FAN)
                         && systemEquip.cmEquip.fanLoopOutputFeedback.readHisVal() > 0 )) {
             analogStatus.append("| Fan ON ")
         }
-        if ((systemEquip.mechanicalCoolingAvailable.readHisVal() > 0) && ((analogControlsEnabled.contains(AdvancedAhuAnalogOutAssociationType.LOAD_COOLING)
+        if ((systemEquip.mechanicalCoolingAvailable.readHisVal() > 0) && ((cmAnalogControlsEnabled.contains(AdvancedAhuAnalogOutAssociationType.LOAD_COOLING)
                         && systemCoolingLoopOp > 0) || (analogControlsEnabled.contains(AdvancedAhuAnalogOutAssociationType.SAT_COOLING)
-                        && systemEquip.cmEquip.coolingLoopOutputFeedback.readHisVal() > 0))) {
+                        && systemEquip.cmEquip.satCoolingLoopOutput.readHisVal() > 0))) {
             analogStatus.append("| Cooling ON ")
         }
-        if ((systemEquip.mechanicalCoolingAvailable.readHisVal() > 0) && ((analogControlsEnabled.contains(AdvancedAhuAnalogOutAssociationType.LOAD_HEATING) && systemHeatingLoopOp > 0)
+        if ((systemEquip.mechanicalCoolingAvailable.readHisVal() > 0) && ((cmAnalogControlsEnabled.contains(AdvancedAhuAnalogOutAssociationType.LOAD_HEATING) && systemHeatingLoopOp > 0)
                         || (analogControlsEnabled.contains(AdvancedAhuAnalogOutAssociationType.SAT_HEATING)
-                        && systemEquip.cmEquip.heatingLoopOutputFeedback.readHisVal() > 0))) {
+                        && systemEquip.cmEquip.satHeatingLoopOutput.readHisVal() > 0))) {
             analogStatus.append("| Heating ON ")
         }
         if (analogStatus.isNotEmpty()) {

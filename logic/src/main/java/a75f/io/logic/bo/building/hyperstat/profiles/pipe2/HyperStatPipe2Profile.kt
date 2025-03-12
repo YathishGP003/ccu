@@ -233,7 +233,7 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
             analogOutStages: HashMap<String, Int>, configuration: Pipe2Configuration, userIntents: UserIntents
     ) {
         // Run water sampling
-         processForWaterSampling(equip, tuner, configuration, relayStages)
+         processForWaterSampling(equip, tuner, configuration, relayStages, analogOutStages, basicSettings)
 
         // any specific user intent run the fan operations
         if(basicSettings.fanMode != StandaloneFanStage.OFF && basicSettings.fanMode != StandaloneFanStage.AUTO) {
@@ -276,7 +276,7 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
 
         if (basicSettings.fanMode == StandaloneFanStage.OFF || supplyWaterTempTh2 > heatingThreshold) {
             CcuLog.d(L.TAG_CCU_HSPIPE2, "Resetting WATER_VALVE to OFF")
-            resetWaterValue(relayStages,equip)
+            resetWaterValue(relayStages, analogOutStages, equip)
         }
 
         if (basicSettings.fanMode != StandaloneFanStage.OFF) {
@@ -349,7 +349,7 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
 
         // b. Deactivate Water Valve associated relay, if it is enabled and the fan speed is off.
         if (basicSettings.fanMode == StandaloneFanStage.OFF || supplyWaterTempTh2 < coolingThreshold) {
-            resetWaterValue(relayStages,equip)
+            resetWaterValue(relayStages, analogOutStages, equip)
         }
 
         if (basicSettings.fanMode != StandaloneFanStage.OFF) {
@@ -461,7 +461,7 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
     }
 
 
-    private fun resetWaterValue(relayStages: HashMap<String, Int>, equip: Pipe2V2Equip) {
+    private fun resetWaterValue(relayStages: HashMap<String, Int>, analogOutStages: HashMap<String, Int>, equip: Pipe2V2Equip) {
         if (equip.waterSamplingStartTime == 0L) {
             if (relayLogicalPoints.containsKey(HsPipe2RelayMapping.WATER_VALVE.ordinal)) {
                 resetLogicalPoint(relayLogicalPoints[HsPipe2RelayMapping.WATER_VALVE.ordinal]!!)
@@ -470,6 +470,7 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
                 resetLogicalPoint(analogLogicalPoints[HsPipe2AnalogOutMapping.WATER_MODULATING_VALUE.ordinal]!!)
             }
             relayStages.remove(AnalogOutput.WATER_VALVE.name)
+            analogOutStages.remove(AnalogOutput.WATER_VALVE.name)
             CcuLog.d(L.TAG_CCU_HSPIPE2, "Resetting WATER_VALVE to OFF")
         }
     }
@@ -488,7 +489,13 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
     private fun processForWaterSampling(
             equip: Pipe2V2Equip, tuner: HyperStatProfileTuners,
             config: Pipe2Configuration, relayStages: HashMap<String, Int>,
+            analogOutStages: HashMap<String, Int>, basicSettings: BasicSettings
     ) {
+
+        if (basicSettings.conditioningMode == StandaloneConditioningMode.OFF) {
+            resetWaterValue(relayStages, analogOutStages , equip)
+            return
+        }
 
         if (!config.isAnyRelayEnabledAssociated(association = HsPipe2RelayMapping.WATER_VALVE.ordinal) ||
                 !config.isAnyAnalogOutEnabledAssociated(association = HsPipe2AnalogOutMapping.WATER_MODULATING_VALUE.ordinal)) {
@@ -521,7 +528,7 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
             if (resetIsRequired()) {
                 equip.waterSamplingStartTime = 0
                 equip.lastWaterValveTurnedOnTime = System.currentTimeMillis()
-                resetWaterValue(relayStages, equip)
+                resetWaterValue(relayStages, analogOutStages, equip)
             }
             CcuLog.d(L.TAG_CCU_HSPIPE2, "No water sampling, because tuner value is zero!")
             return
@@ -541,7 +548,7 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
             if (samplingSinceFrom >= onTimeToDoSampling) {
                 equip.waterSamplingStartTime = 0
                 equip.lastWaterValveTurnedOnTime = System.currentTimeMillis()
-                resetWaterValue(relayStages, equip)
+                resetWaterValue(relayStages, analogOutStages, equip)
                 CcuLog.d(L.TAG_CCU_HSPIPE2, "Resetting WATER_VALVE to OFF")
             } else {
                 relayStages[AnalogOutput.WATER_VALVE.name] = 1
@@ -784,7 +791,7 @@ class HyperStatPipe2Profile : HyperStatFanCoilUnit() {
     ) {
         // Reset Relay
             resetFan(relayStages,analogOutStages,basicSettings)
-            resetWaterValue(relayStages,equip)
+            resetWaterValue(relayStages, analogOutStages, equip)
             resetAux(relayStages)
 
             if (relayLogicalPoints.containsKey(HsPipe2RelayMapping.FAN_ENABLED.ordinal)) resetLogicalPoint(

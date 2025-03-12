@@ -118,8 +118,18 @@ public class VavReheatProfile extends VavProfile
                     updateReheatDuringSystemCooling(loopOp, roomTemp, vavEquip.getId());
                     loopOp =  getGPC36AdjustedHeatingLoopOp(loopOp, roomTemp, vavEquip.getDischargeAirTemp().readHisVal(), equip);
                 }
+                vavEquip.getHeatingLoopOutput().writePointValue(loopOp);
+                loopOp = (int) vavEquip.getHeatingLoopOutput().readHisVal();
+
+                vavEquip.getCoolingLoopOutput().writePointValue(0);
+
             } else if (coolingLoop.getEnabled()) {
                 loopOp = (int) coolingLoop.getLoopOutput(roomTemp, setTempCooling);
+
+                vavEquip.getCoolingLoopOutput().writePointValue(loopOp);
+                loopOp = (int) vavEquip.getHeatingLoopOutput().readHisVal();
+
+                vavEquip.getHeatingLoopOutput().writePointValue(0);
             }
         }
         try {

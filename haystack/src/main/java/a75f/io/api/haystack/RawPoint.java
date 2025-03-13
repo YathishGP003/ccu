@@ -216,8 +216,16 @@ public class RawPoint extends Entity
         return inputType;
     }
 
+    public void setInputType(String inputType) {
+        this.inputType = inputType;
+    }
+
     public String getOutputType() {
         return outputType;
+    }
+
+    public void setOutputType(String outputType) {
+        this.outputType = outputType;
     }
 
     public static class Builder{
@@ -479,9 +487,9 @@ public class RawPoint extends Entity
             p.registerType = this.registerType;
             p.parameterId = this.parameterId;
             p.domainName = this.domainName;
-            p.tags = this.tags;
             p.inputType = this.inputType;
             p.outputType = this.outputType;
+            p.tags = this.tags;
             return p;
         }
 

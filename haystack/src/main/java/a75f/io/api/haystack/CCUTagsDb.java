@@ -982,6 +982,12 @@ public class CCUTagsDb extends HServer {
         if (p.getDomainName() != null) {
             b.add("domainName", p.getDomainName());
         }
+        if (p.getInputType() != null) {
+            b.add(Tags.INPUT_TYPE, p.getInputType());
+        }
+        if (p.getOutputType() != null) {
+            b.add(Tags.OUTPUT_TYPE, p.getOutputType());
+        }
         for (String m : p.getMarkers()) {
             b.add(m);
         }
@@ -1036,6 +1042,12 @@ public class CCUTagsDb extends HServer {
         }
         if (p.getDomainName() != null) {
             b.add("domainName", p.getDomainName());
+        }
+        if (p.getInputType() != null) {
+            b.add(Tags.INPUT_TYPE, p.getInputType());
+        }
+        if (p.getOutputType() != null) {
+            b.add(Tags.OUTPUT_TYPE, p.getOutputType());
         }
         for (String m : p.getMarkers()) {
             b.add(m);

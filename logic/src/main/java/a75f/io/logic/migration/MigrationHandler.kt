@@ -2405,7 +2405,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                         hayStack.deleteEntity(redundantList[0]["id"].toString())
                     }
                 }
-                hayStack.readId("point and port == \"SENSOR_VOC\" and not domainName and deviceRef == \"${ sseDeviceId }\"")?.let { vocSensorId ->
+                hayStack.readId("point and (port == \"SENSOR_VOC\" or port == \"vocSensor\") and not domainName and deviceRef == \"${ sseDeviceId }\"")?.let { vocSensorId ->
                     CcuLog.d(TAG_CCU_MIGRATION_UTIL,"Found non dm sensorVOC point id: ${vocSensorId}")
                     hayStack.deleteEntity(vocSensorId)
                 }
@@ -2931,7 +2931,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
 
             val points = hayStack.readAllEntities(
                 "point and not domainName and " +
-                        "(port == \"" + Port.SENSOR_PM10 + "\" or port == \""+Port.SENSOR_ENERGY_METER +
+                        "(port == \"" + Port.SENSOR_PM10 + "\"  or port == \"pm10Sensor\" or port == \""+Port.SENSOR_ENERGY_METER +
                         "\" or" + " port == \""+Port.SENSOR_NO +"\") and deviceRef == \"$deviceRef\"")
 
             points.forEach { point ->

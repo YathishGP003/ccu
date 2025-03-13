@@ -152,7 +152,13 @@ class DeviceBuilder(private val hayStack : CCUHsApi, private val entityMapper: E
         modelDef.tags.filter { it.kind == TagType.STR && (it.name.lowercase() != "bacnetid" || it.name.lowercase() != "analogtype") }
             .forEach { tag ->
                 tag.defaultValue?.let {
-                    pointBuilder.addTag(tag.name, HStr.make(tag.defaultValue.toString()))
+                    if (tag.name.equals(Tags.INPUT_TYPE, true)) {
+                        pointBuilder.setInputType(tag.defaultValue.toString())
+                    } else if (tag.name.equals(Tags.OUTPUT_TYPE, true)) {
+                        pointBuilder.setOutputType(tag.defaultValue.toString())
+                    } else {
+                        pointBuilder.addTag(tag.name, HStr.make(tag.defaultValue.toString()))
+                    }
                 }
             }
 

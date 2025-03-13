@@ -13,6 +13,7 @@ import a75f.io.logger.CcuLog;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.definitions.OutputAnalogActuatorType;
 import a75f.io.logic.bo.building.definitions.Port;
+import a75f.io.logic.bo.building.definitions.UtilKt;
 import a75f.io.logic.bo.building.firmware.FirmwareVersion;
 import a75f.io.logic.bo.building.heartbeat.HeartBeat;
 
@@ -447,8 +448,10 @@ public class ControlMote
             return ;
         }
 
+        String portName = UtilKt.getPortName(port);
         HashMap<Object,Object> point = CCUHsApi.getInstance().readEntity(
-                "point and physical and deviceRef == \"" + device.get("id").toString() + "\""+" and port == \""+port+"\"");
+                "point and physical and deviceRef == \""
+                        + device.get("id").toString() + "\""+" and (port == \""+port+"\" or port == \""+portName+"\")");
         RawPoint p = new RawPoint.Builder().setHashMap(point).setPointRef(pointRef).build();
         CCUHsApi.getInstance().updatePoint(p,p.getId());
     }
@@ -461,10 +464,10 @@ public class ControlMote
         {
             return ;
         }
-
+        String portName = UtilKt.getPortName(port);
         HashMap<Object,Object> point = CCUHsApi.getInstance().readEntity(
                 "point and physical and deviceRef == \"" + device.get("id").toString() +
-                        "\""+" and port == \""+port+"\"");
+                        "\""+" and (port == \""+port+"\" or port == \""+portName+"\")");
         if (point != null && !point.isEmpty())
         {
             RawPoint p = new RawPoint.Builder().setHashMap(point).build();

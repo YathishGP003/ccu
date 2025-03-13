@@ -1,9 +1,14 @@
 package a75f.io.logic.bo.building.oao;
 
+import static a75f.io.api.haystack.HSUtil.isDomainEquip;
 import static a75f.io.domain.api.DomainName.systemEnhancedVentilationEnable;
 import static a75f.io.domain.api.DomainName.systemPostPurgeEnable;
 import static a75f.io.domain.api.DomainName.systemPrePurgeEnable;
 import static a75f.io.logic.bo.building.system.AdvancedAhuPointMappingsKt.getCMRelayAssociationMap;
+
+import android.content.Context;
+import android.content.SharedPreferences;
+
 import java.util.Map;
 
 import a75f.io.api.haystack.CCUHsApi;
@@ -15,6 +20,7 @@ import a75f.io.domain.api.Point;
 import a75f.io.domain.equips.DabAdvancedHybridSystemEquip;
 import a75f.io.domain.equips.VavAdvancedHybridSystemEquip;
 import a75f.io.logger.CcuLog;
+import a75f.io.logic.Globals;
 import a75f.io.logic.L;
 import a75f.io.logic.bo.building.EpidemicState;
 import a75f.io.logic.bo.building.definitions.ProfileType;
@@ -27,7 +33,6 @@ import a75f.io.logic.bo.building.system.SystemProfile;
 import a75f.io.logic.bo.building.system.dab.DabAdvancedAhu;
 import a75f.io.logic.bo.building.system.dab.DabAdvancedHybridRtu;
 import a75f.io.logic.bo.building.system.dab.DabExternalAhu;
-import a75f.io.logic.bo.building.system.dab.DabFullyModulatingRtu;
 import a75f.io.logic.bo.building.system.dab.DabFullyModulatingRtu;
 import a75f.io.logic.bo.building.system.dab.DabStagedRtu;
 import a75f.io.logic.bo.building.system.dab.DabStagedRtuWithVfd;
@@ -432,9 +437,24 @@ public class OAOProfile
 
     public void doEconomizing(SystemProfile systemProfile) {
 
-        //TODO: This needs to changed with domainName
-        double externalTemp = CCUHsApi.getInstance().readHisValByQuery("system and outside and temp and not lockout");
-        double externalHumidity = CCUHsApi.getInstance().readHisValByQuery("system and outside and humidity");
+        double externalHumidity;
+        double externalTemp;
+        SharedPreferences sharedPreferences = Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE);
+        if (Globals.getInstance().isWeatherTest()) {
+            externalTemp = sharedPreferences.getInt("outside_temp", 0);
+            externalHumidity = sharedPreferences.getInt("outside_humidity", 0);
+        } else {
+            CCUHsApi ccuHsApi = CCUHsApi.getInstance();
+            String systemEquip = Domain.systemEquip.getEquipRef();
+            if (isDomainEquip(systemEquip, ccuHsApi)) {
+                externalTemp = ccuHsApi.readHisValByQuery("domainName==\"" + DomainName.outsideTemperature + "\" and equipRef==\"" + systemEquip + "\"");
+                externalHumidity = ccuHsApi.readHisValByQuery("domainName==\"" + DomainName.outsideHumidity + "\" and equipRef==\"" + systemEquip + "\"");
+
+            } else {
+                externalTemp = CCUHsApi.getInstance().readHisValByQuery("system and outside and temp and not lockout");
+                externalHumidity = CCUHsApi.getInstance().readHisValByQuery("system and outside and humidity");
+            }
+        }
         
         double economizingToMainCoolingLoopMap = oaoEquip.getEconomizingToMainCoolingLoopMap().readPriorityVal();
         

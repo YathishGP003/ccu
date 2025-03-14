@@ -66,7 +66,7 @@ public class DeviceUpdateJob extends BaseJob implements WatchdogMonitor
                         .getInt("control_loop_frequency",60), 45, TimeUnit.SECONDS);
 
         //TODO - TEMP code for performance testing to simulate device load. Remove this code after performance issue resolved
-        //injectTestInputMessage();
+       //injectTestInputMessage(0);
     }
     
     public void doJob()
@@ -113,15 +113,14 @@ public class DeviceUpdateJob extends BaseJob implements WatchdogMonitor
         }
     }
 
-    private void injectTestInputMessage() {
-
+    private void injectTestInputMessage(long initialDelaySeconds) {
+        try {
+            sleep(initialDelaySeconds * 40);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         new Thread(() -> {
-            while (true) {
-                try {
-                    sleep(30000);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
+            while (CCUHsApi.getInstance().isCcuReady()) {
                 List<HashMap<Object, Object>> hsDevices = CCUHsApi.getInstance().readAllEntities("device and hyperstat");
                 hsDevices.forEach(device -> {
                     injectTestRegularUpdateMessage(Integer.parseInt(device.get("addr").toString()), CCUHsApi.getInstance());
@@ -141,6 +140,12 @@ public class DeviceUpdateJob extends BaseJob implements WatchdogMonitor
                         CcuLog.e(L.TAG_CCU_DEVICE, "error ", e);
                     }
                 });
+
+                try {
+                    sleep(30000);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
             }
         }).start();
     }

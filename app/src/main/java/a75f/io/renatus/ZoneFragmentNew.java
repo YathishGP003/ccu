@@ -5,6 +5,7 @@ import static a75f.io.api.haystack.Tags.BACNET;
 import static a75f.io.api.haystack.util.SchedulableMigrationKt.validateMigration;
 import static a75f.io.logic.util.bacnet.BacnetModelBuilderKt.buildBacnetModel;
 import static a75f.io.device.modbus.ModbusModelBuilderKt.buildModbusModel;
+import static a75f.io.logic.L.TAG_CCU_INIT;
 import static a75f.io.logic.bo.building.schedules.ScheduleManager.getScheduleStateString;
 import static a75f.io.logic.bo.building.schedules.ScheduleUtil.disconnectedIntervals;
 import static a75f.io.logic.bo.util.DesiredTempDisplayMode.setPointStatusMessage;
@@ -170,6 +171,7 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 
 
 public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
+    private static final int DELAY_ZONE_LOAD_MS = 20;
     private static final String LOG_TAG = " ZoneFragmentNew ";
     ExpandableListView expandableListView;
     HashMap<String, List<String>> expandableListDetail;
@@ -729,17 +731,24 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                 tablerowLayout[0] = new LinearLayout(tableLayout.getContext());
 
                 gridPosition = 0;
-                new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                    for (int m = 0; m < roomList.size(); m++) {
-                        try {
-                            loadZone(rootView, tablerowLayout, roomList.get(m));
-                        } catch (Exception e) {
-                            CcuLog.e(LOG_TAG, "Loading Zone failed");
-                            e.printStackTrace();
-                        }
+                Handler zoneLoadHandler = new Handler(Looper.getMainLooper());
+                for (int m = 0; m < roomList.size(); m++) {
+                    try {
+                        int zoneIndex = m;
+                        zoneLoadHandler.postDelayed(() -> {
+                            CcuLog.d(TAG_CCU_INIT, "Loading Zone "+zoneIndex);
+                            loadZone(rootView, tablerowLayout, roomList.get(zoneIndex));
+                            if(zoneIndex == roomList.size() - 1) {
+                                CcuLog.d(TAG_CCU_INIT, "Loading Zone Completed");
+                                setCcuReady();
+                            }
+                        }, DELAY_ZONE_LOAD_MS);
+                    } catch (Exception e) {
+                        CcuLog.e(TAG_CCU_INIT, "Loading Zone failed");
+                        e.printStackTrace();
                     }
-                    setCcuReady();
-                }, 100);
+                }
+
             } else {
                 setCcuReady();
             }

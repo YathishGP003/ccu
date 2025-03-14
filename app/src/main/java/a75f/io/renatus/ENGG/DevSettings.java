@@ -62,6 +62,7 @@ import a75f.io.renatus.BuildConfig;
 import a75f.io.renatus.R;
 import a75f.io.renatus.RebootHandlerService;
 import a75f.io.renatus.RenatusApp;
+import a75f.io.renatus.anrwatchdog.ANRHandler;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.CCUUtils;
 import a75f.io.renatus.util.ProgressDialogUtils;
@@ -185,6 +186,9 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
     public @BindView(R.id.initiateReboot) Button btnInitiateReboot;
     public @BindView(R.id.rebootLayout1) LinearLayout rebootLayout1;
     public @BindView(R.id.rebootLayout2) LinearLayout rebootLayout2;
+
+    public @BindView(R.id.anrReportText) TextView anrReportText;
+    public @BindView(R.id.anrTriggerBtn) Button anrTriggerBtn;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                                   Bundle savedInstanceState) {
@@ -449,19 +453,32 @@ public class DevSettings extends Fragment implements AdapterView.OnItemSelectedL
             Toast.makeText(getActivity(), "Saved.", Toast.LENGTH_SHORT).show();
         });
 
-        //Disable ANR reporting UI till we figure out an alternative for instabug.
-        EnableANRLayout.setVisibility(View.GONE);
-
         anrReporting.setChecked(Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting"
                 , Context.MODE_PRIVATE).getBoolean("anr_reporting_enabled", false));
         anrReporting.setOnCheckedChangeListener((compoundButton, b) -> {
-
-            /*CrashReporting.setState(b? Feature.State.ENABLED : Feature.State.DISABLED);
-            CrashReporting.setAnrState(b? Feature.State.ENABLED : Feature.State.DISABLED);*/
             Globals.getInstance().getApplicationContext().getSharedPreferences("ccu_devsetting", Context.MODE_PRIVATE)
                     .edit().putBoolean("anr_reporting_enabled", b).apply();
+            if(!b) {
+                AlertDialog dialog = new AlertDialog.Builder(getActivity())
+                        .setTitle("App restart confirmation")
+                        .setMessage("The ANR config change would be applied after the next app restart. Do you want to restart now?")
+                        .setPositiveButton("Restart", (dialog1, which) -> CCUUiUtil.triggerRestart(getContext()))
+                        .setNegativeButton("Cancel", (dialog1, which) -> {
+                        })
+                        .create();
+                dialog.show();
+            } else {
+                ANRHandler.configureANRWatchdog();
+            }
         });
 
+        anrTriggerBtn.setOnClickListener(view1 -> {
+            try {
+                Thread.sleep(30000); // Block the main thread for 30 seconds
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
         logLevelSpinner.setSelection(CCUHsApi.getInstance().getCcuLogLevel());
         logLevelSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override

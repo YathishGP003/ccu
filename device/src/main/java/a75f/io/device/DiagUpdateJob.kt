@@ -7,14 +7,19 @@ import a75f.io.domain.api.DomainName
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.diag.DiagEquip
+import android.content.Intent
 
 /**
  * This could have been done from DeviceUpdateJob. But having a dedicated status update job to avoids device status
  * not being available at backend if DeviceUpdateJob takes more than a minute due to HW delays and timeouts.
  */
 internal class DiagUpdateJob : BaseJob() {
+    val CCU_APP_HEARTBEAT: String = "a75f.io.renatus.CCU_APP_HEARTBEAT"
     override fun doJob() {
         CcuLog.d(L.TAG_CCU_JOB, "diagUpdateJob -> ")
+        val heartBeatIntent = Intent(CCU_APP_HEARTBEAT)
+        heartBeatIntent.putExtra("AppAliveMinutes", CCUHsApi.getInstance().getAppAliveMinutes())
+        CCUHsApi.getInstance().context.sendBroadcast(heartBeatIntent)
         val diagEquip =
             CCUHsApi.getInstance().readEntity("domainName == \"" + DomainName.diagEquip + "\"")
         if (diagEquip.isNotEmpty() && Domain.isDiagEquipInitialised()) {

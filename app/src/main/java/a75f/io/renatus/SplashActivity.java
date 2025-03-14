@@ -1,5 +1,7 @@
 package a75f.io.renatus;
 
+import static a75f.io.alerts.AlertsConstantsKt.CCU_ANR;
+
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -17,6 +19,7 @@ import org.json.JSONException;
 
 import java.util.HashMap;
 
+import a75f.io.alerts.AlertManager;
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.logger.CcuLog;
 import a75f.io.logic.Globals;
@@ -26,6 +29,7 @@ import a75f.io.logic.ccu.restore.RestoreCCU;
 import a75f.io.logic.logtasks.UploadLogs;
 import a75f.io.logic.util.PreferenceUtil;
 import a75f.io.renatus.ENGG.RenatusEngineeringActivity;
+import a75f.io.renatus.anrwatchdog.ANRHandler;
 import a75f.io.renatus.registration.CreateNewSite;
 import a75f.io.renatus.registration.FreshRegistration;
 import a75f.io.renatus.registration.UpdateCCUFragment;
@@ -122,6 +126,19 @@ public class SplashActivity extends AppCompatActivity implements Globals.OnCcuIn
         } else if(prefs.getBoolean(PreferenceConstants.REGISTRATION)) {
             int recovery = SystemProperties.getInt("renatus_recovery",0);
             Intent i;
+            if (ANRHandler.INSTANCE.isANRPendingTobeReported(this)) {
+                ExecutorTask.executeBackground( () -> {
+                    try {
+                        CcuLog.e(TAG,"ANR Reported");
+                        AlertManager.getInstance().generateAlert(CCU_ANR,
+                                ANRHandler.INSTANCE.getAnrAlertMessage(CCUHsApi.getInstance()));
+                        UploadLogs.instanceOf().saveCcuLogs();
+                        ANRHandler.INSTANCE.updateANRReportingStatus(this, true);
+                    } catch (Exception e) {
+                        CcuLog.e(TAG,"Failed to save logs while in safe mode");
+                    }
+                });
+            }
             if(Globals.getInstance().isSafeMode()){
                 ExecutorTask.executeBackground( () -> {
                     try {

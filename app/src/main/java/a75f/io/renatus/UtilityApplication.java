@@ -1,5 +1,6 @@
 package a75f.io.renatus;
 
+import static java.lang.Thread.sleep;
 import static a75f.io.logic.util.bacnet.BacnetConfigConstants.IS_BACNET_INITIALIZED;
 import static a75f.io.logic.util.PreferenceUtil.getDataSyncProcessing;
 import static a75f.io.logic.util.PreferenceUtil.getSyncStartTime;
@@ -13,9 +14,12 @@ import android.content.res.AssetManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
+import android.os.Handler;
+import android.os.Looper;
 
 import androidx.appcompat.app.AppCompatDelegate;
 
+import com.google.common.base.Throwables;
 import com.raygun.raygun4android.RaygunClient;
 
 import org.greenrobot.eventbus.EventBus;
@@ -37,7 +41,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -69,6 +76,9 @@ import a75f.io.messaging.service.MessageCleanUpWork;
 import a75f.io.messaging.service.MessageRetryHandlerWork;
 import a75f.io.messaging.service.MessagingAckJob;
 import a75f.io.modbusbox.EquipsManager;
+import a75f.io.renatus.anrwatchdog.ANRError;
+import a75f.io.renatus.anrwatchdog.ANRHandler;
+import a75f.io.renatus.anrwatchdog.ANRWatchDog;
 import a75f.io.renatus.ota.OtaCache;
 import a75f.io.renatus.registration.UpdateCCUFragment;
 import a75f.io.renatus.schedules.FileBackupService;
@@ -185,6 +195,9 @@ public abstract class UtilityApplication extends Application implements Globals.
         cache.restoreOtaRequests(context);
         CCUUtils.setCCUReadyProperty("false");
         initNetworkConfig();
+        if (ANRHandler.isAnrWatchdogEnabled()) {
+            ANRHandler.configureANRWatchdog();
+        }
         checkAndServerStatus();
         DashboardHandler.Companion.setDashboardListener(dashboardListener);
         CcuLog.i("UI_PROFILING", "UtilityApplication.onCreate Done");
@@ -647,7 +660,6 @@ public abstract class UtilityApplication extends Application implements Globals.
             e.printStackTrace();
         }
     }
-
     private static void checkAndServerStatus() {
         DashboardHandlerKt.getDashboardConfiguration();
         if (DashboardUtilKt.isDashboardConfig(Globals.getInstance().getApplicationContext()) || isBACnetIntialized()) {

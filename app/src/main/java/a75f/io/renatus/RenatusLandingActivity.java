@@ -104,7 +104,8 @@ import a75f.io.renatus.util.remotecommand.bundle.BundleInstallManager;
 import a75f.io.usbserial.UsbServiceActions;
 import kotlin.Pair;
 
-public class RenatusLandingActivity extends AppCompatActivity implements RemoteCommandHandleInterface, BacnetConfigChange {
+public class
+RenatusLandingActivity extends AppCompatActivity implements RemoteCommandHandleInterface, BacnetConfigChange {
 
     private static final String TAG = "LandingActivityLog";
     private static CountDownTimer countDownTimer;

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.location.Address;
+import android.util.Pair;
 
 import com.google.common.base.Strings;
 
@@ -225,6 +226,63 @@ public class CCUUtils {
 			e.printStackTrace();
 		}
 
+	}
+
+	/**
+	 * Checks if the installed BAC app version needs to be uninstalled.
+	 * The version is considered outdated if it's below 3.2.18 due to signature key mismatch.
+	 *
+	 * @param appName the full name of the BAC app, including the version in the format 'appname_version.apk'
+	 * @return true if the version is below 3.2.18, false otherwise
+	 */
+	public static boolean isBacAppVersionNeedsToUninstall(String appName){
+		boolean isBelow = false;
+		CcuLog.d(L.TAG_CCU_BACNET, "App name "+appName);
+		String appVersion = appName.substring(appName.lastIndexOf('_') + 1);
+		appVersion = appVersion.replace(".apk", "");
+		CcuLog.d(L.TAG_CCU_BACNET, "App version "+appVersion);
+		String[] versionParts = appVersion.split("\\.");
+		if (versionParts.length == 3){
+			int major = Integer.parseInt(versionParts[0]);
+			int minor = Integer.parseInt(versionParts[1]);
+			int patch = Integer.parseInt(versionParts[2]);
+			if (major < 3 || (major == 3 && minor < 2) || (major == 3 && minor == 2 && patch < 18)){
+				isBelow = true;
+			}
+		}
+		return isBelow;
+	}
+
+	/**
+	 * Retrieves the version name and package name of the installed BAC app.
+	 * It first checks the current BAC app package (io.seventyfivef.bacapp). If it's not found, it falls back to the (com.example.ccu_bacapp) package.
+	 *
+	 * @return a Pair containing the version name of the installed BAC app and the package name
+	 */
+	public static Pair<String,String> getInstalledBacAppVersion() {
+		PackageManager manager = Globals.getInstance().getApplicationContext().getPackageManager();
+		try {
+			PackageInfo info = manager.getPackageInfo(L.BAC_APP_PACKAGE_NAME, 0);
+			return new Pair<>(info.versionName, L.BAC_APP_PACKAGE_NAME);
+		} catch (PackageManager.NameNotFoundException e) {
+			e.printStackTrace();
+		}
+		return getInstalledOlderPackageBacApp();
+	}
+
+	/**
+	 * Retrieves the version name and package name of the installed BAC app of Package com.example.ccu_bacapp.
+	 * @return
+	 */
+	public static Pair<String, String> getInstalledOlderPackageBacApp() {
+		PackageManager manager = Globals.getInstance().getApplicationContext().getPackageManager();
+		try {
+			PackageInfo info = manager.getPackageInfo(L.BAC_APP_PACKAGE_NAME_OBSOLETE, 0);
+			return new Pair<>(info.versionName, L.BAC_APP_PACKAGE_NAME_OBSOLETE);
+		} catch (PackageManager.NameNotFoundException e) {
+			e.printStackTrace();
+			return new Pair<>("", "");
+		}
 	}
 
 }

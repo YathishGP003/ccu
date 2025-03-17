@@ -1,7 +1,6 @@
 package a75f.io.domain.util
 
 import a75f.io.domain.api.DomainName
-import a75f.io.domain.util.ModelCache.context
 import io.seventyfivef.domainmodeler.client.ModelDirective
 
 /**
@@ -165,10 +164,9 @@ object ModelLoader {
         return ModelCache.getModelById(MODEL_HYPERSTAT_MONITORING)
     }
 
-    fun getHyperStatDevice() : ModelDirective {
-        return ModelCache.getModelById(MODEL_HYPERSTAT_DEVICE)
+    fun getMyStatDeviceModel() : ModelDirective {
+        return ModelCache.getModelById(MODEL_MYSTAT_DEVICE)
     }
-
 
     fun getTIModel(): ModelDirective {
         return ModelCache.getModelById(MODEL_TI)
@@ -180,10 +178,21 @@ object ModelLoader {
 
     fun getSmartNodePidModel() : ModelDirective {
         return ModelCache.getModelById(MODEL_SMARTNODE_PID)
-        //return ResourceHelper.loadModel("assets/75f/models/smartnodePID_v0.0.28_copy.json", context!!)
     }
     fun getHelioNodePidModel() : ModelDirective {
         return ModelCache.getModelById(MODEL_HELIONODE_PID)
+    }
+
+    fun getMyStatCpuModel(): ModelDirective {
+        return ModelCache.getModelById(MODEL_MYSTAT_CPU)
+    }
+
+    fun getMyStatHpuModel(): ModelDirective {
+        return ModelCache.getModelById(MODEL_MYSTAT_HPU)
+    }
+
+    fun getMyStatPipe2Model(): ModelDirective {
+        return ModelCache.getModelById(MODEL_MYSTAT_PIPE2)
     }
 
     fun getModelForDomainName( domainName : String) : ModelDirective {
@@ -223,6 +232,9 @@ object ModelLoader {
             "otnDevice" -> getOtnDeviceModel()
             "hyperstatDevice" -> getHyperStatDeviceModel()
             "ccuTiDevice" -> getTIDeviceModel()
+            DomainName.myStatCPU -> getMyStatCpuModel()
+            DomainName.myStatHPU -> getMyStatHpuModel()
+            DomainName.mystat2PFCU -> getMyStatPipe2Model()
             else -> throw IllegalStateException("Invalid Model Name")
         }
     }

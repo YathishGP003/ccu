@@ -32,6 +32,7 @@ import a75f.io.renatus.BASE.BaseDialogFragment;
 import a75f.io.renatus.BASE.FragmentCommonBundleArgs;
 import a75f.io.renatus.hyperstat.HyperStatProfileSelectionFragment;
 import a75f.io.renatus.hyperstatsplit.HyperStatSplitProfileSelectionFragment;
+import a75f.io.renatus.profiles.mystat.ui.MyStatProfileSelectionFragment;
 import a75f.io.renatus.util.CCUUiUtil;
 import a75f.io.renatus.util.RxjavaUtil;
 import a75f.io.util.ExecutorTask;
@@ -48,8 +49,6 @@ import butterknife.OnClick;
 public class FragmentSelectDeviceType extends BaseDialogFragment
 {
     public static final String ID = FragmentSelectDeviceType.class.getSimpleName();
-    Zone         mZone;
-    LightProfile mLightProfile;
     short        mNodeAddress;
 
     String       mRoomName;
@@ -95,6 +94,10 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
     @BindView(R.id.hyperstatImageId)
     ImageView hyperStatImage;
 
+
+    @BindView(R.id.mystatImageId)
+    ImageView myStatImage;
+
     @BindView(R.id.smartNodeId)
     ImageView smartNodeImage;
 
@@ -107,11 +110,7 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        // TODO Auto-generated method stub
         super.onCreate(savedInstanceState);
-
-        //setStyle(DialogFragment.STY, R.style.NewDialogStyle);
-
     }
 
     @Override
@@ -152,6 +151,14 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
         }
         HyperStatProfileSelectionFragment hyperStatProfiling = HyperStatProfileSelectionFragment.newInstance(mNodeAddress, mRoomName, mFloorName);
         showDialogFragment(hyperStatProfiling, hyperStatProfiling.getIdString());
+    }
+
+    @OnClick(R.id.rl_mystat) void onMyStatClick() {
+        if (isModbusPaired()) {
+            return;
+        }
+        MyStatProfileSelectionFragment mystatProfile = MyStatProfileSelectionFragment.newInstance(mNodeAddress, mRoomName, mFloorName);
+        showDialogFragment(mystatProfile, MyStatProfileSelectionFragment.MYSTAT_SELECTION_ID);
     }
 
     @OnClick(R.id.rl_hyperstatsplit) void onHyperStatSplitClick() {
@@ -345,6 +352,7 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
             helioNodeImage.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.helio_node_carrier, null));
             hyperStatSplit.setImageDrawable(ResourcesCompat.getDrawable(getResources(),R.drawable.hyperstat_split_carrier,null));
             modbus75Image.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.modbus_carrier, null));
+            myStatImage.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.carr_mystat, null));
         } else if (CCUUiUtil.isAiroverseThemeEnabled(requireContext())) {
             ccu75Image.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ccu_airoverse, null));
             modbus75Image.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.modbus_airoverse, null));

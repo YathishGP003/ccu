@@ -108,6 +108,9 @@ object ModelCache {
 
         modelContainer[MODEL_HYPERSTAT_DEVICE] = getModelById(MODEL_HYPERSTAT_DEVICE)
         CcuLog.i(Domain.LOG_TAG, "hyperstat device loaded")
+
+        modelContainer[MODEL_MYSTAT_DEVICE] = getModelById(MODEL_MYSTAT_DEVICE)
+        CcuLog.i(Domain.LOG_TAG, "mystat device loaded")
     }
     
     private fun loadVavZoneEquipModels() {
@@ -186,16 +189,17 @@ object ModelCache {
         modelContainer[MODEL_HYPERSTAT_PIPE2] = getModelById(MODEL_HYPERSTAT_PIPE2)
         modelContainer[MODEL_HYPERSTAT_HPU] = getModelById(MODEL_HYPERSTAT_HPU)
 
-        CcuLog.i(Domain.LOG_TAG, "HyperStat CPU equip model loaded")
+        modelContainer[MODEL_MYSTAT_CPU] = getModelById(MODEL_MYSTAT_CPU)
+        modelContainer[MODEL_MYSTAT_PIPE2] = getModelById(MODEL_MYSTAT_PIPE2)
+        modelContainer[MODEL_MYSTAT_HPU] = getModelById(MODEL_MYSTAT_HPU)
 
         modelContainer[MODEL_OTN_TI] = getModelById(MODEL_OTN_TI)
         CcuLog.i(Domain.LOG_TAG, "Otn profile model loaded")
-        modelContainer[MODEL_SMART_NODE_SSE] = getModelById(
-            MODEL_SMART_NODE_SSE)
+
+        modelContainer[MODEL_SMART_NODE_SSE] = getModelById(MODEL_SMART_NODE_SSE)
         CcuLog.i(Domain.LOG_TAG, "MODEL_SMART_NODE_SSE model loaded")
 
-        modelContainer[MODEL_HELIO_NODE_SSE] = getModelById(
-            MODEL_HELIO_NODE_SSE)
+        modelContainer[MODEL_HELIO_NODE_SSE] = getModelById(MODEL_HELIO_NODE_SSE)
         CcuLog.i(Domain.LOG_TAG, "MODEL_HELIO_NODE_SSE model loaded")
 
         modelContainer[MODEL_SMARTNODE_PID] = getModelById(MODEL_SMARTNODE_PID)

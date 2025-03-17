@@ -1,4 +1,4 @@
-package a75f.io.logic.jobs
+package a75f.io.logic.util.uiutils
 
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.Point

@@ -51,6 +51,8 @@ import a75f.io.logic.bo.building.hyperstat.profiles.pipe2.HyperStatPipe2Profile;
 import a75f.io.logic.bo.building.hyperstatmonitoring.HyperStatV2MonitoringProfile;
 import a75f.io.logic.bo.building.hyperstatsplit.profiles.cpuecon.HyperStatSplitCpuEconProfile;
 import a75f.io.logic.bo.building.modbus.ModbusProfile;
+import a75f.io.logic.bo.building.mystat.profiles.fancoilunit.pipe2.MyStatPipe2Profile;
+import a75f.io.logic.bo.building.mystat.profiles.packageunit.cpu.MyStatCpuProfile;
 import a75f.io.logic.bo.building.oao.OAOProfile;
 import a75f.io.logic.bo.building.otn.OTNProfile;
 import a75f.io.logic.bo.building.plc.PlcProfile;
@@ -566,6 +568,12 @@ public class Globals {
                         case HYPERSTATSPLIT_CPU:
                             HyperStatSplitCpuEconProfile cpuEcon = new HyperStatSplitCpuEconProfile(eq.getId(), Short.parseShort(eq.getGroup()));
                             L.ccu().zoneProfiles.add(cpuEcon);
+                            break;
+
+                        case MYSTAT_PIPE2:
+                            MyStatPipe2Profile mystatPipe2Profile = new MyStatPipe2Profile();
+                            mystatPipe2Profile.addEquip(eq.getId());
+                            L.ccu().zoneProfiles.add(mystatPipe2Profile);
                             break;
 
                         case MODBUS_PAC:

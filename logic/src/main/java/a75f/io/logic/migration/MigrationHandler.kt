@@ -2956,7 +2956,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         val hyperStatCPUEquip =
             hayStack.readAllEntities("equip and hyperstat and cpu and $not_external_model_query")
         val equipBuilder = ProfileEquipBuilder(hayStack)
-        val deviceModel = ModelLoader.getHyperStatDevice() as SeventyFiveFDeviceDirective
+        val deviceModel = ModelLoader.getHyperStatDeviceModel() as SeventyFiveFDeviceDirective
         val model = ModelLoader.getHyperStatCpuModel()
         val entityMapper = EntityMapper(model as SeventyFiveFProfileDirective)
         val deviceBuilder = DeviceBuilder(hayStack, entityMapper)

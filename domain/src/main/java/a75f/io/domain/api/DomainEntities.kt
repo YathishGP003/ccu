@@ -2,6 +2,9 @@ package a75f.io.domain.api
 
 import a75f.io.api.haystack.RawPoint
 import a75f.io.logger.CcuLog
+import org.projecthaystack.HNum
+import org.projecthaystack.HRef
+import org.projecthaystack.UnknownNameException
 import java.util.Objects
 
 /**
@@ -171,25 +174,57 @@ open class Point(domainName : String, val equipRef: String) : Entity(domainName)
     }
 
     fun writePointValue(value: Double) {
-        requireId()
-        CcuLog.d(
-            "CCU_DEVICE",
-            "test-writable writePointValue:=======value====> $value <--id--> $id <--iswritable-->${isWritable()} <--default value-->${readDefaultVal()}<--dis-->$dis"
-        )
-        if (isWritable()) {
-            if (value == 0.0) {
-                writeDefaultVal(value)
-            } else if (value != readDefaultVal()) {
-                writeDefaultVal(value)
-            }
+
+        try {
+            requireId()
             CcuLog.d(
                 "CCU_DEVICE",
-                "test-writable writePointValue:=======readPriorityVal()====> ${readPriorityVal()} for <--id-->$id<--dis-->$dis"
+                "test-writable writePointValue:=======value====> $value <--id--> $id <--iswritable-->${isWritable()} <--default value-->${readDefaultVal()}<--dis-->$dis"
             )
-            writeHisVal(readPriorityVal())
-        } else {
-            writeHisVal(value)
+            if (isWritable()) {
+                if (value == 0.0) {
+                    writeDefaultVal(value)
+                } else if (value != readDefaultVal()) {
+                    writeDefaultVal(value)
+                }
+                CcuLog.d(
+                    "CCU_DEVICE",
+                    "test-writable writePointValue:=======readPriorityVal()====> ${readPriorityVal()} for <--id-->$id<--dis-->$dis"
+                )
+                writeHisVal(readPriorityVal())
+            } else {
+                writeHisVal(value)
+            }
+        } catch (e: UnknownNameException) {
+            CcuLog.d("CCU_DEVICE", "$domainName is not a writable point")
         }
+    }
+
+    fun pointWriteByUser(value: Double, who: String = Domain.hayStack.getCCUUserName(), level: Int = 8) {
+        try {
+            requireId()
+            CcuLog.d(
+                "CCU_DEVICE",
+                "test-writable writePointValue:=======value====> $value <--id--> $id <--iswritable-->${isWritable()} <--default value-->${readDefaultVal()}<--dis-->$dis"
+            )
+            if (isWritable()) {
+                if (value == 0.0) {
+                    Domain.hayStack.pointWrite(HRef.copy(id), level, who, HNum.make(value), HNum.make(0))
+                } else if (value != readDefaultVal()) {
+                    Domain.hayStack.pointWrite(HRef.copy(id), level, who, HNum.make(value), HNum.make(0))
+                }
+                CcuLog.d(
+                    "CCU_DEVICE",
+                    "test-writable writePointValue:=======readPriorityVal()====> ${readPriorityVal()} for <--id-->$id<--dis-->$dis"
+                )
+                writeHisVal(readPriorityVal())
+            } else {
+                writeHisVal(value)
+            }
+        } catch (e: UnknownNameException) {
+            CcuLog.d("CCU_DEVICE", "$domainName is not a writable point")
+        }
+
     }
 
     fun readDefaultVal() : Double {

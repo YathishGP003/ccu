@@ -40,7 +40,7 @@ fun reconfigureHSV2(msgObject: JsonObject, configPoint: Point) {
 
     val config = getConfiguration(configPoint.equipRef)?.getActiveConfiguration()
     val equipBuilder = ProfileEquipBuilder(hayStack)
-    val deviceModel = ModelLoader.getHyperStatDevice() as SeventyFiveFDeviceDirective
+    val deviceModel = ModelLoader.getHyperStatDeviceModel() as SeventyFiveFDeviceDirective
     val entityMapper = EntityMapper(model as SeventyFiveFProfileDirective)
     val deviceBuilder = DeviceBuilder(hayStack, entityMapper)
     val deviceDis = "${hayStack.siteName}-${deviceModel.name}-${config!!.nodeAddress}"

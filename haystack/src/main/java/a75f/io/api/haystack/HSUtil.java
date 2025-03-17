@@ -421,6 +421,26 @@ public class HSUtil {
         return equipMap.containsKey(Tags.HYPERSTAT);
     }
 
+    public static boolean isMyStatPipe2Equip(String id, CCUHsApi hayStack) {
+        HashMap<Object, Object> equipMap = hayStack.readMapById(id);
+        return isMyStatEquip(equipMap.get(EQUIPREF).toString(), hayStack) && equipMap.containsKey(Tags.PIPE2);
+    }
+
+    public static boolean isMyStatHpuEquip(String id, CCUHsApi hayStack) {
+        HashMap<Object, Object> equipMap = hayStack.readMapById(id);
+        return isMyStatEquip(equipMap.get(EQUIPREF).toString(), hayStack) && equipMap.containsKey(Tags.HPU);
+    }
+
+    public static boolean isMyStatCpuEquip(String id, CCUHsApi hayStack) {
+        HashMap<Object, Object> equipMap = hayStack.readMapById(id);
+        return isMyStatEquip(equipMap.get(EQUIPREF).toString(), hayStack) && equipMap.containsKey(Tags.CPU);
+    }
+
+    private static boolean isMyStatEquip(String equipRef, CCUHsApi hayStack) {
+        HashMap<Object, Object> equipMap = hayStack.readMapById(equipRef);
+        return equipMap.containsKey(Tags.MYSTAT);
+    }
+
     public static boolean isVAVTrueCFMConfig(String id, CCUHsApi hayStack) {
         HashMap<Object, Object> pointEntity = hayStack.readMapById(id);
         if (pointEntity.containsKey("vav") && pointEntity.containsKey("domainName")) {

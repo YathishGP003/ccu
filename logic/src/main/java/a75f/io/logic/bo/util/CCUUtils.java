@@ -401,6 +401,8 @@ public class CCUUtils
             return NodeType.HYPERSTATSPLIT;
         } else if (domainName.contains("hyperstat")) {
             return NodeType.HYPER_STAT;
+        } else if (domainName.contains("mystat")) {
+            return NodeType.MYSTAT;
         } else if (domainName.contains("otn")) {
             return NodeType.OTN;
         } else {

@@ -488,7 +488,11 @@ public class OTAUpdateService extends IntentService {
         }else if(firmwareVersion.startsWith("ConnectModule_") || firmwareVersion.startsWith("connect_module_")){
             mFirmwareDeviceType = FirmwareComponentType_t.CONNECT_MODULE_DEVICE_TYPE;
             startUpdate(id, cmdLevel, mVersionMajor, mVersionMinor, mFirmwareDeviceType,  currentRunningRequestType, currentOtaRequest);
-        }else{
+        } else if (firmwareVersion.startsWith("MyStat_")){
+            mFirmwareDeviceType = FirmwareComponentType_t.MY_STAT_DEVICE_TYPE;
+            startUpdate(id, cmdLevel, mVersionMajor, mVersionMinor, mFirmwareDeviceType,  currentRunningRequestType, currentOtaRequest);
+        }
+        else{
             otaRequestProcessInProgress = false;
         }
     }

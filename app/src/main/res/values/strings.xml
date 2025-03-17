@@ -867,9 +867,11 @@
     <string name="title_helionode">Helio Node</string>
     <string name="title_ss">SS</string>
     <string name="title_hs">HS</string>
+    <string name="title_ms">MS</string>
     <string name="title_hssplit">HS Split</string>
     <string name="title_smartstat">Smart Stat</string>
     <string name="title_hyperstat">HyperStat</string>
+    <string name="title_mystat">MyStat</string>
     <string name="title_hyperstatsplit">HyperStat Split</string>
     <string name="title_wtm">WTM</string>
     <string name="title_wirelesstemp">Wireless Temperature Monitor</string>
@@ -910,6 +912,7 @@
     <!--SMART STAT Module Screen-->
     <string name="title_smartstatmodule">Smart Stat | Select Module Type</string>
     <string name="title_hyperstatmodule">Hyperstat | Select Module Type</string>
+    <string name="title_mystatmodule">MyStat | Select Module Type</string>
     <string name="title_hyperstatsplitmodule">Hyperstat Split | Select Module Type</string>
     <string name="title_cpu">Conventional Package Unit</string>
     <string name="desc_cpu">Unitary equipment with 2 stages for Heating, Cooling and Fan.\nUser can select Fan Low/High/Auto.</string>
@@ -1046,6 +1049,7 @@
     <string name="title_pair_hn_manual">HELIO NODE | MANUAL PAIRING STEPS </string>
     <string name="title_pair_hs_manual">HYPER STAT | MANUAL PAIRING STEPS </string>
     <string name="title_pair_hss_manual">HYPER STAT SPLIT| MANUAL PAIRING STEPS </string>
+    <string name="title_pair_ms_manual">MYSTAT| MANUAL PAIRING STEPS </string>
     <string name="button_pair">PAIR</string>
 
     <string name="title_site_id">Site Id</string>
@@ -1391,6 +1395,7 @@
     <string name="analogin1">Analog-in1</string>
     <string name="analogin2">Analog-in2</string>
     <string name="title_pairhss">HYPERSTAT | PAIRING STEPS </string>
+    <string name="title_pair_mystat">MYSTAT | PAIRING STEPS </string>
     <string name="title_pairhssplit">HYPERSTAT SPLIT | PAIRING STEPS </string>
     <string name="prefs_theme_key">isEnabled</string>
     <string name="txt_CCU_occupancy_status">Occupancy Status on IE Gateway :</string>
@@ -1678,7 +1683,6 @@
     <string name="schedule_error">Schedule Errors</string>
 
 
-
     <string name="space">\" \"</string>
 
 
@@ -1799,4 +1803,6 @@
     <string name="title_alert_status">Status</string>
     <string name="title_alert_message">Message</string>
     <string name="txt_global">Global</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

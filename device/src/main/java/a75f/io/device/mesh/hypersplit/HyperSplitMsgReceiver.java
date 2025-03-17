@@ -1,6 +1,5 @@
 package a75f.io.device.mesh.hypersplit;
 
-import static a75f.io.api.haystack.Tags.DOMAIN_NAME;
 import static a75f.io.api.haystack.Tags.HYPERSTATSPLIT;
 import static a75f.io.device.mesh.Pulse.getHumidityConversion;
 
@@ -14,7 +13,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Equip;
@@ -48,7 +46,7 @@ import a75f.io.logic.bo.haystack.device.HyperStatSplitDevice;
 import a75f.io.logic.bo.util.CCUUtils;
 import a75f.io.logic.bo.util.TemperatureMode;
 import a75f.io.logic.interfaces.ZoneDataInterface;
-import a75f.io.logic.jobs.HyperStatSplitUserIntentHandler;
+import a75f.io.logic.util.uiutils.HyperStatSplitUserIntentHandler;
 
 public class HyperSplitMsgReceiver {
 

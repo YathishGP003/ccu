@@ -156,17 +156,6 @@
             android:layout_height="wrap_content"
             android:text="Relay 4"
             android:layout_marginRight="30dp"/>
-        <Switch
-            android:id="@+id/relay5"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Relay 5"
-            android:layout_marginRight="30dp"/>
-        <Switch
-            android:id="@+id/relay6"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Relay 6" />
 
     </LinearLayout>
 
@@ -187,25 +176,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"/>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Analog2Out"></TextView>
-        <Spinner
-            android:id="@+id/analog2Out"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"/>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Analog3Out"></TextView>
-        <Spinner
-            android:id="@+id/analog3Out"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"/>
 
     </LinearLayout>
 

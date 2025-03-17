@@ -39,7 +39,7 @@ import a75f.io.logic.bo.building.hyperstat.v2.configs.HyperStatConfiguration
 import a75f.io.logic.bo.building.hyperstat.v2.configs.Pipe2AnalogOutConfigs
 import a75f.io.logic.bo.building.hyperstat.v2.configs.Pipe2Configuration
 import a75f.io.logic.bo.building.schedules.Occupancy
-import a75f.io.logic.jobs.HyperStatUserIntentHandler
+import a75f.io.logic.util.uiutils.HyperStatUserIntentHandler
 
 
 /**

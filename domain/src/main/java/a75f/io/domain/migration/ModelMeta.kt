@@ -27,6 +27,10 @@ import a75f.io.domain.util.MODEL_HYPERSTAT_HPU
 import a75f.io.domain.util.MODEL_HYPERSTAT_PIPE2
 import a75f.io.domain.util.MODEL_HYPERSTAT_SPLIT_CPU
 import a75f.io.domain.util.MODEL_HYPERSTAT_SPLIT_DEVICE
+import a75f.io.domain.util.MODEL_MYSTAT_CPU
+import a75f.io.domain.util.MODEL_MYSTAT_DEVICE
+import a75f.io.domain.util.MODEL_MYSTAT_HPU
+import a75f.io.domain.util.MODEL_MYSTAT_PIPE2
 import a75f.io.domain.util.MODEL_OTN_DEVICE
 import a75f.io.domain.util.MODEL_OTN_TI
 import a75f.io.domain.util.MODEL_SMARTNODE_PID
@@ -107,6 +111,10 @@ fun getRequiredModels(): List<String> {
             MODEL_OTN_TI,
             MODEL_OTN_DEVICE,
             MODEL_HELIONODE_PID,
-            MODEL_SMARTNODE_PID
+            MODEL_SMARTNODE_PID,
+            MODEL_MYSTAT_DEVICE,
+            MODEL_MYSTAT_CPU,
+            MODEL_MYSTAT_PIPE2,
+            MODEL_MYSTAT_HPU
     )
 }

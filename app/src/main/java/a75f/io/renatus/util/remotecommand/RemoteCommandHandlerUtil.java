@@ -59,6 +59,7 @@ import a75f.io.device.mesh.LSmartStat;
 import a75f.io.device.mesh.MeshUtil;
 import a75f.io.device.mesh.hypersplit.HyperSplitMessageSender;
 import a75f.io.device.mesh.hyperstat.HyperStatMessageSender;
+import a75f.io.device.mesh.mystat.MyStatMsgSender;
 import a75f.io.device.serial.CcuToCmOverUsbCmResetMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSmartStatControlsMessage_t;
 import a75f.io.device.serial.CcuToCmOverUsbSnControlsMessage_t;
@@ -174,7 +175,6 @@ public class RemoteCommandHandlerUtil {
                 break;
             case RESTART_MODULE:
 
-                //TODO Send commands to SmartNode
                 switch (cmdLevel) {
                     case "system":
                         for (Floor floor : HSUtil.getFloors()) {
@@ -189,6 +189,8 @@ public class RemoteCommandHandlerUtil {
                                         HyperStatMessageSender.sendRestartModuleCommand(Integer.parseInt(d.getAddr()));
                                     } else if (d.getMarkers().contains("hyperstatsplit")) {
                                         HyperSplitMessageSender.sendRestartModuleCommand(Integer.parseInt(d.getAddr()));
+                                    } else if (d.getMarkers().contains("mystat")) {
+                                        MyStatMsgSender.INSTANCE.sendRestartModuleCommand(Integer.parseInt(d.getAddr()));
                                     }
                                 }
                             }
@@ -205,6 +207,8 @@ public class RemoteCommandHandlerUtil {
                                 HyperStatMessageSender.sendRestartModuleCommand(Integer.parseInt(d.getAddr()));
                             } else if (d.getMarkers().contains("hyperstatsplit")) {
                                 HyperSplitMessageSender.sendRestartModuleCommand(Integer.parseInt(d.getAddr()));
+                            } else if (d.getMarkers().contains("mystat")) {
+                                MyStatMsgSender.INSTANCE.sendRestartModuleCommand(Integer.parseInt(d.getAddr()));
                             }
                         }
                         break;
@@ -219,6 +223,8 @@ public class RemoteCommandHandlerUtil {
                             HyperStatMessageSender.sendRestartModuleCommand(Integer.parseInt(equip.getGroup()));
                         } else if (equip.getMarkers().contains("hyperstatsplit")) {
                             HyperSplitMessageSender.sendRestartModuleCommand(Integer.parseInt(equip.getGroup()));
+                        } else if (equip.getMarkers().contains("mystat")) {
+                            MyStatMsgSender.INSTANCE.sendRestartModuleCommand(Integer.parseInt(equip.getGroup()));
                         }
                         break;
                     default:

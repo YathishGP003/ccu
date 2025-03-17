@@ -39,7 +39,7 @@ import a75f.io.logic.bo.building.hyperstat.v2.configs.HyperStatConfiguration
 import a75f.io.logic.bo.building.sensors.SensorManager
 import a75f.io.logic.bo.building.hyperstat.v2.configs.Pipe2Configuration
 import a75f.io.logic.bo.util.UnitUtils
-import a75f.io.logic.jobs.HyperStatUserIntentHandler.Companion.updateHyperStatUIPoints
+import a75f.io.logic.util.uiutils.HyperStatUserIntentHandler.Companion.updateHyperStatUIPoints
 import a75f.io.renatus.R
 import a75f.io.renatus.util.CCUUiUtil
 import a75f.io.renatus.util.HeartBeatUtil
@@ -114,6 +114,7 @@ fun loadHyperStatCpuProfile(
         addView(viewStatus)
         addView(viewPointRow2)
         addView(viewPointRow1)
+        setPadding(0, 0, 0, 10)
     }
     showDischargeConfigIfRequired(viewDischarge,cpuV2EquipPoints,linearLayoutZonePoints)
 }
@@ -173,6 +174,7 @@ fun loadHyperStatHpuProfile(
         addView(viewPointRow2)
         addView(viewPointRow1)
         addView(viewDischarge)
+        setPadding(0, 0, 0, 10)
     }
     showDischargeConfigIfRequired(viewDischarge,equipPoints,linearLayoutZonePoints)
 }
@@ -233,6 +235,7 @@ fun loadHyperStatPipe2Profile(
         addView(viewPointRow2)
         addView(viewPointRow1)
         addView(viewDischarge)
+        setPadding(0, 0, 0, 10)
     }
     showDischargeConfigIfRequired(viewDischarge,equipPoints,linearLayoutZonePoints)
 }

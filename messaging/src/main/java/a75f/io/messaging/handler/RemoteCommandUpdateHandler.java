@@ -44,6 +44,7 @@ public class RemoteCommandUpdateHandler implements MessageHandler
     public static final String OTA_UPDATE_HOME_APP = "ota_update_homeApp";
     public static final String UPDATE_CCU_LOG_LEVEL = "update_ccu_log_level";
     public static final String SAVE_ALERT_LOGS = "save_alert_logs";
+    public static final String OTA_UPDATE_MS = "ota_update_myStat";
     /**
      * Maintain Queue request for all the OTA request and process one by one
      */
@@ -106,6 +107,7 @@ public class RemoteCommandUpdateHandler implements MessageHandler
                             case OTA_UPDATE_CM:
                             case OTA_UPDATE_HN:
                             case OTA_UPDATE_CONNECT:
+                            case OTA_UPDATE_MS:
                                 Intent otaUpdateIntent = new Intent(Globals.IntentActions.PUBNUB_MESSAGE);
                                 otaUpdateIntent.putExtra("id", msgObject.get("remoteCmdLevel").getAsString()); // site id
                                 otaUpdateIntent.putExtra("firmwareVersion", msgObject.get("version").getAsString());

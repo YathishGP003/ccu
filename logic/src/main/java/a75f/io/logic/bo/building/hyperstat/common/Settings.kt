@@ -19,7 +19,10 @@ enum class HSZoneStatus {
    FAN_LEVEL,
    DISCHARGE_AIRFLOW,
    CONFIG,
-   EQUIP
+   EQUIP,
+   PROFILE_NAME,
+   PROFILE_TYPE,
+   SUPPLY_TEMP,
 }
 
 /**

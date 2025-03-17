@@ -2,6 +2,7 @@ package a75f.io.domain.config
 
 import a75f.io.domain.api.EntityConfig
 import a75f.io.domain.api.Point
+import android.util.Log
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfilePointDef
 import io.seventyfivef.domainmodeler.common.point.NumericConstraint

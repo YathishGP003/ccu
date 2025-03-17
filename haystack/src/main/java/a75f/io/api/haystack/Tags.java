@@ -237,6 +237,7 @@ public class Tags
     public static final String UNUSED = "unused";
     public static final String CCUREF = "ccuRef";
     public static final String POINTREF = "pointRef";
+    public static final String MYSTAT = "mystat";
     public static final String INPUT_TYPE = "inputType";
     public static final String OUTPUT_TYPE = "outputType";
 

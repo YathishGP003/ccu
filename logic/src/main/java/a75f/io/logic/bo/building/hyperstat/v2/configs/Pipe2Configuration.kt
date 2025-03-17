@@ -96,6 +96,7 @@ class Pipe2Configuration(
             high.currentVal = getActivePointValue(equip.analog3FanHigh, high)
         }
     }
+
     override fun getDefaultConfiguration(): HyperStatConfiguration {
         val configuration = super.getDefaultConfiguration()
         configuration.apply {
@@ -210,6 +211,7 @@ class Pipe2Configuration(
             addAll(addFanConfigList(analogOut3FanSpeedConfig))
         }
     }
+
     override fun getValueConfigs(): List<ValueConfig> {
         return mutableListOf<ValueConfig>().apply {
             addAll(super.getValueConfigs())

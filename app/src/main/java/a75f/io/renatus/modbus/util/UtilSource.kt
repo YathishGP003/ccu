@@ -276,6 +276,7 @@ fun getNodeType(device: HashMap<Any, Any>): NodeType? {
         domainName.contains("smartnode",true) -> NodeType.SMART_NODE
         domainName.contains("hyperstatsplit",true) -> NodeType.HYPERSTATSPLIT
         domainName.contains("hyperstat",true) -> NodeType.HYPER_STAT
+        domainName.contains("mystat",true) -> NodeType.MYSTAT
         domainName.contains("otn",true) -> NodeType.OTN
         else -> null
     }

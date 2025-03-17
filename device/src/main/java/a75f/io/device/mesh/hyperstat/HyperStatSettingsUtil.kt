@@ -6,6 +6,10 @@ import a75f.io.device.HyperStat
 import a75f.io.device.HyperStat.HyperStatSettingsMessage2_t
 import a75f.io.device.HyperStat.HyperStatSettingsMessage3_t
 import a75f.io.device.HyperStat.HyperStatSettingsMessage_t
+import a75f.io.device.mesh.getCoolingDeadBand
+import a75f.io.device.mesh.getCoolingUserLimit
+import a75f.io.device.mesh.getHeatingDeadBand
+import a75f.io.device.mesh.getHeatingUserLimit
 import a75f.io.device.util.DeviceConfigurationUtil.Companion.getUserConfiguration
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.Domain.readValAtLevelByDomain
@@ -36,37 +40,6 @@ class HyperStatSettingsUtil {
     }
 }
 
-private fun getHeatingUserLimit(type: String, roomRef: String): Int {
-    val hsApi = CCUHsApi.getInstance()
-    var pointValue = hsApi.readPointPriorityValByQuery("schedulable and heating and user and limit and $type and roomRef == \"$roomRef\"")
-    if (pointValue == 0.0) { // // Fall back to default value
-        pointValue = hsApi.readPointPriorityValByQuery("point and schedulable and default and heating and user and limit and min")
-    }
-    return pointValue.toInt()
-}
-
-private fun getCoolingUserLimit(type: String, roomRef: String): Int {
-    val hsApi = CCUHsApi.getInstance()
-    var pointValue = hsApi.readPointPriorityValByQuery("schedulable and cooling and user and limit and $type and roomRef == \"$roomRef\"")
-    if (pointValue == 0.0) { // Fall back to default value
-        pointValue = hsApi.readPointPriorityValByQuery("point and schedulable and default and cooling and user and limit and min")
-    }
-    return pointValue.toInt()
-}
-
-private fun getHeatingDeadBand(roomRef: String): Double {
-    val pointId = CCUHsApi.getInstance().readId("deadband and heating and not multiplier and roomRef == \"$roomRef\"")
-    if (pointId != null)
-        return HSUtil.getPriorityVal(pointId)
-    return 0.0
-}
-
-private fun getCoolingDeadBand(roomRef: String): Double {
-    val pointId = CCUHsApi.getInstance().readId("deadband and cooling and not multiplier and roomRef == \"$roomRef\"")
-    if (pointId != null)
-        return HSUtil.getPriorityVal(pointId)
-    return 0.0
-}
 
 private fun getTempMode(): HyperStat.HyperStatTemperatureMode_e {
     val temperatureMode = readValAtLevelByDomain(DomainName.temperatureMode, TunerConstants.SYSTEM_BUILDING_VAL_LEVEL).toInt()

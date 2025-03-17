@@ -15,6 +15,15 @@ import a75f.io.device.mesh.LSerial
 import a75f.io.device.mesh.MeshUtil
 import a75f.io.device.mesh.Pulse
 import a75f.io.device.mesh.ThermistorUtil
+import a75f.io.device.mesh.getSensorMappedValue
+import a75f.io.device.mesh.updateHsRssi
+import a75f.io.device.mesh.updateHumidity
+import a75f.io.device.mesh.updateIlluminance
+import a75f.io.device.mesh.updateLogicalPoint
+import a75f.io.device.mesh.updateOccupancy
+import a75f.io.device.mesh.updateSensorData
+import a75f.io.device.mesh.updateSound
+import a75f.io.device.mesh.updateTemp
 import a75f.io.device.serial.CcuToCmOverUsbDeviceTempAckMessage_t
 import a75f.io.device.serial.MessageType
 import a75f.io.domain.api.Domain.getDomainEquip
@@ -46,7 +55,7 @@ import a75f.io.logic.bo.building.hyperstat.v2.configs.Pipe2Configuration
 import a75f.io.logic.bo.building.sensors.SensorType
 import a75f.io.logic.bo.util.CCUUtils
 import a75f.io.logic.interfaces.ZoneDataInterface
-import a75f.io.logic.jobs.HyperStatUserIntentHandler.Companion.updateHyperStatUIPoints
+import a75f.io.logic.util.uiutils.HyperStatUserIntentHandler.Companion.updateHyperStatUIPoints
 
 /**
  * Created by Manjunath K on 22-10-2024.
@@ -58,22 +67,22 @@ fun handleRegularUpdate(regularUpdateMessage: HyperStatRegularUpdateMessage_t, d
 
     CcuLog.d(L.TAG_CCU_DEVICE, "HyperStat RegularUpdate: nodeAddress $nodeAddress :  $regularUpdateMessage")
     if (Globals.getInstance().isTemporaryOverrideMode) {
-        updateHsRssi(hsDevice, regularUpdateMessage.rssi)
+        updateHsRssi(hsDevice.rssi, regularUpdateMessage.rssi)
         refresh?.refreshHeartBeatStatus(nodeAddress.toString())
         return
     }
-    updateHsRssi(hsDevice, regularUpdateMessage.rssi)
-    updateTemp(hsDevice, regularUpdateMessage.roomTemperature.toDouble(),nodeAddress,refresh)
+    updateHsRssi(hsDevice.rssi, regularUpdateMessage.rssi)
+    updateTemp(hsDevice.currentTemp, regularUpdateMessage.roomTemperature.toDouble(),nodeAddress,refresh)
 
     updatePhysicalInputs(hsDevice.analog1In, regularUpdateMessage.externalAnalogVoltageInput1.toDouble(), equipRef)
     updatePhysicalInputs(hsDevice.analog2In, regularUpdateMessage.externalAnalogVoltageInput2.toDouble(), equipRef)
     updatePhysicalInputs(hsDevice.th1In, regularUpdateMessage.externalThermistorInput1.toDouble(), equipRef)
     updatePhysicalInputs(hsDevice.th2In, regularUpdateMessage.externalThermistorInput2.toDouble(), equipRef)
 
-    updateOccupancy(hsDevice, regularUpdateMessage.occupantDetected)
-    updateIlluminance(hsDevice, regularUpdateMessage.illuminance.toDouble())
-    updateHumidity(hsDevice, regularUpdateMessage.humidity.toDouble())
-    updateSound(hsDevice, regularUpdateMessage.illuminance.toDouble())
+    updateOccupancy(hsDevice.occupancySensor, regularUpdateMessage.occupantDetected)
+    updateIlluminance(hsDevice.illuminanceSensor, regularUpdateMessage.illuminance.toDouble())
+    updateHumidity(hsDevice.humiditySensor, regularUpdateMessage.humidity.toDouble())
+    updateSound(hsDevice.soundSensor, regularUpdateMessage.illuminance.toDouble())
     updateDynamicSensors(hsDevice, regularUpdateMessage.sensorReadingsList, equipRef)
 
     CcuLog.d(L.TAG_CCU_DEVICE, "HyperStat Regular Update completed")
@@ -237,6 +246,9 @@ private fun updateThermistor(logicalPointId: String, value: Double, equipRef: St
         DomainName.airTempSensor100kOhms_th1, DomainName.airTempSensor100kOhms_th2 -> {
             value/100
         }
+        DomainName.keyCardSensor -> {
+            if ((value * 10) <= 10000) 0.0 else 1.0
+        }
 
         else -> {
             CCUUtils.roundToOneDecimal(ThermistorUtil.getThermistorValueToTemp(value * 10))
@@ -245,74 +257,6 @@ private fun updateThermistor(logicalPointId: String, value: Double, equipRef: St
 
     CcuLog.d(L.TAG_CCU_DEVICE, "DomainName: $logicalDomainName , Raw value: $value, logicalValue : $logicalValue")
     updateSensorData(logicalDomainName, equipRef, logicalValue)
-}
-
-private fun updateHsRssi(device: HyperStatDevice, rssi: Int) {
-    val rssiPoint = device.rssi
-    rssiPoint.writeHisValueByIdWithoutCOV(rssi.toDouble())
-    val logicalPoint = rssiPoint.readPoint()
-    if (logicalPoint.pointRef != null) {
-        CCUHsApi.getInstance().writeHisValueByIdWithoutCOV(logicalPoint.pointRef, 1.0)
-    }
-}
-
-private fun updateTemp(device: HyperStatDevice, temp: Double, address: Int, refresh: ZoneDataInterface?) {
-    val currentTemp = device.currentTemp
-    currentTemp.writeHisVal(temp)
-    updateLogicalPoint(currentTemp, Pulse.getRoomTempConversion(temp))
-    refresh?.updateTemperature(temp, address.toShort())
-}
-
-private fun updateOccupancy(device: HyperStatDevice, occupancyDetected: Boolean) {
-    val occupancy = device.occupancySensor
-    occupancy.writeHisVal(if (occupancyDetected) 1.0 else 0.0)
-    updateLogicalPoint(occupancy, if (occupancyDetected) 1.0 else 0.0)
-}
-
-private fun updateIlluminance(device: HyperStatDevice, illuminance: Double) {
-    val illuminanceSensor = device.illuminanceSensor
-    illuminanceSensor.writeHisVal(illuminance)
-    updateLogicalPoint(illuminanceSensor, illuminance)
-}
-
-private fun updateHumidity(device: HyperStatDevice, humidity: Double) {
-    val humiditySensor = device.humiditySensor
-    humiditySensor.writeHisVal(humidity)
-    updateLogicalPoint(humiditySensor, CCUUtils.roundToOneDecimal(humidity / 10.0))
-}
-
-private fun updateSound(device: HyperStatDevice, sound: Double) {
-    val soundSensor = device.soundSensor
-    soundSensor.writeHisVal(sound)
-    updateLogicalPoint(soundSensor, sound)
-}
-
-private fun updateLogicalPoint(point: PhysicalPoint, value: Double) {
-    CcuLog.d(L.TAG_CCU_DEVICE, "PhysicalPoint: ${point.domainName}, value: $value")
-    val logicalPoint = point.readPoint()
-    if (logicalPoint.pointRef != null) {
-        CCUHsApi.getInstance().writeHisValById(logicalPoint.pointRef, value)
-    }
-}
-
-private fun updateSensorData(domainName: String, equipRef: String, value: Double) {
-    hayStack.writeHisValByQuery("point and domainName == \"$domainName\" and equipRef == \"$equipRef\"", value)
-}
-
-
-private fun getSensorMappedValue(point: HashMap<Any, Any>, rawValue: Double): Double {
-    /*Analog's range is 0 to 10, if CCU receive 5v it means its 50 perc so we need to multiply by 10*/
-    val deciVolts = rawValue * 10
-
-    try {
-        val min = point[Tags.MIN_VAL].toString().toDouble()
-        val max = point[Tags.MAX_VAL].toString().toDouble()
-        val analogConversion = ((max - min) * (deciVolts / 100.0)) + min
-        return CCUUtils.roundToTwoDecimal(analogConversion)
-    } catch (e: Exception) {
-        CcuLog.e(L.TAG_CCU_DEVICE, "Error in getSensorMappedValue $point", e)
-    }
-    return 0.0
 }
 
 private fun updateDynamicSensors(device: HyperStatDevice, sensorReadings: List<SensorReadingPb_t>, equipRef: String) {

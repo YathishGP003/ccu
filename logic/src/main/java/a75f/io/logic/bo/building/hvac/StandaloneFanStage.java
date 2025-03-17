@@ -2,7 +2,6 @@ package a75f.io.logic.bo.building.hvac;
 
 /**
  * Enum maps to all the fan stages used in Fan coil equipments.
- *
  *         <item>  Off </item>
  *         <item>  Auto </item>
  *         <item>  Fan Low Current Occupied Period </item>

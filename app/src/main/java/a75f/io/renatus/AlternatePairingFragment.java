@@ -117,7 +117,7 @@ public class AlternatePairingFragment extends BaseDialogFragment {
                 imageView.setImageResource(R.drawable.air_ms_alt_paring);
             }
             else {
-                imageView.setImageResource(R.drawable.ms_pair);
+                imageView.setImageResource(R.drawable.ms_paring_75_alt);
                 manualPairingLayout.setBackgroundResource(R.drawable.bg_logoscreen);
             }
         }

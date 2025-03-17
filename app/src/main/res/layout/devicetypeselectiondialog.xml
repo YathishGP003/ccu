@@ -298,7 +298,7 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentBottom="true"
                     android:layout_marginStart="60dp"
-                    android:src="@drawable/mystat" />
+                    android:src="@drawable/mystat75" />
 
                 <LinearLayout
                     android:layout_width="wrap_content"

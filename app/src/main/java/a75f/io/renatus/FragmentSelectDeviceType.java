@@ -352,7 +352,7 @@ public class FragmentSelectDeviceType extends BaseDialogFragment
             helioNodeImage.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.helio_node_carrier, null));
             hyperStatSplit.setImageDrawable(ResourcesCompat.getDrawable(getResources(),R.drawable.hyperstat_split_carrier,null));
             modbus75Image.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.modbus_carrier, null));
-            myStatImage.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.carr_mystat, null));
+            myStatImage.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.mystat_carr, null));
         } else if (CCUUiUtil.isAiroverseThemeEnabled(requireContext())) {
             ccu75Image.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ccu_airoverse, null));
             modbus75Image.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.modbus_airoverse, null));

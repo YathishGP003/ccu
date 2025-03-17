@@ -561,7 +561,7 @@ public class FragmentBLEInstructionScreen extends BaseDialogFragment
             else if(CCUUiUtil.isAiroverseThemeEnabled(requireContext()))
                 pairinginstruct.setImageResource(R.drawable.air_ms_paring);
             else {
-                pairinginstruct.setImageResource(R.drawable.ms_pairing);
+                pairinginstruct.setImageResource(R.drawable.ms_paring_75);
                 pairingInstructionMainLayout.setBackgroundResource(R.drawable.bg_logoscreen);
             }
         }

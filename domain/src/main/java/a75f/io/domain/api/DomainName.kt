@@ -1354,6 +1354,7 @@ object DomainName {
 
     const val bundleVersion = "bundleVersion"
     const val otaStatusBundle = "otaStatusBundle"
+    const val firmwareVersionConnectModule = "firmwareVersionConnectModule"
 
     const val disableTouch = "disableTouch"
     const val enableBrightness = "enableBrightness"

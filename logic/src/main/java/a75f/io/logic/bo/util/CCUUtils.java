@@ -111,10 +111,24 @@ public class CCUUtils
         }
         if (!device.isEmpty()) {
             Device deviceInfo = new Device.Builder().setHashMap(device).build();
-            HashMap<Object, Object> firmwarePoint =
-                    hayStack.readEntity("point and physical and firmware and version and deviceRef == \"" + deviceInfo.getId() + "\"");
+            HashMap<Object, Object> firmwarePoint;
+            //if it is hyperStatSplit device ,then query with domainName, not to get connectModule firmware point
+            if (device.get("hyperstatsplit") != null) {
+                firmwarePoint =
+                        hayStack.readEntity("point and physical  and firmware and domainName == \"" + DomainName.firmwareVersion + "\" and  deviceRef == \"" + deviceInfo.getId() + "\"");
+            } else {
+                firmwarePoint =
+                        hayStack.readEntity("point and physical and firmware and version and deviceRef == \"" + deviceInfo.getId() + "\"");
+            }
             hayStack.writeDefaultValById(firmwarePoint.get("id").toString(), firmwareVersion);
         }
+    }
+
+    public static void writeFirmwareVersionForConnectModule(CCUHsApi ccuHsApi, String firmwareVersion, String address) {
+        HashMap<Object, Object> device = ccuHsApi.readEntity("device and addr == \"" + address + "\"");
+        HashMap<Object, Object> connectModuleFirmwarePoint =
+                ccuHsApi.readEntity("domainName==\"" + DomainName.firmwareVersionConnectModule + "\" and deviceRef == \"" + device.get("id").toString() + "\"");
+        ccuHsApi.writeDefaultValById(connectModuleFirmwarePoint.get("id").toString(), firmwareVersion);
     }
 
     private static void writeFirmwareVersionForTiDevices(CCUHsApi ccuHsApi, String firmwareVersion) {

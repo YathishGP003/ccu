@@ -9,6 +9,7 @@ import static a75f.io.device.mesh.MeshUtil.checkDuplicateStruct;
 import static a75f.io.device.mesh.MeshUtil.sendStructToNodes;
 import static a75f.io.device.serial.SmartStatFanSpeed_t.FAN_SPEED_HIGH;
 import static a75f.io.device.serial.SmartStatFanSpeed_t.FAN_SPEED_HIGH2;
+import static a75f.io.logic.bo.util.CCUUtils.writeFirmwareVersionForConnectModule;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -41,6 +42,7 @@ import a75f.io.device.serial.CmToCcuOverUsbSmartStatLocalControlsOverrideMessage
 import a75f.io.device.serial.CmToCcuOverUsbSmartStatRegularUpdateMessage_t;
 import a75f.io.device.serial.CmToCcuOverUsbSnLocalControlsOverrideMessage_t;
 import a75f.io.device.serial.CmToCcuOverUsbSnRegularUpdateMessage_t;
+import a75f.io.device.serial.FirmwareDeviceType_t;
 import a75f.io.device.serial.MessageType;
 import a75f.io.device.serial.SmartNodeSensorReading_t;
 import a75f.io.device.serial.SmartStatFanSpeed_t;
@@ -1169,9 +1171,15 @@ public class Pulse
 				", "+snRebootIndicationMsgs.rebootCause+ "Node Status ");
 		short address = (short)snRebootIndicationMsgs.smartNodeAddress.get();
 			LSerial.getInstance().setResetSeedMessage(true);
+		String connectModuleFirmwareVersion;
 		String firmwareVersion =
 				snRebootIndicationMsgs.smartNodeMajorFirmwareVersion + "." + snRebootIndicationMsgs.smartNodeMinorFirmwareVersion;
-		CCUUtils.writeFirmwareVersion(firmwareVersion, address, false);
+        CCUUtils.writeFirmwareVersion(firmwareVersion, address, false);
+		// updating the connectModule firmwareVersion  for hyperStatSplit : -> rts means slave device
+		if (snRebootIndicationMsgs.smartNodeDeviceType.toString().equals(FirmwareDeviceType_t.FIRMWARE_DEVICE_HYPERSTAT_SPLIT.toString())) {
+			connectModuleFirmwareVersion = snRebootIndicationMsgs.rtsMajorFirmwareVersion + "." + snRebootIndicationMsgs.rtsMinorFirmwareVersion;
+			writeFirmwareVersionForConnectModule(CCUHsApi.getInstance(), connectModuleFirmwareVersion, String.valueOf(address));
+		}
 			String str = "addr:"+address+ " Node status: ";
 			str+= ", master_fw_ver:" + firmwareVersion;
 			switch (snRebootIndicationMsgs.rebootCause.get()){

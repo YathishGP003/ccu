@@ -414,6 +414,11 @@ public class CCUUtils
                 L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_HYBRID_RTU;
     }
 
+    public static String getTruncatedString(String stringValue, int stringLength, int startIndex, int endIndex) {
+        return stringValue.length() > stringLength ? stringValue.substring(startIndex, endIndex) + "..." : stringValue;
+    }
+
+
 
 
 }

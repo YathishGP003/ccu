@@ -3,6 +3,7 @@ package a75f.io.renatus;
 import static a75f.io.api.haystack.CCUTagsDb.TAG_CCU_HS;
 import static a75f.io.api.haystack.Tags.BACNET;
 import static a75f.io.api.haystack.util.SchedulableMigrationKt.validateMigration;
+import static a75f.io.logic.bo.util.CCUUtils.getTruncatedString;
 import static a75f.io.logic.util.bacnet.BacnetModelBuilderKt.buildBacnetModel;
 import static a75f.io.device.modbus.ModbusModelBuilderKt.buildModbusModel;
 import static a75f.io.logic.L.TAG_CCU_INIT;
@@ -1228,10 +1229,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                 namedScheds) {
                             String namedScheduledis = Objects.requireNonNull(nameSched.get("dis")).toString();
                             if(nameSched.get("default") != null){
-                                scheduleArray.add("Default - "+CCUHsApi.getInstance().getSiteName());
+                                scheduleArray.add(getTruncatedString("Default - " + CCUHsApi.getInstance().getSiteName(), 25, 0, 25));
                                 hasImage.add(true);
                             } else if(namedScheduledis.length() > 25){
-                                scheduleArray.add(Objects.requireNonNull(nameSched.get("dis")).toString().substring(0,15)+"...");
+                                scheduleArray.add(getTruncatedString(Objects.requireNonNull(nameSched.get("dis").toString()), 25, 0, 25));
                                 hasImage.add(true);
                             }else{
                                 scheduleArray.add(Objects.requireNonNull(nameSched.get("dis")).toString());
@@ -1675,10 +1676,10 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                     namedScheds) {
                 String namedScheduledis = Objects.requireNonNull(nameSched.get("dis")).toString();
                 if(nameSched.get("default") != null){
-                    scheduleArray.add("Default - "+CCUHsApi.getInstance().getSiteName());
+                    scheduleArray.add(getTruncatedString("Default - " + CCUHsApi.getInstance().getSiteName(), 25, 0, 25));
                     hasImage.add(true);
-                }else if(namedScheduledis.length() > 15){
-                    scheduleArray.add(Objects.requireNonNull(nameSched.get("dis")).toString().substring(0,15)+"...");
+                }else if(namedScheduledis.length() > 25){
+                    scheduleArray.add(getTruncatedString(Objects.requireNonNull(nameSched.get("dis").toString()), 25, 0, 25));
                     hasImage.add(true);
                 }else{
                     scheduleArray.add(Objects.requireNonNull(nameSched.get("dis")).toString());

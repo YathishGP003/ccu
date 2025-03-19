@@ -86,14 +86,13 @@ class ScheduleGroupModel (application: Application) : AndroidViewModel(applicati
                 mSchedule, commonIntervals!!, mCcuHsApi
             )
         } else {
-            RxjavaUtil.executeBackground {
-                if (mSchedule.isZoneSchedule) {
-                    mCcuHsApi.updateZoneSchedule(mSchedule, mSchedule.roomRef)
-                } else {
-                    mCcuHsApi.updateSchedule(mSchedule)
-                }
-                mCcuHsApi.syncEntityTree()
+
+            if (mSchedule.isZoneSchedule) {
+                mCcuHsApi.updateZoneSchedule(mSchedule, mSchedule.roomRef)
+            } else {
+                mCcuHsApi.updateSchedule(mSchedule)
             }
+            mCcuHsApi.syncEntityTree()
         }
         defaultScheduleEditDialog?.forceTrimmedSchedule()
         mOnScheduleUpdateListener?.onScheduleSave(

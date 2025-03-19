@@ -3,6 +3,7 @@ package a75f.io.logic.util.bacnet
 import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.HSUtil
 import a75f.io.api.haystack.Tags
+import a75f.io.domain.api.Domain
 import a75f.io.logger.CcuLog
 import a75f.io.logic.Globals
 import a75f.io.logic.L
@@ -21,6 +22,7 @@ import a75f.io.logic.util.bacnet.BacnetConfigConstants.IP_ADDRESS_VAL
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.IP_DEVICE_INSTANCE_NUMBER
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.IP_DEVICE_OBJECT_NAME
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.IS_BACNET_INITIALIZED
+import a75f.io.logic.util.bacnet.BacnetConfigConstants.IS_BACNET_STACK_INITIALIZED
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.IS_GLOBAL
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.LOCAL_NETWORK_NUMBER
 import a75f.io.logic.util.bacnet.BacnetConfigConstants.LOCATION
@@ -206,6 +208,14 @@ fun sendBroadCast(context: Context, intentAction: String, message: String) {
     fun updateBacnetHeartBeat() {
         val sharedPreferences: SharedPreferences =  PreferenceManager.getDefaultSharedPreferences(Globals.getInstance().applicationContext)
         sharedPreferences.edit().putLong(BACNET_HEART_BEAT, System.currentTimeMillis()).apply()
+
+        // If Stack initialized then update the bacnet server status to online
+        val isBacnetStackInitialized = sharedPreferences.getBoolean(IS_BACNET_STACK_INITIALIZED, false)
+        if (isBacnetStackInitialized) {
+            updateBacnetServerStatus(BacnetServerStatus.INITIALIZED_ONLINE.ordinal)
+        } else {
+            updateBacnetServerStatus(BacnetServerStatus.INITIALIZED_OFFLINE.ordinal)
+        }
     }
 
     fun checkBacnetHealth() {
@@ -214,9 +224,18 @@ fun sendBroadCast(context: Context, intentAction: String, message: String) {
         val bacnetLastHeartBeatTime = preferences.getLong(BACNET_HEART_BEAT, 0)
         CcuLog.d(L.TAG_CCU_BACNET, "Last Bacnet HeartBeat Time: $bacnetLastHeartBeatTime,  time: "+(System.currentTimeMillis() - bacnetLastHeartBeatTime))
         val isBACnetIntialized = preferences.getBoolean(IS_BACNET_INITIALIZED, false)
-        if((isBACnetIntialized && (System.currentTimeMillis() - bacnetLastHeartBeatTime) > 300000)) {
-            preferences.edit().putLong(BACNET_HEART_BEAT, System.currentTimeMillis()).apply()  // resetting the timer again
-            launchBacApp(Globals.getInstance().applicationContext, BROADCAST_BACNET_APP_START, "Start BACnet App","")
+        if(isBACnetIntialized) {
+            if ((System.currentTimeMillis() - bacnetLastHeartBeatTime) > 300000) {
+                preferences.edit().putLong(BACNET_HEART_BEAT, System.currentTimeMillis()).apply()  // resetting the timer again
+                launchBacApp(Globals.getInstance().applicationContext, BROADCAST_BACNET_APP_START, "Start BACnet App", "")
+            } else if ((System.currentTimeMillis() - bacnetLastHeartBeatTime) > 60000) {
+                // If the BACnet is not responding for more than 1 minute, then update the server status to offline
+                CcuLog.d(L.TAG_CCU_BACNET, "BACnet is not responding, Heart beat lost")
+                updateBacnetServerStatus(BacnetServerStatus.INITIALIZED_OFFLINE.ordinal)
+            }
+        } else {
+            CcuLog.d(L.TAG_CCU_BACNET, "BACnet is not initialized")
+            updateBacnetServerStatus(BacnetServerStatus.NOT_INITIALIZED.ordinal)
         }
     }
 
@@ -354,3 +373,23 @@ fun sendBroadCast(context: Context, intentAction: String, message: String) {
         }
         return Pair(updatedConfigString, isConfigChanged)
     }
+
+fun updateBacnetServerStatus(status: Int) {
+    CcuLog.d(L.TAG_CCU_BACNET, "Updating Bacnet Server Status to: $status")
+    Domain.diagEquip.bacnetServerStatus.writeHisValueByIdWithoutCOV(status.toDouble())
+}
+
+fun updateBacnetStackInitStatus(isStackInitSuccess: Boolean) {
+    val sharedPreferences: SharedPreferences =
+        PreferenceManager.getDefaultSharedPreferences(Globals.getInstance().applicationContext)
+    if (isStackInitSuccess) {
+        CcuLog.d(L.TAG_CCU_BACNET, "BACnet Stack initialized successfully")
+        updateBacnetServerStatus(BacnetServerStatus.INITIALIZED_ONLINE.ordinal)
+        sharedPreferences.edit().putBoolean(IS_BACNET_STACK_INITIALIZED, true).apply()
+
+    } else {
+        CcuLog.d(L.TAG_CCU_BACNET, "BACnet Stack initialization failed")
+        updateBacnetServerStatus(BacnetServerStatus.INITIALIZED_OFFLINE.ordinal)
+        sharedPreferences.edit().putBoolean(IS_BACNET_STACK_INITIALIZED, false).apply()
+    }
+}

@@ -1367,6 +1367,7 @@ object DomainName {
     const val helionodePID = "helionodePID"
     const val bundleVersion = "bundleVersion"
     const val otaStatusBundle = "otaStatusBundle"
+    const val bacnetServerStatus = "bacnetServerStatus"
     const val mystatDevice = "mystatDevice"
 
     const val mystatAuxHeating1Activate = "mystatAuxHeating1Activate"

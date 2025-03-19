@@ -134,6 +134,7 @@ public class UpdatePointHandler implements MessageHandler
         || HSUtil.isHSHpuEquip(pointUid, CCUHsApi.getInstance())){
             reconfigureHSV2(msgObject, localPoint);
             updatePoints(localPoint);
+            hayStack.scheduleSync();
             return;
         }
 
@@ -142,6 +143,7 @@ public class UpdatePointHandler implements MessageHandler
         || HSUtil.isMyStatPipe2Equip(pointUid, CCUHsApi.getInstance())){
             reconfigureMyStat(msgObject, localPoint);
             updatePoints(localPoint);
+            hayStack.scheduleSync();
             return;
         }
 

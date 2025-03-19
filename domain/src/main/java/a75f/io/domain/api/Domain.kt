@@ -354,6 +354,9 @@ object Domain {
     fun readEquip(modelId: String) : Map<Any,Any> {
         return hayStack.readEntity("equip and sourceModel==\"$modelId\" or modelId == \"$modelId\"")
     }
+    fun readPointById(id : String) : HashMap<Any,Any> {
+        return hayStack.readMapById(id)
+    }
 
     /* using new model version to fetch the device  which is not migrated to new model version
       specifically for bypass damper and DAB devices

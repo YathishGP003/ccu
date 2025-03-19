@@ -360,6 +360,10 @@ open class PhysicalPoint(domainName : String, val deviceRef: String) : Entity (d
         requireId()
         return RawPoint.Builder().setHDict(Domain.hayStack.readHDictById(id)).build()
     }
+    fun readPointMap() : HashMap<Any,Any> {
+        requireId()
+        return Domain.readPointById(id)
+    }
 
     override fun equals(other: Any?)
             = (other is Point) && this.domainName == other.domainName

@@ -413,12 +413,16 @@ public class CCUUtils
         return L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_HYBRID_RTU ||
                 L.ccu().systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_HYBRID_RTU;
     }
-
     public static String getTruncatedString(String stringValue, int stringLength, int startIndex, int endIndex) {
         return stringValue.length() > stringLength ? stringValue.substring(startIndex, endIndex) + "..." : stringValue;
     }
 
-
-
-
+    public static boolean isCurrentTemperatureWithinLimits(double curTemp, HashMap<Object, Object> point) {
+        if (point.get("minVal") != null && point.get("maxVal") != null && point.get("domainName") != null) {
+            double minVal = Double.parseDouble(point.get("minVal").toString());
+            double maxVal = Double.parseDouble(point.get("maxVal").toString());
+            return curTemp >= minVal || curTemp <= maxVal;
+        }
+        return true;
+    }
 }

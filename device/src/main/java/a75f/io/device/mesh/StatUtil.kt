@@ -8,6 +8,7 @@ import a75f.io.domain.api.PhysicalPoint
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.util.CCUUtils
+import a75f.io.logic.bo.util.CCUUtils.isCurrentTemperatureWithinLimits
 import a75f.io.logic.interfaces.ZoneDataInterface
 
 /**
@@ -26,9 +27,15 @@ fun updateHsRssi(rssiPhysicalPoint: PhysicalPoint, rssi: Int) {
 }
 
 fun updateTemp(currentTemp: PhysicalPoint, temp: Double, address: Int, refresh: ZoneDataInterface?) {
-    currentTemp.writeHisVal(temp)
-    updateLogicalPoint(currentTemp, Pulse.getRoomTempConversion(temp))
-    refresh?.updateTemperature(temp, address.toShort())
+    val currentTempPoint = currentTemp.readPointMap()
+    if (isCurrentTemperatureWithinLimits(temp,currentTempPoint)) {
+        currentTemp.writeHisVal(temp)
+        updateLogicalPoint(currentTemp, Pulse.getRoomTempConversion(temp))
+        refresh?.updateTemperature(temp, address.toShort())
+    } else {
+        CcuLog.d(L.TAG_CCU_DEVICE, "Invalid Current Temp : $temp");
+    }
+
 }
 
 fun updateOccupancy(occupancySensor: PhysicalPoint, occupancyDetected: Boolean) {

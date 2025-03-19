@@ -6,6 +6,7 @@ import a75f.io.domain.equips.VavAdvancedHybridSystemEquip
 import a75f.io.domain.logic.hasChanges
 import a75f.io.domain.util.ModelLoader
 import a75f.io.domain.util.ModelNames
+import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.system.util.deleteCurrentSystemProfile
@@ -13,6 +14,7 @@ import a75f.io.logic.bo.building.system.util.getCurrentSystemEquip
 import a75f.io.logic.bo.building.system.util.getVavConnectEquip
 import a75f.io.logic.bo.building.system.vav.VavAdvancedAhu
 import a75f.io.logic.bo.building.system.vav.config.VavAdvancedHybridAhuConfig
+import a75f.io.renatus.modbus.util.isOaoPairedInConnectModule
 import a75f.io.renatus.modbus.util.showToast
 import a75f.io.renatus.profiles.oao.updateOaoPoints
 import a75f.io.renatus.profiles.system.advancedahu.AdvancedHybridAhuViewModel
@@ -50,7 +52,7 @@ class VavAdvancedHybridAhuViewModel : AdvancedHybridAhuViewModel() {
 
     override fun saveConfiguration() {
         ((viewState.value) as VavAdvancedAhuState).fromStateToProfileConfig(profileConfiguration as VavAdvancedHybridAhuConfig)
-        val validConfig = isValidateConfiguration(profileConfiguration)
+        val validConfig = isValidateConfiguration(profileConfiguration,isAnalogOutMappedToOaoDamper(),isAnalogOutMappedToReturnDamper())
         if (!validConfig.first) {
             showErrorDialog(context,validConfig.second)
             viewState.value.isSaveRequired = true
@@ -70,6 +72,16 @@ class VavAdvancedHybridAhuViewModel : AdvancedHybridAhuViewModel() {
                     newEquipConfiguration()
                 } else {
                     if (profile is VavAdvancedAhu) {
+                        //resetting the epidemic mode points if the user pairing the OAO / removed the OAO in connect Module
+                        if (isOaoPairedFirstTimeOrOaoRemoved()) {
+                            resettingEpidemicModePoints()
+                            CcuLog.i(
+                                Domain.LOG_TAG,
+                                "OAO newly paired/removed in connectModule, reset the epidemicMode points"
+                            )
+                        } else {
+                            CcuLog.i(Domain.LOG_TAG, "OAO already paired/removed in connectModule")
+                        }
                         updateConfiguration(getVavConnectEquip(), ModelNames.vavAdvancedHybridAhuV2_connectModule)
                     } else {
                         newEquipConfiguration()
@@ -113,6 +125,7 @@ class VavAdvancedHybridAhuViewModel : AdvancedHybridAhuViewModel() {
             val vavAdvancedAhuProfile = L.ccu().systemProfile as VavAdvancedAhu
             vavAdvancedAhuProfile.updateStagesSelected()
             launch { L.ccu().systemProfile.removeSystemEquipModbus() }
+            enableDisableCoolingLockOut(false)
         }
         newEquipJob.join()
     }

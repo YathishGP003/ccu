@@ -192,7 +192,7 @@ public class VavFullyModulatingRtu extends VavSystemProfile
             systemCoolingLoopOp = 0;
         }
 
-        int signal;
+        int signal = 0;
         double analogMin, analogMax;
         systemEquip.getCoolingLoopOutput().writePointValue(systemCoolingLoopOp);
         systemCoolingLoopOp = systemEquip.getCoolingLoopOutput().readHisVal();
@@ -205,10 +205,22 @@ public class VavFullyModulatingRtu extends VavSystemProfile
             if (isCoolingLockoutActive()) {
                 signal = (int)(analogMin * ANALOG_SCALE);
             } else {
-                if (analogMax > analogMin) {
-                    signal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * (systemCoolingLoopOp / 100)));
-                } else {
-                    signal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (systemCoolingLoopOp / 100)));
+                double economizingToMainCoolingLoopMap = 0;
+                boolean economizingOn = false;
+
+                if(L.ccu().oaoProfile != null) {
+                    economizingToMainCoolingLoopMap =  L.ccu().oaoProfile.getOAOEquip().getEconomizingToMainCoolingLoopMap().readPriorityVal();
+                    economizingOn =L.ccu().oaoProfile.isEconomizingAvailable();
+                }
+                if(!economizingOn) {
+                    /* OAT > Max Economizing Temp */
+                    signal = getModulatedAnalogVal(analogMin, analogMax, systemCoolingLoopOp);
+                } else if (economizingOn && systemCoolingLoopOp < economizingToMainCoolingLoopMap) {
+                    /* When only Economizing is active, (CLO < 30% (economizingToMainCoolingLoopMap) */
+                    signal = (int) (analogMin * ANALOG_SCALE);
+                } else if  (economizingOn && systemCoolingLoopOp >= economizingToMainCoolingLoopMap) {
+                    /* Economizing + Analog Cooling */
+                    signal = getModulatedAnalogValDuringEcon(analogMin, analogMax, systemCoolingLoopOp, economizingToMainCoolingLoopMap);
                 }
             }
         } else {
@@ -435,15 +447,46 @@ public class VavFullyModulatingRtu extends VavSystemProfile
             systemEquip.getEquipScheduleStatus().writeDefaultVal(scheduleStatus);
         }
     }
+    private int getModulatedAnalogValDuringEcon(double analogMin, double analogMax, double val, double economizingToMainCoolingLoopMap) {
+        int modulatedVal;
+        if(val < economizingToMainCoolingLoopMap) {
+            return (int) (analogMin * ANALOG_SCALE);
+        }
+        if(economizingToMainCoolingLoopMap >= 100) {
+            return (int) (analogMax * ANALOG_SCALE);
+        }
+        if (analogMax > analogMin) {
+            modulatedVal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * ((val - economizingToMainCoolingLoopMap) / (100 - economizingToMainCoolingLoopMap))));
+        } else {
+            modulatedVal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * ((val - economizingToMainCoolingLoopMap) / (100 - economizingToMainCoolingLoopMap))));
+        }
+        return modulatedVal;
+    }
+
+    private int getModulatedAnalogVal(double analogMin, double analogMax, double val) {
+        int modulatedVal;
+        if (analogMax > analogMin) {
+            modulatedVal = (int) (ANALOG_SCALE * (analogMin + (analogMax - analogMin) * (val/100)));
+        } else {
+            modulatedVal = (int) (ANALOG_SCALE * (analogMin - (analogMin - analogMax) * (val/100)));
+        }
+        return modulatedVal;
+    }
 
     @Override
     public String getStatusMessage(){
         StringBuilder status = new StringBuilder();
+        Boolean economizingOn = systemCoolingLoopOp > 0 && L.ccu().oaoProfile != null && L.ccu().oaoProfile.isEconomizingAvailable();
         status.append((systemFanLoopOp > 0 || Domain.cmBoardDevice.getRelay3().readHisVal() > 0.01 ) ? " Fan ON ": "");
-        status.append((systemCoolingLoopOp > 0 && !isCoolingLockoutActive())? " | Cooling ON ":"");
+        if(economizingOn) {
+            double economizingToMainCoolingLoopMap =  L.ccu().oaoProfile.getOAOEquip().getEconomizingToMainCoolingLoopMap().readPriorityVal();
+            status.append((systemCoolingLoopOp >= economizingToMainCoolingLoopMap && !isCoolingLockoutActive())? " | Cooling ON ":"");
+        } else {
+            status.append((systemCoolingLoopOp > 0 && !isCoolingLockoutActive())? " | Cooling ON ":"");
+        }
         status.append((systemHeatingLoopOp > 0 && !isHeatingLockoutActive())? " | Heating ON ":"");
         
-        if (systemCoolingLoopOp > 0 && L.ccu().oaoProfile != null && L.ccu().oaoProfile.isEconomizingAvailable()) {
+        if (economizingOn) {
             status.insert(0, "Free Cooling Used |");
         }
 

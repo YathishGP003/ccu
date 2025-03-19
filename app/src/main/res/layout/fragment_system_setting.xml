@@ -1371,6 +1371,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="16dp"
+                        android:id="@+id/linear_layout_lastupdate"
                         android:layout_marginTop="24dp"
                         android:orientation="horizontal">
 

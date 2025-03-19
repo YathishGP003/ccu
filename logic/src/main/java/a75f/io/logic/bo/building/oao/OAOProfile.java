@@ -27,6 +27,7 @@ import a75f.io.logic.bo.building.definitions.ProfileType;
 import a75f.io.logic.bo.building.hvac.Stage;
 import a75f.io.logic.bo.building.schedules.Occupancy;
 import a75f.io.logic.bo.building.schedules.ScheduleManager;
+import a75f.io.logic.bo.building.system.AdvancedAhuAnalogOutAssociationType;
 import a75f.io.logic.bo.building.system.SystemController;
 import a75f.io.logic.bo.building.system.SystemMode;
 import a75f.io.logic.bo.building.system.SystemProfile;
@@ -75,6 +76,11 @@ public class OAOProfile
     public void setEconomizingAvailable(boolean economizingAvailable)
     {
         OAOProfile.economizingAvailable = economizingAvailable;
+    }
+
+    public double getEconomizingLoopOutput()
+    {
+        return economizingLoopOutput;
     }
 
     public boolean isDcvAvailable() {
@@ -459,9 +465,25 @@ public class OAOProfile
         double economizingToMainCoolingLoopMap = oaoEquip.getEconomizingToMainCoolingLoopMap().readPriorityVal();
         
         if (canDoEconomizing(externalTemp, externalHumidity, systemProfile)) {
-            
+
             setEconomizingAvailable(true);
-            if (systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_ANALOG_RTU ||
+            if(systemProfile instanceof DabAdvancedAhu) {
+                DabAdvancedAhu profile = (DabAdvancedAhu) systemProfile;
+                // Give higher priority to SAT cooling loop output if available
+                if(profile.getAnalogControlsEnabled().contains(AdvancedAhuAnalogOutAssociationType.SAT_COOLING)) {
+                    economizingLoopOutput = Math.min(profile.getSystemSatCoolingLoopOp() * 100 / economizingToMainCoolingLoopMap, 100);
+                } else {
+                    economizingLoopOutput = Math.min(systemProfile.getCoolingLoopOp() * 100 / economizingToMainCoolingLoopMap ,100);
+                }
+            } else if(systemProfile instanceof VavAdvancedAhu) {
+                VavAdvancedAhu profile = (VavAdvancedAhu) systemProfile;
+                // Give higher priority to SAT cooling loop output if available
+                if(profile.getAnalogControlsEnabled().contains(AdvancedAhuAnalogOutAssociationType.SAT_COOLING)) {
+                    economizingLoopOutput = Math.min(profile.getSystemSatCoolingLoopOp() * 100 / economizingToMainCoolingLoopMap, 100);
+                } else {
+                    economizingLoopOutput = Math.min(systemProfile.getCoolingLoopOp() * 100 / economizingToMainCoolingLoopMap ,100);
+                }
+            } else if (systemProfile.getProfileType() == ProfileType.SYSTEM_DAB_ANALOG_RTU ||
                                 systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_ANALOG_RTU ||
                                 systemProfile.getProfileType() == ProfileType.SYSTEM_VAV_IE_RTU
             ) {

@@ -6,6 +6,9 @@ import a75f.io.device.cm.sendTestModeMessage
 import a75f.io.device.connect.ConnectModbusSerialComm
 import a75f.io.domain.api.Domain
 import a75f.io.domain.api.DomainName
+import a75f.io.domain.api.DomainName.systemEnhancedVentilationEnable
+import a75f.io.domain.api.DomainName.systemPostPurgeEnable
+import a75f.io.domain.api.DomainName.systemPrePurgeEnable
 import a75f.io.domain.api.PhysicalPoint
 import a75f.io.domain.logic.DeviceBuilder
 import a75f.io.domain.logic.DomainManager
@@ -35,9 +38,12 @@ import a75f.io.logic.bo.building.system.util.getVavConnectEquip
 import a75f.io.logic.bo.building.system.util.isConnectModuleExist
 import a75f.io.logic.bo.building.system.vav.VavAdvancedAhu
 import a75f.io.logic.bo.util.UnitUtils
+import a75f.io.logic.tuners.TunerUtil
 import a75f.io.renatus.R
 import a75f.io.renatus.modbus.util.ALERT
 import a75f.io.renatus.modbus.util.OK
+import a75f.io.renatus.modbus.util.isOaoPairedInConnectModule
+import a75f.io.renatus.util.SystemProfileUtil
 import a75f.io.renatus.util.TestSignalManager
 import android.annotation.SuppressLint
 import android.content.Context
@@ -85,12 +91,50 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
     lateinit var connectEquipBuilder: ProfileEquipBuilder
     lateinit var connectDeviceBuilder: DeviceBuilder
 
+
+    lateinit var analog1MinOaoDamperList:List<String>
+    lateinit var analog1MaxOaoDamperList:List<String>
+    lateinit var analog2MinOaoDamperList:List<String>
+    lateinit var analog2MaxOaoDamperList:List<String>
+    lateinit var analog3MinOaoDamperList:List<String>
+    lateinit var analog3MaxOaoDamperList:List<String>
+    lateinit var analog4MinOaoDamperList:List<String>
+    lateinit var analog4MaxOaoDamperList:List<String>
+
+
+    lateinit var analog1MinReturnDamperList: List<String>
+    lateinit var analog1MaxReturnDamperList: List<String>
+    lateinit var analog2MinReturnDamperList: List<String>
+    lateinit var analog2MaxReturnDamperList: List<String>
+    lateinit var analog3MinReturnDamperList: List<String>
+    lateinit var analog3MaxReturnDamperList: List<String>
+    lateinit var analog4MinReturnDamperList: List<String>
+    lateinit var analog4MaxReturnDamperList: List<String>
+
+
+    lateinit var outsideDamperMinOpenDuringRecirculationList: List<String>
+    lateinit var outsideDamperMinOpenDuringConditioningList: List<String>
+    lateinit var outsideDamperMinOpenDuringFanLowList: List<String>
+    lateinit var outsideDamperMinOpenDuringFanMediumList: List<String>
+    lateinit var outsideDamperMinOpenDuringFanHighList: List<String>
+
+    lateinit var returnDamperMinOpenPosList: List<String>
+    lateinit var exhaustFanStage1ThresholdList: List<String>
+    lateinit var exhaustFanStage2ThresholdList: List<String>
+    lateinit var currentTransformerTypeList: List<String>
+    lateinit var co2ThresholdList: List<String>
+    lateinit var exhaustFanHysteresisList: List<String>
+    lateinit var systemPurgeOutsideDamperMinPosList: List<String>
+    lateinit var enhancedVentilationOutsideDamperMinOpenList: List<String>
+
+
     private var isEquipPaired = false
     private val celsiusEnabled = MutableStateFlow(UnitUtils.isCelsiusTunerAvailableStatus())
 
     var isConnectModulePaired = false
     var saveJob: Job? = null
     val isCelsiusChecked: StateFlow<Boolean> = celsiusEnabled
+    var isOaoPairedInSystemLevel = false
 
     fun toggleChecked() {
         celsiusEnabled.value = !celsiusEnabled.value
@@ -134,7 +178,25 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
 
         this.context = context
         this.hayStack = hayStack
+        isOaoPairedInSystemLevel()
         CcuLog.i(Domain.LOG_TAG, "Advanced AHU Loaded")
+    }
+
+    private fun isOaoPairedInSystemLevel() {
+        val oaoEquip = CCUHsApi.getInstance().read("equip and oao and domainName== \"${ DomainName.smartnodeOAO }\"")
+        isOaoPairedInSystemLevel = oaoEquip.isNotEmpty()
+    }
+    fun isAnalogOutMappedToOaoDamper(): Boolean {
+        return (viewState.value.connectAnalogOut1Association == ConnectControlType.OAO_DAMPER.ordinal && viewState.value.connectAnalogOut1Enabled) ||
+            (viewState.value.connectAnalogOut2Association == ConnectControlType.OAO_DAMPER.ordinal && viewState.value.connectAnalogOut2Enabled) ||
+            (viewState.value.connectAnalogOut3Association == ConnectControlType.OAO_DAMPER.ordinal && viewState.value.connectAnalogOut3Enabled) ||
+            (viewState.value.connectAnalogOut4Association == ConnectControlType.OAO_DAMPER.ordinal && viewState.value.connectAnalogOut4Enabled)
+    }
+    fun isAnalogOutMappedToReturnDamper(): Boolean {
+        return (viewState.value.connectAnalogOut1Association == ConnectControlType.RETURN_DAMPER.ordinal && viewState.value.connectAnalogOut1Enabled) ||
+            (viewState.value.connectAnalogOut2Association == ConnectControlType.RETURN_DAMPER.ordinal && viewState.value.connectAnalogOut2Enabled) ||
+            (viewState.value.connectAnalogOut3Association == ConnectControlType.RETURN_DAMPER.ordinal && viewState.value.connectAnalogOut3Enabled) ||
+            (viewState.value.connectAnalogOut4Association == ConnectControlType.RETURN_DAMPER.ordinal && viewState.value.connectAnalogOut4Enabled)
     }
 
 
@@ -163,6 +225,92 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
         DomainManager.addSystemDomainEquip(hayStack)
         DomainManager.addCmBoardDevice(hayStack)
         return ahuEquipId
+    }
+     fun initializeLists() {
+
+        analog1MinOaoDamperList =
+            Domain.getListByDomainName(DomainName.analog1MinOAODamper, connectModel)
+        analog1MaxOaoDamperList =
+            Domain.getListByDomainName(DomainName.analog1MaxOAODamper, connectModel)
+         analog2MinOaoDamperList =
+             Domain.getListByDomainName(DomainName.analog2MinOAODamper, connectModel)
+         analog2MaxOaoDamperList =
+             Domain.getListByDomainName(DomainName.analog2MaxOAODamper, connectModel)
+         analog3MinOaoDamperList =
+             Domain.getListByDomainName(DomainName.analog3MinOAODamper, connectModel)
+         analog3MaxOaoDamperList =
+             Domain.getListByDomainName(DomainName.analog3MaxOAODamper, connectModel)
+         analog4MinOaoDamperList =
+             Domain.getListByDomainName(DomainName.analog4MinOAODamper, connectModel)
+         analog4MaxOaoDamperList =
+             Domain.getListByDomainName(DomainName.analog4MaxOAODamper, connectModel)
+
+        analog1MinReturnDamperList =
+            Domain.getListByDomainName(DomainName.analog1MaxReturnDamper, connectModel)
+        analog1MaxReturnDamperList =
+            Domain.getListByDomainName(DomainName.analog1MinReturnDamper, connectModel)
+         analog2MinReturnDamperList =
+             Domain.getListByDomainName(DomainName.analog2MaxReturnDamper, connectModel)
+         analog2MaxReturnDamperList =
+             Domain.getListByDomainName(DomainName.analog2MinReturnDamper, connectModel)
+         analog3MinReturnDamperList =
+             Domain.getListByDomainName(DomainName.analog3MaxReturnDamper, connectModel)
+         analog3MaxReturnDamperList =
+             Domain.getListByDomainName(DomainName.analog3MinReturnDamper, connectModel)
+         analog4MinReturnDamperList =
+             Domain.getListByDomainName(DomainName.analog4MaxReturnDamper, connectModel)
+         analog4MaxReturnDamperList =
+             Domain.getListByDomainName(DomainName.analog4MinReturnDamper, connectModel)
+
+        outsideDamperMinOpenDuringRecirculationList =
+            Domain.getListByDomainName(DomainName.outsideDamperMinOpenDuringRecirculation, connectModel)
+        outsideDamperMinOpenDuringConditioningList =
+            Domain.getListByDomainName(DomainName.outsideDamperMinOpenDuringConditioning, connectModel)
+        outsideDamperMinOpenDuringFanLowList =
+            Domain.getListByDomainName(DomainName.outsideDamperMinOpenDuringFanLow, connectModel)
+        outsideDamperMinOpenDuringFanMediumList =
+            Domain.getListByDomainName(DomainName.outsideDamperMinOpenDuringFanMedium, connectModel)
+        outsideDamperMinOpenDuringFanHighList =
+            Domain.getListByDomainName(DomainName.outsideDamperMinOpenDuringFanHigh, connectModel)
+        returnDamperMinOpenPosList =
+            Domain.getListByDomainName(DomainName.returnDamperMinOpen, connectModel)
+        exhaustFanStage1ThresholdList =
+            Domain.getListByDomainName(DomainName.exhaustFanStage1Threshold, connectModel)
+        exhaustFanStage2ThresholdList =
+            Domain.getListByDomainName(DomainName.exhaustFanStage2Threshold, connectModel)
+        currentTransformerTypeList =
+            Domain.getListOfDisNameByDomainName(DomainName.currentTransformerType, connectModel)
+        co2ThresholdList = Domain.getListByDomainName(DomainName.co2Threshold, connectModel)
+        exhaustFanHysteresisList =
+            Domain.getListByDomainName(DomainName.exhaustFanHysteresis, connectModel)
+        systemPurgeOutsideDamperMinPosList =
+            Domain.getListByDomainName(DomainName.systemPurgeOutsideDamperMinPos, connectModel)
+        enhancedVentilationOutsideDamperMinOpenList =
+            Domain.getListByDomainName(DomainName.enhancedVentilationOutsideDamperMinOpen, connectModel)
+
+    }
+
+    fun resettingEpidemicModePoints() {
+        val epidemicModePoints = listOf(
+            systemPrePurgeEnable,
+            systemPostPurgeEnable,
+            systemEnhancedVentilationEnable
+        )
+
+        epidemicModePoints.forEach { domainName ->
+            if (TunerUtil.readSystemUserIntentVal("domainName == \"$domainName\"") != 0.0) {
+                SystemProfileUtil.setUserIntentByDomain(
+                    domainName,
+                    0.0
+                )
+                CcuLog.i("USER_TEST", "Resetting the system user Intent ${domainName}  to 0 ")
+            }
+        }
+    }
+    fun isOaoPairedFirstTimeOrOaoRemoved(): Boolean {
+        return ((profileConfiguration.connectConfiguration.connectEnabled && profileConfiguration.connectConfiguration.enableOutsideAirOptimization.enabled && !isOaoPairedInConnectModule() && L.ccu().oaoProfile == null) ||
+                (!profileConfiguration.connectConfiguration.enableOutsideAirOptimization.enabled && isOaoPairedInConnectModule() && L.ccu().oaoProfile == null)
+                )
     }
 
     fun updateAhuRefForConnectModule() {
@@ -203,9 +351,60 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
         }
     }
 
+    fun enableDisableCoolingLockOut(isReconfiguration: Boolean) {
+        val ccuHsApi = CCUHsApi.getInstance()
+        val systemProfile = L.ccu().systemProfile
+        // if OAO damper is mapped  for (first time) to analog output then enable outside temp cooling lockout
+        //else oao damper is not mapped disable the outside temp cooling lockout
+        if (isReconfiguration) {
+            if (profileConfiguration.connectConfiguration.enableOutsideAirOptimization.enabled && !isOaoPairedInConnectModule()) {
+                if (!systemProfile.isOutsideTempCoolingLockoutEnabled(ccuHsApi)) {
+                    L.ccu().systemProfile.setOutsideTempCoolingLockoutEnabled(
+                        CCUHsApi.getInstance(),
+                        true
+                    )
+                    CcuLog.i(
+                        Domain.LOG_TAG,
+                        "OAO paired for first time , enabled the Cooling lockout "
+                    )
+                }
+            } else if (!profileConfiguration.connectConfiguration.enableOutsideAirOptimization.enabled) {
+                if (systemProfile.isOutsideTempCoolingLockoutEnabled(ccuHsApi)) {
+                    L.ccu().systemProfile.setOutsideTempCoolingLockoutEnabled(
+                        CCUHsApi.getInstance(),
+                        false
+                    )
+                    CcuLog.i(Domain.LOG_TAG, "OAO is not mapped , disabled the Cooling lockout")
+                }
+            }
+        } else {
+            if (isAnalogOutMappedToOaoDamper()) {
+                if (!systemProfile.isOutsideTempCoolingLockoutEnabled(ccuHsApi)) {
+                    systemProfile.setOutsideTempCoolingLockoutEnabled(
+                        CCUHsApi.getInstance(),
+                        true
+                    )
+                    CcuLog.i(
+                        Domain.LOG_TAG,
+                        "OAO paired for  first time,  enabled the Cooling lockout "
+                    )
+                }
+            } else {
+                if (systemProfile.isOutsideTempCoolingLockoutEnabled(ccuHsApi)) {
+                    systemProfile.setOutsideTempCoolingLockoutEnabled(
+                        CCUHsApi.getInstance(),
+                        false
+                    )
+                    CcuLog.i(Domain.LOG_TAG, "OAO is not mapped, disabled the Cooling lockout")
+                }
+
+            }
+        }
+    }
+
 
      fun updateConfiguration(existingConnectEquip: HashMap<Any,Any>, connectModelName: String) {
-
+         enableDisableCoolingLockOut(true)
          cmEquipBuilder.updateEquipAndPoints(
                  configuration = profileConfiguration.cmConfiguration,
                  modelDef = cmModel,

@@ -49,11 +49,48 @@ open class AdvancedHybridAhuConfig(val cmModel: SeventyFiveFProfileDirective, co
             getActiveEnabledConfigs(connectEquip1)
             getActiveAssociationConfigs(connectEquip1)
             getActiveDynamicConfigs(connectEquip1)
+            getActiveOAOConfigs(connectEquip1)
         }
 
         cmConfiguration.isDefault = false
         connectConfiguration.isDefault = false
         return this
+    }
+
+    private fun getActiveOAOConfigs(connectEquip1: ConnectModuleEquip) {
+        apply {
+           connectConfiguration.analog1MinOaoDamper.currentVal = getDefault(connectEquip1.analog1MinOaoDamper,connectEquip1,connectConfiguration.analog1MinOaoDamper)
+            connectConfiguration.analog1MaxOaoDamper.currentVal = getDefault(connectEquip1.analog1MaxOaoDamper,connectEquip1,connectConfiguration.analog1MaxOaoDamper)
+            connectConfiguration.analog2MinOaoDamper.currentVal = getDefault(connectEquip1.analog2MinOaoDamper,connectEquip1,connectConfiguration.analog2MinOaoDamper)
+            connectConfiguration.analog2MaxOaoDamper.currentVal = getDefault(connectEquip1.analog2MaxOaoDamper,connectEquip1,connectConfiguration.analog2MaxOaoDamper)
+            connectConfiguration.analog3MinOaoDamper.currentVal = getDefault(connectEquip1.analog3MinOaoDamper,connectEquip1,connectConfiguration.analog3MinOaoDamper)
+            connectConfiguration.analog3MaxOaoDamper.currentVal = getDefault(connectEquip1.analog3MaxOaoDamper,connectEquip1,connectConfiguration.analog3MaxOaoDamper)
+            connectConfiguration.analog4MinOaoDamper.currentVal = getDefault(connectEquip1.analog4MinOaoDamper,connectEquip1,connectConfiguration.analog4MinOaoDamper)
+            connectConfiguration.analog4MaxOaoDamper.currentVal = getDefault(connectEquip1.analog4MaxOaoDamper,connectEquip1,connectConfiguration.analog4MaxOaoDamper)
+
+            connectConfiguration.analog1MinReturnDamper.currentVal = getDefault(connectEquip1.analog1MinReturnDamper,connectEquip1,connectConfiguration.analog1MinReturnDamper)
+            connectConfiguration.analog2MaxReturnDamper.currentVal = getDefault(connectEquip1.analog2MaxReturnDamper,connectEquip1,connectConfiguration.analog2MaxReturnDamper)
+            connectConfiguration.analog3MinReturnDamper.currentVal = getDefault(connectEquip1.analog3MinReturnDamper,connectEquip1,connectConfiguration.analog3MinReturnDamper)
+            connectConfiguration.analog3MaxReturnDamper.currentVal = getDefault(connectEquip1.analog3MaxReturnDamper,connectEquip1,connectConfiguration.analog3MaxReturnDamper)
+            connectConfiguration.analog4MinReturnDamper.currentVal = getDefault(connectEquip1.analog4MinReturnDamper,connectEquip1,connectConfiguration.analog4MinReturnDamper)
+            connectConfiguration.analog4MaxReturnDamper.currentVal = getDefault(connectEquip1.analog4MaxReturnDamper,connectEquip1,connectConfiguration.analog4MaxReturnDamper)
+
+            connectConfiguration.outsideDamperMinOpenDuringRecirculation.currentVal = getDefault(connectEquip1.outsideDamperMinOpenDuringRecirculation,connectEquip1,connectConfiguration.outsideDamperMinOpenDuringRecirculation)
+            connectConfiguration.outsideDamperMinOpenDuringConditioning.currentVal = getDefault(connectEquip1.outsideDamperMinOpenDuringConditioning,connectEquip1,connectConfiguration.outsideDamperMinOpenDuringConditioning)
+            connectConfiguration.outsideDamperMinOpenDuringFanLow.currentVal = getDefault(connectEquip1.outsideDamperMinOpenDuringFanLow,connectEquip1,connectConfiguration.outsideDamperMinOpenDuringFanLow)
+            connectConfiguration.outsideDamperMinOpenDuringFanMedium.currentVal = getDefault(connectEquip1.outsideDamperMinOpenDuringFanMedium,connectEquip1,connectConfiguration.outsideDamperMinOpenDuringFanMedium)
+            connectConfiguration.outsideDamperMinOpenDuringFanHigh.currentVal = getDefault(connectEquip1.outsideDamperMinOpenDuringFanHigh,connectEquip1,connectConfiguration.outsideDamperMinOpenDuringFanHigh)
+            connectConfiguration.returnDamperMinOpen.currentVal = getDefault(connectEquip1.returnDamperMinOpen,connectEquip1,connectConfiguration.returnDamperMinOpen)
+            connectConfiguration.exhaustFanStage1Threshold.currentVal = getDefault(connectEquip1.exhaustFanStage1Threshold,connectEquip1,connectConfiguration.exhaustFanStage1Threshold)
+            connectConfiguration.exhaustFanStage2Threshold.currentVal = getDefault(connectEquip1.exhaustFanStage2Threshold,connectEquip1,connectConfiguration.exhaustFanStage2Threshold)
+            connectConfiguration.currentTransformerType.currentVal = getDefault(connectEquip1.currentTransformerType,connectEquip1,connectConfiguration.currentTransformerType)
+            connectConfiguration.co2Threshold.currentVal = getDefault(connectEquip1.co2Threshold,connectEquip1,connectConfiguration.co2Threshold)
+            connectConfiguration.exhaustFanHysteresis.currentVal = getDefault(connectEquip1.exhaustFanHysteresis,connectEquip1,connectConfiguration.exhaustFanHysteresis)
+            connectConfiguration.usePerRoomCO2Sensing.enabled = connectEquip1.usePerRoomCO2Sensing.readDefaultVal() > 0
+            connectConfiguration.enableOutsideAirOptimization.enabled = connectEquip1.enableOutsideAirOptimization.readDefaultVal() > 0
+            connectConfiguration.systemPurgeOutsideDamperMinPos.currentVal = getDefault(connectEquip1.systemPurgeOutsideDamperMinPos,connectEquip1,connectConfiguration.systemPurgeOutsideDamperMinPos)
+            connectConfiguration.enhancedVentilationOutsideDamperMinOpen.currentVal = getDefault(connectEquip1.enhancedVentilationOutsideDamperMinOpen,connectEquip1,connectConfiguration.enhancedVentilationOutsideDamperMinOpen)
+        }
     }
 
     /**

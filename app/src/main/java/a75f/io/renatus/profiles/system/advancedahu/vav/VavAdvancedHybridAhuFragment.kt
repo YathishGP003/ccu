@@ -5,6 +5,7 @@ import a75f.io.logic.bo.building.system.vav.config.VavAdvancedHybridAhuConfig
 import a75f.io.logic.util.onLoadingCompleteListener
 import a75f.io.renatus.composables.DeleteDialog
 import a75f.io.renatus.composables.SaveConfig
+import a75f.io.renatus.compose.ComposeUtil
 import a75f.io.renatus.profiles.system.advancedahu.AdvancedHybridAhuFragment
 import a75f.io.renatus.util.AddProgressGif
 import a75f.io.renatus.util.highPriorityDispatcher
@@ -94,6 +95,14 @@ class VavAdvancedHybridAhuFragment(loadingListener: onLoadingCompleteListener) :
                     item { ConnectAnalogOutConfig(viewModel) }
                     item { ConnectUniInConfig(viewModel) }
                     item { ConnectAnalogOutDynamicConfig(viewModel) }
+                    item {
+                        ComposeUtil.DashDivider()
+                            if (viewModel.isAnalogOutMappedToOaoDamper()) {
+                                viewModel.initializeLists()
+                                OaoConfigScreen(viewModel = viewModel)
+                            }
+                        }
+
                 } else {
                     item { AddConnectModule(viewModel) }
                 }

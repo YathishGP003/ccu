@@ -107,6 +107,14 @@ class AdvancedAhuAlgoHandler (val equip: SystemEquip) {
         return isSystemOccupied && systemCo2Loop > 0
     }
 
+    private fun getExhaustFan1CommandRelayState(ahuSettings: AhuSettings, stageIndex: Int) : Boolean {
+        return if(stageIndex == 0) {
+            ahuSettings.connectEquip1.exhaustFanStage1.readHisVal() > 0
+        } else {
+            ahuSettings.connectEquip1.exhaustFanStage2.readHisVal() > 0
+        }
+    }
+
     fun getAdvancedAhuRelayState(
             association: Point, coolingStages: Int,
             heatingStages: Int, fanStages: Int, systemOccupied: Boolean,
@@ -197,6 +205,8 @@ class AdvancedAhuAlgoHandler (val equip: SystemEquip) {
             AdvancedAhuRelayAssociationType.OCCUPIED_ENABLE -> getOccupiedEnableRelayState()
             AdvancedAhuRelayAssociationType.AHU_FRESH_AIR_FAN_COMMAND -> getAhuFreshAirFanRunCommandRelayState(
                     systemOccupied, ahuSettings.systemEquip.co2LoopOutput.readHisVal())
+            AdvancedAhuRelayAssociationType.EXHAUST_FAN -> getExhaustFan1CommandRelayState(ahuSettings, stageIndex)
+            else -> false
         }
         return Pair(associatedPoint, pointVal)
     }

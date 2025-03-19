@@ -3,8 +3,11 @@ package a75f.io.renatus
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.NodeType
 import a75f.io.logic.bo.building.definitions.ProfileType
+import a75f.io.logic.bo.building.system.util.getConnectModuleDomain
 import a75f.io.renatus.compose.SaveTextView
 import a75f.io.renatus.compose.SubTitle
+import a75f.io.renatus.modbus.util.isOaoPairedInConnectModule
+import a75f.io.renatus.modbus.util.showToast
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -57,8 +60,22 @@ class OaoFragment: Fragment() {
     }
 
     private fun oaoPairOnClick() {
-        val meshAddress: Short = L.generateSmartNodeAddress()
-        showDialogFragment(FragmentBLEInstructionScreen.getInstance(meshAddress, "SYSTEM", "SYSTEM", ProfileType.OAO, NodeType.SMART_NODE), FragmentBLEInstructionScreen.ID);
+        //if the OAO is already paired in connect module not allowing the user to pair the OAO profile
+        if(!isOaoPairedInConnectModule()) {
+            val meshAddress: Short = L.generateSmartNodeAddress()
+            showDialogFragment(
+                FragmentBLEInstructionScreen.getInstance(
+                    meshAddress,
+                    "SYSTEM",
+                    "SYSTEM",
+                    ProfileType.OAO,
+                    NodeType.SMART_NODE
+                ), FragmentBLEInstructionScreen.ID
+            )
+        }
+        else{
+            showToast("OAO is already paired in ${getConnectModuleDomain()}",this.requireContext())
+        }
     }
 
     private fun showDialogFragment(dialogFragment: DialogFragment, id: String) {

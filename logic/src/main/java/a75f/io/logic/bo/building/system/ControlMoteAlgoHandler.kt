@@ -10,6 +10,7 @@ import a75f.io.logic.L
 import a75f.io.logic.bo.building.system.util.AhuSettings
 import a75f.io.logic.bo.building.system.util.getComposeMidPoint
 import a75f.io.logic.bo.building.system.util.getModulatedOutput
+import a75f.io.logic.bo.building.system.util.getModulatedOutputDuringEcon
 
 fun getCMRelayLogicalPhysicalMap(systemEquip: AdvancedHybridSystemEquip): Map<Point, PhysicalPoint> {
     val map: MutableMap<Point, PhysicalPoint> = java.util.HashMap()
@@ -119,6 +120,9 @@ fun getCmLoopOutput(systemEquip: AdvancedHybridSystemEquip, controlType: Advance
                 }
             }
         }
+        // Just to avoid build errors for now. OAO and RETURN dampers are unused in the Advanced AHU system profiles
+        AdvancedAhuAnalogOutAssociationType.OAO_DAMPER -> 0.0
+        AdvancedAhuAnalogOutAssociationType.RETURN_DAMPER -> 0.0
     }
 }
 
@@ -182,6 +186,11 @@ fun getAnalogOut1MinMax(controlType : AdvancedAhuAnalogOutAssociationType, syste
                 }
             }
         }
+        // Just to avoid build errors for now. OAO and RETURN dampers are unused in the Advanced AHU system profiles
+        AdvancedAhuAnalogOutAssociationType.OAO_DAMPER -> {
+        }
+        AdvancedAhuAnalogOutAssociationType.RETURN_DAMPER -> {
+        }
     }
     return Pair(analogMinVoltage, analogMaxVoltage)
 }
@@ -241,6 +250,11 @@ fun getAnalogOut2MinMax(controlType : AdvancedAhuAnalogOutAssociationType, syste
                 }
             }
         }
+        // Just to avoid build errors for now. OAO and RETURN dampers are unused in the Advanced AHU system profiles
+        AdvancedAhuAnalogOutAssociationType.OAO_DAMPER -> {
+        }
+        AdvancedAhuAnalogOutAssociationType.RETURN_DAMPER -> {
+        }
     }
     return Pair(analogMinVoltage, analogMaxVoltage)
 }
@@ -299,6 +313,11 @@ fun getAnalogOut3MinMax(controlType : AdvancedAhuAnalogOutAssociationType, syste
                     analogMaxVoltage = systemEquip.analog3MinHeatingComposite.readDefaultVal()
                 }
             }
+        }
+        // Just to avoid build errors for now. OAO and RETURN dampers are unused in the Advanced AHU system profiles
+        AdvancedAhuAnalogOutAssociationType.OAO_DAMPER -> {
+        }
+        AdvancedAhuAnalogOutAssociationType.RETURN_DAMPER -> {
         }
     }
     return Pair(analogMinVoltage, analogMaxVoltage)
@@ -360,6 +379,11 @@ fun getAnalogOut4MinMax(controlType : AdvancedAhuAnalogOutAssociationType, syste
                 }
             }
         }
+        // Just to avoid build errors for now. OAO and RETURN dampers are unused in the Advanced AHU system profiles
+        AdvancedAhuAnalogOutAssociationType.OAO_DAMPER -> {
+        }
+        AdvancedAhuAnalogOutAssociationType.RETURN_DAMPER -> {
+        }
     }
     return Pair(analogMinVoltage, analogMaxVoltage)
 }
@@ -370,6 +394,7 @@ fun getAnalogModulation(
         minMax: Pair<Double, Double>,
         ahuSettings: AhuSettings
 ) : Double {
+    var econFlag : Boolean = false
     val finalLoop = when (controlType) {
         AdvancedAhuAnalogOutAssociationType.COMPOSITE_SIGNAL -> {
             if (ahuSettings.isMechanicalCoolingAvailable || ahuSettings.isMechanicalHeatingAvailable
@@ -395,6 +420,9 @@ fun getAnalogModulation(
             if (ahuSettings.isMechanicalCoolingAvailable) {
                 0.0
             } else {
+                if(L.ccu().oaoProfile != null && L.ccu().oaoProfile.isEconomizingAvailable) {
+                    econFlag = true
+                }
                 loopOutput
             }
         }
@@ -410,7 +438,13 @@ fun getAnalogModulation(
         }
     }
     CcuLog.i(L.TAG_CCU_SYSTEM, "modulateAnalogOut: loopOutput $finalLoop analogMinVoltage: ${minMax.first}, analogMaxVoltage: ${minMax.second}")
-    return getModulatedOutput(finalLoop, minMax.first, minMax.second).coerceIn(0.0,10.0) * 10
+    return if (econFlag) {
+        // When econ is on we need to send get different modulated output for analog outs
+        val economizingToMainCoolingLoopMap = L.ccu().oaoProfile.oaoEquip.economizingToMainCoolingLoopMap.readPriorityVal()
+        getModulatedOutputDuringEcon(finalLoop, minMax.first, minMax.second, economizingToMainCoolingLoopMap).coerceIn(0.0, 10.0) * 10
+    } else {
+        getModulatedOutput(finalLoop, minMax.first, minMax.second).coerceIn(0.0, 10.0) * 10
+    }
 }
 
 

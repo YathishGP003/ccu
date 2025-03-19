@@ -1,9 +1,12 @@
 package a75f.io.renatus.modbus.util
 
+import a75f.io.api.haystack.CCUHsApi
 import a75f.io.api.haystack.bacnet.parser.BacnetModelDetailResponse
 import a75f.io.api.haystack.bacnet.parser.BacnetPoint
 import a75f.io.api.haystack.modbus.EquipmentDevice
 import a75f.io.api.haystack.modbus.Parameter
+import a75f.io.domain.api.DomainName
+import a75f.io.domain.equips.ConnectModuleEquip
 import a75f.io.logger.CcuLog
 import a75f.io.logic.L
 import a75f.io.logic.bo.building.NodeType
@@ -245,6 +248,14 @@ fun showErrorDialog(context: Context, message: String) {
         dialog.dismiss()
     }
     builder.create().show()
+}
+fun isOaoPairedInConnectModule(): Boolean {
+    val connectModuleEquip = CCUHsApi.getInstance()
+        .readEntity("equip and system and (domainName==\"${DomainName.dabAdvancedHybridAhuV2_connectModule}\" or domainName==\"${DomainName.vavAdvancedHybridAhuV2_connectModule}\")")
+    if (connectModuleEquip.isEmpty()) return false
+
+    val equipId = connectModuleEquip["id"]?.toString() ?: return false
+    return ConnectModuleEquip(equipId).oaoDamper.pointExists()
 }
 fun formattedToastMessage(message: String, context: Context) {
     val layoutInflater = LayoutInflater.from(context)

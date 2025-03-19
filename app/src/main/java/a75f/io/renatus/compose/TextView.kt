@@ -45,14 +45,14 @@ import androidx.compose.ui.unit.sp
 
 
 @Composable
-fun HeaderTextView(text: String, padding : Int = 5, fontSize : Int = 22) {
+fun HeaderTextView(text: String, padding : Int = 5, fontSize : Int = 22,fontWeight: FontWeight = FontWeight.Bold) {
     Text(
         modifier = Modifier
             .wrapContentSize()
             .padding(top = padding.dp),
         style = TextStyle(
             fontFamily = myFontFamily,
-            fontWeight = FontWeight.Bold,
+            fontWeight = fontWeight,
             fontSize = fontSize.sp,
             color = Color.Black,
             textAlign = TextAlign.Center,

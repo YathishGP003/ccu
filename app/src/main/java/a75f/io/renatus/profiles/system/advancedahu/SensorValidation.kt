@@ -432,7 +432,9 @@ fun checkTIValidation(profileConfiguration: AdvancedHybridAhuConfig): Pair<Boole
 }
 
 
-fun isValidateConfiguration(profileConfiguration: AdvancedHybridAhuConfig): Pair<Boolean, Spanned> {
+fun isValidateConfiguration(
+    profileConfiguration: AdvancedHybridAhuConfig,
+    analogOutMappedToOaoDamper: Boolean, analogOutMappedToReturnDamper: Boolean): Pair<Boolean, Spanned> {
 
     var isPressureAvailable = false
     if (isRelayPressureFanAvailable(profileConfiguration.cmConfiguration)) {
@@ -489,7 +491,29 @@ fun isValidateConfiguration(profileConfiguration: AdvancedHybridAhuConfig): Pair
     /*if (!checkTIValidation(profileConfiguration).first) {
         return checkTIValidation(profileConfiguration)
     }*/
+    // added the check only when the connect module is paired
+    if(profileConfiguration.connectConfiguration.connectEnabled) {
+        if (analogOutMappedToOaoDamper &&
+            !profileConfiguration.connectConfiguration.enableOutsideAirOptimization.enabled
+        ) {
+            return Pair(false, Html.fromHtml(OAO_DAMPER_ERROR, Html.FROM_HTML_MODE_LEGACY))
+        }
+        if (!analogOutMappedToOaoDamper &&
+            profileConfiguration.connectConfiguration.enableOutsideAirOptimization.enabled
+        ) {
+            return Pair(
+                false,
+                Html.fromHtml(OUTSIDE_AIR_OPTIMIZATION_ERROR, Html.FROM_HTML_MODE_LEGACY)
+            )
+        }
 
+        if (analogOutMappedToReturnDamper && !analogOutMappedToOaoDamper) {
+            return Pair(
+                false,
+                Html.fromHtml(RETURN_DAMPER_OAO_DAMPER_ERROR, Html.FROM_HTML_MODE_LEGACY)
+            )
+        }
+    }
     return Pair(true, Html.fromHtml("Success", Html.FROM_HTML_MODE_LEGACY))
 }
 

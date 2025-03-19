@@ -151,7 +151,7 @@ abstract class HyperStatFragmentV2 : BaseDialogFragment(), OnPairingCompleteList
      * if any profile specific changes required.
      */
     @Composable
-    open fun Configurations(modifier: Modifier = Modifier) {
+    open fun Configurations(modifier: Modifier) {
         Row(modifier = modifier.fillMaxWidth()) {
             Image(painter = painterResource(id = R.drawable.input_hyperstat_cpu), contentDescription = "Relays", modifier = Modifier
                     .weight(1.5f)

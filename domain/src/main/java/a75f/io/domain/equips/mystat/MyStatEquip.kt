@@ -32,6 +32,7 @@ open class MyStatEquip(equipRef: String) : DomainEquip(equipRef) {
     val temperatureOffset = Point(DomainName.temperatureOffset, equipRef)
     val autoAway = Point(DomainName.autoAway, equipRef)
     val autoForceOccupied = Point(DomainName.autoForceOccupied, equipRef)
+    val enableCo2Display = Point(DomainName.enableCo2Display, equipRef)
 
     val relay1OutputEnable = Point(DomainName.relay1OutputEnable, equipRef)
     val relay2OutputEnable = Point(DomainName.relay2OutputEnable, equipRef)
@@ -87,6 +88,7 @@ open class MyStatEquip(equipRef: String) : DomainEquip(equipRef) {
     val occupiedEnable = Point(DomainName.occupiedEnable, equipRef)
     val humidifierEnable = Point(DomainName.humidifierEnable, equipRef)
     val dehumidifierEnable = Point(DomainName.dehumidifierEnable, equipRef)
+    val dcvDamper = Point(DomainName.dcvDamper, equipRef)
     val dcvDamperModulating = Point(DomainName.dcvDamperModulating, equipRef)
     val targetHumidifier = Point(DomainName.targetHumidifier, equipRef)
     val targetDehumidifier = Point(DomainName.targetDehumidifier, equipRef)
@@ -128,6 +130,8 @@ open class MyStatEquip(equipRef: String) : DomainEquip(equipRef) {
     val doorWindowSensorTitle24 = Point(DomainName.doorWindowSensorTitle24, equipRef)
     val keyCardSensor = Point(DomainName.keyCardSensor, equipRef)
     val coolingLoopOutput = Point(DomainName.coolingLoopOutput, equipRef)
+    val dcvLoopOutput = Point(DomainName.dcvLoopOutput, equipRef)
+    val dcvAvailable = Point(DomainName.dcvAvailable, equipRef)
 
     val analog1FanLow = Point(DomainName.analog1FanLow, equipRef)
     val analog1FanHigh = Point(DomainName.analog1FanHigh, equipRef)

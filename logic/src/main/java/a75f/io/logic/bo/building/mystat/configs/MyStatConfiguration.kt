@@ -55,6 +55,11 @@ abstract class MyStatConfiguration(
     lateinit var universalIn1: EnableConfig
     lateinit var universalIn1Association: AssociationConfig
 
+    lateinit var co2DamperOpeningRate: ValueConfig
+    lateinit var co2Threshold: ValueConfig
+    lateinit var co2Target: ValueConfig
+    lateinit var enableCo2Display: EnableConfig
+
     abstract fun getActiveConfiguration(): MyStatConfiguration
 
     override fun getEnableConfigs(): List<EnableConfig> {
@@ -68,6 +73,7 @@ abstract class MyStatConfiguration(
             add(relay4Enabled)
 
             add(analogOut1Enabled)
+            add(enableCo2Display)
         }
     }
 
@@ -84,13 +90,21 @@ abstract class MyStatConfiguration(
     override fun getValueConfigs(): List<ValueConfig> {
         return mutableListOf<ValueConfig>().apply {
             add(temperatureOffset)
+            add(co2DamperOpeningRate)
+            add(co2Threshold)
+            add(co2Target)
         }
     }
 
     private fun baseConfigs(equip: MyStatEquip) {
         temperatureOffset.currentVal = equip.temperatureOffset.readDefaultVal()
+        co2Target.currentVal = equip.co2Target.readDefaultVal()
+        co2Threshold.currentVal = equip.co2Threshold.readDefaultVal()
+        co2DamperOpeningRate.currentVal = equip.co2DamperOpeningRate.readDefaultVal()
         autoForceOccupied.enabled = equip.autoForceOccupied.readDefaultVal() == 1.0
         autoAway.enabled = equip.autoAway.readDefaultVal() == 1.0
+
+        enableCo2Display.enabled = equip.enableCo2Display.readDefaultVal() == 1.0
     }
 
     private fun myStatConfiguration(equip: MyStatEquip) {
@@ -127,8 +141,12 @@ abstract class MyStatConfiguration(
 
     open fun getDefaultConfiguration(): MyStatConfiguration {
         temperatureOffset = getDefaultValConfig(DomainName.temperatureOffset, model)
+        co2DamperOpeningRate = getDefaultValConfig(DomainName.co2DamperOpeningRate, model)
+        co2Threshold = getDefaultValConfig(DomainName.co2Threshold, model)
+        co2Target = getDefaultValConfig(DomainName.co2Target, model)
         autoForceOccupied = getDefaultEnableConfig(DomainName.autoForceOccupied, model)
         autoAway = getDefaultEnableConfig(DomainName.autoAway, model)
+        enableCo2Display = getDefaultEnableConfig(DomainName.enableCo2Display, model)
 
         relay1Enabled = getDefaultEnableConfig(DomainName.relay1OutputEnable, model)
         relay2Enabled = getDefaultEnableConfig(DomainName.relay2OutputEnable, model)

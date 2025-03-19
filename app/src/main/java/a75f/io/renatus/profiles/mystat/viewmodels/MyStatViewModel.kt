@@ -32,6 +32,7 @@ import a75f.io.renatus.profiles.mystat.viewstates.MyStatHpuViewState
 import a75f.io.renatus.profiles.mystat.viewstates.MyStatPipe2ViewState
 import a75f.io.renatus.profiles.mystat.viewstates.MyStatViewState
 import a75f.io.renatus.profiles.mystat.viewstates.MyStatViewStateUtil
+import a75f.io.renatus.profiles.system.advancedahu.Option
 import android.app.Application
 import android.content.Context
 import android.os.Bundle
@@ -43,6 +44,8 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFDeviceDirective
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
+import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfilePointDef
+import io.seventyfivef.domainmodeler.common.point.NumericConstraint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -68,6 +71,7 @@ open class MyStatViewModel(application: Application) : AndroidViewModel(applicat
     lateinit var temperatureOffsetsList: List<String>
     lateinit var pairingCompleteListener: OnPairingCompleteListener
 
+    var damperOpeningRate = (10..100 step 10).toList().map { Option(it, it.toString()) }
     private val _isDisabled = MutableLiveData(false)
     val isDisabled: LiveData<Boolean> = _isDisabled
     private val _isReloadRequired = MutableLiveData(false)
@@ -219,5 +223,36 @@ open class MyStatViewModel(application: Application) : AndroidViewModel(applicat
         )
     }
 
+    fun getOptionByDomainName(domainName: String, model: SeventyFiveFProfileDirective, roundOffRequired: Boolean = false): List<Option> {
+        val valuesList: MutableList<Option> = mutableListOf()
+        val point = getPointByDomainName(model, domainName) ?: return emptyList()
+
+        if (point.valueConstraint is NumericConstraint) {
+            val minVal = (point.valueConstraint as NumericConstraint).minValue
+            val maxVal = (point.valueConstraint as NumericConstraint).maxValue
+            val incVal = point.presentationData?.get("tagValueIncrement").toString().toDouble()
+            var it = minVal
+            var position = 0
+            while (it <= maxVal && incVal > 0.0) {
+                val item = if (roundOffRequired) {
+                    Option(position++, ("%.0f").format(it))
+                } else {
+                    Option(position++, ("%.2f").format(it))
+                }
+                valuesList.add(item)
+                it += incVal
+            }
+        }
+        return valuesList
+    }
+
+    private fun getPointByDomainName(modelDefinition: SeventyFiveFProfileDirective, domainName: String): SeventyFiveFProfilePointDef? {
+        return modelDefinition.points.find { (it.domainName.contentEquals(domainName)) }
+    }
+
+    fun getUnit(domainName: String, model: SeventyFiveFProfileDirective): String {
+        val point = getPointByDomainName(model, domainName) ?: return ""
+        return if (point.defaultUnit != null) point.defaultUnit!! else ""
+    }
 }
 

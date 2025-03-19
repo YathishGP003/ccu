@@ -16,6 +16,7 @@ import a75f.io.renatus.composables.rememberPickerState
 import a75f.io.renatus.compose.ComposeUtil.Companion.primaryColor
 import a75f.io.renatus.compose.SaveTextView
 import a75f.io.renatus.compose.SearchSpinnerElement
+import a75f.io.renatus.compose.SpinnerElementOption
 import a75f.io.renatus.compose.StyledTextView
 import a75f.io.renatus.compose.SubTitle
 import a75f.io.renatus.compose.ToggleButtonStateful
@@ -40,6 +41,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
@@ -264,6 +266,65 @@ abstract class MyStatFragment : BaseDialogFragment(), OnPairingCompleteListener 
             }
         }
     }
+
+    @Composable
+    fun Co2Control() {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(0.4f)
+                .padding(top = 30.dp, bottom = 10.dp, start = 10.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .padding(top = 10.dp, bottom = 10.dp, start = 15.dp)
+            ) { StyledTextView("CO2 Control", fontSize = 20) }
+
+            Spacer(modifier = Modifier.weight(1f)) // Pushes the toggle to the end
+
+            Box(modifier = Modifier.wrapContentWidth()) {
+                ToggleButtonStateful(defaultSelection = viewModel.viewState.value.co2Control) {
+                    viewModel.viewState.value.co2Control = it
+                }
+            }
+        }
+
+    }
+
+    @Composable
+    fun ThresholdTargetConfig() {
+        if (viewModel.viewState.value.co2Control) {
+            val co2ThresholdOptions = viewModel.getOptionByDomainName(DomainName.co2Threshold, viewModel.equipModel, true)
+            val co2Unit = viewModel.getUnit(DomainName.co2Threshold, viewModel.equipModel)
+            Column(modifier = Modifier.padding(start = 25.dp, top = 25.dp)) {
+                MinMaxConfiguration(
+                    "CO2 Threshold", "CO2 Target",
+                    itemList = co2ThresholdOptions, co2Unit, minDefault = viewModel.viewState.value.co2Threshold.toInt().toString(),
+                    maxDefault = viewModel.viewState.value.co2Target.toInt().toString(),
+                    onMinSelected = { viewModel.viewState.value.co2Threshold = it.value.toDouble() },
+                    onMaxSelected = { viewModel.viewState.value.co2Target = it.value.toDouble() }
+                )
+
+                Row(modifier = Modifier
+                    .width(550.dp)
+                    .padding(bottom = 10.dp)) {
+
+                    Box(modifier = Modifier
+                        .weight(1f)
+                        .padding(top = 10.dp)) {
+                        StyledTextView("CO2 Damper Opening Rate", fontSize = 20, textAlignment = TextAlign.Left)
+                    }
+                    Box(modifier = Modifier
+                        .weight(1f)
+                        .padding(top = 5.dp)) {
+                        SpinnerElementOption(viewModel.viewState.value.co2DamperOperatingRate.toInt().toString(), viewModel.damperOpeningRate, "%",
+                            itemSelected = { viewModel.viewState.value.co2DamperOperatingRate = it.value.toDouble() }, viewModel = null)
+                    }
+                }
+            }
+        }
+
+    }
+
 
 
     @Composable

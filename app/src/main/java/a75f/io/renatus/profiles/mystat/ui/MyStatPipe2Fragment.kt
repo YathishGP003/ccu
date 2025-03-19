@@ -131,7 +131,9 @@ class MyStatPipe2Fragment : MyStatFragment() {
                         AutoForcedOccupiedAutoAwayConfig()
                         Label()
                         Configurations()
+                        Co2Control()
                         AnalogMinMaxConfigurations()
+                        ThresholdTargetConfig()
                         SaveConfig(viewModel)
                     }
                 }
@@ -201,7 +203,7 @@ class MyStatPipe2Fragment : MyStatFragment() {
             if (analogOut1Enabled) ConfigMinMax(
                 analogOut1Association,
                 analogOut1MinMax.dcvDamperConfig,
-                MyStatPipe2AnalogOutMapping.DCV_DAMPER
+                MyStatPipe2AnalogOutMapping.DCV_DAMPER_MODULATION
             )
         }
     }

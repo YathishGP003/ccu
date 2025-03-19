@@ -145,7 +145,7 @@ class MyStatPipe2Configuration(nodeAddress: Int, nodeType: String, priority: Int
                 portType = "${minMaxConfig.fanSpeedConfig.min.currentVal.toInt()}-${minMaxConfig.fanSpeedConfig.max.currentVal.toInt()}v"
             }
 
-            MyStatPipe2AnalogOutMapping.DCV_DAMPER.ordinal -> {
+            MyStatPipe2AnalogOutMapping.DCV_DAMPER_MODULATION.ordinal -> {
                 portType = "${minMaxConfig.dcvDamperConfig.min.currentVal.toInt()}-${minMaxConfig.dcvDamperConfig.max.currentVal.toInt()}v"
             }
 
@@ -184,6 +184,7 @@ enum class MyStatPipe2RelayMapping(val displayName: String) {
     HUMIDIFIER("Humidifier"),
     DEHUMIDIFIER("Dehumidifier"),
     EXTERNALLY_MAPPED("Externally Mapped"),
+    DCV_DAMPER("Dcv Damper"),
 }
 
 
@@ -191,5 +192,5 @@ enum class MyStatPipe2AnalogOutMapping(val displayName: String) {
     WATER_MODULATING_VALUE("Water modulating valve"),
     FAN_SPEED("Fan Speed"),
     EXTERNALLY_MAPPED("Externally Mapped"),
-    DCV_DAMPER("Dcv Damper") // will use later
+    DCV_DAMPER_MODULATION("DCV Damper")
 }

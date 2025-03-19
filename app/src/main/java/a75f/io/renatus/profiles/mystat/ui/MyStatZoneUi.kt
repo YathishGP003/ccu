@@ -17,6 +17,7 @@ import a75f.io.logic.bo.building.mystat.configs.MyStatConfiguration
 import a75f.io.logic.bo.building.mystat.configs.MyStatCpuConfiguration
 import a75f.io.logic.bo.building.mystat.configs.MyStatHpuConfiguration
 import a75f.io.logic.bo.building.mystat.configs.MyStatPipe2Configuration
+import a75f.io.logic.bo.building.mystat.profiles.fancoilunit.pipe2.MyStatPipe2Profile
 import a75f.io.logic.bo.building.mystat.profiles.util.MyStatFanModeCacheStorage
 import a75f.io.logic.bo.building.mystat.profiles.util.MyStatPossibleConditioningMode
 import a75f.io.logic.bo.building.mystat.profiles.util.getMyStatActualConditioningMode
@@ -437,6 +438,11 @@ fun loadMyStatProfile(
         addView(viewRow1)
         setPadding(0, 0, 0, 10)
     }
-    showMyStatSupplyTemp(supplyTempSensor, myStatPoints, zonePointsView)
+    showMyStatSupplyTemp(supplyTempSensor, myStatPoints, zonePointsView, nodeAddress)
     showMyStatDischargeConfigIfRequired(viewDischarge, myStatPoints, zonePointsView)
+}
+
+fun getSupplyDirection(nodeAddress: String): String {
+    val profile = L.getProfile(nodeAddress.toLong()) as MyStatPipe2Profile
+    return profile.supplyDirection()
 }

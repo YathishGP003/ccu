@@ -4,6 +4,7 @@ import a75f.io.logic.bo.building.definitions.ProfileType
 import a75f.io.logic.bo.building.hyperstat.common.HSZoneStatus
 import a75f.io.logic.bo.util.UnitUtils
 import a75f.io.renatus.R
+import a75f.io.renatus.profiles.mystat.ui.getSupplyDirection
 import a75f.io.renatus.profiles.system.advancedahu.Option
 import a75f.io.renatus.util.HeartBeatUtil
 import a75f.io.renatus.views.CustomSpinnerDropDownAdapter
@@ -91,7 +92,7 @@ fun showMyStatDischargeConfigIfRequired(dischargeView: View, pointsList: HashMap
 }
 
 @SuppressLint("DefaultLocale")
-fun showMyStatSupplyTemp(dischargeView: View, pointsList: HashMap<String,Any>, rootView: LinearLayout) {
+fun showMyStatSupplyTemp(dischargeView: View, pointsList: HashMap<String,Any>, rootView: LinearLayout, nodeAddress: String) {
     val profileType = pointsList[HSZoneStatus.PROFILE_TYPE.name] as ProfileType
     val textView = dischargeView.findViewById<TextView>(R.id.text_discharge_airflow)
     textView.text = "Supply Water Temperature: "
@@ -102,6 +103,7 @@ fun showMyStatSupplyTemp(dischargeView: View, pointsList: HashMap<String,Any>, r
                 UnitUtils.fahrenheitToCelsiusTwoDecimal(pointsList[HSZoneStatus.SUPPLY_TEMP.name] as Double)
             supplyTemp = "${String.format("%.2f", converted)} °C"
         }
+        //showTextView(R.id.text_airflowValue, dischargeView, "$supplyTemp (${getSupplyDirection(nodeAddress)})")
         showTextView(R.id.text_airflowValue, dischargeView, supplyTemp)
         rootView.removeView(dischargeView)
         rootView.addView(dischargeView)

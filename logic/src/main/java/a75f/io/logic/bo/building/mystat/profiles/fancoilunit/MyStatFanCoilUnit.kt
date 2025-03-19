@@ -213,13 +213,14 @@ fun getMyStatRelayOutputPoints(equip: MyStatPipe2Equip): HashMap<Int, String> {
     putPointToMap(equip.dehumidifierEnable, relayStatus, MyStatPipe2RelayMapping.DEHUMIDIFIER.ordinal)
     putPointToMap(equip.waterValve, relayStatus, MyStatPipe2RelayMapping.WATER_VALVE.ordinal)
     putPointToMap(equip.auxHeatingStage1, relayStatus, MyStatPipe2RelayMapping.AUX_HEATING_STAGE1.ordinal)
+    putPointToMap(equip.dcvDamper, relayStatus, MyStatPipe2RelayMapping.DCV_DAMPER.ordinal)
     return relayStatus
 }
 
 fun getMyStatAnalogOutputPoints(equip: MyStatPipe2Equip): HashMap<Int, String> {
     val analogOutputPoints: HashMap<Int, String> = HashMap()
     putPointToMap(equip.modulatingWaterValve, analogOutputPoints, MyStatPipe2AnalogOutMapping.WATER_MODULATING_VALUE.ordinal)
-    putPointToMap(equip.dcvDamperModulating, analogOutputPoints, MyStatPipe2AnalogOutMapping.DCV_DAMPER.ordinal)
+    putPointToMap(equip.dcvDamperModulating, analogOutputPoints, MyStatPipe2AnalogOutMapping.DCV_DAMPER_MODULATION.ordinal)
     putPointToMap(equip.fanSignal, analogOutputPoints, MyStatPipe2AnalogOutMapping.FAN_SPEED.ordinal)
     return analogOutputPoints
 }

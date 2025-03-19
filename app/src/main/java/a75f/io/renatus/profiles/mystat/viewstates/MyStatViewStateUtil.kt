@@ -1,6 +1,5 @@
 package a75f.io.renatus.profiles.mystat.viewstates
 
-import a75f.io.logger.CcuLog
 import a75f.io.logic.bo.building.mystat.configs.MyStatConfiguration
 import a75f.io.logic.bo.building.mystat.configs.MyStatHpuConfiguration
 import a75f.io.logic.bo.building.mystat.configs.MyStatPipe2Configuration
@@ -19,6 +18,11 @@ class MyStatViewStateUtil {
                 temperatureOffset = config.temperatureOffset.currentVal
                 isEnableAutoForceOccupied = config.autoForceOccupied.enabled
                 isEnableAutoAway = config.autoAway.enabled
+                co2Control = config.enableCo2Display.enabled
+                co2Threshold = config.co2Threshold.currentVal
+                co2Target = config.co2Target.currentVal
+                co2DamperOperatingRate = config.co2DamperOpeningRate.currentVal
+
 
                 relay1Config = ConfigState(
                     config.relay1Enabled.enabled, config.relay1Association.associationVal
@@ -47,6 +51,10 @@ class MyStatViewStateUtil {
                 temperatureOffset.currentVal = state.temperatureOffset
                 autoForceOccupied.enabled = state.isEnableAutoForceOccupied
                 autoAway.enabled = state.isEnableAutoAway
+                enableCo2Display.enabled = state.co2Control
+                co2Threshold.currentVal = state.co2Threshold
+                co2Target.currentVal = state.co2Target
+                co2DamperOpeningRate.currentVal = state.co2DamperOperatingRate
 
                 relay1Enabled.enabled = state.relay1Config.enabled
                 relay2Enabled.enabled = state.relay2Config.enabled

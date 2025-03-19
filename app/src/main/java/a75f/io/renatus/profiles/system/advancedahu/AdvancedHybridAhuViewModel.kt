@@ -724,17 +724,6 @@ open class AdvancedHybridAhuViewModel : ViewModel() {
         }
     }
 
-    fun showErrorDialog(context: Context, message: Spanned) {
-        val builder = AlertDialog.Builder(context)
-        builder.setTitle(ALERT)
-        builder.setIcon(R.drawable.ic_warning)
-        builder.setMessage(message)
-        builder.setCancelable(false)
-        builder.setPositiveButton(OK) { dialog, _ ->
-            dialog.dismiss()
-        }
-        builder.create().show()
-    }
 
     open fun reset() {}
 

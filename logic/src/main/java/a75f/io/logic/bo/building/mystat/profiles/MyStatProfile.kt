@@ -38,6 +38,7 @@ abstract class MyStatProfile: ZoneProfile() {
     var coolingLoopOutput = 0
     var heatingLoopOutput = 0
     var fanLoopOutput = 0
+    var dcvLoopOutput = 0
     var compressorLoopOutput = 0 // used in HPU
 
     fun doFanEnabled(currentState: ZoneState, whichPort: Port, fanLoopOutput: Int) {
@@ -110,38 +111,73 @@ abstract class MyStatProfile: ZoneProfile() {
         updateLogicalPoint(logicalPointsList[relayPort]!!, relayStatus)
     }
 
-    // Analog Fan operation is common for all the modules
+    fun doDcvDamperOperation(
+        equip: MyStatEquip,
+        port: Port,
+        relayActivationHysteresis: Int,
+        relayStages: HashMap<String, Int>,
+        cO2Threshold: Double,
+        isDoorOpen: Boolean,
+    ) {
+        var relayState = -1.0
+        val currentOccupancy = equip.occupancyMode.readHisVal().toInt()
+        val co2Value = equip.zoneCo2.readHisVal()
+
+        if (isDcvEligibleToOn(co2Value, cO2Threshold, currentOccupancy, isDoorOpen)) {
+            if (dcvLoopOutput > relayActivationHysteresis) {
+                relayState = 1.0
+            }
+        } else if (isDcvEligibleToOff(co2Value, cO2Threshold, currentOccupancy, isDoorOpen)) {
+            relayState = 0.0
+        }
+        if (relayState != -1.0) {
+            updateLogicalPoint(logicalPointsList[port]!!, relayState)
+        }
+        if (getCurrentLogicalPointStatus(logicalPointsList[port]!!) == 1.0) {
+            relayStages[AnalogOutput.DCV_DAMPER.name] = 1
+        }
+    }
+
     fun doAnalogDCVAction(
         port: Port,
         analogOutStages: HashMap<String, Int>,
-        zoneCO2Threshold: Double,
-        zoneCO2DamperOpeningRate: Double,
+        cO2Threshold: Double,
+        damperOpeningRate: Double,
         isDoorOpen: Boolean,
-        equip: MyStatEquip
+        equip: MyStatEquip,
     ) {
-        val currentOccupancyMode = equip.occupancyMode.readHisVal().toInt()
+        val currentOccupancy = equip.occupancyMode.readHisVal().toInt()
         val co2Value = equip.zoneCo2.readHisVal()
-        CcuLog.d(L.TAG_CCU_MSHST, "doAnalogDCVAction: co2Value : $co2Value zoneCO2Threshold: $zoneCO2Threshold zoneCO2DamperOpeningRate $zoneCO2DamperOpeningRate")
-        if (co2Value > 0 && co2Value > zoneCO2Threshold
-            && !isDoorOpen && (currentOccupancyMode == Occupancy.OCCUPIED.ordinal ||
-                    currentOccupancyMode == Occupancy.AUTOFORCEOCCUPIED.ordinal ||
-                    currentOccupancyMode == Occupancy.PRECONDITIONING.ordinal ||
-                    currentOccupancyMode == Occupancy.DEMAND_RESPONSE_OCCUPIED.ordinal ||
-                    currentOccupancyMode == Occupancy.FORCEDOCCUPIED.ordinal)
-        ) {
-            var damperOperationPercent = (co2Value - zoneCO2Threshold) / zoneCO2DamperOpeningRate
-            if (damperOperationPercent > 100) damperOperationPercent = 100.0
-            updateLogicalPoint(logicalPointsList[port]!!, damperOperationPercent)
-            if (damperOperationPercent > 0) analogOutStages[AnalogOutput.DCV_DAMPER.name] =
-                damperOperationPercent.toInt()
-
-        } else if (co2Value < zoneCO2Threshold || currentOccupancyMode == Occupancy.AUTOAWAY.ordinal ||
-            currentOccupancyMode == Occupancy.VACATION.ordinal ||
-            currentOccupancyMode == Occupancy.DEMAND_RESPONSE_UNOCCUPIED.ordinal ||
-            currentOccupancyMode == Occupancy.UNOCCUPIED.ordinal || isDoorOpen
-        ) {
+        CcuLog.d(
+            L.TAG_CCU_MSHST,
+            "doAnalogDCVAction: co2Value : $co2Value zoneCO2Threshold: $cO2Threshold zoneCO2DamperOpeningRate $damperOpeningRate"
+        )
+        if (isDcvEligibleToOn(co2Value, cO2Threshold, currentOccupancy, isDoorOpen)) {
+            updateLogicalPoint(logicalPointsList[port]!!, dcvLoopOutput.toDouble())
+            analogOutStages[AnalogOutput.DCV_DAMPER.name] = dcvLoopOutput
+        } else if (isDcvEligibleToOff(co2Value, cO2Threshold, currentOccupancy, isDoorOpen)) {
             updateLogicalPoint(logicalPointsList[port]!!, 0.0)
         }
+    }
+
+    private fun isDcvEligibleToOff(
+        co2Value: Double, zoneCO2Threshold: Double, currentOccupancy: Int, isDoorOpen: Boolean
+    ): Boolean {
+        return (dcvLoopOutput == 0 || co2Value < zoneCO2Threshold || currentOccupancy == Occupancy.AUTOAWAY.ordinal
+                || currentOccupancy == Occupancy.VACATION.ordinal || isDoorOpen
+                || currentOccupancy == Occupancy.DEMAND_RESPONSE_UNOCCUPIED.ordinal
+                || currentOccupancy == Occupancy.UNOCCUPIED.ordinal)
+    }
+
+    private fun isDcvEligibleToOn(
+        co2Value: Double, zoneCO2Threshold: Double, currentOccupancyMode: Int, isDoorOpen: Boolean
+    ): Boolean {
+        return (co2Value > 0 && co2Value > zoneCO2Threshold && dcvLoopOutput > 0 && !isDoorOpen
+                && (currentOccupancyMode == Occupancy.OCCUPIED.ordinal
+                || currentOccupancyMode == Occupancy.AUTOFORCEOCCUPIED.ordinal
+                || currentOccupancyMode == Occupancy.PRECONDITIONING.ordinal
+                || currentOccupancyMode == Occupancy.DEMAND_RESPONSE_OCCUPIED.ordinal
+                || currentOccupancyMode == Occupancy.FORCEDOCCUPIED.ordinal))
     }
 
     fun doorWindowIsOpen(doorWindowEnabled: Double, doorWindowSensor: Double, equip: MyStatEquip) {
@@ -170,7 +206,7 @@ abstract class MyStatProfile: ZoneProfile() {
         return haystack.readHisValById(logicalPointsList[port]!!)
     }
 
-    fun getCurrentLogicalPointStatus(pointId: String) = haystack.readHisValById(pointId)
+    fun getCurrentLogicalPointStatus(pointId: String): Double = haystack.readHisValById(pointId)
 
     fun resetLogicalPoints(){
         logicalPointsList.forEach { (_, pointId) -> haystack.writeHisValById(pointId, 0.0) }
@@ -205,6 +241,10 @@ abstract class MyStatProfile: ZoneProfile() {
         }
     }
 
+    fun calculateDcvLoop(equip: MyStatEquip, zoneCO2Threshold: Double, zoneCO2DamperOpeningRate: Double) {
+        val co2Value = equip.zoneCo2.readHisVal().toInt()
+        dcvLoopOutput = ((co2Value - zoneCO2Threshold) / zoneCO2DamperOpeningRate).toInt().coerceIn(0, 100)
+    }
 
     fun fallBackFanMode(
         equip: MyStatEquip, equipRef: String, fanModeSaved: Int, basicSettings: MyStatBasicSettings
@@ -302,11 +342,13 @@ abstract class MyStatProfile: ZoneProfile() {
         }
     }
 
-    fun updateLoopOutputs(equip: MyStatEquip, coolingLoop: Int, heatingLoop: Int, fanLoop: Int, isHpuProfile: Boolean = false, compressorLoop: Int = 0) {
+    fun updateLoopOutputs(equip: MyStatEquip, coolingLoop: Int, heatingLoop: Int, fanLoop: Int, dcvLoop: Int, isHpuProfile: Boolean = false, compressorLoop: Int = 0) {
         equip.apply {
             coolingLoopOutput.writePointValue(coolingLoop.toDouble())
             heatingLoopOutput.writePointValue(heatingLoop.toDouble())
             fanLoopOutput.writePointValue(fanLoop.toDouble())
+            dcvLoopOutput.writePointValue(dcvLoop.toDouble())
+            dcvAvailable.writePointValue(if (dcvLoop > 0 )1.0 else 0.0)
             if (isHpuProfile) {
                 (equip as MyStatHpuEquip).compressorLoopOutput.writePointValue(compressorLoop.toDouble())
             }

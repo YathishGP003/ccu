@@ -132,19 +132,19 @@ class MyStatPipe2Profile: MyStatFanCoilUnit() {
         coolingLoopOutput = 0
         heatingLoopOutput = 0
         fanLoopOutput = 0
+        dcvLoopOutput = 0
 
         val currentOperatingMode = equip.occupancyMode.readHisVal().toInt()
         evaluateLoopOutputs(userIntents, myStatLoopController)
         deriveFanLoopOutput(basicSettings, myStatTuners)
+        calculateDcvLoop(equip, config.co2Threshold.currentVal, config.co2DamperOpeningRate.currentVal)
         updateOccupancyDetection(equip)
 
         doorWindowSensorOpenStatus = runForDoorWindowSensor(config, equip, analogOutputStatus, relayOutputStatus)
         runFanLowDuringDoorWindow = checkFanOperationAllowedDoorWindow(userIntents)
         supplyWaterTempTh2 = equip.leavingWaterTemperature.readHisVal()
         if (occupancyStatus == Occupancy.WINDOW_OPEN) resetLoops()
-
-        // runForKeyCardSensor(config, equip) TODO Check it for pipe 2 profile
-        updateLoopOutputs(equip, coolingLoopOutput, heatingLoopOutput, fanLoopOutput, false)
+        updateLoopOutputs(equip, coolingLoopOutput, heatingLoopOutput, fanLoopOutput, dcvLoopOutput,false)
 
         CcuLog.i(L.TAG_CCU_MSPIPE2,
             "Fan speed multiplier:  ${myStatTuners.analogFanSpeedMultiplier} " +
@@ -157,7 +157,7 @@ class MyStatPipe2Profile: MyStatFanCoilUnit() {
                     "heatingThreshold: $heatingThreshold  coolingThreshold : $coolingThreshold \n" +
                     "Current Temp : $currentTemp Desired (Heating: ${userIntents.zoneHeatingTargetTemperature}" +
                     " Cooling: ${userIntents.zoneCoolingTargetTemperature})\n" +
-                    "Loop Outputs: (Heating Loop: $heatingLoopOutput Cooling Loop: $coolingLoopOutput Fan Loop: $fanLoopOutput ) \n"
+                    "Loop Outputs: (Heating Loop: $heatingLoopOutput Cooling Loop: $coolingLoopOutput Fan Loop: $fanLoopOutput DCVLoop: $dcvLoopOutput) \n"
         )
 
         operateRelays(config as MyStatPipe2Configuration, myStatTuners, userIntents, basicSettings, relayOutputStatus, relayLogicalPoints, equip, analogOutputStatus)
@@ -166,7 +166,6 @@ class MyStatPipe2Profile: MyStatFanCoilUnit() {
 
         // Run the title 24 fan operation after the reset of all PI output is done
         doFanOperationTitle24(myStatTuners, basicSettings, relayOutputStatus, userIntents, analogOutputStatus, config)
-        runForKeyCardSensor(config, equip)
 
         updateOperatingMode(currentTemp, averageDesiredTemp, basicSettings, equip)
         equip.equipStatus.writeHisVal(curState.ordinal.toDouble())
@@ -232,7 +231,7 @@ class MyStatPipe2Profile: MyStatFanCoilUnit() {
             MyStatPipe2RelayMapping.AUX_HEATING_STAGE1 -> {
                 operateAuxStageHeating(
                     relayMapping, relayOutputPoints, relayStages, tuner.auxHeating1Activate,
-                    userIntents, config, analogOutStages, MyStatFanSpeed.HIGH, basicSettings
+                    userIntents, config, analogOutStages, basicSettings
                 )
             }
 
@@ -245,6 +244,10 @@ class MyStatPipe2Profile: MyStatFanCoilUnit() {
                 }
             }
 
+            /**
+             * intentionally we are sending analogOutStages for dcv to handle status message
+             */
+            MyStatPipe2RelayMapping.DCV_DAMPER -> doDcvDamperOperation(equip, port, tuner.relayActivationHysteresis, analogOutStages, config.co2Threshold.currentVal, false)
             MyStatPipe2RelayMapping.FAN_ENABLED -> doFanEnabled(curState, port, fanLoopOutput)
             MyStatPipe2RelayMapping.OCCUPIED_ENABLED -> doOccupiedEnabled(port)
             MyStatPipe2RelayMapping.HUMIDIFIER -> doHumidifierOperation(port, tuner.humidityHysteresis, userIntents.targetMinInsideHumidity, equip.zoneHumidity.readHisVal())
@@ -254,9 +257,13 @@ class MyStatPipe2Profile: MyStatFanCoilUnit() {
     }
 
     private fun operateAuxStageHeating(
-        auxMapping: MyStatPipe2RelayMapping, relayOutputPoints: HashMap<Int, String>,
-        relayStages: HashMap<String, Int>, auxHeatingActivate: Double, userIntents: MyStatUserIntents,
-        config: MyStatPipe2Configuration, analogOutStages: HashMap<String, Int>, fanSpeed: MyStatFanSpeed,
+        auxMapping: MyStatPipe2RelayMapping,
+        relayOutputPoints: HashMap<Int, String>,
+        relayStages: HashMap<String, Int>,
+        auxHeatingActivate: Double,
+        userIntents: MyStatUserIntents,
+        config: MyStatPipe2Configuration,
+        analogOutStages: HashMap<String, Int>,
         basicSettings: MyStatBasicSettings
     ) {
         if (!isEligibleForHeating(basicSettings.conditioningMode)) {
@@ -267,7 +274,7 @@ class MyStatPipe2Profile: MyStatFanCoilUnit() {
         if (currentTemp < userIntents.zoneHeatingTargetTemperature - auxHeatingActivate) {
             updateLogicalPoint(relayOutputPoints[auxMapping.ordinal], 1.0)
             relayStages[auxMapping.name] = 1
-            runSpecificAnalogFanSpeed(config, fanSpeed, analogOutStages)
+            runSpecificAnalogFanSpeed(config, MyStatFanSpeed.HIGH, analogOutStages)
 
         } else if (currentTemp >= userIntents.zoneHeatingTargetTemperature - (auxHeatingActivate - 1)) {
             updateLogicalPoint(relayOutputPoints[auxMapping.ordinal], 0.0)
@@ -309,29 +316,28 @@ class MyStatPipe2Profile: MyStatFanCoilUnit() {
     private fun handleAnalogOutState(
         config: MyStatPipe2Configuration, equip: MyStatPipe2Equip, basicSettings: MyStatBasicSettings, analogOutStages: HashMap<String, Int>, userIntents: MyStatUserIntents
     ) {
-        val analogMapping = MyStatPipe2AnalogOutMapping.values().find { it.ordinal == config.analogOut1Association.associationVal }
-        when (analogMapping) {
-            MyStatPipe2AnalogOutMapping.WATER_MODULATING_VALUE -> {
-                if (equip.waterSamplingStartTime == 0L && basicSettings.conditioningMode != StandaloneConditioningMode.OFF) {
-                    doAnalogWaterValveAction(
-                        Port.ANALOG_OUT_ONE, basicSettings, waterValveLoop(userIntents),
-                        analogOutStages
+        if (config.analogOut1Enabled.enabled) {
+            val analogMapping = MyStatPipe2AnalogOutMapping.values().find { it.ordinal == config.analogOut1Association.associationVal }
+            when (analogMapping) {
+                MyStatPipe2AnalogOutMapping.WATER_MODULATING_VALUE -> {
+                    if (equip.waterSamplingStartTime == 0L && basicSettings.conditioningMode != StandaloneConditioningMode.OFF) {
+                        doAnalogWaterValveAction(
+                            Port.ANALOG_OUT_ONE, basicSettings, waterValveLoop(userIntents),
+                            analogOutStages
+                        )
+                    }
+                }
+                MyStatPipe2AnalogOutMapping.DCV_DAMPER_MODULATION -> {
+                    doAnalogDCVAction(
+                        Port.ANALOG_OUT_ONE, analogOutStages, config.co2Threshold.currentVal,
+                        config.co2DamperOpeningRate.currentVal,
+                        isDoorOpenState(config, equip), equip
                     )
                 }
+                else -> {}
             }
-
-            /*
-            TODO will check later
-            MyStatPipe2AnalogOutMapping.DCV_DAMPER -> {
-                doAnalogDCVAction(
-                    Port.ANALOG_OUT_ONE, analogOutStages, config.zoneCO2Threshold.currentVal,
-                    config.zoneCO2DamperOpeningRate.currentVal,
-                    isDoorOpenState(config, equip), equip
-                )
-            }*/
-
-            else -> {}
         }
+
     }
 
     private fun runAlgorithm(
@@ -595,6 +601,8 @@ class MyStatPipe2Profile: MyStatFanCoilUnit() {
 
 
 
+
+
     private fun doFanOperation(
         tuner: MyStatTuners, basicSettings: MyStatBasicSettings, relayStages: HashMap<String, Int>,
         configuration: MyStatPipe2Configuration, userIntents: MyStatUserIntents, analogOutStages: HashMap<String, Int>, equip: MyStatPipe2Equip
@@ -741,20 +749,13 @@ class MyStatPipe2Profile: MyStatFanCoilUnit() {
 
     }
 
-    private fun runForKeyCardSensor(config: MyStatPipe2Configuration, equip: MyStatPipe2Equip) {
-    /*
-    TODO please check this one
-        val isKeyCardEnabled = (config.isEnabledAndAssociated(config.analogIn1Enabled, config.analogIn1Association, AnalogInputAssociation.KEY_CARD_SENSOR.ordinal)
-                || config.isEnabledAndAssociated(config.analogIn1Enabled, config.analogIn2Association, AnalogInputAssociation.KEY_CARD_SENSOR.ordinal))
-        keyCardIsInSlot((if (isKeyCardEnabled) 1.0 else 0.0), if (equip.keyCardSensor.readHisVal() > 0) 1.0 else 0.0, equip)*/
-    }
-
-    private fun doFanOperationTitle24(tuner: MyStatTuners,
-                                      basicSettings: MyStatBasicSettings,
-                                      relayStages: HashMap<String, Int>,
-                                      userIntents: MyStatUserIntents,
-                                      analogOutStages: HashMap<String, Int>,
-                                      configuration: MyStatPipe2Configuration
+    private fun doFanOperationTitle24(
+        tuner: MyStatTuners,
+        basicSettings: MyStatBasicSettings,
+        relayStages: HashMap<String, Int>,
+        userIntents: MyStatUserIntents,
+        analogOutStages: HashMap<String, Int>,
+        configuration: MyStatPipe2Configuration
     ) {
         if (basicSettings.fanMode == MyStatFanStages.AUTO && runFanLowDuringDoorWindow) {
             val lowestStage = configuration.getLowestFanSelected()
@@ -788,7 +789,7 @@ class MyStatPipe2Profile: MyStatFanCoilUnit() {
                     mapping = MyStatPipe2RelayMapping.values().find { it.ordinal == enumPos }?.name
                 }
 
-                Port.ANALOG_OUT_ONE, Port.ANALOG_OUT_TWO, Port.ANALOG_OUT_THREE -> {
+                Port.ANALOG_OUT_ONE -> {
                     val enumPos = analogLogicalPoints.entries.find { it.value.contentEquals(logicalPointId) }?.key
                     mapping = MyStatPipe2AnalogOutMapping.values().find { it.ordinal == enumPos }?.name
                 }
@@ -816,10 +817,14 @@ class MyStatPipe2Profile: MyStatFanCoilUnit() {
         if (relayLogicalPoints.containsKey(MyStatPipe2RelayMapping.OCCUPIED_ENABLED.ordinal)) resetLogicalPoint(
             relayLogicalPoints[MyStatPipe2RelayMapping.OCCUPIED_ENABLED.ordinal]!!
         )
-
-        if (analogLogicalPoints.containsKey(MyStatPipe2AnalogOutMapping.DCV_DAMPER.ordinal)) resetLogicalPoint(
-            analogLogicalPoints[MyStatPipe2AnalogOutMapping.DCV_DAMPER.ordinal]!!
+        if (relayLogicalPoints.containsKey(MyStatPipe2RelayMapping.DCV_DAMPER.ordinal)) resetLogicalPoint(
+            relayLogicalPoints[MyStatPipe2RelayMapping.DCV_DAMPER.ordinal]!!
         )
+
+        if (analogLogicalPoints.containsKey(MyStatPipe2AnalogOutMapping.DCV_DAMPER_MODULATION.ordinal)) resetLogicalPoint(
+            analogLogicalPoints[MyStatPipe2AnalogOutMapping.DCV_DAMPER_MODULATION.ordinal]!!
+        )
+        analogOutStages.remove(AnalogOutput.DCV_DAMPER.name)
     }
 
     private fun getHighFanSpeedIfExist(): String? {
@@ -827,6 +832,15 @@ class MyStatPipe2Profile: MyStatFanCoilUnit() {
             return relayLogicalPoints[MyStatPipe2RelayMapping.FAN_HIGH_SPEED.ordinal]
         }
         return null
+    }
+
+    fun supplyDirection(): String {
+        return if (supplyWaterTempTh2 > heatingThreshold
+            || supplyWaterTempTh2 in coolingThreshold..heatingThreshold) {
+            "Heating"
+        } else {
+            "Cooling"
+        }
     }
     
     private fun isDoorOpenState(config: MyStatConfiguration, equip: MyStatEquip): Boolean {

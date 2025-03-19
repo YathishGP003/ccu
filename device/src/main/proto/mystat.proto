@@ -48,7 +48,8 @@ enum CpuRelayMappings_e {
   CPU_OCCUPIED_ENABLE  = 8;
   CPU_HUMIDIFIER       = 9;
   CPU_DEHUMIDIFIER     = 10;
-  CPU_RELAY_NUM_OF     = 11;
+  CPU_DCV_DAMPER       = 11;
+  CPU_RELAY_NUM_OF     = 12;
 }
 
 enum HpuRelayMappings_e {
@@ -64,7 +65,8 @@ enum HpuRelayMappings_e {
   HPU_DEHUMIDIFIER        = 9;
   HPU_CHANGEOVER_TYPE_O   = 10;
   HPU_CHANGEOVER_TYPE_B   = 11;
-  HPU_RELAY_NUM_OF        = 12;
+  HPU_DCV_DAMPER          = 12;
+  HPU_RELAY_NUM_OF        = 13;
 }
 
 
@@ -78,7 +80,8 @@ enum TwoPipeRelayMappings_e {
   P2_OCCUPIED_ENABLE     = 6;
   P2_HUMIDIFIER          = 7;
   P2_DEHUMIDIFIER        = 8;
-  P2_RELAY_NUM_OF        = 9;
+  P2_DCV_DAMPER          = 9;
+  P2_RELAY_NUM_OF        = 10;
 }
 
 
@@ -93,7 +96,8 @@ enum FourPipeRelayMappings_e {
   P4_OCCUPIED_ENABLE    = 7;
   P4_HUMIDIFIER         = 8;
   P4_DEHUMIDIFIER       = 9;
-  P4_RELAY_NUM_OF       = 10;
+  P4_DCV_DAMPER         = 10;
+  P4_RELAY_NUM_OF       = 11;
 }
 
 
@@ -131,7 +135,7 @@ enum TwoPipeAoutMappings_e {
   P2_AOUT_NONE = 0;
   P2_AOUT_WATER_VALVE = 1;
   P2_FAN_SPEED = 2;
-  P2_DCV_DAMPER = 3;
+  P2_AOUT_DCV_DAMPER = 3;
   P2_AOUT_NUM_OF = 4;
 }
 
@@ -140,7 +144,7 @@ enum FourPipeAoutMappings_e {
   P4_AOUT_WATER_VALVE_COOL = 1;
   P4_FAN_SPEED = 2;
   P4_AOUT_WATER_VALVE_HEAT = 3;
-  P4_DCV_DAMPER = 4;
+  P4_AOUT_DCV_DAMPER = 4;
   P4_AOUT_NUM_OF = 5;
 }
 

@@ -1,7 +1,6 @@
 package a75f.io.renatus.profiles.mystat.viewstates
 
 import a75f.io.renatus.profiles.hyperstatv2.util.ConfigState
-import a75f.io.renatus.profiles.hyperstatv2.util.ThresholdTargetConfig
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -24,18 +23,19 @@ open class MyStatViewState {
     var analogOut1Association by mutableStateOf(0)
 
     var universalIn1 by mutableStateOf(ConfigState(false, 0))
+    var co2Control by mutableStateOf(false)
+    var co2Threshold by mutableStateOf(0.0)
+    var co2Target by mutableStateOf(0.0)
+    var co2DamperOperatingRate by mutableStateOf(0.0)
 
-
-    var testAnalogOut1 by mutableStateOf(0)
 
     open fun isDcvMapped() = false
 
-    fun isAnyRelayMapped(mapping: Int, ignoreSelection: ConfigState): Boolean {
+    fun isAnyRelayEnabledAndMapped(mapping: Int): Boolean {
 
         fun checkSelection(config: ConfigState): Boolean {
-            config.apply { return (ignoreSelection != this && association == mapping) }
+            config.apply { return (enabled && association == mapping) }
         }
-
         if (checkSelection(relay1Config)) return true
         if (checkSelection(relay2Config)) return true
         if (checkSelection(relay3Config)) return true

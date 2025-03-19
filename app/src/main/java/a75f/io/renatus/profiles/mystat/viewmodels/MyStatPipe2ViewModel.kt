@@ -25,10 +25,12 @@ import a75f.io.renatus.profiles.mystat.viewstates.MyStatViewState
 import a75f.io.renatus.profiles.mystat.viewstates.MyStatViewStateUtil
 import a75f.io.renatus.util.ProgressDialogUtils
 import a75f.io.renatus.util.highPriorityDispatcher
+import a75f.io.renatus.util.showErrorDialog
 import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.text.Html
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import io.seventyfivef.domainmodeler.client.type.SeventyFiveFProfileDirective
@@ -63,8 +65,25 @@ class MyStatPipe2ViewModel(application: Application) : MyStatViewModel(applicati
         viewState.value =  MyStatViewStateUtil.pipe2ConfigToState(profileConfiguration as MyStatPipe2Configuration, MyStatPipe2ViewState())
     }
 
+    private fun isValidConfiguration(): Boolean {
+        if (viewState.value.co2Control) {
+            if (!viewState.value.isDcvMapped()) {
+                showErrorDialog(context, Html.fromHtml("<br>CO2 Control toggle is Enabled, but DCV Damper is not mapped.", Html.FROM_HTML_MODE_LEGACY))
+                return false
+            }
+            return true
+
+        } else {
+            if (viewState.value.isDcvMapped()) {
+                showErrorDialog(context, Html.fromHtml("<br>CO2 Control toggle is Disabled, but DCV Damper is mapped.", Html.FROM_HTML_MODE_LEGACY))
+                return false
+            }
+            return true
+        }
+    }
+
     override fun saveConfiguration() {
-        if (saveJob == null) {
+        if (saveJob == null && isValidConfiguration()) {
             ProgressDialogUtils.showProgressDialog(context, "Saving Configuration")
             saveJob = viewModelScope.launch(highPriorityDispatcher) {
                 CCUHsApi.getInstance().resetCcuReady()

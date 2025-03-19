@@ -117,8 +117,20 @@ class MyStatUserIntentHandler {
                     if (status.isNotBlank() && (status[status.length - 2] != ',') && (status[status.length - 2] != '|')) status.append(
                         " | "
                     )
-                    status.append("DCV Analog ON")
+                    status.append("DCV ON")
                 }
+            }
+
+            val trimmed = status.toString().trim()
+            status.setLength(0)
+            status.append(trimmed)
+
+            if (status.isNotEmpty() && status.last() == ',') {
+                status.setLength(status.length - 1)
+            }
+
+            if (status.trim().endsWith(",")) {
+                status.setLength(status.length - 1)
             }
 
             if (!getMyStatStatusString(equipId).contentEquals(status.toString())) {

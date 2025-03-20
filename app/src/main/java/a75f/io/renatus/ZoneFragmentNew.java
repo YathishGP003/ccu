@@ -836,6 +836,7 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                             profileType.contains(ProfileType.HYPERSTAT_CONVENTIONAL_PACKAGE_UNIT.name())||
                             profileType.contains(ProfileType.HYPERSTAT_TWO_PIPE_FCU.name())||
                             profileType.contains(ProfileType.HYPERSTAT_HEAT_PUMP_UNIT.name())||
+                            profileType.contains(ProfileType.HYPERSTATSPLIT_CPU.name())||
                             profileType.contains(ProfileType.MYSTAT_CPU.name())||
                             profileType.contains(ProfileType.MYSTAT_HPU.name())||
                             profileType.contains(ProfileType.MYSTAT_PIPE2.name())

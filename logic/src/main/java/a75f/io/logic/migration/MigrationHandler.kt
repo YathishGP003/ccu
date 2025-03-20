@@ -2716,12 +2716,19 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
     fun initAddressBand() {
         if(!PreferenceUtil.isAddressBandInitCompleted()) {
             CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "Initialising addressBand point")
-            val addressBandVal = Globals.getInstance().smartNodeBand
+            var addressBandVal = L.ccu().addressBand.toString()
             val ccuEquip = hayStack.readEntityByDomainName(DomainName.ccuConfiguration)
             if(ccuEquip.isEmpty()) {
                 CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "CCU Equip not found")
                 return
             }
+            // if the device is not paired the addressBand is coming has 0 ,when we migrated from 2.20.X to 3.0.7
+            // added the fix to fetch the value from point val if point val is not there ,changing it ot 1000 by default
+            if (addressBandVal.toInt() == 0) {
+                addressBandVal = 1000.toString()
+                CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, " updated fallback address band value")
+            }
+
             val addressBandQuery = "point and domainName == \"${DomainName.addressBand}\" and equipRef == \"${ccuEquip["id"]}\""
 
             val addressBandQueryForDuplicatePointWithSameDomainName = "point and domainName == \"${DomainName.addressBand}\""
@@ -2757,6 +2764,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
 
             hayStack.writeDefaultVal(addressBandQuery, addressBandVal)
             PreferenceUtil.setAddressBandInitCompleted()
+            L.ccu().addressBand = if (addressBandVal == null) 1000 else addressBandVal.toShort()
             CcuLog.d(L.TAG_CCU_MIGRATION_UTIL, "Initialising addressBand point completed")
         }
     }

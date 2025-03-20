@@ -103,7 +103,7 @@ public class PreferenceUtil {
     private static final String DAB_FULLY_MODULATING_POINTS_UPDATE = "dabFullyModulatingPointsUpdate";
     private static final String MIGRATE_BACNET_NETWORK_INTERFACE = "migrateBacnetNetworkInterface";
     private static final String DEVICE_POINTS_MIGRATION_STATUS = "devicePointsMigrationStatus";
-    private static final String ADDRESS_BAND_INIT_COMPLETED = "addressBandInitCompleted";
+    private static final String ADDRESS_BAND_INIT_COMPLETED = "addressBandInit";
     private static final String MIGRATE_UPDATE_HSS_POINTS = "migrateUpdateHssPoints";
     private static final String MIGRATE_HSCPU_DATA_CORREPTION = "MIGRATE_HSCPU_DATA_CORREPTION";
 

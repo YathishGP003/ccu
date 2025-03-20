@@ -11,6 +11,7 @@ import org.projecthaystack.client.HClient;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -685,6 +686,11 @@ public class Globals {
             HashMap<Object, Object> addressBand = (HashMap<Object, Object>) Domain.readPoint(DomainName.addressBand);
             CcuLog.i(Domain.LOG_TAG, "AddressBand fetching from point" + addressBand);
             if (addressBand != null && addressBand.size() > 0) {
+
+                if (addressBand.get("val") != null) {
+                    return String.valueOf(addressBand.get("val"));
+                }
+
                 return String.valueOf((int) CCUHsApi.getInstance().
                         readDefaultValById(addressBand.get("id").toString()).doubleValue());
             }

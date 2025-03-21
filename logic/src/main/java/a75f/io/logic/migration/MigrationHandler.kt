@@ -317,9 +317,9 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             PreferenceUtil.setProfileTypeCorrectedInCCUConfigEquip()
         }
 
-        if (!PreferenceUtil.getDabFullyModulatingPointsUpdate()) {
+        if (!PreferenceUtil.getDabEquipPointsUpdate()) {
             createDabMissingPoints()
-            PreferenceUtil.setDabFullyModulatingPointsUpdate()
+            PreferenceUtil.setDabEquipPointsUpdate()
         }
 
         if(!PreferenceUtil.getUpdateBacnetNetworkInterface()) {
@@ -2809,10 +2809,10 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
 
     private fun createDabMissingPoints(){
         val site = hayStack.site
-        val dabFullyModulatingRtuEquip =
-            hayStack.readEntity("equip and system and domainName == \"" + DomainName.dabFullyModulatingAhu + "\"")
+        val dabSystemEquip =hayStack.readEntity(
+            "equip and system and domainName == \"${DomainName.dabFullyModulatingAhu}\" or domainName == \"${DomainName.dabStagedRtu}\" or domainName==\"${DomainName.dabStagedRtuVfdFan}\"")
 
-        if(dabFullyModulatingRtuEquip.isNotEmpty()) {
+        if(dabSystemEquip.isNotEmpty()) {
             val model = ModelLoader.getDabModulatingRtuModelDef()
             val equipDis = "${site?.displayName}-${model.name}"
             val profileConfig =
@@ -2821,11 +2821,11 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
 
             val relay7ToggleVal = hayStack.readDefaultVal(
                 "(config and relay7 and enabled) or (domainName == \"" + DomainName.relay7OutputEnable + "\"" +
-                        " and equipRef == \"" + dabFullyModulatingRtuEquip["id"].toString() + "\")"
+                        " and equipRef == \"" + dabSystemEquip["id"].toString() + "\")"
             )
 
             val humidifier = hayStack.readEntity(
-                "point and humidifier and equipRef == \"" + dabFullyModulatingRtuEquip["id"].toString() + "\""
+                "point and humidifier and equipRef == \"" + dabSystemEquip["id"].toString() + "\""
             )
 
             CcuLog.d(TAG_CCU_MIGRATION_UTIL, "humidifier map - $humidifier")
@@ -2840,7 +2840,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                         PointBuilderConfig(
                             modelPoint,
                             profileConfig,
-                            dabFullyModulatingRtuEquip["id"].toString(),
+                            dabSystemEquip["id"].toString(),
                             site!!.id,
                             site.tz,
                             equipDis
@@ -2849,16 +2849,16 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                 }
             }
 
-            if(relay7ToggleVal == 0.0 && humidifier.isNotEmpty()){
+            if (relay7ToggleVal == 0.0 && humidifier.isNotEmpty()) {
                 CcuLog.d(TAG_CCU_MIGRATION_UTIL, "deleting humidifier point")
                 hayStack.deleteEntityTree(humidifier["id"].toString())
-            }else{
+            } else {
                 CcuLog.d(TAG_CCU_MIGRATION_UTIL, "humidifier point not found to delete")
             }
 
             val dabReheatRelayActivationHysteresis = hayStack.readEntity(
                 "domainName == \"" + DomainName.dabReheatRelayActivationHysteresis + "\"" +
-                        " and equipRef == \"" + dabFullyModulatingRtuEquip["id"].toString() + "\""
+                        " and equipRef == \"" + dabSystemEquip["id"].toString() + "\""
             )
 
             if (dabReheatRelayActivationHysteresis.isEmpty()) {
@@ -2868,32 +2868,34 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
                 Domain.createDomainPoint(
                     model,
                     profileConfig,
-                    dabFullyModulatingRtuEquip["id"].toString(),
+                    dabSystemEquip["id"].toString(),
                     CCUHsApi.getInstance().site!!.id,
                     CCUHsApi.getInstance().site!!.tz,
                     equipDis,
                     DomainName.dabReheatRelayActivationHysteresis
                 )
             }
+            if (dabSystemEquip["domainName"] == DomainName.dabFullyModulatingAhu) {
 
-            val chilledWaterIntegralKFactor = hayStack.readEntity(
-                "domainName == \"" + DomainName.chilledWaterIntegralKFactor + "\"" +
-                        " and equipRef == \"" + dabFullyModulatingRtuEquip["id"].toString() + "\""
-            )
+                val chilledWaterIntegralKFactor = hayStack.readEntity(
+                    "domainName == \"" + DomainName.chilledWaterIntegralKFactor + "\"" +
+                            " and equipRef == \"" + dabSystemEquip["id"].toString() + "\""
+                )
 
-            if (chilledWaterIntegralKFactor.isEmpty()) {
-                CcuLog.d(
-                    TAG_CCU_MIGRATION_UTIL, "Creating point - chilledWaterIntegralKFactor"
-                )
-                Domain.createDomainPoint(
-                    model,
-                    profileConfig,
-                    dabFullyModulatingRtuEquip["id"].toString(),
-                    CCUHsApi.getInstance().site!!.id,
-                    CCUHsApi.getInstance().site!!.tz,
-                    equipDis,
-                    DomainName.chilledWaterIntegralKFactor
-                )
+                if (chilledWaterIntegralKFactor.isEmpty()) {
+                    CcuLog.d(
+                        TAG_CCU_MIGRATION_UTIL, "Creating point - chilledWaterIntegralKFactor"
+                    )
+                    Domain.createDomainPoint(
+                        model,
+                        profileConfig,
+                        dabSystemEquip["id"].toString(),
+                        CCUHsApi.getInstance().site!!.id,
+                        CCUHsApi.getInstance().site!!.tz,
+                        equipDis,
+                        DomainName.chilledWaterIntegralKFactor
+                    )
+                }
             }
         }
     }

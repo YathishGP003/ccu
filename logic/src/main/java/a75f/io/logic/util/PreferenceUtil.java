@@ -100,7 +100,7 @@ public class PreferenceUtil {
     private static final String OLD_PORT_ENABLED_MIGRATION_STATUS = "oldPortEnabledMigrationStatus";
     private static final String RELAY2_port_ENABLED_STATUS = "relay2PortEnabledStatus";
     private static final String PROFILE_TYPE_IN_CCU_CONFIG_STATUS = "profileTypeInCcuConfigStatus";
-    private static final String DAB_FULLY_MODULATING_POINTS_UPDATE = "dabFullyModulatingPointsUpdate";
+    private static final String DAB_EQUIP_POINTS_UPDATE = "dabEquipPointsUpdate";
     private static final String MIGRATE_BACNET_NETWORK_INTERFACE = "migrateBacnetNetworkInterface";
     private static final String DEVICE_POINTS_MIGRATION_STATUS = "devicePointsMigrationStatus";
     private static final String ADDRESS_BAND_INIT_COMPLETED = "addressBandInit";
@@ -828,12 +828,12 @@ public class PreferenceUtil {
     public static void setProfileTypeCorrectedInCCUConfigEquip() {
         setBooleanPreference(PROFILE_TYPE_IN_CCU_CONFIG_STATUS, true);
     }
-    public static boolean getDabFullyModulatingPointsUpdate() {
-        return getBooleanPreference(DAB_FULLY_MODULATING_POINTS_UPDATE);
+    public static boolean getDabEquipPointsUpdate() {
+        return getBooleanPreference(DAB_EQUIP_POINTS_UPDATE);
     }
 
-    public static void setDabFullyModulatingPointsUpdate() {
-        setBooleanPreference(DAB_FULLY_MODULATING_POINTS_UPDATE, true);
+    public static void setDabEquipPointsUpdate() {
+        setBooleanPreference(DAB_EQUIP_POINTS_UPDATE, true);
     }
 
 

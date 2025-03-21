@@ -74,8 +74,8 @@ object DabStagedRtuCutOverMapping {
 
         "targetMinInsideHumidty" to "systemtargetMinInsideHumidity",
         "outsideTempHeatingLockout" to "dabOutsideTempHeatingLockout",
-        "Humidifier" to "humidifierEnable",
-        "DeHumidifier" to "dehumidifierEnable",
+        "humidifier" to "humidifierEnable",
+        "deHumidifier" to "dehumidifierEnable",
         "weightedAverageHeatingLoadMA" to "weightedAverageHeatingLoadMA",
 
         "targetMaxInsideHumidty" to "systemtargetMaxInsideHumidity",
@@ -150,6 +150,7 @@ object DabStagedRtuCutOverMapping {
         "temperatureProportionalRange" to "dabTemperatureProportionalRange",
         "modeChangeoverHysteresis" to "dabModeChangeOverHysteresis",
         "offlineMode" to "offlineMode",
+        "dabReheatRelayActivationHysteresis" to "dabReheatRelayActivationHysteresis",
         "demandResponseEnrollment" to "demandResponseEnrollment",
         "demandResponseSetback" to "demandResponseSetback",
         "effectiveSATConditioning" to "effectiveSATConditioning",

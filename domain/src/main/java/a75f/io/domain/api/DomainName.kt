@@ -1007,6 +1007,9 @@ object DomainName {
     const val staticPressureTRSp = "staticPressureTRSp"
     const val vavFullyModulatingAhu = "vavFullyModulatingAhu"
     const val dabFullyModulatingAhu = "dabFullyModulatingAhu"
+    const val dabStagedRtuVfdFan = "dabStagedRtuVfdFan"
+    const val dabStagedRtu = "dabStagedRtu"
+
     const val humidifier = "humidifier"
     const val dehumidifier = "dehumidifier"
 

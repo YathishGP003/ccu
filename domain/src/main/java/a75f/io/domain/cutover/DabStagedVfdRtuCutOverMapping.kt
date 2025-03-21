@@ -12,6 +12,7 @@ object DabStagedVfdRtuCutOverMapping {
         "systemPrePurgeEnabled" to "systemPrePurgeEnable",
         "useOutsideTempLockoutHeating" to "useOutsideTempLockoutHeating",
         "useOutsideTempLockoutCooling" to "useOutsideTempLockoutCooling",
+        "dabReheatRelayActivationHysteresis" to "dabReheatRelayActivationHysteresis",
 
         "outsideHumidity" to "outsideHumidity",
         "backFillDuration" to "backFillDuration",
@@ -79,8 +80,8 @@ object DabStagedVfdRtuCutOverMapping {
 
         "targetMinInsideHumidty" to "systemtargetMinInsideHumidity",
         "outsideTempHeatingLockout" to "dabOutsideTempHeatingLockout",
-        "Humidifier" to "humidifierEnable",
-        "DeHumidifier" to "dehumidifierEnable",
+        "humidifier" to "humidifierEnable",
+        "deHumidifier" to "dehumidifierEnable",
         "weightedAverageHeatingLoadMA" to "weightedAverageHeatingLoadMA",
 
 

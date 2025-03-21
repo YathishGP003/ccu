@@ -427,7 +427,7 @@ public class CCUUtils
         if (point.get("minVal") != null && point.get("maxVal") != null && point.get("domainName") != null) {
             double minVal = Double.parseDouble(point.get("minVal").toString());
             double maxVal = Double.parseDouble(point.get("maxVal").toString());
-            return curTemp >= minVal || curTemp <= maxVal;
+            return curTemp >= minVal && curTemp <= maxVal;
         }
         return true;
     }

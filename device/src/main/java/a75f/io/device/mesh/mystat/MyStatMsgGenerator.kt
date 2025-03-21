@@ -307,8 +307,7 @@ private fun getRelayConfigs(
                 if (associationVal == MyStatCpuRelayMapping.EXTERNALLY_MAPPED.ordinal) {
                     relayConfig.cpuRelay = MyStat.CpuRelayMappings_e.CPU_NONE
                 } else {
-                    relayConfig.cpuRelay =
-                        MyStat.CpuRelayMappings_e.values()[associationVal + 1]
+                    relayConfig.cpuRelay = MyStat.CpuRelayMappings_e.values()[associationVal + 1]
                 }
             }
 
@@ -316,17 +315,15 @@ private fun getRelayConfigs(
                 if (associationVal == MyStatHpuRelayMapping.EXTERNALLY_MAPPED.ordinal) {
                     relayConfig.hpuRelay = MyStat.HpuRelayMappings_e.HPU_NONE
                 } else {
-                    relayConfig.hpuRelay =
-                        MyStat.HpuRelayMappings_e.values()[associationVal + 1]
+                    relayConfig.hpuRelay = MyStat.HpuRelayMappings_e.values()[associationVal + 1]
                 }
             }
 
             is MyStatPipe2Equip -> {
-                if (associationVal == MyStatPipe2RelayMapping.EXTERNALLY_MAPPED.ordinal) {
-                    relayConfig.twoPipeRelay = MyStat.TwoPipeRelayMappings_e.P2_NONE
-                } else {
-                    relayConfig.twoPipeRelay =
-                        MyStat.TwoPipeRelayMappings_e.values()[associationVal + 1]
+                relayConfig.twoPipeRelay = when (associationVal) {
+                    MyStatPipe2RelayMapping.EXTERNALLY_MAPPED.ordinal -> MyStat.TwoPipeRelayMappings_e.P2_NONE
+                    MyStatPipe2RelayMapping.DCV_DAMPER.ordinal -> MyStat.TwoPipeRelayMappings_e.P2_DCV_DAMPER
+                    else -> MyStat.TwoPipeRelayMappings_e.values()[associationVal + 1]
                 }
             }
         }
@@ -363,10 +360,10 @@ private fun getAnalogOutConfigs(equip: MyStatEquip, settings2: MyStat.MyStatSett
                 }
             }
             is MyStatPipe2Equip -> {
-                twoPipeAoutMapping =  if (analogOutMappingValue == MyStatPipe2AnalogOutMapping.EXTERNALLY_MAPPED.ordinal) {
-                    MyStat.TwoPipeAoutMappings_e.P2_AOUT_NONE
-                } else {
-                     MyStat.TwoPipeAoutMappings_e.values()[analogOutMappingValue + 1]
+                twoPipeAoutMapping = when(analogOutMappingValue) {
+                    MyStatPipe2AnalogOutMapping.EXTERNALLY_MAPPED.ordinal -> MyStat.TwoPipeAoutMappings_e.P2_AOUT_NONE
+                    MyStatPipe2AnalogOutMapping.DCV_DAMPER_MODULATION.ordinal -> MyStat.TwoPipeAoutMappings_e.P2_AOUT_DCV_DAMPER
+                    else -> MyStat.TwoPipeAoutMappings_e.values()[analogOutMappingValue + 1]
                 }
             }
         }

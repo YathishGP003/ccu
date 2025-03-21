@@ -677,15 +677,14 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
 
     private void selectFloor(int position) {
         mFloorListAdapter.setSelectedItem(position);
-        roomList = HSUtil.getZones(floorList.get(position).getId());
-        closeFloor();
-        //updateData();
-        showWeather();
-        clickedView = -1;
-        loadGrid(parentRootView);
-        lvFloorList.setContentDescription(floorList.get(position).getDisplayName());
-        expandableListView.invalidateViews();
+        closeFloorAndShowWeather( () -> {
+            roomList = HSUtil.getZones(floorList.get(position).getId());
+            loadGrid(parentRootView);
+            lvFloorList.setContentDescription(floorList.get(position).getDisplayName());
+            expandableListView.invalidateViews();
+        });
     }
+
 
 
     public void openFloor() {
@@ -699,16 +698,68 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
         }
     }
 
-    public void closeFloor() {
-        try {
-            mDrawerLayout.closeDrawer(drawer_screen);
-        } catch (Exception e) {
-            e.printStackTrace();
-            if (mDrawerLayout != null && mDrawerLayout.isShown()) {
+    public void closeFloorAndShowWeather(Runnable onAnimationEnd) {
+        if (mDrawerLayout != null && drawer_screen != null) {
+            try {
                 mDrawerLayout.closeDrawer(drawer_screen);
+            } catch (Exception e) {
+                e.printStackTrace();
+                if (mDrawerLayout.isShown()) {
+                    mDrawerLayout.closeDrawer(drawer_screen);
+                }
             }
+
+            mDrawerLayout.addDrawerListener(new DrawerLayout.DrawerListener() {
+                @Override
+                public void onDrawerSlide(View drawerView, float slideOffset) {}
+
+                @Override
+                public void onDrawerOpened(View drawerView) {}
+
+                @Override
+                public void onDrawerClosed(View drawerView) {
+                    // Remove listener immediately after closing the drawer
+                    mDrawerLayout.removeDrawerListener(this);
+                    showWeather(onAnimationEnd);
+                }
+
+                @Override
+                public void onDrawerStateChanged(int newState) {}
+            });
+        } else {
+            showWeather(onAnimationEnd);
         }
     }
+
+    private void showWeather(Runnable onAnimationEnd) {
+        weather_data.setVisibility(View.VISIBLE);
+        TranslateAnimation animate = new TranslateAnimation(-weather_data.getWidth(), 0, 0, 0);
+        animate.setDuration(400);
+        animate.setFillAfter(true);
+
+        animate.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {}
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                if (onAnimationEnd != null) {
+                    onAnimationEnd.run();
+                }
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {}
+        });
+
+        weather_data.startAnimation(animate);
+        clickedView = -1;
+        tableLayout.removeAllViews();
+        tableLayout.invalidate();
+        zoneLoadTextView.setTextColor(CCUUiUtil.getPrimaryThemeColor(getContext()));
+        zoneLoadTextView.setVisibility(View.VISIBLE);
+    }
+
     int gridPosition = 0;
     private void loadGrid(View rootView) {
         CcuLog.i("UI_PROFILING","ZoneFragmentNew.loadGrid");

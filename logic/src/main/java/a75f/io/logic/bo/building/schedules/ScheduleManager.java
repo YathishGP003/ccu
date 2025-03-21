@@ -1397,8 +1397,8 @@ public class ScheduleManager {
                             "and equipRef == \"" + ahuServedEquip.get("id") + "\"");
         }
 
-        CcuLog.d("USER_TEST", "totalCoolingDesiredTemp: " + totalCoolingDesiredTemp + ", totalHeatingDesiredTemp: " + totalHeatingDesiredTemp);
-        CcuLog.d("USER_TEST", "ahuServedEquipMapList.size(): " + ahuServedEquipMapList.size());
+        CcuLog.d(TAG_CCU_SCHEDULER, "totalCoolingDesiredTemp: " + totalCoolingDesiredTemp + ", totalHeatingDesiredTemp: " + totalHeatingDesiredTemp);
+        CcuLog.d(TAG_CCU_SCHEDULER, "ahuServedEquipMapList.size(): " + ahuServedEquipMapList.size());
         return new Pair(totalCoolingDesiredTemp/ahuServedEquipMapList.size(), totalHeatingDesiredTemp/ahuServedEquipMapList.size());
     }
 

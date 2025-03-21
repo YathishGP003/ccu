@@ -157,14 +157,18 @@ public class CCUUtils
     }
 
     public static void updateCcuSpecificEntitiesWithCcuRef(CCUHsApi ccuHsApi, Boolean isCcuReregistration){
+        // the total number of tasks using executorService and to be considered by latch
+        // update this TOTAL_TASKS value if any new task is added/removed
+        final int TOTAL_TASKS = 7;
         if(CCUHsApi.getInstance().readEntity("ccu").size() == 0){
             return;
         }
-        CountDownLatch latch = new CountDownLatch(8);
+        CountDownLatch latch = new CountDownLatch(TOTAL_TASKS);
         ExecutorService executorService = Executors.newFixedThreadPool(8);
 
         String ccuId = CCUHsApi.getInstance().readEntity("ccu").get("id").toString();
 
+        // Tasks using executor Service and requires latch for synchronization, currently 7
         executeTask(executorService, latch, () -> updateZoneWithUpdatedCcuRef(ccuHsApi, isCcuReregistration));
         executeTask(executorService, latch, () -> updateZoneOccupancyPointWithUpdatedCcuRef(ccuHsApi, isCcuReregistration));
         executeTask(executorService, latch, () -> updateNonTunerEquipAndPointsWithUpdatedCcuRef(ccuHsApi, isCcuReregistration));
@@ -230,7 +234,9 @@ public class CCUUtils
     public static void executeTask(ExecutorService executorService, CountDownLatch latch, Runnable task) {
         executorService.submit(() -> {
             task.run();
+            CcuLog.d(TAG_CCU_REF, "latchCount before = " + latch.getCount());
             latch.countDown();
+            CcuLog.d(TAG_CCU_REF, "latchCount after = " + latch.getCount());
         });
     }
 

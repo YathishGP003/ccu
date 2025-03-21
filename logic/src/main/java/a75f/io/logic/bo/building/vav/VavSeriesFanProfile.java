@@ -161,7 +161,7 @@ public class VavSeriesFanProfile extends VavProfile
                 vavEquip.getCoolingLoopOutput().writePointValue(0);
             } else if (coolingLoop.getEnabled()) {
                 loopOp = (int) coolingLoop.getLoopOutput(roomTemp, setTempCooling);
-
+                loopOp = Math.max(0, loopOp);
                 vavEquip.getCoolingLoopOutput().writePointValue(loopOp);
                 loopOp = (int) vavEquip.getHeatingLoopOutput().readHisVal();
 

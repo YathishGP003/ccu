@@ -160,7 +160,7 @@ public class VavParallelFanProfile extends VavProfile
 
             } else if (coolingLoop.getEnabled()) {
                 loopOp = (int) coolingLoop.getLoopOutput(roomTemp, setTempCooling);
-
+                loopOp = Math.max(0, loopOp);
                 vavEquip.getCoolingLoopOutput().writePointValue(loopOp);
                 loopOp = (int) vavEquip.getHeatingLoopOutput().readHisVal();
 

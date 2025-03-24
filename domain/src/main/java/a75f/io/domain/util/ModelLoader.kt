@@ -224,7 +224,7 @@ object ModelLoader {
             "smartnodeSSE" -> getSmartNodeSSEModel()
             "helionodeSSE" -> getHelioNodeSSEModel()
             "hyperstatHPU" -> getHyperStatHpuModel()
-            "hyperstat2pfcu" -> getHyperStatPipe2Model()
+            "hyperstat2PFCU" -> getHyperStatPipe2Model()
             "vavStagedRtu" -> getVavStageRtuModelDef()
             "smartnodePID" -> getSmartNodePidModel()
             "helionodePID" -> getHelioNodePidModel()

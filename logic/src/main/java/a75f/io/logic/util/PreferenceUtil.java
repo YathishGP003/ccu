@@ -101,6 +101,7 @@ public class PreferenceUtil {
     private static final String RELAY2_port_ENABLED_STATUS = "relay2PortEnabledStatus";
     private static final String PROFILE_TYPE_IN_CCU_CONFIG_STATUS = "profileTypeInCcuConfigStatus";
     private static final String DAB_EQUIP_POINTS_UPDATE = "dabEquipPointsUpdate";
+    private static final String ADDING_VOC_SENSOR_POINT = "addingVocSensorPoint";
     private static final String MIGRATE_BACNET_NETWORK_INTERFACE = "migrateBacnetNetworkInterface";
     private static final String DEVICE_POINTS_MIGRATION_STATUS = "devicePointsMigrationStatus";
     private static final String ADDRESS_BAND_INIT_COMPLETED = "addressBandInit";
@@ -834,6 +835,14 @@ public class PreferenceUtil {
 
     public static void setDabEquipPointsUpdate() {
         setBooleanPreference(DAB_EQUIP_POINTS_UPDATE, true);
+    }
+
+    public static boolean getVocSensorPointAdded() {
+        return getBooleanPreference(ADDING_VOC_SENSOR_POINT);
+    }
+
+    public static void setVocSensorPointAdded() {
+        setBooleanPreference(ADDING_VOC_SENSOR_POINT, true);
     }
 
 

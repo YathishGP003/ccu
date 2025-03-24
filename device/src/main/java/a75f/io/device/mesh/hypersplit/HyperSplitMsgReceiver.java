@@ -454,7 +454,7 @@ public class HyperSplitMsgReceiver {
                                       HyperSplit.HyperSplitRegularUpdateMessage_t regularUpdateMessage, CCUHsApi hayStack) {
         Double currentTemp = Pulse.getRoomTempConversion((double) regularUpdateMessage.getRegularUpdateCommon().getRoomTemperature());
         HashMap<Object, Object> currentTempPoint = hayStack.readMapById(rawPoint.getId());
-      if(isCurrentTemperatureWithinLimits(currentTemp/10,currentTempPoint)) {
+      if(isCurrentTemperatureWithinLimits(currentTemp,currentTempPoint)) {
           hayStack.writeHisValById(rawPoint.getId(), currentTemp);
           double curRoomTemp = hayStack.readHisValById(point.getId());
           hayStack.writeHisValById(point.getId(), currentTemp);

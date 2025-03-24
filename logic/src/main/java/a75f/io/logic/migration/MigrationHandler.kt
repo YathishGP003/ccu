@@ -1,7 +1,6 @@
 package a75f.io.logic.migration
 
 import a75f.io.api.haystack.CCUHsApi
-import a75f.io.api.haystack.CCUTagsDb.TAG_CCU_DOMAIN
 import a75f.io.api.haystack.Device
 import a75f.io.api.haystack.Equip
 import a75f.io.api.haystack.HayStackConstants
@@ -14,6 +13,7 @@ import a75f.io.api.haystack.sync.HttpUtil
 import a75f.io.domain.HyperStatSplitEquip
 import a75f.io.domain.OAOEquip
 import a75f.io.domain.api.Domain
+import a75f.io.domain.api.Domain.createDomainDevicePoint
 import a75f.io.domain.api.Domain.writeValAtLevelByDomain
 import a75f.io.domain.api.DomainName
 import a75f.io.domain.config.DefaultProfileConfiguration
@@ -320,6 +320,10 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
         if (!PreferenceUtil.getDabEquipPointsUpdate()) {
             createDabMissingPoints()
             PreferenceUtil.setDabEquipPointsUpdate()
+        }
+        if (!PreferenceUtil.getVocSensorPointAdded()) {
+            createVocSensorPointHyperStatEquip()
+            PreferenceUtil.setVocSensorPointAdded()
         }
 
         if(!PreferenceUtil.getUpdateBacnetNetworkInterface()) {
@@ -1442,7 +1446,7 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             pi = pm.getPackageInfo("a75f.io.renatus", 0)
             val currentAppVersion = pi.versionName.substring(pi.versionName.lastIndexOf('_') + 1)
             val migrationVersion = Domain.readStrPointValueByDomainName(DomainName.migrationVersion)
-            CcuLog.d(TAG_CCU_DOMAIN, "currentAppVersion: $currentAppVersion, migrationVersion: $migrationVersion")
+            CcuLog.d(TAG_CCU_MIGRATION_UTIL, "currentAppVersion: $currentAppVersion, migrationVersion: $migrationVersion")
             if (currentAppVersion != migrationVersion) {
                 Domain.writeDefaultValByDomain(DomainName.migrationVersion, currentAppVersion)
             }
@@ -2805,6 +2809,40 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
 
             }
         }
+    }
+
+    private fun createVocSensorPointHyperStatEquip() {
+
+        val hyperStatEquip =
+            hayStack.readAllEntities("equip and (domainName==\"${DomainName.hyperstatCPU}\" or domainName==\"${DomainName.hyperstat2PFCU}\" or domainName==\"${DomainName.hyperstatHPU}\")")
+        hyperStatEquip.forEachIndexed { _, equip ->
+            CcuLog.d(TAG_CCU_MIGRATION_UTIL, " creating voc sensor point hyper stat equip: $equip")
+            val hyperStatDevice =
+                hayStack.readEntity("device and equipRef ==\"" + equip["id"].toString() + "\" and  domainName == \"" + DomainName.hyperstatDevice + "\"")
+
+            val deviceModel = ModelLoader.getHyperStatDeviceModel() as SeventyFiveFDeviceDirective
+            val equipModel = getModelForDomainName(equip["domainName"].toString()) as SeventyFiveFProfileDirective
+            val profileConfig: ProfileConfiguration = getConfiguration(equip["id"].toString()) as ProfileConfiguration
+            val vocSensorPoint = hayStack.readEntity("domainName == \"" + DomainName.vocSensor + "\" and  deviceRef == \"" + hyperStatDevice["id"].toString() + "\"")
+
+            if (vocSensorPoint.isEmpty()) {
+                val device = Device.Builder().setHashMap(hyperStatDevice).build()
+                createDomainDevicePoint(
+                    deviceModel,
+                    equipModel,
+                    profileConfig,
+                    device,
+                    device.displayName,
+                    DomainName.vocSensor
+                )
+            } else {
+                CcuLog.d(
+                    TAG_CCU_MIGRATION_UTIL,
+                    " Voc sensor point already exists for hyper stat equip: ${equip["dis"].toString()}"
+                )
+            }
+        }
+
     }
 
     private fun createDabMissingPoints(){

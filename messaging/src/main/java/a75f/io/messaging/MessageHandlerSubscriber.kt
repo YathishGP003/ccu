@@ -16,6 +16,12 @@ class MessageHandlerSubscriber @Inject constructor(){
 
         handlerService.registerMessageHandler(
             MessageHandlerFactory.createInstance(
+                MessageHandlerFactory.Command.AddEntity
+            )
+        )
+
+        handlerService.registerMessageHandler(
+            MessageHandlerFactory.createInstance(
                 MessageHandlerFactory.Command.UpdateEntity
             )
         )

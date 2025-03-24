@@ -6,11 +6,13 @@ class MessageHandlerFactory {
     enum class Command{
         UpdateEntity, UpdatePoint, UpdateSchedule, SiteSync, RemoveEntity, RemoteCommand,
         PredefinedAlert, CustomAlert, AlertRemoval, AlertDefRemoval, AutoCommissioningMode,
-        SCHEDULE_MIGRATED, sequenceCreated, sequenceUpdated, sequenceDeleted,fixAlert,updateDashboard
+        SCHEDULE_MIGRATED, sequenceCreated, sequenceUpdated, sequenceDeleted,fixAlert,updateDashboard,
+        AddEntity
     }
     companion object {
         fun createInstance(handlerCmd: Command) : MessageHandler =
             when(handlerCmd) {
+                Command.AddEntity -> AddEntityHandler()
                 Command.UpdateEntity -> UpdateEntityHandler()
                 Command.UpdatePoint -> UpdatePointHandler()
                 Command.UpdateSchedule -> UpdateScheduleHandler()

@@ -168,6 +168,10 @@ class MessageHandlerService @Inject constructor(private val appContext: Context,
 
     fun ignoreUpdateEntity(msg: Message) : Boolean {
 
+        if(msg.command.equals("addEntity")){
+            return false
+        }
+
         if (msg.command.equals("updateEntity")) {
             if (msg.target_scope.equals("CCU") &&
                ! (msg.target_id.equals(CCUHsApi.getInstance().ccuId.replace("@", "")))) {

@@ -28,7 +28,7 @@ fun updateHsRssi(rssiPhysicalPoint: PhysicalPoint, rssi: Int) {
 
 fun updateTemp(currentTemp: PhysicalPoint, temp: Double, address: Int, refresh: ZoneDataInterface?) {
     val currentTempPoint = currentTemp.readPointMap()
-    if (isCurrentTemperatureWithinLimits(temp,currentTempPoint)) {
+    if (isCurrentTemperatureWithinLimits(temp/10,currentTempPoint)) {
         currentTemp.writeHisVal(temp)
         updateLogicalPoint(currentTemp, Pulse.getRoomTempConversion(temp))
         refresh?.updateTemperature(temp, address.toShort())

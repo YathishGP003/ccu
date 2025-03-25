@@ -59,10 +59,46 @@ class ProfileEquipBuilder(private val hayStack : CCUHsApi) : DefaultEquipBuilder
             createPoints(modelDef, configuration, entityConfiguration, equipId, siteRef, equipDis)
         }
         CcuLog.i(Domain.LOG_TAG, "Time taken to createPoints: $time ms")
+        /**
+        updating the schedule type point based on existing equip ,
+        eg : if the first equip has 1 -zone schedule type then the new equip will created schedule type has 2 by default ..
+        giving issue while displaying the schedule type in the UI zone page
+         **/
+        updateScheduleTypeBasedOnExistingEquip(hayStack, hayStackEquip)
         DomainManager.addDomainEquip(hayStackEquip)
         DomainManager.addEquip(hayStackEquip)
         return equipId
     }
+
+    private fun updateScheduleTypeBasedOnExistingEquip(hayStack: CCUHsApi, hayStackEquip: Equip, ) {
+        val equipId = hayStackEquip.id
+        if (hayStackEquip.id.isNullOrBlank()) {
+            CcuLog.i(Domain.LOG_TAG, "Invalid equipId")
+            return
+        }
+
+        val scheduleTypePoint =
+            hayStack.readEntity("point and domainName==\"${DomainName.scheduleType}\" and equipRef == \"$equipId\"")
+
+        if (scheduleTypePoint.isEmpty()) {
+            CcuLog.i(Domain.LOG_TAG, "schedule type point not found for equip $equipId")
+            return
+        }
+
+        val existingScheduleTypePoint = hayStack.readEntity(
+            "point and domainName==\"${DomainName.scheduleType}\" and equipRef != \"$equipId\" and roomRef == \"${hayStackEquip.roomRef}\""
+        )
+
+        if (existingScheduleTypePoint.isNotEmpty()) {
+            val existingScheduleTypeVal = hayStack.readPointPriorityVal(existingScheduleTypePoint["id"].toString())
+            CcuLog.i(Domain.LOG_TAG, "ScheduleType point value : $existingScheduleTypeVal ,  dis  :  ${existingScheduleTypePoint["dis"].toString()}" )
+            hayStack.writeDefaultValById(scheduleTypePoint["id"].toString(), existingScheduleTypeVal)
+            hayStack.writeHisValById(scheduleTypePoint["id"].toString(), existingScheduleTypeVal)
+        }
+
+        CcuLog.i(Domain.LOG_TAG, "ScheduleType point values updated for equip $equipId")
+    }
+
 
     /**
      * Updates and existing haystack equip and it points.

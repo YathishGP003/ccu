@@ -1490,8 +1490,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                                         });
 
                                         namedSchedule.setOnCancelButtonClickListener(() -> {
-                                            if(prevPosition == 0)
+                                            if(prevPosition == 0) {
+                                                scheduleImageButton.setVisibility(View.VISIBLE);
+                                                namedScheduleView.setVisibility(View.GONE);
                                                 isItemSelectedEvent = true;
+                                            }
                                             scheduleSpinner.setSelection(prevPosition);
                                         });
                                     }
@@ -1984,8 +1987,11 @@ public class ZoneFragmentNew extends Fragment implements ZoneDataInterface {
                            });
 
                            namedSchedule.setOnCancelButtonClickListener(() -> {
-                               if(prevPosition == 0)
+                               if(prevPosition == 0) {
+                                   scheduleImageButton.setVisibility(View.VISIBLE);
+                                   namedScheduleView.setVisibility(View.GONE);
                                    isItemSelectedEvent = true;
+                               }
                                scheduleSpinner.setSelection(prevPosition);
                            });
                        }

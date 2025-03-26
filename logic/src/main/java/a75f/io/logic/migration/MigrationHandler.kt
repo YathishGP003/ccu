@@ -361,8 +361,39 @@ class MigrationHandler (hsApi : CCUHsApi) : Migration {
             remigrateCpuPoint()
             PreferenceUtil.setRecoverCpuFromCorrecption()
         }
-
+        if (!PreferenceUtil.isDuplicateBuildingAndSystemPointsAreRemoved()) {
+            // Handling exception in case of failure
+            try {
+                removeDuplicateBuildingAndSystemPoints()
+                PreferenceUtil.setDuplicateBuildingAndSystemPointsAreRemoved()
+            } catch (e: Exception) {
+                e.printStackTrace()
+                CcuLog.e(TAG_CCU_MIGRATION_UTIL, "Error in removeDuplicateBuildingAndSystemPoints $e")
+            }
+        }
         hayStack.scheduleSync()
+    }
+
+    private fun removeDuplicateBuildingAndSystemPoints() {
+        CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Removing duplicate building and system points")
+
+        val systemEquip = hayStack.readEntity("equip and system and not modbus and not connectModule")
+        val buildingEquip = Domain.hayStack.readEntityByDomainName("buildingEquip")
+
+        val vavDabAndDuplicatePointMigrationHandler = VavDabAndDuplicatePointMigrationHandler(systemEquip)
+        if (systemEquip.isNotEmpty()) {
+            vavDabAndDuplicatePointMigrationHandler.createSatSpResPoint()
+            vavDabAndDuplicatePointMigrationHandler.deleteSatSPMaxDuplicatePoints()
+        } else {
+            CcuLog.d(TAG_CCU_MIGRATION_UTIL, "System Equip not found")
+        }
+
+        if (buildingEquip.isNotEmpty()) {
+            vavDabAndDuplicatePointMigrationHandler.deleteReheatZoneMaxDischargeTemp(buildingEquip)
+        } else {
+            CcuLog.d(TAG_CCU_MIGRATION_UTIL, "Building Equip not found")
+            return
+        }
     }
 
     private fun updateBacnetNetworkInterface() {

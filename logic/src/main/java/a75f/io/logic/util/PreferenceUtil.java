@@ -107,6 +107,7 @@ public class PreferenceUtil {
     private static final String ADDRESS_BAND_INIT_COMPLETED = "addressBandInit";
     private static final String MIGRATE_UPDATE_HSS_POINTS = "migrateUpdateHssPoints";
     private static final String MIGRATE_HSCPU_DATA_CORREPTION = "MIGRATE_HSCPU_DATA_CORREPTION";
+    private static final String REMOVE_BUILDING_AND_SYSTEM_EQUIP_POINTS = "removeBuildingAndSystemEquipPoints";
 
     public static void setContext(Context c) {
         context= c;
@@ -875,5 +876,12 @@ public class PreferenceUtil {
 
     public static void setMigrateHssPoints() {
         setBooleanPreference(MIGRATE_UPDATE_HSS_POINTS, true);
+    }
+
+    public static boolean isDuplicateBuildingAndSystemPointsAreRemoved() {
+        return getBooleanPreference(REMOVE_BUILDING_AND_SYSTEM_EQUIP_POINTS);
+    }
+    public static void setDuplicateBuildingAndSystemPointsAreRemoved() {
+        setBooleanPreference(REMOVE_BUILDING_AND_SYSTEM_EQUIP_POINTS, true);
     }
 }

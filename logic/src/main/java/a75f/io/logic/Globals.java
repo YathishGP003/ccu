@@ -293,10 +293,6 @@ public class Globals {
                 CcuLog.i(L.TAG_CCU_INIT, "Schedule Jobs");
                 //TunerUpgrades.migrateAutoAwaySetbackTuner(CCUHsApi.getInstance());
 
-                CcuLog.i(L.TAG_CCU_INIT, "Init Watchdog");
-                Watchdog.getInstance().addMonitor(mProcessJob);
-                Watchdog.getInstance().addMonitor(mScheduleProcessJob);
-                Watchdog.getInstance().start();
                 modelMigration(migrationHandler);
                 migrationHandler.doPostModelMigrationTasks();
 
@@ -306,6 +302,12 @@ public class Globals {
                  of system Equip, This will affect DM TO DM migration*/
                 migrationHandler.checkBacnetIdMigrationRequired();
                 migrationHandler.removeRedundantDevicePoints();
+
+                CcuLog.i(L.TAG_CCU_INIT, "Init Watchdog");
+                Watchdog.getInstance().addMonitor(mProcessJob);
+                Watchdog.getInstance().addMonitor(mScheduleProcessJob);
+                Watchdog.getInstance().start();
+
                 migrationHandler.initAddressBand();
             } catch (Exception e) {
                 //Catch ignoring any exception here to avoid app from not loading in case of an init failure.

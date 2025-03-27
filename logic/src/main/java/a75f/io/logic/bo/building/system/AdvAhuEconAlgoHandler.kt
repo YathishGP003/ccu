@@ -24,10 +24,8 @@ import kotlin.math.min
 class AdvAhuEconAlgoHandler(private val connectEquip: ConnectModuleEquip) {
     //    private var economizingAvailable = false
     private var economizingLoopOutput = 0
-    private var dcvAvailable = false
     private var outsideAirCalculatedMinDamper: Double = 0.0
     private var outsideAirLoopOutput = 0.0
-    private var matThrottle = false
     private var outsideAirFinalLoopOutput = 0
     var systemMode: SystemMode? = null
     var returnAirFinalOutput: Double = 0.0
@@ -36,6 +34,8 @@ class AdvAhuEconAlgoHandler(private val connectEquip: ConnectModuleEquip) {
         var analogAssociatedToOAO = false
         private var economizingAvailable: Boolean = false
         private var freeCoolingOn: Boolean = false
+        private var dcvAvailable = false
+        private var matThrottle = false
 
         fun getAnalogsAssociatedToOAO(): Boolean {
             return analogAssociatedToOAO
@@ -56,24 +56,21 @@ class AdvAhuEconAlgoHandler(private val connectEquip: ConnectModuleEquip) {
         private fun setFreeCoolingOn(freeCoolingOn: Boolean) {
             this.freeCoolingOn = freeCoolingOn
         }
-    }
+        private fun isDcvAvailable(): Boolean {
+            return dcvAvailable
+        }
 
+        private fun setDcvAvailable(dcvAvailable: Boolean) {
+            this.dcvAvailable = dcvAvailable
+        }
 
+        private fun setMatThrottle(matThrottle: Boolean) {
+            this.matThrottle = matThrottle
+        }
 
-    private fun isDcvAvailable(): Boolean {
-        return dcvAvailable
-    }
-
-    private fun setDcvAvailable(dcvAvailable: Boolean) {
-        this.dcvAvailable = dcvAvailable
-    }
-
-    private fun setMatThrottle(matThrottle: Boolean) {
-        this.matThrottle = matThrottle
-    }
-
-    private fun isMatThrottle(): Boolean {
-        return matThrottle
+        private fun isMatThrottle(): Boolean {
+            return matThrottle
+        }
     }
 
     /**
@@ -529,7 +526,7 @@ class AdvAhuEconAlgoHandler(private val connectEquip: ConnectModuleEquip) {
             else -> {}
         }
         connectEquip.outsideAirCalculatedMinDamper.writeHisVal(outsideAirCalculatedMinDamper)
-        connectEquip.dcvAvailable.writeHisVal((if (isDcvAvailable()) 1 else 0).toDouble())
+        connectEquip.dcvAvailable.writeHisVal((if (isDcvAvailable()) 1.0 else 0.0))
     }
 
     private fun getOutsideDamperMinOpen(
@@ -609,7 +606,7 @@ class AdvAhuEconAlgoHandler(private val connectEquip: ConnectModuleEquip) {
 
     fun updateLoopPoints() {
         connectEquip.economizingLoopOutput.writeHisVal(economizingLoopOutput.toDouble())
-        connectEquip.dcvAvailable.writeHisVal((if (dcvAvailable) 1 else 0).toDouble())
+        connectEquip.dcvAvailable.writeHisVal((if (isDcvAvailable()) 1 else 0).toDouble())
         connectEquip.outsideAirCalculatedMinDamper.writeHisVal(outsideAirCalculatedMinDamper)
         connectEquip.matThrottle.writeHisVal((if (matThrottle) 1 else 0).toDouble())
         connectEquip.outsideAirFinalLoopOutput.writeHisVal(outsideAirFinalLoopOutput.toDouble())

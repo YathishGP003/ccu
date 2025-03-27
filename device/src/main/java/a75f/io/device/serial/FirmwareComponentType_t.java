@@ -19,7 +19,10 @@ public enum FirmwareComponentType_t
 	HYPERSTAT_SPLIT_DEVICE_TYPE("HyperStat", "hs_fw/", "hyperstatsplit"),
 	CONNECT_MODULE_DEVICE_TYPE("ConnectModule", "connect_fw/", "hyperstatsplit"),
 	Reserve1(null,null,null),
-	MY_STAT_DEVICE_TYPE("MyStat", "ms_fw/", "mystat");
+	MY_STAT_DEVICE_TYPE("MyStat", "ms_fw/", "mystat"),
+	Reserve2(null,null,null),
+	SMART_NODE2_DEVICE_TYPE("SmartNode", "sn_fw/", "smartnode");
+
 
 	private final String updateFileName;
 	private final String updateUrlDirectory;

@@ -38,9 +38,6 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import a75f.io.api.haystack.CCUHsApi;
 import a75f.io.api.haystack.Device;
@@ -932,8 +929,13 @@ public class OTAUpdateService extends IntentService {
         message.messageType.set(MessageType.CCU_TO_CM_OVER_USB_FIRMWARE_METADATA);
         message.lwMeshAddress.set(mCurrentLwMeshAddress);
 
-        FirmwareComponentType_t deviceTypeToSend = (firmware.equals(FirmwareComponentType_t.HYPER_STAT_DEVICE_TYPE) && mFirmwareDeviceTypeFromMeta.equals(FirmwareComponentType_t.HYPERSTAT_SPLIT_DEVICE_TYPE)) ? mFirmwareDeviceTypeFromMeta : firmware;
-        message.metadata.deviceType.set(deviceTypeToSend);
+        FirmwareComponentType_t componentType = getFirmwareComponentType(firmware);
+        CcuLog.d(TAG, "index: " + componentType.ordinal() +
+                ", filename: " + componentType.getUpdateFileName() +
+                ", directory: " + componentType.getUpdateUrlDirectory() +
+                ", marker: " + componentType.getHsMarkerName());
+
+        message.metadata.deviceType.set(componentType);
 
         message.metadata.majorVersion.set(mVersionMajor);
         message.metadata.minorVersion.set(mVersionMinor);
@@ -1234,5 +1236,15 @@ public class OTAUpdateService extends IntentService {
     }
     private boolean isCMDevice(int nodeAddress) {
         return nodeAddress == ( L.ccu().getAddressBand() + 99 );
+    }
+
+    private FirmwareComponentType_t getFirmwareComponentType(FirmwareComponentType_t componentType) {
+        if ((componentType.equals(FirmwareComponentType_t.HYPER_STAT_DEVICE_TYPE) &&
+                mFirmwareDeviceTypeFromMeta.equals(FirmwareComponentType_t.HYPERSTAT_SPLIT_DEVICE_TYPE))
+                || (componentType.equals(FirmwareComponentType_t.SMART_NODE_DEVICE_TYPE) &&
+                mFirmwareDeviceTypeFromMeta.equals(FirmwareComponentType_t.SMART_NODE2_DEVICE_TYPE))) {
+            return mFirmwareDeviceTypeFromMeta;
+        }
+        return componentType;
     }
 }

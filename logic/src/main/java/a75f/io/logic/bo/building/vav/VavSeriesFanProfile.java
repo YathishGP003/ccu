@@ -150,8 +150,25 @@ public class VavSeriesFanProfile extends VavProfile
             handleDeadband(systemMode, reheatEnabled);
             if (heatingLoop.getEnabled()) {
                 loopOp = (int) heatingLoop.getLoopOutput(setTempHeating, roomTemp);
+                loopOp = Math.max(0, loopOp);
+                if (conditioning == SystemController.State.COOLING && isHeatingAvailable(systemMode, reheatEnabled)) {
+                    updateReheatDuringSystemCooling(loopOp, vavEquip.getId());
+                    loopOp =  getGPC36AdjustedHeatingLoopOp(loopOp, roomTemp, vavEquip.getDischargeAirTemp().readHisVal(), equip);
+                }
+                vavEquip.getHeatingLoopOutput().writePointValue(loopOp);
+                loopOp = (int) vavEquip.getHeatingLoopOutput().readHisVal();
+
+                vavEquip.getCoolingLoopOutput().writePointValue(0);
             } else if (coolingLoop.getEnabled()) {
                 loopOp = (int) coolingLoop.getLoopOutput(roomTemp, setTempCooling);
+                loopOp = Math.max(0, loopOp);
+                vavEquip.getCoolingLoopOutput().writePointValue(loopOp);
+                loopOp = (int) vavEquip.getHeatingLoopOutput().readHisVal();
+
+                vavEquip.getHeatingLoopOutput().writePointValue(0);
+            }  else {
+                vavEquip.getCoolingLoopOutput().writePointValue(0);
+                vavEquip.getHeatingLoopOutput().writePointValue(0);
             }
         }
         return loopOp;
@@ -192,6 +209,7 @@ public class VavSeriesFanProfile extends VavProfile
         valve.currentPosition = 0;
         coolingLoop.setEnabled();
         heatingLoop.setDisabled();
+        vavEquip.getHeatingLoopOutput().writePointValue(0);
     }
     
     private void handleHeatingChangeOver() {
@@ -199,6 +217,7 @@ public class VavSeriesFanProfile extends VavProfile
         state = HEATING;
         heatingLoop.setEnabled();
         coolingLoop.setDisabled();
+        vavEquip.getCoolingLoopOutput().writePointValue(0);
     }
     
     private void updateReheatDuringSystemCooling(int loopOp, String equipId) {
